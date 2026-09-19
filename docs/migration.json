@@ -51,18 +51,27 @@
       "sha256": "56332c1a19bf3929174efc9f8416798ff3623e0a8ba7f05000af04d30d993a37",
       "lines": 289,
       "description": "Inspect captured API records without executing them or importing GPA libraries.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": [
+        "src/core/CommandNames.inc",
+        "src/app/Models.cpp"
+      ],
+      "validation": [
+        "docs/NATIVE_BASELINE.md"
+      ]
     },
     {
       "module": "app.py",
       "sha256": "6b37948778a0e97b3d3cfbf155f641b9e723daee792732143c7ff6b44948e0ef",
       "lines": 1217,
       "description": "FloraGPA native desktop inspector. Run with python app.py [capture.gpa_frame].",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": [
+        "src/app/MainWindow.cpp"
+      ],
+      "validation": [
+        "docs/NATIVE_BASELINE.md"
+      ]
     },
     {
       "module": "assets.py",
@@ -168,9 +177,13 @@
       "sha256": "9920849096afc9e18c96b5219add6a71d5cee9119b24303e6ec5e63343ee17fb",
       "lines": 117,
       "description": "Six-stage CB/CB1 command edits, native ranges and observed prefix state.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": [
+        "src/replay/Replay.cpp"
+      ],
+      "validation": [
+        "docs/NATIVE_BASELINE.md"
+      ]
     },
     {
       "module": "constants.py",
@@ -285,9 +298,13 @@
       "sha256": "73ca89e7efe6dbe9917abcf0e9d63381914d66a363e4098287c91892002cd42e",
       "lines": 264,
       "description": "Small offscreen DX11 backend using only Windows system APIs, never GPA DLLs.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": [
+        "src/replay/Replay.cpp"
+      ],
+      "validation": [
+        "docs/NATIVE_BASELINE.md"
+      ]
     },
     {
       "module": "dx11_metric_result.py",
@@ -429,18 +446,26 @@
       "sha256": "3ff9c05d315502b477d5ce4e6dd65ff9cb42998028af810546d2630ff1ba325c",
       "lines": 593,
       "description": "Replay recovered DX11 draw/state/resource records with an independent backend.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": [
+        "src/replay/Replay.cpp"
+      ],
+      "validation": [
+        "docs/NATIVE_BASELINE.md"
+      ]
     },
     {
       "module": "events.py",
       "sha256": "fa4444b64b8a24a2ac6e3a1ba08b50fbf0ee62d7796cc9db23ac2ebfef73a048",
       "lines": 49,
       "description": "Semantic command records. IDs recovered from native Erg type getters.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": [
+        "src/core/Frame.cpp"
+      ],
+      "validation": [
+        "docs/NATIVE_BASELINE.md"
+      ]
     },
     {
       "module": "experiments.py",
@@ -456,18 +481,26 @@
       "sha256": "eeb0c54bb669c217028b681e360b7c8dad309cf7395d308d8a5f8ab54a91d50f",
       "lines": 150,
       "description": "DXGI storage sizes and common typed interpretations for independent assets.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": [
+        "src/core/Frame.cpp"
+      ],
+      "validation": [
+        "docs/NATIVE_BASELINE.md"
+      ]
     },
     {
       "module": "frame.py",
       "sha256": "3f291cf9b4037a786c46ad09878fff8d18901b7ebcd9a5aa54333fe9cce94ef2",
       "lines": 169,
       "description": "Independent reader for the observed IGPA v3 DX11 capture wire format.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": [
+        "src/core/Frame.cpp"
+      ],
+      "validation": [
+        "docs/NATIVE_BASELINE.md"
+      ]
     },
     {
       "module": "frame_metric_index.py",
@@ -519,9 +552,13 @@
       "sha256": "a25deada6700679e399a0c6b5087ae7e3a5076beaa57f703d3f210cef19eeb39",
       "lines": 131,
       "description": "Repeated in-order DX11 timestamp measurements of captured GPU work.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": [
+        "src/replay/Replay.cpp"
+      ],
+      "validation": [
+        "docs/NATIVE_BASELINE.md"
+      ]
     },
     {
       "module": "gpu_statistics.py",
@@ -708,9 +745,13 @@
       "sha256": "37d6ac3808a95f21e0a8392db9644755e0a1faebdeb02e1640a46ecf0909e508",
       "lines": 100,
       "description": "Apply GPA MapErg writes using the replay device's native mapped pitches.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": [
+        "src/replay/Replay.cpp"
+      ],
+      "validation": [
+        "docs/NATIVE_BASELINE.md"
+      ]
     },
     {
       "module": "md_acquisition_priority.py",
@@ -1311,9 +1352,13 @@
       "sha256": "9850b4238a7aac255e7eeff0bdcfa2fcbbf27caf5364fbd7c34d026e50e23d48",
       "lines": 143,
       "description": "Select a replayed backbuffer using captured swap-chain parent identities.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": [
+        "src/replay/Replay.cpp"
+      ],
+      "validation": [
+        "docs/NATIVE_BASELINE.md"
+      ]
     },
     {
       "module": "process_job.py",
@@ -1518,9 +1563,13 @@
       "sha256": "6939c4cd4da11f894e52ee00fc3eae03926640c9e45259c313c7fa3966faaaac",
       "lines": 127,
       "description": "Build native DX11 resources from recovered frame records.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": [
+        "src/replay/Replay.cpp"
+      ],
+      "validation": [
+        "docs/NATIVE_BASELINE.md"
+      ]
     },
     {
       "module": "sampler_edits.py",
@@ -1554,9 +1603,13 @@
       "sha256": "381ddf760646e6e629efbe2e6dd7afe418b95a00855012a18334bcc9d9b10dca",
       "lines": 425,
       "description": "Desktop session model; immutable capture, autosaved experiment, isolated GPU jobs.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": [
+        "src/app/MainWindow.cpp"
+      ],
+      "validation": [
+        "docs/NATIVE_BASELINE.md"
+      ]
     },
     {
       "module": "setter_edits.py",
@@ -1644,9 +1697,13 @@
       "sha256": "9081675c414924a65d31ed805d713d0cfdeddaaa179c91c3668e27a77882a894",
       "lines": 269,
       "description": "DXBC inspection and system D3DCompiler integration. No GPA components.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": [
+        "src/replay/Replay.cpp"
+      ],
+      "validation": [
+        "docs/NATIVE_BASELINE.md"
+      ]
     },
     {
       "module": "so_counts.py",
@@ -1725,18 +1782,26 @@
       "sha256": "b37c52b78a9d1d527f04e9fae6f48768e50051c941df837ecc1705077294431a",
       "lines": 44,
       "description": "Fixed-size StateBlockD3D11 deserializer, recovered from player RVA b6be0.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": [
+        "src/core/Frame.cpp"
+      ],
+      "validation": [
+        "docs/NATIVE_BASELINE.md"
+      ]
     },
     {
       "module": "statistics_ui.py",
       "sha256": "c4c94f5d4e66acf9c8120eb1a375032068475dbee810901f0fa98f51f6b48ebd",
       "lines": 79,
       "description": "Single-event, command-range and full-frame native statistics.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": [
+        "src/app/MainWindow.cpp"
+      ],
+      "validation": [
+        "docs/NATIVE_BASELINE.md"
+      ]
     },
     {
       "module": "stream_output.py",
@@ -1833,9 +1898,13 @@
       "sha256": "4d1253ec79e28991d6a4d2d6da2b3e4b97b2160b9ba667d9369e2eb04faded32",
       "lines": 152,
       "description": "Native Tk image and mesh inspection widgets, without extra imaging libraries.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": [
+        "src/app/Views.cpp"
+      ],
+      "validation": [
+        "docs/NATIVE_BASELINE.md"
+      ]
     }
   ]
 }

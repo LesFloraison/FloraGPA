@@ -1,0 +1,104 @@
+#include "Models.h"
+#include <QColor>
+#include <QFont>
+
+namespace flora {
+void CaptureModel::setFrame(std::shared_ptr<const Frame> frame) {
+    beginResetModel();
+    frame_ = std::move(frame);
+    ids_.clear();
+    if (frame_)
+        for (auto &[id, e] : frame_->entries())
+            if (e.category == (kind_ == Kind::Commands ? 7 : 5))
+                ids_.push_back(id);
+    endResetModel();
+}
+int CaptureModel::rowOf(Id id) const {
+    auto it = std::lower_bound(ids_.begin(), ids_.end(), id);
+    return it != ids_.end() && *it == id ? int(it - ids_.begin()) : -1;
+}
+QVariant CaptureModel::data(const QModelIndex &index, int role) const {
+    if (!index.isValid() || index.row() >= int(ids_.size()) || !frame_)
+        return {};
+    auto id = ids_[index.row()];
+    const auto &e = frame_->entry(id);
+    if (role == Qt::UserRole)
+        return QVariant::fromValue<qulonglong>(id);
+    if (role == Qt::UserRole + 1)
+        return e.type;
+    if (role == Qt::ForegroundRole && kind_ == Kind::Commands && isDraw(e.type))
+        return QColor("#a6dffa");
+    if (role == Qt::ToolTipRole)
+        return QString("ID %1 · type 0x%2 · %3 bytes").arg(id).arg(e.type, 0, 16).arg(e.size);
+    if (role != Qt::DisplayRole)
+        return {};
+    if (index.column() == 0)
+        return QString::number(id);
+    if (index.column() == 1)
+        return QString::fromStdString(kind_ == Kind::Commands ? commandName(e.type) : resourceName(e.type));
+    try {
+        if (kind_ == Kind::Commands && isDraw(e.type)) {
+            auto ev = frame_->event(id);
+            QStringList values;
+            if (ev.argumentBuffer)
+                values << QString::number(ev.argumentBuffer);
+            for (size_t i = 0; i < ev.args.size(); ++i)
+                values << ((e.type == 0x39 && i == 2) || (e.type == 0x3a && i == 3)
+                               ? QString::number(int32_t(ev.args[i]))
+                               : QString::number(ev.args[i]));
+            return values.join(", ");
+        }
+        if (kind_ == Kind::Resources) {
+            auto r = frame_->resource(id);
+            if (r.type == 0x83)
+                return QString("%1 B").arg(r.desc[0]);
+            if (r.type >= 0x84 && r.type <= 0x87) {
+                auto info = textureInfo(r);
+                return QString("%1 × %2").arg(info.width).arg(info.height);
+            }
+        }
+    } catch (const std::exception &) {
+        return "Invalid";
+    }
+    return {};
+}
+QVariant CaptureModel::headerData(int n, Qt::Orientation orientation, int role) const {
+    if (orientation != Qt::Horizontal || role != Qt::DisplayRole)
+        return {};
+    return QStringList{"ID", kind_ == Kind::Commands ? "API call" : "Resource",
+                       kind_ == Kind::Commands ? "Arguments" : "Size"}
+        .value(n);
+}
+bool CaptureFilter::filterAcceptsRow(int row, const QModelIndex &parent) const {
+    auto index = sourceModel()->index(row, 0, parent);
+    auto type = index.data(Qt::UserRole + 1).toUInt();
+    if (workOnly && !(type >= 0x31 && type <= 0x42))
+        return false;
+    if (resourceType == 1 && !(type >= 0x84 && type <= 0x86))
+        return false;
+    if (resourceType == 2 && type != 0x83)
+        return false;
+    if (resourceType == 3 && !(type >= 0x90 && type <= 0x95))
+        return false;
+    return QSortFilterProxyModel::filterAcceptsRow(row, parent);
+}
+QVariant BufferModel::data(const QModelIndex &index, int role) const {
+    if (!index.isValid() || role != Qt::DisplayRole)
+        return {};
+    auto offset = qsizetype(index.row()) * 16;
+    auto bytes = data_.mid(offset, 16);
+    if (index.column() == 0)
+        return QString("%1").arg(offset, 8, 16, QChar('0')).toUpper();
+    if (index.column() == 1)
+        return QString::fromLatin1(bytes.toHex(' ')).toUpper();
+    QString text;
+    for (auto c : bytes)
+        text += (uint8_t(c) >= 32 && uint8_t(c) < 127) ? QChar(c) : QChar('.');
+    return text;
+}
+QVariant BufferModel::headerData(int n, Qt::Orientation orientation, int role) const {
+    if (orientation != Qt::Horizontal || role != Qt::DisplayRole)
+        return {};
+    return QStringList{"Offset", "Hexadecimal", "ASCII"}.value(n);
+}
+} // namespace flora
