@@ -11,9 +11,15 @@ parser.add_argument('--exe', type=Path, required=True)
 parser.add_argument('--captures', type=Path, required=True)
 parser.add_argument('--out', type=Path, required=True)
 parser.add_argument('--qt-bin', type=Path)
+parser.add_argument('--isolated-env', action='store_true', help='Use Windows system paths only for the native child process')
 args = parser.parse_args()
 args.out.mkdir(parents=True, exist_ok=False)
 env = dict(os.environ)
+if args.isolated_env:
+    env = {key: value for key, value in os.environ.items()
+           if key.upper() in {'SYSTEMROOT', 'WINDIR', 'COMSPEC', 'TEMP', 'TMP', 'LOCALAPPDATA', 'APPDATA'}}
+    windows = Path(os.environ['WINDIR'])
+    env['PATH'] = str(windows / 'System32') + os.pathsep + str(windows)
 if args.qt_bin:
     env['PATH'] = str(args.qt_bin) + os.pathsep + env['PATH']
 cases = [

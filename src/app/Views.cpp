@@ -66,7 +66,8 @@ void ImageView::wheelEvent(QWheelEvent *e) {
     e->accept();
 }
 void ImageView::mouseMoveEvent(QMouseEvent *e) {
-    auto p = mapToScene(e->pos()).toPoint();
+    auto scenePosition = mapToScene(e->pos());
+    QPoint p(int(std::floor(scenePosition.x())),int(std::floor(scenePosition.y())));
     if (image_.rect().contains(p)) {
         auto color = image_.pixelColor(p);
         emit pixelHovered(QString("%1, %2    RGBA %3  %4  %5  %6")

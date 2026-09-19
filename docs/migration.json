@@ -78,9 +78,14 @@
       "sha256": "b60a62aeb61d86384ed2e6d69deb8fff0b016a7b9ba11cc603e5e0e503701e6a",
       "lines": 295,
       "description": "Independent shader and captured texture asset inspection/export.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": [
+        "src/replay/TexturePreview.cpp",
+        "src/cli/main.cpp"
+      ],
+      "validation": [
+        "13 native/Python GPU texture comparisons; mip/layer/slice coverage"
+      ]
     },
     {
       "module": "binding_model.py",
@@ -114,9 +119,14 @@
       "sha256": "a727d4cad67e352fa7782f9676856104e94531958061a2e06f2ecf1b53ab8bc7",
       "lines": 83,
       "description": "Export buffer bytes at a command boundary, with available draw reflection.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": [
+        "src/replay/Replay.cpp",
+        "src/app/Models.cpp"
+      ],
+      "validation": [
+        "Initial hex/ASCII view; GPU CLI readback; reflection/editing pending"
+      ]
     },
     {
       "module": "captured_getters.py",
@@ -472,9 +482,13 @@
       "sha256": "33530a2bf67540da61a43cab021384982d4ad9159decd181137c152db08edc8b",
       "lines": 573,
       "description": "Portable, frame-bound edit history. No GPA project format or runtime needed.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": [
+        "src/application/Experiment.cpp"
+      ],
+      "validation": [
+        "Compatible JSON; uint64; frame hash; shader and event edits; GPU undo/redo"
+      ]
     },
     {
       "module": "formats.py",
@@ -516,9 +530,13 @@
       "sha256": "097700f467d640cac2b35e6b5e305456d09c99b5905fb22a88acba87d7090b1c",
       "lines": 97,
       "description": "Lossless selected output storage and explicit RGBA8 display conversion.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": [
+        "src/replay/Replay.cpp"
+      ],
+      "validation": [
+        "GF2/BF1 live RGBA output and negative controls"
+      ]
     },
     {
       "module": "geometry.py",
@@ -565,9 +583,13 @@
       "sha256": "fbaf283548f775dbbf947628a9494a8e8208e131e70310f807c21cb4dbcfb1c5",
       "lines": 134,
       "description": "Native single-event and inclusive command-range DX11 measurements.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": [
+        "src/replay/Replay.cpp"
+      ],
+      "validation": [
+        "Native aggregate pipeline query; original scheduling pending"
+      ]
     },
     {
       "module": "gs_checkpoint.py",
@@ -727,9 +749,13 @@
       "sha256": "b096274a637d9fd416220c2c1031e92c3814606b7463035c5bcb77e13365703a",
       "lines": 75,
       "description": "PNG output for independent GPU readback, using only Python's standard library.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": [
+        "src/app/Views.cpp"
+      ],
+      "validation": [
+        "GUI output hash and channel-aware PNG export"
+      ]
     },
     {
       "module": "instruction_info.py",
@@ -1365,9 +1391,13 @@
       "sha256": "5fdcb3c01ed6f3ed6c72a7afdbe8ec12a549008c48f83207fd89c9af8caaede8",
       "lines": 61,
       "description": "Windows job ownership for a gated collector and all SDK descendants.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": [
+        "src/app/MainWindow.cpp"
+      ],
+      "validation": [
+        "QProcess worker and Windows kill-on-close JobObject; cancellation path"
+      ]
     },
     {
       "module": "profile_ui.py",
@@ -1661,36 +1691,52 @@
       "sha256": "4c04cb0bb67cf5bf7a4e244e01e831395cb621824479cf2c2ea6b0d4a601acba",
       "lines": 82,
       "description": "Editable multi-file HLSL project window with isolated compilation.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": [
+        "src/app/MainWindow.cpp"
+      ],
+      "validation": [
+        "HLSL compile/apply GUI and exact image undo/redo; other edits pending"
+      ]
     },
     {
       "module": "shader_sdbg.py",
       "sha256": "a011137c7bc22fdc25767d24843e3ad2bf0b60e7a5b6d54ac0463df6a29d1616",
       "lines": 89,
       "description": "Bounded D3D10_SHADER_DEBUG_INFO/SDBG reader (Windows SDK d3d10_1shader.h).",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": [
+        "src/application/ShaderInspector.cpp"
+      ],
+      "validation": [
+        "Compiler43 SDBG fixture exact source extraction"
+      ]
     },
     {
       "module": "shader_sources.py",
       "sha256": "ddd4884332149d8c536f66445e61d87dcc19c79429ae93bbc95881d89a135890",
       "lines": 148,
       "description": "Bounded, read-only SPDB/SDBG source extraction. No external file lookup.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": [
+        "src/application/ShaderInspector.cpp"
+      ],
+      "validation": [
+        "Compiled SPDB fixture exact source extraction"
+      ]
     },
     {
       "module": "shader_sources_ui.py",
       "sha256": "0a63d66c0d0123e1b641471a7e8c40f86126cc32a52a88b90f832e8d1e0fd224",
       "lines": 56,
       "description": "Browse captured source files separately from editable reconstructed programs.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": [
+        "src/app/MainWindow.cpp"
+      ],
+      "validation": [
+        "Source/DXBC/reflection tabs; source debugging pending"
+      ]
     },
     {
       "module": "shaders.py",
@@ -1699,10 +1745,12 @@
       "description": "DXBC inspection and system D3DCompiler integration. No GPA components.",
       "status": "partial",
       "native": [
+        "src/application/ShaderInspector.cpp",
+        "src/cli/main.cpp",
         "src/replay/Replay.cpp"
       ],
       "validation": [
-        "docs/NATIVE_BASELINE.md"
+        "DXBC disassembly/reflection; SPDB/SDBG fixtures; HLSL compile/apply; recovery pending"
       ]
     },
     {
@@ -1826,9 +1874,13 @@
       "sha256": "587484a0e9dba3d1401ed03ecbdee634aad0c16750cd2ce85a7b49193a15983f",
       "lines": 29,
       "description": "Lossless tight storage readback for non-multisampled D3D11 textures.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": [
+        "src/replay/TexturePreview.cpp"
+      ],
+      "validation": [
+        "Native preview/readback only; MSAA and planar pending"
+      ]
     },
     {
       "module": "uav_counters.py",

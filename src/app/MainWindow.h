@@ -1,15 +1,18 @@
 #pragma once
 #include "Models.h"
 #include "Views.h"
+#include "application/Experiment.h"
 #include <QComboBox>
 #include <QDockWidget>
 #include <QFutureWatcher>
 #include <QJsonObject>
 #include <QLabel>
+#include <QLineEdit>
 #include <QMainWindow>
 #include <QPlainTextEdit>
 #include <QProcess>
 #include <QProgressBar>
+#include <QSpinBox>
 #include <QTableView>
 #include <QTemporaryDir>
 #include <QTimer>
@@ -37,6 +40,12 @@ class MainWindow final : public QMainWindow {
     void loadSettings();
     void selectEvent(Id id);
     void inspectResource(Id id);
+    void previewTexture();
+    void openExperiment();
+    bool saveExperiment();
+    void experimentChanged();
+    void updateExperimentActions();
+    void compileShader();
     void inspectEvent(Id id);
     void showPipeline(const State &state);
     void startWorker(QStringList args, bool timings);
@@ -49,6 +58,10 @@ class MainWindow final : public QMainWindow {
     void properties(const QString &title, const QList<QPair<QString, QString>> &rows);
     void updateStatistics();
     std::shared_ptr<const Frame> frame_;
+    std::unique_ptr<Experiment> experiment_;
+    QString projectPath_;
+    bool projectDirty_ = false;
+    QAction *undoAction_ = nullptr, *redoAction_ = nullptr, *enableAction_ = nullptr;
     QString capturePath_, pendingPath_;
     CaptureModel *commands_, *resources_;
     CaptureFilter *commandFilter_, *resourceFilter_;
@@ -56,8 +69,22 @@ class MainWindow final : public QMainWindow {
     QTableView *apiView_, *resourceView_, *bufferView_;
     QTreeWidget *pipeline_, *properties_, *metrics_, *statistics_;
     QPlainTextEdit *shader_, *log_;
+    QTabWidget *shaderPane_;
+    QPlainTextEdit *sourceEditor_;
+    QComboBox *sourceFiles_;
+    QTreeWidget *shaderReflection_;
+    QLineEdit *shaderEntry_;
+    Id runningShader_ = 0;
+    QString runningSource_, runningEntry_;
     QTabWidget *centerTabs_, *leftTabs_;
     ImageView *image_;
+    ImageView *textureImage_;
+    QWidget *texturePane_;
+    QComboBox *textureBoundary_, *textureChannels_;
+    QSpinBox *mip_, *layer_, *slice_;
+    QLabel *textureLabel_;
+    QTimer textureTimer_;
+    QString runningKind_;
     EventChart *chart_;
     QMainWindow *workspace_;
     QLabel *frameLabel_, *imageLabel_, *pixelLabel_, *zoomLabel_, *selectionLabel_;

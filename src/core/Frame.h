@@ -4,6 +4,7 @@
 #include <cstring>
 #include <filesystem>
 #include <map>
+#include <mutex>
 #include <span>
 #include <stdexcept>
 #include <string>
@@ -107,6 +108,8 @@ class Frame {
     std::map<Id, Entry> entries_;
     std::filesystem::path path_;
     uint32_t width_{}, height_{};
+    mutable std::once_flag hashOnce_;
+    mutable std::string hash_;
     void close() noexcept;
 
   public:
@@ -119,6 +122,7 @@ class Frame {
     uint64_t size() const { return size_; }
     uint32_t width() const { return width_; }
     uint32_t height() const { return height_; }
+    const std::string &sha256() const;
     const Entry &entry(Id id) const;
     Bytes payload(Id id, int category = -1, int type = -1) const;
     Bytes data(Id id) const;
@@ -129,6 +133,7 @@ class Frame {
     std::vector<std::pair<size_t, Bytes>> updates(Id id, size_t resourceSize) const;
 };
 bool isDraw(uint16_t type);
+std::string sha256(Bytes bytes);
 std::string commandName(uint16_t type);
 std::string resourceName(uint16_t type);
 TextureInfo textureInfo(const Resource &resource);

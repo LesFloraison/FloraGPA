@@ -1,4 +1,5 @@
 #include "MainWindow.h"
+#include "application/ShaderInspector.h"
 #include "replay/Replay.h"
 #include <QApplication>
 #include <QCloseEvent>
@@ -86,6 +87,9 @@ MainWindow::MainWindow() {
     replayTimer_.setSingleShot(true);
     replayTimer_.setInterval(180);
     connect(&replayTimer_, &QTimer::timeout, this, [this] { replay(); });
+    textureTimer_.setSingleShot(true);
+    textureTimer_.setInterval(180);
+    connect(&textureTimer_, &QTimer::timeout, this, &MainWindow::previewTexture);
     timeout_.setSingleShot(true);
     timeout_.setInterval(180000);
     connect(&timeout_, &QTimer::timeout, this, [this] {
@@ -99,6 +103,10 @@ MainWindow::MainWindow() {
             capturePath_ = pendingPath_;
             ++revision_;
             selectedEvent_ = selectedResource_ = 0;
+            experiment_ = std::make_unique<Experiment>(*frame_);
+            projectPath_.clear();
+            projectDirty_ = false;
+            updateExperimentActions();
             commands_->setFrame(frame_);
             resources_->setFrame(frame_);
             chart_->clear();
@@ -106,10 +114,15 @@ MainWindow::MainWindow() {
             metrics_->clear();
             properties_->clear();
             shader_->clear();
+            sourceFiles_->clear();
+            sourceEditor_->clear();
+            shaderReflection_->clear();
+            textureImage_->setImage({});
+            textureLabel_->clear();
             bufferModel_->setBytes({});
             report_ = {};
             image_->setImage({});
-            setWindowTitle(QFileInfo(capturePath_).completeBaseName() + " — FloraGPA");
+            setWindowTitle(QFileInfo(capturePath_).completeBaseName() + "[*] — FloraGPA");
             frameLabel_->setText(QFileInfo(capturePath_).fileName());
             selectionLabel_->setText(QString("%1 API calls").arg(commands_->rowCount()));
             boundary_->setCurrentIndex(0);
@@ -193,31 +206,55 @@ void MainWindow::buildUi() {
     setWindowTitle("FloraGPA");
     setWindowIcon(style()->standardIcon(QStyle::SP_ComputerIcon));
     auto file = menuBar()->addMenu("&File");
-    openAction_ = file->addAction(
-        "&Open Capture…", this,
-        [this] {
-            auto path = QFileDialog::getOpenFileName(this, "Open DX11 capture", {},
-                                                     "GPA frames (*.gpa_frame *.gpaframe);;All files (*)");
-            if (!path.isEmpty())
-                openCapture(path);
-        },
-        QKeySequence::Open);
+    openAction_ = file->addAction("&Open Capture…", QKeySequence::Open, this, [this] {
+        auto path = QFileDialog::getOpenFileName(this, "Open DX11 capture", {},
+                                                 "GPA frames (*.gpa_frame *.gpaframe);;All files (*)");
+        if (!path.isEmpty())
+            openCapture(path);
+    });
     openAction_->setIcon(style()->standardIcon(QStyle::SP_DialogOpenButton));
-    auto saveProject = file->addAction("Save Experiment…");
-    saveProject->setEnabled(false);
-    saveProject->setToolTip("Experiment migration pending");
+    file->addAction("Open Experiment…", this, &MainWindow::openExperiment);
+    file->addAction("Save Experiment…", QKeySequence::Save, this, [this] { saveExperiment(); });
+    auto edit = menuBar()->addMenu("&Edit");
+    undoAction_ = edit->addAction("Undo", QKeySequence::Undo, this, [this] {
+        if (experiment_ && experiment_->undo())
+            experimentChanged();
+    });
+    redoAction_ = edit->addAction("Redo", QKeySequence::Redo, this, [this] {
+        if (!experiment_ || !experiment_->redo())
+            return;
+        try {
+            ReplayOptions check;
+            experiment_->apply(*frame_, check);
+            experimentChanged();
+        } catch (const std::exception &e) {
+            experiment_->undo();
+            showError(QString::fromUtf8(e.what()));
+        }
+    });
+    enableAction_ = edit->addAction("Disable Event", this, [this] {
+        if (!experiment_ || !selectedEvent_)
+            return;
+        try {
+            experiment_->setEnabled(*frame_, selectedEvent_, !experiment_->enabled(selectedEvent_));
+            experimentChanged();
+        } catch (const std::exception &e) {
+            showError(QString::fromUtf8(e.what()));
+        }
+    });
+    updateExperimentActions();
     file->addSeparator();
     exportAction_ =
-        file->addAction("Export Image…", this, &MainWindow::exportImage, QKeySequence("Ctrl+Shift+S"));
+        file->addAction("Export Image…", QKeySequence("Ctrl+Shift+S"), this, &MainWindow::exportImage);
     file->addAction("Export Resource…", this, &MainWindow::exportBytes);
     file->addSeparator();
-    file->addAction("Exit", this, &QWidget::close, QKeySequence::Quit);
+    file->addAction("Exit", QKeySequence::Quit, this, &QWidget::close);
     auto analyze = menuBar()->addMenu("&Analysis");
-    replayAction_ = analyze->addAction("Replay", this, [this] { replay(); }, QKeySequence("F5"));
+    replayAction_ = analyze->addAction("Replay", QKeySequence("F5"), this, [this] { replay(); });
     replayAction_->setIcon(style()->standardIcon(QStyle::SP_MediaPlay));
     collectAction_ =
-        analyze->addAction("Collect GPU Metrics", this, [this] { replay(true); }, QKeySequence("F6"));
-    cancelAction_ = analyze->addAction("Cancel", this, &MainWindow::cancel, QKeySequence("Escape"));
+        analyze->addAction("Collect GPU Metrics", QKeySequence("F6"), this, [this] { replay(true); });
+    cancelAction_ = analyze->addAction("Cancel", QKeySequence("Escape"), this, &MainWindow::cancel);
     cancelAction_->setIcon(style()->standardIcon(QStyle::SP_MediaStop));
     cancelAction_->setEnabled(false);
     auto viewMenu = menuBar()->addMenu("&View");
@@ -294,6 +331,7 @@ void MainWindow::buildUi() {
     apiView_ = table(commandFilter_);
     apiView_->setObjectName("apiLog");
     apiView_->setColumnWidth(1, 185);
+    apiView_->setColumnHidden(2, true);
     resources_ = new CaptureModel(CaptureModel::Kind::Resources, this);
     resourceFilter_ = new CaptureFilter(this);
     resourceFilter_->setSourceModel(resources_);
@@ -355,6 +393,35 @@ void MainWindow::buildUi() {
     image_->setObjectName("frameOutput");
     outputLayout->addWidget(image_);
     centerTabs_->addTab(output, "Output");
+    texturePane_ = new QWidget;
+    auto textureLayout = new QVBoxLayout(texturePane_);
+    textureLayout->setContentsMargins(0, 0, 0, 0);
+    textureLayout->setSpacing(0);
+    auto textureBar = new QToolBar;
+    textureBoundary_ = new QComboBox;
+    textureBoundary_->addItems({"Capture initial", "Before event", "After event"});
+    textureBar->addWidget(textureBoundary_);
+    mip_ = new QSpinBox;
+    layer_ = new QSpinBox;
+    slice_ = new QSpinBox;
+    for (auto pair : {std::pair{mip_, "Mip "}, std::pair{layer_, "Layer "}, std::pair{slice_, "Slice "}}) {
+        pair.first->setPrefix(pair.second);
+        textureBar->addWidget(pair.first);
+        connect(pair.first, &QSpinBox::valueChanged, this, [this] { textureTimer_.start(); });
+    }
+    textureChannels_ = new QComboBox;
+    textureChannels_->addItems({"RGBA", "RGB", "R", "G", "B", "A"});
+    textureBar->addWidget(textureChannels_);
+    textureLabel_ = new QLabel("—");
+    textureBar->addWidget(textureLabel_);
+    textureLayout->addWidget(textureBar);
+    textureImage_ = new ImageView;
+    textureImage_->setObjectName("textureOutput");
+    textureLayout->addWidget(textureImage_);
+    centerTabs_->addTab(texturePane_, "Texture");
+    connect(textureBoundary_, &QComboBox::currentIndexChanged, this, [this] { textureTimer_.start(); });
+    connect(textureChannels_, &QComboBox::currentTextChanged, textureImage_, &ImageView::channel);
+
     pipeline_ = tree({"Stage / Binding", "Resource", "Details"});
     pipeline_->setObjectName("pipeline");
     pipeline_->setColumnWidth(0, 225);
@@ -365,7 +432,51 @@ void MainWindow::buildUi() {
     shader_->setLineWrapMode(QPlainTextEdit::NoWrap);
     shader_->setFont(QFont("Cascadia Mono", 10));
     shader_->setObjectName("shader");
-    centerTabs_->addTab(shader_, "Shader");
+    shaderPane_ = new QTabWidget;
+    shaderPane_->setDocumentMode(true);
+    auto sourcePane = new QWidget;
+    auto sourceLayout = new QVBoxLayout(sourcePane);
+    sourceLayout->setContentsMargins(0, 0, 0, 0);
+    sourceFiles_ = new QComboBox;
+    sourceFiles_->setSizeAdjustPolicy(QComboBox::AdjustToMinimumContentsLengthWithIcon);
+    sourceFiles_->setMinimumContentsLength(25);
+    sourceEditor_ = new QPlainTextEdit;
+    sourceEditor_->setObjectName("shaderSource");
+    sourceEditor_->setReadOnly(false);
+    sourceEditor_->setFont(QFont("Cascadia Mono", 10));
+    sourceEditor_->setLineWrapMode(QPlainTextEdit::NoWrap);
+    auto editBar = new QToolBar;
+    editBar->addAction("Import HLSL", this, [this] {
+        auto path =
+            QFileDialog::getOpenFileName(this, "Import HLSL", {}, "HLSL files (*.hlsl *.fx);;All files (*)");
+        if (path.isEmpty())
+            return;
+        QFile file(path);
+        if (!file.open(QIODevice::ReadOnly)) {
+            showError("Cannot read HLSL source.");
+            return;
+        }
+        sourceEditor_->setPlainText(QString::fromUtf8(file.readAll()));
+        shaderPane_->setCurrentIndex(0);
+    });
+    shaderEntry_ = new QLineEdit("main");
+    shaderEntry_->setMaximumWidth(160);
+    shaderEntry_->setToolTip("HLSL entry point");
+    editBar->addWidget(shaderEntry_);
+    editBar->addAction("Compile && Apply", this, &MainWindow::compileShader);
+    sourceLayout->addWidget(editBar);
+    sourceLayout->addWidget(sourceFiles_);
+    sourceLayout->addWidget(sourceEditor_);
+    shaderPane_->addTab(sourcePane, "Source");
+    shaderPane_->addTab(shader_, "DXBC");
+    shaderReflection_ = tree({"Binding / Variable", "Slot / Offset", "Type / Size"});
+    shaderReflection_->setObjectName("shaderReflection");
+    shaderReflection_->setColumnWidth(0, 250);
+    shaderReflection_->setColumnWidth(1, 120);
+    shaderPane_->addTab(shaderReflection_, "Reflection");
+    connect(sourceFiles_, &QComboBox::currentIndexChanged, this,
+            [this](int index) { sourceEditor_->setPlainText(sourceFiles_->itemData(index).toString()); });
+    centerTabs_->addTab(shaderPane_, "Shader");
     bufferModel_ = new BufferModel(this);
     bufferView_ = table(bufferModel_);
     bufferView_->setFont(QFont("Cascadia Mono", 10));
@@ -383,6 +494,7 @@ void MainWindow::buildUi() {
     properties_ = tree({"Property", "Value"});
     properties_->setObjectName("properties");
     metrics_ = tree({"Metric", "Value"});
+    metrics_->setColumnWidth(0, 175);
     rightTabs->addTab(properties_, "Properties");
     rightTabs->addTab(metrics_, "Metrics");
     auto right = new QDockWidget("Inspector", workspace_);
@@ -459,6 +571,14 @@ void MainWindow::loadSettings() {
     workspace_->restoreState(s.value("window/docks").toByteArray(), 1);
 }
 void MainWindow::closeEvent(QCloseEvent *e) {
+    if (projectDirty_) {
+        auto answer = QMessageBox::question(this, "Unsaved experiment", "Save experiment changes?",
+                                            QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
+        if (answer == QMessageBox::Cancel || (answer == QMessageBox::Save && !saveExperiment())) {
+            e->ignore();
+            return;
+        }
+    }
     QSettings s;
     s.setValue("window/geometry", saveGeometry());
     s.setValue("window/docks", workspace_->saveState(1));
@@ -478,6 +598,12 @@ void MainWindow::setBusy(bool busy) {
     exportAction_->setEnabled(!image_->image().isNull());
 }
 void MainWindow::openCapture(const QString &path) {
+    if (projectDirty_) {
+        auto answer = QMessageBox::question(this, "Unsaved experiment", "Save experiment changes?",
+                                            QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
+        if (answer == QMessageBox::Cancel || (answer == QMessageBox::Save && !saveExperiment()))
+            return;
+    }
     if (loader_.isRunning())
         return;
     cancel();
@@ -486,8 +612,9 @@ void MainWindow::openCapture(const QString &path) {
     setBusy(true);
     statusBar()->showMessage("Opening capture…");
     loader_.setFuture(QtConcurrent::run([path] {
-        return std::shared_ptr<const Frame>(
-            std::make_shared<Frame>(std::filesystem::path(path.toStdWString())));
+        auto frame = std::make_shared<Frame>(std::filesystem::path(path.toStdWString()));
+        frame->sha256();
+        return std::shared_ptr<const Frame>(frame);
     }));
 }
 void MainWindow::replay(bool timings) {
@@ -517,10 +644,31 @@ void MainWindow::startWorker(QStringList args, bool timings) {
         return;
     }
     args << "--out" << jobDir_->path() + "/result";
+    if (args.first() == "compile") {
+        auto path = jobDir_->path() + "/edited.hlsl";
+        try {
+            writeFile(path, runningSource_.toUtf8());
+        } catch (const std::exception &e) {
+            showError(QString::fromUtf8(e.what()));
+            return;
+        }
+        args << "--source" << path << "--entry" << runningEntry_;
+    }
+    if (experiment_ && !experiment_->document().at("history").empty()) {
+        auto path = jobDir_->path() + "/experiment.json";
+        try {
+            experiment_->save(path);
+        } catch (const std::exception &e) {
+            showError(QString::fromUtf8(e.what()));
+            return;
+        }
+        args << "--experiment" << path;
+    }
     if (adapter_->currentIndex() == 1)
         args << "--warp";
     runningRevision_ = revision_;
     runningTimings_ = timings;
+    runningKind_ = args.first();
     stderrBuffer_.clear();
     errorText_.clear();
     setBusy(true);
@@ -531,6 +679,7 @@ void MainWindow::startWorker(QStringList args, bool timings) {
 void MainWindow::cancel() {
     ++revision_;
     replayTimer_.stop();
+    textureTimer_.stop();
     if (process_.state() != QProcess::NotRunning) {
         if (job_)
             TerminateJobObject(job_, 1);
@@ -562,9 +711,32 @@ void MainWindow::finishWorker(int code, QProcess::ExitStatus status) {
         report_ = QJsonDocument::fromJson(file.readAll(), &error).object();
         if (error.error != QJsonParseError::NoError || !report_["completed"].toBool())
             throw std::runtime_error("Worker did not complete");
+        if (runningKind_ == "compile") {
+            QFile binary(jobDir_->path() + "/result/replacement.dxbc");
+            if (!binary.open(QIODevice::ReadOnly))
+                throw std::runtime_error("Compiled bytecode is missing");
+            auto bytes = binary.readAll();
+            experiment_->setShader(
+                *frame_, runningShader_,
+                Bytes(reinterpret_cast<const uint8_t *>(bytes.data()), size_t(bytes.size())),
+                runningSource_.toStdString(), runningEntry_.toStdString());
+            experimentChanged();
+            statusBar()->showMessage("Shader applied", 3000);
+            emit taskFinished(true);
+            return;
+        }
         QImage result(jobDir_->path() + "/result/frame.png");
         if (result.isNull())
             throw std::runtime_error("Worker output image is missing");
+        if (runningKind_ == "texture") {
+            textureImage_->setImage(std::move(result));
+            textureImage_->channel(textureChannels_->currentText());
+            textureLabel_->setText(
+                QString("%1 × %2").arg(report_["width"].toInt()).arg(report_["height"].toInt()));
+            statusBar()->showMessage("Texture ready", 3000);
+            emit taskFinished(true);
+            return;
+        }
         image_->setImage(std::move(result));
         image_->channel(channels_->currentText());
         imageLabel_->setText(QString("T:%1  ·  %2 × %3")
@@ -572,7 +744,7 @@ void MainWindow::finishWorker(int code, QProcess::ExitStatus status) {
                                  .arg(report_["width"].toInt())
                                  .arg(report_["height"].toInt()));
         if (runningTimings_) {
-            findChild<QTabWidget*>("inspectorTabs")->setCurrentWidget(metrics_);
+            findChild<QTabWidget *>("inspectorTabs")->setCurrentWidget(metrics_);
             chart_->setTimings(report_["timings"].toArray());
             metrics_->clear();
             auto stats = report_["pipeline_statistics"].toObject();
@@ -617,6 +789,7 @@ void MainWindow::selectEvent(Id id) {
         return;
     selectedEvent_ = id;
     selectedResource_ = 0;
+    updateExperimentActions();
     ++revision_;
     chart_->setSelection(id);
     selectionLabel_->setText(QString("Event %1").arg(id));
@@ -641,6 +814,11 @@ void MainWindow::selectEvent(Id id) {
     }
     if (process_.state() != QProcess::NotRunning)
         cancel();
+    if (selectedResource_) {
+        auto type = frame_->entry(selectedResource_).type;
+        if (type >= 0x90 && type <= 0x95)
+            inspectResource(selectedResource_);
+    }
     replayTimer_.start();
 }
 void MainWindow::inspectEvent(Id id) {
@@ -729,6 +907,12 @@ void MainWindow::inspectResource(Id id) {
         auto &e = frame_->entry(id);
         if (e.category != 5)
             return;
+        if (selectedResource_ != id) {
+            ++revision_;
+            if (process_.state() != QProcess::NotRunning)
+                cancel();
+            textureTimer_.stop();
+        }
         selectedResource_ = id;
         auto resource = frame_->resource(id);
         QList<QPair<QString, QString>> values{{"ID", QString::number(id)},
@@ -745,9 +929,47 @@ void MainWindow::inspectResource(Id id) {
             return;
         }
         if (e.type >= 0x90 && e.type <= 0x95) {
-            auto bytes = frame_->shader(resource.data);
+            auto effective = experiment_->shaderBytes(*frame_, id);
+            Bytes bytes(effective);
             shader_->setPlainText(QString::fromStdString(disassemble(bytes)));
-            centerTabs_->setCurrentWidget(shader_);
+            auto metadata = inspectShader(bytes);
+            sourceFiles_->clear();
+            sourceEditor_->clear();
+            shaderReflection_->clear();
+            for (auto &file : metadata["embedded_sources"]["files"])
+                sourceFiles_->addItem(QString::fromStdString(file["name"].get<std::string>()),
+                                      QString::fromStdString(file["text"].get<std::string>()));
+            shaderPane_->setCurrentIndex(sourceFiles_->count() ? 0 : 1);
+            auto saved = experiment_->shaderSource(id);
+            shaderEntry_->setText(QString::fromStdString(saved.value("source_entry", std::string("main"))));
+            if (saved.contains("source_text")) {
+                sourceFiles_->addItem("Applied HLSL",
+                                      QString::fromStdString(saved["source_text"].get<std::string>()));
+                sourceFiles_->setCurrentIndex(sourceFiles_->count() - 1);
+                shaderPane_->setCurrentIndex(0);
+            }
+            sourceFiles_->setToolTip(
+                QString::fromStdString(metadata["embedded_sources"]["status"].get<std::string>()));
+            for (auto &binding : metadata["bindings"])
+                new QTreeWidgetItem(shaderReflection_,
+                                    {QString::fromStdString(binding["name"].get<std::string>()),
+                                     QString::number(binding["slot"].get<UINT>()),
+                                     QString("Type %1 · count %2")
+                                         .arg(binding["type"].get<UINT>())
+                                         .arg(binding["count"].get<UINT>())});
+            for (auto &cb : metadata["constant_buffers"]) {
+                auto group = new QTreeWidgetItem(shaderReflection_,
+                                                 {QString::fromStdString(cb["name"].get<std::string>()), "",
+                                                  QString("%1 B").arg(cb["size"].get<UINT>())});
+                for (auto &v : cb["variables"])
+                    new QTreeWidgetItem(group, {QString::fromStdString(v["name"].get<std::string>()),
+                                                QString::number(v["offset"].get<UINT>()),
+                                                QString("%1 B").arg(v["size"].get<UINT>())});
+            }
+            if (metadata["profile"].is_string())
+                values.append(QPair<QString, QString>{
+                    "Profile", QString::fromStdString(metadata["profile"].get<std::string>())});
+            centerTabs_->setCurrentWidget(shaderPane_);
             values.append(QPair<QString, QString>{"DXBC bytes", QString::number(bytes.size())});
         }
         if (e.type == 0x83) {
@@ -770,6 +992,16 @@ void MainWindow::inspectResource(Id id) {
             values.append(QPair<QString, QString>{"Format", QString::number(info.format)});
             values.append(QPair<QString, QString>{"Samples", QString::number(info.samples)});
             values.append(QPair<QString, QString>{"Data ID", QString::number(resource.data)});
+            QSignalBlocker blockMip(mip_), blockLayer(layer_), blockSlice(slice_);
+            mip_->setRange(0, int(info.mips) - 1);
+            layer_->setRange(0, int(info.layers) - 1);
+            slice_->setRange(0, int(info.depth) - 1);
+            mip_->setValue(0);
+            layer_->setValue(0);
+            slice_->setValue(0);
+            textureImage_->setImage({});
+            centerTabs_->setCurrentWidget(texturePane_);
+            textureTimer_.start();
         }
         properties(QString::fromStdString(resourceName(e.type)), values);
     } catch (const std::exception &e) {
@@ -801,13 +1033,126 @@ void MainWindow::updateStatistics() {
     for (auto &[name, count] : kinds)
         row(statistics_, QString::fromStdString(name), QString::number(count));
 }
+void MainWindow::compileShader() {
+    if (!frame_ || !selectedResource_ || busy())
+        return;
+    auto &entry = frame_->entry(selectedResource_);
+    if (entry.type < 0x90 || entry.type > 0x95) {
+        showError("Select a shader resource.");
+        return;
+    }
+    if (sourceEditor_->toPlainText().trimmed().isEmpty()) {
+        showError("HLSL source is empty.");
+        return;
+    }
+    runningShader_ = selectedResource_;
+    runningSource_ = sourceEditor_->toPlainText();
+    runningEntry_ = shaderEntry_->text().trimmed();
+    startWorker({"compile", capturePath_, "--id", QString::number(runningShader_)}, false);
+}
+void MainWindow::previewTexture() {
+    if (!frame_ || !selectedResource_)
+        return;
+    const auto &entry = frame_->entry(selectedResource_);
+    if (entry.type < 0x84 || entry.type > 0x86)
+        return;
+    if (process_.state() != QProcess::NotRunning) {
+        cancel();
+        textureTimer_.start();
+        return;
+    }
+    ++revision_;
+    QStringList args{"texture", capturePath_,
+                     "--id",    QString::number(selectedResource_),
+                     "--mip",   QString::number(mip_->value()),
+                     "--layer", QString::number(layer_->value()),
+                     "--slice", QString::number(slice_->value())};
+    if (textureBoundary_->currentIndex()) {
+        if (!selectedEvent_) {
+            showError("Select an API event first.");
+            return;
+        }
+        args << "--event" << QString::number(selectedEvent_);
+        if (textureBoundary_->currentIndex() == 1)
+            args << "--before";
+    }
+    startWorker(args, false);
+}
+void MainWindow::updateExperimentActions() {
+    if (!undoAction_)
+        return;
+    undoAction_->setEnabled(experiment_ && experiment_->canUndo());
+    redoAction_->setEnabled(experiment_ && experiment_->canRedo());
+    bool editable = frame_ && selectedEvent_ && isDraw(frame_->entry(selectedEvent_).type);
+    enableAction_->setEnabled(editable);
+    enableAction_->setText(
+        editable && experiment_ && !experiment_->enabled(selectedEvent_) ? "Enable Event" : "Disable Event");
+}
+void MainWindow::experimentChanged() {
+    projectDirty_ = true;
+    setWindowModified(true);
+    ++revision_;
+    chart_->clear();
+    metrics_->clear();
+    updateExperimentActions();
+    if (process_.state() != QProcess::NotRunning)
+        cancel();
+    replayTimer_.start();
+}
+void MainWindow::openExperiment() {
+    if (projectDirty_) {
+        auto answer = QMessageBox::question(this, "Unsaved experiment", "Save experiment changes?",
+                                            QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
+        if (answer == QMessageBox::Cancel || (answer == QMessageBox::Save && !saveExperiment()))
+            return;
+    }
+    if (!frame_)
+        return;
+    auto path = QFileDialog::getOpenFileName(this, "Open experiment", {}, "FloraGPA experiments (*.json)");
+    if (path.isEmpty())
+        return;
+    try {
+        auto candidate = std::make_unique<Experiment>(*frame_);
+        candidate->load(path, *frame_);
+        experiment_ = std::move(candidate);
+        projectPath_ = path;
+        experimentChanged();
+        projectDirty_ = false;
+        setWindowModified(false);
+    } catch (const std::exception &e) {
+        showError(QString::fromUtf8(e.what()));
+    }
+}
+bool MainWindow::saveExperiment() {
+    if (!experiment_)
+        return false;
+    auto path = projectPath_;
+    if (path.isEmpty())
+        path = QFileDialog::getSaveFileName(this, "Save experiment",
+                                            QFileInfo(capturePath_).completeBaseName() + ".flora.json",
+                                            "FloraGPA experiments (*.json)");
+    if (path.isEmpty())
+        return false;
+    try {
+        experiment_->save(path);
+        projectPath_ = path;
+        projectDirty_ = false;
+        setWindowModified(false);
+        statusBar()->showMessage("Experiment saved", 3000);
+        return true;
+    } catch (const std::exception &e) {
+        showError(QString::fromUtf8(e.what()));
+        return false;
+    }
+}
 void MainWindow::exportImage() {
-    if (image_->image().isNull())
+    auto viewer = centerTabs_->currentWidget() == texturePane_ ? textureImage_ : image_;
+    if (viewer->image().isNull())
         return;
     auto path = QFileDialog::getSaveFileName(this, "Export output", {}, "PNG image (*.png)");
     if (path.isEmpty())
         return;
-    if (!image_->image().save(path))
+    if (!viewer->displayImage().save(path))
         showError("Cannot save image.");
     else
         statusBar()->showMessage("Image exported", 3000);
@@ -818,9 +1163,11 @@ void MainWindow::exportBytes() {
     try {
         auto r = frame_->resource(selectedResource_);
         Bytes bytes;
-        if (r.type >= 0x90 && r.type <= 0x95)
-            bytes = frame_->shader(r.data);
-        else if (r.data)
+        std::vector<uint8_t> effective;
+        if (r.type >= 0x90 && r.type <= 0x95) {
+            effective = experiment_->shaderBytes(*frame_, selectedResource_);
+            bytes = effective;
+        } else if (r.data)
             bytes = frame_->data(r.data);
         else
             bytes = frame_->payload(selectedResource_);

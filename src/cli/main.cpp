@@ -1,3 +1,5 @@
+#include "application/Experiment.h"
+#include "application/ShaderInspector.h"
 #include "core/Frame.h"
 #include "replay/Replay.h"
 #include <Psapi.h>
@@ -12,6 +14,7 @@
 #include <QJsonObject>
 #include <QSaveFile>
 #include <QTextStream>
+#include <d3dcompiler.h>
 
 using namespace flora;
 void save(const QString &path, const QByteArray &data) {
@@ -43,9 +46,12 @@ int main(int argc, char **argv) {
     p.setApplicationDescription("Native DX11 capture inspection and isolated replay");
     p.addHelpOption();
     p.addVersionOption();
-    p.addPositionalArgument("command", "inventory | replay | shader | buffer");
+    p.addPositionalArgument("command", "inventory | replay | shader | buffer | texture | compile");
     p.addPositionalArgument("capture", "DX11 .gpa_frame file");
     p.addOption({"out", "New or empty output directory", "path"});
+    p.addOption({"experiment", "Compatible FloraGPA experiment project", "path"});
+    p.addOption({"source", "HLSL translation unit", "path"});
+    p.addOption({"entry", "HLSL entry point", "name", "main"});
     p.addOption({"warp", "Use the WARP software adapter"});
     p.addOption({"timings", "Collect native GPU timestamps and pipeline statistics"});
     p.addOption({"debug-device", "Enable D3D11 validation"});
@@ -53,6 +59,9 @@ int main(int argc, char **argv) {
     p.addOption({"before", "Stop before the selected event"});
     p.addOption({"id", "Resource ID", "id"});
     p.addOption({"subresource", "Texture subresource", "index", "0"});
+    p.addOption({"mip", "Texture mip level", "index", "0"});
+    p.addOption({"layer", "Texture array layer", "index", "0"});
+    p.addOption({"slice", "Texture depth slice", "index", "0"});
     p.addOption({"suppress-draws", "Disable draw submissions (negative control)"});
     p.addOption({"disable", "Comma-separated disabled event IDs", "ids"});
     p.process(app);
@@ -69,6 +78,18 @@ int main(int argc, char **argv) {
                 throw std::runtime_error("Invalid unsigned identifier: " + key.toStdString());
             return Id(id);
         };
+        auto parseIndex = [&](const QString &key) {
+            auto value = parseId(key);
+            if (value > UINT32_MAX)
+                throw std::runtime_error("Index exceeds uint32 range");
+            return UINT(value);
+        };
+        if (p.isSet("before") && !p.isSet("event"))
+            throw std::runtime_error("--before requires --event");
+        if (p.isSet("event") && (!parseId("event") || frame.entry(parseId("event")).category != 7))
+            throw std::runtime_error("Event must identify an API command");
+        if (p.isSet("experiment") && p.isSet("disable"))
+            throw std::runtime_error("Use experiment operations or --disable, not both");
         QJsonObject report{{"schema", "FloraGPA native result 1"},
                            {"capture", args[1]},
                            {"width", int(frame.width())},
@@ -120,6 +141,37 @@ int main(int argc, char **argv) {
             report.insert("resources", resources);
             report.insert("draws", qint64(draws));
             report.insert("dispatches", qint64(dispatches));
+        } else if (command == "compile") {
+            if (out.isEmpty() || !p.isSet("id") || !p.isSet("source"))
+                throw std::runtime_error("compile requires --id, --source and --out");
+            auto resource = frame.resource(parseId("id"));
+            auto info = inspectShader(frame.shader(resource.data));
+            auto profile = info.at("profile").get<std::string>();
+            QFile source(p.value("source"));
+            if (!source.open(QIODevice::ReadOnly))
+                throw std::runtime_error("Cannot read HLSL source");
+            auto bytes = source.readAll();
+            UINT flags = D3DCOMPILE_ENABLE_STRICTNESS;
+            auto lines = bytes.split('\n');
+            for (qsizetype i = 0; i < std::min<qsizetype>(5, lines.size()); ++i)
+                if (lines[i].trimmed() == "// FloraGPA compiler optimization: preserve")
+                    flags = D3DCOMPILE_SKIP_OPTIMIZATION;
+            Com<ID3DBlob> code, errors;
+            auto entry = p.value("entry").toUtf8();
+            auto hr = D3DCompile(bytes.data(), size_t(bytes.size()), "edited.hlsl", nullptr, nullptr,
+                                 entry.constData(), profile.c_str(), flags, 0, &code, &errors);
+            QByteArray diagnostics;
+            if (errors)
+                diagnostics = QByteArray(static_cast<const char *>(errors->GetBufferPointer()),
+                                         qsizetype(errors->GetBufferSize()));
+            save(out + "/compiler.log", diagnostics);
+            if (FAILED(hr))
+                throw std::runtime_error(diagnostics.isEmpty() ? "HLSL compilation failed"
+                                                               : diagnostics.toStdString());
+            save(out + "/replacement.dxbc", QByteArray(static_cast<const char *>(code->GetBufferPointer()),
+                                                       qsizetype(code->GetBufferSize())));
+            report.insert("completed", true);
+            report.insert("profile", QString::fromStdString(profile));
         } else if (command == "shader") {
             if (!p.isSet("id") || out.isEmpty())
                 throw std::runtime_error("shader requires --id and --out");
@@ -128,12 +180,22 @@ int main(int argc, char **argv) {
             save(out + "/shader.dxbc",
                  QByteArray(reinterpret_cast<const char *>(bytes.data()), qsizetype(bytes.size())));
             save(out + "/shader.asm", QByteArray::fromStdString(disassemble(bytes)));
+            auto metadata = inspectShader(bytes);
+            save(out + "/shader.json", QByteArray::fromStdString(metadata.dump(2)));
+            const auto &sources = metadata["embedded_sources"]["files"];
+            if (!sources.empty()) {
+                QDir().mkpath(out + "/shader_sources");
+                for (size_t i = 0; i < sources.size(); ++i)
+                    save(out + QString("/shader_sources/%1.hlsl").arg(i, 4, 10, QChar('0')),
+                         QByteArray::fromHex(
+                             QByteArray::fromStdString(sources[i]["raw_hex"].get<std::string>())));
+            }
             report.insert("id", p.value("id"));
-        } else if (command == "replay" || command == "buffer") {
+        } else if (command == "replay" || command == "buffer" || command == "texture") {
             if (out.isEmpty())
                 throw std::runtime_error("Replay requires --out");
             ReplayOptions options;
-            options.timings=p.isSet("timings");
+            options.timings = p.isSet("timings");
             options.warp = p.isSet("warp");
             options.debug = p.isSet("debug-device");
             options.suppressDraws = p.isSet("suppress-draws");
@@ -147,11 +209,17 @@ int main(int argc, char **argv) {
                     throw std::runtime_error("Invalid disabled event");
                 options.disabled.insert(id);
             }
+            if (p.isSet("experiment")) {
+                Experiment project(frame);
+                project.load(p.value("experiment"), frame);
+                project.apply(frame, options);
+            }
             Replay replay(frame, options);
             report.insert("adapter", QString::fromStdString(replay.adapter()));
-            replay.run([](Id event, size_t done, size_t total) {
-                QTextStream(stderr) << "progress " << event << ' ' << done << ' ' << total << Qt::endl;
-            });
+            if (command != "texture" || options.until)
+                replay.run([](Id event, size_t done, size_t total) {
+                    QTextStream(stderr) << "progress " << event << ' ' << done << ' ' << total << Qt::endl;
+                });
             if (command == "buffer") {
                 if (!p.isSet("id"))
                     throw std::runtime_error("buffer requires --id");
@@ -160,7 +228,15 @@ int main(int argc, char **argv) {
                 save(out + "/buffer.bin", raw);
                 report.insert("sha256", digest(raw));
             } else {
-                auto image = replay.output(p.isSet("id") ? parseId("id") : 0, UINT(parseId("subresource")));
+                auto image =
+                    command == "texture"
+                        ? replay.previewTexture(parseId("id"), parseIndex("mip"), parseIndex("layer"),
+                                                parseIndex("slice"))
+                        : replay.output(p.isSet("id") ? parseId("id") : 0, parseIndex("subresource"));
+                if (command == "texture")
+                    report.insert("value_time", options.until
+                                                    ? (options.before ? "before_event" : "after_event")
+                                                    : "capture_initial");
                 QByteArray raw(reinterpret_cast<const char *>(image.rgba.data()),
                                qsizetype(image.rgba.size()));
                 save(out + "/frame.rgba", raw);
@@ -177,8 +253,26 @@ int main(int argc, char **argv) {
             for (auto &[key, value] : replay.counts)
                 counts.insert(QString::fromStdString(key), qint64(value));
             report.insert("counts", counts);
-            if(options.timings){QJsonArray timings;for(auto& row:replay.timings)timings.append(QJsonObject{{"event",QString::number(row.event)},{"microseconds",row.microseconds}});report.insert("timings",timings);
-                auto& s=replay.statistics;report.insert("pipeline_statistics",QJsonObject{{"IA Vertices",QString::number(s.IAVertices)},{"IA Primitives",QString::number(s.IAPrimitives)},{"VS Invocations",QString::number(s.VSInvocations)},{"GS Invocations",QString::number(s.GSInvocations)},{"GS Primitives",QString::number(s.GSPrimitives)},{"Clipper Invocations",QString::number(s.CInvocations)},{"Clipper Primitives",QString::number(s.CPrimitives)},{"PS Invocations",QString::number(s.PSInvocations)},{"HS Invocations",QString::number(s.HSInvocations)},{"DS Invocations",QString::number(s.DSInvocations)},{"CS Invocations",QString::number(s.CSInvocations)}});}
+            if (options.timings) {
+                QJsonArray timings;
+                for (auto &row : replay.timings)
+                    timings.append(QJsonObject{{"event", QString::number(row.event)},
+                                               {"microseconds", row.microseconds}});
+                report.insert("timings", timings);
+                auto &s = replay.statistics;
+                report.insert("pipeline_statistics",
+                              QJsonObject{{"IA Vertices", QString::number(s.IAVertices)},
+                                          {"IA Primitives", QString::number(s.IAPrimitives)},
+                                          {"VS Invocations", QString::number(s.VSInvocations)},
+                                          {"GS Invocations", QString::number(s.GSInvocations)},
+                                          {"GS Primitives", QString::number(s.GSPrimitives)},
+                                          {"Clipper Invocations", QString::number(s.CInvocations)},
+                                          {"Clipper Primitives", QString::number(s.CPrimitives)},
+                                          {"PS Invocations", QString::number(s.PSInvocations)},
+                                          {"HS Invocations", QString::number(s.HSInvocations)},
+                                          {"DS Invocations", QString::number(s.DSInvocations)},
+                                          {"CS Invocations", QString::number(s.CSInvocations)}});
+            }
 
             report.insert("loaded_modules", modules());
             report.insert("completed", true);

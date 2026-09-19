@@ -34,8 +34,16 @@ QVariant CaptureModel::data(const QModelIndex &index, int role) const {
         return {};
     if (index.column() == 0)
         return QString::number(id);
-    if (index.column() == 1)
-        return QString::fromStdString(kind_ == Kind::Commands ? commandName(e.type) : resourceName(e.type));
+    if (index.column() == 1) {
+        auto name =
+            QString::fromStdString(kind_ == Kind::Commands ? commandName(e.type) : resourceName(e.type));
+        if (kind_ == Kind::Commands && isDraw(e.type)) {
+            auto args = data(this->index(index.row(), 2), Qt::DisplayRole).toString();
+            if (!args.isEmpty())
+                name += "  " + args;
+        }
+        return name;
+    }
     try {
         if (kind_ == Kind::Commands && isDraw(e.type)) {
             auto ev = frame_->event(id);

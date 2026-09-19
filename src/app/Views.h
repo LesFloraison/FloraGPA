@@ -12,6 +12,7 @@ class ImageView final : public QGraphicsView {
     explicit ImageView(QWidget *parent = nullptr);
     void setImage(QImage image);
     const QImage &image() const { return image_; }
+    QImage displayImage() const { return item_->pixmap().toImage(); }
     void channel(const QString &channel);
     void fit();
     void actualSize();

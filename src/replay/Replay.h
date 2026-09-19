@@ -17,6 +17,7 @@ struct ReplayOptions {
     Id until = 0;
     bool before = false;
     std::set<Id> disabled;
+    std::map<Id, std::vector<uint8_t>> shaders, textures;
 };
 struct Image {
     uint32_t width{}, height{}, format{};
@@ -24,7 +25,10 @@ struct Image {
     Id resource{};
 };
 class Replay {
-    struct Timestamp { Id event; Com<ID3D11Query> begin, end; };
+    struct Timestamp {
+        Id event;
+        Com<ID3D11Query> begin, end;
+    };
     std::vector<Timestamp> timestamps_;
     const Frame &frame_;
     ReplayOptions options_;
@@ -52,7 +56,10 @@ class Replay {
     template <class T> T *get(Id id) { return static_cast<T *>(object(id)); }
 
   public:
-    struct Timing { Id event; double microseconds; };
+    struct Timing {
+        Id event;
+        double microseconds;
+    };
     std::vector<Timing> timings;
     D3D11_QUERY_DATA_PIPELINE_STATISTICS statistics{};
     std::map<std::string, uint64_t> counts;
@@ -60,6 +67,8 @@ class Replay {
     ~Replay();
     void run(const std::function<void(Id, size_t, size_t)> &progress = {});
     Image output(Id texture = 0, uint32_t subresource = 0);
+    Image previewTexture(Id texture, uint32_t mip = 0, uint32_t layer = 0, uint32_t slice = 0, double low = 0,
+                         double high = 1, const std::string &channel = "rgba");
     std::vector<uint8_t> readBuffer(Id id);
     std::string adapter() const;
 };

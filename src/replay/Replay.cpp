@@ -1,13 +1,13 @@
 #include "Replay.h"
 #include <algorithm>
+#include <chrono>
 #include <d3d11sdklayers.h>
 #include <d3d11shader.h>
 #include <d3dcompiler.h>
 #include <dxgi.h>
 #include <iostream>
-#include <chrono>
-#include <thread>
 #include <sstream>
+#include <thread>
 
 namespace flora {
 void check(HRESULT hr, const char *op) {
@@ -118,6 +118,8 @@ IUnknown *Replay::object(Id id) {
                     d[4] = 92;
             }
             auto data = resource.data && info.samples == 1 ? frame_.data(resource.data) : Bytes{};
+            if (auto it = options_.textures.find(id); it != options_.textures.end())
+                data = it->second;
             if (uint64_t(info.mips) * info.layers > 30720)
                 throw std::runtime_error("Too many texture subresources");
             std::vector<D3D11_SUBRESOURCE_DATA> initial;
@@ -183,6 +185,8 @@ IUnknown *Replay::object(Id id) {
             }
         } else if (t >= 0x90 && t <= 0x95) {
             auto data = frame_.shader(resource.data);
+            if (auto it = options_.shaders.find(id); it != options_.shaders.end())
+                data = it->second;
             Reader head(p);
             head.skip(32);
             auto linkage = head.read<Id>();
@@ -691,7 +695,14 @@ void Replay::command(const Entry &e) {
             (options_.suppressDraws && t != 0x35 && t != 0x36))
             return;
         const auto &a = event.args;
-        if(options_.timings) {Timestamp timestamp{e.id};D3D11_QUERY_DESC desc{D3D11_QUERY_TIMESTAMP,0};check(device_->CreateQuery(&desc,&timestamp.begin),"Create timestamp");check(device_->CreateQuery(&desc,&timestamp.end),"Create timestamp");context_->End(timestamp.begin.Get());timestamps_.push_back(std::move(timestamp));}
+        if (options_.timings) {
+            Timestamp timestamp{e.id};
+            D3D11_QUERY_DESC desc{D3D11_QUERY_TIMESTAMP, 0};
+            check(device_->CreateQuery(&desc, &timestamp.begin), "Create timestamp");
+            check(device_->CreateQuery(&desc, &timestamp.end), "Create timestamp");
+            context_->End(timestamp.begin.Get());
+            timestamps_.push_back(std::move(timestamp));
+        }
         switch (t) {
         case 0x35:
             context_->Dispatch(a[0], a[1], a[2]);
@@ -721,7 +732,8 @@ void Replay::command(const Entry &e) {
             break;
         }
         counts[commandName(t)]++;
-        if(options_.timings)context_->End(timestamps_.back().end.Get());
+        if (options_.timings)
+            context_->End(timestamps_.back().end.Get());
         return;
     }
     if (options_.disabled.contains(e.id))
@@ -861,9 +873,18 @@ void Replay::run(const std::function<void(Id, size_t, size_t)> &progress) {
     for (auto &ranges : ranges_)
         ranges.clear();
     lastTarget_ = 0;
-    timestamps_.clear();timings.clear();statistics={};
-    Com<ID3D11Query> disjoint,stats;
-    if(options_.timings){D3D11_QUERY_DESC desc{D3D11_QUERY_TIMESTAMP_DISJOINT,0};check(device_->CreateQuery(&desc,&disjoint),"Create disjoint query");desc.Query=D3D11_QUERY_PIPELINE_STATISTICS;check(device_->CreateQuery(&desc,&stats),"Create statistics query");context_->Begin(disjoint.Get());context_->Begin(stats.Get());}
+    timestamps_.clear();
+    timings.clear();
+    statistics = {};
+    Com<ID3D11Query> disjoint, stats;
+    if (options_.timings) {
+        D3D11_QUERY_DESC desc{D3D11_QUERY_TIMESTAMP_DISJOINT, 0};
+        check(device_->CreateQuery(&desc, &disjoint), "Create disjoint query");
+        desc.Query = D3D11_QUERY_PIPELINE_STATISTICS;
+        check(device_->CreateQuery(&desc, &stats), "Create statistics query");
+        context_->Begin(disjoint.Get());
+        context_->Begin(stats.Get());
+    }
     size_t total = 0, done = 0;
     for (auto &[id, e] : frame_.entries())
         if (e.category == 7)
@@ -882,15 +903,38 @@ void Replay::run(const std::function<void(Id, size_t, size_t)> &progress) {
             if (progress && ((++done % 128) == 0 || isDraw(e.type)))
                 progress(id, done, total);
         }
-    if(options_.timings){context_->End(stats.Get());context_->End(disjoint.Get());}
+    if (options_.timings) {
+        context_->End(stats.Get());
+        context_->End(disjoint.Get());
+    }
     context_->Flush();
     check(device_->GetDeviceRemovedReason(), "Replay device status");
-    if(options_.timings){
-        const auto deadline=std::chrono::steady_clock::now()+std::chrono::seconds(30);
-        auto wait=[&](ID3D11Query* q,void* data,UINT bytes){for(;;){auto hr=context_->GetData(q,data,bytes,0);check(hr,"Read GPU query");if(hr==S_OK)return;if(std::chrono::steady_clock::now()>deadline)throw std::runtime_error("GPU query timeout");std::this_thread::sleep_for(std::chrono::milliseconds(1));}};
-        D3D11_QUERY_DATA_TIMESTAMP_DISJOINT frequency{};wait(disjoint.Get(),&frequency,sizeof frequency);wait(stats.Get(),&statistics,sizeof statistics);
-        if(frequency.Disjoint||!frequency.Frequency)throw std::runtime_error("GPU timestamp frequency changed during collection");
-        for(auto& timestamp:timestamps_){UINT64 begin=0,end=0;wait(timestamp.begin.Get(),&begin,sizeof begin);wait(timestamp.end.Get(),&end,sizeof end);if(end<begin)throw std::runtime_error("Non-monotonic GPU timestamp");timings.push_back({timestamp.event,double(end-begin)*1e6/double(frequency.Frequency)});}
+    if (options_.timings) {
+        const auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(30);
+        auto wait = [&](ID3D11Query *q, void *data, UINT bytes) {
+            for (;;) {
+                auto hr = context_->GetData(q, data, bytes, 0);
+                check(hr, "Read GPU query");
+                if (hr == S_OK)
+                    return;
+                if (std::chrono::steady_clock::now() > deadline)
+                    throw std::runtime_error("GPU query timeout");
+                std::this_thread::sleep_for(std::chrono::milliseconds(1));
+            }
+        };
+        D3D11_QUERY_DATA_TIMESTAMP_DISJOINT frequency{};
+        wait(disjoint.Get(), &frequency, sizeof frequency);
+        wait(stats.Get(), &statistics, sizeof statistics);
+        if (frequency.Disjoint || !frequency.Frequency)
+            throw std::runtime_error("GPU timestamp frequency changed during collection");
+        for (auto &timestamp : timestamps_) {
+            UINT64 begin = 0, end = 0;
+            wait(timestamp.begin.Get(), &begin, sizeof begin);
+            wait(timestamp.end.Get(), &end, sizeof end);
+            if (end < begin)
+                throw std::runtime_error("Non-monotonic GPU timestamp");
+            timings.push_back({timestamp.event, double(end - begin) * 1e6 / double(frequency.Frequency)});
+        }
     }
     if (options_.debug) {
         Com<ID3D11InfoQueue> queue;

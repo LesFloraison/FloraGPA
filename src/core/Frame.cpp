@@ -216,7 +216,7 @@ std::vector<std::pair<size_t, Bytes>> Frame::updates(Id id, size_t size) const {
     return out;
 }
 std::string commandName(uint16_t type) {
-    static const std::map<uint16_t, std::string> names{
+    static const std::map<int, std::string> names{
 #include "CommandNames.inc"
     };
     auto it = names.find(type);

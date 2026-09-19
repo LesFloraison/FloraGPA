@@ -29,7 +29,10 @@ class CaptureFilter final : public QSortFilterProxyModel {
     bool workOnly = false;
     int resourceType = 0;
     using QSortFilterProxyModel::QSortFilterProxyModel;
-    void refresh() { invalidateFilter(); }
+    void refresh() {
+        beginFilterChange();
+        endFilterChange(Direction::Rows);
+    }
 
   protected:
     bool filterAcceptsRow(int row, const QModelIndex &parent) const override;
