@@ -110,11 +110,21 @@ Command-list pointers and resource IDs remain separate candidates. As in the Pyt
 reference, ExecuteCommandList execution is not restored; only captured immediate-context
 FinishCommandList no-op results with a zero returned reference are accepted by replay.
 
+**Pipeline > Captured State** reconstructs the selected command's before/after state
+from the original capture. Use **Read**, then filter by field or known/unknown state.
+Each field retains its source and event; double-click a resource value or source event
+to navigate. Export preserves all fields, including filtered-out rows and uncertainty
+notes. Reads run in the background and a changed selection invalidates old results.
+This view does not apply experiments. The existing **Snapshot** tab remains available
+for draw/dispatch state blocks.
+
 ```powershell
 .\out\FloraGPA\FloraGPA.Cli.exe commands D:\captures\sample.gpa_frame --out D:\results\api
 # Optional: --filter "set decoded" --resource 25733
 .\out\FloraGPA\FloraGPA.Cli.exe contexts D:\captures\sample.gpa_frame --out D:\results\contexts
 .\out\FloraGPA\FloraGPA.Cli.exe command-lists D:\captures\sample.gpa_frame --out D:\results\lists
+.\out\FloraGPA\FloraGPA.Cli.exe command-state D:\captures\sample.gpa_frame --event 430 --before --out D:\results\state
+# Omit --before to inspect after the command.
 ```
 
 See [migration status](docs/MIGRATION_STATUS.md) for implemented features and
@@ -158,3 +168,10 @@ For context recovery and command-list parity, run `FloraContextTests` with
 `--fixtures` and a new `--out` directory. This compares context evidence, command-list
 inventories and API metadata, including rejected recovery paths, plus GPU buffer
 outputs from a capture whose context identity is missing.
+
+For command-state parity, run `FloraCommandStateTests` with
+`FLORA_STATE_EVIDENCE_DIR` and `FLORA_TEST_CAPTURE_DIR` set, then run
+`tools/validate_command_state_port.py` with the same reference/executable arguments,
+`--fixtures` pointing to that evidence directory and a new `--out` directory.
+It compares before/after fields and provenance against Python, reuses the original
+validator's synthetic fixture, and checks every qualified snapshot in GF2 and BF1.

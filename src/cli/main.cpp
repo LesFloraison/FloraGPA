@@ -1,5 +1,6 @@
 #include "application/ApiCommands.h"
 #include "application/CaptureNames.h"
+#include "application/CommandState.h"
 #include "application/Constants.h"
 #include "application/ContextInspector.h"
 #include "application/Experiment.h"
@@ -53,8 +54,9 @@ int main(int argc, char **argv) {
     p.setApplicationDescription("Native DX11 capture inspection and isolated replay");
     p.addHelpOption();
     p.addVersionOption();
-    p.addPositionalArgument("command", "inventory | commands | contexts | command-lists | replay | shader | "
-                                       "buffer | texture | compile | geometry");
+    p.addPositionalArgument(
+        "command", "inventory | commands | command-state | contexts | command-lists | replay | shader | "
+                   "buffer | texture | compile | geometry");
     p.addPositionalArgument("capture", "DX11 .gpa_frame file");
     p.addOption({"out", "New or empty output directory", "path"});
     p.addOption({"experiment", "Compatible FloraGPA experiment project", "path"});
@@ -118,7 +120,13 @@ int main(int argc, char **argv) {
             if (!QDir().mkpath(out))
                 throw std::runtime_error("Cannot create output directory");
         }
-        if (command == "contexts" || command == "command-lists") {
+        if (command == "command-state") {
+            if (out.isEmpty() || !p.isSet("event"))
+                throw std::runtime_error("command-state requires --event and --out");
+            auto detail = inspectCommandState(frame, parseId("event"), !p.isSet("before"));
+            save(out + "/command-state.json", QByteArray::fromStdString(detail.dump(2) + "\n"));
+            report.insert("completed", true);
+        } else if (command == "contexts" || command == "command-lists") {
             if (out.isEmpty())
                 throw std::runtime_error("Context inspection requires --out");
             auto detail = command == "contexts" ? inspectContexts(frame) : inspectCommandLists(frame);

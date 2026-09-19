@@ -1,4 +1,5 @@
 #include "MainWindow.h"
+#include "CapturedStateView.h"
 #include "application/CommandEdits.h"
 #include "application/Constants.h"
 #include "application/ContextInspector.h"
@@ -133,6 +134,7 @@ MainWindow::MainWindow() {
             resources_->setFrame(frame_);
             chart_->clear();
             pipeline_->clear();
+            capturedState_->setSelection(frame_, 0);
             metrics_->clear();
             properties_->clear();
             shader_->clear();
@@ -505,7 +507,15 @@ void MainWindow::buildUi() {
     pipeline_->setObjectName("pipeline");
     pipeline_->setColumnWidth(0, 225);
     pipeline_->setColumnWidth(1, 110);
-    centerTabs_->addTab(pipeline_, "Pipeline");
+    auto pipelineTabs = new QTabWidget;
+    pipelineTabs->setObjectName("pipelineTabs");
+    pipelineTabs->setDocumentMode(true);
+    pipelineTabs->addTab(pipeline_, "Snapshot");
+    capturedState_ = new CapturedStateView;
+    pipelineTabs->addTab(capturedState_, "Captured State");
+    centerTabs_->addTab(pipelineTabs, "Pipeline");
+    connect(capturedState_, &CapturedStateView::eventRequested, this, &MainWindow::locateEvent);
+    connect(capturedState_, &CapturedStateView::resourceRequested, this, &MainWindow::inspectResource);
     shader_ = new QPlainTextEdit;
     shader_->setReadOnly(true);
     shader_->setLineWrapMode(QPlainTextEdit::NoWrap);
@@ -1052,10 +1062,28 @@ void MainWindow::properties(const QString &title, const QList<QPair<QString, QSt
     group->setExpanded(true);
     properties_->resizeColumnToContents(0);
 }
+void MainWindow::locateEvent(Id id) {
+    if (!frame_)
+        return;
+    auto source = commands_->index(commands_->rowOf(id), 0);
+    if (!source.isValid())
+        return;
+    if (!commandFilter_->mapFromSource(source).isValid()) {
+        findChild<QComboBox *>("apiKinds")->setCurrentIndex(1);
+        findChild<QLineEdit *>("apiSearch")->clear();
+        findChild<QLineEdit *>("apiResourceFilter")->clear();
+    }
+    leftTabs_->setCurrentIndex(0);
+    selectEvent(id);
+    auto index = commandFilter_->mapFromSource(source);
+    apiView_->setCurrentIndex(index);
+    apiView_->scrollTo(index);
+}
 void MainWindow::selectEvent(Id id) {
     if (!frame_ || selectedEvent_ == id)
         return;
     selectedEvent_ = id;
+    capturedState_->setSelection(frame_, id);
     selectedResource_ = 0;
     clearBufferDetails();
     updateExperimentActions();
@@ -1248,17 +1276,7 @@ void MainWindow::inspectCaptureStructure() {
             auto id = item->data(1, Qt::UserRole).toULongLong();
             if (id) {
                 dialog.accept();
-                auto source = commands_->index(commands_->rowOf(id), 0);
-                if (!commandFilter_->mapFromSource(source).isValid()) {
-                    findChild<QComboBox *>("apiKinds")->setCurrentIndex(1);
-                    findChild<QLineEdit *>("apiSearch")->clear();
-                    findChild<QLineEdit *>("apiResourceFilter")->clear();
-                }
-                leftTabs_->setCurrentIndex(0);
-                selectEvent(id);
-                auto index = commandFilter_->mapFromSource(source);
-                apiView_->setCurrentIndex(index);
-                apiView_->scrollTo(index);
+                locateEvent(id);
             }
         });
     };

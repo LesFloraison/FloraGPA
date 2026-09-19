@@ -1,5 +1,7 @@
+#include "StateCapture.h"
 #include "SyntheticCapture.h"
 #include "app/Appearance.h"
+#include "app/CapturedStateView.h"
 #include "app/MainWindow.h"
 #include <QAbstractItemModelTester>
 #include <QAction>
@@ -22,6 +24,86 @@ class UiTests final : public QObject {
         QVERIFY(window.grab().save(directory + '/' + name + ".png"));
     }
   private slots:
+    void capturedStateInspector() {
+        QTemporaryDir dir;
+        auto capture = flora::testing::stateCapture();
+        capture.save(dir.path() + "/state.gpa_frame");
+        auto frame = std::make_shared<flora::Frame>((dir.path() + "/state.gpa_frame").toStdWString());
+        flora::CapturedStateView view;
+        view.resize(1000, 640);
+        view.show();
+        auto read = view.findChild<QAction *>("readCapturedState");
+        auto exportAction = view.findChild<QAction *>("exportCapturedState");
+        auto fields = view.findChild<QTreeWidget *>("capturedStateFields");
+        auto boundary = view.findChild<QComboBox *>("stateBoundary");
+        auto knowledge = view.findChild<QComboBox *>("stateKnowledge");
+        auto search = view.findChild<QLineEdit *>("stateSearch");
+        QSignalSpy done(&view, &flora::CapturedStateView::inspectionFinished);
+        auto field = [&](const QString &name) -> QTreeWidgetItem * {
+            for (int i = 0; i < fields->topLevelItemCount(); ++i)
+                if (fields->topLevelItem(i)->text(0) == name)
+                    return fields->topLevelItem(i);
+            return nullptr;
+        };
+        view.setSelection(frame, 101);
+        QVERIFY(read->isEnabled());
+        read->trigger();
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 10000);
+        QVERIFY(done.takeLast()[0].toBool());
+        QVERIFY(field("vs.shader"));
+        QCOMPARE(field("vs.shader")->text(1), QString("0"));
+        boundary->setCurrentIndex(1);
+        QCOMPARE(fields->topLevelItemCount(), 0);
+        QVERIFY(!exportAction->isEnabled());
+        read->trigger();
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 10000);
+        QVERIFY(done.takeLast()[0].toBool());
+        QCOMPARE(field("vs.shader")->text(1), QString("50"));
+        QCOMPARE(field("vs.shader")->text(3), QString("101"));
+        QVERIFY(exportAction->isEnabled());
+        view.setSelection(frame, 116);
+        read->trigger();
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 10000);
+        QVERIFY(done.takeLast()[0].toBool());
+        search->setText("ps.srv.0");
+        knowledge->setCurrentIndex(2);
+        QVERIFY(!field("ps.srv.0")->isHidden());
+        QCOMPARE(field("ps.srv.0")->text(1), QString("Unknown"));
+        QCOMPARE(field("ps.srv.0")->text(2), QString("unknown"));
+        QVERIFY(field("ps.srv.0")->toolTip(2).contains("Output binding"));
+        snapshot(view, "state-unknown-hazard");
+        knowledge->setCurrentIndex(1);
+        QVERIFY(field("ps.srv.0")->isHidden());
+        view.setSelection(frame, 115);
+        read->trigger();
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 10000);
+        QVERIFY(done.takeLast()[0].toBool());
+        QSignalSpy resource(&view, &flora::CapturedStateView::resourceRequested);
+        QSignalSpy event(&view, &flora::CapturedStateView::eventRequested);
+        auto srv = field("ps.srv.0");
+        QVERIFY(srv);
+        QCOMPARE(srv->text(1), QString("6"));
+        QVERIFY(QMetaObject::invokeMethod(fields, "itemDoubleClicked", Qt::DirectConnection,
+                                          Q_ARG(QTreeWidgetItem *, srv), Q_ARG(int, 1)));
+        QCOMPARE(resource.takeLast()[0].toULongLong(), qulonglong(6));
+        QVERIFY(QMetaObject::invokeMethod(fields, "itemDoubleClicked", Qt::DirectConnection,
+                                          Q_ARG(QTreeWidgetItem *, srv), Q_ARG(int, 3)));
+        QCOMPARE(event.takeLast()[0].toULongLong(), qulonglong(115));
+        snapshot(view, "state-known-source");
+        read->trigger();
+        view.setSelection(frame, 120);
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 10000);
+        QVERIFY(!done.takeLast()[0].toBool());
+        QCOMPARE(fields->topLevelItemCount(), 0);
+        QVERIFY(!exportAction->isEnabled());
+        QVERIFY(read->isEnabled());
+        view.setSelection(frame, 135);
+        read->trigger();
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 10000);
+        QVERIFY(done.takeLast()[0].toBool());
+        QCOMPARE(fields->topLevelItemCount(), 0);
+        QCOMPARE(view.findChild<QLabel *>("stateSummary")->text(), QString("State unavailable"));
+    }
     void inferredContextNavigation() {
         using namespace flora;
         using namespace flora::testing;
@@ -234,6 +316,22 @@ class UiTests final : public QObject {
         });
         structure->trigger();
         QVERIFY(inspected);
+        auto stateView = window.findChild<flora::CapturedStateView *>();
+        QVERIFY(stateView);
+        QVERIFY(select(430));
+        auto analysisTabs = window.findChild<QTabWidget *>("analysisTabs");
+        auto pipelineTabs = window.findChild<QTabWidget *>("pipelineTabs");
+        QVERIFY(analysisTabs && pipelineTabs);
+        analysisTabs->setCurrentWidget(pipelineTabs);
+        pipelineTabs->setCurrentWidget(stateView);
+        QSignalSpy stateDone(stateView, &flora::CapturedStateView::inspectionFinished);
+        stateView->findChild<QAction *>("readCapturedState")->trigger();
+        QTRY_VERIFY_WITH_TIMEOUT(!stateDone.empty(), 30000);
+        QVERIFY(stateDone.takeLast()[0].toBool());
+        QVERIFY(stateView->findChild<QTreeWidget *>("capturedStateFields")->topLevelItemCount() > 1000);
+        QVERIFY(stateView->findChild<QLabel *>("stateSummary")->text().contains("Event 430"));
+        stateView->findChild<QLineEdit *>("stateSearch")->setText("ps.");
+        snapshot(window, "state-gf2-pipeline");
     }
     void counterEditorHistory() {
         auto captures = qEnvironmentVariable("FLORA_TEST_CAPTURE_DIR");

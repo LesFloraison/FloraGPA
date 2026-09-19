@@ -19,6 +19,7 @@
 #include <QTreeWidget>
 
 namespace flora {
+class CapturedStateView;
 class MainWindow final : public QMainWindow {
     Q_OBJECT
   public:
@@ -39,6 +40,7 @@ class MainWindow final : public QMainWindow {
     void buildUi();
     void loadSettings();
     void selectEvent(Id id);
+    void locateEvent(Id id);
     void inspectResource(Id id);
     void previewTexture();
     void previewBuffer();
@@ -94,6 +96,7 @@ class MainWindow final : public QMainWindow {
     Id displayedBuffer_ = 0;
     QTableView *apiView_, *resourceView_, *bufferView_;
     QTreeWidget *pipeline_, *properties_, *metrics_, *statistics_;
+    CapturedStateView *capturedState_;
     QPlainTextEdit *shader_, *log_;
     QTabWidget *shaderPane_;
     QPlainTextEdit *sourceEditor_;

@@ -11,7 +11,8 @@ GF2 与 BF1 DX11 捕获。**尚未完成原 Python 版本的全部功能迁移�
 | 工程 | C++20、VS2022 x64、Qt 6.11.2、CMake、Git、独立 CLI/Worker | 尚未配置远程仓库 |
 | 捕获与重放 | 有边界检查的 IGPA v3 读取、六阶段状态、基本 D3D11 资源和 draw/dispatch、Map/更新/复制/清除 | 特殊 replay 路径尚未完全迁移 |
 | 主界面 | GPA 式深色三栏、真实 GPU 时间柱状图与概览、可停靠面板、API 筛选、任务取消 | 概览尚无范围拖动；未知功能页禁用 |
-| 事件 | draw/dispatch 选择、快照管线、前后边界重放、事件启停 | 非 draw 精确 setter 状态仍不完整 |
+| 事件 | draw/dispatch 选择、快照管线、前后边界重放、事件启停 | 实验后的完整命令级原生绑定读取仍待迁移 |
+| 捕获命令状态 | 六阶段 setter、CB1 范围、IA/RS/OM/SO/predicate 参数、扩展 UAV 槽元数据；命令前/后、逐字段来源、资源重叠失效与快照校准；Pipeline 页异步读取、筛选、跳转、JSON 导出 | 原始捕获状态，不应用实验；只读 DSV / 模糊 3D 重叠保持未知；SO 偏移是 setter 参数，隐藏 counter 和实时写入位置不由此推断 |
 | API 检查 | 捕获字段、偏移/原始位、可选数组、引用跳转、资源/多词筛选、JSON/CSV 导出；getter、annotation、query 与 command-list 调用元数据 | 解码不代表执行；annotation 层级和 view typed-format 预览衔接尚未闭合 |
 | Context / command-list | 五种 context 接口身份、immediate/deferred 区分；缺失 context 的严格 Map READ 证据恢复；command-list 资源、owner 和 Execute/Finish 清单；Qt 字段树、证据导航、JSON 导出 | 推断不补造版本/指针/标志；保留指针与 ID 候选冲突；与 Python 相同，仅接受 immediate-context 的 Finish 空操作，未恢复列表执行 |
 | 捕获查询值 | 按同 ID、命令顺序使用 GetDesc/GetDataSize/CreateQuery/predicate 元数据；BOOL 完整值与 UINT64 低位、缺失字节、HRESULT/冲突状态 | 表示捕获时保存的内存字，不是新执行的 GPU query；原始高位缺失时保持不完整 |
@@ -76,7 +77,7 @@ GF2 与 BF1 DX11 捕获。**尚未完成原 Python 版本的全部功能迁移�
 - UAV counter 的 32 组 Python 对照通过：29 组缓冲区逐字节一致；BF1 的 3 组并行 Append
   输出按完整元素多重集合比较，未写入区域逐字节一致，计数和元数据全部一致。
   Qt 测试覆盖溢出拒绝、最大 uint32 编辑、实际 Worker 读回、撤销/重做与过期结果失效。
-- Release 与 Debug 的十二组 CTest 均通过。不是“所有原版测试已通过”。
+- Release 与 Debug 的十三组 CTest 均通过。不是“所有原版测试已通过”。
 - API 检查与 Python 对照：GF2 全部 920 条、BF1 全部 18,024 条记录的字段、偏移、原始位、
   引用、状态、query 元数据及解析后的 CSV 一致；另验证 BF1 资源/多词组合筛选。
   合成捕获的 3,948 条记录覆盖固定/可选数组布局、逐字节截断、尾随字节、无效 flag、
@@ -93,6 +94,14 @@ GF2 与 BF1 DX11 捕获。**尚未完成原 Python 版本的全部功能迁移�
 - Qt Context 测试验证捕获身份、推断缺失字段、双页清单和 Map 证据导航。较长说明只放在
   工具提示与导出 JSON，界面保持字段树布局。跳转到被隐藏的证据事件时会清除阻碍定位的
   API 筛选并切换到 API Log。
+- 捕获命令状态的逐快照检查：GF2 的 86,380 个、BF1 的 1,545,910 个已知字段预测与
+  合格快照一致。BF1 的四处不完整 view 描述仍产生与 Python 相同的未知状态；Dispatch
+  快照中省略的 VS/PS 不会抹去此前观察，CB1 范围仅在绑定仍一致时保留。
+- 194 组命令状态前/后对照逐项比较值、已知标志、来源事件、原因、资源 ID、notes 和字段顺序；
+  包含原 Python validator 的 KEEP/绑定冲突捕获，以及 C++ 测试生成的多 context、
+  缺失 SO 偏移、只读 DSV、3D 重叠、扩展槽、CB1 拒绝顺序、非有限浮点和未知命令案例。
+  Qt 测试覆盖前/后切换、Known/Unknown 筛选、来源/资源跳转、过期结果失效及真实 GF2 主窗口。
+  这些是捕获状态检查证据，不代表这些 setter 的实验编辑和特殊 GPU 重放已全部迁移。
 - 发布目录在仅保留 Windows 系统 PATH 的子进程中完成两份黄金重放和负对照。
   模块列表未发现 Python/Tk、GPA 或 RenderDoc；尚未做另一台干净 Windows 验证。
 - Qt 自身窗口渲染已检查 1440×900、1920×1080 及 150% / 200% 缩放。
@@ -124,10 +133,15 @@ Context 证据为 `context-fixture/`、`context-validation-1/validation.json`、
 相应 CTest 日志为 `ctest-context-release-final.log`、`ctest-context-debug.log`，发布包为
 `out/FloraGPA-contexts/`，隔离 PATH 的黄金重放证据为 `validation-context-package/`。
 本批 API 元数据回归保存在 `api-validation-contexts/validation.json`。
+捕获命令状态证据为 `state-fixture/`、`state-validation-2/validation.json`、`state-ui/`、
+`state-ui-debug/`、`ctest-state-release.log`、`ctest-state-debug.log`；发布包为
+`out/FloraGPA-state/`，黄金帧回归为 `validation-state-package/`。
+主窗口新增交互的最终 Release 检查另存于 `state-ui-final-release.txt`；仅系统 PATH 的
+命令状态读取保存在 `state-isolated-package/`。
 
 ## 尚未闭合的迁移范围
 
-1. 完整 setter/command/context 语义、predication、stream-output/DrawAuto、
+1. 完整 setter/command/context 的重放与实验语义、predication、stream-output/DrawAuto、
    class linkage、扩展 UAV、MSAA 与 planar 等特殊 replay 路径。
 2. 其余资源/状态/绑定/命令编辑，完整 counter 命令引用、DrawAuto 与后变换几何、覆盖率、
    quad 与像素分析。

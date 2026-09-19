@@ -252,9 +252,19 @@
       "sha256": "b344d0e2f0ed61164f597baed2abe78629b4b1541b56100d9cc93bc57cdbd6c9",
       "lines": 248,
       "description": "Captured context state reconstructed from API setters and qualified snapshots.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": [
+        "src/application/CommandState.cpp",
+        "src/app/CapturedStateView.cpp",
+        "src/cli/main.cpp"
+      ],
+      "validation": [
+        "tests/CommandStateTests.cpp: unknown initial state, qualified snapshots, before/after boundaries, context isolation, hazards, CB1/SO/extended slots and invalidation",
+        "All GF2/BF1 snapshot predictions: 86380 and 1545910 known fields; no differences; four BF1 unresolved-view notes retained",
+        "tools/validate_command_state_port.py: 194 exact before/after field, order, provenance and note comparisons against Python on real captures and two independent synthetic fixtures",
+        "tests/UiTests.cpp: asynchronous original-capture inspection, filters, resource/source navigation, stale-result rejection and GF2 Pipeline integration",
+        "Captured inspection and anchor audit migrated; no full clean-machine/multi-capture closure, and experiment-modified replay_pipeline remains a separate pending module"
+      ]
     },
     {
       "module": "commands_ui.py",
@@ -265,12 +275,15 @@
       "native": [
         "src/app/MainWindow.cpp",
         "src/app/Models.cpp",
+        "src/app/CapturedStateView.cpp",
+        "src/application/CommandState.cpp",
         "src/application/ApiCommands.cpp",
         "src/application/QueryHistory.cpp"
       ],
       "validation": [
         "tests/UiTests.cpp: captured fields/offsets, reference texture navigation and resource filtering",
-        "JSON/CSV export and query interpretation in Inspector; full linked-record details, typed-view/sample selection and non-draw setter-state UI remain pending"
+        "Captured before/after setter-state UI migrated with provenance, uncertainty filtering and navigation",
+        "JSON/CSV export and query interpretation in Inspector; full linked-record details, typed-view/sample selection and experiment-modified native replay-state UI remain pending"
       ]
     },
     {
@@ -325,7 +338,7 @@
         "tests/ContextTests.cpp: all five interface versions, exact identity layouts, READ/Unmap evidence, 21 rejection/conflict scenarios, shared edit validation and real Replay rejection",
         "tools/validate_contexts.py: complete context reports and API metadata on GF2, BF1 and 25 synthetic captures; two inferred-context GPU buffers match Python byte for byte",
         "tests/UiTests.cpp: captured identity, inferred null fields and Map evidence navigation after Worker replay",
-        "Describe, recovery_report and require_immediate migrated; recovery GPU evidence is synthetic, and broader command/context state integration remains pending"
+        "Describe, recovery_report and require_immediate migrated and shared with captured command-state inspection; recovery GPU evidence is synthetic and complete setter replay/experiment coverage remains pending"
       ]
     },
     {
