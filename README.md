@@ -52,6 +52,9 @@ a working D3D11 adapter.
 .\out\FloraGPA\FloraGPA.Cli.exe replay D:\captures\sample.gpa_frame --out D:\results\sample
 ```
 
+To package alongside a running build, use
+`./tools/package.ps1 -OutputDirectory ./out/FloraGPA-next`.
+
 The entire `out/FloraGPA` directory is the application package, including Qt
 plugins and app-local VC143 runtime DLLs. Keep the worker beside the GUI.
 No Python environment, GPA installation or original source directory is used
@@ -66,6 +69,11 @@ The Buffer tab reads initial/before/after values and byte ranges as hex, ASCII o
 export. Resource names come from captured debug metadata.
 Shader **Compile & Apply** and event enable/disable changes use an experiment
 history with undo/redo and frame-bound JSON projects.
+The **Edit** menu and API Log context menu provide **Edit Clear Values** and
+**Replace Update Source**, plus enable/disable for recovered resource-writing
+commands. Update sources are tightly packed binary assets; the file picker
+shows the required byte count. Inspect the affected resource at **After event**
+to see its edited contents. Undo/redo refreshes the current texture or buffer view.
 
 See [migration status](docs/MIGRATION_STATUS.md) for implemented features and
 the remaining parity gaps. This build is not the completed migration.
@@ -79,6 +87,7 @@ worker launches or loads Python.
 python tools/validate_native.py --exe out/FloraGPA/FloraGPA.Cli.exe --captures D:/CDXrepo/FloraGPA --out artifacts/golden-run --isolated-env
 python tools/validate_geometry.py --reference D:/CDXrepo/FloraGPA/standalone --exe out/FloraGPA/FloraGPA.Cli.exe --captures D:/CDXrepo/FloraGPA --qt-bin D:/Qt/6.11.2/msvc2022_64/bin --out artifacts/geometry-run
 python tools/validate_buffers.py --reference D:/CDXrepo/FloraGPA/standalone --exe out/FloraGPA/FloraGPA.Cli.exe --captures D:/CDXrepo/FloraGPA --qt-bin D:/Qt/6.11.2/msvc2022_64/bin --out artifacts/buffer-run
+python tools/validate_commands.py --reference D:/CDXrepo/FloraGPA/standalone --exe out/FloraGPA/FloraGPA.Cli.exe --captures D:/CDXrepo/FloraGPA --qt-bin D:/Qt/6.11.2/msvc2022_64/bin --out artifacts/command-run
 ```
 
 Run GPU checks serially and use a new output directory each time.

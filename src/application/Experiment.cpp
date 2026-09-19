@@ -1,4 +1,5 @@
 #include "Experiment.h"
+#include "CommandEdits.h"
 #include "ShaderInspector.h"
 #include <QFile>
 #include <QSaveFile>
@@ -65,6 +66,8 @@ void Experiment::apply(const Frame &frame, ReplayOptions &options) const {
     options.disabled.clear();
     options.shaders.clear();
     options.textures.clear();
+    options.commandPayloads.clear();
+    options.updateSources.clear();
     for (size_t i = 0; i < revision(); ++i) {
         auto &operations = project_.at("history").at(i).at("operations");
         if (!operations.is_array())
@@ -74,15 +77,28 @@ void Experiment::apply(const Frame &frame, ReplayOptions &options) const {
             if (kind == "enabled") {
                 auto id = identifier(op.at("event"));
                 auto &e = frame.entry(id);
-                static const std::set<uint16_t> writable{0x31, 0x32, 0x33,  0x34,  0x3e, 0x3f,
-                                                         0x40, 0x42, 0x245, 0x246, 0x247};
-                if (e.category != 7 || (!isDraw(e.type) && !writable.contains(e.type)) ||
+                if (e.category != 7 || (!isDraw(e.type) && !isWritableCommand(e.type)) ||
                     !op.at("value").is_boolean())
                     throw std::runtime_error("Unsupported event enable operation");
+                if (!isDraw(e.type))
+                    validateWritableCommand(frame, id);
                 if (op.at("value").get<bool>())
                     options.disabled.erase(id);
                 else
                     options.disabled.insert(id);
+            } else if (kind == "clear") {
+                auto id = identifier(op.at("event"));
+                validateWritableCommand(frame, id);
+                options.commandPayloads[id] =
+                    patchClear(frame.entry(id).type, frame.payload(id), op.at("values"));
+            } else if (kind == "update_source") {
+                auto id = identifier(op.at("event"));
+                auto layout = updateSourceLayout(frame, id);
+                auto bytes = asset(op.at("asset"));
+                if (bytes.size() != layout.size)
+                    throw std::runtime_error("Update source byte count mismatch: expected " +
+                                             std::to_string(layout.size));
+                options.updateSources[id] = std::move(bytes);
             } else if (kind == "shader") {
                 auto id = identifier(op.at("resource"));
                 auto r = frame.resource(id);
@@ -126,8 +142,11 @@ bool Experiment::enabled(Id event) const {
     return enabled;
 }
 void Experiment::setEnabled(const Frame &frame, Id event, bool enabled) {
-    if (!isDraw(frame.entry(event).type))
-        throw std::runtime_error("Select a draw or dispatch event");
+    auto &e = frame.entry(event);
+    if (e.category != 7)
+        throw std::runtime_error("Select an API command");
+    if (!isDraw(e.type))
+        validateWritableCommand(frame, event);
     auto history = project_["history"];
     history.erase(history.begin() + ptrdiff_t(revision()), history.end());
     history.push_back(
@@ -135,6 +154,47 @@ void Experiment::setEnabled(const Frame &frame, Id event, bool enabled) {
          {"operations", Json::array({{{"kind", "enabled"}, {"event", event}, {"value", enabled}}})}});
     project_["history"] = std::move(history);
     project_["cursor"] = project_["history"].size();
+}
+Json Experiment::clear(const Frame &frame, Id event) const {
+    validateWritableCommand(frame, event);
+    for (size_t i = revision(); i > 0; --i) {
+        const auto &ops = project_["history"][i - 1]["operations"];
+        for (auto it = ops.rbegin(); it != ops.rend(); ++it)
+            if (it->at("kind") == "clear" && identifier(it->at("event")) == event)
+                return clearValues(
+                    frame.entry(event).type,
+                    patchClear(frame.entry(event).type, frame.payload(event), it->at("values")));
+    }
+    return clearValues(frame.entry(event).type, frame.payload(event));
+}
+void Experiment::setClear(const Frame &frame, Id event, const Json &values) {
+    validateWritableCommand(frame, event);
+    auto type = frame.entry(event).type;
+    auto normalized = clearValues(type, patchClear(type, frame.payload(event), values));
+    auto &history = project_["history"];
+    history.erase(history.begin() + ptrdiff_t(revision()), history.end());
+    history.push_back(
+        {{"label", "Clear event " + std::to_string(event)},
+         {"operations", Json::array({{{"kind", "clear"}, {"event", event}, {"values", normalized}}})}});
+    project_["cursor"] = history.size();
+}
+void Experiment::setUpdateSource(const Frame &frame, Id event, Bytes data) {
+    auto layout = updateSourceLayout(frame, event);
+    if (data.size() != layout.size)
+        throw std::runtime_error("Update source byte count mismatch: expected " +
+                                 std::to_string(layout.size));
+    Json op{{"kind", "update_source"},
+            {"event", event},
+            {"asset",
+             {{"data", QByteArray(reinterpret_cast<const char *>(data.data()), qsizetype(data.size()))
+                           .toBase64()
+                           .toStdString()},
+              {"sha256", sha256(data)}}}};
+    auto &history = project_["history"];
+    history.erase(history.begin() + ptrdiff_t(revision()), history.end());
+    history.push_back(
+        {{"label", "Update source " + std::to_string(event)}, {"operations", Json::array({op})}});
+    project_["cursor"] = history.size();
 }
 bool Experiment::canUndo() const { return revision() > 0; }
 bool Experiment::canRedo() const { return revision() < project_["history"].size(); }

@@ -1,10 +1,14 @@
 #include "MainWindow.h"
+#include "application/CommandEdits.h"
 #include "application/ShaderInspector.h"
 #include "replay/Replay.h"
 #include <QApplication>
 #include <QCloseEvent>
+#include <QDialog>
+#include <QDialogButtonBox>
 #include <QFileDialog>
 #include <QFileInfo>
+#include <QFormLayout>
 #include <QHBoxLayout>
 #include <QHeaderView>
 #include <QJsonDocument>
@@ -261,6 +265,10 @@ void MainWindow::buildUi() {
             showError(QString::fromUtf8(e.what()));
         }
     });
+    clearAction_ = edit->addAction("Edit Clear Values…", this, &MainWindow::editClear);
+    clearAction_->setObjectName("editClear");
+    updateSourceAction_ = edit->addAction("Replace Update Source…", this, &MainWindow::replaceUpdateSource);
+    updateSourceAction_->setObjectName("replaceUpdateSource");
     updateExperimentActions();
     file->addSeparator();
     exportAction_ =
@@ -348,6 +356,8 @@ void MainWindow::buildUi() {
     commandFilter_->setFilterCaseSensitivity(Qt::CaseInsensitive);
     commandFilter_->workOnly = true;
     apiView_ = table(commandFilter_);
+    apiView_->setContextMenuPolicy(Qt::ActionsContextMenu);
+    apiView_->addActions({enableAction_, clearAction_, updateSourceAction_});
     apiView_->setObjectName("apiLog");
     apiView_->setColumnWidth(1, 185);
     apiView_->setColumnHidden(2, true);
@@ -418,6 +428,7 @@ void MainWindow::buildUi() {
     textureLayout->setSpacing(0);
     auto textureBar = new QToolBar;
     textureBoundary_ = new QComboBox;
+    textureBoundary_->setObjectName("textureBoundary");
     textureBoundary_->addItems({"Capture initial", "Before event", "After event"});
     textureBar->addWidget(textureBoundary_);
     mip_ = new QSpinBox;
@@ -979,6 +990,17 @@ void MainWindow::inspectEvent(Id id) {
         for (size_t i = 0; i < event.args.size(); ++i)
             values.append(
                 QPair<QString, QString>{names.value(int(i), "Argument"), QString::number(event.args[i])});
+    } else if (isClearCommand(e.type)) {
+        auto current = experiment_->clear(*frame_, id);
+        for (auto it = current.begin(); it != current.end(); ++it)
+            values.append({QString::fromStdString(it.key()), QString::fromStdString(it.value().dump())});
+    } else if (e.type == 0x247) {
+        auto layout = updateSourceLayout(*frame_, id);
+        values.append({"Destination", QString::number(layout.destination)});
+        values.append({"Subresource", QString::number(layout.subresource)});
+        values.append({"Source bytes", QString::number(layout.size)});
+        values.append({"Row pitch", QString::number(layout.rowPitch)});
+        values.append({"Slice pitch", QString::number(layout.slicePitch)});
     } else
         values.append(QPair<QString, QString>{"Wire", hex(frame_->payload(id), 96)});
     properties(QString::fromStdString(commandName(e.type)), values);
@@ -1300,8 +1322,13 @@ void MainWindow::updateExperimentActions() {
         return;
     undoAction_->setEnabled(experiment_ && experiment_->canUndo());
     redoAction_->setEnabled(experiment_ && experiment_->canRedo());
-    bool editable = frame_ && selectedEvent_ && isDraw(frame_->entry(selectedEvent_).type);
+    const auto type = frame_ && selectedEvent_ ? frame_->entry(selectedEvent_).type : 0;
+    bool editable = isDraw(uint16_t(type)) || isWritableCommand(uint16_t(type));
     enableAction_->setEnabled(editable);
+    if (clearAction_)
+        clearAction_->setEnabled(isClearCommand(uint16_t(type)));
+    if (updateSourceAction_)
+        updateSourceAction_->setEnabled(type == 0x247);
     enableAction_->setText(
         editable && experiment_ && !experiment_->enabled(selectedEvent_) ? "Enable Event" : "Disable Event");
 }
@@ -1312,14 +1339,120 @@ void MainWindow::experimentChanged() {
     chart_->clear();
     metrics_->clear();
     updateExperimentActions();
+    if (selectedEvent_)
+        inspectEvent(selectedEvent_);
     if (process_.state() != QProcess::NotRunning)
         cancel();
     if (selectedResource_) {
         auto type = frame_->entry(selectedResource_).type;
         if (type >= 0x90 && type <= 0x95)
             inspectResource(selectedResource_);
+        if (type >= 0x84 && type <= 0x87 && centerTabs_->currentWidget() == texturePane_) {
+            replayTimer_.stop();
+            textureTimer_.start();
+            return;
+        }
+        if (type == 0x83 && centerTabs_->currentWidget() == bufferPane_) {
+            replayTimer_.stop();
+            bufferTimer_.start();
+            return;
+        }
     }
     replayTimer_.start();
+}
+void MainWindow::editClear() {
+    if (!frame_ || !experiment_ || !selectedEvent_)
+        return;
+    try {
+        auto event = selectedEvent_;
+        auto values = experiment_->clear(*frame_, event);
+        bool depth = frame_->entry(event).type == 0x31;
+        bool integer = frame_->entry(event).type == 0x33;
+        QDialog dialog(this);
+        dialog.setObjectName("clearDialog");
+        dialog.setWindowTitle(QString("Clear Values — Event %1").arg(event));
+        dialog.setMinimumWidth(340);
+        auto layout = new QFormLayout(&dialog);
+        QList<QLineEdit *> fields;
+        const QStringList names = depth ? QStringList{"Flags", "Depth", "Stencil"}
+                                        : QStringList{"X / R", "Y / G", "Z / B", "W / A"};
+        for (int i = 0; i < names.size(); ++i) {
+            nlohmann::json value = depth ? values.at(i == 0   ? "flags"
+                                                     : i == 1 ? "depth"
+                                                              : "stencil")
+                                         : values["values"][i];
+            auto field = new QLineEdit(QString::fromStdString(value.dump()));
+            field->setObjectName(QString("clearValue%1").arg(i));
+            if (depth && i == 0)
+                field->setToolTip("1 = depth, 2 = stencil, 3 = both");
+            fields.append(field);
+            layout->addRow(names[i], field);
+        }
+        auto error = new QLabel;
+        error->setWordWrap(true);
+        error->hide();
+        layout->addRow(error);
+        auto buttons = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+        buttons->button(QDialogButtonBox::Ok)->setText("Apply");
+        layout->addRow(buttons);
+        connect(buttons, &QDialogButtonBox::rejected, &dialog, &QDialog::reject);
+        connect(buttons, &QDialogButtonBox::accepted, &dialog, [&] {
+            try {
+                nlohmann::json edited;
+                if (!depth)
+                    edited["values"] = nlohmann::json::array();
+                for (int i = 0; i < fields.size(); ++i) {
+                    bool ok = false;
+                    nlohmann::json value;
+                    auto text = fields[i]->text().trimmed();
+                    if (integer || (depth && i != 1)) {
+                        auto number = text.toULongLong(&ok);
+                        if (text.startsWith('-'))
+                            ok = false;
+                        value = uint64_t(number);
+                    } else
+                        value = text.toDouble(&ok);
+                    if (!ok)
+                        throw std::runtime_error("Enter a valid numeric value");
+                    if (depth)
+                        edited[i == 0 ? "flags" : i == 1 ? "depth" : "stencil"] = value;
+                    else
+                        edited["values"].push_back(value);
+                }
+                experiment_->setClear(*frame_, event, edited);
+                dialog.accept();
+            } catch (const std::exception &e) {
+                error->setText(QString::fromUtf8(e.what()));
+                error->show();
+            }
+        });
+        if (dialog.exec() == QDialog::Accepted)
+            experimentChanged();
+    } catch (const std::exception &e) {
+        showError(QString::fromUtf8(e.what()));
+    }
+}
+void MainWindow::replaceUpdateSource() {
+    if (!frame_ || !experiment_ || !selectedEvent_)
+        return;
+    try {
+        auto event = selectedEvent_;
+        auto layout = updateSourceLayout(*frame_, event);
+        auto path = QFileDialog::getOpenFileName(this, QString("Update Source — %1 bytes").arg(layout.size),
+                                                 {}, "Binary data (*.bin);;All files (*)");
+        if (path.isEmpty())
+            return;
+        QFile file(path);
+        if (!file.open(QIODevice::ReadOnly) || uint64_t(file.size()) != layout.size)
+            throw std::runtime_error("Update source must contain " + std::to_string(layout.size) +
+                                     " tightly packed bytes");
+        auto bytes = file.readAll();
+        experiment_->setUpdateSource(
+            *frame_, event, {reinterpret_cast<const uint8_t *>(bytes.constData()), size_t(bytes.size())});
+        experimentChanged();
+    } catch (const std::exception &e) {
+        showError(QString::fromUtf8(e.what()));
+    }
 }
 void MainWindow::openExperiment() {
     if (projectDirty_) {

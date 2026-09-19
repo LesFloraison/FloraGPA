@@ -1,4 +1,5 @@
 #include "Replay.h"
+#include "core/Commands.h"
 #include <algorithm>
 #include <chrono>
 #include <d3d11sdklayers.h>
@@ -64,18 +65,7 @@ std::string Replay::adapter() const {
     text.pop_back();
     return text;
 }
-void Replay::immediate(Id id) const {
-    const auto &e = frame_.entry(id);
-    if (e.category != 5 ||
-        (e.type != 0x99 && e.type != 0x10b && e.type != 0x121 && e.type != 0x123 && e.type != 0x127))
-        throw std::runtime_error("Missing supported context identity");
-    Reader r(frame_.payload(id));
-    r.skip(16);
-    if (r.read<uint32_t>() != 0)
-        throw std::runtime_error("Deferred context replay is not restored");
-    r.skip(4);
-    r.end();
-}
+void Replay::immediate(Id id) const { requireImmediateContext(frame_, id); }
 IUnknown *Replay::object(Id id) {
     if (!id)
         return nullptr;
@@ -685,7 +675,10 @@ void Replay::mappedWrites(const Entry &e) {
 }
 void Replay::command(const Entry &e) {
     auto t = e.type;
-    Reader r(frame_.payload(e.id));
+    Bytes payload = frame_.payload(e.id);
+    if (auto it = options_.commandPayloads.find(e.id); it != options_.commandPayloads.end())
+        payload = it->second;
+    Reader r(payload);
     if (isDraw(t)) {
         auto event = frame_.event(e.id);
         immediate(event.context);
@@ -736,6 +729,8 @@ void Replay::command(const Entry &e) {
             context_->End(timestamps_.back().end.Get());
         return;
     }
+    if (isWritableCommand(t))
+        validateWritableCommand(frame_, e.id);
     if (options_.disabled.contains(e.id))
         return;
     if ((t >= 0x249 && t <= 0x254) || t == 0x34e5 || t == 0x34ee || t == 0x34f4 || t == 0x351c ||
@@ -808,40 +803,20 @@ void Replay::command(const Entry &e) {
         r.end();
         context_->GenerateMips(get<ID3D11ShaderResourceView>(id));
     } else if (t == 0x247) {
-        auto dst = r.read<Id>();
-        auto sub = r.read<UINT>();
-        bool has = r.flag();
+        auto layout = updateSourceLayout(frame_, e.id);
         D3D11_BOX box{};
-        if (has)
-            box = r.read<D3D11_BOX>();
-        auto dataId = r.read<Id>();
-        r.skip(8);
-        r.end();
-        auto data = frame_.data(dataId);
-        auto res = frame_.resource(dst);
-        UINT row = 0, slice = 0;
-        size_t expected = 0;
-        if (res.type == 0x83)
-            expected = has ? box.right - box.left : res.desc[0];
-        else {
-            auto info = textureInfo(res);
-            if (!info.mips || sub >= info.mips * info.layers)
-                throw std::runtime_error("Update subresource limit");
-            auto mip = sub % info.mips;
-            auto w = has ? box.right - box.left : std::max(1u, info.width >> mip),
-                 h = has ? box.bottom - box.top : std::max(1u, info.height >> mip),
-                 depth = has ? box.back - box.front : std::max(1u, info.depth >> mip);
-            auto pitch = pitches(w, h, info.format);
-            row = pitch.first;
-            if (uint64_t(row) * pitch.second > UINT32_MAX)
-                throw std::runtime_error("Update pitch overflow");
-            slice = row * pitch.second;
-            expected = size_t(slice) * depth;
-        }
-        if (data.size() != expected)
+        if (layout.hasBox)
+            std::memcpy(&box, layout.box.data(), sizeof box);
+        Bytes data;
+        if (auto it = options_.updateSources.find(e.id); it != options_.updateSources.end())
+            data = it->second;
+        else
+            data = frame_.data(layout.data);
+        if (data.size() != layout.size)
             throw std::runtime_error("Packed UpdateSubresource size mismatch");
-        context_->UpdateSubresource(get<ID3D11Resource>(dst), sub, has ? &box : nullptr, data.data(), row,
-                                    slice);
+        context_->UpdateSubresource(get<ID3D11Resource>(layout.destination), layout.subresource,
+                                    layout.hasBox ? &box : nullptr, data.data(), layout.rowPitch,
+                                    layout.slicePitch);
     } else if (t == 0x242) {
         r.end();
         context_->ClearState();
@@ -950,7 +925,7 @@ void Replay::run(const std::function<void(Id, size_t, size_t)> &progress) {
     }
 }
 Image Replay::output(Id texture, UINT sub) {
-    if (!texture && !options_.until) {
+    if (!texture && (!options_.until || !lastTarget_)) {
         std::vector<Resource> markers, live;
         for (auto &[id, e] : frame_.entries())
             if (e.category == 5 && (e.type == 0x85 || e.type == 0x87)) {
@@ -965,7 +940,8 @@ Image Replay::output(Id texture, UINT sub) {
                 if (res.device == markers[0].device &&
                     std::equal(res.desc.begin(), res.desc.begin() + 7, markers[0].desc.begin()))
                     matches.push_back(res.id);
-            if (matches.size() == 1)
+            if (matches.size() == 1 && (objects_.contains(matches[0]) || frame_.resource(matches[0]).data ||
+                                        options_.textures.contains(matches[0])))
                 texture = matches[0];
         }
     }

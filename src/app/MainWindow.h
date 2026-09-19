@@ -47,6 +47,8 @@ class MainWindow final : public QMainWindow {
     bool saveExperiment();
     void experimentChanged();
     void updateExperimentActions();
+    void editClear();
+    void replaceUpdateSource();
     void compileShader();
     void inspectGeometry();
     void exportGeometry();
@@ -66,6 +68,7 @@ class MainWindow final : public QMainWindow {
     QString projectPath_;
     bool projectDirty_ = false;
     QAction *undoAction_ = nullptr, *redoAction_ = nullptr, *enableAction_ = nullptr;
+    QAction *clearAction_ = nullptr, *updateSourceAction_ = nullptr;
     QString capturePath_, pendingPath_;
     CaptureModel *commands_, *resources_;
     CaptureFilter *commandFilter_, *resourceFilter_;

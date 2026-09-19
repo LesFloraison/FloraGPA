@@ -153,9 +153,20 @@
       "sha256": "22cd491b2f69b3b5207d821bb12b0d5d01b4b86eb1a7a857fb7f3317bb2cc6cd",
       "lines": 67,
       "description": "Resource-writing command experiments using recovered legacy Erg layouts.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": [
+        "src/core/Commands.cpp",
+        "src/application/CommandEdits.cpp",
+        "src/application/Experiment.cpp",
+        "src/replay/Replay.cpp",
+        "src/app/MainWindow.cpp"
+      ],
+      "validation": [
+        "tests/CommandTests.cpp",
+        "tests/UiTests.cpp: clearEditorHistory",
+        "tools/validate_commands.py: 15 Python/native boundary comparisons; five changed-result controls",
+        "Explicit captured contexts only; missing-context inference and all-format GPU coverage remain pending"
+      ]
     },
     {
       "module": "command_lists.py",
@@ -489,7 +500,8 @@
         "src/application/Experiment.cpp"
       ],
       "validation": [
-        "Compatible JSON; uint64; frame hash; shader and event edits; GPU undo/redo"
+        "Compatible JSON; uint64; frame hash; shader and event edits; GPU undo/redo",
+        "Clear and update_source assets; atomic rejection; GPU and UI history; current texture/buffer refresh"
       ]
     },
     {
@@ -1394,7 +1406,8 @@
         "src/replay/Replay.cpp"
       ],
       "validation": [
-        "docs/NATIVE_BASELINE.md"
+        "docs/NATIVE_BASELINE.md",
+        "Initialized backbuffer fallback before the first draw; GF2 first-clear UI navigation"
       ]
     },
     {
@@ -1912,9 +1925,18 @@
       "sha256": "7e4325f7cca55dd6034fbd37b4a75f1dd1d5f2f168ce860731f8fa7506dc3fa9",
       "lines": 38,
       "description": "Explicit tightly packed UpdateSubresource source assets, separate from GenData.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": [
+        "src/core/Commands.cpp",
+        "src/application/Experiment.cpp",
+        "src/replay/Replay.cpp",
+        "src/app/MainWindow.cpp"
+      ],
+      "validation": [
+        "tests/CommandTests.cpp: update history, WARP readback, layout and rejection cases",
+        "tools/validate_commands.py: six Python/native texture update boundary comparisons",
+        "Explicit captured contexts only; missing-context inference and all-format GPU coverage remain pending"
+      ]
     },
     {
       "module": "verify.py",

@@ -18,6 +18,7 @@ struct ReplayOptions {
     bool before = false;
     std::set<Id> disabled;
     std::map<Id, std::vector<uint8_t>> shaders, textures;
+    std::map<Id, std::vector<uint8_t>> commandPayloads, updateSources;
 };
 struct Image {
     uint32_t width{}, height{}, format{};

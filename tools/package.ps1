@@ -1,11 +1,12 @@
 param(
     [string]$QtRoot = 'D:\Qt\6.11.2\msvc2022_64',
-    [ValidateSet('Release')][string]$Configuration = 'Release'
+    [ValidateSet('Release')][string]$Configuration = 'Release',
+    [string]$OutputDirectory = ''
 )
 $ErrorActionPreference = 'Stop'
 $repo = Split-Path -Parent $PSScriptRoot
 $build = Join-Path $repo "build\vs2022\$Configuration"
-$destination = Join-Path $repo 'out\FloraGPA'
+$destination = if ($OutputDirectory) { [System.IO.Path]::GetFullPath($OutputDirectory) } else { Join-Path $repo 'out\FloraGPA' }
 New-Item -ItemType Directory -Path $destination -Force | Out-Null
 foreach ($name in @('FloraGPA.exe','FloraGPA.Worker.exe','FloraGPA.Cli.exe')) {
     Copy-Item -LiteralPath (Join-Path $build $name) -Destination $destination -Force

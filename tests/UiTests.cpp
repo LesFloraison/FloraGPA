@@ -3,6 +3,9 @@
 #include <QAbstractItemModelTester>
 #include <QAction>
 #include <QCryptographicHash>
+#include <QDialog>
+#include <QDialogButtonBox>
+#include <QPushButton>
 #include <QSignalSpy>
 #include <QTabWidget>
 #include <QtTest>
@@ -18,6 +21,75 @@ class UiTests final : public QObject {
         QVERIFY(window.grab().save(directory + '/' + name + ".png"));
     }
   private slots:
+    void clearEditorHistory() {
+        auto captures = qEnvironmentVariable("FLORA_TEST_CAPTURE_DIR");
+        if (captures.isEmpty())
+            QSKIP("External capture fixtures are not configured");
+        flora::MainWindow window;
+        window.show();
+        QSignalSpy done(&window, &flora::MainWindow::taskFinished);
+        window.openCapture(captures + "/GF2_Exilium_2026_03_03__00_19_35.gpa_frame");
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        auto api = window.findChild<QTableView *>("apiLog");
+        QVERIFY(api);
+        api->setCurrentIndex(api->model()->index(0, 0));
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        auto resources = window.findChild<QTableView *>("resources");
+        for (int row = 0; row < resources->model()->rowCount(); ++row) {
+            auto index = resources->model()->index(row, 0);
+            if (index.data(Qt::UserRole).toULongLong() == 80) {
+                resources->setCurrentIndex(index);
+                break;
+            }
+        }
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        window.findChild<QComboBox *>("textureBoundary")->setCurrentIndex(2);
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        auto image = window.findChild<flora::ImageView *>("textureOutput");
+        auto baseline = image->image();
+        auto edit = window.findChild<QAction *>("editClear");
+        QVERIFY(edit && edit->isEnabled());
+        bool entered = false;
+        QTimer::singleShot(0, &window, [&] {
+            auto dialog = window.findChild<QDialog *>("clearDialog");
+            if (!dialog)
+                return;
+            for (int i = 0; i < 4; ++i)
+                dialog->findChild<QLineEdit *>(QString("clearValue%1").arg(i))->setText(i == 1 ? "0" : "1");
+            snapshot(*dialog, "clear-dialog");
+            entered = true;
+            QTest::mouseClick(dialog->findChild<QDialogButtonBox *>()->button(QDialogButtonBox::Ok),
+                              Qt::LeftButton);
+        });
+        edit->trigger();
+        QVERIFY(entered);
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        auto edited = image->image();
+        QVERIFY(edited != baseline);
+        QCOMPARE(edited.pixelColor(0, 0), QColor(255, 0, 255));
+        snapshot(window, "clear-edited");
+        QAction *undo = nullptr, *redo = nullptr;
+        for (auto action : window.findChildren<QAction *>()) {
+            if (action->shortcut() == QKeySequence::Undo)
+                undo = action;
+            if (action->shortcut() == QKeySequence::Redo)
+                redo = action;
+        }
+        QVERIFY(undo && redo);
+        undo->trigger();
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        QCOMPARE(image->image(), baseline);
+        redo->trigger();
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        QCOMPARE(image->image(), edited);
+    }
     void initTestCase() {
         QCoreApplication::setOrganizationName("FloraGPA-Tests");
         QCoreApplication::setApplicationName("FloraGPA-Tests");

@@ -12,13 +12,14 @@ GF2 与 BF1 DX11 捕获。**尚未完成原 Python 版本的全部功能迁移�
 | 捕获与重放 | 有边界检查的 IGPA v3 读取、六阶段状态、基本 D3D11 资源和 draw/dispatch、Map/更新/复制/清除 | 特殊 replay 路径尚未完全迁移 |
 | 主界面 | GPA 式深色三栏、真实 GPU 时间柱状图与概览、可停靠面板、API 筛选、任务取消 | 概览尚无范围拖动；未知功能页禁用 |
 | 事件 | draw/dispatch 选择、快照管线、前后边界重放、事件启停 | 非 draw 精确 setter 状态仍不完整 |
+| 命令编辑 | RTV / DSV / Uint / Float UAV 清除值；资源写入命令启停；UpdateSubresource 紧密排列源数据替换；菜单、右键、撤销/重做 | 未覆盖缺失 context 的推断恢复；特殊 planar 资源执行仍受现有重放限制 |
 | 图像 | 实际 GPU 输出、缩放/平移/通道、像素值、PNG 导出 | 全帧输出目前限制单采样 RGBA/BGRA8 |
 | 纹理 | GPU 格式转换、BC、浮点/整数、1D/2D/3D、mip/layer/slice、事件边界预览 | MSAA、平面格式及部分查看选项未迁移 |
 | Shader | DXBC 反汇编、反射、SPDB/SDBG 内嵌源码、HLSL 编译替换 | 不含 HLSL 恢复、单步调试及全部反射树 |
 | Buffer | 初始值、事件前后读回、字节范围、Hex/ASCII/32 位解释、导出 | CB 递归字段、UAV counter 与编辑仍待迁移 |
 | 几何 | IA 输入解码、索引与实例、三种顶点表、旋转线框、CSV/OBJ 导出 | DrawAuto、后变换与覆盖未迁移；当前表格上限为 100 万引用 / 1600 万字段 |
 | 资源名称 | GenPrivateData 原始名称、非法 UTF-8 转义、列表筛选和属性显示 | 名称记录不表示逐事件重命名时间线 |
-| 实验项目 | 原格式 JSON、捕获 SHA-256 绑定、资产校验、uint64 ID、原子保存、撤销/重做 | 目前接受事件启停、全局 shader/texture 替换；其他操作明确拒绝 |
+| 实验项目 | 原格式 JSON、捕获 SHA-256 绑定、资产校验、uint64 ID、原子保存、撤销/重做 | 接受事件启停、clear、update_source、全局 shader/texture 替换；其他操作明确拒绝 |
 | 性能 | 原生 D3D11 时间戳、disjoint 与 pipeline statistics | 尚未迁移原版多轮调度、Intel 硬件指标/GTPin |
 
 ## 验证证据
@@ -37,7 +38,15 @@ GF2 与 BF1 DX11 捕获。**尚未完成原 Python 版本的全部功能迁移�
 - 五个 buffer 案例的二进制及逐字数值与原版一致；错误资源、范围溢出、事件 0
   和 uint32 索引溢出均返回明确错误。
 - GF2 的 141 条资源名称及 BF1 的空名称目录与原版一致。
-- Release 与 Debug 的六组 CTest 均通过。不是“所有原版测试已通过”。
+- GF2 / BF1 的五个命令实验案例，涵盖 RTV、Float UAV buffer 清除和两种纹理格式的
+  UpdateSubresource 源替换；事件前、事件后及撤销后的 15 组数据与 Python 逐字节一致，
+  且五个案例的修改结果均不同于原始结果。
+- 命令测试覆盖四种 clear 的数值和记录布局、11 种可启停命令布局、越界/校验和/延迟
+  context 拒绝；WARP 验证 buffer 区域更新、Uint UAV 清除和撤销/重做。mip/array、3D、
+  BC 边界、planar 对齐检查属于布局测试，不代表这些格式全部完成 GPU 实测。
+- Qt 交互测试验证清除值编辑、Worker 实际执行、当前纹理刷新与撤销/重做；
+  窗口截图为 `command-ui/clear-dialog.png` 和 `command-ui/clear-edited.png`。
+- Release 与 Debug 的七组 CTest 均通过。不是“所有原版测试已通过”。
 - 发布目录在仅保留 Windows 系统 PATH 的子进程中完成两份黄金重放和负对照。
   模块列表未发现 Python/Tk、GPA 或 RenderDoc；尚未做另一台干净 Windows 验证。
 - Qt 自身窗口渲染已检查 1440×900、1920×1080 及 150% / 200% 缩放。
@@ -48,7 +57,8 @@ GF2 与 BF1 DX11 捕获。**尚未完成原 Python 版本的全部功能迁移�
 `texture-validation.json`、`geometry-validation-1/`、`geometry-validation-instanced/`、
 `buffer-validation-2/`、`name-validation.json`、`ctest-release-delivery.log`、
 `ctest-debug-publish.log`、`asset-ui-delivery/`、`ui-portable-*.png`、
-`ui-windows-delivery.png`。
+`ui-windows-delivery.png`、`command-validation-2/validation.json`、`command-ui/`、
+`ctest-command-final-release.log`、`ctest-command-debug.log`、`validation-command-package/`。
 源码基线逐模块记录在 `migration.json`。
 
 ## 尚未闭合的迁移范围
