@@ -236,6 +236,7 @@ std::string resourceName(uint16_t t) {
                                                   {0x90, "Vertex shader"}, {0x91, "Geometry shader"},
                                                   {0x92, "Pixel shader"},  {0x93, "Compute shader"},
                                                   {0x94, "Domain shader"}, {0x95, "Hull shader"},
+                                                  {0x97, "Class linkage"}, {0x98, "Class instance"},
                                                   {0x10d, "Blend"},        {0x10e, "Rasterizer"},
                                                   {0x10f, "Rasterizer"}};
     auto it = names.find(t);

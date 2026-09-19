@@ -49,6 +49,7 @@ class Replay {
     Com<ID3D11DeviceContext1> context1_;
     std::map<Id, Com<IUnknown>> objects_;
     std::map<Id, std::array<bool, 128>> usedSrvs_;
+    std::map<Id, uint32_t> interfaceSlots_;
     std::map<std::pair<uint32_t, uint32_t>, Com<ID3D11ComputeShader>> counterWrapShaders_;
     struct Range {
         Id buffer;
@@ -64,6 +65,8 @@ class Replay {
     void clearBindingGaps();
     void requireResolvedBindings() const;
     bool inputBindings(const Entry &entry, Bytes payload);
+    void bindShader(unsigned stage, Id shader, std::span<const Id> classes);
+    void validateClassProgram(Bytes program, unsigned slots) const;
     void immediate(Id id) const;
     void bind(const State &state, bool compute);
     void command(const Entry &entry);

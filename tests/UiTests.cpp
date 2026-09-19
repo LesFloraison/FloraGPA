@@ -1,3 +1,4 @@
+#include "ClassCapture.h"
 #include "StateCapture.h"
 #include "SyntheticCapture.h"
 #include "app/Appearance.h"
@@ -12,6 +13,7 @@
 #include <QPushButton>
 #include <QScopeGuard>
 #include <QSignalSpy>
+#include <QStatusBar>
 #include <QTabWidget>
 #include <QtTest>
 
@@ -26,6 +28,82 @@ class UiTests final : public QObject {
         QVERIFY(window.grab().save(directory + '/' + name + ".png"));
     }
   private slots:
+    void classLinkageInspector() {
+        using namespace flora;
+        auto capture = testing::graphicsClassCapture();
+        QTemporaryDir dir;
+        capture.save(dir.path() + "/classes.gpa_frame");
+        auto artifacts = qEnvironmentVariable("FLORA_UI_ARTIFACT_DIR");
+        if (!artifacts.isEmpty()) {
+            QDir().mkpath(artifacts);
+            capture.save(artifacts + "/classes.gpa_frame");
+        }
+        MainWindow window;
+        window.resize(1500, 950);
+        window.show();
+        QSignalSpy done(&window, &MainWindow::taskFinished);
+        window.openCapture(dir.path() + "/classes.gpa_frame");
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY2(done.takeLast()[0].toBool(), qPrintable(window.statusBar()->currentMessage()));
+        auto output = window.findChild<ImageView *>("frameOutput");
+        QVERIFY(output);
+        QCOMPARE(output->image().pixelColor(0, 0), QColor(Qt::red));
+        auto resources = window.findChild<QTableView *>("resources");
+        auto select = [&](qulonglong id) {
+            for (int i = 0; i < resources->model()->rowCount(); ++i) {
+                auto index = resources->model()->index(i, 0);
+                if (index.data(Qt::UserRole).toULongLong() == id) {
+                    resources->setCurrentIndex(index);
+                    return true;
+                }
+            }
+            return false;
+        };
+        auto properties = window.findChild<QTreeWidget *>("properties");
+        auto property = [&](const QString &name) {
+            for (QTreeWidgetItemIterator it(properties); *it; ++it)
+                if ((*it)->text(0) == name)
+                    return (*it)->text(1);
+            return QString{};
+        };
+        QVERIFY(select(62));
+        QCOMPARE(properties->topLevelItem(0)->text(0), QString("Class instance"));
+        QCOMPARE(property("instance_name"), QString("first"));
+        QCOMPARE(property("instance_index"), QString("1"));
+        QCOMPARE(property("class_linkage_id"), QString("60"));
+        QCOMPARE(property("creation_method"), QString("GetClassInstance"));
+        snapshot(window, "class-instance");
+        QVERIFY(select(60));
+        QCOMPARE(properties->topLevelItem(0)->text(0), QString("Class linkage"));
+        QVERIFY(select(32));
+        QCOMPARE(property("Interface slots"), QString("1"));
+        QCOMPARE(property("Class linkage"), QString("60"));
+        auto source = window.findChild<QPlainTextEdit *>("shaderSource");
+        QVERIFY(source);
+        source->setPlainText("float4 main():SV_Target{return float4(0,1,0,1);}");
+        QAction *compile = nullptr, *undo = nullptr;
+        for (auto action : window.findChildren<QAction *>()) {
+            if (action->text() == "Compile && Apply")
+                compile = action;
+            if (action->shortcut() == QKeySequence::Undo)
+                undo = action;
+        }
+        QVERIFY(compile && undo);
+        done.clear();
+        compile->trigger();
+        QTRY_VERIFY_WITH_TIMEOUT(done.size() >= 2, 30000);
+        for (const auto &result : done)
+            QVERIFY(result[0].toBool());
+        QCOMPARE(output->image().pixelColor(0, 0), QColor(Qt::green));
+        QCOMPARE(property("Interface slots"), QString("0"));
+        done.clear();
+        undo->trigger();
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        QCOMPARE(output->image().pixelColor(0, 0), QColor(Qt::red));
+        QCOMPARE(property("Interface slots"), QString("1"));
+        snapshot(window, "class-shader-restored");
+    }
     void replayStateStaleResults() {
         using namespace flora;
         using namespace flora::testing;

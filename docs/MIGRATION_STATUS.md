@@ -14,7 +14,8 @@ GF2 与 BF1 DX11 捕获。**尚未完成原 Python 版本的全部功能迁移�
 | 事件 | draw/dispatch 选择、快照管线、前后边界重放、事件启停 | 部分命令执行及 setter 实验仍待迁移 |
 | 捕获命令状态 | 六阶段 setter、CB1 范围、IA/RS/OM/SO/predicate 参数、扩展 UAV 槽元数据；命令前/后、逐字段来源、资源重叠失效与快照校准；Pipeline 页异步读取、筛选、跳转、JSON 导出 | 原始捕获状态，不应用实验；只读 DSV / 模糊 3D 重叠保持未知；SO 偏移是 setter 参数，隐藏 counter 和实时写入位置不由此推断 |
 | 命令间输入绑定 | 实际执行 IA layout / VB / IB、六阶段 SRV / sampler、CB / CB1；验证槽位、数组、资源类型、IA bind flags、stride 和 CB1 对齐 / 驱动支持；缺失绑定按阶段 / 槽位追踪 | 缺失资源未被后续 setter / 完整快照 / ClearState 恢复时，选定边界明确失败；setter 编辑仍待迁移 |
-| 重放管线状态 | Pipeline > Replay State 通过 Worker 读取实际六阶段绑定、CB1 范围、IA/RS/OM/SO/predicate、视图及状态描述；命令前/后、实验输入克隆、禁用状态、筛选、跳转和 JSON 导出 | 仅覆盖后端已支持的命令和实验；SO 实时写入位置保持未知；class/SO/predication 等执行路径和完整管线编辑仍待迁移 |
+| 重放管线状态 | Pipeline > Replay State 通过 Worker 读取实际六阶段绑定、CB1 范围、IA/RS/OM/SO/predicate、视图及状态描述；命令前/后、实验输入克隆、禁用状态、筛选、跳转和 JSON 导出 | 仅覆盖后端已支持的命令和实验；SO 实时写入位置保持未知；SO/predication 等执行路径和完整管线编辑仍待迁移 |
+| 动态 shader 类链接 | 六阶段 draw/dispatch 快照的 linkage、具名/显式创建实例、有序接口绑定、CB/texture/sampler 偏移；动态/静态 shader 替换；Qt 资源属性、接口槽数和 CLI 元数据导出 | shader setter 实验、带 SO 的 linked GS 和专用覆盖分析仍待迁移；本机已复现的空函数表 PS 驱动崩溃改为明确提示使用 WARP |
 | API 检查 | 捕获字段、偏移/原始位、可选数组、引用跳转、资源/多词筛选、JSON/CSV 导出；getter、annotation、query 与 command-list 调用元数据 | 解码不代表执行；annotation 层级和 view typed-format 预览衔接尚未闭合 |
 | Context / command-list | 五种 context 接口身份、immediate/deferred 区分；缺失 context 的严格 Map READ 证据恢复；command-list 资源、owner 和 Execute/Finish 清单；Qt 字段树、证据导航、JSON 导出 | 推断不补造版本/指针/标志；保留指针与 ID 候选冲突；与 Python 相同，仅接受 immediate-context 的 Finish 空操作，未恢复列表执行 |
 | 捕获查询值 | 按同 ID、命令顺序使用 GetDesc/GetDataSize/CreateQuery/predicate 元数据；BOOL 完整值与 UINT64 低位、缺失字节、HRESULT/冲突状态 | 表示捕获时保存的内存字，不是新执行的 GPU query；原始高位缺失时保持不完整 |
@@ -29,6 +30,18 @@ GF2 与 BF1 DX11 捕获。**尚未完成原 Python 版本的全部功能迁移�
 | 性能 | 原生 D3D11 时间戳、disjoint 与 pipeline statistics | 尚未迁移原版多轮调度、Intel 硬件指标/GTPin |
 
 ## 验证证据
+
+- 动态类链接的 Python 对照覆盖六个 shader 阶段、具名和显式创建实例、实例数组顺序、
+  CB/texture/sampler 偏移、动态/静态替换以及命令前后边界。发布包 207 组对照全部通过：
+  71 组 GPU 输出逐字节一致，70 个管线边界共 91,420 个字段一致，60 组元数据/DXBC
+  导出及 6 组明确拒绝检查通过。C++ 单元测试另覆盖资源记录
+  逐字节截断、非法名称/owner/flag、重复读取和空函数表 PS。Qt 测试通过真实 Worker
+  验证资源属性、静态 HLSL 替换改变输出和撤销恢复动态 shader；截图位于
+  `artifacts/class-linkage-ui-final/`。保留 Python 原版的快照绑定语义；未启用编辑时的
+  shader setter 不额外执行，避免把 BF1 中缺失资源的 dormant setter 当作有效快照。
+  原 Python 与早期 C++ 均在本机 NVIDIA 10de:249d 上复现空函数表 PS 访问违例；
+  当前 C++ 在该适配器上明确拒绝此路径并提示 WARP，WARP 保留原始 DXBC 且输出正确。
+  正常动态 shader 的硬件路径另外验证；不据此宣称其他 GPU 的该缺陷已验证。
 
 - 命令间输入绑定：硬件与 WARP 的六阶段 native getter 对照，涵盖 SRV 127、sampler 15、
   CB 13、VB 31、IA layout / IB、CB1 窗口与 legacy 重置、空数组和重复 replay；
@@ -95,8 +108,8 @@ GF2 与 BF1 DX11 捕获。**尚未完成原 Python 版本的全部功能迁移�
 - UAV counter 的 32 组 Python 对照通过：29 组缓冲区逐字节一致；BF1 的 3 组并行 Append
   输出按完整元素多重集合比较，未写入区域逐字节一致，计数和元数据全部一致。
   Qt 测试覆盖溢出拒绝、最大 uint32 编辑、实际 Worker 读回、撤销/重做与过期结果失效。
-- 当前 Release 的 15 项 CTest 全部通过；Debug 的 14 项非 UI 测试及修正控件定位后的
-  完整 UI 测试均通过。不是“所有原版测试已通过”。
+- 当前 Release / Debug 各 16 项 CTest 全部通过，包含完整 Qt UI 与新增类链接测试。
+  不是“所有原版测试已通过”。
 - API 检查与 Python 对照：GF2 全部 920 条、BF1 全部 18,024 条记录的字段、偏移、原始位、
   引用、状态、query 元数据及解析后的 CSV 一致；另验证 BF1 资源/多词组合筛选。
   合成捕获的 3,948 条记录覆盖固定/可选数组布局、逐字节截断、尾随字节、无效 flag、
@@ -172,10 +185,19 @@ Debug 首轮暴露旧 UI 测试按类型取错页面的问题，改为按对象�
 同样隔离 PATH 的发布版 GUI/Worker 已完成打开捕获、重放、GPU 指标采集和离屏窗口
 渲染，截图为 `replay-pipeline-ui/package-isolated.png`。
 
+动态类链接的发布包为 `out/FloraGPA-classes/`。仅系统 PATH 的 207 组对照为
+`class-linkage-package-comparison/validation.json`；两份黄金帧和关闭 draw 的负对照为
+`validation-class-package/validation.json`。`class-package-smoke/validation.json` 验证
+非纹理空函数表 PS 的 WARP 原字节码输出、硬件明确拒绝，以及发布版 GUI/Worker
+打开正常动态 shader 捕获；对应窗口截图为 `class-package-smoke/package-gui.png`。
+本批 Release / Debug 回归为 `ctest-class-release.log` 和 `ctest-class-debug.log`；
+类资源的截断/非法字段和快照测试详见 `build/vs2022/class-linkage-Release.txt` 与
+`class-linkage-Debug.txt`。
+
 ## 尚未闭合的迁移范围
 
 1. 完整 setter/command/context 的重放与实验语义、predication、stream-output/DrawAuto、
-   class linkage、扩展 UAV、MSAA 与 planar 等特殊 replay 路径。
+   class linkage 的 setter/带 SO shader 衔接、扩展 UAV、MSAA 与 planar 等特殊 replay 路径。
 2. 其余资源/状态/绑定/命令编辑，完整 counter 命令引用、DrawAuto 与后变换几何、覆盖率、
    quad 与像素分析。
 3. HLSL 恢复、source/instruction 导航、变量/表达式、trace/stack 与 shader 调试。

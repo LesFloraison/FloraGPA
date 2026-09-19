@@ -143,6 +143,23 @@ Changing the selection, boundary, experiment or adapter invalidates previous res
 Omit `--before` for the command's after boundary. Inspection writes
 `replay-pipeline.json` without frame image readback.
 
+Dynamic shader linkage restores captured named and explicitly created class instances
+in all six draw/dispatch shader stages. Resource properties expose the linkage,
+instance descriptor and names; shader properties show the interface slot count.
+Static shader replacements remove captured interfaces, and dynamic replacements
+preserve ordered class bindings. The existing Compile & Apply and undo workflow
+also works with linked shaders. Shader setter experiments and linked stream-output
+shaders are still pending. On the tested NVIDIA 10de:249d adapter, a reproduced
+driver crash for empty-function-table pixel shaders is rejected with a WARP hint;
+select WARP to execute the original bytecode without modification.
+
+```powershell
+.\out\FloraGPA\FloraGPA.Cli.exe class-linkage D:\captures\sample.gpa_frame --id 62 --out D:\results\class
+```
+
+This exports captured class linkage/instance metadata as `class-linkage.json`.
+The `shader` export also includes the linkage ID and reflected interface slot count.
+
 ```powershell
 .\out\FloraGPA\FloraGPA.Cli.exe commands D:\captures\sample.gpa_frame --out D:\results\api
 # Optional: --filter "set decoded" --resource 25733
@@ -166,6 +183,7 @@ python tools/validate_geometry.py --reference D:/CDXrepo/FloraGPA/standalone --e
 python tools/validate_buffers.py --reference D:/CDXrepo/FloraGPA/standalone --exe out/FloraGPA/FloraGPA.Cli.exe --captures D:/CDXrepo/FloraGPA --qt-bin D:/Qt/6.11.2/msvc2022_64/bin --out artifacts/buffer-run
 python tools/validate_commands.py --reference D:/CDXrepo/FloraGPA/standalone --exe out/FloraGPA/FloraGPA.Cli.exe --captures D:/CDXrepo/FloraGPA --qt-bin D:/Qt/6.11.2/msvc2022_64/bin --out artifacts/command-run
 python tools/validate_buffer_edits.py --reference D:/CDXrepo/FloraGPA/standalone --exe out/FloraGPA/FloraGPA.Cli.exe --captures D:/CDXrepo/FloraGPA --qt-bin D:/Qt/6.11.2/msvc2022_64/bin --out artifacts/buffer-edit-run
+python tools/validate_class_linkage_port.py --reference D:/CDXrepo/FloraGPA/standalone --exe out/FloraGPA/FloraGPA.Cli.exe --isolated-env --out artifacts/class-linkage-run
 ```
 
 For constant-layout comparisons, run `FloraConstantTests` with

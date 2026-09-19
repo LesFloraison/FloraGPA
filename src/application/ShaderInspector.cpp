@@ -346,11 +346,9 @@ static Json reflectedType(ID3D11ShaderReflectionType *type, unsigned depth = 0) 
 }
 Json inspectShader(Bytes bytes) {
     auto parts = chunks(bytes);
-    Json result{{"sha256", sha256(bytes)},
-                {"chunks", Json::object()},
-                {"bindings", Json::array()},
-                {"constant_buffers", Json::array()},
-                {"signatures", Json::object()}};
+    Json result{
+        {"sha256", sha256(bytes)},   {"chunks", Json::object()},          {"interface_slots", 0},
+        {"bindings", Json::array()}, {"constant_buffers", Json::array()}, {"signatures", Json::object()}};
     for (auto &[name, data] : parts)
         result["chunks"][name] = data.size();
     result["embedded_sources"] = embedded(parts);
@@ -378,6 +376,7 @@ Json inspectShader(Bytes bytes) {
     D3D11_SHADER_DESC desc{};
     check(reflection->GetDesc(&desc), "Read shader descriptor");
     result["instructions"] = desc.InstructionCount;
+    result["interface_slots"] = parts.contains("IFCE") ? reflection->GetNumInterfaceSlots() : 0;
     for (UINT i = 0; i < desc.BoundResources; ++i) {
         D3D11_SHADER_INPUT_BIND_DESC b{};
         check(reflection->GetResourceBindingDesc(i, &b), "Reflect resource binding");

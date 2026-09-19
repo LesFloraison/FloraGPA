@@ -112,10 +112,12 @@
       "status": "partial",
       "native": [
         "src/replay/TexturePreview.cpp",
-        "src/cli/main.cpp"
+        "src/cli/main.cpp",
+        "src/application/ClassInspector.cpp"
       ],
       "validation": [
-        "13 native/Python GPU texture comparisons; mip/layer/slice coverage"
+        "13 native/Python GPU texture comparisons; mip/layer/slice coverage",
+        "Captured class-instance JSON and original DXBC exports match Python across 30 dynamic shader fixtures"
       ]
     },
     {
@@ -199,9 +201,26 @@
       "sha256": "d89fd9172e6521d95be0cdfa16eb492760eade1cdc4b3ed5bba549734f6bc7d8",
       "lines": 79,
       "description": "Captured DX11 class linkage, instance descriptors and ordered stage slots.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": [
+        "src/core/ClassLinkage.cpp",
+        "src/replay/ClassLinkage.cpp",
+        "src/replay/Replay.cpp",
+        "src/application/ClassInspector.cpp",
+        "src/application/ShaderInspector.cpp",
+        "src/app/MainWindow.cpp",
+        "src/cli/main.cpp"
+      ],
+      "validation": [
+        "tests/ClassLinkageTests.cpp: named/created instances, captured data offsets, snapshot binding, repeated replay, static replacement and malformed resource boundaries",
+        "tools/validate_class_linkage_port.py: 207 comparisons, including 71 exact GPU outputs, 70 pipeline boundaries (91420 fields), 60 metadata/DXBC exports and 6 explicit rejections; all six stages on hardware/WARP",
+        "Captured class descriptors and shader interface counts in Resources/Inspector; CLI class-linkage JSON and shader metadata",
+        "tests/UiTests.cpp: isolated Worker renders dynamic shader, static HLSL replacement changes output, undo restores interfaces and output; compact class/shader Inspector properties",
+        "out/FloraGPA-classes: isolated system PATH package passes 207 reference comparisons, GF2/BF1 golden frames and draw-suppression negatives, GUI/Worker startup and empty-table WARP/explicit hardware rejection",
+        "Release and Debug each pass all 16 CTest targets, including class resource boundary tests and full Qt UI regression; artifacts/ctest-class-release.log and artifacts/ctest-class-debug.log",
+        "Class resource creation and snapshot execution migrated; linked stream-output shaders and diagnostic/coverage integration remain pending, as do shader setter experiments",
+        "NVIDIA 10de:249d empty-function-table dynamic PS guard preserves original bytecode and offers WARP; extended from the reference texture case after the non-texture fixture also crashed in both native and Python hardware replay"
+      ]
     },
     {
       "module": "command_edits.py",
@@ -590,12 +609,14 @@
       "status": "partial",
       "native": [
         "src/replay/Replay.cpp",
-        "src/replay/InputBindings.cpp"
+        "src/replay/InputBindings.cpp",
+        "src/replay/ClassLinkage.cpp"
       ],
       "validation": [
         "docs/NATIVE_BASELINE.md",
         "Missing input-layout, SRV and output bindings reject selected unresolved boundaries; snapshots and ClearState restore validity, later SRV calls resolve only their own stage/range",
-        "Scoped before/after draw observers expose edited input bindings without duplicate submission; observer cleanup and experiment rollback verified on exceptions"
+        "Scoped before/after draw observers expose edited input bindings without duplicate submission; observer cleanup and experiment rollback verified on exceptions",
+        "Six-stage class instance binding with linkage ownership, ordered interfaces, static replacement handling and dynamic SRV retention; preserved dormant captured shader-setter behavior outside edits"
       ]
     },
     {
@@ -660,10 +681,12 @@
       "description": "Independent reader for the observed IGPA v3 DX11 capture wire format.",
       "status": "partial",
       "native": [
-        "src/core/Frame.cpp"
+        "src/core/Frame.cpp",
+        "src/core/ClassLinkage.cpp"
       ],
       "validation": [
-        "docs/NATIVE_BASELINE.md"
+        "docs/NATIVE_BASELINE.md",
+        "Checked class resource descriptors, ASCII names, linkage references and exact record bounds"
       ]
     },
     {
@@ -1765,7 +1788,8 @@
         "tests/ReplayPipelineTests.cpp: hardware/WARP command boundaries, scoped clone provenance, interned sampler identities, extended UAV slots, disabled commands, ClearState, repeated reads and exception rollback",
         "tools/validate_replay_pipeline_port.py: 180 Python comparisons; 153 valid boundaries with 199818 exact fields and 27 expected rejections, including real GF2/BF1 commands and independent rasterizer-extension fixtures",
         "tests/UiTests.cpp: Replay State worker integration, before/after boundaries, full JSON export while filtered, resource navigation, disabled/undo state and stale-result rejection",
-        "Native getter inspection and CLI/Qt paths migrated for supported replay commands and experiments; class/SO/predication execution and remaining pipeline/setter editors still limit full Python parity; live SO cursors remain unknown by design"
+        "Native getter inspection and CLI/Qt paths migrated for supported replay commands and experiments; SO/predication execution and remaining pipeline/setter editors still limit full Python parity; live SO cursors remain unknown by design",
+        "Class-linked six-stage snapshot bindings, instance ordering and runtime identity match Python; static shader overrides expose empty interface arrays"
       ]
     },
     {
@@ -1789,10 +1813,12 @@
       "description": "Build native DX11 resources from recovered frame records.",
       "status": "partial",
       "native": [
-        "src/replay/Replay.cpp"
+        "src/replay/Replay.cpp",
+        "src/replay/ClassLinkage.cpp"
       ],
       "validation": [
-        "docs/NATIVE_BASELINE.md"
+        "docs/NATIVE_BASELINE.md",
+        "Six-stage class instance binding with linkage ownership, ordered interfaces, static replacement handling and dynamic SRV retention; preserved dormant captured shader-setter behavior outside edits"
       ]
     },
     {
@@ -1963,7 +1989,8 @@
         "src/replay/Replay.cpp"
       ],
       "validation": [
-        "DXBC disassembly/reflection; SPDB/SDBG fixtures; HLSL compile/apply; recovery pending"
+        "DXBC disassembly/reflection; SPDB/SDBG fixtures; HLSL compile/apply; recovery pending",
+        "IFCE-gated interface-slot reflection, class linkage metadata, six-stage dynamic/static replacement and unmodified linked DXBC export"
       ]
     },
     {

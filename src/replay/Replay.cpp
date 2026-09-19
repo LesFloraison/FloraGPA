@@ -1,4 +1,5 @@
 #include "Replay.h"
+#include "core/ClassLinkage.h"
 #include "core/Commands.h"
 #include <algorithm>
 #include <chrono>
@@ -176,16 +177,34 @@ IUnknown *Replay::object(Id id) {
                     writeCounter(obj.Get(), initial->second);
                 result = obj;
             }
+        } else if (t == 0x97) {
+            readClassRecord(frame_, id);
+            Com<ID3D11ClassLinkage> obj;
+            check(device_->CreateClassLinkage(&obj), "CreateClassLinkage");
+            result = obj;
+        } else if (t == 0x98) {
+            const auto record = readClassRecord(frame_, id);
+            auto linkage = get<ID3D11ClassLinkage>(record.linkage);
+            Com<ID3D11ClassInstance> obj;
+            const auto &d = record.desc;
+            if (d[7])
+                check(linkage->CreateClassInstance(record.typeName.c_str(), d[3], d[4], d[5], d[6], &obj),
+                      "CreateClassInstance");
+            else
+                check(linkage->GetClassInstance(record.instanceName.c_str(), d[1], &obj), "GetClassInstance");
+            result = obj;
         } else if (t >= 0x90 && t <= 0x95) {
             auto data = frame_.shader(resource.data);
             if (auto it = options_.shaders.find(id); it != options_.shaders.end())
                 data = it->second;
             Reader head(p);
             head.skip(32);
-            auto linkage = head.read<Id>();
+            auto linkage = shaderClassLinkage(frame_, id);
+            head.skip(8);
             auto so = head.read<Id>();
-            if (linkage || (t == 0x91 && so))
-                throw std::runtime_error("Class linkage / stream-output shader migration pending");
+            if (t == 0x91 && so)
+                throw std::runtime_error("Stream-output shader migration pending");
+            auto classLinkage = get<ID3D11ClassLinkage>(linkage);
             Com<ID3D11ShaderReflection> reflection;
             check(D3DReflect(data.data(), data.size(), IID_ID3D11ShaderReflection, &reflection),
                   "Reflect shader");
@@ -201,15 +220,19 @@ IUnknown *Replay::object(Id id) {
             auto chunks = dxbc.read<UINT>();
             if (chunks > 256)
                 throw std::runtime_error("DXBC chunk limit");
-            bool hasRdef = false;
+            bool hasRdef = false, hasInterfaces = false;
+            Bytes program;
             for (UINT i = 0; i < chunks; ++i) {
                 auto offset = dxbc.read<UINT>();
                 if (offset < 32 + chunks * 4 || offset > data.size() || data.size() - offset < 8)
                     throw std::runtime_error("DXBC chunk offset");
                 Reader chunk(data.subspan(offset));
                 auto tag = chunk.read<UINT>(), size = chunk.read<UINT>();
-                chunk.take(size);
+                auto body = chunk.take(size);
+                if (tag == 0x58454853 || (tag == 0x52444853 && program.empty()))
+                    program = body;
                 hasRdef |= tag == 0x46454452;
+                hasInterfaces |= tag == 0x45434649;
             }
             if (!hasRdef)
                 used.fill(true);
@@ -224,11 +247,15 @@ IUnknown *Replay::object(Id id) {
                         used[b.BindPoint + j] = true;
                 }
             }
+            // Stripped SM4 reflection does not provide a reliable interface count.
+            auto slots = hasInterfaces ? reflection->GetNumInterfaceSlots() : 0;
+            validateClassProgram(program, slots);
+            interfaceSlots_[id] = slots;
             usedSrvs_[id] = used;
 #define CREATE_SHADER(Type, Method)                                                                          \
     {                                                                                                        \
         Com<Type> obj;                                                                                       \
-        check(device_->Method(data.data(), data.size(), nullptr, &obj), #Method);                            \
+        check(device_->Method(data.data(), data.size(), classLinkage, &obj), #Method);                       \
         result = obj;                                                                                        \
     }
             switch (t) {
@@ -407,29 +434,10 @@ void Replay::bind(const State &s, bool compute) {
         &ID3D11DeviceContext::PSSetSamplers, &ID3D11DeviceContext::CSSetSamplers};
     for (int stage = 0; stage < 6; ++stage) {
         auto &x = s.stages[stage];
-        if (x.classCount)
-            throw std::runtime_error("Dynamic shader class migration pending");
+        if (x.classCount > x.classes.size())
+            throw std::runtime_error("Shader class count exceeds 256");
+        bindShader(stage, x.shader, std::span(x.classes).first(x.classCount));
         auto shader = object(x.shader);
-        switch (stage) {
-        case 0:
-            context_->VSSetShader(static_cast<ID3D11VertexShader *>(shader), nullptr, 0);
-            break;
-        case 1:
-            context_->HSSetShader(static_cast<ID3D11HullShader *>(shader), nullptr, 0);
-            break;
-        case 2:
-            context_->DSSetShader(static_cast<ID3D11DomainShader *>(shader), nullptr, 0);
-            break;
-        case 3:
-            context_->GSSetShader(static_cast<ID3D11GeometryShader *>(shader), nullptr, 0);
-            break;
-        case 4:
-            context_->PSSetShader(static_cast<ID3D11PixelShader *>(shader), nullptr, 0);
-            break;
-        case 5:
-            context_->CSSetShader(static_cast<ID3D11ComputeShader *>(shader), nullptr, 0);
-            break;
-        }
         std::array<ID3D11Buffer *, 14> cb{};
         std::array<ID3D11SamplerState *, 16> sam{};
         std::array<ID3D11ShaderResourceView *, 128> srv{};
@@ -438,7 +446,7 @@ void Replay::bind(const State &s, bool compute) {
         for (size_t i = 0; i < sam.size(); ++i)
             sam[i] = get<ID3D11SamplerState>(x.samplers[i]);
         for (size_t i = 0; i < srv.size(); ++i)
-            if (shader && usedSrvs_.at(x.shader)[i])
+            if (shader && (x.classCount || usedSrvs_.at(x.shader)[i]))
                 srv[i] = get<ID3D11ShaderResourceView>(x.srv[i]);
         (context_.Get()->*cbFns[stage])(0, 14, cb.data());
         (context_.Get()->*srvFns[stage])(0, 128, srv.data());
@@ -939,6 +947,7 @@ void Replay::run(const std::function<void(Id, size_t, size_t)> &progress,
     clearBindingGaps();
     objects_.clear();
     usedSrvs_.clear();
+    interfaceSlots_.clear();
     counts.clear();
     for (auto &ranges : ranges_)
         ranges.clear();

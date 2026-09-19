@@ -1,5 +1,6 @@
 #include "application/ApiCommands.h"
 #include "application/CaptureNames.h"
+#include "application/ClassInspector.h"
 #include "application/CommandState.h"
 #include "application/Constants.h"
 #include "application/ContextInspector.h"
@@ -57,7 +58,7 @@ int main(int argc, char **argv) {
     p.addVersionOption();
     p.addPositionalArgument(
         "command", "inventory | commands | command-state | contexts | command-lists | replay | shader | "
-                   "buffer | texture | compile | geometry | replay-pipeline");
+                   "buffer | texture | compile | geometry | replay-pipeline | class-linkage");
     p.addPositionalArgument("capture", "DX11 .gpa_frame file");
     p.addOption({"out", "New or empty output directory", "path"});
     p.addOption({"experiment", "Compatible FloraGPA experiment project", "path"});
@@ -121,7 +122,13 @@ int main(int argc, char **argv) {
             if (!QDir().mkpath(out))
                 throw std::runtime_error("Cannot create output directory");
         }
-        if (command == "command-state") {
+        if (command == "class-linkage") {
+            if (out.isEmpty() || !p.isSet("id"))
+                throw std::runtime_error("class-linkage requires --id and --out");
+            auto detail = inspectClass(frame, parseId("id"));
+            save(out + "/class-linkage.json", QByteArray::fromStdString(detail.dump(2) + "\n"));
+            report.insert("completed", true);
+        } else if (command == "command-state") {
             if (out.isEmpty() || !p.isSet("event"))
                 throw std::runtime_error("command-state requires --event and --out");
             auto detail = inspectCommandState(frame, parseId("event"), !p.isSet("before"));
@@ -218,6 +225,7 @@ int main(int argc, char **argv) {
                  QByteArray(reinterpret_cast<const char *>(bytes.data()), qsizetype(bytes.size())));
             save(out + "/shader.asm", QByteArray::fromStdString(disassemble(bytes)));
             auto metadata = inspectShader(bytes);
+            metadata["class_linkage_id"] = shaderClassLinkage(frame, parseId("id"));
             save(out + "/shader.json", QByteArray::fromStdString(metadata.dump(2)));
             const auto &sources = metadata["embedded_sources"]["files"];
             if (!sources.empty()) {

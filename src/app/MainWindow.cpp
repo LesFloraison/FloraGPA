@@ -1,5 +1,6 @@
 #include "MainWindow.h"
 #include "CommandStateView.h"
+#include "application/ClassInspector.h"
 #include "application/CommandEdits.h"
 #include "application/Constants.h"
 #include "application/ContextInspector.h"
@@ -1427,6 +1428,24 @@ void MainWindow::inspectResource(Id id) {
             return;
         }
         auto resource = frame_->resource(id);
+        if (e.type == 0x97 || e.type == 0x98) {
+            auto detail = inspectClass(*frame_, id);
+            auto display = [](const nlohmann::json &value) {
+                return QString::fromStdString(value.is_string() ? value.get<std::string>() : value.dump());
+            };
+            QList<QPair<QString, QString>> values{{"ID", QString::number(id)}};
+            for (auto it = detail.begin(); it != detail.end(); ++it) {
+                if (it.key() == "resource_kind")
+                    continue;
+                if (it.key() == "desc") {
+                    for (auto field = it->begin(); field != it->end(); ++field)
+                        values.append({QString::fromStdString(field.key()), display(*field)});
+                } else
+                    values.append({QString::fromStdString(it.key()), display(*it)});
+            }
+            properties(QString::fromStdString(resourceName(e.type)), values);
+            return;
+        }
         QList<QPair<QString, QString>> values{{"ID", QString::number(id)},
                                               {"Type", QString("0x%1").arg(e.type, 4, 16, QChar('0'))},
                                               {"Device", QString::number(resource.device)}};
@@ -1447,6 +1466,10 @@ void MainWindow::inspectResource(Id id) {
             Bytes bytes(effective);
             shader_->setPlainText(QString::fromStdString(disassemble(bytes)));
             auto metadata = inspectShader(bytes);
+            auto linkage = shaderClassLinkage(*frame_, id);
+            values.append({"Interface slots", QString::number(metadata["interface_slots"].get<UINT>())});
+            if (linkage)
+                values.append({"Class linkage", QString::number(linkage)});
             sourceFiles_->clear();
             sourceEditor_->clear();
             shaderReflection_->clear();

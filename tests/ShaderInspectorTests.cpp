@@ -6,6 +6,26 @@
 class ShaderInspectorTests final : public QObject {
     Q_OBJECT
   private slots:
+    void staticInterfaceCounts() {
+        const std::string source = "float4 main(float4 p:POSITION):SV_Position{return p;}";
+        flora::Com<ID3DBlob> code, errors, stripped, signature;
+        flora::check(D3DCompile(source.data(), source.size(), nullptr, nullptr, nullptr, "main", "vs_4_0", 0,
+                                0, &code, &errors),
+                     "Compile static shader");
+        flora::check(D3DStripShader(code->GetBufferPointer(), code->GetBufferSize(),
+                                    D3DCOMPILER_STRIP_REFLECTION_DATA, &stripped),
+                     "Strip reflection");
+        auto inspect = [](ID3DBlob *blob) {
+            return flora::inspectShader(
+                {static_cast<const uint8_t *>(blob->GetBufferPointer()), blob->GetBufferSize()});
+        };
+        QCOMPARE(inspect(stripped.Get())["interface_slots"], nlohmann::json(0));
+        flora::check(D3DGetInputSignatureBlob(code->GetBufferPointer(), code->GetBufferSize(), &signature),
+                     "Extract signature");
+        auto info = inspect(signature.Get());
+        QCOMPARE(info["stage"], nlohmann::json("signature"));
+        QCOMPARE(info["interface_slots"], nlohmann::json(0));
+    }
     void embeddedSources_data() {
         QTest::addColumn<bool>("legacy");
         QTest::newRow("SPDB compiler47") << false;
