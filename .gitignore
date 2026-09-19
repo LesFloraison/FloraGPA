@@ -1,0 +1,9 @@
+/build/
+/out/
+/artifacts/
+/.vs/
+/CMakeUserPresets.json
+*.user
+*.gpa_frame
+*.rdc
+__pycache__/

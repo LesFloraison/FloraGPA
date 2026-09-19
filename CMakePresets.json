@@ -1,0 +1,6 @@
+{
+  "version": 6,
+  "configurePresets": [{"name":"vs2022","generator":"Visual Studio 17 2022","architecture":"x64","binaryDir":"${sourceDir}/build/vs2022","cacheVariables":{"CMAKE_PREFIX_PATH":"D:/Qt/6.11.2/msvc2022_64","BUILD_TESTING":"ON"}}],
+  "buildPresets": [{"name":"release","configurePreset":"vs2022","configuration":"Release"},{"name":"debug","configurePreset":"vs2022","configuration":"Debug"}],
+  "testPresets": [{"name":"release","configurePreset":"vs2022","configuration":"Release","output":{"outputOnFailure":true}},{"name":"debug","configurePreset":"vs2022","configuration":"Debug","output":{"outputOnFailure":true}}]
+}

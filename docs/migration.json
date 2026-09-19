@@ -1,0 +1,1841 @@
+{
+  "source": "D:\\CDXrepo\\FloraGPA\\standalone",
+  "modules": [
+    {
+      "module": "advanced_ui.py",
+      "sha256": "8c04a537d220466ba27aff029f505a999a6fa8c6f1a71132a4fdb943afabf209",
+      "lines": 424,
+      "description": "Native post-shader mesh, pixel history, debugger and counter views.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "analyze.py",
+      "sha256": "c691ea0e438a2dde640b7d0b9e874a2177e123956a43d1e78a58fff9d08ad1fe",
+      "lines": 235,
+      "description": "Offline independent DX11 asset and draw analysis, running in an isolated worker.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "annotation_contexts.py",
+      "sha256": "eef309ea9c4d1837b725a057deb6957184f20970bcfe4b5a976185d66463cd2d",
+      "lines": 82,
+      "description": "Explicit annotation QueryInterface identities, bounded by observed lifetimes.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "annotations.py",
+      "sha256": "4f36fb7662f1822426647505ec81b8a509b880b048fe33afceedf3271f6e4e06",
+      "lines": 108,
+      "description": "Captured annotation calls and per-object observed nesting; no guessed contexts.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "annotations_ui.py",
+      "sha256": "fda3b3f2a5247fa43c2425bc8e833f864847693d669a719fdcbaeb8a7fabc4c6",
+      "lines": 77,
+      "description": "Observed application annotation streams, exact API navigation and export.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "api_commands.py",
+      "sha256": "56332c1a19bf3929174efc9f8416798ff3623e0a8ba7f05000af04d30d993a37",
+      "lines": 289,
+      "description": "Inspect captured API records without executing them or importing GPA libraries.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "app.py",
+      "sha256": "6b37948778a0e97b3d3cfbf155f641b9e723daee792732143c7ff6b44948e0ef",
+      "lines": 1217,
+      "description": "FloraGPA native desktop inspector. Run with python app.py [capture.gpa_frame].",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "assets.py",
+      "sha256": "b60a62aeb61d86384ed2e6d69deb8fff0b016a7b9ba11cc603e5e0e503701e6a",
+      "lines": 295,
+      "description": "Independent shader and captured texture asset inspection/export.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "binding_model.py",
+      "sha256": "13632f2a057f711dbfa63a7a6df1aebe2790019cd97993c5ba389cfbd5759b6f",
+      "lines": 226,
+      "description": "Dual captured/experimental binding model for persistent output edits.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "blend_edits.py",
+      "sha256": "1b612ec2003a94a23abbe699416740c05f0c937a96a4cfb3919ccd30a575f811",
+      "lines": 184,
+      "description": "Recovered BlendState1 descriptors, native logic ops and per-draw edits.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "buffer_coordinates.py",
+      "sha256": "b8b9d245c9d890b56e1742ce1dbbe35c69bbc1e8adaa62b6d6b8110200e8e50c",
+      "lines": 12,
+      "description": "Buffer RTV diagnostic coordinates describe the view, not GPU write tracing.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "buffers.py",
+      "sha256": "a727d4cad67e352fa7782f9676856104e94531958061a2e06f2ecf1b53ab8bc7",
+      "lines": 83,
+      "description": "Export buffer bytes at a command boundary, with available draw reflection.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "captured_getters.py",
+      "sha256": "c7264cb63c4afc7046ba726382ad83220a22e46fc6c00662ca9f6ad15d66d0ef",
+      "lines": 28,
+      "description": "Read-only API layouts confirmed in original legacy deferred captures.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "class_linkage.py",
+      "sha256": "d89fd9172e6521d95be0cdfa16eb492760eade1cdc4b3ed5bba549734f6bc7d8",
+      "lines": 79,
+      "description": "Captured DX11 class linkage, instance descriptors and ordered stage slots.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "command_edits.py",
+      "sha256": "22cd491b2f69b3b5207d821bb12b0d5d01b4b86eb1a7a857fb7f3317bb2cc6cd",
+      "lines": 67,
+      "description": "Resource-writing command experiments using recovered legacy Erg layouts.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "command_lists.py",
+      "sha256": "f82ae628c4376e9431909b19cbcd31990c38063dae5d304ecc2e8589219b36f6",
+      "lines": 116,
+      "description": "Inspect recovered command-list records without guessing pointer/ID domains.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "command_state.py",
+      "sha256": "b344d0e2f0ed61164f597baed2abe78629b4b1541b56100d9cc93bc57cdbd6c9",
+      "lines": 248,
+      "description": "Captured context state reconstructed from API setters and qualified snapshots.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "commands_ui.py",
+      "sha256": "0303109d07566421d596bd44c402a87ef2307c0a551248a724d4e593b1fc8eb0",
+      "lines": 346,
+      "description": "Captured command stream, exact parameters and linked records.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "constant_buffer_setters.py",
+      "sha256": "9920849096afc9e18c96b5219add6a71d5cee9119b24303e6ec5e63343ee17fb",
+      "lines": 117,
+      "description": "Six-stage CB/CB1 command edits, native ranges and observed prefix state.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "constants.py",
+      "sha256": "bb4a0c0cbd526bc081035f6fb47cb7b7604989359d433fe2de10bad21682dea4",
+      "lines": 105,
+      "description": "Reflected legacy DXBC constant layout, typed values and padding-safe edits.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "contexts.py",
+      "sha256": "3d723cf52567cf615580ca9d8f07edb924d9ae2449360d06675699eb815900b7",
+      "lines": 92,
+      "description": "Captured context interface version is distinct from immediate/deferred kind.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "coverage.py",
+      "sha256": "afd6b0158b330dc78d8a4bdca677b7e5d82b97915ff3e9f1cdd93eed447cbe90",
+      "lines": 73,
+      "description": "Pixel-fragment coverage and an explicitly selectable geometry-only mode.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "coverage_fragment.py",
+      "sha256": "3e95853c711083d2770c83addaf348c07b0580bb3d5c4b5a791c789e47c98af3",
+      "lines": 263,
+      "description": "Coverage written by the original pixel program alongside its actual outputs.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "coverage_geometry.py",
+      "sha256": "cfe0629e450ae41b43cb970cd3749186023d579224019f126edc8f570167a8f4",
+      "lines": 21,
+      "description": "Geometry-only marker with read-only captured depth/stencil tests.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "coverage_isolated.py",
+      "sha256": "1dd2b0882c00fddd3d3c4c071ef9c7c01e96907f4fdf3b445bbffe74a117c7d5",
+      "lines": 94,
+      "description": "Private GPU output copies for diagnostic draws that cannot add an RTV.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "coverage_viewport.py",
+      "sha256": "e1a0d9d8783d6da967a14d8935da03f32a14ae3dd3d307ae32aea3c591704170",
+      "lines": 100,
+      "description": "Diagnostic coverage for draws with no color or depth target.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "debug_config.py",
+      "sha256": "5267bfd1e988390b71d137c898a114799e974ebebd4e6901fe50d817f27e4a64",
+      "lines": 59,
+      "description": "Versioned debugger settings bound to source metadata and shader assembly.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "debug_expression.py",
+      "sha256": "5a2d470785ed0f52568b7d597d1de7f407eb24bfcf4c0f0502585a65bc8d7dde",
+      "lines": 252,
+      "description": "Bounded, read-only watch expressions over recorded source-variable mappings.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "debug_state.py",
+      "sha256": "2b4df3f8647836b4d8aebb1ceb4528d82e02363710090c691d192268f6704e7d",
+      "lines": 38,
+      "description": "Navigate RenderDoc's recorded shader changes in either direction.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "depth_stencil_edits.py",
+      "sha256": "9e2fcbd28c3f34f7548cf44ac19528c2ccd0ad767c31ca23df0947f61ac7f5bf",
+      "lines": 89,
+      "description": "Captured D3D11 depth/stencil descriptors and per-draw partial overrides.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "devices.py",
+      "sha256": "5d3bf637a9e5e1f67464cf52f5cb88d7e83629ae0f996e664ddb0c51f2de8c51",
+      "lines": 56,
+      "description": "Explicit native DX11 device selection and measurement provenance.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "dx11.py",
+      "sha256": "73ca89e7efe6dbe9917abcf0e9d63381914d66a363e4098287c91892002cd42e",
+      "lines": 264,
+      "description": "Small offscreen DX11 backend using only Windows system APIs, never GPA DLLs.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "dx11_metric_result.py",
+      "sha256": "e2f6ca465eb6eef384aa5eaf00924dc15555963a29a8ca846544901776f26921",
+      "lines": 20,
+      "description": "Legacy DX11 callback result assembly (player 0xadef0), no GPA imports.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "dxbc_array_index.py",
+      "sha256": "4f1638da2985062e079ab1ea9a7dd2a9cc575571566472829bb617a624c55ff4",
+      "lines": 50,
+      "description": "Select a targetless coverage index without suppressing original PS work.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "dxbc_domain_inputs.py",
+      "sha256": "54318a13ac10d4393d79b73d6a02940f27a60fd3086221a36b14795d313aff1e",
+      "lines": 33,
+      "description": "Declared DS input registers, without adding or guessing shader inputs.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "dxbc_geometry_emissions.py",
+      "sha256": "35cb3cdf7df9ecf0062e7fb8e0ade51223dc645f568f7691a7be0b647c4f09f1",
+      "lines": 84,
+      "description": "Record original GS Emit/Cut operations and their output values without new IO.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "dxbc_gs_checkpoint.py",
+      "sha256": "a4f85999744f3b8db32f9bfdd74e515563d7f50f552f27f5cb9ae36ba6d2ba20",
+      "lines": 297,
+      "description": "Native GS/DS register snapshots immediately before a selected original token.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "dxbc_hull_capture.py",
+      "sha256": "9c0b6959953c417c38b8b224fdc493fad4535cb89e9f3b8182b5958d40e3aefb",
+      "lines": 138,
+      "description": "Mirror HS output writes into a private UAV without recompiling original math.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "dxbc_hull_instance.py",
+      "sha256": "27c5fda3d151b1f746410ffbe1ef5d56abf38cf57ac663f356d521b751e271d4",
+      "lines": 97,
+      "description": "Carry the native VS InstanceID to HS without rewriting original system IDs.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "dxbc_hull_phases.py",
+      "sha256": "d745651c77381e501452b3f39a8370abe6a16c13fa3bb2e41de062c41c2ae4e1",
+      "lines": 40,
+      "description": "Original HS executable phase boundaries and declared per-phase input model.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "dxbc_immediate.py",
+      "sha256": "cd6e878559c202a18fed8162566c07b2dbbad58e2791531eef19b9bdf0fc7a22",
+      "lines": 10,
+      "description": "Lengths of validated SM4/SM5 immediate operand payloads, in DWORDs.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "dxbc_indexable.py",
+      "sha256": "ac06b017ec516144b946a3d76e59ab4902b698c1a0c3ba23c70db19d91d0ed30",
+      "lines": 84,
+      "description": "Static declarations and 32-bit element addressing for DXBC x# temporaries.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "dxbc_patch.py",
+      "sha256": "a83d9804df9e76121782778c6e55dd83da193bdda9f0432e8ac42a6022b5de29",
+      "lines": 126,
+      "description": "Token-preserving DXBC instrumentation for pixel coverage.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "dxbc_system_id.py",
+      "sha256": "727a742a97cb5beef84cfbbbf75f9b07327a89ce599ef6cdb52be5d1e4605d96",
+      "lines": 100,
+      "description": "Preserve VS logical InstanceID/VertexID when splitting draw submissions.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "dxbc_uav.py",
+      "sha256": "03b5e8c47105106892012c51547573f07a9f0fedc3c3710f4a025df588785a44",
+      "lines": 97,
+      "description": "SM5 UAV register relocation at operand boundaries, never by word search.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "dxbc_vertex_identity.py",
+      "sha256": "260ed5f0b5d06e731bba529d1f6854ec7aad55cf91c2cc1b70a542c4af2b79f8",
+      "lines": 51,
+      "description": "Carry native VS identities through private outputs without changing Draw IDs.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "dxbc_vertex_writes.py",
+      "sha256": "dae6dcbe0c760a16f42da582877dbb9b5c3a1fdc7aa7a588db42d4af6d5248d6",
+      "lines": 86,
+      "description": "Mirror original VS/DS output writes using an SM5 private UAV helper.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "engine.py",
+      "sha256": "3ff9c05d315502b477d5ce4e6dd65ff9cb42998028af810546d2630ff1ba325c",
+      "lines": 593,
+      "description": "Replay recovered DX11 draw/state/resource records with an independent backend.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "events.py",
+      "sha256": "fa4444b64b8a24a2ac6e3a1ba08b50fbf0ee62d7796cc9db23ac2ebfef73a048",
+      "lines": 49,
+      "description": "Semantic command records. IDs recovered from native Erg type getters.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "experiments.py",
+      "sha256": "33530a2bf67540da61a43cab021384982d4ad9159decd181137c152db08edc8b",
+      "lines": 573,
+      "description": "Portable, frame-bound edit history. No GPA project format or runtime needed.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "formats.py",
+      "sha256": "eeb0c54bb669c217028b681e360b7c8dad309cf7395d308d8a5f8ab54a91d50f",
+      "lines": 150,
+      "description": "DXGI storage sizes and common typed interpretations for independent assets.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "frame.py",
+      "sha256": "3f291cf9b4037a786c46ad09878fff8d18901b7ebcd9a5aa54333fe9cce94ef2",
+      "lines": 169,
+      "description": "Independent reader for the observed IGPA v3 DX11 capture wire format.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "frame_metric_index.py",
+      "sha256": "2d0bdd6fe24366de6f1ce476f668b9e23bcbeb5d3fb511e05f6adabcb9df6d02",
+      "lines": 64,
+      "description": "Independent FrameFile internal API index and category-2 metric ranges.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "frame_output.py",
+      "sha256": "097700f467d640cac2b35e6b5e305456d09c99b5905fb22a88acba87d7090b1c",
+      "lines": 97,
+      "description": "Lossless selected output storage and explicit RGBA8 display conversion.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "geometry.py",
+      "sha256": "70da7663201d71d79c57c6523b26c36c00d0ef7bf0031bb32f70d3dd73207fb0",
+      "lines": 171,
+      "description": "Export the IA vertices actually consumed by a selected draw event.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "geometry_emissions.py",
+      "sha256": "c2bfa26d7c9451bbbf0da97d65187138639e233faa1521f1e94496ef158de8fe",
+      "lines": 91,
+      "description": "GS emission records and per-invocation primitive connectivity.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "geometry_instances.py",
+      "sha256": "cf84036e60d3be55e0e70583d70aae785d248bb7c3131edcb46803cc5da229d9",
+      "lines": 51,
+      "description": "Select native SO instance ranges without changing logical IDs or IA fetches.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "gpu_profile.py",
+      "sha256": "a25deada6700679e399a0c6b5087ae7e3a5076beaa57f703d3f210cef19eeb39",
+      "lines": 131,
+      "description": "Repeated in-order DX11 timestamp measurements of captured GPU work.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "gpu_statistics.py",
+      "sha256": "fbaf283548f775dbbf947628a9494a8e8208e131e70310f807c21cb4dbcfb1c5",
+      "lines": 134,
+      "description": "Native single-event and inclusive command-range DX11 measurements.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "gs_checkpoint.py",
+      "sha256": "96cb91001a3be4af56ba8feaf0867a57c6cc090ebee4f91ec6be3fddb3e2cb06",
+      "lines": 129,
+      "description": "GS/DS instruction catalog and native repeated-hit register inspection.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "gs_checkpoint_ui.py",
+      "sha256": "5dd3041a1bcff27491dd4fe7533da6966f12ad5525da624a3a0fa8d81284c3c4",
+      "lines": 283,
+      "description": "Native GS/DS instruction checkpoints, repeated hits and typed register bits.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "gtpin_blocks.py",
+      "sha256": "4241adca763b78da2df35a16c88a30582d365cb9c9c74db8cdbb904333ca400b",
+      "lines": 134,
+      "description": "Validate per-dispatch basic-block counts and retain original ISA provenance.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "gtpin_cycles.py",
+      "sha256": "b434e1b4b5db2d5bf5f684f0c2a0c822bc856e66d235f275792e59966187daf2",
+      "lines": 72,
+      "description": "Cycle readback with exact kernel/dispatch identity and original static ISA.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "gtpin_experiments.py",
+      "sha256": "fe731813a6738acaebe1cf3efbf3e64dcbdede0a6c927060a6ac27828be1f23b",
+      "lines": 73,
+      "description": "Frozen experiment identity and effective shader bindings for SDK profiling.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "gtpin_hlsl.py",
+      "sha256": "7a196ec01492787e6d9262cf1927cad63c69b0ebae47e5ada7db1a910d90194d",
+      "lines": 56,
+      "description": "Bind driver source positions to checksum-verified embedded shader text.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "gtpin_keys.py",
+      "sha256": "c185354d853972480c00277a479c30ac637d7a9e31afaa7f0a54e4cb2447bbc5",
+      "lines": 63,
+      "description": "Independent DXBC correlation key recovered from GPA's GTPin registry.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "gtpin_latency.py",
+      "sha256": "c75c60b49fe5c12d416dacdec0380cca6a00f351547ee8873d3c280f6a123d32",
+      "lines": 101,
+      "description": "Strict per-dispatch latency import with explicit site/ISA and measurement units.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "gtpin_profile.py",
+      "sha256": "1bcba80319493fef71d38217c4079f427b3f6ec41f5216daad73a6583fcbfcbe",
+      "lines": 574,
+      "description": "Optional Intel GTPin SDK cycle/basic-block profiling, without GPA runtime DLLs.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "gtpin_source_map.py",
+      "sha256": "2a60dac1c0ad46891dde7c4112ecc88acf27fba1c096f0c45383f58b829e8537",
+      "lines": 283,
+      "description": "Bounded Intel DX11 ELF/DWARF4 line evidence; never load external source paths.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "hardware_metrics_ui.py",
+      "sha256": "6123447b7b9f90974581ff585e2890cc740d92c468b0e8b76c894bdd47c69e52",
+      "lines": 366,
+      "description": "Driver hardware counters, kept separate by event, metric set and replay pass.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "hlsl_geometry.py",
+      "sha256": "87bc2aaf17d2ab1ad5cdb3d83a89ed7fac4b8222ff4e9d625182d7e6f81b9528",
+      "lines": 108,
+      "description": "Geometry shader declarations, per-vertex input and output streams.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "hlsl_graphics.py",
+      "sha256": "c2a5ae18ba703bfd3525ff1297d8fd60a47946673fce3fdc1b2e3c80c2c8bcd4",
+      "lines": 52,
+      "description": "Signature and interpolation recovery for vertex and pixel shaders.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "hlsl_memory.py",
+      "sha256": "bf7b73b65b963b67c59d705075ed593463cbb8f1bd0f245d3bb85e1cd9a10c6f",
+      "lines": 137,
+      "description": "DXBC raw/structured/shared memory lowering used by native HLSL recovery.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "hlsl_recover.py",
+      "sha256": "95a77be9ba2977768cd65959f44364ba2a0effe09f4037f83f8b390a510f9816",
+      "lines": 474,
+      "description": "Strict DXBC-assembly lowering to editable HLSL, without vendor/decompiler DLLs.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "hull_capture.py",
+      "sha256": "c695b7cdb806a90d00b484d98db4bc2d5cc1b56523adadc6c70676d1d2045ef1",
+      "lines": 166,
+      "description": "Observe HS output writes, retaining per-component validity and patch identity.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "ia_setters.py",
+      "sha256": "e610ef2a73d37f07fe4e9833a0e4686d70f70b5df20ddbdc28525db8bd44cd39",
+      "lines": 183,
+      "description": "Input-layout, vertex and index binding edits with output-hazard history.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "image.py",
+      "sha256": "b096274a637d9fd416220c2c1031e92c3814606b7463035c5bcb77e13365703a",
+      "lines": 75,
+      "description": "PNG output for independent GPU readback, using only Python's standard library.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "instruction_info.py",
+      "sha256": "4f9829293d2b2b9ec904367e6f75d4314ed38cba8f5202aa03154856550e2bbd",
+      "lines": 14,
+      "description": "Public ShaderDebugTrace instruction metadata uses half-open sparse ranges.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "mapped_writes.py",
+      "sha256": "37d6ac3808a95f21e0a8392db9644755e0a1faebdeb02e1640a46ecf0909e508",
+      "lines": 100,
+      "description": "Apply GPA MapErg writes using the replay device's native mapped pitches.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "md_acquisition_priority.py",
+      "sha256": "978baafa31f68ce33ce47854c71672f40d771e8633ca13377ba3fda33a3a9c12",
+      "lines": 85,
+      "description": "Recovered OA arbitration around each uniform collector replay.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "md_frame_ranges.py",
+      "sha256": "f8ff2da42f4d4277c4b2761a9ae1edfd8ba6ab8e27c1356c5e2c9e574d4f39b0",
+      "lines": 69,
+      "description": "Independent category-2 FrameFile ranges on complete replay commands.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "md_frame_ranges_ui.py",
+      "sha256": "6d9bddfc1b5f97862ab973585d717cf47e37000d5e2bf73d291c46a60d52f814",
+      "lines": 57,
+      "description": "Select independent FrameFile metric ranges by their actual API endpoints.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "md_hotspots.py",
+      "sha256": "70def95027ef4592b9fa2842b6435b1e0eb61a9d66b3212f533ea33b43fc125f",
+      "lines": 192,
+      "description": "Event-group metric aggregation using a separate fixed-weight counter pass.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "md_hotspots_ui.py",
+      "sha256": "0626e440b9106b86842f0d71ee3ce87aedc7683858d8b0fcd6abe62ef6f33748",
+      "lines": 181,
+      "description": "Named event groups and independently weighted hardware metric results.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "md_interval.py",
+      "sha256": "37e4423127d11c83cb643d0a39fc11651ac0467b3bb103c857f90ddfc3359e06",
+      "lines": 63,
+      "description": "A single driver counter around an inclusive replay-command interval.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "md_iteration_results.py",
+      "sha256": "af81f8224175d561fba83847a0700187ff6c3212f84256d50a7428013599560b",
+      "lines": 108,
+      "description": "Verify scheduled worker results against their exact report/plan identities.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "md_iteration_transport.py",
+      "sha256": "e4098b606b9c607a61410cc06d1f46269a4a39b898b883be5cdf1a20e2ede893",
+      "lines": 176,
+      "description": "Recovered pass/probe/consumer controllers over a live independent MD device.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "md_iterations.py",
+      "sha256": "b76b3394d8ff0cfa3f8777b756dde497403196cc69c851f6fcd10856771ce0a1",
+      "lines": 172,
+      "description": "Collect real frame metrics using recovered weight, pass and iteration policy.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "md_iterations_ui.py",
+      "sha256": "57ceb6d430a01d0fc380c8e4577db4c3d7f046c0becfb9c036bf68206e2621da",
+      "lines": 165,
+      "description": "Desktop view for recovered, non-uniform pass/iteration results.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "md_profile.py",
+      "sha256": "4c532c2d09854f2414303c6a7a1480fc86b873be688bb47c2fe289568bbee877",
+      "lines": 265,
+      "description": "Intel DX11 hardware metrics from the installed driver; no GPA runtime DLLs.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "md_publisher_values.py",
+      "sha256": "ab5d14eca068e95482032ac4a09a3a1579fcd8b8893d8df435b206c675d48700",
+      "lines": 176,
+      "description": "Recovered publisher transforms applied to independently acquired MD reports.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "md_query_drain.py",
+      "sha256": "8ed583b4af13f32ef3b71545388bb1c3d012c631589394324dfd8026021cc4c8",
+      "lines": 62,
+      "description": "Split MD counter submission/readback through the recovered query-drain core.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "md_recorded_queries.py",
+      "sha256": "d9245414a63c393de64aa5394aca8ed8c447ae78f2ed6dd0262fbe099b8b0312",
+      "lines": 185,
+      "description": "Intel MD counters on owned deferred lists, using recovered query lifecycle.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "md_reusing_pool.py",
+      "sha256": "a52df05d33330bb22aa1969c3e392aa88d81843f572bab7b81beec2346935c48",
+      "lines": 69,
+      "description": "Batch allocation and LIFO counter reuse on the recovered query-pool core.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "md_sample_pool.py",
+      "sha256": "23295d53acb13b027b735b5ccbf46ec8b8e2e566caf177b9fd5f47ad17dea21c",
+      "lines": 110,
+      "description": "Bounded asynchronous MD samples through the recovered query-drain core.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "md_scheduled_pool.py",
+      "sha256": "45f5977d0145d39a5f93d77a4281fecfbb8f5dfd6b251e6ac918a32a6acca8ee",
+      "lines": 145,
+      "description": "MD Counter adapter for the recovered collector Begin/End and subscriptions.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "metric_clock.py",
+      "sha256": "0564602bff73abf227ce5053ac94c26e7aaf330629af0107cf1e7cf7910a0859",
+      "lines": 100,
+      "description": "Recovered publisher clock alignment; calibration source is supplied by caller.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "metric_consumer.py",
+      "sha256": "c35a2ff9f83a35e319660464e77991103fd2d8596adf02afacedcf2efed3f47c",
+      "lines": 63,
+      "description": "Recovered GM callback accumulator, also used by md_iteration_transport.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "metric_deferred_queries.py",
+      "sha256": "8e1f5d21db6367379410675b8adeaa225077a4d0d5c697070dca39d1f796a6ad",
+      "lines": 44,
+      "description": "Independent publisher notification lifecycle (0x213a0).",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "metric_iterations.py",
+      "sha256": "663f6b3a2c92b4a35e98019eb37e4947a5a84758233f34c0c4881baa1b4df7e2",
+      "lines": 179,
+      "description": "Recovered numeric GetMetricValues iteration/weight policy.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "metric_kinds.py",
+      "sha256": "d5d9516eb70cc05a1ec6d541880bf733594d5b0edde9f12e275e1ebec2cac4f0",
+      "lines": 39,
+      "description": "Recovered MD-to-GPA descriptor kind conversion; no GPA runtime dependency.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "metric_outer_passes.py",
+      "sha256": "97d044344179c222ffa6032542fa32d00756417b9e102eb4d377019395ad8bd8",
+      "lines": 56,
+      "description": "GetMetricValuesInternal (playback 0x639c0) over an owned transport.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "metric_pass_controller.py",
+      "sha256": "b23d4f664919e61a0d2874eeef8d423514a39070cc373e60da518b82d1b711ab",
+      "lines": 146,
+      "description": "Recovered player GMQueryManager probe/pass lifetime, without GPA DLLs.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "metric_passes.py",
+      "sha256": "2454b482f8c37593515e72726b26e60a7ae2d43b8608b4879327a32f056d8fe8",
+      "lines": 103,
+      "description": "Independent reconstruction of GPA's iteration/metric/range transposition.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "metric_pipeline_capability.py",
+      "sha256": "1a216254435bae897efccf098203d545ccb1bccd6cbd02eba691af8149907a7c",
+      "lines": 35,
+      "description": "Recovered publisher metadata gate; eligibility does not prove GPU acquisition.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "metric_planner.py",
+      "sha256": "9ecfd3bdb909dc94c394743a332065d2e546818be285b1d941eb8072dac50f2f",
+      "lines": 82,
+      "description": "GPA-compatible ordered grouping of metric compatibility choices.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "metric_priority.py",
+      "sha256": "7a0a3304d1e415a9002fedd882627a6c7a5cc6bf811400355afd8b20dda20cc0",
+      "lines": 163,
+      "description": "Recovered GPA priority-table protocol, independent of its DLLs.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "metric_priority_win32.py",
+      "sha256": "dd68ae07fe554bc5c1e22283970fba8f988ed0579c779e531447182735540781",
+      "lines": 160,
+      "description": "Windows shared priority mutex for the recovered single-device collector.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "metric_probe_config.py",
+      "sha256": "58443b9ce08e32a91f9c49d3062e14f15042da4393284873fc0e2b8c80bbe3e7",
+      "lines": 28,
+      "description": "DX11 API manager's packed probe configuration (player RVA 0x43200).",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "metric_probe_registry.py",
+      "sha256": "af8f4ed3ff573b9ed3993000b3712b564cfca62b4d9e6f25a4f1a1274648fdc0",
+      "lines": 52,
+      "description": "Player wrapper probe registration/cache lifetime, without a native runtime.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "metric_query_batch.py",
+      "sha256": "f629f3125ee70e1c6fa3b8aa9e58e735599319a4f0e54aa3df568a1e27ddd465",
+      "lines": 55,
+      "description": "Independent query-batch lifecycle recovered from the GPA publisher.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "metric_query_drain.py",
+      "sha256": "44c0f13914bde424960af5bf84773e5b579a39d4a2da9a6470f1f93980b27767",
+      "lines": 70,
+      "description": "Publisher pending-query draining; no GPU or GPA runtime dependency.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "metric_query_flags.py",
+      "sha256": "76c222d91c91f6b7d0868e7f9fba3d83e1e9e574405f46fb0f5b71c190d74de1",
+      "lines": 48,
+      "description": "Query flag aggregation recovered from playback ParseQueryFlags (0x67fc0).",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "metric_query_pool.py",
+      "sha256": "be595ef4f58a12f23c9b62a9de907a78971b9a72b6f0ab7452e6354af7f10bc8",
+      "lines": 71,
+      "description": "Publisher query allocation/reuse and context slots recovered from native code.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "metric_range_mapping.py",
+      "sha256": "6548e2bb919145e9bd51af1d6e2dd84a98c81bc53dd59e15323ae64b211a6b29",
+      "lines": 32,
+      "description": "Playback 0x61480 range selection over FrameFile's category-2 index table.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "metric_report_postprocess.py",
+      "sha256": "3f84cc75386aa2c131b0c493b970aa0983e9bb820f6c99106c9c2463a2ea0161",
+      "lines": 100,
+      "description": "DX11 MD report postprocessing recovered from publisher 0x32950/0x326b0.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "metric_report_values.py",
+      "sha256": "2cae190f740a88338b4df58d7004e70c7d0c29b8b9c862aa82b77db8032bd190",
+      "lines": 57,
+      "description": "Recovered publisher value operations; independent of GPA and the GPU.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "metric_request_ui.py",
+      "sha256": "f9e3dff853d0ba9dff36575a5aad27cc462b58e8a395d322eacc8a16c6e60747",
+      "lines": 191,
+      "description": "Metric-symbol selection, plan preview and immutable source-bound results.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "metric_subscriptions.py",
+      "sha256": "d5741a1a004cd7065537d17b4fbb59bb54550a8ae021c06f3b474c4d029818d0",
+      "lines": 164,
+      "description": "Publisher provider binding and subscription lifecycle recovered from GPA.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "metric_values.py",
+      "sha256": "0bb204ed6282acc147e55c649d7285aa3663c5ae968cc4ed5659f7482d5b93c1",
+      "lines": 96,
+      "description": "Independent reconstruction of GPA IteratedValue arithmetic (binary64).",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "metrics_discovery.py",
+      "sha256": "87df569d3370c13c918429476aadfbd42c521339d32205b821c0a0eaf71046f6",
+      "lines": 229,
+      "description": "Optional public Intel driver Metrics Discovery bridge on the replay device.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "msaa.py",
+      "sha256": "eb563b560125601b959166ae63480d0f3fa1a9bd9de39b143b645624e1e47118",
+      "lines": 113,
+      "description": "Independent MSAA resolve/sample inspection, preserving immediate DX11 state.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "msaa_edit.py",
+      "sha256": "d48351dd3d6c4617d2ff3e42a09f468b348d44189c3e397622e5253c8c5c64c1",
+      "lines": 143,
+      "description": "Per-sample MSAA storage transfer using compatible views and isolated draws.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "msaa_notice.py",
+      "sha256": "be8e5dae03b6722fa39dbb954f508220ee50bbb35008e74af5c6ddce076d692a",
+      "lines": 3,
+      "description": "Shared provenance text for MSAA values produced by independent replay.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "native_debug_config.py",
+      "sha256": "28f7c60193ae5edbe5e20985ebc6056ae0653f19e6ee2f4af532d16b3e4c9922",
+      "lines": 56,
+      "description": "Atomic native GS debugger configuration bound to original shader and mappings.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "native_debug_expression.py",
+      "sha256": "66528f2bbbdedb1c750b0c52208c9af201f3d3af4ffd2522fdccf47d3767048e",
+      "lines": 56,
+      "description": "Bounded watch expressions over current native source-frame values.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "native_debug_ui.py",
+      "sha256": "051830d1ae50e7c7d25618ebf3cb1bdadf345ba790fda90ee98e9cd8c0ed2652",
+      "lines": 86,
+      "description": "Native GS breakpoint rules, watch values and versioned configuration controls.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "native_frame_sources.py",
+      "sha256": "aa97182115a15362abb6dd37cf8dedee9b85fe9e3dd4af474a70b4c8191ec6e7",
+      "lines": 51,
+      "description": "Per-frame source locations and lexical ownership of native local symbols.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "native_hs_scopes.py",
+      "sha256": "83ee8379a7d6e652484f57de8cf8221f7897f076242eab106d0e2416f7900170",
+      "lines": 28,
+      "description": "Restrict CodeView scopes to original HS phases, excluding the CP wrapper.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "native_invocation_selector.py",
+      "sha256": "e246d8fad817c03503131e64b51ea8cc5dffe8297b8dd73abc2d5fe0f2b1144e",
+      "lines": 75,
+      "description": "Exact declared main-input selectors, never cross-run invocation identities.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "native_sdbg_expression.py",
+      "sha256": "506de9933d26bee8d14b566e2c8863e8754f6857f1e0f3f9f3b88c4f7fc2b425",
+      "lines": 23,
+      "description": "Read-only expressions over verified, currently visible SDBG assignment history.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "native_sdbg_variables.py",
+      "sha256": "6ade47c637a8d6e32c2983cec5be54951f02c49f94ed836c8c9f96d07caedf07",
+      "lines": 299,
+      "description": "Legacy SDK variable assignments reconstructed from native instruction traces.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "native_source_stack.py",
+      "sha256": "92656a598c51dbee252e92215d6fc8ce7d0c81233475e95b98a4a7e7aa580799",
+      "lines": 116,
+      "description": "Original CodeView statement ranges and source inline stacks, without DIA.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "native_source_trace.py",
+      "sha256": "1ee2849e1b0d437144e4825204bd3cf4fa119e12d96d48d3aac02ff6cac30450",
+      "lines": 153,
+      "description": "Source navigation within one native invocation, using verified original locations.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "native_source_variables.py",
+      "sha256": "b72334b8546d6e704f487ee7d4f9f8a89a05e4a0f0cefcec5730e50071844dc9",
+      "lines": 224,
+      "description": "CodeView local identities and HLSL live ranges resolved against native snapshots.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "output_commands.py",
+      "sha256": "83382f91c480446f92284d72b94d0592a6506e399b16149270ed22f385db7b77",
+      "lines": 95,
+      "description": "Execute recovered OM/CS output bindings at their actual command boundary.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "output_setters.py",
+      "sha256": "8033c4df405df90b5978c8c6ca865412147a1f9d45908f6af79a17409260760c",
+      "lines": 127,
+      "description": "Output setter arguments and captured/experimental binding history.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "pipeline_timestamp_metric.py",
+      "sha256": "eb150b7f414c51ae63b1c57ddfff63f28d89b3d2dbd9afbbef0cd13eac8f8e9d",
+      "lines": 91,
+      "description": "Four-field publisher accumulator, independent of GPA and GPU acquisition.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "pipeline_timestamps.py",
+      "sha256": "b9a6a5c5fb4c7919352a846e275b11fe173ad8f463f17c7fdd6851796347a9e8",
+      "lines": 44,
+      "description": "GPA pipeline timestamp wire records, independent of the publisher DLL.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "planar_capture.py",
+      "sha256": "8bb9b519cbb74568ab8d0bfd75e4f45895bea8bc2b7e601de7f0ab46a3efbcf7",
+      "lines": 70,
+      "description": "Separate legacy GPA GenData from standard DXGI planar upload storage.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "post_transform.py",
+      "sha256": "064a8493a1c2113b3bb8a2b0acc93e9584db65cc53c9fb5b63015cb0f27264d3",
+      "lines": 185,
+      "description": "Read actual final pre-rasterization attributes with native DX11 stream output.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "pre_raster_uav.py",
+      "sha256": "16668d7139ac31bc396e7eb829ba7350f56718e619c083a2dabef17f44d305e8",
+      "lines": 67,
+      "description": "Private graphics UAV bindings for original pre-raster shader re-execution.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "predicate_isolation.py",
+      "sha256": "1bd645fbd7b894a1eaeac009135dc6c50952e7311af29780bb09e15c08d7d0d0",
+      "lines": 79,
+      "description": "Exclude helper draws from captured boolean query intervals.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "predicate_setters.py",
+      "sha256": "a70c301cd56c85c3e8d6ec3ff3f54ee2aee3a330b99c534a7539e4c3ff682eaa",
+      "lines": 23,
+      "description": "Recovered SetPredication parameter experiments.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "predication.py",
+      "sha256": "1646a76da2aa6ebaab347926351452f49882c6124d00f6d65c1714c726347dc5",
+      "lines": 94,
+      "description": "Recovered predicate resources and native Begin/End/SetPredication records.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "presentation.py",
+      "sha256": "9850b4238a7aac255e7eeff0bdcfa2fcbbf27caf5364fbd7c34d026e50e23d48",
+      "lines": 143,
+      "description": "Select a replayed backbuffer using captured swap-chain parent identities.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "process_job.py",
+      "sha256": "5fdcb3c01ed6f3ed6c72a7afdbe8ec12a549008c48f83207fd89c9af8caaede8",
+      "lines": 61,
+      "description": "Windows job ownership for a gated collector and all SDK descendants.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "profile_ui.py",
+      "sha256": "1e6f6f21bdc950584988448ce5312f27a6b00f468367a71bed506dd97196051c",
+      "lines": 87,
+      "description": "Repeated native GPU timing distributions and selectable per-pass timeline.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "quad.py",
+      "sha256": "8687d63ffaee822050a20d1e0ea43d159dab8b1edd10b32a1f9db814fc574da5",
+      "lines": 41,
+      "description": "Export an isolated, serialized quad diagnostic, with explicit measurement scope.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "quad_counter.py",
+      "sha256": "e4e17d5601a1f7d1f8362814b0c2adffae51e075e30f5cfa9e9f63639f16e0a2",
+      "lines": 294,
+      "description": "Independent real-frame integration of the recovered legacy quad counter.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "quad_depth.py",
+      "sha256": "2c0cb6880d5b6979939bfa7cbd77a5ef40e66a73cca856bb2325b6eb448eaf89",
+      "lines": 71,
+      "description": "Research single-event depth preparation using recovered phase-zero bindings.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "quad_post_transform.py",
+      "sha256": "b5e4b03a8ef2e35dfb30b14478f2f72b997b46c5c47f1fc035271f69b42b2cf6",
+      "lines": 84,
+      "description": "Serialize actual final primitives while retaining rasterizer system outputs.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "quad_serial.py",
+      "sha256": "ad43cae619757c69bbc74e509341e69e6b0d6ce4a82f1aff5841feffbb8bab16",
+      "lines": 161,
+      "description": "Serialized primitive diagnostic preserving measured native IA/VS semantics.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "quad_targets.py",
+      "sha256": "46005daa9f516c44b1954dc902c44976409982aaa9f148820ec41dc8680dae86",
+      "lines": 88,
+      "description": "Native output extent and layer selection around the recovered quad program.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "quad_ui.py",
+      "sha256": "f2ce349c5cfda903c3128c887035497b8fa0a5ef0551424dc9a25856994945fa",
+      "lines": 111,
+      "description": "Quad diagnostic view: explicit depth strategy, uint32 cell values and export.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "query_history.py",
+      "sha256": "2b7549b05b4ea195472a70d724b1ccb46a56db3235ad9fa551f627877018f1b7",
+      "lines": 119,
+      "description": "Interpret captured GetData bytes using explicit same-ID query metadata.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "rasterizer_edits.py",
+      "sha256": "d0903527e882ede30d00c3ec157ec3ad8b978f9129e8c6a4e659799c3eca3894",
+      "lines": 157,
+      "description": "Per-draw base D3D11 rasterizer, viewport and scissor experiments.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "rasterizer_extensions.py",
+      "sha256": "62a52c4543046d89fff4868af6ba877e5d91c63afc54eade3bb75772723858b1",
+      "lines": 105,
+      "description": "GPA rasterizer resource versions and native D3D11.1/11.3 extensions.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "rasterizer_ui.py",
+      "sha256": "a392f7145ab54b26f23010fcac98c66671308b519254417aa921eee6126be4cd",
+      "lines": 102,
+      "description": "Inspectable JSON editors for per-draw pipeline state.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "rdc_analyze.py",
+      "sha256": "cd49003d25e07597adb1e2fe58cae64d59e60c6b44a02614a7a55f9d795b1cc8",
+      "lines": 52,
+      "description": "Headless advanced analysis of an independently generated RDC capture.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "rdc_capture.py",
+      "sha256": "6362dc73be5e99beef233a3eada11e39a4a3249aff928426e24d1e03a1c4d4e2",
+      "lines": 57,
+      "description": "Optional recapture through RenderDoc's public application API.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "rdc_cpu_history.py",
+      "sha256": "4fd348d0f0d2687ab77a8cb3e68c43bb31daa5507e5acefee1cbed36af1d0a56",
+      "lines": 91,
+      "description": "CPU texture-write snapshots from exact RenderDoc API events (Python 3.6).",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "rdc_events.py",
+      "sha256": "66dcefebe234f6b56370ee1b6933a673aa2d43a3b18e5a9d4b49ff90abbef9f0",
+      "lines": 59,
+      "description": "Recover exact GPA command provenance from independent RDC annotations.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "rdc_jobs.py",
+      "sha256": "2cb2efff52b75b4d657a0672d472b73fe331450bddf097efd28c77d9313aa3a3",
+      "lines": 29,
+      "description": "Prepare one direct RenderDoc worker; shared by CLI and native desktop.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "rdc_worker.py",
+      "sha256": "753c20e4cb00f20ce8b8b14259df288c9e01f8624f85f7919e57a610675ebc71",
+      "lines": 218,
+      "description": "Public RenderDoc Python API adapter; compatible with its embedded Python 3.6.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "replay.py",
+      "sha256": "4560b5121684f02fbe6a700d43f14b65d7d1e2860ab8b9190bacbbf8c4f1b000",
+      "lines": 188,
+      "description": "Independent IGPA v3 DX11 replay: no GPA DLL or preprocessing dependency.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "replay_pipeline.py",
+      "sha256": "601a7942147a76857a54cefb59449b09c149ec332fd66948b6c554c36b9f5041",
+      "lines": 165,
+      "description": "Native getters at experimental replay boundaries, including scoped clones.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "resource_names.py",
+      "sha256": "913c57b2904a348e682c0e1f8d5909b98c180e4fd42bed2fb0e4d8558b798d61",
+      "lines": 60,
+      "description": "Captured object names from GenPrivateData (9/0x103); no GPA runtime calls.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "resources.py",
+      "sha256": "6939c4cd4da11f894e52ee00fc3eae03926640c9e45259c313c7fa3966faaaac",
+      "lines": 127,
+      "description": "Build native DX11 resources from recovered frame records.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "sampler_edits.py",
+      "sha256": "514d40f73395a84c9227dcbee84062f61cfe2359024beea53208bb5cf9420c8b",
+      "lines": 86,
+      "description": "Per-event six-stage sampler descriptor overrides from recovered type 0x88.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "sampler_setters.py",
+      "sha256": "ad220e98c66b5a717db7730fddb7eab7fa092b830da47eb98f173aff5b34e85b",
+      "lines": 68,
+      "description": "Sampler ranges and original prefix observations for displaced bindings.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "sampler_ui.py",
+      "sha256": "9f6226f019abd875cf2bbfaa363d6e90e516abc0a99b615fdcbcd94d76e30cb4",
+      "lines": 52,
+      "description": "Six-stage per-event sampler descriptor editor.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "session.py",
+      "sha256": "381ddf760646e6e629efbe2e6dd7afe418b95a00855012a18334bcc9d9b10dca",
+      "lines": 425,
+      "description": "Desktop session model; immutable capture, autosaved experiment, isolated GPU jobs.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "setter_edits.py",
+      "sha256": "d73bfbe80ba9450df85530a585d1f3419c0b8528efe949ec47f25e661a9c4db0",
+      "lines": 302,
+      "description": "Persistent edits of recovered IA/RS/OM state-setting command arguments.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "shader_lines.py",
+      "sha256": "8a8cc02a8c107bf4ad6a020abbedf87c6bd1f9e93c5f1a40548d2691fb6f2ec3",
+      "lines": 136,
+      "description": "Embedded SPDB C13 source lines bound to exact original DXBC byte offsets.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "shader_profile_navigation.py",
+      "sha256": "1916ec2f242396d93ed0601e490b0792e1572f40721c506c843ec484b1725985",
+      "lines": 179,
+      "description": "Immutable per-dispatch source/ISA navigation without source-line cost attribution.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "shader_profile_ui.py",
+      "sha256": "ee223115b825ed0c0a5ad2a0bc31c06bc15d625744be437377ba61985a5b89b8",
+      "lines": 238,
+      "description": "Optional, separately installed GTPin measurements for a frozen experiment.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "shader_project.py",
+      "sha256": "96d4e93219896a76c6494e784266b3007f6488a0c2b243c04fce5b2a5d7cbf0d",
+      "lines": 146,
+      "description": "Self-contained HLSL projects and memory-only D3DInclude compilation.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "shader_project_ui.py",
+      "sha256": "4c04cb0bb67cf5bf7a4e244e01e831395cb621824479cf2c2ea6b0d4a601acba",
+      "lines": 82,
+      "description": "Editable multi-file HLSL project window with isolated compilation.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "shader_sdbg.py",
+      "sha256": "a011137c7bc22fdc25767d24843e3ad2bf0b60e7a5b6d54ac0463df6a29d1616",
+      "lines": 89,
+      "description": "Bounded D3D10_SHADER_DEBUG_INFO/SDBG reader (Windows SDK d3d10_1shader.h).",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "shader_sources.py",
+      "sha256": "ddd4884332149d8c536f66445e61d87dcc19c79429ae93bbc95881d89a135890",
+      "lines": 148,
+      "description": "Bounded, read-only SPDB/SDBG source extraction. No external file lookup.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "shader_sources_ui.py",
+      "sha256": "0a63d66c0d0123e1b641471a7e8c40f86126cc32a52a88b90f832e8d1e0fd224",
+      "lines": 56,
+      "description": "Browse captured source files separately from editable reconstructed programs.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "shaders.py",
+      "sha256": "9081675c414924a65d31ed805d713d0cfdeddaaa179c91c3668e27a77882a894",
+      "lines": 269,
+      "description": "DXBC inspection and system D3DCompiler integration. No GPA components.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "so_counts.py",
+      "sha256": "94926fc4a095e14ea8c0585903b05a52b3b1f3ac5cbc39d3a133b99848ac1a04",
+      "lines": 116,
+      "description": "DrawAuto counts from actual per-stream SO query results when history is known.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "so_private.py",
+      "sha256": "5ef72ade3fd538f5edb3be5b91d31bc4efd2a1574ec7f4678b9c409478bff287",
+      "lines": 42,
+      "description": "Private full-pipeline SO targets with measured in-frame byte cursors.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "so_setters.py",
+      "sha256": "c17798d85f343782d531f8794ad9b87eb94332bf187e0924b87a3d138b0d0c83",
+      "lines": 36,
+      "description": "Editable recovered SOSetTargets arguments, including optional offsets.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "source_debug.py",
+      "sha256": "6efbb140250a98fde77a610e9210dac10505259fdaf4b74baf27599933b4ec54",
+      "lines": 131,
+      "description": "Source navigation over a recorded invocation; never infer missing line data.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "source_variables.py",
+      "sha256": "29cdbd41e0653747bd9c4ba75bbc7132b9d46bcf972856f3724f4169881cfba0",
+      "lines": 108,
+      "description": "Resolve public RenderDoc source mappings against the current recorded state.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "srv_edits.py",
+      "sha256": "2dadcd10d22d3bf00778b9de3701914b94f40bbc1668d41959099db1818379c5",
+      "lines": 99,
+      "description": "Per-event SRV descriptor experiments over the captured resource, in six stages.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "srv_setters.py",
+      "sha256": "096710f178b98ecc14671db642ca702f5abce50b7f60a16b612afe2835fe606c",
+      "lines": 169,
+      "description": "Six-stage SRV edits, subresource hazards and captured binding gaps.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "srv_ui.py",
+      "sha256": "d2397d4ad43771d5ff47308f4e827ccda154fec7a657d2a1a4577aa711c3bce9",
+      "lines": 57,
+      "description": "Six-stage shader-resource view descriptor editor.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "state.py",
+      "sha256": "b37c52b78a9d1d527f04e9fae6f48768e50051c941df837ecc1705077294431a",
+      "lines": 44,
+      "description": "Fixed-size StateBlockD3D11 deserializer, recovered from player RVA b6be0.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "statistics_ui.py",
+      "sha256": "c4c94f5d4e66acf9c8120eb1a375032068475dbee810901f0fa98f51f6b48ebd",
+      "lines": 79,
+      "description": "Single-event, command-range and full-frame native statistics.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "stream_output.py",
+      "sha256": "6bad1be7e20e554dc08c96ba45a5cd30b8f6f4d706f7211834bc4f2efa5dc773",
+      "lines": 170,
+      "description": "Recovered GS stream-output declarations, bindings and DrawAuto counts.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "texture_edits.py",
+      "sha256": "085b8cc7e3169fa099d9d8afd3d55a149ac38dca89a527c43e654416334d1a74",
+      "lines": 69,
+      "description": "Output texture bindings and persistent event-time subresource patches.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "texture_readback.py",
+      "sha256": "587484a0e9dba3d1401ed03ecbdee634aad0c16750cd2ce85a7b49193a15983f",
+      "lines": 29,
+      "description": "Lossless tight storage readback for non-multisampled D3D11 textures.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "uav_counters.py",
+      "sha256": "6eb61959eb0713398a9d071edc3f3f0f296e4bdd5c724fb84417249466577f87",
+      "lines": 79,
+      "description": "Per-view Append/Consume/Counter state, independent of buffer storage.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "update_sources.py",
+      "sha256": "7e4325f7cca55dd6034fbd37b4a75f1dd1d5f2f168ce860731f8fa7506dc3fa9",
+      "lines": 38,
+      "description": "Explicit tightly packed UpdateSubresource source assets, separate from GenData.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "verify.py",
+      "sha256": "e6c3d8132b51d6a9cd7ada8124bcbcf6fa7e93ee1fee0b300b4c3dcc1e8a598c",
+      "lines": 78,
+      "description": "Acceptance checks for known captures, including an isolated source copy.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "vertex_identity.py",
+      "sha256": "ea0c6476d91a95fa3ab23c342b49e351f5b5b9887153426c425d0f09d37bf48b",
+      "lines": 70,
+      "description": "Associate native assembled VS outputs with original IA fetch identities.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "vertex_writes.py",
+      "sha256": "cfd9a35d5a8e8669d5893cf0c48fe10594f8d017b4a450667326dd2c010a48c8",
+      "lines": 166,
+      "description": "Read VS/DS writes or GS emissions with the original downstream pipeline.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "view_edits.py",
+      "sha256": "1bfb7a73be0d2a215a80d98e695e3ccf741613a6f236b6d514fa71579f523074",
+      "lines": 88,
+      "description": "Resource-wide view experiments with a separate, immutable-capture replay overlay.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "view_ui.py",
+      "sha256": "a1418751ba0184e66584da285e9ae3394a3393b8772ea688b9b8b2b278149854",
+      "lines": 53,
+      "description": "Resource-wide SRV/RTV/DSV/UAV descriptor editor, separate from capture inspection.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    },
+    {
+      "module": "widgets.py",
+      "sha256": "4d1253ec79e28991d6a4d2d6da2b3e4b97b2160b9ba667d9369e2eb04faded32",
+      "lines": 152,
+      "description": "Native Tk image and mesh inspection widgets, without extra imaging libraries.",
+      "status": "pending",
+      "native": [],
+      "validation": []
+    }
+  ]
+}
