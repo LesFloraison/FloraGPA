@@ -55,6 +55,12 @@ class Replay {
     std::array<std::map<uint32_t, Range>, 6> ranges_;
     Id lastTarget_ = 0;
     uint32_t uavLimit_ = 8;
+    bool replayComplete_ = false;
+    Id layoutGap_ = 0, outputGap_ = 0;
+    std::array<std::array<Id, 128>, 6> srvGaps_{};
+    void clearBindingGaps();
+    void requireResolvedBindings() const;
+    bool inputBindings(const Entry &entry, Bytes payload);
     void immediate(Id id) const;
     void bind(const State &state, bool compute);
     void command(const Entry &entry);
@@ -85,6 +91,10 @@ class Replay {
     std::vector<uint8_t> readBuffer(Id id);
     uint32_t readCounter(Id view);
     void inspectEventInputs(Id event, const std::function<void()> &inspect);
+    // Borrowed native objects, valid only during the callback. The observer must not mutate state.
+    using NativeStateObserver =
+        std::function<void(ID3D11DeviceContext *, const std::map<Id, Com<IUnknown>> &)>;
+    void inspectNativeState(const NativeStateObserver &observe) const;
     struct ConstantRange {
         uint32_t first = 0;
         std::optional<uint32_t> count;

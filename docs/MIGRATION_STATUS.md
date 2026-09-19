@@ -13,6 +13,7 @@ GF2 与 BF1 DX11 捕获。**尚未完成原 Python 版本的全部功能迁移�
 | 主界面 | GPA 式深色三栏、真实 GPU 时间柱状图与概览、可停靠面板、API 筛选、任务取消 | 概览尚无范围拖动；未知功能页禁用 |
 | 事件 | draw/dispatch 选择、快照管线、前后边界重放、事件启停 | 实验后的完整命令级原生绑定读取仍待迁移 |
 | 捕获命令状态 | 六阶段 setter、CB1 范围、IA/RS/OM/SO/predicate 参数、扩展 UAV 槽元数据；命令前/后、逐字段来源、资源重叠失效与快照校准；Pipeline 页异步读取、筛选、跳转、JSON 导出 | 原始捕获状态，不应用实验；只读 DSV / 模糊 3D 重叠保持未知；SO 偏移是 setter 参数，隐藏 counter 和实时写入位置不由此推断 |
+| 命令间输入绑定 | 实际执行 IA layout / VB / IB、六阶段 SRV / sampler、CB / CB1；验证槽位、数组、资源类型、IA bind flags、stride 和 CB1 对齐 / 驱动支持；缺失绑定按阶段 / 槽位追踪 | 缺失资源未被后续 setter / 完整快照 / ClearState 恢复时，选定边界明确失败；setter 编辑及实验后的完整原生管线界面仍待迁移 |
 | API 检查 | 捕获字段、偏移/原始位、可选数组、引用跳转、资源/多词筛选、JSON/CSV 导出；getter、annotation、query 与 command-list 调用元数据 | 解码不代表执行；annotation 层级和 view typed-format 预览衔接尚未闭合 |
 | Context / command-list | 五种 context 接口身份、immediate/deferred 区分；缺失 context 的严格 Map READ 证据恢复；command-list 资源、owner 和 Execute/Finish 清单；Qt 字段树、证据导航、JSON 导出 | 推断不补造版本/指针/标志；保留指针与 ID 候选冲突；与 Python 相同，仅接受 immediate-context 的 Finish 空操作，未恢复列表执行 |
 | 捕获查询值 | 按同 ID、命令顺序使用 GetDesc/GetDataSize/CreateQuery/predicate 元数据；BOOL 完整值与 UINT64 低位、缺失字节、HRESULT/冲突状态 | 表示捕获时保存的内存字，不是新执行的 GPU query；原始高位缺失时保持不完整 |
@@ -27,6 +28,14 @@ GF2 与 BF1 DX11 捕获。**尚未完成原 Python 版本的全部功能迁移�
 | 性能 | 原生 D3D11 时间戳、disjoint 与 pipeline statistics | 尚未迁移原版多轮调度、Intel 硬件指标/GTPin |
 
 ## 验证证据
+
+- 命令间输入绑定：硬件与 WARP 的六阶段 native getter 对照，涵盖 SRV 127、sampler 15、
+  CB 13、VB 31、IA layout / IB、CB1 窗口与 legacy 重置、空数组和重复 replay；
+  SRV / UAV 冲突实际解绑、缺失 SRV 整组失效及同阶段局部覆盖、缺失 layout / 输出恢复。
+  加上 GF2 / BF1 的实际边界，131 组捕获与拒绝路径对照通过，77 个有效边界共
+  87,164 个字段与 Python 一致；BF1 25572 之后缺失输出绑定的拒绝行为也与原版一致。
+  KEEP-RTV 调用忽略缺失 DSV 参数，错误视图类型、非法 KEEP 和 RTV/UAV 槽位重叠明确拒绝。
+  这不代表 setter 实验、完整 native pipeline getter/UI 或任意捕获已完成迁移。
 
 - GF2：72 draw、0 dispatch、44 Map；BF1：1202 draw、73 dispatch、4151 Map。
   两者 RGBA SHA-256 均与 Python 基线相同，详见 `NATIVE_BASELINE.md`。
@@ -138,6 +147,12 @@ Context 证据为 `context-fixture/`、`context-validation-1/validation.json`、
 `out/FloraGPA-state/`，黄金帧回归为 `validation-state-package/`。
 主窗口新增交互的最终 Release 检查另存于 `state-ui-final-release.txt`；仅系统 PATH 的
 命令状态读取保存在 `state-isolated-package/`。
+输入绑定的最终证据为 `input-bindings-keep/`、`input-bindings-keep-release.txt`、
+`input-bindings-keep-debug.txt`、`input-binding-comparison-keep/validation.json`；发布包为
+`out/FloraGPA-bindings-final/`，仅系统 PATH 的黄金帧和关闭 draw 的负对照为
+`validation-bindings-final-package/`。本批 Release / Debug 各 14 项完整回归日志为
+`ctest-input-bindings-release-final.log`、`ctest-input-bindings-debug.log`；随后 KEEP 修正
+另经上述 Release / Debug 输入绑定测试、Python 对照和最终发布包重放检查。
 
 ## 尚未闭合的迁移范围
 

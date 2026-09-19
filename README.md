@@ -118,6 +118,14 @@ notes. Reads run in the background and a changed selection invalidates old resul
 This view does not apply experiments. The existing **Snapshot** tab remains available
 for draw/dispatch state blocks.
 
+Replay executes captured input-layout, vertex/index-buffer, six-stage SRV and sampler
+bindings between draw/dispatch snapshots. CB/CB1 calls validate resource flags and
+window alignment before applying native bindings. A selected boundary with missing
+captured output views, input layouts or unresolved SRV slots returns an error; later
+complete snapshots or ClearState restore binding validity. SRV replacement resolves
+only the overwritten slots in that shader stage. Setter editing and the experimental
+native pipeline-state UI are still being migrated.
+
 ```powershell
 .\out\FloraGPA\FloraGPA.Cli.exe commands D:\captures\sample.gpa_frame --out D:\results\api
 # Optional: --filter "set decoded" --resource 25733

@@ -296,7 +296,9 @@
         "src/replay/Replay.cpp"
       ],
       "validation": [
-        "docs/NATIVE_BASELINE.md"
+        "docs/NATIVE_BASELINE.md",
+        "Hardware/WARP native CB1 getter checks for all six stages, CB slot 13, legacy range reset and malformed window-pair/granularity rejection",
+        "Captured resources require constant-buffer bind flags, valid byte alignment and driver offsetting support; setter editing/prefix history remains pending"
       ]
     },
     {
@@ -586,10 +588,12 @@
       "description": "Replay recovered DX11 draw/state/resource records with an independent backend.",
       "status": "partial",
       "native": [
-        "src/replay/Replay.cpp"
+        "src/replay/Replay.cpp",
+        "src/replay/InputBindings.cpp"
       ],
       "validation": [
-        "docs/NATIVE_BASELINE.md"
+        "docs/NATIVE_BASELINE.md",
+        "Missing input-layout, SRV and output bindings reject selected unresolved boundaries; snapshots and ClearState restore validity, later SRV calls resolve only their own stage/range"
       ]
     },
     {
@@ -891,9 +895,15 @@
       "sha256": "e610ef2a73d37f07fe4e9833a0e4686d70f70b5df20ddbdc28525db8bd44cd39",
       "lines": 183,
       "description": "Input-layout, vertex and index binding edits with output-hazard history.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": [
+        "src/replay/InputBindings.cpp"
+      ],
+      "validation": [
+        "tests/InputBindingTests.cpp: hardware and WARP native getters, before/after boundaries, six stages, high slots, null/empty arrays and malformed records",
+        "tools/validate_input_bindings.py: Python native getter parity and matching rejection of invalid captured setters",
+        "Captured calls execute natively; setter experiment persistence, displaced-range prefix history and editor UI remain pending"
+      ]
     },
     {
       "module": "image.py",
@@ -1439,9 +1449,13 @@
       "sha256": "83382f91c480446f92284d72b94d0592a6506e399b16149270ed22f385db7b77",
       "lines": 95,
       "description": "Execute recovered OM/CS output bindings at their actual command boundary.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": [
+        "src/replay/Replay.cpp"
+      ],
+      "validation": [
+        "InputBindingTests: native KEEP RTV/DSV ignores absent DSV operands; reject invalid KEEP forms, RTV/UAV overlap and wrong view types; unresolved output boundaries reject until a full snapshot or ClearState"
+      ]
     },
     {
       "module": "output_setters.py",
@@ -1782,9 +1796,15 @@
       "sha256": "ad220e98c66b5a717db7730fddb7eab7fa092b830da47eb98f173aff5b34e85b",
       "lines": 68,
       "description": "Sampler ranges and original prefix observations for displaced bindings.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": [
+        "src/replay/InputBindings.cpp"
+      ],
+      "validation": [
+        "tests/InputBindingTests.cpp: hardware and WARP native getters, before/after boundaries, six stages, high slots, null/empty arrays and malformed records",
+        "tools/validate_input_bindings.py: Python native getter parity and matching rejection of invalid captured setters",
+        "Captured calls execute natively; setter experiment persistence, displaced-range prefix history and editor UI remain pending"
+      ]
     },
     {
       "module": "sampler_ui.py",
@@ -1992,9 +2012,15 @@
       "sha256": "096710f178b98ecc14671db642ca702f5abce50b7f60a16b612afe2835fe606c",
       "lines": 169,
       "description": "Six-stage SRV edits, subresource hazards and captured binding gaps.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": [
+        "src/replay/InputBindings.cpp"
+      ],
+      "validation": [
+        "tests/InputBindingTests.cpp: hardware and WARP native getters, before/after boundaries, six stages, high slots, null/empty arrays and malformed records",
+        "tools/validate_input_bindings.py: Python native getter parity and matching rejection of invalid captured setters",
+        "Captured calls execute natively; setter experiment persistence, displaced-range prefix history and editor UI remain pending"
+      ]
     },
     {
       "module": "srv_ui.py",

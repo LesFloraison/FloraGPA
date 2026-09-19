@@ -254,6 +254,7 @@ IUnknown *Replay::object(Id id) {
 #undef CREATE_SHADER
         } else if (t == 0x82) {
             auto dataId = r.read<Id>();
+            r.end();
             Reader layout(frame_.payload(dataId, 9, 0x84));
             auto n = layout.read<uint32_t>();
             if (n > 32)
@@ -530,14 +531,40 @@ void Replay::constantBuffers(const Entry &e) {
     if (ids.size() != count)
         throw std::runtime_error("Missing CB array");
     bool window = e.type >= 0x24f && e.type <= 0x254;
+    bool hasFirst = false, hasSizes = false;
     std::vector<UINT> first, sizes;
     if (window) {
-        first = optional<UINT>(r, count, 14);
-        sizes = optional<UINT>(r, count, 14);
-        if (first.size() != sizes.size())
+        hasFirst = r.flag();
+        if (hasFirst)
+            for (UINT i = 0; i < count; ++i)
+                first.push_back(r.read<UINT>());
+        hasSizes = r.flag();
+        if (hasSizes)
+            for (UINT i = 0; i < count; ++i)
+                sizes.push_back(r.read<UINT>());
+        if (hasFirst != hasSizes)
             throw std::runtime_error("CB1 window pair mismatch");
     }
     r.end();
+    for (UINT i = 0; i < count; ++i) {
+        if (ids[i]) {
+            const auto &entry = frame_.entry(ids[i]);
+            if (entry.category != 5 || entry.type != 0x83)
+                throw std::runtime_error("Constant-buffer binding requires a buffer resource");
+            const auto &desc = frame_.resource(ids[i]).desc;
+            if (desc.at(2) != D3D11_BIND_CONSTANT_BUFFER || !desc.at(0) || desc[0] % 16)
+                throw std::runtime_error("Invalid constant-buffer descriptor");
+        }
+        if (hasFirst && (first[i] % 16 || sizes[i] % 16 || sizes[i] > 4096))
+            throw std::runtime_error("CB1 windows require multiples of 16 constants and count <= 4096");
+    }
+    if (hasFirst) {
+        D3D11_FEATURE_DATA_D3D11_OPTIONS support{};
+        check(device_->CheckFeatureSupport(D3D11_FEATURE_D3D11_OPTIONS, &support, sizeof support),
+              "Query constant-buffer offsetting support");
+        if (!support.ConstantBufferOffsetting)
+            throw std::runtime_error("Driver does not support constant-buffer offsetting");
+    }
     int stage = 0;
     if (e.type >= 0x249 && e.type <= 0x254)
         stage = (e.type - 0x249) % 6;
@@ -582,6 +609,8 @@ void Replay::outputs(const Entry &e) {
     bool om = e.type == 0x34ff || e.type == 0x3500;
     if (om) {
         rtCount = r.read<UINT>();
+        if (rtCount > 8 && !(e.type == 0x3500 && rtCount == UINT_MAX))
+            throw std::runtime_error("RTV count exceeds eight");
         rtvs = optional<Id>(r, rtCount, 8);
         dsv = r.read<Id>();
         if (rtCount != UINT_MAX && rtvs.size() != rtCount)
@@ -590,6 +619,8 @@ void Replay::outputs(const Entry &e) {
     if (e.type != 0x34ff) {
         start = r.read<UINT>();
         count = r.read<UINT>();
+        if (count > 64 && !(e.type == 0x3500 && count == UINT_MAX))
+            throw std::runtime_error("UAV count exceeds 64");
         uavs = optional<Id>(r, count);
         initial = optional<UINT>(r, count);
         if (count != UINT_MAX && (start > uavLimit_ || count > uavLimit_ - start || uavs.size() != count))
@@ -604,12 +635,28 @@ void Replay::outputs(const Entry &e) {
     for (auto id : uavs)
         if (id && !frame_.entries().contains(id))
             missing = true;
-    if (dsv && !frame_.entries().contains(dsv))
+    if (rtCount != UINT_MAX && dsv && !frame_.entries().contains(dsv))
         missing = true;
     if (missing) {
         counts["unresolved_output_setters"]++;
+        outputGap_ = e.id;
         return;
     }
+    if (e.type == 0x3500 && rtCount != UINT_MAX && count != UINT_MAX && start < rtCount)
+        throw std::runtime_error("OM UAV slots overlap RTV bind points");
+    auto viewType = [&](Id id, uint16_t expected) {
+        if (id) {
+            const auto &entry = frame_.entry(id);
+            if (entry.category != 5 || entry.type != expected)
+                throw std::runtime_error("Output binding view has the wrong resource type");
+        }
+    };
+    for (auto id : rtvs)
+        viewType(id, 0x8d);
+    for (auto id : uavs)
+        viewType(id, 0x8f);
+    if (rtCount != UINT_MAX)
+        viewType(dsv, 0x8e);
     std::vector<ID3D11RenderTargetView *> rt;
     for (auto id : rtvs)
         rt.push_back(get<ID3D11RenderTargetView>(id));
@@ -697,6 +744,7 @@ void Replay::command(const Entry &e) {
         auto state = frame_.state(event.state);
         withEventEdits(event, state, [&] {
             bind(state, t == 0x35 || t == 0x36);
+            clearBindingGaps();
             if ((options_.before && e.id == options_.until) || options_.disabled.contains(e.id) ||
                 (options_.suppressDraws && t != 0x35 && t != 0x36))
                 return false;
@@ -748,6 +796,10 @@ void Replay::command(const Entry &e) {
         validateWritableCommand(frame_, e.id);
     if (options_.disabled.contains(e.id))
         return;
+    if (inputBindings(e, payload)) {
+        counts["state_or_auxiliary_records"]++;
+        return;
+    }
     if ((t >= 0x249 && t <= 0x254) || t == 0x34e5 || t == 0x34ee || t == 0x34f4 || t == 0x351c ||
         t == 0x3520 || t == 0x3525) {
         constantBuffers(e);
@@ -843,6 +895,7 @@ void Replay::command(const Entry &e) {
         owner.skip(8);
         immediate(owner.read<Id>());
         context_->ClearState();
+        clearBindingGaps();
         for (auto &ranges : ranges_)
             ranges.clear();
     } else if (t == 0x244) {
@@ -853,10 +906,9 @@ void Replay::command(const Entry &e) {
         context_->Flush();
     } else {
         static const std::set<uint16_t> auxiliary{
-            0x3012, 0x3013, 0x3014, 0x3017, 0x3019, 0x302e, 0x3146, 0x324f, 0x3250, 0x3251, 0x3256, 0x3257,
-            0x3261, 0x3575, 0x3576, 0x3577, 0x3578, 0x3597, 0x34e6, 0x34e7, 0x34e8, 0x34e9, 0x34ec, 0x34ed,
-            0x34ef, 0x34f0, 0x34f1, 0x34f5, 0x34f6, 0x34f7, 0x34f8, 0x34fb, 0x3501, 0x3502, 0x3509, 0x350a,
-            0x3519, 0x351a, 0x351b, 0x351d, 0x351e, 0x351f, 0x3521, 0x3523, 0x3524};
+            0x3012, 0x3013, 0x3014, 0x3017, 0x3019, 0x302e, 0x3146, 0x324f, 0x3250, 0x3251, 0x3256,
+            0x3257, 0x3261, 0x3575, 0x3576, 0x3577, 0x3578, 0x3597, 0x34e7, 0x34e9, 0x34ec, 0x34ed,
+            0x34f5, 0x34f6, 0x34fb, 0x3501, 0x3502, 0x3509, 0x350a, 0x351a, 0x351e, 0x3523};
         if (!auxiliary.contains(t))
             throw std::runtime_error("Command migration pending: " + commandName(t));
         counts["state_or_auxiliary_records"]++;
@@ -865,9 +917,11 @@ void Replay::command(const Entry &e) {
     counts[commandName(t)]++;
 }
 void Replay::run(const std::function<void(Id, size_t, size_t)> &progress) {
+    replayComplete_ = false;
     if (options_.until && frame_.entry(options_.until).category != 7)
         throw std::runtime_error("Stop event is not an API command");
     context_->ClearState();
+    clearBindingGaps();
     objects_.clear();
     usedSrvs_.clear();
     counts.clear();
@@ -908,6 +962,8 @@ void Replay::run(const std::function<void(Id, size_t, size_t)> &progress) {
         context_->End(stats.Get());
         context_->End(disjoint.Get());
     }
+    if (options_.until)
+        requireResolvedBindings();
     context_->Flush();
     check(device_->GetDeviceRemovedReason(), "Replay device status");
     if (options_.timings) {
@@ -949,6 +1005,7 @@ void Replay::run(const std::function<void(Id, size_t, size_t)> &progress) {
                     std::cerr << msg->pDescription << '\n';
             }
     }
+    replayComplete_ = true;
 }
 Image Replay::output(Id texture, UINT sub) {
     if (!texture && (!options_.until || !lastTarget_)) {
