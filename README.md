@@ -85,6 +85,11 @@ field and use **Edit Value**. Changes preserve padding and untouched scalar bits
 and undo as one operation. Per-component tooltips show byte offsets and raw bits;
 `bits:HEX` accepts an exact scalar bit pattern. Stripped shaders without reflected
 variable names leave the field list empty, as in the reference implementation.
+The Buffer **UAV Counters** tab reads Append/Consume and Counter values per view.
+Use **Edit Counter** at **Before event** to change the selected draw/dispatch or
+the frame's initial counter value. Captured resets still override initial values.
+Edits support the full uint32 range, project save/load and undo/redo; previewing
+an event restores its prior counter, while a submitted event retains its changes.
 
 See [migration status](docs/MIGRATION_STATUS.md) for implemented features and
 the remaining parity gaps. This build is not the completed migration.
@@ -108,3 +113,9 @@ directory as `--fixture` to `tools/validate_constants.py`, together with the sam
 `--reference`, `--exe`, `--captures`, `--qt-bin` and a new `--out` directory.
 
 Run GPU checks serially and use a new output directory each time.
+
+For UAV counter comparisons, run `FloraUavCounterTests` with
+`FLORA_COUNTER_EVIDENCE_DIR` pointing to a new artifact directory, then pass it
+as `--fixture` to `tools/validate_uav_counters.py` with the same reference/executable
+arguments above. Parallel Append payloads in the BF1 case are compared as element
+multisets, with exact counter values and exact bytes outside the appended range.

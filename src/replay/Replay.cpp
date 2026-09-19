@@ -171,6 +171,9 @@ IUnknown *Replay::object(Id id) {
                 auto desc = descriptor<D3D11_UNORDERED_ACCESS_VIEW_DESC>(raw);
                 Com<ID3D11UnorderedAccessView> obj;
                 check(device_->CreateUnorderedAccessView(source, &desc, &obj), "CreateUAV");
+                if (auto initial = options_.initialUavCounters.find(id);
+                    initial != options_.initialUavCounters.end())
+                    writeCounter(obj.Get(), initial->second);
                 result = obj;
             }
         } else if (t >= 0x90 && t <= 0x95) {
@@ -692,7 +695,7 @@ void Replay::command(const Entry &e) {
         auto event = frame_.event(e.id);
         immediate(event.context);
         auto state = frame_.state(event.state);
-        withBufferEdits(event, state, [&] {
+        withEventEdits(event, state, [&] {
             bind(state, t == 0x35 || t == 0x36);
             if ((options_.before && e.id == options_.until) || options_.disabled.contains(e.id) ||
                 (options_.suppressDraws && t != 0x35 && t != 0x36))

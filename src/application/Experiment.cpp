@@ -2,6 +2,7 @@
 #include "CommandEdits.h"
 #include "ShaderInspector.h"
 #include "core/BufferBindings.h"
+#include "core/UavCounters.h"
 #include <QFile>
 #include <QSaveFile>
 
@@ -70,6 +71,8 @@ void Experiment::apply(const Frame &frame, ReplayOptions &options) const {
     options.commandPayloads.clear();
     options.updateSources.clear();
     options.buffers.clear();
+    options.initialUavCounters.clear();
+    options.uavCounters.clear();
     for (size_t i = 0; i < revision(); ++i) {
         auto &operations = project_.at("history").at(i).at("operations");
         if (!operations.is_array())
@@ -107,6 +110,18 @@ void Experiment::apply(const Frame &frame, ReplayOptions &options) const {
                 auto bytes = asset(op.at("asset"));
                 validateBufferPatch(frame, event, resource, offset, bytes.size());
                 options.buffers[event][resource].push_back({offset, std::move(bytes)});
+            } else if (kind == "uav_counter" || kind == "initial_uav_counter") {
+                auto view = identifier(op.at("view")), value = identifier(op.at("value"));
+                if (value > UINT32_MAX)
+                    throw std::runtime_error("UAV counter must be a uint32 integer");
+                std::optional<Id> event;
+                if (kind == "uav_counter")
+                    event = identifier(op.at("event"));
+                validateCounterEdit(frame, view, event);
+                if (event)
+                    options.uavCounters[*event][view] = uint32_t(value);
+                else
+                    options.initialUavCounters[view] = uint32_t(value);
             } else if (kind == "shader") {
                 auto id = identifier(op.at("resource"));
                 auto r = frame.resource(id);
@@ -232,6 +247,29 @@ void Experiment::setBufferPatches(const Frame &frame, Id event, Id resource,
     history.erase(history.begin() + ptrdiff_t(revision()), history.end());
     history.push_back({{"label", label}, {"operations", std::move(operations)}});
     project_["cursor"] = history.size();
+}
+std::optional<uint32_t> Experiment::initialUavCounter(Id view) const {
+    for (size_t i = revision(); i > 0; --i)
+        for (auto it = project_["history"][i - 1]["operations"].rbegin();
+             it != project_["history"][i - 1]["operations"].rend(); ++it)
+            if (it->at("kind") == "initial_uav_counter" && identifier(it->at("view")) == view)
+                return uint32_t(identifier(it->at("value")));
+    return {};
+}
+bool Experiment::setUavCounter(const Frame &frame, Id view, uint32_t value, std::optional<Id> event) {
+    validateCounterEdit(frame, view, event);
+    if (!event && initialUavCounter(view) == value)
+        return false;
+    Json op{{"kind", event ? "uav_counter" : "initial_uav_counter"}, {"view", view}, {"value", value}};
+    if (event)
+        op["event"] = *event;
+    auto &history = project_["history"];
+    history.erase(history.begin() + ptrdiff_t(revision()), history.end());
+    history.push_back(
+        {{"label", std::string(event ? "UAV counter " : "Initial UAV counter ") + std::to_string(view)},
+         {"operations", Json::array({op})}});
+    project_["cursor"] = history.size();
+    return true;
 }
 bool Experiment::canRedo() const { return revision() < project_["history"].size(); }
 bool Experiment::undo() {

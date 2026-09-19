@@ -147,7 +147,7 @@ MainWindow::MainWindow() {
             geometryDir_.reset();
             bufferModel_->setBytes({});
             bufferLabel_->clear();
-            constants_->clear();
+            clearBufferDetails();
             displayedBuffer_ = 0;
             report_ = {};
             image_->setImage({});
@@ -574,12 +574,33 @@ void MainWindow::buildUi() {
     constantLayout->addWidget(constantBar);
     constantLayout->addWidget(constants_);
     bufferTabs->addTab(constantPane, "Constants");
+    auto counterPane = new QWidget;
+    auto counterLayout = new QVBoxLayout(counterPane);
+    counterLayout->setContentsMargins(0, 0, 0, 0);
+    counterLayout->setSpacing(0);
+    auto counterBar = new QToolBar;
+    counterEditAction_ = counterBar->addAction("Edit Counter…", this, &MainWindow::editCounter);
+    counterEditAction_->setObjectName("editCounter");
+    counterEditAction_->setEnabled(false);
+    counterEditAction_->setToolTip("Read Before event, then select a UAV counter to edit.");
+    counters_ = tree({"View", "Kind", "Bindings", "Value", "Elements", "Stride"});
+    counters_->setObjectName("uavCounters");
+    counters_->setRootIsDecorated(false);
+    counters_->setColumnWidth(0, 80);
+    counters_->setColumnWidth(1, 140);
+    counters_->setColumnWidth(2, 160);
+    counters_->setColumnWidth(3, 120);
+    counterLayout->addWidget(counterBar);
+    counterLayout->addWidget(counters_);
+    bufferTabs->addTab(counterPane, "UAV Counters");
+    connect(counters_, &QTreeWidget::itemSelectionChanged, this, &MainWindow::updateExperimentActions);
+    connect(counters_, &QTreeWidget::itemDoubleClicked, this, [this] { editCounter(); });
     bufferLayout->addWidget(bufferTabs);
     connect(constants_, &QTreeWidget::itemSelectionChanged, this, &MainWindow::updateExperimentActions);
     connect(constants_, &QTreeWidget::itemDoubleClicked, this, [this] { editConstant(); });
     centerTabs_->addTab(bufferPane_, "Buffer");
     connect(bufferBoundary_, &QComboBox::currentIndexChanged, this, [this] {
-        constants_->clear();
+        clearBufferDetails();
         bufferTimer_.start();
     });
     connect(bufferMode_, &QComboBox::currentIndexChanged, this, [this](int mode) {
@@ -729,6 +750,7 @@ void MainWindow::setBusy(bool busy) {
     if (busy) {
         progress_->setRange(0, 0);
         constantEditAction_->setEnabled(false);
+        counterEditAction_->setEnabled(false);
     } else
         progress_->setValue(0);
     exportAction_->setEnabled(!image_->image().isNull());
@@ -893,7 +915,7 @@ void MainWindow::finishWorker(int code, QProcess::ExitStatus status) {
                 throw std::runtime_error("Buffer output is missing");
             bufferModel_->setBytes(bufferFile.readAll(), uint64_t(report_["offset"].toInteger()));
             displayedBuffer_ = report_["resource"].toString().toULongLong();
-            showConstants(report_);
+            showBufferDetails(report_);
             bufferLabel_->setText(QString("  B:%1 · %2 bytes · %3")
                                       .arg(displayedBuffer_)
                                       .arg(report_["length"].toInteger())
@@ -969,7 +991,7 @@ void MainWindow::selectEvent(Id id) {
         return;
     selectedEvent_ = id;
     selectedResource_ = 0;
-    constants_->clear();
+    clearBufferDetails();
     updateExperimentActions();
     ++revision_;
     chart_->setSelection(id);
@@ -1095,7 +1117,7 @@ void MainWindow::inspectResource(Id id) {
         if (e.category != 5)
             return;
         if (selectedResource_ != id) {
-            constants_->clear();
+            clearBufferDetails();
             ++revision_;
             if (process_.state() != QProcess::NotRunning)
                 cancel();
@@ -1174,6 +1196,7 @@ void MainWindow::inspectResource(Id id) {
             bufferModel_->setBytes({});
             displayedBuffer_ = 0;
             centerTabs_->setCurrentWidget(bufferPane_);
+            replayTimer_.stop();
             if (resource.data || bufferBoundary_->currentIndex() != 0) {
                 bufferLabel_->clear();
                 bufferTimer_.start();
@@ -1340,7 +1363,7 @@ void MainWindow::previewBuffer() {
     }
     ++revision_;
     bufferModel_->setBytes({});
-    constants_->clear();
+    clearBufferDetails();
     displayedBuffer_ = 0;
     bufferLabel_->clear();
     startWorker(args, false);
@@ -1381,9 +1404,16 @@ void MainWindow::updateExperimentActions() {
         const auto item = constants_->currentItem();
         const auto field = item ? item->data(0, Qt::UserRole).toJsonObject() : QJsonObject();
         constantEditAction_->setEnabled(
-            bufferEditable && !busy() && constantsRevision_ == revision_ &&
-            constantsEvent_ == selectedEvent_ && constantsResource_ == selectedResource_ &&
+            bufferEditable && !busy() && bufferDetailsRevision_ == revision_ &&
+            bufferDetailsEvent_ == selectedEvent_ && bufferDetailsResource_ == selectedResource_ &&
             bufferBoundary_->currentIndex() == 1 && field["status"].toString() == "ready");
+    }
+    if (counterEditAction_) {
+        const auto item = counters_->currentItem();
+        counterEditAction_->setEnabled(
+            experiment_ && !busy() && item && bufferDetailsRevision_ == revision_ &&
+            bufferDetailsEvent_ == selectedEvent_ && bufferDetailsEvent_ &&
+            bufferDetailsResource_ == selectedResource_ && bufferBoundary_->currentIndex() == 1);
     }
     enableAction_->setText(
         editable && experiment_ && !experiment_->enabled(selectedEvent_) ? "Enable Event" : "Disable Event");
@@ -1392,7 +1422,7 @@ void MainWindow::experimentChanged() {
     projectDirty_ = true;
     setWindowModified(true);
     ++revision_;
-    constants_->clear();
+    clearBufferDetails();
     chart_->clear();
     metrics_->clear();
     updateExperimentActions();
@@ -1417,12 +1447,20 @@ void MainWindow::experimentChanged() {
     }
     replayTimer_.start();
 }
-void MainWindow::showConstants(const QJsonObject &report) {
+void MainWindow::clearBufferDetails() {
+    bufferDetailsEvent_ = bufferDetailsResource_ = 0;
+    bufferDetailsRevision_ = 0;
     constants_->clear();
-    constantsRevision_ = revision_;
-    constantsEvent_ =
+    counters_->clear();
+    constantEditAction_->setEnabled(false);
+    counterEditAction_->setEnabled(false);
+}
+void MainWindow::showBufferDetails(const QJsonObject &report) {
+    clearBufferDetails();
+    bufferDetailsRevision_ = revision_;
+    bufferDetailsEvent_ =
         report["value_time"].toString() == "before_event" ? report["event"].toString().toULongLong() : 0;
-    constantsResource_ = report["resource"].toString().toULongLong();
+    bufferDetailsResource_ = report["resource"].toString().toULongLong();
     for (const auto &entry : report["constant_bindings"].toArray()) {
         const auto binding = entry.toObject();
         auto title =
@@ -1460,7 +1498,96 @@ void MainWindow::showConstants(const QJsonObject &report) {
         }
         group->setExpanded(true);
     }
+    for (const auto &entry : report["uav_counters"].toArray()) {
+        const auto counter = entry.toObject();
+        QStringList bindings;
+        for (const auto &bound : counter["bindings"].toArray()) {
+            auto binding = bound.toObject();
+            bindings
+                << QString("%1 u%2").arg(binding["stage"].toString().toUpper()).arg(binding["slot"].toInt());
+        }
+        auto item = new QTreeWidgetItem(
+            counters_, {QString::number(counter["view"].toInteger()),
+                        counter["kind"].toString() == "append_consume" ? "Append / Consume" : "Counter",
+                        bindings.isEmpty() ? "Command reference" : bindings.join(", "),
+                        QString::number(counter["value"].toInteger()),
+                        QString::number(counter["num_elements"].toInteger()),
+                        QString::number(counter["stride"].toInteger())});
+        item->setData(0, Qt::UserRole, counter);
+        item->setToolTip(4, QString("First element %1").arg(counter["first_element"].toInteger()));
+        QStringList references;
+        for (const auto &field : counter["reference_fields"].toArray())
+            references << field.toString();
+        item->setToolTip(2, references.join(", "));
+    }
     updateExperimentActions();
+}
+void MainWindow::editCounter() {
+    updateExperimentActions();
+    if (!counterEditAction_->isEnabled())
+        return;
+    const auto counter = counters_->currentItem()->data(0, Qt::UserRole).toJsonObject();
+    const auto view = Id(counter["view"].toInteger()), event = bufferDetailsEvent_,
+               resource = bufferDetailsResource_;
+    const auto revision = revision_;
+    QDialog dialog(this);
+    dialog.setObjectName("counterDialog");
+    dialog.setWindowTitle(QString("UAV Counter — %1").arg(view));
+    dialog.setMinimumWidth(370);
+    auto form = new QFormLayout(&dialog);
+    form->addRow("Buffer", new QLabel(QString::number(resource)));
+    auto scope = new QComboBox;
+    scope->setObjectName("counterScope");
+    const bool eventEditable = isDraw(frame_->entry(event).type) && !counter["bindings"].toArray().isEmpty();
+    if (eventEditable)
+        scope->addItem("Before event", false);
+    scope->addItem("Frame initial", true);
+    scope->setToolTip(
+        "Frame initial applies when the view is created. Captured resets still take precedence.");
+    form->addRow("Scope", scope);
+    auto value = new QLineEdit(QString::number(counter["value"].toInteger()));
+    value->setObjectName("counterValue");
+    value->setToolTip("Unsigned 32-bit counter (decimal or 0x hex)");
+    form->addRow("Value", value);
+    connect(scope, &QComboBox::currentIndexChanged, &dialog, [&] {
+        auto seed = experiment_->initialUavCounter(view);
+        value->setText(
+            QString::number(scope->currentData().toBool() && seed ? *seed : counter["value"].toInteger()));
+    });
+    auto error = new QLabel;
+    error->setWordWrap(true);
+    error->hide();
+    form->addRow(error);
+    auto buttons = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+    buttons->button(QDialogButtonBox::Ok)->setText("Apply");
+    form->addRow(buttons);
+    connect(buttons, &QDialogButtonBox::rejected, &dialog, &QDialog::reject);
+    bool changed = false;
+    connect(buttons, &QDialogButtonBox::accepted, &dialog, [&] {
+        try {
+            if (revision != revision_ || event != selectedEvent_ || resource != selectedResource_ || busy())
+                throw std::runtime_error("Read Before event again before editing");
+            const auto text = value->text().trimmed();
+            bool valid = false;
+            const auto number = text.toULongLong(&valid, 0);
+            if (!valid || text.startsWith('-') || number > UINT32_MAX)
+                throw std::runtime_error("Enter an unsigned 32-bit counter");
+            const auto initial = scope->currentData().toBool();
+            if (initial || number != uint64_t(counter["value"].toInteger()))
+                changed = experiment_->setUavCounter(*frame_, view, uint32_t(number),
+                                                     initial ? std::nullopt : std::optional<Id>(event));
+            dialog.accept();
+        } catch (const std::exception &e) {
+            error->setText(QString::fromUtf8(e.what()));
+            error->show();
+        }
+    });
+    if (dialog.exec() == QDialog::Accepted) {
+        if (changed)
+            experimentChanged();
+        else
+            statusBar()->showMessage("Counter unchanged", 2500);
+    }
 }
 void MainWindow::editConstant() {
     updateExperimentActions();
@@ -1473,7 +1600,7 @@ void MainWindow::editConstant() {
                 .toStdString());
         field["value"] = constantValue(field);
         const auto revision = revision_;
-        const auto event = constantsEvent_, resource = constantsResource_;
+        const auto event = bufferDetailsEvent_, resource = bufferDetailsResource_;
         const unsigned cls = field.at("class_id"), rows = field.at("rows"), cols = field.at("columns");
         QDialog dialog(this);
         dialog.setObjectName("constantDialog");

@@ -25,6 +25,8 @@ struct ReplayOptions {
     std::map<Id, std::vector<uint8_t>> shaders, textures;
     std::map<Id, std::vector<uint8_t>> commandPayloads, updateSources;
     std::map<Id, std::map<Id, std::vector<BufferPatch>>> buffers;
+    std::map<Id, uint32_t> initialUavCounters;
+    std::map<Id, std::map<Id, uint32_t>> uavCounters;
 };
 struct Image {
     uint32_t width{}, height{}, format{};
@@ -44,6 +46,7 @@ class Replay {
     Com<ID3D11DeviceContext1> context1_;
     std::map<Id, Com<IUnknown>> objects_;
     std::map<Id, std::array<bool, 128>> usedSrvs_;
+    std::map<std::pair<uint32_t, uint32_t>, Com<ID3D11ComputeShader>> counterWrapShaders_;
     struct Range {
         Id buffer;
         uint32_t first, count;
@@ -59,7 +62,9 @@ class Replay {
     void constantBuffers(const Entry &entry);
     void mappedWrites(const Entry &entry);
     void setRange(int stage, uint32_t slot, ID3D11Buffer *buffer, const Range &range);
-    void withBufferEdits(const Event &event, const State &state, const std::function<bool()> &submit);
+    void withEventEdits(const Event &event, const State &state, const std::function<bool()> &submit);
+    void writeCounter(ID3D11UnorderedAccessView *view, uint32_t value);
+    void writeCounter(Id view, uint32_t value);
     IUnknown *object(Id id);
     template <class T> T *get(Id id) { return static_cast<T *>(object(id)); }
 
@@ -78,6 +83,7 @@ class Replay {
     Image previewTexture(Id texture, uint32_t mip = 0, uint32_t layer = 0, uint32_t slice = 0, double low = 0,
                          double high = 1, const std::string &channel = "rgba");
     std::vector<uint8_t> readBuffer(Id id);
+    uint32_t readCounter(Id view);
     void inspectEventInputs(Id event, const std::function<void()> &inspect);
     struct ConstantRange {
         uint32_t first = 0;

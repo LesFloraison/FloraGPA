@@ -21,6 +21,93 @@ class UiTests final : public QObject {
         QVERIFY(window.grab().save(directory + '/' + name + ".png"));
     }
   private slots:
+    void counterEditorHistory() {
+        auto captures = qEnvironmentVariable("FLORA_TEST_CAPTURE_DIR");
+        if (captures.isEmpty())
+            QSKIP("External capture fixtures are not configured");
+        flora::MainWindow window;
+        window.resize(1440, 900);
+        window.show();
+        QSignalSpy done(&window, &flora::MainWindow::taskFinished);
+        window.openCapture(captures + "/bf1_2026_01_21__16_53_05.gpa_frame");
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 60000);
+        QVERIFY(done.takeLast()[0].toBool());
+        auto select = [](QTableView *table, qulonglong id) {
+            for (int i = 0; i < table->model()->rowCount(); ++i) {
+                auto index = table->model()->index(i, 0);
+                if (index.data(Qt::UserRole).toULongLong() == id) {
+                    table->setCurrentIndex(index);
+                    return true;
+                }
+            }
+            return false;
+        };
+        auto api = window.findChild<QTableView *>("apiLog");
+        QVERIFY(select(api, 25784));
+        QVERIFY(select(window.findChild<QTableView *>("resources"), 25733));
+        auto boundary = window.findChild<QComboBox *>("bufferBoundary");
+        boundary->setCurrentIndex(1);
+        // Buffer navigation must take precedence over the queued output preview.
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 60000);
+        QVERIFY(done.takeLast()[0].toBool());
+        window.findChild<QTabWidget *>("bufferTabs")->setCurrentIndex(2);
+        auto counters = window.findChild<QTreeWidget *>("uavCounters");
+        QCOMPARE(counters->topLevelItemCount(), 1);
+        auto original = counters->topLevelItem(0)->text(3);
+        QCOMPARE(counters->topLevelItem(0)->text(0), QString("25732"));
+        counters->setCurrentItem(counters->topLevelItem(0));
+        auto edit = window.findChild<QAction *>("editCounter");
+        QVERIFY(edit && edit->isEnabled());
+        bool entered = false;
+        QTimer::singleShot(0, &window, [&] {
+            auto dialog = window.findChild<QDialog *>("counterDialog");
+            if (!dialog)
+                return;
+            QTimer::singleShot(3000, dialog, &QDialog::reject);
+            auto field = dialog->findChild<QLineEdit *>("counterValue");
+            field->setText("0xffffffff");
+            snapshot(*dialog, "counter-dialog");
+            field->setText("4294967296");
+            auto apply = dialog->findChild<QDialogButtonBox *>()->button(QDialogButtonBox::Ok);
+            QTest::mouseClick(apply, Qt::LeftButton);
+            QVERIFY(dialog->isVisible());
+            field->setText("0xffffffff");
+            entered = true;
+            QTest::mouseClick(apply, Qt::LeftButton);
+        });
+        edit->trigger();
+        QVERIFY(entered);
+        QVERIFY(!edit->isEnabled());
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 60000);
+        QVERIFY(done.takeLast()[0].toBool());
+        QCOMPARE(counters->topLevelItem(0)->text(3), QString("4294967295"));
+        snapshot(window, "counter-fields");
+        QAction *undo = nullptr, *redo = nullptr;
+        for (auto a : window.findChildren<QAction *>()) {
+            if (a->shortcut() == QKeySequence::Undo)
+                undo = a;
+            if (a->shortcut() == QKeySequence::Redo)
+                redo = a;
+        }
+        QVERIFY(undo && redo);
+        undo->trigger();
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 60000);
+        QVERIFY(done.takeLast()[0].toBool());
+        QCOMPARE(counters->topLevelItem(0)->text(3), original);
+        redo->trigger();
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 60000);
+        QVERIFY(done.takeLast()[0].toBool());
+        QCOMPARE(counters->topLevelItem(0)->text(3), QString("4294967295"));
+        boundary->setCurrentIndex(2);
+        QVERIFY(!edit->isEnabled());
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 60000);
+        QVERIFY(done.takeLast()[0].toBool());
+        counters->setCurrentItem(counters->topLevelItem(0));
+        QVERIFY(!edit->isEnabled());
+        QVERIFY(counters->topLevelItem(0)->text(3) != QString("4294967295"));
+        QVERIFY(select(api, 25848));
+        QCOMPARE(counters->topLevelItemCount(), 0);
+    }
     void bufferEditorHistory() {
         auto captures = qEnvironmentVariable("FLORA_TEST_CAPTURE_DIR");
         if (captures.isEmpty())

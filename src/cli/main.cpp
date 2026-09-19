@@ -3,6 +3,7 @@
 #include "application/Experiment.h"
 #include "application/Geometry.h"
 #include "application/ShaderInspector.h"
+#include "application/UavCounterInspector.h"
 #include "core/BufferBindings.h"
 #include "core/Frame.h"
 #include "replay/Replay.h"
@@ -257,10 +258,17 @@ int main(int argc, char **argv) {
                 if (!options.until && !resource.data)
                     throw std::runtime_error("Buffer has no captured initial bytes; select an event");
                 std::vector<uint8_t> bytes;
-                if (options.before && options.until && isDraw(frame.entry(options.until).type))
-                    replay.inspectEventInputs(options.until, [&] { bytes = replay.readBuffer(resource.id); });
-                else
+                nlohmann::json counters;
+                auto read = [&] {
                     bytes = replay.readBuffer(resource.id);
+                    counters = inspectUavCounters(frame, replay, options.until, resource.id);
+                };
+                if (options.before && options.until && isDraw(frame.entry(options.until).type))
+                    replay.inspectEventInputs(options.until, read);
+                else
+                    read();
+                report.insert("uav_counters",
+                              QJsonDocument::fromJson(QByteArray::fromStdString(counters.dump())).array());
                 auto constants =
                     options.until && isDraw(frame.entry(options.until).type)
                         ? inspectConstants(frame, replay, options, options.until, resource.id, bytes)

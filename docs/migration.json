@@ -67,10 +67,17 @@
       "description": "FloraGPA native desktop inspector. Run with python app.py [capture.gpa_frame].",
       "status": "partial",
       "native": [
-        "src/app/MainWindow.cpp"
+        "src/app/MainWindow.cpp",
+        "src/core/UavCounters.cpp",
+        "src/replay/UavCounters.cpp",
+        "src/application/UavCounterInspector.cpp",
+        "src/application/Experiment.cpp"
       ],
       "validation": [
-        "docs/NATIVE_BASELINE.md"
+        "docs/NATIVE_BASELINE.md",
+        "tests/UavCounterTests.cpp: CS/OM Append and Counter on hardware and WARP; scope, reset, UINT_MAX, aliases, rollback and history",
+        "tools/validate_uav_counters.py: 32 Python comparisons, 29 exact byte matches and 3 BF1 parallel-append multiset comparisons with exact untouched bytes",
+        "tests/UiTests.cpp: counter edit, overflow rejection, undo/redo and stale-read invalidation"
       ]
     },
     {
@@ -128,15 +135,21 @@
         "src/core/BufferBindings.cpp",
         "src/replay/BufferEdits.cpp",
         "src/application/Experiment.cpp",
-        "src/application/Constants.cpp"
+        "src/application/Constants.cpp",
+        "src/core/UavCounters.cpp",
+        "src/replay/UavCounters.cpp",
+        "src/application/UavCounterInspector.cpp"
       ],
       "validation": [
         "Five Python/native initial/boundary/range comparisons; word CSV; GUI read and subrange",
         "tests/BufferEditTests.cpp: compute input isolation, persistent output, rollback and append-counter preservation",
         "tests/UiTests.cpp: buffer edit, worker preview, undo/redo and after-event input restoration",
         "tools/validate_buffer_edits.py: CB/VB/IB/SRV/UAV byte and binding comparisons; edited geometry and visible draw comparison",
-        "UAV counter inspection/editing, stream-output execution and complete setter overrides remain pending",
-        "tools/validate_constants.py and tests/UiTests.cpp: recursive CB fields, binding windows, typed edits and stale-read rejection"
+        "tools/validate_constants.py and tests/UiTests.cpp: recursive CB fields, binding windows, typed edits and stale-read rejection",
+        "Stream-output execution, complete setter/getter references and other experiment kinds remain pending",
+        "tests/UavCounterTests.cpp: CS/OM Append and Counter on hardware and WARP; scope, reset, UINT_MAX, aliases, rollback and history",
+        "tools/validate_uav_counters.py: 32 Python comparisons, 29 exact byte matches and 3 BF1 parallel-append multiset comparisons with exact untouched bytes",
+        "tests/UiTests.cpp: counter edit, overflow rejection, undo/redo and stale-read invalidation"
       ]
     },
     {
@@ -522,7 +535,10 @@
         "src/application/Experiment.cpp",
         "src/core/BufferBindings.cpp",
         "src/replay/BufferEdits.cpp",
-        "src/app/MainWindow.cpp"
+        "src/app/MainWindow.cpp",
+        "src/core/UavCounters.cpp",
+        "src/replay/UavCounters.cpp",
+        "src/application/UavCounterInspector.cpp"
       ],
       "validation": [
         "Compatible JSON; uint64; frame hash; shader and event edits; GPU undo/redo",
@@ -530,7 +546,10 @@
         "tests/BufferEditTests.cpp: compute input isolation, persistent output, rollback and append-counter preservation",
         "tests/UiTests.cpp: buffer edit, worker preview, undo/redo and after-event input restoration",
         "tools/validate_buffer_edits.py: CB/VB/IB/SRV/UAV byte and binding comparisons; edited geometry and visible draw comparison",
-        "Constant-buffer recursive fields, counter editing, stream-output execution and complete setter overrides remain pending"
+        "Stream-output execution, complete setter/getter references and other experiment kinds remain pending",
+        "tests/UavCounterTests.cpp: CS/OM Append and Counter on hardware and WARP; scope, reset, UINT_MAX, aliases, rollback and history",
+        "tools/validate_uav_counters.py: 32 Python comparisons, 29 exact byte matches and 3 BF1 parallel-append multiset comparisons with exact untouched bytes",
+        "tests/UiTests.cpp: counter edit, overflow rejection, undo/redo and stale-read invalidation"
       ]
     },
     {
@@ -1693,10 +1712,17 @@
       "description": "Desktop session model; immutable capture, autosaved experiment, isolated GPU jobs.",
       "status": "partial",
       "native": [
-        "src/app/MainWindow.cpp"
+        "src/app/MainWindow.cpp",
+        "src/core/UavCounters.cpp",
+        "src/replay/UavCounters.cpp",
+        "src/application/UavCounterInspector.cpp",
+        "src/application/Experiment.cpp"
       ],
       "validation": [
-        "docs/NATIVE_BASELINE.md"
+        "docs/NATIVE_BASELINE.md",
+        "tests/UavCounterTests.cpp: CS/OM Append and Counter on hardware and WARP; scope, reset, UINT_MAX, aliases, rollback and history",
+        "tools/validate_uav_counters.py: 32 Python comparisons, 29 exact byte matches and 3 BF1 parallel-append multiset comparisons with exact untouched bytes",
+        "tests/UiTests.cpp: counter edit, overflow rejection, undo/redo and stale-read invalidation"
       ]
     },
     {
@@ -1945,9 +1971,20 @@
       "sha256": "6eb61959eb0713398a9d071edc3f3f0f296e4bdd5c724fb84417249466577f87",
       "lines": 79,
       "description": "Per-view Append/Consume/Counter state, independent of buffer storage.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": [
+        "src/core/UavCounters.cpp",
+        "src/replay/UavCounters.cpp",
+        "src/application/UavCounterInspector.cpp",
+        "src/application/Experiment.cpp",
+        "src/app/MainWindow.cpp"
+      ],
+      "validation": [
+        "tests/UavCounterTests.cpp: CS/OM Append and Counter on hardware and WARP; scope, reset, UINT_MAX, aliases, rollback and history",
+        "tools/validate_uav_counters.py: 32 Python comparisons, 29 exact byte matches and 3 BF1 parallel-append multiset comparisons with exact untouched bytes",
+        "tests/UiTests.cpp: counter edit, overflow rejection, undo/redo and stale-read invalidation",
+        "Full setter/getter command references and extended UAV replay remain pending"
+      ]
     },
     {
       "module": "update_sources.py",

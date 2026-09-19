@@ -16,10 +16,10 @@ GF2 与 BF1 DX11 捕获。**尚未完成原 Python 版本的全部功能迁移�
 | 图像 | 实际 GPU 输出、缩放/平移/通道、像素值、PNG 导出 | 全帧输出目前限制单采样 RGBA/BGRA8 |
 | 纹理 | GPU 格式转换、BC、浮点/整数、1D/2D/3D、mip/layer/slice、事件边界预览 | MSAA、平面格式及部分查看选项未迁移 |
 | Shader | DXBC 反汇编、反射、SPDB/SDBG 内嵌源码、HLSL 编译替换 | 不含 HLSL 恢复、单步调试及全部反射树 |
-| Buffer | 初始值、事件前后读回、范围、Hex/ASCII/32 位解释、导出；事件字节编辑/二进制补丁导入、绑定识别、撤销/重做；递归 CB 字段、CB1 范围和类型化编辑 | UAV counter 检查/编辑仍待迁移；SO 与完整 setter 支持仍受现有重放边界限制 |
+| Buffer | 初始值、事件前后读回、范围、Hex/ASCII/32 位解释、导出；事件字节编辑/二进制补丁导入、绑定识别、撤销/重做；递归 CB 字段、CB1 范围和类型化编辑；按 UAV view 检查/编辑 Append/Consume/Counter | counter 支持 CS/OM 快照及已恢复 clear/copy/setter 引用；SO、完整 setter/getter 与扩展 UAV 重放仍待迁移 |
 | 几何 | IA 输入解码、索引与实例、三种顶点表、旋转线框、CSV/OBJ 导出 | DrawAuto、后变换与覆盖未迁移；当前表格上限为 100 万引用 / 1600 万字段 |
 | 资源名称 | GenPrivateData 原始名称、非法 UTF-8 转义、列表筛选和属性显示 | 名称记录不表示逐事件重命名时间线 |
-| 实验项目 | 原格式 JSON、捕获 SHA-256 绑定、资产校验、uint64 ID、原子保存、撤销/重做 | 接受事件启停、buffer、clear、update_source、全局 shader/texture 替换；其他操作明确拒绝 |
+| 实验项目 | 原格式 JSON、捕获 SHA-256 绑定、资产校验、uint64 ID、原子保存、撤销/重做 | 接受事件启停、buffer、clear、update_source、事件/初始 UAV counter、全局 shader/texture 替换；其他操作明确拒绝 |
 | 性能 | 原生 D3D11 时间戳、disjoint 与 pipeline statistics | 尚未迁移原版多轮调度、Intel 硬件指标/GTPin |
 
 ## 验证证据
@@ -65,7 +65,15 @@ GF2 与 BF1 DX11 捕获。**尚未完成原 Python 版本的全部功能迁移�
 - 类型化编辑保留未变组件、填充、NaN payload、负零和非规范 bool 位；非连续矩阵补丁
   一次撤销。CLI 输出与 Qt 编辑器均验证负零符号位不被 JSON 规范化丢失。WARP 验证保存/载入后的 typed CB 编辑确实改变 compute 输出，同时后续事件
   的输入恢复。Qt 测试验证矩阵编辑、读回、撤销/重做和过期字段失效。
-- Release 与 Debug 的九组 CTest 均通过。不是“所有原版测试已通过”。
+- UAV counter 按 view 独立管理，支持事件前临时编辑和初始值；捕获中的显式 reset 仍优先。
+  `0xffffffff` 通过 GPU helper 写入实际计数，不会误作 D3D11 setter 的 KEEP 标志。
+  CS 与 OM/像素着色器路径分别覆盖 Append 和 Counter，WARP 与硬件设备均通过；
+  验证预览/禁用/异常回滚、提交后保留、同 buffer 多 view 独立计数、CopyStructureCount、
+  buffer 补丁组合、保存/载入及撤销/重做。扩展槽 metadata 检查不代表扩展 UAV 重放已完成。
+- UAV counter 的 32 组 Python 对照通过：29 组缓冲区逐字节一致；BF1 的 3 组并行 Append
+  输出按完整元素多重集合比较，未写入区域逐字节一致，计数和元数据全部一致。
+  Qt 测试覆盖溢出拒绝、最大 uint32 编辑、实际 Worker 读回、撤销/重做与过期结果失效。
+- Release 与 Debug 的十组 CTest 均通过。不是“所有原版测试已通过”。
 - 发布目录在仅保留 Windows 系统 PATH 的子进程中完成两份黄金重放和负对照。
   模块列表未发现 Python/Tk、GPA 或 RenderDoc；尚未做另一台干净 Windows 验证。
 - Qt 自身窗口渲染已检查 1440×900、1920×1080 及 150% / 200% 缩放。
@@ -82,13 +90,16 @@ Buffer 编辑证据为 `buffer-edit-validation-1/`、`buffer-edit-visible-valida
 `buffer-edit-ui/`、`ctest-buffer-release.log`、`ctest-buffer-debug.log`、`validation-buffer-package/`。
 常量字段证据为 `constant-fixture/`、`constant-validation-2/validation.json`、`constant-ui/`、
 `ctest-constants-release.log`、`ctest-constants-debug.log`、`validation-constants-package/`。
+UAV counter 证据为 `uav-counter-fixture/`、`uav-counter-validation-4/validation.json`、
+`uav-counter-ui/`、`ctest-counter-release.log`、`ctest-counter-debug.log`、
+`validation-counters-package/`；对应发布目录为 `out/FloraGPA-counters/`。
 源码基线逐模块记录在 `migration.json`。
 
 ## 尚未闭合的迁移范围
 
 1. 完整 setter/command/context 语义、predication、stream-output/DrawAuto、
    class linkage、扩展 UAV、MSAA 与 planar 等特殊 replay 路径。
-2. 其余资源/状态/绑定/命令编辑，counter 检查/编辑、DrawAuto 与后变换几何、覆盖率、
+2. 其余资源/状态/绑定/命令编辑，完整 counter 命令引用、DrawAuto 与后变换几何、覆盖率、
    quad 与像素分析。
 3. HLSL 恢复、source/instruction 导航、变量/表达式、trace/stack 与 shader 调试。
 4. RenderDoc 原生 C++ 后端、Intel Metrics Discovery、GTPin 与完整指标调度。
