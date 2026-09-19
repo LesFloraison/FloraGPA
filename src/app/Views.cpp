@@ -5,8 +5,107 @@
 #include <QToolTip>
 #include <QWheelEvent>
 #include <cmath>
+#include <set>
 
 namespace flora {
+void MeshView::setMesh(const QJsonObject &mesh) {
+    vertices_.clear();
+    edges_.clear();
+    points_.clear();
+    yaw_ = pitch_ = 0;
+    auto positions = mesh["positions"].toArray();
+    if (positions.empty()) {
+        update();
+        return;
+    }
+    QVector3D low, high;
+    bool first = true;
+    for (auto value : positions) {
+        auto p = value.toArray();
+        if (p.size() != 3 || !p[0].isDouble() || !p[1].isDouble() || !p[2].isDouble()) {
+            vertices_.clear();
+            update();
+            return;
+        }
+        QVector3D v(float(p[0].toDouble()), float(p[1].toDouble()), float(p[2].toDouble()));
+        if (!std::isfinite(v.x()) || !std::isfinite(v.y()) || !std::isfinite(v.z())) {
+            vertices_.clear();
+            update();
+            return;
+        }
+        if (first) {
+            low = high = v;
+            first = false;
+        }
+        for (int i = 0; i < 3; ++i) {
+            low[i] = std::min(low[i], v[i]);
+            high[i] = std::max(high[i], v[i]);
+        }
+        vertices_.push_back(v);
+    }
+    auto center = (low + high) * .5f;
+    auto extent = high - low;
+    auto span = std::max({extent.x(), extent.y(), extent.z(), 1e-10f});
+    for (auto &v : vertices_)
+        v = (v - center) / span;
+    std::set<std::pair<int, int>> edges;
+    for (auto kind : {"faces", "lines"})
+        for (auto value : mesh[kind].toArray()) {
+            auto indices = value.toArray();
+            auto count = indices.size();
+            for (qsizetype i = 0; i < count - 1 + (QString(kind) == "faces" ? 1 : 0) && edges.size() < 12000;
+                 ++i) {
+                auto a = indices[i].toInt() - 1, b = indices[(i + 1) % count].toInt() - 1;
+                if (a < 0 || b < 0 || a >= vertices_.size() || b >= vertices_.size())
+                    continue;
+                if (a > b)
+                    std::swap(a, b);
+                edges.emplace(a, b);
+            }
+        }
+    for (auto [a, b] : edges)
+        edges_.push_back({a, b});
+    for (auto value : mesh["points"].toArray()) {
+        auto i = value.toInt() - 1;
+        if (i >= 0 && i < vertices_.size() && points_.size() < 12000)
+            points_.push_back(i);
+    }
+    if (points_.empty() && edges_.empty())
+        for (int i = 0; i < std::min<qsizetype>(vertices_.size(), 12000); ++i)
+            points_.push_back(i);
+    update();
+}
+void MeshView::paintEvent(QPaintEvent *) {
+    QPainter p(this);
+    p.fillRect(rect(), QColor("#1b232c"));
+    p.setRenderHint(QPainter::Antialiasing);
+    p.setPen(QPen(QColor("#76d0f5"), 1));
+    QVector<QPointF> projected;
+    auto cy = std::cos(yaw_), sy = std::sin(yaw_), cp = std::cos(pitch_), sp = std::sin(pitch_);
+    auto scale = std::min(width(), height()) * .8;
+    for (auto v : vertices_) {
+        auto x = v.x() * cy + v.z() * sy, z = -v.x() * sy + v.z() * cy, y = v.y() * cp - z * sp;
+        projected.push_back({width() * .5 + x * scale, height() * .5 - y * scale});
+    }
+    for (auto [a, b] : edges_)
+        p.drawLine(projected[a], projected[b]);
+    p.setBrush(QColor("#76d0f5"));
+    for (auto i : points_)
+        p.drawEllipse(projected[i], 2, 2);
+}
+void MeshView::mousePressEvent(QMouseEvent *event) {
+    if (event->button() == Qt::LeftButton)
+        drag_ = event->position();
+}
+void MeshView::mouseMoveEvent(QMouseEvent *event) {
+    if (event->buttons() & Qt::LeftButton) {
+        auto delta = event->position() - drag_;
+        yaw_ += delta.x() * .01;
+        pitch_ += delta.y() * .01;
+        drag_ = event->position();
+        update();
+    }
+}
 ImageView::ImageView(QWidget *parent) : QGraphicsView(parent), scene_(this) {
     setScene(&scene_);
     item_ = scene_.addPixmap({});
@@ -67,7 +166,7 @@ void ImageView::wheelEvent(QWheelEvent *e) {
 }
 void ImageView::mouseMoveEvent(QMouseEvent *e) {
     auto scenePosition = mapToScene(e->pos());
-    QPoint p(int(std::floor(scenePosition.x())),int(std::floor(scenePosition.y())));
+    QPoint p(int(std::floor(scenePosition.x())), int(std::floor(scenePosition.y())));
     if (image_.rect().contains(p)) {
         auto color = image_.pixelColor(p);
         emit pixelHovered(QString("%1, %2    RGBA %3  %4  %5  %6")

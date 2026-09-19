@@ -1,3 +1,4 @@
+#include "app/Appearance.h"
 #include "app/MainWindow.h"
 #include <QAbstractItemModelTester>
 #include <QAction>
@@ -8,7 +9,20 @@
 
 class UiTests final : public QObject {
     Q_OBJECT
+    void snapshot(QWidget &window, const QString &name) {
+        auto directory = qEnvironmentVariable("FLORA_UI_ARTIFACT_DIR");
+        if (directory.isEmpty())
+            return;
+        QVERIFY(QDir().mkpath(directory));
+        QCoreApplication::processEvents();
+        QVERIFY(window.grab().save(directory + '/' + name + ".png"));
+    }
   private slots:
+    void initTestCase() {
+        QCoreApplication::setOrganizationName("FloraGPA-Tests");
+        QCoreApplication::setApplicationName("FloraGPA-Tests");
+        flora::applyAppearance(*qApp);
+    }
     void modelsAndSelection() {
         const auto captures = qEnvironmentVariable("FLORA_TEST_CAPTURE_DIR");
         if (captures.isEmpty())
@@ -54,11 +68,69 @@ class UiTests final : public QObject {
         QVERIFY(done.takeLast()[0].toBool());
         auto pipeline = window.findChild<QTreeWidget *>("pipeline");
         QVERIFY(pipeline->topLevelItemCount() >= 8);
+        QAction *inspect = nullptr;
+        for (auto action : window.findChildren<QAction *>())
+            if (action->text() == "Inspect IA")
+                inspect = action;
+        QVERIFY(inspect);
+        // An explicit analysis request wins over pending navigation debounce.
+        api->setCurrentIndex(api->model()->index(3, 0));
+        api->setCurrentIndex(api->model()->index(2, 0));
+        done.clear();
+        inspect->trigger();
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        auto geometry = window.findChild<QTableView *>("geometryTable");
+        QVERIFY(geometry);
+        QAbstractItemModelTester geometryTester(geometry->model(),
+                                                QAbstractItemModelTester::FailureReportingMode::QtTest);
+        QCOMPARE(geometry->model()->rowCount(), 6);
+        QCOMPARE(geometry->model()->index(0, 4).data().toString(), QString("-900"));
+        snapshot(window, "geometry");
         done.clear();
         window.replay(true);
         QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
         QVERIFY(done.takeLast()[0].toBool());
         QVERIFY(!window.busy());
+        auto resources = window.findChild<QTableView *>("resources");
+        QVERIFY(resources);
+        done.clear();
+        for (int row = 0; row < resources->model()->rowCount(); ++row) {
+            auto index = resources->model()->index(row, 0);
+            if (index.data(Qt::UserRole).toULongLong() == 104) {
+                resources->setCurrentIndex(index);
+                break;
+            }
+        }
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        done.clear();
+        window.findChild<QComboBox *>("bufferBoundary")->setCurrentIndex(1);
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        auto buffer = window.findChild<QTableView *>("bufferTable");
+        QVERIFY(buffer);
+        auto bufferModel = static_cast<flora::BufferModel *>(buffer->model());
+        auto full = bufferModel->bytes();
+        QCOMPARE(QCryptographicHash::hash(full, QCryptographicHash::Sha256).toHex(),
+                 QByteArray("70dd1160191c1a5ddf797256e2b2f63d6bdaa8281fcb8c3409054f7688d0f5fc"));
+        window.findChild<QComboBox *>("bufferMode")->setCurrentIndex(1);
+        QCOMPARE(bufferModel->rowCount(), 44);
+        QCOMPARE(bufferModel->columnCount(), 5);
+        window.findChild<QLineEdit *>("bufferOffset")->setText("3");
+        window.findChild<QLineEdit *>("bufferLength")->setText("17");
+        QAction *read = nullptr;
+        for (auto action : window.findChildren<QAction *>())
+            if (action->text() == "Read")
+                read = action;
+        QVERIFY(read);
+        done.clear();
+        read->trigger();
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        QCOMPARE(bufferModel->bytes(), full.mid(3, 17));
+        QCOMPARE(bufferModel->index(0, 0).data().toString(), QString("00000003"));
+        snapshot(window, "buffer");
     }
     void textureAndShaderExperiment() {
         const auto captures = qEnvironmentVariable("FLORA_TEST_CAPTURE_DIR");
@@ -90,6 +162,7 @@ class UiTests final : public QObject {
         QVERIFY(done.takeLast()[0].toBool());
         QCOMPARE(window.findChild<flora::ImageView *>("textureOutput")->image().size(), QSize(128, 128));
         QVERIFY(select(102));
+        auto originalAssembly = window.findChild<QPlainTextEdit *>("shader")->toPlainText();
         auto source = window.findChild<QPlainTextEdit *>("shaderSource");
         QVERIFY(source);
         source->setPlainText("float4 main() : SV_Target { return float4(1, 0, 1, 1); }");
@@ -111,6 +184,8 @@ class UiTests final : public QObject {
         for (const auto &result : done)
             QVERIFY(result[0].toBool());
         auto edited = image->image();
+        QVERIFY(window.findChild<QPlainTextEdit *>("shader")->toPlainText() != originalAssembly);
+        snapshot(window, "shader");
         QVERIFY(edited != baseline);
         QVERIFY(undo->isEnabled());
         auto reflection = window.findChild<QTreeWidget *>("shaderReflection");
@@ -121,6 +196,7 @@ class UiTests final : public QObject {
         QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
         QVERIFY(done.takeLast()[0].toBool());
         QCOMPARE(image->image(), baseline);
+        QCOMPARE(window.findChild<QPlainTextEdit *>("shader")->toPlainText(), originalAssembly);
         done.clear();
         redo->trigger();
         QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);

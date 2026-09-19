@@ -20,7 +20,7 @@ commands, 72 filtered DrawIndexed rows, and Qt model invariants. Reader tests
 cover large uint64 IDs, truncated data, overflowed bounds and storage pitches.
 
 This is a migration baseline, **not feature parity**. Many specialized replay
-paths, texture conversions, geometry, editing, source recovery/debugging and
+paths, texture conversions, post-transform geometry, editing, source recovery/debugging and
 optional metric backends are still pending. Snapshot-backed draw selection is
 implemented; non-draw state-boundary fidelity remains incomplete. The ledger
 must not mark these broader Python modules complete on this evidence alone.
@@ -28,3 +28,17 @@ must not mark these broader Python modules complete on this evidence alone.
 The GF2 port exposed a stripped-shader case: an empty reflection binding list is
 not proof that no SRVs are used. SRV pruning is applied only when the bytecode
 contains an actual RDEF chunk, matching the reference implementation.
+
+The asset port adds 13 byte-exact texture preview comparisons, six IA geometry
+comparisons (including a nine-instance BF1 draw), five buffer range/boundary
+comparisons, and captured debug-name catalog equality. Geometry comparisons
+cover all three CSV tables and OBJ topology; OBJ coordinate formatting is
+compared numerically. The native IA path still excludes DrawAuto and has bounded
+table sizes. Indirect IA arguments are implemented but not covered by these
+captured cases. Shader recovery, tracing and post-transform output are pending.
+
+The GUI tests now use the same application palette and style as the released
+application, and exercise native HLSL replacement through a serialized project
+passed to a fresh worker. Both the image and DXBC panel restore on undo and
+reapply on redo. Explicit analysis requests cancel pending navigation debounce;
+displayed output labels retain their actual event boundary.

@@ -44,8 +44,24 @@ Windows-only child process paths, not yet on a separate clean Windows machine.
 Use **F5** to replay, **F6** for GPU timings, **Escape** to cancel. Select API
 events to inspect their pipeline and before/after output. Resources provide
 texture mip/layer/slice previews, shader source/DXBC/reflection and buffer bytes.
+The Buffer tab reads initial/before/after values and byte ranges as hex, ASCII or
+32-bit words. Geometry provides IA tables and a rotatable wireframe, with CSV/OBJ
+export. Resource names come from captured debug metadata.
 Shader **Compile & Apply** and event enable/disable changes use an experiment
 history with undo/redo and frame-bound JSON projects.
 
 See [migration status](docs/MIGRATION_STATUS.md) for implemented features and
 the remaining parity gaps. This build is not the completed migration.
+
+## Reference comparisons
+
+These scripts use Python only as a development oracle. Neither the GUI nor the
+worker launches or loads Python.
+
+```powershell
+python tools/validate_native.py --exe out/FloraGPA/FloraGPA.Cli.exe --captures D:/CDXrepo/FloraGPA --out artifacts/golden-run --isolated-env
+python tools/validate_geometry.py --reference D:/CDXrepo/FloraGPA/standalone --exe out/FloraGPA/FloraGPA.Cli.exe --captures D:/CDXrepo/FloraGPA --qt-bin D:/Qt/6.11.2/msvc2022_64/bin --out artifacts/geometry-run
+python tools/validate_buffers.py --reference D:/CDXrepo/FloraGPA/standalone --exe out/FloraGPA/FloraGPA.Cli.exe --captures D:/CDXrepo/FloraGPA --qt-bin D:/Qt/6.11.2/msvc2022_64/bin --out artifacts/buffer-run
+```
+
+Run GPU checks serially and use a new output directory each time.

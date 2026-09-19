@@ -225,18 +225,18 @@ std::string commandName(uint16_t type) {
     return "Unknown (" + std::to_string(type) + ")";
 }
 std::string resourceName(uint16_t t) {
-    static const std::map<uint16_t, std::string> names{{0x82, "Input layout"},  {0x83, "Buffer"},
-                                                       {0x84, "Texture 1D"},    {0x85, "Texture 2D"},
-                                                       {0x86, "Texture 3D"},    {0x87, "Reference image"},
-                                                       {0x88, "Sampler"},       {0x89, "Rasterizer"},
-                                                       {0x8a, "Blend"},         {0x8b, "Depth / stencil"},
-                                                       {0x8c, "SRV"},           {0x8d, "RTV"},
-                                                       {0x8e, "DSV"},           {0x8f, "UAV"},
-                                                       {0x90, "Vertex shader"}, {0x91, "Geometry shader"},
-                                                       {0x92, "Pixel shader"},  {0x93, "Compute shader"},
-                                                       {0x94, "Domain shader"}, {0x95, "Hull shader"},
-                                                       {0x10d, "Blend"},        {0x10e, "Rasterizer"},
-                                                       {0x10f, "Rasterizer"}};
+    static const std::map<int, std::string> names{{0x82, "Input layout"},  {0x83, "Buffer"},
+                                                  {0x84, "Texture 1D"},    {0x85, "Texture 2D"},
+                                                  {0x86, "Texture 3D"},    {0x87, "Reference image"},
+                                                  {0x88, "Sampler"},       {0x89, "Rasterizer"},
+                                                  {0x8a, "Blend"},         {0x8b, "Depth / stencil"},
+                                                  {0x8c, "SRV"},           {0x8d, "RTV"},
+                                                  {0x8e, "DSV"},           {0x8f, "UAV"},
+                                                  {0x90, "Vertex shader"}, {0x91, "Geometry shader"},
+                                                  {0x92, "Pixel shader"},  {0x93, "Compute shader"},
+                                                  {0x94, "Domain shader"}, {0x95, "Hull shader"},
+                                                  {0x10d, "Blend"},        {0x10e, "Rasterizer"},
+                                                  {0x10f, "Rasterizer"}};
     auto it = names.find(t);
     return it == names.end() ? "Resource" : it->second;
 }

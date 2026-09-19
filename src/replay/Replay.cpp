@@ -1017,6 +1017,8 @@ Image Replay::output(Id texture, UINT sub) {
     return out;
 }
 std::vector<uint8_t> Replay::readBuffer(Id id) {
+    if (frame_.resource(id).type != 0x83)
+        throw std::runtime_error("Readback requires a buffer resource");
     auto source = get<ID3D11Buffer>(id);
     D3D11_BUFFER_DESC desc{};
     source->GetDesc(&desc);

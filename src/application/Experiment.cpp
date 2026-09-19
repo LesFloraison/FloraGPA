@@ -154,8 +154,8 @@ bool Experiment::redo() {
 void Experiment::setShader(const Frame &frame, Id id, Bytes bytecode, const std::string &source,
                            const std::string &entry) {
     auto resource = frame.resource(id);
-    static const std::map<uint16_t, std::string> stages{{0x90, "vs"}, {0x91, "gs"}, {0x92, "ps"},
-                                                        {0x93, "cs"}, {0x94, "ds"}, {0x95, "hs"}};
+    static const std::map<int, std::string> stages{{0x90, "vs"}, {0x91, "gs"}, {0x92, "ps"},
+                                                   {0x93, "cs"}, {0x94, "ds"}, {0x95, "hs"}};
     auto metadata = inspectShader(bytecode);
     auto found = stages.find(resource.type);
     if (found == stages.end() || metadata["stage"] != found->second)

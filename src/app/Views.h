@@ -3,9 +3,32 @@
 #include <QGraphicsPixmapItem>
 #include <QGraphicsView>
 #include <QJsonArray>
+#include <QJsonObject>
+#include <QVector3D>
 #include <QWidget>
 
 namespace flora {
+class MeshView final : public QWidget {
+    Q_OBJECT
+  public:
+    explicit MeshView(QWidget *parent = nullptr) : QWidget(parent) {
+        setMinimumHeight(140);
+        setToolTip("IA positions · drag to rotate · preview capped at 12,000 edges/points");
+    }
+    void setMesh(const QJsonObject &mesh);
+
+  protected:
+    void paintEvent(QPaintEvent *) override;
+    void mousePressEvent(QMouseEvent *) override;
+    void mouseMoveEvent(QMouseEvent *) override;
+
+  private:
+    QVector<QVector3D> vertices_;
+    QVector<QPair<int, int>> edges_;
+    QVector<int> points_;
+    QPointF drag_;
+    double yaw_ = 0, pitch_ = 0;
+};
 class ImageView final : public QGraphicsView {
     Q_OBJECT
   public:

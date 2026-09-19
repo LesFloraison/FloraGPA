@@ -122,10 +122,12 @@
       "status": "partial",
       "native": [
         "src/replay/Replay.cpp",
-        "src/app/Models.cpp"
+        "src/cli/main.cpp",
+        "src/app/Models.cpp",
+        "src/app/MainWindow.cpp"
       ],
       "validation": [
-        "Initial hex/ASCII view; GPU CLI readback; reflection/editing pending"
+        "Five Python/native initial/boundary/range comparisons; word CSV; GUI read and subrange; CB recursive reflection and edits pending"
       ]
     },
     {
@@ -497,10 +499,12 @@
       "description": "DXGI storage sizes and common typed interpretations for independent assets.",
       "status": "partial",
       "native": [
-        "src/core/Frame.cpp"
+        "src/core/Frame.cpp",
+        "src/application/Geometry.cpp"
       ],
       "validation": [
-        "docs/NATIVE_BASELINE.md"
+        "docs/NATIVE_BASELINE.md",
+        "Vertex storage families, half/packed float, integer and normalized values; primitive restart tests"
       ]
     },
     {
@@ -543,9 +547,16 @@
       "sha256": "70da7663201d71d79c57c6523b26c36c00d0ef7bf0031bb32f70d3dd73207fb0",
       "lines": 171,
       "description": "Export the IA vertices actually consumed by a selected draw event.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": [
+        "src/application/Geometry.cpp",
+        "src/app/Views.cpp",
+        "src/app/Models.cpp",
+        "src/app/MainWindow.cpp"
+      ],
+      "validation": [
+        "Six Python/native IA cases including nine instances; CSV/OBJ and Qt table checks; DrawAuto pending; table size bounded"
+      ]
     },
     {
       "module": "geometry_emissions.py",
@@ -1584,9 +1595,14 @@
       "sha256": "913c57b2904a348e682c0e1f8d5909b98c180e4fd42bed2fb0e4d8558b798d61",
       "lines": 60,
       "description": "Captured object names from GenPrivateData (9/0x103); no GPA runtime calls.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": [
+        "src/application/CaptureNames.cpp",
+        "src/app/Models.cpp"
+      ],
+      "validation": [
+        "GF2 141 records and BF1 empty catalog match Python; invalid UTF-8/control escape tests"
+      ]
     },
     {
       "module": "resources.py",

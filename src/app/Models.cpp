@@ -1,16 +1,44 @@
 #include "Models.h"
+#include "application/CaptureNames.h"
 #include <QColor>
 #include <QFont>
 
 namespace flora {
+QVariant GeometryModel::data(const QModelIndex &index, int role) const {
+    if (!index.isValid() || index.row() >= rows_.size() || index.column() >= columns_.size() ||
+        role != Qt::DisplayRole)
+        return {};
+    auto value = rows_[index.row()].toArray().at(index.column());
+    if (value.isDouble())
+        return QString::number(value.toDouble(), 'g', 12);
+    if (value.isBool())
+        return value.toBool() ? "True" : "False";
+    return value.toString();
+}
+QVariant GeometryModel::headerData(int section, Qt::Orientation orientation, int role) const {
+    if (role != Qt::DisplayRole || section < 0 ||
+        (orientation == Qt::Horizontal && section >= columns_.size()))
+        return {};
+    return orientation == Qt::Horizontal ? QVariant(columns_.at(section).toString()) : QVariant(section + 1);
+}
 void CaptureModel::setFrame(std::shared_ptr<const Frame> frame) {
     beginResetModel();
     frame_ = std::move(frame);
     ids_.clear();
+    names_.clear();
     if (frame_)
         for (auto &[id, e] : frame_->entries())
             if (e.category == (kind_ == Kind::Commands ? 7 : 5))
                 ids_.push_back(id);
+    if (frame_ && kind_ == Kind::Resources) {
+        auto catalog = capturedNames(*frame_);
+        for (const auto &record : catalog["records"]) {
+            auto id = std::stoull(record["resource_id"].get<std::string>());
+            auto name = QString::fromStdString(record["name"].get<std::string>());
+            if (!names_[id].contains(name))
+                names_[id].push_back(name);
+        }
+    }
     endResetModel();
 }
 int CaptureModel::rowOf(Id id) const {
@@ -29,7 +57,8 @@ QVariant CaptureModel::data(const QModelIndex &index, int role) const {
     if (role == Qt::ForegroundRole && kind_ == Kind::Commands && isDraw(e.type))
         return QColor("#a6dffa");
     if (role == Qt::ToolTipRole)
-        return QString("ID %1 · type 0x%2 · %3 bytes").arg(id).arg(e.type, 0, 16).arg(e.size);
+        return (debugNames(id).isEmpty() ? QString{} : debugNames(id) + '\n') +
+               QString("ID %1 · type 0x%2 · %3 bytes").arg(id).arg(e.type, 0, 16).arg(e.size);
     if (role != Qt::DisplayRole)
         return {};
     if (index.column() == 0)
@@ -37,6 +66,8 @@ QVariant CaptureModel::data(const QModelIndex &index, int role) const {
     if (index.column() == 1) {
         auto name =
             QString::fromStdString(kind_ == Kind::Commands ? commandName(e.type) : resourceName(e.type));
+        if (kind_ == Kind::Resources && !debugNames(id).isEmpty())
+            name += " · " + debugNames(id);
         if (kind_ == Kind::Commands && isDraw(e.type)) {
             auto args = data(this->index(index.row(), 2), Qt::DisplayRole).toString();
             if (!args.isEmpty())
@@ -93,12 +124,28 @@ bool CaptureFilter::filterAcceptsRow(int row, const QModelIndex &parent) const {
 QVariant BufferModel::data(const QModelIndex &index, int role) const {
     if (!index.isValid() || role != Qt::DisplayRole)
         return {};
-    auto offset = qsizetype(index.row()) * 16;
-    auto bytes = data_.mid(offset, 16);
+    auto stride = words_ ? 4 : 16;
+    auto offset = qsizetype(index.row()) * stride;
+    auto bytes = data_.mid(offset, stride);
     if (index.column() == 0)
-        return QString("%1").arg(offset, 8, 16, QChar('0')).toUpper();
+        return QString("%1").arg(offset_ + uint64_t(offset), 8, 16, QChar('0')).toUpper();
     if (index.column() == 1)
         return QString::fromLatin1(bytes.toHex(' ')).toUpper();
+    if (words_) {
+        if (bytes.size() != 4)
+            return {};
+        uint32_t u;
+        int32_t i;
+        float f;
+        std::memcpy(&u, bytes.constData(), 4);
+        std::memcpy(&i, bytes.constData(), 4);
+        std::memcpy(&f, bytes.constData(), 4);
+        if (index.column() == 2)
+            return QString::number(u);
+        if (index.column() == 3)
+            return QString::number(i);
+        return QString::number(double(f), 'g', 9);
+    }
     QString text;
     for (auto c : bytes)
         text += (uint8_t(c) >= 32 && uint8_t(c) < 127) ? QChar(c) : QChar('.');
@@ -107,6 +154,8 @@ QVariant BufferModel::data(const QModelIndex &index, int role) const {
 QVariant BufferModel::headerData(int n, Qt::Orientation orientation, int role) const {
     if (orientation != Qt::Horizontal || role != Qt::DisplayRole)
         return {};
-    return QStringList{"Offset", "Hexadecimal", "ASCII"}.value(n);
+    return (words_ ? QStringList{"Offset", "Hexadecimal", "uint32", "int32", "float32"}
+                   : QStringList{"Offset", "Hexadecimal", "ASCII"})
+        .value(n);
 }
 } // namespace flora

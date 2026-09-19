@@ -80,6 +80,15 @@ QString hex(Bytes bytes, size_t limit = 256) {
         QByteArray(reinterpret_cast<const char *>(bytes.data()), qsizetype(std::min(limit, bytes.size())))
             .toHex(' '));
 }
+QString boundaryLabel(const QJsonObject &report) {
+    auto when = report["value_time"].toString();
+    if (when == "capture_initial")
+        return "Initial";
+    auto event = report["event"].toString();
+    if (event.isEmpty())
+        return "Final";
+    return (when == "before_event" ? QString("Before %1") : QString("After %1")).arg(event);
+}
 } // namespace
 MainWindow::MainWindow() {
     buildUi();
@@ -90,6 +99,9 @@ MainWindow::MainWindow() {
     textureTimer_.setSingleShot(true);
     textureTimer_.setInterval(180);
     connect(&textureTimer_, &QTimer::timeout, this, &MainWindow::previewTexture);
+    bufferTimer_.setSingleShot(true);
+    bufferTimer_.setInterval(180);
+    connect(&bufferTimer_, &QTimer::timeout, this, &MainWindow::previewBuffer);
     timeout_.setSingleShot(true);
     timeout_.setInterval(180000);
     connect(&timeout_, &QTimer::timeout, this, [this] {
@@ -119,7 +131,14 @@ MainWindow::MainWindow() {
             shaderReflection_->clear();
             textureImage_->setImage({});
             textureLabel_->clear();
+            geometry_ = {};
+            geometryModel_->setTable({});
+            mesh_->setMesh({});
+            geometryLabel_->clear();
+            geometryDir_.reset();
             bufferModel_->setBytes({});
+            bufferLabel_->clear();
+            displayedBuffer_ = 0;
             report_ = {};
             image_->setImage({});
             setWindowTitle(QFileInfo(capturePath_).completeBaseName() + "[*] — FloraGPA");
@@ -479,11 +498,80 @@ void MainWindow::buildUi() {
     centerTabs_->addTab(shaderPane_, "Shader");
     bufferModel_ = new BufferModel(this);
     bufferView_ = table(bufferModel_);
+    bufferView_->setObjectName("bufferTable");
     bufferView_->setFont(QFont("Cascadia Mono", 10));
     bufferView_->setColumnWidth(0, 105);
     bufferView_->setColumnWidth(1, 420);
-    centerTabs_->addTab(bufferView_, "Buffer");
-    for (const auto &name : {"Geometry", "Pixel History", "Shader Debug"}) {
+    bufferPane_ = new QWidget;
+    auto bufferLayout = new QVBoxLayout(bufferPane_);
+    bufferLayout->setContentsMargins(0, 0, 0, 0);
+    bufferLayout->setSpacing(0);
+    auto bufferBar = new QToolBar;
+    bufferBoundary_ = new QComboBox;
+    bufferBoundary_->setObjectName("bufferBoundary");
+    bufferBoundary_->addItems({"Initial", "Before event", "After event"});
+    bufferBar->addWidget(bufferBoundary_);
+    bufferMode_ = new QComboBox;
+    bufferMode_->setObjectName("bufferMode");
+    bufferMode_->addItems({"Hex / ASCII", "32-bit words"});
+    bufferMode_->setToolTip("Numeric columns interpret raw storage; they are not inferred types.");
+    bufferBar->addWidget(bufferMode_);
+    bufferOffset_ = new QLineEdit("0");
+    bufferOffset_->setObjectName("bufferOffset");
+    bufferOffset_->setMaximumWidth(110);
+    bufferOffset_->setToolTip("Byte offset (decimal or 0x hex)");
+    bufferBar->addWidget(bufferOffset_);
+    bufferLength_ = new QLineEdit;
+    bufferLength_->setObjectName("bufferLength");
+    bufferLength_->setMaximumWidth(110);
+    bufferLength_->setPlaceholderText("To end");
+    bufferLength_->setToolTip("Byte length (empty reads to the end)");
+    bufferBar->addWidget(bufferLength_);
+    bufferBar->addAction("Read", this, &MainWindow::previewBuffer);
+    bufferBar->addAction("Export", this, &MainWindow::exportBuffer);
+    bufferLabel_ = new QLabel;
+    bufferLayout->addWidget(bufferBar);
+    bufferLayout->addWidget(bufferLabel_);
+    bufferLayout->addWidget(bufferView_);
+    centerTabs_->addTab(bufferPane_, "Buffer");
+    connect(bufferBoundary_, &QComboBox::currentIndexChanged, this, [this] { bufferTimer_.start(); });
+    connect(bufferMode_, &QComboBox::currentIndexChanged, this, [this](int mode) {
+        bufferModel_->setWords(mode == 1);
+        bufferView_->setColumnWidth(1, mode ? 145 : 420);
+    });
+    geometryPane_ = new QWidget;
+    auto geometryLayout = new QVBoxLayout(geometryPane_);
+    geometryLayout->setContentsMargins(0, 0, 0, 0);
+    geometryLayout->setSpacing(0);
+    auto geometryBar = new QToolBar;
+    geometryBar->addAction("Inspect IA", this, &MainWindow::inspectGeometry);
+    geometryBar->addAction("Export", this, &MainWindow::exportGeometry);
+    geometryTable_ = new QComboBox;
+    geometryTable_->addItem("Expanded vertices", "expanded_vertices");
+    geometryTable_->addItem("Unique vertices", "unique_vertices");
+    geometryTable_->addItem("Index mapping", "references");
+    geometryBar->addWidget(geometryTable_);
+    geometryLabel_ = new QLabel;
+    geometryBar->addWidget(geometryLabel_);
+    geometryLayout->addWidget(geometryBar);
+    auto geometrySplit = new QSplitter(Qt::Vertical);
+    mesh_ = new MeshView;
+    mesh_->setObjectName("iaMesh");
+    geometrySplit->addWidget(mesh_);
+    geometryModel_ = new GeometryModel(this);
+    geometryView_ = table(geometryModel_);
+    geometryView_->setObjectName("geometryTable");
+    geometryView_->horizontalHeader()->setStretchLastSection(false);
+    geometryView_->horizontalHeader()->setDefaultSectionSize(130);
+    geometrySplit->addWidget(geometryView_);
+    geometrySplit->setSizes({300, 220});
+    geometryLayout->addWidget(geometrySplit);
+    centerTabs_->addTab(geometryPane_, "Geometry");
+    connect(geometryTable_, &QComboBox::currentIndexChanged, this, [this] {
+        geometryModel_->setTable(
+            geometry_["tables"].toObject()[geometryTable_->currentData().toString()].toObject());
+    });
+    for (const auto &name : {"Pixel History", "Shader Debug"}) {
         int tab = centerTabs_->addTab(new QWidget, name);
         centerTabs_->setTabEnabled(tab, false);
         centerTabs_->setTabToolTip(tab, "Migration pending");
@@ -638,6 +726,9 @@ void MainWindow::replay(bool timings) {
 void MainWindow::startWorker(QStringList args, bool timings) {
     if (process_.state() != QProcess::NotRunning)
         return;
+    replayTimer_.stop();
+    textureTimer_.stop();
+    bufferTimer_.stop();
     jobDir_ = std::make_unique<QTemporaryDir>(QDir::tempPath() + "/FloraGPA-XXXXXX");
     if (!jobDir_->isValid()) {
         showError("Cannot create worker directory.");
@@ -680,6 +771,7 @@ void MainWindow::cancel() {
     ++revision_;
     replayTimer_.stop();
     textureTimer_.stop();
+    bufferTimer_.stop();
     if (process_.state() != QProcess::NotRunning) {
         if (job_)
             TerminateJobObject(job_, 1);
@@ -725,24 +817,63 @@ void MainWindow::finishWorker(int code, QProcess::ExitStatus status) {
             emit taskFinished(true);
             return;
         }
+        if (runningKind_ == "geometry") {
+            QFile geometryFile(jobDir_->path() + "/result/geometry.json");
+            if (!geometryFile.open(QIODevice::ReadOnly))
+                throw std::runtime_error("Geometry output is missing");
+            QJsonParseError parseError;
+            auto geometry = QJsonDocument::fromJson(geometryFile.readAll(), &parseError);
+            if (parseError.error != QJsonParseError::NoError)
+                throw std::runtime_error("Invalid geometry result");
+            geometry_ = geometry.object();
+            geometryModel_->setTable(
+                geometry_["tables"].toObject()[geometryTable_->currentData().toString()].toObject());
+            mesh_->setMesh(geometry_["mesh"].toObject());
+            geometryLabel_->setText(QString("  Event %1 · %2 references · %3 unique")
+                                        .arg(geometry_["event"].toString())
+                                        .arg(geometry_["vertex_references"].toInteger())
+                                        .arg(geometry_["unique_vertices"].toInteger()));
+            geometryDir_ = std::move(jobDir_);
+            centerTabs_->setCurrentWidget(geometryPane_);
+            statusBar()->showMessage("IA geometry ready", 3000);
+            emit taskFinished(true);
+            return;
+        }
+        if (runningKind_ == "buffer") {
+            QFile bufferFile(jobDir_->path() + "/result/buffer.bin");
+            if (!bufferFile.open(QIODevice::ReadOnly))
+                throw std::runtime_error("Buffer output is missing");
+            bufferModel_->setBytes(bufferFile.readAll(), uint64_t(report_["offset"].toInteger()));
+            displayedBuffer_ = report_["resource"].toString().toULongLong();
+            bufferLabel_->setText(QString("  B:%1 · %2 bytes · %3")
+                                      .arg(displayedBuffer_)
+                                      .arg(report_["length"].toInteger())
+                                      .arg(boundaryLabel(report_)));
+            statusBar()->showMessage("Buffer ready", 3000);
+            emit taskFinished(true);
+            return;
+        }
         QImage result(jobDir_->path() + "/result/frame.png");
         if (result.isNull())
             throw std::runtime_error("Worker output image is missing");
         if (runningKind_ == "texture") {
             textureImage_->setImage(std::move(result));
             textureImage_->channel(textureChannels_->currentText());
-            textureLabel_->setText(
-                QString("%1 × %2").arg(report_["width"].toInt()).arg(report_["height"].toInt()));
+            textureLabel_->setText(QString("%1 × %2 · %3")
+                                       .arg(report_["width"].toInt())
+                                       .arg(report_["height"].toInt())
+                                       .arg(boundaryLabel(report_)));
             statusBar()->showMessage("Texture ready", 3000);
             emit taskFinished(true);
             return;
         }
         image_->setImage(std::move(result));
         image_->channel(channels_->currentText());
-        imageLabel_->setText(QString("T:%1  ·  %2 × %3")
+        imageLabel_->setText(QString("T:%1  ·  %2 × %3 · %4")
                                  .arg(report_["resource"].toString())
                                  .arg(report_["width"].toInt())
-                                 .arg(report_["height"].toInt()));
+                                 .arg(report_["height"].toInt())
+                                 .arg(boundaryLabel(report_)));
         if (runningTimings_) {
             findChild<QTabWidget *>("inspectorTabs")->setCurrentWidget(metrics_);
             chart_->setTimings(report_["timings"].toArray());
@@ -814,11 +945,6 @@ void MainWindow::selectEvent(Id id) {
     }
     if (process_.state() != QProcess::NotRunning)
         cancel();
-    if (selectedResource_) {
-        auto type = frame_->entry(selectedResource_).type;
-        if (type >= 0x90 && type <= 0x95)
-            inspectResource(selectedResource_);
-    }
     replayTimer_.start();
 }
 void MainWindow::inspectEvent(Id id) {
@@ -912,12 +1038,15 @@ void MainWindow::inspectResource(Id id) {
             if (process_.state() != QProcess::NotRunning)
                 cancel();
             textureTimer_.stop();
+            bufferTimer_.stop();
         }
         selectedResource_ = id;
         auto resource = frame_->resource(id);
         QList<QPair<QString, QString>> values{{"ID", QString::number(id)},
                                               {"Type", QString("0x%1").arg(e.type, 4, 16, QChar('0'))},
                                               {"Device", QString::number(resource.device)}};
+        if (!resources_->debugNames(id).isEmpty())
+            values.append({"Name", resources_->debugNames(id)});
         if (e.type >= 0x8c && e.type <= 0x8f) {
             Reader r(frame_->payload(id));
             r.skip(16);
@@ -977,10 +1106,16 @@ void MainWindow::inspectResource(Id id) {
                                     "CPU access", "Misc flags", "Structure stride"};
             for (size_t i = 0; i < resource.desc.size(); ++i)
                 values.append(QPair<QString, QString>{names[int(i)], QString::number(resource.desc[i])});
-            auto bytes = resource.data ? frame_->data(resource.data) : Bytes{};
-            bufferModel_->setBytes(
-                QByteArray(reinterpret_cast<const char *>(bytes.data()), qsizetype(bytes.size())));
-            centerTabs_->setCurrentWidget(bufferView_);
+            bufferOffset_->setText("0");
+            bufferLength_->clear();
+            bufferModel_->setBytes({});
+            displayedBuffer_ = 0;
+            centerTabs_->setCurrentWidget(bufferPane_);
+            if (resource.data || bufferBoundary_->currentIndex() != 0) {
+                bufferLabel_->clear();
+                bufferTimer_.start();
+            } else
+                bufferLabel_->setText("  No initial bytes");
             values.append(QPair<QString, QString>{"Data", resource.data ? "Capture initial" : "Unavailable"});
         }
         if (e.type >= 0x84 && e.type <= 0x87) {
@@ -1050,6 +1185,35 @@ void MainWindow::compileShader() {
     runningEntry_ = shaderEntry_->text().trimmed();
     startWorker({"compile", capturePath_, "--id", QString::number(runningShader_)}, false);
 }
+void MainWindow::inspectGeometry() {
+    if (!frame_ || !selectedEvent_ || busy())
+        return;
+    replayTimer_.stop();
+    textureTimer_.stop();
+    bufferTimer_.stop();
+    startWorker({"geometry", capturePath_, "--event", QString::number(selectedEvent_)}, false);
+}
+void MainWindow::exportGeometry() {
+    if (!geometryDir_)
+        return;
+    auto root = QFileDialog::getExistingDirectory(this, "Export geometry");
+    if (root.isEmpty())
+        return;
+    auto base = root + "/FloraGPA-Geometry-" + geometry_["event"].toString(), path = base;
+    for (int i = 1; QFileInfo::exists(path); ++i)
+        path = base + '-' + QString::number(i);
+    if (!QDir().mkpath(path)) {
+        showError("Cannot create export directory.");
+        return;
+    }
+    QDir source(geometryDir_->path() + "/result");
+    for (auto file : source.entryList({"*.csv", "geometry.json", "geometry.obj"}, QDir::Files))
+        if (!QFile::copy(source.filePath(file), path + '/' + file)) {
+            showError("Geometry export failed.");
+            return;
+        }
+    statusBar()->showMessage("Geometry exported", 3000);
+}
 void MainWindow::previewTexture() {
     if (!frame_ || !selectedResource_)
         return;
@@ -1078,6 +1242,59 @@ void MainWindow::previewTexture() {
     }
     startWorker(args, false);
 }
+void MainWindow::previewBuffer() {
+    if (!frame_ || !selectedResource_ || frame_->entry(selectedResource_).type != 0x83)
+        return;
+    if (process_.state() != QProcess::NotRunning) {
+        cancel();
+        bufferTimer_.start();
+        return;
+    }
+    bool valid = false;
+    auto offset = bufferOffset_->text().toULongLong(&valid, 0);
+    if (!valid) {
+        showError("Invalid buffer offset.");
+        return;
+    }
+    QStringList args{"buffer",   capturePath_,           "--id", QString::number(selectedResource_),
+                     "--offset", QString::number(offset)};
+    if (!bufferLength_->text().trimmed().isEmpty()) {
+        auto length = bufferLength_->text().toULongLong(&valid, 0);
+        if (!valid) {
+            showError("Invalid buffer length.");
+            return;
+        }
+        args << "--length" << QString::number(length);
+    }
+    if (bufferBoundary_->currentIndex()) {
+        if (!selectedEvent_) {
+            showError("Select an API event first.");
+            return;
+        }
+        args << "--event" << QString::number(selectedEvent_);
+        if (bufferBoundary_->currentIndex() == 1)
+            args << "--before";
+    }
+    ++revision_;
+    bufferModel_->setBytes({});
+    displayedBuffer_ = 0;
+    bufferLabel_->clear();
+    startWorker(args, false);
+}
+void MainWindow::exportBuffer() {
+    if (!displayedBuffer_)
+        return;
+    auto path = QFileDialog::getSaveFileName(
+        this, "Export buffer", QString("buffer-%1.bin").arg(displayedBuffer_), "Binary data (*.bin)");
+    if (path.isEmpty())
+        return;
+    try {
+        writeFile(path, bufferModel_->bytes());
+        statusBar()->showMessage("Buffer exported", 3000);
+    } catch (const std::exception &error) {
+        showError(QString::fromUtf8(error.what()));
+    }
+}
 void MainWindow::updateExperimentActions() {
     if (!undoAction_)
         return;
@@ -1097,6 +1314,11 @@ void MainWindow::experimentChanged() {
     updateExperimentActions();
     if (process_.state() != QProcess::NotRunning)
         cancel();
+    if (selectedResource_) {
+        auto type = frame_->entry(selectedResource_).type;
+        if (type >= 0x90 && type <= 0x95)
+            inspectResource(selectedResource_);
+    }
     replayTimer_.start();
 }
 void MainWindow::openExperiment() {

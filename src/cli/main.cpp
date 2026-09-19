@@ -1,4 +1,6 @@
+#include "application/CaptureNames.h"
 #include "application/Experiment.h"
+#include "application/Geometry.h"
 #include "application/ShaderInspector.h"
 #include "core/Frame.h"
 #include "replay/Replay.h"
@@ -46,7 +48,7 @@ int main(int argc, char **argv) {
     p.setApplicationDescription("Native DX11 capture inspection and isolated replay");
     p.addHelpOption();
     p.addVersionOption();
-    p.addPositionalArgument("command", "inventory | replay | shader | buffer | texture | compile");
+    p.addPositionalArgument("command", "inventory | replay | shader | buffer | texture | compile | geometry");
     p.addPositionalArgument("capture", "DX11 .gpa_frame file");
     p.addOption({"out", "New or empty output directory", "path"});
     p.addOption({"experiment", "Compatible FloraGPA experiment project", "path"});
@@ -62,6 +64,8 @@ int main(int argc, char **argv) {
     p.addOption({"mip", "Texture mip level", "index", "0"});
     p.addOption({"layer", "Texture array layer", "index", "0"});
     p.addOption({"slice", "Texture depth slice", "index", "0"});
+    p.addOption({"offset", "Buffer byte offset", "bytes", "0"});
+    p.addOption({"length", "Buffer byte length (default: remaining bytes)", "bytes"});
     p.addOption({"suppress-draws", "Disable draw submissions (negative control)"});
     p.addOption({"disable", "Comma-separated disabled event IDs", "ids"});
     p.process(app);
@@ -106,6 +110,9 @@ int main(int argc, char **argv) {
                 throw std::runtime_error("Cannot create output directory");
         }
         if (command == "inventory") {
+            auto names = capturedNames(frame);
+            report.insert("debug_names",
+                          QJsonDocument::fromJson(QByteArray::fromStdString(names.dump())).object());
             QJsonArray events, resources;
             uint64_t draws = 0, dispatches = 0;
             for (const auto &[id, e] : frame.entries()) {
@@ -191,7 +198,8 @@ int main(int argc, char **argv) {
                              QByteArray::fromStdString(sources[i]["raw_hex"].get<std::string>())));
             }
             report.insert("id", p.value("id"));
-        } else if (command == "replay" || command == "buffer" || command == "texture") {
+        } else if (command == "replay" || command == "buffer" || command == "texture" ||
+                   command == "geometry") {
             if (out.isEmpty())
                 throw std::runtime_error("Replay requires --out");
             ReplayOptions options;
@@ -202,6 +210,11 @@ int main(int argc, char **argv) {
             options.before = p.isSet("before");
             if (p.isSet("event"))
                 options.until = parseId("event");
+            if (command == "geometry") {
+                if (!options.until)
+                    throw std::runtime_error("geometry requires --event");
+                options.before = true;
+            }
             for (auto x : p.value("disable").split(',', Qt::SkipEmptyParts)) {
                 bool ok;
                 auto id = x.toULongLong(&ok);
@@ -216,17 +229,61 @@ int main(int argc, char **argv) {
             }
             Replay replay(frame, options);
             report.insert("adapter", QString::fromStdString(replay.adapter()));
-            if (command != "texture" || options.until)
+            report.insert("event", options.until ? QJsonValue(QString::number(options.until))
+                                                 : QJsonValue(QJsonValue::Null));
+            report.insert("value_time",
+                          options.until ? (options.before ? "before_event" : "after_event") : "frame_end");
+            if ((command != "texture" && command != "buffer") || options.until)
                 replay.run([](Id event, size_t done, size_t total) {
                     QTextStream(stderr) << "progress " << event << ' ' << done << ' ' << total << Qt::endl;
                 });
-            if (command == "buffer") {
+            if (command == "geometry") {
+                auto geometry = inspectGeometry(frame, replay, options.until);
+                exportGeometry(geometry, out);
+                report.insert("event", QString::number(options.until));
+                report.insert("vertices", qint64(geometry["vertex_references"].get<uint64_t>()));
+                report.insert("unique_vertices", qint64(geometry["unique_vertices"].get<uint64_t>()));
+            } else if (command == "buffer") {
                 if (!p.isSet("id"))
                     throw std::runtime_error("buffer requires --id");
+                auto resource = frame.resource(parseId("id"));
+                if (resource.type != 0x83)
+                    throw std::runtime_error("Not a buffer resource");
+                if (!options.until && !resource.data)
+                    throw std::runtime_error("Buffer has no captured initial bytes; select an event");
                 auto bytes = replay.readBuffer(parseId("id"));
-                QByteArray raw(reinterpret_cast<const char *>(bytes.data()), qsizetype(bytes.size()));
+                auto offset = parseId("offset");
+                if (offset > bytes.size())
+                    throw std::runtime_error("Buffer offset exceeds resource size");
+                auto length = p.isSet("length") ? parseId("length") : bytes.size() - offset;
+                if (length > bytes.size() - offset)
+                    throw std::runtime_error("Buffer range exceeds resource size");
+                QByteArray raw(reinterpret_cast<const char *>(bytes.data() + offset), qsizetype(length));
                 save(out + "/buffer.bin", raw);
                 report.insert("sha256", digest(raw));
+                report.insert("resource", QString::number(resource.id));
+                report.insert("offset", qint64(offset));
+                report.insert("length", qint64(length));
+                report.insert("value_time", options.until ? (options.before ? "before_event" : "after_event")
+                                                          : "capture_initial");
+                QByteArray csv = "byte_offset,hex_bytes,uint32,int32,float32\n";
+                for (qsizetype pos = 0; pos < raw.size(); pos += 4) {
+                    auto word = raw.mid(pos, 4);
+                    csv += QByteArray::number(offset + pos) + ',' + word.toHex();
+                    if (word.size() == 4) {
+                        uint32_t u;
+                        int32_t i;
+                        float f;
+                        std::memcpy(&u, word.constData(), 4);
+                        std::memcpy(&i, word.constData(), 4);
+                        std::memcpy(&f, word.constData(), 4);
+                        csv += ',' + QByteArray::number(u) + ',' + QByteArray::number(i) + ',' +
+                               QByteArray::number(double(f), 'g', 17);
+                    } else
+                        csv += ",,,";
+                    csv += '\n';
+                }
+                save(out + "/words.csv", csv);
             } else {
                 auto image =
                     command == "texture"
