@@ -123,8 +123,25 @@ bindings between draw/dispatch snapshots. CB/CB1 calls validate resource flags a
 window alignment before applying native bindings. A selected boundary with missing
 captured output views, input layouts or unresolved SRV slots returns an error; later
 complete snapshots or ClearState restore binding validity. SRV replacement resolves
-only the overwritten slots in that shader stage. Setter editing and the experimental
-native pipeline-state UI are still being migrated.
+only the overwritten slots in that shader stage. Setter editing is still being migrated.
+
+**Pipeline > Replay State** reads actual D3D11 bindings at the selected command's
+before/after boundary through the isolated worker. It includes all six shader stages,
+CB1 windows, IA/RS/OM/SO and predication getters, view/sampler descriptors and extended
+rasterizer/blend/depth state. The same field filter, resource navigation and JSON export
+are available as in Captured State. Supported experiments apply to the inspection;
+draw boundaries retain scoped input clones and disabled commands' prepared bindings.
+Runtime object tokens preserve clone identity and ambiguous captured-ID provenance.
+SO live write cursors have no native getter and remain unknown. Unsupported replay
+commands and experiment types remain errors; this inspector does not enable them.
+Changing the selection, boundary, experiment or adapter invalidates previous results.
+
+```powershell
+.\out\FloraGPA\FloraGPA.Cli.exe replay-pipeline D:\captures\sample.gpa_frame --event 430 --before --out D:\results\pipeline
+```
+
+Omit `--before` for the command's after boundary. Inspection writes
+`replay-pipeline.json` without frame image readback.
 
 ```powershell
 .\out\FloraGPA\FloraGPA.Cli.exe commands D:\captures\sample.gpa_frame --out D:\results\api

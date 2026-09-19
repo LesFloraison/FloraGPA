@@ -19,7 +19,7 @@
 #include <QTreeWidget>
 
 namespace flora {
-class CapturedStateView;
+class CommandStateView;
 class MainWindow final : public QMainWindow {
     Q_OBJECT
   public:
@@ -96,7 +96,9 @@ class MainWindow final : public QMainWindow {
     Id displayedBuffer_ = 0;
     QTableView *apiView_, *resourceView_, *bufferView_;
     QTreeWidget *pipeline_, *properties_, *metrics_, *statistics_;
-    CapturedStateView *capturedState_;
+    CommandStateView *capturedState_;
+    CommandStateView *replayedState_;
+    uint64_t runningPipelineRequest_ = 0;
     QPlainTextEdit *shader_, *log_;
     QTabWidget *shaderPane_;
     QPlainTextEdit *sourceEditor_;

@@ -255,7 +255,7 @@
       "status": "partial",
       "native": [
         "src/application/CommandState.cpp",
-        "src/app/CapturedStateView.cpp",
+        "src/app/CommandStateView.cpp",
         "src/cli/main.cpp"
       ],
       "validation": [
@@ -263,7 +263,7 @@
         "All GF2/BF1 snapshot predictions: 86380 and 1545910 known fields; no differences; four BF1 unresolved-view notes retained",
         "tools/validate_command_state_port.py: 194 exact before/after field, order, provenance and note comparisons against Python on real captures and two independent synthetic fixtures",
         "tests/UiTests.cpp: asynchronous original-capture inspection, filters, resource/source navigation, stale-result rejection and GF2 Pipeline integration",
-        "Captured inspection and anchor audit migrated; no full clean-machine/multi-capture closure, and experiment-modified replay_pipeline remains a separate pending module"
+        "Captured inspection and anchor audit migrated; no full clean-machine/multi-capture closure, and experiment-modified replay_pipeline is tracked separately with remaining backend/editor gaps"
       ]
     },
     {
@@ -275,15 +275,16 @@
       "native": [
         "src/app/MainWindow.cpp",
         "src/app/Models.cpp",
-        "src/app/CapturedStateView.cpp",
+        "src/app/CommandStateView.cpp",
         "src/application/CommandState.cpp",
         "src/application/ApiCommands.cpp",
-        "src/application/QueryHistory.cpp"
+        "src/application/QueryHistory.cpp",
+        "src/application/ReplayPipeline.cpp"
       ],
       "validation": [
         "tests/UiTests.cpp: captured fields/offsets, reference texture navigation and resource filtering",
         "Captured before/after setter-state UI migrated with provenance, uncertainty filtering and navigation",
-        "JSON/CSV export and query interpretation in Inspector; full linked-record details, typed-view/sample selection and experiment-modified native replay-state UI remain pending"
+        "JSON/CSV export and query interpretation in Inspector; Replay State worker UI now reads supported experiments with stale-result rejection; full linked-record details and typed-view/sample selection remain pending"
       ]
     },
     {
@@ -593,7 +594,8 @@
       ],
       "validation": [
         "docs/NATIVE_BASELINE.md",
-        "Missing input-layout, SRV and output bindings reject selected unresolved boundaries; snapshots and ClearState restore validity, later SRV calls resolve only their own stage/range"
+        "Missing input-layout, SRV and output bindings reject selected unresolved boundaries; snapshots and ClearState restore validity, later SRV calls resolve only their own stage/range",
+        "Scoped before/after draw observers expose edited input bindings without duplicate submission; observer cleanup and experiment rollback verified on exceptions"
       ]
     },
     {
@@ -1751,9 +1753,20 @@
       "sha256": "601a7942147a76857a54cefb59449b09c149ec332fd66948b6c554c36b9f5041",
       "lines": 165,
       "description": "Native getters at experimental replay boundaries, including scoped clones.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": [
+        "src/application/ReplayPipeline.cpp",
+        "src/replay/Replay.cpp",
+        "src/app/CommandStateView.cpp",
+        "src/app/MainWindow.cpp",
+        "src/cli/main.cpp"
+      ],
+      "validation": [
+        "tests/ReplayPipelineTests.cpp: hardware/WARP command boundaries, scoped clone provenance, interned sampler identities, extended UAV slots, disabled commands, ClearState, repeated reads and exception rollback",
+        "tools/validate_replay_pipeline_port.py: 180 Python comparisons; 153 valid boundaries with 199818 exact fields and 27 expected rejections, including real GF2/BF1 commands and independent rasterizer-extension fixtures",
+        "tests/UiTests.cpp: Replay State worker integration, before/after boundaries, full JSON export while filtered, resource navigation, disabled/undo state and stale-result rejection",
+        "Native getter inspection and CLI/Qt paths migrated for supported replay commands and experiments; class/SO/predication execution and remaining pipeline/setter editors still limit full Python parity; live SO cursors remain unknown by design"
+      ]
     },
     {
       "module": "resource_names.py",

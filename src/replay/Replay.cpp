@@ -745,9 +745,17 @@ void Replay::command(const Entry &e) {
         withEventEdits(event, state, [&] {
             bind(state, t == 0x35 || t == 0x36);
             clearBindingGaps();
+            auto observe = [&](bool after) {
+                if (boundaryObserver_)
+                    boundaryObserver_(e.id, after, context_.Get(), objects_);
+            };
+            observe(false);
             if ((options_.before && e.id == options_.until) || options_.disabled.contains(e.id) ||
-                (options_.suppressDraws && t != 0x35 && t != 0x36))
+                (options_.suppressDraws && t != 0x35 && t != 0x36)) {
+                if (!(options_.before && e.id == options_.until))
+                    observe(true);
                 return false;
+            }
             const auto &a = event.args;
             if (options_.timings) {
                 Timestamp timestamp{e.id};
@@ -788,6 +796,7 @@ void Replay::command(const Entry &e) {
             counts[commandName(t)]++;
             if (options_.timings)
                 context_->End(timestamps_.back().end.Get());
+            observe(true);
             return true;
         });
         return;
@@ -916,7 +925,13 @@ void Replay::command(const Entry &e) {
     }
     counts[commandName(t)]++;
 }
-void Replay::run(const std::function<void(Id, size_t, size_t)> &progress) {
+void Replay::run(const std::function<void(Id, size_t, size_t)> &progress,
+                 const ReplayBoundaryObserver &observer) {
+    boundaryObserver_ = observer;
+    struct ResetObserver {
+        ReplayBoundaryObserver &value;
+        ~ResetObserver() { value = {}; }
+    } reset{boundaryObserver_};
     replayComplete_ = false;
     if (options_.until && frame_.entry(options_.until).category != 7)
         throw std::runtime_error("Stop event is not an API command");

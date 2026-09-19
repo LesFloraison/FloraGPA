@@ -33,7 +33,10 @@ struct Image {
     std::vector<uint8_t> rgba;
     Id resource{};
 };
+using ReplayBoundaryObserver =
+    std::function<void(Id, bool, ID3D11DeviceContext *, const std::map<Id, Com<IUnknown>> &)>;
 class Replay {
+    ReplayBoundaryObserver boundaryObserver_;
     struct Timestamp {
         Id event;
         Com<ID3D11Query> begin, end;
@@ -84,7 +87,9 @@ class Replay {
     std::map<std::string, uint64_t> counts;
     explicit Replay(const Frame &frame, ReplayOptions options = {});
     ~Replay();
-    void run(const std::function<void(Id, size_t, size_t)> &progress = {});
+    void run(const std::function<void(Id, size_t, size_t)> &progress = {},
+             const ReplayBoundaryObserver &observer = {});
+    const ReplayOptions &options() const { return options_; }
     Image output(Id texture = 0, uint32_t subresource = 0);
     Image previewTexture(Id texture, uint32_t mip = 0, uint32_t layer = 0, uint32_t slice = 0, double low = 0,
                          double high = 1, const std::string &channel = "rgba");

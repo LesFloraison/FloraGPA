@@ -1,14 +1,16 @@
 #include "StateCapture.h"
 #include "SyntheticCapture.h"
 #include "app/Appearance.h"
-#include "app/CapturedStateView.h"
+#include "app/CommandStateView.h"
 #include "app/MainWindow.h"
 #include <QAbstractItemModelTester>
 #include <QAction>
 #include <QCryptographicHash>
 #include <QDialog>
 #include <QDialogButtonBox>
+#include <QFileDialog>
 #include <QPushButton>
+#include <QScopeGuard>
 #include <QSignalSpy>
 #include <QTabWidget>
 #include <QtTest>
@@ -24,12 +26,181 @@ class UiTests final : public QObject {
         QVERIFY(window.grab().save(directory + '/' + name + ".png"));
     }
   private slots:
+    void replayStateStaleResults() {
+        using namespace flora;
+        using namespace flora::testing;
+        auto capture = computeCapture();
+        QTemporaryDir dir;
+        capture.save(dir.path() + "/state.gpa_frame");
+        auto frame = std::make_shared<Frame>((dir.path() + "/state.gpa_frame").toStdWString());
+        CommandStateView view(CommandStateView::Source::Replayed);
+        view.setSelection(frame, 100);
+        auto read = view.findChild<QAction *>("readReplayState");
+        auto fields = view.findChild<QTreeWidget *>("replayStateFields");
+        auto boundary = view.findChild<QComboBox *>("stateBoundary");
+        QSignalSpy requested(&view, &CommandStateView::replayRequested);
+        QSignalSpy finished(&view, &CommandStateView::inspectionFinished);
+        view.setWorkerBusy(true);
+        QVERIFY(!read->isEnabled());
+        view.setWorkerBusy(false);
+        read->trigger();
+        QCOMPARE(requested.size(), 1);
+        QVERIFY(!read->isEnabled());
+        auto token = requested.takeFirst()[2].toULongLong();
+        boundary->setCurrentIndex(1);
+        QVERIFY(!view.finishReplay(token, {{"error", "Old error"}}));
+        QVERIFY(read->isEnabled());
+        QCOMPARE(fields->topLevelItemCount(), 0);
+        QVERIFY(view.findChild<QLabel *>("stateSummary")->toolTip().isEmpty());
+        read->trigger();
+        token = requested.takeFirst()[2].toULongLong();
+        QVERIFY(!view.finishReplay(token - 1, {{"error", "Wrong request"}}));
+        QVERIFY(!read->isEnabled());
+        QVERIFY(!view.finishReplay(token, {{"error", "Current error"}}));
+        QVERIFY(read->isEnabled());
+        QCOMPARE(view.findChild<QLabel *>("stateSummary")->toolTip(), QString("Current error"));
+        read->trigger();
+        token = requested.takeFirst()[2].toULongLong();
+        view.invalidate();
+        QVERIFY(!view.finishReplay(token, {{"bad", "stale result"}}));
+        QVERIFY(read->isEnabled());
+        read->trigger();
+        token = requested.takeFirst()[2].toULongLong();
+        QVERIFY(!view.finishReplay(token, {{"bad", "malformed result"}}));
+        QCOMPARE(fields->topLevelItemCount(), 0);
+        QVERIFY(!view.findChild<QAction *>("exportReplayState")->isEnabled());
+        QCOMPARE(finished.size(), 4);
+    }
+    void replayStateInspector() {
+        using namespace flora;
+        auto captures = qEnvironmentVariable("FLORA_TEST_CAPTURE_DIR");
+        if (captures.isEmpty())
+            QSKIP("External captures not configured");
+        MainWindow window;
+        window.resize(1500, 950);
+        window.show();
+        QSignalSpy done(&window, &MainWindow::taskFinished);
+        window.openCapture(captures + "/GF2_Exilium_2026_03_03__00_19_35.gpa_frame");
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        done.clear();
+        auto api = window.findChild<QTableView *>("apiLog");
+        bool selected = false;
+        for (int i = 0; i < api->model()->rowCount(); ++i) {
+            auto index = api->model()->index(i, 0);
+            if (index.data(Qt::UserRole).toULongLong() == 430) {
+                api->setCurrentIndex(index);
+                selected = true;
+                break;
+            }
+        }
+        QVERIFY(selected);
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        done.clear();
+        auto view = window.findChild<CommandStateView *>("replayStateView");
+        QVERIFY(view);
+        auto tabs = window.findChild<QTabWidget *>("pipelineTabs");
+        window.findChild<QTabWidget *>("analysisTabs")->setCurrentWidget(tabs);
+        tabs->setCurrentWidget(view);
+        auto read = view->findChild<QAction *>("readReplayState");
+        auto exportAction = view->findChild<QAction *>("exportReplayState");
+        auto fields = view->findChild<QTreeWidget *>("replayStateFields");
+        auto boundary = view->findChild<QComboBox *>("stateBoundary");
+        auto search = view->findChild<QLineEdit *>("stateSearch");
+        auto summary = view->findChild<QLabel *>("stateSummary");
+        auto field = [&](const QString &name) -> QTreeWidgetItem * {
+            for (int i = 0; i < fields->topLevelItemCount(); ++i)
+                if (fields->topLevelItem(i)->text(0) == name)
+                    return fields->topLevelItem(i);
+            return nullptr;
+        };
+        QSignalSpy stateDone(view, &CommandStateView::inspectionFinished);
+        QVERIFY(read->isEnabled());
+        read->trigger();
+        QVERIFY(!read->isEnabled());
+        QTRY_VERIFY_WITH_TIMEOUT(!stateDone.empty(), 30000);
+        QVERIFY(stateDone.takeLast()[0].toBool());
+        done.clear();
+        QCOMPARE(fields->topLevelItemCount(), 1306);
+        QCOMPARE(field("so.offsets.0")->text(1), QString("Unknown"));
+        QVERIFY(field("so.offsets.0")->toolTip(2).contains("no getter"));
+        QVERIFY(field("vs.shader")->data(1, Qt::UserRole).toULongLong() != 0);
+        QVERIFY(field("vs.shader")->toolTip(1).contains("runtime_object"));
+        QVERIFY(summary->text().contains("Replay"));
+        search->setText("ps.");
+        snapshot(window, "replay-state-gf2");
+        QTemporaryDir exportDir;
+        const auto exportPath = exportDir.path() + "/pipeline.json";
+        const bool nativeDialogs = QCoreApplication::testAttribute(Qt::AA_DontUseNativeDialogs);
+        QCoreApplication::setAttribute(Qt::AA_DontUseNativeDialogs, true);
+        auto restore =
+            qScopeGuard([&] { QCoreApplication::setAttribute(Qt::AA_DontUseNativeDialogs, nativeDialogs); });
+        bool exported = false;
+        QTimer::singleShot(0, &view[0], [&] {
+            auto dialog = view->findChild<QFileDialog *>();
+            if (!dialog)
+                return;
+            dialog->selectFile(exportPath);
+            exported = true;
+            QMetaObject::invokeMethod(dialog, "accept", Qt::QueuedConnection);
+        });
+        exportAction->trigger();
+        QVERIFY(exported);
+        QFile saved(exportPath);
+        QVERIFY(saved.open(QIODevice::ReadOnly));
+        auto bytes = saved.readAll();
+        auto result = nlohmann::json::parse(bytes.constData(), bytes.constData() + bytes.size());
+        QCOMPARE(result["fields"].size(), size_t(1306));
+        QCOMPARE(result["source"], nlohmann::json("native_replay"));
+        read->trigger();
+        boundary->setCurrentIndex(1);
+        QTRY_VERIFY_WITH_TIMEOUT(!stateDone.empty(), 30000);
+        QVERIFY(!stateDone.takeLast()[0].toBool());
+        QCOMPARE(fields->topLevelItemCount(), 0);
+        QVERIFY(!exportAction->isEnabled());
+        done.clear();
+        QAction *toggle = nullptr, *undo = nullptr;
+        for (auto action : window.findChildren<QAction *>()) {
+            if (action->text() == "Disable Event")
+                toggle = action;
+            if (action->text() == "Undo")
+                undo = action;
+        }
+        QVERIFY(toggle && undo);
+        toggle->trigger();
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        done.clear();
+        read->trigger();
+        QTRY_VERIFY_WITH_TIMEOUT(!stateDone.empty(), 30000);
+        QVERIFY(stateDone.takeLast()[0].toBool());
+        done.clear();
+        QVERIFY(summary->text().contains("Experiment"));
+        QVERIFY(summary->text().contains("Disabled"));
+        snapshot(window, "replay-state-disabled");
+        undo->trigger();
+        QCOMPARE(fields->topLevelItemCount(), 0);
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        done.clear();
+        read->trigger();
+        QTRY_VERIFY_WITH_TIMEOUT(!stateDone.empty(), 30000);
+        QVERIFY(stateDone.takeLast()[0].toBool());
+        QVERIFY(!summary->text().contains("Disabled"));
+        search->clear();
+        auto shader = field("vs.shader");
+        QSignalSpy resource(view, &CommandStateView::resourceRequested);
+        QVERIFY(QMetaObject::invokeMethod(fields, "itemDoubleClicked", Qt::DirectConnection,
+                                          Q_ARG(QTreeWidgetItem *, shader), Q_ARG(int, 1)));
+        QCOMPARE(resource.size(), 1);
+    }
     void capturedStateInspector() {
         QTemporaryDir dir;
         auto capture = flora::testing::stateCapture();
         capture.save(dir.path() + "/state.gpa_frame");
         auto frame = std::make_shared<flora::Frame>((dir.path() + "/state.gpa_frame").toStdWString());
-        flora::CapturedStateView view;
+        flora::CommandStateView view;
         view.resize(1000, 640);
         view.show();
         auto read = view.findChild<QAction *>("readCapturedState");
@@ -38,7 +209,7 @@ class UiTests final : public QObject {
         auto boundary = view.findChild<QComboBox *>("stateBoundary");
         auto knowledge = view.findChild<QComboBox *>("stateKnowledge");
         auto search = view.findChild<QLineEdit *>("stateSearch");
-        QSignalSpy done(&view, &flora::CapturedStateView::inspectionFinished);
+        QSignalSpy done(&view, &flora::CommandStateView::inspectionFinished);
         auto field = [&](const QString &name) -> QTreeWidgetItem * {
             for (int i = 0; i < fields->topLevelItemCount(); ++i)
                 if (fields->topLevelItem(i)->text(0) == name)
@@ -78,8 +249,8 @@ class UiTests final : public QObject {
         read->trigger();
         QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 10000);
         QVERIFY(done.takeLast()[0].toBool());
-        QSignalSpy resource(&view, &flora::CapturedStateView::resourceRequested);
-        QSignalSpy event(&view, &flora::CapturedStateView::eventRequested);
+        QSignalSpy resource(&view, &flora::CommandStateView::resourceRequested);
+        QSignalSpy event(&view, &flora::CommandStateView::eventRequested);
         auto srv = field("ps.srv.0");
         QVERIFY(srv);
         QCOMPARE(srv->text(1), QString("6"));
@@ -316,7 +487,7 @@ class UiTests final : public QObject {
         });
         structure->trigger();
         QVERIFY(inspected);
-        auto stateView = window.findChild<flora::CapturedStateView *>();
+        auto stateView = window.findChild<flora::CommandStateView *>("capturedStateView");
         QVERIFY(stateView);
         QVERIFY(select(430));
         auto analysisTabs = window.findChild<QTabWidget *>("analysisTabs");
@@ -324,8 +495,10 @@ class UiTests final : public QObject {
         QVERIFY(analysisTabs && pipelineTabs);
         analysisTabs->setCurrentWidget(pipelineTabs);
         pipelineTabs->setCurrentWidget(stateView);
-        QSignalSpy stateDone(stateView, &flora::CapturedStateView::inspectionFinished);
-        stateView->findChild<QAction *>("readCapturedState")->trigger();
+        QSignalSpy stateDone(stateView, &flora::CommandStateView::inspectionFinished);
+        auto readState = stateView->findChild<QAction *>("readCapturedState");
+        QVERIFY(readState);
+        readState->trigger();
         QTRY_VERIFY_WITH_TIMEOUT(!stateDone.empty(), 30000);
         QVERIFY(stateDone.takeLast()[0].toBool());
         QVERIFY(stateView->findChild<QTreeWidget *>("capturedStateFields")->topLevelItemCount() > 1000);

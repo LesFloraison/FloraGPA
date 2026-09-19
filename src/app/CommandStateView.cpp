@@ -1,4 +1,4 @@
-#include "CapturedStateView.h"
+#include "CommandStateView.h"
 #include "application/CommandState.h"
 #include <QAction>
 #include <QComboBox>
@@ -13,8 +13,8 @@
 #include <QtConcurrent/QtConcurrentRun>
 
 namespace flora {
-CapturedStateView::CapturedStateView(QWidget *parent) : QWidget(parent) {
-    setObjectName("capturedStateView");
+CommandStateView::CommandStateView(Source source, QWidget *parent) : QWidget(parent), source_(source) {
+    setObjectName(source_ == Source::Captured ? "capturedStateView" : "replayStateView");
     auto layout = new QVBoxLayout(this);
     layout->setContentsMargins(0, 0, 0, 0);
     layout->setSpacing(0);
@@ -24,10 +24,10 @@ CapturedStateView::CapturedStateView(QWidget *parent) : QWidget(parent) {
     boundary_->addItems({"Before command", "After command"});
     bar->addWidget(boundary_);
     read_ = bar->addAction("Read");
-    read_->setObjectName("readCapturedState");
+    read_->setObjectName(source_ == Source::Captured ? "readCapturedState" : "readReplayState");
     read_->setEnabled(false);
     export_ = bar->addAction("Export JSON…");
-    export_->setObjectName("exportCapturedState");
+    export_->setObjectName(source_ == Source::Captured ? "exportCapturedState" : "exportReplayState");
     export_->setEnabled(false);
     bar->addSeparator();
     known_ = new QComboBox;
@@ -40,13 +40,13 @@ CapturedStateView::CapturedStateView(QWidget *parent) : QWidget(parent) {
     search_->setClearButtonEnabled(true);
     bar->addWidget(search_);
     layout->addWidget(bar);
-    summary_ = new QLabel("Original capture");
+    summary_ = new QLabel(sourceLabel());
     summary_->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Preferred);
     summary_->setMargin(6);
     summary_->setObjectName("stateSummary");
     layout->addWidget(summary_);
     fields_ = new QTreeWidget;
-    fields_->setObjectName("capturedStateFields");
+    fields_->setObjectName(source_ == Source::Captured ? "capturedStateFields" : "replayStateFields");
     fields_->setHeaderLabels({"Field", "Value", "Source", "Event"});
     fields_->setRootIsDecorated(false);
     fields_->setAlternatingRowColors(true);
@@ -56,13 +56,13 @@ CapturedStateView::CapturedStateView(QWidget *parent) : QWidget(parent) {
     fields_->setColumnWidth(2, 125);
     fields_->header()->setStretchLastSection(true);
     layout->addWidget(fields_);
-    connect(read_, &QAction::triggered, this, &CapturedStateView::read);
+    connect(read_, &QAction::triggered, this, &CommandStateView::read);
     connect(boundary_, &QComboBox::currentIndexChanged, this, [this] {
         ++revision_;
         clear();
     });
-    connect(search_, &QLineEdit::textChanged, this, &CapturedStateView::filter);
-    connect(known_, &QComboBox::currentIndexChanged, this, &CapturedStateView::filter);
+    connect(search_, &QLineEdit::textChanged, this, &CommandStateView::filter);
+    connect(known_, &QComboBox::currentIndexChanged, this, &CommandStateView::filter);
     connect(fields_, &QTreeWidget::itemDoubleClicked, this, [this](QTreeWidgetItem *row, int column) {
         auto id = row->data(column, Qt::UserRole).toULongLong();
         if (id && column == 1)
@@ -73,8 +73,9 @@ CapturedStateView::CapturedStateView(QWidget *parent) : QWidget(parent) {
     connect(export_, &QAction::triggered, this, [this] {
         if (result_.is_null())
             return;
-        auto path = QFileDialog::getSaveFileName(this, "Export Captured State", "command-state.json",
-                                                 "JSON (*.json)");
+        auto path = QFileDialog::getSaveFileName(
+            this, "Export Pipeline State",
+            source_ == Source::Captured ? "command-state.json" : "replay-pipeline.json", "JSON (*.json)");
         if (path.isEmpty())
             return;
         auto bytes = QByteArray::fromStdString(result_.dump(2) + "\n");
@@ -82,42 +83,76 @@ CapturedStateView::CapturedStateView(QWidget *parent) : QWidget(parent) {
         if (!file.open(QIODevice::WriteOnly) || file.write(bytes) != bytes.size() || !file.commit())
             summary_->setText("Export failed");
     });
-    connect(&watcher_, &QFutureWatcher<nlohmann::json>::finished, this, [this] {
-        read_->setEnabled(bool(frame_) && event_);
-        if (runningRevision_ != revision_) {
-            emit inspectionFinished(false);
-            return;
-        }
-        result_ = watcher_.result();
-        if (result_.contains("error")) {
-            summary_->setText("Inspection failed");
-            summary_->setToolTip(QString::fromStdString(result_["error"]));
-            result_ = nullptr;
-            emit inspectionFinished(false);
-            return;
-        }
-        populate();
-        export_->setEnabled(true);
-        emit inspectionFinished(true);
-    });
+    connect(&watcher_, &QFutureWatcher<nlohmann::json>::finished, this,
+            [this] { complete(watcher_.result(), runningRevision_); });
 }
-CapturedStateView::~CapturedStateView() { watcher_.waitForFinished(); }
-void CapturedStateView::setSelection(std::shared_ptr<const Frame> frame, Id event) {
-    frame_ = std::move(frame);
-    event_ = event;
+CommandStateView::~CommandStateView() { watcher_.waitForFinished(); }
+QString CommandStateView::sourceLabel() const {
+    return source_ == Source::Captured ? "Original capture" : "Replay";
+}
+void CommandStateView::setWorkerBusy(bool busy) {
+    workerBusy_ = busy;
+    read_->setEnabled(bool(frame_) && event_ && !watcher_.isRunning() && !replayPending_ &&
+                      (source_ == Source::Captured || !workerBusy_));
+}
+bool CommandStateView::finishReplay(uint64_t request, nlohmann::json result) {
+    if (source_ != Source::Replayed || request != runningRevision_ || !replayPending_)
+        return false;
+    replayPending_ = false;
+    return complete(std::move(result), request);
+}
+bool CommandStateView::complete(nlohmann::json result, uint64_t request) {
+    setWorkerBusy(workerBusy_);
+    if (request != revision_) {
+        emit inspectionFinished(false);
+        return false;
+    }
+    if (result.is_null() || result.contains("error")) {
+        fields_->clear();
+        result_ = nullptr;
+        export_->setEnabled(false);
+        summary_->setText("Inspection failed");
+        summary_->setToolTip(result.is_null() ? "No pipeline state returned"
+                                              : QString::fromStdString(result.at("error")));
+        emit inspectionFinished(false);
+        return false;
+    }
+    try {
+        result_ = std::move(result);
+        populate();
+    } catch (const std::exception &error) {
+        result_ = nullptr;
+        fields_->clear();
+        export_->setEnabled(false);
+        summary_->setText("Inspection failed");
+        summary_->setToolTip(QString::fromUtf8(error.what()));
+        emit inspectionFinished(false);
+        return false;
+    }
+    export_->setEnabled(true);
+    emit inspectionFinished(true);
+    return true;
+}
+void CommandStateView::invalidate() {
     ++revision_;
     clear();
 }
-void CapturedStateView::clear() {
+void CommandStateView::setSelection(std::shared_ptr<const Frame> frame, Id event) {
+    frame_ = std::move(frame);
+    event_ = event;
+    invalidate();
+}
+void CommandStateView::clear() {
     result_ = nullptr;
     fields_->clear();
     export_->setEnabled(false);
-    read_->setEnabled(bool(frame_) && event_ && !watcher_.isRunning());
-    summary_->setText(event_ ? QString("Event %1 · Original capture").arg(event_) : "Original capture");
+    setWorkerBusy(workerBusy_);
+    summary_->setText(event_ ? QString("Event %1 · %2").arg(event_).arg(sourceLabel()) : sourceLabel());
     summary_->setToolTip({});
 }
-void CapturedStateView::read() {
-    if (!frame_ || !event_ || watcher_.isRunning())
+void CommandStateView::read() {
+    if (!frame_ || !event_ || watcher_.isRunning() || replayPending_ ||
+        (source_ == Source::Replayed && workerBusy_))
         return;
     runningRevision_ = revision_;
     auto frame = frame_;
@@ -125,6 +160,15 @@ void CapturedStateView::read() {
     bool after = boundary_->currentIndex() == 1;
     read_->setEnabled(false);
     export_->setEnabled(false);
+    if (source_ == Source::Replayed) {
+        result_ = nullptr;
+        fields_->clear();
+        replayPending_ = true;
+        summary_->setText("Replaying…");
+        summary_->setToolTip({});
+        emit replayRequested(event, after, runningRevision_);
+        return;
+    }
     summary_->setText("Reconstructing…");
     watcher_.setFuture(QtConcurrent::run([frame, event, after] {
         try {
@@ -134,16 +178,22 @@ void CapturedStateView::read() {
         }
     }));
 }
-void CapturedStateView::populate() {
+void CommandStateView::populate() {
     fields_->clear();
     if (result_.contains("unavailable")) {
         summary_->setText("State unavailable");
         summary_->setToolTip(QString::fromStdString(result_["unavailable"]));
         return;
     }
-    summary_->setText(QString("Event %1 · Context %2 · Original capture · %3 known / %4 unknown")
+    auto label = sourceLabel();
+    if (result_.value("experiment_applied", false))
+        label += " · Experiment";
+    if (!result_.value("command_enabled", true))
+        label += " · Disabled";
+    summary_->setText(QString("Event %1 · Context %2 · %3 · %4 known / %5 unknown")
                           .arg(event_)
                           .arg(result_["context"].get<Id>())
+                          .arg(label)
                           .arg(result_["known_fields"].get<uint64_t>())
                           .arg(result_["unknown_fields"].get<uint64_t>()));
     summary_->setToolTip(QString::fromStdString(
@@ -159,7 +209,7 @@ void CapturedStateView::populate() {
                                                  QString::fromStdString(source["kind"]), event});
         row->setData(0, Qt::UserRole, known);
         row->setToolTip(0, row->text(0));
-        row->setToolTip(1, text);
+        row->setToolTip(1, field.contains("object") ? QString::fromStdString(field["object"].dump(2)) : text);
         row->setToolTip(2, QString::fromStdString(source.dump(2)));
         if (!source["event"].is_null()) {
             row->setData(3, Qt::UserRole, QVariant::fromValue<qulonglong>(source["event"].get<Id>()));
@@ -170,13 +220,13 @@ void CapturedStateView::populate() {
             auto found = frame_->entries().find(id);
             if (found != frame_->entries().end() && found->second.category == 5) {
                 row->setData(1, Qt::UserRole, QVariant::fromValue<qulonglong>(id));
-                row->setToolTip(1, text + "\nDouble-click to inspect resource");
+                row->setToolTip(1, row->toolTip(1) + "\nDouble-click to inspect resource");
             }
         }
     }
     filter();
 }
-void CapturedStateView::filter() {
+void CommandStateView::filter() {
     auto term = search_->text().trimmed();
     for (int i = 0; i < fields_->topLevelItemCount(); ++i) {
         auto row = fields_->topLevelItem(i);

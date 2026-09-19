@@ -1,5 +1,5 @@
 #include "MainWindow.h"
-#include "CapturedStateView.h"
+#include "CommandStateView.h"
 #include "application/CommandEdits.h"
 #include "application/Constants.h"
 #include "application/ContextInspector.h"
@@ -135,6 +135,7 @@ MainWindow::MainWindow() {
             chart_->clear();
             pipeline_->clear();
             capturedState_->setSelection(frame_, 0);
+            replayedState_->setSelection(frame_, 0);
             metrics_->clear();
             properties_->clear();
             shader_->clear();
@@ -217,6 +218,9 @@ MainWindow::MainWindow() {
             timeout_.stop();
             setBusy(false);
             showError(process_.errorString());
+            if (runningKind_ == "replay-pipeline")
+                replayedState_->finishReplay(runningPipelineRequest_,
+                                             {{"error", process_.errorString().toStdString()}});
             emit taskFinished(false);
         }
     });
@@ -511,11 +515,29 @@ void MainWindow::buildUi() {
     pipelineTabs->setObjectName("pipelineTabs");
     pipelineTabs->setDocumentMode(true);
     pipelineTabs->addTab(pipeline_, "Snapshot");
-    capturedState_ = new CapturedStateView;
+    capturedState_ = new CommandStateView;
     pipelineTabs->addTab(capturedState_, "Captured State");
+    replayedState_ = new CommandStateView(CommandStateView::Source::Replayed);
+    pipelineTabs->addTab(replayedState_, "Replay State");
     centerTabs_->addTab(pipelineTabs, "Pipeline");
-    connect(capturedState_, &CapturedStateView::eventRequested, this, &MainWindow::locateEvent);
-    connect(capturedState_, &CapturedStateView::resourceRequested, this, &MainWindow::inspectResource);
+    connect(capturedState_, &CommandStateView::eventRequested, this, &MainWindow::locateEvent);
+    connect(capturedState_, &CommandStateView::resourceRequested, this, &MainWindow::inspectResource);
+    connect(replayedState_, &CommandStateView::eventRequested, this, &MainWindow::locateEvent);
+    connect(replayedState_, &CommandStateView::resourceRequested, this, &MainWindow::inspectResource);
+    connect(replayedState_, &CommandStateView::replayRequested, this,
+            [this](qulonglong event, bool after, qulonglong request) {
+                runningPipelineRequest_ = request;
+                if (busy() || !frame_) {
+                    replayedState_->finishReplay(request, {{"error", "Worker is busy"}});
+                    return;
+                }
+                QStringList args{"replay-pipeline", capturePath_, "--event", QString::number(event)};
+                if (!after)
+                    args << "--before";
+                startWorker(args, false);
+                if (process_.state() == QProcess::NotRunning)
+                    replayedState_->finishReplay(request, {{"error", "Cannot start pipeline inspection"}});
+            });
     shader_ = new QPlainTextEdit;
     shader_->setReadOnly(true);
     shader_->setLineWrapMode(QPlainTextEdit::NoWrap);
@@ -773,6 +795,7 @@ void MainWindow::buildUi() {
         }
     });
     connect(adapter_, &QComboBox::currentIndexChanged, this, [this] {
+        replayedState_->invalidate();
         ++revision_;
         if (process_.state() != QProcess::NotRunning)
             cancel();
@@ -818,6 +841,7 @@ void MainWindow::closeEvent(QCloseEvent *e) {
     e->accept();
 }
 void MainWindow::setBusy(bool busy) {
+    replayedState_->setWorkerBusy(busy);
     openAction_->setEnabled(!busy);
     replayAction_->setEnabled(!busy && bool(frame_));
     collectAction_->setEnabled(!busy && bool(frame_));
@@ -933,6 +957,8 @@ void MainWindow::finishWorker(int code, QProcess::ExitStatus status) {
     }
     setBusy(false);
     if (runningRevision_ != revision_) {
+        if (runningKind_ == "replay-pipeline")
+            replayedState_->finishReplay(runningPipelineRequest_, {{"error", "Cancelled"}});
         statusBar()->showMessage("Cancelled", 2000);
         emit taskFinished(false);
         return;
@@ -949,6 +975,17 @@ void MainWindow::finishWorker(int code, QProcess::ExitStatus status) {
         report_ = QJsonDocument::fromJson(file.readAll(), &error).object();
         if (error.error != QJsonParseError::NoError || !report_["completed"].toBool())
             throw std::runtime_error("Worker did not complete");
+        if (runningKind_ == "replay-pipeline") {
+            QFile stateFile(jobDir_->path() + "/result/replay-pipeline.json");
+            if (!stateFile.open(QIODevice::ReadOnly))
+                throw std::runtime_error("Pipeline state output is missing");
+            auto bytes = stateFile.readAll();
+            auto state = nlohmann::json::parse(bytes.constData(), bytes.constData() + bytes.size());
+            auto accepted = replayedState_->finishReplay(runningPipelineRequest_, std::move(state));
+            statusBar()->showMessage(accepted ? "Replay state ready" : "Pipeline result discarded", 3000);
+            emit taskFinished(accepted);
+            return;
+        }
         if (runningKind_ == "compile") {
             QFile binary(jobDir_->path() + "/result/replacement.dxbc");
             if (!binary.open(QIODevice::ReadOnly))
@@ -1044,6 +1081,8 @@ void MainWindow::finishWorker(int code, QProcess::ExitStatus status) {
         emit taskFinished(true);
     } catch (const std::exception &e) {
         showError(QString::fromUtf8(e.what()));
+        if (runningKind_ == "replay-pipeline")
+            replayedState_->finishReplay(runningPipelineRequest_, {{"error", e.what()}});
         emit taskFinished(false);
     }
 }
@@ -1084,6 +1123,7 @@ void MainWindow::selectEvent(Id id) {
         return;
     selectedEvent_ = id;
     capturedState_->setSelection(frame_, id);
+    replayedState_->setSelection(frame_, id);
     selectedResource_ = 0;
     clearBufferDetails();
     updateExperimentActions();
@@ -1680,6 +1720,7 @@ void MainWindow::updateExperimentActions() {
         editable && experiment_ && !experiment_->enabled(selectedEvent_) ? "Enable Event" : "Disable Event");
 }
 void MainWindow::experimentChanged() {
+    replayedState_->invalidate();
     projectDirty_ = true;
     setWindowModified(true);
     ++revision_;

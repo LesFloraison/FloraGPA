@@ -11,9 +11,10 @@ GF2 与 BF1 DX11 捕获。**尚未完成原 Python 版本的全部功能迁移�
 | 工程 | C++20、VS2022 x64、Qt 6.11.2、CMake、Git、独立 CLI/Worker | 尚未配置远程仓库 |
 | 捕获与重放 | 有边界检查的 IGPA v3 读取、六阶段状态、基本 D3D11 资源和 draw/dispatch、Map/更新/复制/清除 | 特殊 replay 路径尚未完全迁移 |
 | 主界面 | GPA 式深色三栏、真实 GPU 时间柱状图与概览、可停靠面板、API 筛选、任务取消 | 概览尚无范围拖动；未知功能页禁用 |
-| 事件 | draw/dispatch 选择、快照管线、前后边界重放、事件启停 | 实验后的完整命令级原生绑定读取仍待迁移 |
+| 事件 | draw/dispatch 选择、快照管线、前后边界重放、事件启停 | 部分命令执行及 setter 实验仍待迁移 |
 | 捕获命令状态 | 六阶段 setter、CB1 范围、IA/RS/OM/SO/predicate 参数、扩展 UAV 槽元数据；命令前/后、逐字段来源、资源重叠失效与快照校准；Pipeline 页异步读取、筛选、跳转、JSON 导出 | 原始捕获状态，不应用实验；只读 DSV / 模糊 3D 重叠保持未知；SO 偏移是 setter 参数，隐藏 counter 和实时写入位置不由此推断 |
-| 命令间输入绑定 | 实际执行 IA layout / VB / IB、六阶段 SRV / sampler、CB / CB1；验证槽位、数组、资源类型、IA bind flags、stride 和 CB1 对齐 / 驱动支持；缺失绑定按阶段 / 槽位追踪 | 缺失资源未被后续 setter / 完整快照 / ClearState 恢复时，选定边界明确失败；setter 编辑及实验后的完整原生管线界面仍待迁移 |
+| 命令间输入绑定 | 实际执行 IA layout / VB / IB、六阶段 SRV / sampler、CB / CB1；验证槽位、数组、资源类型、IA bind flags、stride 和 CB1 对齐 / 驱动支持；缺失绑定按阶段 / 槽位追踪 | 缺失资源未被后续 setter / 完整快照 / ClearState 恢复时，选定边界明确失败；setter 编辑仍待迁移 |
+| 重放管线状态 | Pipeline > Replay State 通过 Worker 读取实际六阶段绑定、CB1 范围、IA/RS/OM/SO/predicate、视图及状态描述；命令前/后、实验输入克隆、禁用状态、筛选、跳转和 JSON 导出 | 仅覆盖后端已支持的命令和实验；SO 实时写入位置保持未知；class/SO/predication 等执行路径和完整管线编辑仍待迁移 |
 | API 检查 | 捕获字段、偏移/原始位、可选数组、引用跳转、资源/多词筛选、JSON/CSV 导出；getter、annotation、query 与 command-list 调用元数据 | 解码不代表执行；annotation 层级和 view typed-format 预览衔接尚未闭合 |
 | Context / command-list | 五种 context 接口身份、immediate/deferred 区分；缺失 context 的严格 Map READ 证据恢复；command-list 资源、owner 和 Execute/Finish 清单；Qt 字段树、证据导航、JSON 导出 | 推断不补造版本/指针/标志；保留指针与 ID 候选冲突；与 Python 相同，仅接受 immediate-context 的 Finish 空操作，未恢复列表执行 |
 | 捕获查询值 | 按同 ID、命令顺序使用 GetDesc/GetDataSize/CreateQuery/predicate 元数据；BOOL 完整值与 UINT64 低位、缺失字节、HRESULT/冲突状态 | 表示捕获时保存的内存字，不是新执行的 GPU query；原始高位缺失时保持不完整 |
@@ -35,7 +36,15 @@ GF2 与 BF1 DX11 捕获。**尚未完成原 Python 版本的全部功能迁移�
   加上 GF2 / BF1 的实际边界，131 组捕获与拒绝路径对照通过，77 个有效边界共
   87,164 个字段与 Python 一致；BF1 25572 之后缺失输出绑定的拒绝行为也与原版一致。
   KEEP-RTV 调用忽略缺失 DSV 参数，错误视图类型、非法 KEEP 和 RTV/UAV 槽位重叠明确拒绝。
-  这不代表 setter 实验、完整 native pipeline getter/UI 或任意捕获已完成迁移。
+  这不代表 setter 实验或任意捕获已完成迁移；原生管线检查的证据另列如下。
+
+- 重放管线检查的 180 组 Python 对照全部通过：153 个有效命令边界共 199,818 个字段，
+  包括值、来源、对象标记、描述和限制；另有 27 个预期拒绝边界。覆盖硬件/WARP、
+  六阶段绑定、扩展 UAV 槽、rasterizer 扩展描述、共享 sampler 身份、CB/SRV 临时克隆、
+  禁用与撤销、ClearState，以及 GF2/BF1 边界。命令前检查不提交 draw/dispatch，重复
+  读取不累计 GPU 写入；回调异常恢复实验存储。Qt 测试覆盖 Worker 读取、完整 JSON
+  导出、筛选、资源跳转、禁用/撤销及过期结果丢弃。截图位于
+  `artifacts/replay-pipeline-ui/`，对照结果位于 `artifacts/replay-pipeline-comparison-2/`。
 
 - GF2：72 draw、0 dispatch、44 Map；BF1：1202 draw、73 dispatch、4151 Map。
   两者 RGBA SHA-256 均与 Python 基线相同，详见 `NATIVE_BASELINE.md`。
@@ -86,7 +95,8 @@ GF2 与 BF1 DX11 捕获。**尚未完成原 Python 版本的全部功能迁移�
 - UAV counter 的 32 组 Python 对照通过：29 组缓冲区逐字节一致；BF1 的 3 组并行 Append
   输出按完整元素多重集合比较，未写入区域逐字节一致，计数和元数据全部一致。
   Qt 测试覆盖溢出拒绝、最大 uint32 编辑、实际 Worker 读回、撤销/重做与过期结果失效。
-- Release 与 Debug 的十三组 CTest 均通过。不是“所有原版测试已通过”。
+- 当前 Release 的 15 项 CTest 全部通过；Debug 的 14 项非 UI 测试及修正控件定位后的
+  完整 UI 测试均通过。不是“所有原版测试已通过”。
 - API 检查与 Python 对照：GF2 全部 920 条、BF1 全部 18,024 条记录的字段、偏移、原始位、
   引用、状态、query 元数据及解析后的 CSV 一致；另验证 BF1 资源/多词组合筛选。
   合成捕获的 3,948 条记录覆盖固定/可选数组布局、逐字节截断、尾随字节、无效 flag、
@@ -153,6 +163,14 @@ Context 证据为 `context-fixture/`、`context-validation-1/validation.json`、
 `validation-bindings-final-package/`。本批 Release / Debug 各 14 项完整回归日志为
 `ctest-input-bindings-release-final.log`、`ctest-input-bindings-debug.log`；随后 KEEP 修正
 另经上述 Release / Debug 输入绑定测试、Python 对照和最终发布包重放检查。
+重放管线检查的 CTest 日志为 `ctest-replay-pipeline-release.log`、
+`ctest-replay-pipeline-debug.log` 与 `ctest-replay-pipeline-debug-ui-fixed.log`。
+Debug 首轮暴露旧 UI 测试按类型取错页面的问题，改为按对象名定位后完整 UI 回归通过。
+发布包为 `out/FloraGPA-pipeline/`；仅系统 PATH 的 180 组管线对照保存在
+`replay-pipeline-package-comparison/validation.json`，两份黄金帧及关闭 draw 的负对照为
+`validation-pipeline-package/validation.json`。
+同样隔离 PATH 的发布版 GUI/Worker 已完成打开捕获、重放、GPU 指标采集和离屏窗口
+渲染，截图为 `replay-pipeline-ui/package-isolated.png`。
 
 ## 尚未闭合的迁移范围
 

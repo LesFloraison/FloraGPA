@@ -550,6 +550,18 @@ bool isStateResourceField(const std::string &key) {
            key.find(".uav.") != key.npos || key.starts_with("rtv.") || key.starts_with("vb.") ||
            key.starts_with("so.targets.");
 }
+const std::vector<std::string> &commandStateFieldNames() {
+    static const auto names = [] {
+        std::vector<std::string> result;
+        for (const auto &[key, value] : defaults())
+            result.push_back(key);
+        return result;
+    }();
+    return names;
+}
+std::optional<Id> stateCommandContext(const Frame &frame, const Json &command) {
+    return commandContext(frame, command);
+}
 Json inspectCommandState(const Frame &frame, Id event, bool after, const Json *commands) {
     Json decoded;
     if (!commands) {

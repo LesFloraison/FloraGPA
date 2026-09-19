@@ -5,6 +5,7 @@
 #include "application/ContextInspector.h"
 #include "application/Experiment.h"
 #include "application/Geometry.h"
+#include "application/ReplayPipeline.h"
 #include "application/ShaderInspector.h"
 #include "application/UavCounterInspector.h"
 #include "core/BufferBindings.h"
@@ -56,7 +57,7 @@ int main(int argc, char **argv) {
     p.addVersionOption();
     p.addPositionalArgument(
         "command", "inventory | commands | command-state | contexts | command-lists | replay | shader | "
-                   "buffer | texture | compile | geometry");
+                   "buffer | texture | compile | geometry | replay-pipeline");
     p.addPositionalArgument("capture", "DX11 .gpa_frame file");
     p.addOption({"out", "New or empty output directory", "path"});
     p.addOption({"experiment", "Compatible FloraGPA experiment project", "path"});
@@ -228,7 +229,7 @@ int main(int argc, char **argv) {
             }
             report.insert("id", p.value("id"));
         } else if (command == "replay" || command == "buffer" || command == "texture" ||
-                   command == "geometry") {
+                   command == "geometry" || command == "replay-pipeline") {
             if (out.isEmpty())
                 throw std::runtime_error("Replay requires --out");
             ReplayOptions options;
@@ -262,10 +263,17 @@ int main(int argc, char **argv) {
                                                  : QJsonValue(QJsonValue::Null));
             report.insert("value_time",
                           options.until ? (options.before ? "before_event" : "after_event") : "frame_end");
-            if ((command != "texture" && command != "buffer") || options.until)
-                replay.run([](Id event, size_t done, size_t total) {
-                    QTextStream(stderr) << "progress " << event << ' ' << done << ' ' << total << Qt::endl;
-                });
+            auto progress = [](Id event, size_t done, size_t total) {
+                QTextStream(stderr) << "progress " << event << ' ' << done << ' ' << total << Qt::endl;
+            };
+            if (command == "replay-pipeline") {
+                auto pipeline = inspectReplayPipeline(frame, replay, p.isSet("experiment"), progress);
+                save(out + "/replay-pipeline.json", QByteArray::fromStdString(pipeline.dump(2) + "\n"));
+                report.insert("value_time", options.before ? "before_command" : "after_command");
+                report.insert("known_fields", qint64(pipeline["known_fields"].get<uint64_t>()));
+                report.insert("unknown_fields", qint64(pipeline["unknown_fields"].get<uint64_t>()));
+            } else if ((command != "texture" && command != "buffer") || options.until)
+                replay.run(progress);
             if (command == "geometry") {
                 nlohmann::json geometry;
                 replay.inspectEventInputs(options.until,
@@ -355,7 +363,7 @@ int main(int argc, char **argv) {
                     csv += '\n';
                 }
                 save(out + "/words.csv", csv);
-            } else {
+            } else if (command != "replay-pipeline") {
                 auto image =
                     command == "texture"
                         ? replay.previewTexture(parseId("id"), parseIndex("mip"), parseIndex("layer"),
