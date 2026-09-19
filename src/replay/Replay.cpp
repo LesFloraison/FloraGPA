@@ -683,50 +683,53 @@ void Replay::command(const Entry &e) {
         auto event = frame_.event(e.id);
         immediate(event.context);
         auto state = frame_.state(event.state);
-        bind(state, t == 0x35 || t == 0x36);
-        if ((options_.before && e.id == options_.until) || options_.disabled.contains(e.id) ||
-            (options_.suppressDraws && t != 0x35 && t != 0x36))
-            return;
-        const auto &a = event.args;
-        if (options_.timings) {
-            Timestamp timestamp{e.id};
-            D3D11_QUERY_DESC desc{D3D11_QUERY_TIMESTAMP, 0};
-            check(device_->CreateQuery(&desc, &timestamp.begin), "Create timestamp");
-            check(device_->CreateQuery(&desc, &timestamp.end), "Create timestamp");
-            context_->End(timestamp.begin.Get());
-            timestamps_.push_back(std::move(timestamp));
-        }
-        switch (t) {
-        case 0x35:
-            context_->Dispatch(a[0], a[1], a[2]);
-            break;
-        case 0x36:
-            context_->DispatchIndirect(get<ID3D11Buffer>(event.argumentBuffer), a[0]);
-            break;
-        case 0x37:
-            context_->Draw(a[0], a[1]);
-            break;
-        case 0x38:
-            throw std::runtime_error("DrawAuto count recovery migration pending");
-        case 0x39:
-            context_->DrawIndexed(a[0], a[1], int32_t(a[2]));
-            break;
-        case 0x3a:
-            context_->DrawIndexedInstanced(a[0], a[1], a[2], int32_t(a[3]), a[4]);
-            break;
-        case 0x3b:
-            context_->DrawIndexedInstancedIndirect(get<ID3D11Buffer>(event.argumentBuffer), a[0]);
-            break;
-        case 0x3c:
-            context_->DrawInstanced(a[0], a[1], a[2], a[3]);
-            break;
-        case 0x3d:
-            context_->DrawInstancedIndirect(get<ID3D11Buffer>(event.argumentBuffer), a[0]);
-            break;
-        }
-        counts[commandName(t)]++;
-        if (options_.timings)
-            context_->End(timestamps_.back().end.Get());
+        withBufferEdits(event, state, [&] {
+            bind(state, t == 0x35 || t == 0x36);
+            if ((options_.before && e.id == options_.until) || options_.disabled.contains(e.id) ||
+                (options_.suppressDraws && t != 0x35 && t != 0x36))
+                return false;
+            const auto &a = event.args;
+            if (options_.timings) {
+                Timestamp timestamp{e.id};
+                D3D11_QUERY_DESC desc{D3D11_QUERY_TIMESTAMP, 0};
+                check(device_->CreateQuery(&desc, &timestamp.begin), "Create timestamp");
+                check(device_->CreateQuery(&desc, &timestamp.end), "Create timestamp");
+                context_->End(timestamp.begin.Get());
+                timestamps_.push_back(std::move(timestamp));
+            }
+            switch (t) {
+            case 0x35:
+                context_->Dispatch(a[0], a[1], a[2]);
+                break;
+            case 0x36:
+                context_->DispatchIndirect(get<ID3D11Buffer>(event.argumentBuffer), a[0]);
+                break;
+            case 0x37:
+                context_->Draw(a[0], a[1]);
+                break;
+            case 0x38:
+                throw std::runtime_error("DrawAuto count recovery migration pending");
+            case 0x39:
+                context_->DrawIndexed(a[0], a[1], int32_t(a[2]));
+                break;
+            case 0x3a:
+                context_->DrawIndexedInstanced(a[0], a[1], a[2], int32_t(a[3]), a[4]);
+                break;
+            case 0x3b:
+                context_->DrawIndexedInstancedIndirect(get<ID3D11Buffer>(event.argumentBuffer), a[0]);
+                break;
+            case 0x3c:
+                context_->DrawInstanced(a[0], a[1], a[2], a[3]);
+                break;
+            case 0x3d:
+                context_->DrawInstancedIndirect(get<ID3D11Buffer>(event.argumentBuffer), a[0]);
+                break;
+            }
+            counts[commandName(t)]++;
+            if (options_.timings)
+                context_->End(timestamps_.back().end.Get());
+            return true;
+        });
         return;
     }
     if (isWritableCommand(t))

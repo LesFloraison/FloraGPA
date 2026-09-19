@@ -124,10 +124,17 @@
         "src/replay/Replay.cpp",
         "src/cli/main.cpp",
         "src/app/Models.cpp",
-        "src/app/MainWindow.cpp"
+        "src/app/MainWindow.cpp",
+        "src/core/BufferBindings.cpp",
+        "src/replay/BufferEdits.cpp",
+        "src/application/Experiment.cpp"
       ],
       "validation": [
-        "Five Python/native initial/boundary/range comparisons; word CSV; GUI read and subrange; CB recursive reflection and edits pending"
+        "Five Python/native initial/boundary/range comparisons; word CSV; GUI read and subrange; CB recursive reflection and edits pending",
+        "tests/BufferEditTests.cpp: compute input isolation, persistent output, rollback and append-counter preservation",
+        "tests/UiTests.cpp: buffer edit, worker preview, undo/redo and after-event input restoration",
+        "tools/validate_buffer_edits.py: CB/VB/IB/SRV/UAV byte and binding comparisons; edited geometry and visible draw comparison",
+        "Constant-buffer recursive fields, counter editing, stream-output execution and complete setter overrides remain pending"
       ]
     },
     {
@@ -497,11 +504,18 @@
       "description": "Portable, frame-bound edit history. No GPA project format or runtime needed.",
       "status": "partial",
       "native": [
-        "src/application/Experiment.cpp"
+        "src/application/Experiment.cpp",
+        "src/core/BufferBindings.cpp",
+        "src/replay/BufferEdits.cpp",
+        "src/app/MainWindow.cpp"
       ],
       "validation": [
         "Compatible JSON; uint64; frame hash; shader and event edits; GPU undo/redo",
-        "Clear and update_source assets; atomic rejection; GPU and UI history; current texture/buffer refresh"
+        "Clear and update_source assets; atomic rejection; GPU and UI history; current texture/buffer refresh",
+        "tests/BufferEditTests.cpp: compute input isolation, persistent output, rollback and append-counter preservation",
+        "tests/UiTests.cpp: buffer edit, worker preview, undo/redo and after-event input restoration",
+        "tools/validate_buffer_edits.py: CB/VB/IB/SRV/UAV byte and binding comparisons; edited geometry and visible draw comparison",
+        "Constant-buffer recursive fields, counter editing, stream-output execution and complete setter overrides remain pending"
       ]
     },
     {

@@ -1,6 +1,7 @@
 #include "MainWindow.h"
 #include "application/CommandEdits.h"
 #include "application/ShaderInspector.h"
+#include "core/BufferBindings.h"
 #include "replay/Replay.h"
 #include <QApplication>
 #include <QCloseEvent>
@@ -16,6 +17,7 @@
 #include <QMenuBar>
 #include <QMessageBox>
 #include <QPushButton>
+#include <QRegularExpression>
 #include <QSaveFile>
 #include <QSettings>
 #include <QSplitter>
@@ -540,6 +542,11 @@ void MainWindow::buildUi() {
     bufferBar->addWidget(bufferLength_);
     bufferBar->addAction("Read", this, &MainWindow::previewBuffer);
     bufferBar->addAction("Export", this, &MainWindow::exportBuffer);
+    bufferEditAction_ = bufferBar->addAction("Edit Bytes…", this, [this] { editBuffer(); });
+    bufferEditAction_->setObjectName("editBuffer");
+    bufferImportAction_ = bufferBar->addAction("Import Patch…", this, [this] { editBuffer(true); });
+    bufferEditAction_->setEnabled(false);
+    bufferImportAction_->setEnabled(false);
     bufferLabel_ = new QLabel;
     bufferLayout->addWidget(bufferBar);
     bufferLayout->addWidget(bufferLabel_);
@@ -1063,6 +1070,7 @@ void MainWindow::inspectResource(Id id) {
             bufferTimer_.stop();
         }
         selectedResource_ = id;
+        updateExperimentActions();
         auto resource = frame_->resource(id);
         QList<QPair<QString, QString>> values{{"ID", QString::number(id)},
                                               {"Type", QString("0x%1").arg(e.type, 4, 16, QChar('0'))},
@@ -1329,6 +1337,12 @@ void MainWindow::updateExperimentActions() {
         clearAction_->setEnabled(isClearCommand(uint16_t(type)));
     if (updateSourceAction_)
         updateSourceAction_->setEnabled(type == 0x247);
+    const bool bufferEditable = isDraw(uint16_t(type)) && selectedResource_ && frame_ &&
+                                frame_->entry(selectedResource_).type == 0x83;
+    if (bufferEditAction_)
+        bufferEditAction_->setEnabled(bufferEditable);
+    if (bufferImportAction_)
+        bufferImportAction_->setEnabled(bufferEditable);
     enableAction_->setText(
         editable && experiment_ && !experiment_->enabled(selectedEvent_) ? "Enable Event" : "Disable Event");
 }
@@ -1359,6 +1373,106 @@ void MainWindow::experimentChanged() {
         }
     }
     replayTimer_.start();
+}
+void MainWindow::editBuffer(bool importFile) {
+    if (!frame_ || !experiment_ || !selectedEvent_ || !selectedResource_)
+        return;
+    try {
+        auto event = selectedEvent_, resource = selectedResource_;
+        auto command = frame_->event(event);
+        auto bindings = bufferBindings(*frame_, command, frame_->state(command.state), resource);
+        if (frame_->resource(resource).type != 0x83 || bindings.empty())
+            throw std::runtime_error("Select a buffer bound to this draw or dispatch");
+        QByteArray imported;
+        QString path;
+        if (importFile) {
+            path = QFileDialog::getOpenFileName(this, "Import Buffer Patch", {},
+                                                "Binary data (*.bin);;All files (*)");
+            if (path.isEmpty())
+                return;
+            QFile file(path);
+            if (!file.open(QIODevice::ReadOnly))
+                throw std::runtime_error("Cannot open buffer patch");
+            if (file.size() <= 0 || uint64_t(file.size()) > frame_->resource(resource).desc.at(0))
+                throw std::runtime_error("Buffer patch is empty or larger than the resource");
+            imported = file.readAll();
+            if (imported.size() != file.size())
+                throw std::runtime_error("Cannot read the complete buffer patch");
+        }
+        QDialog dialog(this);
+        dialog.setObjectName("bufferEditDialog");
+        dialog.setWindowTitle(QString("Buffer %1 — Event %2").arg(resource).arg(event));
+        dialog.setMinimumWidth(480);
+        auto form = new QFormLayout(&dialog);
+        auto effect = new QLabel(persistentBufferEdit(bindings) ? "Persistent output" : "Event input");
+        effect->setToolTip(persistentBufferEdit(bindings)
+                               ? "Writes persist only after command submission."
+                               : "The original buffer is restored after this command.");
+        form->addRow("Scope", effect);
+        auto offset = new QLineEdit(bufferOffset_->text());
+        offset->setObjectName("bufferEditOffset");
+        offset->setToolTip("Byte offset (decimal or 0x hex)");
+        form->addRow("Offset", offset);
+        QPlainTextEdit *hexEditor = nullptr;
+        if (importFile) {
+            form->addRow("File", new QLabel(QFileInfo(path).fileName()));
+            form->addRow("Bytes", new QLabel(QString::number(imported.size())));
+        } else {
+            hexEditor = new QPlainTextEdit;
+            hexEditor->setObjectName("bufferEditHex");
+            hexEditor->setFont(QFont("Cascadia Mono", 10));
+            hexEditor->setMinimumHeight(100);
+            hexEditor->setPlaceholderText("00 00 80 3f");
+            if (displayedBuffer_ == resource) {
+                const auto stride = bufferMode_->currentIndex() == 1 ? 4 : 16;
+                const auto start = std::max(0, bufferView_->currentIndex().row()) * qsizetype(stride);
+                offset->setText(QString::number(bufferModel_->offset() + uint64_t(start)));
+                hexEditor->setPlainText(
+                    QString::fromLatin1(bufferModel_->bytes().mid(start, stride).toHex(' ')));
+            }
+            form->addRow("Hex bytes", hexEditor);
+        }
+        auto error = new QLabel;
+        error->setWordWrap(true);
+        error->hide();
+        form->addRow(error);
+        auto buttons = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+        buttons->button(QDialogButtonBox::Ok)->setText("Apply");
+        form->addRow(buttons);
+        connect(buttons, &QDialogButtonBox::rejected, &dialog, &QDialog::reject);
+        connect(buttons, &QDialogButtonBox::accepted, &dialog, [&] {
+            try {
+                bool ok = false;
+                auto text = offset->text().trimmed();
+                auto position = text.toULongLong(&ok, 0);
+                if (!ok || text.startsWith('-'))
+                    throw std::runtime_error("Enter a valid unsigned byte offset");
+                QByteArray bytes = imported;
+                if (hexEditor) {
+                    auto hex = hexEditor->toPlainText();
+                    hex.remove(QRegularExpression("\\s"));
+                    if (hex.isEmpty() || hex.size() % 2 ||
+                        !QRegularExpression("^[0-9a-fA-F]+$").match(hex).hasMatch())
+                        throw std::runtime_error("Enter complete hexadecimal byte pairs");
+                    bytes = QByteArray::fromHex(hex.toLatin1());
+                }
+                experiment_->setBuffer(
+                    *frame_, event, resource, position,
+                    {reinterpret_cast<const uint8_t *>(bytes.constData()), size_t(bytes.size())});
+                dialog.accept();
+            } catch (const std::exception &e) {
+                error->setText(QString::fromUtf8(e.what()));
+                error->show();
+            }
+        });
+        if (dialog.exec() == QDialog::Accepted) {
+            QSignalBlocker blocker(bufferBoundary_);
+            bufferBoundary_->setCurrentIndex(1);
+            experimentChanged();
+        }
+    } catch (const std::exception &e) {
+        showError(QString::fromUtf8(e.what()));
+    }
 }
 void MainWindow::editClear() {
     if (!frame_ || !experiment_ || !selectedEvent_)

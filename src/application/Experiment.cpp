@@ -1,6 +1,7 @@
 #include "Experiment.h"
 #include "CommandEdits.h"
 #include "ShaderInspector.h"
+#include "core/BufferBindings.h"
 #include <QFile>
 #include <QSaveFile>
 
@@ -68,6 +69,7 @@ void Experiment::apply(const Frame &frame, ReplayOptions &options) const {
     options.textures.clear();
     options.commandPayloads.clear();
     options.updateSources.clear();
+    options.buffers.clear();
     for (size_t i = 0; i < revision(); ++i) {
         auto &operations = project_.at("history").at(i).at("operations");
         if (!operations.is_array())
@@ -99,6 +101,12 @@ void Experiment::apply(const Frame &frame, ReplayOptions &options) const {
                     throw std::runtime_error("Update source byte count mismatch: expected " +
                                              std::to_string(layout.size));
                 options.updateSources[id] = std::move(bytes);
+            } else if (kind == "buffer") {
+                auto event = identifier(op.at("event")), resource = identifier(op.at("resource"));
+                auto offset = identifier(op.at("offset"));
+                auto bytes = asset(op.at("asset"));
+                validateBufferPatch(frame, event, resource, offset, bytes.size());
+                options.buffers[event][resource].push_back({offset, std::move(bytes)});
             } else if (kind == "shader") {
                 auto id = identifier(op.at("resource"));
                 auto r = frame.resource(id);
@@ -197,6 +205,23 @@ void Experiment::setUpdateSource(const Frame &frame, Id event, Bytes data) {
     project_["cursor"] = history.size();
 }
 bool Experiment::canUndo() const { return revision() > 0; }
+void Experiment::setBuffer(const Frame &frame, Id event, Id resource, uint64_t offset, Bytes data) {
+    validateBufferPatch(frame, event, resource, offset, data.size());
+    Json op{{"kind", "buffer"},
+            {"event", event},
+            {"resource", resource},
+            {"offset", offset},
+            {"asset",
+             {{"data", QByteArray(reinterpret_cast<const char *>(data.data()), qsizetype(data.size()))
+                           .toBase64()
+                           .toStdString()},
+              {"sha256", sha256(data)}}}};
+    auto &history = project_["history"];
+    history.erase(history.begin() + ptrdiff_t(revision()), history.end());
+    history.push_back({{"label", "Buffer " + std::to_string(resource) + " at event " + std::to_string(event)},
+                       {"operations", Json::array({op})}});
+    project_["cursor"] = history.size();
+}
 bool Experiment::canRedo() const { return revision() < project_["history"].size(); }
 bool Experiment::undo() {
     if (!canUndo())

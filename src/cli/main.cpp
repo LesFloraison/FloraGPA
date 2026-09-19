@@ -2,6 +2,7 @@
 #include "application/Experiment.h"
 #include "application/Geometry.h"
 #include "application/ShaderInspector.h"
+#include "core/BufferBindings.h"
 #include "core/Frame.h"
 #include "replay/Replay.h"
 #include <Psapi.h>
@@ -238,7 +239,9 @@ int main(int argc, char **argv) {
                     QTextStream(stderr) << "progress " << event << ' ' << done << ' ' << total << Qt::endl;
                 });
             if (command == "geometry") {
-                auto geometry = inspectGeometry(frame, replay, options.until);
+                nlohmann::json geometry;
+                replay.inspectEventInputs(options.until,
+                                          [&] { geometry = inspectGeometry(frame, replay, options.until); });
                 exportGeometry(geometry, out);
                 report.insert("event", QString::number(options.until));
                 report.insert("vertices", qint64(geometry["vertex_references"].get<uint64_t>()));
@@ -251,7 +254,33 @@ int main(int argc, char **argv) {
                     throw std::runtime_error("Not a buffer resource");
                 if (!options.until && !resource.data)
                     throw std::runtime_error("Buffer has no captured initial bytes; select an event");
-                auto bytes = replay.readBuffer(parseId("id"));
+                std::vector<uint8_t> bytes;
+                if (options.before && options.until && isDraw(frame.entry(options.until).type))
+                    replay.inspectEventInputs(options.until, [&] { bytes = replay.readBuffer(resource.id); });
+                else
+                    bytes = replay.readBuffer(resource.id);
+                if (options.until && isDraw(frame.entry(options.until).type)) {
+                    auto event = frame.event(options.until);
+                    auto bindings = bufferBindings(frame, event, frame.state(event.state), resource.id);
+                    QJsonArray list;
+                    for (auto &binding : bindings) {
+                        QJsonObject item{{"role", QString::fromStdString(binding.role)}};
+                        if (!binding.stage.empty())
+                            item.insert("stage", QString::fromStdString(binding.stage));
+                        if (binding.slot >= 0)
+                            item.insert("slot", binding.slot);
+                        if (binding.view)
+                            item.insert("view", QString::number(binding.view));
+                        if (binding.role == "so")
+                            item.insert("offset", qint64(binding.offset));
+                        list.append(item);
+                    }
+                    report.insert("bindings", list);
+                    report.insert("edit_effect", bindings.empty() ? QJsonValue(QJsonValue::Null)
+                                                                  : QJsonValue(persistentBufferEdit(bindings)
+                                                                                   ? "persistent_output"
+                                                                                   : "scoped_input"));
+                }
                 auto offset = parseId("offset");
                 if (offset > bytes.size())
                     throw std::runtime_error("Buffer offset exceeds resource size");

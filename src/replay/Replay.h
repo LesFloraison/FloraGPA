@@ -9,6 +9,10 @@
 namespace flora {
 template <class T> using Com = Microsoft::WRL::ComPtr<T>;
 void check(HRESULT hr, const char *operation);
+struct BufferPatch {
+    uint64_t offset;
+    std::vector<uint8_t> bytes;
+};
 struct ReplayOptions {
     bool timings = false;
     bool warp = false;
@@ -19,6 +23,7 @@ struct ReplayOptions {
     std::set<Id> disabled;
     std::map<Id, std::vector<uint8_t>> shaders, textures;
     std::map<Id, std::vector<uint8_t>> commandPayloads, updateSources;
+    std::map<Id, std::map<Id, std::vector<BufferPatch>>> buffers;
 };
 struct Image {
     uint32_t width{}, height{}, format{};
@@ -53,6 +58,7 @@ class Replay {
     void constantBuffers(const Entry &entry);
     void mappedWrites(const Entry &entry);
     void setRange(int stage, uint32_t slot, ID3D11Buffer *buffer, const Range &range);
+    void withBufferEdits(const Event &event, const State &state, const std::function<bool()> &submit);
     IUnknown *object(Id id);
     template <class T> T *get(Id id) { return static_cast<T *>(object(id)); }
 
@@ -71,6 +77,7 @@ class Replay {
     Image previewTexture(Id texture, uint32_t mip = 0, uint32_t layer = 0, uint32_t slice = 0, double low = 0,
                          double high = 1, const std::string &channel = "rgba");
     std::vector<uint8_t> readBuffer(Id id);
+    void inspectEventInputs(Id event, const std::function<void()> &inspect);
     std::string adapter() const;
 };
 std::string disassemble(Bytes dxbc);

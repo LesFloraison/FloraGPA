@@ -43,6 +43,7 @@ class MainWindow final : public QMainWindow {
     void previewTexture();
     void previewBuffer();
     void exportBuffer();
+    void editBuffer(bool importFile = false);
     void openExperiment();
     bool saveExperiment();
     void experimentChanged();
@@ -69,6 +70,7 @@ class MainWindow final : public QMainWindow {
     bool projectDirty_ = false;
     QAction *undoAction_ = nullptr, *redoAction_ = nullptr, *enableAction_ = nullptr;
     QAction *clearAction_ = nullptr, *updateSourceAction_ = nullptr;
+    QAction *bufferEditAction_ = nullptr, *bufferImportAction_ = nullptr;
     QString capturePath_, pendingPath_;
     CaptureModel *commands_, *resources_;
     CaptureFilter *commandFilter_, *resourceFilter_;

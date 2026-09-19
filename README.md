@@ -74,6 +74,11 @@ The **Edit** menu and API Log context menu provide **Edit Clear Values** and
 commands. Update sources are tightly packed binary assets; the file picker
 shows the required byte count. Inspect the affected resource at **After event**
 to see its edited contents. Undo/redo refreshes the current texture or buffer view.
+The Buffer toolbar provides **Edit Bytes** and **Import Patch** at an unsigned
+byte offset for the selected draw/dispatch. **Before event** displays patched
+inputs; input-only edits are scoped to that command, so **After event** restores
+the original input storage. Output buffer edits persist after submission while
+preserving UAV counters. Geometry inspection also uses the edited inputs.
 
 See [migration status](docs/MIGRATION_STATUS.md) for implemented features and
 the remaining parity gaps. This build is not the completed migration.
@@ -88,6 +93,7 @@ python tools/validate_native.py --exe out/FloraGPA/FloraGPA.Cli.exe --captures D
 python tools/validate_geometry.py --reference D:/CDXrepo/FloraGPA/standalone --exe out/FloraGPA/FloraGPA.Cli.exe --captures D:/CDXrepo/FloraGPA --qt-bin D:/Qt/6.11.2/msvc2022_64/bin --out artifacts/geometry-run
 python tools/validate_buffers.py --reference D:/CDXrepo/FloraGPA/standalone --exe out/FloraGPA/FloraGPA.Cli.exe --captures D:/CDXrepo/FloraGPA --qt-bin D:/Qt/6.11.2/msvc2022_64/bin --out artifacts/buffer-run
 python tools/validate_commands.py --reference D:/CDXrepo/FloraGPA/standalone --exe out/FloraGPA/FloraGPA.Cli.exe --captures D:/CDXrepo/FloraGPA --qt-bin D:/Qt/6.11.2/msvc2022_64/bin --out artifacts/command-run
+python tools/validate_buffer_edits.py --reference D:/CDXrepo/FloraGPA/standalone --exe out/FloraGPA/FloraGPA.Cli.exe --captures D:/CDXrepo/FloraGPA --qt-bin D:/Qt/6.11.2/msvc2022_64/bin --out artifacts/buffer-edit-run
 ```
 
 Run GPU checks serially and use a new output directory each time.

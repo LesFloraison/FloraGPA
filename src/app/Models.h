@@ -66,6 +66,7 @@ class BufferModel final : public QAbstractTableModel {
         endResetModel();
     }
     const QByteArray &bytes() const { return data_; }
+    uint64_t offset() const { return offset_; }
     QVariant data(const QModelIndex &, int role = Qt::DisplayRole) const override;
     QVariant headerData(int, Qt::Orientation, int role) const override;
 

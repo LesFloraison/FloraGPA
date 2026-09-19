@@ -16,10 +16,10 @@ GF2 与 BF1 DX11 捕获。**尚未完成原 Python 版本的全部功能迁移�
 | 图像 | 实际 GPU 输出、缩放/平移/通道、像素值、PNG 导出 | 全帧输出目前限制单采样 RGBA/BGRA8 |
 | 纹理 | GPU 格式转换、BC、浮点/整数、1D/2D/3D、mip/layer/slice、事件边界预览 | MSAA、平面格式及部分查看选项未迁移 |
 | Shader | DXBC 反汇编、反射、SPDB/SDBG 内嵌源码、HLSL 编译替换 | 不含 HLSL 恢复、单步调试及全部反射树 |
-| Buffer | 初始值、事件前后读回、字节范围、Hex/ASCII/32 位解释、导出 | CB 递归字段、UAV counter 与编辑仍待迁移 |
+| Buffer | 初始值、事件前后读回、范围、Hex/ASCII/32 位解释、导出；事件字节编辑/二进制补丁导入、绑定识别、撤销/重做 | CB 递归字段、UAV counter 检查/编辑仍待迁移；SO 与完整 setter 支持仍受现有重放边界限制 |
 | 几何 | IA 输入解码、索引与实例、三种顶点表、旋转线框、CSV/OBJ 导出 | DrawAuto、后变换与覆盖未迁移；当前表格上限为 100 万引用 / 1600 万字段 |
 | 资源名称 | GenPrivateData 原始名称、非法 UTF-8 转义、列表筛选和属性显示 | 名称记录不表示逐事件重命名时间线 |
-| 实验项目 | 原格式 JSON、捕获 SHA-256 绑定、资产校验、uint64 ID、原子保存、撤销/重做 | 接受事件启停、clear、update_source、全局 shader/texture 替换；其他操作明确拒绝 |
+| 实验项目 | 原格式 JSON、捕获 SHA-256 绑定、资产校验、uint64 ID、原子保存、撤销/重做 | 接受事件启停、buffer、clear、update_source、全局 shader/texture 替换；其他操作明确拒绝 |
 | 性能 | 原生 D3D11 时间戳、disjoint 与 pipeline statistics | 尚未迁移原版多轮调度、Intel 硬件指标/GTPin |
 
 ## 验证证据
@@ -46,7 +46,16 @@ GF2 与 BF1 DX11 捕获。**尚未完成原 Python 版本的全部功能迁移�
   BC 边界、planar 对齐检查属于布局测试，不代表这些格式全部完成 GPU 实测。
 - Qt 交互测试验证清除值编辑、Worker 实际执行、当前纹理刷新与撤销/重做；
   窗口截图为 `command-ui/clear-dialog.png` 和 `command-ui/clear-edited.png`。
-- Release 与 Debug 的七组 CTest 均通过。不是“所有原版测试已通过”。
+- Buffer 实验区分事件输入克隆与输出原位修改；输入在提交后恢复，输出仅在真正提交后
+  保留。WARP 合成 compute 捕获验证 CB/SRV 重定向、下一条 dispatch 不受输入污染、
+  输出持续修改、禁用/预览/异常回滚、重复 replay、重叠补丁、项目保存与撤销/重做。
+  Append UAV 经两次 dispatch 和 CopyStructureCount 后计数仍正确，未重新创建原 UAV。
+- GF2 / BF1 的 CB、VB、IB、SRV、UAV 五类真实缓冲区，20 组事件前/后、禁用、撤销
+  数据及绑定元数据与 Python 一致；另对 GF2 可见 draw 430 验证修改后的 VB/IB 几何表、
+  实际渲染图与 Python 一致，且渲染结果区别于未修改版本。
+- Qt Buffer 编辑器经 Worker 验证修改、撤销/重做以及纯输入在事件后恢复原始字节；
+  `buffer-edit-ui/` 保留编辑窗口与缓冲区表格截图。
+- Release 与 Debug 的八组 CTest 均通过。不是“所有原版测试已通过”。
 - 发布目录在仅保留 Windows 系统 PATH 的子进程中完成两份黄金重放和负对照。
   模块列表未发现 Python/Tk、GPA 或 RenderDoc；尚未做另一台干净 Windows 验证。
 - Qt 自身窗口渲染已检查 1440×900、1920×1080 及 150% / 200% 缩放。
@@ -59,13 +68,15 @@ GF2 与 BF1 DX11 捕获。**尚未完成原 Python 版本的全部功能迁移�
 `ctest-debug-publish.log`、`asset-ui-delivery/`、`ui-portable-*.png`、
 `ui-windows-delivery.png`、`command-validation-2/validation.json`、`command-ui/`、
 `ctest-command-final-release.log`、`ctest-command-debug.log`、`validation-command-package/`。
+Buffer 编辑证据为 `buffer-edit-validation-1/`、`buffer-edit-visible-validation/`、
+`buffer-edit-ui/`、`ctest-buffer-release.log`、`ctest-buffer-debug.log`、`validation-buffer-package/`。
 源码基线逐模块记录在 `migration.json`。
 
 ## 尚未闭合的迁移范围
 
 1. 完整 setter/command/context 语义、predication、stream-output/DrawAuto、
    class linkage、扩展 UAV、MSAA 与 planar 等特殊 replay 路径。
-2. 全部资源/状态/绑定/命令编辑，CB 字段、DrawAuto 与后变换几何、覆盖率、
+2. 其余资源/状态/绑定/命令编辑，CB 递归字段与 counter 编辑、DrawAuto 与后变换几何、覆盖率、
    quad 与像素分析。
 3. HLSL 恢复、source/instruction 导航、变量/表达式、trace/stack 与 shader 调试。
 4. RenderDoc 原生 C++ 后端、Intel Metrics Discovery、GTPin 与完整指标调度。

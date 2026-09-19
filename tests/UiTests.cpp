@@ -21,6 +21,81 @@ class UiTests final : public QObject {
         QVERIFY(window.grab().save(directory + '/' + name + ".png"));
     }
   private slots:
+    void bufferEditorHistory() {
+        auto captures = qEnvironmentVariable("FLORA_TEST_CAPTURE_DIR");
+        if (captures.isEmpty())
+            QSKIP("External capture fixtures are not configured");
+        flora::MainWindow window;
+        window.show();
+        QSignalSpy done(&window, &flora::MainWindow::taskFinished);
+        window.openCapture(captures + "/GF2_Exilium_2026_03_03__00_19_35.gpa_frame");
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        auto api = window.findChild<QTableView *>("apiLog");
+        api->setCurrentIndex(api->model()->index(2, 0));
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        auto resources = window.findChild<QTableView *>("resources");
+        for (int i = 0; i < resources->model()->rowCount(); ++i) {
+            auto index = resources->model()->index(i, 0);
+            if (index.data(Qt::UserRole).toULongLong() == 104) {
+                resources->setCurrentIndex(index);
+                break;
+            }
+        }
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        auto boundary = window.findChild<QComboBox *>("bufferBoundary");
+        boundary->setCurrentIndex(1);
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        auto model =
+            static_cast<flora::BufferModel *>(window.findChild<QTableView *>("bufferTable")->model());
+        auto original = model->bytes();
+        auto edit = window.findChild<QAction *>("editBuffer");
+        QVERIFY(edit && edit->isEnabled());
+        bool entered = false;
+        QTimer::singleShot(0, &window, [&] {
+            auto dialog = window.findChild<QDialog *>("bufferEditDialog");
+            if (!dialog)
+                return;
+            dialog->findChild<QLineEdit *>("bufferEditOffset")->setText("0x0");
+            dialog->findChild<QPlainTextEdit *>("bufferEditHex")->setPlainText("00 00 20 41");
+            snapshot(*dialog, "buffer-edit-dialog");
+            entered = true;
+            QTest::mouseClick(dialog->findChild<QDialogButtonBox *>()->button(QDialogButtonBox::Ok),
+                              Qt::LeftButton);
+        });
+        edit->trigger();
+        QVERIFY(entered);
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        auto edited = model->bytes();
+        QCOMPARE(edited.left(4), QByteArray::fromHex("00002041"));
+        QVERIFY(edited != original);
+        QCOMPARE(edited.mid(4), original.mid(4));
+        snapshot(window, "buffer-edited");
+        QAction *undo = nullptr, *redo = nullptr;
+        for (auto a : window.findChildren<QAction *>()) {
+            if (a->shortcut() == QKeySequence::Undo)
+                undo = a;
+            if (a->shortcut() == QKeySequence::Redo)
+                redo = a;
+        }
+        QVERIFY(undo && redo);
+        undo->trigger();
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        QCOMPARE(model->bytes(), original);
+        redo->trigger();
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        QCOMPARE(model->bytes(), edited);
+        boundary->setCurrentIndex(2);
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        QCOMPARE(model->bytes(), original);
+    }
     void clearEditorHistory() {
         auto captures = qEnvironmentVariable("FLORA_TEST_CAPTURE_DIR");
         if (captures.isEmpty())
