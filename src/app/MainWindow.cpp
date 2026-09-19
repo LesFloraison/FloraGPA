@@ -1,6 +1,7 @@
 #include "MainWindow.h"
 #include "application/CommandEdits.h"
 #include "application/Constants.h"
+#include "application/ContextInspector.h"
 #include "application/ShaderInspector.h"
 #include "core/BufferBindings.h"
 #include "replay/Replay.h"
@@ -290,6 +291,9 @@ void MainWindow::buildUi() {
     cancelAction_ = analyze->addAction("Cancel", QKeySequence("Escape"), this, &MainWindow::cancel);
     cancelAction_->setIcon(style()->standardIcon(QStyle::SP_MediaStop));
     cancelAction_->setEnabled(false);
+    auto structureAction =
+        analyze->addAction("Contexts && Command Lists…", this, &MainWindow::inspectCaptureStructure);
+    structureAction->setObjectName("inspectCaptureStructure");
     auto viewMenu = menuBar()->addMenu("&View");
     auto help = menuBar()->addMenu("&Help");
     help->addAction("About FloraGPA", this, [this] {
@@ -412,6 +416,7 @@ void MainWindow::buildUi() {
     leftTabs_ = new QTabWidget;
     leftTabs_->setDocumentMode(true);
     auto apiPane = filtered(apiView_, commandFilter_, apiKinds);
+    apiPane->findChild<QLineEdit *>()->setObjectName("apiSearch");
     auto referenceFilter = new QLineEdit;
     referenceFilter->setObjectName("apiResourceFilter");
     referenceFilter->setPlaceholderText("Referenced resource ID…");
@@ -1147,6 +1152,21 @@ void MainWindow::inspectEvent(Id id) {
             auto group = new QTreeWidgetItem(properties_, {QString::fromLatin1(key), ""});
             append(group, details[key]);
         }
+    // Context kind and interface version are independent. Preserve inferred unknown fields.
+    Id contextId = 0;
+    for (const auto &field : details["fields"])
+        if (field["name"] == (isDraw(frame_->entry(id).type) ? "context" : "object"))
+            contextId = field["value"].get<Id>();
+    if (contextId) {
+        try {
+            auto info = describeContext(*frame_, contextId);
+            auto group =
+                new QTreeWidgetItem(properties_, {"Context", info.version ? "Captured" : "Inferred"});
+            group->setData(0, Qt::UserRole + 1, "contextDetails");
+            append(group, contextJson(info));
+        } catch (const std::exception &) {
+        } // The API object can be a device/resource rather than a context.
+    }
     if (details.contains("remaining_hex")) {
         auto remaining =
             new QTreeWidgetItem(properties_, {"Undecoded bytes", display(details["remaining_offset"])});
@@ -1162,6 +1182,107 @@ void MainWindow::inspectEvent(Id id) {
         } catch (const std::exception &) {
         } // Inspection remains available for unreplayable contexts.
     }
+}
+void MainWindow::inspectCaptureStructure() {
+    if (!frame_)
+        return;
+    auto contexts = inspectContexts(*frame_);
+    nlohmann::json lists;
+    try {
+        lists = inspectCommandLists(*frame_);
+    } catch (const std::exception &error) {
+        lists = {{"error", error.what()}};
+    }
+    QDialog dialog(this);
+    dialog.setObjectName("captureStructureDialog");
+    dialog.setWindowTitle("Contexts and Command Lists");
+    dialog.resize(840, 600);
+    auto layout = new QVBoxLayout(&dialog);
+    auto tabs = new QTabWidget;
+    layout->addWidget(tabs);
+    auto add = [&](const QString &title, const nlohmann::json &document) {
+        auto view = tree({"Field", "Value"});
+        view->setObjectName(title == "Contexts" ? "contextInventory" : "commandListInventory");
+        view->setColumnWidth(0, 290);
+        std::function<void(QTreeWidgetItem *, const nlohmann::json &)> fill;
+        fill = [&](QTreeWidgetItem *parent, const nlohmann::json &value) {
+            auto item = [&](const QString &key, const nlohmann::json &child) {
+                if (key == "assumption" || key == "scope" || key == "limits" || key == "note" ||
+                    key == "source") {
+                    auto detail =
+                        QString::fromStdString(child.is_string() ? child.get<std::string>() : child.dump(2));
+                    if (parent)
+                        parent->setToolTip(0, parent->toolTip(0) + '\n' + detail);
+                    else
+                        view->setToolTip(view->toolTip() + '\n' + detail);
+                    return;
+                }
+                auto label =
+                    child.is_structured()
+                        ? QString{}
+                        : QString::fromStdString(child.is_string() ? child.get<std::string>() : child.dump());
+                auto row = parent ? new QTreeWidgetItem(parent, {key, label})
+                                  : new QTreeWidgetItem(view, {key, label});
+                if (child.is_structured())
+                    fill(row, child);
+                if (child.is_number_unsigned() && (key == "event" || key == "unmap_event" || key == "id")) {
+                    auto id = child.get<Id>();
+                    auto found = frame_->entries().find(id);
+                    if (found != frame_->entries().end() && found->second.category == 7) {
+                        row->setData(1, Qt::UserRole, QVariant::fromValue<qulonglong>(id));
+                        row->setToolTip(1, "Double-click to locate API event");
+                    }
+                }
+            };
+            if (value.is_object())
+                for (auto it = value.begin(); it != value.end(); ++it)
+                    item(QString::fromStdString(it.key()), it.value());
+            else if (value.is_array())
+                for (size_t i = 0; i < value.size(); ++i)
+                    item(QString::number(i), value[i]);
+        };
+        fill(nullptr, document);
+        view->expandToDepth(1);
+        tabs->addTab(view, title);
+        connect(view, &QTreeWidget::itemDoubleClicked, &dialog, [&dialog, this](QTreeWidgetItem *item, int) {
+            auto id = item->data(1, Qt::UserRole).toULongLong();
+            if (id) {
+                dialog.accept();
+                auto source = commands_->index(commands_->rowOf(id), 0);
+                if (!commandFilter_->mapFromSource(source).isValid()) {
+                    findChild<QComboBox *>("apiKinds")->setCurrentIndex(1);
+                    findChild<QLineEdit *>("apiSearch")->clear();
+                    findChild<QLineEdit *>("apiResourceFilter")->clear();
+                }
+                leftTabs_->setCurrentIndex(0);
+                selectEvent(id);
+                auto index = commandFilter_->mapFromSource(source);
+                apiView_->setCurrentIndex(index);
+                apiView_->scrollTo(index);
+            }
+        });
+    };
+    add("Contexts", contexts);
+    add("Command Lists", lists);
+    auto buttons = new QDialogButtonBox(QDialogButtonBox::Close);
+    auto exportButton = buttons->addButton("Export JSON…", QDialogButtonBox::ActionRole);
+    exportButton->setObjectName("exportCaptureStructure");
+    layout->addWidget(buttons);
+    connect(buttons, &QDialogButtonBox::rejected, &dialog, &QDialog::reject);
+    connect(exportButton, &QPushButton::clicked, &dialog, [&] {
+        auto commandLists = tabs->currentIndex() == 1;
+        auto path = QFileDialog::getSaveFileName(&dialog, "Export Capture Structure",
+                                                 commandLists ? "command-lists.json" : "contexts.json",
+                                                 "JSON (*.json)");
+        if (path.isEmpty())
+            return;
+        try {
+            writeFile(path, QByteArray::fromStdString((commandLists ? lists : contexts).dump(2) + "\n"));
+        } catch (const std::exception &error) {
+            showError(QString::fromUtf8(error.what()));
+        }
+    });
+    dialog.exec();
 }
 void MainWindow::showPipeline(const State &s) {
     pipeline_->clear();
@@ -1223,6 +1344,30 @@ void MainWindow::inspectResource(Id id) {
         }
         selectedResource_ = id;
         updateExperimentActions();
+        if (contextVersion(e.type)) {
+            auto context = describeContext(*frame_, id);
+            properties(
+                "Device Context",
+                {{"ID", QString::number(id)},
+                 {"Kind", context.deferred ? "Deferred" : "Immediate"},
+                 {"Interface", QString("ID3D11DeviceContext%1")
+                                   .arg(*context.version ? QString::number(*context.version) : QString{})},
+                 {"Device", QString::number(context.device)},
+                 {"Creation flags", QString::number(*context.flags)},
+                 {"Captured pointer", QString("0x%1").arg(*context.pointer, 0, 16)}});
+            return;
+        }
+        if (e.type == 0x9a) {
+            auto list = inspectCommandList(*frame_, id);
+            properties("Command List",
+                       {{"ID", QString::number(id)},
+                        {"Parent context", QString::number(list["parent_context"].get<Id>())},
+                        {"Parent kind", QString::fromStdString(list["parent_context_type"])},
+                        {"Original player parent",
+                         QString::number(list["original_player_fields"]["parent_context"].get<Id>())},
+                        {"Execution", "Not restored"}});
+            return;
+        }
         auto resource = frame_->resource(id);
         QList<QPair<QString, QString>> values{{"ID", QString::number(id)},
                                               {"Type", QString("0x%1").arg(e.type, 4, 16, QChar('0'))},

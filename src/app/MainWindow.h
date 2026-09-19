@@ -58,6 +58,7 @@ class MainWindow final : public QMainWindow {
     void inspectGeometry();
     void exportGeometry();
     void inspectEvent(Id id);
+    void inspectCaptureStructure();
     void showPipeline(const State &state);
     void startWorker(QStringList args, bool timings);
     void finishWorker(int, QProcess::ExitStatus);

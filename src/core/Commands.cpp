@@ -8,18 +8,6 @@ bool isWritableCommand(uint16_t type) {
     return isClearCommand(type) || type == 0x3e || type == 0x3f || type == 0x40 || type == 0x42 ||
            type == 0x245 || type == 0x246 || type == 0x247;
 }
-void requireImmediateContext(const Frame &frame, Id context) {
-    auto &e = frame.entry(context);
-    if (e.category != 5 ||
-        (e.type != 0x99 && e.type != 0x10b && e.type != 0x121 && e.type != 0x123 && e.type != 0x127))
-        throw std::runtime_error("Missing supported context identity");
-    Reader r(frame.payload(context));
-    r.skip(16);
-    if (r.read<uint32_t>() != 0)
-        throw std::runtime_error("Replay requires an immediate context");
-    r.skip(4);
-    r.end();
-}
 void validateWritableCommand(const Frame &frame, Id event) {
     auto &e = frame.entry(event);
     if (e.category != 7 || !isWritableCommand(e.type))

@@ -55,6 +55,7 @@ Frame::Frame(const std::filesystem::path &path) : path_(path) {
             if (e.offset < 0x128 || e.offset > table || e.size > table - e.offset ||
                 !entries_.emplace(e.id, e).second)
                 throw std::runtime_error("Invalid or duplicate entry " + std::to_string(e.id));
+            entryOrder_.push_back(e.id);
         }
     } catch (...) {
         close();

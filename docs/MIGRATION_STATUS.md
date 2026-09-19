@@ -12,9 +12,10 @@ GF2 与 BF1 DX11 捕获。**尚未完成原 Python 版本的全部功能迁移�
 | 捕获与重放 | 有边界检查的 IGPA v3 读取、六阶段状态、基本 D3D11 资源和 draw/dispatch、Map/更新/复制/清除 | 特殊 replay 路径尚未完全迁移 |
 | 主界面 | GPA 式深色三栏、真实 GPU 时间柱状图与概览、可停靠面板、API 筛选、任务取消 | 概览尚无范围拖动；未知功能页禁用 |
 | 事件 | draw/dispatch 选择、快照管线、前后边界重放、事件启停 | 非 draw 精确 setter 状态仍不完整 |
-| API 检查 | 捕获字段、偏移/原始位、可选数组、引用跳转、资源/多词筛选、JSON/CSV 导出；getter、annotation、query 与 command-list 调用元数据 | 解码不代表执行；annotation 层级、完整 command-list 清单、缺失 context 推断和 view typed-format 预览衔接尚未闭合 |
+| API 检查 | 捕获字段、偏移/原始位、可选数组、引用跳转、资源/多词筛选、JSON/CSV 导出；getter、annotation、query 与 command-list 调用元数据 | 解码不代表执行；annotation 层级和 view typed-format 预览衔接尚未闭合 |
+| Context / command-list | 五种 context 接口身份、immediate/deferred 区分；缺失 context 的严格 Map READ 证据恢复；command-list 资源、owner 和 Execute/Finish 清单；Qt 字段树、证据导航、JSON 导出 | 推断不补造版本/指针/标志；保留指针与 ID 候选冲突；与 Python 相同，仅接受 immediate-context 的 Finish 空操作，未恢复列表执行 |
 | 捕获查询值 | 按同 ID、命令顺序使用 GetDesc/GetDataSize/CreateQuery/predicate 元数据；BOOL 完整值与 UINT64 低位、缺失字节、HRESULT/冲突状态 | 表示捕获时保存的内存字，不是新执行的 GPU query；原始高位缺失时保持不完整 |
-| 命令编辑 | RTV / DSV / Uint / Float UAV 清除值；资源写入命令启停；UpdateSubresource 紧密排列源数据替换；菜单、右键、撤销/重做 | 未覆盖缺失 context 的推断恢复；特殊 planar 资源执行仍受现有重放限制 |
+| 命令编辑 | RTV / DSV / Uint / Float UAV 清除值；资源写入命令启停；UpdateSubresource 紧密排列源数据替换；菜单、右键、撤销/重做；共享 context 校验和恢复 | 特殊 planar 资源执行仍受现有重放限制 |
 | 图像 | 实际 GPU 输出、缩放/平移/通道、像素值、PNG 导出 | 全帧输出目前限制单采样 RGBA/BGRA8 |
 | 纹理 | GPU 格式转换、BC、浮点/整数、1D/2D/3D、mip/layer/slice、事件边界预览 | MSAA、平面格式及部分查看选项未迁移 |
 | Shader | DXBC 反汇编、反射、SPDB/SDBG 内嵌源码、HLSL 编译替换 | 不含 HLSL 恢复、单步调试及全部反射树 |
@@ -75,7 +76,7 @@ GF2 与 BF1 DX11 捕获。**尚未完成原 Python 版本的全部功能迁移�
 - UAV counter 的 32 组 Python 对照通过：29 组缓冲区逐字节一致；BF1 的 3 组并行 Append
   输出按完整元素多重集合比较，未写入区域逐字节一致，计数和元数据全部一致。
   Qt 测试覆盖溢出拒绝、最大 uint32 编辑、实际 Worker 读回、撤销/重做与过期结果失效。
-- Release 与 Debug 的十一组 CTest 均通过。不是“所有原版测试已通过”。
+- Release 与 Debug 的十二组 CTest 均通过。不是“所有原版测试已通过”。
 - API 检查与 Python 对照：GF2 全部 920 条、BF1 全部 18,024 条记录的字段、偏移、原始位、
   引用、状态、query 元数据及解析后的 CSV 一致；另验证 BF1 资源/多词组合筛选。
   合成捕获的 3,948 条记录覆盖固定/可选数组布局、逐字节截断、尾随字节、无效 flag、
@@ -83,6 +84,15 @@ GF2 与 BF1 DX11 捕获。**尚未完成原 Python 版本的全部功能迁移�
   类型与结果状态记录。全部对照通过；invalid 诊断的文字允许与 Python 不同，其余结构仍比较。
 - Qt API 交互测试覆盖字段/偏移显示、引用纹理跳转、资源 ID 筛选与清除筛选。
   捕获字段保持原始值，实验清除值单独显示。纹理导航会取消尚未开始的帧输出预览。
+- Context 对照覆盖 GF2、BF1 和 25 份合成捕获：身份、恢复报告、command-list 清单及 API
+  元数据与 Python 一致，包含 21 类拒绝/冲突证据。保留原始索引顺序、64 位捕获 owner、
+  原播放器的 32 位 parent/owner 以及不确定的 Execute 候选，不把文件清单当成 GPU 执行序列。
+  缺失 context 的 compute 捕获在 WARP 和硬件上均执行成功；两份输出 buffer 与 Python 逐字节一致。
+  五个接口版本的 Finish 空操作经 GPU 路径验证；deferred、缺少 Unmap、非零返回引用、
+  正 HRESULT 和两种 Execute 记录经实际 Replay 入口拒绝。测试未证明原版尚未恢复的列表执行。
+- Qt Context 测试验证捕获身份、推断缺失字段、双页清单和 Map 证据导航。较长说明只放在
+  工具提示与导出 JSON，界面保持字段树布局。跳转到被隐藏的证据事件时会清除阻碍定位的
+  API 筛选并切换到 API Log。
 - 发布目录在仅保留 Windows 系统 PATH 的子进程中完成两份黄金重放和负对照。
   模块列表未发现 Python/Tk、GPA 或 RenderDoc；尚未做另一台干净 Windows 验证。
 - Qt 自身窗口渲染已检查 1440×900、1920×1080 及 150% / 200% 缩放。
@@ -110,6 +120,10 @@ API 检查证据为 `api-fixture/`、`api-validation-3/validation.json`、`api-t
 另经 Release / Debug 的 API 测试验证（`ctest-api-unicode-release.log`、
 `ctest-api-unicode-debug.log`）。
 源码基线逐模块记录在 `migration.json`。
+Context 证据为 `context-fixture/`、`context-validation-1/validation.json`、`context-ui/`；
+相应 CTest 日志为 `ctest-context-release-final.log`、`ctest-context-debug.log`，发布包为
+`out/FloraGPA-contexts/`，隔离 PATH 的黄金重放证据为 `validation-context-package/`。
+本批 API 元数据回归保存在 `api-validation-contexts/validation.json`。
 
 ## 尚未闭合的迁移范围
 

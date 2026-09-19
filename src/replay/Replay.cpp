@@ -761,6 +761,11 @@ void Replay::command(const Entry &e) {
         mappedWrites(e);
         return;
     }
+    if (finishCommandListVersion(t)) {
+        acceptFinishCommandList(frame_, readFinishCommandList(t, payload));
+        counts["finish_command_list_metadata"]++;
+        return;
+    }
     r.skip(16);
     if (t == 0x32 || t == 0x33 || t == 0x34) {
         auto view = r.read<Id>();
@@ -834,11 +839,17 @@ void Replay::command(const Entry &e) {
                                     layout.slicePitch);
     } else if (t == 0x242) {
         r.end();
+        Reader owner(payload);
+        owner.skip(8);
+        immediate(owner.read<Id>());
         context_->ClearState();
         for (auto &ranges : ranges_)
             ranges.clear();
     } else if (t == 0x244) {
         r.end();
+        Reader owner(payload);
+        owner.skip(8);
+        immediate(owner.read<Id>());
         context_->Flush();
     } else {
         static const std::set<uint16_t> auxiliary{

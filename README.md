@@ -101,9 +101,20 @@ retain their undecoded bytes; decoded metadata does not imply GPU replay support
 Captured GetData results use only earlier metadata for the same query ID. Missing
 high words, incomplete results and conflicting descriptors remain explicit.
 
+The Inspector identifies captured and inferred contexts separately. Missing context
+kind can be recovered only from a validated staging Texture2D Map READ / Unmap pair;
+interface version, creation flags and captured pointer remain unknown. Contradictory
+evidence blocks recovery. **Analysis > Contexts & Command Lists** shows identities,
+recovery evidence and command-list inventories, with API navigation and JSON export.
+Command-list pointers and resource IDs remain separate candidates. As in the Python
+reference, ExecuteCommandList execution is not restored; only captured immediate-context
+FinishCommandList no-op results with a zero returned reference are accepted by replay.
+
 ```powershell
 .\out\FloraGPA\FloraGPA.Cli.exe commands D:\captures\sample.gpa_frame --out D:\results\api
 # Optional: --filter "set decoded" --resource 25733
+.\out\FloraGPA\FloraGPA.Cli.exe contexts D:\captures\sample.gpa_frame --out D:\results\contexts
+.\out\FloraGPA\FloraGPA.Cli.exe command-lists D:\captures\sample.gpa_frame --out D:\results\lists
 ```
 
 See [migration status](docs/MIGRATION_STATUS.md) for implemented features and
@@ -140,3 +151,10 @@ For API inspection comparisons, run `FloraApiCommandTests` with
 `tools/validate_api_commands.py` with the reference/executable arguments above and
 one `--fixture` argument for each generated `.gpa_frame`. This checks complete
 record metadata and parsed CSV rows; invalid-record diagnostic wording may differ.
+
+For context recovery and command-list parity, run `FloraContextTests` with
+`FLORA_CONTEXT_EVIDENCE_DIR` pointing to a fixture directory, then run
+`tools/validate_contexts.py` with `--reference`, `--exe`, `--captures`, `--qt-bin`,
+`--fixtures` and a new `--out` directory. This compares context evidence, command-list
+inventories and API metadata, including rejected recovery paths, plus GPU buffer
+outputs from a capture whose context identity is missing.

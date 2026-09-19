@@ -74,7 +74,8 @@
         "tests/ApiCommandTests.cpp: wire bounds, references, metadata order, query states and filtered export",
         "tools/validate_api_commands.py: 920 GF2, 18024 BF1 and 4006 synthetic records plus resource/text filtering; JSON and parsed CSV, allowing different invalid diagnostic wording",
         "tests/UiTests.cpp: field offsets, reference navigation, resource filtering and texture-preview priority",
-        "Missing-context inference for Finish metadata and typed-format view-preview handoff remain pending"
+        "tools/validate_contexts.py: missing-context Finish classification matches Python on recovery and conflicting-evidence captures",
+        "Typed-format view-preview handoff remains pending"
       ]
     },
     {
@@ -219,7 +220,7 @@
         "tests/CommandTests.cpp",
         "tests/UiTests.cpp: clearEditorHistory",
         "tools/validate_commands.py: 15 Python/native boundary comparisons; five changed-result controls",
-        "Explicit captured contexts only; missing-context inference and all-format GPU coverage remain pending"
+        "tests/ContextTests.cpp: writable command validation shares inferred immediate-context identity; all-format GPU coverage remains pending"
       ]
     },
     {
@@ -229,6 +230,8 @@
       "description": "Inspect recovered command-list records without guessing pointer/ID domains.",
       "status": "partial",
       "native": [
+        "src/core/Contexts.cpp",
+        "src/application/ContextInspector.cpp",
         "src/application/ApiCommands.cpp",
         "src/application/QueryHistory.cpp",
         "src/app/Models.cpp",
@@ -238,7 +241,10 @@
         "tests/ApiCommandTests.cpp: wire bounds, references, metadata order, query states and filtered export",
         "tools/validate_api_commands.py: 920 GF2, 18024 BF1 and 4006 synthetic records plus resource/text filtering; JSON and parsed CSV, allowing different invalid diagnostic wording",
         "tests/UiTests.cpp: field offsets, reference navigation, resource filtering and texture-preview priority",
-        "Execute/Finish call metadata migrated; full inventory, resource-owner provenance and context inference remain pending"
+        "tests/ContextTests.cpp: index order, uint32 native owners, uint64 wire identities, pointer/ID collisions and five Finish versions",
+        "tools/validate_contexts.py: exact inventories or rejected-record errors on GF2, BF1 and 25 synthetic captures",
+        "tests/UiTests.cpp: compact inventory tabs, captured/inferred identity and evidence navigation",
+        "Inventory and immediate Finish no-op migrated; Execute execution remains unsupported, matching the Python reference. No original deferred-list capture has been validated."
       ]
     },
     {
@@ -307,9 +313,20 @@
       "sha256": "3d723cf52567cf615580ca9d8f07edb924d9ae2449360d06675699eb815900b7",
       "lines": 92,
       "description": "Captured context interface version is distinct from immediate/deferred kind.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": [
+        "src/core/Contexts.cpp",
+        "src/core/Frame.cpp",
+        "src/application/ContextInspector.cpp",
+        "src/replay/Replay.cpp",
+        "src/app/MainWindow.cpp"
+      ],
+      "validation": [
+        "tests/ContextTests.cpp: all five interface versions, exact identity layouts, READ/Unmap evidence, 21 rejection/conflict scenarios, shared edit validation and real Replay rejection",
+        "tools/validate_contexts.py: complete context reports and API metadata on GF2, BF1 and 25 synthetic captures; two inferred-context GPU buffers match Python byte for byte",
+        "tests/UiTests.cpp: captured identity, inferred null fields and Map evidence navigation after Worker replay",
+        "Describe, recovery_report and require_immediate migrated; recovery GPU evidence is synthetic, and broader command/context state integration remains pending"
+      ]
     },
     {
       "module": "coverage.py",

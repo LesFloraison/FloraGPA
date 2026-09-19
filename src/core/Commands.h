@@ -1,10 +1,10 @@
 #pragma once
+#include "Contexts.h"
 #include "Frame.h"
 
 namespace flora {
 bool isWritableCommand(uint16_t type);
 bool isClearCommand(uint16_t type);
-void requireImmediateContext(const Frame &frame, Id context);
 void validateWritableCommand(const Frame &frame, Id event);
 struct UpdateSourceLayout {
     Id destination{}, data{};

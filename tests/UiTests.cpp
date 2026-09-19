@@ -1,3 +1,4 @@
+#include "SyntheticCapture.h"
 #include "app/Appearance.h"
 #include "app/MainWindow.h"
 #include <QAbstractItemModelTester>
@@ -21,6 +22,101 @@ class UiTests final : public QObject {
         QVERIFY(window.grab().save(directory + '/' + name + ".png"));
     }
   private slots:
+    void inferredContextNavigation() {
+        using namespace flora;
+        using namespace flora::testing;
+        auto capture = graphicsCounterCapture(false);
+        capture.entries.erase(std::remove_if(capture.entries.begin(), capture.entries.end(),
+                                             [](const auto &e) { return e.id == 1; }),
+                              capture.entries.end());
+        capture.add(80, 5, 0x81, std::vector<uint8_t>(28));
+        std::vector<uint8_t> texture(16);
+        put(texture, 8, Id(80));
+        append(texture, D3D11_TEXTURE2D_DESC{1,
+                                             1,
+                                             1,
+                                             1,
+                                             DXGI_FORMAT_R8G8B8A8_UNORM,
+                                             {1, 0},
+                                             D3D11_USAGE_STAGING,
+                                             0,
+                                             D3D11_CPU_ACCESS_READ,
+                                             0});
+        append(texture, Id(0));
+        capture.add(81, 5, 0x85, texture);
+        std::vector<uint8_t> map(48);
+        put(map, 8, Id(1));
+        put(map, 20, Id(81));
+        put(map, 32, uint32_t(D3D11_MAP_READ));
+        put(map, 40, Id(9000));
+        capture.add(82, 7, 0x34ec, map);
+        std::vector<uint8_t> unmap(28);
+        put(unmap, 8, Id(1));
+        put(unmap, 16, Id(81));
+        capture.add(83, 7, 0x34ed, unmap);
+        QTemporaryDir dir;
+        capture.save(dir.path() + "/inferred.gpa_frame");
+        MainWindow window;
+        window.resize(1440, 900);
+        window.show();
+        QSignalSpy done(&window, &MainWindow::taskFinished);
+        window.openCapture(dir.path() + "/inferred.gpa_frame");
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        QCOMPARE(window.findChild<QComboBox *>("apiKinds")->currentIndex(), 0);
+        window.findChild<QLineEdit *>("apiSearch")->setText("Draw");
+        window.findChild<QLineEdit *>("apiResourceFilter")->setText("21");
+        auto action = window.findChild<QAction *>("inspectCaptureStructure");
+        QVERIFY(action);
+        bool navigated = false;
+        QTimer::singleShot(0, &window, [&] {
+            auto dialog = window.findChild<QDialog *>("captureStructureDialog");
+            if (!dialog)
+                return;
+            QTimer::singleShot(3000, dialog, &QDialog::reject);
+            auto tree = dialog->findChild<QTreeWidget *>("contextInventory");
+            QVERIFY(tree);
+            QTreeWidgetItem *target = nullptr;
+            for (QTreeWidgetItemIterator it(tree); *it; ++it)
+                if ((*it)->text(0) == "event" && (*it)->data(1, Qt::UserRole).toULongLong() == 82) {
+                    target = *it;
+                    break;
+                }
+            QVERIFY(target);
+            tree->expandAll();
+            tree->scrollToItem(target);
+            snapshot(*dialog, "context-inferred-evidence");
+            navigated = QMetaObject::invokeMethod(tree, "itemDoubleClicked", Qt::DirectConnection,
+                                                  Q_ARG(QTreeWidgetItem *, target), Q_ARG(int, 1));
+        });
+        action->trigger();
+        QVERIFY(navigated);
+        QCOMPARE(window.findChild<QComboBox *>("apiKinds")->currentIndex(), 1);
+        QVERIFY(window.findChild<QLineEdit *>("apiSearch")->text().isEmpty());
+        QVERIFY(window.findChild<QLineEdit *>("apiResourceFilter")->text().isEmpty());
+        auto api = window.findChild<QTableView *>("apiLog");
+        QCOMPARE(api->currentIndex().data(Qt::UserRole).toULongLong(), qulonglong(82));
+        auto properties = window.findChild<QTreeWidget *>("properties");
+        QTreeWidgetItem *context = nullptr;
+        for (int i = 0; i < properties->topLevelItemCount(); ++i)
+            if (properties->topLevelItem(i)->data(0, Qt::UserRole + 1) == "contextDetails")
+                context = properties->topLevelItem(i);
+        QVERIFY(context);
+        QCOMPARE(context->text(1), QString("Inferred"));
+        int missing = 0;
+        for (int i = 0; i < context->childCount(); ++i) {
+            auto item = context->child(i);
+            if (item->text(0) == "interface_version" || item->text(0) == "creation_flags" ||
+                item->text(0) == "captured_pointer") {
+                QCOMPARE(item->text(1), QString("null"));
+                ++missing;
+            }
+        }
+        QCOMPARE(missing, 3);
+        context->setExpanded(true);
+        properties->scrollToItem(context, QAbstractItemView::PositionAtTop);
+        snapshot(window, "context-inferred-inspector");
+    }
     void apiInspection() {
         const auto captures = qEnvironmentVariable("FLORA_TEST_CAPTURE_DIR");
         if (captures.isEmpty())
@@ -45,15 +141,29 @@ class UiTests final : public QObject {
         };
         QVERIFY(select(79));
         auto props = window.findChild<QTreeWidget *>("properties");
-        QTreeWidgetItem *fields = nullptr, *references = nullptr;
+        QTreeWidgetItem *fields = nullptr, *references = nullptr, *context = nullptr;
         for (int i = 0; i < props->topLevelItemCount(); ++i) {
             auto item = props->topLevelItem(i);
             if (item->data(0, Qt::UserRole + 1) == "apiFields")
                 fields = item;
             if (item->data(0, Qt::UserRole + 1) == "apiReferences")
                 references = item;
+            if (item->data(0, Qt::UserRole + 1) == "contextDetails")
+                context = item;
         }
         QVERIFY(fields && references);
+        QVERIFY(context);
+        QCOMPARE(context->text(1), QString("Captured"));
+        QVERIFY(!context->isExpanded());
+        auto fieldNamed = [](QTreeWidgetItem *parent, const QString &name) -> QTreeWidgetItem * {
+            for (int i = 0; i < parent->childCount(); ++i)
+                if (parent->child(i)->text(0) == name)
+                    return parent->child(i);
+            return nullptr;
+        };
+        auto kind = fieldNamed(context, "context_type");
+        QVERIFY(kind);
+        QCOMPARE(kind->text(1), QString("immediate"));
         QCOMPARE(fields->childCount(), 8);
         QCOMPARE(fields->child(2)->text(0), QString("view"));
         QCOMPARE(fields->child(2)->text(1), QString("75"));
@@ -85,6 +195,45 @@ class UiTests final : public QObject {
         filter->clear();
         QCOMPARE(api->model()->rowCount(), 920);
         QVERIFY(window.findChild<QAction *>("exportApiLog"));
+        auto structure = window.findChild<QAction *>("inspectCaptureStructure");
+        QVERIFY(structure);
+        bool inspected = false;
+        QTimer::singleShot(0, &window, [&] {
+            auto dialog = window.findChild<QDialog *>("captureStructureDialog");
+            if (!dialog)
+                return;
+            QTimer::singleShot(3000, dialog, &QDialog::reject);
+            auto tabs = dialog->findChild<QTabWidget *>();
+            QVERIFY(tabs);
+            QCOMPARE(tabs->count(), 2);
+            auto inventory = dialog->findChild<QTreeWidget *>("contextInventory");
+            auto lists = dialog->findChild<QTreeWidget *>("commandListInventory");
+            QVERIFY(inventory && lists);
+            auto contexts = fieldNamed(inventory->invisibleRootItem(), "contexts");
+            QVERIFY(contexts);
+            QCOMPARE(contexts->childCount(), 1);
+            auto contextKind = fieldNamed(contexts->child(0), "context_type");
+            QVERIFY(contextKind);
+            QCOMPARE(contextKind->text(1), QString("immediate"));
+            auto recovery = fieldNamed(inventory->invisibleRootItem(), "recovery");
+            QVERIFY(recovery);
+            QVERIFY(!fieldNamed(recovery, "assumption"));
+            QVERIFY(!recovery->toolTip(0).isEmpty());
+            QVERIFY(dialog->findChild<QPushButton *>("exportCaptureStructure"));
+            contexts->child(0)->setExpanded(true);
+            snapshot(*dialog, "context-inventory");
+            tabs->setCurrentIndex(1);
+            auto execution = fieldNamed(lists->invisibleRootItem(), "execution_supported");
+            QVERIFY(execution);
+            QCOMPARE(execution->text(1), QString("false"));
+            QVERIFY(!fieldNamed(lists->invisibleRootItem(), "limits"));
+            QVERIFY(!lists->toolTip().isEmpty());
+            snapshot(*dialog, "command-list-inventory");
+            inspected = true;
+            dialog->reject();
+        });
+        structure->trigger();
+        QVERIFY(inspected);
     }
     void counterEditorHistory() {
         auto captures = qEnvironmentVariable("FLORA_TEST_CAPTURE_DIR");

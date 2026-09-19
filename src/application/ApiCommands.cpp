@@ -1,4 +1,5 @@
 #include "ApiCommands.h"
+#include "core/Contexts.h"
 #include <QChar>
 #include <QDir>
 #include <QRegularExpression>
@@ -425,18 +426,7 @@ Json inspectCommand(const Frame &frame, Id id) {
                     {"note", note}};
                 out["note"] = note;
                 try {
-                    auto &owner = frame.entry(context);
-                    if (owner.category != 5 || !in(owner.type, {0x99, 0x10b, 0x121, 0x123, 0x127}))
-                        throw std::runtime_error("Expected a captured device context");
-                    Reader c(frame.payload(context));
-                    c.skip(16);
-                    auto kind = c.read<uint32_t>();
-                    c.skip(4);
-                    c.end();
-                    if (kind || returned || hr > 0)
-                        throw std::runtime_error(
-                            "FinishCommandList execution is not restored: only captured immediate-context "
-                            "no-op results with zero returned reference are supported");
+                    acceptFinishCommandList(frame, readFinishCommandList(t, raw));
                     out["replay_class"] = "captured_immediate_finish_noop";
                 } catch (const std::exception &e2) {
                     out["replay_unavailable"] = e2.what();
