@@ -21,6 +21,71 @@ class UiTests final : public QObject {
         QVERIFY(window.grab().save(directory + '/' + name + ".png"));
     }
   private slots:
+    void apiInspection() {
+        const auto captures = qEnvironmentVariable("FLORA_TEST_CAPTURE_DIR");
+        if (captures.isEmpty())
+            QSKIP("External capture fixtures are not configured");
+        flora::MainWindow window;
+        window.resize(1440, 900);
+        window.show();
+        QSignalSpy done(&window, &flora::MainWindow::taskFinished);
+        window.openCapture(captures + "/GF2_Exilium_2026_03_03__00_19_35.gpa_frame");
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        auto api = window.findChild<QTableView *>("apiLog");
+        auto select = [&](qulonglong id) {
+            for (int i = 0; i < api->model()->rowCount(); ++i) {
+                auto index = api->model()->index(i, 0);
+                if (index.data(Qt::UserRole).toULongLong() == id) {
+                    api->setCurrentIndex(index);
+                    return true;
+                }
+            }
+            return false;
+        };
+        QVERIFY(select(79));
+        auto props = window.findChild<QTreeWidget *>("properties");
+        QTreeWidgetItem *fields = nullptr, *references = nullptr;
+        for (int i = 0; i < props->topLevelItemCount(); ++i) {
+            auto item = props->topLevelItem(i);
+            if (item->data(0, Qt::UserRole + 1) == "apiFields")
+                fields = item;
+            if (item->data(0, Qt::UserRole + 1) == "apiReferences")
+                references = item;
+        }
+        QVERIFY(fields && references);
+        QCOMPARE(fields->childCount(), 8);
+        QCOMPARE(fields->child(2)->text(0), QString("view"));
+        QCOMPARE(fields->child(2)->text(1), QString("75"));
+        QVERIFY(fields->child(2)->toolTip(0).contains("Offset 16"));
+        snapshot(window, "api-fields");
+        QTreeWidgetItem *view = nullptr;
+        for (int i = 0; i < references->childCount(); ++i)
+            if (references->child(i)->text(0) == "view")
+                view = references->child(i);
+        QVERIFY(view);
+        done.clear();
+        QVERIFY(QMetaObject::invokeMethod(props, "itemDoubleClicked", Qt::DirectConnection,
+                                          Q_ARG(QTreeWidgetItem *, view), Q_ARG(int, 1)));
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        QVERIFY(!window.findChild<flora::ImageView *>("textureOutput")->image().isNull());
+        window.findChild<QComboBox *>("apiKinds")->setCurrentIndex(1);
+        auto filter = window.findChild<QLineEdit *>("apiResourceFilter");
+        filter->setText("80");
+        QVERIFY(api->model()->rowCount() > 0);
+        QVERIFY(api->model()->rowCount() < 920);
+        auto proxy = static_cast<flora::CaptureFilter *>(api->model());
+        auto source = static_cast<flora::CaptureModel *>(proxy->sourceModel());
+        for (int i = 0; i < api->model()->rowCount(); ++i)
+            QVERIFY(flora::commandMatches(
+                source->command(api->model()->index(i, 0).data(Qt::UserRole).toULongLong()), "", 80));
+        filter->setText("0");
+        QCOMPARE(api->model()->rowCount(), 0);
+        filter->clear();
+        QCOMPARE(api->model()->rowCount(), 920);
+        QVERIFY(window.findChild<QAction *>("exportApiLog"));
+    }
     void counterEditorHistory() {
         auto captures = qEnvironmentVariable("FLORA_TEST_CAPTURE_DIR");
         if (captures.isEmpty())

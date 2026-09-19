@@ -1,3 +1,4 @@
+#include "application/ApiCommands.h"
 #include "application/CaptureNames.h"
 #include "application/Constants.h"
 #include "application/Experiment.h"
@@ -51,7 +52,8 @@ int main(int argc, char **argv) {
     p.setApplicationDescription("Native DX11 capture inspection and isolated replay");
     p.addHelpOption();
     p.addVersionOption();
-    p.addPositionalArgument("command", "inventory | replay | shader | buffer | texture | compile | geometry");
+    p.addPositionalArgument("command",
+                            "inventory | commands | replay | shader | buffer | texture | compile | geometry");
     p.addPositionalArgument("capture", "DX11 .gpa_frame file");
     p.addOption({"out", "New or empty output directory", "path"});
     p.addOption({"experiment", "Compatible FloraGPA experiment project", "path"});
@@ -63,6 +65,8 @@ int main(int argc, char **argv) {
     p.addOption({"event", "Stop at API event", "id"});
     p.addOption({"before", "Stop before the selected event"});
     p.addOption({"id", "Resource ID", "id"});
+    p.addOption({"filter", "API command text filter", "text"});
+    p.addOption({"resource", "Filter API commands by referenced resource", "id"});
     p.addOption({"subresource", "Texture subresource", "index", "0"});
     p.addOption({"mip", "Texture mip level", "index", "0"});
     p.addOption({"layer", "Texture array layer", "index", "0"});
@@ -113,7 +117,13 @@ int main(int argc, char **argv) {
             if (!QDir().mkpath(out))
                 throw std::runtime_error("Cannot create output directory");
         }
-        if (command == "inventory") {
+        if (command == "commands") {
+            if (out.isEmpty())
+                throw std::runtime_error("commands requires --out");
+            exportCommands(frame, std::filesystem::path(out.toStdWString()), p.value("filter").toStdString(),
+                           p.isSet("resource") ? std::optional<Id>(parseId("resource")) : std::nullopt);
+            report.insert("completed", true);
+        } else if (command == "inventory") {
             auto names = capturedNames(frame);
             report.insert("debug_names",
                           QJsonDocument::fromJson(QByteArray::fromStdString(names.dump())).object());

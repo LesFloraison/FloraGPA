@@ -1,4 +1,5 @@
 #pragma once
+#include "application/ApiCommands.h"
 #include "core/Frame.h"
 #include <QAbstractTableModel>
 #include <QJsonArray>
@@ -20,6 +21,8 @@ class CaptureModel final : public QAbstractTableModel {
     QVariant headerData(int, Qt::Orientation, int role) const override;
     Id idAt(int row) const { return row >= 0 && row < int(ids_.size()) ? ids_[row] : 0; }
     int rowOf(Id id) const;
+    const nlohmann::json &command(Id id) const;
+    bool isCommands() const { return kind_ == Kind::Commands; }
     QString debugNames(Id id) const {
         auto found = names_.find(id);
         return found == names_.end() ? QString{} : found->second.join(" / ");
@@ -30,11 +33,18 @@ class CaptureModel final : public QAbstractTableModel {
     std::shared_ptr<const Frame> frame_;
     std::vector<Id> ids_;
     std::map<Id, QStringList> names_;
+    mutable std::map<Id, nlohmann::json> commandDetails_;
 };
 class CaptureFilter final : public QSortFilterProxyModel {
   public:
     bool workOnly = false;
     int resourceType = 0;
+    std::optional<Id> referencedResource;
+    QString searchText;
+    void setFilterFixedString(const QString &text) {
+        searchText = text;
+        QSortFilterProxyModel::setFilterFixedString(text);
+    }
     using QSortFilterProxyModel::QSortFilterProxyModel;
     void refresh() {
         beginFilterChange();

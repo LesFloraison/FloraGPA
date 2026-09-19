@@ -26,6 +26,7 @@ void CaptureModel::setFrame(std::shared_ptr<const Frame> frame) {
     frame_ = std::move(frame);
     ids_.clear();
     names_.clear();
+    commandDetails_.clear();
     if (frame_)
         for (auto &[id, e] : frame_->entries())
             if (e.category == (kind_ == Kind::Commands ? 7 : 5))
@@ -44,6 +45,23 @@ void CaptureModel::setFrame(std::shared_ptr<const Frame> frame) {
 int CaptureModel::rowOf(Id id) const {
     auto it = std::lower_bound(ids_.begin(), ids_.end(), id);
     return it != ids_.end() && *it == id ? int(it - ids_.begin()) : -1;
+}
+const nlohmann::json &CaptureModel::command(Id id) const {
+    auto found = commandDetails_.find(id);
+    if (found == commandDetails_.end()) {
+        auto details = inspectCommand(*frame_, id);
+        if (details["name"] == "GetData") {
+            // Only GetData requires preceding same-ID metadata; cache the resulting query rows.
+            for (auto &row : inspectCommands(*frame_))
+                if (row.contains("query_result"))
+                    commandDetails_.emplace(row["id"].get<Id>(), row);
+            found = commandDetails_.find(id);
+            if (found != commandDetails_.end())
+                return found->second;
+        }
+        found = commandDetails_.emplace(id, std::move(details)).first;
+    }
+    return found->second;
 }
 QVariant CaptureModel::data(const QModelIndex &index, int role) const {
     if (!index.isValid() || index.row() >= int(ids_.size()) || !frame_)
@@ -119,6 +137,10 @@ bool CaptureFilter::filterAcceptsRow(int row, const QModelIndex &parent) const {
         return false;
     if (resourceType == 3 && !(type >= 0x90 && type <= 0x95))
         return false;
+    auto model = static_cast<const CaptureModel *>(sourceModel());
+    if (model->isCommands() && (referencedResource || !filterRegularExpression().pattern().isEmpty())) {
+        return commandMatches(model->command(model->idAt(row)), searchText.toStdString(), referencedResource);
+    }
     return QSortFilterProxyModel::filterAcceptsRow(row, parent);
 }
 QVariant BufferModel::data(const QModelIndex &index, int role) const {

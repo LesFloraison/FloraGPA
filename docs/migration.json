@@ -33,9 +33,19 @@
       "sha256": "4f36fb7662f1822426647505ec81b8a509b880b048fe33afceedf3271f6e4e06",
       "lines": 108,
       "description": "Captured annotation calls and per-object observed nesting; no guessed contexts.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": [
+        "src/application/ApiCommands.cpp",
+        "src/application/QueryHistory.cpp",
+        "src/app/Models.cpp",
+        "src/app/MainWindow.cpp"
+      ],
+      "validation": [
+        "tests/ApiCommandTests.cpp: wire bounds, references, metadata order, query states and filtered export",
+        "tools/validate_api_commands.py: 920 GF2, 18024 BF1 and 4006 synthetic records plus resource/text filtering; JSON and parsed CSV, allowing different invalid diagnostic wording",
+        "tests/UiTests.cpp: field offsets, reference navigation, resource filtering and texture-preview priority",
+        "Wire reading migrated; nesting, context association and annotation-specific export remain pending"
+      ]
     },
     {
       "module": "annotations_ui.py",
@@ -54,10 +64,17 @@
       "status": "partial",
       "native": [
         "src/core/CommandNames.inc",
-        "src/app/Models.cpp"
+        "src/app/Models.cpp",
+        "src/application/ApiCommands.cpp",
+        "src/application/QueryHistory.cpp",
+        "src/app/MainWindow.cpp"
       ],
       "validation": [
-        "docs/NATIVE_BASELINE.md"
+        "docs/NATIVE_BASELINE.md",
+        "tests/ApiCommandTests.cpp: wire bounds, references, metadata order, query states and filtered export",
+        "tools/validate_api_commands.py: 920 GF2, 18024 BF1 and 4006 synthetic records plus resource/text filtering; JSON and parsed CSV, allowing different invalid diagnostic wording",
+        "tests/UiTests.cpp: field offsets, reference navigation, resource filtering and texture-preview priority",
+        "Missing-context inference for Finish metadata and typed-format view-preview handoff remain pending"
       ]
     },
     {
@@ -71,13 +88,19 @@
         "src/core/UavCounters.cpp",
         "src/replay/UavCounters.cpp",
         "src/application/UavCounterInspector.cpp",
-        "src/application/Experiment.cpp"
+        "src/application/Experiment.cpp",
+        "src/application/ApiCommands.cpp",
+        "src/application/QueryHistory.cpp",
+        "src/app/Models.cpp"
       ],
       "validation": [
         "docs/NATIVE_BASELINE.md",
         "tests/UavCounterTests.cpp: CS/OM Append and Counter on hardware and WARP; scope, reset, UINT_MAX, aliases, rollback and history",
         "tools/validate_uav_counters.py: 32 Python comparisons, 29 exact byte matches and 3 BF1 parallel-append multiset comparisons with exact untouched bytes",
-        "tests/UiTests.cpp: counter edit, overflow rejection, undo/redo and stale-read invalidation"
+        "tests/UiTests.cpp: counter edit, overflow rejection, undo/redo and stale-read invalidation",
+        "tests/ApiCommandTests.cpp: wire bounds, references, metadata order, query states and filtered export",
+        "tools/validate_api_commands.py: 920 GF2, 18024 BF1 and 4006 synthetic records plus resource/text filtering; JSON and parsed CSV, allowing different invalid diagnostic wording",
+        "tests/UiTests.cpp: field offsets, reference navigation, resource filtering and texture-preview priority"
       ]
     },
     {
@@ -157,9 +180,18 @@
       "sha256": "c7264cb63c4afc7046ba726382ad83220a22e46fc6c00662ca9f6ad15d66d0ef",
       "lines": 28,
       "description": "Read-only API layouts confirmed in original legacy deferred captures.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": [
+        "src/application/ApiCommands.cpp",
+        "src/application/QueryHistory.cpp",
+        "src/app/Models.cpp",
+        "src/app/MainWindow.cpp"
+      ],
+      "validation": [
+        "tests/ApiCommandTests.cpp: wire bounds, references, metadata order, query states and filtered export",
+        "tools/validate_api_commands.py: 920 GF2, 18024 BF1 and 4006 synthetic records plus resource/text filtering; JSON and parsed CSV, allowing different invalid diagnostic wording",
+        "tests/UiTests.cpp: field offsets, reference navigation, resource filtering and texture-preview priority"
+      ]
     },
     {
       "module": "class_linkage.py",
@@ -195,9 +227,19 @@
       "sha256": "f82ae628c4376e9431909b19cbcd31990c38063dae5d304ecc2e8589219b36f6",
       "lines": 116,
       "description": "Inspect recovered command-list records without guessing pointer/ID domains.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": [
+        "src/application/ApiCommands.cpp",
+        "src/application/QueryHistory.cpp",
+        "src/app/Models.cpp",
+        "src/app/MainWindow.cpp"
+      ],
+      "validation": [
+        "tests/ApiCommandTests.cpp: wire bounds, references, metadata order, query states and filtered export",
+        "tools/validate_api_commands.py: 920 GF2, 18024 BF1 and 4006 synthetic records plus resource/text filtering; JSON and parsed CSV, allowing different invalid diagnostic wording",
+        "tests/UiTests.cpp: field offsets, reference navigation, resource filtering and texture-preview priority",
+        "Execute/Finish call metadata migrated; full inventory, resource-owner provenance and context inference remain pending"
+      ]
     },
     {
       "module": "command_state.py",
@@ -213,9 +255,17 @@
       "sha256": "0303109d07566421d596bd44c402a87ef2307c0a551248a724d4e593b1fc8eb0",
       "lines": 346,
       "description": "Captured command stream, exact parameters and linked records.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": [
+        "src/app/MainWindow.cpp",
+        "src/app/Models.cpp",
+        "src/application/ApiCommands.cpp",
+        "src/application/QueryHistory.cpp"
+      ],
+      "validation": [
+        "tests/UiTests.cpp: captured fields/offsets, reference texture navigation and resource filtering",
+        "JSON/CSV export and query interpretation in Inspector; full linked-record details, typed-view/sample selection and non-draw setter-state UI remain pending"
+      ]
     },
     {
       "module": "constant_buffer_setters.py",
@@ -1548,9 +1598,19 @@
       "sha256": "2b7549b05b4ea195472a70d724b1ccb46a56db3235ad9fa551f627877018f1b7",
       "lines": 119,
       "description": "Interpret captured GetData bytes using explicit same-ID query metadata.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": [
+        "src/application/ApiCommands.cpp",
+        "src/application/QueryHistory.cpp",
+        "src/app/Models.cpp",
+        "src/app/MainWindow.cpp"
+      ],
+      "validation": [
+        "tests/ApiCommandTests.cpp: wire bounds, references, metadata order, query states and filtered export",
+        "tools/validate_api_commands.py: 920 GF2, 18024 BF1 and 4006 synthetic records plus resource/text filtering; JSON and parsed CSV, allowing different invalid diagnostic wording",
+        "tests/UiTests.cpp: field offsets, reference navigation, resource filtering and texture-preview priority",
+        "Query results are available in API inspection/export; dedicated query-only presentation/export remains pending"
+      ]
     },
     {
       "module": "rasterizer_edits.py",
@@ -1716,13 +1776,19 @@
         "src/core/UavCounters.cpp",
         "src/replay/UavCounters.cpp",
         "src/application/UavCounterInspector.cpp",
-        "src/application/Experiment.cpp"
+        "src/application/Experiment.cpp",
+        "src/application/ApiCommands.cpp",
+        "src/application/QueryHistory.cpp",
+        "src/app/Models.cpp"
       ],
       "validation": [
         "docs/NATIVE_BASELINE.md",
         "tests/UavCounterTests.cpp: CS/OM Append and Counter on hardware and WARP; scope, reset, UINT_MAX, aliases, rollback and history",
         "tools/validate_uav_counters.py: 32 Python comparisons, 29 exact byte matches and 3 BF1 parallel-append multiset comparisons with exact untouched bytes",
-        "tests/UiTests.cpp: counter edit, overflow rejection, undo/redo and stale-read invalidation"
+        "tests/UiTests.cpp: counter edit, overflow rejection, undo/redo and stale-read invalidation",
+        "tests/ApiCommandTests.cpp: wire bounds, references, metadata order, query states and filtered export",
+        "tools/validate_api_commands.py: 920 GF2, 18024 BF1 and 4006 synthetic records plus resource/text filtering; JSON and parsed CSV, allowing different invalid diagnostic wording",
+        "tests/UiTests.cpp: field offsets, reference navigation, resource filtering and texture-preview priority"
       ]
     },
     {

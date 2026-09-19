@@ -91,6 +91,21 @@ the frame's initial counter value. Captured resets still override initial values
 Edits support the full uint32 range, project save/load and undo/redo; previewing
 an event restores its prior counter, while a submitted event retains its changes.
 
+API Log inspection preserves captured scalar/array fields, byte offsets, raw bits,
+and resource references. Inspect **Captured fields** and **References** in the
+right Inspector; double-click a resource reference to navigate to its buffer or
+texture subresource. Search accepts space-separated terms including decode status,
+and **Referenced resource ID** also finds references through views. The API Log
+context menu exports filtered JSON and CSV. Unknown, partial, and invalid records
+retain their undecoded bytes; decoded metadata does not imply GPU replay support.
+Captured GetData results use only earlier metadata for the same query ID. Missing
+high words, incomplete results and conflicting descriptors remain explicit.
+
+```powershell
+.\out\FloraGPA\FloraGPA.Cli.exe commands D:\captures\sample.gpa_frame --out D:\results\api
+# Optional: --filter "set decoded" --resource 25733
+```
+
 See [migration status](docs/MIGRATION_STATUS.md) for implemented features and
 the remaining parity gaps. This build is not the completed migration.
 
@@ -119,3 +134,9 @@ For UAV counter comparisons, run `FloraUavCounterTests` with
 as `--fixture` to `tools/validate_uav_counters.py` with the same reference/executable
 arguments above. Parallel Append payloads in the BF1 case are compared as element
 multisets, with exact counter values and exact bytes outside the appended range.
+
+For API inspection comparisons, run `FloraApiCommandTests` with
+`FLORA_API_EVIDENCE_DIR` set to an artifact directory. Run
+`tools/validate_api_commands.py` with the reference/executable arguments above and
+one `--fixture` argument for each generated `.gpa_frame`. This checks complete
+record metadata and parsed CSV rows; invalid-record diagnostic wording may differ.

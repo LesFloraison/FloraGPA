@@ -365,6 +365,28 @@ void MainWindow::buildUi() {
     apiView_->setContextMenuPolicy(Qt::ActionsContextMenu);
     apiView_->addActions({enableAction_, clearAction_, updateSourceAction_});
     apiView_->setObjectName("apiLog");
+    auto exportApi = new QAction("Export API Log…", this);
+    exportApi->setObjectName("exportApiLog");
+    apiView_->addAction(exportApi);
+    connect(exportApi, &QAction::triggered, this, [this] {
+        if (!frame_)
+            return;
+        auto path = QFileDialog::getExistingDirectory(this, "Export API Log");
+        if (path.isEmpty())
+            return;
+        if ((QFile::exists(path + "/commands.json") || QFile::exists(path + "/commands.csv")) &&
+            QMessageBox::question(this, "Export API Log",
+                                  "Replace existing commands.json and commands.csv?") != QMessageBox::Yes)
+            return;
+        try {
+            exportCommands(*frame_, std::filesystem::path(path.toStdWString()),
+                           commandFilter_->searchText.toStdString(), commandFilter_->referencedResource,
+                           commandFilter_->workOnly);
+            statusBar()->showMessage("API log exported", 3000);
+        } catch (const std::exception &error) {
+            showError(QString::fromUtf8(error.what()));
+        }
+    });
     apiView_->setColumnWidth(1, 185);
     apiView_->setColumnHidden(2, true);
     resources_ = new CaptureModel(CaptureModel::Kind::Resources, this);
@@ -375,6 +397,7 @@ void MainWindow::buildUi() {
     resourceView_ = table(resourceFilter_);
     resourceView_->setObjectName("resources");
     auto apiKinds = new QComboBox;
+    apiKinds->setObjectName("apiKinds");
     apiKinds->addItems({"GPU commands", "All API calls"});
     connect(apiKinds, &QComboBox::currentIndexChanged, this, [this](int i) {
         commandFilter_->workOnly = i == 0;
@@ -388,7 +411,22 @@ void MainWindow::buildUi() {
     });
     leftTabs_ = new QTabWidget;
     leftTabs_->setDocumentMode(true);
-    leftTabs_->addTab(filtered(apiView_, commandFilter_, apiKinds), "API Log");
+    auto apiPane = filtered(apiView_, commandFilter_, apiKinds);
+    auto referenceFilter = new QLineEdit;
+    referenceFilter->setObjectName("apiResourceFilter");
+    referenceFilter->setPlaceholderText("Referenced resource ID…");
+    referenceFilter->setClearButtonEnabled(true);
+    connect(referenceFilter, &QLineEdit::textChanged, this, [this, referenceFilter](const QString &value) {
+        bool valid = false;
+        auto id = value.toULongLong(&valid);
+        referenceFilter->setToolTip(value.isEmpty() || valid ? "" : "Enter an unsigned resource ID");
+        if (!value.isEmpty() && (!valid || value.startsWith('-')))
+            return;
+        commandFilter_->referencedResource = value.isEmpty() ? std::nullopt : std::optional<Id>(id);
+        commandFilter_->refresh();
+    });
+    static_cast<QVBoxLayout *>(apiPane->layout())->insertWidget(2, referenceFilter);
+    leftTabs_->addTab(apiPane, "API Log");
     leftTabs_->addTab(filtered(resourceView_, resourceFilter_, resourceKinds), "Resources");
     statistics_ = tree({"Statistic", "Value"});
     leftTabs_->addTab(statistics_, "Statistics");
@@ -649,6 +687,29 @@ void MainWindow::buildUi() {
     rightTabs->setDocumentMode(true);
     properties_ = tree({"Property", "Value"});
     properties_->setObjectName("properties");
+    connect(properties_, &QTreeWidget::itemDoubleClicked, this, [this](QTreeWidgetItem *item, int) {
+        if (!frame_ || item->data(0, Qt::UserRole).toString().isEmpty())
+            return;
+        try {
+            const auto ref = nlohmann::json::parse(item->data(0, Qt::UserRole).toString().toStdString());
+            const auto selectionText = item->data(1, Qt::UserRole).toString();
+            if (!selectionText.isEmpty()) {
+                const auto selection = nlohmann::json::parse(selectionText.toStdString());
+                inspectResource(selection["resource"].get<Id>());
+                auto type = frame_->entry(selection["resource"]).type;
+                if (type >= 0x84 && type <= 0x87) {
+                    mip_->setValue(selection["mip"].get<int>());
+                    layer_->setValue(selection["layer"].get<int>());
+                    slice_->setValue(selection["slice"].get<int>());
+                }
+            } else if (ref.value("category", 0) == 7)
+                selectEvent(ref["id"]);
+            else if (ref.value("category", 0) == 5)
+                inspectResource(ref["id"]);
+        } catch (const std::exception &error) {
+            showError(QString::fromUtf8(error.what()));
+        }
+    });
     metrics_ = tree({"Metric", "Value"});
     metrics_->setColumnWidth(0, 175);
     rightTabs->addTab(properties_, "Properties");
@@ -1020,51 +1081,87 @@ void MainWindow::selectEvent(Id id) {
     replayTimer_.start();
 }
 void MainWindow::inspectEvent(Id id) {
-    auto &e = frame_->entry(id);
-    QList<QPair<QString, QString>> values{{"ID", QString::number(id)},
-                                          {"Type", QString("0x%1").arg(e.type, 4, 16, QChar('0'))},
-                                          {"Wire bytes", QString::number(e.size)}};
-    if (isDraw(e.type)) {
-        auto event = frame_->event(id);
-        values.append(QPair<QString, QString>{"State", QString::number(event.state)});
-        values.append(QPair<QString, QString>{"Context", QString::number(event.context)});
-        QStringList names;
-        switch (e.type) {
-        case 0x35:
-            names = {"X", "Y", "Z"};
-            break;
-        case 0x37:
-            names = {"Vertex count", "Start vertex"};
-            break;
-        case 0x39:
-            names = {"Index count", "Start index", "Base vertex"};
-            break;
-        case 0x3a:
-            names = {"Index count", "Instance count", "Start index", "Base vertex", "Start instance"};
-            break;
-        case 0x3c:
-            names = {"Vertex count", "Instance count", "Start vertex", "Start instance"};
-            break;
-        default:
-            names = {"Offset"};
+    const auto &details = commands_->command(id);
+    auto display = [](const nlohmann::json &v) {
+        return QString::fromStdString(v.is_string() ? v.get<std::string>() : v.dump());
+    };
+    properties(display(details["name"]),
+               {{"ID", QString::number(id)},
+                {"Type", QString("0x%1").arg(details["type"].get<uint16_t>(), 4, 16, QChar('0'))},
+                {"Wire bytes", display(details["wire_size"])},
+                {"Decode", display(details["status"])}});
+    auto root = properties_->topLevelItem(0);
+    root->setToolTip(0, QString::fromStdString(details.value("note", "")));
+    if (details.contains("error"))
+        new QTreeWidgetItem(root, {"Error", display(details["error"])});
+    auto fields = new QTreeWidgetItem(properties_, {"Captured fields", ""});
+    fields->setData(0, Qt::UserRole + 1, "apiFields");
+    for (const auto &f : details["fields"]) {
+        auto item = new QTreeWidgetItem(fields, {display(f["name"]), display(f["value"])});
+        auto tip = QString("Offset %1 · %2 bytes · %3\n%4")
+                       .arg(f["offset"].get<uint64_t>())
+                       .arg(f["size"].get<uint64_t>())
+                       .arg(display(f["encoding"]), display(f["hex"]));
+        item->setToolTip(0, tip);
+        item->setToolTip(1, tip);
+    }
+    fields->setExpanded(true);
+    auto references = new QTreeWidgetItem(properties_, {"References", ""});
+    references->setData(0, Qt::UserRole + 1, "apiReferences");
+    for (const auto &ref : details["references"]) {
+        auto item = new QTreeWidgetItem(references, {display(ref["field"]), display(ref["id"])});
+        item->setToolTip(1, ref["exists"] == true ? "Double-click to inspect" : "Missing captured record");
+        if (ref["exists"] == true) {
+            item->setData(0, Qt::UserRole, QString::fromStdString(ref.dump()));
+            try {
+                auto selection = commandResourceSelection(*frame_, ref, details);
+                if (!selection.is_null())
+                    item->setData(1, Qt::UserRole, QString::fromStdString(selection.dump()));
+            } catch (const std::exception &error) {
+                item->setToolTip(1, QString::fromUtf8(error.what()));
+            }
         }
-        for (size_t i = 0; i < event.args.size(); ++i)
-            values.append(
-                QPair<QString, QString>{names.value(int(i), "Argument"), QString::number(event.args[i])});
-    } else if (isClearCommand(e.type)) {
-        auto current = experiment_->clear(*frame_, id);
-        for (auto it = current.begin(); it != current.end(); ++it)
-            values.append({QString::fromStdString(it.key()), QString::fromStdString(it.value().dump())});
-    } else if (e.type == 0x247) {
-        auto layout = updateSourceLayout(*frame_, id);
-        values.append({"Destination", QString::number(layout.destination)});
-        values.append({"Subresource", QString::number(layout.subresource)});
-        values.append({"Source bytes", QString::number(layout.size)});
-        values.append({"Row pitch", QString::number(layout.rowPitch)});
-        values.append({"Slice pitch", QString::number(layout.slicePitch)});
-    } else
-        values.append(QPair<QString, QString>{"Wire", hex(frame_->payload(id), 96)});
-    properties(QString::fromStdString(commandName(e.type)), values);
+    }
+    references->setExpanded(true);
+    std::function<void(QTreeWidgetItem *, const nlohmann::json &)> append;
+    append = [&](QTreeWidgetItem *parent, const nlohmann::json &value) {
+        if (value.is_object())
+            for (auto it = value.begin(); it != value.end(); ++it) {
+                bool nested = it.value().is_structured();
+                auto child = new QTreeWidgetItem(
+                    parent, {QString::fromStdString(it.key()), nested ? QString{} : display(it.value())});
+                if (nested)
+                    append(child, it.value());
+            }
+        else if (value.is_array())
+            for (size_t i = 0; i < value.size(); ++i) {
+                auto child = new QTreeWidgetItem(
+                    parent, {QString::number(i), value[i].is_structured() ? QString{} : display(value[i])});
+                if (value[i].is_structured())
+                    append(child, value[i]);
+            }
+    };
+    for (auto key :
+         {"annotation", "query_capture", "query_result", "command_list", "command_list_finish", "replay"})
+        if (details.contains(key)) {
+            auto group = new QTreeWidgetItem(properties_, {QString::fromLatin1(key), ""});
+            append(group, details[key]);
+        }
+    if (details.contains("remaining_hex")) {
+        auto remaining =
+            new QTreeWidgetItem(properties_, {"Undecoded bytes", display(details["remaining_offset"])});
+        remaining->setToolTip(1, display(details["remaining_hex"]));
+        new QTreeWidgetItem(remaining, {"Hex", display(details["remaining_hex"])});
+    }
+    if (details.contains("replay_unavailable"))
+        root->setToolTip(1, display(details["replay_unavailable"]));
+    if (isClearCommand(frame_->entry(id).type) && details["status"] == "decoded") {
+        try {
+            auto group = new QTreeWidgetItem(properties_, {"Experiment values", ""});
+            append(group, experiment_->clear(*frame_, id));
+        } catch (const std::exception &) {
+        } // Inspection remains available for unreplayable contexts.
+    }
 }
 void MainWindow::showPipeline(const State &s) {
     pipeline_->clear();
@@ -1222,6 +1319,7 @@ void MainWindow::inspectResource(Id id) {
             slice_->setValue(0);
             textureImage_->setImage({});
             centerTabs_->setCurrentWidget(texturePane_);
+            replayTimer_.stop();
             textureTimer_.start();
         }
         properties(QString::fromStdString(resourceName(e.type)), values);
