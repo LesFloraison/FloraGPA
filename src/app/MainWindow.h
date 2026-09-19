@@ -44,6 +44,8 @@ class MainWindow final : public QMainWindow {
     void previewBuffer();
     void exportBuffer();
     void editBuffer(bool importFile = false);
+    void showConstants(const QJsonObject &report);
+    void editConstant();
     void openExperiment();
     bool saveExperiment();
     void experimentChanged();
@@ -71,6 +73,10 @@ class MainWindow final : public QMainWindow {
     QAction *undoAction_ = nullptr, *redoAction_ = nullptr, *enableAction_ = nullptr;
     QAction *clearAction_ = nullptr, *updateSourceAction_ = nullptr;
     QAction *bufferEditAction_ = nullptr, *bufferImportAction_ = nullptr;
+    QAction *constantEditAction_ = nullptr;
+    QTreeWidget *constants_ = nullptr;
+    uint64_t constantsRevision_ = 0;
+    Id constantsEvent_ = 0, constantsResource_ = 0;
     QString capturePath_, pendingPath_;
     CaptureModel *commands_, *resources_;
     CaptureFilter *commandFilter_, *resourceFilter_;

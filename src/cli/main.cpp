@@ -1,4 +1,5 @@
 #include "application/CaptureNames.h"
+#include "application/Constants.h"
 #include "application/Experiment.h"
 #include "application/Geometry.h"
 #include "application/ShaderInspector.h"
@@ -101,6 +102,7 @@ int main(int argc, char **argv) {
                            {"height", int(frame.height())},
                            {"entries", int(frame.entries().size())},
                            {"reference_pixels_used", false}};
+        nlohmann::json constantBindings;
         QString out = p.value("out");
         if (!out.isEmpty()) {
             QDir dir(out);
@@ -259,6 +261,13 @@ int main(int argc, char **argv) {
                     replay.inspectEventInputs(options.until, [&] { bytes = replay.readBuffer(resource.id); });
                 else
                     bytes = replay.readBuffer(resource.id);
+                auto constants =
+                    options.until && isDraw(frame.entry(options.until).type)
+                        ? inspectConstants(frame, replay, options, options.until, resource.id, bytes)
+                        : nlohmann::json::array();
+                report.insert("constant_bindings",
+                              QJsonDocument::fromJson(QByteArray::fromStdString(constants.dump())).array());
+                constantBindings = std::move(constants);
                 if (options.until && isDraw(frame.entry(options.until).type)) {
                     auto event = frame.event(options.until);
                     auto bindings = bufferBindings(frame, event, frame.state(event.state), resource.id);
@@ -364,7 +373,11 @@ int main(int argc, char **argv) {
             report.insert("completed", true);
         } else
             throw std::runtime_error("Unknown command");
-        auto json = QJsonDocument(report).toJson();
+        auto nativeReport = nlohmann::json::parse(QJsonDocument(report).toJson().toStdString());
+        // QJson normalizes -0.0 to 0. Preserve reflected values and exact scalar bits in the report.
+        if (!constantBindings.is_null())
+            nativeReport["constant_bindings"] = std::move(constantBindings);
+        auto json = QByteArray::fromStdString(nativeReport.dump(2) + "\n");
         if (!out.isEmpty())
             save(out + "/report.json", json);
         QTextStream(stdout) << json;

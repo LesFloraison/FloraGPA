@@ -127,14 +127,16 @@
         "src/app/MainWindow.cpp",
         "src/core/BufferBindings.cpp",
         "src/replay/BufferEdits.cpp",
-        "src/application/Experiment.cpp"
+        "src/application/Experiment.cpp",
+        "src/application/Constants.cpp"
       ],
       "validation": [
-        "Five Python/native initial/boundary/range comparisons; word CSV; GUI read and subrange; CB recursive reflection and edits pending",
+        "Five Python/native initial/boundary/range comparisons; word CSV; GUI read and subrange",
         "tests/BufferEditTests.cpp: compute input isolation, persistent output, rollback and append-counter preservation",
         "tests/UiTests.cpp: buffer edit, worker preview, undo/redo and after-event input restoration",
         "tools/validate_buffer_edits.py: CB/VB/IB/SRV/UAV byte and binding comparisons; edited geometry and visible draw comparison",
-        "Constant-buffer recursive fields, counter editing, stream-output execution and complete setter overrides remain pending"
+        "UAV counter inspection/editing, stream-output execution and complete setter overrides remain pending",
+        "tools/validate_constants.py and tests/UiTests.cpp: recursive CB fields, binding windows, typed edits and stale-read rejection"
       ]
     },
     {
@@ -220,9 +222,22 @@
       "sha256": "bb4a0c0cbd526bc081035f6fb47cb7b7604989359d433fe2de10bad21682dea4",
       "lines": 105,
       "description": "Reflected legacy DXBC constant layout, typed values and padding-safe edits.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": [
+        "src/application/Constants.cpp",
+        "src/application/ShaderInspector.cpp",
+        "src/replay/Replay.cpp",
+        "src/application/Experiment.cpp",
+        "src/cli/main.cpp",
+        "src/app/MainWindow.cpp"
+      ],
+      "validation": [
+        "tests/ConstantsTests.cpp: recursive compiled DXBC reflection, structures/arrays, row/column-major matrices, double packing, ranges, invalid values, untouched bits and Qt JSON negative-zero recovery",
+        "tools/validate_constants.py: 22 synthetic leaves and patches match Python; 12 GF2/BF1 original/replacement/edit/exact-bits/after/undo inspections, including CB1 first=2304 count=16 and sliced exports",
+        "tests/BufferEditTests.cpp: typed multi-patch atomic history, save/load, rollback, compute submission and input restoration",
+        "tests/UiTests.cpp: compiled reflected shader, compact matrix editor, worker readback, undo/redo, after-event read-only fields and navigation invalidation",
+        "Legacy DXBC layouts supported by the reference are implemented; unsupported layouts remain explicit, stripped names are not recovered; full multi-capture/module closure remains pending"
+      ]
     },
     {
       "module": "contexts.py",

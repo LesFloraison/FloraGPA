@@ -1,3 +1,4 @@
+#include "application/Constants.h"
 #include "application/Experiment.h"
 #include "core/BufferBindings.h"
 #include <QFile>
@@ -201,6 +202,57 @@ uint32_t firstWord(Replay &replay, Id id) {
 class BufferEditTests final : public QObject {
     Q_OBJECT
   private slots:
+    void typedConstantTransaction() {
+        QTemporaryDir dir;
+        auto capture = computeCapture();
+        capture.save(dir.path() + "/compute.gpa_frame");
+        Frame frame((dir.path() + "/compute.gpa_frame").toStdWString());
+        Experiment project(frame);
+        ReplayOptions options;
+        options.warp = true;
+        options.until = 100;
+        options.before = true;
+        Replay replay(frame, options);
+        replay.run();
+        auto constants = inspectConstants(frame, replay, options, 100, 2, replay.readBuffer(2));
+        QCOMPARE(constants.size(), size_t(1));
+        QCOMPARE(constants[0]["stage"], nlohmann::json("cs"));
+        auto field = constants[0]["variables"][0]["fields"][0];
+        QCOMPARE(field["value"], nlohmann::json({2, 0, 0, 0}));
+        auto patches = constantPatches(field, nlohmann::json({20, 0, 0, 9}));
+        QCOMPARE(patches.size(), size_t(2));
+        project.setBufferPatches(frame, 100, 2, patches, "Constant c");
+        QCOMPARE(project.revision(), size_t(1));
+        auto saved = project.document();
+        QVERIFY_THROWS_EXCEPTION(
+            std::runtime_error,
+            project.setBufferPatches(frame, 100, 2, {{0, word(30)}, {16, word(40)}}, "Invalid transaction"));
+        QCOMPARE(project.document(), saved);
+        project.setBufferPatches(frame, 100, 2, {}, "No change");
+        QCOMPARE(project.document(), saved);
+        project.save(dir.path() + "/constants.json");
+        Experiment loaded(frame);
+        loaded.load(dir.path() + "/constants.json", frame);
+        loaded.apply(frame, options);
+        Replay edited(frame, options);
+        edited.run();
+        edited.inspectEventInputs(100, [&] {
+            auto value = inspectConstants(frame, edited, options, 100, 2, edited.readBuffer(2));
+            QCOMPARE(value[0]["variables"][0]["fields"][0]["value"], nlohmann::json({20, 0, 0, 9}));
+        });
+        QCOMPARE(firstWord(edited, 2), 2u);
+        QVERIFY(loaded.undo());
+        loaded.apply(frame, options);
+        QVERIFY(options.buffers.empty());
+        QVERIFY(loaded.redo());
+        loaded.apply(frame, options);
+        options.until = 0;
+        options.before = false;
+        Replay submitted(frame, options);
+        submitted.run();
+        QCOMPARE(firstWord(submitted, 7), 46u);
+        QCOMPARE(firstWord(submitted, 2), 2u);
+    }
     void scopesAndCounters() {
         QTemporaryDir dir;
         auto capture = computeCapture();

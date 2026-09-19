@@ -507,6 +507,15 @@ void Replay::bind(const State &s, bool compute) {
         lastTarget_ = r.read<Id>();
     }
 }
+Replay::ConstantRange Replay::constantRange(unsigned stage, uint32_t slot, Id buffer) const {
+    const auto &ranges = ranges_.at(stage);
+    auto it = ranges.find(slot);
+    if (it == ranges.end())
+        return {};
+    if (it->second.buffer != buffer)
+        throw std::runtime_error("CB1 range disagrees with snapshot");
+    return {it->second.first, it->second.window ? std::optional<uint32_t>(it->second.count) : std::nullopt};
+}
 void Replay::constantBuffers(const Entry &e) {
     Reader r(frame_.payload(e.id));
     r.skip(8);

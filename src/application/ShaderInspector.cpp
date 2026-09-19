@@ -323,6 +323,27 @@ Json embedded(const std::map<std::string, Bytes> &parts) {
     return result;
 }
 } // namespace
+static Json reflectedType(ID3D11ShaderReflectionType *type, unsigned depth = 0) {
+    if (depth > 64)
+        throw std::runtime_error("Constant type nesting exceeds 64");
+    D3D11_SHADER_TYPE_DESC t{};
+    check(type->GetDesc(&t), "Reflect shader type");
+    Json result{{"class_id", t.Class},  {"base_type", t.Type},    {"rows", t.Rows},
+                {"columns", t.Columns}, {"elements", t.Elements}, {"members", t.Members}};
+    if (t.Members) {
+        result["member_types"] = Json::array();
+        for (UINT i = 0; i < t.Members; ++i) {
+            auto member = type->GetMemberTypeByIndex(i);
+            D3D11_SHADER_TYPE_DESC desc{};
+            check(member->GetDesc(&desc), "Reflect structure member");
+            auto name = type->GetMemberTypeName(i);
+            result["member_types"].push_back({{"name", name ? name : ""},
+                                              {"offset", desc.Offset},
+                                              {"type", reflectedType(member, depth + 1)}});
+        }
+    }
+    return result;
+}
 Json inspectShader(Bytes bytes) {
     auto parts = chunks(bytes);
     Json result{{"sha256", sha256(bytes)},
@@ -381,11 +402,13 @@ Json inspectShader(Bytes bytes) {
             cb["variables"].push_back({{"name", v.Name ? v.Name : ""},
                                        {"offset", v.StartOffset},
                                        {"size", v.Size},
+                                       {"flags", v.uFlags},
                                        {"type", t.Type},
                                        {"class", t.Class},
                                        {"rows", t.Rows},
                                        {"columns", t.Columns},
-                                       {"elements", t.Elements}});
+                                       {"elements", t.Elements},
+                                       {"type_layout", reflectedType(variable->GetType())}});
         }
         result["constant_buffers"].push_back(cb);
     }

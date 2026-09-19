@@ -206,20 +206,31 @@ void Experiment::setUpdateSource(const Frame &frame, Id event, Bytes data) {
 }
 bool Experiment::canUndo() const { return revision() > 0; }
 void Experiment::setBuffer(const Frame &frame, Id event, Id resource, uint64_t offset, Bytes data) {
-    validateBufferPatch(frame, event, resource, offset, data.size());
-    Json op{{"kind", "buffer"},
-            {"event", event},
-            {"resource", resource},
-            {"offset", offset},
-            {"asset",
-             {{"data", QByteArray(reinterpret_cast<const char *>(data.data()), qsizetype(data.size()))
-                           .toBase64()
-                           .toStdString()},
-              {"sha256", sha256(data)}}}};
+    setBufferPatches(frame, event, resource, {{offset, {data.begin(), data.end()}}},
+                     "Buffer " + std::to_string(resource) + " at event " + std::to_string(event));
+}
+void Experiment::setBufferPatches(const Frame &frame, Id event, Id resource,
+                                  const std::vector<BufferPatch> &patches, const std::string &label) {
+    if (patches.empty())
+        return;
+    Json operations = Json::array();
+    for (const auto &patch : patches) {
+        auto &data = patch.bytes;
+        validateBufferPatch(frame, event, resource, patch.offset, data.size());
+        operations.push_back(
+            {{"kind", "buffer"},
+             {"event", event},
+             {"resource", resource},
+             {"offset", patch.offset},
+             {"asset",
+              {{"data", QByteArray(reinterpret_cast<const char *>(data.data()), qsizetype(data.size()))
+                            .toBase64()
+                            .toStdString()},
+               {"sha256", sha256(data)}}}});
+    }
     auto &history = project_["history"];
     history.erase(history.begin() + ptrdiff_t(revision()), history.end());
-    history.push_back({{"label", "Buffer " + std::to_string(resource) + " at event " + std::to_string(event)},
-                       {"operations", Json::array({op})}});
+    history.push_back({{"label", label}, {"operations", std::move(operations)}});
     project_["cursor"] = history.size();
 }
 bool Experiment::canRedo() const { return revision() < project_["history"].size(); }

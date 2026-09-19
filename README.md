@@ -79,6 +79,12 @@ byte offset for the selected draw/dispatch. **Before event** displays patched
 inputs; input-only edits are scoped to that command, so **After event** restores
 the original input storage. Output buffer edits persist after submission while
 preserving UAV counters. Geometry inspection also uses the edited inputs.
+The Buffer **Constants** tab shows reflected scalar, vector, matrix, array and
+structure fields, including CB1 binding ranges. Read **Before event**, select a
+field and use **Edit Value**. Changes preserve padding and untouched scalar bits
+and undo as one operation. Per-component tooltips show byte offsets and raw bits;
+`bits:HEX` accepts an exact scalar bit pattern. Stripped shaders without reflected
+variable names leave the field list empty, as in the reference implementation.
 
 See [migration status](docs/MIGRATION_STATUS.md) for implemented features and
 the remaining parity gaps. This build is not the completed migration.
@@ -95,5 +101,10 @@ python tools/validate_buffers.py --reference D:/CDXrepo/FloraGPA/standalone --ex
 python tools/validate_commands.py --reference D:/CDXrepo/FloraGPA/standalone --exe out/FloraGPA/FloraGPA.Cli.exe --captures D:/CDXrepo/FloraGPA --qt-bin D:/Qt/6.11.2/msvc2022_64/bin --out artifacts/command-run
 python tools/validate_buffer_edits.py --reference D:/CDXrepo/FloraGPA/standalone --exe out/FloraGPA/FloraGPA.Cli.exe --captures D:/CDXrepo/FloraGPA --qt-bin D:/Qt/6.11.2/msvc2022_64/bin --out artifacts/buffer-edit-run
 ```
+
+For constant-layout comparisons, run `FloraConstantTests` with
+`FLORA_CONSTANT_EVIDENCE_DIR` pointing to a new artifact directory. Pass that
+directory as `--fixture` to `tools/validate_constants.py`, together with the same
+`--reference`, `--exe`, `--captures`, `--qt-bin` and a new `--out` directory.
 
 Run GPU checks serially and use a new output directory each time.

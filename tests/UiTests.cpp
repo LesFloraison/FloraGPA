@@ -96,6 +96,125 @@ class UiTests final : public QObject {
         QVERIFY(done.takeLast()[0].toBool());
         QCOMPARE(model->bytes(), original);
     }
+    void constantEditorHistory() {
+        auto captures = qEnvironmentVariable("FLORA_TEST_CAPTURE_DIR");
+        if (captures.isEmpty())
+            QSKIP("External capture fixtures are not configured");
+        flora::MainWindow window;
+        window.resize(1440, 900);
+        window.show();
+        QSignalSpy done(&window, &flora::MainWindow::taskFinished);
+        window.openCapture(captures + "/GF2_Exilium_2026_03_03__00_19_35.gpa_frame");
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        auto api = window.findChild<QTableView *>("apiLog");
+        api->setCurrentIndex(api->model()->index(2, 0));
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        auto resources = window.findChild<QTableView *>("resources");
+        // Original GF2 shaders have stripped RDEF. Compile a reflected replacement first.
+        for (int i = 0; i < resources->model()->rowCount(); ++i) {
+            auto index = resources->model()->index(i, 0);
+            if (index.data(Qt::UserRole).toULongLong() == 102) {
+                resources->setCurrentIndex(index);
+                break;
+            }
+        }
+        window.findChild<QPlainTextEdit *>("shaderSource")
+            ->setPlainText("cbuffer Fields:register(b0){row_major float2x3 basis; float4 extra;} "
+                           "float4 main():SV_Target{return float4(basis[0],extra.w);}");
+        QAction *compile = nullptr;
+        for (auto a : window.findChildren<QAction *>())
+            if (a->text() == "Compile && Apply")
+                compile = a;
+        QVERIFY(compile);
+        compile->trigger();
+        QTRY_VERIFY_WITH_TIMEOUT(done.size() >= 2, 30000);
+        for (const auto &result : done)
+            QVERIFY(result[0].toBool());
+        done.clear();
+        for (int i = 0; i < resources->model()->rowCount(); ++i) {
+            auto index = resources->model()->index(i, 0);
+            if (index.data(Qt::UserRole).toULongLong() == 104) {
+                resources->setCurrentIndex(index);
+                break;
+            }
+        }
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        auto boundary = window.findChild<QComboBox *>("bufferBoundary");
+        boundary->setCurrentIndex(1);
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        auto fields = window.findChild<QTreeWidget *>("constantFields");
+        QVERIFY(fields && fields->topLevelItemCount() > 0);
+        QTreeWidgetItem *chosen = nullptr;
+        for (QTreeWidgetItemIterator it(fields); *it; ++it) {
+            auto field = (*it)->data(0, Qt::UserRole).toJsonObject();
+            if (field["status"].toString() == "ready" && field["base_type"].toInt() == 3 &&
+                field["columns"].toInt() > 1) {
+                chosen = *it;
+                break;
+            }
+        }
+        QVERIFY(chosen);
+        fields->setCurrentItem(chosen);
+        window.findChild<QTabWidget *>("bufferTabs")->setCurrentIndex(1);
+        auto offsets = chosen->data(0, Qt::UserRole).toJsonObject()["component_offsets"].toArray();
+        auto model =
+            static_cast<flora::BufferModel *>(window.findChild<QTableView *>("bufferTable")->model());
+        auto original = model->bytes(), expected = original;
+        float first = 13, last = 17;
+        std::memcpy(expected.data() + offsets.first().toInteger(), &first, 4);
+        std::memcpy(expected.data() + offsets.last().toInteger(), &last, 4);
+        auto edit = window.findChild<QAction *>("editConstant");
+        QVERIFY(edit && edit->isEnabled());
+        bool entered = false;
+        QTimer::singleShot(0, &window, [&] {
+            auto dialog = window.findChild<QDialog *>("constantDialog");
+            if (!dialog)
+                return;
+            dialog->findChild<QLineEdit *>("constantValue0")->setText("13");
+            dialog->findChild<QLineEdit *>(QString("constantValue%1").arg(offsets.size() - 1))->setText("17");
+            snapshot(*dialog, "constant-dialog");
+            entered = true;
+            QTimer::singleShot(3000, dialog, &QDialog::reject);
+            QTest::mouseClick(dialog->findChild<QDialogButtonBox *>()->button(QDialogButtonBox::Ok),
+                              Qt::LeftButton);
+        });
+        edit->trigger();
+        QVERIFY(entered);
+        QVERIFY(!edit->isEnabled());
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        QCOMPARE(model->bytes(), expected);
+        snapshot(window, "constant-fields");
+        QAction *undo = nullptr, *redo = nullptr;
+        for (auto a : window.findChildren<QAction *>()) {
+            if (a->shortcut() == QKeySequence::Undo)
+                undo = a;
+            if (a->shortcut() == QKeySequence::Redo)
+                redo = a;
+        }
+        QVERIFY(undo && redo);
+        undo->trigger();
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        QCOMPARE(model->bytes(), original);
+        redo->trigger();
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        QCOMPARE(model->bytes(), expected);
+        boundary->setCurrentIndex(2);
+        QVERIFY(!edit->isEnabled());
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        QCOMPARE(model->bytes(), original);
+        fields->setCurrentItem(fields->topLevelItem(0)->child(0));
+        QVERIFY(!edit->isEnabled());
+        api->setCurrentIndex(api->model()->index(3, 0));
+        QCOMPARE(fields->topLevelItemCount(), 0);
+    }
     void clearEditorHistory() {
         auto captures = qEnvironmentVariable("FLORA_TEST_CAPTURE_DIR");
         if (captures.isEmpty())

@@ -3,6 +3,7 @@
 #define NOMINMAX
 #include <d3d11_3.h>
 #include <functional>
+#include <optional>
 #include <set>
 #include <wrl/client.h>
 
@@ -78,6 +79,11 @@ class Replay {
                          double high = 1, const std::string &channel = "rgba");
     std::vector<uint8_t> readBuffer(Id id);
     void inspectEventInputs(Id event, const std::function<void()> &inspect);
+    struct ConstantRange {
+        uint32_t first = 0;
+        std::optional<uint32_t> count;
+    };
+    ConstantRange constantRange(unsigned stage, uint32_t slot, Id buffer) const;
     std::string adapter() const;
 };
 std::string disassemble(Bytes dxbc);

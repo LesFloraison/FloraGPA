@@ -1,5 +1,6 @@
 #include "MainWindow.h"
 #include "application/CommandEdits.h"
+#include "application/Constants.h"
 #include "application/ShaderInspector.h"
 #include "core/BufferBindings.h"
 #include "replay/Replay.h"
@@ -10,8 +11,10 @@
 #include <QFileDialog>
 #include <QFileInfo>
 #include <QFormLayout>
+#include <QGridLayout>
 #include <QHBoxLayout>
 #include <QHeaderView>
+#include <QJsonArray>
 #include <QJsonDocument>
 #include <QLineEdit>
 #include <QMenuBar>
@@ -144,6 +147,7 @@ MainWindow::MainWindow() {
             geometryDir_.reset();
             bufferModel_->setBytes({});
             bufferLabel_->clear();
+            constants_->clear();
             displayedBuffer_ = 0;
             report_ = {};
             image_->setImage({});
@@ -550,9 +554,34 @@ void MainWindow::buildUi() {
     bufferLabel_ = new QLabel;
     bufferLayout->addWidget(bufferBar);
     bufferLayout->addWidget(bufferLabel_);
-    bufferLayout->addWidget(bufferView_);
+    auto bufferTabs = new QTabWidget;
+    bufferTabs->setObjectName("bufferTabs");
+    bufferTabs->addTab(bufferView_, "Bytes");
+    auto constantPane = new QWidget;
+    auto constantLayout = new QVBoxLayout(constantPane);
+    constantLayout->setContentsMargins(0, 0, 0, 0);
+    constantLayout->setSpacing(0);
+    auto constantBar = new QToolBar;
+    constantEditAction_ = constantBar->addAction("Edit Value…", this, &MainWindow::editConstant);
+    constantEditAction_->setObjectName("editConstant");
+    constantEditAction_->setEnabled(false);
+    constantEditAction_->setToolTip("Read Before event, then select a reflected field to edit.");
+    constants_ = tree({"Field", "Type", "Offset", "Value"});
+    constants_->setObjectName("constantFields");
+    constants_->setColumnWidth(0, 250);
+    constants_->setColumnWidth(1, 180);
+    constants_->setColumnWidth(2, 80);
+    constantLayout->addWidget(constantBar);
+    constantLayout->addWidget(constants_);
+    bufferTabs->addTab(constantPane, "Constants");
+    bufferLayout->addWidget(bufferTabs);
+    connect(constants_, &QTreeWidget::itemSelectionChanged, this, &MainWindow::updateExperimentActions);
+    connect(constants_, &QTreeWidget::itemDoubleClicked, this, [this] { editConstant(); });
     centerTabs_->addTab(bufferPane_, "Buffer");
-    connect(bufferBoundary_, &QComboBox::currentIndexChanged, this, [this] { bufferTimer_.start(); });
+    connect(bufferBoundary_, &QComboBox::currentIndexChanged, this, [this] {
+        constants_->clear();
+        bufferTimer_.start();
+    });
     connect(bufferMode_, &QComboBox::currentIndexChanged, this, [this](int mode) {
         bufferModel_->setWords(mode == 1);
         bufferView_->setColumnWidth(1, mode ? 145 : 420);
@@ -699,6 +728,7 @@ void MainWindow::setBusy(bool busy) {
     progress_->setVisible(busy);
     if (busy) {
         progress_->setRange(0, 0);
+        constantEditAction_->setEnabled(false);
     } else
         progress_->setValue(0);
     exportAction_->setEnabled(!image_->image().isNull());
@@ -863,6 +893,7 @@ void MainWindow::finishWorker(int code, QProcess::ExitStatus status) {
                 throw std::runtime_error("Buffer output is missing");
             bufferModel_->setBytes(bufferFile.readAll(), uint64_t(report_["offset"].toInteger()));
             displayedBuffer_ = report_["resource"].toString().toULongLong();
+            showConstants(report_);
             bufferLabel_->setText(QString("  B:%1 · %2 bytes · %3")
                                       .arg(displayedBuffer_)
                                       .arg(report_["length"].toInteger())
@@ -938,6 +969,7 @@ void MainWindow::selectEvent(Id id) {
         return;
     selectedEvent_ = id;
     selectedResource_ = 0;
+    constants_->clear();
     updateExperimentActions();
     ++revision_;
     chart_->setSelection(id);
@@ -1063,6 +1095,7 @@ void MainWindow::inspectResource(Id id) {
         if (e.category != 5)
             return;
         if (selectedResource_ != id) {
+            constants_->clear();
             ++revision_;
             if (process_.state() != QProcess::NotRunning)
                 cancel();
@@ -1307,6 +1340,7 @@ void MainWindow::previewBuffer() {
     }
     ++revision_;
     bufferModel_->setBytes({});
+    constants_->clear();
     displayedBuffer_ = 0;
     bufferLabel_->clear();
     startWorker(args, false);
@@ -1343,6 +1377,14 @@ void MainWindow::updateExperimentActions() {
         bufferEditAction_->setEnabled(bufferEditable);
     if (bufferImportAction_)
         bufferImportAction_->setEnabled(bufferEditable);
+    if (constantEditAction_) {
+        const auto item = constants_->currentItem();
+        const auto field = item ? item->data(0, Qt::UserRole).toJsonObject() : QJsonObject();
+        constantEditAction_->setEnabled(
+            bufferEditable && !busy() && constantsRevision_ == revision_ &&
+            constantsEvent_ == selectedEvent_ && constantsResource_ == selectedResource_ &&
+            bufferBoundary_->currentIndex() == 1 && field["status"].toString() == "ready");
+    }
     enableAction_->setText(
         editable && experiment_ && !experiment_->enabled(selectedEvent_) ? "Enable Event" : "Disable Event");
 }
@@ -1350,6 +1392,7 @@ void MainWindow::experimentChanged() {
     projectDirty_ = true;
     setWindowModified(true);
     ++revision_;
+    constants_->clear();
     chart_->clear();
     metrics_->clear();
     updateExperimentActions();
@@ -1373,6 +1416,142 @@ void MainWindow::experimentChanged() {
         }
     }
     replayTimer_.start();
+}
+void MainWindow::showConstants(const QJsonObject &report) {
+    constants_->clear();
+    constantsRevision_ = revision_;
+    constantsEvent_ =
+        report["value_time"].toString() == "before_event" ? report["event"].toString().toULongLong() : 0;
+    constantsResource_ = report["resource"].toString().toULongLong();
+    for (const auto &entry : report["constant_bindings"].toArray()) {
+        const auto binding = entry.toObject();
+        auto title =
+            QString("%1 · b%2").arg(binding["stage"].toString().toUpper()).arg(binding["slot"].toInt());
+        if (!binding["name"].toString().isEmpty())
+            title += " · " + binding["name"].toString();
+        auto group = new QTreeWidgetItem(constants_, {title});
+        group->setToolTip(0, QString("Shader %1 · first constant %2 · count %3")
+                                 .arg(binding["shader"].toInteger())
+                                 .arg(binding["first_constant"].toInteger())
+                                 .arg(binding["constant_count"].isNull()
+                                          ? "All"
+                                          : QString::number(binding["constant_count"].toInteger())));
+        for (const auto &v : binding["variables"].toArray()) {
+            auto variable = v.toObject();
+            auto fields = variable["fields"].toArray();
+            auto parent =
+                fields.size() > 1 ? new QTreeWidgetItem(group, {variable["name"].toString()}) : group;
+            for (const auto &f : fields) {
+                auto field = f.toObject();
+                const auto json = nlohmann::json::parse(QJsonDocument(field).toJson().toStdString());
+                auto ready = field["status"].toString() == "ready";
+                auto value = ready ? QString::fromStdString(constantValue(json).dump())
+                             : field["status"].toString() == "outside_bound_range" ? "Outside bound range"
+                                                                                   : "Unsupported layout";
+                auto item =
+                    new QTreeWidgetItem(parent, {field["path"].toString(), field["type_label"].toString(),
+                                                 field.contains("buffer_offset")
+                                                     ? QString::number(field["buffer_offset"].toInteger())
+                                                     : "—",
+                                                 value});
+                item->setData(0, Qt::UserRole, field);
+                item->setToolTip(3, ready ? value : field["reason"].toString(value));
+            }
+        }
+        group->setExpanded(true);
+    }
+    updateExperimentActions();
+}
+void MainWindow::editConstant() {
+    updateExperimentActions();
+    if (!constantEditAction_->isEnabled())
+        return;
+    try {
+        auto field = nlohmann::json::parse(
+            QJsonDocument(constants_->currentItem()->data(0, Qt::UserRole).toJsonObject())
+                .toJson()
+                .toStdString());
+        field["value"] = constantValue(field);
+        const auto revision = revision_;
+        const auto event = constantsEvent_, resource = constantsResource_;
+        const unsigned cls = field.at("class_id"), rows = field.at("rows"), cols = field.at("columns");
+        QDialog dialog(this);
+        dialog.setObjectName("constantDialog");
+        dialog.setWindowTitle(QString::fromStdString(field.at("path").get<std::string>()));
+        dialog.setMinimumWidth(400);
+        auto form = new QFormLayout(&dialog);
+        form->addRow("Type", new QLabel(QString::fromStdString(field.at("type_label").get<std::string>())));
+        form->addRow("Binding", new QLabel(QString("Event %1 · Buffer %2").arg(event).arg(resource)));
+        auto grid = new QGridLayout;
+        QList<QLineEdit *> editors;
+        for (unsigned r = 0; r < rows; ++r) {
+            for (unsigned c = 0; c < cols; ++c) {
+                const auto value = cls >= 2   ? field.at("value").at(r).at(c)
+                                   : cls == 1 ? field.at("value").at(c)
+                                              : field.at("value");
+                auto editor = new QLineEdit(
+                    QString::fromStdString(value.is_string() ? value.get<std::string>() : value.dump()));
+                editor->setObjectName(QString("constantValue%1").arg(editors.size()));
+                editor->setMinimumWidth(85);
+                editor->setFont(QFont("Cascadia Mono", 10));
+                editor->setToolTip(QString("Offset %1 · %2\nNumber, true/false, nan, inf, -inf or bits:HEX")
+                                       .arg(field.at("component_offsets").at(editors.size()).get<uint64_t>())
+                                       .arg(QString::fromStdString(
+                                           field.at("component_hex").at(editors.size()).get<std::string>())));
+                grid->addWidget(editor, int(r), int(c));
+                editors.append(editor);
+            }
+        }
+        form->addRow("Value", grid);
+        auto error = new QLabel;
+        error->setWordWrap(true);
+        error->hide();
+        form->addRow(error);
+        auto buttons = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+        buttons->button(QDialogButtonBox::Ok)->setText("Apply");
+        form->addRow(buttons);
+        bool changed = false;
+        connect(buttons, &QDialogButtonBox::rejected, &dialog, &QDialog::reject);
+        connect(buttons, &QDialogButtonBox::accepted, &dialog, [&] {
+            try {
+                if (revision != revision_ || event != selectedEvent_ || resource != selectedResource_ ||
+                    busy())
+                    throw std::runtime_error("Read Before event again before editing");
+                auto values = nlohmann::json::array();
+                for (auto editor : editors) {
+                    auto text = editor->text().trimmed().toStdString();
+                    values.push_back(text.starts_with("bits:") || text == "nan" || text == "inf" ||
+                                             text == "-inf"
+                                         ? nlohmann::json(text)
+                                         : nlohmann::json::parse(text));
+                }
+                nlohmann::json value;
+                if (cls >= 2) {
+                    value = nlohmann::json::array();
+                    for (unsigned r = 0; r < rows; ++r)
+                        value.push_back(
+                            nlohmann::json(values.begin() + r * cols, values.begin() + (r + 1) * cols));
+                } else
+                    value = cls == 1 ? values : values[0];
+                auto patches = constantPatches(field, value);
+                experiment_->setBufferPatches(*frame_, event, resource, patches,
+                                              "Constant " + field.at("path").get<std::string>());
+                changed = !patches.empty();
+                dialog.accept();
+            } catch (const std::exception &e) {
+                error->setText(QString::fromUtf8(e.what()));
+                error->show();
+            }
+        });
+        if (dialog.exec() == QDialog::Accepted) {
+            if (changed)
+                experimentChanged();
+            else
+                statusBar()->showMessage("Value unchanged", 2500);
+        }
+    } catch (const std::exception &e) {
+        showError(QString::fromUtf8(e.what()));
+    }
 }
 void MainWindow::editBuffer(bool importFile) {
     if (!frame_ || !experiment_ || !selectedEvent_ || !selectedResource_)
