@@ -9,10 +9,14 @@ Pending functionality is not represented as working functionality.
 
 ## Build
 
-Install Qt 6.11.2 **MSVC 2022 x64** (the MinGW kit is not ABI-compatible).
+Install Visual Studio 2022 with **Desktop development with C++**, the MSVC v143
+x64 toolset and a Windows SDK; CMake 3.25 or newer; and Qt 6.11.2
+**MSVC 2022 x64** (the MinGW kit is not ABI-compatible).
+
+From the repository root, configure with your own Qt installation path:
 
 ```powershell
-cmake --preset vs2022 -DFLORA_TEST_CAPTURE_DIR=D:/CDXrepo/FloraGPA
+cmake --preset vs2022 -DCMAKE_PREFIX_PATH="C:/Qt/6.11.2/msvc2022_64"
 cmake --build --preset release
 ctest --preset release
 ```
@@ -22,10 +26,23 @@ The CLI still uses Qt Core and Gui for file handling and PNG output.
 Capture files and GPU test outputs stay outside Git. Commits use the configured
 personal Git identity and English titles and bodies. No remote is configured.
 
-The preset uses `D:/Qt/6.11.2/msvc2022_64`. Override `CMAKE_PREFIX_PATH` for a
-different installation. Open `build/vs2022/FloraGPA.sln` in Visual Studio 2022.
-GPU tests require the external GF2 capture and a working D3D11 adapter; they
-explicitly skip when `FLORA_TEST_CAPTURE_DIR` is empty.
+`CMakeLists.txt` and `CMakePresets.json` are the version-controlled project
+definitions. The configure command generates `build/vs2022/FloraGPA.sln` and
+the `.vcxproj` files; open that solution in Visual Studio 2022 if desired.
+Generated projects and their machine-specific paths stay in the ignored
+`build/` directory. A fresh clone contains the source and vendored JSON headers
+needed to generate them; Python, Intel GPA and the original workspace are not
+required to compile the application.
+
+CMake remembers the Qt path in the local build cache. Machine-specific presets
+may also be kept in the ignored `CMakeUserPresets.json`.
+Local `AGENT.md` / `AGENTS.md` instruction files are ignored as well.
+
+Capture fixtures are optional and are not distributed with the repository.
+To enable fixture-dependent checks, configure again with
+`-DFLORA_TEST_CAPTURE_DIR="D:/captures"`, pointing to the external GF2/BF1
+fixtures. These checks skip when this variable is empty; GPU checks also need
+a working D3D11 adapter.
 
 ## Run and deploy
 

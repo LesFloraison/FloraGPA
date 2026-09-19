@@ -8,3 +8,6 @@
 *.gpaframe
 *.rdc
 __pycache__/
+# Local agent instructions (all directories, case-insensitive spelling).
+[Aa][Gg][Ee][Nn][Tt].[Mm][Dd]
+[Aa][Gg][Ee][Nn][Tt][Ss].[Mm][Dd]

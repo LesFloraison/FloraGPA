@@ -3,8 +3,6 @@
 已有可编译、可运行的 VS2022 / Qt Widgets 原生工程，能够独立重放当前验证的
 GF2 与 BF1 DX11 捕获。**尚未完成原 Python 版本的全部功能迁移。**
 
-原目录 `D:\CDXrepo\FloraGPA` 保留；新工程位于 `D:\CDXrepo\FloraGPA-Cpp`。
-运行程序为 `out\FloraGPA\FloraGPA.exe`，需要保留同目录的 DLL、插件和 Worker。
 
 ## 当前可用
 
