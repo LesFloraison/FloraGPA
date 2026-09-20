@@ -5,6 +5,7 @@
 namespace flora {
 bool isWritableCommand(uint16_t type);
 bool isClearCommand(uint16_t type);
+void validateAnnotationCommand(uint16_t type, Bytes payload);
 void validateWritableCommand(const Frame &frame, Id event);
 struct UpdateSourceLayout {
     Id destination{}, data{};

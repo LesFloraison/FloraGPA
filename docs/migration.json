@@ -24,9 +24,15 @@
       "sha256": "eef309ea9c4d1837b725a057deb6957184f20970bcfe4b5a976185d66463cd2d",
       "lines": 82,
       "description": "Explicit annotation QueryInterface identities, bounded by observed lifetimes.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": [
+        "src/application/Annotations.cpp",
+        "src/core/Commands.cpp",
+        "src/replay/Replay.cpp"
+      ],
+      "validation": [
+        "docs/ANNOTATION_MIGRATION.md: per-object nesting, explicit lifetime-bounded context identity and draw membership, JSON/CSV, validated annotation replay and Qt navigation/filter/export; range-statistics handoff and chart grouping remain pending"
+      ]
     },
     {
       "module": "annotations.py",
@@ -38,13 +44,16 @@
         "src/application/ApiCommands.cpp",
         "src/application/QueryHistory.cpp",
         "src/app/Models.cpp",
-        "src/app/MainWindow.cpp"
+        "src/app/MainWindow.cpp",
+        "src/application/Annotations.cpp",
+        "src/core/Commands.cpp",
+        "src/replay/Replay.cpp"
       ],
       "validation": [
         "tests/ApiCommandTests.cpp: wire bounds, references, metadata order, query states and filtered export",
         "tools/validate_api_commands.py: 920 GF2, 18024 BF1 and 4006 synthetic records plus resource/text filtering; JSON and parsed CSV, allowing different invalid diagnostic wording",
         "tests/UiTests.cpp: field offsets, reference navigation, resource filtering and texture-preview priority",
-        "Wire reading migrated; nesting, context association and annotation-specific export remain pending"
+        "docs/ANNOTATION_MIGRATION.md: per-object nesting, explicit lifetime-bounded context identity and draw membership, JSON/CSV, validated annotation replay and Qt navigation/filter/export; range-statistics handoff and chart grouping remain pending"
       ]
     },
     {
@@ -52,9 +61,14 @@
       "sha256": "fda3b3f2a5247fa43c2425bc8e833f864847693d669a719fdcbaeb8a7fabc4c6",
       "lines": 77,
       "description": "Observed application annotation streams, exact API navigation and export.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": [
+        "src/app/AnnotationsView.cpp",
+        "src/app/MainWindow.cpp"
+      ],
+      "validation": [
+        "docs/ANNOTATION_MIGRATION.md: per-object nesting, explicit lifetime-bounded context identity and draw membership, JSON/CSV, validated annotation replay and Qt navigation/filter/export; range-statistics handoff and chart grouping remain pending"
+      ]
     },
     {
       "module": "api_commands.py",
@@ -706,7 +720,9 @@
         "src/replay/ClassLinkage.cpp",
         "src/replay/StreamOutput.cpp",
         "src/application/PlanarWrites.cpp",
-        "src/application/ExperimentReport.cpp"
+        "src/application/ExperimentReport.cpp",
+        "src/application/Annotations.cpp",
+        "src/core/Commands.cpp"
       ],
       "validation": [
         "docs/NATIVE_BASELINE.md",
@@ -715,7 +731,8 @@
         "Six-stage class instance binding with linkage ownership, ordered interfaces, static replacement handling and dynamic SRV retention; preserved dormant captured shader-setter behavior outside edits",
         "docs/BEFORE_BOUNDARY_MIGRATION.md: ordinary output traversal, prepared inspectors, missing-binding recovery and successful Map work metadata",
         "docs/PLANAR_WRITE_MIGRATION.md: planar Y-only Map with native pitches, tight NV12 Update, explicit full DXGI Update assets, structured write provenance and Qt before/after inspection; 192 packaged real-capture/synthetic/uint64 Python comparisons passed (125 successes, 67 controlled rejections); private consumers and remaining module scope stay incomplete",
-        "docs/EXPERIMENT_REPORT_MIGRATION.md: native active-history assets and applied/pending traversal report; replay/texture/buffer consumers and compact Qt worker log; private analysis consumers remain pending"
+        "docs/EXPERIMENT_REPORT_MIGRATION.md: native active-history assets and applied/pending traversal report; replay/texture/buffer consumers and compact Qt worker log; private analysis consumers remain pending",
+        "docs/ANNOTATION_MIGRATION.md: per-object nesting, explicit lifetime-bounded context identity and draw membership, JSON/CSV, validated annotation replay and Qt navigation/filter/export; range-statistics handoff and chart grouping remain pending"
       ]
     },
     {

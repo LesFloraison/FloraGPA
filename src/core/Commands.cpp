@@ -3,6 +3,25 @@
 #include <limits>
 
 namespace flora {
+void validateAnnotationCommand(uint16_t type, Bytes payload) {
+    if (type < 0x3278 || type > 0x327e)
+        throw std::runtime_error("Not an annotation command");
+    Reader r(payload);
+    r.skip(16);
+    if (type == 0x3278)
+        r.skip(28);
+    else if (type == 0x3279 || type == 0x327a || type == 0x327e)
+        r.skip(4);
+    if (type == 0x327b || type == 0x327c)
+        r.skip(4);
+    if (type == 0x327b || type == 0x327d) {
+        const auto size = r.read<uint32_t>();
+        if (size % 2 || size > 0x8002)
+            throw std::runtime_error("Annotation name length must be even and at most 32770 bytes");
+        r.skip(size);
+    }
+    r.end();
+}
 bool isClearCommand(uint16_t type) { return type >= 0x31 && type <= 0x34; }
 bool isWritableCommand(uint16_t type) {
     return isClearCommand(type) || type == 0x3e || type == 0x3f || type == 0x40 || type == 0x42 ||

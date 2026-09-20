@@ -1,4 +1,5 @@
 #include "MainWindow.h"
+#include "AnnotationsView.h"
 #include "BlendDialog.h"
 #include "CommandStateView.h"
 #include "ConstantBufferDialog.h"
@@ -147,6 +148,7 @@ MainWindow::MainWindow() {
             projectDirty_ = false;
             updateExperimentActions();
             commands_->setFrame(frame_);
+            annotations_->setFrame(frame_);
             resources_->setFrame(frame_);
             chart_->clear();
             pipeline_->clear();
@@ -362,6 +364,9 @@ void MainWindow::buildUi() {
     auto structureAction =
         analyze->addAction("Contexts && Command Lists…", this, &MainWindow::inspectCaptureStructure);
     structureAction->setObjectName("inspectCaptureStructure");
+    auto annotationsAction =
+        analyze->addAction("Annotations", this, [this] { centerTabs_->setCurrentWidget(annotations_); });
+    annotationsAction->setObjectName("showAnnotations");
     auto viewMenu = menuBar()->addMenu("&View");
     auto help = menuBar()->addMenu("&Help");
     help->addAction("About FloraGPA", this, [this] {
@@ -879,6 +884,12 @@ void MainWindow::buildUi() {
     geometrySplit->setSizes({300, 220});
     geometryLayout->addWidget(geometrySplit);
     centerTabs_->addTab(geometryPane_, "Geometry");
+    annotations_ = new AnnotationsView;
+    centerTabs_->addTab(annotations_, "Annotations");
+    connect(annotations_, &AnnotationsView::eventRequested, this, [this](qulonglong id) {
+        if (!busy())
+            locateEvent(id);
+    });
     connect(geometryTable_, &QComboBox::currentIndexChanged, this, [this] {
         geometryModel_->setTable(
             geometry_["tables"].toObject()[geometryTable_->currentData().toString()].toObject());
@@ -1045,6 +1056,7 @@ void MainWindow::setBusy(bool busy) {
         textureExportAction_->setEnabled(false);
     replayedState_->setWorkerBusy(busy);
     predicateView_->setWorkerBusy(busy);
+    annotations_->setWorkerBusy(busy);
     openAction_->setEnabled(!busy);
     viewAction_->setEnabled(!busy && frame_ && experiment_);
     replayAction_->setEnabled(!busy && bool(frame_));

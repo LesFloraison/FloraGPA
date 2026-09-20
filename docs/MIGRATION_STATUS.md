@@ -2,9 +2,21 @@
 
 已有可编译、可运行的 VS2022 / Qt Widgets 原生工程，能够独立重放当前验证的
 GF2 与 BF1 DX11 捕获。**尚未完成原 Python 版本的全部功能迁移。**
-当前独立包为 `out/FloraGPA-experiment-report/FloraGPA.exe`。
+当前独立包为 `out/FloraGPA-annotations/FloraGPA.exe`。
 
-最新批次补齐原生实验执行报告：当前历史位置、总版本数、已应用／待执行事件、
+最新批次迁移 annotation 对象层级、Begin/End 配对、显式 QueryInterface context
+关联、已证明的 Draw/Dispatch 成员，以及完整 JSON/CSV 导出。Qt Annotations 页
+支持异步读取、名称/ID 筛选、证据详情和起止/Draw API 跳转。重放校验并计数七类
+annotation 命令，损坏记录明确拒绝，不创建额外 GPU 对象。
+64 项开发版对照通过：44 份报告（360 条 annotation、310 个节点）和 20 项
+硬件/WARP 重放检查，其中 14 项为预期拒绝。范围统计交接和图表分组仍未迁移。
+Release 全套 37 项 CTest 通过，原有 Qt 53 项无失败、无跳过，新增 annotation
+套件验证实际主窗口导航、筛选后完整导出及异步结果失效。
+独立包同样通过 64 项对照及 GF2/BF1 黄金帧、关闭 draw 负对照；50 份成功报告
+确认 Qt 来自独立包，没有加载 Python/Tk/GPA/RenderDoc。
+详见 [ANNOTATION_MIGRATION.md](ANNOTATION_MIGRATION.md)。
+
+前一批补齐原生实验执行报告：当前历史位置、总版本数、已应用／待执行事件、
 最终 shader／初始纹理资产哈希、合并后的视图描述符及 Update 源信息。
 Replay、Buffer 和事件 Texture 导出使用真实遍历记录，Qt 折叠任务日志显示简短摘要。
 Release 36 项 CTest 全部通过，其中 Qt 53 项无失败、无跳过。
@@ -13,7 +25,7 @@ Release 36 项 CTest 全部通过，其中 Qt 53 项无失败、无跳过。
 217 项 Texture 字节／像素／元数据回归、GF2/BF1 黄金帧及关闭 draw 负对照通过。
 详见 [EXPERIMENT_REPORT_MIGRATION.md](EXPERIMENT_REPORT_MIGRATION.md)。
 
-前一批迁移 NV12/P010/P016 Map 的 Y-only 写入、旧行填充去除、原生行距适配，
+此前迁移 NV12/P010/P016 Map 的 Y-only 写入、旧行填充去除、原生行距适配，
 以及 NV12 Update 和完整实验 Y/UV 源替换。写入来源与 UV 保留／未定义状态进入
 Texture 工具提示及 JSON，事件前检查不增加该事件的写入记录。
 独立包 192 项 Python 对照全部通过：125 个成功字节／像素／来源比较，67 个受控拒绝，
@@ -44,7 +56,8 @@ RAW 编辑，验证见 [TEXTURE_INSPECTION_MIGRATION.md](TEXTURE_INSPECTION_MIGR
 | 动态 shader 类链接 | 六阶段 draw/dispatch 快照的 linkage、具名/显式创建实例、有序接口绑定、CB/texture/sampler 偏移；动态/静态 shader 替换；带 SO 的 linked GS；Qt 资源属性、接口槽数和 CLI 元数据导出 | 六阶段 shader setter 实验已接入；专用覆盖分析仍待迁移；本机已复现的空函数表 PS 驱动崩溃改为明确提示使用 WARP |
 | Stream output / DrawAuto | SO 声明、五版 context 的目标 setter、普通 GS / VS / DS / 仅输出签名的 passthrough；重复/dirty 快照、显式重置、追加、ClearState；逐流 GPU 查询、按实际写入字节及 IA 范围重建 DrawAuto；Qt SO 属性/目标链接和几何导出 | SO setter 的已知 native cursor 保留已接入；私有诊断重放仍待迁移；无帧内历史时原始重放保留捕获计数并标注未验证，有编辑时拒绝猜测 |
 | Predication | occlusion / SO overflow predicate 资源、六组 Begin/End/SetPredication、快照条件绑定、原始 BOOL、实际 GPU 结果；Pipeline > Predicate 前后边界检查与 JSON 导出；辅助预览查询隔离、读回和编辑准备的条件恢复 | active / hint 结果明确不可读；predicate setter 编辑、项目保存与撤销/重做已迁移；尚未迁移的私有诊断消费者仍待闭合；非标准 BOOL 的驱动差异保留 |
-| API 检查 | 捕获字段、偏移/原始位、可选数组、引用跳转、资源/多词筛选、JSON/CSV 导出；getter、annotation、query 与 command-list 调用元数据 | 解码不代表执行；annotation 层级和 view typed-format 预览衔接尚未闭合 |
+| API 检查 | 捕获字段、偏移/原始位、可选数组、引用跳转、资源/多词筛选、JSON/CSV 导出；getter、annotation、query 与 command-list 调用元数据 | 解码不代表所有命令均可执行 |
+| Annotations | 对象独立的层级/配对、生命周期内 QueryInterface 身份、精确 context 成员、未知/冲突/未闭合边界、JSON/CSV；Qt 筛选、证据和 API 跳转；有效记录重放计数 | 范围统计交接及图表分组仍待迁移；关联 deferred context 的记录不代表执行 command list |
 | Context / command-list | 五种 context 接口身份、immediate/deferred 区分；缺失 context 的严格 Map READ 证据恢复；command-list 资源、owner 和 Execute/Finish 清单；Qt 字段树、证据导航、JSON 导出 | 推断不补造版本/指针/标志；保留指针与 ID 候选冲突；与 Python 相同，仅接受 immediate-context 的 Finish 空操作，未恢复列表执行 |
 | 捕获查询值 | 按同 ID、命令顺序使用 GetDesc/GetDataSize/CreateQuery/predicate 元数据；BOOL 完整值与 UINT64 低位、缺失字节、HRESULT/冲突状态 | 表示捕获时保存的内存字，不是新执行的 GPU query；原始高位缺失时保持不完整 |
 | 命令编辑 | RTV / DSV / Uint / Float UAV 清除值；资源写入命令启停；UpdateSubresource 紧密排列源数据替换；菜单、右键、撤销/重做；共享 context 校验和恢复 | 已支持 planar Map / NV12 Update / 显式完整 Update 资产；旧式 P010/P016 捕获 UV 仍不可重建 |

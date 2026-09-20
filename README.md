@@ -134,6 +134,12 @@ retain their undecoded bytes; decoded metadata does not imply GPU replay support
 Captured GetData results use only earlier metadata for the same query ID. Missing
 high words, incomplete results and conflicting descriptors remain explicit.
 
+**Annotations** reads captured per-object Begin/End/Marker groups and explicit
+QueryInterface context proofs. Filter names/IDs, inspect linked draws and evidence,
+locate begin/end/draw API calls, or export all groups as JSON/CSV. Unknown identities
+and interrupted/open groups remain explicit. Annotation range metrics and chart
+grouping remain pending. See [`docs/ANNOTATION_MIGRATION.md`](docs/ANNOTATION_MIGRATION.md).
+
 The Inspector identifies captured and inferred contexts separately. Missing context
 kind can be recovered only from a validated staging Texture2D Map READ / Unmap pair;
 interface version, creation flags and captured pointer remain unknown. Contradictory

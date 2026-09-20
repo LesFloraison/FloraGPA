@@ -769,6 +769,11 @@ void Replay::command(const Entry &e) {
     if (outputHistory_ && OutputBindingModel::models(e.type))
         outputHistory_->advance(e.id);
     Reader r(payload);
+    if (t >= 0x3278 && t <= 0x327e) {
+        validateAnnotationCommand(t, payload);
+        ++counts["annotation_records"];
+        return;
+    }
     if (pipelineSetter(e, payload))
         return;
     if (isDraw(t)) {

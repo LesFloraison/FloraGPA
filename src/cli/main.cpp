@@ -1,3 +1,4 @@
+#include "application/Annotations.h"
 #include "application/ApiCommands.h"
 #include "application/CaptureNames.h"
 #include "application/ClassInspector.h"
@@ -65,7 +66,7 @@ int main(int argc, char **argv) {
     p.addPositionalArgument(
         "command", "inventory | commands | command-state | contexts | command-lists | replay | shader | "
                    "buffer | texture | texture-storage | compile | geometry | replay-pipeline | "
-                   "class-linkage | predicate");
+                   "class-linkage | predicate | annotations");
     p.addPositionalArgument("capture", "DX11 .gpa_frame file");
     p.addOption({"out", "New or empty output directory", "path"});
     p.addOption({"experiment", "Compatible FloraGPA experiment project", "path"});
@@ -161,6 +162,14 @@ int main(int argc, char **argv) {
             auto detail = command == "contexts" ? inspectContexts(frame) : inspectCommandLists(frame);
             save(out + '/' + command + ".json", QByteArray::fromStdString(detail.dump(2) + "\n"));
             report.insert("completed", true);
+        } else if (command == "annotations") {
+            if (out.isEmpty())
+                throw std::runtime_error("annotations requires --out");
+            const auto detail = inspectAnnotations(frame);
+            exportAnnotations(detail, std::filesystem::path(out.toStdWString()));
+            report.insert("completed", true);
+            report.insert("annotation_records", qint64(detail.at("record_count").get<uint64_t>()));
+            report.insert("loaded_modules", modules());
         } else if (command == "commands") {
             if (out.isEmpty())
                 throw std::runtime_error("commands requires --out");
