@@ -2,7 +2,7 @@
 
 已有可编译、可运行的 VS2022 / Qt Widgets 原生工程，能够独立重放当前验证的
 GF2 与 BF1 DX11 捕获。**尚未完成原 Python 版本的全部功能迁移。**
-当前独立包为 `out/FloraGPA-global-views/FloraGPA.exe`。
+当前独立包为 `out/FloraGPA-frame-output/FloraGPA.exe`。
 
 
 ## 当前可用
@@ -28,11 +28,11 @@ GF2 与 BF1 DX11 捕获。**尚未完成原 Python 版本的全部功能迁移�
 | 混合 / 采样实验 | BlendState/BlendState1、八槽独立 color/alpha 运算与因子、双源混合、写掩码、16 种 logic op、blend constant、uint32 sample mask、alpha-to-coverage；Qt General/RT 参数页、旧 preset、字段合并、保存与撤销/重做 | 逻辑运算要求设备与每个 RTV 格式支持；不兼容组合明确拒绝；MSAA 执行已验证，但 MSAA 专用查看界面与私有 coverage 诊断仍待迁移 |
 | Sampler 实验 | 六阶段 × 16 槽 descriptor 编辑：36 种过滤、地址/比较/各向异性、border RGBA、LOD；sampler setter 的起始槽/资源数组、部分覆盖、空调用、ClearState、范围移动时保留前序绑定；Qt 编辑、保存、撤销/重做 | descriptor 只作用于选定 draw/dispatch；继承最终 setter 绑定；缺失前序观察和不支持的 min/max filtering 明确拒绝；私有 coverage/quad 消费者仍待迁移 |
 | SRV 描述符实验 | 六阶段 × 128 槽、十一种维度、格式与 mip/array/buffer 范围；逐事件字段合并、维度切换、原生视图创建、输入 buffer 克隆归属；Qt 编辑、保存与撤销/重做 | 继承最终 SRV setter 编辑；原生驱动处理 SRV/UAV 重叠；texture 输入克隆及私有诊断消费者仍待迁移 |
-| 全局视图实验 | SRV / RTV / DSV / UAV 的格式、维度、mip / 数组层 / 3D 切片 / buffer 范围与标志；不可变捕获副本；Clear / Draw / Dispatch / GenerateMips、绑定冲突与 counter 使用最终描述符；Qt 编辑、项目历史、保存重开、撤销重做 | 原始捕获字段保持不变；主输出自动跟随所有视图子资源、MSAA 专用查看及私有 coverage/debug 消费者仍待迁移 |
+| 全局视图实验 | SRV / RTV / DSV / UAV 的格式、维度、mip / 数组层 / 3D 切片 / buffer 范围与标志；不可变捕获副本；Clear / Draw / Dispatch / GenerateMips、绑定冲突与 counter 使用最终描述符；Qt 编辑、项目历史、保存重开、撤销重做；主输出跟随最终视图范围 | 原始捕获字段保持不变；私有 coverage/debug 消费者仍待迁移 |
 | 纹理原始存储读回 | 非 MSAA 的完整 mip / 数组层 / 3D 切片紧密存储；CLI texture-storage 导出；WARP 绑定中的 mip 检查复制保留 RTV 和 UAV counter | 图像转换独立于原始字节；部分平面/packed 格式和 GUI 原始存储导出仍待迁移 |
 | SRV setter 实验 | 六阶段 × 128 槽的起始槽/视图数组；逐槽跨快照继承、部分覆盖、范围移动/缩短、空调用、ClearState、缺失资源恢复；mip/layer 与只读 depth/stencil 冲突、原生解绑保持；Qt 编辑、保存与撤销/重做 | 移动范围要求可确认的前序绑定；描述符和 buffer 补丁/导出继承最终绑定；texture 输入克隆及私有诊断依赖尚未闭合 |
 | Output / SO setter 实验 | RTV/DSV、OM/CS UAV、SO 目标/偏移；KEEP、独立可选数组、64 槽 UAV、跨快照绑定和已知 SO cursor 保留；紧凑 Qt 表格、项目保存与撤销/重做 | buffer、counter、SRV 描述符及 IA 几何使用最终绑定；未知 SO cursor 拒绝猜测；texture 实验及私有诊断仍待迁移 |
-| 图像 | 实际 GPU 输出、缩放/平移/通道、像素值、PNG 导出 | 全帧输出目前限制单采样 RGBA/BGRA8 |
+| 图像 | 自动/指定 swap chain、RT0–7、深度/模板；RTV/DSV mip、数组层、3D 切片、buffer 范围；浮点/整数/packed 格式、通道/范围、原始存储与 PNG 导出；MSAA resolve/指定样本、整数位保真、深度/模板 resolve | 显示设置项目持久化、像素导航及 before-draw 边界语义统一尚未完成；MSAA 帧前逐样本内容不声称恢复 |
 | 纹理 | GPU 格式转换、BC、浮点/整数、1D/2D/3D、mip/layer/slice、事件边界预览 | MSAA、平面格式及部分查看选项未迁移 |
 | Shader | DXBC 反汇编、反射、SPDB/SDBG 内嵌源码、HLSL 编译替换 | 不含 HLSL 恢复、单步调试及全部反射树 |
 | Buffer | 初始值、事件前后读回、范围、Hex/ASCII/32 位解释、导出；事件字节编辑/二进制补丁导入、绑定识别、撤销/重做；递归 CB 字段、CB1 范围和类型化编辑；按 UAV view 检查/编辑 Append/Consume/Counter | counter 支持 CS/OM 快照及已恢复 clear/copy/setter 引用；输出编辑和扩展 UAV 已接入；完整 setter/getter 与私有诊断仍待迁移 |
@@ -42,6 +42,17 @@ GF2 与 BF1 DX11 捕获。**尚未完成原 Python 版本的全部功能迁移�
 | 性能 | 原生 D3D11 时间戳、disjoint 与 pipeline statistics | 尚未迁移原版多轮调度、Intel 硬件指标/GTPin |
 
 ## 验证证据
+
+- 主输出和 MSAA 的验证说明见 `docs/FRAME_OUTPUT_MIGRATION.md`。
+  CPU **6,515 用例**在 Release / Debug 中通过；完整 Python / native 对照
+  **1,560 项**通过，包含硬件 / WARP 和直接 D3D11 样本图案验证。
+  Release 全量 CTest **27/27** 通过，其中 Qt UI **38 项**全部通过；
+  新增逐样本切换、空输出清除、通道/范围及捕获切换重置测试。
+  反复读取 MSAA 样本后的 RTV 身份和引用计数保持不变。
+  独立包 GF2/BF1 黄金帧与禁用 draw 负对照四项通过，真实视图编辑六项通过。
+  318 份成功报告的 85 个加载模块路径未包含 Python / GPA / RenderDoc；
+  打包的三个 EXE 与验证后的 Release 构建哈希一致。
+  Python 工具仅用于开发对照，不作为应用运行时后端。
 
 - 全局 view 描述符完成 **9,155 项** Python 规则对照，Release / Debug 均通过。
   原生执行完成 **358 项**对照，覆盖硬件 / WARP、纹理范围、buffer UAV、

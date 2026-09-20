@@ -12,6 +12,11 @@ replay, experiment projects and a compact Qt editor. Coverage and remaining
 consumer dependencies are documented in
 [`docs/OUTPUT_BINDING_MIGRATION.md`](docs/OUTPUT_BINDING_MIGRATION.md).
 
+The Output tab supports live presentation/RTV/DSV selection, view-bounded layers,
+MSAA resolve or individual samples, display channels/ranges and raw storage
+export. See [`docs/FRAME_OUTPUT_MIGRATION.md`](docs/FRAME_OUTPUT_MIGRATION.md)
+for parity evidence and remaining integration work.
+
 ## Build
 
 Install Visual Studio 2022 with **Desktop development with C++**, the MSVC v143

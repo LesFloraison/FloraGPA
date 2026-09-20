@@ -11,6 +11,7 @@
 #include "application/CommandEdits.h"
 #include "application/Constants.h"
 #include "application/ContextInspector.h"
+#include "application/FrameOutput.h"
 #include "application/PredicateInspector.h"
 #include "application/SetterEdits.h"
 #include "application/ShaderInspector.h"
@@ -165,6 +166,26 @@ MainWindow::MainWindow() {
             clearBufferDetails();
             displayedBuffer_ = 0;
             report_ = {};
+            outputDir_.reset();
+            outputStorageAction_->setEnabled(false);
+            {
+                QSignalBlocker targetBlock(outputTarget_), layerBlock(outputLayer_),
+                    sampleBlock(outputSample_), channelBlock(channels_);
+                while (outputTarget_->count() > 12)
+                    outputTarget_->removeItem(12);
+                const auto inventory = presentationInventory(*frame_);
+                for (const auto &chain : inventory["swap_chains"])
+                    if (!chain["target"].is_null()) {
+                        auto selector = QString::fromStdString(chain["selector"].get<std::string>());
+                        outputTarget_->addItem(selector, selector);
+                    }
+                outputTarget_->setCurrentIndex(0);
+                outputLayer_->setValue(-1);
+                outputSample_->setValue(-1);
+                channels_->setCurrentText("RGBA");
+                outputLow_->setText("0");
+                outputHigh_->setText("1");
+            }
             image_->setImage({});
             setWindowTitle(QFileInfo(capturePath_).completeBaseName() + "[*] — FloraGPA");
             frameLabel_->setText(QFileInfo(capturePath_).fileName());
@@ -314,6 +335,9 @@ void MainWindow::buildUi() {
     file->addSeparator();
     exportAction_ =
         file->addAction("Export Image…", QKeySequence("Ctrl+Shift+S"), this, &MainWindow::exportImage);
+    outputStorageAction_ = file->addAction("Export Output Storage…", this, &MainWindow::exportOutputStorage);
+    outputStorageAction_->setObjectName("exportOutputStorage");
+    outputStorageAction_->setEnabled(false);
     file->addAction("Export Resource…", this, &MainWindow::exportBytes);
     file->addSeparator();
     file->addAction("Exit", QKeySequence::Quit, this, &QWidget::close);
@@ -485,23 +509,58 @@ void MainWindow::buildUi() {
     outputLayout->setContentsMargins(0, 0, 0, 0);
     outputLayout->setSpacing(0);
     auto imageBar = new QToolBar;
+    auto displayBar = new QToolBar;
     boundary_ = new QComboBox;
     boundary_->addItems({"Final", "Before event", "After event"});
     imageBar->addWidget(boundary_);
+    outputTarget_ = new QComboBox;
+    outputTarget_->setObjectName("outputTarget");
+    for (auto target :
+         {"auto", "present", "rt0", "rt1", "rt2", "rt3", "rt4", "rt5", "rt6", "rt7", "depth", "stencil"})
+        outputTarget_->addItem(QString(target).toUpper(), target);
+    outputTarget_->setToolTip("Output target");
+    imageBar->addWidget(outputTarget_);
+    outputLayer_ = new QSpinBox;
+    outputLayer_->setObjectName("outputLayer");
+    outputLayer_->setRange(-1, 65535);
+    outputLayer_->setSpecialValueText("Auto layer");
+    outputLayer_->setValue(-1);
+    outputLayer_->setToolTip("Absolute array layer or volume slice");
+    imageBar->addWidget(outputLayer_);
+    outputSample_ = new QSpinBox;
+    outputSample_->setObjectName("outputSample");
+    outputSample_->setRange(-1, 31);
+    outputSample_->setSpecialValueText("Resolve");
+    outputSample_->setValue(-1);
+    outputSample_->setToolTip("MSAA sample index; Resolve averages samples");
+    imageBar->addWidget(outputSample_);
     imageBar->addSeparator();
     channels_ = new QComboBox;
     channels_->addItems({"RGB", "RGBA", "R", "G", "B", "A"});
-    imageBar->addWidget(channels_);
+    channels_->setObjectName("outputChannel");
+    displayBar->addWidget(channels_);
+    outputLow_ = new QLineEdit("0");
+    outputHigh_ = new QLineEdit("1");
+    outputLow_->setObjectName("outputLow");
+    outputHigh_->setObjectName("outputHigh");
+    outputLow_->setMaximumWidth(70);
+    outputHigh_->setMaximumWidth(70);
+    outputLow_->setToolTip("Display range minimum");
+    outputHigh_->setToolTip("Display range maximum");
+    displayBar->addWidget(outputLow_);
+    displayBar->addWidget(new QLabel("–"));
+    displayBar->addWidget(outputHigh_);
     imageBar->addSeparator();
     imageBar->addAction("Fit", this, [this] { image_->fit(); });
     imageBar->addAction("100%", this, [this] { image_->actualSize(); });
     imageBar->addAction("Export", this, &MainWindow::exportImage);
     auto imageSpacer = new QWidget;
     imageSpacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
-    imageBar->addWidget(imageSpacer);
+    displayBar->addWidget(imageSpacer);
     imageLabel_ = new QLabel("—");
-    imageBar->addWidget(imageLabel_);
+    displayBar->addWidget(imageLabel_);
     outputLayout->addWidget(imageBar);
+    outputLayout->addWidget(displayBar);
     image_ = new ImageView;
     image_->setObjectName("frameOutput");
     outputLayout->addWidget(image_);
@@ -832,7 +891,20 @@ void MainWindow::buildUi() {
     connect(image_, &ImageView::pixelHovered, pixelLabel_, &QLabel::setText);
     connect(image_, &ImageView::zoomChanged, this,
             [this](int percent) { zoomLabel_->setText(QString("%1%").arg(percent)); });
-    connect(channels_, &QComboBox::currentTextChanged, image_, &ImageView::channel);
+    auto outputChanged = [this] {
+        if (!frame_)
+            return;
+        ++revision_;
+        if (process_.state() != QProcess::NotRunning)
+            cancel();
+        replayTimer_.start();
+    };
+    connect(channels_, &QComboBox::currentTextChanged, this, outputChanged);
+    connect(outputTarget_, &QComboBox::currentIndexChanged, this, outputChanged);
+    connect(outputLayer_, &QSpinBox::valueChanged, this, outputChanged);
+    connect(outputSample_, &QSpinBox::valueChanged, this, outputChanged);
+    connect(outputLow_, &QLineEdit::editingFinished, this, outputChanged);
+    connect(outputHigh_, &QLineEdit::editingFinished, this, outputChanged);
     connect(boundary_, &QComboBox::currentIndexChanged, this, [this] {
         if (frame_) {
             ++revision_;
@@ -933,7 +1005,15 @@ void MainWindow::replay(bool timings) {
         replayTimer_.start();
         return;
     }
-    QStringList args{"replay", capturePath_};
+    QStringList args{"replay",           capturePath_,
+                     "--output-target",  outputTarget_->currentData().toString(),
+                     "--output-channel", channels_->currentText().toLower(),
+                     "--output-low",     outputLow_->text(),
+                     "--output-high",    outputHigh_->text()};
+    if (outputLayer_->value() >= 0)
+        args << "--output-layer" << QString::number(outputLayer_->value());
+    if (outputSample_->value() >= 0)
+        args << "--output-sample" << QString::number(outputSample_->value());
     if (boundary_->currentIndex() != 0 && selectedEvent_ && !timings) {
         args << "--event" << QString::number(selectedEvent_);
         if (boundary_->currentIndex() == 1)
@@ -1110,7 +1190,8 @@ void MainWindow::finishWorker(int code, QProcess::ExitStatus status) {
             return;
         }
         QImage result(jobDir_->path() + "/result/frame.png");
-        if (result.isNull())
+        const bool outputAvailable = runningKind_ != "replay" || report_["image_available"].toBool(true);
+        if (result.isNull() && outputAvailable)
             throw std::runtime_error("Worker output image is missing");
         if (runningKind_ == "texture") {
             textureImage_->setImage(std::move(result));
@@ -1124,12 +1205,24 @@ void MainWindow::finishWorker(int code, QProcess::ExitStatus status) {
             return;
         }
         image_->setImage(std::move(result));
-        image_->channel(channels_->currentText());
+        image_->channel("RGBA");
         imageLabel_->setText(QString("T:%1  ·  %2 × %3 · %4")
                                  .arg(report_["resource"].toString())
                                  .arg(report_["width"].toInt())
                                  .arg(report_["height"].toInt())
                                  .arg(boundaryLabel(report_)));
+        const auto display = report_["output_display"].toObject();
+        if (outputAvailable && !display.isEmpty())
+            imageLabel_->setText(imageLabel_->text() + QString(" · M%1 L%2")
+                                                           .arg(display["mip"].toInt())
+                                                           .arg(display["slice"].toInt()
+                                                                    ? display["slice"].toInt()
+                                                                    : display["layer"].toInt()));
+        if (!outputAvailable)
+            imageLabel_->setText("No output image");
+        imageLabel_->setToolTip(report_["image_status"].toString());
+        outputDir_ = std::move(jobDir_);
+        outputStorageAction_->setEnabled(outputAvailable);
         if (runningTimings_) {
             findChild<QTabWidget *>("inspectorTabs")->setCurrentWidget(metrics_);
             chart_->setTimings(report_["timings"].toArray());
@@ -1144,7 +1237,7 @@ void MainWindow::finishWorker(int code, QProcess::ExitStatus status) {
                 total += x.toObject()["microseconds"].toDouble();
             row(metrics_, "GPU work (µs)", QString::number(total, 'f', 3));
         }
-        exportAction_->setEnabled(true);
+        exportAction_->setEnabled(outputAvailable);
         statusBar()->showMessage(report_["adapter"].toString() + "  ·  Replay complete", 7000);
         log_->appendPlainText(QString("Replay complete · %1 × %2 · %3")
                                   .arg(report_["width"].toInt())
@@ -2689,6 +2782,27 @@ bool MainWindow::saveExperiment() {
     } catch (const std::exception &e) {
         showError(QString::fromUtf8(e.what()));
         return false;
+    }
+}
+void MainWindow::exportOutputStorage() {
+    if (!outputDir_ || !outputStorageAction_->isEnabled())
+        return;
+    const auto path =
+        QFileDialog::getSaveFileName(this, "Export Output Storage", "output.bin", "Binary data (*.bin)");
+    if (path.isEmpty())
+        return;
+    try {
+        QFile source(outputDir_->path() + "/result/output_storage.bin");
+        if (!source.open(QIODevice::ReadOnly))
+            throw std::runtime_error("Output storage is unavailable");
+        writeFile(path, source.readAll());
+        QFile metadata(outputDir_->path() + "/result/output_storage.json");
+        if (!metadata.open(QIODevice::ReadOnly))
+            throw std::runtime_error("Output metadata is unavailable");
+        writeFile(path + ".json", metadata.readAll());
+        statusBar()->showMessage("Output storage exported", 3000);
+    } catch (const std::exception &e) {
+        showError(QString::fromUtf8(e.what()));
     }
 }
 void MainWindow::exportImage() {

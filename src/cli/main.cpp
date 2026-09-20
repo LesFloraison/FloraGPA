@@ -5,6 +5,7 @@
 #include "application/Constants.h"
 #include "application/ContextInspector.h"
 #include "application/Experiment.h"
+#include "application/FrameOutput.h"
 #include "application/Geometry.h"
 #include "application/PredicateInspector.h"
 #include "application/ReplayPipeline.h"
@@ -75,6 +76,13 @@ int main(int argc, char **argv) {
     p.addOption({"id", "Resource ID", "id"});
     p.addOption({"filter", "API command text filter", "text"});
     p.addOption({"resource", "Filter API commands by referenced resource", "id"});
+    p.addOption({"output-target", "Output target: auto, present, rt0..rt7, depth, stencil or swap:<ID>",
+                 "target", "auto"});
+    p.addOption({"output-channel", "Output channel: rgba, rgb, r, g, b or a", "channel", "rgba"});
+    p.addOption({"output-low", "Output display range minimum", "value", "0"});
+    p.addOption({"output-high", "Output display range maximum", "value", "1"});
+    p.addOption({"output-layer", "Absolute output array layer or volume slice", "index"});
+    p.addOption({"output-sample", "Output sample index", "index"});
     p.addOption({"subresource", "Texture subresource", "index", "0"});
     p.addOption({"mip", "Texture mip level", "index", "0"});
     p.addOption({"layer", "Texture array layer", "index", "0"});
@@ -115,7 +123,7 @@ int main(int argc, char **argv) {
                            {"height", int(frame.height())},
                            {"entries", int(frame.entries().size())},
                            {"reference_pixels_used", false}};
-        nlohmann::json constantBindings;
+        nlohmann::json constantBindings, outputSelection, outputDisplay, outputMsaa;
         QString out = p.value("out");
         if (!out.isEmpty()) {
             QDir dir(out);
@@ -404,26 +412,79 @@ int main(int argc, char **argv) {
                 report.insert("value_time", options.until ? (options.before ? "before_event" : "after_event")
                                                           : "capture_initial");
             } else if (command != "replay-pipeline") {
-                auto image =
-                    command == "texture"
-                        ? replay.previewTexture(parseId("id"), parseIndex("mip"), parseIndex("layer"),
-                                                parseIndex("slice"))
-                        : replay.output(p.isSet("id") ? parseId("id") : 0, parseIndex("subresource"));
-                if (command == "texture")
+                Image image;
+                bool available = true;
+                if (command == "texture") {
+                    image = replay.previewTexture(parseId("id"), parseIndex("mip"), parseIndex("layer"),
+                                                  parseIndex("slice"));
                     report.insert("value_time", options.until
                                                     ? (options.before ? "before_event" : "after_event")
                                                     : "capture_initial");
-                QByteArray raw(reinterpret_cast<const char *>(image.rgba.data()),
-                               qsizetype(image.rgba.size()));
-                save(out + "/frame.rgba", raw);
-                QImage preview(image.rgba.data(), int(image.width), int(image.height), int(image.width * 4),
-                               QImage::Format_RGBA8888);
-                if (!preview.save(out + "/frame.png"))
-                    throw std::runtime_error("Cannot write PNG");
-                report.insert("width", int(image.width));
-                report.insert("height", int(image.height));
-                report.insert("resource", QString::number(image.resource));
-                report.insert("rgba_sha256", digest(raw));
+                } else {
+                    FrameDisplayOptions display;
+                    display.channel = p.value("output-channel").toStdString();
+                    bool lowOk = false, highOk = false;
+                    display.low = p.value("output-low").toDouble(&lowOk);
+                    display.high = p.value("output-high").toDouble(&highOk);
+                    if (!lowOk || !highOk)
+                        throw std::runtime_error("Invalid output display range");
+                    displayOutput({}, 28, display);
+                    if (p.isSet("output-layer"))
+                        display.layer = parseIndex("output-layer");
+                    if (p.isSet("output-sample"))
+                        display.sample = parseIndex("output-sample");
+                    outputSelection = selectFrameOutput(replay, p.value("output-target").toStdString());
+                    if (p.isSet("id")) {
+                        if (p.isSet("output-target"))
+                            throw std::runtime_error("Choose a resource override or an output target");
+                        const auto id = parseId("id");
+                        const auto info = textureInfo(frame.resource(id));
+                        const auto sub = parseIndex("subresource");
+                        if (!info.mips || sub >= uint64_t(info.mips) * info.layers)
+                            throw std::runtime_error("Output subresource exceeds storage");
+                        display.mip = sub % info.mips;
+                        if (!display.layer)
+                            display.layer = sub / info.mips;
+                        outputSelection["resource"] = id;
+                        outputSelection["view"] = 0;
+                        outputSelection["kind"] = "explicit_resource";
+                    }
+                    available = !outputSelection["resource"].is_null();
+                    if (available) {
+                        auto result = readFrameOutput(replay, outputSelection["resource"].get<Id>(), display,
+                                                      outputSelection["view"].is_null()
+                                                          ? std::optional<Id>{}
+                                                          : outputSelection["view"].get<Id>(),
+                                                      outputSelection.value("aspect", std::string{}));
+                        image = std::move(result.image);
+                        outputDisplay = std::move(result.display);
+                        outputMsaa = std::move(result.msaa);
+                        save(out + "/output_storage.bin",
+                             QByteArray(reinterpret_cast<const char *>(result.storage.data()),
+                                        qsizetype(result.storage.size())));
+                        save(out + "/output_storage.json",
+                             QByteArray::fromStdString(outputDisplay.dump(2) + "\n"));
+                    }
+                    report.insert("image_available", available);
+                    report.insert("image_status",
+                                  QString::fromStdString(outputSelection["kind"].get<std::string>()));
+                }
+                if (available) {
+                    QByteArray raw(reinterpret_cast<const char *>(image.rgba.data()),
+                                   qsizetype(image.rgba.size()));
+                    save(out + "/frame.rgba", raw);
+                    QImage preview(image.rgba.data(), int(image.width), int(image.height),
+                                   int(image.width * 4), QImage::Format_RGBA8888);
+                    if (!preview.save(out + "/frame.png"))
+                        throw std::runtime_error("Cannot write PNG");
+                    report.insert("width", int(image.width));
+                    report.insert("height", int(image.height));
+                    report.insert("resource", QString::number(image.resource));
+                    report.insert("rgba_sha256", digest(raw));
+                } else {
+                    for (auto key : {"width", "height", "resource", "rgba_sha256"})
+                        report.insert(key, QJsonValue(QJsonValue::Null));
+                }
             }
             QJsonObject counts;
             for (auto &[key, value] : replay.counts)
@@ -471,6 +532,11 @@ int main(int argc, char **argv) {
         } else
             throw std::runtime_error("Unknown command");
         auto nativeReport = nlohmann::json::parse(QJsonDocument(report).toJson().toStdString());
+        if (!outputSelection.is_null()) {
+            nativeReport["output_selection"] = std::move(outputSelection);
+            nativeReport["output_display"] = std::move(outputDisplay);
+            nativeReport["output_msaa"] = std::move(outputMsaa);
+        }
         // QJson normalizes -0.0 to 0. Preserve reflected values and exact scalar bits in the report.
         if (!constantBindings.is_null())
             nativeReport["constant_bindings"] = std::move(constantBindings);

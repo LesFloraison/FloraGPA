@@ -5,11 +5,13 @@
 namespace flora {
 std::vector<uint8_t> Replay::readTexture(Id id) {
     const auto resource = frame_.resource(id);
+    return readTextureStorage(get<ID3D11Resource>(id), resource);
+}
+std::vector<uint8_t> Replay::readTextureStorage(ID3D11Resource *source, const Resource &resource) {
     const auto info = textureInfo(resource);
     if (info.samples != 1 || !info.mips || info.mips > 32 || !info.layers ||
         uint64_t(info.mips) * info.layers > 30720)
         throw std::runtime_error("Texture storage readback requires explicit non-MSAA subresources");
-    auto source = get<ID3D11Resource>(id);
     auto words = resource.desc;
     words[words.size() - 4] = D3D11_USAGE_STAGING;
     words[words.size() - 3] = 0;

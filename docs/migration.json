@@ -414,9 +414,14 @@
       "sha256": "3e95853c711083d2770c83addaf348c07b0580bb3d5c4b5a791c789e47c98af3",
       "lines": 263,
       "description": "Coverage written by the original pixel program alongside its actual outputs.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": [
+        "src/application/FrameOutput.cpp"
+      ],
+      "validation": [
+        "Only target_subresource descriptor/range selection migrated, including buffer RTV, array mip, W slices, MSAA and DSV flags",
+        "Coverage instrumentation, dual-source handling, UAV relocation and execution remain pending"
+      ]
     },
     {
       "module": "coverage_geometry.py",
@@ -765,10 +770,16 @@
       "description": "Lossless selected output storage and explicit RGBA8 display conversion.",
       "status": "partial",
       "native": [
-        "src/replay/Replay.cpp"
+        "src/application/FrameOutput.cpp",
+        "src/replay/TextureReadback.cpp",
+        "src/replay/Msaa.cpp",
+        "src/cli/main.cpp",
+        "src/app/MainWindow.cpp"
       ],
       "validation": [
-        "GF2/BF1 live RGBA output and negative controls"
+        "Selected raw output, RTV/DSV mip/layer/W-slice/buffer ranges, CPU channels/ranges, sRGB encoded values and depth/stencil conversion",
+        "tools/validate_frame_output_port.py: Python/native bytes and metadata; see docs/FRAME_OUTPUT_MIGRATION.md",
+        "MSAA resolve/sample output integrated; experiment UI persistence and before-boundary reconciliation remain pending"
       ]
     },
     {
@@ -1410,27 +1421,45 @@
       "sha256": "eb563b560125601b959166ae63480d0f3fa1a9bd9de39b143b645624e1e47118",
       "lines": 113,
       "description": "Independent MSAA resolve/sample inspection, preserving immediate DX11 state.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": [
+        "src/replay/Msaa.cpp",
+        "src/application/FrameOutput.cpp"
+      ],
+      "validation": [
+        "Hardware resolve, shader mean, selected samples, packed depth/stencil and unused-X convention",
+        "tools/validate_frame_output_port.py: direct native sample-pattern oracle and Python output metadata on hardware/WARP",
+        "tests/FrameOutputTests.cpp: repeated sample reads preserve bindings and view reference counts",
+        "Output consumer integrated; Texture tab and private analysis consumers remain pending"
+      ]
     },
     {
       "module": "msaa_edit.py",
       "sha256": "d48351dd3d6c4617d2ff3e42a09f468b348d44189c3e397622e5253c8c5c64c1",
       "lines": 143,
       "description": "Per-sample MSAA storage transfer using compatible views and isolated draws.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": [
+        "src/replay/Msaa.cpp"
+      ],
+      "validation": [
+        "Compatible integer-family sample reads preserve raw bits, including UINT above 2^24",
+        "Per-sample writes, edit validation and editor integration remain pending"
+      ]
     },
     {
       "module": "msaa_notice.py",
       "sha256": "be8e5dae03b6722fa39dbb954f508220ee50bbb35008e74af5c6ddce076d692a",
       "lines": 3,
       "description": "Shared provenance text for MSAA values produced by independent replay.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": [
+        "src/application/FrameOutput.cpp"
+      ],
+      "validation": [
+        "Reference initialization provenance included in output_msaa JSON",
+        "Shared notice across all MSAA consumers remains pending"
+      ]
     },
     {
       "module": "native_debug_config.py",
@@ -1681,11 +1710,13 @@
       "description": "Select a replayed backbuffer using captured swap-chain parent identities.",
       "status": "partial",
       "native": [
-        "src/replay/Replay.cpp"
+        "src/application/Presentation.cpp",
+        "src/app/MainWindow.cpp"
       ],
       "validation": [
-        "docs/NATIVE_BASELINE.md",
-        "Initialized backbuffer fallback before the first draw; GF2 first-clear UI navigation"
+        "Native OM output identity, automatic/live presentation and explicit swap chains; no reference pixels used",
+        "tools/validate_frame_output_port.py: missing/invalid/ambiguous markers, multiple swap chains, no image and live copies",
+        "Pixel navigation and before-boundary integration remain pending"
       ]
     },
     {

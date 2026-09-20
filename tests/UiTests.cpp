@@ -1,5 +1,6 @@
 #include "ClassCapture.h"
 #include "DepthStencilCapture.h"
+#include "MsaaCapture.h"
 #include "PredicateCapture.h"
 #include "SamplerCapture.h"
 #include "SrvBindingCapture.h"
@@ -642,6 +643,59 @@ class UiTests final : public QObject {
         QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
         QVERIFY(done.takeLast()[0].toBool());
         QCOMPARE(output->image().pixelColor(0, 0), QColor(191, 0, 0, 255));
+    }
+    void outputSelectionControls() {
+        using namespace flora;
+        QTemporaryDir dir;
+        testing::srvCapture().save(dir.path() + "/frame.gpa_frame");
+        MainWindow window;
+        window.resize(1500, 950);
+        window.show();
+        QSignalSpy done(&window, &MainWindow::taskFinished);
+        window.openCapture(dir.path() + "/frame.gpa_frame");
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        auto target = window.findChild<QComboBox *>("outputTarget");
+        auto output = window.findChild<ImageView *>("frameOutput");
+        auto rawExport = window.findChild<QAction *>("exportOutputStorage");
+        QVERIFY(target && output && rawExport);
+        QVERIFY(!output->image().isNull());
+        QVERIFY(rawExport->isEnabled());
+        done.clear();
+        target->setCurrentIndex(target->findData("rt7"));
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        QVERIFY(output->image().isNull());
+        QVERIFY(!rawExport->isEnabled());
+        done.clear();
+        target->setCurrentIndex(target->findData("rt0"));
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        QVERIFY(!output->image().isNull());
+        auto high = window.findChild<QLineEdit *>("outputHigh");
+        high->setText("0.25");
+        done.clear();
+        window.findChild<QComboBox *>("outputChannel")->setCurrentText("R");
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        QCOMPARE(output->image().pixelColor(0, 0), QColor(128, 128, 128, 255));
+        snapshot(window, "output-controls");
+        testing::msaaOutputCapture(false).save(dir.path() + "/msaa.gpa_frame");
+        done.clear();
+        window.openCapture(dir.path() + "/msaa.gpa_frame");
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        QCOMPARE(window.findChild<QComboBox *>("outputChannel")->currentText(), QString("RGBA"));
+        QCOMPARE(high->text(), QString("1"));
+        QCOMPARE(output->image().pixelColor(0, 0), QColor(30, 0, 0, 255));
+        auto sample = window.findChild<QSpinBox *>("outputSample");
+        QVERIFY(sample);
+        done.clear();
+        sample->setValue(3);
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        QCOMPARE(output->image().pixelColor(0, 0), QColor(36, 0, 0, 255));
+        snapshot(window, "output-msaa-sample");
     }
     void viewHistory() {
         using namespace flora;

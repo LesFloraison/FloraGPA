@@ -62,6 +62,12 @@ struct Image {
     std::vector<uint8_t> rgba;
     Id resource{};
 };
+struct MsaaStorage {
+    Resource resource;
+    std::vector<uint8_t> bytes;
+    std::string mode;
+    bool integerBits = false, depthStencil = false, canonicalX = false;
+};
 struct DrawAutoParameters {
     uint32_t vertexCount{}, stream{}, capturedCount{}, iaOffset{}, iaStride{};
     Id resource{}, shader{}, declaration{};
@@ -76,6 +82,7 @@ struct StreamOutputCount {
 using ReplayBoundaryObserver =
     std::function<void(Id, bool, ID3D11DeviceContext *, const std::map<Id, Com<IUnknown>> &)>;
 class Replay {
+    std::vector<uint8_t> readTextureStorage(ID3D11Resource *source, const Resource &resource);
     ReplayBoundaryObserver boundaryObserver_;
     struct Timestamp {
         Id event;
@@ -172,7 +179,7 @@ class Replay {
         bool window;
     };
     std::array<std::map<uint32_t, Range>, 6> ranges_;
-    Id lastTarget_ = 0;
+    Id lastTarget_ = 0, lastTargetView_ = 0, lastEvent_ = 0, lastWorkEvent_ = 0;
     uint32_t uavLimit_ = 8;
     bool replayComplete_ = false;
     Id layoutGap_ = 0, outputGap_ = 0;
@@ -212,11 +219,20 @@ class Replay {
              const ReplayBoundaryObserver &observer = {});
     const ReplayOptions &options() const { return options_; }
     const Frame &frame() const { return frame_; }
+    Id lastOutputResource() const { return lastTarget_; }
+    Id lastOutputView() const { return lastTargetView_; }
+    Id lastEvent() const { return lastEvent_; }
+    Id lastWorkEvent() const { return lastWorkEvent_; }
+    bool unresolvedOutputs() const { return outputGap_ != 0; }
+    bool resourceAvailable(Id id) const {
+        return objects_.contains(id) || frame_.resource(id).data || options_.textures.contains(id);
+    }
     Image output(Id texture = 0, uint32_t subresource = 0);
     Image previewTexture(Id texture, uint32_t mip = 0, uint32_t layer = 0, uint32_t slice = 0, double low = 0,
                          double high = 1, const std::string &channel = "rgba");
     std::vector<uint8_t> readBuffer(Id id);
     std::vector<uint8_t> readTexture(Id id);
+    MsaaStorage readMsaa(Id id, std::optional<uint32_t> sample, uint32_t typedFormat);
     uint32_t readCounter(Id view);
     struct PredicateResult {
         std::string status = "pending";

@@ -75,6 +75,7 @@ class MainWindow final : public QMainWindow {
     void cancel();
     void showError(const QString &error);
     void exportImage();
+    void exportOutputStorage();
     void exportBytes();
     void setBusy(bool);
     void properties(const QString &title, const QList<QPair<QString, QString>> &rows);
@@ -145,6 +146,11 @@ class MainWindow final : public QMainWindow {
     QMainWindow *workspace_;
     QLabel *frameLabel_, *imageLabel_, *pixelLabel_, *zoomLabel_, *selectionLabel_;
     QComboBox *boundary_, *channels_, *adapter_;
+    QComboBox *outputTarget_;
+    QSpinBox *outputLayer_, *outputSample_;
+    QLineEdit *outputLow_, *outputHigh_;
+    QAction *outputStorageAction_;
+    std::unique_ptr<QTemporaryDir> outputDir_;
     QProgressBar *progress_;
     QAction *openAction_, *replayAction_, *collectAction_, *cancelAction_, *exportAction_;
     QDockWidget *logDock_;

@@ -513,6 +513,7 @@ void Replay::bind(const State &s, bool compute) {
         Reader r(frame_.payload(s.rtv[0]));
         r.skip(16);
         lastTarget_ = r.read<Id>();
+        lastTargetView_ = s.rtv[0];
     }
     if (extended || outputHistory_)
         verifyOutputBindings(OutputBindingModel::snapshot(s));
@@ -828,6 +829,7 @@ void Replay::command(const Entry &e) {
                 context_->End(timestamps_.back().end.Get());
             endStreamOutput(e.id, activeStreams);
             counts[commandName(t)]++;
+            lastWorkEvent_ = e.id;
             observe(true);
             return true;
         });
@@ -994,6 +996,8 @@ void Replay::command(const Entry &e) {
         return;
     }
     counts[commandName(t)]++;
+    if (isWritableCommand(t))
+        lastWorkEvent_ = e.id;
 }
 void Replay::run(const std::function<void(Id, size_t, size_t)> &progress,
                  const ReplayBoundaryObserver &observer) {
@@ -1044,7 +1048,7 @@ void Replay::run(const std::function<void(Id, size_t, size_t)> &progress,
     counts.clear();
     for (auto &ranges : ranges_)
         ranges.clear();
-    lastTarget_ = 0;
+    lastTarget_ = lastTargetView_ = lastEvent_ = lastWorkEvent_ = 0;
     timestamps_.clear();
     timings.clear();
     statistics = {};
@@ -1067,6 +1071,7 @@ void Replay::run(const std::function<void(Id, size_t, size_t)> &progress,
                 (id > options_.until || (options_.before && id == options_.until && !isDraw(e.type))))
                 break;
             try {
+                lastEvent_ = id;
                 command(e);
             } catch (const std::exception &error) {
                 throw std::runtime_error("Event " + std::to_string(id) + " (" + commandName(e.type) +
