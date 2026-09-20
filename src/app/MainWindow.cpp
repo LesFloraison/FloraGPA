@@ -1,6 +1,7 @@
 #include "MainWindow.h"
 #include "BlendDialog.h"
 #include "CommandStateView.h"
+#include "OutputDialog.h"
 #include "PredicateView.h"
 #include "RasterizerDialog.h"
 #include "SamplerDialog.h"
@@ -2138,8 +2139,7 @@ void MainWindow::editBuffer(bool importFile) {
         auto command = frame_->event(event);
         ReplayOptions options;
         experiment_->apply(*frame_, options);
-        const auto state =
-            effectiveSrvBindings(*frame_, event, frame_->state(command.state), options.srvSetters);
+        const auto state = effectiveBindings(*frame_, event, frame_->state(command.state), options);
         auto bindings = bufferBindings(*frame_, command, state, resource);
         if (frame_->resource(resource).type != 0x83 || bindings.empty())
             throw std::runtime_error("Select a buffer bound to this draw or dispatch");
@@ -2443,6 +2443,17 @@ void MainWindow::editSetter() {
     try {
         const auto event = selectedEvent_;
         const auto values = experiment_->setter(*frame_, event);
+        if (isSrvOutputCommand(frame_->entry(event).type)) {
+            const auto revision = revision_;
+            auto frame = frame_;
+            if (editOutputSetterDialog(this, *frame, event, values, [&](const nlohmann::json &next) {
+                    if (revision != revision_ || event != selectedEvent_)
+                        throw std::runtime_error("Selection or experiment changed; reopen this editor");
+                    experiment_->setSetter(*frame_, event, next);
+                }))
+                experimentChanged();
+            return;
+        }
         if (samplerSetterStage(frame_->entry(event).type) || srvSetterStage(frame_->entry(event).type)) {
             const auto revision = revision_;
             auto frame = frame_;

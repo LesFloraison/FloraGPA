@@ -95,12 +95,12 @@ std::vector<UavCounter> referencedCounters(const Frame &frame, Id event, Id reso
     r.end();
     return result;
 }
-void validateCounterEdit(const Frame &frame, Id view, std::optional<Id> event) {
+void validateCounterEdit(const Frame &frame, Id view, std::optional<Id> event, const State *effective) {
     if (!describeCounter(frame, view))
         throw std::runtime_error("Select an Append/Consume/Counter UAV view");
     if (event) {
         auto command = frame.event(*event);
-        auto counters = boundCounters(frame, command, frame.state(command.state));
+        auto counters = boundCounters(frame, command, effective ? *effective : frame.state(command.state));
         if (std::none_of(counters.begin(), counters.end(), [&](const auto &x) { return x.view == view; }))
             throw std::runtime_error("Counter view is not bound to this draw or dispatch");
     }

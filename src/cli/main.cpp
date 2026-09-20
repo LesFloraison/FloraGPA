@@ -330,8 +330,7 @@ int main(int argc, char **argv) {
                 constantBindings = std::move(constants);
                 if (options.until && isDraw(frame.entry(options.until).type)) {
                     auto event = frame.event(options.until);
-                    auto state =
-                        effectiveSrvBindings(frame, event.id, frame.state(event.state), options.srvSetters);
+                    auto state = effectiveBindings(frame, event.id, frame.state(event.state), options);
                     auto bindings = bufferBindings(frame, event, state, resource.id);
                     QJsonArray list;
                     for (auto &binding : bindings) {

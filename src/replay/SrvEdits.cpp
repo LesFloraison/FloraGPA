@@ -41,7 +41,7 @@ const SrvObservation &Replay::srvHistory(Id event, bool after) {
     return history->advance(event, after);
 }
 void Replay::observeSrvBindings(Id event) {
-    if (!srvBindings_.active())
+    if (outputHistory_ || !srvBindings_.active())
         return;
     if (outputGap_) {
         srvBindings_.hazards(srvHazards_, srvHistory(event, true).outputs);

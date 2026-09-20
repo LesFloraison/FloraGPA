@@ -1,5 +1,6 @@
 #pragma once
 #include "core/Frame.h"
+#include "core/OutputBindings.h"
 #include "core/Predication.h"
 #include "core/SamplerBindings.h"
 #include "core/SrvBindings.h"
@@ -48,6 +49,7 @@ struct ReplayOptions {
     std::map<Id, PredicateBinding> predicateSetters;
     std::map<Id, SamplerBinding> samplerSetters;
     std::map<Id, SrvBinding> srvSetters;
+    std::map<Id, std::vector<uint8_t>> outputSetters;
     std::map<Id, std::map<std::pair<unsigned, unsigned>, D3D11_SAMPLER_DESC>> samplerEdits;
     std::map<Id, std::map<std::pair<unsigned, unsigned>, D3D11_SHADER_RESOURCE_VIEW_DESC>> srvEdits;
     std::map<Id, DepthStencilEdit> depthStencilEdits;
@@ -108,6 +110,11 @@ class Replay {
     std::optional<PredicateBinding> predicateOverride_;
     SamplerBindings samplerBindings_;
     SrvBindings srvBindings_;
+    std::unique_ptr<OutputBindingHistory> outputHistory_;
+    std::array<bool, 4> retainedSo_{};
+    Id bindingEvent_{};
+    void validateOutputSnapshot(const State &state);
+    void verifyOutputBindings(const BindingValues &expected);
     SrvHazards srvHazards_{frame_};
     std::map<Id, std::unique_ptr<SrvHistory>> srvHistories_;
     const SrvObservation &srvHistory(Id event, bool after = false);
@@ -177,7 +184,7 @@ class Replay {
     void immediate(Id id) const;
     void bind(const State &state, bool compute);
     void command(const Entry &entry);
-    void outputs(const Entry &entry);
+    bool outputs(const Entry &entry, Bytes payload);
     void constantBuffers(const Entry &entry);
     void mappedWrites(const Entry &entry);
     void setRange(int stage, uint32_t slot, ID3D11Buffer *buffer, const Range &range);
@@ -228,4 +235,6 @@ class Replay {
     std::string adapter() const;
 };
 std::string disassemble(Bytes dxbc);
+std::unique_ptr<OutputBindingHistory> makeOutputHistory(const Frame &frame, const ReplayOptions &options);
+State effectiveBindings(const Frame &frame, Id event, State state, const ReplayOptions &options);
 } // namespace flora

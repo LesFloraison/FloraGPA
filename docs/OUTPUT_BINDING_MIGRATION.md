@@ -1,10 +1,11 @@
 # Output binding migration
 
 The native `OutputBindingModel` ports the original/experimental state machine in
-`standalone/binding_model.py`. This is core infrastructure for the remaining
-output setter editors. Output/SO argument validation and cached history are now
-implemented. Experiment project integration, native replay integration,
-retained SO cursors and the Qt editor are **not yet available**.
+`standalone/binding_model.py`. Output/SO argument validation and cached history
+now connect to experiment projects, native replay and the compact Qt setter
+editor. Native SO cursors, extended UAV slots, and final-binding consumers are
+integrated. Full parity still depends on pending global view, texture experiment
+and private diagnostic modules.
 
 ## Implemented
 
@@ -31,6 +32,18 @@ retained SO cursors and the Qt editor are **not yet available**.
 - State overlays mark dirty non-null SO slots as retained and set their offset
   to KEEP. This is a request for append preservation; it does not prove that the
   native hidden cursor is known.
+- Replay rebuilds history per run, executes edited payloads at their original
+  command boundary and applies deltas before event edits. Retained SO slots use
+  native append only when their cursor is known. Original later setters and
+  ClearState still replace bindings. Native output getters verify accepted state;
+  skipped missing-original setters are not falsely treated as executed.
+- Graphics snapshots preserve extended CS/OM UAV slots. Buffer patch validation,
+  counter edits/inspection, SRV descriptors and geometry resolve final bindings.
+  Counter and buffer edits validate after all project operations, independent of
+  operation order.
+- Qt **Edit Setter** supports RTV/DSV, OM/CS UAVs and all five SO setter families,
+  with independent optional arrays, KEEP groups and uint32 counter/offset cells.
+  Unchanged forms do not add history; invalid edits remain in the dialog.
 
 `readOutputCommand` is shared by actual captured command replay and SRV history.
 The experimental model uses whole-subresource overlap, matching Python;
@@ -71,9 +84,37 @@ interleaved contexts, reverse cache reads, future malformed records, counter
 gaps and GF2/BF1 snapshots. The earlier 8,152-boundary model/native-getter
 regression is rerun in `artifacts/output-history-model-regression/validation.json`.
 
-These APIs are deliberately separate from `isEditableSetter` until replay and
-project consumers are connected. The packaged UI still exposes the previously
-completed predicate, sampler and SRV setters.
+The subsequent replay batch passed 1,142 initial comparisons in
+`artifacts/output-replay-full-01/validation.json`. An additional 132 comparisons in
+`artifacts/output-replay-extended-02/validation.json` cover hidden UAV counters,
+buffer/counter composition in both orders, both KEEP forms, slot 63, six-stage
+collateral changes, mixed SRV edits and edited GF2/BF1 boundaries on hardware/WARP.
+These are intermediate evidence. The legacy synthetic counter fixture is copied with explicit
+immediate context 1 in CopyStructureCount records; original source files are intact.
+
+The final isolated package `out/FloraGPA-output-editors/` passes **1,992 checks**
+in `artifacts/output-replay-package-full/validation.json`, including all five SO
+layouts, event boundaries, disabled events, output bytes, all 1,008 binding fields,
+hidden counter metadata, known/unknown retained SO cases, final IA geometry and
+both real captures. Validation retains null-array distinctions and compares
+resource identity groups without comparing process-specific pointer addresses.
+GF2/BF1 full-frame hashes and suppressed-draw negatives pass in
+`artifacts/validation-output-editors-golden/validation.json`.
+
+`artifacts/output-editors-audit.json` records 1,242 successful native reports,
+75 loaded module paths and no Python, GPA or RenderDoc modules. The three packaged
+executables match the corresponding Release build hashes. This is host-local
+isolation evidence, not validation on a separate clean Windows installation.
+
+Release and Debug `OutputBindingTests` each pass all nine tests, including saved
+project reload, rejected edits preserving history, undo/redo, counter/buffer
+composition and repeated replay on the same replay object. The three new Qt tests
+pass in both configurations: parameter validation, SO offsets, and MainWindow
+menu/Worker/undo/redo integration. Logs are `ctest-output-bindings-final-*.log`
+and `output-ui-final-*.txt` under `artifacts/`; screenshots in
+`artifacts/output-ui-final-release/` were visually reviewed.
+The final Release CTest run passes all 25 suites, including all 35 Qt UI tests,
+in `artifacts/ctest-output-editors-final-release.log`.
 
 ### Native ClearState discrepancy
 
@@ -90,22 +131,17 @@ fields or report exact native parity. Original/changed model comparisons still
 include them and match Python. Two ClearState boundaries and their subsequent
 snapshot anchors differ in the current hardware/WARP tests (four observations).
 
-Before exposing output edits, decide how replay establishes canonical null IA
-metadata after ClearState, and verify repeated replay and actual getter output.
-Do not silently manufacture a runtime observation from the offline model.
+Replay State continues to report actual native getter values. The offline model
+retains the Python semantics. No synthetic zeros are substituted for native null
+IA stride/offset observations. Output getter verification checks outputs, not
+unobservable SO cursors or canonicalized IA metadata; the documented discrepancy
+remains a limitation of offline-to-native equivalence.
 
 ## Remaining integration
 
-1. Connect validated output/SO payloads to experiment transactions, save/load and
-   undo/redo. Recreate the immutable history whenever the experiment changes;
-   include modeled SRV/IA replacements in the same history.
-2. Pass cached deltas and gap evidence through the worker/replay boundary rather
-   than independently rebuilding or guessing the affected output state.
-3. Apply deltas before event edits and resource cloning, including final target
-   resolution for buffer/texture edits and export consumers.
-4. Execute replacements at their command boundary, retain edited SO cursors and
-   UAV counters across snapshots, and check native outputs after void setters.
-5. Connect the compact Qt setter form, worker requests, project save/load and
-   undo/redo; verify selection/revision cancellation and all reference consumers.
-6. Close global view edit, private diagnostic and other pending dependencies
-   before marking full output editing or the overall migration complete.
+1. Port global view and texture input/output experiments, including private
+   clones, and resolve their consumers against final output bindings.
+2. Close coverage, quad, post-shader and other private diagnostic consumers.
+3. Add remaining setter families to the shared history as they are migrated.
+4. Keep full output module parity partial until every reference consumer and
+   supported combination has native execution evidence.

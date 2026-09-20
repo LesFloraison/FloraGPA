@@ -10,7 +10,8 @@ nlohmann::json inspectUavCounters(const Frame &frame, Replay &replay, Id id, Id 
     std::vector<UavCounter> counters;
     if (draw) {
         auto event = frame.event(id);
-        counters = boundCounters(frame, event, frame.state(event.state), resource);
+        counters = boundCounters(
+            frame, event, effectiveBindings(frame, id, frame.state(event.state), replay.options()), resource);
     } else
         counters = referencedCounters(frame, id, resource);
     for (const auto &info : counters) {

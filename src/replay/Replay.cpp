@@ -384,6 +384,11 @@ void Replay::setRange(int stage, UINT slot, ID3D11Buffer *buffer, const Range &r
         (context1_.Get()->*fns[stage])(slot, 1, &buffer, &range.first, &range.count);
 }
 void Replay::bind(const State &s, bool compute) {
+    const bool extended =
+        std::any_of(s.omExtended.begin(), s.omExtended.end(), [](Id x) { return x != 0; }) ||
+        std::any_of(s.csExtended.begin(), s.csExtended.end(), [](Id x) { return x != 0; });
+    if (extended || outputHistory_)
+        validateOutputSnapshot(s);
     if (options_.debug)
         std::cerr << "state " << s.ib << " " << s.layout << " " << s.topology << " vp " << s.viewports
                   << " sc " << s.scissors << " mask " << s.sampleMask << " shader " << s.stages[0].shader
@@ -432,6 +437,9 @@ void Replay::bind(const State &s, bool compute) {
             sam[i] = get<ID3D11SamplerState>(x.samplers[i]);
         for (size_t i = 0; i < srv.size(); ++i)
             if (srvBindings_.overrides(unsigned(stage)).contains(unsigned(i)) ||
+                (outputHistory_ &&
+                 outputHistory_->delta(bindingEvent_)
+                     .contains(std::string(samplerStageNames[stage]) + ".srv." + std::to_string(i))) ||
                 (shader && !passthroughShaders_.contains(x.shader) &&
                  (x.classCount || usedSrvs_.at(x.shader)[i])))
                 srv[i] = get<ID3D11ShaderResourceView>(x.srv[i]);
@@ -473,18 +481,15 @@ void Replay::bind(const State &s, bool compute) {
     context_->OMSetDepthStencilState(get<ID3D11DepthStencilState>(s.depthState), s.stencilRef);
     const auto predicate = predicateOverride_.value_or(PredicateBinding{s.predicate, s.predicateValue});
     bindPredicate(predicate.resource, predicate.value);
-    bool extended = std::any_of(s.omExtended.begin(), s.omExtended.end(), [](Id x) { return x != 0; }) ||
-                    std::any_of(s.csExtended.begin(), s.csExtended.end(), [](Id x) { return x != 0; });
-    if (extended)
-        throw std::runtime_error("Extended UAV snapshot migration pending");
-    if (compute) {
-        std::array<ID3D11UnorderedAccessView *, 8> uavs{};
-        for (int i = 0; i < 8; ++i)
-            uavs[i] = get<ID3D11UnorderedAccessView>(s.csUav[i]);
-        context_->CSSetUnorderedAccessViews(0, 8, uavs.data(), nullptr);
-        return;
+    if (compute || extended || outputHistory_) {
+        std::array<ID3D11UnorderedAccessView *, 64> uavs{};
+        for (unsigned i = 0; i < uavLimit_; ++i)
+            uavs[i] = get<ID3D11UnorderedAccessView>(i < 8 ? s.csUav[i] : s.csExtended[i - 8]);
+        context_->CSSetUnorderedAccessViews(0, uavLimit_, uavs.data(), nullptr);
+        if (compute && !extended && !outputHistory_)
+            return;
     }
-    if (s.rtCount > 8 || s.omStart > 64)
+    if (s.rtCount > uavLimit_ || s.omStart > 64)
         throw std::runtime_error("Output snapshot limit");
     bindStreamOutput(s);
     auto rtCount = std::min({s.rtCount, s.omStart, 8u});
@@ -493,19 +498,21 @@ void Replay::bind(const State &s, bool compute) {
         rt[i] = get<ID3D11RenderTargetView>(s.rtv[i]);
     auto depth = get<ID3D11DepthStencilView>(s.dsv);
     if (s.omStart < s.rtCount) {
-        std::array<ID3D11UnorderedAccessView *, 8> uav{};
+        std::array<ID3D11UnorderedAccessView *, 64> uav{};
         for (UINT i = s.omStart; i < s.rtCount; ++i)
-            uav[i - s.omStart] = get<ID3D11UnorderedAccessView>(s.rtv[i]);
+            uav[i - s.omStart] = get<ID3D11UnorderedAccessView>(i < 8 ? s.rtv[i] : s.omExtended[i - 8]);
         context_->OMSetRenderTargetsAndUnorderedAccessViews(rtCount, rt.data(), depth, s.omStart,
                                                             s.rtCount - s.omStart, uav.data(), nullptr);
     } else
         context_->OMSetRenderTargets(rtCount, rt.data(), depth);
     validateBlendOutputs(s, get<ID3D11BlendState>(s.blend));
-    if (rtCount && s.rtv[0]) {
+    if (!compute && rtCount && s.rtv[0]) {
         Reader r(frame_.payload(s.rtv[0]));
         r.skip(16);
         lastTarget_ = r.read<Id>();
     }
+    if (extended || outputHistory_)
+        verifyOutputBindings(OutputBindingModel::snapshot(s));
 }
 Replay::ConstantRange Replay::constantRange(unsigned stage, uint32_t slot, Id buffer) const {
     const auto &ranges = ranges_.at(stage);
@@ -594,8 +601,8 @@ void Replay::constantBuffers(const Entry &e) {
             ranges_[stage].erase(start + i);
     }
 }
-void Replay::outputs(const Entry &e) {
-    const auto command = readOutputCommand(e.type, frame_.payload(e.id));
+bool Replay::outputs(const Entry &e, Bytes payload) {
+    const auto command = readOutputCommand(e.type, payload);
     immediate(command.context);
     validateOutputRange(e.type, command, uavLimit_);
     const auto rtCount = command.rtvCount, start = command.start, count = command.uavCount;
@@ -615,9 +622,11 @@ void Replay::outputs(const Entry &e) {
     if (rtCount != UINT_MAX && dsv && !frame_.entries().contains(dsv))
         missing = true;
     if (missing) {
+        if (options_.outputSetters.contains(e.id))
+            throw std::runtime_error("Edited output binding references a missing view");
         counts["unresolved_output_setters"]++;
         outputGap_ = e.id;
-        return;
+        return false;
     }
     auto viewType = [&](Id id, uint16_t expected) {
         if (id) {
@@ -647,6 +656,7 @@ void Replay::outputs(const Entry &e) {
             count, ua.data(), init);
     else
         context_->CSSetUnorderedAccessViews(start, count, ua.data(), init);
+    return true;
 }
 void Replay::mappedWrites(const Entry &e) {
     Reader r(frame_.payload(e.id));
@@ -712,6 +722,10 @@ void Replay::command(const Entry &e) {
     Bytes payload = frame_.payload(e.id);
     if (auto it = options_.commandPayloads.find(e.id); it != options_.commandPayloads.end())
         payload = it->second;
+    if (auto it = options_.outputSetters.find(e.id); it != options_.outputSetters.end())
+        payload = it->second;
+    if (outputHistory_ && OutputBindingModel::models(e.type))
+        outputHistory_->advance(e.id);
     Reader r(payload);
     if (isDraw(t)) {
         auto event = frame_.event(e.id);
@@ -719,7 +733,13 @@ void Replay::command(const Entry &e) {
         auto state = frame_.state(event.state);
         samplerBindings_.observe(state);
         samplerBindings_.apply(state);
-        if (srvBindings_.active()) {
+        bindingEvent_ = e.id;
+        retainedSo_.fill(false);
+        if (outputHistory_) {
+            auto effective = outputHistory_->state(e.id, state);
+            state = effective.state;
+            retainedSo_ = effective.retainedSo;
+        } else if (srvBindings_.active()) {
             srvBindings_.hazards(srvHazards_, srvOutputs(state));
             srvBindings_.apply(state);
         }
@@ -820,6 +840,8 @@ void Replay::command(const Entry &e) {
     }
     if (isStreamOutputTargets(t)) {
         applyStreamOutput(payload);
+        if (outputHistory_)
+            verifyOutputBindings(outputHistory_->delta(e.id));
         observeSrvBindings(e.id);
         counts["SOSetTargets"]++;
         return;
@@ -847,7 +869,9 @@ void Replay::command(const Entry &e) {
         return;
     }
     if (t == 0x34ff || t == 0x3500 || t == 0x3522 || t == 0x25e) {
-        outputs(e);
+        const bool applied = outputs(e, payload);
+        if (applied && outputHistory_)
+            verifyOutputBindings(outputHistory_->delta(e.id));
         observeSrvBindings(e.id);
         return;
     }
@@ -984,6 +1008,9 @@ void Replay::run(const std::function<void(Id, size_t, size_t)> &progress,
     samplerBindings_ = SamplerBindings{};
     srvBindings_.clear();
     srvHistories_.clear();
+    outputHistory_ = makeOutputHistory(frame_, options_);
+    retainedSo_.fill(false);
+    bindingEvent_ = 0;
     clearBindingGaps();
     objects_.clear();
     editedSamplers_.clear();
@@ -998,14 +1025,14 @@ void Replay::run(const std::function<void(Id, size_t, size_t)> &progress,
     soQueries_.clear();
     soAutoResults_.clear();
     streamOutputHistory.clear();
-    soCountRequiresKnown_ = options_.editedEvents || !options_.shaders.empty() ||
-                            !options_.textures.empty() || !options_.disabled.empty() ||
-                            !options_.buffers.empty() || !options_.commandPayloads.empty() ||
-                            !options_.updateSources.empty() || !options_.uavCounters.empty() ||
-                            !options_.predicateSetters.empty() || !options_.depthStencilEdits.empty() ||
-                            !options_.rasterizerEdits.empty() || !options_.blendEdits.empty() ||
-                            !options_.samplerSetters.empty() || !options_.samplerEdits.empty() ||
-                            !options_.srvEdits.empty() || !options_.srvSetters.empty();
+    soCountRequiresKnown_ =
+        options_.editedEvents || !options_.shaders.empty() || !options_.textures.empty() ||
+        !options_.disabled.empty() || !options_.buffers.empty() || !options_.commandPayloads.empty() ||
+        !options_.updateSources.empty() || !options_.uavCounters.empty() ||
+        !options_.predicateSetters.empty() || !options_.depthStencilEdits.empty() ||
+        !options_.rasterizerEdits.empty() || !options_.blendEdits.empty() ||
+        !options_.samplerSetters.empty() || !options_.samplerEdits.empty() || !options_.srvEdits.empty() ||
+        !options_.srvSetters.empty() || !options_.outputSetters.empty();
     soCountEnabled_ = false;
     for (const auto &[id, entry] : frame_.entries())
         if ((entry.category == 7 && entry.type == 0x38) ||

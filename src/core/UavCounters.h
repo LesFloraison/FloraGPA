@@ -17,5 +17,6 @@ std::optional<UavCounter> describeCounter(const Frame &frame, Id view);
 std::vector<UavCounter> boundCounters(const Frame &frame, const Event &event, const State &state,
                                       Id resource = 0);
 std::vector<UavCounter> referencedCounters(const Frame &frame, Id event, Id resource);
-void validateCounterEdit(const Frame &frame, Id view, std::optional<Id> event = {});
+void validateCounterEdit(const Frame &frame, Id view, std::optional<Id> event = {},
+                         const State *effective = nullptr);
 } // namespace flora

@@ -11,16 +11,20 @@
 #include "app/BlendDialog.h"
 #include "app/CommandStateView.h"
 #include "app/MainWindow.h"
+#include "app/OutputDialog.h"
 #include "app/PredicateView.h"
 #include "app/RasterizerDialog.h"
 #include "app/SamplerDialog.h"
 #include "app/SrvDialog.h"
 #include "application/BlendEdits.h"
+#include "application/OutputEdits.h"
 #include "application/RasterizerEdits.h"
 #include "application/SamplerEdits.h"
+#include "application/SetterEdits.h"
 #include "application/SrvEdits.h"
 #include <QAbstractItemModelTester>
 #include <QAction>
+#include <QCheckBox>
 #include <QCryptographicHash>
 #include <QDialog>
 #include <QDialogButtonBox>
@@ -44,6 +48,196 @@ class UiTests final : public QObject {
         QVERIFY(window.grab().save(directory + '/' + name + ".png"));
     }
   private slots:
+    void outputSetterDialogValidation() {
+        using namespace flora;
+        using Json = nlohmann::json;
+        QTemporaryDir dir;
+        auto capture = testing::stateCapture();
+        capture.save(dir.path() + "/outputs.gpa_frame");
+        Frame frame((dir.path() + "/outputs.gpa_frame").toStdWString());
+        QWidget parent;
+        int commits = 0;
+        QTimer::singleShot(0, &parent, [&] {
+            auto dialog = parent.findChild<QDialog *>("outputSetterDialog");
+            QVERIFY(dialog);
+            QTimer::singleShot(3000, dialog, &QDialog::reject);
+            auto apply = dialog->findChild<QDialogButtonBox *>()->button(QDialogButtonBox::Ok);
+            auto count = dialog->findChild<QSpinBox *>("uav_count");
+            count->setValue(2);
+            apply->click();
+            QCOMPARE(commits, 0);
+            QVERIFY(dialog->findChild<QLabel *>("setterError")->isVisible());
+            count->setValue(1);
+            auto initialCounts = dialog->findChild<QCheckBox *>("initial_counts_provided");
+            initialCounts->setChecked(true);
+            auto table = dialog->findChild<QTableWidget *>("uavBindings");
+            auto value = qobject_cast<QLineEdit *>(table->cellWidget(0, 2));
+            value->setText("4294967296");
+            apply->click();
+            QCOMPARE(commits, 0);
+            value->setText("0xffffffff");
+            snapshot(*dialog, "output-uav-editor");
+            apply->click();
+        });
+        QVERIFY(
+            editOutputSetterDialog(&parent, frame, 140, capturedOutputSetter(frame, 140), [&](auto &values) {
+                ++commits;
+                QCOMPARE(values, Json({{"start_slot", 63},
+                                       {"uav_count", 1},
+                                       {"uavs", {22}},
+                                       {"initial_counts", {UINT32_MAX}}}));
+            }));
+        QCOMPARE(commits, 1);
+        QTimer::singleShot(0, &parent, [&] {
+            auto dialog = parent.findChild<QDialog *>("outputSetterDialog");
+            QVERIFY(dialog);
+            QTimer::singleShot(3000, dialog, &QDialog::reject);
+            dialog->findChild<QCheckBox *>("rtv_keep")->setChecked(true);
+            snapshot(*dialog, "output-keep-editor");
+            dialog->findChild<QDialogButtonBox *>()->button(QDialogButtonBox::Ok)->click();
+        });
+        QVERIFY(
+            editOutputSetterDialog(&parent, frame, 138, capturedOutputSetter(frame, 138), [&](auto &values) {
+                ++commits;
+                QCOMPARE(values, Json({{"rtv_count", UINT32_MAX},
+                                       {"rtvs", nullptr},
+                                       {"dsv", 0},
+                                       {"start_slot", 0},
+                                       {"uav_count", UINT32_MAX},
+                                       {"uavs", nullptr},
+                                       {"initial_counts", nullptr}}));
+            }));
+        QCOMPARE(commits, 2);
+        // Null and provided empty arrays round-trip independently.
+        for (bool present : {false, true}) {
+            Json initial{{"rtv_count", 0}, {"rtvs", present ? Json::array() : Json(nullptr)}, {"dsv", 0}};
+            QTimer::singleShot(0, &parent, [&] {
+                auto dialog = parent.findChild<QDialog *>("outputSetterDialog");
+                QVERIFY(dialog);
+                QTimer::singleShot(3000, dialog, &QDialog::reject);
+                dialog->findChild<QDialogButtonBox *>()->button(QDialogButtonBox::Ok)->click();
+            });
+            QVERIFY(!editOutputSetterDialog(&parent, frame, 114, initial, [&](auto &) { ++commits; }));
+        }
+        QCOMPARE(commits, 2);
+        QTimer::singleShot(0, &parent, [&] {
+            auto dialog = parent.findChild<QDialog *>("outputSetterDialog");
+            QVERIFY(dialog);
+            QTimer::singleShot(3000, dialog, &QDialog::reject);
+            dialog->findChild<QSpinBox *>("rtv_count")->setValue(0);
+            dialog->findChild<QDialogButtonBox *>()->button(QDialogButtonBox::Ok)->click();
+            QVERIFY(dialog->findChild<QLabel *>("setterError")->text().contains("changed"));
+            dialog->reject();
+        });
+        QVERIFY(!editOutputSetterDialog(&parent, frame, 111, capturedOutputSetter(frame, 111),
+                                        [&](auto &) { throw std::runtime_error("Experiment changed"); }));
+        QVERIFY(isEditableSetter(0x34ff));
+        QVERIFY(isEditableSetter(0x3500));
+        QVERIFY(isEditableSetter(0x25e));
+        QVERIFY(isEditableSetter(0x3522));
+    }
+    void outputSetterWorkerHistory() {
+        using namespace flora;
+        QTemporaryDir dir;
+        auto capture = testing::srvBindingCapture();
+        capture.add(905, 7, 0x34ff, testing::statePack(Id(0), Id(1), 1u, uint8_t(1), Id(21), Id(0)));
+        capture.save(dir.path() + "/output.gpa_frame");
+        MainWindow window;
+        window.resize(1500, 950);
+        window.show();
+        QSignalSpy done(&window, &MainWindow::taskFinished);
+        window.openCapture(dir.path() + "/output.gpa_frame");
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        window.findChild<QComboBox *>("apiKinds")->setCurrentIndex(1);
+        auto api = window.findChild<QTableView *>("apiLog");
+        bool selected = false;
+        for (int row = 0; row < api->model()->rowCount(); ++row) {
+            auto index = api->model()->index(row, 0);
+            if (index.data(Qt::UserRole).toULongLong() == 905) {
+                api->setCurrentIndex(index);
+                selected = true;
+                break;
+            }
+        }
+        QVERIFY(selected);
+        QTRY_VERIFY_WITH_TIMEOUT(!window.busy(), 30000);
+        auto edit = window.findChild<QAction *>("editSetter");
+        QVERIFY(edit && edit->isEnabled());
+        bool entered = false;
+        QTimer::singleShot(0, &window, [&] {
+            auto dialog = window.findChild<QDialog *>("outputSetterDialog");
+            QVERIFY(dialog);
+            QTimer::singleShot(3000, dialog, &QDialog::reject);
+            auto count = dialog->findChild<QSpinBox *>("rtv_count");
+            QCOMPARE(count->value(), 1);
+            count->setValue(0);
+            entered = true;
+            dialog->findChild<QDialogButtonBox *>()->button(QDialogButtonBox::Ok)->click();
+        });
+        done.clear();
+        edit->trigger();
+        QVERIFY(entered);
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        QAction *undo = nullptr, *redo = nullptr;
+        for (auto action : window.findChildren<QAction *>()) {
+            if (action->shortcut() == QKeySequence::Undo)
+                undo = action;
+            if (action->shortcut() == QKeySequence::Redo)
+                redo = action;
+        }
+        QVERIFY(undo && redo);
+        for (auto action : {undo, redo}) {
+            done.clear();
+            action->trigger();
+            QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+            QVERIFY(done.takeLast()[0].toBool());
+            bool inspected = false;
+            QTimer::singleShot(0, &window, [&] {
+                auto dialog = window.findChild<QDialog *>("outputSetterDialog");
+                QVERIFY(dialog);
+                QTimer::singleShot(3000, dialog, &QDialog::reject);
+                QCOMPARE(dialog->findChild<QSpinBox *>("rtv_count")->value(), action == undo ? 1 : 0);
+                inspected = true;
+                dialog->reject();
+            });
+            edit->trigger();
+            QVERIFY(inspected);
+        }
+        snapshot(window, "output-setter-workspace");
+    }
+    void streamOutputSetterDialogValidation() {
+        using namespace flora;
+        using Json = nlohmann::json;
+        QTemporaryDir dir;
+        auto capture = testing::streamCapture();
+        capture.add(120, 7, 0x3503, testing::statePack(Id(0), Id(1), 1u, uint8_t(1), Id(70), uint8_t(0)));
+        capture.save(dir.path() + "/so.gpa_frame");
+        Frame frame((dir.path() + "/so.gpa_frame").toStdWString());
+        QWidget parent;
+        Json changed;
+        QTimer::singleShot(0, &parent, [&] {
+            auto dialog = parent.findChild<QDialog *>("outputSetterDialog");
+            QVERIFY(dialog);
+            QTimer::singleShot(3000, dialog, &QDialog::reject);
+            auto apply = dialog->findChild<QDialogButtonBox *>()->button(QDialogButtonBox::Ok);
+            auto table = dialog->findChild<QTableWidget *>("soBindings");
+            dialog->findChild<QCheckBox *>("offsets_provided")->setChecked(true);
+            auto offset = qobject_cast<QLineEdit *>(table->cellWidget(0, 2));
+            offset->setText("3");
+            apply->click();
+            QVERIFY(changed.is_null());
+            QVERIFY(dialog->findChild<QLabel *>("setterError")->isVisible());
+            offset->setText("64");
+            snapshot(*dialog, "stream-output-editor");
+            apply->click();
+        });
+        QVERIFY(editOutputSetterDialog(&parent, frame, 120, capturedOutputSetter(frame, 120),
+                                       [&](auto &values) { changed = values; }));
+        QCOMPARE(changed, Json({{"count", 1}, {"buffers", {70}}, {"offsets", {64}}}));
+        QVERIFY(isEditableSetter(0x3503));
+    }
     void srvDialogValidation() {
         using namespace flora;
         using Json = nlohmann::json;

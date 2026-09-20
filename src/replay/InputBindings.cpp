@@ -167,14 +167,15 @@ bool Replay::inputBindings(const Entry &e, Bytes payload) {
     if (missing) {
         if (edit != options_.srvSetters.end())
             throw std::runtime_error("Edited SRV binding references a missing view");
-        srvBindings_.transition(unsigned(stage), original, nullptr, SrvObservation{});
+        if (!outputHistory_)
+            srvBindings_.transition(unsigned(stage), original, nullptr, SrvObservation{});
         // The whole call is unresolved, including present resources in the same array.
         std::fill_n(srvGaps_[stage].begin() + start, count, e.id);
         counts["unresolved_srv_setters"]++;
         return true;
     }
     auto next = srvBindings_;
-    if (edit != options_.srvSetters.end() || next.active(unsigned(stage))) {
+    if (!outputHistory_ && (edit != options_.srvSetters.end() || next.active(unsigned(stage)))) {
         const auto &previous = srvHistory(e.id);
         next.transition(unsigned(stage), original,
                         edit == options_.srvSetters.end() ? nullptr : &edit->second, previous);

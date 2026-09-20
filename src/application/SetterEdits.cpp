@@ -1,5 +1,6 @@
 #include "SetterEdits.h"
 #include "ApiCommands.h"
+#include "OutputEdits.h"
 #include "core/Contexts.h"
 namespace flora {
 namespace {
@@ -22,10 +23,12 @@ uint64_t integer(const nlohmann::json &value, uint64_t max) {
 } // namespace
 bool isEditableSetter(uint16_t type) {
     return predicateOperation(type) == PredicateOperation::Set || samplerSetterStage(type).has_value() ||
-           srvSetterStage(type).has_value();
+           srvSetterStage(type).has_value() || isSrvOutputCommand(type);
 }
 nlohmann::json capturedSetter(const Frame &frame, Id event) {
     const auto &entry = frame.entry(event);
+    if (entry.category == 7 && isSrvOutputCommand(entry.type))
+        return capturedOutputSetter(frame, event);
     if (entry.category == 7 && samplerSetterStage(entry.type)) {
         if (inspectCommand(frame, event).at("status") != "decoded")
             throw std::runtime_error("Setter requires a complete recovered command layout");

@@ -106,7 +106,7 @@ void Replay::withEventEdits(const Event &event, const State &state, const std::f
                 }
             if (counters != options_.uavCounters.end())
                 for (auto &[view, value] : counters->second) {
-                    validateCounterEdit(frame_, view, event.id);
+                    validateCounterEdit(frame_, view, event.id, &state);
                     counterBackups.emplace_back(view, readCounter(view));
                     writeCounter(view, value);
                 }
@@ -120,7 +120,7 @@ void Replay::withEventEdits(const Event &event, const State &state, const std::f
 }
 void Replay::inspectEventInputs(Id id, const std::function<void()> &inspect) {
     auto event = frame_.event(id);
-    const auto state = effectiveSrvBindings(frame_, id, frame_.state(event.state), options_.srvSetters);
+    const auto state = effectiveBindings(frame_, id, frame_.state(event.state), options_);
     withEventEdits(event, state, [&] {
         inspect();
         return false;

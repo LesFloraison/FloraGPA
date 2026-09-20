@@ -128,7 +128,7 @@ Json capturedSrv(const Frame &frame, Id view) {
     return value;
 }
 Json effectiveSrv(const Frame &frame, Id event, unsigned stage, unsigned slot, const Json &patch,
-                  const std::map<Id, SrvBinding> &setters) {
+                  const std::map<Id, SrvBinding> &setters, const State *effective) {
     if (stage >= 6 || slot >= 128)
         throw std::runtime_error("Invalid SRV experiment target");
     const auto &entry = frame.entry(event);
@@ -136,7 +136,8 @@ Json effectiveSrv(const Frame &frame, Id event, unsigned stage, unsigned slot, c
         throw std::runtime_error("Select a draw or dispatch");
     const auto draw = frame.event(event);
     requireImmediateContext(frame, draw.context);
-    const auto state = effectiveSrvBindings(frame, event, frame.state(draw.state), setters);
+    const auto state =
+        effective ? *effective : effectiveSrvBindings(frame, event, frame.state(draw.state), setters);
     const auto view = state.stages[stage].srv[slot];
     auto value = capturedSrv(frame, view);
     const auto normalized = normalizeSrv(patch);

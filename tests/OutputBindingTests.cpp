@@ -1,4 +1,6 @@
 #include "StateCapture.h"
+#include "StreamCapture.h"
+#include "application/Experiment.h"
 #include "application/OutputEdits.h"
 #include "core/OutputBindings.h"
 #include <QCoreApplication>
@@ -274,6 +276,91 @@ class OutputBindingTests final : public QObject {
         auto result = history.state(161, State{});
         QCOMPARE(result.state.stages[4].srv[0], Id(25));
         QVERIFY_THROWS_EXCEPTION(std::exception, OutputBindingHistory(frame, {{100, edit}}));
+    }
+    void counterExperimentHistory() {
+        try {
+            QTemporaryDir dir;
+            auto c = computeCapture(true);
+            c.add(70, 7, 0x242, statePack(Id(0), Id(1)));
+            c.buffer(34, 35, D3D11_BIND_UNORDERED_ACCESS, D3D11_RESOURCE_MISC_BUFFER_STRUCTURED,
+                     {1, 2, 3, 4});
+            c.uav(36, 34, D3D11_BUFFER_UAV_FLAG_COUNTER);
+            c.add(91, 7, 0x3522, statePack(Id(0), Id(1), 1u, 1u, uint8_t(1), Id(12), uint8_t(1), 0u));
+            c.save(dir.path() + "/counter.gpa_frame");
+            Frame f((dir.path() + "/counter.gpa_frame").toStdWString());
+            Experiment e(f);
+            Json values{{"start_slot", 1}, {"uav_count", 1}, {"uavs", {36}}, {"initial_counts", {1}}};
+            e.setSetter(f, 91, values);
+            QVERIFY(e.setUavCounter(f, 36, 2, 100));
+            e.setBuffer(f, 100, 34, 0, statePack(99u));
+            const auto saved = e.document();
+            auto invalid = values;
+            invalid["uavs"] = {12};
+            QVERIFY_THROWS_EXCEPTION(std::exception, e.setSetter(f, 91, invalid));
+            QCOMPARE(e.document(), saved);
+            e.save(dir.path() + "/project.json");
+            Experiment loaded(f);
+            loaded.load(dir.path() + "/project.json", f);
+            QCOMPARE(loaded.document(), saved);
+            for (bool warp : {false, true}) {
+                ReplayOptions options;
+                options.warp = warp;
+                options.until = 100;
+                loaded.apply(f, options);
+                Replay replay(f, options);
+                for (int i = 0; i < 2; ++i) {
+                    replay.run();
+                    QCOMPARE(replay.readCounter(36), 3u);
+                    QCOMPARE(replay.readBuffer(34), statePack(99u, 2u, 7u, 4u));
+                }
+                QVERIFY(loaded.undo());
+                QVERIFY(loaded.undo());
+                QVERIFY(loaded.undo());
+                loaded.apply(f, options);
+                QVERIFY(options.outputSetters.empty());
+                QVERIFY(options.buffers.empty());
+                QVERIFY(options.uavCounters.empty());
+                QVERIFY(loaded.redo());
+                QVERIFY(loaded.redo());
+                QVERIFY(loaded.redo());
+            }
+        } catch (const std::exception &e) {
+            QFAIL(e.what());
+        }
+    }
+    void retainedStreamOutputReplay() {
+        try {
+            QTemporaryDir dir;
+            auto c = streamCapture();
+            c.add(120, 7, 0x3503, statePack(Id(0), Id(1), 1u, uint8_t(1), Id(70), uint8_t(1), 16u));
+            c.save(dir.path() + "/stream.gpa_frame");
+            Frame f((dir.path() + "/stream.gpa_frame").toStdWString());
+            Experiment e(f);
+            e.setSetter(f, 120, {{"count", 1}, {"buffers", {70}}, {"offsets", {128}}});
+            for (bool warp : {false, true}) {
+                ReplayOptions options;
+                options.warp = warp;
+                options.until = 150;
+                e.apply(f, options);
+                Replay replay(f, options);
+                replay.run();
+                auto first = replay.readBuffer(70);
+                QVERIFY(std::all_of(first.begin() + 64, first.begin() + 128,
+                                    [](uint8_t v) { return v == 0xcd; }));
+                QVERIFY(!std::all_of(first.begin() + 128, first.begin() + 176,
+                                     [](uint8_t v) { return v == 0xcd; }));
+                replay.run();
+                QCOMPARE(replay.readBuffer(70), first);
+                QVERIFY(e.undo());
+                e.apply(f, options);
+                Replay baseline(f, options);
+                baseline.run();
+                QVERIFY(baseline.readBuffer(70) != first);
+                QVERIFY(e.redo());
+            }
+        } catch (const std::exception &e) {
+            QFAIL(e.what());
+        }
     }
     void arguments() {
         QTemporaryDir dir;

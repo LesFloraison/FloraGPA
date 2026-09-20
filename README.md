@@ -7,10 +7,10 @@ This repository migrates the independently recovered Python implementation in
 Migration status is tracked per source module in `docs/migration.json`.
 Pending functionality is not represented as working functionality.
 
-Output/SO setter migration is in progress. Argument validation, the dual binding
-model, cached history and their Python/native getter comparisons are documented in
-[`docs/OUTPUT_BINDING_MIGRATION.md`](docs/OUTPUT_BINDING_MIGRATION.md);
-the output setter experiment and Qt editor are still pending.
+Output/SO setters now connect the dual binding model and cached history to native
+replay, experiment projects and a compact Qt editor. Coverage and remaining
+consumer dependencies are documented in
+[`docs/OUTPUT_BINDING_MIGRATION.md`](docs/OUTPUT_BINDING_MIGRATION.md).
 
 ## Build
 
@@ -128,8 +128,8 @@ bindings between draw/dispatch snapshots. CB/CB1 calls validate resource flags a
 window alignment before applying native bindings. A selected boundary with missing
 captured output views, input layouts or unresolved SRV slots returns an error; later
 complete snapshots or ClearState restore binding validity. SRV replacement resolves
-only the overwritten slots in that shader stage. Sampler, SRV and predicate setter
-editing is available; other setter families are still being migrated.
+only the overwritten slots in that shader stage. Sampler, SRV, predicate,
+output and SO setter editing is available; other setter families are still being migrated.
 
 **Pipeline > Replay State** reads actual D3D11 bindings at the selected command's
 before/after boundary through the isolated worker. It includes all six shader stages,
@@ -141,6 +141,21 @@ Runtime object tokens preserve clone identity and ambiguous captured-ID provenan
 SO live write cursors have no native getter and remain unknown. Unsupported replay
 commands and experiment types remain errors; this inspector does not enable them.
 Changing the selection, boundary, experiment or adapter invalidates previous results.
+
+Select an `OMSetRenderTargets`, `OMSetRenderTargetsAndUnorderedAccessViews`,
+`CSSetUnorderedAccessViews` or `SOSetTargets` call, then **Edit > Edit Setter**.
+The compact Render Targets, Unordered Access and Stream Output pages expose
+resource slots, DSV, initial counters and byte offsets. **Keep bindings** preserves
+the applicable OM group; **Provided** distinguishes null pointers from explicit
+arrays, including empty arrays. Counter/offset cells accept decimal, hexadecimal
+or `KEEP`. Changes support project save/load and undo/redo.
+
+Output changes persist across snapshots and include collateral SRV/IA unbinding.
+Buffer patches, SRV descriptor edits, counter inspection/edits and IA geometry
+use the final bindings. SO append preservation requires a known native write
+cursor. Full output verification reads native getters after applying setters and
+edited snapshots. Texture input/output experiments, global view edits and private
+diagnostic consumers remain separate migration work.
 
 ```powershell
 .\out\FloraGPA\FloraGPA.Cli.exe replay-pipeline D:\captures\sample.gpa_frame --event 430 --before --out D:\results\pipeline
@@ -266,8 +281,8 @@ written-byte history and the first IA buffer's offset/stride, including shader
 replacements and temporary input edits. **Geometry > Inspect IA** exports these
 effective arguments and identifies their provenance. Without known in-frame
 history, unedited replay retains the captured count and marks it unverified;
-edited replay requires known history. Setter experiments, retained outputs under
-those experiments, predication and private diagnostic SO passes remain pending.
+edited replay requires known history. SO setter experiments preserve known native
+append positions across snapshots. Private diagnostic SO passes remain pending.
 
 ```powershell
 .\out\FloraGPA\FloraGPA.Cli.exe commands D:\captures\sample.gpa_frame --out D:\results\api

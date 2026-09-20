@@ -2,6 +2,7 @@
 #include "BlendEdits.h"
 #include "CommandEdits.h"
 #include "DepthStencilEdits.h"
+#include "OutputEdits.h"
 #include "RasterizerEdits.h"
 #include "SamplerEdits.h"
 #include "SetterEdits.h"
@@ -85,6 +86,7 @@ void Experiment::apply(const Frame &frame, ReplayOptions &options) const {
     options.samplerEdits.clear();
     options.srvEdits.clear();
     options.srvSetters.clear();
+    options.outputSetters.clear();
     options.depthStencilEdits.clear();
     options.rasterizerEdits.clear();
     options.blendEdits.clear();
@@ -145,6 +147,8 @@ void Experiment::apply(const Frame &frame, ReplayOptions &options) const {
                     options.samplerSetters[id] = validateSamplerSetter(frame, id, op.at("values"));
                 else if (srvSetterStage(frame.entry(id).type))
                     options.srvSetters[id] = validateSrvSetter(frame, id, op.at("values"));
+                else if (isSrvOutputCommand(frame.entry(id).type))
+                    options.outputSetters[id] = validateOutputSetter(frame, id, op.at("values"));
                 else
                     options.predicateSetters[id] = validatePredicateSetter(frame, id, op.at("values"));
             } else if (kind == "clear") {
@@ -172,7 +176,7 @@ void Experiment::apply(const Frame &frame, ReplayOptions &options) const {
                 std::optional<Id> event;
                 if (kind == "uav_counter")
                     event = identifier(op.at("event"));
-                validateCounterEdit(frame, view, event);
+                validateCounterEdit(frame, view);
                 if (event)
                     options.uavCounters[*event][view] = uint32_t(value);
                 else
@@ -212,17 +216,23 @@ void Experiment::apply(const Frame &frame, ReplayOptions &options) const {
     }
     // Validate against final bindings so history operation order does not affect input edits.
     for (const auto &[event, buffers] : options.buffers) {
-        const auto state =
-            effectiveSrvBindings(frame, event, frame.state(frame.event(event).state), options.srvSetters);
+        const auto state = effectiveBindings(frame, event, frame.state(frame.event(event).state), options);
         for (const auto &[resource, patches] : buffers)
             for (const auto &patch : patches)
                 validateBufferPatch(frame, event, resource, patch.offset, patch.bytes.size(), &state);
     }
     // Descriptor inheritance uses final setter edits, regardless of history order.
-    for (const auto &[event, bindings] : srvs)
+    for (const auto &[event, counters] : options.uavCounters) {
+        const auto state = effectiveBindings(frame, event, frame.state(frame.event(event).state), options);
+        for (auto &[view, value] : counters)
+            validateCounterEdit(frame, view, event, &state);
+    }
+    for (const auto &[event, bindings] : srvs) {
+        const auto state = effectiveBindings(frame, event, frame.state(frame.event(event).state), options);
         for (const auto &[target, patch] : bindings)
-            options.srvEdits[event][target] =
-                nativeSrv(effectiveSrv(frame, event, target.first, target.second, patch, options.srvSetters));
+            options.srvEdits[event][target] = nativeSrv(
+                effectiveSrv(frame, event, target.first, target.second, patch, options.srvSetters, &state));
+    }
     for (const auto &[event, bindings] : samplers) {
         const auto state = samplerState(frame, event, options.samplerSetters);
         for (const auto &[target, patch] : bindings) {
@@ -369,16 +379,14 @@ Json Experiment::srv(const Frame &frame, Id event, const std::string &name, unsi
                 patch = mergeSrv(patch, op.at("values"));
     ReplayOptions options;
     apply(frame, options);
+    const auto effective = effectiveBindings(frame, event, frame.state(frame.event(event).state), options);
     if (patch.empty()) {
         const auto &entry = frame.entry(event);
         if (entry.category != 7 || !isDraw(entry.type))
             throw std::runtime_error("Select a draw or dispatch");
-        patch = capturedSrv(frame, effectiveSrvBindings(frame, event, frame.state(frame.event(event).state),
-                                                        options.srvSetters)
-                                       .stages[stage]
-                                       .srv[slot]);
+        patch = capturedSrv(frame, effective.stages[stage].srv[slot]);
     }
-    return effectiveSrv(frame, event, stage, slot, patch, options.srvSetters);
+    return effectiveSrv(frame, event, stage, slot, patch, options.srvSetters, &effective);
 }
 void Experiment::setSrv(const Frame &frame, Id event, const std::string &stage, unsigned slot,
                         const Json &values) {
@@ -412,6 +420,9 @@ void Experiment::setSetter(const Frame &frame, Id event, const Json &values) {
     } else if (srvSetterStage(frame.entry(event).type)) {
         auto binding = validateSrvSetter(frame, event, values);
         normalized = {{"start_slot", binding.start}, {"views", binding.views}};
+    } else if (isSrvOutputCommand(frame.entry(event).type)) {
+        validateOutputSetter(frame, event, values);
+        normalized = values;
     } else {
         auto binding = validatePredicateSetter(frame, event, values);
         normalized = {{"predicate", binding.resource}, {"predicate_value", binding.value}};
@@ -484,8 +495,7 @@ void Experiment::setBufferPatches(const Frame &frame, Id event, Id resource,
         return;
     ReplayOptions options;
     apply(frame, options);
-    const auto state =
-        effectiveSrvBindings(frame, event, frame.state(frame.event(event).state), options.srvSetters);
+    const auto state = effectiveBindings(frame, event, frame.state(frame.event(event).state), options);
     Json operations = Json::array();
     for (const auto &patch : patches) {
         auto &data = patch.bytes;
@@ -515,7 +525,12 @@ std::optional<uint32_t> Experiment::initialUavCounter(Id view) const {
     return {};
 }
 bool Experiment::setUavCounter(const Frame &frame, Id view, uint32_t value, std::optional<Id> event) {
-    validateCounterEdit(frame, view, event);
+    ReplayOptions options;
+    apply(frame, options);
+    std::optional<State> state;
+    if (event)
+        state = effectiveBindings(frame, *event, frame.state(frame.event(*event).state), options);
+    validateCounterEdit(frame, view, event, state ? &*state : nullptr);
     if (!event && initialUavCounter(view) == value)
         return false;
     Json op{{"kind", event ? "uav_counter" : "initial_uav_counter"}, {"view", view}, {"value", value}};

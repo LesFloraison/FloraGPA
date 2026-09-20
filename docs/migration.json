@@ -129,14 +129,21 @@
       "status": "partial",
       "native": [
         "src/core/OutputBindings.h",
-        "src/core/OutputBindings.cpp"
+        "src/core/OutputBindings.cpp",
+        "src/replay/OutputBindings.cpp",
+        "src/replay/Replay.cpp",
+        "src/application/Experiment.cpp",
+        "src/app/OutputDialog.cpp"
       ],
       "validation": [
         "tools/validate_output_model_port.py: 42 streams, 8152 boundaries and all 1008 original/changed fields, dirty sets and overlays match Python, including GF2/BF1 and missing-output gaps",
         "Hardware/WARP getter comparison covers 288 boundaries; null VB stride/offset persistence after ClearState differs from the reference model at four observations and is recorded explicitly",
         "OutputBindingTests: strict optional/KEEP arrays, truncation, malformed edits, target overlap/dimensions and atomic state preservation",
-        "Replay experiment integration, retained SO cursors, serialization and Qt output/SO editors remain pending; see docs/OUTPUT_BINDING_MIGRATION.md",
-        "OutputBindingHistory: immutable replacements, per-context forward traversal, sparse delta cache, reverse reads and retained SO overlay; 2480 argument/history comparisons in Release and Debug"
+        "OutputBindingHistory: immutable replacements, per-context forward traversal, sparse delta cache, reverse reads and retained SO overlay; 2480 argument/history comparisons in Release and Debug",
+        "Native replay and Qt editor connected: optional arrays/KEEP, extended UAV snapshots, native output getters, retained known SO cursors, saved experiments and final buffer/counter/SRV/geometry bindings; full private diagnostic/global-view/texture experiment parity remains pending",
+        "Intermediate output-replay-full-01: 1142 hardware/WARP checks; output-replay-extended-02: 132 checks including counter continuity, buffer/counter edit ordering, high OM slot, mixed SRV setters and edited GF2/BF1 bindings",
+        "Final isolated package: 1992 checks in artifacts/output-replay-package-full/validation.json; output bytes, 1008 native binding fields, UAV counter metadata, IA geometry, five SO layouts, missing/unknown cases and GF2/BF1 on hardware/WARP",
+        "OutputBindingTests: nine Release and nine Debug passes including repeated replay, save/load, undo/redo and rollback; UiTests: three new dialogs/Worker/history cases pass in both configurations"
       ]
     },
     {
@@ -1548,13 +1555,20 @@
       "status": "partial",
       "native": [
         "src/core/OutputBindings.cpp",
-        "src/application/OutputEdits.cpp"
+        "src/application/OutputEdits.cpp",
+        "src/replay/OutputBindings.cpp",
+        "src/replay/Replay.cpp",
+        "src/application/Experiment.cpp",
+        "src/app/OutputDialog.cpp"
       ],
       "validation": [
         "Effective RTV/DSV signatures, strict complete argument objects, independent optional arrays, KEEP, exact wire encoding and view/hazard validation",
         "OutputBindingHistory: per-context cached deltas, missing-view evidence and unresolved UAV counter initialization rejection; retained SO slots request KEEP offsets",
         "tools/validate_output_history_port.py: 65 groups and 2480 Release/Debug comparisons, including GF2/BF1, six-stage collateral and mixed SRV edits, IA, multiple contexts, reverse reads and malformed future records",
-        "Experiment project integration, native replay consumers/output getter verification, retained cursor handling and Qt editor remain pending"
+        "Native replay and Qt editor connected: optional arrays/KEEP, extended UAV snapshots, native output getters, retained known SO cursors, saved experiments and final buffer/counter/SRV/geometry bindings; full private diagnostic/global-view/texture experiment parity remains pending",
+        "Intermediate output-replay-full-01: 1142 hardware/WARP checks; output-replay-extended-02: 132 checks including counter continuity, buffer/counter edit ordering, high OM slot, mixed SRV setters and edited GF2/BF1 bindings",
+        "Final isolated package: 1992 checks in artifacts/output-replay-package-full/validation.json; output bytes, 1008 native binding fields, UAV counter metadata, IA geometry, five SO layouts, missing/unknown cases and GF2/BF1 on hardware/WARP",
+        "OutputBindingTests: nine Release and nine Debug passes including repeated replay, save/load, undo/redo and rollback; UiTests: three new dialogs/Worker/history cases pass in both configurations"
       ]
     },
     {
@@ -2206,13 +2220,20 @@
       "native": [
         "src/core/StreamOutput.cpp",
         "src/replay/StreamOutput.cpp",
-        "src/application/OutputEdits.cpp"
+        "src/application/OutputEdits.cpp",
+        "src/replay/OutputBindings.cpp",
+        "src/replay/Replay.cpp",
+        "src/application/Experiment.cpp",
+        "src/app/OutputDialog.cpp"
       ],
       "validation": [
         "Captured native SOSetTargets execution, optional independent arrays, clear/reset/append and context validation",
         "tools/validate_stream_output_port.py: 690 final-package checks with system-only PATH, hardware/WARP, synthetic and five original GPA SO captures; original line-stream captured count 6 is recovered as 12 actual vertices",
         "Argument validation and exact encoding now cover five SO setter families, absent/empty arrays, duplicate targets, buffer bind flags and offsets; cached output history carries retained-slot markers",
-        "tools/validate_output_history_port.py: 250 SO argument cases and 240 SO history reads match Python; project, native retained cursor and Qt editor integration remain pending"
+        "Native replay and Qt editor connected: optional arrays/KEEP, extended UAV snapshots, native output getters, retained known SO cursors, saved experiments and final buffer/counter/SRV/geometry bindings; full private diagnostic/global-view/texture experiment parity remains pending",
+        "Intermediate output-replay-full-01: 1142 hardware/WARP checks; output-replay-extended-02: 132 checks including counter continuity, buffer/counter edit ordering, high OM slot, mixed SRV setters and edited GF2/BF1 bindings",
+        "Final isolated package: 1992 checks in artifacts/output-replay-package-full/validation.json; output bytes, 1008 native binding fields, UAV counter metadata, IA geometry, five SO layouts, missing/unknown cases and GF2/BF1 on hardware/WARP",
+        "OutputBindingTests: nine Release and nine Debug passes including repeated replay, save/load, undo/redo and rollback; UiTests: three new dialogs/Worker/history cases pass in both configurations"
       ]
     },
     {

@@ -69,10 +69,17 @@ void Replay::bindStreamOutput(const State &state) {
     }
     bool changed = !soSignature_ || *soSignature_ != signature || (state.mask[20] & 0x80000000);
     std::vector<uint32_t> offsets;
+    const bool retained =
+        std::any_of(retainedSo_.begin(), retainedSo_.end(), [](bool value) { return value; });
     for (size_t i = 0; i < ids.size(); ++i) {
         auto pending = soPendingAppend_.find(uint32_t(i));
         bool continuing =
-            !changed || (objects[i] && pending != soPendingAppend_.end() && pending->second == objects[i]);
+            !changed || retainedSo_[i] ||
+            (objects[i] && pending != soPendingAppend_.end() && pending->second == objects[i]) ||
+            (retained && !(state.mask[20] & 0x80000000) && soSignature_ && i < soSignature_->size() &&
+             soSignature_->at(i) == signature[i]);
+        if (retainedSo_[i] && !soByteCursors_.contains(objects[i]))
+            throw std::runtime_error("Retained SO target has an unknown native append cursor");
         offsets.push_back(continuing ? UINT32_MAX : capturedOffsets[i]);
     }
     if (!objects.empty()) {
@@ -228,7 +235,7 @@ DrawAutoParameters Replay::drawAutoParameters(Id id) {
     auto event = frame_.event(id);
     if (event.type != 0x38)
         throw std::runtime_error("DrawAuto parameters require a DrawAuto event");
-    auto state = frame_.state(event.state);
+    auto state = effectiveBindings(frame_, id, frame_.state(event.state), options_);
     DrawAutoParameters result;
     result.shader = state.stages[3].shader;
     result.declaration = result.shader ? shaderStreamOutput(frame_, result.shader) : 0;

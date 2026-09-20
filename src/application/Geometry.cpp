@@ -186,7 +186,7 @@ Json inspectGeometry(const Frame &frame, Replay &replay, Id eventId) {
     auto event = frame.event(eventId);
     if (event.type < 0x37 || event.type > 0x3d)
         throw std::runtime_error("IA geometry requires a supported graphics draw");
-    auto state = frame.state(event.state);
+    auto state = effectiveBindings(frame, eventId, frame.state(event.state), replay.options());
     if (!state.layout)
         throw std::runtime_error("This procedural draw has no IA input layout");
     Reader resource(frame.payload(state.layout, 5, 0x82));
