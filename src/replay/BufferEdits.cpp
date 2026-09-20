@@ -1,3 +1,4 @@
+#include "InspectionCopyBindings.h"
 #include "Replay.h"
 #include "Unpredicated.h"
 #include "core/BufferBindings.h"
@@ -9,14 +10,17 @@ void Replay::withEventEdits(const Event &event, const State &state, const std::f
     auto edits = options_.buffers.find(event.id);
     auto counters = options_.uavCounters.find(event.id);
     if ((edits == options_.buffers.end() || edits->second.empty()) &&
+        !options_.textureInputs.contains(event.id) && !options_.textureOutputs.contains(event.id) &&
         (counters == options_.uavCounters.end() || counters->second.empty())) {
         submit();
         return;
     }
     std::map<Id, Com<IUnknown>> originals;
     std::vector<Com<ID3D11Buffer>> countClones;
-    std::vector<std::pair<Com<ID3D11Buffer>, Com<ID3D11Buffer>>> backups;
+    std::vector<std::pair<Com<ID3D11Resource>, Com<ID3D11Resource>>> backups;
     std::vector<std::pair<Id, uint32_t>> counterBackups;
+    const auto command = commandName(event.type);
+    const auto submittedBefore = counts.contains(command) ? counts.at(command) : 0;
     auto restore = [&](bool submitted) {
         Unpredicated guard(context_.Get());
         for (const auto &clone : countClones) {
@@ -25,9 +29,11 @@ void Replay::withEventEdits(const Event &event, const State &state, const std::f
         }
         for (auto &[id, original] : originals)
             objects_.at(id) = original;
-        if (!submitted)
+        if (!submitted) {
+            InspectionCopyBindings bindings(context_.Get(), options_.warp);
             for (auto &[target, backup] : backups)
                 context_->CopyResource(target.Get(), backup.Get());
+        }
         if (!submitted)
             for (auto it = counterBackups.rbegin(); it != counterBackups.rend(); ++it)
                 writeCounter(it->first, it->second);
@@ -104,6 +110,7 @@ void Replay::withEventEdits(const Event &event, const State &state, const std::f
                         }
                     }
                 }
+            applyTextureEdits(event, state, originals, backups);
             if (counters != options_.uavCounters.end())
                 for (auto &[view, value] : counters->second) {
                     validateCounterEdit(frame_, view, event.id, &state);
@@ -114,7 +121,9 @@ void Replay::withEventEdits(const Event &event, const State &state, const std::f
         bool submitted = submit();
         restore(submitted);
     } catch (...) {
-        restore(false);
+        // A boundary observer can fail after submission. Keep its output preconditions,
+        // matching the command-count lifetime used by the reference implementation.
+        restore(counts.contains(command) && counts.at(command) != submittedBefore);
         throw;
     }
 }

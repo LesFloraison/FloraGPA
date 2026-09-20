@@ -726,7 +726,9 @@
         "src/app/MainWindow.cpp",
         "src/core/UavCounters.cpp",
         "src/replay/UavCounters.cpp",
-        "src/application/UavCounterInspector.cpp"
+        "src/application/UavCounterInspector.cpp",
+        "src/core/TextureEdits.cpp",
+        "src/replay/TextureEdits.cpp"
       ],
       "validation": [
         "Compatible JSON; uint64; frame hash; shader and event edits; GPU undo/redo",
@@ -739,7 +741,8 @@
         "tools/validate_uav_counters.py: 32 Python comparisons, 29 exact byte matches and 3 BF1 parallel-append multiset comparisons with exact untouched bytes",
         "tests/UiTests.cpp: counter edit, overflow rejection, undo/redo and stale-read invalidation",
         "SRV setter overrides now feed buffer validation, the Qt edit entry point, event-before input scopes and CLI binding metadata; artifacts/srv-setter-edges-verified/validation.json compares exact exported input bytes and binding roles before/after the selected event",
-        "docs/SHADER_SETTER_MIGRATION.md: six-stage persistent shader/class edits, final-asset interface validation, effective constants and Qt stage navigation/Compile & Apply; private diagnostic consumers remain pending"
+        "docs/SHADER_SETTER_MIGRATION.md: six-stage persistent shader/class edits, final-asset interface validation, effective constants and Qt stage navigation/Compile & Apply; private diagnostic consumers remain pending",
+        "docs/EVENT_TEXTURE_MIGRATION.md: event RAW input/output scopes, native MSAA sample writes, final binding validation, project history and Qt import; complete Texture inspection and private consumers remain pending"
       ]
     },
     {
@@ -750,11 +753,13 @@
       "status": "partial",
       "native": [
         "src/core/Frame.cpp",
-        "src/application/Geometry.cpp"
+        "src/application/Geometry.cpp",
+        "src/core/TextureEdits.cpp"
       ],
       "validation": [
         "docs/NATIVE_BASELINE.md",
-        "Vertex storage families, half/packed float, integer and normalized values; primitive restart tests"
+        "Vertex storage families, half/packed float, integer and normalized values; primitive restart tests",
+        "tools/validate_texture_edit_storage.py: 3229 packed-subresource and sample-edit validation cases match Python; 1298 accepted, 1931 rejected"
       ]
     },
     {
@@ -1470,11 +1475,16 @@
       "description": "Per-sample MSAA storage transfer using compatible views and isolated draws.",
       "status": "partial",
       "native": [
-        "src/replay/Msaa.cpp"
+        "src/replay/Msaa.cpp",
+        "src/core/TextureEdits.cpp",
+        "src/replay/TextureEdits.cpp",
+        "src/replay/BufferEdits.cpp",
+        "src/application/Experiment.cpp",
+        "src/app/MainWindow.cpp"
       ],
       "validation": [
         "Compatible integer-family sample reads preserve raw bits, including UINT above 2^24",
-        "Per-sample writes, edit validation and editor integration remain pending"
+        "docs/EVENT_TEXTURE_MIGRATION.md: event RAW input/output scopes, native MSAA sample writes, final binding validation, project history and Qt import; complete Texture inspection and private consumers remain pending"
       ]
     },
     {
@@ -2457,9 +2467,17 @@
       "sha256": "085b8cc7e3169fa099d9d8afd3d55a149ac38dca89a527c43e654416334d1a74",
       "lines": 69,
       "description": "Output texture bindings and persistent event-time subresource patches.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": [
+        "src/core/TextureEdits.cpp",
+        "src/replay/TextureEdits.cpp",
+        "src/replay/BufferEdits.cpp",
+        "src/application/Experiment.cpp",
+        "src/app/MainWindow.cpp"
+      ],
+      "validation": [
+        "docs/EVENT_TEXTURE_MIGRATION.md: event RAW input/output scopes, native MSAA sample writes, final binding validation, project history and Qt import; complete Texture inspection and private consumers remain pending"
+      ]
     },
     {
       "module": "texture_readback.py",

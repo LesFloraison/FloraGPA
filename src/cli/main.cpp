@@ -416,8 +416,14 @@ int main(int argc, char **argv) {
                 Image image;
                 bool available = true;
                 if (command == "texture") {
-                    image = replay.previewTexture(parseId("id"), parseIndex("mip"), parseIndex("layer"),
-                                                  parseIndex("slice"));
+                    auto read = [&] {
+                        image = replay.previewTexture(parseId("id"), parseIndex("mip"), parseIndex("layer"),
+                                                      parseIndex("slice"));
+                    };
+                    if (options.before && options.until && isDraw(frame.entry(options.until).type))
+                        replay.inspectEventInputs(options.until, read);
+                    else
+                        read();
                     report.insert("value_time", options.until
                                                     ? (options.before ? "before_event" : "after_event")
                                                     : "capture_initial");

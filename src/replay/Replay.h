@@ -7,6 +7,7 @@
 #include "core/Predication.h"
 #include "core/SamplerBindings.h"
 #include "core/SrvBindings.h"
+#include "core/TextureEdits.h"
 #define NOMINMAX
 #include <d3d11_3.h>
 #include <functional>
@@ -49,6 +50,7 @@ struct ReplayOptions {
     std::map<Id, std::vector<uint8_t>> shaders, textures;
     std::map<Id, std::vector<uint8_t>> commandPayloads, updateSources;
     std::map<Id, std::map<Id, std::vector<BufferPatch>>> buffers;
+    std::map<Id, std::map<Id, std::vector<TexturePatch>>> textureInputs, textureOutputs;
     std::map<Id, uint32_t> initialUavCounters;
     std::map<Id, std::map<Id, uint32_t>> uavCounters;
     std::map<Id, PredicateBinding> predicateSetters;
@@ -91,6 +93,10 @@ using ReplayBoundaryObserver =
     std::function<void(Id, bool, ID3D11DeviceContext *, const std::map<Id, Com<IUnknown>> &)>;
 class Replay {
     std::vector<uint8_t> readTextureStorage(ID3D11Resource *source, const Resource &resource);
+    Com<ID3D11Resource> createEditTexture(const Resource &resource, std::optional<Bytes> data = {});
+    void writeMsaaSample(ID3D11Resource *target, const Resource &resource, const TexturePatch &patch);
+    void applyTextureEdits(const Event &event, const State &state, std::map<Id, Com<IUnknown>> &originals,
+                           std::vector<std::pair<Com<ID3D11Resource>, Com<ID3D11Resource>>> &backups);
     ReplayBoundaryObserver boundaryObserver_;
     struct Timestamp {
         Id event;

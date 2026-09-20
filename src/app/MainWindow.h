@@ -47,6 +47,7 @@ class MainWindow final : public QMainWindow {
     void previewBuffer();
     void exportBuffer();
     void editBuffer(bool importFile = false);
+    void editTexture(bool output);
     void showBufferDetails(const QJsonObject &report);
     void clearBufferDetails();
     void editCounter();
@@ -95,6 +96,7 @@ class MainWindow final : public QMainWindow {
     QAction *srvAction_ = nullptr;
     QAction *viewAction_ = nullptr;
     QAction *bufferEditAction_ = nullptr, *bufferImportAction_ = nullptr;
+    QAction *textureInputAction_ = nullptr, *textureOutputAction_ = nullptr;
     QAction *constantEditAction_ = nullptr;
     QAction *counterEditAction_ = nullptr;
     QTreeWidget *counters_ = nullptr;

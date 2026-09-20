@@ -596,6 +596,14 @@ void MainWindow::buildUi() {
     textureChannels_ = new QComboBox;
     textureChannels_->addItems({"RGBA", "RGB", "R", "G", "B", "A"});
     textureBar->addWidget(textureChannels_);
+    textureInputAction_ = textureBar->addAction("Import Input…", this, [this] { editTexture(false); });
+    textureOutputAction_ = textureBar->addAction("Import Output…", this, [this] { editTexture(true); });
+    textureInputAction_->setObjectName("importTextureInput");
+    textureOutputAction_->setObjectName("importTextureOutput");
+    textureInputAction_->setToolTip("Replace one input subresource for the selected event.");
+    textureOutputAction_->setToolTip("Replace one output subresource before the selected event.");
+    textureInputAction_->setEnabled(false);
+    textureOutputAction_->setEnabled(false);
     textureLabel_ = new QLabel("—");
     textureBar->addWidget(textureLabel_);
     textureLayout->addWidget(textureBar);
@@ -1994,6 +2002,13 @@ void MainWindow::updateExperimentActions() {
         bufferEditAction_->setEnabled(bufferEditable);
     if (bufferImportAction_)
         bufferImportAction_->setEnabled(bufferEditable);
+    const auto resourceType = frame_ && selectedResource_ ? frame_->entry(selectedResource_).type : 0;
+    const bool textureEditable =
+        !busy() && experiment_ && isDraw(uint16_t(type)) && resourceType >= 0x84 && resourceType <= 0x86;
+    if (textureInputAction_)
+        textureInputAction_->setEnabled(textureEditable);
+    if (textureOutputAction_)
+        textureOutputAction_->setEnabled(textureEditable);
     if (constantEditAction_) {
         const auto item = constants_->currentItem();
         const auto field = item ? item->data(0, Qt::UserRole).toJsonObject() : QJsonObject();
@@ -2294,6 +2309,122 @@ void MainWindow::editConstant() {
             else
                 statusBar()->showMessage("Value unchanged", 2500);
         }
+    } catch (const std::exception &e) {
+        showError(QString::fromUtf8(e.what()));
+    }
+}
+void MainWindow::editTexture(bool output) {
+    if (!frame_ || !experiment_ || !selectedEvent_ || !selectedResource_ || busy())
+        return;
+    try {
+        const auto event = selectedEvent_, resource = selectedResource_, revision = revision_;
+        const auto info = textureInfo(frame_->resource(resource));
+        TexturePatch patch;
+        patch.mip = uint32_t(mip_->value());
+        patch.layer = uint32_t(layer_->value());
+        const auto subs = textureSubresources(frame_->resource(resource));
+        const auto sub = std::find_if(subs.begin(), subs.end(), [&](const auto &s) {
+            return s.mip == patch.mip && s.layer == patch.layer;
+        });
+        if (sub == subs.end())
+            throw std::runtime_error("Texture subresource out of bounds");
+        ReplayOptions options;
+        experiment_->apply(*frame_, options);
+        const auto &effective = effectiveFrame(*frame_, options);
+        const auto command = effective.event(event);
+        const auto state = effectiveBindings(effective, event, effective.state(command.state), options);
+        validateTextureBinding(effective, command, state, resource, patch, output);
+        textureTimer_.stop();
+        replayTimer_.stop();
+        QDialog dialog(this);
+        dialog.setObjectName("textureEditDialog");
+        dialog.setWindowTitle(QString("Texture %1 — Event %2").arg(resource).arg(event));
+        dialog.setMinimumWidth(440);
+        auto form = new QFormLayout(&dialog);
+        auto scope = new QLabel(output ? "Output precondition" : "Event input");
+        scope->setToolTip(output ? "Retained only after command submission."
+                                 : "Original input storage is restored after the event.");
+        form->addRow("Scope", scope);
+        form->addRow(
+            "Subresource",
+            new QLabel(
+                QString("Mip %1 · Layer %2 · %3 bytes").arg(patch.mip).arg(patch.layer).arg(sub->size)));
+        QSpinBox *sample = nullptr;
+        QLineEdit *typed = nullptr;
+        if (info.samples > 1) {
+            sample = new QSpinBox;
+            sample->setObjectName("textureEditSample");
+            sample->setRange(-1, int(info.samples) - 1);
+            sample->setSpecialValueText("Select…");
+            sample->setValue(-1);
+            form->addRow("Sample", sample);
+            typed = new QLineEdit;
+            typed->setObjectName("textureEditFormat");
+            typed->setPlaceholderText("Automatic");
+            typed->setToolTip("Optional DXGI format number (decimal or 0x hex).");
+            form->addRow("Typed format", typed);
+        }
+        auto fileRow = new QWidget;
+        auto row = new QHBoxLayout(fileRow);
+        row->setContentsMargins(0, 0, 0, 0);
+        auto path = new QLineEdit;
+        path->setObjectName("textureEditFile");
+        path->setToolTip("Packed RAW subresource without a DDS header; a 3D mip includes all depth slices.");
+        auto browse = new QPushButton("Browse…");
+        row->addWidget(path, 1);
+        row->addWidget(browse);
+        form->addRow("RAW file", fileRow);
+        connect(browse, &QPushButton::clicked, &dialog, [&] {
+            const auto chosen = QFileDialog::getOpenFileName(&dialog, "Import Texture RAW", {},
+                                                             "Raw data (*.bin *.raw);;All files (*)");
+            if (!chosen.isEmpty())
+                path->setText(chosen);
+        });
+        auto error = new QLabel;
+        error->setObjectName("textureEditError");
+        error->setWordWrap(true);
+        error->hide();
+        form->addRow(error);
+        auto buttons = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+        buttons->button(QDialogButtonBox::Ok)->setText("Apply");
+        form->addRow(buttons);
+        connect(buttons, &QDialogButtonBox::rejected, &dialog, &QDialog::reject);
+        connect(buttons, &QDialogButtonBox::accepted, &dialog, [&] {
+            try {
+                if (!frame_ || !experiment_ || revision_ != revision || selectedEvent_ != event ||
+                    selectedResource_ != resource)
+                    throw std::runtime_error("Selection changed; reopen the texture editor");
+                if (sample) {
+                    if (sample->value() < 0)
+                        throw std::runtime_error("Select an explicit MSAA sample");
+                    patch.sample = uint32_t(sample->value());
+                    patch.typedFormat.reset();
+                    if (!typed->text().trimmed().isEmpty()) {
+                        bool ok = false;
+                        auto value = typed->text().trimmed().toULongLong(&ok, 0);
+                        if (!ok || value > UINT32_MAX)
+                            throw std::runtime_error("Invalid typed format");
+                        patch.typedFormat = uint32_t(value);
+                    }
+                }
+                QFile file(path->text());
+                if (!file.open(QIODevice::ReadOnly))
+                    throw std::runtime_error("Cannot open texture RAW file");
+                if (uint64_t(file.size()) != sub->size)
+                    throw std::runtime_error("RAW byte count does not match the subresource");
+                const auto data = file.readAll();
+                if (uint64_t(data.size()) != sub->size)
+                    throw std::runtime_error("Cannot read complete texture RAW file");
+                patch.bytes.assign(data.begin(), data.end());
+                experiment_->setTexturePatch(*frame_, event, resource, patch, output);
+                dialog.accept();
+            } catch (const std::exception &e) {
+                error->setText(QString::fromUtf8(e.what()));
+                error->show();
+            }
+        });
+        if (dialog.exec() == QDialog::Accepted)
+            experimentChanged();
     } catch (const std::exception &e) {
         showError(QString::fromUtf8(e.what()));
     }

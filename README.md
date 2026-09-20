@@ -96,6 +96,11 @@ byte offset for the selected draw/dispatch. **Before event** displays patched
 inputs; input-only edits are scoped to that command, so **After event** restores
 the original input storage. Output buffer edits persist after submission while
 preserving UAV counters. Geometry inspection also uses the edited inputs.
+The Texture toolbar provides **Import Input…** and **Import Output…** for packed
+RAW subresources at the selected event. MSAA imports require an explicit sample.
+Input clones are scoped to one event; output preconditions persist after command
+submission. See [`docs/EVENT_TEXTURE_MIGRATION.md`](docs/EVENT_TEXTURE_MIGRATION.md)
+for validation and the remaining MSAA/planar Texture inspection work.
 The Buffer **Constants** tab shows reflected scalar, vector, matrix, array and
 structure fields, including CB1 binding ranges. Read **Before event**, select a
 field and use **Edit Value**. Changes preserve padding and untouched scalar bits

@@ -35,6 +35,7 @@ class Experiment {
     nlohmann::json clear(const Frame &frame, Id event) const;
     void setUpdateSource(const Frame &frame, Id event, Bytes data);
     void setBuffer(const Frame &frame, Id event, Id resource, uint64_t offset, Bytes data);
+    void setTexturePatch(const Frame &frame, Id event, Id resource, const TexturePatch &patch, bool output);
     void setBufferPatches(const Frame &frame, Id event, Id resource, const std::vector<BufferPatch> &patches,
                           const std::string &label);
     bool setUavCounter(const Frame &frame, Id view, uint32_t value, std::optional<Id> event = {});

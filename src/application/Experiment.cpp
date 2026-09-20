@@ -116,6 +116,8 @@ void Experiment::apply(const Frame &input, ReplayOptions &options) const {
     options.commandPayloads.clear();
     options.updateSources.clear();
     options.buffers.clear();
+    options.textureInputs.clear();
+    options.textureOutputs.clear();
     options.initialUavCounters.clear();
     options.uavCounters.clear();
     options.predicateSetters.clear();
@@ -209,6 +211,25 @@ void Experiment::apply(const Frame &input, ReplayOptions &options) const {
                 auto offset = identifier(op.at("offset"));
                 auto bytes = asset(op.at("asset"));
                 options.buffers[event][resource].push_back({offset, std::move(bytes)});
+            } else if (kind == "texture_input" || kind == "texture_output") {
+                const auto event = identifier(op.at("event")), resource = identifier(op.at("resource"));
+                const auto number = [&](const Json &value) {
+                    const auto n = identifier(value);
+                    if (n > UINT32_MAX)
+                        throw std::runtime_error("Texture edit value exceeds uint32");
+                    return uint32_t(n);
+                };
+                TexturePatch patch;
+                patch.mip = number(op.at("mip"));
+                patch.layer = number(op.at("layer"));
+                if (op.contains("sample") && !op.at("sample").is_null())
+                    patch.sample = number(op.at("sample"));
+                if (op.contains("typed_format") && !op.at("typed_format").is_null())
+                    patch.typedFormat = number(op.at("typed_format"));
+                patch.bytes = asset(op.at("asset"));
+                validateTexturePatch(frame.resource(resource), patch);
+                (kind == "texture_input" ? options.textureInputs : options.textureOutputs)[event][resource]
+                    .push_back(std::move(patch));
             } else if (kind == "uav_counter" || kind == "initial_uav_counter") {
                 auto view = identifier(op.at("view")), value = identifier(op.at("value"));
                 if (value > UINT32_MAX)
@@ -291,6 +312,14 @@ void Experiment::apply(const Frame &input, ReplayOptions &options) const {
             for (const auto &patch : patches)
                 validateBufferPatch(frame, event, resource, patch.offset, patch.bytes.size(), &state);
     }
+    for (bool output : {false, true})
+        for (const auto &[event, resources] : output ? options.textureOutputs : options.textureInputs) {
+            const auto command = frame.event(event);
+            const auto state = effectiveBindings(frame, event, frame.state(command.state), options);
+            for (const auto &[resource, patches] : resources)
+                for (const auto &patch : patches)
+                    validateTextureBinding(frame, command, state, resource, patch, output);
+        }
     // Descriptor inheritance uses final setter edits, regardless of history order.
     for (const auto &[event, counters] : options.uavCounters) {
         const auto state = effectiveBindings(frame, event, frame.state(frame.event(event).state), options);
@@ -620,6 +649,37 @@ void Experiment::setBufferPatches(const Frame &capture, Id event, Id resource,
     auto &history = project_["history"];
     history.erase(history.begin() + ptrdiff_t(revision()), history.end());
     history.push_back({{"label", label}, {"operations", std::move(operations)}});
+    project_["cursor"] = history.size();
+}
+void Experiment::setTexturePatch(const Frame &capture, Id event, Id resource, const TexturePatch &patch,
+                                 bool output) {
+    ReplayOptions options;
+    apply(capture, options);
+    const auto &frame = effectiveFrame(capture, options);
+    const auto command = frame.event(event);
+    const auto state = effectiveBindings(frame, event, frame.state(command.state), options);
+    validateTexturePatch(frame.resource(resource), patch);
+    validateTextureBinding(frame, command, state, resource, patch, output);
+    Json op = {{"kind", output ? "texture_output" : "texture_input"},
+               {"event", event},
+               {"resource", resource},
+               {"mip", patch.mip},
+               {"layer", patch.layer},
+               {"asset",
+                {{"data", QByteArray(reinterpret_cast<const char *>(patch.bytes.data()),
+                                     qsizetype(patch.bytes.size()))
+                              .toBase64()
+                              .toStdString()},
+                 {"sha256", sha256(patch.bytes)}}}};
+    if (patch.sample)
+        op["sample"] = *patch.sample;
+    if (patch.typedFormat)
+        op["typed_format"] = *patch.typedFormat;
+    auto &history = project_["history"];
+    history.erase(history.begin() + ptrdiff_t(revision()), history.end());
+    history.push_back({{"label", std::string(output ? "Texture output " : "Texture input ") +
+                                     std::to_string(resource) + " at event " + std::to_string(event)},
+                       {"operations", Json::array({std::move(op)})}});
     project_["cursor"] = history.size();
 }
 std::optional<uint32_t> Experiment::initialUavCounter(Id view) const {

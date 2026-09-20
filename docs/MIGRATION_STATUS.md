@@ -2,8 +2,16 @@
 
 已有可编译、可运行的 VS2022 / Qt Widgets 原生工程，能够独立重放当前验证的
 GF2 与 BF1 DX11 捕获。**尚未完成原 Python 版本的全部功能迁移。**
-当前独立包为 `out/FloraGPA-cb-setters-final-v2/FloraGPA.exe`。
+当前独立包为 `out/FloraGPA-event-textures/FloraGPA.exe`。
 
+
+本批新增逐事件纹理输入／输出 RAW 编辑，包括原生 MSAA 指定样本写入、
+最终绑定校验、预览回滚、输出持久化和 Qt 导入／撤销／重做。
+3,229 个存储校验对照、180 个实际 GPU 命令对照、32 组硬件/WARP 生命周期
+测试通过；Release 33 项 CTest 全部通过，其中 Qt 51 项无失败、无跳过。
+GF2 真实输入编辑与 Python 最终图像一致，撤销恢复黄金值。
+完整 MSAA/typed/planar Texture 检查与导出仍需继续迁移，详见
+[EVENT_TEXTURE_MIGRATION.md](EVENT_TEXTURE_MIGRATION.md)。
 
 ## 当前可用
 
@@ -12,7 +20,7 @@ GF2 与 BF1 DX11 捕获。**尚未完成原 Python 版本的全部功能迁移�
 | 工程 | C++20、VS2022 x64、Qt 6.11.2、CMake、Git、独立 CLI/Worker | 尚未配置远程仓库 |
 | 捕获与重放 | 有边界检查的 IGPA v3 读取、六阶段状态、基本 D3D11 资源和 draw/dispatch、Map/更新/复制/清除 | 特殊 replay 路径尚未完全迁移 |
 | 主界面 | GPA 式深色三栏、真实 GPU 时间柱状图与概览、可停靠面板、API 筛选、任务取消 | 概览尚无范围拖动；未知功能页禁用 |
-| 事件 | draw/dispatch 选择、快照管线、前后边界重放、事件启停 | 部分命令执行、纹理实验及私有诊断仍待迁移 |
+| 事件 | draw/dispatch 选择、快照管线、前后边界重放、事件启停 | 部分命令执行、完整纹理检查及私有诊断仍待迁移 |
 | 捕获命令状态 | 六阶段 setter、CB1 范围、IA/RS/OM/SO/predicate 参数、扩展 UAV 槽元数据；命令前/后、逐字段来源、资源重叠失效与快照校准；Pipeline 页异步读取、筛选、跳转、JSON 导出 | 原始捕获状态，不应用实验；只读 DSV / 模糊 3D 重叠保持未知；SO 偏移是 setter 参数，隐藏 counter 和实时写入位置不由此推断 |
 | 命令间输入绑定 | 实际执行 IA layout / VB / IB、六阶段 SRV / sampler、CB / CB1；验证槽位、数组、资源类型、IA bind flags、stride 和 CB1 对齐 / 驱动支持；缺失绑定按阶段 / 槽位追踪 | 缺失资源未被后续 setter / 完整快照 / ClearState 恢复时，选定边界明确失败；已恢复的 setter 家族编辑均已接入，私有诊断仍待迁移 |
 | 重放管线状态 | Pipeline > Replay State 通过 Worker 读取实际六阶段绑定、CB1 范围、IA/RS/OM/SO/predicate、视图及状态描述；命令前/后、实验输入克隆、禁用状态、筛选、跳转和 JSON 导出 | 仅覆盖后端已支持的命令和实验；SO 实时写入位置保持未知；完整管线编辑仍待迁移 |

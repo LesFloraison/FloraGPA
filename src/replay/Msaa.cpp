@@ -238,4 +238,122 @@ MsaaStorage Replay::readMsaa(Id id, std::optional<uint32_t> sample, uint32_t typ
     }
     return result;
 }
+void Replay::writeMsaaSample(ID3D11Resource *destination, const Resource &resource,
+                             const TexturePatch &patch) {
+    validateTexturePatch(resource, patch);
+    const auto info = textureInfo(resource);
+    const auto code = msaaEditEncoding(resource, patch.typedFormat);
+    const bool packedDepth = code.depth && !code.integerBits;
+    auto targetResource = resource;
+    targetResource.desc[4] = code.storage;
+    targetResource.desc[7] = D3D11_USAGE_DEFAULT;
+    targetResource.desc[8] = packedDepth ? D3D11_BIND_DEPTH_STENCIL : D3D11_BIND_RENDER_TARGET;
+    targetResource.desc[9] = targetResource.desc[10] = 0;
+    auto target = createEditTexture(targetResource);
+    const auto sourceFormat = packedDepth ? ((*code.depth)[0] == 20 ? 17u : 42u) : code.access;
+    Resource sourceResource;
+    sourceResource.type = 0x85;
+    sourceResource.desc = {
+        info.width, info.height, 1, 1, sourceFormat, 1, 0, 0, D3D11_BIND_SHADER_RESOURCE, 0, 0};
+    auto source = createEditTexture(sourceResource, Bytes(patch.bytes));
+    D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc{};
+    srvDesc.Format = DXGI_FORMAT(sourceFormat);
+    srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+    srvDesc.Texture2D.MipLevels = 1;
+    Com<ID3D11ShaderResourceView> srv;
+    check(device_->CreateShaderResourceView(source.Get(), &srvDesc, &srv), "Create MSAA edit source SRV");
+    Com<ID3D11DeviceContext> deferred;
+    check(device_->CreateDeferredContext(0, &deferred), "Create MSAA edit context");
+    deferred->CopyResource(target.Get(), destination);
+    auto vertex = compileMsaa(
+        "float4 main(uint i:SV_VertexID):SV_Position{return float4(i==2?3:-1,i==1?3:-1,0,1);}", "vs_5_0");
+    Com<ID3D11VertexShader> vs;
+    check(device_->CreateVertexShader(vertex->GetBufferPointer(), vertex->GetBufferSize(), nullptr, &vs),
+          "Create MSAA edit VS");
+    deferred->VSSetShader(vs.Get(), nullptr, 0);
+    deferred->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+    D3D11_VIEWPORT viewport{0, 0, float(info.width), float(info.height), 0, 1};
+    deferred->RSSetViewports(1, &viewport);
+    D3D11_RASTERIZER_DESC raster{};
+    raster.FillMode = D3D11_FILL_SOLID;
+    raster.CullMode = D3D11_CULL_NONE;
+    raster.DepthClipEnable = TRUE;
+    raster.MultisampleEnable = TRUE;
+    Com<ID3D11RasterizerState> rs;
+    check(device_->CreateRasterizerState(&raster, &rs), "Create MSAA edit rasterizer");
+    deferred->RSSetState(rs.Get());
+    deferred->OMSetBlendState(nullptr, nullptr, 1u << *patch.sample);
+    auto rawSrv = srv.Get();
+    deferred->PSSetShaderResources(0, 1, &rawSrv);
+    const auto pixel = [&](const std::string &text) {
+        auto binary = compileMsaa(text, "ps_5_0");
+        Com<ID3D11PixelShader> ps;
+        check(device_->CreatePixelShader(binary->GetBufferPointer(), binary->GetBufferSize(), nullptr, &ps),
+              "Create MSAA edit PS");
+        deferred->PSSetShader(ps.Get(), nullptr, 0);
+        deferred->Draw(3, 0);
+    };
+    if (packedDepth) {
+        D3D11_DEPTH_STENCIL_VIEW_DESC desc{};
+        desc.Format = DXGI_FORMAT((*code.depth)[0]);
+        desc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2DMSARRAY;
+        desc.Texture2DMSArray = {patch.layer, 1};
+        Com<ID3D11DepthStencilView> dsv;
+        check(device_->CreateDepthStencilView(target.Get(), &desc, &dsv), "Create MSAA edit DSV");
+        deferred->OMSetRenderTargets(0, nullptr, dsv.Get());
+        const auto depthState = [&](bool depth, UINT mask, UINT reference) {
+            D3D11_DEPTH_STENCIL_DESC ds{};
+            ds.DepthEnable = depth;
+            ds.DepthWriteMask = depth ? D3D11_DEPTH_WRITE_MASK_ALL : D3D11_DEPTH_WRITE_MASK_ZERO;
+            ds.DepthFunc = D3D11_COMPARISON_ALWAYS;
+            ds.StencilEnable = !depth;
+            ds.StencilReadMask = 255;
+            ds.StencilWriteMask = UINT8(mask);
+            ds.FrontFace = {D3D11_STENCIL_OP_KEEP, D3D11_STENCIL_OP_KEEP,
+                            depth ? D3D11_STENCIL_OP_KEEP : D3D11_STENCIL_OP_REPLACE,
+                            D3D11_COMPARISON_ALWAYS};
+            ds.BackFace = ds.FrontFace;
+            Com<ID3D11DepthStencilState> state;
+            check(device_->CreateDepthStencilState(&ds, &state), "Create MSAA edit depth stencil state");
+            deferred->OMSetDepthStencilState(state.Get(), reference);
+        };
+        const bool wide = (*code.depth)[0] == 20;
+        const std::string kind = wide ? "uint2" : "uint";
+        const auto prefix = "Texture2D<" + kind +
+                            "> src:register(t0);float main(float4 p:SV_Position):SV_Depth{" + kind +
+                            " v=src.Load(int3(int2(p.xy),0));";
+        depthState(true, 255, 0);
+        // Exact 24-bit depth conversion; a folded reciprocal loses low bits.
+        pixel(prefix + (wide ? "return asfloat(v.x);}"
+                             : "uint n=v&0xffffff;float base=(float)n*(1.0/16777216.0);return "
+                               "asfloat(asuint(base)+(n!=0));}"));
+        depthState(false, 255, 0);
+        pixel("void main(){}");
+        for (unsigned bit = 0; bit < 8; ++bit) {
+            depthState(false, 1u << bit, 255);
+            pixel(prefix + "if(((" + (wide ? "v.y&255" : "v>>24") + ")&" + std::to_string(1u << bit) +
+                  ")==0)discard;return 0;}");
+        }
+    } else {
+        D3D11_RENDER_TARGET_VIEW_DESC desc{};
+        desc.Format = DXGI_FORMAT(code.access);
+        desc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2DMSARRAY;
+        desc.Texture2DMSArray = {patch.layer, 1};
+        Com<ID3D11RenderTargetView> rtv;
+        check(device_->CreateRenderTargetView(target.Get(), &desc, &rtv), "Create MSAA edit RTV");
+        auto raw = rtv.Get();
+        deferred->OMSetRenderTargets(1, &raw, nullptr);
+        const std::string kind = code.integerBits ? "uint4" : "float4";
+        pixel("Texture2D<" + kind + "> src:register(t0);" + kind +
+              " main(float4 p:SV_Position):SV_Target{return src.Load(int3(int2(p.xy),0));}");
+    }
+    deferred->OMSetRenderTargets(0, nullptr, nullptr);
+    deferred->CopyResource(destination, target.Get());
+    Com<ID3D11CommandList> commands;
+    check(deferred->FinishCommandList(FALSE, &commands), "Finish MSAA edit commands");
+    Unpredicated unpredicated(context_.Get());
+    PredicateIsolation isolation(*this);
+    context_->ExecuteCommandList(commands.Get(), TRUE);
+    check(device_->GetDeviceRemovedReason(), "MSAA sample edit");
+}
 } // namespace flora

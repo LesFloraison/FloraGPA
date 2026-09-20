@@ -11,6 +11,7 @@
 #include "StateCapture.h"
 #include "StreamCapture.h"
 #include "SyntheticCapture.h"
+#include "TextureEditCapture.h"
 #include "app/Appearance.h"
 #include "app/BlendDialog.h"
 #include "app/CommandStateView.h"
@@ -2785,6 +2786,107 @@ class UiTests final : public QObject {
         QVERIFY(counters->topLevelItem(0)->text(3) != QString("4294967295"));
         QVERIFY(select(api, 25848));
         QCOMPARE(counters->topLevelItemCount(), 0);
+    }
+    void textureEditorHistory_data() {
+        QTest::addColumn<bool>("output");
+        QTest::newRow("input") << false;
+        QTest::newRow("output") << true;
+    }
+    void textureEditorHistory() {
+        QFETCH(bool, output);
+        QTemporaryDir dir;
+        auto capture = flora::testing::textureEditCapture(28, 1, output);
+        const auto path = dir.path() + "/texture.gpa_frame";
+        capture.save(path);
+        const auto rawPath = dir.path() + "/patch.raw";
+        QFile raw(rawPath);
+        QVERIFY(raw.open(QIODevice::WriteOnly));
+        QCOMPARE(raw.write(QByteArray::fromHex("ff0000ffff0000ffff0000ffff0000ff")), qint64(16));
+        raw.close();
+        flora::MainWindow window;
+        window.resize(1440, 900);
+        window.show();
+        QSignalSpy done(&window, &flora::MainWindow::taskFinished);
+        window.openCapture(path);
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        done.clear();
+        auto api = window.findChild<QTableView *>("apiLog");
+        api->setCurrentIndex(api->model()->index(0, 0));
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        done.clear();
+        auto resources = window.findChild<QTableView *>("resources");
+        for (int i = 0; i < resources->model()->rowCount(); ++i) {
+            const auto index = resources->model()->index(i, 0);
+            if (index.data(Qt::UserRole).toULongLong() == 20) {
+                resources->setCurrentIndex(index);
+                break;
+            }
+        }
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        done.clear();
+        auto boundary = window.findChild<QComboBox *>("textureBoundary");
+        boundary->setCurrentIndex(1);
+        for (auto spin : window.findChildren<QSpinBox *>()) {
+            if (spin->prefix() == "Mip ")
+                spin->setValue(1);
+            if (spin->prefix() == "Layer ")
+                spin->setValue(1);
+        }
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        done.clear();
+        auto image = window.findChild<flora::ImageView *>("textureOutput");
+        const auto original = image->image();
+        auto action = window.findChild<QAction *>(output ? "importTextureOutput" : "importTextureInput");
+        QVERIFY(action && action->isEnabled());
+        bool entered = false;
+        QTimer::singleShot(0, &window, [&] {
+            auto dialog = window.findChild<QDialog *>("textureEditDialog");
+            if (!dialog)
+                return;
+            auto file = dialog->findChild<QLineEdit *>("textureEditFile");
+            auto apply = dialog->findChild<QDialogButtonBox *>()->button(QDialogButtonBox::Ok);
+            file->setText(dir.path() + "/missing.raw");
+            QTest::mouseClick(apply, Qt::LeftButton);
+            entered = dialog->isVisible() && dialog->findChild<QLabel *>("textureEditError")->isVisible();
+            file->setText(rawPath);
+            snapshot(*dialog, "texture-edit-dialog");
+            QTest::mouseClick(apply, Qt::LeftButton);
+        });
+        action->trigger();
+        QVERIFY(entered);
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        done.clear();
+        const auto edited = image->image();
+        QVERIFY(edited != original);
+        QCOMPARE(edited.pixelColor(0, 0), QColor(255, 0, 0, 255));
+        snapshot(window, output ? "texture-output-edited" : "texture-input-edited");
+        QAction *undo = nullptr, *redo = nullptr;
+        for (auto a : window.findChildren<QAction *>()) {
+            if (a->shortcut() == QKeySequence::Undo)
+                undo = a;
+            if (a->shortcut() == QKeySequence::Redo)
+                redo = a;
+        }
+        QVERIFY(undo && redo);
+        undo->trigger();
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        done.clear();
+        QCOMPARE(image->image(), original);
+        redo->trigger();
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        done.clear();
+        QCOMPARE(image->image(), edited);
+        boundary->setCurrentIndex(2);
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        QCOMPARE(image->image(), output ? edited : original);
     }
     void bufferEditorHistory() {
         auto captures = qEnvironmentVariable("FLORA_TEST_CAPTURE_DIR");
