@@ -154,8 +154,8 @@ Output changes persist across snapshots and include collateral SRV/IA unbinding.
 Buffer patches, SRV descriptor edits, counter inspection/edits and IA geometry
 use the final bindings. SO append preservation requires a known native write
 cursor. Full output verification reads native getters after applying setters and
-edited snapshots. Texture input/output experiments, global view edits and private
-diagnostic consumers remain separate migration work.
+edited snapshots. Texture input/output experiments and private diagnostic consumers remain separate migration work.
+Global view descriptors now apply to native replay and binding inspection.
 
 ```powershell
 .\out\FloraGPA\FloraGPA.Cli.exe replay-pipeline D:\captures\sample.gpa_frame --event 430 --before --out D:\results\pipeline
@@ -231,9 +231,28 @@ bindings remain visible even in shader-unused slots. Buffer patch validation,
 the buffer editor and before/after exports also follow these bindings. Both editors use project
 history, save/load and undo/redo.
 
-Global view edits, output setter experiments, texture input clones and private
-diagnostic/debug consumers remain pending. Unsupported experiment kinds remain
-explicit errors.
+Texture input clones and private diagnostic/debug consumers remain pending.
+Unsupported experiment kinds remain explicit errors.
+
+**Edit > Edit View Resource** changes a captured SRV, RTV, DSV or UAV across
+all uses in the frame. Choose a view and **Load** its effective descriptor;
+the compact form follows its dimension and exposes format, mip/layer/depth or
+buffer element ranges and applicable flags. Global changes compose with event
+SRV edits and support project save/load, undo and redo. Native D3D11 validates
+resource compatibility during replay. The captured descriptor remains unchanged;
+**Replay State** reports the native edited descriptor and its source.
+
+Raw non-MSAA texture storage can be exported without display conversion:
+
+```powershell
+.\out\FloraGPA\FloraGPA.Cli.exe texture-storage D:\captures\sample.gpa_frame --event 430 --id 20 --out D:\results\texture
+```
+
+`texture.bin` contains tightly packed subresources in array-layer/mip order,
+including all volume slices. Add `--before` or `--experiment` as needed.
+Main-output view selection/typed conversion, MSAA sample inspection, planar
+formats and coverage/debug consumers still have migration gaps. See
+[global view migration](docs/VIEW_MIGRATION.md) for scope and validation.
 
 **Pipeline > Predicate** reads native occlusion and stream-output overflow predicates
 at the selected command boundary. The compact inspector shows the query status,

@@ -107,6 +107,8 @@ class Frame {
     void *file_ = nullptr;
     void *mapping_ = nullptr;
     const uint8_t *data_ = nullptr;
+    std::shared_ptr<const uint8_t> storage_;
+    std::map<Id, std::vector<uint8_t>> viewPayloads_;
     uint64_t size_ = 0;
     std::map<Id, Entry> entries_;
     std::vector<Id> entryOrder_;
@@ -120,6 +122,8 @@ class Frame {
 
   public:
     explicit Frame(const std::filesystem::path &path);
+    // Shares immutable capture storage; overlays own their replacement bytes and caches.
+    Frame(const Frame &capture, std::map<Id, std::vector<uint8_t>> viewPayloads);
     ~Frame() { close(); }
     Frame(const Frame &) = delete;
     Frame &operator=(const Frame &) = delete;
@@ -133,6 +137,9 @@ class Frame {
     const ContextRecovery &contextRecovery() const;
     const Entry &entry(Id id) const;
     Bytes payload(Id id, int category = -1, int type = -1) const;
+    Bytes capturedPayload(Id id, int category = -1, int type = -1) const;
+    bool hasEditedViews() const { return !viewPayloads_.empty(); }
+    bool isViewEdited(Id id) const { return viewPayloads_.contains(id); }
     Bytes data(Id id) const;
     Bytes shader(Id id) const;
     Resource resource(Id id) const;

@@ -245,6 +245,7 @@ Json descriptor(ID3D11DepthStencilState *p) {
 }
 
 class Snapshot {
+    const Frame &frame_;
     ID3D11DeviceContext *context_;
     Com<ID3D11DeviceContext1> context1_;
     Identities &identities_;
@@ -254,6 +255,9 @@ class Snapshot {
         values_[key] = std::move(value);
         if (!object)
             return;
+        for (const auto &id : metadata.at("captured_ids"))
+            if (frame_.isViewEdited(id.get<Id>()))
+                metadata["descriptor_source"] = "experiment_view_resource";
         if constexpr (std::is_same_v<T, ID3D11ShaderResourceView> || std::is_same_v<T, ID3D11SamplerState> ||
                       std::is_same_v<T, ID3D11RenderTargetView> ||
                       std::is_same_v<T, ID3D11DepthStencilView> ||
@@ -325,8 +329,8 @@ class Snapshot {
     }
 
   public:
-    Snapshot(ID3D11DeviceContext *context, Identities &identities)
-        : context_(context), identities_(identities) {
+    Snapshot(const Frame &frame, ID3D11DeviceContext *context, Identities &identities)
+        : frame_(frame), context_(context), identities_(identities) {
         context->QueryInterface(IID_PPV_ARGS(&context1_));
     }
     Json read() {
@@ -446,8 +450,9 @@ class Snapshot {
 };
 } // namespace
 
-Json inspectReplayPipeline(const Frame &frame, Replay &replay, bool experimentApplied,
+Json inspectReplayPipeline(const Frame &, Replay &replay, bool experimentApplied,
                            const std::function<void(Id, size_t, size_t)> &progress) {
+    const auto &frame = replay.frame();
     const auto &options = replay.options();
     const auto event = options.until;
     const bool after = !options.before;
@@ -462,14 +467,14 @@ Json inspectReplayPipeline(const Frame &frame, Replay &replay, bool experimentAp
     replay.run(progress, [&](Id id, bool isAfter, ID3D11DeviceContext *ctx, const auto &objects) {
         identities.observe(objects);
         if (id == event && isAfter == after)
-            fields = Snapshot(ctx, identities).read();
+            fields = Snapshot(frame, ctx, identities).read();
     });
     if (fields.is_null()) {
         if (command.value("draw", false))
             throw std::runtime_error("Draw pipeline boundary was not observed");
         replay.inspectNativeState([&](ID3D11DeviceContext *ctx, const auto &objects) {
             identities.observe(objects);
-            fields = Snapshot(ctx, identities).read();
+            fields = Snapshot(frame, ctx, identities).read();
         });
     }
     size_t known = 0;

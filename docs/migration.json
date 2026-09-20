@@ -2390,10 +2390,12 @@
       "description": "Lossless tight storage readback for non-multisampled D3D11 textures.",
       "status": "partial",
       "native": [
-        "src/replay/TexturePreview.cpp"
+        "src/replay/TextureReadback.cpp",
+        "src/replay/InspectionCopyBindings.h",
+        "src/cli/main.cpp"
       ],
       "validation": [
-        "Native preview/readback only; MSAA and planar pending"
+        "docs/VIEW_MIGRATION.md"
       ]
     },
     {
@@ -2466,18 +2468,31 @@
       "sha256": "1bfb7a73be0d2a215a80d98e695e3ccf741613a6f236b6d514fa71579f523074",
       "lines": 88,
       "description": "Resource-wide view experiments with a separate, immutable-capture replay overlay.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": [
+        "src/application/ViewEdits.cpp",
+        "src/core/Frame.cpp",
+        "src/application/Experiment.cpp",
+        "src/replay/Replay.cpp",
+        "src/replay/OutputBindings.cpp"
+      ],
+      "validation": [
+        "docs/VIEW_MIGRATION.md"
+      ]
     },
     {
       "module": "view_ui.py",
       "sha256": "a1418751ba0184e66904da285e9ae3394a3393b8772ea688b9b8b2b278149854",
       "lines": 53,
       "description": "Resource-wide SRV/RTV/DSV/UAV descriptor editor, separate from capture inspection.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": [
+        "src/app/ViewDialog.cpp",
+        "src/app/MainWindow.cpp"
+      ],
+      "validation": [
+        "docs/VIEW_MIGRATION.md"
+      ]
     },
     {
       "module": "widgets.py",

@@ -44,7 +44,10 @@ template <class T> std::vector<T> optional(Reader &r, uint32_t count, uint32_t l
         out.push_back(r.read<T>());
     return out;
 }
-Replay::Replay(const Frame &frame, ReplayOptions options) : frame_(frame), options_(std::move(options)) {
+Replay::Replay(const Frame &frame, ReplayOptions options)
+    : frame_(effectiveFrame(frame, options)), options_(std::move(options)) {
+    if (options_.viewFrame && frame_.sha256() != frame.sha256())
+        throw std::runtime_error("View overlay belongs to a different capture");
     D3D_FEATURE_LEVEL levels[] = {D3D_FEATURE_LEVEL_11_1, D3D_FEATURE_LEVEL_11_0};
     D3D_FEATURE_LEVEL level{};
     check(D3D11CreateDevice(nullptr, options_.warp ? D3D_DRIVER_TYPE_WARP : D3D_DRIVER_TYPE_HARDWARE, nullptr,

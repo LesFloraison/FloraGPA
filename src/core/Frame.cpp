@@ -7,6 +7,10 @@
 
 namespace flora {
 void Frame::close() noexcept {
+    if (storage_) {
+        storage_.reset();
+        data_ = nullptr;
+    }
     if (data_)
         UnmapViewOfFile(data_);
     if (mapping_)
@@ -57,9 +61,37 @@ Frame::Frame(const std::filesystem::path &path) : path_(path) {
                 throw std::runtime_error("Invalid or duplicate entry " + std::to_string(e.id));
             entryOrder_.push_back(e.id);
         }
+        // Transfer the mapping only after parsing succeeds. Shared ownership lets
+        // an overlay outlive its source Frame without remapping or copying bytes.
+        auto file = file_, mapping = mapping_;
+        const auto *mapped = data_;
+        file_ = mapping_ = nullptr;
+        data_ = nullptr;
+        storage_ = std::shared_ptr<const uint8_t>(mapped, [file, mapping](const uint8_t *data) {
+            UnmapViewOfFile(data);
+            CloseHandle(mapping);
+            CloseHandle(file);
+        });
+        data_ = mapped;
     } catch (...) {
         close();
         throw;
+    }
+}
+Frame::Frame(const Frame &capture, std::map<Id, std::vector<uint8_t>> viewPayloads)
+    : data_(capture.data_), storage_(capture.storage_), size_(capture.size_), entries_(capture.entries_),
+      entryOrder_(capture.entryOrder_), path_(capture.path_), width_(capture.width_),
+      height_(capture.height_) {
+    for (auto &[id, bytes] : viewPayloads) {
+        const auto &e = entry(id);
+        if (e.category != 5 || e.type < 0x8c || e.type > 0x8f)
+            throw std::runtime_error("View overlay requires an SRV/RTV/DSV/UAV resource");
+        const size_t expected = e.type == 0x8c || e.type == 0x8e ? 48 : 44;
+        auto original = capturedPayload(id);
+        if (original.size() != expected || bytes.size() != expected ||
+            !std::equal(original.begin(), original.begin() + 24, bytes.begin()))
+            throw std::runtime_error("View overlay must preserve the resource identity and wire size");
+        viewPayloads_[id] = std::move(bytes);
     }
 }
 const Entry &Frame::entry(Id id) const {
@@ -68,11 +100,16 @@ const Entry &Frame::entry(Id id) const {
         throw std::runtime_error("Missing capture entry " + std::to_string(id));
     return it->second;
 }
-Bytes Frame::payload(Id id, int category, int type) const {
+Bytes Frame::capturedPayload(Id id, int category, int type) const {
     const auto &e = entry(id);
     if ((category >= 0 && e.category != category) || (type >= 0 && e.type != type))
         throw std::runtime_error("Unexpected record type for " + std::to_string(id));
     return {data_ + e.offset, e.size};
+}
+Bytes Frame::payload(Id id, int category, int type) const {
+    auto original = capturedPayload(id, category, type);
+    auto found = viewPayloads_.find(id);
+    return found == viewPayloads_.end() ? original : Bytes(found->second);
 }
 Bytes Frame::data(Id id) const {
     Reader r(payload(id, 9, 1));

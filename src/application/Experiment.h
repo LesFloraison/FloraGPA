@@ -17,6 +17,8 @@ class Experiment {
     void setEnabled(const Frame &frame, Id event, bool enabled);
     void setClear(const Frame &frame, Id event, const nlohmann::json &values);
     void setSetter(const Frame &frame, Id event, const nlohmann::json &values);
+    void setView(const Frame &frame, Id view, const nlohmann::json &values);
+    nlohmann::json view(const Frame &frame, Id view) const;
     nlohmann::json setter(const Frame &frame, Id event) const;
     void setDepthStencil(const Frame &frame, Id event, const nlohmann::json &values);
     nlohmann::json depthStencil(const Frame &frame, Id event) const;

@@ -1,7 +1,8 @@
 #include "UavCounterInspector.h"
 #include "core/UavCounters.h"
 namespace flora {
-nlohmann::json inspectUavCounters(const Frame &frame, Replay &replay, Id id, Id resource) {
+nlohmann::json inspectUavCounters(const Frame &, Replay &replay, Id id, Id resource) {
+    const auto &frame = replay.frame();
     using Json = nlohmann::json;
     auto result = Json::array();
     if (!id)

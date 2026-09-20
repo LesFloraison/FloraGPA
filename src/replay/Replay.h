@@ -50,6 +50,7 @@ struct ReplayOptions {
     std::map<Id, SamplerBinding> samplerSetters;
     std::map<Id, SrvBinding> srvSetters;
     std::map<Id, std::vector<uint8_t>> outputSetters;
+    std::shared_ptr<const Frame> viewFrame;
     std::map<Id, std::map<std::pair<unsigned, unsigned>, D3D11_SAMPLER_DESC>> samplerEdits;
     std::map<Id, std::map<std::pair<unsigned, unsigned>, D3D11_SHADER_RESOURCE_VIEW_DESC>> srvEdits;
     std::map<Id, DepthStencilEdit> depthStencilEdits;
@@ -210,10 +211,12 @@ class Replay {
     void run(const std::function<void(Id, size_t, size_t)> &progress = {},
              const ReplayBoundaryObserver &observer = {});
     const ReplayOptions &options() const { return options_; }
+    const Frame &frame() const { return frame_; }
     Image output(Id texture = 0, uint32_t subresource = 0);
     Image previewTexture(Id texture, uint32_t mip = 0, uint32_t layer = 0, uint32_t slice = 0, double low = 0,
                          double high = 1, const std::string &channel = "rgba");
     std::vector<uint8_t> readBuffer(Id id);
+    std::vector<uint8_t> readTexture(Id id);
     uint32_t readCounter(Id view);
     struct PredicateResult {
         std::string status = "pending";
@@ -235,6 +238,9 @@ class Replay {
     std::string adapter() const;
 };
 std::string disassemble(Bytes dxbc);
+inline const Frame &effectiveFrame(const Frame &capture, const ReplayOptions &options) {
+    return options.viewFrame ? *options.viewFrame : capture;
+}
 std::unique_ptr<OutputBindingHistory> makeOutputHistory(const Frame &frame, const ReplayOptions &options);
 State effectiveBindings(const Frame &frame, Id event, State state, const ReplayOptions &options);
 } // namespace flora

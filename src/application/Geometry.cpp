@@ -182,7 +182,8 @@ Json meshPrimitives(const std::vector<int64_t> &stream, uint32_t topology) {
     flush();
     return result;
 }
-Json inspectGeometry(const Frame &frame, Replay &replay, Id eventId) {
+Json inspectGeometry(const Frame &, Replay &replay, Id eventId) {
+    const auto &frame = replay.frame();
     auto event = frame.event(eventId);
     if (event.type < 0x37 || event.type > 0x3d)
         throw std::runtime_error("IA geometry requires a supported graphics draw");

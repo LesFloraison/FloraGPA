@@ -60,7 +60,8 @@ int main(int argc, char **argv) {
     p.addVersionOption();
     p.addPositionalArgument(
         "command", "inventory | commands | command-state | contexts | command-lists | replay | shader | "
-                   "buffer | texture | compile | geometry | replay-pipeline | class-linkage | predicate");
+                   "buffer | texture | texture-storage | compile | geometry | replay-pipeline | "
+                   "class-linkage | predicate");
     p.addPositionalArgument("capture", "DX11 .gpa_frame file");
     p.addOption({"out", "New or empty output directory", "path"});
     p.addOption({"experiment", "Compatible FloraGPA experiment project", "path"});
@@ -238,7 +239,8 @@ int main(int argc, char **argv) {
             }
             report.insert("id", p.value("id"));
         } else if (command == "replay" || command == "buffer" || command == "texture" ||
-                   command == "geometry" || command == "replay-pipeline" || command == "predicate") {
+                   command == "texture-storage" || command == "geometry" || command == "replay-pipeline" ||
+                   command == "predicate") {
             if (out.isEmpty())
                 throw std::runtime_error("Replay requires --out");
             ReplayOptions options;
@@ -283,7 +285,8 @@ int main(int argc, char **argv) {
                 report.insert("value_time", options.before ? "before_command" : "after_command");
                 report.insert("known_fields", qint64(pipeline["known_fields"].get<uint64_t>()));
                 report.insert("unknown_fields", qint64(pipeline["unknown_fields"].get<uint64_t>()));
-            } else if ((command != "texture" && command != "buffer") || options.until)
+            } else if ((command != "texture" && command != "buffer" && command != "texture-storage") ||
+                       options.until)
                 replay.run(progress);
             if (command == "geometry") {
                 nlohmann::json geometry;
@@ -331,7 +334,7 @@ int main(int argc, char **argv) {
                 if (options.until && isDraw(frame.entry(options.until).type)) {
                     auto event = frame.event(options.until);
                     auto state = effectiveBindings(frame, event.id, frame.state(event.state), options);
-                    auto bindings = bufferBindings(frame, event, state, resource.id);
+                    auto bindings = bufferBindings(replay.frame(), event, state, resource.id);
                     QJsonArray list;
                     for (auto &binding : bindings) {
                         QJsonObject item{{"role", QString::fromStdString(binding.role)}};
@@ -383,6 +386,23 @@ int main(int argc, char **argv) {
                     csv += '\n';
                 }
                 save(out + "/words.csv", csv);
+            } else if (command == "texture-storage") {
+                const auto id = parseId("id");
+                std::vector<uint8_t> bytes;
+                if (!options.until && !frame.resource(id).data)
+                    throw std::runtime_error("Texture has no captured initial bytes; select an event");
+                auto read = [&] { bytes = replay.readTexture(id); };
+                if (options.before && options.until && isDraw(frame.entry(options.until).type))
+                    replay.inspectEventInputs(options.until, read);
+                else
+                    read();
+                QByteArray raw(reinterpret_cast<const char *>(bytes.data()), qsizetype(bytes.size()));
+                save(out + "/texture.bin", raw);
+                report.insert("resource", QString::number(id));
+                report.insert("sha256", digest(raw));
+                report.insert("length", qint64(bytes.size()));
+                report.insert("value_time", options.until ? (options.before ? "before_event" : "after_event")
+                                                          : "capture_initial");
             } else if (command != "replay-pipeline") {
                 auto image =
                     command == "texture"

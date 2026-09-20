@@ -16,12 +16,14 @@
 #include "app/RasterizerDialog.h"
 #include "app/SamplerDialog.h"
 #include "app/SrvDialog.h"
+#include "app/ViewDialog.h"
 #include "application/BlendEdits.h"
 #include "application/OutputEdits.h"
 #include "application/RasterizerEdits.h"
 #include "application/SamplerEdits.h"
 #include "application/SetterEdits.h"
 #include "application/SrvEdits.h"
+#include "application/ViewEdits.h"
 #include <QAbstractItemModelTester>
 #include <QAction>
 #include <QCheckBox>
@@ -237,6 +239,63 @@ class UiTests final : public QObject {
                                        [&](auto &values) { changed = values; }));
         QCOMPARE(changed, Json({{"count", 1}, {"buffers", {70}}, {"offsets", {64}}}));
         QVERIFY(isEditableSetter(0x3503));
+    }
+    void viewDialogValidation() {
+        using namespace flora;
+        using Json = nlohmann::json;
+        QTemporaryDir dir;
+        testing::stateCapture().save(dir.path() + "/views.gpa_frame");
+        Frame frame((dir.path() + "/views.gpa_frame").toStdWString());
+        QWidget parent;
+        applyAppearance(*qApp);
+        int commits = 0;
+        for (Id id : {Id(6), Id(8), Id(9), Id(22)}) {
+            QTimer::singleShot(0, &parent, [&] {
+                auto dialog = parent.findChild<QDialog *>("viewDialog");
+                QVERIFY(dialog);
+                QTimer::singleShot(3000, dialog, &QDialog::reject);
+                auto box = dialog->findChild<QComboBox *>("viewResource");
+                QCOMPARE(box->currentData().toULongLong(), id);
+                auto dimension = dialog->findChild<QComboBox *>("dimension");
+                QCOMPARE(dimension->count(), id == 6 ? 11 : id == 8 ? 8 : 6);
+                if (id == 9)
+                    QCOMPARE(dimension->currentText(), QString("Texture2DArray"));
+                dialog->findChild<QComboBox *>("format")->setEditText("42");
+                snapshot(*dialog, QString("view-editor-%1").arg(id));
+                dialog->findChild<QDialogButtonBox *>()->button(QDialogButtonBox::Ok)->click();
+            });
+            QVERIFY(editViewDialog(
+                &parent, frame, id, [&](Id view) { return describeView(frame, view); },
+                [&](Id view, const Json &patch) {
+                    QCOMPARE(view, id);
+                    QCOMPARE(patch, Json({{"format", 42}}));
+                    ++commits;
+                }));
+        }
+        QCOMPARE(commits, 4);
+        QTimer::singleShot(0, &parent, [&] {
+            auto dialog = parent.findChild<QDialog *>("viewDialog");
+            QVERIFY(dialog);
+            QTimer::singleShot(3000, dialog, &QDialog::reject);
+            auto apply = dialog->findChild<QDialogButtonBox *>()->button(QDialogButtonBox::Ok);
+            auto box = dialog->findChild<QComboBox *>("viewResource");
+            box->setCurrentIndex(box->findData(QVariant::fromValue<qulonglong>(22)));
+            apply->click();
+            QVERIFY(dialog->findChild<QLabel *>("viewError")->text().contains("Load"));
+            dialog->findChild<QPushButton *>("viewLoad")->click();
+            auto flags = dialog->findChild<QLineEdit *>("flags");
+            QVERIFY(flags);
+            flags->setText("3");
+            apply->click();
+            QVERIFY(dialog->findChild<QLabel *>("viewError")->text().contains("flags"));
+            flags->setText("4");
+            apply->click();
+            QVERIFY(dialog->findChild<QLabel *>("viewError")->text().contains("changed"));
+            dialog->reject();
+        });
+        QVERIFY(!editViewDialog(
+            &parent, frame, 6, [&](Id view) { return describeView(frame, view); },
+            [&](Id, const Json &) { throw std::runtime_error("Experiment changed"); }));
     }
     void srvDialogValidation() {
         using namespace flora;
@@ -561,6 +620,72 @@ class UiTests final : public QObject {
                 break;
             }
         }
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        auto output = window.findChild<ImageView *>("frameOutput");
+        QCOMPARE(output->image().pixelColor(0, 0), QColor(191, 0, 0, 255));
+        QAction *undo = nullptr, *redo = nullptr;
+        for (auto action : window.findChildren<QAction *>()) {
+            if (action->shortcut() == QKeySequence::Undo)
+                undo = action;
+            if (action->shortcut() == QKeySequence::Redo)
+                redo = action;
+        }
+        QVERIFY(undo && redo);
+        done.clear();
+        undo->trigger();
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        QCOMPARE(output->image().pixelColor(0, 0), QColor(32, 0, 0, 255));
+        done.clear();
+        redo->trigger();
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        QCOMPARE(output->image().pixelColor(0, 0), QColor(191, 0, 0, 255));
+    }
+    void viewHistory() {
+        using namespace flora;
+        QTemporaryDir dir;
+        testing::srvCapture().save(dir.path() + "/srv.gpa_frame");
+        MainWindow window;
+        window.resize(1500, 950);
+        window.show();
+        QSignalSpy done(&window, &MainWindow::taskFinished);
+        window.openCapture(dir.path() + "/srv.gpa_frame");
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        auto api = window.findChild<QTableView *>("apiLog");
+        bool selected = false;
+        for (int row = 0; row < api->model()->rowCount(); ++row) {
+            auto index = api->model()->index(row, 0);
+            if (index.data(Qt::UserRole).toULongLong() == 1000) {
+                api->setCurrentIndex(index);
+                selected = true;
+                break;
+            }
+        }
+        QVERIFY(selected);
+        QTRY_VERIFY_WITH_TIMEOUT(!window.busy(), 30000);
+        auto edit = window.findChild<QAction *>("editView");
+        QVERIFY(edit && edit->isEnabled());
+        bool entered = false;
+        QTimer::singleShot(0, &window, [&] {
+            auto dialog = window.findChild<QDialog *>("viewDialog");
+            if (!dialog)
+                return;
+            QTimer::singleShot(3000, dialog, &QDialog::reject);
+            auto views = dialog->findChild<QComboBox *>("viewResource");
+            views->setCurrentIndex(views->findData(QVariant::fromValue<qulonglong>(732)));
+            dialog->findChild<QPushButton *>("viewLoad")->click();
+            dialog->findChild<QLineEdit *>("most_detailed_mip")->setText("1");
+            dialog->findChild<QLineEdit *>("mip_levels")->setText("1");
+            snapshot(*dialog, "view-history-editor");
+            entered = true;
+            dialog->findChild<QDialogButtonBox *>()->button(QDialogButtonBox::Ok)->click();
+        });
+        done.clear();
+        edit->trigger();
+        QVERIFY(entered);
         QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
         QVERIFY(done.takeLast()[0].toBool());
         auto output = window.findChild<ImageView *>("frameOutput");

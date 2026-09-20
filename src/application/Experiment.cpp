@@ -8,6 +8,7 @@
 #include "SetterEdits.h"
 #include "ShaderInspector.h"
 #include "SrvEdits.h"
+#include "ViewEdits.h"
 #include "core/BufferBindings.h"
 #include "core/UavCounters.h"
 #include <QFile>
@@ -71,7 +72,37 @@ void Experiment::save(const QString &path) const {
         file.write(text.data(), qint64(text.size())) != qint64(text.size()) || !file.commit())
         throw std::runtime_error("Cannot save experiment atomically");
 }
-void Experiment::apply(const Frame &frame, ReplayOptions &options) const {
+void Experiment::apply(const Frame &input, ReplayOptions &options) const {
+    // Reapply history against captured descriptors, even when a consumer passes
+    // the effective frame from a prior replay. Never inherit an undone edit.
+    std::shared_ptr<const Frame> baseline;
+    if (input.hasEditedViews())
+        baseline = std::make_shared<Frame>(input, std::map<Id, std::vector<uint8_t>>{});
+    else if (options.viewFrame.get() == &input)
+        baseline = options.viewFrame;
+    const auto &capture = baseline ? *baseline : input;
+    options.viewFrame = baseline;
+    std::map<Id, Json> views;
+    for (size_t i = 0; i < revision(); ++i) {
+        const auto &operations = project_.at("history").at(i).at("operations");
+        if (!operations.is_array())
+            throw std::runtime_error("Invalid experiment operation list");
+        for (const auto &op : operations) {
+            if (op.at("kind") != "view")
+                continue;
+            const auto id = identifier(op.at("resource"));
+            const auto info = describeView(capture, id);
+            views[id] = mergeView(info.at("kind").get<std::string>(),
+                                  views.contains(id) ? views.at(id) : info.at("descriptor"), op.at("values"));
+        }
+    }
+    if (!views.empty()) {
+        std::map<Id, std::vector<uint8_t>> payloads;
+        for (auto &[id, descriptor] : views)
+            payloads[id] = editedViewPayload(capture, id, descriptor);
+        options.viewFrame = std::make_shared<Frame>(capture, std::move(payloads));
+    }
+    const auto &frame = effectiveFrame(capture, options);
     options.editedEvents = false;
     options.disabled.clear();
     options.shaders.clear();
@@ -101,6 +132,8 @@ void Experiment::apply(const Frame &frame, ReplayOptions &options) const {
             // Re-enabling a draw is still an explicit experiment with edited SO history.
             options.editedEvents |= op.contains("event");
             auto kind = op.at("kind").get<std::string>();
+            if (kind == "view")
+                continue;
             if (kind == "enabled") {
                 auto id = identifier(op.at("event"));
                 auto &e = frame.entry(id);
@@ -322,6 +355,29 @@ void Experiment::setPipeline(const Frame &frame, Id event, const Json &values, c
         throw;
     }
 }
+Json Experiment::view(const Frame &capture, Id id) const {
+    ReplayOptions options;
+    apply(capture, options);
+    return describeView(effectiveFrame(capture, options), id);
+}
+void Experiment::setView(const Frame &capture, Id id, const Json &values) {
+    const auto kind = describeView(capture, id).at("kind").get<std::string>();
+    const auto patch = normalizeView(kind, values);
+    auto previous = project_;
+    auto &history = project_["history"];
+    history.erase(history.begin() + ptrdiff_t(revision()), history.end());
+    history.push_back(
+        {{"label", "View " + std::to_string(id)},
+         {"operations", Json::array({{{"kind", "view"}, {"resource", id}, {"values", patch}}})}});
+    project_["cursor"] = history.size();
+    try {
+        ReplayOptions checked;
+        apply(capture, checked);
+    } catch (...) {
+        project_ = std::move(previous);
+        throw;
+    }
+}
 Json Experiment::setter(const Frame &frame, Id event) const {
     auto result = capturedSetter(frame, event);
     for (size_t i = 0; i < revision(); ++i)
@@ -368,7 +424,7 @@ void Experiment::setSampler(const Frame &frame, Id event, const std::string &sta
         throw;
     }
 }
-Json Experiment::srv(const Frame &frame, Id event, const std::string &name, unsigned slot) const {
+Json Experiment::srv(const Frame &capture, Id event, const std::string &name, unsigned slot) const {
     const auto stage = srvStage(name);
     srvSlot(slot);
     Json patch = Json::object();
@@ -378,7 +434,8 @@ Json Experiment::srv(const Frame &frame, Id event, const std::string &name, unsi
                 op.at("stage") == name && srvSlot(op.at("slot")) == slot)
                 patch = mergeSrv(patch, op.at("values"));
     ReplayOptions options;
-    apply(frame, options);
+    apply(capture, options);
+    const auto &frame = effectiveFrame(capture, options);
     const auto effective = effectiveBindings(frame, event, frame.state(frame.event(event).state), options);
     if (patch.empty()) {
         const auto &entry = frame.entry(event);
@@ -412,7 +469,10 @@ void Experiment::setSrv(const Frame &frame, Id event, const std::string &stage, 
         throw;
     }
 }
-void Experiment::setSetter(const Frame &frame, Id event, const Json &values) {
+void Experiment::setSetter(const Frame &capture, Id event, const Json &values) {
+    ReplayOptions current;
+    apply(capture, current);
+    const auto &frame = effectiveFrame(capture, current);
     Json normalized;
     if (samplerSetterStage(frame.entry(event).type)) {
         auto binding = validateSamplerSetter(frame, event, values);
@@ -437,7 +497,7 @@ void Experiment::setSetter(const Frame &frame, Id event, const Json &values) {
     project_["cursor"] = project_["history"].size();
     try {
         ReplayOptions checked;
-        apply(frame, checked);
+        apply(capture, checked);
     } catch (...) {
         project_ = std::move(previous);
         throw;
@@ -489,12 +549,13 @@ void Experiment::setBuffer(const Frame &frame, Id event, Id resource, uint64_t o
     setBufferPatches(frame, event, resource, {{offset, {data.begin(), data.end()}}},
                      "Buffer " + std::to_string(resource) + " at event " + std::to_string(event));
 }
-void Experiment::setBufferPatches(const Frame &frame, Id event, Id resource,
+void Experiment::setBufferPatches(const Frame &capture, Id event, Id resource,
                                   const std::vector<BufferPatch> &patches, const std::string &label) {
     if (patches.empty())
         return;
     ReplayOptions options;
-    apply(frame, options);
+    apply(capture, options);
+    const auto &frame = effectiveFrame(capture, options);
     const auto state = effectiveBindings(frame, event, frame.state(frame.event(event).state), options);
     Json operations = Json::array();
     for (const auto &patch : patches) {
@@ -524,9 +585,10 @@ std::optional<uint32_t> Experiment::initialUavCounter(Id view) const {
                 return uint32_t(identifier(it->at("value")));
     return {};
 }
-bool Experiment::setUavCounter(const Frame &frame, Id view, uint32_t value, std::optional<Id> event) {
+bool Experiment::setUavCounter(const Frame &capture, Id view, uint32_t value, std::optional<Id> event) {
     ReplayOptions options;
-    apply(frame, options);
+    apply(capture, options);
+    const auto &frame = effectiveFrame(capture, options);
     std::optional<State> state;
     if (event)
         state = effectiveBindings(frame, *event, frame.state(frame.event(*event).state), options);

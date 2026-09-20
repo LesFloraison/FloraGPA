@@ -62,6 +62,7 @@ class MainWindow final : public QMainWindow {
     void editBlend();
     void editSampler();
     void editSrv();
+    void editView();
     void replaceUpdateSource();
     void compileShader();
     void inspectGeometry();
@@ -90,6 +91,7 @@ class MainWindow final : public QMainWindow {
     QAction *blendAction_ = nullptr;
     QAction *samplerAction_ = nullptr;
     QAction *srvAction_ = nullptr;
+    QAction *viewAction_ = nullptr;
     QAction *bufferEditAction_ = nullptr, *bufferImportAction_ = nullptr;
     QAction *constantEditAction_ = nullptr;
     QAction *counterEditAction_ = nullptr;

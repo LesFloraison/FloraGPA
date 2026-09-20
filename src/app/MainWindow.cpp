@@ -6,6 +6,7 @@
 #include "RasterizerDialog.h"
 #include "SamplerDialog.h"
 #include "SrvDialog.h"
+#include "ViewDialog.h"
 #include "application/ClassInspector.h"
 #include "application/CommandEdits.h"
 #include "application/Constants.h"
@@ -305,6 +306,8 @@ void MainWindow::buildUi() {
     samplerAction_->setObjectName("editSampler");
     srvAction_ = edit->addAction("Edit Shader Resource View…", this, &MainWindow::editSrv);
     srvAction_->setObjectName("editSrv");
+    viewAction_ = edit->addAction("Edit View Resource…", this, &MainWindow::editView);
+    viewAction_->setObjectName("editView");
     updateSourceAction_ = edit->addAction("Replace Update Source…", this, &MainWindow::replaceUpdateSource);
     updateSourceAction_->setObjectName("replaceUpdateSource");
     updateExperimentActions();
@@ -889,6 +892,7 @@ void MainWindow::setBusy(bool busy) {
     replayedState_->setWorkerBusy(busy);
     predicateView_->setWorkerBusy(busy);
     openAction_->setEnabled(!busy);
+    viewAction_->setEnabled(!busy && frame_ && experiment_);
     replayAction_->setEnabled(!busy && bool(frame_));
     collectAction_->setEnabled(!busy && bool(frame_));
     cancelAction_->setEnabled(busy && !loader_.isRunning());
@@ -1839,6 +1843,8 @@ void MainWindow::updateExperimentActions() {
         blendAction_->setEnabled(isDraw(uint16_t(type)) && type != 0x35 && type != 0x36);
     if (samplerAction_)
         samplerAction_->setEnabled(isDraw(uint16_t(type)));
+    if (viewAction_)
+        viewAction_->setEnabled(frame_ && experiment_ && !busy());
     if (srvAction_)
         srvAction_->setEnabled(isDraw(uint16_t(type)));
     if (updateSourceAction_)
@@ -2140,7 +2146,7 @@ void MainWindow::editBuffer(bool importFile) {
         ReplayOptions options;
         experiment_->apply(*frame_, options);
         const auto state = effectiveBindings(*frame_, event, frame_->state(command.state), options);
-        auto bindings = bufferBindings(*frame_, command, state, resource);
+        auto bindings = bufferBindings(effectiveFrame(*frame_, options), command, state, resource);
         if (frame_->resource(resource).type != 0x83 || bindings.empty())
             throw std::runtime_error("Select a buffer bound to this draw or dispatch");
         QByteArray imported;
@@ -2230,6 +2236,31 @@ void MainWindow::editBuffer(bool importFile) {
             bufferBoundary_->setCurrentIndex(1);
             experimentChanged();
         }
+    } catch (const std::exception &e) {
+        showError(QString::fromUtf8(e.what()));
+    }
+}
+void MainWindow::editView() {
+    if (!frame_ || !experiment_ || busy())
+        return;
+    try {
+        const auto capture = frame_;
+        const auto revision = revision_;
+        auto check = [&] {
+            if (capture != frame_ || revision != revision_ || busy())
+                throw std::runtime_error("Capture or experiment changed; reopen this editor");
+        };
+        if (editViewDialog(
+                this, *capture, selectedResource_,
+                [&](Id view) {
+                    check();
+                    return experiment_->view(*capture, view);
+                },
+                [&](Id view, const nlohmann::json &values) {
+                    check();
+                    experiment_->setView(*capture, view, values);
+                }))
+            experimentChanged();
     } catch (const std::exception &e) {
         showError(QString::fromUtf8(e.what()));
     }

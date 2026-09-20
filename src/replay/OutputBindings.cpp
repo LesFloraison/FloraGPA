@@ -1,7 +1,8 @@
 #include "Replay.h"
 #include <algorithm>
 namespace flora {
-std::unique_ptr<OutputBindingHistory> makeOutputHistory(const Frame &frame, const ReplayOptions &options) {
+std::unique_ptr<OutputBindingHistory> makeOutputHistory(const Frame &capture, const ReplayOptions &options) {
+    const auto &frame = effectiveFrame(capture, options);
     if (options.outputSetters.empty())
         return {};
     auto edits = options.outputSetters;
@@ -27,7 +28,8 @@ std::unique_ptr<OutputBindingHistory> makeOutputHistory(const Frame &frame, cons
     }
     return std::make_unique<OutputBindingHistory>(frame, std::move(edits));
 }
-State effectiveBindings(const Frame &frame, Id event, State state, const ReplayOptions &options) {
+State effectiveBindings(const Frame &capture, Id event, State state, const ReplayOptions &options) {
+    const auto &frame = effectiveFrame(capture, options);
     auto history = makeOutputHistory(frame, options);
     return history ? history->state(event, state).state
                    : effectiveSrvBindings(frame, event, state, options.srvSetters);
