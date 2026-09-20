@@ -87,6 +87,10 @@ stream and instance selection, typed attributes and a rotatable wireframe.
 **VS identities** links native output to original input indices and instances,
 with unique byte-preserving variants and a lossless reference table; see
 [`docs/VS_IDENTITY_MIGRATION.md`](docs/VS_IDENTITY_MIGRATION.md).
+**VS writes**, **DS writes** and **GS emissions** inspect original output records
+with component validity, known identities and GS strip connectivity. These modes
+preserve original downstream bindings through private output/SO copies. See
+[`docs/OUTPUT_LOG_MIGRATION.md`](docs/OUTPUT_LOG_MIGRATION.md) for exports and limits.
 Export retains JSON, CSV, raw output bytes and OBJ when positions are valid;
 geometry choices are saved in experiment projects. Remaining stages and
 validation limits are listed in

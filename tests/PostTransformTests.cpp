@@ -57,6 +57,10 @@ class PostTransformTests final : public QObject {
         QCOMPARE(replayUiState(frame, replayUiDocument(frame, state)).geometryStage, std::string("ia"));
         state.geometryStage = "vs-index";
         QCOMPARE(replayUiState(frame, replayUiDocument(frame, state)).geometryStage, std::string("vs-index"));
+        for (const auto *stage : {"vs-writes", "ds-writes", "gs-emits"}) {
+            state.geometryStage = stage;
+            QCOMPARE(replayUiState(frame, replayUiDocument(frame, state)).geometryStage, std::string(stage));
+        }
         for (const auto *invalid : {"-1", "4294967296", "x", "1.2", "+1"}) {
             state.geometryInstance = invalid;
             QVERIFY_THROWS_EXCEPTION(std::runtime_error, replayUiDocument(frame, state));
@@ -121,13 +125,16 @@ class PostTransformTests final : public QObject {
             const auto count = replay.readCounter(12);
             const auto commands = replay.counts;
             QCOMPARE(count, 0u);
-            for (unsigned repeat = 0; repeat < 2; ++repeat) {
+            for (unsigned repeat = 0; repeat < 3; ++repeat) {
                 PostTransformOptions inspect;
-                inspect.stage = repeat ? "vs-index" : "final";
+                inspect.stage = repeat == 2 ? "vs-writes" : repeat ? "vs-index" : "final";
                 const auto geometry = inspectPostTransform(replay, 200, inspect);
                 QCOMPARE(geometry.report.at("vertices").get<unsigned>(), 3u);
-                QVERIFY(geometry.report.at("pre_raster_uav_isolation").at("stages") ==
-                        nlohmann::json::array({"vs"}));
+                if (repeat != 2)
+                    QVERIFY(geometry.report.at("pre_raster_uav_isolation").at("stages") ==
+                            nlohmann::json::array({"vs"}));
+                else
+                    QCOMPARE(geometry.report.at("vertex_writes").at("records").get<unsigned>(), 3u);
                 QCOMPARE(replay.readBuffer(10), storage);
                 QCOMPARE(replay.readTexture(20), target);
                 QCOMPARE(replay.readCounter(12), count);
@@ -175,6 +182,26 @@ class PostTransformTests final : public QObject {
                     auto identities = inspectPostTransform(replay, 150, indexed);
                     QCOMPARE(identities.identities.size(), size_t(signature ? 3 : 1));
                     QCOMPARE(replay.readBuffer(70), before);
+                    for (const auto *stage : {"vs-writes", "gs-emits"}) {
+                        PostTransformOptions log;
+                        log.stage = stage;
+                        if (signature && log.stage == "gs-emits") {
+                            QVERIFY_THROWS_EXCEPTION(std::runtime_error,
+                                                     inspectPostTransform(replay, 150, log));
+                            continue;
+                        }
+                        const auto history = replay.counts;
+                        for (unsigned repeat = 0; repeat < 2; ++repeat) {
+                            const auto records = inspectPostTransform(replay, 150, log);
+                            const auto key = log.stage == "gs-emits" ? "geometry_emissions" : "vertex_writes";
+                            QVERIFY(records.report.at(key).at("records").get<unsigned>() > 0);
+                            QCOMPARE(
+                                records.report.at(key).at("stream_output").at("strategy").get<std::string>(),
+                                std::string("private_buffers_at_tracked_byte_cursors"));
+                            QCOMPARE(replay.readBuffer(70), before);
+                            QVERIFY(replay.counts == history);
+                        }
+                    }
                     // A direct producer after the helper must resume the original hidden cursor.
                     replay.inspectNativeState(
                         [&](auto context, const auto &) { context->Draw(signature ? 3 : 1, 0); });
@@ -234,6 +261,42 @@ class PostTransformTests final : public QObject {
             QCOMPARE(identity.report.at("attempts").size(), size_t(2));
             identityReplay.inspectNativeState([](auto context, const auto &) { context->Draw(1025, 0); });
             QCOMPARE(identityReplay.readBuffer(70), actual);
+        }
+    }
+    void outputLogOverflowRestoresCursor() {
+        QTemporaryDir dir;
+        auto capture = streamCapture();
+        for (const auto &entry : capture.entries)
+            if (entry.id == 100)
+                put(capture.bytes, entry.offset + 24, 400u);
+        const auto path = dir.path() + "/log-overflow.gpa_frame";
+        capture.save(path);
+        Frame frame(path.toStdWString());
+        for (bool warp : {false, true}) {
+            ReplayOptions o;
+            o.warp = warp;
+            o.before = true;
+            o.until = 100;
+            Replay replay(frame, o);
+            replay.run();
+            const auto before = replay.readBuffer(70), pixels = replay.readTexture(20);
+            PostTransformOptions bounded;
+            bounded.stage = "gs-emits";
+            bounded.maxBytes = 16 + 400 * 64;
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error, inspectPostTransform(replay, 100, bounded));
+            QCOMPARE(replay.readBuffer(70), before);
+            QCOMPARE(replay.readTexture(20), pixels);
+            bounded.maxBytes = 256ull * 1024 * 1024;
+            const auto log = inspectPostTransform(replay, 100, bounded);
+            QCOMPARE(log.report.at("geometry_emissions").at("attempts").size(), size_t(2));
+            QCOMPARE(log.report.at("vertices").get<unsigned>(), 1200u);
+            QCOMPARE(replay.readBuffer(70), before);
+            replay.inspectNativeState([](auto context, const auto &) { context->Draw(400, 0); });
+            const auto actual = replay.readBuffer(70);
+            o.before = false;
+            Replay baseline(frame, o);
+            baseline.run();
+            QCOMPARE(actual, baseline.readBuffer(70));
         }
     }
     void emptyAndNonfiniteExports() {
@@ -387,6 +450,66 @@ class PostTransformTests final : public QObject {
         QCOMPARE(window.findChild<QSpinBox *>("geometryStream")->value(), 3);
         QCOMPARE(window.findChild<QLineEdit *>("geometryInstance")->text(), QString("2"));
         QCOMPARE(table->model()->rowCount(), 0);
+        stage->setCurrentIndex(stage->findData("vs-writes"));
+        window.findChild<QSpinBox *>("geometryStream")->setValue(0);
+        window.findChild<QLineEdit *>("geometryInstance")->clear();
+        tasks.clear();
+        window.findChild<QAction *>("inspectGeometry")->trigger();
+        QTRY_VERIFY_WITH_TIMEOUT(!tasks.empty(), 30000);
+        QVERIFY(tasks.takeLast()[0].toBool());
+        QCOMPARE(table->model()->rowCount(), 3);
+        QCOMPARE(table->model()->headerData(0, Qt::Horizontal).toString(), QString("record"));
+        QCOMPARE(table->model()->headerData(4, Qt::Horizontal).toString(), QString("SV_Position0.x.written"));
+        QVERIFY(!choice->isEnabled());
+        if (!evidence.isEmpty())
+            QVERIFY(window.grab().save(evidence + "/vs-writes.png"));
+        QTimer::singleShot(0, &window, [&] {
+            auto dialog = window.findChild<QFileDialog *>();
+            QVERIFY(dialog);
+            dialog->setDirectory(dir.path());
+            QMetaObject::invokeMethod(dialog, "accept", Qt::QueuedConnection);
+        });
+        window.findChild<QAction *>("exportGeometry")->trigger();
+        for (const auto *file : {"geometry.json", "vertices.bin", "vertices.validity.bin", "vertices.csv"})
+            QVERIFY(QFile::exists(dir.path() + "/FloraGPA-Geometry-1000-2/" + file));
+        QVERIFY(!QFile::exists(dir.path() + "/FloraGPA-Geometry-1000-2/geometry.obj"));
+        const auto streamPath = dir.path() + "/ui-stream.gpa_frame";
+        streamCapture().save(streamPath);
+        loaded.clear();
+        tasks.clear();
+        window.openCapture(streamPath);
+        QTRY_COMPARE_WITH_TIMEOUT(loaded.size(), 1, 30000);
+        QTRY_VERIFY_WITH_TIMEOUT(!tasks.empty(), 30000);
+        QVERIFY(tasks.takeLast()[0].toBool());
+        tasks.clear();
+        for (int row = 0; row < api->model()->rowCount(); ++row) {
+            const auto index = api->model()->index(row, 0);
+            if (index.data(Qt::UserRole).toULongLong() == 150) {
+                api->setCurrentIndex(index);
+                break;
+            }
+        }
+        QTRY_VERIFY_WITH_TIMEOUT(!tasks.empty(), 30000);
+        QVERIFY(tasks.takeLast()[0].toBool());
+        tasks.clear();
+        stage->setCurrentIndex(stage->findData("gs-emits"));
+        window.findChild<QAction *>("inspectGeometry")->trigger();
+        QTRY_VERIFY_WITH_TIMEOUT(!tasks.empty(), 30000);
+        QVERIFY(tasks.takeLast()[0].toBool());
+        QCOMPARE(table->model()->rowCount(), 4);
+        QCOMPARE(table->model()->headerData(7, Qt::Horizontal).toString(), QString("operation"));
+        if (!evidence.isEmpty())
+            QVERIFY(window.grab().save(evidence + "/gs-emissions.png"));
+        QTimer::singleShot(0, &window, [&] {
+            auto dialog = window.findChild<QFileDialog *>();
+            QVERIFY(dialog);
+            dialog->setDirectory(dir.path());
+            QMetaObject::invokeMethod(dialog, "accept", Qt::QueuedConnection);
+        });
+        window.findChild<QAction *>("exportGeometry")->trigger();
+        for (const auto *file : {"geometry.json", "vertices.bin", "vertices.validity.bin", "vertices.csv",
+                                 "primitives.csv", "geometry.obj"})
+            QVERIFY(QFile::exists(dir.path() + "/FloraGPA-Geometry-150/" + file));
     }
 };
 int main(int argc, char **argv) {

@@ -885,7 +885,9 @@ void MainWindow::buildUi() {
     geometryStage_->setObjectName("geometryStage");
     for (auto [label, value] :
          {std::pair{"IA inputs", "ia"}, std::pair{"Final output", "final"}, std::pair{"VS output", "vs"},
-          std::pair{"DS output", "ds"}, std::pair{"GS output", "gs"}, std::pair{"VS identities", "vs-index"}})
+          std::pair{"DS output", "ds"}, std::pair{"GS output", "gs"}, std::pair{"VS identities", "vs-index"},
+          std::pair{"VS writes", "vs-writes"}, std::pair{"DS writes", "ds-writes"},
+          std::pair{"GS emissions", "gs-emits"}})
         geometryStage_->addItem(label, value);
     geometrySource->addWidget(geometryStage_);
     geometryStream_ = new QSpinBox;
@@ -924,9 +926,17 @@ void MainWindow::buildUi() {
     };
     connect(geometryStage_, &QComboBox::currentIndexChanged, this, [this, clearGeometry] {
         const bool post = geometryStage_->currentData() != "ia";
+        const auto selected = geometryStage_->currentData().toString();
+        const bool writes = selected == "vs-writes" || selected == "ds-writes";
+        geometryTable_->setItemText(0, writes                   ? "Invocation records"
+                                       : selected == "gs-emits" ? "Emission records"
+                                                                : "Expanded vertices");
+        mesh_->setVisible(!writes);
         geometryTable_->setCurrentIndex(0);
         geometryTable_->setEnabled(!busy() && (!post || geometryStage_->currentData() == "vs-index"));
-        geometryStream_->setEnabled(!busy() && post);
+        if (writes)
+            geometryStream_->setValue(0);
+        geometryStream_->setEnabled(!busy() && post && !writes);
         geometryInstance_->setEnabled(!busy() && post);
         clearGeometry();
     });
@@ -1135,7 +1145,9 @@ void MainWindow::setBusy(bool busy) {
     geometryStage_->setEnabled(!busy);
     geometryTable_->setEnabled(
         !busy && (geometryStage_->currentData() == "ia" || geometryStage_->currentData() == "vs-index"));
-    geometryStream_->setEnabled(!busy && geometryStage_->currentData() != "ia");
+    geometryStream_->setEnabled(!busy && geometryStage_->currentData() != "ia" &&
+                                geometryStage_->currentData() != "vs-writes" &&
+                                geometryStage_->currentData() != "ds-writes");
     geometryInstance_->setEnabled(!busy && geometryStage_->currentData() != "ia");
     openAction_->setEnabled(!busy);
     viewAction_->setEnabled(!busy && frame_ && experiment_);
@@ -1360,7 +1372,9 @@ void MainWindow::finishWorker(int code, QProcess::ExitStatus status) {
             auto label = QString("  Event %1 · %2 %3")
                              .arg(geometry_["event"].toString())
                              .arg(geometry_["vertex_references"].toInteger())
-                             .arg(post ? "output vertices" : "references");
+                             .arg(geometry_.contains("record_kind") ? geometry_["record_kind"].toString()
+                                  : post                            ? "output vertices"
+                                                                    : "references");
             if (!post || geometry_.contains("unique_vertices"))
                 label += QString(" · %1 unique").arg(geometry_["unique_vertices"].toInteger());
             geometryLabel_->setText(label);
@@ -2082,8 +2096,9 @@ void MainWindow::exportGeometry() {
         return;
     }
     QDir source(geometryDir_->path() + "/result");
-    for (auto file : source.entryList(
-             {"*.csv", "geometry.json", "geometry.obj", "vertices.bin", "unique_vertices.bin"}, QDir::Files))
+    for (auto file : source.entryList({"*.csv", "geometry.json", "geometry.obj", "vertices.bin",
+                                       "vertices.validity.bin", "unique_vertices.bin"},
+                                      QDir::Files))
         if (!QFile::copy(source.filePath(file), path + '/' + file)) {
             showError("Geometry export failed.");
             return;

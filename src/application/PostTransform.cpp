@@ -1,6 +1,9 @@
 #include "PostTransform.h"
 #include "DxbcIdentity.h"
+#include "DxbcInspection.h"
+#include "DxbcOutputLog.h"
 #include "EventDescription.h"
+#include "OutputLogGeometry.h"
 #include "ShaderInspector.h"
 #include "StreamOutputInspector.h"
 #include "core/ClassLinkage.h"
@@ -646,11 +649,266 @@ class PostTransformCapture {
         return result;
     }
 
+    PostTransformGeometry captureLog(const Event &event, const State &state) {
+        const std::string stage = options.stage == "vs-writes"   ? "vs"
+                                  : options.stage == "ds-writes" ? "ds"
+                                                                 : "gs";
+        const auto stageIndex = stage == "vs" ? 0u : stage == "ds" ? 2u : 3u;
+        const auto shaderId = state.stages[stageIndex].shader;
+        if (!shaderId)
+            throw std::runtime_error("Output records require a Draw with the selected shader");
+        if (stage != "gs" && options.stream)
+            throw std::runtime_error("Only GS emissions select a nonzero stream");
+        if (stage == "ds" && (!state.stages[1].shader || state.topology < 33 || state.topology > 64))
+            throw std::runtime_error("DS writes require a paired HS and patch topology");
+        if (r.device_->GetFeatureLevel() < D3D_FEATURE_LEVEL_11_1)
+            throw std::runtime_error("Shader output records require feature level 11.1");
+        Json positions = Json::array();
+        if (state.soCount)
+            for (const auto &p : r.privateStreamOutputPositions(state))
+                positions.push_back({{"slot", p.slot},
+                                     {"resource", p.resource},
+                                     {"offset", p.offset},
+                                     {"capacity_bytes", p.capacity}});
+        Event direct;
+        Json parameters, indirect;
+        drawParameters(event, direct, parameters, indirect);
+        const auto instances = parameters.value("instance_count", 1u);
+        const uint64_t references =
+            uint64_t(instances) * parameters.value("index_count", parameters.value("vertex_count", 0u));
+        if (stage == "vs" && references >= UINT32_MAX)
+            throw std::runtime_error("VS invocation count is not bounded by uint32");
+        if (options.instance && *options.instance >= instances)
+            throw std::runtime_error("Output log instance is outside the original draw");
+        const auto original = code(shaderId);
+        std::set<unsigned> occupied;
+        {
+            std::array<ID3D11UnorderedAccessView *, 64> bound{};
+            r.context_->OMGetRenderTargetsAndUnorderedAccessViews(0, nullptr, nullptr, 0, 64, bound.data());
+            for (unsigned i = 0; i < bound.size(); ++i)
+                if (bound[i]) {
+                    occupied.insert(i);
+                    bound[i]->Release();
+                }
+        }
+        Json executed = Json::array();
+        const std::array<const char *, 5> names{"vs", "hs", "ds", "gs", "ps"};
+        for (unsigned i = 0; i < names.size(); ++i) {
+            if (!state.stages[i].shader)
+                continue;
+            const auto raw = code(state.stages[i].shader);
+            dxbc_detail::Parts parts;
+            std::optional<DxbcProgram> program;
+            for (const auto &[tag, bytes] : readDxbcParts(raw)) {
+                parts.emplace_back(tag, std::vector<uint8_t>(bytes.begin(), bytes.end()));
+                if (tag == 0x58454853 || tag == 0x52444853)
+                    program = readDxbcProgram(bytes);
+            }
+            if (!program)
+                continue;
+            executed.push_back(names[i]);
+            if ((program->header[0] & 255) == 0x50) {
+                const auto declaredUavs = dxbc_detail::uavSlots(*program, parts);
+                occupied.insert(declaredUavs.begin(), declaredUavs.end());
+            }
+        }
+        const auto rtCount = std::min({state.rtCount, state.omStart, 8u});
+        int slot = 63;
+        while (slot >= int(rtCount) && occupied.contains(unsigned(slot)))
+            --slot;
+        if (slot < int(rtCount))
+            throw std::runtime_error("Output records require a free graphics UAV slot");
+        uint32_t capacity = uint32_t(std::max<uint64_t>(1, std::min<uint64_t>(references, 1024)));
+        Json attempts = Json::array(), metadata;
+        std::vector<uint8_t> records, patchedBytes;
+        const bool enabled = !r.options_.suppressDraws && !r.options_.disabled.contains(event.id);
+        bool finished = false;
+        for (unsigned attempt = 0; attempt < 3; ++attempt) {
+            auto patched = stage == "gs"
+                               ? instrumentGeometryEmissions(original, slot, capacity, options.stream)
+                               : instrumentOutputWrites(original, slot, capacity);
+            metadata = std::move(patched.metadata);
+            patchedBytes = std::move(patched.bytes);
+            const auto size = metadata.at("total_bytes").get<uint32_t>();
+            if (size > options.maxBytes)
+                throw std::runtime_error("Shader output log exceeds inspection byte limit");
+            if (enabled && options.instance && instances > 1 &&
+                !metadata.at("known_inputs").contains("instance"))
+                throw std::runtime_error("Original shader has no consumed InstanceID; invocation membership "
+                                         "is unknown, inspect all records");
+            std::vector<uint8_t> initial(size);
+            D3D11_BUFFER_DESC bd{size,
+                                 D3D11_USAGE_DEFAULT,
+                                 D3D11_BIND_UNORDERED_ACCESS,
+                                 0,
+                                 D3D11_RESOURCE_MISC_BUFFER_ALLOW_RAW_VIEWS,
+                                 0};
+            D3D11_SUBRESOURCE_DATA data{initial.data(), 0, 0};
+            Com<ID3D11Buffer> buffer;
+            check(r.device_->CreateBuffer(&bd, &data, &buffer), "Create shader output log");
+            D3D11_UNORDERED_ACCESS_VIEW_DESC ud{};
+            ud.Format = DXGI_FORMAT_R32_TYPELESS;
+            ud.ViewDimension = D3D11_UAV_DIMENSION_BUFFER;
+            ud.Buffer.NumElements = size / 4;
+            ud.Buffer.Flags = D3D11_BUFFER_UAV_FLAG_RAW;
+            Com<ID3D11UnorderedAccessView> view;
+            check(r.device_->CreateUnorderedAccessView(buffer.Get(), &ud, &view),
+                  "Create shader output log view");
+            auto linkage = r.get<ID3D11ClassLinkage>(shaderClassLinkage(r.frame_, shaderId));
+            Com<ID3D11VertexShader> vs;
+            Com<ID3D11DomainShader> ds;
+            Com<ID3D11GeometryShader> gs;
+            if (stage == "vs")
+                check(r.device_->CreateVertexShader(patchedBytes.data(), patchedBytes.size(), linkage, &vs),
+                      "Create write log VS");
+            else if (stage == "ds")
+                check(r.device_->CreateDomainShader(patchedBytes.data(), patchedBytes.size(), linkage, &ds),
+                      "Create write log DS");
+            else if (auto declaration = shaderStreamOutput(r.frame_, shaderId))
+                gs = r.createStreamOutputShader(patchedBytes, declaration, linkage);
+            else
+                check(r.device_->CreateGeometryShader(patchedBytes.data(), patchedBytes.size(), linkage, &gs),
+                      "Create emission log GS");
+            auto classCount = state.stages[stageIndex].classCount;
+            if (classCount > 256)
+                throw std::runtime_error("Output log class instance count exceeds limit");
+            if (r.options_.shaders.contains(shaderId) && inspectShader(original).at("interface_slots") == 0)
+                classCount = 0;
+            std::array<ID3D11ClassInstance *, 256> classes{};
+            for (unsigned i = 0; i < classCount; ++i)
+                classes[i] = r.get<ID3D11ClassInstance>(state.stages[stageIndex].classes[i]);
+            Com<ID3D11Query> query;
+            if (stage == "gs") {
+                D3D11_QUERY_DESC q{D3D11_QUERY_PIPELINE_STATISTICS, 0};
+                check(r.device_->CreateQuery(&q, &query), "Create emission pipeline witness");
+            }
+            r.withPrivateOutputs(
+                event, state,
+                [&] {
+                    if (vs)
+                        r.context_->VSSetShader(vs.Get(), classes.data(), classCount);
+                    if (ds)
+                        r.context_->DSSetShader(ds.Get(), classes.data(), classCount);
+                    if (gs)
+                        r.context_->GSSetShader(gs.Get(), classes.data(), classCount);
+                    std::array<ID3D11UnorderedAccessView *, 64> pointers{};
+                    std::array<Com<ID3D11UnorderedAccessView>, 64> held;
+                    r.context_->OMGetRenderTargetsAndUnorderedAccessViews(0, nullptr, nullptr, 0, 64,
+                                                                          pointers.data());
+                    for (unsigned i = 0; i < 64; ++i)
+                        held[i].Attach(pointers[i]);
+                    if (pointers[slot])
+                        throw std::runtime_error("Private shader log slot became occupied");
+                    pointers[slot] = view.Get();
+                    r.context_->OMSetRenderTargetsAndUnorderedAccessViews(
+                        D3D11_KEEP_RENDER_TARGETS_AND_DEPTH_STENCIL, nullptr, nullptr, rtCount, 64 - rtCount,
+                        pointers.data() + rtCount, nullptr);
+                    if (query)
+                        r.context_->Begin(query.Get());
+                    try {
+                        if (enabled)
+                            submit(event);
+                    } catch (...) {
+                        if (query)
+                            r.context_->End(query.Get());
+                        throw;
+                    }
+                    if (query)
+                        r.context_->End(query.Get());
+                    if (!r.waitIdle(20000))
+                        throw std::runtime_error("Shader output log completion timed out");
+                },
+                true);
+            if (query) {
+                D3D11_QUERY_DATA_PIPELINE_STATISTICS stats{};
+                check(r.context_->GetData(query.Get(), &stats, sizeof stats, 0),
+                      "Read emission pipeline witness");
+                metadata["invocation_count_semantics"] = "observed_entry_atomic_operations";
+                metadata["pipeline_gs_invocations"] = stats.GSInvocations;
+                metadata["pipeline_gs_primitives"] = stats.GSPrimitives;
+            }
+            bd.Usage = D3D11_USAGE_STAGING;
+            bd.BindFlags = 0;
+            bd.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
+            bd.MiscFlags = 0;
+            Com<ID3D11Buffer> staging;
+            check(r.device_->CreateBuffer(&bd, nullptr, &staging), "Create output log readback");
+            {
+                Unpredicated guard(r.context_.Get());
+                r.context_->CopyResource(staging.Get(), buffer.Get());
+            }
+            D3D11_MAPPED_SUBRESOURCE mapped{};
+            check(r.context_->Map(staging.Get(), 0, D3D11_MAP_READ, 0, &mapped), "Read output log records");
+            std::memcpy(initial.data(), mapped.pData, size);
+            r.context_->Unmap(staging.Get(), 0);
+            auto header = Reader(initial).array<uint32_t, 4>();
+            if (metadata.at("counter_wrap_checked").get<bool>() && header[1])
+                throw std::runtime_error("Shader log counter overflowed uint32");
+            if (stage == "gs") {
+                if (header[3])
+                    throw std::runtime_error("Shader source invocation counter overflowed uint32");
+                metadata["invocations"] = header[2];
+                attempts.push_back({{"capacity", capacity},
+                                    {"observed_records", header[0]},
+                                    {"observed_gs_entries", header[2]},
+                                    {"pipeline_gs_invocations", metadata.at("pipeline_gs_invocations")}});
+            } else
+                attempts.push_back({{"capacity", capacity}, {"observed_invocations", header[0]}});
+            if (header[0] > capacity) {
+                capacity = header[0];
+                continue;
+            }
+            const auto length = uint64_t(header[0]) * metadata.at("record_stride").get<uint32_t>();
+            if (length > initial.size() - 16)
+                throw std::runtime_error("Output log record bounds");
+            records.assign(initial.begin() + 16, initial.begin() + 16 + length);
+            finished = true;
+            break;
+        }
+        if (!finished)
+            throw std::runtime_error("Shader output log kept overflowing during bounded retries");
+        const auto fullHash = sha256(records);
+        const auto stride = metadata.at("record_stride").get<uint32_t>();
+        const auto count = records.size() / stride;
+        Json ordinals = Json::array();
+        std::vector<uint8_t> selected;
+        for (size_t i = 0; i < count; ++i) {
+            if (options.instance && instances > 1 &&
+                Reader(Bytes(records).subspan(i * stride + 4)).read<uint32_t>() != *options.instance)
+                continue;
+            ordinals.push_back(i);
+            selected.insert(selected.end(), records.begin() + i * stride, records.begin() + (i + 1) * stride);
+        }
+        std::string upper = stage;
+        std::transform(upper.begin(), upper.end(), upper.begin(),
+                       [](unsigned char c) { return char(std::toupper(c)); });
+        metadata.update(Json{{"original_parameters", parameters},
+                             {"indirect_arguments", indirect},
+                             {"instance_count", instances},
+                             {"instance", options.instance ? Json(*options.instance) : Json(nullptr)},
+                             {"records", ordinals.size()},
+                             {"full_records", count},
+                             {"record_ordinals", ordinals},
+                             {"attempts", attempts},
+                             {"enabled", enabled},
+                             {"full_capture_sha256", fullHash},
+                             {"sha256", sha256(selected)},
+                             {"instrumented_sha256", sha256(patchedBytes)},
+                             {"source", "native_" + upper + "_output_writes_original_downstream"},
+                             {"executed_stages", executed},
+                             {"stream_output",
+                              {{"strategy", positions.empty() ? "no_active_targets"
+                                                              : "private_buffers_at_tracked_byte_cursors"},
+                               {"targets", positions}}}});
+        return outputLogGeometry(inspectionEvent(r.frame_, event.id), std::move(metadata),
+                                 std::move(selected));
+    }
+
   public:
     PostTransformCapture(Replay &replay, const PostTransformOptions &o) : r(replay), options(o) {}
     PostTransformGeometry run(Id id) {
         if (options.stage != "final" && options.stage != "vs" && options.stage != "ds" &&
-            options.stage != "gs" && options.stage != "vs-index")
+            options.stage != "gs" && options.stage != "vs-index" && !isOutputLogStage(options.stage))
             throw std::runtime_error("Requested geometry stage has not yet been migrated");
         if (options.stream > 3)
             throw std::runtime_error("Geometry output stream must be 0..3");
@@ -663,8 +921,10 @@ class PostTransformCapture {
         PostTransformGeometry result;
         r.inspectEventInputs(id, [&] {
             bind(event, state);
-            result = options.stage == "vs-index" ? captureIdentities(event, state) : capture(event, state);
-            if (options.instance && options.stage != "vs-index")
+            result = isOutputLogStage(options.stage) ? captureLog(event, state)
+                     : options.stage == "vs-index"   ? captureIdentities(event, state)
+                                                     : capture(event, state);
+            if (options.instance && options.stage != "vs-index" && !isOutputLogStage(options.stage))
                 selectInstance(result, event, state);
         });
         result.report["event"] = inspectionEvent(r.frame_, id);
@@ -692,6 +952,8 @@ PostTransformGeometry inspectPostTransform(Replay &replay, Id event, const PostT
     return PostTransformCapture(replay, options).run(event);
 }
 Json postTransformTables(const PostTransformGeometry &geometry) {
+    if (isOutputLogStage(geometry.report.value("requested_stage", std::string{})))
+        return outputLogTables(geometry);
     const auto &report = geometry.report;
     const auto count = report.at("vertices").get<uint64_t>(), stride = report.at("stride").get<uint64_t>();
     const auto factor = report.at("vertices_per_primitive").get<uint32_t>();
@@ -820,6 +1082,10 @@ Json postTransformTables(const PostTransformGeometry &geometry) {
     return result;
 }
 void exportPostTransform(const PostTransformGeometry &geometry, const std::filesystem::path &directory) {
+    if (isOutputLogStage(geometry.report.value("requested_stage", std::string{}))) {
+        exportOutputLog(geometry, directory);
+        return;
+    }
     auto root = QString::fromStdWString(directory.wstring());
     if (!QDir().mkpath(root))
         throw std::runtime_error("Cannot create post-transform export directory");

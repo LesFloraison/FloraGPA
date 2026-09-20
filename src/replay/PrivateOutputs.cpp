@@ -3,8 +3,51 @@
 #include "Unpredicated.h"
 #include <set>
 namespace flora {
-void Replay::withPrivateOutputs(const Event &event, const State &state,
-                                const std::function<void()> &inspect) {
+std::vector<Replay::PrivateSoPosition> Replay::privateStreamOutputPositions(const State &state) {
+    if (state.soCount > 4)
+        throw std::runtime_error("Private SO target count exceeds four");
+    std::array<ID3D11Buffer *, 4> pointers{};
+    std::array<Com<ID3D11Buffer>, 4> held;
+    context_->SOGetTargets(4, pointers.data());
+    for (unsigned i = 0; i < 4; ++i)
+        held[i].Attach(pointers[i]);
+    std::vector<PrivateSoPosition> result;
+    for (unsigned slot = 0; slot < 4; ++slot) {
+        const auto id = slot < state.soCount ? state.so[slot] : 0;
+        auto buffer = get<ID3D11Buffer>(id);
+        if (buffer != pointers[slot])
+            throw std::runtime_error("Private output inspection requires matching native SO bindings");
+        if (!buffer)
+            continue;
+        auto found = soByteCursors_.find(buffer);
+        if (found == soByteCursors_.end())
+            throw std::runtime_error("Private output inspection requires known in-frame SO byte cursors");
+        D3D11_BUFFER_DESC desc;
+        buffer->GetDesc(&desc);
+        if (found->second > desc.ByteWidth || found->second % 4)
+            throw std::runtime_error("Tracked SO cursor is outside the native buffer");
+        result.push_back({slot, id, uint32_t(found->second), desc.ByteWidth});
+    }
+    return result;
+}
+void Replay::withPrivateOutputs(const Event &event, const State &state, const std::function<void()> &inspect,
+                                bool copyStreamOutput) {
+    const auto positions = copyStreamOutput && state.soCount ? privateStreamOutputPositions(state)
+                                                             : std::vector<PrivateSoPosition>{};
+    const auto savedSignature = soSignature_;
+    const auto savedPending = soPendingAppend_;
+    const auto savedCounts = soVertexCounts_;
+    const auto savedCursors = soByteCursors_;
+    const auto savedRetained = retainedSo_;
+    auto restoreSo = [&] {
+        if (!copyStreamOutput)
+            return;
+        soSignature_ = savedSignature;
+        soPendingAppend_ = savedPending;
+        soVertexCounts_ = savedCounts;
+        soByteCursors_ = savedCursors;
+        retainedSo_ = savedRetained;
+    };
     std::vector<Id> om(state.rtv.begin(), state.rtv.end());
     om.insert(om.end(), state.omExtended.begin(), state.omExtended.end());
     if (state.rtCount > om.size())
@@ -26,16 +69,32 @@ void Replay::withPrivateOutputs(const Event &event, const State &state,
     auto restore = [&] {
         for (auto &[id, original] : originals)
             objects_[id] = original;
-        bind(state, false);
-        applyGraphicsEdits(event, state);
+        restoreSo();
+        auto restoredState = state;
+        // Original buffers retained their native filled sizes and append cursors.
+        // Replaying a dirty explicit offset here would reset those hidden values.
+        if (copyStreamOutput)
+            restoredState.mask[20] &= ~0x80000000u;
+        try {
+            bind(restoredState, false);
+            applyGraphicsEdits(event, restoredState);
+        } catch (...) {
+            restoreSo();
+            throw;
+        }
+        restoreSo();
     };
     try {
         for (auto id : views) {
             auto view = get<ID3D11View>(id);
             view->GetResource(&owners[id]);
         }
-        for (auto id : outputs) {
-            auto source = owners.at(id);
+        std::vector<Com<ID3D11Resource>> sources;
+        for (auto id : outputs)
+            sources.push_back(owners.at(id));
+        for (const auto &position : positions)
+            sources.emplace_back(get<ID3D11Buffer>(position.resource));
+        for (auto source : sources) {
             if (!clones.contains(source.Get())) {
                 D3D11_RESOURCE_DIMENSION kind;
                 source->GetType(&kind);
@@ -73,6 +132,8 @@ void Replay::withPrivateOutputs(const Event &event, const State &state,
                 }
                 clones.emplace(source.Get(), clone);
             }
+        }
+        for (auto id : outputs) {
             if (frame_.entry(id).type == 0x8f) {
                 D3D11_UNORDERED_ACCESS_VIEW_DESC desc;
                 get<ID3D11UnorderedAccessView>(id)->GetDesc(&desc);
@@ -126,6 +187,21 @@ void Replay::withPrivateOutputs(const Event &event, const State &state,
             PredicateIsolation guard(*this);
             for (const auto &[id, count] : counters)
                 writeCounter(id, count);
+            if (copyStreamOutput) {
+                // Establish private bindings before setting their measured offsets.
+                // Original SO resource objects are never submitted to this draw.
+                bind(state, false);
+                applyGraphicsEdits(event, state);
+                if (state.soCount) {
+                    std::array<ID3D11Buffer *, 4> buffers{};
+                    std::array<UINT, 4> offsets{};
+                    for (const auto &position : positions) {
+                        buffers[position.slot] = get<ID3D11Buffer>(position.resource);
+                        offsets[position.slot] = position.offset;
+                    }
+                    context_->SOSetTargets(state.soCount, buffers.data(), offsets.data());
+                }
+            }
             inspect();
         }
     } catch (...) {

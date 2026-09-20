@@ -1,9 +1,10 @@
 # Native DXBC output-log instrumentation
 
-The C++ application layer now implements the Python VS/DS output-write and GS
-emission bytecode transforms. These are backend building blocks. The production
-Worker, export functions and Geometry controls do **not** expose these modes yet.
-The last user-facing portable package remains `out/FloraGPA-vs-identity`.
+The C++ application layer implements the Python VS/DS output-write and GS
+emission bytecode transforms. The following integration batch now exposes them
+through the production Worker, exports and Qt Geometry controls; see
+[OUTPUT_LOG_MIGRATION.md](OUTPUT_LOG_MIGRATION.md). The evidence below records the
+original instrumentation batch separately from that end-to-end integration.
 
 `instrumentOutputWrites` mirrors each original masked VS/DS output destination
 through a temporary, restores its original output, and records values plus
@@ -80,13 +81,10 @@ module checks exclude Python, Tk, GPA and RenderDoc.
 
 ## Remaining integration
 
-`vertex_writes.py` and `geometry_emissions.py` remain pending as complete workflows.
-Next work must implement private SO buffers at validated native byte cursors,
-original pipeline/class-instance binding, free-slot selection across all active
-stages and actual OM UAVs, private RTV/DSV/UAV/counter isolation, bounded retry and
-readback, original indirect/DrawAuto parameters, selected-instance restrictions,
-record decode, typed validity exports and GS primitive connectivity, followed by
-the compact Qt Geometry modes and project restore.
+The VS/DS write and GS emission workflows now have native capture, private SO
+isolation, export and Qt integration in the subsequent batch. The checkpoint,
+trace and HS branches of `vertex_writes.py` remain unfinished. Integration evidence
+and remaining verification gaps are tracked in `OUTPUT_LOG_MIGRATION.md`.
 
 Current tests establish bytecode-transform parity and focused native execution;
 they do not establish full replay-state restoration, exception cleanup, atomic

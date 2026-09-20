@@ -5,8 +5,14 @@
 namespace flora {
 using Json = nlohmann::json;
 namespace {
-const std::map<std::string, std::string> geometryStages{
-    {"final", "最终"}, {"vs", "VS"}, {"ds", "DS"}, {"gs", "GS"}, {"vs-index", "VS索引"}};
+const std::map<std::string, std::string> geometryStages{{"final", "最终"},
+                                                        {"vs", "VS"},
+                                                        {"ds", "DS"},
+                                                        {"gs", "GS"},
+                                                        {"vs-index", "VS索引"},
+                                                        {"vs-writes", "VS写入"},
+                                                        {"ds-writes", "DS写入"},
+                                                        {"gs-emits", "GS发射"}};
 const std::map<std::string, std::string> geometryTables{
     {"expanded_vertices", "逐次引用"}, {"unique_vertices", "唯一顶点"}, {"references", "索引映射"}};
 std::string text(const Json &object, const char *key, const char *fallback) {

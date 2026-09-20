@@ -2,14 +2,31 @@
 
 已有可编译、可运行的 VS2022 / Qt Widgets 原生工程，能够独立重放当前验证的
 GF2 与 BF1 DX11 捕获。**尚未完成原 Python 版本的全部功能迁移。**
-当前独立包为 `out/FloraGPA-vs-identity/FloraGPA.exe`。
+当前独立包为 `out/FloraGPA-output-logs/FloraGPA.exe`。
 
-最新批次完成 VS/DS 写入、GS 发射记录的 C++ DXBC 插桩基础层。完整插桩字节及
+最新批次接通原生 VS/DS 写入与 GS 发射的采集、导出和 Qt Geometry 入口。
+沿用原 Draw、下游管线与类实例，在私有 RTV/DSV/UAV/SO 上执行并恢复原 SO 游标；
+记录逐分量有效性、原始已知身份、Emit/Cut 顺序和 GS 条带连接关系。VS/DS 写入
+使用记录表，GS 发射保留网格预览，导出包含有效性二进制与图元 CSV。
+开发版 100 项对照通过（90 项成功、10 项预期拒绝），含 Hardware/WARP 的
+GF2/BF1 六项真实捕获对照；BF1 DS 使用实际启用曲面细分的事件 11276。
+原子分配顺序的三项差异保留于证据中，核对完整调用记录和 GS 局部序列。
+最终独立包同样通过 100 项对照，旧 Final/VS/DS/GS 的 140 项对照继续通过。
+Release 40 套 CTest 全部通过，含原有 Qt 53 项及几何套件 10 项，无失败、无跳过；
+GF2/BF1 黄金帧及关闭 Draw 负对照 4 项通过。224 份成功报告的模块审计未发现
+Python/Tk/GPA/RenderDoc，Qt 来自独立包，三个 EXE 与 Release 构建一致。
+证据为 `artifacts/output-log-portable-final/validation.json`、
+`artifacts/output-log-post-regression/validation.json`、
+`artifacts/ctest-output-log-final.log`、`artifacts/output-log-golden-final/validation.json`
+及 `artifacts/output-log-runtime-audit.json`；仍未替代独立机器验证。
+Checkpoint、trace 和 HS 分支仍未迁移，整体目标保持未完成。
+详见 [OUTPUT_LOG_MIGRATION.md](OUTPUT_LOG_MIGRATION.md)。
+
+前一批完成 VS/DS 写入、GS 发射记录的 C++ DXBC 插桩基础层。完整插桩字节及
 元数据 461 项对照全部通过（444 项成功、17 项预期拒绝），其中包含 24 项既有
 VS 身份插桩回归，以及 GF2/BF1 的 163 个不同原始着色器（161 VS、2 DS）。
 原生 Hardware/WARP 执行测试覆盖记录值、有效性、调用数、溢出边界及 GS Emit
-之后的稀疏写入。该层尚未接入 Worker、导出和 Qt：`vertex_writes.py` 与
-`geometry_emissions.py` 完整工作流仍为待迁移，当前可用独立包保持不变。
+之后的稀疏写入。该批仅完成基础层；Worker、导出和 Qt 接入现已由最新批次补齐，checkpoint/trace 等分支仍未迁移。
 Release 40 套 CTest 全部通过，原有 Qt 53 项无失败、无跳过；新增着色器套件
 6 项通过（含 setup/cleanup），GF2/BF1 黄金图像和关闭 Draw 负对照 4 项通过。
 详见 [DXBC_OUTPUT_LOG_MIGRATION.md](DXBC_OUTPUT_LOG_MIGRATION.md)。

@@ -190,7 +190,14 @@ class Replay {
     void applySamplerEdits(Id event);
     void applySrvEdits(Id event, const State &state);
     void applyGraphicsEdits(const Event &event, const State &state);
-    void withPrivateOutputs(const Event &event, const State &state, const std::function<void()> &inspect);
+    struct PrivateSoPosition {
+        uint32_t slot;
+        Id resource;
+        uint32_t offset, capacity;
+    };
+    std::vector<PrivateSoPosition> privateStreamOutputPositions(const State &state);
+    void withPrivateOutputs(const Event &event, const State &state, const std::function<void()> &inspect,
+                            bool copyStreamOutput = false);
     unsigned predicateIsolationDepth_ = 0;
     class PredicateIsolation {
         Replay &replay_;
