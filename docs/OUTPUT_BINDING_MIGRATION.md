@@ -2,7 +2,8 @@
 
 The native `OutputBindingModel` ports the original/experimental state machine in
 `standalone/binding_model.py`. This is core infrastructure for the remaining
-output setter editors. Output/SO experiment serialization, replay integration,
+output setter editors. Output/SO argument validation and cached history are now
+implemented. Experiment project integration, native replay integration,
 retained SO cursors and the Qt editor are **not yet available**.
 
 ## Implemented
@@ -18,6 +19,18 @@ retained SO cursors and the Qt editor are **not yet available**.
 - Missing output records invalidate only possibly affected bindings. Edited
   unknowns cannot be silently replaced by a later captured snapshot. Invalid
   edits leave both histories unchanged.
+- `application/OutputEdits` checks complete argument objects, immediate contexts,
+  unsigned integers, independent null/empty arrays, RTV/UAV view types and target
+  dimensions. It preserves the original 16-byte command prefix when encoding.
+  All five SO setter families validate unique non-null buffers, bind flags and
+  aligned/in-bounds offsets; omitted offsets remain omitted, not zeroed.
+- `OutputBindingHistory` owns immutable replacement payloads, advances each
+  context once and caches only nonempty deltas. Earlier reads do not replay the
+  model; a malformed future record does not affect an earlier requested event.
+  Missing commands that could reset a missing/counter UAV reject explicitly.
+- State overlays mark dirty non-null SO slots as retained and set their offset
+  to KEEP. This is a request for append preservation; it does not prove that the
+  native hidden cursor is known.
 
 `readOutputCommand` is shared by actual captured command replay and SRV history.
 The experimental model uses whole-subresource overlap, matching Python;
@@ -47,6 +60,21 @@ The packaged CLI also passes all 164 existing SRV edge comparisons in
 `artifacts/output-model-srv-edges/validation.json`, including output gaps,
 descriptor/buffer inheritance, immediate-context order and read-only DSV planes.
 
+The subsequent argument/history batch is covered by
+`tools/validate_output_history_port.py`: 65 groups and 2,480 comparisons, with
+548 argument/encoding cases and 1,932 history/state reads. This includes 1,990
+accepted operations and 490 expected rejections. Evidence is in
+`artifacts/output-history-combined/validation.json` for Release and
+`artifacts/output-history-debug/validation.json` for Debug. Coverage includes
+all five SO encodings, six-stage SRV collateral changes and mixed edits, IA,
+interleaved contexts, reverse cache reads, future malformed records, counter
+gaps and GF2/BF1 snapshots. The earlier 8,152-boundary model/native-getter
+regression is rerun in `artifacts/output-history-model-regression/validation.json`.
+
+These APIs are deliberately separate from `isEditableSetter` until replay and
+project consumers are connected. The packaged UI still exposes the previously
+completed predicate, sampler and SRV setters.
+
 ### Native ClearState discrepancy
 
 The Python model sets all IA stride/offset fields to zero after ClearState.
@@ -68,10 +96,11 @@ Do not silently manufacture a runtime observation from the offline model.
 
 ## Remaining integration
 
-1. Validate and serialize output/SO setter arguments transactionally, including
-   independent optional arrays, unique SO resources and exact buffer offsets.
-2. Cache per-context history deltas and missing-command evidence; reject skipped
-   output commands whose UAV counter initialization cannot be reconstructed.
+1. Connect validated output/SO payloads to experiment transactions, save/load and
+   undo/redo. Recreate the immutable history whenever the experiment changes;
+   include modeled SRV/IA replacements in the same history.
+2. Pass cached deltas and gap evidence through the worker/replay boundary rather
+   than independently rebuilding or guessing the affected output state.
 3. Apply deltas before event edits and resource cloning, including final target
    resolution for buffer/texture edits and export consumers.
 4. Execute replacements at their command boundary, retain edited SO cursors and

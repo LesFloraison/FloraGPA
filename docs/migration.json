@@ -135,7 +135,8 @@
         "tools/validate_output_model_port.py: 42 streams, 8152 boundaries and all 1008 original/changed fields, dirty sets and overlays match Python, including GF2/BF1 and missing-output gaps",
         "Hardware/WARP getter comparison covers 288 boundaries; null VB stride/offset persistence after ClearState differs from the reference model at four observations and is recorded explicitly",
         "OutputBindingTests: strict optional/KEEP arrays, truncation, malformed edits, target overlap/dimensions and atomic state preservation",
-        "Replay experiment integration, retained SO cursors, serialization and Qt output/SO editors remain pending; see docs/OUTPUT_BINDING_MIGRATION.md"
+        "Replay experiment integration, retained SO cursors, serialization and Qt output/SO editors remain pending; see docs/OUTPUT_BINDING_MIGRATION.md",
+        "OutputBindingHistory: immutable replacements, per-context forward traversal, sparse delta cache, reverse reads and retained SO overlay; 2480 argument/history comparisons in Release and Debug"
       ]
     },
     {
@@ -1546,11 +1547,14 @@
       "description": "Output setter arguments and captured/experimental binding history.",
       "status": "partial",
       "native": [
-        "src/core/OutputBindings.cpp"
+        "src/core/OutputBindings.cpp",
+        "src/application/OutputEdits.cpp"
       ],
       "validation": [
-        "Effective RTV/DSV target signatures and original/edited binding transitions are implemented and compared with Python",
-        "Setter normalization/serialization, delta history cache, UAV counter gap handling, native output verification and Qt editor remain pending"
+        "Effective RTV/DSV signatures, strict complete argument objects, independent optional arrays, KEEP, exact wire encoding and view/hazard validation",
+        "OutputBindingHistory: per-context cached deltas, missing-view evidence and unresolved UAV counter initialization rejection; retained SO slots request KEEP offsets",
+        "tools/validate_output_history_port.py: 65 groups and 2480 Release/Debug comparisons, including GF2/BF1, six-stage collateral and mixed SRV edits, IA, multiple contexts, reverse reads and malformed future records",
+        "Experiment project integration, native replay consumers/output getter verification, retained cursor handling and Qt editor remain pending"
       ]
     },
     {
@@ -2201,12 +2205,14 @@
       "status": "partial",
       "native": [
         "src/core/StreamOutput.cpp",
-        "src/replay/StreamOutput.cpp"
+        "src/replay/StreamOutput.cpp",
+        "src/application/OutputEdits.cpp"
       ],
       "validation": [
         "Captured native SOSetTargets execution, optional independent arrays, clear/reset/append and context validation",
         "tools/validate_stream_output_port.py: 690 final-package checks with system-only PATH, hardware/WARP, synthetic and five original GPA SO captures; original line-stream captured count 6 is recovered as 12 actual vertices",
-        "Setter experiment serialization, retained output history and dedicated editors remain pending"
+        "Argument validation and exact encoding now cover five SO setter families, absent/empty arrays, duplicate targets, buffer bind flags and offsets; cached output history carries retained-slot markers",
+        "tools/validate_output_history_port.py: 250 SO argument cases and 240 SO history reads match Python; project, native retained cursor and Qt editor integration remain pending"
       ]
     },
     {

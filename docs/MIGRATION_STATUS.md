@@ -40,12 +40,24 @@ GF2 与 BF1 DX11 捕获。**尚未完成原 Python 版本的全部功能迁移�
 
 ## 验证证据
 
+- 输出/SO setter 的参数与历史缓存继续迁移：完整参数集合、严格整数/数组、KEEP、
+  五种 SO 编码、重复目标及偏移检查；按 context 单次推进、只缓存差异、反向读取、
+  缺失输出的 UAV counter 重置拒绝，以及 retained SO 的 KEEP 偏移标记。
+  `tools/validate_output_history_port.py` 的 65 组、2,480 项 Python 对照通过，
+  其中 548 项为参数/编码，1,932 项为历史/状态读取，包含 490 项预期拒绝。
+  Release 证据为 `artifacts/output-history-combined/validation.json`，
+  Debug 证据为 `artifacts/output-history-debug/validation.json`。
+  此前 8,152 个边界的模型回归也通过，见
+  `artifacts/output-history-model-regression/validation.json`。
+  **这些接口尚未接入实验项目和发布包的 output/SO 编辑入口**；原生 SO cursor
+  保留、counter/native getter 验证、重放消费者和 Qt 表单仍待完成。
+
 - 输出绑定核心新增 `OutputBindingModel`，迁移原始/实验双状态、KEEP、跨输出冲突、
   SRV/IA 连带解绑、缺失记录后的受影响字段和跨快照差异。最终 Python 对照覆盖
   42 条流、8,152 个边界，每处比较全部 1,008 个字段、dirty 集合及 overlay。
   输出命令的共享检查解析器已接入原生重放和 SRV 历史。
-  **这不表示 output/SO setter 编辑已可用**：项目序列化、历史缓存、retained SO
-  cursor、counter 缺口处理和 Qt 编辑入口仍待迁移。
+  **这不表示 output/SO setter 编辑已可用**：项目序列化、原生 retained SO
+  cursor 和 Qt 编辑入口仍待迁移。历史缓存和 counter 缺口检查已在后续批次补齐。
   硬件/WARP 的 288 处 getter 对照发现四处空 VB 的 stride/offset 与 Python
   ClearState 模型不同，已明确记录，不能据此声称所有 GPU 状态完全一致。
   具体边界与后续接入要求见 [输出绑定迁移记录](OUTPUT_BINDING_MIGRATION.md)。

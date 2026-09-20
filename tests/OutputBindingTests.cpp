@@ -1,4 +1,5 @@
 #include "StateCapture.h"
+#include "application/OutputEdits.h"
 #include "core/OutputBindings.h"
 #include <QCoreApplication>
 #include <QTemporaryDir>
@@ -62,9 +63,66 @@ void oracle(const QString &path) {
     stream >> request;
     Frame frame(QString::fromStdString(request.at("frame").get<std::string>()).toStdWString());
     OutputBindingModel model(frame, request.value("context", Id(1)));
+    std::map<Id, std::vector<uint8_t>> replacements;
+    for (auto &edit : request.value("edits", Json::array())) {
+        auto bytes =
+            QByteArray::fromHex(QByteArray::fromStdString(edit.at("replacement").get<std::string>()));
+        replacements[edit.at("event").get<Id>()] = std::vector<uint8_t>(bytes.begin(), bytes.end());
+    }
+    OutputBindingHistory history(frame, std::move(replacements));
     Json result = Json::array();
     for (const auto &step : request.at("steps")) {
         Json row;
+        if (request.value("mode", "model") == "arguments") {
+            try {
+                const auto event = step.at("event").get<Id>();
+                row["captured"] = capturedOutputSetter(frame, event);
+                const auto bytes = validateOutputSetter(frame, event, step.at("values"));
+                row["encoded"] =
+                    QByteArray(reinterpret_cast<const char *>(bytes.data()), qsizetype(bytes.size()))
+                        .toHex()
+                        .toStdString();
+                row["status"] = "ok";
+            } catch (const std::exception &e) {
+                row["status"] = "error";
+                row["error"] = e.what();
+            }
+            result.push_back(std::move(row));
+            continue;
+        }
+        if (request.value("mode", "model") == "history") {
+            try {
+                const auto event = step.at("event").get<Id>();
+                row["delta"] = json(history.delta(event));
+                if (step.contains("state")) {
+                    State state = stateFromValues(step.at("state"));
+                    state.soOffsets = step.value("so_offsets", std::array<uint32_t, 4>{});
+                    const auto changed = history.state(event, state);
+                    row["state"] = hash(OutputBindingModel::snapshot(changed.state));
+                    row["so_offsets"] = changed.state.soOffsets;
+                    std::vector<unsigned> retained;
+                    for (unsigned i = 0; i < 4; ++i)
+                        if (changed.retainedSo[i])
+                            retained.push_back(i);
+                    row["so_retained_slots"] = retained;
+                }
+                row["status"] = "ok";
+            } catch (const MissingOutputResource &e) {
+                row["status"] = "missing";
+                row["missing"] = e.resources;
+            } catch (const std::exception &e) {
+                row["status"] = "error";
+                row["error"] = e.what();
+            }
+            row["gaps"] = Json::object();
+            for (auto &[id, gap] : history.gaps())
+                row["gaps"][std::to_string(id)] = {{"event", id},
+                                                   {"missing_views", gap.missingViews},
+                                                   {"affected_fields", gap.fields.affected},
+                                                   {"affected_edited_fields", gap.fields.edited}};
+            result.push_back(std::move(row));
+            continue;
+        }
         try {
             if (step.contains("anchor"))
                 model.anchor(stateFromValues(step.at("anchor")));
@@ -188,6 +246,60 @@ class OutputBindingTests final : public QObject {
         auto missing = statePack(Id(0), Id(1), 1u, uint8_t(1), Id(999999), Id(0));
         QVERIFY_THROWS_EXCEPTION(MissingOutputResource, model.step(frame.entry(161), Bytes(missing)));
         QCOMPARE(model.changed(), before);
+    }
+    void historyCache() {
+        QTemporaryDir dir;
+        auto c = stateCapture();
+        c.add(170, 7, 0x34ff, statePack(Id(0), Id(1), 1u, uint8_t(1), Id(999999), Id(0)));
+        c.add(171, 7, 0x242, statePack(Id(0), Id(1)));
+        c.save(dir.path() + "/frame.gpa_frame");
+        Frame f((dir.path() + "/frame.gpa_frame").toStdWString());
+        // Earlier unrelated malformed captured records would prevent a full
+        // traversal: create the history capture from only the relevant entries.
+        Capture historyCapture;
+        for (const auto &[id, entry] : f.entries())
+            if (entry.category != 7 || id == 100 || id == 160 || id == 161 || id == 170 || id == 171) {
+                auto raw = f.payload(id);
+                historyCapture.add(id, entry.category, entry.type, {raw.begin(), raw.end()});
+            }
+        historyCapture.save(dir.path() + "/history.gpa_frame");
+        Frame frame((dir.path() + "/history.gpa_frame").toStdWString());
+        const auto edit = statePack(Id(0), Id(1), 0u, uint8_t(1), Id(0));
+        OutputBindingHistory history(frame, {{161, edit}});
+        QCOMPARE(history.delta(161).at("rtv.0"), std::optional<Id>(0));
+        QVERIFY(history.delta(171).empty());
+        QCOMPARE(history.delta(161).at("rtv.0"), std::optional<Id>(0));
+        QVERIFY(history.delta(162).empty());
+        QVERIFY(history.gaps().contains(170));
+        auto result = history.state(161, State{});
+        QCOMPARE(result.state.stages[4].srv[0], Id(25));
+        QVERIFY_THROWS_EXCEPTION(std::exception, OutputBindingHistory(frame, {{100, edit}}));
+    }
+    void arguments() {
+        QTemporaryDir dir;
+        auto c = stateCapture();
+        c.buffer(290, 291, 16, 0, {0, 0, 0, 0});
+        c.add(292, 7, 0x3503, statePack(Id(0), Id(1), 1u, uint8_t(1), Id(290), uint8_t(0)));
+        c.save(dir.path() + "/frame.gpa_frame");
+        Frame f((dir.path() + "/frame.gpa_frame").toStdWString());
+        auto so = capturedOutputSetter(f, 292);
+        QVERIFY(so["offsets"].is_null());
+        QCOMPARE(readStreamOutputTargets(validateOutputSetter(f, 292, so)).buffers->at(0), Id(290));
+        so["offsets"] = {3};
+        QVERIFY_THROWS_EXCEPTION(std::exception, validateOutputSetter(f, 292, so));
+        so = {{"count", 2}, {"buffers", {290, 290}}, {"offsets", nullptr}};
+        QVERIFY_THROWS_EXCEPTION(std::exception, validateOutputSetter(f, 292, so));
+        auto output = capturedOutputSetter(f, 161);
+        output["rtvs"] = Json::array();
+        QVERIFY_THROWS_EXCEPTION(std::exception, validateOutputSetter(f, 161, output));
+        output["rtv_count"] = 0;
+        auto raw = validateOutputSetter(f, 161, output);
+        QCOMPARE(readOutputCommand(0x34ff, raw).rtvCount, 0u);
+        output["rtv_count"] = false;
+        QVERIFY_THROWS_EXCEPTION(std::exception, validateOutputSetter(f, 161, output));
+        output["rtv_count"] = 0;
+        output["extra"] = 0;
+        QVERIFY_THROWS_EXCEPTION(std::exception, validateOutputSetter(f, 161, output));
     }
 };
 int main(int argc, char **argv) {

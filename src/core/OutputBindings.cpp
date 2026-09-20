@@ -1,4 +1,5 @@
 #include "OutputBindings.h"
+#include "UavCounters.h"
 #include <algorithm>
 namespace flora {
 namespace {
@@ -548,11 +549,12 @@ void OutputBindingModel::anchor(const State &state) {
     changed_ = std::move(changed);
     differences();
 }
-State OutputBindingModel::overlay(State s) const {
-    for (auto &[key, value] : changed_)
+State OutputBindingModel::overlay(State s) const { return overlay(changed_, s); }
+State OutputBindingModel::overlay(const BindingValues &values, State s) {
+    for (auto &[key, value] : values)
         if (!value)
             throw std::runtime_error("Binding context is not fully resolved");
-    auto get = [&](const std::string &key) { return *changed_.at(key); };
+    auto get = [&](const std::string &key) { return *values.at(key); };
     s.ib = get("ib");
     s.ibFormat = uint32_t(get("ib_format"));
     s.ibOffset = uint32_t(get("ib_offset"));
@@ -586,5 +588,89 @@ State OutputBindingModel::overlay(State s) const {
             s.soCount = i + 1;
     }
     return s;
+}
+void OutputBindingModel::validateArguments(const Frame &frame, uint16_t type, Bytes bytes) {
+    if (!isOutputCommand(type))
+        throw std::runtime_error("Select an output binding command");
+    OutputBindingModel model(frame, 0);
+    auto empty = snapshot(State{});
+    model.apply(empty, type, bytes);
+}
+OutputBindingHistory::OutputBindingHistory(const Frame &frame,
+                                           std::map<Id, std::vector<uint8_t>> replacements)
+    : frame_(frame), replacements_(std::move(replacements)), next_(frame.entries().begin()) {
+    for (auto &[id, bytes] : replacements_) {
+        const auto &entry = frame_.entry(id);
+        if (entry.category != 7 || !OutputBindingModel::models(entry.type) || isDraw(entry.type) ||
+            entry.type == 0x242)
+            throw std::runtime_error("Output history replacement requires a modeled setter");
+    }
+}
+void OutputBindingHistory::advance(Id event) {
+    while (next_ != frame_.entries().end() && next_->first <= event) {
+        const auto &entry = next_->second;
+        if (entry.category != 7 || !OutputBindingModel::models(entry.type)) {
+            ++next_;
+            continue;
+        }
+        Reader r(frame_.payload(entry.id));
+        r.skip(isDraw(entry.type) ? 16 : 8);
+        auto context = r.read<Id>();
+        auto &model = models_[context];
+        if (!model)
+            model = std::make_unique<OutputBindingModel>(frame_, context);
+        auto edited = replacements_.find(entry.id);
+        try {
+            model->step(entry,
+                        edited == replacements_.end() ? std::optional<Bytes>{} : Bytes(edited->second));
+        } catch (const MissingOutputResource &error) {
+            if (edited != replacements_.end())
+                throw;
+            auto command = readOutputCommand(entry.type, frame_.payload(entry.id));
+            if (command.initialCounts && command.uavs)
+                for (size_t i = 0; i < command.uavs->size(); ++i) {
+                    auto view = command.uavs->at(i), count = Id(command.initialCounts->at(i));
+                    if (view && count != keepOutput &&
+                        (!frame_.entries().contains(view) || describeCounter(frame_, view)))
+                        throw std::runtime_error(
+                            "Missing output command has unresolved UAV counter initialization at event " +
+                            std::to_string(entry.id));
+                }
+            gaps_[entry.id] = {error.resources, model->gap(entry)};
+        }
+        BindingValues delta;
+        for (auto &key : model->dirty())
+            delta[key] = model->changed().at(key);
+        if (!delta.empty())
+            deltas_[entry.id] = std::move(delta);
+        ++next_;
+    }
+}
+const BindingValues &OutputBindingHistory::delta(Id event) {
+    advance(event);
+    static const BindingValues empty;
+    auto found = deltas_.find(event);
+    return found == deltas_.end() ? empty : found->second;
+}
+OutputBindingState OutputBindingHistory::state(Id event, State captured) {
+    const auto &changes = delta(event);
+    OutputBindingState result{captured};
+    if (changes.empty())
+        return result;
+    auto values = OutputBindingModel::snapshot(captured);
+    for (auto &[key, value] : changes) {
+        if (!value)
+            throw std::runtime_error("Edited bindings remain unknown at event " + std::to_string(event));
+        values.at(key) = value;
+    }
+    result.state = OutputBindingModel::overlay(values, captured);
+    for (unsigned i = 0; i < 4; ++i) {
+        auto found = changes.find("so.targets." + std::to_string(i));
+        if (found != changes.end() && found->second != Id(0)) {
+            result.state.soOffsets[i] = keepOutput;
+            result.retainedSo[i] = true;
+        }
+    }
+    return result;
 }
 } // namespace flora

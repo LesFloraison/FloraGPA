@@ -47,6 +47,8 @@ class OutputBindingModel {
     OutputBindingModel(const Frame &frame, Id context);
     static bool models(uint16_t type);
     static BindingValues snapshot(const State &state);
+    static State overlay(const BindingValues &values, State state);
+    static void validateArguments(const Frame &frame, uint16_t type, Bytes bytes);
     const BindingValues &original() const { return original_; }
     const BindingValues &changed() const { return changed_; }
     const auto &dirty() const { return dirty_; }
@@ -54,5 +56,30 @@ class OutputBindingModel {
     BindingGap gap(const Entry &entry);
     void anchor(const State &state);
     State overlay(State state) const;
+};
+struct OutputHistoryGap {
+    std::set<Id> missingViews;
+    BindingGap fields;
+};
+struct OutputBindingState {
+    State state;
+    std::array<bool, 4> retainedSo{};
+};
+// Immutable replacement payloads and one forward traversal; earlier requests
+// read cached differences without moving or replaying the live model backwards.
+class OutputBindingHistory {
+    const Frame &frame_;
+    std::map<Id, std::vector<uint8_t>> replacements_;
+    std::map<Id, Entry>::const_iterator next_;
+    std::map<Id, std::unique_ptr<OutputBindingModel>> models_;
+    std::map<Id, BindingValues> deltas_;
+    std::map<Id, OutputHistoryGap> gaps_;
+
+  public:
+    OutputBindingHistory(const Frame &frame, std::map<Id, std::vector<uint8_t>> replacements);
+    void advance(Id event);
+    const BindingValues &delta(Id event);
+    OutputBindingState state(Id event, State captured);
+    const auto &gaps() const { return gaps_; }
 };
 } // namespace flora
