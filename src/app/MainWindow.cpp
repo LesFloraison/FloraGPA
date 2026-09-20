@@ -139,6 +139,7 @@ MainWindow::MainWindow() {
             capturePath_ = pendingPath_;
             ++revision_;
             selectedEvent_ = selectedResource_ = 0;
+            selectedShaderStage_.reset();
             experiment_ = std::make_unique<Experiment>(*frame_);
             projectPath_.clear();
             projectDirty_ = false;
@@ -954,8 +955,13 @@ void MainWindow::buildUi() {
             });
     connect(pipeline_, &QTreeWidget::itemDoubleClicked, this, [this](QTreeWidgetItem *item, int) {
         auto id = item->data(1, Qt::UserRole).toULongLong();
-        if (id)
+        if (id) {
+            const QStringList stages{"VS", "HS", "DS", "GS", "PS", "CS"};
+            const auto stage = item->parent() ? -1 : stages.indexOf(item->text(0));
             inspectResource(id);
+            if (stage >= 0)
+                selectedShaderStage_ = unsigned(stage);
+        }
     });
     setBusy(false);
 }
@@ -1320,6 +1326,7 @@ void MainWindow::selectEvent(Id id) {
     replayedState_->setSelection(frame_, id);
     predicateView_->setSelection(frame_, id);
     selectedResource_ = 0;
+    selectedShaderStage_.reset();
     clearBufferDetails();
     updateExperimentActions();
     ++revision_;
@@ -1333,9 +1340,12 @@ void MainWindow::selectEvent(Id id) {
     }
     try {
         inspectEvent(id);
-        if (isDraw(frame_->entry(id).type))
-            showPipeline(frame_->state(frame_->event(id).state));
-        else
+        if (isDraw(frame_->entry(id).type)) {
+            ReplayOptions options;
+            if (experiment_)
+                experiment_->apply(*frame_, options);
+            showPipeline(effectiveBindings(*frame_, id, frame_->state(frame_->event(id).state), options));
+        } else
             pipeline_->clear();
     } catch (const std::exception &e) {
         showError(QString::fromUtf8(e.what()));
@@ -1558,6 +1568,8 @@ void MainWindow::showPipeline(const State &s) {
         auto group = new QTreeWidgetItem(pipeline_,
                                          {names[k], stage.shader ? QString::number(stage.shader) : "—", ""});
         group->setData(1, Qt::UserRole, QVariant::fromValue<qulonglong>(stage.shader));
+        for (uint32_t i = 0; i < std::min(stage.classCount, 256u); ++i)
+            link(group, QString("Class instance %1").arg(i), stage.classes[i]);
         for (int i = 0; i < 14; ++i)
             if (stage.cb[i])
                 link(group, QString("CB %1").arg(i), stage.cb[i]);
@@ -1590,6 +1602,7 @@ void MainWindow::showPipeline(const State &s) {
     predicate->setExpanded(s.predicate != 0);
 }
 void MainWindow::inspectResource(Id id) {
+    selectedShaderStage_.reset();
     if (!frame_)
         return;
     try {
@@ -1994,6 +2007,7 @@ void MainWindow::updateExperimentActions() {
         editable && experiment_ && !experiment_->enabled(selectedEvent_) ? "Enable Event" : "Disable Event");
 }
 void MainWindow::experimentChanged() {
+    const auto shaderStage = selectedShaderStage_;
     ++outputGeneration_;
     replayedState_->invalidate();
     predicateView_->invalidate();
@@ -2004,14 +2018,34 @@ void MainWindow::experimentChanged() {
     chart_->clear();
     metrics_->clear();
     updateExperimentActions();
-    if (selectedEvent_)
+    if (selectedEvent_) {
         inspectEvent(selectedEvent_);
+        if (isDraw(frame_->entry(selectedEvent_).type)) {
+            ReplayOptions options;
+            experiment_->apply(*frame_, options);
+            const auto state = effectiveBindings(*frame_, selectedEvent_,
+                                                 frame_->state(frame_->event(selectedEvent_).state), options);
+            showPipeline(state);
+            if (shaderStage) {
+                selectedResource_ = state.stages[*shaderStage].shader;
+                if (!selectedResource_) {
+                    shader_->clear();
+                    sourceEditor_->clear();
+                    sourceFiles_->clear();
+                    shaderReflection_->clear();
+                    properties("Shader", {{"Resource", "None"}});
+                }
+            }
+        }
+    }
     if (process_.state() != QProcess::NotRunning)
         cancel();
     if (selectedResource_) {
         auto type = frame_->entry(selectedResource_).type;
-        if (type >= 0x90 && type <= 0x95)
+        if (type >= 0x90 && type <= 0x95) {
             inspectResource(selectedResource_);
+            selectedShaderStage_ = shaderStage;
+        }
         if (type >= 0x84 && type <= 0x87 && centerTabs_->currentWidget() == texturePane_) {
             replayTimer_.stop();
             textureTimer_.start();

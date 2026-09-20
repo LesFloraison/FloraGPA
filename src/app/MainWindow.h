@@ -166,6 +166,7 @@ class MainWindow final : public QMainWindow {
     void *job_ = nullptr;
     uint64_t revision_ = 0, runningRevision_ = 0;
     Id selectedEvent_ = 0, selectedResource_ = 0;
+    std::optional<unsigned> selectedShaderStage_;
     bool runningTimings_ = false;
     QJsonObject report_;
     QByteArray defaultDockState_;

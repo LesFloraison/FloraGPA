@@ -6,6 +6,7 @@ struct PipelineBinding {
     Id context{};
     State values;
 };
+std::optional<unsigned> shaderSetterStage(uint16_t type);
 bool isPipelineSetter(uint16_t type);
 PipelineBinding readPipelineSetter(uint16_t type, Bytes bytes);
 void validatePipelineBinding(const Frame &frame, const PipelineBinding &binding);

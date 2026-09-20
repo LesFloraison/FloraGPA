@@ -81,8 +81,9 @@ rendered pixels, raw storage, output metadata and complete pipeline fields on
 hardware and WARP. Its `--real-only` mode edits all recovered viewport setters in
 GF2/BF1 and compares both edited and undone frames.
 
-This does not complete all setter migration: IA resource, CB/CB1 and shader
-setter editing remain separate work. Pending coverage/debugger/private consumers
+This does not complete all setter migration: IA resource and CB/CB1
+setter editing remain separate work. Six-stage shader setter migration is now
+documented in `docs/SHADER_SETTER_MIGRATION.md`. Pending coverage/debugger/private consumers
 still require their own migration and verification.
 
 ```powershell

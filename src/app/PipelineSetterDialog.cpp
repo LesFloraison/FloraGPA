@@ -29,7 +29,8 @@ bool editPipelineSetterDialog(QWidget *parent, const Frame &frame, Id event, con
     for (auto it = initial.begin(); it != initial.end(); ++it) {
         const auto key = it.key();
         const auto label = QString::fromStdString(key).replace('_', ' ');
-        if (key == "topology" || key == "rasterizer" || key == "blend" || key == "depth_state") {
+        if (key == "topology" || key == "rasterizer" || key == "blend" || key == "depth_state" ||
+            key == "shader") {
             auto box = new QComboBox;
             box->setObjectName(QString::fromStdString("ps_" + key));
             auto add = [&](Id id, const QString &name) {
@@ -51,12 +52,14 @@ bool editPipelineSetterDialog(QWidget *parent, const Frame &frame, Id event, con
                 for (Id id = 33; id <= 64; ++id)
                     add(id, QString("Patch — %1 control points").arg(id - 32));
             } else {
-                add(0, "Default");
+                add(0, key == "shader" ? "None" : "Default");
                 for (auto &[id, e] : frame.entries()) {
-                    const bool matches = key == "rasterizer"
-                                             ? (e.type == 0x89 || e.type == 0x10e || e.type == 0x10f)
-                                         : key == "blend" ? (e.type == 0x8a || e.type == 0x10d)
-                                                          : e.type == 0x8b;
+                    static constexpr uint16_t shaderTypes[]{0x90, 0x95, 0x94, 0x91, 0x92, 0x93};
+                    const bool matches =
+                        key == "shader" ? e.type == shaderTypes[*shaderSetterStage(frame.entry(event).type)]
+                        : key == "rasterizer" ? (e.type == 0x89 || e.type == 0x10e || e.type == 0x10f)
+                        : key == "blend"      ? (e.type == 0x8a || e.type == 0x10d)
+                                              : e.type == 0x8b;
                     if (e.category == 5 && matches)
                         add(id, QString("%1 %2").arg(label).arg(id));
                 }
@@ -70,16 +73,19 @@ bool editPipelineSetterDialog(QWidget *parent, const Frame &frame, Id event, con
             box->setCurrentIndex(index);
             form->addRow(label, box);
             combos[key] = box;
-        } else if (key == "viewports_values" || key == "scissors_values" || key == "blend_factor") {
+        } else if (key == "viewports_values" || key == "scissors_values" || key == "blend_factor" ||
+                   key == "class_instances") {
             arrayKey = key;
-            const bool viewport = key == "viewports_values", factor = key == "blend_factor";
+            const bool viewport = key == "viewports_values", factor = key == "blend_factor",
+                       classes = key == "class_instances";
             table = new QTableWidget;
             table->setObjectName("ps_rows");
-            table->setColumnCount(viewport ? 6 : 4);
+            table->setColumnCount(classes ? 1 : viewport ? 6 : 4);
             table->setHorizontalHeaderLabels(
-                viewport ? QStringList{"X", "Y", "Width", "Height", "Min depth", "Max depth"}
-                : factor ? QStringList{"R", "G", "B", "A"}
-                         : QStringList{"Left", "Top", "Right", "Bottom"});
+                classes    ? QStringList{"Class instance ID"}
+                : viewport ? QStringList{"X", "Y", "Width", "Height", "Min depth", "Max depth"}
+                : factor   ? QStringList{"R", "G", "B", "A"}
+                           : QStringList{"Left", "Top", "Right", "Bottom"});
             table->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
             auto fill = [table](const Json &row) {
                 auto n = table->rowCount();
@@ -90,7 +96,12 @@ bool editPipelineSetterDialog(QWidget *parent, const Frame &frame, Id event, con
                                                             ? QString::number(row.at(c).get<double>(), 'g', 9)
                                                             : QString::fromStdString(row.at(c).dump())));
             };
-            if (factor)
+            if (classes) {
+                table->setToolTip("Ordered interface slots. Enter class instance resource IDs in decimal or "
+                                  "0x hexadecimal.");
+                for (const auto &id : it.value())
+                    fill(Json::array({id}));
+            } else if (factor)
                 fill(it.value());
             else
                 for (const auto &row : it.value())
@@ -104,9 +115,9 @@ bool editPipelineSetterDialog(QWidget *parent, const Frame &frame, Id event, con
                 bar->addWidget(remove);
                 bar->addStretch();
                 layout->addLayout(bar);
-                QObject::connect(add, &QPushButton::clicked, &dialog, [table, fill, viewport] {
-                    if (table->rowCount() < 16)
-                        fill(viewport ? Json{0, 0, 1, 1, 0, 1} : Json{0, 0, 1, 1});
+                QObject::connect(add, &QPushButton::clicked, &dialog, [table, fill, viewport, classes] {
+                    if (table->rowCount() < (classes ? 256 : 16))
+                        fill(classes ? Json{0} : viewport ? Json{0, 0, 1, 1, 0, 1} : Json{0, 0, 1, 1});
                 });
                 QObject::connect(remove, &QPushButton::clicked, &dialog, [table] {
                     if (table->currentRow() >= 0)
@@ -154,7 +165,15 @@ bool editPipelineSetterDialog(QWidget *parent, const Frame &frame, Id event, con
                         if (!cell)
                             throw std::runtime_error("Complete every array cell");
                         bool ok;
-                        if (arrayKey == "scissors_values") {
+                        if (arrayKey == "class_instances") {
+                            auto text = cell->text().trimmed();
+                            auto v =
+                                text.toULongLong(&ok, text.startsWith("0x", Qt::CaseInsensitive) ? 16 : 10);
+                            if (!ok || text.startsWith('-') || !v)
+                                throw std::runtime_error(
+                                    "Class instance requires a nonzero uint64 resource ID");
+                            row.push_back(uint64_t(v));
+                        } else if (arrayKey == "scissors_values") {
                             auto v = cell->text().trimmed().toLongLong(&ok);
                             if (!ok || v < INT32_MIN || v > INT32_MAX)
                                 throw std::runtime_error("Scissor coordinate requires int32");
@@ -166,7 +185,7 @@ bool editPipelineSetterDialog(QWidget *parent, const Frame &frame, Id event, con
                             row.push_back(v);
                         }
                     }
-                    rows.push_back(row);
+                    rows.push_back(arrayKey == "class_instances" ? row.at(0) : row);
                 }
                 values[arrayKey] = arrayKey == "blend_factor" ? rows.at(0) : rows;
             }

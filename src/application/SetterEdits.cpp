@@ -55,6 +55,13 @@ nlohmann::json capturedSetter(const Frame &frame, Id event) {
 }
 nlohmann::json pipelineSetterValues(const PipelineBinding &binding) {
     const auto &s = binding.values;
+    if (auto stage = shaderSetterStage(binding.type)) {
+        const auto &v = s.stages[*stage];
+        if (v.classCount > v.classes.size())
+            throw std::runtime_error("Shader class count exceeds 256");
+        return {{"shader", v.shader},
+                {"class_instances", std::vector<Id>(v.classes.begin(), v.classes.begin() + v.classCount)}};
+    }
     switch (binding.type - 0x34de) {
     case 24:
         return {{"topology", s.topology}};
@@ -84,6 +91,17 @@ PipelineBinding validatePipelineSetter(const Frame &frame, Id event, const nlohm
             throw std::runtime_error("Missing setter argument");
     auto result = readPipelineSetter(entry.type, frame.payload(event));
     auto &s = result.values;
+    if (auto stage = shaderSetterStage(entry.type)) {
+        auto &v = s.stages[*stage];
+        v.shader = integer(values.at("shader"), UINT64_MAX);
+        const auto &classes = values.at("class_instances");
+        if (!classes.is_array() || classes.size() > v.classes.size())
+            throw std::runtime_error("Provide at most 256 class instances");
+        v.classes.fill(0);
+        v.classCount = uint32_t(classes.size());
+        for (size_t i = 0; i < classes.size(); ++i)
+            v.classes[i] = integer(classes[i], UINT64_MAX);
+    }
     switch (entry.type - 0x34de) {
     case 24:
         s.topology = uint32_t(integer(values.at("topology"), 64));

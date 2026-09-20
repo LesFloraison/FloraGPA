@@ -308,7 +308,7 @@ Json inspectConstants(const Frame &frame, const Replay &replay, const ReplayOpti
                       Id resource, Bytes data) {
     Json result = Json::array();
     auto event = frame.event(eventId);
-    auto state = frame.state(event.state);
+    auto state = effectiveBindings(frame, eventId, frame.state(event.state), options);
     bool compute = event.type == 0x35 || event.type == 0x36;
     const char *names[] = {"vs", "hs", "ds", "gs", "ps", "cs"};
     for (unsigned stage = compute ? 5 : 0; stage < (compute ? 6u : 5u); ++stage) {

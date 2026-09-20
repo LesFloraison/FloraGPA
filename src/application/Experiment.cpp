@@ -247,6 +247,25 @@ void Experiment::apply(const Frame &input, ReplayOptions &options) const {
                 throw std::runtime_error("Experiment operation migration pending: " + kind);
         }
     }
+    // Shader assets can appear before or after a setter operation in project history.
+    for (const auto &[event, binding] : options.pipelineSetters) {
+        if (auto stage = shaderSetterStage(binding.type)) {
+            const auto &v = binding.values.stages[*stage];
+            unsigned required = 0;
+            if (v.shader) {
+                auto it = options.shaders.find(v.shader);
+                auto bytes = it == options.shaders.end() ? frame.shader(frame.resource(v.shader).data)
+                                                         : Bytes(it->second);
+                required =
+                    inspectResourceShader(frame, v.shader, bytes).at("interface_slots").get<unsigned>();
+                if (it != options.shaders.end() && !required)
+                    continue; // Static replacements remove captured interfaces at bind time.
+            }
+            if (v.classCount != required)
+                throw std::runtime_error("Shader setter requires " + std::to_string(required) +
+                                         " class instances");
+        }
+    }
     // Validate against final bindings so history operation order does not affect input edits.
     for (const auto &[event, values] : pipeline) {
         const auto state = effectiveBindings(frame, event, frame.state(frame.event(event).state), options);
@@ -649,10 +668,18 @@ void Experiment::setShader(const Frame &frame, Id id, Bytes bytecode, const std:
         {"source_language", "hlsl"},
         {"source_text", source},
         {"source_entry", entry}};
+    auto previous = project_;
     auto &history = project_["history"];
     history.erase(history.begin() + ptrdiff_t(revision()), history.end());
     history.push_back({{"label", "Shader " + std::to_string(id)}, {"operations", Json::array({operation})}});
     project_["cursor"] = history.size();
+    try {
+        ReplayOptions checked;
+        apply(frame, checked);
+    } catch (...) {
+        project_ = std::move(previous);
+        throw;
+    }
 }
 std::vector<uint8_t> Experiment::shaderBytes(const Frame &frame, Id id) const {
     for (size_t i = revision(); i > 0; --i) {

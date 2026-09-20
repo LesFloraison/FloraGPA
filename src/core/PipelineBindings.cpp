@@ -1,11 +1,31 @@
 #include "PipelineBindings.h"
+#include "ClassLinkage.h"
 #include "Contexts.h"
 #include <algorithm>
 #include <cmath>
 namespace flora {
+std::optional<unsigned> shaderSetterStage(uint16_t type) {
+    switch (type - 0x34de) {
+    case 11:
+        return 0;
+    case 60:
+        return 1;
+    case 64:
+        return 2;
+    case 23:
+        return 3;
+    case 9:
+        return 4;
+    case 69:
+        return 5;
+    default:
+        return std::nullopt;
+    }
+}
 bool isPipelineSetter(uint16_t type) {
     const auto slot = type - 0x34de;
-    return slot == 24 || slot == 35 || slot == 36 || slot == 43 || slot == 44 || slot == 45;
+    return shaderSetterStage(type).has_value() || slot == 24 || slot == 35 || slot == 36 || slot == 43 ||
+           slot == 44 || slot == 45;
 }
 PipelineBinding readPipelineSetter(uint16_t type, Bytes bytes) {
     if (!isPipelineSetter(type))
@@ -14,6 +34,18 @@ PipelineBinding readPipelineSetter(uint16_t type, Bytes bytes) {
     r.skip(8);
     PipelineBinding result{type, r.read<Id>()};
     auto &s = result.values;
+    if (auto stage = shaderSetterStage(type)) {
+        auto &v = s.stages[*stage];
+        v.shader = r.read<Id>();
+        v.classCount = r.read<uint32_t>();
+        bool present = r.flag();
+        if (v.classCount > v.classes.size() || (v.classCount && !present))
+            throw std::runtime_error("Invalid shader class array");
+        for (uint32_t i = 0; i < v.classCount; ++i)
+            v.classes[i] = r.read<Id>();
+        r.end();
+        return result;
+    }
     switch (type - 0x34de) {
     case 24:
         s.topology = r.read<uint32_t>();
@@ -59,6 +91,20 @@ void validatePipelineBinding(const Frame &frame, const PipelineBinding &binding)
         if (entry.category != 5 || std::find(types.begin(), types.end(), entry.type) == types.end())
             throw std::runtime_error("Setter resource has the wrong state-object type");
     };
+    if (auto stage = shaderSetterStage(binding.type)) {
+        static constexpr uint16_t types[]{0x90, 0x95, 0x94, 0x91, 0x92, 0x93};
+        const auto &v = s.stages[*stage];
+        resource(v.shader, {types[*stage]});
+        if (v.classCount > v.classes.size() || (!v.shader && v.classCount))
+            throw std::runtime_error("Invalid shader class count");
+        auto linkage = shaderClassLinkage(frame, v.shader);
+        for (uint32_t i = 0; i < v.classCount; ++i) {
+            auto record = readClassRecord(frame, v.classes[i]);
+            if (!record.instance || record.linkage != linkage)
+                throw std::runtime_error("Shader requires instances of the same class linkage");
+        }
+        return;
+    }
     switch (binding.type - 0x34de) {
     case 24:
         if (!(s.topology <= 5 || (s.topology >= 10 && s.topology <= 13) ||
@@ -108,6 +154,14 @@ void validatePipelineBinding(const Frame &frame, const PipelineBinding &binding)
 }
 void overlayPipelineBinding(State &s, const PipelineBinding &binding) {
     const auto &v = binding.values;
+    if (auto stage = shaderSetterStage(binding.type)) {
+        auto &target = s.stages[*stage];
+        const auto &source = v.stages[*stage];
+        target.shader = source.shader;
+        target.classes = source.classes;
+        target.classCount = source.classCount;
+        return;
+    }
     switch (binding.type - 0x34de) {
     case 24:
         s.topology = v.topology;

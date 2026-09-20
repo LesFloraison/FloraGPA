@@ -132,8 +132,8 @@ from the original capture. Use **Read**, then filter by field or known/unknown s
 Each field retains its source and event; double-click a resource value or source event
 to navigate. Export preserves all fields, including filtered-out rows and uncertainty
 notes. Reads run in the background and a changed selection invalidates old results.
-This view does not apply experiments. The existing **Snapshot** tab remains available
-for draw/dispatch state blocks.
+This view does not apply experiments. The **Snapshot** tab shows bindings with persistent setter edits
+for the selected draw/dispatch, including shader and class-instance navigation.
 
 Replay executes captured input-layout, vertex/index-buffer, six-stage SRV and sampler
 bindings between draw/dispatch snapshots. CB/CB1 calls validate resource flags and
@@ -141,7 +141,7 @@ window alignment before applying native bindings. A selected boundary with missi
 captured output views, input layouts or unresolved SRV slots returns an error; later
 complete snapshots or ClearState restore binding validity. SRV replacement resolves
 only the overwritten slots in that shader stage. Sampler, SRV, predicate,
-output and SO setter editing is available; other setter families are still being migrated.
+output, SO and six-stage shader setter editing is available; IA resource and CB/CB1 setter editing remains pending.
 
 **Pipeline > Replay State** reads actual D3D11 bindings at the selected command's
 before/after boundary through the isolated worker. It includes all six shader stages,
@@ -388,3 +388,8 @@ For command-state parity, run `FloraCommandStateTests` with
 `--fixtures` pointing to that evidence directory and a new `--out` directory.
 It compares before/after fields and provenance against Python, reuses the original
 validator's synthetic fixture, and checks every qualified snapshot in GF2 and BF1.
+
+Six-stage shader setters support program/class replacement, persistent snapshot
+overrides, reset/ClearState and project undo/redo. Constants follow the rebound
+shader, and stage navigation opens it for Compile & Apply. See
+[`docs/SHADER_SETTER_MIGRATION.md`](docs/SHADER_SETTER_MIGRATION.md).

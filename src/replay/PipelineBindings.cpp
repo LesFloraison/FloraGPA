@@ -14,6 +14,10 @@ bool Replay::pipelineSetter(const Entry &entry, Bytes payload) {
         throw std::runtime_error("Pipeline setter type mismatch");
     validatePipelineBinding(frame_, binding);
     const auto &s = binding.values;
+    if (auto stage = shaderSetterStage(entry.type)) {
+        const auto &v = s.stages[*stage];
+        bindShader(*stage, v.shader, std::span<const Id>(v.classes.data(), v.classCount));
+    }
     switch (entry.type - 0x34de) {
     case 24:
         context_->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY(s.topology));

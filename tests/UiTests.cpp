@@ -203,6 +203,135 @@ class UiTests final : public QObject {
         }
         snapshot(window, "pipeline-setter-workspace");
     }
+    void shaderSetterWorkerHistory() {
+        using namespace flora;
+        auto capture = testing::graphicsClassCapture();
+        auto program = testing::compileClassProgram(
+            "interface I{uint apply(uint x);};class A:I{uint value;uint apply(uint x){return x+value;}};"
+            "class B:I{uint value;uint apply(uint x){return x+value*2;}};"
+            "cbuffer Classes:register(b0){A first[2];B second[2];} I selected;"
+            "float4 main():SV_Target{return float4(0,selected.apply(0)==20?1:0,0,1);}",
+            "ps_5_0");
+        capture.add(1002, 5, 0x92, testing::statePack(Id(0), Id(0), Id(0), Id(0), Id(60), Id(0), Id(1003)));
+        auto code = testing::statePack(uint64_t(program.size()));
+        code.insert(code.end(), program.begin(), program.end());
+        testing::append(code, Id(0));
+        capture.add(1003, 9, 0x81, code);
+        capture.add(90, 7, 0x34e7, testing::statePack(Id(0), Id(1), Id(32), 1u, uint8_t(1), Id(62)));
+        QTemporaryDir dir;
+        capture.save(dir.path() + "/pipeline.gpa_frame");
+        MainWindow window;
+        window.resize(1500, 950);
+        window.show();
+        QSignalSpy done(&window, &MainWindow::taskFinished);
+        window.openCapture(dir.path() + "/pipeline.gpa_frame");
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        auto output = window.findChild<ImageView *>("frameOutput");
+        QVERIFY(output);
+        QCOMPARE(output->image().pixelColor(0, 0), QColor(255, 0, 0, 255));
+        window.findChild<QComboBox *>("apiKinds")->setCurrentIndex(1);
+        auto api = window.findChild<QTableView *>("apiLog");
+        bool selected = false;
+        for (int row = 0; row < api->model()->rowCount(); ++row) {
+            auto index = api->model()->index(row, 0);
+            if (index.data(Qt::UserRole).toULongLong() == 90) {
+                api->setCurrentIndex(index);
+                selected = true;
+                break;
+            }
+        }
+        QVERIFY(selected);
+        QTRY_VERIFY_WITH_TIMEOUT(!window.busy(), 30000);
+        auto boundary = window.findChild<QComboBox *>("outputBoundary");
+        boundary->setCurrentIndex(0);
+        QTRY_VERIFY_WITH_TIMEOUT(!window.busy(), 30000);
+        auto edit = window.findChild<QAction *>("editSetter");
+        QVERIFY(edit && edit->isEnabled());
+        QTimer::singleShot(0, &window, [&] {
+            auto dialog = window.findChild<QDialog *>("pipelineSetterDialog");
+            QVERIFY(dialog);
+            QTimer::singleShot(3000, dialog, &QDialog::reject);
+            auto rows = dialog->findChild<QTableWidget *>("ps_rows");
+            QCOMPARE(rows->rowCount(), 1);
+            rows->item(0, 0)->setText("18446744073709551616");
+            auto apply = dialog->findChild<QDialogButtonBox *>()->button(QDialogButtonBox::Ok);
+            apply->click();
+            QVERIFY(dialog->findChild<QLabel *>("ps_error")->isVisible());
+            rows->item(0, 0)->setText("0x3e");
+            auto shaders = dialog->findChild<QComboBox *>("ps_shader");
+            shaders->setCurrentIndex(shaders->findData(QVariant::fromValue(qulonglong(1002))));
+            snapshot(*dialog, "shader-setter-dialog");
+            dialog->findChild<QDialogButtonBox *>()->button(QDialogButtonBox::Ok)->click();
+        });
+        done.clear();
+        edit->trigger();
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        QCOMPARE(output->image().pixelColor(0, 0), QColor(0, 255, 0, 255));
+        QAction *undo = nullptr, *redo = nullptr;
+        for (auto action : window.findChildren<QAction *>()) {
+            if (action->shortcut() == QKeySequence::Undo)
+                undo = action;
+            if (action->shortcut() == QKeySequence::Redo)
+                redo = action;
+        }
+        QVERIFY(undo && redo);
+        for (auto action : {undo, redo}) {
+            done.clear();
+            action->trigger();
+            QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+            QVERIFY(done.takeLast()[0].toBool());
+            QCOMPARE(output->image().pixelColor(0, 0),
+                     action == undo ? QColor(255, 0, 0, 255) : QColor(0, 255, 0, 255));
+        }
+        // The effective stage is the resource opened by pipeline navigation and compilation.
+        for (int row = 0; row < api->model()->rowCount(); ++row) {
+            auto index = api->model()->index(row, 0);
+            if (index.data(Qt::UserRole).toULongLong() == 200) {
+                api->setCurrentIndex(index);
+                break;
+            }
+        }
+        QTRY_VERIFY_WITH_TIMEOUT(!window.busy(), 30000);
+        auto pipeline = window.findChild<QTreeWidget *>("pipeline");
+        auto ps = pipeline->findItems("PS", Qt::MatchExactly).value(0);
+        QVERIFY(ps);
+        QCOMPARE(ps->data(1, Qt::UserRole).toULongLong(), qulonglong(1002));
+        QVERIFY(ps->childCount() >= 2);
+        QMetaObject::invokeMethod(pipeline, "itemDoubleClicked", Qt::DirectConnection,
+                                  Q_ARG(QTreeWidgetItem *, ps), Q_ARG(int, 1));
+        auto source = window.findChild<QPlainTextEdit *>("shaderSource");
+        source->setPlainText("float4 main():SV_Target{return float4(0,0,1,1);}");
+        QAction *compile = nullptr;
+        for (auto action : window.findChildren<QAction *>())
+            if (action->text() == "Compile && Apply")
+                compile = action;
+        QVERIFY(compile);
+        done.clear();
+        compile->trigger();
+        QTRY_VERIFY_WITH_TIMEOUT(done.size() >= 2, 30000);
+        for (const auto &result : done)
+            QVERIFY(result[0].toBool());
+        QCOMPARE(output->image().pixelColor(0, 0), QColor(0, 0, 255, 255));
+        done.clear();
+        undo->trigger();
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        QCOMPARE(output->image().pixelColor(0, 0), QColor(0, 255, 0, 255));
+        done.clear();
+        undo->trigger();
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        QCOMPARE(output->image().pixelColor(0, 0), QColor(255, 0, 0, 255));
+        ps = pipeline->findItems("PS", Qt::MatchExactly).value(0);
+        QCOMPARE(ps->data(1, Qt::UserRole).toULongLong(), qulonglong(32));
+        auto properties = window.findChild<QTreeWidget *>("properties");
+        auto ids = properties->findItems("ID", Qt::MatchExactly | Qt::MatchRecursive);
+        QVERIFY(!ids.empty());
+        QCOMPARE(ids[0]->text(1), QString("32"));
+        snapshot(window, "shader-setter-workspace");
+    }
     void imagePixelGestures() {
         flora::ImageView image;
         image.resize(320, 240);
