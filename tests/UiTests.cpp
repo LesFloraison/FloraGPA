@@ -3039,6 +3039,12 @@ class UiTests final : public QObject {
         const auto edited = image->image();
         QVERIFY(edited != original);
         QCOMPARE(edited.pixelColor(0, 0), QColor(255, 0, 0, 255));
+        const auto experimentSummary = [&] {
+            const auto rows = window.findChild<QPlainTextEdit *>("taskLog")->toPlainText().split('\n').filter(
+                "Experiment r");
+            return rows.isEmpty() ? QString{} : rows.last();
+        };
+        QCOMPARE(experimentSummary(), QString("Experiment r1/1 · 0 applied · 1 pending"));
         snapshot(window, output ? "texture-output-edited" : "texture-input-edited");
         QAction *undo = nullptr, *redo = nullptr;
         for (auto a : window.findChildren<QAction *>()) {
@@ -3053,15 +3059,18 @@ class UiTests final : public QObject {
         QVERIFY(done.takeLast()[0].toBool());
         done.clear();
         QCOMPARE(image->image(), original);
+        QCOMPARE(experimentSummary(), QString("Experiment r0/1 · 0 applied · 0 pending"));
         redo->trigger();
         QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
         QVERIFY(done.takeLast()[0].toBool());
         done.clear();
         QCOMPARE(image->image(), edited);
+        QCOMPARE(experimentSummary(), QString("Experiment r1/1 · 0 applied · 1 pending"));
         boundary->setCurrentIndex(2);
         QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
         QVERIFY(done.takeLast()[0].toBool());
         QCOMPARE(image->image(), output ? edited : original);
+        QCOMPARE(experimentSummary(), QString("Experiment r1/1 · 1 applied · 0 pending"));
     }
     void bufferEditorHistory() {
         auto captures = qEnvironmentVariable("FLORA_TEST_CAPTURE_DIR");

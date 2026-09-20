@@ -76,6 +76,8 @@ GUI SHA-256: `d5adbb59ac3b1db306b1cca569e279557687ff386928d31aab8e41c91e68c38f`.
 
 These paths now match the recovered reference behavior, including its explicit
 limits. They do not restore UV that the original capture failed to save.
-The full Python experiment report in Texture exports, private coverage/quad/debug
-consumers, shader tooling, advanced metrics and the remaining migration inventory
-are still incomplete. Separate clean-machine verification remains open.
+The Python experiment report was subsequently migrated; see
+[EXPERIMENT_REPORT_MIGRATION.md](EXPERIMENT_REPORT_MIGRATION.md). Private
+coverage/quad/debug consumers, shader tooling, advanced metrics and the remaining
+migration inventory are still incomplete. Separate clean-machine verification
+remains open.

@@ -2,9 +2,18 @@
 
 已有可编译、可运行的 VS2022 / Qt Widgets 原生工程，能够独立重放当前验证的
 GF2 与 BF1 DX11 捕获。**尚未完成原 Python 版本的全部功能迁移。**
-当前独立包为 `out/FloraGPA-planar-writes/FloraGPA.exe`。
+当前独立包为 `out/FloraGPA-experiment-report/FloraGPA.exe`。
 
-本批迁移 NV12/P010/P016 Map 的 Y-only 写入、旧行填充去除、原生行距适配，
+最新批次补齐原生实验执行报告：当前历史位置、总版本数、已应用／待执行事件、
+最终 shader／初始纹理资产哈希、合并后的视图描述符及 Update 源信息。
+Replay、Buffer 和事件 Texture 导出使用真实遍历记录，Qt 折叠任务日志显示简短摘要。
+Release 36 项 CTest 全部通过，其中 Qt 53 项无失败、无跳过。
+独立包 252 项 Python 报告对照通过，覆盖硬件／WARP、历史游标、事件前后、
+完整帧、禁用／抑制事件、uint64 ID 和 buffer／UAV counter 编辑。
+217 项 Texture 字节／像素／元数据回归、GF2/BF1 黄金帧及关闭 draw 负对照通过。
+详见 [EXPERIMENT_REPORT_MIGRATION.md](EXPERIMENT_REPORT_MIGRATION.md)。
+
+前一批迁移 NV12/P010/P016 Map 的 Y-only 写入、旧行填充去除、原生行距适配，
 以及 NV12 Update 和完整实验 Y/UV 源替换。写入来源与 UV 保留／未定义状态进入
 Texture 工具提示及 JSON，事件前检查不增加该事件的写入记录。
 独立包 192 项 Python 对照全部通过：125 个成功字节／像素／来源比较，67 个受控拒绝，
@@ -19,7 +28,7 @@ Texture 工具提示及 JSON，事件前检查不增加该事件的写入记录�
 前两批已接入 Texture 的 MSAA/typed/plane 检查、DDS/RAW/PNG 导出和逐事件输入／输出
 RAW 编辑，验证见 [TEXTURE_INSPECTION_MIGRATION.md](TEXTURE_INSPECTION_MIGRATION.md)
 及 [EVENT_TEXTURE_MIGRATION.md](EVENT_TEXTURE_MIGRATION.md)。完整迁移仍包含尚未闭合的
-实验报告、私有分析／调试、shader 工具和指标等模块。
+私有分析／调试、shader 工具和指标等模块；实验报告已在本批接入。
 
 ## 当前可用
 
@@ -51,7 +60,7 @@ RAW 编辑，验证见 [TEXTURE_INSPECTION_MIGRATION.md](TEXTURE_INSPECTION_MIGR
 | IA setter 实验 | input layout、VB 槽范围、stride/offset、IB 格式/offset；跨快照保持、原始 setter/ClearState 恢复、输出冲突、几何和 buffer patch；紧凑 Qt 编辑器、项目保存与撤销/重做 | 移动范围需已知前序绑定；缺失输出影响冲突判断时明确拒绝；覆盖/后变换等消费者仍待迁移 |
 | Output / SO setter 实验 | RTV/DSV、OM/CS UAV、SO 目标/偏移；KEEP、独立可选数组、64 槽 UAV、跨快照绑定和已知 SO cursor 保留；紧凑 Qt 表格、项目保存与撤销/重做 | buffer、counter、SRV 描述符及 IA 几何使用最终绑定；未知 SO cursor 拒绝猜测；texture 实验及私有诊断仍待迁移 |
 | 图像 | 自动/指定 swap chain、RT0–7、深度/模板；RTV/DSV mip、数组层、3D 切片、buffer 范围；浮点/整数/packed 格式、通道/范围、原始存储与 PNG 导出；MSAA resolve/指定样本、整数位保真、深度/模板 resolve；显示设置、设备、事件与边界保存/恢复；像素关联 API/资源和 buffer 元素字节 | before-draw 边界语义统一、像素历史/覆盖/调试消费者尚未完成；MSAA 帧前逐样本内容不声称恢复 |
-| 纹理 | GPU 格式转换、BC、浮点/整数、1D/2D/3D、mip/layer/slice、事件边界预览 | MSAA、平面格式及部分查看选项未迁移 |
+| 纹理 | GPU 格式转换、BC、浮点/整数、1D/2D/3D、mip/layer/slice、事件边界预览；MSAA resolve/sample、typed format、Y/UV、通道/范围、DDS/RAW/PNG、输入/输出导入、实验及平面写入报告 | 旧式 P010/P016 缺失 UV 不可恢复；私有分析消费者仍待迁移 |
 | Shader | DXBC 反汇编、反射、SPDB/SDBG 内嵌源码、HLSL 编译替换 | 不含 HLSL 恢复、单步调试及全部反射树 |
 | Buffer | 初始值、事件前后读回、范围、Hex/ASCII/32 位解释、导出；事件字节编辑/二进制补丁导入、绑定识别、撤销/重做；递归 CB 字段、CB1 范围和类型化编辑；按 UAV view 检查/编辑 Append/Consume/Counter | counter 支持 CS/OM 快照及已恢复 clear/copy/setter 引用；输出编辑和扩展 UAV 已接入；完整 setter/getter 与私有诊断仍待迁移 |
 | 几何 | IA 输入解码、索引与实例、DrawAuto 实际参数及来源、三种顶点表、旋转线框、CSV/OBJ 导出 | 后变换与覆盖未迁移；当前表格上限为 100 万引用 / 1600 万字段 |

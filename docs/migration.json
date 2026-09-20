@@ -126,13 +126,15 @@
         "src/application/StreamOutputInspector.cpp",
         "src/application/TextureInspector.cpp",
         "src/replay/Replay.cpp",
-        "src/application/PlanarWrites.cpp"
+        "src/application/PlanarWrites.cpp",
+        "src/application/ExperimentReport.cpp"
       ],
       "validation": [
         "13 native/Python GPU texture comparisons; mip/layer/slice coverage",
         "Captured class-instance JSON and original DXBC exports match Python across 30 dynamic shader fixtures",
         "docs/TEXTURE_INSPECTION_MIGRATION.md: native initial/event/MSAA/typed/plane inspection, DDS/RAW/PNG export and Qt controls; 217 Python comparisons (178 successful exports, 39 rejected cases); private consumers remain pending; planar write provenance is covered subsequently in docs/PLANAR_WRITE_MIGRATION.md",
-        "docs/PLANAR_WRITE_MIGRATION.md: planar Y-only Map with native pitches, tight NV12 Update, explicit full DXGI Update assets, structured write provenance and Qt before/after inspection; 192 packaged real-capture/synthetic/uint64 Python comparisons passed (125 successes, 67 controlled rejections); private consumers and remaining module scope stay incomplete"
+        "docs/PLANAR_WRITE_MIGRATION.md: planar Y-only Map with native pitches, tight NV12 Update, explicit full DXGI Update assets, structured write provenance and Qt before/after inspection; 192 packaged real-capture/synthetic/uint64 Python comparisons passed (125 successes, 67 controlled rejections); private consumers and remaining module scope stay incomplete",
+        "docs/EXPERIMENT_REPORT_MIGRATION.md: native active-history assets and applied/pending traversal report; replay/texture/buffer consumers and compact Qt worker log; private analysis consumers remain pending"
       ]
     },
     {
@@ -211,7 +213,8 @@
         "src/application/Constants.cpp",
         "src/core/UavCounters.cpp",
         "src/replay/UavCounters.cpp",
-        "src/application/UavCounterInspector.cpp"
+        "src/application/UavCounterInspector.cpp",
+        "src/application/ExperimentReport.cpp"
       ],
       "validation": [
         "Five Python/native initial/boundary/range comparisons; word CSV; GUI read and subrange",
@@ -223,7 +226,8 @@
         "tests/UavCounterTests.cpp: CS/OM Append and Counter on hardware and WARP; scope, reset, UINT_MAX, aliases, rollback and history",
         "tools/validate_uav_counters.py: 32 Python comparisons, 29 exact byte matches and 3 BF1 parallel-append multiset comparisons with exact untouched bytes",
         "tests/UiTests.cpp: counter edit, overflow rejection, undo/redo and stale-read invalidation",
-        "SRV setter overrides now feed buffer validation, the Qt edit entry point, event-before input scopes and CLI binding metadata; artifacts/srv-setter-edges-verified/validation.json compares exact exported input bytes and binding roles before/after the selected event"
+        "SRV setter overrides now feed buffer validation, the Qt edit entry point, event-before input scopes and CLI binding metadata; artifacts/srv-setter-edges-verified/validation.json compares exact exported input bytes and binding roles before/after the selected event",
+        "docs/EXPERIMENT_REPORT_MIGRATION.md: native active-history assets and applied/pending traversal report; replay/texture/buffer consumers and compact Qt worker log; private analysis consumers remain pending"
       ]
     },
     {
@@ -701,7 +705,8 @@
         "src/replay/InputBindings.cpp",
         "src/replay/ClassLinkage.cpp",
         "src/replay/StreamOutput.cpp",
-        "src/application/PlanarWrites.cpp"
+        "src/application/PlanarWrites.cpp",
+        "src/application/ExperimentReport.cpp"
       ],
       "validation": [
         "docs/NATIVE_BASELINE.md",
@@ -709,7 +714,8 @@
         "Scoped before/after draw observers expose edited input bindings without duplicate submission; observer cleanup and experiment rollback verified on exceptions",
         "Six-stage class instance binding with linkage ownership, ordered interfaces, static replacement handling and dynamic SRV retention; preserved dormant captured shader-setter behavior outside edits",
         "docs/BEFORE_BOUNDARY_MIGRATION.md: ordinary output traversal, prepared inspectors, missing-binding recovery and successful Map work metadata",
-        "docs/PLANAR_WRITE_MIGRATION.md: planar Y-only Map with native pitches, tight NV12 Update, explicit full DXGI Update assets, structured write provenance and Qt before/after inspection; 192 packaged real-capture/synthetic/uint64 Python comparisons passed (125 successes, 67 controlled rejections); private consumers and remaining module scope stay incomplete"
+        "docs/PLANAR_WRITE_MIGRATION.md: planar Y-only Map with native pitches, tight NV12 Update, explicit full DXGI Update assets, structured write provenance and Qt before/after inspection; 192 packaged real-capture/synthetic/uint64 Python comparisons passed (125 successes, 67 controlled rejections); private consumers and remaining module scope stay incomplete",
+        "docs/EXPERIMENT_REPORT_MIGRATION.md: native active-history assets and applied/pending traversal report; replay/texture/buffer consumers and compact Qt worker log; private analysis consumers remain pending"
       ]
     },
     {
@@ -740,7 +746,8 @@
         "src/replay/UavCounters.cpp",
         "src/application/UavCounterInspector.cpp",
         "src/core/TextureEdits.cpp",
-        "src/replay/TextureEdits.cpp"
+        "src/replay/TextureEdits.cpp",
+        "src/application/ExperimentReport.cpp"
       ],
       "validation": [
         "Compatible JSON; uint64; frame hash; shader and event edits; GPU undo/redo",
@@ -748,13 +755,13 @@
         "tests/BufferEditTests.cpp: compute input isolation, persistent output, rollback and append-counter preservation",
         "tests/UiTests.cpp: buffer edit, worker preview, undo/redo and after-event input restoration",
         "tools/validate_buffer_edits.py: CB/VB/IB/SRV/UAV byte and binding comparisons; edited geometry and visible draw comparison",
-        "Stream-output execution, complete setter/getter references and other experiment kinds remain pending",
         "tests/UavCounterTests.cpp: CS/OM Append and Counter on hardware and WARP; scope, reset, UINT_MAX, aliases, rollback and history",
         "tools/validate_uav_counters.py: 32 Python comparisons, 29 exact byte matches and 3 BF1 parallel-append multiset comparisons with exact untouched bytes",
         "tests/UiTests.cpp: counter edit, overflow rejection, undo/redo and stale-read invalidation",
         "SRV setter overrides now feed buffer validation, the Qt edit entry point, event-before input scopes and CLI binding metadata; artifacts/srv-setter-edges-verified/validation.json compares exact exported input bytes and binding roles before/after the selected event",
         "docs/SHADER_SETTER_MIGRATION.md: six-stage persistent shader/class edits, final-asset interface validation, effective constants and Qt stage navigation/Compile & Apply; private diagnostic consumers remain pending",
-        "docs/EVENT_TEXTURE_MIGRATION.md: event RAW input/output scopes, native MSAA sample writes, final binding validation, project history and Qt import; complete Texture inspection and private consumers remain pending"
+        "docs/EVENT_TEXTURE_MIGRATION.md: event RAW input/output scopes, native MSAA sample writes, final binding validation, project history and Qt import; Texture inspection is covered subsequently in docs/TEXTURE_INSPECTION_MIGRATION.md; private consumers remain pending",
+        "docs/EXPERIMENT_REPORT_MIGRATION.md: native active-history assets and applied/pending traversal report; replay/texture/buffer consumers and compact Qt worker log; private analysis consumers remain pending"
       ]
     },
     {
@@ -2009,10 +2016,12 @@
       "status": "partial",
       "native": [
         "src/replay/Replay.cpp",
-        "src/application/PlanarWrites.cpp"
+        "src/application/PlanarWrites.cpp",
+        "src/application/ExperimentReport.cpp"
       ],
       "validation": [
-        "docs/PLANAR_WRITE_MIGRATION.md: planar Y-only Map with native pitches, tight NV12 Update, explicit full DXGI Update assets, structured write provenance and Qt before/after inspection; 192 packaged real-capture/synthetic/uint64 Python comparisons passed (125 successes, 67 controlled rejections); private consumers and remaining module scope stay incomplete"
+        "docs/PLANAR_WRITE_MIGRATION.md: planar Y-only Map with native pitches, tight NV12 Update, explicit full DXGI Update assets, structured write provenance and Qt before/after inspection; 192 packaged real-capture/synthetic/uint64 Python comparisons passed (125 successes, 67 controlled rejections); private consumers and remaining module scope stay incomplete",
+        "docs/EXPERIMENT_REPORT_MIGRATION.md: native active-history assets and applied/pending traversal report; replay/texture/buffer consumers and compact Qt worker log; private analysis consumers remain pending"
       ]
     },
     {

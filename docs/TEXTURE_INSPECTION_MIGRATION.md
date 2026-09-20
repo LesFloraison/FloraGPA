@@ -86,7 +86,8 @@ SHA-256 values for this build:
 This closes the main Texture inspection/export controls, not the full migration.
 Captured planar Map/Update semantics and their `planar_writes` reports were
 subsequently migrated; see [PLANAR_WRITE_MIGRATION.md](PLANAR_WRITE_MIGRATION.md).
-The full Python `experiment` report field remains pending. Private coverage, quad,
+The Python `experiment` report field was subsequently migrated; see
+[EXPERIMENT_REPORT_MIGRATION.md](EXPERIMENT_REPORT_MIGRATION.md). Private coverage, quad,
 debugger/profiler consumers, full shader/source tooling and the remaining module
 inventory also remain incomplete. These modules retain partial status.
 

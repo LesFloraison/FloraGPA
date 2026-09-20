@@ -759,6 +759,8 @@ State Replay::prepareState(const Event &event) {
 }
 void Replay::command(const Entry &e) {
     auto t = e.type;
+    if (!isDraw(t) && options_.experiment && options_.experiment->events.contains(e.id))
+        appliedExperimentEvents_.push_back(e.id);
     Bytes payload = frame_.payload(e.id);
     if (auto it = options_.commandPayloads.find(e.id); it != options_.commandPayloads.end())
         payload = it->second;
@@ -799,6 +801,9 @@ void Replay::command(const Entry &e) {
                     boundaryObserver_(e.id, after, context_.Get(), objects_);
             };
             observe(false);
+            if (!(options_.before && e.id == options_.until) && options_.experiment &&
+                options_.experiment->events.contains(e.id))
+                appliedExperimentEvents_.push_back(e.id);
             if ((options_.before && e.id == options_.until) || options_.disabled.contains(e.id) ||
                 (options_.suppressDraws && t != 0x35 && t != 0x36)) {
                 if (!(options_.before && e.id == options_.until))
@@ -1076,6 +1081,7 @@ void Replay::run(const std::function<void(Id, size_t, size_t)> &progress,
     objects_.clear();
     ignoredMsaaInitial_.clear();
     planarWrites_.clear();
+    appliedExperimentEvents_.clear();
     editedSamplers_.clear();
     rasterizerExtensions_.clear();
     logicBlendStates_.clear();

@@ -86,6 +86,10 @@ The Buffer tab reads initial/before/after values and byte ranges as hex, ASCII o
 export. Resource names come from captured debug metadata.
 Shader **Compile & Apply** and event enable/disable changes use an experiment
 history with undo/redo and frame-bound JSON projects.
+Replay reports and event Texture exports include the active experiment revision,
+applied/pending events and replacement asset provenance. The collapsed Tasks log
+shows a compact execution summary. See
+[`docs/EXPERIMENT_REPORT_MIGRATION.md`](docs/EXPERIMENT_REPORT_MIGRATION.md).
 The **Edit** menu and API Log context menu provide **Edit Clear Values** and
 **Replace Update Source**, plus enable/disable for recovered resource-writing
 commands. Update sources are tightly packed binary assets; the file picker

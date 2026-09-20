@@ -23,6 +23,11 @@ struct BufferPatch {
     std::vector<uint8_t> bytes;
 };
 struct ReplayOptions {
+    struct ExperimentSummary {
+        size_t cursor{}, revisions{};
+        std::set<Id> events, views;
+    };
+    std::optional<ExperimentSummary> experiment;
     struct BlendEdit {
         std::optional<D3D11_BLEND_DESC1> descriptor;
         std::optional<std::array<float, 4>> factor;
@@ -119,6 +124,7 @@ class Replay {
     std::map<Id, Com<IUnknown>> objects_;
     std::vector<Id> ignoredMsaaInitial_;
     std::vector<PlanarWrite> planarWrites_;
+    std::vector<Id> appliedExperimentEvents_;
     // Keep edited extension states alive while their native identities are registered.
     std::map<ID3D11RasterizerState *, std::pair<Com<ID3D11RasterizerState>, UINT>> rasterizerExtensions_;
     Com<ID3D11RasterizerState> createRasterizer(const D3D11_RASTERIZER_DESC2 &desc);
@@ -250,6 +256,7 @@ class Replay {
     const ReplayOptions &options() const { return options_; }
     const std::vector<Id> &ignoredMsaaInitial() const { return ignoredMsaaInitial_; }
     const std::vector<PlanarWrite> &planarWrites() const { return planarWrites_; }
+    const std::vector<Id> &appliedExperimentEvents() const { return appliedExperimentEvents_; }
     const Frame &frame() const { return frame_; }
     Id lastOutputResource() const { return lastTarget_; }
     Id lastOutputView() const { return lastTargetView_; }

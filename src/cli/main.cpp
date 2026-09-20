@@ -5,6 +5,7 @@
 #include "application/Constants.h"
 #include "application/ContextInspector.h"
 #include "application/Experiment.h"
+#include "application/ExperimentReport.h"
 #include "application/FrameOutput.h"
 #include "application/Geometry.h"
 #include "application/PlanarWrites.h"
@@ -132,7 +133,7 @@ int main(int argc, char **argv) {
                            {"height", int(frame.height())},
                            {"entries", int(frame.entries().size())},
                            {"reference_pixels_used", false}};
-        nlohmann::json constantBindings, outputSelection, outputDisplay, outputMsaa, planarWrites;
+        nlohmann::json constantBindings, outputSelection, outputDisplay, outputMsaa, planarWrites, experiment;
         QString out = p.value("out");
         if (!out.isEmpty()) {
             QDir dir(out);
@@ -525,6 +526,7 @@ int main(int argc, char **argv) {
                 counts.insert(QString::fromStdString(key), qint64(value));
             report.insert("counts", counts);
             planarWrites = planarWriteReport(replay);
+            experiment = experimentReport(replay);
             QJsonArray soHistory;
             for (const auto &row : replay.streamOutputHistory)
                 soHistory.append(QJsonObject{{"event", QString::number(row.event)},
@@ -577,6 +579,7 @@ int main(int argc, char **argv) {
             nativeReport["constant_bindings"] = std::move(constantBindings);
         if (!planarWrites.is_null())
             nativeReport["planar_writes"] = std::move(planarWrites);
+        nativeReport["experiment"] = std::move(experiment);
         auto json = QByteArray::fromStdString(nativeReport.dump(2) + "\n");
         if (!out.isEmpty())
             save(out + "/report.json", json);

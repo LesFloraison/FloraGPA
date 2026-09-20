@@ -340,6 +340,18 @@ void Experiment::apply(const Frame &input, ReplayOptions &options) const {
             options.samplerEdits[event][target] = nativeSampler(values);
         }
     }
+    ReplayOptions::ExperimentSummary summary;
+    summary.cursor = revision();
+    summary.revisions = project_.at("history").size();
+    for (const auto &[id, descriptor] : views)
+        summary.views.insert(id);
+    for (size_t i = 0; i < revision(); ++i)
+        for (const auto &op : project_.at("history").at(i).at("operations")) {
+            const auto kind = op.at("kind").get<std::string>();
+            if (kind != "view" && kind != "shader" && kind != "texture" && kind != "initial_uav_counter")
+                summary.events.insert(identifier(op.at("event")));
+        }
+    options.experiment = std::move(summary);
 }
 bool Experiment::enabled(Id event) const {
     bool enabled = true;

@@ -927,6 +927,7 @@ void MainWindow::buildUi() {
     workspace_->addDockWidget(Qt::RightDockWidgetArea, right);
     viewMenu->addAction(right->toggleViewAction());
     log_ = new QPlainTextEdit;
+    log_->setObjectName("taskLog");
     log_->setReadOnly(true);
     log_->setMaximumBlockCount(10000);
     log_->setFont(QFont("Cascadia Mono", 9));
@@ -1189,6 +1190,14 @@ void MainWindow::finishWorker(int code, QProcess::ExitStatus status) {
         report_ = QJsonDocument::fromJson(reportBytes, &error).object();
         if (error.error != QJsonParseError::NoError || !report_["completed"].toBool())
             throw std::runtime_error("Worker did not complete");
+        if (report_["experiment"].isObject()) {
+            const auto experiment = report_["experiment"].toObject();
+            log_->appendPlainText(QString("Experiment r%1/%2 · %3 applied · %4 pending")
+                                      .arg(experiment["cursor"].toInteger())
+                                      .arg(experiment["revisions"].toInteger())
+                                      .arg(experiment["applied_events"].toArray().size())
+                                      .arg(experiment["pending_events"].toArray().size()));
+        }
         if (runningKind_ == "replay-pipeline") {
             QFile stateFile(jobDir_->path() + "/result/replay-pipeline.json");
             if (!stateFile.open(QIODevice::ReadOnly))

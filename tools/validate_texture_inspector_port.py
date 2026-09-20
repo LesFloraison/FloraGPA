@@ -73,10 +73,12 @@ def compare(name,path,rid=20,event=None,before=False,driver='hardware',sample=No
         differences['native_error']=run.stderr.decode(errors='replace')[-1600:]
     else:
         got=json.loads((actual/'texture.json').read_text())
+        metadata=json.loads(json.dumps(metadata))
         keys=['resource_id','value_time','width','height','depth','mips','layers','format','dimension','samples','misc',
               'sha256','subresources','selected_subresource','selected_plane','recovered_luma_only','storage_scope','uv_available',
               'source_texture','source_layout','capture_sha256','capture_plane_notice','event','pipeline_snapshot_available',
-              'output_bindings','output_edit_supported','output_edit_effect','msaa','msaa_initial_data_not_applied']
+              'output_bindings','output_edit_supported','output_edit_effect','msaa','msaa_initial_data_not_applied',
+              'experiment','planar_writes']
         for key in keys:
             if metadata.get(key)!=got.get(key):differences[key]=dict(expected=metadata.get(key),actual=got.get(key))
         for file in expected.iterdir():

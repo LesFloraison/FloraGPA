@@ -1,5 +1,6 @@
 #include "TextureInspector.h"
 #include "ApiCommands.h"
+#include "ExperimentReport.h"
 #include "PlanarWrites.h"
 #include "core/TextureStorage.h"
 #include <QDir>
@@ -288,6 +289,7 @@ TextureInspection inspectTexture(Replay &replay, Id id, const TextureInspectionO
         out.metadata["msaa_initial_data_not_applied"] = replay.ignoredMsaaInitial();
         out.metadata["planar_writes"] = planarWriteReport(replay);
         out.metadata["planar_write_notice"] = planarWriteNotice(replay);
+        out.metadata["experiment"] = experimentReport(replay);
     }
     return out;
 }
