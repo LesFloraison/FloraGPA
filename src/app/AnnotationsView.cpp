@@ -58,9 +58,14 @@ AnnotationsView::AnnotationsView(QWidget *parent) : QWidget(parent) {
     begin_->setObjectName("locateAnnotationBegin");
     end_->setObjectName("locateAnnotationEnd");
     draw_->setObjectName("locateAnnotationDraw");
-    auto range = navigation->addAction("Range Metrics");
-    range->setEnabled(false);
-    range->setToolTip("Range statistics migration is pending");
+    range_ = navigation->addAction("Range Metrics");
+    range_->setObjectName("annotationRangeMetrics");
+    range_->setToolTip("Use this closed group's inclusive API range");
+    connect(range_, &QAction::triggered, this, [this] {
+        const auto node = selection();
+        if (!workerBusy_ && node && node->at("status") == "closed")
+            emit rangeRequested(node->at("id").get<Id>(), node->at("end").get<Id>());
+    });
     layout->addWidget(navigation);
     summary_ = new QLabel("No capture");
     summary_->setMargin(6);
@@ -282,6 +287,7 @@ void AnnotationsView::updateActions() {
     begin_->setEnabled(ready && node);
     end_->setEnabled(ready && node && !node->at("end").is_null());
     draw_->setEnabled(ready && node && !members_->selectedItems().empty());
+    range_->setEnabled(ready && node && node->at("status") == "closed");
 }
 void AnnotationsView::navigate(bool end) {
     const auto node = selection();

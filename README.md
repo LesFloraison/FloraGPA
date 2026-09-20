@@ -137,8 +137,16 @@ high words, incomplete results and conflicting descriptors remain explicit.
 **Annotations** reads captured per-object Begin/End/Marker groups and explicit
 QueryInterface context proofs. Filter names/IDs, inspect linked draws and evidence,
 locate begin/end/draw API calls, or export all groups as JSON/CSV. Unknown identities
-and interrupted/open groups remain explicit. Annotation range metrics and chart
-grouping remain pending. See [`docs/ANNOTATION_MIGRATION.md`](docs/ANNOTATION_MIGRATION.md).
+and interrupted/open groups remain explicit. **Range Metrics** prefills the closed
+group's inclusive API endpoints in **GPU Statistics**.
+See [`docs/ANNOTATION_MIGRATION.md`](docs/ANNOTATION_MIGRATION.md).
+
+**GPU Statistics** measures a Draw/Dispatch, an inclusive command range, or the
+entire frame on the selected hardware/WARP device. Pipeline invocations, occlusion,
+four SO streams, overflow and elapsed time come from native DX11 queries. JSON/CSV
+export preserves the sample's device, experiment and replay boundaries. These are
+single replay measurements; range timings include binding, uploads and helpers.
+See [`docs/GPU_STATISTICS_MIGRATION.md`](docs/GPU_STATISTICS_MIGRATION.md).
 
 The Inspector identifies captured and inferred contexts separately. Missing context
 kind can be recovered only from a validated staging Texture2D Map READ / Unmap pair;

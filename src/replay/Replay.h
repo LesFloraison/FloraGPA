@@ -23,6 +23,11 @@ struct BufferPatch {
     std::vector<uint8_t> bytes;
 };
 struct ReplayOptions {
+    struct Measurement {
+        Id start{}, end{};
+        bool singleEvent{};
+    };
+    std::optional<Measurement> measurement;
     struct ExperimentSummary {
         size_t cursor{}, revisions{};
         std::set<Id> events, views;
@@ -104,7 +109,22 @@ struct StreamOutputCount {
 };
 using ReplayBoundaryObserver =
     std::function<void(Id, bool, ID3D11DeviceContext *, const std::map<Id, Com<IUnknown>> &)>;
+struct NativeStatistics {
+    D3D11_QUERY_DATA_PIPELINE_STATISTICS pipeline{};
+    D3D11_QUERY_DATA_SO_STATISTICS legacySo{};
+    std::array<D3D11_QUERY_DATA_SO_STATISTICS, 4> streams{};
+    bool overflow{}, disjoint{}, timingAvailable{};
+    uint64_t occlusion{}, frequency{}, startTick{}, endTick{};
+    std::optional<double> elapsedMs;
+    std::map<std::string, uint64_t> replayCounts;
+    PredicateBinding predicate;
+};
+class NativeSample;
 class Replay {
+    NativeSample *activeSample_ = nullptr;
+    std::optional<NativeStatistics> measurementResult_;
+    uint64_t generation_{};
+    PredicateBinding measuredPredicate_;
     std::vector<uint8_t> readTextureStorage(ID3D11Resource *source, const Resource &resource);
     Com<ID3D11Resource> createEditTexture(const Resource &resource, std::optional<Bytes> data = {});
     void writeMsaaSample(ID3D11Resource *target, const Resource &resource, const TexturePatch &patch);
@@ -295,6 +315,11 @@ class Replay {
     };
     ConstantRange constantRange(unsigned stage, uint32_t slot, Id buffer) const;
     std::string adapter() const;
+    DXGI_ADAPTER_DESC adapterDescription() const;
+    D3D_FEATURE_LEVEL featureLevel() const { return device_->GetFeatureLevel(); }
+    const auto &measurementResult() const { return measurementResult_; }
+    uint64_t generation() const { return generation_; }
+    bool reconstructsSoCounts() const { return soCountEnabled_; }
 };
 std::string disassemble(Bytes dxbc);
 inline const Frame &effectiveFrame(const Frame &capture, const ReplayOptions &options) {

@@ -1,5 +1,6 @@
 #include "Replay.h"
 #include "BlendState.h"
+#include "NativeSample.h"
 #include "Unpredicated.h"
 #include "core/ClassLinkage.h"
 #include "core/Commands.h"
@@ -65,13 +66,17 @@ Replay::~Replay() {
         context_->Flush();
     }
 }
-std::string Replay::adapter() const {
+DXGI_ADAPTER_DESC Replay::adapterDescription() const {
     Com<IDXGIDevice> dxgi;
     Com<IDXGIAdapter> adapter;
     DXGI_ADAPTER_DESC desc{};
     check(device_.As(&dxgi), "Query DXGI device");
     check(dxgi->GetAdapter(&adapter), "Get adapter");
     check(adapter->GetDesc(&desc), "Get adapter description");
+    return desc;
+}
+std::string Replay::adapter() const {
+    auto desc = adapterDescription();
     int size = WideCharToMultiByte(CP_UTF8, 0, desc.Description, -1, nullptr, 0, nullptr, nullptr);
     std::string text(size, '\0');
     WideCharToMultiByte(CP_UTF8, 0, desc.Description, -1, text.data(), size, nullptr, nullptr);
@@ -806,11 +811,19 @@ void Replay::command(const Entry &e) {
                     boundaryObserver_(e.id, after, context_.Get(), objects_);
             };
             observe(false);
+            const bool measureEvent =
+                activeSample_ && options_.measurement->singleEvent && e.id == options_.measurement->start;
+            if (measureEvent) {
+                measuredPredicate_ = {state.predicate, state.predicateValue};
+                activeSample_->begin();
+            }
             if (!(options_.before && e.id == options_.until) && options_.experiment &&
                 options_.experiment->events.contains(e.id))
                 appliedExperimentEvents_.push_back(e.id);
             if ((options_.before && e.id == options_.until) || options_.disabled.contains(e.id) ||
                 (options_.suppressDraws && t != 0x35 && t != 0x36)) {
+                if (measureEvent)
+                    activeSample_->end();
                 if (!(options_.before && e.id == options_.until))
                     observe(true);
                 return false;
@@ -865,6 +878,8 @@ void Replay::command(const Entry &e) {
             endStreamOutput(e.id, activeStreams);
             counts[commandName(t)]++;
             lastWorkEvent_ = e.id;
+            if (measureEvent)
+                activeSample_->end();
             observe(true);
             return true;
         });
@@ -1066,6 +1081,20 @@ void Replay::run(const std::function<void(Id, size_t, size_t)> &progress,
         ~ResetObserver() { value = {}; }
     } reset{boundaryObserver_};
     replayComplete_ = false;
+    measurementResult_.reset();
+    if (options_.measurement) {
+        const auto &m = *options_.measurement;
+        for (auto id : {m.start, m.end})
+            if (!id || !frame_.entries().contains(id) || frame_.entry(id).category != 7)
+                throw std::runtime_error("Statistics range endpoints must be captured API command IDs");
+        if (m.start > m.end)
+            throw std::runtime_error("Statistics range start must not exceed end");
+        if (m.singleEvent && (m.start != m.end || !isDraw(frame_.entry(m.start).type)))
+            throw std::runtime_error("Statistics requires a Draw or Dispatch event");
+        if (options_.before || options_.until != m.end || options_.timings)
+            throw std::runtime_error("Statistics requires its own complete replay boundary");
+    }
+    ++generation_;
     if (options_.until && frame_.entry(options_.until).category != 7)
         throw std::runtime_error("Stop event is not an API command");
     context_->ClearState();
@@ -1130,6 +1159,15 @@ void Replay::run(const std::function<void(Id, size_t, size_t)> &progress,
         context_->Begin(disjoint.Get());
         context_->Begin(stats.Get());
     }
+    std::unique_ptr<NativeSample> sample;
+    if (options_.measurement)
+        sample = std::make_unique<NativeSample>(device_.Get(), context_.Get());
+    activeSample_ = sample.get();
+    struct ResetSample {
+        NativeSample *&active;
+        ~ResetSample() { active = nullptr; }
+    } resetSample{activeSample_};
+    std::map<std::string, uint64_t> initialCounts;
     size_t total = 0, done = 0;
     for (auto &[id, e] : frame_.entries())
         if (e.category == 7)
@@ -1143,7 +1181,13 @@ void Replay::run(const std::function<void(Id, size_t, size_t)> &progress,
                 break;
             try {
                 lastEvent_ = id;
+                if (sample && !options_.measurement->singleEvent && id == options_.measurement->start) {
+                    initialCounts = counts;
+                    sample->begin();
+                }
                 command(e);
+                if (sample && !options_.measurement->singleEvent && id == options_.measurement->end)
+                    sample->end();
             } catch (const std::exception &error) {
                 throw std::runtime_error("Event " + std::to_string(id) + " (" + commandName(e.type) +
                                          "): " + error.what());
@@ -1151,6 +1195,15 @@ void Replay::run(const std::function<void(Id, size_t, size_t)> &progress,
             if (progress && ((++done % 128) == 0 || isDraw(e.type)))
                 progress(id, done, total);
         }
+    std::optional<NativeStatistics> measured;
+    if (sample) {
+        auto result = sample->result();
+        result.predicate = measuredPredicate_;
+        for (const auto &[name, count] : counts)
+            if (count != initialCounts[name])
+                result.replayCounts[name] = count - initialCounts[name];
+        measured = std::move(result);
+    }
     // The reference recovers missing setters from a before-draw snapshot without
     // executing that draw's experiments, recording it as work, or notifying observers.
     const bool gaps =
@@ -1209,6 +1262,7 @@ void Replay::run(const std::function<void(Id, size_t, size_t)> &progress,
                     std::cerr << msg->pDescription << '\n';
             }
     }
+    measurementResult_ = std::move(measured);
     replayComplete_ = true;
 }
 Image Replay::output(Id texture, UINT sub) {

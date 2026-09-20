@@ -17,6 +17,7 @@ class AnnotationsView final : public QWidget {
     void setWorkerBusy(bool busy);
   signals:
     void eventRequested(qulonglong id);
+    void rangeRequested(qulonglong start, qulonglong end);
     void inspectionFinished(bool success);
 
   private:
@@ -32,7 +33,7 @@ class AnnotationsView final : public QWidget {
     uint64_t revision_{}, runningRevision_{};
     bool workerBusy_{};
     QFutureWatcher<nlohmann::json> watcher_;
-    QAction *read_, *begin_, *end_, *draw_, *export_;
+    QAction *read_, *begin_, *end_, *draw_, *export_, *range_;
     QLineEdit *filter_;
     QLabel *summary_, *membership_;
     QTreeWidget *nodes_, *members_, *details_;

@@ -9,6 +9,7 @@
 #include "application/ExperimentReport.h"
 #include "application/FrameOutput.h"
 #include "application/Geometry.h"
+#include "application/GpuStatistics.h"
 #include "application/PlanarWrites.h"
 #include "application/PredicateInspector.h"
 #include "application/ReplayPipeline.h"
@@ -66,7 +67,7 @@ int main(int argc, char **argv) {
     p.addPositionalArgument(
         "command", "inventory | commands | command-state | contexts | command-lists | replay | shader | "
                    "buffer | texture | texture-storage | compile | geometry | replay-pipeline | "
-                   "class-linkage | predicate | annotations");
+                   "class-linkage | predicate | annotations | statistics");
     p.addPositionalArgument("capture", "DX11 .gpa_frame file");
     p.addOption({"out", "New or empty output directory", "path"});
     p.addOption({"experiment", "Compatible FloraGPA experiment project", "path"});
@@ -76,6 +77,8 @@ int main(int argc, char **argv) {
     p.addOption({"timings", "Collect native GPU timestamps and pipeline statistics"});
     p.addOption({"debug-device", "Enable D3D11 validation"});
     p.addOption({"event", "Stop at API event", "id"});
+    p.addOption({"start-event", "Inclusive statistics range start", "id"});
+    p.addOption({"end-event", "Inclusive statistics range end", "id"});
     p.addOption({"before", "Stop before the selected event"});
     p.addOption({"id", "Resource ID", "id"});
     p.addOption({"filter", "API command text filter", "text"});
@@ -266,8 +269,8 @@ int main(int argc, char **argv) {
             }
             report.insert("id", p.value("id"));
         } else if (command == "replay" || command == "buffer" || command == "texture" ||
-                   command == "texture-storage" || command == "geometry" || command == "replay-pipeline" ||
-                   command == "predicate") {
+                   command == "statistics" || command == "texture-storage" || command == "geometry" ||
+                   command == "replay-pipeline" || command == "predicate") {
             if (out.isEmpty())
                 throw std::runtime_error("Replay requires --out");
             ReplayOptions options;
@@ -279,6 +282,19 @@ int main(int argc, char **argv) {
             options.prepareBeforeDraw = command != "replay";
             if (p.isSet("event"))
                 options.until = parseId("event");
+            if (command == "statistics") {
+                if (p.isSet("before") || p.isSet("timings"))
+                    throw std::runtime_error("Statistics defines its own query boundaries");
+                const bool range = p.isSet("start-event") || p.isSet("end-event");
+                if (range && (p.isSet("event") || !p.isSet("start-event") || !p.isSet("end-event")))
+                    throw std::runtime_error("Specify a single event or both range endpoints");
+                if (!range && !p.isSet("event"))
+                    throw std::runtime_error("Statistics requires an event or command range");
+                const auto start = range ? parseId("start-event") : options.until;
+                const auto end = range ? parseId("end-event") : options.until;
+                options.until = end;
+                options.measurement = ReplayOptions::Measurement{start, end, !range};
+            }
             if (command == "predicate" && (!options.until || !p.isSet("id")))
                 throw std::runtime_error("predicate requires --event and --id");
             if (command == "geometry") {
@@ -316,7 +332,10 @@ int main(int argc, char **argv) {
             } else if ((command != "texture" && command != "buffer" && command != "texture-storage") ||
                        options.until)
                 replay.run(progress);
-            if (command == "geometry") {
+            if (command == "statistics") {
+                const auto statistics = gpuStatisticsReport(replay);
+                exportGpuStatistics(statistics, std::filesystem::path(out.toStdWString()));
+            } else if (command == "geometry") {
                 nlohmann::json geometry;
                 replay.inspectEventInputs(options.until,
                                           [&] { geometry = inspectGeometry(frame, replay, options.until); });

@@ -91,7 +91,10 @@ GUI SHA-256: `1498be920a7776863d4cbc23bc3f33accbb250f4d1b9eef0856a1931e4d99ecf`.
 
 ## Remaining scope
 
-Range statistics handoff, chart group selection and the remaining private analysis,
-shader/debugger and metrics modules are incomplete. Annotation modules remain
-partial in the migration manifest until their dependent UI paths are closed.
+Range statistics handoff is now implemented and validated in
+[GPU_STATISTICS_MIGRATION.md](GPU_STATISTICS_MIGRATION.md). Chart grouping was
+previously listed as pending, but is absent from the recovered Python annotation
+panel and is not a requirement of this migration. Private analysis, shader/debugger
+and metrics modules elsewhere remain incomplete. Annotation evidence remains
+scoped to the recovered fixtures; the manifest retains its conservative partial status.
 Validation on a separate clean machine and more original captures remains open.

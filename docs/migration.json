@@ -31,7 +31,7 @@
         "src/replay/Replay.cpp"
       ],
       "validation": [
-        "docs/ANNOTATION_MIGRATION.md: per-object nesting, explicit lifetime-bounded context identity and draw membership, JSON/CSV, validated annotation replay and Qt navigation/filter/export; range-statistics handoff and chart grouping remain pending"
+        "docs/ANNOTATION_MIGRATION.md: per-object nesting, explicit lifetime-bounded context identity and draw membership, JSON/CSV, validated annotation replay and Qt navigation/filter/export; range-statistics handoff is covered by docs/GPU_STATISTICS_MIGRATION.md; broader original-capture annotation coverage remains open"
       ]
     },
     {
@@ -53,7 +53,7 @@
         "tests/ApiCommandTests.cpp: wire bounds, references, metadata order, query states and filtered export",
         "tools/validate_api_commands.py: 920 GF2, 18024 BF1 and 4006 synthetic records plus resource/text filtering; JSON and parsed CSV, allowing different invalid diagnostic wording",
         "tests/UiTests.cpp: field offsets, reference navigation, resource filtering and texture-preview priority",
-        "docs/ANNOTATION_MIGRATION.md: per-object nesting, explicit lifetime-bounded context identity and draw membership, JSON/CSV, validated annotation replay and Qt navigation/filter/export; range-statistics handoff and chart grouping remain pending"
+        "docs/ANNOTATION_MIGRATION.md: per-object nesting, explicit lifetime-bounded context identity and draw membership, JSON/CSV, validated annotation replay and Qt navigation/filter/export; range-statistics handoff is covered by docs/GPU_STATISTICS_MIGRATION.md; broader original-capture annotation coverage remains open"
       ]
     },
     {
@@ -67,7 +67,7 @@
         "src/app/MainWindow.cpp"
       ],
       "validation": [
-        "docs/ANNOTATION_MIGRATION.md: per-object nesting, explicit lifetime-bounded context identity and draw membership, JSON/CSV, validated annotation replay and Qt navigation/filter/export; range-statistics handoff and chart grouping remain pending"
+        "docs/ANNOTATION_MIGRATION.md: per-object nesting, explicit lifetime-bounded context identity and draw membership, JSON/CSV, validated annotation replay and Qt navigation/filter/export; range-statistics handoff is covered by docs/GPU_STATISTICS_MIGRATION.md; broader original-capture annotation coverage remains open"
       ]
     },
     {
@@ -732,7 +732,7 @@
         "docs/BEFORE_BOUNDARY_MIGRATION.md: ordinary output traversal, prepared inspectors, missing-binding recovery and successful Map work metadata",
         "docs/PLANAR_WRITE_MIGRATION.md: planar Y-only Map with native pitches, tight NV12 Update, explicit full DXGI Update assets, structured write provenance and Qt before/after inspection; 192 packaged real-capture/synthetic/uint64 Python comparisons passed (125 successes, 67 controlled rejections); private consumers and remaining module scope stay incomplete",
         "docs/EXPERIMENT_REPORT_MIGRATION.md: native active-history assets and applied/pending traversal report; replay/texture/buffer consumers and compact Qt worker log; private analysis consumers remain pending",
-        "docs/ANNOTATION_MIGRATION.md: per-object nesting, explicit lifetime-bounded context identity and draw membership, JSON/CSV, validated annotation replay and Qt navigation/filter/export; range-statistics handoff and chart grouping remain pending"
+        "docs/ANNOTATION_MIGRATION.md: per-object nesting, explicit lifetime-bounded context identity and draw membership, JSON/CSV, validated annotation replay and Qt navigation/filter/export; range-statistics handoff is covered by docs/GPU_STATISTICS_MIGRATION.md; broader original-capture annotation coverage remains open"
       ]
     },
     {
@@ -900,10 +900,13 @@
       "description": "Native single-event and inclusive command-range DX11 measurements.",
       "status": "partial",
       "native": [
-        "src/replay/Replay.cpp"
+        "src/replay/NativeSample.cpp",
+        "src/replay/Replay.cpp",
+        "src/application/GpuStatistics.cpp",
+        "src/cli/main.cpp"
       ],
       "validation": [
-        "Native aggregate pipeline query; original scheduling pending"
+        "docs/GPU_STATISTICS_MIGRATION.md: event/range scheduling, pipeline/SO/occlusion/timestamps, exact report metadata and exports, failed-query cleanup, hardware/WARP and experiment controls; real hardware PS invocation variability remains explicit"
       ]
     },
     {
@@ -2494,10 +2497,11 @@
       "description": "Single-event, command-range and full-frame native statistics.",
       "status": "partial",
       "native": [
+        "src/app/StatisticsView.cpp",
         "src/app/MainWindow.cpp"
       ],
       "validation": [
-        "docs/NATIVE_BASELINE.md"
+        "docs/GPU_STATISTICS_MIGRATION.md: Qt Worker event/range/frame measurements, global device selection, annotation handoff, exact uint64 export, busy and stale-result handling; broader private analysis consumers remain pending"
       ]
     },
     {

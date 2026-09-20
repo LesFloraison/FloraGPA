@@ -10,6 +10,7 @@
 #include "RasterizerDialog.h"
 #include "SamplerDialog.h"
 #include "SrvDialog.h"
+#include "StatisticsView.h"
 #include "ViewDialog.h"
 #include "application/ClassInspector.h"
 #include "application/CommandEdits.h"
@@ -149,6 +150,7 @@ MainWindow::MainWindow() {
             updateExperimentActions();
             commands_->setFrame(frame_);
             annotations_->setFrame(frame_);
+            gpuStatistics_->setSelection(frame_, 0);
             resources_->setFrame(frame_);
             chart_->clear();
             pipeline_->clear();
@@ -261,6 +263,9 @@ MainWindow::MainWindow() {
             timeout_.stop();
             setBusy(false);
             showError(process_.errorString());
+            if (runningKind_ == "statistics")
+                gpuStatistics_->finish(runningStatisticsRequest_,
+                                       {{"error", process_.errorString().toStdString()}});
             if (runningKind_ == "predicate")
                 predicateView_->finish(runningPredicateRequest_,
                                        {{"error", process_.errorString().toStdString()}});
@@ -367,6 +372,9 @@ void MainWindow::buildUi() {
     auto annotationsAction =
         analyze->addAction("Annotations", this, [this] { centerTabs_->setCurrentWidget(annotations_); });
     annotationsAction->setObjectName("showAnnotations");
+    auto statisticsAction =
+        analyze->addAction("GPU Statistics", this, [this] { centerTabs_->setCurrentWidget(gpuStatistics_); });
+    statisticsAction->setObjectName("showGpuStatistics");
     auto viewMenu = menuBar()->addMenu("&View");
     auto help = menuBar()->addMenu("&Help");
     help->addAction("About FloraGPA", this, [this] {
@@ -886,6 +894,31 @@ void MainWindow::buildUi() {
     centerTabs_->addTab(geometryPane_, "Geometry");
     annotations_ = new AnnotationsView;
     centerTabs_->addTab(annotations_, "Annotations");
+    gpuStatistics_ = new StatisticsView;
+    centerTabs_->addTab(gpuStatistics_, "GPU Statistics");
+    connect(annotations_, &AnnotationsView::rangeRequested, this, [this](qulonglong start, qulonglong end) {
+        if (!busy()) {
+            gpuStatistics_->setRange(start, end);
+            centerTabs_->setCurrentWidget(gpuStatistics_);
+        }
+    });
+    connect(gpuStatistics_, &StatisticsView::readRequested, this,
+            [this](qulonglong start, qulonglong end, bool single, qulonglong request) {
+                runningStatisticsRequest_ = request;
+                if (busy()) {
+                    gpuStatistics_->finish(request, {{"error", "Worker is busy"}});
+                    return;
+                }
+                QStringList args{"statistics", capturePath_};
+                if (single)
+                    args << "--event" << QString::number(start);
+                else
+                    args << "--start-event" << QString::number(start) << "--end-event"
+                         << QString::number(end);
+                startWorker(args, false);
+                if (process_.state() == QProcess::NotRunning)
+                    gpuStatistics_->finish(request, {{"error", "Cannot start GPU statistics"}});
+            });
     connect(annotations_, &AnnotationsView::eventRequested, this, [this](qulonglong id) {
         if (!busy())
             locateEvent(id);
@@ -1002,6 +1035,7 @@ void MainWindow::buildUi() {
         ++outputGeneration_;
         replayedState_->invalidate();
         predicateView_->invalidate();
+        gpuStatistics_->invalidate();
         ++revision_;
         if (process_.state() != QProcess::NotRunning)
             cancel();
@@ -1057,6 +1091,7 @@ void MainWindow::setBusy(bool busy) {
     replayedState_->setWorkerBusy(busy);
     predicateView_->setWorkerBusy(busy);
     annotations_->setWorkerBusy(busy);
+    gpuStatistics_->setWorkerBusy(busy);
     openAction_->setEnabled(!busy);
     viewAction_->setEnabled(!busy && frame_ && experiment_);
     replayAction_->setEnabled(!busy && bool(frame_));
@@ -1181,6 +1216,8 @@ void MainWindow::finishWorker(int code, QProcess::ExitStatus status) {
     }
     setBusy(false);
     if (runningRevision_ != revision_) {
+        if (runningKind_ == "statistics")
+            gpuStatistics_->finish(runningStatisticsRequest_, {{"error", "Cancelled"}});
         if (runningKind_ == "predicate")
             predicateView_->finish(runningPredicateRequest_, {{"error", "Cancelled"}});
         if (runningKind_ == "replay-pipeline")
@@ -1209,6 +1246,17 @@ void MainWindow::finishWorker(int code, QProcess::ExitStatus status) {
                                       .arg(experiment["revisions"].toInteger())
                                       .arg(experiment["applied_events"].toArray().size())
                                       .arg(experiment["pending_events"].toArray().size()));
+        }
+        if (runningKind_ == "statistics") {
+            QFile statisticsFile(jobDir_->path() + "/result/statistics.json");
+            if (!statisticsFile.open(QIODevice::ReadOnly))
+                throw std::runtime_error("Statistics output is missing");
+            auto bytes = statisticsFile.readAll();
+            auto result = nlohmann::json::parse(bytes.constData(), bytes.constData() + bytes.size());
+            const auto accepted = gpuStatistics_->finish(runningStatisticsRequest_, result);
+            statusBar()->showMessage(accepted ? "GPU statistics ready" : "Statistics result discarded", 3000);
+            emit taskFinished(accepted);
+            return;
         }
         if (runningKind_ == "replay-pipeline") {
             QFile stateFile(jobDir_->path() + "/result/replay-pipeline.json");
@@ -1369,6 +1417,8 @@ void MainWindow::finishWorker(int code, QProcess::ExitStatus status) {
         emit taskFinished(true);
     } catch (const std::exception &e) {
         showError(QString::fromUtf8(e.what()));
+        if (runningKind_ == "statistics")
+            gpuStatistics_->finish(runningStatisticsRequest_, {{"error", e.what()}});
         if (runningKind_ == "replay-pipeline")
             replayedState_->finishReplay(runningPipelineRequest_, {{"error", e.what()}});
         if (runningKind_ == "predicate")
@@ -1415,6 +1465,7 @@ void MainWindow::selectEvent(Id id) {
     capturedState_->setSelection(frame_, id);
     replayedState_->setSelection(frame_, id);
     predicateView_->setSelection(frame_, id);
+    gpuStatistics_->setSelection(frame_, id);
     selectedResource_ = 0;
     selectedShaderStage_.reset();
     clearBufferDetails();
@@ -2167,6 +2218,7 @@ void MainWindow::experimentChanged() {
     ++outputGeneration_;
     replayedState_->invalidate();
     predicateView_->invalidate();
+    gpuStatistics_->invalidate();
     projectDirty_ = true;
     setWindowModified(true);
     ++revision_;

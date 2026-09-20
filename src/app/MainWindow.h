@@ -22,6 +22,7 @@ namespace flora {
 class CommandStateView;
 class PredicateView;
 class AnnotationsView;
+class StatisticsView;
 class MainWindow final : public QMainWindow {
     Q_OBJECT
   public:
@@ -122,6 +123,8 @@ class MainWindow final : public QMainWindow {
     CommandStateView *replayedState_;
     PredicateView *predicateView_;
     AnnotationsView *annotations_;
+    StatisticsView *gpuStatistics_;
+    uint64_t runningStatisticsRequest_{};
     uint64_t runningPredicateRequest_ = 0;
     uint64_t runningPipelineRequest_ = 0;
     QPlainTextEdit *shader_, *log_;
