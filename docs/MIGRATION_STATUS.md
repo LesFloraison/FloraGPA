@@ -4,7 +4,16 @@
 GF2 与 BF1 DX11 捕获。**尚未完成原 Python 版本的全部功能迁移。**
 当前独立包为 `out/FloraGPA-hull-outputs/FloraGPA.exe`。
 
-最新实现补齐原生 HS 输出采集、VS→HS 实例身份传递、控制点与 patch constants
+最新一批补齐 checkpoint／trace 的 C++ 基础层：原始指令目录、HS 阶段与
+HS/DS 声明输入、动态数组寄存器寻址、双结果指令的地址依赖、静态调用图、
+完整输入筛选及返回记录校验。1476 项检查全部通过，其中 1403 项成功结果
+与 Python 精确一致，72 项一致拒绝，1 项为单独计数的记录长度边界增强；
+包含编译器生成的 GS 4.0/4.1/5.0、HS/DS，以及真实帧的 4 个着色器资源。
+**这一批尚未接通 GPU checkpoint／trace 插桩、采集、导出或 Qt 调试界面**，
+不代表这些功能已经可用，也未替换当前独立包。完整迁移目标保持未完成。
+详见 [CHECKPOINT_MODEL_MIGRATION.md](CHECKPOINT_MODEL_MIGRATION.md)。
+
+上一批实现补齐原生 HS 输出采集、VS→HS 实例身份传递、控制点与 patch constants
 双表、逐分量有效性、完整导出和 Qt 实验项目选择恢复。GPU 原始输入和原始绘制
 参数保持不变；多实例数据从完整绘制结果切片，不改写 InstanceID。
 开发版插桩 226 项对照通过（216 项成功、10 项预期拒绝），GPU 112 项对照通过

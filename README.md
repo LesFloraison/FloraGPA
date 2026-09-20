@@ -94,6 +94,9 @@ preserve original downstream bindings through private output/SO copies. See
 **HS output** provides control-point and patch-constant tables, component validity,
 original instance/patch identities and complete binary/CSV export. See
 [`docs/HULL_OUTPUT_MIGRATION.md`](docs/HULL_OUTPUT_MIGRATION.md).
+The native checkpoint parser and input-selector foundation is documented in
+[`docs/CHECKPOINT_MODEL_MIGRATION.md`](docs/CHECKPOINT_MODEL_MIGRATION.md);
+GPU checkpoint/trace capture and its Qt views remain pending.
 Export retains JSON, CSV, raw output bytes and OBJ when positions are valid;
 geometry choices are saved in experiment projects. Remaining stages and
 validation limits are listed in

@@ -608,9 +608,16 @@
       "sha256": "54318a13ac10d4393d79b73d6a02940f27a60fd3086221a36b14795d313aff1e",
       "lines": 33,
       "description": "Declared DS input registers, without adding or guessing shader inputs.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": [
+        "src/application/DxbcCheckpointModel.h",
+        "src/application/DxbcCheckpointModel.cpp"
+      ],
+      "validation": [
+        "docs/CHECKPOINT_MODEL_MIGRATION.md",
+        "Native declared DS inputs and exact operands implemented; checkpoint GPU consumer remains pending.",
+        "1476 differential/bounds checks: 1403 exact successful comparisons, 72 matching rejections and one separately classified native bounds hardening check; native checkpoint_model CTest."
+      ]
     },
     {
       "module": "dxbc_geometry_emissions.py",
@@ -636,9 +643,16 @@
       "sha256": "a4f85999744f3b8db32f9bfdd74e515563d7f50f552f27f5cb9ae36ba6d2ba20",
       "lines": 297,
       "description": "Native GS/DS register snapshots immediately before a selected original token.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": [
+        "src/application/DxbcCheckpointModel.h",
+        "src/application/DxbcCheckpointModel.cpp"
+      ],
+      "validation": [
+        "docs/CHECKPOINT_MODEL_MIGRATION.md",
+        "Original program catalogs, operand ranges, two-result address dependencies and static call graphs implemented. Complete instrumentation and GPU integration remain pending.",
+        "1476 differential/bounds checks: 1403 exact successful comparisons, 72 matching rejections and one separately classified native bounds hardening check; native checkpoint_model CTest."
+      ]
     },
     {
       "module": "dxbc_hull_capture.py",
@@ -682,9 +696,16 @@
       "sha256": "d745651c77381e501452b3f39a8370abe6a16c13fa3bb2e41de062c41c2ae4e1",
       "lines": 40,
       "description": "Original HS executable phase boundaries and declared per-phase input model.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": [
+        "src/application/DxbcCheckpointModel.h",
+        "src/application/DxbcCheckpointModel.cpp"
+      ],
+      "validation": [
+        "docs/CHECKPOINT_MODEL_MIGRATION.md",
+        "Native original HS phase layout and declared phase inputs implemented; checkpoint GPU consumer remains pending.",
+        "1476 differential/bounds checks: 1403 exact successful comparisons, 72 matching rejections and one separately classified native bounds hardening check; native checkpoint_model CTest."
+      ]
     },
     {
       "module": "dxbc_immediate.py",
@@ -705,9 +726,16 @@
       "sha256": "ac06b017ec516144b946a3d76e59ab4902b698c1a0c3ba23c70db19d91d0ed30",
       "lines": 84,
       "description": "Static declarations and 32-bit element addressing for DXBC x# temporaries.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": [
+        "src/application/DxbcCheckpointModel.h",
+        "src/application/DxbcCheckpointModel.cpp"
+      ],
+      "validation": [
+        "docs/CHECKPOINT_MODEL_MIGRATION.md",
+        "Native declarations, nested access order, address dependency checks, index rewriting and operand generation implemented; checkpoint GPU transform remains pending.",
+        "1476 differential/bounds checks: 1403 exact successful comparisons, 72 matching rejections and one separately classified native bounds hardening check; native checkpoint_model CTest."
+      ]
     },
     {
       "module": "dxbc_patch.py",
@@ -1692,9 +1720,16 @@
       "sha256": "e246d8fad817c03503131e64b51ea8cc5dffe8297b8dd73abc2d5fe0f2b1144e",
       "lines": 75,
       "description": "Exact declared main-input selectors, never cross-run invocation identities.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": [
+        "src/application/InvocationSelector.h",
+        "src/application/InvocationSelector.cpp"
+      ],
+      "validation": [
+        "docs/CHECKPOINT_MODEL_MIGRATION.md",
+        "Native validation, exact keys, snapshot selectors, bounded file IO and independent record verification implemented; trace capture and Qt consumers remain pending.",
+        "1476 differential/bounds checks: 1403 exact successful comparisons, 72 matching rejections and one separately classified native bounds hardening check; native checkpoint_model CTest."
+      ]
     },
     {
       "module": "native_sdbg_expression.py",
