@@ -149,7 +149,19 @@ and front/back operations. The compact dialog saves only changed fields;
 subsequent changes merge per field and support project history, undo and redo.
 Edits apply at the selected draw, including its before boundary; the next unedited
 draw restores its captured state. Reference values accept decimal or hexadecimal.
-Other pipeline edit families remain unsupported until migrated.
+Select **Edit > Edit Rasterizer** to edit fill/cull mode, winding, depth bias,
+depth clipping, scissor, multisample and line flags. The **Viewports** and
+**Scissors** tabs edit up to 16 ordered slots; removing all rows clears the
+binding. Changes merge per field and support the same history and save/load
+workflow, including mixed depth/stencil edits and legacy wireframe/cull presets.
+The next unedited draw restores its captured state.
+
+Forced sample count and conservative rasterization use the device's native
+D3D11.1/11.3 support. Unsupported combinations fail explicitly. Forced sampling
+requires no DSV, disabled depth testing, compatible render targets and a pixel
+shader without sample-frequency execution or depth output; shader replacements
+are checked too. Conservative rasterization requires solid fill and device
+support. Blend editing and private coverage diagnostics remain pending.
 
 **Pipeline > Predicate** reads native occlusion and stream-output overflow predicates
 at the selected command boundary. The compact inspector shows the query status,

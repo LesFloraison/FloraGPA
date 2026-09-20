@@ -455,7 +455,7 @@
       "validation": [
         "Captured/default descriptors, strict scalar and face normalization, depth_test/depth_write aliases, recursive per-field merging and event-scoped native state creation. Stencil reference retains uint32 input while native getters expose the driver low byte.",
         "tools/validate_depth_stencil_port.py: 517 Python comparisons passed for D24S8/D32S8, hardware/WARP, all depth comparison functions and both stencil faces, eight operations, masks, before/after and next-draw restoration; malformed input rejected.",
-        "Private coverage/diagnostic consumers and mixed rasterizer/blend pipeline operations still require their own migrations.",
+        "Mixed rasterizer/depth operations are migrated; private coverage/diagnostic consumers and blend pipeline operations still require their own migrations.",
         "tests/DepthStencilTests.cpp: native D24S8 storage verified for 96 front/back/branch/op/driver cases, depth preservation/write, before-boundary state, repeated replay, history merging and save/load. tests/UiTests.cpp: editor Apply/Undo/Redo changes actual worker-rendered pixels.",
         "Release: all 19 CTest suites passed. Debug: 5 related suites and depth/stencil editor UI passed (artifacts/ctest-depth-release.log, ctest-depth-debug.log, depth-debug-ui.txt).",
         "Final package: 517 comparisons passed with Windows-only child PATH in artifacts/depth-package-comparison/validation.json; GF2/BF1 golden frames and disabled-draw negative controls passed in artifacts/validation-depth-package/validation.json."
@@ -1748,11 +1748,17 @@
       "description": "Per-draw base D3D11 rasterizer, viewport and scissor experiments.",
       "status": "partial",
       "native": [
+        "src/application/RasterizerEdits.cpp",
+        "src/replay/Rasterizer.cpp",
         "src/application/DepthStencilEdits.cpp",
         "src/application/Experiment.cpp"
       ],
       "validation": [
-        "Depth/stencil branch and presets of pipeline normalization/merge migrated; rasterizer, viewport/scissor and blend branches remain pending. Unsupported pipeline keys fail explicitly."
+        "Rasterizer and depth/stencil normalization, twelve state fields, float32 viewports, int32 scissors, zero-to-sixteen array slots, legacy wireframe/cull_none presets and per-field history merging migrated. False cull_none restores the captured value.",
+        "tools/validate_rasterizer_port.py: 309 native/Python comparisons passed with Windows-only child PATH, hardware/WARP images, UAV bytes, exact inspected pipeline fields, before/after and next-draw restoration, mixed depth edits and malformed input rejection. Evidence: artifacts/rasterizer-package-comparison-v2/validation.json.",
+        "tests/RasterizerTests.cpp: repeated replay, captured cull restoration, native state/pixels at before/after/next boundaries, mixed depth edits, project save/load, undo/redo, branch truncation and invalid-edit rollback. Release all 20 CTest suites and Debug five related suites passed.",
+        "Final package out/FloraGPA-rasterizer also passed 517 depth/stencil regressions and four GF2/BF1 golden/negative checks with system-only PATH: artifacts/rasterizer-depth-regression/validation.json and artifacts/validation-rasterizer-package/validation.json.",
+        "Blend normalization/merge and private coverage consumers remain pending; unsupported pipeline keys fail explicitly."
       ]
     },
     {
@@ -1760,18 +1766,32 @@
       "sha256": "62a52c4543046d89fff4868af6ba877e5d91c63afc54eade3bb75772723858b1",
       "lines": 105,
       "description": "GPA rasterizer resource versions and native D3D11.1/11.3 extensions.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": [
+        "src/replay/Rasterizer.cpp",
+        "src/application/RasterizerEdits.cpp",
+        "src/application/ReplayPipeline.cpp"
+      ],
+      "validation": [
+        "Exact State/State1/State2 wire sizes; Device1 forced sampling and Device3 conservative raster support; native capability rejection and submission-time DSV, depth, RTV sample count, sample-frequency/depth-output shader constraints, including shader overrides.",
+        "Included in the 309 tools/validate_rasterizer_port.py comparisons: forced counts 0/1/2/4/8/16, hardware/WARP, with/without RTV, captured extensions, conservative coverage, before/disabled invalid-draw inspection and next-draw restoration.",
+        "Private coverage/diagnostic consumers remain pending. Device compatibility is demonstrated only on this host."
+      ]
     },
     {
       "module": "rasterizer_ui.py",
       "sha256": "a392f7145ab54b26f23010fcac98c66671308b519254417aa921eee6126be4cd",
       "lines": 102,
       "description": "Inspectable JSON editors for per-draw pipeline state.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": [
+        "src/app/RasterizerDialog.cpp",
+        "src/app/MainWindow.cpp"
+      ],
+      "validation": [
+        "Compact Qt State/Viewports/Scissors tabs, changed-field commits, array add/remove and validation, effective history values and stale revision protection. Depth/stencil editor is also migrated; blend editor remains pending.",
+        "tests/UiTests.cpp: Release/Debug worker-rendered Apply/Undo/Redo pixels, changed-field-only commits, invalid values, empty/sixteen-slot arrays, no-op and rejected stale commits. Screenshots inspected in artifacts/rasterizer-ui/."
+      ]
     },
     {
       "module": "rdc_analyze.py",

@@ -352,20 +352,7 @@ IUnknown *Replay::object(Id id) {
                 throw std::runtime_error("Rasterizer size mismatch");
             D3D11_RASTERIZER_DESC2 desc{};
             std::memcpy(&desc, raw.data(), raw.size());
-            if (!desc.ForcedSampleCount &&
-                desc.ConservativeRaster == D3D11_CONSERVATIVE_RASTERIZATION_MODE_OFF) {
-                D3D11_RASTERIZER_DESC basic{};
-                std::memcpy(&basic, &desc, sizeof basic);
-                Com<ID3D11RasterizerState> obj;
-                check(device_->CreateRasterizerState(&basic, &obj), "CreateRasterizerState");
-                result = obj;
-            } else {
-                Com<ID3D11Device3> dev;
-                check(device_.As(&dev), "Query Device3");
-                Com<ID3D11RasterizerState2> obj;
-                check(dev->CreateRasterizerState2(&desc, &obj), "CreateRasterizerState2");
-                result = obj;
-            }
+            result = createRasterizer(desc);
         } else if (t == 0x8a) {
             auto desc = descriptor<D3D11_BLEND_DESC>(r.take(r.remaining()));
             Com<ID3D11BlendState> obj;
@@ -777,6 +764,9 @@ void Replay::command(const Entry &e) {
         auto state = frame_.state(event.state);
         withEventEdits(event, state, [&] {
             bind(state, t == 0x35 || t == 0x36);
+            if ((t == 0x35 || t == 0x36) && options_.rasterizerEdits.contains(e.id))
+                throw std::runtime_error("Graphics pipeline experiment on a dispatch");
+            applyRasterizerEdit(e.id);
             if (auto edit = options_.depthStencilEdits.find(e.id); edit != options_.depthStencilEdits.end()) {
                 if (t == 0x35 || t == 0x36)
                     throw std::runtime_error("Graphics pipeline experiment on a dispatch");
@@ -802,6 +792,8 @@ void Replay::command(const Entry &e) {
                 return false;
             }
             const auto &a = event.args;
+            if (t != 0x35 && t != 0x36)
+                validateRasterizer(state);
             auto autoCount = t == 0x38 ? drawAutoParameters(e.id).vertexCount : 0;
             auto arguments = event.argumentBuffer ? get<ID3D11Buffer>(event.argumentBuffer) : nullptr;
             auto activeStreams =
@@ -1022,6 +1014,7 @@ void Replay::run(const std::function<void(Id, size_t, size_t)> &progress,
     predicateOverride_.reset();
     clearBindingGaps();
     objects_.clear();
+    rasterizerExtensions_.clear();
     usedSrvs_.clear();
     interfaceSlots_.clear();
     passthroughShaders_.clear();
@@ -1035,7 +1028,8 @@ void Replay::run(const std::function<void(Id, size_t, size_t)> &progress,
                             !options_.textures.empty() || !options_.disabled.empty() ||
                             !options_.buffers.empty() || !options_.commandPayloads.empty() ||
                             !options_.updateSources.empty() || !options_.uavCounters.empty() ||
-                            !options_.predicateSetters.empty() || !options_.depthStencilEdits.empty();
+                            !options_.predicateSetters.empty() || !options_.depthStencilEdits.empty() ||
+                            !options_.rasterizerEdits.empty();
     soCountEnabled_ = false;
     for (const auto &[id, entry] : frame_.entries())
         if ((entry.category == 7 && entry.type == 0x38) ||

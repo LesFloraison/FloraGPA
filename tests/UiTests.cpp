@@ -8,6 +8,8 @@
 #include "app/CommandStateView.h"
 #include "app/MainWindow.h"
 #include "app/PredicateView.h"
+#include "app/RasterizerDialog.h"
+#include "application/RasterizerEdits.h"
 #include <QAbstractItemModelTester>
 #include <QAction>
 #include <QCryptographicHash>
@@ -19,6 +21,7 @@
 #include <QSignalSpy>
 #include <QStatusBar>
 #include <QTabWidget>
+#include <QTableWidget>
 #include <QtTest>
 
 class UiTests final : public QObject {
@@ -32,6 +35,132 @@ class UiTests final : public QObject {
         QVERIFY(window.grab().save(directory + '/' + name + ".png"));
     }
   private slots:
+    void rasterizerHistory() {
+        using namespace flora;
+        QTemporaryDir dir;
+        testing::depthStencilCapture().save(dir.path() + "/rasterizer.gpa_frame");
+        MainWindow window;
+        window.resize(1500, 950);
+        window.show();
+        QSignalSpy done(&window, &MainWindow::taskFinished);
+        window.openCapture(dir.path() + "/rasterizer.gpa_frame");
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        auto api = window.findChild<QTableView *>("apiLog");
+        bool selected = false;
+        for (int row = 0; row < api->model()->rowCount(); ++row) {
+            auto index = api->model()->index(row, 0);
+            if (index.data(Qt::UserRole).toULongLong() == 1000) {
+                api->setCurrentIndex(index);
+                selected = true;
+                break;
+            }
+        }
+        QVERIFY(selected);
+        QTRY_VERIFY_WITH_TIMEOUT(!window.busy(), 30000);
+        auto edit = window.findChild<QAction *>("editRasterizer");
+        QVERIFY(edit && edit->isEnabled());
+        bool entered = false;
+        QTimer::singleShot(0, &window, [&] {
+            auto dialog = window.findChild<QDialog *>("rasterizerDialog");
+            if (!dialog)
+                return;
+            QTimer::singleShot(3000, dialog, &QDialog::reject);
+            dialog->findChild<QComboBox *>("rs_scissor_enable")->setCurrentIndex(1);
+            dialog->findChild<QPushButton *>("add_scissors")->click();
+            auto table = dialog->findChild<QTableWidget *>("scissors");
+            table->item(0, 2)->setText("0");
+            table->item(0, 3)->setText("0");
+            snapshot(*dialog, "rasterizer-state-editor");
+            dialog->findChild<QTabWidget *>()->setCurrentIndex(2);
+            snapshot(*dialog, "rasterizer-scissors-editor");
+            entered = true;
+            dialog->findChild<QDialogButtonBox *>()->button(QDialogButtonBox::Ok)->click();
+        });
+        done.clear();
+        edit->trigger();
+        QVERIFY(entered);
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        auto output = window.findChild<ImageView *>("frameOutput");
+        QCOMPARE(output->image().pixelColor(0, 0), QColor(0, 0, 0, 255));
+        QAction *undo = nullptr, *redo = nullptr;
+        for (auto action : window.findChildren<QAction *>()) {
+            if (action->shortcut() == QKeySequence::Undo)
+                undo = action;
+            if (action->shortcut() == QKeySequence::Redo)
+                redo = action;
+        }
+        QVERIFY(undo && redo);
+        done.clear();
+        undo->trigger();
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        QCOMPARE(output->image().pixelColor(0, 0), QColor(255, 0, 0, 255));
+        done.clear();
+        redo->trigger();
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        QCOMPARE(output->image().pixelColor(0, 0), QColor(0, 0, 0, 255));
+    }
+    void rasterizerDialogValidation() {
+        using namespace flora;
+        QTemporaryDir dir;
+        testing::depthStencilCapture().save(dir.path() + "/dialog.gpa_frame");
+        Frame frame((dir.path() + "/dialog.gpa_frame").toStdWString());
+        QWidget parent;
+        auto initial = capturedRasterizer(frame, 1000);
+        int commits = 0;
+        QTimer::singleShot(0, &parent, [&] {
+            auto dialog = parent.findChild<QDialog *>("rasterizerDialog");
+            if (!dialog)
+                return;
+            QTimer::singleShot(3000, dialog, &QDialog::reject);
+            auto table = dialog->findChild<QTableWidget *>("viewports");
+            auto apply = dialog->findChild<QDialogButtonBox *>()->button(QDialogButtonBox::Ok);
+            auto error = dialog->findChild<QLabel *>("rasterizerError");
+            table->item(0, 2)->setText("-1");
+            apply->click();
+            QCOMPARE(commits, 0);
+            QVERIFY(error->isVisible());
+            table->item(0, 2)->setText("1");
+            auto add = dialog->findChild<QPushButton *>("add_viewports");
+            for (int i = 0; i < 15; ++i)
+                add->click();
+            QCOMPARE(table->rowCount(), 16);
+            QVERIFY(!add->isEnabled());
+            auto remove = dialog->findChild<QPushButton *>("remove_viewports");
+            for (int i = 0; i < 16; ++i)
+                remove->click();
+            QCOMPARE(table->rowCount(), 0);
+            QVERIFY(!remove->isEnabled());
+            apply->click();
+        });
+        QVERIFY(editRasterizerDialog(&parent, initial, [&](const auto &patch) {
+            ++commits;
+            QCOMPARE(patch, nlohmann::json({{"viewports", nlohmann::json::array()}}));
+        }));
+        QCOMPARE(commits, 1);
+        QTimer::singleShot(0, &parent, [&] {
+            auto dialog = parent.findChild<QDialog *>("rasterizerDialog");
+            if (dialog)
+                dialog->findChild<QDialogButtonBox *>()->button(QDialogButtonBox::Ok)->click();
+        });
+        QVERIFY(!editRasterizerDialog(&parent, initial, [&](const auto &) { ++commits; }));
+        QCOMPARE(commits, 1);
+        QTimer::singleShot(0, &parent, [&] {
+            auto dialog = parent.findChild<QDialog *>("rasterizerDialog");
+            if (!dialog)
+                return;
+            QTimer::singleShot(3000, dialog, &QDialog::reject);
+            dialog->findChild<QComboBox *>("rs_fill_mode")->setCurrentIndex(0);
+            dialog->findChild<QDialogButtonBox *>()->button(QDialogButtonBox::Ok)->click();
+            QVERIFY(dialog->findChild<QLabel *>("rasterizerError")->text().contains("changed"));
+            dialog->reject();
+        });
+        QVERIFY(!editRasterizerDialog(&parent, initial,
+                                      [&](const auto &) { throw std::runtime_error("Experiment changed"); }));
+    }
     void depthStencilHistory() {
         using namespace flora;
         auto capture = testing::depthStencilCapture();

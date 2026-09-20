@@ -19,6 +19,8 @@ class Experiment {
     nlohmann::json setter(const Frame &frame, Id event) const;
     void setDepthStencil(const Frame &frame, Id event, const nlohmann::json &values);
     nlohmann::json depthStencil(const Frame &frame, Id event) const;
+    void setRasterizer(const Frame &frame, Id event, const nlohmann::json &values);
+    nlohmann::json rasterizer(const Frame &frame, Id event) const;
     nlohmann::json clear(const Frame &frame, Id event) const;
     void setUpdateSource(const Frame &frame, Id event, Bytes data);
     void setBuffer(const Frame &frame, Id event, Id resource, uint64_t offset, Bytes data);

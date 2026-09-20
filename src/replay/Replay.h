@@ -16,6 +16,11 @@ struct BufferPatch {
     std::vector<uint8_t> bytes;
 };
 struct ReplayOptions {
+    struct RasterizerEdit {
+        std::optional<D3D11_RASTERIZER_DESC2> descriptor;
+        std::optional<std::vector<D3D11_VIEWPORT>> viewports;
+        std::optional<std::vector<D3D11_RECT>> scissors;
+    };
     struct DepthStencilEdit {
         std::optional<D3D11_DEPTH_STENCIL_DESC> descriptor;
         std::optional<uint32_t> reference;
@@ -35,6 +40,7 @@ struct ReplayOptions {
     std::map<Id, std::map<Id, uint32_t>> uavCounters;
     std::map<Id, PredicateBinding> predicateSetters;
     std::map<Id, DepthStencilEdit> depthStencilEdits;
+    std::map<Id, RasterizerEdit> rasterizerEdits;
 };
 struct Image {
     uint32_t width{}, height{}, format{};
@@ -67,6 +73,11 @@ class Replay {
     Com<ID3D11DeviceContext> context_;
     Com<ID3D11DeviceContext1> context1_;
     std::map<Id, Com<IUnknown>> objects_;
+    // Keep edited extension states alive while their native identities are registered.
+    std::map<ID3D11RasterizerState *, std::pair<Com<ID3D11RasterizerState>, UINT>> rasterizerExtensions_;
+    Com<ID3D11RasterizerState> createRasterizer(const D3D11_RASTERIZER_DESC2 &desc);
+    void applyRasterizerEdit(Id event);
+    void validateRasterizer(const State &state);
     struct PredicateSegment {
         Com<ID3D11Predicate> native, mirror;
     };

@@ -1,6 +1,7 @@
 #include "Experiment.h"
 #include "CommandEdits.h"
 #include "DepthStencilEdits.h"
+#include "RasterizerEdits.h"
 #include "SetterEdits.h"
 #include "ShaderInspector.h"
 #include "core/BufferBindings.h"
@@ -78,6 +79,7 @@ void Experiment::apply(const Frame &frame, ReplayOptions &options) const {
     options.uavCounters.clear();
     options.predicateSetters.clear();
     options.depthStencilEdits.clear();
+    options.rasterizerEdits.clear();
     std::map<Id, Json> pipeline;
     for (size_t i = 0; i < revision(); ++i) {
         auto &operations = project_.at("history").at(i).at("operations");
@@ -101,9 +103,14 @@ void Experiment::apply(const Frame &frame, ReplayOptions &options) const {
                     options.disabled.insert(id);
             } else if (kind == "pipeline") {
                 auto event = identifier(op.at("event"));
-                auto values = normalizeDepthStencil(op.at("values"));
-                mergeDepthStencil(pipeline[event], values);
-                options.depthStencilEdits[event] = depthStencilEdit(frame, event, pipeline[event]);
+                auto values = normalizePipeline(op.at("values"));
+                mergePipeline(pipeline[event], values);
+                const auto depth = depthPipelineFields(pipeline[event]);
+                if (!depth.empty())
+                    options.depthStencilEdits[event] = depthStencilEdit(frame, event, depth);
+                if (pipeline[event].contains("rasterizer") || pipeline[event].contains("viewports") ||
+                    pipeline[event].contains("scissors"))
+                    options.rasterizerEdits[event] = rasterizerEdit(frame, event, pipeline[event]);
             } else if (kind == "setter") {
                 const auto id = identifier(op.at("event"));
                 options.predicateSetters[id] = validatePredicateSetter(frame, id, op.at("values"));
@@ -199,7 +206,7 @@ Json Experiment::depthStencil(const Frame &frame, Id event) const {
     for (size_t i = 0; i < revision(); ++i)
         for (const auto &op : project_["history"][i]["operations"])
             if (op.at("kind") == "pipeline" && identifier(op.at("event")) == event)
-                mergeDepthStencil(result, normalizeDepthStencil(op.at("values")));
+                mergeDepthStencil(result, depthPipelineFields(normalizePipeline(op.at("values"))));
     return result;
 }
 void Experiment::setDepthStencil(const Frame &frame, Id event, const Json &values) {
@@ -212,6 +219,31 @@ void Experiment::setDepthStencil(const Frame &frame, Id event, const Json &value
          {"operations", Json::array({{{"kind", "pipeline"}, {"event", event}, {"values", values}}})}});
     project_["history"] = std::move(history);
     project_["cursor"] = project_["history"].size();
+}
+Json Experiment::rasterizer(const Frame &frame, Id event) const {
+    Json values = Json::object();
+    for (size_t i = 0; i < revision(); ++i)
+        for (const auto &op : project_["history"][i]["operations"])
+            if (op.at("kind") == "pipeline" && identifier(op.at("event")) == event)
+                mergePipeline(values, normalizePipeline(op.at("values")));
+    return effectiveRasterizer(frame, event, values);
+}
+void Experiment::setRasterizer(const Frame &frame, Id event, const Json &values) {
+    normalizePipeline(values);
+    auto previous = project_;
+    auto &history = project_["history"];
+    history.erase(history.begin() + ptrdiff_t(revision()), history.end());
+    history.push_back(
+        {{"label", "Rasterizer event " + std::to_string(event)},
+         {"operations", Json::array({{{"kind", "pipeline"}, {"event", event}, {"values", values}}})}});
+    project_["cursor"] = history.size();
+    try {
+        ReplayOptions checked;
+        apply(frame, checked);
+    } catch (...) {
+        project_ = std::move(previous);
+        throw;
+    }
 }
 Json Experiment::setter(const Frame &frame, Id event) const {
     auto result = capturedSetter(frame, event);
