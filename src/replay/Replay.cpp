@@ -777,6 +777,18 @@ void Replay::command(const Entry &e) {
         auto state = frame_.state(event.state);
         withEventEdits(event, state, [&] {
             bind(state, t == 0x35 || t == 0x36);
+            if (auto edit = options_.depthStencilEdits.find(e.id); edit != options_.depthStencilEdits.end()) {
+                if (t == 0x35 || t == 0x36)
+                    throw std::runtime_error("Graphics pipeline experiment on a dispatch");
+                Com<ID3D11DepthStencilState> depth;
+                if (edit->second.descriptor)
+                    check(device_->CreateDepthStencilState(&*edit->second.descriptor, &depth),
+                          "Create edited depth/stencil state");
+                else
+                    depth = get<ID3D11DepthStencilState>(state.depthState);
+                context_->OMSetDepthStencilState(depth.Get(),
+                                                 edit->second.reference.value_or(state.stencilRef));
+            }
             clearBindingGaps();
             auto observe = [&](bool after) {
                 if (boundaryObserver_)
@@ -1023,7 +1035,7 @@ void Replay::run(const std::function<void(Id, size_t, size_t)> &progress,
                             !options_.textures.empty() || !options_.disabled.empty() ||
                             !options_.buffers.empty() || !options_.commandPayloads.empty() ||
                             !options_.updateSources.empty() || !options_.uavCounters.empty() ||
-                            !options_.predicateSetters.empty();
+                            !options_.predicateSetters.empty() || !options_.depthStencilEdits.empty();
     soCountEnabled_ = false;
     for (const auto &[id, entry] : frame_.entries())
         if ((entry.category == 7 && entry.type == 0x38) ||

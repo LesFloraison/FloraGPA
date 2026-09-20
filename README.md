@@ -143,6 +143,14 @@ Changing the selection, boundary, experiment or adapter invalidates previous res
 Omit `--before` for the command's after boundary. Inspection writes
 `replay-pipeline.json` without frame image readback.
 
+Select a graphics draw and use **Edit > Edit Depth / Stencil** (also in the API Log
+context menu) to change depth testing/writes, comparison, stencil masks/reference,
+and front/back operations. The compact dialog saves only changed fields;
+subsequent changes merge per field and support project history, undo and redo.
+Edits apply at the selected draw, including its before boundary; the next unedited
+draw restores its captured state. Reference values accept decimal or hexadecimal.
+Other pipeline edit families remain unsupported until migrated.
+
 **Pipeline > Predicate** reads native occlusion and stream-output overflow predicates
 at the selected command boundary. The compact inspector shows the query status,
 boolean result, binding and raw predicate value, with JSON export. Active queries

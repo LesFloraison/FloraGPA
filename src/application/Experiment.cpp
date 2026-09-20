@@ -1,5 +1,6 @@
 #include "Experiment.h"
 #include "CommandEdits.h"
+#include "DepthStencilEdits.h"
 #include "SetterEdits.h"
 #include "ShaderInspector.h"
 #include "core/BufferBindings.h"
@@ -76,6 +77,8 @@ void Experiment::apply(const Frame &frame, ReplayOptions &options) const {
     options.initialUavCounters.clear();
     options.uavCounters.clear();
     options.predicateSetters.clear();
+    options.depthStencilEdits.clear();
+    std::map<Id, Json> pipeline;
     for (size_t i = 0; i < revision(); ++i) {
         auto &operations = project_.at("history").at(i).at("operations");
         if (!operations.is_array())
@@ -96,6 +99,11 @@ void Experiment::apply(const Frame &frame, ReplayOptions &options) const {
                     options.disabled.erase(id);
                 else
                     options.disabled.insert(id);
+            } else if (kind == "pipeline") {
+                auto event = identifier(op.at("event"));
+                auto values = normalizeDepthStencil(op.at("values"));
+                mergeDepthStencil(pipeline[event], values);
+                options.depthStencilEdits[event] = depthStencilEdit(frame, event, pipeline[event]);
             } else if (kind == "setter") {
                 const auto id = identifier(op.at("event"));
                 options.predicateSetters[id] = validatePredicateSetter(frame, id, op.at("values"));
@@ -183,6 +191,25 @@ void Experiment::setEnabled(const Frame &frame, Id event, bool enabled) {
     history.push_back(
         {{"label", std::string(enabled ? "Enable event " : "Disable event ") + std::to_string(event)},
          {"operations", Json::array({{{"kind", "enabled"}, {"event", event}, {"value", enabled}}})}});
+    project_["history"] = std::move(history);
+    project_["cursor"] = project_["history"].size();
+}
+Json Experiment::depthStencil(const Frame &frame, Id event) const {
+    auto result = capturedDepthStencil(frame, event);
+    for (size_t i = 0; i < revision(); ++i)
+        for (const auto &op : project_["history"][i]["operations"])
+            if (op.at("kind") == "pipeline" && identifier(op.at("event")) == event)
+                mergeDepthStencil(result, normalizeDepthStencil(op.at("values")));
+    return result;
+}
+void Experiment::setDepthStencil(const Frame &frame, Id event, const Json &values) {
+    const auto normalized = normalizeDepthStencil(values);
+    depthStencilEdit(frame, event, normalized);
+    auto history = project_["history"];
+    history.erase(history.begin() + ptrdiff_t(revision()), history.end());
+    history.push_back(
+        {{"label", "Depth/stencil event " + std::to_string(event)},
+         {"operations", Json::array({{{"kind", "pipeline"}, {"event", event}, {"values", values}}})}});
     project_["history"] = std::move(history);
     project_["cursor"] = project_["history"].size();
 }

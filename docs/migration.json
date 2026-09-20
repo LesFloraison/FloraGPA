@@ -445,9 +445,21 @@
       "sha256": "9e2fcbd28c3f34f7548cf44ac19528c2ccd0ad767c31ca23df0947f61ac7f5bf",
       "lines": 89,
       "description": "Captured D3D11 depth/stencil descriptors and per-draw partial overrides.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": [
+        "src/application/DepthStencilEdits.cpp",
+        "src/application/Experiment.cpp",
+        "src/replay/Replay.cpp",
+        "src/app/MainWindow.cpp"
+      ],
+      "validation": [
+        "Captured/default descriptors, strict scalar and face normalization, depth_test/depth_write aliases, recursive per-field merging and event-scoped native state creation. Stencil reference retains uint32 input while native getters expose the driver low byte.",
+        "tools/validate_depth_stencil_port.py: 517 Python comparisons passed for D24S8/D32S8, hardware/WARP, all depth comparison functions and both stencil faces, eight operations, masks, before/after and next-draw restoration; malformed input rejected.",
+        "Private coverage/diagnostic consumers and mixed rasterizer/blend pipeline operations still require their own migrations.",
+        "tests/DepthStencilTests.cpp: native D24S8 storage verified for 96 front/back/branch/op/driver cases, depth preservation/write, before-boundary state, repeated replay, history merging and save/load. tests/UiTests.cpp: editor Apply/Undo/Redo changes actual worker-rendered pixels.",
+        "Release: all 19 CTest suites passed. Debug: 5 related suites and depth/stencil editor UI passed (artifacts/ctest-depth-release.log, ctest-depth-debug.log, depth-debug-ui.txt).",
+        "Final package: 517 comparisons passed with Windows-only child PATH in artifacts/depth-package-comparison/validation.json; GF2/BF1 golden frames and disabled-draw negative controls passed in artifacts/validation-depth-package/validation.json."
+      ]
     },
     {
       "module": "devices.py",
@@ -1734,9 +1746,14 @@
       "sha256": "d0903527e882ede30d00c3ec157ec3ad8b978f9129e8c6a4e659799c3eca3894",
       "lines": 157,
       "description": "Per-draw base D3D11 rasterizer, viewport and scissor experiments.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": [
+        "src/application/DepthStencilEdits.cpp",
+        "src/application/Experiment.cpp"
+      ],
+      "validation": [
+        "Depth/stencil branch and presets of pipeline normalization/merge migrated; rasterizer, viewport/scissor and blend branches remain pending. Unsupported pipeline keys fail explicitly."
+      ]
     },
     {
       "module": "rasterizer_extensions.py",

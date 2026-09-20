@@ -16,6 +16,10 @@ struct BufferPatch {
     std::vector<uint8_t> bytes;
 };
 struct ReplayOptions {
+    struct DepthStencilEdit {
+        std::optional<D3D11_DEPTH_STENCIL_DESC> descriptor;
+        std::optional<uint32_t> reference;
+    };
     bool timings = false;
     bool warp = false;
     bool debug = false;
@@ -30,6 +34,7 @@ struct ReplayOptions {
     std::map<Id, uint32_t> initialUavCounters;
     std::map<Id, std::map<Id, uint32_t>> uavCounters;
     std::map<Id, PredicateBinding> predicateSetters;
+    std::map<Id, DepthStencilEdit> depthStencilEdits;
 };
 struct Image {
     uint32_t width{}, height{}, format{};

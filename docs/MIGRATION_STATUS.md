@@ -22,16 +22,24 @@ GF2 与 BF1 DX11 捕获。**尚未完成原 Python 版本的全部功能迁移�
 | Context / command-list | 五种 context 接口身份、immediate/deferred 区分；缺失 context 的严格 Map READ 证据恢复；command-list 资源、owner 和 Execute/Finish 清单；Qt 字段树、证据导航、JSON 导出 | 推断不补造版本/指针/标志；保留指针与 ID 候选冲突；与 Python 相同，仅接受 immediate-context 的 Finish 空操作，未恢复列表执行 |
 | 捕获查询值 | 按同 ID、命令顺序使用 GetDesc/GetDataSize/CreateQuery/predicate 元数据；BOOL 完整值与 UINT64 低位、缺失字节、HRESULT/冲突状态 | 表示捕获时保存的内存字，不是新执行的 GPU query；原始高位缺失时保持不完整 |
 | 命令编辑 | RTV / DSV / Uint / Float UAV 清除值；资源写入命令启停；UpdateSubresource 紧密排列源数据替换；菜单、右键、撤销/重做；共享 context 校验和恢复 | 特殊 planar 资源执行仍受现有重放限制 |
+| 深度 / 模板实验 | 每 draw 的 depth enable/write/func、stencil enable/read/write masks、完整正反面四字段和 uint32 reference；字段递归合并、旧 preset、Qt 三页参数编辑、保存与撤销/重做 | 仅 graphics draw；下一未编辑 draw 恢复捕获状态；私有 coverage / 诊断及混合 rasterizer/blend 实验仍待迁移 |
 | 图像 | 实际 GPU 输出、缩放/平移/通道、像素值、PNG 导出 | 全帧输出目前限制单采样 RGBA/BGRA8 |
 | 纹理 | GPU 格式转换、BC、浮点/整数、1D/2D/3D、mip/layer/slice、事件边界预览 | MSAA、平面格式及部分查看选项未迁移 |
 | Shader | DXBC 反汇编、反射、SPDB/SDBG 内嵌源码、HLSL 编译替换 | 不含 HLSL 恢复、单步调试及全部反射树 |
 | Buffer | 初始值、事件前后读回、范围、Hex/ASCII/32 位解释、导出；事件字节编辑/二进制补丁导入、绑定识别、撤销/重做；递归 CB 字段、CB1 范围和类型化编辑；按 UAV view 检查/编辑 Append/Consume/Counter | counter 支持 CS/OM 快照及已恢复 clear/copy/setter 引用；SO retained 实验、完整 setter/getter 与扩展 UAV 重放仍待迁移 |
 | 几何 | IA 输入解码、索引与实例、DrawAuto 实际参数及来源、三种顶点表、旋转线框、CSV/OBJ 导出 | 后变换与覆盖未迁移；当前表格上限为 100 万引用 / 1600 万字段 |
 | 资源名称 | GenPrivateData 原始名称、非法 UTF-8 转义、列表筛选和属性显示 | 名称记录不表示逐事件重命名时间线 |
-| 实验项目 | 原格式 JSON、捕获 SHA-256 绑定、资产校验、uint64 ID、原子保存、撤销/重做 | 接受事件启停、buffer、clear、update_source、predicate setter、事件/初始 UAV counter、全局 shader/texture 替换；其他操作明确拒绝 |
+| 实验项目 | 原格式 JSON、捕获 SHA-256 绑定、资产校验、uint64 ID、原子保存、撤销/重做 | 接受事件启停、buffer、clear、update_source、predicate setter、depth/stencil pipeline、事件/初始 UAV counter、全局 shader/texture 替换；其他操作明确拒绝 |
 | 性能 | 原生 D3D11 时间戳、disjoint 与 pipeline statistics | 尚未迁移原版多轮调度、Intel 硬件指标/GTPin |
 
 ## 验证证据
+
+- 深度/模板编辑初轮 517 项 Python 对照通过，覆盖 D24S8 / D32S8、硬件/WARP、
+  八种深度比较函数、模板比较、正反面三条分支的八种操作、mask/reference、字段合并、
+  命令前边界与下一 draw 恢复；证据为 `artifacts/depth-compare/validation.json`。
+  `tests/DepthStencilTests.cpp` 另直接读回 96 组原生模板操作的存储字节，并检查
+  深度保持/写入、项目保存/加载、撤销/重做与非法输入不改变历史。Qt Worker 的
+  Apply/Undo/Redo 验证画面黑/红切换，截图为 `artifacts/depth-ui/depth-stencil-editor.png`。
 
 - Predicate setter 编辑已接入 API Log 右键与 Edit 菜单、资源选择和原始 uint32 BOOL 输入、
   原格式 setter 项目操作、保存/加载及撤销/重做。覆盖会持续影响后续 draw/dispatch，
@@ -256,6 +264,17 @@ Debug 的 predicate、experiment、管线、SO 和 buffer edit 五项相关回�
 （`artifacts/ctest-predicate-setters-debug.log`），编辑/检查的 Qt Worker 测试也通过
 （`artifacts/predicate-setters-debug-ui.txt`）。最终发布包的 GF2/BF1 黄金帧及
 关闭 draw 负对照均通过，证据为 `artifacts/validation-predicate-setters-package/validation.json`。
+
+深度/模板编辑的 Release 完整回归共 19 项通过，记录为
+`artifacts/ctest-depth-release.log`；Debug 的五项相关回归通过，记录为
+`artifacts/ctest-depth-debug.log`，另有 `artifacts/depth-debug-ui.txt` 的编辑交互验证。
+原生存储测试在两个配置下均通过，未将驱动对关闭 stencil 时无效操作的规范化
+误判成字段丢失。验证范围仍不包含尚未迁移的 MSAA 检查、私有 coverage 或混合
+rasterizer/blend 管线编辑。
+
+最终独立包为 `out/FloraGPA-depth-stencil/`。仅系统 PATH 的 517 项对照再次全部
+通过（`artifacts/depth-package-comparison/validation.json`），GF2/BF1 黄金帧及
+关闭 draw 负对照通过（`artifacts/validation-depth-package/validation.json`）。
 
 ## 尚未闭合的迁移范围
 

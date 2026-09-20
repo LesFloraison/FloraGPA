@@ -290,6 +290,8 @@ void MainWindow::buildUi() {
     clearAction_->setObjectName("editClear");
     setterAction_ = edit->addAction("Edit Setter…", this, &MainWindow::editSetter);
     setterAction_->setObjectName("editSetter");
+    depthStencilAction_ = edit->addAction("Edit Depth / Stencil…", this, &MainWindow::editDepthStencil);
+    depthStencilAction_->setObjectName("editDepthStencil");
     updateSourceAction_ = edit->addAction("Replace Update Source…", this, &MainWindow::replaceUpdateSource);
     updateSourceAction_->setObjectName("replaceUpdateSource");
     updateExperimentActions();
@@ -383,7 +385,8 @@ void MainWindow::buildUi() {
     commandFilter_->workOnly = true;
     apiView_ = table(commandFilter_);
     apiView_->setContextMenuPolicy(Qt::ActionsContextMenu);
-    apiView_->addActions({enableAction_, clearAction_, setterAction_, updateSourceAction_});
+    apiView_->addActions(
+        {enableAction_, clearAction_, setterAction_, depthStencilAction_, updateSourceAction_});
     apiView_->setObjectName("apiLog");
     auto exportApi = new QAction("Export API Log…", this);
     exportApi->setObjectName("exportApiLog");
@@ -1815,6 +1818,8 @@ void MainWindow::updateExperimentActions() {
         clearAction_->setEnabled(isClearCommand(uint16_t(type)));
     if (setterAction_)
         setterAction_->setEnabled(isEditableSetter(uint16_t(type)));
+    if (depthStencilAction_)
+        depthStencilAction_->setEnabled(isDraw(uint16_t(type)) && type != 0x35 && type != 0x36);
     if (updateSourceAction_)
         updateSourceAction_->setEnabled(type == 0x247);
     const bool bufferEditable = isDraw(uint16_t(type)) && selectedResource_ && frame_ &&
@@ -2201,6 +2206,125 @@ void MainWindow::editBuffer(bool importFile) {
             bufferBoundary_->setCurrentIndex(1);
             experimentChanged();
         }
+    } catch (const std::exception &e) {
+        showError(QString::fromUtf8(e.what()));
+    }
+}
+void MainWindow::editDepthStencil() {
+    if (!frame_ || !experiment_ || !selectedEvent_)
+        return;
+    try {
+        const auto event = selectedEvent_;
+        const auto revision = revision_;
+        const auto original = experiment_->depthStencil(*frame_, event);
+        QDialog dialog(this);
+        dialog.setObjectName("depthStencilDialog");
+        dialog.setWindowTitle(QString("Depth / Stencil — Event %1").arg(event));
+        dialog.setMinimumWidth(420);
+        auto layout = new QVBoxLayout(&dialog);
+        auto tabs = new QTabWidget;
+        layout->addWidget(tabs);
+        struct Field {
+            std::string path;
+            QWidget *widget;
+        };
+        std::vector<Field> fields;
+        const QStringList comparisons{"Never",   "Less",      "Equal",           "Less / equal",
+                                      "Greater", "Not equal", "Greater / equal", "Always"};
+        const QStringList operations{"Keep",
+                                     "Zero",
+                                     "Replace",
+                                     "Increment (clamp)",
+                                     "Decrement (clamp)",
+                                     "Invert",
+                                     "Increment (wrap)",
+                                     "Decrement (wrap)"};
+        auto page = [&](const QString &label) {
+            auto widget = new QWidget;
+            tabs->addTab(widget, label);
+            return new QFormLayout(widget);
+        };
+        auto add = [&](QFormLayout *form, const QString &label, const std::string &path,
+                       const QStringList &choices = QStringList{}, int first = 0) {
+            auto value = original.at(nlohmann::json::json_pointer(path));
+            QWidget *widget;
+            if (!choices.empty()) {
+                auto combo = new QComboBox;
+                for (int i = 0; i < choices.size(); ++i)
+                    combo->addItem(choices[i], i + first);
+                combo->setCurrentIndex((value.is_boolean() ? int(value.get<bool>()) : value.get<int>()) -
+                                       first);
+                widget = combo;
+            } else
+                widget = new QLineEdit(QString::fromStdString(value.dump()));
+            widget->setObjectName(QString::fromStdString(path));
+            fields.push_back({path, widget});
+            form->addRow(label, widget);
+        };
+        auto depth = page("Depth / Stencil");
+        add(depth, "Depth test", "/depth_stencil/depth_enable", {"Disabled", "Enabled"});
+        add(depth, "Depth writes", "/depth_stencil/depth_write_mask", {"Disabled", "Enabled"});
+        add(depth, "Depth function", "/depth_stencil/depth_func", comparisons, 1);
+        add(depth, "Stencil test", "/depth_stencil/stencil_enable", {"Disabled", "Enabled"});
+        add(depth, "Read mask", "/depth_stencil/stencil_read_mask");
+        add(depth, "Write mask", "/depth_stencil/stencil_write_mask");
+        add(depth, "Reference", "/stencil_ref");
+        for (auto face : {"front_face", "back_face"}) {
+            auto form = page(QString(face == std::string("front_face") ? "Front face" : "Back face"));
+            auto prefix = std::string("/depth_stencil/") + face + '/';
+            add(form, "Function", prefix + "func", comparisons, 1);
+            add(form, "Stencil fail", prefix + "fail_op", operations, 1);
+            add(form, "Depth fail", prefix + "depth_fail_op", operations, 1);
+            add(form, "Pass", prefix + "pass_op", operations, 1);
+        }
+        auto error = new QLabel;
+        error->setObjectName("depthStencilError");
+        error->setWordWrap(true);
+        error->hide();
+        layout->addWidget(error);
+        auto buttons = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+        buttons->button(QDialogButtonBox::Ok)->setText("Apply");
+        layout->addWidget(buttons);
+        connect(buttons, &QDialogButtonBox::rejected, &dialog, &QDialog::reject);
+        bool changed = false;
+        connect(buttons, &QDialogButtonBox::accepted, &dialog, [&] {
+            try {
+                if (revision_ != revision || selectedEvent_ != event)
+                    throw std::runtime_error("Selection or experiment changed; reopen this editor");
+                auto patch = nlohmann::json::object();
+                for (const auto &field : fields) {
+                    const nlohmann::json::json_pointer key(field.path);
+                    nlohmann::json value;
+                    if (auto combo = qobject_cast<QComboBox *>(field.widget)) {
+                        if (combo->currentIndex() < 0)
+                            throw std::runtime_error("Select a valid state value");
+                        value = original.at(key).is_boolean()
+                                    ? nlohmann::json(bool(combo->currentData().toInt()))
+                                    : nlohmann::json(combo->currentData().toUInt());
+                    } else {
+                        auto text = qobject_cast<QLineEdit *>(field.widget)->text().trimmed();
+                        bool valid = false;
+                        auto number =
+                            text.toULongLong(&valid, text.startsWith("0x", Qt::CaseInsensitive) ? 16 : 10);
+                        if (!valid || text.startsWith('-'))
+                            throw std::runtime_error("Enter an unsigned mask or reference");
+                        value = uint64_t(number);
+                    }
+                    if (value != original.at(key))
+                        patch[key] = value;
+                }
+                if (!patch.empty()) {
+                    experiment_->setDepthStencil(*frame_, event, patch);
+                    changed = true;
+                }
+                dialog.accept();
+            } catch (const std::exception &e) {
+                error->setText(QString::fromUtf8(e.what()));
+                error->show();
+            }
+        });
+        if (dialog.exec() == QDialog::Accepted && changed)
+            experimentChanged();
     } catch (const std::exception &e) {
         showError(QString::fromUtf8(e.what()));
     }
