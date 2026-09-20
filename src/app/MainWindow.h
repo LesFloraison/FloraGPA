@@ -48,6 +48,7 @@ class MainWindow final : public QMainWindow {
     void exportBuffer();
     void editBuffer(bool importFile = false);
     void editTexture(bool output);
+    void exportTexture();
     void showBufferDetails(const QJsonObject &report);
     void clearBufferDetails();
     void editCounter();
@@ -97,6 +98,7 @@ class MainWindow final : public QMainWindow {
     QAction *viewAction_ = nullptr;
     QAction *bufferEditAction_ = nullptr, *bufferImportAction_ = nullptr;
     QAction *textureInputAction_ = nullptr, *textureOutputAction_ = nullptr;
+    QAction *textureExportAction_ = nullptr;
     QAction *constantEditAction_ = nullptr;
     QAction *counterEditAction_ = nullptr;
     QTreeWidget *counters_ = nullptr;
@@ -141,6 +143,11 @@ class MainWindow final : public QMainWindow {
     ImageView *textureImage_;
     QWidget *texturePane_;
     QComboBox *textureBoundary_, *textureChannels_;
+    QComboBox *texturePlane_;
+    QSpinBox *textureSample_;
+    QLineEdit *textureFormat_, *textureLow_, *textureHigh_;
+    QJsonObject textureMetadata_;
+    std::unique_ptr<QTemporaryDir> textureDir_;
     QSpinBox *mip_, *layer_, *slice_;
     QLabel *textureLabel_;
     QTimer textureTimer_;

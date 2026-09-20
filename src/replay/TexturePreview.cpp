@@ -1,5 +1,6 @@
 #include "Replay.h"
 #include "Unpredicated.h"
+#include "core/TextureStorage.h"
 #include <algorithm>
 #include <cmath>
 #include <d3dcompiler.h>
@@ -19,16 +20,21 @@ Com<ID3DBlob> compile(const std::string &source, const char *profile) {
     return code;
 }
 uint32_t typed(uint32_t f) {
-    static const std::map<uint32_t, uint32_t> types{
-        {1, 2},   {5, 6},   {9, 10},  {15, 16}, {19, 21}, {23, 24}, {27, 28}, {33, 34}, {39, 41},
-        {44, 46}, {48, 49}, {53, 54}, {60, 61}, {70, 71}, {73, 74}, {76, 77}, {79, 80}, {82, 83},
-        {90, 87}, {92, 88}, {94, 95}, {97, 98}, {20, 21}, {40, 41}, {45, 46}, {55, 56}};
+    static const std::map<uint32_t, uint32_t> types{{20, 21}, {40, 41}, {45, 46}, {55, 56}};
     auto it = types.find(f);
     return it == types.end() ? f : it->second;
 }
 } // namespace
 Image Replay::previewTexture(Id id, uint32_t mip, uint32_t layer, uint32_t slice, double low, double high,
                              const std::string &channel) {
+    const auto resource = frame_.resource(id);
+    if (!options_.until && !resource.data)
+        throw std::runtime_error("No captured initial bytes; select an event boundary");
+    return previewTextureStorage(resource, readTexture(id), mip, layer, slice, low, high, channel);
+}
+Image Replay::previewTextureStorage(const Resource &resource, Bytes storage, uint32_t mip, uint32_t layer,
+                                    uint32_t slice, double low, double high, const std::string &channel,
+                                    std::optional<uint32_t> typedFormat) {
     Unpredicated unpredicated(context_.Get());
     PredicateIsolation isolation(*this);
     if (!std::isfinite(low) || !std::isfinite(high) || !std::isfinite(high - low) || high <= low)
@@ -36,7 +42,6 @@ Image Replay::previewTexture(Id id, uint32_t mip, uint32_t layer, uint32_t slice
     if (channel != "rgba" && channel != "rgb" && channel != "r" && channel != "g" && channel != "b" &&
         channel != "a")
         throw std::runtime_error("Invalid display channel");
-    auto resource = frame_.resource(id);
     auto info = textureInfo(resource);
     if (!info.mips || mip >= info.mips || mip >= 32 || layer >= info.layers ||
         slice >= std::max(1u, info.depth >> mip))
@@ -45,9 +50,6 @@ Image Replay::previewTexture(Id id, uint32_t mip, uint32_t layer, uint32_t slice
         throw std::runtime_error("MSAA sample inspection migration pending");
     if (info.format >= 103 && info.format <= 105)
         throw std::runtime_error("Planar texture inspection migration pending");
-    if (!options_.until && !resource.data)
-        throw std::runtime_error("No captured initial bytes; select an event boundary");
-    auto source = get<ID3D11Resource>(id);
     auto d = resource.desc;
     const size_t formatIndex = info.dimension == 2 ? 3 : 4;
     switch (d[formatIndex]) {
@@ -68,29 +70,12 @@ Image Replay::previewTexture(Id id, uint32_t mip, uint32_t layer, uint32_t slice
     d[d.size() - 3] = D3D11_BIND_SHADER_RESOURCE;
     d[d.size() - 2] = 0;
     d[d.size() - 1] = 0;
-    Com<ID3D11Resource> texture;
-    if (info.dimension == 2) {
-        D3D11_TEXTURE1D_DESC desc{};
-        std::memcpy(&desc, d.data(), sizeof desc);
-        Com<ID3D11Texture1D> obj;
-        check(device_->CreateTexture1D(&desc, nullptr, &obj), "Create preview texture");
-        texture = obj;
-    } else if (info.dimension == 4) {
-        D3D11_TEXTURE3D_DESC desc{};
-        std::memcpy(&desc, d.data(), sizeof desc);
-        Com<ID3D11Texture3D> obj;
-        check(device_->CreateTexture3D(&desc, nullptr, &obj), "Create preview texture");
-        texture = obj;
-    } else {
-        D3D11_TEXTURE2D_DESC desc{};
-        std::memcpy(&desc, d.data(), sizeof desc);
-        Com<ID3D11Texture2D> obj;
-        check(device_->CreateTexture2D(&desc, nullptr, &obj), "Create preview texture");
-        texture = obj;
-    }
-    context_->ClearState();
-    context_->CopyResource(texture.Get(), source);
-    auto fmt = typed(info.format);
+    auto previewResource = resource;
+    previewResource.desc = std::move(d);
+    auto texture = createEditTexture(previewResource, storage);
+    Com<ID3D11DeviceContext> deferred;
+    check(device_->CreateDeferredContext(0, &deferred), "Create texture preview context");
+    auto fmt = typed(typedFormat && *typedFormat ? *typedFormat : defaultTextureFormat(info.format));
     D3D11_SHADER_RESOURCE_VIEW_DESC viewDesc{};
     viewDesc.Format = DXGI_FORMAT(fmt);
     std::string type, coordinate;
@@ -120,7 +105,7 @@ Image Replay::previewTexture(Id id, uint32_t mip, uint32_t layer, uint32_t slice
     ps.imbue(std::locale::classic());
     ps << std::setprecision(9) << type << '<' << scalar
        << "> tex:register(t0);float4 main(float4 p:SV_Position):SV_Target{float4 v=(float4(tex.Load("
-       << coordinate << "))-" << low << ")/" << (high - low) << ";return " << expression << ";}";
+       << coordinate << "))-(" << low << "))/(" << (high - low) << ");return " << expression << ";}";
     auto vertex = compile(
              "float4 main(uint id:SV_VertexID):SV_Position{return float4(id==2?3:-1,id==1?3:-1,0,1);}",
              "vs_5_0"),
@@ -155,17 +140,20 @@ Image Replay::previewTexture(Id id, uint32_t mip, uint32_t layer, uint32_t slice
     Com<ID3D11RasterizerState> rs;
     check(device_->CreateRasterizerState(&raster, &rs), "Create preview rasterizer");
     D3D11_VIEWPORT viewport{0, 0, float(width), float(height), 0, 1};
-    context_->RSSetState(rs.Get());
-    context_->RSSetViewports(1, &viewport);
-    context_->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-    context_->VSSetShader(vs.Get(), nullptr, 0);
-    context_->PSSetShader(shader.Get(), nullptr, 0);
+    deferred->RSSetState(rs.Get());
+    deferred->RSSetViewports(1, &viewport);
+    deferred->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+    deferred->VSSetShader(vs.Get(), nullptr, 0);
+    deferred->PSSetShader(shader.Get(), nullptr, 0);
     auto view = srv.Get();
-    context_->PSSetShaderResources(0, 1, &view);
+    deferred->PSSetShaderResources(0, 1, &view);
     auto outputView = rtv.Get();
-    context_->OMSetRenderTargets(1, &outputView, nullptr);
-    context_->Draw(3, 0);
-    context_->ClearState();
+    deferred->OMSetRenderTargets(1, &outputView, nullptr);
+    deferred->Draw(3, 0);
+    deferred->OMSetRenderTargets(0, nullptr, nullptr);
+    Com<ID3D11CommandList> commands;
+    check(deferred->FinishCommandList(FALSE, &commands), "Finish texture preview");
+    context_->ExecuteCommandList(commands.Get(), TRUE);
     targetDesc.Usage = D3D11_USAGE_STAGING;
     targetDesc.BindFlags = 0;
     targetDesc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
@@ -174,7 +162,7 @@ Image Replay::previewTexture(Id id, uint32_t mip, uint32_t layer, uint32_t slice
     context_->CopyResource(staging.Get(), target.Get());
     D3D11_MAPPED_SUBRESOURCE mapped{};
     check(context_->Map(staging.Get(), 0, D3D11_MAP_READ, 0, &mapped), "Read texture preview");
-    Image image{width, height, fmt, {}, id};
+    Image image{width, height, fmt, {}, resource.id};
     try {
         image.rgba.resize(size_t(width) * height * 4);
         for (UINT y = 0; y < height; ++y)

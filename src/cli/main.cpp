@@ -11,6 +11,7 @@
 #include "application/ReplayPipeline.h"
 #include "application/ShaderInspector.h"
 #include "application/StreamOutputInspector.h"
+#include "application/TextureInspector.h"
 #include "application/UavCounterInspector.h"
 #include "core/BufferBindings.h"
 #include "core/Frame.h"
@@ -87,6 +88,13 @@ int main(int argc, char **argv) {
     p.addOption({"mip", "Texture mip level", "index", "0"});
     p.addOption({"layer", "Texture array layer", "index", "0"});
     p.addOption({"slice", "Texture depth slice", "index", "0"});
+    p.addOption({"sample", "Texture MSAA sample (default: resolve)", "index"});
+    p.addOption({"typed-format", "Texture DXGI view format", "format"});
+    p.addOption({"plane", "Texture plane: auto, y or uv", "plane", "auto"});
+    p.addOption({"channel", "Texture display channel", "channel", "rgba"});
+    p.addOption({"low", "Texture display minimum", "value", "0"});
+    p.addOption({"high", "Texture display maximum", "value", "1"});
+    p.addOption({"no-preview", "Export texture storage without a display conversion"});
     p.addOption({"offset", "Buffer byte offset", "bytes", "0"});
     p.addOption({"length", "Buffer byte length (default: remaining bytes)", "bytes"});
     p.addOption({"suppress-draws", "Disable draw submissions (negative control)"});
@@ -416,14 +424,32 @@ int main(int argc, char **argv) {
                 Image image;
                 bool available = true;
                 if (command == "texture") {
-                    auto read = [&] {
-                        image = replay.previewTexture(parseId("id"), parseIndex("mip"), parseIndex("layer"),
-                                                      parseIndex("slice"));
-                    };
-                    if (options.before && options.until && isDraw(frame.entry(options.until).type))
-                        replay.inspectEventInputs(options.until, read);
-                    else
-                        read();
+                    TextureInspectionOptions selection;
+                    selection.mip = parseIndex("mip");
+                    selection.layer = parseIndex("layer");
+                    selection.slice = parseIndex("slice");
+                    selection.channel = p.value("channel").toStdString();
+                    selection.plane = p.value("plane").toStdString();
+                    if (p.isSet("sample"))
+                        selection.sample = parseIndex("sample");
+                    if (p.isSet("typed-format"))
+                        selection.typedFormat = parseIndex("typed-format");
+                    bool lowOk = false, highOk = false;
+                    selection.low = p.value("low").toDouble(&lowOk);
+                    selection.high = p.value("high").toDouble(&highOk);
+                    if (!lowOk || !highOk)
+                        throw std::runtime_error("Invalid texture display range");
+                    selection.preview = !p.isSet("no-preview");
+                    auto inspected = inspectTexture(replay, parseId("id"), selection);
+                    report.insert("reference_pixels_used", frame.resource(parseId("id")).type == 0x87);
+                    exportTextureInspection(inspected, std::filesystem::path(out.toStdWString()));
+                    available = inspected.image.has_value();
+                    if (available)
+                        image = std::move(*inspected.image);
+                    report.insert("texture", QJsonDocument::fromJson(
+                                                 QByteArray::fromStdString(inspected.metadata.dump()))
+                                                 .object());
+                    report.insert("image_available", available);
                     report.insert("value_time", options.until
                                                     ? (options.before ? "before_event" : "after_event")
                                                     : "capture_initial");

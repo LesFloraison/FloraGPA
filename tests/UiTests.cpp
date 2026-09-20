@@ -2787,6 +2787,116 @@ class UiTests final : public QObject {
         QVERIFY(select(api, 25848));
         QCOMPARE(counters->topLevelItemCount(), 0);
     }
+    void textureInspectorControls() {
+        using namespace flora;
+        using namespace flora::testing;
+        QTemporaryDir dir;
+        msaaOutputCapture(false).save(dir.path() + "/msaa.gpa_frame");
+        MainWindow window;
+        window.resize(1500, 950);
+        window.show();
+        QSignalSpy done(&window, &MainWindow::taskFinished);
+        window.openCapture(dir.path() + "/msaa.gpa_frame");
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        done.clear();
+        auto api = window.findChild<QTableView *>("apiLog");
+        api->setCurrentIndex(api->model()->index(1, 0));
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        done.clear();
+        window.findChild<QComboBox *>("textureBoundary")->setCurrentIndex(2);
+        const auto selectResource = [&](Id id) {
+            auto view = window.findChild<QTableView *>("resources");
+            for (int row = 0; row < view->model()->rowCount(); ++row) {
+                auto index = view->model()->index(row, 0);
+                if (index.data(Qt::UserRole).toULongLong() == id) {
+                    view->setCurrentIndex(index);
+                    return true;
+                }
+            }
+            return false;
+        };
+        QVERIFY(selectResource(20));
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        done.clear();
+        auto image = window.findChild<ImageView *>("textureOutput");
+        QCOMPARE(image->image().pixelColor(0, 0), QColor(10, 0, 0, 255));
+        auto sample = window.findChild<QSpinBox *>("textureSample");
+        QVERIFY(sample->isEnabled());
+        sample->setValue(3);
+        for (auto spin : window.findChildren<QSpinBox *>())
+            if (spin->prefix() == "Layer ")
+                spin->setValue(1);
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        done.clear();
+        QCOMPARE(image->image().pixelColor(0, 0), QColor(36, 0, 0, 255));
+        window.findChild<QLineEdit *>("textureFormat")->setText("0x1c");
+        window.findChild<QLineEdit *>("textureHigh")->setText("0.5");
+        window.findChild<QComboBox *>("textureChannels")->setCurrentText("R");
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        done.clear();
+        QCOMPARE(image->image().pixelColor(0, 0), QColor(72, 72, 72, 255));
+        auto exportAction = window.findChild<QAction *>("exportTexture");
+        QVERIFY(exportAction->isEnabled());
+        projectFile(window, "exportTexture", dir.path() + "/sample.bin");
+        QFile raw(dir.path() + "/sample.bin");
+        QVERIFY(raw.open(QIODevice::ReadOnly));
+        auto bytes = raw.readAll();
+        QCOMPARE(bytes.size(), qsizetype(140));
+        QCOMPARE(bytes.left(4), QByteArray::fromHex("240000ff"));
+        projectFile(window, "exportTexture", dir.path() + "/sample.dds");
+        QFile dds(dir.path() + "/sample.dds");
+        QVERIFY(dds.open(QIODevice::ReadOnly));
+        QCOMPARE(dds.size(), qint64(428));
+        QCOMPARE(dds.read(4), QByteArray("DDS "));
+        projectFile(window, "exportTexture", dir.path() + "/sample.png");
+        QImage png(dir.path() + "/sample.png");
+        QCOMPARE(png.pixelColor(0, 0), QColor(72, 72, 72, 255));
+        snapshot(window, "texture-msaa-inspection");
+        bool inherited = false;
+        QTimer::singleShot(0, &window, [&] {
+            auto dialog = window.findChild<QDialog *>("textureEditDialog");
+            if (!dialog)
+                return;
+            inherited = dialog->findChild<QSpinBox *>("textureEditSample")->value() == 3 &&
+                        dialog->findChild<QLineEdit *>("textureEditFormat")->text() == "0x1c";
+            dialog->reject();
+        });
+        window.findChild<QAction *>("importTextureOutput")->trigger();
+        QVERIFY(inherited);
+        Capture luma;
+        luma.add(20, 5, 0x85, statePack(Id(0), Id(0), 2u, 2u, 1u, 1u, 104u, 1u, 0u, 0u, 8u, 0u, 0u, Id(21)));
+        auto storage = word(12);
+        for (uint8_t i = 0; i < 12; ++i)
+            storage.push_back(i);
+        luma.add(21, 9, 1, storage);
+        luma.save(dir.path() + "/luma.gpa_frame");
+        window.openCapture(dir.path() + "/luma.gpa_frame");
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        done.clear();
+        window.findChild<QComboBox *>("textureBoundary")->setCurrentIndex(0);
+        QVERIFY(selectResource(20));
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        done.clear();
+        QVERIFY(!sample->isEnabled());
+        QVERIFY(exportAction->isEnabled());
+        projectFile(window, "exportTexture", dir.path() + "/luma.bin");
+        QFile y(dir.path() + "/luma.bin");
+        QVERIFY(y.open(QIODevice::ReadOnly));
+        QCOMPARE(y.readAll(), QByteArray::fromHex("0001020306070809"));
+        snapshot(window, "texture-captured-luma");
+        window.findChild<QComboBox *>("texturePlane")->setCurrentIndex(2);
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(!done.takeLast()[0].toBool());
+        QVERIFY(!exportAction->isEnabled());
+        QVERIFY(image->image().isNull());
+    }
     void textureEditorHistory_data() {
         QTest::addColumn<bool>("output");
         QTest::newRow("input") << false;

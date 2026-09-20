@@ -161,6 +161,9 @@ MainWindow::MainWindow() {
             shaderReflection_->clear();
             textureImage_->setImage({});
             textureLabel_->clear();
+            textureMetadata_ = {};
+            textureDir_.reset();
+            textureExportAction_->setEnabled(false);
             geometry_ = {};
             geometryModel_->setTable({});
             mesh_->setMesh({});
@@ -595,7 +598,42 @@ void MainWindow::buildUi() {
     }
     textureChannels_ = new QComboBox;
     textureChannels_->addItems({"RGBA", "RGB", "R", "G", "B", "A"});
-    textureBar->addWidget(textureChannels_);
+    textureChannels_->setObjectName("textureChannels");
+    auto textureDisplayBar = new QToolBar;
+    textureDisplayBar->addWidget(textureChannels_);
+    textureSample_ = new QSpinBox;
+    textureSample_->setObjectName("textureSample");
+    textureSample_->setRange(-1, 31);
+    textureSample_->setPrefix("Sample ");
+    textureSample_->setSpecialValueText("Resolve");
+    textureSample_->setValue(-1);
+    textureSample_->setToolTip("Resolve all samples, or inspect one MSAA sample.");
+    textureDisplayBar->addWidget(textureSample_);
+    textureFormat_ = new QLineEdit;
+    textureFormat_->setObjectName("textureFormat");
+    textureFormat_->setPlaceholderText("Format: Auto");
+    textureFormat_->setMaximumWidth(115);
+    textureFormat_->setToolTip("DXGI typed format number (decimal or 0x hex).");
+    textureDisplayBar->addWidget(textureFormat_);
+    texturePlane_ = new QComboBox;
+    texturePlane_->setObjectName("texturePlane");
+    texturePlane_->addItem("Plane: Auto", "auto");
+    texturePlane_->addItem("Y", "y");
+    texturePlane_->addItem("UV", "uv");
+    texturePlane_->setToolTip("Raw planar channels; no RGB color conversion.");
+    textureDisplayBar->addWidget(texturePlane_);
+    textureLow_ = new QLineEdit("0");
+    textureHigh_ = new QLineEdit("1");
+    textureLow_->setObjectName("textureLow");
+    textureHigh_->setObjectName("textureHigh");
+    textureDisplayBar->addWidget(new QLabel(" Range "));
+    for (auto rangeField : {textureLow_, textureHigh_}) {
+        rangeField->setMaximumWidth(75);
+        textureDisplayBar->addWidget(rangeField);
+    }
+    textureExportAction_ = textureDisplayBar->addAction("Export…", this, &MainWindow::exportTexture);
+    textureExportAction_->setObjectName("exportTexture");
+    textureExportAction_->setEnabled(false);
     textureInputAction_ = textureBar->addAction("Import Input…", this, [this] { editTexture(false); });
     textureOutputAction_ = textureBar->addAction("Import Output…", this, [this] { editTexture(true); });
     textureInputAction_->setObjectName("importTextureInput");
@@ -607,12 +645,17 @@ void MainWindow::buildUi() {
     textureLabel_ = new QLabel("—");
     textureBar->addWidget(textureLabel_);
     textureLayout->addWidget(textureBar);
+    textureLayout->addWidget(textureDisplayBar);
     textureImage_ = new ImageView;
     textureImage_->setObjectName("textureOutput");
     textureLayout->addWidget(textureImage_);
     centerTabs_->addTab(texturePane_, "Texture");
     connect(textureBoundary_, &QComboBox::currentIndexChanged, this, [this] { textureTimer_.start(); });
-    connect(textureChannels_, &QComboBox::currentTextChanged, textureImage_, &ImageView::channel);
+    connect(textureChannels_, &QComboBox::currentIndexChanged, this, [this] { textureTimer_.start(); });
+    connect(textureSample_, &QSpinBox::valueChanged, this, [this] { textureTimer_.start(); });
+    connect(texturePlane_, &QComboBox::currentIndexChanged, this, [this] { textureTimer_.start(); });
+    for (auto textureField : {textureFormat_, textureLow_, textureHigh_})
+        connect(textureField, &QLineEdit::editingFinished, this, [this] { textureTimer_.start(); });
 
     pipeline_ = tree({"Stage / Binding", "Resource", "Details"});
     pipeline_->setObjectName("pipeline");
@@ -996,6 +1039,8 @@ void MainWindow::closeEvent(QCloseEvent *e) {
     e->accept();
 }
 void MainWindow::setBusy(bool busy) {
+    if (busy && textureExportAction_)
+        textureExportAction_->setEnabled(false);
     replayedState_->setWorkerBusy(busy);
     predicateView_->setWorkerBusy(busy);
     openAction_->setEnabled(!busy);
@@ -1231,11 +1276,21 @@ void MainWindow::finishWorker(int code, QProcess::ExitStatus status) {
             throw std::runtime_error("Worker output image is missing");
         if (runningKind_ == "texture") {
             textureImage_->setImage(std::move(result));
-            textureImage_->channel(textureChannels_->currentText());
+            textureImage_->channel("RGBA");
+            textureMetadata_ = report_["texture"].toObject();
+            textureDir_ = std::move(jobDir_);
+            textureExportAction_->setEnabled(true);
             textureLabel_->setText(QString("%1 × %2 · %3")
                                        .arg(report_["width"].toInt())
                                        .arg(report_["height"].toInt())
                                        .arg(boundaryLabel(report_)));
+            if (textureMetadata_.contains("selected_plane")) {
+                const auto plane = textureMetadata_["selected_plane"].toObject();
+                textureLabel_->setText(textureLabel_->text() + " · " + plane["name"].toString().toUpper());
+                textureLabel_->setToolTip(textureMetadata_["capture_plane_notice"].toString());
+            } else
+                textureLabel_->setToolTip(
+                    textureMetadata_["msaa"].toObject()["initialization_note"].toString());
             statusBar()->showMessage("Texture ready", 3000);
             emit taskFinished(true);
             return;
@@ -1801,6 +1856,14 @@ void MainWindow::inspectResource(Id id) {
             values.append(QPair<QString, QString>{"Samples", QString::number(info.samples)});
             values.append(QPair<QString, QString>{"Data ID", QString::number(resource.data)});
             QSignalBlocker blockMip(mip_), blockLayer(layer_), blockSlice(slice_);
+            QSignalBlocker blockSample(textureSample_), blockPlane(texturePlane_);
+            textureSample_->setRange(-1, int(std::min(info.samples, 32u)) - 1);
+            textureSample_->setValue(-1);
+            textureSample_->setEnabled(info.samples > 1);
+            texturePlane_->setCurrentIndex(0);
+            texturePlane_->setEnabled(info.format >= 103 && info.format <= 105);
+            textureFormat_->clear();
+            textureExportAction_->setEnabled(false);
             mip_->setRange(0, int(info.mips) - 1);
             layer_->setRange(0, int(info.layers) - 1);
             slice_->setRange(0, int(info.depth) - 1);
@@ -1892,7 +1955,7 @@ void MainWindow::previewTexture() {
     if (!frame_ || !selectedResource_)
         return;
     const auto &entry = frame_->entry(selectedResource_);
-    if (entry.type < 0x84 || entry.type > 0x86)
+    if (entry.type < 0x84 || entry.type > 0x87)
         return;
     if (process_.state() != QProcess::NotRunning) {
         cancel();
@@ -1900,11 +1963,29 @@ void MainWindow::previewTexture() {
         return;
     }
     ++revision_;
+    textureExportAction_->setEnabled(false);
+    textureImage_->setImage({});
+    textureLabel_->clear();
+    textureMetadata_ = {};
+    textureDir_.reset();
     QStringList args{"texture", capturePath_,
                      "--id",    QString::number(selectedResource_),
                      "--mip",   QString::number(mip_->value()),
                      "--layer", QString::number(layer_->value()),
                      "--slice", QString::number(slice_->value())};
+    args << "--channel" << textureChannels_->currentText().toLower() << "--low" << textureLow_->text()
+         << "--high" << textureHigh_->text() << "--plane" << texturePlane_->currentData().toString();
+    if (textureSample_->isEnabled() && textureSample_->value() >= 0)
+        args << "--sample" << QString::number(textureSample_->value());
+    if (!textureFormat_->text().trimmed().isEmpty()) {
+        bool valid = false;
+        const auto value = textureFormat_->text().trimmed().toULongLong(&valid, 0);
+        if (!valid || value > UINT32_MAX) {
+            showError("Invalid typed format.");
+            return;
+        }
+        args << "--typed-format" << QString::number(value);
+    }
     if (textureBoundary_->currentIndex()) {
         if (!selectedEvent_) {
             showError("Select an API event first.");
@@ -1915,6 +1996,35 @@ void MainWindow::previewTexture() {
             args << "--before";
     }
     startWorker(args, false);
+}
+void MainWindow::exportTexture() {
+    if (!textureDir_ || textureMetadata_.isEmpty() || busy())
+        return;
+    const bool luma = textureMetadata_["recovered_luma_only"].toBool();
+    const auto label = luma ? "Y plane" : "Texture";
+    const auto filters = QString("%1 DDS (*.dds);;Preview PNG (*.png);;%2 RAW (*.bin)")
+                             .arg(label)
+                             .arg(luma ? "Y plane" : "Subresource");
+    auto path = QFileDialog::getSaveFileName(
+        this, "Export Texture", QString("texture-%1.dds").arg(textureMetadata_["resource_id"].toInteger()),
+        filters);
+    if (path.isEmpty())
+        return;
+    const auto suffix = QFileInfo(path).suffix().toLower();
+    const auto files = textureMetadata_["export_files"].toObject();
+    const auto source = files.value('.' + suffix).toString(files[".dds"].toString());
+    try {
+        QFile file(textureDir_->path() + "/result/" + source);
+        if (!file.open(QIODevice::ReadOnly))
+            throw std::runtime_error("Texture export asset is unavailable");
+        const auto bytes = file.readAll();
+        if (bytes.size() != file.size())
+            throw std::runtime_error("Cannot read complete texture asset");
+        writeFile(path, bytes);
+        statusBar()->showMessage("Texture exported", 3000);
+    } catch (const std::exception &e) {
+        showError(QString::fromUtf8(e.what()));
+    }
 }
 void MainWindow::previewBuffer() {
     if (!frame_ || !selectedResource_ || frame_->entry(selectedResource_).type != 0x83)
@@ -2356,10 +2466,11 @@ void MainWindow::editTexture(bool output) {
             sample->setObjectName("textureEditSample");
             sample->setRange(-1, int(info.samples) - 1);
             sample->setSpecialValueText("Select…");
-            sample->setValue(-1);
+            sample->setValue(textureSample_->value());
             form->addRow("Sample", sample);
             typed = new QLineEdit;
             typed->setObjectName("textureEditFormat");
+            typed->setText(textureFormat_->text());
             typed->setPlaceholderText("Automatic");
             typed->setToolTip("Optional DXGI format number (decimal or 0x hex).");
             form->addRow("Typed format", typed);

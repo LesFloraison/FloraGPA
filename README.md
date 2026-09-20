@@ -100,7 +100,11 @@ The Texture toolbar provides **Import Input…** and **Import Output…** for pa
 RAW subresources at the selected event. MSAA imports require an explicit sample.
 Input clones are scoped to one event; output preconditions persist after command
 submission. See [`docs/EVENT_TEXTURE_MIGRATION.md`](docs/EVENT_TEXTURE_MIGRATION.md)
-for validation and the remaining MSAA/planar Texture inspection work.
+for edit validation. Texture inspection now provides MSAA resolve/sample, typed
+DXGI format, Y/UV plane, channel/range and DDS/RAW/PNG export controls. Legacy
+P010/P016 initial data exports recovered Y only. See
+[`docs/TEXTURE_INSPECTION_MIGRATION.md`](docs/TEXTURE_INSPECTION_MIGRATION.md)
+for inspection evidence and remaining planar write-provenance work.
 The Buffer **Constants** tab shows reflected scalar, vector, matrix, array and
 structure fields, including CB1 binding ranges. Read **Before event**, select a
 field and use **Edit Value**. Changes preserve padding and untouched scalar bits

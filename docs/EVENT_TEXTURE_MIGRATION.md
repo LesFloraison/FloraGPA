@@ -73,11 +73,9 @@ Testing was on this host, not a separate clean Windows machine.
 
 ## Remaining migration work
 
-The Texture pane still needs the full Python MSAA/typed/planar inspection and
-asset-export controls. MSAA editing works through projects and its import dialog;
-the existing Output pane can inspect selected output samples. The Texture pane's
-MSAA preview is still explicitly unsupported. Its complete inspection workflow
-must be migrated before declaring that consumer complete.
+The Texture pane now includes native MSAA/typed/planar inspection and DDS/RAW/PNG
+export controls. See [TEXTURE_INSPECTION_MIGRATION.md](TEXTURE_INSPECTION_MIGRATION.md)
+for subsequent evidence, captured-Y boundaries and remaining planar write provenance.
 
 Private coverage, quad/debug/profiler consumers and the remaining module inventory
 also remain incomplete. `docs/migration.json` retains partial status; this change

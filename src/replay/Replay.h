@@ -109,6 +109,7 @@ class Replay {
     Com<ID3D11DeviceContext> context_;
     Com<ID3D11DeviceContext1> context1_;
     std::map<Id, Com<IUnknown>> objects_;
+    std::vector<Id> ignoredMsaaInitial_;
     // Keep edited extension states alive while their native identities are registered.
     std::map<ID3D11RasterizerState *, std::pair<Com<ID3D11RasterizerState>, UINT>> rasterizerExtensions_;
     Com<ID3D11RasterizerState> createRasterizer(const D3D11_RASTERIZER_DESC2 &desc);
@@ -238,6 +239,7 @@ class Replay {
     void run(const std::function<void(Id, size_t, size_t)> &progress = {},
              const ReplayBoundaryObserver &observer = {});
     const ReplayOptions &options() const { return options_; }
+    const std::vector<Id> &ignoredMsaaInitial() const { return ignoredMsaaInitial_; }
     const Frame &frame() const { return frame_; }
     Id lastOutputResource() const { return lastTarget_; }
     Id lastOutputView() const { return lastTargetView_; }
@@ -250,6 +252,10 @@ class Replay {
     Image output(Id texture = 0, uint32_t subresource = 0);
     Image previewTexture(Id texture, uint32_t mip = 0, uint32_t layer = 0, uint32_t slice = 0, double low = 0,
                          double high = 1, const std::string &channel = "rgba");
+    Image previewTextureStorage(const Resource &resource, Bytes storage, uint32_t mip = 0, uint32_t layer = 0,
+                                uint32_t slice = 0, double low = 0, double high = 1,
+                                const std::string &channel = "rgba",
+                                std::optional<uint32_t> typedFormat = {});
     std::vector<uint8_t> readBuffer(Id id);
     std::vector<uint8_t> readTexture(Id id);
     MsaaStorage readMsaa(Id id, std::optional<uint32_t> sample, uint32_t typedFormat);

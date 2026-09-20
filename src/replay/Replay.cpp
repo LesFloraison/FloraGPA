@@ -108,8 +108,10 @@ IUnknown *Replay::object(Id id) {
                 throw std::runtime_error("Invalid mip/layer count");
             if (t == 0x87)
                 throw std::runtime_error("Capture-end reference pixels are not replay resources");
-            if (info.format == 104 || info.format == 105)
-                throw std::runtime_error("Legacy planar initial layout migration pending");
+            if ((info.format == 104 || info.format == 105) && resource.data &&
+                !options_.textures.contains(id))
+                throw std::runtime_error("Legacy GPA P010/P016 GenData is not standard DXGI storage; use "
+                                         "captured Y export or a verified complete texture replacement");
             if (auto it = frame_.entries().find(resource.device);
                 it != frame_.entries().end() && it->second.type == 0x38) {
                 if (d[4] == 28)
@@ -120,6 +122,8 @@ IUnknown *Replay::object(Id id) {
                     d[4] = 92;
             }
             auto data = resource.data && info.samples == 1 ? frame_.data(resource.data) : Bytes{};
+            if (resource.data && info.samples > 1)
+                ignoredMsaaInitial_.push_back(id);
             if (auto it = options_.textures.find(id); it != options_.textures.end())
                 data = it->second;
             if (uint64_t(info.mips) * info.layers > 30720)
@@ -1015,6 +1019,7 @@ void Replay::run(const std::function<void(Id, size_t, size_t)> &progress,
     bindingEvent_ = 0;
     clearBindingGaps();
     objects_.clear();
+    ignoredMsaaInitial_.clear();
     editedSamplers_.clear();
     rasterizerExtensions_.clear();
     logicBlendStates_.clear();
