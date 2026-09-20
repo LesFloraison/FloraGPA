@@ -1,10 +1,11 @@
 #include "DxbcIdentity.h"
+#include "DxbcInspection.h"
 #include <QString>
 #include <algorithm>
 #include <bit>
 #include <set>
 namespace flora {
-namespace {
+namespace dxbc_detail {
 using Json = nlohmann::json;
 constexpr uint32_t ISGN = 0x4e475349, OSGN = 0x4e47534f, SHEX = 0x58454853, SHDR = 0x52444853;
 using Parts = std::vector<std::pair<uint32_t, std::vector<uint8_t>>>;
@@ -27,14 +28,17 @@ uint32_t word(Bytes bytes, size_t offset) {
         throw std::runtime_error("DXBC field bounds");
     return Reader(bytes.subspan(offset)).read<uint32_t>();
 }
-Json signature(Bytes bytes) {
+Json signature(Bytes bytes, bool streamed) {
     Reader reader(bytes);
     auto count = reader.read<uint32_t>();
     reader.skip(4);
-    if (count > 256 || uint64_t(count) * 24 > reader.remaining())
+    if (count > 256 || uint64_t(count) * (streamed ? 28 : 24) > reader.remaining())
         throw std::runtime_error("Legacy signature bounds");
     Json result = Json::array();
     for (uint32_t i = 0; i < count; ++i) {
+        const auto stream = streamed ? reader.read<uint32_t>() : 0;
+        if (stream > 3)
+            throw std::runtime_error("Invalid signature stream");
         auto offset = reader.read<uint32_t>(), index = reader.read<uint32_t>(),
              system = reader.read<uint32_t>(), type = reader.read<uint32_t>(), reg = reader.read<uint32_t>();
         auto mask = reader.read<uint8_t>(), used = reader.read<uint8_t>();
@@ -54,6 +58,8 @@ Json signature(Bytes bytes) {
              {"register", reg},
              {"mask", mask},
              {"used_mask", used}});
+        if (streamed)
+            result.back()["stream"] = stream;
     }
     return result;
 }
@@ -138,13 +144,14 @@ void appendSignature(Parts &parts, uint32_t tag, const std::string &name, unsign
 }
 // Walk operands, including nested relative indices and immediate64 vectors, so
 // literals that resemble UAV registers never count as resource use.
-size_t operand(const std::vector<uint32_t> &row, size_t pos, std::set<unsigned> &found, unsigned depth = 0) {
+size_t operand(const std::vector<uint32_t> &row, size_t pos, std::set<unsigned> &found, unsigned depth,
+               bool staticUavs) {
     if (depth > 32 || pos >= row.size())
         throw std::runtime_error("DXBC operand bounds");
     auto token = row[pos++], kind = (token >> 12) & 255, dimensions = (token >> 20) & 3;
     for (auto extended = token >> 31; extended;)
         extended = row.at(pos++) >> 31;
-    if (kind == 30) {
+    if (kind == 30 && staticUavs) {
         if (dimensions != 1 || ((token >> 22) & 7))
             throw std::runtime_error("UAV inspection requires static SM5 registers");
         found.insert(row.at(pos));
@@ -158,7 +165,7 @@ size_t operand(const std::vector<uint32_t> &row, size_t pos, std::set<unsigned> 
         else if (repr != 2)
             throw std::runtime_error("Unsupported DXBC index representation");
         if (repr >= 2 && repr <= 4)
-            pos = operand(row, pos, found, depth + 1);
+            pos = operand(row, pos, found, depth + 1, staticUavs);
     }
     if (kind == 4 || kind == 5) {
         const auto components = token & 3;
@@ -170,7 +177,7 @@ size_t operand(const std::vector<uint32_t> &row, size_t pos, std::set<unsigned> 
         throw std::runtime_error("Truncated DXBC operand");
     return pos;
 }
-bool hasUav(const DxbcProgram &program, Parts &parts) {
+std::set<unsigned> uavSlots(const DxbcProgram &program, Parts &parts) {
     std::set<unsigned> declared, used;
     const std::map<unsigned, unsigned> counts{
         {61, 3},  {121, 2}, {156, 1}, {157, 1}, {158, 1}, {163, 3}, {164, 3}, {165, 3},
@@ -217,7 +224,7 @@ bool hasUav(const DxbcProgram &program, Parts &parts) {
                 throw std::runtime_error("Invalid reflected UAV range");
         }
     }
-    return !declared.empty();
+    return declared;
 }
 std::vector<uint32_t> instruction(unsigned opcode, unsigned reg, unsigned mask, unsigned kind,
                                   std::vector<uint32_t> tail = {}) {
@@ -226,7 +233,8 @@ std::vector<uint32_t> instruction(unsigned opcode, unsigned reg, unsigned mask, 
     row[0] |= uint32_t(row.size()) << 24;
     return row;
 }
-} // namespace
+} // namespace dxbc_detail
+using namespace dxbc_detail;
 VertexIdentityShader instrumentVertexIdentity(Bytes original, uint32_t instances) {
     Parts parts;
     std::set<uint32_t> tags;
@@ -244,7 +252,7 @@ VertexIdentityShader instrumentVertexIdentity(Bytes original, uint32_t instances
     std::set<std::string> names;
     for (const auto &entry : vout)
         names.insert(QString::fromStdString(entry.at("semantic")).toUpper().toStdString());
-    const bool writable = program.header[0] == 0x10050 && hasUav(program, parts);
+    const bool writable = program.header[0] == 0x10050 && !uavSlots(program, parts).empty();
     std::vector<std::vector<uint32_t>> declarations, moves;
     Json markers = Json::object();
     for (const auto &[kind, system, semantic] :

@@ -613,9 +613,16 @@
       "sha256": "35cb3cdf7df9ecf0062e7fb8e0ade51223dc645f568f7691a7be0b647c4f09f1",
       "lines": 84,
       "description": "Record original GS Emit/Cut operations and their output values without new IO.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": [
+        "src/application/DxbcOutputLog.cpp",
+        "src/application/DxbcOutputLog.h",
+        "src/application/DxbcInspection.h"
+      ],
+      "validation": [
+        "docs/DXBC_OUTPUT_LOG_MIGRATION.md",
+        "Exact patched DXBC and metadata parity; native Hardware/WARP record tests. Production capture, private SO isolation, export and Qt integration remain pending."
+      ]
     },
     {
       "module": "dxbc_gs_checkpoint.py",
@@ -631,9 +638,16 @@
       "sha256": "9c0b6959953c417c38b8b224fdc493fad4535cb89e9f3b8182b5958d40e3aefb",
       "lines": 138,
       "description": "Mirror HS output writes into a private UAV without recompiling original math.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": [
+        "src/application/DxbcOutputLog.cpp",
+        "src/application/DxbcOperandArities.h",
+        "src/application/DxbcIdentity.cpp"
+      ],
+      "validation": [
+        "docs/DXBC_OUTPUT_LOG_MIGRATION.md",
+        "Shared operand traversal, opcode arities and instruction construction migrated for VS/DS/GS logs; HS capture itself remains pending."
+      ]
     },
     {
       "module": "dxbc_hull_instance.py",
@@ -740,9 +754,16 @@
       "sha256": "dae6dcbe0c760a16f42da582877dbb9b5c3a1fdc7aa7a588db42d4af6d5248d6",
       "lines": 86,
       "description": "Mirror original VS/DS output writes using an SM5 private UAV helper.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": [
+        "src/application/DxbcOutputLog.cpp",
+        "src/application/DxbcOutputLog.h",
+        "src/application/DxbcInspection.h"
+      ],
+      "validation": [
+        "docs/DXBC_OUTPUT_LOG_MIGRATION.md",
+        "Exact patched DXBC and metadata parity; native Hardware/WARP record tests. Production capture, private SO isolation, export and Qt integration remain pending."
+      ]
     },
     {
       "module": "engine.py",

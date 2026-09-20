@@ -4,7 +4,17 @@
 GF2 与 BF1 DX11 捕获。**尚未完成原 Python 版本的全部功能迁移。**
 当前独立包为 `out/FloraGPA-vs-identity/FloraGPA.exe`。
 
-最新批次迁移 VS 索引关联：通过原生 DXBC 插桩携带真实 VertexID/InstanceID，
+最新批次完成 VS/DS 写入、GS 发射记录的 C++ DXBC 插桩基础层。完整插桩字节及
+元数据 461 项对照全部通过（444 项成功、17 项预期拒绝），其中包含 24 项既有
+VS 身份插桩回归，以及 GF2/BF1 的 163 个不同原始着色器（161 VS、2 DS）。
+原生 Hardware/WARP 执行测试覆盖记录值、有效性、调用数、溢出边界及 GS Emit
+之后的稀疏写入。该层尚未接入 Worker、导出和 Qt：`vertex_writes.py` 与
+`geometry_emissions.py` 完整工作流仍为待迁移，当前可用独立包保持不变。
+Release 40 套 CTest 全部通过，原有 Qt 53 项无失败、无跳过；新增着色器套件
+6 项通过（含 setup/cleanup），GF2/BF1 黄金图像和关闭 Draw 负对照 4 项通过。
+详见 [DXBC_OUTPUT_LOG_MIGRATION.md](DXBC_OUTPUT_LOG_MIGRATION.md)。
+
+前一批迁移 VS 索引关联：通过原生 DXBC 插桩携带真实 VertexID/InstanceID，
 将组装后的 VS 输出关联到原始输入索引和实例，支持展开表、唯一输出表及引用映射。
 同一身份的不同输出字节保留为独立变体，NaN 载荷和正负零不会被数值去重合并。
 原始 Shader 字节、插桩后的 DXBC 哈希、映射和两份二进制表均纳入 Python 对照，
