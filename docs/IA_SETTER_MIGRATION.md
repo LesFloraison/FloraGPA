@@ -85,8 +85,8 @@ that selector was corrected. Initial results remain in
 `artifacts/ia-setters-comparison/` and its sibling log.
 
 Coverage, quad diagnostics and post-transform/debugger consumers are still
-pending their own migration. CB/CB1 setter editing is also separate remaining
-work. This change does not establish complete Python feature parity.
+pending their own migration. CB/CB1 setter migration is documented in
+`docs/CONSTANT_BUFFER_SETTER_MIGRATION.md`. This change does not establish complete Python feature parity.
 
 ```powershell
 python tools/validate_ia_setters_port.py `

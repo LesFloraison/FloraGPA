@@ -1,4 +1,5 @@
 #pragma once
+#include "core/ConstantBufferBindings.h"
 #include "core/Frame.h"
 #include "core/IaBindings.h"
 #include "core/OutputBindings.h"
@@ -53,6 +54,7 @@ struct ReplayOptions {
     std::map<Id, PredicateBinding> predicateSetters;
     std::map<Id, PipelineBinding> pipelineSetters;
     std::map<Id, IaBinding> iaSetters;
+    std::map<Id, ConstantBufferBinding> constantBufferSetters;
     std::map<Id, SamplerBinding> samplerSetters;
     std::map<Id, SrvBinding> srvSetters;
     std::map<Id, std::vector<uint8_t>> outputSetters;
@@ -186,11 +188,9 @@ class Replay {
     Com<ID3D11GeometryShader> createStreamOutputShader(Bytes bytes, Id declaration,
                                                        ID3D11ClassLinkage *linkage);
     std::map<std::pair<uint32_t, uint32_t>, Com<ID3D11ComputeShader>> counterWrapShaders_;
-    struct Range {
-        Id buffer;
-        uint32_t first, count;
-        bool window;
-    };
+    using Range = ConstantBufferRange;
+    ConstantBufferBindings constantBufferBindings_;
+    std::unique_ptr<ConstantBufferHistory> constantBufferHistory_;
     std::array<std::map<uint32_t, Range>, 6> ranges_;
     Id lastTarget_ = 0, lastTargetView_ = 0, lastEvent_ = 0, lastWorkEvent_ = 0;
     uint32_t uavLimit_ = 8;

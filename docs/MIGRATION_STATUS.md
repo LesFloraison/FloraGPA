@@ -2,7 +2,7 @@
 
 已有可编译、可运行的 VS2022 / Qt Widgets 原生工程，能够独立重放当前验证的
 GF2 与 BF1 DX11 捕获。**尚未完成原 Python 版本的全部功能迁移。**
-当前独立包为 `out/FloraGPA-ia-setters-final/FloraGPA.exe`。
+当前独立包为 `out/FloraGPA-cb-setters-final-v2/FloraGPA.exe`。
 
 
 ## 当前可用
@@ -12,9 +12,9 @@ GF2 与 BF1 DX11 捕获。**尚未完成原 Python 版本的全部功能迁移�
 | 工程 | C++20、VS2022 x64、Qt 6.11.2、CMake、Git、独立 CLI/Worker | 尚未配置远程仓库 |
 | 捕获与重放 | 有边界检查的 IGPA v3 读取、六阶段状态、基本 D3D11 资源和 draw/dispatch、Map/更新/复制/清除 | 特殊 replay 路径尚未完全迁移 |
 | 主界面 | GPA 式深色三栏、真实 GPU 时间柱状图与概览、可停靠面板、API 筛选、任务取消 | 概览尚无范围拖动；未知功能页禁用 |
-| 事件 | draw/dispatch 选择、快照管线、前后边界重放、事件启停 | 部分命令执行及 setter 实验仍待迁移 |
+| 事件 | draw/dispatch 选择、快照管线、前后边界重放、事件启停 | 部分命令执行、纹理实验及私有诊断仍待迁移 |
 | 捕获命令状态 | 六阶段 setter、CB1 范围、IA/RS/OM/SO/predicate 参数、扩展 UAV 槽元数据；命令前/后、逐字段来源、资源重叠失效与快照校准；Pipeline 页异步读取、筛选、跳转、JSON 导出 | 原始捕获状态，不应用实验；只读 DSV / 模糊 3D 重叠保持未知；SO 偏移是 setter 参数，隐藏 counter 和实时写入位置不由此推断 |
-| 命令间输入绑定 | 实际执行 IA layout / VB / IB、六阶段 SRV / sampler、CB / CB1；验证槽位、数组、资源类型、IA bind flags、stride 和 CB1 对齐 / 驱动支持；缺失绑定按阶段 / 槽位追踪 | 缺失资源未被后续 setter / 完整快照 / ClearState 恢复时，选定边界明确失败；其余 setter 编辑仍待迁移 |
+| 命令间输入绑定 | 实际执行 IA layout / VB / IB、六阶段 SRV / sampler、CB / CB1；验证槽位、数组、资源类型、IA bind flags、stride 和 CB1 对齐 / 驱动支持；缺失绑定按阶段 / 槽位追踪 | 缺失资源未被后续 setter / 完整快照 / ClearState 恢复时，选定边界明确失败；已恢复的 setter 家族编辑均已接入，私有诊断仍待迁移 |
 | 重放管线状态 | Pipeline > Replay State 通过 Worker 读取实际六阶段绑定、CB1 范围、IA/RS/OM/SO/predicate、视图及状态描述；命令前/后、实验输入克隆、禁用状态、筛选、跳转和 JSON 导出 | 仅覆盖后端已支持的命令和实验；SO 实时写入位置保持未知；完整管线编辑仍待迁移 |
 | 动态 shader 类链接 | 六阶段 draw/dispatch 快照的 linkage、具名/显式创建实例、有序接口绑定、CB/texture/sampler 偏移；动态/静态 shader 替换；带 SO 的 linked GS；Qt 资源属性、接口槽数和 CLI 元数据导出 | 六阶段 shader setter 实验已接入；专用覆盖分析仍待迁移；本机已复现的空函数表 PS 驱动崩溃改为明确提示使用 WARP |
 | Stream output / DrawAuto | SO 声明、五版 context 的目标 setter、普通 GS / VS / DS / 仅输出签名的 passthrough；重复/dirty 快照、显式重置、追加、ClearState；逐流 GPU 查询、按实际写入字节及 IA 范围重建 DrawAuto；Qt SO 属性/目标链接和几何导出 | SO setter 的已知 native cursor 保留已接入；私有诊断重放仍待迁移；无帧内历史时原始重放保留捕获计数并标注未验证，有编辑时拒绝猜测 |
@@ -31,6 +31,7 @@ GF2 与 BF1 DX11 捕获。**尚未完成原 Python 版本的全部功能迁移�
 | 全局视图实验 | SRV / RTV / DSV / UAV 的格式、维度、mip / 数组层 / 3D 切片 / buffer 范围与标志；不可变捕获副本；Clear / Draw / Dispatch / GenerateMips、绑定冲突与 counter 使用最终描述符；Qt 编辑、项目历史、保存重开、撤销重做；主输出跟随最终视图范围 | 原始捕获字段保持不变；私有 coverage/debug 消费者仍待迁移 |
 | 纹理原始存储读回 | 非 MSAA 的完整 mip / 数组层 / 3D 切片紧密存储；CLI texture-storage 导出；WARP 绑定中的 mip 检查复制保留 RTV 和 UAV counter | 图像转换独立于原始字节；部分平面/packed 格式和 GUI 原始存储导出仍待迁移 |
 | SRV setter 实验 | 六阶段 × 128 槽的起始槽/视图数组；逐槽跨快照继承、部分覆盖、范围移动/缩短、空调用、ClearState、缺失资源恢复；mip/layer 与只读 depth/stencil 冲突、原生解绑保持；Qt 编辑、保存与撤销/重做 | 移动范围要求可确认的前序绑定；描述符和 buffer 补丁/导出继承最终绑定；texture 输入克隆及私有诊断依赖尚未闭合 |
+| CB / CB1 setter 实验 | 六阶段、18 种编码；槽范围、buffer 数组、可选 first/count 窗口、跨快照保持、普通 setter/部分覆盖/ClearState 恢复；常量反射和 buffer patch 使用最终绑定；Qt 编辑、保存及撤销/重做 | 快照不能提供缺失的窗口历史；未知移出槽拒绝猜测；偏移窗口需驱动支持；私有诊断消费者仍待迁移 |
 | IA setter 实验 | input layout、VB 槽范围、stride/offset、IB 格式/offset；跨快照保持、原始 setter/ClearState 恢复、输出冲突、几何和 buffer patch；紧凑 Qt 编辑器、项目保存与撤销/重做 | 移动范围需已知前序绑定；缺失输出影响冲突判断时明确拒绝；覆盖/后变换等消费者仍待迁移 |
 | Output / SO setter 实验 | RTV/DSV、OM/CS UAV、SO 目标/偏移；KEEP、独立可选数组、64 槽 UAV、跨快照绑定和已知 SO cursor 保留；紧凑 Qt 表格、项目保存与撤销/重做 | buffer、counter、SRV 描述符及 IA 几何使用最终绑定；未知 SO cursor 拒绝猜测；texture 实验及私有诊断仍待迁移 |
 | 图像 | 自动/指定 swap chain、RT0–7、深度/模板；RTV/DSV mip、数组层、3D 切片、buffer 范围；浮点/整数/packed 格式、通道/范围、原始存储与 PNG 导出；MSAA resolve/指定样本、整数位保真、深度/模板 resolve；显示设置、设备、事件与边界保存/恢复；像素关联 API/资源和 buffer 元素字节 | before-draw 边界语义统一、像素历史/覆盖/调试消费者尚未完成；MSAA 帧前逐样本内容不声称恢复 |
@@ -39,7 +40,7 @@ GF2 与 BF1 DX11 捕获。**尚未完成原 Python 版本的全部功能迁移�
 | Buffer | 初始值、事件前后读回、范围、Hex/ASCII/32 位解释、导出；事件字节编辑/二进制补丁导入、绑定识别、撤销/重做；递归 CB 字段、CB1 范围和类型化编辑；按 UAV view 检查/编辑 Append/Consume/Counter | counter 支持 CS/OM 快照及已恢复 clear/copy/setter 引用；输出编辑和扩展 UAV 已接入；完整 setter/getter 与私有诊断仍待迁移 |
 | 几何 | IA 输入解码、索引与实例、DrawAuto 实际参数及来源、三种顶点表、旋转线框、CSV/OBJ 导出 | 后变换与覆盖未迁移；当前表格上限为 100 万引用 / 1600 万字段 |
 | 资源名称 | GenPrivateData 原始名称、非法 UTF-8 转义、列表筛选和属性显示 | 名称记录不表示逐事件重命名时间线 |
-| 实验项目 | 原格式 JSON、捕获 SHA-256 绑定、资产校验、uint64 ID、原子保存、撤销/重做 | 接受事件启停、buffer、clear、update_source、predicate/sampler/SRV/output/SO/shader 与 topology/RS/OM setter、全局 view、sampler / SRV descriptor、depth/stencil、rasterizer/viewport/scissor 与 blend pipeline、事件/初始 UAV counter、全局 shader/texture 替换；其他操作明确拒绝 |
+| 实验项目 | 原格式 JSON、捕获 SHA-256 绑定、资产校验、uint64 ID、原子保存、撤销/重做 | 接受事件启停、buffer、clear、update_source、predicate/sampler/SRV/output/SO/shader 与 topology/RS/OM/IA/CB/CB1 setter、全局 view、sampler / SRV descriptor、depth/stencil、rasterizer/viewport/scissor 与 blend pipeline、事件/初始 UAV counter、全局 shader/texture 替换；其他操作明确拒绝 |
 | 性能 | 原生 D3D11 时间戳、disjoint 与 pipeline statistics | 尚未迁移原版多轮调度、Intel 硬件指标/GTPin |
 
 ## 验证证据
@@ -52,6 +53,17 @@ setter／ClearState 恢复、项目撤销／重做。常量反射和 Pipeline �
 GF2 的 50 条和 BF1 的 665 条 PS setter 全部编辑后的输出与 Python 一致，
 撤销恢复金标准；最终独立包的原始帧及禁用 draw 负对照也全部通过。
 
+六阶段 CB／CB1 setter 已迁移，涵盖 18 种命令编码、逐槽保持、窗口范围、
+移动／缩短范围时的前序窗口保留、普通 setter 重置和 ClearState。常量反射、
+buffer patch 与 Pipeline 导航使用编辑后的绑定。870 项综合对照通过，包含
+2,196 个 CPU 用例（354 接受、1,842 拒绝）以及硬件／WARP 六阶段实际绑定与输出。
+GF2 的 144 条和 BF1 的 542 条 CB setter 全部编辑后与 Python 输出一致，
+撤销恢复金标准；真实帧六项检查通过。Release 全部 31 个 CTest 套件通过；
+补充缺失窗口数组的编辑修复后，完整 UI 再次通过（49 项、无跳过）。最终包
+原始帧及禁用 draw 负对照四项通过。
+870 份运行时报告无 Python/GPA/RenderDoc，Qt 来自独立包。详见
+`docs/CONSTANT_BUFFER_SETTER_MIGRATION.md`；私有诊断消费者仍待迁移。
+
 Edit Setter 已接入 IA 输入布局、顶点缓冲区和索引缓冲区的持久编辑。
 133 项综合对照通过，包含 411 个 CPU 参数／布局用例（66 接受、345 拒绝）、
 硬件／WARP getter、像素、几何 CSV/OBJ、buffer patch 和 output/SO 组合实验。
@@ -61,7 +73,7 @@ GF2 分别编辑 72 条 VB、72 条 IB、16 条 layout；BF1 分别编辑 1,194�
 完整 UI 套件再次通过（46 项、无失败和跳过），覆盖当前全部 30 个 CTest 套件。
 最终包的原始帧及禁用 draw 负对照四项通过；139 份综合／真实帧运行时报告
 未加载 Python/GPA/RenderDoc，Qt 来自独立包。详见
-`docs/IA_SETTER_MIGRATION.md`；CB/CB1 和私有诊断消费者仍待迁移。
+`docs/IA_SETTER_MIGRATION.md`；CB/CB1 已接入，私有诊断消费者仍待迁移。
 
 Edit Setter 新增拓扑、光栅化状态、视口、裁剪矩形、混合状态和深度／模板
 状态六类持久编辑；后续同类 setter / ClearState 结束覆盖，逐 draw 实验继承
@@ -69,7 +81,7 @@ Edit Setter 新增拓扑、光栅化状态、视口、裁剪矩形、混合状�
 真实 getter、输出像素／原始存储、几何表格／OBJ，以及 SO→DrawAuto 链路。
 Qt 实际 Worker 验证了编辑、撤销、重做；GF2 的 9 条和 BF1 的 208 条视口
 setter 全部修改后图像与 Python 一致，撤销后恢复原始金标准。详见
-`docs/PIPELINE_SETTER_MIGRATION.md`。IA 资源 setter 已接入，CB/CB1 setter 编辑仍待迁移。
+`docs/PIPELINE_SETTER_MIGRATION.md`。IA 资源和 CB/CB1 setter 已接入。
 
 普通 Output 的 Before event 已与 Python 遍历边界对齐：在所选 draw/dispatch
 之前停止；Pipeline／输入检查继续准备所选快照。缺失 RTV、输入布局或 SRV

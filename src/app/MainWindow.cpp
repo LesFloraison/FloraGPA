@@ -1,6 +1,7 @@
 #include "MainWindow.h"
 #include "BlendDialog.h"
 #include "CommandStateView.h"
+#include "ConstantBufferDialog.h"
 #include "IaSetterDialog.h"
 #include "OutputDialog.h"
 #include "PipelineSetterDialog.h"
@@ -1572,8 +1573,12 @@ void MainWindow::showPipeline(const State &s) {
         for (uint32_t i = 0; i < std::min(stage.classCount, 256u); ++i)
             link(group, QString("Class instance %1").arg(i), stage.classes[i]);
         for (int i = 0; i < 14; ++i)
-            if (stage.cb[i])
-                link(group, QString("CB %1").arg(i), stage.cb[i]);
+            if (stage.cb[i]) {
+                auto label = QString("CB %1").arg(i);
+                if (auto range = stage.cbRanges.find(i); range != stage.cbRanges.end() && range->second[0])
+                    label += QString(" [%1 + %2]").arg(*range->second[0]).arg(*range->second[1]);
+                link(group, label, stage.cb[i]);
+            }
         for (int i = 0; i < 128; ++i)
             if (stage.srv[i])
                 link(group, QString("SRV %1").arg(i), stage.srv[i]);
@@ -2630,6 +2635,17 @@ void MainWindow::editSetter() {
     try {
         const auto event = selectedEvent_;
         const auto values = experiment_->setter(*frame_, event);
+        if (constantBufferStage(frame_->entry(event).type)) {
+            const auto revision = revision_;
+            auto frame = frame_;
+            if (editConstantBufferDialog(this, *frame, event, values, [&](const nlohmann::json &next) {
+                    if (revision != revision_ || event != selectedEvent_)
+                        throw std::runtime_error("Selection or experiment changed; reopen this editor");
+                    experiment_->setSetter(*frame_, event, next);
+                }))
+                experimentChanged();
+            return;
+        }
         if (isIaSetter(frame_->entry(event).type)) {
             const auto revision = revision_;
             auto frame = frame_;

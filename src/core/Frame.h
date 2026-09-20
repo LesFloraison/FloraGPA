@@ -78,6 +78,7 @@ struct Stage {
     std::array<Id, 128> srv;
     std::array<Id, 256> classes;
     uint32_t classCount;
+    std::map<unsigned, std::array<std::optional<uint32_t>, 2>> cbRanges;
 };
 struct State {
     std::array<uint32_t, 32> mask{};

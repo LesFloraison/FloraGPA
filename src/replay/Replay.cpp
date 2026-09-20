@@ -541,82 +541,41 @@ Replay::ConstantRange Replay::constantRange(unsigned stage, uint32_t slot, Id bu
     return {it->second.first, it->second.window ? std::optional<uint32_t>(it->second.count) : std::nullopt};
 }
 void Replay::constantBuffers(const Entry &e) {
-    Reader r(frame_.payload(e.id));
-    r.skip(8);
-    immediate(r.read<Id>());
-    auto start = r.read<UINT>(), count = r.read<UINT>();
-    if (start >= 14 || count > 14 - start)
-        throw std::runtime_error("CB slot limit");
-    auto ids = optional<Id>(r, count, 14);
-    if (ids.size() != count)
-        throw std::runtime_error("Missing CB array");
-    bool window = e.type >= 0x24f && e.type <= 0x254;
-    bool hasFirst = false, hasSizes = false;
-    std::vector<UINT> first, sizes;
-    if (window) {
-        hasFirst = r.flag();
-        if (hasFirst)
-            for (UINT i = 0; i < count; ++i)
-                first.push_back(r.read<UINT>());
-        hasSizes = r.flag();
-        if (hasSizes)
-            for (UINT i = 0; i < count; ++i)
-                sizes.push_back(r.read<UINT>());
-        if (hasFirst != hasSizes)
-            throw std::runtime_error("CB1 window pair mismatch");
+    const auto original = readConstantBufferSetter(e.type, frame_.payload(e.id));
+    const auto edited = options_.constantBufferSetters.find(e.id);
+    const auto &b = edited == options_.constantBufferSetters.end() ? original : edited->second;
+    if (b.type != e.type || b.context != original.context)
+        throw std::runtime_error("CB setter type or context mismatch");
+    validateConstantBufferBinding(frame_, b);
+    auto next = constantBufferBindings_;
+    ConstantBufferObservations previous{};
+    if (edited != options_.constantBufferSetters.end() && displacedConstantBuffers(original, b)) {
+        if (!constantBufferHistory_)
+            constantBufferHistory_ = std::make_unique<ConstantBufferHistory>(frame_);
+        previous = constantBufferHistory_->advance(e.id);
     }
-    r.end();
-    for (UINT i = 0; i < count; ++i) {
-        if (ids[i]) {
-            const auto &entry = frame_.entry(ids[i]);
-            if (entry.category != 5 || entry.type != 0x83)
-                throw std::runtime_error("Constant-buffer binding requires a buffer resource");
-            const auto &desc = frame_.resource(ids[i]).desc;
-            if (desc.at(2) != D3D11_BIND_CONSTANT_BUFFER || !desc.at(0) || desc[0] % 16)
-                throw std::runtime_error("Invalid constant-buffer descriptor");
-        }
-        if (hasFirst && (first[i] % 16 || sizes[i] % 16 || sizes[i] > 4096))
-            throw std::runtime_error("CB1 windows require multiples of 16 constants and count <= 4096");
-    }
-    if (hasFirst) {
+    next.transition(original, edited == options_.constantBufferSetters.end() ? nullptr : &b, previous);
+    if (b.first) {
         D3D11_FEATURE_DATA_D3D11_OPTIONS support{};
         check(device_->CheckFeatureSupport(D3D11_FEATURE_D3D11_OPTIONS, &support, sizeof support),
               "Query constant-buffer offsetting support");
         if (!support.ConstantBufferOffsetting)
             throw std::runtime_error("Driver does not support constant-buffer offsetting");
     }
-    int stage = 0;
-    if (e.type >= 0x249 && e.type <= 0x254)
-        stage = (e.type - 0x249) % 6;
-    else
-        switch (e.type - 0x34de) {
-        case 7:
-            stage = 0;
-            break;
-        case 62:
-            stage = 1;
-            break;
-        case 66:
-            stage = 2;
-            break;
-        case 22:
-            stage = 3;
-            break;
-        case 16:
-            stage = 4;
-            break;
-        case 71:
-            stage = 5;
-            break;
-        }
-    for (UINT i = 0; i < count; ++i) {
-        Range x{ids[i], first.empty() ? 0 : first[i], sizes.empty() ? 0 : sizes[i], !first.empty()};
-        setRange(stage, start + i, get<ID3D11Buffer>(ids[i]), x);
-        if (window)
-            ranges_[stage][start + i] = x;
+    // Resolve every resource before mutating native bindings.
+    std::vector<ID3D11Buffer *> buffers;
+    for (auto id : b.buffers)
+        buffers.push_back(get<ID3D11Buffer>(id));
+    const auto stage = constantBufferStage(e.type).value();
+    for (unsigned i = 0; i < b.buffers.size(); ++i) {
+        auto range = constantBufferRow(b, i);
+        setRange(stage, b.start + i, buffers[i], range);
+        if (e.type >= 0x24f && e.type <= 0x254)
+            ranges_[stage][b.start + i] = range;
         else
-            ranges_[stage].erase(start + i);
+            ranges_[stage].erase(b.start + i);
     }
+    constantBufferBindings_ = std::move(next);
 }
 bool Replay::outputs(const Entry &e, Bytes payload) {
     const auto command = readOutputCommand(e.type, payload);
@@ -743,6 +702,7 @@ State Replay::prepareState(const Event &event) {
     if (!outputHistory_)
         iaBindings_.hazards(frame_, srvOutputs(state));
     iaBindings_.apply(state, !outputHistory_);
+    constantBufferBindings_.apply(state);
     samplerBindings_.observe(state);
     samplerBindings_.apply(state);
     bindingEvent_ = event.id;
@@ -1004,6 +964,7 @@ void Replay::command(const Entry &e) {
         activePipelineBindings_.clear();
         srvBindings_.clear();
         iaBindings_.clear();
+        constantBufferBindings_.clear();
         resetStreamOutputBindings();
         clearBindingGaps();
         for (auto &ranges : ranges_)
@@ -1047,6 +1008,8 @@ void Replay::run(const std::function<void(Id, size_t, size_t)> &progress,
     srvHistories_.clear();
     iaBindings_.clear();
     iaHistories_.clear();
+    constantBufferBindings_.clear();
+    constantBufferHistory_.reset();
     outputHistory_ = makeOutputHistory(frame_, options_);
     retainedSo_.fill(false);
     bindingEvent_ = 0;
@@ -1064,15 +1027,16 @@ void Replay::run(const std::function<void(Id, size_t, size_t)> &progress,
     soQueries_.clear();
     soAutoResults_.clear();
     streamOutputHistory.clear();
-    soCountRequiresKnown_ =
-        options_.editedEvents || !options_.shaders.empty() || !options_.textures.empty() ||
-        !options_.disabled.empty() || !options_.buffers.empty() || !options_.commandPayloads.empty() ||
-        !options_.updateSources.empty() || !options_.uavCounters.empty() ||
-        !options_.predicateSetters.empty() || !options_.depthStencilEdits.empty() ||
-        !options_.rasterizerEdits.empty() || !options_.blendEdits.empty() ||
-        !options_.pipelineSetters.empty() || !options_.samplerSetters.empty() ||
-        !options_.samplerEdits.empty() || !options_.srvEdits.empty() || !options_.srvSetters.empty() ||
-        !options_.outputSetters.empty() || !options_.iaSetters.empty();
+    soCountRequiresKnown_ = options_.editedEvents || !options_.shaders.empty() ||
+                            !options_.textures.empty() || !options_.disabled.empty() ||
+                            !options_.buffers.empty() || !options_.commandPayloads.empty() ||
+                            !options_.updateSources.empty() || !options_.uavCounters.empty() ||
+                            !options_.predicateSetters.empty() || !options_.depthStencilEdits.empty() ||
+                            !options_.rasterizerEdits.empty() || !options_.blendEdits.empty() ||
+                            !options_.pipelineSetters.empty() || !options_.samplerSetters.empty() ||
+                            !options_.samplerEdits.empty() || !options_.srvEdits.empty() ||
+                            !options_.srvSetters.empty() || !options_.outputSetters.empty() ||
+                            !options_.iaSetters.empty() || !options_.constantBufferSetters.empty();
     soCountEnabled_ = false;
     for (const auto &[id, entry] : frame_.entries())
         if ((entry.category == 7 && entry.type == 0x38) ||

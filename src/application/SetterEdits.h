@@ -1,4 +1,5 @@
 #pragma once
+#include "core/ConstantBufferBindings.h"
 #include "core/IaBindings.h"
 #include "core/PipelineBindings.h"
 #include "core/Predication.h"
@@ -6,6 +7,9 @@
 #include "core/SrvBindings.h"
 #include <nlohmann/json.hpp>
 namespace flora {
+nlohmann::json constantBufferSetterValues(const ConstantBufferBinding &binding);
+ConstantBufferBinding validateConstantBufferSetter(const Frame &frame, Id event,
+                                                   const nlohmann::json &values);
 nlohmann::json iaSetterValues(const IaBinding &binding);
 IaBinding validateIaSetter(const Frame &frame, Id event, const nlohmann::json &values);
 bool isEditableSetter(uint16_t type);

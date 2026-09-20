@@ -121,6 +121,7 @@ void Experiment::apply(const Frame &input, ReplayOptions &options) const {
     options.predicateSetters.clear();
     options.pipelineSetters.clear();
     options.iaSetters.clear();
+    options.constantBufferSetters.clear();
     options.samplerSetters.clear();
     options.samplerEdits.clear();
     options.srvEdits.clear();
@@ -175,7 +176,10 @@ void Experiment::apply(const Frame &input, ReplayOptions &options) const {
                 patch.update(values);
             } else if (kind == "setter") {
                 const auto id = identifier(op.at("event"));
-                if (isIaSetter(frame.entry(id).type))
+                if (constantBufferStage(frame.entry(id).type))
+                    options.constantBufferSetters[id] =
+                        validateConstantBufferSetter(frame, id, op.at("values"));
+                else if (isIaSetter(frame.entry(id).type))
                     options.iaSetters[id] = validateIaSetter(frame, id, op.at("values"));
                 else if (isPipelineSetter(frame.entry(id).type))
                     options.pipelineSetters[id] = validatePipelineSetter(frame, id, op.at("values"));
@@ -509,7 +513,9 @@ void Experiment::setSetter(const Frame &capture, Id event, const Json &values) {
     apply(capture, current);
     const auto &frame = effectiveFrame(capture, current);
     Json normalized;
-    if (isIaSetter(frame.entry(event).type)) {
+    if (constantBufferStage(frame.entry(event).type)) {
+        normalized = constantBufferSetterValues(validateConstantBufferSetter(frame, event, values));
+    } else if (isIaSetter(frame.entry(event).type)) {
         normalized = iaSetterValues(validateIaSetter(frame, event, values));
     } else if (isPipelineSetter(frame.entry(event).type)) {
         normalized = pipelineSetterValues(validatePipelineSetter(frame, event, values));

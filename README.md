@@ -141,11 +141,16 @@ window alignment before applying native bindings. A selected boundary with missi
 captured output views, input layouts or unresolved SRV slots returns an error; later
 complete snapshots or ClearState restore binding validity. SRV replacement resolves
 only the overwritten slots in that shader stage. Sampler, SRV, predicate,
-output, SO, six-stage shader and IA setter editing is available; CB/CB1 setter editing remains pending.
+output, SO, six-stage shader, IA and CB/CB1 setter editing is available.
 The IA editor provides input-layout and index-buffer selectors and a vertex-buffer
 range table. Persistent edits affect replay, Pipeline inspection, buffer patches
 and geometry exports, with project save/load and undo/redo. See
 [`docs/IA_SETTER_MIGRATION.md`](docs/IA_SETTER_MIGRATION.md).
+The CB editor supports all six stages, start slots, buffer arrays and optional
+CB1 first/count ranges. Moving a range preserves observed displaced windows;
+ordinary setters reset CB1 windows. Constants and scoped buffer patches follow
+the effective binding. See
+[`docs/CONSTANT_BUFFER_SETTER_MIGRATION.md`](docs/CONSTANT_BUFFER_SETTER_MIGRATION.md).
 
 **Pipeline > Replay State** reads actual D3D11 bindings at the selected command's
 before/after boundary through the isolated worker. It includes all six shader stages,

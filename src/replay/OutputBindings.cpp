@@ -35,6 +35,7 @@ State effectiveBindings(const Frame &capture, Id event, State state, const Repla
     const auto &frame = effectiveFrame(capture, options);
     auto history = makeOutputHistory(frame, options);
     state = pipelineBindingsAt(frame, event, state, options.pipelineSetters);
+    state = effectiveConstantBufferBindings(frame, event, state, options.constantBufferSetters);
     state = effectiveIaBindings(frame, event, state, options.iaSetters, !history);
     return history ? history->state(event, state).state
                    : effectiveSrvBindings(frame, event, state, options.srvSetters);

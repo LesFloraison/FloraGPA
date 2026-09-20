@@ -1,4 +1,5 @@
 #include "ClassCapture.h"
+#include "ConstantBufferCapture.h"
 #include "DepthStencilCapture.h"
 #include "IaSetterCapture.h"
 #include "MsaaCapture.h"
@@ -13,6 +14,7 @@
 #include "app/Appearance.h"
 #include "app/BlendDialog.h"
 #include "app/CommandStateView.h"
+#include "app/ConstantBufferDialog.h"
 #include "app/IaSetterDialog.h"
 #include "app/MainWindow.h"
 #include "app/OutputDialog.h"
@@ -254,6 +256,168 @@ class UiTests final : public QObject {
                      action == undo ? QColor(255, 0, 0, 255) : QColor(0, 0, 0, 255));
         }
         snapshot(window, "pipeline-setter-workspace");
+    }
+    void constantBufferDialogControls() {
+        using namespace flora;
+        QTemporaryDir dir;
+        auto capture = testing::constantBufferCapture();
+        capture.buffer(UINT64_MAX - 1, UINT64_MAX - 2, 4, 0, {});
+        capture.save(dir.path() + "/cb.gpa_frame");
+        Frame frame((dir.path() + "/cb.gpa_frame").toStdWString());
+        QWidget parent;
+        int commits = 0;
+        QTimer::singleShot(0, &parent, [&] {
+            auto dialog = parent.findChild<QDialog *>("constantBufferDialog");
+            QVERIFY(dialog);
+            QTimer::singleShot(3000, dialog, &QDialog::reject);
+            auto rows = dialog->findChild<QTableWidget *>("cb_rows");
+            auto apply = dialog->findChild<QDialogButtonBox *>()->button(QDialogButtonBox::Ok);
+            rows->item(0, 1)->setText("1");
+            apply->click();
+            QVERIFY(dialog->findChild<QLabel *>("cb_error")->isVisible());
+            QCOMPARE(commits, 0);
+            rows->item(0, 1)->setText("0xfffffff0");
+            rows->item(0, 2)->setText("4096");
+            auto box = qobject_cast<QComboBox *>(rows->cellWidget(0, 0));
+            box->setCurrentIndex(box->findData(QVariant::fromValue(qulonglong(UINT64_MAX - 1))));
+            rows->setCurrentCell(1, 0);
+            dialog->findChild<QPushButton *>("cb_remove")->click();
+            dialog->findChild<QSpinBox *>("cb_start")->setValue(13);
+            dialog->findChild<QPushButton *>("cb_add")->click();
+            QCOMPARE(rows->rowCount(), 1);
+            auto window = dialog->findChild<QCheckBox *>("cb_window");
+            window->setChecked(false);
+            QVERIFY(rows->isColumnHidden(1));
+            window->setChecked(true);
+            QVERIFY(!rows->isColumnHidden(1));
+            snapshot(*dialog, "constant-buffer-range-editor");
+            apply->click();
+        });
+        QVERIFY(editConstantBufferDialog(&parent, frame, 90, capturedSetter(frame, 90), [&](const auto &v) {
+            ++commits;
+            QCOMPARE(v.at("buffers")[0].template get<Id>(), UINT64_MAX - 1);
+            QCOMPARE(v.at("first_constants")[0].template get<uint32_t>(), 0xfffffff0u);
+        }));
+        QCOMPARE(commits, 1);
+        QTimer::singleShot(0, &parent, [&] {
+            auto dialog = parent.findChild<QDialog *>("constantBufferDialog");
+            QVERIFY(dialog);
+            QTimer::singleShot(3000, dialog, &QDialog::reject);
+            dialog->findChild<QCheckBox *>("cb_window")->setChecked(false);
+            snapshot(*dialog, "constant-buffer-whole-editor");
+            dialog->findChild<QDialogButtonBox *>()->button(QDialogButtonBox::Ok)->click();
+        });
+        QVERIFY(editConstantBufferDialog(&parent, frame, 90, capturedSetter(frame, 90), [&](const auto &v) {
+            ++commits;
+            QVERIFY(v.at("first_constants").is_null());
+            QVERIFY(v.at("constant_counts").is_null());
+        }));
+        QCOMPARE(commits, 2);
+    }
+    void constantBufferMissingWindowArray() {
+        using namespace flora;
+        QTemporaryDir dir;
+        auto capture = testing::constantBufferCapture();
+        capture.add(96, 7, 0x253, testing::cbSetter(0x253, 2, {60}, std::vector<uint32_t>{16}, std::nullopt));
+        capture.add(97, 7, 0x253, testing::cbSetter(0x253, 2, {60}, std::nullopt, std::vector<uint32_t>{16}));
+        capture.save(dir.path() + "/partial.gpa_frame");
+        Frame frame((dir.path() + "/partial.gpa_frame").toStdWString());
+        QWidget parent;
+        int commits = 0;
+        for (Id event : {96, 97}) {
+            QTimer::singleShot(0, &parent, [&] {
+                auto dialog = parent.findChild<QDialog *>("constantBufferDialog");
+                QVERIFY(dialog);
+                QTimer::singleShot(3000, dialog, &QDialog::reject);
+                QVERIFY(dialog->findChild<QCheckBox *>("cb_window")->isChecked());
+                auto rows = dialog->findChild<QTableWidget *>("cb_rows");
+                auto missing = rows->item(0, event == 96 ? 2 : 1);
+                QVERIFY(missing->text().isEmpty());
+                auto apply = dialog->findChild<QDialogButtonBox *>()->button(QDialogButtonBox::Ok);
+                apply->click();
+                QVERIFY(dialog->findChild<QLabel *>("cb_error")->isVisible());
+                missing->setText("16");
+                apply->click();
+            });
+            QVERIFY(editConstantBufferDialog(
+                &parent, frame, event, capturedSetter(frame, event), [&](const auto &v) {
+                    ++commits;
+                    QCOMPARE(v.at("first_constants"), nlohmann::json::array({16}));
+                    QCOMPARE(v.at("constant_counts"), nlohmann::json::array({16}));
+                }));
+        }
+        QCOMPARE(commits, 2);
+    }
+    void constantBufferWorkerHistory() {
+        using namespace flora;
+        QTemporaryDir dir;
+        testing::constantBufferCapture().save(dir.path() + "/cb.gpa_frame");
+        MainWindow window;
+        window.resize(1500, 950);
+        window.show();
+        QSignalSpy done(&window, &MainWindow::taskFinished);
+        window.openCapture(dir.path() + "/cb.gpa_frame");
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY2(done.takeLast()[0].toBool(), qPrintable(window.statusBar()->currentMessage()));
+        auto output = window.findChild<ImageView *>("frameOutput");
+        QVERIFY(output);
+        QCOMPARE(output->image().pixelColor(0, 0), QColor(0, 0, 0, 0));
+        auto api = window.findChild<QTableView *>("apiLog");
+        window.findChild<QComboBox *>("apiKinds")->setCurrentIndex(1);
+        bool selected = false;
+        done.clear();
+        for (int row = 0; row < api->model()->rowCount(); ++row) {
+            auto index = api->model()->index(row, 0);
+            if (index.data(Qt::UserRole).toULongLong() == 90) {
+                api->setCurrentIndex(index);
+                selected = true;
+                break;
+            }
+        }
+        QVERIFY(selected);
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        done.clear();
+        window.findChild<QComboBox *>("outputBoundary")->setCurrentIndex(0);
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        auto edit = window.findChild<QAction *>("editSetter");
+        QVERIFY(edit && edit->isEnabled());
+        QTimer::singleShot(0, &window, [&] {
+            auto dialog = window.findChild<QDialog *>("constantBufferDialog");
+            QVERIFY(dialog);
+            QTimer::singleShot(3000, dialog, &QDialog::reject);
+            auto rows = dialog->findChild<QTableWidget *>("cb_rows");
+            for (int i = 0; i < 2; ++i) {
+                auto box = qobject_cast<QComboBox *>(rows->cellWidget(i, 0));
+                box->setCurrentIndex(box->findData(QVariant::fromValue(qulonglong(60 + 2 * i))));
+                rows->item(i, 1)->setText("16");
+                rows->item(i, 2)->setText("16");
+            }
+            dialog->findChild<QDialogButtonBox *>()->button(QDialogButtonBox::Ok)->click();
+        });
+        done.clear();
+        edit->trigger();
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY2(done.takeLast()[0].toBool(), qPrintable(window.statusBar()->currentMessage()));
+        QCOMPARE(output->image().pixelColor(0, 0), QColor(64, 32, 0, 0));
+        QAction *undo = nullptr, *redo = nullptr;
+        for (auto action : window.findChildren<QAction *>()) {
+            if (action->shortcut() == QKeySequence::Undo)
+                undo = action;
+            if (action->shortcut() == QKeySequence::Redo)
+                redo = action;
+        }
+        QVERIFY(undo && redo);
+        for (auto action : {undo, redo}) {
+            done.clear();
+            action->trigger();
+            QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+            QVERIFY(done.takeLast()[0].toBool());
+            QCOMPARE(output->image().pixelColor(0, 0),
+                     action == undo ? QColor(0, 0, 0, 0) : QColor(64, 32, 0, 0));
+        }
+        snapshot(window, "constant-buffer-workspace");
     }
     void iaSetterWorkerHistory() {
         using namespace flora;

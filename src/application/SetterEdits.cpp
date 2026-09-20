@@ -24,12 +24,19 @@ uint64_t integer(const nlohmann::json &value, uint64_t max) {
 }
 } // namespace
 bool isEditableSetter(uint16_t type) {
-    return isIaSetter(type) || predicateOperation(type) == PredicateOperation::Set ||
-           samplerSetterStage(type).has_value() || srvSetterStage(type).has_value() ||
-           isSrvOutputCommand(type) || isPipelineSetter(type);
+    return constantBufferStage(type).has_value() || isIaSetter(type) ||
+           predicateOperation(type) == PredicateOperation::Set || samplerSetterStage(type).has_value() ||
+           srvSetterStage(type).has_value() || isSrvOutputCommand(type) || isPipelineSetter(type);
 }
 nlohmann::json capturedSetter(const Frame &frame, Id event) {
     const auto &entry = frame.entry(event);
+    if (entry.category == 7 && constantBufferStage(entry.type)) {
+        if (inspectCommand(frame, event).at("status") != "decoded")
+            throw std::runtime_error("Setter requires a complete recovered command layout");
+        auto binding = readConstantBufferSetter(entry.type, frame.payload(event));
+        requireImmediateContext(frame, binding.context);
+        return constantBufferSetterValues(binding);
+    }
     if (entry.category == 7 && isIaSetter(entry.type)) {
         if (inspectCommand(frame, event).at("status") != "decoded")
             throw std::runtime_error("Setter requires a complete recovered command layout");
@@ -60,6 +67,48 @@ nlohmann::json capturedSetter(const Frame &frame, Id event) {
     }
     auto captured = command(frame, event);
     return {{"predicate", captured.resource}, {"predicate_value", captured.value}};
+}
+nlohmann::json constantBufferSetterValues(const ConstantBufferBinding &b) {
+    nlohmann::json values{{"start_slot", b.start}, {"buffers", b.buffers}};
+    if (b.type >= 0x24f && b.type <= 0x254) {
+        values["first_constants"] = b.first ? nlohmann::json(*b.first) : nlohmann::json(nullptr);
+        values["constant_counts"] = b.counts ? nlohmann::json(*b.counts) : nlohmann::json(nullptr);
+    }
+    return values;
+}
+ConstantBufferBinding validateConstantBufferSetter(const Frame &frame, Id event,
+                                                   const nlohmann::json &values) {
+    auto type = frame.entry(event).type;
+    if (!constantBufferStage(type))
+        throw std::runtime_error("Select a constant-buffer setter");
+    auto original = capturedSetter(frame, event);
+    if (!values.is_object() || values.size() != original.size())
+        throw std::runtime_error("Provide all and only the selected setter arguments");
+    for (const auto &[key, value] : original.items())
+        if (!values.contains(key))
+            throw std::runtime_error("Missing constant-buffer setter argument");
+    auto b = readConstantBufferSetter(type, frame.payload(event));
+    b.start = uint32_t(integer(values.at("start_slot"), 13));
+    auto array = [&]<class T>(const char *key, uint64_t maximum) {
+        const auto &a = values.at(key);
+        if (!a.is_array() || a.size() > 14 - b.start)
+            throw std::runtime_error("CB array exceeds slot range");
+        std::vector<T> result;
+        for (const auto &v : a)
+            result.push_back(T(integer(v, maximum)));
+        return result;
+    };
+    b.buffers = array.operator()<Id>("buffers", UINT64_MAX);
+    if (type >= 0x24f && type <= 0x254) {
+        b.first = values.at("first_constants").is_null()
+                      ? std::nullopt
+                      : std::optional(array.operator()<uint32_t>("first_constants", UINT32_MAX));
+        b.counts = values.at("constant_counts").is_null()
+                       ? std::nullopt
+                       : std::optional(array.operator()<uint32_t>("constant_counts", 4096));
+    }
+    validateConstantBufferBinding(frame, b);
+    return b;
 }
 nlohmann::json iaSetterValues(const IaBinding &b) {
     if (b.type == 0x34ef)

@@ -79,7 +79,8 @@ programs and class instances are submitted and compared on both devices.
 
 Coverage, quad diagnostics and shader debugger/profiler consumers remain pending
 migration. IA resource setter migration is documented in
-`docs/IA_SETTER_MIGRATION.md`; CB/CB1 setter editing remains separate work. Passing these tests does not establish full Python feature parity.
+`docs/IA_SETTER_MIGRATION.md`; CB/CB1 setter migration is documented in
+`docs/CONSTANT_BUFFER_SETTER_MIGRATION.md`. Passing these tests does not establish full Python feature parity.
 
 ```powershell
 python tools/validate_shader_setters_port.py `
