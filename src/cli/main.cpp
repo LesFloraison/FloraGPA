@@ -257,6 +257,7 @@ int main(int argc, char **argv) {
             options.debug = p.isSet("debug-device");
             options.suppressDraws = p.isSet("suppress-draws");
             options.before = p.isSet("before");
+            options.prepareBeforeDraw = command != "replay";
             if (p.isSet("event"))
                 options.until = parseId("event");
             if (command == "predicate" && (!options.until || !p.isSet("id")))

@@ -720,6 +720,24 @@ void Replay::mappedWrites(const Entry &e) {
     }
     context_->Unmap(obj, sub);
     counts["Map"]++;
+    lastWorkEvent_ = e.id;
+}
+State Replay::prepareState(const Event &event) {
+    immediate(event.context);
+    auto state = frame_.state(event.state);
+    samplerBindings_.observe(state);
+    samplerBindings_.apply(state);
+    bindingEvent_ = event.id;
+    retainedSo_.fill(false);
+    if (outputHistory_) {
+        auto effective = outputHistory_->state(event.id, state);
+        state = effective.state;
+        retainedSo_ = effective.retainedSo;
+    } else if (srvBindings_.active()) {
+        srvBindings_.hazards(srvHazards_, srvOutputs(state));
+        srvBindings_.apply(state);
+    }
+    return state;
 }
 void Replay::command(const Entry &e) {
     auto t = e.type;
@@ -733,20 +751,7 @@ void Replay::command(const Entry &e) {
     Reader r(payload);
     if (isDraw(t)) {
         auto event = frame_.event(e.id);
-        immediate(event.context);
-        auto state = frame_.state(event.state);
-        samplerBindings_.observe(state);
-        samplerBindings_.apply(state);
-        bindingEvent_ = e.id;
-        retainedSo_.fill(false);
-        if (outputHistory_) {
-            auto effective = outputHistory_->state(e.id, state);
-            state = effective.state;
-            retainedSo_ = effective.retainedSo;
-        } else if (srvBindings_.active()) {
-            srvBindings_.hazards(srvHazards_, srvOutputs(state));
-            srvBindings_.apply(state);
-        }
+        auto state = prepareState(event);
         withEventEdits(event, state, [&] {
             bind(state, t == 0x35 || t == 0x36);
             if ((t == 0x35 || t == 0x36) &&
@@ -1068,7 +1073,9 @@ void Replay::run(const std::function<void(Id, size_t, size_t)> &progress,
     for (auto &[id, e] : frame_.entries())
         if (e.category == 7) {
             if (options_.until &&
-                (id > options_.until || (options_.before && id == options_.until && !isDraw(e.type))))
+                (id > options_.until ||
+                 (options_.before && id == options_.until &&
+                  (!isDraw(e.type) || (!options_.prepareBeforeDraw && !boundaryObserver_)))))
                 break;
             try {
                 lastEvent_ = id;
@@ -1080,6 +1087,17 @@ void Replay::run(const std::function<void(Id, size_t, size_t)> &progress,
             if (progress && ((++done % 128) == 0 || isDraw(e.type)))
                 progress(id, done, total);
         }
+    // The reference recovers missing setters from a before-draw snapshot without
+    // executing that draw's experiments, recording it as work, or notifying observers.
+    const bool gaps =
+        outputGap_ || layoutGap_ || std::any_of(srvGaps_.begin(), srvGaps_.end(), [](const auto &stage) {
+            return std::any_of(stage.begin(), stage.end(), [](Id id) { return id != 0; });
+        });
+    if (gaps && options_.before && options_.until && isDraw(frame_.entry(options_.until).type)) {
+        const auto &entry = frame_.entry(options_.until);
+        bind(prepareState(frame_.event(options_.until)), entry.type == 0x35 || entry.type == 0x36);
+        clearBindingGaps();
+    }
     if (options_.timings) {
         context_->End(stats.Get());
         context_->End(disjoint.Get());

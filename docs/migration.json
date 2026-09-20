@@ -682,7 +682,8 @@
         "docs/NATIVE_BASELINE.md",
         "Missing input-layout, SRV and output bindings reject selected unresolved boundaries; snapshots and ClearState restore validity, later SRV calls resolve only their own stage/range",
         "Scoped before/after draw observers expose edited input bindings without duplicate submission; observer cleanup and experiment rollback verified on exceptions",
-        "Six-stage class instance binding with linkage ownership, ordered interfaces, static replacement handling and dynamic SRV retention; preserved dormant captured shader-setter behavior outside edits"
+        "Six-stage class instance binding with linkage ownership, ordered interfaces, static replacement handling and dynamic SRV retention; preserved dormant captured shader-setter behavior outside edits",
+        "docs/BEFORE_BOUNDARY_MIGRATION.md: ordinary output traversal, prepared inspectors, missing-binding recovery and successful Map work metadata"
       ]
     },
     {
@@ -782,7 +783,7 @@
       "validation": [
         "Selected raw output, RTV/DSV mip/layer/W-slice/buffer ranges, CPU channels/ranges, sRGB encoded values and depth/stencil conversion",
         "tools/validate_frame_output_port.py: Python/native bytes and metadata; see docs/FRAME_OUTPUT_MIGRATION.md",
-        "MSAA resolve/sample output integrated; output settings persist; before-boundary reconciliation remains pending"
+        "MSAA resolve/sample output integrated; output settings persist; ordinary before-draw traversal and missing-binding recovery match Python, see docs/BEFORE_BOUNDARY_MIGRATION.md"
       ]
     },
     {
@@ -1038,7 +1039,8 @@
         "src/replay/Replay.cpp"
       ],
       "validation": [
-        "docs/NATIVE_BASELINE.md"
+        "docs/NATIVE_BASELINE.md",
+        "docs/BEFORE_BOUNDARY_MIGRATION.md: ordinary output traversal, prepared inspectors, missing-binding recovery and successful Map work metadata"
       ]
     },
     {
@@ -1719,7 +1721,7 @@
       "validation": [
         "Native OM output identity, automatic/live presentation and explicit swap chains; no reference pixels used",
         "tools/validate_frame_output_port.py: missing/invalid/ambiguous markers, multiple swap chains, no image and live copies",
-        "Output pixel API/resource navigation is connected; before-boundary integration remains pending"
+        "Output pixel API/resource navigation is connected; before-boundary target and command/work metadata match Python, see docs/BEFORE_BOUNDARY_MIGRATION.md"
       ]
     },
     {
@@ -1962,7 +1964,8 @@
         "tests/UiTests.cpp: Replay State worker integration, before/after boundaries, full JSON export while filtered, resource navigation, disabled/undo state and stale-result rejection",
         "Native getter inspection and CLI/Qt paths migrated for supported replay commands and experiments; Predication, SO retained experiments and remaining pipeline/setter editors still limit full Python parity; live SO cursors remain unknown by design",
         "Class-linked six-stage snapshot bindings, instance ordering and runtime identity match Python; static shader overrides expose empty interface arrays",
-        "Six SO setter before/after boundaries match all 1306 Python fields each; live write cursors remain unknown"
+        "Six SO setter before/after boundaries match all 1306 Python fields each; live write cursors remain unknown",
+        "docs/BEFORE_BOUNDARY_MIGRATION.md: ordinary output traversal, prepared inspectors, missing-binding recovery and successful Map work metadata"
       ]
     },
     {

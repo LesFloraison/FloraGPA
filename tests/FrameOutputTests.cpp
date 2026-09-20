@@ -62,6 +62,89 @@ void oracle(const QString &path) {
 class FrameOutputTests : public QObject {
     Q_OBJECT
   private slots:
+    void mappedWriteNavigation() {
+        QTemporaryDir dir;
+        Capture capture;
+        capture.add(1, 5, 0x127, std::vector<uint8_t>(24));
+        capture.add(2, 5, 0x83, statePack(Id(0), Id(0), 16u, 2u, 1u, 0x10000u, 0u, 0u, Id(0)));
+        capture.add(5, 9, 1, statePack(16u, 11u, 22u, 33u, 44u));
+        capture.add(100, 7, 0x246, statePack(Id(0), Id(1), int32_t(0), Id(2), 0u, 4u, 0u, Id(5)));
+        capture.add(110, 7, 0x246, statePack(Id(0), Id(1), int32_t(-1), Id(2), 0u, 4u, 0u, Id(5)));
+        capture.add(120, 7, 0x246, statePack(Id(0), Id(1), int32_t(0), Id(2), 0u, 1u, 0u, Id(0)));
+        const auto path = dir.path() + "/mapped.gpa_frame";
+        capture.save(path);
+        Frame frame(path.toStdWString());
+        ReplayOptions options;
+        options.warp = true;
+        Replay replay(frame, options);
+        replay.run();
+        QCOMPARE(replay.lastEvent(), Id(120));
+        QCOMPARE(replay.lastWorkEvent(), Id(100));
+        QCOMPARE(replay.counts.at("Map"), uint64_t(1));
+        QCOMPARE(replay.readBuffer(2), statePack(11u, 22u, 33u, 44u));
+        QCOMPARE(selectFrameOutput(replay)["navigation_event"], Json(100));
+    }
+    void beforeDrawTraversal() {
+        QTemporaryDir dir;
+        auto capture = msaaOutputCapture(false);
+        const auto path = dir.path() + "/boundary.gpa_frame";
+        capture.save(path);
+        Frame frame(path.toStdWString());
+        ReplayOptions options;
+        options.warp = true;
+        options.before = true;
+        options.prepareBeforeDraw = false;
+        options.until = 100;
+        Replay first(frame, options);
+        first.run();
+        QCOMPARE(first.lastEvent(), Id(0));
+        QVERIFY(selectFrameOutput(first)["resource"].is_null());
+        options.until = 110;
+        Replay ordinary(frame, options);
+        ordinary.run();
+        QCOMPARE(ordinary.lastEvent(), Id(100));
+        QCOMPARE(ordinary.lastWorkEvent(), Id(100));
+        QCOMPARE(selectFrameOutput(ordinary, "rt0")["view"], Json(22));
+        options.disabled.insert(110);
+        Replay observed(frame, options);
+        int boundaries = 0;
+        observed.run({}, [&](Id id, bool after, auto *, const auto &) {
+            if (id == 110) {
+                QVERIFY(!after);
+                ++boundaries;
+            }
+        });
+        QCOMPARE(boundaries, 1);
+        QCOMPARE(observed.lastEvent(), Id(110));
+        QCOMPARE(observed.lastWorkEvent(), Id(100));
+        QCOMPARE(selectFrameOutput(observed, "rt0")["view"], Json(23));
+        // Reusing the same replay must clear the observer and restore ordinary traversal.
+        observed.run();
+        QCOMPARE(observed.lastEvent(), Id(100));
+        QCOMPARE(selectFrameOutput(observed, "rt0")["view"], Json(22));
+    }
+    void beforeDrawRecoversMissingBindings() {
+        QTemporaryDir dir;
+        auto capture = msaaOutputCapture(false);
+        capture.add(105, 7, 0x34ff, statePack(Id(0), Id(1), 1u, uint8_t(1), Id(999999), Id(0)));
+        const auto path = dir.path() + "/gap.gpa_frame";
+        capture.save(path);
+        Frame frame(path.toStdWString());
+        ReplayOptions options;
+        options.warp = true;
+        options.before = true;
+        options.prepareBeforeDraw = false;
+        options.until = 110;
+        Replay replay(frame, options);
+        replay.run();
+        QCOMPARE(replay.lastEvent(), Id(105));
+        QCOMPARE(replay.lastWorkEvent(), Id(100));
+        QCOMPARE(selectFrameOutput(replay, "rt0")["view"], Json(23));
+        options.before = false;
+        options.until = 105;
+        Replay unresolved(frame, options);
+        QVERIFY_THROWS_EXCEPTION(std::exception, unresolved.run());
+    }
     void replayUiRoundTrip() {
         QTemporaryDir dir;
         auto capture = computeCapture();

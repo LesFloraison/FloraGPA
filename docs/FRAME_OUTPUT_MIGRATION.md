@@ -82,10 +82,10 @@ driver and API selection now save and restore through experiment UI state;
 see `docs/OUTPUT_SESSION_MIGRATION.md`. Output pixel navigation identifies the
 API/resource and selected subresource, and buffer pixels open their exact byte
 range. The downstream pixel-history/coverage/debugger workflows remain pending.
-The native before-draw inspector prepares the selected draw snapshot; the Python
-ordinary replay path can stop before binding that snapshot unless an observer
-or missing-binding recovery requests it. That boundary distinction needs a
-separate reconciliation, not an after-boundary parity claim.
+Ordinary before-draw output now stops before the selected snapshot, while input
+and pipeline inspectors retain their prepared boundary. Missing-binding recovery
+follows the reference exception; see `docs/BEFORE_BOUNDARY_MIGRATION.md` for the
+consumer distinction and dedicated comparison coverage.
 
 The Texture tab still has its older preview path; MSAA output support here does
 not imply that all texture inspection/editing consumers have been migrated.

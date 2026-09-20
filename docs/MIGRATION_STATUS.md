@@ -2,7 +2,7 @@
 
 已有可编译、可运行的 VS2022 / Qt Widgets 原生工程，能够独立重放当前验证的
 GF2 与 BF1 DX11 捕获。**尚未完成原 Python 版本的全部功能迁移。**
-当前独立包为 `out/FloraGPA-output-session/FloraGPA.exe`。
+当前独立包为 `out/FloraGPA-before-boundary-final/FloraGPA.exe`。
 
 
 ## 当前可用
@@ -42,6 +42,13 @@ GF2 与 BF1 DX11 捕获。**尚未完成原 Python 版本的全部功能迁移�
 | 性能 | 原生 D3D11 时间戳、disjoint 与 pipeline statistics | 尚未迁移原版多轮调度、Intel 硬件指标/GTPin |
 
 ## 验证证据
+
+普通 Output 的 Before event 已与 Python 遍历边界对齐：在所选 draw/dispatch
+之前停止；Pipeline／输入检查继续准备所选快照。缺失 RTV、输入布局或 SRV
+可以由完整快照恢复，但不提交所选命令。成功 Map 写入现会更新输出导航的
+最后工作事件；失败或无写入数据的 Map 不会覆盖它。GF2／BF1 首、中、末
+draw/dispatch 的前后边界共 12 项独立包对照通过，像素、原始存储、选择及
+导航元数据均与 Python 一致。详见 `docs/BEFORE_BOUNDARY_MIGRATION.md`。
 
 - 输出会话已接入项目 JSON，保存保持原实验历史并保留未迁移页面的未知字段。
   uint64 ID、数值范围文本、非法设置拒绝、菜单保存重开、WARP/事件/样本恢复、

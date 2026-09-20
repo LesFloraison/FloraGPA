@@ -72,5 +72,6 @@ test logs are local ignored artifacts. Verification:
 Package: `out/FloraGPA-output-session/FloraGPA.exe`.
 
 Remaining scope includes restoration of shader drafts and all other page-specific
-UI state, Texture/coverage image click integration, native pixel-history/debugger
-consumers, and the previously documented before-draw replay distinction.
+UI state, Texture/coverage image click integration and native pixel-history/debugger
+consumers. The before-draw replay distinction is now handled separately in
+`docs/BEFORE_BOUNDARY_MIGRATION.md`.

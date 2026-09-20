@@ -19,6 +19,10 @@ for parity evidence and remaining integration work.
 Output settings and device/API selection are saved in experiment projects.
 Click an output pixel to locate its API/resource; a buffer RTV pixel opens the
 corresponding element bytes. See [`docs/OUTPUT_SESSION_MIGRATION.md`](docs/OUTPUT_SESSION_MIGRATION.md).
+Output **Before event** stops before the selected command. Pipeline and input
+inspection prepare its snapshot before reading; the boundary distinction and
+missing-binding recovery are documented in
+[`docs/BEFORE_BOUNDARY_MIGRATION.md`](docs/BEFORE_BOUNDARY_MIGRATION.md).
 
 ## Build
 

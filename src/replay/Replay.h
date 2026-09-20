@@ -39,6 +39,8 @@ struct ReplayOptions {
     bool suppressDraws = false;
     Id until = 0;
     bool before = false;
+    // Input inspectors prepare the selected snapshot; ordinary frame output stops before it.
+    bool prepareBeforeDraw = true;
     bool editedEvents = false;
     std::set<Id> disabled;
     std::map<Id, std::vector<uint8_t>> shaders, textures;
@@ -191,6 +193,7 @@ class Replay {
     void validateClassProgram(Bytes program, unsigned slots) const;
     void immediate(Id id) const;
     void bind(const State &state, bool compute);
+    State prepareState(const Event &event);
     void command(const Entry &entry);
     bool outputs(const Entry &entry, Bytes payload);
     void constantBuffers(const Entry &entry);
