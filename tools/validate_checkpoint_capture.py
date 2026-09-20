@@ -1,6 +1,6 @@
 """Development-only comparison of native checkpoint capture and complete exports.
 
-Source debug mapping is explicitly pending. Compare all other report fields,
+Source variables and source stacks are explicitly pending. Original source lines are compared. Compare all other report fields,
 original bytecode/disassembly, and complete per-invocation histories (including
 raw register bits and CSVs). Atomic invocation/record allocation order may vary;
 never sort individual snapshots across invocations or discard their hit order.
@@ -22,6 +22,7 @@ p = argparse.ArgumentParser(description=__doc__)
 for name in ('reference', 'exe', 'qt-bin', 'out'):
     p.add_argument('--'+name, type=Path, required=True)
 p.add_argument('--smoke', action='store_true')
+p.add_argument('--source-only', action='store_true', help='SPDB and SDBG source-mapped production captures')
 p.add_argument('--integration-only', action='store_true', help='Indirect draws, scoped buffer edits and disabled captures')
 a = p.parse_args()
 a.out = a.out.resolve()
@@ -51,7 +52,7 @@ def save(completed=False):
     sources = ('gs_checkpoint.py', 'vertex_writes.py', 'native_invocation_selector.py', 'dxbc_gs_checkpoint.py')
     (a.out/'validation.json').write_text(json.dumps(dict(
         completed=completed, passed=all(c['passed'] for c in checks), checks=checks,
-        pending=['source_lines', 'source_variables', 'source_stack', 'catalog.source_location', 'Qt integration'],
+        pending=['source_variables', 'source_stack', 'Qt integration'],
         executable_sha256=hashlib.sha256(a.exe.read_bytes()).hexdigest(),
         reference_sources={s: hashlib.sha256((a.reference/'standalone'/s).read_bytes()).hexdigest() for s in sources}
     ), indent=2), encoding='utf-8')
@@ -104,10 +105,8 @@ def canonical(folder, report):
 
 def core(report):
     result = copy.deepcopy(report)
-    for key in ('source_lines', 'source_variables', 'source_stack', 'source_debug_status', 'hits_preview'):
+    for key in ('source_variables', 'source_stack', 'source_debug_status', 'hits_preview'):
         result.pop(key, None)
-    for entry in result['catalog'] + ([result['checkpoint_instruction']] if result.get('checkpoint_instruction') else []):
-        entry.pop('source_location', None)
     source_limits = report.get('source_variables', {}).get('limits', [])
     result['limits'] = [v for v in result['limits'] if v not in source_limits and not v.startswith('HS source frames are restricted')]
     if 'register_capture' in result:
@@ -205,26 +204,51 @@ if a.integration_only:
                             project=project, suppress=suppress)
     save(True)
     raise SystemExit(0 if all(c['passed'] for c in checks) else 1)
-path = calls_fixture(a.out/'calls')
-cases.append(('calls', path, 'gs', 81))
-if not a.smoke:
-    path = with_so(path, a.out/'calls-so.gpa_frame')
-    cases.append(('calls-so', path, 'gs', 81))
-    for profile in ('gs_4_0', 'gs_4_1', 'gs_5_0'):
-        path, _ = array_fixture(a.out/profile, profile)
-        cases.append((profile, path, 'gs', 81))
-for domain in (('tri',) if a.smoke else ('tri', 'quad', 'isoline')):
-    path, _, _ = ds_fixture(a.out/('ds-'+domain+'.gpa_frame'), domain=domain, instances=2, patches=2)
-    cases.append(('ds-'+domain, path, 'ds', 83))
-    path = a.out/('hs-'+domain+'.gpa_frame')
-    hs_fixture(path, domain=domain)
-    cases.append(('hs-'+domain, path, 'hs', 61))
-if not a.smoke:
-    path = a.out/'hs-join.gpa_frame'
-    join_fixture(path)
-    cases.append(('hs-join', path, 'hs', 61))
-    path, _, _ = ds_fixture(a.out/'ds-culled.gpa_frame', factor=0)
-    cases.append(('ds-culled', path, 'ds', 83))
+if a.source_only:
+    from validate_gs_source_lines import PROJECT
+    from sdbg_tess_fixture import fixture as legacy_tess, compile_legacy
+    from validate_geometry_emissions import fixture as geometry_fixture
+    from validate_geometry_emissions_edges import replace
+    from shader_project import compile_project
+    from probe_hs_source_scopes import project as hull_project
+    a.smoke = True
+    for legacy in (False, True):
+        tag = 'sdbg' if legacy else 'spdb'
+        path = a.out/(tag+'-gs.gpa_frame')
+        geometry_fixture(path, topology='point')
+        raw = compile_legacy(PROJECT) if legacy else compile_project(PROJECT)[0]
+        replace(path, path, raw, data_id=81)
+        cases.append((tag+'-gs', path, 'gs', 81))
+        if legacy:
+            path = a.out/'sdbg-tess.gpa_frame'; legacy_tess(path)
+            cases += [('sdbg-hs', path, 'hs', 61), ('sdbg-ds', path, 'ds', 63)]
+        else:
+            path = a.out/'spdb-hs.gpa_frame'; hs_fixture(path)
+            replace(path, path, compile_project(hull_project(5))[0], data_id=61)
+            cases.append(('spdb-hs', path, 'hs', 61))
+            path, _, _ = ds_fixture(a.out/'spdb-ds.gpa_frame')
+            cases.append(('spdb-ds', path, 'ds', 83))
+else:
+    path = calls_fixture(a.out/'calls')
+    cases.append(('calls', path, 'gs', 81))
+    if not a.smoke:
+        path = with_so(path, a.out/'calls-so.gpa_frame')
+        cases.append(('calls-so', path, 'gs', 81))
+        for profile in ('gs_4_0', 'gs_4_1', 'gs_5_0'):
+            path, _ = array_fixture(a.out/profile, profile)
+            cases.append((profile, path, 'gs', 81))
+    for domain in (('tri',) if a.smoke else ('tri', 'quad', 'isoline')):
+        path, _, _ = ds_fixture(a.out/('ds-'+domain+'.gpa_frame'), domain=domain, instances=2, patches=2)
+        cases.append(('ds-'+domain, path, 'ds', 83))
+        path = a.out/('hs-'+domain+'.gpa_frame')
+        hs_fixture(path, domain=domain)
+        cases.append(('hs-'+domain, path, 'hs', 61))
+    if not a.smoke:
+        path = a.out/'hs-join.gpa_frame'
+        join_fixture(path)
+        cases.append(('hs-join', path, 'hs', 61))
+        path, _, _ = ds_fixture(a.out/'ds-culled.gpa_frame', factor=0)
+        cases.append(('ds-culled', path, 'ds', 83))
 for label, path, stage, shader in cases:
     with Frame(path) as f: raw = f.shader(shader)
     entries, _ = catalog(raw, stage)

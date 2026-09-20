@@ -2,9 +2,17 @@
 
 已有可编译、可运行的 VS2022 / Qt Widgets 原生工程，能够独立重放当前验证的
 GF2 与 BF1 DX11 捕获。**尚未完成原 Python 版本的全部功能迁移。**
-当前独立包为 `out/FloraGPA-checkpoint-capture/FloraGPA.exe`。
+当前独立包为 `out/FloraGPA-source-debug/FloraGPA.exe`。
 
-最新一批接通 GS/DS/HS checkpoint／trace 的 C++ 正式采集与 CLI 导出：
+最新一批接通 SPDB C13／SDBG 原始源码行映射与 checkpoint 指令源码位置。
+6,515 项解析、路径、文本与边界对照全部通过；独立包 Hardware/WARP 的
+60 项 SPDB/SDBG GS/HS/DS 捕获对照通过，源码行与指令目录也参与完整比较。
+修正了 Qt 部署旧编译器漏报 `#line` 的问题，源码导航明确使用系统编译器。
+相关 CTest 与 53 项 Qt 回归通过；最终包 4 项黄金帧检查及 60 份运行时审计通过。
+源码变量、源码调用栈以及 Qt 源码调试入口仍待迁移，完整目标保持未完成。
+详见 [SOURCE_LINES_MIGRATION.md](SOURCE_LINES_MIGRATION.md)。
+
+上一批接通 GS/DS/HS checkpoint／trace 的 C++ 正式采集与 CLI 导出：
 原始 Draw、私有输出／SO 隔离、HS 运行时筛选、容量重试、完整命中序列和
 寄存器位值／有效性，均复用原生重放路径。开发版 540 项 Python 对照全部通过
 （324 项成功、216 项一致拒绝），其中 298 项捕获的原始快照字节也完全一致。
@@ -12,7 +20,8 @@ GF2 与 BF1 DX11 捕获。**尚未完成原 Python 版本的全部功能迁移�
 CTest 全部通过，原 Qt 53 项无失败、无跳过；GF2/BF1 黄金帧及负对照 4 项通过。
 旧 VS/DS 写入与 GS 发射 100 项回归通过；154 份独立包成功报告的模块审计通过，
 三个 EXE 与最终 Release 构建一致，仍未替代另一台干净机器的验证。
-**源码行／变量／源码调用栈、Qt checkpoint 调试界面仍未迁移**，清单维持 partial。
+该批当时源码行／变量／源码调用栈与 Qt checkpoint 调试界面均未迁移；
+源码行现已接通，其余依赖仍 pending，清单维持 partial。
 详见 [CHECKPOINT_CAPTURE_MIGRATION.md](CHECKPOINT_CAPTURE_MIGRATION.md)。
 
 上一批完成 GS/DS/HS checkpoint／trace 的完整 C++ DXBC 插桩层，包括

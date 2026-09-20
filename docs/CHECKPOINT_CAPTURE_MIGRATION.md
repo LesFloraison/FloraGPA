@@ -2,7 +2,7 @@
 
 The C++ application layer now captures original GS/DS/HS instructions through
 `inspectCheckpoint` and the `shader-checkpoint` CLI command. This builds on the
-verified native DXBC transform. Source-level debug metadata and Qt checkpoint
+verified native DXBC transform. Source variables/stacks and Qt checkpoint
 views are still pending; this is not the complete Python debugger migration.
 
 ## Available behavior
@@ -101,12 +101,12 @@ call-stack transitions, raw NaN payloads, infinities, signed zero, and blank CSV
 values for unwritten components. Its initial focused result is in
 `artifacts/checkpoint-decoder-v1.txt`.
 
-Source debug is deliberately explicit: native reports include
-`source_debug_status: pending_native_source_mapping`. They do not claim the
-Python `source_lines`, `source_variables`, `source_stack` or catalog source
-locations are implemented. The parity tool excludes precisely those fields and
-their source-specific limits. Qt checkpoint controls, source stepping, locals,
-watches and source breakpoints remain part of the full migration goal.
+The subsequent [source-line batch](SOURCE_LINES_MIGRATION.md) adds `source_lines`
+and catalog source locations; the parity tool now compares them. Reports use
+`source_debug_status: source_variables_and_stack_pending`. Python
+`source_variables` and `source_stack` remain excluded from parity and unimplemented.
+Qt checkpoint controls, source stepping, locals, watches and source breakpoints
+remain part of the full migration goal.
 
 These synthetic capture comparisons do not establish arbitrary-shader coverage.
 The previous transform matrix includes real GF2/BF1 shader bytecode, but that is

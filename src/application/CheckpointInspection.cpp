@@ -1,5 +1,7 @@
 #include "CheckpointInspection.h"
 #include "DxbcCheckpointModel.h"
+#include "ShaderSourceLines.h"
+#include "SystemDisassembly.h"
 #include <QDir>
 #include <QRegularExpression>
 #include <QSaveFile>
@@ -93,15 +95,9 @@ void csvRow(QSaveFile &file, const std::vector<std::string> &values) {
 CheckpointInspection checkpointCatalog(Bytes shader, Id resource, const Json &event,
                                        const CheckpointInspectionOptions &options) {
     auto parsed = checkpoint::program(shader, options.stage);
-    Com<ID3DBlob> assembly;
-    check(D3DDisassemble(shader.data(), shader.size(), 0xa4, nullptr, &assembly),
-          "Disassemble original checkpoint shader");
     CheckpointInspection result;
     result.shader.assign(shader.begin(), shader.end());
-    result.assembly.assign(static_cast<const char *>(assembly->GetBufferPointer()),
-                           assembly->GetBufferSize());
-    while (!result.assembly.empty() && result.assembly.back() == 0)
-        result.assembly.pop_back();
+    result.assembly = systemDisassembly(shader);
     const QRegularExpression pattern(QStringLiteral("^\\s*(?:(\\d+)\\s+)?0x([0-9a-fA-F]+):\\s*(.*)$"));
     std::map<uint64_t, std::pair<Json, std::string>> lines;
     for (auto line : QString::fromStdString(result.assembly).split('\n')) {
@@ -114,6 +110,8 @@ CheckpointInspection checkpointCatalog(Bytes shader, Id resource, const Json &ev
         lines[match.captured(2).toULongLong(nullptr, 16)] = {
             number.isEmpty() ? Json(nullptr) : Json(number.toULongLong()), match.captured(3).toStdString()};
     }
+    const auto sourceLines = shaderSourceLines(shader, result.assembly);
+    const auto sourceOffsets = shaderLinesByOffset(sourceLines);
     for (auto &entry : parsed.catalog) {
         const auto found = lines.find(entry.at("word_offset").get<uint64_t>() * 4);
         if (found == lines.end())
@@ -122,6 +120,9 @@ CheckpointInspection checkpointCatalog(Bytes shader, Id resource, const Json &ev
         entry["assembly"] = found->second.second;
         entry["checkpoint_allowed"] =
             entry.at("checkpoint_allowed").get<bool>() && !found->second.first.is_null();
+        const auto offset = std::to_string(entry.at("word_offset").get<uint64_t>() * 4);
+        if (sourceOffsets.contains(offset))
+            entry["source_location"] = sourceOffsets.at(offset);
     }
     Json selected = nullptr;
     if (options.instruction) {
@@ -176,7 +177,8 @@ CheckpointInspection checkpointCatalog(Bytes shader, Id resource, const Json &ev
                      {"backend", "native_d3d11"},
                      {"record_count", 0},
                      {"limits", limits},
-                     {"source_debug_status", "pending_native_source_mapping"}};
+                     {"source_lines", sourceLines},
+                     {"source_debug_status", "source_variables_and_stack_pending"}};
     if (options.stage == "hs")
         result.report["hs_phases"] = checkpoint::hullPhases(parsed.code.instructions);
     if (options.trace)

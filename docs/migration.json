@@ -1043,12 +1043,16 @@
         "src/application/CheckpointInspection.h",
         "src/application/CheckpointInspection.cpp",
         "src/application/PostTransform.cpp",
-        "src/cli/main.cpp"
+        "src/cli/main.cpp",
+        "src/application/ShaderSourceLines.cpp",
+        "src/application/SystemDisassembly.h"
       ],
       "validation": [
         "docs/CHECKPOINT_CAPTURE_MIGRATION.md",
-        "540 native/Python capture and export comparisons: 324 successes and 216 matching rejections. Original source lines, variables, source stack and catalog source locations remain pending.",
-        "PostTransformTests::checkpointCaptureAndIsolation; CheckpointTests::decodedRecordsAndExports"
+        "540 native/Python capture and export comparisons: 324 successes and 216 matching rejections. At that batch, source metadata was pending; source lines and catalog locations are now connected (SOURCE_LINES_MIGRATION.md). Source variables and source stacks remain pending.",
+        "PostTransformTests::checkpointCaptureAndIsolation; CheckpointTests::decodedRecordsAndExports",
+        "docs/SOURCE_LINES_MIGRATION.md",
+        "60 packaged SPDB/SDBG GS/HS/DS capture comparisons passed with source lines and catalog locations included."
       ]
     },
     {
@@ -2404,9 +2408,18 @@
       "sha256": "8a8cc02a8c107bf4ad6a020abbedf87c6bd1f9e93c5f1a40548d2691fb6f2ec3",
       "lines": 136,
       "description": "Embedded SPDB C13 source lines bound to exact original DXBC byte offsets.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": [
+        "src/application/ShaderSourceLines.h",
+        "src/application/ShaderSourceLines.cpp",
+        "src/application/ShaderDebugData.h",
+        "src/application/SystemDisassembly.h",
+        "src/application/UnicodeCaseFoldData.h"
+      ],
+      "validation": [
+        "docs/SOURCE_LINES_MIGRATION.md",
+        "6515 source-map, path, text, inlinee and ambiguity comparisons passed; production reports carry original source maps. Qt navigation consumers remain pending."
+      ]
     },
     {
       "module": "shader_profile_navigation.py",
@@ -2455,10 +2468,14 @@
       "description": "Bounded D3D10_SHADER_DEBUG_INFO/SDBG reader (Windows SDK d3d10_1shader.h).",
       "status": "partial",
       "native": [
-        "src/application/ShaderInspector.cpp"
+        "src/application/ShaderInspector.cpp",
+        "src/application/ShaderDebugData.h",
+        "src/application/ShaderSourceLines.cpp"
       ],
       "validation": [
-        "Compiler43 SDBG fixture exact source extraction"
+        "Compiler43 SDBG fixture exact source extraction",
+        "docs/SOURCE_LINES_MIGRATION.md",
+        "Bounded SDBG instruction/token line mapping and Python-compatible whole-buffer UTF-8/UTF-16 decoding. Source-variable and source-stack consumers remain pending."
       ]
     },
     {
@@ -2468,10 +2485,14 @@
       "description": "Bounded, read-only SPDB/SDBG source extraction. No external file lookup.",
       "status": "partial",
       "native": [
-        "src/application/ShaderInspector.cpp"
+        "src/application/ShaderInspector.cpp",
+        "src/application/ShaderDebugData.h",
+        "src/application/ShaderSourceLines.cpp"
       ],
       "validation": [
-        "Compiled SPDB fixture exact source extraction"
+        "Compiled SPDB fixture exact source extraction",
+        "docs/SOURCE_LINES_MIGRATION.md",
+        "Bounded SDBG instruction/token line mapping and Python-compatible whole-buffer UTF-8/UTF-16 decoding. Source-variable and source-stack consumers remain pending."
       ]
     },
     {

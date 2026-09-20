@@ -1,4 +1,5 @@
 #include "application/ShaderInspector.h"
+#include "application/ShaderSourceLines.h"
 #include "replay/Replay.h"
 #include <QtTest>
 #include <d3dcompiler.h>
@@ -63,6 +64,15 @@ class ShaderInspectorTests final : public QObject {
         QVERIFY(!embedded["files"].empty());
         QCOMPARE(embedded["files"][0]["text"].get<std::string>(), source);
         QCOMPARE(embedded["environment"]["hlslEntry"].get<std::string>(), std::string("main"));
+        auto lines = flora::shaderSourceLines(bytes);
+        QCOMPARE(lines.at("status").get<std::string>(), std::string("available"));
+        QCOMPARE(lines.at("files").at(0).at("text").get<std::string>(), source);
+        QVERIFY(!flora::shaderLinesByOffset(lines).empty());
+        QVERIFY(!flora::shaderSourceLines(bytes, "#line 1 \"" +
+                                                     lines.at("files").at(0).at("name").get<std::string>() +
+                                                     "\"\n0 0x00000009: ret")
+                     .at("issues")
+                     .empty());
         QCOMPARE(info["constant_buffers"][0]["size"].get<UINT>(), 16u);
         auto shortened = bytes.first(31);
         QVERIFY_THROWS_EXCEPTION(std::runtime_error, flora::inspectShader(shortened));

@@ -3,6 +3,8 @@
 #include "application/DxbcCheckpoint.h"
 #include "application/DxbcCheckpointModel.h"
 #include "application/InvocationSelector.h"
+#include "application/ShaderDebugData.h"
+#include "application/ShaderSourceLines.h"
 #include <QCoreApplication>
 #include <QFile>
 #include <QTemporaryDir>
@@ -38,6 +40,28 @@ Json inputsJson(const DeclaredInputs &inputs, bool domain) {
 }
 Json evaluate(const Json &j) {
     const auto op = j.at("op").get<std::string>();
+    if (op == "source-text") {
+        const auto bytes = j.at("bytes").get<std::vector<uint8_t>>();
+        const auto text = shader_debug::decodeSourceText(bytes);
+        return {{"text", text.text}, {"encoding", text.encoding}, {"text_valid", text.valid}};
+    }
+    if (op == "source-lines") {
+        auto report = shaderSourceLines(read(j.at("input")),
+                                        j.contains("assembly") ? std::optional<std::string>(j.at("assembly"))
+                                                               : std::nullopt);
+        return {{"report", report}, {"by_offset", shaderLinesByOffset(report)}};
+    }
+    if (op == "source-path")
+        return shader_debug::sourcePathKey(j.at("path"));
+    if (op == "source-offsets")
+        return shaderLinesByOffset(j.at("report"));
+    if (op == "inlinee-sources") {
+        std::map<uint32_t, Json> checksums;
+        for (const auto &[key, value] : j.at("checksums").items())
+            checksums[std::stoul(key)] = value;
+        return shader_debug::inlineeSources(j.at("tables").get<std::vector<std::vector<uint8_t>>>(),
+                                            checksums);
+    }
     if (op == "instrument") {
         CheckpointOptions options;
         options.stage = j.at("stage");

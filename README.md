@@ -101,7 +101,9 @@ the complete DXBC transform and direct GPU tests are in
 Production GS/DS/HS capture and binary/CSV export are available through the
 `shader-checkpoint` CLI; see
 [`docs/CHECKPOINT_CAPTURE_MIGRATION.md`](docs/CHECKPOINT_CAPTURE_MIGRATION.md).
-Original source-debug mapping and Qt checkpoint views remain pending.
+Original SPDB/SDBG source-line maps and instruction locations are now included;
+see [`docs/SOURCE_LINES_MIGRATION.md`](docs/SOURCE_LINES_MIGRATION.md).
+Source variables, source stacks and Qt checkpoint views remain pending.
 Export retains JSON, CSV, raw output bytes and OBJ when positions are valid;
 geometry choices are saved in experiment projects. Remaining stages and
 validation limits are listed in
