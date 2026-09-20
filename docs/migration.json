@@ -126,9 +126,17 @@
       "sha256": "13632f2a057f711dbfa63a7a6df1aebe2790019cd97993c5ba389cfbd5759b6f",
       "lines": 226,
       "description": "Dual captured/experimental binding model for persistent output edits.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": [
+        "src/core/OutputBindings.h",
+        "src/core/OutputBindings.cpp"
+      ],
+      "validation": [
+        "tools/validate_output_model_port.py: 42 streams, 8152 boundaries and all 1008 original/changed fields, dirty sets and overlays match Python, including GF2/BF1 and missing-output gaps",
+        "Hardware/WARP getter comparison covers 288 boundaries; null VB stride/offset persistence after ClearState differs from the reference model at four observations and is recorded explicitly",
+        "OutputBindingTests: strict optional/KEEP arrays, truncation, malformed edits, target overlap/dimensions and atomic state preservation",
+        "Replay experiment integration, retained SO cursors, serialization and Qt output/SO editors remain pending; see docs/OUTPUT_BINDING_MIGRATION.md"
+      ]
     },
     {
       "module": "blend_edits.py",
@@ -1522,10 +1530,13 @@
       "description": "Execute recovered OM/CS output bindings at their actual command boundary.",
       "status": "partial",
       "native": [
-        "src/replay/Replay.cpp"
+        "src/replay/Replay.cpp",
+        "src/core/OutputBindings.cpp",
+        "src/core/SrvBindings.cpp"
       ],
       "validation": [
-        "InputBindingTests: native KEEP RTV/DSV ignores absent DSV operands; reject invalid KEEP forms, RTV/UAV overlap and wrong view types; unresolved output boundaries reject until a full snapshot or ClearState"
+        "InputBindingTests: native KEEP RTV/DSV ignores absent DSV operands; reject invalid KEEP forms, RTV/UAV overlap and wrong view types; unresolved output boundaries reject until a full snapshot or ClearState",
+        "Shared checked output parser used by actual replay and SRV history; independent optional arrays, explicit KEEP, exact end and typed range validation"
       ]
     },
     {
@@ -1533,9 +1544,14 @@
       "sha256": "8033c4df405df90b5978c8c6ca865412147a1f9d45908f6af79a17409260760c",
       "lines": 127,
       "description": "Output setter arguments and captured/experimental binding history.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": [
+        "src/core/OutputBindings.cpp"
+      ],
+      "validation": [
+        "Effective RTV/DSV target signatures and original/edited binding transitions are implemented and compared with Python",
+        "Setter normalization/serialization, delta history cache, UAV counter gap handling, native output verification and Qt editor remain pending"
+      ]
     },
     {
       "module": "pipeline_timestamp_metric.py",

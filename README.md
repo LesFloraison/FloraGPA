@@ -7,6 +7,11 @@ This repository migrates the independently recovered Python implementation in
 Migration status is tracked per source module in `docs/migration.json`.
 Pending functionality is not represented as working functionality.
 
+Output/SO setter migration is in progress. The dual binding model and its
+Python/native getter comparisons are documented in
+[`docs/OUTPUT_BINDING_MIGRATION.md`](docs/OUTPUT_BINDING_MIGRATION.md);
+the output setter experiment and Qt editor are still pending.
+
 ## Build
 
 Install Visual Studio 2022 with **Desktop development with C++**, the MSVC v143

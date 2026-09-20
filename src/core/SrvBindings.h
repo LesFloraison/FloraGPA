@@ -32,7 +32,13 @@ class SrvHazards {
   public:
     explicit SrvHazards(const Frame &frame) : frame_(frame) {}
     // General output/output overlap keeps the captured state's conservative rules.
-    std::optional<bool> overlap(std::optional<Id> left, std::optional<Id> right, bool shaderResource = false);
+    std::optional<bool> overlap(std::optional<Id> left, std::optional<Id> right, bool shaderResource = false,
+                                bool wholeSubresource = false);
+    // Experimental output bindings use whole-subresource conflicts, including
+    // readonly DSVs and 3D views, as the reference dual binding model does.
+    std::optional<bool> outputOverlap(std::optional<Id> left, std::optional<Id> right) {
+        return overlap(left, right, false, true);
+    }
     std::optional<Id> effective(Id view, const SrvOutputs &outputs, bool unknown = false);
 };
 struct SrvObservation {

@@ -2,7 +2,7 @@
 
 已有可编译、可运行的 VS2022 / Qt Widgets 原生工程，能够独立重放当前验证的
 GF2 与 BF1 DX11 捕获。**尚未完成原 Python 版本的全部功能迁移。**
-当前独立包为 `out/FloraGPA-srv-bindings-final/FloraGPA.exe`。
+当前独立包为 `out/FloraGPA-output-binding-model/FloraGPA.exe`。
 
 
 ## 当前可用
@@ -39,6 +39,23 @@ GF2 与 BF1 DX11 捕获。**尚未完成原 Python 版本的全部功能迁移�
 | 性能 | 原生 D3D11 时间戳、disjoint 与 pipeline statistics | 尚未迁移原版多轮调度、Intel 硬件指标/GTPin |
 
 ## 验证证据
+
+- 输出绑定核心新增 `OutputBindingModel`，迁移原始/实验双状态、KEEP、跨输出冲突、
+  SRV/IA 连带解绑、缺失记录后的受影响字段和跨快照差异。最终 Python 对照覆盖
+  42 条流、8,152 个边界，每处比较全部 1,008 个字段、dirty 集合及 overlay。
+  输出命令的共享检查解析器已接入原生重放和 SRV 历史。
+  **这不表示 output/SO setter 编辑已可用**：项目序列化、历史缓存、retained SO
+  cursor、counter 缺口处理和 Qt 编辑入口仍待迁移。
+  硬件/WARP 的 288 处 getter 对照发现四处空 VB 的 stride/offset 与 Python
+  ClearState 模型不同，已明确记录，不能据此声称所有 GPU 状态完全一致。
+  具体边界与后续接入要求见 [输出绑定迁移记录](OUTPUT_BINDING_MIGRATION.md)。
+  本轮新包 GF2/BF1 黄金帧及两项禁用 draw 的负检查均通过；Release 25/25
+  CTest、Debug output/input/SRV binding 三套检查通过。证据位于
+  `artifacts/output-model-verified/validation.json`、
+  `artifacts/validation-output-model-golden/validation.json` 和
+  `artifacts/ctest-output-model-*.log`。
+  共享解析器变更后的 164 项 SRV 边界回归也全部通过，见
+  `artifacts/output-model-srv-edges/validation.json`。
 
 - SRV setter 的最终 `out/FloraGPA-srv-bindings-final/` 包通过 1,272 项 Python 对照：
   `artifacts/srv-setters-verified/validation.json` 中 1,104 项合成与四项

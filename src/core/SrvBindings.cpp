@@ -1,5 +1,6 @@
 #include "SrvBindings.h"
 #include "Contexts.h"
+#include "OutputBindings.h"
 #include "StreamOutput.h"
 #include <algorithm>
 namespace flora {
@@ -36,9 +37,7 @@ void validateSrvResource(const Frame &frame, Id view) {
     if (owner.type < 0x83 || owner.type > 0x87)
         throw std::runtime_error("SRV owner is not a supported buffer or texture");
 }
-bool isSrvOutputCommand(uint16_t type) {
-    return type == 0x34ff || type == 0x3500 || type == 0x3522 || type == 0x25e || isStreamOutputTargets(type);
-}
+bool isSrvOutputCommand(uint16_t type) { return isOutputCommand(type) || isStreamOutputTargets(type); }
 SrvOutputs srvOutputs(const State &s) {
     SrvOutputs out{};
     for (unsigned i = 0; i < 8; ++i)
@@ -140,7 +139,8 @@ std::optional<SrvHazards::Span> SrvHazards::span(Id id) {
     return result;
 }
 
-std::optional<bool> SrvHazards::overlap(std::optional<Id> a, std::optional<Id> b, bool shaderResource) {
+std::optional<bool> SrvHazards::overlap(std::optional<Id> a, std::optional<Id> b, bool shaderResource,
+                                        bool wholeSubresource) {
     if (a == Id(0) || b == Id(0))
         return false;
     if (!a || !b)
@@ -184,7 +184,7 @@ std::optional<bool> SrvHazards::overlap(std::optional<Id> a, std::optional<Id> b
             // W slices of a 3D mip do not partition shader-resource access.
             return true;
         }
-        if (left->ambiguous || right->ambiguous)
+        if (!wholeSubresource && (left->ambiguous || right->ambiguous))
             return {};
         return true;
     } catch (const std::exception &) {
@@ -223,16 +223,6 @@ std::optional<Id> SrvHazards::effective(Id view, const SrvOutputs &outputs, bool
     return view;
 }
 namespace {
-template <class T> std::vector<T> optionalArray(Reader &r, uint32_t count, uint32_t limit) {
-    if (!r.flag())
-        return {};
-    if (count > limit)
-        throw std::runtime_error("Output array exceeds binding limit");
-    std::vector<T> result;
-    for (uint32_t i = 0; i < count; ++i)
-        result.push_back(r.read<T>());
-    return result;
-}
 std::map<unsigned, Id> outputChanges(const Frame &frame, const Entry &entry) {
     std::map<unsigned, Id> out;
     if (isStreamOutputTargets(entry.type)) {
@@ -243,54 +233,7 @@ std::map<unsigned, Id> outputChanges(const Frame &frame, const Entry &entry) {
             out[136 + i] = c.buffers && i < c.buffers->size() ? c.buffers->at(i) : 0;
         return out;
     }
-    Reader r(frame.payload(entry.id));
-    r.skip(16);
-    uint32_t rc = UINT32_MAX, uc = UINT32_MAX, start = 0;
-    std::vector<Id> rt, ua;
-    Id depth = 0;
-    const bool om = entry.type == 0x34ff || entry.type == 0x3500;
-    if (om) {
-        rc = r.read<uint32_t>();
-        rt = optionalArray<Id>(r, rc, 8);
-        depth = r.read<Id>();
-        if (rc > 8 && !(entry.type == 0x3500 && rc == UINT32_MAX))
-            throw std::runtime_error("RTV count exceeds eight");
-    }
-    if (entry.type != 0x34ff) {
-        start = r.read<uint32_t>();
-        uc = r.read<uint32_t>();
-        ua = optionalArray<Id>(r, uc, 64);
-        optionalArray<uint32_t>(r, uc, 64);
-        if (uc != UINT32_MAX && (start > 64 || uc > 64 - start))
-            throw std::runtime_error("UAV range exceeds 64 slots");
-        if (!om && uc == UINT32_MAX)
-            throw std::runtime_error("Invalid CS UAV count");
-    }
-    r.end();
-    if (om && rc != UINT32_MAX) {
-        for (unsigned i = 0; i < 8; ++i)
-            out[i] = i < rt.size() ? rt[i] : 0;
-        out[140] = depth;
-    }
-    if (entry.type == 0x34ff) {
-        for (unsigned i = 0; i < 64; ++i)
-            out[8 + i] = 0;
-    } else if (om) {
-        if (uc != UINT32_MAX) {
-            if (rc != UINT32_MAX && start < rc)
-                throw std::runtime_error("OM RTV and UAV slots overlap");
-            for (unsigned i = 0; i < 64; ++i)
-                out[8 + i] = i >= start && i - start < ua.size() ? ua[i - start] : 0;
-            if (rc == UINT32_MAX)
-                for (unsigned i = std::min(start, 8u); i < 8; ++i)
-                    out[i] = 0;
-        } else if (rc != UINT32_MAX)
-            for (unsigned i = 0; i < rc; ++i)
-                out[8 + i] = 0;
-    } else
-        for (unsigned i = 0; i < uc; ++i)
-            out[72 + start + i] = i < ua.size() ? ua[i] : 0;
-    return out;
+    return outputChanges(entry.type, readOutputCommand(entry.type, frame.payload(entry.id)));
 }
 } // namespace
 SrvHistory::SrvHistory(const Frame &frame, Id context)

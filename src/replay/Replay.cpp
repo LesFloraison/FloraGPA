@@ -5,6 +5,7 @@
 #include "core/Commands.h"
 #include "core/Dxbc.h"
 #include "core/InspectionRecords.h"
+#include "core/OutputBindings.h"
 #include "core/Predication.h"
 #include "core/StreamOutput.h"
 #include <algorithm>
@@ -594,34 +595,15 @@ void Replay::constantBuffers(const Entry &e) {
     }
 }
 void Replay::outputs(const Entry &e) {
-    Reader r(frame_.payload(e.id));
-    r.skip(8);
-    immediate(r.read<Id>());
-    UINT rtCount = 0, start = 0, count = 0;
-    Id dsv = 0;
-    std::vector<Id> rtvs, uavs;
-    std::vector<UINT> initial;
-    bool om = e.type == 0x34ff || e.type == 0x3500;
-    if (om) {
-        rtCount = r.read<UINT>();
-        if (rtCount > 8 && !(e.type == 0x3500 && rtCount == UINT_MAX))
-            throw std::runtime_error("RTV count exceeds eight");
-        rtvs = optional<Id>(r, rtCount, 8);
-        dsv = r.read<Id>();
-        if (rtCount != UINT_MAX && rtvs.size() != rtCount)
-            throw std::runtime_error("Missing RTV array");
-    }
-    if (e.type != 0x34ff) {
-        start = r.read<UINT>();
-        count = r.read<UINT>();
-        if (count > 64 && !(e.type == 0x3500 && count == UINT_MAX))
-            throw std::runtime_error("UAV count exceeds 64");
-        uavs = optional<Id>(r, count);
-        initial = optional<UINT>(r, count);
-        if (count != UINT_MAX && (start > uavLimit_ || count > uavLimit_ - start || uavs.size() != count))
-            throw std::runtime_error("UAV range invalid");
-    }
-    r.end();
+    const auto command = readOutputCommand(e.type, frame_.payload(e.id));
+    immediate(command.context);
+    validateOutputRange(e.type, command, uavLimit_);
+    const auto rtCount = command.rtvCount, start = command.start, count = command.uavCount;
+    const auto dsv = command.dsv;
+    const auto &rtvs = command.rtvs.value_or(std::vector<Id>{});
+    const auto &uavs = command.uavs.value_or(std::vector<Id>{});
+    const auto &initial = command.initialCounts.value_or(std::vector<uint32_t>{});
+    const bool om = e.type == 0x34ff || e.type == 0x3500;
     // Captures may omit unused placeholder views. A later full snapshot resolves them.
     bool missing = false;
     for (auto id : rtvs)
@@ -637,8 +619,6 @@ void Replay::outputs(const Entry &e) {
         outputGap_ = e.id;
         return;
     }
-    if (e.type == 0x3500 && rtCount != UINT_MAX && count != UINT_MAX && start < rtCount)
-        throw std::runtime_error("OM UAV slots overlap RTV bind points");
     auto viewType = [&](Id id, uint16_t expected) {
         if (id) {
             const auto &entry = frame_.entry(id);
