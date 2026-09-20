@@ -120,6 +120,7 @@ void Experiment::apply(const Frame &input, ReplayOptions &options) const {
     options.uavCounters.clear();
     options.predicateSetters.clear();
     options.pipelineSetters.clear();
+    options.iaSetters.clear();
     options.samplerSetters.clear();
     options.samplerEdits.clear();
     options.srvEdits.clear();
@@ -174,7 +175,9 @@ void Experiment::apply(const Frame &input, ReplayOptions &options) const {
                 patch.update(values);
             } else if (kind == "setter") {
                 const auto id = identifier(op.at("event"));
-                if (isPipelineSetter(frame.entry(id).type))
+                if (isIaSetter(frame.entry(id).type))
+                    options.iaSetters[id] = validateIaSetter(frame, id, op.at("values"));
+                else if (isPipelineSetter(frame.entry(id).type))
                     options.pipelineSetters[id] = validatePipelineSetter(frame, id, op.at("values"));
                 else if (samplerSetterStage(frame.entry(id).type))
                     options.samplerSetters[id] = validateSamplerSetter(frame, id, op.at("values"));
@@ -506,7 +509,9 @@ void Experiment::setSetter(const Frame &capture, Id event, const Json &values) {
     apply(capture, current);
     const auto &frame = effectiveFrame(capture, current);
     Json normalized;
-    if (isPipelineSetter(frame.entry(event).type)) {
+    if (isIaSetter(frame.entry(event).type)) {
+        normalized = iaSetterValues(validateIaSetter(frame, event, values));
+    } else if (isPipelineSetter(frame.entry(event).type)) {
         normalized = pipelineSetterValues(validatePipelineSetter(frame, event, values));
     } else if (samplerSetterStage(frame.entry(event).type)) {
         auto binding = validateSamplerSetter(frame, event, values);

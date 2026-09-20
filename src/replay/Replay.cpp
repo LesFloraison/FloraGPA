@@ -529,6 +529,7 @@ void Replay::bind(const State &s, bool compute) {
     }
     if (extended || outputHistory_)
         verifyOutputBindings(OutputBindingModel::snapshot(s));
+    observeIaBindings(bindingEvent_);
 }
 Replay::ConstantRange Replay::constantRange(unsigned stage, uint32_t slot, Id buffer) const {
     const auto &ranges = ranges_.at(stage);
@@ -739,6 +740,9 @@ State Replay::prepareState(const Event &event) {
     auto state = frame_.state(event.state);
     for (const auto &[type, binding] : activePipelineBindings_)
         overlayPipelineBinding(state, binding);
+    if (!outputHistory_)
+        iaBindings_.hazards(frame_, srvOutputs(state));
+    iaBindings_.apply(state, !outputHistory_);
     samplerBindings_.observe(state);
     samplerBindings_.apply(state);
     bindingEvent_ = event.id;
@@ -869,6 +873,7 @@ void Replay::command(const Entry &e) {
         if (outputHistory_)
             verifyOutputBindings(outputHistory_->delta(e.id));
         observeSrvBindings(e.id);
+        observeIaBindings(e.id);
         counts["SOSetTargets"]++;
         return;
     }
@@ -899,6 +904,7 @@ void Replay::command(const Entry &e) {
         if (applied && outputHistory_)
             verifyOutputBindings(outputHistory_->delta(e.id));
         observeSrvBindings(e.id);
+        observeIaBindings(e.id);
         return;
     }
     if (t == 0x246) {
@@ -997,6 +1003,7 @@ void Replay::command(const Entry &e) {
         samplerBindings_.clear();
         activePipelineBindings_.clear();
         srvBindings_.clear();
+        iaBindings_.clear();
         resetStreamOutputBindings();
         clearBindingGaps();
         for (auto &ranges : ranges_)
@@ -1038,6 +1045,8 @@ void Replay::run(const std::function<void(Id, size_t, size_t)> &progress,
     activePipelineBindings_.clear();
     srvBindings_.clear();
     srvHistories_.clear();
+    iaBindings_.clear();
+    iaHistories_.clear();
     outputHistory_ = makeOutputHistory(frame_, options_);
     retainedSo_.fill(false);
     bindingEvent_ = 0;
@@ -1055,15 +1064,15 @@ void Replay::run(const std::function<void(Id, size_t, size_t)> &progress,
     soQueries_.clear();
     soAutoResults_.clear();
     streamOutputHistory.clear();
-    soCountRequiresKnown_ = options_.editedEvents || !options_.shaders.empty() ||
-                            !options_.textures.empty() || !options_.disabled.empty() ||
-                            !options_.buffers.empty() || !options_.commandPayloads.empty() ||
-                            !options_.updateSources.empty() || !options_.uavCounters.empty() ||
-                            !options_.predicateSetters.empty() || !options_.depthStencilEdits.empty() ||
-                            !options_.rasterizerEdits.empty() || !options_.blendEdits.empty() ||
-                            !options_.pipelineSetters.empty() || !options_.samplerSetters.empty() ||
-                            !options_.samplerEdits.empty() || !options_.srvEdits.empty() ||
-                            !options_.srvSetters.empty() || !options_.outputSetters.empty();
+    soCountRequiresKnown_ =
+        options_.editedEvents || !options_.shaders.empty() || !options_.textures.empty() ||
+        !options_.disabled.empty() || !options_.buffers.empty() || !options_.commandPayloads.empty() ||
+        !options_.updateSources.empty() || !options_.uavCounters.empty() ||
+        !options_.predicateSetters.empty() || !options_.depthStencilEdits.empty() ||
+        !options_.rasterizerEdits.empty() || !options_.blendEdits.empty() ||
+        !options_.pipelineSetters.empty() || !options_.samplerSetters.empty() ||
+        !options_.samplerEdits.empty() || !options_.srvEdits.empty() || !options_.srvSetters.empty() ||
+        !options_.outputSetters.empty() || !options_.iaSetters.empty();
     soCountEnabled_ = false;
     for (const auto &[id, entry] : frame_.entries())
         if ((entry.category == 7 && entry.type == 0x38) ||

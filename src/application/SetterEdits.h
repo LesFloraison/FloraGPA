@@ -1,10 +1,13 @@
 #pragma once
+#include "core/IaBindings.h"
 #include "core/PipelineBindings.h"
 #include "core/Predication.h"
 #include "core/SamplerBindings.h"
 #include "core/SrvBindings.h"
 #include <nlohmann/json.hpp>
 namespace flora {
+nlohmann::json iaSetterValues(const IaBinding &binding);
+IaBinding validateIaSetter(const Frame &frame, Id event, const nlohmann::json &values);
 bool isEditableSetter(uint16_t type);
 nlohmann::json capturedSetter(const Frame &frame, Id event);
 PredicateBinding validatePredicateSetter(const Frame &frame, Id event, const nlohmann::json &values);

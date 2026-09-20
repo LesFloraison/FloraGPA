@@ -78,8 +78,8 @@ is retained in `artifacts/shader-setters-comparison.log`. Valid replacement
 programs and class instances are submitted and compared on both devices.
 
 Coverage, quad diagnostics and shader debugger/profiler consumers remain pending
-migration. IA resource and CB/CB1 setter editing are also separate remaining
-work. Passing these tests does not establish full Python feature parity.
+migration. IA resource setter migration is documented in
+`docs/IA_SETTER_MIGRATION.md`; CB/CB1 setter editing remains separate work. Passing these tests does not establish full Python feature parity.
 
 ```powershell
 python tools/validate_shader_setters_port.py `

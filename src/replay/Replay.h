@@ -1,5 +1,6 @@
 #pragma once
 #include "core/Frame.h"
+#include "core/IaBindings.h"
 #include "core/OutputBindings.h"
 #include "core/PipelineBindings.h"
 #include "core/Predication.h"
@@ -51,6 +52,7 @@ struct ReplayOptions {
     std::map<Id, std::map<Id, uint32_t>> uavCounters;
     std::map<Id, PredicateBinding> predicateSetters;
     std::map<Id, PipelineBinding> pipelineSetters;
+    std::map<Id, IaBinding> iaSetters;
     std::map<Id, SamplerBinding> samplerSetters;
     std::map<Id, SrvBinding> srvSetters;
     std::map<Id, std::vector<uint8_t>> outputSetters;
@@ -123,6 +125,11 @@ class Replay {
     SamplerBindings samplerBindings_;
     std::map<uint16_t, PipelineBinding> activePipelineBindings_;
     bool pipelineSetter(const Entry &entry, Bytes payload);
+    IaBindings iaBindings_;
+    std::map<Id, std::unique_ptr<IaHistory>> iaHistories_;
+    const IaObservation &iaHistory(Id event, bool after = false);
+    bool iaSetter(const Entry &entry, Bytes payload);
+    void observeIaBindings(Id event);
     SrvBindings srvBindings_;
     std::unique_ptr<OutputBindingHistory> outputHistory_;
     std::array<bool, 4> retainedSo_{};

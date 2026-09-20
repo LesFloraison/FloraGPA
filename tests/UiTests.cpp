@@ -1,5 +1,6 @@
 #include "ClassCapture.h"
 #include "DepthStencilCapture.h"
+#include "IaSetterCapture.h"
 #include "MsaaCapture.h"
 #include "PipelineSetterCapture.h"
 #include "PredicateCapture.h"
@@ -12,6 +13,7 @@
 #include "app/Appearance.h"
 #include "app/BlendDialog.h"
 #include "app/CommandStateView.h"
+#include "app/IaSetterDialog.h"
 #include "app/MainWindow.h"
 #include "app/OutputDialog.h"
 #include "app/PipelineSetterDialog.h"
@@ -70,6 +72,56 @@ class UiTests final : public QObject {
         QVERIFY(window.grab().save(directory + '/' + name + ".png"));
     }
   private slots:
+    void iaSetterDialogControls() {
+        using namespace flora;
+        using Json = nlohmann::json;
+        QTemporaryDir dir;
+        auto capture = testing::iaSetterCapture();
+        capture.buffer(UINT64_MAX - 1, UINT64_MAX - 2, D3D11_BIND_VERTEX_BUFFER, 0, {});
+        capture.save(dir.path() + "/ia.gpa_frame");
+        Frame frame((dir.path() + "/ia.gpa_frame").toStdWString());
+        QWidget parent;
+        int commits = 0;
+        QTimer::singleShot(0, &parent, [&] {
+            auto dialog = parent.findChild<QDialog *>("iaSetterDialog");
+            QVERIFY(dialog);
+            QTimer::singleShot(3000, dialog, &QDialog::reject);
+            auto rows = dialog->findChild<QTableWidget *>("ia_rows");
+            auto apply = dialog->findChild<QDialogButtonBox *>()->button(QDialogButtonBox::Ok);
+            rows->item(0, 1)->setText("2049");
+            apply->click();
+            QCOMPARE(commits, 0);
+            QVERIFY(dialog->findChild<QLabel *>("ia_error")->isVisible());
+            rows->item(0, 1)->setText("2048");
+            rows->item(0, 2)->setText("0xffffffff");
+            auto box = qobject_cast<QComboBox *>(rows->cellWidget(0, 0));
+            box->setCurrentIndex(box->findData(QVariant::fromValue(qulonglong(UINT64_MAX - 1))));
+            rows->setCurrentCell(1, 0);
+            dialog->findChild<QPushButton *>("ia_remove")->click();
+            dialog->findChild<QSpinBox *>("ia_start")->setValue(31);
+            dialog->findChild<QPushButton *>("ia_add")->click();
+            QCOMPARE(rows->rowCount(), 1);
+            snapshot(*dialog, "ia-vertex-setter");
+            apply->click();
+        });
+        QVERIFY(editIaSetterDialog(&parent, frame, 90, capturedSetter(frame, 90), [&](const auto &values) {
+            ++commits;
+            QCOMPARE(values.at("start_slot"), Json(31));
+            QCOMPARE(values.at("buffers")[0], Json(UINT64_MAX - 1));
+            QCOMPARE(values.at("offsets")[0], Json(UINT32_MAX));
+        }));
+        QTimer::singleShot(0, &parent, [&] {
+            auto dialog = parent.findChild<QDialog *>("iaSetterDialog");
+            QVERIFY(dialog);
+            QTimer::singleShot(3000, dialog, &QDialog::reject);
+            dialog->findChild<QDialogButtonBox *>()->button(QDialogButtonBox::Ok)->click();
+        });
+        QVERIFY(editIaSetterDialog(&parent, frame, 92, capturedSetter(frame, 92), [&](const auto &values) {
+            ++commits;
+            QCOMPARE(values.at("input_layout"), Json(0));
+        }));
+        QCOMPARE(commits, 2);
+    }
     void pipelineSetterDialogControls() {
         using namespace flora;
         using Json = nlohmann::json;
@@ -202,6 +254,87 @@ class UiTests final : public QObject {
                      action == undo ? QColor(255, 0, 0, 255) : QColor(0, 0, 0, 255));
         }
         snapshot(window, "pipeline-setter-workspace");
+    }
+    void iaSetterWorkerHistory() {
+        using namespace flora;
+        auto capture = testing::iaSetterCapture();
+        std::erase_if(capture.entries, [](const Entry &e) { return e.id == 200 || e.id == 300; });
+        for (const auto &e : capture.entries) {
+            if (e.id == 34) {
+                testing::put(capture.bytes, e.offset + 128, Id(66));
+                testing::put(capture.bytes, e.offset + 136, 42u);
+                testing::put(capture.bytes, e.offset + 140, 0u);
+            }
+            if (e.id == 67) {
+                testing::put(capture.bytes, e.offset + 4, 0u);
+                testing::put(capture.bytes, e.offset + 8, 1u);
+                testing::put(capture.bytes, e.offset + 12, 2u);
+            }
+        }
+        capture.add(195, 7, 0x32, testing::statePack(Id(0), Id(1), Id(21), uint8_t(1), 0.f, 0.f, 0.f, 1.f));
+        capture.add(200, 7, 0x39, testing::statePack(Id(34), Id(0), Id(1), 3u, 0u, 0));
+        QTemporaryDir dir;
+        capture.save(dir.path() + "/pipeline.gpa_frame");
+        MainWindow window;
+        window.resize(1500, 950);
+        window.show();
+        QSignalSpy done(&window, &MainWindow::taskFinished);
+        window.openCapture(dir.path() + "/pipeline.gpa_frame");
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        auto output = window.findChild<ImageView *>("frameOutput");
+        QVERIFY(output);
+        QCOMPARE(output->image().pixelColor(0, 0), QColor(255, 0, 0, 255));
+        window.findChild<QComboBox *>("apiKinds")->setCurrentIndex(1);
+        auto api = window.findChild<QTableView *>("apiLog");
+        bool selected = false;
+        for (int row = 0; row < api->model()->rowCount(); ++row) {
+            auto index = api->model()->index(row, 0);
+            if (index.data(Qt::UserRole).toULongLong() == 91) {
+                api->setCurrentIndex(index);
+                selected = true;
+                break;
+            }
+        }
+        QVERIFY(selected);
+        QTRY_VERIFY_WITH_TIMEOUT(!window.busy(), 30000);
+        auto boundary = window.findChild<QComboBox *>("outputBoundary");
+        boundary->setCurrentIndex(0);
+        QTRY_VERIFY_WITH_TIMEOUT(!window.busy(), 30000);
+        auto edit = window.findChild<QAction *>("editSetter");
+        QVERIFY(edit && edit->isEnabled());
+        QTimer::singleShot(0, &window, [&] {
+            auto dialog = window.findChild<QDialog *>("iaSetterDialog");
+            QVERIFY(dialog);
+            QTimer::singleShot(3000, dialog, &QDialog::reject);
+            dialog->findChild<QComboBox *>("ia_resource")->setCurrentIndex(0);
+            dialog->findChild<QComboBox *>("ia_format")->setCurrentIndex(0);
+            dialog->findChild<QLineEdit *>("ia_offset")->setText("0");
+            snapshot(*dialog, "ia-index-setter");
+            dialog->findChild<QDialogButtonBox *>()->button(QDialogButtonBox::Ok)->click();
+        });
+        done.clear();
+        edit->trigger();
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        QCOMPARE(output->image().pixelColor(0, 0), QColor(0, 0, 0, 255));
+        QAction *undo = nullptr, *redo = nullptr;
+        for (auto action : window.findChildren<QAction *>()) {
+            if (action->shortcut() == QKeySequence::Undo)
+                undo = action;
+            if (action->shortcut() == QKeySequence::Redo)
+                redo = action;
+        }
+        QVERIFY(undo && redo);
+        for (auto action : {undo, redo}) {
+            done.clear();
+            action->trigger();
+            QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+            QVERIFY(done.takeLast()[0].toBool());
+            QCOMPARE(output->image().pixelColor(0, 0),
+                     action == undo ? QColor(255, 0, 0, 255) : QColor(0, 0, 0, 255));
+        }
+        snapshot(window, "ia-setter-workspace");
     }
     void shaderSetterWorkerHistory() {
         using namespace flora;
@@ -1364,7 +1497,7 @@ class UiTests final : public QObject {
         QSignalSpy done(&window, &MainWindow::taskFinished);
         window.openCapture(dir.path() + "/blend.gpa_frame");
         QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
-        QVERIFY(done.takeLast()[0].toBool());
+        QVERIFY2(done.takeLast()[0].toBool(), qPrintable(window.statusBar()->currentMessage()));
         auto api = window.findChild<QTableView *>("apiLog");
         bool selected = false;
         for (int row = 0; row < api->model()->rowCount(); ++row) {
@@ -1376,7 +1509,9 @@ class UiTests final : public QObject {
             }
         }
         QVERIFY(selected);
-        QTRY_VERIFY_WITH_TIMEOUT(!window.busy(), 30000);
+        // Event selection starts a debounced preview; idle alone does not await it.
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY2(done.takeLast()[0].toBool(), qPrintable(window.statusBar()->currentMessage()));
         auto edit = window.findChild<QAction *>("editBlend");
         QVERIFY(edit && edit->isEnabled());
         bool entered = false;
@@ -1396,7 +1531,7 @@ class UiTests final : public QObject {
         edit->trigger();
         QVERIFY(entered);
         QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
-        QVERIFY(done.takeLast()[0].toBool());
+        QVERIFY2(done.takeLast()[0].toBool(), qPrintable(window.statusBar()->currentMessage()));
         auto output = window.findChild<ImageView *>("frameOutput");
         QCOMPARE(output->image().pixelColor(0, 0), QColor(0, 0, 0, 255));
         QAction *undo = nullptr, *redo = nullptr;
@@ -1410,12 +1545,12 @@ class UiTests final : public QObject {
         done.clear();
         undo->trigger();
         QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
-        QVERIFY(done.takeLast()[0].toBool());
+        QVERIFY2(done.takeLast()[0].toBool(), qPrintable(window.statusBar()->currentMessage()));
         QCOMPARE(output->image().pixelColor(0, 0), QColor(255, 0, 0, 255));
         done.clear();
         redo->trigger();
         QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
-        QVERIFY(done.takeLast()[0].toBool());
+        QVERIFY2(done.takeLast()[0].toBool(), qPrintable(window.statusBar()->currentMessage()));
         QCOMPARE(output->image().pixelColor(0, 0), QColor(0, 0, 0, 255));
     }
     void blendDialogValidation() {

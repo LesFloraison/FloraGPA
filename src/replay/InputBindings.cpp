@@ -55,6 +55,8 @@ void Replay::inspectNativeState(const NativeStateObserver &observe) const {
 }
 
 bool Replay::inputBindings(const Entry &e, Bytes payload) {
+    if (isIaSetter(e.type) && (!options_.iaSetters.empty() || iaBindings_.active()))
+        return iaSetter(e, payload);
     const unsigned slot = unsigned(e.type) - 0x34de;
     auto srv = std::find(std::begin(srvSlots), std::end(srvSlots), slot);
     auto sampler = std::find(std::begin(samplerSlots), std::end(samplerSlots), slot);

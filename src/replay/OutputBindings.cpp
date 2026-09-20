@@ -9,6 +9,9 @@ std::unique_ptr<OutputBindingHistory> makeOutputHistory(const Frame &capture, co
     for (auto &[id, bytes] : edits)
         if (frame.entry(id).category != 7 || !isSrvOutputCommand(frame.entry(id).type))
             throw std::runtime_error("Output replacement requires an output or SO setter");
+    for (const auto &[id, binding] : options.iaSetters)
+        if (binding.type != 0x34ef)
+            edits[id] = encodeIaSetter(binding, frame.payload(id).first(16));
     for (auto &[id, binding] : options.srvSetters) {
         if (!srvSetterStage(frame.entry(id).type) || binding.start >= 128 ||
             binding.views.size() > 128 - binding.start)
@@ -32,6 +35,7 @@ State effectiveBindings(const Frame &capture, Id event, State state, const Repla
     const auto &frame = effectiveFrame(capture, options);
     auto history = makeOutputHistory(frame, options);
     state = pipelineBindingsAt(frame, event, state, options.pipelineSetters);
+    state = effectiveIaBindings(frame, event, state, options.iaSetters, !history);
     return history ? history->state(event, state).state
                    : effectiveSrvBindings(frame, event, state, options.srvSetters);
 }

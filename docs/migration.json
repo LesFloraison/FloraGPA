@@ -1003,12 +1003,22 @@
       "description": "Input-layout, vertex and index binding edits with output-hazard history.",
       "status": "partial",
       "native": [
-        "src/replay/InputBindings.cpp"
+        "src/replay/InputBindings.cpp",
+        "src/core/IaBindings.cpp",
+        "src/replay/IaBindings.cpp",
+        "src/application/SetterEdits.cpp",
+        "src/application/Experiment.cpp",
+        "src/app/IaSetterDialog.cpp"
       ],
       "validation": [
         "tests/InputBindingTests.cpp: hardware and WARP native getters, before/after boundaries, six stages, high slots, null/empty arrays and malformed records",
         "tools/validate_input_bindings.py: Python native getter parity and matching rejection of invalid captured setters",
-        "Captured calls execute natively; setter experiment persistence, displaced-range prefix history and editor UI remain pending"
+        "Persistent layout/VB/IB edits, displaced-range observations, output hazards, original resets and ClearState now affect replay, effective snapshots, buffer patches and geometry; private diagnostic consumers remain pending.",
+        "tests/IaSetterTests.cpp: native getters, repeat traversal, save/load, undo/redo and invalid-operation atomicity; tests/UiTests.cpp: uint64 selectors, numeric validation and worker-backed IB edit history.",
+        "artifacts/ia-setters-package/validation.json: 133 passing comparisons, including 411 CPU cases (66 accepted, 345 rejected), hardware/WARP pipeline fields, rendered bytes, geometry exports, scoped buffer edits and combined output/SO experiments.",
+        "artifacts/ia-setters-real-final/validation.json: 18 passing GF2/BF1 checks; independently edit every VB, IB or layout setter, compare Python output and restore original golden hashes with undo.",
+        "Release: 29 non-UI CTest suites passed; full UI rerun passed all 46 cases with no skips after awaiting the selected preview in blendHistory. Together these cover all 30 suites.",
+        "out/FloraGPA-ia-setters-final: executable hashes match Release; 139 comparison reports load no Python/GPA/RenderDoc and use packaged Qt. Final golden and suppressed-draw negative checks pass in artifacts/validation-ia-setters-final/validation.json."
       ]
     },
     {
@@ -2114,18 +2124,22 @@
         "src/app/SamplerDialog.cpp",
         "src/core/PipelineBindings.cpp",
         "src/replay/PipelineBindings.cpp",
-        "src/app/PipelineSetterDialog.cpp"
+        "src/app/PipelineSetterDialog.cpp",
+        "src/core/IaBindings.cpp",
+        "src/replay/IaBindings.cpp",
+        "src/app/IaSetterDialog.cpp"
       ],
       "validation": [
         "Predicate setter arguments validate all fields, resource type/descriptor, immediate context, uint64 IDs and raw uint32 BOOL. Compatible setter history persists across draw/dispatch snapshots until an original setter or ClearState.",
         "tests/PredicationTests.cpp: repeated replay, save/load, undo/redo, branch history, invalid-operation atomicity and later reset. tests/UiTests.cpp: real worker observes apply/undo/redo and rejects invalid numeric input.",
         "tools/validate_predicate_setters_port.py: six wire families, hardware/WARP outputs and pipeline boundaries, replacement/detach/noncanonical BOOL, later reset, lifecycle rejection and SO/DrawAuto.",
-        "Predicate, sampler, SRV, output/SO, topology and RS/OM pipeline setter families are implemented; IA resource and CB/CB1 setter editing and private diagnostic consumers remain pending.",
+        "Predicate, sampler, SRV, output/SO, shader/class, topology, RS/OM and IA setter families are implemented; CB/CB1 setter editing and private diagnostic consumers remain pending.",
         "artifacts/predicate-setters-package/validation.json: all 1265 comparisons passed with Windows-only native child PATH; 210 actual pipeline boundaries, image/buffer results, four SO/DrawAuto geometry cases and query lifecycle rejection.",
         "Release: all 18 CTest suites passed. Debug: 5 related suites plus predicate editor/inspector UI passed. Both golden frames and disabled-draw negative controls passed in artifacts/validation-predicate-setters-package/validation.json.",
         "Sampler validation is recorded in artifacts/sampler-final-comparison/validation.json and sampler-real-comparison/validation.json; SRV history/validation and inherited descriptor/buffer consumers are covered by tests/SrvBindingTests.cpp and tools/validate_srv_setters_port.py / validate_srv_setter_edges.py",
         "docs/PIPELINE_SETTER_MIGRATION.md: persistent six-family topology/RS/OM edits, typed Qt controls, CPU/GPU parity and final-state per-draw inheritance",
-        "docs/SHADER_SETTER_MIGRATION.md: six-stage persistent shader/class edits, final-asset interface validation, effective constants and Qt stage navigation/Compile & Apply; private diagnostic consumers remain pending"
+        "docs/SHADER_SETTER_MIGRATION.md: six-stage persistent shader/class edits, final-asset interface validation, effective constants and Qt stage navigation/Compile & Apply; private diagnostic consumers remain pending",
+        "docs/IA_SETTER_MIGRATION.md: persistent input layout, vertex/index buffer edits, displaced ranges, output hazards, geometry and Qt validation."
       ]
     },
     {

@@ -2,7 +2,7 @@
 
 已有可编译、可运行的 VS2022 / Qt Widgets 原生工程，能够独立重放当前验证的
 GF2 与 BF1 DX11 捕获。**尚未完成原 Python 版本的全部功能迁移。**
-当前独立包为 `out/FloraGPA-shader-setters-final/FloraGPA.exe`。
+当前独立包为 `out/FloraGPA-ia-setters-final/FloraGPA.exe`。
 
 
 ## 当前可用
@@ -31,6 +31,7 @@ GF2 与 BF1 DX11 捕获。**尚未完成原 Python 版本的全部功能迁移�
 | 全局视图实验 | SRV / RTV / DSV / UAV 的格式、维度、mip / 数组层 / 3D 切片 / buffer 范围与标志；不可变捕获副本；Clear / Draw / Dispatch / GenerateMips、绑定冲突与 counter 使用最终描述符；Qt 编辑、项目历史、保存重开、撤销重做；主输出跟随最终视图范围 | 原始捕获字段保持不变；私有 coverage/debug 消费者仍待迁移 |
 | 纹理原始存储读回 | 非 MSAA 的完整 mip / 数组层 / 3D 切片紧密存储；CLI texture-storage 导出；WARP 绑定中的 mip 检查复制保留 RTV 和 UAV counter | 图像转换独立于原始字节；部分平面/packed 格式和 GUI 原始存储导出仍待迁移 |
 | SRV setter 实验 | 六阶段 × 128 槽的起始槽/视图数组；逐槽跨快照继承、部分覆盖、范围移动/缩短、空调用、ClearState、缺失资源恢复；mip/layer 与只读 depth/stencil 冲突、原生解绑保持；Qt 编辑、保存与撤销/重做 | 移动范围要求可确认的前序绑定；描述符和 buffer 补丁/导出继承最终绑定；texture 输入克隆及私有诊断依赖尚未闭合 |
+| IA setter 实验 | input layout、VB 槽范围、stride/offset、IB 格式/offset；跨快照保持、原始 setter/ClearState 恢复、输出冲突、几何和 buffer patch；紧凑 Qt 编辑器、项目保存与撤销/重做 | 移动范围需已知前序绑定；缺失输出影响冲突判断时明确拒绝；覆盖/后变换等消费者仍待迁移 |
 | Output / SO setter 实验 | RTV/DSV、OM/CS UAV、SO 目标/偏移；KEEP、独立可选数组、64 槽 UAV、跨快照绑定和已知 SO cursor 保留；紧凑 Qt 表格、项目保存与撤销/重做 | buffer、counter、SRV 描述符及 IA 几何使用最终绑定；未知 SO cursor 拒绝猜测；texture 实验及私有诊断仍待迁移 |
 | 图像 | 自动/指定 swap chain、RT0–7、深度/模板；RTV/DSV mip、数组层、3D 切片、buffer 范围；浮点/整数/packed 格式、通道/范围、原始存储与 PNG 导出；MSAA resolve/指定样本、整数位保真、深度/模板 resolve；显示设置、设备、事件与边界保存/恢复；像素关联 API/资源和 buffer 元素字节 | before-draw 边界语义统一、像素历史/覆盖/调试消费者尚未完成；MSAA 帧前逐样本内容不声称恢复 |
 | 纹理 | GPU 格式转换、BC、浮点/整数、1D/2D/3D、mip/layer/slice、事件边界预览 | MSAA、平面格式及部分查看选项未迁移 |
@@ -51,13 +52,24 @@ setter／ClearState 恢复、项目撤销／重做。常量反射和 Pipeline �
 GF2 的 50 条和 BF1 的 665 条 PS setter 全部编辑后的输出与 Python 一致，
 撤销恢复金标准；最终独立包的原始帧及禁用 draw 负对照也全部通过。
 
+Edit Setter 已接入 IA 输入布局、顶点缓冲区和索引缓冲区的持久编辑。
+133 项综合对照通过，包含 411 个 CPU 参数／布局用例（66 接受、345 拒绝）、
+硬件／WARP getter、像素、几何 CSV/OBJ、buffer patch 和 output/SO 组合实验。
+GF2 分别编辑 72 条 VB、72 条 IB、16 条 layout；BF1 分别编辑 1,194、641、645 条。
+18 项真实帧检查全部通过，编辑输出与 Python 一致，撤销精确恢复金标准。
+本轮 Release 的 29 个非 UI 套件通过；修正旧 blendHistory 测试对延迟预览的等待后，
+完整 UI 套件再次通过（46 项、无失败和跳过），覆盖当前全部 30 个 CTest 套件。
+最终包的原始帧及禁用 draw 负对照四项通过；139 份综合／真实帧运行时报告
+未加载 Python/GPA/RenderDoc，Qt 来自独立包。详见
+`docs/IA_SETTER_MIGRATION.md`；CB/CB1 和私有诊断消费者仍待迁移。
+
 Edit Setter 新增拓扑、光栅化状态、视口、裁剪矩形、混合状态和深度／模板
 状态六类持久编辑；后续同类 setter / ClearState 结束覆盖，逐 draw 实验继承
 修改后的默认值。748 项参数／布局对照与 269 项综合检查通过，包含硬件／WARP
 真实 getter、输出像素／原始存储、几何表格／OBJ，以及 SO→DrawAuto 链路。
 Qt 实际 Worker 验证了编辑、撤销、重做；GF2 的 9 条和 BF1 的 208 条视口
 setter 全部修改后图像与 Python 一致，撤销后恢复原始金标准。详见
-`docs/PIPELINE_SETTER_MIGRATION.md`。IA 资源和 CB/CB1 setter 编辑仍待迁移。
+`docs/PIPELINE_SETTER_MIGRATION.md`。IA 资源 setter 已接入，CB/CB1 setter 编辑仍待迁移。
 
 普通 Output 的 Before event 已与 Python 遍历边界对齐：在所选 draw/dispatch
 之前停止；Pipeline／输入检查继续准备所选快照。缺失 RTV、输入布局或 SRV

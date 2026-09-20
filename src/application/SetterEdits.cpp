@@ -24,11 +24,19 @@ uint64_t integer(const nlohmann::json &value, uint64_t max) {
 }
 } // namespace
 bool isEditableSetter(uint16_t type) {
-    return predicateOperation(type) == PredicateOperation::Set || samplerSetterStage(type).has_value() ||
-           srvSetterStage(type).has_value() || isSrvOutputCommand(type) || isPipelineSetter(type);
+    return isIaSetter(type) || predicateOperation(type) == PredicateOperation::Set ||
+           samplerSetterStage(type).has_value() || srvSetterStage(type).has_value() ||
+           isSrvOutputCommand(type) || isPipelineSetter(type);
 }
 nlohmann::json capturedSetter(const Frame &frame, Id event) {
     const auto &entry = frame.entry(event);
+    if (entry.category == 7 && isIaSetter(entry.type)) {
+        if (inspectCommand(frame, event).at("status") != "decoded")
+            throw std::runtime_error("Setter requires a complete recovered command layout");
+        auto binding = readIaSetter(entry.type, frame.payload(event));
+        requireImmediateContext(frame, binding.context);
+        return iaSetterValues(binding);
+    }
     if (entry.category == 7 && isPipelineSetter(entry.type)) {
         if (inspectCommand(frame, event).at("status") != "decoded")
             throw std::runtime_error("Setter requires a complete recovered command layout");
@@ -52,6 +60,47 @@ nlohmann::json capturedSetter(const Frame &frame, Id event) {
     }
     auto captured = command(frame, event);
     return {{"predicate", captured.resource}, {"predicate_value", captured.value}};
+}
+nlohmann::json iaSetterValues(const IaBinding &b) {
+    if (b.type == 0x34ef)
+        return {{"input_layout", b.resource}};
+    if (b.type == 0x34f1)
+        return {{"ib", b.resource}, {"ib_format", b.format}, {"ib_offset", b.offset}};
+    return {{"start_slot", b.start}, {"buffers", b.buffers}, {"strides", b.strides}, {"offsets", b.offsets}};
+}
+IaBinding validateIaSetter(const Frame &frame, Id event, const nlohmann::json &values) {
+    auto type = frame.entry(event).type;
+    if (!isIaSetter(type))
+        throw std::runtime_error("Select an IA setter");
+    auto original = capturedSetter(frame, event);
+    if (!values.is_object() || values.size() != original.size())
+        throw std::runtime_error("Provide all and only the selected setter arguments");
+    for (auto &[key, value] : original.items())
+        if (!values.contains(key))
+            throw std::runtime_error("Missing IA setter argument");
+    auto b = readIaSetter(type, frame.payload(event));
+    if (type == 0x34ef)
+        b.resource = integer(values.at("input_layout"), UINT64_MAX);
+    else if (type == 0x34f1) {
+        b.resource = integer(values.at("ib"), UINT64_MAX);
+        b.format = uint32_t(integer(values.at("ib_format"), UINT32_MAX));
+        b.offset = uint32_t(integer(values.at("ib_offset"), UINT32_MAX));
+    } else {
+        b.start = uint32_t(integer(values.at("start_slot"), 31));
+        auto array = [&]<class T>(const char *key, std::vector<T> &target, uint64_t maximum) {
+            const auto &a = values.at(key);
+            if (!a.is_array() || a.size() > 32 - b.start)
+                throw std::runtime_error("IA array exceeds slot range");
+            target.clear();
+            for (const auto &v : a)
+                target.push_back(T(integer(v, maximum)));
+        };
+        array("buffers", b.buffers, UINT64_MAX);
+        array("strides", b.strides, UINT32_MAX);
+        array("offsets", b.offsets, UINT32_MAX);
+    }
+    validateIaBinding(frame, b);
+    return b;
 }
 nlohmann::json pipelineSetterValues(const PipelineBinding &binding) {
     const auto &s = binding.values;
