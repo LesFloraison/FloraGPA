@@ -82,8 +82,13 @@ Use **F5** to replay, **F6** for GPU timings, **Escape** to cancel. Select API
 events to inspect their pipeline and before/after output. Resources provide
 texture mip/layer/slice previews, shader source/DXBC/reflection and buffer bytes.
 The Buffer tab reads initial/before/after values and byte ranges as hex, ASCII or
-32-bit words. Geometry provides IA tables and a rotatable wireframe, with CSV/OBJ
-export. Resource names come from captured debug metadata.
+32-bit words. Geometry provides IA tables and native Final/VS/DS/GS output,
+stream and instance selection, typed attributes and a rotatable wireframe.
+Export retains JSON, CSV, raw output bytes and OBJ when positions are valid;
+geometry choices are saved in experiment projects. Remaining stages and
+validation limits are listed in
+[`docs/POST_TRANSFORM_MIGRATION.md`](docs/POST_TRANSFORM_MIGRATION.md).
+Resource names come from captured debug metadata.
 Shader **Compile & Apply** and event enable/disable changes use an experiment
 history with undo/redo and frame-bound JSON projects.
 Replay reports and event Texture exports include the active experiment revision,

@@ -1,8 +1,14 @@
 #include "SessionUi.h"
 #include <QString>
+#include <algorithm>
+#include <map>
 namespace flora {
 using Json = nlohmann::json;
 namespace {
+const std::map<std::string, std::string> geometryStages{
+    {"final", "最终"}, {"vs", "VS"}, {"ds", "DS"}, {"gs", "GS"}};
+const std::map<std::string, std::string> geometryTables{
+    {"expanded_vertices", "逐次引用"}, {"unique_vertices", "唯一顶点"}, {"references", "索引映射"}};
 std::string text(const Json &object, const char *key, const char *fallback) {
     if (!object.contains(key))
         return fallback;
@@ -84,6 +90,31 @@ ReplayUiState replayUiState(const Frame &frame, const Json &ui, Id currentEvent)
             throw std::runtime_error("Invalid project output boundary");
         state.boundary = state.event ? boundary.get<int>() : 0;
     }
+    const auto geometry = ui.value("geometry_selection", Json::object());
+    if (geometry.is_object()) {
+        for (const auto &[native, legacy] : geometryStages)
+            if (geometry.value("stage", Json()) == legacy || geometry.value("stage", Json()) == native)
+                state.geometryStage = native;
+        if (ui.value("flora_geometry_stage", Json()) == "ia")
+            state.geometryStage = "ia";
+        for (const auto &[native, legacy] : geometryTables)
+            if (geometry.value("ia_table", Json()) == legacy || geometry.value("ia_table", Json()) == native)
+                state.geometryTable = native;
+        const auto stream = geometry.value("stream", Json());
+        for (unsigned i = 0; i < 4; ++i)
+            if (stream == std::to_string(i))
+                state.geometryStream = i;
+        const auto instance = geometry.value("instance", Json());
+        if (instance.is_string()) {
+            auto value = QString::fromStdString(instance.get<std::string>());
+            bool valid = false;
+            const auto number = value.toULongLong(&valid);
+            if (value.isEmpty() ||
+                (valid && number <= UINT32_MAX &&
+                 std::all_of(value.begin(), value.end(), [](QChar c) { return c >= '0' && c <= '9'; })))
+                state.geometryInstance = value.toStdString();
+        }
+    }
     return state;
 }
 Json replayUiDocument(const Frame &frame, const ReplayUiState &state, const Json &previous) {
@@ -104,7 +135,24 @@ Json replayUiDocument(const Frame &frame, const ReplayUiState &state, const Json
     ui["event"] = state.event && eventId(frame, Json(state.event), true) ? Json(state.event) : Json();
     ui["command"] = state.event ? Json(state.event) : Json();
     ui["flora_output_boundary"] = state.boundary;
-    replayUiState(frame, ui);
+    if (state.geometryStream > 3 || !geometryTables.contains(state.geometryTable) ||
+        (state.geometryStage != "ia" && !geometryStages.contains(state.geometryStage)))
+        throw std::runtime_error("Invalid project geometry selection");
+    auto geometry = ui.value("geometry_selection", Json::object());
+    if (!geometry.is_object())
+        geometry = Json::object();
+    geometry.update(
+        Json{{"stage", geometryStages.at(state.geometryStage == "ia" ? "final" : state.geometryStage)},
+             {"stream", std::to_string(state.geometryStream)},
+             {"instance", state.geometryInstance},
+             {"ia_table", geometryTables.at(state.geometryTable)}});
+    ui["geometry_selection"] = std::move(geometry);
+    if (state.geometryStage == "ia")
+        ui["flora_geometry_stage"] = "ia";
+    else
+        ui.erase("flora_geometry_stage");
+    if (replayUiState(frame, ui).geometryInstance != state.geometryInstance)
+        throw std::runtime_error("Invalid project geometry instance");
     return ui;
 }
 } // namespace flora

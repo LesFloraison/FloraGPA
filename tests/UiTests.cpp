@@ -2131,10 +2131,7 @@ class UiTests final : public QObject {
         snapshot(window, "stream-output-shader");
         auto api = window.findChild<QTableView *>("apiLog");
         api->setCurrentIndex(api->model()->index(2, 0));
-        QAction *inspect = nullptr;
-        for (auto action : window.findChildren<QAction *>())
-            if (action->text() == "Inspect IA")
-                inspect = action;
+        auto inspect = window.findChild<QAction *>("inspectGeometry");
         QVERIFY(inspect);
         done.clear();
         inspect->trigger();
@@ -3385,10 +3382,7 @@ class UiTests final : public QObject {
         QVERIFY(done.takeLast()[0].toBool());
         auto pipeline = window.findChild<QTreeWidget *>("pipeline");
         QVERIFY(pipeline->topLevelItemCount() >= 8);
-        QAction *inspect = nullptr;
-        for (auto action : window.findChildren<QAction *>())
-            if (action->text() == "Inspect IA")
-                inspect = action;
+        auto inspect = window.findChild<QAction *>("inspectGeometry");
         QVERIFY(inspect);
         // An explicit analysis request wins over pending navigation debounce.
         api->setCurrentIndex(api->model()->index(3, 0));

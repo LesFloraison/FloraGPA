@@ -23,6 +23,7 @@ Id shaderStreamOutput(const Frame &frame, Id shader);
 StreamOutputDeclaration readStreamOutputDeclaration(const Frame &frame, Id id);
 StreamOutputTargets readStreamOutputTargets(Bytes payload);
 bool isStreamOutputTargets(uint16_t type);
+std::map<uint32_t, uint32_t> streamOutputTopologies(Bytes bytecode);
 void validateStreamOutputBindings(const Frame &frame, std::span<const Id> ids,
                                   std::span<const uint32_t> offsets);
 } // namespace flora

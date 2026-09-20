@@ -15,9 +15,14 @@
       "sha256": "c691ea0e438a2dde640b7d0b9e874a2177e123956a43d1e78a58fff9d08ad1fe",
       "lines": 235,
       "description": "Offline independent DX11 asset and draw analysis, running in an isolated worker.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": [
+        "src/cli/main.cpp"
+      ],
+      "validation": [
+        "docs/POST_TRANSFORM_MIGRATION.md",
+        "Native post-geometry command supports final/vs/ds/gs, streams and instances; remaining analysis entry points remain pending."
+      ]
     },
     {
       "module": "annotation_contexts.py",
@@ -124,7 +129,9 @@
         "docs/OUTPUT_SESSION_MIGRATION.md: output settings, driver/API/boundary project round trip; exact uint64 IDs and unknown UI fields; output pixel/resource/element navigation; other page UI state remains pending",
         "docs/SHADER_SETTER_MIGRATION.md: six-stage persistent shader/class edits, final-asset interface validation, effective constants and Qt stage navigation/Compile & Apply; private diagnostic consumers remain pending",
         "docs/TEXTURE_INSPECTION_MIGRATION.md: native initial/event/MSAA/typed/plane inspection, DDS/RAW/PNG export and Qt controls; 217 Python comparisons (178 successful exports, 39 rejected cases); private consumers remain pending; planar write provenance is covered subsequently in docs/PLANAR_WRITE_MIGRATION.md",
-        "docs/PLANAR_WRITE_MIGRATION.md: planar Y-only Map with native pitches, tight NV12 Update, explicit full DXGI Update assets, structured write provenance and Qt before/after inspection; 192 packaged real-capture/synthetic/uint64 Python comparisons passed (125 successes, 67 controlled rejections); private consumers and remaining module scope stay incomplete"
+        "docs/PLANAR_WRITE_MIGRATION.md: planar Y-only Map with native pitches, tight NV12 Update, explicit full DXGI Update assets, structured write provenance and Qt before/after inspection; 192 packaged real-capture/synthetic/uint64 Python comparisons passed (125 successes, 67 controlled rejections); private consumers and remaining module scope stay incomplete",
+        "docs/POST_TRANSFORM_MIGRATION.md",
+        "Geometry stages, streams, instances, typed table, mesh, complete directory export and migrated geometry project settings; advanced geometry stages remain pending."
       ]
     },
     {
@@ -482,9 +489,14 @@
       "sha256": "1dd2b0882c00fddd3d3c4c071ef9c7c01e96907f4fdf3b445bbffe74a117c7d5",
       "lines": 94,
       "description": "Private GPU output copies for diagnostic draws that cannot add an RTV.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": [
+        "src/replay/PrivateOutputs.cpp"
+      ],
+      "validation": [
+        "docs/POST_TRANSFORM_MIGRATION.md",
+        "Retain-original-SO private output path only; default copied-SO and additional high-slot general consumer modes remain pending."
+      ]
     },
     {
       "module": "coverage_viewport.py",
@@ -876,9 +888,14 @@
       "sha256": "cf84036e60d3be55e0e70583d70aae785d248bb7c3131edcb46803cc5da229d9",
       "lines": 51,
       "description": "Select native SO instance ranges without changing logical IDs or IA fetches.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": [
+        "src/application/PostTransform.cpp"
+      ],
+      "validation": [
+        "docs/POST_TRANSFORM_MIGRATION.md",
+        "Full-capture slicing and native prefix statistics migrated; broader live-predicate and class-linkage combinations remain to validate."
+      ]
     },
     {
       "module": "gpu_profile.py",
@@ -1728,18 +1745,31 @@
       "sha256": "064a8493a1c2113b3bb8a2b0acc93e9584db65cc53c9fb5b63015cb0f27264d3",
       "lines": 185,
       "description": "Read actual final pre-rasterization attributes with native DX11 stream output.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": [
+        "src/application/PostTransform.cpp",
+        "src/cli/main.cpp",
+        "src/app/MainWindow.cpp"
+      ],
+      "validation": [
+        "docs/POST_TRANSFORM_MIGRATION.md",
+        "Final/VS/DS/GS SO capture and exports migrated; vs-index, vs-writes, ds-writes, hs and gs-emits dispatch branches remain pending."
+      ]
     },
     {
       "module": "pre_raster_uav.py",
       "sha256": "16668d7139ac31bc396e7eb829ba7350f56718e619c083a2dabef17f44d305e8",
       "lines": 67,
       "description": "Private graphics UAV bindings for original pre-raster shader re-execution.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": [
+        "src/application/PostTransform.cpp",
+        "src/replay/PrivateOutputs.cpp"
+      ],
+      "validation": [
+        "docs/POST_TRANSFORM_MIGRATION.md",
+        "Writer metadata and private output snapshot use migrated for post-transform; general UAV relocation/diagnostic consumers remain pending."
+      ]
     },
     {
       "module": "predicate_isolation.py",
@@ -2669,7 +2699,9 @@
       ],
       "validation": [
         "docs/NATIVE_BASELINE.md",
-        "UiTests::imagePixelGestures and outputPixelNavigation: left-click coordinates, drag separation and output provenance; other image consumers pending"
+        "UiTests::imagePixelGestures and outputPixelNavigation: left-click coordinates, drag separation and output provenance; other image consumers pending",
+        "docs/POST_TRANSFORM_MIGRATION.md",
+        "Post-transform mesh shares one-based OBJ indices; rendered triangle covered by PostTransformTests."
       ]
     }
   ]

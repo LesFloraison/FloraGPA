@@ -762,6 +762,28 @@ State Replay::prepareState(const Event &event) {
     }
     return state;
 }
+void Replay::applyGraphicsEdits(const Event &event, const State &state) {
+    const auto t = event.type;
+    const auto &e = event;
+    if ((t == 0x35 || t == 0x36) &&
+        (options_.rasterizerEdits.contains(e.id) || options_.blendEdits.contains(e.id)))
+        throw std::runtime_error("Graphics pipeline experiment on a dispatch");
+    applyRasterizerEdit(e.id);
+    if (auto edit = options_.depthStencilEdits.find(e.id); edit != options_.depthStencilEdits.end()) {
+        if (t == 0x35 || t == 0x36)
+            throw std::runtime_error("Graphics pipeline experiment on a dispatch");
+        Com<ID3D11DepthStencilState> depth;
+        if (edit->second.descriptor)
+            check(device_->CreateDepthStencilState(&*edit->second.descriptor, &depth),
+                  "Create edited depth/stencil state");
+        else
+            depth = get<ID3D11DepthStencilState>(state.depthState);
+        context_->OMSetDepthStencilState(depth.Get(), edit->second.reference.value_or(state.stencilRef));
+    }
+    applyBlendEdit(e.id, state);
+    applySamplerEdits(e.id);
+    applySrvEdits(e.id, state);
+}
 void Replay::command(const Entry &e) {
     auto t = e.type;
     if (!isDraw(t) && options_.experiment && options_.experiment->events.contains(e.id))
@@ -786,25 +808,7 @@ void Replay::command(const Entry &e) {
         auto state = prepareState(event);
         withEventEdits(event, state, [&] {
             bind(state, t == 0x35 || t == 0x36);
-            if ((t == 0x35 || t == 0x36) &&
-                (options_.rasterizerEdits.contains(e.id) || options_.blendEdits.contains(e.id)))
-                throw std::runtime_error("Graphics pipeline experiment on a dispatch");
-            applyRasterizerEdit(e.id);
-            if (auto edit = options_.depthStencilEdits.find(e.id); edit != options_.depthStencilEdits.end()) {
-                if (t == 0x35 || t == 0x36)
-                    throw std::runtime_error("Graphics pipeline experiment on a dispatch");
-                Com<ID3D11DepthStencilState> depth;
-                if (edit->second.descriptor)
-                    check(device_->CreateDepthStencilState(&*edit->second.descriptor, &depth),
-                          "Create edited depth/stencil state");
-                else
-                    depth = get<ID3D11DepthStencilState>(state.depthState);
-                context_->OMSetDepthStencilState(depth.Get(),
-                                                 edit->second.reference.value_or(state.stencilRef));
-            }
-            applyBlendEdit(e.id, state);
-            applySamplerEdits(e.id);
-            applySrvEdits(e.id, state);
+            applyGraphicsEdits(event, state);
             clearBindingGaps();
             auto observe = [&](bool after) {
                 if (boundaryObserver_)

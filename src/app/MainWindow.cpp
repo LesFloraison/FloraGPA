@@ -869,8 +869,8 @@ void MainWindow::buildUi() {
     geometryLayout->setContentsMargins(0, 0, 0, 0);
     geometryLayout->setSpacing(0);
     auto geometryBar = new QToolBar;
-    geometryBar->addAction("Inspect IA", this, &MainWindow::inspectGeometry);
-    geometryBar->addAction("Export", this, &MainWindow::exportGeometry);
+    geometryBar->addAction("Inspect", this, &MainWindow::inspectGeometry)->setObjectName("inspectGeometry");
+    geometryBar->addAction("Export", this, &MainWindow::exportGeometry)->setObjectName("exportGeometry");
     geometryTable_ = new QComboBox;
     geometryTable_->addItem("Expanded vertices", "expanded_vertices");
     geometryTable_->addItem("Unique vertices", "unique_vertices");
@@ -879,6 +879,28 @@ void MainWindow::buildUi() {
     geometryLabel_ = new QLabel;
     geometryBar->addWidget(geometryLabel_);
     geometryLayout->addWidget(geometryBar);
+    auto geometrySource = new QToolBar;
+    geometryStage_ = new QComboBox;
+    geometryStage_->setObjectName("geometryStage");
+    for (auto [label, value] :
+         {std::pair{"IA inputs", "ia"}, std::pair{"Final output", "final"}, std::pair{"VS output", "vs"},
+          std::pair{"DS output", "ds"}, std::pair{"GS output", "gs"}})
+        geometryStage_->addItem(label, value);
+    geometrySource->addWidget(geometryStage_);
+    geometryStream_ = new QSpinBox;
+    geometryStream_->setObjectName("geometryStream");
+    geometryStream_->setRange(0, 3);
+    geometryStream_->setPrefix("Stream ");
+    geometryStream_->setEnabled(false);
+    geometrySource->addWidget(geometryStream_);
+    geometryInstance_ = new QLineEdit;
+    geometryInstance_->setObjectName("geometryInstance");
+    geometryInstance_->setPlaceholderText("All instances");
+    geometryInstance_->setToolTip("Zero-based instance within the original draw; empty selects all");
+    geometryInstance_->setMaximumWidth(160);
+    geometryInstance_->setEnabled(false);
+    geometrySource->addWidget(geometryInstance_);
+    geometryLayout->addWidget(geometrySource);
     auto geometrySplit = new QSplitter(Qt::Vertical);
     mesh_ = new MeshView;
     mesh_->setObjectName("iaMesh");
@@ -892,6 +914,23 @@ void MainWindow::buildUi() {
     geometrySplit->setSizes({300, 220});
     geometryLayout->addWidget(geometrySplit);
     centerTabs_->addTab(geometryPane_, "Geometry");
+    auto clearGeometry = [this] {
+        geometry_ = {};
+        geometryDir_.reset();
+        geometryLabel_->clear();
+        geometryModel_->setTable({});
+        mesh_->setMesh({});
+    };
+    connect(geometryStage_, &QComboBox::currentIndexChanged, this, [this, clearGeometry] {
+        const bool post = geometryStage_->currentData() != "ia";
+        geometryTable_->setCurrentIndex(0);
+        geometryTable_->setEnabled(!busy() && !post);
+        geometryStream_->setEnabled(!busy() && post);
+        geometryInstance_->setEnabled(!busy() && post);
+        clearGeometry();
+    });
+    connect(geometryStream_, &QSpinBox::valueChanged, this, clearGeometry);
+    connect(geometryInstance_, &QLineEdit::textChanged, this, clearGeometry);
     annotations_ = new AnnotationsView;
     centerTabs_->addTab(annotations_, "Annotations");
     gpuStatistics_ = new StatisticsView;
@@ -1092,6 +1131,10 @@ void MainWindow::setBusy(bool busy) {
     predicateView_->setWorkerBusy(busy);
     annotations_->setWorkerBusy(busy);
     gpuStatistics_->setWorkerBusy(busy);
+    geometryStage_->setEnabled(!busy);
+    geometryTable_->setEnabled(!busy && geometryStage_->currentData() == "ia");
+    geometryStream_->setEnabled(!busy && geometryStage_->currentData() != "ia");
+    geometryInstance_->setEnabled(!busy && geometryStage_->currentData() != "ia");
     openAction_->setEnabled(!busy);
     viewAction_->setEnabled(!busy && frame_ && experiment_);
     replayAction_->setEnabled(!busy && bool(frame_));
@@ -1294,8 +1337,10 @@ void MainWindow::finishWorker(int code, QProcess::ExitStatus status) {
             emit taskFinished(true);
             return;
         }
-        if (runningKind_ == "geometry") {
-            QFile geometryFile(jobDir_->path() + "/result/geometry.json");
+        if (runningKind_ == "geometry" || runningKind_ == "post-geometry") {
+            const bool post = runningKind_ == "post-geometry";
+            QFile geometryFile(jobDir_->path() +
+                               (post ? "/result/geometry-ui.json" : "/result/geometry.json"));
             if (!geometryFile.open(QIODevice::ReadOnly))
                 throw std::runtime_error("Geometry output is missing");
             QJsonParseError parseError;
@@ -1306,10 +1351,17 @@ void MainWindow::finishWorker(int code, QProcess::ExitStatus status) {
             geometryModel_->setTable(
                 geometry_["tables"].toObject()[geometryTable_->currentData().toString()].toObject());
             mesh_->setMesh(geometry_["mesh"].toObject());
-            geometryLabel_->setText(QString("  Event %1 · %2 references · %3 unique")
-                                        .arg(geometry_["event"].toString())
-                                        .arg(geometry_["vertex_references"].toInteger())
-                                        .arg(geometry_["unique_vertices"].toInteger()));
+            mesh_->setToolTip(geometry_["obj_unavailable_reason"].isString()
+                                  ? geometry_["obj_unavailable_reason"].toString()
+                                  : QString(post ? "Shader output positions divided by W" : "IA positions") +
+                                        " · drag to rotate · preview capped at 12,000 edges/points");
+            auto label = QString("  Event %1 · %2 %3")
+                             .arg(geometry_["event"].toString())
+                             .arg(geometry_["vertex_references"].toInteger())
+                             .arg(post ? "output vertices" : "references");
+            if (!post)
+                label += QString(" · %1 unique").arg(geometry_["unique_vertices"].toInteger());
+            geometryLabel_->setText(label);
             const auto automatic = geometry_["draw_auto"].toObject();
             geometryLabel_->setToolTip(
                 automatic.isEmpty()
@@ -1321,7 +1373,7 @@ void MainWindow::finishWorker(int code, QProcess::ExitStatus status) {
                                                                       : " · Captured count"));
             geometryDir_ = std::move(jobDir_);
             centerTabs_->setCurrentWidget(geometryPane_);
-            statusBar()->showMessage("IA geometry ready", 3000);
+            statusBar()->showMessage(post ? "Shader output geometry ready" : "IA geometry ready", 3000);
             emit taskFinished(true);
             return;
         }
@@ -2004,7 +2056,15 @@ void MainWindow::inspectGeometry() {
     replayTimer_.stop();
     textureTimer_.stop();
     bufferTimer_.stop();
-    startWorker({"geometry", capturePath_, "--event", QString::number(selectedEvent_)}, false);
+    QStringList args{geometryStage_->currentData() == "ia" ? "geometry" : "post-geometry", capturePath_,
+                     "--event", QString::number(selectedEvent_)};
+    if (args.first() == "post-geometry") {
+        args << "--geometry-stage" << geometryStage_->currentData().toString() << "--stream"
+             << QString::number(geometryStream_->value());
+        if (!geometryInstance_->text().trimmed().isEmpty())
+            args << "--instance" << geometryInstance_->text().trimmed();
+    }
+    startWorker(args, false);
 }
 void MainWindow::exportGeometry() {
     if (!geometryDir_)
@@ -2020,7 +2080,8 @@ void MainWindow::exportGeometry() {
         return;
     }
     QDir source(geometryDir_->path() + "/result");
-    for (auto file : source.entryList({"*.csv", "geometry.json", "geometry.obj"}, QDir::Files))
+    for (auto file :
+         source.entryList({"*.csv", "geometry.json", "geometry.obj", "vertices.bin"}, QDir::Files))
         if (!QFile::copy(source.filePath(file), path + '/' + file)) {
             showError("Geometry export failed.");
             return;
@@ -3190,6 +3251,14 @@ void MainWindow::openExperiment() {
         }
         experiment_ = std::move(candidate);
         projectPath_ = path;
+        geometryStage_->setCurrentIndex(
+            geometryStage_->findData(QString::fromStdString(settings.geometryStage)));
+        geometryStream_->setValue(int(settings.geometryStream));
+        geometryInstance_->setText(QString::fromStdString(settings.geometryInstance));
+        geometryTable_->setCurrentIndex(
+            settings.geometryStage == "ia"
+                ? geometryTable_->findData(QString::fromStdString(settings.geometryTable))
+                : 0);
         if (settings.event)
             locateEvent(settings.event);
         {
@@ -3227,6 +3296,10 @@ bool MainWindow::saveExperiment() {
         state.warp = adapter_->currentIndex() == 1;
         state.event = selectedEvent_;
         state.boundary = boundary_->currentIndex();
+        state.geometryStage = geometryStage_->currentData().toString().toStdString();
+        state.geometryStream = uint32_t(geometryStream_->value());
+        state.geometryInstance = geometryInstance_->text().trimmed().toStdString();
+        state.geometryTable = geometryTable_->currentData().toString().toStdString();
         experiment_->save(
             path,
             replayUiDocument(*frame_, state, experiment_->document().value("ui", nlohmann::json::object())));

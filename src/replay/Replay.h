@@ -121,6 +121,7 @@ struct NativeStatistics {
 };
 class NativeSample;
 class Replay {
+    friend class PostTransformCapture;
     NativeSample *activeSample_ = nullptr;
     std::optional<NativeStatistics> measurementResult_;
     uint64_t generation_{};
@@ -188,6 +189,8 @@ class Replay {
     std::optional<bool> samplerMinMax_;
     void applySamplerEdits(Id event);
     void applySrvEdits(Id event, const State &state);
+    void applyGraphicsEdits(const Event &event, const State &state);
+    void withPrivateOutputs(const Event &event, const State &state, const std::function<void()> &inspect);
     unsigned predicateIsolationDepth_ = 0;
     class PredicateIsolation {
         Replay &replay_;

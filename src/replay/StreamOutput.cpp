@@ -111,7 +111,7 @@ void Replay::applyStreamOutput(Bytes payload) {
         if (objects[i] && offsets[i] == UINT32_MAX)
             soPendingAppend_[i] = objects[i];
 }
-static std::map<uint32_t, uint32_t> outputTopologies(Bytes bytecode) {
+std::map<uint32_t, uint32_t> streamOutputTopologies(Bytes bytecode) {
     bool program = false;
     for (const auto &[tag, bytes] : readDxbcParts(bytecode))
         program |= tag == 0x52444853 || tag == 0x58454853;
@@ -149,11 +149,11 @@ std::vector<Replay::ActiveStream> Replay::beginStreamOutput(const State &state) 
         return frame_.shader(frame_.resource(id).data);
     };
     auto decl = readStreamOutputDeclaration(frame_, declId);
-    auto factors = outputTopologies(bytecode(gs));
+    auto factors = streamOutputTopologies(bytecode(gs));
     if (factors.empty()) {
         auto hs = state.stages[1].shader;
         if (hs && state.stages[2].shader)
-            factors = outputTopologies(bytecode(hs));
+            factors = streamOutputTopologies(bytecode(hs));
         else {
             switch (state.topology) {
             case 1:

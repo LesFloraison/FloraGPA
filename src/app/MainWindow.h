@@ -141,6 +141,9 @@ class MainWindow final : public QMainWindow {
     GeometryModel *geometryModel_;
     QTableView *geometryView_;
     QComboBox *geometryTable_;
+    QComboBox *geometryStage_;
+    QSpinBox *geometryStream_;
+    QLineEdit *geometryInstance_;
     QLabel *geometryLabel_;
     QJsonObject geometry_;
     std::unique_ptr<QTemporaryDir> geometryDir_;

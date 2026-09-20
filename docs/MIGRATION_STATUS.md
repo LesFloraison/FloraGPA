@@ -2,9 +2,31 @@
 
 已有可编译、可运行的 VS2022 / Qt Widgets 原生工程，能够独立重放当前验证的
 GF2 与 BF1 DX11 捕获。**尚未完成原 Python 版本的全部功能迁移。**
-当前独立包为 `out/FloraGPA-statistics/FloraGPA.exe`。
+当前独立包为 `out/FloraGPA-post-transform/FloraGPA.exe`。
 
-最新批次迁移原生单事件、包含端点的命令区间和整帧 GPU 统计。Qt GPU Statistics
+最新批次迁移原生 Final/VS/DS/GS 后变换几何、四路输出流和指定实例采集。
+Geometry 页整合 IA 与 Shader 输出、类型化属性表、线框预览及 JSON/CSV/BIN/OBJ
+导出，并保存/恢复实验项目中的已迁移阶段、流和实例选择。界面保留紧凑的工具栏，
+未迁移的 HS、VS 索引、逐次写入和 GS 发射功能不显示为可用。
+私有 RTV/DSV/UAV 快照及隐藏计数器隔离诊断写入，保留原 SO 缓冲区和游标；
+原生测试验证了重复采集、扩容后超限失败、重试及随后直接绘制的存储一致性。
+已修复 Qt 网格与新数据的索引基准差异，并用实际渲染及导出测试覆盖。
+Release 39 套 CTest 全部通过，原有 Qt 53 项无失败、无跳过；新增几何套件 8 项
+通过。独立包 140 项 Python 对照全部通过，其中 130 项成功采集、10 项预期拒绝。
+对照包含精确元数据、原始字节、类型化 CSV 和 OBJ，覆盖实例步进、间接参数、
+GS/DS、四路流、高槽位 UAV、扩容、输入替换、着色器替换/撤销及关闭事件。
+证据见 `artifacts/ctest-post-transform-final.log`、`artifacts/post-transform-tests-final.txt`
+和 `artifacts/post-transform-portable-final/validation.json`。
+独立包真实 GF2/BF1 14 项对照也全部通过，包含首尾绘制以及 BF1 的 Final/VS/DS
+曲面细分阶段，均覆盖 Hardware/WARP。整帧黄金图像与关闭 Draw 负对照 4 项通过。
+148 份成功报告的模块审计确认 Qt 来自独立包，未加载 Python/Tk/GPA/RenderDoc；
+发布的三个 EXE 与验证后的 Release 构建逐字节一致。对应证据为
+`artifacts/post-transform-real-portable-final/validation.json`、
+`artifacts/post-transform-golden-final/validation.json` 和
+`artifacts/post-transform-runtime-audit.json`。验证在本机完成，未代替独立机器验证。
+范围及验证缺口见 [POST_TRANSFORM_MIGRATION.md](POST_TRANSFORM_MIGRATION.md)。
+
+前一批迁移原生单事件、包含端点的命令区间和整帧 GPU 统计。Qt GPU Statistics
 页提供管线调用数、遮挡样本、四路 SO、溢出、时间及 JSON/CSV 导出，沿用全局
 Hardware/WARP 选择；Annotations 的 Range Metrics 预填闭合分组范围。
 独立包最终 92 项 Python 对照通过（78 项成功采样、14 项预期拒绝），Release 38 套
@@ -570,7 +592,7 @@ Debug 的 predicate、experiment、管线、SO 和 buffer edit 五项相关回�
 
 1. 其余 setter/command/context 的重放与实验语义、SO 的 retained 输出与私有诊断、
    扩展 UAV、私有 MSAA/planar 消费者等特殊 replay 路径。
-2. 其余资源/状态/绑定/命令编辑，完整 counter 命令引用、后变换几何、覆盖率、
+2. 其余资源/状态/绑定/命令编辑，完整 counter 命令引用、HS/索引/写入/发射几何、覆盖率、
    quad 与像素分析。
 3. HLSL 恢复、source/instruction 导航、变量/表达式、trace/stack 与 shader 调试。
 4. RenderDoc 原生 C++ 后端、Intel Metrics Discovery、GTPin 与完整指标调度。

@@ -11,6 +11,7 @@
 #include "application/Geometry.h"
 #include "application/GpuStatistics.h"
 #include "application/PlanarWrites.h"
+#include "application/PostTransform.h"
 #include "application/PredicateInspector.h"
 #include "application/ReplayPipeline.h"
 #include "application/ShaderInspector.h"
@@ -67,7 +68,7 @@ int main(int argc, char **argv) {
     p.addPositionalArgument(
         "command", "inventory | commands | command-state | contexts | command-lists | replay | shader | "
                    "buffer | texture | texture-storage | compile | geometry | replay-pipeline | "
-                   "class-linkage | predicate | annotations | statistics");
+                   "class-linkage | predicate | annotations | statistics | post-geometry");
     p.addPositionalArgument("capture", "DX11 .gpa_frame file");
     p.addOption({"out", "New or empty output directory", "path"});
     p.addOption({"experiment", "Compatible FloraGPA experiment project", "path"});
@@ -79,6 +80,9 @@ int main(int argc, char **argv) {
     p.addOption({"event", "Stop at API event", "id"});
     p.addOption({"start-event", "Inclusive statistics range start", "id"});
     p.addOption({"end-event", "Inclusive statistics range end", "id"});
+    p.addOption({"geometry-stage", "Post-transform stage: final, vs, ds, gs", "stage", "final"});
+    p.addOption({"stream", "Post-transform SO stream 0..3", "index", "0"});
+    p.addOption({"instance", "Zero-based instance within the original draw", "index"});
     p.addOption({"before", "Stop before the selected event"});
     p.addOption({"id", "Resource ID", "id"});
     p.addOption({"filter", "API command text filter", "text"});
@@ -270,7 +274,7 @@ int main(int argc, char **argv) {
             report.insert("id", p.value("id"));
         } else if (command == "replay" || command == "buffer" || command == "texture" ||
                    command == "statistics" || command == "texture-storage" || command == "geometry" ||
-                   command == "replay-pipeline" || command == "predicate") {
+                   command == "post-geometry" || command == "replay-pipeline" || command == "predicate") {
             if (out.isEmpty())
                 throw std::runtime_error("Replay requires --out");
             ReplayOptions options;
@@ -297,7 +301,7 @@ int main(int argc, char **argv) {
             }
             if (command == "predicate" && (!options.until || !p.isSet("id")))
                 throw std::runtime_error("predicate requires --event and --id");
-            if (command == "geometry") {
+            if (command == "geometry" || command == "post-geometry") {
                 if (!options.until)
                     throw std::runtime_error("geometry requires --event");
                 options.before = true;
@@ -335,6 +339,19 @@ int main(int argc, char **argv) {
             if (command == "statistics") {
                 const auto statistics = gpuStatisticsReport(replay);
                 exportGpuStatistics(statistics, std::filesystem::path(out.toStdWString()));
+            } else if (command == "post-geometry") {
+                PostTransformOptions inspect;
+                inspect.stage = p.value("geometry-stage").toStdString();
+                bool valid = false;
+                inspect.stream = p.value("stream").toUInt(&valid);
+                if (!valid || inspect.stream > 3)
+                    throw std::runtime_error("SO stream must be 0..3");
+                if (p.isSet("instance")) {
+                    inspect.instance = p.value("instance").toUInt(&valid);
+                    if (!valid)
+                        throw std::runtime_error("Instance must be an unsigned integer");
+                }
+                exportPostTransform(inspectPostTransform(replay, options.until, inspect), out.toStdWString());
             } else if (command == "geometry") {
                 nlohmann::json geometry;
                 replay.inspectEventInputs(options.until,
