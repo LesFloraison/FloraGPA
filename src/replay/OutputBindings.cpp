@@ -31,6 +31,7 @@ std::unique_ptr<OutputBindingHistory> makeOutputHistory(const Frame &capture, co
 State effectiveBindings(const Frame &capture, Id event, State state, const ReplayOptions &options) {
     const auto &frame = effectiveFrame(capture, options);
     auto history = makeOutputHistory(frame, options);
+    state = pipelineBindingsAt(frame, event, state, options.pipelineSetters);
     return history ? history->state(event, state).state
                    : effectiveSrvBindings(frame, event, state, options.srvSetters);
 }

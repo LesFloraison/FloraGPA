@@ -169,6 +169,12 @@ cursor. Full output verification reads native getters after applying setters and
 edited snapshots. Texture input/output experiments and private diagnostic consumers remain separate migration work.
 Global view descriptors now apply to native replay and binding inspection.
 
+**Edit Setter** also edits topology, rasterizer state, viewport/scissor arrays,
+blend state/factors/sample mask and depth/stencil state/reference. These changes
+persist until a later setter of the same family or ClearState. Per-draw pipeline
+editors inherit the modified state; Geometry uses the edited topology. See
+[`docs/PIPELINE_SETTER_MIGRATION.md`](docs/PIPELINE_SETTER_MIGRATION.md).
+
 ```powershell
 .\out\FloraGPA\FloraGPA.Cli.exe replay-pipeline D:\captures\sample.gpa_frame --event 430 --before --out D:\results\pipeline
 ```

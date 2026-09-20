@@ -1,6 +1,7 @@
 #include "ClassCapture.h"
 #include "DepthStencilCapture.h"
 #include "MsaaCapture.h"
+#include "PipelineSetterCapture.h"
 #include "PredicateCapture.h"
 #include "SamplerCapture.h"
 #include "SrvBindingCapture.h"
@@ -13,6 +14,7 @@
 #include "app/CommandStateView.h"
 #include "app/MainWindow.h"
 #include "app/OutputDialog.h"
+#include "app/PipelineSetterDialog.h"
 #include "app/PredicateView.h"
 #include "app/RasterizerDialog.h"
 #include "app/SamplerDialog.h"
@@ -68,6 +70,139 @@ class UiTests final : public QObject {
         QVERIFY(window.grab().save(directory + '/' + name + ".png"));
     }
   private slots:
+    void pipelineSetterDialogControls() {
+        using namespace flora;
+        using Json = nlohmann::json;
+        QTemporaryDir dir;
+        auto capture = testing::pipelineSetterCapture();
+        capture.add(UINT64_MAX - 1, 5, 0x89,
+                    testing::statePack(Id(0), Id(0), 3u, 1u, 0u, 0, 0.f, 0.f, 1u, 0u, 0u, 0u));
+        capture.save(dir.path() + "/pipeline.gpa_frame");
+        Frame frame((dir.path() + "/pipeline.gpa_frame").toStdWString());
+        QWidget parent;
+        int commits = 0;
+        QTimer::singleShot(0, &parent, [&] {
+            auto dialog = parent.findChild<QDialog *>("pipelineSetterDialog");
+            QVERIFY(dialog);
+            QTimer::singleShot(3000, dialog, &QDialog::reject);
+            auto apply = dialog->findChild<QDialogButtonBox *>()->button(QDialogButtonBox::Ok);
+            auto mask = dialog->findChild<QLineEdit *>("ps_sample_mask");
+            mask->setText("4294967296");
+            apply->click();
+            QCOMPARE(commits, 0);
+            QVERIFY(dialog->findChild<QLabel *>("ps_error")->isVisible());
+            mask->setText("0xffffffff");
+            dialog->findChild<QTableWidget *>("ps_rows")->item(0, 0)->setText("-1");
+            snapshot(*dialog, "pipeline-blend-setter");
+            apply->click();
+        });
+        QVERIFY(editPipelineSetterDialog(&parent, frame, 91, capturedSetter(frame, 91), [&](const auto &v) {
+            ++commits;
+            QCOMPARE(v.at("sample_mask"), Json(UINT32_MAX));
+            QCOMPARE(v.at("blend_factor")[0], Json(-1.));
+        }));
+        QTimer::singleShot(0, &parent, [&] {
+            auto dialog = parent.findChild<QDialog *>("pipelineSetterDialog");
+            QVERIFY(dialog);
+            QTimer::singleShot(3000, dialog, &QDialog::reject);
+            auto apply = dialog->findChild<QDialogButtonBox *>()->button(QDialogButtonBox::Ok);
+            auto rows = dialog->findChild<QTableWidget *>("ps_rows");
+            rows->item(0, 2)->setText("-1");
+            apply->click();
+            QCOMPARE(commits, 1);
+            QVERIFY(dialog->findChild<QLabel *>("ps_error")->isVisible());
+            rows->item(0, 2)->setText("2");
+            dialog->findChild<QPushButton *>("ps_add")->click();
+            QCOMPARE(rows->rowCount(), 2);
+            snapshot(*dialog, "pipeline-viewport-setter");
+            apply->click();
+        });
+        QVERIFY(editPipelineSetterDialog(&parent, frame, 94, capturedSetter(frame, 94), [&](const auto &v) {
+            ++commits;
+            QCOMPARE(v.at("viewports_values").size(), size_t(2));
+        }));
+        QTimer::singleShot(0, &parent, [&] {
+            auto dialog = parent.findChild<QDialog *>("pipelineSetterDialog");
+            QVERIFY(dialog);
+            QTimer::singleShot(3000, dialog, &QDialog::reject);
+            auto box = dialog->findChild<QComboBox *>("ps_rasterizer");
+            box->setCurrentIndex(box->findData(QVariant::fromValue(qulonglong(UINT64_MAX - 1))));
+            dialog->findChild<QDialogButtonBox *>()->button(QDialogButtonBox::Ok)->click();
+        });
+        QVERIFY(editPipelineSetterDialog(&parent, frame, 93, capturedSetter(frame, 93), [&](const auto &v) {
+            ++commits;
+            QCOMPARE(v.at("rasterizer").template get<Id>(), UINT64_MAX - 1);
+        }));
+        QCOMPARE(commits, 3);
+    }
+    void pipelineSetterWorkerHistory() {
+        using namespace flora;
+        auto capture = testing::depthStencilCapture();
+        capture.add(900, 7, 0x350a,
+                    testing::statePack(Id(0), Id(1), 1u, uint8_t(1), 0.f, 0.f, 1.f, 1.f, 0.f, 1.f));
+        QTemporaryDir dir;
+        capture.save(dir.path() + "/pipeline.gpa_frame");
+        MainWindow window;
+        window.resize(1500, 950);
+        window.show();
+        QSignalSpy done(&window, &MainWindow::taskFinished);
+        window.openCapture(dir.path() + "/pipeline.gpa_frame");
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        auto output = window.findChild<ImageView *>("frameOutput");
+        QVERIFY(output);
+        QCOMPARE(output->image().pixelColor(0, 0), QColor(255, 0, 0, 255));
+        window.findChild<QComboBox *>("apiKinds")->setCurrentIndex(1);
+        auto api = window.findChild<QTableView *>("apiLog");
+        bool selected = false;
+        for (int row = 0; row < api->model()->rowCount(); ++row) {
+            auto index = api->model()->index(row, 0);
+            if (index.data(Qt::UserRole).toULongLong() == 900) {
+                api->setCurrentIndex(index);
+                selected = true;
+                break;
+            }
+        }
+        QVERIFY(selected);
+        QTRY_VERIFY_WITH_TIMEOUT(!window.busy(), 30000);
+        auto boundary = window.findChild<QComboBox *>("outputBoundary");
+        boundary->setCurrentIndex(0);
+        QTRY_VERIFY_WITH_TIMEOUT(!window.busy(), 30000);
+        auto edit = window.findChild<QAction *>("editSetter");
+        QVERIFY(edit && edit->isEnabled());
+        QTimer::singleShot(0, &window, [&] {
+            auto dialog = window.findChild<QDialog *>("pipelineSetterDialog");
+            QVERIFY(dialog);
+            QTimer::singleShot(3000, dialog, &QDialog::reject);
+            auto rows = dialog->findChild<QTableWidget *>("ps_rows");
+            rows->setCurrentCell(0, 0);
+            dialog->findChild<QPushButton *>("ps_remove")->click();
+            QCOMPARE(rows->rowCount(), 0);
+            dialog->findChild<QDialogButtonBox *>()->button(QDialogButtonBox::Ok)->click();
+        });
+        done.clear();
+        edit->trigger();
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        QCOMPARE(output->image().pixelColor(0, 0), QColor(0, 0, 0, 255));
+        QAction *undo = nullptr, *redo = nullptr;
+        for (auto action : window.findChildren<QAction *>()) {
+            if (action->shortcut() == QKeySequence::Undo)
+                undo = action;
+            if (action->shortcut() == QKeySequence::Redo)
+                redo = action;
+        }
+        QVERIFY(undo && redo);
+        for (auto action : {undo, redo}) {
+            done.clear();
+            action->trigger();
+            QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+            QVERIFY(done.takeLast()[0].toBool());
+            QCOMPARE(output->image().pixelColor(0, 0),
+                     action == undo ? QColor(255, 0, 0, 255) : QColor(0, 0, 0, 255));
+        }
+        snapshot(window, "pipeline-setter-workspace");
+    }
     void imagePixelGestures() {
         flora::ImageView image;
         image.resize(320, 240);

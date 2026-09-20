@@ -97,8 +97,10 @@ void mergeDepthStencil(Json &base, const Json &patch) {
                 base["depth_stencil"][field.key()] = field.value();
     }
 }
-Json capturedDepthStencil(const Frame &frame, Id event) {
-    const auto s = graphicsState(frame, event);
+Json capturedDepthStencil(const Frame &frame, Id event, const State *base) {
+    auto s = graphicsState(frame, event);
+    if (base)
+        s = *base;
     D3D11_DEPTH_STENCIL_DESC d{};
     d.DepthEnable = TRUE;
     d.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
@@ -123,13 +125,14 @@ Json capturedDepthStencil(const Frame &frame, Id event) {
               {"back_face", face(d.BackFace)}}},
             {"stencil_ref", s.stencilRef}};
 }
-Json effectiveDepthStencil(const Frame &frame, Id event, const Json &normalized) {
-    auto result = capturedDepthStencil(frame, event);
+Json effectiveDepthStencil(const Frame &frame, Id event, const Json &normalized, const State *base) {
+    auto result = capturedDepthStencil(frame, event, base);
     mergeDepthStencil(result, normalized);
     return result;
 }
-ReplayOptions::DepthStencilEdit depthStencilEdit(const Frame &frame, Id event, const Json &normalized) {
-    auto result = effectiveDepthStencil(frame, event, normalized);
+ReplayOptions::DepthStencilEdit depthStencilEdit(const Frame &frame, Id event, const Json &normalized,
+                                                 const State *base) {
+    auto result = effectiveDepthStencil(frame, event, normalized, base);
     ReplayOptions::DepthStencilEdit out;
     if (normalized.contains("stencil_ref"))
         out.reference = result["stencil_ref"].get<uint32_t>();

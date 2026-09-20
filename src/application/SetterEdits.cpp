@@ -1,7 +1,9 @@
 #include "SetterEdits.h"
 #include "ApiCommands.h"
 #include "OutputEdits.h"
+#include "RasterizerEdits.h"
 #include "core/Contexts.h"
+#include <cmath>
 namespace flora {
 namespace {
 PredicateCommand command(const Frame &frame, Id event) {
@@ -23,10 +25,17 @@ uint64_t integer(const nlohmann::json &value, uint64_t max) {
 } // namespace
 bool isEditableSetter(uint16_t type) {
     return predicateOperation(type) == PredicateOperation::Set || samplerSetterStage(type).has_value() ||
-           srvSetterStage(type).has_value() || isSrvOutputCommand(type);
+           srvSetterStage(type).has_value() || isSrvOutputCommand(type) || isPipelineSetter(type);
 }
 nlohmann::json capturedSetter(const Frame &frame, Id event) {
     const auto &entry = frame.entry(event);
+    if (entry.category == 7 && isPipelineSetter(entry.type)) {
+        if (inspectCommand(frame, event).at("status") != "decoded")
+            throw std::runtime_error("Setter requires a complete recovered command layout");
+        auto binding = readPipelineSetter(entry.type, frame.payload(event));
+        requireImmediateContext(frame, binding.context);
+        return pipelineSetterValues(binding);
+    }
     if (entry.category == 7 && isSrvOutputCommand(entry.type))
         return capturedOutputSetter(frame, event);
     if (entry.category == 7 && samplerSetterStage(entry.type)) {
@@ -43,6 +52,74 @@ nlohmann::json capturedSetter(const Frame &frame, Id event) {
     }
     auto captured = command(frame, event);
     return {{"predicate", captured.resource}, {"predicate_value", captured.value}};
+}
+nlohmann::json pipelineSetterValues(const PipelineBinding &binding) {
+    const auto &s = binding.values;
+    switch (binding.type - 0x34de) {
+    case 24:
+        return {{"topology", s.topology}};
+    case 35:
+        return {{"blend", s.blend}, {"blend_factor", s.blendFactor}, {"sample_mask", s.sampleMask}};
+    case 36:
+        return {{"depth_state", s.depthState}, {"stencil_ref", s.stencilRef}};
+    case 43:
+        return {{"rasterizer", s.rasterizer}};
+    case 44:
+        return {{"viewports_values", *s.viewportValues}};
+    case 45:
+        return {{"scissors_values", *s.scissorValues}};
+    default:
+        throw std::runtime_error("Not a pipeline setter");
+    }
+}
+PipelineBinding validatePipelineSetter(const Frame &frame, Id event, const nlohmann::json &values) {
+    const auto &entry = frame.entry(event);
+    if (entry.category != 7 || !isPipelineSetter(entry.type))
+        throw std::runtime_error("Select a pipeline setter");
+    const auto original = capturedSetter(frame, event);
+    if (!values.is_object() || values.size() != original.size())
+        throw std::runtime_error("Provide all and only the selected setter arguments");
+    for (auto it = original.begin(); it != original.end(); ++it)
+        if (!values.contains(it.key()))
+            throw std::runtime_error("Missing setter argument");
+    auto result = readPipelineSetter(entry.type, frame.payload(event));
+    auto &s = result.values;
+    switch (entry.type - 0x34de) {
+    case 24:
+        s.topology = uint32_t(integer(values.at("topology"), 64));
+        break;
+    case 35:
+        s.blend = integer(values.at("blend"), UINT64_MAX);
+        s.sampleMask = uint32_t(integer(values.at("sample_mask"), UINT32_MAX));
+        if (!values.at("blend_factor").is_array() || values.at("blend_factor").size() != 4)
+            throw std::runtime_error("Blend factor requires four floats");
+        for (size_t i = 0; i < 4; ++i) {
+            const auto &value = values.at("blend_factor")[i];
+            if (!value.is_number() || !std::isfinite(value.get<float>()))
+                throw std::runtime_error("Blend factor requires finite float32");
+            s.blendFactor[i] = value.get<float>();
+        }
+        break;
+    case 36:
+        s.depthState = integer(values.at("depth_state"), UINT64_MAX);
+        s.stencilRef = uint32_t(integer(values.at("stencil_ref"), UINT32_MAX));
+        break;
+    case 43:
+        s.rasterizer = integer(values.at("rasterizer"), UINT64_MAX);
+        break;
+    case 44:
+        s.viewportValues = normalizePipeline({{"viewports", values.at("viewports_values")}})
+                               .at("viewports")
+                               .get<std::vector<std::array<float, 6>>>();
+        break;
+    case 45:
+        s.scissorValues = normalizePipeline({{"scissors", values.at("scissors_values")}})
+                              .at("scissors")
+                              .get<std::vector<std::array<int32_t, 4>>>();
+        break;
+    }
+    validatePipelineBinding(frame, result);
+    return result;
 }
 PredicateBinding validatePredicateSetter(const Frame &frame, Id event, const nlohmann::json &values) {
     command(frame, event);

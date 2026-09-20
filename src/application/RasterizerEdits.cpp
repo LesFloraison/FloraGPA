@@ -130,8 +130,10 @@ void mergePipeline(Json &base, const Json &patch) {
         if (patch.contains(key))
             base[key] = patch[key];
 }
-Json capturedRasterizer(const Frame &frame, Id event) {
+Json capturedRasterizer(const Frame &frame, Id event, const State *base) {
     auto s = graphics(frame, event);
+    if (base)
+        s = *base;
     D3D11_RASTERIZER_DESC2 d{};
     d.FillMode = D3D11_FILL_SOLID;
     d.CullMode = D3D11_CULL_BACK;
@@ -162,6 +164,14 @@ Json capturedRasterizer(const Frame &frame, Id event) {
                {"conservative_raster", d.ConservativeRaster}}}};
     for (const auto key : {"viewports", "scissors"}) {
         bool viewport = std::string(key) == "viewports";
+        if (viewport && s.viewportValues) {
+            out[key] = *s.viewportValues;
+            continue;
+        }
+        if (!viewport && s.scissorValues) {
+            out[key] = *s.scissorValues;
+            continue;
+        }
         Id id = viewport ? s.viewports : s.scissors;
         out[key] = Json::array();
         if (!id)
@@ -180,8 +190,8 @@ Json capturedRasterizer(const Frame &frame, Id event) {
     }
     return out;
 }
-Json effectiveRasterizer(const Frame &frame, Id event, const Json &normalized) {
-    auto out = capturedRasterizer(frame, event);
+Json effectiveRasterizer(const Frame &frame, Id event, const Json &normalized, const State *base) {
+    auto out = capturedRasterizer(frame, event, base);
     if (normalized.contains("rasterizer"))
         for (auto it = normalized["rasterizer"].begin(); it != normalized["rasterizer"].end(); ++it)
             if (!it.value().is_null())
@@ -193,8 +203,9 @@ Json effectiveRasterizer(const Frame &frame, Id event, const Json &normalized) {
         throw std::runtime_error("Conservative rasterization requires solid fill");
     return out;
 }
-ReplayOptions::RasterizerEdit rasterizerEdit(const Frame &frame, Id event, const Json &normalized) {
-    const auto values = effectiveRasterizer(frame, event, normalized);
+ReplayOptions::RasterizerEdit rasterizerEdit(const Frame &frame, Id event, const Json &normalized,
+                                             const State *base) {
+    const auto values = effectiveRasterizer(frame, event, normalized, base);
     ReplayOptions::RasterizerEdit out;
     if (normalized.contains("rasterizer")) {
         const auto &r = values["rasterizer"];

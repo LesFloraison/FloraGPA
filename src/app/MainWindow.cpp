@@ -2,6 +2,7 @@
 #include "BlendDialog.h"
 #include "CommandStateView.h"
 #include "OutputDialog.h"
+#include "PipelineSetterDialog.h"
 #include "PredicateView.h"
 #include "RasterizerDialog.h"
 #include "SamplerDialog.h"
@@ -2594,6 +2595,17 @@ void MainWindow::editSetter() {
     try {
         const auto event = selectedEvent_;
         const auto values = experiment_->setter(*frame_, event);
+        if (isPipelineSetter(frame_->entry(event).type)) {
+            const auto revision = revision_;
+            auto frame = frame_;
+            if (editPipelineSetterDialog(this, *frame, event, values, [&](const nlohmann::json &next) {
+                    if (revision != revision_ || event != selectedEvent_)
+                        throw std::runtime_error("Selection or experiment changed; reopen this editor");
+                    experiment_->setSetter(*frame_, event, next);
+                }))
+                experimentChanged();
+            return;
+        }
         if (isSrvOutputCommand(frame_->entry(event).type)) {
             const auto revision = revision_;
             auto frame = frame_;

@@ -170,7 +170,8 @@
         "First independent package: 665 comparisons including captured-enable=true preset restoration and real GF2/BF1 before/original/zero-write-mask outputs with unchanged draw counts. Evidence: artifacts/blend-package-comparison/validation.json.",
         "Captured BOOLs normalize before state creation as in the reference decoder. Native 264/328-byte, noncanonical BOOL and truncated/trailing descriptor checks passed; final Release all 21 suites and Debug blend/editor regressions passed (artifacts/ctest-blend-final-release.log, ctest-blend-final-debug.log, blend-final-debug-ui.txt).",
         "Final package out/FloraGPA-blend-v2 passed 671 Python/native comparisons and four GF2/BF1 golden/negative checks with system-only child PATH: artifacts/blend-final-comparison/validation.json and artifacts/validation-blend-final/validation.json. This batch also passed 309 rasterizer regressions in artifacts/blend-rasterizer-regression/validation.json.",
-        "Private coverage consumers and the dedicated MSAA sample viewer remain pending; device compatibility has only been tested on this host."
+        "Private coverage consumers and the dedicated MSAA sample viewer remain pending; device compatibility has only been tested on this host.",
+        "Per-draw descriptor defaults inherit final preceding topology/RS/OM setters; see docs/PIPELINE_SETTER_MIGRATION.md"
       ]
     },
     {
@@ -1845,7 +1846,8 @@
         "tools/validate_rasterizer_port.py: 309 native/Python comparisons passed with Windows-only child PATH, hardware/WARP images, UAV bytes, exact inspected pipeline fields, before/after and next-draw restoration, mixed depth edits and malformed input rejection. Evidence: artifacts/rasterizer-package-comparison-v2/validation.json.",
         "tests/RasterizerTests.cpp: repeated replay, captured cull restoration, native state/pixels at before/after/next boundaries, mixed depth edits, project save/load, undo/redo, branch truncation and invalid-edit rollback. Release all 20 CTest suites and Debug five related suites passed.",
         "Final package out/FloraGPA-rasterizer also passed 517 depth/stencil regressions and four GF2/BF1 golden/negative checks with system-only PATH: artifacts/rasterizer-depth-regression/validation.json and artifacts/validation-rasterizer-package/validation.json.",
-        "Blend normalization/merge is now migrated in src/application/BlendEdits.cpp; private coverage consumers remain pending. Unsupported pipeline keys fail explicitly."
+        "Blend normalization/merge is now migrated in src/application/BlendEdits.cpp; private coverage consumers remain pending. Unsupported pipeline keys fail explicitly.",
+        "Per-draw descriptor defaults inherit final preceding topology/RS/OM setters; see docs/PIPELINE_SETTER_MIGRATION.md"
       ]
     },
     {
@@ -2106,16 +2108,20 @@
         "src/app/MainWindow.cpp",
         "src/core/SamplerBindings.cpp",
         "src/core/SrvBindings.cpp",
-        "src/app/SamplerDialog.cpp"
+        "src/app/SamplerDialog.cpp",
+        "src/core/PipelineBindings.cpp",
+        "src/replay/PipelineBindings.cpp",
+        "src/app/PipelineSetterDialog.cpp"
       ],
       "validation": [
         "Predicate setter arguments validate all fields, resource type/descriptor, immediate context, uint64 IDs and raw uint32 BOOL. Compatible setter history persists across draw/dispatch snapshots until an original setter or ClearState.",
         "tests/PredicationTests.cpp: repeated replay, save/load, undo/redo, branch history, invalid-operation atomicity and later reset. tests/UiTests.cpp: real worker observes apply/undo/redo and rejects invalid numeric input.",
         "tools/validate_predicate_setters_port.py: six wire families, hardware/WARP outputs and pipeline boundaries, replacement/detach/noncanonical BOOL, later reset, lifecycle rejection and SO/DrawAuto.",
-        "Predicate, sampler and SRV setter families are implemented; IA/CB/shader/RS/OM/SO families and private diagnostic replay consumers remain pending.",
+        "Predicate, sampler, SRV, output/SO, topology and RS/OM pipeline setter families are implemented; IA resource, CB/CB1 and shader setter editing and private diagnostic consumers remain pending.",
         "artifacts/predicate-setters-package/validation.json: all 1265 comparisons passed with Windows-only native child PATH; 210 actual pipeline boundaries, image/buffer results, four SO/DrawAuto geometry cases and query lifecycle rejection.",
         "Release: all 18 CTest suites passed. Debug: 5 related suites plus predicate editor/inspector UI passed. Both golden frames and disabled-draw negative controls passed in artifacts/validation-predicate-setters-package/validation.json.",
-        "Sampler validation is recorded in artifacts/sampler-final-comparison/validation.json and sampler-real-comparison/validation.json; SRV history/validation and inherited descriptor/buffer consumers are covered by tests/SrvBindingTests.cpp and tools/validate_srv_setters_port.py / validate_srv_setter_edges.py"
+        "Sampler validation is recorded in artifacts/sampler-final-comparison/validation.json and sampler-real-comparison/validation.json; SRV history/validation and inherited descriptor/buffer consumers are covered by tests/SrvBindingTests.cpp and tools/validate_srv_setters_port.py / validate_srv_setter_edges.py",
+        "docs/PIPELINE_SETTER_MIGRATION.md: persistent six-family topology/RS/OM edits, typed Qt controls, CPU/GPU parity and final-state per-draw inheritance"
       ]
     },
     {

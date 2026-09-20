@@ -456,7 +456,14 @@ void Replay::bind(const State &s, bool compute) {
         }
     }
     context_->RSSetState(get<ID3D11RasterizerState>(s.rasterizer));
-    if (s.viewports) {
+    if (s.viewportValues) {
+        if (device_->GetFeatureLevel() < D3D_FEATURE_LEVEL_11_0)
+            throw std::runtime_error("Viewport editing requires feature level 11_0");
+        std::vector<D3D11_VIEWPORT> rows;
+        for (const auto &v : *s.viewportValues)
+            rows.push_back({v[0], v[1], v[2], v[3], v[4], v[5]});
+        context_->RSSetViewports(UINT(rows.size()), rows.empty() ? nullptr : rows.data());
+    } else if (s.viewports) {
         Reader r(frame_.payload(s.viewports, 9, 0x87));
         auto n = r.read<UINT>();
         if (n > 16)
@@ -468,7 +475,12 @@ void Replay::bind(const State &s, bool compute) {
         context_->RSSetViewports(n, v.data());
     } else
         context_->RSSetViewports(0, nullptr);
-    if (s.scissors) {
+    if (s.scissorValues) {
+        std::vector<D3D11_RECT> rows;
+        for (const auto &v : *s.scissorValues)
+            rows.push_back({v[0], v[1], v[2], v[3]});
+        context_->RSSetScissorRects(UINT(rows.size()), rows.empty() ? nullptr : rows.data());
+    } else if (s.scissors) {
         Reader r(frame_.payload(s.scissors, 9, 0x86));
         auto n = r.read<UINT>();
         if (n > 16)
@@ -725,6 +737,8 @@ void Replay::mappedWrites(const Entry &e) {
 State Replay::prepareState(const Event &event) {
     immediate(event.context);
     auto state = frame_.state(event.state);
+    for (const auto &[type, binding] : activePipelineBindings_)
+        overlayPipelineBinding(state, binding);
     samplerBindings_.observe(state);
     samplerBindings_.apply(state);
     bindingEvent_ = event.id;
@@ -749,6 +763,8 @@ void Replay::command(const Entry &e) {
     if (outputHistory_ && OutputBindingModel::models(e.type))
         outputHistory_->advance(e.id);
     Reader r(payload);
+    if (pipelineSetter(e, payload))
+        return;
     if (isDraw(t)) {
         auto event = frame_.event(e.id);
         auto state = prepareState(event);
@@ -979,6 +995,7 @@ void Replay::command(const Entry &e) {
         predicateValue_ = 0;
         predicateOverride_.reset();
         samplerBindings_.clear();
+        activePipelineBindings_.clear();
         srvBindings_.clear();
         resetStreamOutputBindings();
         clearBindingGaps();
@@ -1018,6 +1035,7 @@ void Replay::run(const std::function<void(Id, size_t, size_t)> &progress,
     resetPredicates();
     predicateOverride_.reset();
     samplerBindings_ = SamplerBindings{};
+    activePipelineBindings_.clear();
     srvBindings_.clear();
     srvHistories_.clear();
     outputHistory_ = makeOutputHistory(frame_, options_);
@@ -1037,14 +1055,15 @@ void Replay::run(const std::function<void(Id, size_t, size_t)> &progress,
     soQueries_.clear();
     soAutoResults_.clear();
     streamOutputHistory.clear();
-    soCountRequiresKnown_ =
-        options_.editedEvents || !options_.shaders.empty() || !options_.textures.empty() ||
-        !options_.disabled.empty() || !options_.buffers.empty() || !options_.commandPayloads.empty() ||
-        !options_.updateSources.empty() || !options_.uavCounters.empty() ||
-        !options_.predicateSetters.empty() || !options_.depthStencilEdits.empty() ||
-        !options_.rasterizerEdits.empty() || !options_.blendEdits.empty() ||
-        !options_.samplerSetters.empty() || !options_.samplerEdits.empty() || !options_.srvEdits.empty() ||
-        !options_.srvSetters.empty() || !options_.outputSetters.empty();
+    soCountRequiresKnown_ = options_.editedEvents || !options_.shaders.empty() ||
+                            !options_.textures.empty() || !options_.disabled.empty() ||
+                            !options_.buffers.empty() || !options_.commandPayloads.empty() ||
+                            !options_.updateSources.empty() || !options_.uavCounters.empty() ||
+                            !options_.predicateSetters.empty() || !options_.depthStencilEdits.empty() ||
+                            !options_.rasterizerEdits.empty() || !options_.blendEdits.empty() ||
+                            !options_.pipelineSetters.empty() || !options_.samplerSetters.empty() ||
+                            !options_.samplerEdits.empty() || !options_.srvEdits.empty() ||
+                            !options_.srvSetters.empty() || !options_.outputSetters.empty();
     soCountEnabled_ = false;
     for (const auto &[id, entry] : frame_.entries())
         if ((entry.category == 7 && entry.type == 0x38) ||

@@ -101,12 +101,12 @@ void mergeBlend(Json &base, const Json &patch) {
         if (patch.contains(key))
             base[key] = patch[key];
 }
-Json capturedBlend(const Frame &frame, Id event) {
+Json capturedBlend(const Frame &frame, Id event, const State *base) {
     auto e = frame.event(event);
     if (!isDraw(e.type) || e.type == 0x35 || e.type == 0x36)
         throw std::runtime_error("Graphics pipeline experiment on a dispatch or non-draw");
     requireImmediateContext(frame, e.context);
-    const auto s = frame.state(e.state);
+    const auto s = base ? *base : frame.state(e.state);
     auto d = defaultBlend();
     if (s.blend) {
         const auto &entry = frame.entry(s.blend);
@@ -137,8 +137,8 @@ Json capturedBlend(const Frame &frame, Id event) {
             {"blend_factor", s.blendFactor},
             {"sample_mask", s.sampleMask}};
 }
-Json effectiveBlend(const Frame &frame, Id event, const Json &normalized) {
-    const auto captured = capturedBlend(frame, event);
+Json effectiveBlend(const Frame &frame, Id event, const Json &normalized, const State *base) {
+    const auto captured = capturedBlend(frame, event, base);
     auto result = captured;
     mergeBlend(result, normalized);
     for (auto &[slot, row] : result["blend_state"]["targets"].items())
@@ -147,8 +147,8 @@ Json effectiveBlend(const Frame &frame, Id event, const Json &normalized) {
     validateCombination(result["blend_state"]);
     return result;
 }
-ReplayOptions::BlendEdit blendEdit(const Frame &frame, Id event, const Json &normalized) {
-    auto values = effectiveBlend(frame, event, normalized);
+ReplayOptions::BlendEdit blendEdit(const Frame &frame, Id event, const Json &normalized, const State *base) {
+    auto values = effectiveBlend(frame, event, normalized, base);
     ReplayOptions::BlendEdit result;
     if (normalized.contains("blend_state")) {
         auto &b = values["blend_state"];

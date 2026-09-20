@@ -6,6 +6,7 @@
 #include <map>
 #include <memory>
 #include <mutex>
+#include <optional>
 #include <span>
 #include <stdexcept>
 #include <string>
@@ -91,6 +92,8 @@ struct State {
     Id scissors{}, rasterizer{}, viewports{}, blend{}, depthState{}, dsv{}, predicate{};
     std::array<float, 4> blendFactor{};
     uint32_t sampleMask{}, stencilRef{};
+    std::optional<std::vector<std::array<float, 6>>> viewportValues;
+    std::optional<std::vector<std::array<int32_t, 4>>> scissorValues;
     std::array<Id, 8> rtv{}, csUav{};
     uint32_t omStart{}, rtCount{}, csStart{}, csCount{}, predicateValue{};
     std::array<uint32_t, 8> omCounts{}, csCounts{};

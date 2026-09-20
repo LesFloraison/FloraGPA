@@ -119,6 +119,7 @@ void Experiment::apply(const Frame &input, ReplayOptions &options) const {
     options.initialUavCounters.clear();
     options.uavCounters.clear();
     options.predicateSetters.clear();
+    options.pipelineSetters.clear();
     options.samplerSetters.clear();
     options.samplerEdits.clear();
     options.srvEdits.clear();
@@ -156,15 +157,6 @@ void Experiment::apply(const Frame &input, ReplayOptions &options) const {
                 auto event = identifier(op.at("event"));
                 auto values = normalizePipeline(op.at("values"));
                 mergePipeline(pipeline[event], values);
-                const auto depth = depthPipelineFields(pipeline[event]);
-                if (!depth.empty())
-                    options.depthStencilEdits[event] = depthStencilEdit(frame, event, depth);
-                if (pipeline[event].contains("rasterizer") || pipeline[event].contains("viewports") ||
-                    pipeline[event].contains("scissors"))
-                    options.rasterizerEdits[event] = rasterizerEdit(frame, event, pipeline[event]);
-                if (pipeline[event].contains("blend_state") || pipeline[event].contains("blend_factor") ||
-                    pipeline[event].contains("sample_mask"))
-                    options.blendEdits[event] = blendEdit(frame, event, pipeline[event]);
             } else if (kind == "srv_descriptor") {
                 const auto event = identifier(op.at("event"));
                 const auto stage = srvStage(op.at("stage").get<std::string>());
@@ -182,7 +174,9 @@ void Experiment::apply(const Frame &input, ReplayOptions &options) const {
                 patch.update(values);
             } else if (kind == "setter") {
                 const auto id = identifier(op.at("event"));
-                if (samplerSetterStage(frame.entry(id).type))
+                if (isPipelineSetter(frame.entry(id).type))
+                    options.pipelineSetters[id] = validatePipelineSetter(frame, id, op.at("values"));
+                else if (samplerSetterStage(frame.entry(id).type))
                     options.samplerSetters[id] = validateSamplerSetter(frame, id, op.at("values"));
                 else if (srvSetterStage(frame.entry(id).type))
                     options.srvSetters[id] = validateSrvSetter(frame, id, op.at("values"));
@@ -254,6 +248,17 @@ void Experiment::apply(const Frame &input, ReplayOptions &options) const {
         }
     }
     // Validate against final bindings so history operation order does not affect input edits.
+    for (const auto &[event, values] : pipeline) {
+        const auto state = effectiveBindings(frame, event, frame.state(frame.event(event).state), options);
+        const auto depth = depthPipelineFields(values);
+        if (!depth.empty())
+            options.depthStencilEdits[event] = depthStencilEdit(frame, event, depth, &state);
+        if (values.contains("rasterizer") || values.contains("viewports") || values.contains("scissors"))
+            options.rasterizerEdits[event] = rasterizerEdit(frame, event, values, &state);
+        if (values.contains("blend_state") || values.contains("blend_factor") ||
+            values.contains("sample_mask"))
+            options.blendEdits[event] = blendEdit(frame, event, values, &state);
+    }
     for (const auto &[event, buffers] : options.buffers) {
         const auto state = effectiveBindings(frame, event, frame.state(frame.event(event).state), options);
         for (const auto &[resource, patches] : buffers)
@@ -304,7 +309,10 @@ void Experiment::setEnabled(const Frame &frame, Id event, bool enabled) {
     project_["cursor"] = project_["history"].size();
 }
 Json Experiment::depthStencil(const Frame &frame, Id event) const {
-    auto result = capturedDepthStencil(frame, event);
+    ReplayOptions options;
+    apply(frame, options);
+    const auto state = effectiveBindings(frame, event, frame.state(frame.event(event).state), options);
+    auto result = capturedDepthStencil(frame, event, &state);
     for (size_t i = 0; i < revision(); ++i)
         for (const auto &op : project_["history"][i]["operations"])
             if (op.at("kind") == "pipeline" && identifier(op.at("event")) == event)
@@ -312,34 +320,33 @@ Json Experiment::depthStencil(const Frame &frame, Id event) const {
     return result;
 }
 void Experiment::setDepthStencil(const Frame &frame, Id event, const Json &values) {
-    const auto normalized = normalizeDepthStencil(values);
-    depthStencilEdit(frame, event, normalized);
-    auto history = project_["history"];
-    history.erase(history.begin() + ptrdiff_t(revision()), history.end());
-    history.push_back(
-        {{"label", "Depth/stencil event " + std::to_string(event)},
-         {"operations", Json::array({{{"kind", "pipeline"}, {"event", event}, {"values", values}}})}});
-    project_["history"] = std::move(history);
-    project_["cursor"] = project_["history"].size();
+    normalizeDepthStencil(values);
+    setPipeline(frame, event, values, "Depth/stencil");
 }
 Json Experiment::rasterizer(const Frame &frame, Id event) const {
+    ReplayOptions options;
+    apply(frame, options);
+    const auto state = effectiveBindings(frame, event, frame.state(frame.event(event).state), options);
     Json values = Json::object();
     for (size_t i = 0; i < revision(); ++i)
         for (const auto &op : project_["history"][i]["operations"])
             if (op.at("kind") == "pipeline" && identifier(op.at("event")) == event)
                 mergePipeline(values, normalizePipeline(op.at("values")));
-    return effectiveRasterizer(frame, event, values);
+    return effectiveRasterizer(frame, event, values, &state);
 }
 void Experiment::setRasterizer(const Frame &frame, Id event, const Json &values) {
     setPipeline(frame, event, values, "Rasterizer");
 }
 Json Experiment::blend(const Frame &frame, Id event) const {
+    ReplayOptions options;
+    apply(frame, options);
+    const auto state = effectiveBindings(frame, event, frame.state(frame.event(event).state), options);
     Json values = Json::object();
     for (size_t i = 0; i < revision(); ++i)
         for (const auto &op : project_["history"][i]["operations"])
             if (op.at("kind") == "pipeline" && identifier(op.at("event")) == event)
                 mergePipeline(values, normalizePipeline(op.at("values")));
-    return effectiveBlend(frame, event, values);
+    return effectiveBlend(frame, event, values, &state);
 }
 void Experiment::setBlend(const Frame &frame, Id event, const Json &values) {
     setPipeline(frame, event, values, "Blend");
@@ -480,7 +487,9 @@ void Experiment::setSetter(const Frame &capture, Id event, const Json &values) {
     apply(capture, current);
     const auto &frame = effectiveFrame(capture, current);
     Json normalized;
-    if (samplerSetterStage(frame.entry(event).type)) {
+    if (isPipelineSetter(frame.entry(event).type)) {
+        normalized = pipelineSetterValues(validatePipelineSetter(frame, event, values));
+    } else if (samplerSetterStage(frame.entry(event).type)) {
         auto binding = validateSamplerSetter(frame, event, values);
         normalized = {{"start_slot", binding.start}, {"samplers", binding.resources}};
     } else if (srvSetterStage(frame.entry(event).type)) {

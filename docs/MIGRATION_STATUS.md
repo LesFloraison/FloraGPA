@@ -2,7 +2,7 @@
 
 已有可编译、可运行的 VS2022 / Qt Widgets 原生工程，能够独立重放当前验证的
 GF2 与 BF1 DX11 捕获。**尚未完成原 Python 版本的全部功能迁移。**
-当前独立包为 `out/FloraGPA-before-boundary-final/FloraGPA.exe`。
+当前独立包为 `out/FloraGPA-pipeline-setters/FloraGPA.exe`。
 
 
 ## 当前可用
@@ -42,6 +42,14 @@ GF2 与 BF1 DX11 捕获。**尚未完成原 Python 版本的全部功能迁移�
 | 性能 | 原生 D3D11 时间戳、disjoint 与 pipeline statistics | 尚未迁移原版多轮调度、Intel 硬件指标/GTPin |
 
 ## 验证证据
+
+Edit Setter 新增拓扑、光栅化状态、视口、裁剪矩形、混合状态和深度／模板
+状态六类持久编辑；后续同类 setter / ClearState 结束覆盖，逐 draw 实验继承
+修改后的默认值。748 项参数／布局对照与 269 项综合检查通过，包含硬件／WARP
+真实 getter、输出像素／原始存储、几何表格／OBJ，以及 SO→DrawAuto 链路。
+Qt 实际 Worker 验证了编辑、撤销、重做；GF2 的 9 条和 BF1 的 208 条视口
+setter 全部修改后图像与 Python 一致，撤销后恢复原始金标准。详见
+`docs/PIPELINE_SETTER_MIGRATION.md`。IA 资源、CB/CB1、shader setter 编辑仍待迁移。
 
 普通 Output 的 Before event 已与 Python 遍历边界对齐：在所选 draw/dispatch
 之前停止；Pipeline／输入检查继续准备所选快照。缺失 RTV、输入布局或 SRV
