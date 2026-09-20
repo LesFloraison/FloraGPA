@@ -56,6 +56,7 @@ class MainWindow final : public QMainWindow {
     void experimentChanged();
     void updateExperimentActions();
     void editClear();
+    void editSetter();
     void replaceUpdateSource();
     void compileShader();
     void inspectGeometry();
@@ -78,6 +79,7 @@ class MainWindow final : public QMainWindow {
     bool projectDirty_ = false;
     QAction *undoAction_ = nullptr, *redoAction_ = nullptr, *enableAction_ = nullptr;
     QAction *clearAction_ = nullptr, *updateSourceAction_ = nullptr;
+    QAction *setterAction_ = nullptr;
     QAction *bufferEditAction_ = nullptr, *bufferImportAction_ = nullptr;
     QAction *constantEditAction_ = nullptr;
     QAction *counterEditAction_ = nullptr;

@@ -1,5 +1,6 @@
 #include "Experiment.h"
 #include "CommandEdits.h"
+#include "SetterEdits.h"
 #include "ShaderInspector.h"
 #include "core/BufferBindings.h"
 #include "core/UavCounters.h"
@@ -74,6 +75,7 @@ void Experiment::apply(const Frame &frame, ReplayOptions &options) const {
     options.buffers.clear();
     options.initialUavCounters.clear();
     options.uavCounters.clear();
+    options.predicateSetters.clear();
     for (size_t i = 0; i < revision(); ++i) {
         auto &operations = project_.at("history").at(i).at("operations");
         if (!operations.is_array())
@@ -94,6 +96,9 @@ void Experiment::apply(const Frame &frame, ReplayOptions &options) const {
                     options.disabled.erase(id);
                 else
                     options.disabled.insert(id);
+            } else if (kind == "setter") {
+                const auto id = identifier(op.at("event"));
+                options.predicateSetters[id] = validatePredicateSetter(frame, id, op.at("values"));
             } else if (kind == "clear") {
                 auto id = identifier(op.at("event"));
                 validateWritableCommand(frame, id);
@@ -178,6 +183,25 @@ void Experiment::setEnabled(const Frame &frame, Id event, bool enabled) {
     history.push_back(
         {{"label", std::string(enabled ? "Enable event " : "Disable event ") + std::to_string(event)},
          {"operations", Json::array({{{"kind", "enabled"}, {"event", event}, {"value", enabled}}})}});
+    project_["history"] = std::move(history);
+    project_["cursor"] = project_["history"].size();
+}
+Json Experiment::setter(const Frame &frame, Id event) const {
+    auto result = capturedSetter(frame, event);
+    for (size_t i = 0; i < revision(); ++i)
+        for (const auto &op : project_["history"][i]["operations"])
+            if (op.at("kind") == "setter" && identifier(op.at("event")) == event)
+                result = op.at("values");
+    return result;
+}
+void Experiment::setSetter(const Frame &frame, Id event, const Json &values) {
+    auto binding = validatePredicateSetter(frame, event, values);
+    Json normalized{{"predicate", binding.resource}, {"predicate_value", binding.value}};
+    auto history = project_["history"];
+    history.erase(history.begin() + ptrdiff_t(revision()), history.end());
+    history.push_back(
+        {{"label", "Setter event " + std::to_string(event)},
+         {"operations", Json::array({{{"kind", "setter"}, {"event", event}, {"values", normalized}}})}});
     project_["history"] = std::move(history);
     project_["cursor"] = project_["history"].size();
 }

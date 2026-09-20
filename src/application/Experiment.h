@@ -15,6 +15,8 @@ class Experiment {
     void apply(const Frame &frame, ReplayOptions &options) const;
     void setEnabled(const Frame &frame, Id event, bool enabled);
     void setClear(const Frame &frame, Id event, const nlohmann::json &values);
+    void setSetter(const Frame &frame, Id event, const nlohmann::json &values);
+    nlohmann::json setter(const Frame &frame, Id event) const;
     nlohmann::json clear(const Frame &frame, Id event) const;
     void setUpdateSource(const Frame &frame, Id event, Bytes data);
     void setBuffer(const Frame &frame, Id event, Id resource, uint64_t offset, Bytes data);

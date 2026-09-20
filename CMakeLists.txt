@@ -24,6 +24,7 @@ add_library(FloraExperiment src/application/Experiment.cpp src/application/Shade
 target_include_directories(FloraExperiment SYSTEM PUBLIC third_party)
 target_link_libraries(FloraExperiment PUBLIC FloraReplay Qt6::Core)
 target_sources(FloraExperiment PRIVATE src/application/PredicateInspector.cpp)
+target_sources(FloraExperiment PRIVATE src/application/SetterEdits.cpp)
 foreach(name FloraGPA.Cli FloraGPA.Worker)
   add_executable(${name} src/cli/main.cpp)
   target_link_libraries(${name} PRIVATE FloraExperiment Qt6::Core Qt6::Gui psapi)

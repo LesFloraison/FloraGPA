@@ -509,7 +509,8 @@ void Replay::bind(const State &s, bool compute) {
         context_->RSSetScissorRects(0, nullptr);
     context_->OMSetBlendState(get<ID3D11BlendState>(s.blend), s.blendFactor.data(), s.sampleMask);
     context_->OMSetDepthStencilState(get<ID3D11DepthStencilState>(s.depthState), s.stencilRef);
-    bindPredicate(s.predicate, s.predicateValue);
+    const auto predicate = predicateOverride_.value_or(PredicateBinding{s.predicate, s.predicateValue});
+    bindPredicate(predicate.resource, predicate.value);
     bool extended = std::any_of(s.omExtended.begin(), s.omExtended.end(), [](Id x) { return x != 0; }) ||
                     std::any_of(s.csExtended.begin(), s.csExtended.end(), [](Id x) { return x != 0; });
     if (extended)
@@ -854,7 +855,20 @@ void Replay::command(const Entry &e) {
         return;
     }
     if (predicateOperation(t)) {
-        applyPredicate(t, payload);
+        if (predicateOperation(t) == PredicateOperation::Set) {
+            auto captured = readPredicateCommand(t, payload);
+            immediate(captured.context);
+            auto edit = options_.predicateSetters.find(e.id);
+            const auto binding = edit == options_.predicateSetters.end()
+                                     ? PredicateBinding{captured.resource, captured.value}
+                                     : edit->second;
+            // Commit the persistent edit only after native binding succeeds.
+            bindPredicate(binding.resource, binding.value);
+            predicateOverride_ =
+                edit == options_.predicateSetters.end() ? std::optional<PredicateBinding>{} : binding;
+            counts["SetPredication"]++;
+        } else
+            applyPredicate(t, payload);
         return;
     }
     if ((t >= 0x249 && t <= 0x254) || t == 0x34e5 || t == 0x34ee || t == 0x34f4 || t == 0x351c ||
@@ -958,6 +972,7 @@ void Replay::command(const Entry &e) {
         context_->ClearState();
         boundPredicate_ = 0;
         predicateValue_ = 0;
+        predicateOverride_.reset();
         resetStreamOutputBindings();
         clearBindingGaps();
         for (auto &ranges : ranges_)
@@ -992,6 +1007,7 @@ void Replay::run(const std::function<void(Id, size_t, size_t)> &progress,
         throw std::runtime_error("Stop event is not an API command");
     context_->ClearState();
     resetPredicates();
+    predicateOverride_.reset();
     clearBindingGaps();
     objects_.clear();
     usedSrvs_.clear();
@@ -1006,7 +1022,8 @@ void Replay::run(const std::function<void(Id, size_t, size_t)> &progress,
     soCountRequiresKnown_ = options_.editedEvents || !options_.shaders.empty() ||
                             !options_.textures.empty() || !options_.disabled.empty() ||
                             !options_.buffers.empty() || !options_.commandPayloads.empty() ||
-                            !options_.updateSources.empty() || !options_.uavCounters.empty();
+                            !options_.updateSources.empty() || !options_.uavCounters.empty() ||
+                            !options_.predicateSetters.empty();
     soCountEnabled_ = false;
     for (const auto &[id, entry] : frame_.entries())
         if ((entry.category == 7 && entry.type == 0x38) ||

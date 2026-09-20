@@ -1,5 +1,6 @@
 #pragma once
 #include "core/Frame.h"
+#include "core/Predication.h"
 #define NOMINMAX
 #include <d3d11_3.h>
 #include <functional>
@@ -28,6 +29,7 @@ struct ReplayOptions {
     std::map<Id, std::map<Id, std::vector<BufferPatch>>> buffers;
     std::map<Id, uint32_t> initialUavCounters;
     std::map<Id, std::map<Id, uint32_t>> uavCounters;
+    std::map<Id, PredicateBinding> predicateSetters;
 };
 struct Image {
     uint32_t width{}, height{}, format{};
@@ -70,6 +72,7 @@ class Replay {
     std::map<Id, PredicateInterval> activePredicates_;
     Id boundPredicate_ = 0;
     uint32_t predicateValue_ = 0;
+    std::optional<PredicateBinding> predicateOverride_;
     unsigned predicateIsolationDepth_ = 0;
     class PredicateIsolation {
         Replay &replay_;

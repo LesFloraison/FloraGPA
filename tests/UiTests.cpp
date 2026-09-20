@@ -31,6 +31,85 @@ class UiTests final : public QObject {
         QVERIFY(window.grab().save(directory + '/' + name + ".png"));
     }
   private slots:
+    void predicateSetterHistory() {
+        using namespace flora;
+        auto capture = testing::predicateCapture(true, 0);
+        QTemporaryDir dir;
+        capture.save(dir.path() + "/setter.gpa_frame");
+        MainWindow window;
+        window.resize(1500, 950);
+        window.show();
+        QSignalSpy done(&window, &MainWindow::taskFinished);
+        window.openCapture(dir.path() + "/setter.gpa_frame");
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        window.findChild<QComboBox *>("apiKinds")->setCurrentIndex(1);
+        auto api = window.findChild<QTableView *>("apiLog");
+        bool selected = false;
+        for (int row = 0; row < api->model()->rowCount(); ++row) {
+            auto index = api->model()->index(row, 0);
+            if (index.data(Qt::UserRole).toULongLong() == 1200) {
+                api->setCurrentIndex(index);
+                selected = true;
+                break;
+            }
+        }
+        QVERIFY(selected);
+        QTRY_VERIFY_WITH_TIMEOUT(!window.busy(), 30000);
+        auto edit = window.findChild<QAction *>("editSetter");
+        QVERIFY(edit && edit->isEnabled());
+        bool entered = false;
+        QTimer::singleShot(0, &window, [&] {
+            auto dialog = window.findChild<QDialog *>("setterDialog");
+            if (!dialog)
+                return;
+            QTimer::singleShot(3000, dialog, &QDialog::reject);
+            auto value = dialog->findChild<QLineEdit *>("setterPredicateValue");
+            auto apply = dialog->findChild<QDialogButtonBox *>()->button(QDialogButtonBox::Ok);
+            value->setText("4294967296");
+            QTest::mouseClick(apply, Qt::LeftButton);
+            QVERIFY(dialog->findChild<QLabel *>("setterError")->isVisible());
+            value->setText("0x1");
+            snapshot(*dialog, "predicate-setter-dialog");
+            entered = true;
+            QTest::mouseClick(apply, Qt::LeftButton);
+        });
+        done.clear();
+        edit->trigger();
+        QVERIFY(entered);
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        auto view = window.findChild<PredicateView *>("predicatePane");
+        auto frame = std::make_shared<Frame>((dir.path() + "/setter.gpa_frame").toStdWString());
+        auto checkValue = [&](const QString &expected) {
+            view->setSelection(frame, 3000);
+            view->findChild<QComboBox *>("predicateBoundary")->setCurrentIndex(1);
+            QSignalSpy read(view, &PredicateView::inspectionFinished);
+            view->findChild<QAction *>("readPredicate")->trigger();
+            QTRY_VERIFY_WITH_TIMEOUT(!read.empty(), 30000);
+            QVERIFY(read.takeLast()[0].toBool());
+            QCOMPARE(view->findChild<QTreeWidget *>("predicateFields")->topLevelItem(3)->text(1), expected);
+        };
+        checkValue("1");
+        QAction *undo = nullptr, *redo = nullptr;
+        for (auto action : window.findChildren<QAction *>()) {
+            if (action->shortcut() == QKeySequence::Undo)
+                undo = action;
+            if (action->shortcut() == QKeySequence::Redo)
+                redo = action;
+        }
+        QVERIFY(undo && redo);
+        done.clear();
+        undo->trigger();
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        checkValue("0");
+        done.clear();
+        redo->trigger();
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        checkValue("1");
+    }
     void predicateInspector() {
         using namespace flora;
         auto capture = testing::predicateCapture(false, 0);

@@ -6,6 +6,7 @@
 #include "application/Constants.h"
 #include "application/ContextInspector.h"
 #include "application/PredicateInspector.h"
+#include "application/SetterEdits.h"
 #include "application/ShaderInspector.h"
 #include "core/BufferBindings.h"
 #include "replay/Replay.h"
@@ -287,6 +288,8 @@ void MainWindow::buildUi() {
     });
     clearAction_ = edit->addAction("Edit Clear Values…", this, &MainWindow::editClear);
     clearAction_->setObjectName("editClear");
+    setterAction_ = edit->addAction("Edit Setter…", this, &MainWindow::editSetter);
+    setterAction_->setObjectName("editSetter");
     updateSourceAction_ = edit->addAction("Replace Update Source…", this, &MainWindow::replaceUpdateSource);
     updateSourceAction_->setObjectName("replaceUpdateSource");
     updateExperimentActions();
@@ -380,7 +383,7 @@ void MainWindow::buildUi() {
     commandFilter_->workOnly = true;
     apiView_ = table(commandFilter_);
     apiView_->setContextMenuPolicy(Qt::ActionsContextMenu);
-    apiView_->addActions({enableAction_, clearAction_, updateSourceAction_});
+    apiView_->addActions({enableAction_, clearAction_, setterAction_, updateSourceAction_});
     apiView_->setObjectName("apiLog");
     auto exportApi = new QAction("Export API Log…", this);
     exportApi->setObjectName("exportApiLog");
@@ -1810,6 +1813,8 @@ void MainWindow::updateExperimentActions() {
     enableAction_->setEnabled(editable);
     if (clearAction_)
         clearAction_->setEnabled(isClearCommand(uint16_t(type)));
+    if (setterAction_)
+        setterAction_->setEnabled(isEditableSetter(uint16_t(type)));
     if (updateSourceAction_)
         updateSourceAction_->setEnabled(type == 0x247);
     const bool bufferEditable = isDraw(uint16_t(type)) && selectedResource_ && frame_ &&
@@ -2196,6 +2201,67 @@ void MainWindow::editBuffer(bool importFile) {
             bufferBoundary_->setCurrentIndex(1);
             experimentChanged();
         }
+    } catch (const std::exception &e) {
+        showError(QString::fromUtf8(e.what()));
+    }
+}
+void MainWindow::editSetter() {
+    if (!frame_ || !experiment_ || !selectedEvent_)
+        return;
+    try {
+        const auto event = selectedEvent_;
+        const auto values = experiment_->setter(*frame_, event);
+        QDialog dialog(this);
+        dialog.setObjectName("setterDialog");
+        dialog.setWindowTitle(QString("SetPredication — Event %1").arg(event));
+        dialog.setMinimumWidth(360);
+        auto layout = new QFormLayout(&dialog);
+        auto predicate = new QComboBox;
+        predicate->setObjectName("setterPredicate");
+        predicate->addItem("None", QVariant::fromValue(qulonglong(0)));
+        for (const auto &[id, entry] : frame_->entries())
+            if (entry.category == 5 && entry.type == 0x96)
+                predicate->addItem(QString("Predicate %1").arg(id), QVariant::fromValue(qulonglong(id)));
+        const auto id = values.at("predicate").get<Id>();
+        int index = predicate->findData(QVariant::fromValue(qulonglong(id)));
+        if (index < 0) {
+            predicate->addItem(QString("Missing %1").arg(id), QVariant::fromValue(qulonglong(id)));
+            index = predicate->count() - 1;
+        }
+        predicate->setCurrentIndex(index);
+        layout->addRow("Predicate", predicate);
+        auto value = new QLineEdit(QString::number(values.at("predicate_value").get<uint32_t>()));
+        value->setObjectName("setterPredicateValue");
+        value->setToolTip("Raw uint32 BOOL; decimal or 0x hexadecimal. Zero and one are canonical values.");
+        layout->addRow("Predicate value", value);
+        auto error = new QLabel;
+        error->setObjectName("setterError");
+        error->setWordWrap(true);
+        error->hide();
+        layout->addRow(error);
+        auto buttons = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+        buttons->button(QDialogButtonBox::Ok)->setText("Apply");
+        layout->addRow(buttons);
+        connect(buttons, &QDialogButtonBox::rejected, &dialog, &QDialog::reject);
+        connect(buttons, &QDialogButtonBox::accepted, &dialog, [&] {
+            try {
+                const auto text = value->text().trimmed();
+                bool valid = false;
+                const auto bits =
+                    text.toULongLong(&valid, text.startsWith("0x", Qt::CaseInsensitive) ? 16 : 10);
+                if (!valid || text.startsWith('-') || bits > UINT32_MAX)
+                    throw std::runtime_error("Enter a uint32 value");
+                experiment_->setSetter(*frame_, event,
+                                       {{"predicate", uint64_t(predicate->currentData().toULongLong())},
+                                        {"predicate_value", uint32_t(bits)}});
+                dialog.accept();
+            } catch (const std::exception &e) {
+                error->setText(QString::fromUtf8(e.what()));
+                error->show();
+            }
+        });
+        if (dialog.exec() == QDialog::Accepted)
+            experimentChanged();
     } catch (const std::exception &e) {
         showError(QString::fromUtf8(e.what()));
     }

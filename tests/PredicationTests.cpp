@@ -1,6 +1,8 @@
 #include "PredicateCapture.h"
 #include "StreamCapture.h"
+#include "application/Experiment.h"
 #include "application/PredicateInspector.h"
+#include "application/SetterEdits.h"
 #include <QTemporaryDir>
 #include <QtTest>
 using namespace flora;
@@ -8,6 +10,80 @@ using namespace flora::testing;
 class PredicationTests final : public QObject {
     Q_OBJECT
   private slots:
+    void setterHistory() {
+        auto c = predicateCapture(true, 0);
+        QTemporaryDir dir;
+        c.save(dir.path() + "/setter.gpa_frame");
+        Frame frame((dir.path() + "/setter.gpa_frame").toStdWString());
+        Experiment project(frame);
+        const nlohmann::json value{{"predicate", 600}, {"predicate_value", 1}};
+        project.setSetter(frame, 1200, value);
+        QCOMPARE(project.setter(frame, 1200), value);
+        project.save(dir.path() + "/project.json");
+        Experiment loaded(frame);
+        loaded.load(dir.path() + "/project.json", frame);
+        QCOMPARE(loaded.document(), project.document());
+        auto verify = [&](bool skipped) {
+            ReplayOptions o;
+            o.warp = true;
+            o.until = 3000;
+            project.apply(frame, o);
+            Replay r(frame, o);
+            for (int repeat = 0; repeat < 2; ++repeat) {
+                r.run();
+                QCOMPARE(firstWord(r, 7), skipped ? 10u : 9u);
+                QCOMPARE(r.readPredicateResult(600).predicateValue, skipped ? 1u : 0u);
+                QCOMPARE(r.counts.at("SetPredication"), uint64_t(1));
+            }
+        };
+        verify(true);
+        QVERIFY(project.undo());
+        verify(false);
+        QVERIFY(project.redo());
+        verify(true);
+        auto old = project.document();
+        QVERIFY_THROWS_EXCEPTION(
+            std::runtime_error,
+            project.setSetter(frame, 1200, {{"predicate", true}, {"predicate_value", 0}}));
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, project.setSetter(frame, 1100, value));
+        QCOMPARE(project.document(), old);
+        QVERIFY(project.undo());
+        project.setSetter(frame, 1200, {{"predicate", 0}, {"predicate_value", UINT32_MAX}});
+        QVERIFY(!project.canRedo());
+        ReplayOptions o;
+        o.warp = true;
+        o.until = 3000;
+        project.apply(frame, o);
+        Replay r(frame, o);
+        r.run();
+        QCOMPARE(firstWord(r, 7), 9u);
+        auto result = r.readPredicateResult(600);
+        QVERIFY(!result.bound);
+        QCOMPARE(result.predicateValue, UINT32_MAX);
+    }
+    void setterOverrideReset() {
+        for (bool clear : {false, true}) {
+            auto c = predicateCapture(true, 0);
+            if (clear)
+                c.add(1500, 7, 0x242, statePack(Id(0), Id(1)));
+            else
+                c.add(1500, 7, 0x248, statePack(Id(0), Id(1), Id(600), 0u));
+            QTemporaryDir dir;
+            c.save(dir.path() + "/reset.gpa_frame");
+            Frame frame((dir.path() + "/reset.gpa_frame").toStdWString());
+            Experiment project(frame);
+            project.setSetter(frame, 1200, {{"predicate", 600}, {"predicate_value", 1}});
+            ReplayOptions o;
+            o.warp = true;
+            o.until = 3000;
+            project.apply(frame, o);
+            Replay r(frame, o);
+            r.run();
+            // The original draw snapshot resumes after a later setter/ClearState.
+            QCOMPARE(r.output(20).rgba, (std::vector<uint8_t>{0, 255, 0, 255}));
+            QCOMPARE(r.readPredicateResult(600).predicateValue, 0u);
+        }
+    }
     void checkedCommands() {
         for (auto type : {0x241, 0x30b2, 0x31b2, 0x331b, 0x33e1, 0x34f9, 0x243, 0x30b3, 0x31b3, 0x331c,
                           0x33e2, 0x34fa, 0x248, 0x30b5, 0x31b5, 0x331e, 0x33e4, 0x34fc}) {

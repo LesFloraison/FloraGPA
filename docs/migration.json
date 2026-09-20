@@ -1575,9 +1575,21 @@
       "sha256": "a70c301cd56c85c3e8d6ec3ff3f54ee2aee3a330b99c534a7539e4c3ff682eaa",
       "lines": 23,
       "description": "Recovered SetPredication parameter experiments.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": [
+        "src/application/SetterEdits.cpp",
+        "src/application/Experiment.cpp",
+        "src/replay/Replay.cpp",
+        "src/app/MainWindow.cpp"
+      ],
+      "validation": [
+        "Predicate setter arguments validate all fields, resource type/descriptor, immediate context, uint64 IDs and raw uint32 BOOL. Compatible setter history persists across draw/dispatch snapshots until an original setter or ClearState.",
+        "tests/PredicationTests.cpp: repeated replay, save/load, undo/redo, branch history, invalid-operation atomicity and later reset. tests/UiTests.cpp: real worker observes apply/undo/redo and rejects invalid numeric input.",
+        "tools/validate_predicate_setters_port.py: six wire families, hardware/WARP outputs and pipeline boundaries, replacement/detach/noncanonical BOOL, later reset, lifecycle rejection and SO/DrawAuto.",
+        "General setter families, offline state consumer integration and private diagnostic replay consumers remain pending; this batch implements the predicate family only.",
+        "artifacts/predicate-setters-package/validation.json: all 1265 comparisons passed with Windows-only native child PATH; 210 actual pipeline boundaries, image/buffer results, four SO/DrawAuto geometry cases and query lifecycle rejection.",
+        "Release: all 18 CTest suites passed. Debug: 5 related suites plus predicate editor/inspector UI passed. Both golden frames and disabled-draw negative controls passed in artifacts/validation-predicate-setters-package/validation.json."
+      ]
     },
     {
       "module": "predication.py",
@@ -1594,7 +1606,7 @@
       "validation": [
         "Checked predicate descriptors and all six Begin/End/SetPredication wire families; snapshot bindings, seed intervals, repeated replay and GPU query inspection.",
         "tests/PredicationTests.cpp; tools/validate_predication_port.py: 624 hardware/WARP comparisons, including raw BOOL, active/seed/hint results, clear/copy/dispatch, four-stream overflow, supported experiments and rejection cases.",
-        "tests/UiTests.cpp: real-worker boundary inspection and stale-result discard. Predicate setter experiments and private diagnostic replay integration remain pending.",
+        "tests/UiTests.cpp: real-worker boundary inspection and stale-result discard. Predicate setter experiments now execute through native experiment history; private diagnostic replay integration remains pending.",
         "artifacts/ctest-predication-release.log and artifacts/ctest-predication-debug.log: all 18 suites passed; 39 native predicate test cases per configuration.",
         "artifacts/predicate-package-comparison/validation.json: 624 comparisons passed with Windows-only child PATH; artifacts/validation-predication-package/validation.json: both golden captures and disabled-draw negative controls passed."
       ]
@@ -1923,9 +1935,21 @@
       "sha256": "d73bfbe80ba9450df85530a585d1f3419c0b8528efe949ec47f25e661a9c4db0",
       "lines": 302,
       "description": "Persistent edits of recovered IA/RS/OM state-setting command arguments.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": [
+        "src/application/SetterEdits.cpp",
+        "src/application/Experiment.cpp",
+        "src/replay/Replay.cpp",
+        "src/app/MainWindow.cpp"
+      ],
+      "validation": [
+        "Predicate setter arguments validate all fields, resource type/descriptor, immediate context, uint64 IDs and raw uint32 BOOL. Compatible setter history persists across draw/dispatch snapshots until an original setter or ClearState.",
+        "tests/PredicationTests.cpp: repeated replay, save/load, undo/redo, branch history, invalid-operation atomicity and later reset. tests/UiTests.cpp: real worker observes apply/undo/redo and rejects invalid numeric input.",
+        "tools/validate_predicate_setters_port.py: six wire families, hardware/WARP outputs and pipeline boundaries, replacement/detach/noncanonical BOOL, later reset, lifecycle rejection and SO/DrawAuto.",
+        "General setter families, offline state consumer integration and private diagnostic replay consumers remain pending; this batch implements the predicate family only.",
+        "artifacts/predicate-setters-package/validation.json: all 1265 comparisons passed with Windows-only native child PATH; 210 actual pipeline boundaries, image/buffer results, four SO/DrawAuto geometry cases and query lifecycle rejection.",
+        "Release: all 18 CTest suites passed. Debug: 5 related suites plus predicate editor/inspector UI passed. Both golden frames and disabled-draw negative controls passed in artifacts/validation-predicate-setters-package/validation.json."
+      ]
     },
     {
       "module": "shader_lines.py",

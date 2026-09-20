@@ -7,6 +7,11 @@ struct PredicateDescriptor {
     uint32_t type{}, flags{};
 };
 enum class PredicateOperation { Begin, End, Set };
+struct PredicateBinding {
+    Id resource{};
+    uint32_t value{};
+    bool operator==(const PredicateBinding &) const = default;
+};
 struct PredicateCommand {
     PredicateOperation operation;
     Id context{}, resource{};

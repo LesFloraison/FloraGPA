@@ -148,7 +148,11 @@ at the selected command boundary. The compact inspector shows the query status,
 boolean result, binding and raw predicate value, with JSON export. Active queries
 and hint-only queries have no readable result. Captured Begin/End/SetPredication
 calls and snapshot bindings execute on the GPU; inspection helper draws are
-excluded from captured query intervals. Predicate setter editing remains pending.
+excluded from captured query intervals. Select SetPredication in **All API calls**,
+then use **Edit > Edit Setter** (also in the API Log context menu). Choose a predicate
+or None and enter its raw uint32 BOOL as decimal or hexadecimal. Edits persist
+across subsequent draw/dispatch snapshots until a captured setter or ClearState,
+and support project save/load plus undo/redo. Begin/End pairing is not editable.
 
 ```powershell
 .\out\FloraGPA\FloraGPA.Cli.exe predicate D:\captures\sample.gpa_frame --event 430 --id 60 --out D:\results\predicate
