@@ -1,14 +1,15 @@
 #include "application/ApiCommands.h"
 #include "application/CaptureNames.h"
 #include "application/ClassInspector.h"
-#include "application/StreamOutputInspector.h"
 #include "application/CommandState.h"
 #include "application/Constants.h"
 #include "application/ContextInspector.h"
 #include "application/Experiment.h"
 #include "application/Geometry.h"
+#include "application/PredicateInspector.h"
 #include "application/ReplayPipeline.h"
 #include "application/ShaderInspector.h"
+#include "application/StreamOutputInspector.h"
 #include "application/UavCounterInspector.h"
 #include "core/BufferBindings.h"
 #include "core/Frame.h"
@@ -59,7 +60,7 @@ int main(int argc, char **argv) {
     p.addVersionOption();
     p.addPositionalArgument(
         "command", "inventory | commands | command-state | contexts | command-lists | replay | shader | "
-                   "buffer | texture | compile | geometry | replay-pipeline | class-linkage");
+                   "buffer | texture | compile | geometry | replay-pipeline | class-linkage | predicate");
     p.addPositionalArgument("capture", "DX11 .gpa_frame file");
     p.addOption({"out", "New or empty output directory", "path"});
     p.addOption({"experiment", "Compatible FloraGPA experiment project", "path"});
@@ -237,7 +238,7 @@ int main(int argc, char **argv) {
             }
             report.insert("id", p.value("id"));
         } else if (command == "replay" || command == "buffer" || command == "texture" ||
-                   command == "geometry" || command == "replay-pipeline") {
+                   command == "geometry" || command == "replay-pipeline" || command == "predicate") {
             if (out.isEmpty())
                 throw std::runtime_error("Replay requires --out");
             ReplayOptions options;
@@ -248,6 +249,8 @@ int main(int argc, char **argv) {
             options.before = p.isSet("before");
             if (p.isSet("event"))
                 options.until = parseId("event");
+            if (command == "predicate" && (!options.until || !p.isSet("id")))
+                throw std::runtime_error("predicate requires --event and --id");
             if (command == "geometry") {
                 if (!options.until)
                     throw std::runtime_error("geometry requires --event");
@@ -290,6 +293,14 @@ int main(int argc, char **argv) {
                 report.insert("event", QString::number(options.until));
                 report.insert("vertices", qint64(geometry["vertex_references"].get<uint64_t>()));
                 report.insert("unique_vertices", qint64(geometry["unique_vertices"].get<uint64_t>()));
+            } else if (command == "predicate") {
+                auto detail = inspectPredicate(frame, replay, parseId("id"));
+                detail["event"] = options.until;
+                detail["value_time"] = options.before ? "before_command" : "after_command";
+                save(out + "/predicate.json", QByteArray::fromStdString(detail.dump(2) + "\n"));
+                report.insert("predicate",
+                              QJsonDocument::fromJson(QByteArray::fromStdString(detail.dump())).object());
+                report.insert("value_time", options.before ? "before_command" : "after_command");
             } else if (command == "buffer") {
                 if (!p.isSet("id"))
                     throw std::runtime_error("buffer requires --id");
@@ -399,16 +410,19 @@ int main(int argc, char **argv) {
             report.insert("counts", counts);
             QJsonArray soHistory;
             for (const auto &row : replay.streamOutputHistory)
-                soHistory.append(QJsonObject{{"event",QString::number(row.event)},{"stream",int(row.stream)},
-                                            {"vertices_per_primitive",int(row.factor)},
-                                            {"primitives_written",QString::number(row.written)},
-                                            {"primitives_storage_needed",QString::number(row.needed)}});
+                soHistory.append(QJsonObject{{"event", QString::number(row.event)},
+                                             {"stream", int(row.stream)},
+                                             {"vertices_per_primitive", int(row.factor)},
+                                             {"primitives_written", QString::number(row.written)},
+                                             {"primitives_storage_needed", QString::number(row.needed)}});
             report.insert("stream_output_history", soHistory);
-            if (auto it = replay.drawAutoResults().find(options.until); it != replay.drawAutoResults().end()) {
+            if (auto it = replay.drawAutoResults().find(options.until);
+                it != replay.drawAutoResults().end()) {
                 const auto &parameters = it->second;
                 auto detail = drawAutoJson(parameters);
-                detail["parameters"] = {{"vertex_count",parameters.vertexCount},{"start_vertex",0}};
-                report.insert("draw_auto", QJsonDocument::fromJson(QByteArray::fromStdString(detail.dump())).object());
+                detail["parameters"] = {{"vertex_count", parameters.vertexCount}, {"start_vertex", 0}};
+                report.insert("draw_auto",
+                              QJsonDocument::fromJson(QByteArray::fromStdString(detail.dump())).object());
             }
             if (options.timings) {
                 QJsonArray timings;

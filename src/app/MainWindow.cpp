@@ -1,9 +1,11 @@
 #include "MainWindow.h"
 #include "CommandStateView.h"
+#include "PredicateView.h"
 #include "application/ClassInspector.h"
 #include "application/CommandEdits.h"
 #include "application/Constants.h"
 #include "application/ContextInspector.h"
+#include "application/PredicateInspector.h"
 #include "application/ShaderInspector.h"
 #include "core/BufferBindings.h"
 #include "replay/Replay.h"
@@ -137,6 +139,7 @@ MainWindow::MainWindow() {
             pipeline_->clear();
             capturedState_->setSelection(frame_, 0);
             replayedState_->setSelection(frame_, 0);
+            predicateView_->setSelection(frame_, 0);
             metrics_->clear();
             properties_->clear();
             shader_->clear();
@@ -219,6 +222,9 @@ MainWindow::MainWindow() {
             timeout_.stop();
             setBusy(false);
             showError(process_.errorString());
+            if (runningKind_ == "predicate")
+                predicateView_->finish(runningPredicateRequest_,
+                                       {{"error", process_.errorString().toStdString()}});
             if (runningKind_ == "replay-pipeline")
                 replayedState_->finishReplay(runningPipelineRequest_,
                                              {{"error", process_.errorString().toStdString()}});
@@ -520,6 +526,24 @@ void MainWindow::buildUi() {
     pipelineTabs->addTab(capturedState_, "Captured State");
     replayedState_ = new CommandStateView(CommandStateView::Source::Replayed);
     pipelineTabs->addTab(replayedState_, "Replay State");
+    predicateView_ = new PredicateView;
+    pipelineTabs->addTab(predicateView_, "Predicate");
+    connect(predicateView_, &PredicateView::readRequested, this,
+            [this](qulonglong resource, qulonglong event, bool after, qulonglong request) {
+                runningPredicateRequest_ = request;
+                if (busy() || !frame_) {
+                    predicateView_->finish(request, {{"error", "Worker is busy"}});
+                    return;
+                }
+                QStringList args{"predicate", capturePath_,
+                                 "--event",   QString::number(event),
+                                 "--id",      QString::number(resource)};
+                if (!after)
+                    args << "--before";
+                startWorker(args, false);
+                if (process_.state() == QProcess::NotRunning)
+                    predicateView_->finish(request, {{"error", "Cannot start predicate inspection"}});
+            });
     centerTabs_->addTab(pipelineTabs, "Pipeline");
     connect(capturedState_, &CommandStateView::eventRequested, this, &MainWindow::locateEvent);
     connect(capturedState_, &CommandStateView::resourceRequested, this, &MainWindow::inspectResource);
@@ -797,6 +821,7 @@ void MainWindow::buildUi() {
     });
     connect(adapter_, &QComboBox::currentIndexChanged, this, [this] {
         replayedState_->invalidate();
+        predicateView_->invalidate();
         ++revision_;
         if (process_.state() != QProcess::NotRunning)
             cancel();
@@ -843,6 +868,7 @@ void MainWindow::closeEvent(QCloseEvent *e) {
 }
 void MainWindow::setBusy(bool busy) {
     replayedState_->setWorkerBusy(busy);
+    predicateView_->setWorkerBusy(busy);
     openAction_->setEnabled(!busy);
     replayAction_->setEnabled(!busy && bool(frame_));
     collectAction_->setEnabled(!busy && bool(frame_));
@@ -958,6 +984,8 @@ void MainWindow::finishWorker(int code, QProcess::ExitStatus status) {
     }
     setBusy(false);
     if (runningRevision_ != revision_) {
+        if (runningKind_ == "predicate")
+            predicateView_->finish(runningPredicateRequest_, {{"error", "Cancelled"}});
         if (runningKind_ == "replay-pipeline")
             replayedState_->finishReplay(runningPipelineRequest_, {{"error", "Cancelled"}});
         statusBar()->showMessage("Cancelled", 2000);
@@ -984,6 +1012,17 @@ void MainWindow::finishWorker(int code, QProcess::ExitStatus status) {
             auto state = nlohmann::json::parse(bytes.constData(), bytes.constData() + bytes.size());
             auto accepted = replayedState_->finishReplay(runningPipelineRequest_, std::move(state));
             statusBar()->showMessage(accepted ? "Replay state ready" : "Pipeline result discarded", 3000);
+            emit taskFinished(accepted);
+            return;
+        }
+        if (runningKind_ == "predicate") {
+            QFile predicateFile(jobDir_->path() + "/result/predicate.json");
+            if (!predicateFile.open(QIODevice::ReadOnly))
+                throw std::runtime_error("Predicate output is missing");
+            auto bytes = predicateFile.readAll();
+            auto result = nlohmann::json::parse(bytes.constData(), bytes.constData() + bytes.size());
+            auto accepted = predicateView_->finish(runningPredicateRequest_, result);
+            statusBar()->showMessage(accepted ? "Predicate ready" : "Predicate result discarded", 3000);
             emit taskFinished(accepted);
             return;
         }
@@ -1018,11 +1057,14 @@ void MainWindow::finishWorker(int code, QProcess::ExitStatus status) {
                                         .arg(geometry_["vertex_references"].toInteger())
                                         .arg(geometry_["unique_vertices"].toInteger()));
             const auto automatic = geometry_["draw_auto"].toObject();
-            geometryLabel_->setToolTip(automatic.isEmpty() ? QString{} :
-                QString::fromUtf8(QJsonDocument(automatic).toJson(QJsonDocument::Indented)));
+            geometryLabel_->setToolTip(
+                automatic.isEmpty()
+                    ? QString{}
+                    : QString::fromUtf8(QJsonDocument(automatic).toJson(QJsonDocument::Indented)));
             if (!automatic.isEmpty())
-                geometryLabel_->setText(geometryLabel_->text() +
-                    (automatic["history_verified"].toBool() ? " · SO verified" : " · Captured count"));
+                geometryLabel_->setText(geometryLabel_->text() + (automatic["history_verified"].toBool()
+                                                                      ? " · SO verified"
+                                                                      : " · Captured count"));
             geometryDir_ = std::move(jobDir_);
             centerTabs_->setCurrentWidget(geometryPane_);
             statusBar()->showMessage("IA geometry ready", 3000);
@@ -1090,6 +1132,8 @@ void MainWindow::finishWorker(int code, QProcess::ExitStatus status) {
         showError(QString::fromUtf8(e.what()));
         if (runningKind_ == "replay-pipeline")
             replayedState_->finishReplay(runningPipelineRequest_, {{"error", e.what()}});
+        if (runningKind_ == "predicate")
+            predicateView_->finish(runningPredicateRequest_, {{"error", e.what()}});
         emit taskFinished(false);
     }
 }
@@ -1131,6 +1175,7 @@ void MainWindow::selectEvent(Id id) {
     selectedEvent_ = id;
     capturedState_->setSelection(frame_, id);
     replayedState_->setSelection(frame_, id);
+    predicateView_->setSelection(frame_, id);
     selectedResource_ = 0;
     clearBufferDetails();
     updateExperimentActions();
@@ -1381,11 +1426,11 @@ void MainWindow::showPipeline(const State &s) {
                 link(group, QString("Sampler %1").arg(i), stage.samplers[i]);
     }
     auto so = new QTreeWidgetItem(pipeline_, {"SO", "", "Stream Output"});
-    for (UINT slot = 0; slot < std::min(s.soCount,4u); ++slot)
+    for (UINT slot = 0; slot < std::min(s.soCount, 4u); ++slot)
         link(so, QString("Buffer %1").arg(slot), s.so[slot],
              s.soOffsets[slot] == UINT32_MAX ? "Append" : QString("Offset %1").arg(s.soOffsets[slot]));
     so->setExpanded(s.soCount != 0);
-    so->setToolTip(2,"Captured binding offsets; live append positions have no native getter.");
+    so->setToolTip(2, "Captured binding offsets; live append positions have no native getter.");
     auto rs = new QTreeWidgetItem(pipeline_, {"RS", "", "Rasterizer"});
     link(rs, "State", s.rasterizer);
     link(rs, "Viewports", s.viewports);
@@ -1397,6 +1442,9 @@ void MainWindow::showPipeline(const State &s) {
         link(om, QString(i < s.omStart ? "RTV %1" : "UAV %1").arg(i), s.rtv[i]);
     link(om, "DSV", s.dsv);
     om->setExpanded(true);
+    auto predicate = new QTreeWidgetItem(pipeline_, {"Predication", "", "Conditional Execution"});
+    link(predicate, "Predicate", s.predicate, QString("Value %1").arg(s.predicateValue));
+    predicate->setExpanded(s.predicate != 0);
 }
 void MainWindow::inspectResource(Id id) {
     if (!frame_)
@@ -1440,6 +1488,17 @@ void MainWindow::inspectResource(Id id) {
             return;
         }
         auto resource = frame_->resource(id);
+        if (e.type == 0x96) {
+            auto descriptor = readPredicate(*frame_, id);
+            properties("Predicate", {{"ID", QString::number(id)},
+                                     {"Query", descriptor.type == 5 ? "Occlusion" : "SO overflow"},
+                                     {"Flags", QString::number(descriptor.flags)}});
+            predicateView_->selectResource(id);
+            auto tabs = findChild<QTabWidget *>("pipelineTabs");
+            tabs->setCurrentWidget(predicateView_);
+            centerTabs_->setCurrentWidget(tabs);
+            return;
+        }
         if (e.type == 0x97 || e.type == 0x98) {
             auto detail = inspectClass(*frame_, id);
             auto display = [](const nlohmann::json &value) {
@@ -1495,10 +1554,16 @@ void MainWindow::inspectResource(Id id) {
                     values.append(QPair<QString, QString>{"Execution", "Passthrough"});
                 auto group = new QTreeWidgetItem(shaderReflection_, {"Stream Output", "", ""});
                 for (const auto &element : so["entries"]) {
-                    auto name = element["semantic"].is_null() ? QString("Gap") : QString::fromStdString(element["semantic"].get<std::string>()) + QString::number(element["index"].get<UINT>());
+                    auto name = element["semantic"].is_null()
+                                    ? QString("Gap")
+                                    : QString::fromStdString(element["semantic"].get<std::string>()) +
+                                          QString::number(element["index"].get<UINT>());
                     new QTreeWidgetItem(group, {name, QString::number(element["output_slot"].get<UINT>()),
-                        QString("Stream %1 · components %2–%3").arg(element["stream"].get<UINT>())
-                            .arg(element["start_component"].get<UINT>()).arg(element["start_component"].get<UINT>() + element["component_count"].get<UINT>() - 1)});
+                                                QString("Stream %1 · components %2–%3")
+                                                    .arg(element["stream"].get<UINT>())
+                                                    .arg(element["start_component"].get<UINT>())
+                                                    .arg(element["start_component"].get<UINT>() +
+                                                         element["component_count"].get<UINT>() - 1)});
                 }
                 group->setExpanded(true);
             }
@@ -1773,6 +1838,7 @@ void MainWindow::updateExperimentActions() {
 }
 void MainWindow::experimentChanged() {
     replayedState_->invalidate();
+    predicateView_->invalidate();
     projectDirty_ = true;
     setWindowModified(true);
     ++revision_;

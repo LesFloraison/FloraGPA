@@ -1,4 +1,5 @@
 #include "Replay.h"
+#include "Unpredicated.h"
 #include <algorithm>
 #include <cmath>
 #include <d3dcompiler.h>
@@ -28,6 +29,8 @@ uint32_t typed(uint32_t f) {
 } // namespace
 Image Replay::previewTexture(Id id, uint32_t mip, uint32_t layer, uint32_t slice, double low, double high,
                              const std::string &channel) {
+    Unpredicated unpredicated(context_.Get());
+    PredicateIsolation isolation(*this);
     if (!std::isfinite(low) || !std::isfinite(high) || !std::isfinite(high - low) || high <= low)
         throw std::runtime_error("Display range must be finite and increasing");
     if (channel != "rgba" && channel != "rgb" && channel != "r" && channel != "g" && channel != "b" &&

@@ -60,6 +60,32 @@ class Replay {
     Com<ID3D11DeviceContext> context_;
     Com<ID3D11DeviceContext1> context1_;
     std::map<Id, Com<IUnknown>> objects_;
+    struct PredicateSegment {
+        Com<ID3D11Predicate> native, mirror;
+    };
+    struct PredicateInterval {
+        PredicateSegment current;
+        std::vector<PredicateSegment> completed;
+    };
+    std::map<Id, PredicateInterval> activePredicates_;
+    Id boundPredicate_ = 0;
+    uint32_t predicateValue_ = 0;
+    unsigned predicateIsolationDepth_ = 0;
+    class PredicateIsolation {
+        Replay &replay_;
+        std::map<Id, PredicateSegment> next_;
+
+      public:
+        explicit PredicateIsolation(Replay &replay);
+        ~PredicateIsolation();
+        PredicateIsolation(const PredicateIsolation &) = delete;
+        PredicateIsolation &operator=(const PredicateIsolation &) = delete;
+    };
+    Com<ID3D11Predicate> createPredicate(Id id, bool readable = false);
+    void bindPredicate(Id id, uint32_t value);
+    void applyPredicate(uint16_t type, Bytes payload);
+    void resetPredicates();
+    bool waitIdle(unsigned timeoutMs);
     std::map<Id, std::array<bool, 128>> usedSrvs_;
     std::map<Id, uint32_t> interfaceSlots_;
     std::set<Id> passthroughShaders_;
@@ -83,7 +109,8 @@ class Replay {
     void resetStreamOutputBindings();
     std::vector<ActiveStream> beginStreamOutput(const State &state);
     void endStreamOutput(Id event, const std::vector<ActiveStream> &active);
-    Com<ID3D11GeometryShader> createStreamOutputShader(Bytes bytes, Id declaration, ID3D11ClassLinkage *linkage);
+    Com<ID3D11GeometryShader> createStreamOutputShader(Bytes bytes, Id declaration,
+                                                       ID3D11ClassLinkage *linkage);
     std::map<std::pair<uint32_t, uint32_t>, Com<ID3D11ComputeShader>> counterWrapShaders_;
     struct Range {
         Id buffer;
@@ -135,6 +162,13 @@ class Replay {
                          double high = 1, const std::string &channel = "rgba");
     std::vector<uint8_t> readBuffer(Id id);
     uint32_t readCounter(Id view);
+    struct PredicateResult {
+        std::string status = "pending";
+        std::optional<bool> value;
+        bool bound = false;
+        uint32_t predicateValue{};
+    };
+    PredicateResult readPredicateResult(Id resource, unsigned timeoutMs = 1000);
     void inspectEventInputs(Id event, const std::function<void()> &inspect);
     // Borrowed native objects, valid only during the callback. The observer must not mutate state.
     using NativeStateObserver =

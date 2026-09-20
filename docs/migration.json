@@ -465,10 +465,12 @@
       "description": "Small offscreen DX11 backend using only Windows system APIs, never GPA DLLs.",
       "status": "partial",
       "native": [
-        "src/replay/Replay.cpp"
+        "src/replay/Replay.cpp",
+        "src/replay/Unpredicated.h"
       ],
       "validation": [
-        "docs/NATIVE_BASELINE.md"
+        "docs/NATIVE_BASELINE.md",
+        "Unpredicated guards restore the exact native predicate pointer and raw BOOL around readback, counter inspection and buffer edit preparation/restoration."
       ]
     },
     {
@@ -1556,9 +1558,17 @@
       "sha256": "1bd645fbd7b894a1eaeac009135dc6c50952e7311af29780bb09e15c08d7d0d0",
       "lines": 79,
       "description": "Exclude helper draws from captured boolean query intervals.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": [
+        "src/replay/Predication.cpp",
+        "src/replay/TexturePreview.cpp"
+      ],
+      "validation": [
+        "Native predicate intervals are split around texture preview helper draws; completed segments reduce by logical OR using a real GPU predicate, including readable mirrors for hint predicates.",
+        "tests/PredicationTests.cpp: false/true occlusion, hint queries, SO overflow, repeated replay and active-query reset. Full private diagnostic consumers are not yet migrated.",
+        "artifacts/ctest-predication-release.log and artifacts/ctest-predication-debug.log: all 18 suites passed; 39 native predicate test cases per configuration.",
+        "artifacts/predicate-package-comparison/validation.json: 624 comparisons passed with Windows-only child PATH; artifacts/validation-predication-package/validation.json: both golden captures and disabled-draw negative controls passed."
+      ]
     },
     {
       "module": "predicate_setters.py",
@@ -1574,9 +1584,20 @@
       "sha256": "1646a76da2aa6ebaab347926351452f49882c6124d00f6d65c1714c726347dc5",
       "lines": 94,
       "description": "Recovered predicate resources and native Begin/End/SetPredication records.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": [
+        "src/core/Predication.cpp",
+        "src/replay/Predication.cpp",
+        "src/application/PredicateInspector.cpp",
+        "src/app/PredicateView.cpp"
+      ],
+      "validation": [
+        "Checked predicate descriptors and all six Begin/End/SetPredication wire families; snapshot bindings, seed intervals, repeated replay and GPU query inspection.",
+        "tests/PredicationTests.cpp; tools/validate_predication_port.py: 624 hardware/WARP comparisons, including raw BOOL, active/seed/hint results, clear/copy/dispatch, four-stream overflow, supported experiments and rejection cases.",
+        "tests/UiTests.cpp: real-worker boundary inspection and stale-result discard. Predicate setter experiments and private diagnostic replay integration remain pending.",
+        "artifacts/ctest-predication-release.log and artifacts/ctest-predication-debug.log: all 18 suites passed; 39 native predicate test cases per configuration.",
+        "artifacts/predicate-package-comparison/validation.json: 624 comparisons passed with Windows-only child PATH; artifacts/validation-predication-package/validation.json: both golden captures and disabled-draw negative controls passed."
+      ]
     },
     {
       "module": "presentation.py",

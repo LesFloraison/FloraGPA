@@ -1,10 +1,12 @@
 #include "ClassCapture.h"
-#include "StreamCapture.h"
+#include "PredicateCapture.h"
 #include "StateCapture.h"
+#include "StreamCapture.h"
 #include "SyntheticCapture.h"
 #include "app/Appearance.h"
 #include "app/CommandStateView.h"
 #include "app/MainWindow.h"
+#include "app/PredicateView.h"
 #include <QAbstractItemModelTester>
 #include <QAction>
 #include <QCryptographicHash>
@@ -29,41 +31,111 @@ class UiTests final : public QObject {
         QVERIFY(window.grab().save(directory + '/' + name + ".png"));
     }
   private slots:
+    void predicateInspector() {
+        using namespace flora;
+        auto capture = testing::predicateCapture(false, 0);
+        QTemporaryDir dir;
+        capture.save(dir.path() + "/predicate.gpa_frame");
+        MainWindow window;
+        window.resize(1500, 950);
+        window.show();
+        QSignalSpy done(&window, &MainWindow::taskFinished);
+        window.openCapture(dir.path() + "/predicate.gpa_frame");
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY2(done.takeLast()[0].toBool(), qPrintable(window.statusBar()->currentMessage()));
+        auto view = window.findChild<PredicateView *>("predicatePane");
+        QVERIFY(view);
+        auto tabs = window.findChild<QTabWidget *>("pipelineTabs");
+        window.findChild<QTabWidget *>("analysisTabs")->setCurrentWidget(tabs);
+        tabs->setCurrentWidget(view);
+        auto read = view->findChild<QAction *>("readPredicate");
+        auto boundary = view->findChild<QComboBox *>("predicateBoundary");
+        auto fields = view->findChild<QTreeWidget *>("predicateFields");
+        QSignalSpy inspected(view, &PredicateView::inspectionFinished);
+        auto frame = std::make_shared<Frame>((dir.path() + "/predicate.gpa_frame").toStdWString());
+        // Drive explicit boundaries through the real isolated worker.
+        for (auto event : {1000u, 1100u, 1200u}) {
+            view->setSelection(frame, event);
+            boundary->setCurrentIndex(1);
+            QTRY_VERIFY_WITH_TIMEOUT(read->isEnabled(), 30000);
+            read->trigger();
+            QTRY_VERIFY_WITH_TIMEOUT(!inspected.empty(), 30000);
+            QVERIFY(inspected.takeLast()[0].toBool());
+            QCOMPARE(fields->topLevelItem(0)->text(1), event == 1000 ? QString("active") : QString("ready"));
+            QCOMPARE(fields->topLevelItem(1)->text(1), event == 1000 ? QString("—") : QString("false"));
+            QCOMPARE(fields->topLevelItem(2)->text(1), event == 1200 ? QString("true") : QString("false"));
+        }
+        snapshot(window, "predicate-inspector");
+        read->trigger();
+        boundary->setCurrentIndex(0);
+        QTRY_VERIFY_WITH_TIMEOUT(read->isEnabled(), 30000);
+        QCOMPARE(fields->topLevelItemCount(), 0);
+        QVERIFY(inspected.empty());
+    }
+    void predicateStaleResult() {
+        using namespace flora;
+        auto capture = testing::predicateCapture();
+        QTemporaryDir dir;
+        capture.save(dir.path() + "/predicate.gpa_frame");
+        auto frame = std::make_shared<Frame>((dir.path() + "/predicate.gpa_frame").toStdWString());
+        PredicateView view;
+        view.setSelection(frame, 1000);
+        QSignalSpy requests(&view, &PredicateView::readRequested);
+        auto read = view.findChild<QAction *>("readPredicate");
+        read->trigger();
+        QCOMPARE(requests.size(), 1);
+        auto token = requests.takeFirst()[3].toULongLong();
+        view.setSelection(frame, 1100);
+        QVERIFY(!view.finish(token, {{"error", "obsolete"}}));
+        QCOMPARE(view.findChild<QTreeWidget *>("predicateFields")->topLevelItemCount(), 0);
+    }
     void streamOutputInspector() {
         using namespace flora;
         auto capture = testing::streamCapture();
-        QTemporaryDir dir;capture.save(dir.path()+"/so.gpa_frame");
-        MainWindow window;window.resize(1500,950);window.show();
-        QSignalSpy done(&window,&MainWindow::taskFinished);
-        window.openCapture(dir.path()+"/so.gpa_frame");
-        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(),30000);
-        QVERIFY2(done.takeLast()[0].toBool(),qPrintable(window.statusBar()->currentMessage()));
-        auto resources=window.findChild<QTableView *>("resources");
-        bool selected=false;
-        for(int i=0;i<resources->model()->rowCount();++i) {
-            auto index=resources->model()->index(i,0);
-            if(index.data(Qt::UserRole).toULongLong()==60) {resources->setCurrentIndex(index);selected=true;break;}
+        QTemporaryDir dir;
+        capture.save(dir.path() + "/so.gpa_frame");
+        MainWindow window;
+        window.resize(1500, 950);
+        window.show();
+        QSignalSpy done(&window, &MainWindow::taskFinished);
+        window.openCapture(dir.path() + "/so.gpa_frame");
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY2(done.takeLast()[0].toBool(), qPrintable(window.statusBar()->currentMessage()));
+        auto resources = window.findChild<QTableView *>("resources");
+        bool selected = false;
+        for (int i = 0; i < resources->model()->rowCount(); ++i) {
+            auto index = resources->model()->index(i, 0);
+            if (index.data(Qt::UserRole).toULongLong() == 60) {
+                resources->setCurrentIndex(index);
+                selected = true;
+                break;
+            }
         }
         QVERIFY(selected);
-        auto properties=window.findChild<QTreeWidget *>("properties");
-        bool declaration=false;
-        for(QTreeWidgetItemIterator it(properties);*it;++it)
-            if((*it)->text(0)=="SO declaration") declaration=(*it)->text(1)=="62";
+        auto properties = window.findChild<QTreeWidget *>("properties");
+        bool declaration = false;
+        for (QTreeWidgetItemIterator it(properties); *it; ++it)
+            if ((*it)->text(0) == "SO declaration")
+                declaration = (*it)->text(1) == "62";
         QVERIFY(declaration);
-        auto reflection=window.findChild<QTreeWidget *>("shaderReflection");
-        QCOMPARE(reflection->topLevelItem(0)->text(0),QString("Stream Output"));
-        QCOMPARE(reflection->topLevelItem(0)->child(0)->text(0),QString("SV_Position0"));
-        snapshot(window,"stream-output-shader");
-        auto api=window.findChild<QTableView *>("apiLog");
-        api->setCurrentIndex(api->model()->index(2,0));
-        QAction *inspect=nullptr;
-        for(auto action:window.findChildren<QAction *>()) if(action->text()=="Inspect IA") inspect=action;
-        QVERIFY(inspect);done.clear();inspect->trigger();
-        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(),30000);
-        QVERIFY2(done.takeLast()[0].toBool(),qPrintable(window.statusBar()->currentMessage()));
-        auto geometry=window.findChild<QTableView *>("geometryTable");
-        QCOMPARE(geometry->model()->rowCount(),6);
-        snapshot(window,"stream-output-geometry");
+        auto reflection = window.findChild<QTreeWidget *>("shaderReflection");
+        QCOMPARE(reflection->topLevelItem(0)->text(0), QString("Stream Output"));
+        QCOMPARE(reflection->topLevelItem(0)->child(0)->text(0), QString("SV_Position0"));
+        snapshot(window, "stream-output-shader");
+        auto api = window.findChild<QTableView *>("apiLog");
+        api->setCurrentIndex(api->model()->index(2, 0));
+        QAction *inspect = nullptr;
+        for (auto action : window.findChildren<QAction *>())
+            if (action->text() == "Inspect IA")
+                inspect = action;
+        QVERIFY(inspect);
+        done.clear();
+        inspect->trigger();
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY2(done.takeLast()[0].toBool(), qPrintable(window.statusBar()->currentMessage()));
+        auto geometry = window.findChild<QTableView *>("geometryTable");
+        QCOMPARE(geometry->model()->rowCount(), 6);
+        snapshot(window, "stream-output-geometry");
     }
     void classLinkageInspector() {
         using namespace flora;

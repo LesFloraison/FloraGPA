@@ -14,9 +14,10 @@ GF2 与 BF1 DX11 捕获。**尚未完成原 Python 版本的全部功能迁移�
 | 事件 | draw/dispatch 选择、快照管线、前后边界重放、事件启停 | 部分命令执行及 setter 实验仍待迁移 |
 | 捕获命令状态 | 六阶段 setter、CB1 范围、IA/RS/OM/SO/predicate 参数、扩展 UAV 槽元数据；命令前/后、逐字段来源、资源重叠失效与快照校准；Pipeline 页异步读取、筛选、跳转、JSON 导出 | 原始捕获状态，不应用实验；只读 DSV / 模糊 3D 重叠保持未知；SO 偏移是 setter 参数，隐藏 counter 和实时写入位置不由此推断 |
 | 命令间输入绑定 | 实际执行 IA layout / VB / IB、六阶段 SRV / sampler、CB / CB1；验证槽位、数组、资源类型、IA bind flags、stride 和 CB1 对齐 / 驱动支持；缺失绑定按阶段 / 槽位追踪 | 缺失资源未被后续 setter / 完整快照 / ClearState 恢复时，选定边界明确失败；setter 编辑仍待迁移 |
-| 重放管线状态 | Pipeline > Replay State 通过 Worker 读取实际六阶段绑定、CB1 范围、IA/RS/OM/SO/predicate、视图及状态描述；命令前/后、实验输入克隆、禁用状态、筛选、跳转和 JSON 导出 | 仅覆盖后端已支持的命令和实验；SO 实时写入位置保持未知；predication、SO retained 实验及完整管线编辑仍待迁移 |
+| 重放管线状态 | Pipeline > Replay State 通过 Worker 读取实际六阶段绑定、CB1 范围、IA/RS/OM/SO/predicate、视图及状态描述；命令前/后、实验输入克隆、禁用状态、筛选、跳转和 JSON 导出 | 仅覆盖后端已支持的命令和实验；SO 实时写入位置保持未知；SO retained 实验及完整管线编辑仍待迁移 |
 | 动态 shader 类链接 | 六阶段 draw/dispatch 快照的 linkage、具名/显式创建实例、有序接口绑定、CB/texture/sampler 偏移；动态/静态 shader 替换；带 SO 的 linked GS；Qt 资源属性、接口槽数和 CLI 元数据导出 | shader setter 实验和专用覆盖分析仍待迁移；本机已复现的空函数表 PS 驱动崩溃改为明确提示使用 WARP |
-| Stream output / DrawAuto | SO 声明、五版 context 的目标 setter、普通 GS / VS / DS / 仅输出签名的 passthrough；重复/dirty 快照、显式重置、追加、ClearState；逐流 GPU 查询、按实际写入字节及 IA 范围重建 DrawAuto；Qt SO 属性/目标链接和几何导出 | 输出/setter 实验的 retained 目标、predication 和私有诊断重放仍待迁移；无帧内历史时原始重放保留捕获计数并标注未验证，有编辑时拒绝猜测 |
+| Stream output / DrawAuto | SO 声明、五版 context 的目标 setter、普通 GS / VS / DS / 仅输出签名的 passthrough；重复/dirty 快照、显式重置、追加、ClearState；逐流 GPU 查询、按实际写入字节及 IA 范围重建 DrawAuto；Qt SO 属性/目标链接和几何导出 | 输出/setter 实验的 retained 目标和私有诊断重放仍待迁移；无帧内历史时原始重放保留捕获计数并标注未验证，有编辑时拒绝猜测 |
+| Predication | occlusion / SO overflow predicate 资源、六组 Begin/End/SetPredication、快照条件绑定、原始 BOOL、实际 GPU 结果；Pipeline > Predicate 前后边界检查与 JSON 导出；辅助预览查询隔离、读回和编辑准备的条件恢复 | active / hint 结果明确不可读；setter 实验及尚未迁移的私有诊断消费者仍待闭合；非标准 BOOL 的驱动差异保留 |
 | API 检查 | 捕获字段、偏移/原始位、可选数组、引用跳转、资源/多词筛选、JSON/CSV 导出；getter、annotation、query 与 command-list 调用元数据 | 解码不代表执行；annotation 层级和 view typed-format 预览衔接尚未闭合 |
 | Context / command-list | 五种 context 接口身份、immediate/deferred 区分；缺失 context 的严格 Map READ 证据恢复；command-list 资源、owner 和 Execute/Finish 清单；Qt 字段树、证据导航、JSON 导出 | 推断不补造版本/指针/标志；保留指针与 ID 候选冲突；与 Python 相同，仅接受 immediate-context 的 Finish 空操作，未恢复列表执行 |
 | 捕获查询值 | 按同 ID、命令顺序使用 GetDesc/GetDataSize/CreateQuery/predicate 元数据；BOOL 完整值与 UINT64 低位、缺失字节、HRESULT/冲突状态 | 表示捕获时保存的内存字，不是新执行的 GPU query；原始高位缺失时保持不完整 |
@@ -31,6 +32,14 @@ GF2 与 BF1 DX11 捕获。**尚未完成原 Python 版本的全部功能迁移�
 | 性能 | 原生 D3D11 时间戳、disjoint 与 pipeline statistics | 尚未迁移原版多轮调度、Intel 硬件指标/GTPin |
 
 ## 验证证据
+
+- Predication 的 Python 对照共 624 项通过：硬件/WARP、false/true、原始 BOOL
+  0/1/7/0xffffffff、六组 context 命令、前后边界、空查询初值、hint、ClearState、
+  shader 替换/生产者禁用/跳过 dispatch 的输出编辑、四流溢出和非法调用拒绝。
+  16 个完整管线边界的每个字段也与原版一致。非标准 BOOL 的硬件/WARP 差异
+  同样由原 Python 复现，未将原始值归一化。Qt Worker 验证 active/ready/false、
+  绑定状态和过期结果丢弃；界面截图为 `artifacts/predicate-ui/predicate-inspector.png`。
+  初轮对照证据为 `artifacts/predicate-comparison-first/validation.json`。
 
 - SO / DrawAuto 原生回归覆盖硬件和 WARP、重复重放、dirty 快照重置、输出签名、
   点/线/三角形计数、输入克隆和禁用生产者、未知历史的实验拒绝，以及声明/数组的
@@ -216,9 +225,21 @@ SO / DrawAuto 的发布包为 `out/FloraGPA-stream-output-captures/`。最终对
 发布版 GUI/Worker 的完整原始线输出重放、时间戳采集及离屏渲染为
 `so-package-smoke-fixed/validation.json`，截图为 `so-package-smoke-fixed/package-gui.png`。
 
+Predication 发布包为 `out/FloraGPA-predication/`。Release / Debug 各 18 项完整
+CTest 回归全部通过，日志为 `artifacts/ctest-predication-release.log` 和
+`artifacts/ctest-predication-debug.log`；各自的原生 predicate 测试有 39 项通过。
+仅系统 PATH 的发布包 624 项对照为
+`artifacts/predicate-package-comparison/validation.json`；GF2/BF1 黄金帧与
+关闭 draw 的负对照为 `artifacts/validation-predication-package/validation.json`。
+
+新增 predication 后，最终发布包的 690 项 SO / DrawAuto 回归仍全部通过，证据为
+`artifacts/so-predication-package-comparison/validation.json`。仅系统 PATH 的
+GUI/Worker 已完成 GF2 打开、重放和 GPU 指标采集，窗口截图为
+`artifacts/predicate-package-smoke/package-gui.png`，运行记录为同目录 `validation.json`。
+
 ## 尚未闭合的迁移范围
 
-1. 完整 setter/command/context 的重放与实验语义、predication、SO 的 retained 输出与私有诊断、
+1. 完整 setter/command/context 的重放与实验语义、predicate setter 编辑、SO 的 retained 输出与私有诊断、
    class linkage 的 setter 衔接、扩展 UAV、MSAA 与 planar 等特殊 replay 路径。
 2. 其余资源/状态/绑定/命令编辑，完整 counter 命令引用、后变换几何、覆盖率、
    quad 与像素分析。

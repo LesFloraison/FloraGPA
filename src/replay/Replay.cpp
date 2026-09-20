@@ -1,9 +1,11 @@
 #include "Replay.h"
+#include "Unpredicated.h"
 #include "core/ClassLinkage.h"
 #include "core/Commands.h"
-#include "core/StreamOutput.h"
 #include "core/Dxbc.h"
 #include "core/InspectionRecords.h"
+#include "core/Predication.h"
+#include "core/StreamOutput.h"
 #include <algorithm>
 #include <chrono>
 #include <d3d11sdklayers.h>
@@ -51,6 +53,7 @@ Replay::Replay(const Frame &frame, ReplayOptions options) : frame_(frame), optio
     uavLimit_ = level >= D3D_FEATURE_LEVEL_11_1 ? 64 : 8;
 }
 Replay::~Replay() {
+    resetPredicates();
     if (context_) {
         context_->ClearState();
         context_->Flush();
@@ -180,6 +183,12 @@ IUnknown *Replay::object(Id id) {
                     writeCounter(obj.Get(), initial->second);
                 result = obj;
             }
+        } else if (t == 0x96) {
+            auto predicate = createPredicate(id);
+            Unpredicated guard(context_.Get());
+            context_->Begin(predicate.Get());
+            context_->End(predicate.Get());
+            result = predicate;
         } else if (t == 0x97) {
             readClassRecord(frame_, id);
             Com<ID3D11ClassLinkage> obj;
@@ -232,8 +241,8 @@ IUnknown *Replay::object(Id id) {
                 hasRdef |= tag == 0x46454452;
                 hasInterfaces |= tag == 0x45434649;
             }
-            bool passthrough = t == 0x91 && so &&
-                               (program.empty() || (Reader(program).read<UINT>() >> 16) != 2);
+            bool passthrough =
+                t == 0x91 && so && (program.empty() || (Reader(program).read<UINT>() >> 16) != 2);
             if (passthrough) {
                 if (!program.empty()) {
                     auto stage = Reader(program).read<UINT>() >> 16;
@@ -461,7 +470,8 @@ void Replay::bind(const State &s, bool compute) {
         for (size_t i = 0; i < sam.size(); ++i)
             sam[i] = get<ID3D11SamplerState>(x.samplers[i]);
         for (size_t i = 0; i < srv.size(); ++i)
-            if (shader && !passthroughShaders_.contains(x.shader) && (x.classCount || usedSrvs_.at(x.shader)[i]))
+            if (shader && !passthroughShaders_.contains(x.shader) &&
+                (x.classCount || usedSrvs_.at(x.shader)[i]))
                 srv[i] = get<ID3D11ShaderResourceView>(x.srv[i]);
         (context_.Get()->*cbFns[stage])(0, 14, cb.data());
         (context_.Get()->*srvFns[stage])(0, 128, srv.data());
@@ -499,9 +509,7 @@ void Replay::bind(const State &s, bool compute) {
         context_->RSSetScissorRects(0, nullptr);
     context_->OMSetBlendState(get<ID3D11BlendState>(s.blend), s.blendFactor.data(), s.sampleMask);
     context_->OMSetDepthStencilState(get<ID3D11DepthStencilState>(s.depthState), s.stencilRef);
-    if (s.predicate)
-        throw std::runtime_error("Predication replay migration pending");
-    context_->SetPredication(nullptr, FALSE);
+    bindPredicate(s.predicate, s.predicateValue);
     bool extended = std::any_of(s.omExtended.begin(), s.omExtended.end(), [](Id x) { return x != 0; }) ||
                     std::any_of(s.csExtended.begin(), s.csExtended.end(), [](Id x) { return x != 0; });
     if (extended)
@@ -783,7 +791,8 @@ void Replay::command(const Entry &e) {
             const auto &a = event.args;
             auto autoCount = t == 0x38 ? drawAutoParameters(e.id).vertexCount : 0;
             auto arguments = event.argumentBuffer ? get<ID3D11Buffer>(event.argumentBuffer) : nullptr;
-            auto activeStreams = t != 0x35 && t != 0x36 ? beginStreamOutput(state) : std::vector<ActiveStream>{};
+            auto activeStreams =
+                t != 0x35 && t != 0x36 ? beginStreamOutput(state) : std::vector<ActiveStream>{};
             if (options_.timings) {
                 Timestamp timestamp{e.id};
                 D3D11_QUERY_DESC desc{D3D11_QUERY_TIMESTAMP, 0};
@@ -842,6 +851,10 @@ void Replay::command(const Entry &e) {
     if (isStreamOutputTargets(t)) {
         applyStreamOutput(payload);
         counts["SOSetTargets"]++;
+        return;
+    }
+    if (predicateOperation(t)) {
+        applyPredicate(t, payload);
         return;
     }
     if ((t >= 0x249 && t <= 0x254) || t == 0x34e5 || t == 0x34ee || t == 0x34f4 || t == 0x351c ||
@@ -943,6 +956,8 @@ void Replay::command(const Entry &e) {
         owner.skip(8);
         immediate(owner.read<Id>());
         context_->ClearState();
+        boundPredicate_ = 0;
+        predicateValue_ = 0;
         resetStreamOutputBindings();
         clearBindingGaps();
         for (auto &ranges : ranges_)
@@ -976,6 +991,7 @@ void Replay::run(const std::function<void(Id, size_t, size_t)> &progress,
     if (options_.until && frame_.entry(options_.until).category != 7)
         throw std::runtime_error("Stop event is not an API command");
     context_->ClearState();
+    resetPredicates();
     clearBindingGaps();
     objects_.clear();
     usedSrvs_.clear();
@@ -987,10 +1003,10 @@ void Replay::run(const std::function<void(Id, size_t, size_t)> &progress,
     soQueries_.clear();
     soAutoResults_.clear();
     streamOutputHistory.clear();
-    soCountRequiresKnown_ = options_.editedEvents || !options_.shaders.empty() || !options_.textures.empty() ||
-                           !options_.disabled.empty() || !options_.buffers.empty() ||
-                           !options_.commandPayloads.empty() || !options_.updateSources.empty() ||
-                           !options_.uavCounters.empty();
+    soCountRequiresKnown_ = options_.editedEvents || !options_.shaders.empty() ||
+                            !options_.textures.empty() || !options_.disabled.empty() ||
+                            !options_.buffers.empty() || !options_.commandPayloads.empty() ||
+                            !options_.updateSources.empty() || !options_.uavCounters.empty();
     soCountEnabled_ = false;
     for (const auto &[id, entry] : frame_.entries())
         if ((entry.category == 7 && entry.type == 0x38) ||
@@ -1080,6 +1096,7 @@ void Replay::run(const std::function<void(Id, size_t, size_t)> &progress,
     replayComplete_ = true;
 }
 Image Replay::output(Id texture, UINT sub) {
+    Unpredicated guard(context_.Get());
     if (!texture && (!options_.until || !lastTarget_)) {
         std::vector<Resource> markers, live;
         for (auto &[id, e] : frame_.entries())
@@ -1148,6 +1165,7 @@ Image Replay::output(Id texture, UINT sub) {
     return out;
 }
 std::vector<uint8_t> Replay::readBuffer(Id id) {
+    Unpredicated guard(context_.Get());
     if (frame_.resource(id).type != 0x83)
         throw std::runtime_error("Readback requires a buffer resource");
     auto source = get<ID3D11Buffer>(id);
@@ -1176,9 +1194,8 @@ std::vector<uint8_t> Replay::readBuffer(Id id) {
 }
 std::string disassemble(Bytes data) {
     auto parts = readDxbcParts(data);
-    if (std::none_of(parts.begin(),parts.end(),[](const auto &part) {
-            return part.first == 0x52444853 || part.first == 0x58454853;
-        }))
+    if (std::none_of(parts.begin(), parts.end(),
+                     [](const auto &part) { return part.first == 0x52444853 || part.first == 0x58454853; }))
         return "// Signature only; no executable shader instructions.\n";
     Com<ID3DBlob> blob;
     check(D3DDisassemble(data.data(), data.size(), D3D_DISASM_ENABLE_INSTRUCTION_NUMBERING, nullptr, &blob),

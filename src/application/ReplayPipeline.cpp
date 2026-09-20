@@ -397,7 +397,7 @@ class Snapshot {
         BOOL predicateValue{};
         context_->GetPredication(&predicate, &predicateValue);
         resource("predicate", predicate.Get());
-        values_["predicate_value"] = predicateValue;
+        values_["predicate_value"] = uint32_t(predicateValue);
         Com<ID3D11Device> device;
         context_->GetDevice(&device);
         UINT limit = device->GetFeatureLevel() >= D3D_FEATURE_LEVEL_11_1 ? 64 : 8;

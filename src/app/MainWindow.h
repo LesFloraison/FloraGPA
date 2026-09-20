@@ -20,6 +20,7 @@
 
 namespace flora {
 class CommandStateView;
+class PredicateView;
 class MainWindow final : public QMainWindow {
     Q_OBJECT
   public:
@@ -98,6 +99,8 @@ class MainWindow final : public QMainWindow {
     QTreeWidget *pipeline_, *properties_, *metrics_, *statistics_;
     CommandStateView *capturedState_;
     CommandStateView *replayedState_;
+    PredicateView *predicateView_;
+    uint64_t runningPredicateRequest_ = 0;
     uint64_t runningPipelineRequest_ = 0;
     QPlainTextEdit *shader_, *log_;
     QTabWidget *shaderPane_;

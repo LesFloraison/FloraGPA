@@ -143,6 +143,22 @@ Changing the selection, boundary, experiment or adapter invalidates previous res
 Omit `--before` for the command's after boundary. Inspection writes
 `replay-pipeline.json` without frame image readback.
 
+**Pipeline > Predicate** reads native occlusion and stream-output overflow predicates
+at the selected command boundary. The compact inspector shows the query status,
+boolean result, binding and raw predicate value, with JSON export. Active queries
+and hint-only queries have no readable result. Captured Begin/End/SetPredication
+calls and snapshot bindings execute on the GPU; inspection helper draws are
+excluded from captured query intervals. Predicate setter editing remains pending.
+
+```powershell
+.\out\FloraGPA\FloraGPA.Cli.exe predicate D:\captures\sample.gpa_frame --event 430 --id 60 --out D:\results\predicate
+```
+
+Add `--before` for the command's before boundary. The output is `predicate.json`.
+Raw BOOL values are preserved: the tested WARP and hardware drivers differ for
+noncanonical values such as 7 and `0xffffffff`, also reproduced by the Python
+reference. Results describe this replay's GPU query, not captured GetData bytes.
+
 Dynamic shader linkage restores captured named and explicitly created class instances
 in all six draw/dispatch shader stages. Resource properties expose the linkage,
 instance descriptor and names; shader properties show the interface slot count.

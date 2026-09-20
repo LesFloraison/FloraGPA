@@ -1,9 +1,11 @@
 #include "core/UavCounters.h"
 #include "Replay.h"
+#include "Unpredicated.h"
 #include <d3dcompiler.h>
 
 namespace flora {
 uint32_t Replay::readCounter(Id view) {
+    Unpredicated guard(context_.Get());
     if (!describeCounter(frame_, view))
         throw std::runtime_error("UAV has no hidden counter");
     auto uav = get<ID3D11UnorderedAccessView>(view);
@@ -28,6 +30,7 @@ void Replay::writeCounter(Id view, uint32_t value) {
     writeCounter(get<ID3D11UnorderedAccessView>(view), value);
 }
 void Replay::writeCounter(ID3D11UnorderedAccessView *view, uint32_t value) {
+    Unpredicated guard(context_.Get());
     D3D11_UNORDERED_ACCESS_VIEW_DESC desc{};
     view->GetDesc(&desc);
     if (desc.Format != DXGI_FORMAT_UNKNOWN || desc.ViewDimension != D3D11_UAV_DIMENSION_BUFFER ||
