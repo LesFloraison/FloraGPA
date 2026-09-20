@@ -1801,9 +1801,16 @@
       "sha256": "b72334b8546d6e704f487ee7d4f9f8a89a05e4a0f0cefcec5730e50071844dc9",
       "lines": 224,
       "description": "CodeView local identities and HLSL live ranges resolved against native snapshots.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": [
+        "src/application/SourceVariables.cpp",
+        "src/application/CheckpointInspection.cpp"
+      ],
+      "validation": [
+        "docs/SOURCE_VARIABLES_MIGRATION.md",
+        "14060 symbol/type/value comparisons passed, including 9940 native Hardware/WARP snapshot records; 7 diagnostic wording differences preserve status and issue counts.",
+        "SPDB symbols are included in production checkpoint exports. SDBG assignments, native HS phase ownership and Qt source-variable integration remain pending."
+      ]
     },
     {
       "module": "output_commands.py",

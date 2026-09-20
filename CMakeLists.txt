@@ -51,6 +51,7 @@ target_sources(FloraExperiment PRIVATE src/application/DxbcCheckpointModel.cpp s
 target_sources(FloraExperiment PRIVATE src/application/DxbcCheckpoint.cpp)
 target_sources(FloraExperiment PRIVATE src/application/CheckpointInspection.cpp)
 target_sources(FloraExperiment PRIVATE src/application/ShaderSourceLines.cpp)
+target_sources(FloraExperiment PRIVATE src/application/SourceVariables.cpp)
 target_link_libraries(FloraExperiment PUBLIC Qt6::Gui)
 target_sources(FloraExperiment PRIVATE src/application/PredicateInspector.cpp)
 target_sources(FloraExperiment PRIVATE src/application/SetterEdits.cpp)

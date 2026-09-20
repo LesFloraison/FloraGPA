@@ -2,14 +2,22 @@
 
 已有可编译、可运行的 VS2022 / Qt Widgets 原生工程，能够独立重放当前验证的
 GF2 与 BF1 DX11 捕获。**尚未完成原 Python 版本的全部功能迁移。**
-当前独立包为 `out/FloraGPA-source-debug/FloraGPA.exe`。
+当前独立包为 `out/FloraGPA-source-variables/FloraGPA.exe`。
 
-最新一批接通 SPDB C13／SDBG 原始源码行映射与 checkpoint 指令源码位置。
+最新一批接通 SPDB 源码变量的 C++ 符号／类型／存活区间解析，并纳入正式
+checkpoint 导出；原生变量值解析 API 保留逐分量有效性、原始位值和冲突状态。
+14,060 项对照通过，包含 9,940 条 Hardware/WARP 快照记录，7 项仅诊断措辞不同。
+独立包 76 项源码捕获对照、相关 4 套 CTest、4 项黄金帧检查和 76 份运行时审计通过。
+SDBG 赋值重建、HS 阶段作用域归属、源码调用栈以及 Qt 源码变量窗口仍待迁移；
+HS 解析对照使用参考版提供的阶段作用域，不能据此声称原生阶段归属已完成。
+详见 [SOURCE_VARIABLES_MIGRATION.md](SOURCE_VARIABLES_MIGRATION.md)。
+
+上一批接通 SPDB C13／SDBG 原始源码行映射与 checkpoint 指令源码位置。
 6,515 项解析、路径、文本与边界对照全部通过；独立包 Hardware/WARP 的
 60 项 SPDB/SDBG GS/HS/DS 捕获对照通过，源码行与指令目录也参与完整比较。
 修正了 Qt 部署旧编译器漏报 `#line` 的问题，源码导航明确使用系统编译器。
 相关 CTest 与 53 项 Qt 回归通过；最终包 4 项黄金帧检查及 60 份运行时审计通过。
-源码变量、源码调用栈以及 Qt 源码调试入口仍待迁移，完整目标保持未完成。
+该批当时源码变量、源码调用栈以及 Qt 源码调试入口仍待迁移，完整目标保持未完成。
 详见 [SOURCE_LINES_MIGRATION.md](SOURCE_LINES_MIGRATION.md)。
 
 上一批接通 GS/DS/HS checkpoint／trace 的 C++ 正式采集与 CLI 导出：

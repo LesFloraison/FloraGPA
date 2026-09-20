@@ -2,8 +2,9 @@
 
 `ShaderSourceLines` now ports the recovered SPDB C13 and legacy SDBG instruction
 line readers. Checkpoint catalogs and captured reports include `source_lines`
-and unambiguous per-instruction `source_location` values. Source variables,
-source function/inline stacks and the Qt debugger remain pending.
+and unambiguous per-instruction `source_location` values. SPDB source-variable
+symbols have since been added; see [SOURCE_VARIABLES_MIGRATION.md](SOURCE_VARIABLES_MIGRATION.md).
+Source function/inline stacks and the Qt debugger remain pending.
 
 The native reader preserves embedded source bytes, encoding validity, checksums,
 original DXBC offsets, C13 base records, module checksums and inlinee tables.

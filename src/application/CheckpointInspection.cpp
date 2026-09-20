@@ -1,6 +1,7 @@
 #include "CheckpointInspection.h"
 #include "DxbcCheckpointModel.h"
 #include "ShaderSourceLines.h"
+#include "SourceVariables.h"
 #include "SystemDisassembly.h"
 #include <QDir>
 #include <QRegularExpression>
@@ -178,7 +179,10 @@ CheckpointInspection checkpointCatalog(Bytes shader, Id resource, const Json &ev
                      {"record_count", 0},
                      {"limits", limits},
                      {"source_lines", sourceLines},
-                     {"source_debug_status", "source_variables_and_stack_pending"}};
+                     {"source_variables", sourceVariables(shader)},
+                     {"source_debug_status", "sdbg_variables_source_stack_and_qt_pending"}};
+    if (options.stage == "hs")
+        result.report["source_debug_status"] = "hs_scope_attachment_source_stack_and_qt_pending";
     if (options.stage == "hs")
         result.report["hs_phases"] = checkpoint::hullPhases(parsed.code.instructions);
     if (options.trace)

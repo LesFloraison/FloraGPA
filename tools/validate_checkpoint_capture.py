@@ -1,6 +1,7 @@
 """Development-only comparison of native checkpoint capture and complete exports.
 
-Source variables and source stacks are explicitly pending. Original source lines are compared. Compare all other report fields,
+SPDB symbols and original source lines are compared. SDBG assignments, HS scope
+attachment and source stacks remain pending. Compare all other report fields,
 original bytecode/disassembly, and complete per-invocation histories (including
 raw register bits and CSVs). Atomic invocation/record allocation order may vary;
 never sort individual snapshots across invocations or discard their hit order.
@@ -52,7 +53,7 @@ def save(completed=False):
     sources = ('gs_checkpoint.py', 'vertex_writes.py', 'native_invocation_selector.py', 'dxbc_gs_checkpoint.py')
     (a.out/'validation.json').write_text(json.dumps(dict(
         completed=completed, passed=all(c['passed'] for c in checks), checks=checks,
-        pending=['source_variables', 'source_stack', 'Qt integration'],
+        pending=['SDBG source variables', 'HS source scope attachment', 'source_stack', 'Qt integration'],
         executable_sha256=hashlib.sha256(a.exe.read_bytes()).hexdigest(),
         reference_sources={s: hashlib.sha256((a.reference/'standalone'/s).read_bytes()).hexdigest() for s in sources}
     ), indent=2), encoding='utf-8')
@@ -155,6 +156,15 @@ def compare(name, path, stage, driver, instruction=None, trace=False, phase=None
     else:
         got = json.loads((actual/'checkpoint.json').read_text())
         want = json.loads(json.dumps(want))
+        symbols = copy.deepcopy(want['source_variables'])
+        # Phase ownership is attached by the Python source-stack module. Its native
+        # migration is pending; compare the decoded SPDB symbols independently.
+        symbols.pop('hs_phases', None)
+        if symbols.get('format') == 'SDBG assignments':
+            if got.get('source_variables', {}).get('status') != 'pending_native_sdbg_symbols':
+                differences.append(dict(source_variables='Missing explicit SDBG migration status'))
+        elif got.get('source_variables') != symbols:
+            differences.append(dict(source_variables='Decoded SPDB symbols differ'))
         left, right = core(want), core(got)
         for field in sorted(set(left)|set(right)):
             if left.get(field) != right.get(field):
@@ -211,6 +221,7 @@ if a.source_only:
     from validate_geometry_emissions_edges import replace
     from shader_project import compile_project
     from probe_hs_source_scopes import project as hull_project
+    from validate_native_source_variables import TYPED
     a.smoke = True
     for legacy in (False, True):
         tag = 'sdbg' if legacy else 'spdb'
@@ -228,6 +239,14 @@ if a.source_only:
             cases.append(('spdb-hs', path, 'hs', 61))
             path, _, _ = ds_fixture(a.out/'spdb-ds.gpa_frame')
             cases.append(('spdb-ds', path, 'ds', 83))
+    for tag, text in [('typed', TYPED), ('unused', TYPED.replace(
+            'a[(prim+gi)%3].x+a[(prim+gi)%3].y+a[(prim+gi)%3].z', 'a[(prim+gi)%3].x'))]:
+        path = a.out/('spdb-'+tag+'.gpa_frame')
+        geometry_fixture(path, topology='point')
+        project = dict(format='FloraGPA shader project 1', files=[dict(name='types.hlsl', text=text)],
+                       root='types.hlsl', entry='main', profile='gs_5_0', flags=5)
+        replace(path, path, compile_project(project)[0], data_id=81)
+        cases.append(('spdb-'+tag, path, 'gs', 81))
 else:
     path = calls_fixture(a.out/'calls')
     cases.append(('calls', path, 'gs', 81))

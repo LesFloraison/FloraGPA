@@ -5,6 +5,7 @@
 #include "application/InvocationSelector.h"
 #include "application/ShaderDebugData.h"
 #include "application/ShaderSourceLines.h"
+#include "application/SourceVariables.h"
 #include <QCoreApplication>
 #include <QFile>
 #include <QTemporaryDir>
@@ -40,6 +41,23 @@ Json inputsJson(const DeclaredInputs &inputs, bool domain) {
 }
 Json evaluate(const Json &j) {
     const auto op = j.at("op").get<std::string>();
+    if (op == "source-variables")
+        return sourceVariables(read(j.at("input")));
+    if (op == "resolve-source-variables")
+        return resolveSourceVariables(j.at("model"), j.at("registers"), j.at("metadata"), j.at("hit"),
+                                      j.at("offset"));
+    if (op == "codeview-numeric") {
+        const auto bytes = j.at("bytes").get<std::vector<uint8_t>>();
+        const auto [value, next] = codeview::numeric(bytes, j.value("offset", size_t(0)));
+        return Json::array({value, next});
+    }
+    if (op == "source-type") {
+        codeview::Records records;
+        for (const auto &row : j.at("records"))
+            records[row.at("id").get<uint32_t>()] = {row.at("kind").get<uint16_t>(),
+                                                     row.at("bytes").get<std::vector<uint8_t>>()};
+        return codeview::Types(std::move(records)).get(j.at("index"));
+    }
     if (op == "source-text") {
         const auto bytes = j.at("bytes").get<std::vector<uint8_t>>();
         const auto text = shader_debug::decodeSourceText(bytes);
@@ -188,6 +206,46 @@ int probe(const std::string &path) {
 class CheckpointTests final : public QObject {
     Q_OBJECT
   private slots:
+    void sourceValueValidity() {
+        auto model = Json::parse(R"({"scopes":[{"id":"main","name":"main","kind":"function"}],
+          "variables":[{"id":"wide","scope":"main","name":"wide",
+          "type":{"name":"double","size":8,"leaves":[{"path":"","offset":0,"size":8,"type":"double"}]},
+          "ranges":[{"register_type":0,"flags":1,"variable_offset":0,"size":8,
+          "start":8,"end":32,"gaps":[[12,4]],"register_offsets":[0]}]}]})");
+        auto regs =
+            Json::parse(R"([{"name":"r0","bits":[0,1074003968,1,2],"written":[true,true,true,true]}])");
+        auto values = resolveSourceVariables(model, regs, Json::object(), Json::object(), 16);
+        QVERIFY(values.at(0).at("value") == "2.5");
+        QVERIFY(values.at(0).at("references") == Json::array({"r0.x", "r0.y"}));
+        for (auto offset : {7u, 20u, 23u, 32u}) {
+            values = resolveSourceVariables(model, regs, Json::object(), Json::object(), offset);
+            QVERIFY(values.at(0).at("status") == "unavailable");
+            QVERIFY(values.at(0).at("bits").is_null());
+        }
+        regs[0]["written"][1] = false;
+        values = resolveSourceVariables(model, regs, Json::object(), Json::object(), 16);
+        QVERIFY(values.at(0).at("status") == "unavailable");
+        regs[0]["written"][1] = true;
+        auto alias = model["variables"][0]["ranges"][0];
+        alias["register_offsets"] = Json::array({8});
+        model["variables"][0]["ranges"].push_back(alias);
+        values = resolveSourceVariables(model, regs, Json::object(), Json::object(), 16);
+        QVERIFY(values.at(0).at("status") == "ambiguous");
+        QVERIFY(values.at(0).at("bits").is_null());
+        // Without phase ownership, an HS snapshot cannot borrow arbitrary locals.
+        values = resolveSourceVariables(model, regs, Json{{"shader_stage", "hs"}, {"hs_phase", {{"id", 0}}}},
+                                        Json::object(), 16);
+        QVERIFY(values.empty());
+    }
+    void sourceTypeBounds() {
+        const std::vector<uint8_t> negative{0, 128, 255};
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, codeview::numeric(negative, 0));
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, codeview::numeric(negative, 99));
+        codeview::Types recursive({{0x1000, {0x1001, {0, 16, 0, 0}}}});
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, recursive.get(0x1000));
+        const std::vector<uint8_t> truncated(55);
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, codeview::records(truncated));
+    }
     void decodedRecordsAndExports() {
         Json meta = Json::parse(R"({"record_stride":64,"registers":1,"records":3,
           "invocations":1,"instance_count":1,"shader_stage":"gs","trace":true,
