@@ -1,7 +1,7 @@
 """Development-only comparison of native checkpoint capture and complete exports.
 
-SPDB symbols and original source lines are compared. SDBG assignments, HS scope
-attachment and source stacks remain pending. Compare all other report fields,
+SPDB symbols, original source lines, source stacks and HS phase ownership are
+compared. SDBG assignments and Qt integration remain pending. Compare all other report fields,
 original bytecode/disassembly, and complete per-invocation histories (including
 raw register bits and CSVs). Atomic invocation/record allocation order may vary;
 never sort individual snapshots across invocations or discard their hit order.
@@ -53,7 +53,7 @@ def save(completed=False):
     sources = ('gs_checkpoint.py', 'vertex_writes.py', 'native_invocation_selector.py', 'dxbc_gs_checkpoint.py')
     (a.out/'validation.json').write_text(json.dumps(dict(
         completed=completed, passed=all(c['passed'] for c in checks), checks=checks,
-        pending=['SDBG source variables', 'HS source scope attachment', 'source_stack', 'Qt integration'],
+        pending=['SDBG source variables', 'source trace navigation', 'Qt integration'],
         executable_sha256=hashlib.sha256(a.exe.read_bytes()).hexdigest(),
         reference_sources={s: hashlib.sha256((a.reference/'standalone'/s).read_bytes()).hexdigest() for s in sources}
     ), indent=2), encoding='utf-8')
@@ -106,10 +106,10 @@ def canonical(folder, report):
 
 def core(report):
     result = copy.deepcopy(report)
-    for key in ('source_variables', 'source_stack', 'source_debug_status', 'hits_preview'):
+    for key in ('source_variables', 'source_debug_status', 'hits_preview'):
         result.pop(key, None)
     source_limits = report.get('source_variables', {}).get('limits', [])
-    result['limits'] = [v for v in result['limits'] if v not in source_limits and not v.startswith('HS source frames are restricted')]
+    result['limits'] = [v for v in result['limits'] if v not in source_limits]
     if 'register_capture' in result:
         meta = result['register_capture']
         for key in ('sha256', 'full_capture_sha256'):
@@ -157,9 +157,6 @@ def compare(name, path, stage, driver, instruction=None, trace=False, phase=None
         got = json.loads((actual/'checkpoint.json').read_text())
         want = json.loads(json.dumps(want))
         symbols = copy.deepcopy(want['source_variables'])
-        # Phase ownership is attached by the Python source-stack module. Its native
-        # migration is pending; compare the decoded SPDB symbols independently.
-        symbols.pop('hs_phases', None)
         if symbols.get('format') == 'SDBG assignments':
             if got.get('source_variables', {}).get('status') != 'pending_native_sdbg_symbols':
                 differences.append(dict(source_variables='Missing explicit SDBG migration status'))
@@ -222,6 +219,7 @@ if a.source_only:
     from shader_project import compile_project
     from probe_hs_source_scopes import project as hull_project
     from validate_native_source_variables import TYPED
+    from validate_gs_source_stack import nested
     a.smoke = True
     for legacy in (False, True):
         tag = 'sdbg' if legacy else 'spdb'
@@ -247,6 +245,11 @@ if a.source_only:
                        root='types.hlsl', entry='main', profile='gs_5_0', flags=5)
         replace(path, path, compile_project(project)[0], data_id=81)
         cases.append(('spdb-'+tag, path, 'gs', 81))
+    for flags in (1, 5):
+        path = a.out/('spdb-nested-'+str(flags)+'.gpa_frame')
+        geometry_fixture(path, topology='point')
+        replace(path, path, compile_project(nested(flags))[0], data_id=81)
+        cases.append(('spdb-nested-'+str(flags), path, 'gs', 81))
 else:
     path = calls_fixture(a.out/'calls')
     cases.append(('calls', path, 'gs', 81))

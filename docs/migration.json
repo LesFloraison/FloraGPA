@@ -1727,18 +1727,24 @@
       "sha256": "aa97182115a15362abb6dd37cf8dedee9b85fe9e3dd4af474a70b4c8191ec6e7",
       "lines": 51,
       "description": "Per-frame source locations and lexical ownership of native local symbols.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": ["src/application/SourceStack.cpp"],
+      "validation": [
+        "docs/SOURCE_STACK_MIGRATION.md",
+        "Native per-frame source locations and lexical local ownership; 1388 independent DIA frame locations agree. Source trace and Qt consumers remain pending."
+      ]
     },
     {
       "module": "native_hs_scopes.py",
       "sha256": "83ee8379a7d6e652484f57de8cf8221f7897f076242eab106d0e2416f7900170",
       "lines": 28,
       "description": "Restrict CodeView scopes to original HS phases, excluding the CP wrapper.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": ["src/application/SourceStack.cpp", "src/application/CheckpointInspection.cpp"],
+      "validation": [
+        "docs/SOURCE_STACK_MIGRATION.md",
+        "Production native control-point/fork/join scope ownership, excluding the control-point wrapper in fork/join. Complete HS fields and native shader-to-variable resolution compared; source trace and Qt consumers remain pending."
+      ]
     },
     {
       "module": "native_invocation_selector.py",
@@ -1783,9 +1789,12 @@
       "sha256": "92656a598c51dbee252e92215d6fc8ce7d0c81233475e95b98a4a7e7aa580799",
       "lines": 116,
       "description": "Original CodeView statement ranges and source inline stacks, without DIA.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": ["src/application/SourceStack.cpp", "src/application/CheckpointInspection.cpp"],
+      "validation": [
+        "docs/SOURCE_STACK_MIGRATION.md",
+        "3492 parser/stack/location/ownership checks passed, including 28702 queries and three independent DIA comparisons. Production exports include source_stack; source trace navigation and Qt consumers remain pending."
+      ]
     },
     {
       "module": "native_source_trace.py",
@@ -1809,7 +1818,9 @@
       "validation": [
         "docs/SOURCE_VARIABLES_MIGRATION.md",
         "14060 symbol/type/value comparisons passed, including 9940 native Hardware/WARP snapshot records; 7 diagnostic wording differences preserve status and issue counts.",
-        "SPDB symbols are included in production checkpoint exports. SDBG assignments, native HS phase ownership and Qt source-variable integration remain pending."
+        "SPDB symbols are included in production checkpoint exports. SDBG assignments and Qt source-variable integration remain pending.",
+        "docs/SOURCE_STACK_MIGRATION.md",
+        "Native HS phase ownership is now attached in production. 15742 updated comparisons passed, including 11606 native snapshot records resolved from original shaders without Python-supplied native symbol models."
       ]
     },
     {

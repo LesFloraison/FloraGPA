@@ -8,8 +8,10 @@ scope labels, raw bits, validity and component references.
 
 This is a partial debugger migration. The resolver is a native library API;
 there is not yet a Qt source-variable view or a new resolved-values CLI export.
-Existing binary/register exports remain unchanged. SDBG assignment reconstruction,
-source stacks and production HS phase ownership are still pending.
+Existing binary/register exports remain unchanged. Source stacks and production
+HS phase ownership have since been ported; see
+[SOURCE_STACK_MIGRATION.md](SOURCE_STACK_MIGRATION.md). SDBG assignment
+reconstruction, source trace navigation and Qt integration remain pending.
 
 ## Behavior
 
@@ -35,15 +37,15 @@ reported explicitly; source values are never inferred from unobserved storage.
 
 SDBG has an execution-based assignment model and returns
 `pending_native_sdbg_symbols` until that separate module is ported. HS resolution
-requires phase-local scope ownership from the source-stack module. Without it,
-the resolver returns no HS locals instead of borrowing another phase's scope.
-The report's `source_debug_status` keeps this dependency explicit.
+now receives native phase-local scope ownership from the source-stack module.
+If ownership is unavailable, the resolver returns no HS locals instead of
+borrowing another phase's scope.
 
-Checkpoint symbol comparisons exclude only the reference stack's attached
-`hs_phases` field. Resolver-only HS comparisons supply the reference attachment
-to both resolvers; these verify value resolution, not native phase attachment.
-Neither this evidence nor the SPDB migration establishes completion of the
-debugger or the full Python-to-C++ migration.
+The original batch below excluded the reference stack's attached `hs_phases`
+field and used supplied phase ownership for resolver-only tests. The newer
+source-stack batch compares that field in full, and its snapshot resolver
+builds the native model directly from each original shader. Neither batch
+establishes completion of the debugger or full Python-to-C++ migration.
 
 ## Verification
 

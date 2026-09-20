@@ -2,14 +2,23 @@
 
 已有可编译、可运行的 VS2022 / Qt Widgets 原生工程，能够独立重放当前验证的
 GF2 与 BF1 DX11 捕获。**尚未完成原 Python 版本的全部功能迁移。**
-当前独立包为 `out/FloraGPA-source-variables/FloraGPA.exe`。
+当前独立包为 `out/FloraGPA-source-stack/FloraGPA.exe`。
 
-最新一批接通 SPDB 源码变量的 C++ 符号／类型／存活区间解析，并纳入正式
+最新一批接通原生源码调用栈、逐函数源码位置和 HS 阶段作用域，并纳入正式
+checkpoint 导出。3,492 项源码栈检查通过，涵盖 28,702 次查询和 1,388 个独立
+Microsoft DIA 源码位置对照。92 项独立包 Hardware/WARP 捕获对照通过。
+原始 shader → C++ 符号／源码栈 → 变量值的 15,742 项对照通过，包含 11,606 条
+实测快照，HS 阶段归属由 C++ 自行构建。相关 4 套 CTest、4 项黄金帧检查和
+92 份运行时模块审计通过；应用不加载 DIA，独立测试工具使用 DIA 作为对照。
+SDBG 赋值重建、源码单步导航、断点／监视和 Qt 源码调试视图仍待迁移。
+详见 [SOURCE_STACK_MIGRATION.md](SOURCE_STACK_MIGRATION.md)。
+
+上一批接通 SPDB 源码变量的 C++ 符号／类型／存活区间解析，并纳入正式
 checkpoint 导出；原生变量值解析 API 保留逐分量有效性、原始位值和冲突状态。
 14,060 项对照通过，包含 9,940 条 Hardware/WARP 快照记录，7 项仅诊断措辞不同。
 独立包 76 项源码捕获对照、相关 4 套 CTest、4 项黄金帧检查和 76 份运行时审计通过。
-SDBG 赋值重建、HS 阶段作用域归属、源码调用栈以及 Qt 源码变量窗口仍待迁移；
-HS 解析对照使用参考版提供的阶段作用域，不能据此声称原生阶段归属已完成。
+该批当时 SDBG 赋值重建、HS 阶段作用域归属、源码调用栈及 Qt 源码变量窗口待迁移；
+该批 HS 解析对照使用参考版提供的阶段作用域，原生阶段归属由最新一批补齐。
 详见 [SOURCE_VARIABLES_MIGRATION.md](SOURCE_VARIABLES_MIGRATION.md)。
 
 上一批接通 SPDB C13／SDBG 原始源码行映射与 checkpoint 指令源码位置。

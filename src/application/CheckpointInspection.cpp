@@ -1,6 +1,7 @@
 #include "CheckpointInspection.h"
 #include "DxbcCheckpointModel.h"
 #include "ShaderSourceLines.h"
+#include "SourceStack.h"
 #include "SourceVariables.h"
 #include "SystemDisassembly.h"
 #include <QDir>
@@ -112,6 +113,8 @@ CheckpointInspection checkpointCatalog(Bytes shader, Id resource, const Json &ev
             number.isEmpty() ? Json(nullptr) : Json(number.toULongLong()), match.captured(3).toStdString()};
     }
     const auto sourceLines = shaderSourceLines(shader, result.assembly);
+    auto sourceSymbols = sourceVariables(shader);
+    const auto stack = sourceStack(shader, sourceSymbols, sourceLines);
     const auto sourceOffsets = shaderLinesByOffset(sourceLines);
     for (auto &entry : parsed.catalog) {
         const auto found = lines.find(entry.at("word_offset").get<uint64_t>() * 4);
@@ -156,6 +159,9 @@ CheckpointInspection checkpointCatalog(Bytes shader, Id resource, const Json &ev
         limits.push_back("HS pipeline invocation statistics count patches, while logged entry counts belong "
                          "to the selected control-point/fork/join phase; undeclared phase IDs and draw "
                          "instances remain unknown.");
+        limits.push_back("HS source frames are restricted to the selected original phase. Fork/join exclude "
+                         "the compiler control-point entry wrapper; missing inline scopes remain unmapped "
+                         "instead of falling back to main.");
         limits.push_back(
             "HS single-point and whole-phase logging use identical instrumented bytecode with runtime "
             "selection; driver arithmetic refactoring may still differ from the uninstrumented shader. These "
@@ -179,10 +185,9 @@ CheckpointInspection checkpointCatalog(Bytes shader, Id resource, const Json &ev
                      {"record_count", 0},
                      {"limits", limits},
                      {"source_lines", sourceLines},
-                     {"source_variables", sourceVariables(shader)},
-                     {"source_debug_status", "sdbg_variables_source_stack_and_qt_pending"}};
-    if (options.stage == "hs")
-        result.report["source_debug_status"] = "hs_scope_attachment_source_stack_and_qt_pending";
+                     {"source_variables", sourceSymbols},
+                     {"source_stack", stack},
+                     {"source_debug_status", "sdbg_variables_source_trace_and_qt_pending"}};
     if (options.stage == "hs")
         result.report["hs_phases"] = checkpoint::hullPhases(parsed.code.instructions);
     if (options.trace)

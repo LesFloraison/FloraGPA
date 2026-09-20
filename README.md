@@ -104,9 +104,12 @@ Production GS/DS/HS capture and binary/CSV export are available through the
 Original SPDB/SDBG source-line maps and instruction locations are now included;
 see [`docs/SOURCE_LINES_MIGRATION.md`](docs/SOURCE_LINES_MIGRATION.md).
 SPDB source-variable symbols are also included in checkpoint exports; native
-register-to-source value resolution is available as a library API. SDBG variable
-assignments, HS phase ownership, source stacks and Qt checkpoint views remain
-pending. See [`docs/SOURCE_VARIABLES_MIGRATION.md`](docs/SOURCE_VARIABLES_MIGRATION.md).
+register-to-source value resolution is available as a library API. Source stacks,
+per-frame locations and HS phase ownership are also included; see
+[`docs/SOURCE_VARIABLES_MIGRATION.md`](docs/SOURCE_VARIABLES_MIGRATION.md) and
+[`docs/SOURCE_STACK_MIGRATION.md`](docs/SOURCE_STACK_MIGRATION.md).
+SDBG variable assignments, source trace navigation and Qt checkpoint views
+remain pending.
 Export retains JSON, CSV, raw output bytes and OBJ when positions are valid;
 geometry choices are saved in experiment projects. Remaining stages and
 validation limits are listed in

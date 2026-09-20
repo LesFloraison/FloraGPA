@@ -126,9 +126,10 @@ for size in (4,8):
     for end in range(len(fields)):
         typ(f'struct-{size}-truncated-{end}',{**recs,0x1001:(0x1203,fields[:end])})
 
-def resolved(name, model, regs, meta, hit, offset=16):
+def resolved(name, model, regs, meta, hit, offset=16, native_shader=None):
     job(name,'resolve-source-variables',lambda:resolve(model,regs,meta,hit,offset),
-        model=model,registers=regs,metadata=meta,hit=hit,offset=offset)
+        **(dict(input=str(native_shader.resolve())) if native_shader else dict(model=model)),
+        registers=regs,metadata=meta,hit=hit,offset=offset)
 def scalar(kind='float',size=4,binding=None):
     return dict(scopes=[dict(id='s',name='main',kind='function')],variables=[dict(
         id='v',scope='s',name='value',type=dict(name=kind,size=size,
@@ -183,8 +184,8 @@ if a.captures:
         report=json.loads(path.read_text());raw=(path.parent/'shader.dxbc').read_bytes();model=decode(raw)
         source(path.parent.name+'-symbols',raw)
         if 'register_capture' not in report:continue
-        # HS phase ownership is supplied by the reference stack model for resolver-only
-        # parity. Native production attachment remains a separately documented gap.
+        # The reference attaches phases here; the native probe builds its own complete
+        # model directly from the original shader, without receiving these symbols.
         if report['register_capture']['shader_stage']=='hs':
             from native_source_stack import build
             build(raw,model)
@@ -193,7 +194,7 @@ if a.captures:
         for row in headers(data,meta):
             token=row['token'] if meta.get('trace') else meta['checkpoint']['token']
             resolved(path.parent.name+'-record-'+str(row['record']),model,
-                     register_values(data,meta,row['record']),meta,row,entries[token])
+                     register_values(data,meta,row['record']),meta,row,entries[token],path.parent/'shader.dxbc')
             capture_count+=1
 
 manifest=a.out/'jobs.json';manifest.write_text(json.dumps(jobs),encoding='utf-8')
@@ -214,8 +215,10 @@ for case,want,got in zip(jobs,expected,actual):
     checks.append(dict(name=case['name'],passed=equivalent,exact=exact))
 report=dict(passed=all(r['passed'] for r in checks),count=len(checks),exact=sum(r['exact'] for r in checks),
             snapshot_records=capture_count,checks=checks,
-            pending=['SDBG assignments','production HS phase attachment','Qt source variable view'],
-            executable_sha256=hashlib.sha256(a.exe.read_bytes()).hexdigest())
+            pending=['SDBG assignments','source trace navigation','Qt source variable view'],
+            executable_sha256=hashlib.sha256(a.exe.read_bytes()).hexdigest(),
+            reference_sources={s:hashlib.sha256((a.reference/'standalone'/s).read_bytes()).hexdigest()
+                               for s in ('native_source_variables.py','native_source_stack.py','native_hs_scopes.py')})
 (a.out/'validation.json').write_text(json.dumps(report,indent=2),encoding='utf-8')
 print(json.dumps({k:v for k,v in report.items() if k!='checks'}),flush=True)
 for row in checks:

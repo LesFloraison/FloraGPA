@@ -5,6 +5,7 @@
 #include "application/InvocationSelector.h"
 #include "application/ShaderDebugData.h"
 #include "application/ShaderSourceLines.h"
+#include "application/SourceStack.h"
 #include "application/SourceVariables.h"
 #include <QCoreApplication>
 #include <QFile>
@@ -41,8 +42,52 @@ Json inputsJson(const DeclaredInputs &inputs, bool domain) {
 }
 Json evaluate(const Json &j) {
     const auto op = j.at("op").get<std::string>();
+    if (op == "source-stack") {
+        const auto raw = read(j.at("input"));
+        auto symbols = j.contains("symbols") ? j.at("symbols") : sourceVariables(raw);
+        auto result =
+            sourceStack(raw, symbols, j.contains("source") ? j.at("source") : shaderSourceLines(raw));
+        Json queries = Json::array();
+        for (const auto &q : j.value("queries", Json::array())) {
+            auto selected = sourceStackAt(result, q.at("offset"), q.value("depth", 0u));
+            Json locations = Json::object();
+            for (const auto &frame : result.at("frames"))
+                locations[frame.at("id").get<std::string>()] =
+                    sourceFrameLocation(result, frame.at("id"), q.at("offset"));
+            queries.push_back({{"stack", selected}, {"locations", locations}});
+        }
+        return {{"model", result}, {"symbols", symbols}, {"queries", queries}};
+    }
+    if (op == "inline-compressed") {
+        const auto bytes = j.at("bytes").get<std::vector<uint8_t>>();
+        const auto [value, next] = codeview::compressed(bytes, j.value("offset", size_t(0)));
+        return Json::array({value, next});
+    }
+    if (op == "inline-ranges")
+        return codeview::statementRanges(j.at("bytes").get<std::vector<uint8_t>>(), j.at("base"),
+                                         j.at("boundaries").get<std::set<uint64_t>>(),
+                                         j.value("details", false));
+    if (op == "stack-at")
+        return sourceStackAt(j.at("model"), j.at("offset"), j.value("depth", 0u));
+    if (op == "frame-locals")
+        return sourceFrameLocals(j.at("symbols"), j.at("values"), j.at("frame"));
+    if (op == "frame-location")
+        return sourceFrameLocation(j.at("model"), j.at("frame"), j.at("offset"));
     if (op == "source-variables")
         return sourceVariables(read(j.at("input")));
+    if (op == "resolve-source-variables" && j.contains("input")) {
+        // Cache only immutable probe fixture models; production builds one per capture.
+        static std::map<std::string, Json> models;
+        const auto path = j.at("input").get<std::string>();
+        if (!models.contains(path)) {
+            const auto raw = read(path);
+            auto symbols = sourceVariables(raw);
+            sourceStack(raw, symbols, shaderSourceLines(raw));
+            models[path] = std::move(symbols);
+        }
+        return resolveSourceVariables(models.at(path), j.at("registers"), j.at("metadata"), j.at("hit"),
+                                      j.at("offset"));
+    }
     if (op == "resolve-source-variables")
         return resolveSourceVariables(j.at("model"), j.at("registers"), j.at("metadata"), j.at("hit"),
                                       j.at("offset"));
@@ -206,6 +251,36 @@ int probe(const std::string &path) {
 class CheckpointTests final : public QObject {
     Q_OBJECT
   private slots:
+    void sourceStackBoundaries() {
+        const std::vector<uint8_t> annotations{3, 0, 6, 2, 3, 4, 4, 4};
+        const auto ranges = codeview::statementRanges(annotations, 8, {8, 12, 16}, true);
+        QCOMPARE(ranges.size(), size_t(2));
+        QVERIFY(ranges[0]["start"] == 8 && ranges[0]["end"] == 12 && ranges[0]["line_delta"] == 0);
+        QVERIFY(ranges[1]["start"] == 12 && ranges[1]["end"] == 16 && ranges[1]["line_delta"] == 1);
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, codeview::statementRanges(annotations, 8, {8, 16}));
+        const std::vector<uint8_t> unfinished{3, 0};
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, codeview::statementRanges(unfinished, 8, {8, 12}));
+        auto model = Json::parse(R"({"status":"available","frames":[
+          {"id":"main","name":"main","kind":"function","parent":null,"ranges":[{"start":8,"end":32}]},
+          {"id":"leaf","name":"leaf","kind":"inline","parent":"main","ranges":[{"start":12,"end":20}]}]})");
+        QVERIFY(sourceStackAt(model, 12)["frames"].size() == 2);
+        QVERIFY(sourceStackAt(model, 20)["frames"].size() == 1);
+        QVERIFY(sourceStackAt(model, 32)["status"] == "unmapped");
+        QVERIFY(sourceStackAt(model, 12, 1)["status"] == "unmapped_subroutine");
+        model["hs_phases"] = Json::array(
+            {{{"id", 1}, {"kind", "fork"}, {"start", 8}, {"end", 32}, {"frame_ids", Json::array({"leaf"})}}});
+        model["scope_semantics"] = "phase_local";
+        QVERIFY(sourceStackAt(model, 12)["frames"].size() == 1);
+        QVERIFY(sourceStackAt(model, 12)["frames"][0]["id"] == "leaf");
+        QVERIFY(sourceStackAt(model, 20)["status"] == "unmapped_hs_phase_scope");
+        model["frames"][0]["parent"] = "leaf";
+        QVERIFY(sourceStackAt(model, 12)["status"] == "ambiguous");
+        Json symbols = Json::parse(R"({"scopes":[{"id":"main","parent":null,"kind":"function"},
+          {"id":"block","parent":"main","kind":"block"},{"id":"leaf","parent":"block","kind":"inline"}]})");
+        const auto values = Json::parse(R"([{"scope_id":"main"},{"scope_id":"block"},{"scope_id":"leaf"}])");
+        QVERIFY(sourceFrameLocals(symbols, values, "main") == Json::array({values[0], values[1]}));
+        QVERIFY(sourceFrameLocals(symbols, values, "leaf") == Json::array({values[2]}));
+    }
     void sourceValueValidity() {
         auto model = Json::parse(R"({"scopes":[{"id":"main","name":"main","kind":"function"}],
           "variables":[{"id":"wide","scope":"main","name":"wide",
