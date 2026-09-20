@@ -8,6 +8,7 @@ p.add_argument('--qt-bin',type=Path,required=True)
 p.add_argument('--out',type=Path,required=True)
 p.add_argument('--smoke',action='store_true')
 p.add_argument('--real-only',action='store_true')
+p.add_argument('--identity',action='store_true')
 a=p.parse_args();a.out.mkdir(parents=True,exist_ok=False)
 sys.path[:0]=[str(a.reference/'standalone'),str(a.reference/'tools')]
 from frame import Frame
@@ -25,7 +26,7 @@ env={k:v for k,v in os.environ.items() if k.upper() in ('SYSTEMROOT','WINDIR','C
 env['PATH']=str(a.qt_bin.resolve())+os.pathsep+os.environ['WINDIR']+'/System32;'+os.environ['WINDIR']
 checks=[]
 source_hashes={name:hashlib.sha256((a.reference/'standalone'/name).read_bytes()).hexdigest()
-    for name in ('post_transform.py','geometry_instances.py','coverage_isolated.py','pre_raster_uav.py')}
+    for name in ('post_transform.py','geometry_instances.py','coverage_isolated.py','pre_raster_uav.py','vertex_identity.py','dxbc_vertex_identity.py','dxbc_hull_instance.py','dxbc_uav.py')}
 def save(completed=False):
     (a.out/'validation.json').write_text(json.dumps(dict(completed=completed,passed=all(c['passed'] for c in checks),checks=checks,
         executable_sha256=hashlib.sha256(a.exe.read_bytes()).hexdigest(),reference_sources=source_hashes),indent=2))
@@ -57,8 +58,8 @@ def compare(name,path,driver='hardware',stage='final',stream=0,instance=None,eve
         for key in sorted(set(want)|set(got)):
             if key not in want or key not in got or want[key]!=got[key]:diff.append(dict(field=key,expected=want.get(key),actual=got.get(key)))
         if (expected/'vertices.bin').read_bytes()!=(actual/'vertices.bin').read_bytes():diff.append(dict(raw_bytes='different'))
-        def table(root):
-            with (root/'vertices.csv').open(encoding='utf-8-sig',newline='') as f:
+        def table(root,filename='vertices.csv'):
+            with (root/filename).open(encoding='utf-8-sig',newline='') as f:
                 rows=list(csv.reader(f))
             def cell(x):
                 try:
@@ -67,6 +68,15 @@ def compare(name,path,driver='hardware',stage='final',stream=0,instance=None,eve
                 except ValueError:return x
             return [[cell(x) for x in row] for row in rows]
         if table(expected)!=table(actual):diff.append(dict(csv='different values or columns'))
+        if stage=='vs-index':
+            for filename in ('unique_vertices.csv','references.csv'):
+                if table(expected,filename)!=table(actual,filename):diff.append(dict(file=filename,error='different values or columns'))
+            unique=(actual/'unique_vertices.bin').read_bytes()
+            if unique!=(expected/'unique_vertices.bin').read_bytes():diff.append(dict(unique_bytes='different'))
+            with (actual/'references.csv').open(encoding='utf-8',newline='') as f:refs=list(csv.DictReader(f))
+            stride=got['stride']
+            reconstructed=b''.join(unique[int(row['unique_vertex'])*stride:(int(row['unique_vertex'])+1)*stride] for row in refs)
+            if reconstructed!=(actual/'vertices.bin').read_bytes():diff.append(dict(reconstruction='not lossless'))
         def obj(root):
             path=root/'geometry.obj'
             if not path.exists():return None
@@ -76,6 +86,54 @@ def compare(name,path,driver='hardware',stage='final',stream=0,instance=None,eve
         if any(x.startswith(('python','tk8','tcl8','gpa_','gpa-')) or x in ('renderdoc.dll','dx11_player.dll','dx11_playback.dll','shimd3d64.dll','gpa.dll') for x in modules):diff.append(dict(runtime=modules))
     checks.append(dict(name=name,passed=not diff,expected_rejection=reject,reference_error=error,differences=diff));save()
     print(name,'PASS' if not diff else 'FAIL',flush=True)
+if a.identity:
+    from validate_unique_ia import fixture as identity_fixture
+    from validate_hull_instance_uav import fixture as identity_uav
+    if a.real_only:
+        for label,filename,events in (('gf2','GF2_Exilium_2026_03_03__00_19_35.gpa_frame',(181,)),('bf1','bf1_2026_01_21__16_53_05.gpa_frame',(876,1415,11276))):
+            for event in events:
+                from events import draw_event
+                with Frame(a.reference/filename) as frame:last=draw_event(frame,frame.entries[event])['parameters'].get('instance_count',1)-1
+                for driver in ('hardware','warp'):
+                    for instance in (None,last):
+                        compare(f'{driver}-{label}-{event}-{instance}',a.reference/filename,driver,'vs-index',event=event,instance=instance)
+    else:
+        for driver in ('hardware','warp'):
+            for indexed in ((True,) if a.smoke else (False,True)):
+                for topology in ((4,) if a.smoke else (1,2,3,4,5,10,11,12,13,35)):
+                    path=a.out/f'{driver}-{indexed}-{topology}.gpa_frame'
+                    identity_fixture(path,bits=32,topology=topology,indexed=indexed)
+                    for instance in (None,2):compare(f'{driver}-{indexed}-{topology}-{instance}',path,driver,'vs-index',instance=instance)
+            if not a.smoke:
+                for width,reject in ((3,False),(4,True)):
+                    source='struct V{float4 p:SV_Position;'+''.join(f'float{width} a{i}:TEXCOORD{i};' for i in range(31))+'};V main(uint id:SV_VertexID,uint inst:SV_InstanceID){V o;o.p=float4(id,inst,0,1);'+''.join(f'o.a{i}=float{width}(id,inst,{i}'+(',1' if width==4 else '')+');' for i in range(31))+'return o;}'
+                    path=fixture(a.out/f'{driver}-packed-{width}.gpa_frame',source=source)
+                    compare(f'{driver}-packed-{width}',path,driver,'vs-index',reject=reject)
+                source='struct V{float4 p:SV_Position;uint a:FLORA_VERTEX_ID;uint b:FLORA_INSTANCE_ID;};V main(uint id:SV_VertexID,uint inst:SV_InstanceID){V o;o.p=float4(id,inst,0,1);o.a=id;o.b=inst;return o;}'
+                path=fixture(a.out/f'{driver}-semantic-collision.gpa_frame',source=source)
+                compare(f'{driver}-semantic-collision',path,driver,'vs-index')
+                for profile in ('vs_4_0','vs_4_1'):
+                    path=fixture(a.out/f'{driver}-{profile}.gpa_frame')
+                    replacement=a.out/f'{driver}-{profile}.dxbc';replacement.write_bytes(compile_hlsl(VS,profile)[0])
+                    project=a.out/f'{driver}-{profile}.json'
+                    with Frame(path) as frame:experiment(frame,project,[dict(kind='shader',resource=10,asset=blob(replacement))])
+                    compare(f'{driver}-{profile}',path,driver,'vs-index',project=project)
+                for bits,step,zero,empty in ((16,0,False,False),(16,2,True,False),(32,2,False,True)):
+                    path=a.out/f'{driver}-extra-{bits}-{step}-{zero}-{empty}.gpa_frame'
+                    identity_fixture(path,bits=bits,step=step,zero_stride=zero,empty=empty)
+                    compare(path.stem,path,driver,'vs-index')
+                for existing in (False,True):
+                    path=identity_uav(a.out/f'{driver}-identity-uav-{existing}.gpa_frame','vs',7,existing)
+                    compare(f'{driver}-identity-uav-{existing}',path,driver,'vs-index',reject=not existing)
+                path=a.out/f'{driver}-identity-errors.gpa_frame';identity_fixture(path)
+                for kind,edits in (('patched-index',[operation(22,4,struct.pack('<H',6))]),('disabled',[dict(kind='enabled',event=100,value=False)])):
+                    project=a.out/f'{driver}-identity-{kind}.json'
+                    with Frame(path) as frame:experiment(frame,project,edits)
+                    compare(f'{driver}-identity-{kind}',path,driver,'vs-index',project=project)
+                for stream,instance in ((1,None),(0,4)):
+                    compare(f'{driver}-identity-invalid-{stream}-{instance}',path,driver,'vs-index',stream=stream,instance=instance,reject=True)
+    save(True);print('Checks',len(checks),'failures',sum(not c['passed'] for c in checks),flush=True)
+    raise SystemExit(0 if all(c['passed'] for c in checks) else 1)
 if a.real_only:
     from events import draw_event
     from state import decode_state

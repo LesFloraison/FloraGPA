@@ -6,6 +6,9 @@ existing IA view, a stream selector (0–3), optional zero-based instance select
 typed attribute rows, a rotatable wireframe and directory export. It runs in the
 native Worker and respects the application's Hardware/WARP selection.
 
+The subsequent [VS identity migration](VS_IDENTITY_MIGRATION.md) adds `vs-index`,
+unique output variants, original input identities and their reference mapping.
+
 ## Capture and state preservation
 
 - Inspection replays to the selected draw's before boundary, prepares its captured
@@ -100,7 +103,7 @@ rendered mesh, result invalidation, file export and project save/restore.
 
 This batch does **not** complete all geometry or advanced analysis features:
 
-- `vs-index`, `vs-writes`, `ds-writes`, `hs` and `gs-emits` remain separate pending
+- `vs-writes`, `ds-writes`, `hs` and `gs-emits` remain separate pending
   migrations. The CLI rejects those stage requests instead of substituting output.
 - Quad/coverage consumers and general private-output modes that copy original SO
   buffers or relocate UAV slots remain pending. This helper implements the

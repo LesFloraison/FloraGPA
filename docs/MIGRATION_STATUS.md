@@ -2,9 +2,29 @@
 
 已有可编译、可运行的 VS2022 / Qt Widgets 原生工程，能够独立重放当前验证的
 GF2 与 BF1 DX11 捕获。**尚未完成原 Python 版本的全部功能迁移。**
-当前独立包为 `out/FloraGPA-post-transform/FloraGPA.exe`。
+当前独立包为 `out/FloraGPA-vs-identity/FloraGPA.exe`。
 
-最新批次迁移原生 Final/VS/DS/GS 后变换几何、四路输出流和指定实例采集。
+最新批次迁移 VS 索引关联：通过原生 DXBC 插桩携带真实 VertexID/InstanceID，
+将组装后的 VS 输出关联到原始输入索引和实例，支持展开表、唯一输出表及引用映射。
+同一身份的不同输出字节保留为独立变体，NaN 载荷和正负零不会被数值去重合并。
+原始 Shader 字节、插桩后的 DXBC 哈希、映射和两份二进制表均纳入 Python 对照，
+引用表必须能无损重建完整输出。Qt 支持三表切换、完整导出和实验项目恢复。
+独立包 108 项合成对照全部通过（100 项成功、8 项预期拒绝），覆盖 SM4/SM5、
+列表/条带/邻接/控制点、输出分量复用、语义冲突、间接参数、UAV 限制、空绘制、
+关闭事件及编辑后的当前 GPU 索引。Release 39 套 CTest、原有 Qt 53 项及扩展后的
+几何套件 9 项均通过。证据为 `artifacts/vs-identity-portable-final/validation.json`、
+`artifacts/ctest-vs-identity-final.log` 和 `artifacts/vs-identity-tests-final.txt`。
+独立包真实 GF2/BF1 16 项对照通过，包括完整输出和最后一个实例，覆盖 BF1
+事件 1415 的第九个实例及事件 11276 的曲面控制点。原有 Final/VS/DS/GS 的
+140 项对照继续通过。对应证据为 `artifacts/vs-identity-real-portable-final/validation.json`
+和 `artifacts/vs-identity-post-regression/validation.json`。
+GF2/BF1 黄金帧与关闭 Draw 负对照共 4 项通过。250 份成功报告的模块审计未发现
+Python/Tk/GPA/RenderDoc，Qt 来自独立包，三个 EXE 与最终 Release 构建一致。
+证据为 `artifacts/vs-identity-golden-final/validation.json` 及
+`artifacts/vs-identity-runtime-audit.json`；仍未替代独立机器验证。
+详情见 [VS_IDENTITY_MIGRATION.md](VS_IDENTITY_MIGRATION.md)。
+
+前一批迁移原生 Final/VS/DS/GS 后变换几何、四路输出流和指定实例采集。
 Geometry 页整合 IA 与 Shader 输出、类型化属性表、线框预览及 JSON/CSV/BIN/OBJ
 导出，并保存/恢复实验项目中的已迁移阶段、流和实例选择。界面保留紧凑的工具栏，
 未迁移的 HS、VS 索引、逐次写入和 GS 发射功能不显示为可用。
@@ -592,7 +612,7 @@ Debug 的 predicate、experiment、管线、SO 和 buffer edit 五项相关回�
 
 1. 其余 setter/command/context 的重放与实验语义、SO 的 retained 输出与私有诊断、
    扩展 UAV、私有 MSAA/planar 消费者等特殊 replay 路径。
-2. 其余资源/状态/绑定/命令编辑，完整 counter 命令引用、HS/索引/写入/发射几何、覆盖率、
+2. 其余资源/状态/绑定/命令编辑，完整 counter 命令引用、HS/写入/发射几何、覆盖率、
    quad 与像素分析。
 3. HLSL 恢复、source/instruction 导航、变量/表达式、trace/stack 与 shader 调试。
 4. RenderDoc 原生 C++ 后端、Intel Metrics Discovery、GTPin 与完整指标调度。

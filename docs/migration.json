@@ -131,7 +131,9 @@
         "docs/TEXTURE_INSPECTION_MIGRATION.md: native initial/event/MSAA/typed/plane inspection, DDS/RAW/PNG export and Qt controls; 217 Python comparisons (178 successful exports, 39 rejected cases); private consumers remain pending; planar write provenance is covered subsequently in docs/PLANAR_WRITE_MIGRATION.md",
         "docs/PLANAR_WRITE_MIGRATION.md: planar Y-only Map with native pitches, tight NV12 Update, explicit full DXGI Update assets, structured write provenance and Qt before/after inspection; 192 packaged real-capture/synthetic/uint64 Python comparisons passed (125 successes, 67 controlled rejections); private consumers and remaining module scope stay incomplete",
         "docs/POST_TRANSFORM_MIGRATION.md",
-        "Geometry stages, streams, instances, typed table, mesh, complete directory export and migrated geometry project settings; advanced geometry stages remain pending."
+        "Geometry stages, streams, instances, typed table, mesh, complete directory export and migrated geometry project settings; advanced geometry stages remain pending.",
+        "docs/VS_IDENTITY_MIGRATION.md",
+        "VS identities table switching, complete export and legacy project-selection restoration migrated."
       ]
     },
     {
@@ -638,9 +640,14 @@
       "sha256": "27c5fda3d151b1f746410ffbe1ef5d56abf38cf57ac663f356d521b751e271d4",
       "lines": 97,
       "description": "Carry the native VS InstanceID to HS without rewriting original system IDs.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": [
+        "src/application/DxbcIdentity.cpp"
+      ],
+      "validation": [
+        "docs/VS_IDENTITY_MIGRATION.md",
+        "Signature/declaration occupancy, free-component allocation and signature append helpers migrated for VS identity; the VS-to-HS carry operation remains pending."
+      ]
     },
     {
       "module": "dxbc_hull_phases.py",
@@ -656,9 +663,14 @@
       "sha256": "cd6e878559c202a18fed8162566c07b2dbbad58e2791531eef19b9bdf0fc7a22",
       "lines": 10,
       "description": "Lengths of validated SM4/SM5 immediate operand payloads, in DWORDs.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": [
+        "src/application/DxbcIdentity.cpp"
+      ],
+      "validation": [
+        "docs/VS_IDENTITY_MIGRATION.md",
+        "Validated immediate32 and vector immediate64 lengths used by the identity UAV operand walker; remaining instrumentation consumers pending."
+      ]
     },
     {
       "module": "dxbc_indexable.py",
@@ -681,7 +693,9 @@
       "validation": [
         "Checked DXBC chunks and retail checksum; output-signature-only SO creation adds an empty ISGN while retaining original output signature bytes",
         "tools/validate_stream_output_port.py: 690 final-package checks with system-only PATH, hardware/WARP, synthetic and five original GPA SO captures; original line-stream captured count 6 is recovered as 12 actual vertices",
-        "Coverage instrumentation and the remaining token editing functions are pending"
+        "Coverage instrumentation and the remaining token editing functions are pending",
+        "docs/VS_IDENTITY_MIGRATION.md",
+        "Checked program-token reader and retail DXBC container/checksum writer migrated; pixel-coverage instrumentation remains pending."
       ]
     },
     {
@@ -698,18 +712,28 @@
       "sha256": "03b5e8c47105106892012c51547573f07a9f0fedc3c3710f4a025df588785a44",
       "lines": 97,
       "description": "SM5 UAV register relocation at operand boundaries, never by word search.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": [
+        "src/application/DxbcIdentity.cpp"
+      ],
+      "validation": [
+        "docs/VS_IDENTITY_MIGRATION.md",
+        "Operand-aware UAV declaration/use analysis migrated for the identity reuse guard; relocation and RT0 reservation remain pending."
+      ]
     },
     {
       "module": "dxbc_vertex_identity.py",
       "sha256": "260ed5f0b5d06e731bba529d1f6854ec7aad55cf91c2cc1b70a542c4af2b79f8",
       "lines": 51,
       "description": "Carry native VS identities through private outputs without changing Draw IDs.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": [
+        "src/application/DxbcIdentity.cpp"
+      ],
+      "validation": [
+        "docs/VS_IDENTITY_MIGRATION.md",
+        "Native SM4/SM5 identity carriers; register/component allocation, semantic collisions, consumed-system-input UAV guard and exact patched DXBC parity."
+      ]
     },
     {
       "module": "dxbc_vertex_writes.py",
@@ -1753,7 +1777,9 @@
       ],
       "validation": [
         "docs/POST_TRANSFORM_MIGRATION.md",
-        "Final/VS/DS/GS SO capture and exports migrated; vs-index, vs-writes, ds-writes, hs and gs-emits dispatch branches remain pending."
+        "Final/VS/DS/GS SO capture and exports migrated; vs-writes, ds-writes, hs and gs-emits dispatch branches remain pending.",
+        "docs/VS_IDENTITY_MIGRATION.md",
+        "vs-index dispatch, unique binary/CSV tables and reference metadata now migrated; vs-writes, ds-writes, hs and gs-emits remain pending."
       ]
     },
     {
@@ -2644,9 +2670,14 @@
       "sha256": "ea0c6476d91a95fa3ab23c342b49e351f5b5b9887153426c425d0f09d37bf48b",
       "lines": 70,
       "description": "Associate native assembled VS outputs with original IA fetch identities.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": [
+        "src/application/PostTransform.cpp"
+      ],
+      "validation": [
+        "docs/VS_IDENTITY_MIGRATION.md",
+        "Native vs-index capture, GPU index membership, selected-instance filtering and lossless variant/reference export migrated; broader class-linkage, live-query and large-output stress remain verification gaps."
+      ]
     },
     {
       "module": "vertex_writes.py",

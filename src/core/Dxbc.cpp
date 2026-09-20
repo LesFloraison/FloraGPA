@@ -84,19 +84,18 @@ static std::array<uint32_t, 4> checksum(Bytes data) {
     }
     return state;
 }
-std::vector<uint8_t> addEmptyInputSignature(Bytes bytes) {
-    auto parts = readDxbcParts(bytes);
-    for (const auto &[tag, body] : parts)
-        if (tag == 0x4e475349 || tag == 0x52444853 || tag == 0x58454853)
-            return {bytes.begin(), bytes.end()};
-    const std::array<uint8_t, 8> empty{0, 0, 0, 0, 8, 0, 0, 0};
-    parts.emplace_back(0x4e475349, empty);
+std::vector<uint8_t> makeDxbc(const DxbcParts &parts) {
+    if (parts.size() > 256)
+        throw std::runtime_error("DXBC chunk count exceeds limit");
     std::vector<uint8_t> out(32 + parts.size() * 4);
     auto put = [&](size_t offset, uint32_t value) { std::memcpy(out.data() + offset, &value, 4); };
     put(0, 0x43425844);
     put(20, 1);
     put(28, uint32_t(parts.size()));
     for (size_t i = 0; i < parts.size(); ++i) {
+        if (parts[i].second.size() > UINT32_MAX ||
+            uint64_t(out.size()) + 8 + parts[i].second.size() > UINT32_MAX)
+            throw std::runtime_error("DXBC container exceeds uint32 size");
         put(32 + i * 4, uint32_t(out.size()));
         append(out, parts[i].first);
         append(out, uint32_t(parts[i].second.size()));
@@ -108,5 +107,48 @@ std::vector<uint8_t> addEmptyInputSignature(Bytes bytes) {
     auto hash = checksum(Bytes(out).subspan(20));
     std::memcpy(out.data() + 4, hash.data(), 16);
     return out;
+}
+std::vector<uint8_t> addEmptyInputSignature(Bytes bytes) {
+    auto parts = readDxbcParts(bytes);
+    for (const auto &[tag, body] : parts)
+        if (tag == 0x4e475349 || tag == 0x52444853 || tag == 0x58454853)
+            return {bytes.begin(), bytes.end()};
+    const std::array<uint8_t, 8> empty{0, 0, 0, 0, 8, 0, 0, 0};
+    parts.emplace_back(0x4e475349, empty);
+    return makeDxbc(parts);
+}
+DxbcProgram readDxbcProgram(Bytes bytes) {
+    Reader reader(bytes);
+    DxbcProgram result{reader.array<uint32_t, 2>(), {}};
+    if (bytes.size() % 4 || uint64_t(result.header[1]) * 4 != bytes.size())
+        throw std::runtime_error("DXBC program length mismatch");
+    while (reader.remaining()) {
+        const auto first = reader.read<uint32_t>();
+        std::vector<uint32_t> row{first};
+        auto length = (first >> 24) & 127;
+        if ((first & 2047) == 53) {
+            length = reader.read<uint32_t>();
+            row.push_back(length);
+        }
+        if (length < row.size() || uint64_t(length - row.size()) * 4 > reader.remaining())
+            throw std::runtime_error("DXBC instruction length");
+        while (row.size() < length)
+            row.push_back(reader.read<uint32_t>());
+        result.instructions.push_back(std::move(row));
+    }
+    return result;
+}
+std::vector<uint8_t> writeDxbcProgram(const DxbcProgram &program) {
+    std::vector<uint8_t> bytes;
+    append(bytes, program.header[0]);
+    append(bytes, 0);
+    for (const auto &row : program.instructions)
+        for (auto word : row)
+            append(bytes, word);
+    if (bytes.size() / 4 > UINT32_MAX)
+        throw std::runtime_error("DXBC program exceeds uint32 size");
+    auto count = uint32_t(bytes.size() / 4);
+    std::memcpy(bytes.data() + 4, &count, 4);
+    return bytes;
 }
 } // namespace flora

@@ -872,6 +872,7 @@ void MainWindow::buildUi() {
     geometryBar->addAction("Inspect", this, &MainWindow::inspectGeometry)->setObjectName("inspectGeometry");
     geometryBar->addAction("Export", this, &MainWindow::exportGeometry)->setObjectName("exportGeometry");
     geometryTable_ = new QComboBox;
+    geometryTable_->setObjectName("geometryTableChoice");
     geometryTable_->addItem("Expanded vertices", "expanded_vertices");
     geometryTable_->addItem("Unique vertices", "unique_vertices");
     geometryTable_->addItem("Index mapping", "references");
@@ -884,7 +885,7 @@ void MainWindow::buildUi() {
     geometryStage_->setObjectName("geometryStage");
     for (auto [label, value] :
          {std::pair{"IA inputs", "ia"}, std::pair{"Final output", "final"}, std::pair{"VS output", "vs"},
-          std::pair{"DS output", "ds"}, std::pair{"GS output", "gs"}})
+          std::pair{"DS output", "ds"}, std::pair{"GS output", "gs"}, std::pair{"VS identities", "vs-index"}})
         geometryStage_->addItem(label, value);
     geometrySource->addWidget(geometryStage_);
     geometryStream_ = new QSpinBox;
@@ -924,7 +925,7 @@ void MainWindow::buildUi() {
     connect(geometryStage_, &QComboBox::currentIndexChanged, this, [this, clearGeometry] {
         const bool post = geometryStage_->currentData() != "ia";
         geometryTable_->setCurrentIndex(0);
-        geometryTable_->setEnabled(!busy() && !post);
+        geometryTable_->setEnabled(!busy() && (!post || geometryStage_->currentData() == "vs-index"));
         geometryStream_->setEnabled(!busy() && post);
         geometryInstance_->setEnabled(!busy() && post);
         clearGeometry();
@@ -1132,7 +1133,8 @@ void MainWindow::setBusy(bool busy) {
     annotations_->setWorkerBusy(busy);
     gpuStatistics_->setWorkerBusy(busy);
     geometryStage_->setEnabled(!busy);
-    geometryTable_->setEnabled(!busy && geometryStage_->currentData() == "ia");
+    geometryTable_->setEnabled(
+        !busy && (geometryStage_->currentData() == "ia" || geometryStage_->currentData() == "vs-index"));
     geometryStream_->setEnabled(!busy && geometryStage_->currentData() != "ia");
     geometryInstance_->setEnabled(!busy && geometryStage_->currentData() != "ia");
     openAction_->setEnabled(!busy);
@@ -1359,7 +1361,7 @@ void MainWindow::finishWorker(int code, QProcess::ExitStatus status) {
                              .arg(geometry_["event"].toString())
                              .arg(geometry_["vertex_references"].toInteger())
                              .arg(post ? "output vertices" : "references");
-            if (!post)
+            if (!post || geometry_.contains("unique_vertices"))
                 label += QString(" · %1 unique").arg(geometry_["unique_vertices"].toInteger());
             geometryLabel_->setText(label);
             const auto automatic = geometry_["draw_auto"].toObject();
@@ -2080,8 +2082,8 @@ void MainWindow::exportGeometry() {
         return;
     }
     QDir source(geometryDir_->path() + "/result");
-    for (auto file :
-         source.entryList({"*.csv", "geometry.json", "geometry.obj", "vertices.bin"}, QDir::Files))
+    for (auto file : source.entryList(
+             {"*.csv", "geometry.json", "geometry.obj", "vertices.bin", "unique_vertices.bin"}, QDir::Files))
         if (!QFile::copy(source.filePath(file), path + '/' + file)) {
             showError("Geometry export failed.");
             return;
@@ -3256,7 +3258,7 @@ void MainWindow::openExperiment() {
         geometryStream_->setValue(int(settings.geometryStream));
         geometryInstance_->setText(QString::fromStdString(settings.geometryInstance));
         geometryTable_->setCurrentIndex(
-            settings.geometryStage == "ia"
+            (settings.geometryStage == "ia" || settings.geometryStage == "vs-index")
                 ? geometryTable_->findData(QString::fromStdString(settings.geometryTable))
                 : 0);
         if (settings.event)

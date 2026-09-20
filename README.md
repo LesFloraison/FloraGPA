@@ -84,6 +84,9 @@ texture mip/layer/slice previews, shader source/DXBC/reflection and buffer bytes
 The Buffer tab reads initial/before/after values and byte ranges as hex, ASCII or
 32-bit words. Geometry provides IA tables and native Final/VS/DS/GS output,
 stream and instance selection, typed attributes and a rotatable wireframe.
+**VS identities** links native output to original input indices and instances,
+with unique byte-preserving variants and a lossless reference table; see
+[`docs/VS_IDENTITY_MIGRATION.md`](docs/VS_IDENTITY_MIGRATION.md).
 Export retains JSON, CSV, raw output bytes and OBJ when positions are valid;
 geometry choices are saved in experiment projects. Remaining stages and
 validation limits are listed in

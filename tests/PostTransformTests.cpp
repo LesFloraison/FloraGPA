@@ -2,6 +2,7 @@
 #include "StreamCapture.h"
 #include "app/Appearance.h"
 #include "app/MainWindow.h"
+#include "application/DxbcIdentity.h"
 #include "application/PostTransform.h"
 #include "application/SessionUi.h"
 #include <QAction>
@@ -54,10 +55,50 @@ class PostTransformTests final : public QObject {
         QVERIFY(saved.at("geometry_selection") == original.at("geometry_selection"));
         state.geometryStage = "ia";
         QCOMPARE(replayUiState(frame, replayUiDocument(frame, state)).geometryStage, std::string("ia"));
+        state.geometryStage = "vs-index";
+        QCOMPARE(replayUiState(frame, replayUiDocument(frame, state)).geometryStage, std::string("vs-index"));
         for (const auto *invalid : {"-1", "4294967296", "x", "1.2", "+1"}) {
             state.geometryInstance = invalid;
             QVERIFY_THROWS_EXCEPTION(std::runtime_error, replayUiDocument(frame, state));
         }
+    }
+    void identityBitVariants() {
+        PostTransformGeometry geometry;
+        geometry.report = {{"vertices", 6},
+                           {"stride", 4},
+                           {"vertices_per_primitive", 1},
+                           {"event", {{"id", 100}}},
+                           {"vertex_identity", nlohmann::json::object()},
+                           {"attributes",
+                            {{{"semantic", "NAN"},
+                              {"index", 0},
+                              {"components", {0}},
+                              {"component_count", 1},
+                              {"component_type", 3},
+                              {"system_value", 0},
+                              {"offset", 0}}}}};
+        geometry.bytes = statePack(0x7fc00001u, 0x7fc00002u, 0x7fc00001u, 0u, 0x80000000u, 0x7fc00001u);
+        geometry.identities.assign(5, {0, 10, 10});
+        geometry.identities.push_back({1, 10, 10});
+        const auto tables = postTransformTables(geometry);
+        QCOMPARE(tables.at("unique_vertices").get<unsigned>(), 5u);
+        QCOMPARE(tables.at("unique_identities").get<unsigned>(), 2u);
+        QCOMPARE(tables.at("conflicting_identities").get<unsigned>(), 1u);
+        const unsigned variants[]{0, 1, 0, 2, 3, 0};
+        const auto &refs = tables.at("tables").at("references").at("rows");
+        for (unsigned i = 0; i < 6; ++i)
+            QCOMPARE(refs[i][7].get<unsigned>(), variants[i]);
+        QTemporaryDir dir;
+        exportPostTransform(geometry, dir.path().toStdWString());
+        QFile file(dir.path() + "/unique_vertices.bin");
+        QVERIFY(file.open(QIODevice::ReadOnly));
+        auto unique = file.readAll();
+        QCOMPARE(unique.size(), qsizetype(20));
+        QByteArray restored;
+        for (const auto &row : refs)
+            restored += unique.mid(row[8].get<unsigned>() * 4, 4);
+        QCOMPARE(restored,
+                 QByteArray(reinterpret_cast<const char *>(geometry.bytes.data()), geometry.bytes.size()));
     }
     void outputIsolationAndFailure() {
         QTemporaryDir dir;
@@ -81,7 +122,9 @@ class PostTransformTests final : public QObject {
             const auto commands = replay.counts;
             QCOMPARE(count, 0u);
             for (unsigned repeat = 0; repeat < 2; ++repeat) {
-                const auto geometry = inspectPostTransform(replay, 200);
+                PostTransformOptions inspect;
+                inspect.stage = repeat ? "vs-index" : "final";
+                const auto geometry = inspectPostTransform(replay, 200, inspect);
                 QCOMPARE(geometry.report.at("vertices").get<unsigned>(), 3u);
                 QVERIFY(geometry.report.at("pre_raster_uav_isolation").at("stages") ==
                         nlohmann::json::array({"vs"}));
@@ -127,6 +170,11 @@ class PostTransformTests final : public QObject {
                         QCOMPARE(geometry.bytes.size(), size_t(48));
                         QCOMPARE(replay.readBuffer(70), before);
                     }
+                    PostTransformOptions indexed;
+                    indexed.stage = "vs-index";
+                    auto identities = inspectPostTransform(replay, 150, indexed);
+                    QCOMPARE(identities.identities.size(), size_t(signature ? 3 : 1));
+                    QCOMPARE(replay.readBuffer(70), before);
                     // A direct producer after the helper must resume the original hidden cursor.
                     replay.inspectNativeState(
                         [&](auto context, const auto &) { context->Draw(signature ? 3 : 1, 0); });
@@ -172,6 +220,20 @@ class PostTransformTests final : public QObject {
             Replay baseline(frame, options);
             baseline.run();
             QCOMPARE(actual, baseline.readBuffer(70));
+            // Restore the same before boundary after the baseline submitted the draw.
+            options.before = true;
+            Replay identityReplay(frame, options);
+            identityReplay.run();
+            bounded.stage = "vs-index";
+            bounded.maxBytes = 1024 * 24;
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error, inspectPostTransform(identityReplay, 100, bounded));
+            QCOMPARE(identityReplay.readBuffer(70), before);
+            bounded.maxBytes = 256ull * 1024 * 1024;
+            const auto identity = inspectPostTransform(identityReplay, 100, bounded);
+            QCOMPARE(identity.identities.size(), size_t(1025));
+            QCOMPARE(identity.report.at("attempts").size(), size_t(2));
+            identityReplay.inspectNativeState([](auto context, const auto &) { context->Draw(1025, 0); });
+            QCOMPARE(identityReplay.readBuffer(70), actual);
         }
     }
     void emptyAndNonfiniteExports() {
@@ -274,10 +336,36 @@ class PostTransformTests final : public QObject {
             QDir().mkpath(evidence);
             QVERIFY(window.grab().save(evidence + "/post-transform.png"));
         }
+        stage->setCurrentIndex(stage->findData("vs-index"));
+        tasks.clear();
+        window.findChild<QAction *>("inspectGeometry")->trigger();
+        QTRY_VERIFY_WITH_TIMEOUT(!tasks.empty(), 30000);
+        QVERIFY(tasks.takeLast()[0].toBool());
+        auto choice = window.findChild<QComboBox *>("geometryTableChoice");
+        QVERIFY(choice && choice->isEnabled());
+        choice->setCurrentIndex(choice->findData("references"));
+        QCOMPARE(table->model()->rowCount(), 3);
+        QCOMPARE(table->model()->headerData(5, Qt::Horizontal).toString(), QString("vertex_id"));
+        choice->setCurrentIndex(choice->findData("unique_vertices"));
+        QCOMPARE(table->model()->rowCount(), 3);
+        QCOMPARE(table->model()->headerData(0, Qt::Horizontal).toString(), QString("unique_vertex"));
+        if (!evidence.isEmpty())
+            QVERIFY(window.grab().save(evidence + "/vs-identities.png"));
+        QTimer::singleShot(0, &window, [&] {
+            auto dialog = window.findChild<QFileDialog *>();
+            QVERIFY(dialog);
+            dialog->setDirectory(dir.path());
+            QMetaObject::invokeMethod(dialog, "accept", Qt::QueuedConnection);
+        });
+        window.findChild<QAction *>("exportGeometry")->trigger();
+        for (const auto *file : {"geometry.json", "vertices.bin", "vertices.csv", "geometry.obj",
+                                 "unique_vertices.bin", "unique_vertices.csv", "references.csv"})
+            QVERIFY(QFile::exists(dir.path() + "/FloraGPA-Geometry-1000-1/" + file));
         stage->setCurrentIndex(0);
         QCOMPARE(table->model()->rowCount(), 0);
         QVERIFY(!window.findChild<QLineEdit *>("geometryInstance")->isEnabled());
-        stage->setCurrentIndex(stage->findData("gs"));
+        stage->setCurrentIndex(stage->findData("vs-index"));
+        choice->setCurrentIndex(choice->findData("references"));
         window.findChild<QSpinBox *>("geometryStream")->setValue(3);
         window.findChild<QLineEdit *>("geometryInstance")->setText("2");
         const auto project = dir.path() + "/geometry.json";
@@ -285,7 +373,7 @@ class PostTransformTests final : public QObject {
         QFile saved(project);
         QVERIFY(saved.open(QIODevice::ReadOnly));
         const auto document = nlohmann::json::parse(saved.readAll().toStdString());
-        QCOMPARE(document.at("ui").at("geometry_selection").at("stage"), nlohmann::json("GS"));
+        QCOMPARE(document.at("ui").at("geometry_selection").at("stage"), nlohmann::json("VS索引"));
         saved.close();
         stage->setCurrentIndex(0);
         window.findChild<QSpinBox *>("geometryStream")->setValue(0);
@@ -294,7 +382,8 @@ class PostTransformTests final : public QObject {
         projectFile(window, "openExperiment", project);
         QTRY_VERIFY_WITH_TIMEOUT(!tasks.empty(), 30000);
         QVERIFY(tasks.takeLast()[0].toBool());
-        QCOMPARE(stage->currentData().toString(), QString("gs"));
+        QCOMPARE(stage->currentData().toString(), QString("vs-index"));
+        QCOMPARE(choice->currentData().toString(), QString("references"));
         QCOMPARE(window.findChild<QSpinBox *>("geometryStream")->value(), 3);
         QCOMPARE(window.findChild<QLineEdit *>("geometryInstance")->text(), QString("2"));
         QCOMPARE(table->model()->rowCount(), 0);

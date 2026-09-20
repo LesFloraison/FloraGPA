@@ -1,4 +1,5 @@
 #include "PostTransform.h"
+#include "DxbcIdentity.h"
 #include "EventDescription.h"
 #include "ShaderInspector.h"
 #include "StreamOutputInspector.h"
@@ -14,6 +15,7 @@
 #include <iomanip>
 #include <limits>
 #include <locale>
+#include <set>
 #include <sstream>
 #include <thread>
 namespace flora {
@@ -151,10 +153,10 @@ class PostTransformCapture {
         }
         return false;
     }
-    void selectInstance(PostTransformGeometry &result, const Event &event, const State &state) {
-        Event direct = event;
-        Json indirect = nullptr;
-        auto parameters = inspectionEvent(r.frame_, event.id).at("parameters");
+    void drawParameters(const Event &event, Event &direct, Json &parameters, Json &indirect) {
+        direct = event;
+        indirect = nullptr;
+        parameters = inspectionEvent(r.frame_, event.id).at("parameters");
         if (event.type == 0x38) {
             const auto automatic = r.drawAutoParameters(event.id);
             direct.type = 0x37;
@@ -185,6 +187,11 @@ class PostTransformCapture {
                                         .toHex()
                                         .toStdString()}};
         }
+    }
+    void selectInstance(PostTransformGeometry &result, const Event &event, const State &state) {
+        Event direct;
+        Json parameters, indirect;
+        drawParameters(event, direct, parameters, indirect);
         const auto total = parameters.value("instance_count", 1u), instance = *options.instance;
         if (instance >= total)
             throw std::runtime_error("Geometry instance is outside the draw instance range");
@@ -259,8 +266,9 @@ class PostTransformCapture {
         limits.push_back(
             "Selected bytes are sliced from the full capture; prefix queries determine only boundaries.");
     }
-    PostTransformGeometry capture(const Event &event, const State &state, bool countsOnly = false) {
-        const auto requested = options.stage;
+    PostTransformGeometry capture(const Event &event, const State &state, bool countsOnly = false,
+                                  Bytes overrideCode = {}, const std::function<void()> &configure = {}) {
+        const auto requested = options.stage == "vs-index" ? "vs" : options.stage;
         const auto stage = requested == "final" ? (state.stages[3].shader   ? "gs"
                                                    : state.stages[2].shader ? "ds"
                                                                             : "vs")
@@ -271,7 +279,7 @@ class PostTransformCapture {
             throw std::runtime_error("Draw has no selected shader for geometry inspection");
         if (stage == "ds" && !state.stages[1].shader)
             throw std::runtime_error("DS geometry requires a paired hull shader");
-        auto bytes = code(rid);
+        auto bytes = overrideCode.empty() ? code(rid) : overrideCode;
         auto info = inspectShader(bytes);
         const bool executableGs = stage == "gs" && info.at("stage") == "gs";
         if (requested == "gs" && !executableGs)
@@ -362,6 +370,8 @@ class PostTransformCapture {
             check(r.device_->CreateBuffer(&desc, nullptr, &output), "Create post-transform buffer");
             r.withPrivateOutputs(event, state, [&] {
                 bind(event, state);
+                if (configure)
+                    configure();
                 r.unbindStreamOutput();
                 if (stage == "vs") {
                     r.context_->HSSetShader(nullptr, nullptr, 0);
@@ -475,14 +485,172 @@ class PostTransformCapture {
               "Captured outputs are not truncated to original SO buffer capacity.",
               "Re-execution on private UAV snapshots does not guarantee repeated atomic return ordering "
               "across invocations."}}};
-        return {std::move(report), std::move(raw)};
+        return {std::move(report), std::move(raw), {}};
+    }
+
+    PostTransformGeometry captureIdentities(const Event &event, const State &state) {
+        if (options.stream)
+            throw std::runtime_error("VS identities only support stream zero");
+        Event direct;
+        Json parameters, indirect;
+        drawParameters(event, direct, parameters, indirect);
+        const auto instances = parameters.value("instance_count", 1u);
+        const bool indexed = parameters.contains("index_count");
+        const auto count = parameters.value(indexed ? "index_count" : "vertex_count", 0u);
+        if (options.instance && *options.instance >= instances)
+            throw std::runtime_error("VS identity instance is outside the original draw");
+        auto original = code(state.stages[0].shader);
+        const auto originalLayout = postTransformLayout(original, 0);
+        const auto fields = originalLayout.at("attributes");
+        const auto stride = originalLayout.at("stride").get<uint32_t>();
+        Json markers = Json::object(), patchedHash = nullptr;
+        PostTransformGeometry result;
+        if (r.options_.suppressDraws || r.options_.disabled.contains(event.id) || !count || !instances) {
+            result = capture(event, state);
+            if (!result.bytes.empty())
+                throw std::runtime_error("Unexpected VS output from an empty identity capture");
+        } else {
+            auto patched = instrumentVertexIdentity(original, instances);
+            markers = patched.markers;
+            patchedHash = sha256(patched.bytes);
+            Com<ID3D11VertexShader> shader;
+            const auto linkage = shaderClassLinkage(r.frame_, state.stages[0].shader);
+            check(r.device_->CreateVertexShader(patched.bytes.data(), patched.bytes.size(),
+                                                r.get<ID3D11ClassLinkage>(linkage), &shader),
+                  "Create identity vertex shader");
+            std::array<ID3D11ClassInstance *, 256> classes{};
+            auto classCount = state.stages[0].classCount;
+            if (r.options_.shaders.contains(state.stages[0].shader) &&
+                inspectShader(original).at("interface_slots") == 0)
+                classCount = 0;
+            for (unsigned i = 0; i < classCount; ++i)
+                classes[i] = r.get<ID3D11ClassInstance>(state.stages[0].classes[i]);
+            result = capture(event, state, false, patched.bytes,
+                             [&] { r.context_->VSSetShader(shader.Get(), classes.data(), classCount); });
+            std::map<std::pair<std::string, unsigned>, Json> lookup;
+            for (const auto &field : result.report.at("attributes"))
+                lookup[{field.at("semantic").get<std::string>(), field.at("index").get<unsigned>()}] = field;
+            const auto oldStride = result.report.at("stride").get<uint32_t>();
+            const auto vertexOffset = lookup.at({markers.at("vertex").at("semantic").get<std::string>(), 0})
+                                          .at("offset")
+                                          .get<uint32_t>();
+            const auto instanceOffset =
+                lookup.at({markers.at("instance").at("semantic").get<std::string>(), 0})
+                    .at("offset")
+                    .get<uint32_t>();
+            std::set<uint32_t> valid;
+            if (indexed) {
+                const unsigned width = state.ibFormat == 57 ? 2 : state.ibFormat == 42 ? 4 : 0;
+                if (!width)
+                    throw std::runtime_error("VS identity requires a supported index format");
+                auto buffer = r.readBuffer(state.ib);
+                const uint64_t offset =
+                    uint64_t(state.ibOffset) + uint64_t(parameters.at("start_index").get<uint32_t>()) * width;
+                const uint64_t size = uint64_t(count) * width;
+                if (offset > buffer.size() || size > buffer.size() - offset)
+                    throw std::runtime_error("VS identity index range exceeds the current buffer");
+                Reader reader(Bytes(buffer).subspan(size_t(offset), size_t(size)));
+                for (unsigned i = 0; i < count; ++i)
+                    valid.insert(width == 2 ? reader.read<uint16_t>() : reader.read<uint32_t>());
+                if (state.topology == 3 || state.topology == 5 || state.topology == 11 ||
+                    state.topology == 13)
+                    valid.erase(width == 2 ? 0xffff : UINT32_MAX);
+            }
+            std::vector<uint8_t> raw;
+            for (size_t at = 0; at < result.bytes.size(); at += oldStride) {
+                auto data = Bytes(result.bytes).subspan(at, oldStride);
+                const auto vid = Reader(data.subspan(vertexOffset)).read<uint32_t>(),
+                           iid = Reader(data.subspan(instanceOffset)).read<uint32_t>();
+                if (iid >= instances || (indexed ? !valid.contains(vid) : vid >= count))
+                    throw std::runtime_error("Native VS identity is outside the original input references");
+                const auto base = indexed ? parameters.at("base_vertex").get<int64_t>()
+                                          : parameters.at("start_vertex").get<int64_t>();
+                result.identities.push_back({iid, int64_t(vid) + base, vid});
+                for (const auto &field : fields) {
+                    auto source = lookup.at(
+                        {field.at("semantic").get<std::string>(), field.at("index").get<unsigned>()});
+                    const auto offset = source.at("offset").get<uint32_t>(),
+                               size = field.at("component_count").get<uint32_t>() * 4;
+                    Reader reader(data);
+                    reader.skip(offset);
+                    auto bytes = reader.take(size);
+                    raw.insert(raw.end(), bytes.begin(), bytes.end());
+                }
+            }
+            result.bytes = std::move(raw);
+        }
+        const auto fullHash = sha256(result.bytes);
+        auto &report = result.report;
+        const auto fullVertices = report.at("vertices").get<uint64_t>(),
+                   factor = report.at("vertices_per_primitive").get<uint64_t>();
+        if (options.instance) {
+            std::vector<uint8_t> selected;
+            std::vector<PostTransformGeometry::Identity> identities;
+            uint64_t first = 0;
+            for (size_t i = 0; i < result.identities.size(); ++i)
+                if (result.identities[i].instance == *options.instance) {
+                    if (identities.empty())
+                        first = i;
+                    identities.push_back(result.identities[i]);
+                    selected.insert(selected.end(), result.bytes.begin() + i * stride,
+                                    result.bytes.begin() + (i + 1) * stride);
+                }
+            if (identities.size() % factor)
+                throw std::runtime_error("VS identity selection splits a native primitive");
+            result.bytes = std::move(selected);
+            result.identities = std::move(identities);
+            report["instance_selection"] = {
+                {"instance", *options.instance},
+                {"instance_count", instances},
+                {"strategy", "native_vs_identity"},
+                {"first_vertex", first},
+                {"vertex_count", result.identities.size()},
+                {"original_parameters", parameters},
+                {"indirect_arguments", indirect},
+                {"full_capture",
+                 {{"vertices", fullVertices}, {"primitives", fullVertices / factor}, {"sha256", fullHash}}},
+                {"prefix_queries", Json::array()},
+                {"system_ids_rewritten", false},
+                {"input_offsets_rewritten", false}};
+        }
+        report.update(Json{{"requested_stage", "vs-index"},
+                           {"attributes", fields},
+                           {"stride", stride},
+                           {"vertices", result.identities.size()},
+                           {"primitives", result.identities.size() / factor},
+                           {"sha256", sha256(result.bytes)},
+                           {"vertex_identity",
+                            {{"source", "native_VS_system_values"},
+                             {"markers", markers},
+                             {"indexed", indexed},
+                             {"original_parameters", parameters},
+                             {"indirect_arguments", indirect},
+                             {"full_capture_sha256", fullHash},
+                             {"patched_sha256", patchedHash},
+                             {"original_shader_sha256", sha256(original)},
+                             {"system_ids_rewritten", false},
+                             {"input_offsets_rewritten", false},
+                             {"scope", "Native assembled VS output references; omitted adjacency and "
+                                       "incomplete primitives are not fabricated"}}}});
+        Json limits = Json::array();
+        for (const auto &limit : report.at("limits")) {
+            auto value = limit.get<std::string>();
+            if (!value.starts_with("Primitive-expanded") && !value.starts_with("No per-instance partition"))
+                limits.push_back(value);
+        }
+        limits.push_back(
+            "Unique rows retain distinct output bit patterns for the same original vertex identity.");
+        limits.push_back("Identities cover native assembled VS output only; adjacency helpers and "
+                         "unassembled tail vertices may be absent.");
+        report["limits"] = std::move(limits);
+        return result;
     }
 
   public:
     PostTransformCapture(Replay &replay, const PostTransformOptions &o) : r(replay), options(o) {}
     PostTransformGeometry run(Id id) {
         if (options.stage != "final" && options.stage != "vs" && options.stage != "ds" &&
-            options.stage != "gs")
+            options.stage != "gs" && options.stage != "vs-index")
             throw std::runtime_error("Requested geometry stage has not yet been migrated");
         if (options.stream > 3)
             throw std::runtime_error("Geometry output stream must be 0..3");
@@ -495,8 +663,8 @@ class PostTransformCapture {
         PostTransformGeometry result;
         r.inspectEventInputs(id, [&] {
             bind(event, state);
-            result = capture(event, state);
-            if (options.instance)
+            result = options.stage == "vs-index" ? captureIdentities(event, state) : capture(event, state);
+            if (options.instance && options.stage != "vs-index")
                 selectInstance(result, event, state);
         });
         result.report["event"] = inspectionEvent(r.frame_, id);
@@ -504,6 +672,19 @@ class PostTransformCapture {
         for (auto key : {"vertex_references", "obj_vertices", "obj_faces", "obj_lines", "obj_points",
                          "obj_unavailable_reason"})
             result.report[key] = presentation.at(key);
+        if (options.stage == "vs-index") {
+            for (auto key : {"unique_vertices", "unique_identities", "conflicting_identities"})
+                result.report[key] = presentation.at(key);
+            result.report["tables"] = {
+                {"unique_vertices",
+                 {{"file", "unique_vertices.csv"},
+                  {"binary", "unique_vertices.bin"},
+                  {"stride", result.report.at("stride")},
+                  {"rows", result.report.at("unique_vertices")}}},
+                {"references", {{"file", "references.csv"}, {"rows", result.identities.size()}}},
+                {"expanded_vertices",
+                 {{"file", "vertices.csv"}, {"binary", "vertices.bin"}, {"rows", result.identities.size()}}}};
+        }
         return result;
     }
 };
@@ -587,15 +768,56 @@ Json postTransformTables(const PostTransformGeometry &geometry) {
                 faces.push_back({first + 1, first + 2, first + 3});
         }
     auto table = Json{{"columns", columns}, {"rows", rows}};
-    return {{"event", std::to_string(report.at("event").at("id").get<Id>())},
-            {"vertex_references", count},
-            {"obj_vertices", positions.size()},
-            {"obj_faces", faces.size()},
-            {"obj_lines", lines.size()},
-            {"obj_points", points.size()},
-            {"obj_unavailable_reason", reason},
-            {"tables", {{"expanded_vertices", table}}},
-            {"mesh", {{"positions", positions}, {"faces", faces}, {"lines", lines}, {"points", points}}}};
+    Json result{{"event", std::to_string(report.at("event").at("id").get<Id>())},
+                {"vertex_references", count},
+                {"obj_vertices", positions.size()},
+                {"obj_faces", faces.size()},
+                {"obj_lines", lines.size()},
+                {"obj_points", points.size()},
+                {"obj_unavailable_reason", reason},
+                {"tables", {{"expanded_vertices", table}}},
+                {"mesh", {{"positions", positions}, {"faces", faces}, {"lines", lines}, {"points", points}}}};
+    if (report.contains("vertex_identity")) {
+        if (geometry.identities.size() != count)
+            throw std::runtime_error("VS identity row count mismatch");
+        Json uniqueColumns = {"unique_vertex", "identity",           "variant", "instance", "vertex_index",
+                              "vertex_id",     "first_output_vertex"};
+        for (size_t i = 3; i < columns.size(); ++i)
+            uniqueColumns.push_back(columns[i]);
+        Json uniqueRows = Json::array(), references = Json::array();
+        std::map<std::pair<uint32_t, int64_t>, uint64_t> identities;
+        std::map<std::pair<uint64_t, std::string>, std::pair<uint64_t, uint64_t>> variants;
+        std::map<uint64_t, uint64_t> counts;
+        for (size_t i = 0; i < geometry.identities.size(); ++i) {
+            const auto &v = geometry.identities[i];
+            const auto [found, added] =
+                identities.try_emplace({v.instance, v.vertexIndex}, identities.size());
+            const auto identity = found->second;
+            std::string data(reinterpret_cast<const char *>(geometry.bytes.data() + i * stride), stride);
+            auto [entry, isNew] = variants.try_emplace(
+                {identity, std::move(data)}, std::pair{uint64_t(variants.size()), counts[identity]});
+            const auto [row, variant] = entry->second;
+            if (isNew) {
+                ++counts[identity];
+                Json unique = {row, identity, variant, v.instance, v.vertexIndex, v.vertexId, i};
+                for (size_t c = 3; c < rows[i].size(); ++c)
+                    unique.push_back(rows[i][c]);
+                uniqueRows.push_back(std::move(unique));
+            }
+            references.push_back(
+                {i, i / factor, i % factor, v.instance, v.vertexIndex, v.vertexId, identity, variant, row});
+        }
+        result["unique_vertices"] = variants.size();
+        result["unique_identities"] = identities.size();
+        result["conflicting_identities"] =
+            std::count_if(counts.begin(), counts.end(), [](const auto &p) { return p.second > 1; });
+        result["tables"]["unique_vertices"] = {{"columns", uniqueColumns}, {"rows", uniqueRows}};
+        result["tables"]["references"] = {{"columns",
+                                           {"vertex", "primitive", "corner", "instance", "vertex_index",
+                                            "vertex_id", "identity", "variant", "unique_vertex"}},
+                                          {"rows", references}};
+    }
+    return result;
 }
 void exportPostTransform(const PostTransformGeometry &geometry, const std::filesystem::path &directory) {
     auto root = QString::fromStdWString(directory.wstring());
@@ -629,6 +851,23 @@ void exportPostTransform(const PostTransformGeometry &geometry, const std::files
     for (const auto &row : table.at("rows"))
         append(row);
     save("vertices.csv", csv);
+    if (geometry.report.contains("vertex_identity")) {
+        for (const char *name : {"unique_vertices", "references"}) {
+            csv.clear();
+            const auto &selected = tables.at("tables").at(name);
+            append(selected.at("columns"));
+            for (const auto &row : selected.at("rows"))
+                append(row);
+            save(QString::fromLatin1(name) + ".csv", csv);
+        }
+        QByteArray unique;
+        const auto stride = geometry.report.at("stride").get<size_t>();
+        for (const auto &row : tables.at("tables").at("unique_vertices").at("rows")) {
+            const auto offset = row[6].get<size_t>() * stride;
+            unique.append(reinterpret_cast<const char *>(geometry.bytes.data() + offset), stride);
+        }
+        save("unique_vertices.bin", unique);
+    }
     if (tables.at("obj_unavailable_reason").is_null()) {
         std::string stage = geometry.report.at("shader_stage").get<std::string>();
         std::transform(stage.begin(), stage.end(), stage.begin(),
