@@ -2,6 +2,7 @@
 #include "DepthStencilCapture.h"
 #include "PredicateCapture.h"
 #include "SamplerCapture.h"
+#include "SrvBindingCapture.h"
 #include "SrvCapture.h"
 #include "StateCapture.h"
 #include "StreamCapture.h"
@@ -199,10 +200,41 @@ class UiTests final : public QObject {
             snapshot(*dialog, "sampler-setter-editor");
             apply->click();
         });
-        QVERIFY(editSamplerSetterDialog(
+        QVERIFY(editResourceSetterDialog(
             &parent, frame, 900, {{"start_slot", 2}, {"samplers", {0}}}, [&](auto &v) {
                 ++commits;
                 QCOMPARE(v, nlohmann::json({{"start_slot", 15}, {"samplers", {741}}}));
+            }));
+        QCOMPARE(commits, 1);
+    }
+    void srvSetterDialogValidation() {
+        using namespace flora;
+        QTemporaryDir dir;
+        testing::srvBindingCapture().save(dir.path() + "/frame.gpa_frame");
+        Frame frame((dir.path() + "/frame.gpa_frame").toStdWString());
+        QWidget parent;
+        int commits = 0;
+        QTimer::singleShot(0, &parent, [&] {
+            auto dialog = parent.findChild<QDialog *>("srvSetterDialog");
+            QVERIFY(dialog);
+            QTimer::singleShot(3000, dialog, &QDialog::reject);
+            auto apply = dialog->findChild<QDialogButtonBox *>()->button(QDialogButtonBox::Ok);
+            dialog->findChild<QSpinBox *>("start_slot")->setValue(127);
+            dialog->findChild<QSpinBox *>("srvCount")->setValue(2);
+            apply->click();
+            QCOMPARE(commits, 0);
+            QVERIFY(dialog->findChild<QLabel *>("setterError")->isVisible());
+            dialog->findChild<QSpinBox *>("srvCount")->setValue(1);
+            auto table = dialog->findChild<QTableWidget *>("srvBindings");
+            auto box = qobject_cast<QComboBox *>(table->cellWidget(0, 1));
+            box->setCurrentIndex(box->findData(QVariant::fromValue(qulonglong(733))));
+            snapshot(*dialog, "srv-setter-editor");
+            apply->click();
+        });
+        QVERIFY(editResourceSetterDialog(
+            &parent, frame, 910, {{"start_slot", 0}, {"views", {732}}}, [&](auto &v) {
+                ++commits;
+                QCOMPARE(v, nlohmann::json({{"start_slot", 127}, {"views", {733}}}));
             }));
         QCOMPARE(commits, 1);
     }
@@ -282,6 +314,81 @@ class UiTests final : public QObject {
         QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
         QVERIFY(done.takeLast()[0].toBool());
         QCOMPARE(output->image().pixelColor(0, 0), QColor(0, 96, 0, 255));
+    }
+    void srvSetterHistory() {
+        using namespace flora;
+        QTemporaryDir dir;
+        auto capture = testing::srvBindingCapture();
+        capture.save(dir.path() + "/srv-setter.gpa_frame");
+        MainWindow window;
+        window.resize(1500, 950);
+        window.show();
+        QSignalSpy done(&window, &MainWindow::taskFinished);
+        window.openCapture(dir.path() + "/srv-setter.gpa_frame");
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        window.findChild<QComboBox *>("apiKinds")->setCurrentIndex(1);
+        auto api = window.findChild<QTableView *>("apiLog");
+        bool selected = false;
+        for (int row = 0; row < api->model()->rowCount(); ++row) {
+            auto index = api->model()->index(row, 0);
+            if (index.data(Qt::UserRole).toULongLong() == 910) {
+                api->setCurrentIndex(index);
+                selected = true;
+                break;
+            }
+        }
+        QVERIFY(selected);
+        QTRY_VERIFY_WITH_TIMEOUT(!window.busy(), 30000);
+        auto edit = window.findChild<QAction *>("editSetter");
+        QVERIFY(edit && edit->isEnabled());
+        bool entered = false;
+        QTimer::singleShot(0, &window, [&] {
+            auto dialog = window.findChild<QDialog *>("srvSetterDialog");
+            if (!dialog)
+                return;
+            QTimer::singleShot(3000, dialog, &QDialog::reject);
+            auto table = dialog->findChild<QTableWidget *>("srvBindings");
+            auto box = qobject_cast<QComboBox *>(table->cellWidget(0, 1));
+            box->setCurrentIndex(box->findData(QVariant::fromValue(qulonglong(733))));
+            entered = true;
+            dialog->findChild<QDialogButtonBox *>()->button(QDialogButtonBox::Ok)->click();
+        });
+        done.clear();
+        edit->trigger();
+        QVERIFY(entered);
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        done.clear();
+        for (int row = 0; row < api->model()->rowCount(); ++row) {
+            auto index = api->model()->index(row, 0);
+            if (index.data(Qt::UserRole).toULongLong() == 1000) {
+                api->setCurrentIndex(index);
+                break;
+            }
+        }
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        auto output = window.findChild<ImageView *>("frameOutput");
+        QCOMPARE(output->image().pixelColor(0, 0), QColor(191, 0, 0, 255));
+        QAction *undo = nullptr, *redo = nullptr;
+        for (auto action : window.findChildren<QAction *>()) {
+            if (action->shortcut() == QKeySequence::Undo)
+                undo = action;
+            if (action->shortcut() == QKeySequence::Redo)
+                redo = action;
+        }
+        QVERIFY(undo && redo);
+        done.clear();
+        undo->trigger();
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        QCOMPARE(output->image().pixelColor(0, 0), QColor(32, 0, 0, 255));
+        done.clear();
+        redo->trigger();
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        QCOMPARE(output->image().pixelColor(0, 0), QColor(191, 0, 0, 255));
     }
     void srvHistory() {
         using namespace flora;

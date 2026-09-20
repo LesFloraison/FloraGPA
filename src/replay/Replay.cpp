@@ -430,8 +430,9 @@ void Replay::bind(const State &s, bool compute) {
         for (size_t i = 0; i < sam.size(); ++i)
             sam[i] = get<ID3D11SamplerState>(x.samplers[i]);
         for (size_t i = 0; i < srv.size(); ++i)
-            if (shader && !passthroughShaders_.contains(x.shader) &&
-                (x.classCount || usedSrvs_.at(x.shader)[i]))
+            if (srvBindings_.overrides(unsigned(stage)).contains(unsigned(i)) ||
+                (shader && !passthroughShaders_.contains(x.shader) &&
+                 (x.classCount || usedSrvs_.at(x.shader)[i])))
                 srv[i] = get<ID3D11ShaderResourceView>(x.srv[i]);
         (context_.Get()->*cbFns[stage])(0, 14, cb.data());
         (context_.Get()->*srvFns[stage])(0, 128, srv.data());
@@ -738,6 +739,10 @@ void Replay::command(const Entry &e) {
         auto state = frame_.state(event.state);
         samplerBindings_.observe(state);
         samplerBindings_.apply(state);
+        if (srvBindings_.active()) {
+            srvBindings_.hazards(srvHazards_, srvOutputs(state));
+            srvBindings_.apply(state);
+        }
         withEventEdits(event, state, [&] {
             bind(state, t == 0x35 || t == 0x36);
             if ((t == 0x35 || t == 0x36) &&
@@ -835,6 +840,7 @@ void Replay::command(const Entry &e) {
     }
     if (isStreamOutputTargets(t)) {
         applyStreamOutput(payload);
+        observeSrvBindings(e.id);
         counts["SOSetTargets"]++;
         return;
     }
@@ -862,6 +868,7 @@ void Replay::command(const Entry &e) {
     }
     if (t == 0x34ff || t == 0x3500 || t == 0x3522 || t == 0x25e) {
         outputs(e);
+        observeSrvBindings(e.id);
         return;
     }
     if (t == 0x246) {
@@ -958,6 +965,7 @@ void Replay::command(const Entry &e) {
         predicateValue_ = 0;
         predicateOverride_.reset();
         samplerBindings_.clear();
+        srvBindings_.clear();
         resetStreamOutputBindings();
         clearBindingGaps();
         for (auto &ranges : ranges_)
@@ -994,6 +1002,8 @@ void Replay::run(const std::function<void(Id, size_t, size_t)> &progress,
     resetPredicates();
     predicateOverride_.reset();
     samplerBindings_ = SamplerBindings{};
+    srvBindings_.clear();
+    srvHistories_.clear();
     clearBindingGaps();
     objects_.clear();
     editedSamplers_.clear();
@@ -1008,13 +1018,14 @@ void Replay::run(const std::function<void(Id, size_t, size_t)> &progress,
     soQueries_.clear();
     soAutoResults_.clear();
     streamOutputHistory.clear();
-    soCountRequiresKnown_ =
-        options_.editedEvents || !options_.shaders.empty() || !options_.textures.empty() ||
-        !options_.disabled.empty() || !options_.buffers.empty() || !options_.commandPayloads.empty() ||
-        !options_.updateSources.empty() || !options_.uavCounters.empty() ||
-        !options_.predicateSetters.empty() || !options_.depthStencilEdits.empty() ||
-        !options_.rasterizerEdits.empty() || !options_.blendEdits.empty() ||
-        !options_.samplerSetters.empty() || !options_.samplerEdits.empty() || !options_.srvEdits.empty();
+    soCountRequiresKnown_ = options_.editedEvents || !options_.shaders.empty() ||
+                            !options_.textures.empty() || !options_.disabled.empty() ||
+                            !options_.buffers.empty() || !options_.commandPayloads.empty() ||
+                            !options_.updateSources.empty() || !options_.uavCounters.empty() ||
+                            !options_.predicateSetters.empty() || !options_.depthStencilEdits.empty() ||
+                            !options_.rasterizerEdits.empty() || !options_.blendEdits.empty() ||
+                            !options_.samplerSetters.empty() || !options_.samplerEdits.empty() ||
+                            !options_.srvEdits.empty() || !options_.srvSetters.empty();
     soCountEnabled_ = false;
     for (const auto &[id, entry] : frame_.entries())
         if ((entry.category == 7 && entry.type == 0x38) ||

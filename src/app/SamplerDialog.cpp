@@ -9,6 +9,7 @@
 #include <QLineEdit>
 #include <QPushButton>
 #include <QSpinBox>
+#include <QStandardItemModel>
 #include <QTableWidget>
 #include <QVBoxLayout>
 namespace flora {
@@ -170,10 +171,13 @@ bool editSamplerDialog(QWidget *parent, const std::function<Json(const std::stri
     dialog.exec();
     return changed;
 }
-bool editSamplerSetterDialog(QWidget *parent, const Frame &frame, Id event, const Json &initial,
-                             const std::function<void(const Json &)> &commit) {
+bool editResourceSetterDialog(QWidget *parent, const Frame &frame, Id event, const Json &initial,
+                              const std::function<void(const Json &)> &commit) {
+    const bool srv = srvSetterStage(frame.entry(event).type).has_value();
+    const char *key = srv ? "views" : "samplers";
+    const int limit = srv ? 128 : 16;
     QDialog dialog(parent);
-    dialog.setObjectName("samplerSetterDialog");
+    dialog.setObjectName(srv ? "srvSetterDialog" : "samplerSetterDialog");
     dialog.setWindowTitle(QString::fromStdString(commandName(frame.entry(event).type)) +
                           QString(" — Event %1").arg(event));
     dialog.resize(460, 440);
@@ -181,22 +185,37 @@ bool editSamplerSetterDialog(QWidget *parent, const Frame &frame, Id event, cons
     auto form = new QFormLayout;
     auto start = new QSpinBox;
     start->setObjectName("start_slot");
-    start->setRange(0, 15);
+    start->setRange(0, limit - 1);
     start->setValue(initial.at("start_slot").get<int>());
     auto count = new QSpinBox;
-    count->setObjectName("samplerCount");
-    count->setRange(0, 16);
-    count->setValue(int(initial.at("samplers").size()));
+    count->setObjectName(srv ? "srvCount" : "samplerCount");
+    count->setRange(0, limit);
+    count->setValue(int(initial.at(key).size()));
     form->addRow("Start slot", start);
     form->addRow("Count", count);
     layout->addLayout(form);
     auto table = new QTableWidget(0, 2);
-    table->setObjectName("samplerBindings");
-    table->setHorizontalHeaderLabels({"Slot", "Sampler"});
+    table->setObjectName(srv ? "srvBindings" : "samplerBindings");
+    table->setHorizontalHeaderLabels({"Slot", srv ? "View" : "Sampler"});
     table->verticalHeader()->hide();
     table->horizontalHeader()->setStretchLastSection(true);
     layout->addWidget(table);
+    auto resources = new QStandardItemModel(&dialog);
+    auto addResource = [&](const QString &label, Id id) {
+        auto item = new QStandardItem(label);
+        item->setData(QVariant::fromValue(qulonglong(id)), Qt::UserRole);
+        resources->appendRow(item);
+    };
+    addResource("None", 0);
+    for (const auto &[id, entry] : frame.entries())
+        if (entry.category == 5 && entry.type == (srv ? 0x8c : 0x88))
+            addResource(QString(srv ? "SRV %1" : "Sampler %1").arg(id), id);
+    auto error = new QLabel;
+    error->setObjectName("setterError");
+    error->setWordWrap(true);
+    error->hide();
     auto sync = [&] {
+        error->hide();
         while (table->rowCount() > count->value())
             table->removeRow(table->rowCount() - 1);
         while (table->rowCount() < count->value()) {
@@ -206,10 +225,8 @@ bool editSamplerSetterDialog(QWidget *parent, const Frame &frame, Id event, cons
             item->setFlags(Qt::ItemIsEnabled);
             table->setItem(row, 0, item);
             auto box = new QComboBox;
-            box->addItem("None", QVariant::fromValue(qulonglong(0)));
-            for (const auto &[id, entry] : frame.entries())
-                if (entry.category == 5 && entry.type == 0x88)
-                    box->addItem(QString("Sampler %1").arg(id), QVariant::fromValue(qulonglong(id)));
+            box->setModel(resources);
+            QObject::connect(box, &QComboBox::currentIndexChanged, &dialog, [error] { error->hide(); });
             table->setCellWidget(row, 1, box);
         }
         for (int row = 0; row < table->rowCount(); ++row)
@@ -218,7 +235,7 @@ bool editSamplerSetterDialog(QWidget *parent, const Frame &frame, Id event, cons
     sync();
     for (int i = 0; i < count->value(); ++i) {
         auto box = qobject_cast<QComboBox *>(table->cellWidget(i, 1));
-        const auto id = initial["samplers"][i].get<Id>();
+        const auto id = initial[key][i].get<Id>();
         auto index = box->findData(QVariant::fromValue(qulonglong(id)));
         if (index < 0) {
             box->addItem(QString("Missing %1").arg(id), QVariant::fromValue(qulonglong(id)));
@@ -228,10 +245,6 @@ bool editSamplerSetterDialog(QWidget *parent, const Frame &frame, Id event, cons
     }
     QObject::connect(start, &QSpinBox::valueChanged, &dialog, sync);
     QObject::connect(count, &QSpinBox::valueChanged, &dialog, sync);
-    auto error = new QLabel;
-    error->setObjectName("setterError");
-    error->setWordWrap(true);
-    error->hide();
     layout->addWidget(error);
     auto buttons = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
     buttons->button(QDialogButtonBox::Ok)->setText("Apply");
@@ -240,11 +253,12 @@ bool editSamplerSetterDialog(QWidget *parent, const Frame &frame, Id event, cons
     QObject::connect(buttons, &QDialogButtonBox::rejected, &dialog, &QDialog::reject);
     QObject::connect(buttons, &QDialogButtonBox::accepted, &dialog, [&] {
         try {
-            if (start->value() + count->value() > 16)
-                throw std::runtime_error("Sampler range exceeds 16 slots");
-            Json value{{"start_slot", start->value()}, {"samplers", Json::array()}};
+            if (start->value() + count->value() > limit)
+                throw std::runtime_error(srv ? "SRV range exceeds 128 slots"
+                                             : "Sampler range exceeds 16 slots");
+            Json value{{"start_slot", start->value()}, {key, Json::array()}};
             for (int i = 0; i < count->value(); ++i)
-                value["samplers"].push_back(uint64_t(
+                value[key].push_back(uint64_t(
                     qobject_cast<QComboBox *>(table->cellWidget(i, 1))->currentData().toULongLong()));
             if (value != initial) {
                 commit(value);

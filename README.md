@@ -123,7 +123,8 @@ bindings between draw/dispatch snapshots. CB/CB1 calls validate resource flags a
 window alignment before applying native bindings. A selected boundary with missing
 captured output views, input layouts or unresolved SRV slots returns an error; later
 complete snapshots or ClearState restore binding validity. SRV replacement resolves
-only the overwritten slots in that shader stage. Setter editing is still being migrated.
+only the overwritten slots in that shader stage. Sampler, SRV and predicate setter
+editing is available; other setter families are still being migrated.
 
 **Pipeline > Replay State** reads actual D3D11 bindings at the selected command's
 before/after boundary through the isolated worker. It includes all six shader stages,
@@ -193,13 +194,26 @@ change the DXGI format, dimension, mip/layer/cube range or buffer element range.
 The form follows the chosen dimension; format names and numeric values are both
 accepted. `0xffffffff` selects all remaining mips. Invalid resource/format/range
 combinations fail through native D3D11 validation. Edits support save/load and
-undo/redo and restore the captured view at the next unedited event.
+undo/redo and restore the underlying binding at the next unedited event.
 
 Temporary SRVs use the current view's native resource, including an edited buffer
 input clone; other slots sharing the captured view remain independent. Native
-overlap with an active output can unbind the edited SRV. Cross-command SRV setter
-experiments, global view edits, texture input clones and private diagnostic/debug
-consumers are still pending and unsupported experiment kinds remain explicit errors.
+overlap with an active output can unbind the edited SRV.
+
+Select a six-stage **SetShaderResources** command and use **Edit Setter** to change
+its starting slot and view array. Overrides persist per slot across draw/dispatch
+snapshots until overwritten or cleared. Moving or shrinking an array preserves
+previously observed bindings of the displaced slots; unknown bindings are rejected.
+SRV conflicts track output subresources and read-only depth/stencil planes. Once an
+output unbinds an SRV, removing that output does not resurrect the SRV. Descriptor
+edits inherit the final setter edits regardless of operation order, and explicit
+bindings remain visible even in shader-unused slots. Buffer patch validation,
+the buffer editor and before/after exports also follow these bindings. Both editors use project
+history, save/load and undo/redo.
+
+Global view edits, output setter experiments, texture input clones and private
+diagnostic/debug consumers remain pending. Unsupported experiment kinds remain
+explicit errors.
 
 **Pipeline > Predicate** reads native occlusion and stream-output overflow predicates
 at the selected command boundary. The compact inspector shows the query status,

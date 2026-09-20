@@ -56,7 +56,8 @@ bool persistentBufferEdit(const std::vector<BufferBinding> &bindings) {
         return b.role == "uav" || b.role == "rtv" || b.role == "so";
     });
 }
-void validateBufferPatch(const Frame &frame, Id event, Id resource, uint64_t offset, size_t size) {
+void validateBufferPatch(const Frame &frame, Id event, Id resource, uint64_t offset, size_t size,
+                         const State *effective) {
     auto command = frame.event(event);
     auto target = frame.resource(resource);
     if (target.type != 0x83)
@@ -64,7 +65,7 @@ void validateBufferPatch(const Frame &frame, Id event, Id resource, uint64_t off
     auto width = target.desc.at(0);
     if (!size || offset > width || size > width - offset)
         throw std::runtime_error("Buffer edit is empty or out of bounds");
-    if (bufferBindings(frame, command, frame.state(command.state), resource).empty())
+    if (bufferBindings(frame, command, effective ? *effective : frame.state(command.state), resource).empty())
         throw std::runtime_error("Buffer is not bound to the selected draw or dispatch");
 }
 } // namespace flora

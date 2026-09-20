@@ -2136,7 +2136,11 @@ void MainWindow::editBuffer(bool importFile) {
     try {
         auto event = selectedEvent_, resource = selectedResource_;
         auto command = frame_->event(event);
-        auto bindings = bufferBindings(*frame_, command, frame_->state(command.state), resource);
+        ReplayOptions options;
+        experiment_->apply(*frame_, options);
+        const auto state =
+            effectiveSrvBindings(*frame_, event, frame_->state(command.state), options.srvSetters);
+        auto bindings = bufferBindings(*frame_, command, state, resource);
         if (frame_->resource(resource).type != 0x83 || bindings.empty())
             throw std::runtime_error("Select a buffer bound to this draw or dispatch");
         QByteArray imported;
@@ -2439,10 +2443,10 @@ void MainWindow::editSetter() {
     try {
         const auto event = selectedEvent_;
         const auto values = experiment_->setter(*frame_, event);
-        if (samplerSetterStage(frame_->entry(event).type)) {
+        if (samplerSetterStage(frame_->entry(event).type) || srvSetterStage(frame_->entry(event).type)) {
             const auto revision = revision_;
             auto frame = frame_;
-            if (editSamplerSetterDialog(this, *frame, event, values, [&](const nlohmann::json &next) {
+            if (editResourceSetterDialog(this, *frame, event, values, [&](const nlohmann::json &next) {
                     if (revision != revision_ || event != selectedEvent_)
                         throw std::runtime_error("Selection or experiment changed; reopen this editor");
                     experiment_->setSetter(*frame_, event, next);

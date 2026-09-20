@@ -330,7 +330,9 @@ int main(int argc, char **argv) {
                 constantBindings = std::move(constants);
                 if (options.until && isDraw(frame.entry(options.until).type)) {
                     auto event = frame.event(options.until);
-                    auto bindings = bufferBindings(frame, event, frame.state(event.state), resource.id);
+                    auto state =
+                        effectiveSrvBindings(frame, event.id, frame.state(event.state), options.srvSetters);
+                    auto bindings = bufferBindings(frame, event, state, resource.id);
                     QJsonArray list;
                     for (auto &binding : bindings) {
                         QJsonObject item{{"role", QString::fromStdString(binding.role)}};

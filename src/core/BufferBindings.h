@@ -11,5 +11,6 @@ struct BufferBinding {
 std::vector<BufferBinding> bufferBindings(const Frame &frame, const Event &event, const State &state,
                                           Id resource);
 bool persistentBufferEdit(const std::vector<BufferBinding> &bindings);
-void validateBufferPatch(const Frame &frame, Id event, Id resource, uint64_t offset, size_t size);
+void validateBufferPatch(const Frame &frame, Id event, Id resource, uint64_t offset, size_t size,
+                         const State *effective = nullptr);
 } // namespace flora

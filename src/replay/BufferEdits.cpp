@@ -120,7 +120,8 @@ void Replay::withEventEdits(const Event &event, const State &state, const std::f
 }
 void Replay::inspectEventInputs(Id id, const std::function<void()> &inspect) {
     auto event = frame_.event(id);
-    withEventEdits(event, frame_.state(event.state), [&] {
+    const auto state = effectiveSrvBindings(frame_, id, frame_.state(event.state), options_.srvSetters);
+    withEventEdits(event, state, [&] {
         inspect();
         return false;
     });

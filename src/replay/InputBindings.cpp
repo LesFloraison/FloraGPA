@@ -138,6 +138,15 @@ bool Replay::inputBindings(const Entry &e, Bytes payload) {
         return true;
     }
     const auto stage = size_t(srv - std::begin(srvSlots));
+    const SrvBinding original{start, ids};
+    const auto edit = options_.srvSetters.find(e.id);
+    if (edit != options_.srvSetters.end()) {
+        start = edit->second.start;
+        ids = edit->second.views;
+        count = UINT(ids.size());
+        if (start >= 128 || count > 128 - start)
+            throw std::runtime_error("SRV range exceeds 128 slots");
+    }
     bool missing = false;
     for (auto id : ids) {
         if (!id)
@@ -156,10 +165,20 @@ bool Replay::inputBindings(const Entry &e, Bytes payload) {
             throw std::runtime_error("SRV owner is not a supported buffer or texture");
     }
     if (missing) {
+        if (edit != options_.srvSetters.end())
+            throw std::runtime_error("Edited SRV binding references a missing view");
+        srvBindings_.transition(unsigned(stage), original, nullptr, SrvObservation{});
         // The whole call is unresolved, including present resources in the same array.
         std::fill_n(srvGaps_[stage].begin() + start, count, e.id);
         counts["unresolved_srv_setters"]++;
         return true;
+    }
+    auto next = srvBindings_;
+    if (edit != options_.srvSetters.end() || next.active(unsigned(stage))) {
+        const auto &previous = srvHistory(e.id);
+        next.transition(unsigned(stage), original,
+                        edit == options_.srvSetters.end() ? nullptr : &edit->second, previous);
+        next.hazards(srvHazards_, previous.outputs);
     }
     std::vector<ID3D11ShaderResourceView *> views;
     for (auto id : ids)
@@ -172,6 +191,8 @@ bool Replay::inputBindings(const Entry &e, Bytes payload) {
         &ID3D11DeviceContext::PSSetShaderResources, &ID3D11DeviceContext::CSSetShaderResources};
     (context_.Get()->*setters[stage])(start, count, views.data());
     std::fill_n(srvGaps_[stage].begin() + start, count, Id(0));
+    srvBindings_ = std::move(next);
+    observeSrvBindings(e.id);
     return true;
 }
 } // namespace flora

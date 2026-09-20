@@ -84,6 +84,7 @@ void Experiment::apply(const Frame &frame, ReplayOptions &options) const {
     options.samplerSetters.clear();
     options.samplerEdits.clear();
     options.srvEdits.clear();
+    options.srvSetters.clear();
     options.depthStencilEdits.clear();
     options.rasterizerEdits.clear();
     options.blendEdits.clear();
@@ -142,6 +143,8 @@ void Experiment::apply(const Frame &frame, ReplayOptions &options) const {
                 const auto id = identifier(op.at("event"));
                 if (samplerSetterStage(frame.entry(id).type))
                     options.samplerSetters[id] = validateSamplerSetter(frame, id, op.at("values"));
+                else if (srvSetterStage(frame.entry(id).type))
+                    options.srvSetters[id] = validateSrvSetter(frame, id, op.at("values"));
                 else
                     options.predicateSetters[id] = validatePredicateSetter(frame, id, op.at("values"));
             } else if (kind == "clear") {
@@ -161,7 +164,6 @@ void Experiment::apply(const Frame &frame, ReplayOptions &options) const {
                 auto event = identifier(op.at("event")), resource = identifier(op.at("resource"));
                 auto offset = identifier(op.at("offset"));
                 auto bytes = asset(op.at("asset"));
-                validateBufferPatch(frame, event, resource, offset, bytes.size());
                 options.buffers[event][resource].push_back({offset, std::move(bytes)});
             } else if (kind == "uav_counter" || kind == "initial_uav_counter") {
                 auto view = identifier(op.at("view")), value = identifier(op.at("value"));
@@ -208,11 +210,19 @@ void Experiment::apply(const Frame &frame, ReplayOptions &options) const {
                 throw std::runtime_error("Experiment operation migration pending: " + kind);
         }
     }
+    // Validate against final bindings so history operation order does not affect input edits.
+    for (const auto &[event, buffers] : options.buffers) {
+        const auto state =
+            effectiveSrvBindings(frame, event, frame.state(frame.event(event).state), options.srvSetters);
+        for (const auto &[resource, patches] : buffers)
+            for (const auto &patch : patches)
+                validateBufferPatch(frame, event, resource, patch.offset, patch.bytes.size(), &state);
+    }
     // Descriptor inheritance uses final setter edits, regardless of history order.
     for (const auto &[event, bindings] : srvs)
         for (const auto &[target, patch] : bindings)
             options.srvEdits[event][target] =
-                nativeSrv(effectiveSrv(frame, event, target.first, target.second, patch));
+                nativeSrv(effectiveSrv(frame, event, target.first, target.second, patch, options.srvSetters));
     for (const auto &[event, bindings] : samplers) {
         const auto state = samplerState(frame, event, options.samplerSetters);
         for (const auto &[target, patch] : bindings) {
@@ -357,13 +367,18 @@ Json Experiment::srv(const Frame &frame, Id event, const std::string &name, unsi
             if (op.at("kind") == "srv_descriptor" && identifier(op.at("event")) == event &&
                 op.at("stage") == name && srvSlot(op.at("slot")) == slot)
                 patch = mergeSrv(patch, op.at("values"));
+    ReplayOptions options;
+    apply(frame, options);
     if (patch.empty()) {
         const auto &entry = frame.entry(event);
         if (entry.category != 7 || !isDraw(entry.type))
             throw std::runtime_error("Select a draw or dispatch");
-        patch = capturedSrv(frame, frame.state(frame.event(event).state).stages[stage].srv[slot]);
+        patch = capturedSrv(frame, effectiveSrvBindings(frame, event, frame.state(frame.event(event).state),
+                                                        options.srvSetters)
+                                       .stages[stage]
+                                       .srv[slot]);
     }
-    return effectiveSrv(frame, event, stage, slot, patch);
+    return effectiveSrv(frame, event, stage, slot, patch, options.srvSetters);
 }
 void Experiment::setSrv(const Frame &frame, Id event, const std::string &stage, unsigned slot,
                         const Json &values) {
@@ -394,6 +409,9 @@ void Experiment::setSetter(const Frame &frame, Id event, const Json &values) {
     if (samplerSetterStage(frame.entry(event).type)) {
         auto binding = validateSamplerSetter(frame, event, values);
         normalized = {{"start_slot", binding.start}, {"samplers", binding.resources}};
+    } else if (srvSetterStage(frame.entry(event).type)) {
+        auto binding = validateSrvSetter(frame, event, values);
+        normalized = {{"start_slot", binding.start}, {"views", binding.views}};
     } else {
         auto binding = validatePredicateSetter(frame, event, values);
         normalized = {{"predicate", binding.resource}, {"predicate_value", binding.value}};
@@ -464,10 +482,14 @@ void Experiment::setBufferPatches(const Frame &frame, Id event, Id resource,
                                   const std::vector<BufferPatch> &patches, const std::string &label) {
     if (patches.empty())
         return;
+    ReplayOptions options;
+    apply(frame, options);
+    const auto state =
+        effectiveSrvBindings(frame, event, frame.state(frame.event(event).state), options.srvSetters);
     Json operations = Json::array();
     for (const auto &patch : patches) {
         auto &data = patch.bytes;
-        validateBufferPatch(frame, event, resource, patch.offset, data.size());
+        validateBufferPatch(frame, event, resource, patch.offset, data.size(), &state);
         operations.push_back(
             {{"kind", "buffer"},
              {"event", event},

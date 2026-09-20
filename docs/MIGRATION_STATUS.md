@@ -2,7 +2,7 @@
 
 已有可编译、可运行的 VS2022 / Qt Widgets 原生工程，能够独立重放当前验证的
 GF2 与 BF1 DX11 捕获。**尚未完成原 Python 版本的全部功能迁移。**
-当前独立包为 `out/FloraGPA-srv-descriptors/FloraGPA.exe`。
+当前独立包为 `out/FloraGPA-srv-bindings-final/FloraGPA.exe`。
 
 
 ## 当前可用
@@ -14,7 +14,7 @@ GF2 与 BF1 DX11 捕获。**尚未完成原 Python 版本的全部功能迁移�
 | 主界面 | GPA 式深色三栏、真实 GPU 时间柱状图与概览、可停靠面板、API 筛选、任务取消 | 概览尚无范围拖动；未知功能页禁用 |
 | 事件 | draw/dispatch 选择、快照管线、前后边界重放、事件启停 | 部分命令执行及 setter 实验仍待迁移 |
 | 捕获命令状态 | 六阶段 setter、CB1 范围、IA/RS/OM/SO/predicate 参数、扩展 UAV 槽元数据；命令前/后、逐字段来源、资源重叠失效与快照校准；Pipeline 页异步读取、筛选、跳转、JSON 导出 | 原始捕获状态，不应用实验；只读 DSV / 模糊 3D 重叠保持未知；SO 偏移是 setter 参数，隐藏 counter 和实时写入位置不由此推断 |
-| 命令间输入绑定 | 实际执行 IA layout / VB / IB、六阶段 SRV / sampler、CB / CB1；验证槽位、数组、资源类型、IA bind flags、stride 和 CB1 对齐 / 驱动支持；缺失绑定按阶段 / 槽位追踪 | 缺失资源未被后续 setter / 完整快照 / ClearState 恢复时，选定边界明确失败；setter 编辑仍待迁移 |
+| 命令间输入绑定 | 实际执行 IA layout / VB / IB、六阶段 SRV / sampler、CB / CB1；验证槽位、数组、资源类型、IA bind flags、stride 和 CB1 对齐 / 驱动支持；缺失绑定按阶段 / 槽位追踪 | 缺失资源未被后续 setter / 完整快照 / ClearState 恢复时，选定边界明确失败；其余 setter 编辑仍待迁移 |
 | 重放管线状态 | Pipeline > Replay State 通过 Worker 读取实际六阶段绑定、CB1 范围、IA/RS/OM/SO/predicate、视图及状态描述；命令前/后、实验输入克隆、禁用状态、筛选、跳转和 JSON 导出 | 仅覆盖后端已支持的命令和实验；SO 实时写入位置保持未知；SO retained 实验及完整管线编辑仍待迁移 |
 | 动态 shader 类链接 | 六阶段 draw/dispatch 快照的 linkage、具名/显式创建实例、有序接口绑定、CB/texture/sampler 偏移；动态/静态 shader 替换；带 SO 的 linked GS；Qt 资源属性、接口槽数和 CLI 元数据导出 | shader setter 实验和专用覆盖分析仍待迁移；本机已复现的空函数表 PS 驱动崩溃改为明确提示使用 WARP |
 | Stream output / DrawAuto | SO 声明、五版 context 的目标 setter、普通 GS / VS / DS / 仅输出签名的 passthrough；重复/dirty 快照、显式重置、追加、ClearState；逐流 GPU 查询、按实际写入字节及 IA 范围重建 DrawAuto；Qt SO 属性/目标链接和几何导出 | 输出/setter 实验的 retained 目标和私有诊断重放仍待迁移；无帧内历史时原始重放保留捕获计数并标注未验证，有编辑时拒绝猜测 |
@@ -27,17 +27,46 @@ GF2 与 BF1 DX11 捕获。**尚未完成原 Python 版本的全部功能迁移�
 | 光栅 / 视口 / 裁剪实验 | 十二项 rasterizer 字段、0–16 槽 viewport/scissor、旧 wireframe/cull_none preset；原生 State/State1/State2、forced sample count 和 conservative raster；Qt 三页编辑、字段合并、历史和保存/加载 | 受设备能力与合法 draw 组合限制；强制采样检查 DSV、深度、RTV 采样数和替换后的 PS；私有 coverage 消费者仍待迁移 |
 | 混合 / 采样实验 | BlendState/BlendState1、八槽独立 color/alpha 运算与因子、双源混合、写掩码、16 种 logic op、blend constant、uint32 sample mask、alpha-to-coverage；Qt General/RT 参数页、旧 preset、字段合并、保存与撤销/重做 | 逻辑运算要求设备与每个 RTV 格式支持；不兼容组合明确拒绝；MSAA 执行已验证，但 MSAA 专用查看界面与私有 coverage 诊断仍待迁移 |
 | Sampler 实验 | 六阶段 × 16 槽 descriptor 编辑：36 种过滤、地址/比较/各向异性、border RGBA、LOD；sampler setter 的起始槽/资源数组、部分覆盖、空调用、ClearState、范围移动时保留前序绑定；Qt 编辑、保存、撤销/重做 | descriptor 只作用于选定 draw/dispatch；继承最终 setter 绑定；缺失前序观察和不支持的 min/max filtering 明确拒绝；私有 coverage/quad 消费者仍待迁移 |
-| SRV 描述符实验 | 六阶段 × 128 槽、十一种维度、格式与 mip/array/buffer 范围；逐事件字段合并、维度切换、原生视图创建、输入 buffer 克隆归属；Qt 编辑、保存与撤销/重做 | 当前继承捕获的 draw/dispatch 绑定；原生驱动处理 SRV/UAV 重叠；跨命令 SRV setter 实验、全局 view 编辑、texture 输入克隆及私有诊断消费者仍待迁移 |
+| SRV 描述符实验 | 六阶段 × 128 槽、十一种维度、格式与 mip/array/buffer 范围；逐事件字段合并、维度切换、原生视图创建、输入 buffer 克隆归属；Qt 编辑、保存与撤销/重做 | 继承最终 SRV setter 编辑；原生驱动处理 SRV/UAV 重叠；全局 view 编辑、texture 输入克隆及私有诊断消费者仍待迁移 |
+| SRV setter 实验 | 六阶段 × 128 槽的起始槽/视图数组；逐槽跨快照继承、部分覆盖、范围移动/缩短、空调用、ClearState、缺失资源恢复；mip/layer 与只读 depth/stencil 冲突、原生解绑保持；Qt 编辑、保存与撤销/重做 | 移动范围要求可确认的前序绑定；描述符和 buffer 补丁/导出继承最终绑定；全局 view、output setter、texture 输入克隆及私有诊断依赖尚未闭合 |
 | 图像 | 实际 GPU 输出、缩放/平移/通道、像素值、PNG 导出 | 全帧输出目前限制单采样 RGBA/BGRA8 |
 | 纹理 | GPU 格式转换、BC、浮点/整数、1D/2D/3D、mip/layer/slice、事件边界预览 | MSAA、平面格式及部分查看选项未迁移 |
 | Shader | DXBC 反汇编、反射、SPDB/SDBG 内嵌源码、HLSL 编译替换 | 不含 HLSL 恢复、单步调试及全部反射树 |
 | Buffer | 初始值、事件前后读回、范围、Hex/ASCII/32 位解释、导出；事件字节编辑/二进制补丁导入、绑定识别、撤销/重做；递归 CB 字段、CB1 范围和类型化编辑；按 UAV view 检查/编辑 Append/Consume/Counter | counter 支持 CS/OM 快照及已恢复 clear/copy/setter 引用；SO retained 实验、完整 setter/getter 与扩展 UAV 重放仍待迁移 |
 | 几何 | IA 输入解码、索引与实例、DrawAuto 实际参数及来源、三种顶点表、旋转线框、CSV/OBJ 导出 | 后变换与覆盖未迁移；当前表格上限为 100 万引用 / 1600 万字段 |
 | 资源名称 | GenPrivateData 原始名称、非法 UTF-8 转义、列表筛选和属性显示 | 名称记录不表示逐事件重命名时间线 |
-| 实验项目 | 原格式 JSON、捕获 SHA-256 绑定、资产校验、uint64 ID、原子保存、撤销/重做 | 接受事件启停、buffer、clear、update_source、predicate/sampler setter、sampler / SRV descriptor、depth/stencil、rasterizer/viewport/scissor 与 blend pipeline、事件/初始 UAV counter、全局 shader/texture 替换；其他操作明确拒绝 |
+| 实验项目 | 原格式 JSON、捕获 SHA-256 绑定、资产校验、uint64 ID、原子保存、撤销/重做 | 接受事件启停、buffer、clear、update_source、predicate/sampler/SRV setter、sampler / SRV descriptor、depth/stencil、rasterizer/viewport/scissor 与 blend pipeline、事件/初始 UAV counter、全局 shader/texture 替换；其他操作明确拒绝 |
 | 性能 | 原生 D3D11 时间戳、disjoint 与 pipeline statistics | 尚未迁移原版多轮调度、Intel 硬件指标/GTPin |
 
 ## 验证证据
+
+- SRV setter 的最终 `out/FloraGPA-srv-bindings-final/` 包通过 1,272 项 Python 对照：
+  `artifacts/srv-setters-verified/validation.json` 中 1,104 项合成与四项
+  真实帧对照，以及 `artifacts/srv-setter-edges-verified/validation.json` 的 164 项
+  组合边界检查。覆盖六阶段 × 128 槽、前后边界、禁用事件、部分覆盖、空调用、
+  移动/缩短范围、ClearState、槽位 127 与 shader 未使用槽位、缺失资源恢复，
+  以及 RTV/UAV 解绑后不恢复已清空的 SRV。
+  GF2 的 151 条、BF1 的 2,173 条 setter 置空编辑与 Python 整帧逐字节相同，
+  移除编辑后恢复原黄金帧。全部十一种维度（包括 MSAA）的描述符继承，
+  setter / descriptor 操作顺序、只读 depth/stencil 四种标志、未知输出冲突，
+  新绑定 buffer 的输入克隆、事件前/后导出字节与绑定角色均已对照。
+  CPU 测试覆盖无前序观察的拒绝、历史回退、无效 ClearState 保持未知、
+  保存/加载与失败重绑定的项目回滚。Debug 增量链接曾出现损坏 COFF 中间文件，
+  清理后完整重建成功；Qt 紧凑视图数组编辑器与 sampler 共用资源模型，
+  截图 `artifacts/srv-setter-ui-final/srv-setter-editor.png` 已检查。
+  context 记录交错时，原生离线检查曾将有效的继承绑定误判为空；修正后
+  硬件/WARP、两种操作顺序和 CPU 检查全部通过。捕获前序观察按 context 分开，
+  编辑覆盖按原版单一重放 context 的命令顺序继承，不代表新增了多设备重放。
+  最终 Release 24 套测试、Debug 六套相关测试均通过，见
+  `artifacts/ctest-srv-setters-verified-release.log` 与 `ctest-srv-setters-verified-debug.log`。
+  Debug 的 SRV setter / descriptor 与 sampler setter 三项 Worker 交互通过
+  （`artifacts/srv-setter-debug-verified-interactions.txt`）；buffer 编辑交互另在配置
+  外部 GF2 夹具后复查（`artifacts/srv-setter-debug-buffer-history.txt`）。
+  最终黄金帧及关闭 draw 负对照共四项通过
+  （`artifacts/validation-srv-setters-verified/validation.json`）。
+  1,232 份成功原生报告的 75 种模块未发现 Python、GPA 或 RenderDoc，
+  三个 EXE 与最终 Release 哈希一致（`artifacts/srv-setters-module-audit.json`）。
+  全局 view 编辑、output setter 实验、texture 输入克隆和私有诊断消费者仍待迁移。
 
 - SRV 描述符迁移的最终独立包通过 288 项 Python 对照，记录为
   `artifacts/srv-final-comparison/validation.json`。覆盖六阶段全部 768 个实际槽位、
@@ -55,7 +84,7 @@ GF2 与 BF1 DX11 捕获。**尚未完成原 Python 版本的全部功能迁移�
   最终包的黄金帧及关闭 draw 负对照共四项通过
   （`artifacts/validation-srv-final/validation.json`）。268 份报告的模块审计
   未发现 Python、GPA 或 RenderDoc，三个发布 EXE 与 Release 构建哈希一致
-  （`artifacts/srv-module-audit.json`）。跨命令 setter 实验、全局 view 编辑、
+  （`artifacts/srv-module-audit.json`）。全局 view 编辑、
   texture 输入克隆及私有诊断依赖尚未闭合，因此相关模块仍标记为 partial。
 
 - Sampler descriptor / setter 迁移的最终独立包通过 954 项合成 Python 对照，

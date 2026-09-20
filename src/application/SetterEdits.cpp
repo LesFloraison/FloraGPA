@@ -21,7 +21,8 @@ uint64_t integer(const nlohmann::json &value, uint64_t max) {
 }
 } // namespace
 bool isEditableSetter(uint16_t type) {
-    return predicateOperation(type) == PredicateOperation::Set || samplerSetterStage(type).has_value();
+    return predicateOperation(type) == PredicateOperation::Set || samplerSetterStage(type).has_value() ||
+           srvSetterStage(type).has_value();
 }
 nlohmann::json capturedSetter(const Frame &frame, Id event) {
     const auto &entry = frame.entry(event);
@@ -31,6 +32,11 @@ nlohmann::json capturedSetter(const Frame &frame, Id event) {
         const auto captured = readSamplerCommand(frame.payload(event));
         requireImmediateContext(frame, captured.context);
         return {{"start_slot", captured.binding.start}, {"samplers", captured.binding.resources}};
+    }
+    if (entry.category == 7 && srvSetterStage(entry.type)) {
+        const auto captured = readSrvCommand(frame.payload(event));
+        requireImmediateContext(frame, captured.context);
+        return {{"start_slot", captured.binding.start}, {"views", captured.binding.views}};
     }
     auto captured = command(frame, event);
     return {{"predicate", captured.resource}, {"predicate_value", captured.value}};
@@ -61,6 +67,24 @@ SamplerBinding validateSamplerSetter(const Frame &frame, Id event, const nlohman
         auto id = integer(value, UINT64_MAX);
         validateSamplerResource(frame, id);
         result.resources.push_back(id);
+    }
+    return result;
+}
+SrvBinding validateSrvSetter(const Frame &frame, Id event, const nlohmann::json &values) {
+    if (frame.entry(event).category != 7 || !srvSetterStage(frame.entry(event).type))
+        throw std::runtime_error("Select a shader-resource view setter");
+    capturedSetter(frame, event);
+    if (!values.is_object() || values.size() != 2 || !values.contains("start_slot") ||
+        !values.contains("views") || !values.at("views").is_array())
+        throw std::runtime_error("Provide start_slot and a views array");
+    SrvBinding result;
+    result.start = uint32_t(integer(values.at("start_slot"), 127));
+    if (values.at("views").size() > 128 - result.start)
+        throw std::runtime_error("SRV range exceeds 128 slots");
+    for (const auto &value : values.at("views")) {
+        auto id = integer(value, UINT64_MAX);
+        validateSrvResource(frame, id);
+        result.views.push_back(id);
     }
     return result;
 }

@@ -191,7 +191,8 @@
         "Stream-output execution, complete setter/getter references and other experiment kinds remain pending",
         "tests/UavCounterTests.cpp: CS/OM Append and Counter on hardware and WARP; scope, reset, UINT_MAX, aliases, rollback and history",
         "tools/validate_uav_counters.py: 32 Python comparisons, 29 exact byte matches and 3 BF1 parallel-append multiset comparisons with exact untouched bytes",
-        "tests/UiTests.cpp: counter edit, overflow rejection, undo/redo and stale-read invalidation"
+        "tests/UiTests.cpp: counter edit, overflow rejection, undo/redo and stale-read invalidation",
+        "SRV setter overrides now feed buffer validation, the Qt edit entry point, event-before input scopes and CLI binding metadata; artifacts/srv-setter-edges-verified/validation.json compares exact exported input bytes and binding roles before/after the selected event"
       ]
     },
     {
@@ -697,7 +698,8 @@
         "Stream-output execution, complete setter/getter references and other experiment kinds remain pending",
         "tests/UavCounterTests.cpp: CS/OM Append and Counter on hardware and WARP; scope, reset, UINT_MAX, aliases, rollback and history",
         "tools/validate_uav_counters.py: 32 Python comparisons, 29 exact byte matches and 3 BF1 parallel-append multiset comparisons with exact untouched bytes",
-        "tests/UiTests.cpp: counter edit, overflow rejection, undo/redo and stale-read invalidation"
+        "tests/UiTests.cpp: counter edit, overflow rejection, undo/redo and stale-read invalidation",
+        "SRV setter overrides now feed buffer validation, the Qt edit entry point, event-before input scopes and CLI binding metadata; artifacts/srv-setter-edges-verified/validation.json compares exact exported input bytes and binding roles before/after the selected event"
       ]
     },
     {
@@ -2027,15 +2029,19 @@
         "src/application/SetterEdits.cpp",
         "src/application/Experiment.cpp",
         "src/replay/Replay.cpp",
-        "src/app/MainWindow.cpp"
+        "src/app/MainWindow.cpp",
+        "src/core/SamplerBindings.cpp",
+        "src/core/SrvBindings.cpp",
+        "src/app/SamplerDialog.cpp"
       ],
       "validation": [
         "Predicate setter arguments validate all fields, resource type/descriptor, immediate context, uint64 IDs and raw uint32 BOOL. Compatible setter history persists across draw/dispatch snapshots until an original setter or ClearState.",
         "tests/PredicationTests.cpp: repeated replay, save/load, undo/redo, branch history, invalid-operation atomicity and later reset. tests/UiTests.cpp: real worker observes apply/undo/redo and rejects invalid numeric input.",
         "tools/validate_predicate_setters_port.py: six wire families, hardware/WARP outputs and pipeline boundaries, replacement/detach/noncanonical BOOL, later reset, lifecycle rejection and SO/DrawAuto.",
-        "General setter families, offline state consumer integration and private diagnostic replay consumers remain pending; this batch implements the predicate family only.",
+        "Predicate, sampler and SRV setter families are implemented; IA/CB/shader/RS/OM/SO families and private diagnostic replay consumers remain pending.",
         "artifacts/predicate-setters-package/validation.json: all 1265 comparisons passed with Windows-only native child PATH; 210 actual pipeline boundaries, image/buffer results, four SO/DrawAuto geometry cases and query lifecycle rejection.",
-        "Release: all 18 CTest suites passed. Debug: 5 related suites plus predicate editor/inspector UI passed. Both golden frames and disabled-draw negative controls passed in artifacts/validation-predicate-setters-package/validation.json."
+        "Release: all 18 CTest suites passed. Debug: 5 related suites plus predicate editor/inspector UI passed. Both golden frames and disabled-draw negative controls passed in artifacts/validation-predicate-setters-package/validation.json.",
+        "Sampler validation is recorded in artifacts/sampler-final-comparison/validation.json and sampler-real-comparison/validation.json; SRV history/validation and inherited descriptor/buffer consumers are covered by tests/SrvBindingTests.cpp and tools/validate_srv_setters_port.py / validate_srv_setter_edges.py"
       ]
     },
     {
@@ -2214,7 +2220,8 @@
       "native": [
         "src/application/SrvEdits.cpp",
         "src/application/Experiment.cpp",
-        "src/replay/SrvEdits.cpp"
+        "src/replay/SrvEdits.cpp",
+        "src/core/SrvBindings.cpp"
       ],
       "validation": [
         "tests/SrvTests.cpp: eleven descriptor unions, strict uint32 validation, dimension changes, merged history, project save/load and rollback; hardware/WARP event scope, before/after, repeated replay and native range rejection",
@@ -2223,7 +2230,8 @@
         "GF2 15 and BF1 9817 multi-mip edits match Python pixels exactly; removing edits restores both original golden hashes",
         "artifacts/ctest-srv-final-release.log: all 23 suites passed; artifacts/ctest-srv-final-debug.log: three related suites passed",
         "artifacts/validation-srv-final/validation.json: four golden-frame and suppressed-draw checks passed; artifacts/srv-module-audit.json: 268 reports, no Python/GPA/RenderDoc loaded; packaged EXE hashes match Release",
-        "Cross-command SRV setter experiments, global view edits, texture input clones and private diagnostic/debug consumers remain pending; descriptors currently inherit captured draw/dispatch bindings"
+        "Descriptors inherit final SRV setter bindings independently of history operation order; global view edits, texture input clones and private diagnostic/debug consumers remain pending",
+        "artifacts/srv-setter-edges-verified/validation.json: eleven inherited dimensions, buffer clone ownership and read-only depth/stencil binding conflicts match Python"
       ]
     },
     {
@@ -2233,12 +2241,26 @@
       "description": "Six-stage SRV edits, subresource hazards and captured binding gaps.",
       "status": "partial",
       "native": [
-        "src/replay/InputBindings.cpp"
+        "src/core/SrvBindings.cpp",
+        "src/application/SetterEdits.cpp",
+        "src/application/Experiment.cpp",
+        "src/replay/InputBindings.cpp",
+        "src/replay/SrvEdits.cpp",
+        "src/app/SamplerDialog.cpp"
       ],
       "validation": [
-        "tests/InputBindingTests.cpp: hardware and WARP native getters, before/after boundaries, six stages, high slots, null/empty arrays and malformed records",
-        "tools/validate_input_bindings.py: Python native getter parity and matching rejection of invalid captured setters",
-        "Captured calls execute natively; setter experiment persistence, displaced-range prefix history and editor UI remain pending"
+        "tests/SrvBindingTests.cpp: strict wire/range/resource validation, observed versus unknown history, displaced slots, backward event inspection, save/load and transaction rollback; explicit unused slot 127 and repeated replay on hardware/WARP",
+        "artifacts/srv-setters-verified/validation.json: 1104 six-stage synthetic comparisons plus four real-frame comparisons passed on the final package; 151 GF2 and 2173 BF1 setter edits match Python output bytes, and undo restores both golden hashes",
+        "SrvHazards qualifies mip/layer overlap and depth/stencil read planes; native getters retain hazard nulls after outputs are removed. ClearState clears overrides; invalid captured reset records do not invent known observations.",
+        "artifacts/srv-setter-edges-verified/validation.json: 164 final-package comparisons passed, including output gaps, malformed future commands, eleven inherited dimensions, descriptor/setter operation order, new buffer input clones and before/after byte exports, all four read-only DSV flag combinations on hardware/WARP",
+        "tests/SrvBindingTests.cpp bufferHistory: newly bound buffers accept patches, invalid later rebinding rolls back atomically, and save/load/undo preserve the project",
+        "tests/UiTests.cpp: srvSetterHistory and srvSetterDialogValidation cover the compact view-array editor; a shared resource model avoids copying the complete capture view list for each slot",
+        "tests/SrvBindingTests.cpp contextRecordOrder and the final edge oracle verify interleaved immediate-context records: prefix observations remain per context while override command order matches the original single-context replay model; the earlier implementation incorrectly rejected a bound descriptor and was corrected",
+        "artifacts/ctest-srv-setters-verified-release.log: all 24 Release suites passed; artifacts/ctest-srv-setters-verified-debug.log: six related Debug suites passed",
+        "artifacts/srv-setter-debug-verified-interactions.txt: three SRV/sampler worker history interactions passed; the external buffer fixture check is recorded separately in srv-setter-debug-buffer-history.txt",
+        "artifacts/validation-srv-setters-verified/validation.json: both golden frames and two suppressed-draw negative controls passed",
+        "artifacts/srv-setters-module-audit.json: 1232 successful native reports, 75 unique modules, no Python/GPA/RenderDoc; all three packaged executables match the final Release build",
+        "Global view edits, output setter experiments, texture input clones and private diagnostic/debug consumers remain pending"
       ]
     },
     {
@@ -2256,7 +2278,8 @@
         "tests/UiTests.cpp: srvHistory verifies actual worker pixels through Apply/Undo/Redo; srvDialogValidation covers target reload, uint32 overflow, dimension-specific fields, editable DXGI format, no-op history and stale commit rejection",
         "artifacts/ctest-srv-final-release.log: full UI suite passed; artifacts/srv-debug-ui.txt: SRV history/validation and sampler history passed",
         "artifacts/srv-ui/srv-editor.png and srv-array-editor.png visually inspected; compact English form exposed through Edit menu and API Log context menu",
-        "Editor loads captured draw/dispatch bindings; setter-edit inheritance and global view-edit dependency closure remain pending"
+        "Final setter inheritance is covered by artifacts/srv-setter-debug-verified-interactions.txt and the complete Release UI suite; view-array range checks and shared sampler editor regression pass in both builds",
+        "Editor loads final setter-modified draw/dispatch bindings; global view-edit dependency closure remains pending"
       ]
     },
     {

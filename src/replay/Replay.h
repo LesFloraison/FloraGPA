@@ -2,6 +2,7 @@
 #include "core/Frame.h"
 #include "core/Predication.h"
 #include "core/SamplerBindings.h"
+#include "core/SrvBindings.h"
 #define NOMINMAX
 #include <d3d11_3.h>
 #include <functional>
@@ -46,6 +47,7 @@ struct ReplayOptions {
     std::map<Id, std::map<Id, uint32_t>> uavCounters;
     std::map<Id, PredicateBinding> predicateSetters;
     std::map<Id, SamplerBinding> samplerSetters;
+    std::map<Id, SrvBinding> srvSetters;
     std::map<Id, std::map<std::pair<unsigned, unsigned>, D3D11_SAMPLER_DESC>> samplerEdits;
     std::map<Id, std::map<std::pair<unsigned, unsigned>, D3D11_SHADER_RESOURCE_VIEW_DESC>> srvEdits;
     std::map<Id, DepthStencilEdit> depthStencilEdits;
@@ -105,6 +107,11 @@ class Replay {
     uint32_t predicateValue_ = 0;
     std::optional<PredicateBinding> predicateOverride_;
     SamplerBindings samplerBindings_;
+    SrvBindings srvBindings_;
+    SrvHazards srvHazards_{frame_};
+    std::map<Id, std::unique_ptr<SrvHistory>> srvHistories_;
+    const SrvObservation &srvHistory(Id event, bool after = false);
+    void observeSrvBindings(Id event);
     std::map<std::array<uint8_t, 52>, Com<ID3D11SamplerState>> editedSamplers_;
     std::optional<bool> samplerMinMax_;
     void applySamplerEdits(Id event);
