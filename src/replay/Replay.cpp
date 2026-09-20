@@ -8,6 +8,7 @@
 #include "core/OutputBindings.h"
 #include "core/Predication.h"
 #include "core/StreamOutput.h"
+#include "core/TextureStorage.h"
 #include <algorithm>
 #include <chrono>
 #include <d3d11sdklayers.h>
@@ -652,14 +653,21 @@ void Replay::mappedWrites(const Entry &e) {
     if (kind < 2 || kind > 5)
         throw std::runtime_error("Invalid writable Map type");
     auto desc = frame_.resource(id);
-    uint32_t row = 0, rows = 0, depth = 1;
+    uint32_t row = 0, rows = 0, depth = 1, planarFormat = 0, planarHeight = 0;
+    uint64_t sourceRowPitch = 0;
     size_t size = 0;
     bool texture = desc.type != 0x83;
     if (texture) {
         auto info = textureInfo(desc);
-        if (info.samples != 1 || !info.mips || sub >= info.mips * info.layers || kind == 5 ||
-            info.format >= 103 && info.format <= 105)
+        if (info.samples != 1 || !info.mips || info.mips > 32 || sub >= uint64_t(info.mips) * info.layers ||
+            kind == 5)
             throw std::runtime_error("Unsupported mapped texture layout");
+        if (info.format >= 103 && info.format <= 105) {
+            textureSubresources(desc);
+            planarFormat = info.format;
+            planarHeight = info.height;
+            sourceRowPitch = uint64_t(info.width) * (info.format == 103 ? 1 : 3);
+        }
         auto mip = sub % info.mips;
         auto pitch = pitches(std::max(1u, info.width >> mip), std::max(1u, info.height >> mip), info.format);
         row = pitch.first;
@@ -674,19 +682,35 @@ void Replay::mappedWrites(const Entry &e) {
         size = desc.desc[0];
     }
     auto updates = frame_.updates(dataId, size);
+    Bytes tight;
+    std::vector<uint8_t> recoveredLuma;
+    if (texture && frame_.entry(dataId).type == 1) {
+        tight = updates.at(0).second;
+        if (planarFormat == 103) {
+            rows = planarHeight;
+            tight = tight.first(size_t(row) * rows);
+        } else if (planarFormat) {
+            auto single = desc;
+            single.desc[3] = 1;
+            recoveredLuma = capturedLuma(single, tight, 0, 0, 0, "y").bytes;
+            tight = recoveredLuma;
+            rows = planarHeight;
+        }
+    }
     auto obj = get<ID3D11Resource>(id);
     D3D11_MAPPED_SUBRESOURCE mapped{};
     check(context_->Map(obj, sub, D3D11_MAP(kind), flags, &mapped), "Map captured writes");
     try {
+        if (!mapped.pData)
+            throw std::runtime_error("Map returned a null data pointer");
         if (texture && frame_.entry(dataId).type == 1) {
             if (mapped.RowPitch < row || (depth > 1 && mapped.DepthPitch < uint64_t(mapped.RowPitch) * rows))
                 throw std::runtime_error("Mapped pitch too small");
-            auto data = updates[0].second;
             for (UINT z = 0; z < depth; ++z)
                 for (UINT y = 0; y < rows; ++y)
                     std::memcpy(static_cast<uint8_t *>(mapped.pData) + size_t(z) * mapped.DepthPitch +
                                     size_t(y) * mapped.RowPitch,
-                                data.data() + (size_t(z) * rows + y) * row, row);
+                                tight.data() + (size_t(z) * rows + y) * row, row);
         } else
             for (auto [offset, data] : updates)
                 std::memcpy(static_cast<uint8_t *>(mapped.pData) + offset, data.data(), data.size());
@@ -695,6 +719,18 @@ void Replay::mappedWrites(const Entry &e) {
         throw;
     }
     context_->Unmap(obj, sub);
+    if (planarFormat) {
+        PlanarWrite write;
+        write.event = e.id;
+        write.resource = id;
+        write.subresource = sub;
+        write.format = planarFormat;
+        write.mapType = kind;
+        write.sourceRowPitch = sourceRowPitch;
+        write.writtenRowBytes = row;
+        write.nativeRowPitch = mapped.RowPitch;
+        planarWrites_.push_back(write);
+    }
     counts["Map"]++;
     lastWorkEvent_ = e.id;
 }
@@ -942,6 +978,12 @@ void Replay::command(const Entry &e) {
         context_->GenerateMips(get<ID3D11ShaderResourceView>(id));
     } else if (t == 0x247) {
         auto layout = updateSourceLayout(frame_, e.id);
+        const auto destination = frame_.resource(layout.destination);
+        const auto format = destination.type == 0x83 ? 0 : textureInfo(destination).format;
+        const bool explicitSource = options_.updateSources.contains(e.id);
+        if ((format == 104 || format == 105) && !explicitSource)
+            throw std::runtime_error("Legacy GPA P010/P016 Update chroma reads beyond saved GenData; "
+                                     "use an explicit complete Update source replacement");
         D3D11_BOX box{};
         if (layout.hasBox)
             std::memcpy(&box, layout.box.data(), sizeof box);
@@ -955,6 +997,19 @@ void Replay::command(const Entry &e) {
         context_->UpdateSubresource(get<ID3D11Resource>(layout.destination), layout.subresource,
                                     layout.hasBox ? &box : nullptr, data.data(), layout.rowPitch,
                                     layout.slicePitch);
+        if (format >= 103 && format <= 105) {
+            PlanarWrite write;
+            write.event = e.id;
+            write.resource = layout.destination;
+            write.subresource = layout.subresource;
+            write.format = format;
+            write.explicitSource = explicitSource;
+            write.rowPitch = layout.rowPitch;
+            write.slicePitch = layout.slicePitch;
+            if (layout.hasBox)
+                write.box = layout.box;
+            planarWrites_.push_back(write);
+        }
     } else if (t == 0x242) {
         r.end();
         Reader owner(payload);
@@ -1020,6 +1075,7 @@ void Replay::run(const std::function<void(Id, size_t, size_t)> &progress,
     clearBindingGaps();
     objects_.clear();
     ignoredMsaaInitial_.clear();
+    planarWrites_.clear();
     editedSamplers_.clear();
     rasterizerExtensions_.clear();
     logicBlendStates_.clear();

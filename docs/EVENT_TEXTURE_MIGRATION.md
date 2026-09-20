@@ -75,7 +75,8 @@ Testing was on this host, not a separate clean Windows machine.
 
 The Texture pane now includes native MSAA/typed/planar inspection and DDS/RAW/PNG
 export controls. See [TEXTURE_INSPECTION_MIGRATION.md](TEXTURE_INSPECTION_MIGRATION.md)
-for subsequent evidence, captured-Y boundaries and remaining planar write provenance.
+for subsequent inspection evidence and captured-Y boundaries. Planar write provenance
+is covered by [PLANAR_WRITE_MIGRATION.md](PLANAR_WRITE_MIGRATION.md).
 
 Private coverage, quad/debug/profiler consumers and the remaining module inventory
 also remain incomplete. `docs/migration.json` retains partial status; this change

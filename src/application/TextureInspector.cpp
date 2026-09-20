@@ -1,5 +1,6 @@
 #include "TextureInspector.h"
 #include "ApiCommands.h"
+#include "PlanarWrites.h"
 #include "core/TextureStorage.h"
 #include <QDir>
 #include <QImage>
@@ -285,6 +286,8 @@ TextureInspection inspectTexture(Replay &replay, Id id, const TextureInspectionO
                                             "writes and unoverwritten patch bytes persist.");
         out.metadata["msaa"] = msaa;
         out.metadata["msaa_initial_data_not_applied"] = replay.ignoredMsaaInitial();
+        out.metadata["planar_writes"] = planarWriteReport(replay);
+        out.metadata["planar_write_notice"] = planarWriteNotice(replay);
     }
     return out;
 }

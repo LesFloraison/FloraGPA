@@ -2787,6 +2787,71 @@ class UiTests final : public QObject {
         QVERIFY(select(api, 25848));
         QCOMPARE(counters->topLevelItemCount(), 0);
     }
+    void planarTextureWrites() {
+        using namespace flora;
+        using namespace flora::testing;
+        QTemporaryDir dir;
+        Capture c;
+        c.add(1, 5, 0x127, std::vector<uint8_t>(24));
+        c.add(20, 5, 0x85,
+              statePack(Id(0), Id(0), 10u, 6u, 1u, 1u, 103u, 1u, 0u, 3u, 0u, 0x30000u, 0u, Id(21)));
+        auto initial = word(90);
+        initial.insert(initial.end(), 60, 0x31);
+        initial.insert(initial.end(), 30, 0x7b);
+        c.add(21, 9, 1, initial);
+        auto writes = word(90);
+        writes.insert(writes.end(), 90, 0x65);
+        c.add(22, 9, 1, writes);
+        c.add(80, 7, 0x246, statePack(Id(0), Id(1), int32_t(0), Id(20), 0u, 2u, 0u, Id(22)));
+        const auto path = dir.path() + "/planar.gpa_frame";
+        c.save(path);
+        MainWindow window;
+        window.resize(1500, 950);
+        window.show();
+        QSignalSpy done(&window, &MainWindow::taskFinished);
+        window.openCapture(path);
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        done.clear();
+        for (auto combo : window.findChildren<QComboBox *>())
+            if (combo->findText("All API calls") >= 0)
+                combo->setCurrentText("All API calls");
+        auto api = window.findChild<QTableView *>("apiLog");
+        api->setCurrentIndex(api->model()->index(0, 0));
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        done.clear();
+        window.findChild<QComboBox *>("textureBoundary")->setCurrentIndex(2);
+        auto resources = window.findChild<QTableView *>("resources");
+        for (int row = 0; row < resources->model()->rowCount(); ++row) {
+            auto index = resources->model()->index(row, 0);
+            if (index.data(Qt::UserRole).toULongLong() == 20) {
+                resources->setCurrentIndex(index);
+                break;
+            }
+        }
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        done.clear();
+        auto image = window.findChild<ImageView *>("textureOutput");
+        auto label = window.findChild<QLabel *>("textureLabel");
+        QCOMPARE(image->image().pixelColor(0, 0).red(), 0x65);
+        QVERIFY(label->toolTip().contains("Map writes Y only"));
+        QVERIFY(label->toolTip().contains("WRITE/READ_WRITE retain UV"));
+        auto plane = window.findChild<QComboBox *>("texturePlane");
+        plane->setCurrentIndex(2);
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        done.clear();
+        QCOMPARE(image->image().pixelColor(0, 0), QColor(0x7b, 0x7b, 0, 255));
+        snapshot(window, "planar-retained-uv");
+        plane->setCurrentIndex(1);
+        window.findChild<QComboBox *>("textureBoundary")->setCurrentIndex(1);
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        QCOMPARE(image->image().pixelColor(0, 0).red(), 0x31);
+        QVERIFY(!label->toolTip().contains("Map writes Y only"));
+    }
     void textureInspectorControls() {
         using namespace flora;
         using namespace flora::testing;

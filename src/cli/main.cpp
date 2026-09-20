@@ -7,6 +7,7 @@
 #include "application/Experiment.h"
 #include "application/FrameOutput.h"
 #include "application/Geometry.h"
+#include "application/PlanarWrites.h"
 #include "application/PredicateInspector.h"
 #include "application/ReplayPipeline.h"
 #include "application/ShaderInspector.h"
@@ -131,7 +132,7 @@ int main(int argc, char **argv) {
                            {"height", int(frame.height())},
                            {"entries", int(frame.entries().size())},
                            {"reference_pixels_used", false}};
-        nlohmann::json constantBindings, outputSelection, outputDisplay, outputMsaa;
+        nlohmann::json constantBindings, outputSelection, outputDisplay, outputMsaa, planarWrites;
         QString out = p.value("out");
         if (!out.isEmpty()) {
             QDir dir(out);
@@ -523,6 +524,7 @@ int main(int argc, char **argv) {
             for (auto &[key, value] : replay.counts)
                 counts.insert(QString::fromStdString(key), qint64(value));
             report.insert("counts", counts);
+            planarWrites = planarWriteReport(replay);
             QJsonArray soHistory;
             for (const auto &row : replay.streamOutputHistory)
                 soHistory.append(QJsonObject{{"event", QString::number(row.event)},
@@ -573,6 +575,8 @@ int main(int argc, char **argv) {
         // QJson normalizes -0.0 to 0. Preserve reflected values and exact scalar bits in the report.
         if (!constantBindings.is_null())
             nativeReport["constant_bindings"] = std::move(constantBindings);
+        if (!planarWrites.is_null())
+            nativeReport["planar_writes"] = std::move(planarWrites);
         auto json = QByteArray::fromStdString(nativeReport.dump(2) + "\n");
         if (!out.isEmpty())
             save(out + "/report.json", json);

@@ -78,6 +78,14 @@ struct MsaaStorage {
     std::string mode;
     bool integerBits = false, depthStencil = false, canonicalX = false;
 };
+struct PlanarWrite {
+    Id event{}, resource{};
+    uint32_t subresource{}, format{}, mapType{};
+    uint64_t sourceRowPitch{};
+    uint32_t writtenRowBytes{}, nativeRowPitch{}, rowPitch{}, slicePitch{};
+    bool explicitSource = false;
+    std::optional<std::array<uint32_t, 6>> box;
+};
 struct DrawAutoParameters {
     uint32_t vertexCount{}, stream{}, capturedCount{}, iaOffset{}, iaStride{};
     Id resource{}, shader{}, declaration{};
@@ -110,6 +118,7 @@ class Replay {
     Com<ID3D11DeviceContext1> context1_;
     std::map<Id, Com<IUnknown>> objects_;
     std::vector<Id> ignoredMsaaInitial_;
+    std::vector<PlanarWrite> planarWrites_;
     // Keep edited extension states alive while their native identities are registered.
     std::map<ID3D11RasterizerState *, std::pair<Com<ID3D11RasterizerState>, UINT>> rasterizerExtensions_;
     Com<ID3D11RasterizerState> createRasterizer(const D3D11_RASTERIZER_DESC2 &desc);
@@ -240,6 +249,7 @@ class Replay {
              const ReplayBoundaryObserver &observer = {});
     const ReplayOptions &options() const { return options_; }
     const std::vector<Id> &ignoredMsaaInitial() const { return ignoredMsaaInitial_; }
+    const std::vector<PlanarWrite> &planarWrites() const { return planarWrites_; }
     const Frame &frame() const { return frame_; }
     Id lastOutputResource() const { return lastTarget_; }
     Id lastOutputView() const { return lastTargetView_; }

@@ -643,6 +643,7 @@ void MainWindow::buildUi() {
     textureInputAction_->setEnabled(false);
     textureOutputAction_->setEnabled(false);
     textureLabel_ = new QLabel("—");
+    textureLabel_->setObjectName("textureLabel");
     textureBar->addWidget(textureLabel_);
     textureLayout->addWidget(textureBar);
     textureLayout->addWidget(textureDisplayBar);
@@ -1292,6 +1293,9 @@ void MainWindow::finishWorker(int code, QProcess::ExitStatus status) {
                 textureLabel_->setToolTip(
                     textureMetadata_["msaa"].toObject()["initialization_note"].toString());
             statusBar()->showMessage("Texture ready", 3000);
+            const auto planarNotice = textureMetadata_["planar_write_notice"].toString();
+            if (!planarNotice.isEmpty())
+                textureLabel_->setToolTip(textureLabel_->toolTip() + '\n' + planarNotice);
             emit taskFinished(true);
             return;
         }

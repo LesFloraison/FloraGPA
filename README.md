@@ -104,7 +104,10 @@ for edit validation. Texture inspection now provides MSAA resolve/sample, typed
 DXGI format, Y/UV plane, channel/range and DDS/RAW/PNG export controls. Legacy
 P010/P016 initial data exports recovered Y only. See
 [`docs/TEXTURE_INSPECTION_MIGRATION.md`](docs/TEXTURE_INSPECTION_MIGRATION.md)
-for inspection evidence and remaining planar write-provenance work.
+for inspection evidence. Native planar Map preserves UV on WRITE/READ_WRITE and
+leaves it undefined after DISCARD; NV12 Update and explicit planar source
+replacements write complete Y/UV regions. Texture tooltips and JSON identify the
+write source. See [`docs/PLANAR_WRITE_MIGRATION.md`](docs/PLANAR_WRITE_MIGRATION.md).
 The Buffer **Constants** tab shows reflected scalar, vector, matrix, array and
 structure fields, including CB1 binding ranges. Read **Before event**, select a
 field and use **Edit Value**. Changes preserve padding and untouched scalar bits

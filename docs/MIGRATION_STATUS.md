@@ -2,22 +2,24 @@
 
 已有可编译、可运行的 VS2022 / Qt Widgets 原生工程，能够独立重放当前验证的
 GF2 与 BF1 DX11 捕获。**尚未完成原 Python 版本的全部功能迁移。**
-当前独立包为 `out/FloraGPA-texture-inspector/FloraGPA.exe`。
+当前独立包为 `out/FloraGPA-planar-writes/FloraGPA.exe`。
 
-本批迁移 Texture 页的 MSAA resolve／指定样本、typed DXGI format、Y/UV 平面、
-通道／范围和 DDS／RAW／PNG 导出；保留紧凑工具栏，检查失败会清空旧图像并禁用导出。
-217 个 Python 对照全部通过，其中 178 个成功导出的字节／像素／关键元数据一致，
-39 个非法选择或受限路径明确拒绝。负数显示范围修复另有独立像素期望值检查。
-Release 34 项 CTest 全部通过，其中 Qt 52 项无失败、无跳过；180 个逐事件纹理
-GPU 编辑对照再次通过。
-独立包复核同样通过 217 项检查、15 项真实 GF2 编辑／运行时检查，以及 GF2/BF1
-黄金帧与关闭 draw 的负对照。
-旧式 P010/P016 捕获仅恢复已保存的 Y，UV 不可用；完整平面 Map/Update 写入语义与
-来源报告仍待迁移。详见 [TEXTURE_INSPECTION_MIGRATION.md](TEXTURE_INSPECTION_MIGRATION.md)。
+本批迁移 NV12/P010/P016 Map 的 Y-only 写入、旧行填充去除、原生行距适配，
+以及 NV12 Update 和完整实验 Y/UV 源替换。写入来源与 UV 保留／未定义状态进入
+Texture 工具提示及 JSON，事件前检查不增加该事件的写入记录。
+独立包 192 项 Python 对照全部通过：125 个成功字节／像素／来源比较，67 个受控拒绝，
+包括实际捕获、硬件/WARP、完整帧、非法输入和 uint64 ID 精度。Release 35 项 CTest
+全部通过，其中 Qt 53 项无失败、无跳过。详见
+[PLANAR_WRITE_MIGRATION.md](PLANAR_WRITE_MIGRATION.md)。
+独立包的既有 217 项 Texture 检查／导出回归、GF2/BF1 黄金帧和关闭 draw 负对照也全部通过。
 
-前一批逐事件纹理输入／输出 RAW 编辑包括原生 MSAA 指定样本写入、最终绑定校验、
-预览回滚、输出持久化和 Qt 导入／撤销／重做；验证见
-[EVENT_TEXTURE_MIGRATION.md](EVENT_TEXTURE_MIGRATION.md)。
+旧式 P010/P016 捕获的 UV 缺失仍无法凭空恢复；初始重放需要完整实验纹理替换，
+捕获的 Update 仍明确拒绝，显式完整 Update 资产可用。这与原 Python 恢复的行为一致。
+
+前两批已接入 Texture 的 MSAA/typed/plane 检查、DDS/RAW/PNG 导出和逐事件输入／输出
+RAW 编辑，验证见 [TEXTURE_INSPECTION_MIGRATION.md](TEXTURE_INSPECTION_MIGRATION.md)
+及 [EVENT_TEXTURE_MIGRATION.md](EVENT_TEXTURE_MIGRATION.md)。完整迁移仍包含尚未闭合的
+实验报告、私有分析／调试、shader 工具和指标等模块。
 
 ## 当前可用
 
@@ -26,7 +28,7 @@ GPU 编辑对照再次通过。
 | 工程 | C++20、VS2022 x64、Qt 6.11.2、CMake、Git、独立 CLI/Worker | 尚未配置远程仓库 |
 | 捕获与重放 | 有边界检查的 IGPA v3 读取、六阶段状态、基本 D3D11 资源和 draw/dispatch、Map/更新/复制/清除 | 特殊 replay 路径尚未完全迁移 |
 | 主界面 | GPA 式深色三栏、真实 GPU 时间柱状图与概览、可停靠面板、API 筛选、任务取消 | 概览尚无范围拖动；未知功能页禁用 |
-| 事件 | draw/dispatch 选择、快照管线、前后边界重放、事件启停 | 部分命令执行、planar 写入来源及私有诊断仍待迁移 |
+| 事件 | draw/dispatch 选择、快照管线、前后边界重放、事件启停 | 部分命令执行和私有诊断仍待迁移 |
 | 捕获命令状态 | 六阶段 setter、CB1 范围、IA/RS/OM/SO/predicate 参数、扩展 UAV 槽元数据；命令前/后、逐字段来源、资源重叠失效与快照校准；Pipeline 页异步读取、筛选、跳转、JSON 导出 | 原始捕获状态，不应用实验；只读 DSV / 模糊 3D 重叠保持未知；SO 偏移是 setter 参数，隐藏 counter 和实时写入位置不由此推断 |
 | 命令间输入绑定 | 实际执行 IA layout / VB / IB、六阶段 SRV / sampler、CB / CB1；验证槽位、数组、资源类型、IA bind flags、stride 和 CB1 对齐 / 驱动支持；缺失绑定按阶段 / 槽位追踪 | 缺失资源未被后续 setter / 完整快照 / ClearState 恢复时，选定边界明确失败；已恢复的 setter 家族编辑均已接入，私有诊断仍待迁移 |
 | 重放管线状态 | Pipeline > Replay State 通过 Worker 读取实际六阶段绑定、CB1 范围、IA/RS/OM/SO/predicate、视图及状态描述；命令前/后、实验输入克隆、禁用状态、筛选、跳转和 JSON 导出 | 仅覆盖后端已支持的命令和实验；SO 实时写入位置保持未知；完整管线编辑仍待迁移 |
@@ -36,14 +38,14 @@ GPU 编辑对照再次通过。
 | API 检查 | 捕获字段、偏移/原始位、可选数组、引用跳转、资源/多词筛选、JSON/CSV 导出；getter、annotation、query 与 command-list 调用元数据 | 解码不代表执行；annotation 层级和 view typed-format 预览衔接尚未闭合 |
 | Context / command-list | 五种 context 接口身份、immediate/deferred 区分；缺失 context 的严格 Map READ 证据恢复；command-list 资源、owner 和 Execute/Finish 清单；Qt 字段树、证据导航、JSON 导出 | 推断不补造版本/指针/标志；保留指针与 ID 候选冲突；与 Python 相同，仅接受 immediate-context 的 Finish 空操作，未恢复列表执行 |
 | 捕获查询值 | 按同 ID、命令顺序使用 GetDesc/GetDataSize/CreateQuery/predicate 元数据；BOOL 完整值与 UINT64 低位、缺失字节、HRESULT/冲突状态 | 表示捕获时保存的内存字，不是新执行的 GPU query；原始高位缺失时保持不完整 |
-| 命令编辑 | RTV / DSV / Uint / Float UAV 清除值；资源写入命令启停；UpdateSubresource 紧密排列源数据替换；菜单、右键、撤销/重做；共享 context 校验和恢复 | 特殊 planar 资源执行仍受现有重放限制 |
+| 命令编辑 | RTV / DSV / Uint / Float UAV 清除值；资源写入命令启停；UpdateSubresource 紧密排列源数据替换；菜单、右键、撤销/重做；共享 context 校验和恢复 | 已支持 planar Map / NV12 Update / 显式完整 Update 资产；旧式 P010/P016 捕获 UV 仍不可重建 |
 | 深度 / 模板实验 | 每 draw 的 depth enable/write/func、stencil enable/read/write masks、完整正反面四字段和 uint32 reference；字段递归合并、旧 preset、Qt 三页参数编辑、保存与撤销/重做 | 仅 graphics draw；下一未编辑 draw 恢复捕获状态；可与 rasterizer/blend 编辑混合，私有 coverage / 诊断仍待迁移 |
 | 光栅 / 视口 / 裁剪实验 | 十二项 rasterizer 字段、0–16 槽 viewport/scissor、旧 wireframe/cull_none preset；原生 State/State1/State2、forced sample count 和 conservative raster；Qt 三页编辑、字段合并、历史和保存/加载 | 受设备能力与合法 draw 组合限制；强制采样检查 DSV、深度、RTV 采样数和替换后的 PS；私有 coverage 消费者仍待迁移 |
 | 混合 / 采样实验 | BlendState/BlendState1、八槽独立 color/alpha 运算与因子、双源混合、写掩码、16 种 logic op、blend constant、uint32 sample mask、alpha-to-coverage；Qt General/RT 参数页、旧 preset、字段合并、保存与撤销/重做 | 逻辑运算要求设备与每个 RTV 格式支持；不兼容组合明确拒绝；MSAA 执行及 Output/Texture 样本查看已验证；私有 coverage 诊断仍待迁移 |
 | Sampler 实验 | 六阶段 × 16 槽 descriptor 编辑：36 种过滤、地址/比较/各向异性、border RGBA、LOD；sampler setter 的起始槽/资源数组、部分覆盖、空调用、ClearState、范围移动时保留前序绑定；Qt 编辑、保存、撤销/重做 | descriptor 只作用于选定 draw/dispatch；继承最终 setter 绑定；缺失前序观察和不支持的 min/max filtering 明确拒绝；私有 coverage/quad 消费者仍待迁移 |
 | SRV 描述符实验 | 六阶段 × 128 槽、十一种维度、格式与 mip/array/buffer 范围；逐事件字段合并、维度切换、原生视图创建、输入 buffer 克隆归属；Qt 编辑、保存与撤销/重做 | 继承最终 SRV setter 编辑；原生驱动处理 SRV/UAV 重叠；texture 输入克隆已接入；私有诊断消费者仍待迁移 |
 | 全局视图实验 | SRV / RTV / DSV / UAV 的格式、维度、mip / 数组层 / 3D 切片 / buffer 范围与标志；不可变捕获副本；Clear / Draw / Dispatch / GenerateMips、绑定冲突与 counter 使用最终描述符；Qt 编辑、项目历史、保存重开、撤销重做；主输出跟随最终视图范围 | 原始捕获字段保持不变；私有 coverage/debug 消费者仍待迁移 |
-| 纹理原始存储读回 | 非 MSAA 的完整 mip / 数组层 / 3D 切片紧密存储；CLI texture-storage 导出；WARP 绑定中的 mip 检查复制保留 RTV 和 UAV counter | 图像转换独立于原始字节；Qt DDS/RAW/PNG 导出已接入；旧式 P010/P016 初始数据仅恢复 Y，planar 写入来源仍待迁移 |
+| 纹理原始存储读回 | 非 MSAA 的完整 mip / 数组层 / 3D 切片紧密存储；CLI texture-storage 导出；WARP 绑定中的 mip 检查复制保留 RTV 和 UAV counter | 图像转换独立于原始字节；Qt DDS/RAW/PNG 导出已接入；旧式 P010/P016 初始数据仅恢复 Y；planar 写入来源已接入 |
 | SRV setter 实验 | 六阶段 × 128 槽的起始槽/视图数组；逐槽跨快照继承、部分覆盖、范围移动/缩短、空调用、ClearState、缺失资源恢复；mip/layer 与只读 depth/stencil 冲突、原生解绑保持；Qt 编辑、保存与撤销/重做 | 移动范围要求可确认的前序绑定；描述符和 buffer 补丁/导出继承最终绑定；texture 输入克隆及私有诊断依赖尚未闭合 |
 | CB / CB1 setter 实验 | 六阶段、18 种编码；槽范围、buffer 数组、可选 first/count 窗口、跨快照保持、普通 setter/部分覆盖/ClearState 恢复；常量反射和 buffer patch 使用最终绑定；Qt 编辑、保存及撤销/重做 | 快照不能提供缺失的窗口历史；未知移出槽拒绝猜测；偏移窗口需驱动支持；私有诊断消费者仍待迁移 |
 | IA setter 实验 | input layout、VB 槽范围、stride/offset、IB 格式/offset；跨快照保持、原始 setter/ClearState 恢复、输出冲突、几何和 buffer patch；紧凑 Qt 编辑器、项目保存与撤销/重做 | 移动范围需已知前序绑定；缺失输出影响冲突判断时明确拒绝；覆盖/后变换等消费者仍待迁移 |
@@ -531,7 +533,7 @@ Debug 的 predicate、experiment、管线、SO 和 buffer edit 五项相关回�
 ## 尚未闭合的迁移范围
 
 1. 其余 setter/command/context 的重放与实验语义、SO 的 retained 输出与私有诊断、
-   扩展 UAV、私有 MSAA 消费者与 planar Map/Update 等特殊 replay 路径。
+   扩展 UAV、私有 MSAA/planar 消费者等特殊 replay 路径。
 2. 其余资源/状态/绑定/命令编辑，完整 counter 命令引用、后变换几何、覆盖率、
    quad 与像素分析。
 3. HLSL 恢复、source/instruction 导航、变量/表达式、trace/stack 与 shader 调试。

@@ -95,7 +95,9 @@
         "src/app/Models.cpp",
         "src/application/SessionUi.cpp",
         "src/app/Views.cpp",
-        "src/application/TextureInspector.cpp"
+        "src/application/TextureInspector.cpp",
+        "src/replay/Replay.cpp",
+        "src/application/PlanarWrites.cpp"
       ],
       "validation": [
         "docs/NATIVE_BASELINE.md",
@@ -107,7 +109,8 @@
         "tests/UiTests.cpp: field offsets, reference navigation, resource filtering and texture-preview priority",
         "docs/OUTPUT_SESSION_MIGRATION.md: output settings, driver/API/boundary project round trip; exact uint64 IDs and unknown UI fields; output pixel/resource/element navigation; other page UI state remains pending",
         "docs/SHADER_SETTER_MIGRATION.md: six-stage persistent shader/class edits, final-asset interface validation, effective constants and Qt stage navigation/Compile & Apply; private diagnostic consumers remain pending",
-        "docs/TEXTURE_INSPECTION_MIGRATION.md: native initial/event/MSAA/typed/plane inspection, DDS/RAW/PNG export and Qt controls; 217 Python comparisons (178 successful exports, 39 rejected cases); planar write provenance and private consumers remain pending"
+        "docs/TEXTURE_INSPECTION_MIGRATION.md: native initial/event/MSAA/typed/plane inspection, DDS/RAW/PNG export and Qt controls; 217 Python comparisons (178 successful exports, 39 rejected cases); private consumers remain pending; planar write provenance is covered subsequently in docs/PLANAR_WRITE_MIGRATION.md",
+        "docs/PLANAR_WRITE_MIGRATION.md: planar Y-only Map with native pitches, tight NV12 Update, explicit full DXGI Update assets, structured write provenance and Qt before/after inspection; 192 packaged real-capture/synthetic/uint64 Python comparisons passed (125 successes, 67 controlled rejections); private consumers and remaining module scope stay incomplete"
       ]
     },
     {
@@ -121,12 +124,15 @@
         "src/cli/main.cpp",
         "src/application/ClassInspector.cpp",
         "src/application/StreamOutputInspector.cpp",
-        "src/application/TextureInspector.cpp"
+        "src/application/TextureInspector.cpp",
+        "src/replay/Replay.cpp",
+        "src/application/PlanarWrites.cpp"
       ],
       "validation": [
         "13 native/Python GPU texture comparisons; mip/layer/slice coverage",
         "Captured class-instance JSON and original DXBC exports match Python across 30 dynamic shader fixtures",
-        "docs/TEXTURE_INSPECTION_MIGRATION.md: native initial/event/MSAA/typed/plane inspection, DDS/RAW/PNG export and Qt controls; 217 Python comparisons (178 successful exports, 39 rejected cases); planar write provenance and private consumers remain pending"
+        "docs/TEXTURE_INSPECTION_MIGRATION.md: native initial/event/MSAA/typed/plane inspection, DDS/RAW/PNG export and Qt controls; 217 Python comparisons (178 successful exports, 39 rejected cases); private consumers remain pending; planar write provenance is covered subsequently in docs/PLANAR_WRITE_MIGRATION.md",
+        "docs/PLANAR_WRITE_MIGRATION.md: planar Y-only Map with native pitches, tight NV12 Update, explicit full DXGI Update assets, structured write provenance and Qt before/after inspection; 192 packaged real-capture/synthetic/uint64 Python comparisons passed (125 successes, 67 controlled rejections); private consumers and remaining module scope stay incomplete"
       ]
     },
     {
@@ -694,14 +700,16 @@
         "src/replay/Replay.cpp",
         "src/replay/InputBindings.cpp",
         "src/replay/ClassLinkage.cpp",
-        "src/replay/StreamOutput.cpp"
+        "src/replay/StreamOutput.cpp",
+        "src/application/PlanarWrites.cpp"
       ],
       "validation": [
         "docs/NATIVE_BASELINE.md",
         "Missing input-layout, SRV and output bindings reject selected unresolved boundaries; snapshots and ClearState restore validity, later SRV calls resolve only their own stage/range",
         "Scoped before/after draw observers expose edited input bindings without duplicate submission; observer cleanup and experiment rollback verified on exceptions",
         "Six-stage class instance binding with linkage ownership, ordered interfaces, static replacement handling and dynamic SRV retention; preserved dormant captured shader-setter behavior outside edits",
-        "docs/BEFORE_BOUNDARY_MIGRATION.md: ordinary output traversal, prepared inspectors, missing-binding recovery and successful Map work metadata"
+        "docs/BEFORE_BOUNDARY_MIGRATION.md: ordinary output traversal, prepared inspectors, missing-binding recovery and successful Map work metadata",
+        "docs/PLANAR_WRITE_MIGRATION.md: planar Y-only Map with native pitches, tight NV12 Update, explicit full DXGI Update assets, structured write provenance and Qt before/after inspection; 192 packaged real-capture/synthetic/uint64 Python comparisons passed (125 successes, 67 controlled rejections); private consumers and remaining module scope stay incomplete"
       ]
     },
     {
@@ -765,7 +773,7 @@
         "docs/NATIVE_BASELINE.md",
         "Vertex storage families, half/packed float, integer and normalized values; primitive restart tests",
         "tools/validate_texture_edit_storage.py: 3229 packed-subresource and sample-edit validation cases match Python; 1298 accepted, 1931 rejected",
-        "docs/TEXTURE_INSPECTION_MIGRATION.md: native initial/event/MSAA/typed/plane inspection, DDS/RAW/PNG export and Qt controls; 217 Python comparisons (178 successful exports, 39 rejected cases); planar write provenance and private consumers remain pending"
+        "docs/TEXTURE_INSPECTION_MIGRATION.md: native initial/event/MSAA/typed/plane inspection, DDS/RAW/PNG export and Qt controls; 217 Python comparisons (178 successful exports, 39 rejected cases); private consumers remain pending; planar write provenance is covered subsequently in docs/PLANAR_WRITE_MIGRATION.md"
       ]
     },
     {
@@ -1072,11 +1080,13 @@
       "description": "Apply GPA MapErg writes using the replay device's native mapped pitches.",
       "status": "partial",
       "native": [
-        "src/replay/Replay.cpp"
+        "src/replay/Replay.cpp",
+        "src/application/PlanarWrites.cpp"
       ],
       "validation": [
         "docs/NATIVE_BASELINE.md",
-        "docs/BEFORE_BOUNDARY_MIGRATION.md: ordinary output traversal, prepared inspectors, missing-binding recovery and successful Map work metadata"
+        "docs/BEFORE_BOUNDARY_MIGRATION.md: ordinary output traversal, prepared inspectors, missing-binding recovery and successful Map work metadata",
+        "docs/PLANAR_WRITE_MIGRATION.md: planar Y-only Map with native pitches, tight NV12 Update, explicit full DXGI Update assets, structured write provenance and Qt before/after inspection; 192 packaged real-capture/synthetic/uint64 Python comparisons passed (125 successes, 67 controlled rejections); private consumers and remaining module scope stay incomplete"
       ]
     },
     {
@@ -1473,7 +1483,7 @@
         "tools/validate_frame_output_port.py: direct native sample-pattern oracle and Python output metadata on hardware/WARP",
         "tests/FrameOutputTests.cpp: repeated sample reads preserve bindings and view reference counts",
         "Output and Texture consumers integrated; private analysis consumers remain pending",
-        "docs/TEXTURE_INSPECTION_MIGRATION.md: native initial/event/MSAA/typed/plane inspection, DDS/RAW/PNG export and Qt controls; 217 Python comparisons (178 successful exports, 39 rejected cases); planar write provenance and private consumers remain pending"
+        "docs/TEXTURE_INSPECTION_MIGRATION.md: native initial/event/MSAA/typed/plane inspection, DDS/RAW/PNG export and Qt controls; 217 Python comparisons (178 successful exports, 39 rejected cases); private consumers remain pending; planar write provenance is covered subsequently in docs/PLANAR_WRITE_MIGRATION.md"
       ]
     },
     {
@@ -1494,7 +1504,7 @@
       "validation": [
         "Compatible integer-family sample reads preserve raw bits, including UINT above 2^24",
         "docs/EVENT_TEXTURE_MIGRATION.md: event RAW input/output scopes, native MSAA sample writes, final binding validation, project history and Qt import; Texture inspection controls are now integrated; private consumers remain pending",
-        "docs/TEXTURE_INSPECTION_MIGRATION.md: native initial/event/MSAA/typed/plane inspection, DDS/RAW/PNG export and Qt controls; 217 Python comparisons (178 successful exports, 39 rejected cases); planar write provenance and private consumers remain pending"
+        "docs/TEXTURE_INSPECTION_MIGRATION.md: native initial/event/MSAA/typed/plane inspection, DDS/RAW/PNG export and Qt controls; 217 Python comparisons (178 successful exports, 39 rejected cases); private consumers remain pending; planar write provenance is covered subsequently in docs/PLANAR_WRITE_MIGRATION.md"
       ]
     },
     {
@@ -1510,7 +1520,7 @@
       "validation": [
         "Reference initialization provenance included in output_msaa JSON",
         "Shared notice across all MSAA consumers remains pending",
-        "docs/TEXTURE_INSPECTION_MIGRATION.md: native initial/event/MSAA/typed/plane inspection, DDS/RAW/PNG export and Qt controls; 217 Python comparisons (178 successful exports, 39 rejected cases); planar write provenance and private consumers remain pending"
+        "docs/TEXTURE_INSPECTION_MIGRATION.md: native initial/event/MSAA/typed/plane inspection, DDS/RAW/PNG export and Qt controls; 217 Python comparisons (178 successful exports, 39 rejected cases); private consumers remain pending; planar write provenance is covered subsequently in docs/PLANAR_WRITE_MIGRATION.md"
       ]
     },
     {
@@ -1677,10 +1687,13 @@
       "description": "Separate legacy GPA GenData from standard DXGI planar upload storage.",
       "status": "partial",
       "native": [
-        "src/core/TextureStorage.cpp"
+        "src/core/TextureStorage.cpp",
+        "src/replay/Replay.cpp",
+        "src/application/PlanarWrites.cpp"
       ],
       "validation": [
-        "docs/TEXTURE_INSPECTION_MIGRATION.md: native initial/event/MSAA/typed/plane inspection, DDS/RAW/PNG export and Qt controls; 217 Python comparisons (178 successful exports, 39 rejected cases); planar write provenance and private consumers remain pending"
+        "docs/TEXTURE_INSPECTION_MIGRATION.md: native initial/event/MSAA/typed/plane inspection, DDS/RAW/PNG export and Qt controls; 217 Python comparisons (178 successful exports, 39 rejected cases); private consumers remain pending; planar write provenance is covered subsequently in docs/PLANAR_WRITE_MIGRATION.md",
+        "docs/PLANAR_WRITE_MIGRATION.md: planar Y-only Map with native pitches, tight NV12 Update, explicit full DXGI Update assets, structured write provenance and Qt before/after inspection; 192 packaged real-capture/synthetic/uint64 Python comparisons passed (125 successes, 67 controlled rejections); private consumers and remaining module scope stay incomplete"
       ]
     },
     {
@@ -1993,9 +2006,14 @@
       "sha256": "4560b5121684f02fbe6a700d43f14b65d7d1e2860ab8b9190bacbbf8c4f1b000",
       "lines": 188,
       "description": "Independent IGPA v3 DX11 replay: no GPA DLL or preprocessing dependency.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": [
+        "src/replay/Replay.cpp",
+        "src/application/PlanarWrites.cpp"
+      ],
+      "validation": [
+        "docs/PLANAR_WRITE_MIGRATION.md: planar Y-only Map with native pitches, tight NV12 Update, explicit full DXGI Update assets, structured write provenance and Qt before/after inspection; 192 packaged real-capture/synthetic/uint64 Python comparisons passed (125 successes, 67 controlled rejections); private consumers and remaining module scope stay incomplete"
+      ]
     },
     {
       "module": "replay_pipeline.py",
@@ -2509,7 +2527,7 @@
       ],
       "validation": [
         "docs/VIEW_MIGRATION.md",
-        "docs/TEXTURE_INSPECTION_MIGRATION.md: native initial/event/MSAA/typed/plane inspection, DDS/RAW/PNG export and Qt controls; 217 Python comparisons (178 successful exports, 39 rejected cases); planar write provenance and private consumers remain pending"
+        "docs/TEXTURE_INSPECTION_MIGRATION.md: native initial/event/MSAA/typed/plane inspection, DDS/RAW/PNG export and Qt controls; 217 Python comparisons (178 successful exports, 39 rejected cases); private consumers remain pending; planar write provenance is covered subsequently in docs/PLANAR_WRITE_MIGRATION.md"
       ]
     },
     {
@@ -2542,12 +2560,14 @@
         "src/core/Commands.cpp",
         "src/application/Experiment.cpp",
         "src/replay/Replay.cpp",
-        "src/app/MainWindow.cpp"
+        "src/app/MainWindow.cpp",
+        "src/application/PlanarWrites.cpp"
       ],
       "validation": [
         "tests/CommandTests.cpp: update history, WARP readback, layout and rejection cases",
         "tools/validate_commands.py: six Python/native texture update boundary comparisons",
-        "Explicit captured contexts only; missing-context inference and all-format GPU coverage remain pending"
+        "Captured/recovered immediate contexts use the shared context validator; GPU format coverage is bounded by documented fixtures",
+        "docs/PLANAR_WRITE_MIGRATION.md: planar Y-only Map with native pitches, tight NV12 Update, explicit full DXGI Update assets, structured write provenance and Qt before/after inspection; 192 packaged real-capture/synthetic/uint64 Python comparisons passed (125 successes, 67 controlled rejections); private consumers and remaining module scope stay incomplete"
       ]
     },
     {
