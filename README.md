@@ -91,6 +91,9 @@ with unique byte-preserving variants and a lossless reference table; see
 with component validity, known identities and GS strip connectivity. These modes
 preserve original downstream bindings through private output/SO copies. See
 [`docs/OUTPUT_LOG_MIGRATION.md`](docs/OUTPUT_LOG_MIGRATION.md) for exports and limits.
+**HS output** provides control-point and patch-constant tables, component validity,
+original instance/patch identities and complete binary/CSV export. See
+[`docs/HULL_OUTPUT_MIGRATION.md`](docs/HULL_OUTPUT_MIGRATION.md).
 Export retains JSON, CSV, raw output bytes and OBJ when positions are valid;
 geometry choices are saved in experiment projects. Remaining stages and
 validation limits are listed in

@@ -103,10 +103,11 @@ rendered mesh, result invalidation, file export and project save/restore.
 
 This batch does **not** complete all geometry or advanced analysis features:
 
-- `vs-writes`, `ds-writes`, `hs` and `gs-emits` remain separate pending
-  migrations. The CLI rejects those stage requests instead of substituting output.
-- Quad/coverage consumers and general private-output modes that copy original SO
-  buffers or relocate UAV slots remain pending. This helper implements the
+- Subsequent batches migrated `vs-writes`, `ds-writes`, `gs-emits` and `hs`,
+  including their Qt and CLI routes; see [OUTPUT_LOG_MIGRATION.md](OUTPUT_LOG_MIGRATION.md)
+  and [HULL_OUTPUT_MIGRATION.md](HULL_OUTPUT_MIGRATION.md).
+- Quad/coverage consumers and general UAV relocation remain pending. Copied SO
+  targets now support the output-log routes. This helper implements the
   retain-original-SO path used by native post-transform capture.
 - RenderDoc-backed mesh/debugging, pixel history and shader stepping are not
   implemented by this batch.

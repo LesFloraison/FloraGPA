@@ -6,6 +6,7 @@ namespace flora {
 using Json = nlohmann::json;
 namespace {
 const std::map<std::string, std::string> geometryStages{{"final", "最终"},
+                                                        {"hs", "HS"},
                                                         {"vs", "VS"},
                                                         {"ds", "DS"},
                                                         {"gs", "GS"},
@@ -13,8 +14,10 @@ const std::map<std::string, std::string> geometryStages{{"final", "最终"},
                                                         {"vs-writes", "VS写入"},
                                                         {"ds-writes", "DS写入"},
                                                         {"gs-emits", "GS发射"}};
-const std::map<std::string, std::string> geometryTables{
-    {"expanded_vertices", "逐次引用"}, {"unique_vertices", "唯一顶点"}, {"references", "索引映射"}};
+const std::map<std::string, std::string> geometryTables{{"expanded_vertices", "逐次引用"},
+                                                        {"unique_vertices", "唯一顶点"},
+                                                        {"references", "索引映射"},
+                                                        {"patch_constants", "patch_constants"}};
 std::string text(const Json &object, const char *key, const char *fallback) {
     if (!object.contains(key))
         return fallback;

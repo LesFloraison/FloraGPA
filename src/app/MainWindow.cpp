@@ -885,9 +885,9 @@ void MainWindow::buildUi() {
     geometryStage_->setObjectName("geometryStage");
     for (auto [label, value] :
          {std::pair{"IA inputs", "ia"}, std::pair{"Final output", "final"}, std::pair{"VS output", "vs"},
-          std::pair{"DS output", "ds"}, std::pair{"GS output", "gs"}, std::pair{"VS identities", "vs-index"},
-          std::pair{"VS writes", "vs-writes"}, std::pair{"DS writes", "ds-writes"},
-          std::pair{"GS emissions", "gs-emits"}})
+          std::pair{"HS output", "hs"}, std::pair{"DS output", "ds"}, std::pair{"GS output", "gs"},
+          std::pair{"VS identities", "vs-index"}, std::pair{"VS writes", "vs-writes"},
+          std::pair{"DS writes", "ds-writes"}, std::pair{"GS emissions", "gs-emits"}})
         geometryStage_->addItem(label, value);
     geometrySource->addWidget(geometryStage_);
     geometryStream_ = new QSpinBox;
@@ -927,13 +927,25 @@ void MainWindow::buildUi() {
     connect(geometryStage_, &QComboBox::currentIndexChanged, this, [this, clearGeometry] {
         const bool post = geometryStage_->currentData() != "ia";
         const auto selected = geometryStage_->currentData().toString();
-        const bool writes = selected == "vs-writes" || selected == "ds-writes";
-        geometryTable_->setItemText(0, writes                   ? "Invocation records"
-                                       : selected == "gs-emits" ? "Emission records"
-                                                                : "Expanded vertices");
+        const bool hull = selected == "hs";
+        const bool writes = selected == "vs-writes" || selected == "ds-writes" || hull;
+        {
+            QSignalBlocker blocker(geometryTable_);
+            geometryTable_->clear();
+            geometryTable_->addItem(hull                     ? "Control points"
+                                    : writes                 ? "Invocation records"
+                                    : selected == "gs-emits" ? "Emission records"
+                                                             : "Expanded vertices",
+                                    "expanded_vertices");
+            if (hull)
+                geometryTable_->addItem("Patch constants", "patch_constants");
+            else if (!post || selected == "vs-index") {
+                geometryTable_->addItem("Unique vertices", "unique_vertices");
+                geometryTable_->addItem("Index mapping", "references");
+            }
+        }
         mesh_->setVisible(!writes);
-        geometryTable_->setCurrentIndex(0);
-        geometryTable_->setEnabled(!busy() && (!post || geometryStage_->currentData() == "vs-index"));
+        geometryTable_->setEnabled(!busy() && (!post || selected == "vs-index" || hull));
         if (writes)
             geometryStream_->setValue(0);
         geometryStream_->setEnabled(!busy() && post && !writes);
@@ -1143,11 +1155,12 @@ void MainWindow::setBusy(bool busy) {
     annotations_->setWorkerBusy(busy);
     gpuStatistics_->setWorkerBusy(busy);
     geometryStage_->setEnabled(!busy);
-    geometryTable_->setEnabled(
-        !busy && (geometryStage_->currentData() == "ia" || geometryStage_->currentData() == "vs-index"));
-    geometryStream_->setEnabled(!busy && geometryStage_->currentData() != "ia" &&
-                                geometryStage_->currentData() != "vs-writes" &&
-                                geometryStage_->currentData() != "ds-writes");
+    geometryTable_->setEnabled(!busy && (geometryStage_->currentData() == "ia" ||
+                                         geometryStage_->currentData() == "vs-index" ||
+                                         geometryStage_->currentData() == "hs"));
+    geometryStream_->setEnabled(
+        !busy && geometryStage_->currentData() != "ia" && geometryStage_->currentData() != "vs-writes" &&
+        geometryStage_->currentData() != "ds-writes" && geometryStage_->currentData() != "hs");
     geometryInstance_->setEnabled(!busy && geometryStage_->currentData() != "ia");
     openAction_->setEnabled(!busy);
     viewAction_->setEnabled(!busy && frame_ && experiment_);
@@ -2096,9 +2109,10 @@ void MainWindow::exportGeometry() {
         return;
     }
     QDir source(geometryDir_->path() + "/result");
-    for (auto file : source.entryList({"*.csv", "geometry.json", "geometry.obj", "vertices.bin",
-                                       "vertices.validity.bin", "unique_vertices.bin"},
-                                      QDir::Files))
+    for (auto file :
+         source.entryList({"*.csv", "geometry.json", "geometry.obj", "vertices.bin", "vertices.validity.bin",
+                           "unique_vertices.bin", "patch_constants.bin", "patch_constants.validity.bin"},
+                          QDir::Files))
         if (!QFile::copy(source.filePath(file), path + '/' + file)) {
             showError("Geometry export failed.");
             return;
@@ -3273,7 +3287,8 @@ void MainWindow::openExperiment() {
         geometryStream_->setValue(int(settings.geometryStream));
         geometryInstance_->setText(QString::fromStdString(settings.geometryInstance));
         geometryTable_->setCurrentIndex(
-            (settings.geometryStage == "ia" || settings.geometryStage == "vs-index")
+            (settings.geometryStage == "ia" || settings.geometryStage == "vs-index" ||
+             settings.geometryStage == "hs")
                 ? geometryTable_->findData(QString::fromStdString(settings.geometryTable))
                 : 0);
         if (settings.event)

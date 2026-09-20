@@ -1,4 +1,5 @@
 #include "DepthStencilCapture.h"
+#include "HullCapture.h"
 #include "StreamCapture.h"
 #include "app/Appearance.h"
 #include "app/MainWindow.h"
@@ -11,6 +12,7 @@
 #include <QDir>
 #include <QFileDialog>
 #include <QLineEdit>
+#include <QMessageBox>
 #include <QSettings>
 #include <QSignalSpy>
 #include <QTemporaryDir>
@@ -57,10 +59,13 @@ class PostTransformTests final : public QObject {
         QCOMPARE(replayUiState(frame, replayUiDocument(frame, state)).geometryStage, std::string("ia"));
         state.geometryStage = "vs-index";
         QCOMPARE(replayUiState(frame, replayUiDocument(frame, state)).geometryStage, std::string("vs-index"));
-        for (const auto *stage : {"vs-writes", "ds-writes", "gs-emits"}) {
+        for (const auto *stage : {"vs-writes", "ds-writes", "gs-emits", "hs"}) {
             state.geometryStage = stage;
             QCOMPARE(replayUiState(frame, replayUiDocument(frame, state)).geometryStage, std::string(stage));
         }
+        state.geometryTable = "patch_constants";
+        QCOMPARE(replayUiState(frame, replayUiDocument(frame, state)).geometryTable,
+                 std::string("patch_constants"));
         for (const auto *invalid : {"-1", "4294967296", "x", "1.2", "+1"}) {
             state.geometryInstance = invalid;
             QVERIFY_THROWS_EXCEPTION(std::runtime_error, replayUiDocument(frame, state));
@@ -298,6 +303,145 @@ class PostTransformTests final : public QObject {
             baseline.run();
             QCOMPARE(actual, baseline.readBuffer(70));
         }
+    }
+    void hullOutputAndIsolation() {
+        QTemporaryDir dir;
+        for (bool explicitPhase : {false, true})
+            for (bool warp : {false, true}) {
+                const auto path = dir.path() + "/hull.gpa_frame";
+                hullCapture(explicitPhase).save(path);
+                Frame frame(path.toStdWString());
+                ReplayOptions o;
+                o.warp = warp;
+                o.before = true;
+                o.until = 200;
+                Replay replay(frame, o);
+                replay.run();
+                const auto storage = replay.readBuffer(10), pixels = replay.readTexture(20);
+                const auto counter = replay.readCounter(12);
+                const auto counts = replay.counts;
+                PostTransformOptions options;
+                options.stage = "hs";
+                options.maxBytes = 1;
+                QVERIFY_THROWS_EXCEPTION(std::runtime_error, inspectPostTransform(replay, 200, options));
+                options.maxBytes = 256ull * 1024 * 1024;
+                PostTransformOptions dsOptions;
+                dsOptions.stage = "ds";
+                const auto originalDs = inspectPostTransform(replay, 200, dsOptions);
+                options.hullDownstream = true;
+                auto full = inspectPostTransform(replay, 200, options);
+                QCOMPARE(full.downstreamBytes, originalDs.bytes);
+                QCOMPARE(full.report.at("hull").at("patches").get<unsigned>(), 4u);
+                const auto ui = postTransformTables(full);
+                const auto &rows = ui.at("tables").at("expanded_vertices").at("rows");
+                QCOMPARE(rows.size(), size_t(12));
+                for (unsigned i = 0; i < 12; ++i) {
+                    const auto &row = rows[i];
+                    QCOMPARE(row[0].get<unsigned>(), i / 6);
+                    QCOMPARE(row[1].get<unsigned>(), (i % 6) / 3);
+                    QCOMPARE(row[2].get<unsigned>(), i % 3);
+                    QCOMPARE(row[3].get<double>(), double(i % 6));
+                    QCOMPARE(row[5].get<double>(), double(i / 6));
+                    QCOMPARE(row[7].get<double>(),
+                             explicitPhase ? double(i % 3) * .25 + double((i % 6) / 3) : 0.0);
+                    for (unsigned j : {4u, 6u, 8u, 10u})
+                        QVERIFY(row[j].get<bool>());
+                }
+                for (unsigned repeat = 0; repeat < 2; ++repeat) {
+                    options.instance = 1;
+                    auto selected = inspectPostTransform(replay, 200, options);
+                    const auto bytes = full.report.at("hull").at("patch_stride").get<unsigned>() * 2;
+                    std::vector<uint8_t> expected(full.bytes.begin() + bytes, full.bytes.begin() + 2 * bytes);
+                    expected.insert(expected.end(), full.bytes.begin() + 3 * bytes, full.bytes.end());
+                    QCOMPARE(selected.bytes, expected);
+                    QCOMPARE(replay.readBuffer(10), storage);
+                    QCOMPARE(replay.readTexture(20), pixels);
+                    QCOMPARE(replay.readCounter(12), counter);
+                    QVERIFY(replay.counts == counts);
+                }
+                replay.inspectNativeState(
+                    [](auto context, const auto &) { context->DrawInstanced(6, 2, 0, 9); });
+                const auto after = replay.readBuffer(10);
+                const auto afterCounter = replay.readCounter(12);
+                o.before = false;
+                Replay baseline(frame, o);
+                baseline.run();
+                QCOMPARE(after, baseline.readBuffer(10));
+                QCOMPARE(afterCounter, baseline.readCounter(12));
+                QCOMPARE(afterCounter, 4u);
+            }
+    }
+    void hullWindowInspection() {
+        QTemporaryDir dir;
+        const auto path = dir.path() + "/hull.gpa_frame";
+        hullCapture().save(path);
+        MainWindow window;
+        window.resize(1440, 900);
+        window.show();
+        QTimer dialogs;
+        QStringList unexpectedDialogs;
+        connect(&dialogs, &QTimer::timeout, &window, [&] {
+            for (auto widget : QApplication::topLevelWidgets())
+                if (auto box = qobject_cast<QMessageBox *>(widget)) {
+                    unexpectedDialogs.push_back(box->text());
+                    qWarning() << "Unexpected HS dialog:" << box->text();
+                    box->reject();
+                }
+        });
+        dialogs.start(100);
+        QSignalSpy loaded(&window, &MainWindow::captureLoaded), tasks(&window, &MainWindow::taskFinished);
+        window.openCapture(path);
+        QTRY_COMPARE_WITH_TIMEOUT(loaded.size(), 1, 30000);
+        QTRY_VERIFY_WITH_TIMEOUT(!tasks.empty(), 30000);
+        QVERIFY(tasks.takeLast()[0].toBool());
+        tasks.clear();
+        auto api = window.findChild<QTableView *>("apiLog");
+        for (int row = 0; row < api->model()->rowCount(); ++row) {
+            const auto index = api->model()->index(row, 0);
+            if (index.data(Qt::UserRole).toULongLong() == 200) {
+                api->setCurrentIndex(index);
+                break;
+            }
+        }
+        QTRY_VERIFY_WITH_TIMEOUT(!tasks.empty(), 30000);
+        QVERIFY(tasks.takeLast()[0].toBool());
+        auto stage = window.findChild<QComboBox *>("geometryStage"),
+             choice = window.findChild<QComboBox *>("geometryTableChoice");
+        stage->setCurrentIndex(stage->findData("hs"));
+        auto table = window.findChild<QTableView *>("geometryTable");
+        QVERIFY(table);
+        tasks.clear();
+        window.findChild<QAction *>("inspectGeometry")->trigger();
+        QTRY_VERIFY_WITH_TIMEOUT(!tasks.empty(), 30000);
+        QVERIFY(tasks.takeLast()[0].toBool());
+        QCOMPARE(table->model()->rowCount(), 12);
+        QVERIFY(choice->isEnabled());
+        choice->setCurrentIndex(choice->findData("patch_constants"));
+        QCOMPARE(table->model()->rowCount(), 4);
+        const auto evidence = qEnvironmentVariable("FLORA_POST_TRANSFORM_EVIDENCE_DIR");
+        if (!evidence.isEmpty()) {
+            QDir().mkpath(evidence);
+            QVERIFY(window.grab().save(evidence + "/hs-patch-constants.png"));
+        }
+        QTimer::singleShot(0, &window, [&] {
+            auto dialog = window.findChild<QFileDialog *>();
+            QVERIFY(dialog);
+            dialog->setDirectory(dir.path());
+            QMetaObject::invokeMethod(dialog, "accept", Qt::QueuedConnection);
+        });
+        window.findChild<QAction *>("exportGeometry")->trigger();
+        for (const auto *file :
+             {"geometry.json", "vertices.bin", "vertices.validity.bin", "vertices.csv", "patch_constants.bin",
+              "patch_constants.validity.bin", "patch_constants.csv"})
+            QVERIFY(QFile::exists(dir.path() + "/FloraGPA-Geometry-200/" + file));
+        QVERIFY(!QFile::exists(dir.path() + "/FloraGPA-Geometry-200/geometry.obj"));
+        const auto project = dir.path() + "/hull-project.json";
+        projectFile(window, "saveExperiment", project);
+        stage->setCurrentIndex(stage->findData("vs"));
+        projectFile(window, "openExperiment", project);
+        QCOMPARE(stage->currentData().toString(), QString("hs"));
+        QCOMPARE(choice->currentData().toString(), QString("patch_constants"));
+        QVERIFY2(unexpectedDialogs.isEmpty(), qPrintable(unexpectedDialogs.join('\n')));
     }
     void emptyAndNonfiniteExports() {
         QTemporaryDir dir;

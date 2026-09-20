@@ -5,6 +5,9 @@
 namespace flora::dxbc_detail {
 using Parts = std::vector<std::pair<uint32_t, std::vector<uint8_t>>>;
 using Masks = std::array<uint32_t, 32>;
+std::vector<uint8_t> &part(Parts &parts, uint32_t tag);
+void appendSignature(Parts &parts, uint32_t tag, const std::string &name, unsigned reg, unsigned mask,
+                     unsigned system, bool output);
 nlohmann::json signature(Bytes bytes, bool streamed = false);
 Masks occupied(const nlohmann::json &signature, const DxbcProgram &program, unsigned kind);
 size_t operand(const std::vector<uint32_t> &row, size_t pos, std::set<unsigned> &found, unsigned depth = 0,

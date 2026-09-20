@@ -1,4 +1,5 @@
 #include "PostTransform.h"
+#include "DxbcHull.h"
 #include "DxbcIdentity.h"
 #include "DxbcInspection.h"
 #include "DxbcOutputLog.h"
@@ -271,7 +272,9 @@ class PostTransformCapture {
     }
     PostTransformGeometry capture(const Event &event, const State &state, bool countsOnly = false,
                                   Bytes overrideCode = {}, const std::function<void()> &configure = {}) {
-        const auto requested = options.stage == "vs-index" ? "vs" : options.stage;
+        const auto requested = options.stage == "hs"         ? "ds"
+                               : options.stage == "vs-index" ? "vs"
+                                                             : options.stage;
         const auto stage = requested == "final" ? (state.stages[3].shader   ? "gs"
                                                    : state.stages[2].shader ? "ds"
                                                                             : "vs")
@@ -649,6 +652,180 @@ class PostTransformCapture {
         return result;
     }
 
+    PostTransformGeometry captureHull(const Event &event, const State &state) {
+        if (options.stream || !state.stages[1].shader || !state.stages[2].shader)
+            throw std::runtime_error("HS inspection requires paired HS/DS and stream zero");
+        if (r.device_->GetFeatureLevel() < D3D_FEATURE_LEVEL_11_1)
+            throw std::runtime_error("HS inspection requires feature level 11.1");
+        Event direct;
+        Json parameters, indirect;
+        drawParameters(event, direct, parameters, indirect);
+        const auto instances = parameters.value("instance_count", 1u);
+        if (options.instance && *options.instance >= instances)
+            throw std::runtime_error("HS instance exceeds original count");
+        auto raw = code(state.stages[1].shader);
+        auto meta = hullOutputSchema(raw);
+        const auto inputs = meta.at("input_control_points").get<unsigned>(),
+                   stride = meta.at("patch_stride").get<unsigned>();
+        if (state.topology != 32 + inputs)
+            throw std::runtime_error("HS input control point count mismatches topology");
+        const auto per = parameters.value("index_count", parameters.value("vertex_count", 0u)) / inputs;
+        const auto patches = uint64_t(per) * instances, size = patches * stride * 2;
+        if (patches > UINT32_MAX || size > options.maxBytes || size > 256ull * 1024 * 1024)
+            throw std::runtime_error("HS output exceeds inspection byte limit");
+        std::set<unsigned> occupied;
+        std::array<ID3D11UnorderedAccessView *, 64> bound{};
+        r.context_->OMGetRenderTargetsAndUnorderedAccessViews(0, nullptr, nullptr, 0, 64, bound.data());
+        for (unsigned i = 0; i < 64; ++i)
+            if (bound[i]) {
+                occupied.insert(i);
+                bound[i]->Release();
+            }
+        for (unsigned i = 0; i < 3; ++i) {
+            dxbc_detail::Parts parts;
+            std::optional<DxbcProgram> program;
+            for (auto &[tag, data] : readDxbcParts(code(state.stages[i].shader))) {
+                parts.emplace_back(tag, std::vector<uint8_t>(data.begin(), data.end()));
+                if (tag == 0x58454853 || tag == 0x52444853)
+                    program = readDxbcProgram(data);
+            }
+            if (program && (program->header[0] & 255) == 0x50) {
+                const auto used = dxbc_detail::uavSlots(*program, parts);
+                occupied.insert(used.begin(), used.end());
+            }
+        }
+        int slot = -1;
+        for (int i = 7; i >= 0; --i)
+            if (!occupied.contains(unsigned(i))) {
+                slot = i;
+                break;
+            }
+        if (slot < 0)
+            for (int i = 8; i < 64; ++i)
+                if (!occupied.contains(unsigned(i))) {
+                    slot = i;
+                    break;
+                }
+        if (slot < 0)
+            throw std::runtime_error("HS output requires a free graphics UAV slot");
+        const bool enabled = !r.options_.suppressDraws && !r.options_.disabled.contains(event.id);
+        HullInstanceShaders carrier;
+        Json identity = nullptr;
+        if (instances > 1 && patches && enabled) {
+            carrier = carryHullInstance(code(state.stages[0].shader), raw);
+            raw = carrier.hull;
+            identity = carrier.identity;
+        }
+        auto patched = instrumentHullOutputs(raw, slot, uint32_t(patches), identity, per);
+        meta = std::move(patched.metadata);
+        const auto allocation = UINT(std::max<uint64_t>(size, 4));
+        std::vector<uint8_t> initial(allocation);
+        D3D11_BUFFER_DESC bd{allocation,
+                             D3D11_USAGE_DEFAULT,
+                             D3D11_BIND_UNORDERED_ACCESS,
+                             0,
+                             D3D11_RESOURCE_MISC_BUFFER_ALLOW_RAW_VIEWS,
+                             0};
+        D3D11_SUBRESOURCE_DATA data{initial.data(), 0, 0};
+        Com<ID3D11Buffer> target;
+        check(r.device_->CreateBuffer(&bd, &data, &target), "Create HS output buffer");
+        D3D11_UNORDERED_ACCESS_VIEW_DESC ud{};
+        ud.Format = DXGI_FORMAT_R32_TYPELESS;
+        ud.ViewDimension = D3D11_UAV_DIMENSION_BUFFER;
+        ud.Buffer.NumElements = allocation / 4;
+        ud.Buffer.Flags = D3D11_BUFFER_UAV_FLAG_RAW;
+        Com<ID3D11UnorderedAccessView> view;
+        check(r.device_->CreateUnorderedAccessView(target.Get(), &ud, &view), "Create HS output view");
+        Com<ID3D11HullShader> hs;
+        Com<ID3D11VertexShader> vs;
+        check(r.device_->CreateHullShader(
+                  patched.bytes.data(), patched.bytes.size(),
+                  r.get<ID3D11ClassLinkage>(shaderClassLinkage(r.frame_, state.stages[1].shader)), &hs),
+              "Create capture HS");
+        if (!carrier.vertex.empty())
+            check(r.device_->CreateVertexShader(
+                      carrier.vertex.data(), carrier.vertex.size(),
+                      r.get<ID3D11ClassLinkage>(shaderClassLinkage(r.frame_, state.stages[0].shader)), &vs),
+                  "Create HS identity VS");
+        auto configure = [&] {
+            for (unsigned i = 0; i < 2; ++i) {
+                if (i == 0 && !vs)
+                    continue;
+                auto count = state.stages[i].classCount;
+                if (count > 256)
+                    throw std::runtime_error("HS inspection class count exceeds limit");
+                if (r.options_.shaders.contains(state.stages[i].shader) &&
+                    inspectShader(code(state.stages[i].shader)).at("interface_slots") == 0)
+                    count = 0;
+                std::array<ID3D11ClassInstance *, 256> classes{};
+                for (unsigned j = 0; j < count; ++j)
+                    classes[j] = r.get<ID3D11ClassInstance>(state.stages[i].classes[j]);
+                if (i)
+                    r.context_->HSSetShader(hs.Get(), classes.data(), count);
+                else
+                    r.context_->VSSetShader(vs.Get(), classes.data(), count);
+            }
+            std::array<ID3D11UnorderedAccessView *, 64> pointers{};
+            std::array<Com<ID3D11UnorderedAccessView>, 64> held;
+            r.context_->OMGetRenderTargetsAndUnorderedAccessViews(0, nullptr, nullptr, 0, 64,
+                                                                  pointers.data());
+            for (unsigned i = 0; i < 64; ++i)
+                held[i].Attach(pointers[i]);
+            if (pointers[slot])
+                throw std::runtime_error("HS helper UAV slot became occupied");
+            pointers[slot] = view.Get();
+            r.context_->OMSetRenderTargetsAndUnorderedAccessViews(0, nullptr, nullptr, 0, 64, pointers.data(),
+                                                                  nullptr);
+        };
+        auto downstream = capture(event, state, !options.hullDownstream, {}, configure);
+        std::vector<uint8_t> bytes(size);
+        if (size) {
+            bd.Usage = D3D11_USAGE_STAGING;
+            bd.BindFlags = 0;
+            bd.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
+            bd.MiscFlags = 0;
+            Com<ID3D11Buffer> staging;
+            check(r.device_->CreateBuffer(&bd, nullptr, &staging), "Create HS readback");
+            Unpredicated guard(r.context_.Get());
+            r.context_->CopyResource(staging.Get(), target.Get());
+            D3D11_MAPPED_SUBRESOURCE mapped{};
+            check(r.context_->Map(staging.Get(), 0, D3D11_MAP_READ, 0, &mapped), "Read HS outputs");
+            std::memcpy(bytes.data(), mapped.pData, size);
+            r.context_->Unmap(staging.Get(), 0);
+        }
+        const auto fullHash = sha256(bytes);
+        if (options.instance) {
+            const auto length = uint64_t(per) * stride, start = uint64_t(*options.instance) * length,
+                       validity = meta.at("validity_offset").get<uint64_t>();
+            std::vector<uint8_t> selected(bytes.begin() + start, bytes.begin() + start + length);
+            selected.insert(selected.end(), bytes.begin() + validity + start,
+                            bytes.begin() + validity + start + length);
+            bytes = std::move(selected);
+            meta.update(Json{{"patches", per},
+                             {"data_bytes", length},
+                             {"validity_offset", length},
+                             {"total_bytes", length * 2}});
+        }
+        meta.update(Json{{"original_parameters", parameters},
+                         {"indirect_arguments", indirect},
+                         {"instance_count", instances},
+                         {"instance", options.instance ? Json(*options.instance) : Json(nullptr)},
+                         {"first_instance", options.instance.value_or(0)},
+                         {"patches_per_instance", per},
+                         {"captured_patches", patches},
+                         {"full_capture_sha256", fullHash},
+                         {"instance_identity", identity},
+                         {"vertex_instrumented_sha256",
+                          carrier.vertex.empty() ? Json(nullptr) : Json(sha256(carrier.vertex))},
+                         {"source", "native_D3D11_hull_output_writes"},
+                         {"instrumented_sha256", sha256(patched.bytes)},
+                         {"enabled", enabled},
+                         {"sha256", sha256(bytes)}});
+        auto result = hullGeometry(inspectionEvent(r.frame_, event.id), state.stages[1].shader,
+                                   std::move(meta), std::move(bytes), std::move(downstream.report));
+        result.downstreamBytes = std::move(downstream.bytes);
+        return result;
+    }
     PostTransformGeometry captureLog(const Event &event, const State &state) {
         const std::string stage = options.stage == "vs-writes"   ? "vs"
                                   : options.stage == "ds-writes" ? "ds"
@@ -908,7 +1085,8 @@ class PostTransformCapture {
     PostTransformCapture(Replay &replay, const PostTransformOptions &o) : r(replay), options(o) {}
     PostTransformGeometry run(Id id) {
         if (options.stage != "final" && options.stage != "vs" && options.stage != "ds" &&
-            options.stage != "gs" && options.stage != "vs-index" && !isOutputLogStage(options.stage))
+            options.stage != "gs" && options.stage != "vs-index" && options.stage != "hs" &&
+            !isOutputLogStage(options.stage))
             throw std::runtime_error("Requested geometry stage has not yet been migrated");
         if (options.stream > 3)
             throw std::runtime_error("Geometry output stream must be 0..3");
@@ -921,10 +1099,12 @@ class PostTransformCapture {
         PostTransformGeometry result;
         r.inspectEventInputs(id, [&] {
             bind(event, state);
-            result = isOutputLogStage(options.stage) ? captureLog(event, state)
-                     : options.stage == "vs-index"   ? captureIdentities(event, state)
-                                                     : capture(event, state);
-            if (options.instance && options.stage != "vs-index" && !isOutputLogStage(options.stage))
+            result = options.stage == "hs"             ? captureHull(event, state)
+                     : isOutputLogStage(options.stage) ? captureLog(event, state)
+                     : options.stage == "vs-index"     ? captureIdentities(event, state)
+                                                       : capture(event, state);
+            if (options.instance && options.stage != "hs" && options.stage != "vs-index" &&
+                !isOutputLogStage(options.stage))
                 selectInstance(result, event, state);
         });
         result.report["event"] = inspectionEvent(r.frame_, id);
@@ -952,6 +1132,8 @@ PostTransformGeometry inspectPostTransform(Replay &replay, Id event, const PostT
     return PostTransformCapture(replay, options).run(event);
 }
 Json postTransformTables(const PostTransformGeometry &geometry) {
+    if (geometry.report.value("requested_stage", std::string{}) == "hs")
+        return hullTables(geometry);
     if (isOutputLogStage(geometry.report.value("requested_stage", std::string{})))
         return outputLogTables(geometry);
     const auto &report = geometry.report;
@@ -1082,6 +1264,10 @@ Json postTransformTables(const PostTransformGeometry &geometry) {
     return result;
 }
 void exportPostTransform(const PostTransformGeometry &geometry, const std::filesystem::path &directory) {
+    if (geometry.report.value("requested_stage", std::string{}) == "hs") {
+        exportHull(geometry, directory);
+        return;
+    }
     if (isOutputLogStage(geometry.report.value("requested_stage", std::string{}))) {
         exportOutputLog(geometry, directory);
         return;

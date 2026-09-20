@@ -134,7 +134,9 @@
         "Geometry stages, streams, instances, typed table, mesh, complete directory export and migrated geometry project settings; advanced geometry stages remain pending.",
         "docs/VS_IDENTITY_MIGRATION.md",
         "VS identities table switching, complete export and legacy project-selection restoration migrated.",
-        "docs/OUTPUT_LOG_MIGRATION.md"
+        "docs/OUTPUT_LOG_MIGRATION.md",
+        "docs/HULL_OUTPUT_MIGRATION.md",
+        "HS output uses compact control-point/patch-constant tables, complete export and project selection restoration."
       ]
     },
     {
@@ -647,11 +649,15 @@
       "native": [
         "src/application/DxbcOutputLog.cpp",
         "src/application/DxbcOperandArities.h",
-        "src/application/DxbcIdentity.cpp"
+        "src/application/DxbcIdentity.cpp",
+        "src/application/DxbcHull.cpp",
+        "src/application/DxbcHull.h"
       ],
       "validation": [
         "docs/DXBC_OUTPUT_LOG_MIGRATION.md",
-        "Shared operand traversal, opcode arities and instruction construction migrated for VS/DS/GS logs; HS capture itself remains pending."
+        "Shared operand traversal, opcode arities and instruction construction migrated for VS/DS/GS logs; the HS transform is now implemented in DxbcHull.cpp.",
+        "docs/HULL_OUTPUT_MIGRATION.md",
+        "Native HS schema and control-point/patch-constant write instrumentation; full DXBC parity and GPU integration verified in the cited matrix."
       ]
     },
     {
@@ -661,11 +667,14 @@
       "description": "Carry the native VS InstanceID to HS without rewriting original system IDs.",
       "status": "partial",
       "native": [
-        "src/application/DxbcIdentity.cpp"
+        "src/application/DxbcIdentity.cpp",
+        "src/application/DxbcHull.cpp"
       ],
       "validation": [
         "docs/VS_IDENTITY_MIGRATION.md",
-        "Signature/declaration occupancy, free-component allocation and signature append helpers migrated for VS identity; the VS-to-HS carry operation remains pending."
+        "Signature/declaration occupancy, free-component allocation and signature append helpers migrated for VS identity; native VS-to-HS carrying is now integrated.",
+        "docs/HULL_OUTPUT_MIGRATION.md",
+        "Native VS-to-HS InstanceID carrier integrated, including packed outputs, whole-register system inputs and original UAV reuse guards."
       ]
     },
     {
@@ -1126,11 +1135,14 @@
       "description": "Observe HS output writes, retaining per-component validity and patch identity.",
       "status": "partial",
       "native": [
-        "src/application/OutputLogGeometry.cpp"
+        "src/application/OutputLogGeometry.cpp",
+        "src/application/PostTransform.cpp"
       ],
       "validation": [
         "docs/OUTPUT_LOG_MIGRATION.md",
-        "Shared signature field packing only, used by VS/DS/GS log export; actual HS output capture remains pending."
+        "Shared signature packing supports VS/DS/GS logs and the integrated HS capture/export route.",
+        "docs/HULL_OUTPUT_MIGRATION.md",
+        "Native HS capture, selected-instance slicing, DS witness, typed tables and complete export integrated; broader runtime verification gaps remain documented."
       ]
     },
     {
@@ -1818,8 +1830,10 @@
         "docs/POST_TRANSFORM_MIGRATION.md",
         "Final/VS/DS/GS SO capture and exports migrated.",
         "docs/VS_IDENTITY_MIGRATION.md",
-        "vs-index dispatch, unique binary/CSV tables and reference metadata migrated; VS/DS writes and GS emissions are also integrated. HS dispatch remains pending.",
-        "docs/OUTPUT_LOG_MIGRATION.md"
+        "vs-index dispatch, unique binary/CSV tables and reference metadata migrated; VS/DS writes and GS emissions are also integrated. HS dispatch is now integrated.",
+        "docs/OUTPUT_LOG_MIGRATION.md",
+        "docs/HULL_OUTPUT_MIGRATION.md",
+        "HS dispatch now migrated alongside other existing output modes."
       ]
     },
     {

@@ -2,9 +2,25 @@
 
 已有可编译、可运行的 VS2022 / Qt Widgets 原生工程，能够独立重放当前验证的
 GF2 与 BF1 DX11 捕获。**尚未完成原 Python 版本的全部功能迁移。**
-当前独立包为 `out/FloraGPA-output-logs/FloraGPA.exe`。
+当前独立包为 `out/FloraGPA-hull-outputs/FloraGPA.exe`。
 
-最新批次接通原生 VS/DS 写入与 GS 发射的采集、导出和 Qt Geometry 入口。
+最新实现补齐原生 HS 输出采集、VS→HS 实例身份传递、控制点与 patch constants
+双表、逐分量有效性、完整导出和 Qt 实验项目选择恢复。GPU 原始输入和原始绘制
+参数保持不变；多实例数据从完整绘制结果切片，不改写 InstanceID。
+开发版插桩 226 项对照通过（216 项成功、10 项预期拒绝），GPU 112 项对照通过
+（100 项成功、12 项预期拒绝），包括 Hardware/WARP 上的 BF1 HS 输出。
+原生测试核对 CPU 预期值、下游 DS 字节、原 UAV/隐藏计数器以及后续 Draw；
+Release 40 套 CTest 全部通过，原有 Qt 53 项无失败、无跳过。最终独立包 HS
+112 项对照通过，旧几何 140 项、写入／发射 100 项、黄金帧与负对照 4 项均通过。
+324 份成功报告的模块审计未发现 Python/Tk/GPA/RenderDoc，Qt 来自包内，三个
+EXE 与最终 Release 构建一致。证据见 `artifacts/hull-portable-final/validation.json`、
+`artifacts/ctest-hull-final.log`、`artifacts/hull-post-regression/validation.json`、
+`artifacts/hull-log-regression/validation.json`、`artifacts/hull-golden-final/validation.json`
+和 `artifacts/hull-runtime-audit.json`；仍未替代独立机器验证。
+HS/DS/GS checkpoint、trace 和调试器仍未迁移，完整目标尚未完成。
+详见 [HULL_OUTPUT_MIGRATION.md](HULL_OUTPUT_MIGRATION.md)。
+
+上一批接通原生 VS/DS 写入与 GS 发射的采集、导出和 Qt Geometry 入口。
 沿用原 Draw、下游管线与类实例，在私有 RTV/DSV/UAV/SO 上执行并恢复原 SO 游标；
 记录逐分量有效性、原始已知身份、Emit/Cut 顺序和 GS 条带连接关系。VS/DS 写入
 使用记录表，GS 发射保留网格预览，导出包含有效性二进制与图元 CSV。

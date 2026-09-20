@@ -46,6 +46,7 @@ target_sources(FloraExperiment PRIVATE src/application/EventDescription.cpp src/
 target_sources(FloraExperiment PRIVATE src/application/DxbcIdentity.cpp)
 target_sources(FloraExperiment PRIVATE src/application/DxbcOutputLog.cpp)
 target_sources(FloraExperiment PRIVATE src/application/OutputLogGeometry.cpp)
+target_sources(FloraExperiment PRIVATE src/application/DxbcHull.cpp)
 target_link_libraries(FloraExperiment PUBLIC Qt6::Gui)
 target_sources(FloraExperiment PRIVATE src/application/PredicateInspector.cpp)
 target_sources(FloraExperiment PRIVATE src/application/SetterEdits.cpp)

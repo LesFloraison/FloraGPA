@@ -411,4 +411,193 @@ void exportOutputLog(const PostTransformGeometry &geometry, const std::filesyste
     } else if (QFile::exists(root + "/geometry.obj") && !QFile::remove(root + "/geometry.obj"))
         throw std::runtime_error("Cannot remove obsolete output log OBJ");
 }
+namespace {
+struct HullTable {
+    std::vector<uint8_t> values, validity;
+    Json description, ui;
+};
+std::map<std::string, HullTable> presentHull(const PostTransformGeometry &g) {
+    const auto &m = g.report.at("hull");
+    const auto patches = m.at("patches").get<uint64_t>(), patchStride = m.at("patch_stride").get<uint64_t>(),
+               validityOffset = m.at("validity_offset").get<uint64_t>();
+    if (!patchStride || patches > g.bytes.size() / patchStride || patches * patchStride != validityOffset ||
+        validityOffset > g.bytes.size() / 2 || validityOffset * 2 != g.bytes.size())
+        throw std::runtime_error("HS output storage bounds");
+    std::map<std::string, HullTable> result;
+    for (const auto *name : {"control_points", "patch_constants"}) {
+        const bool cp = std::string(name) == "control_points";
+        const auto fields = attributes(m.at(cp ? "control_point_signature" : "patch_constant_signature"));
+        const auto points = cp ? m.at("output_control_points").get<unsigned>() : 1u;
+        const auto sourceStride = cp ? m.at("control_point_stride").get<unsigned>() : 0u;
+        const auto offset = cp ? 0u : m.at("patch_constant_offset").get<unsigned>();
+        if (!points || points > 32)
+            throw std::runtime_error("HS control point count");
+        unsigned packedStride = 0;
+        for (const auto &f : fields)
+            packedStride += f.at("component_count").get<unsigned>() * 4;
+        HullTable table;
+        Json columns = {"instance", "patch", "control_point"}, rows = Json::array();
+        uint64_t writtenCount = 0;
+        for (const auto &f : fields)
+            for (const auto &c : f.at("components")) {
+                const auto label = f.at("semantic").get<std::string>() +
+                                   std::to_string(f.at("index").get<unsigned>()) + "." +
+                                   "xyzw"[c.get<unsigned>()];
+                columns.push_back(label);
+                columns.push_back(label + ".written");
+            }
+        for (uint64_t patch = 0; patch < patches; ++patch)
+            for (unsigned point = 0; point < points; ++point) {
+                const auto per = m.at("patches_per_instance").get<uint32_t>();
+                if (!per)
+                    throw std::runtime_error("HS patch identity divisor is zero");
+                Json row = {m.at("first_instance").get<uint64_t>() + patch / per, patch % per,
+                            cp ? Json(point) : Json(nullptr)};
+                const auto base = patch * patchStride + uint64_t(point) * sourceStride + offset;
+                for (const auto &f : fields)
+                    for (const auto &component : f.at("register_components")) {
+                        const auto at =
+                            base + f.at("register").get<uint64_t>() * 16 + component.get<unsigned>() * 4;
+                        if (at > validityOffset || validityOffset - at < 4)
+                            throw std::runtime_error("HS output field bounds");
+                        auto bytes = Bytes(g.bytes).subspan(at, 4),
+                             valid = Bytes(g.bytes).subspan(validityOffset + at, 4);
+                        table.values.insert(table.values.end(), bytes.begin(), bytes.end());
+                        table.validity.insert(table.validity.end(), valid.begin(), valid.end());
+                        const bool written = word(valid, 0) != 0;
+                        writtenCount += written;
+                        row.push_back(written ? number(bytes, 0, f.at("component_type")) : Json(nullptr));
+                        row.push_back(written);
+                    }
+                rows.push_back(std::move(row));
+            }
+        const std::string stem = cp ? "vertices" : name;
+        table.description = {{"attributes", fields},
+                             {"stride", packedStride},
+                             {"records", patches * points},
+                             {"records_per_patch", points},
+                             {"binary", stem + ".bin"},
+                             {"validity_binary", stem + ".validity.bin"},
+                             {"csv", stem + ".csv"},
+                             {"sha256", sha256(table.values)},
+                             {"validity_sha256", sha256(table.validity)},
+                             {"written_components", writtenCount}};
+        table.ui = {{"columns", columns}, {"rows", std::move(rows)}};
+        result.emplace(name, std::move(table));
+    }
+    return result;
+}
+} // namespace
+PostTransformGeometry hullGeometry(const Json &event, Id shader, Json metadata, std::vector<uint8_t> bytes,
+                                   Json downstream) {
+    PostTransformGeometry result;
+    result.bytes = std::move(bytes);
+    result.report = {{"hull", metadata}};
+    const auto tables = presentHull(result);
+    const auto &cp = tables.at("control_points").description;
+    const std::string reason =
+        "HS control points are stage attributes; no position space or assembled surface is inferred";
+    auto &r = result.report;
+    r.update(Json{
+        {"geometry_stage", "hull_control_points_and_patch_constants"},
+        {"requested_stage", "hs"},
+        {"shader_stage", "hs"},
+        {"shader_resource", shader},
+        {"stream", 0},
+        {"attributes", cp.at("attributes")},
+        {"stride", cp.at("stride")},
+        {"vertices", cp.at("records")},
+        {"vertex_references", cp.at("records")},
+        {"vertices_per_primitive", 1},
+        {"primitives", cp.at("records")},
+        {"obj_vertices", 0},
+        {"obj_faces", 0},
+        {"obj_points", 0},
+        {"obj_lines", 0},
+        {"obj_unavailable_reason", reason},
+        {"sha256", cp.at("sha256")},
+        {"tables", {{"control_points", cp}, {"patch_constants", tables.at("patch_constants").description}}},
+        {"event", event},
+        {"enabled", metadata.at("enabled")},
+        {"original_outputs_written", false},
+        {"rasterization_disabled", true},
+        {"downstream_geometry", downstream},
+        {"source", metadata.at("source")},
+        {"limits",
+         {"Patch IDs are local to the recorded original instance; multiple instances require a free VS "
+          "output / HS input register.",
+          "Adding InstanceID to a VS with UAV access is rejected because it can change native VS reuse and "
+          "side effects.",
+          "Unwritten components are unknown: CSV fields are blank and uint32 validity is zero; binary zero "
+          "is not an observed value.",
+          "Writes are observed during private re-execution, not the original execution; cross-invocation UAV "
+          "atomic ordering can differ.",
+          "HS/DS remain paired; downstream DS executes privately as an output-preservation witness."}}});
+    if (!metadata.at("instance").is_null())
+        r["instance_selection"] = {{"instance", metadata.at("instance")},
+                                   {"instance_count", metadata.at("instance_count")},
+                                   {"strategy", metadata.at("instance_count").get<unsigned>() > 1
+                                                    ? "full_original_instance_slots"
+                                                    : "single_original_instance"}};
+    return result;
+}
+Json hullTables(const PostTransformGeometry &g) {
+    const auto tables = presentHull(g);
+    return {{"event", std::to_string(g.report.at("event").at("id").get<Id>())},
+            {"vertex_references", g.report.at("vertex_references")},
+            {"record_kind", "control points"},
+            {"obj_vertices", 0},
+            {"obj_faces", 0},
+            {"obj_lines", 0},
+            {"obj_points", 0},
+            {"obj_unavailable_reason", g.report.at("obj_unavailable_reason")},
+            {"tables",
+             {{"expanded_vertices", tables.at("control_points").ui},
+              {"patch_constants", tables.at("patch_constants").ui}}},
+            {"mesh",
+             {{"positions", Json::array()},
+              {"faces", Json::array()},
+              {"lines", Json::array()},
+              {"points", Json::array()}}}};
+}
+void exportHull(const PostTransformGeometry &g, const std::filesystem::path &directory) {
+    const auto root = QString::fromStdWString(directory.wstring());
+    if (!QDir().mkpath(root))
+        throw std::runtime_error("Cannot create HS export directory");
+    auto save = [&](const std::string &name, const QByteArray &bytes) {
+        QSaveFile f(root + '/' + QString::fromStdString(name));
+        if (!f.open(QIODevice::WriteOnly) || f.write(bytes) != bytes.size() || !f.commit())
+            throw std::runtime_error("Cannot save HS export");
+    };
+    for (const auto &[name, table] : presentHull(g)) {
+        save(table.description.at("binary"),
+             QByteArray(reinterpret_cast<const char *>(table.values.data()), table.values.size()));
+        save(table.description.at("validity_binary"),
+             QByteArray(reinterpret_cast<const char *>(table.validity.data()), table.validity.size()));
+        QByteArray csv;
+        auto row = [&](const Json &r) {
+            QStringList cells;
+            for (const auto &v : r) {
+                auto cell = QString::fromStdString(v.is_null()      ? ""
+                                                   : v.is_boolean() ? (v.get<bool>() ? "True" : "False")
+                                                   : v.is_string()  ? v.get<std::string>()
+                                                                    : v.dump());
+                if (cell.contains(',') || cell.contains('"') || cell.contains('\n')) {
+                    cell.replace("\"", "\"\"");
+                    cell = '"' + cell + '"';
+                }
+                cells.push_back(cell);
+            }
+            csv += (cells.join(',') + "\r\n").toUtf8();
+        };
+        row(table.ui.at("columns"));
+        for (const auto &r : table.ui.at("rows"))
+            row(r);
+        save(table.description.at("csv"), csv);
+    }
+    save("geometry.json", QByteArray::fromStdString(g.report.dump(2) + "\n"));
+    save("geometry-ui.json", QByteArray::fromStdString(hullTables(g).dump()));
+    if (QFile::exists(root + "/geometry.obj") && !QFile::remove(root + "/geometry.obj"))
+        throw std::runtime_error("Cannot remove obsolete HS OBJ");
+}
 } // namespace flora

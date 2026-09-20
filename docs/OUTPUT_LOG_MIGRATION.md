@@ -102,8 +102,9 @@ Evidence: `artifacts/output-log-portable-final/validation.json`,
 screenshots are in `artifacts/output-log-ui-final/`; the focused Qt rerun passes
 with setup/cleanup included (`artifacts/output-log-ui-final.txt`).
 
-HS output capture, GS/DS/HS checkpoints and traces, shader debugging, coverage and
-quad consumers still require migration. Broad dynamic class-linkage combinations,
+HS output capture is now integrated; see [HULL_OUTPUT_MIGRATION.md](HULL_OUTPUT_MIGRATION.md).
+GS/DS/HS checkpoints and traces, shader debugging, coverage and quad consumers
+still require migration. Broad dynamic class-linkage combinations,
 active-predicate/timeout fault injection specifically for every new log stage,
 more real GS captures, clean-machine validation and large-output memory stress
 remain verification gaps. The 256 MiB GPU log limit is not a total CPU-memory cap:

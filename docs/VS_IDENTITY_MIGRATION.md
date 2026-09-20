@@ -97,9 +97,10 @@ draws, overflow followed by limit failure/retry, real Qt Worker calls, all three
 tables, complete UI export and project save/restore. The verified UI screenshot
 is `artifacts/vs-identity-ui-final/vs-identities.png`.
 
-The full migration remains open. HS output, per-invocation VS/DS writes, GS
-emissions, coverage/quad consumers and shader debugging are separate pending
-features. Broad dynamic class-linkage combinations, malformed-token fuzzing,
+The full migration remains open. HS output, per-invocation VS/DS writes and GS
+emissions were migrated in subsequent batches; see `HULL_OUTPUT_MIGRATION.md`
+and `OUTPUT_LOG_MIGRATION.md`. Coverage/quad consumers and shader debugging remain
+pending. Broad dynamic class-linkage combinations, malformed-token fuzzing,
 large-output memory stress and a clean-machine run remain verification gaps.
 As in the prior geometry batch, the SO storage limit does not bound the memory
 used by all attribute tables and mesh JSON. Atomic return ordering is not made

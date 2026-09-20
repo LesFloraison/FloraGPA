@@ -1,3 +1,4 @@
+#include "application/DxbcHull.h"
 #include "application/DxbcIdentity.h"
 #include "application/DxbcInspection.h"
 #include "application/DxbcOutputLog.h"
@@ -50,7 +51,15 @@ int probe(const std::string &manifest) {
             const auto code = read(job.at("input"));
             OutputLogShader patched;
             const auto stage = job.at("stage").get<std::string>();
-            if (stage == "identity") {
+            if (stage == "hull") {
+                patched = instrumentHullOutputs(code, job.at("slot"), job.at("patches"),
+                                                job.value("identity", Json(nullptr)),
+                                                job.value("per_instance", 0u));
+            } else if (stage == "hull-identity") {
+                auto pair = carryHullInstance(read(job.at("vertex")), code);
+                write(job.at("vertex_output"), pair.vertex);
+                patched = {std::move(pair.hull), std::move(pair.identity)};
+            } else if (stage == "identity") {
                 auto identity = instrumentVertexIdentity(code, job.value("instances", 2u));
                 patched = {std::move(identity.bytes), std::move(identity.markers)};
             } else if (stage == "gs")

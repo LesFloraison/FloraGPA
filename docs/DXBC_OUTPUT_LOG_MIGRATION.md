@@ -82,12 +82,14 @@ module checks exclude Python, Tk, GPA and RenderDoc.
 ## Remaining integration
 
 The VS/DS write and GS emission workflows now have native capture, private SO
-isolation, export and Qt integration in the subsequent batch. The checkpoint,
-trace and HS branches of `vertex_writes.py` remain unfinished. Integration evidence
+isolation, export and Qt integration in the subsequent batch. HS outputs are also
+integrated in [HULL_OUTPUT_MIGRATION.md](HULL_OUTPUT_MIGRATION.md). Checkpoint and
+trace branches of `vertex_writes.py` remain unfinished. Integration evidence
 and remaining verification gaps are tracked in `OUTPUT_LOG_MIGRATION.md`.
 
 Current tests establish bytecode-transform parity and focused native execution;
 they do not establish full replay-state restoration, exception cleanup, atomic
 ordering stability, dynamic class-linkage coverage, clean-machine portability or
-end-to-end output-log UI parity. HS capture and shader checkpoints/debugging are
-separate unfinished dependencies. The full Python-to-C++ migration remains open.
+end-to-end output-log UI parity; those integration checks are tracked in the later
+workflow reports. Shader checkpoints/debugging remain unfinished dependencies.
+The full Python-to-C++ migration remains open.
