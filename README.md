@@ -173,6 +173,20 @@ Logic operations require device and RTV-format support; invalid combinations
 fail explicitly. MSAA masks and alpha-to-coverage execute on the GPU, while the
 dedicated MSAA sample viewer and coverage diagnostics are still being migrated.
 
+**Edit > Edit Sampler** edits any of the 16 sampler slots in all six shader stages
+at the selected draw/dispatch. Choose the stage and slot, then **Load**; filtering,
+address modes, comparison, anisotropy, border RGBA and LOD controls save only changed
+fields. Minimum/maximum filtering requires native device support. Descriptor edits
+are scoped to that event, including its before boundary and disabled events.
+
+Select a captured `*SetSamplers` call in **All API calls**, then **Edit Setter** to
+change its starting slot and resource array. Bindings persist across snapshots
+until overwritten per slot or reset by ClearState. Moving or shrinking the array
+preserves the previous bindings of displaced slots; missing prior observations
+produce an explicit error. Descriptor edits inherit the final edited bindings,
+regardless of operation order. Both editors support project save/load and undo/redo.
+Private coverage/quad consumers remain pending.
+
 **Pipeline > Predicate** reads native occlusion and stream-output overflow predicates
 at the selected command boundary. The compact inspector shows the query status,
 boolean result, binding and raw predicate value, with JSON export. Active queries

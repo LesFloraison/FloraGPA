@@ -24,6 +24,9 @@ class Experiment {
     nlohmann::json rasterizer(const Frame &frame, Id event) const;
     void setBlend(const Frame &frame, Id event, const nlohmann::json &values);
     nlohmann::json blend(const Frame &frame, Id event) const;
+    void setSampler(const Frame &frame, Id event, const std::string &stage, unsigned slot,
+                    const nlohmann::json &values);
+    nlohmann::json sampler(const Frame &frame, Id event, const std::string &stage, unsigned slot) const;
     nlohmann::json clear(const Frame &frame, Id event) const;
     void setUpdateSource(const Frame &frame, Id event, Bytes data);
     void setBuffer(const Frame &frame, Id event, Id resource, uint64_t offset, Bytes data);

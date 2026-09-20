@@ -1,6 +1,7 @@
 #include "ClassCapture.h"
 #include "DepthStencilCapture.h"
 #include "PredicateCapture.h"
+#include "SamplerCapture.h"
 #include "StateCapture.h"
 #include "StreamCapture.h"
 #include "SyntheticCapture.h"
@@ -10,8 +11,10 @@
 #include "app/MainWindow.h"
 #include "app/PredicateView.h"
 #include "app/RasterizerDialog.h"
+#include "app/SamplerDialog.h"
 #include "application/BlendEdits.h"
 #include "application/RasterizerEdits.h"
+#include "application/SamplerEdits.h"
 #include <QAbstractItemModelTester>
 #include <QAction>
 #include <QCryptographicHash>
@@ -37,6 +40,237 @@ class UiTests final : public QObject {
         QVERIFY(window.grab().save(directory + '/' + name + ".png"));
     }
   private slots:
+    void samplerDialogValidation() {
+        using namespace flora;
+        QTemporaryDir dir;
+        testing::samplerCapture().save(dir.path() + "/frame.gpa_frame");
+        Frame frame((dir.path() + "/frame.gpa_frame").toStdWString());
+        QWidget parent;
+        auto initial = samplerDescriptor(frame, 0);
+        int commits = 0;
+        QTimer::singleShot(0, &parent, [&] {
+            auto dialog = parent.findChild<QDialog *>("samplerDialog");
+            QVERIFY(dialog);
+            QTimer::singleShot(3000, dialog, &QDialog::reject);
+            auto apply = dialog->findChild<QDialogButtonBox *>()->button(QDialogButtonBox::Ok);
+            dialog->findChild<QSpinBox *>("samplerSlot")->setValue(15);
+            apply->click();
+            QCOMPARE(commits, 0);
+            QVERIFY(dialog->findChild<QLabel *>("samplerError")->text().contains("Load"));
+            dialog->findChild<QPushButton *>("samplerLoad")->click();
+            dialog->findChild<QLineEdit *>("mip_lod_bias")->setText("16");
+            apply->click();
+            QCOMPARE(commits, 0);
+            dialog->findChild<QLineEdit *>("mip_lod_bias")->setText("-2.5");
+            apply->click();
+        });
+        QVERIFY(editSamplerDialog(
+            &parent, [&](auto &, auto) { return initial; },
+            [&](const auto &stage, unsigned slot, const auto &patch) {
+                ++commits;
+                QCOMPARE(stage, std::string("ps"));
+                QCOMPARE(slot, 15u);
+                QCOMPARE(patch, nlohmann::json({{"mip_lod_bias", -2.5}}));
+            }));
+        QCOMPARE(commits, 1);
+        QTimer::singleShot(0, &parent, [&] {
+            auto dialog = parent.findChild<QDialog *>("samplerDialog");
+            QVERIFY(dialog);
+            QTimer::singleShot(3000, dialog, &QDialog::reject);
+            dialog->findChild<QDialogButtonBox *>()->button(QDialogButtonBox::Ok)->click();
+        });
+        QVERIFY(!editSamplerDialog(
+            &parent, [&](auto &, auto) { return initial; }, [&](auto &, auto, auto &) { ++commits; }));
+        QCOMPARE(commits, 1);
+        QTimer::singleShot(0, &parent, [&] {
+            auto dialog = parent.findChild<QDialog *>("samplerDialog");
+            QVERIFY(dialog);
+            QTimer::singleShot(3000, dialog, &QDialog::reject);
+            dialog->findChild<QLineEdit *>("mip_lod_bias")->setText("2");
+            dialog->findChild<QDialogButtonBox *>()->button(QDialogButtonBox::Ok)->click();
+            QVERIFY(dialog->findChild<QLabel *>("samplerError")->text().contains("changed"));
+            dialog->reject();
+        });
+        QVERIFY(!editSamplerDialog(
+            &parent, [&](auto &, auto) { return initial; },
+            [&](auto &, auto, auto &) { throw std::runtime_error("Experiment changed"); }));
+    }
+    void samplerSetterDialogValidation() {
+        using namespace flora;
+        QTemporaryDir dir;
+        testing::samplerCapture().save(dir.path() + "/frame.gpa_frame");
+        Frame frame((dir.path() + "/frame.gpa_frame").toStdWString());
+        QWidget parent;
+        int commits = 0;
+        QTimer::singleShot(0, &parent, [&] {
+            auto dialog = parent.findChild<QDialog *>("samplerSetterDialog");
+            QVERIFY(dialog);
+            QTimer::singleShot(3000, dialog, &QDialog::reject);
+            auto apply = dialog->findChild<QDialogButtonBox *>()->button(QDialogButtonBox::Ok);
+            dialog->findChild<QSpinBox *>("start_slot")->setValue(15);
+            dialog->findChild<QSpinBox *>("samplerCount")->setValue(2);
+            apply->click();
+            QCOMPARE(commits, 0);
+            QVERIFY(dialog->findChild<QLabel *>("setterError")->isVisible());
+            dialog->findChild<QSpinBox *>("samplerCount")->setValue(1);
+            auto table = dialog->findChild<QTableWidget *>("samplerBindings");
+            auto box = qobject_cast<QComboBox *>(table->cellWidget(0, 1));
+            box->setCurrentIndex(box->findData(QVariant::fromValue(qulonglong(741))));
+            snapshot(*dialog, "sampler-setter-editor");
+            apply->click();
+        });
+        QVERIFY(editSamplerSetterDialog(
+            &parent, frame, 900, {{"start_slot", 2}, {"samplers", {0}}}, [&](auto &v) {
+                ++commits;
+                QCOMPARE(v, nlohmann::json({{"start_slot", 15}, {"samplers", {741}}}));
+            }));
+        QCOMPARE(commits, 1);
+    }
+    void samplerSetterHistory() {
+        using namespace flora;
+        QTemporaryDir dir;
+        auto capture = testing::samplerCapture();
+        // Establish the synthetic frame's output target before selecting a setter.
+        capture.add(840, 7, 0x37, testing::statePack(Id(990), Id(0), Id(1), 0u, 0u));
+        capture.save(dir.path() + "/sampler.gpa_frame");
+        MainWindow window;
+        window.resize(1500, 950);
+        window.show();
+        QSignalSpy done(&window, &MainWindow::taskFinished);
+        window.openCapture(dir.path() + "/sampler.gpa_frame");
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        window.findChild<QComboBox *>("apiKinds")->setCurrentIndex(1);
+        auto api = window.findChild<QTableView *>("apiLog");
+        bool selected = false;
+        for (int row = 0; row < api->model()->rowCount(); ++row) {
+            auto index = api->model()->index(row, 0);
+            if (index.data(Qt::UserRole).toULongLong() == 900) {
+                api->setCurrentIndex(index);
+                selected = true;
+                break;
+            }
+        }
+        QVERIFY(selected);
+        QTRY_VERIFY_WITH_TIMEOUT(!window.busy(), 30000);
+        auto edit = window.findChild<QAction *>("editSetter");
+        QVERIFY(edit && edit->isEnabled());
+        bool entered = false;
+        QTimer::singleShot(0, &window, [&] {
+            auto dialog = window.findChild<QDialog *>("samplerSetterDialog");
+            if (!dialog)
+                return;
+            QTimer::singleShot(3000, dialog, &QDialog::reject);
+            auto table = dialog->findChild<QTableWidget *>("samplerBindings");
+            auto box = qobject_cast<QComboBox *>(table->cellWidget(0, 1));
+            box->setCurrentIndex(box->findData(QVariant::fromValue(qulonglong(741))));
+            entered = true;
+            dialog->findChild<QDialogButtonBox *>()->button(QDialogButtonBox::Ok)->click();
+        });
+        done.clear();
+        edit->trigger();
+        QVERIFY(entered);
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        done.clear();
+        for (int row = 0; row < api->model()->rowCount(); ++row) {
+            auto index = api->model()->index(row, 0);
+            if (index.data(Qt::UserRole).toULongLong() == 1000) {
+                api->setCurrentIndex(index);
+                break;
+            }
+        }
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        auto output = window.findChild<ImageView *>("frameOutput");
+        QCOMPARE(output->image().pixelColor(0, 0), QColor(0, 96, 0, 255));
+        QAction *undo = nullptr, *redo = nullptr;
+        for (auto action : window.findChildren<QAction *>()) {
+            if (action->shortcut() == QKeySequence::Undo)
+                undo = action;
+            if (action->shortcut() == QKeySequence::Redo)
+                redo = action;
+        }
+        QVERIFY(undo && redo);
+        done.clear();
+        undo->trigger();
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        QCOMPARE(output->image().pixelColor(0, 0), QColor(0, 0, 0, 0));
+        done.clear();
+        redo->trigger();
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        QCOMPARE(output->image().pixelColor(0, 0), QColor(0, 96, 0, 255));
+    }
+    void samplerHistory() {
+        using namespace flora;
+        QTemporaryDir dir;
+        testing::samplerCapture().save(dir.path() + "/sampler.gpa_frame");
+        MainWindow window;
+        window.resize(1500, 950);
+        window.show();
+        QSignalSpy done(&window, &MainWindow::taskFinished);
+        window.openCapture(dir.path() + "/sampler.gpa_frame");
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        auto api = window.findChild<QTableView *>("apiLog");
+        bool selected = false;
+        for (int row = 0; row < api->model()->rowCount(); ++row) {
+            auto index = api->model()->index(row, 0);
+            if (index.data(Qt::UserRole).toULongLong() == 1000) {
+                api->setCurrentIndex(index);
+                selected = true;
+                break;
+            }
+        }
+        QVERIFY(selected);
+        QTRY_VERIFY_WITH_TIMEOUT(!window.busy(), 30000);
+        auto edit = window.findChild<QAction *>("editSampler");
+        QVERIFY(edit && edit->isEnabled());
+        bool entered = false;
+        QTimer::singleShot(0, &window, [&] {
+            auto dialog = window.findChild<QDialog *>("samplerDialog");
+            if (!dialog)
+                return;
+            QTimer::singleShot(3000, dialog, &QDialog::reject);
+            dialog->findChild<QSpinBox *>("samplerSlot")->setValue(2);
+            dialog->findChild<QPushButton *>("samplerLoad")->click();
+            for (const auto *axis : {"address_u", "address_v", "address_w"})
+                dialog->findChild<QComboBox *>(axis)->setCurrentIndex(3);
+            dialog->findChild<QLineEdit *>("border_color/0")->setText("0.25");
+            dialog->findChild<QLineEdit *>("border_color/1")->setText("0");
+            dialog->findChild<QLineEdit *>("border_color/2")->setText("0");
+            snapshot(*dialog, "sampler-editor");
+            entered = true;
+            dialog->findChild<QDialogButtonBox *>()->button(QDialogButtonBox::Ok)->click();
+        });
+        done.clear();
+        edit->trigger();
+        QVERIFY(entered);
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        auto output = window.findChild<ImageView *>("frameOutput");
+        QCOMPARE(output->image().pixelColor(0, 0), QColor(64, 0, 0, 255));
+        QAction *undo = nullptr, *redo = nullptr;
+        for (auto action : window.findChildren<QAction *>()) {
+            if (action->shortcut() == QKeySequence::Undo)
+                undo = action;
+            if (action->shortcut() == QKeySequence::Redo)
+                redo = action;
+        }
+        QVERIFY(undo && redo);
+        done.clear();
+        undo->trigger();
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        QCOMPARE(output->image().pixelColor(0, 0), QColor(0, 0, 0, 0));
+        done.clear();
+        redo->trigger();
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        QCOMPARE(output->image().pixelColor(0, 0), QColor(64, 0, 0, 255));
+    }
     void blendHistory() {
         using namespace flora;
         QTemporaryDir dir;

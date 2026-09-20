@@ -1,6 +1,7 @@
 #pragma once
 #include "core/Frame.h"
 #include "core/Predication.h"
+#include "core/SamplerBindings.h"
 #define NOMINMAX
 #include <d3d11_3.h>
 #include <functional>
@@ -44,6 +45,8 @@ struct ReplayOptions {
     std::map<Id, uint32_t> initialUavCounters;
     std::map<Id, std::map<Id, uint32_t>> uavCounters;
     std::map<Id, PredicateBinding> predicateSetters;
+    std::map<Id, SamplerBinding> samplerSetters;
+    std::map<Id, std::map<std::pair<unsigned, unsigned>, D3D11_SAMPLER_DESC>> samplerEdits;
     std::map<Id, DepthStencilEdit> depthStencilEdits;
     std::map<Id, RasterizerEdit> rasterizerEdits;
     std::map<Id, BlendEdit> blendEdits;
@@ -100,6 +103,10 @@ class Replay {
     Id boundPredicate_ = 0;
     uint32_t predicateValue_ = 0;
     std::optional<PredicateBinding> predicateOverride_;
+    SamplerBindings samplerBindings_;
+    std::map<std::array<uint8_t, 52>, Com<ID3D11SamplerState>> editedSamplers_;
+    std::optional<bool> samplerMinMax_;
+    void applySamplerEdits(Id event);
     unsigned predicateIsolationDepth_ = 0;
     class PredicateIsolation {
         Replay &replay_;

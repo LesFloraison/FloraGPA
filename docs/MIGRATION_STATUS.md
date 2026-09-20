@@ -2,7 +2,7 @@
 
 已有可编译、可运行的 VS2022 / Qt Widgets 原生工程，能够独立重放当前验证的
 GF2 与 BF1 DX11 捕获。**尚未完成原 Python 版本的全部功能迁移。**
-当前独立包为 `out/FloraGPA-blend-v2/FloraGPA.exe`。
+当前独立包为 `out/FloraGPA-samplers/FloraGPA.exe`。
 
 
 ## 当前可用
@@ -26,16 +26,41 @@ GF2 与 BF1 DX11 捕获。**尚未完成原 Python 版本的全部功能迁移�
 | 深度 / 模板实验 | 每 draw 的 depth enable/write/func、stencil enable/read/write masks、完整正反面四字段和 uint32 reference；字段递归合并、旧 preset、Qt 三页参数编辑、保存与撤销/重做 | 仅 graphics draw；下一未编辑 draw 恢复捕获状态；可与 rasterizer/blend 编辑混合，私有 coverage / 诊断仍待迁移 |
 | 光栅 / 视口 / 裁剪实验 | 十二项 rasterizer 字段、0–16 槽 viewport/scissor、旧 wireframe/cull_none preset；原生 State/State1/State2、forced sample count 和 conservative raster；Qt 三页编辑、字段合并、历史和保存/加载 | 受设备能力与合法 draw 组合限制；强制采样检查 DSV、深度、RTV 采样数和替换后的 PS；私有 coverage 消费者仍待迁移 |
 | 混合 / 采样实验 | BlendState/BlendState1、八槽独立 color/alpha 运算与因子、双源混合、写掩码、16 种 logic op、blend constant、uint32 sample mask、alpha-to-coverage；Qt General/RT 参数页、旧 preset、字段合并、保存与撤销/重做 | 逻辑运算要求设备与每个 RTV 格式支持；不兼容组合明确拒绝；MSAA 执行已验证，但 MSAA 专用查看界面与私有 coverage 诊断仍待迁移 |
+| Sampler 实验 | 六阶段 × 16 槽 descriptor 编辑：36 种过滤、地址/比较/各向异性、border RGBA、LOD；sampler setter 的起始槽/资源数组、部分覆盖、空调用、ClearState、范围移动时保留前序绑定；Qt 编辑、保存、撤销/重做 | descriptor 只作用于选定 draw/dispatch；继承最终 setter 绑定；缺失前序观察和不支持的 min/max filtering 明确拒绝；私有 coverage/quad 消费者仍待迁移 |
 | 图像 | 实际 GPU 输出、缩放/平移/通道、像素值、PNG 导出 | 全帧输出目前限制单采样 RGBA/BGRA8 |
 | 纹理 | GPU 格式转换、BC、浮点/整数、1D/2D/3D、mip/layer/slice、事件边界预览 | MSAA、平面格式及部分查看选项未迁移 |
 | Shader | DXBC 反汇编、反射、SPDB/SDBG 内嵌源码、HLSL 编译替换 | 不含 HLSL 恢复、单步调试及全部反射树 |
 | Buffer | 初始值、事件前后读回、范围、Hex/ASCII/32 位解释、导出；事件字节编辑/二进制补丁导入、绑定识别、撤销/重做；递归 CB 字段、CB1 范围和类型化编辑；按 UAV view 检查/编辑 Append/Consume/Counter | counter 支持 CS/OM 快照及已恢复 clear/copy/setter 引用；SO retained 实验、完整 setter/getter 与扩展 UAV 重放仍待迁移 |
 | 几何 | IA 输入解码、索引与实例、DrawAuto 实际参数及来源、三种顶点表、旋转线框、CSV/OBJ 导出 | 后变换与覆盖未迁移；当前表格上限为 100 万引用 / 1600 万字段 |
 | 资源名称 | GenPrivateData 原始名称、非法 UTF-8 转义、列表筛选和属性显示 | 名称记录不表示逐事件重命名时间线 |
-| 实验项目 | 原格式 JSON、捕获 SHA-256 绑定、资产校验、uint64 ID、原子保存、撤销/重做 | 接受事件启停、buffer、clear、update_source、predicate setter、depth/stencil、rasterizer/viewport/scissor 与 blend pipeline、事件/初始 UAV counter、全局 shader/texture 替换；其他操作明确拒绝 |
+| 实验项目 | 原格式 JSON、捕获 SHA-256 绑定、资产校验、uint64 ID、原子保存、撤销/重做 | 接受事件启停、buffer、clear、update_source、predicate/sampler setter、sampler descriptor、depth/stencil、rasterizer/viewport/scissor 与 blend pipeline、事件/初始 UAV counter、全局 shader/texture 替换；其他操作明确拒绝 |
 | 性能 | 原生 D3D11 时间戳、disjoint 与 pipeline statistics | 尚未迁移原版多轮调度、Intel 硬件指标/GTPin |
 
 ## 验证证据
+
+- Sampler descriptor / setter 迁移的最终独立包通过 954 项合成 Python 对照，
+  覆盖六阶段 × 16 槽实际绑定、输出字节、命令前/后、禁用 draw、部分覆盖、空调用、
+  范围移动/缩短、ClearState、操作顺序和非法输入；全部 36 种 filter、五种寻址、
+  comparison、LOD 限制和偏移均包含硬件/WARP 对照。
+  证据为 `artifacts/sampler-final-comparison/validation.json`。
+  整帧追加验证共 6 项通过（`artifacts/sampler-real-comparison/validation.json`）：
+  GF2 的 576 项 LOD 编辑 / 98 项空绑定编辑、BF1 的 27,373 项 LOD 编辑 /
+  476 项空绑定编辑均与原版输出逐字节相同，撤销实验后恢复原黄金帧哈希。
+  第一轮整帧验证因脚本误传 `--event 0` 被 CLI 拒绝；修正为省略该参数后，
+  以上六项单独重跑通过，954 项合成结果未受影响。
+  原生前序记录、范围、历史、保存/加载和事务回滚的 Release / Debug CPU 检查
+  通过；Qt 紧凑参数/资源数组编辑器已经接入菜单和 API Log 右键。
+  936 份成功重放报告的运行模块审计未发现 Python、GPA 或 RenderDoc，
+  记录为 `artifacts/sampler-module-audit.json`。私有 coverage/quad 消费者仍待迁移。
+  Release 22 套测试最终均通过：首轮的 21 套非 UI 回归和原生 sampler GPU 测试
+  见 `artifacts/ctest-sampler-final-release.log`；新 setter UI 夹具在首个 draw 前
+  没有可识别输出目标，补入零顶点 draw 建立目标后，完整 UI 套件复跑通过
+  （`artifacts/ctest-sampler-final-ui.log`）。Debug 四套相关测试通过
+  （`artifacts/ctest-sampler-debug.log`）；五项 Qt 交互的结果见
+  `artifacts/sampler-debug-ui.txt` 及夹具修正后的 `sampler-debug-setter-ui.txt`。
+  最终包的两份黄金帧和关闭 draw 负对照共四项通过，记录为
+  `artifacts/validation-sampler-final/validation.json`。界面截图已检查，位于
+  `artifacts/sampler-ui-verified/`；三个发布 EXE 与最终 Release 构建哈希一致。
 
 - 混合/采样迁移初轮 639 项 Python 对照通过，逐字段比较实际管线描述、draw 计数
   与 RGBA8 纹理预览；覆盖普通/双源因子、颜色/alpha 运算、全部写掩码、八槽 MRT、

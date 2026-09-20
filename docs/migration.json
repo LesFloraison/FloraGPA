@@ -1930,9 +1930,22 @@
       "sha256": "514d40f73395a84c9227dcbee84062f61cfe2359024beea53208bb5cf9420c8b",
       "lines": 86,
       "description": "Per-event six-stage sampler descriptor overrides from recovered type 0x88.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": [
+        "src/application/SamplerEdits.cpp",
+        "src/application/Experiment.cpp",
+        "src/replay/Samplers.cpp"
+      ],
+      "validation": [
+        "tests/SamplerTests.cpp: checked wire records, displaced-range observations, event-scoped native descriptors, history, rollback, save/load and repeat replay",
+        "tests/UiTests.cpp: sampler parameter and range dialogs, invalid inputs, stale commit rejection, changed fields and Worker Apply/Undo/Redo",
+        "tools/validate_sampler_port.py: six-stage hardware/WARP native bindings and sampling, all 36 filters, address/LOD/comparison behavior, partial overwrite, ClearState, range displacement, mixed operation order and invalid input rejection",
+        "artifacts/sampler-final-comparison/validation.json: 954 packaged hardware/WARP comparisons passed",
+        "artifacts/sampler-real-comparison/validation.json: six GF2/BF1 full-frame LOD/null-binding/original comparisons passed; 936 native replay module reports audited without Python/GPA/RenderDoc",
+        "Release 22 suites passed after a synthetic UI fixture correction (ctest-sampler-final-release.log plus ctest-sampler-final-ui.log); Debug four related suites and five Qt interactions passed, with samplerSetterHistory retried after the same fixture correction",
+        "artifacts/validation-sampler-final/validation.json: GF2/BF1 golden frames and suppressed-draw negative controls passed; package out/FloraGPA-samplers matches the Release executables",
+        "Private coverage and quad consumers remain pending; full application parity is not claimed"
+      ]
     },
     {
       "module": "sampler_setters.py",
@@ -1941,12 +1954,20 @@
       "description": "Sampler ranges and original prefix observations for displaced bindings.",
       "status": "partial",
       "native": [
-        "src/replay/InputBindings.cpp"
+        "src/core/SamplerBindings.cpp",
+        "src/application/SetterEdits.cpp",
+        "src/replay/InputBindings.cpp",
+        "src/app/SamplerDialog.cpp"
       ],
       "validation": [
-        "tests/InputBindingTests.cpp: hardware and WARP native getters, before/after boundaries, six stages, high slots, null/empty arrays and malformed records",
-        "tools/validate_input_bindings.py: Python native getter parity and matching rejection of invalid captured setters",
-        "Captured calls execute natively; setter experiment persistence, displaced-range prefix history and editor UI remain pending"
+        "tests/SamplerTests.cpp: checked wire records, displaced-range observations, event-scoped native descriptors, history, rollback, save/load and repeat replay",
+        "tests/UiTests.cpp: sampler parameter and range dialogs, invalid inputs, stale commit rejection, changed fields and Worker Apply/Undo/Redo",
+        "tools/validate_sampler_port.py: six-stage hardware/WARP native bindings and sampling, all 36 filters, address/LOD/comparison behavior, partial overwrite, ClearState, range displacement, mixed operation order and invalid input rejection",
+        "artifacts/sampler-final-comparison/validation.json: 954 packaged hardware/WARP comparisons passed",
+        "artifacts/sampler-real-comparison/validation.json: six GF2/BF1 full-frame LOD/null-binding/original comparisons passed; 936 native replay module reports audited without Python/GPA/RenderDoc",
+        "Release 22 suites passed after a synthetic UI fixture correction (ctest-sampler-final-release.log plus ctest-sampler-final-ui.log); Debug four related suites and five Qt interactions passed, with samplerSetterHistory retried after the same fixture correction",
+        "artifacts/validation-sampler-final/validation.json: GF2/BF1 golden frames and suppressed-draw negative controls passed; package out/FloraGPA-samplers matches the Release executables",
+        "Private coverage and quad consumers remain pending; full application parity is not claimed"
       ]
     },
     {
@@ -1954,9 +1975,21 @@
       "sha256": "9f6226f019abd875cf2bbfaa363d6e90e516abc0a99b615fdcbcd94d76e30cb4",
       "lines": 52,
       "description": "Six-stage per-event sampler descriptor editor.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": [
+        "src/app/SamplerDialog.cpp",
+        "src/app/MainWindow.cpp"
+      ],
+      "validation": [
+        "tests/SamplerTests.cpp: checked wire records, displaced-range observations, event-scoped native descriptors, history, rollback, save/load and repeat replay",
+        "tests/UiTests.cpp: sampler parameter and range dialogs, invalid inputs, stale commit rejection, changed fields and Worker Apply/Undo/Redo",
+        "tools/validate_sampler_port.py: six-stage hardware/WARP native bindings and sampling, all 36 filters, address/LOD/comparison behavior, partial overwrite, ClearState, range displacement, mixed operation order and invalid input rejection",
+        "artifacts/sampler-final-comparison/validation.json: 954 packaged hardware/WARP comparisons passed",
+        "artifacts/sampler-real-comparison/validation.json: six GF2/BF1 full-frame LOD/null-binding/original comparisons passed; 936 native replay module reports audited without Python/GPA/RenderDoc",
+        "Release 22 suites passed after a synthetic UI fixture correction (ctest-sampler-final-release.log plus ctest-sampler-final-ui.log); Debug four related suites and five Qt interactions passed, with samplerSetterHistory retried after the same fixture correction",
+        "artifacts/validation-sampler-final/validation.json: GF2/BF1 golden frames and suppressed-draw negative controls passed; package out/FloraGPA-samplers matches the Release executables",
+        "Private coverage and quad consumers remain pending; full application parity is not claimed"
+      ]
     },
     {
       "module": "session.py",

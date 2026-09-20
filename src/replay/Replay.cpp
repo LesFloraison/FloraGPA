@@ -736,6 +736,8 @@ void Replay::command(const Entry &e) {
         auto event = frame_.event(e.id);
         immediate(event.context);
         auto state = frame_.state(event.state);
+        samplerBindings_.observe(state);
+        samplerBindings_.apply(state);
         withEventEdits(event, state, [&] {
             bind(state, t == 0x35 || t == 0x36);
             if ((t == 0x35 || t == 0x36) &&
@@ -755,6 +757,7 @@ void Replay::command(const Entry &e) {
                                                  edit->second.reference.value_or(state.stencilRef));
             }
             applyBlendEdit(e.id, state);
+            applySamplerEdits(e.id);
             clearBindingGaps();
             auto observe = [&](bool after) {
                 if (boundaryObserver_)
@@ -953,6 +956,7 @@ void Replay::command(const Entry &e) {
         boundPredicate_ = 0;
         predicateValue_ = 0;
         predicateOverride_.reset();
+        samplerBindings_.clear();
         resetStreamOutputBindings();
         clearBindingGaps();
         for (auto &ranges : ranges_)
@@ -988,8 +992,10 @@ void Replay::run(const std::function<void(Id, size_t, size_t)> &progress,
     context_->ClearState();
     resetPredicates();
     predicateOverride_.reset();
+    samplerBindings_ = SamplerBindings{};
     clearBindingGaps();
     objects_.clear();
+    editedSamplers_.clear();
     rasterizerExtensions_.clear();
     logicBlendStates_.clear();
     usedSrvs_.clear();
@@ -1006,7 +1012,8 @@ void Replay::run(const std::function<void(Id, size_t, size_t)> &progress,
                             !options_.buffers.empty() || !options_.commandPayloads.empty() ||
                             !options_.updateSources.empty() || !options_.uavCounters.empty() ||
                             !options_.predicateSetters.empty() || !options_.depthStencilEdits.empty() ||
-                            !options_.rasterizerEdits.empty() || !options_.blendEdits.empty();
+                            !options_.rasterizerEdits.empty() || !options_.blendEdits.empty() ||
+                            !options_.samplerSetters.empty() || !options_.samplerEdits.empty();
     soCountEnabled_ = false;
     for (const auto &[id, entry] : frame_.entries())
         if ((entry.category == 7 && entry.type == 0x38) ||

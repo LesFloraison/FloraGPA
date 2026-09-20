@@ -3,6 +3,7 @@
 #include "CommandStateView.h"
 #include "PredicateView.h"
 #include "RasterizerDialog.h"
+#include "SamplerDialog.h"
 #include "application/ClassInspector.h"
 #include "application/CommandEdits.h"
 #include "application/Constants.h"
@@ -298,6 +299,8 @@ void MainWindow::buildUi() {
     rasterizerAction_->setObjectName("editRasterizer");
     blendAction_ = edit->addAction("Edit Blend / Samples…", this, &MainWindow::editBlend);
     blendAction_->setObjectName("editBlend");
+    samplerAction_ = edit->addAction("Edit Sampler…", this, &MainWindow::editSampler);
+    samplerAction_->setObjectName("editSampler");
     updateSourceAction_ = edit->addAction("Replace Update Source…", this, &MainWindow::replaceUpdateSource);
     updateSourceAction_->setObjectName("replaceUpdateSource");
     updateExperimentActions();
@@ -392,7 +395,7 @@ void MainWindow::buildUi() {
     apiView_ = table(commandFilter_);
     apiView_->setContextMenuPolicy(Qt::ActionsContextMenu);
     apiView_->addActions({enableAction_, clearAction_, setterAction_, depthStencilAction_, rasterizerAction_,
-                          blendAction_, updateSourceAction_});
+                          blendAction_, samplerAction_, updateSourceAction_});
     apiView_->setObjectName("apiLog");
     auto exportApi = new QAction("Export API Log…", this);
     exportApi->setObjectName("exportApiLog");
@@ -1830,6 +1833,8 @@ void MainWindow::updateExperimentActions() {
         rasterizerAction_->setEnabled(isDraw(uint16_t(type)) && type != 0x35 && type != 0x36);
     if (blendAction_)
         blendAction_->setEnabled(isDraw(uint16_t(type)) && type != 0x35 && type != 0x36);
+    if (samplerAction_)
+        samplerAction_->setEnabled(isDraw(uint16_t(type)));
     if (updateSourceAction_)
         updateSourceAction_->setEnabled(type == 0x247);
     const bool bufferEditable = isDraw(uint16_t(type)) && selectedResource_ && frame_ &&
@@ -2220,6 +2225,31 @@ void MainWindow::editBuffer(bool importFile) {
         showError(QString::fromUtf8(e.what()));
     }
 }
+void MainWindow::editSampler() {
+    if (!frame_ || !experiment_ || !selectedEvent_)
+        return;
+    try {
+        const auto event = selectedEvent_;
+        const auto revision = revision_;
+        auto check = [&] {
+            if (revision != revision_ || event != selectedEvent_)
+                throw std::runtime_error("Selection or experiment changed; reopen this editor");
+        };
+        if (editSamplerDialog(
+                this,
+                [&](const std::string &stage, unsigned slot) {
+                    check();
+                    return experiment_->sampler(*frame_, event, stage, slot);
+                },
+                [&](const std::string &stage, unsigned slot, const nlohmann::json &patch) {
+                    check();
+                    experiment_->setSampler(*frame_, event, stage, slot, patch);
+                }))
+            experimentChanged();
+    } catch (const std::exception &e) {
+        showError(QString::fromUtf8(e.what()));
+    }
+}
 void MainWindow::editBlend() {
     if (!frame_ || !experiment_ || !selectedEvent_)
         return;
@@ -2379,6 +2409,17 @@ void MainWindow::editSetter() {
     try {
         const auto event = selectedEvent_;
         const auto values = experiment_->setter(*frame_, event);
+        if (samplerSetterStage(frame_->entry(event).type)) {
+            const auto revision = revision_;
+            auto frame = frame_;
+            if (editSamplerSetterDialog(this, *frame, event, values, [&](const nlohmann::json &next) {
+                    if (revision != revision_ || event != selectedEvent_)
+                        throw std::runtime_error("Selection or experiment changed; reopen this editor");
+                    experiment_->setSetter(*frame_, event, next);
+                }))
+                experimentChanged();
+            return;
+        }
         QDialog dialog(this);
         dialog.setObjectName("setterDialog");
         dialog.setWindowTitle(QString("SetPredication — Event %1").arg(event));

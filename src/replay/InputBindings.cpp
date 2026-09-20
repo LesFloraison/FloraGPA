@@ -87,7 +87,7 @@ bool Replay::inputBindings(const Entry &e, Bytes payload) {
         context_->IASetIndexBuffer(get<ID3D11Buffer>(id), DXGI_FORMAT(format), offset);
         return true;
     }
-    const auto start = r.read<UINT>(), count = r.read<UINT>();
+    auto start = r.read<UINT>(), count = r.read<UINT>();
     const UINT limit = slot == 18 ? 32 : isSrv ? 128 : 16;
     if (start >= limit || count > limit - start)
         throw std::runtime_error("Input binding slot range exceeds API limit");
@@ -108,6 +108,17 @@ bool Replay::inputBindings(const Entry &e, Bytes payload) {
     }
     r.end();
     if (isSampler) {
+        const auto stage = unsigned(sampler - std::begin(samplerSlots));
+        const SamplerBinding original{start, ids};
+        const auto edit = options_.samplerSetters.find(e.id);
+        auto next = samplerBindings_;
+        next.transition(stage, original, edit == options_.samplerSetters.end() ? nullptr : &edit->second);
+        next.observeCommand(stage, original);
+        if (edit != options_.samplerSetters.end()) {
+            start = edit->second.start;
+            ids = edit->second.resources;
+            count = UINT(ids.size());
+        }
         for (auto id : ids) {
             resourceType(frame_, id, 0x88);
             if (id && frame_.payload(id).size() != 68)
@@ -123,6 +134,7 @@ bool Replay::inputBindings(const Entry &e, Bytes payload) {
             &ID3D11DeviceContext::DSSetSamplers, &ID3D11DeviceContext::GSSetSamplers,
             &ID3D11DeviceContext::PSSetSamplers, &ID3D11DeviceContext::CSSetSamplers};
         (context_.Get()->*setters[sampler - std::begin(samplerSlots)])(start, count, samplers.data());
+        samplerBindings_ = std::move(next);
         return true;
     }
     const auto stage = size_t(srv - std::begin(srvSlots));

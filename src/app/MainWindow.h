@@ -60,6 +60,7 @@ class MainWindow final : public QMainWindow {
     void editDepthStencil();
     void editRasterizer();
     void editBlend();
+    void editSampler();
     void replaceUpdateSource();
     void compileShader();
     void inspectGeometry();
@@ -86,6 +87,7 @@ class MainWindow final : public QMainWindow {
     QAction *depthStencilAction_ = nullptr;
     QAction *rasterizerAction_ = nullptr;
     QAction *blendAction_ = nullptr;
+    QAction *samplerAction_ = nullptr;
     QAction *bufferEditAction_ = nullptr, *bufferImportAction_ = nullptr;
     QAction *constantEditAction_ = nullptr;
     QAction *counterEditAction_ = nullptr;

@@ -3,6 +3,7 @@
 #include "CommandEdits.h"
 #include "DepthStencilEdits.h"
 #include "RasterizerEdits.h"
+#include "SamplerEdits.h"
 #include "SetterEdits.h"
 #include "ShaderInspector.h"
 #include "core/BufferBindings.h"
@@ -79,10 +80,13 @@ void Experiment::apply(const Frame &frame, ReplayOptions &options) const {
     options.initialUavCounters.clear();
     options.uavCounters.clear();
     options.predicateSetters.clear();
+    options.samplerSetters.clear();
+    options.samplerEdits.clear();
     options.depthStencilEdits.clear();
     options.rasterizerEdits.clear();
     options.blendEdits.clear();
     std::map<Id, Json> pipeline;
+    std::map<Id, std::map<std::pair<unsigned, unsigned>, Json>> samplers;
     for (size_t i = 0; i < revision(); ++i) {
         auto &operations = project_.at("history").at(i).at("operations");
         if (!operations.is_array())
@@ -116,9 +120,21 @@ void Experiment::apply(const Frame &frame, ReplayOptions &options) const {
                 if (pipeline[event].contains("blend_state") || pipeline[event].contains("blend_factor") ||
                     pipeline[event].contains("sample_mask"))
                     options.blendEdits[event] = blendEdit(frame, event, pipeline[event]);
+            } else if (kind == "sampler") {
+                const auto event = identifier(op.at("event"));
+                const auto stage = samplerStage(op.at("stage").get<std::string>());
+                const auto slot = samplerSlot(op.at("slot"));
+                const auto values = normalizeSampler(op.at("values"));
+                auto &patch = samplers[event][{stage, slot}];
+                if (patch.is_null())
+                    patch = Json::object();
+                patch.update(values);
             } else if (kind == "setter") {
                 const auto id = identifier(op.at("event"));
-                options.predicateSetters[id] = validatePredicateSetter(frame, id, op.at("values"));
+                if (samplerSetterStage(frame.entry(id).type))
+                    options.samplerSetters[id] = validateSamplerSetter(frame, id, op.at("values"));
+                else
+                    options.predicateSetters[id] = validatePredicateSetter(frame, id, op.at("values"));
             } else if (kind == "clear") {
                 auto id = identifier(op.at("event"));
                 validateWritableCommand(frame, id);
@@ -181,6 +197,15 @@ void Experiment::apply(const Frame &frame, ReplayOptions &options) const {
                 options.textures[id] = std::move(bytes);
             } else
                 throw std::runtime_error("Experiment operation migration pending: " + kind);
+        }
+    }
+    // Descriptor inheritance uses final setter edits, regardless of history order.
+    for (const auto &[event, bindings] : samplers) {
+        const auto state = samplerState(frame, event, options.samplerSetters);
+        for (const auto &[target, patch] : bindings) {
+            auto values = samplerDescriptor(frame, state.stages[target.first].samplers[target.second]);
+            values.update(patch);
+            options.samplerEdits[event][target] = nativeSampler(values);
         }
     }
 }
@@ -272,9 +297,54 @@ Json Experiment::setter(const Frame &frame, Id event) const {
                 result = op.at("values");
     return result;
 }
+Json Experiment::sampler(const Frame &frame, Id event, const std::string &name, unsigned slot) const {
+    const auto stage = samplerStage(name);
+    samplerSlot(slot);
+    ReplayOptions options;
+    apply(frame, options);
+    const auto state = samplerState(frame, event, options.samplerSetters);
+    auto result = samplerDescriptor(frame, state.stages[stage].samplers[slot]);
+    for (size_t i = 0; i < revision(); ++i)
+        for (const auto &op : project_["history"][i]["operations"])
+            if (op.at("kind") == "sampler" && identifier(op.at("event")) == event && op.at("stage") == name &&
+                samplerSlot(op.at("slot")) == slot)
+                result.update(normalizeSampler(op.at("values")));
+    return normalizeSampler(result);
+}
+void Experiment::setSampler(const Frame &frame, Id event, const std::string &stage, unsigned slot,
+                            const Json &values) {
+    samplerStage(stage);
+    samplerSlot(slot);
+    const auto normalized = normalizeSampler(values);
+    auto previous = project_;
+    auto &history = project_["history"];
+    history.erase(history.begin() + ptrdiff_t(revision()), history.end());
+    history.push_back(
+        {{"label", "Sampler " + stage + "[" + std::to_string(slot) + "] event " + std::to_string(event)},
+         {"operations", Json::array({{{"kind", "sampler"},
+                                      {"event", event},
+                                      {"stage", stage},
+                                      {"slot", slot},
+                                      {"values", normalized}}})}});
+    project_["cursor"] = history.size();
+    try {
+        ReplayOptions checked;
+        apply(frame, checked);
+    } catch (...) {
+        project_ = std::move(previous);
+        throw;
+    }
+}
 void Experiment::setSetter(const Frame &frame, Id event, const Json &values) {
-    auto binding = validatePredicateSetter(frame, event, values);
-    Json normalized{{"predicate", binding.resource}, {"predicate_value", binding.value}};
+    Json normalized;
+    if (samplerSetterStage(frame.entry(event).type)) {
+        auto binding = validateSamplerSetter(frame, event, values);
+        normalized = {{"start_slot", binding.start}, {"samplers", binding.resources}};
+    } else {
+        auto binding = validatePredicateSetter(frame, event, values);
+        normalized = {{"predicate", binding.resource}, {"predicate_value", binding.value}};
+    }
+    auto previous = project_;
     auto history = project_["history"];
     history.erase(history.begin() + ptrdiff_t(revision()), history.end());
     history.push_back(
@@ -282,6 +352,13 @@ void Experiment::setSetter(const Frame &frame, Id event, const Json &values) {
          {"operations", Json::array({{{"kind", "setter"}, {"event", event}, {"values", normalized}}})}});
     project_["history"] = std::move(history);
     project_["cursor"] = project_["history"].size();
+    try {
+        ReplayOptions checked;
+        apply(frame, checked);
+    } catch (...) {
+        project_ = std::move(previous);
+        throw;
+    }
 }
 Json Experiment::clear(const Frame &frame, Id event) const {
     validateWritableCommand(frame, event);
