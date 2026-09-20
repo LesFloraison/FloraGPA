@@ -14,8 +14,9 @@ GF2 与 BF1 DX11 捕获。**尚未完成原 Python 版本的全部功能迁移�
 | 事件 | draw/dispatch 选择、快照管线、前后边界重放、事件启停 | 部分命令执行及 setter 实验仍待迁移 |
 | 捕获命令状态 | 六阶段 setter、CB1 范围、IA/RS/OM/SO/predicate 参数、扩展 UAV 槽元数据；命令前/后、逐字段来源、资源重叠失效与快照校准；Pipeline 页异步读取、筛选、跳转、JSON 导出 | 原始捕获状态，不应用实验；只读 DSV / 模糊 3D 重叠保持未知；SO 偏移是 setter 参数，隐藏 counter 和实时写入位置不由此推断 |
 | 命令间输入绑定 | 实际执行 IA layout / VB / IB、六阶段 SRV / sampler、CB / CB1；验证槽位、数组、资源类型、IA bind flags、stride 和 CB1 对齐 / 驱动支持；缺失绑定按阶段 / 槽位追踪 | 缺失资源未被后续 setter / 完整快照 / ClearState 恢复时，选定边界明确失败；setter 编辑仍待迁移 |
-| 重放管线状态 | Pipeline > Replay State 通过 Worker 读取实际六阶段绑定、CB1 范围、IA/RS/OM/SO/predicate、视图及状态描述；命令前/后、实验输入克隆、禁用状态、筛选、跳转和 JSON 导出 | 仅覆盖后端已支持的命令和实验；SO 实时写入位置保持未知；SO/predication 等执行路径和完整管线编辑仍待迁移 |
-| 动态 shader 类链接 | 六阶段 draw/dispatch 快照的 linkage、具名/显式创建实例、有序接口绑定、CB/texture/sampler 偏移；动态/静态 shader 替换；Qt 资源属性、接口槽数和 CLI 元数据导出 | shader setter 实验、带 SO 的 linked GS 和专用覆盖分析仍待迁移；本机已复现的空函数表 PS 驱动崩溃改为明确提示使用 WARP |
+| 重放管线状态 | Pipeline > Replay State 通过 Worker 读取实际六阶段绑定、CB1 范围、IA/RS/OM/SO/predicate、视图及状态描述；命令前/后、实验输入克隆、禁用状态、筛选、跳转和 JSON 导出 | 仅覆盖后端已支持的命令和实验；SO 实时写入位置保持未知；predication、SO retained 实验及完整管线编辑仍待迁移 |
+| 动态 shader 类链接 | 六阶段 draw/dispatch 快照的 linkage、具名/显式创建实例、有序接口绑定、CB/texture/sampler 偏移；动态/静态 shader 替换；带 SO 的 linked GS；Qt 资源属性、接口槽数和 CLI 元数据导出 | shader setter 实验和专用覆盖分析仍待迁移；本机已复现的空函数表 PS 驱动崩溃改为明确提示使用 WARP |
+| Stream output / DrawAuto | SO 声明、五版 context 的目标 setter、普通 GS / VS / DS / 仅输出签名的 passthrough；重复/dirty 快照、显式重置、追加、ClearState；逐流 GPU 查询、按实际写入字节及 IA 范围重建 DrawAuto；Qt SO 属性/目标链接和几何导出 | 输出/setter 实验的 retained 目标、predication 和私有诊断重放仍待迁移；无帧内历史时原始重放保留捕获计数并标注未验证，有编辑时拒绝猜测 |
 | API 检查 | 捕获字段、偏移/原始位、可选数组、引用跳转、资源/多词筛选、JSON/CSV 导出；getter、annotation、query 与 command-list 调用元数据 | 解码不代表执行；annotation 层级和 view typed-format 预览衔接尚未闭合 |
 | Context / command-list | 五种 context 接口身份、immediate/deferred 区分；缺失 context 的严格 Map READ 证据恢复；command-list 资源、owner 和 Execute/Finish 清单；Qt 字段树、证据导航、JSON 导出 | 推断不补造版本/指针/标志；保留指针与 ID 候选冲突；与 Python 相同，仅接受 immediate-context 的 Finish 空操作，未恢复列表执行 |
 | 捕获查询值 | 按同 ID、命令顺序使用 GetDesc/GetDataSize/CreateQuery/predicate 元数据；BOOL 完整值与 UINT64 低位、缺失字节、HRESULT/冲突状态 | 表示捕获时保存的内存字，不是新执行的 GPU query；原始高位缺失时保持不完整 |
@@ -23,13 +24,23 @@ GF2 与 BF1 DX11 捕获。**尚未完成原 Python 版本的全部功能迁移�
 | 图像 | 实际 GPU 输出、缩放/平移/通道、像素值、PNG 导出 | 全帧输出目前限制单采样 RGBA/BGRA8 |
 | 纹理 | GPU 格式转换、BC、浮点/整数、1D/2D/3D、mip/layer/slice、事件边界预览 | MSAA、平面格式及部分查看选项未迁移 |
 | Shader | DXBC 反汇编、反射、SPDB/SDBG 内嵌源码、HLSL 编译替换 | 不含 HLSL 恢复、单步调试及全部反射树 |
-| Buffer | 初始值、事件前后读回、范围、Hex/ASCII/32 位解释、导出；事件字节编辑/二进制补丁导入、绑定识别、撤销/重做；递归 CB 字段、CB1 范围和类型化编辑；按 UAV view 检查/编辑 Append/Consume/Counter | counter 支持 CS/OM 快照及已恢复 clear/copy/setter 引用；SO、完整 setter/getter 与扩展 UAV 重放仍待迁移 |
-| 几何 | IA 输入解码、索引与实例、三种顶点表、旋转线框、CSV/OBJ 导出 | DrawAuto、后变换与覆盖未迁移；当前表格上限为 100 万引用 / 1600 万字段 |
+| Buffer | 初始值、事件前后读回、范围、Hex/ASCII/32 位解释、导出；事件字节编辑/二进制补丁导入、绑定识别、撤销/重做；递归 CB 字段、CB1 范围和类型化编辑；按 UAV view 检查/编辑 Append/Consume/Counter | counter 支持 CS/OM 快照及已恢复 clear/copy/setter 引用；SO retained 实验、完整 setter/getter 与扩展 UAV 重放仍待迁移 |
+| 几何 | IA 输入解码、索引与实例、DrawAuto 实际参数及来源、三种顶点表、旋转线框、CSV/OBJ 导出 | 后变换与覆盖未迁移；当前表格上限为 100 万引用 / 1600 万字段 |
 | 资源名称 | GenPrivateData 原始名称、非法 UTF-8 转义、列表筛选和属性显示 | 名称记录不表示逐事件重命名时间线 |
 | 实验项目 | 原格式 JSON、捕获 SHA-256 绑定、资产校验、uint64 ID、原子保存、撤销/重做 | 接受事件启停、buffer、clear、update_source、事件/初始 UAV counter、全局 shader/texture 替换；其他操作明确拒绝 |
 | 性能 | 原生 D3D11 时间戳、disjoint 与 pipeline statistics | 尚未迁移原版多轮调度、Intel 硬件指标/GTPin |
 
 ## 验证证据
+
+- SO / DrawAuto 原生回归覆盖硬件和 WARP、重复重放、dirty 快照重置、输出签名、
+  点/线/三角形计数、输入克隆和禁用生产者、未知历史的实验拒绝，以及声明/数组的
+  截断和非法字段。逐流 GPU 查询提供实际写入与所需容量；GPU 结束时间戳在 SO
+  CPU 读回等待之前提交。Qt Worker 测试验证 SO 声明属性、反射条目、DrawAuto 的
+  六顶点 IA 表和计数来源，截图位于 `artifacts/so-ui/`。
+  最终发布包仅系统 PATH 的 690 项对照全部通过，覆盖五种 context setter、四流、
+  GS/VS/DS/签名 passthrough、linked GS、溢出/零输出、shader 与 buffer 实验，
+  以及五份原始 GPA SO 捕获的图像/缓冲区基准、逐生产者禁用、帧尾遍历和时间戳。
+  原始线输出捕获保存计数 6，硬件/WARP 均重建为实际 12 个顶点；没有直接相信捕获值。
 
 - 动态类链接的 Python 对照覆盖六个 shader 阶段、具名和显式创建实例、实例数组顺序、
   CB/texture/sampler 偏移、动态/静态替换以及命令前后边界。发布包 207 组对照全部通过：
@@ -108,7 +119,7 @@ GF2 与 BF1 DX11 捕获。**尚未完成原 Python 版本的全部功能迁移�
 - UAV counter 的 32 组 Python 对照通过：29 组缓冲区逐字节一致；BF1 的 3 组并行 Append
   输出按完整元素多重集合比较，未写入区域逐字节一致，计数和元数据全部一致。
   Qt 测试覆盖溢出拒绝、最大 uint32 编辑、实际 Worker 读回、撤销/重做与过期结果失效。
-- 当前 Release / Debug 各 16 项 CTest 全部通过，包含完整 Qt UI 与新增类链接测试。
+- 当前 Release / Debug 各 17 项 CTest 全部通过，包含完整 Qt UI、类链接与新增 SO 测试。
   不是“所有原版测试已通过”。
 - API 检查与 Python 对照：GF2 全部 920 条、BF1 全部 18,024 条记录的字段、偏移、原始位、
   引用、状态、query 元数据及解析后的 CSV 一致；另验证 BF1 资源/多词组合筛选。
@@ -194,11 +205,22 @@ Debug 首轮暴露旧 UI 测试按类型取错页面的问题，改为按对象�
 类资源的截断/非法字段和快照测试详见 `build/vs2022/class-linkage-Release.txt` 与
 `class-linkage-Debug.txt`。
 
+SO / DrawAuto 的发布包为 `out/FloraGPA-stream-output-captures/`。最终对照为
+`so-captured-package-comparison/validation.json`，两份黄金帧和关闭 draw 的负对照为
+`validation-so-captured-package/validation.json`。Release / Debug 的完整回归日志为
+`ctest-so-release-timing.log` 与 `ctest-so-debug.log`；各自的 SO 测试包含 18 个通过项，
+详见 `build/vs2022/stream-output-Release.txt` 和 `stream-output-Debug.txt`。
+帧尾检查记录的补齐另经 Release / Debug 各四项相关回归验证，日志为
+`ctest-so-inspection-release.log` 和 `ctest-so-inspection-debug.log`。
+新增校验覆盖 15 种 getter/lifetime 记录，保留捕获返回值且不修改 GPU 绑定。
+发布版 GUI/Worker 的完整原始线输出重放、时间戳采集及离屏渲染为
+`so-package-smoke-fixed/validation.json`，截图为 `so-package-smoke-fixed/package-gui.png`。
+
 ## 尚未闭合的迁移范围
 
-1. 完整 setter/command/context 的重放与实验语义、predication、stream-output/DrawAuto、
-   class linkage 的 setter/带 SO shader 衔接、扩展 UAV、MSAA 与 planar 等特殊 replay 路径。
-2. 其余资源/状态/绑定/命令编辑，完整 counter 命令引用、DrawAuto 与后变换几何、覆盖率、
+1. 完整 setter/command/context 的重放与实验语义、predication、SO 的 retained 输出与私有诊断、
+   class linkage 的 setter 衔接、扩展 UAV、MSAA 与 planar 等特殊 replay 路径。
+2. 其余资源/状态/绑定/命令编辑，完整 counter 命令引用、后变换几何、覆盖率、
    quad 与像素分析。
 3. HLSL 恢复、source/instruction 导航、变量/表达式、trace/stack 与 shader 调试。
 4. RenderDoc 原生 C++ 后端、Intel Metrics Discovery、GTPin 与完整指标调度。

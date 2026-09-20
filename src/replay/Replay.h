@@ -21,6 +21,7 @@ struct ReplayOptions {
     bool suppressDraws = false;
     Id until = 0;
     bool before = false;
+    bool editedEvents = false;
     std::set<Id> disabled;
     std::map<Id, std::vector<uint8_t>> shaders, textures;
     std::map<Id, std::vector<uint8_t>> commandPayloads, updateSources;
@@ -32,6 +33,17 @@ struct Image {
     uint32_t width{}, height{}, format{};
     std::vector<uint8_t> rgba;
     Id resource{};
+};
+struct DrawAutoParameters {
+    uint32_t vertexCount{}, stream{}, capturedCount{}, iaOffset{}, iaStride{};
+    Id resource{}, shader{}, declaration{};
+    std::optional<uint64_t> filledBytes;
+    bool verified = false, noRasterization = false;
+};
+struct StreamOutputCount {
+    Id event{};
+    uint32_t stream{}, factor{};
+    uint64_t written{}, needed{};
 };
 using ReplayBoundaryObserver =
     std::function<void(Id, bool, ID3D11DeviceContext *, const std::map<Id, Com<IUnknown>> &)>;
@@ -50,6 +62,28 @@ class Replay {
     std::map<Id, Com<IUnknown>> objects_;
     std::map<Id, std::array<bool, 128>> usedSrvs_;
     std::map<Id, uint32_t> interfaceSlots_;
+    std::set<Id> passthroughShaders_;
+    std::array<Com<ID3D11Buffer>, 4> soSinks_;
+    std::optional<std::vector<std::pair<Id, uint32_t>>> soSignature_;
+    std::map<uint32_t, ID3D11Buffer *> soPendingAppend_;
+    std::map<ID3D11Buffer *, uint32_t> soVertexCounts_;
+    std::map<ID3D11Buffer *, uint64_t> soByteCursors_;
+    std::map<uint32_t, Com<ID3D11Query>> soQueries_;
+    std::map<Id, DrawAutoParameters> soAutoResults_;
+    bool soCountEnabled_ = false, soCountRequiresKnown_ = false;
+    struct ActiveStream {
+        uint32_t stream{}, factor{};
+        std::map<ID3D11Buffer *, uint32_t> strides;
+        Com<ID3D11Query> query;
+    };
+    void unbindStreamOutput();
+    void bindStreamOutput(const State &state);
+    void applyStreamOutput(Bytes payload);
+    void markStreamOutputOffsets(std::span<ID3D11Buffer *const> objects, std::span<const uint32_t> offsets);
+    void resetStreamOutputBindings();
+    std::vector<ActiveStream> beginStreamOutput(const State &state);
+    void endStreamOutput(Id event, const std::vector<ActiveStream> &active);
+    Com<ID3D11GeometryShader> createStreamOutputShader(Bytes bytes, Id declaration, ID3D11ClassLinkage *linkage);
     std::map<std::pair<uint32_t, uint32_t>, Com<ID3D11ComputeShader>> counterWrapShaders_;
     struct Range {
         Id buffer;
@@ -88,6 +122,9 @@ class Replay {
     std::vector<Timing> timings;
     D3D11_QUERY_DATA_PIPELINE_STATISTICS statistics{};
     std::map<std::string, uint64_t> counts;
+    std::vector<StreamOutputCount> streamOutputHistory;
+    DrawAutoParameters drawAutoParameters(Id event);
+    const auto &drawAutoResults() const { return soAutoResults_; }
     explicit Replay(const Frame &frame, ReplayOptions options = {});
     ~Replay();
     void run(const std::function<void(Id, size_t, size_t)> &progress = {},

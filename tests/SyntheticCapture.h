@@ -66,6 +66,7 @@ struct Capture {
 };
 inline std::vector<uint8_t> snapshot(const State &s) {
     std::vector<uint8_t> out(128);
+    std::memcpy(out.data(), s.mask.data(), 128);
     append(out, s.ib);
     append(out, s.ibFormat);
     append(out, s.ibOffset);

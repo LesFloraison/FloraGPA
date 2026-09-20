@@ -65,6 +65,7 @@ void Experiment::save(const QString &path) const {
         throw std::runtime_error("Cannot save experiment atomically");
 }
 void Experiment::apply(const Frame &frame, ReplayOptions &options) const {
+    options.editedEvents = false;
     options.disabled.clear();
     options.shaders.clear();
     options.textures.clear();
@@ -78,6 +79,8 @@ void Experiment::apply(const Frame &frame, ReplayOptions &options) const {
         if (!operations.is_array())
             throw std::runtime_error("Invalid experiment operation list");
         for (auto &op : operations) {
+            // Re-enabling a draw is still an explicit experiment with edited SO history.
+            options.editedEvents |= op.contains("event");
             auto kind = op.at("kind").get<std::string>();
             if (kind == "enabled") {
                 auto id = identifier(op.at("event"));
@@ -287,13 +290,7 @@ bool Experiment::redo() {
 
 void Experiment::setShader(const Frame &frame, Id id, Bytes bytecode, const std::string &source,
                            const std::string &entry) {
-    auto resource = frame.resource(id);
-    static const std::map<int, std::string> stages{{0x90, "vs"}, {0x91, "gs"}, {0x92, "ps"},
-                                                   {0x93, "cs"}, {0x94, "ds"}, {0x95, "hs"}};
-    auto metadata = inspectShader(bytecode);
-    auto found = stages.find(resource.type);
-    if (found == stages.end() || metadata["stage"] != found->second)
-        throw std::runtime_error("Replacement shader stage mismatch");
+    inspectResourceShader(frame, id, bytecode);
     Json operation{
         {"kind", "shader"},
         {"resource", id},

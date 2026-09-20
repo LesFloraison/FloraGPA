@@ -79,6 +79,7 @@ struct Stage {
     uint32_t classCount;
 };
 struct State {
+    std::array<uint32_t, 32> mask{};
     Id ib{}, layout{};
     uint32_t ibFormat{}, ibOffset{}, topology{};
     std::array<Id, 32> vb{};

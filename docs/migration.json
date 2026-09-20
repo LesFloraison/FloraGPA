@@ -113,7 +113,8 @@
       "native": [
         "src/replay/TexturePreview.cpp",
         "src/cli/main.cpp",
-        "src/application/ClassInspector.cpp"
+        "src/application/ClassInspector.cpp",
+        "src/application/StreamOutputInspector.cpp"
       ],
       "validation": [
         "13 native/Python GPU texture comparisons; mip/layer/slice coverage",
@@ -188,12 +189,15 @@
         "src/application/ApiCommands.cpp",
         "src/application/QueryHistory.cpp",
         "src/app/Models.cpp",
-        "src/app/MainWindow.cpp"
+        "src/app/MainWindow.cpp",
+        "src/core/InspectionRecords.cpp",
+        "src/replay/Replay.cpp"
       ],
       "validation": [
         "tests/ApiCommandTests.cpp: wire bounds, references, metadata order, query states and filtered export",
         "tools/validate_api_commands.py: 920 GF2, 18024 BF1 and 4006 synthetic records plus resource/text filtering; JSON and parsed CSV, allowing different invalid diagnostic wording",
-        "tests/UiTests.cpp: field offsets, reference navigation, resource filtering and texture-preview priority"
+        "tests/UiTests.cpp: field offsets, reference navigation, resource filtering and texture-preview priority",
+        "Native traversal validates all 15 recovered inspection/lifetime wire types without applying captured returns; includes trailing Factory3 references and strict truncation/flag/count tests"
       ]
     },
     {
@@ -218,8 +222,9 @@
         "tests/UiTests.cpp: isolated Worker renders dynamic shader, static HLSL replacement changes output, undo restores interfaces and output; compact class/shader Inspector properties",
         "out/FloraGPA-classes: isolated system PATH package passes 207 reference comparisons, GF2/BF1 golden frames and draw-suppression negatives, GUI/Worker startup and empty-table WARP/explicit hardware rejection",
         "Release and Debug each pass all 16 CTest targets, including class resource boundary tests and full Qt UI regression; artifacts/ctest-class-release.log and artifacts/ctest-class-debug.log",
-        "Class resource creation and snapshot execution migrated; linked stream-output shaders and diagnostic/coverage integration remain pending, as do shader setter experiments",
-        "NVIDIA 10de:249d empty-function-table dynamic PS guard preserves original bytecode and offers WARP; extended from the reference texture case after the non-texture fixture also crashed in both native and Python hardware replay"
+        "Class resource creation and snapshot execution migrated; diagnostic/coverage integration remains pending, as do shader setter experiments",
+        "NVIDIA 10de:249d empty-function-table dynamic PS guard preserves original bytecode and offers WARP; extended from the reference texture case after the non-texture fixture also crashed in both native and Python hardware replay",
+        "Linked GS stream output passes hardware/WARP buffer, image, count history and downstream DrawAuto geometry comparisons"
       ]
     },
     {
@@ -561,9 +566,15 @@
       "sha256": "a83d9804df9e76121782778c6e55dd83da193bdda9f0432e8ac42a6022b5de29",
       "lines": 126,
       "description": "Token-preserving DXBC instrumentation for pixel coverage.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": [
+        "src/core/Dxbc.cpp"
+      ],
+      "validation": [
+        "Checked DXBC chunks and retail checksum; output-signature-only SO creation adds an empty ISGN while retaining original output signature bytes",
+        "tools/validate_stream_output_port.py: 690 final-package checks with system-only PATH, hardware/WARP, synthetic and five original GPA SO captures; original line-stream captured count 6 is recovered as 12 actual vertices",
+        "Coverage instrumentation and the remaining token editing functions are pending"
+      ]
     },
     {
       "module": "dxbc_system_id.py",
@@ -610,7 +621,8 @@
       "native": [
         "src/replay/Replay.cpp",
         "src/replay/InputBindings.cpp",
-        "src/replay/ClassLinkage.cpp"
+        "src/replay/ClassLinkage.cpp",
+        "src/replay/StreamOutput.cpp"
       ],
       "validation": [
         "docs/NATIVE_BASELINE.md",
@@ -682,7 +694,8 @@
       "status": "partial",
       "native": [
         "src/core/Frame.cpp",
-        "src/core/ClassLinkage.cpp"
+        "src/core/ClassLinkage.cpp",
+        "src/core/StreamOutput.cpp"
       ],
       "validation": [
         "docs/NATIVE_BASELINE.md",
@@ -721,10 +734,12 @@
         "src/application/Geometry.cpp",
         "src/app/Views.cpp",
         "src/app/Models.cpp",
-        "src/app/MainWindow.cpp"
+        "src/app/MainWindow.cpp",
+        "src/application/StreamOutputInspector.cpp"
       ],
       "validation": [
-        "Six Python/native IA cases including nine instances; CSV/OBJ and Qt table checks; DrawAuto pending; table size bounded"
+        "Six Python/native IA cases including nine instances; CSV/OBJ and Qt table checks; DrawAuto SO counts and provenance migrated; table size bounded",
+        "DrawAuto uses captured/unverified or native SO byte-count provenance; effective arguments and IA CSV tables match Python in SO comparisons"
       ]
     },
     {
@@ -845,7 +860,7 @@
     },
     {
       "module": "gtpin_profile.py",
-      "sha256": "1bcba80319493fef71d38217c4079f427b3f6ec41f5216daad73a6583fcbfcbe",
+      "sha256": "1bcba80319493fef71d38217c4079f427b3f6ec41f5216daad73a6903fcbfcbe",
       "lines": 574,
       "description": "Optional Intel GTPin SDK cycle/basic-block profiling, without GPA runtime DLLs.",
       "status": "pending",
@@ -1788,8 +1803,9 @@
         "tests/ReplayPipelineTests.cpp: hardware/WARP command boundaries, scoped clone provenance, interned sampler identities, extended UAV slots, disabled commands, ClearState, repeated reads and exception rollback",
         "tools/validate_replay_pipeline_port.py: 180 Python comparisons; 153 valid boundaries with 199818 exact fields and 27 expected rejections, including real GF2/BF1 commands and independent rasterizer-extension fixtures",
         "tests/UiTests.cpp: Replay State worker integration, before/after boundaries, full JSON export while filtered, resource navigation, disabled/undo state and stale-result rejection",
-        "Native getter inspection and CLI/Qt paths migrated for supported replay commands and experiments; SO/predication execution and remaining pipeline/setter editors still limit full Python parity; live SO cursors remain unknown by design",
-        "Class-linked six-stage snapshot bindings, instance ordering and runtime identity match Python; static shader overrides expose empty interface arrays"
+        "Native getter inspection and CLI/Qt paths migrated for supported replay commands and experiments; Predication, SO retained experiments and remaining pipeline/setter editors still limit full Python parity; live SO cursors remain unknown by design",
+        "Class-linked six-stage snapshot bindings, instance ordering and runtime identity match Python; static shader overrides expose empty interface arrays",
+        "Six SO setter before/after boundaries match all 1306 Python fields each; live write cursors remain unknown"
       ]
     },
     {
@@ -1814,7 +1830,8 @@
       "status": "partial",
       "native": [
         "src/replay/Replay.cpp",
-        "src/replay/ClassLinkage.cpp"
+        "src/replay/ClassLinkage.cpp",
+        "src/replay/StreamOutput.cpp"
       ],
       "validation": [
         "docs/NATIVE_BASELINE.md",
@@ -1998,9 +2015,20 @@
       "sha256": "94926fc4a095e14ea8c0585903b05a52b3b1f3ac5cbc39d3a133b99848ac1a04",
       "lines": 116,
       "description": "DrawAuto counts from actual per-stream SO query results when history is known.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": [
+        "src/replay/StreamOutput.cpp",
+        "src/replay/BufferEdits.cpp",
+        "src/application/Geometry.cpp",
+        "src/application/StreamOutputInspector.cpp"
+      ],
+      "validation": [
+        "Per-stream native SO statistics, topology factors, written/storage-needed history, per-buffer vertex/byte tracking and IA byte-range DrawAuto counts",
+        "Input clones copy explicit count metadata without copying native append cursors; unknown history uses captured count only without edits",
+        "tests/StreamOutputTests.cpp: hardware/WARP repeat replay, signature passthrough, dirty snapshots, point/line topology factors, simultaneous timestamp queries, scoped clone counts, unknown edited-history rejection and malformed records",
+        "tools/validate_stream_output_port.py: 690 final-package checks with system-only PATH, hardware/WARP, synthetic and five original GPA SO captures; original line-stream captured count 6 is recovered as 12 actual vertices",
+        "Predication, output/setter experiments and private diagnostic replay integration remain pending"
+      ]
     },
     {
       "module": "so_private.py",
@@ -2016,9 +2044,16 @@
       "sha256": "c17798d85f343782d531f8794ad9b87eb94332bf187e0924b87a3d138b0d0c83",
       "lines": 36,
       "description": "Editable recovered SOSetTargets arguments, including optional offsets.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": [
+        "src/core/StreamOutput.cpp",
+        "src/replay/StreamOutput.cpp"
+      ],
+      "validation": [
+        "Captured native SOSetTargets execution, optional independent arrays, clear/reset/append and context validation",
+        "tools/validate_stream_output_port.py: 690 final-package checks with system-only PATH, hardware/WARP, synthetic and five original GPA SO captures; original line-stream captured count 6 is recovered as 12 actual vertices",
+        "Setter experiment serialization, retained output history and dedicated editors remain pending"
+      ]
     },
     {
       "module": "source_debug.py",
@@ -2078,7 +2113,8 @@
       "description": "Fixed-size StateBlockD3D11 deserializer, recovered from player RVA b6be0.",
       "status": "partial",
       "native": [
-        "src/core/Frame.cpp"
+        "src/core/Frame.cpp",
+        "src/core/StreamOutput.cpp"
       ],
       "validation": [
         "docs/NATIVE_BASELINE.md"
@@ -2102,9 +2138,22 @@
       "sha256": "6bad1be7e20e554dc08c96ba45a5cd30b8f6f4d706f7211834bc4f2efa5dc773",
       "lines": 170,
       "description": "Recovered GS stream-output declarations, bindings and DrawAuto counts.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": [
+        "src/core/StreamOutput.cpp",
+        "src/replay/StreamOutput.cpp",
+        "src/replay/Replay.cpp",
+        "src/application/StreamOutputInspector.cpp",
+        "src/application/ShaderInspector.cpp",
+        "src/app/MainWindow.cpp"
+      ],
+      "validation": [
+        "Checked SO declarations and five context-version target setters; native GS/VS/DS/signature passthrough creation, unchanged/dirty snapshots, append/reset and hardware unbind sinks",
+        "Qt shader SO properties/reflection and snapshot buffer navigation; DrawAuto IA geometry and JSON/CSV/OBJ export",
+        "tests/StreamOutputTests.cpp: hardware/WARP repeat replay, signature passthrough, dirty snapshots, point/line topology factors, simultaneous timestamp queries, scoped clone counts, unknown edited-history rejection and malformed records",
+        "tools/validate_stream_output_port.py: 690 final-package checks with system-only PATH, hardware/WARP, synthetic and five original GPA SO captures; original line-stream captured count 6 is recovered as 12 actual vertices",
+        "Retained targets under output/setter experiments and private diagnostic SO isolation remain pending"
+      ]
     },
     {
       "module": "texture_edits.py",
@@ -2204,7 +2253,7 @@
     },
     {
       "module": "view_ui.py",
-      "sha256": "a1418751ba0184e66584da285e9ae3394a3393b8772ea688b9b8b2b278149854",
+      "sha256": "a1418751ba0184e66904da285e9ae3394a3393b8772ea688b9b8b2b278149854",
       "lines": 53,
       "description": "Resource-wide SRV/RTV/DSV/UAV descriptor editor, separate from capture inspection.",
       "status": "pending",

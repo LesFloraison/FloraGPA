@@ -1,6 +1,7 @@
 #include "application/ApiCommands.h"
 #include "application/CaptureNames.h"
 #include "application/ClassInspector.h"
+#include "application/StreamOutputInspector.h"
 #include "application/CommandState.h"
 #include "application/Constants.h"
 #include "application/ContextInspector.h"
@@ -224,8 +225,7 @@ int main(int argc, char **argv) {
             save(out + "/shader.dxbc",
                  QByteArray(reinterpret_cast<const char *>(bytes.data()), qsizetype(bytes.size())));
             save(out + "/shader.asm", QByteArray::fromStdString(disassemble(bytes)));
-            auto metadata = inspectShader(bytes);
-            metadata["class_linkage_id"] = shaderClassLinkage(frame, parseId("id"));
+            auto metadata = inspectResourceShader(frame, parseId("id"), bytes);
             save(out + "/shader.json", QByteArray::fromStdString(metadata.dump(2)));
             const auto &sources = metadata["embedded_sources"]["files"];
             if (!sources.empty()) {
@@ -397,6 +397,19 @@ int main(int argc, char **argv) {
             for (auto &[key, value] : replay.counts)
                 counts.insert(QString::fromStdString(key), qint64(value));
             report.insert("counts", counts);
+            QJsonArray soHistory;
+            for (const auto &row : replay.streamOutputHistory)
+                soHistory.append(QJsonObject{{"event",QString::number(row.event)},{"stream",int(row.stream)},
+                                            {"vertices_per_primitive",int(row.factor)},
+                                            {"primitives_written",QString::number(row.written)},
+                                            {"primitives_storage_needed",QString::number(row.needed)}});
+            report.insert("stream_output_history", soHistory);
+            if (auto it = replay.drawAutoResults().find(options.until); it != replay.drawAutoResults().end()) {
+                const auto &parameters = it->second;
+                auto detail = drawAutoJson(parameters);
+                detail["parameters"] = {{"vertex_count",parameters.vertexCount},{"start_vertex",0}};
+                report.insert("draw_auto", QJsonDocument::fromJson(QByteArray::fromStdString(detail.dump())).object());
+            }
             if (options.timings) {
                 QJsonArray timings;
                 for (auto &row : replay.timings)

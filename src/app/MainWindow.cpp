@@ -1017,6 +1017,12 @@ void MainWindow::finishWorker(int code, QProcess::ExitStatus status) {
                                         .arg(geometry_["event"].toString())
                                         .arg(geometry_["vertex_references"].toInteger())
                                         .arg(geometry_["unique_vertices"].toInteger()));
+            const auto automatic = geometry_["draw_auto"].toObject();
+            geometryLabel_->setToolTip(automatic.isEmpty() ? QString{} :
+                QString::fromUtf8(QJsonDocument(automatic).toJson(QJsonDocument::Indented)));
+            if (!automatic.isEmpty())
+                geometryLabel_->setText(geometryLabel_->text() +
+                    (automatic["history_verified"].toBool() ? " · SO verified" : " · Captured count"));
             geometryDir_ = std::move(jobDir_);
             centerTabs_->setCurrentWidget(geometryPane_);
             statusBar()->showMessage("IA geometry ready", 3000);
@@ -1374,6 +1380,12 @@ void MainWindow::showPipeline(const State &s) {
             if (stage.samplers[i])
                 link(group, QString("Sampler %1").arg(i), stage.samplers[i]);
     }
+    auto so = new QTreeWidgetItem(pipeline_, {"SO", "", "Stream Output"});
+    for (UINT slot = 0; slot < std::min(s.soCount,4u); ++slot)
+        link(so, QString("Buffer %1").arg(slot), s.so[slot],
+             s.soOffsets[slot] == UINT32_MAX ? "Append" : QString("Offset %1").arg(s.soOffsets[slot]));
+    so->setExpanded(s.soCount != 0);
+    so->setToolTip(2,"Captured binding offsets; live append positions have no native getter.");
     auto rs = new QTreeWidgetItem(pipeline_, {"RS", "", "Rasterizer"});
     link(rs, "State", s.rasterizer);
     link(rs, "Viewports", s.viewports);
@@ -1465,7 +1477,7 @@ void MainWindow::inspectResource(Id id) {
             auto effective = experiment_->shaderBytes(*frame_, id);
             Bytes bytes(effective);
             shader_->setPlainText(QString::fromStdString(disassemble(bytes)));
-            auto metadata = inspectShader(bytes);
+            auto metadata = inspectResourceShader(*frame_, id, bytes);
             auto linkage = shaderClassLinkage(*frame_, id);
             values.append({"Interface slots", QString::number(metadata["interface_slots"].get<UINT>())});
             if (linkage)
@@ -1473,6 +1485,23 @@ void MainWindow::inspectResource(Id id) {
             sourceFiles_->clear();
             sourceEditor_->clear();
             shaderReflection_->clear();
+            if (metadata.contains("stream_output")) {
+                const auto &so = metadata["stream_output"];
+                values.append({"SO declaration", QString::number(so["id"].get<Id>())});
+                auto stream = so["rasterized_stream"].get<uint32_t>();
+                values.append({"Rasterized stream", stream == UINT32_MAX ? "None" : QString::number(stream)});
+                values.append({"SO strides", QString::fromStdString(so["strides"].dump())});
+                if (metadata["passthrough"].get<bool>())
+                    values.append(QPair<QString, QString>{"Execution", "Passthrough"});
+                auto group = new QTreeWidgetItem(shaderReflection_, {"Stream Output", "", ""});
+                for (const auto &element : so["entries"]) {
+                    auto name = element["semantic"].is_null() ? QString("Gap") : QString::fromStdString(element["semantic"].get<std::string>()) + QString::number(element["index"].get<UINT>());
+                    new QTreeWidgetItem(group, {name, QString::number(element["output_slot"].get<UINT>()),
+                        QString("Stream %1 · components %2–%3").arg(element["stream"].get<UINT>())
+                            .arg(element["start_component"].get<UINT>()).arg(element["start_component"].get<UINT>() + element["component_count"].get<UINT>() - 1)});
+                }
+                group->setExpanded(true);
+            }
             for (auto &file : metadata["embedded_sources"]["files"])
                 sourceFiles_->addItem(QString::fromStdString(file["name"].get<std::string>()),
                                       QString::fromStdString(file["text"].get<std::string>()));

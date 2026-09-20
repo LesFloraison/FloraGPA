@@ -13,9 +13,14 @@ void Replay::withEventEdits(const Event &event, const State &state, const std::f
         return;
     }
     std::map<Id, Com<IUnknown>> originals;
+    std::vector<Com<ID3D11Buffer>> countClones;
     std::vector<std::pair<Com<ID3D11Buffer>, Com<ID3D11Buffer>>> backups;
     std::vector<std::pair<Id, uint32_t>> counterBackups;
     auto restore = [&](bool submitted) {
+        for (const auto &clone : countClones) {
+            soVertexCounts_.erase(clone.Get());
+            soByteCursors_.erase(clone.Get());
+        }
         for (auto &[id, original] : originals)
             objects_.at(id) = original;
         if (!submitted)
@@ -54,6 +59,12 @@ void Replay::withEventEdits(const Event &event, const State &state, const std::f
                     // Preserve the original UAV identity and its hidden append/counter state.
                     context_->CopyResource(target.Get(), clone.Get());
                 } else {
+                    // Copy explicit DrawAuto metadata, never the hidden native SO cursor.
+                    countClones.push_back(clone);
+                    if (auto it = soVertexCounts_.find(target.Get()); it != soVertexCounts_.end())
+                        soVertexCounts_[clone.Get()] = it->second;
+                    if (auto it = soByteCursors_.find(target.Get()); it != soByteCursors_.end())
+                        soByteCursors_[clone.Get()] = it->second;
                     // Materialize aliases against original storage before changing lazy resource lookup.
                     std::set<Id> aliases;
                     aliases.insert(state.rtv.begin(), state.rtv.end());

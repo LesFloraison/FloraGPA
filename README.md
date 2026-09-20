@@ -148,8 +148,8 @@ in all six draw/dispatch shader stages. Resource properties expose the linkage,
 instance descriptor and names; shader properties show the interface slot count.
 Static shader replacements remove captured interfaces, and dynamic replacements
 preserve ordered class bindings. The existing Compile & Apply and undo workflow
-also works with linked shaders. Shader setter experiments and linked stream-output
-shaders are still pending. On the tested NVIDIA 10de:249d adapter, a reproduced
+also works with linked shaders, including geometry shaders with stream output.
+Shader setter experiments are still pending. On the tested NVIDIA 10de:249d adapter, a reproduced
 driver crash for empty-function-table pixel shaders is rejected with a WARP hint;
 select WARP to execute the original bytecode without modification.
 
@@ -159,6 +159,18 @@ select WARP to execute the original bytecode without modification.
 
 This exports captured class linkage/instance metadata as `class-linkage.json`.
 The `shader` export also includes the linkage ID and reflected interface slot count.
+
+Stream output restores captured declarations, target buffers, explicit resets and
+append bindings across all five recovered context versions. GS bytecode, VS/DS
+passthrough and output-only signatures are supported. Shader **Reflection** and
+Inspector show the SO declaration; **Pipeline > Snapshot** links its target buffers.
+Replay reports include actual per-stream SO query history. DrawAuto uses known
+written-byte history and the first IA buffer's offset/stride, including shader
+replacements and temporary input edits. **Geometry > Inspect IA** exports these
+effective arguments and identifies their provenance. Without known in-frame
+history, unedited replay retains the captured count and marks it unverified;
+edited replay requires known history. Setter experiments, retained outputs under
+those experiments, predication and private diagnostic SO passes remain pending.
 
 ```powershell
 .\out\FloraGPA\FloraGPA.Cli.exe commands D:\captures\sample.gpa_frame --out D:\results\api
@@ -184,6 +196,7 @@ python tools/validate_buffers.py --reference D:/CDXrepo/FloraGPA/standalone --ex
 python tools/validate_commands.py --reference D:/CDXrepo/FloraGPA/standalone --exe out/FloraGPA/FloraGPA.Cli.exe --captures D:/CDXrepo/FloraGPA --qt-bin D:/Qt/6.11.2/msvc2022_64/bin --out artifacts/command-run
 python tools/validate_buffer_edits.py --reference D:/CDXrepo/FloraGPA/standalone --exe out/FloraGPA/FloraGPA.Cli.exe --captures D:/CDXrepo/FloraGPA --qt-bin D:/Qt/6.11.2/msvc2022_64/bin --out artifacts/buffer-edit-run
 python tools/validate_class_linkage_port.py --reference D:/CDXrepo/FloraGPA/standalone --exe out/FloraGPA/FloraGPA.Cli.exe --isolated-env --out artifacts/class-linkage-run
+python tools/validate_stream_output_port.py --reference D:/CDXrepo/FloraGPA/standalone --exe out/FloraGPA/FloraGPA.Cli.exe --isolated-env --out artifacts/stream-output-run
 ```
 
 For constant-layout comparisons, run `FloraConstantTests` with
@@ -192,6 +205,14 @@ directory as `--fixture` to `tools/validate_constants.py`, together with the sam
 `--reference`, `--exe`, `--captures`, `--qt-bin` and a new `--out` directory.
 
 Run GPU checks serially and use a new output directory each time.
+
+The SO comparison also accepts `--captured-dir` pointing to the preserved
+`analysis/capture_samples/stream_output` suite. It verifies the capture hashes,
+original image/storage hashes, Python/native SO histories and DrawAuto counts,
+and disabled producers on hardware and WARP. These optional captures are not
+distributed with the repository.
+Add `--linear-captured-dir` pointing to `analysis/capture_samples/linear` to
+include the original point/line SO captures and their DrawAuto count recovery.
 
 For UAV counter comparisons, run `FloraUavCounterTests` with
 `FLORA_COUNTER_EVIDENCE_DIR` pointing to a new artifact directory, then pass it

@@ -1,4 +1,6 @@
 #include "ShaderInspector.h"
+#include "StreamOutputInspector.h"
+#include "core/ClassLinkage.h"
 #include "replay/Replay.h"
 #include <QByteArray>
 #include <QStringDecoder>
@@ -433,5 +435,29 @@ Json inspectShader(Bytes bytes) {
         result["signatures"][kind == 0 ? "input" : kind == 1 ? "output" : "patch"] = sig;
     }
     return result;
+}
+Json inspectResourceShader(const Frame &frame, Id id, Bytes bytes) {
+    static const std::map<uint16_t, std::string> stages{{0x90,"vs"},{0x91,"gs"},{0x92,"ps"},
+                                                       {0x93,"cs"},{0x94,"ds"},{0x95,"hs"}};
+    const auto &entry = frame.entry(id);
+    if (entry.category != 5 || !stages.contains(entry.type))
+        throw std::runtime_error("Resource is not a shader");
+    auto out = inspectShader(bytes);
+    auto stage = out.at("stage").get<std::string>();
+    auto so = entry.type == 0x91 ? shaderStreamOutput(frame,id) : 0;
+    bool passthrough = so && (stage == "vs" || stage == "ds" || stage == "signature");
+    if (stage != stages.at(entry.type) && !passthrough)
+        throw std::runtime_error("Replacement shader stage mismatch");
+    out["pipeline_stage"] = stages.at(entry.type);
+    out["bytecode_stage"] = stage;
+    out["passthrough"] = passthrough;
+    out["class_linkage_id"] = shaderClassLinkage(frame,id);
+    if (so)
+        out["stream_output"] = streamOutputJson(readStreamOutputDeclaration(frame,so));
+    if (passthrough) {
+        out["interface_slots"] = 0;
+        out["execution_note"] = "Only the preceding stage output signature is used; these bytecode instructions do not execute in GS.";
+    }
+    return out;
 }
 } // namespace flora

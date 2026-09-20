@@ -120,7 +120,7 @@ State Frame::state(Id id) const {
         throw std::runtime_error("Unsupported state block size");
     Reader r(p);
     State s;
-    r.skip(128);
+    s.mask = r.array<uint32_t, 32>();
     s.ib = r.read<Id>();
     s.ibFormat = r.read<uint32_t>();
     s.ibOffset = r.read<uint32_t>();

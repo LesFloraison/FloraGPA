@@ -1,6 +1,9 @@
 #include "Replay.h"
 #include "core/ClassLinkage.h"
 #include "core/Commands.h"
+#include "core/StreamOutput.h"
+#include "core/Dxbc.h"
+#include "core/InspectionRecords.h"
 #include <algorithm>
 #include <chrono>
 #include <d3d11sdklayers.h>
@@ -202,14 +205,9 @@ IUnknown *Replay::object(Id id) {
             auto linkage = shaderClassLinkage(frame_, id);
             head.skip(8);
             auto so = head.read<Id>();
-            if (t == 0x91 && so)
-                throw std::runtime_error("Stream-output shader migration pending");
             auto classLinkage = get<ID3D11ClassLinkage>(linkage);
             Com<ID3D11ShaderReflection> reflection;
-            check(D3DReflect(data.data(), data.size(), IID_ID3D11ShaderReflection, &reflection),
-                  "Reflect shader");
             D3D11_SHADER_DESC sd{};
-            check(reflection->GetDesc(&sd), "Shader descriptor");
             std::array<bool, 128> used{};
             // Stripped SM4 shaders can reflect no bindings while still sampling SRVs.
             // Only an actual RDEF chunk proves that undeclared slots are unused.
@@ -234,7 +232,21 @@ IUnknown *Replay::object(Id id) {
                 hasRdef |= tag == 0x46454452;
                 hasInterfaces |= tag == 0x45434649;
             }
-            if (!hasRdef)
+            bool passthrough = t == 0x91 && so &&
+                               (program.empty() || (Reader(program).read<UINT>() >> 16) != 2);
+            if (passthrough) {
+                if (!program.empty()) {
+                    auto stage = Reader(program).read<UINT>() >> 16;
+                    if (stage != 1 && stage != 4)
+                        throw std::runtime_error("SO passthrough requires VS, DS or signature bytecode");
+                }
+                passthroughShaders_.insert(id);
+            } else {
+                check(D3DReflect(data.data(), data.size(), IID_ID3D11ShaderReflection, &reflection),
+                      "Reflect shader");
+                check(reflection->GetDesc(&sd), "Shader descriptor");
+            }
+            if (!hasRdef && !passthrough)
                 used.fill(true);
             for (UINT i = 0; i < sd.BoundResources; ++i) {
                 D3D11_SHADER_INPUT_BIND_DESC b{};
@@ -248,7 +260,7 @@ IUnknown *Replay::object(Id id) {
                 }
             }
             // Stripped SM4 reflection does not provide a reliable interface count.
-            auto slots = hasInterfaces ? reflection->GetNumInterfaceSlots() : 0;
+            auto slots = hasInterfaces && !passthrough ? reflection->GetNumInterfaceSlots() : 0;
             validateClassProgram(program, slots);
             interfaceSlots_[id] = slots;
             usedSrvs_[id] = used;
@@ -263,7 +275,10 @@ IUnknown *Replay::object(Id id) {
                 CREATE_SHADER(ID3D11VertexShader, CreateVertexShader);
                 break;
             case 0x91:
-                CREATE_SHADER(ID3D11GeometryShader, CreateGeometryShader);
+                if (so)
+                    result = createStreamOutputShader(data, so, classLinkage);
+                else
+                    CREATE_SHADER(ID3D11GeometryShader, CreateGeometryShader);
                 break;
             case 0x92:
                 CREATE_SHADER(ID3D11PixelShader, CreatePixelShader);
@@ -408,7 +423,7 @@ void Replay::bind(const State &s, bool compute) {
     context_->OMSetRenderTargetsAndUnorderedAccessViews(0, nullptr, nullptr, 0, uavLimit_, empty.data(),
                                                         nullptr);
     context_->CSSetUnorderedAccessViews(0, uavLimit_, empty.data(), nullptr);
-    context_->SOSetTargets(0, nullptr, nullptr);
+    unbindStreamOutput();
     context_->IASetInputLayout(get<ID3D11InputLayout>(s.layout));
     context_->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY(s.topology));
     context_->IASetIndexBuffer(get<ID3D11Buffer>(s.ib), DXGI_FORMAT(s.ibFormat), s.ibOffset);
@@ -446,7 +461,7 @@ void Replay::bind(const State &s, bool compute) {
         for (size_t i = 0; i < sam.size(); ++i)
             sam[i] = get<ID3D11SamplerState>(x.samplers[i]);
         for (size_t i = 0; i < srv.size(); ++i)
-            if (shader && (x.classCount || usedSrvs_.at(x.shader)[i]))
+            if (shader && !passthroughShaders_.contains(x.shader) && (x.classCount || usedSrvs_.at(x.shader)[i]))
                 srv[i] = get<ID3D11ShaderResourceView>(x.srv[i]);
         (context_.Get()->*cbFns[stage])(0, 14, cb.data());
         (context_.Get()->*srvFns[stage])(0, 128, srv.data());
@@ -484,8 +499,8 @@ void Replay::bind(const State &s, bool compute) {
         context_->RSSetScissorRects(0, nullptr);
     context_->OMSetBlendState(get<ID3D11BlendState>(s.blend), s.blendFactor.data(), s.sampleMask);
     context_->OMSetDepthStencilState(get<ID3D11DepthStencilState>(s.depthState), s.stencilRef);
-    if (s.predicate || s.soCount)
-        throw std::runtime_error("Predication / stream-output replay migration pending");
+    if (s.predicate)
+        throw std::runtime_error("Predication replay migration pending");
     context_->SetPredication(nullptr, FALSE);
     bool extended = std::any_of(s.omExtended.begin(), s.omExtended.end(), [](Id x) { return x != 0; }) ||
                     std::any_of(s.csExtended.begin(), s.csExtended.end(), [](Id x) { return x != 0; });
@@ -500,6 +515,7 @@ void Replay::bind(const State &s, bool compute) {
     }
     if (s.rtCount > 8 || s.omStart > 64)
         throw std::runtime_error("Output snapshot limit");
+    bindStreamOutput(s);
     auto rtCount = std::min({s.rtCount, s.omStart, 8u});
     std::array<ID3D11RenderTargetView *, 8> rt{};
     for (UINT i = 0; i < rtCount; ++i)
@@ -765,6 +781,9 @@ void Replay::command(const Entry &e) {
                 return false;
             }
             const auto &a = event.args;
+            auto autoCount = t == 0x38 ? drawAutoParameters(e.id).vertexCount : 0;
+            auto arguments = event.argumentBuffer ? get<ID3D11Buffer>(event.argumentBuffer) : nullptr;
+            auto activeStreams = t != 0x35 && t != 0x36 ? beginStreamOutput(state) : std::vector<ActiveStream>{};
             if (options_.timings) {
                 Timestamp timestamp{e.id};
                 D3D11_QUERY_DESC desc{D3D11_QUERY_TIMESTAMP, 0};
@@ -778,13 +797,14 @@ void Replay::command(const Entry &e) {
                 context_->Dispatch(a[0], a[1], a[2]);
                 break;
             case 0x36:
-                context_->DispatchIndirect(get<ID3D11Buffer>(event.argumentBuffer), a[0]);
+                context_->DispatchIndirect(arguments, a[0]);
                 break;
             case 0x37:
                 context_->Draw(a[0], a[1]);
                 break;
             case 0x38:
-                throw std::runtime_error("DrawAuto count recovery migration pending");
+                context_->Draw(autoCount, 0);
+                break;
             case 0x39:
                 context_->DrawIndexed(a[0], a[1], int32_t(a[2]));
                 break;
@@ -792,18 +812,20 @@ void Replay::command(const Entry &e) {
                 context_->DrawIndexedInstanced(a[0], a[1], a[2], int32_t(a[3]), a[4]);
                 break;
             case 0x3b:
-                context_->DrawIndexedInstancedIndirect(get<ID3D11Buffer>(event.argumentBuffer), a[0]);
+                context_->DrawIndexedInstancedIndirect(arguments, a[0]);
                 break;
             case 0x3c:
                 context_->DrawInstanced(a[0], a[1], a[2], a[3]);
                 break;
             case 0x3d:
-                context_->DrawInstancedIndirect(get<ID3D11Buffer>(event.argumentBuffer), a[0]);
+                context_->DrawInstancedIndirect(arguments, a[0]);
                 break;
             }
-            counts[commandName(t)]++;
+            // Queue the timestamp before SO readback can wait on the CPU.
             if (options_.timings)
                 context_->End(timestamps_.back().end.Get());
+            endStreamOutput(e.id, activeStreams);
+            counts[commandName(t)]++;
             observe(true);
             return true;
         });
@@ -815,6 +837,11 @@ void Replay::command(const Entry &e) {
         return;
     if (inputBindings(e, payload)) {
         counts["state_or_auxiliary_records"]++;
+        return;
+    }
+    if (isStreamOutputTargets(t)) {
+        applyStreamOutput(payload);
+        counts["SOSetTargets"]++;
         return;
     }
     if ((t >= 0x249 && t <= 0x254) || t == 0x34e5 || t == 0x34ee || t == 0x34f4 || t == 0x351c ||
@@ -833,6 +860,10 @@ void Replay::command(const Entry &e) {
     if (finishCommandListVersion(t)) {
         acceptFinishCommandList(frame_, readFinishCommandList(t, payload));
         counts["finish_command_list_metadata"]++;
+        return;
+    }
+    if (acceptInspectionRecord(t, payload)) {
+        counts["inspection_records"]++;
         return;
     }
     r.skip(16);
@@ -912,6 +943,7 @@ void Replay::command(const Entry &e) {
         owner.skip(8);
         immediate(owner.read<Id>());
         context_->ClearState();
+        resetStreamOutputBindings();
         clearBindingGaps();
         for (auto &ranges : ranges_)
             ranges.clear();
@@ -948,6 +980,22 @@ void Replay::run(const std::function<void(Id, size_t, size_t)> &progress,
     objects_.clear();
     usedSrvs_.clear();
     interfaceSlots_.clear();
+    passthroughShaders_.clear();
+    resetStreamOutputBindings();
+    soVertexCounts_.clear();
+    soByteCursors_.clear();
+    soQueries_.clear();
+    soAutoResults_.clear();
+    streamOutputHistory.clear();
+    soCountRequiresKnown_ = options_.editedEvents || !options_.shaders.empty() || !options_.textures.empty() ||
+                           !options_.disabled.empty() || !options_.buffers.empty() ||
+                           !options_.commandPayloads.empty() || !options_.updateSources.empty() ||
+                           !options_.uavCounters.empty();
+    soCountEnabled_ = false;
+    for (const auto &[id, entry] : frame_.entries())
+        if ((entry.category == 7 && entry.type == 0x38) ||
+            (entry.category == 5 && entry.type == 0x91 && shaderStreamOutput(frame_, id)))
+            soCountEnabled_ = true;
     counts.clear();
     for (auto &ranges : ranges_)
         ranges.clear();
@@ -1127,6 +1175,11 @@ std::vector<uint8_t> Replay::readBuffer(Id id) {
     return data;
 }
 std::string disassemble(Bytes data) {
+    auto parts = readDxbcParts(data);
+    if (std::none_of(parts.begin(),parts.end(),[](const auto &part) {
+            return part.first == 0x52444853 || part.first == 0x58454853;
+        }))
+        return "// Signature only; no executable shader instructions.\n";
     Com<ID3DBlob> blob;
     check(D3DDisassemble(data.data(), data.size(), D3D_DISASM_ENABLE_INSTRUCTION_NUMBERING, nullptr, &blob),
           "Disassemble DXBC");

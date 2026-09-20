@@ -1,4 +1,5 @@
 #include "Geometry.h"
+#include "StreamOutputInspector.h"
 #include <QSaveFile>
 #include <algorithm>
 #include <cmath>
@@ -183,9 +184,8 @@ Json meshPrimitives(const std::vector<int64_t> &stream, uint32_t topology) {
 }
 Json inspectGeometry(const Frame &frame, Replay &replay, Id eventId) {
     auto event = frame.event(eventId);
-    if (event.type < 0x37 || event.type > 0x3d || event.type == 0x38)
-        throw std::runtime_error(
-            "IA geometry requires a supported graphics draw; DrawAuto migration is pending");
+    if (event.type < 0x37 || event.type > 0x3d)
+        throw std::runtime_error("IA geometry requires a supported graphics draw");
     auto state = frame.state(event.state);
     if (!state.layout)
         throw std::runtime_error("This procedural draw has no IA input layout");
@@ -250,6 +250,12 @@ Json inspectGeometry(const Frame &frame, Replay &replay, Id eventId) {
     layout.skip(layout.read<uint32_t>());
     layout.end();
     auto args = event.args;
+    Json automatic = nullptr;
+    if (event.type == 0x38) {
+        auto parameters = replay.drawAutoParameters(eventId);
+        args = {parameters.vertexCount, 0};
+        automatic = drawAutoJson(parameters);
+    }
     bool indexed = event.type == 0x39 || event.type == 0x3a || event.type == 0x3b;
     Json indirect = nullptr;
     if (event.argumentBuffer) {
@@ -388,6 +394,7 @@ Json inspectGeometry(const Frame &frame, Replay &replay, Id eventId) {
         {"attribute_interpretation", "decoded_buffer_storage"},
         {"effective_parameters", params},
         {"indirect_arguments", indirect},
+        {"draw_auto", automatic},
         {"topology", state.topology},
         {"elements", metadata},
         {"vertex_references", refs},

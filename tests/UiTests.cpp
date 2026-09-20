@@ -1,4 +1,5 @@
 #include "ClassCapture.h"
+#include "StreamCapture.h"
 #include "StateCapture.h"
 #include "SyntheticCapture.h"
 #include "app/Appearance.h"
@@ -28,6 +29,42 @@ class UiTests final : public QObject {
         QVERIFY(window.grab().save(directory + '/' + name + ".png"));
     }
   private slots:
+    void streamOutputInspector() {
+        using namespace flora;
+        auto capture = testing::streamCapture();
+        QTemporaryDir dir;capture.save(dir.path()+"/so.gpa_frame");
+        MainWindow window;window.resize(1500,950);window.show();
+        QSignalSpy done(&window,&MainWindow::taskFinished);
+        window.openCapture(dir.path()+"/so.gpa_frame");
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(),30000);
+        QVERIFY2(done.takeLast()[0].toBool(),qPrintable(window.statusBar()->currentMessage()));
+        auto resources=window.findChild<QTableView *>("resources");
+        bool selected=false;
+        for(int i=0;i<resources->model()->rowCount();++i) {
+            auto index=resources->model()->index(i,0);
+            if(index.data(Qt::UserRole).toULongLong()==60) {resources->setCurrentIndex(index);selected=true;break;}
+        }
+        QVERIFY(selected);
+        auto properties=window.findChild<QTreeWidget *>("properties");
+        bool declaration=false;
+        for(QTreeWidgetItemIterator it(properties);*it;++it)
+            if((*it)->text(0)=="SO declaration") declaration=(*it)->text(1)=="62";
+        QVERIFY(declaration);
+        auto reflection=window.findChild<QTreeWidget *>("shaderReflection");
+        QCOMPARE(reflection->topLevelItem(0)->text(0),QString("Stream Output"));
+        QCOMPARE(reflection->topLevelItem(0)->child(0)->text(0),QString("SV_Position0"));
+        snapshot(window,"stream-output-shader");
+        auto api=window.findChild<QTableView *>("apiLog");
+        api->setCurrentIndex(api->model()->index(2,0));
+        QAction *inspect=nullptr;
+        for(auto action:window.findChildren<QAction *>()) if(action->text()=="Inspect IA") inspect=action;
+        QVERIFY(inspect);done.clear();inspect->trigger();
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(),30000);
+        QVERIFY2(done.takeLast()[0].toBool(),qPrintable(window.statusBar()->currentMessage()));
+        auto geometry=window.findChild<QTableView *>("geometryTable");
+        QCOMPARE(geometry->model()->rowCount(),6);
+        snapshot(window,"stream-output-geometry");
+    }
     void classLinkageInspector() {
         using namespace flora;
         auto capture = testing::graphicsClassCapture();
