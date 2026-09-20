@@ -1,9 +1,12 @@
 #include "PostTransform.h"
+#include "CheckpointInspection.h"
+#include "DxbcCheckpoint.h"
 #include "DxbcHull.h"
 #include "DxbcIdentity.h"
 #include "DxbcInspection.h"
 #include "DxbcOutputLog.h"
 #include "EventDescription.h"
+#include "InvocationSelector.h"
 #include "OutputLogGeometry.h"
 #include "ShaderInspector.h"
 #include "StreamOutputInspector.h"
@@ -826,18 +829,28 @@ class PostTransformCapture {
         result.downstreamBytes = std::move(downstream.bytes);
         return result;
     }
-    PostTransformGeometry captureLog(const Event &event, const State &state) {
-        const std::string stage = options.stage == "vs-writes"   ? "vs"
+    struct CapturedLog {
+        Json metadata;
+        std::vector<uint8_t> bytes;
+    };
+    CapturedLog captureLog(const Event &event, const State &state,
+                           const std::optional<CheckpointOptions> &checkpoint = {}) {
+        const std::string stage = checkpoint                     ? checkpoint->stage
+                                  : options.stage == "vs-writes" ? "vs"
                                   : options.stage == "ds-writes" ? "ds"
                                                                  : "gs";
-        const auto stageIndex = stage == "vs" ? 0u : stage == "ds" ? 2u : 3u;
+        const auto stageIndex = stage == "vs" ? 0u : stage == "hs" ? 1u : stage == "ds" ? 2u : 3u;
         const auto shaderId = state.stages[stageIndex].shader;
         if (!shaderId)
             throw std::runtime_error("Output records require a Draw with the selected shader");
         if (stage != "gs" && options.stream)
             throw std::runtime_error("Only GS emissions select a nonzero stream");
+        if (checkpoint && (options.stream || options.instance))
+            throw std::runtime_error("Checkpoints do not select an output stream or draw instance");
         if (stage == "ds" && (!state.stages[1].shader || state.topology < 33 || state.topology > 64))
             throw std::runtime_error("DS writes require a paired HS and patch topology");
+        if (stage == "hs" && (!state.stages[2].shader || state.topology < 33 || state.topology > 64))
+            throw std::runtime_error("HS checkpoints require a paired DS and patch topology");
         if (r.device_->GetFeatureLevel() < D3D_FEATURE_LEVEL_11_1)
             throw std::runtime_error("Shader output records require feature level 11.1");
         Json positions = Json::array();
@@ -901,7 +914,11 @@ class PostTransformCapture {
         const bool enabled = !r.options_.suppressDraws && !r.options_.disabled.contains(event.id);
         bool finished = false;
         for (unsigned attempt = 0; attempt < 3; ++attempt) {
-            auto patched = stage == "gs"
+            auto checkpointOptions = checkpoint.value_or(CheckpointOptions{});
+            checkpointOptions.slot = uint32_t(slot);
+            checkpointOptions.capacity = capacity;
+            auto patched = checkpoint ? instrumentCheckpoint(original, checkpointOptions)
+                           : stage == "gs"
                                ? instrumentGeometryEmissions(original, slot, capacity, options.stream)
                                : instrumentOutputWrites(original, slot, capacity);
             metadata = std::move(patched.metadata);
@@ -914,6 +931,23 @@ class PostTransformCapture {
                 throw std::runtime_error("Original shader has no consumed InstanceID; invocation membership "
                                          "is unknown, inspect all records");
             std::vector<uint8_t> initial(size);
+            if (stage == "hs") {
+                auto put = [&](uint32_t offset, uint32_t value) {
+                    if (offset > initial.size() || initial.size() - offset < 4)
+                        throw std::runtime_error("HS checkpoint runtime parameter bounds");
+                    std::memcpy(initial.data() + offset, &value, 4);
+                };
+                put(24, metadata.at("runtime_checkpoint_token"));
+                put(28, capacity);
+                if (metadata.contains("input_selector")) {
+                    put(metadata.at("runtime_input_filter_offset"), 1);
+                    std::map<checkpoint::InputKey, uint32_t> values;
+                    for (const auto &term : metadata.at("input_selector").at("inputs"))
+                        values[{term.at("name"), term.at("component")}] = term.at("bits");
+                    for (const auto &term : metadata.at("runtime_input_terms"))
+                        put(term.at("offset"), values.at({term.at("name"), term.at("component")}));
+                }
+            }
             D3D11_BUFFER_DESC bd{size,
                                  D3D11_USAGE_DEFAULT,
                                  D3D11_BIND_UNORDERED_ACCESS,
@@ -933,6 +967,7 @@ class PostTransformCapture {
                   "Create shader output log view");
             auto linkage = r.get<ID3D11ClassLinkage>(shaderClassLinkage(r.frame_, shaderId));
             Com<ID3D11VertexShader> vs;
+            Com<ID3D11HullShader> hs;
             Com<ID3D11DomainShader> ds;
             Com<ID3D11GeometryShader> gs;
             if (stage == "vs")
@@ -941,6 +976,9 @@ class PostTransformCapture {
             else if (stage == "ds")
                 check(r.device_->CreateDomainShader(patchedBytes.data(), patchedBytes.size(), linkage, &ds),
                       "Create write log DS");
+            else if (stage == "hs")
+                check(r.device_->CreateHullShader(patchedBytes.data(), patchedBytes.size(), linkage, &hs),
+                      "Create checkpoint HS");
             else if (auto declaration = shaderStreamOutput(r.frame_, shaderId))
                 gs = r.createStreamOutputShader(patchedBytes, declaration, linkage);
             else
@@ -955,7 +993,7 @@ class PostTransformCapture {
             for (unsigned i = 0; i < classCount; ++i)
                 classes[i] = r.get<ID3D11ClassInstance>(state.stages[stageIndex].classes[i]);
             Com<ID3D11Query> query;
-            if (stage == "gs") {
+            if (stage == "gs" || checkpoint) {
                 D3D11_QUERY_DESC q{D3D11_QUERY_PIPELINE_STATISTICS, 0};
                 check(r.device_->CreateQuery(&q, &query), "Create emission pipeline witness");
             }
@@ -964,6 +1002,8 @@ class PostTransformCapture {
                 [&] {
                     if (vs)
                         r.context_->VSSetShader(vs.Get(), classes.data(), classCount);
+                    if (hs)
+                        r.context_->HSSetShader(hs.Get(), classes.data(), classCount);
                     if (ds)
                         r.context_->DSSetShader(ds.Get(), classes.data(), classCount);
                     if (gs)
@@ -992,17 +1032,29 @@ class PostTransformCapture {
                     }
                     if (query)
                         r.context_->End(query.Get());
-                    if (!r.waitIdle(20000))
+                    if (!r.waitIdle(checkpoint && !checkpoint->token ? 60000 : 20000))
                         throw std::runtime_error("Shader output log completion timed out");
                 },
                 true);
             if (query) {
                 D3D11_QUERY_DATA_PIPELINE_STATISTICS stats{};
-                check(r.context_->GetData(query.Get(), &stats, sizeof stats, 0),
-                      "Read emission pipeline witness");
+                const auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(20);
+                for (;;) {
+                    const auto hr = r.context_->GetData(query.Get(), &stats, sizeof stats, 0);
+                    check(hr, "Read shader invocation pipeline witness");
+                    if (hr == S_OK)
+                        break;
+                    if (std::chrono::steady_clock::now() >= deadline)
+                        throw std::runtime_error("Shader invocation pipeline witness timed out");
+                    std::this_thread::sleep_for(std::chrono::milliseconds(1));
+                }
                 metadata["invocation_count_semantics"] = "observed_entry_atomic_operations";
-                metadata["pipeline_gs_invocations"] = stats.GSInvocations;
-                metadata["pipeline_gs_primitives"] = stats.GSPrimitives;
+                if (stage == "gs") {
+                    metadata["pipeline_gs_invocations"] = stats.GSInvocations;
+                    metadata["pipeline_gs_primitives"] = stats.GSPrimitives;
+                } else
+                    metadata["pipeline_" + stage + "_invocations"] =
+                        stage == "hs" ? stats.HSInvocations : stats.DSInvocations;
             }
             bd.Usage = D3D11_USAGE_STAGING;
             bd.BindFlags = 0;
@@ -1019,31 +1071,52 @@ class PostTransformCapture {
             std::memcpy(initial.data(), mapped.pData, size);
             r.context_->Unmap(staging.Get(), 0);
             auto header = Reader(initial).array<uint32_t, 4>();
+            if (stage == "hs" && (header[1] & 4))
+                throw std::runtime_error("HS relative output address exceeds declared register storage");
+            if (metadata.contains("indexable_temporaries") && (header[1] & 2))
+                throw std::runtime_error("Shader indexable temporary access is out of bounds");
             if (metadata.at("counter_wrap_checked").get<bool>() && header[1])
                 throw std::runtime_error("Shader log counter overflowed uint32");
-            if (stage == "gs") {
+            if (stage == "gs" || checkpoint) {
                 if (header[3])
                     throw std::runtime_error("Shader source invocation counter overflowed uint32");
                 metadata["invocations"] = header[2];
                 attempts.push_back({{"capacity", capacity},
                                     {"observed_records", header[0]},
-                                    {"observed_gs_entries", header[2]},
-                                    {"pipeline_gs_invocations", metadata.at("pipeline_gs_invocations")}});
+                                    {"observed_" + stage + "_entries", header[2]},
+                                    {"pipeline_" + stage + "_invocations",
+                                     metadata.at("pipeline_" + stage + "_invocations")}});
             } else
                 attempts.push_back({{"capacity", capacity}, {"observed_invocations", header[0]}});
+            if (metadata.contains("input_selector")) {
+                const auto matchedOffset = metadata.at("matched_count_offset").get<uint32_t>();
+                const auto overflowOffset = metadata.at("matched_overflow_offset").get<uint32_t>();
+                if (Reader(Bytes(initial).subspan(overflowOffset)).read<uint32_t>())
+                    throw std::runtime_error("Input match counter overflowed uint32");
+                const auto matched = Reader(Bytes(initial).subspan(matchedOffset)).read<uint32_t>();
+                metadata["matched_invocations"] = matched;
+                if (!matched ||
+                    (metadata.at("input_selector").at("match_policy") == "unique" && matched != 1))
+                    throw std::runtime_error("Original input bits matched " + std::to_string(matched) +
+                                             " invocations; unique input selection requires exactly one");
+                attempts.back()["matched_invocations"] = matched;
+            }
             if (header[0] > capacity) {
                 capacity = header[0];
                 continue;
             }
             const auto length = uint64_t(header[0]) * metadata.at("record_stride").get<uint32_t>();
-            if (length > initial.size() - 16)
+            const auto start = metadata.value("data_offset", 16u);
+            if (start > initial.size() || length > initial.size() - start)
                 throw std::runtime_error("Output log record bounds");
-            records.assign(initial.begin() + 16, initial.begin() + 16 + length);
+            records.assign(initial.begin() + start, initial.begin() + start + length);
             finished = true;
             break;
         }
         if (!finished)
             throw std::runtime_error("Shader output log kept overflowing during bounded retries");
+        if (metadata.contains("input_selector"))
+            checkpoint::verifySelectorRecords(records, metadata);
         const auto fullHash = sha256(records);
         const auto stride = metadata.at("record_stride").get<uint32_t>();
         const auto count = records.size() / stride;
@@ -1077,12 +1150,48 @@ class PostTransformCapture {
                               {{"strategy", positions.empty() ? "no_active_targets"
                                                               : "private_buffers_at_tracked_byte_cursors"},
                                {"targets", positions}}}});
-        return outputLogGeometry(inspectionEvent(r.frame_, event.id), std::move(metadata),
-                                 std::move(selected));
+        return {std::move(metadata), std::move(selected)};
     }
 
   public:
     PostTransformCapture(Replay &replay, const PostTransformOptions &o) : r(replay), options(o) {}
+    CheckpointInspection registers(Id id, const CheckpointInspectionOptions &request) {
+        if (request.stage != "gs" && request.stage != "ds" && request.stage != "hs")
+            throw std::runtime_error("Native checkpoint stage must be GS, DS or HS");
+        if (request.trace && request.instruction)
+            throw std::runtime_error("Select a single checkpoint or an invocation trace");
+        if (!request.trace && !request.inputSelector.is_null())
+            throw std::runtime_error("Input selection requires a complete invocation trace");
+        if (!r.replayComplete_ || !r.options_.before || r.options_.until != id)
+            throw std::runtime_error("Checkpoint inspection requires a completed before-event replay");
+        const auto event = r.frame_.event(id);
+        if (event.type < 0x37 || event.type > 0x3d)
+            throw std::runtime_error("Checkpoint inspection requires a Draw");
+        const auto state = r.prepareState(event);
+        CheckpointInspection result;
+        options.maxBytes = request.maxBytes;
+        r.inspectEventInputs(id, [&] {
+            bind(event, state);
+            const auto shader = state.stages[request.stage == "hs"   ? 1
+                                             : request.stage == "ds" ? 2
+                                                                     : 3]
+                                    .shader;
+            if (!shader)
+                throw std::runtime_error("Selected draw has no " + request.stage + " shader");
+            result = checkpointCatalog(code(shader), shader, inspectionEvent(r.frame_, id), request);
+            if (!request.trace && !request.instruction)
+                return;
+            CheckpointOptions instrument;
+            instrument.stage = request.stage;
+            instrument.hullPhase = request.hullPhase;
+            instrument.inputSelector = request.inputSelector;
+            if (request.instruction)
+                instrument.token = result.report.at("checkpoint_instruction").at("token");
+            auto captured = captureLog(event, state, instrument);
+            completeCheckpointInspection(result, std::move(captured.metadata), std::move(captured.bytes));
+        });
+        return result;
+    }
     PostTransformGeometry run(Id id) {
         if (options.stage != "final" && options.stage != "vs" && options.stage != "ds" &&
             options.stage != "gs" && options.stage != "vs-index" && options.stage != "hs" &&
@@ -1099,9 +1208,13 @@ class PostTransformCapture {
         PostTransformGeometry result;
         r.inspectEventInputs(id, [&] {
             bind(event, state);
-            result = options.stage == "hs"             ? captureHull(event, state)
-                     : isOutputLogStage(options.stage) ? captureLog(event, state)
-                     : options.stage == "vs-index"     ? captureIdentities(event, state)
+            if (isOutputLogStage(options.stage)) {
+                auto captured = captureLog(event, state);
+                result = outputLogGeometry(inspectionEvent(r.frame_, id), std::move(captured.metadata),
+                                           std::move(captured.bytes));
+            } else
+                result = options.stage == "hs"         ? captureHull(event, state)
+                         : options.stage == "vs-index" ? captureIdentities(event, state)
                                                        : capture(event, state);
             if (options.instance && options.stage != "hs" && options.stage != "vs-index" &&
                 !isOutputLogStage(options.stage))
@@ -1128,6 +1241,9 @@ class PostTransformCapture {
         return result;
     }
 };
+CheckpointInspection inspectCheckpoint(Replay &replay, Id event, const CheckpointInspectionOptions &options) {
+    return PostTransformCapture(replay, {}).registers(event, options);
+}
 PostTransformGeometry inspectPostTransform(Replay &replay, Id event, const PostTransformOptions &options) {
     return PostTransformCapture(replay, options).run(event);
 }

@@ -1,4 +1,5 @@
 #include "CheckpointGpu.h"
+#include "application/CheckpointInspection.h"
 #include "application/DxbcCheckpoint.h"
 #include "application/DxbcCheckpointModel.h"
 #include "application/InvocationSelector.h"
@@ -163,6 +164,78 @@ int probe(const std::string &path) {
 class CheckpointTests final : public QObject {
     Q_OBJECT
   private slots:
+    void decodedRecordsAndExports() {
+        Json meta = Json::parse(R"({"record_stride":64,"registers":1,"records":3,
+          "invocations":1,"instance_count":1,"shader_stage":"gs","trace":true,
+          "call_depth_offset":24,"known_inputs":{},
+          "register_slots":[{"name":"r0","kind":"temporary","register":0,"mask":15}],
+          "checkpoints":[{"token":0,"opcode":4,"call_target":9,"function_label":null},
+                         {"token":1,"opcode":62,"function_label":9},
+                         {"token":2,"opcode":62,"function_label":null}]})");
+        std::vector<uint8_t> bytes(3 * 64);
+        auto put = [&](size_t offset, uint32_t value) { std::memcpy(bytes.data() + offset, &value, 4); };
+        for (unsigned r = 0; r < 3; ++r) {
+            put(r * 64 + 4, r);
+            put(r * 64 + 16, r);
+            put(r * 64 + 20, r ? 62 : 4);
+            put(r * 64 + 24, r == 1 ? 1 : 0);
+            for (unsigned c = 0; c < 3; ++c)
+                put(r * 64 + 48 + c * 4, 1);
+            put(r * 64 + 32, 0x7fc12345); // Preserve NaN payloads even when float formatting is "nan".
+            put(r * 64 + 36, 0xff800000);
+            put(r * 64 + 40, 0x80000000);
+            put(r * 64 + 44, 42); // Unwritten raw storage must not appear as a defined CSV value.
+        }
+        auto rows = checkpointHeaders(bytes, meta);
+        QCOMPARE(rows.size(), size_t(3));
+        QVERIFY(rows[0]["primitive_id"].is_null());
+        QVERIFY(rows[0]["call_stack"].empty());
+        QVERIFY(rows[1]["call_stack"] == Json::array({{{"label", 9}, {"call_token", 0}}}));
+        QVERIFY(rows[2]["call_stack"].empty());
+        const auto regs = checkpointRegisters(bytes, meta, 1);
+        QCOMPARE(regs[0]["bits"][0].get<uint32_t>(), 0x7fc12345u);
+        QVERIFY(regs[0]["written"] == Json::array({true, true, true, false}));
+        for (auto [offset, bad] : std::vector<std::pair<size_t, uint32_t>>{
+                 {0, 1}, {4, 1}, {16, 3}, {20, 62}, {24, 33}, {64 + 24, 0}, {128 + 24, 1}}) {
+            uint32_t saved;
+            std::memcpy(&saved, bytes.data() + offset, 4);
+            put(offset, bad);
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error, checkpointHeaders(bytes, meta));
+            put(offset, saved);
+        }
+        put(48, 2);
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, checkpointRegisters(bytes, meta, 0));
+        put(48, 1);
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, checkpointRegisters(bytes, meta, 3));
+        auto badMeta = meta;
+        badMeta["record_stride"] = 0;
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, checkpointHeaders(bytes, badMeta));
+        badMeta = meta;
+        badMeta["registers"] = 4097;
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, checkpointHeaders(bytes, badMeta));
+        auto truncated = bytes;
+        truncated.pop_back();
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, checkpointHeaders(truncated, meta));
+
+        CheckpointInspection capture;
+        capture.shader = {1, 2, 3, 4};
+        capture.assembly = "original assembly\n";
+        capture.report = {{"catalog", Json::array({{{"token", 0}, {"instruction", 7}},
+                                                   {{"token", 1}, {"instruction", 11}},
+                                                   {{"token", 2}, {"instruction", 8}}})}};
+        completeCheckpointInspection(capture, meta, bytes);
+        QCOMPARE(capture.report["hits_preview"][1]["call_stack"][0]["call_instruction"].get<unsigned>(), 7u);
+        QTemporaryDir directory;
+        exportCheckpoint(capture, std::filesystem::path(directory.path().toStdWString()));
+        QFile file(directory.path() + "/registers.csv");
+        QVERIFY(file.open(QIODevice::ReadOnly));
+        const auto csv = file.readAll();
+        QVERIFY(csv.contains("0,r0,x,True,0x7fc12345,2143363909,2143363909,nan\r\n"));
+        QVERIFY(csv.contains("0,r0,y,True,0xff800000,4286578688,-8388608,-inf\r\n"));
+        QVERIFY(csv.contains("0,r0,z,True,0x80000000,2147483648,-2147483648,-0.0\r\n"));
+        QVERIFY(csv.contains("0,r0,w,False,,,,\r\n"));
+        QCOMPARE(read((directory.path() + "/snapshots.bin").toStdString()), bytes);
+    }
     void nativeSnapshots() {
         try {
             flora::testing::validateCheckpointGpu();

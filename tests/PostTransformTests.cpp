@@ -3,7 +3,9 @@
 #include "StreamCapture.h"
 #include "app/Appearance.h"
 #include "app/MainWindow.h"
+#include "application/CheckpointInspection.h"
 #include "application/DxbcIdentity.h"
+#include "application/InvocationSelector.h"
 #include "application/PostTransform.h"
 #include "application/SessionUi.h"
 #include <QAction>
@@ -36,6 +38,158 @@ class PostTransformTests final : public QObject {
         QVERIFY(handled);
     }
   private slots:
+    void checkpointCaptureAndIsolation() {
+        try {
+            QTemporaryDir dir;
+            using Json = nlohmann::json;
+            for (const std::string stage : {"gs", "ds", "hs"})
+                for (bool warp : {false, true}) {
+                    const auto path = dir.path() + "/checkpoint.gpa_frame";
+                    if (stage == "gs")
+                        streamCapture().save(path);
+                    else
+                        hullCapture().save(path);
+                    Frame frame(path.toStdWString());
+                    ReplayOptions opts;
+                    opts.warp = warp;
+                    opts.before = true;
+                    opts.until = stage == "gs" ? 150 : 200;
+                    Replay replay(frame, opts);
+                    replay.run();
+                    const Id storageId = stage == "gs" ? 70 : 10;
+                    const auto storage = replay.readBuffer(storageId), pixels = replay.readTexture(20);
+                    const auto counter = stage == "gs" ? 0 : replay.readCounter(12);
+                    const auto counts = replay.counts;
+                    CheckpointInspectionOptions request;
+                    request.stage = stage;
+                    const auto catalog = inspectCheckpoint(replay, opts.until, request);
+                    QCOMPARE(catalog.report.at("record_count").get<unsigned>(), 0u);
+                    QVERIFY(!catalog.shader.empty());
+                    QVERIFY(!catalog.assembly.empty());
+                    QVERIFY(!catalog.report.contains("register_capture"));
+                    const auto phases =
+                        stage == "hs" ? catalog.report.at("hs_phases") : Json::array({nullptr});
+                    for (const auto &phase : phases) {
+                        request.trace = true;
+                        request.instruction.reset();
+                        request.inputSelector = nullptr;
+                        if (!phase.is_null())
+                            request.hullPhase = phase.at("id");
+                        auto capture = inspectCheckpoint(replay, opts.until, request);
+                        const auto &meta = capture.report.at("register_capture");
+                        qInfo().noquote()
+                            << QString::fromStdString(stage) << warp << QString::fromStdString(phase.dump())
+                            << QString::fromStdString(meta.at("attempts").dump());
+                        const auto &initialAttempt = meta.at("attempts").at(0);
+                        const bool overflow = initialAttempt.at("observed_records").get<uint64_t>() >
+                                              initialAttempt.at("capacity").get<uint64_t>();
+                        QCOMPARE(meta.at("attempts").size(), overflow ? size_t(2) : size_t(1));
+                        if (stage != "hs" || phase.at("kind") == "control_points")
+                            QVERIFY(overflow);
+                        QVERIFY(capture.report.at("record_count").get<unsigned>() > 0);
+                        QVERIFY(!capture.bytes.empty());
+                        QCOMPARE(replay.readBuffer(storageId), storage);
+                        QCOMPARE(replay.readTexture(20), pixels);
+                        if (stage != "gs")
+                            QCOMPARE(replay.readCounter(12), counter);
+                        QVERIFY(replay.counts == counts);
+                        const auto firstCapacity = meta.at("attempts").at(0).at("capacity").get<uint64_t>();
+                        request.maxBytes = meta.value("data_offset", 16u) +
+                                           firstCapacity * meta.at("record_stride").get<uint64_t>();
+                        if (meta.at("attempts").size() == 1)
+                            --request.maxBytes;
+                        QVERIFY_THROWS_EXCEPTION(std::runtime_error,
+                                                 inspectCheckpoint(replay, opts.until, request));
+                        request.maxBytes = 256ull * 1024 * 1024;
+                        QCOMPARE(replay.readBuffer(storageId), storage);
+                        if (stage != "gs")
+                            QCOMPARE(replay.readCounter(12), counter);
+                        const auto rows = checkpointHeaders(capture.bytes, meta);
+                        const auto &first = rows.at(0);
+                        const auto registers = checkpointRegisters(capture.bytes, meta, first.at("record"));
+                        if (!checkpoint::inputKeys(meta.at("register_slots"), meta.at("known_inputs"))
+                                 .empty()) {
+                            auto selector =
+                                checkpoint::selectorFromSnapshot(capture.report, registers, first, "all");
+                            request.inputSelector = selector;
+                            const auto selected = inspectCheckpoint(replay, opts.until, request);
+                            const auto matched = selected.report.at("register_capture")
+                                                     .at("matched_invocations")
+                                                     .get<uint32_t>();
+                            QVERIFY(matched > 0);
+                            request.inputSelector["match_policy"] = "unique";
+                            if (matched == 1)
+                                QVERIFY(inspectCheckpoint(replay, opts.until, request)
+                                            .report.at("record_count")
+                                            .get<uint32_t>() > 0);
+                            else
+                                QVERIFY_THROWS_EXCEPTION(std::runtime_error,
+                                                         inspectCheckpoint(replay, opts.until, request));
+                            request.inputSelector = selector;
+                            request.inputSelector["inputs"][0]["bits"] =
+                                selector.at("inputs").at(0).at("bits").get<uint32_t>() ^ 0xffffffffu;
+                            QVERIFY_THROWS_EXCEPTION(std::runtime_error,
+                                                     inspectCheckpoint(replay, opts.until, request));
+                            request.inputSelector = nullptr;
+                        }
+                        request.trace = false;
+                        for (const auto &entry : catalog.report.at("catalog"))
+                            if (entry.at("checkpoint_allowed") == true && entry.at("opcode") == 62 &&
+                                (phase.is_null() || entry.at("hs_phase") == phase.at("id"))) {
+                                request.instruction = entry.at("instruction");
+                                break;
+                            }
+                        QVERIFY(request.instruction.has_value());
+                        const auto single = inspectCheckpoint(replay, opts.until, request);
+                        QCOMPARE(single.report.at("checkpoint"), Json(*request.instruction));
+                        QVERIFY(single.report.at("record_count").get<unsigned>() > 0);
+                        const auto target = std::filesystem::path(dir.path().toStdWString()) / "export";
+                        exportCheckpoint(single, target);
+                        QCOMPARE(std::filesystem::file_size(target / "snapshots.bin"), single.bytes.size());
+                        QVERIFY(std::filesystem::file_size(target / "hits.csv") > 0);
+                        QVERIFY(std::filesystem::file_size(target / "registers.csv") > 0);
+                        QCOMPARE(replay.readBuffer(storageId), storage);
+                        QCOMPARE(replay.readTexture(20), pixels);
+                        if (stage != "gs")
+                            QCOMPARE(replay.readCounter(12), counter);
+                        QVERIFY(replay.counts == counts);
+                    }
+                    replay.inspectNativeState([&](auto context, const auto &) {
+                        if (stage == "gs")
+                            context->Draw(1, 0);
+                        else
+                            context->DrawInstanced(6, 2, 0, 9);
+                    });
+                    const auto after = replay.readBuffer(storageId);
+                    const auto afterCounter = stage == "gs" ? 0 : replay.readCounter(12);
+                    opts.before = false;
+                    Replay baseline(frame, opts);
+                    baseline.run();
+                    QCOMPARE(after, baseline.readBuffer(storageId));
+                    if (stage != "gs")
+                        QCOMPARE(afterCounter, baseline.readCounter(12));
+                    opts.before = true;
+                    request.trace = true;
+                    request.instruction.reset();
+                    request.inputSelector = nullptr;
+                    for (bool suppress : {false, true}) {
+                        opts.suppressDraws = suppress;
+                        opts.disabled.clear();
+                        if (!suppress)
+                            opts.disabled.insert(opts.until);
+                        Replay disabled(frame, opts);
+                        disabled.run();
+                        const auto empty = inspectCheckpoint(disabled, opts.until, request);
+                        QVERIFY(empty.bytes.empty());
+                        QCOMPARE(empty.report.at("record_count").get<unsigned>(), 0u);
+                        QVERIFY(!empty.report.at("register_capture").at("enabled").get<bool>());
+                        QCOMPARE(empty.report.at("register_capture").at("invocations").get<unsigned>(), 0u);
+                    }
+                }
+        } catch (const std::exception &error) {
+            QFAIL(error.what());
+        }
+    }
     void geometryProjectSelection() {
         QTemporaryDir dir;
         const auto path = dir.path() + "/geometry.gpa_frame";

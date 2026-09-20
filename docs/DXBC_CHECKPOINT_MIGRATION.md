@@ -3,9 +3,10 @@
 `src/application/DxbcCheckpoint.{h,cpp}` now implements the recovered GS/DS/HS
 checkpoint and invocation-trace DXBC transform in C++. It uses the native
 checkpoint model and exact input selectors from the preceding batch.
-**Production capture coordination, exports and Qt debugger integration remain
-pending.** The user-facing package is still `out/FloraGPA-hull-outputs`; this
-batch does not add a placeholder inspection mode to the interface.
+Production capture coordination and binary/CSV exports were subsequently connected
+in [CHECKPOINT_CAPTURE_MIGRATION.md](CHECKPOINT_CAPTURE_MIGRATION.md).
+Original source-debug metadata and Qt debugger integration remain pending.
+The evidence below describes the preceding transform batch.
 
 ## Implemented transform
 
@@ -89,13 +90,11 @@ matrix is revalidated in `artifacts/checkpoint-model-transform-final`.
 
 ## Remaining work
 
-Connect the transform to production original-draw capture: reserve a free UAV,
-retain class instances and the original downstream pipeline, isolate original
-outputs/SO state, initialize HS runtime fields, read back with bounded retries,
-and reject wrap/index faults or non-unique results under `unique` policy.
-Then port typed snapshot/trace exports, original source-debug metadata and the
-compact Qt debugger views. Hardware fault injection, full production state
-restoration and broad frame coverage still need validation at that layer.
+The subsequent production capture batch now covers original-draw submission,
+free UAV reservation, original bindings/class instances, private outputs/SO, HS
+runtime parameters, bounded retries, exact selectors and typed exports. See the
+capture document for state-restoration evidence. Original source-debug metadata,
+compact Qt debugger views and broader production frame coverage remain pending.
 
 The complete Python-to-C++/Qt migration is not finished. This transform and its
 direct GPU fixtures establish one necessary layer of the requested end state.

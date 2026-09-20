@@ -2,15 +2,26 @@
 
 已有可编译、可运行的 VS2022 / Qt Widgets 原生工程，能够独立重放当前验证的
 GF2 与 BF1 DX11 捕获。**尚未完成原 Python 版本的全部功能迁移。**
-当前独立包为 `out/FloraGPA-hull-outputs/FloraGPA.exe`。
+当前独立包为 `out/FloraGPA-checkpoint-capture/FloraGPA.exe`。
 
-最新一批完成 GS/DS/HS checkpoint／trace 的完整 C++ DXBC 插桩层，包括
+最新一批接通 GS/DS/HS checkpoint／trace 的 C++ 正式采集与 CLI 导出：
+原始 Draw、私有输出／SO 隔离、HS 运行时筛选、容量重试、完整命中序列和
+寄存器位值／有效性，均复用原生重放路径。开发版 540 项 Python 对照全部通过
+（324 项成功、216 项一致拒绝），其中 298 项捕获的原始快照字节也完全一致。
+独立包另有 60 项间接绘制、输入／参数编辑、禁用绘制对照通过。Release 41 套
+CTest 全部通过，原 Qt 53 项无失败、无跳过；GF2/BF1 黄金帧及负对照 4 项通过。
+旧 VS/DS 写入与 GS 发射 100 项回归通过；154 份独立包成功报告的模块审计通过，
+三个 EXE 与最终 Release 构建一致，仍未替代另一台干净机器的验证。
+**源码行／变量／源码调用栈、Qt checkpoint 调试界面仍未迁移**，清单维持 partial。
+详见 [CHECKPOINT_CAPTURE_MIGRATION.md](CHECKPOINT_CAPTURE_MIGRATION.md)。
+
+上一批完成 GS/DS/HS checkpoint／trace 的完整 C++ DXBC 插桩层，包括
 寄存器值／有效性、动态数组与双结果指令、原始调用、HS 运行时 token／输入筛选。
 1090 项插桩对照全部通过：875 项 DXBC 字节与元数据一致，215 项一致拒绝；
 覆盖 27 个 shader，其中 4 个来自 GF2/BF1。Hardware/WARP 原生测试核对
 GS 数组浮点位值、HS 控制点整数、DS 快照与下游 SO 字节、管线计数，以及
-计数器回绕、索引越界和容量边界。**生产采集协调、导出和 Qt 调试界面仍待接通**，
-没有将插桩层完成计作完整功能可用；当前独立包未替换。
+计数器回绕、索引越界和容量边界。**当时生产采集协调、导出和 Qt 调试界面尚待接通**，
+没有将插桩层完成计作完整功能可用；该批未替换独立包。
 详见 [DXBC_CHECKPOINT_MIGRATION.md](DXBC_CHECKPOINT_MIGRATION.md)。
 
 上一批补齐 checkpoint／trace 的 C++ 基础层：原始指令目录、HS 阶段与
@@ -35,7 +46,7 @@ EXE 与最终 Release 构建一致。证据见 `artifacts/hull-portable-final/va
 `artifacts/ctest-hull-final.log`、`artifacts/hull-post-regression/validation.json`、
 `artifacts/hull-log-regression/validation.json`、`artifacts/hull-golden-final/validation.json`
 和 `artifacts/hull-runtime-audit.json`；仍未替代独立机器验证。
-HS/DS/GS checkpoint、trace 的生产采集和调试器仍未接通，完整目标尚未完成。
+该 HS 输出批次当时尚未接通 checkpoint、trace 的生产采集和调试器；完整目标仍未完成。
 详见 [HULL_OUTPUT_MIGRATION.md](HULL_OUTPUT_MIGRATION.md)。
 
 上一批接通原生 VS/DS 写入与 GS 发射的采集、导出和 Qt Geometry 入口。

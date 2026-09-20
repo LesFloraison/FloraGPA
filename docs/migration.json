@@ -657,7 +657,9 @@
         "1476 differential/bounds checks: 1403 exact successful comparisons, 72 matching rejections and one separately classified native bounds hardening check; native checkpoint_model CTest.",
         "docs/DXBC_CHECKPOINT_MIGRATION.md",
         "Complete GS/DS/HS checkpoint/trace DXBC transform implemented: values/validity, inputs, dynamic arrays, staged dependent results, calls and HS runtime selection. Production capture/export/Qt integration remains pending.",
-        "1090 transform comparisons: 875 exact DXBC and metadata successes, 215 matching rejections, 27 shaders including four real frame resources; native Hardware/WARP GS/DS/HS snapshots, CPU/SO witnesses, filtering, overflow and index bounds tests."
+        "1090 transform comparisons: 875 exact DXBC and metadata successes, 215 matching rejections, 27 shaders including four real frame resources; native Hardware/WARP GS/DS/HS snapshots, CPU/SO witnesses, filtering, overflow and index bounds tests.",
+        "docs/CHECKPOINT_CAPTURE_MIGRATION.md",
+        "Production GS/DS/HS checkpoint capture/export with bounded retries, input filtering and original resource/state restoration. Source debug and Qt checkpoint views remain pending."
       ]
     },
     {
@@ -1036,9 +1038,18 @@
       "sha256": "96cb91001a3be4af56ba8feaf0867a57c6cc090ebee4f91ec6be3fddb3e2cb06",
       "lines": 129,
       "description": "GS/DS instruction catalog and native repeated-hit register inspection.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": [
+        "src/application/CheckpointInspection.h",
+        "src/application/CheckpointInspection.cpp",
+        "src/application/PostTransform.cpp",
+        "src/cli/main.cpp"
+      ],
+      "validation": [
+        "docs/CHECKPOINT_CAPTURE_MIGRATION.md",
+        "540 native/Python capture and export comparisons: 324 successes and 216 matching rejections. Original source lines, variables, source stack and catalog source locations remain pending.",
+        "PostTransformTests::checkpointCaptureAndIsolation; CheckpointTests::decodedRecordsAndExports"
+      ]
     },
     {
       "module": "gs_checkpoint_ui.py",
@@ -1740,7 +1751,9 @@
         "Native validation, exact keys, snapshot selectors, bounded file IO and independent record verification implemented; trace capture and Qt consumers remain pending.",
         "1476 differential/bounds checks: 1403 exact successful comparisons, 72 matching rejections and one separately classified native bounds hardening check; native checkpoint_model CTest.",
         "docs/DXBC_CHECKPOINT_MIGRATION.md",
-        "Now consumed by the complete native checkpoint transform and direct Hardware/WARP fixtures; production capture/export/Qt integration remains pending."
+        "Now consumed by the complete native checkpoint transform and direct Hardware/WARP fixtures; production capture/export/Qt integration remains pending.",
+        "docs/CHECKPOINT_CAPTURE_MIGRATION.md",
+        "Production GS/DS/HS checkpoint capture/export with bounded retries, input filtering and original resource/state restoration. Source debug and Qt checkpoint views remain pending."
       ]
     },
     {
@@ -2797,7 +2810,9 @@
       ],
       "validation": [
         "docs/OUTPUT_LOG_MIGRATION.md",
-        "Native VS/DS writes and GS emission capture, original downstream execution and exports; HS/checkpoint/trace branches remain pending."
+        "Native VS/DS writes and GS emission capture, original downstream execution and exports; HS/checkpoint/trace branches remain pending.",
+        "docs/CHECKPOINT_CAPTURE_MIGRATION.md",
+        "Production GS/DS/HS checkpoint capture/export with bounded retries, input filtering and original resource/state restoration. Source debug and Qt checkpoint views remain pending."
       ]
     },
     {
