@@ -135,9 +135,24 @@
       "sha256": "1b612ec2003a94a23abbe699416740c05f0c937a96a4cfb3919ccd30a575f811",
       "lines": 184,
       "description": "Recovered BlendState1 descriptors, native logic ops and per-draw edits.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": [
+        "src/application/BlendEdits.cpp",
+        "src/replay/Blend.cpp",
+        "src/replay/BlendState.h",
+        "src/application/Experiment.cpp",
+        "src/app/BlendDialog.cpp"
+      ],
+      "validation": [
+        "BlendState/State1 exact descriptor layouts; eight target fields, strict factors/ops/masks/float32 constants, recursive per-slot merging and captured-enable restoration through blend_disabled=false.",
+        "Native Device1 logic state creation, OutputMergerLogicOp and RTV FORMAT_SUPPORT2 validation; per-draw preparation, before/disabled boundaries, next-draw restoration and mixed rasterizer/depth edits.",
+        "tests/BlendTests.cpp: hardware/WARP raw float arithmetic for color/alpha and dual-source factors, all write masks, eight independent targets, all 16 integer logic operations, repeated replay and portable history; MSAA per-sample readback and independent native alpha-to-coverage oracle.",
+        "Initial Python/native comparison: 639 exact pipeline-field, draw-count, preview and rejection checks passed in artifacts/blend-first-comparison-v2/validation.json. Release all 21 CTest suites; Debug five related suites and four editor interactions passed.",
+        "First independent package: 665 comparisons including captured-enable=true preset restoration and real GF2/BF1 before/original/zero-write-mask outputs with unchanged draw counts. Evidence: artifacts/blend-package-comparison/validation.json.",
+        "Captured BOOLs normalize before state creation as in the reference decoder. Native 264/328-byte, noncanonical BOOL and truncated/trailing descriptor checks passed; final Release all 21 suites and Debug blend/editor regressions passed (artifacts/ctest-blend-final-release.log, ctest-blend-final-debug.log, blend-final-debug-ui.txt).",
+        "Final package out/FloraGPA-blend-v2 passed 671 Python/native comparisons and four GF2/BF1 golden/negative checks with system-only child PATH: artifacts/blend-final-comparison/validation.json and artifacts/validation-blend-final/validation.json. This batch also passed 309 rasterizer regressions in artifacts/blend-rasterizer-regression/validation.json.",
+        "Private coverage consumers and the dedicated MSAA sample viewer remain pending; device compatibility has only been tested on this host."
+      ]
     },
     {
       "module": "buffer_coordinates.py",
@@ -455,7 +470,7 @@
       "validation": [
         "Captured/default descriptors, strict scalar and face normalization, depth_test/depth_write aliases, recursive per-field merging and event-scoped native state creation. Stencil reference retains uint32 input while native getters expose the driver low byte.",
         "tools/validate_depth_stencil_port.py: 517 Python comparisons passed for D24S8/D32S8, hardware/WARP, all depth comparison functions and both stencil faces, eight operations, masks, before/after and next-draw restoration; malformed input rejected.",
-        "Mixed rasterizer/depth operations are migrated; private coverage/diagnostic consumers and blend pipeline operations still require their own migrations.",
+        "Mixed rasterizer/depth/blend operations are migrated; private coverage/diagnostic consumers still require their own migrations.",
         "tests/DepthStencilTests.cpp: native D24S8 storage verified for 96 front/back/branch/op/driver cases, depth preservation/write, before-boundary state, repeated replay, history merging and save/load. tests/UiTests.cpp: editor Apply/Undo/Redo changes actual worker-rendered pixels.",
         "Release: all 19 CTest suites passed. Debug: 5 related suites and depth/stencil editor UI passed (artifacts/ctest-depth-release.log, ctest-depth-debug.log, depth-debug-ui.txt).",
         "Final package: 517 comparisons passed with Windows-only child PATH in artifacts/depth-package-comparison/validation.json; GF2/BF1 golden frames and disabled-draw negative controls passed in artifacts/validation-depth-package/validation.json."
@@ -1758,7 +1773,7 @@
         "tools/validate_rasterizer_port.py: 309 native/Python comparisons passed with Windows-only child PATH, hardware/WARP images, UAV bytes, exact inspected pipeline fields, before/after and next-draw restoration, mixed depth edits and malformed input rejection. Evidence: artifacts/rasterizer-package-comparison-v2/validation.json.",
         "tests/RasterizerTests.cpp: repeated replay, captured cull restoration, native state/pixels at before/after/next boundaries, mixed depth edits, project save/load, undo/redo, branch truncation and invalid-edit rollback. Release all 20 CTest suites and Debug five related suites passed.",
         "Final package out/FloraGPA-rasterizer also passed 517 depth/stencil regressions and four GF2/BF1 golden/negative checks with system-only PATH: artifacts/rasterizer-depth-regression/validation.json and artifacts/validation-rasterizer-package/validation.json.",
-        "Blend normalization/merge and private coverage consumers remain pending; unsupported pipeline keys fail explicitly."
+        "Blend normalization/merge is now migrated in src/application/BlendEdits.cpp; private coverage consumers remain pending. Unsupported pipeline keys fail explicitly."
       ]
     },
     {
@@ -1785,12 +1800,14 @@
       "description": "Inspectable JSON editors for per-draw pipeline state.",
       "status": "partial",
       "native": [
+        "src/app/BlendDialog.cpp",
         "src/app/RasterizerDialog.cpp",
         "src/app/MainWindow.cpp"
       ],
       "validation": [
-        "Compact Qt State/Viewports/Scissors tabs, changed-field commits, array add/remove and validation, effective history values and stale revision protection. Depth/stencil editor is also migrated; blend editor remains pending.",
-        "tests/UiTests.cpp: Release/Debug worker-rendered Apply/Undo/Redo pixels, changed-field-only commits, invalid values, empty/sixteen-slot arrays, no-op and rejected stale commits. Screenshots inspected in artifacts/rasterizer-ui/."
+        "Compact Qt State/Viewports/Scissors tabs, changed-field commits, array add/remove and validation, effective history values and stale revision protection. Depth/stencil and blend editors are also migrated; broader session and private coverage consumers remain pending.",
+        "tests/UiTests.cpp: Release/Debug worker-rendered Apply/Undo/Redo pixels, changed-field-only commits, invalid values, empty/sixteen-slot arrays, no-op and rejected stale commits. Screenshots inspected in artifacts/rasterizer-ui/.",
+        "Blend editor: Release/Debug Apply/Undo/Redo changes actual worker pixels; uint32 overflow, partial target-only changes, no-op and rejected stale commit checks passed. General/RT screenshots inspected in artifacts/blend-ui/."
       ]
     },
     {

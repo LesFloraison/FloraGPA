@@ -16,6 +16,11 @@ struct BufferPatch {
     std::vector<uint8_t> bytes;
 };
 struct ReplayOptions {
+    struct BlendEdit {
+        std::optional<D3D11_BLEND_DESC1> descriptor;
+        std::optional<std::array<float, 4>> factor;
+        std::optional<uint32_t> sampleMask;
+    };
     struct RasterizerEdit {
         std::optional<D3D11_RASTERIZER_DESC2> descriptor;
         std::optional<std::vector<D3D11_VIEWPORT>> viewports;
@@ -41,6 +46,7 @@ struct ReplayOptions {
     std::map<Id, PredicateBinding> predicateSetters;
     std::map<Id, DepthStencilEdit> depthStencilEdits;
     std::map<Id, RasterizerEdit> rasterizerEdits;
+    std::map<Id, BlendEdit> blendEdits;
 };
 struct Image {
     uint32_t width{}, height{}, format{};
@@ -78,6 +84,11 @@ class Replay {
     Com<ID3D11RasterizerState> createRasterizer(const D3D11_RASTERIZER_DESC2 &desc);
     void applyRasterizerEdit(Id event);
     void validateRasterizer(const State &state);
+    std::map<ID3D11BlendState *, Com<ID3D11BlendState>> logicBlendStates_;
+    std::map<DXGI_FORMAT, bool> logicFormats_;
+    Com<ID3D11BlendState> createBlend(const D3D11_BLEND_DESC1 &desc, bool extended = false);
+    void validateBlendOutputs(const State &state, ID3D11BlendState *blend);
+    void applyBlendEdit(Id event, const State &state);
     struct PredicateSegment {
         Com<ID3D11Predicate> native, mirror;
     };

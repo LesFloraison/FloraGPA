@@ -1,4 +1,5 @@
 #include "Replay.h"
+#include "BlendState.h"
 #include "Unpredicated.h"
 #include "core/ClassLinkage.h"
 #include "core/Commands.h"
@@ -353,36 +354,8 @@ IUnknown *Replay::object(Id id) {
             D3D11_RASTERIZER_DESC2 desc{};
             std::memcpy(&desc, raw.data(), raw.size());
             result = createRasterizer(desc);
-        } else if (t == 0x8a) {
-            auto desc = descriptor<D3D11_BLEND_DESC>(r.take(r.remaining()));
-            Com<ID3D11BlendState> obj;
-            check(device_->CreateBlendState(&desc, &obj), "CreateBlendState");
-            result = obj;
-        } else if (t == 0x10d) {
-            auto desc = descriptor<D3D11_BLEND_DESC1>(r.take(r.remaining()));
-            bool logic = false;
-            for (UINT i = 0; i < (desc.IndependentBlendEnable ? 8u : 1u); ++i)
-                logic |= desc.RenderTarget[i].LogicOpEnable != FALSE;
-            if (!logic) {
-                D3D11_BLEND_DESC basic{};
-                basic.AlphaToCoverageEnable = desc.AlphaToCoverageEnable;
-                basic.IndependentBlendEnable = desc.IndependentBlendEnable;
-                for (UINT i = 0; i < 8; ++i) {
-                    auto &a = desc.RenderTarget[i];
-                    basic.RenderTarget[i] = {
-                        a.BlendEnable,   a.SrcBlend,       a.DestBlend,    a.BlendOp,
-                        a.SrcBlendAlpha, a.DestBlendAlpha, a.BlendOpAlpha, a.RenderTargetWriteMask};
-                }
-                Com<ID3D11BlendState> obj;
-                check(device_->CreateBlendState(&basic, &obj), "CreateBlendState");
-                result = obj;
-            } else {
-                Com<ID3D11Device1> dev;
-                check(device_.As(&dev), "Query Device1");
-                Com<ID3D11BlendState1> obj;
-                check(dev->CreateBlendState1(&desc, &obj), "CreateBlendState1");
-                result = obj;
-            }
+        } else if (t == 0x8a || t == 0x10d) {
+            result = createBlend(decodeBlend(r.take(r.remaining()), t == 0x10d));
         } else
             throw std::runtime_error("Resource migration pending: " + resourceName(t) + " type " +
                                      std::to_string(t));
@@ -525,6 +498,7 @@ void Replay::bind(const State &s, bool compute) {
                                                             s.rtCount - s.omStart, uav.data(), nullptr);
     } else
         context_->OMSetRenderTargets(rtCount, rt.data(), depth);
+    validateBlendOutputs(s, get<ID3D11BlendState>(s.blend));
     if (rtCount && s.rtv[0]) {
         Reader r(frame_.payload(s.rtv[0]));
         r.skip(16);
@@ -764,7 +738,8 @@ void Replay::command(const Entry &e) {
         auto state = frame_.state(event.state);
         withEventEdits(event, state, [&] {
             bind(state, t == 0x35 || t == 0x36);
-            if ((t == 0x35 || t == 0x36) && options_.rasterizerEdits.contains(e.id))
+            if ((t == 0x35 || t == 0x36) &&
+                (options_.rasterizerEdits.contains(e.id) || options_.blendEdits.contains(e.id)))
                 throw std::runtime_error("Graphics pipeline experiment on a dispatch");
             applyRasterizerEdit(e.id);
             if (auto edit = options_.depthStencilEdits.find(e.id); edit != options_.depthStencilEdits.end()) {
@@ -779,6 +754,7 @@ void Replay::command(const Entry &e) {
                 context_->OMSetDepthStencilState(depth.Get(),
                                                  edit->second.reference.value_or(state.stencilRef));
             }
+            applyBlendEdit(e.id, state);
             clearBindingGaps();
             auto observe = [&](bool after) {
                 if (boundaryObserver_)
@@ -1015,6 +991,7 @@ void Replay::run(const std::function<void(Id, size_t, size_t)> &progress,
     clearBindingGaps();
     objects_.clear();
     rasterizerExtensions_.clear();
+    logicBlendStates_.clear();
     usedSrvs_.clear();
     interfaceSlots_.clear();
     passthroughShaders_.clear();
@@ -1029,7 +1006,7 @@ void Replay::run(const std::function<void(Id, size_t, size_t)> &progress,
                             !options_.buffers.empty() || !options_.commandPayloads.empty() ||
                             !options_.updateSources.empty() || !options_.uavCounters.empty() ||
                             !options_.predicateSetters.empty() || !options_.depthStencilEdits.empty() ||
-                            !options_.rasterizerEdits.empty();
+                            !options_.rasterizerEdits.empty() || !options_.blendEdits.empty();
     soCountEnabled_ = false;
     for (const auto &[id, entry] : frame_.entries())
         if ((entry.category == 7 && entry.type == 0x38) ||

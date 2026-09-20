@@ -7,6 +7,7 @@
 namespace flora {
 class Experiment {
     nlohmann::json project_;
+    void setPipeline(const Frame &frame, Id event, const nlohmann::json &values, const std::string &label);
 
   public:
     explicit Experiment(const Frame &frame);
@@ -21,6 +22,8 @@ class Experiment {
     nlohmann::json depthStencil(const Frame &frame, Id event) const;
     void setRasterizer(const Frame &frame, Id event, const nlohmann::json &values);
     nlohmann::json rasterizer(const Frame &frame, Id event) const;
+    void setBlend(const Frame &frame, Id event, const nlohmann::json &values);
+    nlohmann::json blend(const Frame &frame, Id event) const;
     nlohmann::json clear(const Frame &frame, Id event) const;
     void setUpdateSource(const Frame &frame, Id event, Bytes data);
     void setBuffer(const Frame &frame, Id event, Id resource, uint64_t offset, Bytes data);

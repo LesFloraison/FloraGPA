@@ -2,7 +2,7 @@
 
 已有可编译、可运行的 VS2022 / Qt Widgets 原生工程，能够独立重放当前验证的
 GF2 与 BF1 DX11 捕获。**尚未完成原 Python 版本的全部功能迁移。**
-当前独立包为 `out/FloraGPA-rasterizer/FloraGPA.exe`。
+当前独立包为 `out/FloraGPA-blend-v2/FloraGPA.exe`。
 
 
 ## 当前可用
@@ -23,18 +23,43 @@ GF2 与 BF1 DX11 捕获。**尚未完成原 Python 版本的全部功能迁移�
 | Context / command-list | 五种 context 接口身份、immediate/deferred 区分；缺失 context 的严格 Map READ 证据恢复；command-list 资源、owner 和 Execute/Finish 清单；Qt 字段树、证据导航、JSON 导出 | 推断不补造版本/指针/标志；保留指针与 ID 候选冲突；与 Python 相同，仅接受 immediate-context 的 Finish 空操作，未恢复列表执行 |
 | 捕获查询值 | 按同 ID、命令顺序使用 GetDesc/GetDataSize/CreateQuery/predicate 元数据；BOOL 完整值与 UINT64 低位、缺失字节、HRESULT/冲突状态 | 表示捕获时保存的内存字，不是新执行的 GPU query；原始高位缺失时保持不完整 |
 | 命令编辑 | RTV / DSV / Uint / Float UAV 清除值；资源写入命令启停；UpdateSubresource 紧密排列源数据替换；菜单、右键、撤销/重做；共享 context 校验和恢复 | 特殊 planar 资源执行仍受现有重放限制 |
-| 深度 / 模板实验 | 每 draw 的 depth enable/write/func、stencil enable/read/write masks、完整正反面四字段和 uint32 reference；字段递归合并、旧 preset、Qt 三页参数编辑、保存与撤销/重做 | 仅 graphics draw；下一未编辑 draw 恢复捕获状态；可与 rasterizer 编辑混合，私有 coverage / 诊断及 blend 实验仍待迁移 |
-| 光栅 / 视口 / 裁剪实验 | 十二项 rasterizer 字段、0–16 槽 viewport/scissor、旧 wireframe/cull_none preset；原生 State/State1/State2、forced sample count 和 conservative raster；Qt 三页编辑、字段合并、历史和保存/加载 | 受设备能力与合法 draw 组合限制；强制采样检查 DSV、深度、RTV 采样数和替换后的 PS；私有 coverage 消费者与 blend 分支仍待迁移 |
+| 深度 / 模板实验 | 每 draw 的 depth enable/write/func、stencil enable/read/write masks、完整正反面四字段和 uint32 reference；字段递归合并、旧 preset、Qt 三页参数编辑、保存与撤销/重做 | 仅 graphics draw；下一未编辑 draw 恢复捕获状态；可与 rasterizer/blend 编辑混合，私有 coverage / 诊断仍待迁移 |
+| 光栅 / 视口 / 裁剪实验 | 十二项 rasterizer 字段、0–16 槽 viewport/scissor、旧 wireframe/cull_none preset；原生 State/State1/State2、forced sample count 和 conservative raster；Qt 三页编辑、字段合并、历史和保存/加载 | 受设备能力与合法 draw 组合限制；强制采样检查 DSV、深度、RTV 采样数和替换后的 PS；私有 coverage 消费者仍待迁移 |
+| 混合 / 采样实验 | BlendState/BlendState1、八槽独立 color/alpha 运算与因子、双源混合、写掩码、16 种 logic op、blend constant、uint32 sample mask、alpha-to-coverage；Qt General/RT 参数页、旧 preset、字段合并、保存与撤销/重做 | 逻辑运算要求设备与每个 RTV 格式支持；不兼容组合明确拒绝；MSAA 执行已验证，但 MSAA 专用查看界面与私有 coverage 诊断仍待迁移 |
 | 图像 | 实际 GPU 输出、缩放/平移/通道、像素值、PNG 导出 | 全帧输出目前限制单采样 RGBA/BGRA8 |
 | 纹理 | GPU 格式转换、BC、浮点/整数、1D/2D/3D、mip/layer/slice、事件边界预览 | MSAA、平面格式及部分查看选项未迁移 |
 | Shader | DXBC 反汇编、反射、SPDB/SDBG 内嵌源码、HLSL 编译替换 | 不含 HLSL 恢复、单步调试及全部反射树 |
 | Buffer | 初始值、事件前后读回、范围、Hex/ASCII/32 位解释、导出；事件字节编辑/二进制补丁导入、绑定识别、撤销/重做；递归 CB 字段、CB1 范围和类型化编辑；按 UAV view 检查/编辑 Append/Consume/Counter | counter 支持 CS/OM 快照及已恢复 clear/copy/setter 引用；SO retained 实验、完整 setter/getter 与扩展 UAV 重放仍待迁移 |
 | 几何 | IA 输入解码、索引与实例、DrawAuto 实际参数及来源、三种顶点表、旋转线框、CSV/OBJ 导出 | 后变换与覆盖未迁移；当前表格上限为 100 万引用 / 1600 万字段 |
 | 资源名称 | GenPrivateData 原始名称、非法 UTF-8 转义、列表筛选和属性显示 | 名称记录不表示逐事件重命名时间线 |
-| 实验项目 | 原格式 JSON、捕获 SHA-256 绑定、资产校验、uint64 ID、原子保存、撤销/重做 | 接受事件启停、buffer、clear、update_source、predicate setter、depth/stencil 与 rasterizer/viewport/scissor pipeline、事件/初始 UAV counter、全局 shader/texture 替换；其他操作明确拒绝 |
+| 实验项目 | 原格式 JSON、捕获 SHA-256 绑定、资产校验、uint64 ID、原子保存、撤销/重做 | 接受事件启停、buffer、clear、update_source、predicate setter、depth/stencil、rasterizer/viewport/scissor 与 blend pipeline、事件/初始 UAV counter、全局 shader/texture 替换；其他操作明确拒绝 |
 | 性能 | 原生 D3D11 时间戳、disjoint 与 pipeline statistics | 尚未迁移原版多轮调度、Intel 硬件指标/GTPin |
 
 ## 验证证据
+
+- 混合/采样迁移初轮 639 项 Python 对照通过，逐字段比较实际管线描述、draw 计数
+  与 RGBA8 纹理预览；覆盖普通/双源因子、颜色/alpha 运算、全部写掩码、八槽 MRT、
+  16 种 logic op、捕获的逻辑状态、旧 BlendState、历史合并与非法输入拒绝。
+  证据为 `artifacts/blend-first-comparison-v2/validation.json`。
+  `tests/BlendTests.cpp` 另直接读回浮点/整数原始存储，以算术和按位运算独立核对；
+  MSAA 测试逐样本读取，不用 resolve 冒充采样验证。alpha-to-coverage 与单独创建的
+  D3D11 状态逐样本一致。Release 全部 21 套 CTest 与 Debug 五套相关测试通过，
+  记录为 `artifacts/ctest-blend-release.log` 和 `ctest-blend-debug.log`。
+  Qt Apply/Undo/Redo、uint32 溢出、只记录改动槽位、无改动和过期提交检查通过；
+  Debug 另复查了 rasterizer/depth 编辑交互（`artifacts/blend-debug-ui.txt`）。
+  已检查 `artifacts/blend-ui/blend-general-editor.png` 和 `blend-target-editor.png`。
+  首版独立包的扩展对照共 665 项通过，另覆盖捕获 enable=true 的旧 preset 恢复，
+  以及真实 GF2/BF1 draw 的提交前、原始输出和零写掩码实验：编辑后保留提交前
+  颜色存储，draw 次数不变。证据为 `artifacts/blend-package-comparison/validation.json`。
+  源码复核后补齐了原版对捕获 BOOL 的真值归一化，原生测试新增 264/328 字节
+  描述符、非标准 BOOL、截断/多余字节的检查。更新后 Release 21 套再次全部通过
+  （`artifacts/ctest-blend-final-release.log`），Debug blend 套件与两项编辑交互通过
+  （`artifacts/ctest-blend-final-debug.log`、`blend-final-debug-ui.txt`）。
+  最终 `out/FloraGPA-blend-v2/` 包通过全部 671 项对照，包括硬件/WARP 的非标准
+  捕获 BOOL，以及再次执行的真实帧编辑验证；GF2/BF1 黄金帧和关闭 draw 负对照
+  全部通过。证据为 `artifacts/blend-final-comparison/validation.json` 和
+  `artifacts/validation-blend-final/validation.json`。本批另通过 309 项光栅化回归
+  （`artifacts/blend-rasterizer-regression/validation.json`）。
 
 - 光栅/视口/裁剪迁移的最终包通过 309 项 Python 对照，覆盖硬件/WARP 的实际画面、
   UAV 字节与管线字段，十二项状态、空/满槽数组、字段合并、命令前/后、下一 draw
@@ -48,7 +73,7 @@ GF2 与 BF1 DX11 捕获。**尚未完成原 Python 版本的全部功能迁移�
   `rasterizer-debug-ui.txt`。Qt 测试验证实际画面的 Apply/Undo/Redo、只保存改动字段、
   数组增加/删除/上限、无改动不写历史、非法值和过期提交拒绝。
   截图为 `artifacts/rasterizer-ui/rasterizer-state-editor.png` 与
-  `rasterizer-scissors-editor.png`。私有 coverage 及 blend 编辑仍未迁移。
+  `rasterizer-scissors-editor.png`。私有 coverage 仍待迁移；blend 编辑见上述后续批次。
   最终独立包还通过 517 项深度/模板回归与 GF2/BF1 黄金帧及关闭 draw 负对照，
   证据为 `artifacts/rasterizer-depth-regression/validation.json` 和
   `artifacts/validation-rasterizer-package/validation.json`。
@@ -289,7 +314,7 @@ Debug 的 predicate、experiment、管线、SO 和 buffer edit 五项相关回�
 `artifacts/ctest-depth-debug.log`，另有 `artifacts/depth-debug-ui.txt` 的编辑交互验证。
 原生存储测试在两个配置下均通过，未将驱动对关闭 stencil 时无效操作的规范化
 误判成字段丢失。该轮验证未包含 MSAA 检查和混合 rasterizer 管线编辑；它们随后
-在上述光栅化批次验证。私有 coverage 和 blend 管线编辑仍待迁移。
+在上述光栅化批次验证；blend 管线编辑见后续混合批次，私有 coverage 仍待迁移。
 
 该轮独立包为 `out/FloraGPA-depth-stencil/`。仅系统 PATH 的 517 项对照再次全部
 通过（`artifacts/depth-package-comparison/validation.json`），GF2/BF1 黄金帧及

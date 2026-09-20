@@ -1,4 +1,5 @@
 #include "Experiment.h"
+#include "BlendEdits.h"
 #include "CommandEdits.h"
 #include "DepthStencilEdits.h"
 #include "RasterizerEdits.h"
@@ -80,6 +81,7 @@ void Experiment::apply(const Frame &frame, ReplayOptions &options) const {
     options.predicateSetters.clear();
     options.depthStencilEdits.clear();
     options.rasterizerEdits.clear();
+    options.blendEdits.clear();
     std::map<Id, Json> pipeline;
     for (size_t i = 0; i < revision(); ++i) {
         auto &operations = project_.at("history").at(i).at("operations");
@@ -111,6 +113,9 @@ void Experiment::apply(const Frame &frame, ReplayOptions &options) const {
                 if (pipeline[event].contains("rasterizer") || pipeline[event].contains("viewports") ||
                     pipeline[event].contains("scissors"))
                     options.rasterizerEdits[event] = rasterizerEdit(frame, event, pipeline[event]);
+                if (pipeline[event].contains("blend_state") || pipeline[event].contains("blend_factor") ||
+                    pipeline[event].contains("sample_mask"))
+                    options.blendEdits[event] = blendEdit(frame, event, pipeline[event]);
             } else if (kind == "setter") {
                 const auto id = identifier(op.at("event"));
                 options.predicateSetters[id] = validatePredicateSetter(frame, id, op.at("values"));
@@ -229,12 +234,26 @@ Json Experiment::rasterizer(const Frame &frame, Id event) const {
     return effectiveRasterizer(frame, event, values);
 }
 void Experiment::setRasterizer(const Frame &frame, Id event, const Json &values) {
+    setPipeline(frame, event, values, "Rasterizer");
+}
+Json Experiment::blend(const Frame &frame, Id event) const {
+    Json values = Json::object();
+    for (size_t i = 0; i < revision(); ++i)
+        for (const auto &op : project_["history"][i]["operations"])
+            if (op.at("kind") == "pipeline" && identifier(op.at("event")) == event)
+                mergePipeline(values, normalizePipeline(op.at("values")));
+    return effectiveBlend(frame, event, values);
+}
+void Experiment::setBlend(const Frame &frame, Id event, const Json &values) {
+    setPipeline(frame, event, values, "Blend");
+}
+void Experiment::setPipeline(const Frame &frame, Id event, const Json &values, const std::string &label) {
     normalizePipeline(values);
     auto previous = project_;
     auto &history = project_["history"];
     history.erase(history.begin() + ptrdiff_t(revision()), history.end());
     history.push_back(
-        {{"label", "Rasterizer event " + std::to_string(event)},
+        {{"label", label + " event " + std::to_string(event)},
          {"operations", Json::array({{{"kind", "pipeline"}, {"event", event}, {"values", values}}})}});
     project_["cursor"] = history.size();
     try {

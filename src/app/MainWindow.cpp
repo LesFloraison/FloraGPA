@@ -1,4 +1,5 @@
 #include "MainWindow.h"
+#include "BlendDialog.h"
 #include "CommandStateView.h"
 #include "PredicateView.h"
 #include "RasterizerDialog.h"
@@ -295,6 +296,8 @@ void MainWindow::buildUi() {
     depthStencilAction_->setObjectName("editDepthStencil");
     rasterizerAction_ = edit->addAction("Edit Rasterizer…", this, &MainWindow::editRasterizer);
     rasterizerAction_->setObjectName("editRasterizer");
+    blendAction_ = edit->addAction("Edit Blend / Samples…", this, &MainWindow::editBlend);
+    blendAction_->setObjectName("editBlend");
     updateSourceAction_ = edit->addAction("Replace Update Source…", this, &MainWindow::replaceUpdateSource);
     updateSourceAction_->setObjectName("replaceUpdateSource");
     updateExperimentActions();
@@ -389,7 +392,7 @@ void MainWindow::buildUi() {
     apiView_ = table(commandFilter_);
     apiView_->setContextMenuPolicy(Qt::ActionsContextMenu);
     apiView_->addActions({enableAction_, clearAction_, setterAction_, depthStencilAction_, rasterizerAction_,
-                          updateSourceAction_});
+                          blendAction_, updateSourceAction_});
     apiView_->setObjectName("apiLog");
     auto exportApi = new QAction("Export API Log…", this);
     exportApi->setObjectName("exportApiLog");
@@ -1825,6 +1828,8 @@ void MainWindow::updateExperimentActions() {
         depthStencilAction_->setEnabled(isDraw(uint16_t(type)) && type != 0x35 && type != 0x36);
     if (rasterizerAction_)
         rasterizerAction_->setEnabled(isDraw(uint16_t(type)) && type != 0x35 && type != 0x36);
+    if (blendAction_)
+        blendAction_->setEnabled(isDraw(uint16_t(type)) && type != 0x35 && type != 0x36);
     if (updateSourceAction_)
         updateSourceAction_->setEnabled(type == 0x247);
     const bool bufferEditable = isDraw(uint16_t(type)) && selectedResource_ && frame_ &&
@@ -2211,6 +2216,23 @@ void MainWindow::editBuffer(bool importFile) {
             bufferBoundary_->setCurrentIndex(1);
             experimentChanged();
         }
+    } catch (const std::exception &e) {
+        showError(QString::fromUtf8(e.what()));
+    }
+}
+void MainWindow::editBlend() {
+    if (!frame_ || !experiment_ || !selectedEvent_)
+        return;
+    try {
+        const auto event = selectedEvent_;
+        const auto revision = revision_;
+        auto initial = experiment_->blend(*frame_, event);
+        if (editBlendDialog(this, initial, [&](const nlohmann::json &patch) {
+                if (revision != revision_ || event != selectedEvent_)
+                    throw std::runtime_error("Selection or experiment changed; reopen this editor");
+                experiment_->setBlend(*frame_, event, patch);
+            }))
+            experimentChanged();
     } catch (const std::exception &e) {
         showError(QString::fromUtf8(e.what()));
     }

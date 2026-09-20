@@ -1,4 +1,5 @@
 #include "RasterizerEdits.h"
+#include "BlendEdits.h"
 #include "core/Contexts.h"
 #include <cmath>
 #include <set>
@@ -47,14 +48,16 @@ Json depthPipelineFields(const Json &values) {
 Json normalizePipeline(const Json &values) {
     if (!values.is_object() || values.empty())
         throw std::runtime_error("Empty pipeline experiment");
-    const std::set<std::string> allowed{"depth_stencil", "stencil_ref", "depth_test",
-                                        "depth_write",   "rasterizer",  "wireframe",
-                                        "cull_none",     "viewports",   "scissors"};
+    const std::set<std::string> allowed{"depth_stencil", "stencil_ref", "depth_test",   "depth_write",
+                                        "rasterizer",    "wireframe",   "cull_none",    "viewports",
+                                        "scissors",      "blend_state", "blend_factor", "sample_mask",
+                                        "blend_disabled"};
     for (auto it = values.begin(); it != values.end(); ++it)
         if (!allowed.contains(it.key()))
             throw std::runtime_error("Pipeline field migration pending: " + it.key());
     auto depth = depthPipelineFields(values);
     Json out = depth.empty() ? Json::object() : normalizeDepthStencil(depth);
+    out.update(normalizeBlend(values));
     auto rs = values.value("rasterizer", Json::object());
     if (!rs.is_object() || (values.contains("rasterizer") && rs.empty()))
         throw std::runtime_error("Unknown or empty rasterizer fields");
@@ -119,6 +122,7 @@ Json normalizePipeline(const Json &values) {
 }
 void mergePipeline(Json &base, const Json &patch) {
     mergeDepthStencil(base, depthPipelineFields(patch));
+    mergeBlend(base, patch);
     if (patch.contains("rasterizer"))
         for (auto it = patch["rasterizer"].begin(); it != patch["rasterizer"].end(); ++it)
             base["rasterizer"][it.key()] = it.value();

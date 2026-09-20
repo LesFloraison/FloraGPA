@@ -161,7 +161,17 @@ D3D11.1/11.3 support. Unsupported combinations fail explicitly. Forced sampling
 requires no DSV, disabled depth testing, compatible render targets and a pixel
 shader without sample-frequency execution or depth output; shader replacements
 are checked too. Conservative rasterization requires solid fill and device
-support. Blend editing and private coverage diagnostics remain pending.
+support. Private coverage diagnostics remain pending.
+
+**Edit > Edit Blend / Samples** provides a compact General page and eight render
+target pages: alpha-to-coverage, independent blending, color/alpha factors and
+operations, write channels, logic operations, blend constants and the uint32
+sample mask. Decimal and hexadecimal masks are accepted. Edits preserve untouched
+target fields, merge with rasterizer/depth edits, and support save/load, undo and
+redo. `blend_disabled=false` restores each target's captured enable flag.
+Logic operations require device and RTV-format support; invalid combinations
+fail explicitly. MSAA masks and alpha-to-coverage execute on the GPU, while the
+dedicated MSAA sample viewer and coverage diagnostics are still being migrated.
 
 **Pipeline > Predicate** reads native occlusion and stream-output overflow predicates
 at the selected command boundary. The compact inspector shows the query status,

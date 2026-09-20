@@ -5,10 +5,12 @@
 #include "StreamCapture.h"
 #include "SyntheticCapture.h"
 #include "app/Appearance.h"
+#include "app/BlendDialog.h"
 #include "app/CommandStateView.h"
 #include "app/MainWindow.h"
 #include "app/PredicateView.h"
 #include "app/RasterizerDialog.h"
+#include "application/BlendEdits.h"
 #include "application/RasterizerEdits.h"
 #include <QAbstractItemModelTester>
 #include <QAction>
@@ -35,6 +37,121 @@ class UiTests final : public QObject {
         QVERIFY(window.grab().save(directory + '/' + name + ".png"));
     }
   private slots:
+    void blendHistory() {
+        using namespace flora;
+        QTemporaryDir dir;
+        testing::depthStencilCapture().save(dir.path() + "/blend.gpa_frame");
+        MainWindow window;
+        window.resize(1500, 950);
+        window.show();
+        QSignalSpy done(&window, &MainWindow::taskFinished);
+        window.openCapture(dir.path() + "/blend.gpa_frame");
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        auto api = window.findChild<QTableView *>("apiLog");
+        bool selected = false;
+        for (int row = 0; row < api->model()->rowCount(); ++row) {
+            auto index = api->model()->index(row, 0);
+            if (index.data(Qt::UserRole).toULongLong() == 1000) {
+                api->setCurrentIndex(index);
+                selected = true;
+                break;
+            }
+        }
+        QVERIFY(selected);
+        QTRY_VERIFY_WITH_TIMEOUT(!window.busy(), 30000);
+        auto edit = window.findChild<QAction *>("editBlend");
+        QVERIFY(edit && edit->isEnabled());
+        bool entered = false;
+        QTimer::singleShot(0, &window, [&] {
+            auto dialog = window.findChild<QDialog *>("blendDialog");
+            if (!dialog)
+                return;
+            QTimer::singleShot(3000, dialog, &QDialog::reject);
+            dialog->findChild<QLineEdit *>("/sample_mask")->setText("0x00000000");
+            snapshot(*dialog, "blend-general-editor");
+            dialog->findChild<QTabWidget *>()->setCurrentIndex(1);
+            snapshot(*dialog, "blend-target-editor");
+            entered = true;
+            dialog->findChild<QDialogButtonBox *>()->button(QDialogButtonBox::Ok)->click();
+        });
+        done.clear();
+        edit->trigger();
+        QVERIFY(entered);
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        auto output = window.findChild<ImageView *>("frameOutput");
+        QCOMPARE(output->image().pixelColor(0, 0), QColor(0, 0, 0, 255));
+        QAction *undo = nullptr, *redo = nullptr;
+        for (auto action : window.findChildren<QAction *>()) {
+            if (action->shortcut() == QKeySequence::Undo)
+                undo = action;
+            if (action->shortcut() == QKeySequence::Redo)
+                redo = action;
+        }
+        QVERIFY(undo && redo);
+        done.clear();
+        undo->trigger();
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        QCOMPARE(output->image().pixelColor(0, 0), QColor(255, 0, 0, 255));
+        done.clear();
+        redo->trigger();
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        QCOMPARE(output->image().pixelColor(0, 0), QColor(0, 0, 0, 255));
+    }
+    void blendDialogValidation() {
+        using namespace flora;
+        QTemporaryDir dir;
+        testing::depthStencilCapture().save(dir.path() + "/blend.gpa_frame");
+        Frame frame((dir.path() + "/blend.gpa_frame").toStdWString());
+        QWidget parent;
+        auto initial = capturedBlend(frame, 1000);
+        int commits = 0;
+        QTimer::singleShot(0, &parent, [&] {
+            auto dialog = parent.findChild<QDialog *>("blendDialog");
+            if (!dialog)
+                return;
+            QTimer::singleShot(3000, dialog, &QDialog::reject);
+            auto mask = dialog->findChild<QLineEdit *>("/sample_mask");
+            auto apply = dialog->findChild<QDialogButtonBox *>()->button(QDialogButtonBox::Ok);
+            mask->setText("4294967296");
+            apply->click();
+            QCOMPARE(commits, 0);
+            QVERIFY(dialog->findChild<QLabel *>("blendError")->isVisible());
+            mask->setText("0xf5f5f5f5");
+            dialog->findChild<QComboBox *>("/blend_state/targets/3/write_mask")->setCurrentIndex(5);
+            apply->click();
+        });
+        QVERIFY(editBlendDialog(&parent, initial, [&](const auto &patch) {
+            ++commits;
+            QCOMPARE(patch, nlohmann::json({{"sample_mask", 0xf5f5f5f5u},
+                                            {"blend_state", {{"targets", {{"3", {{"write_mask", 5}}}}}}}}));
+        }));
+        QCOMPARE(commits, 1);
+        QTimer::singleShot(0, &parent, [&] {
+            auto dialog = parent.findChild<QDialog *>("blendDialog");
+            if (!dialog)
+                return;
+            QTimer::singleShot(3000, dialog, &QDialog::reject);
+            dialog->findChild<QDialogButtonBox *>()->button(QDialogButtonBox::Ok)->click();
+        });
+        QVERIFY(!editBlendDialog(&parent, initial, [&](const auto &) { ++commits; }));
+        QCOMPARE(commits, 1);
+        QTimer::singleShot(0, &parent, [&] {
+            auto dialog = parent.findChild<QDialog *>("blendDialog");
+            if (!dialog)
+                return;
+            QTimer::singleShot(3000, dialog, &QDialog::reject);
+            dialog->findChild<QLineEdit *>("/sample_mask")->setText("0");
+            dialog->findChild<QDialogButtonBox *>()->button(QDialogButtonBox::Ok)->click();
+            QVERIFY(dialog->findChild<QLabel *>("blendError")->text().contains("changed"));
+            dialog->reject();
+        });
+        QVERIFY(!editBlendDialog(&parent, initial,
+                                 [&](const auto &) { throw std::runtime_error("Experiment changed"); }));
+    }
     void rasterizerHistory() {
         using namespace flora;
         QTemporaryDir dir;
