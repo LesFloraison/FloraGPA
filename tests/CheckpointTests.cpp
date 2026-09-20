@@ -1,11 +1,13 @@
 #include "CheckpointGpu.h"
 #include "application/CheckpointInspection.h"
+#include "application/DebugExpression.h"
 #include "application/DxbcCheckpoint.h"
 #include "application/DxbcCheckpointModel.h"
 #include "application/InvocationSelector.h"
 #include "application/ShaderDebugData.h"
 #include "application/ShaderSourceLines.h"
 #include "application/SourceStack.h"
+#include "application/SourceTrace.h"
 #include "application/SourceVariables.h"
 #include <QCoreApplication>
 #include <QFile>
@@ -42,6 +44,99 @@ Json inputsJson(const DeclaredInputs &inputs, bool domain) {
 }
 Json evaluate(const Json &j) {
     const auto op = j.at("op").get<std::string>();
+    if (op == "source-trace") {
+        size_t loads = 0;
+        SourceTrace::ValueLoader loader;
+        if (j.contains("values"))
+            loader = [&](size_t i) {
+                ++loads;
+                return j.at("values").at(i);
+            };
+        SourceTrace nav(j.at("result"), j.at("rows"), loader);
+        Json results = Json::array();
+        for (const auto &q : j.at("queries")) {
+            Json row;
+            try {
+                const auto action = q.at("action").get<std::string>();
+                const auto i = q.value("index", size_t(0));
+                Json v;
+                if (action == "location")
+                    v = nav.location(i);
+                else if (action == "stack")
+                    v = nav.stack(i);
+                else if (action == "path") {
+                    const auto p = nav.path(i);
+                    v = p ? Json(*p) : Json(nullptr);
+                } else if (action == "same")
+                    v = nav.same(i, q.at("other"));
+                else if (action == "reentry")
+                    v = nav.reentry(i);
+                else if (action == "next")
+                    v = nav.next(i, q.at("direction"));
+                else if (action == "function")
+                    v = nav.functionStep(i, q.value("out", false));
+                else if (action == "seek")
+                    v = nav.seek(i);
+                else if (action == "entry")
+                    v = nav.breakpointEntry(i);
+                else if (action == "line-entry")
+                    v = nav.lineEntry(i, {q.at("file"), q.at("line")});
+                else if (action == "count")
+                    v = nav.encounterCount(i, {q.at("file"), q.at("line")});
+                else if (action == "toggle")
+                    nav.toggle(q.at("file"), q.at("line"));
+                else if (action == "rule")
+                    nav.setRule(q.at("file"), q.at("line"), q.value("text", ""), q.value("mode", "always"),
+                                q.value("count", int64_t(1)));
+                else if (action == "export")
+                    v = nav.exportBreakpoints();
+                else if (action == "copy") {
+                    SourceTrace copy(j.at("result"), j.at("rows"), loader);
+                    copy.copyRules(nav);
+                    v = copy.exportBreakpoints();
+                } else if (action == "watch") {
+                    auto env = nav.environment(
+                        i, q.contains("frame") ? std::optional<std::string>(q.at("frame")) : std::nullopt);
+                    const auto value = env.expression(DebugExpression(q.at("text")));
+                    v = {{"type", value.kind}, {"text", value.text()}};
+                } else
+                    throw std::runtime_error("Unknown trace query");
+                row = {{"success", true}, {"value", v}};
+            } catch (const std::exception &e) {
+                row = {{"success", false}, {"error", e.what()}};
+            }
+            row["loads"] = loads;
+            results.push_back(std::move(row));
+        }
+        return results;
+    }
+    if (op == "debug-expression") {
+        DebugExpression expression(j.at("expression"));
+        if (j.value("parse_only", false))
+            return expression.text();
+        auto environment =
+            j.value("environment", "records") == "native"
+                ? DebugEnvironment::native(j.at("symbols"), j.at("values"), j.at("offset"), j.at("frame"))
+            : j.value("environment", "records") == "sdbg"
+                ? DebugEnvironment::sdbg(j.at("symbols"), j.at("values"), j.at("offset"))
+                : DebugEnvironment(j.at("records"));
+        const auto result = expression.evaluate(environment);
+        Json values = Json::array();
+        for (const auto &v : result.values)
+            std::visit(
+                [&](auto x) {
+                    using T = decltype(x);
+                    if constexpr (std::is_same_v<T, double>)
+                        values.push_back({{"bits", std::bit_cast<uint64_t>(x)}});
+                    else
+                        values.push_back({{"value", x}});
+                },
+                v);
+        return {{"type", result.kind},
+                {"values", values},
+                {"text", result.text()},
+                {"truth", result.values.size() == 1 ? Json(result.truth()) : Json(nullptr)}};
+    }
     if (op == "source-stack") {
         const auto raw = read(j.at("input"));
         auto symbols = j.contains("symbols") ? j.at("symbols") : sourceVariables(raw);
@@ -251,6 +346,61 @@ int probe(const std::string &path) {
 class CheckpointTests final : public QObject {
     Q_OBJECT
   private slots:
+    void expressionSemantics() {
+        const DebugEnvironment empty(Json::array());
+        auto text = [&](const char *s) { return DebugExpression(s).evaluate(empty).text(); };
+        QCOMPARE(text("0xffffffffu * 0xffffffffu"), std::string("1"));
+        QCOMPARE(text("-7 / 3"), std::string("-2"));
+        QCOMPARE(text("-7 % 3"), std::string("-1"));
+        QCOMPARE(text("float(16777216)+1"), std::string("16777216"));
+        QCOMPARE(text("double(16777216)+1"), std::string("16777217"));
+        QCOMPARE(text("false && missing"), std::string("false"));
+        QCOMPARE(text("true ? 7u : missing"), std::string("7"));
+        QCOMPARE(text("float3(1,2,3).zyx"), std::string("3, 2, 1"));
+        QVERIFY_THROWS_EXCEPTION(ExpressionError, DebugExpression("1<<32").evaluate(empty));
+        QVERIFY_THROWS_EXCEPTION(ExpressionError, DebugExpression("float2(1,2) && true").evaluate(empty));
+        QVERIFY_THROWS_EXCEPTION(ExpressionError, DebugExpression("x = 1"));
+        QVERIFY_THROWS_EXCEPTION(ExpressionError, DebugExpression(std::string(2049, '1')));
+        const auto records = Json::parse(R"([
+          {"name":"s.x","scope":"local","type":"int","values":[1],"columns":1,"status":"unavailable"},
+          {"name":"s.y","scope":"global","type":"int","values":[9],"columns":1,"status":"available"}])");
+        QVERIFY_THROWS_EXCEPTION(ExpressionError, DebugExpression("s.x").evaluate(DebugEnvironment(records)));
+        QVERIFY_THROWS_EXCEPTION(ExpressionError, DebugExpression("s.y").evaluate(DebugEnvironment(records)));
+    }
+    void sourceTraceConditionStops() {
+        const auto report = Json::parse(R"({"trace":true,"catalog":[
+          {"instruction":0,"word_offset":2,"checkpoint_allowed":true,"source_location":{"file":0,"line_start":1,"line_end":1}},
+          {"instruction":1,"word_offset":3,"checkpoint_allowed":true,"source_location":{"file":0,"line_start":2,"line_end":2}},
+          {"instruction":2,"word_offset":4,"checkpoint_allowed":true,"source_location":{"file":0,"line_start":3,"line_end":3}}],
+          "source_stack":{"status":"available","frames":[
+            {"id":"main","name":"main","kind":"function","parent":null,"ranges":[{"start":8,"end":20}]},
+            {"id":"leaf","name":"leaf","kind":"inline","parent":"main","ranges":[{"start":12,"end":16}]}]},
+          "source_variables":{"scopes":[{"id":"main","parent":null,"kind":"function"},{"id":"leaf","parent":"main","kind":"inline"}],
+            "variables":[{"id":"x","name":"x","type":{}}]}})");
+        auto rows = Json::parse(R"([{"record":0,"invocation":0,"hit":0,"instruction":0},
+          {"record":1,"invocation":0,"hit":1,"instruction":1},{"record":2,"invocation":0,"hit":2,"instruction":2},
+          {"record":3,"invocation":1,"hit":0,"instruction":0}])");
+        SourceTrace trace(report, rows, [](size_t) {
+            return Json::parse(
+                R"([{"variable_id":"x","scope_id":"leaf","name":"x","type":"uint","bits":7,"status":"available"}])");
+        });
+        QCOMPARE(trace.functionStep(0), size_t(2));
+        trace.setRule(0, 2, "x == 7");
+        QCOMPARE(trace.functionStep(0), size_t(1));
+        QCOMPARE(trace.seek(0), size_t(1));
+        trace.setRule(0, 2, "false");
+        QCOMPARE(trace.functionStep(0), size_t(2));
+        trace.setRule(0, 2, "missing");
+        QVERIFY_THROWS_EXCEPTION(ExpressionError, trace.functionStep(0));
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, trace.next(2, 1));
+        const auto rules = trace.exportBreakpoints();
+        QVERIFY_THROWS_EXCEPTION(ExpressionError, trace.setRule(0, 2, "x = 1"));
+        QVERIFY(trace.exportBreakpoints() == rules);
+        rows.erase(rows.begin());
+        SourceTrace truncated(report, rows);
+        truncated.setRule(0, 2, "", "equal", 1);
+        QVERIFY_THROWS_EXCEPTION(ExpressionError, truncated.breakpointEntry(0));
+    }
     void sourceStackBoundaries() {
         const std::vector<uint8_t> annotations{3, 0, 6, 2, 3, 4, 4, 4};
         const auto ranges = codeview::statementRanges(annotations, 8, {8, 12, 16}, true);

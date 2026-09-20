@@ -108,8 +108,11 @@ register-to-source value resolution is available as a library API. Source stacks
 per-frame locations and HS phase ownership are also included; see
 [`docs/SOURCE_VARIABLES_MIGRATION.md`](docs/SOURCE_VARIABLES_MIGRATION.md) and
 [`docs/SOURCE_STACK_MIGRATION.md`](docs/SOURCE_STACK_MIGRATION.md).
-SDBG variable assignments, source trace navigation and Qt checkpoint views
-remain pending.
+Native source navigation, conditional breakpoints and watch expressions are
+available as library APIs; see
+[`docs/SOURCE_NAVIGATION_MIGRATION.md`](docs/SOURCE_NAVIGATION_MIGRATION.md).
+SDBG variable assignments, debugger configuration and Qt checkpoint views
+remain pending; these APIs do not yet add debugger controls to the application.
 Export retains JSON, CSV, raw output bytes and OBJ when positions are valid;
 geometry choices are saved in experiment projects. Remaining stages and
 validation limits are listed in

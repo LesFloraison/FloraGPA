@@ -527,9 +527,14 @@
       "sha256": "5a2d470785ed0f52568b7d597d1de7f407eb24bfcf4c0f0502585a65bc8d7dde",
       "lines": 252,
       "description": "Bounded, read-only watch expressions over recorded source-variable mappings.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": [
+        "src/application/DebugExpression.cpp"
+      ],
+      "validation": [
+        "docs/SOURCE_NAVIGATION_MIGRATION.md",
+        "Bounded read-only parser and typed evaluator ported. 15821 expression/environment comparisons passed; debugger UI consumers remain pending."
+      ]
     },
     {
       "module": "debug_state.py",
@@ -1709,9 +1714,14 @@
       "sha256": "66528f2bbbdedb1c750b0c52208c9af201f3d3af4ffd2522fdccf47d3767048e",
       "lines": 56,
       "description": "Bounded watch expressions over current native source-frame values.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": [
+        "src/application/DebugExpression.cpp"
+      ],
+      "validation": [
+        "docs/SOURCE_NAVIGATION_MIGRATION.md",
+        "Native live lexical shadowing, original scalar bits and typed vector groups ported; actual GS/HS/DS snapshot comparisons passed. Qt consumers remain pending."
+      ]
     },
     {
       "module": "native_debug_ui.py",
@@ -1728,10 +1738,14 @@
       "lines": 51,
       "description": "Per-frame source locations and lexical ownership of native local symbols.",
       "status": "partial",
-      "native": ["src/application/SourceStack.cpp"],
+      "native": [
+        "src/application/SourceStack.cpp"
+      ],
       "validation": [
         "docs/SOURCE_STACK_MIGRATION.md",
-        "Native per-frame source locations and lexical local ownership; 1388 independent DIA frame locations agree. Source trace and Qt consumers remain pending."
+        "Native per-frame source locations and lexical local ownership; 1388 independent DIA frame locations agree. Source trace and Qt consumers remain pending.",
+        "docs/SOURCE_NAVIGATION_MIGRATION.md",
+        "Now consumed by the native SourceTrace library; Qt debugger consumers remain pending."
       ]
     },
     {
@@ -1740,10 +1754,15 @@
       "lines": 28,
       "description": "Restrict CodeView scopes to original HS phases, excluding the CP wrapper.",
       "status": "partial",
-      "native": ["src/application/SourceStack.cpp", "src/application/CheckpointInspection.cpp"],
+      "native": [
+        "src/application/SourceStack.cpp",
+        "src/application/CheckpointInspection.cpp"
+      ],
       "validation": [
         "docs/SOURCE_STACK_MIGRATION.md",
-        "Production native control-point/fork/join scope ownership, excluding the control-point wrapper in fork/join. Complete HS fields and native shader-to-variable resolution compared; source trace and Qt consumers remain pending."
+        "Production native control-point/fork/join scope ownership, excluding the control-point wrapper in fork/join. Complete HS fields and native shader-to-variable resolution compared; source trace and Qt consumers remain pending.",
+        "docs/SOURCE_NAVIGATION_MIGRATION.md",
+        "Now consumed by the native SourceTrace library; Qt debugger consumers remain pending."
       ]
     },
     {
@@ -1771,9 +1790,14 @@
       "sha256": "506de9933d26bee8d14b566e2c8863e8754f6857f1e0f3f9f3b88c4f7fc2b425",
       "lines": 23,
       "description": "Read-only expressions over verified, currently visible SDBG assignment history.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": [
+        "src/application/DebugExpression.cpp"
+      ],
+      "validation": [
+        "docs/SOURCE_NAVIGATION_MIGRATION.md",
+        "Verified-assignment environment and ambiguous-name rejection ported and tested synthetically. Native SDBG assignment reconstruction and Qt consumers remain pending."
+      ]
     },
     {
       "module": "native_sdbg_variables.py",
@@ -1790,10 +1814,15 @@
       "lines": 116,
       "description": "Original CodeView statement ranges and source inline stacks, without DIA.",
       "status": "partial",
-      "native": ["src/application/SourceStack.cpp", "src/application/CheckpointInspection.cpp"],
+      "native": [
+        "src/application/SourceStack.cpp",
+        "src/application/CheckpointInspection.cpp"
+      ],
       "validation": [
         "docs/SOURCE_STACK_MIGRATION.md",
-        "3492 parser/stack/location/ownership checks passed, including 28702 queries and three independent DIA comparisons. Production exports include source_stack; source trace navigation and Qt consumers remain pending."
+        "3492 parser/stack/location/ownership checks passed, including 28702 queries and three independent DIA comparisons. Production exports include source_stack; source trace navigation and Qt consumers remain pending.",
+        "docs/SOURCE_NAVIGATION_MIGRATION.md",
+        "Now consumed by the native SourceTrace library; Qt debugger consumers remain pending."
       ]
     },
     {
@@ -1801,9 +1830,14 @@
       "sha256": "1ee2849e1b0d437144e4825204bd3cf4fa119e12d96d48d3aac02ff6cac30450",
       "lines": 153,
       "description": "Source navigation within one native invocation, using verified original locations.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": [
+        "src/application/SourceTrace.cpp"
+      ],
+      "validation": [
+        "docs/SOURCE_NAVIGATION_MIGRATION.md",
+        "Full native source navigation, conditional/count breakpoints, rule copy/export and frame-watch APIs. 28998 differential operations in 73 scenarios passed. Configuration and Qt consumer wiring remain pending."
+      ]
     },
     {
       "module": "native_source_variables.py",

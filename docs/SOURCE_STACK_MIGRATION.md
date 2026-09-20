@@ -29,8 +29,11 @@ instructions and native decoded scopes; no precomputed Python phase model is
 passed to the native resolver.
 
 The library provides stack-at-offset, frame-local selection and per-frame
-source-location queries. Source trace stepping, breakpoints/watch controls,
-SDBG assignment reconstruction and the Qt source debugger are still pending.
+source-location queries. Source trace stepping and breakpoint/watch evaluation
+have since been added as native library APIs; see
+[SOURCE_NAVIGATION_MIGRATION.md](SOURCE_NAVIGATION_MIGRATION.md).
+SDBG assignment reconstruction, debugger configuration and the Qt source
+debugger remain pending.
 The full migration is not complete; these module entries remain partial until
 their remaining consumers are integrated.
 

@@ -11,7 +11,9 @@ there is not yet a Qt source-variable view or a new resolved-values CLI export.
 Existing binary/register exports remain unchanged. Source stacks and production
 HS phase ownership have since been ported; see
 [SOURCE_STACK_MIGRATION.md](SOURCE_STACK_MIGRATION.md). SDBG assignment
-reconstruction, source trace navigation and Qt integration remain pending.
+reconstruction and Qt integration remain pending. Source trace navigation and
+watch evaluation have since been added as library APIs; see
+[SOURCE_NAVIGATION_MIGRATION.md](SOURCE_NAVIGATION_MIGRATION.md).
 
 ## Behavior
 
