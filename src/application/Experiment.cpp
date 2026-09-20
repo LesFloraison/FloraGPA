@@ -6,6 +6,7 @@
 #include "SamplerEdits.h"
 #include "SetterEdits.h"
 #include "ShaderInspector.h"
+#include "SrvEdits.h"
 #include "core/BufferBindings.h"
 #include "core/UavCounters.h"
 #include <QFile>
@@ -82,11 +83,13 @@ void Experiment::apply(const Frame &frame, ReplayOptions &options) const {
     options.predicateSetters.clear();
     options.samplerSetters.clear();
     options.samplerEdits.clear();
+    options.srvEdits.clear();
     options.depthStencilEdits.clear();
     options.rasterizerEdits.clear();
     options.blendEdits.clear();
     std::map<Id, Json> pipeline;
     std::map<Id, std::map<std::pair<unsigned, unsigned>, Json>> samplers;
+    std::map<Id, std::map<std::pair<unsigned, unsigned>, Json>> srvs;
     for (size_t i = 0; i < revision(); ++i) {
         auto &operations = project_.at("history").at(i).at("operations");
         if (!operations.is_array())
@@ -120,6 +123,12 @@ void Experiment::apply(const Frame &frame, ReplayOptions &options) const {
                 if (pipeline[event].contains("blend_state") || pipeline[event].contains("blend_factor") ||
                     pipeline[event].contains("sample_mask"))
                     options.blendEdits[event] = blendEdit(frame, event, pipeline[event]);
+            } else if (kind == "srv_descriptor") {
+                const auto event = identifier(op.at("event"));
+                const auto stage = srvStage(op.at("stage").get<std::string>());
+                const auto slot = srvSlot(op.at("slot"));
+                auto &patch = srvs[event][{stage, slot}];
+                patch = mergeSrv(patch, op.at("values"));
             } else if (kind == "sampler") {
                 const auto event = identifier(op.at("event"));
                 const auto stage = samplerStage(op.at("stage").get<std::string>());
@@ -200,6 +209,10 @@ void Experiment::apply(const Frame &frame, ReplayOptions &options) const {
         }
     }
     // Descriptor inheritance uses final setter edits, regardless of history order.
+    for (const auto &[event, bindings] : srvs)
+        for (const auto &[target, patch] : bindings)
+            options.srvEdits[event][target] =
+                nativeSrv(effectiveSrv(frame, event, target.first, target.second, patch));
     for (const auto &[event, bindings] : samplers) {
         const auto state = samplerState(frame, event, options.samplerSetters);
         for (const auto &[target, patch] : bindings) {
@@ -322,6 +335,47 @@ void Experiment::setSampler(const Frame &frame, Id event, const std::string &sta
     history.push_back(
         {{"label", "Sampler " + stage + "[" + std::to_string(slot) + "] event " + std::to_string(event)},
          {"operations", Json::array({{{"kind", "sampler"},
+                                      {"event", event},
+                                      {"stage", stage},
+                                      {"slot", slot},
+                                      {"values", normalized}}})}});
+    project_["cursor"] = history.size();
+    try {
+        ReplayOptions checked;
+        apply(frame, checked);
+    } catch (...) {
+        project_ = std::move(previous);
+        throw;
+    }
+}
+Json Experiment::srv(const Frame &frame, Id event, const std::string &name, unsigned slot) const {
+    const auto stage = srvStage(name);
+    srvSlot(slot);
+    Json patch = Json::object();
+    for (size_t i = 0; i < revision(); ++i)
+        for (const auto &op : project_["history"][i]["operations"])
+            if (op.at("kind") == "srv_descriptor" && identifier(op.at("event")) == event &&
+                op.at("stage") == name && srvSlot(op.at("slot")) == slot)
+                patch = mergeSrv(patch, op.at("values"));
+    if (patch.empty()) {
+        const auto &entry = frame.entry(event);
+        if (entry.category != 7 || !isDraw(entry.type))
+            throw std::runtime_error("Select a draw or dispatch");
+        patch = capturedSrv(frame, frame.state(frame.event(event).state).stages[stage].srv[slot]);
+    }
+    return effectiveSrv(frame, event, stage, slot, patch);
+}
+void Experiment::setSrv(const Frame &frame, Id event, const std::string &stage, unsigned slot,
+                        const Json &values) {
+    srvStage(stage);
+    srvSlot(slot);
+    const auto normalized = normalizeSrv(values);
+    auto previous = project_;
+    auto &history = project_["history"];
+    history.erase(history.begin() + ptrdiff_t(revision()), history.end());
+    history.push_back(
+        {{"label", "SRV " + stage + "[" + std::to_string(slot) + "] event " + std::to_string(event)},
+         {"operations", Json::array({{{"kind", "srv_descriptor"},
                                       {"event", event},
                                       {"stage", stage},
                                       {"slot", slot},

@@ -2,6 +2,7 @@
 #include "DepthStencilCapture.h"
 #include "PredicateCapture.h"
 #include "SamplerCapture.h"
+#include "SrvCapture.h"
 #include "StateCapture.h"
 #include "StreamCapture.h"
 #include "SyntheticCapture.h"
@@ -12,9 +13,11 @@
 #include "app/PredicateView.h"
 #include "app/RasterizerDialog.h"
 #include "app/SamplerDialog.h"
+#include "app/SrvDialog.h"
 #include "application/BlendEdits.h"
 #include "application/RasterizerEdits.h"
 #include "application/SamplerEdits.h"
+#include "application/SrvEdits.h"
 #include <QAbstractItemModelTester>
 #include <QAction>
 #include <QCryptographicHash>
@@ -40,6 +43,83 @@ class UiTests final : public QObject {
         QVERIFY(window.grab().save(directory + '/' + name + ".png"));
     }
   private slots:
+    void srvDialogValidation() {
+        using namespace flora;
+        using Json = nlohmann::json;
+        QWidget parent;
+        int commits = 0;
+        Json initial{{"format", 41}, {"dimension", 4}, {"most_detailed_mip", 0}, {"mip_levels", 2}};
+        QTimer::singleShot(0, &parent, [&] {
+            auto dialog = parent.findChild<QDialog *>("srvDialog");
+            QVERIFY(dialog);
+            QTimer::singleShot(3000, dialog, &QDialog::reject);
+            auto apply = dialog->findChild<QDialogButtonBox *>()->button(QDialogButtonBox::Ok);
+            dialog->findChild<QSpinBox *>("srvSlot")->setValue(127);
+            apply->click();
+            QCOMPARE(commits, 0);
+            QVERIFY(dialog->findChild<QLabel *>("srvError")->text().contains("Load"));
+            dialog->findChild<QPushButton *>("srvLoad")->click();
+            auto mips = dialog->findChild<QLineEdit *>("mip_levels");
+            mips->setText("4294967296");
+            apply->click();
+            QCOMPARE(commits, 0);
+            mips->setText("0xffffffff");
+            apply->click();
+        });
+        QVERIFY(editSrvDialog(
+            &parent, [&](auto &, auto) { return initial; },
+            [&](auto &stage, unsigned slot, auto &patch) {
+                ++commits;
+                QCOMPARE(stage, std::string("ps"));
+                QCOMPARE(slot, 127u);
+                QCOMPARE(patch, Json({{"mip_levels", UINT32_MAX}}));
+            }));
+        QTimer::singleShot(0, &parent, [&] {
+            auto dialog = parent.findChild<QDialog *>("srvDialog");
+            QVERIFY(dialog);
+            QTimer::singleShot(3000, dialog, &QDialog::reject);
+            auto dimension = dialog->findChild<QComboBox *>("dimension");
+            dimension->setCurrentIndex(dimension->findData(5u));
+            QVERIFY(dialog->findChild<QLineEdit *>("first_array_slice"));
+            dialog->findChild<QLineEdit *>("first_array_slice")->setText("2");
+            dialog->findChild<QComboBox *>("format")->setEditText("0x29");
+            snapshot(*dialog, "srv-array-editor");
+            dialog->findChild<QDialogButtonBox *>()->button(QDialogButtonBox::Ok)->click();
+        });
+        QVERIFY(editSrvDialog(
+            &parent, [&](auto &, auto) { return initial; },
+            [&](auto &, auto, auto &patch) {
+                ++commits;
+                QCOMPARE(patch, Json({{"format", 41},
+                                      {"dimension", 5},
+                                      {"first_array_slice", 2},
+                                      {"array_size", 1},
+                                      {"most_detailed_mip", 0},
+                                      {"mip_levels", 2}}));
+            }));
+        QCOMPARE(commits, 2);
+        QTimer::singleShot(0, &parent, [&] {
+            auto dialog = parent.findChild<QDialog *>("srvDialog");
+            QVERIFY(dialog);
+            QTimer::singleShot(3000, dialog, &QDialog::reject);
+            dialog->findChild<QDialogButtonBox *>()->button(QDialogButtonBox::Ok)->click();
+        });
+        QVERIFY(!editSrvDialog(
+            &parent, [&](auto &, auto) { return initial; }, [&](auto &, auto, auto &) { ++commits; }));
+        QCOMPARE(commits, 2);
+        QTimer::singleShot(0, &parent, [&] {
+            auto dialog = parent.findChild<QDialog *>("srvDialog");
+            QVERIFY(dialog);
+            QTimer::singleShot(3000, dialog, &QDialog::reject);
+            dialog->findChild<QLineEdit *>("mip_levels")->setText("1");
+            dialog->findChild<QDialogButtonBox *>()->button(QDialogButtonBox::Ok)->click();
+            QVERIFY(dialog->findChild<QLabel *>("srvError")->text().contains("changed"));
+            dialog->reject();
+        });
+        QVERIFY(!editSrvDialog(
+            &parent, [&](auto &, auto) { return initial; },
+            [&](auto &, auto, auto &) { throw std::runtime_error("Experiment changed"); }));
+    }
     void samplerDialogValidation() {
         using namespace flora;
         QTemporaryDir dir;
@@ -202,6 +282,69 @@ class UiTests final : public QObject {
         QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
         QVERIFY(done.takeLast()[0].toBool());
         QCOMPARE(output->image().pixelColor(0, 0), QColor(0, 96, 0, 255));
+    }
+    void srvHistory() {
+        using namespace flora;
+        QTemporaryDir dir;
+        testing::srvCapture().save(dir.path() + "/srv.gpa_frame");
+        MainWindow window;
+        window.resize(1500, 950);
+        window.show();
+        QSignalSpy done(&window, &MainWindow::taskFinished);
+        window.openCapture(dir.path() + "/srv.gpa_frame");
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        auto api = window.findChild<QTableView *>("apiLog");
+        bool selected = false;
+        for (int row = 0; row < api->model()->rowCount(); ++row) {
+            auto index = api->model()->index(row, 0);
+            if (index.data(Qt::UserRole).toULongLong() == 1000) {
+                api->setCurrentIndex(index);
+                selected = true;
+                break;
+            }
+        }
+        QVERIFY(selected);
+        QTRY_VERIFY_WITH_TIMEOUT(!window.busy(), 30000);
+        auto edit = window.findChild<QAction *>("editSrv");
+        QVERIFY(edit && edit->isEnabled());
+        bool entered = false;
+        QTimer::singleShot(0, &window, [&] {
+            auto dialog = window.findChild<QDialog *>("srvDialog");
+            if (!dialog)
+                return;
+            QTimer::singleShot(3000, dialog, &QDialog::reject);
+            dialog->findChild<QLineEdit *>("most_detailed_mip")->setText("1");
+            dialog->findChild<QLineEdit *>("mip_levels")->setText("1");
+            snapshot(*dialog, "srv-editor");
+            entered = true;
+            dialog->findChild<QDialogButtonBox *>()->button(QDialogButtonBox::Ok)->click();
+        });
+        done.clear();
+        edit->trigger();
+        QVERIFY(entered);
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        auto output = window.findChild<ImageView *>("frameOutput");
+        QCOMPARE(output->image().pixelColor(0, 0), QColor(191, 0, 0, 255));
+        QAction *undo = nullptr, *redo = nullptr;
+        for (auto action : window.findChildren<QAction *>()) {
+            if (action->shortcut() == QKeySequence::Undo)
+                undo = action;
+            if (action->shortcut() == QKeySequence::Redo)
+                redo = action;
+        }
+        QVERIFY(undo && redo);
+        done.clear();
+        undo->trigger();
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        QCOMPARE(output->image().pixelColor(0, 0), QColor(32, 0, 0, 255));
+        done.clear();
+        redo->trigger();
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        QCOMPARE(output->image().pixelColor(0, 0), QColor(191, 0, 0, 255));
     }
     void samplerHistory() {
         using namespace flora;

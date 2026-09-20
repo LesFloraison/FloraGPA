@@ -187,6 +187,20 @@ produce an explicit error. Descriptor edits inherit the final edited bindings,
 regardless of operation order. Both editors support project save/load and undo/redo.
 Private coverage/quad consumers remain pending.
 
+**Edit > Edit Shader Resource View** edits the selected draw/dispatch's input view
+in any of the six stages and 128 slots. Choose the stage/slot and **Load**, then
+change the DXGI format, dimension, mip/layer/cube range or buffer element range.
+The form follows the chosen dimension; format names and numeric values are both
+accepted. `0xffffffff` selects all remaining mips. Invalid resource/format/range
+combinations fail through native D3D11 validation. Edits support save/load and
+undo/redo and restore the captured view at the next unedited event.
+
+Temporary SRVs use the current view's native resource, including an edited buffer
+input clone; other slots sharing the captured view remain independent. Native
+overlap with an active output can unbind the edited SRV. Cross-command SRV setter
+experiments, global view edits, texture input clones and private diagnostic/debug
+consumers are still pending and unsupported experiment kinds remain explicit errors.
+
 **Pipeline > Predicate** reads native occlusion and stream-output overflow predicates
 at the selected command boundary. The compact inspector shows the query status,
 boolean result, binding and raw predicate value, with JSON export. Active queries

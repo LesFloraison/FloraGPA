@@ -758,6 +758,7 @@ void Replay::command(const Entry &e) {
             }
             applyBlendEdit(e.id, state);
             applySamplerEdits(e.id);
+            applySrvEdits(e.id, state);
             clearBindingGaps();
             auto observe = [&](bool after) {
                 if (boundaryObserver_)
@@ -1007,13 +1008,13 @@ void Replay::run(const std::function<void(Id, size_t, size_t)> &progress,
     soQueries_.clear();
     soAutoResults_.clear();
     streamOutputHistory.clear();
-    soCountRequiresKnown_ = options_.editedEvents || !options_.shaders.empty() ||
-                            !options_.textures.empty() || !options_.disabled.empty() ||
-                            !options_.buffers.empty() || !options_.commandPayloads.empty() ||
-                            !options_.updateSources.empty() || !options_.uavCounters.empty() ||
-                            !options_.predicateSetters.empty() || !options_.depthStencilEdits.empty() ||
-                            !options_.rasterizerEdits.empty() || !options_.blendEdits.empty() ||
-                            !options_.samplerSetters.empty() || !options_.samplerEdits.empty();
+    soCountRequiresKnown_ =
+        options_.editedEvents || !options_.shaders.empty() || !options_.textures.empty() ||
+        !options_.disabled.empty() || !options_.buffers.empty() || !options_.commandPayloads.empty() ||
+        !options_.updateSources.empty() || !options_.uavCounters.empty() ||
+        !options_.predicateSetters.empty() || !options_.depthStencilEdits.empty() ||
+        !options_.rasterizerEdits.empty() || !options_.blendEdits.empty() ||
+        !options_.samplerSetters.empty() || !options_.samplerEdits.empty() || !options_.srvEdits.empty();
     soCountEnabled_ = false;
     for (const auto &[id, entry] : frame_.entries())
         if ((entry.category == 7 && entry.type == 0x38) ||

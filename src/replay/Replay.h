@@ -47,6 +47,7 @@ struct ReplayOptions {
     std::map<Id, PredicateBinding> predicateSetters;
     std::map<Id, SamplerBinding> samplerSetters;
     std::map<Id, std::map<std::pair<unsigned, unsigned>, D3D11_SAMPLER_DESC>> samplerEdits;
+    std::map<Id, std::map<std::pair<unsigned, unsigned>, D3D11_SHADER_RESOURCE_VIEW_DESC>> srvEdits;
     std::map<Id, DepthStencilEdit> depthStencilEdits;
     std::map<Id, RasterizerEdit> rasterizerEdits;
     std::map<Id, BlendEdit> blendEdits;
@@ -107,6 +108,7 @@ class Replay {
     std::map<std::array<uint8_t, 52>, Com<ID3D11SamplerState>> editedSamplers_;
     std::optional<bool> samplerMinMax_;
     void applySamplerEdits(Id event);
+    void applySrvEdits(Id event, const State &state);
     unsigned predicateIsolationDepth_ = 0;
     class PredicateIsolation {
         Replay &replay_;

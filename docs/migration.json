@@ -2210,9 +2210,21 @@
       "sha256": "2dadcd10d22d3bf00778b9de3701914b94f40bbc1668d41959099db1818379c5",
       "lines": 99,
       "description": "Per-event SRV descriptor experiments over the captured resource, in six stages.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": [
+        "src/application/SrvEdits.cpp",
+        "src/application/Experiment.cpp",
+        "src/replay/SrvEdits.cpp"
+      ],
+      "validation": [
+        "tests/SrvTests.cpp: eleven descriptor unions, strict uint32 validation, dimension changes, merged history, project save/load and rollback; hardware/WARP event scope, before/after, repeated replay and native range rejection",
+        "Scoped buffer input clones retain SRV ownership; failed descriptor creation restores persistent output edits and original input storage",
+        "artifacts/srv-final-comparison/validation.json: 288 Python comparisons passed, including all six stages, 768 native slots, high unused slots, shared views, typed/raw/structured buffers, eleven dimensions, format changes, remaining mips and overlapping/nonoverlapping UAV hazards",
+        "GF2 15 and BF1 9817 multi-mip edits match Python pixels exactly; removing edits restores both original golden hashes",
+        "artifacts/ctest-srv-final-release.log: all 23 suites passed; artifacts/ctest-srv-final-debug.log: three related suites passed",
+        "artifacts/validation-srv-final/validation.json: four golden-frame and suppressed-draw checks passed; artifacts/srv-module-audit.json: 268 reports, no Python/GPA/RenderDoc loaded; packaged EXE hashes match Release",
+        "Cross-command SRV setter experiments, global view edits, texture input clones and private diagnostic/debug consumers remain pending; descriptors currently inherit captured draw/dispatch bindings"
+      ]
     },
     {
       "module": "srv_setters.py",
@@ -2234,9 +2246,18 @@
       "sha256": "d2397d4ad43771d5ff47308f4e827ccda154fec7a657d2a1a4577aa711c3bce9",
       "lines": 57,
       "description": "Six-stage shader-resource view descriptor editor.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": [
+        "src/app/SrvDialog.cpp",
+        "src/app/DxgiFormats.inc",
+        "src/app/MainWindow.cpp"
+      ],
+      "validation": [
+        "tests/UiTests.cpp: srvHistory verifies actual worker pixels through Apply/Undo/Redo; srvDialogValidation covers target reload, uint32 overflow, dimension-specific fields, editable DXGI format, no-op history and stale commit rejection",
+        "artifacts/ctest-srv-final-release.log: full UI suite passed; artifacts/srv-debug-ui.txt: SRV history/validation and sampler history passed",
+        "artifacts/srv-ui/srv-editor.png and srv-array-editor.png visually inspected; compact English form exposed through Edit menu and API Log context menu",
+        "Editor loads captured draw/dispatch bindings; setter-edit inheritance and global view-edit dependency closure remain pending"
+      ]
     },
     {
       "module": "state.py",

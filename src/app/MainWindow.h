@@ -61,6 +61,7 @@ class MainWindow final : public QMainWindow {
     void editRasterizer();
     void editBlend();
     void editSampler();
+    void editSrv();
     void replaceUpdateSource();
     void compileShader();
     void inspectGeometry();
@@ -88,6 +89,7 @@ class MainWindow final : public QMainWindow {
     QAction *rasterizerAction_ = nullptr;
     QAction *blendAction_ = nullptr;
     QAction *samplerAction_ = nullptr;
+    QAction *srvAction_ = nullptr;
     QAction *bufferEditAction_ = nullptr, *bufferImportAction_ = nullptr;
     QAction *constantEditAction_ = nullptr;
     QAction *counterEditAction_ = nullptr;

@@ -4,6 +4,7 @@
 #include "PredicateView.h"
 #include "RasterizerDialog.h"
 #include "SamplerDialog.h"
+#include "SrvDialog.h"
 #include "application/ClassInspector.h"
 #include "application/CommandEdits.h"
 #include "application/Constants.h"
@@ -301,6 +302,8 @@ void MainWindow::buildUi() {
     blendAction_->setObjectName("editBlend");
     samplerAction_ = edit->addAction("Edit Sampler…", this, &MainWindow::editSampler);
     samplerAction_->setObjectName("editSampler");
+    srvAction_ = edit->addAction("Edit Shader Resource View…", this, &MainWindow::editSrv);
+    srvAction_->setObjectName("editSrv");
     updateSourceAction_ = edit->addAction("Replace Update Source…", this, &MainWindow::replaceUpdateSource);
     updateSourceAction_->setObjectName("replaceUpdateSource");
     updateExperimentActions();
@@ -395,7 +398,7 @@ void MainWindow::buildUi() {
     apiView_ = table(commandFilter_);
     apiView_->setContextMenuPolicy(Qt::ActionsContextMenu);
     apiView_->addActions({enableAction_, clearAction_, setterAction_, depthStencilAction_, rasterizerAction_,
-                          blendAction_, samplerAction_, updateSourceAction_});
+                          blendAction_, samplerAction_, srvAction_, updateSourceAction_});
     apiView_->setObjectName("apiLog");
     auto exportApi = new QAction("Export API Log…", this);
     exportApi->setObjectName("exportApiLog");
@@ -1835,6 +1838,8 @@ void MainWindow::updateExperimentActions() {
         blendAction_->setEnabled(isDraw(uint16_t(type)) && type != 0x35 && type != 0x36);
     if (samplerAction_)
         samplerAction_->setEnabled(isDraw(uint16_t(type)));
+    if (srvAction_)
+        srvAction_->setEnabled(isDraw(uint16_t(type)));
     if (updateSourceAction_)
         updateSourceAction_->setEnabled(type == 0x247);
     const bool bufferEditable = isDraw(uint16_t(type)) && selectedResource_ && frame_ &&
@@ -2221,6 +2226,31 @@ void MainWindow::editBuffer(bool importFile) {
             bufferBoundary_->setCurrentIndex(1);
             experimentChanged();
         }
+    } catch (const std::exception &e) {
+        showError(QString::fromUtf8(e.what()));
+    }
+}
+void MainWindow::editSrv() {
+    if (!frame_ || !experiment_ || !selectedEvent_)
+        return;
+    try {
+        const auto event = selectedEvent_;
+        const auto revision = revision_;
+        auto check = [&] {
+            if (revision != revision_ || event != selectedEvent_)
+                throw std::runtime_error("Selection or experiment changed; reopen this editor");
+        };
+        if (editSrvDialog(
+                this,
+                [&](const std::string &stage, unsigned slot) {
+                    check();
+                    return experiment_->srv(*frame_, event, stage, slot);
+                },
+                [&](const std::string &stage, unsigned slot, const nlohmann::json &values) {
+                    check();
+                    experiment_->setSrv(*frame_, event, stage, slot, values);
+                }))
+            experimentChanged();
     } catch (const std::exception &e) {
         showError(QString::fromUtf8(e.what()));
     }
