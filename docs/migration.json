@@ -616,7 +616,9 @@
       "validation": [
         "docs/CHECKPOINT_MODEL_MIGRATION.md",
         "Native declared DS inputs and exact operands implemented; checkpoint GPU consumer remains pending.",
-        "1476 differential/bounds checks: 1403 exact successful comparisons, 72 matching rejections and one separately classified native bounds hardening check; native checkpoint_model CTest."
+        "1476 differential/bounds checks: 1403 exact successful comparisons, 72 matching rejections and one separately classified native bounds hardening check; native checkpoint_model CTest.",
+        "docs/DXBC_CHECKPOINT_MIGRATION.md",
+        "Now consumed by the complete native checkpoint transform and direct Hardware/WARP fixtures; production capture/export/Qt integration remains pending."
       ]
     },
     {
@@ -646,12 +648,16 @@
       "status": "partial",
       "native": [
         "src/application/DxbcCheckpointModel.h",
-        "src/application/DxbcCheckpointModel.cpp"
+        "src/application/DxbcCheckpointModel.cpp",
+        "src/application/DxbcCheckpoint.h",
+        "src/application/DxbcCheckpoint.cpp"
       ],
       "validation": [
         "docs/CHECKPOINT_MODEL_MIGRATION.md",
-        "Original program catalogs, operand ranges, two-result address dependencies and static call graphs implemented. Complete instrumentation and GPU integration remain pending.",
-        "1476 differential/bounds checks: 1403 exact successful comparisons, 72 matching rejections and one separately classified native bounds hardening check; native checkpoint_model CTest."
+        "1476 differential/bounds checks: 1403 exact successful comparisons, 72 matching rejections and one separately classified native bounds hardening check; native checkpoint_model CTest.",
+        "docs/DXBC_CHECKPOINT_MIGRATION.md",
+        "Complete GS/DS/HS checkpoint/trace DXBC transform implemented: values/validity, inputs, dynamic arrays, staged dependent results, calls and HS runtime selection. Production capture/export/Qt integration remains pending.",
+        "1090 transform comparisons: 875 exact DXBC and metadata successes, 215 matching rejections, 27 shaders including four real frame resources; native Hardware/WARP GS/DS/HS snapshots, CPU/SO witnesses, filtering, overflow and index bounds tests."
       ]
     },
     {
@@ -704,7 +710,9 @@
       "validation": [
         "docs/CHECKPOINT_MODEL_MIGRATION.md",
         "Native original HS phase layout and declared phase inputs implemented; checkpoint GPU consumer remains pending.",
-        "1476 differential/bounds checks: 1403 exact successful comparisons, 72 matching rejections and one separately classified native bounds hardening check; native checkpoint_model CTest."
+        "1476 differential/bounds checks: 1403 exact successful comparisons, 72 matching rejections and one separately classified native bounds hardening check; native checkpoint_model CTest.",
+        "docs/DXBC_CHECKPOINT_MIGRATION.md",
+        "Now consumed by the complete native checkpoint transform and direct Hardware/WARP fixtures; production capture/export/Qt integration remains pending."
       ]
     },
     {
@@ -734,7 +742,9 @@
       "validation": [
         "docs/CHECKPOINT_MODEL_MIGRATION.md",
         "Native declarations, nested access order, address dependency checks, index rewriting and operand generation implemented; checkpoint GPU transform remains pending.",
-        "1476 differential/bounds checks: 1403 exact successful comparisons, 72 matching rejections and one separately classified native bounds hardening check; native checkpoint_model CTest."
+        "1476 differential/bounds checks: 1403 exact successful comparisons, 72 matching rejections and one separately classified native bounds hardening check; native checkpoint_model CTest.",
+        "docs/DXBC_CHECKPOINT_MIGRATION.md",
+        "Now consumed by the complete native checkpoint transform and direct Hardware/WARP fixtures; production capture/export/Qt integration remains pending."
       ]
     },
     {
@@ -1728,7 +1738,9 @@
       "validation": [
         "docs/CHECKPOINT_MODEL_MIGRATION.md",
         "Native validation, exact keys, snapshot selectors, bounded file IO and independent record verification implemented; trace capture and Qt consumers remain pending.",
-        "1476 differential/bounds checks: 1403 exact successful comparisons, 72 matching rejections and one separately classified native bounds hardening check; native checkpoint_model CTest."
+        "1476 differential/bounds checks: 1403 exact successful comparisons, 72 matching rejections and one separately classified native bounds hardening check; native checkpoint_model CTest.",
+        "docs/DXBC_CHECKPOINT_MIGRATION.md",
+        "Now consumed by the complete native checkpoint transform and direct Hardware/WARP fixtures; production capture/export/Qt integration remains pending."
       ]
     },
     {

@@ -4,12 +4,21 @@
 GF2 与 BF1 DX11 捕获。**尚未完成原 Python 版本的全部功能迁移。**
 当前独立包为 `out/FloraGPA-hull-outputs/FloraGPA.exe`。
 
-最新一批补齐 checkpoint／trace 的 C++ 基础层：原始指令目录、HS 阶段与
+最新一批完成 GS/DS/HS checkpoint／trace 的完整 C++ DXBC 插桩层，包括
+寄存器值／有效性、动态数组与双结果指令、原始调用、HS 运行时 token／输入筛选。
+1090 项插桩对照全部通过：875 项 DXBC 字节与元数据一致，215 项一致拒绝；
+覆盖 27 个 shader，其中 4 个来自 GF2/BF1。Hardware/WARP 原生测试核对
+GS 数组浮点位值、HS 控制点整数、DS 快照与下游 SO 字节、管线计数，以及
+计数器回绕、索引越界和容量边界。**生产采集协调、导出和 Qt 调试界面仍待接通**，
+没有将插桩层完成计作完整功能可用；当前独立包未替换。
+详见 [DXBC_CHECKPOINT_MIGRATION.md](DXBC_CHECKPOINT_MIGRATION.md)。
+
+上一批补齐 checkpoint／trace 的 C++ 基础层：原始指令目录、HS 阶段与
 HS/DS 声明输入、动态数组寄存器寻址、双结果指令的地址依赖、静态调用图、
 完整输入筛选及返回记录校验。1476 项检查全部通过，其中 1403 项成功结果
 与 Python 精确一致，72 项一致拒绝，1 项为单独计数的记录长度边界增强；
 包含编译器生成的 GS 4.0/4.1/5.0、HS/DS，以及真实帧的 4 个着色器资源。
-**这一批尚未接通 GPU checkpoint／trace 插桩、采集、导出或 Qt 调试界面**，
+该批当时尚未接通 GPU checkpoint／trace 插桩、采集、导出或 Qt 调试界面，
 不代表这些功能已经可用，也未替换当前独立包。完整迁移目标保持未完成。
 详见 [CHECKPOINT_MODEL_MIGRATION.md](CHECKPOINT_MODEL_MIGRATION.md)。
 
@@ -26,7 +35,7 @@ EXE 与最终 Release 构建一致。证据见 `artifacts/hull-portable-final/va
 `artifacts/ctest-hull-final.log`、`artifacts/hull-post-regression/validation.json`、
 `artifacts/hull-log-regression/validation.json`、`artifacts/hull-golden-final/validation.json`
 和 `artifacts/hull-runtime-audit.json`；仍未替代独立机器验证。
-HS/DS/GS checkpoint、trace 和调试器仍未迁移，完整目标尚未完成。
+HS/DS/GS checkpoint、trace 的生产采集和调试器仍未接通，完整目标尚未完成。
 详见 [HULL_OUTPUT_MIGRATION.md](HULL_OUTPUT_MIGRATION.md)。
 
 上一批接通原生 VS/DS 写入与 GS 发射的采集、导出和 Qt Geometry 入口。

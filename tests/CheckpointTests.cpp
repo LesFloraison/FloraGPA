@@ -1,3 +1,5 @@
+#include "CheckpointGpu.h"
+#include "application/DxbcCheckpoint.h"
 #include "application/DxbcCheckpointModel.h"
 #include "application/InvocationSelector.h"
 #include <QCoreApplication>
@@ -35,6 +37,28 @@ Json inputsJson(const DeclaredInputs &inputs, bool domain) {
 }
 Json evaluate(const Json &j) {
     const auto op = j.at("op").get<std::string>();
+    if (op == "instrument") {
+        CheckpointOptions options;
+        options.stage = j.at("stage");
+        options.slot = j.at("slot");
+        options.capacity = j.at("capacity");
+        if (j.at("checkpoint") != "trace") {
+            const auto &token = j.at("checkpoint");
+            if (!token.is_number_integer() || token.get<int64_t>() < 0 || token.get<uint64_t>() > UINT32_MAX)
+                throw std::runtime_error("Invalid checkpoint token");
+            options.token = token.get<uint32_t>();
+        }
+        if (j.contains("phase") && !j.at("phase").is_null())
+            options.hullPhase = j.at("phase").get<uint32_t>();
+        options.inputSelector = j.value("selector", Json(nullptr));
+        auto patched = instrumentCheckpoint(read(j.at("input")), options);
+        QFile output(QString::fromStdString(j.at("output").get<std::string>()));
+        if (!output.open(QIODevice::WriteOnly) ||
+            output.write(reinterpret_cast<const char *>(patched.bytes.data()), patched.bytes.size()) !=
+                qint64(patched.bytes.size()))
+            throw std::runtime_error("Cannot write checkpoint probe DXBC");
+        return patched.metadata;
+    }
     if (op == "domain")
         return inputsJson(domainInputs(j.at("rows").get<Rows>()), true);
     if (op == "hull")
@@ -139,6 +163,13 @@ int probe(const std::string &path) {
 class CheckpointTests final : public QObject {
     Q_OBJECT
   private slots:
+    void nativeSnapshots() {
+        try {
+            flora::testing::validateCheckpointGpu();
+        } catch (const std::exception &error) {
+            QFAIL(error.what());
+        }
+    }
     void nestedAddressOrder() {
         const auto arrays = indexableDeclarations({{0x04000069, 7, 8, 4}, {0x04000069, 3, 4, 2}});
         const auto nested = indexableOperand(7, 0, 15, {}, 1, indexableOperand(3, 2, 3, {}, 0));

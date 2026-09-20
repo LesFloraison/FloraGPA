@@ -96,7 +96,9 @@ original instance/patch identities and complete binary/CSV export. See
 [`docs/HULL_OUTPUT_MIGRATION.md`](docs/HULL_OUTPUT_MIGRATION.md).
 The native checkpoint parser and input-selector foundation is documented in
 [`docs/CHECKPOINT_MODEL_MIGRATION.md`](docs/CHECKPOINT_MODEL_MIGRATION.md);
-GPU checkpoint/trace capture and its Qt views remain pending.
+the complete DXBC transform and direct GPU tests are in
+[`docs/DXBC_CHECKPOINT_MIGRATION.md`](docs/DXBC_CHECKPOINT_MIGRATION.md).
+Production checkpoint/trace capture and its Qt views remain pending.
 Export retains JSON, CSV, raw output bytes and OBJ when positions are valid;
 geometry choices are saved in experiment projects. Remaining stages and
 validation limits are listed in

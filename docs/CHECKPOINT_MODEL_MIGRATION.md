@@ -3,8 +3,10 @@
 The C++ checkpoint foundation now models the original GS/DS/HS instruction
 stream, declared inputs, indexable temporaries and exact input selectors.
 This is a dependency of the recovered register snapshot and invocation trace
-features. **GPU checkpoint instrumentation, capture, export and Qt debugger
-integration are still pending.** The current user-facing package remains
+features. GPU instrumentation is now implemented and tested in
+[DXBC_CHECKPOINT_MIGRATION.md](DXBC_CHECKPOINT_MIGRATION.md).
+**Production capture, export and Qt debugger integration are still pending.**
+The current user-facing package remains
 `out/FloraGPA-hull-outputs/FloraGPA.exe`; this batch does not advertise a new
 working inspection mode.
 
@@ -73,10 +75,9 @@ The report also records hashes of the five original Python modules.
 
 ## Remaining integration
 
-Continue with the complete checkpoint/trace DXBC transform: register value and
-validity shadows, cached declared inputs, index bounds guards, dependent result
-staging, shared logging subroutines, HS runtime token/filter selection and exact
-metadata. Then connect original-draw private-output capture and readback/retries,
+The complete checkpoint/trace DXBC transform is now implemented; see
+[DXBC_CHECKPOINT_MIGRATION.md](DXBC_CHECKPOINT_MIGRATION.md) for byte parity and
+native GPU evidence. Next connect original-draw private-output capture and readback/retries,
 typed checkpoint exports, source-debug metadata and the compact Qt inspection
 views. These requirements remain part of the full migration goal; parser tests
 do not establish their completion or overall feature parity.
