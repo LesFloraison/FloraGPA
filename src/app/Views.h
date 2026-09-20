@@ -41,11 +41,14 @@ class ImageView final : public QGraphicsView {
     void actualSize();
   signals:
     void pixelHovered(const QString &value);
+    void pixelSelected(int x, int y, const QColor &color);
     void zoomChanged(int percentage);
 
   protected:
     void wheelEvent(QWheelEvent *) override;
     void mouseMoveEvent(QMouseEvent *) override;
+    void mousePressEvent(QMouseEvent *) override;
+    void mouseReleaseEvent(QMouseEvent *) override;
     void resizeEvent(QResizeEvent *) override;
 
   private:
@@ -53,6 +56,8 @@ class ImageView final : public QGraphicsView {
     QGraphicsPixmapItem *item_;
     QImage image_;
     bool fitting_ = true;
+    QPoint pressedAt_;
+    bool pixelClick_ = false;
 };
 class EventChart final : public QWidget {
     Q_OBJECT

@@ -16,6 +16,9 @@ The Output tab supports live presentation/RTV/DSV selection, view-bounded layers
 MSAA resolve or individual samples, display channels/ranges and raw storage
 export. See [`docs/FRAME_OUTPUT_MIGRATION.md`](docs/FRAME_OUTPUT_MIGRATION.md)
 for parity evidence and remaining integration work.
+Output settings and device/API selection are saved in experiment projects.
+Click an output pixel to locate its API/resource; a buffer RTV pixel opens the
+corresponding element bytes. See [`docs/OUTPUT_SESSION_MIGRATION.md`](docs/OUTPUT_SESSION_MIGRATION.md).
 
 ## Build
 

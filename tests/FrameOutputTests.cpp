@@ -1,6 +1,8 @@
 #include "MsaaCapture.h"
 #include "SyntheticCapture.h"
+#include "application/Experiment.h"
 #include "application/FrameOutput.h"
+#include "application/SessionUi.h"
 #include <QCoreApplication>
 #include <QTemporaryDir>
 #include <QtTest>
@@ -60,6 +62,66 @@ void oracle(const QString &path) {
 class FrameOutputTests : public QObject {
     Q_OBJECT
   private slots:
+    void replayUiRoundTrip() {
+        QTemporaryDir dir;
+        auto capture = computeCapture();
+        for (auto &entry : capture.entries)
+            if (entry.id == 111)
+                entry.id = UINT64_MAX;
+        capture.save(dir.path() + "/ui.gpa_frame");
+        Frame frame((dir.path() + "/ui.gpa_frame").toStdWString());
+        Json original{{"shader_documents", {{"900", "unsaved shader"}}},
+                      {"frame_display", {{"future_setting", "keep"}}},
+                      {"future_id", UINT64_MAX}};
+        ReplayUiState state;
+        state.target = "rt3";
+        state.channel = "b";
+        state.low = "-0.00";
+        state.high = "4e0";
+        state.layer = 2;
+        state.sample = 3;
+        state.warp = true;
+        state.event = UINT64_MAX;
+        state.boundary = 1;
+        auto ui = replayUiDocument(frame, state, original);
+        auto restored = replayUiState(frame, ui);
+        QCOMPARE(restored.event, UINT64_MAX);
+        QCOMPARE(restored.low, std::string("-0.00"));
+        QCOMPARE(restored.high, std::string("4e0"));
+        QCOMPARE(restored.layer, std::optional<uint32_t>(2));
+        QCOMPARE(restored.sample, std::optional<uint32_t>(3));
+        QCOMPARE(restored.boundary, 1);
+        QVERIFY(restored.warp);
+        QCOMPARE(ui["frame_display"]["future_setting"], Json("keep"));
+        QCOMPARE(ui["shader_documents"], original["shader_documents"]);
+        Experiment experiment(frame);
+        experiment.setEnabled(frame, UINT64_MAX, false);
+        const auto before = experiment.document();
+        const auto path = dir.path() + "/experiment.json";
+        experiment.save(path, ui);
+        QCOMPARE(experiment.document(), before);
+        Experiment loaded(frame);
+        loaded.load(path, frame);
+        QCOMPARE(loaded.document()["ui"], ui);
+        QCOMPARE(loaded.document()["history"], before["history"]);
+        QVERIFY(!loaded.enabled(UINT64_MAX));
+        QVERIFY_THROWS_EXCEPTION(std::exception, experiment.save(path, Json::array()));
+        loaded.load(path, frame);
+        QCOMPARE(loaded.document()["ui"], ui);
+        for (auto bad :
+             {Json{{"driver", "invalid"}}, Json{{"frame_display", {{"sample", "-1"}}}},
+              Json{{"frame_display", {{"sample", "32"}}}}, Json{{"frame_display", {{"channel", "wat"}}}},
+              Json{{"frame_display", {{"low", "1"}, {"high", "1"}}}},
+              Json{{"frame_display", {{"low", "nan"}}}}, Json{{"frame_display", {{"layer", true}}}},
+              Json{{"flora_output_boundary", 3}}})
+            QVERIFY_THROWS_EXCEPTION(std::exception, replayUiState(frame, bad));
+        QCOMPARE(replayUiState(frame, Json{{"frame_display", {{"target", "swap:123"}}}}).target,
+                 std::string("auto"));
+        QCOMPARE(replayUiState(frame, Json::object()).boundary, 0);
+        QCOMPARE(replayUiState(frame, Json{{"event", 999}}, UINT64_MAX).event, UINT64_MAX);
+        QCOMPARE(replayUiState(frame, Json{{"frame_display", {{"layer", " +2 "}, {"sample", "0"}}}}).layer,
+                 std::optional<uint32_t>(2));
+    }
     void displayValues() {
         std::vector<uint8_t> rgba{10, 20, 30, 40};
         QCOMPARE(displayOutput(rgba, 29), rgba);

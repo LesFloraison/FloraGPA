@@ -12,7 +12,7 @@ class Experiment {
   public:
     explicit Experiment(const Frame &frame);
     void load(const QString &path, const Frame &frame);
-    void save(const QString &path) const;
+    void save(const QString &path, const nlohmann::json &ui = nullptr) const;
     void apply(const Frame &frame, ReplayOptions &options) const;
     void setEnabled(const Frame &frame, Id event, bool enabled);
     void setClear(const Frame &frame, Id event, const nlohmann::json &values);

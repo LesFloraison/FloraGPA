@@ -13,6 +13,7 @@
 #include "application/ContextInspector.h"
 #include "application/FrameOutput.h"
 #include "application/PredicateInspector.h"
+#include "application/SessionUi.h"
 #include "application/SetterEdits.h"
 #include "application/ShaderInspector.h"
 #include "core/BufferBindings.h"
@@ -167,6 +168,7 @@ MainWindow::MainWindow() {
             displayedBuffer_ = 0;
             report_ = {};
             outputDir_.reset();
+            outputReport_ = nullptr;
             outputStorageAction_->setEnabled(false);
             {
                 QSignalBlocker targetBlock(outputTarget_), layerBlock(outputLayer_),
@@ -284,8 +286,9 @@ void MainWindow::buildUi() {
             openCapture(path);
     });
     openAction_->setIcon(style()->standardIcon(QStyle::SP_DialogOpenButton));
-    file->addAction("Open Experiment…", this, &MainWindow::openExperiment);
-    file->addAction("Save Experiment…", QKeySequence::Save, this, [this] { saveExperiment(); });
+    file->addAction("Open Experiment…", this, &MainWindow::openExperiment)->setObjectName("openExperiment");
+    file->addAction("Save Experiment…", QKeySequence::Save, this, [this] { saveExperiment(); })
+        ->setObjectName("saveExperiment");
     auto edit = menuBar()->addMenu("&Edit");
     undoAction_ = edit->addAction("Undo", QKeySequence::Undo, this, [this] {
         if (experiment_ && experiment_->undo())
@@ -374,6 +377,7 @@ void MainWindow::buildUi() {
     spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
     bar->addWidget(spacer);
     adapter_ = new QComboBox;
+    adapter_->setObjectName("replayAdapter");
     adapter_->addItems({"Hardware · DX11", "WARP · DX11"});
     adapter_->setToolTip("Replay adapter");
     bar->addWidget(adapter_);
@@ -511,6 +515,7 @@ void MainWindow::buildUi() {
     auto imageBar = new QToolBar;
     auto displayBar = new QToolBar;
     boundary_ = new QComboBox;
+    boundary_->setObjectName("outputBoundary");
     boundary_->addItems({"Final", "Before event", "After event"});
     imageBar->addWidget(boundary_);
     outputTarget_ = new QComboBox;
@@ -524,6 +529,7 @@ void MainWindow::buildUi() {
     outputLayer_->setObjectName("outputLayer");
     outputLayer_->setRange(-1, 65535);
     outputLayer_->setSpecialValueText("Auto layer");
+    outputLayer_->setPrefix("Layer ");
     outputLayer_->setValue(-1);
     outputLayer_->setToolTip("Absolute array layer or volume slice");
     imageBar->addWidget(outputLayer_);
@@ -531,6 +537,7 @@ void MainWindow::buildUi() {
     outputSample_->setObjectName("outputSample");
     outputSample_->setRange(-1, 31);
     outputSample_->setSpecialValueText("Resolve");
+    outputSample_->setPrefix("Sample ");
     outputSample_->setValue(-1);
     outputSample_->setToolTip("MSAA sample index; Resolve averages samples");
     imageBar->addWidget(outputSample_);
@@ -889,18 +896,28 @@ void MainWindow::buildUi() {
     zoomLabel_->setMinimumWidth(42);
     statusBar()->addPermanentWidget(zoomLabel_);
     connect(image_, &ImageView::pixelHovered, pixelLabel_, &QLabel::setText);
+    connect(image_, &ImageView::pixelSelected, this, &MainWindow::selectOutputPixel);
     connect(image_, &ImageView::zoomChanged, this,
             [this](int percent) { zoomLabel_->setText(QString("%1%").arg(percent)); });
     auto outputChanged = [this] {
         if (!frame_)
             return;
         ++revision_;
+        ++outputGeneration_;
         if (process_.state() != QProcess::NotRunning)
             cancel();
         replayTimer_.start();
     };
     connect(channels_, &QComboBox::currentTextChanged, this, outputChanged);
-    connect(outputTarget_, &QComboBox::currentIndexChanged, this, outputChanged);
+    connect(outputTarget_, &QComboBox::currentIndexChanged, this, [this, outputChanged] {
+        if (outputLow_->text() == "0") {
+            if (outputTarget_->currentData().toString() == "stencil" && outputHigh_->text() == "1")
+                outputHigh_->setText("255");
+            else if (outputTarget_->currentData().toString() != "stencil" && outputHigh_->text() == "255")
+                outputHigh_->setText("1");
+        }
+        outputChanged();
+    });
     connect(outputLayer_, &QSpinBox::valueChanged, this, outputChanged);
     connect(outputSample_, &QSpinBox::valueChanged, this, outputChanged);
     connect(outputLow_, &QLineEdit::editingFinished, this, outputChanged);
@@ -914,6 +931,7 @@ void MainWindow::buildUi() {
         }
     });
     connect(adapter_, &QComboBox::currentIndexChanged, this, [this] {
+        ++outputGeneration_;
         replayedState_->invalidate();
         predicateView_->invalidate();
         ++revision_;
@@ -1104,7 +1122,8 @@ void MainWindow::finishWorker(int code, QProcess::ExitStatus status) {
         if (!file.open(QIODevice::ReadOnly))
             throw std::runtime_error("Worker report is missing");
         QJsonParseError error;
-        report_ = QJsonDocument::fromJson(file.readAll(), &error).object();
+        const auto reportBytes = file.readAll();
+        report_ = QJsonDocument::fromJson(reportBytes, &error).object();
         if (error.error != QJsonParseError::NoError || !report_["completed"].toBool())
             throw std::runtime_error("Worker did not complete");
         if (runningKind_ == "replay-pipeline") {
@@ -1221,6 +1240,13 @@ void MainWindow::finishWorker(int code, QProcess::ExitStatus status) {
         if (!outputAvailable)
             imageLabel_->setText("No output image");
         imageLabel_->setToolTip(report_["image_status"].toString());
+        const auto msaa = report_["output_msaa"].toObject();
+        if (!msaa.isEmpty())
+            imageLabel_->setToolTip(imageLabel_->toolTip() + "\n" + msaa["initialization_note"].toString());
+        outputReport_ = outputAvailable ? nlohmann::json::parse(reportBytes.constData(),
+                                                                reportBytes.constData() + reportBytes.size())
+                                        : nlohmann::json();
+        displayedOutputGeneration_ = outputGeneration_;
         outputDir_ = std::move(jobDir_);
         outputStorageAction_->setEnabled(outputAvailable);
         if (runningTimings_) {
@@ -1967,6 +1993,7 @@ void MainWindow::updateExperimentActions() {
         editable && experiment_ && !experiment_->enabled(selectedEvent_) ? "Enable Event" : "Disable Event");
 }
 void MainWindow::experimentChanged() {
+    ++outputGeneration_;
     replayedState_->invalidate();
     predicateView_->invalidate();
     projectDirty_ = true;
@@ -2739,6 +2766,8 @@ void MainWindow::replaceUpdateSource() {
     }
 }
 void MainWindow::openExperiment() {
+    if (busy())
+        return;
     if (projectDirty_) {
         auto answer = QMessageBox::question(this, "Unsaved experiment", "Save experiment changes?",
                                             QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
@@ -2753,8 +2782,28 @@ void MainWindow::openExperiment() {
     try {
         auto candidate = std::make_unique<Experiment>(*frame_);
         candidate->load(path, *frame_);
+        const auto settings = replayUiState(
+            *frame_, candidate->document().value("ui", nlohmann::json::object()), selectedEvent_);
+        {
+            QSignalBlocker target(outputTarget_), channel(channels_), layer(outputLayer_),
+                sample(outputSample_), adapter(adapter_);
+            outputTarget_->setCurrentIndex(outputTarget_->findData(QString::fromStdString(settings.target)));
+            channels_->setCurrentText(QString::fromStdString(settings.channel).toUpper());
+            outputLow_->setText(QString::fromStdString(settings.low));
+            outputHigh_->setText(QString::fromStdString(settings.high));
+            outputLayer_->setValue(settings.layer ? int(*settings.layer) : -1);
+            outputSample_->setValue(settings.sample ? int(*settings.sample) : -1);
+            adapter_->setCurrentIndex(settings.warp ? 1 : 0);
+        }
         experiment_ = std::move(candidate);
         projectPath_ = path;
+        if (settings.event)
+            locateEvent(settings.event);
+        {
+            QSignalBlocker boundary(boundary_);
+            boundary_->setCurrentIndex(settings.boundary);
+        }
+        centerTabs_->setCurrentWidget(image_->parentWidget());
         experimentChanged();
         projectDirty_ = false;
         setWindowModified(false);
@@ -2773,7 +2822,21 @@ bool MainWindow::saveExperiment() {
     if (path.isEmpty())
         return false;
     try {
-        experiment_->save(path);
+        ReplayUiState state;
+        state.target = outputTarget_->currentData().toString().toStdString();
+        state.channel = channels_->currentText().toLower().toStdString();
+        state.low = outputLow_->text().toStdString();
+        state.high = outputHigh_->text().toStdString();
+        if (outputLayer_->value() >= 0)
+            state.layer = uint32_t(outputLayer_->value());
+        if (outputSample_->value() >= 0)
+            state.sample = uint32_t(outputSample_->value());
+        state.warp = adapter_->currentIndex() == 1;
+        state.event = selectedEvent_;
+        state.boundary = boundary_->currentIndex();
+        experiment_->save(
+            path,
+            replayUiDocument(*frame_, state, experiment_->document().value("ui", nlohmann::json::object())));
         projectPath_ = path;
         projectDirty_ = false;
         setWindowModified(false);
@@ -2801,6 +2864,70 @@ void MainWindow::exportOutputStorage() {
             throw std::runtime_error("Output metadata is unavailable");
         writeFile(path + ".json", metadata.readAll());
         statusBar()->showMessage("Output storage exported", 3000);
+    } catch (const std::exception &e) {
+        showError(QString::fromUtf8(e.what()));
+    }
+}
+void MainWindow::selectOutputPixel(int x, int y, const QColor &color) {
+    if (!frame_ || busy() || outputReport_.is_null())
+        return;
+    if (outputGeneration_ != displayedOutputGeneration_ || replayTimer_.isActive()) {
+        statusBar()->showMessage("Replay output before selecting a pixel", 4000);
+        return;
+    }
+    try {
+        const auto display = outputReport_.at("output_display");
+        const auto selection = outputReport_.at("output_selection");
+        const auto resource = display.at("resource").get<Id>();
+        const auto eventValue = selection.value("boundary", std::string{}) == "api_event"
+                                    ? outputReport_.at("event")
+                                    : selection.at("navigation_event");
+        Id event = 0;
+        if (eventValue.is_string())
+            event = std::stoull(eventValue.get<std::string>());
+        else if (eventValue.is_number_unsigned())
+            event = eventValue.get<Id>();
+        if (event && frame_->entries().contains(event) && frame_->entry(event).category == 7)
+            locateEvent(event);
+        const auto &entry = frame_->entry(resource);
+        if (entry.type == 0x83) {
+            const auto view = display.at("view_selection");
+            if (y != 0 || x < 0 || uint64_t(x) >= view.at("element_count").get<uint64_t>())
+                return;
+            inspectResource(resource);
+            bufferOffset_->setText(QString::number((view.at("first_element").get<uint64_t>() + uint64_t(x)) *
+                                                   view.at("element_size").get<uint64_t>()));
+            bufferLength_->setText(QString::number(view.at("element_size").get<uint64_t>()));
+            bufferBoundary_->setCurrentIndex(event ? 2 : 0);
+            replayTimer_.stop();
+            bufferTimer_.start();
+            return;
+        }
+        selectedResource_ = resource;
+        updateExperimentActions();
+        const auto coordinate = entry.type == 0x86 ? display.at("slice") : display.at("layer");
+        properties("Output Pixel",
+                   {{"Resource", QString::number(resource)},
+                    {"Event", event ? QString::number(event) : "—"},
+                    {"Pixel", QString("%1, %2").arg(x).arg(y)},
+                    {"Mip", QString::fromStdString(display.at("mip").dump())},
+                    {entry.type == 0x86 ? "Slice" : "Layer", QString::fromStdString(coordinate.dump())},
+                    {"Sample", display.at("sample").is_null()
+                                   ? (display.value("source_samples", 1u) > 1 ? "0 (resolved display)" : "0")
+                                   : QString::fromStdString(display.at("sample").dump())},
+                    {"Display RGBA", QString("%1, %2, %3, %4")
+                                         .arg(color.red())
+                                         .arg(color.green())
+                                         .arg(color.blue())
+                                         .arg(color.alpha())}});
+        auto root = properties_->topLevelItem(0);
+        if (root && root->childCount())
+            root->child(0)->setData(
+                0, Qt::UserRole,
+                QString::fromStdString(
+                    nlohmann::json({{"id", resource}, {"exists", true}, {"category", 5}}).dump()));
+        findChild<QTabWidget *>("inspectorTabs")->setCurrentIndex(0);
+        statusBar()->showMessage(QString("Pixel %1, %2 · T:%3").arg(x).arg(y).arg(resource), 4000);
     } catch (const std::exception &e) {
         showError(QString::fromUtf8(e.what()));
     }

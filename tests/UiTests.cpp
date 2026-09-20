@@ -42,6 +42,23 @@
 
 class UiTests final : public QObject {
     Q_OBJECT
+    void projectFile(flora::MainWindow &window, const char *actionName, const QString &path) {
+        const bool native = QCoreApplication::testAttribute(Qt::AA_DontUseNativeDialogs);
+        QCoreApplication::setAttribute(Qt::AA_DontUseNativeDialogs, true);
+        auto restore =
+            qScopeGuard([&] { QCoreApplication::setAttribute(Qt::AA_DontUseNativeDialogs, native); });
+        bool handled = false;
+        QTimer::singleShot(0, &window, [&] {
+            auto dialog = window.findChild<QFileDialog *>();
+            QVERIFY(dialog);
+            QTimer::singleShot(3000, dialog, &QDialog::reject);
+            dialog->selectFile(path);
+            handled = true;
+            QMetaObject::invokeMethod(dialog, "accept", Qt::QueuedConnection);
+        });
+        window.findChild<QAction *>(actionName)->trigger();
+        QVERIFY(handled);
+    }
     void snapshot(QWidget &window, const QString &name) {
         auto directory = qEnvironmentVariable("FLORA_UI_ARTIFACT_DIR");
         if (directory.isEmpty())
@@ -51,6 +68,185 @@ class UiTests final : public QObject {
         QVERIFY(window.grab().save(directory + '/' + name + ".png"));
     }
   private slots:
+    void imagePixelGestures() {
+        flora::ImageView image;
+        image.resize(320, 240);
+        QImage data(4, 3, QImage::Format_RGBA8888);
+        data.fill(QColor(11, 22, 33, 44));
+        image.setImage(data);
+        image.show();
+        QCoreApplication::processEvents();
+        QSignalSpy picked(&image, &flora::ImageView::pixelSelected);
+        const auto position = image.mapFromScene(QPointF(1.5, 1.5));
+        QTest::mouseClick(image.viewport(), Qt::LeftButton, Qt::NoModifier, position);
+        QCOMPARE(picked.size(), 1);
+        QCOMPARE(picked[0][0].toInt(), 1);
+        QCOMPARE(picked[0][1].toInt(), 1);
+        QCOMPARE(picked[0][2].value<QColor>(), QColor(11, 22, 33, 44));
+        QTest::mousePress(image.viewport(), Qt::LeftButton, Qt::NoModifier, position);
+        QTest::mouseMove(image.viewport(), position + QPoint(35, 0));
+        QTest::mouseRelease(image.viewport(), Qt::LeftButton, Qt::NoModifier, position + QPoint(35, 0));
+        QCOMPARE(picked.size(), 1);
+        QTest::mouseClick(image.viewport(), Qt::RightButton, Qt::NoModifier, position);
+        QCOMPARE(picked.size(), 1);
+    }
+    void outputProjectSettings() {
+        using namespace flora;
+        QTemporaryDir dir;
+        testing::msaaOutputCapture(false).save(dir.path() + "/msaa.gpa_frame");
+        MainWindow window;
+        window.resize(1500, 950);
+        window.show();
+        QSignalSpy done(&window, &MainWindow::taskFinished);
+        window.openCapture(dir.path() + "/msaa.gpa_frame");
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        auto target = window.findChild<QComboBox *>("outputTarget");
+        auto channel = window.findChild<QComboBox *>("outputChannel");
+        auto adapter = window.findChild<QComboBox *>("replayAdapter");
+        auto sample = window.findChild<QSpinBox *>("outputSample");
+        auto layer = window.findChild<QSpinBox *>("outputLayer");
+        auto high = window.findChild<QLineEdit *>("outputHigh");
+        auto image = window.findChild<ImageView *>("frameOutput");
+        done.clear();
+        target->setCurrentIndex(target->findData("rt0"));
+        layer->setValue(1);
+        sample->setValue(3);
+        adapter->setCurrentIndex(1);
+        high->setText("2.00");
+        channel->setCurrentText("R");
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        QCOMPARE(image->image().pixelColor(0, 0), QColor(18, 18, 18, 255));
+        auto api = window.findChild<QTableView *>("apiLog");
+        done.clear();
+        for (int row = 0; row < api->model()->rowCount(); ++row)
+            if (api->model()->index(row, 0).data(Qt::UserRole).toULongLong() == 110)
+                api->setCurrentIndex(api->model()->index(row, 0));
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        const auto path = dir.path() + "/output.json";
+        projectFile(window, "saveExperiment", path);
+        QFile saved(path);
+        QVERIFY(saved.open(QIODevice::ReadOnly));
+        const auto document = nlohmann::json::parse(saved.readAll().toStdString());
+        saved.close();
+        QCOMPARE(document["ui"]["driver"], nlohmann::json("warp"));
+        QCOMPARE(document["ui"]["frame_display"]["sample"], nlohmann::json("3"));
+        QCOMPARE(document["ui"]["frame_display"]["high"], nlohmann::json("2.00"));
+        QVERIFY(document["history"].empty());
+        QCOMPARE(document["ui"]["event"], nlohmann::json(110));
+        QCOMPARE(document["ui"]["flora_output_boundary"], nlohmann::json(2));
+        done.clear();
+        target->setCurrentIndex(target->findData("rt7"));
+        sample->setValue(-1);
+        adapter->setCurrentIndex(0);
+        high->setText("1");
+        channel->setCurrentText("RGBA");
+        for (int row = 0; row < api->model()->rowCount(); ++row)
+            if (api->model()->index(row, 0).data(Qt::UserRole).toULongLong() == 100)
+                api->setCurrentIndex(api->model()->index(row, 0));
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        QVERIFY(image->image().isNull());
+        done.clear();
+        projectFile(window, "openExperiment", path);
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        QCOMPARE(target->currentData().toString(), QString("rt0"));
+        QCOMPARE(channel->currentText(), QString("R"));
+        QCOMPARE(high->text(), QString("2.00"));
+        QCOMPARE(sample->value(), 3);
+        QCOMPARE(layer->value(), 1);
+        QCOMPARE(adapter->currentIndex(), 1);
+        QCOMPARE(api->currentIndex().data(Qt::UserRole).toULongLong(), 110ull);
+        QCOMPARE(window.findChild<QComboBox *>("outputBoundary")->currentIndex(), 2);
+        QCOMPARE(image->image().pixelColor(0, 0), QColor(18, 18, 18, 255));
+        auto invalid = document;
+        invalid["ui"]["driver"] = "invalid";
+        QFile broken(dir.path() + "/invalid.json");
+        QVERIFY(broken.open(QIODevice::WriteOnly));
+        broken.write(QByteArray::fromStdString(invalid.dump()));
+        broken.close();
+        projectFile(window, "openExperiment", broken.fileName());
+        QCOMPARE(adapter->currentIndex(), 1);
+        QCOMPARE(sample->value(), 3);
+        QCOMPARE(image->image().pixelColor(0, 0), QColor(18, 18, 18, 255));
+        snapshot(window, "output-project-restored");
+    }
+    void outputPixelNavigation() {
+        using namespace flora;
+        QTemporaryDir dir;
+        testing::msaaOutputCapture(false).save(dir.path() + "/msaa.gpa_frame");
+        MainWindow window;
+        window.resize(1500, 950);
+        window.show();
+        QSignalSpy done(&window, &MainWindow::taskFinished);
+        window.openCapture(dir.path() + "/msaa.gpa_frame");
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        auto image = window.findChild<ImageView *>("frameOutput");
+        done.clear();
+        window.findChild<QComboBox *>("outputChannel")->setCurrentText("R");
+        QTest::mouseClick(image->viewport(), Qt::LeftButton, Qt::NoModifier,
+                          image->mapFromScene(QPointF(2.5, 1.5)));
+        QCOMPARE(window.findChild<QTableView *>("apiLog")->currentIndex().data(Qt::UserRole).toULongLong(),
+                 0ull);
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        done.clear();
+        QTest::mouseClick(image->viewport(), Qt::LeftButton, Qt::NoModifier,
+                          image->mapFromScene(QPointF(2.5, 1.5)));
+        QCOMPARE(window.findChild<QTableView *>("apiLog")->currentIndex().data(Qt::UserRole).toULongLong(),
+                 110ull);
+        auto props = window.findChild<QTreeWidget *>("properties");
+        QCOMPARE(props->topLevelItem(0)->text(0), QString("Output Pixel"));
+        QCOMPARE(props->topLevelItem(0)->child(0)->text(1), QString("20"));
+        QCOMPARE(props->topLevelItem(0)->child(2)->text(1), QString("2, 1"));
+        QCOMPARE(props->topLevelItem(0)->child(4)->text(1), QString("1"));
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        snapshot(window, "output-pixel-navigation");
+        // Inspecting another resource does not invalidate this frame's own provenance.
+        auto resources = window.findChild<QTableView *>("resources");
+        for (int row = 0; row < resources->model()->rowCount(); ++row)
+            if (resources->model()->index(row, 0).data(Qt::UserRole).toULongLong() == 10)
+                resources->setCurrentIndex(resources->model()->index(row, 0));
+        window.findChild<QTabWidget *>("analysisTabs")->setCurrentIndex(0);
+        QTest::mouseClick(image->viewport(), Qt::LeftButton, Qt::NoModifier,
+                          image->mapFromScene(QPointF(1.5, 2.5)));
+        QCOMPARE(props->topLevelItem(0)->text(0), QString("Output Pixel"));
+        QCOMPARE(props->topLevelItem(0)->child(2)->text(1), QString("1, 2"));
+        testing::Capture buffer;
+        buffer.add(1, 5, 0x127, std::vector<uint8_t>(24));
+        buffer.buffer(20, 21, 32, 0, {0, 0, 0, 0});
+        buffer.buffer(24, 25, 0, 0, {0, 1, 2, 3});
+        buffer.add(22, 5, 0x8d, testing::statePack(Id(0), Id(0), Id(20), 42u, 1u, 1u, 2u, 0u));
+        buffer.add(100, 7, 0x34ff, testing::statePack(Id(0), Id(1), 1u, uint8_t(1), Id(22), Id(0)));
+        buffer.add(101, 7, 0x3e, testing::statePack(Id(0), Id(1), Id(20), Id(24)));
+        buffer.save(dir.path() + "/buffer.gpa_frame");
+        done.clear();
+        window.openCapture(dir.path() + "/buffer.gpa_frame");
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        done.clear();
+        auto target = window.findChild<QComboBox *>("outputTarget");
+        target->setCurrentIndex(target->findData("rt0"));
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        done.clear();
+        QTest::mouseClick(image->viewport(), Qt::LeftButton, Qt::NoModifier,
+                          image->mapFromScene(QPointF(1.5, .5)));
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        QCOMPARE(window.findChild<QLineEdit *>("bufferOffset")->text(), QString("8"));
+        QCOMPARE(window.findChild<QLineEdit *>("bufferLength")->text(), QString("4"));
+        auto table = window.findChild<QTableView *>("bufferTable");
+        QCOMPARE(table->model()->index(0, 1).data().toString(), QString("02 00 00 00"));
+        QCOMPARE(window.findChild<QTableView *>("apiLog")->currentIndex().data(Qt::UserRole).toULongLong(),
+                 101ull);
+        snapshot(window, "output-buffer-pixel");
+    }
     void outputSetterDialogValidation() {
         using namespace flora;
         using Json = nlohmann::json;

@@ -77,9 +77,11 @@ Package: `out/FloraGPA-frame-output/FloraGPA.exe`.
 
 ## Remaining integration
 
-This does not complete the Python application migration. Frame-display settings
-are not yet persisted/restored in experiment UI state. Pixel-to-API/resource
-navigation and the downstream pixel-history/coverage workflows remain pending.
+This does not complete the Python application migration. Output display settings,
+driver and API selection now save and restore through experiment UI state;
+see `docs/OUTPUT_SESSION_MIGRATION.md`. Output pixel navigation identifies the
+API/resource and selected subresource, and buffer pixels open their exact byte
+range. The downstream pixel-history/coverage/debugger workflows remain pending.
 The native before-draw inspector prepares the selected draw snapshot; the Python
 ordinary replay path can stop before binding that snapshot unless an observer
 or missing-binding recovery requests it. That boundary distinction needs a

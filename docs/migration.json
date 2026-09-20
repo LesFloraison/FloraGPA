@@ -92,7 +92,9 @@
         "src/application/Experiment.cpp",
         "src/application/ApiCommands.cpp",
         "src/application/QueryHistory.cpp",
-        "src/app/Models.cpp"
+        "src/app/Models.cpp",
+        "src/application/SessionUi.cpp",
+        "src/app/Views.cpp"
       ],
       "validation": [
         "docs/NATIVE_BASELINE.md",
@@ -101,7 +103,8 @@
         "tests/UiTests.cpp: counter edit, overflow rejection, undo/redo and stale-read invalidation",
         "tests/ApiCommandTests.cpp: wire bounds, references, metadata order, query states and filtered export",
         "tools/validate_api_commands.py: 920 GF2, 18024 BF1 and 4006 synthetic records plus resource/text filtering; JSON and parsed CSV, allowing different invalid diagnostic wording",
-        "tests/UiTests.cpp: field offsets, reference navigation, resource filtering and texture-preview priority"
+        "tests/UiTests.cpp: field offsets, reference navigation, resource filtering and texture-preview priority",
+        "docs/OUTPUT_SESSION_MIGRATION.md: output settings, driver/API/boundary project round trip; exact uint64 IDs and unknown UI fields; output pixel/resource/element navigation; other page UI state remains pending"
       ]
     },
     {
@@ -779,7 +782,7 @@
       "validation": [
         "Selected raw output, RTV/DSV mip/layer/W-slice/buffer ranges, CPU channels/ranges, sRGB encoded values and depth/stencil conversion",
         "tools/validate_frame_output_port.py: Python/native bytes and metadata; see docs/FRAME_OUTPUT_MIGRATION.md",
-        "MSAA resolve/sample output integrated; experiment UI persistence and before-boundary reconciliation remain pending"
+        "MSAA resolve/sample output integrated; output settings persist; before-boundary reconciliation remains pending"
       ]
     },
     {
@@ -1716,7 +1719,7 @@
       "validation": [
         "Native OM output identity, automatic/live presentation and explicit swap chains; no reference pixels used",
         "tools/validate_frame_output_port.py: missing/invalid/ambiguous markers, multiple swap chains, no image and live copies",
-        "Pixel navigation and before-boundary integration remain pending"
+        "Output pixel API/resource navigation is connected; before-boundary integration remains pending"
       ]
     },
     {
@@ -2072,7 +2075,9 @@
         "src/application/Experiment.cpp",
         "src/application/ApiCommands.cpp",
         "src/application/QueryHistory.cpp",
-        "src/app/Models.cpp"
+        "src/app/Models.cpp",
+        "src/application/SessionUi.cpp",
+        "src/app/Views.cpp"
       ],
       "validation": [
         "docs/NATIVE_BASELINE.md",
@@ -2081,7 +2086,8 @@
         "tests/UiTests.cpp: counter edit, overflow rejection, undo/redo and stale-read invalidation",
         "tests/ApiCommandTests.cpp: wire bounds, references, metadata order, query states and filtered export",
         "tools/validate_api_commands.py: 920 GF2, 18024 BF1 and 4006 synthetic records plus resource/text filtering; JSON and parsed CSV, allowing different invalid diagnostic wording",
-        "tests/UiTests.cpp: field offsets, reference navigation, resource filtering and texture-preview priority"
+        "tests/UiTests.cpp: field offsets, reference navigation, resource filtering and texture-preview priority",
+        "docs/OUTPUT_SESSION_MIGRATION.md: output settings, driver/API/boundary project round trip; exact uint64 IDs and unknown UI fields; output pixel/resource/element navigation; other page UI state remains pending"
       ]
     },
     {
@@ -2535,7 +2541,8 @@
         "src/app/Views.cpp"
       ],
       "validation": [
-        "docs/NATIVE_BASELINE.md"
+        "docs/NATIVE_BASELINE.md",
+        "UiTests::imagePixelGestures and outputPixelNavigation: left-click coordinates, drag separation and output provenance; other image consumers pending"
       ]
     }
   ]

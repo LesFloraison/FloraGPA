@@ -2,7 +2,7 @@
 
 已有可编译、可运行的 VS2022 / Qt Widgets 原生工程，能够独立重放当前验证的
 GF2 与 BF1 DX11 捕获。**尚未完成原 Python 版本的全部功能迁移。**
-当前独立包为 `out/FloraGPA-frame-output/FloraGPA.exe`。
+当前独立包为 `out/FloraGPA-output-session/FloraGPA.exe`。
 
 
 ## 当前可用
@@ -32,7 +32,7 @@ GF2 与 BF1 DX11 捕获。**尚未完成原 Python 版本的全部功能迁移�
 | 纹理原始存储读回 | 非 MSAA 的完整 mip / 数组层 / 3D 切片紧密存储；CLI texture-storage 导出；WARP 绑定中的 mip 检查复制保留 RTV 和 UAV counter | 图像转换独立于原始字节；部分平面/packed 格式和 GUI 原始存储导出仍待迁移 |
 | SRV setter 实验 | 六阶段 × 128 槽的起始槽/视图数组；逐槽跨快照继承、部分覆盖、范围移动/缩短、空调用、ClearState、缺失资源恢复；mip/layer 与只读 depth/stencil 冲突、原生解绑保持；Qt 编辑、保存与撤销/重做 | 移动范围要求可确认的前序绑定；描述符和 buffer 补丁/导出继承最终绑定；texture 输入克隆及私有诊断依赖尚未闭合 |
 | Output / SO setter 实验 | RTV/DSV、OM/CS UAV、SO 目标/偏移；KEEP、独立可选数组、64 槽 UAV、跨快照绑定和已知 SO cursor 保留；紧凑 Qt 表格、项目保存与撤销/重做 | buffer、counter、SRV 描述符及 IA 几何使用最终绑定；未知 SO cursor 拒绝猜测；texture 实验及私有诊断仍待迁移 |
-| 图像 | 自动/指定 swap chain、RT0–7、深度/模板；RTV/DSV mip、数组层、3D 切片、buffer 范围；浮点/整数/packed 格式、通道/范围、原始存储与 PNG 导出；MSAA resolve/指定样本、整数位保真、深度/模板 resolve | 显示设置项目持久化、像素导航及 before-draw 边界语义统一尚未完成；MSAA 帧前逐样本内容不声称恢复 |
+| 图像 | 自动/指定 swap chain、RT0–7、深度/模板；RTV/DSV mip、数组层、3D 切片、buffer 范围；浮点/整数/packed 格式、通道/范围、原始存储与 PNG 导出；MSAA resolve/指定样本、整数位保真、深度/模板 resolve；显示设置、设备、事件与边界保存/恢复；像素关联 API/资源和 buffer 元素字节 | before-draw 边界语义统一、像素历史/覆盖/调试消费者尚未完成；MSAA 帧前逐样本内容不声称恢复 |
 | 纹理 | GPU 格式转换、BC、浮点/整数、1D/2D/3D、mip/layer/slice、事件边界预览 | MSAA、平面格式及部分查看选项未迁移 |
 | Shader | DXBC 反汇编、反射、SPDB/SDBG 内嵌源码、HLSL 编译替换 | 不含 HLSL 恢复、单步调试及全部反射树 |
 | Buffer | 初始值、事件前后读回、范围、Hex/ASCII/32 位解释、导出；事件字节编辑/二进制补丁导入、绑定识别、撤销/重做；递归 CB 字段、CB1 范围和类型化编辑；按 UAV view 检查/编辑 Append/Consume/Counter | counter 支持 CS/OM 快照及已恢复 clear/copy/setter 引用；输出编辑和扩展 UAV 已接入；完整 setter/getter 与私有诊断仍待迁移 |
@@ -42,6 +42,13 @@ GF2 与 BF1 DX11 捕获。**尚未完成原 Python 版本的全部功能迁移�
 | 性能 | 原生 D3D11 时间戳、disjoint 与 pipeline statistics | 尚未迁移原版多轮调度、Intel 硬件指标/GTPin |
 
 ## 验证证据
+
+- 输出会话已接入项目 JSON，保存保持原实验历史并保留未迁移页面的未知字段。
+  uint64 ID、数值范围文本、非法设置拒绝、菜单保存重开、WARP/事件/样本恢复、
+  点击与拖动区分、过期图像拒绝和 buffer 元素导航均通过测试。
+  Release 全套 CTest **27/27**，Qt UI **41 项**无跳过；最后一次像素有效性修正的
+  Release / Debug 四项交互回归均通过。独立包 GF2/BF1 黄金帧及负对照四项通过。
+  详见 `docs/OUTPUT_SESSION_MIGRATION.md`。
 
 - 主输出和 MSAA 的验证说明见 `docs/FRAME_OUTPUT_MIGRATION.md`。
   CPU **6,515 用例**在 Release / Debug 中通过；完整 Python / native 对照

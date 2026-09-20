@@ -1,4 +1,5 @@
 #include "Views.h"
+#include <QApplication>
 #include <QJsonObject>
 #include <QMouseEvent>
 #include <QPainter>
@@ -117,6 +118,7 @@ ImageView::ImageView(QWidget *parent) : QGraphicsView(parent), scene_(this) {
     setRenderHint(QPainter::SmoothPixmapTransform, false);
 }
 void ImageView::setImage(QImage image) {
+    pixelClick_ = false;
     image_ = std::move(image);
     channel("RGB");
     fit();
@@ -165,6 +167,8 @@ void ImageView::wheelEvent(QWheelEvent *e) {
     e->accept();
 }
 void ImageView::mouseMoveEvent(QMouseEvent *e) {
+    if (pixelClick_ && (e->pos() - pressedAt_).manhattanLength() > QApplication::startDragDistance())
+        pixelClick_ = false;
     auto scenePosition = mapToScene(e->pos());
     QPoint p(int(std::floor(scenePosition.x())), int(std::floor(scenePosition.y())));
     if (image_.rect().contains(p)) {
@@ -178,6 +182,21 @@ void ImageView::mouseMoveEvent(QMouseEvent *e) {
                               .arg(color.alpha()));
     }
     QGraphicsView::mouseMoveEvent(e);
+}
+void ImageView::mousePressEvent(QMouseEvent *e) {
+    pixelClick_ = e->button() == Qt::LeftButton;
+    pressedAt_ = e->pos();
+    QGraphicsView::mousePressEvent(e);
+}
+void ImageView::mouseReleaseEvent(QMouseEvent *e) {
+    const bool click = pixelClick_ && e->button() == Qt::LeftButton &&
+                       (e->pos() - pressedAt_).manhattanLength() <= QApplication::startDragDistance();
+    pixelClick_ = false;
+    const auto location = mapToScene(e->pos());
+    const QPoint pixel(int(std::floor(location.x())), int(std::floor(location.y())));
+    QGraphicsView::mouseReleaseEvent(e);
+    if (click && image_.rect().contains(pixel))
+        emit pixelSelected(pixel.x(), pixel.y(), image_.pixelColor(pixel));
 }
 void ImageView::resizeEvent(QResizeEvent *e) {
     QGraphicsView::resizeEvent(e);

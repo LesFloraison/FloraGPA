@@ -76,6 +76,7 @@ class MainWindow final : public QMainWindow {
     void showError(const QString &error);
     void exportImage();
     void exportOutputStorage();
+    void selectOutputPixel(int x, int y, const QColor &color);
     void exportBytes();
     void setBusy(bool);
     void properties(const QString &title, const QList<QPair<QString, QString>> &rows);
@@ -151,6 +152,8 @@ class MainWindow final : public QMainWindow {
     QLineEdit *outputLow_, *outputHigh_;
     QAction *outputStorageAction_;
     std::unique_ptr<QTemporaryDir> outputDir_;
+    nlohmann::json outputReport_;
+    uint64_t outputGeneration_ = 0, displayedOutputGeneration_ = 0;
     QProgressBar *progress_;
     QAction *openAction_, *replayAction_, *collectAction_, *cancelAction_, *exportAction_;
     QDockWidget *logDock_;

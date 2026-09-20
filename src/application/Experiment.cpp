@@ -65,8 +65,14 @@ void Experiment::load(const QString &path, const Frame &frame) {
         throw;
     }
 }
-void Experiment::save(const QString &path) const {
-    auto text = project_.dump(2) + "\n";
+void Experiment::save(const QString &path, const Json &ui) const {
+    auto document = project_;
+    if (!ui.is_null()) {
+        if (!ui.is_object())
+            throw std::runtime_error("Project UI state must be an object");
+        document["ui"] = ui;
+    }
+    auto text = document.dump(2) + "\n";
     QSaveFile file(path);
     if (!file.open(QIODevice::WriteOnly) ||
         file.write(text.data(), qint64(text.size())) != qint64(text.size()) || !file.commit())
