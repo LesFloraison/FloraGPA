@@ -2393,9 +2393,19 @@
       "sha256": "ad43cae619757c69bbc74e509341e69e6b0d6ce4a82f1aff5841feffbb8bab16",
       "lines": 161,
       "description": "Serialized primitive diagnostic preserving measured native IA/VS semantics.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "ported",
+      "native": [
+        "src/application/QuadSerial.cpp",
+        "src/application/QuadSerial.h",
+        "src/application/DrawParameters.cpp",
+        "src/application/DrawParameters.h"
+      ],
+      "validation": [
+        "docs/QUAD_SERIAL_MIGRATION.md",
+        "tests/QuadSerialTests.cpp",
+        "tools/validate_quad_serial.py",
+        "Native helper parity: 2,378 comparisons, including 192 hardware/WARP GPU cases and 10 exact expected rejections. GPU index/argument writes, DrawAuto SO history, class instances, scoped edits, replacement VS and IA restoration are checked. Counter execution/private passes and Qt Quad integration remain pending in their owning modules."
+      ]
     },
     {
       "module": "quad_targets.py",

@@ -84,8 +84,9 @@ The complete Python-to-C++/Qt migration remains unfinished.
 
 The full Quad migration still needs every original execution responsibility:
 
-- Native serial IA/VS submission, strip assembly from current GPU index data,
-  instance step-rate offsets, indirect/DrawAuto resolution and shader caching.
+- Native serial IA/VS submission is now implemented and separately validated
+  in [QUAD_SERIAL_MIGRATION.md](QUAD_SERIAL_MIGRATION.md). Its integration into
+  the counter's private-output passes still remains.
 - Final HS/DS/GS/SO primitive capture, rasterizer-system-output bridge shaders,
   stream selection and the original WARP direct-isoline rejection.
 - Target/view matching and selected subresources; buffer/3D prepared-depth
