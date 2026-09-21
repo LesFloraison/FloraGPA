@@ -18,6 +18,7 @@
 #include "SrvDialog.h"
 #include "StatisticsView.h"
 #include "GpuProfileView.h"
+#include "CoverageView.h"
 #include "ViewDialog.h"
 #include "application/ClassInspector.h"
 #include "application/CommandEdits.h"
@@ -281,6 +282,8 @@ MainWindow::MainWindow() {
             showError(process_.errorString());
             if (runningKind_ == "timings")
                 gpuProfile_->finish(runningProfileRequest_, {{"error",process_.errorString().toStdString()}});
+            if (runningKind_ == "coverage")
+                coverage_->finish(runningCoverageRequest_, {{"error",process_.errorString().toStdString()}});
             if (runningKind_ == "statistics")
                 gpuStatistics_->finish(runningStatisticsRequest_,
                                        {{"error", process_.errorString().toStdString()}});
@@ -1027,6 +1030,7 @@ void MainWindow::buildUi() {
     gpuStatistics_ = new StatisticsView;
     centerTabs_->addTab(gpuStatistics_, "GPU Statistics");
     gpuProfile_ = new GpuProfileView;
+    buildCoverageUi();
     centerTabs_->addTab(gpuProfile_, "GPU Timing");
     connect(gpuProfile_, &GpuProfileView::eventRequested, this, [this](qulonglong id) { if(!busy()) locateEvent(id); });
     connect(gpuProfile_, &GpuProfileView::readRequested, this, [this](const QString &text,qulonglong serial) {
@@ -1242,6 +1246,7 @@ void MainWindow::buildUi() {
     });
     connect(adapter_, &QComboBox::currentIndexChanged, this, [this] {
         updateCheckpointContext();
+        updateProfileContext();
         ++outputGeneration_;
         replayedState_->invalidate();
         predicateView_->invalidate();
@@ -1323,6 +1328,7 @@ void MainWindow::setBusy(bool busy) {
     annotations_->setWorkerBusy(busy);
     gpuStatistics_->setWorkerBusy(busy);
     gpuProfile_->setWorkerBusy(busy);
+    coverage_->setWorkerBusy(busy);
     geometryStage_->setEnabled(!busy);
     geometryTable_->setEnabled(!busy && (geometryStage_->currentData() == "ia" ||
                                          geometryStage_->currentData() == "vs-index" ||
@@ -1600,6 +1606,8 @@ void MainWindow::finishWorker(int code, QProcess::ExitStatus status) {
             gpuStatistics_->finish(runningStatisticsRequest_, {{"error", "Cancelled"}});
         if (runningKind_ == "timings")
             gpuProfile_->finish(runningProfileRequest_, {{"error", "Cancelled"}});
+        if (runningKind_ == "coverage")
+            coverage_->finish(runningCoverageRequest_, {{"error", "Cancelled"}});
         if (runningKind_ == "predicate")
             predicateView_->finish(runningPredicateRequest_, {{"error", "Cancelled"}});
         if (runningKind_ == "replay-pipeline")
@@ -1669,6 +1677,15 @@ void MainWindow::finishWorker(int code, QProcess::ExitStatus status) {
             runningCheckpoint_->keepOutput(std::move(jobDir_));
             statusBar()->showMessage("Shader checkpoints ready", 3000);
             emit taskFinished(true);
+            return;
+        }
+        if (runningKind_ == "coverage") {
+            QFile coverageFile(jobDir_->filePath("result/coverage.json"));
+            if (!coverageFile.open(QIODevice::ReadOnly)) throw std::runtime_error("Coverage output is missing");
+            const auto result = nlohmann::json::parse(coverageFile.readAll().toStdString());
+            const bool accepted = coverage_->finish(runningCoverageRequest_, result, jobDir_->filePath("result"));
+            statusBar()->showMessage(accepted ? "Coverage ready" : "Coverage result discarded", 3000);
+            emit taskFinished(accepted);
             return;
         }
         if (runningKind_ == "timings") {
@@ -1962,6 +1979,8 @@ void MainWindow::finishWorker(int code, QProcess::ExitStatus status) {
             finishRdcAnalysis({{"ok", false}, {"error", e.what()}});
         if (runningKind_ == "timings")
             gpuProfile_->finish(runningProfileRequest_, {{"error",e.what()}});
+        if (runningKind_ == "coverage")
+            coverage_->finish(runningCoverageRequest_, {{"error",e.what()}});
         if (runningKind_ == "statistics")
             gpuStatistics_->finish(runningStatisticsRequest_, {{"error", e.what()}});
         if (runningKind_ == "replay-pipeline")
@@ -2593,6 +2612,7 @@ void MainWindow::updateProfileContext() {
     }
     const auto bytes=QByteArray::fromStdString(operations.dump(-1,' ',true));
     gpuProfile_->setContext(frame_,selectedEvent_,QString::fromLatin1(QCryptographicHash::hash(bytes,QCryptographicHash::Sha256).toHex()));
+    updateCoverageContext(QString::fromLatin1(QCryptographicHash::hash(bytes,QCryptographicHash::Sha256).toHex()));
 }
 void MainWindow::stashShaderDrafts() {
     if (!shaderDocument_) return;

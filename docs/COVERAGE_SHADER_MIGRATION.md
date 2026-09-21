@@ -75,14 +75,14 @@ CLI (`artifacts/coverage-shaders-golden/validation.json`).
 
 ## Remaining diagnostic migration
 
-The native coverage executor must still integrate output selection, marker
-textures, isolated RTV/DSV/UAV copies, hidden counters, pre-raster shader
-bindings, SO suspension, native readback and original-event submission. Quad
-diagnostics additionally need their counter/reference programs, serialized
-primitive submissions, depth preparation and accounting exports. The existing
-Python geometry/coverage controls and Quad panel must then be connected to Qt,
-including selection, coordinates, experiment persistence and complete exports.
+The subsequent [coverage executor](COVERAGE_EXECUTION_MIGRATION.md) integrates
+output selection, marker textures, private RTV/DSV/UAV copies, hidden counters,
+pre-raster shader bindings, SO suspension, native readback and original-event
+submission. [Qt coverage](COVERAGE_UI_MIGRATION.md) connects its controls,
+coordinates, experiment context and exports.
 
-These consumers retain their pending/partial statuses in `migration.json`.
-Only the three audited transformation modules are marked ported here; the
-complete Python-to-C++/Qt migration remains unfinished.
+Quad diagnostics still need their counter/reference programs, serialized
+primitive submissions, depth preparation, accounting exports and Qt controls.
+Those consumers retain pending/partial statuses in `migration.json`. Only the
+three transformation modules were audited in this shader stage; the complete
+Python-to-C++/Qt migration remains unfinished.

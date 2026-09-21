@@ -63,11 +63,14 @@ a working D3D11 adapter.
 
 ## Run and deploy
 
-Native **Coverage** is available through the CLI/worker:
+Native **Coverage** is available in the central image-inspection tab and through the CLI/worker:
 `coverage <capture> --id <draw> --out <directory>`. Fragment and geometry modes,
 target/layer selection, depth-test overrides and experiment projects retain the
-original coverage/after-draw/overlay exports. The Qt Coverage panel remains
-pending. See [coverage execution](docs/COVERAGE_EXECUTION_MIGRATION.md).
+original coverage/after-draw/overlay exports. The Qt panel provides Fit / 1:1,
+pixel navigation, cancellation and ZIP export of the four original artifacts.
+It shares the current experiment and hardware/WARP setting; changes invalidate
+stale results. See [coverage execution](docs/COVERAGE_EXECUTION_MIGRATION.md)
+and [Qt coverage](docs/COVERAGE_UI_MIGRATION.md).
 
 **GPU Timing** collects repeated native timestamp samples with warmup, inclusive
 API ranges and optional resource-writing commands. It shows distributions and

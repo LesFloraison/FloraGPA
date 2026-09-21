@@ -1,9 +1,10 @@
 # Native coverage execution
 
 `application/Coverage.cpp` executes the original fragment and geometry coverage
-diagnostics with D3D11. The CLI and isolated native worker expose `coverage`;
-the Qt coverage panel and Quad consumers remain to be migrated. This is further
-progress toward the full migration, not completion of the application.
+diagnostics with D3D11. The CLI and isolated native worker expose `coverage`.
+The subsequent [Qt coverage migration](COVERAGE_UI_MIGRATION.md) connects its
+controls, image navigation and exports to the analyzer. Quad consumers remain
+to be migrated. This is not completion of the application.
 
 ```powershell
 .\out\FloraGPA-coverage\FloraGPA.Cli.exe coverage D:\captures\sample.gpa_frame --id 430 --out D:\results\coverage
@@ -85,15 +86,17 @@ not intentionally change original depth/stencil behavior.
   Python/Tk/GPA/RenderDoc runtime dependency. All four product executable hashes
   match Release (`artifacts/coverage-runtime-audit.json`).
 
-Delivered package: `out/FloraGPA-coverage/`. The GUI retains its existing views;
-the new coverage interface in this package is CLI/worker only.
+Backend-stage package: `out/FloraGPA-coverage/` (CLI/worker coverage only).
+The subsequent Qt package is `out/FloraGPA-coverage-ui/`; its delivery evidence
+is recorded in [COVERAGE_UI_MIGRATION.md](COVERAGE_UI_MIGRATION.md).
 
 These results do not establish correctness for arbitrary captures or a separate
 clean Windows installation. MSAA reports retain the original explicit statement
 that pre-capture per-sample storage is not reconstructed. Buffer RTV coordinates
 describe view elements and raster positions, not observed GPU write addresses.
 
-The coverage module entries remain `partial` while Qt integration and the
-remaining consumer/experiment audit are open. Quad execution is not included in
-these claims. Python is used only by development comparisons; neither product
-executable launches Python for coverage.
+At this backend stage the coverage module entries remained `partial` pending
+Qt integration and the consumer/experiment audit, documented in the subsequent
+Qt migration. Quad execution is not included in these claims. Python is used
+only by development comparisons; neither product executable launches Python
+for coverage.

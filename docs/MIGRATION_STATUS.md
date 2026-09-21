@@ -2,17 +2,30 @@
 
 已有可编译、可运行的 VS2022 / Qt Widgets 原生工程，能够独立重放当前验证的
 GF2 与 BF1 DX11 捕获。**尚未完成原 Python 版本的全部功能迁移。**
-当前独立包为 `out/FloraGPA-coverage/FloraGPA.exe`。
+当前独立包为 `out/FloraGPA-coverage-ui/FloraGPA.exe`。
 
-最新一批迁入 Coverage 原生执行与 CLI/Worker 导出：fragment／geometry、
+最新一批接通中央 **Coverage** 页：Fragment／Geometry、有效 RTV／DSV、层／索引、
+深度测试、Fit／1:1、尺寸／缩放、纹理像素与缓冲区字节范围联动、取消重试及四项
+原版产物的 ZIP 导出。当前实验和硬件／WARP 设置共用原生 Worker；切换事件、
+实验或设备即清除过期结果。原版没有保存 Coverage 控件设置，迁移版保持这一边界。
+完整 Release 构建和 7 套相关 CTest 通过；原主窗口 54 项、Coverage 6 项均无
+失败或跳过。Windows-only PATH 发布包通过同样 6 项交互检查、16 项 CLI／Worker
+检查、4 项黄金帧／负对照和 10 份依赖审计。Qt 导出的完整报告和三张图像与原版
+真实 GF2 绘制逐项一致；四个程序与 Release 哈希一致，包中已移除临时测试文件。
+四个独立 Coverage 模块完成职责审计并更新为 `ported`，共享模块保留剩余缺口。
+当前总数为 **20 `ported`、116 `partial`、68 `pending`**，不是工作量百分比。
+**Quad 执行、界面及其他待迁模块仍未完成**。详见
+[COVERAGE_UI_MIGRATION.md](COVERAGE_UI_MIGRATION.md)。
+
+上一批迁入 Coverage 原生执行与 CLI/Worker 导出：fragment／geometry、
 RTV／DSV／viewport、数组层／mip／体纹理切片、缓冲区 RTV、MSAA、UAV
 重定位与私有输出隔离均已接通，保留实验编辑、条件绘制和 SO／DrawAuto 语义。
 744 组合成与集成 GPU 对照共 6,624 项检查通过，另有 GF2／BF1 的 8 组真实
 绘制对照、80 项检查通过。WARP 深度预览的初始 CPU 转换差异已按原版独立
 硬件 GPU 预览修正，没有放宽像素对照。完整 Release 构建、7 套相关 CTest、
 16 组独立包 CLI／Worker 检查、4 项黄金帧／负对照和 10 份运行依赖审计通过。
-四个产品程序与 Release 哈希一致。**Coverage 的 Qt 面板与 Quad 执行仍待迁移**，
-相关模块保留 `partial`；当前总数为 16 `ported`、120 `partial`、68 `pending`，
+四个产品程序与 Release 哈希一致。当时 Coverage 的 Qt 面板与 Quad 执行仍待迁移，
+相关模块保留 `partial`；该阶段总数为 16 `ported`、120 `partial`、68 `pending`，
 不是工作量百分比。详见 [COVERAGE_EXECUTION_MIGRATION.md](COVERAGE_EXECUTION_MIGRATION.md)。
 
 上一批补齐 Coverage／Quad 所依赖的 DXBC 改写：保留原 PS 的新增标记输出、
@@ -22,9 +35,9 @@ main 返回处替换颜色、保留 alpha、数组索引筛选、六阶段 SM5 U
 生成的字节码通过 660 项检查，覆盖硬件／WARP、MSAA、双源混合、动态 PS、
 数组索引及各前置阶段的 UAV 副作用。此项证据不代表整个 Python 诊断引擎已迁移。
 Release 全量构建、五套相关 CTest 和四项黄金帧／负对照通过。三个底层模块
-更新为 `ported`，当前为 16 `ported`、117 `partial`、71 `pending`，不等同于
-工作量百分比。完整 Coverage／Quad 后端与 Qt 页面仍待迁移，当前可用独立包
-仍为上述 GPU Timing 版本。详见 [COVERAGE_SHADER_MIGRATION.md](COVERAGE_SHADER_MIGRATION.md)。
+更新为 `ported`，该阶段为 16 `ported`、117 `partial`、71 `pending`，不等同于
+工作量百分比。当时完整 Coverage／Quad 后端与 Qt 页面仍待迁移，独立包为
+GPU Timing 版本。详见 [COVERAGE_SHADER_MIGRATION.md](COVERAGE_SHADER_MIGRATION.md)。
 
 上一批将原版重复 GPU 采样迁入原生后端和中央 **GPU Timing** 页：预热、
 包含端点的 API 范围、可选资源写入、耗时分布、逐轮真实时间轴、API 跳转、
