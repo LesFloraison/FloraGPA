@@ -1796,7 +1796,7 @@
       ],
       "validation": [
         "docs/SOURCE_NAVIGATION_MIGRATION.md",
-        "Verified-assignment environment and ambiguous-name rejection ported and tested synthetically. Native SDBG assignment reconstruction and Qt consumers remain pending."
+        "Verified-assignment environment and ambiguous-name rejection ported and tested synthetically. Native SDBG assignment reconstruction is now available as a separate library; Qt consumers remain pending."
       ]
     },
     {
@@ -1804,9 +1804,16 @@
       "sha256": "6ade47c637a8d6e32c2983cec5be54951f02c49f94ed836c8c9f96d07caedf07",
       "lines": 299,
       "description": "Legacy SDK variable assignments reconstructed from native instruction traces.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": [
+        "src/application/SdbgVariables.cpp",
+        "src/application/SourceVariables.cpp",
+        "src/application/CheckpointInspection.cpp"
+      ],
+      "validation": [
+        "docs/SDBG_VARIABLES_MIGRATION.md",
+        "13790 symbol/history comparisons passed; 442 additional exact history scenarios over 6220 native records. Production exports include SDBG symbols and limits. Qt history consumers and debugger configuration remain pending."
+      ]
     },
     {
       "module": "native_source_stack.py",
@@ -1852,9 +1859,10 @@
       "validation": [
         "docs/SOURCE_VARIABLES_MIGRATION.md",
         "14060 symbol/type/value comparisons passed, including 9940 native Hardware/WARP snapshot records; 7 diagnostic wording differences preserve status and issue counts.",
-        "SPDB symbols are included in production checkpoint exports. SDBG assignments and Qt source-variable integration remain pending.",
+        "SPDB/SDBG symbols are included in production checkpoint exports; source-variable resolution and assignment histories are native library APIs. Qt source-variable integration remains pending.",
         "docs/SOURCE_STACK_MIGRATION.md",
-        "Native HS phase ownership is now attached in production. 15742 updated comparisons passed, including 11606 native snapshot records resolved from original shaders without Python-supplied native symbol models."
+        "Native HS phase ownership is now attached in production. 15742 updated comparisons passed, including 11606 native snapshot records resolved from original shaders without Python-supplied native symbol models.",
+        "docs/SDBG_VARIABLES_MIGRATION.md"
       ]
     },
     {

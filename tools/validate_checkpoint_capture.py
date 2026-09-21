@@ -1,7 +1,7 @@
 """Development-only comparison of native checkpoint capture and complete exports.
 
-SPDB symbols, original source lines, source stacks and HS phase ownership are
-compared. SDBG assignments and Qt integration remain pending. Compare all other report fields,
+SPDB/SDBG symbols, original source lines, source stacks and HS phase ownership are
+compared. Debugger configuration and Qt integration remain pending. Compare other report fields,
 original bytecode/disassembly, and complete per-invocation histories (including
 raw register bits and CSVs). Atomic invocation/record allocation order may vary;
 never sort individual snapshots across invocations or discard their hit order.
@@ -53,7 +53,7 @@ def save(completed=False):
     sources = ('gs_checkpoint.py', 'vertex_writes.py', 'native_invocation_selector.py', 'dxbc_gs_checkpoint.py')
     (a.out/'validation.json').write_text(json.dumps(dict(
         completed=completed, passed=all(c['passed'] for c in checks), checks=checks,
-        pending=['SDBG source variables', 'source trace navigation', 'Qt integration'],
+        pending=['Debugger configuration', 'Qt checkpoint integration'],
         executable_sha256=hashlib.sha256(a.exe.read_bytes()).hexdigest(),
         reference_sources={s: hashlib.sha256((a.reference/'standalone'/s).read_bytes()).hexdigest() for s in sources}
     ), indent=2), encoding='utf-8')
@@ -106,10 +106,8 @@ def canonical(folder, report):
 
 def core(report):
     result = copy.deepcopy(report)
-    for key in ('source_variables', 'source_debug_status', 'hits_preview'):
+    for key in ('source_debug_status', 'hits_preview'):
         result.pop(key, None)
-    source_limits = report.get('source_variables', {}).get('limits', [])
-    result['limits'] = [v for v in result['limits'] if v not in source_limits]
     if 'register_capture' in result:
         meta = result['register_capture']
         for key in ('sha256', 'full_capture_sha256'):
@@ -156,12 +154,6 @@ def compare(name, path, stage, driver, instruction=None, trace=False, phase=None
     else:
         got = json.loads((actual/'checkpoint.json').read_text())
         want = json.loads(json.dumps(want))
-        symbols = copy.deepcopy(want['source_variables'])
-        if symbols.get('format') == 'SDBG assignments':
-            if got.get('source_variables', {}).get('status') != 'pending_native_sdbg_symbols':
-                differences.append(dict(source_variables='Missing explicit SDBG migration status'))
-        elif got.get('source_variables') != symbols:
-            differences.append(dict(source_variables='Decoded SPDB symbols differ'))
         left, right = core(want), core(got)
         for field in sorted(set(left)|set(right)):
             if left.get(field) != right.get(field):
@@ -250,6 +242,19 @@ if a.source_only:
         geometry_fixture(path, topology='point')
         replace(path, path, compile_project(nested(flags))[0], data_id=81)
         cases.append(('spdb-nested-'+str(flags), path, 'gs', 81))
+    from sdbg_variable_fixture import SOURCE as LEGACY_SOURCE, TYPED as LEGACY_TYPED
+    from sdbg_array_fixture import SOURCE as LEGACY_ARRAY
+    from probe_sdbg_wide import PREFIX, CASES
+    legacy_sources = [('basic', LEGACY_SOURCE), ('typed', LEGACY_TYPED), ('array', LEGACY_ARRAY)]
+    for tag, (body, expression) in CASES.items():
+        legacy_sources.append(('wide-'+tag, PREFIX+body+'\nV o;o.p=input[0];o.ids=uint4('+expression+',prim,0,1);dst.Append(o);\n}'))
+    for tag, text in legacy_sources:
+        path = a.out/('sdbg-'+tag+'.gpa_frame')
+        geometry_fixture(path, topology='point')
+        project = dict(format='FloraGPA shader project 1', files=[dict(name='legacy.hlsl', text=text)],
+                       root='legacy.hlsl', entry='main', profile='gs_5_0', flags=5)
+        replace(path, path, compile_legacy(project), data_id=81)
+        cases.append(('sdbg-'+tag, path, 'gs', 81))
 else:
     path = calls_fixture(a.out/'calls')
     cases.append(('calls', path, 'gs', 81))

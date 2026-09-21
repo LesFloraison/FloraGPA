@@ -4,6 +4,7 @@
 #include "application/DxbcCheckpoint.h"
 #include "application/DxbcCheckpointModel.h"
 #include "application/InvocationSelector.h"
+#include "application/SdbgVariables.h"
 #include "application/ShaderDebugData.h"
 #include "application/ShaderSourceLines.h"
 #include "application/SourceStack.h"
@@ -44,6 +45,19 @@ Json inputsJson(const DeclaredInputs &inputs, bool domain) {
 }
 Json evaluate(const Json &j) {
     const auto op = j.at("op").get<std::string>();
+    if (op == "sdbg-variables")
+        return sdbgVariables(read(j.at("input")));
+    if (op == "sdbg-history") {
+        auto report = j.at("result");
+        if (j.contains("input"))
+            report["source_variables"] = sdbgVariables(read(j.at("input")));
+        SdbgTraceValues trace(report, j.at("rows"),
+                              [&](size_t index) { return j.at("registers").at(index); });
+        Json values = Json::array();
+        for (const auto &index : j.at("indices"))
+            values.push_back(trace.at(index.get<size_t>()));
+        return {{"values", values}, {"events", trace.eventCount()}};
+    }
     if (op == "source-trace") {
         size_t loads = 0;
         SourceTrace::ValueLoader loader;
@@ -346,6 +360,62 @@ int probe(const std::string &path) {
 class CheckpointTests final : public QObject {
     Q_OBJECT
   private slots:
+    void sdbgAssignmentHistory() {
+        auto report = Json::parse(R"({"trace":true,"shader_sha256":"fixture","catalog":[
+          {"instruction":0,"token":10,"opcode":54,"word_offset":2,"checkpoint_allowed":true},
+          {"instruction":1,"token":11,"opcode":199,"word_offset":3,"checkpoint_allowed":true},
+          {"instruction":2,"token":12,"opcode":62,"word_offset":4,"checkpoint_allowed":true}],
+          "source_variables":{"status":"available","format":"SDBG assignments","shader_stage":"gs",
+            "shader_sha256":"fixture","initial":[],"phases":[],"scopes":[{"id":"s","name":"main"}],
+            "variables":[
+              {"id":"a","sdbg_id":0,"scope":"s","scope_label":"main","name":"a","type":{"leaves":[
+                {"path":"[0]","scalar":0,"type":"uint","size":4},
+                {"path":"[1]","scalar":1,"type":"uint","size":4}]}},
+              {"id":"wide","sdbg_id":1,"scope":"s","scope_label":"main","name":"wide","type":{"leaves":[
+                {"path":"","scalar":2,"type":"double","size":8}]}}],
+            "scalar_owners":{"0":[0,1],"1":[2]},"array_bindings":{"0":{"array":0,"slots":{"0:0":0,"1:0":1}}},
+            "instruction_map":{
+              "8":{"visible_variables":[0,1],"assignments":[{"scalar":0,"register":null,"component":0,
+                "invalidate_owner":null,"array_destination":{"owner":0,"array":0,"offset":0,
+                  "index_register":"r0","index_component":0,"binding":"0"}}]},
+              "12":{"visible_variables":[0,1],"assignments":[{"scalar":2,"register":"r1","component":0,"words":2,"invalidate_owner":null}]},
+              "16":{"visible_variables":[0,1],"assignments":[]}}}})");
+        auto rows = Json::parse(R"([
+          {"invocation":0,"hit":0,"instruction":0,"token":10,"opcode":54},
+          {"invocation":0,"hit":1,"instruction":1,"token":11,"opcode":199},
+          {"invocation":0,"hit":2,"instruction":2,"token":12,"opcode":62}])");
+        auto registers = Json::parse(R"([
+          [{"name":"r0","bits":[1,0,0,0],"written":[true,false,false,false]}],
+          [{"name":"r0","bits":[0,0,0,0],"written":[true,false,false,false]},
+           {"name":"x0[1]","bits":[42,0,0,0],"written":[true,false,false,false]}],
+          [{"name":"r1","bits":[0,1074003968,0,0],"written":[true,true,false,false]}]])");
+        size_t loads = 0;
+        auto load = [&](size_t i) {
+            ++loads;
+            return registers.at(i);
+        };
+        SdbgTraceValues trace(report, rows, load);
+        QCOMPARE(loads, size_t(3));
+        QVERIFY(trace.at(2)[2]["value"] == "2.5");
+        QVERIFY(trace.at(2)[2]["references"] == Json::array({"r1.x/r1.y"}));
+        QVERIFY(trace.at(1)[1]["bits"] == 42);
+        QVERIFY(trace.at(1)[0]["status"] == "unavailable");
+        QVERIFY(trace.at(1)[2]["status"] == "unavailable");
+        QVERIFY(trace.at(0)[1]["status"] == "unavailable");
+        QCOMPARE(loads, size_t(3));
+        QCOMPARE(trace.eventCount(), size_t(2));
+        registers[2][0]["written"][1] = false;
+        SdbgTraceValues partial(report, rows, load);
+        QVERIFY(partial.at(2)[2]["status"] == "unavailable");
+        registers[0][0]["written"][0] = false;
+        SdbgTraceValues unknownIndex(report, rows, load);
+        QVERIFY(unknownIndex.at(1)[1]["status"] == "unavailable");
+        rows[1]["hit"] = 9;
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, SdbgTraceValues(report, rows, load));
+        rows[1]["hit"] = 1;
+        report["shader_sha256"] = "different";
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, SdbgTraceValues(report, rows, load));
+    }
     void expressionSemantics() {
         const DebugEnvironment empty(Json::array());
         auto text = [&](const char *s) { return DebugExpression(s).evaluate(empty).text(); };

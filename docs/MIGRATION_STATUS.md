@@ -2,13 +2,20 @@
 
 已有可编译、可运行的 VS2022 / Qt Widgets 原生工程，能够独立重放当前验证的
 GF2 与 BF1 DX11 捕获。**尚未完成原 Python 版本的全部功能迁移。**
-当前独立包为 `out/FloraGPA-source-stack/FloraGPA.exe`。
+当前独立包为 `out/FloraGPA-sdbg-values/FloraGPA.exe`。
 
-最新一批迁入 C++ 源码导航、条件断点、命中次数规则和监视表达式底层 API。
+最新一批迁入 SDBG 变量符号与逐次赋值历史，正式 checkpoint 导出已包含完整符号。
+13,790 项符号／历史对照通过；新捕获的 6,220 条快照用于 442 项精确历史对照，
+包含数组写入前索引、双精度完整分量、反向／随机查看及缺失历史拒绝。
+独立包 164 项 Hardware/WARP 捕获对照、15,742 项 SPDB 回归、相关 4 套 CTest、
+4 项黄金帧和 164 份运行时审计通过。Qt 调试视图和配置持久化仍待接通，
+未将底层完成计作界面功能完成。详见 [SDBG_VARIABLES_MIGRATION.md](SDBG_VARIABLES_MIGRATION.md)。
+
+上一批迁入 C++ 源码导航、条件断点、命中次数规则和监视表达式底层 API。
 15,821 项表达式／作用域对照通过；73 个导航场景中的 28,998 次操作对照通过，
 包括实测快照、嵌套内联、调用／HS 阶段边界、条件断点优先停靠、缓存与截断预览。
 完整 Release 构建及相关 4 套 CTest 通过。该批尚未接通 Qt 调试控件和配置持久化，
-未替换当前独立包；SDBG 赋值重建仍待迁移，SDBG 表达式适配层只接受已验证的赋值值。
+当时未替换独立包；SDBG 赋值重建现已补齐，SDBG 表达式适配层只接受已验证的赋值值。
 详见 [SOURCE_NAVIGATION_MIGRATION.md](SOURCE_NAVIGATION_MIGRATION.md)。
 
 上一批接通原生源码调用栈、逐函数源码位置和 HS 阶段作用域，并纳入正式

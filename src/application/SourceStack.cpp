@@ -293,8 +293,7 @@ Json sourceStack(Bytes raw, Json &symbols, const Json &source) {
                 {"shader_sha256", sha256(raw)},
                 {"frames", Json::array()},
                 {"issues", Json::array()}};
-    if (symbols.value("format", "") == "SDBG assignments" ||
-        symbols.value("status", "") == "pending_native_sdbg_symbols") {
+    if (symbols.value("format", "") == "SDBG assignments") {
         result["issues"].push_back("SDBG scope snapshots are not a reconstructed function stack");
         return result;
     }

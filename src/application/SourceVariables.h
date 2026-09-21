@@ -3,6 +3,9 @@
 #include <nlohmann/json.hpp>
 
 namespace flora {
+namespace source_detail {
+std::string scalarText(const std::string &kind, uint64_t bits);
+}
 nlohmann::json sourceVariables(Bytes shader);
 nlohmann::json resolveSourceVariables(const nlohmann::json &model, const nlohmann::json &registers,
                                       const nlohmann::json &metadata, const nlohmann::json &hit,

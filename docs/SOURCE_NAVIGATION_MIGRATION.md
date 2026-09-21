@@ -2,10 +2,10 @@
 
 `DebugExpression` and `SourceTrace` port the recovered expression engine, native
 source-frame environments and invocation-local source navigation to C++.
-They are library APIs at this stage. The Qt debugger, its saved configuration
-and SDBG assignment reconstruction are not yet integrated. The current deployed
-application remains `out/FloraGPA-source-stack/FloraGPA.exe`; this batch does not
-claim new debugger controls in that package.
+They are library APIs at this stage. The Qt debugger and its saved configuration
+are not yet integrated. SDBG assignment reconstruction was subsequently ported;
+see [SDBG_VARIABLES_MIGRATION.md](SDBG_VARIABLES_MIGRATION.md). Neither batch
+claims new debugger controls in the application.
 
 ## Expression semantics
 
@@ -28,7 +28,8 @@ Equal-depth duplicate names remain ambiguous. Aggregate/vector lookups use the
 decoded type groups; scalar fields named `x` and `y` alone do not imply a vector.
 The SDBG environment adapter accepts verified assignment-history values and
 rejects same-name declarations without inventing lexical ancestry. The adapter
-does not reconstruct SDBG assignments; that dependency remains pending.
+does not reconstruct SDBG assignments itself; the separate `SdbgTraceValues`
+library now supplies that dependency. Qt consumer wiring remains pending.
 
 ## Navigation semantics
 

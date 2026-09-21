@@ -215,7 +215,7 @@ for case,want,got in zip(jobs,expected,actual):
     checks.append(dict(name=case['name'],passed=equivalent,exact=exact))
 report=dict(passed=all(r['passed'] for r in checks),count=len(checks),exact=sum(r['exact'] for r in checks),
             snapshot_records=capture_count,checks=checks,
-            pending=['SDBG assignments','source trace navigation','Qt source variable view'],
+            pending=['Debugger configuration','Qt source variable view'],
             executable_sha256=hashlib.sha256(a.exe.read_bytes()).hexdigest(),
             reference_sources={s:hashlib.sha256((a.reference/'standalone'/s).read_bytes()).hexdigest()
                                for s in ('native_source_variables.py','native_source_stack.py','native_hs_scopes.py')})

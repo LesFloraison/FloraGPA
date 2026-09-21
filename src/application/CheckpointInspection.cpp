@@ -153,6 +153,8 @@ CheckpointInspection checkpointCatalog(Bytes shader, Id resource, const Json &ev
                                "original instructions retain native subroutine input behavior.",
                                "Executed out-of-bounds indexable temporary accesses reject the capture "
                                "because their native behavior is undefined."});
+    for (const auto &limit : sourceSymbols.value("limits", Json::array()))
+        limits.push_back(limit);
     if (options.stage == "hs") {
         limits[3] = "HS outputs and temporaries describe only the selected original phase execution; "
                     "previous phases are not concatenated.";
@@ -187,7 +189,7 @@ CheckpointInspection checkpointCatalog(Bytes shader, Id resource, const Json &ev
                      {"source_lines", sourceLines},
                      {"source_variables", sourceSymbols},
                      {"source_stack", stack},
-                     {"source_debug_status", "sdbg_variables_source_trace_and_qt_pending"}};
+                     {"source_debug_status", "debugger_configuration_and_qt_pending"}};
     if (options.stage == "hs")
         result.report["hs_phases"] = checkpoint::hullPhases(parsed.code.instructions);
     if (options.trace)

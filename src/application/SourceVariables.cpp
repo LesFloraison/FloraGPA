@@ -1,4 +1,5 @@
 #include "SourceVariables.h"
+#include "SdbgVariables.h"
 #include "ShaderDebugData.h"
 #include "core/Dxbc.h"
 #include <bit>
@@ -238,7 +239,7 @@ Json sourceVariables(Bytes raw) {
     const auto parts = shader_debug::chunks(raw);
     if (!parts.contains("SPDB")) {
         if (parts.contains("SDBG"))
-            result["status"] = "pending_native_sdbg_symbols";
+            return sdbgVariables(raw);
         return result;
     }
     try {
@@ -436,11 +437,23 @@ std::string floatValue(double value) {
     return result + digits.substr(0, point) + "." + digits.substr(point);
 }
 } // namespace
+std::string source_detail::scalarText(const std::string &kind, uint64_t bits) {
+    if (kind == "float")
+        return floatValue(std::bit_cast<float>(uint32_t(bits)));
+    if (kind == "double")
+        return floatValue(std::bit_cast<double>(bits));
+    if (kind == "int")
+        return std::to_string(std::bit_cast<int32_t>(uint32_t(bits)));
+    if (kind == "int64")
+        return std::to_string(std::bit_cast<int64_t>(bits));
+    if (kind == "bool")
+        return bits ? "True" : "False";
+    return std::to_string(bits);
+}
 Json resolveSourceVariables(const Json &model, const Json &registers, const Json &meta, const Json &row,
                             uint64_t byteOffset) {
-    if (model.value("format", "") == "SDBG assignments" ||
-        model.value("status", "") == "pending_native_sdbg_symbols")
-        throw std::runtime_error("Native SDBG assignment reconstruction is pending");
+    if (model.value("format", "") == "SDBG assignments")
+        return sdbgDisplay(model, {}, byteOffset);
     std::map<std::string, Json> byName, scopes;
     for (const auto &reg : registers)
         byName[reg.at("name").get<std::string>()] = reg;
@@ -635,19 +648,7 @@ Json resolveSourceVariables(const Json &model, const Json &registers, const Json
             if (words.size() * 4 == size) {
                 const uint64_t bits = uint64_t(words[0]) | (size == 8 ? uint64_t(words[1]) << 32 : 0);
                 const auto kind = leaf.at("type").get<std::string>();
-                std::string value;
-                if (kind == "float")
-                    value = floatValue(std::bit_cast<float>(uint32_t(bits)));
-                else if (kind == "double")
-                    value = floatValue(std::bit_cast<double>(bits));
-                else if (kind == "int")
-                    value = std::to_string(std::bit_cast<int32_t>(uint32_t(bits)));
-                else if (kind == "int64")
-                    value = std::to_string(std::bit_cast<int64_t>(bits));
-                else if (kind == "bool")
-                    value = bits ? "True" : "False";
-                else
-                    value = std::to_string(bits);
+                const auto value = source_detail::scalarText(kind, bits);
                 item.update(
                     {{"status", "available"}, {"value", value}, {"bits", bits}, {"references", refs}});
             }
