@@ -1,5 +1,6 @@
 #include "DxbcCoverage.h"
 #include "DxbcInspection.h"
+#include "HlslCompilation.h"
 #include <algorithm>
 #include <bit>
 
@@ -260,6 +261,25 @@ std::vector<uint8_t> replaceCoverageMarker(Bytes original, const CoverageMarkerO
             signature.at(offset + 21) = 0;
         }
     }
+    return p.finish(true);
+}
+std::vector<uint8_t> filterQuadArrayIndex(Bytes original, std::optional<uint32_t> index,
+                                          const Json &producer) {
+    if (!index || (producer.is_null() && *index == 0))
+        return {original.begin(), original.end()};
+    if (producer.is_null())
+        return compileHlsl("void main(){}", "ps_5_0").bytecode;
+    Program p(original);
+    CoverageMarkerOptions options;
+    options.arrayIndex = index;
+    options.arrayRouted = true;
+    options.arraySource = producer;
+    const auto marker = arrayMarker(p, options);
+    const auto temporary = marker[0][2];
+    const Rows test{marker[0], {0x0300003f, 0x0010000a, temporary}};
+    auto split = std::find_if_not(p.code.instructions.begin(), p.code.instructions.end(),
+                                  [](const auto &row) { return declaration(row[0] & 2047); });
+    p.code.instructions.insert(split, test.begin(), test.end());
     return p.finish(true);
 }
 RelocatedShader relocateShaderUavs(Bytes original, const std::map<uint32_t, uint32_t> &mapping,

@@ -4,7 +4,17 @@
 GF2 与 BF1 DX11 捕获。**尚未完成原 Python 版本的全部功能迁移。**
 当前独立包为 `out/FloraGPA-coverage-ui/FloraGPA.exe`。
 
-最新一批接通中央 **Coverage** 页：Fragment／Geometry、有效 RTV／DSV、层／索引、
+最新一批补齐 Quad 串行诊断的原生字节码准备：拆分绘制的 VertexID／InstanceID
+补偿，以及计数器 UAV 写入前的数组索引筛选。4,342 项 Python／C++ 字节码和
+元数据对照通过，覆盖 395 份着色器及 2,099 项预期拒绝输入。原版测试驱动使用
+C++ 生成字节码通过 803 项 GPU 检查，覆盖硬件／WARP、实例步长、点线三角形、
+strip 重启／退化图元、间接绘制、数组和 MSAA。**这些检查验证的是字节码处理，
+原生 Quad 调度和 Qt 面板仍待迁移**。完整 Release 构建、6 套相关 CTest 与
+4 项黄金帧／负对照通过。系统 ID 模块更新为 `ported`，Quad 目标模块为 `partial`；
+当前总数为 **21 `ported`、117 `partial`、66 `pending`**，不是工作量百分比。
+详见 [QUAD_SHADER_MIGRATION.md](QUAD_SHADER_MIGRATION.md)。可用界面包仍为上述 Coverage 版本。
+
+上一批接通中央 **Coverage** 页：Fragment／Geometry、有效 RTV／DSV、层／索引、
 深度测试、Fit／1:1、尺寸／缩放、纹理像素与缓冲区字节范围联动、取消重试及四项
 原版产物的 ZIP 导出。当前实验和硬件／WARP 设置共用原生 Worker；切换事件、
 实验或设备即清除过期结果。原版没有保存 Coverage 控件设置，迁移版保持这一边界。
@@ -13,7 +23,7 @@ GF2 与 BF1 DX11 捕获。**尚未完成原 Python 版本的全部功能迁移�
 检查、4 项黄金帧／负对照和 10 份依赖审计。Qt 导出的完整报告和三张图像与原版
 真实 GF2 绘制逐项一致；四个程序与 Release 哈希一致，包中已移除临时测试文件。
 四个独立 Coverage 模块完成职责审计并更新为 `ported`，共享模块保留剩余缺口。
-当前总数为 **20 `ported`、116 `partial`、68 `pending`**，不是工作量百分比。
+该阶段总数为 **20 `ported`、116 `partial`、68 `pending`**，不是工作量百分比。
 **Quad 执行、界面及其他待迁模块仍未完成**。详见
 [COVERAGE_UI_MIGRATION.md](COVERAGE_UI_MIGRATION.md)。
 

@@ -15,6 +15,9 @@ struct CoverageMarkerOptions {
 std::vector<uint8_t> addCoverageMarker(Bytes original, uint32_t slot);
 // Replace a color output at main exits; only for an isolated diagnostic draw.
 std::vector<uint8_t> replaceCoverageMarker(Bytes original, const CoverageMarkerOptions &options = {});
+// Return before any original UAV instruction when this rasterized array index is not selected.
+std::vector<uint8_t> filterQuadArrayIndex(Bytes original, std::optional<uint32_t> index,
+                                          const nlohmann::json &producer = nullptr);
 struct RelocatedShader {
     std::vector<uint8_t> bytes;
     std::set<uint32_t> declared;

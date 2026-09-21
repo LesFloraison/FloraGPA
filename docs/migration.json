@@ -915,9 +915,18 @@
       "sha256": "727a742a97cb5beef84cfbbbf75f9b07327a89ce599ef6cdb52be5d1e4605d96",
       "lines": 100,
       "description": "Preserve VS logical InstanceID/VertexID when splitting draw submissions.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "ported",
+      "native": [
+        "src/application/DxbcSystemId.cpp",
+        "src/application/DxbcSystemId.h"
+      ],
+      "validation": [
+        "docs/QUAD_SHADER_MIGRATION.md",
+        "tests/DxbcQuadTests.cpp",
+        "tools/validate_quad_shaders.py",
+        "tools/validate_quad_shader_gpu.py",
+        "4,342 binary/metadata comparisons over 395 shaders, including 2,099 expected rejections. 32 native-bytecode system-ID GPU cases and 80 point/line/triangle list/strip comparisons pass on hardware/WARP. Quad execution and Qt consumers remain pending."
+      ]
     },
     {
       "module": "dxbc_uav.py",
@@ -2393,9 +2402,17 @@
       "sha256": "46005daa9f516c44b1954dc902c44976409982aaa9f148820ec41dc8680dae86",
       "lines": 88,
       "description": "Native output extent and layer selection around the recovered quad program.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": [
+        "src/application/DxbcCoverage.cpp",
+        "src/application/DxbcCoverage.h"
+      ],
+      "validation": [
+        "docs/QUAD_SHADER_MIGRATION.md",
+        "tools/validate_quad_shaders.py",
+        "tools/validate_quad_shader_gpu.py",
+        "Only filter_shader is migrated: original counter/reference binaries, producer-aligned array inputs and pre-UAV early return match Python. 691 original GPU checks use injected native transformations. Target/dummy/producer/storage integration is not yet migrated; the fixture scheduler still uses Python."
+      ]
     },
     {
       "module": "quad_ui.py",
