@@ -7,6 +7,7 @@
 #include "SamplerEdits.h"
 #include "SetterEdits.h"
 #include "ShaderInspector.h"
+#include "ShaderProject.h"
 #include "SrvEdits.h"
 #include "ViewEdits.h"
 #include "core/BufferBindings.h"
@@ -763,6 +764,28 @@ void Experiment::setShader(const Frame &frame, Id id, Bytes bytecode, const std:
         project_ = std::move(previous);
         throw;
     }
+}
+void Experiment::setShaderProject(const Frame &frame, Id id, Bytes bytecode, const Json &project) {
+    const auto normalized = validateShaderProject(project);
+    const auto previous = project_;
+    try {
+        setShader(frame, id, bytecode, "", normalized.at("entry").get<std::string>());
+        auto &revision = project_["history"].back();
+        revision["label"] = "Shader project " + std::to_string(id);
+        auto &operation = revision["operations"].back();
+        operation.erase("source_text");
+        operation.erase("source_entry");
+        operation["source_language"] = "hlsl_project";
+        operation["source_project"] = normalized;
+    } catch (...) {
+        project_ = previous;
+        throw;
+    }
+}
+Json Experiment::shaderProject(Id id) const {
+    const auto source = shaderSource(id);
+    return source.value("source_language", Json{}) == "hlsl_project" ? source.value("source_project", Json{})
+                                                                     : Json{};
 }
 std::vector<uint8_t> Experiment::shaderBytes(const Frame &frame, Id id) const {
     for (size_t i = revision(); i > 0; --i) {

@@ -1,3 +1,4 @@
+#include "RdcAnalyzeCli.h"
 #include "application/Annotations.h"
 #include "application/ApiCommands.h"
 #include "application/CaptureNames.h"
@@ -17,13 +18,14 @@
 #include "application/PredicateInspector.h"
 #include "application/ReplayPipeline.h"
 #include "application/ShaderInspector.h"
+#include "application/ShaderProject.h"
 #include "application/StreamOutputInspector.h"
+#include "application/SystemDisassembly.h"
 #include "application/TextureInspector.h"
 #include "application/UavCounterInspector.h"
 #include "core/BufferBindings.h"
 #include "core/Frame.h"
 #include "replay/Replay.h"
-#include "RdcAnalyzeCli.h"
 #include <Psapi.h>
 #include <QCommandLineParser>
 #include <QCoreApplication>
@@ -73,12 +75,13 @@ int main(int argc, char **argv) {
     p.addPositionalArgument(
         "command",
         "inventory | commands | command-state | contexts | command-lists | replay | shader | "
-        "buffer | texture | texture-storage | compile | geometry | replay-pipeline | "
-        "class-linkage | predicate | annotations | statistics | post-geometry | shader-checkpoint | rdc-analyze");
+        "buffer | texture | texture-storage | compile | compile-project | geometry | replay-pipeline | "
+        "class-linkage | predicate | annotations | statistics | post-geometry | shader-checkpoint | "
+        "rdc-analyze");
     p.addPositionalArgument("capture", "DX11 .gpa_frame file");
     p.addOption({"out", "New or empty output directory", "path"});
     p.addOption({"experiment", "Compatible FloraGPA experiment project", "path"});
-    p.addOption({"source", "HLSL translation unit", "path"});
+    p.addOption({"source", "HLSL translation unit or shader project JSON", "path"});
     p.addOption({"entry", "HLSL entry point", "name", "main"});
     p.addOption({"warp", "Use the WARP software adapter"});
     p.addOption({"timings", "Collect native GPU timestamps and pipeline statistics"});
@@ -159,6 +162,7 @@ int main(int argc, char **argv) {
                            {"entries", int(frame.entries().size())},
                            {"reference_pixels_used", false}};
         nlohmann::json constantBindings, outputSelection, outputDisplay, outputMsaa, planarWrites, experiment;
+        nlohmann::json shaderProjectReport;
         QString out = p.value("out");
         if (!out.isEmpty()) {
             QDir dir(out);
@@ -239,6 +243,35 @@ int main(int argc, char **argv) {
             report.insert("resources", resources);
             report.insert("draws", qint64(draws));
             report.insert("dispatches", qint64(dispatches));
+        } else if (command == "compile-project") {
+            if (out.isEmpty() || !p.isSet("id") || !p.isSet("source"))
+                throw std::runtime_error("compile-project requires --id, --source and --out");
+            const auto id = parseId("id");
+            Experiment shaderExperiment(frame);
+            if (p.isSet("experiment"))
+                shaderExperiment.load(p.value("experiment"), frame);
+            const auto current = shaderExperiment.shaderBytes(frame, id);
+            const auto original = inspectResourceShader(frame, id, current);
+            QFile source(p.value("source"));
+            if (!source.open(QIODevice::ReadOnly))
+                throw std::runtime_error("Cannot read shader project");
+            const auto project = validateShaderProject(nlohmann::json::parse(source.readAll().toStdString()));
+            const auto compiled = compileShaderProject(project);
+            auto metadata = inspectResourceShader(frame, id, compiled.bytecode);
+            if (original.at("stage") != "signature" && metadata.at("stage") != original.at("stage"))
+                throw std::runtime_error("Shader project stage does not match selected shader");
+            save(out + "/replacement.dxbc",
+                 QByteArray(reinterpret_cast<const char *>(compiled.bytecode.data()),
+                            qsizetype(compiled.bytecode.size())));
+            save(out + "/shader_project.json", QByteArray::fromStdString(project.dump(2, ' ', true)));
+            auto assembly = QByteArray::fromStdString(systemDisassembly(compiled.bytecode, 0x80));
+            assembly.replace("\r\n", "\n");
+            assembly.replace("\n", "\r\n");
+            save(out + "/replacement.asm", assembly);
+            metadata["resource_id"] = id;
+            metadata["compilation"] = compiled.report;
+            shaderProjectReport = std::move(metadata);
+            report.insert("completed", true);
         } else if (command == "compile") {
             if (out.isEmpty() || !p.isSet("id") || !p.isSet("source"))
                 throw std::runtime_error("compile requires --id, --source and --out");
@@ -273,13 +306,28 @@ int main(int argc, char **argv) {
         } else if (command == "shader") {
             if (!p.isSet("id") || out.isEmpty())
                 throw std::runtime_error("shader requires --id and --out");
-            auto res = frame.resource(parseId("id"));
-            auto bytes = frame.shader(res.data);
+            Experiment shaderExperiment(frame);
+            if (p.isSet("experiment"))
+                shaderExperiment.load(p.value("experiment"), frame);
+            auto bytes = shaderExperiment.shaderBytes(frame, parseId("id"));
             save(out + "/shader.dxbc",
                  QByteArray(reinterpret_cast<const char *>(bytes.data()), qsizetype(bytes.size())));
             save(out + "/shader.asm", QByteArray::fromStdString(disassemble(bytes)));
             auto metadata = inspectResourceShader(frame, parseId("id"), bytes);
+            const auto project = shaderExperiment.shaderProject(parseId("id"));
+            if (!project.is_null()) {
+                try {
+                    auto source = verifyShaderProject(bytes, project);
+                    source["available"] = true;
+                    metadata["source_project"] = source;
+                    save(out + "/shader_project.json", QByteArray::fromStdString(project.dump(2, ' ', true)));
+                } catch (const std::exception &e) {
+                    metadata["source_project"] = {{"available", false}, {"error", e.what()}};
+                }
+            }
             save(out + "/shader.json", QByteArray::fromStdString(metadata.dump(2)));
+            save(out + "/shader_sources.json",
+                 QByteArray::fromStdString(metadata.at("embedded_sources").dump(2, ' ', true)));
             const auto &sources = metadata["embedded_sources"]["files"];
             if (!sources.empty()) {
                 QDir().mkpath(out + "/shader_sources");
@@ -289,6 +337,7 @@ int main(int argc, char **argv) {
                              QByteArray::fromStdString(sources[i]["raw_hex"].get<std::string>())));
             }
             report.insert("id", p.value("id"));
+            report.insert("completed", true);
         } else if (command == "replay" || command == "buffer" || command == "texture" ||
                    command == "statistics" || command == "texture-storage" || command == "geometry" ||
                    command == "post-geometry" || command == "replay-pipeline" || command == "predicate" ||
@@ -657,7 +706,11 @@ int main(int argc, char **argv) {
             report.insert("completed", true);
         } else
             throw std::runtime_error("Unknown command");
+        if (command == "compile-project" || command == "shader")
+            report.insert("loaded_modules", modules());
         auto nativeReport = nlohmann::json::parse(QJsonDocument(report).toJson().toStdString());
+        if (!shaderProjectReport.is_null())
+            nativeReport.update(shaderProjectReport);
         if (!outputSelection.is_null()) {
             nativeReport["output_selection"] = std::move(outputSelection);
             nativeReport["output_display"] = std::move(outputDisplay);

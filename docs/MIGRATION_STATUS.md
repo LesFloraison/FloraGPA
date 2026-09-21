@@ -2,9 +2,22 @@
 
 已有可编译、可运行的 VS2022 / Qt Widgets 原生工程，能够独立重放当前验证的
 GF2 与 BF1 DX11 捕获。**尚未完成原 Python 版本的全部功能迁移。**
-当前独立包为 `out/FloraGPA-rdc-cli/FloraGPA.exe`。
+当前独立包为 `out/FloraGPA-shader-project/FloraGPA.exe`。
 
-最新一批补齐 `FloraGPA.Cli rdc-analyze`，覆盖原版八种 RDC 分析，以及事件／
+最新一批将多文件 **Shader Project** 接入 Shader 页：根文件选择、源码添加／删除、
+Settings、JSON 导入／保存及隔离的 Compile & Apply 已迁入 Qt。原生编译器仅解析
+项目内保存的 include，保留宏、编译选项和原版的展开上限；显式使用系统
+D3DCompiler 47。项目随实验保存，支持撤销／重做，重开时验证当前 DXBC，过期
+草稿不能覆盖更新的实验，但仍可导出。
+发布包通过 2,057 组原 Python 对照（263 组拒绝输入）、2 组原 CLI 导出对照、
+10 项模型与 7 项界面／重放检查。六个 shader 阶段和原 GPA 三文件样本均有验证；
+硬件／WARP 的修改后像素与 CPU 预期一致。Release 全量构建及 7 套相关 CTest
+通过，其中原主窗口 54 项回归无失败或跳过；4 项黄金帧／负对照及 9 份发布包
+依赖审计通过，四个程序与构建哈希一致。两个项目模块更新为 `ported`，共享模块
+仍按缺口保留状态。清单现为 7 `ported`、120 `partial`、77 `pending`，不等同于
+工作量百分比。详见 [SHADER_PROJECT_MIGRATION.md](SHADER_PROJECT_MIGRATION.md)。
+
+上一批补齐 `FloraGPA.Cli rdc-analyze`，覆盖原版八种 RDC 分析，以及事件／
 资源／实例／线程参数、超时、日志、失败报告和进程清理。Qt 四类分析页与命令行
 共用原生作业准备；修复完整 uint64 ID 检查，并补齐模块清单和反汇编 CRLF 导出。
 最终包 15 组原 CLI 对照、33 项进程／参数测试、4 项黄金帧／负对照和 19 份运行时

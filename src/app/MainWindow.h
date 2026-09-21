@@ -10,6 +10,7 @@
 #include <QLineEdit>
 #include <QMainWindow>
 #include <QPlainTextEdit>
+#include <QPointer>
 #include <QProcess>
 #include <QProgressBar>
 #include <QSpinBox>
@@ -28,6 +29,7 @@ class PixelHistoryView;
 class ReplayDebugView;
 class RdcCountersView;
 class ReplayMeshView;
+class ShaderProjectDialog;
 class MainWindow final : public QMainWindow {
     Q_OBJECT
   public:
@@ -74,6 +76,8 @@ class MainWindow final : public QMainWindow {
     void editView();
     void replaceUpdateSource();
     void compileShader();
+    void openShaderProject();
+    void showShaderProjectEditor(const nlohmann::json &project);
     void inspectGeometry();
     void exportGeometry();
     void inspectEvent(Id id);
@@ -164,6 +168,8 @@ class MainWindow final : public QMainWindow {
     QLineEdit *shaderEntry_;
     Id runningShader_ = 0;
     QString runningSource_, runningEntry_;
+    nlohmann::json runningShaderProject_;
+    QPointer<ShaderProjectDialog> runningShaderProjectEditor_;
     QTabWidget *centerTabs_, *leftTabs_;
     QWidget *geometryPane_;
     QTabWidget *geometryViews_;

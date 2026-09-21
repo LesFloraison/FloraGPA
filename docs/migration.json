@@ -2730,21 +2730,34 @@
       "sha256": "96d4e93219896a76c6494e784266b3007f6488a0c2b243c04fce5b2a5d7cbf0d",
       "lines": 146,
       "description": "Self-contained HLSL projects and memory-only D3DInclude compilation.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "ported",
+      "native": [
+        "src/application/ShaderProject.cpp",
+        "src/application/ShaderProject.h"
+      ],
+      "validation": [
+        "2,057 preserved-Python model cases, including 263 rejections; six shader stages and original GPA multi-file source recovery/verification",
+        "Two original analyze.py comparisons against the shipping native CLI: exact compilation metadata, project JSON and assembly; exact release DXBC and debug non-debug chunks plus embedded sources",
+        "10 model Qt cases; explicit System32 compiler and no filesystem include fallback"
+      ]
     },
     {
       "module": "shader_project_ui.py",
       "sha256": "4c04cb0bb67cf5bf7a4e244e01e831395cb621824479cf2c2ea6b0d4a601acba",
       "lines": 82,
       "description": "Editable multi-file HLSL project window with isolated compilation.",
-      "status": "partial",
+      "status": "ported",
       "native": [
-        "src/app/MainWindow.cpp"
+        "src/app/ShaderProjectDialog.cpp",
+        "src/app/ShaderProjectDialog.h",
+        "src/app/MainWindow.cpp",
+        "src/application/Experiment.cpp",
+        "src/cli/main.cpp"
       ],
       "validation": [
-        "HLSL compile/apply GUI and exact image undo/redo; other edits pending"
+        "Seven shipping Qt cases: source/root/settings editing, add/remove/import/export, worker apply/failure, undo/redo, project reopen, stale draft protection and provenance save/load",
+        "Original GPA three-file project: hardware and WARP captured image and edited CPU pixel oracle, history restoration",
+        "54 original UI cases, four golden-frame/negative controls and nine shipping runtime module audits passed"
       ]
     },
     {

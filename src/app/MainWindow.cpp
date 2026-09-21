@@ -13,8 +13,8 @@
 #include "RdcCountersView.h"
 #include "ReplayDebugView.h"
 #include "ReplayMeshView.h"
-#include "application/RdcJobs.h"
 #include "SamplerDialog.h"
+#include "ShaderProjectDialog.h"
 #include "SrvDialog.h"
 #include "StatisticsView.h"
 #include "ViewDialog.h"
@@ -24,9 +24,11 @@
 #include "application/ContextInspector.h"
 #include "application/FrameOutput.h"
 #include "application/PredicateInspector.h"
+#include "application/RdcJobs.h"
 #include "application/SessionUi.h"
 #include "application/SetterEdits.h"
 #include "application/ShaderInspector.h"
+#include "application/ShaderProject.h"
 #include "core/BufferBindings.h"
 #include "replay/Replay.h"
 #include <QApplication>
@@ -57,6 +59,7 @@
 #include <QToolBar>
 #include <QVBoxLayout>
 #include <QtConcurrent/QtConcurrentRun>
+#include <d3dcompiler.h>
 
 namespace flora {
 namespace {
@@ -766,6 +769,8 @@ void MainWindow::buildUi() {
     shaderEntry_->setToolTip("HLSL entry point");
     editBar->addWidget(shaderEntry_);
     editBar->addAction("Compile && Apply", this, &MainWindow::compileShader);
+    editBar->addAction("Shader Project", this, &MainWindow::openShaderProject)
+        ->setObjectName("openShaderProject");
     sourceLayout->addWidget(editBar);
     sourceLayout->addWidget(sourceFiles_);
     sourceLayout->addWidget(sourceEditor_);
@@ -1236,6 +1241,8 @@ void MainWindow::closeEvent(QCloseEvent *e) {
     e->accept();
 }
 void MainWindow::setBusy(bool busy) {
+    for (auto editor : findChildren<ShaderProjectDialog *>())
+        editor->setBusy(busy);
     updateCheckpointContext();
     if (history_)
         history_->setWorkerBusy(busy);
@@ -1380,9 +1387,9 @@ void MainWindow::startHistoryWorker() {
     auto options = historyRequest_;
     for (const auto key : {"action", "renderdoc", "frame_sha256", "experiment_key"})
         options.erase(key);
-    auto prepared = prepareRdcJob(historyRdc_, historyRequest_.at("action").get<std::string>(),
-                                  jobDir_->path() + "/result",
-                                  QString::fromStdString(historyRequest_.at("renderdoc").get<std::string>()), options);
+    auto prepared = prepareRdcJob(
+        historyRdc_, historyRequest_.at("action").get<std::string>(), jobDir_->path() + "/result",
+        QString::fromStdString(historyRequest_.at("renderdoc").get<std::string>()), options);
     prepared["frame_sha256"] = historyRequest_.at("frame_sha256");
     prepared["experiment_key"] = historyRequest_.at("experiment_key");
     historyRequest_ = std::move(prepared);
@@ -1468,6 +1475,16 @@ void MainWindow::startWorker(QStringList args, bool timings) {
             return;
         }
         args << "--source" << path << "--entry" << runningEntry_;
+    }
+    if (args.first() == "compile-project") {
+        const auto path = jobDir_->path() + "/shader-project.json";
+        try {
+            writeFile(path, QByteArray::fromStdString(runningShaderProject_.dump(2, ' ', true)));
+        } catch (const std::exception &e) {
+            showError(QString::fromUtf8(e.what()));
+            return;
+        }
+        args << "--source" << path;
     }
     if (experiment_ && !experiment_->document().at("history").empty()) {
         auto path = jobDir_->path() + "/experiment.json";
@@ -1619,15 +1636,68 @@ void MainWindow::finishWorker(int code, QProcess::ExitStatus status) {
             emit taskFinished(accepted);
             return;
         }
-        if (runningKind_ == "compile") {
+        if (runningKind_ == "shader") {
+            QFile shaderFile(jobDir_->path() + "/result/shader.json");
+            if (!shaderFile.open(QIODevice::ReadOnly))
+                throw std::runtime_error("Shader metadata is missing");
+            const auto metadata = nlohmann::json::parse(shaderFile.readAll().toStdString());
+            nlohmann::json project;
+            if (metadata.contains("source_project")) {
+                const auto &source = metadata.at("source_project");
+                if (!source.at("available").get<bool>())
+                    throw std::runtime_error(source.at("error").get<std::string>());
+                QFile saved(jobDir_->path() + "/result/shader_project.json");
+                if (!saved.open(QIODevice::ReadOnly))
+                    throw std::runtime_error("Saved shader project is missing");
+                project = nlohmann::json::parse(saved.readAll().toStdString());
+            } else if (!metadata.at("embedded_sources").at("files").empty()) {
+                project = shaderProjectFromSources(metadata.at("embedded_sources"),
+                                                   metadata.at("profile").get<std::string>());
+            } else if (!runningSource_.isEmpty()) {
+                uint32_t flags = D3DCOMPILE_ENABLE_STRICTNESS;
+                const auto lines = runningSource_.split('\n');
+                for (qsizetype i = 0; i < std::min<qsizetype>(5, lines.size()); ++i)
+                    if (lines[i].trimmed() == "// FloraGPA compiler optimization: preserve")
+                        flags = D3DCOMPILE_SKIP_OPTIMIZATION;
+                project = {{"format", "FloraGPA shader project 1"},
+                           {"root", "edited.hlsl"},
+                           {"entry", runningEntry_.toStdString()},
+                           {"profile", metadata.at("profile")},
+                           {"flags", flags},
+                           {"defines", nlohmann::json::array()},
+                           {"include_dirs", nlohmann::json::array()},
+                           {"files", nlohmann::json::array({{{"name", "edited.hlsl"},
+                                                             {"text", runningSource_.toStdString()}}})}};
+            } else
+                throw std::runtime_error("No embedded sources; import or reconstruct HLSL first");
+            showShaderProjectEditor(project);
+            emit taskFinished(true);
+            return;
+        }
+        if (runningKind_ == "compile" || runningKind_ == "compile-project") {
             QFile binary(jobDir_->path() + "/result/replacement.dxbc");
             if (!binary.open(QIODevice::ReadOnly))
                 throw std::runtime_error("Compiled bytecode is missing");
             auto bytes = binary.readAll();
-            experiment_->setShader(
-                *frame_, runningShader_,
-                Bytes(reinterpret_cast<const uint8_t *>(bytes.data()), size_t(bytes.size())),
-                runningSource_.toStdString(), runningEntry_.toStdString());
+            if (runningKind_ == "compile-project") {
+                const auto compilation = report_["compilation"].toObject();
+                if (!compilation["diagnostics"].toString().isEmpty())
+                    log_->appendPlainText(compilation["diagnostics"].toString());
+                if (compilation.contains("removed_legacy_flags"))
+                    log_->appendPlainText(
+                        "Shader project: legacy NO_PRESHADER flag omitted for D3DCompiler 47.");
+                experiment_->setShaderProject(
+                    *frame_, runningShader_,
+                    Bytes(reinterpret_cast<const uint8_t *>(bytes.data()), size_t(bytes.size())),
+                    runningShaderProject_);
+                if (runningShaderProjectEditor_)
+                    runningShaderProjectEditor_->setContextKey(
+                        QString::fromStdString(experiment_->document().dump()));
+            } else
+                experiment_->setShader(
+                    *frame_, runningShader_,
+                    Bytes(reinterpret_cast<const uint8_t *>(bytes.data()), size_t(bytes.size())),
+                    runningSource_.toStdString(), runningEntry_.toStdString());
             experimentChanged();
             statusBar()->showMessage("Shader applied", 3000);
             emit taskFinished(true);
@@ -2350,6 +2420,45 @@ void MainWindow::compileShader() {
     runningSource_ = sourceEditor_->toPlainText();
     runningEntry_ = shaderEntry_->text().trimmed();
     startWorker({"compile", capturePath_, "--id", QString::number(runningShader_)}, false);
+}
+void MainWindow::openShaderProject() {
+    if (!frame_ || !selectedResource_ || busy())
+        return;
+    const auto &resource = frame_->entry(selectedResource_);
+    if (resource.type < 0x90 || resource.type > 0x95) {
+        showError("Select a shader resource.");
+        return;
+    }
+    runningShader_ = selectedResource_;
+    runningSource_ = sourceEditor_->toPlainText();
+    runningEntry_ = shaderEntry_->text().trimmed();
+    startWorker({"shader", capturePath_, "--id", QString::number(runningShader_)}, false);
+}
+void MainWindow::showShaderProjectEditor(const nlohmann::json &project) {
+    auto editor = new ShaderProjectDialog(project, this);
+    editor->setAttribute(Qt::WA_DeleteOnClose);
+    editor->setContextKey(QString::fromStdString(experiment_->document().dump()));
+    const auto openedFrame = frame_;
+    const auto shader = runningShader_;
+    connect(editor, &ShaderProjectDialog::applyRequested, this, [this, editor, openedFrame, shader] {
+        if (busy())
+            return;
+        try {
+            if (frame_ != openedFrame || selectedResource_ != shader || !experiment_ ||
+                editor->contextKey() != QString::fromStdString(experiment_->document().dump()))
+                throw std::runtime_error(
+                    "Shader context changed. Reopen the project to apply; this draft can still be saved.");
+            runningShaderProject_ = validateShaderProject(editor->draft());
+            runningShader_ = shader;
+            runningShaderProjectEditor_ = editor;
+            startWorker({"compile-project", capturePath_, "--id", QString::number(shader)}, false);
+            editor->setBusy(busy());
+        } catch (const std::exception &e) {
+            showError(QString::fromUtf8(e.what()));
+        }
+    });
+    connect(this, &MainWindow::taskFinished, editor, [editor] { editor->setBusy(false); });
+    editor->show();
 }
 void MainWindow::inspectGeometry() {
     if (!frame_ || !selectedEvent_ || busy())

@@ -63,6 +63,13 @@ a working D3D11 adapter.
 
 ## Run and deploy
 
+**Shader > Source > Shader Project** edits multi-file HLSL with virtual includes,
+macros and compiler settings. Compile & Apply runs in the native worker; project
+sources persist with experiment history and are verified against current DXBC
+when reopened. Import/export uses the original shader-project JSON format.
+See [shader project migration](docs/SHADER_PROJECT_MIGRATION.md) for CLI usage,
+validation and scope.
+
 **Shader Debug** now contains native GS / HS / DS checkpoint views: Read,
 Capture, Trace and Trace Input, instruction/source stepping, breakpoints,
 frame-scoped variables and watches, configuration import/save and ZIP export.

@@ -42,6 +42,8 @@ class Experiment {
     std::optional<uint32_t> initialUavCounter(Id view) const;
     void setShader(const Frame &frame, Id id, Bytes bytecode, const std::string &source,
                    const std::string &entry);
+    void setShaderProject(const Frame &frame, Id id, Bytes bytecode, const nlohmann::json &project);
+    nlohmann::json shaderProject(Id id) const;
     std::vector<uint8_t> shaderBytes(const Frame &frame, Id id) const;
     nlohmann::json shaderSource(Id id) const;
     bool enabled(Id event) const;
