@@ -1,6 +1,7 @@
 #include <QCoreApplication>
 #include <QDir>
 #include <QFile>
+#include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QProcess>
@@ -41,6 +42,20 @@ class RdcWorkerTests : public QObject {
             << QJsonObject{{"action", "history"}, {"y", 4294967296.0}} << "uint32";
         QTest::newRow("boolean-resource")
             << QJsonObject{{"action", "history"}, {"resource", true}} << "unsigned integer";
+        QTest::newRow("debug-both-events")
+            << QJsonObject{{"action", "debug-vertex"}, {"gpa_event", 18}, {"eid", 47}} << "not both";
+        QTest::newRow("debug-negative-index")
+            << QJsonObject{{"action", "debug-vertex"}, {"index", -1}} << "unsigned integer";
+        QTest::newRow("debug-overflow-instance")
+            << QJsonObject{{"action", "debug-vertex"}, {"instance", 4294967296.0}} << "uint32";
+        QTest::newRow("debug-group-size")
+            << QJsonObject{{"action", "debug-thread"}, {"group", QJsonArray{0, 0}}} << "three coordinates";
+        QTest::newRow("debug-thread-overflow")
+            << QJsonObject{{"action", "debug-thread"}, {"thread", QJsonArray{0, 4294967296.0, 0}}}
+            << "uint32";
+        QTest::newRow("debug-thread-boolean")
+            << QJsonObject{{"action", "debug-thread"}, {"thread", QJsonArray{0, true, 0}}}
+            << "unsigned integer";
         QTest::newRow("wrong-library")
             << QJsonObject{{"action", "history"},
                            {"renderdoc", qEnvironmentVariable("WINDIR") + "/System32/version.dll"}}

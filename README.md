@@ -96,6 +96,10 @@ see [RDC_HISTORY_MIGRATION.md](docs/RDC_HISTORY_MIGRATION.md). The main-window
 integer-aware before/after values, expandable details and JSON export, with
 experiment-aware recapture caching. See
 [PIXEL_HISTORY_UI_MIGRATION.md](docs/PIXEL_HISTORY_UI_MIGRATION.md).
+The same native worker now accepts `debug-pixel`, `debug-vertex` and
+`debug-thread` jobs with complete source/assembly and typed step traces. Their
+Qt debugger integration remains pending; see
+[RDC_DEBUG_MIGRATION.md](docs/RDC_DEBUG_MIGRATION.md).
 
 Use **F5** to replay, **F6** for GPU timings, **Escape** to cancel. Select API
 events to inspect their pipeline and before/after output. Resources provide

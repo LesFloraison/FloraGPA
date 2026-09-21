@@ -1,6 +1,8 @@
 #include "Backend.h"
 #include "Api.h"
+#include "DebugTrace.h"
 #include "application/RdcEvents.h"
+#include <QSaveFile>
 #define NOMINMAX
 #include <Windows.h>
 #include <algorithm>
@@ -164,7 +166,7 @@ class Session {
             if (!controller)
                 throw std::runtime_error("RenderDoc did not create a replay controller");
             if (controller->GetAPIProperties().pipelineType != GraphicsAPI::D3D11)
-                throw std::runtime_error("Pixel history requires a DX11 independent replay capture");
+                throw std::runtime_error("Native analysis requires a DX11 independent replay capture");
         } catch (...) {
             close();
             throw;
@@ -309,6 +311,120 @@ bool selected(const Json &write, const TextureDescription &tex, const Subresourc
     return box.is_null() ||
            (box[0] <= x && x < box[3] && box[1] <= y && y < box[4] && box[2] <= z && z < box[5]);
 }
+const ActionDescription *findAction(const rdcarray<ActionDescription> &nodes, uint32_t eid) {
+    for (const auto &node : nodes) {
+        if (node.eventId == eid)
+            return &node;
+        if (const auto *found = findAction(node.children, eid))
+            return found;
+    }
+    return nullptr;
+}
+rdcfixedarray<uint32_t, 3> coordinates(const Json &job, const char *key) {
+    rdcfixedarray<uint32_t, 3> result{};
+    if (!job.contains(key))
+        return result;
+    const auto &v = job.at(key);
+    if (!v.is_array() || v.size() != 3)
+        throw std::runtime_error(std::string("Expected three coordinates: ") + key);
+    for (size_t i = 0; i < 3; ++i) {
+        const auto n = number(v[i]);
+        if (n > UINT32_MAX)
+            throw std::runtime_error(std::string("Coordinate exceeds uint32: ") + key);
+        result[i] = uint32_t(n);
+    }
+    return result;
+}
+Json debug(IReplayController &controller, uint32_t eid, const Json &job) {
+    const auto kind = job.at("action").get<std::string>();
+    const auto *selected = findAction(controller.GetRootActions(), eid);
+    const bool compute = kind == "debug-thread", vertex = kind == "debug-vertex";
+    if (!selected || !(selected->flags & (compute ? ActionFlags::Dispatch : ActionFlags::Drawcall)))
+        throw std::runtime_error(compute ? "Compute debugging requires an executed dispatch action"
+                                         : "Selected analysis requires an executed draw action");
+    const auto *pipe = controller.GetD3D11PipelineState();
+    if (!pipe)
+        throw std::runtime_error("No D3D11 pipeline at the selected event");
+    const auto *reflection = compute  ? pipe->computeShader.reflection
+                             : vertex ? pipe->vertexShader.reflection
+                                      : pipe->pixelShader.reflection;
+    if (!reflection)
+        throw std::runtime_error("No shader bound at the selected stage");
+    if (!reflection->debugInfo.debuggable)
+        throw std::runtime_error("Shader cannot be debugged: " + text(reflection->debugInfo.debugStatus));
+    Json result = Json::object();
+    auto freeTrace = [&](ShaderDebugTrace *p) {
+        if (p)
+            controller.FreeTrace(p);
+    };
+    std::unique_ptr<ShaderDebugTrace, decltype(freeTrace)> trace(nullptr, freeTrace);
+    if (compute) {
+        trace.reset(controller.DebugThread(coordinates(job, "group"), coordinates(job, "thread")));
+    } else if (vertex) {
+        int64_t actual = 0;
+        if (job.contains("index") && !job.at("index").is_null()) {
+            actual = index(job, "index");
+        } else if (selected->flags & ActionFlags::Indexed) {
+            const auto &ib = pipe->inputAssembly.indexBuffer;
+            if (ib.byteStride != 1 && ib.byteStride != 2 && ib.byteStride != 4)
+                throw std::runtime_error("Invalid index buffer stride");
+            const auto address = uint64_t(ib.byteOffset) +
+                                 (uint64_t(selected->indexOffset) + index(job, "vertex")) * ib.byteStride;
+            const auto bytes = controller.GetBufferData(ib.resourceId, address, ib.byteStride);
+            if (bytes.size() != ib.byteStride)
+                throw std::runtime_error("Selected vertex index is outside the index buffer");
+            uint32_t raw = 0;
+            memcpy(&raw, bytes.data(), ib.byteStride);
+            actual = int64_t(raw) + selected->baseVertex;
+        } else {
+            actual = int64_t(selected->vertexOffset) + index(job, "vertex");
+        }
+        if (actual < 0 || uint64_t(actual) > UINT32_MAX)
+            throw std::runtime_error("Actual vertex index is outside uint32");
+        result["actual_vertex_index"] = actual;
+        trace.reset(
+            controller.DebugVertex(index(job, "vertex"), index(job, "instance"), uint32_t(actual), 0));
+    } else {
+        DebugPixelInputs inputs;
+        inputs.sample = index(job, "sample");
+        trace.reset(controller.DebugPixel(index(job, "x"), index(job, "y"), inputs));
+    }
+    if (!trace || !trace->debugger)
+        throw std::runtime_error("No debugger trace at the selected invocation");
+    result["trace"] = flora::rdcDebugTrace(*trace);
+    Json missingOffsets = Json::array();
+    const auto &globals = result["trace"]["sourceVars"];
+    for (size_t i = 0; i < globals.size(); ++i)
+        if (globals[i]["offset"].is_null())
+            missingOffsets.push_back(i);
+    result["debug_scope"] = {
+        {"unavailable_global_source_offsets", missingOffsets},
+        {"offset_policy", "RenderDoc 1.45 DXBC signature/whole-block mappings have uninitialized offsets; "
+                          "these are null, while defined member/instruction offsets are preserved."}};
+    result["source_debug"] = flora::rdcDebugInfo(reflection->debugInfo);
+    // D3D11 has no monolithic pipeline object, matching PipeState's null ID.
+    const auto assembly = controller.DisassembleShader(ResourceId::Null(), reflection, "");
+    QSaveFile file(QString::fromStdString(job.at("out").get<std::string>()) + "/debug_shader.asm");
+    if (!file.open(QIODevice::WriteOnly) ||
+        file.write(assembly.c_str(), qint64(assembly.size())) != qint64(assembly.size()) || !file.commit())
+        throw std::runtime_error("Cannot export shader disassembly");
+    result["disassembly"] = text(assembly);
+    Json steps = Json::array();
+    for (;;) {
+        const auto batch = controller.ContinueDebug(trace->debugger);
+        if (batch.empty())
+            break;
+        if (batch.size() > 250000 - steps.size())
+            throw std::runtime_error("Debug trace exceeded 250000 steps");
+        for (const auto &state : batch)
+            steps.push_back(flora::rdcDebugState(state));
+    }
+    if (steps.empty())
+        throw std::runtime_error("Shader debugger returned no steps");
+    result["step_count"] = steps.size();
+    result["steps"] = std::move(steps);
+    return result;
+}
 } // namespace
 
 extern "C" void __cdecl RENDERDOC_FreeArrayMem(void *mem) {
@@ -320,16 +436,21 @@ extern "C" void *__cdecl RENDERDOC_AllocArrayMem(uint64_t size) { return allocat
 namespace flora {
 Json runRdcJob(const Json &job) {
     const auto action = job.at("action").get<std::string>();
-    if (action != "history" && action != "events")
+    const bool debugging = action == "debug-pixel" || action == "debug-vertex" || action == "debug-thread";
+    if (action != "history" && action != "events" && !debugging)
         throw std::runtime_error("Unsupported native RenderDoc job action");
-    if (action == "history") {
+    if (action == "history" || debugging) {
         if (!job.value("gpa_event", Json(nullptr)).is_null() && !job.value("eid", Json(nullptr)).is_null())
             throw std::runtime_error("Choose GPA or RDC event, not both");
-        for (const auto *key : {"x", "y", "mip", "layer", "sample", "eid"})
+        for (const auto *key : {"x", "y", "mip", "layer", "sample", "eid", "vertex", "instance", "index"})
             index(job, key);
         for (const auto *key : {"gpa_event", "resource"})
             if (job.contains(key) && !job.at(key).is_null())
                 number(job.at(key));
+        if (debugging) {
+            coordinates(job, "group");
+            coordinates(job, "thread");
+        }
     }
     Session session(job);
     auto &controller = *session.controller;
@@ -363,6 +484,12 @@ Json runRdcJob(const Json &job) {
     if (!eid || (!events.actions.contains(eid) && !events.chunks.contains(eid)))
         throw std::runtime_error("No selectable replay action");
     controller.SetFrameEvent(eid, true);
+    if (debugging) {
+        result.update(debug(controller, eid, job));
+        result["eid"] = eid;
+        result["gpa_event"] = gpa;
+        return result;
+    }
     const auto resources = controller.GetResources();
     ResourceId resource;
     const auto gpaResource = job.value("resource", Json(nullptr));

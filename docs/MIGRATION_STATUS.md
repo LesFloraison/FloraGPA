@@ -2,9 +2,19 @@
 
 已有可编译、可运行的 VS2022 / Qt Widgets 原生工程，能够独立重放当前验证的
 GF2 与 BF1 DX11 捕获。**尚未完成原 Python 版本的全部功能迁移。**
-当前独立包为 `out/FloraGPA-pixel-history/FloraGPA.exe`。
+当前独立包为 `out/FloraGPA-debug-backend/FloraGPA.exe`。
 
-最新一批将 Pixel History 接入 Qt 主窗口：独立再捕获、Hardware／WARP、
+最新一批迁入原生 PS／VS／CS 调试后端：像素调用、索引／非索引顶点和计算线程
+可通过独立 `FloraGPA.Rdc.exe` 取得完整步骤、源码、反汇编、调用栈和变量变化。
+发布包 171 项检查通过，包含 21 份完整轨迹／279 个步骤与 7 种失败选择；覆盖
+Hardware／WARP、多文件源码、循环、16／32 位索引偏移、负 base vertex、显式索引
+及原 GF2／BF1 捕获。RenderDoc 1.45 未初始化的全局映射偏移明确标为不可用，
+其余轨迹字段逐项与 Python 原版对照。完整 Release 构建、相关 4 套 CTest、
+4 项黄金帧及负对照、44 份运行时依赖审计通过；4 个程序与构建哈希一致。
+PS／VS／CS 的 Qt 步进、源码变量、断点／监视和配置仍待接通，整个迁移目标未完成。
+详见 [RDC_DEBUG_MIGRATION.md](RDC_DEBUG_MIGRATION.md)。
+
+上一批将 Pixel History 接入 Qt 主窗口：独立再捕获、Hardware／WARP、
 实验缓存与撤销复用、取消／重试、原始 API 定位、精确整数值、折叠详情和完整
 JSON 导出均已接通；Output／Texture 像素选择可填写历史查询坐标。
 45 套 Release CTest 通过，含原 Qt 54 项回归，无失败、无跳过。
@@ -12,7 +22,8 @@ JSON 导出均已接通；Output／Texture 像素选择可填写历史查询坐�
 重跑新 Qt 测试，6 项通过且无跳过（含 22 份后端历史报告、真实 CPU 写入和
 Hardware／WARP 再捕获）。新包 4 项黄金帧及负对照、10 份运行时模块审计通过，
 4 个程序与最终构建哈希一致，实际 Qt 截图已检查。共享 RenderDoc worker 的
-像素／顶点／计算 shader 调试、计数器等消费者仍待迁移，相关模块保持 `partial`。
+像素／顶点／计算 shader 调试在该批仍待迁移（现已迁入后端，Qt 消费者待接通），
+计数器等其他消费者仍待迁移，相关模块保持 `partial`。
 详见 [PIXEL_HISTORY_UI_MIGRATION.md](PIXEL_HISTORY_UI_MIGRATION.md)。
 
 上一批接通原生 RenderDoc 重放控制器、PixelHistory 结果和 CPU 写入补充。

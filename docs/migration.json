@@ -2368,7 +2368,9 @@
       ],
       "validation": [
         "docs/PIXEL_HISTORY_UI_MIGRATION.md",
-        "Qt Pixel History is connected to native recapture and history workers with experiment/driver/library caching, cancellation, API navigation, details and JSON export. Other shared advanced-analysis/debugger/counter actions remain pending."
+        "Qt Pixel History is connected to native recapture and history workers with experiment/driver/library caching, cancellation, API navigation, details and JSON export. Other shared advanced-analysis/debugger/counter actions remain pending.",
+        "docs/RDC_DEBUG_MIGRATION.md",
+        "The native worker also accepts validated debug-pixel/debug-vertex/debug-thread jobs. Main-window task preparation remains connected only for Pixel History until the replay-debug UI adapter is migrated."
       ]
     },
     {
@@ -2379,13 +2381,16 @@
       "status": "partial",
       "native": [
         "src/rdc/Backend.cpp",
-        "src/rdc/main.cpp"
+        "src/rdc/main.cpp",
+        "src/rdc/DebugTrace.cpp"
       ],
       "validation": [
         "docs/RDC_HISTORY_MIGRATION.md",
         "Native RenderDoc 1.45 replay-controller consumer implements exact event mapping, PixelHistory records and CPU-write supplementation. Qt history workflow is now connected; other rdc_worker analysis/debugger actions are not migrated by this batch.",
         "Packaged backend: 152 checks, 22 complete history comparisons (35 records, 10 CPU snapshots), nine real controller-index comparisons; two relevant CTest suites and four golden/negative checks passed. Malformed structured-data injection remains pending; Qt workflow validation is recorded separately.",
-        "docs/PIXEL_HISTORY_UI_MIGRATION.md"
+        "docs/PIXEL_HISTORY_UI_MIGRATION.md",
+        "docs/RDC_DEBUG_MIGRATION.md",
+        "Packaged native PS/VS/CS debugging: 171 checks, 21 full trace comparisons (279 steps), seven rejected selections. Known uninitialized 1.45 DXBC global mapping offsets are null with explicit scope metadata; all other trace/source/disassembly fields are compared. Qt replay-debug navigation, watches/configuration, and inventory/texture/postmesh/counter branches remain pending."
       ]
     },
     {
