@@ -96,8 +96,9 @@ workload completion percentage, and the full Python-to-C++/Qt goal is unfinished
 
 ## Remaining integration
 
-Both serial strategies still need the native counter's target/view selection,
-private passes and UAV slot restoration, depth preparation, counter/reference
+Target/view selection and resource helpers are now implemented separately in
+[QUAD_RESOURCE_MIGRATION.md](QUAD_RESOURCE_MIGRATION.md). Both serial strategies
+still need integration with private passes and UAV slot restoration, depth preparation, counter/reference
 programs, uint32 artifacts/report/preview and Qt controls. The original event
 must run exactly once after diagnostics. Splitting changes scheduling; these
 helpers do not measure physical quad invocations and do not reconstruct GPA's

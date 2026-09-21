@@ -92,7 +92,8 @@ pending. These are module statuses, not a percentage of completed work.
 ## Remaining Quad work
 
 Final HS/DS/GS/SO capture and bridge submission are now implemented in
-[QUAD_FINAL_MIGRATION.md](QUAD_FINAL_MIGRATION.md). Target/depth adapters,
+[QUAD_FINAL_MIGRATION.md](QUAD_FINAL_MIGRATION.md). Target and resource helpers are
+implemented in [QUAD_RESOURCE_MIGRATION.md](QUAD_RESOURCE_MIGRATION.md). Depth preparation,
 per-pass private UAV/output isolation, counter/reference execution, artifact
 reports and Qt controls still need integration. Serial splitting changes GPU
 scheduling; this diagnostic must retain the original experimental scope and

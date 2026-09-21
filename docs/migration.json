@@ -2366,9 +2366,13 @@
       "sha256": "e4e17d5601a1f7d1f8362814b0c2adffae51e075e30f5cfa9e9f63639f16e0a2",
       "lines": 294,
       "description": "Independent real-frame integration of the recovered legacy quad counter.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": ["src/application/QuadResources.cpp", "src/application/QuadResources.h"],
+      "validation": [
+        "docs/QUAD_RESOURCE_MIGRATION.md",
+        "tools/validate_quad_resources.py",
+        "Only fingerprint_outputs is migrated: actual RTV/DSV/UAV owners, append/counter values, high slots, SO buffers and every MSAA sample. 112 hardware/WARP cases retain identical original storage. High-UAV restoration, depth preparation, counter/reference execution, report and preview remain pending."
+      ]
     },
     {
       "module": "quad_depth.py",
@@ -2422,16 +2426,21 @@
       "sha256": "46005daa9f516c44b1954dc902c44976409982aaa9f148820ec41dc8680dae86",
       "lines": 88,
       "description": "Native output extent and layer selection around the recovered quad program.",
-      "status": "partial",
+      "status": "ported",
       "native": [
         "src/application/DxbcCoverage.cpp",
-        "src/application/DxbcCoverage.h"
+        "src/application/DxbcCoverage.h",
+        "src/application/QuadResources.cpp",
+        "src/application/QuadResources.h"
       ],
       "validation": [
         "docs/QUAD_SHADER_MIGRATION.md",
         "tools/validate_quad_shaders.py",
         "tools/validate_quad_shader_gpu.py",
-        "Only filter_shader is migrated: original counter/reference binaries, producer-aligned array inputs and pre-UAV early return match Python. 691 original GPU checks use injected native transformations. Target/dummy/producer/storage integration is not yet migrated; the fixture scheduler still uses Python."
+        "filter_shader: original counter/reference binaries, producer-aligned array inputs and pre-UAV early return match Python. 691 original GPU checks use injected native transformations.",
+        "docs/QUAD_RESOURCE_MIGRATION.md",
+        "tools/validate_quad_resources.py",
+        "Native select/dummy/producer/storage helpers match 112 hardware/WARP cases, 1232 selections including 796 expected rejections and 872 dummy allocations. Actual descriptors, full storage and output fingerprints are checked. Complete counter and Qt integration remain pending."
       ]
     },
     {

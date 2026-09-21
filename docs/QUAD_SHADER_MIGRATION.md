@@ -90,8 +90,10 @@ The full Quad migration still needs every original execution responsibility:
 - Final HS/DS/GS/SO primitive capture and bridge submission are now implemented
   and separately validated in [QUAD_FINAL_MIGRATION.md](QUAD_FINAL_MIGRATION.md).
   Their integration into the counter executor still remains.
-- Target/view matching and selected subresources; buffer/3D prepared-depth
-  adapters; native dummy output allocation and full sample-storage fingerprints.
+- Target/view matching, selected subresources, buffer/3D adapters, dummy output
+  allocation and full sample-storage fingerprints are now implemented and
+  separately validated in [QUAD_RESOURCE_MIGRATION.md](QUAD_RESOURCE_MIGRATION.md).
+  Their integration into the counter executor still remains.
 - Private pre-raster UAV resources/counters, fresh isolation for each pass,
   exception-safe high UAV restoration, original SO suspension and predicate
   isolation. Original draw submission still occurs exactly once.
