@@ -3,7 +3,8 @@
 `application/QuadUavs` migrates `pre_raster_uav.PrivateGraphicsUAVs` for native
 counter/reference and depth-preparation passes. It complements the already
 migrated Coverage RT0 relocation and PostTransform private-output isolation.
-The complete native Quad executor and Qt panel remain unfinished.
+The complete native Quad executor is now integrated and verified in
+[Quad execution](QUAD_EXECUTION_MIGRATION.md). The Qt panel remains unfinished.
 
 ## Preserved behavior
 
@@ -80,8 +81,7 @@ reservation and relocated stage binding. The module ledger is 26 ported,
 
 ## Remaining work
 
-The full counter still needs target cross-view validation, serial/final strategy
-selection and integration, original counter/reference HLSL, uint32 resources,
-prepared/before/none depth orchestration, report/preview/export generation,
-single original-event processing and Qt controls. The delivered GUI package
-remains `out/FloraGPA-coverage-ui/FloraGPA.exe`.
+The full counter integration described above is now implemented and verified;
+see [Quad execution](QUAD_EXECUTION_MIGRATION.md). Qt controls, cell inspection,
+settings and ZIP export remain pending. The delivered GUI package remains
+`out/FloraGPA-coverage-ui/FloraGPA.exe`.

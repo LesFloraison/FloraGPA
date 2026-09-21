@@ -63,6 +63,13 @@ a working D3D11 adapter.
 
 ## Run and deploy
 
+Native **Quad diagnostics** are available through the CLI/worker:
+`quad <capture> --id <draw> --quad-depth prepared|before|none --out <directory>`.
+Target/layer selection and experiment edits retain the original reports, five
+uint32 arrays and log2 preview. These are serialized diagnostic groups, not
+physical quad invocations. The Qt Quad panel is still pending; see
+[Quad execution](docs/QUAD_EXECUTION_MIGRATION.md).
+
 Native **Coverage** is available in the central image-inspection tab and through the CLI/worker:
 `coverage <capture> --id <draw> --out <directory>`. Fragment and geometry modes,
 target/layer selection, depth-test overrides and experiment projects retain the

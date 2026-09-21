@@ -925,7 +925,7 @@
         "tests/DxbcQuadTests.cpp",
         "tools/validate_quad_shaders.py",
         "tools/validate_quad_shader_gpu.py",
-        "4,342 binary/metadata comparisons over 395 shaders, including 2,099 expected rejections. 32 native-bytecode system-ID GPU cases and 80 point/line/triangle list/strip comparisons pass on hardware/WARP. Quad execution and Qt consumers remain pending."
+        "4,342 binary/metadata comparisons over 395 shaders, including 2,099 expected rejections. 32 native-bytecode system-ID GPU cases and 80 point/line/triangle list/strip comparisons pass on hardware/WARP. Quad execution is subsequently verified in docs/QUAD_EXECUTION_MIGRATION.md; Qt consumers remain pending."
       ]
     },
     {
@@ -2254,7 +2254,7 @@
         "Coverage migrates reserve_marker_rt0 and bind_relocated across PS and pre-raster stages, with native UAV bytecode relocation and dynamic classes.",
         "docs/QUAD_UAV_MIGRATION.md",
         "tools/validate_quad_uavs.py",
-        "Native writers and PrivateGraphicsUAVs match 164 hardware/WARP cases including six exact expected rejections, 632 completed private passes, 2528 unchanged diagnostic seeds and 384 actual private writer passes. Shared VS/PS and HS/DS registers, high slots, raw/structured counters, dynamic classes, overrides, disabled events and private depth are covered. Complete Quad executor and Qt integration remain pending."
+        "Native writers and PrivateGraphicsUAVs match 164 hardware/WARP cases including six exact expected rejections, 632 completed private passes, 2528 unchanged diagnostic seeds and 384 actual private writer passes. Shared VS/PS and HS/DS registers, high slots, raw/structured counters, dynamic classes, overrides, disabled events and private depth are covered. Complete Quad execution is subsequently integrated in docs/QUAD_EXECUTION_MIGRATION.md; Qt integration remains pending."
       ]
     },
     {
@@ -2366,23 +2366,32 @@
       "sha256": "8687d63ffaee822050a20d1e0ea43d159dab8b1edd10b32a1f9db814fc574da5",
       "lines": 41,
       "description": "Export an isolated, serialized quad diagnostic, with explicit measurement scope.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "ported",
+      "native": ["src/application/Quad.cpp", "src/application/Quad.h", "src/cli/main.cpp"],
+      "validation": [
+        "docs/QUAD_EXECUTION_MIGRATION.md",
+        "tools/validate_quad_executor.py",
+        "tools/validate_quad_cli.py",
+        "582 hardware/WARP synthetic cases (14 expected rejections) and 12 real GF2/BF1 cases match full Python reports, five raw uint32 arrays, decoded preview pixels and original resource fingerprints. Original event storage/counts match ordinary replay. CLI/Worker pass 24 actual entry-point, export, experiment, error and isolated runtime checks. Qt Quad integration remains pending."
+      ]
     },
     {
       "module": "quad_counter.py",
       "sha256": "e4e17d5601a1f7d1f8362814b0c2adffae51e075e30f5cfa9e9f63639f16e0a2",
       "lines": 294,
       "description": "Independent real-frame integration of the recovered legacy quad counter.",
-      "status": "partial",
-      "native": ["src/application/QuadResources.cpp", "src/application/QuadResources.h", "src/application/QuadBindings.h"],
+      "status": "ported",
+      "native": ["src/application/Quad.cpp", "src/application/Quad.h", "src/application/shaders/quad_counter.hlsl", "src/application/QuadResources.cpp", "src/application/QuadResources.h", "src/application/QuadBindings.h"],
       "validation": [
         "docs/QUAD_RESOURCE_MIGRATION.md",
         "tools/validate_quad_resources.py",
         "fingerprint_outputs is migrated: actual RTV/DSV/UAV owners, append/counter values, high slots, SO buffers and every MSAA sample. 112 hardware/WARP cases retain identical original storage.",
         "docs/QUAD_DEPTH_MIGRATION.md",
-        "preserve_high_uavs is migrated and exercised by native depth preparation, including exceptional exits. Depth preparation is separately ported, but its integration and counter/reference execution, report and preview remain pending."
+        "preserve_high_uavs is migrated and exercised by native depth preparation, including exceptional exits.",
+        "docs/QUAD_EXECUTION_MIGRATION.md",
+        "tests/QuadTests.cpp",
+        "tools/validate_quad_executor.py",
+        "Full native counter/reference execution, target compatibility, prepared/before/none depth orchestration, serial/final routing, storage verification, reports and preview match 594 original GPU cases including 14 expected refusals. Lower-level nonserial and disabled internal storage verification retain independently checked original resources/counts. Embedded recovered shader bytes and compiled shader hashes match Python."
       ]
     },
     {
@@ -2395,7 +2404,7 @@
       "validation": [
         "docs/QUAD_DEPTH_MIGRATION.md",
         "tools/validate_quad_depth.py",
-        "192 hardware/WARP cases including 10 expected rejections match complete original metadata, cleared/prepared hashes, repeat digests, native binding restoration, full original storage and unchanged counts. Array/MSAA, typeless 1D/read-only depth, buffer/3D adapters, dynamic classes, SO copy/safe suspension, high UAVs, indirect draws, predicates and PS edits are covered. Full counter and Qt integration remain pending."
+        "192 hardware/WARP cases including 10 expected rejections match complete original metadata, cleared/prepared hashes, repeat digests, native binding restoration, full original storage and unchanged counts. Array/MSAA, typeless 1D/read-only depth, buffer/3D adapters, dynamic classes, SO copy/safe suspension, high UAVs, indirect draws, predicates and PS edits are covered. Full counter integration is subsequently verified in docs/QUAD_EXECUTION_MIGRATION.md; Qt integration remains pending."
       ]
     },
     {

@@ -21,6 +21,7 @@
 #include "application/PlanarWrites.h"
 #include "application/PostTransform.h"
 #include "application/PredicateInspector.h"
+#include "application/Quad.h"
 #include "application/ReplayPipeline.h"
 #include "application/ShaderInspector.h"
 #include "application/ShaderProject.h"
@@ -82,7 +83,7 @@ int main(int argc, char **argv) {
         "command",
         "inventory | commands | command-state | contexts | command-lists | replay | shader | "
         "buffer | texture | texture-storage | compile | compile-project | assemble | geometry | replay-pipeline | "
-        "class-linkage | predicate | annotations | statistics | timings | coverage | post-geometry | shader-checkpoint | "
+        "class-linkage | predicate | annotations | statistics | timings | coverage | quad | post-geometry | shader-checkpoint | "
         "rdc-analyze");
     p.addPositionalArgument("capture", "DX11 .gpa_frame file");
     p.addOption({"out", "New or empty output directory", "path"});
@@ -107,6 +108,9 @@ int main(int argc, char **argv) {
     p.addOption({"coverage-target", "Coverage target: auto, depth or rt0..rt7", "target", "auto"});
     p.addOption({"coverage-layer", "Coverage array layer, volume slice or viewport array index", "index"});
     p.addOption({"ignore-depth", "Ignore depth/stencil tests for coverage"});
+    p.addOption({"quad-depth", "Quad depth: prepared, before or none", "mode", "prepared"});
+    p.addOption({"quad-target", "Quad target: auto, depth or rt0..rt7", "target", "auto"});
+    p.addOption({"quad-layer", "Absolute target layer, volume slice or viewport array index", "index"});
     p.addOption({"geometry-stage",
                  "Geometry stage: final, vs, hs, ds, gs, vs-index, vs-writes, ds-writes, gs-emits", "stage",
                  "final"});
@@ -151,6 +155,8 @@ int main(int argc, char **argv) {
             throw std::runtime_error("Expected command and capture path");
         Frame frame(std::filesystem::path(args[1].toStdWString()));
         auto command = args[0];
+        if (command != "quad" && (p.isSet("quad-depth") || p.isSet("quad-target") || p.isSet("quad-layer")))
+            throw std::runtime_error("Quad options apply to quad only");
         if (command != "coverage" && (p.isSet("coverage-mode") || p.isSet("coverage-target") ||
             p.isSet("coverage-layer") || p.isSet("ignore-depth")))
             throw std::runtime_error("Coverage options apply to coverage only");
@@ -200,10 +206,12 @@ int main(int argc, char **argv) {
             if (!QDir().mkpath(out))
                 throw std::runtime_error("Cannot create output directory");
         }
-        if (command == "coverage") {
+        if (command == "coverage" || command == "quad") {
             if (out.isEmpty() || !p.isSet("id") || p.isSet("before") || p.isSet("timings") ||
                 p.isSet("event") || p.isSet("suppress-draws"))
-                throw std::runtime_error("Coverage requires --id and --out and defines its own replay boundary");
+                throw std::runtime_error(command == "quad"
+                    ? "Quad requires --id and --out and defines its own replay boundary"
+                    : "Coverage requires --id and --out and defines its own replay boundary");
             ReplayOptions options;
             options.warp = p.isSet("warp");
             options.debug = p.isSet("debug-device");
@@ -220,15 +228,25 @@ int main(int argc, char **argv) {
                     throw std::runtime_error("Invalid disabled event");
                 options.disabled.insert(id);
             }
-            CoverageOptions request;
-            request.mode = p.value("coverage-mode").toStdString();
-            request.target = p.value("coverage-target").toStdString();
-            request.depthTest = !p.isSet("ignore-depth");
-            if (p.isSet("coverage-layer")) request.layer = parseIndex("coverage-layer");
             Replay replay(frame, options);
-            auto result = captureCoverage(replay, options.until, request);
-            exportCoverage(result, std::filesystem::path(out.toStdWString()));
-            shaderProjectReport = {{"coverage", result.report}};
+            if (command == "quad") {
+                QuadOptions request;
+                request.depthMode = p.value("quad-depth").toStdString();
+                request.target = p.value("quad-target").toStdString();
+                if (p.isSet("quad-layer")) request.layer = parseIndex("quad-layer");
+                auto result = captureQuad(replay, options.until, request);
+                exportQuad(result, std::filesystem::path(out.toStdWString()));
+                shaderProjectReport = {{"quad", result.report}};
+            } else {
+                CoverageOptions request;
+                request.mode = p.value("coverage-mode").toStdString();
+                request.target = p.value("coverage-target").toStdString();
+                request.depthTest = !p.isSet("ignore-depth");
+                if (p.isSet("coverage-layer")) request.layer = parseIndex("coverage-layer");
+                auto result = captureCoverage(replay, options.until, request);
+                exportCoverage(result, std::filesystem::path(out.toStdWString()));
+                shaderProjectReport = {{"coverage", result.report}};
+            }
             report.insert("loaded_modules", modules());
             report.insert("completed", true);
         } else if (command == "timings") {
