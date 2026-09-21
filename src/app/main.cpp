@@ -17,9 +17,12 @@ int main(int argc, char **argv) {
     p.addPositionalArgument("capture", "Capture to open", "[capture]");
     p.addOption({"screenshot", "Save this application's rendered window after replay", "path"});
     p.addOption({"collect", "Collect GPU timestamps after loading"});
+    p.addOption({"decompiler", "Optional shader decompiler/assembler executable", "path"});
     p.addOption({"size", "Window size for layout verification", "widthxheight"});
     p.process(app);
     flora::MainWindow window;
+    if (p.isSet("decompiler"))
+        window.setShaderTool(p.value("decompiler"));
     if (p.isSet("size")) {
         auto dims = p.value("size").split('x');
         if (dims.size() != 2)

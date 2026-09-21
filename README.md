@@ -63,6 +63,12 @@ a working D3D11 adapter.
 
 ## Run and deploy
 
+**Shader > DXBC** supports Read, Import ASM and **Assemble & Apply** using a
+selected **External Tool**. The same tool provides optional recovery fallback
+for **Recover HLSL**. HLSL/ASM drafts and entry names are saved with experiments.
+The tool is optional and is not bundled; see
+[external shader tools](docs/EXTERNAL_SHADER_MIGRATION.md) for CLI usage and validation.
+
 **Shader > Source > Recover HLSL** reconstructs supported DXBC in the native
 worker. Edit the result and use **Compile & Apply**; changes follow experiment
 undo/redo. Verified saved source is reused only when it reproduces the current

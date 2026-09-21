@@ -120,8 +120,8 @@ The original recovery limitations are retained, including ConsumeStructuredBuffe
 and unsupported shader declarations/instructions/tessellation forms. Recovery is
 not a general-purpose original-source restoration system.
 
-Optional external decompiler fallback and external DXBC assembler editing from
-the shared `shaders.py` / `app.py` modules are not part of this delivery. Those
-shared modules remain partial. This does not complete the full Python-to-C++
+Optional external decompiler fallback and external DXBC assembler editing were
+migrated in the subsequent [external tools delivery](EXTERNAL_SHADER_MIGRATION.md).
+Those shared modules remain partial. This does not complete the full Python-to-C++
 migration. Validation is on the current Windows host; a separate clean-machine
 installation has not been tested.

@@ -9,6 +9,7 @@
 #include "application/ContextInspector.h"
 #include "application/Experiment.h"
 #include "application/ExperimentReport.h"
+#include "application/ExternalShaderTools.h"
 #include "application/FrameOutput.h"
 #include "application/Geometry.h"
 #include "application/GpuStatistics.h"
@@ -34,6 +35,7 @@
 #include <QCryptographicHash>
 #include <QDir>
 #include <QFile>
+#include <QFileInfo>
 #include <QImage>
 #include <QJsonArray>
 #include <QJsonDocument>
@@ -77,7 +79,7 @@ int main(int argc, char **argv) {
     p.addPositionalArgument(
         "command",
         "inventory | commands | command-state | contexts | command-lists | replay | shader | "
-        "buffer | texture | texture-storage | compile | compile-project | geometry | replay-pipeline | "
+        "buffer | texture | texture-storage | compile | compile-project | assemble | geometry | replay-pipeline | "
         "class-linkage | predicate | annotations | statistics | post-geometry | shader-checkpoint | "
         "rdc-analyze");
     p.addPositionalArgument("capture", "DX11 .gpa_frame file");
@@ -85,6 +87,9 @@ int main(int argc, char **argv) {
     p.addOption({"experiment", "Compatible FloraGPA experiment project", "path"});
     p.addOption({"source", "HLSL translation unit or shader project JSON", "path"});
     p.addOption({"entry", "HLSL entry point", "name", "main"});
+    p.addOption({"profile", "Optional shader target profile for compile", "profile"});
+    p.addOption({"optimization", "HLSL optimization: auto, preserve or optimize", "mode", "auto"});
+    p.addOption({"decompiler", "Optional cmd_Decompiler.exe for recovery fallback or assembly", "path"});
     p.addOption({"recover", "Reconstruct supported DXBC as editable HLSL (shader only)"});
     p.addOption({"warp", "Use the WARP software adapter"});
     p.addOption({"timings", "Collect native GPU timestamps and pipeline statistics"});
@@ -139,6 +144,10 @@ int main(int argc, char **argv) {
         auto command = args[0];
         if (p.isSet("recover") && command != "shader")
             throw std::runtime_error("--recover applies to shader only");
+        if ((p.isSet("profile") || p.value("optimization") != "auto") && command != "compile")
+            throw std::runtime_error("--profile and --optimization apply to compile only");
+        if (p.isSet("decompiler") && command != "shader" && command != "assemble")
+            throw std::runtime_error("--decompiler applies to shader or assemble only");
         if (p.isSet("renderdoc") && command != "replay")
             throw std::runtime_error("--renderdoc applies to replay only");
         auto parseId = [&](const QString &key) {
@@ -277,32 +286,57 @@ int main(int argc, char **argv) {
             metadata["compilation"] = compiled.report;
             shaderProjectReport = std::move(metadata);
             report.insert("completed", true);
+        } else if (command == "assemble") {
+            if (out.isEmpty() || !p.isSet("id") || !p.isSet("source") || !p.isSet("decompiler"))
+                throw std::runtime_error("assemble requires --id, --source, --decompiler and --out");
+            Experiment shaderExperiment(frame);
+            if (p.isSet("experiment"))
+                shaderExperiment.load(p.value("experiment"), frame);
+            const auto original = shaderExperiment.shaderBytes(frame, parseId("id"));
+            QFile source(p.value("source"));
+            if (!source.open(QIODevice::ReadOnly))
+                throw std::runtime_error("Cannot read DXBC assembly");
+            shaderProjectReport = assembleShader(original, source.readAll(), out, p.value("decompiler"));
+            report.insert("completed", true);
         } else if (command == "compile") {
             if (out.isEmpty() || !p.isSet("id") || !p.isSet("source"))
                 throw std::runtime_error("compile requires --id, --source and --out");
             Experiment shaderExperiment(frame);
             if (p.isSet("experiment"))
                 shaderExperiment.load(p.value("experiment"), frame);
-            auto info = inspectShader(shaderExperiment.shaderBytes(frame, parseId("id")));
-            auto profile = info.at("profile").get<std::string>();
+            auto info = inspectResourceShader(frame, parseId("id"), shaderExperiment.shaderBytes(frame, parseId("id")));
+            const auto profile = p.isSet("profile") ? p.value("profile").toStdString() :
+                (info.at("profile").is_string() ? info.at("profile").get<std::string>() : std::string{});
+            if (profile.empty())
+                throw std::runtime_error("Output signature has no program to compile; specify --profile");
             QFile source(p.value("source"));
             if (!source.open(QIODevice::ReadOnly))
                 throw std::runtime_error("Cannot read HLSL source");
             auto bytes = source.readAll();
             HlslCompilation compiled;
             try {
-                compiled = compileHlsl(bytes.toStdString(), profile, p.value("entry").toStdString());
+                compiled = compileHlsl(bytes.toStdString(), profile, p.value("entry").toStdString(),
+                    QDir::toNativeSeparators(QFileInfo(p.value("source")).absoluteFilePath()).toStdString(),
+                    p.value("optimization").toStdString());
             } catch (const std::exception &e) {
                 save(out + "/compiler.log", QByteArray(e.what()));
                 throw;
             }
             save(out + "/compiler.log", QByteArray::fromStdString(compiled.diagnostics));
+            auto metadata = inspectResourceShader(frame, parseId("id"), compiled.bytecode);
+            if (info.at("stage") != "signature" && metadata.at("stage") != info.at("stage"))
+                throw std::runtime_error("Replacement shader stage does not match the selected resource");
             save(out + "/replacement.dxbc",
                  QByteArray(reinterpret_cast<const char *>(compiled.bytecode.data()),
                             qsizetype(compiled.bytecode.size())));
             report.insert("completed", true);
             report.insert("profile", QString::fromStdString(profile));
-            shaderProjectReport = {{"compilation", compiled.options}, {"diagnostics", compiled.diagnostics}};
+            save(out + "/replacement.hlsl", bytes);
+            auto assembly = QByteArray::fromStdString(systemDisassembly(compiled.bytecode, 0x80));
+            assembly.replace("\r\n", "\n"); assembly.replace("\n", "\r\n");
+            save(out + "/replacement.asm", assembly);
+            metadata.update({{"compilation", compiled.options}, {"diagnostics", compiled.diagnostics}, {"resource_id", parseId("id")}});
+            shaderProjectReport = std::move(metadata);
         } else if (command == "shader") {
             if (!p.isSet("id") || out.isEmpty())
                 throw std::runtime_error("shader requires --id and --out");
@@ -312,8 +346,10 @@ int main(int argc, char **argv) {
             auto bytes = shaderExperiment.shaderBytes(frame, parseId("id"));
             save(out + "/shader.dxbc",
                  QByteArray(reinterpret_cast<const char *>(bytes.data()), qsizetype(bytes.size())));
-            save(out + "/shader.asm", QByteArray::fromStdString(disassemble(bytes)));
             auto metadata = inspectResourceShader(frame, parseId("id"), bytes);
+            auto assembly = QByteArray::fromStdString(metadata.at("stage") == "signature" ? disassemble(bytes) : systemDisassembly(bytes, 0x80));
+            assembly.replace("\r\n", "\n"); assembly.replace("\n", "\r\n");
+            save(out + "/shader.asm", assembly);
             const auto project = shaderExperiment.shaderProject(parseId("id"));
             if (!project.is_null()) {
                 try {
@@ -325,24 +361,14 @@ int main(int argc, char **argv) {
                     metadata["source_project"] = {{"available", false}, {"error", e.what()}};
                 }
             }
-            if (p.isSet("recover")) {
+            if (p.isSet("recover") || p.isSet("decompiler")) {
                 if (metadata.at("stage") == "signature")
                     metadata["decompilation"] = {
                         {"available", false},
                         {"reason", "Output signature only; no executable shader program or HLSL body"}};
                 else {
-                    save(out + "/reconstructed.dxbc",
-                         QByteArray(reinterpret_cast<const char *>(bytes.data()), qsizetype(bytes.size())));
-                    const auto recovered =
-                        reconstructHlsl(bytes, shaderExperiment.shaderSource(parseId("id")));
-                    auto text = QByteArray::fromStdString(recovered.source);
-                    if (recovered.report.at("source_kind") != "saved_applied_hlsl")
-                        text.replace("\n", "\r\n");
-                    save(out + "/reconstructed.hlsl", text);
-                    save(out + "/reconstructed.recompiled.dxbc",
-                         QByteArray(reinterpret_cast<const char *>(recovered.recompiled.data()),
-                                    qsizetype(recovered.recompiled.size())));
-                    metadata["decompilation"] = recovered.report;
+                    metadata["decompilation"] = exportRecoveredHlsl(bytes, out, p.value("decompiler"),
+                        shaderExperiment.shaderSource(parseId("id")));
                 }
             }
             shaderProjectReport = metadata;
@@ -727,7 +753,7 @@ int main(int argc, char **argv) {
             report.insert("completed", true);
         } else
             throw std::runtime_error("Unknown command");
-        if (command == "compile-project" || command == "shader")
+        if (command == "compile-project" || command == "shader" || command == "compile" || command == "assemble")
             report.insert("loaded_modules", modules());
         auto nativeReport = nlohmann::json::parse(QJsonDocument(report).toJson().toStdString());
         if (!shaderProjectReport.is_null())

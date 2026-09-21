@@ -39,6 +39,7 @@ class MainWindow final : public QMainWindow {
     void replay(bool timings = false);
     bool busy() const { return process_.state() != QProcess::NotRunning || loader_.isRunning(); }
     QString capturePath() const { return capturePath_; }
+    void setShaderTool(const QString &path) { shaderTool_ = path; }
   signals:
     void captureLoaded();
     void taskFinished(bool success);
@@ -78,6 +79,10 @@ class MainWindow final : public QMainWindow {
     void compileShader();
     void openShaderProject();
     void recoverShader();
+    void readShaderAssembly();
+    void assembleShader();
+    bool chooseShaderTool();
+    void stashShaderDrafts();
     void showShaderProjectEditor(const nlohmann::json &project);
     void inspectGeometry();
     void exportGeometry();
@@ -170,6 +175,11 @@ class MainWindow final : public QMainWindow {
     Id runningShader_ = 0;
     QString runningSource_, runningEntry_;
     bool runningRecover_ = false;
+    bool runningAssemblyRead_ = false;
+    QString shaderTool_;
+    Id shaderDocument_ = 0;
+    nlohmann::json shaderDocuments_ = nlohmann::json::object();
+    nlohmann::json shaderEntries_ = nlohmann::json::object();
     std::string runningShaderContext_;
     nlohmann::json runningShaderProject_;
     QPointer<ShaderProjectDialog> runningShaderProjectEditor_;

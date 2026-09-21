@@ -3624,6 +3624,15 @@ class UiTests final : public QObject {
         for (const auto &result : done)
             QVERIFY(result[0].toBool());
         auto edited = image->image();
+        // DXBC is now an independent draft, matching the original editor. Read
+        // explicitly refreshes it from the effective experiment bytecode.
+        QCOMPARE(window.findChild<QPlainTextEdit *>("shader")->toPlainText(), originalAssembly);
+        auto readAssembly = window.findChild<QAction *>("readShaderAssembly");
+        QVERIFY(readAssembly);
+        done.clear();
+        readAssembly->trigger();
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
         QVERIFY(window.findChild<QPlainTextEdit *>("shader")->toPlainText() != originalAssembly);
         snapshot(window, "shader");
         QVERIFY(edited != baseline);
@@ -3636,6 +3645,10 @@ class UiTests final : public QObject {
         QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
         QVERIFY(done.takeLast()[0].toBool());
         QCOMPARE(image->image(), baseline);
+        done.clear();
+        readAssembly->trigger();
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
         QCOMPARE(window.findChild<QPlainTextEdit *>("shader")->toPlainText(), originalAssembly);
         done.clear();
         redo->trigger();

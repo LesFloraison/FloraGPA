@@ -739,7 +739,9 @@ bool Experiment::redo() {
 }
 
 void Experiment::setShader(const Frame &frame, Id id, Bytes bytecode, const std::string &source,
-                           const std::string &entry) {
+                           const std::string &entry, const std::string &language) {
+    if (language != "hlsl" && language != "asm")
+        throw std::runtime_error("Unsupported shader source language");
     inspectResourceShader(frame, id, bytecode);
     Json operation{
         {"kind", "shader"},
@@ -749,7 +751,7 @@ void Experiment::setShader(const Frame &frame, Id id, Bytes bytecode, const std:
                        .toBase64()
                        .toStdString()},
           {"sha256", sha256(bytecode)}}},
-        {"source_language", "hlsl"},
+        {"source_language", language},
         {"source_text", source},
         {"source_entry", entry}};
     auto previous = project_;

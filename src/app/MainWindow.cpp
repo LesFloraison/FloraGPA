@@ -29,6 +29,7 @@
 #include "application/SetterEdits.h"
 #include "application/ShaderInspector.h"
 #include "application/ShaderProject.h"
+#include "application/SystemDisassembly.h"
 #include "core/BufferBindings.h"
 #include "replay/Replay.h"
 #include <QApplication>
@@ -153,6 +154,9 @@ MainWindow::MainWindow() {
             capturePath_ = pendingPath_;
             ++revision_;
             selectedEvent_ = selectedResource_ = 0;
+            shaderDocument_ = 0;
+            shaderDocuments_ = nlohmann::json::object();
+            shaderEntries_ = nlohmann::json::object();
             selectedShaderStage_.reset();
             experiment_ = std::make_unique<Experiment>(*frame_);
             projectPath_.clear();
@@ -736,7 +740,7 @@ void MainWindow::buildUi() {
                     replayedState_->finishReplay(request, {{"error", "Cannot start pipeline inspection"}});
             });
     shader_ = new QPlainTextEdit;
-    shader_->setReadOnly(true);
+    shader_->setReadOnly(false);
     shader_->setLineWrapMode(QPlainTextEdit::NoWrap);
     shader_->setFont(QFont("Cascadia Mono", 10));
     shader_->setObjectName("shader");
@@ -756,6 +760,7 @@ void MainWindow::buildUi() {
     sourceEditor_->setLineWrapMode(QPlainTextEdit::NoWrap);
     auto editBar = new QToolBar;
     editBar->addAction("Import HLSL", this, [this] {
+        if (busy()) return;
         auto path =
             QFileDialog::getOpenFileName(this, "Import HLSL", {}, "HLSL files (*.hlsl *.fx);;All files (*)");
         if (path.isEmpty())
@@ -767,7 +772,7 @@ void MainWindow::buildUi() {
         }
         sourceEditor_->setPlainText(QString::fromUtf8(file.readAll()));
         shaderPane_->setCurrentIndex(0);
-    });
+    })->setObjectName("importShaderHlsl");
     shaderEntry_ = new QLineEdit("main");
     shaderEntry_->setObjectName("shaderEntry");
     shaderEntry_->setMaximumWidth(160);
@@ -780,11 +785,33 @@ void MainWindow::buildUi() {
         "Reconstruct editable HLSL from DXBC. Recompilation does not prove semantic equivalence.");
     editBar->addAction("Shader Project", this, &MainWindow::openShaderProject)
         ->setObjectName("openShaderProject");
+    auto toolAction = new QAction("External Tool…", this);
+    toolAction->setObjectName("shaderTool");
+    toolAction->setToolTip("Select cmd_Decompiler.exe for assembly and optional recovery fallback.");
+    connect(toolAction, &QAction::triggered, this, [this] { chooseShaderTool(); });
+    editBar->addAction(toolAction);
     sourceLayout->addWidget(editBar);
     sourceLayout->addWidget(sourceFiles_);
     sourceLayout->addWidget(sourceEditor_);
     shaderPane_->addTab(sourcePane, "Source");
-    shaderPane_->addTab(shader_, "DXBC");
+    auto assemblyPane = new QWidget;
+    auto assemblyLayout = new QVBoxLayout(assemblyPane);
+    assemblyLayout->setContentsMargins(0, 0, 0, 0);
+    auto assemblyBar = new QToolBar;
+    assemblyBar->addAction("Read", this, &MainWindow::readShaderAssembly)->setObjectName("readShaderAssembly");
+    assemblyBar->addAction("Import ASM", this, [this] {
+        if (busy()) return;
+        const auto path = QFileDialog::getOpenFileName(this, "Import assembly", {}, "DXBC assembly (*.asm);;All files (*)");
+        if (path.isEmpty()) return;
+        QFile file(path);
+        if (!file.open(QIODevice::ReadOnly)) { showError("Cannot read DXBC assembly."); return; }
+        shader_->setPlainText(QString::fromUtf8(file.readAll()));
+    })->setObjectName("importShaderAssembly");
+    assemblyBar->addAction("Assemble && Apply", this, &MainWindow::assembleShader)->setObjectName("assembleShader");
+    assemblyBar->addAction(toolAction);
+    assemblyLayout->addWidget(assemblyBar);
+    assemblyLayout->addWidget(shader_);
+    shaderPane_->addTab(assemblyPane, "DXBC");
     shaderReflection_ = tree({"Binding / Variable", "Slot / Offset", "Type / Size"});
     shaderReflection_->setObjectName("shaderReflection");
     shaderReflection_->setColumnWidth(0, 250);
@@ -1250,6 +1277,11 @@ void MainWindow::closeEvent(QCloseEvent *e) {
     e->accept();
 }
 void MainWindow::setBusy(bool busy) {
+    shader_->setReadOnly(busy);
+    sourceEditor_->setReadOnly(busy);
+    shaderEntry_->setEnabled(!busy);
+    for (const auto name : {"readShaderAssembly", "importShaderAssembly", "importShaderHlsl", "assembleShader", "shaderTool", "recoverShader", "compileShader", "openShaderProject"})
+        if (auto action = findChild<QAction *>(name)) action->setEnabled(!busy);
     for (auto editor : findChildren<ShaderProjectDialog *>())
         editor->setBusy(busy);
     updateCheckpointContext();
@@ -1467,7 +1499,7 @@ void MainWindow::startWorker(QStringList args, bool timings) {
     if (process_.state() != QProcess::NotRunning)
         return;
     runningRecover_ = args.first() == "shader" && args.contains("--recover");
-    if (args.first() == "shader" || args.first() == "compile" || args.first() == "compile-project")
+    if (args.first() == "shader" || args.first() == "compile" || args.first() == "compile-project" || args.first() == "assemble")
         runningShaderContext_ = frame_->sha256() + experiment_->document().dump();
     replayTimer_.stop();
     textureTimer_.stop();
@@ -1478,8 +1510,8 @@ void MainWindow::startWorker(QStringList args, bool timings) {
         return;
     }
     args << "--out" << jobDir_->path() + "/result";
-    if (args.first() == "compile") {
-        auto path = jobDir_->path() + "/edited.hlsl";
+    if (args.first() == "compile" || args.first() == "assemble") {
+        auto path = jobDir_->path() + (args.first() == "assemble" ? "/edited.asm" : "/edited.hlsl");
         try {
             writeFile(path, runningSource_.toUtf8());
         } catch (const std::exception &e) {
@@ -1488,6 +1520,8 @@ void MainWindow::startWorker(QStringList args, bool timings) {
         }
         args << "--source" << path << "--entry" << runningEntry_;
     }
+    if ((runningRecover_ || args.first() == "assemble") && !shaderTool_.isEmpty())
+        args << "--decompiler" << shaderTool_;
     if (args.first() == "compile-project") {
         const auto path = jobDir_->path() + "/shader-project.json";
         try {
@@ -1656,6 +1690,17 @@ void MainWindow::finishWorker(int code, QProcess::ExitStatus status) {
             if (!shaderFile.open(QIODevice::ReadOnly))
                 throw std::runtime_error("Shader metadata is missing");
             const auto metadata = nlohmann::json::parse(shaderFile.readAll().toStdString());
+            if (runningAssemblyRead_) {
+                QFile assemblyFile(jobDir_->path() + "/result/shader.asm");
+                if (!assemblyFile.open(QIODevice::ReadOnly))
+                    throw std::runtime_error("Shader assembly is missing");
+                shader_->setPlainText(QString::fromUtf8(assemblyFile.readAll()));
+                stashShaderDrafts();
+                shaderPane_->setCurrentIndex(1);
+                statusBar()->showMessage("Assembly ready", 3000);
+                emit taskFinished(true);
+                return;
+            }
             if (runningRecover_) {
                 const auto &recovery = metadata.at("decompilation");
                 if (!recovery.value("available", true))
@@ -1677,6 +1722,7 @@ void MainWindow::finishWorker(int code, QProcess::ExitStatus status) {
                 sourceFiles_->setCurrentIndex(sourceFiles_->count() - 1);
                 shaderEntry_->setText(QString::fromStdString(recovery.value("entry", std::string("main"))));
                 shaderPane_->setCurrentIndex(0);
+                stashShaderDrafts();
                 log_->appendPlainText(QString::fromStdString(recovery.dump(2)));
                 statusBar()->showMessage(saved ? "Saved HLSL verified" : "HLSL reconstructed", 3000);
                 emit taskFinished(true);
@@ -1715,7 +1761,7 @@ void MainWindow::finishWorker(int code, QProcess::ExitStatus status) {
             emit taskFinished(true);
             return;
         }
-        if (runningKind_ == "compile" || runningKind_ == "compile-project") {
+        if (runningKind_ == "compile" || runningKind_ == "compile-project" || runningKind_ == "assemble") {
             if (!frame_ || selectedResource_ != runningShader_ ||
                 runningShaderContext_ != frame_->sha256() + experiment_->document().dump())
                 throw std::runtime_error("Shader context changed; compiled result discarded");
@@ -1741,7 +1787,7 @@ void MainWindow::finishWorker(int code, QProcess::ExitStatus status) {
                 experiment_->setShader(
                     *frame_, runningShader_,
                     Bytes(reinterpret_cast<const uint8_t *>(bytes.data()), size_t(bytes.size())),
-                    runningSource_.toStdString(), runningEntry_.toStdString());
+                    runningSource_.toStdString(), runningEntry_.toStdString(), runningKind_ == "assemble" ? "asm" : "hlsl");
             experimentChanged();
             statusBar()->showMessage("Shader applied", 3000);
             emit taskFinished(true);
@@ -2214,6 +2260,8 @@ void MainWindow::showPipeline(const State &s) {
     predicate->setExpanded(s.predicate != 0);
 }
 void MainWindow::inspectResource(Id id) {
+    stashShaderDrafts();
+    shaderDocument_ = 0;
     selectedShaderStage_.reset();
     if (!frame_)
         return;
@@ -2303,8 +2351,8 @@ void MainWindow::inspectResource(Id id) {
         if (e.type >= 0x90 && e.type <= 0x95) {
             auto effective = experiment_->shaderBytes(*frame_, id);
             Bytes bytes(effective);
-            shader_->setPlainText(QString::fromStdString(disassemble(bytes)));
             auto metadata = inspectResourceShader(*frame_, id, bytes);
+            shader_->setPlainText(QString::fromStdString(metadata.at("stage") == "signature" ? disassemble(bytes) : systemDisassembly(bytes, 0x80)));
             auto linkage = shaderClassLinkage(*frame_, id);
             values.append({"Interface slots", QString::number(metadata["interface_slots"].get<UINT>())});
             if (linkage)
@@ -2341,12 +2389,23 @@ void MainWindow::inspectResource(Id id) {
             shaderPane_->setCurrentIndex(sourceFiles_->count() ? 0 : 1);
             auto saved = experiment_->shaderSource(id);
             shaderEntry_->setText(QString::fromStdString(saved.value("source_entry", std::string("main"))));
-            if (saved.contains("source_text")) {
+            if (saved.contains("source_text") && saved.value("source_language", std::string{}) == "hlsl") {
                 sourceFiles_->addItem("Applied HLSL",
                                       QString::fromStdString(saved["source_text"].get<std::string>()));
                 sourceFiles_->setCurrentIndex(sourceFiles_->count() - 1);
                 shaderPane_->setCurrentIndex(0);
             }
+            if (saved.contains("source_text") && saved.value("source_language", std::string{}) == "asm")
+                shader_->setPlainText(QString::fromStdString(saved.at("source_text").get<std::string>()));
+            const auto hlslKey = std::to_string(id) + ":HLSL";
+            const auto asmKey = std::to_string(id) + ":DXBC 汇编";
+            if (shaderDocuments_.contains(hlslKey)) {
+                sourceEditor_->setPlainText(QString::fromStdString(shaderDocuments_.at(hlslKey).get<std::string>()));
+                shaderEntry_->setText(QString::fromStdString(shaderEntries_.value(hlslKey, std::string("main"))));
+            }
+            if (shaderDocuments_.contains(asmKey))
+                shader_->setPlainText(QString::fromStdString(shaderDocuments_.at(asmKey).get<std::string>()));
+            shaderDocument_ = id;
             sourceFiles_->setToolTip(
                 QString::fromStdString(metadata["embedded_sources"]["status"].get<std::string>()));
             for (auto &binding : metadata["bindings"])
@@ -2474,6 +2533,7 @@ void MainWindow::openShaderProject() {
         return;
     }
     runningShader_ = selectedResource_;
+    runningAssemblyRead_ = false;
     runningSource_ = sourceEditor_->toPlainText();
     runningEntry_ = shaderEntry_->text().trimmed();
     startWorker({"shader", capturePath_, "--id", QString::number(runningShader_)}, false);
@@ -2487,7 +2547,39 @@ void MainWindow::recoverShader() {
         return;
     }
     runningShader_ = selectedResource_;
+    runningAssemblyRead_ = false;
     startWorker({"shader", capturePath_, "--id", QString::number(runningShader_), "--recover"}, false);
+}
+void MainWindow::stashShaderDrafts() {
+    if (!shaderDocument_) return;
+    const auto key = std::to_string(shaderDocument_);
+    shaderDocuments_[key + ":HLSL"] = sourceEditor_->toPlainText().toStdString();
+    shaderDocuments_[key + ":DXBC 汇编"] = shader_->toPlainText().toStdString();
+    shaderEntries_[key + ":HLSL"] = shaderEntry_->text().toStdString();
+    shaderEntries_[key + ":DXBC 汇编"] = "main";
+}
+bool MainWindow::chooseShaderTool() {
+    if (busy()) return false;
+    const auto path = QFileDialog::getOpenFileName(this, "Select shader tool", shaderTool_, "Executable (*.exe)");
+    if (path.isEmpty()) return false;
+    shaderTool_ = path;
+    return true;
+}
+void MainWindow::readShaderAssembly() {
+    if (!frame_ || busy() || shaderDocument_ != selectedResource_ || !shaderDocument_) return;
+    runningShader_ = selectedResource_;
+    runningAssemblyRead_ = true;
+    startWorker({"shader", capturePath_, "--id", QString::number(runningShader_)}, false);
+}
+void MainWindow::assembleShader() {
+    if (!frame_ || busy() || shaderDocument_ != selectedResource_ || !shaderDocument_) return;
+    if (shaderTool_.isEmpty() && !chooseShaderTool()) return;
+    if (shader_->toPlainText().trimmed().isEmpty()) { showError("DXBC assembly is empty."); return; }
+    stashShaderDrafts();
+    runningShader_ = selectedResource_;
+    runningSource_ = shader_->toPlainText();
+    runningEntry_ = "main";
+    startWorker({"assemble", capturePath_, "--id", QString::number(runningShader_)}, false);
 }
 void MainWindow::showShaderProjectEditor(const nlohmann::json &project) {
     auto editor = new ShaderProjectDialog(project, this);
@@ -2743,6 +2835,7 @@ void MainWindow::updateExperimentActions() {
         editable && experiment_ && !experiment_->enabled(selectedEvent_) ? "Enable Event" : "Disable Event");
 }
 void MainWindow::experimentChanged() {
+    stashShaderDrafts();
     updateCheckpointContext();
     const auto shaderStage = selectedShaderStage_;
     ++outputGeneration_;
@@ -2767,6 +2860,7 @@ void MainWindow::experimentChanged() {
             if (shaderStage) {
                 selectedResource_ = state.stages[*shaderStage].shader;
                 if (!selectedResource_) {
+                    shaderDocument_ = 0;
                     shader_->clear();
                     sourceEditor_->clear();
                     sourceFiles_->clear();
@@ -3705,6 +3799,14 @@ void MainWindow::openExperiment() {
     try {
         auto candidate = std::make_unique<Experiment>(*frame_);
         candidate->load(path, *frame_);
+        const auto ui = candidate->document().value("ui", nlohmann::json::object());
+        const auto documents = ui.value("shader_documents", nlohmann::json::object());
+        const auto entries = ui.value("shader_entries", nlohmann::json::object());
+        for (const auto *values : {&documents, &entries}) {
+            if (!values->is_object()) throw std::runtime_error("Invalid shader drafts in experiment");
+            for (const auto &value : values->items())
+                if (!value.value().is_string()) throw std::runtime_error("Invalid shader draft text");
+        }
         const auto settings = replayUiState(
             *frame_, candidate->document().value("ui", nlohmann::json::object()), selectedEvent_);
         {
@@ -3719,6 +3821,9 @@ void MainWindow::openExperiment() {
             adapter_->setCurrentIndex(settings.warp ? 1 : 0);
         }
         experiment_ = std::move(candidate);
+        shaderDocument_ = 0;
+        shaderDocuments_ = documents;
+        shaderEntries_ = entries;
         projectPath_ = path;
         geometryStage_->setCurrentIndex(
             geometryStage_->findData(QString::fromStdString(settings.geometryStage)));
@@ -3770,9 +3875,11 @@ bool MainWindow::saveExperiment() {
         state.geometryStream = uint32_t(geometryStream_->value());
         state.geometryInstance = geometryInstance_->text().trimmed().toStdString();
         state.geometryTable = geometryTable_->currentData().toString().toStdString();
-        experiment_->save(
-            path,
-            replayUiDocument(*frame_, state, experiment_->document().value("ui", nlohmann::json::object())));
+        stashShaderDrafts();
+        auto ui = replayUiDocument(*frame_, state, experiment_->document().value("ui", nlohmann::json::object()));
+        ui["shader_documents"] = shaderDocuments_;
+        ui["shader_entries"] = shaderEntries_;
+        experiment_->save(path, ui);
         projectPath_ = path;
         projectDirty_ = false;
         setWindowModified(false);

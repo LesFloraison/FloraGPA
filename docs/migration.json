@@ -39,12 +39,15 @@
       "description": "Offline independent DX11 asset and draw analysis, running in an isolated worker.",
       "status": "partial",
       "native": [
-        "src/cli/main.cpp"
+        "src/cli/main.cpp",
+        "src/application/ExternalShaderTools.cpp"
       ],
       "validation": [
         "docs/POST_TRANSFORM_MIGRATION.md",
         "Native post-geometry command supports final/vs/ds/gs, streams and instances; remaining analysis entry points remain pending.",
-        "Native HLSL recovery/compile and verified saved source are connected to shader --recover and the Qt source editor. See HLSL_RECOVERY_MIGRATION.md. Optional external decompiler fallback and external assembly editing remain pending; shared module is partial."
+        "Native HLSL recovery/compile and verified saved source are connected to shader --recover and the Qt source editor. See HLSL_RECOVERY_MIGRATION.md. Optional external decompiler fallback and external assembly editing are now covered by EXTERNAL_SHADER_MIGRATION.md; the shared module remains partial pending a complete responsibility/metadata audit.",
+        "docs/EXTERNAL_SHADER_MIGRATION.md",
+        "Native optional tool execution, CLI assembly/profile/optimization, Qt assembly editing and per-resource HLSL/ASM drafts are connected. Six-stage binary comparison, native-first and external fallback, modified GPU replay and cancellation checks are covered; shared module remains partial."
       ]
     },
     {
@@ -139,7 +142,8 @@
         "src/app/Views.cpp",
         "src/application/TextureInspector.cpp",
         "src/replay/Replay.cpp",
-        "src/application/PlanarWrites.cpp"
+        "src/application/PlanarWrites.cpp",
+        "src/application/ExternalShaderTools.cpp"
       ],
       "validation": [
         "docs/NATIVE_BASELINE.md",
@@ -160,7 +164,9 @@
         "docs/OUTPUT_LOG_MIGRATION.md",
         "docs/HULL_OUTPUT_MIGRATION.md",
         "HS output uses compact control-point/patch-constant tables, complete export and project selection restoration.",
-        "Native HLSL recovery/compile and verified saved source are connected to shader --recover and the Qt source editor. See HLSL_RECOVERY_MIGRATION.md. Optional external decompiler fallback and external assembly editing remain pending; shared module is partial."
+        "Native HLSL recovery/compile and verified saved source are connected to shader --recover and the Qt source editor. See HLSL_RECOVERY_MIGRATION.md. Optional external decompiler fallback and external assembly editing are now covered by EXTERNAL_SHADER_MIGRATION.md; the shared module remains partial pending a complete responsibility/metadata audit.",
+        "docs/EXTERNAL_SHADER_MIGRATION.md",
+        "Native optional tool execution, CLI assembly/profile/optimization, Qt assembly editing and per-resource HLSL/ASM drafts are connected. Six-stage binary comparison, native-first and external fallback, modified GPU replay and cancellation checks are covered; shared module remains partial."
       ]
     },
     {
@@ -2847,12 +2853,15 @@
         "src/replay/Replay.cpp",
         "src/application/HlslCompilation.h",
         "src/application/ShaderProject.cpp",
-        "src/application/HlslRecoveryTranslation.cpp"
+        "src/application/HlslRecoveryTranslation.cpp",
+        "src/application/ExternalShaderTools.cpp"
       ],
       "validation": [
         "DXBC disassembly/reflection; SPDB/SDBG fixtures; HLSL compile/apply; recovery pending",
         "IFCE-gated interface-slot reflection, class linkage metadata, six-stage dynamic/static replacement and unmodified linked DXBC export",
-        "Native HLSL recovery/compile and verified saved source are connected to shader --recover and the Qt source editor. See HLSL_RECOVERY_MIGRATION.md. Optional external decompiler fallback and external assembly editing remain pending; shared module is partial."
+        "Native HLSL recovery/compile and verified saved source are connected to shader --recover and the Qt source editor. See HLSL_RECOVERY_MIGRATION.md. Optional external decompiler fallback and external assembly editing are now covered by EXTERNAL_SHADER_MIGRATION.md; the shared module remains partial pending a complete responsibility/metadata audit.",
+        "docs/EXTERNAL_SHADER_MIGRATION.md",
+        "Native optional tool execution, CLI assembly/profile/optimization, Qt assembly editing and per-resource HLSL/ASM drafts are connected. Six-stage binary comparison, native-first and external fallback, modified GPU replay and cancellation checks are covered; shared module remains partial."
       ]
     },
     {

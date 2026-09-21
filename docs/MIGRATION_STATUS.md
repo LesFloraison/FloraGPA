@@ -2,9 +2,22 @@
 
 已有可编译、可运行的 VS2022 / Qt Widgets 原生工程，能够独立重放当前验证的
 GF2 与 BF1 DX11 捕获。**尚未完成原 Python 版本的全部功能迁移。**
-当前独立包为 `out/FloraGPA-hlsl-recovery/FloraGPA.exe`。
+当前独立包为 `out/FloraGPA-shader-tools/FloraGPA.exe`。
 
-最新一批将原版四个 DXBC→HLSL lowering 模块完整迁入 C++，并接入
+最新一批迁移了原版可选外部反编译器回退、DXBC 汇编编辑、CLI profile／优化
+选项和按资源保存的 HLSL／ASM 草稿。Qt 的 **Shader → DXBC** 提供 Read、
+Import ASM、Assemble & Apply 和 External Tool；草稿与入口名随实验保存，
+切换资源及撤销／重做不会丢失。外部工具在隔离进程中执行，超时或取消时清理
+子进程树。未捆绑第三方工具，原生恢复仍优先使用。
+发布包 21 组原 Python／CLI 对照通过，涵盖六个阶段汇编字节、回退成功／失败、
+三个 profile × 三个优化模式、Shader 导出及汇编往返；四项黄金帧／负对照通过。
+完整 Release 构建及相关 10 套 CTest 通过（含更新只读汇编旧假设后的回归），
+原主窗口 54 项无失败或跳过。Windows-only PATH 的发布包模型／Qt 检查为
+14／4 项通过；16 份依赖报告通过审计，四个程序与 Release 哈希一致。
+共享模块仍保持 `partial`；数量维持 11 `ported`、120 `partial`、73 `pending`。
+详见 [EXTERNAL_SHADER_MIGRATION.md](EXTERNAL_SHADER_MIGRATION.md)。
+
+上一批将原版四个 DXBC→HLSL lowering 模块完整迁入 C++，并接入
 **Shader → Source → Recover HLSL** 和 CLI `shader --recover`。复用源码编辑、
 Compile & Apply、实验保存与撤销／重做；保存源码只有在重新编译后的 DXBC
 逐字节一致时才标为已验证。重建源码保留“非原始源码／语义未验证”的标记，
@@ -17,8 +30,8 @@ Compile & Apply、实验保存与撤销／重做；保存源码只有在重新�
 54 项无失败或跳过。Windows-only PATH 下的发布包模型 10 项、Qt 套件 3 项通过，
 4 项黄金帧／负对照和 11 份运行时依赖审计通过，四个程序与 Release 哈希一致。
 四个模块更新为 `ported`，清单为 11 `ported`、120 `partial`、73 `pending`；
-这不是工作量百分比。原版外部反编译器回退和外部汇编编辑入口仍未迁移，相关共享
-模块保持 `partial`。详见 [HLSL_RECOVERY_MIGRATION.md](HLSL_RECOVERY_MIGRATION.md)。
+这不是工作量百分比。外部反编译器回退和汇编编辑入口已在上述后续批次迁移，
+相关共享模块保持 `partial`。详见 [HLSL_RECOVERY_MIGRATION.md](HLSL_RECOVERY_MIGRATION.md)。
 
 上一批将多文件 **Shader Project** 接入 Shader 页：根文件选择、源码添加／删除、
 Settings、JSON 导入／保存及隔离的 Compile & Apply 已迁入 Qt。原生编译器仅解析
