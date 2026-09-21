@@ -4,7 +4,18 @@
 GF2 与 BF1 DX11 捕获。**尚未完成原 Python 版本的全部功能迁移。**
 当前独立包为 `out/FloraGPA-gpu-profile/FloraGPA.exe`。
 
-最新一批将原版重复 GPU 采样迁入原生后端和中央 **GPU Timing** 页：预热、
+最新一批补齐 Coverage／Quad 所依赖的 DXBC 改写：保留原 PS 的新增标记输出、
+main 返回处替换颜色、保留 alpha、数组索引筛选、六阶段 SM5 UAV 重定位、
+反射范围和 64 槽 feature flag 均已迁入原生代码。3,564 组逐字节 Python 对照
+通过，覆盖 378 份独立着色器和 501 组拒绝输入。原版 GPU 测试驱动使用 C++
+生成的字节码通过 660 项检查，覆盖硬件／WARP、MSAA、双源混合、动态 PS、
+数组索引及各前置阶段的 UAV 副作用。此项证据不代表整个 Python 诊断引擎已迁移。
+Release 全量构建、五套相关 CTest 和四项黄金帧／负对照通过。三个底层模块
+更新为 `ported`，当前为 16 `ported`、117 `partial`、71 `pending`，不等同于
+工作量百分比。完整 Coverage／Quad 后端与 Qt 页面仍待迁移，当前可用独立包
+仍为上述 GPU Timing 版本。详见 [COVERAGE_SHADER_MIGRATION.md](COVERAGE_SHADER_MIGRATION.md)。
+
+上一批将原版重复 GPU 采样迁入原生后端和中央 **GPU Timing** 页：预热、
 包含端点的 API 范围、可选资源写入、耗时分布、逐轮真实时间轴、API 跳转、
 实验设置和 JSON／CSV／ZIP 导出均已接通。取消和过期结果检查沿用隔离 worker；
 每轮恢复捕获资源，保留 disabled／predication／DrawAuto 的原版测量边界。

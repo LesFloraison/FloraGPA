@@ -654,9 +654,19 @@
       "sha256": "4f1638da2985062e079ab1ea9a7dd2a9cc575571566472829bb617a624c55ff4",
       "lines": 50,
       "description": "Select a targetless coverage index without suppressing original PS work.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "ported",
+      "native": [
+        "src/application/DxbcCoverage.cpp",
+        "src/application/DxbcCoverage.h"
+      ],
+      "validation": [
+        "docs/COVERAGE_SHADER_MIGRATION.md",
+        "tools/validate_dxbc_coverage.py",
+        "tools/validate_coverage_shader_gpu.py",
+        "tests/DxbcCoverageTests.cpp",
+        "3,564 exact binary/metadata comparisons over 378 shaders, including 501 expected rejections, passed. Five original GPU fixture matrices with native shader transformations passed 660 checks. This does not mark the original coverage/quad executor or Qt views as migrated.",
+        "Complete Release build, five relevant CTest suites, five native coverage test cases including setup/cleanup, and four golden/negative controls passed."
+      ]
     },
     {
       "module": "dxbc_domain_inputs.py",
@@ -813,16 +823,22 @@
       "sha256": "a83d9804df9e76121782778c6e55dd83da193bdda9f0432e8ac42a6022b5de29",
       "lines": 126,
       "description": "Token-preserving DXBC instrumentation for pixel coverage.",
-      "status": "partial",
+      "status": "ported",
       "native": [
-        "src/core/Dxbc.cpp"
+        "src/core/Dxbc.cpp",
+        "src/application/DxbcCoverage.cpp",
+        "src/application/DxbcCoverage.h"
       ],
       "validation": [
         "Checked DXBC chunks and retail checksum; output-signature-only SO creation adds an empty ISGN while retaining original output signature bytes",
         "tools/validate_stream_output_port.py: 690 final-package checks with system-only PATH, hardware/WARP, synthetic and five original GPA SO captures; original line-stream captured count 6 is recovered as 12 actual vertices",
-        "Coverage instrumentation and the remaining token editing functions are pending",
         "docs/VS_IDENTITY_MIGRATION.md",
-        "Checked program-token reader and retail DXBC container/checksum writer migrated; pixel-coverage instrumentation remains pending."
+        "docs/COVERAGE_SHADER_MIGRATION.md",
+        "tools/validate_dxbc_coverage.py",
+        "tools/validate_coverage_shader_gpu.py",
+        "tests/DxbcCoverageTests.cpp",
+        "3,564 exact binary/metadata comparisons over 378 shaders, including 501 expected rejections, passed. Five original GPU fixture matrices with native shader transformations passed 660 checks. This does not mark the original coverage/quad executor or Qt views as migrated.",
+        "Complete Release build, five relevant CTest suites, five native coverage test cases including setup/cleanup, and four golden/negative controls passed."
       ]
     },
     {
@@ -839,13 +855,20 @@
       "sha256": "03b5e8c47105106892012c51547573f07a9f0fedc3c3710f4a025df588785a44",
       "lines": 97,
       "description": "SM5 UAV register relocation at operand boundaries, never by word search.",
-      "status": "partial",
+      "status": "ported",
       "native": [
-        "src/application/DxbcIdentity.cpp"
+        "src/application/DxbcIdentity.cpp",
+        "src/application/DxbcCoverage.cpp",
+        "src/application/DxbcCoverage.h"
       ],
       "validation": [
         "docs/VS_IDENTITY_MIGRATION.md",
-        "Operand-aware UAV declaration/use analysis migrated for the identity reuse guard; relocation and RT0 reservation remain pending."
+        "docs/COVERAGE_SHADER_MIGRATION.md",
+        "tools/validate_dxbc_coverage.py",
+        "tools/validate_coverage_shader_gpu.py",
+        "tests/DxbcCoverageTests.cpp",
+        "3,564 exact binary/metadata comparisons over 378 shaders, including 501 expected rejections, passed. Five original GPU fixture matrices with native shader transformations passed 660 checks. This does not mark the original coverage/quad executor or Qt views as migrated.",
+        "Complete Release build, five relevant CTest suites, five native coverage test cases including setup/cleanup, and four golden/negative controls passed."
       ]
     },
     {
