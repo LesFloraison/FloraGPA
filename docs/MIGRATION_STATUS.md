@@ -2,16 +2,27 @@
 
 已有可编译、可运行的 VS2022 / Qt Widgets 原生工程，能够独立重放当前验证的
 GF2 与 BF1 DX11 捕获。**尚未完成原 Python 版本的全部功能迁移。**
-当前独立包为 `out/FloraGPA-history-backend/FloraGPA.exe`。
+当前独立包为 `out/FloraGPA-pixel-history/FloraGPA.exe`。
 
-最新一批接通原生 RenderDoc 重放控制器、PixelHistory 结果和 CPU 写入补充。
+最新一批将 Pixel History 接入 Qt 主窗口：独立再捕获、Hardware／WARP、
+实验缓存与撤销复用、取消／重试、原始 API 定位、精确整数值、折叠详情和完整
+JSON 导出均已接通；Output／Texture 像素选择可填写历史查询坐标。
+45 套 Release CTest 通过，含原 Qt 54 项回归，无失败、无跳过。
+最终 Details 布局／提示清理后重新完整构建，在发布包、Windows-only PATH 下
+重跑新 Qt 测试，6 项通过且无跳过（含 22 份后端历史报告、真实 CPU 写入和
+Hardware／WARP 再捕获）。新包 4 项黄金帧及负对照、10 份运行时模块审计通过，
+4 个程序与最终构建哈希一致，实际 Qt 截图已检查。共享 RenderDoc worker 的
+像素／顶点／计算 shader 调试、计数器等消费者仍待迁移，相关模块保持 `partial`。
+详见 [PIXEL_HISTORY_UI_MIGRATION.md](PIXEL_HISTORY_UI_MIGRATION.md)。
+
+上一批接通原生 RenderDoc 重放控制器、PixelHistory 结果和 CPU 写入补充。
 独立 `FloraGPA.Rdc.exe` 通过 JSON 任务运行，不调用 Python/qrenderdoc。
 发布包 152 项检查通过：22 组完整像素历史对照（35 条记录、其中 10 条 CPU
 快照）、9 份真实 RDC 事件索引、5 种非法选择，覆盖 MSAA、Resolve、复制／清除／
 深度／mip 操作、Update 区域、1D／数组／体纹理 Map、整数值及未变化的局部写入。
 完整 Release 构建、相关 2 套 CTest、4 项黄金帧及负对照、44 份运行时报告审计通过。
-Qt Pixel History 界面、再捕获缓存与实验联动、任务取消和导航／导出仍待接通；
-共享 RenderDoc worker 的其他分析和调试分支也未迁移，相关模块保持 `partial`。
+该批当时 Qt Pixel History 界面、缓存、实验联动、取消和导航／导出待接通，
+现已由最新界面批次接通；共享 worker 的其他分析和调试分支仍未迁移。
 详见 [RDC_HISTORY_MIGRATION.md](RDC_HISTORY_MIGRATION.md)。
 
 上一批迁入可选 RenderDoc 原生再捕获与精确命令来源映射。CLI 可将独立重放
@@ -20,7 +31,7 @@ Qt Pixel History 界面、再捕获缓存与实验联动、任务取消和导航
 及负对照、18 份运行时模块审计全部通过；原 Qt 54 项回归无失败、无跳过。
 BF1 的 5,491 个已执行命令均获得唯一可选择的原生事件映射。
 该批是 Pixel History 的依赖迁移；当时生产版 RenderDoc 重放控制器、像素历史结果、
-CPU 写入补充与 Qt 视图均待接通，前三项已由最新后端批次迁入，Qt 视图仍待接通。
+CPU 写入补充与 Qt 视图均待接通，现已分别由后端与界面批次迁入。
 详见 [RDC_CAPTURE_MIGRATION.md](RDC_CAPTURE_MIGRATION.md)。
 
 上一批将 GS／HS／DS 检查点调试接入主窗口：读取原始 shader、单点与完整轨迹

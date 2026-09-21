@@ -6,9 +6,16 @@
       "sha256": "8c04a537d220466ba27aff029f505a999a6fa8c6f1a71132a4fdb943afabf209",
       "lines": 424,
       "description": "Native post-shader mesh, pixel history, debugger and counter views.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": [
+        "src/app/PixelHistoryView.cpp",
+        "src/app/MainWindow.cpp",
+        "src/rdc/main.cpp"
+      ],
+      "validation": [
+        "docs/PIXEL_HISTORY_UI_MIGRATION.md",
+        "Qt Pixel History is connected to native recapture and history workers with experiment/driver/library caching, cancellation, API navigation, details and JSON export. Other shared advanced-analysis/debugger/counter actions remain pending."
+      ]
     },
     {
       "module": "analyze.py",
@@ -2308,7 +2315,8 @@
       ],
       "validation": [
         "docs/RDC_CAPTURE_MIGRATION.md",
-        "Packaged optional recapture: 99 checks across nine captures; 709 exact Python provenance comparisons including all nine RDCs; 43 Release CTest suites and four golden/negative checks passed. Native history replay-controller is now available; Qt recapture/history orchestration remains pending."
+        "Packaged optional recapture: 99 checks across nine captures; 709 exact Python provenance comparisons including all nine RDCs; 43 Release CTest suites and four golden/negative checks passed. Native history replay-controller is now available; Qt recapture/history orchestration is now connected; see PIXEL_HISTORY_UI_MIGRATION.md.",
+        "docs/PIXEL_HISTORY_UI_MIGRATION.md"
       ]
     },
     {
@@ -2323,8 +2331,9 @@
       ],
       "validation": [
         "docs/RDC_HISTORY_MIGRATION.md",
-        "Native RenderDoc 1.45 replay-controller consumer implements exact event mapping, PixelHistory records and CPU-write supplementation. Qt history workflow remains pending; other rdc_worker analysis/debugger actions are not migrated by this batch.",
-        "Packaged backend: 152 checks, 22 complete history comparisons (35 records, 10 CPU snapshots), nine real controller-index comparisons; two relevant CTest suites and four golden/negative checks passed. Malformed structured-data injection and Qt workflow coverage remain pending."
+        "Native RenderDoc 1.45 replay-controller consumer implements exact event mapping, PixelHistory records and CPU-write supplementation. Qt history workflow is now connected; other rdc_worker analysis/debugger actions are not migrated by this batch.",
+        "Packaged backend: 152 checks, 22 complete history comparisons (35 records, 10 CPU snapshots), nine real controller-index comparisons; two relevant CTest suites and four golden/negative checks passed. Malformed structured-data injection remains pending; Qt workflow validation is recorded separately.",
+        "docs/PIXEL_HISTORY_UI_MIGRATION.md"
       ]
     },
     {
@@ -2341,8 +2350,9 @@
       "validation": [
         "docs/RDC_CAPTURE_MIGRATION.md",
         "docs/RDC_HISTORY_MIGRATION.md",
-        "Native RenderDoc 1.45 replay-controller consumer implements exact event mapping, PixelHistory records and CPU-write supplementation. Qt history workflow remains pending; other rdc_worker analysis/debugger actions are not migrated by this batch.",
-        "Packaged backend: 152 checks, 22 complete history comparisons (35 records, 10 CPU snapshots), nine real controller-index comparisons; two relevant CTest suites and four golden/negative checks passed. Malformed structured-data injection and Qt workflow coverage remain pending."
+        "Native RenderDoc 1.45 replay-controller consumer implements exact event mapping, PixelHistory records and CPU-write supplementation. Qt history workflow is now connected; other rdc_worker analysis/debugger actions are not migrated by this batch.",
+        "Packaged backend: 152 checks, 22 complete history comparisons (35 records, 10 CPU snapshots), nine real controller-index comparisons; two relevant CTest suites and four golden/negative checks passed. Malformed structured-data injection remains pending; Qt workflow validation is recorded separately.",
+        "docs/PIXEL_HISTORY_UI_MIGRATION.md"
       ]
     },
     {
@@ -2350,9 +2360,16 @@
       "sha256": "2cb2efff52b75b4d657a0672d472b73fe331450bddf097efd28c77d9313aa3a3",
       "lines": 29,
       "description": "Prepare one direct RenderDoc worker; shared by CLI and native desktop.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": [
+        "src/app/PixelHistoryView.cpp",
+        "src/app/MainWindow.cpp",
+        "src/rdc/main.cpp"
+      ],
+      "validation": [
+        "docs/PIXEL_HISTORY_UI_MIGRATION.md",
+        "Qt Pixel History is connected to native recapture and history workers with experiment/driver/library caching, cancellation, API navigation, details and JSON export. Other shared advanced-analysis/debugger/counter actions remain pending."
+      ]
     },
     {
       "module": "rdc_worker.py",
@@ -2366,8 +2383,9 @@
       ],
       "validation": [
         "docs/RDC_HISTORY_MIGRATION.md",
-        "Native RenderDoc 1.45 replay-controller consumer implements exact event mapping, PixelHistory records and CPU-write supplementation. Qt history workflow remains pending; other rdc_worker analysis/debugger actions are not migrated by this batch.",
-        "Packaged backend: 152 checks, 22 complete history comparisons (35 records, 10 CPU snapshots), nine real controller-index comparisons; two relevant CTest suites and four golden/negative checks passed. Malformed structured-data injection and Qt workflow coverage remain pending."
+        "Native RenderDoc 1.45 replay-controller consumer implements exact event mapping, PixelHistory records and CPU-write supplementation. Qt history workflow is now connected; other rdc_worker analysis/debugger actions are not migrated by this batch.",
+        "Packaged backend: 152 checks, 22 complete history comparisons (35 records, 10 CPU snapshots), nine real controller-index comparisons; two relevant CTest suites and four golden/negative checks passed. Malformed structured-data injection remains pending; Qt workflow validation is recorded separately.",
+        "docs/PIXEL_HISTORY_UI_MIGRATION.md"
       ]
     },
     {

@@ -7,6 +7,7 @@
 #include "IaSetterDialog.h"
 #include "OutputDialog.h"
 #include "PipelineSetterDialog.h"
+#include "PixelHistoryView.h"
 #include "PredicateView.h"
 #include "RasterizerDialog.h"
 #include "SamplerDialog.h"
@@ -26,6 +27,7 @@
 #include "replay/Replay.h"
 #include <QApplication>
 #include <QCloseEvent>
+#include <QCryptographicHash>
 #include <QDialog>
 #include <QDialogButtonBox>
 #include <QFileDialog>
@@ -273,6 +275,9 @@ MainWindow::MainWindow() {
             if (runningKind_ == "replay-pipeline")
                 replayedState_->finishReplay(runningPipelineRequest_,
                                              {{"error", process_.errorString().toStdString()}});
+            if (runningKind_ == "history" || runningKind_ == "history-capture")
+                history_->finish(historyRequestId_,
+                                 {{"ok", false}, {"error", process_.errorString().toStdString()}});
             emit taskFinished(false);
         }
     });
@@ -990,11 +995,14 @@ void MainWindow::buildUi() {
         geometryModel_->setTable(
             geometry_["tables"].toObject()[geometryTable_->currentData().toString()].toObject());
     });
-    for (const auto &name : {"Pixel History"}) {
-        int tab = centerTabs_->addTab(new QWidget, name);
-        centerTabs_->setTabEnabled(tab, false);
-        centerTabs_->setTabToolTip(tab, "Migration pending");
-    }
+    history_ = new PixelHistoryView;
+    centerTabs_->addTab(history_, "Pixel History");
+    connect(history_, &PixelHistoryView::readRequested, this, &MainWindow::readPixelHistory);
+    connect(history_, &PixelHistoryView::cancelRequested, this, &MainWindow::cancel);
+    connect(history_, &PixelHistoryView::eventRequested, this, [this](qulonglong id) {
+        if (!busy())
+            locateEvent(id);
+    });
     auto debugTabs = new QTabWidget;
     debugTabs->setObjectName("checkpointStageTabs");
     debugTabs->setDocumentMode(true);
@@ -1082,6 +1090,18 @@ void MainWindow::buildUi() {
     statusBar()->addPermanentWidget(zoomLabel_);
     connect(image_, &ImageView::pixelHovered, pixelLabel_, &QLabel::setText);
     connect(image_, &ImageView::pixelSelected, this, &MainWindow::selectOutputPixel);
+    connect(textureImage_, &ImageView::pixelSelected, this, [this](int x, int y, const QColor &) {
+        if (busy() || textureTimer_.isActive() || textureMetadata_.isEmpty() ||
+            qulonglong(textureMetadata_["resource_id"].toInteger()) != selectedResource_)
+            return;
+        const auto preview = textureMetadata_["preview_options"].toObject();
+        const auto layer =
+            textureMetadata_["dimension"].toInt() == 4 ? preview["slice"].toInt() : preview["layer"].toInt();
+        const auto sample = textureMetadata_["msaa"].toObject()["selected_sample"].toInt(0);
+        history_->selectPixel(selectedResource_, x, y, preview["mip"].toInt(), layer, sample);
+        statusBar()->showMessage(QString("History pixel %1, %2 · T:%3").arg(x).arg(y).arg(selectedResource_),
+                                 4000);
+    });
     connect(image_, &ImageView::zoomChanged, this,
             [this](int percent) { zoomLabel_->setText(QString("%1%").arg(percent)); });
     auto outputChanged = [this] {
@@ -1172,6 +1192,8 @@ void MainWindow::closeEvent(QCloseEvent *e) {
 }
 void MainWindow::setBusy(bool busy) {
     updateCheckpointContext();
+    if (history_)
+        history_->setWorkerBusy(busy);
     for (auto view : checkpoints_)
         if (view)
             view->setWorkerBusy(busy);
@@ -1216,6 +1238,77 @@ void MainWindow::updateCheckpointContext() {
     for (auto view : checkpoints_)
         if (view)
             view->setContext(key, available);
+    if (history_)
+        history_->setContext(historyContextKey(), selectedEvent_);
+}
+QString MainWindow::historyContextKey() const {
+    if (!frame_)
+        return {};
+    nlohmann::json active = nlohmann::json::array();
+    if (experiment_)
+        for (size_t i = 0; i < experiment_->revision(); ++i)
+            active.push_back(experiment_->document().at("history").at(i).at("operations"));
+    const auto bytes = QByteArray::fromStdString(active.dump());
+    return QString::fromStdString(frame_->sha256()) + ':' + QString::number(adapter_->currentIndex()) + ':' +
+           QString::fromLatin1(QCryptographicHash::hash(bytes, QCryptographicHash::Sha256).toHex());
+}
+void MainWindow::readPixelHistory() {
+    if (busy() || !frame_)
+        return;
+    historyRequestId_ = history_->requestId();
+    try {
+        historyRequest_ = history_->request();
+        const auto library = QFileInfo(history_->backendPath()).canonicalFilePath();
+        QFile file(library);
+        if (library.isEmpty() || !file.open(QIODevice::ReadOnly))
+            throw std::runtime_error("Select an installed RenderDoc 1.45 library");
+        QCryptographicHash digest(QCryptographicHash::Sha256);
+        if (!digest.addData(&file))
+            throw std::runtime_error("Cannot read RenderDoc library identity");
+        historyRequest_["renderdoc"] = library.toStdString();
+        historyKey_ =
+            historyContextKey() + ':' + library + ':' + QString::fromLatin1(digest.result().toHex());
+        historyRequest_["experiment_key"] = historyKey_.toStdString();
+        historyRequest_["frame_sha256"] = frame_->sha256();
+        if (const auto it = historyCaptures_.find(historyKey_);
+            it != historyCaptures_.end() && QFileInfo::exists(it->second.path)) {
+            historyRdc_ = it->second.path;
+            historyCacheOrder_.removeAll(historyKey_);
+            historyCacheOrder_.append(historyKey_);
+            startHistoryWorker();
+        } else {
+            startWorker({"replay", capturePath_, "--renderdoc", library}, false);
+            if (process_.state() == QProcess::NotRunning)
+                throw std::runtime_error("Cannot start independent recapture");
+            runningKind_ = "history-capture";
+            statusBar()->showMessage("Capturing pixel history…");
+        }
+    } catch (const std::exception &e) {
+        history_->finish(historyRequestId_, {{"ok", false}, {"error", e.what()}});
+        showError(QString::fromUtf8(e.what()));
+        emit taskFinished(false);
+    }
+}
+void MainWindow::startHistoryWorker() {
+    replayTimer_.stop();
+    textureTimer_.stop();
+    bufferTimer_.stop();
+    jobDir_ = std::make_unique<QTemporaryDir>(QDir::tempPath() + "/FloraGPA-history-XXXXXX");
+    if (!jobDir_->isValid())
+        throw std::runtime_error("Cannot create history worker directory");
+    historyRequest_["capture"] = historyRdc_.toStdString();
+    historyRequest_["out"] = (jobDir_->path() + "/result").toStdString();
+    const auto path = jobDir_->path() + "/job.json";
+    writeFile(path, QByteArray::fromStdString(historyRequest_.dump(2)));
+    runningRevision_ = revision_;
+    runningTimings_ = false;
+    runningKind_ = "history";
+    stderrBuffer_.clear();
+    errorText_.clear();
+    setBusy(true);
+    statusBar()->showMessage("Reading pixel history…");
+    timeout_.start();
+    process_.start(QCoreApplication::applicationDirPath() + "/FloraGPA.Rdc.exe", {"--job", path});
 }
 void MainWindow::openCapture(const QString &path) {
     if (projectDirty_) {
@@ -1327,6 +1420,8 @@ void MainWindow::finishWorker(int code, QProcess::ExitStatus status) {
     }
     setBusy(false);
     if (runningRevision_ != revision_) {
+        if (runningKind_ == "history" || runningKind_ == "history-capture")
+            history_->finish(historyRequestId_, {{"ok", false}, {"error", "Cancelled"}});
         if (runningKind_ == "statistics")
             gpuStatistics_->finish(runningStatisticsRequest_, {{"error", "Cancelled"}});
         if (runningKind_ == "predicate")
@@ -1341,6 +1436,21 @@ void MainWindow::finishWorker(int code, QProcess::ExitStatus status) {
         if (code || status != QProcess::NormalExit) {
             auto error = QJsonDocument::fromJson(errorText_.toUtf8()).object()["error"].toString(errorText_);
             throw std::runtime_error((error.isEmpty() ? "Replay worker failed" : error).toStdString());
+        }
+        if (runningKind_ == "history") {
+            QFile file(jobDir_->path() + "/result/result.json");
+            if (!file.open(QIODevice::ReadOnly))
+                throw std::runtime_error("History result is missing");
+            const auto bytes = file.readAll();
+            auto result = nlohmann::json::parse(bytes.begin(), bytes.end());
+            result["capture"] = historyRdc_.toStdString();
+            result["frame_sha256"] = historyRequest_.at("frame_sha256");
+            result["experiment_key"] = historyRequest_.at("experiment_key");
+            result["selection"] = historyRequest_;
+            const bool accepted = history_->finish(historyRequestId_, result);
+            statusBar()->showMessage(accepted ? "Pixel history ready" : "History selection changed", 3000);
+            emit taskFinished(accepted);
+            return;
         }
         QFile file(jobDir_->path() + "/result/report.json");
         if (!file.open(QIODevice::ReadOnly))
@@ -1357,6 +1467,18 @@ void MainWindow::finishWorker(int code, QProcess::ExitStatus status) {
                                       .arg(experiment["revisions"].toInteger())
                                       .arg(experiment["applied_events"].toArray().size())
                                       .arg(experiment["pending_events"].toArray().size()));
+        }
+        if (runningKind_ == "history-capture") {
+            historyRdc_ = report_["rdc_capture"].toString();
+            if (historyRdc_.isEmpty() || !QFileInfo::exists(historyRdc_))
+                throw std::runtime_error("Independent RenderDoc capture is missing");
+            historyCaptures_[historyKey_] = {std::shared_ptr<QTemporaryDir>(std::move(jobDir_)), historyRdc_};
+            historyCacheOrder_.removeAll(historyKey_);
+            historyCacheOrder_.append(historyKey_);
+            while (historyCacheOrder_.size() > 4)
+                historyCaptures_.erase(historyCacheOrder_.takeFirst());
+            startHistoryWorker();
+            return;
         }
         if (runningKind_ == "shader-checkpoint") {
             if (!runningCheckpoint_)
@@ -1548,6 +1670,8 @@ void MainWindow::finishWorker(int code, QProcess::ExitStatus status) {
         emit taskFinished(true);
     } catch (const std::exception &e) {
         showError(QString::fromUtf8(e.what()));
+        if (runningKind_ == "history" || runningKind_ == "history-capture")
+            history_->finish(historyRequestId_, {{"ok", false}, {"error", e.what()}});
         if (runningKind_ == "statistics")
             gpuStatistics_->finish(runningStatisticsRequest_, {{"error", e.what()}});
         if (runningKind_ == "replay-pipeline")
@@ -3456,6 +3580,10 @@ void MainWindow::selectOutputPixel(int x, int y, const QColor &color) {
         selectedResource_ = resource;
         updateExperimentActions();
         const auto coordinate = entry.type == 0x86 ? display.at("slice") : display.at("layer");
+        history_->selectPixel(resource, x, y, display.at("mip").get<int>(), coordinate.get<int>(),
+                              display.value("sample", nlohmann::json(nullptr)).is_number()
+                                  ? display.at("sample").get<int>()
+                                  : 0);
         properties("Output Pixel",
                    {{"Resource", QString::number(resource)},
                     {"Event", event ? QString::number(event) : "—"},

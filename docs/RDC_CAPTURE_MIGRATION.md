@@ -46,8 +46,8 @@ unmapped. Traversal has explicit depth/count/name and numeric limits.
 This recapture batch was a prerequisite for Pixel History. The subsequent
 [native history backend](RDC_HISTORY_MIGRATION.md) connects `RdcEvents` to the
 real replay controller and adds PixelHistory conversion and structured CPU-write
-supplementation. Its Qt history view and main-window orchestration still need
-integration, so the Pixel History tab remains disabled. Python/qrenderdoc are
+supplementation. The [Qt history view](PIXEL_HISTORY_UI_MIGRATION.md) now integrates
+main-window orchestration and enables Pixel History. Python/qrenderdoc are
 used only as external development oracles for reopening captures and comparing
 results.
 

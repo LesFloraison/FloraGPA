@@ -69,9 +69,9 @@ and the two compatibility changes; no RenderDoc binary is redistributed.
 
 ## Remaining integration
 
-The Pixel History Qt tab is still disabled. Main-window job scheduling, automatic
-recapture/cache invalidation with experiments, cancellation and history-table
-navigation/export still need integration. This backend does not complete the
+The subsequent [Qt Pixel History migration](PIXEL_HISTORY_UI_MIGRATION.md) connects
+main-window job scheduling, recapture/cache invalidation with experiments,
+cancellation and history-table navigation/export. This backend does not complete the
 shared `rdc_worker.py` module: its RenderDoc-backed texture/postmesh/counter and
 pixel/vertex/compute debugger consumers remain pending. The full migration goal
 is unchanged; passing this backend's checks is not full UI parity.
@@ -108,8 +108,9 @@ executables match the Release build, and no RenderDoc/Python runtime is bundled
 
 The malformed structured-chunk and failed-PickPixel mock cases from the Python
 unit suite have not yet been independently injected into the native controller;
-the production parser preserves explicit gaps, but these branches and Qt workflow
-coverage remain incomplete. Native module migration entries stay `partial`.
+the production parser preserves explicit gaps, but these branches remain unverified.
+Qt workflow coverage is recorded separately in the UI migration document. Shared
+native module migration entries stay `partial`.
 
 ```powershell
 python tools/validate_rdc_history.py --reference D:/CDXrepo/FloraGPA --exe out/FloraGPA-history-backend/FloraGPA.Rdc.exe --cli out/FloraGPA-history-backend/FloraGPA.Cli.exe --qt-bin out/FloraGPA-history-backend --captures artifacts/rdc-capture-package --out artifacts/rdc-history-check

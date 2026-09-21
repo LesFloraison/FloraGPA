@@ -67,7 +67,7 @@ a working D3D11 adapter.
 Capture, Trace and Trace Input, instruction/source stepping, breakpoints,
 frame-scoped variables and watches, configuration import/save and ZIP export.
 See [CHECKPOINT_UI_MIGRATION.md](docs/CHECKPOINT_UI_MIGRATION.md) for the workflow,
-verification and limits. Other debugger stages and Pixel History remain pending.
+verification and limits. Other debugger stages remain pending.
 
 ```powershell
 .\tools\package.ps1
@@ -91,8 +91,11 @@ only for this explicit option; neither Python nor qrenderdoc is used to capture.
 See [RDC_CAPTURE_MIGRATION.md](docs/RDC_CAPTURE_MIGRATION.md).
 `FloraGPA.Rdc.exe` now reads real Pixel History and CPU-write snapshots through
 the optional RenderDoc 1.45 native replay API. It accepts an isolated JSON job;
-see [RDC_HISTORY_MIGRATION.md](docs/RDC_HISTORY_MIGRATION.md). Pixel History's Qt
-view, automatic recapture scheduling and cancellation remain pending.
+see [RDC_HISTORY_MIGRATION.md](docs/RDC_HISTORY_MIGRATION.md). The main-window
+**Pixel History** tab now provides native Read/Cancel, exact API navigation,
+integer-aware before/after values, expandable details and JSON export, with
+experiment-aware recapture caching. See
+[PIXEL_HISTORY_UI_MIGRATION.md](docs/PIXEL_HISTORY_UI_MIGRATION.md).
 
 Use **F5** to replay, **F6** for GPU timings, **Escape** to cancel. Select API
 events to inspect their pipeline and before/after output. Resources provide

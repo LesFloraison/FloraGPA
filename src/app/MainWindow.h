@@ -24,6 +24,7 @@ class PredicateView;
 class AnnotationsView;
 class StatisticsView;
 class CheckpointView;
+class PixelHistoryView;
 class MainWindow final : public QMainWindow {
     Q_OBJECT
   public:
@@ -87,6 +88,19 @@ class MainWindow final : public QMainWindow {
     void properties(const QString &title, const QList<QPair<QString, QString>> &rows);
     void updateStatistics();
     void updateCheckpointContext();
+    QString historyContextKey() const;
+    void readPixelHistory();
+    void startHistoryWorker();
+    PixelHistoryView *history_ = nullptr;
+    nlohmann::json historyRequest_;
+    uint64_t historyRequestId_{};
+    QString historyKey_, historyRdc_;
+    struct HistoryCapture {
+        std::shared_ptr<QTemporaryDir> directory;
+        QString path;
+    };
+    std::map<QString, HistoryCapture> historyCaptures_;
+    QStringList historyCacheOrder_;
     std::array<CheckpointView *, 3> checkpoints_{};
     CheckpointView *runningCheckpoint_ = nullptr;
     bool runningCheckpointCatalog_ = true;
