@@ -495,9 +495,19 @@
       "sha256": "afd6b0158b330dc78d8a4bdca677b7e5d82b97915ff3e9f1cdd93eed447cbe90",
       "lines": 73,
       "description": "Pixel-fragment coverage and an explicitly selectable geometry-only mode.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": [
+        "src/application/Coverage.cpp",
+        "src/application/Coverage.h"
+      ],
+      "validation": [
+        "docs/COVERAGE_EXECUTION_MIGRATION.md",
+        "tests/CoverageTests.cpp",
+        "tools/validate_coverage_port.py",
+        "tools/validate_coverage_cli.py",
+        "Native fragment/geometry execution and CLI/worker exports are implemented; Qt coverage and remaining consumer/experiment audits are pending.",
+        "560 synthetic GPU cases / 4,900 checks and 184 integration GPU cases / 1,724 checks passed against independent Python execution. Hardware/WARP storage, counters, MSAA samples, masks, previews, metadata and SO history are compared."
+      ]
     },
     {
       "module": "coverage_fragment.py",
@@ -506,11 +516,17 @@
       "description": "Coverage written by the original pixel program alongside its actual outputs.",
       "status": "partial",
       "native": [
-        "src/application/FrameOutput.cpp"
+        "src/application/FrameOutput.cpp",
+        "src/application/Coverage.cpp",
+        "src/application/Coverage.h"
       ],
       "validation": [
-        "Only target_subresource descriptor/range selection migrated, including buffer RTV, array mip, W slices, MSAA and DSV flags",
-        "Coverage instrumentation, dual-source handling, UAV relocation and execution remain pending"
+        "docs/COVERAGE_EXECUTION_MIGRATION.md",
+        "tests/CoverageTests.cpp",
+        "tools/validate_coverage_port.py",
+        "tools/validate_coverage_cli.py",
+        "Native fragment/geometry execution and CLI/worker exports are implemented; Qt coverage and remaining consumer/experiment audits are pending.",
+        "560 synthetic GPU cases / 4,900 checks and 184 integration GPU cases / 1,724 checks passed against independent Python execution. Hardware/WARP storage, counters, MSAA samples, masks, previews, metadata and SO history are compared."
       ]
     },
     {
@@ -518,9 +534,19 @@
       "sha256": "cfe0629e450ae41b43cb970cd3749186023d579224019f126edc8f570167a8f4",
       "lines": 21,
       "description": "Geometry-only marker with read-only captured depth/stencil tests.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": [
+        "src/application/Coverage.cpp",
+        "src/application/Coverage.h"
+      ],
+      "validation": [
+        "docs/COVERAGE_EXECUTION_MIGRATION.md",
+        "tests/CoverageTests.cpp",
+        "tools/validate_coverage_port.py",
+        "tools/validate_coverage_cli.py",
+        "Native fragment/geometry execution and CLI/worker exports are implemented; Qt coverage and remaining consumer/experiment audits are pending.",
+        "560 synthetic GPU cases / 4,900 checks and 184 integration GPU cases / 1,724 checks passed against independent Python execution. Hardware/WARP storage, counters, MSAA samples, masks, previews, metadata and SO history are compared."
+      ]
     },
     {
       "module": "coverage_isolated.py",
@@ -529,12 +555,20 @@
       "description": "Private GPU output copies for diagnostic draws that cannot add an RTV.",
       "status": "partial",
       "native": [
-        "src/replay/PrivateOutputs.cpp"
+        "src/replay/PrivateOutputs.cpp",
+        "src/application/Coverage.cpp",
+        "src/application/Coverage.h"
       ],
       "validation": [
         "docs/POST_TRANSFORM_MIGRATION.md",
-        "Native retained-SO and copied-SO paths support migrated geometry consumers; additional coverage and general consumer integration remains pending.",
-        "docs/OUTPUT_LOG_MIGRATION.md"
+        "Native retained-SO and copied-SO paths support geometry consumers. Native coverage integration is documented in COVERAGE_EXECUTION_MIGRATION.md; remaining consumers are pending.",
+        "docs/OUTPUT_LOG_MIGRATION.md",
+        "docs/COVERAGE_EXECUTION_MIGRATION.md",
+        "tests/CoverageTests.cpp",
+        "tools/validate_coverage_port.py",
+        "tools/validate_coverage_cli.py",
+        "Native fragment/geometry execution and CLI/worker exports are implemented; Qt coverage and remaining consumer/experiment audits are pending.",
+        "560 synthetic GPU cases / 4,900 checks and 184 integration GPU cases / 1,724 checks passed against independent Python execution. Hardware/WARP storage, counters, MSAA samples, masks, previews, metadata and SO history are compared."
       ]
     },
     {
@@ -542,9 +576,19 @@
       "sha256": "e1a0d9d8783d6da967a14d8935da03f32a14ae3dd3d307ae32aea3c591704170",
       "lines": 100,
       "description": "Diagnostic coverage for draws with no color or depth target.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": [
+        "src/application/Coverage.cpp",
+        "src/application/Coverage.h"
+      ],
+      "validation": [
+        "docs/COVERAGE_EXECUTION_MIGRATION.md",
+        "tests/CoverageTests.cpp",
+        "tools/validate_coverage_port.py",
+        "tools/validate_coverage_cli.py",
+        "Native fragment/geometry execution and CLI/worker exports are implemented; Qt coverage and remaining consumer/experiment audits are pending.",
+        "560 synthetic GPU cases / 4,900 checks and 184 integration GPU cases / 1,724 checks passed against independent Python execution. Hardware/WARP storage, counters, MSAA samples, masks, previews, metadata and SO history are compared."
+      ]
     },
     {
       "module": "debug_config.py",

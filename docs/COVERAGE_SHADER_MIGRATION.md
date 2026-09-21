@@ -5,10 +5,10 @@ rewrites. `DxbcCoverage.cpp` now implements the remaining responsibilities of
 `dxbc_patch.py`, `dxbc_array_index.py` and `dxbc_uav.py`. Existing checked DXBC
 container, checksum and instruction parsing in `core/Dxbc.cpp` is reused.
 
-This is a backend dependency of the full diagnostic migration. Coverage/Quad
-commands and their Qt views are not yet connected, and no new working UI control
-is advertised for them. The current usable application package remains
-`out/FloraGPA-gpu-profile/FloraGPA.exe`.
+This checkpoint supplied a backend dependency of the diagnostic migration.
+Native Coverage execution and CLI/worker export were subsequently connected;
+see [coverage execution](COVERAGE_EXECUTION_MIGRATION.md). Qt Coverage and Quad
+execution remain pending.
 
 ## Preserved behavior
 

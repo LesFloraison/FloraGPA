@@ -53,12 +53,15 @@ std::optional<std::pair<uint32_t, uint32_t>> integerFamily(uint32_t format, uint
 
 MsaaStorage Replay::readMsaa(Id id, std::optional<uint32_t> sample, uint32_t typedFormat) {
     const auto resource = frame_.resource(id);
+    return readMsaaStorage(get<ID3D11Resource>(id), resource, sample, typedFormat);
+}
+MsaaStorage Replay::readMsaaStorage(ID3D11Resource *source, const Resource &resource,
+                                   std::optional<uint32_t> sample, uint32_t typedFormat) {
     const auto info = textureInfo(resource);
     if (info.dimension != 3 || info.samples <= 1 || info.mips != 1)
         throw std::runtime_error("MSAA inspection requires a multisampled 2D texture with one mip");
     if (sample && *sample >= info.samples)
         throw std::runtime_error("MSAA sample index out of bounds");
-    auto source = get<ID3D11Resource>(id);
     const auto depth = depthFamily(info.format, resource.desc[8]);
     const auto bits = sample ? integerFamily(info.format, typedFormat) : std::nullopt;
     const auto targetFormat = depth ? depth->typed : typedFormat;

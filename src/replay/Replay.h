@@ -124,11 +124,14 @@ class NativeSample;
 class RenderDocCapture;
 class Replay {
     friend class PostTransformCapture;
+    friend class CoverageCapture;
     NativeSample *activeSample_ = nullptr;
     std::optional<NativeStatistics> measurementResult_;
     uint64_t generation_{};
     PredicateBinding measuredPredicate_;
     std::vector<uint8_t> readTextureStorage(ID3D11Resource *source, const Resource &resource);
+    MsaaStorage readMsaaStorage(ID3D11Resource *source, const Resource &resource,
+                                std::optional<uint32_t> sample, uint32_t typedFormat);
     Com<ID3D11Resource> createEditTexture(const Resource &resource, std::optional<Bytes> data = {});
     void writeMsaaSample(ID3D11Resource *target, const Resource &resource, const TexturePatch &patch);
     void applyTextureEdits(const Event &event, const State &state, std::map<Id, Com<IUnknown>> &originals,

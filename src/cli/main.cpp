@@ -7,6 +7,7 @@
 #include "application/CommandState.h"
 #include "application/Constants.h"
 #include "application/ContextInspector.h"
+#include "application/Coverage.h"
 #include "application/Experiment.h"
 #include "application/ExperimentReport.h"
 #include "application/ExternalShaderTools.h"
@@ -81,7 +82,7 @@ int main(int argc, char **argv) {
         "command",
         "inventory | commands | command-state | contexts | command-lists | replay | shader | "
         "buffer | texture | texture-storage | compile | compile-project | assemble | geometry | replay-pipeline | "
-        "class-linkage | predicate | annotations | statistics | timings | post-geometry | shader-checkpoint | "
+        "class-linkage | predicate | annotations | statistics | timings | coverage | post-geometry | shader-checkpoint | "
         "rdc-analyze");
     p.addPositionalArgument("capture", "DX11 .gpa_frame file");
     p.addOption({"out", "New or empty output directory", "path"});
@@ -102,6 +103,10 @@ int main(int argc, char **argv) {
     p.addOption({"samples", "Repeated timing samples (1..1000)", "count", "5"});
     p.addOption({"warmup", "Timing warmup replays (0..1000)", "count", "1"});
     p.addOption({"include-writes", "Include resource-writing commands in repeated timings"});
+    p.addOption({"coverage-mode", "Coverage mode: fragment or geometry", "mode", "fragment"});
+    p.addOption({"coverage-target", "Coverage target: auto, depth or rt0..rt7", "target", "auto"});
+    p.addOption({"coverage-layer", "Coverage array layer, volume slice or viewport array index", "index"});
+    p.addOption({"ignore-depth", "Ignore depth/stencil tests for coverage"});
     p.addOption({"geometry-stage",
                  "Geometry stage: final, vs, hs, ds, gs, vs-index, vs-writes, ds-writes, gs-emits", "stage",
                  "final"});
@@ -146,6 +151,9 @@ int main(int argc, char **argv) {
             throw std::runtime_error("Expected command and capture path");
         Frame frame(std::filesystem::path(args[1].toStdWString()));
         auto command = args[0];
+        if (command != "coverage" && (p.isSet("coverage-mode") || p.isSet("coverage-target") ||
+            p.isSet("coverage-layer") || p.isSet("ignore-depth")))
+            throw std::runtime_error("Coverage options apply to coverage only");
         if (p.isSet("recover") && command != "shader")
             throw std::runtime_error("--recover applies to shader only");
         if ((p.isSet("profile") || p.value("optimization") != "auto") && command != "compile")
@@ -192,7 +200,38 @@ int main(int argc, char **argv) {
             if (!QDir().mkpath(out))
                 throw std::runtime_error("Cannot create output directory");
         }
-        if (command == "timings") {
+        if (command == "coverage") {
+            if (out.isEmpty() || !p.isSet("id") || p.isSet("before") || p.isSet("timings") ||
+                p.isSet("event") || p.isSet("suppress-draws"))
+                throw std::runtime_error("Coverage requires --id and --out and defines its own replay boundary");
+            ReplayOptions options;
+            options.warp = p.isSet("warp");
+            options.debug = p.isSet("debug-device");
+            options.until = parseId("id");
+            if (p.isSet("experiment")) {
+                Experiment project(frame);
+                project.load(p.value("experiment"), frame);
+                project.apply(frame, options);
+            }
+            for (const auto &value : p.value("disable").split(',', Qt::SkipEmptyParts)) {
+                bool valid = false;
+                const auto id = value.toULongLong(&valid);
+                if (!valid || !frame.entries().contains(id) || frame.entry(id).category != 7)
+                    throw std::runtime_error("Invalid disabled event");
+                options.disabled.insert(id);
+            }
+            CoverageOptions request;
+            request.mode = p.value("coverage-mode").toStdString();
+            request.target = p.value("coverage-target").toStdString();
+            request.depthTest = !p.isSet("ignore-depth");
+            if (p.isSet("coverage-layer")) request.layer = parseIndex("coverage-layer");
+            Replay replay(frame, options);
+            auto result = captureCoverage(replay, options.until, request);
+            exportCoverage(result, std::filesystem::path(out.toStdWString()));
+            shaderProjectReport = {{"coverage", result.report}};
+            report.insert("loaded_modules", modules());
+            report.insert("completed", true);
+        } else if (command == "timings") {
             if (out.isEmpty() || p.isSet("before") || p.isSet("timings") || p.isSet("event") || p.isSet("suppress-draws"))
                 throw std::runtime_error("Repeated timings require --out and define their own boundaries");
             if(p.isSet("id") && p.isSet("start-event"))

@@ -2,9 +2,20 @@
 
 已有可编译、可运行的 VS2022 / Qt Widgets 原生工程，能够独立重放当前验证的
 GF2 与 BF1 DX11 捕获。**尚未完成原 Python 版本的全部功能迁移。**
-当前独立包为 `out/FloraGPA-gpu-profile/FloraGPA.exe`。
+当前独立包为 `out/FloraGPA-coverage/FloraGPA.exe`。
 
-最新一批补齐 Coverage／Quad 所依赖的 DXBC 改写：保留原 PS 的新增标记输出、
+最新一批迁入 Coverage 原生执行与 CLI/Worker 导出：fragment／geometry、
+RTV／DSV／viewport、数组层／mip／体纹理切片、缓冲区 RTV、MSAA、UAV
+重定位与私有输出隔离均已接通，保留实验编辑、条件绘制和 SO／DrawAuto 语义。
+744 组合成与集成 GPU 对照共 6,624 项检查通过，另有 GF2／BF1 的 8 组真实
+绘制对照、80 项检查通过。WARP 深度预览的初始 CPU 转换差异已按原版独立
+硬件 GPU 预览修正，没有放宽像素对照。完整 Release 构建、7 套相关 CTest、
+16 组独立包 CLI／Worker 检查、4 项黄金帧／负对照和 10 份运行依赖审计通过。
+四个产品程序与 Release 哈希一致。**Coverage 的 Qt 面板与 Quad 执行仍待迁移**，
+相关模块保留 `partial`；当前总数为 16 `ported`、120 `partial`、68 `pending`，
+不是工作量百分比。详见 [COVERAGE_EXECUTION_MIGRATION.md](COVERAGE_EXECUTION_MIGRATION.md)。
+
+上一批补齐 Coverage／Quad 所依赖的 DXBC 改写：保留原 PS 的新增标记输出、
 main 返回处替换颜色、保留 alpha、数组索引筛选、六阶段 SM5 UAV 重定位、
 反射范围和 64 槽 feature flag 均已迁入原生代码。3,564 组逐字节 Python 对照
 通过，覆盖 378 份独立着色器和 501 组拒绝输入。原版 GPU 测试驱动使用 C++
