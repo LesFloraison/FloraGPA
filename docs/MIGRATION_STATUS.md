@@ -1,11 +1,23 @@
-# FloraGPA C++ 迁移进度 — 2026-09-21
+# FloraGPA C++ 迁移进度 — 2026-09-22
 
 已有可编译、可运行的 VS2022 / Qt Widgets 原生工程，能够独立重放当前验证的
 GF2 与 BF1 DX11 捕获。**尚未完成原 Python 版本的全部功能迁移。**
-当前独立包为 `out/FloraGPA-replay-metrics/FloraGPA.exe`。
+当前独立包为 `out/FloraGPA-replay-assets/FloraGPA.exe`。
+
+最新一批补齐原生 RenderDoc `inventory`／`texture` 分析接口：完整资源关系、纹理／
+缓冲描述和原始子资源字节均已接通。支持无 Draw／Dispatch 的目录查询，保留原版
+三维纹理读取整个 mip 体积的语义，以及注解联合值的高位字符转义、NaN 和负零。
+发布包 34 组对照通过：2,982 项资源描述、703 项纹理描述、646 项缓冲描述，
+22,593,876 字节纹理数据逐项／逐字节与 Python 一致；另有 8 项注解序列化对照。
+这些入口不依赖 Python／Tk／GPA 运行时，普通 Qt 资源视图继续使用既有原生实现。
+完整 Release 构建、相关 5 套 CTest、发布包 5 项序列化测试、4 项黄金帧／负对照
+及 38 份运行时模块审计通过。四个程序与构建哈希一致，临时测试程序已从包中移除。
+RenderDoc `postmesh` 及其 Qt 消费者仍待迁移；本批不将独立 Geometry 模式视为
+该分支已完成。详见 [RDC_ASSETS_MIGRATION.md](RDC_ASSETS_MIGRATION.md)。
 
 
-最新一批将原 Python 的通用重放计数器接入右侧 **Replay Metrics**：原生测量、
+
+上一批将原 Python 的通用重放计数器接入右侧 **Replay Metrics**：原生测量、
 Selection／Frame 范围、过滤、API 定位、指标目录、详情和完整 JSON 导出已接通，
 与 Pixel History／Shader Debug 共享实验感知的再捕获缓存及取消流程。
 数值保留原始整数精度，默认窄面板可同时显示指标、数值和单位；详情默认收起。

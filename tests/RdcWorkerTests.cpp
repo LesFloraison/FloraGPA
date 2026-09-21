@@ -46,6 +46,12 @@ class RdcWorkerTests : public QObject {
             << QJsonObject{{"action", "counters"}, {"gpa_event", 18}, {"eid", 47}} << "not both";
         QTest::newRow("counters-negative-event")
             << QJsonObject{{"action", "counters"}, {"gpa_event", -1}} << "unsigned integer";
+        QTest::newRow("inventory-both-events")
+            << QJsonObject{{"action", "inventory"}, {"gpa_event", 18}, {"eid", 47}} << "not both";
+        QTest::newRow("texture-negative-mip")
+            << QJsonObject{{"action", "texture"}, {"mip", -1}} << "unsigned integer";
+        QTest::newRow("texture-overflow-sample")
+            << QJsonObject{{"action", "texture"}, {"sample", 4294967296.0}} << "uint32";
         QTest::newRow("debug-both-events")
             << QJsonObject{{"action", "debug-vertex"}, {"gpa_event", 18}, {"eid", 47}} << "not both";
         QTest::newRow("debug-negative-index")

@@ -1,3 +1,4 @@
+#include "Assets.h"
 #include "Backend.h"
 #include <QCoreApplication>
 #include <QDir>
@@ -53,7 +54,8 @@ int main(int argc, char **argv) {
     result["loaded_modules"] = modules;
     if (!output.isEmpty()) {
         QSaveFile file(QDir(output).filePath("result.json"));
-        const auto bytes = result.dump(2);
+        const auto bytes =
+            result.value("action", "") == "inventory" ? flora::rdcInventoryText(result) : result.dump(2);
         if (!file.open(QIODevice::WriteOnly) ||
             file.write(bytes.data(), qint64(bytes.size())) != qint64(bytes.size()) || !file.commit())
             return 2;

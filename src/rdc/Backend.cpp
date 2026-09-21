@@ -1,5 +1,6 @@
 #include "Backend.h"
 #include "Api.h"
+#include "Assets.h"
 #include "Counters.h"
 #include "DebugTrace.h"
 #include "application/RdcEvents.h"
@@ -438,9 +439,10 @@ namespace flora {
 Json runRdcJob(const Json &job) {
     const auto action = job.at("action").get<std::string>();
     const bool debugging = action == "debug-pixel" || action == "debug-vertex" || action == "debug-thread";
-    if (action != "history" && action != "events" && action != "counters" && !debugging)
+    if (action != "history" && action != "events" && action != "counters" && action != "inventory" &&
+        action != "texture" && !debugging)
         throw std::runtime_error("Unsupported native RenderDoc job action");
-    if (action == "history" || action == "counters" || debugging) {
+    if (action != "events") {
         if (!job.value("gpa_event", Json(nullptr)).is_null() && !job.value("eid", Json(nullptr)).is_null())
             throw std::runtime_error("Choose GPA or RDC event, not both");
         for (const auto *key : {"x", "y", "mip", "layer", "sample", "eid", "vertex", "instance", "index"})
@@ -469,6 +471,7 @@ Json runRdcJob(const Json &job) {
         result["cpu_writes"] = writes(events);
         return result;
     }
+    const auto resources = controller.GetResources();
     const auto gpa = job.value("gpa_event", Json(nullptr));
     if (!gpa.is_null() && !mapping["gpa_event_map"].contains(std::to_string(number(gpa))))
         throw std::runtime_error("Selected GPA event has no uniquely mapped executed action");
@@ -482,9 +485,28 @@ Json runRdcJob(const Json &job) {
             for (const auto &v : mapping["gpa_event_map"].items())
                 eid = (std::max)(eid, v.value().get<uint32_t>());
     }
-    if (!eid || (!events.actions.contains(eid) && !events.chunks.contains(eid)))
+    if (!eid && action == "inventory" && !events.chunks.empty())
+        eid = events.chunks.rbegin()->first;
+    if ((!eid || (!events.actions.contains(eid) && !events.chunks.contains(eid))) &&
+        !(eid == 0 && action == "inventory"))
         throw std::runtime_error("No selectable replay action");
     controller.SetFrameEvent(eid, true);
+    if (action == "inventory") {
+        Json described = Json::array(), textures = Json::array(), buffers = Json::array();
+        for (const auto &r : resources)
+            described.push_back(rdcResourceDescription(r));
+        for (const auto &t : controller.GetTextures())
+            textures.push_back(rdcTextureDescription(t));
+        for (const auto &b : controller.GetBuffers())
+            buffers.push_back(rdcBufferDescription(b));
+        result.update({{"eid", eid},
+                       {"gpa_event", gpa},
+                       {"actions", mapping.at("actions")},
+                       {"resources", described},
+                       {"textures", textures},
+                       {"buffers", buffers}});
+        return result;
+    }
     if (action == "counters") {
         rdcarray<GPUCounter> selected;
         Json available = Json::array(), values = Json::array();
@@ -524,7 +546,6 @@ Json runRdcJob(const Json &job) {
         result["gpa_event"] = gpa;
         return result;
     }
-    const auto resources = controller.GetResources();
     ResourceId resource;
     const auto gpaResource = job.value("resource", Json(nullptr));
     if (gpaResource.is_null()) {
@@ -548,6 +569,27 @@ Json runRdcJob(const Json &job) {
         throw std::runtime_error("Selected resource is not a texture");
     const auto &tex = *found;
     const Subresource sub(index(job, "mip"), index(job, "layer"), index(job, "sample"));
+    if (action == "texture") {
+        const auto data = controller.GetTextureData(resource, sub);
+        const auto destination = path(job.at("out")) / L"texture.bin";
+        QSaveFile file(QString::fromStdWString(destination.wstring()));
+        if (!file.open(QIODevice::WriteOnly) ||
+            file.write(reinterpret_cast<const char *>(data.data()), qint64(data.size())) !=
+                qint64(data.size()) ||
+            !file.commit())
+            throw std::runtime_error("Cannot save raw replay texture");
+        Json name = nullptr;
+        for (const auto &r : resources)
+            if (r.resourceId == resource)
+                name = text(r.name);
+        result.update({{"eid", eid},
+                       {"gpa_event", gpa},
+                       {"resource", resourceName(resource)},
+                       {"resource_name", name},
+                       {"byte_length", data.size()},
+                       {"subresource", {{"mip", sub.mip}, {"slice", sub.slice}, {"sample", sub.sample}}}});
+        return result;
+    }
     const auto x = index(job, "x"), y = index(job, "y");
     validate(tex, sub, x, y);
     const std::string kind = tex.format.compType == CompType::UInt   ? "uint"

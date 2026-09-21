@@ -105,6 +105,11 @@ Qt views share the Pixel History recapture cache and cancellation pipeline;
 see [RDC_DEBUG_MIGRATION.md](docs/RDC_DEBUG_MIGRATION.md) for backend validation
 and [REPLAY_DEBUG_UI_MIGRATION.md](docs/REPLAY_DEBUG_UI_MIGRATION.md) for the UI.
 
+The native replay worker also accepts **inventory** and **texture** jobs,
+preserving resource relationships, exact metadata and raw subresource bytes.
+See [RDC_ASSETS_MIGRATION.md](docs/RDC_ASSETS_MIGRATION.md) for the job interface,
+3D texture semantics and comparison evidence.
+
 The right-side **Replay Metrics** inspector now measures generic replay counters,
 with Selection/Frame views, filtering, API navigation, a counter catalog and
 complete JSON export. It shares native recapture and caching with Pixel History
