@@ -3,3 +3,5 @@
 *.ico binary
 *.exe binary
 *.dll binary
+# Preserve upstream replay-header whitespace for source/hash comparisons.
+third_party/renderdoc/replay/*.h whitespace=-blank-at-eol

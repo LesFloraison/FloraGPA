@@ -1,0 +1,116 @@
+{
+  "source": "Local upstream RenderDoc 1.45 source snapshot, renderdoc/api/replay (no Git metadata)",
+  "tested_binary_commit": "2fc0bc04cb95499635f63986a55bc6f67849dd9f",
+  "files": [
+    {
+      "file": "apidefs.h",
+      "upstream_sha256": "1cd02f545ff9f259aa1019d35a1b738b01eace51c2948c3a13946223dff7f9ac",
+      "vendored_sha256_lf": "1cd02f545ff9f259aa1019d35a1b738b01eace51c2948c3a13946223dff7f9ac"
+    },
+    {
+      "file": "capture_options.h",
+      "upstream_sha256": "11f89ae7d38ce4d6b40c67fe9869c3de640d9e58786401e1b4be3a20c85fd5ed",
+      "vendored_sha256_lf": "11f89ae7d38ce4d6b40c67fe9869c3de640d9e58786401e1b4be3a20c85fd5ed"
+    },
+    {
+      "file": "common_pipestate.h",
+      "upstream_sha256": "53d2caa369d01393119cd4696ced0fa03ac448599a5e0c2b4f0f4a150fa912f1",
+      "vendored_sha256_lf": "53d2caa369d01393119cd4696ced0fa03ac448599a5e0c2b4f0f4a150fa912f1"
+    },
+    {
+      "file": "control_types.h",
+      "upstream_sha256": "6538ad67a3aaa02f0e6f61fced2c5f3aef5f1960f57c5414d7b45e5b9c01ad4d",
+      "vendored_sha256_lf": "6538ad67a3aaa02f0e6f61fced2c5f3aef5f1960f57c5414d7b45e5b9c01ad4d"
+    },
+    {
+      "file": "d3d11_pipestate.h",
+      "upstream_sha256": "b3dcad868aa6e4136468fc2030e3497503b2e6bd9c5123368accfee6126e7f95",
+      "vendored_sha256_lf": "b3dcad868aa6e4136468fc2030e3497503b2e6bd9c5123368accfee6126e7f95"
+    },
+    {
+      "file": "d3d12_pipestate.h",
+      "upstream_sha256": "3da0b041e437ede953973e938a90b992933a1118eeeb6ae5ba25b525bf239e31",
+      "vendored_sha256_lf": "3da0b041e437ede953973e938a90b992933a1118eeeb6ae5ba25b525bf239e31"
+    },
+    {
+      "file": "data_types.h",
+      "upstream_sha256": "a5cd8493ad5ce201f30358002377cda5dc07000057c015187e3eb9a704de5fbe",
+      "vendored_sha256_lf": "a5cd8493ad5ce201f30358002377cda5dc07000057c015187e3eb9a704de5fbe"
+    },
+    {
+      "file": "gl_pipestate.h",
+      "upstream_sha256": "5c82dd37919e5cae93f986aa87e51e2ceb14c0d2210ebc8b69602d098b5a59f0",
+      "vendored_sha256_lf": "5c82dd37919e5cae93f986aa87e51e2ceb14c0d2210ebc8b69602d098b5a59f0"
+    },
+    {
+      "file": "pipestate.h",
+      "upstream_sha256": "f437f08225eede6ab5337ac1e9f93297cc40806381f6d803a486bf79421d2cd7",
+      "vendored_sha256_lf": "f437f08225eede6ab5337ac1e9f93297cc40806381f6d803a486bf79421d2cd7"
+    },
+    {
+      "file": "rdcarray.h",
+      "upstream_sha256": "6b2917a4b80061b2416e9690d3b0bd436a8ea2b949e627268492540065a3e865",
+      "vendored_sha256_lf": "6b2917a4b80061b2416e9690d3b0bd436a8ea2b949e627268492540065a3e865"
+    },
+    {
+      "file": "rdcdatetime.h",
+      "upstream_sha256": "148291eeb3e385045672ef9a034925f481e494d3d8c5fa4a7fd4a2102c29df8d",
+      "vendored_sha256_lf": "148291eeb3e385045672ef9a034925f481e494d3d8c5fa4a7fd4a2102c29df8d"
+    },
+    {
+      "file": "rdcflatmap.h",
+      "upstream_sha256": "15305cbbe572e82db6b52cf1c796946e90cabab956a73899e58d04a966073414",
+      "vendored_sha256_lf": "15305cbbe572e82db6b52cf1c796946e90cabab956a73899e58d04a966073414"
+    },
+    {
+      "file": "rdcpair.h",
+      "upstream_sha256": "2221968eeb0c46c7a302dd9949328ab8641569ae120b5ae7460386678d4f5cf2",
+      "vendored_sha256_lf": "2221968eeb0c46c7a302dd9949328ab8641569ae120b5ae7460386678d4f5cf2"
+    },
+    {
+      "file": "rdcstr.h",
+      "upstream_sha256": "5b4f7cfca47ea1af94e8d6e5c3456df4e2a990c31db78b1964eb7eb4fe42c98d",
+      "vendored_sha256_lf": "5b4f7cfca47ea1af94e8d6e5c3456df4e2a990c31db78b1964eb7eb4fe42c98d"
+    },
+    {
+      "file": "renderdoc_replay.h",
+      "upstream_sha256": "d6d62885867f3e7e389b5edce22bb6bc83581a817207727a1159cfa332b3b296",
+      "vendored_sha256_lf": "b665ea6f17df8b9dfe177e03ee400ac8f017da7e17fc97d33d302da2a4a12709"
+    },
+    {
+      "file": "replay_enums.h",
+      "upstream_sha256": "0284bc383e243c43550b4e7479b8ced6c45e2c7cc2cd6d3efc2f7cb7fd66f15d",
+      "vendored_sha256_lf": "0284bc383e243c43550b4e7479b8ced6c45e2c7cc2cd6d3efc2f7cb7fd66f15d"
+    },
+    {
+      "file": "resourceid.h",
+      "upstream_sha256": "119aa479994904bfb818afa5dc65725e42fb0df7406831d43c2da133ed3c130a",
+      "vendored_sha256_lf": "119aa479994904bfb818afa5dc65725e42fb0df7406831d43c2da133ed3c130a"
+    },
+    {
+      "file": "shader_types.h",
+      "upstream_sha256": "07c28dfbfaae8b802a6288f1f31ba9377aed4f059f6c67803c2ce5af94e4c83f",
+      "vendored_sha256_lf": "037ded9dff9d2e7ee32a565186ccff7357f8eb92ff1a32b2e7a35ceb78e820a0"
+    },
+    {
+      "file": "stringise.h",
+      "upstream_sha256": "f073ec1b6afa37aad8ae851d45aed5bceac7be8b938adb8f76948acca9803099",
+      "vendored_sha256_lf": "f073ec1b6afa37aad8ae851d45aed5bceac7be8b938adb8f76948acca9803099"
+    },
+    {
+      "file": "structured_data.h",
+      "upstream_sha256": "43e8daeb6c63cb37304709cd020e1ac6d3e7b94724f600aa54244afc0e2044f7",
+      "vendored_sha256_lf": "43e8daeb6c63cb37304709cd020e1ac6d3e7b94724f600aa54244afc0e2044f7"
+    },
+    {
+      "file": "version.h",
+      "upstream_sha256": "15236f7846912c94be2351c443aa03110e0844c301f38aa6afff40f06c0921e2",
+      "vendored_sha256_lf": "15236f7846912c94be2351c443aa03110e0844c301f38aa6afff40f06c0921e2"
+    },
+    {
+      "file": "vk_pipestate.h",
+      "upstream_sha256": "bacacc987852621628e0124377c354d78f0775f52c6320155e1e177fbe3cca28",
+      "vendored_sha256_lf": "bacacc987852621628e0124377c354d78f0775f52c6320155e1e177fbe3cca28"
+    }
+  ]
+}

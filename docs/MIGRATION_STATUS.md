@@ -2,15 +2,25 @@
 
 已有可编译、可运行的 VS2022 / Qt Widgets 原生工程，能够独立重放当前验证的
 GF2 与 BF1 DX11 捕获。**尚未完成原 Python 版本的全部功能迁移。**
-当前独立包为 `out/FloraGPA-rdc-capture/FloraGPA.exe`。
+当前独立包为 `out/FloraGPA-history-backend/FloraGPA.exe`。
 
-最新一批迁入可选 RenderDoc 原生再捕获与精确命令来源映射。CLI 可将独立重放
+最新一批接通原生 RenderDoc 重放控制器、PixelHistory 结果和 CPU 写入补充。
+独立 `FloraGPA.Rdc.exe` 通过 JSON 任务运行，不调用 Python/qrenderdoc。
+发布包 152 项检查通过：22 组完整像素历史对照（35 条记录、其中 10 条 CPU
+快照）、9 份真实 RDC 事件索引、5 种非法选择，覆盖 MSAA、Resolve、复制／清除／
+深度／mip 操作、Update 区域、1D／数组／体纹理 Map、整数值及未变化的局部写入。
+完整 Release 构建、相关 2 套 CTest、4 项黄金帧及负对照、44 份运行时报告审计通过。
+Qt Pixel History 界面、再捕获缓存与实验联动、任务取消和导航／导出仍待接通；
+共享 RenderDoc worker 的其他分析和调试分支也未迁移，相关模块保持 `partial`。
+详见 [RDC_HISTORY_MIGRATION.md](RDC_HISTORY_MIGRATION.md)。
+
+上一批迁入可选 RenderDoc 原生再捕获与精确命令来源映射。CLI 可将独立重放
 导出为 RDC，保留 GPA 命令与资源身份，正常重放不加载 RenderDoc。独立包九份
 捕获的 99 项检查、709 组原 Python 映射对照、43 套 Release CTest、4 项黄金帧
 及负对照、18 份运行时模块审计全部通过；原 Qt 54 项回归无失败、无跳过。
 BF1 的 5,491 个已执行命令均获得唯一可选择的原生事件映射。
-该批是 Pixel History 的依赖迁移；生产版 RenderDoc 重放控制器、像素历史结果、
-CPU 写入补充与 Qt 视图仍待接通，相关清单保持 `partial`／`pending`。
+该批是 Pixel History 的依赖迁移；当时生产版 RenderDoc 重放控制器、像素历史结果、
+CPU 写入补充与 Qt 视图均待接通，前三项已由最新后端批次迁入，Qt 视图仍待接通。
 详见 [RDC_CAPTURE_MIGRATION.md](RDC_CAPTURE_MIGRATION.md)。
 
 上一批将 GS／HS／DS 检查点调试接入主窗口：读取原始 shader、单点与完整轨迹

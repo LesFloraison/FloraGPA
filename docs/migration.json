@@ -2308,7 +2308,7 @@
       ],
       "validation": [
         "docs/RDC_CAPTURE_MIGRATION.md",
-        "Packaged optional recapture: 99 checks across nine captures; 709 exact Python provenance comparisons including all nine RDCs; 43 Release CTest suites and four golden/negative checks passed. Production RenderDoc replay-controller and Pixel History consumers remain pending."
+        "Packaged optional recapture: 99 checks across nine captures; 709 exact Python provenance comparisons including all nine RDCs; 43 Release CTest suites and four golden/negative checks passed. Native history replay-controller is now available; Qt recapture/history orchestration remains pending."
       ]
     },
     {
@@ -2316,9 +2316,16 @@
       "sha256": "4fd348d0f0d2687ab77a8cb3e68c43bb31daa5507e5acefee1cbed36af1d0a56",
       "lines": 91,
       "description": "CPU texture-write snapshots from exact RenderDoc API events (Python 3.6).",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": [
+        "src/rdc/Backend.cpp",
+        "src/rdc/main.cpp"
+      ],
+      "validation": [
+        "docs/RDC_HISTORY_MIGRATION.md",
+        "Native RenderDoc 1.45 replay-controller consumer implements exact event mapping, PixelHistory records and CPU-write supplementation. Qt history workflow remains pending; other rdc_worker analysis/debugger actions are not migrated by this batch.",
+        "Packaged backend: 152 checks, 22 complete history comparisons (35 records, 10 CPU snapshots), nine real controller-index comparisons; two relevant CTest suites and four golden/negative checks passed. Malformed structured-data injection and Qt workflow coverage remain pending."
+      ]
     },
     {
       "module": "rdc_events.py",
@@ -2327,11 +2334,15 @@
       "description": "Recover exact GPA command provenance from independent RDC annotations.",
       "status": "partial",
       "native": [
-        "src/application/RdcEvents.cpp"
+        "src/application/RdcEvents.cpp",
+        "src/rdc/Backend.cpp",
+        "src/rdc/main.cpp"
       ],
       "validation": [
         "docs/RDC_CAPTURE_MIGRATION.md",
-        "Packaged optional recapture: 99 checks across nine captures; 709 exact Python provenance comparisons including all nine RDCs; 43 Release CTest suites and four golden/negative checks passed. Production RenderDoc replay-controller and Pixel History consumers remain pending."
+        "docs/RDC_HISTORY_MIGRATION.md",
+        "Native RenderDoc 1.45 replay-controller consumer implements exact event mapping, PixelHistory records and CPU-write supplementation. Qt history workflow remains pending; other rdc_worker analysis/debugger actions are not migrated by this batch.",
+        "Packaged backend: 152 checks, 22 complete history comparisons (35 records, 10 CPU snapshots), nine real controller-index comparisons; two relevant CTest suites and four golden/negative checks passed. Malformed structured-data injection and Qt workflow coverage remain pending."
       ]
     },
     {
@@ -2348,9 +2359,16 @@
       "sha256": "753c20e4cb00f20ce8b8b14259df288c9e01f8624f85f7919e57a610675ebc71",
       "lines": 218,
       "description": "Public RenderDoc Python API adapter; compatible with its embedded Python 3.6.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": [
+        "src/rdc/Backend.cpp",
+        "src/rdc/main.cpp"
+      ],
+      "validation": [
+        "docs/RDC_HISTORY_MIGRATION.md",
+        "Native RenderDoc 1.45 replay-controller consumer implements exact event mapping, PixelHistory records and CPU-write supplementation. Qt history workflow remains pending; other rdc_worker analysis/debugger actions are not migrated by this batch.",
+        "Packaged backend: 152 checks, 22 complete history comparisons (35 records, 10 CPU snapshots), nine real controller-index comparisons; two relevant CTest suites and four golden/negative checks passed. Malformed structured-data injection and Qt workflow coverage remain pending."
+      ]
     },
     {
       "module": "replay.py",

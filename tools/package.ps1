@@ -8,7 +8,7 @@ $repo = Split-Path -Parent $PSScriptRoot
 $build = Join-Path $repo "build\vs2022\$Configuration"
 $destination = if ($OutputDirectory) { [System.IO.Path]::GetFullPath($OutputDirectory) } else { Join-Path $repo 'out\FloraGPA' }
 New-Item -ItemType Directory -Path $destination -Force | Out-Null
-foreach ($name in @('FloraGPA.exe','FloraGPA.Worker.exe','FloraGPA.Cli.exe')) {
+foreach ($name in @('FloraGPA.exe','FloraGPA.Worker.exe','FloraGPA.Cli.exe','FloraGPA.Rdc.exe')) {
     Copy-Item -LiteralPath (Join-Path $build $name) -Destination $destination -Force
 }
 $env:VSINSTALLDIR = 'C:\Program Files\Microsoft Visual Studio\2022\Community'

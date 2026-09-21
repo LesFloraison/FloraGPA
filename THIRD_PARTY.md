@@ -23,3 +23,10 @@
   FloraGPA requests public application API 1.6.0 and only loads RenderDoc when
   explicitly selected for optional recapture. No RenderDoc binary or Python
   runtime is redistributed with FloraGPA.
+- RenderDoc 1.45 public replay headers are vendored under
+  `third_party/renderdoc/replay/` for the isolated native analysis worker.
+  MIT, Copyright (c) 2015-2026 Baldur Karlsson and (c) 2014 Crytek; per-file
+  notices are preserved. `replay-manifest.json` records the local upstream
+  snapshot hashes and tested binary commit. `REPLAY_HEADERS.md` documents the
+  two small compatibility changes. This uses the version-specific C++ replay
+  ABI; the optional external DLL must report release version 1.45.

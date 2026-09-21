@@ -43,14 +43,13 @@ unmapped. Traversal has explicit depth/count/name and numeric limits.
 
 ## Remaining Pixel History work
 
-This is a prerequisite for Pixel History, not its completed UI. The native
-RenderDoc replay-controller adapter, PixelHistory result conversion, structured
-CPU-write supplementation and Qt history view still need migration. `RdcEvents`
-currently consumes normalized native action/event data and is verified through
-a development probe; the production replay-controller consumer is not connected.
-The main-window Pixel History tab therefore remains disabled. Python/qrenderdoc
-are used only as external development oracles for reopening captures and
-comparing this batch's mappings.
+This recapture batch was a prerequisite for Pixel History. The subsequent
+[native history backend](RDC_HISTORY_MIGRATION.md) connects `RdcEvents` to the
+real replay controller and adds PixelHistory conversion and structured CPU-write
+supplementation. Its Qt history view and main-window orchestration still need
+integration, so the Pixel History tab remains disabled. Python/qrenderdoc are
+used only as external development oracles for reopening captures and comparing
+results.
 
 The separate RenderDoc-backed pixel/vertex/compute debugging workflows and
 counter consumers also remain pending. This batch does not substitute output
