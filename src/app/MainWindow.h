@@ -77,6 +77,7 @@ class MainWindow final : public QMainWindow {
     void replaceUpdateSource();
     void compileShader();
     void openShaderProject();
+    void recoverShader();
     void showShaderProjectEditor(const nlohmann::json &project);
     void inspectGeometry();
     void exportGeometry();
@@ -168,6 +169,8 @@ class MainWindow final : public QMainWindow {
     QLineEdit *shaderEntry_;
     Id runningShader_ = 0;
     QString runningSource_, runningEntry_;
+    bool runningRecover_ = false;
+    std::string runningShaderContext_;
     nlohmann::json runningShaderProject_;
     QPointer<ShaderProjectDialog> runningShaderProjectEditor_;
     QTabWidget *centerTabs_, *leftTabs_;

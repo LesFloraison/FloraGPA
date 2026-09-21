@@ -616,6 +616,9 @@ void MainWindow::buildUi() {
     mip_ = new QSpinBox;
     layer_ = new QSpinBox;
     slice_ = new QSpinBox;
+    mip_->setObjectName("textureMip");
+    layer_->setObjectName("textureLayer");
+    slice_->setObjectName("textureSlice");
     for (auto pair : {std::pair{mip_, "Mip "}, std::pair{layer_, "Layer "}, std::pair{slice_, "Slice "}}) {
         pair.first->setPrefix(pair.second);
         textureBar->addWidget(pair.first);
@@ -743,6 +746,7 @@ void MainWindow::buildUi() {
     auto sourceLayout = new QVBoxLayout(sourcePane);
     sourceLayout->setContentsMargins(0, 0, 0, 0);
     sourceFiles_ = new QComboBox;
+    sourceFiles_->setObjectName("shaderSources");
     sourceFiles_->setSizeAdjustPolicy(QComboBox::AdjustToMinimumContentsLengthWithIcon);
     sourceFiles_->setMinimumContentsLength(25);
     sourceEditor_ = new QPlainTextEdit;
@@ -765,10 +769,15 @@ void MainWindow::buildUi() {
         shaderPane_->setCurrentIndex(0);
     });
     shaderEntry_ = new QLineEdit("main");
+    shaderEntry_->setObjectName("shaderEntry");
     shaderEntry_->setMaximumWidth(160);
     shaderEntry_->setToolTip("HLSL entry point");
     editBar->addWidget(shaderEntry_);
-    editBar->addAction("Compile && Apply", this, &MainWindow::compileShader);
+    editBar->addAction("Compile && Apply", this, &MainWindow::compileShader)->setObjectName("compileShader");
+    auto recover = editBar->addAction("Recover HLSL", this, &MainWindow::recoverShader);
+    recover->setObjectName("recoverShader");
+    recover->setToolTip(
+        "Reconstruct editable HLSL from DXBC. Recompilation does not prove semantic equivalence.");
     editBar->addAction("Shader Project", this, &MainWindow::openShaderProject)
         ->setObjectName("openShaderProject");
     sourceLayout->addWidget(editBar);
@@ -1457,6 +1466,9 @@ void MainWindow::replay(bool timings) {
 void MainWindow::startWorker(QStringList args, bool timings) {
     if (process_.state() != QProcess::NotRunning)
         return;
+    runningRecover_ = args.first() == "shader" && args.contains("--recover");
+    if (args.first() == "shader" || args.first() == "compile" || args.first() == "compile-project")
+        runningShaderContext_ = frame_->sha256() + experiment_->document().dump();
     replayTimer_.stop();
     textureTimer_.stop();
     bufferTimer_.stop();
@@ -1637,10 +1649,39 @@ void MainWindow::finishWorker(int code, QProcess::ExitStatus status) {
             return;
         }
         if (runningKind_ == "shader") {
+            if (!frame_ || selectedResource_ != runningShader_ ||
+                runningShaderContext_ != frame_->sha256() + experiment_->document().dump())
+                throw std::runtime_error("Shader context changed; result discarded");
             QFile shaderFile(jobDir_->path() + "/result/shader.json");
             if (!shaderFile.open(QIODevice::ReadOnly))
                 throw std::runtime_error("Shader metadata is missing");
             const auto metadata = nlohmann::json::parse(shaderFile.readAll().toStdString());
+            if (runningRecover_) {
+                const auto &recovery = metadata.at("decompilation");
+                if (!recovery.value("available", true))
+                    throw std::runtime_error(recovery.at("reason").get<std::string>());
+                QFile recoveredFile(jobDir_->path() + "/result/reconstructed.hlsl");
+                if (!recoveredFile.open(QIODevice::ReadOnly))
+                    throw std::runtime_error("Recovered source is missing");
+                const bool saved = recovery.at("source_kind") == "saved_applied_hlsl";
+                const auto label = saved ? "Applied HLSL (verified)" : "Reconstructed HLSL";
+                const auto existing = sourceFiles_->findText(label);
+                if (existing >= 0)
+                    sourceFiles_->removeItem(existing);
+                sourceFiles_->addItem(label, QString::fromUtf8(recoveredFile.readAll()));
+                sourceFiles_->setItemData(sourceFiles_->count() - 1,
+                                          saved ? "Saved source reproduces the current bytecode."
+                                                : "Reconstructed from DXBC; not original source. Semantic "
+                                                  "equivalence is not verified.",
+                                          Qt::ToolTipRole);
+                sourceFiles_->setCurrentIndex(sourceFiles_->count() - 1);
+                shaderEntry_->setText(QString::fromStdString(recovery.value("entry", std::string("main"))));
+                shaderPane_->setCurrentIndex(0);
+                log_->appendPlainText(QString::fromStdString(recovery.dump(2)));
+                statusBar()->showMessage(saved ? "Saved HLSL verified" : "HLSL reconstructed", 3000);
+                emit taskFinished(true);
+                return;
+            }
             nlohmann::json project;
             if (metadata.contains("source_project")) {
                 const auto &source = metadata.at("source_project");
@@ -1675,6 +1716,9 @@ void MainWindow::finishWorker(int code, QProcess::ExitStatus status) {
             return;
         }
         if (runningKind_ == "compile" || runningKind_ == "compile-project") {
+            if (!frame_ || selectedResource_ != runningShader_ ||
+                runningShaderContext_ != frame_->sha256() + experiment_->document().dump())
+                throw std::runtime_error("Shader context changed; compiled result discarded");
             QFile binary(jobDir_->path() + "/result/replacement.dxbc");
             if (!binary.open(QIODevice::ReadOnly))
                 throw std::runtime_error("Compiled bytecode is missing");
@@ -2433,6 +2477,17 @@ void MainWindow::openShaderProject() {
     runningSource_ = sourceEditor_->toPlainText();
     runningEntry_ = shaderEntry_->text().trimmed();
     startWorker({"shader", capturePath_, "--id", QString::number(runningShader_)}, false);
+}
+void MainWindow::recoverShader() {
+    if (!frame_ || !selectedResource_ || busy())
+        return;
+    const auto &resource = frame_->entry(selectedResource_);
+    if (resource.type < 0x90 || resource.type > 0x95) {
+        showError("Select a shader resource.");
+        return;
+    }
+    runningShader_ = selectedResource_;
+    startWorker({"shader", capturePath_, "--id", QString::number(runningShader_), "--recover"}, false);
 }
 void MainWindow::showShaderProjectEditor(const nlohmann::json &project) {
     auto editor = new ShaderProjectDialog(project, this);

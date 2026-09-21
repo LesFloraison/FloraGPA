@@ -63,6 +63,14 @@ a working D3D11 adapter.
 
 ## Run and deploy
 
+**Shader > Source > Recover HLSL** reconstructs supported DXBC in the native
+worker. Edit the result and use **Compile & Apply**; changes follow experiment
+undo/redo. Verified saved source is reused only when it reproduces the current
+bytecode. Reconstruction is labelled explicitly and does not claim to restore
+original source or prove semantic equivalence. CLI: `shader <capture> --id <id>
+--recover --out <directory>`. See [native HLSL recovery](docs/HLSL_RECOVERY_MIGRATION.md)
+for preserved limitations and validation.
+
 **Shader > Source > Shader Project** edits multi-file HLSL with virtual includes,
 macros and compiler settings. Compile & Apply runs in the native worker; project
 sources persist with experiment history and are verified against current DXBC

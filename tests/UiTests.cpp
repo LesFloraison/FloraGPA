@@ -3018,9 +3018,9 @@ class UiTests final : public QObject {
         auto sample = window.findChild<QSpinBox *>("textureSample");
         QVERIFY(sample->isEnabled());
         sample->setValue(3);
-        for (auto spin : window.findChildren<QSpinBox *>())
-            if (spin->prefix() == "Layer ")
-                spin->setValue(1);
+        auto layer = window.findChild<QSpinBox *>("textureLayer");
+        QVERIFY(layer);
+        layer->setValue(1);
         QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
         QVERIFY(done.takeLast()[0].toBool());
         done.clear();
@@ -3131,12 +3131,11 @@ class UiTests final : public QObject {
         done.clear();
         auto boundary = window.findChild<QComboBox *>("textureBoundary");
         boundary->setCurrentIndex(1);
-        for (auto spin : window.findChildren<QSpinBox *>()) {
-            if (spin->prefix() == "Mip ")
-                spin->setValue(1);
-            if (spin->prefix() == "Layer ")
-                spin->setValue(1);
-        }
+        auto mip = window.findChild<QSpinBox *>("textureMip");
+        auto layer = window.findChild<QSpinBox *>("textureLayer");
+        QVERIFY(mip && layer);
+        mip->setValue(1);
+        layer->setValue(1);
         QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
         QVERIFY(done.takeLast()[0].toBool());
         done.clear();

@@ -43,7 +43,8 @@
       ],
       "validation": [
         "docs/POST_TRANSFORM_MIGRATION.md",
-        "Native post-geometry command supports final/vs/ds/gs, streams and instances; remaining analysis entry points remain pending."
+        "Native post-geometry command supports final/vs/ds/gs, streams and instances; remaining analysis entry points remain pending.",
+        "Native HLSL recovery/compile and verified saved source are connected to shader --recover and the Qt source editor. See HLSL_RECOVERY_MIGRATION.md. Optional external decompiler fallback and external assembly editing remain pending; shared module is partial."
       ]
     },
     {
@@ -158,7 +159,8 @@
         "VS identities table switching, complete export and legacy project-selection restoration migrated.",
         "docs/OUTPUT_LOG_MIGRATION.md",
         "docs/HULL_OUTPUT_MIGRATION.md",
-        "HS output uses compact control-point/patch-constant tables, complete export and project selection restoration."
+        "HS output uses compact control-point/patch-constant tables, complete export and project selection restoration.",
+        "Native HLSL recovery/compile and verified saved source are connected to shader --recover and the Qt source editor. See HLSL_RECOVERY_MIGRATION.md. Optional external decompiler fallback and external assembly editing remain pending; shared module is partial."
       ]
     },
     {
@@ -1211,36 +1213,62 @@
       "sha256": "87bc2aaf17d2ab1ad5cdb3d83a89ed7fac4b8222ff4e9d625182d7e6f81b9528",
       "lines": 108,
       "description": "Geometry shader declarations, per-vertex input and output streams.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "ported",
+      "native": [
+        "src/application/HlslRecoveryStages.cpp"
+      ],
+      "validation": [
+        "docs/HLSL_RECOVERY_MIGRATION.md",
+        "Packaged native oracle: 3,685 exact comparisons (931 rejected), 577 unique captured programs with 375 exact recovered sources and recompiled bytecodes; six-stage original CLI exports match byte-for-byte. Six CPU/GPU oracle suites passed through native lowering and compilation (341 native calls); all 47 BF1 CS/HS/DS replacements retain the golden RGBA hash. Original unsupported cases remain explicit errors.",
+        "Delivery: complete Release build; eight relevant CTest suites passed across the initial and corrected UI runs, including 54 original UI cases. Windows-only package tests: 10 model/GPU and 3 Qt suite cases, no skips. Four golden/negative controls and 11 runtime audits passed; four delivered executable hashes match Release. Initial failures and remaining shared-module gaps are documented."
+      ]
     },
     {
       "module": "hlsl_graphics.py",
       "sha256": "c2a5ae18ba703bfd3525ff1297d8fd60a47946673fce3fdc1b2e3c80c2c8bcd4",
       "lines": 52,
       "description": "Signature and interpolation recovery for vertex and pixel shaders.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "ported",
+      "native": [
+        "src/application/HlslRecoveryStages.cpp"
+      ],
+      "validation": [
+        "docs/HLSL_RECOVERY_MIGRATION.md",
+        "Packaged native oracle: 3,685 exact comparisons (931 rejected), 577 unique captured programs with 375 exact recovered sources and recompiled bytecodes; six-stage original CLI exports match byte-for-byte. Six CPU/GPU oracle suites passed through native lowering and compilation (341 native calls); all 47 BF1 CS/HS/DS replacements retain the golden RGBA hash. Original unsupported cases remain explicit errors.",
+        "Delivery: complete Release build; eight relevant CTest suites passed across the initial and corrected UI runs, including 54 original UI cases. Windows-only package tests: 10 model/GPU and 3 Qt suite cases, no skips. Four golden/negative controls and 11 runtime audits passed; four delivered executable hashes match Release. Initial failures and remaining shared-module gaps are documented."
+      ]
     },
     {
       "module": "hlsl_memory.py",
       "sha256": "bf7b73b65b963b67c59d705075ed593463cbb8f1bd0f245d3bb85e1cd9a10c6f",
       "lines": 137,
       "description": "DXBC raw/structured/shared memory lowering used by native HLSL recovery.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "ported",
+      "native": [
+        "src/application/HlslRecoveryMemory.cpp"
+      ],
+      "validation": [
+        "docs/HLSL_RECOVERY_MIGRATION.md",
+        "Packaged native oracle: 3,685 exact comparisons (931 rejected), 577 unique captured programs with 375 exact recovered sources and recompiled bytecodes; six-stage original CLI exports match byte-for-byte. Six CPU/GPU oracle suites passed through native lowering and compilation (341 native calls); all 47 BF1 CS/HS/DS replacements retain the golden RGBA hash. Original unsupported cases remain explicit errors.",
+        "Delivery: complete Release build; eight relevant CTest suites passed across the initial and corrected UI runs, including 54 original UI cases. Windows-only package tests: 10 model/GPU and 3 Qt suite cases, no skips. Four golden/negative controls and 11 runtime audits passed; four delivered executable hashes match Release. Initial failures and remaining shared-module gaps are documented."
+      ]
     },
     {
       "module": "hlsl_recover.py",
       "sha256": "95a77be9ba2977768cd65959f44364ba2a0effe09f4037f83f8b390a510f9816",
       "lines": 474,
       "description": "Strict DXBC-assembly lowering to editable HLSL, without vendor/decompiler DLLs.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "ported",
+      "native": [
+        "src/application/HlslRecovery.cpp",
+        "src/application/HlslRecoveryInstructions.cpp",
+        "src/application/HlslRecoveryTranslation.cpp"
+      ],
+      "validation": [
+        "docs/HLSL_RECOVERY_MIGRATION.md",
+        "Packaged native oracle: 3,685 exact comparisons (931 rejected), 577 unique captured programs with 375 exact recovered sources and recompiled bytecodes; six-stage original CLI exports match byte-for-byte. Six CPU/GPU oracle suites passed through native lowering and compilation (341 native calls); all 47 BF1 CS/HS/DS replacements retain the golden RGBA hash. Original unsupported cases remain explicit errors.",
+        "Delivery: complete Release build; eight relevant CTest suites passed across the initial and corrected UI runs, including 54 original UI cases. Windows-only package tests: 10 model/GPU and 3 Qt suite cases, no skips. Four golden/negative controls and 11 runtime audits passed; four delivered executable hashes match Release. Initial failures and remaining shared-module gaps are documented."
+      ]
     },
     {
       "module": "hull_capture.py",
@@ -2816,11 +2844,15 @@
       "native": [
         "src/application/ShaderInspector.cpp",
         "src/cli/main.cpp",
-        "src/replay/Replay.cpp"
+        "src/replay/Replay.cpp",
+        "src/application/HlslCompilation.h",
+        "src/application/ShaderProject.cpp",
+        "src/application/HlslRecoveryTranslation.cpp"
       ],
       "validation": [
         "DXBC disassembly/reflection; SPDB/SDBG fixtures; HLSL compile/apply; recovery pending",
-        "IFCE-gated interface-slot reflection, class linkage metadata, six-stage dynamic/static replacement and unmodified linked DXBC export"
+        "IFCE-gated interface-slot reflection, class linkage metadata, six-stage dynamic/static replacement and unmodified linked DXBC export",
+        "Native HLSL recovery/compile and verified saved source are connected to shader --recover and the Qt source editor. See HLSL_RECOVERY_MIGRATION.md. Optional external decompiler fallback and external assembly editing remain pending; shared module is partial."
       ]
     },
     {

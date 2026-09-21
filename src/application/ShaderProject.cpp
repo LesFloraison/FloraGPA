@@ -1,7 +1,9 @@
 #include "ShaderProject.h"
+#include "HlslCompilation.h"
 #include "ShaderDebugData.h"
 #include "UnicodeCaseFoldData.h"
 #include "replay/Replay.h"
+#include <QRegularExpression>
 #include <QString>
 #include <d3dcompiler.h>
 #include <set>
@@ -573,5 +575,53 @@ Json verifyShaderProject(Bytes bytecode, const Json &project) {
     result.report["semantic_equivalence"] =
         std::ranges::equal(bytecode, result.bytecode) ? "bytecode_identical" : "non_debug_chunks_identical";
     return result.report;
+}
+Json hlslCompilationOptions(const std::string &source, const std::string &optimization) {
+    if (optimization != "auto" && optimization != "preserve" && optimization != "optimize")
+        fail("Unknown HLSL optimization mode");
+    bool hint = false;
+    size_t begin = 0;
+    for (unsigned n = 0; n < 5 && begin < source.size(); ++n) {
+        auto end = source.find_first_of("\r\n", begin);
+        if (end == std::string::npos)
+            end = source.size();
+        hint |= source.substr(begin, end - begin) == "// FloraGPA compiler optimization: preserve";
+        begin = end + 1;
+        if (end < source.size() && source[end] == '\r' && begin < source.size() && source[begin] == '\n')
+            ++begin;
+    }
+    const auto mode = optimization == "auto" ? (hint ? "preserve" : "optimize") : optimization;
+    return {{"optimization", mode}, {"flags", mode == "preserve" ? 4 : 2048}, {"source_hint", hint}};
+}
+HlslCompilation compileHlsl(const std::string &source, const std::string &profile, const std::string &entry,
+                            const std::string &name, const std::string &optimization) {
+    if (!QRegularExpression(QStringLiteral("^(vs|ps|gs|hs|ds|cs)_(4_0|4_1|5_0)$"))
+             .match(QString::fromStdString(profile))
+             .hasMatch())
+        fail("Unsupported shader target profile");
+    if (entry.find('\0') != std::string::npos || name.find('\0') != std::string::npos ||
+        std::any_of(entry.begin(), entry.end(), [](unsigned char c) { return c > 127; }))
+        fail("Invalid HLSL entry point or source name");
+    HlslCompilation result;
+    result.options = hlslCompilationOptions(source, optimization);
+    Com<ID3DBlob> code, errors;
+    const auto hr =
+        projectCompiler()(source.data(), source.size(), name.c_str(), nullptr, nullptr, entry.c_str(),
+                          profile.c_str(), result.options.at("flags").get<UINT>(), 0, &code, &errors);
+    if (errors) {
+        QByteArray text(static_cast<const char *>(errors->GetBufferPointer()),
+                        qsizetype(errors->GetBufferSize()));
+        while (text.endsWith('\0'))
+            text.chop(1);
+        result.diagnostics = QString::fromUtf8(text).toStdString();
+    }
+    if (FAILED(hr))
+        fail(QString("HLSL compilation failed (0x%1):\n").arg(uint32_t(hr), 8, 16, QChar('0')).toStdString() +
+             result.diagnostics);
+    if (!code)
+        fail("HLSL compiler returned no bytecode");
+    const auto first = static_cast<const uint8_t *>(code->GetBufferPointer());
+    result.bytecode.assign(first, first + code->GetBufferSize());
+    return result;
 }
 } // namespace flora
