@@ -10,6 +10,7 @@
 #include "PixelHistoryView.h"
 #include "PredicateView.h"
 #include "RasterizerDialog.h"
+#include "RdcCountersView.h"
 #include "ReplayDebugView.h"
 #include "SamplerDialog.h"
 #include "SrvDialog.h"
@@ -1073,6 +1074,15 @@ void MainWindow::buildUi() {
     metrics_->setColumnWidth(0, 175);
     rightTabs->addTab(properties_, "Properties");
     rightTabs->addTab(metrics_, "Metrics");
+    rdcCounters_ = new RdcCountersView;
+    rightTabs->addTab(rdcCounters_, "Replay Metrics");
+    connect(rdcCounters_, &RdcCountersView::readRequested, this, [this] { readRdcAnalysis(nullptr, true); });
+    connect(rdcCounters_, &RdcCountersView::cancelRequested, this, &MainWindow::cancel);
+    connect(rdcCounters_, &RdcCountersView::error, this, &MainWindow::showError);
+    connect(rdcCounters_, &RdcCountersView::eventRequested, this, [this](qulonglong event) {
+        if (!busy())
+            locateEvent(event);
+    });
     auto right = new QDockWidget("Inspector", workspace_);
     right->setObjectName("inspectorDock");
     right->setWidget(rightTabs);
@@ -1212,6 +1222,8 @@ void MainWindow::setBusy(bool busy) {
     updateCheckpointContext();
     if (history_)
         history_->setWorkerBusy(busy);
+    if (rdcCounters_)
+        rdcCounters_->setWorkerBusy(busy);
     for (auto view : checkpoints_)
         if (view)
             view->setWorkerBusy(busy);
@@ -1261,6 +1273,8 @@ void MainWindow::updateCheckpointContext() {
             view->setContext(key, available);
     if (history_)
         history_->setContext(historyContextKey(), selectedEvent_);
+    if (rdcCounters_)
+        rdcCounters_->setContext(historyContextKey(), selectedEvent_);
     for (auto view : replayDebug_)
         if (view)
             view->setContext(historyContextKey(), selectedEvent_);
@@ -1277,18 +1291,25 @@ QString MainWindow::historyContextKey() const {
            QString::fromLatin1(QCryptographicHash::hash(bytes, QCryptographicHash::Sha256).toHex());
 }
 bool MainWindow::finishRdcAnalysis(const nlohmann::json &result) {
+    if (runningCounters_)
+        return rdcCounters_->finish(historyRequestId_, result);
     return runningDebug_ ? runningDebug_->finish(historyRequestId_, result)
                          : history_->finish(historyRequestId_, result);
 }
-void MainWindow::readRdcAnalysis(ReplayDebugView *view) {
+void MainWindow::readRdcAnalysis(ReplayDebugView *view, bool counters) {
     if (busy() || !frame_)
         return;
     runningDebug_ = view;
-    historyRequestId_ = view ? view->requestId() : history_->requestId();
+    runningCounters_ = counters;
+    historyRequestId_ = counters ? rdcCounters_->requestId()
+                        : view   ? view->requestId()
+                                 : history_->requestId();
     try {
-        historyRequest_ = view ? view->request() : history_->request();
-        const auto library =
-            QFileInfo(view ? view->backendPath() : history_->backendPath()).canonicalFilePath();
+        historyRequest_ = counters ? rdcCounters_->request() : view ? view->request() : history_->request();
+        const auto library = QFileInfo(counters ? rdcCounters_->backendPath()
+                                       : view   ? view->backendPath()
+                                                : history_->backendPath())
+                                 .canonicalFilePath();
         QFile file(library);
         if (library.isEmpty() || !file.open(QIODevice::ReadOnly))
             throw std::runtime_error("Select an installed RenderDoc 1.45 library");
@@ -1336,7 +1357,9 @@ void MainWindow::startHistoryWorker() {
     stderrBuffer_.clear();
     errorText_.clear();
     setBusy(true);
-    statusBar()->showMessage(runningDebug_ ? "Reading shader trace…" : "Reading pixel history…");
+    statusBar()->showMessage(runningCounters_ ? "Measuring replay counters…"
+                             : runningDebug_  ? "Reading shader trace…"
+                                              : "Reading pixel history…");
     timeout_.start();
     process_.start(QCoreApplication::applicationDirPath() + "/FloraGPA.Rdc.exe", {"--job", path});
 }
@@ -1478,7 +1501,9 @@ void MainWindow::finishWorker(int code, QProcess::ExitStatus status) {
             result["experiment_key"] = historyRequest_.at("experiment_key");
             result["selection"] = historyRequest_;
             const bool accepted = finishRdcAnalysis(result);
-            statusBar()->showMessage(accepted ? (runningDebug_ ? "Shader trace ready" : "Pixel history ready")
+            statusBar()->showMessage(accepted ? (runningCounters_ ? "Replay metrics ready"
+                                                 : runningDebug_  ? "Shader trace ready"
+                                                                  : "Pixel history ready")
                                               : "Analysis selection changed",
                                      3000);
             emit taskFinished(accepted);

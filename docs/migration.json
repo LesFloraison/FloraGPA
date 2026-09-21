@@ -12,14 +12,19 @@
         "src/app/MainWindow.cpp",
         "src/rdc/main.cpp",
         "src/app/ReplayDebugView.cpp",
-        "src/application/ReplayDebugModel.cpp"
+        "src/application/ReplayDebugModel.cpp",
+        "src/rdc/Counters.cpp",
+        "src/app/RdcCountersView.cpp"
       ],
       "validation": [
         "docs/PIXEL_HISTORY_UI_MIGRATION.md",
-        "Qt Pixel History is connected to native recapture and history workers with experiment/driver/library caching, cancellation, API navigation, details and JSON export. Other shared inventory/texture/postmesh/counter actions remain pending; recorded shader debug UI is now connected.",
+        "Qt Pixel History is connected to native recapture and history workers with experiment/driver/library caching, cancellation, API navigation, details and JSON export. Other shared inventory/texture/postmesh actions remain pending; recorded shader debug UI is now connected.",
         "docs/REPLAY_DEBUG_UI_MIGRATION.md",
-        "VS/PS/CS Qt views now share native recapture and cache with Pixel History, with navigation, breakpoints/watches, configurations and exports. Inventory/texture/postmesh/counters and other shared consumers remain outside this batch.",
-        "Packaged Qt debugger: 7 cases passed without skips; 14 runtime reports contain no Python/Tk/GPA modules, Qt is package-local, four delivered executables match Release, and four golden/negative controls pass. Full CTest: 47 other suites passed plus corrected new-suite rerun; original Qt regression: 54 passed without skips."
+        "VS/PS/CS Qt views now share native recapture and cache with Pixel History, with navigation, breakpoints/watches, configurations and exports. Inventory/texture/postmesh and other shared consumers remain pending; counters are covered by the subsequent Replay Metrics migration.",
+        "Packaged Qt debugger: 7 cases passed without skips; 14 runtime reports contain no Python/Tk/GPA modules, Qt is package-local, four delivered executables match Release, and four golden/negative controls pass. Full CTest: 47 other suites passed plus corrected new-suite rerun; original Qt regression: 54 passed without skips.",
+        "docs/REPLAY_METRICS_MIGRATION.md",
+        "Native counters and right-side Qt Replay Metrics now preserve catalogs, units, exact integer storage, event provenance, full export and shared recapture/cache/cancellation. Nine comparisons cover 18,928 rows: 16,157 exact values, 1,456 independent durations and 1,315 separately audited BF1 PS measurements. BF1 PS numerical parity is not claimed; repeat variability is observed in both implementations. Shared inventory/texture/postmesh and other consumers remain incomplete.",
+        "Replay Metrics delivery: complete Release build, seven relevant CTest suites, 54 original UI cases without skips, six packaged counter UI cases without skips, four golden/negative controls and ten runtime-module audits passed; all four delivered executables match Release."
       ]
     },
     {
@@ -2404,8 +2409,11 @@
         "docs/RDC_DEBUG_MIGRATION.md",
         "The native worker also accepts validated debug-pixel/debug-vertex/debug-thread jobs. Main-window task preparation now covers Pixel History and recorded VS/PS/CS debugging.",
         "docs/REPLAY_DEBUG_UI_MIGRATION.md",
-        "VS/PS/CS Qt views now share native recapture and cache with Pixel History, with navigation, breakpoints/watches, configurations and exports. Inventory/texture/postmesh/counters and other shared consumers remain outside this batch.",
-        "Packaged Qt debugger: 7 cases passed without skips; 14 runtime reports contain no Python/Tk/GPA modules, Qt is package-local, four delivered executables match Release, and four golden/negative controls pass. Full CTest: 47 other suites passed plus corrected new-suite rerun; original Qt regression: 54 passed without skips."
+        "VS/PS/CS Qt views now share native recapture and cache with Pixel History, with navigation, breakpoints/watches, configurations and exports. Inventory/texture/postmesh and other shared consumers remain pending; counters are covered by the subsequent Replay Metrics migration.",
+        "Packaged Qt debugger: 7 cases passed without skips; 14 runtime reports contain no Python/Tk/GPA modules, Qt is package-local, four delivered executables match Release, and four golden/negative controls pass. Full CTest: 47 other suites passed plus corrected new-suite rerun; original Qt regression: 54 passed without skips.",
+        "docs/REPLAY_METRICS_MIGRATION.md",
+        "Generic counters now use the native shared recapture/cache worker pipeline, including Hardware/WARP, experiment invalidation, cancellation, retry and backend recovery.",
+        "Replay Metrics delivery: complete Release build, seven relevant CTest suites, 54 original UI cases without skips, six packaged counter UI cases without skips, four golden/negative controls and ten runtime-module audits passed; all four delivered executables match Release."
       ]
     },
     {
@@ -2419,7 +2427,9 @@
         "src/rdc/main.cpp",
         "src/rdc/DebugTrace.cpp",
         "src/app/ReplayDebugView.cpp",
-        "src/application/ReplayDebugModel.cpp"
+        "src/application/ReplayDebugModel.cpp",
+        "src/rdc/Counters.cpp",
+        "src/app/RdcCountersView.cpp"
       ],
       "validation": [
         "docs/RDC_HISTORY_MIGRATION.md",
@@ -2429,8 +2439,11 @@
         "docs/RDC_DEBUG_MIGRATION.md",
         "Packaged native PS/VS/CS debugging: 171 checks, 21 full trace comparisons (279 steps), seven rejected selections. Known uninitialized 1.45 DXBC global mapping offsets are null with explicit scope metadata; all other trace/source/disassembly fields are compared. Qt replay-debug navigation and watches/configuration are now connected with separate UI evidence; inventory/texture/postmesh/counter branches remain pending.",
         "docs/REPLAY_DEBUG_UI_MIGRATION.md",
-        "VS/PS/CS Qt views now share native recapture and cache with Pixel History, with navigation, breakpoints/watches, configurations and exports. Inventory/texture/postmesh/counters and other shared consumers remain outside this batch.",
-        "Packaged Qt debugger: 7 cases passed without skips; 14 runtime reports contain no Python/Tk/GPA modules, Qt is package-local, four delivered executables match Release, and four golden/negative controls pass. Full CTest: 47 other suites passed plus corrected new-suite rerun; original Qt regression: 54 passed without skips."
+        "VS/PS/CS Qt views now share native recapture and cache with Pixel History, with navigation, breakpoints/watches, configurations and exports. Inventory/texture/postmesh and other shared consumers remain pending; counters are covered by the subsequent Replay Metrics migration.",
+        "Packaged Qt debugger: 7 cases passed without skips; 14 runtime reports contain no Python/Tk/GPA modules, Qt is package-local, four delivered executables match Release, and four golden/negative controls pass. Full CTest: 47 other suites passed plus corrected new-suite rerun; original Qt regression: 54 passed without skips.",
+        "docs/REPLAY_METRICS_MIGRATION.md",
+        "Native counters and right-side Qt Replay Metrics now preserve catalogs, units, exact integer storage, event provenance, full export and shared recapture/cache/cancellation. Nine comparisons cover 18,928 rows: 16,157 exact values, 1,456 independent durations and 1,315 separately audited BF1 PS measurements. BF1 PS numerical parity is not claimed; repeat variability is observed in both implementations. Shared inventory/texture/postmesh and other consumers remain incomplete.",
+        "Replay Metrics delivery: complete Release build, seven relevant CTest suites, 54 original UI cases without skips, six packaged counter UI cases without skips, four golden/negative controls and ten runtime-module audits passed; all four delivered executables match Release."
       ]
     },
     {

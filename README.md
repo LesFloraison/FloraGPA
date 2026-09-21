@@ -105,6 +105,12 @@ Qt views share the Pixel History recapture cache and cancellation pipeline;
 see [RDC_DEBUG_MIGRATION.md](docs/RDC_DEBUG_MIGRATION.md) for backend validation
 and [REPLAY_DEBUG_UI_MIGRATION.md](docs/REPLAY_DEBUG_UI_MIGRATION.md) for the UI.
 
+The right-side **Replay Metrics** inspector now measures generic replay counters,
+with Selection/Frame views, filtering, API navigation, a counter catalog and
+complete JSON export. It shares native recapture and caching with Pixel History
+and Shader Debug. See [REPLAY_METRICS_MIGRATION.md](docs/REPLAY_METRICS_MIGRATION.md)
+for validation and the observed BF1 PS invocation variability.
+
 Use **F5** to replay, **F6** for GPU timings, **Escape** to cancel. Select API
 events to inspect their pipeline and before/after output. Resources provide
 texture mip/layer/slice previews, shader source/DXBC/reflection and buffer bytes.

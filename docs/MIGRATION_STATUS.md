@@ -2,9 +2,23 @@
 
 已有可编译、可运行的 VS2022 / Qt Widgets 原生工程，能够独立重放当前验证的
 GF2 与 BF1 DX11 捕获。**尚未完成原 Python 版本的全部功能迁移。**
-当前独立包为 `out/FloraGPA-replay-debug/FloraGPA.exe`。
+当前独立包为 `out/FloraGPA-replay-metrics/FloraGPA.exe`。
 
-最新一批将 PS／VS／CS 调试接入 Qt：指令／源码前后步进、步过／步出、
+
+最新一批将原 Python 的通用重放计数器接入右侧 **Replay Metrics**：原生测量、
+Selection／Frame 范围、过滤、API 定位、指标目录、详情和完整 JSON 导出已接通，
+与 Pixel History／Shader Debug 共享实验感知的再捕获缓存及取消流程。
+数值保留原始整数精度，默认窄面板可同时显示指标、数值和单位；详情默认收起。
+九组原 Python 对照共检查 18,928 条结果：16,157 条数值精确一致，1,456 条独立
+GPU 时间检查有效性，1,315 条 BF1 PS 测量值单独审计。重复运行两版均观察到
+BF1 PS 调用次数波动；不将这部分计入数值完全一致，也不修改产品输出掩盖差异。
+完整 Release 构建及相关 7 套 CTest 通过，原主窗口 54 项无失败、无跳过。发布包
+在 Windows-only PATH 下通过 6 项界面检查、4 项黄金帧／负对照和 10 份运行时
+模块审计；四个程序与 Release 构建哈希一致。实际发布包 Qt 布局已检查。
+本批不完成厂商硬件指标调度、GTPin 或剩余 RenderDoc 分析分支；共享模块仍为
+`partial`。详见 [REPLAY_METRICS_MIGRATION.md](REPLAY_METRICS_MIGRATION.md)。
+
+上一批将 PS／VS／CS 调试接入 Qt：指令／源码前后步进、步过／步出、
 运行到指令、条件和次数断点、监视、调用栈、带类型的源码变量、配置导入／保存及
 完整 JSON 导出已接通。三个阶段与 Pixel History 共用原生再捕获缓存和取消流程；
 事件、实验、驱动或调用参数变化会使旧轨迹失效。界面按 VS／HS／DS／GS／PS／CS

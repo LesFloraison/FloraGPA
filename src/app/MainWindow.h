@@ -26,6 +26,7 @@ class StatisticsView;
 class CheckpointView;
 class PixelHistoryView;
 class ReplayDebugView;
+class RdcCountersView;
 class MainWindow final : public QMainWindow {
     Q_OBJECT
   public:
@@ -90,12 +91,14 @@ class MainWindow final : public QMainWindow {
     void updateStatistics();
     void updateCheckpointContext();
     QString historyContextKey() const;
-    void readRdcAnalysis(ReplayDebugView *view = nullptr);
+    void readRdcAnalysis(ReplayDebugView *view = nullptr, bool counters = false);
     bool finishRdcAnalysis(const nlohmann::json &result);
     void startHistoryWorker();
     PixelHistoryView *history_ = nullptr;
     std::array<ReplayDebugView *, 3> replayDebug_{};
     ReplayDebugView *runningDebug_ = nullptr;
+    RdcCountersView *rdcCounters_ = nullptr;
+    bool runningCounters_ = false;
     nlohmann::json historyRequest_;
     uint64_t historyRequestId_{};
     QString historyKey_, historyRdc_;

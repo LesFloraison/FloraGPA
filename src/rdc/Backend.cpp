@@ -1,5 +1,6 @@
 #include "Backend.h"
 #include "Api.h"
+#include "Counters.h"
 #include "DebugTrace.h"
 #include "application/RdcEvents.h"
 #include <QSaveFile>
@@ -437,9 +438,9 @@ namespace flora {
 Json runRdcJob(const Json &job) {
     const auto action = job.at("action").get<std::string>();
     const bool debugging = action == "debug-pixel" || action == "debug-vertex" || action == "debug-thread";
-    if (action != "history" && action != "events" && !debugging)
+    if (action != "history" && action != "events" && action != "counters" && !debugging)
         throw std::runtime_error("Unsupported native RenderDoc job action");
-    if (action == "history" || debugging) {
+    if (action == "history" || action == "counters" || debugging) {
         if (!job.value("gpa_event", Json(nullptr)).is_null() && !job.value("eid", Json(nullptr)).is_null())
             throw std::runtime_error("Choose GPA or RDC event, not both");
         for (const auto *key : {"x", "y", "mip", "layer", "sample", "eid", "vertex", "instance", "index"})
@@ -484,6 +485,39 @@ Json runRdcJob(const Json &job) {
     if (!eid || (!events.actions.contains(eid) && !events.chunks.contains(eid)))
         throw std::runtime_error("No selectable replay action");
     controller.SetFrameEvent(eid, true);
+    if (action == "counters") {
+        rdcarray<GPUCounter> selected;
+        Json available = Json::array(), values = Json::array();
+        std::map<GPUCounter, CounterDescription> descriptions;
+        for (const auto counter : controller.EnumerateCounters()) {
+            auto description = controller.DescribeCounter(counter);
+            if (description.counter != counter || !descriptions.emplace(counter, description).second)
+                throw std::runtime_error("Invalid or duplicate counter description");
+            available.push_back(rdcCounterDescription(description));
+            if (uint32_t(counter) < uint32_t(GPUCounter::FirstAMD))
+                selected.push_back(counter);
+        }
+        for (const auto &counter : controller.FetchCounters(selected)) {
+            const auto it = descriptions.find(counter.counter);
+            if (it == descriptions.end())
+                throw std::runtime_error("Counter result has no description");
+            const auto &description = it->second;
+            Json row{{"eventId", counter.eventId},
+                     {"counter", uint32_t(counter.counter)},
+                     {"name", text(description.name)},
+                     {"unit", rdcCounterUnit(description.unit)},
+                     {"value", rdcCounterValue(description, counter)}};
+            row.update(rdcProvenance(counter.eventId, mapping["reverse"]));
+            values.push_back(std::move(row));
+        }
+        result.update({{"eid", eid},
+                       {"gpa_event", gpa},
+                       {"available", available},
+                       {"values", values},
+                       {"result_count", values.size()},
+                       {"note", "Measured on the replay GPU; GPA vendor-specific metrics are not implied."}});
+        return result;
+    }
     if (debugging) {
         result.update(debug(controller, eid, job));
         result["eid"] = eid;

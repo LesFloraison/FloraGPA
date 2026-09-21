@@ -42,6 +42,10 @@ class RdcWorkerTests : public QObject {
             << QJsonObject{{"action", "history"}, {"y", 4294967296.0}} << "uint32";
         QTest::newRow("boolean-resource")
             << QJsonObject{{"action", "history"}, {"resource", true}} << "unsigned integer";
+        QTest::newRow("counters-both-events")
+            << QJsonObject{{"action", "counters"}, {"gpa_event", 18}, {"eid", 47}} << "not both";
+        QTest::newRow("counters-negative-event")
+            << QJsonObject{{"action", "counters"}, {"gpa_event", -1}} << "unsigned integer";
         QTest::newRow("debug-both-events")
             << QJsonObject{{"action", "debug-vertex"}, {"gpa_event", 18}, {"eid", 47}} << "not both";
         QTest::newRow("debug-negative-index")
