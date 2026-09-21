@@ -23,6 +23,7 @@ Copy-Item -LiteralPath (Join-Path $repo 'THIRD_PARTY.md') -Destination $destinat
 $licenses = Join-Path $destination 'licenses'
 New-Item -ItemType Directory -Path $licenses -Force | Out-Null
 Copy-Item -LiteralPath (Join-Path $repo 'third_party\nlohmann\LICENSE.MIT') -Destination (Join-Path $licenses 'nlohmann-json-MIT.txt') -Force
+Copy-Item -LiteralPath (Join-Path $repo 'third_party\renderdoc\LICENSE.MIT') -Destination (Join-Path $licenses 'renderdoc-api-MIT.txt') -Force
 Copy-Item -Path (Join-Path $repo 'third_party\qt\*.txt') -Destination $licenses -Force
 $qtLicenses = Join-Path $QtRoot '..\..\Licenses'
 if (Test-Path -LiteralPath $qtLicenses) {

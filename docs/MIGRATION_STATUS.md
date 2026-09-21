@@ -2,9 +2,18 @@
 
 已有可编译、可运行的 VS2022 / Qt Widgets 原生工程，能够独立重放当前验证的
 GF2 与 BF1 DX11 捕获。**尚未完成原 Python 版本的全部功能迁移。**
-当前独立包为 `out/FloraGPA-checkpoint-ui/FloraGPA.exe`。
+当前独立包为 `out/FloraGPA-rdc-capture/FloraGPA.exe`。
 
-最新一批将 GS／HS／DS 检查点调试接入主窗口：读取原始 shader、单点与完整轨迹
+最新一批迁入可选 RenderDoc 原生再捕获与精确命令来源映射。CLI 可将独立重放
+导出为 RDC，保留 GPA 命令与资源身份，正常重放不加载 RenderDoc。独立包九份
+捕获的 99 项检查、709 组原 Python 映射对照、43 套 Release CTest、4 项黄金帧
+及负对照、18 份运行时模块审计全部通过；原 Qt 54 项回归无失败、无跳过。
+BF1 的 5,491 个已执行命令均获得唯一可选择的原生事件映射。
+该批是 Pixel History 的依赖迁移；生产版 RenderDoc 重放控制器、像素历史结果、
+CPU 写入补充与 Qt 视图仍待接通，相关清单保持 `partial`／`pending`。
+详见 [RDC_CAPTURE_MIGRATION.md](RDC_CAPTURE_MIGRATION.md)。
+
+上一批将 GS／HS／DS 检查点调试接入主窗口：读取原始 shader、单点与完整轨迹
 采集、精确输入重新采集、HS 阶段选择、指令／源码步进、条件断点、源码帧变量、
 SDBG 历史监视、配置导入／保存和完整 ZIP 导出。44 份实测轨迹的 3,246 项
 界面对照通过，包含 1,752 次按钮导航、变量／帧／监视与归档检查；原 Qt 54 项
@@ -15,14 +24,14 @@ SDBG 历史监视、配置导入／保存和完整 ZIP 导出。44 份实测轨�
 
 清单中的 `ported` 表示该 Python 模块的功能已有接通并验证的原生对应实现；
 `partial` 表示共享模块仍有未迁移或未充分验证的分支／消费者，`pending` 表示待迁移。
-本批将检查点界面、原生调试配置和断点／监视组件三项记为 `ported`；这不代表
+检查点界面批次将检查点界面、原生调试配置和断点／监视组件三项记为 `ported`；这不代表
 整个应用迁移完成，也不代表已验证任意捕获或另一台干净 Windows 机器。
 
 上一批迁入原生调试配置与 Qt 断点／监视面板组件。984 项配置对照通过，
 覆盖 164 份捕获报告的身份、配置往返、规则限制、编码和文件边界；原生事务回滚、
 Qt 按钮／文件对话框、源码帧切换与 SDBG 历史监视检查通过，实际 Qt 渲染已检查。
 完整 Release 构建通过。该批当时组件尚未接入主窗口，也未替换独立包；
-完整检查点视图与 Worker 协调已由最新一批接通。
+完整检查点视图与 Worker 协调已由检查点界面批次接通。
 详见 [NATIVE_DEBUG_CONFIG_MIGRATION.md](NATIVE_DEBUG_CONFIG_MIGRATION.md)。
 
 上一批迁入 SDBG 变量符号与逐次赋值历史，正式 checkpoint 导出已包含完整符号。

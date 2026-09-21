@@ -84,6 +84,13 @@ No Python environment, GPA installation or original source directory is used
 by the application. Package portability has been checked on this host with
 Windows-only child process paths, not yet on a separate clean Windows machine.
 
+Native CLI replay can optionally export a RenderDoc capture with
+`--renderdoc "C:/Program Files/RenderDoc/renderdoc.dll"`. The original GPA command
+and resource identities are retained in annotations/names. RenderDoc is loaded
+only for this explicit option; neither Python nor qrenderdoc is used to capture.
+See [RDC_CAPTURE_MIGRATION.md](docs/RDC_CAPTURE_MIGRATION.md). The native Pixel
+History consumer and its Qt view remain pending.
+
 Use **F5** to replay, **F6** for GPU timings, **Escape** to cancel. Select API
 events to inspect their pipeline and before/after output. Resources provide
 texture mip/layer/slice previews, shader source/DXBC/reflection and buffer bytes.
@@ -121,8 +128,8 @@ available as library APIs; see
 [`docs/SOURCE_NAVIGATION_MIGRATION.md`](docs/SOURCE_NAVIGATION_MIGRATION.md).
 Debugger configuration and a compact Qt breakpoint/watch component are also
 ported; see [`docs/NATIVE_DEBUG_CONFIG_MIGRATION.md`](docs/NATIVE_DEBUG_CONFIG_MIGRATION.md).
-The complete Qt checkpoint view and main-window integration remain pending;
-these components do not yet add debugger controls to the delivered application.
+These components are now integrated into the GS / HS / DS checkpoint view;
+see [CHECKPOINT_UI_MIGRATION.md](docs/CHECKPOINT_UI_MIGRATION.md).
 Export retains JSON, CSV, raw output bytes and OBJ when positions are valid;
 geometry choices are saved in experiment projects. Remaining stages and
 validation limits are listed in

@@ -15,3 +15,11 @@
   `aaf127c04cb31c406e5b04a63f1ae89369fccde6d8fa7cdda1ed4f32dfc5de63`.
 - Windows D3D11, DXGI, D3DCompiler and BCrypt are operating-system APIs.
   No Intel GPA libraries are included.
+- RenderDoc public application API header: MIT, Copyright (c) 2015-2026 Baldur
+  Karlsson. Vendored unmodified as `third_party/renderdoc/renderdoc_app.h`, with
+  license at `third_party/renderdoc/LICENSE.MIT`. Source: the local upstream
+  RenderDoc 1.45 source snapshot's `renderdoc/api/app/renderdoc_app.h`.
+  Header SHA-256: `b7005e7dc34c3635046868bbd76d81b9b055aede0f56daa0bd39fedee0639ffb`.
+  FloraGPA requests public application API 1.6.0 and only loads RenderDoc when
+  explicitly selected for optional recapture. No RenderDoc binary or Python
+  runtime is redistributed with FloraGPA.

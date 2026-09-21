@@ -2300,9 +2300,16 @@
       "sha256": "6362dc73be5e99beef233a3eada11e39a4a3249aff928426e24d1e03a1c4d4e2",
       "lines": 57,
       "description": "Optional recapture through RenderDoc's public application API.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": [
+        "src/replay/RenderDocCapture.cpp",
+        "src/replay/Replay.cpp",
+        "src/cli/main.cpp"
+      ],
+      "validation": [
+        "docs/RDC_CAPTURE_MIGRATION.md",
+        "Packaged optional recapture: 99 checks across nine captures; 709 exact Python provenance comparisons including all nine RDCs; 43 Release CTest suites and four golden/negative checks passed. Production RenderDoc replay-controller and Pixel History consumers remain pending."
+      ]
     },
     {
       "module": "rdc_cpu_history.py",
@@ -2318,9 +2325,14 @@
       "sha256": "66dcefebe234f6b56370ee1b6933a673aa2d43a3b18e5a9d4b49ff90abbef9f0",
       "lines": 59,
       "description": "Recover exact GPA command provenance from independent RDC annotations.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": [
+        "src/application/RdcEvents.cpp"
+      ],
+      "validation": [
+        "docs/RDC_CAPTURE_MIGRATION.md",
+        "Packaged optional recapture: 99 checks across nine captures; 709 exact Python provenance comparisons including all nine RDCs; 43 Release CTest suites and four golden/negative checks passed. Production RenderDoc replay-controller and Pixel History consumers remain pending."
+      ]
     },
     {
       "module": "rdc_jobs.py",

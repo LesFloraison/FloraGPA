@@ -1,6 +1,8 @@
 #include "Replay.h"
 #include "BlendState.h"
 #include "NativeSample.h"
+#include "RenderDocCapture.h"
+#include "ReplayAnnotation.h"
 #include "Unpredicated.h"
 #include "core/ClassLinkage.h"
 #include "core/Commands.h"
@@ -50,6 +52,10 @@ Replay::Replay(const Frame &frame, ReplayOptions options)
     : frame_(effectiveFrame(frame, options)), options_(std::move(options)) {
     if (options_.viewFrame && frame_.sha256() != frame.sha256())
         throw std::runtime_error("View overlay belongs to a different capture");
+    if (options_.renderdocLibrary.empty() != options_.renderdocOutput.empty())
+        throw std::runtime_error("RenderDoc library and output must be specified together");
+    if (!options_.renderdocLibrary.empty())
+        renderdoc_ = std::make_unique<RenderDocCapture>(options_.renderdocLibrary, options_.renderdocOutput);
     D3D_FEATURE_LEVEL levels[] = {D3D_FEATURE_LEVEL_11_1, D3D_FEATURE_LEVEL_11_0};
     D3D_FEATURE_LEVEL level{};
     check(D3D11CreateDevice(nullptr, options_.warp ? D3D_DRIVER_TYPE_WARP : D3D_DRIVER_TYPE_HARDWARE, nullptr,
@@ -58,13 +64,22 @@ Replay::Replay(const Frame &frame, ReplayOptions options)
           "Create DX11 device");
     check(context_.As(&context1_), "Query DX11.1 context");
     uavLimit_ = level >= D3D_FEATURE_LEVEL_11_1 ? 64 : 8;
+    if (renderdoc_) {
+        check(context_.As(&captureAnnotation_), "Query capture annotations");
+        renderdoc_->start(device_.Get());
+    }
 }
 Replay::~Replay() {
+    if (renderdoc_)
+        renderdoc_->discard();
     resetPredicates();
     if (context_) {
         context_->ClearState();
         context_->Flush();
     }
+}
+std::optional<std::filesystem::path> Replay::finishCapture() {
+    return renderdoc_ ? std::optional(renderdoc_->finish()) : std::nullopt;
 }
 DXGI_ADAPTER_DESC Replay::adapterDescription() const {
     Com<IDXGIDevice> dxgi;
@@ -375,6 +390,16 @@ IUnknown *Replay::object(Id id) {
                                      std::to_string(t));
     } catch (const std::exception &e) {
         throw std::runtime_error("Resource " + std::to_string(id) + ": " + e.what());
+    }
+    if (renderdoc_ && result) {
+        Com<ID3D11DeviceChild> child;
+        if (SUCCEEDED(result.As(&child))) {
+            std::ostringstream name;
+            name << "GPA resource " << id << " (type 0x" << std::hex << frame_.entry(id).type << ')';
+            const auto value = name.str();
+            check(child->SetPrivateData(WKPDID_D3DDebugObjectName, UINT(value.size()), value.data()),
+                  "Name captured resource");
+        }
     }
     objects_.emplace(id, result);
     return result.Get();
@@ -704,6 +729,7 @@ void Replay::mappedWrites(const Entry &e) {
     }
     auto obj = get<ID3D11Resource>(id);
     D3D11_MAPPED_SUBRESOURCE mapped{};
+    ReplayAnnotation marker(captureAnnotation_.Get(), e.id, "MapCapturedWrites");
     check(context_->Map(obj, sub, D3D11_MAP(kind), flags, &mapped), "Map captured writes");
     try {
         if (!mapped.pData)
@@ -847,34 +873,37 @@ void Replay::command(const Entry &e) {
                 context_->End(timestamp.begin.Get());
                 timestamps_.push_back(std::move(timestamp));
             }
-            switch (t) {
-            case 0x35:
-                context_->Dispatch(a[0], a[1], a[2]);
-                break;
-            case 0x36:
-                context_->DispatchIndirect(arguments, a[0]);
-                break;
-            case 0x37:
-                context_->Draw(a[0], a[1]);
-                break;
-            case 0x38:
-                context_->Draw(autoCount, 0);
-                break;
-            case 0x39:
-                context_->DrawIndexed(a[0], a[1], int32_t(a[2]));
-                break;
-            case 0x3a:
-                context_->DrawIndexedInstanced(a[0], a[1], a[2], int32_t(a[3]), a[4]);
-                break;
-            case 0x3b:
-                context_->DrawIndexedInstancedIndirect(arguments, a[0]);
-                break;
-            case 0x3c:
-                context_->DrawInstanced(a[0], a[1], a[2], a[3]);
-                break;
-            case 0x3d:
-                context_->DrawInstancedIndirect(arguments, a[0]);
-                break;
+            {
+                ReplayAnnotation marker(captureAnnotation_.Get(), e.id, commandName(t), false);
+                switch (t) {
+                case 0x35:
+                    context_->Dispatch(a[0], a[1], a[2]);
+                    break;
+                case 0x36:
+                    context_->DispatchIndirect(arguments, a[0]);
+                    break;
+                case 0x37:
+                    context_->Draw(a[0], a[1]);
+                    break;
+                case 0x38:
+                    context_->Draw(autoCount, 0);
+                    break;
+                case 0x39:
+                    context_->DrawIndexed(a[0], a[1], int32_t(a[2]));
+                    break;
+                case 0x3a:
+                    context_->DrawIndexedInstanced(a[0], a[1], a[2], int32_t(a[3]), a[4]);
+                    break;
+                case 0x3b:
+                    context_->DrawIndexedInstancedIndirect(arguments, a[0]);
+                    break;
+                case 0x3c:
+                    context_->DrawInstanced(a[0], a[1], a[2], a[3]);
+                    break;
+                case 0x3d:
+                    context_->DrawInstancedIndirect(arguments, a[0]);
+                    break;
+                }
             }
             // Queue the timestamp before SO readback can wait on the CPU.
             if (options_.timings)
@@ -958,29 +987,42 @@ void Replay::command(const Entry &e) {
         r.end();
         float floats[4];
         std::memcpy(floats, values.data(), 16);
-        if (t == 0x32)
-            context_->ClearRenderTargetView(get<ID3D11RenderTargetView>(view), floats);
-        else if (t == 0x33)
-            context_->ClearUnorderedAccessViewUint(get<ID3D11UnorderedAccessView>(view), values.data());
-        else
-            context_->ClearUnorderedAccessViewFloat(get<ID3D11UnorderedAccessView>(view), floats);
+        if (t == 0x32) {
+            const auto target = get<ID3D11RenderTargetView>(view);
+            ReplayAnnotation marker(captureAnnotation_.Get(), e.id, commandName(t));
+            context_->ClearRenderTargetView(target, floats);
+        } else {
+            const auto target = get<ID3D11UnorderedAccessView>(view);
+            ReplayAnnotation marker(captureAnnotation_.Get(), e.id, commandName(t));
+            if (t == 0x33)
+                context_->ClearUnorderedAccessViewUint(target, values.data());
+            else
+                context_->ClearUnorderedAccessViewFloat(target, floats);
+        }
     } else if (t == 0x31) {
         auto view = r.read<Id>();
         auto flags = r.read<UINT>();
         auto depth = r.read<float>();
         auto stencil = r.read<uint8_t>();
         r.end();
-        context_->ClearDepthStencilView(get<ID3D11DepthStencilView>(view), flags, depth, stencil);
+        const auto target = get<ID3D11DepthStencilView>(view);
+        ReplayAnnotation marker(captureAnnotation_.Get(), e.id, commandName(t));
+        context_->ClearDepthStencilView(target, flags, depth, stencil);
     } else if (t == 0x3e) {
         auto dst = r.read<Id>(), src = r.read<Id>();
         r.end();
-        context_->CopyResource(get<ID3D11Resource>(dst), get<ID3D11Resource>(src));
+        const auto destination = get<ID3D11Resource>(dst), source = get<ID3D11Resource>(src);
+        ReplayAnnotation marker(captureAnnotation_.Get(), e.id, commandName(t));
+        context_->CopyResource(destination, source);
     } else if (t == 0x3f) {
         auto dst = r.read<Id>();
         auto offset = r.read<UINT>();
         auto src = r.read<Id>();
         r.end();
-        context_->CopyStructureCount(get<ID3D11Buffer>(dst), offset, get<ID3D11UnorderedAccessView>(src));
+        const auto destination = get<ID3D11Buffer>(dst);
+        const auto source = get<ID3D11UnorderedAccessView>(src);
+        ReplayAnnotation marker(captureAnnotation_.Get(), e.id, commandName(t));
+        context_->CopyStructureCount(destination, offset, source);
     } else if (t == 0x40) {
         auto dst = r.read<Id>();
         auto sub = r.read<UINT>(), x = r.read<UINT>(), y = r.read<UINT>(), z = r.read<UINT>();
@@ -991,20 +1033,24 @@ void Replay::command(const Entry &e) {
         if (has)
             box = r.read<D3D11_BOX>();
         r.end();
-        context_->CopySubresourceRegion(get<ID3D11Resource>(dst), sub, x, y, z, get<ID3D11Resource>(src),
-                                        srcSub, has ? &box : nullptr);
+        const auto destination = get<ID3D11Resource>(dst), source = get<ID3D11Resource>(src);
+        ReplayAnnotation marker(captureAnnotation_.Get(), e.id, commandName(t));
+        context_->CopySubresourceRegion(destination, sub, x, y, z, source, srcSub, has ? &box : nullptr);
     } else if (t == 0x42) {
         auto dst = r.read<Id>();
         auto sub = r.read<UINT>();
         auto src = r.read<Id>();
         auto srcSub = r.read<UINT>(), format = r.read<UINT>();
         r.end();
-        context_->ResolveSubresource(get<ID3D11Resource>(dst), sub, get<ID3D11Resource>(src), srcSub,
-                                     DXGI_FORMAT(format));
+        const auto destination = get<ID3D11Resource>(dst), source = get<ID3D11Resource>(src);
+        ReplayAnnotation marker(captureAnnotation_.Get(), e.id, commandName(t));
+        context_->ResolveSubresource(destination, sub, source, srcSub, DXGI_FORMAT(format));
     } else if (t == 0x245) {
         auto id = r.read<Id>();
         r.end();
-        context_->GenerateMips(get<ID3D11ShaderResourceView>(id));
+        const auto view = get<ID3D11ShaderResourceView>(id);
+        ReplayAnnotation marker(captureAnnotation_.Get(), e.id, commandName(t));
+        context_->GenerateMips(view);
     } else if (t == 0x247) {
         auto layout = updateSourceLayout(frame_, e.id);
         const auto destination = frame_.resource(layout.destination);
@@ -1023,9 +1069,10 @@ void Replay::command(const Entry &e) {
             data = frame_.data(layout.data);
         if (data.size() != layout.size)
             throw std::runtime_error("Packed UpdateSubresource size mismatch");
-        context_->UpdateSubresource(get<ID3D11Resource>(layout.destination), layout.subresource,
-                                    layout.hasBox ? &box : nullptr, data.data(), layout.rowPitch,
-                                    layout.slicePitch);
+        const auto destinationObject = get<ID3D11Resource>(layout.destination);
+        ReplayAnnotation marker(captureAnnotation_.Get(), e.id, commandName(t));
+        context_->UpdateSubresource(destinationObject, layout.subresource, layout.hasBox ? &box : nullptr,
+                                    data.data(), layout.rowPitch, layout.slicePitch);
         if (format >= 103 && format <= 105) {
             PlanarWrite write;
             write.event = e.id;

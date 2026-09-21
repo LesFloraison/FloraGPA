@@ -80,6 +80,7 @@ int main(int argc, char **argv) {
     p.addOption({"warp", "Use the WARP software adapter"});
     p.addOption({"timings", "Collect native GPU timestamps and pipeline statistics"});
     p.addOption({"debug-device", "Enable D3D11 validation"});
+    p.addOption({"renderdoc", "Optional RenderDoc DLL for independent replay recapture", "path"});
     p.addOption({"event", "Stop at API event", "id"});
     p.addOption({"start-event", "Inclusive statistics range start", "id"});
     p.addOption({"end-event", "Inclusive statistics range end", "id"});
@@ -127,6 +128,8 @@ int main(int argc, char **argv) {
             throw std::runtime_error("Expected command and capture path");
         Frame frame(std::filesystem::path(args[1].toStdWString()));
         auto command = args[0];
+        if (p.isSet("renderdoc") && command != "replay")
+            throw std::runtime_error("--renderdoc applies to replay only");
         auto parseId = [&](const QString &key) {
             bool valid = false;
             auto id = p.value(key).toULongLong(&valid);
@@ -293,6 +296,10 @@ int main(int argc, char **argv) {
             options.timings = p.isSet("timings");
             options.warp = p.isSet("warp");
             options.debug = p.isSet("debug-device");
+            if (p.isSet("renderdoc")) {
+                options.renderdocLibrary = p.value("renderdoc").toStdWString();
+                options.renderdocOutput = QDir(out).absoluteFilePath("independent").toStdWString();
+            }
             options.suppressDraws = p.isSet("suppress-draws");
             options.before = p.isSet("before");
             options.prepareBeforeDraw = command != "replay";
@@ -599,6 +606,8 @@ int main(int argc, char **argv) {
                 }
             }
             QJsonObject counts;
+            if (const auto capture = replay.finishCapture())
+                report.insert("rdc_capture", QString::fromStdWString(capture->wstring()));
             for (auto &[key, value] : replay.counts)
                 counts.insert(QString::fromStdString(key), qint64(value));
             report.insert("counts", counts);
