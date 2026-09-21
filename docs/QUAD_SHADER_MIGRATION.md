@@ -87,8 +87,9 @@ The full Quad migration still needs every original execution responsibility:
 - Native serial IA/VS submission is now implemented and separately validated
   in [QUAD_SERIAL_MIGRATION.md](QUAD_SERIAL_MIGRATION.md). Its integration into
   the counter's private-output passes still remains.
-- Final HS/DS/GS/SO primitive capture, rasterizer-system-output bridge shaders,
-  stream selection and the original WARP direct-isoline rejection.
+- Final HS/DS/GS/SO primitive capture and bridge submission are now implemented
+  and separately validated in [QUAD_FINAL_MIGRATION.md](QUAD_FINAL_MIGRATION.md).
+  Their integration into the counter executor still remains.
 - Target/view matching and selected subresources; buffer/3D prepared-depth
   adapters; native dummy output allocation and full sample-storage fingerprints.
 - Private pre-raster UAV resources/counters, fresh isolation for each pass,

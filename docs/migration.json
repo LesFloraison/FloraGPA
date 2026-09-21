@@ -2384,9 +2384,19 @@
       "sha256": "b5e4b03a8ef2e35dfb30b14478f2f72b997b46c5c47f1fc035271f69b42b2cf6",
       "lines": 84,
       "description": "Serialize actual final primitives while retaining rasterizer system outputs.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "ported",
+      "native": [
+        "src/application/QuadFinal.cpp",
+        "src/application/QuadFinal.h",
+        "src/application/PostTransform.cpp",
+        "src/application/PostTransform.h"
+      ],
+      "validation": [
+        "docs/QUAD_FINAL_MIGRATION.md",
+        "tests/QuadFinalTests.cpp",
+        "tools/validate_quad_final.py",
+        "140 hardware/WARP native/Python cases compare full capture metadata, generated signatures, two helper submissions, SO/UAV/counter isolation and all MSAA samples. Three exact expected rejections preserve WARP direct-isoline and no-rasterized-stream limits. Full counter execution and Qt integration remain pending in their owning modules."
+      ]
     },
     {
       "module": "quad_serial.py",

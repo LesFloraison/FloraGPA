@@ -1127,6 +1127,13 @@ class PostTransformCapture {
 
   public:
     PostTransformCapture(Replay &replay, const PostTransformOptions &o) : r(replay), options(o) {}
+    PostTransformGeometry bound(const Event &event, const State &state) {
+        if (options.stream > 3)
+            throw std::runtime_error("Geometry output stream must be 0..3");
+        if (event.type < 0x37 || event.type > 0x3d)
+            throw std::runtime_error("Post-transform geometry requires a Draw");
+        return capture(event, state);
+    }
     CheckpointInspection registers(Id id, const CheckpointInspectionOptions &request) {
         if (request.stage != "gs" && request.stage != "ds" && request.stage != "hs")
             throw std::runtime_error("Native checkpoint stage must be GS, DS or HS");
@@ -1218,6 +1225,13 @@ CheckpointInspection inspectCheckpoint(Replay &replay, Id event, const Checkpoin
 }
 PostTransformGeometry inspectPostTransform(Replay &replay, Id event, const PostTransformOptions &options) {
     return PostTransformCapture(replay, options).run(event);
+}
+PostTransformGeometry captureBoundPostTransform(Replay &replay, const Event &event, const State &state,
+                                                uint32_t stream, uint64_t maxBytes) {
+    PostTransformOptions options;
+    options.stream = stream;
+    options.maxBytes = maxBytes;
+    return PostTransformCapture(replay, options).bound(event, state);
 }
 Json postTransformTables(const PostTransformGeometry &geometry) {
     if (geometry.report.value("requested_stage", std::string{}) == "hs")

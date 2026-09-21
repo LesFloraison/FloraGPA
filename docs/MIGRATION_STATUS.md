@@ -4,13 +4,22 @@
 GF2 与 BF1 DX11 捕获。**尚未完成原 Python 版本的全部功能迁移。**
 当前独立包为 `out/FloraGPA-coverage-ui/FloraGPA.exe`。
 
-最新一批迁入 Quad 的原生 IA／VS 串行提交：点线三角形列表与 strip、当前 GPU
+最新一批迁入 Quad 的原生最终几何提交：复用私有 SO 捕获，保留 HS／DS／GS 输出、
+位置、裁剪／剔除距离、数组／视口路由和所选光栅化流，再逐图元提交诊断绘制。
+140 组硬件／WARP 对照通过，包括 3 项明确拒绝；完整几何元数据、生成签名、
+重复提交、SO／高槽位 UAV 隔离、动态类实例及 2／4／8 倍 MSAA 各样本均已检查。
+完整 Release 构建、10 套相关 CTest、4 组 PostTransform 对照和 4 项黄金帧／负对照
+通过。`quad_post_transform.py` 更新为 `ported`；当前为 **23 `ported`、117 `partial`、
+64 `pending`**，不是工作量百分比。**完整 Quad 计数器和 Qt 页面仍待接通**，独立包
+保持 Coverage 版本。详见 [QUAD_FINAL_MIGRATION.md](QUAD_FINAL_MIGRATION.md)。
+
+上一批迁入 Quad 的原生 IA／VS 串行提交：点线三角形列表与 strip、当前 GPU
 索引读取、重启／退化图元、实例步长、间接参数、DrawAuto、动态 VS 类实例及实验
 替换着色器。2,378 项 Python／C++ 对照通过，其中 192 项硬件／WARP GPU 用例、
 10 项预期拒绝；输出存储、完整元数据、执行计数、拒绝信息和 IA 绑定恢复均已检查。
 完整 Release 构建、10 套相关 CTest、四组 PostTransform 对照及 GF2／BF1 的
 四项黄金帧／负对照通过。`quad_serial.py` 更新为 `ported`；
-当前为 **22 `ported`、117 `partial`、65 `pending`**，不是工作量百分比。
+该阶段为 **22 `ported`、117 `partial`、65 `pending`**，不是工作量百分比。
 **完整 Quad 执行和 Qt 页面仍未迁完**，本批仅完成其串行提交模块，独立包保持
 Coverage 版本。详见 [QUAD_SERIAL_MIGRATION.md](QUAD_SERIAL_MIGRATION.md)。
 

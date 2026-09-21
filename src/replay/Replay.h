@@ -126,6 +126,7 @@ class Replay {
     friend class PostTransformCapture;
     friend class CoverageCapture;
     friend class QuadSerialState;
+    friend class QuadFinalState;
     NativeSample *activeSample_ = nullptr;
     std::optional<NativeStatistics> measurementResult_;
     uint64_t generation_{};
