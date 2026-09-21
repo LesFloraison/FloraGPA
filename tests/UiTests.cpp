@@ -18,6 +18,7 @@
 #include "app/ConstantBufferDialog.h"
 #include "app/IaSetterDialog.h"
 #include "app/MainWindow.h"
+#include "app/NativeDebugControls.h"
 #include "app/OutputDialog.h"
 #include "app/PipelineSetterDialog.h"
 #include "app/PredicateView.h"
@@ -75,6 +76,135 @@ class UiTests final : public QObject {
         QVERIFY(window.grab().save(directory + '/' + name + ".png"));
     }
   private slots:
+    void nativeDebugControls() {
+        using namespace flora;
+        using Json = nlohmann::json;
+        NativeDebugControls panel;
+        panel.resize(680, 470);
+        panel.show();
+        QVERIFY(!panel.isEnabled());
+        auto result = Json::parse(R"({"action":"gs-checkpoint","trace":true,
+          "shader_sha256":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "catalog":[{"instruction":0,"word_offset":2,"checkpoint_allowed":true,
+            "source_location":{"file":0,"line_start":1,"line_end":1}}],
+          "source_lines":{"files":[{"name":"main.hlsl","text":"uint x;"}]},
+          "source_stack":{"status":"available","frames":[{"id":"main","name":"main","kind":"function","parent":null,"ranges":[{"start":8,"end":12}]}]},
+          "source_variables":{"scopes":[{"id":"main","name":"main","parent":null,"kind":"function"}],
+            "variables":[{"id":"x","name":"x","scope":"main","type":{}}]}})");
+        const auto rows = Json::parse(R"([{"record":0,"invocation":0,"hit":0,"instruction":0},
+                                          {"record":1,"invocation":0,"hit":1,"instruction":0}])");
+        size_t loads = 0;
+        auto loader = [&](size_t index) {
+            ++loads;
+            return Json::array({{{"variable_id", "x"},
+                                 {"scope_id", "main"},
+                                 {"name", "x"},
+                                 {"type", "uint"},
+                                 {"bits", index ? 11 : 7},
+                                 {"status", "available"}}});
+        };
+        QSignalSpy errors(&panel, &NativeDebugControls::error);
+        QSignalSpy changed(&panel, &NativeDebugControls::rulesChanged);
+        QSignalSpy selected(&panel, &NativeDebugControls::sourcePointSelected);
+        panel.reset(result, rows, loader);
+        QVERIFY(panel.isEnabled());
+        panel.setSourcePoint(0, 1);
+        panel.findChild<QLineEdit *>("debugCondition")->setText("x > 1");
+        auto mode = panel.findChild<QComboBox *>("debugHitMode");
+        mode->setCurrentIndex(mode->findData("multiple"));
+        panel.findChild<QLineEdit *>("debugHitCount")->setText("2");
+        panel.findChild<QPushButton *>("debugApplyRule")->click();
+        QCOMPARE(changed.count(), 1);
+        QVERIFY(panel.configuration()["source_breakpoints"][0]["hit_count"]["count"] == 2);
+        auto rules = panel.findChild<QTreeWidget *>("debugRules");
+        rules->setCurrentItem(rules->topLevelItem(0));
+        QCOMPARE(selected.count(), 1);
+        auto add = [&](const QString &expression) {
+            panel.findChild<QLineEdit *>("debugWatchExpression")->setText(expression);
+            panel.findChild<QPushButton *>("debugAddWatch")->click();
+        };
+        add("x + 1");
+        QVERIFY(panel.watchResults()[0]["status"] == "unavailable");
+        panel.setRecord(0);
+        QVERIFY(panel.watchResults()[0]["text"] == "8");
+        QCOMPARE(loads, size_t(1));
+        add(" x + 1 ");
+        QCOMPARE(errors.count(), 1);
+        QCOMPARE(panel.settings().watches.size(), size_t(1));
+        add("missing");
+        QVERIFY(panel.watchResults()[1]["status"] == "unavailable");
+        QCOMPARE(loads, size_t(1));
+        panel.setRecord(1);
+        QVERIFY(panel.watchResults()[0]["text"] == "12");
+        panel.setRecord(1, "absent-frame");
+        QVERIFY(panel.watchResults()[0]["status"] == "unavailable");
+        panel.setRecord(1, "main");
+        QVERIFY(panel.watchResults()[0]["text"] == "12");
+        const auto saved = panel.configuration();
+        auto invalid = saved;
+        invalid["source_breakpoints"][0]["condition"] = "false";
+        invalid["watches"].push_back("x = 1");
+        QVERIFY_THROWS_EXCEPTION(ExpressionError, panel.importConfiguration(invalid));
+        QVERIFY(panel.configuration() == saved);
+        panel.reset(result, rows, loader, true);
+        QVERIFY(panel.configuration() == saved);
+        panel.setRecord(0);
+        QVERIFY(panel.watchResults()[0]["text"] == "8");
+        auto watches = panel.findChild<QTreeWidget *>("debugWatchValues");
+        watches->setCurrentItem(watches->topLevelItem(1));
+        panel.findChild<QPushButton *>("debugRemoveWatch")->click();
+        QCOMPARE(panel.settings().watches.size(), size_t(1));
+        snapshot(panel, "native-debug-controls");
+        rules->setCurrentItem(rules->topLevelItem(0));
+        panel.findChild<QPushButton *>("debugRemoveRule")->click();
+        QVERIFY(panel.configuration()["source_breakpoints"].empty());
+        panel.importConfiguration(saved);
+        QVERIFY(panel.configuration() == saved);
+        QTemporaryDir directory;
+        QVERIFY(directory.isValid());
+        const auto path = directory.path() + "/debug-config.json";
+        auto fileAction = [&](const char *button) {
+            const bool previous = QCoreApplication::testAttribute(Qt::AA_DontUseNativeDialogs);
+            QCoreApplication::setAttribute(Qt::AA_DontUseNativeDialogs, true);
+            auto restore =
+                qScopeGuard([&] { QCoreApplication::setAttribute(Qt::AA_DontUseNativeDialogs, previous); });
+            bool handled = false;
+            QTimer::singleShot(0, &panel, [&] {
+                auto dialog = panel.findChild<QFileDialog *>();
+                QVERIFY(dialog);
+                QTimer::singleShot(3000, dialog, &QDialog::reject);
+                dialog->selectFile(path);
+                handled = true;
+                QMetaObject::invokeMethod(dialog, "accept", Qt::QueuedConnection);
+            });
+            panel.findChild<QPushButton *>(button)->click();
+            QVERIFY(handled);
+        };
+        fileAction("debugSave");
+        QVERIFY(readNativeDebugConfig(path.toStdWString()) == saved);
+        panel.reset(result, rows, loader);
+        QVERIFY(panel.configuration()["watches"].empty());
+        QVERIFY(panel.configuration()["source_breakpoints"].empty());
+        fileAction("debugImport");
+        QVERIFY(panel.configuration() == saved);
+        result["source_variables"] = Json::parse(R"({"status":"available","format":"SDBG assignments",
+          "shader_sha256":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "variables":[{"id":"x","sdbg_id":0,"name":"x","return_value":false,"type":{}}],
+          "instruction_map":{"8":{"visible_variables":[0]}}})");
+        panel.reset(result, rows, loader);
+        add("x + 1");
+        panel.setRecord(0);
+        QVERIFY(panel.watchResults()[0]["status"] == "available");
+        QVERIFY(panel.watchResults()[0]["text"] == "8");
+        QVERIFY(panel.watchResults()[0]["basis"] == "sdbg_assignment_history");
+        panel.setRecord(0, "main");
+        QVERIFY(panel.watchResults()[0]["status"] == "unavailable");
+        result["trace"] = false;
+        panel.reset(result, rows, loader);
+        add("x + 1");
+        panel.setRecord(0);
+        QVERIFY(panel.watchResults()[0]["status"] == "unavailable");
+    }
     void iaSetterDialogControls() {
         using namespace flora;
         using Json = nlohmann::json;

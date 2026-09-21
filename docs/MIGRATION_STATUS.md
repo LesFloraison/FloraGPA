@@ -4,7 +4,13 @@
 GF2 与 BF1 DX11 捕获。**尚未完成原 Python 版本的全部功能迁移。**
 当前独立包为 `out/FloraGPA-sdbg-values/FloraGPA.exe`。
 
-最新一批迁入 SDBG 变量符号与逐次赋值历史，正式 checkpoint 导出已包含完整符号。
+最新一批迁入原生调试配置与 Qt 断点／监视面板组件。984 项配置对照通过，
+覆盖 164 份捕获报告的身份、配置往返、规则限制、编码和文件边界；原生事务回滚、
+Qt 按钮／文件对话框、源码帧切换与 SDBG 历史监视检查通过，实际 Qt 渲染已检查。
+完整 Release 构建通过。组件尚未接入主窗口，完整检查点视图与 Worker 协调仍待迁移，
+本批未替换独立包。详见 [NATIVE_DEBUG_CONFIG_MIGRATION.md](NATIVE_DEBUG_CONFIG_MIGRATION.md)。
+
+上一批迁入 SDBG 变量符号与逐次赋值历史，正式 checkpoint 导出已包含完整符号。
 13,790 项符号／历史对照通过；新捕获的 6,220 条快照用于 442 项精确历史对照，
 包含数组写入前索引、双精度完整分量、反向／随机查看及缺失历史拒绝。
 独立包 164 项 Hardware/WARP 捕获对照、15,742 项 SPDB 回归、相关 4 套 CTest、

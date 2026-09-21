@@ -4,6 +4,7 @@
 #include "application/DxbcCheckpoint.h"
 #include "application/DxbcCheckpointModel.h"
 #include "application/InvocationSelector.h"
+#include "application/NativeDebugConfig.h"
 #include "application/SdbgVariables.h"
 #include "application/ShaderDebugData.h"
 #include "application/ShaderSourceLines.h"
@@ -45,6 +46,21 @@ Json inputsJson(const DeclaredInputs &inputs, bool domain) {
 }
 Json evaluate(const Json &j) {
     const auto op = j.at("op").get<std::string>();
+    if (op == "native-debug-identity")
+        return nativeDebugIdentity(j.at("result"));
+    if (op == "native-debug-config-read")
+        return readNativeDebugConfig(QString::fromStdString(j.at("input").get<std::string>()).toStdWString());
+    if (op == "native-debug-config-write") {
+        const std::filesystem::path path =
+            QString::fromStdString(j.at("output").get<std::string>()).toStdWString();
+        writeNativeDebugConfig(path, j.at("config"));
+        return readNativeDebugConfig(path);
+    }
+    if (op == "native-debug-config") {
+        auto settings =
+            prepareNativeDebugConfig(j.at("result"), j.value("rows", Json::array()), {}, j.at("config"));
+        return exportNativeDebugConfig(j.at("result"), settings);
+    }
     if (op == "sdbg-variables")
         return sdbgVariables(read(j.at("input")));
     if (op == "sdbg-history") {
@@ -360,6 +376,53 @@ int probe(const std::string &path) {
 class CheckpointTests final : public QObject {
     Q_OBJECT
   private slots:
+    void nativeDebugConfigurationTransaction() {
+        auto result = Json::parse(R"({"action":"gs-checkpoint",
+          "shader_sha256":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "catalog":[{"instruction":0,"word_offset":2,"checkpoint_allowed":true,
+            "source_location":{"file":0,"line_start":1,"line_end":1}}],
+          "source_lines":{"files":[{"name":"main.hlsl","text":"uint value;"}]},
+          "source_variables":{},"source_stack":{}})");
+        NativeDebugSettings live{SourceTrace(result, Json::array()), {0}, {DebugExpression("  2u + 3u  ")}};
+        live.source.setRule(0, 1, "true", "multiple", 3);
+        const auto original = exportNativeDebugConfig(result, live);
+        const auto restored = prepareNativeDebugConfig(result, Json::array(), {}, original);
+        QVERIFY(exportNativeDebugConfig(result, restored) == original);
+        QVERIFY(original["watches"][0] == "2u + 3u");
+        auto invalid = original;
+        invalid["source_breakpoints"][0]["condition"] = "false";
+        invalid["watches"].push_back("x = 1");
+        QVERIFY_THROWS_EXCEPTION(ExpressionError,
+                                 live = prepareNativeDebugConfig(result, Json::array(), {}, invalid));
+        QVERIFY(exportNativeDebugConfig(result, live) == original);
+        auto changed = result;
+        changed["source_lines"]["files"][0]["text"] = "uint different;";
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error,
+                                 prepareNativeDebugConfig(changed, Json::array(), {}, original));
+        invalid = original;
+        invalid["instruction_breakpoints"][0] = true;
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error,
+                                 prepareNativeDebugConfig(result, Json::array(), {}, invalid));
+        invalid = original;
+        invalid["source_breakpoints"][0]["hit_count"]["count"] = true;
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error,
+                                 prepareNativeDebugConfig(result, Json::array(), {}, invalid));
+        QTemporaryDir directory;
+        QVERIFY(directory.isValid());
+        const std::filesystem::path path =
+            (directory.path() + QString::fromUtf8("/调试 config.json")).toStdWString();
+        writeNativeDebugConfig(path, original);
+        QVERIFY(readNativeDebugConfig(path) == original);
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error,
+                                 writeNativeDebugConfig(path, std::string(1024 * 1024, 'x')));
+        QVERIFY(readNativeDebugConfig(path) == original);
+        QFile file(QString::fromStdWString(path.wstring()));
+        QVERIFY(file.open(QIODevice::WriteOnly | QIODevice::Truncate));
+        const QByteArray deep = QByteArray(130, '[') + "0" + QByteArray(130, ']');
+        QCOMPARE(file.write(deep), qint64(deep.size()));
+        file.close();
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, readNativeDebugConfig(path));
+    }
     void sdbgAssignmentHistory() {
         auto report = Json::parse(R"({"trace":true,"shader_sha256":"fixture","catalog":[
           {"instruction":0,"token":10,"opcode":54,"word_offset":2,"checkpoint_allowed":true},

@@ -1705,9 +1705,15 @@
       "sha256": "28f7c60193ae5edbe5e20985ebc6056ae0653f19e6ee2f4af532d16b3e4c9922",
       "lines": 56,
       "description": "Atomic native GS debugger configuration bound to original shader and mappings.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": [
+        "src/application/NativeDebugConfig.cpp",
+        "src/app/NativeDebugControls.cpp"
+      ],
+      "validation": [
+        "docs/NATIVE_DEBUG_CONFIG_MIGRATION.md",
+        "984 configuration comparisons passed (720 exact successes, 264 consistent rejections), including 164 native capture identities. Native transactional rollback and Qt file-dialog round trips pass. Parent checkpoint/main-window integration remains pending."
+      ]
     },
     {
       "module": "native_debug_expression.py",
@@ -1720,7 +1726,9 @@
       ],
       "validation": [
         "docs/SOURCE_NAVIGATION_MIGRATION.md",
-        "Native live lexical shadowing, original scalar bits and typed vector groups ported; actual GS/HS/DS snapshot comparisons passed. Qt consumers remain pending."
+        "Native live lexical shadowing, original scalar bits and typed vector groups ported; actual GS/HS/DS snapshot comparisons passed. Qt consumers remain pending.",
+        "docs/NATIVE_DEBUG_CONFIG_MIGRATION.md",
+        "Now consumed by the Qt NativeDebugControls component; full checkpoint/main-window integration remains pending."
       ]
     },
     {
@@ -1728,9 +1736,14 @@
       "sha256": "051830d1ae50e7c7d25618ebf3cb1bdadf345ba790fda90ee98e9cd8c0ed2652",
       "lines": 86,
       "description": "Native GS breakpoint rules, watch values and versioned configuration controls.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": [
+        "src/app/NativeDebugControls.cpp"
+      ],
+      "validation": [
+        "docs/NATIVE_DEBUG_CONFIG_MIGRATION.md",
+        "Qt rule/watch component built and visually inspected. Native UI tests cover rules, frame/record watches, failed-import rollback, retention, file dialogs and SDBG validity. Not yet instantiated by the main window; checkpoint view and capture wiring remain pending."
+      ]
     },
     {
       "module": "native_frame_sources.py",
@@ -1796,7 +1809,9 @@
       ],
       "validation": [
         "docs/SOURCE_NAVIGATION_MIGRATION.md",
-        "Verified-assignment environment and ambiguous-name rejection ported and tested synthetically. Native SDBG assignment reconstruction is now available as a separate library; Qt consumers remain pending."
+        "Verified-assignment environment and ambiguous-name rejection ported and tested synthetically. Native SDBG assignment reconstruction is now available as a separate library; Qt consumers remain pending.",
+        "docs/NATIVE_DEBUG_CONFIG_MIGRATION.md",
+        "Now consumed by the Qt NativeDebugControls component; full checkpoint/main-window integration remains pending."
       ]
     },
     {
@@ -1843,7 +1858,9 @@
       ],
       "validation": [
         "docs/SOURCE_NAVIGATION_MIGRATION.md",
-        "Full native source navigation, conditional/count breakpoints, rule copy/export and frame-watch APIs. 28998 differential operations in 73 scenarios passed. Configuration and Qt consumer wiring remain pending."
+        "Full native source navigation, conditional/count breakpoints, rule copy/export and frame-watch APIs. 28998 differential operations in 73 scenarios passed. Configuration and Qt consumer wiring remain pending.",
+        "docs/NATIVE_DEBUG_CONFIG_MIGRATION.md",
+        "Now consumed by the Qt NativeDebugControls component; full checkpoint/main-window integration remains pending."
       ]
     },
     {

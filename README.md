@@ -113,8 +113,10 @@ per-frame locations and HS phase ownership are also included; see
 Native source navigation, conditional breakpoints and watch expressions are
 available as library APIs; see
 [`docs/SOURCE_NAVIGATION_MIGRATION.md`](docs/SOURCE_NAVIGATION_MIGRATION.md).
-Debugger configuration and Qt checkpoint views
-remain pending; these APIs do not yet add debugger controls to the application.
+Debugger configuration and a compact Qt breakpoint/watch component are also
+ported; see [`docs/NATIVE_DEBUG_CONFIG_MIGRATION.md`](docs/NATIVE_DEBUG_CONFIG_MIGRATION.md).
+The complete Qt checkpoint view and main-window integration remain pending;
+these components do not yet add debugger controls to the delivered application.
 Export retains JSON, CSV, raw output bytes and OBJ when positions are valid;
 geometry choices are saved in experiment projects. Remaining stages and
 validation limits are listed in
