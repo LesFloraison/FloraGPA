@@ -97,9 +97,10 @@ The full Quad migration still needs every original execution responsibility:
 - Private pre-raster UAV resources/counters, fresh isolation for each pass,
   exception-safe high UAV restoration, original SO suspension and predicate
   isolation. Original draw submission still occurs exactly once.
-- Prepared/before/none depth strategies, copied stencil and per-sample storage,
-  counter/reference shaders, uint32 binary artifacts, histogram accounting and
-  the original report/preview palette.
+- Private depth preparation, copied stencil, per-sample digests and high-UAV
+  restoration are separately migrated in [QUAD_DEPTH_MIGRATION.md](QUAD_DEPTH_MIGRATION.md).
+  Depth strategy integration, counter/reference shaders, uint32 binary artifacts,
+  histogram accounting and the original report/preview palette remain pending.
 - Qt depth/target/layer controls, real uint32 heatmap cells, reports, experiment
   settings, cancellation/stale-result handling and complete ZIP export, using
   the established compact GPA-style layout.

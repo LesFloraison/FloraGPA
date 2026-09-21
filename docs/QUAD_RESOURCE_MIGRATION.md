@@ -80,9 +80,9 @@ and 63 pending; these are module counts, not workload percentages.
 
 ## Remaining integration
 
-`quad_depth.py` still needs the PS gate, original-DSV copy/stencil preservation or
-local D24S8 allocation, clear-depth pass, original draw with private outputs and
-prepared-depth integrity digest. The complete counter requires cross-view
-compatibility, high-UAV restoration, isolated counter/reference passes, original
+Depth preparation and high-UAV restoration are now implemented and separately
+validated in [QUAD_DEPTH_MIGRATION.md](QUAD_DEPTH_MIGRATION.md). Their counter
+integration remains. The complete counter requires cross-view compatibility,
+private graphics UAV relocation, isolated counter/reference passes, original
 HLSL, uint32 storage/report/preview, single original-event submission and Qt
 controls/export. The existing experimental measurement limits remain in force.

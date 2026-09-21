@@ -2367,11 +2367,13 @@
       "lines": 294,
       "description": "Independent real-frame integration of the recovered legacy quad counter.",
       "status": "partial",
-      "native": ["src/application/QuadResources.cpp", "src/application/QuadResources.h"],
+      "native": ["src/application/QuadResources.cpp", "src/application/QuadResources.h", "src/application/QuadBindings.h"],
       "validation": [
         "docs/QUAD_RESOURCE_MIGRATION.md",
         "tools/validate_quad_resources.py",
-        "Only fingerprint_outputs is migrated: actual RTV/DSV/UAV owners, append/counter values, high slots, SO buffers and every MSAA sample. 112 hardware/WARP cases retain identical original storage. High-UAV restoration, depth preparation, counter/reference execution, report and preview remain pending."
+        "fingerprint_outputs is migrated: actual RTV/DSV/UAV owners, append/counter values, high slots, SO buffers and every MSAA sample. 112 hardware/WARP cases retain identical original storage.",
+        "docs/QUAD_DEPTH_MIGRATION.md",
+        "preserve_high_uavs is migrated and exercised by native depth preparation, including exceptional exits. Depth preparation is separately ported, but its integration and counter/reference execution, report and preview remain pending."
       ]
     },
     {
@@ -2379,9 +2381,13 @@
       "sha256": "2c0cb6880d5b6979939bfa7cbd77a5ef40e66a73cca856bb2325b6eb448eaf89",
       "lines": 71,
       "description": "Research single-event depth preparation using recovered phase-zero bindings.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "ported",
+      "native": ["src/application/QuadDepth.cpp", "src/application/QuadDepth.h", "src/application/QuadBindings.h"],
+      "validation": [
+        "docs/QUAD_DEPTH_MIGRATION.md",
+        "tools/validate_quad_depth.py",
+        "192 hardware/WARP cases including 10 expected rejections match complete original metadata, cleared/prepared hashes, repeat digests, native binding restoration, full original storage and unchanged counts. Array/MSAA, typeless 1D/read-only depth, buffer/3D adapters, dynamic classes, SO copy/safe suspension, high UAVs, indirect draws, predicates and PS edits are covered. Full counter and Qt integration remain pending."
+      ]
     },
     {
       "module": "quad_post_transform.py",
