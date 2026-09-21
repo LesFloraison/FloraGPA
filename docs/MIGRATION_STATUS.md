@@ -2,9 +2,23 @@
 
 已有可编译、可运行的 VS2022 / Qt Widgets 原生工程，能够独立重放当前验证的
 GF2 与 BF1 DX11 捕获。**尚未完成原 Python 版本的全部功能迁移。**
-当前独立包为 `out/FloraGPA-shader-tools/FloraGPA.exe`。
+当前独立包为 `out/FloraGPA-gpu-profile/FloraGPA.exe`。
 
-最新一批迁移了原版可选外部反编译器回退、DXBC 汇编编辑、CLI profile／优化
+最新一批将原版重复 GPU 采样迁入原生后端和中央 **GPU Timing** 页：预热、
+包含端点的 API 范围、可选资源写入、耗时分布、逐轮真实时间轴、API 跳转、
+实验设置和 JSON／CSV／ZIP 导出均已接通。取消和过期结果检查沿用隔离 worker；
+每轮恢复捕获资源，保留 disabled／predication／DrawAuto 的原版测量边界。
+发布包 232 组 Python 对照通过，其中 26 组执行 GPU 重放，覆盖硬件／WARP、
+修改着色器后的 DrawAuto、真实帧禁用绘制及恢复。原始计数、来源信息、每条
+CSV、资源字节和从实际 ticks 重算的分布均已检查；不要求两次独立采样耗时相同。
+13 组命令行检查、发布包 Qt 6 项检查、四项黄金帧／负对照和九份依赖审计通过。
+完整 Release 构建通过，相关九套 CTest 在初次与修正后的回归中通过；原主窗口
+54 项无失败或跳过。四个程序与 Release 哈希一致，发布包不含测试程序。
+两个独立模块更新为 `ported`，共享模块仍保留各自缺口：当前为 13 `ported`、
+119 `partial`、72 `pending`，这不是工作量百分比。详见
+[GPU_PROFILE_MIGRATION.md](GPU_PROFILE_MIGRATION.md)。
+
+上一批迁移了原版可选外部反编译器回退、DXBC 汇编编辑、CLI profile／优化
 选项和按资源保存的 HLSL／ASM 草稿。Qt 的 **Shader → DXBC** 提供 Read、
 Import ASM、Assemble & Apply 和 External Tool；草稿与入口名随实验保存，
 切换资源及撤销／重做不会丢失。外部工具在隔离进程中执行，超时或取消时清理

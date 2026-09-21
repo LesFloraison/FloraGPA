@@ -287,7 +287,8 @@ class Replay {
     ~Replay();
     std::optional<std::filesystem::path> finishCapture();
     void run(const std::function<void(Id, size_t, size_t)> &progress = {},
-             const ReplayBoundaryObserver &observer = {});
+             const ReplayBoundaryObserver &observer = {},
+             const ReplayBoundaryObserver &commandObserver = {});
     const ReplayOptions &options() const { return options_; }
     const std::vector<Id> &ignoredMsaaInitial() const { return ignoredMsaaInitial_; }
     const std::vector<PlanarWrite> &planarWrites() const { return planarWrites_; }

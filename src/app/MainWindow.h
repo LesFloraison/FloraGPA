@@ -24,6 +24,7 @@ class CommandStateView;
 class PredicateView;
 class AnnotationsView;
 class StatisticsView;
+class GpuProfileView;
 class CheckpointView;
 class PixelHistoryView;
 class ReplayDebugView;
@@ -83,6 +84,7 @@ class MainWindow final : public QMainWindow {
     void assembleShader();
     bool chooseShaderTool();
     void stashShaderDrafts();
+    void updateProfileContext();
     void showShaderProjectEditor(const nlohmann::json &project);
     void inspectGeometry();
     void exportGeometry();
@@ -163,6 +165,9 @@ class MainWindow final : public QMainWindow {
     PredicateView *predicateView_;
     AnnotationsView *annotations_;
     StatisticsView *gpuStatistics_;
+    GpuProfileView *gpuProfile_;
+    uint64_t runningProfileRequest_{};
+    int profileTimeoutMs_ = 240000;
     uint64_t runningStatisticsRequest_{};
     uint64_t runningPredicateRequest_ = 0;
     uint64_t runningPipelineRequest_ = 0;

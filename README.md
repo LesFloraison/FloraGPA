@@ -63,6 +63,13 @@ a working D3D11 adapter.
 
 ## Run and deploy
 
+**GPU Timing** collects repeated native timestamp samples with warmup, inclusive
+API ranges and optional resource-writing commands. It shows distributions and
+per-pass timelines with API navigation, saves settings in experiments and exports
+all raw samples as JSON/CSV in a ZIP. CLI: `timings <capture> --samples 5 --warmup 1
+--out <directory>`. See [repeated GPU timing](docs/GPU_PROFILE_MIGRATION.md) for
+measurement boundaries, provenance and validation.
+
 **Shader > DXBC** supports Read, Import ASM and **Assemble & Apply** using a
 selected **External Tool**. The same tool provides optional recovery fallback
 for **Recover HLSL**. HLSL/ASM drafts and entry names are saved with experiments.

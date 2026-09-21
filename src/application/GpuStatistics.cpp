@@ -17,6 +17,44 @@ Json autoResult(const DrawAutoParameters &p) {
     return value;
 }
 } // namespace
+std::map<std::string, uint64_t> compatibleReplayCounts(const Replay &replay, Id start, Id end,
+                                                       std::map<std::string, uint64_t> counts) {
+    // Retain the original report families while leaving native engine diagnostics intact.
+    for (auto name :
+         {"unresolved_output_setters", "unresolved_input_layout_setters", "unresolved_srv_setters"})
+        counts.erase(name);
+    for (auto name : {"ClearUnorderedAccessViewUint", "ClearUnorderedAccessViewFloat"})
+        if (auto it = counts.find(name); it != counts.end()) {
+            counts["ClearUnorderedAccessView"] += it->second;
+            counts.erase(it);
+        }
+    for (const auto &[id, e] : replay.frame().entries()) {
+        if (e.category != 7 || id < start || id > end)
+            continue;
+        const bool off = replay.options().disabled.contains(id);
+        if (!off && e.type == 0x34fb) {
+            ++counts["query_metadata_records"];
+            auto &auxiliary = counts.at("state_or_auxiliary_records");
+            if (--auxiliary == 0)
+                counts.erase("state_or_auxiliary_records");
+        }
+        if (off)
+            ++counts["experiment_disabled_" + commandName(e.type)];
+        if (!off && (constantBufferStage(e.type).has_value() || e.type == 0x34ff || e.type == 0x3500 ||
+                     e.type == 0x3522 || e.type == 0x25e))
+            ++counts["state_or_auxiliary_records"];
+        if (isDraw(e.type)) {
+            ++counts[commandName(e.type) + "_records"];
+            if (!off && !replay.options().suppressDraws && (e.type == 0x39 || e.type == 0x3a)) {
+                const auto event = replay.frame().event(id);
+                const auto indices = uint64_t(event.args[0]) * (e.type == 0x3a ? event.args[1] : 1);
+                if (indices)
+                    counts["submitted_indices"] += indices;
+            }
+        }
+    }
+    return counts;
+}
 Json gpuStatisticsReport(const Replay &replay) {
     if (!replay.options().measurement || !replay.measurementResult())
         throw std::runtime_error("No completed GPU statistics sample");
@@ -95,54 +133,20 @@ Json gpuStatisticsReport(const Replay &replay) {
     } else {
         Json disabled = Json::array(), autos = Json::object();
         uint64_t commands = 0, draws = 0;
-        auto counts = s.replayCounts;
-        // Native replay exposes extra diagnostics, while Python's range report
-        // counts these commands in its common state/auxiliary family.
-        for (auto name :
-             {"unresolved_output_setters", "unresolved_input_layout_setters", "unresolved_srv_setters"})
-            counts.erase(name);
-        for (auto it = counts.begin(); it != counts.end();) {
-            if (it->first == "ClearUnorderedAccessViewUint" || it->first == "ClearUnorderedAccessViewFloat") {
-                const auto count = it->second;
-                it = counts.erase(it);
-                counts["ClearUnorderedAccessView"] += count;
-            } else
-                ++it;
-        }
+        auto counts = compatibleReplayCounts(replay, m.start, m.end, s.replayCounts);
         for (const auto &[id, e] : replay.frame().entries()) {
             if (e.category != 7 || id < m.start || id > m.end)
                 continue;
             ++commands;
             const bool off = replay.options().disabled.contains(id);
-            // This recovered GetData record is replay-neutral; the native engine
-            // currently accounts for it alongside auxiliary commands.
-            if (!off && e.type == 0x34fb) {
-                ++counts["query_metadata_records"];
-                auto &auxiliary = counts.at("state_or_auxiliary_records");
-                if (--auxiliary == 0)
-                    counts.erase("state_or_auxiliary_records");
-            }
-            if (off) {
+            if (off)
                 disabled.push_back(id);
-                counts["experiment_disabled_" + commandName(e.type)]++;
-            }
-            if (!off && (constantBufferStage(e.type).has_value() || e.type == 0x34ff || e.type == 0x3500 ||
-                         e.type == 0x3522 || e.type == 0x25e))
-                ++counts["state_or_auxiliary_records"];
-            if (isDraw(e.type)) {
+            if (isDraw(e.type))
                 ++draws;
-                counts[commandName(e.type) + "_records"]++;
-                if (!off && !replay.options().suppressDraws && (e.type == 0x39 || e.type == 0x3a)) {
-                    const auto event = replay.frame().event(id);
-                    const auto indices = uint64_t(event.args[0]) * (e.type == 0x3a ? event.args[1] : 1);
-                    if (indices)
-                        counts["submitted_indices"] += indices;
-                }
-            }
         }
-        for (const auto &[id, p] : replay.drawAutoResults())
+        for (const auto &[id, parameters] : replay.drawAutoResults())
             if (id >= m.start && id <= m.end)
-                autos[std::to_string(id)] = autoResult(p);
+                autos[std::to_string(id)] = autoResult(parameters);
         out["range"] = {{"start", m.start},
                         {"end", m.end},
                         {"inclusive", true},

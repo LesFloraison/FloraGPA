@@ -17,6 +17,7 @@
 #include "ShaderProjectDialog.h"
 #include "SrvDialog.h"
 #include "StatisticsView.h"
+#include "GpuProfileView.h"
 #include "ViewDialog.h"
 #include "application/ClassInspector.h"
 #include "application/CommandEdits.h"
@@ -165,6 +166,7 @@ MainWindow::MainWindow() {
             commands_->setFrame(frame_);
             annotations_->setFrame(frame_);
             gpuStatistics_->setSelection(frame_, 0);
+            updateProfileContext();
             resources_->setFrame(frame_);
             chart_->clear();
             pipeline_->clear();
@@ -277,6 +279,8 @@ MainWindow::MainWindow() {
             timeout_.stop();
             setBusy(false);
             showError(process_.errorString());
+            if (runningKind_ == "timings")
+                gpuProfile_->finish(runningProfileRequest_, {{"error",process_.errorString().toStdString()}});
             if (runningKind_ == "statistics")
                 gpuStatistics_->finish(runningStatisticsRequest_,
                                        {{"error", process_.errorString().toStdString()}});
@@ -1022,6 +1026,21 @@ void MainWindow::buildUi() {
     centerTabs_->addTab(annotations_, "Annotations");
     gpuStatistics_ = new StatisticsView;
     centerTabs_->addTab(gpuStatistics_, "GPU Statistics");
+    gpuProfile_ = new GpuProfileView;
+    centerTabs_->addTab(gpuProfile_, "GPU Timing");
+    connect(gpuProfile_, &GpuProfileView::eventRequested, this, [this](qulonglong id) { if(!busy()) locateEvent(id); });
+    connect(gpuProfile_, &GpuProfileView::readRequested, this, [this](const QString &text,qulonglong serial) {
+        runningProfileRequest_ = serial;
+        if(busy()){gpuProfile_->finish(serial,{{"error","Worker is busy"}});return;}
+        const auto request=nlohmann::json::parse(text.toStdString());
+        QStringList args{"timings",capturePath_,"--samples",QString::number(request.at("samples").get<unsigned>()),"--warmup",QString::number(request.at("warmup").get<unsigned>())};
+        if(request.contains("start"))args<<"--start-event"<<QString::number(request.at("start").get<Id>());
+        if(request.contains("end"))args<<"--end-event"<<QString::number(request.at("end").get<Id>());
+        if(request.at("include_writes").get<bool>())args<<"--include-writes";
+        profileTimeoutMs_=std::max(240000,60000*int(request.at("samples").get<unsigned>()+request.at("warmup").get<unsigned>()));
+        startWorker(args,false);
+        if(process_.state()==QProcess::NotRunning)gpuProfile_->finish(serial,{{"error","Cannot start GPU timing"}});
+    });
     connect(annotations_, &AnnotationsView::rangeRequested, this, [this](qulonglong start, qulonglong end) {
         if (!busy()) {
             gpuStatistics_->setRange(start, end);
@@ -1303,6 +1322,7 @@ void MainWindow::setBusy(bool busy) {
     predicateView_->setWorkerBusy(busy);
     annotations_->setWorkerBusy(busy);
     gpuStatistics_->setWorkerBusy(busy);
+    gpuProfile_->setWorkerBusy(busy);
     geometryStage_->setEnabled(!busy);
     geometryTable_->setEnabled(!busy && (geometryStage_->currentData() == "ia" ||
                                          geometryStage_->currentData() == "vs-index" ||
@@ -1446,7 +1466,7 @@ void MainWindow::startHistoryWorker() {
                              : runningAnalysis_ == RdcAnalysis::Counters ? "Measuring replay counters…"
                              : runningDebug_                             ? "Reading shader trace…"
                                                                          : "Reading pixel history…");
-    timeout_.start();
+    timeout_.start(180000);
     process_.start(QCoreApplication::applicationDirPath() + "/FloraGPA.Rdc.exe", {"--job", path});
 }
 void MainWindow::openCapture(const QString &path) {
@@ -1551,7 +1571,7 @@ void MainWindow::startWorker(QStringList args, bool timings) {
     errorText_.clear();
     setBusy(true);
     statusBar()->showMessage(timings ? "Collecting GPU metrics…" : "Replaying…");
-    timeout_.start();
+    timeout_.start(runningKind_ == "timings" ? profileTimeoutMs_ : 180000);
     process_.start(QCoreApplication::applicationDirPath() + "/FloraGPA.Worker.exe", args);
 }
 void MainWindow::cancel() {
@@ -1578,6 +1598,8 @@ void MainWindow::finishWorker(int code, QProcess::ExitStatus status) {
             finishRdcAnalysis({{"ok", false}, {"error", "Cancelled"}});
         if (runningKind_ == "statistics")
             gpuStatistics_->finish(runningStatisticsRequest_, {{"error", "Cancelled"}});
+        if (runningKind_ == "timings")
+            gpuProfile_->finish(runningProfileRequest_, {{"error", "Cancelled"}});
         if (runningKind_ == "predicate")
             predicateView_->finish(runningPredicateRequest_, {{"error", "Cancelled"}});
         if (runningKind_ == "replay-pipeline")
@@ -1648,6 +1670,15 @@ void MainWindow::finishWorker(int code, QProcess::ExitStatus status) {
             statusBar()->showMessage("Shader checkpoints ready", 3000);
             emit taskFinished(true);
             return;
+        }
+        if (runningKind_ == "timings") {
+            QFile profileFile(jobDir_->filePath("result/profile.json"));
+            if(!profileFile.open(QIODevice::ReadOnly))throw std::runtime_error("GPU profile output is missing");
+            auto result=nlohmann::json::parse(profileFile.readAll().toStdString());
+            result["loaded_modules"]=nlohmann::json::parse(QJsonDocument(report_["loaded_modules"].toArray()).toJson().toStdString());
+            const bool accepted=gpuProfile_->finish(runningProfileRequest_,result);
+            statusBar()->showMessage(accepted?"GPU timing ready":"GPU timing result discarded",3000);
+            emit taskFinished(accepted);return;
         }
         if (runningKind_ == "statistics") {
             QFile statisticsFile(jobDir_->path() + "/result/statistics.json");
@@ -1929,6 +1960,8 @@ void MainWindow::finishWorker(int code, QProcess::ExitStatus status) {
         showError(QString::fromUtf8(e.what()));
         if (runningKind_ == "history" || runningKind_ == "history-capture")
             finishRdcAnalysis({{"ok", false}, {"error", e.what()}});
+        if (runningKind_ == "timings")
+            gpuProfile_->finish(runningProfileRequest_, {{"error",e.what()}});
         if (runningKind_ == "statistics")
             gpuStatistics_->finish(runningStatisticsRequest_, {{"error", e.what()}});
         if (runningKind_ == "replay-pipeline")
@@ -1979,6 +2012,7 @@ void MainWindow::selectEvent(Id id) {
     replayedState_->setSelection(frame_, id);
     predicateView_->setSelection(frame_, id);
     gpuStatistics_->setSelection(frame_, id);
+    updateProfileContext();
     selectedResource_ = 0;
     selectedShaderStage_.reset();
     clearBufferDetails();
@@ -2550,6 +2584,16 @@ void MainWindow::recoverShader() {
     runningAssemblyRead_ = false;
     startWorker({"shader", capturePath_, "--id", QString::number(runningShader_), "--recover"}, false);
 }
+void MainWindow::updateProfileContext() {
+    auto operations=nlohmann::json::array();
+    if(experiment_) {
+        const auto &doc=experiment_->document();
+        for(size_t n=0;n<doc.at("cursor").get<size_t>();++n)
+            for(const auto &op:doc.at("history").at(n).at("operations"))operations.push_back(op);
+    }
+    const auto bytes=QByteArray::fromStdString(operations.dump(-1,' ',true));
+    gpuProfile_->setContext(frame_,selectedEvent_,QString::fromLatin1(QCryptographicHash::hash(bytes,QCryptographicHash::Sha256).toHex()));
+}
 void MainWindow::stashShaderDrafts() {
     if (!shaderDocument_) return;
     const auto key = std::to_string(shaderDocument_);
@@ -2836,6 +2880,7 @@ void MainWindow::updateExperimentActions() {
 }
 void MainWindow::experimentChanged() {
     stashShaderDrafts();
+    updateProfileContext();
     updateCheckpointContext();
     const auto shaderStage = selectedShaderStage_;
     ++outputGeneration_;
@@ -3809,6 +3854,7 @@ void MainWindow::openExperiment() {
         }
         const auto settings = replayUiState(
             *frame_, candidate->document().value("ui", nlohmann::json::object()), selectedEvent_);
+        gpuProfile_->restoreSettings(ui.value("gpu_profile",nlohmann::json::object()));
         {
             QSignalBlocker target(outputTarget_), channel(channels_), layer(outputLayer_),
                 sample(outputSample_), adapter(adapter_);
@@ -3879,6 +3925,7 @@ bool MainWindow::saveExperiment() {
         auto ui = replayUiDocument(*frame_, state, experiment_->document().value("ui", nlohmann::json::object()));
         ui["shader_documents"] = shaderDocuments_;
         ui["shader_entries"] = shaderEntries_;
+        ui["gpu_profile"] = gpuProfile_->settings();
         experiment_->save(path, ui);
         projectPath_ = path;
         projectDirty_ = false;

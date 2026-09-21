@@ -47,7 +47,8 @@
         "Native post-geometry command supports final/vs/ds/gs, streams and instances; remaining analysis entry points remain pending.",
         "Native HLSL recovery/compile and verified saved source are connected to shader --recover and the Qt source editor. See HLSL_RECOVERY_MIGRATION.md. Optional external decompiler fallback and external assembly editing are now covered by EXTERNAL_SHADER_MIGRATION.md; the shared module remains partial pending a complete responsibility/metadata audit.",
         "docs/EXTERNAL_SHADER_MIGRATION.md",
-        "Native optional tool execution, CLI assembly/profile/optimization, Qt assembly editing and per-resource HLSL/ASM drafts are connected. Six-stage binary comparison, native-first and external fallback, modified GPU replay and cancellation checks are covered; shared module remains partial."
+        "Native optional tool execution, CLI assembly/profile/optimization, Qt assembly editing and per-resource HLSL/ASM drafts are connected. Six-stage binary comparison, native-first and external fallback, modified GPU replay and cancellation checks are covered; shared module remains partial.",
+        "docs/GPU_PROFILE_MIGRATION.md: repeated timing CLI/Qt integration and shared count normalization are covered; remaining shared-module responsibilities retain their existing status."
       ]
     },
     {
@@ -143,7 +144,8 @@
         "src/application/TextureInspector.cpp",
         "src/replay/Replay.cpp",
         "src/application/PlanarWrites.cpp",
-        "src/application/ExternalShaderTools.cpp"
+        "src/application/ExternalShaderTools.cpp",
+        "src/app/GpuProfileView.cpp"
       ],
       "validation": [
         "docs/NATIVE_BASELINE.md",
@@ -166,7 +168,8 @@
         "HS output uses compact control-point/patch-constant tables, complete export and project selection restoration.",
         "Native HLSL recovery/compile and verified saved source are connected to shader --recover and the Qt source editor. See HLSL_RECOVERY_MIGRATION.md. Optional external decompiler fallback and external assembly editing are now covered by EXTERNAL_SHADER_MIGRATION.md; the shared module remains partial pending a complete responsibility/metadata audit.",
         "docs/EXTERNAL_SHADER_MIGRATION.md",
-        "Native optional tool execution, CLI assembly/profile/optimization, Qt assembly editing and per-resource HLSL/ASM drafts are connected. Six-stage binary comparison, native-first and external fallback, modified GPU replay and cancellation checks are covered; shared module remains partial."
+        "Native optional tool execution, CLI assembly/profile/optimization, Qt assembly editing and per-resource HLSL/ASM drafts are connected. Six-stage binary comparison, native-first and external fallback, modified GPU replay and cancellation checks are covered; shared module remains partial.",
+        "docs/GPU_PROFILE_MIGRATION.md: repeated timing CLI/Qt integration and shared count normalization are covered; remaining shared-module responsibilities retain their existing status."
       ]
     },
     {
@@ -902,7 +905,8 @@
         "docs/BEFORE_BOUNDARY_MIGRATION.md: ordinary output traversal, prepared inspectors, missing-binding recovery and successful Map work metadata",
         "docs/PLANAR_WRITE_MIGRATION.md: planar Y-only Map with native pitches, tight NV12 Update, explicit full DXGI Update assets, structured write provenance and Qt before/after inspection; 192 packaged real-capture/synthetic/uint64 Python comparisons passed (125 successes, 67 controlled rejections); private consumers and remaining module scope stay incomplete",
         "docs/EXPERIMENT_REPORT_MIGRATION.md: native active-history assets and applied/pending traversal report; replay/texture/buffer consumers and compact Qt worker log; private analysis consumers remain pending",
-        "docs/ANNOTATION_MIGRATION.md: per-object nesting, explicit lifetime-bounded context identity and draw membership, JSON/CSV, validated annotation replay and Qt navigation/filter/export; range-statistics handoff is covered by docs/GPU_STATISTICS_MIGRATION.md; broader original-capture annotation coverage remains open"
+        "docs/ANNOTATION_MIGRATION.md: per-object nesting, explicit lifetime-bounded context identity and draw membership, JSON/CSV, validated annotation replay and Qt navigation/filter/export; range-statistics handoff is covered by docs/GPU_STATISTICS_MIGRATION.md; broader original-capture annotation coverage remains open",
+        "docs/GPU_PROFILE_MIGRATION.md: repeated timing CLI/Qt integration and shared count normalization are covered; remaining shared-module responsibilities retain their existing status."
       ]
     },
     {
@@ -1065,12 +1069,20 @@
       "sha256": "a25deada6700679e399a0c6b5087ae7e3a5076beaa57f703d3f210cef19eeb39",
       "lines": 131,
       "description": "Repeated in-order DX11 timestamp measurements of captured GPU work.",
-      "status": "partial",
+      "status": "ported",
       "native": [
-        "src/replay/Replay.cpp"
+        "src/application/GpuProfile.cpp",
+        "src/application/GpuProfile.h",
+        "src/application/GpuStatistics.cpp",
+        "src/replay/Replay.cpp",
+        "src/cli/main.cpp"
       ],
       "validation": [
-        "docs/NATIVE_BASELINE.md"
+        "docs/GPU_PROFILE_MIGRATION.md",
+        "tests/GpuProfileTests.cpp",
+        "tools/validate_gpu_profile_port.py",
+        "tools/validate_gpu_profile_cli.py",
+        "Packaged comparison: 232 cases, including 26 hardware/WARP GPU cases; exact storage, counts, saved experiment provenance, edited DrawAuto, native-tick arithmetic and complete CSV exports. Thirteen CLI cases, four golden/negative controls and nine runtime audits pass."
       ]
     },
     {
@@ -1086,7 +1098,8 @@
         "src/cli/main.cpp"
       ],
       "validation": [
-        "docs/GPU_STATISTICS_MIGRATION.md: event/range scheduling, pipeline/SO/occlusion/timestamps, exact report metadata and exports, failed-query cleanup, hardware/WARP and experiment controls; real hardware PS invocation variability remains explicit"
+        "docs/GPU_STATISTICS_MIGRATION.md: event/range scheduling, pipeline/SO/occlusion/timestamps, exact report metadata and exports, failed-query cleanup, hardware/WARP and experiment controls; real hardware PS invocation variability remains explicit",
+        "docs/GPU_PROFILE_MIGRATION.md: repeated timing CLI/Qt integration and shared count normalization are covered; remaining shared-module responsibilities retain their existing status."
       ]
     },
     {
@@ -2226,9 +2239,17 @@
       "sha256": "1e6f6f21bdc950584988448ce5312f27a6b00f468367a71bed506dd97196051c",
       "lines": 87,
       "description": "Repeated native GPU timing distributions and selectable per-pass timeline.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "ported",
+      "native": [
+        "src/app/GpuProfileView.cpp",
+        "src/app/GpuProfileView.h",
+        "src/app/MainWindow.cpp"
+      ],
+      "validation": [
+        "docs/GPU_PROFILE_MIGRATION.md",
+        "tests/GpuProfileTests.cpp",
+        "Packaged Qt/native suite: six passed without failures or skips, including setup/cleanup. Covers actual worker sampling, timeline navigation, persisted settings, frozen provenance, cancellation and ZIP export. Existing main-window regression: 54 passed without skips."
+      ]
     },
     {
       "module": "quad.py",

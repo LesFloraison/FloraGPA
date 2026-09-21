@@ -13,6 +13,7 @@
 #include "application/FrameOutput.h"
 #include "application/Geometry.h"
 #include "application/GpuStatistics.h"
+#include "application/GpuProfile.h"
 #include "application/HlslCompilation.h"
 #include "application/HlslRecovery.h"
 #include "application/InvocationSelector.h"
@@ -80,7 +81,7 @@ int main(int argc, char **argv) {
         "command",
         "inventory | commands | command-state | contexts | command-lists | replay | shader | "
         "buffer | texture | texture-storage | compile | compile-project | assemble | geometry | replay-pipeline | "
-        "class-linkage | predicate | annotations | statistics | post-geometry | shader-checkpoint | "
+        "class-linkage | predicate | annotations | statistics | timings | post-geometry | shader-checkpoint | "
         "rdc-analyze");
     p.addPositionalArgument("capture", "DX11 .gpa_frame file");
     p.addOption({"out", "New or empty output directory", "path"});
@@ -98,6 +99,9 @@ int main(int argc, char **argv) {
     p.addOption({"event", "Stop at API event", "id"});
     p.addOption({"start-event", "Inclusive statistics range start", "id"});
     p.addOption({"end-event", "Inclusive statistics range end", "id"});
+    p.addOption({"samples", "Repeated timing samples (1..1000)", "count", "5"});
+    p.addOption({"warmup", "Timing warmup replays (0..1000)", "count", "1"});
+    p.addOption({"include-writes", "Include resource-writing commands in repeated timings"});
     p.addOption({"geometry-stage",
                  "Geometry stage: final, vs, hs, ds, gs, vs-index, vs-writes, ds-writes, gs-emits", "stage",
                  "final"});
@@ -146,6 +150,8 @@ int main(int argc, char **argv) {
             throw std::runtime_error("--recover applies to shader only");
         if ((p.isSet("profile") || p.value("optimization") != "auto") && command != "compile")
             throw std::runtime_error("--profile and --optimization apply to compile only");
+        if (command != "timings" && (p.value("samples") != "5" || p.value("warmup") != "1" || p.isSet("include-writes")))
+            throw std::runtime_error("--samples, --warmup and --include-writes apply to timings only");
         if (p.isSet("decompiler") && command != "shader" && command != "assemble")
             throw std::runtime_error("--decompiler applies to shader or assemble only");
         if (p.isSet("renderdoc") && command != "replay")
@@ -186,7 +192,28 @@ int main(int argc, char **argv) {
             if (!QDir().mkpath(out))
                 throw std::runtime_error("Cannot create output directory");
         }
-        if (command == "class-linkage") {
+        if (command == "timings") {
+            if (out.isEmpty() || p.isSet("before") || p.isSet("timings") || p.isSet("event") || p.isSet("suppress-draws"))
+                throw std::runtime_error("Repeated timings require --out and define their own boundaries");
+            if(p.isSet("id") && p.isSet("start-event"))
+                throw std::runtime_error("Use --id or --start-event for the profile start");
+            nlohmann::json values{{"samples",parseId("samples")},{"warmup",parseId("warmup")},{"include_writes",p.isSet("include-writes")}};
+            if(p.isSet("id") || p.isSet("start-event")) values["start"]=parseId(p.isSet("id")?"id":"start-event");
+            if(p.isSet("end-event")) values["end"]=parseId("end-event");
+            const auto request=gpuProfileRequest(values);
+            const auto selected=gpuProfileSelection(frame,request);
+            ReplayOptions options;options.warp=p.isSet("warp");options.debug=p.isSet("debug-device");options.until=selected.end;
+            if(p.isSet("experiment")){Experiment project(frame);project.load(p.value("experiment"),frame);project.apply(frame,options);}
+            for(const auto &value:p.value("disable").split(',',Qt::SkipEmptyParts)) {
+                bool valid=false;const auto id=value.toULongLong(&valid);
+                if(!valid || !frame.entries().contains(id) || frame.entry(id).category!=7)throw std::runtime_error("Invalid disabled event");
+                options.disabled.insert(id);
+            }
+            Replay replay(frame,options);
+            shaderProjectReport=profileGpu(replay,frame,request,out);
+            report.insert("loaded_modules",modules());
+            report.insert("completed",true);
+        } else if (command == "class-linkage") {
             if (out.isEmpty() || !p.isSet("id"))
                 throw std::runtime_error("class-linkage requires --id and --out");
             auto detail = inspectClass(frame, parseId("id"));
