@@ -85,8 +85,9 @@ completion percentages. The overall Python-to-C++/Qt migration remains unfinishe
 
 ## Remaining integration
 
-The full native counter still needs cross-view compatibility checks, private
-graphics UAV relocation around reserved slots 0–4, counter/reference passes,
+Private graphics UAV relocation and its depth callback are now implemented and
+validated in [QUAD_UAV_MIGRATION.md](QUAD_UAV_MIGRATION.md). The full native
+counter still needs cross-view compatibility checks, counter/reference passes,
 original HLSL and uint32 artifacts, accounting/report/preview generation, single
 original-event execution and compact Qt controls/export. Passing this helper's
 tests does not establish full Quad parity or full Python migration.

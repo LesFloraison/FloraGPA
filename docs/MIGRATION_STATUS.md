@@ -4,7 +4,16 @@
 GF2 与 BF1 DX11 捕获。**尚未完成原 Python 版本的全部功能迁移。**
 当前独立包为 `out/FloraGPA-coverage-ui/FloraGPA.exe`。
 
-最新一批迁入 Quad 原生私有深度准备：原 PS 门限、实际 DSV 资源复制、模板保留、
+最新一批补齐前置阶段 UAV 迁移：独立写入阶段查询、为 Quad 预留 u0–u4、
+跨 VS／HS／DS／GS／PS 一致重定位、动态类实例和私有计数器绑定，并接入私有深度
+准备回调。164 组硬件／WARP 对照通过（6 项预期拒绝），覆盖 632 次完整私有绘制、
+2,528 项诊断槽位初值检查和 384 次实际私有资源写入。完整 Release、14 套相关
+CTest、GF2／BF1 四项黄金帧／负对照通过。`pre_raster_uav.py` 更新为 `ported`；
+当前为 **26 `ported`、116 `partial`、62 `pending`**，不是工作量百分比。
+**完整 Quad 计数／参考绘制、报告导出和 Qt 页面仍待接通**，独立包保持 Coverage
+版本。详见 [QUAD_UAV_MIGRATION.md](QUAD_UAV_MIGRATION.md)。
+
+上一批迁入 Quad 原生私有深度准备：原 PS 门限、实际 DSV 资源复制、模板保留、
 局部 D24S8 分配、深度清除和单次原始几何提交，并补齐高槽位 UAV 恢复。
 192 组硬件／WARP 对照通过，包含 10 项预期拒绝；完整元数据、清除／准备后的
 全样本哈希、重复摘要、原始输出和绑定恢复均一致。SO 不复制路径复用已有的

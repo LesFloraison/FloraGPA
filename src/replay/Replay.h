@@ -129,6 +129,7 @@ class Replay {
     friend class QuadFinalState;
     friend class QuadResources;
     friend class QuadDepth;
+    friend class QuadUavs;
     NativeSample *activeSample_ = nullptr;
     std::optional<NativeStatistics> measurementResult_;
     uint64_t generation_{};

@@ -94,9 +94,10 @@ The full Quad migration still needs every original execution responsibility:
   allocation and full sample-storage fingerprints are now implemented and
   separately validated in [QUAD_RESOURCE_MIGRATION.md](QUAD_RESOURCE_MIGRATION.md).
   Their integration into the counter executor still remains.
-- Private pre-raster UAV resources/counters, fresh isolation for each pass,
-  exception-safe high UAV restoration, original SO suspension and predicate
-  isolation. Original draw submission still occurs exactly once.
+- Private graphics UAV relocation and fresh passes are implemented and validated
+  in [QUAD_UAV_MIGRATION.md](QUAD_UAV_MIGRATION.md), including counters, classes and
+  exception-safe restoration. The full counter still needs to compose these
+  with SO suspension and process the original event exactly once.
 - Private depth preparation, copied stencil, per-sample digests and high-UAV
   restoration are separately migrated in [QUAD_DEPTH_MIGRATION.md](QUAD_DEPTH_MIGRATION.md).
   Depth strategy integration, counter/reference shaders, uint32 binary artifacts,

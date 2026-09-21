@@ -2238,14 +2238,23 @@
       "sha256": "16668d7139ac31bc396e7eb829ba7350f56718e619c083a2dabef17f44d305e8",
       "lines": 67,
       "description": "Private graphics UAV bindings for original pre-raster shader re-execution.",
-      "status": "partial",
+      "status": "ported",
       "native": [
         "src/application/PostTransform.cpp",
-        "src/replay/PrivateOutputs.cpp"
+        "src/replay/PrivateOutputs.cpp",
+        "src/application/Coverage.cpp",
+        "src/application/DxbcCoverage.cpp",
+        "src/application/QuadUavs.cpp",
+        "src/application/QuadUavs.h"
       ],
       "validation": [
         "docs/POST_TRANSFORM_MIGRATION.md",
-        "Writer metadata and private output snapshot use migrated for post-transform; general UAV relocation/diagnostic consumers remain pending."
+        "Writer metadata and private output snapshots are migrated for PostTransform.",
+        "docs/COVERAGE_EXECUTION_MIGRATION.md",
+        "Coverage migrates reserve_marker_rt0 and bind_relocated across PS and pre-raster stages, with native UAV bytecode relocation and dynamic classes.",
+        "docs/QUAD_UAV_MIGRATION.md",
+        "tools/validate_quad_uavs.py",
+        "Native writers and PrivateGraphicsUAVs match 164 hardware/WARP cases including six exact expected rejections, 632 completed private passes, 2528 unchanged diagnostic seeds and 384 actual private writer passes. Shared VS/PS and HS/DS registers, high slots, raw/structured counters, dynamic classes, overrides, disabled events and private depth are covered. Complete Quad executor and Qt integration remain pending."
       ]
     },
     {

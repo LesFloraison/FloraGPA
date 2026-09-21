@@ -83,6 +83,6 @@ and 63 pending; these are module counts, not workload percentages.
 Depth preparation and high-UAV restoration are now implemented and separately
 validated in [QUAD_DEPTH_MIGRATION.md](QUAD_DEPTH_MIGRATION.md). Their counter
 integration remains. The complete counter requires cross-view compatibility,
-private graphics UAV relocation, isolated counter/reference passes, original
+integration of the [private graphics UAV helper](QUAD_UAV_MIGRATION.md), isolated counter/reference passes, original
 HLSL, uint32 storage/report/preview, single original-event submission and Qt
 controls/export. The existing experimental measurement limits remain in force.
