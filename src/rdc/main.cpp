@@ -42,17 +42,41 @@ int main(int argc, char **argv) {
         fprintf(stderr, "%s\n", e.what());
     }
     Json modules = Json::array();
-    HMODULE handles[2048];
-    DWORD length{};
-    if (EnumProcessModules(GetCurrentProcess(), handles, sizeof(handles), &length)) {
-        for (DWORD i = 0; i < (std::min)(length / DWORD(sizeof(HMODULE)), DWORD(2048)); ++i) {
-            wchar_t name[32768]{};
-            if (GetModuleFileNameW(handles[i], name, 32768))
-                modules.push_back(QString::fromWCharArray(name).toStdString());
-        }
+    try {
+        modules = result.contains("loaded_modules") ? result["loaded_modules"] : flora::rdcLoadedModules();
+    } catch (const std::exception &e) {
+        result["ok"] = false;
+        result["module_inventory_error"] = e.what();
+        fprintf(stderr, "%s\n", e.what());
+        if (!result.contains("error"))
+            result["error"] = e.what();
     }
     result["loaded_modules"] = modules;
+    const bool evaluated = result.value("ok", false);
+    if (evaluated) {
+        Json forbidden = Json::array();
+        for (const auto &module : modules) {
+            const auto path = QString::fromStdString(module.get<std::string>()).replace('/', '\\').toLower();
+            const auto name = path.section('\\', -1);
+            if (path.contains("\\intelswtools\\gpa") || name == "dx11_player.dll" ||
+                name == "dx11_playback.dll" || name == "shimd3d64.dll" || name == "gpa.dll")
+                forbidden.push_back(module);
+        }
+        result["gpa_modules_loaded"] = forbidden;
+        if (!forbidden.empty()) {
+            result["ok"] = false;
+            result["error"] = "Unexpected GPA modules loaded";
+            fprintf(stderr, "Unexpected GPA modules loaded\n");
+        }
+    }
     if (!output.isEmpty()) {
+        if (evaluated) {
+            QSaveFile modulesFile(QDir(output).filePath("loaded_modules.json"));
+            const auto bytes = QByteArray::fromStdString(modules.dump(2));
+            if (!modulesFile.open(QIODevice::WriteOnly) || modulesFile.write(bytes) != bytes.size() ||
+                !modulesFile.commit())
+                return 2;
+        }
         QSaveFile file(QDir(output).filePath("result.json"));
         const auto bytes =
             result.value("action", "") == "inventory" ? flora::rdcInventoryText(result) : result.dump(2);

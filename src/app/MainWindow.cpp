@@ -13,6 +13,7 @@
 #include "RdcCountersView.h"
 #include "ReplayDebugView.h"
 #include "ReplayMeshView.h"
+#include "application/RdcJobs.h"
 #include "SamplerDialog.h"
 #include "SrvDialog.h"
 #include "StatisticsView.h"
@@ -1376,8 +1377,15 @@ void MainWindow::startHistoryWorker() {
     jobDir_ = std::make_unique<QTemporaryDir>(QDir::tempPath() + "/FloraGPA-history-XXXXXX");
     if (!jobDir_->isValid())
         throw std::runtime_error("Cannot create history worker directory");
-    historyRequest_["capture"] = historyRdc_.toStdString();
-    historyRequest_["out"] = (jobDir_->path() + "/result").toStdString();
+    auto options = historyRequest_;
+    for (const auto key : {"action", "renderdoc", "frame_sha256", "experiment_key"})
+        options.erase(key);
+    auto prepared = prepareRdcJob(historyRdc_, historyRequest_.at("action").get<std::string>(),
+                                  jobDir_->path() + "/result",
+                                  QString::fromStdString(historyRequest_.at("renderdoc").get<std::string>()), options);
+    prepared["frame_sha256"] = historyRequest_.at("frame_sha256");
+    prepared["experiment_key"] = historyRequest_.at("experiment_key");
+    historyRequest_ = std::move(prepared);
     const auto path = jobDir_->path() + "/job.json";
     writeFile(path, QByteArray::fromStdString(historyRequest_.dump(2)));
     runningRevision_ = revision_;

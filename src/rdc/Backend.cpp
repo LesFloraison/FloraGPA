@@ -8,6 +8,8 @@
 #include <QSaveFile>
 #define NOMINMAX
 #include <Windows.h>
+
+#include <Psapi.h>
 #include <algorithm>
 #include <cmath>
 #include <filesystem>
@@ -42,7 +44,7 @@ uint64_t id(ResourceId value) {
 }
 std::string resourceName(ResourceId value) { return "ResourceId::" + std::to_string(id(value)); }
 uint64_t number(const Json &v) {
-    if (!(v.is_number_unsigned() || v.is_number_integer()) || v < 0)
+    if (!v.is_number_integer() || (!v.is_number_unsigned() && v.get<int64_t>() < 0))
         throw std::runtime_error("Expected an unsigned integer");
     return v.get<uint64_t>();
 }
@@ -407,9 +409,11 @@ Json debug(IReplayController &controller, uint32_t eid, const Json &job) {
     result["source_debug"] = flora::rdcDebugInfo(reflection->debugInfo);
     // D3D11 has no monolithic pipeline object, matching PipeState's null ID.
     const auto assembly = controller.DisassembleShader(ResourceId::Null(), reflection, "");
+    auto exportedAssembly = QByteArray(assembly.c_str(), qsizetype(assembly.size()));
+    exportedAssembly.replace("\n", "\r\n");
     QSaveFile file(QString::fromStdString(job.at("out").get<std::string>()) + "/debug_shader.asm");
-    if (!file.open(QIODevice::WriteOnly) ||
-        file.write(assembly.c_str(), qint64(assembly.size())) != qint64(assembly.size()) || !file.commit())
+    if (!file.open(QIODevice::WriteOnly) || file.write(exportedAssembly) != exportedAssembly.size() ||
+        !file.commit())
         throw std::runtime_error("Cannot export shader disassembly");
     result["disassembly"] = text(assembly);
     Json steps = Json::array();
@@ -437,6 +441,23 @@ extern "C" void __cdecl RENDERDOC_FreeArrayMem(void *mem) {
 extern "C" void *__cdecl RENDERDOC_AllocArrayMem(uint64_t size) { return allocate(size); }
 
 namespace flora {
+Json rdcLoadedModules() {
+    Json modules = Json::array();
+    HMODULE handles[2048];
+    DWORD length{};
+    if (!EnumProcessModules(GetCurrentProcess(), handles, sizeof(handles), &length))
+        throw std::runtime_error("Cannot enumerate analysis modules: " + std::to_string(GetLastError()));
+    if (length > sizeof(handles))
+        throw std::runtime_error("Module inventory buffer too small");
+    for (DWORD i = 0; i < length / DWORD(sizeof(HMODULE)); ++i) {
+        wchar_t name[32768]{};
+        const auto size = GetModuleFileNameW(handles[i], name, 32768);
+        if (!size || size >= 32768)
+            throw std::runtime_error("Cannot read complete analysis module path");
+        modules.push_back(QString::fromWCharArray(name).toStdString());
+    }
+    return modules;
+}
 Json runRdcJob(const Json &job) {
     const auto action = job.at("action").get<std::string>();
     const bool debugging = action == "debug-pixel" || action == "debug-vertex" || action == "debug-thread";
@@ -467,10 +488,15 @@ Json runRdcJob(const Json &job) {
                 {"backend_commit", session.commit},
                 {"gpa_event_map", mapping["gpa_event_map"]},
                 {"gpa_command_map", mapping["gpa_command_map"]}};
+    // Match the original audit point before the replay controller is shut down.
+    auto complete = [&] {
+        result["loaded_modules"] = rdcLoadedModules();
+        return std::move(result);
+    };
     if (action == "events") {
         result["index"] = mapping;
         result["cpu_writes"] = writes(events);
-        return result;
+        return complete();
     }
     const auto resources = controller.GetResources();
     const auto gpa = job.value("gpa_event", Json(nullptr));
@@ -545,7 +571,7 @@ Json runRdcJob(const Json &job) {
                        {"vertex_count", decoded.positions.size()},
                        {"index_count", decoded.indexCount},
                        {"face_count", decoded.candidateFaceCount}});
-        return result;
+        return complete();
     }
     if (action == "inventory") {
         Json described = Json::array(), textures = Json::array(), buffers = Json::array();
@@ -561,7 +587,7 @@ Json runRdcJob(const Json &job) {
                        {"resources", described},
                        {"textures", textures},
                        {"buffers", buffers}});
-        return result;
+        return complete();
     }
     if (action == "counters") {
         rdcarray<GPUCounter> selected;
@@ -594,13 +620,13 @@ Json runRdcJob(const Json &job) {
                        {"values", values},
                        {"result_count", values.size()},
                        {"note", "Measured on the replay GPU; GPA vendor-specific metrics are not implied."}});
-        return result;
+        return complete();
     }
     if (debugging) {
         result.update(debug(controller, eid, job));
         result["eid"] = eid;
         result["gpa_event"] = gpa;
-        return result;
+        return complete();
     }
     ResourceId resource;
     const auto gpaResource = job.value("resource", Json(nullptr));
@@ -644,7 +670,7 @@ Json runRdcJob(const Json &job) {
                        {"resource_name", name},
                        {"byte_length", data.size()},
                        {"subresource", {{"mip", sub.mip}, {"slice", sub.slice}, {"sample", sub.sample}}}});
-        return result;
+        return complete();
     }
     const auto x = index(job, "x"), y = index(job, "y");
     validate(tex, sub, x, y);
@@ -747,6 +773,6 @@ Json runRdcJob(const Json &job) {
     for (const auto &r : resources)
         if (r.resourceId == resource)
             result["resource_name"] = text(r.name);
-    return result;
+    return complete();
 }
 } // namespace flora

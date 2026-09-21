@@ -92,6 +92,12 @@ Native CLI replay can optionally export a RenderDoc capture with
 and resource identities are retained in annotations/names. RenderDoc is loaded
 only for this explicit option; neither Python nor qrenderdoc is used to capture.
 See [RDC_CAPTURE_MIGRATION.md](docs/RDC_CAPTURE_MIGRATION.md).
+Headless analysis is available through
+`FloraGPA.Cli rdc-analyze <capture.rdc> <action> --out <directory>`.
+Run `rdc-analyze --help` for the original eight analysis actions, event/resource
+selection, invocation parameters, library selection and timeout. See
+[RDC_CLI_MIGRATION.md](docs/RDC_CLI_MIGRATION.md) for examples and native worker
+logging, process cleanup and comparison evidence.
 `FloraGPA.Rdc.exe` now reads real Pixel History and CPU-write snapshots through
 the optional RenderDoc 1.45 native replay API. It accepts an isolated JSON job;
 see [RDC_HISTORY_MIGRATION.md](docs/RDC_HISTORY_MIGRATION.md). The main-window

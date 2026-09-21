@@ -70,6 +70,10 @@ class RdcWorkerTests : public QObject {
             << QJsonObject{{"action", "history"},
                            {"renderdoc", qEnvironmentVariable("WINDIR") + "/System32/version.dll"}}
             << "Missing RenderDoc entry point";
+        QTest::newRow("full-uint64-resource")
+            << QJsonObject{{"action", "inventory"},
+                           {"renderdoc", qEnvironmentVariable("WINDIR") + "/System32/version.dll"}}
+            << "Missing RenderDoc entry point";
     }
     void invalidJob() {
         QFETCH(QJsonObject, job);
@@ -79,7 +83,11 @@ class RdcWorkerTests : public QObject {
         const auto out = dir.path() + QString::fromUtf8("/结果");
         job["out"] = out;
         const auto input = dir.path() + "/job.json";
-        write(input, QJsonDocument(job).toJson());
+        auto encoded = QJsonDocument(job).toJson();
+        if (QString::fromLatin1(QTest::currentDataTag()) == "full-uint64-resource") {
+            encoded.insert(encoded.indexOf('{') + 1, "\"resource\":18446744073709551615,");
+        }
+        write(input, encoded);
         QCOMPARE(run(input), 1);
         const auto result = QJsonDocument::fromJson(read(out + "/result.json")).object();
         QCOMPARE(result["ok"].toBool(true), false);

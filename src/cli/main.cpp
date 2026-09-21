@@ -23,6 +23,7 @@
 #include "core/BufferBindings.h"
 #include "core/Frame.h"
 #include "replay/Replay.h"
+#include "RdcAnalyzeCli.h"
 #include <Psapi.h>
 #include <QCommandLineParser>
 #include <QCoreApplication>
@@ -63,6 +64,8 @@ int main(int argc, char **argv) {
     QCoreApplication app(argc, argv);
     app.setApplicationName("FloraGPA.Cli");
     app.setApplicationVersion("0.1.0");
+    if (app.arguments().size() > 1 && app.arguments()[1] == "rdc-analyze")
+        return rdcAnalyzeCli(app.arguments().mid(1));
     QCommandLineParser p;
     p.setApplicationDescription("Native DX11 capture inspection and isolated replay");
     p.addHelpOption();
@@ -71,7 +74,7 @@ int main(int argc, char **argv) {
         "command",
         "inventory | commands | command-state | contexts | command-lists | replay | shader | "
         "buffer | texture | texture-storage | compile | geometry | replay-pipeline | "
-        "class-linkage | predicate | annotations | statistics | post-geometry | shader-checkpoint");
+        "class-linkage | predicate | annotations | statistics | post-geometry | shader-checkpoint | rdc-analyze");
     p.addPositionalArgument("capture", "DX11 .gpa_frame file");
     p.addOption({"out", "New or empty output directory", "path"});
     p.addOption({"experiment", "Compatible FloraGPA experiment project", "path"});

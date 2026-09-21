@@ -2,9 +2,18 @@
 
 已有可编译、可运行的 VS2022 / Qt Widgets 原生工程，能够独立重放当前验证的
 GF2 与 BF1 DX11 捕获。**尚未完成原 Python 版本的全部功能迁移。**
-当前独立包为 `out/FloraGPA-replay-mesh/FloraGPA.exe`。
+当前独立包为 `out/FloraGPA-rdc-cli/FloraGPA.exe`。
 
-最新一批将原 Python 的 `postmesh` 接入 **Geometry → Replay Mesh**：支持 VS／
+最新一批补齐 `FloraGPA.Cli rdc-analyze`，覆盖原版八种 RDC 分析，以及事件／
+资源／实例／线程参数、超时、日志、失败报告和进程清理。Qt 四类分析页与命令行
+共用原生作业准备；修复完整 uint64 ID 检查，并补齐模块清单和反汇编 CRLF 导出。
+最终包 15 组原 CLI 对照、33 项进程／参数测试、4 项黄金帧／负对照和 19 份运行时
+审计通过。完整 Release 构建及 8 套相关 CTest 通过，包含原主窗口 54 项检查；
+最终诊断调整后的 3 套相关 worker 测试再次通过。四个程序与构建哈希一致。
+经逐项职责核对，`rdc_analyze.py` 和 `rdc_jobs.py` 更新为 `ported`，其余模块按
+各自证据保留状态。详见 [RDC_CLI_MIGRATION.md](RDC_CLI_MIGRATION.md)。
+
+上一批将原 Python 的 `postmesh` 接入 **Geometry → Replay Mesh**：支持 VS／
 最终 GS 或 DS 输出、实例选择、网格预览、原始位置表和完整 JSON／CSV／OBJ 导出。
 独立 Geometry 检查保留在相邻页签；详情默认收起。与 Pixel History／Shader Debug／
 Replay Metrics 共享原生再捕获、缓存与取消流程，已读出的导出不依赖临时目录存续。

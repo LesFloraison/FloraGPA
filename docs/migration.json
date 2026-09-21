@@ -2338,9 +2338,18 @@
       "sha256": "cd49003d25e07597adb1e2fe58cae64d59e60c6b44a02614a7a55f9d795b1cc8",
       "lines": 52,
       "description": "Headless advanced analysis of an independently generated RDC capture.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "ported",
+      "native": [
+        "src/application/RdcJobs.cpp",
+        "src/cli/RdcAnalyzeCli.cpp",
+        "src/cli/main.cpp",
+        "src/app/MainWindow.cpp"
+      ],
+      "validation": [
+        "docs/RDC_CLI_MIGRATION.md",
+        "Source-responsibility audit: all eight original CLI actions, defaults, event/resource/invocation parameters, strict paths and empty output, hidden native process, timeout/descendant cleanup, logs, report checks and printed result path are ported. Qt analysis views use the shared native preparation. Python bootstrap/qrenderdoc are replaced by the native worker and selected DLL; API-width and timeout bounds are explicit.",
+        "Final package: 15 actual original-CLI comparisons, 33 process/argument tests without skips, four golden/negative controls and 19 runtime-module audits pass. Complete Release and eight relevant CTest suites pass (54 original UI cases); three worker/job suites pass again after final module-audit refinements. Four product executable hashes match Release. Larger replay-controller limitations remain tracked under rdc_worker.py."
+      ]
     },
     {
       "module": "rdc_capture.py",
@@ -2400,7 +2409,7 @@
       "sha256": "2cb2efff52b75b4d657a0672d472b73fe331450bddf097efd28c77d9313aa3a3",
       "lines": 29,
       "description": "Prepare one direct RenderDoc worker; shared by CLI and native desktop.",
-      "status": "partial",
+      "status": "ported",
       "native": [
         "src/app/PixelHistoryView.cpp",
         "src/app/MainWindow.cpp",
@@ -2409,7 +2418,10 @@
         "src/application/ReplayDebugModel.cpp",
         "src/rdc/Assets.cpp",
         "src/application/ReplayMesh.cpp",
-        "src/app/ReplayMeshView.cpp"
+        "src/app/ReplayMeshView.cpp",
+        "src/application/RdcJobs.cpp",
+        "src/cli/RdcAnalyzeCli.cpp",
+        "src/cli/main.cpp"
       ],
       "validation": [
         "docs/PIXEL_HISTORY_UI_MIGRATION.md",
@@ -2428,7 +2440,10 @@
         "Inventory/texture delivery: complete Release build, five relevant CTest suites, five packaged serializer cases, four GF2/BF1 golden/negative controls and 38 runtime-module audits passed. Four product executable hashes match Release; temporary test files were removed.",
         "docs/REPLAY_MESH_MIGRATION.md",
         "Native postmesh preserves VS/GS/DS output, instance selection, indexed/nonindexed positions, triangle semantics and exact binary/CSV/OBJ exports. Qt Geometry / Replay Mesh shares recapture/cache/cancellation with the existing analysis views. Ten initial controller comparisons, eight additional instance comparisons and 78 original-branch model cases pass. Shared module status remains partial pending remaining consumers and full module audits.",
-        "Replay Mesh delivery: complete Release build; six existing relevant CTest suites passed, including 54 original UI cases; corrected new-suite packaged run passed six cases without skips. Packaged native/Python matrix: 18 comparisons, four rejections, 3,676 vertices, 19,432 indices, 715,705 exact artifact bytes. Four golden/negative controls and 34 runtime audits passed; four executable hashes match Release. Initial test-assumption failures and report differences remain recorded in REPLAY_MESH_MIGRATION.md."
+        "Replay Mesh delivery: complete Release build; six existing relevant CTest suites passed, including 54 original UI cases; corrected new-suite packaged run passed six cases without skips. Packaged native/Python matrix: 18 comparisons, four rejections, 3,676 vertices, 19,432 indices, 715,705 exact artifact bytes. Four golden/negative controls and 34 runtime audits passed; four executable hashes match Release. Initial test-assumption failures and report differences remain recorded in REPLAY_MESH_MIGRATION.md.",
+        "docs/RDC_CLI_MIGRATION.md",
+        "Source-responsibility audit: all eight original CLI actions, defaults, event/resource/invocation parameters, strict paths and empty output, hidden native process, timeout/descendant cleanup, logs, report checks and printed result path are ported. Qt analysis views use the shared native preparation. Python bootstrap/qrenderdoc are replaced by the native worker and selected DLL; API-width and timeout bounds are explicit.",
+        "Final package: 15 actual original-CLI comparisons, 33 process/argument tests without skips, four golden/negative controls and 19 runtime-module audits pass. Complete Release and eight relevant CTest suites pass (54 original UI cases); three worker/job suites pass again after final module-audit refinements. Four product executable hashes match Release. Larger replay-controller limitations remain tracked under rdc_worker.py."
       ]
     },
     {
@@ -2468,7 +2483,9 @@
         "Inventory/texture delivery: complete Release build, five relevant CTest suites, five packaged serializer cases, four GF2/BF1 golden/negative controls and 38 runtime-module audits passed. Four product executable hashes match Release; temporary test files were removed.",
         "docs/REPLAY_MESH_MIGRATION.md",
         "Native postmesh preserves VS/GS/DS output, instance selection, indexed/nonindexed positions, triangle semantics and exact binary/CSV/OBJ exports. Qt Geometry / Replay Mesh shares recapture/cache/cancellation with the existing analysis views. Ten initial controller comparisons, eight additional instance comparisons and 78 original-branch model cases pass. Shared module status remains partial pending remaining consumers and full module audits.",
-        "Replay Mesh delivery: complete Release build; six existing relevant CTest suites passed, including 54 original UI cases; corrected new-suite packaged run passed six cases without skips. Packaged native/Python matrix: 18 comparisons, four rejections, 3,676 vertices, 19,432 indices, 715,705 exact artifact bytes. Four golden/negative controls and 34 runtime audits passed; four executable hashes match Release. Initial test-assumption failures and report differences remain recorded in REPLAY_MESH_MIGRATION.md."
+        "Replay Mesh delivery: complete Release build; six existing relevant CTest suites passed, including 54 original UI cases; corrected new-suite packaged run passed six cases without skips. Packaged native/Python matrix: 18 comparisons, four rejections, 3,676 vertices, 19,432 indices, 715,705 exact artifact bytes. Four golden/negative controls and 34 runtime audits passed; four executable hashes match Release. Initial test-assumption failures and report differences remain recorded in REPLAY_MESH_MIGRATION.md.",
+        "docs/RDC_CLI_MIGRATION.md",
+        "Public native headless orchestration now covers all eight actions. Worker preserves the original module-list sidecar and GPA-module exclusions with enumeration before controller shutdown, rejects incomplete module inventories, exports CRLF disassembly bytes, and accepts exact full-range uint64 IDs. Fifteen packaged public-CLI comparisons pass; remaining larger controller audit keeps this module partial."
       ]
     },
     {
