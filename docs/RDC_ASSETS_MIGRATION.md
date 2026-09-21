@@ -124,9 +124,9 @@ the existing GPA-style workspace and independent resource views are retained.
 
 ## Remaining migration
 
-The RenderDoc `postmesh` action and its Qt consumer remain to be connected.
-The existing independent Geometry modes continue to work, but do not replace
-that optional analysis interface in the migration checklist. Vendor-specific
+The RenderDoc `postmesh` action and its Qt consumer were subsequently connected
+in [REPLAY_MESH_MIGRATION.md](REPLAY_MESH_MIGRATION.md). The existing independent
+Geometry modes remain separately available. Vendor-specific
 metric scheduling, GTPin and other pending modules also remain outside this
 batch. Shared modules retain `partial` status; this does not complete the full
 Python-to-C++ migration.

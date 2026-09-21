@@ -2,9 +2,20 @@
 
 已有可编译、可运行的 VS2022 / Qt Widgets 原生工程，能够独立重放当前验证的
 GF2 与 BF1 DX11 捕获。**尚未完成原 Python 版本的全部功能迁移。**
-当前独立包为 `out/FloraGPA-replay-assets/FloraGPA.exe`。
+当前独立包为 `out/FloraGPA-replay-mesh/FloraGPA.exe`。
 
-最新一批补齐原生 RenderDoc `inventory`／`texture` 分析接口：完整资源关系、纹理／
+最新一批将原 Python 的 `postmesh` 接入 **Geometry → Replay Mesh**：支持 VS／
+最终 GS 或 DS 输出、实例选择、网格预览、原始位置表和完整 JSON／CSV／OBJ 导出。
+独立 Geometry 检查保留在相邻页签；详情默认收起。与 Pixel History／Shader Debug／
+Replay Metrics 共享原生再捕获、缓存与取消流程，已读出的导出不依赖临时目录存续。
+发布包对照覆盖 18 种真实配置和 4 种拒绝请求：3,676 个顶点、19,432 个索引、
+715,705 字节导出完全一致，另有 78 组执行原 Python 分支的模型边界对照。
+发布包界面 6 项通过，无失败和跳过；原主窗口 54 项回归通过。完整 Release
+构建、4 项黄金帧／负对照和 34 份运行时依赖审计通过，四个程序与构建哈希一致。
+共享模块仍保留 `partial`，不据此宣称全部 Python 功能完成迁移。
+详见 [REPLAY_MESH_MIGRATION.md](REPLAY_MESH_MIGRATION.md)。
+
+上一批补齐原生 RenderDoc `inventory`／`texture` 分析接口：完整资源关系、纹理／
 缓冲描述和原始子资源字节均已接通。支持无 Draw／Dispatch 的目录查询，保留原版
 三维纹理读取整个 mip 体积的语义，以及注解联合值的高位字符转义、NaN 和负零。
 发布包 34 组对照通过：2,982 项资源描述、703 项纹理描述、646 项缓冲描述，
@@ -12,8 +23,8 @@ GF2 与 BF1 DX11 捕获。**尚未完成原 Python 版本的全部功能迁移�
 这些入口不依赖 Python／Tk／GPA 运行时，普通 Qt 资源视图继续使用既有原生实现。
 完整 Release 构建、相关 5 套 CTest、发布包 5 项序列化测试、4 项黄金帧／负对照
 及 38 份运行时模块审计通过。四个程序与构建哈希一致，临时测试程序已从包中移除。
-RenderDoc `postmesh` 及其 Qt 消费者仍待迁移；本批不将独立 Geometry 模式视为
-该分支已完成。详见 [RDC_ASSETS_MIGRATION.md](RDC_ASSETS_MIGRATION.md)。
+该批次未包含 `postmesh`，后续已由上述 Replay Mesh 批次接通。
+详见 [RDC_ASSETS_MIGRATION.md](RDC_ASSETS_MIGRATION.md)。
 
 
 

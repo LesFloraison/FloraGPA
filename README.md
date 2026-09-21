@@ -110,6 +110,13 @@ preserving resource relationships, exact metadata and raw subresource bytes.
 See [RDC_ASSETS_MIGRATION.md](docs/RDC_ASSETS_MIGRATION.md) for the job interface,
 3D texture semantics and comparison evidence.
 
+**Geometry → Replay Mesh** now reads post-shader VS / final GS-or-DS output
+for the selected draw and instance through the native RenderDoc worker.
+It provides a wireframe preview, raw position table, and complete JSON / CSV /
+OBJ export. The existing independent Geometry modes remain in the adjacent
+tab. See [REPLAY_MESH_MIGRATION.md](docs/REPLAY_MESH_MIGRATION.md) for preserved
+index/triangle semantics and original Python comparison evidence.
+
 The right-side **Replay Metrics** inspector now measures generic replay counters,
 with Selection/Frame views, filtering, API navigation, a counter catalog and
 complete JSON export. It shares native recapture and caching with Pixel History

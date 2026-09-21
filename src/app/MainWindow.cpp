@@ -12,6 +12,7 @@
 #include "RasterizerDialog.h"
 #include "RdcCountersView.h"
 #include "ReplayDebugView.h"
+#include "ReplayMeshView.h"
 #include "SamplerDialog.h"
 #include "SrvDialog.h"
 #include "StatisticsView.h"
@@ -872,7 +873,15 @@ void MainWindow::buildUi() {
         bufferView_->setColumnWidth(1, mode ? 145 : 420);
     });
     geometryPane_ = new QWidget;
-    auto geometryLayout = new QVBoxLayout(geometryPane_);
+    auto geometryOuter = new QVBoxLayout(geometryPane_);
+    geometryOuter->setContentsMargins(0, 0, 0, 0);
+    geometryViews_ = new QTabWidget;
+    geometryViews_->setObjectName("geometryViews");
+    geometryViews_->setDocumentMode(true);
+    geometryOuter->addWidget(geometryViews_);
+    auto nativeGeometry = new QWidget;
+    geometryViews_->addTab(nativeGeometry, "Independent");
+    auto geometryLayout = new QVBoxLayout(nativeGeometry);
     geometryLayout->setContentsMargins(0, 0, 0, 0);
     geometryLayout->setSpacing(0);
     auto geometryBar = new QToolBar;
@@ -923,6 +932,12 @@ void MainWindow::buildUi() {
     geometrySplit->addWidget(geometryView_);
     geometrySplit->setSizes({300, 220});
     geometryLayout->addWidget(geometrySplit);
+    replayMesh_ = new ReplayMeshView;
+    geometryViews_->addTab(replayMesh_, "Replay Mesh");
+    connect(replayMesh_, &ReplayMeshView::readRequested, this,
+            [this] { readRdcAnalysis(nullptr, RdcAnalysis::Mesh); });
+    connect(replayMesh_, &ReplayMeshView::cancelRequested, this, &MainWindow::cancel);
+    connect(replayMesh_, &ReplayMeshView::error, this, &MainWindow::showError);
     centerTabs_->addTab(geometryPane_, "Geometry");
     auto clearGeometry = [this] {
         geometry_ = {};
@@ -1076,7 +1091,8 @@ void MainWindow::buildUi() {
     rightTabs->addTab(metrics_, "Metrics");
     rdcCounters_ = new RdcCountersView;
     rightTabs->addTab(rdcCounters_, "Replay Metrics");
-    connect(rdcCounters_, &RdcCountersView::readRequested, this, [this] { readRdcAnalysis(nullptr, true); });
+    connect(rdcCounters_, &RdcCountersView::readRequested, this,
+            [this] { readRdcAnalysis(nullptr, RdcAnalysis::Counters); });
     connect(rdcCounters_, &RdcCountersView::cancelRequested, this, &MainWindow::cancel);
     connect(rdcCounters_, &RdcCountersView::error, this, &MainWindow::showError);
     connect(rdcCounters_, &RdcCountersView::eventRequested, this, [this](qulonglong event) {
@@ -1224,6 +1240,8 @@ void MainWindow::setBusy(bool busy) {
         history_->setWorkerBusy(busy);
     if (rdcCounters_)
         rdcCounters_->setWorkerBusy(busy);
+    if (replayMesh_)
+        replayMesh_->setWorkerBusy(busy);
     for (auto view : checkpoints_)
         if (view)
             view->setWorkerBusy(busy);
@@ -1275,6 +1293,8 @@ void MainWindow::updateCheckpointContext() {
         history_->setContext(historyContextKey(), selectedEvent_);
     if (rdcCounters_)
         rdcCounters_->setContext(historyContextKey(), selectedEvent_);
+    if (replayMesh_)
+        replayMesh_->setContext(historyContextKey(), selectedEvent_);
     for (auto view : replayDebug_)
         if (view)
             view->setContext(historyContextKey(), selectedEvent_);
@@ -1291,24 +1311,33 @@ QString MainWindow::historyContextKey() const {
            QString::fromLatin1(QCryptographicHash::hash(bytes, QCryptographicHash::Sha256).toHex());
 }
 bool MainWindow::finishRdcAnalysis(const nlohmann::json &result) {
-    if (runningCounters_)
+    if (runningAnalysis_ == RdcAnalysis::Mesh)
+        return replayMesh_->finish(historyRequestId_, result,
+                                   jobDir_ ? jobDir_->path() + "/result" : QString());
+    if (runningAnalysis_ == RdcAnalysis::Counters)
         return rdcCounters_->finish(historyRequestId_, result);
     return runningDebug_ ? runningDebug_->finish(historyRequestId_, result)
                          : history_->finish(historyRequestId_, result);
 }
-void MainWindow::readRdcAnalysis(ReplayDebugView *view, bool counters) {
+void MainWindow::readRdcAnalysis(ReplayDebugView *view, RdcAnalysis kind) {
     if (busy() || !frame_)
         return;
     runningDebug_ = view;
-    runningCounters_ = counters;
-    historyRequestId_ = counters ? rdcCounters_->requestId()
-                        : view   ? view->requestId()
-                                 : history_->requestId();
+    runningAnalysis_ = view ? RdcAnalysis::Debug : kind;
+    const bool counters = kind == RdcAnalysis::Counters, mesh = kind == RdcAnalysis::Mesh;
+    historyRequestId_ = mesh       ? replayMesh_->requestId()
+                        : counters ? rdcCounters_->requestId()
+                        : view     ? view->requestId()
+                                   : history_->requestId();
     try {
-        historyRequest_ = counters ? rdcCounters_->request() : view ? view->request() : history_->request();
-        const auto library = QFileInfo(counters ? rdcCounters_->backendPath()
-                                       : view   ? view->backendPath()
-                                                : history_->backendPath())
+        historyRequest_ = mesh       ? replayMesh_->request()
+                          : counters ? rdcCounters_->request()
+                          : view     ? view->request()
+                                     : history_->request();
+        const auto library = QFileInfo(mesh       ? replayMesh_->backendPath()
+                                       : counters ? rdcCounters_->backendPath()
+                                       : view     ? view->backendPath()
+                                                  : history_->backendPath())
                                  .canonicalFilePath();
         QFile file(library);
         if (library.isEmpty() || !file.open(QIODevice::ReadOnly))
@@ -1357,9 +1386,10 @@ void MainWindow::startHistoryWorker() {
     stderrBuffer_.clear();
     errorText_.clear();
     setBusy(true);
-    statusBar()->showMessage(runningCounters_ ? "Measuring replay counters…"
-                             : runningDebug_  ? "Reading shader trace…"
-                                              : "Reading pixel history…");
+    statusBar()->showMessage(runningAnalysis_ == RdcAnalysis::Mesh       ? "Reading post-shader mesh…"
+                             : runningAnalysis_ == RdcAnalysis::Counters ? "Measuring replay counters…"
+                             : runningDebug_                             ? "Reading shader trace…"
+                                                                         : "Reading pixel history…");
     timeout_.start();
     process_.start(QCoreApplication::applicationDirPath() + "/FloraGPA.Rdc.exe", {"--job", path});
 }
@@ -1501,9 +1531,11 @@ void MainWindow::finishWorker(int code, QProcess::ExitStatus status) {
             result["experiment_key"] = historyRequest_.at("experiment_key");
             result["selection"] = historyRequest_;
             const bool accepted = finishRdcAnalysis(result);
-            statusBar()->showMessage(accepted ? (runningCounters_ ? "Replay metrics ready"
-                                                 : runningDebug_  ? "Shader trace ready"
-                                                                  : "Pixel history ready")
+            statusBar()->showMessage(accepted ? (runningAnalysis_ == RdcAnalysis::Mesh ? "Replay mesh ready"
+                                                 : runningAnalysis_ == RdcAnalysis::Counters
+                                                     ? "Replay metrics ready"
+                                                 : runningDebug_ ? "Shader trace ready"
+                                                                 : "Pixel history ready")
                                               : "Analysis selection changed",
                                      3000);
             emit taskFinished(accepted);
@@ -2314,6 +2346,7 @@ void MainWindow::compileShader() {
 void MainWindow::inspectGeometry() {
     if (!frame_ || !selectedEvent_ || busy())
         return;
+    geometryViews_->setCurrentIndex(0);
     replayTimer_.stop();
     textureTimer_.stop();
     bufferTimer_.stop();

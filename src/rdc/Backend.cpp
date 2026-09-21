@@ -4,6 +4,7 @@
 #include "Counters.h"
 #include "DebugTrace.h"
 #include "application/RdcEvents.h"
+#include "application/ReplayMesh.h"
 #include <QSaveFile>
 #define NOMINMAX
 #include <Windows.h>
@@ -440,7 +441,7 @@ Json runRdcJob(const Json &job) {
     const auto action = job.at("action").get<std::string>();
     const bool debugging = action == "debug-pixel" || action == "debug-vertex" || action == "debug-thread";
     if (action != "history" && action != "events" && action != "counters" && action != "inventory" &&
-        action != "texture" && !debugging)
+        action != "texture" && action != "postmesh" && !debugging)
         throw std::runtime_error("Unsupported native RenderDoc job action");
     if (action != "events") {
         if (!job.value("gpa_event", Json(nullptr)).is_null() && !job.value("eid", Json(nullptr)).is_null())
@@ -491,6 +492,61 @@ Json runRdcJob(const Json &job) {
         !(eid == 0 && action == "inventory"))
         throw std::runtime_error("No selectable replay action");
     controller.SetFrameEvent(eid, true);
+    if (action == "postmesh") {
+        const auto *selected = findAction(controller.GetRootActions(), eid);
+        if (!selected || !(selected->flags & ActionFlags::Drawcall))
+            throw std::runtime_error("Selected analysis requires an executed draw action");
+        const auto stage = job.value("stage", std::string("VSOut"));
+        const auto nativeStage = stage == "VSOut"   ? MeshDataStage::VSOut
+                                 : stage == "GSOut" ? MeshDataStage::GSOut
+                                                    : MeshDataStage::VSIn;
+        if (stage != "VSOut" && stage != "GSOut" && stage != "VSIn")
+            throw std::runtime_error("Unsupported DX11 post-shader stage");
+        const auto mesh = controller.GetPostVSData(index(job, "instance"), 0, nativeStage);
+        if (mesh.vertexResourceId == ResourceId::Null())
+            throw std::runtime_error("Selected event/stage has no post-shader mesh data");
+        auto save = [&](const wchar_t *name, const void *bytes, size_t size) {
+            QSaveFile file(QString::fromStdWString((path(job.at("out")) / name).wstring()));
+            if (!file.open(QIODevice::WriteOnly) ||
+                file.write(static_cast<const char *>(bytes), qint64(size)) != qint64(size) || !file.commit())
+                throw std::runtime_error("Cannot save post-shader mesh artifact");
+        };
+        const auto raw =
+            controller.GetBufferData(mesh.vertexResourceId, mesh.vertexByteOffset, mesh.vertexByteSize);
+        save(L"post_vertices.bin", raw.data(), raw.size());
+        bytebuf ib;
+        if (mesh.indexResourceId != ResourceId::Null()) {
+            ib = controller.GetBufferData(mesh.indexResourceId, mesh.indexByteOffset,
+                                          uint64_t(mesh.numIndices) * mesh.indexByteStride);
+            save(L"post_indices.bin", ib.data(), ib.size());
+        }
+        Json metadata{{"vertexResourceId", resourceName(mesh.vertexResourceId)},
+                      {"vertexByteOffset", mesh.vertexByteOffset},
+                      {"vertexByteStride", mesh.vertexByteStride},
+                      {"indexResourceId", resourceName(mesh.indexResourceId)},
+                      {"indexByteOffset", mesh.indexByteOffset},
+                      {"indexByteStride", mesh.indexByteStride},
+                      {"baseVertex", mesh.baseVertex},
+                      {"numIndices", mesh.numIndices},
+                      {"topology", uint32_t(mesh.topology)},
+                      {"format", rdcResourceFormat(mesh.format)},
+                      {"unproject", mesh.unproject},
+                      {"nearPlane", real(mesh.nearPlane)},
+                      {"farPlane", real(mesh.farPlane)},
+                      {"status", text(mesh.status)}};
+        const auto decoded = ReplayMesh::decode(metadata, {raw.data(), raw.size()}, {ib.data(), ib.size()});
+        const auto csv = decoded.csv(), obj = decoded.obj();
+        save(L"post_vertices.csv", csv.data(), csv.size());
+        save(L"post_geometry.obj", obj.data(), obj.size());
+        result.update({{"eid", eid},
+                       {"gpa_event", gpa},
+                       {"stage", stage},
+                       {"mesh", metadata},
+                       {"vertex_count", decoded.positions.size()},
+                       {"index_count", decoded.indexCount},
+                       {"face_count", decoded.candidateFaceCount}});
+        return result;
+    }
     if (action == "inventory") {
         Json described = Json::array(), textures = Json::array(), buffers = Json::array();
         for (const auto &r : resources)

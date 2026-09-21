@@ -27,6 +27,7 @@ class CheckpointView;
 class PixelHistoryView;
 class ReplayDebugView;
 class RdcCountersView;
+class ReplayMeshView;
 class MainWindow final : public QMainWindow {
     Q_OBJECT
   public:
@@ -91,14 +92,16 @@ class MainWindow final : public QMainWindow {
     void updateStatistics();
     void updateCheckpointContext();
     QString historyContextKey() const;
-    void readRdcAnalysis(ReplayDebugView *view = nullptr, bool counters = false);
+    enum class RdcAnalysis { History, Debug, Counters, Mesh };
+    void readRdcAnalysis(ReplayDebugView *view = nullptr, RdcAnalysis kind = RdcAnalysis::History);
     bool finishRdcAnalysis(const nlohmann::json &result);
     void startHistoryWorker();
     PixelHistoryView *history_ = nullptr;
     std::array<ReplayDebugView *, 3> replayDebug_{};
     ReplayDebugView *runningDebug_ = nullptr;
     RdcCountersView *rdcCounters_ = nullptr;
-    bool runningCounters_ = false;
+    ReplayMeshView *replayMesh_ = nullptr;
+    RdcAnalysis runningAnalysis_ = RdcAnalysis::History;
     nlohmann::json historyRequest_;
     uint64_t historyRequestId_{};
     QString historyKey_, historyRdc_;
@@ -163,6 +166,7 @@ class MainWindow final : public QMainWindow {
     QString runningSource_, runningEntry_;
     QTabWidget *centerTabs_, *leftTabs_;
     QWidget *geometryPane_;
+    QTabWidget *geometryViews_;
     MeshView *mesh_;
     GeometryModel *geometryModel_;
     QTableView *geometryView_;
