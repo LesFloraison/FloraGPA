@@ -126,6 +126,11 @@ Json parse(const QByteArray &raw) {
     return Json::parse(text.begin(), text.end(), callback);
 }
 } // namespace
+std::string debugConfigCanonicalJson(const Json &value) {
+    std::string result;
+    canonical(result, value);
+    return result;
+}
 Json nativeDebugIdentity(const Json &result) {
     const auto kind = action(result);
     const auto digest = result.value("shader_sha256", Json(nullptr));

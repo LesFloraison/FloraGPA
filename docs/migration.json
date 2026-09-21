@@ -10,11 +10,16 @@
       "native": [
         "src/app/PixelHistoryView.cpp",
         "src/app/MainWindow.cpp",
-        "src/rdc/main.cpp"
+        "src/rdc/main.cpp",
+        "src/app/ReplayDebugView.cpp",
+        "src/application/ReplayDebugModel.cpp"
       ],
       "validation": [
         "docs/PIXEL_HISTORY_UI_MIGRATION.md",
-        "Qt Pixel History is connected to native recapture and history workers with experiment/driver/library caching, cancellation, API navigation, details and JSON export. Other shared advanced-analysis/debugger/counter actions remain pending."
+        "Qt Pixel History is connected to native recapture and history workers with experiment/driver/library caching, cancellation, API navigation, details and JSON export. Other shared inventory/texture/postmesh/counter actions remain pending; recorded shader debug UI is now connected.",
+        "docs/REPLAY_DEBUG_UI_MIGRATION.md",
+        "VS/PS/CS Qt views now share native recapture and cache with Pixel History, with navigation, breakpoints/watches, configurations and exports. Inventory/texture/postmesh/counters and other shared consumers remain outside this batch.",
+        "Packaged Qt debugger: 7 cases passed without skips; 14 runtime reports contain no Python/Tk/GPA modules, Qt is package-local, four delivered executables match Release, and four golden/negative controls pass. Full CTest: 47 other suites passed plus corrected new-suite rerun; original Qt regression: 54 passed without skips."
       ]
     },
     {
@@ -525,9 +530,18 @@
       "sha256": "5267bfd1e988390b71d137c898a114799e974ebebd4e6901fe50d817f27e4a64",
       "lines": 59,
       "description": "Versioned debugger settings bound to source metadata and shader assembly.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": [
+        "src/application/ReplayDebugModel.cpp",
+        "src/app/ReplayDebugView.cpp",
+        "src/application/NativeDebugConfig.cpp"
+      ],
+      "validation": [
+        "docs/REPLAY_DEBUG_UI_MIGRATION.md",
+        "21 real traces, 67 model scenarios and 8,170 native/Python operations; original Python is used only as a development oracle.",
+        "Original recorded shader identity and format, atomic replacement validation, watches and bounded encoding-aware configuration IO are integrated with Qt import/save and JSON export. Unicode dialog roundtrips and invalid replacement rollback are tested.",
+        "Packaged Qt debugger: 7 cases passed without skips; 14 runtime reports contain no Python/Tk/GPA modules, Qt is package-local, four delivered executables match Release, and four golden/negative controls pass. Full CTest: 47 other suites passed plus corrected new-suite rerun; original Qt regression: 54 passed without skips."
+      ]
     },
     {
       "module": "debug_expression.py",
@@ -548,9 +562,17 @@
       "sha256": "2b4df3f8647836b4d8aebb1ceb4528d82e02363710090c691d192268f6704e7d",
       "lines": 38,
       "description": "Navigate RenderDoc's recorded shader changes in either direction.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": [
+        "src/application/ReplayDebugModel.cpp",
+        "src/app/ReplayDebugView.cpp"
+      ],
+      "validation": [
+        "docs/REPLAY_DEBUG_UI_MIGRATION.md",
+        "21 real traces, 67 model scenarios and 8,170 native/Python operations; original Python is used only as a development oracle.",
+        "Recorded register creation/deletion/renaming and reversible state, four register interpretations and negative zero are integrated into Qt. Covered by complete real trace transitions and synthetic metadata scenarios; broader shader coverage remains unproven.",
+        "Packaged Qt debugger: 7 cases passed without skips; 14 runtime reports contain no Python/Tk/GPA modules, Qt is package-local, four delivered executables match Release, and four golden/negative controls pass. Full CTest: 47 other suites passed plus corrected new-suite rerun; original Qt regression: 54 passed without skips."
+      ]
     },
     {
       "module": "depth_stencil_edits.py",
@@ -1270,9 +1292,17 @@
       "sha256": "4f9829293d2b2b9ec904367e6f75d4314ed38cba8f5202aa03154856550e2bbd",
       "lines": 14,
       "description": "Public ShaderDebugTrace instruction metadata uses half-open sparse ranges.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": [
+        "src/application/ReplayDebugModel.cpp",
+        "src/app/ReplayDebugView.cpp"
+      ],
+      "validation": [
+        "docs/REPLAY_DEBUG_UI_MIGRATION.md",
+        "21 real traces, 67 model scenarios and 8,170 native/Python operations; original Python is used only as a development oracle.",
+        "Native half-open sparse instruction lookup, with invalid/duplicate-key rejection, is used by source variables and navigation and compared with the original metadata adapter.",
+        "Packaged Qt debugger: 7 cases passed without skips; 14 runtime reports contain no Python/Tk/GPA modules, Qt is package-local, four delivered executables match Release, and four golden/negative controls pass. Full CTest: 47 other suites passed plus corrected new-suite rerun; original Qt regression: 54 passed without skips."
+      ]
     },
     {
       "module": "mapped_writes.py",
@@ -2331,7 +2361,7 @@
       ],
       "validation": [
         "docs/RDC_HISTORY_MIGRATION.md",
-        "Native RenderDoc 1.45 replay-controller consumer implements exact event mapping, PixelHistory records and CPU-write supplementation. Qt history workflow is now connected; other rdc_worker analysis/debugger actions are not migrated by this batch.",
+        "Native RenderDoc 1.45 replay-controller consumer implements exact event mapping, PixelHistory records and CPU-write supplementation. Qt history workflow is now connected; other rdc_worker analysis branches remain pending, with recorded shader debugging covered by subsequent backend/UI evidence.",
         "Packaged backend: 152 checks, 22 complete history comparisons (35 records, 10 CPU snapshots), nine real controller-index comparisons; two relevant CTest suites and four golden/negative checks passed. Malformed structured-data injection remains pending; Qt workflow validation is recorded separately.",
         "docs/PIXEL_HISTORY_UI_MIGRATION.md"
       ]
@@ -2350,7 +2380,7 @@
       "validation": [
         "docs/RDC_CAPTURE_MIGRATION.md",
         "docs/RDC_HISTORY_MIGRATION.md",
-        "Native RenderDoc 1.45 replay-controller consumer implements exact event mapping, PixelHistory records and CPU-write supplementation. Qt history workflow is now connected; other rdc_worker analysis/debugger actions are not migrated by this batch.",
+        "Native RenderDoc 1.45 replay-controller consumer implements exact event mapping, PixelHistory records and CPU-write supplementation. Qt history workflow is now connected; other rdc_worker analysis branches remain pending, with recorded shader debugging covered by subsequent backend/UI evidence.",
         "Packaged backend: 152 checks, 22 complete history comparisons (35 records, 10 CPU snapshots), nine real controller-index comparisons; two relevant CTest suites and four golden/negative checks passed. Malformed structured-data injection remains pending; Qt workflow validation is recorded separately.",
         "docs/PIXEL_HISTORY_UI_MIGRATION.md"
       ]
@@ -2364,13 +2394,18 @@
       "native": [
         "src/app/PixelHistoryView.cpp",
         "src/app/MainWindow.cpp",
-        "src/rdc/main.cpp"
+        "src/rdc/main.cpp",
+        "src/app/ReplayDebugView.cpp",
+        "src/application/ReplayDebugModel.cpp"
       ],
       "validation": [
         "docs/PIXEL_HISTORY_UI_MIGRATION.md",
-        "Qt Pixel History is connected to native recapture and history workers with experiment/driver/library caching, cancellation, API navigation, details and JSON export. Other shared advanced-analysis/debugger/counter actions remain pending.",
+        "Qt Pixel History is connected to native recapture and history workers with experiment/driver/library caching, cancellation, API navigation, details and JSON export. Other shared inventory/texture/postmesh/counter actions remain pending; recorded shader debug UI is now connected.",
         "docs/RDC_DEBUG_MIGRATION.md",
-        "The native worker also accepts validated debug-pixel/debug-vertex/debug-thread jobs. Main-window task preparation remains connected only for Pixel History until the replay-debug UI adapter is migrated."
+        "The native worker also accepts validated debug-pixel/debug-vertex/debug-thread jobs. Main-window task preparation now covers Pixel History and recorded VS/PS/CS debugging.",
+        "docs/REPLAY_DEBUG_UI_MIGRATION.md",
+        "VS/PS/CS Qt views now share native recapture and cache with Pixel History, with navigation, breakpoints/watches, configurations and exports. Inventory/texture/postmesh/counters and other shared consumers remain outside this batch.",
+        "Packaged Qt debugger: 7 cases passed without skips; 14 runtime reports contain no Python/Tk/GPA modules, Qt is package-local, four delivered executables match Release, and four golden/negative controls pass. Full CTest: 47 other suites passed plus corrected new-suite rerun; original Qt regression: 54 passed without skips."
       ]
     },
     {
@@ -2382,15 +2417,20 @@
       "native": [
         "src/rdc/Backend.cpp",
         "src/rdc/main.cpp",
-        "src/rdc/DebugTrace.cpp"
+        "src/rdc/DebugTrace.cpp",
+        "src/app/ReplayDebugView.cpp",
+        "src/application/ReplayDebugModel.cpp"
       ],
       "validation": [
         "docs/RDC_HISTORY_MIGRATION.md",
-        "Native RenderDoc 1.45 replay-controller consumer implements exact event mapping, PixelHistory records and CPU-write supplementation. Qt history workflow is now connected; other rdc_worker analysis/debugger actions are not migrated by this batch.",
+        "Native RenderDoc 1.45 replay-controller consumer implements exact event mapping, PixelHistory records and CPU-write supplementation. Qt history workflow is now connected; other rdc_worker analysis branches remain pending, with recorded shader debugging covered by subsequent backend/UI evidence.",
         "Packaged backend: 152 checks, 22 complete history comparisons (35 records, 10 CPU snapshots), nine real controller-index comparisons; two relevant CTest suites and four golden/negative checks passed. Malformed structured-data injection remains pending; Qt workflow validation is recorded separately.",
         "docs/PIXEL_HISTORY_UI_MIGRATION.md",
         "docs/RDC_DEBUG_MIGRATION.md",
-        "Packaged native PS/VS/CS debugging: 171 checks, 21 full trace comparisons (279 steps), seven rejected selections. Known uninitialized 1.45 DXBC global mapping offsets are null with explicit scope metadata; all other trace/source/disassembly fields are compared. Qt replay-debug navigation, watches/configuration, and inventory/texture/postmesh/counter branches remain pending."
+        "Packaged native PS/VS/CS debugging: 171 checks, 21 full trace comparisons (279 steps), seven rejected selections. Known uninitialized 1.45 DXBC global mapping offsets are null with explicit scope metadata; all other trace/source/disassembly fields are compared. Qt replay-debug navigation and watches/configuration are now connected with separate UI evidence; inventory/texture/postmesh/counter branches remain pending.",
+        "docs/REPLAY_DEBUG_UI_MIGRATION.md",
+        "VS/PS/CS Qt views now share native recapture and cache with Pixel History, with navigation, breakpoints/watches, configurations and exports. Inventory/texture/postmesh/counters and other shared consumers remain outside this batch.",
+        "Packaged Qt debugger: 7 cases passed without skips; 14 runtime reports contain no Python/Tk/GPA modules, Qt is package-local, four delivered executables match Release, and four golden/negative controls pass. Full CTest: 47 other suites passed plus corrected new-suite rerun; original Qt regression: 54 passed without skips."
       ]
     },
     {
@@ -2779,18 +2819,34 @@
       "sha256": "6efbb140250a98fde77a610e9210dac10505259fdaf4b74baf27599933b4ec54",
       "lines": 131,
       "description": "Source navigation over a recorded invocation; never infer missing line data.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": [
+        "src/application/ReplayDebugModel.cpp",
+        "src/app/ReplayDebugView.cpp"
+      ],
+      "validation": [
+        "docs/REPLAY_DEBUG_UI_MIGRATION.md",
+        "21 real traces, 67 model scenarios and 8,170 native/Python operations; original Python is used only as a development oracle.",
+        "Recorded instruction/source navigation, callstack-aware over/out, executable line breakpoints, conditions and encounter-count rules are integrated. Separate condition state preserves the visible cursor after failed searches.",
+        "Packaged Qt debugger: 7 cases passed without skips; 14 runtime reports contain no Python/Tk/GPA modules, Qt is package-local, four delivered executables match Release, and four golden/negative controls pass. Full CTest: 47 other suites passed plus corrected new-suite rerun; original Qt regression: 54 passed without skips."
+      ]
     },
     {
       "module": "source_variables.py",
       "sha256": "29cdbd41e0653747bd9c4ba75bbc7132b9d46bcf972856f3724f4169881cfba0",
       "lines": 108,
       "description": "Resolve public RenderDoc source mappings against the current recorded state.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": [
+        "src/application/ReplayDebugModel.cpp",
+        "src/app/ReplayDebugView.cpp"
+      ],
+      "validation": [
+        "docs/REPLAY_DEBUG_UI_MIGRATION.md",
+        "21 real traces, 67 model scenarios and 8,170 native/Python operations; original Python is used only as a development oracle.",
+        "Typed local/global source components, exact backing paths and whole containers, references, missing/ambiguous/undefined/partial values and dimensions are integrated into the recorded Qt debugger. Exhaustive shader/type/mapping coverage remains unproven.",
+        "Packaged Qt debugger: 7 cases passed without skips; 14 runtime reports contain no Python/Tk/GPA modules, Qt is package-local, four delivered executables match Release, and four golden/negative controls pass. Full CTest: 47 other suites passed plus corrected new-suite rerun; original Qt regression: 54 passed without skips."
+      ]
     },
     {
       "module": "srv_edits.py",

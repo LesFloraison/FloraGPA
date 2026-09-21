@@ -105,9 +105,10 @@ validation tool. All GPU jobs and external oracles are run serially.
 ## Remaining work
 
 The Qt PS/VS/CS debugger, replay-trace navigation adapter, source variables,
-breakpoints/watches and debugger configuration still require migration and
-integration. Existing GS/HS/DS checkpoint adapters cannot be treated as evidence
-that these different RenderDoc trace consumers are complete. Other shared worker
-branches (inventory/texture/postmesh/counters) also remain outside this batch.
+breakpoints/watches and debugger configuration have since been connected in
+[REPLAY_DEBUG_UI_MIGRATION.md](REPLAY_DEBUG_UI_MIGRATION.md), with separate
+recorded-trace and UI evidence. Existing GS/HS/DS checkpoint adapters are not
+used as evidence for these different consumers. Other shared worker branches
+(inventory/texture/postmesh/counters) remain outside this batch.
 No claim is made for other RenderDoc ABIs, every shader operation, exhaustive
 250,000-step exhaustion, or deployment on a separate clean Windows machine.

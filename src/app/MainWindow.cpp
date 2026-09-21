@@ -10,6 +10,7 @@
 #include "PixelHistoryView.h"
 #include "PredicateView.h"
 #include "RasterizerDialog.h"
+#include "ReplayDebugView.h"
 #include "SamplerDialog.h"
 #include "SrvDialog.h"
 #include "StatisticsView.h"
@@ -276,8 +277,7 @@ MainWindow::MainWindow() {
                 replayedState_->finishReplay(runningPipelineRequest_,
                                              {{"error", process_.errorString().toStdString()}});
             if (runningKind_ == "history" || runningKind_ == "history-capture")
-                history_->finish(historyRequestId_,
-                                 {{"ok", false}, {"error", process_.errorString().toStdString()}});
+                finishRdcAnalysis({{"ok", false}, {"error", process_.errorString().toStdString()}});
             emit taskFinished(false);
         }
     });
@@ -997,7 +997,7 @@ void MainWindow::buildUi() {
     });
     history_ = new PixelHistoryView;
     centerTabs_->addTab(history_, "Pixel History");
-    connect(history_, &PixelHistoryView::readRequested, this, &MainWindow::readPixelHistory);
+    connect(history_, &PixelHistoryView::readRequested, this, [this] { readRdcAnalysis(); });
     connect(history_, &PixelHistoryView::cancelRequested, this, &MainWindow::cancel);
     connect(history_, &PixelHistoryView::eventRequested, this, [this](qulonglong id) {
         if (!busy())
@@ -1023,6 +1023,23 @@ void MainWindow::buildUi() {
                     startWorker(args, false);
                 });
     }
+    const QStringList replayStages{"vs", "ps", "cs"};
+    for (size_t i = 0; i < replayDebug_.size(); ++i) {
+        auto view = replayDebug_[i] = new ReplayDebugView(replayStages[int(i)]);
+        debugTabs->addTab(view, replayStages[int(i)].toUpper());
+        connect(view, &ReplayDebugView::readRequested, this, [this, view] { readRdcAnalysis(view); });
+        connect(view, &ReplayDebugView::cancelRequested, this, &MainWindow::cancel);
+        connect(view, &ReplayDebugView::error, this, &MainWindow::showError);
+    }
+    const QList<QWidget *> stageOrder{replayDebug_[0], checkpoints_[1], checkpoints_[2],
+                                      checkpoints_[0], replayDebug_[1], replayDebug_[2]};
+    for (int i = 0; i < stageOrder.size(); ++i) {
+        const auto index = debugTabs->indexOf(stageOrder[i]);
+        const auto label = debugTabs->tabText(index);
+        debugTabs->removeTab(index);
+        debugTabs->insertTab(i, stageOrder[i], label);
+    }
+    debugTabs->setCurrentIndex(0);
     centerTabs_->addTab(debugTabs, "Shader Debug");
     auto rightTabs = new QTabWidget;
     rightTabs->setObjectName("inspectorTabs");
@@ -1099,6 +1116,7 @@ void MainWindow::buildUi() {
             textureMetadata_["dimension"].toInt() == 4 ? preview["slice"].toInt() : preview["layer"].toInt();
         const auto sample = textureMetadata_["msaa"].toObject()["selected_sample"].toInt(0);
         history_->selectPixel(selectedResource_, x, y, preview["mip"].toInt(), layer, sample);
+        replayDebug_[1]->selectPixel(x, y, sample);
         statusBar()->showMessage(QString("History pixel %1, %2 · T:%3").arg(x).arg(y).arg(selectedResource_),
                                  4000);
     });
@@ -1197,6 +1215,9 @@ void MainWindow::setBusy(bool busy) {
     for (auto view : checkpoints_)
         if (view)
             view->setWorkerBusy(busy);
+    for (auto view : replayDebug_)
+        if (view)
+            view->setWorkerBusy(busy);
     if (busy && textureExportAction_)
         textureExportAction_->setEnabled(false);
     replayedState_->setWorkerBusy(busy);
@@ -1240,6 +1261,9 @@ void MainWindow::updateCheckpointContext() {
             view->setContext(key, available);
     if (history_)
         history_->setContext(historyContextKey(), selectedEvent_);
+    for (auto view : replayDebug_)
+        if (view)
+            view->setContext(historyContextKey(), selectedEvent_);
 }
 QString MainWindow::historyContextKey() const {
     if (!frame_)
@@ -1252,13 +1276,19 @@ QString MainWindow::historyContextKey() const {
     return QString::fromStdString(frame_->sha256()) + ':' + QString::number(adapter_->currentIndex()) + ':' +
            QString::fromLatin1(QCryptographicHash::hash(bytes, QCryptographicHash::Sha256).toHex());
 }
-void MainWindow::readPixelHistory() {
+bool MainWindow::finishRdcAnalysis(const nlohmann::json &result) {
+    return runningDebug_ ? runningDebug_->finish(historyRequestId_, result)
+                         : history_->finish(historyRequestId_, result);
+}
+void MainWindow::readRdcAnalysis(ReplayDebugView *view) {
     if (busy() || !frame_)
         return;
-    historyRequestId_ = history_->requestId();
+    runningDebug_ = view;
+    historyRequestId_ = view ? view->requestId() : history_->requestId();
     try {
-        historyRequest_ = history_->request();
-        const auto library = QFileInfo(history_->backendPath()).canonicalFilePath();
+        historyRequest_ = view ? view->request() : history_->request();
+        const auto library =
+            QFileInfo(view ? view->backendPath() : history_->backendPath()).canonicalFilePath();
         QFile file(library);
         if (library.isEmpty() || !file.open(QIODevice::ReadOnly))
             throw std::runtime_error("Select an installed RenderDoc 1.45 library");
@@ -1281,10 +1311,10 @@ void MainWindow::readPixelHistory() {
             if (process_.state() == QProcess::NotRunning)
                 throw std::runtime_error("Cannot start independent recapture");
             runningKind_ = "history-capture";
-            statusBar()->showMessage("Capturing pixel history…");
+            statusBar()->showMessage("Capturing analysis frame…");
         }
     } catch (const std::exception &e) {
-        history_->finish(historyRequestId_, {{"ok", false}, {"error", e.what()}});
+        finishRdcAnalysis({{"ok", false}, {"error", e.what()}});
         showError(QString::fromUtf8(e.what()));
         emit taskFinished(false);
     }
@@ -1306,7 +1336,7 @@ void MainWindow::startHistoryWorker() {
     stderrBuffer_.clear();
     errorText_.clear();
     setBusy(true);
-    statusBar()->showMessage("Reading pixel history…");
+    statusBar()->showMessage(runningDebug_ ? "Reading shader trace…" : "Reading pixel history…");
     timeout_.start();
     process_.start(QCoreApplication::applicationDirPath() + "/FloraGPA.Rdc.exe", {"--job", path});
 }
@@ -1421,7 +1451,7 @@ void MainWindow::finishWorker(int code, QProcess::ExitStatus status) {
     setBusy(false);
     if (runningRevision_ != revision_) {
         if (runningKind_ == "history" || runningKind_ == "history-capture")
-            history_->finish(historyRequestId_, {{"ok", false}, {"error", "Cancelled"}});
+            finishRdcAnalysis({{"ok", false}, {"error", "Cancelled"}});
         if (runningKind_ == "statistics")
             gpuStatistics_->finish(runningStatisticsRequest_, {{"error", "Cancelled"}});
         if (runningKind_ == "predicate")
@@ -1440,15 +1470,17 @@ void MainWindow::finishWorker(int code, QProcess::ExitStatus status) {
         if (runningKind_ == "history") {
             QFile file(jobDir_->path() + "/result/result.json");
             if (!file.open(QIODevice::ReadOnly))
-                throw std::runtime_error("History result is missing");
+                throw std::runtime_error("Analysis result is missing");
             const auto bytes = file.readAll();
             auto result = nlohmann::json::parse(bytes.begin(), bytes.end());
             result["capture"] = historyRdc_.toStdString();
             result["frame_sha256"] = historyRequest_.at("frame_sha256");
             result["experiment_key"] = historyRequest_.at("experiment_key");
             result["selection"] = historyRequest_;
-            const bool accepted = history_->finish(historyRequestId_, result);
-            statusBar()->showMessage(accepted ? "Pixel history ready" : "History selection changed", 3000);
+            const bool accepted = finishRdcAnalysis(result);
+            statusBar()->showMessage(accepted ? (runningDebug_ ? "Shader trace ready" : "Pixel history ready")
+                                              : "Analysis selection changed",
+                                     3000);
             emit taskFinished(accepted);
             return;
         }
@@ -1671,7 +1703,7 @@ void MainWindow::finishWorker(int code, QProcess::ExitStatus status) {
     } catch (const std::exception &e) {
         showError(QString::fromUtf8(e.what()));
         if (runningKind_ == "history" || runningKind_ == "history-capture")
-            history_->finish(historyRequestId_, {{"ok", false}, {"error", e.what()}});
+            finishRdcAnalysis({{"ok", false}, {"error", e.what()}});
         if (runningKind_ == "statistics")
             gpuStatistics_->finish(runningStatisticsRequest_, {{"error", e.what()}});
         if (runningKind_ == "replay-pipeline")
@@ -3584,6 +3616,10 @@ void MainWindow::selectOutputPixel(int x, int y, const QColor &color) {
                               display.value("sample", nlohmann::json(nullptr)).is_number()
                                   ? display.at("sample").get<int>()
                                   : 0);
+        replayDebug_[1]->selectPixel(x, y,
+                                     display.value("sample", nlohmann::json(nullptr)).is_number()
+                                         ? display.at("sample").get<int>()
+                                         : 0);
         properties("Output Pixel",
                    {{"Resource", QString::number(resource)},
                     {"Event", event ? QString::number(event) : "—"},

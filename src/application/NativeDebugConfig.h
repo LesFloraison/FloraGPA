@@ -3,6 +3,8 @@
 #include <filesystem>
 
 namespace flora {
+// Shared persisted identity encoding: Python compact sorted UTF-8 JSON.
+std::string debugConfigCanonicalJson(const nlohmann::json &value);
 struct NativeDebugSettings {
     SourceTrace source;
     std::set<uint64_t> instructions;

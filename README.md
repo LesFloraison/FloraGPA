@@ -67,7 +67,10 @@ a working D3D11 adapter.
 Capture, Trace and Trace Input, instruction/source stepping, breakpoints,
 frame-scoped variables and watches, configuration import/save and ZIP export.
 See [CHECKPOINT_UI_MIGRATION.md](docs/CHECKPOINT_UI_MIGRATION.md) for the workflow,
-verification and limits. Other debugger stages remain pending.
+verification and limits. VS / PS / CS now use the recorded native replay
+debugger with instruction/source navigation, typed variables, callstack,
+conditional/count breakpoints, watches, configuration import/save and JSON
+export. See [REPLAY_DEBUG_UI_MIGRATION.md](docs/REPLAY_DEBUG_UI_MIGRATION.md).
 
 ```powershell
 .\tools\package.ps1
@@ -98,8 +101,9 @@ experiment-aware recapture caching. See
 [PIXEL_HISTORY_UI_MIGRATION.md](docs/PIXEL_HISTORY_UI_MIGRATION.md).
 The same native worker now accepts `debug-pixel`, `debug-vertex` and
 `debug-thread` jobs with complete source/assembly and typed step traces. Their
-Qt debugger integration remains pending; see
-[RDC_DEBUG_MIGRATION.md](docs/RDC_DEBUG_MIGRATION.md).
+Qt views share the Pixel History recapture cache and cancellation pipeline;
+see [RDC_DEBUG_MIGRATION.md](docs/RDC_DEBUG_MIGRATION.md) for backend validation
+and [REPLAY_DEBUG_UI_MIGRATION.md](docs/REPLAY_DEBUG_UI_MIGRATION.md) for the UI.
 
 Use **F5** to replay, **F6** for GPU timings, **Escape** to cancel. Select API
 events to inspect their pipeline and before/after output. Resources provide
