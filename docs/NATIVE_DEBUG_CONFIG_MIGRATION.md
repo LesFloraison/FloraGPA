@@ -2,9 +2,10 @@
 
 `NativeDebugConfig` ports `native_debug_config.py`. `NativeDebugControls` ports
 the breakpoint/watch controls to a compact Qt Widgets component. The component
-is built and tested but is not yet instantiated by `MainWindow`: the complete
-checkpoint view and Worker capture wiring remain pending. The current delivered
-application remains `out/FloraGPA-sdbg-values/FloraGPA.exe`.
+is now integrated into the main-window GS / HS / DS checkpoint views, including
+native Worker capture and original source-frame readers. Integration evidence
+and the current package are recorded in
+[CHECKPOINT_UI_MIGRATION.md](CHECKPOINT_UI_MIGRATION.md).
 
 ## Configuration compatibility
 
@@ -29,7 +30,7 @@ watch add/remove, selected-record/frame values, and configuration import/save.
 Unavailable values remain explicit; individual expression errors do not discard
 other watches. SDBG results retain the `sdbg_assignment_history` basis and refuse
 single-point or unverified ancestor-frame evaluation. The parent checkpoint
-view will supply native register/value readers and source selection signals.
+view supplies native register/value readers and source selection signals.
 
 ## Validation
 
@@ -64,5 +65,6 @@ python tools/validate_native_debug_config.py --reference D:/CDXrepo/FloraGPA --e
 ```
 
 Use a fresh output directory. Python is only the development oracle, never part
-of the application runtime. Both migrated modules remain partial in the manifest
-until the parent checkpoint view is integrated and tested end to end.
+of the application runtime. The original component-only evidence above is
+supplemented by the main-window and capture integration checks documented in
+[CHECKPOINT_UI_MIGRATION.md](CHECKPOINT_UI_MIGRATION.md).

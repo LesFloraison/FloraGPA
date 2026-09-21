@@ -655,7 +655,9 @@
         "src/application/DxbcCheckpointModel.h",
         "src/application/DxbcCheckpointModel.cpp",
         "src/application/DxbcCheckpoint.h",
-        "src/application/DxbcCheckpoint.cpp"
+        "src/application/DxbcCheckpoint.cpp",
+        "src/app/CheckpointView.cpp",
+        "src/app/MainWindow.cpp"
       ],
       "validation": [
         "docs/CHECKPOINT_MODEL_MIGRATION.md",
@@ -664,7 +666,9 @@
         "Complete GS/DS/HS checkpoint/trace DXBC transform implemented: values/validity, inputs, dynamic arrays, staged dependent results, calls and HS runtime selection. Production capture/export/Qt integration remains pending.",
         "1090 transform comparisons: 875 exact DXBC and metadata successes, 215 matching rejections, 27 shaders including four real frame resources; native Hardware/WARP GS/DS/HS snapshots, CPU/SO witnesses, filtering, overflow and index bounds tests.",
         "docs/CHECKPOINT_CAPTURE_MIGRATION.md",
-        "Production GS/DS/HS checkpoint capture/export with bounded retries, input filtering and original resource/state restoration. Source debug and Qt checkpoint views remain pending."
+        "Production GS/DS/HS checkpoint capture/export with bounded retries, input filtering and original resource/state restoration. Source debug and Qt checkpoint views remain pending.",
+        "docs/CHECKPOINT_UI_MIGRATION.md",
+        "GS/HS/DS main-window checkpoint, trace and input recapture consumers are now connected, superseding earlier Qt/configuration-pending notes. Actual Qt navigation, selected values/frames/watches and ZIP contents are compared with Python; other shared-module consumers retain their existing status."
       ]
     },
     {
@@ -1050,14 +1054,18 @@
         "src/application/PostTransform.cpp",
         "src/cli/main.cpp",
         "src/application/ShaderSourceLines.cpp",
-        "src/application/SystemDisassembly.h"
+        "src/application/SystemDisassembly.h",
+        "src/app/CheckpointView.cpp",
+        "src/app/MainWindow.cpp"
       ],
       "validation": [
         "docs/CHECKPOINT_CAPTURE_MIGRATION.md",
         "540 native/Python capture and export comparisons: 324 successes and 216 matching rejections. At that batch, source metadata was pending; source lines and catalog locations are now connected (SOURCE_LINES_MIGRATION.md). Source variables and source stacks remain pending.",
         "PostTransformTests::checkpointCaptureAndIsolation; CheckpointTests::decodedRecordsAndExports",
         "docs/SOURCE_LINES_MIGRATION.md",
-        "60 packaged SPDB/SDBG GS/HS/DS capture comparisons passed with source lines and catalog locations included."
+        "60 packaged SPDB/SDBG GS/HS/DS capture comparisons passed with source lines and catalog locations included.",
+        "docs/CHECKPOINT_UI_MIGRATION.md",
+        "GS/HS/DS main-window checkpoint, trace and input recapture consumers are now connected, superseding earlier Qt/configuration-pending notes. Actual Qt navigation, selected values/frames/watches and ZIP contents are compared with Python; other shared-module consumers retain their existing status."
       ]
     },
     {
@@ -1065,9 +1073,18 @@
       "sha256": "5dd3041a1bcff27491dd4fe7533da6966f12ad5525da624a3a0fa8d81284c3c4",
       "lines": 283,
       "description": "Native GS/DS instruction checkpoints, repeated hits and typed register bits.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "ported",
+      "native": [
+        "src/app/CheckpointView.cpp",
+        "src/app/MainWindow.cpp",
+        "src/application/ZipArchive.cpp",
+        "src/app/NativeDebugControls.cpp"
+      ],
+      "validation": [
+        "docs/CHECKPOINT_UI_MIGRATION.md",
+        "GS/HS/DS main-window checkpoint, trace and input recapture consumers are now connected, superseding earlier Qt/configuration-pending notes. Actual Qt navigation, selected values/frames/watches and ZIP contents are compared with Python; other shared-module consumers retain their existing status.",
+        "Native UI tests exercise hardware/WARP capture, HS phase changes, cancellation/retry, event/driver/experiment invalidation, and export availability. Export uses uncompressed standard ZIP; >4 GiB archive behavior remains untested."
+      ]
     },
     {
       "module": "gtpin_blocks.py",
@@ -1705,14 +1722,18 @@
       "sha256": "28f7c60193ae5edbe5e20985ebc6056ae0653f19e6ee2f4af532d16b3e4c9922",
       "lines": 56,
       "description": "Atomic native GS debugger configuration bound to original shader and mappings.",
-      "status": "partial",
+      "status": "ported",
       "native": [
         "src/application/NativeDebugConfig.cpp",
-        "src/app/NativeDebugControls.cpp"
+        "src/app/NativeDebugControls.cpp",
+        "src/app/CheckpointView.cpp",
+        "src/app/MainWindow.cpp"
       ],
       "validation": [
         "docs/NATIVE_DEBUG_CONFIG_MIGRATION.md",
-        "984 configuration comparisons passed (720 exact successes, 264 consistent rejections), including 164 native capture identities. Native transactional rollback and Qt file-dialog round trips pass. Parent checkpoint/main-window integration remains pending."
+        "984 configuration comparisons passed (720 exact successes, 264 consistent rejections), including 164 native capture identities. Native transactional rollback and Qt file-dialog round trips pass. Parent checkpoint/main-window integration remains pending.",
+        "docs/CHECKPOINT_UI_MIGRATION.md",
+        "GS/HS/DS main-window checkpoint, trace and input recapture consumers are now connected, superseding earlier Qt/configuration-pending notes. Actual Qt navigation, selected values/frames/watches and ZIP contents are compared with Python; other shared-module consumers retain their existing status."
       ]
     },
     {
@@ -1722,13 +1743,17 @@
       "description": "Bounded watch expressions over current native source-frame values.",
       "status": "partial",
       "native": [
-        "src/application/DebugExpression.cpp"
+        "src/application/DebugExpression.cpp",
+        "src/app/CheckpointView.cpp",
+        "src/app/MainWindow.cpp"
       ],
       "validation": [
         "docs/SOURCE_NAVIGATION_MIGRATION.md",
         "Native live lexical shadowing, original scalar bits and typed vector groups ported; actual GS/HS/DS snapshot comparisons passed. Qt consumers remain pending.",
         "docs/NATIVE_DEBUG_CONFIG_MIGRATION.md",
-        "Now consumed by the Qt NativeDebugControls component; full checkpoint/main-window integration remains pending."
+        "Now consumed by the Qt NativeDebugControls component; full checkpoint/main-window integration remains pending.",
+        "docs/CHECKPOINT_UI_MIGRATION.md",
+        "GS/HS/DS main-window checkpoint, trace and input recapture consumers are now connected, superseding earlier Qt/configuration-pending notes. Actual Qt navigation, selected values/frames/watches and ZIP contents are compared with Python; other shared-module consumers retain their existing status."
       ]
     },
     {
@@ -1736,13 +1761,17 @@
       "sha256": "051830d1ae50e7c7d25618ebf3cb1bdadf345ba790fda90ee98e9cd8c0ed2652",
       "lines": 86,
       "description": "Native GS breakpoint rules, watch values and versioned configuration controls.",
-      "status": "partial",
+      "status": "ported",
       "native": [
-        "src/app/NativeDebugControls.cpp"
+        "src/app/NativeDebugControls.cpp",
+        "src/app/CheckpointView.cpp",
+        "src/app/MainWindow.cpp"
       ],
       "validation": [
         "docs/NATIVE_DEBUG_CONFIG_MIGRATION.md",
-        "Qt rule/watch component built and visually inspected. Native UI tests cover rules, frame/record watches, failed-import rollback, retention, file dialogs and SDBG validity. Not yet instantiated by the main window; checkpoint view and capture wiring remain pending."
+        "Qt rule/watch component built and visually inspected. Native UI tests cover rules, frame/record watches, failed-import rollback, retention, file dialogs and SDBG validity. Not yet instantiated by the main window; checkpoint view and capture wiring remain pending.",
+        "docs/CHECKPOINT_UI_MIGRATION.md",
+        "GS/HS/DS main-window checkpoint, trace and input recapture consumers are now connected, superseding earlier Qt/configuration-pending notes. Actual Qt navigation, selected values/frames/watches and ZIP contents are compared with Python; other shared-module consumers retain their existing status."
       ]
     },
     {
@@ -1752,13 +1781,17 @@
       "description": "Per-frame source locations and lexical ownership of native local symbols.",
       "status": "partial",
       "native": [
-        "src/application/SourceStack.cpp"
+        "src/application/SourceStack.cpp",
+        "src/app/CheckpointView.cpp",
+        "src/app/MainWindow.cpp"
       ],
       "validation": [
         "docs/SOURCE_STACK_MIGRATION.md",
         "Native per-frame source locations and lexical local ownership; 1388 independent DIA frame locations agree. Source trace and Qt consumers remain pending.",
         "docs/SOURCE_NAVIGATION_MIGRATION.md",
-        "Now consumed by the native SourceTrace library; Qt debugger consumers remain pending."
+        "Now consumed by the native SourceTrace library; Qt debugger consumers remain pending.",
+        "docs/CHECKPOINT_UI_MIGRATION.md",
+        "GS/HS/DS main-window checkpoint, trace and input recapture consumers are now connected, superseding earlier Qt/configuration-pending notes. Actual Qt navigation, selected values/frames/watches and ZIP contents are compared with Python; other shared-module consumers retain their existing status."
       ]
     },
     {
@@ -1769,13 +1802,17 @@
       "status": "partial",
       "native": [
         "src/application/SourceStack.cpp",
-        "src/application/CheckpointInspection.cpp"
+        "src/application/CheckpointInspection.cpp",
+        "src/app/CheckpointView.cpp",
+        "src/app/MainWindow.cpp"
       ],
       "validation": [
         "docs/SOURCE_STACK_MIGRATION.md",
         "Production native control-point/fork/join scope ownership, excluding the control-point wrapper in fork/join. Complete HS fields and native shader-to-variable resolution compared; source trace and Qt consumers remain pending.",
         "docs/SOURCE_NAVIGATION_MIGRATION.md",
-        "Now consumed by the native SourceTrace library; Qt debugger consumers remain pending."
+        "Now consumed by the native SourceTrace library; Qt debugger consumers remain pending.",
+        "docs/CHECKPOINT_UI_MIGRATION.md",
+        "GS/HS/DS main-window checkpoint, trace and input recapture consumers are now connected, superseding earlier Qt/configuration-pending notes. Actual Qt navigation, selected values/frames/watches and ZIP contents are compared with Python; other shared-module consumers retain their existing status."
       ]
     },
     {
@@ -1786,7 +1823,9 @@
       "status": "partial",
       "native": [
         "src/application/InvocationSelector.h",
-        "src/application/InvocationSelector.cpp"
+        "src/application/InvocationSelector.cpp",
+        "src/app/CheckpointView.cpp",
+        "src/app/MainWindow.cpp"
       ],
       "validation": [
         "docs/CHECKPOINT_MODEL_MIGRATION.md",
@@ -1795,7 +1834,9 @@
         "docs/DXBC_CHECKPOINT_MIGRATION.md",
         "Now consumed by the complete native checkpoint transform and direct Hardware/WARP fixtures; production capture/export/Qt integration remains pending.",
         "docs/CHECKPOINT_CAPTURE_MIGRATION.md",
-        "Production GS/DS/HS checkpoint capture/export with bounded retries, input filtering and original resource/state restoration. Source debug and Qt checkpoint views remain pending."
+        "Production GS/DS/HS checkpoint capture/export with bounded retries, input filtering and original resource/state restoration. Source debug and Qt checkpoint views remain pending.",
+        "docs/CHECKPOINT_UI_MIGRATION.md",
+        "GS/HS/DS main-window checkpoint, trace and input recapture consumers are now connected, superseding earlier Qt/configuration-pending notes. Actual Qt navigation, selected values/frames/watches and ZIP contents are compared with Python; other shared-module consumers retain their existing status."
       ]
     },
     {
@@ -1805,13 +1846,17 @@
       "description": "Read-only expressions over verified, currently visible SDBG assignment history.",
       "status": "partial",
       "native": [
-        "src/application/DebugExpression.cpp"
+        "src/application/DebugExpression.cpp",
+        "src/app/CheckpointView.cpp",
+        "src/app/MainWindow.cpp"
       ],
       "validation": [
         "docs/SOURCE_NAVIGATION_MIGRATION.md",
         "Verified-assignment environment and ambiguous-name rejection ported and tested synthetically. Native SDBG assignment reconstruction is now available as a separate library; Qt consumers remain pending.",
         "docs/NATIVE_DEBUG_CONFIG_MIGRATION.md",
-        "Now consumed by the Qt NativeDebugControls component; full checkpoint/main-window integration remains pending."
+        "Now consumed by the Qt NativeDebugControls component; full checkpoint/main-window integration remains pending.",
+        "docs/CHECKPOINT_UI_MIGRATION.md",
+        "GS/HS/DS main-window checkpoint, trace and input recapture consumers are now connected, superseding earlier Qt/configuration-pending notes. Actual Qt navigation, selected values/frames/watches and ZIP contents are compared with Python; other shared-module consumers retain their existing status."
       ]
     },
     {
@@ -1823,11 +1868,15 @@
       "native": [
         "src/application/SdbgVariables.cpp",
         "src/application/SourceVariables.cpp",
-        "src/application/CheckpointInspection.cpp"
+        "src/application/CheckpointInspection.cpp",
+        "src/app/CheckpointView.cpp",
+        "src/app/MainWindow.cpp"
       ],
       "validation": [
         "docs/SDBG_VARIABLES_MIGRATION.md",
-        "13790 symbol/history comparisons passed; 442 additional exact history scenarios over 6220 native records. Production exports include SDBG symbols and limits. Qt history consumers and debugger configuration remain pending."
+        "13790 symbol/history comparisons passed; 442 additional exact history scenarios over 6220 native records. Production exports include SDBG symbols and limits. Qt history consumers and debugger configuration remain pending.",
+        "docs/CHECKPOINT_UI_MIGRATION.md",
+        "GS/HS/DS main-window checkpoint, trace and input recapture consumers are now connected, superseding earlier Qt/configuration-pending notes. Actual Qt navigation, selected values/frames/watches and ZIP contents are compared with Python; other shared-module consumers retain their existing status."
       ]
     },
     {
@@ -1838,13 +1887,17 @@
       "status": "partial",
       "native": [
         "src/application/SourceStack.cpp",
-        "src/application/CheckpointInspection.cpp"
+        "src/application/CheckpointInspection.cpp",
+        "src/app/CheckpointView.cpp",
+        "src/app/MainWindow.cpp"
       ],
       "validation": [
         "docs/SOURCE_STACK_MIGRATION.md",
         "3492 parser/stack/location/ownership checks passed, including 28702 queries and three independent DIA comparisons. Production exports include source_stack; source trace navigation and Qt consumers remain pending.",
         "docs/SOURCE_NAVIGATION_MIGRATION.md",
-        "Now consumed by the native SourceTrace library; Qt debugger consumers remain pending."
+        "Now consumed by the native SourceTrace library; Qt debugger consumers remain pending.",
+        "docs/CHECKPOINT_UI_MIGRATION.md",
+        "GS/HS/DS main-window checkpoint, trace and input recapture consumers are now connected, superseding earlier Qt/configuration-pending notes. Actual Qt navigation, selected values/frames/watches and ZIP contents are compared with Python; other shared-module consumers retain their existing status."
       ]
     },
     {
@@ -1854,13 +1907,17 @@
       "description": "Source navigation within one native invocation, using verified original locations.",
       "status": "partial",
       "native": [
-        "src/application/SourceTrace.cpp"
+        "src/application/SourceTrace.cpp",
+        "src/app/CheckpointView.cpp",
+        "src/app/MainWindow.cpp"
       ],
       "validation": [
         "docs/SOURCE_NAVIGATION_MIGRATION.md",
         "Full native source navigation, conditional/count breakpoints, rule copy/export and frame-watch APIs. 28998 differential operations in 73 scenarios passed. Configuration and Qt consumer wiring remain pending.",
         "docs/NATIVE_DEBUG_CONFIG_MIGRATION.md",
-        "Now consumed by the Qt NativeDebugControls component; full checkpoint/main-window integration remains pending."
+        "Now consumed by the Qt NativeDebugControls component; full checkpoint/main-window integration remains pending.",
+        "docs/CHECKPOINT_UI_MIGRATION.md",
+        "GS/HS/DS main-window checkpoint, trace and input recapture consumers are now connected, superseding earlier Qt/configuration-pending notes. Actual Qt navigation, selected values/frames/watches and ZIP contents are compared with Python; other shared-module consumers retain their existing status."
       ]
     },
     {
@@ -1871,7 +1928,9 @@
       "status": "partial",
       "native": [
         "src/application/SourceVariables.cpp",
-        "src/application/CheckpointInspection.cpp"
+        "src/application/CheckpointInspection.cpp",
+        "src/app/CheckpointView.cpp",
+        "src/app/MainWindow.cpp"
       ],
       "validation": [
         "docs/SOURCE_VARIABLES_MIGRATION.md",
@@ -1879,7 +1938,9 @@
         "SPDB/SDBG symbols are included in production checkpoint exports; source-variable resolution and assignment histories are native library APIs. Qt source-variable integration remains pending.",
         "docs/SOURCE_STACK_MIGRATION.md",
         "Native HS phase ownership is now attached in production. 15742 updated comparisons passed, including 11606 native snapshot records resolved from original shaders without Python-supplied native symbol models.",
-        "docs/SDBG_VARIABLES_MIGRATION.md"
+        "docs/SDBG_VARIABLES_MIGRATION.md",
+        "docs/CHECKPOINT_UI_MIGRATION.md",
+        "GS/HS/DS main-window checkpoint, trace and input recapture consumers are now connected, superseding earlier Qt/configuration-pending notes. Actual Qt navigation, selected values/frames/watches and ZIP contents are compared with Python; other shared-module consumers retain their existing status."
       ]
     },
     {

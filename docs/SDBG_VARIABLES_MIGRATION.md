@@ -4,7 +4,8 @@
 history to C++. Production checkpoint exports now include the complete SDBG
 variable model and its limits. `SdbgTraceValues` reconstructs values from native
 snapshot callbacks without Python. Configuration persistence and Qt debugger
-consumers remain pending; this does not add debugger controls to the UI.
+consumers were subsequently connected in
+[CHECKPOINT_UI_MIGRATION.md](CHECKPOINT_UI_MIGRATION.md).
 
 ## Behavior
 

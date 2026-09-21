@@ -2,10 +2,11 @@
 
 `DebugExpression` and `SourceTrace` port the recovered expression engine, native
 source-frame environments and invocation-local source navigation to C++.
-They are library APIs at this stage. The Qt debugger and its saved configuration
-are not yet integrated. SDBG assignment reconstruction was subsequently ported;
-see [SDBG_VARIABLES_MIGRATION.md](SDBG_VARIABLES_MIGRATION.md). Neither batch
-claims new debugger controls in the application.
+They were first verified as library APIs. The Qt debugger and its saved
+configuration are now integrated; see
+[CHECKPOINT_UI_MIGRATION.md](CHECKPOINT_UI_MIGRATION.md). SDBG assignment
+reconstruction was also ported; see
+[SDBG_VARIABLES_MIGRATION.md](SDBG_VARIABLES_MIGRATION.md).
 
 ## Expression semantics
 

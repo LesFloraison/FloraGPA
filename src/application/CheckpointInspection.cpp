@@ -189,7 +189,7 @@ CheckpointInspection checkpointCatalog(Bytes shader, Id resource, const Json &ev
                      {"source_lines", sourceLines},
                      {"source_variables", sourceSymbols},
                      {"source_stack", stack},
-                     {"source_debug_status", "debugger_configuration_and_qt_pending"}};
+                     {"source_debug_status", "native_checkpoint_debugger_available"}};
     if (options.stage == "hs")
         result.report["hs_phases"] = checkpoint::hullPhases(parsed.code.instructions);
     if (options.trace)

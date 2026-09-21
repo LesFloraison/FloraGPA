@@ -1,6 +1,7 @@
 #include "MainWindow.h"
 #include "AnnotationsView.h"
 #include "BlendDialog.h"
+#include "CheckpointView.h"
 #include "CommandStateView.h"
 #include "ConstantBufferDialog.h"
 #include "IaSetterDialog.h"
@@ -989,11 +990,32 @@ void MainWindow::buildUi() {
         geometryModel_->setTable(
             geometry_["tables"].toObject()[geometryTable_->currentData().toString()].toObject());
     });
-    for (const auto &name : {"Pixel History", "Shader Debug"}) {
+    for (const auto &name : {"Pixel History"}) {
         int tab = centerTabs_->addTab(new QWidget, name);
         centerTabs_->setTabEnabled(tab, false);
         centerTabs_->setTabToolTip(tab, "Migration pending");
     }
+    auto debugTabs = new QTabWidget;
+    debugTabs->setObjectName("checkpointStageTabs");
+    debugTabs->setDocumentMode(true);
+    const QStringList debugStages{"gs", "hs", "ds"};
+    for (size_t i = 0; i < checkpoints_.size(); ++i) {
+        auto view = checkpoints_[i] = new CheckpointView(debugStages[int(i)]);
+        debugTabs->addTab(view, debugStages[int(i)].toUpper());
+        connect(view, &CheckpointView::error, this, &MainWindow::showError);
+        connect(view, &CheckpointView::captureRequested, this,
+                [this, view](const QStringList &options, bool catalog) {
+                    if (busy() || !frame_ || !selectedEvent_)
+                        return;
+                    runningCheckpoint_ = view;
+                    runningCheckpointCatalog_ = catalog;
+                    QStringList args{"shader-checkpoint", capturePath_, "--event",
+                                     QString::number(selectedEvent_)};
+                    args += options;
+                    startWorker(args, false);
+                });
+    }
+    centerTabs_->addTab(debugTabs, "Shader Debug");
     auto rightTabs = new QTabWidget;
     rightTabs->setObjectName("inspectorTabs");
     rightTabs->setDocumentMode(true);
@@ -1094,6 +1116,7 @@ void MainWindow::buildUi() {
         }
     });
     connect(adapter_, &QComboBox::currentIndexChanged, this, [this] {
+        updateCheckpointContext();
         ++outputGeneration_;
         replayedState_->invalidate();
         predicateView_->invalidate();
@@ -1148,6 +1171,10 @@ void MainWindow::closeEvent(QCloseEvent *e) {
     e->accept();
 }
 void MainWindow::setBusy(bool busy) {
+    updateCheckpointContext();
+    for (auto view : checkpoints_)
+        if (view)
+            view->setWorkerBusy(busy);
     if (busy && textureExportAction_)
         textureExportAction_->setEnabled(false);
     replayedState_->setWorkerBusy(busy);
@@ -1175,6 +1202,20 @@ void MainWindow::setBusy(bool busy) {
     } else
         progress_->setValue(0);
     exportAction_->setEnabled(!image_->image().isNull());
+}
+void MainWindow::updateCheckpointContext() {
+    const bool available = frame_ && selectedEvent_ && isDraw(frame_->entry(selectedEvent_).type);
+    QString key;
+    if (frame_) {
+        const auto document = experiment_ ? experiment_->document().dump() : std::string();
+        const auto digest =
+            sha256(Bytes(reinterpret_cast<const uint8_t *>(document.data()), document.size()));
+        key = QString::fromStdString(frame_->sha256()) + ':' + QString::number(selectedEvent_) + ':' +
+              QString::number(adapter_->currentIndex()) + ':' + QString::fromStdString(digest);
+    }
+    for (auto view : checkpoints_)
+        if (view)
+            view->setContext(key, available);
 }
 void MainWindow::openCapture(const QString &path) {
     if (projectDirty_) {
@@ -1316,6 +1357,15 @@ void MainWindow::finishWorker(int code, QProcess::ExitStatus status) {
                                       .arg(experiment["revisions"].toInteger())
                                       .arg(experiment["applied_events"].toArray().size())
                                       .arg(experiment["pending_events"].toArray().size()));
+        }
+        if (runningKind_ == "shader-checkpoint") {
+            if (!runningCheckpoint_)
+                throw std::runtime_error("Missing checkpoint view");
+            runningCheckpoint_->loadOutput(jobDir_->path() + "/result", runningCheckpointCatalog_);
+            runningCheckpoint_->keepOutput(std::move(jobDir_));
+            statusBar()->showMessage("Shader checkpoints ready", 3000);
+            emit taskFinished(true);
+            return;
         }
         if (runningKind_ == "statistics") {
             QFile statisticsFile(jobDir_->path() + "/result/statistics.json");
@@ -1543,6 +1593,7 @@ void MainWindow::selectEvent(Id id) {
     if (!frame_ || selectedEvent_ == id)
         return;
     selectedEvent_ = id;
+    updateCheckpointContext();
     capturedState_->setSelection(frame_, id);
     replayedState_->setSelection(frame_, id);
     predicateView_->setSelection(frame_, id);
@@ -2306,6 +2357,7 @@ void MainWindow::updateExperimentActions() {
         editable && experiment_ && !experiment_->enabled(selectedEvent_) ? "Enable Event" : "Disable Event");
 }
 void MainWindow::experimentChanged() {
+    updateCheckpointContext();
     const auto shaderStage = selectedShaderStage_;
     ++outputGeneration_;
     replayedState_->invalidate();

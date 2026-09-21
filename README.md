@@ -63,6 +63,12 @@ a working D3D11 adapter.
 
 ## Run and deploy
 
+**Shader Debug** now contains native GS / HS / DS checkpoint views: Read,
+Capture, Trace and Trace Input, instruction/source stepping, breakpoints,
+frame-scoped variables and watches, configuration import/save and ZIP export.
+See [CHECKPOINT_UI_MIGRATION.md](docs/CHECKPOINT_UI_MIGRATION.md) for the workflow,
+verification and limits. Other debugger stages and Pixel History remain pending.
+
 ```powershell
 .\tools\package.ps1
 .\out\FloraGPA\FloraGPA.exe

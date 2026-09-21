@@ -2,19 +2,34 @@
 
 已有可编译、可运行的 VS2022 / Qt Widgets 原生工程，能够独立重放当前验证的
 GF2 与 BF1 DX11 捕获。**尚未完成原 Python 版本的全部功能迁移。**
-当前独立包为 `out/FloraGPA-sdbg-values/FloraGPA.exe`。
+当前独立包为 `out/FloraGPA-checkpoint-ui/FloraGPA.exe`。
 
-最新一批迁入原生调试配置与 Qt 断点／监视面板组件。984 项配置对照通过，
+最新一批将 GS／HS／DS 检查点调试接入主窗口：读取原始 shader、单点与完整轨迹
+采集、精确输入重新采集、HS 阶段选择、指令／源码步进、条件断点、源码帧变量、
+SDBG 历史监视、配置导入／保存和完整 ZIP 导出。44 份实测轨迹的 3,246 项
+界面对照通过，包含 1,752 次按钮导航、变量／帧／监视与归档检查；原 Qt 54 项
+回归无失败、无跳过。新包 164 项源码捕获对照、4 项黄金帧及负对照、166 份
+运行时模块审计通过。完整 Release 构建和实际 Qt 布局检查通过。
+界面保持 GPA 风格布局与简洁英文控件；未接通的其他调试阶段仍留空。
+详见 [CHECKPOINT_UI_MIGRATION.md](CHECKPOINT_UI_MIGRATION.md)。
+
+清单中的 `ported` 表示该 Python 模块的功能已有接通并验证的原生对应实现；
+`partial` 表示共享模块仍有未迁移或未充分验证的分支／消费者，`pending` 表示待迁移。
+本批将检查点界面、原生调试配置和断点／监视组件三项记为 `ported`；这不代表
+整个应用迁移完成，也不代表已验证任意捕获或另一台干净 Windows 机器。
+
+上一批迁入原生调试配置与 Qt 断点／监视面板组件。984 项配置对照通过，
 覆盖 164 份捕获报告的身份、配置往返、规则限制、编码和文件边界；原生事务回滚、
 Qt 按钮／文件对话框、源码帧切换与 SDBG 历史监视检查通过，实际 Qt 渲染已检查。
-完整 Release 构建通过。组件尚未接入主窗口，完整检查点视图与 Worker 协调仍待迁移，
-本批未替换独立包。详见 [NATIVE_DEBUG_CONFIG_MIGRATION.md](NATIVE_DEBUG_CONFIG_MIGRATION.md)。
+完整 Release 构建通过。该批当时组件尚未接入主窗口，也未替换独立包；
+完整检查点视图与 Worker 协调已由最新一批接通。
+详见 [NATIVE_DEBUG_CONFIG_MIGRATION.md](NATIVE_DEBUG_CONFIG_MIGRATION.md)。
 
 上一批迁入 SDBG 变量符号与逐次赋值历史，正式 checkpoint 导出已包含完整符号。
 13,790 项符号／历史对照通过；新捕获的 6,220 条快照用于 442 项精确历史对照，
 包含数组写入前索引、双精度完整分量、反向／随机查看及缺失历史拒绝。
 独立包 164 项 Hardware/WARP 捕获对照、15,742 项 SPDB 回归、相关 4 套 CTest、
-4 项黄金帧和 164 份运行时审计通过。Qt 调试视图和配置持久化仍待接通，
+4 项黄金帧和 164 份运行时审计通过。该批当时 Qt 调试视图和配置持久化仍待接通，
 未将底层完成计作界面功能完成。详见 [SDBG_VARIABLES_MIGRATION.md](SDBG_VARIABLES_MIGRATION.md)。
 
 上一批迁入 C++ 源码导航、条件断点、命中次数规则和监视表达式底层 API。

@@ -23,6 +23,7 @@ class CommandStateView;
 class PredicateView;
 class AnnotationsView;
 class StatisticsView;
+class CheckpointView;
 class MainWindow final : public QMainWindow {
     Q_OBJECT
   public:
@@ -85,6 +86,10 @@ class MainWindow final : public QMainWindow {
     void setBusy(bool);
     void properties(const QString &title, const QList<QPair<QString, QString>> &rows);
     void updateStatistics();
+    void updateCheckpointContext();
+    std::array<CheckpointView *, 3> checkpoints_{};
+    CheckpointView *runningCheckpoint_ = nullptr;
+    bool runningCheckpointCatalog_ = true;
     std::shared_ptr<const Frame> frame_;
     std::unique_ptr<Experiment> experiment_;
     QString projectPath_;

@@ -1,7 +1,7 @@
 """Development-only comparison of native checkpoint capture and complete exports.
 
 SPDB/SDBG symbols, original source lines, source stacks and HS phase ownership are
-compared. Debugger configuration and Qt integration remain pending. Compare other report fields,
+compared. Qt interactions and configuration have separate validators. Compare other report fields,
 original bytecode/disassembly, and complete per-invocation histories (including
 raw register bits and CSVs). Atomic invocation/record allocation order may vary;
 never sort individual snapshots across invocations or discard their hit order.
@@ -53,7 +53,7 @@ def save(completed=False):
     sources = ('gs_checkpoint.py', 'vertex_writes.py', 'native_invocation_selector.py', 'dxbc_gs_checkpoint.py')
     (a.out/'validation.json').write_text(json.dumps(dict(
         completed=completed, passed=all(c['passed'] for c in checks), checks=checks,
-        pending=['Debugger configuration', 'Qt checkpoint integration'],
+        outside_scope=['Debugger configuration', 'Qt checkpoint integration'],
         executable_sha256=hashlib.sha256(a.exe.read_bytes()).hexdigest(),
         reference_sources={s: hashlib.sha256((a.reference/'standalone'/s).read_bytes()).hexdigest() for s in sources}
     ), indent=2), encoding='utf-8')
