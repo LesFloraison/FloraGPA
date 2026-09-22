@@ -42,8 +42,9 @@ Python `hardware_metrics.metric_iterations` fields. Legacy Chinese scope/pass
 values are recognized; unsupported scopes require an explicit range choice.
 
 The `metric-catalog --out <new-directory>` CLI/worker command also works without
-a capture. This migrates the list-sets branch of `md_profile.py`; its general
-uniform collector is still pending. The shared `hardware_metrics_ui.py` and
+a capture. That batch migrated the list-sets branch of `md_profile.py`; its
+uniform collector is covered by the subsequent
+[MD_PROFILE_MIGRATION.md](MD_PROFILE_MIGRATION.md). The shared `hardware_metrics_ui.py` and
 `session.py` remain partial: other profiling owners and consumers are not
 represented as finished. Settings are saved with experiment projects; this
 does not claim that the entire Python application/session persistence is ported.

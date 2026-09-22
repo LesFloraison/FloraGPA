@@ -1297,9 +1297,16 @@
       "sha256": "fe731813a6738acaebe1cf3efbf3e64dcbdede0a6c927060a6ac27828be1f23b",
       "lines": 73,
       "description": "Frozen experiment identity and effective shader bindings for SDK profiling.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": [
+        "src/application/MdProfile.cpp",
+        "src/application/MdIterations.cpp",
+        "src/application/Experiment.cpp"
+      ],
+      "validation": [
+        "docs/MD_PROFILE_MIGRATION.md",
+        "Frozen experiment loading/identity and effective submission shader metadata are used by the native MD collectors and checked with the original Python helpers. Instrumentation worker comparisons, current-submission tracker integration and native shader COM verification remain for the GTPin migration."
+      ]
     },
     {
       "module": "gtpin_hlsl.py",
@@ -1666,14 +1673,18 @@
       "sha256": "4c532c2d09854f2414303c6a7a1480fc86b873be688bb47c2fe289568bbee877",
       "lines": 265,
       "description": "Intel DX11 hardware metrics from the installed driver; no GPA runtime DLLs.",
-      "status": "partial",
+      "status": "ported",
       "native": [
+        "src/application/MdProfile.h",
+        "src/application/MdProfile.cpp",
         "src/application/MdIterations.cpp",
         "src/cli/main.cpp"
       ],
       "validation": [
-        "docs/MD_ITERATIONS_UI_MIGRATION.md",
-        "Catalog/list-sets and shared scheduled setup are native. Uniform collection, remaining hardware metric views and profiling owners are not migrated by this batch."
+        "docs/MD_PROFILE_MIGRATION.md",
+        "Native uniform collector preserves set/symbol planning, event/interval/FrameFile scopes, set-then-iteration sampling, frozen experiments, priority arbitration, exact presentation checks, raw reports, original matrices/statistics and requested/publisher JSON/CSV. Catalog/list-sets uses metric-catalog. Shared Qt/session integration is tracked separately.",
+        "Packaged differential validation: 34 requests and 12 accepted collections covering 46 replays and 203 raw reports; original Python decoding, matrix/statistics/request functions and exact CSV exports agree. Eleven completed delivery collections were revalidated without remeasurement; BF1 was explicitly rerun after a strict one-pixel rejection. That intermittent image issue remains unresolved.",
+        "Nine additional native/Python collection pairs exercise independent samples, split drain and synchronous End fallback bridges across all three scopes. Test forwarders hide optional exports but retain real Intel counters and are not distributed."
       ]
     },
     {

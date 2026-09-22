@@ -13,13 +13,14 @@
 #include "application/ExternalShaderTools.h"
 #include "application/FrameOutput.h"
 #include "application/Geometry.h"
-#include "application/GpuStatistics.h"
 #include "application/GpuProfile.h"
+#include "application/GpuStatistics.h"
 #include "application/HlslCompilation.h"
 #include "application/HlslRecovery.h"
 #include "application/InvocationSelector.h"
-#include "application/MetricIterations.h"
 #include "application/MdIterations.h"
+#include "application/MdProfile.h"
+#include "application/MetricIterations.h"
 #include "application/PlanarWrites.h"
 #include "application/PostTransform.h"
 #include "application/PredicateInspector.h"
@@ -84,13 +85,13 @@ int main(int argc, char **argv) {
     p.addHelpOption();
     p.addVersionOption();
     p.addPositionalArgument(
-        "command",
-        "inventory | commands | command-state | contexts | command-lists | replay | shader | "
-        "buffer | texture | texture-storage | compile | compile-project | assemble | geometry | "
-        "replay-pipeline | "
-        "class-linkage | predicate | annotations | metric-index | metric-catalog | metric-iterations | "
-        "statistics | timings | coverage | quad | post-geometry | shader-checkpoint | "
-        "rdc-analyze");
+        "command", "inventory | commands | command-state | contexts | command-lists | replay | shader | "
+                   "buffer | texture | texture-storage | compile | compile-project | assemble | geometry | "
+                   "replay-pipeline | "
+                   "class-linkage | predicate | annotations | metric-index | metric-catalog | metric-profile "
+                   "| metric-iterations | "
+                   "statistics | timings | coverage | quad | post-geometry | shader-checkpoint | "
+                   "rdc-analyze");
     p.addPositionalArgument("capture", "DX11 .gpa_frame file");
     p.addOption({"out", "New or empty output directory", "path"});
     p.addOption({"experiment", "Compatible FloraGPA experiment project", "path"});
@@ -116,6 +117,11 @@ int main(int argc, char **argv) {
     p.addOption({"pass-map", "Scheduled pass mapping, comma separated", "indices"});
     p.addOption({"weights", "Cached metric weight JSON array", "path"});
     p.addOption({"metrics-bridge", "Optional independent Metrics Discovery bridge", "path"});
+    p.addOption({"set", "Hardware metric set (repeatable)", "name"});
+    p.addOption({"all-sets", "Collect every driver metric set"});
+    p.addOption({"interval", "Collect one inclusive complete-command interval"});
+    p.addOption({"all-frame-ranges", "Collect all category-2 FrameFile ranges"});
+    p.addOption({"publisher-values", "Export recovered publisher values as well as raw metrics"});
     QCommandLineOption readyFile("ready-file", "Desktop process job handshake", "path");
     readyFile.setFlags(QCommandLineOption::HiddenFromHelp);
     p.addOption(readyFile);
@@ -170,7 +176,7 @@ int main(int argc, char **argv) {
             throw std::runtime_error("Expected command");
         auto command = args[0];
         if (p.isSet(readyFile)) {
-            if (command != "metric-iterations" && command != "metric-catalog")
+            if (command != "metric-iterations" && command != "metric-catalog" && command != "metric-profile")
                 throw std::runtime_error("--ready-file applies to Intel metric workers only");
             QElapsedTimer deadline;
             deadline.start();
@@ -202,13 +208,19 @@ int main(int argc, char **argv) {
             throw std::runtime_error("--recover applies to shader only");
         if ((p.isSet("profile") || p.value("optimization") != "auto") && command != "compile")
             throw std::runtime_error("--profile and --optimization apply to compile only");
-        if (command != "timings" && command != "metric-iterations" && (p.value("samples") != "5" || p.value("warmup") != "1"))
-            throw std::runtime_error("--samples and --warmup apply to timings or metric-iterations only");
+        if (command != "timings" && command != "metric-iterations" && command != "metric-profile" &&
+            (p.value("samples") != "5" || p.value("warmup") != "1"))
+            throw std::runtime_error(
+                "--samples and --warmup apply to timings or Intel metric collection only");
         if (command != "timings" && p.isSet("include-writes"))
             throw std::runtime_error("--include-writes applies to timings only");
-        if (command != "metric-iterations" && (p.isSet("metric") || p.isSet("frame-range") || p.isSet("pass") ||
-            p.isSet("pass-map") || p.isSet("weights") || p.isSet("metrics-bridge")))
-            throw std::runtime_error("Scheduled metric options apply to metric-iterations only");
+        if (command != "metric-iterations" && command != "metric-profile" &&
+            (p.isSet("metric") || p.isSet("frame-range") || p.isSet("pass") || p.isSet("pass-map") ||
+             p.isSet("weights") || p.isSet("metrics-bridge")))
+            throw std::runtime_error("Metric options apply to Intel metric collection only");
+        if (command != "metric-profile" && (p.isSet("set") || p.isSet("all-sets") || p.isSet("interval") ||
+                                            p.isSet("all-frame-ranges") || p.isSet("publisher-values")))
+            throw std::runtime_error("Uniform metric options apply to metric-profile only");
         if (p.isSet("decompiler") && command != "shader" && command != "assemble")
             throw std::runtime_error("--decompiler applies to shader or assemble only");
         if (p.isSet("renderdoc") && command != "replay")
@@ -241,7 +253,7 @@ int main(int argc, char **argv) {
         nlohmann::json constantBindings, outputSelection, outputDisplay, outputMsaa, planarWrites, experiment;
         nlohmann::json shaderProjectReport;
         QString out = p.value("out");
-        if (!out.isEmpty() && command != "metric-iterations") {
+        if (!out.isEmpty() && command != "metric-iterations" && command != "metric-profile") {
             QDir dir(out);
             if (dir.exists() &&
                 !dir.entryList(QDir::NoDotAndDotDot | QDir::AllEntries | QDir::Hidden).empty())
@@ -249,7 +261,76 @@ int main(int argc, char **argv) {
             if (!QDir().mkpath(out))
                 throw std::runtime_error("Cannot create output directory");
         }
-        if (command == "metric-iterations") {
+        if (command == "metric-profile") {
+            if (out.isEmpty())
+                throw std::invalid_argument("metric-profile requires --out");
+            for (const auto option : {"warp", "debug-device", "before", "disable", "suppress-draws",
+                                      "timings", "id", "pass", "pass-map", "weights"})
+                if (p.isSet(option))
+                    throw std::invalid_argument(std::string("Unsupported uniform metric option: --") +
+                                                option);
+            if (int(p.isSet("set")) + int(p.isSet("all-sets")) + int(p.isSet("metric")) > 1)
+                throw std::invalid_argument("Choose metric sets or symbols, not both");
+            if (p.isSet("all-frame-ranges") && p.isSet("frame-range"))
+                throw std::invalid_argument("Choose all or selected frame ranges");
+            if (!p.isSet("interval") && (p.isSet("start-event") || p.isSet("end-event")))
+                throw std::invalid_argument("Interval endpoints require --interval");
+            const auto number = [](const QString &value) {
+                bool ok{};
+                const auto n = value.toULongLong(&ok);
+                if (!ok || value.trimmed().startsWith('-'))
+                    throw std::invalid_argument("Expected unsigned metric index");
+                return uint64_t(n);
+            };
+            nlohmann::json sets = nlohmann::json::array({"RenderBasic"}), symbols,
+                           events = nlohmann::json::array(), interval, ranges;
+            if (p.isSet("set")) {
+                sets = nlohmann::json::array();
+                for (const auto &v : p.values("set"))
+                    sets.push_back(v.toStdString());
+            }
+            if (p.isSet("all-sets"))
+                sets = nullptr;
+            if (p.isSet("metric")) {
+                sets = nlohmann::json::array();
+                symbols = nlohmann::json::array();
+                for (const auto &v : p.values("metric"))
+                    symbols.push_back(v.toStdString());
+            }
+            for (const auto &v : p.values("event"))
+                events.push_back(number(v));
+            if (p.isSet("interval"))
+                interval = nlohmann::json::array(
+                    {p.isSet("start-event") ? nlohmann::json(number(p.value("start-event")))
+                                            : nlohmann::json(),
+                     p.isSet("end-event") ? nlohmann::json(number(p.value("end-event"))) : nlohmann::json()});
+            if (p.isSet("all-frame-ranges"))
+                ranges = "all";
+            if (p.isSet("frame-range")) {
+                ranges = nlohmann::json::array();
+                for (const auto &v : p.values("frame-range"))
+                    ranges.push_back(number(v));
+            }
+            const auto profile = collectUniformMetrics(
+                frame, out,
+                {{"sets", sets},
+                 {"symbols", symbols},
+                 {"events", events},
+                 {"interval", interval},
+                 {"frame_ranges", ranges},
+                 {"samples", p.isSet("samples") ? number(p.value("samples")) : 1},
+                 {"warmup", number(p.value("warmup"))},
+                 {"publisher_values", p.isSet("publisher-values")}},
+                p.value("experiment"), p.value("metrics-bridge"), {}, [&](const nlohmann::json &value) {
+                    QTextStream(stdout) << QByteArray::fromStdString(value.dump()) << Qt::endl;
+                });
+            report.insert("completed", true);
+            report.insert("profile", "profile.json");
+            report.insert("records", qint64(profile.at("records").size()));
+            report.insert("sets", qint64(profile.at("sets").size()));
+            report.insert("loaded_modules", modules());
+            experiment = profile.at("experiment");
+        } else if (command == "metric-iterations") {
             if (out.isEmpty()) throw std::runtime_error("metric-iterations requires --out");
             for (const auto option : {"warp", "debug-device", "event", "before", "disable", "suppress-draws", "timings", "start-event", "end-event", "id"})
                 if (p.isSet(option)) throw std::runtime_error(std::string("Unsupported scheduled metric option: --") + option);

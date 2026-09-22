@@ -140,6 +140,14 @@ project saves; failed or cancelled measurements retain the previous result.
 See [scheduled metrics in Qt](docs/MD_ITERATIONS_UI_MIGRATION.md). Other profiling
 owners and the remaining hardware-metric views are still pending.
 
+The native `metric-profile` CLI/worker now collects uniform Intel metrics by
+event, inclusive API interval or FrameFile range. It preserves explicit/all sets,
+automatic symbol planning, repeated samples, frozen experiments, original raw
+reports and optional publisher JSON/CSV. See
+[uniform Intel metrics](docs/MD_PROFILE_MIGRATION.md) for options, comparison
+evidence and the unresolved intermittent BF1 baseline pixel difference. Its Qt
+owner and the remaining hardware-metric views are still pending.
+
 **Shader > DXBC** supports Read, Import ASM and **Assemble & Apply** using a
 selected **External Tool**. The same tool provides optional recovery fallback
 for **Recover HLSL**. HLSL/ASM drafts and entry names are saved with experiments.
