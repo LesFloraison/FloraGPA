@@ -103,7 +103,8 @@ Local evidence (ignored by Git):
 
 The current portable application directory is `out/FloraGPA-pass-controller/`.
 Test-only binaries are moved out after verification. The test publisher bridges
-the native components on this host; the complete production MD iteration
-transport, probe registry/configuration, callback result adapter and profiling
-worker/Qt flow remain pending. This batch changes no analyzer controls and does
+the native components on this host. Probe registration/configuration and callback
+result assembly were subsequently migrated in [probe registry](METRIC_PROBE_REGISTRY_MIGRATION.md).
+The complete production MD iteration transport and profiling worker/Qt flow
+remain pending. This batch changes no analyzer controls and does
 not imply that the entire Python profiling workflow is available in the UI.

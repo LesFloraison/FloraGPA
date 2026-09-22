@@ -4,6 +4,7 @@
 #include "application/MetricAcquisitionPriority.h"
 #include "application/MetricClock.h"
 #include "application/MetricPassController.h"
+#include "application/MetricProbeRegistry.h"
 #include "application/MetricQueries.h"
 #include "application/MetricReport.h"
 #include "application/MetricsDiscovery.h"
@@ -704,17 +705,41 @@ class MetricsDiscoveryTests : public QObject {
             lockOptions.path = controllerDir.filePath("controller.table");
             lockOptions.mutexName = "FloraGPA_PassController_" + QUuid::createUuid().toString();
             auto lock = metricDeviceMutex(md.catalog(), lockOptions);
-            struct Publisher final : MetricPassPublisher, MetricProbeBackend {
+            struct Publisher final : MetricPassPublisher, MetricProbeRegistryBackend {
                 MetricsDiscovery &md;
                 MetricPublisherObserver &observer;
                 MetricPassController *manager{};
                 std::unique_ptr<MdScheduledPool> pool;
-                MetricProbeFanout probes;
+                MetricProbeRegistry registry;
+                uint64_t devicePointer;
+                std::vector<uint64_t> createdKinds, destroyedHandles;
                 std::vector<uint64_t> subscribed;
                 bool failSecond{};
                 size_t delivered{};
-                Publisher(MetricsDiscovery &m, MetricPublisherObserver &o)
-                    : md(m), observer(o), probes({9, 0, 2}, *this) {}
+                Publisher(MetricsDiscovery &m, MetricPublisherObserver &o, ID3D11Device *device)
+                    : md(m), observer(o), registry(*this),
+                      devicePointer(uint64_t(reinterpret_cast<uintptr_t>(device))) {
+                    if (!registry.registerType("probe_types/22") || !registry.registerType("probe_types/9"))
+                        throw std::runtime_error("Test probe registration failed");
+                }
+                MetricProbeResult lookup(uint64_t parent, const std::string &path) override {
+                    if (!parent)
+                        return {0, 555};
+                    return {0, path == "probe_types/22" ? 22 : 9};
+                }
+                MetricProbeResult createProbe(uint64_t kind, Bytes configuration) override {
+                    Reader reader(configuration);
+                    if (reader.read<uint32_t>() != 3 || reader.read<uint64_t>() != devicePointer ||
+                        reader.remaining())
+                        throw std::runtime_error("Probe device configuration mismatch");
+                    createdKinds.push_back(kind);
+                    return {0, kind};
+                }
+                int32_t destroyProbe(uint64_t handle) override {
+                    closePool();
+                    destroyedHandles.push_back(handle);
+                    return 0;
+                }
                 void closePool() {
                     if (pool)
                         pool->close();
@@ -733,19 +758,21 @@ class MetricsDiscoveryTests : public QObject {
                     std::erase(subscribed, handle);
                     return 0;
                 }
-                bool configure(uint64_t, Bytes configuration) override { return configuration.size() == 12; }
+                bool configure(uint64_t group, Bytes configuration) override {
+                    return registry.configure(group, configuration);
+                }
                 bool begin(uint64_t a, uint64_t b, uint32_t tag, uint64_t ctx) override {
-                    return probes.begin(a, b, tag, ctx);
+                    return registry.begin(a, b, tag, ctx);
                 }
                 bool end(uint64_t key, uint32_t tag, uint64_t ctx) override {
-                    return probes.end(key, tag, ctx);
+                    return registry.end(key, tag, ctx);
                 }
                 void flush(uint64_t) override {
                     if (pool)
                         pool->finish();
                 }
                 int32_t beginProbe(uint64_t handle, uint64_t, uint64_t, uint32_t, uint64_t) override {
-                    if (handle == 2)
+                    if (handle == 22)
                         return failSecond ? 9 : 0;
                     pool->begin([&](MetricResult &result) {
                         if (!result.values.at("available").get<bool>())
@@ -770,12 +797,17 @@ class MetricsDiscoveryTests : public QObject {
                         pool->submit();
                     return 0;
                 }
-            } publisher(md, observer);
+            } publisher(md, observer, device.device.Get());
             MetricPassController manager({11, 22, 33}, {}, {}, publisher, *lock, nullptr, {{"pool_size", 2}});
             publisher.manager = &manager;
-            const auto plan = manager.prepare({0, 1, 2}, {{0}, {1}, {0}}, 6,
-                                              [](uint32_t) { return std::vector<uint8_t>(12); });
+            const Json devices = Json::array({Json::array({6, publisher.devicePointer, Json::array({17})})});
+            const auto plan = manager.prepare({0, 1, 2}, {{0}, {1}, {0}}, 6, [&](uint32_t key) {
+                return dx11MetricConfigurationForKey(devices, key);
+            });
             QVERIFY(plan["passes"] == Json::array({{0, 2}, {1}}));
+            QCOMPARE(publisher.createdKinds, std::vector<uint64_t>({22, 9}));
+            QVERIFY(manager.configure(6, dx11MetricConfigurationForKey(devices, 17)));
+            QCOMPARE(publisher.createdKinds.size(), size_t(2));
             bind(device.context.Get());
             for (uint32_t pass = 0; pass < 2; ++pass) {
                 manager.select(pass);
@@ -796,6 +828,13 @@ class MetricsDiscoveryTests : public QObject {
             QCOMPARE(manager.consumer().counts(), std::vector<uint64_t>({3, 3, 3}));
             const auto &rows = manager.consumer().rows();
             QCOMPARE(rows, std::vector<std::vector<double>>({{1., 1., 1.}, {2., 2., 2.}, {4., 4., 4.}}));
+            const auto assembled =
+                receiveDx11MetricResult({11, 22, 33}, {0, 0, 0}, rows, manager.consumer().timings());
+            QCOMPARE(assembled["status"], Json(0));
+            for (const auto &metric : assembled["metrics"]) {
+                QVERIFY(metric["values"] == Json::array({1., 2., 4.}));
+                QVERIFY(metric["aux"] == Json::array({0, 0, 0}));
+            }
             manager.select(0);
             publisher.failSecond = true;
             QVERIFY_THROWS_EXCEPTION(std::runtime_error, manager.begin(6));
@@ -815,6 +854,8 @@ class MetricsDiscoveryTests : public QObject {
             QCOMPARE(manager.consumer().rows(), std::vector<std::vector<double>>({{2., 0., 2.}}));
             QCOMPARE(md.sampleCount(), 0u);
             QCOMPARE(md.sampleStats()["cached"], Json(0));
+            publisher.registry.release();
+            QCOMPARE(publisher.destroyedHandles, std::vector<uint64_t>({9, 22}));
             lock->close();
         }
         QVERIFY(md.provenance()["driver"]["sha256"].get<std::string>().size() == 64);

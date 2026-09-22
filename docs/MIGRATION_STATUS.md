@@ -1,5 +1,15 @@
 # FloraGPA C++ 迁移进度 — 2026-09-22
 
+本批完成 probe 注册／缓存、DX11 设备与上下文配置、回调结果装配三个模块。
+保留注册顺序创建、类型编号顺序执行／释放、失败句柄缓存、12 字节设备配置、
+上下文别名优先级以及仅时间数据的结果返回。802 组对照（含 2,542 次注册表
+操作）和 1,035 项 GPA 保存结果通过。真实 Intel 集成覆盖缓存复用、配置设备
+身份、两个指标集的结果装配、后续 probe 失败清理与重试。完整 Release、
+12 套相关 CTest、既有 controller／轮次回归及独立包黄金帧全部通过。
+当前为 **62 `ported`、115 `partial`、27 `pending`**，不是工作量百分比。
+完整 MD transport、profiling worker 与 Intel 指标 Qt 流程仍待迁移。
+详见 [METRIC_PROBE_REGISTRY_MIGRATION.md](METRIC_PROBE_REGISTRY_MIGRATION.md)。
+
 本批完成 pass controller（含 probe 顺序转发）和指标回调消费者两个模块。
 保留独立行游标、空请求／同 pass 的状态语义、配置失败后的旧设备键、锁顺序、
 订阅池容量及失败后的拥有者清理责任。494 组／4,445 步 Python／C++ 对照和

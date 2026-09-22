@@ -115,6 +115,9 @@ category-2 API/range index; see [numeric iterations](docs/METRIC_ITERATIONS_MIGR
 Pass preparation/lifetime, ordered probe fanout and numeric/timing callbacks
 are also native and verified with the real Intel query pool and priority lock;
 see [pass controller](docs/METRIC_PASS_CONTROLLER_MIGRATION.md).
+The probe registration/cache lifecycle, packed device/context configuration and
+DX11 callback result assembly are also native; see
+[probe registry](docs/METRIC_PROBE_REGISTRY_MIGRATION.md).
 The full profiling scheduler and Qt workflow remain pending.
 
 **Shader > DXBC** supports Read, Import ASM and **Assemble & Apply** using a

@@ -59,6 +59,7 @@ target_sources(FloraExperiment PRIVATE src/application/MetricPriority.cpp src/ap
 target_sources(FloraExperiment PRIVATE src/application/MetricAcquisitionPriority.cpp)
 target_sources(FloraExperiment PRIVATE src/application/MetricIterations.cpp src/application/FrameMetricIndex.cpp)
 target_sources(FloraExperiment PRIVATE src/application/MetricPassController.cpp)
+target_sources(FloraExperiment PRIVATE src/application/MetricProbeRegistry.cpp)
 target_link_libraries(FloraExperiment PRIVATE shell32 ole32)
 target_link_libraries(FloraExperiment PRIVATE psapi)
 add_dependencies(FloraExperiment FloraMetricsBridge)

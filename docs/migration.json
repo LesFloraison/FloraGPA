@@ -721,9 +721,18 @@
       "sha256": "e2f6ca465eb6eef384aa5eaf00924dc15555963a29a8ca846544901776f26921",
       "lines": 20,
       "description": "Legacy DX11 callback result assembly (player 0xadef0), no GPA imports.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "ported",
+      "native": [
+        "src/application/MetricProbeRegistry.h",
+        "src/application/MetricProbeRegistry.cpp"
+      ],
+      "validation": [
+        "docs/METRIC_PROBE_REGISTRY_MIGRATION.md",
+        "tests/MetricPassControllerTests.cpp",
+        "tests/MetricsDiscoveryTests.cpp",
+        "tools/validate_metric_probe_registry.py",
+        "802 exact scenarios including 2,542 registry actions and 1,035 saved original observations; typed pointer/configuration bytes, partial handles, call ordering, callback guards and binary64 results. Real Intel integration verifies cached registry probes, live device/context configuration, two-set matrix assembly, later-probe failure cleanup and retry. Full Release, 12 related CTest suites, controller/iteration regressions, packaged native tests and four golden/negative replays passed. Production MD transport and profiling worker/Qt integration remain pending."
+      ]
     },
     {
       "module": "dxbc_array_index.py",
@@ -1903,18 +1912,36 @@
       "sha256": "58443b9ce08e32a91f9c49d3062e14f15042da4393284873fc0e2b8c80bbe3e7",
       "lines": 28,
       "description": "DX11 API manager's packed probe configuration (player RVA 0x43200).",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "ported",
+      "native": [
+        "src/application/MetricProbeRegistry.h",
+        "src/application/MetricProbeRegistry.cpp"
+      ],
+      "validation": [
+        "docs/METRIC_PROBE_REGISTRY_MIGRATION.md",
+        "tests/MetricPassControllerTests.cpp",
+        "tests/MetricsDiscoveryTests.cpp",
+        "tools/validate_metric_probe_registry.py",
+        "802 exact scenarios including 2,542 registry actions and 1,035 saved original observations; typed pointer/configuration bytes, partial handles, call ordering, callback guards and binary64 results. Real Intel integration verifies cached registry probes, live device/context configuration, two-set matrix assembly, later-probe failure cleanup and retry. Full Release, 12 related CTest suites, controller/iteration regressions, packaged native tests and four golden/negative replays passed. Production MD transport and profiling worker/Qt integration remain pending."
+      ]
     },
     {
       "module": "metric_probe_registry.py",
       "sha256": "af8f4ed3ff573b9ed3993000b3712b564cfca62b4d9e6f25a4f1a1274648fdc0",
       "lines": 52,
       "description": "Player wrapper probe registration/cache lifetime, without a native runtime.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "ported",
+      "native": [
+        "src/application/MetricProbeRegistry.h",
+        "src/application/MetricProbeRegistry.cpp"
+      ],
+      "validation": [
+        "docs/METRIC_PROBE_REGISTRY_MIGRATION.md",
+        "tests/MetricPassControllerTests.cpp",
+        "tests/MetricsDiscoveryTests.cpp",
+        "tools/validate_metric_probe_registry.py",
+        "802 exact scenarios including 2,542 registry actions and 1,035 saved original observations; typed pointer/configuration bytes, partial handles, call ordering, callback guards and binary64 results. Real Intel integration verifies cached registry probes, live device/context configuration, two-set matrix assembly, later-probe failure cleanup and retry. Full Release, 12 related CTest suites, controller/iteration regressions, packaged native tests and four golden/negative replays passed. Production MD transport and profiling worker/Qt integration remain pending."
+      ]
     },
     {
       "module": "metric_query_batch.py",
