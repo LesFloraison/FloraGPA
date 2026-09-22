@@ -3,6 +3,7 @@
 #include "application/MdScheduledPool.h"
 #include "application/MetricAcquisitionPriority.h"
 #include "application/MetricClock.h"
+#include "application/MetricPassController.h"
 #include "application/MetricQueries.h"
 #include "application/MetricReport.h"
 #include "application/MetricsDiscovery.h"
@@ -695,6 +696,126 @@ class MetricsDiscoveryTests : public QObject {
             recordedRetry.release(list);
             QCOMPARE(recordedRetry.report()["records"].size(), size_t(1));
             QCOMPARE(md.recordedCount(), 0u);
+        }
+        {
+            QTemporaryDir controllerDir;
+            QVERIFY(controllerDir.isValid());
+            MetricPriorityOptions lockOptions;
+            lockOptions.path = controllerDir.filePath("controller.table");
+            lockOptions.mutexName = "FloraGPA_PassController_" + QUuid::createUuid().toString();
+            auto lock = metricDeviceMutex(md.catalog(), lockOptions);
+            struct Publisher final : MetricPassPublisher, MetricProbeBackend {
+                MetricsDiscovery &md;
+                MetricPublisherObserver &observer;
+                MetricPassController *manager{};
+                std::unique_ptr<MdScheduledPool> pool;
+                MetricProbeFanout probes;
+                std::vector<uint64_t> subscribed;
+                bool failSecond{};
+                size_t delivered{};
+                Publisher(MetricsDiscovery &m, MetricPublisherObserver &o)
+                    : md(m), observer(o), probes({9, 0, 2}, *this) {}
+                void closePool() {
+                    if (pool)
+                        pool->close();
+                    pool.reset();
+                }
+                void setPool(uint32_t capacity) override {
+                    closePool();
+                    md.select(manager->currentPass == 0 ? "RenderBasic" : "ComputeBasic");
+                    pool = std::make_unique<MdScheduledPool>(md, observer, capacity);
+                }
+                int32_t subscribe(uint64_t, uint64_t handle) override {
+                    subscribed.push_back(handle);
+                    return 0;
+                }
+                int32_t unsubscribe(uint64_t, uint64_t handle) override {
+                    std::erase(subscribed, handle);
+                    return 0;
+                }
+                bool configure(uint64_t, Bytes configuration) override { return configuration.size() == 12; }
+                bool begin(uint64_t a, uint64_t b, uint32_t tag, uint64_t ctx) override {
+                    return probes.begin(a, b, tag, ctx);
+                }
+                bool end(uint64_t key, uint32_t tag, uint64_t ctx) override {
+                    return probes.end(key, tag, ctx);
+                }
+                void flush(uint64_t) override {
+                    if (pool)
+                        pool->finish();
+                }
+                int32_t beginProbe(uint64_t handle, uint64_t, uint64_t, uint32_t, uint64_t) override {
+                    if (handle == 2)
+                        return failSecond ? 9 : 0;
+                    pool->begin([&](MetricResult &result) {
+                        if (!result.values.at("available").get<bool>())
+                            throw std::runtime_error("Unavailable controller sample");
+                        size_t index = 0;
+                        while (index < md.selected()["metrics"].size() &&
+                               md.selected()["metrics"][index]["name"] != "CsThreads")
+                            ++index;
+                        const auto value = result.values["values"].at(index).at("value").get<double>();
+                        std::array<uint8_t, 20> packet{};
+                        const uint32_t header = 0x14600000;
+                        std::memcpy(packet.data(), &header, 4);
+                        std::memcpy(packet.data() + 12, &value, 8);
+                        for (auto h : subscribed)
+                            manager->consumer().receive(h, 0xa3, Bytes(packet));
+                        ++delivered;
+                    });
+                    return 0;
+                }
+                int32_t endProbe(uint64_t handle, uint64_t, uint32_t, uint64_t) override {
+                    if (handle == 9)
+                        pool->submit();
+                    return 0;
+                }
+            } publisher(md, observer);
+            MetricPassController manager({11, 22, 33}, {}, {}, publisher, *lock, nullptr, {{"pool_size", 2}});
+            publisher.manager = &manager;
+            const auto plan = manager.prepare({0, 1, 2}, {{0}, {1}, {0}}, 6,
+                                              [](uint32_t) { return std::vector<uint8_t>(12); });
+            QVERIFY(plan["passes"] == Json::array({{0, 2}, {1}}));
+            bind(device.context.Get());
+            for (uint32_t pass = 0; pass < 2; ++pass) {
+                manager.select(pass);
+                QVERIFY(lock->audit()["depth"] == 1);
+                manager.begin(5);
+                QVERIFY(!publisher.pool->active());
+                for (unsigned groups : {1u, 4u, 8u}) {
+                    manager.begin(6);
+                    device.context->Dispatch(groups, 1, 1);
+                    manager.end();
+                }
+                manager.finish(true);
+                publisher.closePool();
+                QCOMPARE(manager.completedProbes, 3u);
+                QVERIFY(lock->audit()["depth"] == 0);
+            }
+            QCOMPARE(publisher.delivered, size_t(6));
+            QCOMPARE(manager.consumer().counts(), std::vector<uint64_t>({3, 3, 3}));
+            const auto &rows = manager.consumer().rows();
+            QCOMPARE(rows, std::vector<std::vector<double>>({{1., 1., 1.}, {2., 2., 2.}, {4., 4., 4.}}));
+            manager.select(0);
+            publisher.failSecond = true;
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error, manager.begin(6));
+            QVERIFY(publisher.pool->active());
+            QVERIFY(lock->audit()["depth"] == 1);
+            publisher.closePool();
+            manager.finish(true);
+            QCOMPARE(md.sampleCount(), 0u);
+            QVERIFY(lock->audit()["depth"] == 0);
+            publisher.failSecond = false;
+            manager.select(0);
+            manager.begin(6);
+            device.context->Dispatch(4, 1, 1);
+            manager.end();
+            manager.finish();
+            publisher.closePool();
+            QCOMPARE(manager.consumer().rows(), std::vector<std::vector<double>>({{2., 0., 2.}}));
+            QCOMPARE(md.sampleCount(), 0u);
+            QCOMPARE(md.sampleStats()["cached"], Json(0));
+            lock->close();
         }
         QVERIFY(md.provenance()["driver"]["sha256"].get<std::string>().size() == 64);
         auto warp = createDx11Device(true);

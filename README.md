@@ -112,6 +112,9 @@ The numeric outer receiver, weight/iteration policy, query flags and FrameFile
 range mapping now run through native transport interfaces. The CLI/worker
 command `metric-index <capture> --out <directory>` independently exports the
 category-2 API/range index; see [numeric iterations](docs/METRIC_ITERATIONS_MIGRATION.md).
+Pass preparation/lifetime, ordered probe fanout and numeric/timing callbacks
+are also native and verified with the real Intel query pool and priority lock;
+see [pass controller](docs/METRIC_PASS_CONTROLLER_MIGRATION.md).
 The full profiling scheduler and Qt workflow remain pending.
 
 **Shader > DXBC** supports Read, Import ASM and **Assemble & Apply** using a

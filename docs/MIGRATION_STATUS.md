@@ -1,5 +1,15 @@
 # FloraGPA C++ 迁移进度 — 2026-09-22
 
+本批完成 pass controller（含 probe 顺序转发）和指标回调消费者两个模块。
+保留独立行游标、空请求／同 pass 的状态语义、配置失败后的旧设备键、锁顺序、
+订阅池容量及失败后的拥有者清理责任。494 组／4,445 步 Python／C++ 对照和
+1,908 项保存的 GPA 观测通过；真实 Intel 的两个指标集验证六次采样、后续 probe
+失败时的活动查询清理及重新采样。完整 Release、12 套相关 CTest、既有轮次／
+订阅池回归与独立包黄金帧均通过。当前为 **59 `ported`、115 `partial`、
+30 `pending`**，不是工作量百分比。生产 MD transport、probe 注册／配置、
+结果装配及完整 profiling worker／Qt 流程仍待迁移。详见
+[METRIC_PASS_CONTROLLER_MIGRATION.md](METRIC_PASS_CONTROLLER_MIGRATION.md)。
+
 本批完成数值指标外层接收、权重／轮次策略、查询标志、范围映射及 FrameFile
 类别 2 索引五个模块，并提供原生 CLI／worker 的 `metric-index` 导出入口。
 保留取消／部分结果、累计重复记录和“外层成功但数据不完整”的状态语义。

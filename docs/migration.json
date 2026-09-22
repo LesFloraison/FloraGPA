@@ -1734,9 +1734,18 @@
       "sha256": "c35a2ff9f83a35e319660464e77991103fd2d8596adf02afacedcf2efed3f47c",
       "lines": 63,
       "description": "Recovered GM callback accumulator, also used by md_iteration_transport.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "ported",
+      "native": [
+        "src/application/MetricPassController.h",
+        "src/application/MetricPassController.cpp"
+      ],
+      "validation": [
+        "docs/METRIC_PASS_CONTROLLER_MIGRATION.md",
+        "tests/MetricPassControllerTests.cpp",
+        "tests/MetricsDiscoveryTests.cpp",
+        "tools/validate_metric_pass_controller.py",
+        "494 scenarios / 4,445 action steps compare exact states, callbacks and failures; 1,908 saved GPA observations cover consumer, pass lifetime and preparation. Real Intel integration connects both passes to native scheduled pools and private priority ownership, verifies per-column callbacks, cleans a query started before a later probe failure, and retries. Full Release, 12 related CTest suites, packaged native tests, existing iteration/collector regressions and four golden/negative replays passed. Production MD transport/registry/configuration and profiling worker/Qt integration remain pending."
+      ]
     },
     {
       "module": "metric_deferred_queries.py",
@@ -1807,9 +1816,18 @@
       "sha256": "b23d4f664919e61a0d2874eeef8d423514a39070cc373e60da518b82d1b711ab",
       "lines": 146,
       "description": "Recovered player GMQueryManager probe/pass lifetime, without GPA DLLs.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "ported",
+      "native": [
+        "src/application/MetricPassController.h",
+        "src/application/MetricPassController.cpp"
+      ],
+      "validation": [
+        "docs/METRIC_PASS_CONTROLLER_MIGRATION.md",
+        "tests/MetricPassControllerTests.cpp",
+        "tests/MetricsDiscoveryTests.cpp",
+        "tools/validate_metric_pass_controller.py",
+        "494 scenarios / 4,445 action steps compare exact states, callbacks and failures; 1,908 saved GPA observations cover consumer, pass lifetime and preparation. Real Intel integration connects both passes to native scheduled pools and private priority ownership, verifies per-column callbacks, cleans a query started before a later probe failure, and retries. Full Release, 12 related CTest suites, packaged native tests, existing iteration/collector regressions and four golden/negative replays passed. Production MD transport/registry/configuration and profiling worker/Qt integration remain pending."
+      ]
     },
     {
       "module": "metric_passes.py",
