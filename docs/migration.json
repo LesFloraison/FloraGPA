@@ -1490,9 +1490,15 @@
       "sha256": "978baafa31f68ce33ce47854c71672f40d771e8633ca13377ba3fda33a3a9c12",
       "lines": 85,
       "description": "Recovered OA arbitration around each uniform collector replay.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "ported",
+      "native": [
+        "src/application/MetricAcquisitionPriority.h",
+        "src/application/MetricAcquisitionPriority.cpp"
+      ],
+      "validation": [
+        "docs/METRIC_PRIORITY_MIGRATION.md",
+        "350 native/Python scenarios cover 5,860 byte-compared table steps, acquisition failure order and saved publisher/audit acceptance. 83 private-process checks include original GPA interoperability and 13 native runtime module inventories. Packaged native and Intel checks pass without skips, including begun-counter failure cleanup and fresh-session retry; analysis/recorded regressions and four golden/negative controls pass. Higher-level scheduling and Qt consumers remain incomplete."
+      ]
     },
     {
       "module": "md_frame_ranges.py",
@@ -1589,19 +1595,22 @@
       "sha256": "ab5d14eca068e95482032ac4a09a3a1579fcd8b8893d8df435b206c675d48700",
       "lines": 176,
       "description": "Recovered publisher transforms applied to independently acquired MD reports.",
-      "status": "partial",
+      "status": "ported",
       "native": [
         "src/application/MetricPublisher.h",
         "src/application/MetricPublisher.cpp",
         "src/application/MetricAnalysis.h",
-        "src/application/MetricAnalysis.cpp"
+        "src/application/MetricAnalysis.cpp",
+        "src/application/MetricAcquisitionPriority.cpp"
       ],
       "validation": [
         "docs/RECORDED_METRICS_MIGRATION.md",
         "tools/validate_recorded_metrics.py: 358 exact scenarios (131 recorded lifecycle, 227 publisher classes) compare reports, identities, clock/busy state, errors and CSV bytes. Real Intel integration checks 72 repeated-execution reports on two contexts/two metric sets, six failure paths and a successful retry; native tests cover timeout/destruction cleanup.",
         "Both publisher classes, calculated-value encoding, clock audits, transforms, reports and CSV are native. Worker-sidecar loading/validation, publisher_profile projection and publisher_analysis statistics/requested-result helpers remain pending; do not mark this module complete before their acquisition/planner dependencies and consumers are migrated.",
         "docs/METRIC_ANALYSIS_MIGRATION.md",
-        "Publisher profile projection and converted statistics/requested results now use native MetricAnalysis; saved GF2/BF1/edited sidecars and identity failures compare exactly. Worker-sidecar loading and priority-ownership validation remain pending, so module status stays partial."
+        "Publisher profile projection and converted statistics/requested results now use native MetricAnalysis; saved GF2/BF1/edited sidecars and identity failures compare exactly. Worker-sidecar loading and priority-ownership validation remain pending, so module status stays partial.",
+        "docs/METRIC_PRIORITY_MIGRATION.md",
+        "350 native/Python scenarios cover 5,860 byte-compared table steps, acquisition failure order and saved publisher/audit acceptance. 83 private-process checks include original GPA interoperability and 13 native runtime module inventories. Packaged native and Intel checks pass without skips, including begun-counter failure cleanup and fresh-session retry; analysis/recorded regressions and four golden/negative controls pass. Higher-level scheduling and Qt consumers remain incomplete."
       ]
     },
     {
@@ -1819,18 +1828,30 @@
       "sha256": "7a0a3304d1e415a9002fedd882627a6c7a5cc6bf811400355afd8b20dda20cc0",
       "lines": 163,
       "description": "Recovered GPA priority-table protocol, independent of its DLLs.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "ported",
+      "native": [
+        "src/application/MetricPriority.h",
+        "src/application/MetricPriority.cpp"
+      ],
+      "validation": [
+        "docs/METRIC_PRIORITY_MIGRATION.md",
+        "350 native/Python scenarios cover 5,860 byte-compared table steps, acquisition failure order and saved publisher/audit acceptance. 83 private-process checks include original GPA interoperability and 13 native runtime module inventories. Packaged native and Intel checks pass without skips, including begun-counter failure cleanup and fresh-session retry; analysis/recorded regressions and four golden/negative controls pass. Higher-level scheduling and Qt consumers remain incomplete."
+      ]
     },
     {
       "module": "metric_priority_win32.py",
       "sha256": "dd68ae07fe554bc5c1e22283970fba8f988ed0579c779e531447182735540781",
       "lines": 160,
       "description": "Windows shared priority mutex for the recovered single-device collector.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "ported",
+      "native": [
+        "src/application/MetricPriorityWin32.h",
+        "src/application/MetricPriorityWin32.cpp"
+      ],
+      "validation": [
+        "docs/METRIC_PRIORITY_MIGRATION.md",
+        "350 native/Python scenarios cover 5,860 byte-compared table steps, acquisition failure order and saved publisher/audit acceptance. 83 private-process checks include original GPA interoperability and 13 native runtime module inventories. Packaged native and Intel checks pass without skips, including begun-counter failure cleanup and fresh-session retry; analysis/recorded regressions and four golden/negative controls pass. Higher-level scheduling and Qt consumers remain incomplete."
+      ]
     },
     {
       "module": "metric_probe_config.py",

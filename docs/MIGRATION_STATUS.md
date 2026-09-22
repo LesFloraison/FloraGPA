@@ -1,5 +1,14 @@
 # FloraGPA C++ 迁移进度 — 2026-09-22
 
+本批完成优先级表、Windows 跨进程协调、逐轮采集所有权及发布器侧车文件校验。
+350 组 Python／C++ 对照覆盖 5,860 次共享表操作；83 项进程互通检查包含
+C++、Python 和隔离的原 GPA 测试进程，使用私有文件且未触碰 GPA 默认协调文件。
+真实 Intel 验证三次持锁采样、Begin 后异常清理及新会话重试；独立包原生测试、
+既有分析／发布器回归及 GF2／BF1 四项黄金帧／负对照通过。当前为
+**52 `ported`、115 `partial`、37 `pending`**，不是工作量百分比。完整采集
+调度、worker/controller 和 Qt 指标控件仍待迁移。详见
+[METRIC_PRIORITY_MIGRATION.md](METRIC_PRIORITY_MIGRATION.md)。
+
 本批完成采样矩阵、统计汇总及有序指标请求规划三个 Python 模块的 C++ 迁移，
 并接通发布器转换值的分析接口。保留完整范围／轮次校验、二进制浮点运算顺序、
 缺失值和 uint64 原始值；修复并验证 JSON 有符号／无符号整数比较边界。

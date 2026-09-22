@@ -1,6 +1,7 @@
 #include "application/MdRecordedQueries.h"
 #include "application/MdSamplePool.h"
 #include "application/MdScheduledPool.h"
+#include "application/MetricAcquisitionPriority.h"
 #include "application/MetricClock.h"
 #include "application/MetricQueries.h"
 #include "application/MetricReport.h"
@@ -11,6 +12,7 @@
 #include <QFile>
 #include <QTemporaryDir>
 #include <QThread>
+#include <QUuid>
 #include <QtTest>
 #include <d3dcompiler.h>
 #include <functional>
@@ -697,6 +699,64 @@ class MetricsDiscoveryTests : public QObject {
         QVERIFY(md.provenance()["driver"]["sha256"].get<std::string>().size() == 64);
         auto warp = createDx11Device(true);
         QVERIFY_THROWS_EXCEPTION(std::runtime_error, MetricsDiscovery(warp.device.Get()));
+        {
+            QTemporaryDir arbitrationDir;
+            QVERIFY(arbitrationDir.isValid());
+            MetricPriorityOptions options;
+            options.path = arbitrationDir.filePath("private-priority.table");
+            options.mutexName = "FloraGPA_MetricIntegration_" + QUuid::createUuid().toString();
+            const auto factory = [&](const Json &catalog) { return metricDeviceMutex(catalog, options); };
+            md.select("ComputeBasic");
+            bind(device.context.Get());
+            MetricAcquisitionPriority acquisition(md, arbitrationDir.path(), factory);
+            unsigned completed{};
+            acquisition.run([&](MetricAcquisitionPriority &scope) {
+                for (unsigned i = 0; i < 3; ++i)
+                    scope.replay(i, "ComputeBasic", i, [&] {
+                        md.begin();
+                        device.context->Dispatch(4, 1, 1);
+                        const auto report = md.end();
+                        if (report.values.at("available") != true)
+                            throw std::runtime_error("Arbitrated Intel sample unavailable");
+                        ++completed;
+                    });
+            });
+            QCOMPARE(completed, 3u);
+            const auto audit = acquisition.report();
+            Json validation = Json::array();
+            for (unsigned i = 0; i < 3; ++i)
+                validation.push_back({{"pass_index", i}, {"set", "ComputeBasic"}, {"sample_index", i}});
+            const Json profile = {{"arbitration", "gpa_priority_v2"},
+                                  {"priority_audit", "priority-audit.json"},
+                                  {"adapter_luid", md.catalog().at("luid")},
+                                  {"validation", {{"passes", validation}}}};
+            QVERIFY(validateMetricPriorityResult(arbitrationDir.path(), profile, true) == audit);
+            QVERIFY(!md.closed());
+            MetricAcquisitionPriority failed(md, arbitrationDir.path(), factory);
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error, failed.run([&](MetricAcquisitionPriority &scope) {
+                scope.replay(0, "ComputeBasic", 0, [&] {
+                    md.begin();
+                    device.context->Dispatch(2, 1, 1);
+                    throw std::runtime_error("injected begun-counter replay failure");
+                });
+            }));
+            QVERIFY(md.closed());
+            QVERIFY(failed.report()["passes"][0]["counters_closed_after_failure"] == true);
+            QVERIFY(failed.report()["lock"]["closed"] == true);
+            QVERIFY(!QFile::exists(*options.path));
+            MetricsDiscovery retried(device.device.Get());
+            retried.select("ComputeBasic");
+            MetricAcquisitionPriority priorityRetry(retried, arbitrationDir.path(), factory);
+            priorityRetry.run([&](MetricAcquisitionPriority &scope) {
+                scope.replay(0, "ComputeBasic", 0, [&] {
+                    retried.begin();
+                    device.context->Dispatch(2, 1, 1);
+                    if (retried.end().values.at("available") != true)
+                        throw std::runtime_error("Arbitrated retry unavailable");
+                });
+            });
+            QVERIFY(priorityRetry.report()["passes"][0]["complete"] == true);
+        }
         md.close();
         md.close();
         QVERIFY_THROWS_EXCEPTION(std::runtime_error, md.begin());

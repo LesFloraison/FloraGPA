@@ -56,6 +56,14 @@ bool equal(const Json &a, const Json &b) {
         return !std::isnan(b.get<double>()) && compareIntegerFloat(a, b.get<double>()) == 0;
     if (integer(b) && a.is_number_float())
         return equal(b, a);
+    if (a.is_object() && b.is_object()) {
+        if (a.size() != b.size())
+            return false;
+        for (auto it = a.begin(); it != a.end(); ++it)
+            if (!b.contains(it.key()) || !equal(it.value(), b.at(it.key())))
+                return false;
+        return true;
+    }
     if (a.is_array() && b.is_array()) {
         if (a.size() != b.size())
             return false;
@@ -108,6 +116,7 @@ Json publishedStatistics(const MetricStatistics &s) {
 }
 } // namespace
 
+bool metricIdentityEqual(const Json &a, const Json &b) { return equal(a, b); }
 double metricSequentialSum(std::span<const double> values) {
     double total = 0;
     for (const auto value : values)

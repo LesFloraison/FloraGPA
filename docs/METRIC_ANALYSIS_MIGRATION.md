@@ -3,8 +3,8 @@
 `MetricAnalysis` ports `metric_values.py`, `metric_passes.py` and
 `metric_planner.py` into the native application library. It also implements
 the profile projection and analysis helpers from `md_publisher_values.py`.
-The latter module remains partial because its worker-sidecar loader and
-priority-ownership validation are not yet migrated.
+Its remaining worker-sidecar loader and priority-ownership validation were
+subsequently completed in [priority arbitration](METRIC_PRIORITY_MIGRATION.md).
 
 ## Behavior
 
@@ -95,7 +95,7 @@ Local evidence (ignored, not distributed):
 
 These APIs are callable from C++ and introduce no Python runtime dependency.
 They are not yet exposed as a complete Intel metric profiling workflow in the
-CLI/worker or Qt analyzer. Priority arbitration, sidecar acceptance, higher-level
+CLI/worker or Qt analyzer. Priority arbitration and sidecar acceptance are now native; higher-level
 iteration/pass scheduling, hotspot consumers and the compact Qt metric controls
 remain to be migrated and connected. Existing reference limitations concerning
 driver formulas, special pass zero and full scheduling remain unchanged.

@@ -141,6 +141,7 @@ void MetricsDiscovery::close() {
         impl_->handle = nullptr;
     }
 }
+bool MetricsDiscovery::closed() const { return impl_->handle == nullptr; }
 void MetricsDiscovery::select(const std::string &name) {
     impl_->open();
     Json chosen;

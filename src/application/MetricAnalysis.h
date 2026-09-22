@@ -5,6 +5,8 @@
 #include <vector>
 
 namespace flora {
+// Equality used by reference report identities, including numeric aliases in tuples/dicts.
+bool metricIdentityEqual(const nlohmann::json &a, const nlohmann::json &b);
 // Keep binary64 values separate from JSON publication, which uses null for NA.
 struct MetricStatistics {
     double median{}, minimum{}, maximum{}, mean{}, variationPercent{};

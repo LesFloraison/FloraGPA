@@ -5,6 +5,7 @@
 namespace flora {
 MetricTypedValue encodePublisherValue(const nlohmann::json &value);
 std::string metricCsv(const std::vector<std::string> &fields, const nlohmann::json &rows);
+nlohmann::json loadMetricPublisherResult(const QString &folder, const nlohmann::json &profile);
 class MetricPublisherValues final : public MetricPublisherObserver {
   public:
     explicit MetricPublisherValues(MetricClockTransport &metrics, bool recorded = false);

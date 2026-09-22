@@ -53,6 +53,7 @@ class MetricsDiscovery final : public MetricSampleTransport,
     unsigned recordedCount();
     nlohmann::json provenance() const override;
     void close();
+    bool closed() const;
 
   private:
     struct Impl;

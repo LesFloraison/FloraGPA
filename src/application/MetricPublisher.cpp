@@ -1,7 +1,11 @@
 #include "MetricPublisher.h"
+#include "MetricAcquisitionPriority.h"
+#include "MetricAnalysis.h"
 #include <QByteArray>
+#include <QDir>
 #include <QFile>
 #include <algorithm>
+#include <bit>
 #include <charconv>
 #include <cmath>
 namespace flora {
@@ -327,5 +331,48 @@ void MetricPublisherValues::writeCsv(const QString &path) const {
     if (!file.open(QIODevice::WriteOnly) ||
         file.write(bytes.data(), qint64(bytes.size())) != qint64(bytes.size()))
         throw std::runtime_error("Cannot write publisher CSV");
+}
+Json loadMetricPublisherResult(const QString &folder, const Json &profile) {
+    if (profile.value("mode", Json()) != "recovered_metric_iterations")
+        validateMetricPriorityResult(folder, profile);
+    if (profile.value("publisher_values", Json()) != "publisher-values.json")
+        throw std::invalid_argument("Missing canonical publisher result reference");
+    QFile file(QDir(folder).filePath("publisher-values.json"));
+    if (!file.open(QIODevice::ReadOnly))
+        throw std::runtime_error("Cannot read publisher result: " + file.fileName().toStdString());
+    const auto result = Json::parse(file.readAll().toStdString()),
+               rows = result.value("records", Json::array());
+    const auto &rawRows = profile.at("records");
+    if (rows.size() != rawRows.size())
+        throw std::invalid_argument("Publisher result roster differs from capture");
+    std::map<std::string, Json> metadata;
+    for (const auto &s : profile.at("sets"))
+        metadata[s.at("name").get<std::string>()] = s;
+    for (size_t i = 0; i < rows.size(); ++i) {
+        const auto &raw = rawRows[i], &converted = rows[i];
+        for (const auto key : {"set", "event", "start_event", "end_event", "pass_index", "sample_index",
+                               "raw_report", "raw_sha256", "available", "unavailable_reasons"})
+            if (!metricIdentityEqual(raw.value(key, Json()), converted.value(key, Json())))
+                throw std::invalid_argument("Publisher result identity differs from capture");
+        for (const auto group : {"metrics", "information"}) {
+            const auto &values = converted.at(std::string_view(group) == "metrics" ? "values" : group),
+                       &definitions = metadata.at(raw.at("set").get<std::string>()).at(group);
+            if (values.size() != definitions.size())
+                throw std::invalid_argument("Publisher field roster differs from capture");
+            for (size_t j = 0; j < values.size(); ++j) {
+                const auto &definition = definitions[j], &value = values[j];
+                const auto unit = definition.at("name") == "GpuTime" ? Json("us") : definition.at("unit");
+                if (!metricIdentityEqual(value.at("name"), definition.at("name")) ||
+                    !metricIdentityEqual(value.at("unit"), unit))
+                    throw std::invalid_argument("Publisher field metadata differs from capture");
+                const auto number = metricTypedDouble(rawHex(value.at("typed_hex").get<std::string>()));
+                const auto &scalar = value.at("value");
+                if (!scalar.is_number() || !std::isfinite(number) ||
+                    std::bit_cast<uint64_t>(number) != std::bit_cast<uint64_t>(scalar.get<double>()))
+                    throw std::invalid_argument("Publisher scalar disagrees with its typed bytes");
+            }
+        }
+    }
+    return result;
 }
 } // namespace flora
