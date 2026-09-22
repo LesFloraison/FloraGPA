@@ -1,0 +1,9 @@
+{
+  "repository": "https://github.com/intel/metrics-discovery",
+  "commit": "b798d05c3c535d3840eccbba23670584c26dd1a9",
+  "files": [
+    "inc/common/instrumentation/api/metrics_discovery_api.h",
+    "README.md",
+    "LICENSE.md"
+  ]
+}

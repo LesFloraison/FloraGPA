@@ -1,5 +1,6 @@
 #include "Replay.h"
 #include "BlendState.h"
+#include "Device.h"
 #include "NativeSample.h"
 #include "RenderDocCapture.h"
 #include "ReplayAnnotation.h"
@@ -56,14 +57,11 @@ Replay::Replay(const Frame &frame, ReplayOptions options)
         throw std::runtime_error("RenderDoc library and output must be specified together");
     if (!options_.renderdocLibrary.empty())
         renderdoc_ = std::make_unique<RenderDocCapture>(options_.renderdocLibrary, options_.renderdocOutput);
-    D3D_FEATURE_LEVEL levels[] = {D3D_FEATURE_LEVEL_11_1, D3D_FEATURE_LEVEL_11_0};
-    D3D_FEATURE_LEVEL level{};
-    check(D3D11CreateDevice(nullptr, options_.warp ? D3D_DRIVER_TYPE_WARP : D3D_DRIVER_TYPE_HARDWARE, nullptr,
-                            options_.debug ? D3D11_CREATE_DEVICE_DEBUG : 0, levels, 2, D3D11_SDK_VERSION,
-                            &device_, &level, &context_),
-          "Create DX11 device");
+    auto selected = createDx11Device(options_.warp, options_.debug, options_.vendor);
+    device_ = std::move(selected.device);
+    context_ = std::move(selected.context);
     check(context_.As(&context1_), "Query DX11.1 context");
-    uavLimit_ = level >= D3D_FEATURE_LEVEL_11_1 ? 64 : 8;
+    uavLimit_ = selected.level >= D3D_FEATURE_LEVEL_11_1 ? 64 : 8;
     if (renderdoc_) {
         check(context_.As(&captureAnnotation_), "Query capture annotations");
         renderdoc_->start(device_.Get());

@@ -690,9 +690,16 @@
       "sha256": "5d3bf637a9e5e1f67464cf52f5cb88d7e83629ae0f996e664ddb0c51f2de8c51",
       "lines": 56,
       "description": "Explicit native DX11 device selection and measurement provenance.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "ported",
+      "native": [
+        "src/replay/Device.cpp",
+        "src/replay/Device.h",
+        "src/replay/Replay.cpp"
+      ],
+      "validation": [
+        "docs/METRICS_DISCOVERY_MIGRATION.md",
+        "Hardware and WARP device provenance matches the original Python factory; explicit Intel vendor selection, conflicting WARP/vendor selection and missing-vendor refusal are covered by native tests."
+      ]
     },
     {
       "module": "dx11.py",
@@ -1672,9 +1679,15 @@
       "sha256": "d5d9516eb70cc05a1ec6d541880bf733594d5b0edde9f12e275e1ebec2cac4f0",
       "lines": 39,
       "description": "Recovered MD-to-GPA descriptor kind conversion; no GPA runtime dependency.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "ported",
+      "native": [
+        "src/application/MetricKinds.cpp",
+        "src/application/MetricsDiscovery.h"
+      ],
+      "validation": [
+        "docs/METRICS_DISCOVERY_MIGRATION.md",
+        "All eight original kinds, percent/time/frequency exceptions, invalid descriptors and the full installed-driver annotated catalog match Python. Missing old-bridge kind metadata remains absent."
+      ]
     },
     {
       "module": "metric_outer_passes.py",
@@ -1852,9 +1865,16 @@
       "sha256": "87df569d3370c13c918429476aadfbd42c521339d32205b821c0a0eaf71046f6",
       "lines": 229,
       "description": "Optional public Intel driver Metrics Discovery bridge on the replay device.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "ported",
+      "native": [
+        "src/application/MetricsDiscovery.cpp",
+        "src/application/MetricsDiscovery.h",
+        "src/metrics/Bridge.cpp"
+      ],
+      "validation": [
+        "docs/METRICS_DISCOVERY_MIGRATION.md",
+        "Native wrapper preserves catalog selection, typed results, raw reports, clocks, split draining, independent samples, object reuse, deferred counters and provenance. 5,100 reference comparisons include 4,781 exact saved reports. Native hardware and historical capability tests pass without skips; original bridge validation passes 142 sample/reuse checks and 171 recorded checks. Higher-level collectors, publishers, profiling and Qt consumers remain separate pending modules."
+      ]
     },
     {
       "module": "msaa.py",

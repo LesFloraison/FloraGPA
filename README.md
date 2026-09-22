@@ -88,6 +88,11 @@ all raw samples as JSON/CSV in a ZIP. CLI: `timings <capture> --samples 5 --warm
 --out <directory>`. See [repeated GPU timing](docs/GPU_PROFILE_MIGRATION.md) for
 measurement boundaries, provenance and validation.
 
+The native Intel Metrics Discovery foundation now provides device selection,
+annotated catalogs, counter samples, object reuse and deferred counter execution.
+Its higher-level profiling scheduler and Qt controls remain pending; see
+[Metrics Discovery migration](docs/METRICS_DISCOVERY_MIGRATION.md).
+
 **Shader > DXBC** supports Read, Import ASM and **Assemble & Apply** using a
 selected **External Tool**. The same tool provides optional recovery fallback
 for **Recover HLSL**. HLSL/ASM drafts and entry names are saved with experiments.

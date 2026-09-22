@@ -8,7 +8,7 @@ $repo = Split-Path -Parent $PSScriptRoot
 $build = Join-Path $repo "build\vs2022\$Configuration"
 $destination = if ($OutputDirectory) { [System.IO.Path]::GetFullPath($OutputDirectory) } else { Join-Path $repo 'out\FloraGPA' }
 New-Item -ItemType Directory -Path $destination -Force | Out-Null
-foreach ($name in @('FloraGPA.exe','FloraGPA.Worker.exe','FloraGPA.Cli.exe','FloraGPA.Rdc.exe')) {
+foreach ($name in @('FloraGPA.exe','FloraGPA.Worker.exe','FloraGPA.Cli.exe','FloraGPA.Rdc.exe','FloraGPA.Metrics.dll')) {
     Copy-Item -LiteralPath (Join-Path $build $name) -Destination $destination -Force
 }
 $env:VSINSTALLDIR = 'C:\Program Files\Microsoft Visual Studio\2022\Community'
@@ -24,6 +24,7 @@ $licenses = Join-Path $destination 'licenses'
 New-Item -ItemType Directory -Path $licenses -Force | Out-Null
 Copy-Item -LiteralPath (Join-Path $repo 'third_party\nlohmann\LICENSE.MIT') -Destination (Join-Path $licenses 'nlohmann-json-MIT.txt') -Force
 Copy-Item -LiteralPath (Join-Path $repo 'third_party\renderdoc\LICENSE.MIT') -Destination (Join-Path $licenses 'renderdoc-api-MIT.txt') -Force
+Copy-Item -LiteralPath (Join-Path $repo 'third_party\metrics-discovery\LICENSE.md') -Destination (Join-Path $licenses 'intel-metrics-discovery-MIT.txt') -Force
 Copy-Item -Path (Join-Path $repo 'third_party\qt\*.txt') -Destination $licenses -Force
 $qtLicenses = Join-Path $QtRoot '..\..\Licenses'
 if (Test-Path -LiteralPath $qtLicenses) {

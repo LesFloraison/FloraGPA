@@ -1,0 +1,295 @@
+#include "application/MetricsDiscovery.h"
+#include "replay/Device.h"
+#include <QCoreApplication>
+#include <QElapsedTimer>
+#include <QFile>
+#include <QThread>
+#include <QtTest>
+#include <d3dcompiler.h>
+#include <functional>
+using namespace flora;
+using Json = nlohmann::json;
+namespace {
+MetricResult wait(const std::function<std::optional<MetricResult>(bool)> &poll) {
+    QElapsedTimer elapsed;
+    elapsed.start();
+    for (bool flush = true;; flush = false) {
+        if (auto value = poll(flush))
+            return std::move(*value);
+        if (elapsed.elapsed() > 10000)
+            throw std::runtime_error("Counter polling timed out");
+        QThread::msleep(1);
+    }
+}
+Json read(const QString &path) {
+    QFile file(path);
+    if (!file.open(QIODevice::ReadOnly))
+        throw std::runtime_error("Cannot read metrics fixture");
+    return Json::parse(file.readAll().toStdString());
+}
+Json probe(const Json &jobs) {
+    Json result = Json::array();
+    std::optional<Dx11Device> device;
+    std::unique_ptr<MetricsDiscovery> md;
+    for (const auto &job : jobs)
+        try {
+            const auto op = job.at("op").get<std::string>();
+            if (op == "kind")
+                result.push_back(metricDescriptorKind(job.at("type"), job.at("unit"), job.at("symbol")));
+            else if (op == "validate") {
+                std::vector<uint8_t> raw(job.at("size").get<size_t>());
+                result.push_back(validateMetricResult(job.at("metadata"), job.at("result"), raw));
+            } else if (op == "device") {
+                auto value = createDx11Device(
+                    job.value("warp", false), false,
+                    job.contains("vendor") ? std::optional(job.at("vendor").get<uint32_t>()) : std::nullopt);
+                result.push_back(value.information());
+            } else {
+                if (!device) {
+                    device = createDx11Device(false, false, 0x8086);
+                    md = std::make_unique<MetricsDiscovery>(device->device.Get());
+                }
+                if (op == "catalog")
+                    result.push_back(md->catalog());
+                else if (op == "decode") {
+                    md->select(job.at("set").get<std::string>());
+                    QFile file(QString::fromStdString(job.at("path").get<std::string>()));
+                    if (!file.open(QIODevice::ReadOnly))
+                        throw std::runtime_error("Cannot read raw report");
+                    const auto data = file.readAll();
+                    auto decoded = md->decode(
+                        Bytes(reinterpret_cast<const uint8_t *>(data.constData()), size_t(data.size())));
+                    result.push_back(
+                        {{"result", decoded.values},
+                         {"raw_hex", QByteArray(reinterpret_cast<const char *>(decoded.raw.data()),
+                                                qsizetype(decoded.raw.size()))
+                                         .toHex()
+                                         .toStdString()}});
+                } else
+                    throw std::runtime_error("Unknown probe operation");
+            }
+        } catch (const std::exception &e) {
+            result.push_back({{"error", e.what()}});
+        }
+    return result;
+}
+} // namespace
+class MetricsDiscoveryTests : public QObject {
+    Q_OBJECT
+  private slots:
+    void legacyCapabilities() {
+        const auto root = qEnvironmentVariable("FLORA_TEST_REFERENCE_ROOT");
+        if (root.isEmpty())
+            QSKIP("Set FLORA_TEST_REFERENCE_ROOT for historical bridge compatibility");
+        auto device = createDx11Device(false, false, 0x8086);
+        {
+            MetricsDiscovery old(device.device.Get(),
+                                 root + "/output/metrics-discovery-drain-build/Release/flora_metrics.dll");
+            QVERIFY(old.supportsDrain());
+            QVERIFY(!old.supportsSamples() && !old.supportsReuse() && !old.supportsRecorded());
+            old.select("ComputeBasic");
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error, old.sampleBegin());
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error, old.sampleReserve(1));
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error, old.recordedBegin(device.context.Get()));
+            old.begin();
+            old.end();
+        }
+        {
+            MetricsDiscovery old(device.device.Get(),
+                                 root + "/output/metrics-discovery-reuse-build/Release/flora_metrics.dll");
+            QVERIFY(old.supportsDrain() && old.supportsSamples() && old.supportsReuse());
+            QVERIFY(!old.supportsRecorded());
+            old.select("RenderBasic");
+            old.sampleReserve(1);
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error, old.recordedCount());
+        }
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, createDx11Device(true, false, 0x8086));
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, createDx11Device(false, false, 0xffffffff));
+    }
+    void valueTypes() {
+        Json meta{
+            {"report_size", 4},
+            {"metrics",
+             Json::array(
+                 {{{"result_type", 0}}, {{"result_type", 1}}, {{"result_type", 3}}, {{"result_type", 2}}})},
+            {"information_count", 1},
+            {"information", Json::array({{{"name", "ReportLost"}}})}};
+        Json value{{"reports", 1},
+                   {"values", Json::array({{{"type", 0}, {"value", UINT32_MAX}},
+                                           {{"type", 1}, {"value", UINT64_MAX}},
+                                           {{"type", 2}, {"value", 0.5}},
+                                           {{"type", 3}, {"value", true}},
+                                           {{"type", 3}, {"value", false}}})}};
+        std::vector<uint8_t> raw(4);
+        QVERIFY(validateMetricResult(meta, value, raw)["available"] == true);
+        auto bad = value;
+        bad["reports"] = true;
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, validateMetricResult(meta, bad, raw));
+        for (const auto &v : {Json(true), Json(-1), Json(1.5), Json(4294967296ull)}) {
+            bad = value;
+            bad["values"][0]["value"] = v;
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error, validateMetricResult(meta, bad, raw));
+        }
+        bad = value;
+        bad["values"][2]["value"] = std::numeric_limits<double>::infinity();
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, validateMetricResult(meta, bad, raw));
+        bad = value;
+        bad["values"][2]["value"] = nullptr;
+        QVERIFY(validateMetricResult(meta, bad, raw)["available"] == true);
+        bad = value;
+        bad["values"][4]["value"] = true;
+        QCOMPARE(validateMetricResult(meta, bad, raw)["unavailable_reasons"], Json::array({"ReportLost"}));
+    }
+    void hardwareLifecycle() {
+        if (!qEnvironmentVariableIsSet("FLORA_TEST_INTEL_METRICS"))
+            QSKIP("Set FLORA_TEST_INTEL_METRICS for installed Intel driver checks");
+        auto device = createDx11Device(false, false, 0x8086);
+        QCOMPARE(device.information()["adapter"]["vendor_id"], Json(0x8086));
+        MetricsDiscovery md(device.device.Get());
+        QVERIFY(md.supportsDrain() && md.supportsSamples() && md.supportsReuse() && md.supportsRecorded());
+        QVERIFY(!md.catalog().at("sets").empty());
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, md.begin());
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, md.sampleBegin());
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, md.select("invented"));
+        md.select("ComputeBasic");
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, md.end());
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, md.end(0));
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, md.sampleReserve(257));
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, md.sampleSubmit(0));
+        const char shader[] = "RWStructuredBuffer<uint> Output:register(u0); [numthreads(8,1,1)] void "
+                              "main(uint3 id:SV_DispatchThreadID) { Output[id.x]=id.x*17+1337; }";
+        Com<ID3DBlob> code, error;
+        check(D3DCompile(shader, sizeof(shader) - 1, nullptr, nullptr, nullptr, "main", "cs_5_0", 0, 0, &code,
+                         &error),
+              "Compile metric workload");
+        Com<ID3D11ComputeShader> cs;
+        check(
+            device.device->CreateComputeShader(code->GetBufferPointer(), code->GetBufferSize(), nullptr, &cs),
+            "Create metric workload");
+        D3D11_BUFFER_DESC desc{
+            1024, D3D11_USAGE_DEFAULT, D3D11_BIND_UNORDERED_ACCESS, 0, D3D11_RESOURCE_MISC_BUFFER_STRUCTURED,
+            4};
+        Com<ID3D11Buffer> buffer, staging;
+        check(device.device->CreateBuffer(&desc, nullptr, &buffer), "Create metric buffer");
+        desc.Usage = D3D11_USAGE_STAGING;
+        desc.BindFlags = 0;
+        desc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
+        desc.MiscFlags = 0;
+        desc.StructureByteStride = 0;
+        check(device.device->CreateBuffer(&desc, nullptr, &staging), "Create metric staging");
+        D3D11_UNORDERED_ACCESS_VIEW_DESC viewDesc{};
+        viewDesc.ViewDimension = D3D11_UAV_DIMENSION_BUFFER;
+        viewDesc.Buffer.NumElements = 256;
+        Com<ID3D11UnorderedAccessView> view;
+        check(device.device->CreateUnorderedAccessView(buffer.Get(), &viewDesc, &view), "Create metric UAV");
+        auto bind = [&](ID3D11DeviceContext *context) {
+            context->CSSetShader(cs.Get(), nullptr, 0);
+            auto *uav = view.Get();
+            context->CSSetUnorderedAccessViews(0, 1, &uav, nullptr);
+        };
+        bind(device.context.Get());
+        for (const auto *name : {"RenderBasic", "ComputeBasic"}) {
+            md.select(name);
+            std::vector<std::pair<uint64_t, unsigned>> pending;
+            for (unsigned groups : {1u, 4u, 16u, 2u, 8u, 0u, 3u, 12u}) {
+                const auto id = md.sampleBegin();
+                QVERIFY_THROWS_EXCEPTION(std::runtime_error, md.sampleBegin());
+                QVERIFY_THROWS_EXCEPTION(std::runtime_error, md.clockPair());
+                QVERIFY_THROWS_EXCEPTION(std::runtime_error, md.samplePoll(id));
+                device.context->Dispatch(groups, 1, 1);
+                md.sampleSubmit(id);
+                pending.emplace_back(id, groups);
+            }
+            QCOMPARE(md.sampleCount(), 8u);
+            QCOMPARE(md.clockPair()["status"], Json(0));
+            std::vector<MetricResult> results;
+            for (auto it = pending.rbegin(); it != pending.rend(); ++it) {
+                auto value = wait([&](bool flush) { return md.samplePoll(it->first, flush); });
+                QVERIFY(value.values["available"] == true);
+                const auto &metrics = md.selected()["metrics"];
+                bool found = false;
+                for (size_t i = 0; i < metrics.size(); ++i)
+                    if (metrics[i]["name"] == "CsThreads") {
+                        QCOMPARE(value.values["values"][i]["value"], Json((it->second + 1) / 2));
+                        found = true;
+                    }
+                QVERIFY(found);
+                QCOMPARE(md.sampleResult(it->first).values, value.values);
+                QCOMPARE(md.sampleResult(it->first).raw, value.raw);
+                md.sampleRelease(it->first);
+                QVERIFY_THROWS_EXCEPTION(std::runtime_error, md.samplePoll(it->first));
+                results.push_back(std::move(value));
+            }
+            for (const auto &value : results)
+                QCOMPARE(md.decode(value.raw).values, value.values);
+        }
+        device.context->CopyResource(staging.Get(), buffer.Get());
+        D3D11_MAPPED_SUBRESOURCE mapped{};
+        check(device.context->Map(staging.Get(), 0, D3D11_MAP_READ, 0, &mapped), "Read metric workload");
+        std::vector<uint32_t> pixels(256);
+        memcpy(pixels.data(), mapped.pData, 1024);
+        device.context->Unmap(staging.Get(), 0);
+        for (unsigned i = 0; i < 128; ++i)
+            QCOMPARE(pixels[i], i * 17 + 1337);
+        md.sampleReserve(2);
+        const auto id = md.sampleBegin(), object = md.sampleInfo(id);
+        device.context->Dispatch(4, 1, 1);
+        md.sampleSubmit(id);
+        wait([&](bool flush) { return md.samplePoll(id, flush); });
+        md.sampleRecycle(id);
+        const auto recycled = md.sampleBegin();
+        QCOMPARE(md.sampleInfo(recycled), object);
+        QVERIFY(recycled != id);
+        md.sampleRelease(recycled);
+        QVERIFY(md.sampleStats()["reused"].get<unsigned>() >= 1);
+        md.sampleClearCache();
+        md.begin();
+        device.context->Dispatch(2, 1, 1);
+        md.submit();
+        QVERIFY(wait([&](bool flush) { return md.poll(flush); }).values["available"] == true);
+        md.discard();
+        md.begin();
+        device.context->Dispatch(4, 1, 1);
+        QVERIFY(md.end().values["available"] == true);
+        Com<ID3D11DeviceContext> deferred;
+        check(device.device->CreateDeferredContext(0, &deferred), "Create recorded context");
+        bind(deferred.Get());
+        const auto recorded = md.recordedBegin(deferred.Get());
+        deferred->Dispatch(8, 1, 1);
+        md.recordedEnd(recorded);
+        Com<ID3D11CommandList> command;
+        check(deferred->FinishCommandList(FALSE, &command), "Finish recorded workload");
+        const std::array<uint64_t, 1> tokens{recorded};
+        const auto execution = md.recordedExecute(command.Get(), tokens);
+        auto value = wait([&](bool flush) { return md.recordedPoll(recorded, execution, flush); });
+        QVERIFY(value.values["available"] == true);
+        QCOMPARE(md.recordedResult(recorded, execution).values, value.values);
+        const auto next = md.recordedExecute(command.Get(), tokens);
+        QVERIFY(next != execution);
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, md.recordedPoll(recorded, execution));
+        wait([&](bool flush) { return md.recordedPoll(recorded, next, flush); });
+        md.recordedRelease(recorded);
+        QCOMPARE(md.recordedCount(), 0u);
+        QVERIFY(md.provenance()["driver"]["sha256"].get<std::string>().size() == 64);
+        auto warp = createDx11Device(true);
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, MetricsDiscovery(warp.device.Get()));
+        md.close();
+        md.close();
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, md.begin());
+    }
+};
+int main(int argc, char **argv) {
+    QCoreApplication app(argc, argv);
+    const auto args = app.arguments();
+    if (args.size() == 4 && args[1] == "--probe") {
+        auto result = probe(read(args[2]));
+        QFile output(args[3]);
+        if (!output.open(QIODevice::WriteOnly))
+            return 2;
+        output.write(QByteArray::fromStdString(result.dump(2)));
+        return 0;
+    }
+    MetricsDiscoveryTests tests;
+    return QTest::qExec(&tests, argc, argv);
+}
+#include "MetricsDiscoveryTests.moc"

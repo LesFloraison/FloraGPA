@@ -49,6 +49,7 @@ struct ReplayOptions {
     };
     bool timings = false;
     bool warp = false;
+    std::optional<uint32_t> vendor;
     bool debug = false;
     std::filesystem::path renderdocLibrary, renderdocOutput;
     bool suppressDraws = false;
@@ -341,6 +342,7 @@ class Replay {
     ConstantRange constantRange(unsigned stage, uint32_t slot, Id buffer) const;
     std::string adapter() const;
     DXGI_ADAPTER_DESC adapterDescription() const;
+    ID3D11Device *nativeDevice() const { return device_.Get(); }
     D3D_FEATURE_LEVEL featureLevel() const { return device_->GetFeatureLevel(); }
     const auto &measurementResult() const { return measurementResult_; }
     uint64_t generation() const { return generation_; }

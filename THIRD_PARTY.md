@@ -1,5 +1,14 @@
 # Third-party components
 
+- Intel Metrics Discovery public interface: MIT, Copyright (c) 2019-2026 Intel
+  Corporation. Vendored header and license are in `third_party/metrics-discovery/`.
+  Pinned upstream commit: `b798d05c3c535d3840eccbba23670584c26dd1a9`;
+  `source.json` records original paths. Header SHA-256:
+  `6cf0c5d6be3ac6c329f3e1241a2da520af89f3b37ac476fbab072c45ef8e9333`.
+  `FloraGPA.Metrics.dll` is built from our native bridge source. Intel's driver
+  DLL is discovered from the loaded Intel DX11 driver in Windows DriverStore;
+  it is neither bundled nor required for normal replay.
+
 - Qt 6.11.2: dynamically linked MSVC2022 x64 Core, Gui, Widgets and Concurrent;
   Test is used only for development. Installed through the Qt maintenance tool.
   Qt license texts are included with the portable build. Qt source and licensing:
