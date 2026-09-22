@@ -1,5 +1,15 @@
 # FloraGPA C++ 迁移进度 — 2026-09-22
 
+本批完成 `md_iteration_transport.py` 的 C++ 迁移，将轮次协议、pass controller、
+probe 注册表、查询池、发布器转换及优先级锁连接成原生 MD 采集会话。
+343 组 Python／C++ 对照覆盖 1,173 次状态观测、327 次成功直接重放和 12 次
+完整组合轮次采集。真实 Intel 验证重复采集、多 pass、probe 缓存及六种清理
+故障组合；设备关闭失败时保留锁并允许重试。完整 Release、12 套相关 CTest、
+728 组既有 collector 与 358 组发布器回归、独立包黄金帧／负对照均通过。
+当前为 **63 `ported`、115 `partial`、26 `pending`**，不是工作量百分比。
+完整帧范围采集、profiling worker 与 Intel 指标 Qt 流程仍待迁移。详见
+[MD_ITERATION_TRANSPORT_MIGRATION.md](MD_ITERATION_TRANSPORT_MIGRATION.md)。
+
 本批完成 probe 注册／缓存、DX11 设备与上下文配置、回调结果装配三个模块。
 保留注册顺序创建、类型编号顺序执行／释放、失败句柄缓存、12 字节设备配置、
 上下文别名优先级以及仅时间数据的结果返回。802 组对照（含 2,542 次注册表

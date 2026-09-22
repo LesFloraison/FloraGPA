@@ -1,4 +1,5 @@
 #include "application/MdSamplePool.h"
+#include "application/MdIterationTransport.h"
 #include "application/MdScheduledPool.h"
 #include "application/MetricCollector.h"
 #include <QCoreApplication>
@@ -364,7 +365,12 @@ Json ids(const std::vector<std::shared_ptr<MetricProviderBinding>> &metrics) {
         out.push_back(static_cast<ProbeMetric &>(*m).id);
     return out;
 }
+#include "MdIterationSessionProbe.inc"
 Json run(const Json &job) {
+    if (job.at("op") == "iteration_descriptors")
+        return mdIterationDescriptors(job.at("catalog"), job.at("symbols"));
+    if (job.at("op") == "iteration_session")
+        return iterationSession(job);
     if (job["op"] == "scheduled")
         return sampled<MdScheduledPool>(job);
     if (job["op"] == "sample")
@@ -579,6 +585,52 @@ class MetricCollectorTests : public QObject {
         pool.close();
         QCOMPARE(result.raw.size(), size_t(1));
         QVERIFY(metrics.owned.empty() && metrics.cached.empty());
+    }
+    void scheduledDestructorOwnership() {
+        FakeTransport metrics;
+        Publisher publisher(metrics);
+        {
+            MdScheduledPool pool(metrics, publisher, 2);
+            pool.begin();
+            pool.close();
+            metrics.trace.clear();
+        }
+        QVERIFY(metrics.trace.empty());
+        for (bool restart : {false, true}) {
+            {
+                MdScheduledPool pool(metrics, publisher, 2);
+                if (restart) {
+                    pool.begin();
+                    pool.close();
+                }
+                pool.begin();
+                QCOMPARE(metrics.owned.size(), size_t(1));
+            }
+            QVERIFY(metrics.owned.empty() && metrics.cached.empty());
+        }
+        {
+            MdScheduledPool pool(metrics, publisher, 2);
+            pool.begin();
+            metrics.error = "clear";
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error, pool.close());
+            metrics.trace.clear();
+        }
+        // The owning session handles failed cleanup; destruction cannot touch a closed driver.
+        QVERIFY(metrics.trace.empty());
+        QVERIFY(metrics.owned.empty() && !metrics.cached.empty());
+        metrics.error.clear();
+        metrics.sampleClearCache();
+    }
+    void iterationRejectsMissingPool() {
+        const Json catalog = {{"sets", {{{"name", "Only"}, {"metrics", {
+            {{"name", "A"}, {"unit", "count"}, {"result_type", 1}, {"metric_type", 0}, {"gpa_kind", 0}}
+        }}, {"information", Json::array()}}}}};
+        const auto result = iterationSession({{"catalog", catalog}, {"symbols", {"A"}},
+            {"steps", {{{"op", "prepare"}, {"ids", {1}}}, {{"op", "begin"}},
+                {{"op", "submit"}}, {{"op", "close"}}}}});
+        QCOMPARE(result["steps"][1]["error"], Json("No active MD query pool"));
+        QCOMPARE(result["steps"][2]["error"], Json("No active MD query pool"));
+        QVERIFY(result["steps"][3]["closed"] == true);
     }
     void emptyBatchesRetainIdentity() {
         MetricQueryPool pool({}, 3);

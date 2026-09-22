@@ -16,7 +16,7 @@ struct MdScheduledPool::State : std::enable_shared_from_this<State> {
     std::vector<std::shared_ptr<Query>> owned;
     Json audit = Json::array(), drains = Json::array(), polls = Json::array(), nativeStats;
     size_t highWatermark{}, batchCount{};
-    bool waiting{};
+    bool waiting{}, needsCleanup{true};
     Time::time_point deadline;
     Consumer nextConsume;
     std::shared_ptr<Query> delivery;
@@ -159,6 +159,9 @@ struct MdScheduledPool::State : std::enable_shared_from_this<State> {
         }
     }
     void close() {
+        // An explicit attempt transfers failure recovery to the caller. Destruction
+        // must not issue an extra driver cleanup after that caller closed the device.
+        needsCleanup = false;
         std::exception_ptr error;
         for (const auto &query : owned) {
             if (query->token) {
@@ -198,12 +201,14 @@ MdScheduledPool::MdScheduledPool(MetricSampleTransport &metrics, MetricPublisher
 }
 MdScheduledPool::~MdScheduledPool() {
     try {
-        close();
+        if (state_ && state_->needsCleanup)
+            close();
     } catch (...) {
     }
 }
 void MdScheduledPool::begin(Consumer consume) {
     auto &s = *state_;
+    s.needsCleanup = true;
     if (s.current)
         throw std::runtime_error("Counter already active");
     s.nextConsume = std::move(consume);

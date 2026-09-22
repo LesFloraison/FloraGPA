@@ -1,4 +1,5 @@
 #include "application/MdRecordedQueries.h"
+#include "application/MdIterationTransport.h"
 #include "application/MdSamplePool.h"
 #include "application/MdScheduledPool.h"
 #include "application/MetricAcquisitionPriority.h"
@@ -22,6 +23,36 @@
 using namespace flora;
 using Json = nlohmann::json;
 namespace {
+struct FaultSessionSamples final : MetricSampleTransport {
+    MetricsDiscovery &md;
+    std::string fault;
+    explicit FaultSessionSamples(MetricsDiscovery &m) : md(m) {}
+    bool supportsSamples() const override { return md.supportsSamples(); }
+    bool supportsReuse() const override { return md.supportsReuse(); }
+    uint64_t sampleBegin() override { return md.sampleBegin(); }
+    void sampleSubmit(uint64_t t) override { md.sampleSubmit(t); }
+    std::optional<MetricResult> samplePoll(uint64_t t, bool flush) override {
+        return md.samplePoll(t, flush);
+    }
+    void sampleRelease(uint64_t t) override {
+        if (fault == "release" || fault == "stats")
+            throw std::runtime_error("Injected release");
+        md.sampleRelease(t);
+    }
+    void sampleReserve(unsigned n) override { md.sampleReserve(n); }
+    void sampleRecycle(uint64_t t) override { md.sampleRecycle(t); }
+    void sampleClearCache() override {
+        if (fault == "clear")
+            throw std::runtime_error("Injected cache clear");
+        md.sampleClearCache();
+    }
+    uint64_t sampleInfo(uint64_t t) override { return md.sampleInfo(t); }
+    Json sampleStats() override {
+        if (fault == "stats")
+            throw std::runtime_error("Injected stats");
+        return md.sampleStats();
+    }
+};
 struct FaultRecorded final : MetricRecordedTransport {
     MetricsDiscovery &md;
     std::string fault;
@@ -918,6 +949,137 @@ class MetricsDiscoveryTests : public QObject {
                 });
             });
             QVERIFY(priorityRetry.report()["passes"][0]["complete"] == true);
+        }
+        {
+            MetricsDiscovery live(device.device.Get());
+            QTemporaryDir arbitrationDir;
+            QVERIFY(arbitrationDir.isValid());
+            MetricPriorityOptions options;
+            options.path = arbitrationDir.filePath("iteration-priority.table");
+            options.mutexName = "FloraGPA_MdIteration_" + QUuid::createUuid().toString();
+            const auto factory = [&](const Json &catalog) { return metricDeviceMutex(catalog, options); };
+            bind(device.context.Get());
+            uint64_t sample{};
+            const auto acquire = [&](MdIterationTransport &transport, uint32_t pass, const Json &ranges) {
+                const auto current = sample++;
+                for (const auto &range : ranges) {
+                    const auto event = range.get<unsigned>();
+                    transport.begin([&, event, pass, current](MetricResult &result) {
+                        const auto &set = live.selected();
+                        const auto count = set.at("metrics").size();
+                        const auto &all = result.values.at("values");
+                        Json values = Json::array(), info = Json::array();
+                        for (size_t i = 0; i < all.size(); ++i)
+                            (i < count ? values : info).push_back(all[i]);
+                        transport.deliver(set,
+                                          {{"set", set.at("name")},
+                                           {"event", event},
+                                           {"pass_index", pass},
+                                           {"sample_index", current},
+                                           {"raw_report", "hardware.bin"},
+                                           {"raw_sha256", sha256(result.raw)},
+                                           {"available", result.values.at("available")},
+                                           {"unavailable_reasons", result.values.at("unavailable_reasons")},
+                                           {"values", values},
+                                           {"information", info}});
+                    });
+                    device.context->Dispatch(event, 1, 1);
+                    transport.submit();
+                }
+            };
+            {
+                MdIterationTransport session(live, device.device.Get(), Json::array({"CsThreads"}), acquire,
+                                             factory);
+                const auto result = MetricIterationRunner(session).collect(
+                    session.requestedIds(), {1, 4, 8}, {{"weights", {1., 1., 1.}}, {"samples", 2}});
+                QVERIFY(result.at("complete") == true);
+                QCOMPARE(result.at("iterations").size(), size_t(2));
+                for (const auto &iteration : result.at("iterations"))
+                    QCOMPARE(iteration.at("metrics")[0].at("values"), Json::array({1., 2., 4.}));
+                QCOMPARE(session.publisherValues().recordCount(), size_t(6));
+                session.close();
+                const auto audit = session.audit();
+                QCOMPARE(audit["query_pools"].size(), size_t(2));
+                QCOMPARE(audit["probes_created"], Json(1));
+                QCOMPARE(audit["local_lock_depth"], Json(0));
+                QVERIFY(audit["subscriptions"].empty());
+                QCOMPARE(live.sampleCount(), 0u);
+                QCOMPARE(live.sampleStats()["cached"], Json(0));
+            }
+            {
+                MdIterationTransport session(
+                    live, device.device.Get(),
+                    {"GpuTime", "EuActive", "Sampler00InputAvailable", "Sampler00OutputReady"}, acquire,
+                    factory);
+                const auto prepared = session.prepare(session.requestedIds());
+                QCOMPARE(prepared["groups"].size(), size_t(2));
+                for (auto pass : {1u, 0u, 1u}) {
+                    const auto result = session.replay(pass, {1, 4, 8}, false);
+                    QVERIFY(!result["metrics"].empty());
+                    for (const auto &metric : result["metrics"]) {
+                        QCOMPARE(metric["values"].size(), size_t(3));
+                        for (const auto &v : metric["values"])
+                            QVERIFY(v.is_number() && std::isfinite(v.get<double>()));
+                    }
+                }
+                QCOMPARE(session.publisherValues().recordCount(), size_t(9));
+                session.close();
+                QCOMPARE(session.audit()["probes_created"], Json(1));
+                QCOMPARE(live.sampleCount(), 0u);
+                QCOMPARE(live.sampleStats()["cached"], Json(0));
+            }
+            QVERIFY(!QFile::exists(*options.path));
+        }
+        for (const auto fault : {"release", "clear", "stats"}) {
+            for (bool retryClose : {false, true}) {
+                MetricsDiscovery live(device.device.Get());
+                FaultSessionSamples samples(live);
+                samples.fault = fault;
+                QTemporaryDir arbitrationDir;
+                QVERIFY(arbitrationDir.isValid());
+                MetricPriorityOptions options;
+                options.path = arbitrationDir.filePath("failed-iteration.table");
+                options.mutexName = "FloraGPA_FailedIteration_" + QUuid::createUuid().toString();
+                SharedMetricPriorityMutex *lock{};
+                std::vector<unsigned> closeDepths;
+                MdIterationClient client{samples,
+                                         live,
+                                         live.catalog(),
+                                         [&](const std::string &name) { live.select(name); },
+                                         [&] { return live.sampleCount(); },
+                                         [&] {
+                                             closeDepths.push_back(lock->audit().at("depth").get<unsigned>());
+                                             if (retryClose && closeDepths.size() == 1)
+                                                 throw std::runtime_error("Injected native close");
+                                             live.close();
+                                         },
+                                         [&] { return live.closed(); }};
+                MdIterationTransport session(
+                    client, uint64_t(reinterpret_cast<uintptr_t>(device.device.Get())), {"CsThreads"},
+                    [&](MdIterationTransport &transport, uint32_t, const Json &) {
+                        transport.begin({});
+                        device.context->Dispatch(4, 1, 1);
+                        throw std::runtime_error("Injected replay failure with a begun query");
+                    },
+                    [&](const Json &catalog) {
+                        auto result = metricDeviceMutex(catalog, options);
+                        lock = result.get();
+                        return result;
+                    });
+                session.prepare(session.requestedIds());
+                QVERIFY_THROWS_EXCEPTION(std::runtime_error, session.replay(0, {1}, false));
+                QCOMPARE(lock->audit()["depth"], Json(1));
+                session.close();
+                QVERIFY(session.closed() && live.closed());
+                QCOMPARE(closeDepths, std::vector<unsigned>(retryClose ? 2 : 1, 1));
+                const auto audit = session.audit();
+                QCOMPARE(audit["local_lock_depth"], Json(0));
+                QCOMPARE(audit["cleanup_failure"]["stage"], Json("query_pool"));
+                if (std::string(fault) == "stats")
+                    QCOMPARE(audit["cleanup_failure"]["before_device_close"]["native_pool"]["unavailable"],
+                             Json("RuntimeError"));
+                QVERIFY(!QFile::exists(*options.path));
+            }
         }
         md.close();
         md.close();

@@ -256,6 +256,11 @@ void MetricPublisherValues::append(const Json &metadata, const Json &row) {
     s.records.push_back(std::move(converted));
 }
 size_t MetricPublisherValues::recordCount() const { return state_->records.size(); }
+const Json &MetricPublisherValues::lastRecord() const {
+    if (state_->records.empty())
+        throw std::out_of_range("No publisher records");
+    return state_->records.back();
+}
 size_t MetricPublisherValues::refreshCount() const { return state_->refreshes.size(); }
 Json MetricPublisherValues::report() const {
     const auto &s = *state_;

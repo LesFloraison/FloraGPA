@@ -1579,9 +1579,18 @@
       "sha256": "e4098b606b9c607a61410cc06d1f46269a4a39b898b883be5cdf1a20e2ede893",
       "lines": 176,
       "description": "Recovered pass/probe/consumer controllers over a live independent MD device.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "ported",
+      "native": [
+        "src/application/MdIterationTransport.h",
+        "src/application/MdIterationTransport.cpp"
+      ],
+      "validation": [
+        "docs/MD_ITERATION_TRANSPORT_MIGRATION.md",
+        "tools/validate_md_iteration_transport.py and tests/MdIterationSessionProbe.inc: 343 Python/C++ scenarios, 1173 state observations, 327 successful replays and 12 completed composed iteration acquisitions; driver/lock ordering, publisher records, automatic weights, multi-pass receiver reset, 257-range exhaustion and cleanup failures compared.",
+        "tests/MetricsDiscoveryTests.cpp: real Intel repeated CsThreads results [1,2,4], three replays across two sets beginning at pass 1, cached probe reuse and six native cleanup-failure combinations; owner close before priority release, including failed first-close retry.",
+        "tests/MetricCollectorTests.cpp: destructor cleanup suppression after explicit success/failure, omitted-close RAII cleanup and rearming on reuse. Existing 728 collector and 358 publisher comparisons pass.",
+        "Full Release and 12 related CTest suites pass. Windows-only PATH package: seven collector and five Intel tests without skips; missing-pool Begin/End raises a native exception. GF2/BF1 golden images and disabled-draw negative controls pass. Full frame acquisition owners and Intel metric Qt integration remain pending."
+      ]
     },
     {
       "module": "md_iterations.py",

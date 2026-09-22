@@ -118,6 +118,9 @@ see [pass controller](docs/METRIC_PASS_CONTROLLER_MIGRATION.md).
 The probe registration/cache lifecycle, packed device/context configuration and
 DX11 callback result assembly are also native; see
 [probe registry](docs/METRIC_PROBE_REGISTRY_MIGRATION.md).
+The MD iteration transport now connects these components to a live native
+device, with per-replay query cleanup and persistent publisher state; see
+[MD iteration transport](docs/MD_ITERATION_TRANSPORT_MIGRATION.md).
 The full profiling scheduler and Qt workflow remain pending.
 
 **Shader > DXBC** supports Read, Import ASM and **Assemble & Apply** using a

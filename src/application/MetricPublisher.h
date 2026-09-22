@@ -18,6 +18,7 @@ class MetricPublisherValues final : public MetricPublisherObserver {
     std::string csv() const;
     void writeCsv(const QString &path) const;
     size_t recordCount() const override;
+    const nlohmann::json &lastRecord() const;
     size_t refreshCount() const override;
 
   private:
