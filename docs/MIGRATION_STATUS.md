@@ -1,5 +1,16 @@
 # FloraGPA C++ 迁移进度 — 2026-09-22
 
+本批完成 `md_iterations.py` 的完整调度采集命令迁移：CLI／worker 现可执行
+自动或缓存权重、多 pass、非均匀重复采集、冻结实验，并输出原始报告、
+调度审计和 JSON／CSV 指标结果。7 组采集、17 次计数重放、267 份报告经
+原 Python 结果读取器校验；39 组请求对照、取消／不完整结果／重试与启动
+握手测试通过。18 套相关 CTest、343 组 transport 对照和黄金帧／负对照通过。
+首次 BF1 采集曾出现一个像素差异并被严格拒绝；后续原生／Python 诊断与
+原参数复测通过，原因仍未确定，未放宽图像校验。当前为 **66 `ported`、
+115 `partial`、23 `pending`**，不是工作量百分比。原生调度结果读取器、
+Intel 指标 Qt 流程和其他 profiling 模块仍待迁移。详见
+[MD_ITERATIONS_MIGRATION.md](MD_ITERATIONS_MIGRATION.md)。
+
 本批完成 `md_interval.py` 与 `md_frame_ranges.py`：区间／帧范围选择、完整命令
 作用域、同步与回调计数器均已迁入 C++。769 组对照覆盖 257 次选择检查和
 4,912 次状态观测；GF2／BF1 真实 Intel 采集覆盖四条计数路径，图像与基线一致。

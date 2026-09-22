@@ -19,6 +19,7 @@
 #include "application/HlslRecovery.h"
 #include "application/InvocationSelector.h"
 #include "application/MetricIterations.h"
+#include "application/MdIterations.h"
 #include "application/PlanarWrites.h"
 #include "application/PostTransform.h"
 #include "application/PredicateInspector.h"
@@ -38,6 +39,7 @@
 #include <QCoreApplication>
 #include <QCryptographicHash>
 #include <QDir>
+#include <QElapsedTimer>
 #include <QFile>
 #include <QFileInfo>
 #include <QImage>
@@ -46,6 +48,7 @@
 #include <QJsonObject>
 #include <QSaveFile>
 #include <QTextStream>
+#include <QThread>
 #include <d3dcompiler.h>
 
 using namespace flora;
@@ -84,7 +87,7 @@ int main(int argc, char **argv) {
         "command",
         "inventory | commands | command-state | contexts | command-lists | replay | shader | "
         "buffer | texture | texture-storage | compile | compile-project | assemble | geometry | replay-pipeline | "
-        "class-linkage | predicate | annotations | metric-index | statistics | timings | coverage | quad | post-geometry | shader-checkpoint | "
+        "class-linkage | predicate | annotations | metric-index | metric-iterations | statistics | timings | coverage | quad | post-geometry | shader-checkpoint | "
         "rdc-analyze");
     p.addPositionalArgument("capture", "DX11 .gpa_frame file");
     p.addOption({"out", "New or empty output directory", "path"});
@@ -102,9 +105,18 @@ int main(int argc, char **argv) {
     p.addOption({"event", "Stop at API event", "id"});
     p.addOption({"start-event", "Inclusive statistics range start", "id"});
     p.addOption({"end-event", "Inclusive statistics range end", "id"});
-    p.addOption({"samples", "Repeated timing samples (1..1000)", "count", "5"});
-    p.addOption({"warmup", "Timing warmup replays (0..1000)", "count", "1"});
+    p.addOption({"samples", "Samples: timings 1..1000, scheduled metrics 0..100 (default 1)", "count", "5"});
+    p.addOption({"warmup", "Warmup replays: timings 0..1000, scheduled metrics 0..100", "count", "1"});
     p.addOption({"include-writes", "Include resource-writing commands in repeated timings"});
+    p.addOption({"metric", "Scheduled Intel metric symbol (repeatable)", "symbol"});
+    p.addOption({"frame-range", "Category-2 frame range index (repeatable)", "index"});
+    p.addOption({"pass", "Scheduled metric pass: all or zero-based index", "index", "all"});
+    p.addOption({"pass-map", "Scheduled pass mapping, comma separated", "indices"});
+    p.addOption({"weights", "Cached metric weight JSON array", "path"});
+    p.addOption({"metrics-bridge", "Optional independent Metrics Discovery bridge", "path"});
+    QCommandLineOption readyFile("ready-file", "Desktop process job handshake", "path");
+    readyFile.setFlags(QCommandLineOption::HiddenFromHelp);
+    p.addOption(readyFile);
     p.addOption({"coverage-mode", "Coverage mode: fragment or geometry", "mode", "fragment"});
     p.addOption({"coverage-target", "Coverage target: auto, depth or rt0..rt7", "target", "auto"});
     p.addOption({"coverage-layer", "Coverage array layer, volume slice or viewport array index", "index"});
@@ -154,8 +166,19 @@ int main(int argc, char **argv) {
         const auto args = p.positionalArguments();
         if (args.size() != 2)
             throw std::runtime_error("Expected command and capture path");
-        Frame frame(std::filesystem::path(args[1].toStdWString()));
         auto command = args[0];
+        if (p.isSet(readyFile)) {
+            if (command != "metric-iterations")
+                throw std::runtime_error("--ready-file applies to metric-iterations only");
+            QElapsedTimer deadline;
+            deadline.start();
+            while (!QFileInfo(p.value(readyFile)).isFile()) {
+                if (deadline.elapsed() > 10000)
+                    throw std::runtime_error("Scheduled collector was not assigned to the desktop process job");
+                QThread::msleep(10);
+            }
+        }
+        Frame frame(std::filesystem::path(args[1].toStdWString()));
         if (command != "quad" && (p.isSet("quad-depth") || p.isSet("quad-target") || p.isSet("quad-layer")))
             throw std::runtime_error("Quad options apply to quad only");
         if (command != "coverage" && (p.isSet("coverage-mode") || p.isSet("coverage-target") ||
@@ -165,8 +188,13 @@ int main(int argc, char **argv) {
             throw std::runtime_error("--recover applies to shader only");
         if ((p.isSet("profile") || p.value("optimization") != "auto") && command != "compile")
             throw std::runtime_error("--profile and --optimization apply to compile only");
-        if (command != "timings" && (p.value("samples") != "5" || p.value("warmup") != "1" || p.isSet("include-writes")))
-            throw std::runtime_error("--samples, --warmup and --include-writes apply to timings only");
+        if (command != "timings" && command != "metric-iterations" && (p.value("samples") != "5" || p.value("warmup") != "1"))
+            throw std::runtime_error("--samples and --warmup apply to timings or metric-iterations only");
+        if (command != "timings" && p.isSet("include-writes"))
+            throw std::runtime_error("--include-writes applies to timings only");
+        if (command != "metric-iterations" && (p.isSet("metric") || p.isSet("frame-range") || p.isSet("pass") ||
+            p.isSet("pass-map") || p.isSet("weights") || p.isSet("metrics-bridge")))
+            throw std::runtime_error("Scheduled metric options apply to metric-iterations only");
         if (p.isSet("decompiler") && command != "shader" && command != "assemble")
             throw std::runtime_error("--decompiler applies to shader or assemble only");
         if (p.isSet("renderdoc") && command != "replay")
@@ -199,7 +227,7 @@ int main(int argc, char **argv) {
         nlohmann::json constantBindings, outputSelection, outputDisplay, outputMsaa, planarWrites, experiment;
         nlohmann::json shaderProjectReport;
         QString out = p.value("out");
-        if (!out.isEmpty()) {
+        if (!out.isEmpty() && command != "metric-iterations") {
             QDir dir(out);
             if (dir.exists() &&
                 !dir.entryList(QDir::NoDotAndDotDot | QDir::AllEntries | QDir::Hidden).empty())
@@ -207,7 +235,41 @@ int main(int argc, char **argv) {
             if (!QDir().mkpath(out))
                 throw std::runtime_error("Cannot create output directory");
         }
-        if (command == "coverage" || command == "quad") {
+        if (command == "metric-iterations") {
+            if (out.isEmpty()) throw std::runtime_error("metric-iterations requires --out");
+            for (const auto option : {"warp", "debug-device", "event", "before", "disable", "suppress-draws", "timings", "start-event", "end-event", "id"})
+                if (p.isSet(option)) throw std::runtime_error(std::string("Unsupported scheduled metric option: --") + option);
+            const auto number = [](const QString &text) {
+                bool ok{}; const auto v = text.toULongLong(&ok);
+                if (!ok) throw std::invalid_argument("Expected unsigned metric index");
+                return uint64_t(v);
+            };
+            nlohmann::json symbols = nlohmann::json::array(), ranges, mapping = nlohmann::json::array(), weights = nlohmann::json::array();
+            for (const auto &symbol : p.values("metric")) symbols.push_back(symbol.toStdString());
+            if (p.isSet("frame-range")) {
+                ranges = nlohmann::json::array();
+                for (const auto &value : p.values("frame-range")) ranges.push_back(number(value));
+            }
+            if (p.isSet("pass-map") && !p.value("pass-map").isEmpty())
+                for (const auto &value : p.value("pass-map").split(',')) mapping.push_back(number(value));
+            if (p.isSet("weights")) {
+                QFile input(p.value("weights"));
+                if (!input.open(QIODevice::ReadOnly)) throw std::runtime_error("Cannot open cached weights");
+                weights = nlohmann::json::parse(input.readAll().toStdString());
+            }
+            const auto profile = collectScheduledMetrics(frame, out,
+                {{"symbols", symbols}, {"frame_ranges", ranges}, {"samples", p.isSet("samples") ? number(p.value("samples")) : 1},
+                 {"warmup", number(p.value("warmup"))}, {"requested_pass", p.value("pass") == "all" ? uint64_t(metricAllPasses) : number(p.value("pass"))},
+                 {"pass_mapping", mapping}, {"weights", weights}}, p.value("experiment"), p.value("metrics-bridge"), {},
+                 [&](const nlohmann::json &progress) { QTextStream(stdout) << QByteArray::fromStdString(progress.dump()) << Qt::endl; });
+            report.insert("completed", true);
+            report.insert("profile", "scheduled-profile.json");
+            report.insert("replays", qint64(profile.at("replays").size()));
+            report.insert("reports", qint64(profile.at("records").size()));
+            report.insert("iterations", qint64(profile.at("actual_iteration_count").get<uint64_t>()));
+            report.insert("loaded_modules", modules());
+            experiment = profile.at("experiment");
+        } else if (command == "coverage" || command == "quad") {
             if (out.isEmpty() || !p.isSet("id") || p.isSet("before") || p.isSet("timings") ||
                 p.isSet("event") || p.isSet("suppress-draws"))
                 throw std::runtime_error(command == "quad"

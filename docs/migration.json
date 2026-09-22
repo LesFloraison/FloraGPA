@@ -1615,9 +1615,18 @@
       "sha256": "b76b3394d8ff0cfa3f8777b756dde497403196cc69c851f6fcd10856771ce0a1",
       "lines": 172,
       "description": "Collect real frame metrics using recovered weight, pass and iteration policy.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "ported",
+      "native": [
+        "src/application/MdIterations.cpp",
+        "src/application/MdIterations.h",
+        "src/application/MdIterationTransport.cpp",
+        "src/cli/main.cpp"
+      ],
+      "validation": [
+        "docs/MD_ITERATIONS_MIGRATION.md",
+        "The native CLI/worker preserves full-frame scheduled acquisition, automatic/cached weights, mapped pass repetitions, frozen experiments, exact image/range validation, raw/publisher/audit artifacts, binary64 result cells, cancellation and the desktop ready-file handshake. The unchanged Python result reader validates seven collections, 17 replays and 267 raw reports; 39 input-domain comparisons, packaged cancellation/incomplete/retry cases and 343 transport scenarios pass.",
+        "An initial BF1 Sampler_1 replay differed by one pixel and was correctly rejected. Its cause remains unresolved. Native and original Python diagnostics produced identical baseline bytes; the original-parameter native rerun passed without any tolerance or automatic retry. This does not establish a fix or universal capture/driver reliability. The native scheduled-result reader, Qt workflow and other profiling owners remain pending."
+      ]
     },
     {
       "module": "md_iterations_ui.py",

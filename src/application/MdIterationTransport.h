@@ -34,6 +34,8 @@ class MdIterationTransport final : public MetricIterationTransport {
     nlohmann::json replay(uint32_t pass, const nlohmann::json &ranges, bool requestFlag) override;
     void begin(MdScheduledPool::Consumer consume);
     void submit();
+    void flush();
+    nlohmann::json passMetricIds(uint32_t pass) const;
     void deliver(const nlohmann::json &description, const nlohmann::json &row);
     void close();
     bool closed() const;

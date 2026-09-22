@@ -90,7 +90,8 @@ measurement boundaries, provenance and validation.
 
 The native Intel Metrics Discovery foundation now provides device selection,
 annotated catalogs, counter samples, object reuse and deferred counter execution.
-Its higher-level profiling scheduler and Qt controls remain pending; see
+Its Qt controls remain pending; the scheduled collection command is described
+below. See
 [Metrics Discovery migration](docs/METRICS_DISCOVERY_MIGRATION.md).
 Its shared clock, report postprocessing and query drain now have native
 implementations with exact value/state comparisons; see
@@ -123,7 +124,13 @@ device, with per-replay query cleanup and persistent publisher state; see
 [MD iteration transport](docs/MD_ITERATION_TRANSPORT_MIGRATION.md).
 Complete-command intervals and independent FrameFile range counters now run
 through native replay scopes; see [frame range acquisition](docs/MD_FRAME_RANGES_MIGRATION.md).
-The full profiling scheduler and Qt workflow remain pending.
+The full scheduled collection command is now native:
+`metric-iterations <capture> --metric GpuTime --metric EuActive --out <new-directory>`.
+It preserves weight acquisition, pass mapping, nonuniform repetitions, frozen
+experiments, raw reports and scheduled JSON/CSV results. See
+[scheduled collection](docs/MD_ITERATIONS_MIGRATION.md) for usage, validation and
+the unresolved intermittent BF1 image mismatch. The scheduled-result reader,
+other profiling owners and Intel metrics Qt workflow remain pending.
 
 **Shader > DXBC** supports Read, Import ASM and **Assemble & Apply** using a
 selected **External Tool**. The same tool provides optional recovery fallback

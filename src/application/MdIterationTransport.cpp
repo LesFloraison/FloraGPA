@@ -276,6 +276,13 @@ void MdIterationTransport::begin(MdScheduledPool::Consumer consume) {
     s.consume = {};
 }
 void MdIterationTransport::submit() { state_->manager->end(); }
+void MdIterationTransport::flush() { state_->manager->flush(); }
+Json MdIterationTransport::passMetricIds(uint32_t pass) const {
+    Json result = Json::array();
+    for (const auto &index : state_->manager->passes().at(pass))
+        result.push_back(state_->handles.at(index.get<size_t>()));
+    return result;
+}
 void MdIterationTransport::deliver(const Json &description, const Json &row) {
     auto &s = *state_;
     s.values->append(description, row);
