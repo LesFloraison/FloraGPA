@@ -92,6 +92,9 @@ The native Intel Metrics Discovery foundation now provides device selection,
 annotated catalogs, counter samples, object reuse and deferred counter execution.
 Its higher-level profiling scheduler and Qt controls remain pending; see
 [Metrics Discovery migration](docs/METRICS_DISCOVERY_MIGRATION.md).
+Its shared clock, report postprocessing and query drain now have native
+implementations with exact value/state comparisons; see
+[publisher core migration](docs/METRIC_CORE_MIGRATION.md).
 
 **Shader > DXBC** supports Read, Import ASM and **Assemble & Apply** using a
 selected **External Tool**. The same tool provides optional recovery fallback

@@ -1,3 +1,6 @@
+#include "application/MetricClock.h"
+#include "application/MetricQueries.h"
+#include "application/MetricReport.h"
 #include "application/MetricsDiscovery.h"
 #include "replay/Device.h"
 #include <QCoreApplication>
@@ -251,6 +254,93 @@ class MetricsDiscoveryTests : public QObject {
         md.begin();
         device.context->Dispatch(4, 1, 1);
         QVERIFY(md.end().values["available"] == true);
+        // Connect the recovered queue and clock directly to the installed driver.
+        auto firstPair = md.clockPair();
+        bool firstClock = true;
+        MetricsDiscoveryClockSource clockSource(firstPair.at("maximum_ns").get<int64_t>(), [&] {
+            const auto pair = firstClock ? firstPair : md.clockPair();
+            firstClock = false;
+            return MetricClockPair{pair.at("status").get<uint64_t>(), pair.at("gpu_ns").get<uint64_t>(),
+                                   pair.at("cpu_ns").get<uint64_t>()};
+        });
+        MetricClock clock(clockSource);
+        struct CounterSink final : MetricQuerySink {
+            std::optional<MetricResult> result;
+            unsigned completed{}, flushed{};
+            uint64_t category() const override { return 0; }
+            void setKey(uint64_t) override {}
+            void complete(uint64_t, uint32_t) override { ++completed; }
+            void flush() override { ++flushed; }
+        } sink;
+        struct CounterQuery final : MetricQuery {
+            MetricsDiscovery &md;
+            std::optional<MetricResult> result;
+            explicit CounterQuery(MetricsDiscovery &value) : md(value) {}
+            uint64_t category() const override { return 0; }
+            void begin(void *) override { md.begin(); }
+            void end(void *) override { md.submit(); }
+            bool ready(bool flush) override {
+                result = md.poll(flush);
+                return result.has_value();
+            }
+            bool valid() override { return result.has_value(); }
+            bool writeMetric(MetricQuerySink &value) override {
+                static_cast<CounterSink &>(value).result = result;
+                return true;
+            }
+        };
+        auto query = std::make_shared<CounterQuery>(md);
+        auto batch = std::make_shared<MetricQueryBatch>(std::vector<std::shared_ptr<MetricQuery>>{query});
+        batch->begin(device.context.Get());
+        device.context->Dispatch(4, 1, 1);
+        batch->end(device.context.Get());
+        PendingMetricPool pool;
+        pool.bySlot[0] = {batch};
+        MetricBatchSlots recycledBatches;
+        MetricQueryDrain collector;
+        collector.pending = &pool;
+        collector.recycled = &recycledBatches;
+        collector.metrics = {&sink};
+        collector.updateClock = [&](bool force) { clock.update(force); };
+        collector.drain(true);
+        QCOMPARE(batch->state, 0u);
+        QVERIFY(pool.bySlot[0].empty() && recycledBatches[0].size() == 1);
+        QCOMPARE(sink.completed, 1u);
+        QCOMPARE(sink.flushed, 1u);
+        QVERIFY(sink.result && sink.result->values["available"] == true && clockSource.lastSuccess());
+        md.discard();
+        MetricTypedReport typed;
+        for (const auto &value : sink.result->values["values"]) {
+            MetricTypedValue record{};
+            const auto type = value["type"].get<uint32_t>();
+            std::memcpy(record.data(), &type, 4);
+            QVERIFY(!value["value"].is_null());
+            if (type == 2) {
+                const auto number = value["value"].get<float>();
+                std::memcpy(record.data() + 8, &number, 4);
+            } else {
+                const auto number =
+                    type == 3 ? uint64_t(value["value"].get<bool>()) : value["value"].get<uint64_t>();
+                std::memcpy(record.data() + 8, &number, 8);
+            }
+            typed.push_back(record);
+        }
+        auto information = md.selected()["information"];
+        for (auto &definition : information)
+            definition["information_type"] = definition["info_type"];
+        MetricBusyState busy;
+        const auto converted =
+            postprocessMetricReports({typed}, md.selected()["metrics"], information, clock, busy);
+        QVERIFY(converted.keys[0] != 0);
+        bool durationChecked = false;
+        for (size_t i = 0; i < md.selected()["metrics"].size(); ++i) {
+            if (md.selected()["metrics"][i]["name"] == "GpuTime") {
+                QCOMPARE(metricTimestampInteger(converted.reports[0][i]),
+                         metricTimestampInteger(typed[i]) / 1000);
+                durationChecked = true;
+            }
+        }
+        QVERIFY(durationChecked);
         Com<ID3D11DeviceContext> deferred;
         check(device.device->CreateDeferredContext(0, &deferred), "Create recorded context");
         bind(deferred.Get());

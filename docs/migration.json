@@ -1643,9 +1643,15 @@
       "sha256": "0564602bff73abf227ce5053ac94c26e7aaf330629af0107cf1e7cf7910a0859",
       "lines": 100,
       "description": "Recovered publisher clock alignment; calibration source is supplied by caller.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "ported",
+      "native": [
+        "src/application/MetricClock.h",
+        "src/application/MetricClock.cpp"
+      ],
+      "validation": [
+        "docs/METRIC_CORE_MIGRATION.md",
+        "tools/validate_metric_core.py: 6,961 exact Python/native comparisons include 120 groups / 1,080 saved original GPA report observations, float and record bytes, clock traces, callback errors, partial writes, queue state, byte failure wraparound and deferred rearming. Native tests execute the full 0xffffff wait bound and connect the shared queue/clock/report core to a real Intel compute counter. Publisher/collection adapters and their Qt consumers remain separate pending modules."
+      ]
     },
     {
       "module": "metric_consumer.py",
@@ -1775,18 +1781,30 @@
       "sha256": "f629f3125ee70e1c6fa3b8aa9e58e735599319a4f0e54aa3df568a1e27ddd465",
       "lines": 55,
       "description": "Independent query-batch lifecycle recovered from the GPA publisher.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "ported",
+      "native": [
+        "src/application/MetricQueries.h",
+        "src/application/MetricQueries.cpp"
+      ],
+      "validation": [
+        "docs/METRIC_CORE_MIGRATION.md",
+        "tools/validate_metric_core.py: 6,961 exact Python/native comparisons include 120 groups / 1,080 saved original GPA report observations, float and record bytes, clock traces, callback errors, partial writes, queue state, byte failure wraparound and deferred rearming. Native tests execute the full 0xffffff wait bound and connect the shared queue/clock/report core to a real Intel compute counter. Publisher/collection adapters and their Qt consumers remain separate pending modules."
+      ]
     },
     {
       "module": "metric_query_drain.py",
       "sha256": "44c0f13914bde424960af5bf84773e5b579a39d4a2da9a6470f1f93980b27767",
       "lines": 70,
       "description": "Publisher pending-query draining; no GPU or GPA runtime dependency.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "ported",
+      "native": [
+        "src/application/MetricQueries.h",
+        "src/application/MetricQueries.cpp"
+      ],
+      "validation": [
+        "docs/METRIC_CORE_MIGRATION.md",
+        "tools/validate_metric_core.py: 6,961 exact Python/native comparisons include 120 groups / 1,080 saved original GPA report observations, float and record bytes, clock traces, callback errors, partial writes, queue state, byte failure wraparound and deferred rearming. Native tests execute the full 0xffffff wait bound and connect the shared queue/clock/report core to a real Intel compute counter. Publisher/collection adapters and their Qt consumers remain separate pending modules."
+      ]
     },
     {
       "module": "metric_query_flags.py",
@@ -1820,18 +1838,30 @@
       "sha256": "3f84cc75386aa2c131b0c493b970aa0983e9bb820f6c99106c9c2463a2ea0161",
       "lines": 100,
       "description": "DX11 MD report postprocessing recovered from publisher 0x32950/0x326b0.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "ported",
+      "native": [
+        "src/application/MetricReport.h",
+        "src/application/MetricReport.cpp"
+      ],
+      "validation": [
+        "docs/METRIC_CORE_MIGRATION.md",
+        "tools/validate_metric_core.py: 6,961 exact Python/native comparisons include 120 groups / 1,080 saved original GPA report observations, float and record bytes, clock traces, callback errors, partial writes, queue state, byte failure wraparound and deferred rearming. Native tests execute the full 0xffffff wait bound and connect the shared queue/clock/report core to a real Intel compute counter. Publisher/collection adapters and their Qt consumers remain separate pending modules."
+      ]
     },
     {
       "module": "metric_report_values.py",
       "sha256": "2cae190f740a88338b4df58d7004e70c7d0c29b8b9c862aa82b77db8032bd190",
       "lines": 57,
       "description": "Recovered publisher value operations; independent of GPA and the GPU.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "ported",
+      "native": [
+        "src/application/MetricReport.h",
+        "src/application/MetricReport.cpp"
+      ],
+      "validation": [
+        "docs/METRIC_CORE_MIGRATION.md",
+        "tools/validate_metric_core.py: 6,961 exact Python/native comparisons include 120 groups / 1,080 saved original GPA report observations, float and record bytes, clock traces, callback errors, partial writes, queue state, byte failure wraparound and deferred rearming. Native tests execute the full 0xffffff wait bound and connect the shared queue/clock/report core to a real Intel compute counter. Publisher/collection adapters and their Qt consumers remain separate pending modules."
+      ]
     },
     {
       "module": "metric_request_ui.py",
