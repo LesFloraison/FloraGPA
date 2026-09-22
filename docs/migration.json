@@ -1091,11 +1091,13 @@
       "native": [
         "src/core/Frame.cpp",
         "src/core/ClassLinkage.cpp",
-        "src/core/StreamOutput.cpp"
+        "src/core/StreamOutput.cpp",
+        "src/application/FrameMetricIndex.cpp"
       ],
       "validation": [
         "docs/NATIVE_BASELINE.md",
-        "Checked class resource descriptors, ASCII names, linkage references and exact record bounds"
+        "Checked class resource descriptors, ASCII names, linkage references and exact record bounds",
+        "docs/METRIC_ITERATIONS_MIGRATION.md: independent category-2 metric index and range execution adapters are now native; shared Frame responsibilities remain partial."
       ]
     },
     {
@@ -1103,9 +1105,18 @@
       "sha256": "2d0bdd6fe24366de6f1ce476f668b9e23bcbeb5d3fb511e05f6adabcb9df6d02",
       "lines": 64,
       "description": "Independent FrameFile internal API index and category-2 metric ranges.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "ported",
+      "native": [
+        "src/application/FrameMetricIndex.cpp",
+        "src/application/data/FrameApiTypes.h",
+        "src/cli/main.cpp"
+      ],
+      "validation": [
+        "docs/METRIC_ITERATIONS_MIGRATION.md",
+        "tests/MetricIterationTests.cpp",
+        "tools/validate_metric_iterations.py",
+        "Packaged native protocol: 2,758 exact Python comparisons and 1,907 saved GPA observations; complete uint16 classification and 1,547 decoder types; real GF2/BF1 CLI index JSON and runtime module checks. Ten related CTest suites, 3,043 analysis comparisons plus 479 saved checks, packaged Intel integration and four golden/negative replays passed. Full profiling transport/controller/worker and Intel metric Qt integration remain pending."
+      ]
     },
     {
       "module": "frame_output.py",
@@ -1747,9 +1758,17 @@
       "sha256": "663f6b3a2c92b4a35e98019eb37e4947a5a84758233f34c0c4881baa1b4df7e2",
       "lines": 179,
       "description": "Recovered numeric GetMetricValues iteration/weight policy.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "ported",
+      "native": [
+        "src/application/MetricIterations.h",
+        "src/application/MetricIterations.cpp"
+      ],
+      "validation": [
+        "docs/METRIC_ITERATIONS_MIGRATION.md",
+        "tests/MetricIterationTests.cpp",
+        "tools/validate_metric_iterations.py",
+        "Packaged native protocol: 2,758 exact Python comparisons and 1,907 saved GPA observations; complete uint16 classification and 1,547 decoder types; real GF2/BF1 CLI index JSON and runtime module checks. Ten related CTest suites, 3,043 analysis comparisons plus 479 saved checks, packaged Intel integration and four golden/negative replays passed. Full profiling transport/controller/worker and Intel metric Qt integration remain pending."
+      ]
     },
     {
       "module": "metric_kinds.py",
@@ -1771,9 +1790,17 @@
       "sha256": "97d044344179c222ffa6032542fa32d00756417b9e102eb4d377019395ad8bd8",
       "lines": 56,
       "description": "GetMetricValuesInternal (playback 0x639c0) over an owned transport.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "ported",
+      "native": [
+        "src/application/MetricIterations.h",
+        "src/application/MetricIterations.cpp"
+      ],
+      "validation": [
+        "docs/METRIC_ITERATIONS_MIGRATION.md",
+        "tests/MetricIterationTests.cpp",
+        "tools/validate_metric_iterations.py",
+        "Packaged native protocol: 2,758 exact Python comparisons and 1,907 saved GPA observations; complete uint16 classification and 1,547 decoder types; real GF2/BF1 CLI index JSON and runtime module checks. Ten related CTest suites, 3,043 analysis comparisons plus 479 saved checks, packaged Intel integration and four golden/negative replays passed. Full profiling transport/controller/worker and Intel metric Qt integration remain pending."
+      ]
     },
     {
       "module": "metric_pass_controller.py",
@@ -1906,9 +1933,17 @@
       "sha256": "76c222d91c91f6b7d0868e7f9fba3d83e1e9e574405f46fb0f5b71c190d74de1",
       "lines": 48,
       "description": "Query flag aggregation recovered from playback ParseQueryFlags (0x67fc0).",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "ported",
+      "native": [
+        "src/application/MetricIterations.h",
+        "src/application/MetricIterations.cpp"
+      ],
+      "validation": [
+        "docs/METRIC_ITERATIONS_MIGRATION.md",
+        "tests/MetricIterationTests.cpp",
+        "tools/validate_metric_iterations.py",
+        "Packaged native protocol: 2,758 exact Python comparisons and 1,907 saved GPA observations; complete uint16 classification and 1,547 decoder types; real GF2/BF1 CLI index JSON and runtime module checks. Ten related CTest suites, 3,043 analysis comparisons plus 479 saved checks, packaged Intel integration and four golden/negative replays passed. Full profiling transport/controller/worker and Intel metric Qt integration remain pending."
+      ]
     },
     {
       "module": "metric_query_pool.py",
@@ -1930,9 +1965,17 @@
       "sha256": "6548e2bb919145e9bd51af1d6e2dd84a98c81bc53dd59e15323ae64b211a6b29",
       "lines": 32,
       "description": "Playback 0x61480 range selection over FrameFile's category-2 index table.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "ported",
+      "native": [
+        "src/application/MetricIterations.h",
+        "src/application/MetricIterations.cpp"
+      ],
+      "validation": [
+        "docs/METRIC_ITERATIONS_MIGRATION.md",
+        "tests/MetricIterationTests.cpp",
+        "tools/validate_metric_iterations.py",
+        "Packaged native protocol: 2,758 exact Python comparisons and 1,907 saved GPA observations; complete uint16 classification and 1,547 decoder types; real GF2/BF1 CLI index JSON and runtime module checks. Ten related CTest suites, 3,043 analysis comparisons plus 479 saved checks, packaged Intel integration and four golden/negative replays passed. Full profiling transport/controller/worker and Intel metric Qt integration remain pending."
+      ]
     },
     {
       "module": "metric_report_postprocess.py",
@@ -2530,7 +2573,11 @@
       "lines": 41,
       "description": "Export an isolated, serialized quad diagnostic, with explicit measurement scope.",
       "status": "ported",
-      "native": ["src/application/Quad.cpp", "src/application/Quad.h", "src/cli/main.cpp"],
+      "native": [
+        "src/application/Quad.cpp",
+        "src/application/Quad.h",
+        "src/cli/main.cpp"
+      ],
       "validation": [
         "docs/QUAD_EXECUTION_MIGRATION.md",
         "tools/validate_quad_executor.py",
@@ -2544,7 +2591,14 @@
       "lines": 294,
       "description": "Independent real-frame integration of the recovered legacy quad counter.",
       "status": "ported",
-      "native": ["src/application/Quad.cpp", "src/application/Quad.h", "src/application/shaders/quad_counter.hlsl", "src/application/QuadResources.cpp", "src/application/QuadResources.h", "src/application/QuadBindings.h"],
+      "native": [
+        "src/application/Quad.cpp",
+        "src/application/Quad.h",
+        "src/application/shaders/quad_counter.hlsl",
+        "src/application/QuadResources.cpp",
+        "src/application/QuadResources.h",
+        "src/application/QuadBindings.h"
+      ],
       "validation": [
         "docs/QUAD_RESOURCE_MIGRATION.md",
         "tools/validate_quad_resources.py",
@@ -2563,7 +2617,11 @@
       "lines": 71,
       "description": "Research single-event depth preparation using recovered phase-zero bindings.",
       "status": "ported",
-      "native": ["src/application/QuadDepth.cpp", "src/application/QuadDepth.h", "src/application/QuadBindings.h"],
+      "native": [
+        "src/application/QuadDepth.cpp",
+        "src/application/QuadDepth.h",
+        "src/application/QuadBindings.h"
+      ],
       "validation": [
         "docs/QUAD_DEPTH_MIGRATION.md",
         "tools/validate_quad_depth.py",
@@ -2636,7 +2694,13 @@
       "lines": 111,
       "description": "Quad diagnostic view: explicit depth strategy, uint32 cell values and export.",
       "status": "ported",
-      "native": ["src/app/QuadView.cpp", "src/app/QuadView.h", "src/app/MainWindowQuad.cpp", "src/app/MainWindow.cpp", "src/application/ZipArchive.cpp"],
+      "native": [
+        "src/app/QuadView.cpp",
+        "src/app/QuadView.h",
+        "src/app/MainWindowQuad.cpp",
+        "src/app/MainWindow.cpp",
+        "src/application/ZipArchive.cpp"
+      ],
       "validation": [
         "docs/QUAD_UI_MIGRATION.md",
         "tests/QuadUiTests.cpp",

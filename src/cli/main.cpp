@@ -18,6 +18,7 @@
 #include "application/HlslCompilation.h"
 #include "application/HlslRecovery.h"
 #include "application/InvocationSelector.h"
+#include "application/MetricIterations.h"
 #include "application/PlanarWrites.h"
 #include "application/PostTransform.h"
 #include "application/PredicateInspector.h"
@@ -83,7 +84,7 @@ int main(int argc, char **argv) {
         "command",
         "inventory | commands | command-state | contexts | command-lists | replay | shader | "
         "buffer | texture | texture-storage | compile | compile-project | assemble | geometry | replay-pipeline | "
-        "class-linkage | predicate | annotations | statistics | timings | coverage | quad | post-geometry | shader-checkpoint | "
+        "class-linkage | predicate | annotations | metric-index | statistics | timings | coverage | quad | post-geometry | shader-checkpoint | "
         "rdc-analyze");
     p.addPositionalArgument("capture", "DX11 .gpa_frame file");
     p.addOption({"out", "New or empty output directory", "path"});
@@ -288,6 +289,17 @@ int main(int argc, char **argv) {
             auto detail = command == "contexts" ? inspectContexts(frame) : inspectCommandLists(frame);
             save(out + '/' + command + ".json", QByteArray::fromStdString(detail.dump(2) + "\n"));
             report.insert("completed", true);
+        } else if (command == "metric-index") {
+            if (out.isEmpty())
+                throw std::runtime_error("metric-index requires --out");
+            auto detail = buildFrameMetricIndex(frame);
+            detail.update({{"frame", QDir::toNativeSeparators(QFileInfo(args[1]).absoluteFilePath()).toStdString()},
+                           {"independent", true},
+                           {"category_scope", {2}},
+                           {"all_framefile_categories", false}});
+            save(out + "/metric-index.json", QByteArray::fromStdString(detail.dump(2) + "\n"));
+            report.insert("completed", true);
+            report.insert("loaded_modules", modules());
         } else if (command == "annotations") {
             if (out.isEmpty())
                 throw std::runtime_error("annotations requires --out");

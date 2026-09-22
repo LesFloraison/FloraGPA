@@ -1,5 +1,15 @@
 # FloraGPA C++ 迁移进度 — 2026-09-22
 
+本批完成数值指标外层接收、权重／轮次策略、查询标志、范围映射及 FrameFile
+类别 2 索引五个模块，并提供原生 CLI／worker 的 `metric-index` 导出入口。
+保留取消／部分结果、累计重复记录和“外层成功但数据不完整”的状态语义。
+独立包通过 2,758 组 Python／C++ 精确对照及 1,907 项保存的 GPA 观测，另核对
+全部 65,536 个类型分类及 1,547 项解码器清单。GF2／BF1 的索引导出、黄金帧
+和负对照均通过；10 套相关 CTest、既有分析回归和真实 Intel 集成通过。
+当前为 **57 `ported`、115 `partial`、32 `pending`**，不是工作量百分比。
+完整采集 pass controller、生产 transport、worker 流程及 Intel 指标 Qt
+控件仍待接通。详见 [METRIC_ITERATIONS_MIGRATION.md](METRIC_ITERATIONS_MIGRATION.md)。
+
 本批完成优先级表、Windows 跨进程协调、逐轮采集所有权及发布器侧车文件校验。
 350 组 Python／C++ 对照覆盖 5,860 次共享表操作；83 项进程互通检查包含
 C++、Python 和隔离的原 GPA 测试进程，使用私有文件且未触碰 GPA 默认协调文件。
