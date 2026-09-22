@@ -90,8 +90,8 @@ measurement boundaries, provenance and validation.
 
 The native Intel Metrics Discovery foundation now provides device selection,
 annotated catalogs, counter samples, object reuse and deferred counter execution.
-Scheduled collection is available in the right-side **Intel Metrics** panel;
-other profiling controls remain pending. See
+Uniform set/request and scheduled collection are available in the right-side
+**Intel Metrics** panel; hotspot analysis remains pending. See
 [Metrics Discovery migration](docs/METRICS_DISCOVERY_MIGRATION.md).
 Its shared clock, report postprocessing and query drain now have native
 implementations with exact value/state comparisons; see
@@ -137,16 +137,19 @@ The right-side **Intel Metrics** panel now reads the catalog, previews pass
 plans, collects scheduled matrices, locates their API boundaries and exports
 the complete result ZIP. Setup and experiment identity are preserved across
 project saves; failed or cancelled measurements retain the previous result.
-See [scheduled metrics in Qt](docs/MD_ITERATIONS_UI_MIGRATION.md). Other profiling
-owners and the remaining hardware-metric views are still pending.
+See [scheduled metrics in Qt](docs/MD_ITERATIONS_UI_MIGRATION.md).
+The same inspector also contains uniform set and metric-request modes.
 
 The native `metric-profile` CLI/worker now collects uniform Intel metrics by
 event, inclusive API interval or FrameFile range. It preserves explicit/all sets,
 automatic symbol planning, repeated samples, frozen experiments, original raw
 reports and optional publisher JSON/CSV. See
 [uniform Intel metrics](docs/MD_PROFILE_MIGRATION.md) for options, comparison
-evidence and the unresolved intermittent BF1 baseline pixel difference. Its Qt
-owner and the remaining hardware-metric views are still pending.
+evidence and the unresolved intermittent BF1 baseline pixel difference. The Qt
+owner now supports all seven scopes, a frame range picker, ordered metric plans,
+raw/publisher values, per-sample details, API navigation and complete ZIP export.
+See [uniform metrics in Qt](docs/UNIFORM_METRICS_UI_MIGRATION.md). Hotspot analysis
+and the other pending hardware-metric consumers remain incomplete.
 
 **Shader > DXBC** supports Read, Import ASM and **Assemble & Apply** using a
 selected **External Tool**. The same tool provides optional recovery fallback

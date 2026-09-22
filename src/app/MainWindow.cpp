@@ -7,6 +7,7 @@
 #include "CoverageView.h"
 #include "GpuProfileView.h"
 #include "IaSetterDialog.h"
+#include "IntelMetricsView.h"
 #include "OutputDialog.h"
 #include "PipelineSetterDialog.h"
 #include "PixelHistoryView.h"
@@ -17,7 +18,6 @@
 #include "ReplayDebugView.h"
 #include "ReplayMeshView.h"
 #include "SamplerDialog.h"
-#include "ScheduledMetricsView.h"
 #include "ShaderProjectDialog.h"
 #include "SrvDialog.h"
 #include "StatisticsView.h"
@@ -253,7 +253,8 @@ MainWindow::MainWindow() {
         if (!ok) {
             errorText_ = "Cannot isolate the replay worker.";
             process_.kill();
-        } else if (runningKind_ == "metric-iterations" || runningKind_ == "metric-catalog") {
+        } else if (runningKind_ == "metric-iterations" || runningKind_ == "metric-profile" ||
+                   runningKind_ == "metric-catalog") {
             try {
                 writeFile(jobDir_->filePath("process-tree.json"),
                           QByteArray::fromStdString(nlohmann::json({{"pid", process_.processId()},
@@ -269,7 +270,8 @@ MainWindow::MainWindow() {
     });
     connect(&process_, &QProcess::readyReadStandardError, this, [this] {
         const auto chunk = process_.readAllStandardError();
-        if (runningKind_ == "metric-iterations" || runningKind_ == "metric-catalog")
+        if (runningKind_ == "metric-iterations" || runningKind_ == "metric-profile" ||
+            runningKind_ == "metric-catalog")
             scheduledLog_ += chunk;
         stderrBuffer_ += chunk;
         for (;;) {
@@ -292,7 +294,8 @@ MainWindow::MainWindow() {
     });
     connect(&process_, &QProcess::readyReadStandardOutput, this, [this] {
         const auto chunk = process_.readAllStandardOutput();
-        if (runningKind_ != "metric-iterations" && runningKind_ != "metric-catalog")
+        if (runningKind_ != "metric-iterations" && runningKind_ != "metric-profile" &&
+            runningKind_ != "metric-catalog")
             return;
         scheduledLog_ += chunk;
         scheduledStdout_ += chunk;
@@ -303,7 +306,8 @@ MainWindow::MainWindow() {
             const auto line = scheduledStdout_.left(end);
             scheduledStdout_.remove(0, end + 1);
             const auto event = nlohmann::json::parse(line.toStdString(), nullptr, false);
-            if (event.is_object() && event.contains("replay") && event.contains("ranges"))
+            if (event.is_object() && ((event.contains("replay") && event.contains("ranges")) ||
+                                      (event.contains("set") && event.contains("events"))))
                 scheduledMetrics_->progress(event);
         }
     });
@@ -312,7 +316,8 @@ MainWindow::MainWindow() {
             timeout_.stop();
             setBusy(false);
             showError(process_.errorString());
-            if (runningKind_ == "metric-iterations" || runningKind_ == "metric-catalog")
+            if (runningKind_ == "metric-iterations" || runningKind_ == "metric-profile" ||
+                runningKind_ == "metric-catalog")
                 scheduledMetrics_->finish(runningScheduledRequest_,
                                           {{"error", process_.errorString().toStdString()}});
             if (runningKind_ == "timings")
@@ -1194,11 +1199,11 @@ void MainWindow::buildUi() {
     rightTabs->addTab(metrics_, "Metrics");
     rdcCounters_ = new RdcCountersView;
     rightTabs->addTab(rdcCounters_, "Replay Metrics");
-    scheduledMetrics_ = new ScheduledMetricsView;
+    scheduledMetrics_ = new IntelMetricsView;
     rightTabs->addTab(scheduledMetrics_, "Intel Metrics");
-    connect(scheduledMetrics_, &ScheduledMetricsView::readRequested, this, &MainWindow::readScheduledMetrics);
-    connect(scheduledMetrics_, &ScheduledMetricsView::cancelRequested, this, &MainWindow::cancel);
-    connect(scheduledMetrics_, &ScheduledMetricsView::eventRequested, this, [this](qulonglong event) {
+    connect(scheduledMetrics_, &IntelMetricsView::readRequested, this, &MainWindow::readScheduledMetrics);
+    connect(scheduledMetrics_, &IntelMetricsView::cancelRequested, this, &MainWindow::cancel);
+    connect(scheduledMetrics_, &IntelMetricsView::eventRequested, this, [this](qulonglong event) {
         if (!busy())
             locateEvent(event);
     });
@@ -1577,7 +1582,9 @@ void MainWindow::readScheduledMetrics(bool catalog, uint64_t serial) {
         runningScheduledBridge_ = scheduledMetrics_->bridgePath();
         runningScheduledKey_ = scheduledMetrics_->experimentKey();
         runningScheduledPrepared_ = scheduledMetrics_->request();
-        startWorker({catalog ? "metric-catalog" : "metric-iterations", capturePath_}, false);
+        startWorker(
+            {catalog ? QString("metric-catalog") : scheduledMetrics_->collectorCommand(), capturePath_},
+            false);
         if (process_.state() == QProcess::NotRunning)
             throw std::runtime_error("Cannot start Intel metric worker");
     } catch (const std::exception &e) {
@@ -1599,10 +1606,12 @@ void MainWindow::startWorker(QStringList args, bool timings) {
         showError("Cannot create worker directory.");
         return;
     }
-    const bool scheduled = args.first() == "metric-iterations", catalog = args.first() == "metric-catalog";
+    const bool uniform = args.first() == "metric-profile",
+               scheduled = args.first() == "metric-iterations" || uniform,
+               catalog = args.first() == "metric-catalog";
     if (scheduled)
-        args = scheduledWorkerArguments(capturePath_, jobDir_->path(), runningScheduledBridge_,
-                                        runningScheduledPrepared_);
+        args = (uniform ? uniformWorkerArguments : scheduledWorkerArguments)(
+            capturePath_, jobDir_->path(), runningScheduledBridge_, runningScheduledPrepared_);
     if (catalog)
         args = {"metric-catalog", "--metrics-bridge", runningScheduledBridge_, "--ready-file",
                 jobDir_->filePath("start.ready")};
@@ -1676,7 +1685,8 @@ void MainWindow::finishWorker(int code, QProcess::ExitStatus status) {
     }
     setBusy(false);
     if (runningRevision_ != revision_) {
-        if (runningKind_ == "metric-iterations" || runningKind_ == "metric-catalog")
+        if (runningKind_ == "metric-iterations" || runningKind_ == "metric-profile" ||
+            runningKind_ == "metric-catalog")
             scheduledMetrics_->finish(runningScheduledRequest_, {{"error", "Cancelled"}});
         if (runningKind_ == "history" || runningKind_ == "history-capture")
             finishRdcAnalysis({{"ok", false}, {"error", "Cancelled"}});
@@ -1697,7 +1707,8 @@ void MainWindow::finishWorker(int code, QProcess::ExitStatus status) {
         return;
     }
     try {
-        if (runningKind_ == "metric-iterations" || runningKind_ == "metric-catalog")
+        if (runningKind_ == "metric-iterations" || runningKind_ == "metric-profile" ||
+            runningKind_ == "metric-catalog")
             writeFile(jobDir_->filePath("worker.log"), scheduledLog_);
         if (code || status != QProcess::NormalExit) {
             auto error = QJsonDocument::fromJson(errorText_.toUtf8()).object()["error"].toString(errorText_);
@@ -1710,13 +1721,15 @@ void MainWindow::finishWorker(int code, QProcess::ExitStatus status) {
             const bool accepted = scheduledMetrics_->finishCatalog(
                 runningScheduledRequest_, nlohmann::json::parse(file.readAll().toStdString()),
                 runningScheduledBridge_);
+            statusBar()->showMessage(accepted ? "Intel catalog ready" : "Intel catalog discarded", 3000);
             emit taskFinished(accepted);
             return;
         }
-        if (runningKind_ == "metric-iterations") {
+        if (runningKind_ == "metric-iterations" || runningKind_ == "metric-profile") {
             const auto result =
-                acceptScheduledResult(jobDir_->filePath("result"), runningScheduledPrepared_,
-                                      jobDir_->filePath("experiment.json"), runningScheduledKey_);
+                (runningKind_ == "metric-profile" ? acceptUniformResult : acceptScheduledResult)(
+                    jobDir_->filePath("result"), runningScheduledPrepared_,
+                    jobDir_->filePath("experiment.json"), runningScheduledKey_);
             const bool accepted =
                 scheduledMetrics_->finish(runningScheduledRequest_, result, std::move(jobDir_));
             statusBar()->showMessage(accepted ? "Intel metrics ready" : "Intel metrics discarded", 3000);
@@ -2086,7 +2099,8 @@ void MainWindow::finishWorker(int code, QProcess::ExitStatus status) {
         emit taskFinished(true);
     } catch (const std::exception &e) {
         showError(QString::fromUtf8(e.what()));
-        if (runningKind_ == "metric-iterations" || runningKind_ == "metric-catalog")
+        if (runningKind_ == "metric-iterations" || runningKind_ == "metric-profile" ||
+            runningKind_ == "metric-catalog")
             scheduledMetrics_->finish(runningScheduledRequest_, {{"error", e.what()}});
         if (runningKind_ == "history" || runningKind_ == "history-capture")
             finishRdcAnalysis({{"ok", false}, {"error", e.what()}});
@@ -2731,7 +2745,8 @@ void MainWindow::updateProfileContext() {
         frame_, experiment_.get(),
         frame_ ? QString::fromStdString(frame_->sha256()) + ':' +
                      QString::fromLatin1(QCryptographicHash::hash(bytes, QCryptographicHash::Sha256).toHex())
-               : QString());
+               : QString(),
+        selectedEvent_);
     updateCoverageContext(QString::fromLatin1(QCryptographicHash::hash(bytes,QCryptographicHash::Sha256).toHex()));
 }
 void MainWindow::stashShaderDrafts() {
@@ -3995,7 +4010,7 @@ void MainWindow::openExperiment() {
         const auto settings = replayUiState(
             *frame_, candidate->document().value("ui", nlohmann::json::object()), selectedEvent_);
         gpuProfile_->restoreSettings(ui.value("gpu_profile",nlohmann::json::object()));
-        scheduledMetrics_->restoreSettings(scheduledUiSettings(ui));
+        scheduledMetrics_->restoreDocument(ui);
         quad_->restoreSettings(ui);
         {
             QSignalBlocker target(outputTarget_), channel(channels_), layer(outputLayer_),
@@ -4068,7 +4083,7 @@ bool MainWindow::saveExperiment() {
         ui["shader_documents"] = shaderDocuments_;
         ui["shader_entries"] = shaderEntries_;
         ui["gpu_profile"] = gpuProfile_->settings();
-        ui = scheduledUiDocument(std::move(ui), scheduledMetrics_->settings());
+        ui = scheduledMetrics_->saveDocument(std::move(ui));
         ui.update(quad_->settings());
         experiment_->save(path, ui);
         projectPath_ = path;

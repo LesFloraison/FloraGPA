@@ -397,6 +397,11 @@ bool ScheduledMetricsView::finishCatalog(uint64_t serial, const Json &catalog, c
     if (serial != serial_)
         return false;
     pending_ = false;
+    setCatalog(catalog, bridge);
+    tabs_->setCurrentIndex(1);
+    return true;
+}
+void ScheduledMetricsView::setCatalog(const Json &catalog, const QString &bridge) {
     catalog_ = catalog;
     summary_->setToolTip({});
     catalogBridge_ = bridge;
@@ -409,9 +414,7 @@ bool ScheduledMetricsView::finishCatalog(uint64_t serial, const Json &catalog, c
                 item->setToolTip(0, text(m.value("label", m["name"])));
             }
     summary_->setText(QString("%1 sets · %2 metrics").arg(catalog["sets"].size()).arg(seen.size()));
-    tabs_->setCurrentIndex(1);
     updateActions();
-    return true;
 }
 bool ScheduledMetricsView::finish(uint64_t serial, const Json &result,
                                   std::unique_ptr<QTemporaryDir> directory) {

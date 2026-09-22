@@ -1363,11 +1363,14 @@
         "src/app/ScheduledMetricsView.cpp",
         "src/application/MdIterations.cpp",
         "src/app/MainWindow.cpp",
-        "src/cli/main.cpp"
+        "src/cli/main.cpp",
+        "src/app/UniformMetricsView.cpp",
+        "src/app/IntelMetricsView.cpp",
+        "src/application/UniformMetricSession.cpp"
       ],
       "validation": [
-        "docs/MD_ITERATIONS_UI_MIGRATION.md",
-        "Catalog/list-sets and shared scheduled setup are native. Uniform collection, remaining hardware metric views and profiling owners are not migrated by this batch."
+        "docs/UNIFORM_METRICS_UI_MIGRATION.md",
+        "Uniform set/request collection and shared scheduled controls are native. Hotspot/event-group owner remains pending."
       ]
     },
     {
@@ -1558,9 +1561,15 @@
       "sha256": "6d9bddfc1b5f97862ab973585d717cf47e37000d5e2bf73d291c46a60d52f814",
       "lines": 57,
       "description": "Select independent FrameFile metric ranges by their actual API endpoints.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "ported",
+      "native": [
+        "src/app/FrameRangeDialog.cpp",
+        "src/app/UniformMetricsView.cpp"
+      ],
+      "validation": [
+        "docs/UNIFORM_METRICS_UI_MIGRATION.md",
+        "tests/UniformMetricsUiTests.cpp"
+      ]
     },
     {
       "module": "md_hotspots.py",
@@ -2134,9 +2143,17 @@
       "sha256": "f9e3dff853d0ba9dff36575a5aad27cc462b58e8a395d322eacc8a16c6e60747",
       "lines": 191,
       "description": "Metric-symbol selection, plan preview and immutable source-bound results.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "ported",
+      "native": [
+        "src/app/UniformMetricsView.cpp",
+        "src/app/IntelMetricsView.cpp",
+        "src/application/UniformMetricSession.cpp"
+      ],
+      "validation": [
+        "docs/UNIFORM_METRICS_UI_MIGRATION.md",
+        "tests/UniformMetricsUiTests.cpp",
+        "tools/validate_uniform_ui_export.py"
+      ]
     },
     {
       "module": "metric_subscriptions.py",

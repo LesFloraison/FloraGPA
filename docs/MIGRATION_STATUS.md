@@ -1,5 +1,27 @@
 # FloraGPA C++ 迁移进度 — 2026-09-22
 
+本批完成均匀 Intel 指标的 Qt 接入。右侧 **Intel Metrics** 在指标集、指标请求、
+调度采集之间切换；七种范围、帧范围选择窗口、目录筛选、计划预览、原始／转换值、
+逐次统计、API 定位和 ZIP 导出均已接入原生 worker。共享设置与各模式的结果分开保存，
+支持旧 Python 工程设置；取消、失败、请求编辑及实验变化不会覆盖已采集结果。
+修复了切换到未采集转换值时表格清空触发旧行详情读取的问题，并验证 uint64 精确显示。
+
+16 套相关 CTest 全部通过，原主界面 54 个用例无跳过。独立发布包中的均匀采集
+6 个用例、调度采集 7 个用例无跳过通过。三个均匀导出包共 21 份原始报告（包含
+双指标组、两次采样的 12 份报告），以及调度导出的 3 份报告／12 个指标格，均由
+未修改的 Python 读取器核对；矩阵、统计、请求来源和发布器数值一致。运行模块审计
+未发现 Python／Tk／GPA 依赖，Qt 来自发布包。GF2／BF1 黄金帧及两项禁用 draw
+负对照通过。四个生产程序与 Metrics DLL 和最终 Release 文件哈希一致。
+
+独立包：`out/FloraGPA-uniform-ui-final/`。证据：
+`artifacts/uniform-ui-delivery-complete/`、`artifacts/uniform-ui-complete-export/validation.json`、
+`artifacts/uniform-ui-scheduled-export/validation.json`、`artifacts/ctest-uniform-ui-final.log`、
+`artifacts/uniform-ui-final-audit.json`。测试程序及 Qt6Test 已移至独立测试工具目录。
+当前为 **71 `ported`、117 `partial`、16 `pending`**，不是工作量百分比。
+热点／事件分组分析、其余 GTPin 消费者与剩余模块仍未完成；完整迁移目标保持进行中。
+本批未改变 BF1 偶发基线差异的严格拒绝行为，也未宣称该问题已解决。
+详见 [UNIFORM_METRICS_UI_MIGRATION.md](UNIFORM_METRICS_UI_MIGRATION.md)。
+
 本批完成 `md_profile.py` 的原生均匀采集后端与 CLI／worker：事件、连续 API
 区间和 FrameFile 范围均保留原版边界，支持指标集／自动规划、重复采样、
 冻结实验、原始报告和发布器统计／CSV。34 组请求对照、12 组有效采集

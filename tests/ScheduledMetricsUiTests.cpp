@@ -1,4 +1,5 @@
 #include "app/Appearance.h"
+#include "app/IntelMetricsView.h"
 #include "app/MainWindow.h"
 #include "app/ScheduledMetricsView.h"
 #include "application/MdIterationSession.h"
@@ -180,9 +181,11 @@ class ScheduledMetricsUiTests : public QObject {
         QTRY_VERIFY_WITH_TIMEOUT(!window.busy() && !window.capturePath().isEmpty(), 60000);
         auto view = window.findChild<ScheduledMetricsView *>();
         QVERIFY(view);
-        auto tabs = qobject_cast<QTabWidget *>(view->parentWidget()->parentWidget());
+        auto owner = window.findChild<IntelMetricsView *>();
+        owner->findChild<QComboBox *>("intelMetricMode")->setCurrentIndex(2);
+        auto tabs = qobject_cast<QTabWidget *>(owner->parentWidget()->parentWidget());
         QVERIFY(tabs);
-        tabs->setCurrentWidget(view);
+        tabs->setCurrentWidget(owner);
         tasks.clear();
         view->findChild<QAction *>("scheduledReadCatalog")->trigger();
         QTRY_VERIFY_WITH_TIMEOUT(!window.busy() && !tasks.empty(), 30000);

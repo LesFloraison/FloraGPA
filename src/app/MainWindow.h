@@ -25,7 +25,7 @@ class PredicateView;
 class AnnotationsView;
 class StatisticsView;
 class GpuProfileView;
-class ScheduledMetricsView;
+class IntelMetricsView;
 class CoverageView;
 class QuadView;
 class CheckpointView;
@@ -174,7 +174,7 @@ class MainWindow final : public QMainWindow {
     AnnotationsView *annotations_;
     StatisticsView *gpuStatistics_;
     GpuProfileView *gpuProfile_;
-    ScheduledMetricsView *scheduledMetrics_ = nullptr;
+    IntelMetricsView *scheduledMetrics_ = nullptr;
     uint64_t runningScheduledRequest_{};
     nlohmann::json runningScheduledPrepared_;
     QString runningScheduledBridge_, runningScheduledKey_;
