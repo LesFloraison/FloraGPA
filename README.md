@@ -103,8 +103,10 @@ Synchronous and FIFO collection, including native Counter reuse, are now migrate
 as well; see [acquisition adapters](docs/METRIC_ADAPTERS_MIGRATION.md).
 Owned deferred command lists now support repeated metric collection, publisher
 conversion and recorded JSON/CSV export through native adapters; see
-[recorded metrics](docs/RECORDED_METRICS_MIGRATION.md). Worker-sidecar validation,
-publisher statistics and the full profiling/Qt workflow remain pending.
+[recorded metrics](docs/RECORDED_METRICS_MIGRATION.md). Native iteration matrices,
+binary64 statistics, ordered request planning and converted publisher analysis
+are now available; see [metric analysis](docs/METRIC_ANALYSIS_MIGRATION.md).
+Worker-sidecar validation and the full profiling/Qt workflow remain pending.
 
 **Shader > DXBC** supports Read, Import ASM and **Assemble & Apply** using a
 selected **External Tool**. The same tool provides optional recovery fallback

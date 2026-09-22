@@ -1592,12 +1592,16 @@
       "status": "partial",
       "native": [
         "src/application/MetricPublisher.h",
-        "src/application/MetricPublisher.cpp"
+        "src/application/MetricPublisher.cpp",
+        "src/application/MetricAnalysis.h",
+        "src/application/MetricAnalysis.cpp"
       ],
       "validation": [
         "docs/RECORDED_METRICS_MIGRATION.md",
         "tools/validate_recorded_metrics.py: 358 exact scenarios (131 recorded lifecycle, 227 publisher classes) compare reports, identities, clock/busy state, errors and CSV bytes. Real Intel integration checks 72 repeated-execution reports on two contexts/two metric sets, six failure paths and a successful retry; native tests cover timeout/destruction cleanup.",
-        "Both publisher classes, calculated-value encoding, clock audits, transforms, reports and CSV are native. Worker-sidecar loading/validation, publisher_profile projection and publisher_analysis statistics/requested-result helpers remain pending; do not mark this module complete before their acquisition/planner dependencies and consumers are migrated."
+        "Both publisher classes, calculated-value encoding, clock audits, transforms, reports and CSV are native. Worker-sidecar loading/validation, publisher_profile projection and publisher_analysis statistics/requested-result helpers remain pending; do not mark this module complete before their acquisition/planner dependencies and consumers are migrated.",
+        "docs/METRIC_ANALYSIS_MIGRATION.md",
+        "Publisher profile projection and converted statistics/requested results now use native MetricAnalysis; saved GF2/BF1/edited sidecars and identity failures compare exactly. Worker-sidecar loading and priority-ownership validation remain pending, so module status stays partial."
       ]
     },
     {
@@ -1776,9 +1780,15 @@
       "sha256": "2454b482f8c37593515e72726b26e60a7ae2d43b8608b4879327a32f056d8fe8",
       "lines": 103,
       "description": "Independent reconstruction of GPA's iteration/metric/range transposition.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "ported",
+      "native": [
+        "src/application/MetricAnalysis.h",
+        "src/application/MetricAnalysis.cpp"
+      ],
+      "validation": [
+        "docs/METRIC_ANALYSIS_MIGRATION.md",
+        "3,043 exact Python/native comparisons and 479 saved GPA checks cover binary64 statistics, aggregation, complete iteration/range identity, ordered request planning, uint64 preservation and converted publisher projection/analysis. Full Release, nine relevant CTest suites, 358 recorded/publisher and 6,961 core regressions pass. The profiling scheduler and Qt consumers remain separate incomplete modules."
+      ]
     },
     {
       "module": "metric_pipeline_capability.py",
@@ -1794,9 +1804,15 @@
       "sha256": "9ecfd3bdb909dc94c394743a332065d2e546818be285b1d941eb8072dac50f2f",
       "lines": 82,
       "description": "GPA-compatible ordered grouping of metric compatibility choices.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "ported",
+      "native": [
+        "src/application/MetricAnalysis.h",
+        "src/application/MetricAnalysis.cpp"
+      ],
+      "validation": [
+        "docs/METRIC_ANALYSIS_MIGRATION.md",
+        "3,043 exact Python/native comparisons and 479 saved GPA checks cover binary64 statistics, aggregation, complete iteration/range identity, ordered request planning, uint64 preservation and converted publisher projection/analysis. Full Release, nine relevant CTest suites, 358 recorded/publisher and 6,961 core regressions pass. The profiling scheduler and Qt consumers remain separate incomplete modules."
+      ]
     },
     {
       "module": "metric_priority.py",
@@ -1956,9 +1972,15 @@
       "sha256": "0bb204ed6282acc147e55c649d7285aa3663c5ae968cc4ed5659f7482d5b93c1",
       "lines": 96,
       "description": "Independent reconstruction of GPA IteratedValue arithmetic (binary64).",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "ported",
+      "native": [
+        "src/application/MetricAnalysis.h",
+        "src/application/MetricAnalysis.cpp"
+      ],
+      "validation": [
+        "docs/METRIC_ANALYSIS_MIGRATION.md",
+        "3,043 exact Python/native comparisons and 479 saved GPA checks cover binary64 statistics, aggregation, complete iteration/range identity, ordered request planning, uint64 preservation and converted publisher projection/analysis. Full Release, nine relevant CTest suites, 358 recorded/publisher and 6,961 core regressions pass. The profiling scheduler and Qt consumers remain separate incomplete modules."
+      ]
     },
     {
       "module": "metrics_discovery.py",
