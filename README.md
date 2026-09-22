@@ -90,8 +90,8 @@ measurement boundaries, provenance and validation.
 
 The native Intel Metrics Discovery foundation now provides device selection,
 annotated catalogs, counter samples, object reuse and deferred counter execution.
-Its Qt controls remain pending; the scheduled collection command is described
-below. See
+Scheduled collection is available in the right-side **Intel Metrics** panel;
+other profiling controls remain pending. See
 [Metrics Discovery migration](docs/METRICS_DISCOVERY_MIGRATION.md).
 Its shared clock, report postprocessing and query drain now have native
 implementations with exact value/state comparisons; see
@@ -133,7 +133,12 @@ the unresolved intermittent BF1 image mismatch. Saved scheduled results now
 have a native offline verifier that reconstructs their numeric protocol and
 checks report identities and cleanup audits; see
 [scheduled-result reader](docs/MD_ITERATION_RESULTS_MIGRATION.md).
-Other profiling owners and the Intel metrics Qt workflow remain pending.
+The right-side **Intel Metrics** panel now reads the catalog, previews pass
+plans, collects scheduled matrices, locates their API boundaries and exports
+the complete result ZIP. Setup and experiment identity are preserved across
+project saves; failed or cancelled measurements retain the previous result.
+See [scheduled metrics in Qt](docs/MD_ITERATIONS_UI_MIGRATION.md). Other profiling
+owners and the remaining hardware-metric views are still pending.
 
 **Shader > DXBC** supports Read, Import ASM and **Assemble & Apply** using a
 selected **External Tool**. The same tool provides optional recovery fallback

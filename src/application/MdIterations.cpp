@@ -4,6 +4,7 @@
 #include "MdIterationTransport.h"
 #include "MetricAcquisitionPriority.h"
 #include "MetricsDiscovery.h"
+#include "replay/Device.h"
 #include <QDir>
 #include <QFile>
 #include <QFileInfo>
@@ -78,6 +79,21 @@ Json adapter(const Replay &replay) {
             {"shared_system_memory", d.SharedSystemMemory}};
 }
 } // namespace
+Json collectMetricCatalog(const QString &directory, const QString &bridge) {
+    QDir out(directory);
+    if (out.exists() || !QDir().mkpath(out.absolutePath()))
+        throw std::invalid_argument("Catalog output directory must be new");
+    auto device = createDx11Device(false, false, 0x8086);
+    MetricsDiscovery md(device.device.Get(), bridge);
+    const auto modules = loadedModules();
+    auto provenance = md.provenance();
+    provenance["loaded_modules"] = modules;
+    saveJson(out.filePath("catalog.json"), md.catalog());
+    saveJson(out.filePath("provenance.json"), provenance);
+    Json report = {{"schema", "FloraGPA native result 1"}, {"completed", true}, {"loaded_modules", modules}};
+    saveJson(out.filePath("report.json"), report);
+    return report;
+}
 Json scheduledMetricRequest(const Json &request) {
     const auto samples = request.value("samples", Json(1)), warmup = request.value("warmup", Json(1));
     if (!count(samples))

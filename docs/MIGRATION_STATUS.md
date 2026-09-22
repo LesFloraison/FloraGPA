@@ -1,5 +1,19 @@
 # FloraGPA C++ 迁移进度 — 2026-09-22
 
+本批将 `md_iterations_ui.py` 迁入右侧 **Intel Metrics** 面板：目录读取、
+指标选择、范围／pass／权重设置、计划预览、调度采集、指标矩阵、API 定位、
+折叠详情与完整 ZIP 导出均接入原生 worker。结果在接受前核对冻结请求和
+实验身份；取消、失败及实验变化保留旧结果并标明状态。支持 Python 工程
+中的旧设置与 C++ 工程保存／恢复。独立包 7 个用例无跳过通过，导出 ZIP
+由未修改的 Python 读取器校验，发布器数据与界面结果完全一致。
+14 套相关 CTest 通过，其中原主界面 54 个用例无跳过通过。
+补齐外部样本后 Replay Metrics 6 个用例无跳过通过；最终包 GF2／BF1
+黄金帧与两项禁用绘制负对照通过，四个程序及指标桥接 DLL 与 Release 哈希一致。
+当前为 **68 `ported`、117 `partial`、19 `pending`**，不是工作量百分比。
+`hardware_metrics_ui.py`、`md_profile.py` 与共享 session 仍为部分迁移；
+其他 profiling 视图、完整原版 GPU 调度以及 BF1 偶发像素差异仍未完成／解决。
+详见 [MD_ITERATIONS_UI_MIGRATION.md](MD_ITERATIONS_UI_MIGRATION.md)。
+
 本批完成 `md_iteration_results.py` 的原生离线读取与校验：从保存的发布器
 报告重建调度协议和统计矩阵，检查命令边界、原始文件哈希、优先级锁、
 资源释放及冻结实验。127 组 Python／C++ 对照全部一致（16 组接受、111 组

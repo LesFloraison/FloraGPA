@@ -86,8 +86,10 @@ int main(int argc, char **argv) {
     p.addPositionalArgument(
         "command",
         "inventory | commands | command-state | contexts | command-lists | replay | shader | "
-        "buffer | texture | texture-storage | compile | compile-project | assemble | geometry | replay-pipeline | "
-        "class-linkage | predicate | annotations | metric-index | metric-iterations | statistics | timings | coverage | quad | post-geometry | shader-checkpoint | "
+        "buffer | texture | texture-storage | compile | compile-project | assemble | geometry | "
+        "replay-pipeline | "
+        "class-linkage | predicate | annotations | metric-index | metric-catalog | metric-iterations | "
+        "statistics | timings | coverage | quad | post-geometry | shader-checkpoint | "
         "rdc-analyze");
     p.addPositionalArgument("capture", "DX11 .gpa_frame file");
     p.addOption({"out", "New or empty output directory", "path"});
@@ -164,12 +166,12 @@ int main(int argc, char **argv) {
     p.process(app);
     try {
         const auto args = p.positionalArguments();
-        if (args.size() != 2)
-            throw std::runtime_error("Expected command and capture path");
+        if (args.isEmpty())
+            throw std::runtime_error("Expected command");
         auto command = args[0];
         if (p.isSet(readyFile)) {
-            if (command != "metric-iterations")
-                throw std::runtime_error("--ready-file applies to metric-iterations only");
+            if (command != "metric-iterations" && command != "metric-catalog")
+                throw std::runtime_error("--ready-file applies to Intel metric workers only");
             QElapsedTimer deadline;
             deadline.start();
             while (!QFileInfo(p.value(readyFile)).isFile()) {
@@ -178,6 +180,18 @@ int main(int argc, char **argv) {
                 QThread::msleep(10);
             }
         }
+        if (command == "metric-catalog") {
+            if (args.size() != 1 || p.value("out").isEmpty())
+                throw std::runtime_error("metric-catalog requires --out and no capture argument");
+            for (const auto &option : p.optionNames())
+                if (option != "out" && option != "metrics-bridge" && option != "ready-file")
+                    throw std::runtime_error("Unsupported catalog option: --" + option.toStdString());
+            const auto result = collectMetricCatalog(p.value("out"), p.value("metrics-bridge"));
+            QTextStream(stdout) << QByteArray::fromStdString(result.dump(2)) << Qt::endl;
+            return 0;
+        }
+        if (args.size() != 2)
+            throw std::runtime_error("Expected command and capture path");
         Frame frame(std::filesystem::path(args[1].toStdWString()));
         if (command != "quad" && (p.isSet("quad-depth") || p.isSet("quad-target") || p.isSet("quad-layer")))
             throw std::runtime_error("Quad options apply to quad only");

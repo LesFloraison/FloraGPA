@@ -1351,9 +1351,17 @@
       "sha256": "6123447b7b9f90974581ff585e2890cc740d92c468b0e8b76c894bdd47c69e52",
       "lines": 366,
       "description": "Driver hardware counters, kept separate by event, metric set and replay pass.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": [
+        "src/app/ScheduledMetricsView.cpp",
+        "src/application/MdIterations.cpp",
+        "src/app/MainWindow.cpp",
+        "src/cli/main.cpp"
+      ],
+      "validation": [
+        "docs/MD_ITERATIONS_UI_MIGRATION.md",
+        "Catalog/list-sets and shared scheduled setup are native. Uniform collection, remaining hardware metric views and profiling owners are not migrated by this batch."
+      ]
     },
     {
       "module": "hlsl_geometry.py",
@@ -1640,18 +1648,33 @@
       "sha256": "57ceb6d430a01d0fc380c8e4577db4c3d7f046c0becfb9c036bf68206e2621da",
       "lines": 165,
       "description": "Desktop view for recovered, non-uniform pass/iteration results.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "ported",
+      "native": [
+        "src/app/ScheduledMetricsView.h",
+        "src/app/ScheduledMetricsView.cpp",
+        "src/application/MdIterationSession.h",
+        "src/application/MdIterationSession.cpp",
+        "src/app/MainWindow.cpp"
+      ],
+      "validation": [
+        "docs/MD_ITERATIONS_UI_MIGRATION.md",
+        "Seven packaged Qt cases pass without skips: settings, frozen request/result identities, live catalog and scheduled acquisition, API navigation, failed refresh, cancellation/retry, cached weights, stale experiments and project round trips. Exported publisher values exactly match the unchanged Python reader; raw reports and process audits are retained."
+      ]
     },
     {
       "module": "md_profile.py",
       "sha256": "4c532c2d09854f2414303c6a7a1480fc86b873be688bb47c2fe289568bbee877",
       "lines": 265,
       "description": "Intel DX11 hardware metrics from the installed driver; no GPA runtime DLLs.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": [
+        "src/application/MdIterations.cpp",
+        "src/cli/main.cpp"
+      ],
+      "validation": [
+        "docs/MD_ITERATIONS_UI_MIGRATION.md",
+        "Catalog/list-sets and shared scheduled setup are native. Uniform collection, remaining hardware metric views and profiling owners are not migrated by this batch."
+      ]
     },
     {
       "module": "md_publisher_values.py",
@@ -3176,7 +3199,9 @@
         "src/application/QueryHistory.cpp",
         "src/app/Models.cpp",
         "src/application/SessionUi.cpp",
-        "src/app/Views.cpp"
+        "src/app/Views.cpp",
+        "src/application/MdIterationSession.h",
+        "src/application/MdIterationSession.cpp"
       ],
       "validation": [
         "docs/NATIVE_BASELINE.md",
@@ -3186,7 +3211,8 @@
         "tests/ApiCommandTests.cpp: wire bounds, references, metadata order, query states and filtered export",
         "tools/validate_api_commands.py: 920 GF2, 18024 BF1 and 4006 synthetic records plus resource/text filtering; JSON and parsed CSV, allowing different invalid diagnostic wording",
         "tests/UiTests.cpp: field offsets, reference navigation, resource filtering and texture-preview priority",
-        "docs/OUTPUT_SESSION_MIGRATION.md: output settings, driver/API/boundary project round trip; exact uint64 IDs and unknown UI fields; output pixel/resource/element navigation; other page UI state remains pending"
+        "docs/OUTPUT_SESSION_MIGRATION.md: output settings, driver/API/boundary project round trip; exact uint64 IDs and unknown UI fields; output pixel/resource/element navigation; other page UI state remains pending",
+        "docs/MD_ITERATIONS_UI_MIGRATION.md: frozen scheduled requests and result acceptance, ready-file Job isolation, cancellation, complete ZIP export and legacy/project UI settings are native. Other shared session responsibilities remain incomplete."
       ]
     },
     {

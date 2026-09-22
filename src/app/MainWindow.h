@@ -25,6 +25,7 @@ class PredicateView;
 class AnnotationsView;
 class StatisticsView;
 class GpuProfileView;
+class ScheduledMetricsView;
 class CoverageView;
 class QuadView;
 class CheckpointView;
@@ -98,6 +99,7 @@ class MainWindow final : public QMainWindow {
     void inspectCaptureStructure();
     void showPipeline(const State &state);
     void startWorker(QStringList args, bool timings);
+    void readScheduledMetrics(bool catalog, uint64_t serial);
     void finishWorker(int, QProcess::ExitStatus);
     void cancel();
     void showError(const QString &error);
@@ -172,6 +174,11 @@ class MainWindow final : public QMainWindow {
     AnnotationsView *annotations_;
     StatisticsView *gpuStatistics_;
     GpuProfileView *gpuProfile_;
+    ScheduledMetricsView *scheduledMetrics_ = nullptr;
+    uint64_t runningScheduledRequest_{};
+    nlohmann::json runningScheduledPrepared_;
+    QString runningScheduledBridge_, runningScheduledKey_;
+    QByteArray scheduledLog_, scheduledStdout_;
     QuadView *quad_;
     uint64_t runningQuadRequest_{};
     CoverageView *coverage_;

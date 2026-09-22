@@ -8,8 +8,9 @@ The profile is read-only. Python is used only by the development comparator.
 
 The native scheduled producer is described in
 [MD_ITERATIONS_MIGRATION.md](MD_ITERATIONS_MIGRATION.md). This batch provides the
-reader needed by the Qt consumer; it does not yet introduce the Intel scheduled
-metric controls or claim that `md_iterations_ui.py` has been migrated.
+reader needed by the Qt consumer. The subsequent
+[scheduled metrics UI migration](MD_ITERATIONS_UI_MIGRATION.md) connects it to
+the Intel Metrics panel and frozen worker result acceptance.
 
 ## Reconstructed validation
 
@@ -100,4 +101,5 @@ Local evidence (ignored by Git):
 - `artifacts/md-iteration-results-delivery-audit.json`
 
 Package: `out/FloraGPA-md-iteration-results/FloraGPA.exe`; distribute its directory.
-The reader's Qt integration remains pending; the visible UI is unchanged.
+That batch left the visible UI unchanged. Its subsequent Qt integration is
+documented in [MD_ITERATIONS_UI_MIGRATION.md](MD_ITERATIONS_UI_MIGRATION.md).

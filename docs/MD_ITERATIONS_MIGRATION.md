@@ -129,3 +129,7 @@ Evidence paths are local and ignored by Git:
 Package: `out/FloraGPA-md-iterations-final/FloraGPA.exe`; distribute its whole directory.
 Verification is on this host's Intel adapter and driver, not a claim of
 compatibility across all Intel GPUs or arbitrary capture files.
+
+The subsequent [Qt migration](MD_ITERATIONS_UI_MIGRATION.md) exposes this
+collector through Inspector > Intel Metrics, with frozen request acceptance,
+cancellation, experiment settings and complete result ZIP export.
