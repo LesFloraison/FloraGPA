@@ -100,8 +100,11 @@ MD sample adapter now use the native collector. Its 535 transition comparisons
 and real Intel workload checks are documented in
 [collector migration](docs/METRIC_COLLECTOR_MIGRATION.md).
 Synchronous and FIFO collection, including native Counter reuse, are now migrated
-as well; see [acquisition adapters](docs/METRIC_ADAPTERS_MIGRATION.md). Recorded
-collection, publisher conversion/export and the full profiling workflow remain pending.
+as well; see [acquisition adapters](docs/METRIC_ADAPTERS_MIGRATION.md).
+Owned deferred command lists now support repeated metric collection, publisher
+conversion and recorded JSON/CSV export through native adapters; see
+[recorded metrics](docs/RECORDED_METRICS_MIGRATION.md). Worker-sidecar validation,
+publisher statistics and the full profiling/Qt workflow remain pending.
 
 **Shader > DXBC** supports Read, Import ASM and **Assemble & Apply** using a
 selected **External Tool**. The same tool provides optional recovery fallback

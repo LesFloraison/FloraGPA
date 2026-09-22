@@ -2,11 +2,32 @@
 #include <cstdint>
 #include <nlohmann/json.hpp>
 #include <optional>
+#include <span>
 #include <vector>
+struct ID3D11DeviceContext;
+struct ID3D11CommandList;
 namespace flora {
 struct MetricResult {
     nlohmann::json values;
     std::vector<uint8_t> raw;
+};
+class MetricClockTransport {
+  public:
+    virtual ~MetricClockTransport() = default;
+    virtual nlohmann::json clockPair() = 0;
+};
+class MetricRecordedTransport : public MetricClockTransport {
+  public:
+    virtual bool supportsRecorded() const = 0;
+    virtual const nlohmann::json &selected() const = 0;
+    virtual uint64_t recordedBegin(ID3D11DeviceContext *context) = 0;
+    virtual void recordedEnd(uint64_t token) = 0;
+    virtual uint64_t recordedExecute(ID3D11CommandList *command, std::span<const uint64_t> tokens,
+                                     bool restore = false) = 0;
+    virtual std::optional<MetricResult> recordedPoll(uint64_t token, uint64_t execution,
+                                                     bool flush = false) = 0;
+    virtual void recordedRelease(uint64_t token) = 0;
+    virtual nlohmann::json provenance() const = 0;
 };
 class MetricCounterTransport {
   public:

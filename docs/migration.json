@@ -1589,9 +1589,16 @@
       "sha256": "ab5d14eca068e95482032ac4a09a3a1579fcd8b8893d8df435b206c675d48700",
       "lines": 176,
       "description": "Recovered publisher transforms applied to independently acquired MD reports.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "partial",
+      "native": [
+        "src/application/MetricPublisher.h",
+        "src/application/MetricPublisher.cpp"
+      ],
+      "validation": [
+        "docs/RECORDED_METRICS_MIGRATION.md",
+        "tools/validate_recorded_metrics.py: 358 exact scenarios (131 recorded lifecycle, 227 publisher classes) compare reports, identities, clock/busy state, errors and CSV bytes. Real Intel integration checks 72 repeated-execution reports on two contexts/two metric sets, six failure paths and a successful retry; native tests cover timeout/destruction cleanup.",
+        "Both publisher classes, calculated-value encoding, clock audits, transforms, reports and CSV are native. Worker-sidecar loading/validation, publisher_profile projection and publisher_analysis statistics/requested-result helpers remain pending; do not mark this module complete before their acquisition/planner dependencies and consumers are migrated."
+      ]
     },
     {
       "module": "md_query_drain.py",
@@ -1615,9 +1622,20 @@
       "sha256": "d9245414a63c393de64aa5394aca8ed8c447ae78f2ed6dd0262fbe099b8b0312",
       "lines": 185,
       "description": "Intel MD counters on owned deferred lists, using recovered query lifecycle.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "ported",
+      "native": [
+        "src/application/MetricPublisher.h",
+        "src/application/MetricPublisher.cpp",
+        "src/application/MdRecordedQueries.h",
+        "src/application/MdRecordedQueries.cpp",
+        "src/application/MetricSampleTransport.h",
+        "src/application/MetricsDiscovery.h",
+        "src/application/MetricQueries.h"
+      ],
+      "validation": [
+        "docs/RECORDED_METRICS_MIGRATION.md",
+        "tools/validate_recorded_metrics.py: 358 exact scenarios (131 recorded lifecycle, 227 publisher classes) compare reports, identities, clock/busy state, errors and CSV bytes. Real Intel integration checks 72 repeated-execution reports on two contexts/two metric sets, six failure paths and a successful retry; native tests cover timeout/destruction cleanup."
+      ]
     },
     {
       "module": "md_reusing_pool.py",

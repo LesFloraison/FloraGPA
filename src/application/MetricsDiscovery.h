@@ -9,20 +9,22 @@ unsigned metricDescriptorKind(const nlohmann::json &type, const nlohmann::json &
 nlohmann::json annotateMetricCatalog(nlohmann::json catalog);
 nlohmann::json validateMetricResult(const nlohmann::json &metadata, nlohmann::json result, Bytes raw);
 QString metricsDriverLibrary();
-class MetricsDiscovery final : public MetricSampleTransport, public MetricCounterTransport {
+class MetricsDiscovery final : public MetricSampleTransport,
+                               public MetricCounterTransport,
+                               public MetricRecordedTransport {
   public:
     explicit MetricsDiscovery(ID3D11Device *device, const QString &bridge = {});
     ~MetricsDiscovery() override;
     MetricsDiscovery(const MetricsDiscovery &) = delete;
     MetricsDiscovery &operator=(const MetricsDiscovery &) = delete;
     const nlohmann::json &catalog() const;
-    const nlohmann::json &selected() const;
+    const nlohmann::json &selected() const override;
     void select(const std::string &name);
     void begin() override;
     MetricResult end(unsigned timeoutMs = 10000);
     MetricResult result();
     MetricResult decode(Bytes raw);
-    nlohmann::json clockPair();
+    nlohmann::json clockPair() override;
     bool supportsDrain() const override;
     void submit() override;
     std::optional<MetricResult> poll(bool flush = false) override;
@@ -40,16 +42,16 @@ class MetricsDiscovery final : public MetricSampleTransport, public MetricCounte
     void sampleClearCache() override;
     uint64_t sampleInfo(uint64_t token) override;
     nlohmann::json sampleStats() override;
-    bool supportsRecorded() const;
-    uint64_t recordedBegin(ID3D11DeviceContext *context);
-    void recordedEnd(uint64_t token);
+    bool supportsRecorded() const override;
+    uint64_t recordedBegin(ID3D11DeviceContext *context) override;
+    void recordedEnd(uint64_t token) override;
     uint64_t recordedExecute(ID3D11CommandList *command, std::span<const uint64_t> tokens,
-                             bool restore = false);
-    std::optional<MetricResult> recordedPoll(uint64_t token, uint64_t execution, bool flush = false);
+                             bool restore = false) override;
+    std::optional<MetricResult> recordedPoll(uint64_t token, uint64_t execution, bool flush = false) override;
     MetricResult recordedResult(uint64_t token, uint64_t execution);
-    void recordedRelease(uint64_t token);
+    void recordedRelease(uint64_t token) override;
     unsigned recordedCount();
-    nlohmann::json provenance() const;
+    nlohmann::json provenance() const override;
     void close();
 
   private:

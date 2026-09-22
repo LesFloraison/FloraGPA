@@ -1,5 +1,16 @@
 # FloraGPA C++ 迁移进度 — 2026-09-22
 
+本批完成录制式指标会话的 C++ 迁移：延迟上下文范围、Finish／重复 Execute、
+干净／脏列表释放、失败清理及 JSON／CSV 导出。发布器两种转换类同时迁入，
+包含时钟校准、回绕、busy 状态、原始哈希与转换值，但源模块的侧车结果验证和
+统计分析依赖尚未闭合，仍记为 `partial`。358 组新对照、728／6,961／5,100 组
+既有回归及 8 套相关 CTest 通过；真实 Intel 双上下文／双指标集验证 72 份重复
+执行报告、六类失败清理及后续重试。独立包 `out/FloraGPA-recorded-metrics/`
+通过仅系统 PATH 原生测试、新对照矩阵及 GF2／BF1 四项黄金帧／负对照。
+当前为 **45 `ported`、116 `partial`、43 `pending`**，不是工作量百分比。
+详见 [RECORDED_METRICS_MIGRATION.md](RECORDED_METRICS_MIGRATION.md)；完整指标
+分析及 Qt 控件仍待接通。
+
 本批继续完成同步计数器、异步 FIFO 采样和可复用 Counter 三种采集策略，保留
 各自时钟刷新／交付／回收顺序及失败清理语义。扩展后的 728 组逐操作对照通过；
 三种策略各自的 9 段真实 Intel Dispatch 验证结果顺序、计数、原始报告与复用身份。

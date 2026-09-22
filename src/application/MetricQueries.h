@@ -59,6 +59,7 @@ class DeferredMetricQueries {
 };
 class MetricQueryDrain {
   public:
+    virtual ~MetricQueryDrain() = default;
     PendingMetricPool *pending{};
     MetricBatchSlots *recycled{};
     std::vector<MetricQuerySink *> metrics;
@@ -66,6 +67,6 @@ class MetricQueryDrain {
     uint64_t slotCount{}, limit{};
     bool limited{};
     std::map<uint64_t, std::shared_ptr<DeferredMetricQueries>> deferred;
-    void drain(bool wait = false);
+    virtual void drain(bool wait = false);
 };
 } // namespace flora

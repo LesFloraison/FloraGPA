@@ -1,3 +1,4 @@
+#include "application/MdRecordedQueries.h"
 #include "application/MdSamplePool.h"
 #include "application/MdScheduledPool.h"
 #include "application/MetricClock.h"
@@ -8,6 +9,7 @@
 #include <QCoreApplication>
 #include <QElapsedTimer>
 #include <QFile>
+#include <QTemporaryDir>
 #include <QThread>
 #include <QtTest>
 #include <d3dcompiler.h>
@@ -16,6 +18,44 @@
 using namespace flora;
 using Json = nlohmann::json;
 namespace {
+struct FaultRecorded final : MetricRecordedTransport {
+    MetricsDiscovery &md;
+    std::string fault;
+    explicit FaultRecorded(MetricsDiscovery &value) : md(value) {}
+    void fail(const char *name) const {
+        if (fault == name)
+            throw std::runtime_error(std::string("Injected ") + name);
+    }
+    bool supportsRecorded() const override { return md.supportsRecorded(); }
+    const Json &selected() const override { return md.selected(); }
+    Json provenance() const override { return md.provenance(); }
+    Json clockPair() override {
+        auto value = md.clockPair();
+        if (fault == "clock")
+            value["status"] = 1;
+        return value;
+    }
+    uint64_t recordedBegin(ID3D11DeviceContext *context) override {
+        fail("begin");
+        return md.recordedBegin(context);
+    }
+    void recordedEnd(uint64_t token) override {
+        fail("end");
+        md.recordedEnd(token);
+    }
+    uint64_t recordedExecute(ID3D11CommandList *command, std::span<const uint64_t> tokens,
+                             bool restore) override {
+        fail("execute");
+        return md.recordedExecute(command, tokens, restore);
+    }
+    std::optional<MetricResult> recordedPoll(uint64_t token, uint64_t execution, bool flush) override {
+        fail("poll");
+        if (fault == "timeout")
+            return {};
+        return md.recordedPoll(token, execution, flush);
+    }
+    void recordedRelease(uint64_t token) override { md.recordedRelease(token); }
+};
 MetricResult wait(const std::function<std::optional<MetricResult>(bool)> &poll) {
     QElapsedTimer elapsed;
     elapsed.start();
@@ -515,6 +555,145 @@ class MetricsDiscoveryTests : public QObject {
         wait([&](bool flush) { return md.recordedPoll(recorded, next, flush); });
         md.recordedRelease(recorded);
         QCOMPARE(md.recordedCount(), 0u);
+        Com<ID3D11DeviceContext> otherDeferred;
+        check(device.device->CreateDeferredContext(0, &otherDeferred), "Create second recorded context");
+        const std::array<ID3D11DeviceContext *, 2> contexts{deferred.Get(), otherDeferred.Get()};
+        const std::array<unsigned, 6> recordedWork{1, 4, 16, 2, 3, 8};
+        for (bool publisherValues : {false, true}) {
+            MdRecordedQueries session(md, 10000, publisherValues);
+            for (const auto *set : {"ComputeBasic", "RenderBasic"}) {
+                md.select(set);
+                std::vector<uint64_t> lists;
+                for (unsigned list = 0; list < 3; ++list) {
+                    auto *context = contexts[list % 2];
+                    bind(context);
+                    for (unsigned range = 0; range < 2; ++range) {
+                        const auto key = list * 2 + range;
+                        session.begin(uint64_t(reinterpret_cast<uintptr_t>(context)), key, key * 10);
+                        context->Dispatch(recordedWork[key], 1, 1);
+                        session.end(uint64_t(reinterpret_cast<uintptr_t>(context)));
+                    }
+                    lists.push_back(
+                        session.finish(uint64_t(reinterpret_cast<uintptr_t>(context)), list % 2 != 0));
+                }
+                for (unsigned repeat = 0; repeat < 3; ++repeat) {
+                    for (unsigned index = 0; index < 3; ++index)
+                        session.execute(lists[(index + repeat) % 3], (index + repeat) % 2 != 0);
+                    QVERIFY_THROWS_EXCEPTION(std::runtime_error, session.report());
+                    session.drain(false);
+                }
+                for (auto list : lists)
+                    session.release(list);
+                session.drain(true);
+                QCOMPARE(md.recordedCount(), 0u);
+                QCOMPARE(session.ownedCount(), size_t(0));
+                QCOMPARE(session.commandCount(), size_t(0));
+            }
+            const auto report = session.report();
+            QCOMPARE(report["sets"].size(), size_t(2));
+            QCOMPARE(report["records"].size(), size_t(36));
+            QCOMPARE(report["executions"].size(), size_t(18));
+            std::map<std::pair<std::string, uint64_t>, unsigned> deliveries;
+            for (const auto &row : report["records"]) {
+                const auto set = row["set"].get<std::string>();
+                const auto key = row["key0"].get<uint64_t>();
+                QVERIFY(key < recordedWork.size());
+                QCOMPARE(row["key1"], Json(key * 10));
+                QVERIFY(row["result"]["available"] == true);
+                const auto &sets = report["sets"];
+                const auto definitions = std::find_if(
+                    sets.begin(), sets.end(), [&](const auto &group) { return group["name"] == set; });
+                for (size_t i = 0; i < definitions->at("metrics").size(); ++i)
+                    if (definitions->at("metrics")[i]["name"] == "CsThreads")
+                        QCOMPARE(row["result"]["values"][i]["value"], Json((recordedWork[key] + 1) / 2));
+                ++deliveries[{set, key}];
+            }
+            QCOMPARE(deliveries.size(), size_t(12));
+            for (const auto &[key, count] : deliveries)
+                QCOMPARE(count, 3u);
+            if (publisherValues) {
+                const auto &convertedRecords = report["publisher_values"]["records"];
+                QCOMPARE(convertedRecords.size(), report["records"].size());
+                QVERIFY(!report["publisher_values"]["refreshes"].empty());
+                for (size_t i = 0; i < convertedRecords.size(); ++i) {
+                    for (const auto *field :
+                         {"set", "key0", "key1", "tag", "token", "execution", "list_id", "context_slot"})
+                        QCOMPARE(convertedRecords[i][field], report["records"][i][field]);
+                    const auto raw = QByteArray::fromHex(
+                        QByteArray::fromStdString(report["records"][i]["raw_hex"].get<std::string>()));
+                    QCOMPARE(convertedRecords[i]["raw_sha256"],
+                             Json(sha256(
+                                 Bytes(reinterpret_cast<const uint8_t *>(raw.data()), size_t(raw.size())))));
+                    for (const auto &field : convertedRecords[i]["values"]) {
+                        const auto typedBytes = QByteArray::fromHex(
+                            QByteArray::fromStdString(field["typed_hex"].get<std::string>()));
+                        QCOMPARE(metricTypedDouble(Bytes(reinterpret_cast<const uint8_t *>(typedBytes.data()),
+                                                         size_t(typedBytes.size()))),
+                                 field["value"].get<double>());
+                    }
+                }
+            } else
+                QVERIFY(report["publisher_values"].is_null());
+            QTemporaryDir output;
+            const auto folder = output.filePath("recorded");
+            QCOMPARE(session.exportReport(folder), report);
+            QCOMPARE(read(folder + "/recorded-profile.json"), report);
+            QVERIFY(QFile::exists(folder + "/raw-values.csv"));
+            QCOMPARE(QFile::exists(folder + "/publisher-values.csv"), publisherValues);
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error, session.exportReport(folder));
+            session.close();
+            QCOMPARE(session.report(), report);
+        }
+        for (const std::string fault : {"begin", "end", "execute", "poll", "timeout", "clock"}) {
+            FaultRecorded transport(md);
+            MdRecordedQueries session(transport, fault == "timeout" ? 1 : 10000, fault == "clock");
+            const auto context = uint64_t(reinterpret_cast<uintptr_t>(deferred.Get()));
+            bind(deferred.Get());
+            if (fault == "begin") {
+                transport.fault = fault;
+                QVERIFY_THROWS_EXCEPTION(std::runtime_error, session.begin(context, 77));
+            } else {
+                session.begin(context, 77);
+                deferred->Dispatch(4, 1, 1);
+                if (fault == "end") {
+                    transport.fault = fault;
+                    QVERIFY_THROWS_EXCEPTION(std::runtime_error, session.end(context));
+                } else {
+                    session.end(context);
+                    const auto list = session.finish(context);
+                    if (fault == "execute") {
+                        transport.fault = fault;
+                        QVERIFY_THROWS_EXCEPTION(std::runtime_error, session.execute(list));
+                    } else {
+                        session.execute(list);
+                        transport.fault = fault;
+                        QVERIFY_THROWS_EXCEPTION(std::runtime_error, session.drain());
+                    }
+                }
+            }
+            QVERIFY(session.closed() && session.failed());
+            QVERIFY(session.records().empty());
+            QCOMPARE(session.commandCount(), size_t(0));
+            QCOMPARE(session.ownedCount(), size_t(0));
+            QCOMPARE(md.recordedCount(), 0u);
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error, session.report());
+            Com<ID3D11CommandList> discarded;
+            check(deferred->FinishCommandList(FALSE, &discarded), "Discard failed recording");
+        }
+        {
+            MdRecordedQueries recordedRetry(md, 10000, true);
+            const auto context = uint64_t(reinterpret_cast<uintptr_t>(deferred.Get()));
+            bind(deferred.Get());
+            recordedRetry.begin(context, 88);
+            deferred->Dispatch(2, 1, 1);
+            recordedRetry.end(context);
+            const auto list = recordedRetry.finish(context);
+            recordedRetry.execute(list);
+            recordedRetry.drain();
+            recordedRetry.release(list);
+            QCOMPARE(recordedRetry.report()["records"].size(), size_t(1));
+            QCOMPARE(md.recordedCount(), 0u);
+        }
         QVERIFY(md.provenance()["driver"]["sha256"].get<std::string>().size() == 64);
         auto warp = createDx11Device(true);
         QVERIFY_THROWS_EXCEPTION(std::runtime_error, MetricsDiscovery(warp.device.Get()));
