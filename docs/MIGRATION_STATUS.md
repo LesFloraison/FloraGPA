@@ -1,5 +1,15 @@
 # FloraGPA C++ 迁移进度 — 2026-09-22
 
+本批完成 `md_iteration_results.py` 的原生离线读取与校验：从保存的发布器
+报告重建调度协议和统计矩阵，检查命令边界、原始文件哈希、优先级锁、
+资源释放及冻结实验。127 组 Python／C++ 对照全部一致（16 组接受、111 组
+拒绝），包含七组真实采集、旧版格式、不可用样本及篡改／缺失文件。
+完整 Release、12 套相关 CTest、独立包 4 个原生用例和黄金帧／负对照通过。
+当前为 **67 `ported`、115 `partial`、22 `pending`**，不是工作量百分比。
+此处完成读取器 API，Intel 指标 Qt 界面及其他 profiling 模块仍待迁移。
+读取器不重新解码 PNG 或打开原始帧；首次 BF1 单像素差异仍未确定原因。
+详见 [MD_ITERATION_RESULTS_MIGRATION.md](MD_ITERATION_RESULTS_MIGRATION.md)。
+
 本批完成 `md_iterations.py` 的完整调度采集命令迁移：CLI／worker 现可执行
 自动或缓存权重、多 pass、非均匀重复采集、冻结实验，并输出原始报告、
 调度审计和 JSON／CSV 指标结果。7 组采集、17 次计数重放、267 份报告经

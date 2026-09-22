@@ -129,8 +129,11 @@ The full scheduled collection command is now native:
 It preserves weight acquisition, pass mapping, nonuniform repetitions, frozen
 experiments, raw reports and scheduled JSON/CSV results. See
 [scheduled collection](docs/MD_ITERATIONS_MIGRATION.md) for usage, validation and
-the unresolved intermittent BF1 image mismatch. The scheduled-result reader,
-other profiling owners and Intel metrics Qt workflow remain pending.
+the unresolved intermittent BF1 image mismatch. Saved scheduled results now
+have a native offline verifier that reconstructs their numeric protocol and
+checks report identities and cleanup audits; see
+[scheduled-result reader](docs/MD_ITERATION_RESULTS_MIGRATION.md).
+Other profiling owners and the Intel metrics Qt workflow remain pending.
 
 **Shader > DXBC** supports Read, Import ASM and **Assemble & Apply** using a
 selected **External Tool**. The same tool provides optional recovery fallback

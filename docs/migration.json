@@ -1588,9 +1588,16 @@
       "sha256": "af81f8224175d561fba83847a0700187ff6c3212f84256d50a7428013599560b",
       "lines": 108,
       "description": "Verify scheduled worker results against their exact report/plan identities.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "ported",
+      "native": [
+        "src/application/MdIterationResults.cpp",
+        "src/application/MdIterationResults.h"
+      ],
+      "validation": [
+        "docs/MD_ITERATION_RESULTS_MIGRATION.md",
+        "127 comparisons with the unchanged Python reader agree: 16 accepted results and 111 rejections. Coverage includes seven real collections, legacy auxiliary/arbitration semantics, unavailable/null values, numeric aliases, independent copied artifacts, source-report/protocol/matrix mutations, priority/cleanup audits and missing files. Accepted publisher results match exactly; explicit ValueError messages match, while platform-specific I/O/JSON/type errors are compared by rejection.",
+        "Full Release build, 12 related CTest suites, four packaged native test cases without skips, isolated-path reader comparisons and four golden/negative controls pass. This ports the reader API; Qt integration remains pending. The original verifier does not decode PNGs, rehash the original capture or independently validate raw_size, and these limits are retained. The previously observed intermittent BF1 acquisition pixel mismatch remains unresolved."
+      ]
     },
     {
       "module": "md_iteration_transport.py",

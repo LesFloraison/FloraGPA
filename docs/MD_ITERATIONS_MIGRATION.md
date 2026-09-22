@@ -7,8 +7,9 @@ artifacts. Runtime code uses C++ and the independent Metrics Discovery bridge.
 Python is used only for development comparisons.
 
 This completes the scheduled collection command, not the remaining uniform
-profilers, native scheduled-result reader or Intel metrics Qt workflow.
-`md_iteration_results.py` and `md_iterations_ui.py` remain pending.
+profilers or Intel metrics Qt workflow. The subsequent native result reader is
+documented in [MD_ITERATION_RESULTS_MIGRATION.md](MD_ITERATION_RESULTS_MIGRATION.md).
+`md_iterations_ui.py` remains pending.
 
 ## Usage
 
