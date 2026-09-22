@@ -19,6 +19,7 @@
 #include "StatisticsView.h"
 #include "GpuProfileView.h"
 #include "CoverageView.h"
+#include "QuadView.h"
 #include "ViewDialog.h"
 #include "application/ClassInspector.h"
 #include "application/CommandEdits.h"
@@ -284,6 +285,8 @@ MainWindow::MainWindow() {
                 gpuProfile_->finish(runningProfileRequest_, {{"error",process_.errorString().toStdString()}});
             if (runningKind_ == "coverage")
                 coverage_->finish(runningCoverageRequest_, {{"error",process_.errorString().toStdString()}});
+            if (runningKind_ == "quad")
+                quad_->finish(runningQuadRequest_, {{"error",process_.errorString().toStdString()}});
             if (runningKind_ == "statistics")
                 gpuStatistics_->finish(runningStatisticsRequest_,
                                        {{"error", process_.errorString().toStdString()}});
@@ -1031,6 +1034,7 @@ void MainWindow::buildUi() {
     centerTabs_->addTab(gpuStatistics_, "GPU Statistics");
     gpuProfile_ = new GpuProfileView;
     buildCoverageUi();
+    buildQuadUi();
     centerTabs_->addTab(gpuProfile_, "GPU Timing");
     connect(gpuProfile_, &GpuProfileView::eventRequested, this, [this](qulonglong id) { if(!busy()) locateEvent(id); });
     connect(gpuProfile_, &GpuProfileView::readRequested, this, [this](const QString &text,qulonglong serial) {
@@ -1329,6 +1333,7 @@ void MainWindow::setBusy(bool busy) {
     gpuStatistics_->setWorkerBusy(busy);
     gpuProfile_->setWorkerBusy(busy);
     coverage_->setWorkerBusy(busy);
+    quad_->setWorkerBusy(busy);
     geometryStage_->setEnabled(!busy);
     geometryTable_->setEnabled(!busy && (geometryStage_->currentData() == "ia" ||
                                          geometryStage_->currentData() == "vs-index" ||
@@ -1608,6 +1613,8 @@ void MainWindow::finishWorker(int code, QProcess::ExitStatus status) {
             gpuProfile_->finish(runningProfileRequest_, {{"error", "Cancelled"}});
         if (runningKind_ == "coverage")
             coverage_->finish(runningCoverageRequest_, {{"error", "Cancelled"}});
+        if (runningKind_ == "quad")
+            quad_->finish(runningQuadRequest_, {{"error", "Cancelled"}});
         if (runningKind_ == "predicate")
             predicateView_->finish(runningPredicateRequest_, {{"error", "Cancelled"}});
         if (runningKind_ == "replay-pipeline")
@@ -1677,6 +1684,15 @@ void MainWindow::finishWorker(int code, QProcess::ExitStatus status) {
             runningCheckpoint_->keepOutput(std::move(jobDir_));
             statusBar()->showMessage("Shader checkpoints ready", 3000);
             emit taskFinished(true);
+            return;
+        }
+        if (runningKind_ == "quad") {
+            QFile quadFile(jobDir_->filePath("result/quad.json"));
+            if (!quadFile.open(QIODevice::ReadOnly)) throw std::runtime_error("Quad output is missing");
+            const auto result = nlohmann::json::parse(quadFile.readAll().toStdString());
+            const bool accepted = quad_->finish(runningQuadRequest_, result, jobDir_->filePath("result"));
+            statusBar()->showMessage(accepted ? "Quad ready" : "Quad result discarded", 3000);
+            emit taskFinished(accepted);
             return;
         }
         if (runningKind_ == "coverage") {
@@ -1981,6 +1997,8 @@ void MainWindow::finishWorker(int code, QProcess::ExitStatus status) {
             gpuProfile_->finish(runningProfileRequest_, {{"error",e.what()}});
         if (runningKind_ == "coverage")
             coverage_->finish(runningCoverageRequest_, {{"error",e.what()}});
+        if (runningKind_ == "quad")
+            quad_->finish(runningQuadRequest_, {{"error",e.what()}});
         if (runningKind_ == "statistics")
             gpuStatistics_->finish(runningStatisticsRequest_, {{"error", e.what()}});
         if (runningKind_ == "replay-pipeline")
@@ -3875,6 +3893,7 @@ void MainWindow::openExperiment() {
         const auto settings = replayUiState(
             *frame_, candidate->document().value("ui", nlohmann::json::object()), selectedEvent_);
         gpuProfile_->restoreSettings(ui.value("gpu_profile",nlohmann::json::object()));
+        quad_->restoreSettings(ui);
         {
             QSignalBlocker target(outputTarget_), channel(channels_), layer(outputLayer_),
                 sample(outputSample_), adapter(adapter_);
@@ -3946,6 +3965,7 @@ bool MainWindow::saveExperiment() {
         ui["shader_documents"] = shaderDocuments_;
         ui["shader_entries"] = shaderEntries_;
         ui["gpu_profile"] = gpuProfile_->settings();
+        ui.update(quad_->settings());
         experiment_->save(path, ui);
         projectPath_ = path;
         projectDirty_ = false;

@@ -3,8 +3,8 @@
 `application/Quad` integrates the previously migrated target, depth, serial,
 final-geometry and private-UAV helpers into the original diagnostic workflow.
 `FloraGPA.Cli` and `FloraGPA.Worker` accept the same native `quad` command.
-The Qt Quad panel is still pending; the existing delivered Coverage GUI is
-unchanged by this backend integration.
+The Qt Quad panel is subsequently integrated and verified in
+[Qt Quad](QUAD_UI_MIGRATION.md); this document records backend evidence.
 
 ## Behavior and artifacts
 
@@ -119,5 +119,6 @@ This is a migration of the recovered diagnostic. It does not claim physical
 quad invocations, exact hardware scheduling or full Intel GPA feature parity.
 The original bounded-lock, primitive identity, replacement-PS, uint32 overflow,
 MSAA initialization and buffer-coordinate limitations remain in exported data.
-GUI controls, cell inspection, settings persistence and ZIP export remain the
-next consumer work; Python is not used by either native executable.
+GUI controls, cell inspection, settings persistence and ZIP export are now
+integrated in [Qt Quad](QUAD_UI_MIGRATION.md). Python is not used by either
+native executable.

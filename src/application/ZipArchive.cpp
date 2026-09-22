@@ -40,9 +40,12 @@ void writeZipArchive(const QString &destination, const std::vector<ZipEntry> &en
     std::set<QString> names;
     for (const auto &entry : entries) {
         const auto name = entry.name.toUtf8();
-        if (name.isEmpty() || name.size() > 65535 || entry.name.contains('/') || entry.name.contains('\\') ||
-            entry.name == "." || entry.name == ".." || name.contains('\0') ||
-            !names.insert(entry.name).second)
+        const auto parts = entry.name.split('/');
+        const bool invalidPath = std::any_of(parts.begin(), parts.end(), [](const QString &part) {
+            return part.isEmpty() || part == "." || part == ".." || part.contains(':');
+        });
+        if (name.isEmpty() || name.size() > 65535 || invalidPath || entry.name.contains('\\') ||
+            name.contains('\0') || !names.insert(entry.name).second)
             throw std::runtime_error("Invalid checkpoint archive member name");
         QFile input(entry.source);
         if (!entry.source.isEmpty() && !input.open(QIODevice::ReadOnly))

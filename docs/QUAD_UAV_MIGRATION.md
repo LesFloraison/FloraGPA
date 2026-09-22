@@ -4,7 +4,8 @@
 counter/reference and depth-preparation passes. It complements the already
 migrated Coverage RT0 relocation and PostTransform private-output isolation.
 The complete native Quad executor is now integrated and verified in
-[Quad execution](QUAD_EXECUTION_MIGRATION.md). The Qt panel remains unfinished.
+[Quad execution](QUAD_EXECUTION_MIGRATION.md), with the Qt consumer in
+[Qt Quad](QUAD_UI_MIGRATION.md).
 
 ## Preserved behavior
 
@@ -83,5 +84,4 @@ reservation and relocated stage binding. The module ledger is 26 ported,
 
 The full counter integration described above is now implemented and verified;
 see [Quad execution](QUAD_EXECUTION_MIGRATION.md). Qt controls, cell inspection,
-settings and ZIP export remain pending. The delivered GUI package remains
-`out/FloraGPA-coverage-ui/FloraGPA.exe`.
+settings and ZIP export are integrated in [Qt Quad](QUAD_UI_MIGRATION.md).

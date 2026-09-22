@@ -1,4 +1,5 @@
 #include "CoverageView.h"
+#include "QuadView.h"
 #include "MainWindow.h"
 #include "PixelHistoryView.h"
 #include "ReplayDebugView.h"
@@ -55,6 +56,8 @@ void MainWindow::updateCoverageContext(const QString &experimentKey) {
     }
     coverage_->setContext(frame_, selectedEvent_,
                           experimentKey + ":" + QString::number(adapter_->currentIndex()), state, error);
+    quad_->setContext(frame_, selectedEvent_,
+                      experimentKey + ":" + QString::number(adapter_->currentIndex()), state, error);
 }
 void MainWindow::selectCoveragePixel(const QString &text, int x, int y, const QColor &color) {
     if (!frame_ || busy())

@@ -26,6 +26,7 @@ class AnnotationsView;
 class StatisticsView;
 class GpuProfileView;
 class CoverageView;
+class QuadView;
 class CheckpointView;
 class PixelHistoryView;
 class ReplayDebugView;
@@ -87,6 +88,7 @@ class MainWindow final : public QMainWindow {
     void stashShaderDrafts();
     void updateProfileContext();
     void buildCoverageUi();
+    void buildQuadUi();
     void updateCoverageContext(const QString &experimentKey);
     void selectCoveragePixel(const QString &report, int x, int y, const QColor &color);
     void showShaderProjectEditor(const nlohmann::json &project);
@@ -170,6 +172,8 @@ class MainWindow final : public QMainWindow {
     AnnotationsView *annotations_;
     StatisticsView *gpuStatistics_;
     GpuProfileView *gpuProfile_;
+    QuadView *quad_;
+    uint64_t runningQuadRequest_{};
     CoverageView *coverage_;
     uint64_t runningCoverageRequest_{};
     uint64_t runningProfileRequest_{};
