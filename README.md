@@ -91,7 +91,7 @@ measurement boundaries, provenance and validation.
 The native Intel Metrics Discovery foundation now provides device selection,
 annotated catalogs, counter samples, object reuse and deferred counter execution.
 Uniform set/request and scheduled collection are available in the right-side
-**Intel Metrics** panel; hotspot analysis remains pending. See
+**Intel Metrics** panel; the event-group Qt owner remains pending. See
 [Metrics Discovery migration](docs/METRICS_DISCOVERY_MIGRATION.md).
 Its shared clock, report postprocessing and query drain now have native
 implementations with exact value/state comparisons; see
@@ -148,8 +148,14 @@ reports and optional publisher JSON/CSV. See
 evidence and the unresolved intermittent BF1 baseline pixel difference. The Qt
 owner now supports all seven scopes, a frame range picker, ordered metric plans,
 raw/publisher values, per-sample details, API navigation and complete ZIP export.
-See [uniform metrics in Qt](docs/UNIFORM_METRICS_UI_MIGRATION.md). Hotspot analysis
-and the other pending hardware-metric consumers remain incomplete.
+See [uniform metrics in Qt](docs/UNIFORM_METRICS_UI_MIGRATION.md). The event-group
+Qt owner and other pending hardware-metric consumers remain incomplete.
+
+Native `metric-groups` now collects independent fixed weights and repeated
+per-event metrics, combines overlapping named groups, and exports raw/converted
+JSON and CSV with verified source identities. Its offline publisher reader
+recomputes aggregates from both source profiles. See
+[event-group metrics](docs/MD_HOTSPOTS_MIGRATION.md).
 
 **Shader > DXBC** supports Read, Import ASM and **Assemble & Apply** using a
 selected **External Tool**. The same tool provides optional recovery fallback

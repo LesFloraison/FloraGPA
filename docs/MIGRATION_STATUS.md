@@ -1,5 +1,28 @@
 # FloraGPA C++ 迁移进度 — 2026-09-22
 
+本批完成 `md_hotspots.py` 原生事件组采集与 CLI／worker。`metric-groups` 先独立
+采集一次时钟／时长权重，再采集各指标组的重复样本；按事件组逐轮合并后计算统计。
+支持重叠事件组、冻结实验、原始／发布器转换值、JSON／CSV 导出，以及重建并核对
+两份来源采集的离线发布器汇总读取器。事件组 Qt 编辑器与 session 接入尚未完成。
+
+独立包验证通过 291 组算术／读取器对照（其中 63 组按预期拒绝），有限浮点按
+binary64 位比较；原 Python 采集器另行执行，572 项身份／调度对照通过。
+四组真实 Intel 采集覆盖默认组、重叠组、多指标集与禁用 draw 的实验，保留
+17 份原始报告、11 次测量重放、200 条分组结果。PNG 像素、原始报告哈希、
+4 项原版桥接库／驱动身份及发布包 Qt 路径另行核对通过。20 份原生模块报告
+未发现 Python／Tk／GPA 运行时依赖。
+
+17 套相关 CTest、独立包 4 个用例全部通过；原主界面 54 个、均匀采集 Qt 6 个、
+调度 Qt 7 个用例均无跳过通过。取消清理、失败后重试、已有目录拒绝及两阶段间
+实验快照变化拒绝均已验证。GF2／BF1 黄金帧与两项禁用 draw 负对照通过。
+该轮独立包为 `out/FloraGPA-event-groups-final/`，测试工具已移出发布目录。
+证据：`artifacts/md-hotspots-delivery/validation.json`、
+`artifacts/md-hotspots-source-audit.json`、`artifacts/ctest-md-hotspots-final.log`、
+`artifacts/md-hotspots-final-audit.json`。四个程序及 Metrics DLL 与 Release 哈希一致。
+当前为 **72 `ported`、117 `partial`、15 `pending`**，不是工作量百分比。
+完整迁移目标保持进行中，下一步继续事件组 Qt 面板与其余消费者。
+详见 [MD_HOTSPOTS_MIGRATION.md](MD_HOTSPOTS_MIGRATION.md)。
+
 本批完成均匀 Intel 指标的 Qt 接入。右侧 **Intel Metrics** 在指标集、指标请求、
 调度采集之间切换；七种范围、帧范围选择窗口、目录筛选、计划预览、原始／转换值、
 逐次统计、API 定位和 ZIP 导出均已接入原生 worker。共享设置与各模式的结果分开保存，

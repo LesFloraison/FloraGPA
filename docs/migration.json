@@ -1370,7 +1370,7 @@
       ],
       "validation": [
         "docs/UNIFORM_METRICS_UI_MIGRATION.md",
-        "Uniform set/request collection and shared scheduled controls are native. Hotspot/event-group owner remains pending."
+        "Uniform set/request collection and shared scheduled controls are native. Event-group acquisition is native in MdHotspots; its Qt owner remains pending."
       ]
     },
     {
@@ -1576,9 +1576,16 @@
       "sha256": "70def95027ef4592b9fa2842b6435b1e0eb61a9d66b3212f533ea33b43fc125f",
       "lines": 192,
       "description": "Event-group metric aggregation using a separate fixed-weight counter pass.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "ported",
+      "native": [
+        "src/application/MdHotspots.cpp",
+        "src/cli/main.cpp"
+      ],
+      "validation": [
+        "docs/MD_HOTSPOTS_MIGRATION.md",
+        "tests/MdHotspotTests.cpp",
+        "tools/validate_md_hotspots.py"
+      ]
     },
     {
       "module": "md_hotspots_ui.py",

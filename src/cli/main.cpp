@@ -18,6 +18,7 @@
 #include "application/HlslCompilation.h"
 #include "application/HlslRecovery.h"
 #include "application/InvocationSelector.h"
+#include "application/MdHotspots.h"
 #include "application/MdIterations.h"
 #include "application/MdProfile.h"
 #include "application/MetricIterations.h"
@@ -89,7 +90,7 @@ int main(int argc, char **argv) {
                    "buffer | texture | texture-storage | compile | compile-project | assemble | geometry | "
                    "replay-pipeline | "
                    "class-linkage | predicate | annotations | metric-index | metric-catalog | metric-profile "
-                   "| metric-iterations | "
+                   "| metric-iterations | metric-groups | "
                    "statistics | timings | coverage | quad | post-geometry | shader-checkpoint | "
                    "rdc-analyze");
     p.addPositionalArgument("capture", "DX11 .gpa_frame file");
@@ -118,6 +119,7 @@ int main(int argc, char **argv) {
     p.addOption({"weights", "Cached metric weight JSON array", "path"});
     p.addOption({"metrics-bridge", "Optional independent Metrics Discovery bridge", "path"});
     p.addOption({"set", "Hardware metric set (repeatable)", "name"});
+    p.addOption({"groups", "Named event groups JSON array", "path"});
     p.addOption({"all-sets", "Collect every driver metric set"});
     p.addOption({"interval", "Collect one inclusive complete-command interval"});
     p.addOption({"all-frame-ranges", "Collect all category-2 FrameFile ranges"});
@@ -175,8 +177,11 @@ int main(int argc, char **argv) {
         if (args.isEmpty())
             throw std::runtime_error("Expected command");
         auto command = args[0];
+        if (p.isSet("groups") && command != "metric-groups")
+            throw std::invalid_argument("--groups applies to metric-groups only");
         if (p.isSet(readyFile)) {
-            if (command != "metric-iterations" && command != "metric-catalog" && command != "metric-profile")
+            if (command != "metric-iterations" && command != "metric-catalog" &&
+                command != "metric-profile" && command != "metric-groups")
                 throw std::runtime_error("--ready-file applies to Intel metric workers only");
             QElapsedTimer deadline;
             deadline.start();
@@ -209,17 +214,18 @@ int main(int argc, char **argv) {
         if ((p.isSet("profile") || p.value("optimization") != "auto") && command != "compile")
             throw std::runtime_error("--profile and --optimization apply to compile only");
         if (command != "timings" && command != "metric-iterations" && command != "metric-profile" &&
-            (p.value("samples") != "5" || p.value("warmup") != "1"))
+            command != "metric-groups" && (p.value("samples") != "5" || p.value("warmup") != "1"))
             throw std::runtime_error(
                 "--samples and --warmup apply to timings or Intel metric collection only");
         if (command != "timings" && p.isSet("include-writes"))
             throw std::runtime_error("--include-writes applies to timings only");
-        if (command != "metric-iterations" && command != "metric-profile" &&
+        if (command != "metric-iterations" && command != "metric-profile" && command != "metric-groups" &&
             (p.isSet("metric") || p.isSet("frame-range") || p.isSet("pass") || p.isSet("pass-map") ||
              p.isSet("weights") || p.isSet("metrics-bridge")))
             throw std::runtime_error("Metric options apply to Intel metric collection only");
-        if (command != "metric-profile" && (p.isSet("set") || p.isSet("all-sets") || p.isSet("interval") ||
-                                            p.isSet("all-frame-ranges") || p.isSet("publisher-values")))
+        if (command != "metric-profile" && command != "metric-groups" &&
+            (p.isSet("set") || p.isSet("all-sets") || p.isSet("interval") || p.isSet("all-frame-ranges") ||
+             p.isSet("publisher-values")))
             throw std::runtime_error("Uniform metric options apply to metric-profile only");
         if (p.isSet("decompiler") && command != "shader" && command != "assemble")
             throw std::runtime_error("--decompiler applies to shader or assemble only");
@@ -253,7 +259,8 @@ int main(int argc, char **argv) {
         nlohmann::json constantBindings, outputSelection, outputDisplay, outputMsaa, planarWrites, experiment;
         nlohmann::json shaderProjectReport;
         QString out = p.value("out");
-        if (!out.isEmpty() && command != "metric-iterations" && command != "metric-profile") {
+        if (!out.isEmpty() && command != "metric-iterations" && command != "metric-profile" &&
+            command != "metric-groups") {
             QDir dir(out);
             if (dir.exists() &&
                 !dir.entryList(QDir::NoDotAndDotDot | QDir::AllEntries | QDir::Hidden).empty())
@@ -261,7 +268,54 @@ int main(int argc, char **argv) {
             if (!QDir().mkpath(out))
                 throw std::runtime_error("Cannot create output directory");
         }
-        if (command == "metric-profile") {
+        if (command == "metric-groups") {
+            if (out.isEmpty())
+                throw std::invalid_argument("metric-groups requires --out");
+            for (const auto &option : p.optionNames())
+                if (!QStringList{"out", "set", "event", "samples", "warmup", "experiment", "metrics-bridge",
+                                 "groups", "publisher-values", "ready-file"}
+                         .contains(option))
+                    throw std::invalid_argument("Unsupported event group option: --" + option.toStdString());
+            auto number = [](const QString &value) {
+                bool ok{};
+                const auto n = value.toULongLong(&ok);
+                if (!ok || value.trimmed().startsWith('-'))
+                    throw std::invalid_argument("Expected unsigned group index");
+                return uint64_t(n);
+            };
+            nlohmann::json sets = nlohmann::json::array({"RenderBasic"}), events = nlohmann::json::array(),
+                           groups;
+            if (p.isSet("set")) {
+                sets = nlohmann::json::array();
+                for (const auto &s : p.values("set"))
+                    sets.push_back(s.toStdString());
+            }
+            for (const auto &e : p.values("event"))
+                events.push_back(number(e));
+            if (p.isSet("groups")) {
+                QFile f(p.value("groups"));
+                if (!f.open(QIODevice::ReadOnly))
+                    throw std::runtime_error("Cannot read event groups");
+                groups = nlohmann::json::parse(f.readAll().toStdString());
+            }
+            const auto result = collectMetricGroups(
+                frame, out,
+                {{"sets", sets},
+                 {"events", events},
+                 {"groups", groups},
+                 {"samples", p.isSet("samples") ? number(p.value("samples")) : 3},
+                 {"warmup", number(p.value("warmup"))},
+                 {"publisher_values", p.isSet("publisher-values")}},
+                p.value("experiment"), p.value("metrics-bridge"), {}, [&](const nlohmann::json &event) {
+                    QTextStream(stdout) << QByteArray::fromStdString(event.dump()) << Qt::endl;
+                });
+            report.insert("completed", true);
+            report.insert("aggregates", "aggregates.json");
+            report.insert("groups", qint64(result.at("groups").size()));
+            report.insert("records", qint64(result.at("records").size()));
+            report.insert("loaded_modules", modules());
+            experiment = result.at("experiment");
+        } else if (command == "metric-profile") {
             if (out.isEmpty())
                 throw std::invalid_argument("metric-profile requires --out");
             for (const auto option : {"warp", "debug-device", "before", "disable", "suppress-draws",
