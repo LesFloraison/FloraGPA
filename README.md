@@ -121,6 +121,8 @@ DX11 callback result assembly are also native; see
 The MD iteration transport now connects these components to a live native
 device, with per-replay query cleanup and persistent publisher state; see
 [MD iteration transport](docs/MD_ITERATION_TRANSPORT_MIGRATION.md).
+Complete-command intervals and independent FrameFile range counters now run
+through native replay scopes; see [frame range acquisition](docs/MD_FRAME_RANGES_MIGRATION.md).
 The full profiling scheduler and Qt workflow remain pending.
 
 **Shader > DXBC** supports Read, Import ASM and **Assemble & Apply** using a

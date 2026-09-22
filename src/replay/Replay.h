@@ -111,6 +111,8 @@ struct StreamOutputCount {
 };
 using ReplayBoundaryObserver =
     std::function<void(Id, bool, ID3D11DeviceContext *, const std::map<Id, Com<IUnknown>> &)>;
+// Synchronous wrapper around a complete command. Invoke the body exactly once.
+using ReplayCommandScope = std::function<void(Id, const std::function<void()> &)>;
 struct NativeStatistics {
     D3D11_QUERY_DATA_PIPELINE_STATISTICS pipeline{};
     D3D11_QUERY_DATA_SO_STATISTICS legacySo{};
@@ -298,7 +300,8 @@ class Replay {
     std::optional<std::filesystem::path> finishCapture();
     void run(const std::function<void(Id, size_t, size_t)> &progress = {},
              const ReplayBoundaryObserver &observer = {},
-             const ReplayBoundaryObserver &commandObserver = {});
+             const ReplayBoundaryObserver &commandObserver = {},
+             const ReplayCommandScope &commandScope = {});
     const ReplayOptions &options() const { return options_; }
     const std::vector<Id> &ignoredMsaaInitial() const { return ignoredMsaaInitial_; }
     const std::vector<PlanarWrite> &planarWrites() const { return planarWrites_; }

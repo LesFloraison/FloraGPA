@@ -1525,9 +1525,18 @@
       "sha256": "f8ff2da42f4d4277c4b2761a9ae1edfd8ba6ab8e27c1356c5e2c9e574d4f39b0",
       "lines": 69,
       "description": "Independent category-2 FrameFile ranges on complete replay commands.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "ported",
+      "native": [
+        "src/application/MdFrameRanges.h",
+        "src/application/MdFrameRanges.cpp",
+        "src/replay/Replay.cpp"
+      ],
+      "validation": [
+        "docs/MD_FRAME_RANGES_MIGRATION.md",
+        "tools/validate_md_frame_ranges.py: 769 scenarios across both scope modules, 257 selection checks and 4912 state observations; original Python selection, call ordering, failures, delayed callback identity and exact boundary audits match.",
+        "tests/MdFrameRangeTests.cpp: real GF2/BF1 Intel acquisition with three sorted frame ranges through MdIterationTransport and synchronous counters, exact baseline image equality, deferred callback ownership, rejected partial commands and zero remaining samples/cache/priority registrations.",
+        "Three consecutive Windows-only PATH package runs pass four native cases without skips. An initial expanded hardware run during a full build raised an unreported exception; cause unknown, not reproduced after diagnostic reporting was added. Full profiling owners and Qt consumers remain pending."
+      ]
     },
     {
       "module": "md_frame_ranges_ui.py",
@@ -1561,9 +1570,18 @@
       "sha256": "37e4423127d11c83cb643d0a39fc11651ac0467b3bb103c857f90ddfc3359e06",
       "lines": 63,
       "description": "A single driver counter around an inclusive replay-command interval.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "ported",
+      "native": [
+        "src/application/MdFrameRanges.h",
+        "src/application/MdFrameRanges.cpp",
+        "src/replay/Replay.cpp"
+      ],
+      "validation": [
+        "docs/MD_FRAME_RANGES_MIGRATION.md",
+        "tools/validate_md_frame_ranges.py: inclusive selection, experiment enablement, unknown command names, synchronous/callback interval transitions and Begin/End/consumer/command failure states compare with Python as part of 769 scenarios and 4912 scope observations.",
+        "tests/MdFrameRangeTests.cpp: both real captures run synchronous and scheduled-pool callback intervals on Intel, with exact full boundary rosters, one report per interval and unchanged RGBA output; failures reject incomplete verification.",
+        "Three consecutive packaged native runs pass without skips. The initial expanded hardware check raised an unreported exception during compilation; its cause remains unknown and the failure record is retained."
+      ]
     },
     {
       "module": "md_iteration_results.py",

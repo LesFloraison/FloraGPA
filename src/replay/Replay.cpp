@@ -1124,7 +1124,8 @@ void Replay::command(const Entry &e) {
 }
 void Replay::run(const std::function<void(Id, size_t, size_t)> &progress,
                  const ReplayBoundaryObserver &observer,
-                 const ReplayBoundaryObserver &commandObserver) {
+                 const ReplayBoundaryObserver &commandObserver,
+                 const ReplayCommandScope &commandScope) {
     boundaryObserver_ = observer;
     struct ResetObserver {
         ReplayBoundaryObserver &value;
@@ -1235,11 +1236,17 @@ void Replay::run(const std::function<void(Id, size_t, size_t)> &progress,
                     initialCounts = counts;
                     sample->begin();
                 }
-                if (commandObserver)
-                    commandObserver(id, false, context_.Get(), objects_);
-                command(e);
-                if (commandObserver)
-                    commandObserver(id, true, context_.Get(), objects_);
+                const auto execute = [&] {
+                    if (commandObserver)
+                        commandObserver(id, false, context_.Get(), objects_);
+                    command(e);
+                    if (commandObserver)
+                        commandObserver(id, true, context_.Get(), objects_);
+                };
+                if (commandScope)
+                    commandScope(id, execute);
+                else
+                    execute();
                 if (sample && !options_.measurement->singleEvent && id == options_.measurement->end)
                     sample->end();
             } catch (const std::exception &error) {
