@@ -1,5 +1,14 @@
 # FloraGPA C++ 迁移进度 — 2026-09-22
 
+本批继续完成同步计数器、异步 FIFO 采样和可复用 Counter 三种采集策略，保留
+各自时钟刷新／交付／回收顺序及失败清理语义。扩展后的 728 组逐操作对照通过；
+三种策略各自的 9 段真实 Intel Dispatch 验证结果顺序、计数、原始报告与复用身份。
+完整 Release、7 套相关 CTest、5,100 组 MD 及 6,961 组共享核心回归通过；
+独立包 `out/FloraGPA-metric-adapters/` 在仅系统 PATH 下通过原生测试、728 组
+对照及 GF2／BF1 四项黄金帧／负对照。当前为 **44 `ported`、115 `partial`、
+45 `pending`**，不是工作量百分比。录制式采集、发布器转换／导出和完整指标
+分析／Qt 控件仍待迁移。详见 [METRIC_ADAPTERS_MIGRATION.md](METRIC_ADAPTERS_MIGRATION.md)。
+
 本批完成查询池、提供者订阅、上下文槽位、延迟通知及调度式 Intel MD 采样池的
 C++ 迁移。535 组逐操作 Python／C++ 对照通过，覆盖批次状态、身份、回调顺序、
 失败清理和重试；真实 Intel 驱动上的 9 段 Dispatch 验证交付顺序、计数值和

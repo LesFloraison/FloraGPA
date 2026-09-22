@@ -1,3 +1,4 @@
+#include "application/MdSamplePool.h"
 #include "application/MdScheduledPool.h"
 #include "application/MetricClock.h"
 #include "application/MetricQueries.h"
@@ -416,6 +417,85 @@ class MetricsDiscoveryTests : public QObject {
         scheduled.close();
         QCOMPARE(md.sampleCount(), 0u);
         QCOMPARE(md.sampleStats()["cached"], Json(0));
+        for (bool reuse : {false, true}) {
+            ScheduledObserver adapterObserver(clock);
+            std::unique_ptr<MdSamplePool> samples;
+            if (reuse)
+                samples = std::make_unique<MdReusingPool>(md, adapterObserver, 3);
+            else
+                samples = std::make_unique<MdSamplePool>(md, adapterObserver, 3);
+            std::vector<std::pair<unsigned, MetricResult>> records;
+            for (auto groups : workloads) {
+                samples->begin([&, groups](MetricResult &result) {
+                    records.emplace_back(groups, result);
+                    ++adapterObserver.records;
+                });
+                device.context->Dispatch(groups, 1, 1);
+                samples->submit();
+            }
+            samples->finish();
+            QVERIFY(!samples->active() && samples->ownedCount() == 0);
+            QCOMPARE(md.sampleCount(), 0u);
+            QCOMPARE(records.size(), workloads.size());
+            for (size_t i = 0; i < workloads.size(); ++i) {
+                QCOMPARE(records[i].first, workloads[i]);
+                QVERIFY(records[i].second.values["available"] == true);
+                QCOMPARE(records[i].second.values["values"][csIndex]["value"], Json((workloads[i] + 1) / 2));
+                QCOMPARE(md.decode(records[i].second.raw).values, records[i].second.values);
+            }
+            const auto history = samples->report();
+            QCOMPARE(history["records"].size(), workloads.size());
+            QVERIFY(history["high_watermark"].get<unsigned>() <= 3);
+            std::map<uint64_t, std::pair<uint64_t, uint64_t>> counterUses;
+            for (size_t i = 0; i < history["records"].size(); ++i) {
+                const auto &record = history["records"][i];
+                QCOMPARE(record["report_index"], Json(i));
+                QCOMPARE(record["state"], Json(0));
+                if (reuse) {
+                    const auto batchId = record["batch_id"].get<uint64_t>();
+                    const auto identity = record["counter_id"].get<uint64_t>();
+                    const auto use = record["use_index"].get<uint64_t>();
+                    if (auto previous = counterUses.find(batchId); previous != counterUses.end()) {
+                        QCOMPARE(identity, previous->second.first);
+                        QCOMPARE(use, ++previous->second.second);
+                    } else {
+                        QCOMPARE(use, uint64_t(1));
+                        counterUses.emplace(batchId, std::pair(identity, use));
+                    }
+                }
+            }
+            if (reuse)
+                QVERIFY(counterUses.size() <= 3);
+            samples->close();
+            QCOMPARE(md.sampleStats()["cached"], Json(0));
+            samples->begin();
+            device.context->Dispatch(6, 1, 1);
+            QCOMPARE(samples->end().values["values"][csIndex]["value"], Json(3));
+            samples->close();
+            QCOMPARE(md.sampleCount(), 0u);
+            QCOMPARE(md.sampleStats()["cached"], Json(0));
+        }
+        {
+            ScheduledObserver counterObserver(clock);
+            MdCounter counter(md, counterObserver);
+            for (auto groups : workloads) {
+                counter.begin();
+                device.context->Dispatch(groups, 1, 1);
+                const auto result = counter.end();
+                QVERIFY(!counter.active() && result.values["available"] == true);
+                QCOMPARE(result.values["values"][csIndex]["value"], Json((groups + 1) / 2));
+                QCOMPARE(md.decode(result.raw).values, result.values);
+                ++counterObserver.records;
+            }
+            QCOMPARE(counter.audit().size(), workloads.size());
+            for (size_t i = 0; i < counter.audit().size(); ++i) {
+                const auto &record = counter.audit()[i];
+                QCOMPARE(record["report_index"], Json(i));
+                QCOMPARE(record["state"], Json(0));
+                QCOMPARE(record["recycled"], Json(1));
+                QCOMPARE(record["refresh_range"], Json::array({i, i + 1}));
+            }
+        }
         Com<ID3D11DeviceContext> deferred;
         check(device.device->CreateDeferredContext(0, &deferred), "Create recorded context");
         bind(deferred.Get());

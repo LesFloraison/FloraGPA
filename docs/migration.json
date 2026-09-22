@@ -1598,9 +1598,17 @@
       "sha256": "8ed583b4af13f32ef3b71545388bb1c3d012c631589394324dfd8026021cc4c8",
       "lines": 62,
       "description": "Split MD counter submission/readback through the recovered query-drain core.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "ported",
+      "native": [
+        "src/application/MdSamplePool.h",
+        "src/application/MdSamplePool.cpp",
+        "src/application/MetricSampleTransport.h",
+        "src/application/MetricsDiscovery.h"
+      ],
+      "validation": [
+        "docs/METRIC_ADAPTERS_MIGRATION.md",
+        "tools/validate_metric_collector.py: 728 exact transition scenarios include synchronous, FIFO and reusable acquisition, report mutation, Counter identity, cleanup exception precedence and retries. Native tests exercise timeout cleanup for each policy; MetricsDiscoveryTests verifies nine real Intel Dispatch workloads per policy, report order/counts/raw decode, bounded ownership, identity reuse and restart after close. Recorded acquisition, publisher conversion/export and full profiling/Qt integration remain pending."
+      ]
     },
     {
       "module": "md_recorded_queries.py",
@@ -1616,18 +1624,34 @@
       "sha256": "a52df05d33330bb22aa1969c3e392aa88d81843f572bab7b81beec2346935c48",
       "lines": 69,
       "description": "Batch allocation and LIFO counter reuse on the recovered query-pool core.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "ported",
+      "native": [
+        "src/application/MdSamplePool.h",
+        "src/application/MdSamplePool.cpp",
+        "src/application/MetricSampleTransport.h",
+        "src/application/MetricsDiscovery.h"
+      ],
+      "validation": [
+        "docs/METRIC_ADAPTERS_MIGRATION.md",
+        "tools/validate_metric_collector.py: 728 exact transition scenarios include synchronous, FIFO and reusable acquisition, report mutation, Counter identity, cleanup exception precedence and retries. Native tests exercise timeout cleanup for each policy; MetricsDiscoveryTests verifies nine real Intel Dispatch workloads per policy, report order/counts/raw decode, bounded ownership, identity reuse and restart after close. Recorded acquisition, publisher conversion/export and full profiling/Qt integration remain pending."
+      ]
     },
     {
       "module": "md_sample_pool.py",
       "sha256": "23295d53acb13b027b735b5ccbf46ec8b8e2e566caf177b9fd5f47ad17dea21c",
       "lines": 110,
       "description": "Bounded asynchronous MD samples through the recovered query-drain core.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "ported",
+      "native": [
+        "src/application/MdSamplePool.h",
+        "src/application/MdSamplePool.cpp",
+        "src/application/MetricSampleTransport.h",
+        "src/application/MetricsDiscovery.h"
+      ],
+      "validation": [
+        "docs/METRIC_ADAPTERS_MIGRATION.md",
+        "tools/validate_metric_collector.py: 728 exact transition scenarios include synchronous, FIFO and reusable acquisition, report mutation, Counter identity, cleanup exception precedence and retries. Native tests exercise timeout cleanup for each policy; MetricsDiscoveryTests verifies nine real Intel Dispatch workloads per policy, report order/counts/raw decode, bounded ownership, identity reuse and restart after close. Recorded acquisition, publisher conversion/export and full profiling/Qt integration remain pending."
+      ]
     },
     {
       "module": "md_scheduled_pool.py",

@@ -98,8 +98,10 @@ implementations with exact value/state comparisons; see
 Provider subscriptions, query pools, deferred notifications and the scheduled
 MD sample adapter now use the native collector. Its 535 transition comparisons
 and real Intel workload checks are documented in
-[collector migration](docs/METRIC_COLLECTOR_MIGRATION.md). Publisher conversion,
-the remaining collection policies and Intel profiling controls are still pending.
+[collector migration](docs/METRIC_COLLECTOR_MIGRATION.md).
+Synchronous and FIFO collection, including native Counter reuse, are now migrated
+as well; see [acquisition adapters](docs/METRIC_ADAPTERS_MIGRATION.md). Recorded
+collection, publisher conversion/export and the full profiling workflow remain pending.
 
 **Shader > DXBC** supports Read, Import ASM and **Assemble & Apply** using a
 selected **External Tool**. The same tool provides optional recovery fallback

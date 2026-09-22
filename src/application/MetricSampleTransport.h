@@ -8,6 +8,15 @@ struct MetricResult {
     nlohmann::json values;
     std::vector<uint8_t> raw;
 };
+class MetricCounterTransport {
+  public:
+    virtual ~MetricCounterTransport() = default;
+    virtual bool supportsDrain() const = 0;
+    virtual void begin() = 0;
+    virtual void submit() = 0;
+    virtual std::optional<MetricResult> poll(bool flush = false) = 0;
+    virtual void discard() = 0;
+};
 class MetricSampleTransport {
   public:
     virtual ~MetricSampleTransport() = default;

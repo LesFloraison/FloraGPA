@@ -1,3 +1,4 @@
+#include "application/MdSamplePool.h"
 #include "application/MdScheduledPool.h"
 #include "application/MetricCollector.h"
 #include <QCoreApplication>
@@ -6,23 +7,58 @@
 using namespace flora;
 using Json = nlohmann::json;
 namespace {
-struct FakeTransport final : MetricSampleTransport {
+struct FakeTransport final : MetricSampleTransport, MetricCounterTransport {
     struct Counter {
         uint64_t id{}, uses{}, polls{};
         std::string state;
     };
     std::vector<Counter> cached;
     std::map<uint64_t, Counter> owned;
+    std::optional<Counter> single;
     uint64_t created{}, reused{}, serial{};
+    uint64_t identityOffset{};
     bool never{}, supported = true;
+    bool samplesSupported = true, drainSupported = true, allocate{};
     unsigned readyAfter{};
     std::string error;
     Json trace = Json::array();
-    bool supportsSamples() const override { return true; }
+    bool supportsSamples() const override { return samplesSupported; }
     bool supportsReuse() const override { return supported; }
+    bool supportsDrain() const override { return drainSupported; }
     void fail(const char *operation) {
-        if (error == operation)
+        if (("," + error + ",").find("," + std::string(operation) + ",") != std::string::npos)
             throw std::runtime_error(operation);
+    }
+    void begin() override {
+        trace.push_back({"counter_begin"});
+        fail("begin");
+        if (single)
+            throw std::runtime_error("Counter exists");
+        single = Counter{++serial, 0, 0, "begun"};
+    }
+    void submit() override {
+        trace.push_back({"counter_submit"});
+        fail("submit");
+        if (!single || single->state != "begun")
+            throw std::runtime_error("Invalid counter submit");
+        single->state = "ended";
+    }
+    std::optional<MetricResult> poll(bool flush) override {
+        trace.push_back({"counter_poll", flush});
+        fail("poll");
+        if (!single || single->state == "begun")
+            throw std::runtime_error("Invalid counter poll");
+        ++single->polls;
+        if (!never && (flush || (readyAfter && single->polls >= readyAfter)))
+            single->state = "ready";
+        if (single->state != "ready")
+            return {};
+        return MetricResult{{{"available", single->id % 2 == 0}}, {uint8_t(single->id % 256)}};
+    }
+    void discard() override {
+        trace.push_back({"discard"});
+        fail("discard");
+        single.reset();
     }
     void sampleReserve(unsigned count) override {
         trace.push_back({"reserve", count});
@@ -35,6 +71,8 @@ struct FakeTransport final : MetricSampleTransport {
     uint64_t sampleBegin() override {
         trace.push_back({"begin"});
         fail("begin");
+        if (cached.empty() && allocate)
+            cached.push_back({++created, 0, 0, "cached"});
         if (cached.empty())
             throw std::runtime_error("Empty native cache");
         auto item = cached.back();
@@ -49,7 +87,7 @@ struct FakeTransport final : MetricSampleTransport {
     uint64_t sampleInfo(uint64_t token) override {
         trace.push_back({"info", token});
         fail("info");
-        return owned.at(token).id;
+        return owned.at(token).id + identityOffset;
     }
     void sampleSubmit(uint64_t token) override {
         trace.push_back({"submit", token});
@@ -110,6 +148,8 @@ struct Publisher final : MetricPublisherObserver {
     void update(bool force) override {
         transport.trace.push_back({"clock", force});
         transport.fail("clock");
+        if (transport.single && transport.single->state == "begun")
+            throw std::runtime_error("Clock during begun sample");
         for (const auto &[id, item] : transport.owned)
             if (item.state == "begun")
                 throw std::runtime_error("Clock during begun sample");
@@ -118,12 +158,14 @@ struct Publisher final : MetricPublisherObserver {
     size_t recordCount() const override { return records.size(); }
     size_t refreshCount() const override { return refreshes.size(); }
 };
-Json scheduled(const Json &job) {
+template <class Pool> Json sampled(const Json &job) {
     FakeTransport transport;
     transport.supported = job.value("supported", true);
+    transport.samplesSupported = job.value("samples_supported", true);
+    transport.allocate = job["op"] == "sample";
     transport.readyAfter = job.value("ready_after", 0u);
     Publisher publisher(transport);
-    MdScheduledPool pool(transport, publisher, job.value("capacity", 3u), job.value("timeout", 10000u));
+    Pool pool(transport, publisher, job.value("capacity", 3u), job.value("timeout", 10000u));
     Json rows = Json::array();
     bool consumerError = false;
     for (const auto &step : job.at("steps")) {
@@ -132,6 +174,8 @@ Json scheduled(const Json &job) {
             const auto op = step.at("op").get<std::string>();
             if (op == "fault")
                 transport.error = step.at("value").get<std::string>();
+            else if (op == "info_offset")
+                transport.identityOffset = step.at("value").get<uint64_t>();
             else if (op == "never")
                 transport.never = step.at("value").get<bool>();
             else if (op == "consumer_error")
@@ -141,6 +185,8 @@ Json scheduled(const Json &job) {
                     transport.trace.push_back({"consume", value.raw.at(0)});
                     if (consumerError)
                         throw std::runtime_error("consumer");
+                    if (job.value("mutate", false))
+                        value.values["consumed"] = value.raw.at(0);
                     publisher.records.push_back({value.values.at("available"), value.raw.at(0)});
                 })
                                                        : MdScheduledPool::Consumer{});
@@ -170,6 +216,46 @@ Json scheduled(const Json &job) {
         row["trace"] = transport.trace;
         transport.trace.clear();
         rows.push_back(row);
+    }
+    return rows;
+}
+Json counter(const Json &job) {
+    FakeTransport transport;
+    transport.drainSupported = job.value("supported", true);
+    transport.readyAfter = job.value("ready_after", 0u);
+    Publisher publisher(transport);
+    MdCounter pool(transport, publisher, job.value("timeout", 10000u));
+    Json rows = Json::array();
+    for (const auto &step : job.at("steps")) {
+        Json row;
+        try {
+            const auto op = step.at("op").get<std::string>();
+            if (op == "fault")
+                transport.error = step.at("value").get<std::string>();
+            else if (op == "begin")
+                pool.begin();
+            else if (op == "end") {
+                const auto result = pool.end();
+                row["return"] = {{"values", result.values}, {"raw", result.raw}};
+                // The synchronous caller publishes after End returns.
+                publisher.records.push_back({result.values.at("available"), result.raw.at(0)});
+            }
+            if (!row.contains("return"))
+                row["return"] = nullptr;
+        } catch (const std::exception &e) {
+            row["error"] = e.what();
+        }
+        row["audit"] = pool.audit();
+        row["active"] = pool.active();
+        row["single"] = transport.single ? Json{{"id", transport.single->id},
+                                                {"polls", transport.single->polls},
+                                                {"state", transport.single->state}}
+                                         : Json();
+        row["records"] = publisher.records;
+        row["refreshes"] = publisher.refreshes;
+        row["trace"] = transport.trace;
+        transport.trace.clear();
+        rows.push_back(std::move(row));
     }
     return rows;
 }
@@ -280,7 +366,13 @@ Json ids(const std::vector<std::shared_ptr<MetricProviderBinding>> &metrics) {
 }
 Json run(const Json &job) {
     if (job["op"] == "scheduled")
-        return scheduled(job);
+        return sampled<MdScheduledPool>(job);
+    if (job["op"] == "sample")
+        return sampled<MdSamplePool>(job);
+    if (job["op"] == "reuse")
+        return sampled<MdReusingPool>(job);
+    if (job["op"] == "counter")
+        return counter(job);
     Json trace = Json::array(), rows = Json::array();
     std::map<std::string, MetricProviderPtr> providers;
     std::vector<MetricProviderPtr> ordered;
@@ -437,6 +529,38 @@ Json run(const Json &job) {
 class MetricCollectorTests : public QObject {
     Q_OBJECT
   private slots:
+    void adapterTimeoutCleanup() {
+        for (bool reuse : {false, true}) {
+            FakeTransport metrics;
+            metrics.allocate = !reuse;
+            Publisher publisher(metrics);
+            std::unique_ptr<MdSamplePool> pool;
+            if (reuse)
+                pool = std::make_unique<MdReusingPool>(metrics, publisher, 2, 1);
+            else
+                pool = std::make_unique<MdSamplePool>(metrics, publisher, 2, 1);
+            pool->begin();
+            pool->submit();
+            metrics.never = true;
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error, pool->finish());
+            QVERIFY(metrics.owned.empty() && metrics.cached.empty());
+            QVERIFY(!pool->active() && pool->ownedCount() == 0);
+            metrics.never = false;
+            pool->begin();
+            QCOMPARE(pool->end().raw.size(), size_t(1));
+            pool->close();
+        }
+        FakeTransport metrics;
+        Publisher publisher(metrics);
+        MdCounter counter(metrics, publisher, 1);
+        counter.begin();
+        metrics.never = true;
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, counter.end());
+        QVERIFY(!counter.active() && !metrics.single);
+        metrics.never = false;
+        counter.begin();
+        QCOMPARE(counter.end().raw.size(), size_t(1));
+    }
     void timeoutCleanup() {
         FakeTransport metrics;
         Publisher publisher(metrics);

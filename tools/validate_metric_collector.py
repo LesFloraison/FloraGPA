@@ -19,23 +19,44 @@ def main():
     from metric_query_pool import QueryPool,ContextSlots,pool_provider_order
     from metric_subscriptions import ProviderMetric,PublisherCollector
     from md_scheduled_pool import PublisherScheduledPool
+    from md_sample_pool import PublisherSamplePool
+    from md_reusing_pool import PublisherReusingPool
+    from md_query_drain import PublisherCounter
 
     class Fake:
         supports_samples=True
         def __init__(self,job):
             self.supports_reuse=job.get('supported',True);self.ready_after=job.get('ready_after',0)
+            self.supports_samples=job.get('samples_supported',True);self.supports_drain=job.get('supported',True)
+            self.single=None;self.allocate=job['op']=='sample';self.identity_offset=0
             self.cached=[];self.owned={};self.created=self.reused=self.serial=0;self.never=False;self.error='';self.trace=[]
         def fail(self,name):
-            if self.error==name:raise RuntimeError(name)
+            if name in self.error.split(','):raise RuntimeError(name)
+        def begin(self):
+            self.trace.append(['counter_begin']);self.fail('begin')
+            if self.single:raise RuntimeError('Counter exists')
+            self.serial+=1;self.single=dict(id=self.serial,polls=0,state='begun')
+        def submit(self):
+            self.trace.append(['counter_submit']);self.fail('submit')
+            if not self.single or self.single['state']!='begun':raise RuntimeError('Invalid counter submit')
+            self.single['state']='ended'
+        def poll(self,flush):
+            self.trace.append(['counter_poll',flush]);self.fail('poll')
+            if not self.single or self.single['state']=='begun':raise RuntimeError('Invalid counter poll')
+            self.single['polls']+=1
+            if not self.never and (flush or self.ready_after and self.single['polls']>=self.ready_after):self.single['state']='ready'
+            return (dict(available=self.single['id']%2==0),bytes([self.single['id']%256])) if self.single['state']=='ready' else None
+        def discard(self):self.trace.append(['discard']);self.fail('discard');self.single=None
         def sample_reserve(self,count):
             self.trace.append(['reserve',count]);self.fail('reserve')
             if self.owned or self.cached:raise RuntimeError('Invalid reserve')
             for _ in range(count):self.created+=1;self.cached.append(dict(id=self.created,uses=0,polls=0,state='cached'))
         def sample_begin(self):
             self.trace.append(['begin']);self.fail('begin')
+            if not self.cached and self.allocate:self.created+=1;self.cached.append(dict(id=self.created,uses=0,polls=0,state='cached'))
             if not self.cached:raise RuntimeError('Empty native cache')
             item=self.cached.pop();self.reused+=item['uses']!=0;item['uses']+=1;item['polls']=0;item['state']='begun';self.serial+=1;self.owned[self.serial]=item;return self.serial
-        def sample_info(self,token):self.trace.append(['info',token]);self.fail('info');return self.owned[token]['id']
+        def sample_info(self,token):self.trace.append(['info',token]);self.fail('info');return self.owned[token]['id']+self.identity_offset
         def sample_submit(self,token):
             self.trace.append(['submit',token]);self.fail('submit');item=self.owned[token]
             if item['state']!='begun':raise RuntimeError('Invalid submit')
@@ -65,20 +86,23 @@ def main():
         def __init__(self,fake):self.fake=fake;self.records=[];self.refreshes=[]
         def update(self,force):
             self.fake.trace.append(['clock',force]);self.fake.fail('clock')
+            if self.fake.single and self.fake.single['state']=='begun':raise RuntimeError('Clock during begun sample')
             if any(v['state']=='begun' for v in self.fake.owned.values()):raise RuntimeError('Clock during begun sample')
             self.refreshes.append(len(self.records))
 
     def scheduled(job):
-        fake=Fake(job);publisher=Publisher(fake);pool=PublisherScheduledPool(fake,publisher,job.get('capacity',3),job.get('timeout',10000));rows=[];consumer_error=False
+        fake=Fake(job);publisher=Publisher(fake);pool={'scheduled':PublisherScheduledPool,'sample':PublisherSamplePool,'reuse':PublisherReusingPool}[job['op']](fake,publisher,job.get('capacity',3),job.get('timeout',10000));rows=[];consumer_error=False
         def consume(result,raw):
             fake.trace.append(['consume',raw[0]])
             if consumer_error:raise RuntimeError('consumer')
+            if job.get('mutate',False):result['consumed']=raw[0]
             publisher.records.append([result['available'],raw[0]])
         for step in job['steps']:
             row={}
             try:
                 op=step['op'];value=None
                 if op=='fault':fake.error=step['value']
+                elif op=='info_offset':fake.identity_offset=step['value']
                 elif op=='never':fake.never=step['value']
                 elif op=='consumer_error':consumer_error=step['value']
                 elif op=='begin':pool.begin(consume if step.get('consume',True) else None)
@@ -88,6 +112,21 @@ def main():
                 row['return']=value
             except (RuntimeError,ValueError,TimeoutError) as e:row['error']=str(e)
             row.update(report=copy.deepcopy(pool.report()),owned=len(pool.owned),active=pool.current is not None,stats=fake.stats(),records=copy.deepcopy(publisher.records),refreshes=publisher.refreshes[:],trace=copy.deepcopy(fake.trace));fake.trace.clear();rows.append(row)
+        return rows
+
+    def counter(job):
+        fake=Fake(job);publisher=Publisher(fake);pool=PublisherCounter(fake,publisher,job.get('timeout',10000));rows=[]
+        for step in job['steps']:
+            row={}
+            try:
+                op=step['op'];value=None
+                if op=='fault':fake.error=step['value']
+                elif op=='begin':pool.begin()
+                elif op=='end':
+                    result,raw=pool.end();value=dict(values=result,raw=list(raw));publisher.records.append([result['available'],raw[0]])
+                row['return']=value
+            except (RuntimeError,ValueError,TimeoutError) as e:row['error']=str(e)
+            row.update(audit=copy.deepcopy(pool.audit),active=pool.current is not None,single=copy.deepcopy(fake.single),records=copy.deepcopy(publisher.records),refreshes=publisher.refreshes[:],trace=copy.deepcopy(fake.trace));fake.trace.clear();rows.append(row)
         return rows
 
     class Query:
@@ -115,7 +154,8 @@ def main():
     def describe(batch):return None if batch is None else dict(queries=[q.id for q in batch.queries],state=batch.state,key0=batch.key0,key1=batch.key1,tag=batch.tag)
     def slots(values):return {str(k):[describe(b) for b in items] for k,items in values.items()}
     def reference(job):
-        if job['op']=='scheduled':return scheduled(job)
+        if job['op'] in ('scheduled','sample','reuse'):return scheduled(job)
+        if job['op']=='counter':return counter(job)
         trace=[];rows=[];providers={};ordered=[]
         for cfg in job['providers']:
             if cfg is None:ordered.append(None);continue
@@ -246,6 +286,36 @@ def main():
     for capacity in (0,257):add('scheduled',capacity=capacity,steps=[])
     for timeout in (0,60001):add('scheduled',timeout=timeout,steps=[])
     add('scheduled',supported=False,steps=[])
+    # Compare each original acquisition policy independently with identical transports.
+    for policy in ('sample','reuse'):
+        for original in [job for job in jobs if job['op']=='scheduled']:
+            job=copy.deepcopy(original);job['op']=policy;jobs.append(job)
+        add(policy,samples_supported=False,steps=[])
+        for capacity in (1,2,3):
+            add(policy,capacity=capacity,steps=[action('begin'),action('end'),action('fault',value='begin'),action('begin'),action('fault',value=''),action('begin'),action('end'),action('close')])
+    for policy in ('scheduled','reuse'):
+        add(policy,capacity=2,steps=[action('begin'),action('end'),action('info_offset',value=100),action('begin'),action('info_offset',value=0),action('begin'),action('end'),action('close')])
+    for count in (1,3,25):
+        steps=[]
+        for _ in range(count):steps.extend([action('begin'),action('end')])
+        add('counter',steps=steps)
+    add('counter',steps=[action('end'),action('begin'),action('begin'),action('end'),action('end')])
+    for fault in ('begin','submit','poll','clock','discard'):
+        steps=[] if fault=='begin' else [action('begin')]
+        steps += [action('fault',value=fault),action('begin' if fault=='begin' else 'end'),action('fault',value='')]
+        if fault=='discard':steps += [action('end')]
+        steps += [action('begin'),action('end')]
+        add('counter',steps=steps)
+    for timeout in (0,60001):add('counter',timeout=timeout,steps=[])
+    add('counter',supported=False,steps=[])
+    for policy in ('scheduled','sample','reuse'):
+        add(policy,capacity=2,mutate=True,steps=[action('begin'),action('end'),action('begin'),action('submit'),action('finish'),action('close')])
+    for fault in ('begin','submit','poll','clock'):
+        steps=[] if fault=='begin' else [action('begin')]
+        steps += [action('fault',value=fault+',discard'),action('begin' if fault=='begin' else 'end'),action('fault',value='')]
+        if fault!='begin':steps += [action('end')]
+        steps += [action('begin'),action('end')]
+        add('counter',steps=steps)
     expected=[]
     for job in jobs:
         try:expected.append(reference(copy.deepcopy(job)))

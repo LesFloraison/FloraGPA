@@ -9,7 +9,7 @@ unsigned metricDescriptorKind(const nlohmann::json &type, const nlohmann::json &
 nlohmann::json annotateMetricCatalog(nlohmann::json catalog);
 nlohmann::json validateMetricResult(const nlohmann::json &metadata, nlohmann::json result, Bytes raw);
 QString metricsDriverLibrary();
-class MetricsDiscovery final : public MetricSampleTransport {
+class MetricsDiscovery final : public MetricSampleTransport, public MetricCounterTransport {
   public:
     explicit MetricsDiscovery(ID3D11Device *device, const QString &bridge = {});
     ~MetricsDiscovery() override;
@@ -18,15 +18,15 @@ class MetricsDiscovery final : public MetricSampleTransport {
     const nlohmann::json &catalog() const;
     const nlohmann::json &selected() const;
     void select(const std::string &name);
-    void begin();
+    void begin() override;
     MetricResult end(unsigned timeoutMs = 10000);
     MetricResult result();
     MetricResult decode(Bytes raw);
     nlohmann::json clockPair();
-    bool supportsDrain() const;
-    void submit();
-    std::optional<MetricResult> poll(bool flush = false);
-    void discard();
+    bool supportsDrain() const override;
+    void submit() override;
+    std::optional<MetricResult> poll(bool flush = false) override;
+    void discard() override;
     bool supportsSamples() const override;
     uint64_t sampleBegin() override;
     void sampleSubmit(uint64_t token) override;
