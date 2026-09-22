@@ -1634,9 +1634,19 @@
       "sha256": "45f5977d0145d39a5f93d77a4281fecfbb8f5dfd6b251e6ac918a32a6acca8ee",
       "lines": 145,
       "description": "MD Counter adapter for the recovered collector Begin/End and subscriptions.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "ported",
+      "native": [
+        "src/application/MetricCollector.h",
+        "src/application/MetricCollector.cpp",
+        "src/application/MdScheduledPool.h",
+        "src/application/MdScheduledPool.cpp",
+        "src/application/MetricSampleTransport.h",
+        "src/application/MetricsDiscovery.h"
+      ],
+      "validation": [
+        "docs/METRIC_COLLECTOR_MIGRATION.md",
+        "tools/validate_metric_collector.py: 535 exact Python/native scenarios compare provider identity and binding, compatibility, pools, contexts, Begin/End, deferred notices, records, traces, failures and retry. MetricCollectorTests verifies timeout cleanup and batch identity. MetricsDiscoveryTests connects the scheduled adapter to real Intel workloads and verifies report order, counts, Counter identity and cache cleanup. Publisher value conversion, other acquisition adapters, higher-level profiling and Qt consumers remain separate pending modules."
+      ]
     },
     {
       "module": "metric_clock.py",
@@ -1667,9 +1677,15 @@
       "sha256": "8e1f5d21db6367379410675b8adeaa225077a4d0d5c697070dca39d1f796a6ad",
       "lines": 44,
       "description": "Independent publisher notification lifecycle (0x213a0).",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "ported",
+      "native": [
+        "src/application/MetricCollector.h",
+        "src/application/MetricCollector.cpp"
+      ],
+      "validation": [
+        "docs/METRIC_COLLECTOR_MIGRATION.md",
+        "tools/validate_metric_collector.py: 535 exact Python/native scenarios compare provider identity and binding, compatibility, pools, contexts, Begin/End, deferred notices, records, traces, failures and retry. MetricCollectorTests verifies timeout cleanup and batch identity. MetricsDiscoveryTests connects the scheduled adapter to real Intel workloads and verifies report order, counts, Counter identity and cache cleanup. Publisher value conversion, other acquisition adapters, higher-level profiling and Qt consumers remain separate pending modules."
+      ]
     },
     {
       "module": "metric_iterations.py",
@@ -1820,9 +1836,15 @@
       "sha256": "be595ef4f58a12f23c9b62a9de907a78971b9a72b6f0ab7452e6354af7f10bc8",
       "lines": 71,
       "description": "Publisher query allocation/reuse and context slots recovered from native code.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "ported",
+      "native": [
+        "src/application/MetricCollector.h",
+        "src/application/MetricCollector.cpp"
+      ],
+      "validation": [
+        "docs/METRIC_COLLECTOR_MIGRATION.md",
+        "tools/validate_metric_collector.py: 535 exact Python/native scenarios compare provider identity and binding, compatibility, pools, contexts, Begin/End, deferred notices, records, traces, failures and retry. MetricCollectorTests verifies timeout cleanup and batch identity. MetricsDiscoveryTests connects the scheduled adapter to real Intel workloads and verifies report order, counts, Counter identity and cache cleanup. Publisher value conversion, other acquisition adapters, higher-level profiling and Qt consumers remain separate pending modules."
+      ]
     },
     {
       "module": "metric_range_mapping.py",
@@ -1877,9 +1899,15 @@
       "sha256": "d5741a1a004cd7065537d17b4fbb59bb54550a8ae021c06f3b474c4d029818d0",
       "lines": 164,
       "description": "Publisher provider binding and subscription lifecycle recovered from GPA.",
-      "status": "pending",
-      "native": [],
-      "validation": []
+      "status": "ported",
+      "native": [
+        "src/application/MetricCollector.h",
+        "src/application/MetricCollector.cpp"
+      ],
+      "validation": [
+        "docs/METRIC_COLLECTOR_MIGRATION.md",
+        "tools/validate_metric_collector.py: 535 exact Python/native scenarios compare provider identity and binding, compatibility, pools, contexts, Begin/End, deferred notices, records, traces, failures and retry. MetricCollectorTests verifies timeout cleanup and batch identity. MetricsDiscoveryTests connects the scheduled adapter to real Intel workloads and verifies report order, counts, Counter identity and cache cleanup. Publisher value conversion, other acquisition adapters, higher-level profiling and Qt consumers remain separate pending modules."
+      ]
     },
     {
       "module": "metric_values.py",

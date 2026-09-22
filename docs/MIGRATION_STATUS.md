@@ -1,5 +1,17 @@
 # FloraGPA C++ 迁移进度 — 2026-09-22
 
+本批完成查询池、提供者订阅、上下文槽位、延迟通知及调度式 Intel MD 采样池的
+C++ 迁移。535 组逐操作 Python／C++ 对照通过，覆盖批次状态、身份、回调顺序、
+失败清理和重试；真实 Intel 驱动上的 9 段 Dispatch 验证交付顺序、计数值和
+批次／Counter 复用身份，关闭后可重新采样。完整 Release 构建及 6,961 组共享
+时钟／报告／队列对照通过。详见
+[METRIC_COLLECTOR_MIGRATION.md](METRIC_COLLECTOR_MIGRATION.md)。
+当前清单为 **41 `ported`、115 `partial`、48 `pending`**，不是工作量百分比。
+完整发布器转换／导出、其余采集策略、调度分析和 Intel 指标 Qt 控件仍待迁移。
+独立包为 `out/FloraGPA-metric-collector/`；5 套相关 CTest（含主窗口 UI）、
+5,100 组 MD 接口／报告对照及 GF2／BF1 四项黄金帧／负对照全部通过。
+发布包仅系统 PATH 下通过 535 组对照与原生收集器／Intel 集成测试，无跳过。
+
 已有可编译、可运行的 VS2022 / Qt Widgets 原生工程，能够独立重放当前验证的
 GF2 与 BF1 DX11 捕获。**尚未完成原 Python 版本的全部功能迁移。**
 当前独立包为 `out/FloraGPA-coverage-ui/FloraGPA.exe`。

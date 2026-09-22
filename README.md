@@ -95,6 +95,11 @@ Its higher-level profiling scheduler and Qt controls remain pending; see
 Its shared clock, report postprocessing and query drain now have native
 implementations with exact value/state comparisons; see
 [publisher core migration](docs/METRIC_CORE_MIGRATION.md).
+Provider subscriptions, query pools, deferred notifications and the scheduled
+MD sample adapter now use the native collector. Its 535 transition comparisons
+and real Intel workload checks are documented in
+[collector migration](docs/METRIC_COLLECTOR_MIGRATION.md). Publisher conversion,
+the remaining collection policies and Intel profiling controls are still pending.
 
 **Shader > DXBC** supports Read, Import ASM and **Assemble & Apply** using a
 selected **External Tool**. The same tool provides optional recovery fallback

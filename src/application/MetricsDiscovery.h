@@ -1,4 +1,5 @@
 #pragma once
+#include "MetricSampleTransport.h"
 #include "replay/Replay.h"
 #include <QString>
 #include <nlohmann/json.hpp>
@@ -8,14 +9,10 @@ unsigned metricDescriptorKind(const nlohmann::json &type, const nlohmann::json &
 nlohmann::json annotateMetricCatalog(nlohmann::json catalog);
 nlohmann::json validateMetricResult(const nlohmann::json &metadata, nlohmann::json result, Bytes raw);
 QString metricsDriverLibrary();
-struct MetricResult {
-    nlohmann::json values;
-    std::vector<uint8_t> raw;
-};
-class MetricsDiscovery final {
+class MetricsDiscovery final : public MetricSampleTransport {
   public:
     explicit MetricsDiscovery(ID3D11Device *device, const QString &bridge = {});
-    ~MetricsDiscovery();
+    ~MetricsDiscovery() override;
     MetricsDiscovery(const MetricsDiscovery &) = delete;
     MetricsDiscovery &operator=(const MetricsDiscovery &) = delete;
     const nlohmann::json &catalog() const;
@@ -30,19 +27,19 @@ class MetricsDiscovery final {
     void submit();
     std::optional<MetricResult> poll(bool flush = false);
     void discard();
-    bool supportsSamples() const;
-    uint64_t sampleBegin();
-    void sampleSubmit(uint64_t token);
-    std::optional<MetricResult> samplePoll(uint64_t token, bool flush = false);
+    bool supportsSamples() const override;
+    uint64_t sampleBegin() override;
+    void sampleSubmit(uint64_t token) override;
+    std::optional<MetricResult> samplePoll(uint64_t token, bool flush = false) override;
     MetricResult sampleResult(uint64_t token);
-    void sampleRelease(uint64_t token);
+    void sampleRelease(uint64_t token) override;
     unsigned sampleCount();
-    bool supportsReuse() const;
-    void sampleReserve(unsigned count);
-    void sampleRecycle(uint64_t token);
-    void sampleClearCache();
-    uint64_t sampleInfo(uint64_t token);
-    nlohmann::json sampleStats();
+    bool supportsReuse() const override;
+    void sampleReserve(unsigned count) override;
+    void sampleRecycle(uint64_t token) override;
+    void sampleClearCache() override;
+    uint64_t sampleInfo(uint64_t token) override;
+    nlohmann::json sampleStats() override;
     bool supportsRecorded() const;
     uint64_t recordedBegin(ID3D11DeviceContext *context);
     void recordedEnd(uint64_t token);
