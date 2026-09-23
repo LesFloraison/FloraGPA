@@ -29,7 +29,9 @@
         "Replay Metrics delivery: complete Release build, seven relevant CTest suites, 54 original UI cases without skips, six packaged counter UI cases without skips, four golden/negative controls and ten runtime-module audits passed; all four delivered executables match Release.",
         "docs/REPLAY_MESH_MIGRATION.md",
         "Native postmesh preserves VS/GS/DS output, instance selection, indexed/nonindexed positions, triangle semantics and exact binary/CSV/OBJ exports. Qt Geometry / Replay Mesh shares recapture/cache/cancellation with the existing analysis views. Ten initial controller comparisons, eight additional instance comparisons and 78 original-branch model cases pass. Shared module status remains partial pending remaining consumers and full module audits.",
-        "Replay Mesh delivery: complete Release build; six existing relevant CTest suites passed, including 54 original UI cases; corrected new-suite packaged run passed six cases without skips. Packaged native/Python matrix: 18 comparisons, four rejections, 3,676 vertices, 19,432 indices, 715,705 exact artifact bytes. Four golden/negative controls and 34 runtime audits passed; four executable hashes match Release. Initial test-assumption failures and report differences remain recorded in REPLAY_MESH_MIGRATION.md."
+        "Replay Mesh delivery: complete Release build; six existing relevant CTest suites passed, including 54 original UI cases; corrected new-suite packaged run passed six cases without skips. Packaged native/Python matrix: 18 comparisons, four rejections, 3,676 vertices, 19,432 indices, 715,705 exact artifact bytes. Four golden/negative controls and 34 runtime audits passed; four executable hashes match Release. Initial test-assumption failures and report differences remain recorded in REPLAY_MESH_MIGRATION.md.",
+        "docs/DRAW_RESOURCES_UI.md: Resources workspace, bound-resource thumbnails, independent Coverage overlay and pixel-pick history integration. Eight relevant CTest suites and BF1 thumbnail/RT/Coverage plus golden/negative controls pass; external-fixture skips remain. Real Pixel History is unverified because RenderDoc 1.45 is unavailable; GF2 is unavailable. No full-parity claim.",
+        "docs/RENDERDOC146_VALIDATION.md: Isolated native backend compiled against official 1.46 headers passes BF1 Pixel History, real mouse picking/latest-click cache reuse, and existing hardware/WARP history UI scenarios. Existing 1.45 production backend/package unchanged; other replay consumers not validated for 1.46."
       ]
     },
     {
@@ -148,7 +150,10 @@
         "src/application/ExternalShaderTools.cpp",
         "src/app/GpuProfileView.cpp",
         "src/app/CoverageView.cpp",
-        "src/app/MainWindowCoverage.cpp"
+        "src/app/MainWindowCoverage.cpp",
+        "src/app/ResourceBrowser.cpp",
+        "src/app/MainWindowResources.cpp",
+        "src/application/DrawResources.cpp"
       ],
       "validation": [
         "docs/NATIVE_BASELINE.md",
@@ -173,7 +178,9 @@
         "docs/EXTERNAL_SHADER_MIGRATION.md",
         "Native optional tool execution, CLI assembly/profile/optimization, Qt assembly editing and per-resource HLSL/ASM drafts are connected. Six-stage binary comparison, native-first and external fallback, modified GPU replay and cancellation checks are covered; shared module remains partial.",
         "docs/GPU_PROFILE_MIGRATION.md: repeated timing CLI/Qt integration and shared count normalization are covered; remaining shared-module responsibilities retain their existing status.",
-        "docs/COVERAGE_UI_MIGRATION.md: native coverage controls, shared experiment/device context, isolated cancellation/retry, overlay pixel/buffer navigation and original artifact export are integrated; this shared module retains other unported responsibilities."
+        "docs/COVERAGE_UI_MIGRATION.md: native coverage controls, shared experiment/device context, isolated cancellation/retry, overlay pixel/buffer navigation and original artifact export are integrated; this shared module retains other unported responsibilities.",
+        "docs/DRAW_RESOURCES_UI.md: Resources workspace, bound-resource thumbnails, independent Coverage overlay and pixel-pick history integration. Eight relevant CTest suites and BF1 thumbnail/RT/Coverage plus golden/negative controls pass; external-fixture skips remain. Real Pixel History is unverified because RenderDoc 1.45 is unavailable; GF2 is unavailable. No full-parity claim.",
+        "docs/RENDERDOC146_VALIDATION.md: Isolated native backend compiled against official 1.46 headers passes BF1 Pixel History, real mouse picking/latest-click cache reuse, and existing hardware/WARP history UI scenarios. Existing 1.45 production backend/package unchanged; other replay consumers not validated for 1.46."
       ]
     },
     {
@@ -515,7 +522,8 @@
         "docs/COVERAGE_UI_MIGRATION.md",
         "tests/CoverageUiTests.cpp",
         "tools/validate_coverage_ui_export.py",
-        "Native execution, CLI/worker exports and Qt controls/navigation are integrated. The original coverage controls were not persisted by save_ui; existing experiment edits, undo/redo and device selection are shared. Four standalone coverage modules were audited against all original functions; shared private-output and application modules retain their remaining consumers."
+        "Native execution, CLI/worker exports and Qt controls/navigation are integrated. The original coverage controls were not persisted by save_ui; existing experiment edits, undo/redo and device selection are shared. Four standalone coverage modules were audited against all original functions; shared private-output and application modules retain their remaining consumers.",
+        "docs/DRAW_RESOURCES_UI.md: Resources workspace, bound-resource thumbnails, independent Coverage overlay and pixel-pick history integration. Eight relevant CTest suites and BF1 thumbnail/RT/Coverage plus golden/negative controls pass; external-fixture skips remain. Real Pixel History is unverified because RenderDoc 1.45 is unavailable; GF2 is unavailable. No full-parity claim."
       ]
     },
     {
@@ -3673,7 +3681,8 @@
       ],
       "validation": [
         "docs/VIEW_MIGRATION.md",
-        "docs/TEXTURE_INSPECTION_MIGRATION.md: native initial/event/MSAA/typed/plane inspection, DDS/RAW/PNG export and Qt controls; 217 Python comparisons (178 successful exports, 39 rejected cases); private consumers remain pending; planar write provenance is covered subsequently in docs/PLANAR_WRITE_MIGRATION.md"
+        "docs/TEXTURE_INSPECTION_MIGRATION.md: native initial/event/MSAA/typed/plane inspection, DDS/RAW/PNG export and Qt controls; 217 Python comparisons (178 successful exports, 39 rejected cases); private consumers remain pending; planar write provenance is covered subsequently in docs/PLANAR_WRITE_MIGRATION.md",
+        "docs/DRAW_RESOURCES_UI.md: Resources workspace, bound-resource thumbnails, independent Coverage overlay and pixel-pick history integration. Eight relevant CTest suites and BF1 thumbnail/RT/Coverage plus golden/negative controls pass; external-fixture skips remain. Real Pixel History is unverified because RenderDoc 1.45 is unavailable; GF2 is unavailable. No full-parity claim."
       ]
     },
     {

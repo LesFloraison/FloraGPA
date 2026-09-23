@@ -8,6 +8,7 @@ class QSpinBox;
 class QTreeWidget;
 class QPlainTextEdit;
 namespace flora {
+bool historyBackendCompatible(const QString &path);
 class PixelHistoryView final : public QWidget {
     Q_OBJECT
   public:
@@ -15,6 +16,8 @@ class PixelHistoryView final : public QWidget {
     void setContext(const QString &key, qulonglong event);
     void setWorkerBusy(bool busy);
     void selectPixel(qulonglong resource, int x, int y, int mip, int layer, int sample);
+    void queryPixel(qulonglong event, qulonglong resource, int x, int y, int mip, int layer, int sample);
+    void setNotice(const QString &notice);
     QString backendPath() const { return backendPath_; }
     void setBackendPath(const QString &path);
     nlohmann::json request() const;

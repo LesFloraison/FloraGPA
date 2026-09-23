@@ -14,9 +14,22 @@
 #include <QToolBar>
 #include <QTreeWidget>
 #include <QVBoxLayout>
+#include <Windows.h>
 
 namespace flora {
 using Json = nlohmann::json;
+bool historyBackendCompatible(const QString &path) {
+    const auto name = path.toStdWString();
+    DWORD ignored = 0;
+    const auto size = GetFileVersionInfoSizeW(name.c_str(), &ignored);
+    if (!size) return false;
+    std::vector<uint8_t> bytes(size);
+    if (!GetFileVersionInfoW(name.c_str(), 0, size, bytes.data())) return false;
+    VS_FIXEDFILEINFO *info = nullptr; UINT length = 0;
+    if (!VerQueryValueW(bytes.data(), L"\\", reinterpret_cast<void **>(&info), &length) || length < sizeof(*info)) return false;
+    return HIWORD(info->dwFileVersionMS) == 1 && LOWORD(info->dwFileVersionMS) == 45;
+}
+
 namespace {
 QString scalar(const Json &v) {
     if (v.is_null())
@@ -85,8 +98,14 @@ PixelHistoryView::PixelHistoryView(QWidget *parent) : QWidget(parent) {
     tools->addSeparator();
     backend_ = tools->addAction("RenderDoc…");
     backend_->setObjectName("historyBackend");
+    auto advanced = tools->addAction("Coordinates");
+    advanced->setCheckable(true);
+    advanced->setObjectName("historyCoordinatesToggle");
     layout->addWidget(tools);
     auto inputs = new QToolBar;
+    tools->removeAction(read_);
+    inputs->addAction(read_);
+    tools->insertAction(cancel_, backend_);
     auto idInput = [&](const QString &label, const char *name, const QString &placeholder) {
         inputs->addWidget(new QLabel(label));
         auto value = new QLineEdit;
@@ -116,10 +135,13 @@ PixelHistoryView::PixelHistoryView(QWidget *parent) : QWidget(parent) {
     sample_ = spin(" Sample ", "historySample", 31);
     sample_->setToolTip("Individual MSAA sample; sample 0 for single-sampled textures");
     layout->addWidget(inputs);
+    inputs->hide();
+    connect(advanced, &QAction::toggled, inputs, &QWidget::setVisible);
     summary_ = new QLabel("No history");
     summary_->setObjectName("historySummary");
     summary_->setMargin(6);
     summary_->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Preferred);
+    summary_->setWordWrap(true);
     layout->addWidget(summary_);
     auto split = new QSplitter(Qt::Vertical);
     split->setChildrenCollapsible(false);
@@ -129,9 +151,12 @@ PixelHistoryView::PixelHistoryView(QWidget *parent) : QWidget(parent) {
     records_->setRootIsDecorated(false);
     records_->setUniformRowHeights(true);
     records_->setAlternatingRowColors(true);
-    const int widths[] = {72, 72, 72, 270, 210, 210};
+    const int widths[] = {65, 65, 65, 185, 150, 150};
     for (int i = 0; i < 6; ++i)
         records_->setColumnWidth(i, widths[i]);
+    for (int column : {1, 2, 4, 5}) records_->setColumnHidden(column, true);
+    records_->header()->setStretchLastSection(false);
+    records_->header()->setSectionResizeMode(3, QHeaderView::Stretch);
     details_ = new QPlainTextEdit;
     details_->setReadOnly(true);
     details_->setObjectName("historyDetails");
@@ -236,6 +261,16 @@ Json PixelHistoryView::request() const {
             {"layer", layer_->value()},
             {"sample", sample_->value()}};
 }
+void PixelHistoryView::setNotice(const QString &notice) {
+    summary_->setText(notice);
+    summary_->setToolTip(notice);
+}
+void PixelHistoryView::queryPixel(qulonglong event, qulonglong resource, int x, int y, int mip, int layer, int sample) {
+    if (busy_) return;
+    eventInput_->setText(event ? QString::number(event) : QString());
+    selectPixel(resource, x, y, mip, layer, sample);
+    read_->trigger();
+}
 void PixelHistoryView::invalidate() {
     ++requestId_;
     result_ = nullptr;
@@ -307,6 +342,8 @@ bool PixelHistoryView::finish(uint64_t request, const Json &result) {
                           .arg(scope.at("cpu_write_gaps").size())
                           .arg(result.at("x").get<uint32_t>())
                           .arg(result.at("y").get<uint32_t>()));
+    summary_->setText(summary_->text() + QString("\nT:%1 · through API %2 · mip %3 / layer %4 / sample %5")
+        .arg(resource_->text(), eventInput_->text()).arg(mip_->value()).arg(layer_->value()).arg(sample_->value()));
     summary_->setToolTip(QString::fromStdString(scope.dump(2)));
     details_->setPlainText(QString::fromStdString(scope.dump(2)));
     updateActions();

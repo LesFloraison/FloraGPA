@@ -1,5 +1,6 @@
 #include "RdcAnalyzeCli.h"
 #include "application/Annotations.h"
+#include "application/DrawResources.h"
 #include "application/ApiCommands.h"
 #include "application/CaptureNames.h"
 #include "application/CheckpointInspection.h"
@@ -86,7 +87,7 @@ int main(int argc, char **argv) {
     p.addHelpOption();
     p.addVersionOption();
     p.addPositionalArgument(
-        "command", "inventory | commands | command-state | contexts | command-lists | replay | shader | "
+        "command", "inventory | commands | command-state | contexts | command-lists | replay | draw-resources | shader | "
                    "buffer | texture | texture-storage | compile | compile-project | assemble | geometry | "
                    "replay-pipeline | "
                    "class-linkage | predicate | annotations | metric-index | metric-catalog | metric-profile "
@@ -167,6 +168,7 @@ int main(int argc, char **argv) {
     p.addOption({"low", "Texture display minimum", "value", "0"});
     p.addOption({"high", "Texture display maximum", "value", "1"});
     p.addOption({"no-preview", "Export texture storage without a display conversion"});
+    p.addOption({"preview-request", "Draw resource preview request JSON", "path"});
     p.addOption({"offset", "Buffer byte offset", "bytes", "0"});
     p.addOption({"length", "Buffer byte length (default: remaining bytes)", "bytes"});
     p.addOption({"suppress-draws", "Disable draw submissions (negative control)"});
@@ -177,6 +179,8 @@ int main(int argc, char **argv) {
         if (args.isEmpty())
             throw std::runtime_error("Expected command");
         auto command = args[0];
+        if (p.isSet("preview-request") && command != "draw-resources")
+            throw std::runtime_error("--preview-request requires draw-resources");
         if (p.isSet("groups") && command != "metric-groups")
             throw std::invalid_argument("--groups applies to metric-groups only");
         if (p.isSet(readyFile)) {
@@ -418,6 +422,26 @@ int main(int argc, char **argv) {
             report.insert("iterations", qint64(profile.at("actual_iteration_count").get<uint64_t>()));
             report.insert("loaded_modules", modules());
             experiment = profile.at("experiment");
+        } else if (command == "draw-resources") {
+            if (out.isEmpty() || !p.isSet("id") || p.isSet("before") || p.isSet("event"))
+                throw std::runtime_error("draw-resources requires --id and --out and observes both draw boundaries");
+            ReplayOptions options;
+            options.warp = p.isSet("warp");
+            options.debug = p.isSet("debug-device");
+            if (p.isSet("experiment")) {
+                Experiment project(frame);
+                project.load(p.value("experiment"), frame);
+                project.apply(frame, options);
+            }
+            nlohmann::json request{{"previews", nlohmann::json::array()}};
+            if (p.isSet("preview-request")) {
+                QFile file(p.value("preview-request"));
+                if (!file.open(QIODevice::ReadOnly)) throw std::runtime_error("Cannot read preview request");
+                request = nlohmann::json::parse(file.readAll().toStdString());
+            }
+            const auto result = exportDrawResources(frame, parseId("id"), options, request, out.toStdWString());
+            QTextStream(stdout) << QByteArray::fromStdString(result.dump()) << Qt::endl;
+            return 0;
         } else if (command == "coverage" || command == "quad") {
             if (out.isEmpty() || !p.isSet("id") || p.isSet("before") || p.isSet("timings") ||
                 p.isSet("event") || p.isSet("suppress-draws"))

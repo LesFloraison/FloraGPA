@@ -158,6 +158,11 @@ MainWindow::MainWindow() {
             capturePath_ = pendingPath_;
             ++revision_;
             selectedEvent_ = selectedResource_ = 0;
+            selectedBinding_.reset(); pendingPixel_ = nullptr;
+            resourceBrowser_->clear(); resourceImages_->setCurrentIndex(0); invalidateResourceImage();
+            { QSignalBlocker a(outputLayer_), b(outputSample_);
+              outputLayer_->setRange(-1, 65535); outputLayer_->setValue(-1);
+              outputSample_->setRange(-1, 31); outputSample_->setValue(-1); }
             shaderDocument_ = 0;
             shaderDocuments_ = nlohmann::json::object();
             shaderEntries_ = nlohmann::json::object();
@@ -313,6 +318,10 @@ MainWindow::MainWindow() {
     });
     connect(&process_, &QProcess::errorOccurred, this, [this](QProcess::ProcessError e) {
         if (e == QProcess::FailedToStart) {
+            if (runningKind_ == "draw-resources") {
+                resourceBrowser_->failPreviews(runningResourceKey_, process_.errorString());
+                resourceTimer_.start();
+            }
             timeout_.stop();
             setBusy(false);
             showError(process_.errorString());
@@ -1120,7 +1129,7 @@ void MainWindow::buildUi() {
             geometry_["tables"].toObject()[geometryTable_->currentData().toString()].toObject());
     });
     history_ = new PixelHistoryView;
-    centerTabs_->addTab(history_, "Pixel History");
+    leftTabs_->insertTab(1, history_, "Pixel History");
     connect(history_, &PixelHistoryView::readRequested, this, [this] { readRdcAnalysis(); });
     connect(history_, &PixelHistoryView::cancelRequested, this, &MainWindow::cancel);
     connect(history_, &PixelHistoryView::eventRequested, this, [this](qulonglong id) {
@@ -1248,8 +1257,13 @@ void MainWindow::buildUi() {
     zoomLabel_->setMinimumWidth(42);
     statusBar()->addPermanentWidget(zoomLabel_);
     connect(image_, &ImageView::pixelHovered, pixelLabel_, &QLabel::setText);
+    buildResourceWorkspace(output);
     connect(image_, &ImageView::pixelSelected, this, &MainWindow::selectOutputPixel);
     connect(textureImage_, &ImageView::pixelSelected, this, [this](int x, int y, const QColor &) {
+        if (historyPick_->isChecked()) {
+            history_->setNotice("Select an output RT to query Pixel History.");
+            leftTabs_->setCurrentWidget(history_); return;
+        }
         if (busy() || textureTimer_.isActive() || textureMetadata_.isEmpty() ||
             qulonglong(textureMetadata_["resource_id"].toInteger()) != selectedResource_)
             return;
@@ -1352,6 +1366,7 @@ void MainWindow::closeEvent(QCloseEvent *e) {
     e->accept();
 }
 void MainWindow::setBusy(bool busy) {
+    busy = busy && runningKind_ != "draw-resources";
     shader_->setReadOnly(busy);
     sourceEditor_->setReadOnly(busy);
     shaderEntry_->setEnabled(!busy);
@@ -1450,6 +1465,11 @@ bool MainWindow::finishRdcAnalysis(const nlohmann::json &result) {
 void MainWindow::readRdcAnalysis(ReplayDebugView *view, RdcAnalysis kind) {
     if (busy() || !frame_)
         return;
+    if (!view && kind == RdcAnalysis::History && !historyBackendReady()) {
+        history_->setNotice("Select a RenderDoc 1.45 release library using RenderDoc…");
+        emit taskFinished(false);
+        return;
+    }
     runningDebug_ = view;
     runningAnalysis_ = view ? RdcAnalysis::Debug : kind;
     const bool counters = kind == RdcAnalysis::Counters, mesh = kind == RdcAnalysis::Mesh;
@@ -1648,6 +1668,13 @@ void MainWindow::startWorker(QStringList args, bool timings) {
         }
         args << "--experiment" << path;
     }
+    if (args.first() == "draw-resources") {
+        const auto path = jobDir_->filePath("previews.json");
+        try { writeFile(path, QByteArray::fromStdString(previewRequest_.dump())); }
+        catch (const std::exception &e) { showError(QString::fromUtf8(e.what())); return; }
+        args << "--preview-request" << path;
+    }
+    if ((args.first() == "replay" && !args.contains("--renderdoc")) || args.first() == "texture") invalidateResourceImage();
     if (adapter_->currentIndex() == 1 && !scheduled && !catalog)
         args << "--warp";
     runningRevision_ = revision_;
@@ -1685,6 +1712,10 @@ void MainWindow::finishWorker(int code, QProcess::ExitStatus status) {
     }
     setBusy(false);
     if (runningRevision_ != revision_) {
+        if (runningKind_ == "draw-resources") {
+            resourceBrowser_->failPreviews(runningResourceKey_, "Selection changed");
+            resourceTimer_.start(); return;
+        }
         if (runningKind_ == "metric-iterations" || runningKind_ == "metric-profile" ||
             runningKind_ == "metric-catalog")
             scheduledMetrics_->finish(runningScheduledRequest_, {{"error", "Cancelled"}});
@@ -1757,6 +1788,14 @@ void MainWindow::finishWorker(int code, QProcess::ExitStatus status) {
             emit taskFinished(accepted);
             return;
         }
+        if (runningKind_ == "draw-resources") {
+            QFile thumbnails(jobDir_->filePath("result/report.json"));
+            if (!thumbnails.open(QIODevice::ReadOnly)) throw std::runtime_error("Thumbnail report is missing");
+            resourceBrowser_->acceptPreviews(runningResourceKey_, nlohmann::json::parse(thumbnails.readAll().toStdString()), jobDir_->filePath("result"));
+            thumbnails.close();
+            statusBar()->showMessage("Thumbnails ready", 2000);
+            jobDir_.reset(); resourceTimer_.start(); return;
+        }
         QFile file(jobDir_->path() + "/result/report.json");
         if (!file.open(QIODevice::ReadOnly))
             throw std::runtime_error("Worker report is missing");
@@ -1808,6 +1847,7 @@ void MainWindow::finishWorker(int code, QProcess::ExitStatus status) {
             if (!coverageFile.open(QIODevice::ReadOnly)) throw std::runtime_error("Coverage output is missing");
             const auto result = nlohmann::json::parse(coverageFile.readAll().toStdString());
             const bool accepted = coverage_->finish(runningCoverageRequest_, result, jobDir_->filePath("result"));
+            applyCoverageOverlay();
             statusBar()->showMessage(accepted ? "Coverage ready" : "Coverage result discarded", 3000);
             emit taskFinished(accepted);
             return;
@@ -2030,6 +2070,7 @@ void MainWindow::finishWorker(int code, QProcess::ExitStatus status) {
             textureImage_->setImage(std::move(result));
             textureImage_->channel("RGBA");
             textureMetadata_ = report_["texture"].toObject();
+            resourceImagePending_ = false; resourceImageContext_ = historyContextKey();
             textureDir_ = std::move(jobDir_);
             textureExportAction_->setEnabled(true);
             textureLabel_->setText(QString("%1 × %2 · %3")
@@ -2074,6 +2115,7 @@ void MainWindow::finishWorker(int code, QProcess::ExitStatus status) {
                                                                 reportBytes.constData() + reportBytes.size())
                                         : nlohmann::json();
         displayedOutputGeneration_ = outputGeneration_;
+        resourceImagePending_ = false; resourceImageContext_ = historyContextKey();
         outputDir_ = std::move(jobDir_);
         outputStorageAction_->setEnabled(outputAvailable);
         if (runningTimings_) {
@@ -2098,6 +2140,10 @@ void MainWindow::finishWorker(int code, QProcess::ExitStatus status) {
                                   .arg(report_["rgba_sha256"].toString()));
         emit taskFinished(true);
     } catch (const std::exception &e) {
+        if (runningKind_ == "draw-resources") {
+            resourceBrowser_->failPreviews(runningResourceKey_, QString::fromUtf8(e.what()));
+            resourceTimer_.start(); return;
+        }
         showError(QString::fromUtf8(e.what()));
         if (runningKind_ == "metric-iterations" || runningKind_ == "metric-profile" ||
             runningKind_ == "metric-catalog")
@@ -2192,7 +2238,8 @@ void MainWindow::selectEvent(Id id) {
     }
     if (process_.state() != QProcess::NotRunning)
         cancel();
-    replayTimer_.start();
+    updateResourceContext(true);
+    if (!selectedBinding_) { resourceImages_->setCurrentIndex(0); replayTimer_.start(); }
 }
 void MainWindow::inspectEvent(Id id) {
     const auto &details = commands_->command(id);
@@ -2655,7 +2702,10 @@ void MainWindow::inspectResource(Id id) {
             layer_->setValue(0);
             slice_->setValue(0);
             textureImage_->setImage({});
-            centerTabs_->setCurrentWidget(texturePane_);
+            if (!resourceSelecting_) selectedBinding_.reset();
+            invalidateResourceImage();
+            resourceImages_->setCurrentWidget(texturePane_);
+            centerTabs_->setCurrentWidget(resourceWorkspace_);
             replayTimer_.stop();
             textureTimer_.start();
         }
@@ -2748,6 +2798,7 @@ void MainWindow::updateProfileContext() {
                : QString(),
         selectedEvent_);
     updateCoverageContext(QString::fromLatin1(QCryptographicHash::hash(bytes,QCryptographicHash::Sha256).toHex()));
+    updateResourceContext();
 }
 void MainWindow::stashShaderDrafts() {
     if (!shaderDocument_) return;
@@ -3078,7 +3129,7 @@ void MainWindow::experimentChanged() {
             inspectResource(selectedResource_);
             selectedShaderStage_ = shaderStage;
         }
-        if (type >= 0x84 && type <= 0x87 && centerTabs_->currentWidget() == texturePane_) {
+        if (type >= 0x84 && type <= 0x87 && textureMode()) {
             replayTimer_.stop();
             textureTimer_.start();
             return;
@@ -4043,8 +4094,15 @@ void MainWindow::openExperiment() {
             QSignalBlocker boundary(boundary_);
             boundary_->setCurrentIndex(settings.boundary);
         }
-        centerTabs_->setCurrentWidget(image_->parentWidget());
+        centerTabs_->setCurrentWidget(resourceWorkspace_);
+        resourceImages_->setCurrentIndex(0);
         experimentChanged();
+        const auto resourceUi = ui.value("flora_resources", nlohmann::json::object());
+        if (resourceUi.is_object()) {
+            coverageToggle_->setChecked(resourceUi.value("coverage", false));
+            const auto key = resourceUi.value("binding", std::string());
+            if (!key.empty() && resourceBrowser_->select(key)) selectDrawResource(QString::fromStdString(key));
+        }
         projectDirty_ = false;
         setWindowModified(false);
     } catch (const std::exception &e) {
@@ -4083,6 +4141,8 @@ bool MainWindow::saveExperiment() {
         ui["shader_documents"] = shaderDocuments_;
         ui["shader_entries"] = shaderEntries_;
         ui["gpu_profile"] = gpuProfile_->settings();
+        ui["flora_resources"] = {{"binding", selectedBinding_ ? selectedBinding_->key : std::string()},
+                                  {"coverage", coverageToggle_->isChecked()}};
         ui = scheduledMetrics_->saveDocument(std::move(ui));
         ui.update(quad_->settings());
         experiment_->save(path, ui);
@@ -4118,8 +4178,39 @@ void MainWindow::exportOutputStorage() {
     }
 }
 void MainWindow::selectOutputPixel(int x, int y, const QColor &color) {
-    if (!frame_ || busy() || outputReport_.is_null())
+    if (!frame_ || outputReport_.is_null()) return;
+    if (busy() && runningKind_ != "draw-resources" && runningKind_ != "coverage" &&
+        runningKind_ != "history" && runningKind_ != "history-capture") return;
+    if (historyPick_->isChecked()) {
+        if (resourceImagePending_ || outputGeneration_ != displayedOutputGeneration_ || replayTimer_.isActive()) return;
+        const auto &d = outputReport_.at("output_display");
+        if (d.value("view_kind", nlohmann::json()) != "rtv" && d.value("view_kind", nlohmann::json()) != "dsv") {
+            history_->setNotice("Select a bound RT or depth view to query history."); return;
+        }
+        const auto resource = d.at("resource").get<Id>();
+        if (frame_->entry(resource).type == 0x83) return;
+        const auto layer = frame_->entry(resource).type == 0x86 ? d.at("slice") : d.at("layer");
+        // The displayed report owns provenance, including a Before boundary.
+        const auto time = outputReport_.value("value_time", std::string());
+        const auto capturedEvent = outputReport_.at("event");
+        Id event = capturedEvent.is_string() ? std::stoull(capturedEvent.get<std::string>()) : 0;
+        if (time == "before_event") {
+            const auto before = event;
+            event = 0;
+            for (auto id : frame_->entryOrder()) {
+                if (id == before) break;
+                if (frame_->entry(id).category == 7) event = id;
+            }
+            if (!event) { history_->setNotice("No preceding API boundary for this image."); return; }
+        } else if (time == "frame_end") {
+            const auto last = outputReport_.at("output_selection").at("event");
+            event = last.is_number_unsigned() ? last.get<Id>() : 0;
+        }
+        requestHistoryPixel(event, resource, x, y, d.at("mip").get<int>(), layer.get<int>(),
+                            d.at("sample").is_number() ? d.at("sample").get<int>() : 0);
         return;
+    }
+    if (busy()) return;
     if (outputGeneration_ != displayedOutputGeneration_ || replayTimer_.isActive()) {
         statusBar()->showMessage("Replay output before selecting a pixel", 4000);
         return;
@@ -4190,7 +4281,7 @@ void MainWindow::selectOutputPixel(int x, int y, const QColor &color) {
     }
 }
 void MainWindow::exportImage() {
-    auto viewer = centerTabs_->currentWidget() == texturePane_ ? textureImage_ : image_;
+    auto viewer = textureMode() ? textureImage_ : image_;
     if (viewer->image().isNull())
         return;
     auto path = QFileDialog::getSaveFileName(this, "Export output", {}, "PNG image (*.png)");

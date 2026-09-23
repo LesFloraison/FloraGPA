@@ -840,7 +840,8 @@ class UiTests final : public QObject {
                 api->setCurrentIndex(api->model()->index(row, 0));
         QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
         QVERIFY(done.takeLast()[0].toBool());
-        QVERIFY(image->image().isNull());
+        // Selecting a draw now defaults to its lowest valid RTV.
+        QVERIFY(!image->image().isNull());
         done.clear();
         projectFile(window, "openExperiment", path);
         QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);

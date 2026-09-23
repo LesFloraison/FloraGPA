@@ -86,10 +86,10 @@ CoverageView::CoverageView(QWidget *parent) : QWidget(parent) {
         if (!busy_ && !result_.is_null() && result_.value("target_kind", "") != "viewport")
             emit pixelRequested(QString::fromStdString(result_.dump()), x, y, color);
     });
-    connect(mode_, &QComboBox::currentIndexChanged, this, [this] { invalidate(); });
-    connect(target_, &QComboBox::currentIndexChanged, this, [this] { invalidate(); });
-    connect(layer_, &QLineEdit::textChanged, this, [this] { invalidate(); });
-    connect(depth_, &QCheckBox::toggled, this, [this] { invalidate(); });
+    connect(mode_, &QComboBox::currentIndexChanged, this, [this] { invalidate(); emit settingsChanged(); });
+    connect(target_, &QComboBox::currentIndexChanged, this, [this] { invalidate(); emit settingsChanged(); });
+    connect(layer_, &QLineEdit::textChanged, this, [this] { invalidate(); emit settingsChanged(); });
+    connect(depth_, &QCheckBox::toggled, this, [this] { invalidate(); emit settingsChanged(); });
     connect(read_, &QAction::triggered, this, &CoverageView::read);
     connect(cancel_, &QAction::triggered, this, &CoverageView::cancelRequested);
     connect(export_, &QAction::triggered, this, [this] {
@@ -116,6 +116,26 @@ void CoverageView::invalidate() {
     summary_->setText(available_ ? "Not captured" : "Select a draw");
     summary_->setToolTip({});
     updateActions();
+}
+void CoverageView::setEmbedded() {
+    image_->hide(); pixel_->hide(); zoom_->hide();
+    setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Maximum);
+    auto tools = findChildren<QToolBar *>();
+    if (!tools.empty()) {
+        auto diagnostic = tools.front()->addAction("Show diagnostic");
+        diagnostic->setObjectName("coverageDiagnostic");
+        connect(diagnostic, &QAction::triggered, this, &CoverageView::diagnosticRequested);
+    }
+}
+Json CoverageView::settings() const {
+    return {{"mode", mode_->currentData().toString().toStdString()}, {"depth_test", depth_->isChecked()}};
+}
+void CoverageView::captureTarget(const QString &target, uint32_t layer) {
+    { QSignalBlocker a(target_), b(layer_);
+      const auto index = target_->findData(target);
+      if (index < 0) return;
+      target_->setCurrentIndex(index); layer_->setText(QString::number(layer)); }
+    read();
 }
 void CoverageView::setContext(std::shared_ptr<const Frame> frame, Id event, const QString &key,
                               std::optional<State> state, const QString &error) {

@@ -18,6 +18,8 @@
 #include <QTemporaryDir>
 #include <QTimer>
 #include <QTreeWidget>
+#include <QStackedWidget>
+#include "ResourceBrowser.h"
 
 namespace flora {
 class CommandStateView;
@@ -53,6 +55,27 @@ class MainWindow final : public QMainWindow {
 
   private:
     void buildUi();
+    void buildResourceWorkspace(QWidget *output);
+    void updateResourceContext(bool chooseDefault = false);
+    void selectDrawResource(const QString &key);
+    void pumpResourceJobs();
+    void invalidateResourceImage();
+    void applyCoverageOverlay();
+    void requestHistoryPixel(Id event, Id resource, int x, int y, int mip, int layer, int sample);
+    bool textureMode() const;
+    bool historyBackendReady() const;
+    QWidget *resourceWorkspace_ = nullptr;
+    QStackedWidget *resourceImages_ = nullptr;
+    ResourceBrowser *resourceBrowser_ = nullptr;
+    QAction *coverageToggle_ = nullptr, *historyPick_ = nullptr;
+    QLabel *resourceStatus_ = nullptr;
+    QTimer resourceTimer_;
+    QString runningResourceKey_, coverageKey_;
+    nlohmann::json previewRequest_, pendingPixel_;
+    std::optional<DrawResourceBinding> selectedBinding_;
+    bool resourceSelecting_ = false;
+    bool resourceImagePending_ = false;
+    QString resourceImageContext_;
     void loadSettings();
     void selectEvent(Id id);
     void locateEvent(Id id);

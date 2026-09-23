@@ -10,7 +10,6 @@ namespace flora {
 using Json = nlohmann::json;
 void MainWindow::buildCoverageUi() {
     coverage_ = new CoverageView;
-    centerTabs_->insertTab(1, coverage_, "Coverage");
     connect(coverage_, &CoverageView::readRequested, this, [this](const QString &text, qulonglong serial) {
         if (busy()) {
             coverage_->finish(serial, {{"error", "Worker is busy"}});

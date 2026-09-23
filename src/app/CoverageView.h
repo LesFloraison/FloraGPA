@@ -17,10 +17,18 @@ class CoverageView final : public QWidget {
     void setWorkerBusy(bool busy);
     bool finish(uint64_t request, const nlohmann::json &result, const QString &directory = {});
     void exportResult(const QString &path) const;
+    void setEmbedded();
+    void captureTarget(const QString &target, uint32_t layer);
+    nlohmann::json settings() const;
+    const nlohmann::json &result() const { return result_; }
+    QImage mask() const { return QImage::fromData(files_[1], "PNG"); }
+    QImage diagnostic() const { return QImage::fromData(files_[3], "PNG"); }
   signals:
     void readRequested(const QString &request, qulonglong serial);
     void cancelRequested();
     void pixelRequested(const QString &report, int x, int y, const QColor &color);
+    void settingsChanged();
+    void diagnosticRequested();
 
   private:
     void invalidate();

@@ -12,7 +12,12 @@ replay, experiment projects and a compact Qt editor. Coverage and remaining
 consumer dependencies are documented in
 [`docs/OUTPUT_BINDING_MIGRATION.md`](docs/OUTPUT_BINDING_MIGRATION.md).
 
-The Output tab supports live presentation/RTV/DSV selection, view-bounded layers,
+The Resources workspace combines draw input/output thumbnails, texture inspection,
+and an independent Coverage layer. Pixel History lives beside the API Log: enable
+its pick mode, then click an RT pixel. A compatible RenderDoc 1.45 release library
+is required for history queries. See [Draw resources](docs/DRAW_RESOURCES_UI.md).
+
+The shared viewer supports live presentation/RTV/DSV selection, view-bounded layers,
 MSAA resolve or individual samples, display channels/ranges and raw storage
 export. See [`docs/FRAME_OUTPUT_MIGRATION.md`](docs/FRAME_OUTPUT_MIGRATION.md)
 for parity evidence and remaining integration work.

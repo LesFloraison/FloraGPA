@@ -110,6 +110,9 @@ void MeshView::mouseMoveEvent(QMouseEvent *event) {
 ImageView::ImageView(QWidget *parent) : QGraphicsView(parent), scene_(this) {
     setScene(&scene_);
     item_ = scene_.addPixmap({});
+    overlay_ = scene_.addPixmap({});
+    overlay_->setZValue(1);
+    overlay_->setAcceptedMouseButtons(Qt::NoButton);
     setFrameShape(QFrame::NoFrame);
     setBackgroundBrush(QColor("#1b232c"));
     setDragMode(ScrollHandDrag);
@@ -118,10 +121,48 @@ ImageView::ImageView(QWidget *parent) : QGraphicsView(parent), scene_(this) {
     setRenderHint(QPainter::SmoothPixmapTransform, false);
 }
 void ImageView::setImage(QImage image) {
+    clearOverlay();
+    selectedPixel_.reset();
     pixelClick_ = false;
     image_ = std::move(image);
     channel("RGB");
     fit();
+}
+void ImageView::clearOverlay() {
+    overlay_->setPixmap({});
+}
+void ImageView::setOverlayMask(const QImage &mask) {
+    clearOverlay();
+    if (mask.isNull() || mask.size() != image_.size())
+        return;
+    auto tint = mask.convertToFormat(QImage::Format_RGBA8888);
+    for (int y = 0; y < tint.height(); ++y) {
+        auto row = tint.scanLine(y);
+        for (int x = 0; x < tint.width(); ++x) {
+            const bool covered = row[x * 4] != 0;
+            row[x * 4] = 255; row[x * 4 + 1] = 0; row[x * 4 + 2] = 255;
+            row[x * 4 + 3] = covered ? 255 : 0;
+        }
+    }
+    overlay_->setPixmap(QPixmap::fromImage(tint));
+    overlay_->setOpacity(1.);
+}
+void ImageView::setPixelPicking(bool enabled) {
+    picking_ = enabled;
+    viewport()->setCursor(enabled ? Qt::CrossCursor : Qt::OpenHandCursor);
+}
+void ImageView::setSelectedPixel(std::optional<QPoint> pixel) {
+    selectedPixel_ = pixel;
+    viewport()->update();
+}
+void ImageView::drawForeground(QPainter *painter, const QRectF &) {
+    if (!selectedPixel_ || !image_.rect().contains(*selectedPixel_)) return;
+    const QPointF at = QPointF(*selectedPixel_) + QPointF(.5, .5);
+    painter->setPen(QPen(QColor("#00e5ff"), 0));
+    const double radius = 8. / std::max(.01, transform().m11());
+    painter->drawLine(at - QPointF(radius, 0), at + QPointF(radius, 0));
+    painter->drawLine(at - QPointF(0, radius), at + QPointF(0, radius));
+    painter->drawRect(QRectF(selectedPixel_->x(), selectedPixel_->y(), 1, 1));
 }
 void ImageView::channel(const QString &channel) {
     if (image_.isNull()) {
@@ -195,6 +236,7 @@ void ImageView::mouseReleaseEvent(QMouseEvent *e) {
     const auto location = mapToScene(e->pos());
     const QPoint pixel(int(std::floor(location.x())), int(std::floor(location.y())));
     QGraphicsView::mouseReleaseEvent(e);
+    if (picking_) viewport()->setCursor(Qt::CrossCursor);
     if (click && image_.rect().contains(pixel))
         emit pixelSelected(pixel.x(), pixel.y(), image_.pixelColor(pixel));
 }

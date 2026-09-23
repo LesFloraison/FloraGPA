@@ -39,6 +39,11 @@ class ImageView final : public QGraphicsView {
     void channel(const QString &channel);
     void fit();
     void actualSize();
+    void setOverlayMask(const QImage &mask);
+    void clearOverlay();
+    void setPixelPicking(bool enabled);
+    void setSelectedPixel(std::optional<QPoint> pixel);
+    bool hasOverlay() const { return !overlay_->pixmap().isNull(); }
   signals:
     void pixelHovered(const QString &value);
     void pixelSelected(int x, int y, const QColor &color);
@@ -50,10 +55,14 @@ class ImageView final : public QGraphicsView {
     void mousePressEvent(QMouseEvent *) override;
     void mouseReleaseEvent(QMouseEvent *) override;
     void resizeEvent(QResizeEvent *) override;
+    void drawForeground(QPainter *, const QRectF &) override;
 
   private:
     QGraphicsScene scene_;
     QGraphicsPixmapItem *item_;
+    QGraphicsPixmapItem *overlay_;
+    std::optional<QPoint> selectedPixel_;
+    bool picking_ = false;
     QImage image_;
     bool fitting_ = true;
     QPoint pressedAt_;
