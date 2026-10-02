@@ -115,3 +115,31 @@ Follow-up: [RenderDoc 1.46 isolated validation](RENDERDOC146_VALIDATION.md)
 now verifies real BF1 mouse-driven Pixel History plus hardware/WARP history
 regressions using a separately compiled matching backend. The original package
 and its 1.45 allowlist remain unchanged.
+
+## Local import verification — 2026-10-02
+
+The takeaway archive at commit `f1c3e82` was verified as a direct descendant of
+the local `a746005` baseline. ZIP CRC/path checks, Git object integrity and the
+clean archived worktree were checked before integration. No incoming Git config,
+hooks or generated build directories were copied into the main checkout.
+
+A fresh VS2022 / Qt 6.11.2 Release build produced the application, native workers,
+metrics bridge and nine relevant test targets. Eight CTest suites passed on the
+first run; `history_ui` exposed an outdated test selecting the central tab even
+though Pixel History now belongs to the left tab group. The test now locates the
+owning tab group and verifies visibility. Its corrected rerun passed all six
+cases without skips, including CPU writes and real RenderDoc 1.45 hardware/WARP
+history, cancellation/retry and cache behavior. CTest now retains a dedicated
+history text log. No production behavior was changed by this test correction.
+
+The main UI passed 54 cases, draw resources 10 (including BF1 screenshots), and
+Coverage UI six, all without skips. Coverage, texture inspection, frame output,
+replay pipeline and core suites also passed. GF2/BF1 golden replays and both
+suppressed-draw negative controls passed from the portable package with an
+isolated child PATH. All five production binary hashes match the reviewed build.
+These are focused regression results, not a rerun of all 88 registered suites.
+
+Evidence, including the initial failure and corrected history run, is retained
+under `artifacts/takeaway-review-20261002/`. The resulting package is
+`out/FloraGPA-resources-20261002/`. RenderDoc 1.46 production support remains
+outside this import; the separate clean-machine validation limit also remains.

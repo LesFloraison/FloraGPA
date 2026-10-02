@@ -28,6 +28,15 @@ Json read(const QString &path) {
     return Json::parse(bytes.begin(), bytes.end());
 }
 QAction *action(QWidget &view, const char *name) { return view.findChild<QAction *>(name); }
+bool showHistoryTab(MainWindow &window, PixelHistoryView *view) {
+    for (auto tabs : window.findChildren<QTabWidget *>()) {
+        if (tabs->indexOf(view) < 0)
+            continue;
+        tabs->setCurrentWidget(view);
+        return view->isVisible();
+    }
+    return false;
+}
 } // namespace
 class HistoryUiTests : public QObject {
     Q_OBJECT
@@ -118,7 +127,7 @@ class HistoryUiTests : public QObject {
         tasks.clear();
         auto view = window.findChild<PixelHistoryView *>();
         QVERIFY(view);
-        window.findChild<QTabWidget *>("analysisTabs")->setCurrentWidget(view);
+        QVERIFY(showHistoryTab(window, view));
         view->selectPixel(84, 0, 0, 1, 0, 0);
         view->findChild<QLineEdit *>("historyEvent")->setText("213");
         action(*view, "readPixelHistory")->trigger();
@@ -204,7 +213,7 @@ class HistoryUiTests : public QObject {
         tasks.clear();
         auto history = window.findChild<PixelHistoryView *>();
         QVERIFY(history);
-        window.findChild<QTabWidget *>("analysisTabs")->setCurrentWidget(history);
+        QVERIFY(showHistoryTab(window, history));
         history->selectPixel(20, 2, 2, 0, 0, 2);
         history->findChild<QLineEdit *>("historyEvent")->setText("100");
         auto readAction = action(*history, "readPixelHistory");
