@@ -140,6 +140,29 @@ int wmain(int argc, wchar_t **argv) {
                 context->ClearRenderTargetView(chain.rtv.Get(), magenta);
                 auto view = chain.rtv.Get();
                 context->OMSetRenderTargets(1, &view, nullptr);
+#ifdef FLORA_PIPELINE_BOUNDARY_PROBE
+                context->HSSetShader(nullptr, nullptr, 0);
+                context->DSSetShader(nullptr, nullptr, 0);
+                context->GSSetShader(nullptr, nullptr, 0);
+                context->CSSetShader(nullptr, nullptr, 0);
+                context->OMSetBlendState(nullptr, nullptr, 0xffffffffu);
+                context->OMSetDepthStencilState(nullptr, 0xa5);
+                context->RSSetViewports(0, nullptr);
+                context->RSSetScissorRects(0, nullptr);
+                D3D11_RECT scissor{1, 2, 7, 6};
+                context->RSSetScissorRects(1, &scissor);
+                // Independent native getter oracle before any Draw can restore a snapshot.
+                UINT count = 16, mask = 0, reference = 0;
+                D3D11_VIEWPORT empty[16];
+                context->RSGetViewports(&count, empty);
+                if (count != 0) throw std::runtime_error("Native zero viewport boundary mismatch");
+                float factors[4]{};
+                context->OMGetBlendState(nullptr, factors, &mask);
+                context->OMGetDepthStencilState(nullptr, &reference);
+                if (mask != 0xffffffffu || reference != 0xa5 ||
+                    factors[0] != 1 || factors[1] != 1 || factors[2] != 1 || factors[3] != 1)
+                    throw std::runtime_error("Native OM setter boundary mismatch");
+#endif
                 D3D11_VIEWPORT viewport{0, 0, 8, 8, 0, 1};
                 context->RSSetViewports(1, &viewport);
                 context->RSSetState(rs.Get());

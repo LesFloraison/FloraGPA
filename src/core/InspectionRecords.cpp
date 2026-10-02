@@ -128,6 +128,8 @@ bool acceptInspectionRecord(uint16_t type, Bytes payload) {
     case 0x304d:
     case 0x3528:
     case 0x3537:
+    case 0x3539:
+    case 0x353a:
     case 0x353d:
     case 0x4029:
     case 0x402a:
@@ -196,6 +198,18 @@ bool acceptInspectionRecord(uint16_t type, Bytes payload) {
         }
         break;
     }
+    case 0x3539:
+        r.skip(8); // Returned blend-state identity (zero also covers omitted output pointer).
+        if (r.flag())
+            r.skip(16); // Four captured blend factors.
+        if (r.flag())
+            r.skip(4); // Captured sample mask.
+        break;
+    case 0x353a:
+        r.skip(8); // Returned depth-stencil-state identity.
+        if (r.flag())
+            r.skip(4); // Captured stencil reference.
+        break;
     }
     r.end();
     return true;

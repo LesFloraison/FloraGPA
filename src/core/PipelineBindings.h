@@ -9,6 +9,7 @@ struct PipelineBinding {
 std::optional<unsigned> shaderSetterStage(uint16_t type);
 bool isPipelineSetter(uint16_t type);
 PipelineBinding readPipelineSetter(uint16_t type, Bytes bytes);
+Id missingPipelineShader(const Frame &frame, const PipelineBinding &binding);
 void validatePipelineBinding(const Frame &frame, const PipelineBinding &binding);
 void overlayPipelineBinding(State &state, const PipelineBinding &binding);
 State pipelineBindingsAt(const Frame &frame, Id event, State state,

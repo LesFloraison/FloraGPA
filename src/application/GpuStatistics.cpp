@@ -21,7 +21,8 @@ std::map<std::string, uint64_t> compatibleReplayCounts(const Replay &replay, Id 
                                                        std::map<std::string, uint64_t> counts) {
     // Retain the original report families while leaving native engine diagnostics intact.
     for (auto name :
-         {"unresolved_output_setters", "unresolved_input_layout_setters", "unresolved_srv_setters"})
+         {"unresolved_output_setters", "unresolved_input_layout_setters", "unresolved_srv_setters",
+          "unresolved_shader_setters", "pipeline_setter_records"})
         counts.erase(name);
     for (auto name : {"ClearUnorderedAccessViewUint", "ClearUnorderedAccessViewFloat"})
         if (auto it = counts.find(name); it != counts.end()) {

@@ -31,11 +31,17 @@ void bufferType(const Frame &frame, Id id, UINT flag) {
 } // namespace
 
 void Replay::clearBindingGaps() {
+    pipelineGaps_.clear();
     layoutGap_ = outputGap_ = 0;
     for (auto &stage : srvGaps_)
         stage.fill(0);
 }
 void Replay::requireResolvedBindings() const {
+    if (!pipelineGaps_.empty()) {
+        const auto [event, shader] = pipelineGaps_.begin()->second;
+        throw std::runtime_error("Unresolved captured shader " + std::to_string(shader) +
+                                 " from event " + std::to_string(event));
+    }
     if (outputGap_)
         throw std::runtime_error("Unresolved captured output bindings from event " +
                                  std::to_string(outputGap_));

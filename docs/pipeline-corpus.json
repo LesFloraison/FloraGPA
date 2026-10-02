@@ -1,0 +1,118 @@
+{
+  "schema": "FloraGPA compatibility corpus 1",
+  "profile": "GPA 2025 R1 legacy DX11 / IGPA v3",
+  "root_parameter": "--captures-root",
+  "completed": true,
+  "cases": [
+    {
+      "id": "pipeline_initial",
+      "path": "0/capture.gpa_frame",
+      "sha256": "a467c3193827d7ea92b14df8b8187b34f728d99a51dc4201c06718df9cc478b4",
+      "bytes": 76751,
+      "family": "pipeline_boundaries",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified CaptureNextFrame output; buffer bytes additionally checked by native producer and C++ boundary tests.",
+      "device_scope": "Default hardware producer; original player adapter unidentified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "boundaries": [],
+      "controls": [
+        {
+          "disable_event": 59,
+          "repeat": 2,
+          "expected_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b"
+        }
+      ]
+    },
+    {
+      "id": "pipeline_upload",
+      "path": "1/capture.gpa_frame",
+      "sha256": "69f029af7d37ea105cf02b0f975fec880afc7b7e2a055fb57bfb9d6e079d1afb",
+      "bytes": 76896,
+      "family": "pipeline_boundaries",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified CaptureNextFrame output; buffer bytes additionally checked by native producer and C++ boundary tests.",
+      "device_scope": "Default hardware producer; original player adapter unidentified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "boundaries": [],
+      "controls": [
+        {
+          "disable_event": 61,
+          "repeat": 2,
+          "expected_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b"
+        }
+      ]
+    },
+    {
+      "id": "pipeline_validation",
+      "path": "2/capture.gpa_frame",
+      "sha256": "8e75c355a3a48a9de353cd720f15f6de83c1b947bb21d26121a522b7d1205fed",
+      "bytes": 7572,
+      "family": "pipeline_boundaries",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified CaptureNextFrame output; buffer bytes additionally checked by native producer and C++ boundary tests.",
+      "device_scope": "Default hardware producer; original player adapter unidentified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "boundaries": [],
+      "controls": []
+    },
+    {
+      "id": "pipeline_failed",
+      "path": "3/capture.gpa_frame",
+      "sha256": "3338fd0fac16969e5145204c3db6ec9182388d676f088d43354b4b177e16098b",
+      "bytes": 7572,
+      "family": "pipeline_boundaries",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified CaptureNextFrame output; buffer bytes additionally checked by native producer and C++ boundary tests.",
+      "device_scope": "Default hardware producer; original player adapter unidentified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "boundaries": [],
+      "controls": []
+    },
+    {
+      "id": "pipeline_initial_then_update",
+      "path": "4/capture.gpa_frame",
+      "sha256": "8c85ac64fb6bccea41b0a31f385ae6cde4517913ea55eac2753c0c1b6ffb68b3",
+      "bytes": 76912,
+      "family": "pipeline_boundaries",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified CaptureNextFrame output; buffer bytes additionally checked by native producer and C++ boundary tests.",
+      "device_scope": "Default hardware producer; original player adapter unidentified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "boundaries": [],
+      "controls": [
+        {
+          "disable_event": 61,
+          "repeat": 2,
+          "expected_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b"
+        }
+      ]
+    }
+  ],
+  "producer_sha256": "4932138babb264d9e9e51e323d10dd4a0cf21de1f2bfc16b6c8cc4c2ac4384e4",
+  "sources": {
+    "native/buffer_creation_probe.cpp": "29717f9c91d4b2095d4ad208f817fae24930f0961257d379dff53a3bbcabe9bb",
+    "native/present_capture_probe.cpp": "7c29f1e572ab16a5bc497d39eef8198d79056877a9e1d3fff3f7ed530a32c4e3",
+    "capture_buffers.py": "74566d299d17dba91580377206251f7e568d8480bb3fd71f8b3627098ee15a2e",
+    "capture_present.py": "18a1a493a55d842f6408114de73deb786a3066c31ea7d6e63415bb0b040eacae",
+    "native/pipeline_boundary_probe.cpp": "f42a328189471b641d7d5763288d9ccb404622b1b4fb46c6e348f55ef737fe52"
+  },
+  "gpa_sha256": {
+    "shimloader64.dll": "af68e28ba54ab0068c95f82081828788d6f59879283127dc330b818af7369888",
+    "shimd3d64.dll": "cb0b99d113511cbf7ca9f949d97aa02e4a1f8f110b1f3ad3165d8a81035dee31"
+  },
+  "variant": "pipeline_boundaries",
+  "source_manifest": {
+    "path": "artifacts\\m2-pipeline-originals\\manifest.json",
+    "sha256": "2976724155d9eb56e06cc2a0127b3809fcdb331b1d09f7fced5681aba452e7cd"
+  }
+}

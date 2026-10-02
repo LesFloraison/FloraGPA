@@ -1390,7 +1390,7 @@ void Replay::run(const std::function<void(Id, size_t, size_t)> &progress,
     // The reference recovers missing setters from a before-draw snapshot without
     // executing that draw's experiments, recording it as work, or notifying observers.
     const bool gaps =
-        outputGap_ || layoutGap_ || std::any_of(srvGaps_.begin(), srvGaps_.end(), [](const auto &stage) {
+        !pipelineGaps_.empty() || outputGap_ || layoutGap_ || std::any_of(srvGaps_.begin(), srvGaps_.end(), [](const auto &stage) {
             return std::any_of(stage.begin(), stage.end(), [](Id id) { return id != 0; });
         });
     if (gaps && options_.before && options_.until && isDraw(frame_.entry(options_.until).type)) {

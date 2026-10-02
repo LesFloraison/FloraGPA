@@ -4,14 +4,19 @@ bool Replay::pipelineSetter(const Entry &entry, Bytes payload) {
     if (!isPipelineSetter(entry.type))
         return false;
     const auto edit = options_.pipelineSetters.find(entry.id);
-    if (edit == options_.pipelineSetters.end() && !activePipelineBindings_.contains(entry.type)) {
-        ++counts["state_or_auxiliary_records"];
-        return true;
-    }
     const auto binding =
         edit == options_.pipelineSetters.end() ? readPipelineSetter(entry.type, payload) : edit->second;
     if (binding.type != entry.type)
         throw std::runtime_error("Pipeline setter type mismatch");
+    if (edit == options_.pipelineSetters.end()) {
+        if (const auto missing = missingPipelineShader(frame_, binding)) {
+            pipelineGaps_[entry.type] = {entry.id, missing};
+            activePipelineBindings_.erase(entry.type);
+            ++counts["unresolved_shader_setters"];
+            ++counts["state_or_auxiliary_records"];
+            return true;
+        }
+    }
     validatePipelineBinding(frame_, binding);
     const auto &s = binding.values;
     if (auto stage = shaderSetterStage(entry.type)) {
@@ -48,11 +53,13 @@ bool Replay::pipelineSetter(const Entry &entry, Bytes payload) {
         break;
     }
     }
+    pipelineGaps_.erase(entry.type);
     if (edit == options_.pipelineSetters.end())
         activePipelineBindings_.erase(entry.type);
     else
         activePipelineBindings_[entry.type] = binding;
     ++counts["state_or_auxiliary_records"];
+    ++counts["pipeline_setter_records"];
     return true;
 }
 } // namespace flora

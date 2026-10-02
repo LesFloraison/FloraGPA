@@ -58,7 +58,7 @@ class FrameValidationTests final : public QObject {
     void auxiliaryIsNotCertified() {
         QCOMPARE(std::string(replayCapability(0x359d).handling), std::string("metadata"));
         QCOMPARE(std::string(replayCapability(0x41).handling), std::string("unsupported"));
-        QCOMPARE(std::string(replayCapability(0x34f6).handling), std::string("snapshot"));
+        QCOMPARE(std::string(replayCapability(0x34f6).handling), std::string("execute"));
         QVERIFY(!isReplayAuxiliary(0x3017));
         QVERIFY(!isReplayAuxiliary(0x3578));
         QCOMPARE(std::string(replayCapability(0x3017).handling), std::string("metadata"));

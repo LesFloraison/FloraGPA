@@ -31,7 +31,8 @@ PipelineBinding readPipelineSetter(uint16_t type, Bytes bytes) {
     if (!isPipelineSetter(type))
         throw std::runtime_error("Not a pipeline setter");
     Reader r(bytes);
-    r.skip(8);
+    if (r.read<Id>())
+        throw std::runtime_error("Linked pipeline setter execution is unresolved");
     PipelineBinding result{type, r.read<Id>()};
     auto &s = result.values;
     if (auto stage = shaderSetterStage(type)) {
@@ -80,6 +81,15 @@ PipelineBinding readPipelineSetter(uint16_t type, Bytes bytes) {
     }
     r.end();
     return result;
+}
+Id missingPipelineShader(const Frame &frame, const PipelineBinding &binding) {
+    requireImmediateContext(frame, binding.context);
+    if (auto stage = shaderSetterStage(binding.type)) {
+        const auto &v = binding.values.stages[*stage];
+        if (v.shader && !frame.entries().contains(v.shader) && !v.classCount)
+            return v.shader;
+    }
+    return 0;
 }
 void validatePipelineBinding(const Frame &frame, const PipelineBinding &binding) {
     requireImmediateContext(frame, binding.context);
@@ -202,7 +212,9 @@ State pipelineBindingsAt(const Frame &frame, Id event, State state,
             if (auto it = edits.find(id); it != edits.end())
                 active[e.type] = it->second;
             else if (active.contains(e.type)) {
-                validatePipelineBinding(frame, readPipelineSetter(e.type, frame.payload(id)));
+                const auto captured = readPipelineSetter(e.type, frame.payload(id));
+                if (!missingPipelineShader(frame, captured))
+                    validatePipelineBinding(frame, captured);
                 active.erase(e.type);
             }
         }

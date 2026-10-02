@@ -14,6 +14,7 @@ def main():
     parser.add_argument('--producer', type=Path, required=True)
     parser.add_argument('--out', type=Path, required=True)
     parser.add_argument('--gpa-dir', type=Path, default=Path('C:/Program Files/IntelSWTools/GPA'))
+    parser.add_argument('--pipeline-boundaries', action='store_true', help='Record the pipeline boundary producer variant')
     args = parser.parse_args()
     producer = args.producer.resolve(strict=True)
     gpa = args.gpa_dir.resolve(strict=True)
@@ -25,6 +26,9 @@ def main():
                 'sources':{name:digest(source/name) for name in ['native/buffer_creation_probe.cpp',
                     'native/present_capture_probe.cpp', 'capture_buffers.py', 'capture_present.py']},
                 'gpa_sha256':{name:digest(gpa/name) for name in ['shimloader64.dll','shimd3d64.dll']}}
+    if args.pipeline_boundaries:
+        manifest['variant']='pipeline_boundaries'
+        manifest['sources']['native/pipeline_boundary_probe.cpp']=digest(source/'native/pipeline_boundary_probe.cpp')
 
     def save():
         (out/'manifest.json').write_text(json.dumps(manifest,indent=2)+'\n',encoding='utf-8')
@@ -55,8 +59,8 @@ def main():
                     expected=struct.pack('<16I',*[((0x11110000 if mode==0 else 0x22220000)+i) for i in range(16)])
                     require((folder/backend/'buffer.bin').read_bytes()==expected,'Buffer CPU oracle mismatch')
                 save()
-            manifest['cases'].append({'id':'buffer_'+name,'path':f'{mode}/capture.gpa_frame',
-                'sha256':digest(capture),'bytes':capture.stat().st_size,'family':'buffer_creation',
+            manifest['cases'].append({'id':('pipeline_' if args.pipeline_boundaries else 'buffer_')+name,'path':f'{mode}/capture.gpa_frame',
+                'sha256':digest(capture),'bytes':capture.stat().st_size,'family':'pipeline_boundaries' if args.pipeline_boundaries else 'buffer_creation',
                 'origin':'self_owned_original_gpa_capture','source_manifests':[],
                 'provenance_note':'Unmodified CaptureNextFrame output; buffer bytes additionally checked by native producer and C++ boundary tests.',
                 'device_scope':'Default hardware producer; original player adapter unidentified.',

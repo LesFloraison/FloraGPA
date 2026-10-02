@@ -17,6 +17,10 @@ The [buffer creation audit](BUFFER_CREATION_AUDIT.md) restores creation-time
 storage semantics and checks private-data observations. Five shader-dependent
 original captures are registered separately; no observed family remains in the
 historical corpus's auxiliary fallback, but M2 acceptance is still incomplete.
+The [pipeline setter audit](PIPELINE_SETTER_AUDIT.md) executes twelve setter
+families at their own boundaries, retains explicit missing-shader diagnostics,
+and adds checked OM getter metadata. Draw snapshots remain necessary for omitted
+state; event-boundary acceptance is recorded separately from final-image results.
 
 ## Reproduce
 

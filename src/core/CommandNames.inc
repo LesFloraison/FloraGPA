@@ -147,6 +147,8 @@
 {0x3528, "PSGetShader"},
 {0x3531, "IAGetPrimitiveTopology"},
 {0x3537, "OMGetRenderTargets"},
+{0x3539, "OMGetBlendState"},
+{0x353a, "OMGetDepthStencilState"},
 {0x353d, "RSGetViewports"},
 {0x3550, "Context4.FinishCommandList"},
 {0x3575, "Device.QueryInterface"},

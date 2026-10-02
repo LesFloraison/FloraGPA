@@ -28,7 +28,7 @@ bool queryCreate(uint16_t t) { return in(t, {0x3074, 0x3235, 0x33a8, 0x3471, 0x3
 bool queryCreate1(uint16_t t) { return in(t, {0x3495, 0x34d6, 0x35b1}); }
 bool queryGet(uint16_t t) { return in(t, {0x30b4, 0x31b4, 0x331d, 0x33e3, 0x34fb}); }
 bool getter(uint16_t t) {
-    return in(t, {0x304b, 0x304c, 0x304d, 0x3528, 0x3537, 0x353d, 0x4029, 0x402a, 0x30ea, 0x31ea, 0x3353,
+    return in(t, {0x304b, 0x304c, 0x304d, 0x3528, 0x3537, 0x3539, 0x353a, 0x353d, 0x4029, 0x402a, 0x30ea, 0x31ea, 0x3353,
                   0x3419, 0x3531, 0x313b, 0x300e, 0x359d});
 }
 const std::map<uint16_t, int> finishes{{0x3109, 0}, {0x3209, 1}, {0x3372, 2}, {0x3438, 3}, {0x3550, 4}};
@@ -210,6 +210,13 @@ void readGetter(uint16_t t, Wire &r) {
         auto n = r.u("rtv_count");
         r.array("returned_rtvs", "Q", n, true);
         r.id("returned_dsv");
+    } else if (t == 0x3539) {
+        r.id("returned_blend_state");
+        if (r.flag("blend_factor_present")) r.field("returned_blend_factor", "4f");
+        if (r.flag("sample_mask_present")) r.u("returned_sample_mask");
+    } else if (t == 0x353a) {
+        r.id("returned_depth_stencil_state");
+        if (r.flag("stencil_ref_present")) r.u("returned_stencil_ref");
     } else if (t == 0x353d) {
         auto n = r.flag("viewport_count_present") ? r.u("returned_viewport_count") : 0;
         if (r.flag("viewports_present")) {
@@ -314,9 +321,9 @@ Json inspectCommand(const Frame &frame, Id id) {
                       "Draw links require validated QueryInterface evidence.";
     if (getter(t))
         out["note"] = "Captured inspection/lifetime metadata; it does not set replay state.";
-    if (in(t, {0x3528, 0x3537}))
+    if (in(t, {0x3528, 0x3537, 0x3539, 0x353a}))
         out["note"] = out["note"].get<std::string>() +
-                      " A zero shader or DSV reference cannot distinguish an omitted "
+                    " A zero returned object reference cannot distinguish an omitted "
                       "output pointer from a null returned binding.";
     if (in(t, {0x3017, 0x3597, 0x3578}))
         out["note"] = "Captured process pointers are numeric values, not resource IDs or readable addresses "

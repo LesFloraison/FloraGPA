@@ -1,0 +1,260 @@
+{
+  "schema": "FloraGPA pipeline setter acceptance 1",
+  "profile": "GPA 2025 R1 legacy DX11 / IGPA v3",
+  "completion": "M2 in progress; M3-M6 incomplete",
+  "package": "out\\FloraGPA-pipeline-final-20261003",
+  "exe_sha256": "e218ef395326c7fd8d326ece9c8b2d2a356120fc359945278cae3afaa9f7b6f6",
+  "cross_player_adapter_match": "not established",
+  "corpora": {
+    "m2-pipeline-release-corpus": {
+      "cases": 91,
+      "outcomes": {
+        "repeat_stable": 90,
+        "repeat_variable": 1
+      },
+      "manifest_sha256": "09b806ef0d3f5267f0b9d3fc80ddc5edeba15a0cc02015c7a664128f5eb47cc1",
+      "result_path": "artifacts\\m2-pipeline-release-corpus\\validation.json",
+      "sha256": "3b3cf72b6f8edffa180da34bca346cba542f0a2ca8b43806c1ad2ef9b01f1939",
+      "prior_stable_images_unchanged": 90
+    },
+    "m2-pipeline-release-originals": {
+      "cases": 5,
+      "outcomes": {
+        "repeat_stable": 5
+      },
+      "manifest_sha256": "9e4382725592b29eb11f8cff331cdd21b641b8ea2a8ce25ed7db72e82af9fb69",
+      "result_path": "artifacts\\m2-pipeline-release-originals\\validation.json",
+      "sha256": "4e3ee72294c0556c259ab0f58465aaececf424467e3884652099a9fdd1f59808"
+    },
+    "m2-pipeline-release-present": {
+      "cases": 5,
+      "outcomes": {
+        "repeat_stable": 5
+      },
+      "manifest_sha256": "5053a8e86f19c7cf383556560bf58f13419fc18845c5aa6935a6c830c80a0048",
+      "result_path": "artifacts\\m2-pipeline-release-present\\validation.json",
+      "sha256": "7f871bef60b22fa3bdda50c6beb3790454130e002942336e61b8f9971adb0159",
+      "prior_stable_images_unchanged": 5
+    },
+    "m2-pipeline-release-buffer": {
+      "cases": 5,
+      "outcomes": {
+        "repeat_stable": 5
+      },
+      "manifest_sha256": "513e35ce51d37cdaf7a80249577cf282b15dd47243094b86212a81b441cff848",
+      "result_path": "artifacts\\m2-pipeline-release-buffer\\validation.json",
+      "sha256": "fdb6388d05079df200122ae0d41439c6329eb06e0592035db85f9f234eef0ad7",
+      "prior_stable_images_unchanged": 5
+    }
+  },
+  "sources": {
+    "src/core/PipelineBindings.cpp": "6cb738160352dd8590a13fe39b81835d1dc4bfb624f4a2036f9d401ae3db9fcd",
+    "src/core/PipelineBindings.h": "830371aa8223d4c27899dd9db90191c788e9235b1d7c40509afe53abd09ba574",
+    "src/core/InspectionRecords.cpp": "9b2a7ad980fcc0ba08ceb7192a91f25d5ea94569b8af665cc83a4b2c42ff92d1",
+    "src/replay/PipelineBindings.cpp": "f43998c8926673360112361275fd43cc61d731b9ba354d5f0986ebc04a29428f",
+    "src/replay/InputBindings.cpp": "ba87d07c4af949f1e7ae9f79cdc59b77b9b4b14a384459b4d39909197a60baeb",
+    "src/replay/Replay.cpp": "86b545a247e45f9973f78c0e007ef483ca04a5e89cd79d68ed06054fcd98d192",
+    "src/replay/Replay.h": "0b60250db3583928999e74a8b62928ac7e6518987a50e5000f4ac5e58fd7d709",
+    "src/application/FrameValidation.cpp": "a88bee261fb561ee0315def1788db344981fc4c8a68d70e659d83e55ad39d7f0",
+    "src/application/ApiCommands.cpp": "143e576f5f4c02a7d57101f04cb17b1f3ae8a6b28e13c7e13959f257e08b09ef",
+    "src/application/GpuStatistics.cpp": "7fb03774402f8f36b5327ac536a1e6038dc6cbebd98f3ff5a6c0c29d28fbd878",
+    "tests/PipelineSetterTests.cpp": "b1e8804c97241b0d775c9079a22e078d576cb1e7e57dfbac2da20da1f1c597d2",
+    "tools/validate_corpus.py": "b06bdde971515e6d4ca66982f7e6d4daf5dc2e22eeabaf35fd6e4e33ee7a056d",
+    "tests/test_compatibility_tools.py": "fffc1ebfa2bb92da5d827d06a92397851521a216feb0a784f812cdfaaecc1844"
+  },
+  "evidence": {
+    "artifacts/ctest-m2-pipeline-release.log": "021d843f3111c5c55c0696404652caead852facba0b74baab235b1251a76b1d7",
+    "artifacts/compatibility-tools-pipeline.log": "fa69c3d6ea2abc39a83e20b56054a5988e054f755282cbb384b46389e9bab39f",
+    "artifacts/m2-pipeline-getters.c": "d6c6b812e29d6e4104a33d5ffb6f48fcd19348ea44bc5c384b2833ccc0e04751",
+    "artifacts/m2-pipeline-ghidra.log": "66761151d6285cac6ec624997276d64dd9d767ec9e59dc4e97f7178f5e71d501",
+    "artifacts\\m2-pipeline-release-pipeline-setters.txt": "91218377b1bb3c5a86057b7c8885cdd028e3c30d3edddbdcbe0c42eacabb1577",
+    "artifacts\\m2-pipeline-release-ui.txt": "bdfff8500bffc10030acea5a17916850558cb4405d6e85afb4078215465431e4"
+  },
+  "native_replays": 212,
+  "registered_file_outcomes": {
+    "repeat_stable": 105,
+    "repeat_variable": 1
+  },
+  "original_player_replays": 10,
+  "corpus_control_runs": 15,
+  "golden_controls": [
+    {
+      "case": "gf2",
+      "rgba_sha256": "2e1abc5eacb0bbfd801f9fe059c305baa9a0786c384b36a42fa5a323dd979fd1",
+      "passed": true,
+      "counts": {
+        "ClearDepthStencilView": 2,
+        "ClearRenderTargetView": 1,
+        "CreateBuffer": 2,
+        "DrawIndexed": 72,
+        "Map": 44,
+        "Present": 1,
+        "buffers_created_without_initial_data": 2,
+        "object_observation_records": 49,
+        "pipeline_setter_records": 142,
+        "private_data_observations": 4,
+        "query_metadata_records": 2,
+        "state_or_auxiliary_records": 551,
+        "unmap_observations": 44
+      }
+    },
+    {
+      "case": "gf2-negative",
+      "rgba_sha256": "b2c5548a51715f581c4591acc266ac7a0c65b54b7ecd9a49f43499fa9b76c5f1",
+      "passed": true,
+      "counts": {
+        "ClearDepthStencilView": 2,
+        "ClearRenderTargetView": 1,
+        "CreateBuffer": 2,
+        "Map": 44,
+        "Present": 1,
+        "buffers_created_without_initial_data": 2,
+        "object_observation_records": 49,
+        "pipeline_setter_records": 142,
+        "private_data_observations": 4,
+        "query_metadata_records": 2,
+        "state_or_auxiliary_records": 551,
+        "unmap_observations": 44
+      }
+    },
+    {
+      "case": "bf1",
+      "rgba_sha256": "1f724d1840652f66afd26dd30c95aecd5c1b4932eede56109198f15a8f57a2f6",
+      "passed": true,
+      "counts": {
+        "ClearDepthStencilView": 10,
+        "ClearRenderTargetView": 10,
+        "ClearUnorderedAccessViewFloat": 1,
+        "CopyResource": 2,
+        "CopyStructureCount": 6,
+        "CopySubresourceRegion": 7,
+        "Dispatch": 60,
+        "DispatchIndirect": 13,
+        "Draw": 79,
+        "DrawIndexed": 41,
+        "DrawIndexedInstanced": 1053,
+        "DrawInstanced": 29,
+        "GenerateMips": 2,
+        "Map": 4151,
+        "Present": 1,
+        "UpdateSubresource": 27,
+        "map_read_observations": 2,
+        "object_observation_records": 28,
+        "pipeline_setter_records": 2221,
+        "query_metadata_records": 17,
+        "state_or_auxiliary_records": 7354,
+        "unmap_observations": 4153,
+        "unresolved_input_layout_setters": 2,
+        "unresolved_output_setters": 6,
+        "unresolved_shader_setters": 4,
+        "unresolved_srv_setters": 2
+      }
+    },
+    {
+      "case": "bf1-negative",
+      "rgba_sha256": "cd3a3066f984b1c317fbeefec2836503f32078321d3dc1f367465f2c06d435bf",
+      "passed": true,
+      "counts": {
+        "ClearDepthStencilView": 10,
+        "ClearRenderTargetView": 10,
+        "ClearUnorderedAccessViewFloat": 1,
+        "CopyResource": 2,
+        "CopyStructureCount": 6,
+        "CopySubresourceRegion": 7,
+        "Dispatch": 60,
+        "DispatchIndirect": 13,
+        "GenerateMips": 2,
+        "Map": 4151,
+        "Present": 1,
+        "UpdateSubresource": 27,
+        "map_read_observations": 2,
+        "object_observation_records": 28,
+        "pipeline_setter_records": 2221,
+        "query_metadata_records": 17,
+        "state_or_auxiliary_records": 7354,
+        "unmap_observations": 4153,
+        "unresolved_input_layout_setters": 2,
+        "unresolved_output_setters": 6,
+        "unresolved_shader_setters": 4,
+        "unresolved_srv_setters": 2
+      }
+    }
+  ],
+  "package_sha256": {
+    "FloraGPA.exe": "6ec28a3ab04f0f0ca45182f58bf92ca89621fdeeb6cf10feaa62d1c9f72bc924",
+    "FloraGPA.Worker.exe": "5b75c91202a962ee32807d7ad88976c19c91c08c8651280078cc10c016c36893",
+    "FloraGPA.Cli.exe": "e218ef395326c7fd8d326ece9c8b2d2a356120fc359945278cae3afaa9f7b6f6",
+    "FloraGPA.Rdc.exe": "f4d21d43e661d24d392e91fc1a1f1460a20d1377fcf5075c57083ad289e82773",
+    "FloraGPA.Metrics.dll": "58b6278f2a93e783b1e8bb1290e9b0e51745f1a36825f296584f52159fd7c6db"
+  },
+  "producer": {
+    "frames": 120,
+    "manifest_path": "artifacts/m2-pipeline-originals/manifest.json",
+    "sha256": "2976724155d9eb56e06cc2a0127b3809fcdb331b1d09f7fced5681aba452e7cd",
+    "gpa_sha256": {
+      "shimloader64.dll": "af68e28ba54ab0068c95f82081828788d6f59879283127dc330b818af7369888",
+      "shimd3d64.dll": "cb0b99d113511cbf7ca9f949d97aa02e4a1f8f110b1f3ad3165d8a81035dee31"
+    }
+  },
+  "historical_api_type_handling": {
+    "execute": 59,
+    "metadata": 40
+  },
+  "missing_shader_findings": [
+    {
+      "category": 7,
+      "entry_id": 26972,
+      "event_id": 26972,
+      "kind": "shader_binding_not_saved",
+      "reason": "Shader identity is absent; native state remains unresolved until a later setter, ClearState or validated draw snapshot",
+      "record_type": 13545,
+      "resource_id": 26973,
+      "severity": "warning"
+    },
+    {
+      "category": 7,
+      "entry_id": 26974,
+      "event_id": 26974,
+      "kind": "shader_binding_not_saved",
+      "reason": "Shader identity is absent; native state remains unresolved until a later setter, ClearState or validated draw snapshot",
+      "record_type": 13543,
+      "resource_id": 26975,
+      "severity": "warning"
+    },
+    {
+      "category": 7,
+      "entry_id": 27675,
+      "event_id": 27675,
+      "kind": "shader_binding_not_saved",
+      "reason": "Shader identity is absent; native state remains unresolved until a later setter, ClearState or validated draw snapshot",
+      "record_type": 13545,
+      "resource_id": 26973,
+      "severity": "warning"
+    },
+    {
+      "category": 7,
+      "entry_id": 27676,
+      "event_id": 27676,
+      "kind": "shader_binding_not_saved",
+      "reason": "Shader identity is absent; native state remains unresolved until a later setter, ClearState or validated draw snapshot",
+      "record_type": 13543,
+      "resource_id": 26975,
+      "severity": "warning"
+    }
+  ],
+  "limits": [
+    "Other interface layouts and deferred contexts remain unverified",
+    "New original HS/DS/GS/CS bindings are null; not comprehensive stage/linkage validation",
+    "Draw snapshots remain necessary for omitted capture state",
+    "Absent shaders cannot be inspected until a later known state boundary",
+    "Original-player adapter is unidentified",
+    "Helldivers nondeterminism is preserved"
+  ],
+  "real_missing_shader_boundary": {
+    "event": 26972,
+    "resource": 26973,
+    "status": "rejected",
+    "log": "artifacts\\m2-pipeline-bf1-gap.log",
+    "sha256": "36487688cf2443992d5b9a1c9afa5c8fafc8181afcf69df41f866477cf5f21d9"
+  }
+}

@@ -268,6 +268,7 @@ class Replay {
     uint32_t uavLimit_ = 8;
     bool replayComplete_ = false;
     Id layoutGap_ = 0, outputGap_ = 0;
+    std::map<uint16_t, std::pair<Id, Id>> pipelineGaps_;
     std::array<std::array<Id, 128>, 6> srvGaps_{};
     void clearBindingGaps();
     void requireResolvedBindings() const;

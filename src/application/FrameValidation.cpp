@@ -118,6 +118,14 @@ Json validateFrame(const std::filesystem::path &path, const std::function<bool()
                             finding(&e, "error", "command_list_unsupported", ex.what());
                         }
                     } else {
+                        if (isPipelineSetter(e.type)) {
+                            const auto binding = readPipelineSetter(e.type, frame.payload(id));
+                            if (const auto missing = missingPipelineShader(frame, binding))
+                                finding(&e,"warning","shader_binding_not_saved",
+                                    "Shader identity is absent; native state remains unresolved until a later setter, ClearState or validated draw snapshot",missing);
+                            else
+                                validatePipelineBinding(frame, binding);
+                        }
                         acceptQueryMetadata(e.type, frame.payload(id));
                         acceptInspectionRecord(e.type, frame.payload(id));
                         acceptPassiveObjectRecord(e.type, frame.payload(id));
