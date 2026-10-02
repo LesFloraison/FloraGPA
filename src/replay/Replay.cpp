@@ -1245,10 +1245,7 @@ void Replay::command(const Entry &e) {
         immediate(owner.read<Id>());
         context_->Flush();
     } else {
-        if (!isReplayAuxiliary(t))
-            throw std::runtime_error("Command migration pending: " + commandName(t));
-        counts["state_or_auxiliary_records"]++;
-        return;
+        throw std::runtime_error("Command migration pending: " + commandName(t));
     }
     counts[commandName(t)]++;
     if (isWritableCommand(t))

@@ -49,7 +49,6 @@ class ObjectObservationTests final : public QObject {
         for (const auto &[type, raw] : records()) {
             types.insert(type);
             QVERIFY(isPassiveObjectRecord(type));
-            QVERIFY(!isReplayAuxiliary(type));
             QCOMPARE(std::string(replayCapability(type).handling), std::string("metadata"));
             QVERIFY(acceptPassiveObjectRecord(type, raw));
             for (size_t size = 0; size < raw.size(); ++size)

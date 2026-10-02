@@ -18,10 +18,6 @@ bool in(uint16_t t, std::initializer_list<uint16_t> values) {
     return std::find(values.begin(), values.end(), t) != values.end();
 }
 } // namespace
-bool isReplayAuxiliary(uint16_t t) {
-    return in(t, {0x34e7, 0x34e9,
-                  0x34f5, 0x34f6, 0x34fb, 0x3501, 0x3502, 0x3509, 0x350a, 0x351a, 0x351e, 0x3523});
-}
 ReplayCapability replayCapability(uint16_t t) {
     if (isCopyCommand(t))
         return {"execute", "src/core/CopyCommands.cpp;src/core/TextureCopies.cpp;src/replay/Replay.cpp",
@@ -52,8 +48,6 @@ ReplayCapability replayCapability(uint16_t t) {
         (t >= 0x249 && t <= 0x254) || in(t, {0x34e5, 0x34ee, 0x34f4, 0x351c, 0x3520, 0x3525, 0x242, 0x244}))
         return {"execute", "src/replay/Replay.cpp;src/replay/InputBindings.cpp",
                 "tests/ApiCommandTests.cpp;tests/StreamOutputTests.cpp;tools/validate_native.py"};
-    if (isReplayAuxiliary(t))
-        return {"auxiliary_unverified", "src/core/ReplayCapabilities.cpp", "M2: audit required"};
     return {"unsupported", "src/replay/Replay.cpp", "M2/M3: implementation evidence required"};
 }
 } // namespace flora

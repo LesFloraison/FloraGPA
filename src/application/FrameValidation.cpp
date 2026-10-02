@@ -97,9 +97,6 @@ Json validateFrame(const std::filesystem::path &path, const std::function<bool()
                     if (std::string(cap.handling) == "unsupported")
                         finding(&e, "error", "implementation_gap",
                                 "No native replay path for " + commandName(e.type));
-                    else if (std::string(cap.handling) == "auxiliary_unverified")
-                        finding(&e, "warning", "auxiliary_audit",
-                                "Accepted by legacy replay fallback; full semantics not verified");
                     else if (!checked)
                         finding(&e, "warning", "decoder_gap",
                                 "Replay path exists but API wire inspection is incomplete");

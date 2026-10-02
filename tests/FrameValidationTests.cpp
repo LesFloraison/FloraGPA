@@ -55,14 +55,87 @@ class FrameValidationTests final : public QObject {
             ids.insert(f["entry_id"].get<Id>());
         QCOMPARE(ids, std::set<Id>({10, 11, 12, 13}));
     }
-    void auxiliaryIsNotCertified() {
+    void explicitHandlingOnly() {
         QCOMPARE(std::string(replayCapability(0x359d).handling), std::string("metadata"));
         QCOMPARE(std::string(replayCapability(0x41).handling), std::string("unsupported"));
         QCOMPARE(std::string(replayCapability(0x34f6).handling), std::string("execute"));
-        QVERIFY(!isReplayAuxiliary(0x3017));
-        QVERIFY(!isReplayAuxiliary(0x3578));
         QCOMPARE(std::string(replayCapability(0x3017).handling), std::string("metadata"));
         QCOMPARE(std::string(replayCapability(0x3578).handling), std::string("execute"));
+    }
+    void formerFallbackRecordsCannotSkipValidation() {
+        QTemporaryDir dir;
+        std::vector<std::pair<uint16_t, std::vector<uint8_t>>> records;
+        auto prefix = [] {
+            std::vector<uint8_t> raw;
+            append(raw, Id(0));
+            append(raw, Id(1));
+            return raw;
+        };
+        for (uint16_t type : {0x34e7, 0x34e9, 0x34f5, 0x351a, 0x351e, 0x3523}) {
+            auto raw = prefix();
+            append(raw, Id(0));
+            append(raw, 0u);
+            append(raw, uint8_t(0));
+            records.emplace_back(type, raw);
+        }
+        auto raw = prefix();
+        append(raw, 4u);
+        records.emplace_back(0x34f6, raw);
+        raw = prefix();
+        append(raw, Id(0));
+        append(raw, uint8_t(0));
+        append(raw, UINT32_MAX);
+        records.emplace_back(0x3501, raw);
+        raw = prefix();
+        append(raw, Id(0));
+        append(raw, 0u);
+        records.emplace_back(0x3502, raw);
+        raw = prefix();
+        append(raw, Id(0));
+        records.emplace_back(0x3509, raw);
+        raw = prefix();
+        append(raw, 0u);
+        append(raw, uint8_t(0));
+        records.emplace_back(0x350a, raw);
+        raw = prefix();
+        append(raw, 1u);
+        append(raw, Id(0));
+        append(raw, uint8_t(0));
+        append(raw, 0u);
+        append(raw, 0u);
+        records.emplace_back(0x34fb, raw);
+        for (const auto &[type, payload] : records)
+            for (bool truncate : {false, true}) {
+                Capture c;
+                c.add(1, 5, 0x127, std::vector<uint8_t>(24));
+                auto bytes = payload;
+                if (truncate)
+                    bytes.pop_back();
+                c.add(100, 7, type, bytes);
+                const auto path = dir.filePath(QString("%1-%2.gpa_frame").arg(type).arg(truncate));
+                c.save(path);
+                const auto report = validateFrame(path.toStdWString());
+                QCOMPARE(report["status"] == "blocked", truncate);
+                Frame frame(path.toStdWString());
+                ReplayOptions options;
+                options.warp = true;
+                Replay replay(frame, options);
+                if (truncate)
+                    QVERIFY_THROWS_EXCEPTION(std::runtime_error, replay.run());
+                else
+                    replay.run();
+            }
+        Capture unknown;
+        unknown.add(1, 5, 0x127, std::vector<uint8_t>(24));
+        unknown.add(100, 7, 0xfffe, prefix());
+        const auto path = dir.filePath("unknown.gpa_frame");
+        unknown.save(path);
+        Frame frame(path.toStdWString());
+        QCOMPARE(validateFrame(path.toStdWString())["status"], nlohmann::json("blocked"));
+        ReplayOptions options;
+        options.warp = true;
+        Replay replay(frame, options);
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, replay.run());
     }
     void extendedOutputSlots() {
         QTemporaryDir dir;

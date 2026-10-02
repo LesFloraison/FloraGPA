@@ -62,8 +62,8 @@ class MapRecordTests final : public QObject {
             QCOMPARE(replay.counts.at("map_read_observations"), uint64_t(1));
             QCOMPARE(replay.counts.at("unmap_observations"), uint64_t(1));
         }
-        QVERIFY(!isReplayAuxiliary(0x34ec));
-        QVERIFY(!isReplayAuxiliary(0x34ed));
+        QCOMPARE(std::string(replayCapability(0x34ec).handling), std::string("metadata"));
+        QCOMPARE(std::string(replayCapability(0x34ed).handling), std::string("metadata"));
     }
     void writesStillExecute_data() { readObservations_data(); }
     void writesStillExecute() {

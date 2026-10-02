@@ -1,5 +1,15 @@
 # FloraGPA C++ 迁移进度 — 2026-10-03
 
+2026-10-03（M2 第八批）：删除已被严格执行／观察解码接管的辅助白名单及兜底分支。
+12 类旧白名单记录的完整／截断输入和未知命令均完成预检与实际重放验证；四项
+相关 CTest、原有 123 份文件的 246 次重放、49 次对照和四项黄金帧通过。
+122 份既有稳定图像哈希不变，Helldivers 保留波动。另生成真实的帧内创建纹理
+专项捕获：原版两次重放通过，但 FloraGPA 在事件 4 的 CreateTexture2D 处拒绝，
+预检定位到九类共 26 条未实现记录。当前总清单因此为 123 份可重放、1 份新发现
+阻塞；不能把旧回归通过当成全部兼容。只读 Ghidra 已定位创建纹理／SRV 和相关
+查询序列化，下一批优先补齐此普通路径。M2 与 M3–M6 未完成，模块计数不变。
+详见 [STRICT_DISPATCH_AUDIT.md](STRICT_DISPATCH_AUDIT.md)。
+
 2026-10-03（M2 第七批）：纹理 CopyResource／CopySubresourceRegion 与 Resolve
 加入共用的格式族、mip／array／volume、坐标、深度／MSAA 与 typed format 校验，
 Resolve 在执行设备上检查格式支持。真实原生调试层证据纠正了 BC 小 mip 边界：

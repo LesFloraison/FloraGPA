@@ -1,0 +1,31 @@
+{
+  "schema": "FloraGPA compatibility corpus 1",
+  "profile": "GPA 2025 R1 legacy DX11 / IGPA v3",
+  "root_parameter": "--captures-root",
+  "cases": [
+    {
+      "id": "creation_late_texture2d",
+      "path": "capture.gpa_frame",
+      "sha256": "4e647b891315c6b6d14b79663070a06cf2d96ad50a67af36a25040db56a18f55",
+      "bytes": 76462,
+      "family": "texture_creation",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified original capture from the retained late-texture native probe; unsupported discovery, not accepted replay coverage.",
+      "device_scope": "Default hardware producer; original player adapter unidentified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "boundaries": [],
+      "controls": []
+    }
+  ],
+  "discovery": {
+    "producer": "artifacts/m2-late-texture-probe/build/Release/LateTextureProbe.exe",
+    "producer_sha256": "a6a928971e9345c6b38cd713487ae92a17eb38199cd1d4e8233e8553067e576e",
+    "producer_source": "artifacts/m2-late-texture-probe/probe.cpp",
+    "producer_source_sha256": "585a71dcef96b131cb0dd7bbe31af8bd5a1e636abfd08f3f5eee8c049b8f9bf8",
+    "oracle_path": "artifacts\\m2-late-texture-layout-late\\captured\\oracle.json",
+    "oracle_sha256": "1c5772126b094f86813a0ae1c220a4c99b021ec82e88f5de3d4dbb9aa27349ab",
+    "status": "native implementation gaps; not included in accepted regression corpus"
+  }
+}

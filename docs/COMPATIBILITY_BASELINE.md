@@ -30,6 +30,10 @@ format families, mip/layer/volume bounds, depth/MSAA whole copies, BC physical
 blocks and Resolve typed formats/device support. Eleven new originals add exact
 resource-byte and original-image evidence. Special reinterpretation and packed/
 planar transfer paths still retain explicit partial-validation diagnostics.
+The [strict dispatch audit](STRICT_DISPATCH_AUDIT.md) removes the now-redundant
+auxiliary fallback. Its original late-texture probe also discovers an unsupported
+creation/SRV path: 123 prior files remain replayable, while the newly enrolled
+creation file is explicitly blocked and queued for M2 implementation.
 
 ## Reproduce
 
