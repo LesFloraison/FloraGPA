@@ -1,0 +1,238 @@
+{
+  "schema": "FloraGPA buffer copy acceptance 1",
+  "profile": "GPA 2025 R1 legacy DX11 / IGPA v3",
+  "completion": "M2 in progress; M3-M6 incomplete",
+  "package": "out\\FloraGPA-copy-final-20261003",
+  "exe_sha256": "9d0472316e8d12ce2f48331210961c7bd8ae379977ddf8c83deeff0c1bde8ed3",
+  "cross_player_adapter_match": "not established",
+  "corpora": {
+    "corpus": {
+      "cases": 91,
+      "outcomes": {
+        "repeat_stable": 90,
+        "repeat_variable": 1
+      },
+      "manifest_sha256": "09b806ef0d3f5267f0b9d3fc80ddc5edeba15a0cc02015c7a664128f5eb47cc1",
+      "result_path": "artifacts\\m2-copy-release-corpus\\validation.json",
+      "sha256": "93b2f5a931a5453000c9cb9bd28bf6853d3e0ddf7bef51d18c10506c5a584a9b",
+      "prior_stable_images_unchanged": 90
+    },
+    "originals": {
+      "cases": 6,
+      "outcomes": {
+        "repeat_stable": 6
+      },
+      "manifest_sha256": "1569eae9edb7ab6143a2ab3847f45d4107510623211b58825ef3f064069e65a8",
+      "result_path": "artifacts\\m2-copy-release-originals\\validation.json",
+      "sha256": "c0f446638d2a7bb7591af4ae9272c06f114c9b7381cbcbc6d370a323c40a257e"
+    },
+    "present": {
+      "cases": 5,
+      "outcomes": {
+        "repeat_stable": 5
+      },
+      "manifest_sha256": "5053a8e86f19c7cf383556560bf58f13419fc18845c5aa6935a6c830c80a0048",
+      "result_path": "artifacts\\m2-copy-release-present\\validation.json",
+      "sha256": "2105e83b705157ea9e38c1c675c4f671d9c80f29a24cc74b68e89254eddcacd4",
+      "prior_stable_images_unchanged": 5
+    },
+    "buffer": {
+      "cases": 5,
+      "outcomes": {
+        "repeat_stable": 5
+      },
+      "manifest_sha256": "513e35ce51d37cdaf7a80249577cf282b15dd47243094b86212a81b441cff848",
+      "result_path": "artifacts\\m2-copy-release-buffer\\validation.json",
+      "sha256": "ae8271327305586c7805a6b92fce4641410b00986e9b0c478af5cfb163f60997",
+      "prior_stable_images_unchanged": 5
+    },
+    "pipeline": {
+      "cases": 5,
+      "outcomes": {
+        "repeat_stable": 5
+      },
+      "manifest_sha256": "9e4382725592b29eb11f8cff331cdd21b641b8ea2a8ce25ed7db72e82af9fb69",
+      "result_path": "artifacts\\m2-copy-release-pipeline\\validation.json",
+      "sha256": "510b6433e5eb58fef6cb0212234ac6025206580bb52312b4d5591a75ad8960ab",
+      "prior_stable_images_unchanged": 5
+    }
+  },
+  "sources": {
+    "src/core/CopyCommands.cpp": "53a62c77ac517d34896bf7397b554a1d0477ec2fd2d296f2b5572e1fc3a846a7",
+    "src/core/CopyCommands.h": "3739ee69e56165426271315d704e9f99c8cbbb55c4509a433436370fab9150f9",
+    "src/core/ReplayCapabilities.cpp": "7cf45e45d6e033798c08b8b30e94af96f3a7c13c40494f1ec6e42d818f153c4e",
+    "src/replay/Replay.cpp": "dc3cacb47979a9bf062e63cb1fb5ac4d3f946c7ba97d0610bc042bbc82ba65a8",
+    "src/application/FrameValidation.cpp": "7b7b1dd86b018f73c6daabc8bf938652d274ecb603401b0a4a76216ff76449a2",
+    "src/application/GpuStatistics.cpp": "fc6176dab81d9b5521ce4324debc32a0b75ade31fface2fa5dd6d70568419641",
+    "tests/CopyCommandTests.cpp": "b3090c3c86f85b0531ca59966b8298a4e33a3324856cc8a9f534a958ef86b946",
+    "tools/native/buffer_copy_probe.cpp": "f737f6c6bc826270c5cb96bd2a584ae1ed3e5dd5a9e6e05040f3c91e7bac0a26",
+    "tools/capture_copies.py": "91a906f4653b4d00ad6742d81c33f0454a976ff3595381d04913be11efb28b70"
+  },
+  "evidence": {
+    "artifacts/ctest-m2-copy-final.log": "22ef2cdc9c87db96c118b0e070ddc87e9eb8db1f08ee9b2c7d7e54be12d6fc55",
+    "artifacts/ctest-m2-copy-test-correction.log": "e76de4754a0551cc697807e4e026886db17fc24f7bc3e2a540685f9b7e124d1e",
+    "artifacts/ctest-m2-copy-diagnostic.log": "749d063826d38dcd420829a1bfedf46758121782f033746d9b84d2f5f1f7868a",
+    "artifacts/compatibility-tools-copy.log": "61fa71214f8c3ce170ac3c2451c2498a0aa3d857246a57af562770f1b23be17b",
+    "artifacts/m2-copy-negative-before/validation.json": "f604320e3bd401b2e901610880933ca4263082d49e60a16e3c4dc848927ead27",
+    "artifacts/m2-copy-negative-final/validation.json": "bd24b981916d8a0e3a1fdb633e2cfb93eb5e8e84c21855fe235fdaac80328391",
+    "artifacts\\m2-copy-release-copy-commands.txt": "377992b1e47ba1f2381b8e3969398bb95e39336267ca573bc5aed5be5dc1a89e",
+    "artifacts\\m2-copy-release-ui.txt": "62dbf6e0f80fb166137a3fef01cb5c06674b80fae79bf3d97edf1d790cb73ab6"
+  },
+  "native_replays": 224,
+  "registered_file_outcomes": {
+    "repeat_stable": 111,
+    "repeat_variable": 1
+  },
+  "original_player_replays": 12,
+  "corpus_control_runs": 27,
+  "golden_controls": [
+    {
+      "case": "gf2",
+      "rgba_sha256": "2e1abc5eacb0bbfd801f9fe059c305baa9a0786c384b36a42fa5a323dd979fd1",
+      "passed": true,
+      "counts": {
+        "ClearDepthStencilView": 2,
+        "ClearRenderTargetView": 1,
+        "CreateBuffer": 2,
+        "DrawIndexed": 72,
+        "Map": 44,
+        "Present": 1,
+        "buffers_created_without_initial_data": 2,
+        "object_observation_records": 49,
+        "pipeline_setter_records": 142,
+        "private_data_observations": 4,
+        "query_metadata_records": 2,
+        "state_or_auxiliary_records": 551,
+        "unmap_observations": 44
+      }
+    },
+    {
+      "case": "gf2-negative",
+      "rgba_sha256": "b2c5548a51715f581c4591acc266ac7a0c65b54b7ecd9a49f43499fa9b76c5f1",
+      "passed": true,
+      "counts": {
+        "ClearDepthStencilView": 2,
+        "ClearRenderTargetView": 1,
+        "CreateBuffer": 2,
+        "Map": 44,
+        "Present": 1,
+        "buffers_created_without_initial_data": 2,
+        "object_observation_records": 49,
+        "pipeline_setter_records": 142,
+        "private_data_observations": 4,
+        "query_metadata_records": 2,
+        "state_or_auxiliary_records": 551,
+        "unmap_observations": 44
+      }
+    },
+    {
+      "case": "bf1",
+      "rgba_sha256": "1f724d1840652f66afd26dd30c95aecd5c1b4932eede56109198f15a8f57a2f6",
+      "passed": true,
+      "counts": {
+        "ClearDepthStencilView": 10,
+        "ClearRenderTargetView": 10,
+        "ClearUnorderedAccessViewFloat": 1,
+        "CopyResource": 2,
+        "CopyStructureCount": 6,
+        "CopySubresourceRegion": 7,
+        "Dispatch": 60,
+        "DispatchIndirect": 13,
+        "Draw": 79,
+        "DrawIndexed": 41,
+        "DrawIndexedInstanced": 1053,
+        "DrawInstanced": 29,
+        "GenerateMips": 2,
+        "Map": 4151,
+        "Present": 1,
+        "UpdateSubresource": 27,
+        "map_read_observations": 2,
+        "object_observation_records": 28,
+        "pipeline_setter_records": 2221,
+        "query_metadata_records": 17,
+        "state_or_auxiliary_records": 7354,
+        "unmap_observations": 4153,
+        "unresolved_input_layout_setters": 2,
+        "unresolved_output_setters": 6,
+        "unresolved_shader_setters": 4,
+        "unresolved_srv_setters": 2
+      }
+    },
+    {
+      "case": "bf1-negative",
+      "rgba_sha256": "cd3a3066f984b1c317fbeefec2836503f32078321d3dc1f367465f2c06d435bf",
+      "passed": true,
+      "counts": {
+        "ClearDepthStencilView": 10,
+        "ClearRenderTargetView": 10,
+        "ClearUnorderedAccessViewFloat": 1,
+        "CopyResource": 2,
+        "CopyStructureCount": 6,
+        "CopySubresourceRegion": 7,
+        "Dispatch": 60,
+        "DispatchIndirect": 13,
+        "GenerateMips": 2,
+        "Map": 4151,
+        "Present": 1,
+        "UpdateSubresource": 27,
+        "map_read_observations": 2,
+        "object_observation_records": 28,
+        "pipeline_setter_records": 2221,
+        "query_metadata_records": 17,
+        "state_or_auxiliary_records": 7354,
+        "unmap_observations": 4153,
+        "unresolved_input_layout_setters": 2,
+        "unresolved_output_setters": 6,
+        "unresolved_shader_setters": 4,
+        "unresolved_srv_setters": 2
+      }
+    }
+  ],
+  "package_sha256": {
+    "FloraGPA.exe": "9a6a0f4bea46ae990b86ef341da84aeb289d66de3451bf49d380b011854a78d1",
+    "FloraGPA.Worker.exe": "52fa04e449f7b75c96ac7cab716562d0ac79ec791e04fa8149010033ec0396cb",
+    "FloraGPA.Cli.exe": "9d0472316e8d12ce2f48331210961c7bd8ae379977ddf8c83deeff0c1bde8ed3",
+    "FloraGPA.Rdc.exe": "f4d21d43e661d24d392e91fc1a1f1460a20d1377fcf5075c57083ad289e82773",
+    "FloraGPA.Metrics.dll": "58b6278f2a93e783b1e8bb1290e9b0e51745f1a36825f296584f52159fd7c6db"
+  },
+  "producer": {
+    "frames": 144,
+    "manifest_path": "artifacts\\m2-copy-originals-verified\\manifest.json",
+    "sha256": "7a6d6bb0ccd37b7955e427e7796c6adb2b62b2f23bf1f0576a52942659c77c28",
+    "gpa_sha256": {
+      "shimloader64.dll": "af68e28ba54ab0068c95f82081828788d6f59879283127dc330b818af7369888",
+      "shimd3d64.dll": "cb0b99d113511cbf7ca9f949d97aa02e4a1f8f110b1f3ad3165d8a81035dee31"
+    }
+  },
+  "historical_api_type_handling": {
+    "execute": 59,
+    "metadata": 40
+  },
+  "texture_copy_validation_partial_findings": 92,
+  "test_result": "Seven existing CTest suites passed; the new suite passed after fixing its file-overwrite fixture, with no production-code change. Initial failure retained.",
+  "negative_preflight": {
+    "prior_status": "review_required",
+    "current_status": "blocked",
+    "findings": [
+      {
+        "category": 7,
+        "entry_id": 100,
+        "event_id": 100,
+        "kind": "copy_command_rejected",
+        "reason": "Copy destination 2, source 8: CopyStructureCount offset is unaligned or outside the destination",
+        "record_type": 63,
+        "resource_id": 2,
+        "severity": "error"
+      }
+    ]
+  },
+  "limits": [
+    "Full texture copy/resolve format and subresource semantics remain unaudited",
+    "Same-buffer nonempty region copies remain rejected",
+    "Original captures prove bounded equal-edge empty boxes; inverted empty-box coverage is synthetic",
+    "Initial hidden counter content is not inferred from view validity",
+    "Original-player adapter is unidentified",
+    "Helldivers nondeterminism is preserved",
+    "M2 incomplete; deferred execution remains later work"
+  ]
+}

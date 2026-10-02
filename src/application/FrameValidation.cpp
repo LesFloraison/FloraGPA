@@ -1,5 +1,6 @@
 #include "FrameValidation.h"
 #include "core/BufferCreation.h"
+#include "core/CopyCommands.h"
 #include "core/PresentRecords.h"
 #include "ApiCommands.h"
 #include "ContextInspector.h"
@@ -125,6 +126,16 @@ Json validateFrame(const std::filesystem::path &path, const std::function<bool()
                                     "Shader identity is absent; native state remains unresolved until a later setter, ClearState or validated draw snapshot",missing);
                             else
                                 validatePipelineBinding(frame, binding);
+                        }
+                        if (isCopyCommand(e.type)) {
+                            const auto copy = readCopyCommand(e.type, frame.payload(id));
+                            try {
+                                if(validateCopyCommand(frame,copy)==CopyValidation::TextureReferences)
+                                    finding(&e,"info","texture_copy_validation_partial",
+                                        "Resource kinds and destination usage checked; texture format, subresource and region semantics require further audit",copy.destination);
+                            } catch(const std::exception &error) {
+                                finding(&e,"error","copy_command_rejected",error.what(),copy.destination);
+                            }
                         }
                         acceptQueryMetadata(e.type, frame.payload(id));
                         acceptInspectionRecord(e.type, frame.payload(id));

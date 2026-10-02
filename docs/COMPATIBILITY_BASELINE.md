@@ -21,6 +21,10 @@ The [pipeline setter audit](PIPELINE_SETTER_AUDIT.md) executes twelve setter
 families at their own boundaries, retains explicit missing-shader diagnostics,
 and adds checked OM getter metadata. Draw snapshots remain necessary for omitted
 state; event-boundary acceptance is recorded separately from final-image results.
+The [buffer copy audit](BUFFER_COPY_AUDIT.md) adds shared preflight/runtime checks
+for resource kinds, byte ranges and structured counter writes. Six original
+captures have native byte/image oracles and original-player image comparisons;
+full texture copy/resolve semantics remain explicitly unaudited.
 
 ## Reproduce
 

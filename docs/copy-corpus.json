@@ -1,0 +1,155 @@
+{
+  "schema": "FloraGPA compatibility corpus 1",
+  "profile": "GPA 2025 R1 legacy DX11 / IGPA v3",
+  "root_parameter": "--captures-root",
+  "completed": true,
+  "cases": [
+    {
+      "id": "copy_whole",
+      "path": "0/capture.gpa_frame",
+      "sha256": "fe2cccc05d6b12bab90bd2b0c698a026b70cf5b69eb8caf651324271db2e1221",
+      "bytes": 75914,
+      "family": "buffer_copy",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified CaptureNextFrame output; buffer bytes additionally checked by native producer and C++ boundary tests.",
+      "device_scope": "Default hardware producer; original player adapter unidentified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "boundaries": [],
+      "controls": [
+        {
+          "disable_event": 8,
+          "repeat": 2,
+          "expected_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+          "purpose": "copy must supply shader inputs"
+        }
+      ]
+    },
+    {
+      "id": "copy_byte_region",
+      "path": "1/capture.gpa_frame",
+      "sha256": "286264fc1c9e45131b3dbce413ef7400188e005830663db9e4773112ea6afbfc",
+      "bytes": 75914,
+      "family": "buffer_copy",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified CaptureNextFrame output; buffer bytes additionally checked by native producer and C++ boundary tests.",
+      "device_scope": "Default hardware producer; original player adapter unidentified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "boundaries": [],
+      "controls": [
+        {
+          "disable_event": 8,
+          "repeat": 2,
+          "expected_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+          "purpose": "copy must supply shader inputs"
+        }
+      ]
+    },
+    {
+      "id": "copy_null_region",
+      "path": "2/capture.gpa_frame",
+      "sha256": "c74c8cdbacb87c04a526c951e3f0d9a156a4b03c58f91e9c3b15588c3e1418a1",
+      "bytes": 75890,
+      "family": "buffer_copy",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified CaptureNextFrame output; buffer bytes additionally checked by native producer and C++ boundary tests.",
+      "device_scope": "Default hardware producer; original player adapter unidentified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "boundaries": [],
+      "controls": [
+        {
+          "disable_event": 8,
+          "repeat": 2,
+          "expected_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+          "purpose": "copy must supply shader inputs"
+        }
+      ]
+    },
+    {
+      "id": "copy_empty_region",
+      "path": "3/capture.gpa_frame",
+      "sha256": "28f0c2f51d12348e40a82e8f9711dd65e26eaebff69e4a5b946da1197bf86444",
+      "bytes": 75786,
+      "family": "buffer_copy",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified CaptureNextFrame output; buffer bytes additionally checked by native producer and C++ boundary tests.",
+      "device_scope": "Default hardware producer; original player adapter unidentified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "boundaries": [],
+      "controls": [
+        {
+          "disable_event": 8,
+          "repeat": 2,
+          "expected_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+          "purpose": "empty copy has no write effect"
+        }
+      ]
+    },
+    {
+      "id": "copy_append_count",
+      "path": "4/capture.gpa_frame",
+      "sha256": "a4573998d11f4e4e1904b78b39c32043fa8025f6efd0bd001e57b096ad2c7704",
+      "bytes": 76071,
+      "family": "buffer_copy",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified CaptureNextFrame output; buffer bytes additionally checked by native producer and C++ boundary tests.",
+      "device_scope": "Default hardware producer; original player adapter unidentified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "boundaries": [],
+      "controls": [
+        {
+          "disable_event": 15,
+          "repeat": 2,
+          "expected_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+          "purpose": "copy must supply shader inputs"
+        }
+      ]
+    },
+    {
+      "id": "copy_structured_count",
+      "path": "5/capture.gpa_frame",
+      "sha256": "69b818fc85afb423e2f80a0d22585950ecf588c6924e85cf0d0883023678cc97",
+      "bytes": 76071,
+      "family": "buffer_copy",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified CaptureNextFrame output; buffer bytes additionally checked by native producer and C++ boundary tests.",
+      "device_scope": "Default hardware producer; original player adapter unidentified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "boundaries": [],
+      "controls": [
+        {
+          "disable_event": 15,
+          "repeat": 2,
+          "expected_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+          "purpose": "copy must supply shader inputs"
+        }
+      ]
+    }
+  ],
+  "producer_sha256": "7a88dd95ccc3fa76686d259418980fc495482a50c9bb9257f130d59b19770427",
+  "sources": {
+    "native/buffer_copy_probe.cpp": "f737f6c6bc826270c5cb96bd2a584ae1ed3e5dd5a9e6e05040f3c91e7bac0a26",
+    "native/present_capture_probe.cpp": "7c29f1e572ab16a5bc497d39eef8198d79056877a9e1d3fff3f7ed530a32c4e3",
+    "capture_copies.py": "91a906f4653b4d00ad6742d81c33f0454a976ff3595381d04913be11efb28b70",
+    "capture_present.py": "18a1a493a55d842f6408114de73deb786a3066c31ea7d6e63415bb0b040eacae"
+  },
+  "gpa_sha256": {
+    "shimloader64.dll": "af68e28ba54ab0068c95f82081828788d6f59879283127dc330b818af7369888",
+    "shimd3d64.dll": "cb0b99d113511cbf7ca9f949d97aa02e4a1f8f110b1f3ad3165d8a81035dee31"
+  },
+  "source_manifest": {
+    "path": "artifacts\\m2-copy-originals-verified\\manifest.json",
+    "sha256": "7a6d6bb0ccd37b7955e427e7796c6adb2b62b2f23bf1f0576a52942659c77c28"
+  }
+}

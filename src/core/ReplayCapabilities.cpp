@@ -1,6 +1,7 @@
 #include "ReplayCapabilities.h"
 #include "Commands.h"
 #include "Contexts.h"
+#include "CopyCommands.h"
 #include "IaBindings.h"
 #include "InspectionRecords.h"
 #include "MapRecords.h"
@@ -22,6 +23,9 @@ bool isReplayAuxiliary(uint16_t t) {
                   0x34f5, 0x34f6, 0x34fb, 0x3501, 0x3502, 0x3509, 0x350a, 0x351a, 0x351e, 0x3523});
 }
 ReplayCapability replayCapability(uint16_t t) {
+    if (isCopyCommand(t))
+        return {"execute", "src/core/CopyCommands.cpp;src/replay/Replay.cpp",
+                "tests/CopyCommandTests.cpp;docs/BUFFER_COPY_AUDIT.md"};
     if (t == 0x3578 || t == 0x3017)
         return {t == 0x3578 ? "execute" : "metadata", "src/core/BufferCreation.cpp;src/replay/Replay.cpp",
                 "tests/BufferCreationTests.cpp;docs/BUFFER_CREATION_AUDIT.md"};

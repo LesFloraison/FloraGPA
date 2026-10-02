@@ -1,4 +1,5 @@
 #include "Replay.h"
+#include "core/CopyCommands.h"
 #include "core/ReplayCapabilities.h"
 #include "BlendState.h"
 #include "Device.h"
@@ -937,6 +938,8 @@ void Replay::command(const Entry &e) {
     }
     if (isWritableCommand(t))
         validateWritableCommand(frame_, e.id);
+    if (isCopyCommand(t))
+        validateCopyCommand(frame_, readCopyCommand(t, payload));
     if (options_.disabled.contains(e.id))
         return;
     if (inputBindings(e, payload)) {
@@ -1159,7 +1162,10 @@ void Replay::command(const Entry &e) {
         r.end();
         const auto destination = get<ID3D11Resource>(dst), source = get<ID3D11Resource>(src);
         ReplayAnnotation marker(captureAnnotation_.Get(), e.id, commandName(t));
-        context_->CopySubresourceRegion(destination, sub, x, y, z, source, srcSub, has ? &box : nullptr);
+        if (has && (box.left >= box.right || box.top >= box.bottom || box.front >= box.back))
+            ++counts["empty_copy_regions"];
+        else
+            context_->CopySubresourceRegion(destination, sub, x, y, z, source, srcSub, has ? &box : nullptr);
     } else if (t == 0x42) {
         auto dst = r.read<Id>();
         auto sub = r.read<UINT>();
