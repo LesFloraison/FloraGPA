@@ -37,6 +37,13 @@ def run(command, log, timeout, env):
 def load(path):
     return json.loads(path.read_text(encoding='utf-8')) if path.is_file() else None
 
+
+def original_kernel_completed(report):
+    # A wrapper can fail to name/decode multi-swap-chain exports after successful playback.
+    # This does not certify its images, adapter selection, or cross-player equivalence.
+    return (report.get('open_status') == 0 and report.get('playback_status') == 0 and
+            report.get('closed') is True and report.get('callbacks') == [])
+
 def image_difference(a, b):
     if len(a) != len(b):
         return {'same_byte_length': False, 'byte_equal': False}
@@ -166,6 +173,10 @@ def main():
                     r=run([sys.executable,args.oracle_tools.resolve()/'replay_frame.py',capture,'--out',output,'--timeout',args.timeout-5],
                           directory/f'original-{i+1}.log',args.timeout,oracle_env)
                     r['report']=load(output/'replay_report.json') or {}
+                    r['kernel_report']=load(output/'native_result.json') or {}
+                    r['kernel_completed']=original_kernel_completed(r['kernel_report'])
+                    r['exports']={f.name:digest(f) for f in output.glob('framebuffer*')
+                                  if f.is_file() and f.suffix in {'.tga','.dds'}}
                     item['original'].append(r)
                 if all(r['exit_code']==0 and r['report'].get('native',{}).get('closed') for r in item['original']):
                     item['original_status']='repeat_stable' if len({r['report']['replayed_rgba_sha256'] for r in item['original']})==1 else 'repeat_variable'
@@ -173,7 +184,9 @@ def main():
                     if all(x is not None for x in original):
                         item['original_repeat_difference']=image_difference(original[0],original[1])
                         if raw[0].exists():item['native_original_observed_difference']=image_difference(raw[0].read_bytes(),original[0])
-                else:item['original_status']='replay_or_export_failed'
+                else:
+                    item['original_status']=('export_adapter_failed' if
+                        all(r['kernel_completed'] for r in item['original']) else 'replay_or_export_failed')
             else:item['original_status']='not_run'
             controls=[]
             for control in case.get('controls',[]):

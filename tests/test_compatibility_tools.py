@@ -7,10 +7,20 @@ import tempfile
 import unittest
 
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'tools'))
-from validate_corpus import image_difference, original_rgba, summarize_native, run, prioritize
+from validate_corpus import image_difference, original_rgba, summarize_native, run, prioritize, original_kernel_completed
 from catalog_captures import catalog, digest
 
 class CompatibilityToolsTests(unittest.TestCase):
+    def test_kernel_success_requires_complete_evidence(self):
+        success = {'open_status':0, 'playback_status':0, 'closed':True, 'callbacks':[]}
+        self.assertTrue(original_kernel_completed(success))
+        for key in success:
+            partial = dict(success); del partial[key]
+            self.assertFalse(original_kernel_completed(partial))
+        for key, value in [('open_status',13), ('playback_status',1), ('closed',False), ('callbacks',[{}])]:
+            failed = dict(success); failed[key] = value
+            self.assertFalse(original_kernel_completed(failed))
+
     def test_golden_failure_is_not_tolerated(self):
         runs=[{'exit_code':0,'report':{'completed':True,'rgba_sha256':'wrong'}}]*2
         self.assertEqual(summarize_native(runs,{'reference_rgba_sha256':'right'}),'golden_mismatch')
