@@ -3107,6 +3107,7 @@
         "src/application/ExperimentReport.cpp"
       ],
       "validation": [
+        "docs/COMPATIBILITY_BASELINE.md: M1 offline preflight, explicit auxiliary audit coverage, serial corpus comparison and compact Qt diagnostics. This adds acceptance infrastructure; replay.py remains partial, and passing preflight does not certify GPU output.",
         "docs/PLANAR_WRITE_MIGRATION.md: planar Y-only Map with native pitches, tight NV12 Update, explicit full DXGI Update assets, structured write provenance and Qt before/after inspection; 192 packaged real-capture/synthetic/uint64 Python comparisons passed (125 successes, 67 controlled rejections); private consumers and remaining module scope stay incomplete",
         "docs/EXPERIMENT_REPORT_MIGRATION.md: native active-history assets and applied/pending traversal report; replay/texture/buffer consumers and compact Qt worker log; private analysis consumers remain pending"
       ]

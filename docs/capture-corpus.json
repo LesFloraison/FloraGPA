@@ -1,0 +1,1911 @@
+{
+  "schema": "FloraGPA compatibility corpus 1",
+  "profile": "GPA 2025 R1 legacy DX11 / IGPA v3",
+  "root_parameter": "--captures-root",
+  "cases": [
+    {
+      "id": "gf2__GF2_Exilium_2026_03_03__00_19_35",
+      "path": "GF2_Exilium_2026_03_03__00_19_35.gpa_frame",
+      "sha256": "fc7b7f7de20a578da2977b2ff91d96f5cf80887b393bc85859be8cab1af91c8e",
+      "bytes": 126008392,
+      "family": "gf2",
+      "origin": "user_supplied_game_capture",
+      "provenance_note": "Linked manifests are evidence pointers; modified fixtures are not certified as original captures.",
+      "source_manifests": [],
+      "device_scope": "Record the actual replay adapter; fixture provenance may constrain interpretation.",
+      "reference_rgba_sha256": "2e1abc5eacb0bbfd801f9fe059c305baa9a0786c384b36a42fa5a323dd979fd1",
+      "comparison_policy": "exact_golden",
+      "boundaries": [],
+      "controls": []
+    },
+    {
+      "id": "bf1__bf1_2026_01_21__16_53_05",
+      "path": "bf1_2026_01_21__16_53_05.gpa_frame",
+      "sha256": "26044d33cb6c3087c2204b7d57664203741a679f988430b7d05b24af582e0620",
+      "bytes": 1596926637,
+      "family": "bf1",
+      "origin": "user_supplied_game_capture",
+      "provenance_note": "Linked manifests are evidence pointers; modified fixtures are not certified as original captures.",
+      "source_manifests": [],
+      "device_scope": "Record the actual replay adapter; fixture provenance may constrain interpretation.",
+      "reference_rgba_sha256": "1f724d1840652f66afd26dd30c95aecd5c1b4932eede56109198f15a8f57a2f6",
+      "comparison_policy": "exact_golden",
+      "boundaries": [],
+      "controls": []
+    },
+    {
+      "id": "helldivers__helldivers2_2026_04_02__18_02_58",
+      "path": "helldivers2_2026_04_02__18_02_58.gpa_frame",
+      "sha256": "97915a80c7617e9a67068a5d85b87f1b2a7883faa9831428084ebd7270f37139",
+      "bytes": 1581399564,
+      "family": "helldivers",
+      "origin": "user_supplied_game_capture",
+      "provenance_note": "Linked manifests are evidence pointers; modified fixtures are not certified as original captures.",
+      "source_manifests": [],
+      "device_scope": "Record the actual replay adapter; fixture provenance may constrain interpretation.",
+      "reference_rgba_sha256": null,
+      "comparison_policy": "known_variable",
+      "boundaries": [
+        {
+          "resource": 18325,
+          "event": 18344,
+          "expect_stable": true
+        },
+        {
+          "resource": 18325,
+          "event": 18401,
+          "expect_stable": false
+        }
+      ],
+      "controls": [
+        {
+          "disable_event": 18401,
+          "repeat": 3,
+          "expected_rgba_sha256": "22f2d66bdbca7a3b1aa868c5a68e39ebc7669e070596eec6b8f0e6cc922e2605"
+        }
+      ]
+    },
+    {
+      "id": "adjacency__capture__5daf54e1",
+      "path": "analysis/capture_samples/adjacency/10/capture.gpa_frame",
+      "sha256": "a24477d86c4501d5c46ca6efd4bbeba8c028fcab600bed0c14b813f7cf85768c",
+      "bytes": 138587,
+      "family": "adjacency",
+      "origin": "local_research_fixture",
+      "provenance_note": "Linked manifests are evidence pointers; modified fixtures are not certified as original captures.",
+      "source_manifests": [
+        {
+          "path": "analysis/capture_samples/adjacency/manifest.json",
+          "sha256": "b023c1563e839d0ce57e7fc6bd83a5515bf122080fe4036f5b13e4fc3a9b9d9a",
+          "contains_capture_hash": true
+        }
+      ],
+      "device_scope": "Record the actual replay adapter; fixture provenance may constrain interpretation.",
+      "reference_rgba_sha256": null,
+      "comparison_policy": "observe",
+      "boundaries": [],
+      "controls": []
+    },
+    {
+      "id": "adjacency__capture__ec7ba6d3",
+      "path": "analysis/capture_samples/adjacency/11/capture.gpa_frame",
+      "sha256": "597891dab594a1c582f3f1ecaed0c3d8c75634c072020a21cd303379e3177dc5",
+      "bytes": 138587,
+      "family": "adjacency",
+      "origin": "local_research_fixture",
+      "provenance_note": "Linked manifests are evidence pointers; modified fixtures are not certified as original captures.",
+      "source_manifests": [
+        {
+          "path": "analysis/capture_samples/adjacency/manifest.json",
+          "sha256": "b023c1563e839d0ce57e7fc6bd83a5515bf122080fe4036f5b13e4fc3a9b9d9a",
+          "contains_capture_hash": true
+        }
+      ],
+      "device_scope": "Record the actual replay adapter; fixture provenance may constrain interpretation.",
+      "reference_rgba_sha256": null,
+      "comparison_policy": "observe",
+      "boundaries": [],
+      "controls": []
+    },
+    {
+      "id": "adjacency__capture__558e5fc1",
+      "path": "analysis/capture_samples/adjacency/12/capture.gpa_frame",
+      "sha256": "c6ab6f511f43bfb8486a965167d78e3c17aa75c9dc9dce1702fb384744dd22db",
+      "bytes": 138587,
+      "family": "adjacency",
+      "origin": "local_research_fixture",
+      "provenance_note": "Linked manifests are evidence pointers; modified fixtures are not certified as original captures.",
+      "source_manifests": [
+        {
+          "path": "analysis/capture_samples/adjacency/manifest.json",
+          "sha256": "b023c1563e839d0ce57e7fc6bd83a5515bf122080fe4036f5b13e4fc3a9b9d9a",
+          "contains_capture_hash": true
+        }
+      ],
+      "device_scope": "Record the actual replay adapter; fixture provenance may constrain interpretation.",
+      "reference_rgba_sha256": null,
+      "comparison_policy": "observe",
+      "boundaries": [],
+      "controls": []
+    },
+    {
+      "id": "adjacency__capture__478252bd",
+      "path": "analysis/capture_samples/adjacency/13/capture.gpa_frame",
+      "sha256": "1f06104446436598b64cd4c8eec6c9cffc2a3e9d641352bfb3871027e9c5db1c",
+      "bytes": 138587,
+      "family": "adjacency",
+      "origin": "local_research_fixture",
+      "provenance_note": "Linked manifests are evidence pointers; modified fixtures are not certified as original captures.",
+      "source_manifests": [
+        {
+          "path": "analysis/capture_samples/adjacency/manifest.json",
+          "sha256": "b023c1563e839d0ce57e7fc6bd83a5515bf122080fe4036f5b13e4fc3a9b9d9a",
+          "contains_capture_hash": true
+        }
+      ],
+      "device_scope": "Record the actual replay adapter; fixture provenance may constrain interpretation.",
+      "reference_rgba_sha256": null,
+      "comparison_policy": "observe",
+      "boundaries": [],
+      "controls": []
+    },
+    {
+      "id": "finish__restore0__8d45b613",
+      "path": "analysis/capture_samples/finish/restore0.gpa_frame",
+      "sha256": "0061e2e641aa8f38bb5769d51b9986fd88da32f63878476ed3b86b6b7e65d80e",
+      "bytes": 7917,
+      "family": "finish",
+      "origin": "local_research_fixture",
+      "provenance_note": "Linked manifests are evidence pointers; modified fixtures are not certified as original captures.",
+      "source_manifests": [
+        {
+          "path": "analysis/capture_samples/finish/manifest.json",
+          "sha256": "84174b351004fa55e31b039bfea7fcc5eef27eb3d0a401328a66a9ec26cab28c",
+          "contains_capture_hash": true
+        }
+      ],
+      "device_scope": "Record the actual replay adapter; fixture provenance may constrain interpretation.",
+      "reference_rgba_sha256": null,
+      "comparison_policy": "observe",
+      "boundaries": [],
+      "controls": []
+    },
+    {
+      "id": "finish__restore1__b3c096be",
+      "path": "analysis/capture_samples/finish/restore1.gpa_frame",
+      "sha256": "65b1ae0f27d66284a108029a381d02a99dcb7f03a04da3ee877661688af8ad16",
+      "bytes": 7917,
+      "family": "finish",
+      "origin": "local_research_fixture",
+      "provenance_note": "Linked manifests are evidence pointers; modified fixtures are not certified as original captures.",
+      "source_manifests": [
+        {
+          "path": "analysis/capture_samples/finish/manifest.json",
+          "sha256": "84174b351004fa55e31b039bfea7fcc5eef27eb3d0a401328a66a9ec26cab28c",
+          "contains_capture_hash": true
+        }
+      ],
+      "device_scope": "Record the actual replay adapter; fixture provenance may constrain interpretation.",
+      "reference_rgba_sha256": null,
+      "comparison_policy": "observe",
+      "boundaries": [],
+      "controls": []
+    },
+    {
+      "id": "hull_instances__capture__b85def43",
+      "path": "analysis/capture_samples/hull_instances/active/capture.gpa_frame",
+      "sha256": "5385e698a98eb74fd5197765b8b2d038e81835d36822c7928f8e14448e172727",
+      "bytes": 172747,
+      "family": "hull_instances",
+      "origin": "local_research_fixture",
+      "provenance_note": "Linked manifests are evidence pointers; modified fixtures are not certified as original captures.",
+      "source_manifests": [
+        {
+          "path": "analysis/capture_samples/hull_instances/manifest.json",
+          "sha256": "092534f3b5b07fcba190d4eff7d37a2d8723af60d3ee60bb183b698ff0e2f588",
+          "contains_capture_hash": true
+        }
+      ],
+      "device_scope": "Record the actual replay adapter; fixture provenance may constrain interpretation.",
+      "reference_rgba_sha256": null,
+      "comparison_policy": "observe",
+      "boundaries": [],
+      "controls": []
+    },
+    {
+      "id": "hull_instances__capture__bbf826c4",
+      "path": "analysis/capture_samples/hull_instances/culled/capture.gpa_frame",
+      "sha256": "9999895235c8bef203e47188d3f31a82f48eccaaf087825ef6e86e1e087dd91b",
+      "bytes": 172803,
+      "family": "hull_instances",
+      "origin": "local_research_fixture",
+      "provenance_note": "Linked manifests are evidence pointers; modified fixtures are not certified as original captures.",
+      "source_manifests": [
+        {
+          "path": "analysis/capture_samples/hull_instances/manifest.json",
+          "sha256": "092534f3b5b07fcba190d4eff7d37a2d8723af60d3ee60bb183b698ff0e2f588",
+          "contains_capture_hash": true
+        }
+      ],
+      "device_scope": "Record the actual replay adapter; fixture provenance may constrain interpretation.",
+      "reference_rgba_sha256": null,
+      "comparison_policy": "observe",
+      "boundaries": [],
+      "controls": []
+    },
+    {
+      "id": "legacy__deferred0-each0-restore0-repeat1__288d4dfb",
+      "path": "analysis/capture_samples/legacy/deferred0-each0-restore0-repeat1.gpa_frame",
+      "sha256": "16ca084b9b00841e1959e4adf91470301ed11a49207c4f870698eca6ac63d79e",
+      "bytes": 210611,
+      "family": "legacy",
+      "origin": "local_research_fixture",
+      "provenance_note": "Linked manifests are evidence pointers; modified fixtures are not certified as original captures.",
+      "source_manifests": [
+        {
+          "path": "analysis/capture_samples/legacy/manifest.json",
+          "sha256": "485325c58814ebb4254a9ff9eb4812dd0903cb45252611f6e9b8826bbd23333e",
+          "contains_capture_hash": true
+        }
+      ],
+      "device_scope": "Record the actual replay adapter; fixture provenance may constrain interpretation.",
+      "reference_rgba_sha256": null,
+      "comparison_policy": "observe",
+      "boundaries": [],
+      "controls": []
+    },
+    {
+      "id": "legacy__deferred0-each0-restore0-repeat2__15515ddd",
+      "path": "analysis/capture_samples/legacy/deferred0-each0-restore0-repeat2.gpa_frame",
+      "sha256": "1f59ef5226f6c71293e5d1ec913f52ef9dee6cb9b60e04ceeca6e785e377e23d",
+      "bytes": 256271,
+      "family": "legacy",
+      "origin": "local_research_fixture",
+      "provenance_note": "Linked manifests are evidence pointers; modified fixtures are not certified as original captures.",
+      "source_manifests": [
+        {
+          "path": "analysis/capture_samples/legacy/manifest.json",
+          "sha256": "485325c58814ebb4254a9ff9eb4812dd0903cb45252611f6e9b8826bbd23333e",
+          "contains_capture_hash": true
+        }
+      ],
+      "device_scope": "Record the actual replay adapter; fixture provenance may constrain interpretation.",
+      "reference_rgba_sha256": null,
+      "comparison_policy": "observe",
+      "boundaries": [],
+      "controls": []
+    },
+    {
+      "id": "legacy__deferred1-each0-restore0-repeat1__45a99d25",
+      "path": "analysis/capture_samples/legacy/deferred1-each0-restore0-repeat1.gpa_frame",
+      "sha256": "30e2f79500ad3e41805897d8caaf3ff84f7f964807d6d58fff213e97b188de4a",
+      "bytes": 211336,
+      "family": "legacy",
+      "origin": "local_research_fixture",
+      "provenance_note": "Linked manifests are evidence pointers; modified fixtures are not certified as original captures.",
+      "source_manifests": [
+        {
+          "path": "analysis/capture_samples/legacy/manifest.json",
+          "sha256": "485325c58814ebb4254a9ff9eb4812dd0903cb45252611f6e9b8826bbd23333e",
+          "contains_capture_hash": true
+        }
+      ],
+      "device_scope": "Record the actual replay adapter; fixture provenance may constrain interpretation.",
+      "reference_rgba_sha256": null,
+      "comparison_policy": "observe",
+      "boundaries": [],
+      "controls": []
+    },
+    {
+      "id": "legacy__deferred1-each0-restore0-repeat2__8c4c6384",
+      "path": "analysis/capture_samples/legacy/deferred1-each0-restore0-repeat2.gpa_frame",
+      "sha256": "97b8467d402a6cea4d7b0bf03d8815cf606c1b3615c3504824c018ee4cd5a0f9",
+      "bytes": 257721,
+      "family": "legacy",
+      "origin": "local_research_fixture",
+      "provenance_note": "Linked manifests are evidence pointers; modified fixtures are not certified as original captures.",
+      "source_manifests": [
+        {
+          "path": "analysis/capture_samples/legacy/manifest.json",
+          "sha256": "485325c58814ebb4254a9ff9eb4812dd0903cb45252611f6e9b8826bbd23333e",
+          "contains_capture_hash": true
+        }
+      ],
+      "device_scope": "Record the actual replay adapter; fixture provenance may constrain interpretation.",
+      "reference_rgba_sha256": null,
+      "comparison_policy": "observe",
+      "boundaries": [],
+      "controls": []
+    },
+    {
+      "id": "legacy__deferred1-each0-restore1-repeat1__fa26aa51",
+      "path": "analysis/capture_samples/legacy/deferred1-each0-restore1-repeat1.gpa_frame",
+      "sha256": "31b3745ba8a868755cd8d754c26ab34bbb67d420640edc3e32ca2d871a8aed10",
+      "bytes": 210996,
+      "family": "legacy",
+      "origin": "local_research_fixture",
+      "provenance_note": "Linked manifests are evidence pointers; modified fixtures are not certified as original captures.",
+      "source_manifests": [
+        {
+          "path": "analysis/capture_samples/legacy/manifest.json",
+          "sha256": "485325c58814ebb4254a9ff9eb4812dd0903cb45252611f6e9b8826bbd23333e",
+          "contains_capture_hash": true
+        }
+      ],
+      "device_scope": "Record the actual replay adapter; fixture provenance may constrain interpretation.",
+      "reference_rgba_sha256": null,
+      "comparison_policy": "observe",
+      "boundaries": [],
+      "controls": []
+    },
+    {
+      "id": "legacy__deferred1-each0-restore1-repeat2__086c98e4",
+      "path": "analysis/capture_samples/legacy/deferred1-each0-restore1-repeat2.gpa_frame",
+      "sha256": "4028c5ef074a4b7d7a71798e43f69850c891c8f016752ccf011da67b949086e7",
+      "bytes": 257325,
+      "family": "legacy",
+      "origin": "local_research_fixture",
+      "provenance_note": "Linked manifests are evidence pointers; modified fixtures are not certified as original captures.",
+      "source_manifests": [
+        {
+          "path": "analysis/capture_samples/legacy/manifest.json",
+          "sha256": "485325c58814ebb4254a9ff9eb4812dd0903cb45252611f6e9b8826bbd23333e",
+          "contains_capture_hash": true
+        }
+      ],
+      "device_scope": "Record the actual replay adapter; fixture provenance may constrain interpretation.",
+      "reference_rgba_sha256": null,
+      "comparison_policy": "observe",
+      "boundaries": [],
+      "controls": []
+    },
+    {
+      "id": "legacy__deferred1-each1-restore0-repeat1__3223d05a",
+      "path": "analysis/capture_samples/legacy/deferred1-each1-restore0-repeat1.gpa_frame",
+      "sha256": "e20df09ce3f64d693e6048b9c8cdcdb70bf1821f330640a39774390430e95534",
+      "bytes": 211778,
+      "family": "legacy",
+      "origin": "local_research_fixture",
+      "provenance_note": "Linked manifests are evidence pointers; modified fixtures are not certified as original captures.",
+      "source_manifests": [
+        {
+          "path": "analysis/capture_samples/legacy/manifest.json",
+          "sha256": "485325c58814ebb4254a9ff9eb4812dd0903cb45252611f6e9b8826bbd23333e",
+          "contains_capture_hash": true
+        }
+      ],
+      "device_scope": "Record the actual replay adapter; fixture provenance may constrain interpretation.",
+      "reference_rgba_sha256": null,
+      "comparison_policy": "observe",
+      "boundaries": [],
+      "controls": []
+    },
+    {
+      "id": "legacy__deferred1-each1-restore0-repeat2__bdc3bfab",
+      "path": "analysis/capture_samples/legacy/deferred1-each1-restore0-repeat2.gpa_frame",
+      "sha256": "e422342203ebd464e7a94c51232f33febf9ad706ab07134b4a7915ead6c2b6a7",
+      "bytes": 258163,
+      "family": "legacy",
+      "origin": "local_research_fixture",
+      "provenance_note": "Linked manifests are evidence pointers; modified fixtures are not certified as original captures.",
+      "source_manifests": [
+        {
+          "path": "analysis/capture_samples/legacy/manifest.json",
+          "sha256": "485325c58814ebb4254a9ff9eb4812dd0903cb45252611f6e9b8826bbd23333e",
+          "contains_capture_hash": true
+        }
+      ],
+      "device_scope": "Record the actual replay adapter; fixture provenance may constrain interpretation.",
+      "reference_rgba_sha256": null,
+      "comparison_policy": "observe",
+      "boundaries": [],
+      "controls": []
+    },
+    {
+      "id": "legacy__deferred1-each1-restore1-repeat1__4d767fe7",
+      "path": "analysis/capture_samples/legacy/deferred1-each1-restore1-repeat1.gpa_frame",
+      "sha256": "dedb661e7c17fe86f9197ab542038b39b4cf1dbf86648f2b5172fd4a0c0333d1",
+      "bytes": 211438,
+      "family": "legacy",
+      "origin": "local_research_fixture",
+      "provenance_note": "Linked manifests are evidence pointers; modified fixtures are not certified as original captures.",
+      "source_manifests": [
+        {
+          "path": "analysis/capture_samples/legacy/manifest.json",
+          "sha256": "485325c58814ebb4254a9ff9eb4812dd0903cb45252611f6e9b8826bbd23333e",
+          "contains_capture_hash": true
+        }
+      ],
+      "device_scope": "Record the actual replay adapter; fixture provenance may constrain interpretation.",
+      "reference_rgba_sha256": null,
+      "comparison_policy": "observe",
+      "boundaries": [],
+      "controls": []
+    },
+    {
+      "id": "legacy__deferred1-each1-restore1-repeat2__ea842a48",
+      "path": "analysis/capture_samples/legacy/deferred1-each1-restore1-repeat2.gpa_frame",
+      "sha256": "b1d4b42d4096537d337050e760f911d6c8fe83cc86871161cb01c1b521d18670",
+      "bytes": 257767,
+      "family": "legacy",
+      "origin": "local_research_fixture",
+      "provenance_note": "Linked manifests are evidence pointers; modified fixtures are not certified as original captures.",
+      "source_manifests": [
+        {
+          "path": "analysis/capture_samples/legacy/manifest.json",
+          "sha256": "485325c58814ebb4254a9ff9eb4812dd0903cb45252611f6e9b8826bbd23333e",
+          "contains_capture_hash": true
+        }
+      ],
+      "device_scope": "Record the actual replay adapter; fixture provenance may constrain interpretation.",
+      "reference_rgba_sha256": null,
+      "comparison_policy": "observe",
+      "boundaries": [],
+      "controls": []
+    },
+    {
+      "id": "linear__capture__86112c0a",
+      "path": "analysis/capture_samples/linear/lines/capture.gpa_frame",
+      "sha256": "930b68c670e0a01f6ddc07ac37d4dd1fa7746e5212b9fea15aed56b124b267d3",
+      "bytes": 138435,
+      "family": "linear",
+      "origin": "local_research_fixture",
+      "provenance_note": "Linked manifests are evidence pointers; modified fixtures are not certified as original captures.",
+      "source_manifests": [
+        {
+          "path": "analysis/capture_samples/linear/manifest.json",
+          "sha256": "c8b4ed6a467d6e64abdfdd3ff6a7d67f2fe18d2f8ef82e530b42bc31399094e7",
+          "contains_capture_hash": true
+        }
+      ],
+      "device_scope": "Record the actual replay adapter; fixture provenance may constrain interpretation.",
+      "reference_rgba_sha256": null,
+      "comparison_policy": "observe",
+      "boundaries": [],
+      "controls": []
+    },
+    {
+      "id": "linear__capture__2592b36b",
+      "path": "analysis/capture_samples/linear/points/capture.gpa_frame",
+      "sha256": "02281ec81bf359df47289bfaf5ec86406770fb74cab4462ca43a758d0bffdee5",
+      "bytes": 138435,
+      "family": "linear",
+      "origin": "local_research_fixture",
+      "provenance_note": "Linked manifests are evidence pointers; modified fixtures are not certified as original captures.",
+      "source_manifests": [
+        {
+          "path": "analysis/capture_samples/linear/manifest.json",
+          "sha256": "c8b4ed6a467d6e64abdfdd3ff6a7d67f2fe18d2f8ef82e530b42bc31399094e7",
+          "contains_capture_hash": true
+        }
+      ],
+      "device_scope": "Record the actual replay adapter; fixture provenance may constrain interpretation.",
+      "reference_rgba_sha256": null,
+      "comparison_policy": "observe",
+      "boundaries": [],
+      "controls": []
+    },
+    {
+      "id": "linear__capture__875dc038",
+      "path": "analysis/capture_samples/linear/so-lines/capture.gpa_frame",
+      "sha256": "4fc3df7dbfb435d1a88a154ab4b67bd915bd2014f17ed18e2822024161ee65ef",
+      "bytes": 244082,
+      "family": "linear",
+      "origin": "local_research_fixture",
+      "provenance_note": "Linked manifests are evidence pointers; modified fixtures are not certified as original captures.",
+      "source_manifests": [
+        {
+          "path": "analysis/capture_samples/linear/manifest.json",
+          "sha256": "c8b4ed6a467d6e64abdfdd3ff6a7d67f2fe18d2f8ef82e530b42bc31399094e7",
+          "contains_capture_hash": true
+        }
+      ],
+      "device_scope": "Record the actual replay adapter; fixture provenance may constrain interpretation.",
+      "reference_rgba_sha256": null,
+      "comparison_policy": "observe",
+      "boundaries": [],
+      "controls": []
+    },
+    {
+      "id": "linear__capture__64102341",
+      "path": "analysis/capture_samples/linear/so-points/capture.gpa_frame",
+      "sha256": "7ef03a0e83beea6171c77071f687a4d2dafe598b0754fa3789392dd959f84507",
+      "bytes": 244046,
+      "family": "linear",
+      "origin": "local_research_fixture",
+      "provenance_note": "Linked manifests are evidence pointers; modified fixtures are not certified as original captures.",
+      "source_manifests": [
+        {
+          "path": "analysis/capture_samples/linear/manifest.json",
+          "sha256": "c8b4ed6a467d6e64abdfdd3ff6a7d67f2fe18d2f8ef82e530b42bc31399094e7",
+          "contains_capture_hash": true
+        }
+      ],
+      "device_scope": "Record the actual replay adapter; fixture provenance may constrain interpretation.",
+      "reference_rgba_sha256": null,
+      "comparison_policy": "observe",
+      "boundaries": [],
+      "controls": []
+    },
+    {
+      "id": "linear__capture__957341e9",
+      "path": "analysis/capture_samples/linear/strip-r16/capture.gpa_frame",
+      "sha256": "2996194a61df7bac9144da61e5754f718765bad0898104519f19a094d4088873",
+      "bytes": 138609,
+      "family": "linear",
+      "origin": "local_research_fixture",
+      "provenance_note": "Linked manifests are evidence pointers; modified fixtures are not certified as original captures.",
+      "source_manifests": [
+        {
+          "path": "analysis/capture_samples/linear/manifest.json",
+          "sha256": "c8b4ed6a467d6e64abdfdd3ff6a7d67f2fe18d2f8ef82e530b42bc31399094e7",
+          "contains_capture_hash": true
+        }
+      ],
+      "device_scope": "Record the actual replay adapter; fixture provenance may constrain interpretation.",
+      "reference_rgba_sha256": null,
+      "comparison_policy": "observe",
+      "boundaries": [],
+      "controls": []
+    },
+    {
+      "id": "linear__capture__42e47f2e",
+      "path": "analysis/capture_samples/linear/strip-r32/capture.gpa_frame",
+      "sha256": "d126ff27c161e40aaed209bb213a6f99a77850ad49c1c4797237545918bed015",
+      "bytes": 138623,
+      "family": "linear",
+      "origin": "local_research_fixture",
+      "provenance_note": "Linked manifests are evidence pointers; modified fixtures are not certified as original captures.",
+      "source_manifests": [
+        {
+          "path": "analysis/capture_samples/linear/manifest.json",
+          "sha256": "c8b4ed6a467d6e64abdfdd3ff6a7d67f2fe18d2f8ef82e530b42bc31399094e7",
+          "contains_capture_hash": true
+        }
+      ],
+      "device_scope": "Record the actual replay adapter; fixture provenance may constrain interpretation.",
+      "reference_rgba_sha256": null,
+      "comparison_policy": "observe",
+      "boundaries": [],
+      "controls": []
+    },
+    {
+      "id": "msaa__initialized__7a054bcb",
+      "path": "analysis/capture_samples/msaa/initialized.gpa_frame",
+      "sha256": "294276958894d7cd6dd1b4409bef5675c3435e5650fc57373a8ab5acad63acc3",
+      "bytes": 192228,
+      "family": "msaa",
+      "origin": "local_research_fixture",
+      "provenance_note": "Linked manifests are evidence pointers; modified fixtures are not certified as original captures.",
+      "source_manifests": [
+        {
+          "path": "analysis/capture_samples/msaa/manifest.json",
+          "sha256": "8951a6a7040ef9ffabf0a7ae2352bb9a150f8d02689b7b61f2099fa1893868f1",
+          "contains_capture_hash": true
+        }
+      ],
+      "device_scope": "Record the actual replay adapter; fixture provenance may constrain interpretation.",
+      "reference_rgba_sha256": null,
+      "comparison_policy": "observe",
+      "boundaries": [],
+      "controls": []
+    },
+    {
+      "id": "msaa__retained__3cc74122",
+      "path": "analysis/capture_samples/msaa/retained.gpa_frame",
+      "sha256": "48d988f68236ac9b6b6c1f4f0b48d8680024cd7c4d6a1c07075195defa5c5b9b",
+      "bytes": 154637,
+      "family": "msaa",
+      "origin": "local_research_fixture",
+      "provenance_note": "Linked manifests are evidence pointers; modified fixtures are not certified as original captures.",
+      "source_manifests": [
+        {
+          "path": "analysis/capture_samples/msaa/manifest.json",
+          "sha256": "8951a6a7040ef9ffabf0a7ae2352bb9a150f8d02689b7b61f2099fa1893868f1",
+          "contains_capture_hash": true
+        }
+      ],
+      "device_scope": "Record the actual replay adapter; fixture provenance may constrain interpretation.",
+      "reference_rgba_sha256": null,
+      "comparison_policy": "observe",
+      "boundaries": [],
+      "controls": []
+    },
+    {
+      "id": "no_draw__compute__6193260f",
+      "path": "analysis/capture_samples/no_draw/compute.gpa_frame",
+      "sha256": "f50bfa6cc039ff38e1b144c7d68d3e1a720ebe604be69d0a21d921399455af44",
+      "bytes": 45784,
+      "family": "no_draw",
+      "origin": "local_research_fixture",
+      "provenance_note": "Linked manifests are evidence pointers; modified fixtures are not certified as original captures.",
+      "source_manifests": [
+        {
+          "path": "analysis/capture_samples/no_draw/manifest.json",
+          "sha256": "60e80b38a581a44b10ed8decff0d367a5fa4ee6760d72195c48f769c24c99c62",
+          "contains_capture_hash": true
+        }
+      ],
+      "device_scope": "Record the actual replay adapter; fixture provenance may constrain interpretation.",
+      "reference_rgba_sha256": null,
+      "comparison_policy": "observe",
+      "boundaries": [],
+      "controls": []
+    },
+    {
+      "id": "no_draw__upload__74b3b1d4",
+      "path": "analysis/capture_samples/no_draw/upload.gpa_frame",
+      "sha256": "d8e8864619bd909b0c066fc72f22ecb9efd030668e97730656485c47e536a180",
+      "bytes": 8243,
+      "family": "no_draw",
+      "origin": "local_research_fixture",
+      "provenance_note": "Linked manifests are evidence pointers; modified fixtures are not certified as original captures.",
+      "source_manifests": [
+        {
+          "path": "analysis/capture_samples/no_draw/manifest.json",
+          "sha256": "60e80b38a581a44b10ed8decff0d367a5fa4ee6760d72195c48f769c24c99c62",
+          "contains_capture_hash": true
+        }
+      ],
+      "device_scope": "Record the actual replay adapter; fixture provenance may constrain interpretation.",
+      "reference_rgba_sha256": null,
+      "comparison_policy": "observe",
+      "boundaries": [],
+      "controls": []
+    },
+    {
+      "id": "output_formats__bgra__5a76e4aa",
+      "path": "analysis/capture_samples/output_formats/bgra.gpa_frame",
+      "sha256": "294c6a5c13b7ea72e715c5d0aa4f3a5a37bebfafd8dba53f662c99bdaf461019",
+      "bytes": 8243,
+      "family": "output_formats",
+      "origin": "local_research_fixture",
+      "provenance_note": "Linked manifests are evidence pointers; modified fixtures are not certified as original captures.",
+      "source_manifests": [
+        {
+          "path": "analysis/capture_samples/output_formats/manifest.json",
+          "sha256": "c694efc63264d86dc4ccb49cde47c25689c4876fe9293209e19ea922b1f0ba07",
+          "contains_capture_hash": true
+        }
+      ],
+      "device_scope": "Record the actual replay adapter; fixture provenance may constrain interpretation.",
+      "reference_rgba_sha256": null,
+      "comparison_policy": "observe",
+      "boundaries": [],
+      "controls": []
+    },
+    {
+      "id": "output_formats__fp16__401460fa",
+      "path": "analysis/capture_samples/output_formats/fp16.gpa_frame",
+      "sha256": "6c526965b6e1dc31e37769babf06b51869812060ca7f179f8b002447828725da",
+      "bytes": 9779,
+      "family": "output_formats",
+      "origin": "local_research_fixture",
+      "provenance_note": "Linked manifests are evidence pointers; modified fixtures are not certified as original captures.",
+      "source_manifests": [
+        {
+          "path": "analysis/capture_samples/output_formats/manifest.json",
+          "sha256": "c694efc63264d86dc4ccb49cde47c25689c4876fe9293209e19ea922b1f0ba07",
+          "contains_capture_hash": true
+        }
+      ],
+      "device_scope": "Record the actual replay adapter; fixture provenance may constrain interpretation.",
+      "reference_rgba_sha256": null,
+      "comparison_policy": "observe",
+      "boundaries": [],
+      "controls": []
+    },
+    {
+      "id": "output_formats__rgb10a2__a546d935",
+      "path": "analysis/capture_samples/output_formats/rgb10a2.gpa_frame",
+      "sha256": "89a4403af75062f4a407ce482fa8aff3e457b50cb3e3d6109e2c1c54eb93312b",
+      "bytes": 8243,
+      "family": "output_formats",
+      "origin": "local_research_fixture",
+      "provenance_note": "Linked manifests are evidence pointers; modified fixtures are not certified as original captures.",
+      "source_manifests": [
+        {
+          "path": "analysis/capture_samples/output_formats/manifest.json",
+          "sha256": "c694efc63264d86dc4ccb49cde47c25689c4876fe9293209e19ea922b1f0ba07",
+          "contains_capture_hash": true
+        }
+      ],
+      "device_scope": "Record the actual replay adapter; fixture provenance may constrain interpretation.",
+      "reference_rgba_sha256": null,
+      "comparison_policy": "observe",
+      "boundaries": [],
+      "controls": []
+    },
+    {
+      "id": "pre_raster_uav__capture__430cfa0a",
+      "path": "analysis/capture_samples/pre_raster_uav/ds-7-raw/capture.gpa_frame",
+      "sha256": "a2c6dfaa6eb40007890d1d665cd27fd53c997feecfb220330b14e0e51824aa1b",
+      "bytes": 171854,
+      "family": "pre_raster_uav",
+      "origin": "local_research_fixture",
+      "provenance_note": "Linked manifests are evidence pointers; modified fixtures are not certified as original captures.",
+      "source_manifests": [
+        {
+          "path": "analysis/capture_samples/pre_raster_uav/manifest.json",
+          "sha256": "6fc829c5d214344bfe4f08346112c2bd7f1c9675e9cd4ee85523fc4880a6c957",
+          "contains_capture_hash": true
+        }
+      ],
+      "device_scope": "Record the actual replay adapter; fixture provenance may constrain interpretation.",
+      "reference_rgba_sha256": null,
+      "comparison_policy": "observe",
+      "boundaries": [],
+      "controls": []
+    },
+    {
+      "id": "pre_raster_uav__fixture__5be8ef22",
+      "path": "analysis/capture_samples/pre_raster_uav/ds-7-raw/sources/fixture.gpa_frame",
+      "sha256": "09dcd2362287e93253a59da9c50270abd46d95e909d9e00c0ae887b5b5fcef7e",
+      "bytes": 50077,
+      "family": "pre_raster_uav",
+      "origin": "local_research_fixture",
+      "provenance_note": "Linked manifests are evidence pointers; modified fixtures are not certified as original captures.",
+      "source_manifests": [
+        {
+          "path": "analysis/capture_samples/pre_raster_uav/manifest.json",
+          "sha256": "6fc829c5d214344bfe4f08346112c2bd7f1c9675e9cd4ee85523fc4880a6c957",
+          "contains_capture_hash": false
+        }
+      ],
+      "device_scope": "Record the actual replay adapter; fixture provenance may constrain interpretation.",
+      "reference_rgba_sha256": null,
+      "comparison_policy": "observe",
+      "boundaries": [],
+      "controls": []
+    },
+    {
+      "id": "pre_raster_uav__capture__6d78f000",
+      "path": "analysis/capture_samples/pre_raster_uav/ds-8-counter/capture.gpa_frame",
+      "sha256": "632ea92bfcbdac5d3adc34dad8e319c4a39dae4e101a438d7ea9daa441d0758c",
+      "bytes": 172503,
+      "family": "pre_raster_uav",
+      "origin": "local_research_fixture",
+      "provenance_note": "Linked manifests are evidence pointers; modified fixtures are not certified as original captures.",
+      "source_manifests": [
+        {
+          "path": "analysis/capture_samples/pre_raster_uav/manifest.json",
+          "sha256": "6fc829c5d214344bfe4f08346112c2bd7f1c9675e9cd4ee85523fc4880a6c957",
+          "contains_capture_hash": true
+        }
+      ],
+      "device_scope": "Record the actual replay adapter; fixture provenance may constrain interpretation.",
+      "reference_rgba_sha256": null,
+      "comparison_policy": "observe",
+      "boundaries": [],
+      "controls": []
+    },
+    {
+      "id": "pre_raster_uav__fixture__17bd5f68",
+      "path": "analysis/capture_samples/pre_raster_uav/ds-8-counter/sources/fixture.gpa_frame",
+      "sha256": "2b1d2ba301e42b19e3b7aa1a27e329303b76da3e8e1513d97e3cf72d5e26516e",
+      "bytes": 50093,
+      "family": "pre_raster_uav",
+      "origin": "local_research_fixture",
+      "provenance_note": "Linked manifests are evidence pointers; modified fixtures are not certified as original captures.",
+      "source_manifests": [
+        {
+          "path": "analysis/capture_samples/pre_raster_uav/manifest.json",
+          "sha256": "6fc829c5d214344bfe4f08346112c2bd7f1c9675e9cd4ee85523fc4880a6c957",
+          "contains_capture_hash": false
+        }
+      ],
+      "device_scope": "Record the actual replay adapter; fixture provenance may constrain interpretation.",
+      "reference_rgba_sha256": null,
+      "comparison_policy": "observe",
+      "boundaries": [],
+      "controls": []
+    },
+    {
+      "id": "pre_raster_uav__capture__fe10c82e",
+      "path": "analysis/capture_samples/pre_raster_uav/gs-1-raw/capture.gpa_frame",
+      "sha256": "212c76c6b37c2511e2de2bb2eb3ab8c4134e330e7e5b2e12d88278ccab509ace",
+      "bytes": 154742,
+      "family": "pre_raster_uav",
+      "origin": "local_research_fixture",
+      "provenance_note": "Linked manifests are evidence pointers; modified fixtures are not certified as original captures.",
+      "source_manifests": [
+        {
+          "path": "analysis/capture_samples/pre_raster_uav/manifest.json",
+          "sha256": "6fc829c5d214344bfe4f08346112c2bd7f1c9675e9cd4ee85523fc4880a6c957",
+          "contains_capture_hash": true
+        }
+      ],
+      "device_scope": "Record the actual replay adapter; fixture provenance may constrain interpretation.",
+      "reference_rgba_sha256": null,
+      "comparison_policy": "observe",
+      "boundaries": [],
+      "controls": []
+    },
+    {
+      "id": "pre_raster_uav__fixture__3da999b2",
+      "path": "analysis/capture_samples/pre_raster_uav/gs-1-raw/sources/fixture.gpa_frame",
+      "sha256": "e853546baea8f03179cc7b7886bfca38dd6205981b81724e6fd6cac06b968ebe",
+      "bytes": 48773,
+      "family": "pre_raster_uav",
+      "origin": "local_research_fixture",
+      "provenance_note": "Linked manifests are evidence pointers; modified fixtures are not certified as original captures.",
+      "source_manifests": [
+        {
+          "path": "analysis/capture_samples/pre_raster_uav/manifest.json",
+          "sha256": "6fc829c5d214344bfe4f08346112c2bd7f1c9675e9cd4ee85523fc4880a6c957",
+          "contains_capture_hash": false
+        }
+      ],
+      "device_scope": "Record the actual replay adapter; fixture provenance may constrain interpretation.",
+      "reference_rgba_sha256": null,
+      "comparison_policy": "observe",
+      "boundaries": [],
+      "controls": []
+    },
+    {
+      "id": "pre_raster_uav__capture__4807393e",
+      "path": "analysis/capture_samples/pre_raster_uav/gs-63-counter/capture.gpa_frame",
+      "sha256": "6b2b7cb73a6fb6f229c1724d27884b97e5e56918066a006f83214ba7cc5d8274",
+      "bytes": 155491,
+      "family": "pre_raster_uav",
+      "origin": "local_research_fixture",
+      "provenance_note": "Linked manifests are evidence pointers; modified fixtures are not certified as original captures.",
+      "source_manifests": [
+        {
+          "path": "analysis/capture_samples/pre_raster_uav/manifest.json",
+          "sha256": "6fc829c5d214344bfe4f08346112c2bd7f1c9675e9cd4ee85523fc4880a6c957",
+          "contains_capture_hash": true
+        }
+      ],
+      "device_scope": "Record the actual replay adapter; fixture provenance may constrain interpretation.",
+      "reference_rgba_sha256": null,
+      "comparison_policy": "observe",
+      "boundaries": [],
+      "controls": []
+    },
+    {
+      "id": "pre_raster_uav__fixture__1337c104",
+      "path": "analysis/capture_samples/pre_raster_uav/gs-63-counter/sources/fixture.gpa_frame",
+      "sha256": "e810863cbe68a48a1e8925e727d3066a7c37509d3e1f7a63049280a86c624a50",
+      "bytes": 48889,
+      "family": "pre_raster_uav",
+      "origin": "local_research_fixture",
+      "provenance_note": "Linked manifests are evidence pointers; modified fixtures are not certified as original captures.",
+      "source_manifests": [
+        {
+          "path": "analysis/capture_samples/pre_raster_uav/manifest.json",
+          "sha256": "6fc829c5d214344bfe4f08346112c2bd7f1c9675e9cd4ee85523fc4880a6c957",
+          "contains_capture_hash": false
+        }
+      ],
+      "device_scope": "Record the actual replay adapter; fixture provenance may constrain interpretation.",
+      "reference_rgba_sha256": null,
+      "comparison_policy": "observe",
+      "boundaries": [],
+      "controls": []
+    },
+    {
+      "id": "pre_raster_uav__capture__7997d001",
+      "path": "analysis/capture_samples/pre_raster_uav/hs-4-raw/capture.gpa_frame",
+      "sha256": "2fe1a10b162995bbd3d98de1701c4ec0ad0f47defa37df0bb3bffe015f11f7fb",
+      "bytes": 171938,
+      "family": "pre_raster_uav",
+      "origin": "local_research_fixture",
+      "provenance_note": "Linked manifests are evidence pointers; modified fixtures are not certified as original captures.",
+      "source_manifests": [
+        {
+          "path": "analysis/capture_samples/pre_raster_uav/manifest.json",
+          "sha256": "6fc829c5d214344bfe4f08346112c2bd7f1c9675e9cd4ee85523fc4880a6c957",
+          "contains_capture_hash": true
+        }
+      ],
+      "device_scope": "Record the actual replay adapter; fixture provenance may constrain interpretation.",
+      "reference_rgba_sha256": null,
+      "comparison_policy": "observe",
+      "boundaries": [],
+      "controls": []
+    },
+    {
+      "id": "pre_raster_uav__fixture__2f476df1",
+      "path": "analysis/capture_samples/pre_raster_uav/hs-4-raw/sources/fixture.gpa_frame",
+      "sha256": "18c895b298f64d240cc21ed7d819669ea3b6ade6ae2e33aab50d96a7843c8cab",
+      "bytes": 50161,
+      "family": "pre_raster_uav",
+      "origin": "local_research_fixture",
+      "provenance_note": "Linked manifests are evidence pointers; modified fixtures are not certified as original captures.",
+      "source_manifests": [
+        {
+          "path": "analysis/capture_samples/pre_raster_uav/manifest.json",
+          "sha256": "6fc829c5d214344bfe4f08346112c2bd7f1c9675e9cd4ee85523fc4880a6c957",
+          "contains_capture_hash": false
+        }
+      ],
+      "device_scope": "Record the actual replay adapter; fixture provenance may constrain interpretation.",
+      "reference_rgba_sha256": null,
+      "comparison_policy": "observe",
+      "boundaries": [],
+      "controls": []
+    },
+    {
+      "id": "pre_raster_uav__capture__3ebba119",
+      "path": "analysis/capture_samples/pre_raster_uav/hs-63-counter/capture.gpa_frame",
+      "sha256": "00b274e9b06e29267c0ac8dc4ed0c44040f904854efa30a9a4feb58281f6e78b",
+      "bytes": 172663,
+      "family": "pre_raster_uav",
+      "origin": "local_research_fixture",
+      "provenance_note": "Linked manifests are evidence pointers; modified fixtures are not certified as original captures.",
+      "source_manifests": [
+        {
+          "path": "analysis/capture_samples/pre_raster_uav/manifest.json",
+          "sha256": "6fc829c5d214344bfe4f08346112c2bd7f1c9675e9cd4ee85523fc4880a6c957",
+          "contains_capture_hash": true
+        }
+      ],
+      "device_scope": "Record the actual replay adapter; fixture provenance may constrain interpretation.",
+      "reference_rgba_sha256": null,
+      "comparison_policy": "observe",
+      "boundaries": [],
+      "controls": []
+    },
+    {
+      "id": "pre_raster_uav__fixture__6d7483be",
+      "path": "analysis/capture_samples/pre_raster_uav/hs-63-counter/sources/fixture.gpa_frame",
+      "sha256": "587d855cf16a279f0c1ff13b454662effa7044fb347fa249fbbc3f476227955b",
+      "bytes": 50253,
+      "family": "pre_raster_uav",
+      "origin": "local_research_fixture",
+      "provenance_note": "Linked manifests are evidence pointers; modified fixtures are not certified as original captures.",
+      "source_manifests": [
+        {
+          "path": "analysis/capture_samples/pre_raster_uav/manifest.json",
+          "sha256": "6fc829c5d214344bfe4f08346112c2bd7f1c9675e9cd4ee85523fc4880a6c957",
+          "contains_capture_hash": false
+        }
+      ],
+      "device_scope": "Record the actual replay adapter; fixture provenance may constrain interpretation.",
+      "reference_rgba_sha256": null,
+      "comparison_policy": "observe",
+      "boundaries": [],
+      "controls": []
+    },
+    {
+      "id": "pre_raster_uav__capture__c28fd028",
+      "path": "analysis/capture_samples/pre_raster_uav/vs-1-raw/capture.gpa_frame",
+      "sha256": "b9f71ba37ac5dec7cf8d4c9c1beea176b5448dd41f56585b9471f780abe99fe8",
+      "bytes": 140014,
+      "family": "pre_raster_uav",
+      "origin": "local_research_fixture",
+      "provenance_note": "Linked manifests are evidence pointers; modified fixtures are not certified as original captures.",
+      "source_manifests": [
+        {
+          "path": "analysis/capture_samples/pre_raster_uav/manifest.json",
+          "sha256": "6fc829c5d214344bfe4f08346112c2bd7f1c9675e9cd4ee85523fc4880a6c957",
+          "contains_capture_hash": true
+        }
+      ],
+      "device_scope": "Record the actual replay adapter; fixture provenance may constrain interpretation.",
+      "reference_rgba_sha256": null,
+      "comparison_policy": "observe",
+      "boundaries": [],
+      "controls": []
+    },
+    {
+      "id": "pre_raster_uav__fixture__1561ce47",
+      "path": "analysis/capture_samples/pre_raster_uav/vs-1-raw/sources/fixture.gpa_frame",
+      "sha256": "9fe459fe8ef9cf5150e92170c0c703ae2a3544041c0bed44b716040fca227ce8",
+      "bytes": 47957,
+      "family": "pre_raster_uav",
+      "origin": "local_research_fixture",
+      "provenance_note": "Linked manifests are evidence pointers; modified fixtures are not certified as original captures.",
+      "source_manifests": [
+        {
+          "path": "analysis/capture_samples/pre_raster_uav/manifest.json",
+          "sha256": "6fc829c5d214344bfe4f08346112c2bd7f1c9675e9cd4ee85523fc4880a6c957",
+          "contains_capture_hash": false
+        }
+      ],
+      "device_scope": "Record the actual replay adapter; fixture provenance may constrain interpretation.",
+      "reference_rgba_sha256": null,
+      "comparison_policy": "observe",
+      "boundaries": [],
+      "controls": []
+    },
+    {
+      "id": "pre_raster_uav__capture__dcb6e20e",
+      "path": "analysis/capture_samples/pre_raster_uav/vs-8-counter/capture.gpa_frame",
+      "sha256": "6f159dfb84cb67b794f861fe69ab373e386c6f79b815ab0c0efdb0e7d91d3102",
+      "bytes": 140735,
+      "family": "pre_raster_uav",
+      "origin": "local_research_fixture",
+      "provenance_note": "Linked manifests are evidence pointers; modified fixtures are not certified as original captures.",
+      "source_manifests": [
+        {
+          "path": "analysis/capture_samples/pre_raster_uav/manifest.json",
+          "sha256": "6fc829c5d214344bfe4f08346112c2bd7f1c9675e9cd4ee85523fc4880a6c957",
+          "contains_capture_hash": true
+        }
+      ],
+      "device_scope": "Record the actual replay adapter; fixture provenance may constrain interpretation.",
+      "reference_rgba_sha256": null,
+      "comparison_policy": "observe",
+      "boundaries": [],
+      "controls": []
+    },
+    {
+      "id": "pre_raster_uav__fixture__b2d8c0b1",
+      "path": "analysis/capture_samples/pre_raster_uav/vs-8-counter/sources/fixture.gpa_frame",
+      "sha256": "9a1eecd4f4286563fac07906bc79e776979a2461119a6136af53ee543fe86218",
+      "bytes": 48045,
+      "family": "pre_raster_uav",
+      "origin": "local_research_fixture",
+      "provenance_note": "Linked manifests are evidence pointers; modified fixtures are not certified as original captures.",
+      "source_manifests": [
+        {
+          "path": "analysis/capture_samples/pre_raster_uav/manifest.json",
+          "sha256": "6fc829c5d214344bfe4f08346112c2bd7f1c9675e9cd4ee85523fc4880a6c957",
+          "contains_capture_hash": false
+        }
+      ],
+      "device_scope": "Record the actual replay adapter; fixture provenance may constrain interpretation.",
+      "reference_rgba_sha256": null,
+      "comparison_policy": "observe",
+      "boundaries": [],
+      "controls": []
+    },
+    {
+      "id": "pre_raster_uav_verified__capture__f28676a4",
+      "path": "analysis/capture_samples/pre_raster_uav_verified/ds-7-raw/capture.gpa_frame",
+      "sha256": "a1cf1712786b1d3e5a72be36f5e8649fd29529b0f0afbd72c35260be415e9665",
+      "bytes": 171854,
+      "family": "pre_raster_uav_verified",
+      "origin": "local_research_fixture",
+      "provenance_note": "Linked manifests are evidence pointers; modified fixtures are not certified as original captures.",
+      "source_manifests": [
+        {
+          "path": "analysis/capture_samples/pre_raster_uav_verified/manifest.json",
+          "sha256": "63f1cccbcf8188afd3cad099e107041f21b83a7305b1f70ff7ecd67d088a2dfc",
+          "contains_capture_hash": true
+        }
+      ],
+      "device_scope": "Record the actual replay adapter; fixture provenance may constrain interpretation.",
+      "reference_rgba_sha256": null,
+      "comparison_policy": "observe",
+      "boundaries": [],
+      "controls": []
+    },
+    {
+      "id": "pre_raster_uav_verified__fixture__9526fa08",
+      "path": "analysis/capture_samples/pre_raster_uav_verified/ds-7-raw/sources/fixture.gpa_frame",
+      "sha256": "09dcd2362287e93253a59da9c50270abd46d95e909d9e00c0ae887b5b5fcef7e",
+      "bytes": 50077,
+      "family": "pre_raster_uav_verified",
+      "origin": "local_research_fixture",
+      "provenance_note": "Linked manifests are evidence pointers; modified fixtures are not certified as original captures.",
+      "source_manifests": [
+        {
+          "path": "analysis/capture_samples/pre_raster_uav_verified/manifest.json",
+          "sha256": "63f1cccbcf8188afd3cad099e107041f21b83a7305b1f70ff7ecd67d088a2dfc",
+          "contains_capture_hash": false
+        }
+      ],
+      "device_scope": "Record the actual replay adapter; fixture provenance may constrain interpretation.",
+      "reference_rgba_sha256": null,
+      "comparison_policy": "observe",
+      "boundaries": [],
+      "controls": []
+    },
+    {
+      "id": "pre_raster_uav_verified__capture__9afdbc9b",
+      "path": "analysis/capture_samples/pre_raster_uav_verified/ds-8-counter/capture.gpa_frame",
+      "sha256": "944a28207d0869c7b9dde6781ef268da4968a08f2b883ee9fe06bd414bef5d2a",
+      "bytes": 172503,
+      "family": "pre_raster_uav_verified",
+      "origin": "local_research_fixture",
+      "provenance_note": "Linked manifests are evidence pointers; modified fixtures are not certified as original captures.",
+      "source_manifests": [
+        {
+          "path": "analysis/capture_samples/pre_raster_uav_verified/manifest.json",
+          "sha256": "63f1cccbcf8188afd3cad099e107041f21b83a7305b1f70ff7ecd67d088a2dfc",
+          "contains_capture_hash": true
+        }
+      ],
+      "device_scope": "Record the actual replay adapter; fixture provenance may constrain interpretation.",
+      "reference_rgba_sha256": null,
+      "comparison_policy": "observe",
+      "boundaries": [],
+      "controls": []
+    },
+    {
+      "id": "pre_raster_uav_verified__fixture__3f90a56d",
+      "path": "analysis/capture_samples/pre_raster_uav_verified/ds-8-counter/sources/fixture.gpa_frame",
+      "sha256": "2b1d2ba301e42b19e3b7aa1a27e329303b76da3e8e1513d97e3cf72d5e26516e",
+      "bytes": 50093,
+      "family": "pre_raster_uav_verified",
+      "origin": "local_research_fixture",
+      "provenance_note": "Linked manifests are evidence pointers; modified fixtures are not certified as original captures.",
+      "source_manifests": [
+        {
+          "path": "analysis/capture_samples/pre_raster_uav_verified/manifest.json",
+          "sha256": "63f1cccbcf8188afd3cad099e107041f21b83a7305b1f70ff7ecd67d088a2dfc",
+          "contains_capture_hash": false
+        }
+      ],
+      "device_scope": "Record the actual replay adapter; fixture provenance may constrain interpretation.",
+      "reference_rgba_sha256": null,
+      "comparison_policy": "observe",
+      "boundaries": [],
+      "controls": []
+    },
+    {
+      "id": "pre_raster_uav_verified__capture__4db6dd7c",
+      "path": "analysis/capture_samples/pre_raster_uav_verified/gs-1-raw/capture.gpa_frame",
+      "sha256": "408c13d107c2cb499155b48bd24fafd79a16c71d7f0fe5399ebb5eb25fe6cabf",
+      "bytes": 154742,
+      "family": "pre_raster_uav_verified",
+      "origin": "local_research_fixture",
+      "provenance_note": "Linked manifests are evidence pointers; modified fixtures are not certified as original captures.",
+      "source_manifests": [
+        {
+          "path": "analysis/capture_samples/pre_raster_uav_verified/manifest.json",
+          "sha256": "63f1cccbcf8188afd3cad099e107041f21b83a7305b1f70ff7ecd67d088a2dfc",
+          "contains_capture_hash": true
+        }
+      ],
+      "device_scope": "Record the actual replay adapter; fixture provenance may constrain interpretation.",
+      "reference_rgba_sha256": null,
+      "comparison_policy": "observe",
+      "boundaries": [],
+      "controls": []
+    },
+    {
+      "id": "pre_raster_uav_verified__fixture__0f88e6e2",
+      "path": "analysis/capture_samples/pre_raster_uav_verified/gs-1-raw/sources/fixture.gpa_frame",
+      "sha256": "e853546baea8f03179cc7b7886bfca38dd6205981b81724e6fd6cac06b968ebe",
+      "bytes": 48773,
+      "family": "pre_raster_uav_verified",
+      "origin": "local_research_fixture",
+      "provenance_note": "Linked manifests are evidence pointers; modified fixtures are not certified as original captures.",
+      "source_manifests": [
+        {
+          "path": "analysis/capture_samples/pre_raster_uav_verified/manifest.json",
+          "sha256": "63f1cccbcf8188afd3cad099e107041f21b83a7305b1f70ff7ecd67d088a2dfc",
+          "contains_capture_hash": false
+        }
+      ],
+      "device_scope": "Record the actual replay adapter; fixture provenance may constrain interpretation.",
+      "reference_rgba_sha256": null,
+      "comparison_policy": "observe",
+      "boundaries": [],
+      "controls": []
+    },
+    {
+      "id": "pre_raster_uav_verified__capture__4855b71d",
+      "path": "analysis/capture_samples/pre_raster_uav_verified/gs-63-counter/capture.gpa_frame",
+      "sha256": "feb80d3fb77dad84bf423cb8ea32cd0c2c918da216874efb015514319ca6fcaf",
+      "bytes": 155491,
+      "family": "pre_raster_uav_verified",
+      "origin": "local_research_fixture",
+      "provenance_note": "Linked manifests are evidence pointers; modified fixtures are not certified as original captures.",
+      "source_manifests": [
+        {
+          "path": "analysis/capture_samples/pre_raster_uav_verified/manifest.json",
+          "sha256": "63f1cccbcf8188afd3cad099e107041f21b83a7305b1f70ff7ecd67d088a2dfc",
+          "contains_capture_hash": true
+        }
+      ],
+      "device_scope": "Record the actual replay adapter; fixture provenance may constrain interpretation.",
+      "reference_rgba_sha256": null,
+      "comparison_policy": "observe",
+      "boundaries": [],
+      "controls": []
+    },
+    {
+      "id": "pre_raster_uav_verified__fixture__7a7de406",
+      "path": "analysis/capture_samples/pre_raster_uav_verified/gs-63-counter/sources/fixture.gpa_frame",
+      "sha256": "e810863cbe68a48a1e8925e727d3066a7c37509d3e1f7a63049280a86c624a50",
+      "bytes": 48889,
+      "family": "pre_raster_uav_verified",
+      "origin": "local_research_fixture",
+      "provenance_note": "Linked manifests are evidence pointers; modified fixtures are not certified as original captures.",
+      "source_manifests": [
+        {
+          "path": "analysis/capture_samples/pre_raster_uav_verified/manifest.json",
+          "sha256": "63f1cccbcf8188afd3cad099e107041f21b83a7305b1f70ff7ecd67d088a2dfc",
+          "contains_capture_hash": false
+        }
+      ],
+      "device_scope": "Record the actual replay adapter; fixture provenance may constrain interpretation.",
+      "reference_rgba_sha256": null,
+      "comparison_policy": "observe",
+      "boundaries": [],
+      "controls": []
+    },
+    {
+      "id": "pre_raster_uav_verified__capture__0b5bbe9c",
+      "path": "analysis/capture_samples/pre_raster_uav_verified/hs-4-raw/capture.gpa_frame",
+      "sha256": "bd74ebe64b0148a76495819786b18b5e57e7e65effe873888d522d8d3535f337",
+      "bytes": 171938,
+      "family": "pre_raster_uav_verified",
+      "origin": "local_research_fixture",
+      "provenance_note": "Linked manifests are evidence pointers; modified fixtures are not certified as original captures.",
+      "source_manifests": [
+        {
+          "path": "analysis/capture_samples/pre_raster_uav_verified/manifest.json",
+          "sha256": "63f1cccbcf8188afd3cad099e107041f21b83a7305b1f70ff7ecd67d088a2dfc",
+          "contains_capture_hash": true
+        }
+      ],
+      "device_scope": "Record the actual replay adapter; fixture provenance may constrain interpretation.",
+      "reference_rgba_sha256": null,
+      "comparison_policy": "observe",
+      "boundaries": [],
+      "controls": []
+    },
+    {
+      "id": "pre_raster_uav_verified__fixture__3722fd17",
+      "path": "analysis/capture_samples/pre_raster_uav_verified/hs-4-raw/sources/fixture.gpa_frame",
+      "sha256": "18c895b298f64d240cc21ed7d819669ea3b6ade6ae2e33aab50d96a7843c8cab",
+      "bytes": 50161,
+      "family": "pre_raster_uav_verified",
+      "origin": "local_research_fixture",
+      "provenance_note": "Linked manifests are evidence pointers; modified fixtures are not certified as original captures.",
+      "source_manifests": [
+        {
+          "path": "analysis/capture_samples/pre_raster_uav_verified/manifest.json",
+          "sha256": "63f1cccbcf8188afd3cad099e107041f21b83a7305b1f70ff7ecd67d088a2dfc",
+          "contains_capture_hash": false
+        }
+      ],
+      "device_scope": "Record the actual replay adapter; fixture provenance may constrain interpretation.",
+      "reference_rgba_sha256": null,
+      "comparison_policy": "observe",
+      "boundaries": [],
+      "controls": []
+    },
+    {
+      "id": "pre_raster_uav_verified__capture__45ad7ba9",
+      "path": "analysis/capture_samples/pre_raster_uav_verified/hs-63-counter/capture.gpa_frame",
+      "sha256": "be42c9de3c9f27c578b5f39ffe6b8d1d152d2f54fe4a501573dc729decbd9906",
+      "bytes": 172663,
+      "family": "pre_raster_uav_verified",
+      "origin": "local_research_fixture",
+      "provenance_note": "Linked manifests are evidence pointers; modified fixtures are not certified as original captures.",
+      "source_manifests": [
+        {
+          "path": "analysis/capture_samples/pre_raster_uav_verified/manifest.json",
+          "sha256": "63f1cccbcf8188afd3cad099e107041f21b83a7305b1f70ff7ecd67d088a2dfc",
+          "contains_capture_hash": true
+        }
+      ],
+      "device_scope": "Record the actual replay adapter; fixture provenance may constrain interpretation.",
+      "reference_rgba_sha256": null,
+      "comparison_policy": "observe",
+      "boundaries": [],
+      "controls": []
+    },
+    {
+      "id": "pre_raster_uav_verified__fixture__ff36efc3",
+      "path": "analysis/capture_samples/pre_raster_uav_verified/hs-63-counter/sources/fixture.gpa_frame",
+      "sha256": "587d855cf16a279f0c1ff13b454662effa7044fb347fa249fbbc3f476227955b",
+      "bytes": 50253,
+      "family": "pre_raster_uav_verified",
+      "origin": "local_research_fixture",
+      "provenance_note": "Linked manifests are evidence pointers; modified fixtures are not certified as original captures.",
+      "source_manifests": [
+        {
+          "path": "analysis/capture_samples/pre_raster_uav_verified/manifest.json",
+          "sha256": "63f1cccbcf8188afd3cad099e107041f21b83a7305b1f70ff7ecd67d088a2dfc",
+          "contains_capture_hash": false
+        }
+      ],
+      "device_scope": "Record the actual replay adapter; fixture provenance may constrain interpretation.",
+      "reference_rgba_sha256": null,
+      "comparison_policy": "observe",
+      "boundaries": [],
+      "controls": []
+    },
+    {
+      "id": "pre_raster_uav_verified__capture__ef27623f",
+      "path": "analysis/capture_samples/pre_raster_uav_verified/vs-1-raw/capture.gpa_frame",
+      "sha256": "65a2ab43f294e37b7988957b9541b9daf857fecd388ad20afbf7dd83ab58f8ec",
+      "bytes": 140014,
+      "family": "pre_raster_uav_verified",
+      "origin": "local_research_fixture",
+      "provenance_note": "Linked manifests are evidence pointers; modified fixtures are not certified as original captures.",
+      "source_manifests": [
+        {
+          "path": "analysis/capture_samples/pre_raster_uav_verified/manifest.json",
+          "sha256": "63f1cccbcf8188afd3cad099e107041f21b83a7305b1f70ff7ecd67d088a2dfc",
+          "contains_capture_hash": true
+        }
+      ],
+      "device_scope": "Record the actual replay adapter; fixture provenance may constrain interpretation.",
+      "reference_rgba_sha256": null,
+      "comparison_policy": "observe",
+      "boundaries": [],
+      "controls": []
+    },
+    {
+      "id": "pre_raster_uav_verified__fixture__eead4cd6",
+      "path": "analysis/capture_samples/pre_raster_uav_verified/vs-1-raw/sources/fixture.gpa_frame",
+      "sha256": "9fe459fe8ef9cf5150e92170c0c703ae2a3544041c0bed44b716040fca227ce8",
+      "bytes": 47957,
+      "family": "pre_raster_uav_verified",
+      "origin": "local_research_fixture",
+      "provenance_note": "Linked manifests are evidence pointers; modified fixtures are not certified as original captures.",
+      "source_manifests": [
+        {
+          "path": "analysis/capture_samples/pre_raster_uav_verified/manifest.json",
+          "sha256": "63f1cccbcf8188afd3cad099e107041f21b83a7305b1f70ff7ecd67d088a2dfc",
+          "contains_capture_hash": false
+        }
+      ],
+      "device_scope": "Record the actual replay adapter; fixture provenance may constrain interpretation.",
+      "reference_rgba_sha256": null,
+      "comparison_policy": "observe",
+      "boundaries": [],
+      "controls": []
+    },
+    {
+      "id": "pre_raster_uav_verified__capture__9b6d1554",
+      "path": "analysis/capture_samples/pre_raster_uav_verified/vs-8-counter/capture.gpa_frame",
+      "sha256": "011c309f1ed3b76d2fab8cad211db91c06c19ae9befa12586b3ca2d92c536661",
+      "bytes": 140735,
+      "family": "pre_raster_uav_verified",
+      "origin": "local_research_fixture",
+      "provenance_note": "Linked manifests are evidence pointers; modified fixtures are not certified as original captures.",
+      "source_manifests": [
+        {
+          "path": "analysis/capture_samples/pre_raster_uav_verified/manifest.json",
+          "sha256": "63f1cccbcf8188afd3cad099e107041f21b83a7305b1f70ff7ecd67d088a2dfc",
+          "contains_capture_hash": true
+        }
+      ],
+      "device_scope": "Record the actual replay adapter; fixture provenance may constrain interpretation.",
+      "reference_rgba_sha256": null,
+      "comparison_policy": "observe",
+      "boundaries": [],
+      "controls": []
+    },
+    {
+      "id": "pre_raster_uav_verified__fixture__12dcdb5e",
+      "path": "analysis/capture_samples/pre_raster_uav_verified/vs-8-counter/sources/fixture.gpa_frame",
+      "sha256": "9a1eecd4f4286563fac07906bc79e776979a2461119a6136af53ee543fe86218",
+      "bytes": 48045,
+      "family": "pre_raster_uav_verified",
+      "origin": "local_research_fixture",
+      "provenance_note": "Linked manifests are evidence pointers; modified fixtures are not certified as original captures.",
+      "source_manifests": [
+        {
+          "path": "analysis/capture_samples/pre_raster_uav_verified/manifest.json",
+          "sha256": "63f1cccbcf8188afd3cad099e107041f21b83a7305b1f70ff7ecd67d088a2dfc",
+          "contains_capture_hash": false
+        }
+      ],
+      "device_scope": "Record the actual replay adapter; fixture provenance may constrain interpretation.",
+      "reference_rgba_sha256": null,
+      "comparison_policy": "observe",
+      "boundaries": [],
+      "controls": []
+    },
+    {
+      "id": "preframe_counters__fixture__bfed6d59",
+      "path": "analysis/capture_samples/preframe_counters/vs-1/sources/fixture.gpa_frame",
+      "sha256": "9ee9b578e7c90804ae4490471c395adf80895536d81674ea0b1505b6709a880a",
+      "bytes": 48045,
+      "family": "preframe_counters",
+      "origin": "local_research_fixture",
+      "provenance_note": "Linked manifests are evidence pointers; modified fixtures are not certified as original captures.",
+      "source_manifests": [],
+      "device_scope": "Record the actual replay adapter; fixture provenance may constrain interpretation.",
+      "reference_rgba_sha256": null,
+      "comparison_policy": "observe",
+      "boundaries": [],
+      "controls": []
+    },
+    {
+      "id": "preframe_counters2__capture__b7fac0a3",
+      "path": "analysis/capture_samples/preframe_counters2/ds-8/capture.gpa_frame",
+      "sha256": "d54cf0f75eb8f4d2e3db0f4583a6c4256a80496beb2f2edf0f2306612d9cfe2f",
+      "bytes": 175061,
+      "family": "preframe_counters2",
+      "origin": "local_research_fixture",
+      "provenance_note": "Linked manifests are evidence pointers; modified fixtures are not certified as original captures.",
+      "source_manifests": [
+        {
+          "path": "analysis/capture_samples/preframe_counters2/manifest.json",
+          "sha256": "ec42ac3f56a333962f6887a9395918e241d35669622e7865de60085b70041a44",
+          "contains_capture_hash": true
+        }
+      ],
+      "device_scope": "Record the actual replay adapter; fixture provenance may constrain interpretation.",
+      "reference_rgba_sha256": null,
+      "comparison_policy": "observe",
+      "boundaries": [],
+      "controls": []
+    },
+    {
+      "id": "preframe_counters2__fixture__f080032d",
+      "path": "analysis/capture_samples/preframe_counters2/ds-8/sources/fixture.gpa_frame",
+      "sha256": "2b1d2ba301e42b19e3b7aa1a27e329303b76da3e8e1513d97e3cf72d5e26516e",
+      "bytes": 50093,
+      "family": "preframe_counters2",
+      "origin": "local_research_fixture",
+      "provenance_note": "Linked manifests are evidence pointers; modified fixtures are not certified as original captures.",
+      "source_manifests": [
+        {
+          "path": "analysis/capture_samples/preframe_counters2/manifest.json",
+          "sha256": "ec42ac3f56a333962f6887a9395918e241d35669622e7865de60085b70041a44",
+          "contains_capture_hash": false
+        }
+      ],
+      "device_scope": "Record the actual replay adapter; fixture provenance may constrain interpretation.",
+      "reference_rgba_sha256": null,
+      "comparison_policy": "observe",
+      "boundaries": [],
+      "controls": []
+    },
+    {
+      "id": "preframe_counters2__capture__0bc6288d",
+      "path": "analysis/capture_samples/preframe_counters2/gs-1/capture.gpa_frame",
+      "sha256": "2b404fcd3e730f6d472405fd1dd3c8130b6af66be528ffee37d7a2223b918a57",
+      "bytes": 158049,
+      "family": "preframe_counters2",
+      "origin": "local_research_fixture",
+      "provenance_note": "Linked manifests are evidence pointers; modified fixtures are not certified as original captures.",
+      "source_manifests": [
+        {
+          "path": "analysis/capture_samples/preframe_counters2/manifest.json",
+          "sha256": "ec42ac3f56a333962f6887a9395918e241d35669622e7865de60085b70041a44",
+          "contains_capture_hash": true
+        }
+      ],
+      "device_scope": "Record the actual replay adapter; fixture provenance may constrain interpretation.",
+      "reference_rgba_sha256": null,
+      "comparison_policy": "observe",
+      "boundaries": [],
+      "controls": []
+    },
+    {
+      "id": "preframe_counters2__fixture__71ac4e94",
+      "path": "analysis/capture_samples/preframe_counters2/gs-1/sources/fixture.gpa_frame",
+      "sha256": "83ea33a5e0aa9a0e8fe12992cef61a4f20a33fc9cdd45edb6a76e7ebb6be3cfd",
+      "bytes": 48889,
+      "family": "preframe_counters2",
+      "origin": "local_research_fixture",
+      "provenance_note": "Linked manifests are evidence pointers; modified fixtures are not certified as original captures.",
+      "source_manifests": [
+        {
+          "path": "analysis/capture_samples/preframe_counters2/manifest.json",
+          "sha256": "ec42ac3f56a333962f6887a9395918e241d35669622e7865de60085b70041a44",
+          "contains_capture_hash": false
+        }
+      ],
+      "device_scope": "Record the actual replay adapter; fixture provenance may constrain interpretation.",
+      "reference_rgba_sha256": null,
+      "comparison_policy": "observe",
+      "boundaries": [],
+      "controls": []
+    },
+    {
+      "id": "preframe_counters2__capture__68538996",
+      "path": "analysis/capture_samples/preframe_counters2/hs-4/capture.gpa_frame",
+      "sha256": "77d83a7492ef391ac313f8bfab0b339cc254eab8ca2cf08f8e8c53f5d8e93219",
+      "bytes": 175221,
+      "family": "preframe_counters2",
+      "origin": "local_research_fixture",
+      "provenance_note": "Linked manifests are evidence pointers; modified fixtures are not certified as original captures.",
+      "source_manifests": [
+        {
+          "path": "analysis/capture_samples/preframe_counters2/manifest.json",
+          "sha256": "ec42ac3f56a333962f6887a9395918e241d35669622e7865de60085b70041a44",
+          "contains_capture_hash": true
+        }
+      ],
+      "device_scope": "Record the actual replay adapter; fixture provenance may constrain interpretation.",
+      "reference_rgba_sha256": null,
+      "comparison_policy": "observe",
+      "boundaries": [],
+      "controls": []
+    },
+    {
+      "id": "preframe_counters2__fixture__200ba678",
+      "path": "analysis/capture_samples/preframe_counters2/hs-4/sources/fixture.gpa_frame",
+      "sha256": "75d1072e59a80269d9d2d45ef33990f4815fa3e5fdb7fe9088596b11463b5d0a",
+      "bytes": 50253,
+      "family": "preframe_counters2",
+      "origin": "local_research_fixture",
+      "provenance_note": "Linked manifests are evidence pointers; modified fixtures are not certified as original captures.",
+      "source_manifests": [
+        {
+          "path": "analysis/capture_samples/preframe_counters2/manifest.json",
+          "sha256": "ec42ac3f56a333962f6887a9395918e241d35669622e7865de60085b70041a44",
+          "contains_capture_hash": false
+        }
+      ],
+      "device_scope": "Record the actual replay adapter; fixture provenance may constrain interpretation.",
+      "reference_rgba_sha256": null,
+      "comparison_policy": "observe",
+      "boundaries": [],
+      "controls": []
+    },
+    {
+      "id": "preframe_counters2__capture__213aa7b7",
+      "path": "analysis/capture_samples/preframe_counters2/vs-1/capture.gpa_frame",
+      "sha256": "4d6e1bf41f3670b6ee6989da11d6fe78d386d80b60dc299b2ef7b973c3c26f0a",
+      "bytes": 143293,
+      "family": "preframe_counters2",
+      "origin": "local_research_fixture",
+      "provenance_note": "Linked manifests are evidence pointers; modified fixtures are not certified as original captures.",
+      "source_manifests": [
+        {
+          "path": "analysis/capture_samples/preframe_counters2/manifest.json",
+          "sha256": "ec42ac3f56a333962f6887a9395918e241d35669622e7865de60085b70041a44",
+          "contains_capture_hash": true
+        }
+      ],
+      "device_scope": "Record the actual replay adapter; fixture provenance may constrain interpretation.",
+      "reference_rgba_sha256": null,
+      "comparison_policy": "observe",
+      "boundaries": [],
+      "controls": []
+    },
+    {
+      "id": "preframe_counters2__fixture__543daeb0",
+      "path": "analysis/capture_samples/preframe_counters2/vs-1/sources/fixture.gpa_frame",
+      "sha256": "9ee9b578e7c90804ae4490471c395adf80895536d81674ea0b1505b6709a880a",
+      "bytes": 48045,
+      "family": "preframe_counters2",
+      "origin": "local_research_fixture",
+      "provenance_note": "Linked manifests are evidence pointers; modified fixtures are not certified as original captures.",
+      "source_manifests": [
+        {
+          "path": "analysis/capture_samples/preframe_counters2/manifest.json",
+          "sha256": "ec42ac3f56a333962f6887a9395918e241d35669622e7865de60085b70041a44",
+          "contains_capture_hash": false
+        }
+      ],
+      "device_scope": "Record the actual replay adapter; fixture provenance may constrain interpretation.",
+      "reference_rgba_sha256": null,
+      "comparison_policy": "observe",
+      "boundaries": [],
+      "controls": []
+    },
+    {
+      "id": "queries__queries__f9f66bd4",
+      "path": "analysis/capture_samples/queries/queries.gpa_frame",
+      "sha256": "241e26d3ed1774d5ec10c6ee2599bf539b3c12e9f2bc4bd98d4b68eca6eb4d99",
+      "bytes": 257776,
+      "family": "queries",
+      "origin": "local_research_fixture",
+      "provenance_note": "Linked manifests are evidence pointers; modified fixtures are not certified as original captures.",
+      "source_manifests": [
+        {
+          "path": "analysis/capture_samples/queries/manifest.json",
+          "sha256": "199d43aad2917c9c581190404dce3a373b299a88efee5d67fd86ae987d7d9135",
+          "contains_capture_hash": true
+        }
+      ],
+      "device_scope": "Record the actual replay adapter; fixture provenance may constrain interpretation.",
+      "reference_rgba_sha256": null,
+      "comparison_policy": "observe",
+      "boundaries": [],
+      "controls": []
+    },
+    {
+      "id": "shader_project__project__325793fb",
+      "path": "analysis/capture_samples/shader_project/project.gpa_frame",
+      "sha256": "4d55e47a714240c4ae6546d3c471e8598a1719ba16c3b5b84432954231f4f7b6",
+      "bytes": 261889,
+      "family": "shader_project",
+      "origin": "local_research_fixture",
+      "provenance_note": "Linked manifests are evidence pointers; modified fixtures are not certified as original captures.",
+      "source_manifests": [
+        {
+          "path": "analysis/capture_samples/shader_project/manifest.json",
+          "sha256": "2bdafd537f043ad8ad5f89f8e5bbddb245ee6ecc18589677ce1e2f1f3c5a5457",
+          "contains_capture_hash": true
+        }
+      ],
+      "device_scope": "Record the actual replay adapter; fixture provenance may constrain interpretation.",
+      "reference_rgba_sha256": null,
+      "comparison_policy": "observe",
+      "boundaries": [],
+      "controls": []
+    },
+    {
+      "id": "shader_sources__source__843eabfa",
+      "path": "analysis/capture_samples/shader_sources/source.gpa_frame",
+      "sha256": "edfea0dfee8338db3e5826adf519792ca6eff3f3e4e0064c5e66c7e9cd8cadc8",
+      "bytes": 257857,
+      "family": "shader_sources",
+      "origin": "local_research_fixture",
+      "provenance_note": "Linked manifests are evidence pointers; modified fixtures are not certified as original captures.",
+      "source_manifests": [
+        {
+          "path": "analysis/capture_samples/shader_sources/manifest.json",
+          "sha256": "36c0029335965c1ff196d8ed5a14550f99628d33c78ae1a6b4c12d49f53700aa",
+          "contains_capture_hash": true
+        }
+      ],
+      "device_scope": "Record the actual replay adapter; fixture provenance may constrain interpretation.",
+      "reference_rgba_sha256": null,
+      "comparison_policy": "observe",
+      "boundaries": [],
+      "controls": []
+    },
+    {
+      "id": "stream_output__geometry__79e02e58",
+      "path": "analysis/capture_samples/stream_output/geometry.gpa_frame",
+      "sha256": "b32fbf1d4cd808ce966b04cb407715ab645710c950f5a77d86c5e933cf89ccdb",
+      "bytes": 243578,
+      "family": "stream_output",
+      "origin": "local_research_fixture",
+      "provenance_note": "Linked manifests are evidence pointers; modified fixtures are not certified as original captures.",
+      "source_manifests": [
+        {
+          "path": "analysis/capture_samples/stream_output/manifest.json",
+          "sha256": "c605f3a51479e7f787c7af04b856e74cd87e54a5219d05f73a4a759197a42c97",
+          "contains_capture_hash": true
+        }
+      ],
+      "device_scope": "Record the actual replay adapter; fixture provenance may constrain interpretation.",
+      "reference_rgba_sha256": null,
+      "comparison_policy": "observe",
+      "boundaries": [],
+      "controls": []
+    },
+    {
+      "id": "stream_output__null-gs__da13691e",
+      "path": "analysis/capture_samples/stream_output/null-gs.gpa_frame",
+      "sha256": "b2d6881cc42c545d32d2e46f40c705377a051c8c70c98ad315fe4969b6c34c92",
+      "bytes": 229002,
+      "family": "stream_output",
+      "origin": "local_research_fixture",
+      "provenance_note": "Linked manifests are evidence pointers; modified fixtures are not certified as original captures.",
+      "source_manifests": [
+        {
+          "path": "analysis/capture_samples/stream_output/manifest.json",
+          "sha256": "c605f3a51479e7f787c7af04b856e74cd87e54a5219d05f73a4a759197a42c97",
+          "contains_capture_hash": true
+        }
+      ],
+      "device_scope": "Record the actual replay adapter; fixture provenance may constrain interpretation.",
+      "reference_rgba_sha256": null,
+      "comparison_policy": "observe",
+      "boundaries": [],
+      "controls": []
+    },
+    {
+      "id": "stream_output__relay__03cd139b",
+      "path": "analysis/capture_samples/stream_output/relay.gpa_frame",
+      "sha256": "703a75a5ba8a6660ba212c0b8a16cc9573c01dba1fa042723b8cdb49c5744139",
+      "bytes": 251857,
+      "family": "stream_output",
+      "origin": "local_research_fixture",
+      "provenance_note": "Linked manifests are evidence pointers; modified fixtures are not certified as original captures.",
+      "source_manifests": [
+        {
+          "path": "analysis/capture_samples/stream_output/manifest.json",
+          "sha256": "c605f3a51479e7f787c7af04b856e74cd87e54a5219d05f73a4a759197a42c97",
+          "contains_capture_hash": true
+        }
+      ],
+      "device_scope": "Record the actual replay adapter; fixture provenance may constrain interpretation.",
+      "reference_rgba_sha256": null,
+      "comparison_policy": "observe",
+      "boundaries": [],
+      "controls": []
+    },
+    {
+      "id": "target_dimensions__capture__351e056a",
+      "path": "analysis/capture_samples/target_dimensions/1d/capture.gpa_frame",
+      "sha256": "cab90342d5e9c2658a9d65d1570b22e766aae7fd8cb9b655713dcab24e83c6a8",
+      "bytes": 179606,
+      "family": "target_dimensions",
+      "origin": "local_research_fixture",
+      "provenance_note": "Linked manifests are evidence pointers; modified fixtures are not certified as original captures.",
+      "source_manifests": [
+        {
+          "path": "analysis/capture_samples/target_dimensions/manifest.json",
+          "sha256": "9e0a9187181081fe1ce824f8aab3aa05ce5fda74b62e926fa3293b4ba18644a1",
+          "contains_capture_hash": true
+        }
+      ],
+      "device_scope": "Record the actual replay adapter; fixture provenance may constrain interpretation.",
+      "reference_rgba_sha256": null,
+      "comparison_policy": "observe",
+      "boundaries": [],
+      "controls": []
+    },
+    {
+      "id": "target_dimensions__capture__f9b3ef1f",
+      "path": "analysis/capture_samples/target_dimensions/1d-array/capture.gpa_frame",
+      "sha256": "101b1c381639ec8102d78b1e0947b673b85d3de0deaf2b750bf2e2b3409427cb",
+      "bytes": 196500,
+      "family": "target_dimensions",
+      "origin": "local_research_fixture",
+      "provenance_note": "Linked manifests are evidence pointers; modified fixtures are not certified as original captures.",
+      "source_manifests": [
+        {
+          "path": "analysis/capture_samples/target_dimensions/manifest.json",
+          "sha256": "9e0a9187181081fe1ce824f8aab3aa05ce5fda74b62e926fa3293b4ba18644a1",
+          "contains_capture_hash": true
+        }
+      ],
+      "device_scope": "Record the actual replay adapter; fixture provenance may constrain interpretation.",
+      "reference_rgba_sha256": null,
+      "comparison_policy": "observe",
+      "boundaries": [],
+      "controls": []
+    },
+    {
+      "id": "target_dimensions__capture__585a9e38",
+      "path": "analysis/capture_samples/target_dimensions/1d-depth/capture.gpa_frame",
+      "sha256": "6d2feb41849383c2824334dd27eff5d8aa8efa4e01135e6fcb944ba387ac214d",
+      "bytes": 197414,
+      "family": "target_dimensions",
+      "origin": "local_research_fixture",
+      "provenance_note": "Linked manifests are evidence pointers; modified fixtures are not certified as original captures.",
+      "source_manifests": [
+        {
+          "path": "analysis/capture_samples/target_dimensions/manifest.json",
+          "sha256": "9e0a9187181081fe1ce824f8aab3aa05ce5fda74b62e926fa3293b4ba18644a1",
+          "contains_capture_hash": true
+        }
+      ],
+      "device_scope": "Record the actual replay adapter; fixture provenance may constrain interpretation.",
+      "reference_rgba_sha256": null,
+      "comparison_policy": "observe",
+      "boundaries": [],
+      "controls": []
+    },
+    {
+      "id": "target_dimensions__capture__ce2541c8",
+      "path": "analysis/capture_samples/target_dimensions/3d/capture.gpa_frame",
+      "sha256": "d4d5e4d9f2bfb77d639ba80608e87eaf06fb837e21c0efb29238d990019decaf",
+      "bytes": 207866,
+      "family": "target_dimensions",
+      "origin": "local_research_fixture",
+      "provenance_note": "Linked manifests are evidence pointers; modified fixtures are not certified as original captures.",
+      "source_manifests": [
+        {
+          "path": "analysis/capture_samples/target_dimensions/manifest.json",
+          "sha256": "9e0a9187181081fe1ce824f8aab3aa05ce5fda74b62e926fa3293b4ba18644a1",
+          "contains_capture_hash": true
+        }
+      ],
+      "device_scope": "Record the actual replay adapter; fixture provenance may constrain interpretation.",
+      "reference_rgba_sha256": null,
+      "comparison_policy": "observe",
+      "boundaries": [],
+      "controls": []
+    },
+    {
+      "id": "target_dimensions__capture__37f22692",
+      "path": "analysis/capture_samples/target_dimensions/buffer/capture.gpa_frame",
+      "sha256": "f6f23bcd2e7af77b940a29c25d9b2e185a5c4d55e47f80e680ded4ddb8409de9",
+      "bytes": 179493,
+      "family": "target_dimensions",
+      "origin": "local_research_fixture",
+      "provenance_note": "Linked manifests are evidence pointers; modified fixtures are not certified as original captures.",
+      "source_manifests": [
+        {
+          "path": "analysis/capture_samples/target_dimensions/manifest.json",
+          "sha256": "9e0a9187181081fe1ce824f8aab3aa05ce5fda74b62e926fa3293b4ba18644a1",
+          "contains_capture_hash": true
+        }
+      ],
+      "device_scope": "Record the actual replay adapter; fixture provenance may constrain interpretation.",
+      "reference_rgba_sha256": null,
+      "comparison_policy": "observe",
+      "boundaries": [],
+      "controls": []
+    },
+    {
+      "id": "target_dimensions__capture__102c900b",
+      "path": "analysis/capture_samples/target_dimensions/buffer-sparse/capture.gpa_frame",
+      "sha256": "fc88ec83a60ad18359e6cb96962d401eb1b54dcac6577c6b91672ad645127664",
+      "bytes": 179541,
+      "family": "target_dimensions",
+      "origin": "local_research_fixture",
+      "provenance_note": "Linked manifests are evidence pointers; modified fixtures are not certified as original captures.",
+      "source_manifests": [
+        {
+          "path": "analysis/capture_samples/target_dimensions/manifest.json",
+          "sha256": "9e0a9187181081fe1ce824f8aab3aa05ce5fda74b62e926fa3293b4ba18644a1",
+          "contains_capture_hash": true
+        }
+      ],
+      "device_scope": "Record the actual replay adapter; fixture provenance may constrain interpretation.",
+      "reference_rgba_sha256": null,
+      "comparison_policy": "observe",
+      "boundaries": [],
+      "controls": []
+    },
+    {
+      "id": "texture_maps__array-mip__d18215cf",
+      "path": "analysis/capture_samples/texture_maps/array-mip.gpa_frame",
+      "sha256": "6a09f64fb26ca89eee7ec13a1a2d7d8d80a2c6bfde4dbbca9e74a5b72a67b4c4",
+      "bytes": 165583,
+      "family": "texture_maps",
+      "origin": "local_research_fixture",
+      "provenance_note": "Linked manifests are evidence pointers; modified fixtures are not certified as original captures.",
+      "source_manifests": [
+        {
+          "path": "analysis/capture_samples/texture_maps/manifest.json",
+          "sha256": "20c367ab18b2cfeaa4dac49da9f0e4a01c7cea438b9a072d460a89707dbe6ec9",
+          "contains_capture_hash": true
+        }
+      ],
+      "device_scope": "Record the actual replay adapter; fixture provenance may constrain interpretation.",
+      "reference_rgba_sha256": null,
+      "comparison_policy": "observe",
+      "boundaries": [],
+      "controls": []
+    },
+    {
+      "id": "texture_maps__dynamic-1d__cfa2f862",
+      "path": "analysis/capture_samples/texture_maps/dynamic-1d.gpa_frame",
+      "sha256": "efca88e98cceb63bfd44ee2a18ba6c1f8325662f17a6a137d8c4cf3cc7f74e68",
+      "bytes": 162959,
+      "family": "texture_maps",
+      "origin": "local_research_fixture",
+      "provenance_note": "Linked manifests are evidence pointers; modified fixtures are not certified as original captures.",
+      "source_manifests": [
+        {
+          "path": "analysis/capture_samples/texture_maps/manifest.json",
+          "sha256": "20c367ab18b2cfeaa4dac49da9f0e4a01c7cea438b9a072d460a89707dbe6ec9",
+          "contains_capture_hash": true
+        }
+      ],
+      "device_scope": "Record the actual replay adapter; fixture provenance may constrain interpretation.",
+      "reference_rgba_sha256": null,
+      "comparison_policy": "observe",
+      "boundaries": [],
+      "controls": []
+    },
+    {
+      "id": "texture_maps__dynamic-2d__940dc713",
+      "path": "analysis/capture_samples/texture_maps/dynamic-2d.gpa_frame",
+      "sha256": "f6b5461cd0fa6bbc3a8649fb35b5b2073ebc43487db3edf21de6ce7ed5ee187e",
+      "bytes": 164643,
+      "family": "texture_maps",
+      "origin": "local_research_fixture",
+      "provenance_note": "Linked manifests are evidence pointers; modified fixtures are not certified as original captures.",
+      "source_manifests": [
+        {
+          "path": "analysis/capture_samples/texture_maps/manifest.json",
+          "sha256": "20c367ab18b2cfeaa4dac49da9f0e4a01c7cea438b9a072d460a89707dbe6ec9",
+          "contains_capture_hash": true
+        }
+      ],
+      "device_scope": "Record the actual replay adapter; fixture provenance may constrain interpretation.",
+      "reference_rgba_sha256": null,
+      "comparison_policy": "observe",
+      "boundaries": [],
+      "controls": []
+    },
+    {
+      "id": "texture_maps__volume-mip__6a1cca0c",
+      "path": "analysis/capture_samples/texture_maps/volume-mip.gpa_frame",
+      "sha256": "0740e9d2a8f92d41555b2851b31fd8bc4691b26c94174d332dcf5443ea5b675d",
+      "bytes": 168891,
+      "family": "texture_maps",
+      "origin": "local_research_fixture",
+      "provenance_note": "Linked manifests are evidence pointers; modified fixtures are not certified as original captures.",
+      "source_manifests": [
+        {
+          "path": "analysis/capture_samples/texture_maps/manifest.json",
+          "sha256": "20c367ab18b2cfeaa4dac49da9f0e4a01c7cea438b9a072d460a89707dbe6ec9",
+          "contains_capture_hash": true
+        }
+      ],
+      "device_scope": "Record the actual replay adapter; fixture provenance may constrain interpretation.",
+      "reference_rgba_sha256": null,
+      "comparison_policy": "observe",
+      "boundaries": [],
+      "controls": []
+    }
+  ]
+}

@@ -7,6 +7,12 @@ This repository migrates the independently recovered Python implementation in
 Migration status is tracked per source module in `docs/migration.json`.
 Pending functionality is not represented as working functionality.
 
+Offline compatibility preflight is available through `validate-frame <capture>
+--out <new-directory>` and the compact **Preflight** status-bar entry. It reports
+known structural blockers and coverage gaps; it does not certify GPU output.
+The serial development corpus runner retains independent/original-kernel repeats,
+strict goldens and diagnostics. See [compatibility baseline and roadmap](docs/COMPATIBILITY_BASELINE.md).
+
 The tested Helldivers 2 frame now opens and replays after restoring
 `Device5.GetImmediateContext` and captured Query metadata handling.
 See [compatibility fix and accuracy limits](docs/HELLDIVERS_REPLAY_FIX.md).

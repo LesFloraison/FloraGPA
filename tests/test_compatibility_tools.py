@@ -1,0 +1,71 @@
+"""CPU-only development harness regression checks; no GPA binaries needed."""
+import json
+from pathlib import Path
+import struct
+import sys
+import tempfile
+import unittest
+
+sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'tools'))
+from validate_corpus import image_difference, original_rgba, summarize_native, run, prioritize
+from catalog_captures import catalog, digest
+
+class CompatibilityToolsTests(unittest.TestCase):
+    def test_golden_failure_is_not_tolerated(self):
+        runs=[{'exit_code':0,'report':{'completed':True,'rgba_sha256':'wrong'}}]*2
+        self.assertEqual(summarize_native(runs,{'reference_rgba_sha256':'right'}),'golden_mismatch')
+
+    def test_no_image_and_failure_are_distinct(self):
+        self.assertEqual(summarize_native([{'exit_code':0,'report':{'completed':True}}]*2,{}),'replayed_without_image')
+        self.assertEqual(summarize_native([{'exit_code':2,'report':{}}]*2,{}),'replay_failed')
+
+    def test_variance_remains_visible(self):
+        runs=[{'exit_code':0,'report':{'completed':True,'rgba_sha256':h}} for h in ['a','b']]
+        self.assertEqual(summarize_native(runs,{}),'repeat_variable')
+        d=image_difference(bytes([0,1,2,255]),bytes([2,1,4,255]))
+        self.assertEqual(d['changed_bytes'],2)
+        self.assertEqual(d['max_absolute_channel'],2)
+        self.assertFalse(d['byte_equal'])
+
+    def test_original_tga_orientation_and_channels(self):
+        with tempfile.TemporaryDirectory() as d:
+            p=Path(d);head=bytearray(18);head[2]=2
+            struct.pack_into('<HHBB',head,12,1,2,32,0)
+            (p/'framebuffer_new.tga').write_bytes(head+bytes([3,2,1,255,6,5,4,128]))
+            self.assertEqual(original_rgba(p),bytes([4,5,6,128,1,2,3,255]))
+
+    def test_truncated_tga_is_rejected(self):
+        with tempfile.TemporaryDirectory() as d:
+            p=Path(d);(p/'framebuffer_new.tga').write_bytes(b'bad')
+            with self.assertRaisesRegex(ValueError,'Truncated'):original_rgba(p)
+
+    def test_failed_child_launch_retains_evidence(self):
+        with tempfile.TemporaryDirectory() as d:
+            p=Path(d)
+            r=run([p/'missing.exe'],p/'child.log',1,{})
+            self.assertIsNone(r['exit_code'])
+            self.assertIn('launch_error',r)
+            self.assertGreater((p/'child.log').stat().st_size,0)
+
+    def test_queue_priorities(self):
+        cases=[{'id':'game','origin':'user_supplied_game_capture'}, {'id':'fixture','origin':'local_research_fixture'}]
+        f={'captures':['game'],'severity':'error','kind':'replay_failed'}
+        self.assertEqual(prioritize(f,cases)['priority'],0)
+        f.update(captures=['fixture'],python_evidence='recovered implementation')
+        self.assertEqual(prioritize(f,cases)['priority'],1)
+        del f['python_evidence'];f['kind']='auxiliary_audit'
+        self.assertEqual(prioritize(f,cases)['priority'],2)
+        f['kind']='implementation_gap'
+        self.assertEqual(prioritize(f,cases)['priority'],3)
+
+    def test_catalog_hash_provenance_does_not_certify_modified_capture(self):
+        with tempfile.TemporaryDirectory() as d:
+            root=Path(d);folder=root/'analysis/capture_samples/legacy';folder.mkdir(parents=True)
+            cap=folder/'modified.gpa_frame';cap.write_bytes(b'fixture')
+            (folder/'manifest.json').write_text(json.dumps({'original_gpa_capture':True,'sha256':digest(cap)}))
+            c=catalog(root)['cases'][0]
+            self.assertEqual(c['origin'],'local_research_fixture')
+            self.assertTrue(c['source_manifests'][0]['contains_capture_hash'])
+            self.assertIsNone(c['reference_rgba_sha256'])
+
+if __name__=='__main__':unittest.main()
