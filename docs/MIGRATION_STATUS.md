@@ -1,4 +1,11 @@
-# FloraGPA C++ 迁移进度 — 2026-09-22
+# FloraGPA C++ 迁移进度 — 2026-10-03
+
+2026-10-03：修复 Helldivers 2 捕获打开时的重放阻塞。新增严格校验的
+`Device5.GetImmediateContext` 记录支持，补齐已有 Python Query 元数据处理的
+C++ 重放路径。该帧可完整执行 607 次绘制和 130 次 Dispatch，输出 1920×1080
+画面。普通 Query 对象／CPU 分支恢复仍未实现；本样本在原生和 Python 重复重放
+中均有轻微像素波动，未宣称像素完全一致。模块迁移状态不因此升级。
+详见 [HELLDIVERS_REPLAY_FIX.md](HELLDIVERS_REPLAY_FIX.md)。
 
 本批完成 `md_hotspots.py` 原生事件组采集与 CLI／worker。`metric-groups` 先独立
 采集一次时钟／时长权重，再采集各指标组的重复样本；按事件组逐轮合并后计算统计。

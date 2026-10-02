@@ -3041,11 +3041,14 @@ class UiTests final : public QObject {
         auto bytes = raw.readAll();
         QCOMPARE(bytes.size(), qsizetype(140));
         QCOMPARE(bytes.left(4), QByteArray::fromHex("240000ff"));
+        // Closing the file dialog can commit an editor and queue a texture refresh.
+        QTRY_VERIFY_WITH_TIMEOUT(exportAction->isEnabled(), 30000);
         projectFile(window, "exportTexture", dir.path() + "/sample.dds");
         QFile dds(dir.path() + "/sample.dds");
         QVERIFY(dds.open(QIODevice::ReadOnly));
         QCOMPARE(dds.size(), qint64(428));
         QCOMPARE(dds.read(4), QByteArray("DDS "));
+        QTRY_VERIFY_WITH_TIMEOUT(exportAction->isEnabled(), 30000);
         projectFile(window, "exportTexture", dir.path() + "/sample.png");
         QImage png(dir.path() + "/sample.png");
         QCOMPARE(png.pixelColor(0, 0), QColor(72, 72, 72, 255));
@@ -3486,6 +3489,37 @@ class UiTests final : public QObject {
         filter.setFilterKeyColumn(-1);
         filter.setFilterFixedString("DrawIndexed");
         QCOMPARE(filter.rowCount(), 72);
+    }
+    void helldiversReplayAndNavigate() {
+        const auto capture = qEnvironmentVariable("FLORA_TEST_HELLDIVERS_CAPTURE");
+        if (capture.isEmpty())
+            QSKIP("Set FLORA_TEST_HELLDIVERS_CAPTURE for the external regression capture");
+        flora::MainWindow window;
+        window.resize(1600, 950);
+        window.show();
+        QSignalSpy loaded(&window, &flora::MainWindow::captureLoaded);
+        QSignalSpy done(&window, &flora::MainWindow::taskFinished);
+        window.openCapture(capture);
+        QTRY_COMPARE_WITH_TIMEOUT(loaded.size(), 1, 60000);
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 120000);
+        QVERIFY(done.takeLast()[0].toBool());
+        auto image = window.findChild<flora::ImageView *>("frameOutput");
+        QVERIFY(image);
+        const auto pixels = image->image().convertToFormat(QImage::Format_RGBA8888);
+        QCOMPARE(pixels.size(), QSize(1920, 1080));
+        // This capture varies slightly across repeated GPU replays; do not assert a fixed hash.
+        snapshot(window, "helldivers-frame");
+        auto api = window.findChild<QTableView *>("apiLog");
+        QVERIFY(api && api->model()->rowCount() > 1);
+        done.clear();
+        api->setCurrentIndex(api->model()->index(api->model()->rowCount() - 1, 0));
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 120000);
+        QVERIFY(done.takeLast()[0].toBool());
+        auto browser = window.findChild<flora::ResourceBrowser *>();
+        QVERIFY(browser && !browser->bindings().empty());
+        QVERIFY(browser->selected().has_value());
+        QVERIFY(!image->image().isNull());
+        snapshot(window, "helldivers-resources");
     }
     void replayAndNavigate() {
         const auto captures = qEnvironmentVariable("FLORA_TEST_CAPTURE_DIR");

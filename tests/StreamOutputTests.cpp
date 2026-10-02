@@ -187,6 +187,54 @@ class StreamOutputTests final : public QObject {
                          statePack(Id(0), Id(1), 1u, uint8_t(2), uint8_t(0))})
             QVERIFY_THROWS_EXCEPTION(std::runtime_error, readStreamOutputTargets(raw));
     }
+    void capturedQueryMetadata() {
+        auto capture = streamCapture();
+        std::vector<std::pair<uint16_t, std::vector<uint8_t>>> records;
+        auto add = [&](uint16_t type, const std::vector<uint8_t> &tail) {
+            auto raw = statePack(Id(0), Id(UINT64_MAX));
+            raw.insert(raw.end(), tail.begin(), tail.end());
+            records.emplace_back(type, raw);
+            capture.add(300 + records.size(), 7, type, raw);
+        };
+        for (auto t : {0x3074, 0x3235, 0x33a8, 0x3471, 0x34b2, 0x358d}) {
+            add(uint16_t(t), statePack(0, uint8_t(1), 0u, 0u, Id(0)));
+            add(uint16_t(t), statePack(int32_t(0x80004005), uint8_t(0), Id(0)));
+            QVERIFY_THROWS_EXCEPTION(
+                std::runtime_error,
+                acceptQueryMetadata(uint16_t(t), statePack(Id(0), Id(1), 0, uint8_t(1), 0u, 0u, Id(123))));
+            QVERIFY_THROWS_EXCEPTION(
+                std::runtime_error,
+                acceptQueryMetadata(uint16_t(t), statePack(Id(0), Id(1), 0, uint8_t(2), Id(0))));
+        }
+        for (auto t : {0x3495, 0x34d6, 0x35b1})
+            add(uint16_t(t), statePack(0));
+        for (auto t : {0x30b4, 0x31b4, 0x331d, 0x33e3, 0x34fb}) {
+            add(uint16_t(t), statePack(0, Id(UINT64_MAX), uint8_t(1), 0xdeadbeefu, 88u, 0u));
+            add(uint16_t(t), statePack(1, Id(123), uint8_t(0), 0u, 1u));
+        }
+        add(0x3151, statePack(88u));
+        add(0x3152, statePack(uint8_t(1), 4u, 0u));
+        add(0x3152, statePack(uint8_t(0)));
+        for (const auto &[type, raw] : records) {
+            QVERIFY(acceptQueryMetadata(type, raw));
+            for (size_t length = 0; length < raw.size(); ++length)
+                QVERIFY_THROWS_EXCEPTION(std::runtime_error,
+                                         acceptQueryMetadata(type, Bytes(raw).first(length)));
+            auto trailing = raw;
+            trailing.push_back(0);
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error, acceptQueryMetadata(type, trailing));
+        }
+        QVERIFY(!acceptQueryMetadata(0xffff, {}));
+        QTemporaryDir dir;
+        capture.save(dir.filePath("queries.gpa_frame"));
+        Frame frame(dir.filePath("queries.gpa_frame").toStdWString());
+        ReplayOptions options;
+        options.warp = true;
+        Replay replay(frame, options);
+        replay.run();
+        QCOMPARE(replay.counts["query_metadata_records"], uint64_t(records.size()));
+        QCOMPARE(replay.drawAutoParameters(200).vertexCount, 6u);
+    }
     void trailingInspectionRecords() {
         auto c = streamCapture();
         std::vector<std::pair<uint16_t, std::vector<uint8_t>>> records;
@@ -199,6 +247,8 @@ class StreamOutputTests final : public QObject {
         for (auto t : {0x304c, 0x304d, 0x4029, 0x402a})
             add(uint16_t(t), statePack(3u));
         add(0x304b, statePack(0u, Id(0), Id(0), Id(0xdeadbeef)));
+        add(0x359d, statePack(Id(0)));
+        add(0x359d, statePack(Id(UINT64_MAX)));
         for (auto t : {0x30ea, 0x31ea, 0x3353, 0x3419, 0x3531, 0x313b, 0x300e}) {
             add(uint16_t(t), statePack(uint8_t(1), 4u));
             add(uint16_t(t), statePack(uint8_t(0)));

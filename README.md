@@ -7,6 +7,10 @@ This repository migrates the independently recovered Python implementation in
 Migration status is tracked per source module in `docs/migration.json`.
 Pending functionality is not represented as working functionality.
 
+The tested Helldivers 2 frame now opens and replays after restoring
+`Device5.GetImmediateContext` and captured Query metadata handling.
+See [compatibility fix and accuracy limits](docs/HELLDIVERS_REPLAY_FIX.md).
+
 Output/SO setters now connect the dual binding model and cached history to native
 replay, experiment projects and a compact Qt editor. Coverage and remaining
 consumer dependencies are documented in

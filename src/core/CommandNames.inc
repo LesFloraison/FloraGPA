@@ -155,6 +155,7 @@
 {0x3578, "Device.CreateBuffer"},
 {0x358d, "Device5.CreateQuery"},
 {0x3597, "Device.GetPrivateData"},
+{0x359d, "Device5.GetImmediateContext"},
 {0x35b1, "Device5.CreateQuery1"},
 {0x4029, "Factory3.AddRef"},
 {0x402a, "Factory3.Release"},

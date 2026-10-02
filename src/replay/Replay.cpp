@@ -972,6 +972,10 @@ void Replay::command(const Entry &e) {
         counts["finish_command_list_metadata"]++;
         return;
     }
+    if (acceptQueryMetadata(t, payload)) {
+        counts["query_metadata_records"]++;
+        return;
+    }
     if (acceptInspectionRecord(t, payload)) {
         counts["inspection_records"]++;
         return;

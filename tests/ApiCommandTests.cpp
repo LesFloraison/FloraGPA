@@ -58,6 +58,8 @@ Capture apiCapture() {
         sample(t, pack(Id(6)));
     sample(0x34f1, pack(Id(2), 42u, 4u));
     sample(0x34f6, pack(4u));
+    sample(0x359d, pack(Id(0)));
+    sample(0x359d, pack(Id(UINT64_MAX)));
     sample(0x34ed, pack(Id(5), 5u));
     sample(0x248, pack(Id(8), 1u));
     sample(0x3502, pack(Id(9), 3u));
@@ -196,9 +198,18 @@ class ApiCommandTests final : public QObject {
         QCOMPARE(selected["layer"], Json(1));
         QCOMPARE(selected["typed_format"], Json(28));
         bool sawNegative = false, sawAnnotation = false, sawPartial = false;
+        size_t immediateContextRecords = 0;
         for (auto &r : rows) {
             if (r["status"] != "decoded")
                 continue;
+            if (r["type"] == 0x359d) {
+                QCOMPARE(r["name"], Json("Device5.GetImmediateContext"));
+                QCOMPARE(r["wire_size"], Json(24));
+                QCOMPARE(r["fields"].back()["name"], Json("returned_context"));
+                QCOMPARE(r["fields"].back()["value"],
+                         Json(immediateContextRecords == 0 ? Id(0) : Id(UINT64_MAX)));
+                ++immediateContextRecords;
+            }
             if (r["type"] == 0x39) {
                 QCOMPARE(r["parameters"]["base_vertex"], Json(-2));
                 sawNegative = true;
@@ -215,6 +226,7 @@ class ApiCommandTests final : public QObject {
             }
         }
         QVERIFY(sawNegative && sawAnnotation && sawPartial);
+        QCOMPARE(immediateContextRecords, size_t(2));
         auto evidence = qEnvironmentVariable("FLORA_API_EVIDENCE_DIR");
         if (!evidence.isEmpty()) {
             QVERIFY(QDir().mkpath(evidence));

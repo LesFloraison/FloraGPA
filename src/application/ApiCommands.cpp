@@ -29,7 +29,7 @@ bool queryCreate1(uint16_t t) { return in(t, {0x3495, 0x34d6, 0x35b1}); }
 bool queryGet(uint16_t t) { return in(t, {0x30b4, 0x31b4, 0x331d, 0x33e3, 0x34fb}); }
 bool getter(uint16_t t) {
     return in(t, {0x304b, 0x304c, 0x304d, 0x3528, 0x3537, 0x353d, 0x4029, 0x402a, 0x30ea, 0x31ea, 0x3353,
-                  0x3419, 0x3531, 0x313b, 0x300e});
+                  0x3419, 0x3531, 0x313b, 0x300e, 0x359d});
 }
 const std::map<uint16_t, int> finishes{{0x3109, 0}, {0x3209, 1}, {0x3372, 2}, {0x3438, 3}, {0x3550, 4}};
 class Wire {
@@ -189,7 +189,9 @@ Json annotation(uint16_t t, Wire &r) {
     return info;
 }
 void readGetter(uint16_t t, Wire &r) {
-    if (in(t, {0x30ea, 0x31ea, 0x3353, 0x3419, 0x3531})) {
+    if (t == 0x359d)
+        r.id("returned_context");
+    else if (in(t, {0x30ea, 0x31ea, 0x3353, 0x3419, 0x3531})) {
         if (r.flag("topology_present"))
             r.u("returned_topology");
     } else if (in(t, {0x313b, 0x300e}))
