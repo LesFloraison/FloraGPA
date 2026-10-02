@@ -6,4 +6,8 @@ namespace flora {
 bool acceptInspectionRecord(uint16_t type, Bytes payload);
 // Captured query observations do not recreate missing query objects or CPU branches.
 bool acceptQueryMetadata(uint16_t type, Bytes payload);
+// CPU object observations: replay owns resource lifetimes independently and
+// never dereferences captured returned/private-data pointers.
+bool isPassiveObjectRecord(uint16_t type);
+bool acceptPassiveObjectRecord(uint16_t type, Bytes payload);
 } // namespace flora

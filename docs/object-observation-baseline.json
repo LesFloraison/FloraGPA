@@ -1,0 +1,242 @@
+{
+  "schema": "FloraGPA M2 object observation evidence 1",
+  "date": "2026-10-03",
+  "sample_files": 91,
+  "native_runs": 182,
+  "stable_baseline_images_unchanged": 90,
+  "native_outcomes": {
+    "repeat_stable": 90,
+    "repeat_variable": 1
+  },
+  "native_module_and_raw_hash_audits_passed": 182,
+  "preflight_outcomes": {
+    "review_required": 91
+  },
+  "warning_occurrences": 561,
+  "command_handling": {
+    "execute": 45,
+    "metadata": 39,
+    "auxiliary_unverified": 3,
+    "snapshot": 12
+  },
+  "object_observations_per_corpus_pass": 1374,
+  "fresh_original_cases": [
+    "gf2",
+    "bf1"
+  ],
+  "original_adapter_configuration": "default, unidentified; numerical equivalence of device settings not asserted",
+  "packaged_release_files": [
+    {
+      "name": "FloraGPA.exe",
+      "sha256": "e0e12803eeaa5cceb4f383a4bf9c9575775ca12313c10a9bc0bb13aae4c58c5a"
+    },
+    {
+      "name": "FloraGPA.Cli.exe",
+      "sha256": "9844076c516695d1ba4a75e4bac1559fdc48ad9f224f36b8b1464cc0094ee31f"
+    },
+    {
+      "name": "FloraGPA.Worker.exe",
+      "sha256": "78b787478c6f090acd87fb8fe838a21cc60a6e0a7dd88c13ef35f0222071315e"
+    },
+    {
+      "name": "FloraGPA.Rdc.exe",
+      "sha256": "f4d21d43e661d24d392e91fc1a1f1460a20d1377fcf5075c57083ad289e82773"
+    },
+    {
+      "name": "FloraGPA.Metrics.dll",
+      "sha256": "58b6278f2a93e783b1e8bb1290e9b0e51745f1a36825f296584f52159fd7c6db"
+    }
+  ],
+  "native_present_probe": {
+    "headless_composition_swapchain": true,
+    "observations": [
+      {
+        "warp": false,
+        "flags": 0,
+        "hresult": 0,
+        "rtv_bound_before": true,
+        "rtv_bound_after": false
+      },
+      {
+        "warp": false,
+        "flags": 1,
+        "hresult": 0,
+        "rtv_bound_before": true,
+        "rtv_bound_after": true
+      },
+      {
+        "warp": false,
+        "flags": 2,
+        "hresult": -2005270527,
+        "rtv_bound_before": true,
+        "rtv_bound_after": true
+      },
+      {
+        "warp": true,
+        "flags": 0,
+        "hresult": 0,
+        "rtv_bound_before": true,
+        "rtv_bound_after": false
+      },
+      {
+        "warp": true,
+        "flags": 1,
+        "hresult": 0,
+        "rtv_bound_before": true,
+        "rtv_bound_after": true
+      },
+      {
+        "warp": true,
+        "flags": 2,
+        "hresult": -2005270527,
+        "rtv_bound_before": true,
+        "rtv_bound_after": true
+      }
+    ],
+    "completed": true
+  },
+  "native_present_probe_source_sha256": "a8c84aa86321b93ff5985acf1898a32991885bb618330251c607d1fce676f7b1",
+  "native_present_probe_exe_sha256": "7c1e6940257f65d02199d2ba8a9b30c9865ffaa3fc5043f964109e94e7849a08",
+  "research_evidence_sha256": {
+    "analysis/API_COMMANDS.md": "5cc23da59e3e553941036c16debdeee9ff3f06be681e98d128fd5ca49f8ae67b",
+    "analysis/api_commands/queries.c": "8d9bf689058d9aa43c11e04830fe617a186d7c009dcc9e61d9384d93d7637e91",
+    "analysis/api_commands/shim_wire.c": "1efb0b7e9464a7bd5281234d4e4ade9218e34a0c34c9f2f769e40a48bec689ed"
+  },
+  "remaining_auxiliary_types": [
+    {
+      "type": "0x3017",
+      "name": "Buffer.SetPrivateData",
+      "cases": 1
+    },
+    {
+      "type": "0x3257",
+      "name": "SwapChain.Present",
+      "cases": 70
+    },
+    {
+      "type": "0x3578",
+      "name": "Device.CreateBuffer",
+      "cases": 1
+    }
+  ],
+  "evidence_directories": [
+    "artifacts/m2-object-corpus",
+    "artifacts/m2-object-original",
+    "artifacts/m2-present-probe",
+    "artifacts/m2-object-ui",
+    "artifacts/m2-object-golden"
+  ],
+  "native_present_probe_result": "artifacts/m2-present-probe/measured-run/present.json",
+  "delivery_ctest": {
+    "suites_passed": 6,
+    "suites": [
+      "ui",
+      "stream_output",
+      "object_observations",
+      "frame_validation",
+      "compatibility_ui",
+      "api_commands"
+    ],
+    "main_ui_cases_passed": 55,
+    "main_ui_cases_skipped": 0
+  },
+  "golden_and_negative_controls": [
+    {
+      "case": "gf2",
+      "rgba_sha256": "2e1abc5eacb0bbfd801f9fe059c305baa9a0786c384b36a42fa5a323dd979fd1",
+      "passed": true,
+      "counts": {
+        "ClearDepthStencilView": 2,
+        "ClearRenderTargetView": 1,
+        "DrawIndexed": 72,
+        "Map": 44,
+        "object_observation_records": 49,
+        "query_metadata_records": 2,
+        "state_or_auxiliary_records": 558,
+        "unmap_observations": 44
+      }
+    },
+    {
+      "case": "gf2-negative",
+      "rgba_sha256": "b2c5548a51715f581c4591acc266ac7a0c65b54b7ecd9a49f43499fa9b76c5f1",
+      "passed": true,
+      "counts": {
+        "ClearDepthStencilView": 2,
+        "ClearRenderTargetView": 1,
+        "Map": 44,
+        "object_observation_records": 49,
+        "query_metadata_records": 2,
+        "state_or_auxiliary_records": 558,
+        "unmap_observations": 44
+      }
+    },
+    {
+      "case": "bf1",
+      "rgba_sha256": "1f724d1840652f66afd26dd30c95aecd5c1b4932eede56109198f15a8f57a2f6",
+      "passed": true,
+      "counts": {
+        "ClearDepthStencilView": 10,
+        "ClearRenderTargetView": 10,
+        "ClearUnorderedAccessViewFloat": 1,
+        "CopyResource": 2,
+        "CopyStructureCount": 6,
+        "CopySubresourceRegion": 7,
+        "Dispatch": 60,
+        "DispatchIndirect": 13,
+        "Draw": 79,
+        "DrawIndexed": 41,
+        "DrawIndexedInstanced": 1053,
+        "DrawInstanced": 29,
+        "GenerateMips": 2,
+        "Map": 4151,
+        "UpdateSubresource": 27,
+        "map_read_observations": 2,
+        "object_observation_records": 28,
+        "query_metadata_records": 17,
+        "state_or_auxiliary_records": 7355,
+        "unmap_observations": 4153,
+        "unresolved_input_layout_setters": 2,
+        "unresolved_output_setters": 6,
+        "unresolved_srv_setters": 2
+      }
+    },
+    {
+      "case": "bf1-negative",
+      "rgba_sha256": "cd3a3066f984b1c317fbeefec2836503f32078321d3dc1f367465f2c06d435bf",
+      "passed": true,
+      "counts": {
+        "ClearDepthStencilView": 10,
+        "ClearRenderTargetView": 10,
+        "ClearUnorderedAccessViewFloat": 1,
+        "CopyResource": 2,
+        "CopyStructureCount": 6,
+        "CopySubresourceRegion": 7,
+        "Dispatch": 60,
+        "DispatchIndirect": 13,
+        "GenerateMips": 2,
+        "Map": 4151,
+        "UpdateSubresource": 27,
+        "map_read_observations": 2,
+        "object_observation_records": 28,
+        "query_metadata_records": 17,
+        "state_or_auxiliary_records": 7355,
+        "unmap_observations": 4153,
+        "unresolved_input_layout_setters": 2,
+        "unresolved_output_setters": 6,
+        "unresolved_srv_setters": 2
+      }
+    }
+  ],
+  "evidence_sha256": {
+    "artifacts/m2-object-corpus/validation.json": "c7fb9ca8dbed88f46c7b664a74dbd6963df56c770ce3ef53361ca21326a88e1c",
+    "artifacts/m2-object-original/validation.json": "194ee2424bd961640d65a07b152b43ea967bd78d9dbb67bbfd95d00fb9dcc9d9",
+    "artifacts/m2-object-golden/validation.json": "09d067f2721581be496d44be9b8112718cfd91ecc6b98edf56cc03a96075ae99",
+    "artifacts/ctest-m2-object-delivery.log": "351dcf4f3b8d45de7c88440d09a20ce6218b5f96b0d691384d42f5c27fef9522",
+    "artifacts/m2-present-probe/measured-run/present.json": "6ee31e8d20e444fd1dc4b05af9fc9c54a7386cac3aa53e5a0d819debd0ea03dc"
+  },
+  "module_migration_counts": {
+    "partial": 117,
+    "pending": 15,
+    "ported": 72
+  }
+}

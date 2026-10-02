@@ -117,6 +117,7 @@ Json validateFrame(const std::filesystem::path &path, const std::function<bool()
                     } else {
                         acceptQueryMetadata(e.type, frame.payload(id));
                         acceptInspectionRecord(e.type, frame.payload(id));
+                        acceptPassiveObjectRecord(e.type, frame.payload(id));
                         if (isWritableCommand(e.type))
                             validateWritableCommand(frame, id);
                         if (e.type >= 0x3278 && e.type <= 0x327e)

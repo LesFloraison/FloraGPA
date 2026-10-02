@@ -1,5 +1,71 @@
 #include "InspectionRecords.h"
 namespace flora {
+bool isPassiveObjectRecord(uint16_t type) {
+    switch (type) {
+    case 0x3012:
+    case 0x3013:
+    case 0x3014:
+    case 0x3019:
+    case 0x302e:
+    case 0x3146:
+    case 0x324f:
+    case 0x3250:
+    case 0x3251:
+    case 0x3256:
+    case 0x3261:
+    case 0x3575:
+    case 0x3576:
+    case 0x3577:
+    case 0x3597:
+        return true;
+    default:
+        return false;
+    }
+}
+bool acceptPassiveObjectRecord(uint16_t type, Bytes payload) {
+    if (!isPassiveObjectRecord(type))
+        return false;
+    Reader r(payload);
+    r.skip(16); // Captured link and owner; not native replay COM pointers.
+    switch (type) {
+    case 0x3012:
+    case 0x324f:
+    case 0x3256:
+    case 0x3575:
+        r.skip(4 + 16 + 8); // HRESULT, requested IID, returned object identity.
+        break;
+    case 0x3013:
+    case 0x3014:
+    case 0x3250:
+    case 0x3251:
+    case 0x3576:
+    case 0x3577:
+        r.skip(4); // Observed reference count, including zero. Never release replay storage.
+        break;
+    case 0x3019:
+    case 0x3146:
+        if (r.flag())
+            r.skip(4); // Captured resource dimension, not a new resource description.
+        break;
+    case 0x302e:
+        if (r.flag())
+            r.skip(24); // D3D11_SHADER_RESOURCE_VIEW_DESC, including the raw union.
+        break;
+    case 0x3261:
+        r.skip(4); // HRESULT.
+        if (r.flag())
+            r.skip(72); // Observed x64 DXGI_SWAP_CHAIN_DESC, including ABI padding.
+        break;
+    case 0x3597:
+        r.skip(4 + 16); // HRESULT and private-data GUID.
+        if (r.flag())
+            r.skip(4); // Returned size only; the pointed-to bytes were not saved here.
+        r.skip(8);     // Opaque original process pointer. Do not allocate or dereference it.
+        break;
+    }
+    r.end();
+    return true;
+}
 bool acceptQueryMetadata(uint16_t type, Bytes payload) {
     enum class Kind { Create, Create1, GetData, GetSize, GetDesc } kind;
     switch (type) {

@@ -7,6 +7,9 @@ The Python module totals (72 ported, 117 partial, 15 pending) remain unchanged.
 Subsequent M2 work: [strict Map/Unmap observation audit](MAP_OBSERVATION_AUDIT.md)
 removes two observed families from the unchecked fallback. The recorded M1 table
 and JSON below remain the historical baseline; M2 results are reported separately.
+The [object observation audit](OBJECT_OBSERVATION_AUDIT.md) checks another 15
+families, leaving three observed auxiliary families unverified. Its native Present
+probe records a state dependency still awaiting production implementation.
 
 ## Reproduce
 

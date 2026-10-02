@@ -992,6 +992,10 @@ void Replay::command(const Entry &e) {
         counts["inspection_records"]++;
         return;
     }
+    if (acceptPassiveObjectRecord(t, payload)) {
+        ++counts["object_observation_records"];
+        return;
+    }
     r.skip(16);
     if (t == 0x32 || t == 0x33 || t == 0x34) {
         auto view = r.read<Id>();

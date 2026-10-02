@@ -59,8 +59,8 @@ class FrameValidationTests final : public QObject {
         QCOMPARE(std::string(replayCapability(0x359d).handling), std::string("metadata"));
         QCOMPARE(std::string(replayCapability(0x41).handling), std::string("unsupported"));
         QCOMPARE(std::string(replayCapability(0x34f6).handling), std::string("snapshot"));
-        QVERIFY(isReplayAuxiliary(0x3012));
-        QCOMPARE(std::string(replayCapability(0x3012).handling), std::string("auxiliary_unverified"));
+        QVERIFY(isReplayAuxiliary(0x3017));
+        QCOMPARE(std::string(replayCapability(0x3017).handling), std::string("auxiliary_unverified"));
     }
     void extendedOutputSlots() {
         QTemporaryDir dir;
