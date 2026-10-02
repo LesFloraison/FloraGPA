@@ -4,6 +4,7 @@
 #include "core/Commands.h"
 #include "core/IaBindings.h"
 #include "core/InspectionRecords.h"
+#include "core/MapRecords.h"
 #include "core/OutputBindings.h"
 #include "core/PipelineBindings.h"
 #include "core/Predication.h"
@@ -46,6 +47,7 @@ Json validateFrame(const std::filesystem::path &path, const std::function<bool()
         report["source_sha256"] = frame.sha256();
         std::map<std::pair<unsigned, unsigned>, Json> coverage;
         size_t scanned = 0;
+        std::optional<MapRecordAudit> mapAudit;
         auto reference = [&](const Entry &e, Id id, int category) {
             if (!id)
                 return;
@@ -77,6 +79,13 @@ Json validateFrame(const std::filesystem::path &path, const std::function<bool()
             try {
                 bool checked = false;
                 if (e.category == 7) {
+                    if (isMapObservation(e.type)) {
+                        if (!mapAudit)
+                            mapAudit = auditMapRecords(frame);
+                        const auto &map = mapAudit->at(id);
+                        if (!map.error.empty())
+                            finding(&e, "error", "map_observation_rejected", map.error, map.resource);
+                    }
                     const auto command = inspectCommand(frame, id);
                     if (command["status"] == "invalid")
                         throw std::runtime_error(command.value("error", "Invalid command wire layout"));

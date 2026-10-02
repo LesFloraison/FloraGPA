@@ -1,0 +1,377 @@
+{
+  "sample_cases": 91,
+  "native_runs": 182,
+  "stable_baseline_hashes_unchanged": 90,
+  "raw_hashes_verified": 182,
+  "preflight": {
+    "review_required": 91
+  },
+  "command_types": {
+    "execute": 45,
+    "auxiliary_unverified": 18,
+    "snapshot": 12,
+    "metadata": 24
+  },
+  "paired_map_occurrences": {
+    "Map": 6448,
+    "map_read_observations": 150,
+    "unmap_observations": 6598
+  },
+  "fresh_original_cases_agreeing_with_producer": 4,
+  "producer_byte_checks": [
+    {
+      "case": "dynamic-2d",
+      "driver": "hardware",
+      "before": true,
+      "capture_sha256": "f6b5461cd0fa6bbc3a8649fb35b5b2073ebc43487db3edf21de6ce7ed5ee187e",
+      "sha256": "47f0149b43961165c5fa224dbd2d1e956cf0a26b86d15ee3e12652c2a6e013ca",
+      "bytes": 364,
+      "passed": true,
+      "counts": {
+        "ClearState": 1,
+        "Map": 1,
+        "unmap_observations": 1
+      }
+    },
+    {
+      "case": "dynamic-2d",
+      "driver": "hardware",
+      "before": false,
+      "capture_sha256": "f6b5461cd0fa6bbc3a8649fb35b5b2073ebc43487db3edf21de6ce7ed5ee187e",
+      "sha256": "59e43e167319c39ae60f14ee4626e2cfd61b14aa2f1da02c9cf7148392ce7c99",
+      "bytes": 364,
+      "passed": true,
+      "counts": {
+        "ClearState": 1,
+        "Map": 2,
+        "unmap_observations": 1
+      }
+    },
+    {
+      "case": "dynamic-2d",
+      "driver": "warp",
+      "before": true,
+      "capture_sha256": "f6b5461cd0fa6bbc3a8649fb35b5b2073ebc43487db3edf21de6ce7ed5ee187e",
+      "sha256": "47f0149b43961165c5fa224dbd2d1e956cf0a26b86d15ee3e12652c2a6e013ca",
+      "bytes": 364,
+      "passed": true,
+      "counts": {
+        "ClearState": 1,
+        "Map": 1,
+        "unmap_observations": 1
+      }
+    },
+    {
+      "case": "dynamic-2d",
+      "driver": "warp",
+      "before": false,
+      "capture_sha256": "f6b5461cd0fa6bbc3a8649fb35b5b2073ebc43487db3edf21de6ce7ed5ee187e",
+      "sha256": "59e43e167319c39ae60f14ee4626e2cfd61b14aa2f1da02c9cf7148392ce7c99",
+      "bytes": 364,
+      "passed": true,
+      "counts": {
+        "ClearState": 1,
+        "Map": 2,
+        "unmap_observations": 1
+      }
+    },
+    {
+      "case": "array-mip",
+      "driver": "hardware",
+      "before": true,
+      "capture_sha256": "6a09f64fb26ca89eee7ec13a1a2d7d8d80a2c6bfde4dbbca9e74a5b72a67b4c4",
+      "sha256": "834a709ba2534ebe3ee1397fd4f7bd288b2acc1d20a08d6c862dcd99b6f04400",
+      "bytes": 72,
+      "passed": true,
+      "counts": {
+        "ClearState": 1,
+        "Map": 1,
+        "unmap_observations": 1
+      }
+    },
+    {
+      "case": "array-mip",
+      "driver": "hardware",
+      "before": false,
+      "capture_sha256": "6a09f64fb26ca89eee7ec13a1a2d7d8d80a2c6bfde4dbbca9e74a5b72a67b4c4",
+      "sha256": "ae1d2356dae0b8fd29c929f20323ed535381a56f5d6851e8146deec77b5c03e6",
+      "bytes": 72,
+      "passed": true,
+      "counts": {
+        "ClearState": 1,
+        "Map": 2,
+        "unmap_observations": 1
+      }
+    },
+    {
+      "case": "array-mip",
+      "driver": "warp",
+      "before": true,
+      "capture_sha256": "6a09f64fb26ca89eee7ec13a1a2d7d8d80a2c6bfde4dbbca9e74a5b72a67b4c4",
+      "sha256": "834a709ba2534ebe3ee1397fd4f7bd288b2acc1d20a08d6c862dcd99b6f04400",
+      "bytes": 72,
+      "passed": true,
+      "counts": {
+        "ClearState": 1,
+        "Map": 1,
+        "unmap_observations": 1
+      }
+    },
+    {
+      "case": "array-mip",
+      "driver": "warp",
+      "before": false,
+      "capture_sha256": "6a09f64fb26ca89eee7ec13a1a2d7d8d80a2c6bfde4dbbca9e74a5b72a67b4c4",
+      "sha256": "ae1d2356dae0b8fd29c929f20323ed535381a56f5d6851e8146deec77b5c03e6",
+      "bytes": 72,
+      "passed": true,
+      "counts": {
+        "ClearState": 1,
+        "Map": 2,
+        "unmap_observations": 1
+      }
+    },
+    {
+      "case": "volume-mip",
+      "driver": "hardware",
+      "before": true,
+      "capture_sha256": "0740e9d2a8f92d41555b2851b31fd8bc4691b26c94174d332dcf5443ea5b675d",
+      "sha256": "81c611f35bff79491538b2f7cf201c7597a661a5c549633541c62bdc8af1613f",
+      "bytes": 144,
+      "passed": true,
+      "counts": {
+        "ClearState": 1,
+        "Map": 1,
+        "unmap_observations": 1
+      }
+    },
+    {
+      "case": "volume-mip",
+      "driver": "hardware",
+      "before": false,
+      "capture_sha256": "0740e9d2a8f92d41555b2851b31fd8bc4691b26c94174d332dcf5443ea5b675d",
+      "sha256": "70f3982627919f6afb08bfa59368d6e4ca1371e612a62809235f5805d75c0892",
+      "bytes": 144,
+      "passed": true,
+      "counts": {
+        "ClearState": 1,
+        "Map": 2,
+        "unmap_observations": 1
+      }
+    },
+    {
+      "case": "volume-mip",
+      "driver": "warp",
+      "before": true,
+      "capture_sha256": "0740e9d2a8f92d41555b2851b31fd8bc4691b26c94174d332dcf5443ea5b675d",
+      "sha256": "81c611f35bff79491538b2f7cf201c7597a661a5c549633541c62bdc8af1613f",
+      "bytes": 144,
+      "passed": true,
+      "counts": {
+        "ClearState": 1,
+        "Map": 1,
+        "unmap_observations": 1
+      }
+    },
+    {
+      "case": "volume-mip",
+      "driver": "warp",
+      "before": false,
+      "capture_sha256": "0740e9d2a8f92d41555b2851b31fd8bc4691b26c94174d332dcf5443ea5b675d",
+      "sha256": "70f3982627919f6afb08bfa59368d6e4ca1371e612a62809235f5805d75c0892",
+      "bytes": 144,
+      "passed": true,
+      "counts": {
+        "ClearState": 1,
+        "Map": 2,
+        "unmap_observations": 1
+      }
+    },
+    {
+      "case": "dynamic-1d",
+      "driver": "hardware",
+      "before": true,
+      "capture_sha256": "efca88e98cceb63bfd44ee2a18ba6c1f8325662f17a6a137d8c4cf3cc7f74e68",
+      "sha256": "7955cb2de90dd9efc6df9fdbf5f5d10c114f4135a9a6b52db1003be749e32f7a",
+      "bytes": 52,
+      "passed": true,
+      "counts": {
+        "ClearState": 1,
+        "Map": 1,
+        "unmap_observations": 1
+      }
+    },
+    {
+      "case": "dynamic-1d",
+      "driver": "hardware",
+      "before": false,
+      "capture_sha256": "efca88e98cceb63bfd44ee2a18ba6c1f8325662f17a6a137d8c4cf3cc7f74e68",
+      "sha256": "283ba27e0fa25d54557076d7945470ccc2a5e32f2337bf963830d24dde2c6289",
+      "bytes": 52,
+      "passed": true,
+      "counts": {
+        "ClearState": 1,
+        "Map": 2,
+        "unmap_observations": 1
+      }
+    },
+    {
+      "case": "dynamic-1d",
+      "driver": "warp",
+      "before": true,
+      "capture_sha256": "efca88e98cceb63bfd44ee2a18ba6c1f8325662f17a6a137d8c4cf3cc7f74e68",
+      "sha256": "7955cb2de90dd9efc6df9fdbf5f5d10c114f4135a9a6b52db1003be749e32f7a",
+      "bytes": 52,
+      "passed": true,
+      "counts": {
+        "ClearState": 1,
+        "Map": 1,
+        "unmap_observations": 1
+      }
+    },
+    {
+      "case": "dynamic-1d",
+      "driver": "warp",
+      "before": false,
+      "capture_sha256": "efca88e98cceb63bfd44ee2a18ba6c1f8325662f17a6a137d8c4cf3cc7f74e68",
+      "sha256": "283ba27e0fa25d54557076d7945470ccc2a5e32f2337bf963830d24dde2c6289",
+      "bytes": 52,
+      "passed": true,
+      "counts": {
+        "ClearState": 1,
+        "Map": 2,
+        "unmap_observations": 1
+      }
+    }
+  ],
+  "helldivers_controls_passed": true,
+  "source_evidence_sha256": {
+    "analysis/context_recovery/map_hook.c": "58e7141f1415ac2a2cdd9e0a1648c662fa67bff15eff8eacd9554faa1fd554b0",
+    "analysis/context_recovery/map_data.c": "b8812b654db0703aa36ac085539e87df1fd32fa4b414e5cee862c0dd67f34ab2",
+    "analysis/CONTEXT_RECOVERY.md": "3f8b27edb62afaf3dcb6c7c019344690973f55508ac1fc88cfa52c5978a4921d",
+    "analysis/capture_samples/texture_maps/manifest.json": "20c367ab18b2cfeaa4dac49da9f0e4a01c7cea438b9a072d460a89707dbe6ec9"
+  },
+  "packaged_release_files": [
+    {
+      "file": "FloraGPA.exe",
+      "sha256": "4f573a1658151d26ddced4edcede38a672c336b3e1c52f75d4663dbb5ac20390"
+    },
+    {
+      "file": "FloraGPA.Cli.exe",
+      "sha256": "8d2093375596d376079436637aea99c48c8e53d479897e395de55819193c9be9"
+    },
+    {
+      "file": "FloraGPA.Worker.exe",
+      "sha256": "4a1230c1b3f8caa3db86035d3846c27ab90a54c1914070f98e31f6684a17ba0b"
+    },
+    {
+      "file": "FloraGPA.Rdc.exe",
+      "sha256": "f4d21d43e661d24d392e91fc1a1f1460a20d1377fcf5075c57083ad289e82773"
+    },
+    {
+      "file": "FloraGPA.Metrics.dll",
+      "sha256": "58b6278f2a93e783b1e8bb1290e9b0e51745f1a36825f296584f52159fd7c6db"
+    }
+  ],
+  "runtime_audits_passed": 182,
+  "schema": "FloraGPA M2 Map observation audit 1",
+  "date": "2026-10-03",
+  "evidence_directories": [
+    "artifacts/m2-map-corpus",
+    "artifacts/m2-map-producer",
+    "artifacts/m2-map-original",
+    "artifacts/m2-map-golden",
+    "artifacts/m2-map-ui"
+  ],
+  "ctest_suites_passed": 8,
+  "map_test_cases_passed": 27,
+  "main_ui_cases_passed_without_skips": 55,
+  "golden_and_negative_controls": [
+    {
+      "case": "gf2",
+      "rgba_sha256": "2e1abc5eacb0bbfd801f9fe059c305baa9a0786c384b36a42fa5a323dd979fd1",
+      "passed": true,
+      "counts": {
+        "ClearDepthStencilView": 2,
+        "ClearRenderTargetView": 1,
+        "DrawIndexed": 72,
+        "Map": 44,
+        "query_metadata_records": 2,
+        "state_or_auxiliary_records": 607,
+        "unmap_observations": 44
+      }
+    },
+    {
+      "case": "gf2-negative",
+      "rgba_sha256": "b2c5548a51715f581c4591acc266ac7a0c65b54b7ecd9a49f43499fa9b76c5f1",
+      "passed": true,
+      "counts": {
+        "ClearDepthStencilView": 2,
+        "ClearRenderTargetView": 1,
+        "Map": 44,
+        "query_metadata_records": 2,
+        "state_or_auxiliary_records": 607,
+        "unmap_observations": 44
+      }
+    },
+    {
+      "case": "bf1",
+      "rgba_sha256": "1f724d1840652f66afd26dd30c95aecd5c1b4932eede56109198f15a8f57a2f6",
+      "passed": true,
+      "counts": {
+        "ClearDepthStencilView": 10,
+        "ClearRenderTargetView": 10,
+        "ClearUnorderedAccessViewFloat": 1,
+        "CopyResource": 2,
+        "CopyStructureCount": 6,
+        "CopySubresourceRegion": 7,
+        "Dispatch": 60,
+        "DispatchIndirect": 13,
+        "Draw": 79,
+        "DrawIndexed": 41,
+        "DrawIndexedInstanced": 1053,
+        "DrawInstanced": 29,
+        "GenerateMips": 2,
+        "Map": 4151,
+        "UpdateSubresource": 27,
+        "map_read_observations": 2,
+        "query_metadata_records": 17,
+        "state_or_auxiliary_records": 7383,
+        "unmap_observations": 4153,
+        "unresolved_input_layout_setters": 2,
+        "unresolved_output_setters": 6,
+        "unresolved_srv_setters": 2
+      }
+    },
+    {
+      "case": "bf1-negative",
+      "rgba_sha256": "cd3a3066f984b1c317fbeefec2836503f32078321d3dc1f367465f2c06d435bf",
+      "passed": true,
+      "counts": {
+        "ClearDepthStencilView": 10,
+        "ClearRenderTargetView": 10,
+        "ClearUnorderedAccessViewFloat": 1,
+        "CopyResource": 2,
+        "CopyStructureCount": 6,
+        "CopySubresourceRegion": 7,
+        "Dispatch": 60,
+        "DispatchIndirect": 13,
+        "GenerateMips": 2,
+        "Map": 4151,
+        "UpdateSubresource": 27,
+        "map_read_observations": 2,
+        "query_metadata_records": 17,
+        "state_or_auxiliary_records": 7383,
+        "unmap_observations": 4153,
+        "unresolved_input_layout_setters": 2,
+        "unresolved_output_setters": 6,
+        "unresolved_srv_setters": 2
+      }
+    }
+  ],
+  "module_status_counts": {
+    "partial": 117,
+    "pending": 15,
+    "ported": 72
+  }
+}

@@ -4,6 +4,10 @@ This is the M1 acceptance infrastructure for GPA 2025 R1 legacy DX11 / IGPA v3.
 It is not a declaration that M2–M5 or the analyzer migration are complete.
 The Python module totals (72 ported, 117 partial, 15 pending) remain unchanged.
 
+Subsequent M2 work: [strict Map/Unmap observation audit](MAP_OBSERVATION_AUDIT.md)
+removes two observed families from the unchecked fallback. The recorded M1 table
+and JSON below remain the historical baseline; M2 results are reported separately.
+
 ## Reproduce
 
 The production offline check uses the existing C++ decoders and creates no GPU device:

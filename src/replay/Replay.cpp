@@ -826,6 +826,17 @@ void Replay::command(const Entry &e) {
         ++counts["annotation_records"];
         return;
     }
+    if (isMapObservation(t)) {
+        if (!std::ranges::equal(payload, frame_.payload(e.id)))
+            throw std::runtime_error("Map observation payload edits are not supported");
+        if (!mapRecordAudit_)
+            mapRecordAudit_ = auditMapRecords(frame_);
+        requireMapRecord(*mapRecordAudit_, e.id);
+        // CPU READ results cannot change GPU storage. Writable 0x246 playback
+        // already maps, copies saved bytes and unmaps at its own event boundary.
+        ++counts[t == 0x34ec ? "map_read_observations" : "unmap_observations"];
+        return;
+    }
     if (pipelineSetter(e, payload))
         return;
     if (isDraw(t)) {

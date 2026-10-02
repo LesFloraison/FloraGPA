@@ -2,6 +2,7 @@
 #include "core/ConstantBufferBindings.h"
 #include "core/Frame.h"
 #include "core/IaBindings.h"
+#include "core/MapRecords.h"
 #include "core/OutputBindings.h"
 #include "core/PipelineBindings.h"
 #include "core/Predication.h"
@@ -152,6 +153,7 @@ class Replay {
     };
     std::vector<Timestamp> timestamps_;
     const Frame &frame_;
+    std::optional<MapRecordAudit> mapRecordAudit_;
     ReplayOptions options_;
     std::unique_ptr<RenderDocCapture> renderdoc_;
     Com<ID3DUserDefinedAnnotation> captureAnnotation_;
