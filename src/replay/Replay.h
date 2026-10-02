@@ -1,4 +1,5 @@
 #pragma once
+#include "core/TextureCreation.h"
 #include "core/ConstantBufferBindings.h"
 #include "core/BufferCreation.h"
 #include "core/Frame.h"
@@ -156,6 +157,7 @@ class Replay {
     const Frame &frame_;
     std::optional<MapRecordAudit> mapRecordAudit_;
     std::optional<BufferCreationAudit> bufferCreationAudit_;
+    std::optional<TextureCreationAudit> textureCreationAudit_;
     ReplayOptions options_;
     std::unique_ptr<RenderDocCapture> renderdoc_;
     Com<ID3DUserDefinedAnnotation> captureAnnotation_;

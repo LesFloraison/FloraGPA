@@ -11,7 +11,7 @@
       "family": "texture_creation",
       "origin": "self_owned_original_gpa_capture",
       "source_manifests": [],
-      "provenance_note": "Unmodified original capture from the retained late-texture native probe; unsupported discovery, not accepted replay coverage.",
+      "provenance_note": "Unmodified original late-texture capture; historically blocked during strict dispatch, now covered by Texture2D/SRV creation acceptance.",
       "device_scope": "Default hardware producer; original player adapter unidentified.",
       "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
       "comparison_policy": "exact_golden",
@@ -26,6 +26,6 @@
     "producer_source_sha256": "585a71dcef96b131cb0dd7bbe31af8bd5a1e636abfd08f3f5eee8c049b8f9bf8",
     "oracle_path": "artifacts\\m2-late-texture-layout-late\\captured\\oracle.json",
     "oracle_sha256": "1c5772126b094f86813a0ae1c220a4c99b021ec82e88f5de3d4dbb9aa27349ab",
-    "status": "native implementation gaps; not included in accepted regression corpus"
+    "status": "Historical native blocker; resolved by TEXTURE_CREATION_AUDIT.md (capture and producer evidence unchanged)"
   }
 }

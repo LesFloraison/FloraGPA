@@ -88,3 +88,10 @@ Early exploratory launches did not emit a capture, including a known-good static
 control; those missing-file checks are not evidence of a FloraGPA format failure.
 Reusing the established `folder/capture.gpa_frame` and `folder/captured` layout
 produced both controls. The discovery evidence uses only the emitted, hashed file.
+
+## Subsequent resolution
+
+The creation blocker above is preserved as historical discovery evidence. The
+next M2 change implements and accepts its Texture2D/SRV path; see
+[TEXTURE_CREATION_AUDIT.md](TEXTURE_CREATION_AUDIT.md) and the pinned creation
+baseline. The new acceptance does not broaden deferred/context or version scope.

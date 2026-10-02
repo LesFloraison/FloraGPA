@@ -1,0 +1,236 @@
+{
+  "schema": "FloraGPA texture creation acceptance 1",
+  "completion": "M2 in progress; M3-M6 incomplete",
+  "scope": "Device5 Texture2D and Texture2D SRV creation; seven related metadata layouts",
+  "package": "out\\FloraGPA-texture-creation-20261003",
+  "package_sha256": {
+    "FloraGPA.exe": "8d96f1329508631d759befd89b8cc905c6be053cb621c661a6a87c4a3472bc3f",
+    "FloraGPA.Cli.exe": "9ee96d5f87ddf5ea176195981c78c6219d5a33e372a46b32e2acb775948f446d",
+    "FloraGPA.Worker.exe": "a207e930d63a4098ecc2763d02e672e95b678dc28f3676ffbfe49d0071c48c32",
+    "FloraGPA.Rdc.exe": "f4d21d43e661d24d392e91fc1a1f1460a20d1377fcf5075c57083ad289e82773",
+    "FloraGPA.Metrics.dll": "58b6278f2a93e783b1e8bb1290e9b0e51745f1a36825f296584f52159fd7c6db"
+  },
+  "native_runs": 262,
+  "file_outcomes": {
+    "repeat_stable": 130,
+    "repeat_variable": 1
+  },
+  "prior_stable_images_unchanged": 122,
+  "corpus_controls": 53,
+  "boundary_runs": 22,
+  "new_original_player_runs": 16,
+  "producer_frame_checks": 168,
+  "hardware_warp_original_creation_runs": 14,
+  "golden_controls": [
+    {
+      "case": "gf2",
+      "rgba_sha256": "2e1abc5eacb0bbfd801f9fe059c305baa9a0786c384b36a42fa5a323dd979fd1",
+      "passed": true,
+      "counts": {
+        "ClearDepthStencilView": 2,
+        "ClearRenderTargetView": 1,
+        "CreateBuffer": 2,
+        "DrawIndexed": 72,
+        "Map": 44,
+        "Present": 1,
+        "buffers_created_without_initial_data": 2,
+        "object_observation_records": 49,
+        "pipeline_setter_records": 142,
+        "private_data_observations": 4,
+        "query_metadata_records": 2,
+        "state_or_auxiliary_records": 551,
+        "unmap_observations": 44
+      }
+    },
+    {
+      "case": "gf2-negative",
+      "rgba_sha256": "b2c5548a51715f581c4591acc266ac7a0c65b54b7ecd9a49f43499fa9b76c5f1",
+      "passed": true,
+      "counts": {
+        "ClearDepthStencilView": 2,
+        "ClearRenderTargetView": 1,
+        "CreateBuffer": 2,
+        "Map": 44,
+        "Present": 1,
+        "buffers_created_without_initial_data": 2,
+        "object_observation_records": 49,
+        "pipeline_setter_records": 142,
+        "private_data_observations": 4,
+        "query_metadata_records": 2,
+        "state_or_auxiliary_records": 551,
+        "unmap_observations": 44
+      }
+    },
+    {
+      "case": "bf1",
+      "rgba_sha256": "1f724d1840652f66afd26dd30c95aecd5c1b4932eede56109198f15a8f57a2f6",
+      "passed": true,
+      "counts": {
+        "ClearDepthStencilView": 10,
+        "ClearRenderTargetView": 10,
+        "ClearUnorderedAccessViewFloat": 1,
+        "CopyResource": 2,
+        "CopyStructureCount": 6,
+        "CopySubresourceRegion": 7,
+        "Dispatch": 60,
+        "DispatchIndirect": 13,
+        "Draw": 79,
+        "DrawIndexed": 41,
+        "DrawIndexedInstanced": 1053,
+        "DrawInstanced": 29,
+        "GenerateMips": 2,
+        "Map": 4151,
+        "Present": 1,
+        "UpdateSubresource": 27,
+        "map_read_observations": 2,
+        "object_observation_records": 28,
+        "pipeline_setter_records": 2221,
+        "query_metadata_records": 17,
+        "state_or_auxiliary_records": 7354,
+        "unmap_observations": 4153,
+        "unresolved_input_layout_setters": 2,
+        "unresolved_output_setters": 6,
+        "unresolved_shader_setters": 4,
+        "unresolved_srv_setters": 2
+      }
+    },
+    {
+      "case": "bf1-negative",
+      "rgba_sha256": "cd3a3066f984b1c317fbeefec2836503f32078321d3dc1f367465f2c06d435bf",
+      "passed": true,
+      "counts": {
+        "ClearDepthStencilView": 10,
+        "ClearRenderTargetView": 10,
+        "ClearUnorderedAccessViewFloat": 1,
+        "CopyResource": 2,
+        "CopyStructureCount": 6,
+        "CopySubresourceRegion": 7,
+        "Dispatch": 60,
+        "DispatchIndirect": 13,
+        "GenerateMips": 2,
+        "Map": 4151,
+        "Present": 1,
+        "UpdateSubresource": 27,
+        "map_read_observations": 2,
+        "object_observation_records": 28,
+        "pipeline_setter_records": 2221,
+        "query_metadata_records": 17,
+        "state_or_auxiliary_records": 7354,
+        "unmap_observations": 4153,
+        "unresolved_input_layout_setters": 2,
+        "unresolved_output_setters": 6,
+        "unresolved_shader_setters": 4,
+        "unresolved_srv_setters": 2
+      }
+    }
+  ],
+  "results": {
+    "corpus": {
+      "path": "artifacts\\m2-creation-release-corpus\\validation.json",
+      "sha256": "e8accf904228ac74b2215e8e960470148b8335ca7ead7da0dc096202c4103ebc",
+      "counts": {
+        "repeat_stable": 90,
+        "repeat_variable": 1
+      }
+    },
+    "originals": {
+      "path": "artifacts\\m2-creation-release-originals\\validation.json",
+      "sha256": "409836d3134a1973c4b309783d9fc041094aad04f9559ed6ec6d4b35aef6d2e5",
+      "counts": {
+        "repeat_stable": 11
+      }
+    },
+    "copy": {
+      "path": "artifacts\\m2-creation-release-copy\\validation.json",
+      "sha256": "ebf8bc1e93c0afd41a9977b24fb56ecc0c59111b9047d121d5ee840a6e92e56f",
+      "counts": {
+        "repeat_stable": 6
+      }
+    },
+    "present": {
+      "path": "artifacts\\m2-creation-release-present\\validation.json",
+      "sha256": "20c67d24781b36b92004a672c50d5585fc1fe3a87a40ced45f7fba99dcd889f6",
+      "counts": {
+        "repeat_stable": 5
+      }
+    },
+    "buffer": {
+      "path": "artifacts\\m2-creation-release-buffer\\validation.json",
+      "sha256": "cdedf4fe5b0f5495ff11917329a9b977718f4d85e891092b142e1ec48d5ba019",
+      "counts": {
+        "repeat_stable": 5
+      }
+    },
+    "pipeline": {
+      "path": "artifacts\\m2-creation-release-pipeline\\validation.json",
+      "sha256": "9b983bf25d440df20bacf836f2f2290024452c7b6a03010ef7522d698b29ad8c",
+      "counts": {
+        "repeat_stable": 5
+      }
+    },
+    "creation": {
+      "path": "artifacts\\m2-creation-release-creation\\validation.json",
+      "sha256": "419e34269ad39093502367379cf5cf4dba82cad60ace449a84a838f27c1bdef3",
+      "counts": {
+        "repeat_stable": 7
+      }
+    },
+    "discovery": {
+      "path": "artifacts\\m2-creation-release-discovery\\validation.json",
+      "sha256": "d1dc8b20d5203508d199929bb0d23afcf534700112deefa7cfc0f2ed8c0b61f9",
+      "counts": {
+        "repeat_stable": 1
+      }
+    }
+  },
+  "ctest": {
+    "path": "artifacts/ctest-m2-creation.log",
+    "sha256": "660d14248c9c2dd81ada2e6830a4b6d36dc1f2e6781c8b57edce1331b6edb388",
+    "suites": 14,
+    "qt_details": {
+      "texture-creation": {
+        "path": "build\\vs2022\\texture-creation-Release.txt",
+        "sha256": "bf6f4c7dea46b5087f51d52f453743c7c1a2a7c38d97fcd9797287e6028ed31b",
+        "cases": 7
+      },
+      "ui": {
+        "path": "build\\vs2022\\ui-Release.txt",
+        "sha256": "a9162704041690a94b5408d69a2e4b33b351ddffe1c64b9dbdb9b04c01d025f8",
+        "cases": 55
+      },
+      "texture-edit-replay": {
+        "path": "build\\vs2022\\texture-edit-replay-Release.txt",
+        "sha256": "f679be1a3092c129f1b20248ab24fac13dfb0817ce0288136cd67950916ed54f",
+        "cases": 34
+      }
+    }
+  },
+  "sources": {
+    "src/core/TextureCreation.cpp": "0931fbc6f6112078fb1417d504fee1d7321dd4c5dfe99f8aebb78c8724c2029e",
+    "src/core/TextureCreation.h": "cc76c49b628eb7f7aa0a44b4ddae6a9d2584dfee4049c7858894be62399ee070",
+    "src/application/ApiCommands.cpp": "35f51accd195044d9a973e3694848530a9b8f17d03888ebb909689b8c151d854",
+    "src/application/FrameValidation.cpp": "03959519fc75c5205e7a496de46a20dc49308df93f478283cec3699c7fb4a4c4",
+    "src/core/ReplayCapabilities.cpp": "fc457aeae801de8656d73d0b9867488dd11a3bed276c1ba4b70d571fcfdbfd28",
+    "src/core/CommandNames.inc": "d6157249327820e87f217a13554817622b15fefb0fb6649218a0af43e171db2c",
+    "src/replay/Replay.cpp": "e6f36cb07918c1be3f40c9bdc6d4be27cd60b029b819b5e4df872de1a5825226",
+    "src/replay/Replay.h": "3cdd0e9fb08c16703630a63efea02379f34907dec50a78209f7c8349fb50f0ac",
+    "tests/TextureCreationTests.cpp": "e3580c13d6eac4b236e08742e0007a5796963811ae8331e9803083605a2e0a76",
+    "tools/native/texture_creation_probe.cpp": "6f22b3ed84f56323000951666ea74c54c166d4593b81f3a86b46dc03605528d6",
+    "tools/native/texture_probe_helpers.h": "30abcac380d84d505fd344d4083d97300f50df5b2e5cc7dffb11ea03c6d6ee3d",
+    "tools/native/texture_copy_probe.cpp": "9713f07b873a1700bae72e6397c7189e3b2325ea076de3aaff8fe0fa64cde1cb",
+    "tools/native/present_capture_probe.cpp": "7c29f1e572ab16a5bc497d39eef8198d79056877a9e1d3fff3f7ed530a32c4e3",
+    "CMakeLists.txt": "0fd901df47b73cec60671e2f173438fd24302aa3264d64a1f5618ff3e8e1b4c0"
+  },
+  "evidence": {
+    "artifacts/m2-creation-wrappers.c": "5872c57cc13bc96e4efadec2cad001714ea2b595afe7c842e55f6581bf3f751b",
+    "artifacts/m2-texture-refcount-wrappers.c": "8cc50f041e61fe9f2efe5ca831baab0028148b964c78638b9803963ee51e2ee7",
+    "artifacts/m2-texture-creation-acceptance/manifest.json": "7bdfac7c89b42b88d2d1cf393e381c74583af39f7f49b6273c60a51dd7acf930"
+  },
+  "limits": [
+    "Original player adapter unidentified; observed image equality is not matched-device equivalence",
+    "Texture1D/3D creation wire decoded; execution awaits real original capture acceptance",
+    "Other view/device layouts, implicit normalization, identity versioning and deferred execution remain unsupported",
+    "These fixtures do not certify all formats/usages/sample counts",
+    "Known Helldivers variability unchanged; missing contents are not synthesized"
+  ]
+}

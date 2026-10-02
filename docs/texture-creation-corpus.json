@@ -1,0 +1,191 @@
+{
+  "schema": "FloraGPA compatibility corpus 1",
+  "profile": "GPA 2025 R1 legacy DX11 / IGPA v3",
+  "root_parameter": "--captures-root",
+  "cases": [
+    {
+      "id": "texture_creation_upload",
+      "path": "0/capture.gpa_frame",
+      "sha256": "9347a131c7c14ec6ee53e2708897eedd99962534ed89ada4b38868f4711938b7",
+      "bytes": 70157,
+      "family": "texture_creation",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified CaptureNextFrame output; independent native and shim producer subresource bytes and texture-dependent image oracles.",
+      "device_scope": "Default hardware producer; original player adapter unidentified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "boundaries": [
+        {
+          "event": 23,
+          "resource": 8,
+          "expect_stable": true,
+          "expected_storage_sha256": "bdbe73d146e4e0df9407d70117e9650e5fadb088cfa77163a9ce8f4382b8a19b"
+        }
+      ],
+      "controls": []
+    },
+    {
+      "id": "texture_creation_initial",
+      "path": "1/capture.gpa_frame",
+      "sha256": "0c92e6541ccf94073a44a39581981c9026791263e7d36a1cae29b7ed8411cea8",
+      "bytes": 67882,
+      "family": "texture_creation",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified CaptureNextFrame output; independent native and shim producer subresource bytes and texture-dependent image oracles.",
+      "device_scope": "Default hardware producer; original player adapter unidentified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "boundaries": [
+        {
+          "event": 4,
+          "resource": 8,
+          "expect_stable": true,
+          "expected_storage_sha256": "bdbe73d146e4e0df9407d70117e9650e5fadb088cfa77163a9ce8f4382b8a19b"
+        }
+      ],
+      "controls": []
+    },
+    {
+      "id": "texture_creation_initial_then_update",
+      "path": "2/capture.gpa_frame",
+      "sha256": "880248b06b23434260a265841b253034eb0a3b014e14ad3a886f9f3b783c8c25",
+      "bytes": 70830,
+      "family": "texture_creation",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified CaptureNextFrame output; independent native and shim producer subresource bytes and texture-dependent image oracles.",
+      "device_scope": "Default hardware producer; original player adapter unidentified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "boundaries": [
+        {
+          "event": 4,
+          "resource": 8,
+          "expect_stable": true,
+          "expected_storage_sha256": "bdbe73d146e4e0df9407d70117e9650e5fadb088cfa77163a9ce8f4382b8a19b"
+        },
+        {
+          "event": 40,
+          "resource": 8,
+          "expect_stable": true,
+          "expected_storage_sha256": "e45679eec1ad42b4adc2c4c82769aac4ca76583676e90e7bd3dfb8328b8ff8f3"
+        }
+      ],
+      "controls": [
+        {
+          "disable_event": 34,
+          "repeat": 2,
+          "expected_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+          "purpose": "Diagnostic-only omission of mip-0 overwrite must preserve initial bytes and produce magenta; original capture/shaders unchanged."
+        }
+      ]
+    },
+    {
+      "id": "texture_creation_default_srv",
+      "path": "3/capture.gpa_frame",
+      "sha256": "abf6b45b0f1abe17cffb649b815cc8760c479abb1e81536dd50e45fcd513aeae",
+      "bytes": 70133,
+      "family": "texture_creation",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified CaptureNextFrame output; independent native and shim producer subresource bytes and texture-dependent image oracles.",
+      "device_scope": "Default hardware producer; original player adapter unidentified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "boundaries": [
+        {
+          "event": 23,
+          "resource": 8,
+          "expect_stable": true,
+          "expected_storage_sha256": "bdbe73d146e4e0df9407d70117e9650e5fadb088cfa77163a9ce8f4382b8a19b"
+        }
+      ],
+      "controls": []
+    },
+    {
+      "id": "texture_creation_failed",
+      "path": "4/capture.gpa_frame",
+      "sha256": "9da5b01189feeb9821162d705d9e6e1a85039acfe405a323a945cc451a6c0915",
+      "bytes": 70369,
+      "family": "texture_creation",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified CaptureNextFrame output; independent native and shim producer subresource bytes and texture-dependent image oracles.",
+      "device_scope": "Default hardware producer; original player adapter unidentified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "boundaries": [
+        {
+          "event": 26,
+          "resource": 11,
+          "expect_stable": true,
+          "expected_storage_sha256": "bdbe73d146e4e0df9407d70117e9650e5fadb088cfa77163a9ce8f4382b8a19b"
+        }
+      ],
+      "controls": []
+    },
+    {
+      "id": "texture_creation_validation_only",
+      "path": "5/capture.gpa_frame",
+      "sha256": "58a67379804740d36a90be73d4d26c0936c0c4a0715bfd22b7bf14395f98817e",
+      "bytes": 70369,
+      "family": "texture_creation",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified CaptureNextFrame output; independent native and shim producer subresource bytes and texture-dependent image oracles.",
+      "device_scope": "Default hardware producer; original player adapter unidentified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "boundaries": [
+        {
+          "event": 26,
+          "resource": 11,
+          "expect_stable": true,
+          "expected_storage_sha256": "bdbe73d146e4e0df9407d70117e9650e5fadb088cfa77163a9ce8f4382b8a19b"
+        }
+      ],
+      "controls": []
+    },
+    {
+      "id": "texture_creation_immediate_overwrite",
+      "path": "6/capture.gpa_frame",
+      "sha256": "c90f167392b7570093c95597bbca3c9f9b1bd1ef69ba4cec11b2c2c657be342a",
+      "bytes": 70189,
+      "family": "texture_creation",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified CaptureNextFrame output; independent native and shim producer subresource bytes and texture-dependent image oracles.",
+      "device_scope": "Default hardware producer; original player adapter unidentified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "boundaries": [
+        {
+          "event": 4,
+          "resource": 8,
+          "expect_stable": true,
+          "expected_storage_sha256": "bdbe73d146e4e0df9407d70117e9650e5fadb088cfa77163a9ce8f4382b8a19b"
+        },
+        {
+          "event": 23,
+          "resource": 8,
+          "expect_stable": true,
+          "expected_storage_sha256": "e45679eec1ad42b4adc2c4c82769aac4ca76583676e90e7bd3dfb8328b8ff8f3"
+        }
+      ],
+      "controls": [
+        {
+          "disable_event": 16,
+          "repeat": 2,
+          "expected_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+          "purpose": "Diagnostic-only omission of mip-0 overwrite must preserve initial bytes and produce magenta; original capture/shaders unchanged."
+        }
+      ]
+    }
+  ],
+  "source_manifest": {
+    "path": "artifacts\\m2-texture-creation-acceptance\\manifest.json",
+    "sha256": "7bdfac7c89b42b88d2d1cf393e381c74583af39f7f49b6273c60a51dd7acf930"
+  }
+}

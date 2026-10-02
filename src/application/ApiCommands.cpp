@@ -1,5 +1,6 @@
 #include "ApiCommands.h"
 #include "core/Contexts.h"
+#include "core/TextureCreation.h"
 #include <QChar>
 #include <QDir>
 #include <QRegularExpression>
@@ -325,7 +326,7 @@ Json inspectCommand(const Frame &frame, Id id) {
         out["note"] = out["note"].get<std::string>() +
                     " A zero returned object reference cannot distinguish an omitted "
                       "output pointer from a null returned binding.";
-    if (in(t, {0x3017, 0x3597, 0x3578}))
+    if (in(t, {0x3017, 0x3597, 0x3578}) || isTextureCreation(t))
         out["note"] = "Captured process pointers are numeric values, not resource IDs or readable addresses "
                       "in this process.";
     if (t == 0x246)
@@ -589,6 +590,44 @@ Json inspectCommand(const Frame &frame, Id id) {
                     r.u("format");
                     r.u("view_dimension");
                     r.field("descriptor_union", "4I");
+                }
+            } else if (isTextureCreation(t)) {
+                const auto creation = readTextureCreation(t, raw);
+                r.field("hresult", "i");
+                if (t == 0x357c)
+                    r.id("source_resource");
+                if (r.flag("descriptor_present"))
+                    r.field("descriptor", std::to_string(creation.descriptor.size()) + "I");
+                if (t != 0x357c && r.flag("initial_data_present"))
+                    for (size_t i = 0; i < creation.initial.size(); ++i) {
+                        auto prefix = "initial[" + std::to_string(i) + "].";
+                        r.id(prefix + "captured_pointer", false);
+                        r.u(prefix + "row_pitch");
+                        r.u(prefix + "slice_pitch");
+                    }
+                r.id("returned_resource");
+            } else if (isTextureCreationObservation(t)) {
+                acceptTextureCreationObservation(t, raw);
+                if (t == 0x313f) {
+                    r.field("hresult", "i");
+                    r.field("iid", "16s");
+                    r.id("returned_interface");
+                } else if (t == 0x3140 || t == 0x3141)
+                    r.u("observed_reference_count");
+                else if (t == 0x3142)
+                    r.id("returned_device");
+                else if (t == 0x3149) {
+                    if (r.flag("descriptor_present"))
+                        r.field("descriptor", "11I");
+                } else {
+                    r.field("hresult", "i");
+                    r.u("format");
+                    if (t == 0x35aa) {
+                        r.u("sample_count");
+                        r.u("flags");
+                    }
+                    if (r.flag("output_present"))
+                        r.u(t == 0x3592 ? "format_support" : "quality_levels");
                 }
             } else if (t == 0x3578) {
                 r.field("hresult", "i");

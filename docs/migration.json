@@ -3105,9 +3105,11 @@
       "native": [
         "src/replay/Replay.cpp",
         "src/application/PlanarWrites.cpp",
-        "src/application/ExperimentReport.cpp"
+        "src/application/ExperimentReport.cpp",
+        "src/core/TextureCreation.cpp"
       ],
       "validation": [
+        "docs/TEXTURE_CREATION_AUDIT.md: M2 executes captured Texture2D/SRV creation at its event with strict wire/reference/initial-byte checks and no future-blob preload. Seven original array/mip/padded-row fixtures cover initialization, uploads, immediate overwrite, default SRV, failure and validation-only calls; hardware/WARP byte boundaries and the prior late-texture blocker are included. Texture1D/3D creation execution and wider creation layouts remain unsupported pending original acceptance. Full package results are pinned in texture-creation-baseline.json; module remains partial.",
         "docs/STRICT_DISPATCH_AUDIT.md: M2 removes the redundant auxiliary fallback; all commands now require an explicit execution/observation path. Four CTest suites, 246 prior corpus runs, 49 controls and four goldens pass with 122 stable hashes unchanged. An additional unmodified late-texture creation capture passes two original-player runs but is correctly rejected by FloraGPA; nine uncovered record families are located and queued. The module remains partial.",
         "docs/TEXTURE_COPY_AUDIT.md: M2 checks ordinary texture copy/Resolve format, subresource, extent, MSAA/depth and physical BC-block semantics. Eleven original captures pass hardware/WARP destination-byte checks and 22 original-player image comparisons. Final package: 246 independent runs preserve 111 prior stable images; 49 controls, four goldens and 12 CTest suites pass. The native debug layer independently rejects explicit 1x1 BC boxes; 4x4 blocks and null boxes on small mips pass. Special reinterpretation/packed/planar paths remain partial; module status is unchanged.",
         "docs/BUFFER_COPY_AUDIT.md: M2 adds shared checked buffer copy references, byte ranges and structured counter destinations. Six unmodified original captures pass hardware/WARP boundary bytes and twelve original-player image comparisons; 224 independent corpus runs preserve 105 prior stable hashes, 27 controls and four goldens pass. Seven existing CTest suites pass; the new copy suite passes after a test-only mapped-file fixture correction. Texture copy/resolve, initial counters and deferred semantics remain incomplete; replay.py stays partial.",

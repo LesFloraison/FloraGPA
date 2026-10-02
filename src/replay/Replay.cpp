@@ -109,6 +109,13 @@ IUnknown *Replay::object(Id id) {
         it != bufferCreationAudit_->creationEvents.end() && !objects_.contains(id))
         throw std::runtime_error("Resource " + std::to_string(id) +
                                  " is not available before CreateBuffer event " + std::to_string(it->second));
+    if (!textureCreationAudit_)
+        textureCreationAudit_ = auditTextureCreations(frame_);
+    if (auto it = textureCreationAudit_->creationEvents.find(id);
+        it != textureCreationAudit_->creationEvents.end() && !objects_.contains(id))
+        throw std::runtime_error("Resource " + std::to_string(id) +
+                                 " is not available before texture/view creation event " +
+                                 std::to_string(it->second));
     if (auto it = objects_.find(id); it != objects_.end())
         return it->second.Get();
     const auto resource = frame_.resource(id);
@@ -1028,6 +1035,70 @@ void Replay::command(const Entry &e) {
                 ++counts["buffers_created_without_initial_data"];
         } else
             ++counts["buffer_creation_observations"];
+        return;
+    }
+    if (acceptTextureCreationObservation(t, payload)) {
+        ++counts["texture_creation_observations"];
+        return;
+    }
+    if (isTextureCreation(t)) {
+        if (!textureCreationAudit_)
+            textureCreationAudit_ = auditTextureCreations(frame_);
+        const auto &creation = requireTextureCreation(*textureCreationAudit_, e.id);
+        if (creation.result != 0) {
+            ++counts["texture_creation_observations"];
+            return;
+        }
+        if (objects_.contains(creation.resource))
+            throw std::runtime_error("Texture/view identity already has replay storage");
+        Com<IUnknown> created;
+        if (t == 0x357c) {
+            D3D11_SHADER_RESOURCE_VIEW_DESC desc{};
+            if (creation.hasDescriptor)
+                std::memcpy(&desc, creation.descriptor.data(), sizeof(desc));
+            Com<ID3D11ShaderResourceView> view;
+            check(device_->CreateShaderResourceView(get<ID3D11Resource>(creation.source),
+                                                    creation.hasDescriptor ? &desc : nullptr, &view),
+                  "Captured CreateShaderResourceView");
+            D3D11_SHADER_RESOURCE_VIEW_DESC actual{};
+            view->GetDesc(&actual);
+            std::array<uint32_t, 6> actualWords{};
+            std::memcpy(actualWords.data(), &actual, sizeof(actual));
+            Reader saved(frame_.capturedPayload(creation.resource, 5, 0x8c));
+            saved.skip(24);
+            const auto savedWords = saved.array<uint32_t, 6>();
+            saved.end();
+            if (!textureSrvDescriptorEqual(savedWords, actualWords))
+                throw std::runtime_error("Created SRV descriptor does not reproduce the saved view");
+            Reader effective(frame_.payload(creation.resource, 5, 0x8c));
+            effective.skip(24);
+            const auto effectiveWords = effective.array<uint32_t, 6>();
+            effective.end();
+            if (!textureSrvDescriptorEqual(savedWords, effectiveWords)) {
+                std::memcpy(&desc, effectiveWords.data(), sizeof(desc));
+                view.Reset();
+                check(device_->CreateShaderResourceView(get<ID3D11Resource>(creation.source), &desc, &view),
+                      "Create captured SRV with experiment overlay");
+            }
+            created = view;
+        } else {
+            const auto resource = frame_.resource(creation.resource);
+            auto data = creation.data ? std::optional<Bytes>(frame_.data(creation.data)) : std::nullopt;
+            if (auto it = options_.textures.find(creation.resource); it != options_.textures.end())
+                data = Bytes(it->second);
+            created = createEditTexture(resource, data);
+            if (!creation.hasInitial)
+                ++counts["textures_created_without_initial_data"];
+        }
+        if (renderdoc_) {
+            Com<ID3D11DeviceChild> child;
+            check(created.As(&child), "Captured object is a device child");
+            const auto name = "GPA resource " + std::to_string(creation.resource) + " (captured creation)";
+            check(child->SetPrivateData(WKPDID_D3DDebugObjectName, UINT(name.size()), name.data()),
+                  "Name captured texture/view");
+        }
+        objects_.emplace(creation.resource, created);
+        ++counts[commandName(t)];
         return;
     }
     if (t == 0x3017) {

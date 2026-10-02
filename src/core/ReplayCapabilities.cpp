@@ -11,6 +11,7 @@
 #include "SamplerBindings.h"
 #include "SrvBindings.h"
 #include "StreamOutput.h"
+#include "TextureCreation.h"
 #include <algorithm>
 namespace flora {
 namespace {
@@ -19,6 +20,13 @@ bool in(uint16_t t, std::initializer_list<uint16_t> values) {
 }
 } // namespace
 ReplayCapability replayCapability(uint16_t t) {
+    if (t == 0x3579 || t == 0x357b)
+        return {"unsupported", "src/core/TextureCreation.cpp",
+                "Texture1D/Texture3D wire decoded; original creation acceptance pending"};
+    if (isTextureCreation(t) || isTextureCreationObservation(t))
+        return {isTextureCreation(t) ? "execute" : "metadata",
+                "src/core/TextureCreation.cpp;src/replay/Replay.cpp",
+                "tests/TextureCreationTests.cpp;docs/TEXTURE_CREATION_AUDIT.md"};
     if (isCopyCommand(t))
         return {"execute", "src/core/CopyCommands.cpp;src/core/TextureCopies.cpp;src/replay/Replay.cpp",
                 "tests/CopyCommandTests.cpp;tests/TextureCopyTests.cpp;docs/BUFFER_COPY_AUDIT.md;docs/TEXTURE_COPY_AUDIT.md"};

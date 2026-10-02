@@ -1,19 +1,20 @@
 #include "FrameValidation.h"
-#include "core/BufferCreation.h"
-#include "core/CopyCommands.h"
-#include "core/PresentRecords.h"
 #include "ApiCommands.h"
 #include "ContextInspector.h"
+#include "core/BufferCreation.h"
 #include "core/Commands.h"
+#include "core/CopyCommands.h"
 #include "core/IaBindings.h"
 #include "core/InspectionRecords.h"
 #include "core/MapRecords.h"
 #include "core/OutputBindings.h"
 #include "core/PipelineBindings.h"
 #include "core/Predication.h"
+#include "core/PresentRecords.h"
 #include "core/ReplayCapabilities.h"
 #include "core/SrvBindings.h"
 #include "core/StreamOutput.h"
+#include "core/TextureCreation.h"
 #include <map>
 namespace flora {
 using Json = nlohmann::json;
@@ -52,6 +53,7 @@ Json validateFrame(const std::filesystem::path &path, const std::function<bool()
         size_t scanned = 0;
         std::optional<MapRecordAudit> mapAudit;
         std::optional<BufferCreationAudit> creationAudit;
+        std::optional<TextureCreationAudit> textureCreationAudit;
         auto reference = [&](const Entry &e, Id id, int category) {
             if (!id)
                 return;
@@ -133,6 +135,20 @@ Json validateFrame(const std::filesystem::path &path, const std::function<bool()
                             } catch(const std::exception &error) {
                                 finding(&e,"error","copy_command_rejected",error.what(),copy.destination);
                             }
+                        }
+                        acceptTextureCreationObservation(e.type, frame.payload(id));
+                        if (isTextureCreation(e.type)) {
+                            if (!textureCreationAudit)
+                                textureCreationAudit = auditTextureCreations(frame);
+                            const auto &creation = textureCreationAudit->records.at(id);
+                            if (!creation.error.empty())
+                                finding(&e, "error", "texture_creation_rejected", creation.error,
+                                        creation.resource);
+                            else if (creation.result == 0 && !creation.hasInitial && e.type != 0x357c)
+                                finding(&e, "info", "texture_initial_contents_undefined",
+                                        "Creation has no saved initial-data observations; a later first-use "
+                                        "blob is not a creation-time initializer",
+                                        creation.resource);
                         }
                         acceptQueryMetadata(e.type, frame.payload(id));
                         acceptInspectionRecord(e.type, frame.payload(id));
