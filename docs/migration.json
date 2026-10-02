@@ -125,7 +125,7 @@
         "tests/UiTests.cpp: field offsets, reference navigation, resource filtering and texture-preview priority",
         "tools/validate_contexts.py: missing-context Finish classification matches Python on recovery and conflicting-evidence captures",
         "Typed-format view-preview handoff remains pending",
-        "docs/HELLDIVERS_REPLAY_FIX.md: strict Device5.GetImmediateContext inspection and captured query metadata acceptance unblock the Helldivers frame. Nonzero CreateQuery identities remain unsupported; no query result remeasurement or CPU branching restoration. Full-frame pixel parity is not claimed; native and Python repeats vary slightly. Shared module status is unchanged."
+        "docs/HELLDIVERS_REPLAY_FIX.md: strict Device5.GetImmediateContext inspection and captured query metadata acceptance unblock the Helldivers frame. Nonzero CreateQuery identities remain unsupported; no query result remeasurement or CPU branching restoration. Full-frame pixel parity is not claimed; native, Python and installed original GPA kernel repeats vary slightly. Follow-up localizes native variation to captured in-place sharpening Dispatch 18401; disabling it gives three identical outputs but changes the workload. Shared module status is unchanged."
       ]
     },
     {
@@ -320,7 +320,7 @@
         "tools/validate_api_commands.py: 920 GF2, 18024 BF1 and 4006 synthetic records plus resource/text filtering; JSON and parsed CSV, allowing different invalid diagnostic wording",
         "tests/UiTests.cpp: field offsets, reference navigation, resource filtering and texture-preview priority",
         "Native traversal validates all 15 recovered inspection/lifetime wire types without applying captured returns; includes trailing Factory3 references and strict truncation/flag/count tests",
-        "docs/HELLDIVERS_REPLAY_FIX.md: strict Device5.GetImmediateContext inspection and captured query metadata acceptance unblock the Helldivers frame. Nonzero CreateQuery identities remain unsupported; no query result remeasurement or CPU branching restoration. Full-frame pixel parity is not claimed; native and Python repeats vary slightly. Shared module status is unchanged."
+        "docs/HELLDIVERS_REPLAY_FIX.md: strict Device5.GetImmediateContext inspection and captured query metadata acceptance unblock the Helldivers frame. Nonzero CreateQuery identities remain unsupported; no query result remeasurement or CPU branching restoration. Full-frame pixel parity is not claimed; native, Python and installed original GPA kernel repeats vary slightly. Follow-up localizes native variation to captured in-place sharpening Dispatch 18401; disabling it gives three identical outputs but changes the workload. Shared module status is unchanged."
       ]
     },
     {
@@ -1034,7 +1034,7 @@
         "docs/EXPERIMENT_REPORT_MIGRATION.md: native active-history assets and applied/pending traversal report; replay/texture/buffer consumers and compact Qt worker log; private analysis consumers remain pending",
         "docs/ANNOTATION_MIGRATION.md: per-object nesting, explicit lifetime-bounded context identity and draw membership, JSON/CSV, validated annotation replay and Qt navigation/filter/export; range-statistics handoff is covered by docs/GPU_STATISTICS_MIGRATION.md; broader original-capture annotation coverage remains open",
         "docs/GPU_PROFILE_MIGRATION.md: repeated timing CLI/Qt integration and shared count normalization are covered; remaining shared-module responsibilities retain their existing status.",
-        "docs/HELLDIVERS_REPLAY_FIX.md: strict Device5.GetImmediateContext inspection and captured query metadata acceptance unblock the Helldivers frame. Nonzero CreateQuery identities remain unsupported; no query result remeasurement or CPU branching restoration. Full-frame pixel parity is not claimed; native and Python repeats vary slightly. Shared module status is unchanged."
+        "docs/HELLDIVERS_REPLAY_FIX.md: strict Device5.GetImmediateContext inspection and captured query metadata acceptance unblock the Helldivers frame. Nonzero CreateQuery identities remain unsupported; no query result remeasurement or CPU branching restoration. Full-frame pixel parity is not claimed; native, Python and installed original GPA kernel repeats vary slightly. Follow-up localizes native variation to captured in-place sharpening Dispatch 18401; disabling it gives three identical outputs but changes the workload. Shared module status is unchanged."
       ]
     },
     {
@@ -2882,7 +2882,7 @@
         "tools/validate_api_commands.py: 920 GF2, 18024 BF1 and 4006 synthetic records plus resource/text filtering; JSON and parsed CSV, allowing different invalid diagnostic wording",
         "tests/UiTests.cpp: field offsets, reference navigation, resource filtering and texture-preview priority",
         "Query results are available in API inspection/export; dedicated query-only presentation/export remains pending",
-        "docs/HELLDIVERS_REPLAY_FIX.md: strict Device5.GetImmediateContext inspection and captured query metadata acceptance unblock the Helldivers frame. Nonzero CreateQuery identities remain unsupported; no query result remeasurement or CPU branching restoration. Full-frame pixel parity is not claimed; native and Python repeats vary slightly. Shared module status is unchanged."
+        "docs/HELLDIVERS_REPLAY_FIX.md: strict Device5.GetImmediateContext inspection and captured query metadata acceptance unblock the Helldivers frame. Nonzero CreateQuery identities remain unsupported; no query result remeasurement or CPU branching restoration. Full-frame pixel parity is not claimed; native, Python and installed original GPA kernel repeats vary slightly. Follow-up localizes native variation to captured in-place sharpening Dispatch 18401; disabling it gives three identical outputs but changes the workload. Shared module status is unchanged."
       ]
     },
     {

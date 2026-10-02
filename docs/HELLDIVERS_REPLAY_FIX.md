@@ -98,8 +98,74 @@ comparison of replay behavior, not an entirely unadapted oracle.
 
 The means include all RGBA channels; alpha is identical in all four comparisons.
 These are observations from two runs per implementation, not tolerance guarantees.
-The source of the variation remains unresolved. The UI test checks successful
-replay and resource navigation rather than asserting an arbitrary first-run hash.
+Follow-up investigation below localizes the observed variation to an in-place
+sharpening dispatch. The UI test checks successful replay and resource navigation
+rather than asserting an arbitrary first-run hash.
 GF2 and BF1 retain their existing exact hash baselines. This fix establishes that
 this Helldivers frame opens and replays, not pixel-perfect reconstruction or
 universal compatibility with all Helldivers captures and analysis features.
+
+
+### Follow-up: original GPA comparison and localized cause
+
+The installed original GPA 2025 R1 `dx11_player.dll` was replayed twice through
+our previously recovered private ABI adapter (`tools/replay_frame.py` in the
+Python research workspace), in separate worker processes. Its pinned SHA-256 is
+`39061ff329e4a32d0c8375ce9ee15e2017bccab0593943b962a860e11723d38b`.
+Both opens/playbacks returned success, cleanly closed, and exported a newly
+rendered framebuffer. Their image hashes differ:
+
+- `f39dbb39b9e7ccd2a3adece45a4d4f02ac0b67da53b00ab64f269204bdd36595`
+- `d1d0493b1930704fd99ecfe26655a0bb675c29f603001700c7c3395496faa413`
+
+86,549 / 2,073,600 pixels differ (4.174%); mean absolute RGB error is
+0.0371965 on the 0–255 scale, maximum channel difference 29, alpha identical.
+This confirms repeat variation in the **original replay kernel** for this capture.
+It does not measure full GUI behavior: the adapter requests single-threaded host
+operation, no initial warmup playbacks, no GT query manager, and one explicit
+playback, using the kernel's default adapter selection. The precise selected
+adapter was not recorded by that adapter, so this is not an assertion of
+numerically identical driver/device conditions between the two implementations.
+
+Native boundary experiments identify the responsible captured shader path:
+
+| Boundary / control | Repeated result |
+|---|---|
+| Resource 18325 after Dispatch 18344 | Two raw RGBA16F images byte-identical |
+| Resource 18325 after Dispatch 18401 | 357,759 half-float components differ; maximum absolute difference 0.017822265625 |
+| Resource 18325 after Dispatch 18431 | 353,985 half-float components differ; maximum absolute difference 0.037353515625 |
+| Final input resource 18734 (MSAA UI texture, resolved) | Two readbacks byte-identical |
+| Full frame, only Dispatch 18401 disabled | Three complete output hashes identical |
+
+Dispatch 18401 binds CS resource 18393 and UAV 18324, backed by texture 18325.
+It dispatches 120×68×1 groups with 8×8×1 threads per group. The captured DXBC
+contains `sharpen_amount` / `sharpening_amount` constants and an in-place
+neighborhood sharpening filter: read center/up/down/left/right from `u0`, then
+write the filtered value to `u0`. There are no `sync` instructions in this shader.
+Neighboring invocations therefore read locations that other invocations overwrite.
+The observed outcome depends on scheduling and visibility of those writes; it is
+not explained merely by floating-point arithmetic being approximate.
+
+For comparison, HLSL synchronization is explicitly scoped: see Microsoft's
+[RWTexture2D documentation](https://learn.microsoft.com/en-us/windows/win32/direct3dhlsl/sm5-object-rwtexture2d)
+and [group synchronization documentation](https://learn.microsoft.com/en-us/windows/win32/direct3dhlsl/groupmemorybarrierwithgroupsync).
+An API boundary wait cannot impose a deterministic ordering on competing reads
+and writes inside one dispatch. A deterministic neighborhood filter normally
+reads an unchanged input and writes to separate output storage.
+
+The earlier MSAA initialization lead is not supported as the cause here:
+ClearRenderTargetView event 18733 clears RTV 18736 / texture 18734 before UI
+rendering, and its resolved final input repeats exactly in the tested pair.
+
+Disabling only event 18401 reduces Dispatch count from 130 to 129; draws remain
+607. Three full-frame runs yield
+`22f2d66bdbca7a3b1aa868c5a68e39ebc7669e070596eec6b8f0e6cc922e2605`, with
+`reference_pixels_used=false`. This is a **diagnostic control**, not an application
+fix: omitting sharpening changes the captured workload and its intended image.
+The production replayer still executes the original captured shader unchanged.
+
+Evidence resides in `artifacts/helldivers-variance/`: original-kernel reports and
+TGA exports, shader disassemblies, raw stage readbacks, and the three disabled-
+sharpening reports. The tested data strongly localizes the observed native repeat
+variation; it does not prove that every possible source of nondeterminism in the
+game or every configuration of the GPA GUI has been exhausted.
