@@ -1,0 +1,254 @@
+{
+  "schema": "FloraGPA compatibility corpus 1",
+  "profile": "GPA 2025 R1 legacy DX11 / IGPA v3",
+  "root_parameter": "--captures-root",
+  "completed": true,
+  "cases": [
+    {
+      "id": "texture_copy_whole_2d",
+      "path": "0/capture.gpa_frame",
+      "sha256": "fd84cf8628869c03030052be5b050e32c6c431ad2ceb9f486a9fc45eb68ff75f",
+      "bytes": 74729,
+      "family": "texture_copy",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified original CaptureNextFrame output; native and shim producer byte/image oracles plus hardware/WARP C++ event-boundary checks.",
+      "device_scope": "Default hardware producer; original player adapter unidentified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "boundaries": [],
+      "controls": [
+        {
+          "disable_event": 24,
+          "repeat": 2,
+          "expected_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+          "purpose": "transfer must supply shader texture input"
+        }
+      ]
+    },
+    {
+      "id": "texture_copy_array_mip_region",
+      "path": "1/capture.gpa_frame",
+      "sha256": "f8ce4a5b738dc3b82d535249c5568000ccd15c294eaf4e17b5b66715846260f5",
+      "bytes": 74685,
+      "family": "texture_copy",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified original CaptureNextFrame output; native and shim producer byte/image oracles plus hardware/WARP C++ event-boundary checks.",
+      "device_scope": "Default hardware producer; original player adapter unidentified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "boundaries": [],
+      "controls": [
+        {
+          "disable_event": 24,
+          "repeat": 2,
+          "expected_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+          "purpose": "transfer must supply shader texture input"
+        }
+      ]
+    },
+    {
+      "id": "texture_copy_same_resource_layers",
+      "path": "2/capture.gpa_frame",
+      "sha256": "74610557ab572f18f5221b663976fd5d1fbe767e1e4ea188ecace959fdfc8b56",
+      "bytes": 74661,
+      "family": "texture_copy",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified original CaptureNextFrame output; native and shim producer byte/image oracles plus hardware/WARP C++ event-boundary checks.",
+      "device_scope": "Default hardware producer; original player adapter unidentified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "boundaries": [],
+      "controls": [
+        {
+          "disable_event": 24,
+          "repeat": 2,
+          "expected_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+          "purpose": "transfer must supply shader texture input"
+        }
+      ]
+    },
+    {
+      "id": "texture_copy_volume_region",
+      "path": "3/capture.gpa_frame",
+      "sha256": "62b8eae5af1be1adb9b9b60dcdd9ea89b15dde7739fdcbde97de74e4b9283fce",
+      "bytes": 72701,
+      "family": "texture_copy",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified original CaptureNextFrame output; native and shim producer byte/image oracles plus hardware/WARP C++ event-boundary checks.",
+      "device_scope": "Default hardware producer; original player adapter unidentified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "boundaries": [],
+      "controls": [
+        {
+          "disable_event": 16,
+          "repeat": 2,
+          "expected_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+          "purpose": "transfer must supply shader texture input"
+        }
+      ]
+    },
+    {
+      "id": "texture_copy_one_d_region",
+      "path": "4/capture.gpa_frame",
+      "sha256": "3b1e24b7612cb33097fa7c5b56c3b0cc439d064dbd7ea46e6b275cf719bb524b",
+      "bytes": 61649,
+      "family": "texture_copy",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified original CaptureNextFrame output; native and shim producer byte/image oracles plus hardware/WARP C++ event-boundary checks.",
+      "device_scope": "Default hardware producer; original player adapter unidentified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "boundaries": [],
+      "controls": [
+        {
+          "disable_event": 16,
+          "repeat": 2,
+          "expected_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+          "purpose": "transfer must supply shader texture input"
+        }
+      ]
+    },
+    {
+      "id": "texture_copy_bc_mip_edge",
+      "path": "5/capture.gpa_frame",
+      "sha256": "78d06baf7e9164ecec1577319ead21c78f51905522a1e53f696ced91b2611f5a",
+      "bytes": 62165,
+      "family": "texture_copy",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified original CaptureNextFrame output; native and shim producer byte/image oracles plus hardware/WARP C++ event-boundary checks.",
+      "device_scope": "Default hardware producer; original player adapter unidentified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "boundaries": [],
+      "controls": [
+        {
+          "disable_event": 24,
+          "repeat": 2,
+          "expected_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+          "purpose": "transfer must supply shader texture input"
+        }
+      ]
+    },
+    {
+      "id": "texture_copy_depth_whole",
+      "path": "6/capture.gpa_frame",
+      "sha256": "f909453bba67beacfe23255d2eb4a806bb54492c572401a20915a934a5df36d1",
+      "bytes": 63975,
+      "family": "texture_copy",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified original CaptureNextFrame output; native and shim producer byte/image oracles plus hardware/WARP C++ event-boundary checks.",
+      "device_scope": "Default hardware producer; original player adapter unidentified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "boundaries": [],
+      "controls": [
+        {
+          "disable_event": 12,
+          "repeat": 2,
+          "expected_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+          "purpose": "transfer must supply shader texture input"
+        }
+      ]
+    },
+    {
+      "id": "texture_copy_msaa_copy",
+      "path": "7/capture.gpa_frame",
+      "sha256": "47c2af3dc76bdf003c9aaf8c9cf7ce3599e8999b14d3b0e07c26ca9b356d103b",
+      "bytes": 62612,
+      "family": "texture_copy",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified original CaptureNextFrame output; native and shim producer byte/image oracles plus hardware/WARP C++ event-boundary checks.",
+      "device_scope": "Default hardware producer; original player adapter unidentified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "boundaries": [],
+      "controls": [
+        {
+          "disable_event": 16,
+          "repeat": 2,
+          "expected_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+          "purpose": "transfer must supply shader texture input"
+        }
+      ]
+    },
+    {
+      "id": "texture_copy_resolve_typed",
+      "path": "8/capture.gpa_frame",
+      "sha256": "ce0969cd9ada22724205a9d8dbcb690a7e0c374410e19e5faa2c5209b93e3af0",
+      "bytes": 61958,
+      "family": "texture_copy",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified original CaptureNextFrame output; native and shim producer byte/image oracles plus hardware/WARP C++ event-boundary checks.",
+      "device_scope": "Default hardware producer; original player adapter unidentified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "boundaries": [],
+      "controls": [
+        {
+          "disable_event": 12,
+          "repeat": 2,
+          "expected_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+          "purpose": "transfer must supply shader texture input"
+        }
+      ]
+    },
+    {
+      "id": "texture_copy_resolve_typeless",
+      "path": "9/capture.gpa_frame",
+      "sha256": "cb6648d819124746a9b1ea6fa0ec50c31e0398a643e25c28b51450ace02c202e",
+      "bytes": 61958,
+      "family": "texture_copy",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified original CaptureNextFrame output; native and shim producer byte/image oracles plus hardware/WARP C++ event-boundary checks.",
+      "device_scope": "Default hardware producer; original player adapter unidentified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "boundaries": [],
+      "controls": [
+        {
+          "disable_event": 12,
+          "repeat": 2,
+          "expected_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+          "purpose": "transfer must supply shader texture input"
+        }
+      ]
+    },
+    {
+      "id": "texture_copy_bc_mip_null",
+      "path": "10/capture.gpa_frame",
+      "sha256": "0e8ab05d12776344542cc0e6bbc278fd3800b9e617a38051c59f65af453a091c",
+      "bytes": 62141,
+      "family": "texture_copy",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified original CaptureNextFrame output; native and shim producer byte/image oracles plus hardware/WARP C++ event-boundary checks.",
+      "device_scope": "Default hardware producer; original player adapter unidentified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "boundaries": [],
+      "controls": [
+        {
+          "disable_event": 24,
+          "repeat": 2,
+          "expected_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+          "purpose": "transfer must supply shader texture input"
+        }
+      ]
+    }
+  ],
+  "source_manifest": {
+    "path": "artifacts\\m2-texture-copy-originals-verified\\manifest.json",
+    "sha256": "958e831f1d533285595ed600a851652890d319745da34be5f3a3661d17771c3e"
+  }
+}

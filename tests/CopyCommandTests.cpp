@@ -225,8 +225,7 @@ class CopyCommandTests : public QObject {
         auto path = dir.filePath("texture.gpa_frame");
         c.save(path);
         Frame f(path.toStdWString());
-        QCOMPARE(validateCopyCommand(f, readCopyCommand(0x3e, f.payload(100))),
-                 CopyValidation::TextureReferences);
+        QCOMPARE(validateCopyCommand(f, readCopyCommand(0x3e, f.payload(100))), CopyValidation::Texture);
         const auto report = validateFrame(path.toStdWString());
         bool partial = false;
         for (const auto &finding : report["findings"])
@@ -234,7 +233,7 @@ class CopyCommandTests : public QObject {
                 QCOMPARE(finding["event_id"], nlohmann::json(100));
                 partial = true;
             }
-        QVERIFY(partial);
+        QVERIFY(!partial);
         QVERIFY_THROWS_EXCEPTION(std::runtime_error,
                                  validateCopyCommand(f, readCopyCommand(0x3e, whole(2, 20))));
         c.add(22, 5, 0x87, texture);

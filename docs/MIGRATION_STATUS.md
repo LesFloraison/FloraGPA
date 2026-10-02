@@ -1,5 +1,16 @@
 # FloraGPA C++ 迁移进度 — 2026-10-03
 
+2026-10-03（M2 第七批）：纹理 CopyResource／CopySubresourceRegion 与 Resolve
+加入共用的格式族、mip／array／volume、坐标、深度／MSAA 与 typed format 校验，
+Resolve 在执行设备上检查格式支持。真实原生调试层证据纠正了 BC 小 mip 边界：
+显式 1×1 框非法，4×4 物理块框及 null box 整复制均通过原版专项捕获。11 份新
+原版捕获在硬件／WARP 上完成事件后与帧末字节核对，22 次原版重放图像完全一致。
+最终包 123 份文件、246 次独立重放通过，122 份重复稳定，Helldivers 保留波动；
+原有 111 份稳定图像哈希不变，49 次对照与四项黄金帧通过。12 项相关 CTest
+通过；纹理传输 7、纹理编辑重放 34、主 UI 55 项 Qt 用例均无跳过。特殊重解释、
+packed／planar 和其他接口布局仍有范围缺口；M2 与 M3–M6 未完成，模块计数不变。
+详见 [TEXTURE_COPY_AUDIT.md](TEXTURE_COPY_AUDIT.md)。
+
 2026-10-03（M2 第六批）：CopyResource／CopySubresourceRegion／CopyStructureCount
 共用预检与执行校验，补齐缓冲区引用、大小、字节范围、计数器四字节对齐与 UAV
 范围检查。普通区域复制允许非对齐字节偏移；合法空区域保留事件并记录无写入，

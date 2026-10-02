@@ -132,7 +132,7 @@ Json validateFrame(const std::filesystem::path &path, const std::function<bool()
                             try {
                                 if(validateCopyCommand(frame,copy)==CopyValidation::TextureReferences)
                                     finding(&e,"info","texture_copy_validation_partial",
-                                        "Resource kinds and destination usage checked; texture format, subresource and region semantics require further audit",copy.destination);
+                                        "Texture copy uses a special reinterpretation, packed or planar format; full transfer semantics require further audit",copy.destination);
                             } catch(const std::exception &error) {
                                 finding(&e,"error","copy_command_rejected",error.what(),copy.destination);
                             }

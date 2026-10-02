@@ -25,6 +25,11 @@ The [buffer copy audit](BUFFER_COPY_AUDIT.md) adds shared preflight/runtime chec
 for resource kinds, byte ranges and structured counter writes. Six original
 captures have native byte/image oracles and original-player image comparisons;
 full texture copy/resolve semantics remain explicitly unaudited.
+The subsequent [texture transfer audit](TEXTURE_COPY_AUDIT.md) checks ordinary
+format families, mip/layer/volume bounds, depth/MSAA whole copies, BC physical
+blocks and Resolve typed formats/device support. Eleven new originals add exact
+resource-byte and original-image evidence. Special reinterpretation and packed/
+planar transfer paths still retain explicit partial-validation diagnostics.
 
 ## Reproduce
 

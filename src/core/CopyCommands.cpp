@@ -1,8 +1,9 @@
 #include "CopyCommands.h"
 #include "Contexts.h"
+#include "TextureCopies.h"
 #include "UavCounters.h"
 namespace flora {
-bool isCopyCommand(uint16_t type) { return type == 0x3e || type == 0x3f || type == 0x40; }
+bool isCopyCommand(uint16_t type) { return type == 0x3e || type == 0x3f || type == 0x40 || type == 0x42; }
 CopyCommand readCopyCommand(uint16_t type, Bytes payload) {
     if (!isCopyCommand(type))
         throw std::runtime_error("Not a copy command");
@@ -15,15 +16,19 @@ CopyCommand readCopyCommand(uint16_t type, Bytes payload) {
     c.destination = r.read<Id>();
     if (type == 0x3f)
         c.x = r.read<uint32_t>();
-    if (type == 0x40) {
+    if (type == 0x40 || type == 0x42)
         c.destinationSubresource = r.read<uint32_t>();
+    if (type == 0x40) {
         c.x = r.read<uint32_t>();
         c.y = r.read<uint32_t>();
         c.z = r.read<uint32_t>();
     }
     c.source = r.read<Id>();
-    if (type == 0x40) {
+    if (type == 0x40 || type == 0x42)
         c.sourceSubresource = r.read<uint32_t>();
+    if (type == 0x42)
+        c.format = r.read<uint32_t>();
+    if (type == 0x40) {
         if (r.flag())
             c.box = r.array<uint32_t, 6>();
     }
@@ -70,7 +75,9 @@ CopyValidation validateCopyCommand(const Frame &frame, const CopyCommand &c) {
         if (c.type == 0x3e && c.destination == c.source)
             throw std::runtime_error("CopyResource requires different resources");
         if (dst.type != 0x83)
-            return CopyValidation::TextureReferences;
+            return validateTextureCopy(src, dst, c);
+        if (c.type == 0x42)
+            throw std::runtime_error("ResolveSubresource requires 2D multisample textures");
         if (c.type == 0x3e) {
             if (dst.desc[0] != src.desc[0])
                 throw std::runtime_error("CopyResource buffer ByteWidth mismatch");

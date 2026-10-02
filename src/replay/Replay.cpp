@@ -1174,6 +1174,10 @@ void Replay::command(const Entry &e) {
         r.end();
         const auto destination = get<ID3D11Resource>(dst), source = get<ID3D11Resource>(src);
         ReplayAnnotation marker(captureAnnotation_.Get(), e.id, commandName(t));
+        UINT support = 0;
+        check(device_->CheckFormatSupport(DXGI_FORMAT(format), &support), "Check resolve format support");
+        if (!(support & D3D11_FORMAT_SUPPORT_MULTISAMPLE_RESOLVE))
+            throw std::runtime_error("Resolve format is unsupported by the replay device");
         context_->ResolveSubresource(destination, sub, source, srcSub, DXGI_FORMAT(format));
     } else if (t == 0x245) {
         auto id = r.read<Id>();

@@ -24,8 +24,8 @@ bool isReplayAuxiliary(uint16_t t) {
 }
 ReplayCapability replayCapability(uint16_t t) {
     if (isCopyCommand(t))
-        return {"execute", "src/core/CopyCommands.cpp;src/replay/Replay.cpp",
-                "tests/CopyCommandTests.cpp;docs/BUFFER_COPY_AUDIT.md"};
+        return {"execute", "src/core/CopyCommands.cpp;src/core/TextureCopies.cpp;src/replay/Replay.cpp",
+                "tests/CopyCommandTests.cpp;tests/TextureCopyTests.cpp;docs/BUFFER_COPY_AUDIT.md;docs/TEXTURE_COPY_AUDIT.md"};
     if (t == 0x3578 || t == 0x3017)
         return {t == 0x3578 ? "execute" : "metadata", "src/core/BufferCreation.cpp;src/replay/Replay.cpp",
                 "tests/BufferCreationTests.cpp;docs/BUFFER_CREATION_AUDIT.md"};

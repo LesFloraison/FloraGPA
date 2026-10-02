@@ -1,0 +1,252 @@
+{
+  "schema": "FloraGPA texture copy acceptance 1",
+  "profile": "GPA 2025 R1 legacy DX11 / IGPA v3",
+  "completion": "M2 in progress; M3-M6 incomplete",
+  "package": "out\\FloraGPA-texture-copy-final-20261003",
+  "exe_sha256": "51d0821f8a7a5e639242817f1c53d912bd329f3a6fc828cc769e90fb7863d2df",
+  "cross_player_adapter_match": "not established",
+  "corpora": {
+    "corpus": {
+      "cases": 91,
+      "outcomes": {
+        "repeat_stable": 90,
+        "repeat_variable": 1
+      },
+      "manifest_sha256": "09b806ef0d3f5267f0b9d3fc80ddc5edeba15a0cc02015c7a664128f5eb47cc1",
+      "result_path": "artifacts\\m2-texture-release-corpus\\validation.json",
+      "sha256": "a4b917f76c89fb8b3259eef387a20ead6468b9d25b3928ba538c03ed95d2c65b",
+      "prior_stable_images_unchanged": 90
+    },
+    "originals": {
+      "cases": 11,
+      "outcomes": {
+        "repeat_stable": 11
+      },
+      "manifest_sha256": "e3dd71474a7b06411c41491f42722ac4c1e594f034a358967e43ee5f6f66aa75",
+      "result_path": "artifacts\\m2-texture-release-originals\\validation.json",
+      "sha256": "ba94b6100054d4039a6dad4e04497f4f77e0f814d500b04c5c7edffa9289f23e"
+    },
+    "present": {
+      "cases": 5,
+      "outcomes": {
+        "repeat_stable": 5
+      },
+      "manifest_sha256": "5053a8e86f19c7cf383556560bf58f13419fc18845c5aa6935a6c830c80a0048",
+      "result_path": "artifacts\\m2-texture-release-present\\validation.json",
+      "sha256": "695a2e6cdadeebcac66d86be410762972ae1691f521a79f24cea740b707eff4b",
+      "prior_stable_images_unchanged": 5
+    },
+    "buffer": {
+      "cases": 5,
+      "outcomes": {
+        "repeat_stable": 5
+      },
+      "manifest_sha256": "513e35ce51d37cdaf7a80249577cf282b15dd47243094b86212a81b441cff848",
+      "result_path": "artifacts\\m2-texture-release-buffer\\validation.json",
+      "sha256": "df7a2373c9d86ba1ee957a3a56e1eb924bf0da3fd187ea481b0061d42ee0ba68",
+      "prior_stable_images_unchanged": 5
+    },
+    "pipeline": {
+      "cases": 5,
+      "outcomes": {
+        "repeat_stable": 5
+      },
+      "manifest_sha256": "9e4382725592b29eb11f8cff331cdd21b641b8ea2a8ce25ed7db72e82af9fb69",
+      "result_path": "artifacts\\m2-texture-release-pipeline\\validation.json",
+      "sha256": "64d82cca8c245141c670c0ee61c813df7ba829321872f3189ef571d93b686c5a",
+      "prior_stable_images_unchanged": 5
+    },
+    "copy": {
+      "cases": 6,
+      "outcomes": {
+        "repeat_stable": 6
+      },
+      "manifest_sha256": "1569eae9edb7ab6143a2ab3847f45d4107510623211b58825ef3f064069e65a8",
+      "result_path": "artifacts\\m2-texture-release-copy\\validation.json",
+      "sha256": "467bf95314a9463be0f6be5d71b577adc71e6418396daa00cb513a4d9c8c0593",
+      "prior_stable_images_unchanged": 6
+    }
+  },
+  "sources": {
+    "src/core/CopyCommands.cpp": "c5ed30378755db5fa06c372d0f10d66108cdd5b3958710604e4df4a02ed29568",
+    "src/core/CopyCommands.h": "d7095aacb06ff79651be4866e6cd9a2657a4f254d3c60b0320e1d542e453e607",
+    "src/core/ReplayCapabilities.cpp": "ef548d57bee6e97eb802659874730edd4a1bf855d59dbb4b632b66f518b4cc2a",
+    "src/replay/Replay.cpp": "30100fcc163e82234b4722d961396c9ef562ad67499fa55d2c490a7249854215",
+    "src/application/FrameValidation.cpp": "09b2a063c0f75c91b7eff439f1b76412731fe0ce7e0143269becd7a077ef5076",
+    "src/core/TextureCopies.cpp": "9ab90ef5c6f19a28417d93f85dbe0a49e886d9a089c9027ee119e96498810922",
+    "src/core/TextureCopies.h": "03784454862d91b962aa78525dce1bc1eff6b07ba453046f0085c5fb77c2186f",
+    "tests/CopyCommandTests.cpp": "9c0fcd24e66540ccf4eccb53fde3bb86f064c28261ee5a93f25b326b05a512f7",
+    "tests/TextureCopyTests.cpp": "09ea3f1113515ba4937c23e63778da97a268139a3522299ac28aefb1f0597442",
+    "tools/native/texture_copy_probe.cpp": "048868709f29275db4a0fcdbe1eb53b4c25828f1898b10a1d61ad908cfff1dc4",
+    "tools/capture_texture_copies.py": "4ba98af3cd299356e2229d7370212b1851511013d90a05d42fef4073c4b8ab11"
+  },
+  "evidence": {
+    "artifacts/ctest-m2-texture-final.log": "b5a26fd3a4e7ddf56ca9d01a23b9454115ebec448bdcab951afd0a751725cd1d",
+    "artifacts/compatibility-tools-texture.log": "da36754f47a67525cf50b8688941a3f70b683dbcf9aa6b9c041a7f5645d403b3",
+    "artifacts/m2-texture-bc-debug/debug.txt": "a9eb9b1328ea2058c59eb84a73eca42c5c656c2c3e06b4cdc5fc28cd98793f66",
+    "artifacts/m2-texture-bc-block-debug/oracle.json": "88158d228f8d7f7127b546599d053c3a72d3d181ee243736a93047887d181dfb",
+    "artifacts/m2-texture-negative-before/validation.json": "10f8bab3bc0449c2b024b35574e8ac4c22e89593382a8bafcd7ec0243ef14fd3",
+    "artifacts/m2-texture-negative-after/validation.json": "b89ab8d2604504504512c0bc7f52a9b239dc4ac2d3115009aea03060b70a6ff9",
+    "artifacts/m2-texture-copy-fixtures/bc-unaligned-box.json": "d56b779f77836c1ac2ea4a3fac0f1e846986a5cb03c3934d95f570912baf97d6",
+    "artifacts\\m2-texture-release-copy-commands.txt": "5b187995c8900636ad96bb3a8f831b3229922469f7b4c0d9d197279f9ef98718",
+    "artifacts\\m2-texture-release-texture-copies.txt": "c3040d8e61e17d0627ffd8b4c8c552f0904b50e41b0608bcb3c983b18985332c",
+    "artifacts\\m2-texture-release-texture-edit-replay.txt": "6fe07182d66b411d2590ca700055d49e8e54cdd529d5dae9a75a1c799d550efb",
+    "artifacts\\m2-texture-release-ui.txt": "b0da501249874e0f625d2b3f3053e6d9850d15117ec8e3b979cbf56e3d71c8bf"
+  },
+  "native_replays": 246,
+  "registered_file_outcomes": {
+    "repeat_stable": 122,
+    "repeat_variable": 1
+  },
+  "original_player_replays": 22,
+  "corpus_control_runs": 49,
+  "golden_controls": [
+    {
+      "case": "gf2",
+      "rgba_sha256": "2e1abc5eacb0bbfd801f9fe059c305baa9a0786c384b36a42fa5a323dd979fd1",
+      "passed": true,
+      "counts": {
+        "ClearDepthStencilView": 2,
+        "ClearRenderTargetView": 1,
+        "CreateBuffer": 2,
+        "DrawIndexed": 72,
+        "Map": 44,
+        "Present": 1,
+        "buffers_created_without_initial_data": 2,
+        "object_observation_records": 49,
+        "pipeline_setter_records": 142,
+        "private_data_observations": 4,
+        "query_metadata_records": 2,
+        "state_or_auxiliary_records": 551,
+        "unmap_observations": 44
+      }
+    },
+    {
+      "case": "gf2-negative",
+      "rgba_sha256": "b2c5548a51715f581c4591acc266ac7a0c65b54b7ecd9a49f43499fa9b76c5f1",
+      "passed": true,
+      "counts": {
+        "ClearDepthStencilView": 2,
+        "ClearRenderTargetView": 1,
+        "CreateBuffer": 2,
+        "Map": 44,
+        "Present": 1,
+        "buffers_created_without_initial_data": 2,
+        "object_observation_records": 49,
+        "pipeline_setter_records": 142,
+        "private_data_observations": 4,
+        "query_metadata_records": 2,
+        "state_or_auxiliary_records": 551,
+        "unmap_observations": 44
+      }
+    },
+    {
+      "case": "bf1",
+      "rgba_sha256": "1f724d1840652f66afd26dd30c95aecd5c1b4932eede56109198f15a8f57a2f6",
+      "passed": true,
+      "counts": {
+        "ClearDepthStencilView": 10,
+        "ClearRenderTargetView": 10,
+        "ClearUnorderedAccessViewFloat": 1,
+        "CopyResource": 2,
+        "CopyStructureCount": 6,
+        "CopySubresourceRegion": 7,
+        "Dispatch": 60,
+        "DispatchIndirect": 13,
+        "Draw": 79,
+        "DrawIndexed": 41,
+        "DrawIndexedInstanced": 1053,
+        "DrawInstanced": 29,
+        "GenerateMips": 2,
+        "Map": 4151,
+        "Present": 1,
+        "UpdateSubresource": 27,
+        "map_read_observations": 2,
+        "object_observation_records": 28,
+        "pipeline_setter_records": 2221,
+        "query_metadata_records": 17,
+        "state_or_auxiliary_records": 7354,
+        "unmap_observations": 4153,
+        "unresolved_input_layout_setters": 2,
+        "unresolved_output_setters": 6,
+        "unresolved_shader_setters": 4,
+        "unresolved_srv_setters": 2
+      }
+    },
+    {
+      "case": "bf1-negative",
+      "rgba_sha256": "cd3a3066f984b1c317fbeefec2836503f32078321d3dc1f367465f2c06d435bf",
+      "passed": true,
+      "counts": {
+        "ClearDepthStencilView": 10,
+        "ClearRenderTargetView": 10,
+        "ClearUnorderedAccessViewFloat": 1,
+        "CopyResource": 2,
+        "CopyStructureCount": 6,
+        "CopySubresourceRegion": 7,
+        "Dispatch": 60,
+        "DispatchIndirect": 13,
+        "GenerateMips": 2,
+        "Map": 4151,
+        "Present": 1,
+        "UpdateSubresource": 27,
+        "map_read_observations": 2,
+        "object_observation_records": 28,
+        "pipeline_setter_records": 2221,
+        "query_metadata_records": 17,
+        "state_or_auxiliary_records": 7354,
+        "unmap_observations": 4153,
+        "unresolved_input_layout_setters": 2,
+        "unresolved_output_setters": 6,
+        "unresolved_shader_setters": 4,
+        "unresolved_srv_setters": 2
+      }
+    }
+  ],
+  "package_sha256": {
+    "FloraGPA.exe": "b859573980ac5bb348f3cf51afa7752481a057d9105b3a6c1aeee9c7bdcacefb",
+    "FloraGPA.Worker.exe": "9376efd5dcfd40ebcaedcdc5670641fcb9a56014944a8d5b79172fcb6ba35195",
+    "FloraGPA.Cli.exe": "51d0821f8a7a5e639242817f1c53d912bd329f3a6fc828cc769e90fb7863d2df",
+    "FloraGPA.Rdc.exe": "f4d21d43e661d24d392e91fc1a1f1460a20d1377fcf5075c57083ad289e82773",
+    "FloraGPA.Metrics.dll": "58b6278f2a93e783b1e8bb1290e9b0e51745f1a36825f296584f52159fd7c6db"
+  },
+  "producer": {
+    "frames": 264,
+    "manifest_path": "artifacts\\m2-texture-copy-originals-verified\\manifest.json",
+    "sha256": "958e831f1d533285595ed600a851652890d319745da34be5f3a3661d17771c3e",
+    "gpa_sha256": {
+      "shimloader64.dll": "af68e28ba54ab0068c95f82081828788d6f59879283127dc330b818af7369888",
+      "shimd3d64.dll": "cb0b99d113511cbf7ca9f949d97aa02e4a1f8f110b1f3ad3165d8a81035dee31"
+    }
+  },
+  "historical_api_type_handling": {
+    "execute": 59,
+    "metadata": 40
+  },
+  "texture_copy_validation_partial_findings": 0,
+  "test_result": "Twelve relevant CTest suites passed. Seven texture-transfer Qt cases and 55 main UI cases passed with no skips.",
+  "negative_preflight": {
+    "prior_status": "review_required",
+    "current_status": "blocked",
+    "findings": [
+      {
+        "category": 7,
+        "entry_id": 24,
+        "event_id": 24,
+        "kind": "copy_command_rejected",
+        "reason": "Copy destination 5, source 15: BC copy region is not aligned to physical storage blocks",
+        "record_type": 64,
+        "resource_id": 5,
+        "severity": "error"
+      }
+    ]
+  },
+  "limits": [
+    "Special format reinterpretation and packed/planar transfer validation remain partial",
+    "The new corpus is not exhaustive format/quality/cube/feature-level conformance",
+    "Implicit-mip inspection consumers remain separate work",
+    "Original-player adapter is unidentified",
+    "Helldivers nondeterminism is preserved",
+    "M2 incomplete; deferred execution remains later work"
+  ]
+}
