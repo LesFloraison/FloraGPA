@@ -13,6 +13,7 @@
 #include "application/ExperimentReport.h"
 #include "application/ExternalShaderTools.h"
 #include "application/FrameOutput.h"
+#include "application/FrameValidation.h"
 #include "application/Geometry.h"
 #include "application/GpuProfile.h"
 #include "application/GpuStatistics.h"
@@ -87,7 +88,7 @@ int main(int argc, char **argv) {
     p.addHelpOption();
     p.addVersionOption();
     p.addPositionalArgument(
-        "command", "inventory | commands | command-state | contexts | command-lists | replay | draw-resources | shader | "
+        "command", "validate-frame | inventory | commands | command-state | contexts | command-lists | replay | draw-resources | shader | "
                    "buffer | texture | texture-storage | compile | compile-project | assemble | geometry | "
                    "replay-pipeline | "
                    "class-linkage | predicate | annotations | metric-index | metric-catalog | metric-profile "
@@ -207,6 +208,21 @@ int main(int argc, char **argv) {
         }
         if (args.size() != 2)
             throw std::runtime_error("Expected command and capture path");
+        if (command == "validate-frame") {
+            for (const auto &option : p.optionNames())
+                if (option != "out") throw std::runtime_error("validate-frame accepts only --out");
+            const auto output = p.value("out");
+            if (output.isEmpty()) throw std::runtime_error("validate-frame requires --out");
+            QDir dir(output);
+            if (dir.exists() && !dir.entryList(QDir::NoDotAndDotDot | QDir::AllEntries | QDir::Hidden | QDir::System).empty())
+                throw std::runtime_error("Output directory must be new or empty");
+            if (!QDir().mkpath(output)) throw std::runtime_error("Cannot create validation output directory");
+            auto validation = validateFrame(std::filesystem::path(args[1].toStdWString()));
+            save(dir.filePath("validation.json"), QByteArray::fromStdString(validation.dump(2) + "\n"));
+            QTextStream(stdout) << QString::fromStdString(validation["status"].get<std::string>())
+                                << ": " << dir.filePath("validation.json") << Qt::endl;
+            return validation["status"] == "blocked" ? 2 : 0;
+        }
         Frame frame(std::filesystem::path(args[1].toStdWString()));
         if (command != "quad" && (p.isSet("quad-depth") || p.isSet("quad-target") || p.isSet("quad-layer")))
             throw std::runtime_error("Quad options apply to quad only");

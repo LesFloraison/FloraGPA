@@ -23,6 +23,7 @@
 
 namespace flora {
 class CommandStateView;
+class CompatibilityButton;
 class PredicateView;
 class AnnotationsView;
 class StatisticsView;
@@ -55,6 +56,7 @@ class MainWindow final : public QMainWindow {
 
   private:
     void buildUi();
+    CompatibilityButton *compatibility_ = nullptr;
     void buildResourceWorkspace(QWidget *output);
     void updateResourceContext(bool chooseDefault = false);
     void selectDrawResource(const QString &key);

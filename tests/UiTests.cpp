@@ -15,6 +15,7 @@
 #include "app/Appearance.h"
 #include "app/BlendDialog.h"
 #include "app/CommandStateView.h"
+#include "app/CompatibilityButton.h"
 #include "app/ConstantBufferDialog.h"
 #include "app/IaSetterDialog.h"
 #include "app/MainWindow.h"
@@ -3509,6 +3510,17 @@ class UiTests final : public QObject {
         QCOMPARE(pixels.size(), QSize(1920, 1080));
         // This capture varies slightly across repeated GPU replays; do not assert a fixed hash.
         snapshot(window, "helldivers-frame");
+        auto preflight = window.findChild<flora::CompatibilityButton *>("captureCompatibility");
+        QVERIFY(preflight && preflight->isEnabled());
+        QSignalSpy checked(preflight, &flora::CompatibilityButton::resultReady);
+        preflight->click();
+        QTRY_COMPARE_WITH_TIMEOUT(checked.size(), 1, 60000);
+        QCOMPARE(preflight->report()["status"], nlohmann::json("review_required"));
+        QCOMPARE(preflight->report()["gpu_validation"], nlohmann::json("not_run"));
+        auto compatibilityDialog = preflight->findChild<QDialog *>("compatibilityDialog");
+        QVERIFY(compatibilityDialog);
+        snapshot(*compatibilityDialog, "helldivers-compatibility");
+        compatibilityDialog->close();
         auto api = window.findChild<QTableView *>("apiLog");
         QVERIFY(api && api->model()->rowCount() > 1);
         done.clear();

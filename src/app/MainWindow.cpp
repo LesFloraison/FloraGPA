@@ -1,4 +1,5 @@
 #include "MainWindow.h"
+#include "CompatibilityButton.h"
 #include "AnnotationsView.h"
 #include "BlendDialog.h"
 #include "CheckpointView.h"
@@ -1253,6 +1254,8 @@ void MainWindow::buildUi() {
     progress_->setFixedHeight(12);
     progress_->hide();
     statusBar()->addPermanentWidget(progress_);
+    compatibility_ = new CompatibilityButton(this);
+    statusBar()->addPermanentWidget(compatibility_);
     zoomLabel_ = new QLabel;
     zoomLabel_->setMinimumWidth(42);
     statusBar()->addPermanentWidget(zoomLabel_);
@@ -1560,6 +1563,7 @@ void MainWindow::openCapture(const QString &path) {
     cancel();
     replayTimer_.stop();
     pendingPath_ = path;
+    compatibility_->setCapture(path);
     setBusy(true);
     statusBar()->showMessage("Opening capture…");
     loader_.setFuture(QtConcurrent::run([path] {

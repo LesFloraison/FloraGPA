@@ -1,0 +1,229 @@
+#include "FrameValidation.h"
+#include "ApiCommands.h"
+#include "ContextInspector.h"
+#include "core/Commands.h"
+#include "core/IaBindings.h"
+#include "core/InspectionRecords.h"
+#include "core/OutputBindings.h"
+#include "core/PipelineBindings.h"
+#include "core/Predication.h"
+#include "core/ReplayCapabilities.h"
+#include "core/SrvBindings.h"
+#include "core/StreamOutput.h"
+#include <map>
+namespace flora {
+using Json = nlohmann::json;
+Json validateFrame(const std::filesystem::path &path, const std::function<bool()> &cancelled) {
+    const auto utf8 = path.u8string();
+    Json report{{"schema", "FloraGPA frame validation 1"},
+                {"capture", std::string(utf8.begin(), utf8.end())},
+                {"profile", "GPA 2025 R1 legacy DX11 / IGPA v3"},
+                {"scope", "offline_original_capture"},
+                {"gpu_validation", "not_run"},
+                {"replay_proven", false},
+                {"completed", false},
+                {"findings", Json::array()},
+                {"coverage", Json::array()}};
+    unsigned errors = 0, warnings = 0;
+    auto finding = [&](const Entry *e, const char *severity, const char *kind, const std::string &reason,
+                       Id referenced = 0) {
+        errors += std::string(severity) == "error";
+        warnings += std::string(severity) == "warning";
+        report["findings"].push_back({{"severity", severity},
+                                      {"kind", kind},
+                                      {"reason", reason},
+                                      {"entry_id", e ? Json(e->id) : Json(nullptr)},
+                                      {"category", e ? Json(e->category) : Json(nullptr)},
+                                      {"record_type", e ? Json(e->type) : Json(nullptr)},
+                                      {"event_id", e && e->category == 7 ? Json(e->id) : Json(nullptr)},
+                                      {"resource_id", e && e->category == 5 ? Json(e->id)
+                                                      : referenced          ? Json(referenced)
+                                                                            : Json(nullptr)}});
+    };
+    try {
+        Frame frame(path);
+        report["entries"] = frame.entries().size();
+        report["source_sha256"] = frame.sha256();
+        std::map<std::pair<unsigned, unsigned>, Json> coverage;
+        size_t scanned = 0;
+        auto reference = [&](const Entry &e, Id id, int category) {
+            if (!id)
+                return;
+            auto it = frame.entries().find(id);
+            if (it == frame.entries().end() || it->second.category != category)
+                finding(&e, "warning", "reference_requires_review",
+                        "Missing or unexpected-category reference; runtime recovery/use must be checked", id);
+        };
+        for (const auto &[id, e] : frame.entries()) {
+            if (cancelled && cancelled()) {
+                report["cancelled"] = true;
+                break;
+            }
+            ++scanned;
+            auto cap = e.category == 7 ? replayCapability(e.type) : ReplayCapability{"not_evaluated", "", ""};
+            auto &row = coverage[{e.category, e.type}];
+            if (row.is_null())
+                row = {{"category", e.category},
+                       {"record_type", e.type},
+                       {"count", 0},
+                       {"first_entry", id},
+                       {"name", e.category == 7 ? commandName(e.type) : resourceName(e.type)},
+                       {"handling", cap.handling},
+                       {"implementation", cap.implementation},
+                       {"evidence", cap.evidence},
+                       {"decoded_records", 0},
+                       {"unchecked_records", 0}};
+            row["count"] = row["count"].get<size_t>() + 1;
+            try {
+                bool checked = false;
+                if (e.category == 7) {
+                    const auto command = inspectCommand(frame, id);
+                    if (command["status"] == "invalid")
+                        throw std::runtime_error(command.value("error", "Invalid command wire layout"));
+                    checked = command["status"] == "decoded";
+                    if (std::string(cap.handling) == "unsupported")
+                        finding(&e, "error", "implementation_gap",
+                                "No native replay path for " + commandName(e.type));
+                    else if (std::string(cap.handling) == "auxiliary_unverified")
+                        finding(&e, "warning", "auxiliary_audit",
+                                "Accepted by legacy replay fallback; full semantics not verified");
+                    else if (!checked)
+                        finding(&e, "warning", "decoder_gap",
+                                "Replay path exists but API wire inspection is incomplete");
+                    if (isDraw(e.type)) {
+                        auto ev = frame.event(id);
+                        try {
+                            requireImmediateContext(frame, ev.context);
+                        } catch (const std::exception &ex) {
+                            finding(&e, "error", "context_unsupported", ex.what(), ev.context);
+                        }
+                        frame.state(ev.state);
+                        reference(e, ev.argumentBuffer, 5);
+                    } else if (finishCommandListVersion(e.type)) {
+                        try {
+                            acceptFinishCommandList(frame, readFinishCommandList(e.type, frame.payload(id)));
+                        } catch (const std::exception &ex) {
+                            finding(&e, "error", "command_list_unsupported", ex.what());
+                        }
+                    } else {
+                        acceptQueryMetadata(e.type, frame.payload(id));
+                        acceptInspectionRecord(e.type, frame.payload(id));
+                        if (isWritableCommand(e.type))
+                            validateWritableCommand(frame, id);
+                        if (e.type >= 0x3278 && e.type <= 0x327e)
+                            validateAnnotationCommand(e.type, frame.payload(id));
+                        if (e.type == 0x247) {
+                            const auto layout = updateSourceLayout(frame, id);
+                            const auto dst = frame.resource(layout.destination);
+                            if (dst.type != 0x83 &&
+                                (textureInfo(dst).format == 104 || textureInfo(dst).format == 105))
+                                finding(&e, "error", "capture_data_missing",
+                                        "Legacy P010/P016 Update requires an explicit complete source "
+                                        "replacement",
+                                        dst.id);
+                        }
+                    }
+                } else if (e.category == 3 && e.type == 3) {
+                    const auto s = frame.state(id);
+                    checked = true;
+                    for (const auto &stage : s.stages) {
+                        reference(e, stage.shader, 5);
+                        for (auto x : stage.cb)
+                            reference(e, x, 5);
+                        for (auto x : stage.srv)
+                            reference(e, x, 5);
+                        if (stage.classCount > stage.classes.size())
+                            throw std::runtime_error("Class instance count exceeds snapshot capacity");
+                    }
+                    for (auto x : s.rtv)
+                        reference(e, x, 5);
+                    for (auto x : s.csUav)
+                        reference(e, x, 5);
+                    reference(e, s.dsv, 5);
+                    reference(e, s.ib, 5);
+                    for (auto x : s.vb)
+                        reference(e, x, 5);
+                    // rtCount spans RTV and OM UAV slots, including the extended
+                    // D3D11.1 snapshot. Device-specific limits are checked at replay.
+                    if (s.rtCount > 64 || s.omStart > 64 || s.soCount > 4)
+                        throw std::runtime_error("Output count exceeds snapshot capacity");
+                } else if (e.category == 9 && e.type == 1) {
+                    frame.data(id);
+                    checked = true;
+                } else if (e.category == 9 && e.type == 0x81) {
+                    frame.shader(id);
+                    checked = true;
+                } else if (e.category == 5) {
+                    const auto r = frame.resource(id);
+                    if (e.type == 0x83) {
+                        checked = true;
+                        if (r.data && frame.data(r.data).size() != r.desc[0])
+                            throw std::runtime_error("Buffer initial data length does not match descriptor");
+                    } else if (e.type >= 0x84 && e.type <= 0x87) {
+                        const auto info = textureInfo(r);
+                        if (r.data)
+                            frame.data(r.data);
+                        checked = true;
+                        if (info.samples > 1 && r.data)
+                            finding(&e, "warning", "capture_data_limit",
+                                    "MSAA GenData is not per-sample initialization; verify in-frame writes "
+                                    "before use");
+                        if (info.format >= 103 && info.format <= 105)
+                            finding(&e, "warning", "capture_data_limit",
+                                    "Planar capture initial data/UV completeness requires layout-specific "
+                                    "verification");
+                    } else if (e.type >= 0x90 && e.type <= 0x95) {
+                        frame.shader(r.data);
+                        checked = true;
+                    } else if (contextVersion(e.type)) {
+                        const auto c = describeContext(frame, id, false);
+                        checked = true;
+                        if (c.deferred)
+                            finding(&e, "warning", "implementation_gap",
+                                    "Deferred context inventory is decoded; production execution is not "
+                                    "implemented");
+                    } else if (e.type == 0x9a) {
+                        inspectCommandList(frame, id);
+                        checked = true;
+                        finding(&e, "warning", "implementation_gap",
+                                "Command list inventory is decoded; execution is unverified");
+                    } else if (e.type == 0x96) {
+                        readPredicate(frame, id);
+                        checked = true;
+                    }
+                }
+                const auto key = checked ? "decoded_records" : "unchecked_records";
+                row[key] = row[key].get<size_t>() + 1;
+            } catch (const std::exception &ex) {
+                finding(&e, "error", "record_rejected", ex.what());
+            }
+        }
+        size_t unchecked = 0;
+        for (auto &[key, row] : coverage) {
+            unchecked += row["unchecked_records"].get<size_t>();
+            if (row["unchecked_records"].get<size_t>() && key.first == 5)
+                finding(&frame.entry(row["first_entry"].get<Id>()), "warning", "offline_coverage_gap",
+                        "This resource family has no complete offline descriptor validator; GPU replay "
+                        "remains necessary");
+            report["coverage"].push_back(std::move(row));
+        }
+        report["unchecked_records"] = unchecked;
+        report["scanned_records"] = scanned;
+        report["completed"] = scanned == frame.entries().size() && !report.value("cancelled", false);
+        report["limits"] = {
+            "GPU resource creation, shader execution, binding recovery and pixel correctness are not tested",
+            "Unrecognized non-command payloads and descriptor-specific semantics remain outside offline "
+            "coverage",
+            "Reports inspect original capture data, not an experiment project"};
+    } catch (const std::exception &ex) {
+        finding(nullptr, "error", "container_rejected", ex.what());
+    }
+    report["errors"] = errors;
+    report["warnings"] = warnings;
+    report["status"] = report.value("cancelled", false) ? "cancelled"
+                       : errors                         ? "blocked"
+                       : warnings                       ? "review_required"
+                                                        : "checked";
+    return report;
+}
+} // namespace flora
