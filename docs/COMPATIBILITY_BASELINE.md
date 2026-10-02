@@ -13,6 +13,10 @@ probe records a state dependency still awaiting production implementation.
 The subsequent [Present audit](PRESENT_REPLAY_AUDIT.md) implements checked TEST
 and submission-boundary binding transitions, adds five original captures, and
 leaves buffer rotation and unsupported statuses/flags explicitly diagnosed.
+The [buffer creation audit](BUFFER_CREATION_AUDIT.md) restores creation-time
+storage semantics and checks private-data observations. Five shader-dependent
+original captures are registered separately; no observed family remains in the
+historical corpus's auxiliary fallback, but M2 acceptance is still incomplete.
 
 ## Reproduce
 

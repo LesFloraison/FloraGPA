@@ -102,6 +102,12 @@ void Replay::immediate(Id id) const { requireImmediateContext(frame_, id); }
 IUnknown *Replay::object(Id id) {
     if (!id)
         return nullptr;
+    if (!bufferCreationAudit_)
+        bufferCreationAudit_ = auditBufferCreations(frame_);
+    if (auto it = bufferCreationAudit_->creationEvents.find(id);
+        it != bufferCreationAudit_->creationEvents.end() && !objects_.contains(id))
+        throw std::runtime_error("Resource " + std::to_string(id) +
+                                 " is not available before CreateBuffer event " + std::to_string(it->second));
     if (auto it = objects_.find(id); it != objects_.end())
         return it->second.Get();
     const auto resource = frame_.resource(id);
@@ -991,6 +997,39 @@ void Replay::command(const Entry &e) {
     }
     if (acceptInspectionRecord(t, payload)) {
         counts["inspection_records"]++;
+        return;
+    }
+    if (t == 0x3578) {
+        if (!bufferCreationAudit_)
+            bufferCreationAudit_ = auditBufferCreations(frame_);
+        const auto &creation = requireBufferCreation(*bufferCreationAudit_, e.id);
+        if (creation.result == 0) {
+            if (objects_.contains(creation.resource))
+                throw std::runtime_error("CreateBuffer identity already has materialized replay storage");
+            D3D11_BUFFER_DESC desc{};
+            static_assert(sizeof(desc) == sizeof(creation.descriptor));
+            std::memcpy(&desc, creation.descriptor.data(), sizeof(desc));
+            const auto data = creation.data ? frame_.data(creation.data) : Bytes{};
+            D3D11_SUBRESOURCE_DATA initial{data.data(), 0, 0};
+            Com<ID3D11Buffer> buffer;
+            check(device_->CreateBuffer(&desc, creation.hasInitial ? &initial : nullptr, &buffer),
+                  "Captured CreateBuffer");
+            if (renderdoc_) {
+                const auto name = "GPA resource " + std::to_string(creation.resource) + " (type 0x83)";
+                check(buffer->SetPrivateData(WKPDID_D3DDebugObjectName, UINT(name.size()), name.data()),
+                      "Name captured resource");
+            }
+            objects_.emplace(creation.resource, buffer);
+            ++counts["CreateBuffer"];
+            if (!creation.hasInitial)
+                ++counts["buffers_created_without_initial_data"];
+        } else
+            ++counts["buffer_creation_observations"];
+        return;
+    }
+    if (t == 0x3017) {
+        readPrivateDataObservation(payload);
+        ++counts["private_data_observations"];
         return;
     }
     if (t == 0x3257) {

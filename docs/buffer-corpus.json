@@ -1,0 +1,114 @@
+{
+  "schema": "FloraGPA compatibility corpus 1",
+  "profile": "GPA 2025 R1 legacy DX11 / IGPA v3",
+  "root_parameter": "--captures-root",
+  "completed": true,
+  "cases": [
+    {
+      "id": "buffer_initial",
+      "path": "0/capture.gpa_frame",
+      "sha256": "ec91e5e4511f4e368185b674a9fba1fb6dd50c675d682c9ea3a2464a3e3514c2",
+      "bytes": 76354,
+      "family": "buffer_creation",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified CaptureNextFrame output; buffer bytes additionally checked by native producer and C++ boundary tests.",
+      "device_scope": "Default hardware producer; original player adapter unidentified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "boundaries": [],
+      "controls": [
+        {
+          "disable_event": 47,
+          "repeat": 2,
+          "expected_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b"
+        }
+      ]
+    },
+    {
+      "id": "buffer_upload",
+      "path": "1/capture.gpa_frame",
+      "sha256": "6c076bdc515f35c75c87ba2fbabf8b1fa5b9a6d59699921b05a88e14df3feabc",
+      "bytes": 76499,
+      "family": "buffer_creation",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified CaptureNextFrame output; buffer bytes additionally checked by native producer and C++ boundary tests.",
+      "device_scope": "Default hardware producer; original player adapter unidentified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "boundaries": [],
+      "controls": [
+        {
+          "disable_event": 49,
+          "repeat": 2,
+          "expected_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b"
+        }
+      ]
+    },
+    {
+      "id": "buffer_validation",
+      "path": "2/capture.gpa_frame",
+      "sha256": "cc3aa48951e21818b6f7012dcaa9728acb966d5c72f0049d79551fc43e75f812",
+      "bytes": 7572,
+      "family": "buffer_creation",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified CaptureNextFrame output; buffer bytes additionally checked by native producer and C++ boundary tests.",
+      "device_scope": "Default hardware producer; original player adapter unidentified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "boundaries": [],
+      "controls": []
+    },
+    {
+      "id": "buffer_failed",
+      "path": "3/capture.gpa_frame",
+      "sha256": "b8a3e7190b7417902c9562ab4eeab4621071d9dd4ecfa3cb2b06265791106e10",
+      "bytes": 7572,
+      "family": "buffer_creation",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified CaptureNextFrame output; buffer bytes additionally checked by native producer and C++ boundary tests.",
+      "device_scope": "Default hardware producer; original player adapter unidentified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "boundaries": [],
+      "controls": []
+    },
+    {
+      "id": "buffer_initial_then_update",
+      "path": "4/capture.gpa_frame",
+      "sha256": "571aa372d30f632951a927dbb45d108a388bc5fe9163f443e0da2680f48cea37",
+      "bytes": 76515,
+      "family": "buffer_creation",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified CaptureNextFrame output; buffer bytes additionally checked by native producer and C++ boundary tests.",
+      "device_scope": "Default hardware producer; original player adapter unidentified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "boundaries": [],
+      "controls": [
+        {
+          "disable_event": 49,
+          "repeat": 2,
+          "expected_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b"
+        }
+      ]
+    }
+  ],
+  "producer_sha256": "eb59e16f5eb278462e429b727f448649b2ed77e1aeef3ae788a301c034eda7a3",
+  "sources": {
+    "native/buffer_creation_probe.cpp": "795e67671debd7e97033e7163acd4dae55f34d554602c788c1fc4f3ab8154482",
+    "native/present_capture_probe.cpp": "7c29f1e572ab16a5bc497d39eef8198d79056877a9e1d3fff3f7ed530a32c4e3",
+    "capture_buffers.py": "e45ff85f7faae0949aa663a6e1977381ee86fb3b30ad90cbe9ca3c8ed23c9ddf",
+    "capture_present.py": "18a1a493a55d842f6408114de73deb786a3066c31ea7d6e63415bb0b040eacae"
+  },
+  "gpa_sha256": {
+    "shimloader64.dll": "af68e28ba54ab0068c95f82081828788d6f59879283127dc330b818af7369888",
+    "shimd3d64.dll": "cb0b99d113511cbf7ca9f949d97aa02e4a1f8f110b1f3ad3165d8a81035dee31"
+  },
+  "source_manifest": "artifacts/m2-buffer-gpu-originals/manifest.json",
+  "source_manifest_sha256": "d34ab967fb29ad77a3c45fdb0892fe6bbf319e61f699ae9cffb8b5102cfa96b4"
+}

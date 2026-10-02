@@ -139,6 +139,9 @@ class PresentRecordTests final : public QObject {
         c = makeCapture(3, 1);
         c.add(201, 7, 0x242, pack(Id(0), Id(1)));
         check(c, true);
+        c = makeCapture();
+        c.add(201, 7, 0x3017, pack(Id(0), Id(3), int32_t(0), std::array<uint8_t, 16>{}, 5u, Id(UINT64_MAX)));
+        check(c, true);
         for (auto [offset, value] : std::vector<std::pair<size_t, uint32_t>>{{72, 0}, {80, 0}}) {
             c = makeCapture(3, 0x200);
             bytes = raw(c, 2);

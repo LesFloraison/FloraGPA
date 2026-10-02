@@ -1,4 +1,5 @@
 #include "FrameValidation.h"
+#include "core/BufferCreation.h"
 #include "core/PresentRecords.h"
 #include "ApiCommands.h"
 #include "ContextInspector.h"
@@ -49,6 +50,7 @@ Json validateFrame(const std::filesystem::path &path, const std::function<bool()
         std::map<std::pair<unsigned, unsigned>, Json> coverage;
         size_t scanned = 0;
         std::optional<MapRecordAudit> mapAudit;
+        std::optional<BufferCreationAudit> creationAudit;
         auto reference = [&](const Entry &e, Id id, int category) {
             if (!id)
                 return;
@@ -119,6 +121,20 @@ Json validateFrame(const std::filesystem::path &path, const std::function<bool()
                         acceptQueryMetadata(e.type, frame.payload(id));
                         acceptInspectionRecord(e.type, frame.payload(id));
                         acceptPassiveObjectRecord(e.type, frame.payload(id));
+                        if (e.type == 0x3578) {
+                            if (!creationAudit) creationAudit = auditBufferCreations(frame);
+                            const auto &creation = creationAudit->records.at(id);
+                            if (!creation.error.empty()) finding(&e,"error","buffer_creation_rejected",creation.error,creation.resource);
+                            else if (creation.result == 0 && !creation.hasInitial)
+                                finding(&e,"info","buffer_initial_contents_undefined",
+                                    "CreateBuffer requested storage without initial data; later captured writes define its contents",creation.resource);
+                        }
+                        if (e.type == 0x3017) {
+                            const auto data = readPrivateDataObservation(frame.payload(id));
+                            if (data.result >= 0 && data.size)
+                                finding(&e,"info","private_data_payload_not_saved",
+                                    "API record stores an opaque pointer, not private-data bytes; saved resource names are separate metadata",data.owner);
+                        }
                         if (e.type == 0x3257) {
                             try {
                                 validatePresentRecord(frame, id);

@@ -1,4 +1,5 @@
 #include "PresentRecords.h"
+#include "BufferCreation.h"
 #include "InspectionRecords.h"
 namespace flora {
 PresentRecord validatePresentRecord(const Frame &frame, Id event) {
@@ -67,6 +68,10 @@ PresentRecord validatePresentRecord(const Frame &frame, Id event) {
             if (entry.category != 7)
                 continue;
             auto payload = frame.payload(id);
+            if (entry.type == 0x3017) {
+                readPrivateDataObservation(payload);
+                continue;
+            }
             if (acceptPassiveObjectRecord(entry.type, payload) ||
                 acceptInspectionRecord(entry.type, payload) || acceptQueryMetadata(entry.type, payload))
                 continue;
