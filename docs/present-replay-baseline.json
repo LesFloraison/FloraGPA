@@ -1,0 +1,384 @@
+{
+  "schema": "FloraGPA Present replay evidence 1",
+  "date": "2026-10-03",
+  "old_corpus": {
+    "files": 91,
+    "native_runs": 182,
+    "outcomes": {
+      "repeat_stable": 90,
+      "repeat_variable": 1
+    },
+    "stable_hashes_unchanged": 90,
+    "preflight": {
+      "review_required": 91
+    },
+    "errors": 0,
+    "warnings": 491,
+    "command_handling": {
+      "execute": 46,
+      "metadata": 39,
+      "auxiliary_unverified": 2,
+      "snapshot": 12
+    }
+  },
+  "new_corpus": {
+    "files": 5,
+    "native_runs": 10,
+    "outcomes": {
+      "repeat_stable": 5
+    },
+    "native_and_shim_producer_frames": 120,
+    "kernel_completed_runs": 10,
+    "export_outcomes": {
+      "repeat_stable": 1,
+      "export_adapter_failed": 4
+    },
+    "original_adapter": "default, unidentified; matched-device equivalence not asserted",
+    "cases": [
+      {
+        "id": "present_flip_test",
+        "rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+        "original_status": "repeat_stable",
+        "kernel_reports": [
+          {
+            "player_dll": "C:\\Program Files\\IntelSWTools\\GPA\\dx11_player.dll",
+            "player_sha256": "39061ff329e4a32d0c8375ce9ee15e2017bccab0593943b962a860e11723d38b",
+            "adapter_selection": "Original kernel default (undefined GpuId)",
+            "callbacks": [],
+            "open_status": 0,
+            "playback_status": 0,
+            "closed": true
+          },
+          {
+            "player_dll": "C:\\Program Files\\IntelSWTools\\GPA\\dx11_player.dll",
+            "player_sha256": "39061ff329e4a32d0c8375ce9ee15e2017bccab0593943b962a860e11723d38b",
+            "adapter_selection": "Original kernel default (undefined GpuId)",
+            "callbacks": [],
+            "open_status": 0,
+            "playback_status": 0,
+            "closed": true
+          }
+        ],
+        "original_exports": [
+          {
+            "framebuffer_new1.tga": "f05884797f2e6d4cbf52885a6e30bd59e84b8e923d6dcd7dc43a80c9b3b7aaed",
+            "framebuffer_orig.tga": "f05884797f2e6d4cbf52885a6e30bd59e84b8e923d6dcd7dc43a80c9b3b7aaed"
+          },
+          {
+            "framebuffer_new1.tga": "f05884797f2e6d4cbf52885a6e30bd59e84b8e923d6dcd7dc43a80c9b3b7aaed",
+            "framebuffer_orig.tga": "f05884797f2e6d4cbf52885a6e30bd59e84b8e923d6dcd7dc43a80c9b3b7aaed"
+          }
+        ]
+      },
+      {
+        "id": "present_secondary_flip",
+        "rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "original_status": "export_adapter_failed",
+        "kernel_reports": [
+          {
+            "player_dll": "C:\\Program Files\\IntelSWTools\\GPA\\dx11_player.dll",
+            "player_sha256": "39061ff329e4a32d0c8375ce9ee15e2017bccab0593943b962a860e11723d38b",
+            "adapter_selection": "Original kernel default (undefined GpuId)",
+            "callbacks": [],
+            "open_status": 0,
+            "playback_status": 0,
+            "closed": true
+          },
+          {
+            "player_dll": "C:\\Program Files\\IntelSWTools\\GPA\\dx11_player.dll",
+            "player_sha256": "39061ff329e4a32d0c8375ce9ee15e2017bccab0593943b962a860e11723d38b",
+            "adapter_selection": "Original kernel default (undefined GpuId)",
+            "callbacks": [],
+            "open_status": 0,
+            "playback_status": 0,
+            "closed": true
+          }
+        ],
+        "original_exports": [
+          {
+            "framebuffer_new1_0.dds": "d13baaa12c073f62368c9eaeaa83d86f2fdb5228082e249c4f47849339e69248",
+            "framebuffer_new1_1.dds": "0ce29a7e6ad080b3f67aba35876b27412524c33333b144073418dc1140ae2f6b",
+            "framebuffer_orig1.tga": "0ce29a7e6ad080b3f67aba35876b27412524c33333b144073418dc1140ae2f6b"
+          },
+          {
+            "framebuffer_new1_0.dds": "d13baaa12c073f62368c9eaeaa83d86f2fdb5228082e249c4f47849339e69248",
+            "framebuffer_new1_1.dds": "0ce29a7e6ad080b3f67aba35876b27412524c33333b144073418dc1140ae2f6b",
+            "framebuffer_orig1.tga": "0ce29a7e6ad080b3f67aba35876b27412524c33333b144073418dc1140ae2f6b"
+          }
+        ]
+      },
+      {
+        "id": "present_secondary_discard",
+        "rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "original_status": "export_adapter_failed",
+        "kernel_reports": [
+          {
+            "player_dll": "C:\\Program Files\\IntelSWTools\\GPA\\dx11_player.dll",
+            "player_sha256": "39061ff329e4a32d0c8375ce9ee15e2017bccab0593943b962a860e11723d38b",
+            "adapter_selection": "Original kernel default (undefined GpuId)",
+            "callbacks": [],
+            "open_status": 0,
+            "playback_status": 0,
+            "closed": true
+          },
+          {
+            "player_dll": "C:\\Program Files\\IntelSWTools\\GPA\\dx11_player.dll",
+            "player_sha256": "39061ff329e4a32d0c8375ce9ee15e2017bccab0593943b962a860e11723d38b",
+            "adapter_selection": "Original kernel default (undefined GpuId)",
+            "callbacks": [],
+            "open_status": 0,
+            "playback_status": 0,
+            "closed": true
+          }
+        ],
+        "original_exports": [
+          {
+            "framebuffer_new1_0.dds": "d13baaa12c073f62368c9eaeaa83d86f2fdb5228082e249c4f47849339e69248",
+            "framebuffer_new1_1.dds": "0ce29a7e6ad080b3f67aba35876b27412524c33333b144073418dc1140ae2f6b",
+            "framebuffer_orig1.tga": "0ce29a7e6ad080b3f67aba35876b27412524c33333b144073418dc1140ae2f6b"
+          },
+          {
+            "framebuffer_new1_0.dds": "d13baaa12c073f62368c9eaeaa83d86f2fdb5228082e249c4f47849339e69248",
+            "framebuffer_new1_1.dds": "0ce29a7e6ad080b3f67aba35876b27412524c33333b144073418dc1140ae2f6b",
+            "framebuffer_orig1.tga": "0ce29a7e6ad080b3f67aba35876b27412524c33333b144073418dc1140ae2f6b"
+          }
+        ]
+      },
+      {
+        "id": "present_secondary_flip_discard",
+        "rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "original_status": "export_adapter_failed",
+        "kernel_reports": [
+          {
+            "player_dll": "C:\\Program Files\\IntelSWTools\\GPA\\dx11_player.dll",
+            "player_sha256": "39061ff329e4a32d0c8375ce9ee15e2017bccab0593943b962a860e11723d38b",
+            "adapter_selection": "Original kernel default (undefined GpuId)",
+            "callbacks": [],
+            "open_status": 0,
+            "playback_status": 0,
+            "closed": true
+          },
+          {
+            "player_dll": "C:\\Program Files\\IntelSWTools\\GPA\\dx11_player.dll",
+            "player_sha256": "39061ff329e4a32d0c8375ce9ee15e2017bccab0593943b962a860e11723d38b",
+            "adapter_selection": "Original kernel default (undefined GpuId)",
+            "callbacks": [],
+            "open_status": 0,
+            "playback_status": 0,
+            "closed": true
+          }
+        ],
+        "original_exports": [
+          {
+            "framebuffer_new1_0.dds": "d13baaa12c073f62368c9eaeaa83d86f2fdb5228082e249c4f47849339e69248",
+            "framebuffer_new1_1.dds": "0ce29a7e6ad080b3f67aba35876b27412524c33333b144073418dc1140ae2f6b",
+            "framebuffer_orig1.tga": "0ce29a7e6ad080b3f67aba35876b27412524c33333b144073418dc1140ae2f6b"
+          },
+          {
+            "framebuffer_new1_0.dds": "d13baaa12c073f62368c9eaeaa83d86f2fdb5228082e249c4f47849339e69248",
+            "framebuffer_new1_1.dds": "0ce29a7e6ad080b3f67aba35876b27412524c33333b144073418dc1140ae2f6b",
+            "framebuffer_orig1.tga": "0ce29a7e6ad080b3f67aba35876b27412524c33333b144073418dc1140ae2f6b"
+          }
+        ]
+      },
+      {
+        "id": "present_secondary_tearing",
+        "rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "original_status": "export_adapter_failed",
+        "kernel_reports": [
+          {
+            "player_dll": "C:\\Program Files\\IntelSWTools\\GPA\\dx11_player.dll",
+            "player_sha256": "39061ff329e4a32d0c8375ce9ee15e2017bccab0593943b962a860e11723d38b",
+            "adapter_selection": "Original kernel default (undefined GpuId)",
+            "callbacks": [],
+            "open_status": 0,
+            "playback_status": 0,
+            "closed": true
+          },
+          {
+            "player_dll": "C:\\Program Files\\IntelSWTools\\GPA\\dx11_player.dll",
+            "player_sha256": "39061ff329e4a32d0c8375ce9ee15e2017bccab0593943b962a860e11723d38b",
+            "adapter_selection": "Original kernel default (undefined GpuId)",
+            "callbacks": [],
+            "open_status": 0,
+            "playback_status": 0,
+            "closed": true
+          }
+        ],
+        "original_exports": [
+          {
+            "framebuffer_new1_0.dds": "d13baaa12c073f62368c9eaeaa83d86f2fdb5228082e249c4f47849339e69248",
+            "framebuffer_new1_1.dds": "0ce29a7e6ad080b3f67aba35876b27412524c33333b144073418dc1140ae2f6b",
+            "framebuffer_orig1.tga": "0ce29a7e6ad080b3f67aba35876b27412524c33333b144073418dc1140ae2f6b"
+          },
+          {
+            "framebuffer_new1_0.dds": "d13baaa12c073f62368c9eaeaa83d86f2fdb5228082e249c4f47849339e69248",
+            "framebuffer_new1_1.dds": "0ce29a7e6ad080b3f67aba35876b27412524c33333b144073418dc1140ae2f6b",
+            "framebuffer_orig1.tga": "0ce29a7e6ad080b3f67aba35876b27412524c33333b144073418dc1140ae2f6b"
+          }
+        ]
+      }
+    ]
+  },
+  "native_module_audits_passed": 192,
+  "raw_image_hash_audits_passed": 192,
+  "native_present_probe_observations": 60,
+  "native_present_probe_hardware_warp_agreement": true,
+  "tests": {
+    "delivery_ctest_suites": 7,
+    "present_qt_passed": 25,
+    "present_qt_skipped": 0,
+    "main_ui_passed": 55,
+    "main_ui_skipped": 0,
+    "compatibility_tools_passed": 9,
+    "golden_negative_controls_passed": 4
+  },
+  "golden_controls": [
+    {
+      "case": "gf2",
+      "rgba_sha256": "2e1abc5eacb0bbfd801f9fe059c305baa9a0786c384b36a42fa5a323dd979fd1",
+      "passed": true,
+      "counts": {
+        "ClearDepthStencilView": 2,
+        "ClearRenderTargetView": 1,
+        "DrawIndexed": 72,
+        "Map": 44,
+        "Present": 1,
+        "object_observation_records": 49,
+        "query_metadata_records": 2,
+        "state_or_auxiliary_records": 557,
+        "unmap_observations": 44
+      }
+    },
+    {
+      "case": "gf2-negative",
+      "rgba_sha256": "b2c5548a51715f581c4591acc266ac7a0c65b54b7ecd9a49f43499fa9b76c5f1",
+      "passed": true,
+      "counts": {
+        "ClearDepthStencilView": 2,
+        "ClearRenderTargetView": 1,
+        "Map": 44,
+        "Present": 1,
+        "object_observation_records": 49,
+        "query_metadata_records": 2,
+        "state_or_auxiliary_records": 557,
+        "unmap_observations": 44
+      }
+    },
+    {
+      "case": "bf1",
+      "rgba_sha256": "1f724d1840652f66afd26dd30c95aecd5c1b4932eede56109198f15a8f57a2f6",
+      "passed": true,
+      "counts": {
+        "ClearDepthStencilView": 10,
+        "ClearRenderTargetView": 10,
+        "ClearUnorderedAccessViewFloat": 1,
+        "CopyResource": 2,
+        "CopyStructureCount": 6,
+        "CopySubresourceRegion": 7,
+        "Dispatch": 60,
+        "DispatchIndirect": 13,
+        "Draw": 79,
+        "DrawIndexed": 41,
+        "DrawIndexedInstanced": 1053,
+        "DrawInstanced": 29,
+        "GenerateMips": 2,
+        "Map": 4151,
+        "Present": 1,
+        "UpdateSubresource": 27,
+        "map_read_observations": 2,
+        "object_observation_records": 28,
+        "query_metadata_records": 17,
+        "state_or_auxiliary_records": 7354,
+        "unmap_observations": 4153,
+        "unresolved_input_layout_setters": 2,
+        "unresolved_output_setters": 6,
+        "unresolved_srv_setters": 2
+      }
+    },
+    {
+      "case": "bf1-negative",
+      "rgba_sha256": "cd3a3066f984b1c317fbeefec2836503f32078321d3dc1f367465f2c06d435bf",
+      "passed": true,
+      "counts": {
+        "ClearDepthStencilView": 10,
+        "ClearRenderTargetView": 10,
+        "ClearUnorderedAccessViewFloat": 1,
+        "CopyResource": 2,
+        "CopyStructureCount": 6,
+        "CopySubresourceRegion": 7,
+        "Dispatch": 60,
+        "DispatchIndirect": 13,
+        "GenerateMips": 2,
+        "Map": 4151,
+        "Present": 1,
+        "UpdateSubresource": 27,
+        "map_read_observations": 2,
+        "object_observation_records": 28,
+        "query_metadata_records": 17,
+        "state_or_auxiliary_records": 7354,
+        "unmap_observations": 4153,
+        "unresolved_input_layout_setters": 2,
+        "unresolved_output_setters": 6,
+        "unresolved_srv_setters": 2
+      }
+    }
+  ],
+  "packaged_release_files": [
+    {
+      "name": "FloraGPA.exe",
+      "sha256": "ca6c386351b12efe9178d27d93dbaddb91e81d23c07b8b61bc0dda1118d08f03"
+    },
+    {
+      "name": "FloraGPA.Cli.exe",
+      "sha256": "44a28be7bfb7da50b6a3c02e456b958160939ca2797e652f2a4fe9ad45d2f02d"
+    },
+    {
+      "name": "FloraGPA.Worker.exe",
+      "sha256": "589da311547a8a1e3d05acbf7465b07a042a28680f5d4840e0007a9d7eaeb5ad"
+    },
+    {
+      "name": "FloraGPA.Rdc.exe",
+      "sha256": "f4d21d43e661d24d392e91fc1a1f1460a20d1377fcf5075c57083ad289e82773"
+    },
+    {
+      "name": "FloraGPA.Metrics.dll",
+      "sha256": "58b6278f2a93e783b1e8bb1290e9b0e51745f1a36825f296584f52159fd7c6db"
+    }
+  ],
+  "evidence_sha256": {
+    "artifacts/m2-present-corpus/validation.json": "599b183d6bdd09fa294b514d914d6bf33ddeae55f21cc757a856ec7a172ca50c",
+    "artifacts/m2-present-five-originals/manifest.json": "c834c12c56512996b0a4f58d018ecc51375333a58d562090d00225b7f08ef396",
+    "artifacts/m2-present-five-validation/validation.json": "ca92e076f887ba369f1f768af2eadbc015f54798cf824e0f49cf3fc7e12a50f4",
+    "artifacts/m2-present-bindings-uav/present.json": "51c7186c3ff3915110d64b3af81820fa32e0fe887d22af43ea635cc946231ec8",
+    "artifacts/ctest-m2-present-delivery.log": "2ee95669b1245fe6b600f8be34e6c9d944626f6b83702fa7a94b94ee5f35c402",
+    "artifacts/ctest-present-five-originals.log": "5537293e7a8a56f5a102a2f7b5e208ebc153b10f9e022c6579b9d589b41ce7ea",
+    "artifacts/tests-present-compatibility-tools.log": "41786c31b9cf680556086c7d34d179cb473afdeb88a77dc17ed59396414b14bb",
+    "artifacts/m2-present-golden/validation.json": "f79095ce635804d0115681491705d47621d967a970b2bb5992463b89014970c7",
+    "build/vs2022/present-records-Release.txt": "9b8e662a57c9a77605f9c7387aa8ab86ceed056a02fd87addd702e680f84771b",
+    "build/vs2022/ui-Release.txt": "251eba1671a7004a57cbc3548ba47bae93e35afb5dbdb058c4c37cb7937618de"
+  },
+  "source_sha256": {
+    "src/core/PresentRecords.h": "e797aaee1eaa30a872287e0b430679adb94403b3ef2f5780d09a0f088323e10d",
+    "src/core/PresentRecords.cpp": "ac2c67936b119d28116fc57295c7294ca133795ab7aa8e03f392c3d1df84f105",
+    "src/replay/Replay.cpp": "da7774e153807726da6d68f0793eb8d3e8bebc0e5930d8b5420e48da799c5757",
+    "src/application/FrameValidation.cpp": "13542d2428b5f0ef1e25621bf28e7391f9d43322267dc3246aed18c9f53bb99f",
+    "tools/native/present_capture_probe.cpp": "7c29f1e572ab16a5bc497d39eef8198d79056877a9e1d3fff3f7ed530a32c4e3",
+    "tools/native/present_boundary_probe.cpp": "a8b325817230c823ffd9266fe7e9f143d58127651c1710b6c98c6e218bd99c66",
+    "tools/capture_present.py": "18a1a493a55d842f6408114de73deb786a3066c31ea7d6e63415bb0b040eacae",
+    "tools/validate_corpus.py": "e101ef3ed29abd76cc3f9b526b4e195513002caef42ef9d2c4ea2c2f6a3f5623",
+    "tests/PresentRecordTests.cpp": "0c9d3a15e6c1b2b8f1c1d5241890c132898e52904b54cafa0569f9efd7e30cdd",
+    "tests/test_compatibility_tools.py": "d59828280b3d2aeb4c4d8f7af6cb09f8790c91e0b8e108804f7af42d89730690"
+  },
+  "module_migration_counts": {
+    "partial": 117,
+    "pending": 15,
+    "ported": 72
+  },
+  "remaining_gaps": [
+    "SetPrivateData and CreateBuffer auxiliary semantics",
+    "Present buffer rotation/post-submission work, resize, unsupported flags and statuses",
+    "Original multi-DDS export-to-swap-chain mapping",
+    "Resource validators, deferred execution and remaining M3-M6 scope"
+  ]
+}

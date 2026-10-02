@@ -1,0 +1,107 @@
+{
+  "schema": "FloraGPA compatibility corpus 1",
+  "profile": "GPA 2025 R1 legacy DX11 / IGPA v3",
+  "root_parameter": "--captures-root",
+  "completed": true,
+  "cases": [
+    {
+      "id": "present_flip_test",
+      "path": "0/capture.gpa_frame",
+      "sha256": "36fc8d3ac5f8ee53721770215a6d1103e63e4ad26179b04b1d6f5736064847fc",
+      "bytes": 8090,
+      "family": "present",
+      "origin": "self_owned_original_gpa_capture",
+      "provenance_note": "Original CaptureNextFrame output, never rewritten; see producer_runs.",
+      "source_manifests": [],
+      "device_scope": "Producer uses default hardware adapter; original player adapter unidentified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "boundaries": [],
+      "controls": [],
+      "covers": [
+        "Present TEST with subsequent clear/copy"
+      ]
+    },
+    {
+      "id": "present_secondary_flip",
+      "path": "1/capture.gpa_frame",
+      "sha256": "d71b2e1e371c37fa12e90c848a90c7477df5d1535b4e9222db0e75731d07c462",
+      "bytes": 8122,
+      "family": "present",
+      "origin": "self_owned_original_gpa_capture",
+      "provenance_note": "Original CaptureNextFrame output, never rewritten; see producer_runs.",
+      "source_manifests": [],
+      "device_scope": "Producer uses default hardware adapter; original player adapter unidentified.",
+      "reference_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "comparison_policy": "exact_golden",
+      "boundaries": [],
+      "controls": [],
+      "covers": [
+        "terminal flip RTV unbind"
+      ]
+    },
+    {
+      "id": "present_secondary_discard",
+      "path": "2/capture.gpa_frame",
+      "sha256": "211167a6294017c3d2554521ba89d16fa428559eea26ec89605d9680e7f2295c",
+      "bytes": 8298,
+      "family": "present",
+      "origin": "self_owned_original_gpa_capture",
+      "provenance_note": "Original CaptureNextFrame output, never rewritten; see producer_runs.",
+      "source_manifests": [],
+      "device_scope": "Producer uses default hardware adapter; original player adapter unidentified.",
+      "reference_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "comparison_policy": "exact_golden",
+      "boundaries": [],
+      "controls": [],
+      "covers": [
+        "terminal discard binding retention"
+      ]
+    },
+    {
+      "id": "present_secondary_flip_discard",
+      "path": "3/capture.gpa_frame",
+      "sha256": "f8708b83125f07b6a50507689c3c3c43a792b7d6f39f53b4393933acd70b19c2",
+      "bytes": 8122,
+      "family": "present",
+      "origin": "self_owned_original_gpa_capture",
+      "provenance_note": "Original CaptureNextFrame output, never rewritten; see producer_runs.",
+      "source_manifests": [],
+      "device_scope": "Producer uses default hardware adapter; original player adapter unidentified.",
+      "reference_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "comparison_policy": "exact_golden",
+      "boundaries": [],
+      "controls": [],
+      "covers": [
+        "terminal flip RTV unbind"
+      ]
+    },
+    {
+      "id": "present_secondary_tearing",
+      "path": "4/capture.gpa_frame",
+      "sha256": "e1affcb70ec918f9feffd2cf02e78dbc901577c5ac7a8bd63cd11877e0bd9af3",
+      "bytes": 8122,
+      "family": "present",
+      "origin": "self_owned_original_gpa_capture",
+      "provenance_note": "Original CaptureNextFrame output, never rewritten; see producer_runs.",
+      "source_manifests": [],
+      "device_scope": "Producer uses default hardware adapter; original player adapter unidentified.",
+      "reference_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "comparison_policy": "exact_golden",
+      "boundaries": [],
+      "controls": [],
+      "covers": [
+        "terminal flip RTV unbind"
+      ]
+    }
+  ],
+  "producer_sha256": "8ceb4d95aaaa25265b772b331967e19dffd5b0d0a9a8c61b8c9e8510ed6e7115",
+  "source_sha256": "7c29f1e572ab16a5bc497d39eef8198d79056877a9e1d3fff3f7ed530a32c4e3",
+  "tool_sha256": "18a1a493a55d842f6408114de73deb786a3066c31ea7d6e63415bb0b040eacae",
+  "gpa_sha256": {
+    "shimloader64.dll": "af68e28ba54ab0068c95f82081828788d6f59879283127dc330b818af7369888",
+    "shimd3d64.dll": "cb0b99d113511cbf7ca9f949d97aa02e4a1f8f110b1f3ad3165d8a81035dee31"
+  },
+  "source_manifest": "artifacts/m2-present-five-originals/manifest.json",
+  "source_manifest_sha256": "c834c12c56512996b0a4f58d018ecc51375333a58d562090d00225b7f08ef396"
+}

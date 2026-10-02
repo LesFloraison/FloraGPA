@@ -1,4 +1,5 @@
 #include "FrameValidation.h"
+#include "core/PresentRecords.h"
 #include "ApiCommands.h"
 #include "ContextInspector.h"
 #include "core/Commands.h"
@@ -118,6 +119,20 @@ Json validateFrame(const std::filesystem::path &path, const std::function<bool()
                         acceptQueryMetadata(e.type, frame.payload(id));
                         acceptInspectionRecord(e.type, frame.payload(id));
                         acceptPassiveObjectRecord(e.type, frame.payload(id));
+                        if (e.type == 0x3257) {
+                            try {
+                                validatePresentRecord(frame, id);
+                            } catch (const std::exception &error) {
+                                Id chain = 0;
+                                auto raw = frame.payload(id);
+                                if (raw.size() >= 16) {
+                                    Reader header(raw);
+                                    header.skip(8);
+                                    chain = header.read<Id>();
+                                }
+                                finding(&e, "error", "present_unsupported", error.what(), chain);
+                            }
+                        }
                         if (isWritableCommand(e.type))
                             validateWritableCommand(frame, id);
                         if (e.type >= 0x3278 && e.type <= 0x327e)

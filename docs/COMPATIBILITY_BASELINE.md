@@ -10,6 +10,9 @@ and JSON below remain the historical baseline; M2 results are reported separatel
 The [object observation audit](OBJECT_OBSERVATION_AUDIT.md) checks another 15
 families, leaving three observed auxiliary families unverified. Its native Present
 probe records a state dependency still awaiting production implementation.
+The subsequent [Present audit](PRESENT_REPLAY_AUDIT.md) implements checked TEST
+and submission-boundary binding transitions, adds five original captures, and
+leaves buffer rotation and unsupported statuses/flags explicitly diagnosed.
 
 ## Reproduce
 

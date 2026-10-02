@@ -18,10 +18,13 @@ bool in(uint16_t t, std::initializer_list<uint16_t> values) {
 }
 } // namespace
 bool isReplayAuxiliary(uint16_t t) {
-    return in(t, {0x3017, 0x3257, 0x3578, 0x34e7, 0x34e9,
+    return in(t, {0x3017, 0x3578, 0x34e7, 0x34e9,
                   0x34f5, 0x34f6, 0x34fb, 0x3501, 0x3502, 0x3509, 0x350a, 0x351a, 0x351e, 0x3523});
 }
 ReplayCapability replayCapability(uint16_t t) {
+    if (t == 0x3257)
+        return {"execute", "src/core/PresentRecords.cpp;src/replay/Replay.cpp",
+                "tests/PresentRecordTests.cpp;docs/PRESENT_REPLAY_AUDIT.md"};
     if (isPassiveObjectRecord(t))
         return {"metadata", "src/core/InspectionRecords.cpp;src/replay/Replay.cpp",
                 "tests/ObjectObservationTests.cpp;docs/OBJECT_OBSERVATION_AUDIT.md"};

@@ -12,6 +12,7 @@
 #include "core/InspectionRecords.h"
 #include "core/OutputBindings.h"
 #include "core/Predication.h"
+#include "core/PresentRecords.h"
 #include "core/StreamOutput.h"
 #include "core/TextureStorage.h"
 #include <algorithm>
@@ -990,6 +991,72 @@ void Replay::command(const Entry &e) {
     }
     if (acceptInspectionRecord(t, payload)) {
         counts["inspection_records"]++;
+        return;
+    }
+    if (t == 0x3257) {
+        const auto present = validatePresentRecord(frame_, e.id);
+        if (present.unbindRtv && objects_.contains(present.backbuffer)) {
+            // Captured Texture2D storage represents the submitted single-frame image.
+            // Preserve it for readback; later buffer rotation is rejected by the validator.
+            auto backbuffer = get<ID3D11Resource>(present.backbuffer);
+            auto isBackbuffer = [&](ID3D11View *view) {
+                if (!view)
+                    return false;
+                Com<ID3D11Resource> resource;
+                view->GetResource(&resource);
+                return resource.Get() == backbuffer;
+            };
+            std::array<ID3D11RenderTargetView *, 8> targets{};
+            std::array<Com<ID3D11RenderTargetView>, 8> owned;
+            Com<ID3D11DepthStencilView> depth;
+            context_->OMGetRenderTargets(8, targets.data(), &depth);
+            bool changed = false;
+            UINT count = 0;
+            for (size_t slot = 0; slot < targets.size(); ++slot) {
+                owned[slot].Attach(targets[slot]);
+                if (targets[slot]) {
+                    if (isBackbuffer(targets[slot])) {
+                        targets[slot] = nullptr;
+                        changed = true;
+                    } else
+                        count = UINT(slot + 1);
+                }
+            }
+            std::array<ID3D11UnorderedAccessView *, 64> om{}, cs{};
+            std::array<Com<ID3D11UnorderedAccessView>, 64> ownedOm, ownedCs;
+            context_->OMGetRenderTargetsAndUnorderedAccessViews(0, nullptr, nullptr, 0, uavLimit_, om.data());
+            context_->CSGetUnorderedAccessViews(0, uavLimit_, cs.data());
+            bool changedOm = false;
+            for (UINT slot = 0; slot < uavLimit_; ++slot) {
+                ownedOm[slot].Attach(om[slot]);
+                ownedCs[slot].Attach(cs[slot]);
+                if (isBackbuffer(om[slot])) {
+                    om[slot] = nullptr;
+                    changedOm = true;
+                    ++counts["present_om_uav_unbinds"];
+                }
+                if (isBackbuffer(cs[slot])) {
+                    ID3D11UnorderedAccessView *empty = nullptr;
+                    context_->CSSetUnorderedAccessViews(slot, 1, &empty, nullptr);
+                    ++counts["present_cs_uav_unbinds"];
+                }
+            }
+            if (changedOm) {
+                std::array<UINT, 64> initial;
+                initial.fill(UINT_MAX);
+                context_->OMSetRenderTargetsAndUnorderedAccessViews(count, targets.data(), depth.Get(), count,
+                                                                    uavLimit_ - count, om.data() + count,
+                                                                    initial.data() + count);
+            }
+            if (changed) {
+                if (!changedOm)
+                    context_->OMSetRenderTargetsAndUnorderedAccessViews(count, targets.data(), depth.Get(), 0,
+                                                                        D3D11_KEEP_UNORDERED_ACCESS_VIEWS,
+                                                                        nullptr, nullptr);
+                ++counts["present_rtv_unbinds"];
+            }
+        }
+        ++counts[present.test ? "present_tests" : "Present"];
         return;
     }
     if (acceptPassiveObjectRecord(t, payload)) {
