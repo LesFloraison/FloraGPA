@@ -9,8 +9,28 @@ import unittest
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'tools'))
 from validate_corpus import image_difference, original_rgba, summarize_native, run, prioritize, original_kernel_completed
 from catalog_captures import catalog, digest
+from validate_corpus import validation_failed
 
 class CompatibilityToolsTests(unittest.TestCase):
+    def test_batch_exit_rejects_recorded_failures(self):
+        good = {'status':'repeat_stable', 'preflight':{'exit_code':0,
+                'report':{'status':'review_required','errors':0}}, 'original_status':'not_run'}
+        self.assertFalse(validation_failed({'cases':[good]}))
+        for status in ['preflight_only','repeat_variable','replayed_without_image']:
+            self.assertFalse(validation_failed({'cases':[dict(good,status=status)]}))
+        for status in ['capture_missing_or_hash_mismatch','golden_mismatch','replay_failed']:
+            self.assertTrue(validation_failed({'cases':[dict(good,status=status)]}))
+        for preflight in [{}, {'exit_code':1,'report':{}},
+                {'exit_code':0,'report':{'status':'blocked','errors':1}},
+                {'exit_code':0,'report':{'status':'checked','errors':1}}]:
+            self.assertTrue(validation_failed({'cases':[dict(good,preflight=preflight)]}))
+        for status in ['replay_or_export_failed','export_adapter_failed']:
+            self.assertTrue(validation_failed({'cases':[dict(good,original_status=status)]}))
+        for key, value in [('controls',[{'passed':False}]),('boundaries',[{'passed':False}]),
+                           ('native',[{'runtime_dependency_audit':'failed'}])]:
+            self.assertTrue(validation_failed({'cases':[dict(good,**{key:value})]}))
+        self.assertTrue(validation_failed({'cases':[]}))
+        self.assertEqual(summarize_native([],{}),'replay_failed')
     def test_kernel_success_requires_complete_evidence(self):
         success = {'open_status':0, 'playback_status':0, 'closed':True, 'callbacks':[]}
         self.assertTrue(original_kernel_completed(success))

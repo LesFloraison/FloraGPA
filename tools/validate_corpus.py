@@ -68,7 +68,7 @@ def original_rgba(directory):
     return bytes(rgba)
 
 def summarize_native(runs, case):
-    good = all(r.get('report', {}).get('completed') and r['exit_code'] == 0 for r in runs)
+    good = bool(runs) and all(r.get('report', {}).get('completed') and r['exit_code'] == 0 for r in runs)
     if not good: return 'replay_failed'
     hashes = [r['report'].get('rgba_sha256') for r in runs]
     expected = case.get('reference_rgba_sha256')
@@ -88,6 +88,23 @@ def prioritize(finding, cases):
     else:
         priority, basis = 3, 'isolated or insufficiently evidenced path'
     return dict(finding, priority=priority, priority_basis=basis)
+
+def validation_failed(summary):
+    """Exit status reflects recorded failures; warnings and measured variance stay distinct."""
+    if not summary.get('cases'):
+        return True
+    for case in summary['cases']:
+        preflight = case.get('preflight', {})
+        report = preflight.get('report') or {}
+        if (case.get('status') in {'capture_missing_or_hash_mismatch', 'golden_mismatch', 'replay_failed'} or
+                not report or preflight.get('exit_code') != 0 or report.get('status') == 'blocked' or
+                report.get('errors', 0) or
+                case.get('original_status') in {'replay_or_export_failed', 'export_adapter_failed'} or
+                any(x.get('runtime_dependency_audit') == 'failed' for x in case.get('native', [])) or
+                any(not x['passed'] for x in case.get('boundaries', [])) or
+                any(not x['passed'] for x in case.get('controls', []))):
+            return True
+    return False
 
 def main():
     p = argparse.ArgumentParser(description=__doc__)
@@ -228,10 +245,6 @@ def main():
     for item in summary['cases']:summary['counts'][item['status']]=summary['counts'].get(item['status'],0)+1
     write(args.out/'validation.json',summary)
     write(args.out/'coverage.json',summary['coverage']);write(args.out/'repair-queue.json',summary['queue'])
-    return int(any(c['status'] in {'capture_missing_or_hash_mismatch','golden_mismatch'} or
-                   not c.get('preflight',{}).get('report') or
-                   any(x.get('runtime_dependency_audit')=='failed' for x in c.get('native',[])) or
-                   any(not x['passed'] for x in c.get('boundaries',[])) or
-                   any(not x['passed'] for x in c.get('controls',[])) for c in summary['cases']))
+    return int(validation_failed(summary))
 
 if __name__=='__main__':sys.exit(main())
