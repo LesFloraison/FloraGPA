@@ -11,4 +11,7 @@ struct DxbcProgram {
 DxbcProgram readDxbcProgram(Bytes bytes);
 std::vector<uint8_t> writeDxbcProgram(const DxbcProgram &program);
 std::vector<uint8_t> addEmptyInputSignature(Bytes bytes);
+// SM4/5 declarations survive reflection stripping. Unknown/interface layouts
+// conservatively retain every slot; this is not full shader validation.
+std::array<bool, 128> shaderSrvDeclarations(Bytes bytes);
 } // namespace flora

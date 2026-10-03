@@ -1,15 +1,14 @@
 # Current capabilities and compatibility
 
-Reviewed **2026-10-04**. Current source/binary hashes and acceptance are pinned
-in the [resource LOD baseline](resource-lod-baseline.json). The previous Context1
-transfer implementation is `5da80a6`; its immutable baseline remains available.
-This summary describes present scope; historical audits retain their own results.
+Reviewed **2026-10-04**. The latest acceptance is pinned in the
+[LOD shader usage baseline](min-lod-usage-baseline.json), following implementation
+revision 57c4d58. Earlier baselines retain their immutable evidence.
 
-The inventory now contains **322 files: 321 positive replays and one explicit
-missing-state rejection**. Resource Set/GetResourceMinLOD is implemented for the
-verified immediate Context4 records. The rejected capture omits its initial LOD;
-preflight and runtime identify event 22 / resource 23. Original-player mip-0
-image differences remain separate diagnostic evidence, not equivalence claims.
+The inventory contains **332 files: 328 positive replays and four explicit
+missing-state rejections**. Verified unused static SRVs no longer trigger false LOD errors,
+including reflection-stripped static shaders. Actual sampling still requires
+proved state; late sampling is diagnosed at its consuming draw. Original-player
+mip-0 differences remain diagnostic evidence, not equivalence claims.
 
 ## Supported scope
 
@@ -31,28 +30,28 @@ tested workloads; opening a file does not prove accurate replay.
 | RenderDoc analysis | Pixel History, VS/PS/CS recorded debugging, Replay Mesh and Replay Metrics | Requires compatible external RenderDoc 1.45 release DLL; unavailable values and backend limits remain explicit. [History](PIXEL_HISTORY_UI_MIGRATION.md), [debugging](REPLAY_DEBUG_UI_MIGRATION.md), [mesh](REPLAY_MESH_MIGRATION.md), [metrics](REPLAY_METRICS_MIGRATION.md) |
 | GPU measurements | Native DX11 statistics/timing; Intel MD foundation, scheduled/uniform Qt collection and event-group CLI collection | Intel paths require supported hardware/driver. Event-group Qt/session integration, GTPin/Shader Profiler and further consumers remain incomplete. [Statistics](GPU_STATISTICS_MIGRATION.md), [timing](GPU_PROFILE_MIGRATION.md), [scheduled UI](MD_ITERATIONS_UI_MIGRATION.md), [uniform UI](UNIFORM_METRICS_UI_MIGRATION.md), [groups](MD_HOTSPOTS_MIGRATION.md) |
 | Captured contexts and command lists | Identity/evidence inspection, inventory and explicitly checked limited metadata paths | Production replay of captured Deferred Context / ExecuteCommandList semantics remains incomplete. Self-created lists in metrics/diagnostics do not establish captured-list replay support. [Context workflow](USAGE.md#contexts-and-pipeline-boundaries) |
-| Resource minimum LOD | Native setters, initial getter evidence, frame-time creation defaults, ClearState preservation and disabled-setter experiments | Missing initial state is rejected; nonzero-LOD full storage export and conservative unused-binding checks remain boundaries. [Resource LOD](RESOURCE_LOD_AUDIT.md) |
+| Resource minimum LOD | Native setters, initial getter evidence, frame-time creation defaults, ClearState preservation and disabled-setter experiments | Missing required initial state is rejected; nonzero-LOD full storage export and UAV/output/interface guards remain boundaries. Unused static SRVs use program declarations. [LOD](RESOURCE_LOD_AUDIT.md), [shader usage](MIN_LOD_USAGE_AUDIT.md) |
 | Query and predication | Captured Query metadata/history; native predicate Begin/End, binding and Device5 frame-time creation | New predicates remain unissued until their recorded interval completes. Ordinary Query records may omit identities, intervals or full result bytes; pre-frame predicate history is not reconstructed. [Predicate creation](PREDICATE_CREATION_AUDIT.md) |
 
 ## Latest accepted replay matrix
 
-The [resource LOD baseline](resource-lod-baseline.json) records the latest full
-matrix and explicit negative control; see the [LOD audit](RESOURCE_LOD_AUDIT.md).
+The [LOD shader usage baseline](min-lod-usage-baseline.json) records the latest
+full matrix and four explicit rejection controls; see the [usage audit](MIN_LOD_USAGE_AUDIT.md).
 
 | Measure | Recorded result |
 |---|---|
-| Inventory / positive files / explicit missing-state files | 322 / 321 / 1 |
-| Ordinary independent positive runs | 642 |
-| Repeated output | 320 stable files; one known-variable Helldivers file |
-| Previously stable image hashes | All 309 unchanged |
+| Inventory / positive files / explicit missing-state files | 332 / 328 / 4 |
+| Ordinary independent positive runs | 656 |
+| Repeated output | 327 stable files; one known-variable Helldivers file |
+| Previously stable image hashes | All 320 unchanged |
 | Diagnostic control runs | 353 |
-| Resource boundary exports | 208: 204 strict byte goldens and four Helldivers before/after diagnostic exports |
-| New LOD producer frame checks | 288 |
-| New LOD hardware/WARP rows | 24: 22 positive rows, two expected unknown-state rejection rows |
-| New original-player comparisons | 22 completed runs: three files equal producer pixels, eight files retain a mip-0 discrepancy |
+| Resource boundary exports | 208: 204 strict byte goldens and four Helldivers boundary diagnostics |
+| New usage producer frame checks | 240 across ten original captures |
+| New usage hardware/WARP rows | 20: 14 positive, six expected sampling-state rejections |
+| New original-player comparisons | 20 completed runs: seven files equal producer, three retain a mip-0 discrepancy |
 | Related CTest suites / golden checks | 37 / 4 passed |
-| LOD / Qt-Worker test cases | 29 / 56 passed, no skips |
-| New record-family evidence | Context4 Set/GetResourceMinLOD, initial observation provenance, creation defaults and event order |
+| LOD / Qt-Worker test cases | 51 / 56 passed, no skips |
+| New execution evidence | Unused PS/VS slots, null PS, stripped shaders, late shader changes and shader replacements |
 
 These are separate measurements, not an overall correctness percentage. The
 matrix includes research fixtures and self-owned original captures as well as
@@ -93,7 +92,7 @@ under matched device/driver settings.
 
 [Comparison reporting](original-comparison-baseline.json) separately verifies
 execution status and image comparisons (13 CPU checks, nine independent runs,
-seven original runs). These focused runs are not added to the 642-run matrix.
+seven original runs). These focused runs are not added to the 656-run matrix.
 Helldivers' [sharpening variability](HELLDIVERS_REPLAY_FIX.md) remains visible;
 no shader modification, global tolerance or automatic event disable manufactures
 a stable result. Earlier Intel-metric batches retain their separately documented
@@ -133,8 +132,8 @@ identify local evidence, not files supplied by a clone. Original captures,
 proprietary DLLs and the recovered Python reference are not bundled. Hashes
 identify evidence; they do not make missing artifacts public.
 
-One historical aggregate log is unavailable: this batch's wrapper overwrote the
-previous ClearView CTest log. Its original hash, archived per-suite Qt results
+One historical aggregate log is unavailable: an earlier Context1 batch's wrapper
+overwrote the previous ClearView CTest log. Its original hash, archived per-suite Qt results
 and corpus reports remain; the incident and current regression evidence are
 recorded in the [transfer audit](TRANSFER1_AUDIT.md).
 

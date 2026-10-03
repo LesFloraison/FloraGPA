@@ -1,0 +1,484 @@
+{
+  "schema": "FloraGPA resource LOD shader usage acceptance 1",
+  "completion": "M2 and M3-M6 incomplete",
+  "previous_implementation": "57c4d58",
+  "inventory_files": 332,
+  "positive_files": 328,
+  "explicit_missing_state_files": 4,
+  "file_outcomes": {
+    "repeat_stable": 327,
+    "repeat_variable": 1
+  },
+  "native_positive_runs": 656,
+  "previous_stable_hashes_unchanged": 320,
+  "diagnostic_control_runs": 353,
+  "resource_boundary_exports": 208,
+  "strict_byte_golden_exports": 204,
+  "helldivers_diagnostic_exports": 4,
+  "new_producer_frame_checks": 240,
+  "new_original_player_runs": 20,
+  "new_original_equal_files": 7,
+  "new_original_different_files": 3,
+  "original_configuration_equivalence": "not established; producer pixels govern self-owned fixtures",
+  "cases": [
+    {
+      "mode": 0,
+      "capture_sha256": "e84a579dcc0442dc38518335e396f9190d84be97af95fc9235c2b078d5c14610",
+      "producer_rgba_sha256": "c262b5c549abc0f3f8a81ef1672eda4d07f475f7c97cc37afab49b47d79ba935",
+      "original_rgba_sha256": "c262b5c549abc0f3f8a81ef1672eda4d07f475f7c97cc37afab49b47d79ba935",
+      "original_equals_producer": true,
+      "before_status": "repeat_stable",
+      "before_preflight_errors": 1,
+      "after_status": "repeat_stable",
+      "after_preflight_errors": 0
+    },
+    {
+      "mode": 1,
+      "capture_sha256": "e7634b59386855264b62ca81c1462977c307ae3ce7fd126d4bdf77a82ff8037e",
+      "producer_rgba_sha256": "c262b5c549abc0f3f8a81ef1672eda4d07f475f7c97cc37afab49b47d79ba935",
+      "original_rgba_sha256": "c262b5c549abc0f3f8a81ef1672eda4d07f475f7c97cc37afab49b47d79ba935",
+      "original_equals_producer": true,
+      "before_status": "repeat_stable",
+      "before_preflight_errors": 1,
+      "after_status": "repeat_stable",
+      "after_preflight_errors": 0
+    },
+    {
+      "mode": 2,
+      "capture_sha256": "6f4c9850ab11530651eb1a1c324dd4ba809f35b80f5e5f3a57a6b71bdc479fea",
+      "producer_rgba_sha256": "c262b5c549abc0f3f8a81ef1672eda4d07f475f7c97cc37afab49b47d79ba935",
+      "original_rgba_sha256": "c262b5c549abc0f3f8a81ef1672eda4d07f475f7c97cc37afab49b47d79ba935",
+      "original_equals_producer": true,
+      "before_status": "repeat_stable",
+      "before_preflight_errors": 1,
+      "after_status": "repeat_stable",
+      "after_preflight_errors": 0
+    },
+    {
+      "mode": 3,
+      "capture_sha256": "f2f34975da1f050944c45afa0687c5efaa1ffde8c2b75415697f15bcc16a10ac",
+      "producer_rgba_sha256": "c262b5c549abc0f3f8a81ef1672eda4d07f475f7c97cc37afab49b47d79ba935",
+      "original_rgba_sha256": "c262b5c549abc0f3f8a81ef1672eda4d07f475f7c97cc37afab49b47d79ba935",
+      "original_equals_producer": true,
+      "before_status": "replay_failed",
+      "before_preflight_errors": 1,
+      "after_status": "repeat_stable",
+      "after_preflight_errors": 0
+    },
+    {
+      "mode": 4,
+      "capture_sha256": "9de7a711beca2bd8835b2abf5198170cc71f024c10c505cec3606d778caa5dc5",
+      "producer_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "original_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "original_equals_producer": false,
+      "before_status": "replay_failed",
+      "before_preflight_errors": 1,
+      "after_status": "replay_failed",
+      "after_preflight_errors": 1
+    },
+    {
+      "mode": 5,
+      "capture_sha256": "ba4a8837800fcba35e33cc0288ffa88514d164fd3949ce2f629e9ffb751300a0",
+      "producer_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "original_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "original_equals_producer": false,
+      "before_status": "replay_failed",
+      "before_preflight_errors": 1,
+      "after_status": "replay_failed",
+      "after_preflight_errors": 1
+    },
+    {
+      "mode": 6,
+      "capture_sha256": "ebfabcf6d66041ebe3396ad736f6d558badedf508305b1d5dc1a22e0457cdef0",
+      "producer_rgba_sha256": "2c893cd47b6757133987906e00c55e6dcce3c567b9df9e7f91ffecd3604cc6a6",
+      "original_rgba_sha256": "2c893cd47b6757133987906e00c55e6dcce3c567b9df9e7f91ffecd3604cc6a6",
+      "original_equals_producer": true,
+      "before_status": "repeat_stable",
+      "before_preflight_errors": 0,
+      "after_status": "repeat_stable",
+      "after_preflight_errors": 0
+    },
+    {
+      "mode": 7,
+      "capture_sha256": "43b5ce3ee1c447a4de32be26264a94b8a5b2e238c71ae76bfb5158804c0fd839",
+      "producer_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "original_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "original_equals_producer": true,
+      "before_status": "repeat_stable",
+      "before_preflight_errors": 1,
+      "after_status": "repeat_stable",
+      "after_preflight_errors": 0
+    },
+    {
+      "mode": 8,
+      "capture_sha256": "27810a2502599e2ea284375b321189358fc551885b764b245f2e74911525150c",
+      "producer_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "original_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "original_equals_producer": false,
+      "before_status": "replay_failed",
+      "before_preflight_errors": 2,
+      "after_status": "replay_failed",
+      "after_preflight_errors": 1
+    },
+    {
+      "mode": 9,
+      "capture_sha256": "3db08f00aac9f5b64a672d4701a9b66f873ed573a7156e34d3b56ab64916472c",
+      "producer_rgba_sha256": "c262b5c549abc0f3f8a81ef1672eda4d07f475f7c97cc37afab49b47d79ba935",
+      "original_rgba_sha256": "c262b5c549abc0f3f8a81ef1672eda4d07f475f7c97cc37afab49b47d79ba935",
+      "original_equals_producer": true,
+      "before_status": "repeat_stable",
+      "before_preflight_errors": 1,
+      "after_status": "repeat_stable",
+      "after_preflight_errors": 0
+    }
+  ],
+  "negative_cases": [
+    {
+      "id": "minlod_6",
+      "event": 22,
+      "resource": 23,
+      "report": "artifacts\\m2-minlod-usage-final-missing-state\\validation.json",
+      "sha256": "8c6d58eac43754a3087aca810fb3a8171493761a2a899ba0dacdd5b5d33e0b49"
+    },
+    {
+      "id": "minlod_usage_4",
+      "event": 22,
+      "resource": 23,
+      "report": "artifacts\\m2-minlod-usage-final-usage\\validation.json",
+      "sha256": "b8a8c047d85843eba653f84ae44d73a1cf8bba12d1aca8c0a3d040159d6d4a32"
+    },
+    {
+      "id": "minlod_usage_5",
+      "event": 22,
+      "resource": 23,
+      "report": "artifacts\\m2-minlod-usage-final-usage\\validation.json",
+      "sha256": "b8a8c047d85843eba653f84ae44d73a1cf8bba12d1aca8c0a3d040159d6d4a32"
+    },
+    {
+      "id": "minlod_usage_8",
+      "event": 33,
+      "resource": 23,
+      "report": "artifacts\\m2-minlod-usage-final-usage\\validation.json",
+      "sha256": "b8a8c047d85843eba653f84ae44d73a1cf8bba12d1aca8c0a3d040159d6d4a32"
+    }
+  ],
+  "results": {
+    "corpus": {
+      "path": "artifacts\\m2-minlod-usage-regression-corpus\\validation.json",
+      "sha256": "7a54b01321956492a73aa62f52ef4ae93c8ea9644eee95a6473bd2a71b4b03dc",
+      "counts": {
+        "repeat_stable": 90,
+        "repeat_variable": 1
+      }
+    },
+    "originals": {
+      "path": "artifacts\\m2-minlod-usage-regression-originals\\validation.json",
+      "sha256": "dff9f1a3331bd7f8b1cdd089899de27b59931737d44c8bbdf1e15f6fd1160b4d",
+      "counts": {
+        "repeat_stable": 11
+      }
+    },
+    "copy": {
+      "path": "artifacts\\m2-minlod-usage-regression-copy\\validation.json",
+      "sha256": "9d4c3161a3ee3b55e1f55d9dfdce38f03766159a4776b90bebe1b578c4898617",
+      "counts": {
+        "repeat_stable": 6
+      }
+    },
+    "present": {
+      "path": "artifacts\\m2-minlod-usage-regression-present\\validation.json",
+      "sha256": "2928ae94a97028cbef5bfd6d42e810806b69219cf00622c088b83b94b13a16a8",
+      "counts": {
+        "repeat_stable": 5
+      }
+    },
+    "buffer": {
+      "path": "artifacts\\m2-minlod-usage-regression-buffer\\validation.json",
+      "sha256": "5acb02617146d48700d7165a751037fc7d143c876d556ad3aaa1484bbef4804d",
+      "counts": {
+        "repeat_stable": 5
+      }
+    },
+    "pipeline": {
+      "path": "artifacts\\m2-minlod-usage-regression-pipeline\\validation.json",
+      "sha256": "29d53acc523016ef5bd02a635faa0fdd8adf9b0865582edd022f2a31344dd897",
+      "counts": {
+        "repeat_stable": 5
+      }
+    },
+    "creation": {
+      "path": "artifacts\\m2-minlod-usage-regression-creation\\validation.json",
+      "sha256": "3296dbb2d87c6d3376c3e01ab06ff3a4f2cbd386fae1b2afe054033f9fedfedf",
+      "counts": {
+        "repeat_stable": 7
+      }
+    },
+    "discovery": {
+      "path": "artifacts\\m2-minlod-usage-regression-discovery\\validation.json",
+      "sha256": "da586078e8c376a3fbad65f4e5ce42461a06ca13b197d7697e0e31919394db45",
+      "counts": {
+        "repeat_stable": 1
+      }
+    },
+    "dimensions": {
+      "path": "artifacts\\m2-minlod-usage-regression-dimensions\\validation.json",
+      "sha256": "d84ffebcf431410b108a2fe612dcdfc84cd6093b0ec83dfb927b0d2ff3364196",
+      "counts": {
+        "repeat_stable": 17
+      }
+    },
+    "views": {
+      "path": "artifacts\\m2-minlod-usage-regression-views\\validation.json",
+      "sha256": "2d8c0baa5bcbdf1e8d460f2c7d33dd94157c05f9224fcbdda48f800f480f561f",
+      "counts": {
+        "repeat_stable": 12
+      }
+    },
+    "buffer-views": {
+      "path": "artifacts\\m2-minlod-usage-regression-buffer-views\\validation.json",
+      "sha256": "07fe020d4ac048be38843c69aaa6af453c19d171a7a0171ba28633855f51ff0e",
+      "counts": {
+        "repeat_stable": 19
+      }
+    },
+    "pipeline-creation": {
+      "path": "artifacts\\m2-minlod-usage-regression-pipeline-creation\\validation.json",
+      "sha256": "74c74b680fe36db16cdb8d69ebaa34092509e9580fa3ed0937d0496318362eff",
+      "counts": {
+        "repeat_stable": 32
+      }
+    },
+    "geometry-creation": {
+      "path": "artifacts\\m2-minlod-usage-regression-geometry-creation\\validation.json",
+      "sha256": "99026a33cf3977e229760147dcd8a8bf2ad03893b7150f61cb9ad96cd4b87344",
+      "counts": {
+        "repeat_stable": 20
+      }
+    },
+    "class-creation": {
+      "path": "artifacts\\m2-minlod-usage-regression-class-creation\\validation.json",
+      "sha256": "20e793e486e611084dcac987653d16aea8ab7b3edf26150561d4d9a562e26ff8",
+      "counts": {
+        "repeat_stable": 13
+      }
+    },
+    "predicate-creation": {
+      "path": "artifacts\\m2-minlod-usage-regression-predicate-creation\\validation.json",
+      "sha256": "2996c155324d6fad0634a920df46e201ebac1ccb7c3fca5e61f0b592a736cbe0",
+      "counts": {
+        "repeat_stable": 10
+      }
+    },
+    "clear-view": {
+      "path": "artifacts\\m2-minlod-usage-regression-clear-view\\validation.json",
+      "sha256": "8734fb424290c0da7f6553f356237d8f3a813a88974836b874eeade372a473db",
+      "counts": {
+        "repeat_stable": 16
+      }
+    },
+    "transfer1": {
+      "path": "artifacts\\m2-minlod-usage-regression-transfer1\\validation.json",
+      "sha256": "c4b3b0048f514402c0402059319192d5154b8684acd7638ff308a4b7165a05d7",
+      "counts": {
+        "repeat_stable": 26
+      }
+    },
+    "transfer1-context": {
+      "path": "artifacts\\m2-minlod-usage-regression-transfer1-context\\validation.json",
+      "sha256": "d3673a61fc5f471c5bf45b06ed45e4a9c591c558ab0f4febbd63241c312938f2",
+      "counts": {
+        "repeat_stable": 14
+      }
+    },
+    "minlod": {
+      "path": "artifacts\\m2-minlod-usage-final-minlod\\validation.json",
+      "sha256": "8bc17f48df958fb6fd13e44ae9a1cac723de31d192d79c7b41163052f23f13ff",
+      "counts": {
+        "repeat_stable": 11
+      }
+    },
+    "usage": {
+      "path": "artifacts\\m2-minlod-usage-final-usage\\validation.json",
+      "sha256": "b8a8c047d85843eba653f84ae44d73a1cf8bba12d1aca8c0a3d040159d6d4a32",
+      "counts": {
+        "repeat_stable": 7,
+        "replay_failed": 3
+      }
+    }
+  },
+  "package": "out\\FloraGPA-minlod-usage-20261004",
+  "package_sha256": {
+    "FloraGPA.exe": "1813cccf1f644afb7d86ddaea85116aff211e6469356ac6ce7d6e6281636c0e3",
+    "FloraGPA.Cli.exe": "0579a4a0c153a16418f0c0e7046c9c42b4c41ea5810acbed4244b1f00658405b",
+    "FloraGPA.Worker.exe": "3566a0375d8efe2f2d7a4afb1fccea600d836c1836fc0f0322d0e268afc39887",
+    "FloraGPA.Rdc.exe": "f4d21d43e661d24d392e91fc1a1f1460a20d1377fcf5075c57083ad289e82773",
+    "FloraGPA.Metrics.dll": "58b6278f2a93e783b1e8bb1290e9b0e51745f1a36825f296584f52159fd7c6db"
+  },
+  "ctest": {
+    "path": "artifacts\\ctest-m2-minlod-usage.log",
+    "sha256": "e9030af6a2d6232cb596dae91dc0d747b645bac7a945ab1d83f8de367b9e6ce0",
+    "suites": 37,
+    "qt": {
+      "resource-lod": {
+        "path": "artifacts\\m2-minlod-usage-qt-results\\resource-lod-Release.txt",
+        "sha256": "6cc0bd3147bc1dcfbe35c753a3a8178b702c4c6292368151e5dff173a9ca6ead",
+        "passed": 51
+      },
+      "ui": {
+        "path": "artifacts\\m2-minlod-usage-qt-results\\ui-Release.txt",
+        "sha256": "0a2ab374ec68b9f8763f9a8c72716442e5578703cce2a9d275b5505eb54cd06a",
+        "passed": 56
+      },
+      "transfer1": {
+        "path": "artifacts\\m2-minlod-usage-qt-results\\transfer1-Release.txt",
+        "sha256": "ff6597b34b818267a35bdd12df114ff95e083dad8e47cfb268a4c23b6137a628",
+        "passed": 57
+      }
+    }
+  },
+  "goldens": {
+    "path": "artifacts\\m2-minlod-usage-regression-golden\\validation.json",
+    "sha256": "5e1dde1ab9876f50c472cdf84378931ffc3b5cd8e9700002b67d37bf81383ade",
+    "results": [
+      {
+        "case": "gf2",
+        "rgba_sha256": "2e1abc5eacb0bbfd801f9fe059c305baa9a0786c384b36a42fa5a323dd979fd1",
+        "passed": true,
+        "counts": {
+          "ClearDepthStencilView": 2,
+          "ClearRenderTargetView": 1,
+          "CreateBuffer": 2,
+          "DrawIndexed": 72,
+          "Map": 44,
+          "Present": 1,
+          "buffers_created_without_initial_data": 2,
+          "object_observation_records": 49,
+          "pipeline_setter_records": 142,
+          "private_data_observations": 4,
+          "query_metadata_records": 2,
+          "state_or_auxiliary_records": 551,
+          "unmap_observations": 44
+        }
+      },
+      {
+        "case": "gf2-negative",
+        "rgba_sha256": "b2c5548a51715f581c4591acc266ac7a0c65b54b7ecd9a49f43499fa9b76c5f1",
+        "passed": true,
+        "counts": {
+          "ClearDepthStencilView": 2,
+          "ClearRenderTargetView": 1,
+          "CreateBuffer": 2,
+          "Map": 44,
+          "Present": 1,
+          "buffers_created_without_initial_data": 2,
+          "object_observation_records": 49,
+          "pipeline_setter_records": 142,
+          "private_data_observations": 4,
+          "query_metadata_records": 2,
+          "state_or_auxiliary_records": 551,
+          "unmap_observations": 44
+        }
+      },
+      {
+        "case": "bf1",
+        "rgba_sha256": "1f724d1840652f66afd26dd30c95aecd5c1b4932eede56109198f15a8f57a2f6",
+        "passed": true,
+        "counts": {
+          "ClearDepthStencilView": 10,
+          "ClearRenderTargetView": 10,
+          "ClearUnorderedAccessViewFloat": 1,
+          "CopyResource": 2,
+          "CopyStructureCount": 6,
+          "CopySubresourceRegion": 7,
+          "Dispatch": 60,
+          "DispatchIndirect": 13,
+          "Draw": 79,
+          "DrawIndexed": 41,
+          "DrawIndexedInstanced": 1053,
+          "DrawInstanced": 29,
+          "GenerateMips": 2,
+          "Map": 4151,
+          "Present": 1,
+          "UpdateSubresource": 27,
+          "map_read_observations": 2,
+          "object_observation_records": 28,
+          "pipeline_setter_records": 2221,
+          "query_metadata_records": 17,
+          "state_or_auxiliary_records": 7354,
+          "unmap_observations": 4153,
+          "unresolved_input_layout_setters": 2,
+          "unresolved_output_setters": 6,
+          "unresolved_shader_setters": 4,
+          "unresolved_srv_setters": 2
+        }
+      },
+      {
+        "case": "bf1-negative",
+        "rgba_sha256": "cd3a3066f984b1c317fbeefec2836503f32078321d3dc1f367465f2c06d435bf",
+        "passed": true,
+        "counts": {
+          "ClearDepthStencilView": 10,
+          "ClearRenderTargetView": 10,
+          "ClearUnorderedAccessViewFloat": 1,
+          "CopyResource": 2,
+          "CopyStructureCount": 6,
+          "CopySubresourceRegion": 7,
+          "Dispatch": 60,
+          "DispatchIndirect": 13,
+          "GenerateMips": 2,
+          "Map": 4151,
+          "Present": 1,
+          "UpdateSubresource": 27,
+          "map_read_observations": 2,
+          "object_observation_records": 28,
+          "pipeline_setter_records": 2221,
+          "query_metadata_records": 17,
+          "state_or_auxiliary_records": 7354,
+          "unmap_observations": 4153,
+          "unresolved_input_layout_setters": 2,
+          "unresolved_output_setters": 6,
+          "unresolved_shader_setters": 4,
+          "unresolved_srv_setters": 2
+        }
+      }
+    ]
+  },
+  "sources": {
+    "CMakeLists.txt": "8a377fe5a9e965054362746949d0faceb8ba04db3b1c4d90876fb1b51ec78b40",
+    "src/core/Dxbc.h": "99ec2288d82cfc490b69e6bd30a9316b89aec8b9b5bfd0b826baa373adff1166",
+    "src/core/Dxbc.cpp": "9c36b54f6aed36a256314369e349799e1e0ff05af3d7ad177f9c85844a843e90",
+    "src/core/ResourceLod.cpp": "33a8f09e50ad05a41db805e6d2bb687f40c61fa1503373bfdad9ec73c488530f",
+    "src/replay/Replay.cpp": "71c983d397724d308c9e511fb629a58ec70ce69b8fa361665c445d233044cd48",
+    "src/replay/Replay.h": "0c212286b2f735b522f32debde4fea8fcc04a863aea7d5804b5a3e5e3b764e12",
+    "src/replay/PipelineCreation.cpp": "c67acc995a44f1e92ecc0adc4d72c913705f41e9aa7162847b33f2f8192a48bf",
+    "src/replay/ResourceLod.cpp": "84fa03b3b1e8cf2a105e1270cb5883edfb8bc96f3fe75300a360c05a749fa5b8",
+    "tests/ResourceLodTests.cpp": "e9450f56c374867d37affc7b49437a35773080ac09bf7c2696018727e6579106",
+    "tools/native/min_lod_usage_probe.cpp": "a91f66cfe88a610212ae033da8db020bf210f706a040eba45d3a51006a8c82f3",
+    "tools/native/texture_probe_helpers.h": "30abcac380d84d505fd344d4083d97300f50df5b2e5cc7dffb11ea03c6d6ee3d",
+    "tools/native/present_capture_probe.cpp": "7c29f1e572ab16a5bc497d39eef8198d79056877a9e1d3fff3f7ed530a32c4e3"
+  },
+  "evidence": {
+    "artifacts/summarize-minlod-usage.py": "186e51f6fdcd02e1825253735ea8f08cfa3c9d61d545169fbceb5405eb1bb582",
+    "artifacts/capture-minlod-usage.py": "162ef835aedcbc923f34950acfc228668b7ef1ba84c7dc6e5bed34a301eba1c5",
+    "artifacts/m2-minlod-usage/manifest.json": "a69c5cea79c24c09e942bc9eb7bda960157003b922cf48926ecf0debff167dd6",
+    "artifacts/m2-minlod-usage-before/validation.json": "23c0ec93b07a540fe2851c4068fc9babe4b650b102b9aa4ef710565b75a88ef7",
+    "artifacts/m2-minlod-usage-before.log": "cb49919ab0e460e0e16b421f4485f4c78588c542b54b2601939d28a1ca3c49b6",
+    "artifacts/minlod-usage-discovery-corpus.json": "26db5459c3b1aa29c6266bfca3ac9e8eee1b6f6c8326e22931dd3e5a75fb794e",
+    "artifacts/minlod-usage-token-format.hpp": "5862ef7c8b819f0d02ba73563a9df4dc0e89f11fe59d8f598def39122273c626",
+    "artifacts/minlod-usage-tests-first.txt": "d87be369c13e82ef0f3caf1dea6d807c7def038067093342f2e4c30e0e24e1b3",
+    "artifacts/minlod-usage-declaration-tests.txt": "56ed5f76151e73f835761359a1029e9a2c4bd3c20e1f8350e236906ce6d420ea",
+    "artifacts/run-minlod-usage-ctest.ps1": "8b8182042b87c788577fa57db99078131674246d60f3ff85e8e7d0f9eeb53514",
+    "artifacts/run-minlod-usage-regression.py": "0550bb8ac5bace43516847cd190f38a00c2ee6ffc0ddac26c71de883f5287a31",
+    "artifacts/run-minlod-usage-all.py": "3d3238eb0846f749e7a458b4baebb479084c62508f769ba7da2299381166024d",
+    "artifacts/build-minlod-usage-regression.log": "dadebb4d453996df7979fc915e79a5530beb7c3703798abd82209ce325c2122e",
+    "artifacts/run-minlod-usage-all.log": "3eb99d397fa1eaa9d5ef1030e5580726b4a46a3d0fb3e00940dcaabff8c65f88",
+    "artifacts/package-minlod-usage.log": "8c36502f0fceb6bc08f26e5ce16d890f4a3bba1de907c304a345688694c7c098"
+  },
+  "limits": [
+    "Declared SRVs are conservative accesses; no dynamic branch inference",
+    "Unknown bytecode models, interface/class resource offsets remain conservative",
+    "UAV/RTV/DSV guards remain conservative; no blanket unused-output exemption",
+    "Unknown minimum LOD at actual sampled access is still rejected",
+    "Nonzero resource LOD full storage export remains unverified; captured deferred/linked command lists remain incomplete"
+  ]
+}

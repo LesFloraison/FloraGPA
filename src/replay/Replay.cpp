@@ -1447,6 +1447,7 @@ void Replay::run(const std::function<void(Id, size_t, size_t)> &progress,
     if (!resourceLodAudit_)
         resourceLodAudit_ = auditResourceLod(frame_);
     resourceLods_.clear();
+    resourceLodShaderSrvs_.clear();
     for (const auto &[resource, initial] : resourceLodAudit_->initial)
         resourceLods_[resource] = initial.value;
     unissuedPredicates_.clear();

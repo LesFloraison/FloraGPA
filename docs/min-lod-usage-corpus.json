@@ -1,0 +1,216 @@
+{
+  "schema": "FloraGPA compatibility corpus 1",
+  "profile": "GPA 2025 R1 legacy DX11 / IGPA v3",
+  "cases": [
+    {
+      "id": "minlod_usage_0",
+      "path": "m2-minlod-usage/0/capture.gpa_frame",
+      "sha256": "e84a579dcc0442dc38518335e396f9190d84be97af95fc9235c2b078d5c14610",
+      "bytes": 58336,
+      "family": "resource_min_lod_usage",
+      "origin": "self_owned_original_gpa_capture",
+      "reference_rgba_sha256": "c262b5c549abc0f3f8a81ef1672eda4d07f475f7c97cc37afab49b47d79ba935",
+      "comparison_policy": "exact_golden",
+      "controls": [],
+      "boundaries": [],
+      "coverage": [
+        "unused_ps_t0"
+      ],
+      "source_manifests": [
+        "artifacts\\m2-minlod-usage\\manifest.json"
+      ],
+      "device_scope": "Local hardware producer; original-player adapter/configuration unproven.",
+      "provenance_note": "Unmodified original GPA output; native and injected producers each verify 12 frames. Missing pre-frame LOD is relevant only for modes 4, 5 and 8. See MIN_LOD_USAGE_AUDIT.md.",
+      "expected_outcome": "exact_replay_with_unused_clamp_binding"
+    },
+    {
+      "id": "minlod_usage_1",
+      "path": "m2-minlod-usage/1/capture.gpa_frame",
+      "sha256": "e7634b59386855264b62ca81c1462977c307ae3ce7fd126d4bdf77a82ff8037e",
+      "bytes": 58336,
+      "family": "resource_min_lod_usage",
+      "origin": "self_owned_original_gpa_capture",
+      "reference_rgba_sha256": "c262b5c549abc0f3f8a81ef1672eda4d07f475f7c97cc37afab49b47d79ba935",
+      "comparison_policy": "exact_golden",
+      "controls": [],
+      "boundaries": [],
+      "coverage": [
+        "unused_ps_t1"
+      ],
+      "source_manifests": [
+        "artifacts\\m2-minlod-usage\\manifest.json"
+      ],
+      "device_scope": "Local hardware producer; original-player adapter/configuration unproven.",
+      "provenance_note": "Unmodified original GPA output; native and injected producers each verify 12 frames. Missing pre-frame LOD is relevant only for modes 4, 5 and 8. See MIN_LOD_USAGE_AUDIT.md.",
+      "expected_outcome": "exact_replay_with_unused_clamp_binding"
+    },
+    {
+      "id": "minlod_usage_2",
+      "path": "m2-minlod-usage/2/capture.gpa_frame",
+      "sha256": "6f4c9850ab11530651eb1a1c324dd4ba809f35b80f5e5f3a57a6b71bdc479fea",
+      "bytes": 58336,
+      "family": "resource_min_lod_usage",
+      "origin": "self_owned_original_gpa_capture",
+      "reference_rgba_sha256": "c262b5c549abc0f3f8a81ef1672eda4d07f475f7c97cc37afab49b47d79ba935",
+      "comparison_policy": "exact_golden",
+      "controls": [],
+      "boundaries": [],
+      "coverage": [
+        "unused_vs_t0"
+      ],
+      "source_manifests": [
+        "artifacts\\m2-minlod-usage\\manifest.json"
+      ],
+      "device_scope": "Local hardware producer; original-player adapter/configuration unproven.",
+      "provenance_note": "Unmodified original GPA output; native and injected producers each verify 12 frames. Missing pre-frame LOD is relevant only for modes 4, 5 and 8. See MIN_LOD_USAGE_AUDIT.md.",
+      "expected_outcome": "exact_replay_with_unused_clamp_binding"
+    },
+    {
+      "id": "minlod_usage_3",
+      "path": "m2-minlod-usage/3/capture.gpa_frame",
+      "sha256": "f2f34975da1f050944c45afa0687c5efaa1ffde8c2b75415697f15bcc16a10ac",
+      "bytes": 58064,
+      "family": "resource_min_lod_usage",
+      "origin": "self_owned_original_gpa_capture",
+      "reference_rgba_sha256": "c262b5c549abc0f3f8a81ef1672eda4d07f475f7c97cc37afab49b47d79ba935",
+      "comparison_policy": "exact_golden",
+      "controls": [],
+      "boundaries": [],
+      "coverage": [
+        "stripped_unused_ps"
+      ],
+      "source_manifests": [
+        "artifacts\\m2-minlod-usage\\manifest.json"
+      ],
+      "device_scope": "Local hardware producer; original-player adapter/configuration unproven.",
+      "provenance_note": "Unmodified original GPA output; native and injected producers each verify 12 frames. Missing pre-frame LOD is relevant only for modes 4, 5 and 8. See MIN_LOD_USAGE_AUDIT.md.",
+      "expected_outcome": "exact_replay_with_unused_clamp_binding"
+    },
+    {
+      "id": "minlod_usage_4",
+      "path": "m2-minlod-usage/4/capture.gpa_frame",
+      "sha256": "9de7a711beca2bd8835b2abf5198170cc71f024c10c505cec3606d778caa5dc5",
+      "bytes": 58116,
+      "family": "resource_min_lod_usage",
+      "origin": "self_owned_original_gpa_capture",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "controls": [],
+      "boundaries": [],
+      "coverage": [
+        "stripped_sampled_ps"
+      ],
+      "source_manifests": [
+        "artifacts\\m2-minlod-usage\\manifest.json"
+      ],
+      "device_scope": "Local hardware producer; original-player adapter/configuration unproven.",
+      "provenance_note": "Unmodified original GPA output; native and injected producers each verify 12 frames. Missing pre-frame LOD is relevant only for modes 4, 5 and 8. See MIN_LOD_USAGE_AUDIT.md.",
+      "expected_outcome": "missing_initial_lod_at_sampling_draw"
+    },
+    {
+      "id": "minlod_usage_5",
+      "path": "m2-minlod-usage/5/capture.gpa_frame",
+      "sha256": "ba4a8837800fcba35e33cc0288ffa88514d164fd3949ce2f629e9ffb751300a0",
+      "bytes": 58460,
+      "family": "resource_min_lod_usage",
+      "origin": "self_owned_original_gpa_capture",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "controls": [],
+      "boundaries": [],
+      "coverage": [
+        "sampled_ps"
+      ],
+      "source_manifests": [
+        "artifacts\\m2-minlod-usage\\manifest.json"
+      ],
+      "device_scope": "Local hardware producer; original-player adapter/configuration unproven.",
+      "provenance_note": "Unmodified original GPA output; native and injected producers each verify 12 frames. Missing pre-frame LOD is relevant only for modes 4, 5 and 8. See MIN_LOD_USAGE_AUDIT.md.",
+      "expected_outcome": "missing_initial_lod_at_sampling_draw"
+    },
+    {
+      "id": "minlod_usage_6",
+      "path": "m2-minlod-usage/6/capture.gpa_frame",
+      "sha256": "ebfabcf6d66041ebe3396ad736f6d558badedf508305b1d5dc1a22e0457cdef0",
+      "bytes": 45976,
+      "family": "resource_min_lod_usage",
+      "origin": "self_owned_original_gpa_capture",
+      "reference_rgba_sha256": "2c893cd47b6757133987906e00c55e6dcce3c567b9df9e7f91ffecd3604cc6a6",
+      "comparison_policy": "exact_golden",
+      "controls": [],
+      "boundaries": [],
+      "coverage": [
+        "null_ps"
+      ],
+      "source_manifests": [
+        "artifacts\\m2-minlod-usage\\manifest.json"
+      ],
+      "device_scope": "Local hardware producer; original-player adapter/configuration unproven.",
+      "provenance_note": "Unmodified original GPA output; native and injected producers each verify 12 frames. Missing pre-frame LOD is relevant only for modes 4, 5 and 8. See MIN_LOD_USAGE_AUDIT.md.",
+      "expected_outcome": "exact_replay_with_unused_clamp_binding"
+    },
+    {
+      "id": "minlod_usage_7",
+      "path": "m2-minlod-usage/7/capture.gpa_frame",
+      "sha256": "43b5ce3ee1c447a4de32be26264a94b8a5b2e238c71ae76bfb5158804c0fd839",
+      "bytes": 59000,
+      "family": "resource_min_lod_usage",
+      "origin": "self_owned_original_gpa_capture",
+      "reference_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "comparison_policy": "exact_golden",
+      "controls": [],
+      "boundaries": [],
+      "coverage": [
+        "sampled_t0_unused_t1"
+      ],
+      "source_manifests": [
+        "artifacts\\m2-minlod-usage\\manifest.json"
+      ],
+      "device_scope": "Local hardware producer; original-player adapter/configuration unproven.",
+      "provenance_note": "Unmodified original GPA output; native and injected producers each verify 12 frames. Missing pre-frame LOD is relevant only for modes 4, 5 and 8. See MIN_LOD_USAGE_AUDIT.md.",
+      "expected_outcome": "exact_replay_with_unused_clamp_binding"
+    },
+    {
+      "id": "minlod_usage_8",
+      "path": "m2-minlod-usage/8/capture.gpa_frame",
+      "sha256": "27810a2502599e2ea284375b321189358fc551885b764b245f2e74911525150c",
+      "bytes": 93382,
+      "family": "resource_min_lod_usage",
+      "origin": "self_owned_original_gpa_capture",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "controls": [],
+      "boundaries": [],
+      "coverage": [
+        "late_sample"
+      ],
+      "source_manifests": [
+        "artifacts\\m2-minlod-usage\\manifest.json"
+      ],
+      "device_scope": "Local hardware producer; original-player adapter/configuration unproven.",
+      "provenance_note": "Unmodified original GPA output; native and injected producers each verify 12 frames. Missing pre-frame LOD is relevant only for modes 4, 5 and 8. See MIN_LOD_USAGE_AUDIT.md.",
+      "expected_outcome": "missing_initial_lod_at_sampling_draw"
+    },
+    {
+      "id": "minlod_usage_9",
+      "path": "m2-minlod-usage/9/capture.gpa_frame",
+      "sha256": "3db08f00aac9f5b64a672d4701a9b66f873ed573a7156e34d3b56ab64916472c",
+      "bytes": 93914,
+      "family": "resource_min_lod_usage",
+      "origin": "self_owned_original_gpa_capture",
+      "reference_rgba_sha256": "c262b5c549abc0f3f8a81ef1672eda4d07f475f7c97cc37afab49b47d79ba935",
+      "comparison_policy": "exact_golden",
+      "controls": [],
+      "boundaries": [],
+      "coverage": [
+        "late_unused"
+      ],
+      "source_manifests": [
+        "artifacts\\m2-minlod-usage\\manifest.json"
+      ],
+      "device_scope": "Local hardware producer; original-player adapter/configuration unproven.",
+      "provenance_note": "Unmodified original GPA output; native and injected producers each verify 12 frames. Missing pre-frame LOD is relevant only for modes 4, 5 and 8. See MIN_LOD_USAGE_AUDIT.md.",
+      "expected_outcome": "exact_replay_with_unused_clamp_binding"
+    }
+  ]
+}

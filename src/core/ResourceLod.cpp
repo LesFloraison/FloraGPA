@@ -1,6 +1,7 @@
 #include "ResourceLod.h"
 #include "Contexts.h"
 #include "CopyCommands.h"
+#include "Dxbc.h"
 #include "ReplayCapabilities.h"
 #include "TextureCreation.h"
 #include <cmath>
@@ -61,10 +62,17 @@ std::set<Id> resourceLodAccesses(const Frame &frame, const Entry &entry, Bytes p
     if (isDraw(t)) {
         const auto s = frame.state(frame.event(entry.id).state);
         const bool compute = t == 0x35 || t == 0x36;
-        for (unsigned stage = compute ? 5 : 0; stage < (compute ? 6u : 5u); ++stage)
-            if (s.stages[stage].shader)
-                for (auto view : s.stages[stage].srv)
-                    add(view);
+        for (unsigned stage = compute ? 5 : 0; stage < (compute ? 6u : 5u); ++stage) {
+            const auto &binding = s.stages[stage];
+            if (binding.shader) {
+                auto used = shaderSrvDeclarations(frame.shader(frame.resource(binding.shader).data));
+                if (binding.classCount)
+                    used.fill(true);
+                for (size_t slot = 0; slot < binding.srv.size(); ++slot)
+                    if (used[slot])
+                        add(binding.srv[slot]);
+            }
+        }
         for (auto view : compute ? s.csUav : s.rtv)
             add(view);
         if (!compute) {

@@ -1,9 +1,11 @@
 #include "SyntheticCapture.h"
 #include "application/ApiCommands.h"
 #include "application/FrameValidation.h"
+#include "core/Dxbc.h"
 #include "core/ResourceLod.h"
 #include <QTemporaryDir>
 #include <QtTest>
+#include <d3dcompiler.h>
 using namespace flora;
 using namespace flora::testing;
 namespace {
@@ -32,6 +34,147 @@ void copy(const Frame &frame, const QString &path, Id edited, const std::vector<
 class ResourceLodTests final : public QObject {
     Q_OBJECT
   private slots:
+    void compiledSrvDeclarations() {
+        const std::string source =
+            "Texture2D<float4> tex:register(t3); ByteAddressBuffer raw:register(t5);"
+            "StructuredBuffer<uint> structured:register(t127); RWStructuredBuffer<uint> dst:register(u0);"
+            "[numthreads(1,1,1)] void "
+            "main(){dst[0]=asuint(tex.Load(int3(0,0,0)).x)^raw.Load(0)^structured[0];}";
+        Com<ID3DBlob> code, errors, stripped;
+        check(D3DCompile(source.data(), source.size(), nullptr, nullptr, nullptr, "main", "cs_5_0", 0, 0,
+                         &code, &errors),
+              "Compile declaration counterexample");
+        check(D3DStripShader(code->GetBufferPointer(), code->GetBufferSize(),
+                             D3DCOMPILER_STRIP_REFLECTION_DATA, &stripped),
+              "Strip declaration counterexample");
+        for (auto blob : {code.Get(), stripped.Get()}) {
+            auto used = shaderSrvDeclarations(
+                Bytes(static_cast<const uint8_t *>(blob->GetBufferPointer()), blob->GetBufferSize()));
+            QCOMPARE(std::count(used.begin(), used.end(), true), 3);
+            QVERIFY(used[3] && used[5] && used[127]);
+        }
+    }
+    void shaderUsage_data() {
+        QTest::addColumn<int>("mode");
+        QTest::addColumn<bool>("warp");
+        for (int mode = 0; mode < 10; ++mode)
+            for (bool warp : {false, true})
+                QTest::newRow(qPrintable(QString("usage-%1-%2").arg(mode).arg(warp ? "warp" : "hardware")))
+                    << mode << warp;
+    }
+    void shaderUsage() {
+        QFETCH(int, mode);
+        QFETCH(bool, warp);
+        const auto root = qEnvironmentVariable("FLORA_MINLOD_USAGE");
+        if (root.isEmpty())
+            QSKIP("Set original LOD shader usage captures");
+        const auto folder = root + QString("/%1/").arg(mode);
+        Frame frame((folder + "capture.gpa_frame").toStdWString());
+        const auto audit = auditResourceLod(frame);
+        QVERIFY(audit.initial.empty());
+        QVERIFY(audit.records.empty());
+        QVERIFY(!audit.clamped.empty());
+        const bool sampled = mode == 4 || mode == 5 || mode == 8;
+        const auto validation = validateFrame(frame.path());
+        QCOMPARE(validation["errors"].get<int>(), sampled ? 1 : 0);
+        QCOMPARE(audit.issues.size(), sampled ? size_t(1) : size_t(0));
+        std::vector<Id> draws;
+        Id ps = 0;
+        for (const auto &[id, entry] : frame.entries())
+            if (entry.category == 7 && isDraw(entry.type)) {
+                draws.push_back(id);
+                ps = frame.state(frame.event(id).state).stages[4].shader;
+            }
+        QVERIFY(!draws.empty());
+        if (sampled)
+            QCOMPARE(audit.issues.front().event, draws.back());
+        ReplayOptions options;
+        options.warp = warp;
+        Replay replay(frame, options);
+        for (int repeat = 0; repeat < 2; ++repeat) {
+            if (sampled) {
+                try {
+                    replay.run();
+                    QFAIL("Missing sampled LOD must not be fabricated");
+                } catch (const std::runtime_error &e) {
+                    QVERIFY(
+                        QString::fromUtf8(e.what()).contains(QString("Event %1 (Draw)").arg(draws.back())));
+                    QVERIFY(QString::fromUtf8(e.what()).contains("initial minimum LOD is unresolved"));
+                }
+            } else {
+                replay.run();
+                QCOMPARE(replay.output().rgba, bytes(folder + "native/expected.rgba"));
+            }
+        }
+        // Replay decisions must follow the actual replacement shader, not the
+        // original capture's reflection or the offline preflight result.
+        if (mode == 3 || mode == 5) {
+            options.shaders[ps] =
+                bytes(root + (mode == 3 ? "/4/native/sampled.dxbc" : "/3/native/constant.dxbc"));
+            Replay experiment(frame, options);
+            if (mode == 3)
+                QVERIFY_THROWS_EXCEPTION(std::runtime_error, experiment.run());
+            else {
+                experiment.run();
+                QCOMPARE(experiment.output().rgba, bytes(root + "/3/native/expected.rgba"));
+            }
+        }
+    }
+    void shaderDeclarationBounds() {
+        const auto root = qEnvironmentVariable("FLORA_MINLOD_USAGE");
+        if (root.isEmpty())
+            QSKIP("Set original LOD shader usage captures");
+        const auto source = bytes(root + "/4/native/sampled.dxbc");
+        const auto used = shaderSrvDeclarations(source);
+        QVERIFY(used[0]);
+        QCOMPARE(std::count(used.begin(), used.end(), true), 1);
+        const auto none = shaderSrvDeclarations(bytes(root + "/3/native/constant.dxbc"));
+        QCOMPARE(std::count(none.begin(), none.end(), true), 0);
+        for (size_t length = 0; length < source.size(); ++length)
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error, shaderSrvDeclarations(Bytes(source).first(length)));
+        auto parts = readDxbcParts(source);
+        auto found =
+            std::find_if(parts.begin(), parts.end(), [](const auto &p) { return p.first == 0x58454853; });
+        QVERIFY(found != parts.end());
+        const auto original = readDxbcProgram(found->second);
+        auto declared = std::find_if(original.instructions.begin(), original.instructions.end(),
+                                     [](const auto &r) { return (r[0] & 0x7ff) == 88; });
+        QVERIFY(declared != original.instructions.end());
+        const auto index = size_t(declared - original.instructions.begin());
+        for (int bad = 0; bad < 5; ++bad) {
+            auto changed = original;
+            auto &row = changed.instructions[index];
+            if (bad == 0)
+                row[2] = 128;
+            if (bad == 1)
+                row[1] |= 0x80000000u;
+            if (bad == 2)
+                row[1] ^= 1u << 12; // Wrong operand kind.
+            if (bad == 3)
+                row[1] |= 1u << 22; // Non-immediate index.
+            if (bad == 4)
+                row.pop_back();
+            const auto program = writeDxbcProgram(changed);
+            found->second = program;
+            const auto rebuilt = makeDxbc(parts);
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error, shaderSrvDeclarations(rebuilt));
+        }
+        auto future = original;
+        future.header[0] = (future.header[0] & 0xffff0000) | 0x51;
+        const auto futureBytes = writeDxbcProgram(future);
+        found->second = futureBytes;
+        auto conservative = shaderSrvDeclarations(makeDxbc(parts));
+        QCOMPARE(std::count(conservative.begin(), conservative.end(), true), 128);
+        const auto program = writeDxbcProgram(original);
+        found->second = program;
+        parts.emplace_back(0x45434649, Bytes{});
+        conservative = shaderSrvDeclarations(makeDxbc(parts));
+        QCOMPARE(std::count(conservative.begin(), conservative.end(), true), 128);
+        parts.emplace_back(0x52444853, program);
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, shaderSrvDeclarations(makeDxbc(parts)));
+        DxbcParts emptyProgram{{0x58454853, Bytes{}}};
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, shaderSrvDeclarations(makeDxbc(emptyProgram)));
+    }
     void originals_data() {
         QTest::addColumn<int>("mode");
         QTest::addColumn<bool>("warp");

@@ -5,6 +5,25 @@
 > [Documentation](README.md)。`artifacts/`、`out/`、`build/` 及外部参考目录
 > 是未随仓库发布的本地证据位置，不代表克隆后即可访问。
 
+2026-10-04（M2 第二十一批）：修正“绑定即访问”的 LOD 误判。十份未修改原版捕获、
+240 次原生／注入生产程序帧检查，覆盖未使用 PS/VS 槽位、空 PS、剥离反射及
+前后切换着色器。旧版五份成功重放文件仍预检误报，剥离常量 PS 被运行时误拒绝；
+晚采样文件还误标记了不采样的首个 Draw。现在从可执行声明读取 SRV 槽位，
+运行时按实际原生 Shader 身份及视图检查，替换实验使用替换后的声明。
+七份不依赖未知 LOD 的文件通过，三份真正采样的文件仍拒绝并定位实际 Draw；
+没有恢复或默认补零缺失状态，没有自动改写 Shader。原版二十次对照：七份与
+生产程序一致，三份保留 mip 0 差异，未宣称设备／配置等价。
+
+最终 332 份登记：328 正向、四份缺失状态对照。656 次正向重放，327 份稳定、
+Helldivers 保留已知波动；320 份既有稳定哈希全部不变。353 次诊断对照、
+208 次资源导出（204 严格字节黄金＋4 Helldivers 诊断）、37 套 CTest 和四项
+黄金／负对照通过。LOD 51 项、Qt/Worker 56 项均无跳过，包含替换 Shader、
+截断／非法操作数、独立编译 typed/raw/structured 声明与保守回退反例。
+UAV/RTV/DSV、接口资源偏移、分支非使用及非零 LOD 完整存储仍有边界。
+详见 [MIN_LOD_USAGE_AUDIT.md](MIN_LOD_USAGE_AUDIT.md) 与
+[min-lod-usage-baseline.json](min-lod-usage-baseline.json)。
+M2–M6 和 72/117/15 模块状态不变。
+
 2026-10-04（M2 第二十批）：实现 Context4 SetResourceMinLOD (`0x3515`) 和
 GetResourceMinLOD (`0x3516`) 的完整字段检查与原生 setter。首次 getter 可在已解释、
 无先前 setter 的记录前缀中证明初始值；帧内创建单独采用原生默认值，ClearState

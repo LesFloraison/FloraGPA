@@ -161,6 +161,7 @@ class Replay {
     const Frame &frame_;
     std::optional<ResourceLodAudit> resourceLodAudit_;
     std::map<Id, float> resourceLods_;
+    std::map<IUnknown *, std::array<bool, 128>> resourceLodShaderSrvs_;
     void requireResourceLod(Id resource) const;
     void requireBoundResourceLods(bool compute);
     std::optional<MapRecordAudit> mapRecordAudit_;

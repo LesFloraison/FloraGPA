@@ -96,6 +96,12 @@ Com<IUnknown> Replay::createCapturedShader(Id id, uint16_t t, Bytes data, Id lin
         break;
     }
 #undef CREATE_SHADER
+    if (resourceLodAudit_ && !resourceLodAudit_->clamped.empty()) {
+        Com<IUnknown> identity;
+        check(result.As(&identity), "Shader LOD identity");
+        resourceLodShaderSrvs_[identity.Get()] =
+            passthrough ? std::array<bool, 128>{} : shaderSrvDeclarations(data);
+    }
     return result;
 }
 namespace {

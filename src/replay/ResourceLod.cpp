@@ -34,13 +34,36 @@ void Replay::requireBoundResourceLods(bool compute) {
         &ID3D11DeviceContext::DSGetShaderResources, &ID3D11DeviceContext::GSGetShaderResources,
         &ID3D11DeviceContext::PSGetShaderResources, &ID3D11DeviceContext::CSGetShaderResources};
     for (unsigned stage = compute ? 5 : 0; stage < (compute ? 6u : 5u); ++stage) {
+        Com<IUnknown> shader;
+        UINT classes = 0;
+#define LOD_SHADER(Stage, Type, GetShader)                                                                   \
+    case Stage: {                                                                                            \
+        Com<Type> current;                                                                                   \
+        context_->GetShader(&current, nullptr, &classes);                                                    \
+        if (current)                                                                                         \
+            check(current.As(&shader), "Bound LOD shader");                                                  \
+        break;                                                                                               \
+    }
+        switch (stage) {
+            LOD_SHADER(0, ID3D11VertexShader, VSGetShader);
+            LOD_SHADER(1, ID3D11HullShader, HSGetShader);
+            LOD_SHADER(2, ID3D11DomainShader, DSGetShader);
+            LOD_SHADER(3, ID3D11GeometryShader, GSGetShader);
+            LOD_SHADER(4, ID3D11PixelShader, PSGetShader);
+            LOD_SHADER(5, ID3D11ComputeShader, CSGetShader);
+        }
+#undef LOD_SHADER
+        if (!shader)
+            continue;
+        const auto usage = resourceLodShaderSrvs_.find(shader.Get());
         std::array<ID3D11ShaderResourceView *, 128> raw{};
         std::array<Com<ID3D11ShaderResourceView>, 128> owned;
         (context_.Get()->*getters[stage])(0, 128, raw.data());
         for (size_t i = 0; i < raw.size(); ++i)
             owned[i].Attach(raw[i]);
-        for (auto view : raw)
-            checkView(view);
+        for (size_t slot = 0; slot < raw.size(); ++slot)
+            if (classes || usage == resourceLodShaderSrvs_.end() || usage->second[slot])
+                checkView(raw[slot]);
     }
     std::array<ID3D11UnorderedAccessView *, 64> raw{};
     std::array<Com<ID3D11UnorderedAccessView>, 64> owned;

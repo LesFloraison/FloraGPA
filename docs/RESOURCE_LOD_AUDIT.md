@@ -1,5 +1,8 @@
 # M2: resource minimum LOD replay
 
+> Unused static SRV checks are superseded by the [shader usage audit](MIN_LOD_USAGE_AUDIT.md).
+> This batch's baseline remains unchanged. UAV/output/interface and storage limits still apply.
+
 The immediate Context4 records `SetResourceMinLOD` (`0x3515`) and
 `GetResourceMinLOD` (`0x3516`) now have checked decoding. The setter calls the
 native DX11 API at its captured event. Getters retain captured observations;

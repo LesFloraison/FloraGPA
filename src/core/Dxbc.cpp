@@ -1,6 +1,51 @@
 #include "Dxbc.h"
 #include <bit>
 namespace flora {
+std::array<bool, 128> shaderSrvDeclarations(Bytes bytes) {
+    std::array<bool, 128> used{};
+    auto unknown = [&] {
+        used.fill(true);
+        return used;
+    };
+    Bytes code;
+    bool interfaces = false, hasCode = false;
+    for (const auto &[tag, body] : readDxbcParts(bytes)) {
+        interfaces |= tag == 0x45434649; // IFCE: class resource offsets are runtime state.
+        if (tag == 0x52444853 || tag == 0x58454853) {
+            if (hasCode)
+                throw std::runtime_error("Ambiguous DXBC executable chunks");
+            hasCode = true;
+            code = body;
+        }
+    }
+    if (!hasCode)
+        return unknown();
+    const auto program = readDxbcProgram(code);
+    const auto version = program.header[0] & 0xffff;
+    if (interfaces || (version != 0x40 && version != 0x41 && version != 0x50) ||
+        (program.header[0] >> 16) > 5)
+        return unknown();
+    for (const auto &row : program.instructions) {
+        const auto op = row[0] & 0x7ff;
+        if (op == 120 || op == 144 || op == 145 || op == 146)
+            return unknown(); // Interface calls / function bodies / tables / interfaces.
+        if (op != 88 && op != 161 && op != 162)
+            continue;
+        // DCL_RESOURCE, DCL_RESOURCE_RAW, DCL_RESOURCE_STRUCTURED in SM4/5:
+        // opcode, one immediate t-register operand, index, optional return/stride.
+        const size_t length = op == 161 ? 3 : 4;
+        if (row.size() != length || (row[0] & 0x80000000u))
+            throw std::runtime_error("Unsupported DXBC SRV declaration length/extension");
+        const auto operand = row[1];
+        if ((operand & 0x80000000u) || ((operand >> 12) & 255) != 7 || ((operand >> 20) & 3) != 1 ||
+            ((operand >> 22) & 7) != 0)
+            throw std::runtime_error("Unsupported DXBC SRV declaration operand");
+        if (row[2] >= used.size())
+            throw std::runtime_error("DXBC SRV declaration exceeds slot limit");
+        used[row[2]] = true;
+    }
+    return used;
+}
 DxbcParts readDxbcParts(Bytes bytes) {
     Reader r(bytes);
     if (r.read<uint32_t>() != 0x43425844)
