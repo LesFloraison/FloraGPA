@@ -1,6 +1,6 @@
 # FloraGPA
 
-<img src="assets/icons/FloraGPA.svg" alt="FloraGPA icon" width="96" height="96">
+<img src="docs/images/floragpa-title.png" alt="FloraGPA" width="960">
 
 An independent Windows x64 DX11 single-frame replay and analysis tool,
 built with C++20, Visual Studio 2022 and Qt 6 Widgets.
@@ -29,6 +29,16 @@ Support depends on the recorded layout, saved resource data, command path and
 device capabilities. See [current support and limits](docs/CURRENT_STATUS.md)
 for the capability matrix and evidence; module migration totals are not a
 percentage of original GPA functionality.
+
+## Screenshots
+
+**Girls' Frontline 2 — replay, resource inspection and GPU metrics**
+
+![FloraGPA workspace showing a Girls' Frontline 2 capture](docs/images/gf2-workspace.png)
+
+**Battlefield 1 — frame output and API event navigation**
+
+![FloraGPA workspace showing a Battlefield 1 capture](docs/images/bf1-workspace.png)
 
 ## Build
 
