@@ -128,7 +128,7 @@ void Replay::pipelineCreation(const Entry &entry) {
         return;
     }
     if (!c.note.empty()) {
-        ++counts["unmaterialized_layout_creations"];
+        ++counts[c.type == 0x3580 ? "unmaterialized_layout_creations" : "unmaterialized_so_creations"];
         return;
     }
     Com<IUnknown> created;
@@ -210,9 +210,11 @@ void Replay::pipelineCreation(const Entry &entry) {
               "Captured input layout creation");
         created = layout;
     } else {
-        created = createCapturedShader(c.resource, pipelineCreatedType(c.type), c.bytecode, c.linkage, 0);
+        created = createCapturedShader(c.resource, pipelineCreatedType(c.type), c.bytecode, c.linkage,
+                                       c.streamOutputId);
         if (auto it = options_.shaders.find(c.resource); it != options_.shaders.end())
-            created = createCapturedShader(c.resource, pipelineCreatedType(c.type), it->second, c.linkage, 0);
+            created = createCapturedShader(c.resource, pipelineCreatedType(c.type), it->second, c.linkage,
+                                           c.streamOutputId);
     }
     objects_.insert_or_assign(c.resource, created);
     ++counts[commandName(c.type)];

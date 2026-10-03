@@ -1,0 +1,627 @@
+{
+  "schema": "FloraGPA geometry stage creation acceptance 1",
+  "completion": "M2 in progress; M3-M6 incomplete",
+  "scope": "Device5 GS/HS/DS and GS-with-SO creation, full saved SO strides and semantic strings, explicit unmaterialized SO diagnostics",
+  "package": "out\\FloraGPA-geometry-creation-20261003",
+  "package_sha256": {
+    "FloraGPA.exe": "532b4b52389eb7e3c20d9329d3836075539b4e729329a4d44722b65ebcf7015d",
+    "FloraGPA.Cli.exe": "2b575085285f8ca63ca86e6f4bebe9ae06d9b25d495bf67e8266abd6e9c83729",
+    "FloraGPA.Worker.exe": "f034185352c33c8075831877618bd29981671810da2745cd0b51f96916faa839",
+    "FloraGPA.Rdc.exe": "f4d21d43e661d24d392e91fc1a1f1460a20d1377fcf5075c57083ad289e82773",
+    "FloraGPA.Metrics.dll": "58b6278f2a93e783b1e8bb1290e9b0e51745f1a36825f296584f52159fd7c6db"
+  },
+  "native_runs": 462,
+  "file_outcomes": {
+    "repeat_stable": 230,
+    "repeat_variable": 1
+  },
+  "prior_stable_images_unchanged": 210,
+  "corpus_controls": 227,
+  "boundary_runs": 88,
+  "new_original_player_runs": 40,
+  "producer_frame_checks": 480,
+  "hardware_warp_original_creation_runs": 40,
+  "golden_controls": [
+    {
+      "case": "gf2",
+      "rgba_sha256": "2e1abc5eacb0bbfd801f9fe059c305baa9a0786c384b36a42fa5a323dd979fd1",
+      "passed": true,
+      "counts": {
+        "ClearDepthStencilView": 2,
+        "ClearRenderTargetView": 1,
+        "CreateBuffer": 2,
+        "DrawIndexed": 72,
+        "Map": 44,
+        "Present": 1,
+        "buffers_created_without_initial_data": 2,
+        "object_observation_records": 49,
+        "pipeline_setter_records": 142,
+        "private_data_observations": 4,
+        "query_metadata_records": 2,
+        "state_or_auxiliary_records": 551,
+        "unmap_observations": 44
+      }
+    },
+    {
+      "case": "gf2-negative",
+      "rgba_sha256": "b2c5548a51715f581c4591acc266ac7a0c65b54b7ecd9a49f43499fa9b76c5f1",
+      "passed": true,
+      "counts": {
+        "ClearDepthStencilView": 2,
+        "ClearRenderTargetView": 1,
+        "CreateBuffer": 2,
+        "Map": 44,
+        "Present": 1,
+        "buffers_created_without_initial_data": 2,
+        "object_observation_records": 49,
+        "pipeline_setter_records": 142,
+        "private_data_observations": 4,
+        "query_metadata_records": 2,
+        "state_or_auxiliary_records": 551,
+        "unmap_observations": 44
+      }
+    },
+    {
+      "case": "bf1",
+      "rgba_sha256": "1f724d1840652f66afd26dd30c95aecd5c1b4932eede56109198f15a8f57a2f6",
+      "passed": true,
+      "counts": {
+        "ClearDepthStencilView": 10,
+        "ClearRenderTargetView": 10,
+        "ClearUnorderedAccessViewFloat": 1,
+        "CopyResource": 2,
+        "CopyStructureCount": 6,
+        "CopySubresourceRegion": 7,
+        "Dispatch": 60,
+        "DispatchIndirect": 13,
+        "Draw": 79,
+        "DrawIndexed": 41,
+        "DrawIndexedInstanced": 1053,
+        "DrawInstanced": 29,
+        "GenerateMips": 2,
+        "Map": 4151,
+        "Present": 1,
+        "UpdateSubresource": 27,
+        "map_read_observations": 2,
+        "object_observation_records": 28,
+        "pipeline_setter_records": 2221,
+        "query_metadata_records": 17,
+        "state_or_auxiliary_records": 7354,
+        "unmap_observations": 4153,
+        "unresolved_input_layout_setters": 2,
+        "unresolved_output_setters": 6,
+        "unresolved_shader_setters": 4,
+        "unresolved_srv_setters": 2
+      }
+    },
+    {
+      "case": "bf1-negative",
+      "rgba_sha256": "cd3a3066f984b1c317fbeefec2836503f32078321d3dc1f367465f2c06d435bf",
+      "passed": true,
+      "counts": {
+        "ClearDepthStencilView": 10,
+        "ClearRenderTargetView": 10,
+        "ClearUnorderedAccessViewFloat": 1,
+        "CopyResource": 2,
+        "CopyStructureCount": 6,
+        "CopySubresourceRegion": 7,
+        "Dispatch": 60,
+        "DispatchIndirect": 13,
+        "GenerateMips": 2,
+        "Map": 4151,
+        "Present": 1,
+        "UpdateSubresource": 27,
+        "map_read_observations": 2,
+        "object_observation_records": 28,
+        "pipeline_setter_records": 2221,
+        "query_metadata_records": 17,
+        "state_or_auxiliary_records": 7354,
+        "unmap_observations": 4153,
+        "unresolved_input_layout_setters": 2,
+        "unresolved_output_setters": 6,
+        "unresolved_shader_setters": 4,
+        "unresolved_srv_setters": 2
+      }
+    }
+  ],
+  "results": {
+    "corpus": {
+      "path": "artifacts\\m2-geometry-creation-release-corpus\\validation.json",
+      "sha256": "0d0d03ee36c2ad044f3430b879ddad1ff9de0135e295aba8eb43f25e479b7b4c",
+      "counts": {
+        "repeat_stable": 90,
+        "repeat_variable": 1
+      }
+    },
+    "originals": {
+      "path": "artifacts\\m2-geometry-creation-release-originals\\validation.json",
+      "sha256": "0c1a5c852d2c564a6a8cf65efe4724c9e41d76ae34ec08027411791767911290",
+      "counts": {
+        "repeat_stable": 11
+      }
+    },
+    "copy": {
+      "path": "artifacts\\m2-geometry-creation-release-copy\\validation.json",
+      "sha256": "556398d12b527454ce78fbb46b3abe00ad642e374fd70779f370135024b4036c",
+      "counts": {
+        "repeat_stable": 6
+      }
+    },
+    "present": {
+      "path": "artifacts\\m2-geometry-creation-release-present\\validation.json",
+      "sha256": "74a21124573fb7a1b7ebf8048a2388b97c51dbf185a16f683bb5f9d03e479775",
+      "counts": {
+        "repeat_stable": 5
+      }
+    },
+    "buffer": {
+      "path": "artifacts\\m2-geometry-creation-release-buffer\\validation.json",
+      "sha256": "8d942512c011bceea8c1c89781e6c6e4e3c9494306f619542e621e35f8d727a3",
+      "counts": {
+        "repeat_stable": 5
+      }
+    },
+    "pipeline": {
+      "path": "artifacts\\m2-geometry-creation-release-pipeline\\validation.json",
+      "sha256": "710c04c9a2a5a6bae84ff454df79206a1eb21a785409fdc8cc4cf54e91a9fee3",
+      "counts": {
+        "repeat_stable": 5
+      }
+    },
+    "creation": {
+      "path": "artifacts\\m2-geometry-creation-release-creation\\validation.json",
+      "sha256": "3dc5fcbb5dc85583ac4835589838536ca2dc77c8828d39b82d40915c59a485f8",
+      "counts": {
+        "repeat_stable": 7
+      }
+    },
+    "discovery": {
+      "path": "artifacts\\m2-geometry-creation-release-discovery\\validation.json",
+      "sha256": "f08e94632669243f7f7b1050858eef620fe63e7efde7f4192a8a4440ed450e72",
+      "counts": {
+        "repeat_stable": 1
+      }
+    },
+    "dimensions": {
+      "path": "artifacts\\m2-geometry-creation-release-dimensions\\validation.json",
+      "sha256": "ff34567ad102597ce41c3924049c312c414aab5b0b365fd1f0486c4a459ed611",
+      "counts": {
+        "repeat_stable": 17
+      }
+    },
+    "views": {
+      "path": "artifacts\\m2-geometry-creation-release-views\\validation.json",
+      "sha256": "f9e1418ef387f1f52734d1bca40c471c9615322736118b20d046f81b68ca5f5f",
+      "counts": {
+        "repeat_stable": 12
+      }
+    },
+    "buffer-views": {
+      "path": "artifacts\\m2-geometry-creation-release-buffer-views\\validation.json",
+      "sha256": "bb336d2c39f9639697d8496d9dd59be00dd9bfaff5cb20f88098e030c432b5f1",
+      "counts": {
+        "repeat_stable": 19
+      }
+    },
+    "pipeline-creation": {
+      "path": "artifacts\\m2-geometry-creation-release-pipeline-creation\\validation.json",
+      "sha256": "c76f817a238c8fc8aa2c4ed8ebafafffc039b451ba553acbd02e95dedf820f09",
+      "counts": {
+        "repeat_stable": 32
+      }
+    },
+    "geometry-creation": {
+      "path": "artifacts\\m2-geometry-creation-release-geometry-creation\\validation.json",
+      "sha256": "d5363b7e4f37e4134e535a8ef010124756d5c5e559f809b885d5b7741c662e1a",
+      "counts": {
+        "repeat_stable": 20
+      }
+    }
+  },
+  "ctest": {
+    "path": "artifacts/ctest-m2-geometry-creation.log",
+    "sha256": "fb27ca652339dc4d27485e4344685a65b630e0d915e035865fd0df3d05ea3c34",
+    "suites": 28,
+    "geometry_binding_rerun": {
+      "path": "artifacts/ctest-geometry-bindings.log",
+      "sha256": "7059fbe993c2b19a9c3764a0095f6071abe64fe1131ecb158fb7bd408f5e3c3f",
+      "scope": "45 cases, including native bound GS/HS/DS identity after Draw on hardware and WARP"
+    },
+    "qt_details": {
+      "geometry-creation": {
+        "path": "build\\vs2022\\geometry-creation-Release.txt",
+        "sha256": "3c111e5636705d9cba34dba5065bd8f523426013cf183a803e9d0d5ba2f73938",
+        "cases": 45
+      },
+      "class-linkage": {
+        "path": "build\\vs2022\\class-linkage-Release.txt",
+        "sha256": "bdee840ea407aa8157591bb4e8344c3a11cd3954c4cc437c3d8bca91f6c2ef8d",
+        "cases": 10
+      },
+      "pipeline-creation": {
+        "path": "build\\vs2022\\pipeline-creation-Release.txt",
+        "sha256": "fb30a16f39f532557627595995cb32d2692c4674c6a8529e54502b81539c8121",
+        "cases": 70
+      },
+      "buffer-view-creation": {
+        "path": "build\\vs2022\\buffer-view-creation-Release.txt",
+        "sha256": "200ce5693ad997ce11e16dd62b8f0fa9ad860c53030ad9b7e2702c5214bbbbae",
+        "cases": 42
+      },
+      "view-creation": {
+        "path": "build\\vs2022\\view-creation-Release.txt",
+        "sha256": "be98f49ea3f5841b0eac349ab55a231d974512a6f452aa00e741779721548660",
+        "cases": 32
+      },
+      "texture-creation": {
+        "path": "build\\vs2022\\texture-creation-Release.txt",
+        "sha256": "a0bf1a6732ec197b47e7c25202b7a71967ac4ac10ddef4a783b7c946460227d6",
+        "cases": 55
+      },
+      "ui": {
+        "path": "build\\vs2022\\ui-Release.txt",
+        "sha256": "0f2c1a4e01dc9323984d3450163e9a7a67918e946dae1898307302d2f7e797a1",
+        "cases": 55
+      },
+      "texture-edit-replay": {
+        "path": "build\\vs2022\\texture-edit-replay-Release.txt",
+        "sha256": "61d6940bf948f657fba18f24979c3d9e6c6d74ece8ea7110fd0f73a6d7b139a1",
+        "cases": 34
+      }
+    }
+  },
+  "sources": {
+    "tools/native/geometry_creation_probe.cpp": "e9e1ffad88ab98b21ef2a34ecfd6443c8c392475d4ad249cc60a0006d2eb9024",
+    "tests/GeometryCreationTests.cpp": "3f7a77c30ea9e35ee51673afc25704e01e7827c7e9d573d216907853460b2b6d",
+    "src/core/PipelineCreation.cpp": "bbc58e42a0624f730fd7f54e70ce92811e02f4be4e9b680fdea7f3a775089a63",
+    "src/core/PipelineCreation.h": "32952207bef9e7e790780795cab046f7f638f6431c49916b98694ad1c5c596e4",
+    "src/replay/PipelineCreation.cpp": "b82759db625be98c0bb4135332bcb4490d3a5a150265a0b3e28d36ce55f45e93",
+    "tests/PipelineCreationTests.cpp": "275a4b74c77496387b6ab0170a149f55a5bdfd31a36991b5f9827aa6ef57bade",
+    "tests/ClassLinkageTests.cpp": "224af0b602c737d20b22b57d8755c8d6161675f015816ac4728411562b19e92b",
+    "tools/native/pipeline_creation_probe.cpp": "16c8be8306839383f3336c0ce1258946573575096f3baba27b76339de7c5d3a0",
+    "src/core/TextureCreation.cpp": "d1e4f432623abbe6e92f24835418712b78d840a95aed4182c6496e1dffaff968",
+    "src/core/TextureCreation.h": "36ef4d1e15123303e8623ac3e4e370d1ca73d3b6180191ee7a4cd15a16a279e8",
+    "src/application/ApiCommands.cpp": "877e61abbdb4c73601466aa38b33d89355d411919e31777d8b27beba051849fc",
+    "src/application/FrameValidation.cpp": "8279855a8a33103ed1d4ec7cd08b7799583842a6bdb725e0fad58cb7678677fd",
+    "src/core/ReplayCapabilities.cpp": "0404bb7eeb84f9008ae21338ddde972f20faa36b6d9afecae43a2141769640b6",
+    "src/core/CommandNames.inc": "4d664aabfcd7c666655e25cde7f04887ad20d3ffc5cda139cb28c29a7cc9554d",
+    "src/replay/Replay.cpp": "a6b92cd73cf58dcaa73b4ba521ab6a24a97a0d3b55ff800575f852416e60b56d",
+    "src/replay/Replay.h": "8d2535c2f62b0865e507d72065cf9709b9d96a93943dd1c645a18e247cb73b6f",
+    "tests/TextureCreationTests.cpp": "b13daad41d1e879936c95e8a25cb83020b1d7a3cded44eb8ee9d1eda997c88fb",
+    "tests/ViewCreationTests.cpp": "a15e68efc4bfddadc74302574f4626e2a72daa06f6ff627217bedbd74978e5e9",
+    "tests/BufferViewCreationTests.cpp": "ea1c45be4d1bdb1a713c549954b3ec876b778a63fe2df2eb516efaf299eaaeb3",
+    "src/replay/UavCounters.cpp": "6f6fcad030c94f7525d89fb4ae2fffe710bd3e785cd7567c8a7e920dfb537055",
+    "tools/native/view_creation_probe.cpp": "a812ae2877d211d23d4b859e2aabad8c498483b7266938ba825726d07b90ef1e",
+    "tools/native/buffer_view_creation_probe.cpp": "0935d7a436c2b31513632af21e961767733d8d0d4a507a672c77360d5edcfe24",
+    "tools/native/texture_creation_probe.cpp": "2c825ccee1b698d2be2090f00b1a4b05305e839cd2008e9f8e0baa2007d89c8d",
+    "tools/native/texture_probe_helpers.h": "30abcac380d84d505fd344d4083d97300f50df5b2e5cc7dffb11ea03c6d6ee3d",
+    "tools/native/texture_copy_probe.cpp": "9713f07b873a1700bae72e6397c7189e3b2325ea076de3aaff8fe0fa64cde1cb",
+    "tools/native/present_capture_probe.cpp": "7c29f1e572ab16a5bc497d39eef8198d79056877a9e1d3fff3f7ed530a32c4e3",
+    "CMakeLists.txt": "188202db1914bf9bfca9b4bd328a884b7b3f3880a083ecb1ed51ad766e21b51c"
+  },
+  "evidence": {
+    "artifacts/m2-geometry-creation-wrappers.c": "16cdb5b5cd986c56030d9fb5d97a9de12a9628ca294069bd5b29dc662de88921",
+    "artifacts/m2-geometry-creation-ghidra.log": "ae631bb35663d7cf70181efb51a17f4b6719f2a60e9a19df8d3f93ab57e1d218",
+    "artifacts/m2-geometry-creation-string-rvas.json": "861783d11534f410f1dab6f861d6f93750a7883ba52c2b6c54fdfe4e0adf1feb",
+    "artifacts/m2-geometry-creation-originals/manifest.json": "fbb46b7093ffc259401dc2b4ef5b35dd8f7fbe6a1aba3050cac2d96f045d6184",
+    "artifacts/m2-geometry-creation-before/validation.json": "90981bccbf55b12d471b61a014135971d80976370653f37825bb3a21aa61f03e"
+  },
+  "limits": [
+    "Original player adapter unidentified; observed image equality is not matched-device equivalence",
+    "Frame-before counter recovery, other device layouts, identity versioning and deferred execution remain incomplete",
+    "These fixtures do not certify all formats/usages/sample counts",
+    "Known Helldivers variability unchanged; missing contents are not synthesized",
+    "Unused SO creations without a saved declaration cannot recover semantic strings and additional strides; required state/runtime use rejected",
+    "Class-linkage creation, extended device layouts, identity versioning and deferred execution remain incomplete",
+    "Original fixtures exercise two output slots, stream zero, GS and VS passthrough; other SO declaration combinations are not certified"
+  ],
+  "so_oracles": {
+    "artifacts\\m2-geometry-creation-originals\\30\\native\\buffer0.bin": {
+      "sha256": "34f75fc6a7a5c7d38b32fba28ba4728764f42f4a96c326cb01d54be2c2efd6e1",
+      "bytes": 48,
+      "stride": 16
+    },
+    "artifacts\\m2-geometry-creation-originals\\30\\native\\buffer1.bin": {
+      "sha256": "914caa97c31ac7e31986867d31a244289ddb35445734a0660fda65fa5e9fbf0d",
+      "bytes": 60,
+      "stride": 20
+    },
+    "artifacts\\m2-geometry-creation-originals\\30\\captured\\buffer0.bin": {
+      "sha256": "34f75fc6a7a5c7d38b32fba28ba4728764f42f4a96c326cb01d54be2c2efd6e1",
+      "bytes": 48,
+      "stride": 16
+    },
+    "artifacts\\m2-geometry-creation-originals\\30\\captured\\buffer1.bin": {
+      "sha256": "914caa97c31ac7e31986867d31a244289ddb35445734a0660fda65fa5e9fbf0d",
+      "bytes": 60,
+      "stride": 20
+    },
+    "artifacts\\m2-geometry-creation-originals\\31\\native\\buffer0.bin": {
+      "sha256": "34f75fc6a7a5c7d38b32fba28ba4728764f42f4a96c326cb01d54be2c2efd6e1",
+      "bytes": 48,
+      "stride": 16
+    },
+    "artifacts\\m2-geometry-creation-originals\\31\\native\\buffer1.bin": {
+      "sha256": "914caa97c31ac7e31986867d31a244289ddb35445734a0660fda65fa5e9fbf0d",
+      "bytes": 60,
+      "stride": 20
+    },
+    "artifacts\\m2-geometry-creation-originals\\31\\captured\\buffer0.bin": {
+      "sha256": "34f75fc6a7a5c7d38b32fba28ba4728764f42f4a96c326cb01d54be2c2efd6e1",
+      "bytes": 48,
+      "stride": 16
+    },
+    "artifacts\\m2-geometry-creation-originals\\31\\captured\\buffer1.bin": {
+      "sha256": "914caa97c31ac7e31986867d31a244289ddb35445734a0660fda65fa5e9fbf0d",
+      "bytes": 60,
+      "stride": 20
+    },
+    "artifacts\\m2-geometry-creation-originals\\32\\native\\buffer0.bin": {
+      "sha256": "34f75fc6a7a5c7d38b32fba28ba4728764f42f4a96c326cb01d54be2c2efd6e1",
+      "bytes": 48,
+      "stride": 16
+    },
+    "artifacts\\m2-geometry-creation-originals\\32\\native\\buffer1.bin": {
+      "sha256": "914caa97c31ac7e31986867d31a244289ddb35445734a0660fda65fa5e9fbf0d",
+      "bytes": 60,
+      "stride": 20
+    },
+    "artifacts\\m2-geometry-creation-originals\\32\\captured\\buffer0.bin": {
+      "sha256": "34f75fc6a7a5c7d38b32fba28ba4728764f42f4a96c326cb01d54be2c2efd6e1",
+      "bytes": 48,
+      "stride": 16
+    },
+    "artifacts\\m2-geometry-creation-originals\\32\\captured\\buffer1.bin": {
+      "sha256": "914caa97c31ac7e31986867d31a244289ddb35445734a0660fda65fa5e9fbf0d",
+      "bytes": 60,
+      "stride": 20
+    },
+    "artifacts\\m2-geometry-creation-originals\\33\\native\\buffer0.bin": {
+      "sha256": "34f75fc6a7a5c7d38b32fba28ba4728764f42f4a96c326cb01d54be2c2efd6e1",
+      "bytes": 48,
+      "stride": 16
+    },
+    "artifacts\\m2-geometry-creation-originals\\33\\native\\buffer1.bin": {
+      "sha256": "914caa97c31ac7e31986867d31a244289ddb35445734a0660fda65fa5e9fbf0d",
+      "bytes": 60,
+      "stride": 20
+    },
+    "artifacts\\m2-geometry-creation-originals\\33\\captured\\buffer0.bin": {
+      "sha256": "34f75fc6a7a5c7d38b32fba28ba4728764f42f4a96c326cb01d54be2c2efd6e1",
+      "bytes": 48,
+      "stride": 16
+    },
+    "artifacts\\m2-geometry-creation-originals\\33\\captured\\buffer1.bin": {
+      "sha256": "914caa97c31ac7e31986867d31a244289ddb35445734a0660fda65fa5e9fbf0d",
+      "bytes": 60,
+      "stride": 20
+    },
+    "artifacts\\m2-geometry-creation-originals\\40\\native\\buffer0.bin": {
+      "sha256": "34f75fc6a7a5c7d38b32fba28ba4728764f42f4a96c326cb01d54be2c2efd6e1",
+      "bytes": 48,
+      "stride": 16
+    },
+    "artifacts\\m2-geometry-creation-originals\\40\\native\\buffer1.bin": {
+      "sha256": "914caa97c31ac7e31986867d31a244289ddb35445734a0660fda65fa5e9fbf0d",
+      "bytes": 60,
+      "stride": 20
+    },
+    "artifacts\\m2-geometry-creation-originals\\40\\captured\\buffer0.bin": {
+      "sha256": "34f75fc6a7a5c7d38b32fba28ba4728764f42f4a96c326cb01d54be2c2efd6e1",
+      "bytes": 48,
+      "stride": 16
+    },
+    "artifacts\\m2-geometry-creation-originals\\40\\captured\\buffer1.bin": {
+      "sha256": "914caa97c31ac7e31986867d31a244289ddb35445734a0660fda65fa5e9fbf0d",
+      "bytes": 60,
+      "stride": 20
+    },
+    "artifacts\\m2-geometry-creation-originals\\41\\native\\buffer0.bin": {
+      "sha256": "34f75fc6a7a5c7d38b32fba28ba4728764f42f4a96c326cb01d54be2c2efd6e1",
+      "bytes": 48,
+      "stride": 16
+    },
+    "artifacts\\m2-geometry-creation-originals\\41\\native\\buffer1.bin": {
+      "sha256": "914caa97c31ac7e31986867d31a244289ddb35445734a0660fda65fa5e9fbf0d",
+      "bytes": 60,
+      "stride": 20
+    },
+    "artifacts\\m2-geometry-creation-originals\\41\\captured\\buffer0.bin": {
+      "sha256": "34f75fc6a7a5c7d38b32fba28ba4728764f42f4a96c326cb01d54be2c2efd6e1",
+      "bytes": 48,
+      "stride": 16
+    },
+    "artifacts\\m2-geometry-creation-originals\\41\\captured\\buffer1.bin": {
+      "sha256": "914caa97c31ac7e31986867d31a244289ddb35445734a0660fda65fa5e9fbf0d",
+      "bytes": 60,
+      "stride": 20
+    },
+    "artifacts\\m2-geometry-creation-originals\\42\\native\\buffer0.bin": {
+      "sha256": "34f75fc6a7a5c7d38b32fba28ba4728764f42f4a96c326cb01d54be2c2efd6e1",
+      "bytes": 48,
+      "stride": 16
+    },
+    "artifacts\\m2-geometry-creation-originals\\42\\native\\buffer1.bin": {
+      "sha256": "914caa97c31ac7e31986867d31a244289ddb35445734a0660fda65fa5e9fbf0d",
+      "bytes": 60,
+      "stride": 20
+    },
+    "artifacts\\m2-geometry-creation-originals\\42\\captured\\buffer0.bin": {
+      "sha256": "34f75fc6a7a5c7d38b32fba28ba4728764f42f4a96c326cb01d54be2c2efd6e1",
+      "bytes": 48,
+      "stride": 16
+    },
+    "artifacts\\m2-geometry-creation-originals\\42\\captured\\buffer1.bin": {
+      "sha256": "914caa97c31ac7e31986867d31a244289ddb35445734a0660fda65fa5e9fbf0d",
+      "bytes": 60,
+      "stride": 20
+    },
+    "artifacts\\m2-geometry-creation-originals\\43\\native\\buffer0.bin": {
+      "sha256": "34f75fc6a7a5c7d38b32fba28ba4728764f42f4a96c326cb01d54be2c2efd6e1",
+      "bytes": 48,
+      "stride": 16
+    },
+    "artifacts\\m2-geometry-creation-originals\\43\\native\\buffer1.bin": {
+      "sha256": "914caa97c31ac7e31986867d31a244289ddb35445734a0660fda65fa5e9fbf0d",
+      "bytes": 60,
+      "stride": 20
+    },
+    "artifacts\\m2-geometry-creation-originals\\43\\captured\\buffer0.bin": {
+      "sha256": "34f75fc6a7a5c7d38b32fba28ba4728764f42f4a96c326cb01d54be2c2efd6e1",
+      "bytes": 48,
+      "stride": 16
+    },
+    "artifacts\\m2-geometry-creation-originals\\43\\captured\\buffer1.bin": {
+      "sha256": "914caa97c31ac7e31986867d31a244289ddb35445734a0660fda65fa5e9fbf0d",
+      "bytes": 60,
+      "stride": 20
+    }
+  },
+  "replay_so_bytes": {
+    "artifacts\\m2-geometry-creation-byte-oracles\\30-hardware-buffer0.bin": {
+      "sha256": "34f75fc6a7a5c7d38b32fba28ba4728764f42f4a96c326cb01d54be2c2efd6e1",
+      "bytes": 48
+    },
+    "artifacts\\m2-geometry-creation-byte-oracles\\30-hardware-buffer1.bin": {
+      "sha256": "914caa97c31ac7e31986867d31a244289ddb35445734a0660fda65fa5e9fbf0d",
+      "bytes": 60
+    },
+    "artifacts\\m2-geometry-creation-byte-oracles\\30-warp-buffer0.bin": {
+      "sha256": "34f75fc6a7a5c7d38b32fba28ba4728764f42f4a96c326cb01d54be2c2efd6e1",
+      "bytes": 48
+    },
+    "artifacts\\m2-geometry-creation-byte-oracles\\30-warp-buffer1.bin": {
+      "sha256": "914caa97c31ac7e31986867d31a244289ddb35445734a0660fda65fa5e9fbf0d",
+      "bytes": 60
+    },
+    "artifacts\\m2-geometry-creation-byte-oracles\\31-hardware-buffer0.bin": {
+      "sha256": "34f75fc6a7a5c7d38b32fba28ba4728764f42f4a96c326cb01d54be2c2efd6e1",
+      "bytes": 48
+    },
+    "artifacts\\m2-geometry-creation-byte-oracles\\31-hardware-buffer1.bin": {
+      "sha256": "914caa97c31ac7e31986867d31a244289ddb35445734a0660fda65fa5e9fbf0d",
+      "bytes": 60
+    },
+    "artifacts\\m2-geometry-creation-byte-oracles\\31-warp-buffer0.bin": {
+      "sha256": "34f75fc6a7a5c7d38b32fba28ba4728764f42f4a96c326cb01d54be2c2efd6e1",
+      "bytes": 48
+    },
+    "artifacts\\m2-geometry-creation-byte-oracles\\31-warp-buffer1.bin": {
+      "sha256": "914caa97c31ac7e31986867d31a244289ddb35445734a0660fda65fa5e9fbf0d",
+      "bytes": 60
+    },
+    "artifacts\\m2-geometry-creation-byte-oracles\\32-hardware-buffer0.bin": {
+      "sha256": "34f75fc6a7a5c7d38b32fba28ba4728764f42f4a96c326cb01d54be2c2efd6e1",
+      "bytes": 48
+    },
+    "artifacts\\m2-geometry-creation-byte-oracles\\32-hardware-buffer1.bin": {
+      "sha256": "914caa97c31ac7e31986867d31a244289ddb35445734a0660fda65fa5e9fbf0d",
+      "bytes": 60
+    },
+    "artifacts\\m2-geometry-creation-byte-oracles\\32-warp-buffer0.bin": {
+      "sha256": "34f75fc6a7a5c7d38b32fba28ba4728764f42f4a96c326cb01d54be2c2efd6e1",
+      "bytes": 48
+    },
+    "artifacts\\m2-geometry-creation-byte-oracles\\32-warp-buffer1.bin": {
+      "sha256": "914caa97c31ac7e31986867d31a244289ddb35445734a0660fda65fa5e9fbf0d",
+      "bytes": 60
+    },
+    "artifacts\\m2-geometry-creation-byte-oracles\\33-hardware-buffer0.bin": {
+      "sha256": "34f75fc6a7a5c7d38b32fba28ba4728764f42f4a96c326cb01d54be2c2efd6e1",
+      "bytes": 48
+    },
+    "artifacts\\m2-geometry-creation-byte-oracles\\33-hardware-buffer1.bin": {
+      "sha256": "914caa97c31ac7e31986867d31a244289ddb35445734a0660fda65fa5e9fbf0d",
+      "bytes": 60
+    },
+    "artifacts\\m2-geometry-creation-byte-oracles\\33-warp-buffer0.bin": {
+      "sha256": "34f75fc6a7a5c7d38b32fba28ba4728764f42f4a96c326cb01d54be2c2efd6e1",
+      "bytes": 48
+    },
+    "artifacts\\m2-geometry-creation-byte-oracles\\33-warp-buffer1.bin": {
+      "sha256": "914caa97c31ac7e31986867d31a244289ddb35445734a0660fda65fa5e9fbf0d",
+      "bytes": 60
+    },
+    "artifacts\\m2-geometry-creation-byte-oracles\\40-hardware-buffer0.bin": {
+      "sha256": "34f75fc6a7a5c7d38b32fba28ba4728764f42f4a96c326cb01d54be2c2efd6e1",
+      "bytes": 48
+    },
+    "artifacts\\m2-geometry-creation-byte-oracles\\40-hardware-buffer1.bin": {
+      "sha256": "914caa97c31ac7e31986867d31a244289ddb35445734a0660fda65fa5e9fbf0d",
+      "bytes": 60
+    },
+    "artifacts\\m2-geometry-creation-byte-oracles\\40-warp-buffer0.bin": {
+      "sha256": "34f75fc6a7a5c7d38b32fba28ba4728764f42f4a96c326cb01d54be2c2efd6e1",
+      "bytes": 48
+    },
+    "artifacts\\m2-geometry-creation-byte-oracles\\40-warp-buffer1.bin": {
+      "sha256": "914caa97c31ac7e31986867d31a244289ddb35445734a0660fda65fa5e9fbf0d",
+      "bytes": 60
+    },
+    "artifacts\\m2-geometry-creation-byte-oracles\\41-hardware-buffer0.bin": {
+      "sha256": "34f75fc6a7a5c7d38b32fba28ba4728764f42f4a96c326cb01d54be2c2efd6e1",
+      "bytes": 48
+    },
+    "artifacts\\m2-geometry-creation-byte-oracles\\41-hardware-buffer1.bin": {
+      "sha256": "914caa97c31ac7e31986867d31a244289ddb35445734a0660fda65fa5e9fbf0d",
+      "bytes": 60
+    },
+    "artifacts\\m2-geometry-creation-byte-oracles\\41-warp-buffer0.bin": {
+      "sha256": "34f75fc6a7a5c7d38b32fba28ba4728764f42f4a96c326cb01d54be2c2efd6e1",
+      "bytes": 48
+    },
+    "artifacts\\m2-geometry-creation-byte-oracles\\41-warp-buffer1.bin": {
+      "sha256": "914caa97c31ac7e31986867d31a244289ddb35445734a0660fda65fa5e9fbf0d",
+      "bytes": 60
+    },
+    "artifacts\\m2-geometry-creation-byte-oracles\\42-hardware-buffer0.bin": {
+      "sha256": "34f75fc6a7a5c7d38b32fba28ba4728764f42f4a96c326cb01d54be2c2efd6e1",
+      "bytes": 48
+    },
+    "artifacts\\m2-geometry-creation-byte-oracles\\42-hardware-buffer1.bin": {
+      "sha256": "914caa97c31ac7e31986867d31a244289ddb35445734a0660fda65fa5e9fbf0d",
+      "bytes": 60
+    },
+    "artifacts\\m2-geometry-creation-byte-oracles\\42-warp-buffer0.bin": {
+      "sha256": "34f75fc6a7a5c7d38b32fba28ba4728764f42f4a96c326cb01d54be2c2efd6e1",
+      "bytes": 48
+    },
+    "artifacts\\m2-geometry-creation-byte-oracles\\42-warp-buffer1.bin": {
+      "sha256": "914caa97c31ac7e31986867d31a244289ddb35445734a0660fda65fa5e9fbf0d",
+      "bytes": 60
+    },
+    "artifacts\\m2-geometry-creation-byte-oracles\\43-hardware-buffer0.bin": {
+      "sha256": "34f75fc6a7a5c7d38b32fba28ba4728764f42f4a96c326cb01d54be2c2efd6e1",
+      "bytes": 48
+    },
+    "artifacts\\m2-geometry-creation-byte-oracles\\43-hardware-buffer1.bin": {
+      "sha256": "914caa97c31ac7e31986867d31a244289ddb35445734a0660fda65fa5e9fbf0d",
+      "bytes": 60
+    },
+    "artifacts\\m2-geometry-creation-byte-oracles\\43-warp-buffer0.bin": {
+      "sha256": "34f75fc6a7a5c7d38b32fba28ba4728764f42f4a96c326cb01d54be2c2efd6e1",
+      "bytes": 48
+    },
+    "artifacts\\m2-geometry-creation-byte-oracles\\43-warp-buffer1.bin": {
+      "sha256": "914caa97c31ac7e31986867d31a244289ddb35445734a0660fda65fa5e9fbf0d",
+      "bytes": 60
+    }
+  },
+  "previously_rejected_new_files": 20,
+  "unmaterialized_so": [
+    {
+      "capture": "geometry_creation_gs_so_repeat",
+      "event_id": 4,
+      "handling": "metadata",
+      "reason": "SO declaration snapshot is absent; semantic strings and remaining strides cannot be recovered for this unused creation; reject any use of its identity",
+      "resource_id": 5
+    },
+    {
+      "capture": "geometry_creation_passthrough_so_repeat",
+      "event_id": 4,
+      "handling": "metadata",
+      "reason": "SO declaration snapshot is absent; semantic strings and remaining strides cannot be recovered for this unused creation; reject any use of its identity",
+      "resource_id": 5
+    }
+  ]
+}

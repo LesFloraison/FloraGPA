@@ -1,0 +1,451 @@
+{
+  "schema": "FloraGPA compatibility corpus 1",
+  "profile": "GPA 2025 R1 legacy DX11 / IGPA v3",
+  "root_parameter": "--captures-root",
+  "cases": [
+    {
+      "id": "geometry_creation_gs_success",
+      "path": "0/capture.gpa_frame",
+      "sha256": "28969589d0d545ed8a4cd72cd70291617554356c7b61155e5540a944b1746ec4",
+      "bytes": 89370,
+      "family": "geometry_creation",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified CaptureNextFrame output; native and GPA-injected producer image oracle on twelve frames each. SO verifies two buffers with distinct strides.",
+      "device_scope": "Producer device IDs retained; original player adapter unidentified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 23,
+          "repeat": 2,
+          "expected_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+          "purpose": "Diagnostic-only Draw/Dispatch omission; original shaders/files unchanged."
+        }
+      ],
+      "boundaries": []
+    },
+    {
+      "id": "geometry_creation_gs_failed",
+      "path": "1/capture.gpa_frame",
+      "sha256": "38007d791b3cc7de85befe8740bcc6568a934ef29ebbd1f095d8ab470fc9fae4",
+      "bytes": 89443,
+      "family": "geometry_creation",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified CaptureNextFrame output; native and GPA-injected producer image oracle on twelve frames each. SO verifies two buffers with distinct strides.",
+      "device_scope": "Producer device IDs retained; original player adapter unidentified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 24,
+          "repeat": 2,
+          "expected_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+          "purpose": "Diagnostic-only Draw/Dispatch omission; original shaders/files unchanged."
+        }
+      ],
+      "boundaries": []
+    },
+    {
+      "id": "geometry_creation_gs_validation",
+      "path": "2/capture.gpa_frame",
+      "sha256": "bfbea0172d668f558b6d229ec86208438acd786faf4e028cf90dbbc7f25261bf",
+      "bytes": 104055,
+      "family": "geometry_creation",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified CaptureNextFrame output; native and GPA-injected producer image oracle on twelve frames each. SO verifies two buffers with distinct strides.",
+      "device_scope": "Producer device IDs retained; original player adapter unidentified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 24,
+          "repeat": 2,
+          "expected_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+          "purpose": "Diagnostic-only Draw/Dispatch omission; original shaders/files unchanged."
+        }
+      ],
+      "boundaries": []
+    },
+    {
+      "id": "geometry_creation_gs_repeat",
+      "path": "3/capture.gpa_frame",
+      "sha256": "0cc10df052d243bf0bb4cdaa1292693bf71e7784e110c3585e6ec907d4689a0e",
+      "bytes": 104055,
+      "family": "geometry_creation",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified CaptureNextFrame output; native and GPA-injected producer image oracle on twelve frames each. SO verifies two buffers with distinct strides.",
+      "device_scope": "Producer device IDs retained; original player adapter unidentified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 25,
+          "repeat": 2,
+          "expected_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+          "purpose": "Diagnostic-only Draw/Dispatch omission; original shaders/files unchanged."
+        }
+      ],
+      "boundaries": []
+    },
+    {
+      "id": "geometry_creation_hs_success",
+      "path": "10/capture.gpa_frame",
+      "sha256": "b76deffc5bc30c7809a1946926a43f3e34480e5f3346b2e5a2174264a472557a",
+      "bytes": 108442,
+      "family": "geometry_creation",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified CaptureNextFrame output; native and GPA-injected producer image oracle on twelve frames each. SO verifies two buffers with distinct strides.",
+      "device_scope": "Producer device IDs retained; original player adapter unidentified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 24,
+          "repeat": 2,
+          "expected_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+          "purpose": "Diagnostic-only Draw/Dispatch omission; original shaders/files unchanged."
+        }
+      ],
+      "boundaries": []
+    },
+    {
+      "id": "geometry_creation_hs_failed",
+      "path": "11/capture.gpa_frame",
+      "sha256": "574f0c9dafa5d687d203b6b73601b0372f7655365538d8c9a8f9fa1ba3aa961a",
+      "bytes": 108515,
+      "family": "geometry_creation",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified CaptureNextFrame output; native and GPA-injected producer image oracle on twelve frames each. SO verifies two buffers with distinct strides.",
+      "device_scope": "Producer device IDs retained; original player adapter unidentified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 25,
+          "repeat": 2,
+          "expected_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+          "purpose": "Diagnostic-only Draw/Dispatch omission; original shaders/files unchanged."
+        }
+      ],
+      "boundaries": []
+    },
+    {
+      "id": "geometry_creation_hs_validation",
+      "path": "12/capture.gpa_frame",
+      "sha256": "7f9156cb83b787c3fec4e710b9d0200f18aaace1cf1bb1c68c4cd6f92b0c3235",
+      "bytes": 125255,
+      "family": "geometry_creation",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified CaptureNextFrame output; native and GPA-injected producer image oracle on twelve frames each. SO verifies two buffers with distinct strides.",
+      "device_scope": "Producer device IDs retained; original player adapter unidentified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 25,
+          "repeat": 2,
+          "expected_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+          "purpose": "Diagnostic-only Draw/Dispatch omission; original shaders/files unchanged."
+        }
+      ],
+      "boundaries": []
+    },
+    {
+      "id": "geometry_creation_hs_repeat",
+      "path": "13/capture.gpa_frame",
+      "sha256": "7f6b418c830581d5f6146bb17f6971ca43e3f21dffbe73a75a991060041153bf",
+      "bytes": 125255,
+      "family": "geometry_creation",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified CaptureNextFrame output; native and GPA-injected producer image oracle on twelve frames each. SO verifies two buffers with distinct strides.",
+      "device_scope": "Producer device IDs retained; original player adapter unidentified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 26,
+          "repeat": 2,
+          "expected_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+          "purpose": "Diagnostic-only Draw/Dispatch omission; original shaders/files unchanged."
+        }
+      ],
+      "boundaries": []
+    },
+    {
+      "id": "geometry_creation_ds_success",
+      "path": "20/capture.gpa_frame",
+      "sha256": "4f84b201989942fb9ca2fc27e4e9daa820529f33a5f467be55a7439894d953ab",
+      "bytes": 106394,
+      "family": "geometry_creation",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified CaptureNextFrame output; native and GPA-injected producer image oracle on twelve frames each. SO verifies two buffers with distinct strides.",
+      "device_scope": "Producer device IDs retained; original player adapter unidentified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 24,
+          "repeat": 2,
+          "expected_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+          "purpose": "Diagnostic-only Draw/Dispatch omission; original shaders/files unchanged."
+        }
+      ],
+      "boundaries": []
+    },
+    {
+      "id": "geometry_creation_ds_failed",
+      "path": "21/capture.gpa_frame",
+      "sha256": "ab8d27bd38fe52f0954b1e1b31bb64c893942bb3aa307b35420074c0c1ccf990",
+      "bytes": 106467,
+      "family": "geometry_creation",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified CaptureNextFrame output; native and GPA-injected producer image oracle on twelve frames each. SO verifies two buffers with distinct strides.",
+      "device_scope": "Producer device IDs retained; original player adapter unidentified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 25,
+          "repeat": 2,
+          "expected_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+          "purpose": "Diagnostic-only Draw/Dispatch omission; original shaders/files unchanged."
+        }
+      ],
+      "boundaries": []
+    },
+    {
+      "id": "geometry_creation_ds_validation",
+      "path": "22/capture.gpa_frame",
+      "sha256": "c4633b83624ad6347263de9c6e5c2a9db0dec1cdc76fd2109acf1b431fe877ee",
+      "bytes": 121159,
+      "family": "geometry_creation",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified CaptureNextFrame output; native and GPA-injected producer image oracle on twelve frames each. SO verifies two buffers with distinct strides.",
+      "device_scope": "Producer device IDs retained; original player adapter unidentified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 25,
+          "repeat": 2,
+          "expected_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+          "purpose": "Diagnostic-only Draw/Dispatch omission; original shaders/files unchanged."
+        }
+      ],
+      "boundaries": []
+    },
+    {
+      "id": "geometry_creation_ds_repeat",
+      "path": "23/capture.gpa_frame",
+      "sha256": "61604ee72caa64de7a3050eba494137ebfcdb0550e330212a931252fefad4d58",
+      "bytes": 121159,
+      "family": "geometry_creation",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified CaptureNextFrame output; native and GPA-injected producer image oracle on twelve frames each. SO verifies two buffers with distinct strides.",
+      "device_scope": "Producer device IDs retained; original player adapter unidentified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 26,
+          "repeat": 2,
+          "expected_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+          "purpose": "Diagnostic-only Draw/Dispatch omission; original shaders/files unchanged."
+        }
+      ],
+      "boundaries": []
+    },
+    {
+      "id": "geometry_creation_gs_so_success",
+      "path": "30/capture.gpa_frame",
+      "sha256": "6201cf456adabe784c87e2b58f290cb3be82e3ae978379f22070d22121df4300",
+      "bytes": 91086,
+      "family": "geometry_creation",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified CaptureNextFrame output; native and GPA-injected producer image oracle on twelve frames each. SO verifies two buffers with distinct strides.",
+      "device_scope": "Producer device IDs retained; original player adapter unidentified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 32,
+          "repeat": 2,
+          "expected_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+          "purpose": "Diagnostic-only Draw/Dispatch omission; original shaders/files unchanged."
+        }
+      ],
+      "boundaries": []
+    },
+    {
+      "id": "geometry_creation_gs_so_failed",
+      "path": "31/capture.gpa_frame",
+      "sha256": "d70b01052ad12254c4c854fedf6c27d31a758b8b37c68934e7b6c270ae0e32e2",
+      "bytes": 91225,
+      "family": "geometry_creation",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified CaptureNextFrame output; native and GPA-injected producer image oracle on twelve frames each. SO verifies two buffers with distinct strides.",
+      "device_scope": "Producer device IDs retained; original player adapter unidentified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 33,
+          "repeat": 2,
+          "expected_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+          "purpose": "Diagnostic-only Draw/Dispatch omission; original shaders/files unchanged."
+        }
+      ],
+      "boundaries": []
+    },
+    {
+      "id": "geometry_creation_gs_so_validation",
+      "path": "32/capture.gpa_frame",
+      "sha256": "db23c19d000d406027e36c22f567ba100f3af1f03baa035dac1233748870e4e8",
+      "bytes": 105837,
+      "family": "geometry_creation",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified CaptureNextFrame output; native and GPA-injected producer image oracle on twelve frames each. SO verifies two buffers with distinct strides.",
+      "device_scope": "Producer device IDs retained; original player adapter unidentified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 33,
+          "repeat": 2,
+          "expected_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+          "purpose": "Diagnostic-only Draw/Dispatch omission; original shaders/files unchanged."
+        }
+      ],
+      "boundaries": []
+    },
+    {
+      "id": "geometry_creation_gs_so_repeat",
+      "path": "33/capture.gpa_frame",
+      "sha256": "9d12e0e4fe2fefc8e853ce216c6ac6b2ab6f325dca5904f952176010a9b1226d",
+      "bytes": 105837,
+      "family": "geometry_creation",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified CaptureNextFrame output; native and GPA-injected producer image oracle on twelve frames each. SO verifies two buffers with distinct strides.",
+      "device_scope": "Producer device IDs retained; original player adapter unidentified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 34,
+          "repeat": 2,
+          "expected_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+          "purpose": "Diagnostic-only Draw/Dispatch omission; original shaders/files unchanged."
+        }
+      ],
+      "boundaries": []
+    },
+    {
+      "id": "geometry_creation_passthrough_so_success",
+      "path": "40/capture.gpa_frame",
+      "sha256": "0d272a6c024d573cd33abfa4649ef4dbca573de75a022d42a1ca586aad41167f",
+      "bytes": 90950,
+      "family": "geometry_creation",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified CaptureNextFrame output; native and GPA-injected producer image oracle on twelve frames each. SO verifies two buffers with distinct strides.",
+      "device_scope": "Producer device IDs retained; original player adapter unidentified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 32,
+          "repeat": 2,
+          "expected_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+          "purpose": "Diagnostic-only Draw/Dispatch omission; original shaders/files unchanged."
+        }
+      ],
+      "boundaries": []
+    },
+    {
+      "id": "geometry_creation_passthrough_so_failed",
+      "path": "41/capture.gpa_frame",
+      "sha256": "13372a47155ac6711f70b075d0ba95b83da7415bfc031ae7620904400071f3e5",
+      "bytes": 91089,
+      "family": "geometry_creation",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified CaptureNextFrame output; native and GPA-injected producer image oracle on twelve frames each. SO verifies two buffers with distinct strides.",
+      "device_scope": "Producer device IDs retained; original player adapter unidentified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 33,
+          "repeat": 2,
+          "expected_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+          "purpose": "Diagnostic-only Draw/Dispatch omission; original shaders/files unchanged."
+        }
+      ],
+      "boundaries": []
+    },
+    {
+      "id": "geometry_creation_passthrough_so_validation",
+      "path": "42/capture.gpa_frame",
+      "sha256": "8ba02304cbf91535bb4e37ea8bdcc766b951075b58e8f8155aa38bb82eeb5a34",
+      "bytes": 105633,
+      "family": "geometry_creation",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified CaptureNextFrame output; native and GPA-injected producer image oracle on twelve frames each. SO verifies two buffers with distinct strides.",
+      "device_scope": "Producer device IDs retained; original player adapter unidentified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 33,
+          "repeat": 2,
+          "expected_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+          "purpose": "Diagnostic-only Draw/Dispatch omission; original shaders/files unchanged."
+        }
+      ],
+      "boundaries": []
+    },
+    {
+      "id": "geometry_creation_passthrough_so_repeat",
+      "path": "43/capture.gpa_frame",
+      "sha256": "f49086b9c03e618bc63f2c2e02767732807d25f7acb0d7d539ecfe5b16db52dd",
+      "bytes": 105633,
+      "family": "geometry_creation",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified CaptureNextFrame output; native and GPA-injected producer image oracle on twelve frames each. SO verifies two buffers with distinct strides.",
+      "device_scope": "Producer device IDs retained; original player adapter unidentified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 34,
+          "repeat": 2,
+          "expected_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+          "purpose": "Diagnostic-only Draw/Dispatch omission; original shaders/files unchanged."
+        }
+      ],
+      "boundaries": []
+    }
+  ],
+  "source_manifest": {
+    "path": "artifacts\\m2-geometry-creation-originals\\manifest.json",
+    "sha256": "fbb46b7093ffc259401dc2b4ef5b35dd8f7fbe6a1aba3050cac2d96f045d6184"
+  }
+}

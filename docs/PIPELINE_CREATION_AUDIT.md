@@ -123,3 +123,9 @@ Existing pre-frame GS/HS/DS/SO handling is retained, not newly certified as a
 creation path. Frame-before resource/counter recovery remains a separate gap.
 The captured input layout exception cannot recover absent semantic strings.
 M2 and M3–M6 remain incomplete; migration module counts are unchanged.
+
+Subsequent acceptance: [GEOMETRY_CREATION_AUDIT.md](GEOMETRY_CREATION_AUDIT.md)
+adds ordinary GS/HS/DS and GS-with-SO creation, including two output slots and
+VS passthrough. The earlier 32 fixtures remain in its regression matrix.
+Class-linkage creation, broader interface layouts and deferred execution remain
+open; the historical limitations above describe the preceding release.

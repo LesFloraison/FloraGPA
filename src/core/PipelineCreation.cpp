@@ -4,15 +4,20 @@
 #include <algorithm>
 namespace flora {
 bool isStateCreation(uint16_t t) { return t >= 0x3589 && t <= 0x358c; }
-bool isPipelineCreation(uint16_t t) {
-    return t == 0x3580 || t == 0x3581 || t == 0x3584 || t == 0x3587 || isStateCreation(t);
-}
+bool isPipelineCreation(uint16_t t) { return (t >= 0x3580 && t <= 0x3587) || isStateCreation(t); }
 uint16_t pipelineCreatedType(uint16_t t) {
     switch (t) {
     case 0x3580:
         return 0x82;
     case 0x3581:
         return 0x90;
+    case 0x3582:
+    case 0x3583:
+        return 0x91;
+    case 0x3585:
+        return 0x95;
+    case 0x3586:
+        return 0x94;
     case 0x3584:
         return 0x92;
     case 0x3587:
@@ -57,6 +62,35 @@ PipelineCreationRecord readPipelineCreation(uint16_t t, Bytes bytes) {
         c.hasBytecode = r.flag();
         if (c.hasBytecode)
             c.bytecode = r.take(size_t(c.bytecodeLength));
+        if (t == 0x3583) {
+            const auto count = r.read<uint32_t>();
+            c.hasDescriptor = r.flag();
+            if (count > 512)
+                throw std::runtime_error("SO creation element count exceeds 512");
+            if (c.hasDescriptor)
+                for (uint32_t i = 0; i < count; ++i) {
+                    StreamOutputElement element;
+                    element.stream = r.read<uint32_t>();
+                    r.skip(4);
+                    element.semanticId = r.read<Id>();
+                    element.index = r.read<uint32_t>();
+                    element.start = r.read<uint8_t>();
+                    element.count = r.read<uint8_t>();
+                    element.slot = r.read<uint8_t>();
+                    r.skip(1);
+                    c.streamOutput.entries.push_back(element);
+                }
+            else if (count && !c.result)
+                throw std::runtime_error("SO creation elements are absent");
+            if (r.flag())
+                c.firstStride = r.read<uint32_t>();
+            c.strideCount = r.read<uint32_t>();
+            c.streamOutput.rasterizedStream = r.read<uint32_t>();
+            if (c.strideCount > 4)
+                throw std::runtime_error("SO creation stride count exceeds four");
+            if (c.strideCount && !c.firstStride && !c.result)
+                throw std::runtime_error("SO creation strides are absent");
+        }
         if (t != 0x3580)
             c.linkage = r.read<Id>();
     }
@@ -105,6 +139,10 @@ PipelineCreationAudit auditPipelineCreations(const Frame &frame) {
                     if (c.type == 0x3580)
                         c.note = "Input layout semantic strings are absent; retain this unmaterialized "
                                  "creation as metadata and reject any attempt to use its identity";
+                    if (c.type == 0x3583)
+                        c.note =
+                            "SO declaration snapshot is absent; semantic strings and remaining strides "
+                            "cannot be recovered for this unused creation; reject any use of its identity";
                     continue;
                 }
                 const auto resource = frame.resource(c.resource);
@@ -142,7 +180,27 @@ PipelineCreationAudit auditPipelineCreations(const Frame &frame) {
                         throw std::runtime_error("Created shader bytecode/linkage differs from saved shader");
                     Reader r(frame.capturedPayload(c.resource));
                     r.skip(40);
-                    if (r.read<Id>())
+                    c.streamOutputId = r.read<Id>();
+                    if (c.type == 0x3583) {
+                        if (!c.streamOutputId)
+                            throw std::runtime_error("SO creation declaration snapshot is absent");
+                        const auto saved = readStreamOutputDeclaration(frame, c.streamOutputId);
+                        if (saved.entries.size() != c.streamOutput.entries.size() ||
+                            saved.strides.size() != c.strideCount ||
+                            saved.rasterizedStream != c.streamOutput.rasterizedStream ||
+                            (c.strideCount && saved.strides[0] != *c.firstStride))
+                            throw std::runtime_error("SO creation declaration differs from saved snapshot");
+                        for (size_t i = 0; i < saved.entries.size(); ++i) {
+                            const auto &x = c.streamOutput.entries[i], &y = saved.entries[i];
+                            if (x.stream != y.stream || bool(x.semanticId) != bool(y.semanticId) ||
+                                x.index != y.index || x.start != y.start || x.count != y.count ||
+                                x.slot != y.slot)
+                                throw std::runtime_error("SO creation element differs from saved snapshot");
+                        }
+                        // The original writer saves only the first stride and opaque semantic pointers.
+                        // The complete saved declaration is the source for names and additional strides.
+                        c.streamOutput = saved;
+                    } else if (c.streamOutputId)
                         throw std::runtime_error(
                             "Ordinary shader creation has unexpected stream-output data");
                 } else {
@@ -163,15 +221,16 @@ PipelineCreationAudit auditPipelineCreations(const Frame &frame) {
             for (const auto &[id, entry] : frame.entries())
                 if (entry.category == 3 && entry.type == 3) {
                     try {
-                        if (frame.state(id).layout == creation.resource) {
-                            creation.error =
-                                "Input semantic strings are absent for a layout required by state snapshot " +
-                                std::to_string(id);
+                        const auto state = frame.state(id);
+                        if ((creation.type == 0x3580 ? state.layout : state.stages[3].shader) ==
+                            creation.resource) {
+                            creation.error = "Missing creation information is required by state snapshot " +
+                                             std::to_string(id);
                             break;
                         }
                     } catch (const std::exception &error) {
-                        creation.error =
-                            "Cannot prove unmaterialized layout is unused: " + std::string(error.what());
+                        creation.error = "Cannot prove unmaterialized pipeline object is unused: " +
+                                         std::string(error.what());
                         break;
                     }
                 }

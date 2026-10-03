@@ -23,7 +23,8 @@ bool in(uint16_t t, std::initializer_list<uint16_t> values) {
 ReplayCapability replayCapability(uint16_t t) {
     if (isPipelineCreation(t))
         return {"execute", "src/core/PipelineCreation.cpp;src/replay/PipelineCreation.cpp",
-                "tests/PipelineCreationTests.cpp;docs/PIPELINE_CREATION_AUDIT.md"};
+                "tests/PipelineCreationTests.cpp;tests/GeometryCreationTests.cpp;docs/"
+                "PIPELINE_CREATION_AUDIT.md;docs/GEOMETRY_CREATION_AUDIT.md"};
     if (isTextureCreation(t) || isTextureCreationObservation(t))
         return {isTextureCreation(t) ? "execute" : "metadata",
                 "src/core/TextureCreation.cpp;src/replay/Replay.cpp",

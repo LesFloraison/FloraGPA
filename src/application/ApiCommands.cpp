@@ -614,6 +614,22 @@ Json inspectCommand(const Frame &frame, Id id) {
                     r.field("bytecode_length", "Q");
                     if (r.flag("bytecode_present"))
                         r.field("bytecode", std::to_string(creation.bytecode.size()) + "s");
+                    if (t == 0x3583) {
+                        r.u("so_element_count");
+                        if (r.flag("so_elements_present"))
+                            for (size_t i = 0; i < creation.streamOutput.entries.size(); ++i) {
+                                const auto prefix = "so_element[" + std::to_string(i) + "].";
+                                r.u(prefix + "stream");
+                                r.field(prefix + "padding", "4s");
+                                r.id(prefix + "semantic_name_pointer", false);
+                                r.u(prefix + "semantic_index");
+                                r.field(prefix + "components_slot_padding", "4B");
+                            }
+                        if (r.flag("strides_present"))
+                            r.u("first_stride");
+                        r.u("stride_count");
+                        r.u("rasterized_stream");
+                    }
                     if (t != 0x3580)
                         r.id("class_linkage");
                 }

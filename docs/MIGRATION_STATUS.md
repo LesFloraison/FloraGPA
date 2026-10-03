@@ -1,5 +1,20 @@
 # FloraGPA C++ 迁移进度 — 2026-10-03
 
+2026-10-03（M2 第十四批）：补齐 Device5 的 GS／HS／DS 与带 Stream Output 的
+Shader 帧内创建，包含 VS 字节码透传 SO。原版 API 记录仅保存首个 stride 与语义
+字符串指针，现与完整 SO 声明快照核对后恢复所有步长及字符串；缺失声明的未使用
+对象明确标注为未实例化元数据，状态依赖与运行时使用均拒绝。20 份原版捕获、
+480 次生产程序帧检查、40 次原版播放器对照及硬件／WARP 专项检查通过。SO 使用
+16／20 字节不同步长的两个输出缓冲区，保留 32 份独立重放原始字节。全部 231 份
+文件的 462 次重放完成：230 份重复稳定，Helldivers 保留波动，210 份既有稳定
+图像哈希不变。227 次诊断对照、88 次既有纹理边界导出、四项黄金检查、28 套
+CTest 通过；新增专项 45 项、上一批创建 70 项、主 UI 55 项均无跳过。五个发布
+二进制与 Release 一致，462 次普通重放依赖审计通过。原版设备身份仍未确认；
+ClassLinkage 创建、扩展接口／身份版本、其他 SO 创建组合及 Deferred／Command
+List 保持开放。M2 与 M3–M6 未完成，迁移模块计数不变。详见
+[GEOMETRY_CREATION_AUDIT.md](GEOMETRY_CREATION_AUDIT.md) 与
+[geometry-creation-baseline.json](geometry-creation-baseline.json)。
+
 2026-10-03（M2 第十三批）：接通八类 Device5 帧内管线对象创建：VS／PS／CS、
 InputLayout、Blend／DepthStencil／Rasterizer／Sampler。使用捕获的原始描述符创建，
 核对原生 GetDesc 规范化结果，并验证重复状态创建的缓存身份。未使用 Shader 可由

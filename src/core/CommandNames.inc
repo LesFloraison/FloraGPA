@@ -219,3 +219,7 @@
 {0x358a, "Device5.CreateDepthStencilState"},
 {0x358b, "Device5.CreateRasterizerState"},
 {0x358c, "Device5.CreateSamplerState"},
+{0x3582, "Device5.CreateGeometryShader"},
+{0x3583, "Device5.CreateGeometryShaderWithStreamOutput"},
+{0x3585, "Device5.CreateHullShader"},
+{0x3586, "Device5.CreateDomainShader"},

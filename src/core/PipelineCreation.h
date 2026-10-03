@@ -1,5 +1,6 @@
 #pragma once
 #include "Frame.h"
+#include "StreamOutput.h"
 namespace flora {
 struct PipelineCreationRecord {
     uint16_t type{};
@@ -8,6 +9,10 @@ struct PipelineCreationRecord {
     bool hasDescriptor{}, hasBytecode{};
     uint64_t bytecodeLength{};
     Bytes descriptor, bytecode;
+    StreamOutputDeclaration streamOutput;
+    Id streamOutputId{};
+    uint32_t strideCount{};
+    std::optional<uint32_t> firstStride;
     struct Element {
         Id capturedName{};
         std::array<uint32_t, 6> fields{};
