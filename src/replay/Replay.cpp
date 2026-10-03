@@ -117,6 +117,17 @@ IUnknown *Replay::object(Id id) {
         throw std::runtime_error("Resource " + std::to_string(id) +
                                  " is not available before texture/view creation event " +
                                  std::to_string(it->second));
+    if (!pipelineCreationAudit_)
+        pipelineCreationAudit_ = auditPipelineCreations(frame_);
+    if (auto it = pipelineCreationAudit_->creationEvents.find(id);
+        it != pipelineCreationAudit_->creationEvents.end() && !objects_.contains(id)) {
+        const auto &creation = requirePipelineCreation(*pipelineCreationAudit_, it->second);
+        if (!creation.note.empty())
+            throw std::runtime_error("Pipeline resource " + std::to_string(id) + ": " + creation.note);
+        if (!isStateCreation(creation.type))
+            throw std::runtime_error("Pipeline resource " + std::to_string(id) +
+                                     " is unavailable before creation event " + std::to_string(it->second));
+    }
     if (auto it = objects_.find(id); it != objects_.end())
         return it->second.Get();
     const auto resource = frame_.resource(id);
@@ -259,95 +270,7 @@ IUnknown *Replay::object(Id id) {
             auto linkage = shaderClassLinkage(frame_, id);
             head.skip(8);
             auto so = head.read<Id>();
-            auto classLinkage = get<ID3D11ClassLinkage>(linkage);
-            Com<ID3D11ShaderReflection> reflection;
-            D3D11_SHADER_DESC sd{};
-            std::array<bool, 128> used{};
-            // Stripped SM4 shaders can reflect no bindings while still sampling SRVs.
-            // Only an actual RDEF chunk proves that undeclared slots are unused.
-            Reader dxbc(data);
-            dxbc.skip(20);
-            if (dxbc.read<UINT>() != 1 || dxbc.read<UINT>() != data.size())
-                throw std::runtime_error("DXBC container bounds");
-            auto chunks = dxbc.read<UINT>();
-            if (chunks > 256)
-                throw std::runtime_error("DXBC chunk limit");
-            bool hasRdef = false, hasInterfaces = false;
-            Bytes program;
-            for (UINT i = 0; i < chunks; ++i) {
-                auto offset = dxbc.read<UINT>();
-                if (offset < 32 + chunks * 4 || offset > data.size() || data.size() - offset < 8)
-                    throw std::runtime_error("DXBC chunk offset");
-                Reader chunk(data.subspan(offset));
-                auto tag = chunk.read<UINT>(), size = chunk.read<UINT>();
-                auto body = chunk.take(size);
-                if (tag == 0x58454853 || (tag == 0x52444853 && program.empty()))
-                    program = body;
-                hasRdef |= tag == 0x46454452;
-                hasInterfaces |= tag == 0x45434649;
-            }
-            bool passthrough =
-                t == 0x91 && so && (program.empty() || (Reader(program).read<UINT>() >> 16) != 2);
-            if (passthrough) {
-                if (!program.empty()) {
-                    auto stage = Reader(program).read<UINT>() >> 16;
-                    if (stage != 1 && stage != 4)
-                        throw std::runtime_error("SO passthrough requires VS, DS or signature bytecode");
-                }
-                passthroughShaders_.insert(id);
-            } else {
-                check(D3DReflect(data.data(), data.size(), IID_ID3D11ShaderReflection, &reflection),
-                      "Reflect shader");
-                check(reflection->GetDesc(&sd), "Shader descriptor");
-            }
-            if (!hasRdef && !passthrough)
-                used.fill(true);
-            for (UINT i = 0; i < sd.BoundResources; ++i) {
-                D3D11_SHADER_INPUT_BIND_DESC b{};
-                check(reflection->GetResourceBindingDesc(i, &b), "Shader binding");
-                if (b.Type == D3D_SIT_TBUFFER || b.Type == D3D_SIT_TEXTURE || b.Type == D3D_SIT_STRUCTURED ||
-                    b.Type == D3D_SIT_BYTEADDRESS) {
-                    if (b.BindPoint > 128 || b.BindCount > 128 - b.BindPoint)
-                        throw std::runtime_error("SRV range overflow");
-                    for (UINT j = 0; j < b.BindCount; ++j)
-                        used[b.BindPoint + j] = true;
-                }
-            }
-            // Stripped SM4 reflection does not provide a reliable interface count.
-            auto slots = hasInterfaces && !passthrough ? reflection->GetNumInterfaceSlots() : 0;
-            validateClassProgram(program, slots);
-            interfaceSlots_[id] = slots;
-            usedSrvs_[id] = used;
-#define CREATE_SHADER(Type, Method)                                                                          \
-    {                                                                                                        \
-        Com<Type> obj;                                                                                       \
-        check(device_->Method(data.data(), data.size(), classLinkage, &obj), #Method);                       \
-        result = obj;                                                                                        \
-    }
-            switch (t) {
-            case 0x90:
-                CREATE_SHADER(ID3D11VertexShader, CreateVertexShader);
-                break;
-            case 0x91:
-                if (so)
-                    result = createStreamOutputShader(data, so, classLinkage);
-                else
-                    CREATE_SHADER(ID3D11GeometryShader, CreateGeometryShader);
-                break;
-            case 0x92:
-                CREATE_SHADER(ID3D11PixelShader, CreatePixelShader);
-                break;
-            case 0x93:
-                CREATE_SHADER(ID3D11ComputeShader, CreateComputeShader);
-                break;
-            case 0x94:
-                CREATE_SHADER(ID3D11DomainShader, CreateDomainShader);
-                break;
-            case 0x95:
-                CREATE_SHADER(ID3D11HullShader, CreateHullShader);
-                break;
-            }
-#undef CREATE_SHADER
+            result = createCapturedShader(id, t, data, linkage, so);
         } else if (t == 0x82) {
             auto dataId = r.read<Id>();
             r.end();
@@ -1046,6 +969,10 @@ void Replay::command(const Entry &e) {
     }
     if (acceptTextureCreationObservation(t, payload)) {
         ++counts["texture_creation_observations"];
+        return;
+    }
+    if (isPipelineCreation(t)) {
+        pipelineCreation(e);
         return;
     }
     if (isTextureCreation(t)) {

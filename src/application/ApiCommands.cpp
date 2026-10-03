@@ -1,5 +1,6 @@
 #include "ApiCommands.h"
 #include "core/Contexts.h"
+#include "core/PipelineCreation.h"
 #include "core/TextureCreation.h"
 #include <QChar>
 #include <QDir>
@@ -594,6 +595,29 @@ Json inspectCommand(const Frame &frame, Id id) {
                     r.u("view_dimension");
                     r.field("descriptor_union", "4I");
                 }
+            } else if (isPipelineCreation(t)) {
+                const auto creation = readPipelineCreation(t, raw);
+                r.field("hresult", "i");
+                if (isStateCreation(t)) {
+                    if (r.flag("descriptor_present"))
+                        r.field("descriptor", std::to_string(creation.descriptor.size()) + "s");
+                } else {
+                    if (t == 0x3580) {
+                        r.u("element_count");
+                        if (r.flag("elements_present"))
+                            for (size_t i = 0; i < creation.elements.size(); ++i) {
+                                const auto prefix = "element[" + std::to_string(i) + "].";
+                                r.id(prefix + "semantic_name_pointer", false);
+                                r.field(prefix + "descriptor", "6I");
+                            }
+                    }
+                    r.field("bytecode_length", "Q");
+                    if (r.flag("bytecode_present"))
+                        r.field("bytecode", std::to_string(creation.bytecode.size()) + "s");
+                    if (t != 0x3580)
+                        r.id("class_linkage");
+                }
+                r.id("returned_resource");
             } else if (isTextureCreation(t)) {
                 const auto creation = readTextureCreation(t, raw);
                 r.field("hresult", "i");

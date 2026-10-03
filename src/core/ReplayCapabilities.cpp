@@ -7,6 +7,7 @@
 #include "MapRecords.h"
 #include "OutputBindings.h"
 #include "PipelineBindings.h"
+#include "PipelineCreation.h"
 #include "Predication.h"
 #include "SamplerBindings.h"
 #include "SrvBindings.h"
@@ -20,6 +21,9 @@ bool in(uint16_t t, std::initializer_list<uint16_t> values) {
 }
 } // namespace
 ReplayCapability replayCapability(uint16_t t) {
+    if (isPipelineCreation(t))
+        return {"execute", "src/core/PipelineCreation.cpp;src/replay/PipelineCreation.cpp",
+                "tests/PipelineCreationTests.cpp;docs/PIPELINE_CREATION_AUDIT.md"};
     if (isTextureCreation(t) || isTextureCreationObservation(t))
         return {isTextureCreation(t) ? "execute" : "metadata",
                 "src/core/TextureCreation.cpp;src/replay/Replay.cpp",

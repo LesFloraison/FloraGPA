@@ -102,3 +102,8 @@ Build `FloraBufferViewCreationProbe` explicitly; its arguments are
 `GPA_LOCAL_INJECT=true` for capture runs and execute all GPU checks serially.
 Use `FLORA_BUFFER_VIEW_CAPTURES` for the original-fixture CTest directory.
 Captures and generated artifacts remain outside Git.
+
+Subsequent acceptance: [PIPELINE_CREATION_AUDIT.md](PIPELINE_CREATION_AUDIT.md)
+retains these nineteen fixtures in its 211-file matrix and records unchanged
+prior stable image hashes. That increment handles cached pipeline state identity;
+general resource identity/version reconstruction remains open.

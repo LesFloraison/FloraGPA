@@ -1,0 +1,344 @@
+{
+  "schema": "FloraGPA pipeline object creation acceptance 1",
+  "completion": "M2 in progress; M3-M6 incomplete",
+  "scope": "Device5 VS/PS/CS, input layout and four state creation families; canonical descriptors, cached identities and missing layout semantics diagnostics",
+  "package": "out\\FloraGPA-pipeline-creation-20261003",
+  "package_sha256": {
+    "FloraGPA.exe": "a5d071b030c9c2adaee6b9b45b557e2a6bf98a79f022be36a459946f76073387",
+    "FloraGPA.Cli.exe": "ed9396d0099b1bac55d1261592ba69d127bd6d7736805f1eb2b4728d47363cb7",
+    "FloraGPA.Worker.exe": "b6e4a1fa4a9cff736ebf2d7a520087b5b8e8721af157e7adf9e6f8b82da513ab",
+    "FloraGPA.Rdc.exe": "f4d21d43e661d24d392e91fc1a1f1460a20d1377fcf5075c57083ad289e82773",
+    "FloraGPA.Metrics.dll": "58b6278f2a93e783b1e8bb1290e9b0e51745f1a36825f296584f52159fd7c6db"
+  },
+  "native_runs": 422,
+  "file_outcomes": {
+    "repeat_stable": 210,
+    "repeat_variable": 1
+  },
+  "prior_stable_images_unchanged": 178,
+  "corpus_controls": 187,
+  "boundary_runs": 88,
+  "new_original_player_runs": 64,
+  "producer_frame_checks": 768,
+  "hardware_warp_original_creation_runs": 64,
+  "golden_controls": [
+    {
+      "case": "gf2",
+      "rgba_sha256": "2e1abc5eacb0bbfd801f9fe059c305baa9a0786c384b36a42fa5a323dd979fd1",
+      "passed": true,
+      "counts": {
+        "ClearDepthStencilView": 2,
+        "ClearRenderTargetView": 1,
+        "CreateBuffer": 2,
+        "DrawIndexed": 72,
+        "Map": 44,
+        "Present": 1,
+        "buffers_created_without_initial_data": 2,
+        "object_observation_records": 49,
+        "pipeline_setter_records": 142,
+        "private_data_observations": 4,
+        "query_metadata_records": 2,
+        "state_or_auxiliary_records": 551,
+        "unmap_observations": 44
+      }
+    },
+    {
+      "case": "gf2-negative",
+      "rgba_sha256": "b2c5548a51715f581c4591acc266ac7a0c65b54b7ecd9a49f43499fa9b76c5f1",
+      "passed": true,
+      "counts": {
+        "ClearDepthStencilView": 2,
+        "ClearRenderTargetView": 1,
+        "CreateBuffer": 2,
+        "Map": 44,
+        "Present": 1,
+        "buffers_created_without_initial_data": 2,
+        "object_observation_records": 49,
+        "pipeline_setter_records": 142,
+        "private_data_observations": 4,
+        "query_metadata_records": 2,
+        "state_or_auxiliary_records": 551,
+        "unmap_observations": 44
+      }
+    },
+    {
+      "case": "bf1",
+      "rgba_sha256": "1f724d1840652f66afd26dd30c95aecd5c1b4932eede56109198f15a8f57a2f6",
+      "passed": true,
+      "counts": {
+        "ClearDepthStencilView": 10,
+        "ClearRenderTargetView": 10,
+        "ClearUnorderedAccessViewFloat": 1,
+        "CopyResource": 2,
+        "CopyStructureCount": 6,
+        "CopySubresourceRegion": 7,
+        "Dispatch": 60,
+        "DispatchIndirect": 13,
+        "Draw": 79,
+        "DrawIndexed": 41,
+        "DrawIndexedInstanced": 1053,
+        "DrawInstanced": 29,
+        "GenerateMips": 2,
+        "Map": 4151,
+        "Present": 1,
+        "UpdateSubresource": 27,
+        "map_read_observations": 2,
+        "object_observation_records": 28,
+        "pipeline_setter_records": 2221,
+        "query_metadata_records": 17,
+        "state_or_auxiliary_records": 7354,
+        "unmap_observations": 4153,
+        "unresolved_input_layout_setters": 2,
+        "unresolved_output_setters": 6,
+        "unresolved_shader_setters": 4,
+        "unresolved_srv_setters": 2
+      }
+    },
+    {
+      "case": "bf1-negative",
+      "rgba_sha256": "cd3a3066f984b1c317fbeefec2836503f32078321d3dc1f367465f2c06d435bf",
+      "passed": true,
+      "counts": {
+        "ClearDepthStencilView": 10,
+        "ClearRenderTargetView": 10,
+        "ClearUnorderedAccessViewFloat": 1,
+        "CopyResource": 2,
+        "CopyStructureCount": 6,
+        "CopySubresourceRegion": 7,
+        "Dispatch": 60,
+        "DispatchIndirect": 13,
+        "GenerateMips": 2,
+        "Map": 4151,
+        "Present": 1,
+        "UpdateSubresource": 27,
+        "map_read_observations": 2,
+        "object_observation_records": 28,
+        "pipeline_setter_records": 2221,
+        "query_metadata_records": 17,
+        "state_or_auxiliary_records": 7354,
+        "unmap_observations": 4153,
+        "unresolved_input_layout_setters": 2,
+        "unresolved_output_setters": 6,
+        "unresolved_shader_setters": 4,
+        "unresolved_srv_setters": 2
+      }
+    }
+  ],
+  "results": {
+    "corpus": {
+      "path": "artifacts\\m2-pipeline-creation-release-corpus\\validation.json",
+      "sha256": "d40df2ab312c5f45dd4f5f9f8ce110e6864d257fcc09a8ff80e3462a41650a0a",
+      "counts": {
+        "repeat_stable": 90,
+        "repeat_variable": 1
+      }
+    },
+    "originals": {
+      "path": "artifacts\\m2-pipeline-creation-release-originals\\validation.json",
+      "sha256": "b45c7686ed28372b872c79eb19c6843123555ea137acbdd06bc2c287cf3d8dcb",
+      "counts": {
+        "repeat_stable": 11
+      }
+    },
+    "copy": {
+      "path": "artifacts\\m2-pipeline-creation-release-copy\\validation.json",
+      "sha256": "c6e85172babb77a7aef130f798d57ddad9a5af12057156b0c31f982f724abd84",
+      "counts": {
+        "repeat_stable": 6
+      }
+    },
+    "present": {
+      "path": "artifacts\\m2-pipeline-creation-release-present\\validation.json",
+      "sha256": "c1dbd3d09c63663a964bc82f380b0da10f981e902d5f3ef1d796cf3c33fdc6b2",
+      "counts": {
+        "repeat_stable": 5
+      }
+    },
+    "buffer": {
+      "path": "artifacts\\m2-pipeline-creation-release-buffer\\validation.json",
+      "sha256": "6315c3c01d50e3032ebf8e5c4c8f4234f36948bef2658f44f1a678a26a083a13",
+      "counts": {
+        "repeat_stable": 5
+      }
+    },
+    "pipeline": {
+      "path": "artifacts\\m2-pipeline-creation-release-pipeline\\validation.json",
+      "sha256": "a00b32bddb6f787efa14957a7f4ebdccfb57d74fcaad6d43037065fa65665644",
+      "counts": {
+        "repeat_stable": 5
+      }
+    },
+    "creation": {
+      "path": "artifacts\\m2-pipeline-creation-release-creation\\validation.json",
+      "sha256": "d17ab820fb723cf60373af897d0b5e03a1c82d0ec7752819d1fb61495023d77e",
+      "counts": {
+        "repeat_stable": 7
+      }
+    },
+    "discovery": {
+      "path": "artifacts\\m2-pipeline-creation-release-discovery\\validation.json",
+      "sha256": "0d240ad230ed558878a557737ac037bdbe04a5bd3ef10370fb2a6272634ff613",
+      "counts": {
+        "repeat_stable": 1
+      }
+    },
+    "dimensions": {
+      "path": "artifacts\\m2-pipeline-creation-release-dimensions\\validation.json",
+      "sha256": "0c5e9c3b387dacfefe2cc3f8ec622514dfc95a7bf006497533dfc26e4316b65e",
+      "counts": {
+        "repeat_stable": 17
+      }
+    },
+    "views": {
+      "path": "artifacts\\m2-pipeline-creation-release-views\\validation.json",
+      "sha256": "bb18e4714d730c44d76457cbff40c011801f17dc06dfe15c82e2940eee163b39",
+      "counts": {
+        "repeat_stable": 12
+      }
+    },
+    "buffer-views": {
+      "path": "artifacts\\m2-pipeline-creation-release-buffer-views\\validation.json",
+      "sha256": "13bac74a4692aac32c15227af983ab4f27a6b3deb17550ee0c081cbf16359c15",
+      "counts": {
+        "repeat_stable": 19
+      }
+    },
+    "pipeline-creation": {
+      "path": "artifacts\\m2-pipeline-creation-release-pipeline-creation\\validation.json",
+      "sha256": "d966b302a48da743eccdb3997b04f6b21b22db85a6446064ad8c9c14167974d7",
+      "counts": {
+        "repeat_stable": 32
+      }
+    }
+  },
+  "ctest": {
+    "path": "artifacts/ctest-m2-pipeline-creation.log",
+    "sha256": "61cd271fa9231e662a33e6b817022c9cc9b99b9eabf7192f003ee5a8f0013186",
+    "suites": 27,
+    "initial_passed": 26,
+    "corrected_suite": "class_linkage",
+    "corrected_path": "artifacts/ctest-class-linkage-boundaries-corrected.log",
+    "corrected_sha256": "360cb95cf860cb6d9cfa50d49cd134912fa1f1d0c1e23dea82a606fd73d4b654",
+    "correction": "Stale expectation that CSSetShader event 90 is ignored; expect shader/classes bound at 90, unbound at 95 and restored by Dispatch snapshot at 100. Pipeline setters were already implemented in 9306d5e. Runtime unchanged by test correction.",
+    "qt_details": {
+      "class-linkage": {
+        "path": "build\\vs2022\\class-linkage-Release.txt",
+        "sha256": "377f8814273b5489b85e1e7e7c40873a6d8092359b892b9ed9a6aeb274fd993a",
+        "cases": 10
+      },
+      "pipeline-creation": {
+        "path": "build\\vs2022\\pipeline-creation-Release.txt",
+        "sha256": "43f4c1a87f6b93b044b20a3c30719201b9a497d9e44262f9e4245c98bee8be2d",
+        "cases": 70
+      },
+      "buffer-view-creation": {
+        "path": "build\\vs2022\\buffer-view-creation-Release.txt",
+        "sha256": "0d25ba8da27771811b597415fcad8f2b9b5b5de76282b4a01d75117199b76214",
+        "cases": 42
+      },
+      "view-creation": {
+        "path": "build\\vs2022\\view-creation-Release.txt",
+        "sha256": "2dcc8f410a0030b0dbd79bcb44f2da9bdf5c8f0b9eef41e3ade876521f957cd1",
+        "cases": 32
+      },
+      "texture-creation": {
+        "path": "build\\vs2022\\texture-creation-Release.txt",
+        "sha256": "e66bf61e9f9177d0fe6092442f24b77562dcffc8ae11341a07a7669447495fd7",
+        "cases": 55
+      },
+      "ui": {
+        "path": "build\\vs2022\\ui-Release.txt",
+        "sha256": "c390c519776c59ab5cd96a347a842c77396c51e487e3cfd771a8ed4f21e167a1",
+        "cases": 55
+      },
+      "texture-edit-replay": {
+        "path": "build\\vs2022\\texture-edit-replay-Release.txt",
+        "sha256": "992d477448f6f95800bb5af00f616a94ed3b9efed9d5eb5285121a2ca4410970",
+        "cases": 34
+      }
+    }
+  },
+  "sources": {
+    "src/core/PipelineCreation.cpp": "7d813042c7b0d9fd78e3562eac7b43295de377865abf70e4f256805716c0fcf1",
+    "src/core/PipelineCreation.h": "2afce151c8507d716a4d28b48ebd09ff4f4e0b4c35b2be43ed1bec7b90033db2",
+    "src/replay/PipelineCreation.cpp": "2d56d8d74bc9d804e235aa8ebd85bdc2478dfa11e158ae8bc89ef313a0301177",
+    "tests/PipelineCreationTests.cpp": "275a4b74c77496387b6ab0170a149f55a5bdfd31a36991b5f9827aa6ef57bade",
+    "tests/ClassLinkageTests.cpp": "224af0b602c737d20b22b57d8755c8d6161675f015816ac4728411562b19e92b",
+    "tools/native/pipeline_creation_probe.cpp": "16c8be8306839383f3336c0ce1258946573575096f3baba27b76339de7c5d3a0",
+    "src/core/TextureCreation.cpp": "d1e4f432623abbe6e92f24835418712b78d840a95aed4182c6496e1dffaff968",
+    "src/core/TextureCreation.h": "36ef4d1e15123303e8623ac3e4e370d1ca73d3b6180191ee7a4cd15a16a279e8",
+    "src/application/ApiCommands.cpp": "590ad5d70c3bb0ecc4a6e561fd0f28079aa7bd9f4a7cd55394a4d7606b02ac13",
+    "src/application/FrameValidation.cpp": "8279855a8a33103ed1d4ec7cd08b7799583842a6bdb725e0fad58cb7678677fd",
+    "src/core/ReplayCapabilities.cpp": "57d39f26514e580d1e18417c4b41fdff17c522855d146b6ef52c888421c06572",
+    "src/core/CommandNames.inc": "79dc90ea72f3cfe59077566f332c2d73df9b30d28bfa14db2db2e06aef133563",
+    "src/replay/Replay.cpp": "a6b92cd73cf58dcaa73b4ba521ab6a24a97a0d3b55ff800575f852416e60b56d",
+    "src/replay/Replay.h": "8d2535c2f62b0865e507d72065cf9709b9d96a93943dd1c645a18e247cb73b6f",
+    "tests/TextureCreationTests.cpp": "b13daad41d1e879936c95e8a25cb83020b1d7a3cded44eb8ee9d1eda997c88fb",
+    "tests/ViewCreationTests.cpp": "a15e68efc4bfddadc74302574f4626e2a72daa06f6ff627217bedbd74978e5e9",
+    "tests/BufferViewCreationTests.cpp": "ea1c45be4d1bdb1a713c549954b3ec876b778a63fe2df2eb516efaf299eaaeb3",
+    "src/replay/UavCounters.cpp": "6f6fcad030c94f7525d89fb4ae2fffe710bd3e785cd7567c8a7e920dfb537055",
+    "tools/native/view_creation_probe.cpp": "a812ae2877d211d23d4b859e2aabad8c498483b7266938ba825726d07b90ef1e",
+    "tools/native/buffer_view_creation_probe.cpp": "0935d7a436c2b31513632af21e961767733d8d0d4a507a672c77360d5edcfe24",
+    "tools/native/texture_creation_probe.cpp": "2c825ccee1b698d2be2090f00b1a4b05305e839cd2008e9f8e0baa2007d89c8d",
+    "tools/native/texture_probe_helpers.h": "30abcac380d84d505fd344d4083d97300f50df5b2e5cc7dffb11ea03c6d6ee3d",
+    "tools/native/texture_copy_probe.cpp": "9713f07b873a1700bae72e6397c7189e3b2325ea076de3aaff8fe0fa64cde1cb",
+    "tools/native/present_capture_probe.cpp": "7c29f1e572ab16a5bc497d39eef8198d79056877a9e1d3fff3f7ed530a32c4e3",
+    "CMakeLists.txt": "7a04a252a77a6c2caf83b63f25a924a7638bf311920fae7c25da873b0fde89b6"
+  },
+  "evidence": {
+    "artifacts/m2-next-pipeline-creation-wrappers.c": "caceb5c093eeb51a99be1a2f4ee3ed9da941123dd890479627a6c17520ddb01c",
+    "artifacts/m2-next-pipeline-creation-ghidra.log": "476e2c075f3db5f62f413598c9f30aada8867f50f8739ec3df963b9fbd716ff3",
+    "artifacts/m2-next-pipeline-creation-string-rvas.json": "13243ae57eca40814e3c18fab9bc704904bb33720719d2be40b9c0e4e7bde603",
+    "artifacts/m2-pipeline-creation-originals/manifest.json": "49ece4e3365edfffe2162520c93479a0f1f118166fccae89e1dc0bebfe36c796",
+    "artifacts/m2-pipeline-creation-before/validation.json": "b878be16142fd3abe8bfb40cf6c3e3e44b29d3d96cf1b2c0e08e6049c2e62c76"
+  },
+  "limits": [
+    "Original player adapter unidentified; observed image equality is not matched-device equivalence",
+    "Frame-before counter recovery, other device layouts, identity versioning and deferred execution remain incomplete",
+    "These fixtures do not certify all formats/usages/sample counts",
+    "Known Helldivers variability unchanged; missing contents are not synthesized",
+    "Unused layout in mode 33 lacks saved semantic strings: explicit unmaterialized metadata; draw state dependency and runtime use rejected",
+    "GS/HS/DS/SO and class-linkage creation and extended interface layouts remain unimplemented"
+  ],
+  "compute_oracles": {
+    "artifacts\\m2-pipeline-creation-originals\\20\\native\\buffer.bin": {
+      "sha256": "a5dcf5b8418dfafec16079148ec90cf81dfc6276c1cce220017c782ecb7d7aea",
+      "value": 123
+    },
+    "artifacts\\m2-pipeline-creation-originals\\20\\captured\\buffer.bin": {
+      "sha256": "a5dcf5b8418dfafec16079148ec90cf81dfc6276c1cce220017c782ecb7d7aea",
+      "value": 123
+    },
+    "artifacts\\m2-pipeline-creation-originals\\21\\native\\buffer.bin": {
+      "sha256": "a5dcf5b8418dfafec16079148ec90cf81dfc6276c1cce220017c782ecb7d7aea",
+      "value": 123
+    },
+    "artifacts\\m2-pipeline-creation-originals\\21\\captured\\buffer.bin": {
+      "sha256": "a5dcf5b8418dfafec16079148ec90cf81dfc6276c1cce220017c782ecb7d7aea",
+      "value": 123
+    },
+    "artifacts\\m2-pipeline-creation-originals\\22\\native\\buffer.bin": {
+      "sha256": "a5dcf5b8418dfafec16079148ec90cf81dfc6276c1cce220017c782ecb7d7aea",
+      "value": 123
+    },
+    "artifacts\\m2-pipeline-creation-originals\\22\\captured\\buffer.bin": {
+      "sha256": "a5dcf5b8418dfafec16079148ec90cf81dfc6276c1cce220017c782ecb7d7aea",
+      "value": 123
+    },
+    "artifacts\\m2-pipeline-creation-originals\\23\\native\\buffer.bin": {
+      "sha256": "a5dcf5b8418dfafec16079148ec90cf81dfc6276c1cce220017c782ecb7d7aea",
+      "value": 123
+    },
+    "artifacts\\m2-pipeline-creation-originals\\23\\captured\\buffer.bin": {
+      "sha256": "a5dcf5b8418dfafec16079148ec90cf81dfc6276c1cce220017c782ecb7d7aea",
+      "value": 123
+    }
+  },
+  "previously_rejected_new_files": 32,
+  "unmaterialized_layout": {
+    "event_id": 20,
+    "handling": "metadata",
+    "reason": "Input layout semantic strings are absent; retain this unmaterialized creation as metadata and reject any attempt to use its identity",
+    "resource_id": 21
+  }
+}

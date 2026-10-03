@@ -3106,7 +3106,9 @@
         "src/replay/Replay.cpp",
         "src/application/PlanarWrites.cpp",
         "src/application/ExperimentReport.cpp",
-        "src/core/TextureCreation.cpp"
+        "src/core/TextureCreation.cpp",
+        "src/core/PipelineCreation.cpp",
+        "src/replay/PipelineCreation.cpp"
       ],
       "validation": [
         "docs/BUFFER_VIEW_CREATION_AUDIT.md: M2 accepts Device5 typed/raw/structured buffer SRV/UAV and typed RTV creation, with checked bounds, bind flags, descriptors and identity. Nineteen original captures cover defaults, failures, validation-only calls and Counter/Append reset plus repeated KEEP dispatch; 456 producer frame checks and 38 original-player comparisons pass. Newly created hidden counters require explicit captured initialization or an experiment seed; undefined use is rejected. Seven added metadata decoders have original-writer and synthetic evidence, three with real-capture coverage. Final 179-file acceptance is pinned in buffer-view-baseline.json. Frame-before counters, other creation/interface layouts, identity versioning and deferred execution remain incomplete; module remains partial.",
@@ -3122,7 +3124,8 @@
         "docs/PRESENT_REPLAY_AUDIT.md: M2 adds checked Present TEST and submission-boundary RTV/CS-UAV/OM-UAV transitions. Five original captures, native producer/binding probes, 25 Present Qt cases, seven CTest suites, prior 182 corpus replays and four golden/negative controls passed. Original kernels completed all five cases; four multi-DDS export mappings remain unverified. Post-Present rotation, unsupported flags/statuses and other replay gaps keep the module partial.",
         "docs/BUFFER_CREATION_AUDIT.md: M2 executes checked CreateBuffer at its boundary without loading future first-use snapshots as initial data; private-data pointers remain opaque observations. Five shader-dependent original captures match the original player; creation/final bytes, six negative controls, prior 96-frame regression, eight CTest suites and RDC identity mapping passed. Zero observed auxiliary families is not complete interface/layout or resource-semantic coverage; replay.py remains partial.",
         "docs/PLANAR_WRITE_MIGRATION.md: planar Y-only Map with native pitches, tight NV12 Update, explicit full DXGI Update assets, structured write provenance and Qt before/after inspection; 192 packaged real-capture/synthetic/uint64 Python comparisons passed (125 successes, 67 controlled rejections); private consumers and remaining module scope stay incomplete",
-        "docs/EXPERIMENT_REPORT_MIGRATION.md: native active-history assets and applied/pending traversal report; replay/texture/buffer consumers and compact Qt worker log; private analysis consumers remain pending"
+        "docs/EXPERIMENT_REPORT_MIGRATION.md: native active-history assets and applied/pending traversal report; replay/texture/buffer consumers and compact Qt worker log; private analysis consumers remain pending",
+        "docs/PIPELINE_CREATION_AUDIT.md: Eight Device5 VS/PS/CS, input-layout and state creation families; native canonical descriptors and cached state identity checked. 32 unmodified original captures, 768 producer frame checks, 64 original-player comparisons and 64 hardware/WARP cases. Explicit metadata for unused input layout without semantic strings; dependent state/runtime use rejected. Pipeline tests 70 cases, 27 related CTest suites, 422 serial corpus replays (210 stable files, one known variable), 178 prior stable hashes unchanged, 187 controls, 88 retained texture boundaries and four goldens. M2 remains partial; GS/HS/DS/SO and class-linkage creation, extended layouts, general identity versions and deferred execution remain open. Original player adapter unidentified."
       ]
     },
     {

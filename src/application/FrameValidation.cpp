@@ -9,6 +9,7 @@
 #include "core/MapRecords.h"
 #include "core/OutputBindings.h"
 #include "core/PipelineBindings.h"
+#include "core/PipelineCreation.h"
 #include "core/Predication.h"
 #include "core/PresentRecords.h"
 #include "core/ReplayCapabilities.h"
@@ -54,6 +55,7 @@ Json validateFrame(const std::filesystem::path &path, const std::function<bool()
         std::optional<MapRecordAudit> mapAudit;
         std::optional<BufferCreationAudit> creationAudit;
         std::optional<TextureCreationAudit> textureCreationAudit;
+        std::optional<PipelineCreationAudit> pipelineCreationAudit;
         auto reference = [&](const Entry &e, Id id, int category) {
             if (!id)
                 return;
@@ -139,6 +141,25 @@ Json validateFrame(const std::filesystem::path &path, const std::function<bool()
                             } catch (const std::exception &error) {
                                 finding(&e, "error", "copy_command_rejected", error.what(), copy.destination);
                             }
+                        }
+                        if (isPipelineCreation(e.type)) {
+                            if (!pipelineCreationAudit)
+                                pipelineCreationAudit = auditPipelineCreations(frame);
+                            const auto &creation = pipelineCreationAudit->records.at(id);
+                            if (!creation.error.empty())
+                                finding(&e, "error", "pipeline_creation_rejected", creation.error,
+                                        creation.resource);
+                            else if (!creation.note.empty())
+                                finding(&e, "info", "unmaterialized_pipeline_creation", creation.note,
+                                        creation.resource);
+                            if (creation.error.empty() && (creation.result != 0 || !creation.note.empty()))
+                                report["record_handling_overrides"].push_back(
+                                    {{"event_id", id},
+                                     {"resource_id", creation.resource},
+                                     {"handling", "metadata"},
+                                     {"reason", creation.result != 0
+                                                    ? "Failed/validation-only pipeline creation"
+                                                    : creation.note}});
                         }
                         acceptTextureCreationObservation(e.type, frame.payload(id));
                         if (isTextureCreation(e.type)) {

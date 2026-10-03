@@ -1,5 +1,20 @@
 # FloraGPA C++ 迁移进度 — 2026-10-03
 
+2026-10-03（M2 第十三批）：接通八类 Device5 帧内管线对象创建：VS／PS／CS、
+InputLayout、Blend／DepthStencil／Rasterizer／Sampler。使用捕获的原始描述符创建，
+核对原生 GetDesc 规范化结果，并验证重复状态创建的缓存身份。未使用 Shader 可由
+内联 DXBC 完整创建；缺失语义字符串的未使用 InputLayout 明确记录为未实例化
+元数据，任何状态依赖或运行时使用均拒绝，不猜测字符串。失败与仅验证调用有
+逐事件处理分类。32 份原版捕获、768 次生产程序帧检查、64 次原版播放器对照与
+64 次硬件／WARP 专项重放通过。全部 211 份文件的 422 次独立重放完成：210 份
+重复稳定，Helldivers 保留波动，178 份既有稳定图像哈希不变。187 次对照、88 次
+既有纹理边界导出、四项黄金检查和 27 套 CTest 通过；新增专项 70 项、主 UI
+55 项均无跳过。五个发布二进制与 Release 一致，422 次普通重放依赖审计通过。
+原版设备身份仍未确认。GS／HS／DS／SO Shader 创建、ClassLinkage 创建、扩展
+接口、一般身份版本及 Deferred／Command List 仍待完成。M2 与 M3–M6 保持开放，
+迁移模块计数不变。详见 [PIPELINE_CREATION_AUDIT.md](PIPELINE_CREATION_AUDIT.md)
+和 [pipeline-creation-baseline.json](pipeline-creation-baseline.json)。
+
 2026-10-03（M2 第十二批）：恢复缓冲区 SRV／RTV／UAV 帧内创建，覆盖 typed、raw、
 structured、默认描述符、失败／验证调用及 Counter／Append。元素范围、格式／步长、
 绑定标志和身份检查接入共同创建审计。新建隐藏计数必须来自显式重置或实验初值；

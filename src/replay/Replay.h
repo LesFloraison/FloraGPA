@@ -6,6 +6,7 @@
 #include "core/MapRecords.h"
 #include "core/OutputBindings.h"
 #include "core/PipelineBindings.h"
+#include "core/PipelineCreation.h"
 #include "core/Predication.h"
 #include "core/SamplerBindings.h"
 #include "core/SrvBindings.h"
@@ -158,6 +159,9 @@ class Replay {
     std::optional<MapRecordAudit> mapRecordAudit_;
     std::optional<BufferCreationAudit> bufferCreationAudit_;
     std::optional<TextureCreationAudit> textureCreationAudit_;
+    std::optional<PipelineCreationAudit> pipelineCreationAudit_;
+    void pipelineCreation(const Entry &entry);
+    Com<IUnknown> createCapturedShader(Id id, uint16_t type, Bytes data, Id linkage, Id so);
     ReplayOptions options_;
     std::unique_ptr<RenderDocCapture> renderdoc_;
     Com<ID3DUserDefinedAnnotation> captureAnnotation_;
