@@ -1,0 +1,130 @@
+{
+  "schema": "FloraGPA compatibility corpus 1",
+  "profile": "GPA 2025 R1 legacy DX11 / IGPA v3",
+  "cases": [
+    {
+      "id": "minlod_0",
+      "path": "0/capture.gpa_frame",
+      "sha256": "f6cc8c580717233cba4ea71d5014266e1d550f456902a935c02a4be20ab97795",
+      "bytes": 58564,
+      "family": "resource_min_lod",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [
+        "artifacts\\m2-minlod-discovery\\manifest.json"
+      ],
+      "reference_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "comparison_policy": "exact_golden",
+      "provenance_note": "Unmodified original GPA CaptureNextFrame output. Native and shim-injected producer verify 12 frames each against CPU mip-color image oracles. This is discovery, not an accepted extension of replay scope.",
+      "device_scope": "Local hardware producer; original-player adapter/configuration not identified.",
+      "coverage": [
+        "resource_min_lod",
+        "resource_min_lod_observation",
+        "mip_dependent_sampling"
+      ]
+    },
+    {
+      "id": "minlod_1",
+      "path": "1/capture.gpa_frame",
+      "sha256": "461257b3a77a3276e0495bf05177e16fb89ed34c70d3c4f896b2b3c6143829cb",
+      "bytes": 58564,
+      "family": "resource_min_lod",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [
+        "artifacts\\m2-minlod-discovery\\manifest.json"
+      ],
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "provenance_note": "Unmodified original GPA CaptureNextFrame output. Native and shim-injected producer verify 12 frames each against CPU mip-color image oracles. This is discovery, not an accepted extension of replay scope.",
+      "device_scope": "Local hardware producer; original-player adapter/configuration not identified.",
+      "coverage": [
+        "resource_min_lod",
+        "resource_min_lod_observation",
+        "mip_dependent_sampling"
+      ]
+    },
+    {
+      "id": "minlod_2",
+      "path": "2/capture.gpa_frame",
+      "sha256": "dde72748bed2640b78decf9228ba66d9fb9689aacc73db1f1478d74a674fdf8e",
+      "bytes": 58564,
+      "family": "resource_min_lod",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [
+        "artifacts\\m2-minlod-discovery\\manifest.json"
+      ],
+      "reference_rgba_sha256": "c262b5c549abc0f3f8a81ef1672eda4d07f475f7c97cc37afab49b47d79ba935",
+      "comparison_policy": "exact_golden",
+      "provenance_note": "Unmodified original GPA CaptureNextFrame output. Native and shim-injected producer verify 12 frames each against CPU mip-color image oracles. This is discovery, not an accepted extension of replay scope.",
+      "device_scope": "Local hardware producer; original-player adapter/configuration not identified.",
+      "coverage": [
+        "resource_min_lod",
+        "resource_min_lod_observation",
+        "mip_dependent_sampling"
+      ]
+    },
+    {
+      "id": "minlod_3",
+      "path": "3/capture.gpa_frame",
+      "sha256": "e06ee2f42cad0703c360539d5cf80a1d3e253acd00fcfef518d05a9b381a2aa8",
+      "bytes": 58616,
+      "family": "resource_min_lod",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [
+        "artifacts\\m2-minlod-discovery\\manifest.json"
+      ],
+      "reference_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "comparison_policy": "exact_golden",
+      "provenance_note": "Unmodified original GPA CaptureNextFrame output. Native and shim-injected producer verify 12 frames each against CPU mip-color image oracles. This is discovery, not an accepted extension of replay scope.",
+      "device_scope": "Local hardware producer; original-player adapter/configuration not identified.",
+      "coverage": [
+        "resource_min_lod",
+        "resource_min_lod_observation",
+        "mip_dependent_sampling"
+      ]
+    },
+    {
+      "id": "minlod_4",
+      "path": "4/capture.gpa_frame",
+      "sha256": "24f0a9065de676c361410ec6b90ed7160b9e0fdb8439e50670bfff883f0e1727",
+      "bytes": 58604,
+      "family": "resource_min_lod",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [
+        "artifacts\\m2-minlod-discovery\\manifest.json"
+      ],
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "provenance_note": "Unmodified original GPA CaptureNextFrame output. Native and shim-injected producer verify 12 frames each against CPU mip-color image oracles. This is discovery, not an accepted extension of replay scope.",
+      "device_scope": "Local hardware producer; original-player adapter/configuration not identified.",
+      "coverage": [
+        "resource_min_lod",
+        "resource_min_lod_observation",
+        "mip_dependent_sampling"
+      ]
+    },
+    {
+      "id": "minlod_5",
+      "path": "5/capture.gpa_frame",
+      "sha256": "e3a54cdb9c9943cd4c3e909aeeaaf884528ad7f2de11e24f35010b2814ca3c07",
+      "bytes": 58512,
+      "family": "resource_min_lod",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [
+        "artifacts\\m2-minlod-discovery\\manifest.json"
+      ],
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "provenance_note": "Unmodified original GPA CaptureNextFrame output. Native and shim-injected producer verify 12 frames each against CPU mip-color image oracles. This is discovery, not an accepted extension of replay scope.",
+      "device_scope": "Local hardware producer; original-player adapter/configuration not identified.",
+      "coverage": [
+        "resource_min_lod",
+        "resource_min_lod_observation",
+        "mip_dependent_sampling"
+      ]
+    }
+  ],
+  "producer_manifest": {
+    "path": "artifacts\\m2-minlod-discovery\\manifest.json",
+    "sha256": "c0224023b97d617f25810af8a28c37cbabfddaefc9d3182fdb2514f2b843b2db"
+  }
+}

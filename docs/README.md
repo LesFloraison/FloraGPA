@@ -35,6 +35,8 @@ upstream repository that are not vendored here.
 
 ## Historical implementation and acceptance records
 
+- [Resource minimum LOD discovery](MIN_LOD_DISCOVERY.md), [blocked corpus](min-lod-discovery-corpus.json) and [discovery baseline](min-lod-discovery-baseline.json).
+
 - [Texture export across queued refreshes](TEXTURE_EXPORT_FIX.md).
 
 - [Context1 resource transfers](TRANSFER1_AUDIT.md), [acceptance baseline](transfer1-baseline.json), [original corpus](transfer1-corpus.json) and [retained context-omission controls](transfer1-context-corpus.json).

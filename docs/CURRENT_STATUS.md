@@ -1,12 +1,19 @@
 # Current capabilities and compatibility
 
-Reviewed **2026-10-03**. Replay source and binary hashes are pinned in the
+Reviewed **2026-10-04**. Replay source and binary hashes are pinned in the
 [Context1 transfer baseline](transfer1-baseline.json); earlier ClearView
 acceptance is pinned by `e6a5642`, predicate acceptance by `f91ca95`, and
 resource-boundary enforcement by `fa26cc5`.
 This is the current capability summary. Linked migration/audit documents describe
 individual batches and may retain limitations superseded by later work.
 The new Context1 transfer batch adds execution evidence, not clean-machine certification.
+
+New [resource-LOD discovery](MIN_LOD_DISCOVERY.md) adds six blocked original
+captures outside that accepted matrix. The combined inventory is **316 files:
+310 previously accepted, six newly blocked**. Set/GetResourceMinLOD execution
+and observation recovery are the next ordinary-path repair. The producer passes
+144 native/injected frame checks; the original player produces a different image
+for four of the six files, so its successful exit alone cannot certify this path.
 
 ## Supported scope
 

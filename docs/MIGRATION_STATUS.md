@@ -1,9 +1,20 @@
-# FloraGPA C++ 迁移进度 — 2026-10-03
+# FloraGPA C++ 迁移进度 — 2026-10-04
 
 > 本文是按批次保留的开发日志；历史数字与“尚未完成”描述对应各自批次。
 > 当前能力与限制统一参见 [Current status](CURRENT_STATUS.md)，文档入口见
 > [Documentation](README.md)。`artifacts/`、`out/`、`build/` 及外部参考目录
 > 是未随仓库发布的本地证据位置，不代表克隆后即可访问。
+
+2026-10-04（M2 第十九批，缺口发现）：新增资源级最小 LOD 专项程序与六份未修改
+原版捕获，覆盖 LOD 0/1/2、重置、ClearState 后保留，以及帧前设置／帧内 getter。
+144 次原生／注入程序帧检查全部通过；FloraGPA 十二次重放在 Set/GetResourceMinLOD
+处明确拒绝。只读 Ghidra 与实际 payload 确认 `0x3515`、`0x3516` 的 28 字节布局。
+原版内核十二次重放完成，但四份非零 LOD 样本输出 mip 0 红色，与程序期望不符；
+保留差异，不把成功退出当成语义正确，不据此修改黄金结果。帧前设置样本仍保存了
+getter 返回值，不能宣称信息完全缺失；安全恢复时点与实验禁用语义需要继续验证。
+当前登记 316 份文件：310 份既有验收样本、6 份新阻塞。生产重放代码未改，本批
+不冒充实现验收，也未重复运行旧矩阵。详见 [MIN_LOD_DISCOVERY.md](MIN_LOD_DISCOVERY.md)。
+后续优先修复这一已证实的普通路径缺口，M2–M6 与 72/117/15 模块状态不变。
 
 2026-10-03（M2 第十八批）：接通标准化 immediate-context
 CopySubresourceRegion1 (`0x256`) 与 UpdateSubresource1 (`0x255`)。保留原始

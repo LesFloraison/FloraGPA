@@ -1,0 +1,91 @@
+{
+  "schema": "FloraGPA resource LOD discovery 1",
+  "status": "six_enrolled_files_blocked; implementation pending",
+  "pre_fix_revision": "5da80a6",
+  "producer_frame_checks": 144,
+  "native_replay_runs": 12,
+  "native_replay_successful": 0,
+  "original_player_runs": 12,
+  "original_files_equal_producer": 2,
+  "original_files_different_from_producer": 4,
+  "original_device_configuration": "not identified; no general cross-implementation equivalence claim",
+  "cases": [
+    {
+      "mode": 0,
+      "native_producer_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "original_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "original_equals_producer": true,
+      "flora_status": "explicitly_rejected_unsupported_records",
+      "errors": 2
+    },
+    {
+      "mode": 1,
+      "native_producer_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "original_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "original_equals_producer": false,
+      "flora_status": "explicitly_rejected_unsupported_records",
+      "errors": 2
+    },
+    {
+      "mode": 2,
+      "native_producer_rgba_sha256": "c262b5c549abc0f3f8a81ef1672eda4d07f475f7c97cc37afab49b47d79ba935",
+      "original_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "original_equals_producer": false,
+      "flora_status": "explicitly_rejected_unsupported_records",
+      "errors": 2
+    },
+    {
+      "mode": 3,
+      "native_producer_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "original_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "original_equals_producer": true,
+      "flora_status": "explicitly_rejected_unsupported_records",
+      "errors": 3
+    },
+    {
+      "mode": 4,
+      "native_producer_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "original_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "original_equals_producer": false,
+      "flora_status": "explicitly_rejected_unsupported_records",
+      "errors": 2
+    },
+    {
+      "mode": 5,
+      "native_producer_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "original_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "original_equals_producer": false,
+      "flora_status": "explicitly_rejected_unsupported_records",
+      "errors": 1
+    }
+  ],
+  "sources": {
+    "tools/native/min_lod_probe.cpp": "29f49e457432a7690f8b27eb14ce5f0c3d251e8e64389d622c6a01d1de857d3d",
+    "tools/native/texture_probe_helpers.h": "30abcac380d84d505fd344d4083d97300f50df5b2e5cc7dffb11ea03c6d6ee3d",
+    "tools/native/present_capture_probe.cpp": "7c29f1e572ab16a5bc497d39eef8198d79056877a9e1d3fff3f7ed530a32c4e3"
+  },
+  "producer_sha256": "16b02cdbfe9c31e6b74abd922cd72994ffdf14ed3e534dd65d71a8b99b963076",
+  "evidence": {
+    "artifacts\\m2-minlod-discovery\\manifest.json": "c0224023b97d617f25810af8a28c37cbabfddaefc9d3182fdb2514f2b843b2db",
+    "artifacts\\m2-minlod-before\\validation.json": "d6cdbd0870700b24bae2a97453d85ba31037d384acad27ce41b9d55b09231f94",
+    "artifacts\\m2-minlod-before.log": "f3da24c71450fee976d01ca3bbd96363d7724451dc4fd32d6ff7756b4c11a337",
+    "artifacts\\capture-minlod-discovery.py": "26e292ed042f50f442814eb3c4df1798b8c1e7b5b424badcd1f333e9ba567d04",
+    "artifacts\\capture-minlod-discovery.log": "70cb5aa3e25c934cfa547f4a6f8c094e96654947cd99da6749b3921c90959a53",
+    "artifacts\\m2-minlod-wrappers.c": "bd8f8207a022277186aeb9c133989b4b0a1790bae8e71a7ff47cea106889976c",
+    "artifacts\\m2-minlod-wrappers-ghidra.log": "16396f07aebd9d9425ffc8bc0f6307a4d6960d5e3f82cebb434f452807f7cae9"
+  },
+  "package_cli_sha256": "60b9a6c27dcc6a7c075378e5da14dc4ec01481193839b2792540144579da1529",
+  "installed_video_controllers": [
+    {
+      "Name": "Intel(R) Iris(R) Xe Graphics",
+      "DriverVersion": "32.0.101.6790",
+      "PNPDeviceID": "PCI\\VEN_8086&DEV_46A6&SUBSYS_133D1043&REV_0C\\3&11583659&0&10"
+    },
+    {
+      "Name": "NVIDIA GeForce RTX 3070 Laptop GPU",
+      "DriverVersion": "32.0.15.8097",
+      "PNPDeviceID": "PCI\\VEN_10DE&DEV_249D&SUBSYS_133D1043&REV_A1\\4&174EDE7&0&0008"
+    }
+  ],
+  "next_gate": "Recover and validate resource LOD setter execution and saved getter observation semantics; prove pre-frame state provenance before restoration."
+}
