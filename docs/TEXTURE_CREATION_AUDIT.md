@@ -106,3 +106,10 @@ regression evidence, not an extended-duration M5 reliability certification.
 Next, extend the real creation corpus to 1D/3D and remaining view kinds, then
 audit special creation formats and normalization. The ordinary-path gate remains
 ahead of M3 command-list work and M6 analyzer expansion.
+
+## Subsequent dimensional acceptance
+
+The Texture1D/Texture3D limitation above describes this historical batch.
+[TEXTURE_DIMENSIONS_AUDIT.md](TEXTURE_DIMENSIONS_AUDIT.md) records the subsequent
+original-capture acceptance, related metadata and correction of the old minimum
+row-pitch assumption. Other creation and deferred boundaries remain open.

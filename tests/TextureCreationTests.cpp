@@ -81,7 +81,7 @@ class TextureCreationTests final : public QObject {
             verify(c, false);
         }
         for (auto [offset, value] : std::vector<std::pair<size_t, uint32_t>>{
-                 {0, 1}, {8, 999}, {16, 2}, {20, 2}, {21, 8}, {29, 33}, {65, 2}, {74, 1}}) {
+                 {0, 1}, {8, 999}, {16, 2}, {20, 2}, {21, 8}, {29, 33}, {65, 2}, {74, 0}}) {
             auto c = capture();
             auto b = call();
             put(b, offset, value);
@@ -106,7 +106,7 @@ class TextureCreationTests final : public QObject {
             replace(c, 100, call(false, hr, 3));
             verify(c, false);
         }
-        // These wire layouts are recovered; GPU semantics remain explicitly outside accepted scope.
+        // Dimension-specific descriptors retain strict wire boundaries.
         for (uint16_t t : {uint16_t(0x3579), uint16_t(0x357b)}) {
             auto raw = pack(Id(0), Id(2), int32_t(0), uint8_t(1));
             std::vector<uint32_t> d = t == 0x3579 ? std::vector<uint32_t>{4, 1, 1, 28, 0, 8, 0, 0}
@@ -129,6 +129,14 @@ class TextureCreationTests final : public QObject {
             {0x3149, pack(Id(123), Id(3), uint8_t(1), desc)},
             {0x3592, pack(Id(123), Id(2), int32_t(0), 28u, uint8_t(1), UINT32_MAX)},
             {0x35aa, pack(Id(123), Id(2), int32_t(0), 28u, 1u, 0u, uint8_t(1), 1u)}};
+        for (auto t : {0x3134, 0x3007})
+            records[uint16_t(t)] = records.at(0x313f);
+        for (auto t : {0x3135, 0x3136, 0x3008, 0x3009})
+            records[uint16_t(t)] = records.at(0x3140);
+        for (auto t : {0x3137, 0x300a})
+            records[uint16_t(t)] = records.at(0x3142);
+        records[0x313e] = pack(Id(123), Id(3), uint8_t(1), std::array<uint32_t, 8>{});
+        records[0x3011] = pack(Id(123), Id(3), uint8_t(1), std::array<uint32_t, 9>{});
         for (auto [t, b] : records) {
             QVERIFY(acceptTextureCreationObservation(t, b));
             for (size_t n = 0; n < b.size(); ++n)
@@ -137,8 +145,8 @@ class TextureCreationTests final : public QObject {
             b.push_back(0);
             QVERIFY_EXCEPTION_THROWN(acceptTextureCreationObservation(t, b), std::runtime_error);
         }
-        for (auto [t, pos] :
-             std::vector<std::pair<uint16_t, size_t>>{{0x3149, 16}, {0x3592, 24}, {0x35aa, 32}}) {
+        for (auto [t, pos] : std::vector<std::pair<uint16_t, size_t>>{
+                 {0x3149, 16}, {0x313e, 16}, {0x3011, 16}, {0x3592, 24}, {0x35aa, 32}}) {
             auto b = records.at(t);
             b[pos] = 2;
             QVERIFY_EXCEPTION_THROWN(acceptTextureCreationObservation(t, b), std::runtime_error);
@@ -252,53 +260,152 @@ class TextureCreationTests final : public QObject {
                 }
             }
     }
+    void dimensionCreationBoundaries() {
+        QTemporaryDir dir;
+        for (uint16_t type : {uint16_t(0x3579), uint16_t(0x357b)})
+            for (bool initial : {false, true}) {
+                const std::vector<uint32_t> d = type == 0x3579
+                                                    ? std::vector<uint32_t>{4, 2, 2, 28, 0, 8, 0, 0}
+                                                    : std::vector<uint32_t>{4, 4, 2, 2, 28, 0, 8, 0, 0};
+                const UINT size = type == 0x3579 ? 48 : 144;
+                auto resource = pack(Id(0), Id(2)), wire = pack(Id(0), Id(2), int32_t(0), uint8_t(1));
+                for (auto word : d) {
+                    append(resource, word);
+                    append(wire, word);
+                }
+                append(resource, Id(initial ? 4 : 999));
+                append(wire, uint8_t(initial));
+                if (initial)
+                    for (UINT mip = 0; mip < 2; ++mip) {
+                        append(wire, UINT64_MAX);
+                        append(wire, type == 0x3579 ? 0u : 16u >> mip);
+                        append(wire, type == 0x3579 ? 0u : 64u >> (2 * mip));
+                    }
+                append(wire, Id(3));
+                Capture c;
+                c.add(1, 5, 0x127, Raw(24));
+                c.add(2, 5, 0x81, Raw(28));
+                c.add(3, 5, uint16_t(0x84 + type - 0x3579), resource);
+                auto data = pack(size);
+                data.insert(data.end(), size, 71);
+                c.add(4, 9, 1, data);
+                c.add(100, 7, type, wire);
+                for (size_t n = 0; n < wire.size(); ++n)
+                    QVERIFY_EXCEPTION_THROWN(readTextureCreation(type, Bytes(wire).first(n)),
+                                             std::runtime_error);
+                auto extra = wire;
+                extra.push_back(0);
+                QVERIFY_EXCEPTION_THROWN(readTextureCreation(type, extra), std::runtime_error);
+                const auto path = dir.filePath("dimension.gpa_frame");
+                c.save(path);
+                {
+                    Frame frame(path.toStdWString());
+                    const auto audit = auditTextureCreations(frame);
+                    QVERIFY2(audit.records.at(100).error.empty(), audit.records.at(100).error.c_str());
+                    for (bool warp : {false, true}) {
+                        ReplayOptions options;
+                        options.warp = warp;
+                        options.before = true;
+                        options.until = 100;
+                        Replay before(frame, options);
+                        before.run();
+                        QVERIFY_EXCEPTION_THROWN(before.readTexture(3), std::runtime_error);
+                        options.before = false;
+                        options.until = 0;
+                        Replay replay(frame, options);
+                        replay.run();
+                        if (initial)
+                            QCOMPARE(replay.readTexture(3), Raw(size, 71));
+                        else
+                            QCOMPARE(replay.counts.at("textures_created_without_initial_data"), uint64_t(1));
+                    }
+                }
+                if (initial) {
+                    if (type == 0x357b) {
+                        auto badPitch = wire;
+                        put(badPitch, 70, 0u);
+                        replace(c, 100, badPitch);
+                        c.save(path);
+                        {
+                            Frame bad(path.toStdWString());
+                            QVERIFY(!auditTextureCreations(bad).records.at(100).error.empty());
+                        }
+                        replace(c, 100, wire);
+                    }
+                    // Initial data must cover the full array/volume, not just the serialized pointer count.
+                    replace(c, 4, pack(4u, 71u));
+                    c.save(path);
+                    Frame bad(path.toStdWString());
+                    QVERIFY(!auditTextureCreations(bad).records.at(100).error.empty());
+                }
+            }
+    }
+    void originalCaptures_data() {
+        QTest::addColumn<QString>("root");
+        QTest::addColumn<int>("scenario");
+        QTest::addColumn<bool>("warp");
+        std::vector<int> modes{7, 10, 11, 12, 13, 14, 15, 16, 30, 31, 32, 33, 34, 35, 36, 37, 38};
+        for (int i = 0; i < 7; ++i)
+            modes.push_back(i);
+        for (auto scenario : modes)
+            for (bool warp : {false, true}) {
+                const auto root = qEnvironmentVariable(scenario < 7 ? "FLORA_TEXTURE_CREATION_CAPTURES"
+                                                                    : "FLORA_TEXTURE_DIMENSION_CAPTURES");
+                QTest::newRow(
+                    QString("%1-%2").arg(scenario).arg(warp ? "warp" : "hardware").toUtf8().constData())
+                    << root << scenario << warp;
+            }
+    }
     void originalCaptures() {
-        const auto root = qEnvironmentVariable("FLORA_TEXTURE_CREATION_CAPTURES");
+        QFETCH(QString, root);
+        QFETCH(int, scenario);
+        QFETCH(bool, warp);
+        const int mode = scenario % 10, dimension = scenario >= 10 ? scenario / 10 : 2;
         if (root.isEmpty())
             QSKIP("Set FLORA_TEXTURE_CREATION_CAPTURES to the original creation corpus");
-        for (int mode = 0; mode < 7; ++mode)
-            for (bool warp : {false, true}) {
-                const auto folder = root + QString("/%1/").arg(mode);
-                Frame frame((folder + "capture.gpa_frame").toStdWString());
-                const auto initial = fileBytes(folder + "native/initial.bin"),
-                           expected = fileBytes(folder + "native/expected.bin");
-                const auto audit = auditTextureCreations(frame);
-                Id texture = 0, creationEvent = 0;
-                unsigned views = 0, observations = 0;
-                for (const auto &[id, c] : audit.records) {
-                    QVERIFY2(c.error.empty(), c.error.c_str());
-                    QCOMPARE(inspectCommand(frame, id)["status"], nlohmann::json("decoded"));
-                    if (c.result != 0)
-                        ++observations;
-                    else if (c.type == 0x357a) {
-                        texture = c.resource;
-                        creationEvent = id;
-                        QCOMPARE(c.hasInitial, mode == 1 || mode == 2 || mode == 6);
-                        if (c.hasInitial) {
-                            const auto bytes = frame.data(c.data);
-                            QCOMPARE(Raw(bytes.begin(), bytes.end()), initial);
-                        }
-                    } else if (c.type == 0x357c)
-                        ++views;
+        const auto folder = root + QString("/%1/").arg(scenario);
+        Frame frame((folder + "capture.gpa_frame").toStdWString());
+        const auto initial = fileBytes(folder + "native/initial.bin"),
+                   expected = fileBytes(folder + "native/expected.bin");
+        const auto audit = auditTextureCreations(frame);
+        Id texture = 0, creationEvent = 0;
+        unsigned views = 0, observations = 0;
+        for (const auto &[id, c] : audit.records) {
+            QVERIFY2(c.error.empty(), c.error.c_str());
+            QCOMPARE(inspectCommand(frame, id)["status"], nlohmann::json("decoded"));
+            if (c.result != 0)
+                ++observations;
+            else if (c.type == uint16_t(0x3578 + dimension)) {
+                texture = c.resource;
+                creationEvent = id;
+                QCOMPARE(c.hasInitial, mode == 1 || mode == 2 || mode >= 6);
+                if (c.hasInitial) {
+                    const auto bytes = frame.data(c.data);
+                    QCOMPARE(Raw(bytes.begin(), bytes.end()), initial);
                 }
-                QVERIFY(texture && creationEvent);
-                QCOMPARE(views, 1u);
-                QCOMPARE(observations, mode == 4 || mode == 5 ? 1u : 0u);
-                QCOMPARE(validateFrame(frame.path())["errors"], nlohmann::json(0));
-                ReplayOptions options;
-                options.warp = warp;
-                Replay replay(frame, options);
-                bool observed = false;
-                replay.run({}, {}, [&](Id event, bool after, auto *, const auto &) {
-                    if (event == creationEvent && after) {
-                        observed = true;
-                        if (mode == 1 || mode == 2 || mode == 6)
-                            QCOMPARE(replay.readTexture(texture), initial);
-                    }
-                });
-                QVERIFY(observed);
-                QCOMPARE(replay.readTexture(texture), expected);
+            } else if (c.type == 0x357c)
+                ++views;
+        }
+        QVERIFY(texture && creationEvent);
+        for (const auto &[id, e] : frame.entries())
+            if (e.category == 7 && isTextureCreationObservation(e.type))
+                QCOMPARE(inspectCommand(frame, id)["status"], nlohmann::json("decoded"));
+        QCOMPARE(views, 1u);
+        QCOMPARE(observations, mode == 4 || mode == 5 ? 1u : 0u);
+        QCOMPARE(validateFrame(frame.path())["errors"], nlohmann::json(0));
+        ReplayOptions options;
+        options.warp = warp;
+        Replay replay(frame, options);
+        bool observed = false;
+        replay.run({}, {}, [&](Id event, bool after, auto *, const auto &) {
+            if (event == creationEvent && after) {
+                observed = true;
+                if (mode == 1 || mode == 2 || mode >= 6)
+                    QCOMPARE(replay.readTexture(texture), initial);
             }
+        });
+        QVERIFY(observed);
+        QCOMPARE(replay.readTexture(texture), expected);
     }
 };
 QTEST_GUILESS_MAIN(TextureCreationTests)

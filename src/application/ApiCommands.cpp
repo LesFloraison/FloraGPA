@@ -608,17 +608,17 @@ Json inspectCommand(const Frame &frame, Id id) {
                 r.id("returned_resource");
             } else if (isTextureCreationObservation(t)) {
                 acceptTextureCreationObservation(t, raw);
-                if (t == 0x313f) {
+                if (in(t, {0x313f, 0x3134, 0x3007})) {
                     r.field("hresult", "i");
                     r.field("iid", "16s");
                     r.id("returned_interface");
-                } else if (t == 0x3140 || t == 0x3141)
+                } else if (in(t, {0x3140, 0x3141, 0x3135, 0x3136, 0x3008, 0x3009}))
                     r.u("observed_reference_count");
-                else if (t == 0x3142)
+                else if (in(t, {0x3142, 0x3137, 0x300a}))
                     r.id("returned_device");
-                else if (t == 0x3149) {
+                else if (in(t, {0x3149, 0x313e, 0x3011})) {
                     if (r.flag("descriptor_present"))
-                        r.field("descriptor", "11I");
+                        r.field("descriptor", t == 0x313e ? "8I" : t == 0x3011 ? "9I" : "11I");
                 } else {
                     r.field("hresult", "i");
                     r.u("format");

@@ -6,10 +6,10 @@ bool textureSrvDescriptorEqual(std::span<const uint32_t> a, std::span<const uint
     if (a.size() != 6 || b.size() != 6 || a[0] != b[0] || a[1] != b[1])
         return false;
     // Compare the active union only; padding and inactive descriptor members are not semantics.
-    const auto words = a[1] == 4 || a[1] == 7 || a[1] == 9 ? 4
-                       : a[1] == 5 || a[1] == 10           ? 6
-                       : a[1] == 6                         ? 2
-                                                           : 0;
+    const auto words = a[1] == 2 || a[1] == 4 || a[1] == 7 || a[1] == 8 || a[1] == 9 ? 4
+                       : a[1] == 3 || a[1] == 5 || a[1] == 10                        ? 6
+                       : a[1] == 6                                                   ? 2
+                                                                                     : 0;
     return words && std::equal(a.begin(), a.begin() + words, b.begin());
 }
 TextureCreationRecord readTextureCreation(uint16_t t, Bytes bytes) {
@@ -78,15 +78,13 @@ TextureCreationAudit auditTextureCreations(const Frame &frame) {
                 const auto saved = r.array<uint32_t, 6>();
                 r.end();
                 const auto source = frame.resource(c.source);
-                if (resource.device != c.device || source.device != c.device || source.type != 0x85)
+                if (resource.device != c.device || source.device != c.device || source.type < 0x84 ||
+                    source.type > 0x86)
                     throw std::runtime_error(
-                        "Captured SRV creation requires a Texture2D source on the recorded device");
+                        "Captured SRV creation requires a texture source on the recorded device");
                 if (c.hasDescriptor && !textureSrvDescriptorEqual(saved, c.descriptor))
                     throw std::runtime_error("Created SRV descriptor differs from its saved resource");
             } else {
-                if (e.type != 0x357a)
-                    throw std::runtime_error("Texture1D/Texture3D creation wire is decoded; execution awaits "
-                                             "original capture acceptance");
                 if (!c.hasDescriptor || resource.type != uint16_t(0x84 + e.type - 0x3579) ||
                     resource.device != c.device)
                     throw std::runtime_error(
@@ -108,9 +106,10 @@ TextureCreationAudit auditTextureCreations(const Frame &frame) {
                             throw std::runtime_error(
                                 "Texture initial observation has a null process pointer");
                     for (size_t i = 0; i < c.initial.size(); ++i)
-                        if (c.initial[i].rowPitch < subs[i].rowPitch)
+                        if ((e.type != 0x3579 && !c.initial[i].rowPitch) ||
+                            (e.type == 0x357b && !c.initial[i].slicePitch))
                             throw std::runtime_error(
-                                "Texture initial row pitch is shorter than a captured row");
+                                "Texture initial data has a zero required row/slice pitch");
                     const auto data = frame.data(resource.data);
                     if (data.size() != subs.back().offset + subs.back().size)
                         throw std::runtime_error(
@@ -133,8 +132,9 @@ const TextureCreationRecord &requireTextureCreation(const TextureCreationAudit &
     return c;
 }
 bool isTextureCreationObservation(uint16_t t) {
-    return t == 0x313f || t == 0x3140 || t == 0x3141 || t == 0x3142 || t == 0x3149 || t == 0x3592 ||
-           t == 0x35aa;
+    return t == 0x3134 || t == 0x3135 || t == 0x3136 || t == 0x3137 || t == 0x313e || t == 0x3007 ||
+           t == 0x3008 || t == 0x3009 || t == 0x300a || t == 0x3011 || t == 0x313f || t == 0x3140 ||
+           t == 0x3141 || t == 0x3142 || t == 0x3149 || t == 0x3592 || t == 0x35aa;
 }
 bool acceptTextureCreationObservation(uint16_t t, Bytes bytes) {
     if (!isTextureCreationObservation(t))
@@ -142,19 +142,29 @@ bool acceptTextureCreationObservation(uint16_t t, Bytes bytes) {
     Reader r(bytes);
     r.skip(16); // Link/owner are observations, not replay COM calls.
     switch (t) {
+    case 0x3134:
+    case 0x3007:
     case 0x313f:
         r.skip(4 + 16 + 8);
         break;
     case 0x3140:
     case 0x3141:
+    case 0x3135:
+    case 0x3136:
+    case 0x3008:
+    case 0x3009:
         r.skip(4);
         break;
     case 0x3142:
+    case 0x3137:
+    case 0x300a:
         r.skip(8);
         break;
     case 0x3149:
+    case 0x313e:
+    case 0x3011:
         if (r.flag())
-            r.skip(44);
+            r.skip(t == 0x313e ? 32 : t == 0x3011 ? 36 : 44);
         break;
     case 0x3592:
         r.skip(8);

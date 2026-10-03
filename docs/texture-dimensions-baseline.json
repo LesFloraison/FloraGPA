@@ -1,0 +1,250 @@
+{
+  "schema": "FloraGPA texture dimensions acceptance 1",
+  "completion": "M2 in progress; M3-M6 incomplete",
+  "scope": "Device5 Texture1D/Texture3D creation and their SRVs; ten additional metadata layouts; valid overlapping input pitches",
+  "package": "out\\FloraGPA-texture-dimensions-20261003",
+  "package_sha256": {
+    "FloraGPA.exe": "c745483ee989d84d020148060fb8260bcfeed21e0c949070d4714fa168173c86",
+    "FloraGPA.Cli.exe": "a305fc86c8136631dd0be6dc3b1535a7250942738e8f4594bfbc3a325dd2e456",
+    "FloraGPA.Worker.exe": "96fa0c65bd44eaf2fbc5e725908b89506b2643f94310a7f6625c8a2d3c60bf95",
+    "FloraGPA.Rdc.exe": "f4d21d43e661d24d392e91fc1a1f1460a20d1377fcf5075c57083ad289e82773",
+    "FloraGPA.Metrics.dll": "58b6278f2a93e783b1e8bb1290e9b0e51745f1a36825f296584f52159fd7c6db"
+  },
+  "native_runs": 296,
+  "file_outcomes": {
+    "repeat_stable": 147,
+    "repeat_variable": 1
+  },
+  "prior_stable_images_unchanged": 130,
+  "corpus_controls": 61,
+  "boundary_runs": 64,
+  "new_original_player_runs": 34,
+  "producer_frame_checks": 408,
+  "hardware_warp_original_creation_runs": 48,
+  "golden_controls": [
+    {
+      "case": "gf2",
+      "rgba_sha256": "2e1abc5eacb0bbfd801f9fe059c305baa9a0786c384b36a42fa5a323dd979fd1",
+      "passed": true,
+      "counts": {
+        "ClearDepthStencilView": 2,
+        "ClearRenderTargetView": 1,
+        "CreateBuffer": 2,
+        "DrawIndexed": 72,
+        "Map": 44,
+        "Present": 1,
+        "buffers_created_without_initial_data": 2,
+        "object_observation_records": 49,
+        "pipeline_setter_records": 142,
+        "private_data_observations": 4,
+        "query_metadata_records": 2,
+        "state_or_auxiliary_records": 551,
+        "unmap_observations": 44
+      }
+    },
+    {
+      "case": "gf2-negative",
+      "rgba_sha256": "b2c5548a51715f581c4591acc266ac7a0c65b54b7ecd9a49f43499fa9b76c5f1",
+      "passed": true,
+      "counts": {
+        "ClearDepthStencilView": 2,
+        "ClearRenderTargetView": 1,
+        "CreateBuffer": 2,
+        "Map": 44,
+        "Present": 1,
+        "buffers_created_without_initial_data": 2,
+        "object_observation_records": 49,
+        "pipeline_setter_records": 142,
+        "private_data_observations": 4,
+        "query_metadata_records": 2,
+        "state_or_auxiliary_records": 551,
+        "unmap_observations": 44
+      }
+    },
+    {
+      "case": "bf1",
+      "rgba_sha256": "1f724d1840652f66afd26dd30c95aecd5c1b4932eede56109198f15a8f57a2f6",
+      "passed": true,
+      "counts": {
+        "ClearDepthStencilView": 10,
+        "ClearRenderTargetView": 10,
+        "ClearUnorderedAccessViewFloat": 1,
+        "CopyResource": 2,
+        "CopyStructureCount": 6,
+        "CopySubresourceRegion": 7,
+        "Dispatch": 60,
+        "DispatchIndirect": 13,
+        "Draw": 79,
+        "DrawIndexed": 41,
+        "DrawIndexedInstanced": 1053,
+        "DrawInstanced": 29,
+        "GenerateMips": 2,
+        "Map": 4151,
+        "Present": 1,
+        "UpdateSubresource": 27,
+        "map_read_observations": 2,
+        "object_observation_records": 28,
+        "pipeline_setter_records": 2221,
+        "query_metadata_records": 17,
+        "state_or_auxiliary_records": 7354,
+        "unmap_observations": 4153,
+        "unresolved_input_layout_setters": 2,
+        "unresolved_output_setters": 6,
+        "unresolved_shader_setters": 4,
+        "unresolved_srv_setters": 2
+      }
+    },
+    {
+      "case": "bf1-negative",
+      "rgba_sha256": "cd3a3066f984b1c317fbeefec2836503f32078321d3dc1f367465f2c06d435bf",
+      "passed": true,
+      "counts": {
+        "ClearDepthStencilView": 10,
+        "ClearRenderTargetView": 10,
+        "ClearUnorderedAccessViewFloat": 1,
+        "CopyResource": 2,
+        "CopyStructureCount": 6,
+        "CopySubresourceRegion": 7,
+        "Dispatch": 60,
+        "DispatchIndirect": 13,
+        "GenerateMips": 2,
+        "Map": 4151,
+        "Present": 1,
+        "UpdateSubresource": 27,
+        "map_read_observations": 2,
+        "object_observation_records": 28,
+        "pipeline_setter_records": 2221,
+        "query_metadata_records": 17,
+        "state_or_auxiliary_records": 7354,
+        "unmap_observations": 4153,
+        "unresolved_input_layout_setters": 2,
+        "unresolved_output_setters": 6,
+        "unresolved_shader_setters": 4,
+        "unresolved_srv_setters": 2
+      }
+    }
+  ],
+  "results": {
+    "corpus": {
+      "path": "artifacts\\m2-dimensions-release-corpus\\validation.json",
+      "sha256": "d547d78d747aff0d07a24a6dcb749aa14222ff1d2f13de65644aa3471adf0669",
+      "counts": {
+        "repeat_stable": 90,
+        "repeat_variable": 1
+      }
+    },
+    "originals": {
+      "path": "artifacts\\m2-dimensions-release-originals\\validation.json",
+      "sha256": "076d49d22d26fdfa1ec15d99ddb5cb1bc2b3d6313ca4d9dfb4de1dcb3346e0b1",
+      "counts": {
+        "repeat_stable": 11
+      }
+    },
+    "copy": {
+      "path": "artifacts\\m2-dimensions-release-copy\\validation.json",
+      "sha256": "6f7af363c297003a3bbdc4ce8dc64b075e498f09b5212aeff7d7901c9164ffb9",
+      "counts": {
+        "repeat_stable": 6
+      }
+    },
+    "present": {
+      "path": "artifacts\\m2-dimensions-release-present\\validation.json",
+      "sha256": "28d60c9df6cf82a060081f65a30b97a664ca087250b0b012969ca60c1e1b1027",
+      "counts": {
+        "repeat_stable": 5
+      }
+    },
+    "buffer": {
+      "path": "artifacts\\m2-dimensions-release-buffer\\validation.json",
+      "sha256": "47b65adbdcb7cb71c0a25b07481f72cbfc0c3eb7cffa0af050d43da0e1915645",
+      "counts": {
+        "repeat_stable": 5
+      }
+    },
+    "pipeline": {
+      "path": "artifacts\\m2-dimensions-release-pipeline\\validation.json",
+      "sha256": "f2144343cece529b30d74b8f9d510f6ac720f0103d20d0c6d471e05d2cb29430",
+      "counts": {
+        "repeat_stable": 5
+      }
+    },
+    "creation": {
+      "path": "artifacts\\m2-dimensions-release-creation\\validation.json",
+      "sha256": "6717fa5d7b81604807d766f0fd6e02f572d146e32efdca0380d912ee1f2d8445",
+      "counts": {
+        "repeat_stable": 7
+      }
+    },
+    "discovery": {
+      "path": "artifacts\\m2-dimensions-release-discovery\\validation.json",
+      "sha256": "2db5320cc16a53e2b72c414fd71eaa37a346fa7ec955b950e941d80ce04aec2f",
+      "counts": {
+        "repeat_stable": 1
+      }
+    },
+    "dimensions": {
+      "path": "artifacts\\m2-dimensions-release-dimensions\\validation.json",
+      "sha256": "a42252ee550ee3df9dd497abddf841efd776686dcd1286e1f9dbb8d4eca4c1e3",
+      "counts": {
+        "repeat_stable": 17
+      }
+    }
+  },
+  "ctest": {
+    "path": "artifacts/ctest-m2-dimensions.log",
+    "sha256": "605e2f1ca1e7b143979844a27c1d06a37565de2f632b97c9698a05f92a8ec332",
+    "suites": 14,
+    "qt_details": {
+      "texture-creation": {
+        "path": "build\\vs2022\\texture-creation-Release.txt",
+        "sha256": "0dfa7a6741234862fee7947048db9fae5b279997b09dfbd9aac1d214476fadbb",
+        "cases": 55
+      },
+      "ui": {
+        "path": "build\\vs2022\\ui-Release.txt",
+        "sha256": "403f117a9edeabb1fe0e0721371410c6d55765920ba0920d3f9aae01ea7b8cc9",
+        "cases": 55
+      },
+      "texture-edit-replay": {
+        "path": "build\\vs2022\\texture-edit-replay-Release.txt",
+        "sha256": "4de4fc57e2e7555ec1ac2eb4ecb4b586bd6f2a9c97bda294617fd1297519a9f2",
+        "cases": 34
+      }
+    }
+  },
+  "sources": {
+    "src/core/TextureCreation.cpp": "b5df5a100e935745cec5283e8ec78175c58bcef4501e761a1d457ca5a729e2b9",
+    "src/core/TextureCreation.h": "cc76c49b628eb7f7aa0a44b4ddae6a9d2584dfee4049c7858894be62399ee070",
+    "src/application/ApiCommands.cpp": "50a28752bf61c564a94707891487be2668d53b81119cfac988ba2f82829c9852",
+    "src/application/FrameValidation.cpp": "03959519fc75c5205e7a496de46a20dc49308df93f478283cec3699c7fb4a4c4",
+    "src/core/ReplayCapabilities.cpp": "6612fd3ac767a424e3915c1892a503c03804af2f3ef23ef108c1ea444987d9ec",
+    "src/core/CommandNames.inc": "100e79cffe0721655600530a865f9353d5aa427933e1d61b1aa92aa7d44addf8",
+    "src/replay/Replay.cpp": "e6f36cb07918c1be3f40c9bdc6d4be27cd60b029b819b5e4df872de1a5825226",
+    "src/replay/Replay.h": "3cdd0e9fb08c16703630a63efea02379f34907dec50a78209f7c8349fb50f0ac",
+    "tests/TextureCreationTests.cpp": "b13daad41d1e879936c95e8a25cb83020b1d7a3cded44eb8ee9d1eda997c88fb",
+    "tools/native/texture_creation_probe.cpp": "2c825ccee1b698d2be2090f00b1a4b05305e839cd2008e9f8e0baa2007d89c8d",
+    "tools/native/texture_probe_helpers.h": "30abcac380d84d505fd344d4083d97300f50df5b2e5cc7dffb11ea03c6d6ee3d",
+    "tools/native/texture_copy_probe.cpp": "9713f07b873a1700bae72e6397c7189e3b2325ea076de3aaff8fe0fa64cde1cb",
+    "tools/native/present_capture_probe.cpp": "7c29f1e572ab16a5bc497d39eef8198d79056877a9e1d3fff3f7ed530a32c4e3",
+    "CMakeLists.txt": "0fd901df47b73cec60671e2f173438fd24302aa3264d64a1f5618ff3e8e1b4c0"
+  },
+  "evidence": {
+    "artifacts/m2-next-creation-wrappers.c": "6482a23bb4ab34edecee5b79939e356b64e13e36b41dc64dcbaaf29caa38e379",
+    "artifacts/m2-next-creation-wrapper-index.json": "252bf51a2e8d47ab9157b0ae8ab80164680fe38bd80c3f6aa1928ac412964c37",
+    "artifacts/m2-creation-pitch-results.csv": "a5fbe18e6d8d233fd6090b625b72bae5127eebac46939238f4b28ff8c873140a",
+    "artifacts/m2-creation-pitch-probe/probe.cpp": "a42ea431a0c168f85518a257577937acbd2ca3230efc78b26e4d78b03d2da541",
+    "artifacts/m2-texture-dimensions-final/manifest.json": "dab924b2b40532853c737d54a6dd51ed139d5e2e6f17042b00711c93a67eb10e"
+  },
+  "limits": [
+    "Original player adapter unidentified; observed image equality is not matched-device equivalence",
+    "Other view/device layouts, implicit normalization, identity versioning and deferred execution remain unsupported",
+    "These fixtures do not certify all formats/usages/sample counts",
+    "Known Helldivers variability unchanged; missing contents are not synthesized"
+  ],
+  "before_fix_evidence": {
+    "artifacts/m2-dimensions-overlap-before/7/validation.json": "14502a02a735ac6d8fd364d977e7987303de68fd62e6e71530c3cecfea83e693",
+    "artifacts/m2-dimensions-overlap-before/37/validation.json": "f173bfe913af6adbe46a1a2563ab79eff2e30114dbeece432b1a38e4e29015d8",
+    "artifacts/m2-dimensions-overlap-before/38/validation.json": "3fd01213b950b7586d42b9394c2831e07c2ef7505b7724250dbe8fac5b153384",
+    "artifacts/m2-texture-dimensions-before/validation.json": "421fd9686ba19149f04f48508fd3e4b1f67e2fd4d26298b9dfd4783ccbc730a2"
+  }
+}

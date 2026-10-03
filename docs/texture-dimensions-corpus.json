@@ -1,0 +1,437 @@
+{
+  "schema": "FloraGPA compatibility corpus 1",
+  "profile": "GPA 2025 R1 legacy DX11 / IGPA v3",
+  "root_parameter": "--captures-root",
+  "cases": [
+    {
+      "id": "texture_creation_2d_overlapping_rows",
+      "path": "7/capture.gpa_frame",
+      "sha256": "0e9d06703c2aba4c0bd409fd30b037c5c1d988fb239d1762fe0b28563ff087f4",
+      "bytes": 67882,
+      "family": "texture_creation_dimensions",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified CaptureNextFrame output; native and GPA-injected producer bytes/images checked on twelve frames each. Overlap cases use nonuniform source pixels.",
+      "device_scope": "Producer device IDs in retained oracle; original player adapter unidentified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "controls": [],
+      "boundaries": [
+        {
+          "event": 4,
+          "resource": 8,
+          "expect_stable": true,
+          "expected_storage_sha256": "19a5b62801804cf7aeed028cea517e8fe1196042d4d4fe59be713c433fe97f54"
+        }
+      ]
+    },
+    {
+      "id": "texture_creation_1d_upload",
+      "path": "10/capture.gpa_frame",
+      "sha256": "3138a314548e550e30be28166793c45e6cc3b1275c63b35550ed3292936f044c",
+      "bytes": 62900,
+      "family": "texture_creation_dimensions",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified CaptureNextFrame output; native and GPA-injected producer bytes/images checked on twelve frames each. Overlap cases use nonuniform source pixels.",
+      "device_scope": "Producer device IDs in retained oracle; original player adapter unidentified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "controls": [],
+      "boundaries": [
+        {
+          "event": 22,
+          "resource": 7,
+          "expect_stable": true,
+          "expected_storage_sha256": "f6c1da7d2ce4b91eb77218aab54fc659e710f1e829e904e09eb8f658fc41bc5e"
+        }
+      ]
+    },
+    {
+      "id": "texture_creation_1d_initial",
+      "path": "11/capture.gpa_frame",
+      "sha256": "0b0b9e2346688b49ea63522711ff67d3674f86b7173de38fe27a3633116efb5e",
+      "bytes": 62949,
+      "family": "texture_creation_dimensions",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified CaptureNextFrame output; native and GPA-injected producer bytes/images checked on twelve frames each. Overlap cases use nonuniform source pixels.",
+      "device_scope": "Producer device IDs in retained oracle; original player adapter unidentified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "controls": [],
+      "boundaries": [
+        {
+          "event": 4,
+          "resource": 7,
+          "expect_stable": true,
+          "expected_storage_sha256": "f6c1da7d2ce4b91eb77218aab54fc659e710f1e829e904e09eb8f658fc41bc5e"
+        }
+      ]
+    },
+    {
+      "id": "texture_creation_1d_initial_then_update",
+      "path": "12/capture.gpa_frame",
+      "sha256": "bc6fc314b83cfaacca3c9c987bc48d184aeee90dae93f7de372fc42a1eab43cb",
+      "bytes": 63529,
+      "family": "texture_creation_dimensions",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified CaptureNextFrame output; native and GPA-injected producer bytes/images checked on twelve frames each. Overlap cases use nonuniform source pixels.",
+      "device_scope": "Producer device IDs in retained oracle; original player adapter unidentified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 32,
+          "repeat": 2,
+          "expected_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+          "purpose": "Diagnostic-only mip-0 upload omission preserves creation pixels; original files and shaders unchanged."
+        }
+      ],
+      "boundaries": [
+        {
+          "event": 4,
+          "resource": 7,
+          "expect_stable": true,
+          "expected_storage_sha256": "f6c1da7d2ce4b91eb77218aab54fc659e710f1e829e904e09eb8f658fc41bc5e"
+        },
+        {
+          "event": 38,
+          "resource": 7,
+          "expect_stable": true,
+          "expected_storage_sha256": "bbba42da53f15153ce4f7af694baaac0f75b22f830ec79d41fc2d60d1f672330"
+        }
+      ]
+    },
+    {
+      "id": "texture_creation_1d_default_srv",
+      "path": "13/capture.gpa_frame",
+      "sha256": "6c2265834e87239aba31e52443b13c484850af434d5ddc4cc9efab20f0f73b1d",
+      "bytes": 62876,
+      "family": "texture_creation_dimensions",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified CaptureNextFrame output; native and GPA-injected producer bytes/images checked on twelve frames each. Overlap cases use nonuniform source pixels.",
+      "device_scope": "Producer device IDs in retained oracle; original player adapter unidentified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "controls": [],
+      "boundaries": [
+        {
+          "event": 22,
+          "resource": 7,
+          "expect_stable": true,
+          "expected_storage_sha256": "f6c1da7d2ce4b91eb77218aab54fc659e710f1e829e904e09eb8f658fc41bc5e"
+        }
+      ]
+    },
+    {
+      "id": "texture_creation_1d_failed",
+      "path": "14/capture.gpa_frame",
+      "sha256": "4d1136f819f3bb188748caed718d8a3f1ec330e6ca5f5fb1b538b77f5350b4f1",
+      "bytes": 63039,
+      "family": "texture_creation_dimensions",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified CaptureNextFrame output; native and GPA-injected producer bytes/images checked on twelve frames each. Overlap cases use nonuniform source pixels.",
+      "device_scope": "Producer device IDs in retained oracle; original player adapter unidentified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "controls": [],
+      "boundaries": [
+        {
+          "event": 24,
+          "resource": 9,
+          "expect_stable": true,
+          "expected_storage_sha256": "f6c1da7d2ce4b91eb77218aab54fc659e710f1e829e904e09eb8f658fc41bc5e"
+        }
+      ]
+    },
+    {
+      "id": "texture_creation_1d_validation_only",
+      "path": "15/capture.gpa_frame",
+      "sha256": "ec5b89d0d5c9ec5bc8ee4d49456ba7d4b6e212c66b2409b8264d02e49db91af4",
+      "bytes": 63039,
+      "family": "texture_creation_dimensions",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified CaptureNextFrame output; native and GPA-injected producer bytes/images checked on twelve frames each. Overlap cases use nonuniform source pixels.",
+      "device_scope": "Producer device IDs in retained oracle; original player adapter unidentified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "controls": [],
+      "boundaries": [
+        {
+          "event": 24,
+          "resource": 9,
+          "expect_stable": true,
+          "expected_storage_sha256": "f6c1da7d2ce4b91eb77218aab54fc659e710f1e829e904e09eb8f658fc41bc5e"
+        }
+      ]
+    },
+    {
+      "id": "texture_creation_1d_immediate_overwrite",
+      "path": "16/capture.gpa_frame",
+      "sha256": "7564153dfd88f60625a59c71d4ddc793c952237da934f5dcc6cc01993bbfb1c9",
+      "bytes": 62932,
+      "family": "texture_creation_dimensions",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified CaptureNextFrame output; native and GPA-injected producer bytes/images checked on twelve frames each. Overlap cases use nonuniform source pixels.",
+      "device_scope": "Producer device IDs in retained oracle; original player adapter unidentified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 15,
+          "repeat": 2,
+          "expected_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+          "purpose": "Diagnostic-only mip-0 upload omission preserves creation pixels; original files and shaders unchanged."
+        }
+      ],
+      "boundaries": [
+        {
+          "event": 4,
+          "resource": 7,
+          "expect_stable": true,
+          "expected_storage_sha256": "f6c1da7d2ce4b91eb77218aab54fc659e710f1e829e904e09eb8f658fc41bc5e"
+        },
+        {
+          "event": 22,
+          "resource": 7,
+          "expect_stable": true,
+          "expected_storage_sha256": "bbba42da53f15153ce4f7af694baaac0f75b22f830ec79d41fc2d60d1f672330"
+        }
+      ]
+    },
+    {
+      "id": "texture_creation_3d_upload",
+      "path": "30/capture.gpa_frame",
+      "sha256": "1c233a8caab261228625b59f9856146b50f6ba10054c405898cb7a71aeeadaba",
+      "bytes": 68810,
+      "family": "texture_creation_dimensions",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified CaptureNextFrame output; native and GPA-injected producer bytes/images checked on twelve frames each. Overlap cases use nonuniform source pixels.",
+      "device_scope": "Producer device IDs in retained oracle; original player adapter unidentified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "controls": [],
+      "boundaries": [
+        {
+          "event": 18,
+          "resource": 7,
+          "expect_stable": true,
+          "expected_storage_sha256": "acd9cc842e5135fff210571644aba37b7d8c500dde138927af3ab69d9d81ac73"
+        }
+      ]
+    },
+    {
+      "id": "texture_creation_3d_initial",
+      "path": "31/capture.gpa_frame",
+      "sha256": "774ad432612ceb37cd4c01ed3873292144ab58c58dd0c734c58aa2c52b8030cb",
+      "bytes": 66693,
+      "family": "texture_creation_dimensions",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified CaptureNextFrame output; native and GPA-injected producer bytes/images checked on twelve frames each. Overlap cases use nonuniform source pixels.",
+      "device_scope": "Producer device IDs in retained oracle; original player adapter unidentified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "controls": [],
+      "boundaries": [
+        {
+          "event": 4,
+          "resource": 7,
+          "expect_stable": true,
+          "expected_storage_sha256": "acd9cc842e5135fff210571644aba37b7d8c500dde138927af3ab69d9d81ac73"
+        }
+      ]
+    },
+    {
+      "id": "texture_creation_3d_initial_then_update",
+      "path": "32/capture.gpa_frame",
+      "sha256": "63e3e977de7afba82799831f1bf1c8676628d1149c3404f98d45ff23ef077f0d",
+      "bytes": 69191,
+      "family": "texture_creation_dimensions",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified CaptureNextFrame output; native and GPA-injected producer bytes/images checked on twelve frames each. Overlap cases use nonuniform source pixels.",
+      "device_scope": "Producer device IDs in retained oracle; original player adapter unidentified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 26,
+          "repeat": 2,
+          "expected_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+          "purpose": "Diagnostic-only mip-0 upload omission preserves creation pixels; original files and shaders unchanged."
+        }
+      ],
+      "boundaries": [
+        {
+          "event": 4,
+          "resource": 7,
+          "expect_stable": true,
+          "expected_storage_sha256": "acd9cc842e5135fff210571644aba37b7d8c500dde138927af3ab69d9d81ac73"
+        },
+        {
+          "event": 28,
+          "resource": 7,
+          "expect_stable": true,
+          "expected_storage_sha256": "c8b8f87308ed27047be64fca7d129aa134101cbf7b4a01c8e05adb33a007ee85"
+        }
+      ]
+    },
+    {
+      "id": "texture_creation_3d_default_srv",
+      "path": "33/capture.gpa_frame",
+      "sha256": "74258a109b414b0bafadf8f4dd3ce35e1211832f2add7aa893316a44e9d9b4b5",
+      "bytes": 68786,
+      "family": "texture_creation_dimensions",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified CaptureNextFrame output; native and GPA-injected producer bytes/images checked on twelve frames each. Overlap cases use nonuniform source pixels.",
+      "device_scope": "Producer device IDs in retained oracle; original player adapter unidentified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "controls": [],
+      "boundaries": [
+        {
+          "event": 18,
+          "resource": 7,
+          "expect_stable": true,
+          "expected_storage_sha256": "acd9cc842e5135fff210571644aba37b7d8c500dde138927af3ab69d9d81ac73"
+        }
+      ]
+    },
+    {
+      "id": "texture_creation_3d_failed",
+      "path": "34/capture.gpa_frame",
+      "sha256": "559d9efac59fe9102a29b1d71b28040b43199fb49f3d2290867a93ae25eb092a",
+      "bytes": 68953,
+      "family": "texture_creation_dimensions",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified CaptureNextFrame output; native and GPA-injected producer bytes/images checked on twelve frames each. Overlap cases use nonuniform source pixels.",
+      "device_scope": "Producer device IDs in retained oracle; original player adapter unidentified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "controls": [],
+      "boundaries": [
+        {
+          "event": 20,
+          "resource": 9,
+          "expect_stable": true,
+          "expected_storage_sha256": "acd9cc842e5135fff210571644aba37b7d8c500dde138927af3ab69d9d81ac73"
+        }
+      ]
+    },
+    {
+      "id": "texture_creation_3d_validation_only",
+      "path": "35/capture.gpa_frame",
+      "sha256": "23c680b476aa8bb4c0a1914405b80a93b322f29228d36c558adcb48afe0bd456",
+      "bytes": 68953,
+      "family": "texture_creation_dimensions",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified CaptureNextFrame output; native and GPA-injected producer bytes/images checked on twelve frames each. Overlap cases use nonuniform source pixels.",
+      "device_scope": "Producer device IDs in retained oracle; original player adapter unidentified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "controls": [],
+      "boundaries": [
+        {
+          "event": 20,
+          "resource": 9,
+          "expect_stable": true,
+          "expected_storage_sha256": "acd9cc842e5135fff210571644aba37b7d8c500dde138927af3ab69d9d81ac73"
+        }
+      ]
+    },
+    {
+      "id": "texture_creation_3d_immediate_overwrite",
+      "path": "36/capture.gpa_frame",
+      "sha256": "1a926461cba3f08318d0edcd714de908d09d866c6b4d8e5e9f33ba310f2668d4",
+      "bytes": 68842,
+      "family": "texture_creation_dimensions",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified CaptureNextFrame output; native and GPA-injected producer bytes/images checked on twelve frames each. Overlap cases use nonuniform source pixels.",
+      "device_scope": "Producer device IDs in retained oracle; original player adapter unidentified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 15,
+          "repeat": 2,
+          "expected_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+          "purpose": "Diagnostic-only mip-0 upload omission preserves creation pixels; original files and shaders unchanged."
+        }
+      ],
+      "boundaries": [
+        {
+          "event": 4,
+          "resource": 7,
+          "expect_stable": true,
+          "expected_storage_sha256": "acd9cc842e5135fff210571644aba37b7d8c500dde138927af3ab69d9d81ac73"
+        },
+        {
+          "event": 18,
+          "resource": 7,
+          "expect_stable": true,
+          "expected_storage_sha256": "c8b8f87308ed27047be64fca7d129aa134101cbf7b4a01c8e05adb33a007ee85"
+        }
+      ]
+    },
+    {
+      "id": "texture_creation_3d_overlapping_rows",
+      "path": "37/capture.gpa_frame",
+      "sha256": "108f648ef39c78782850e272f7ba37d0883abd44fc75b0f89a8469211d65eafe",
+      "bytes": 66693,
+      "family": "texture_creation_dimensions",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified CaptureNextFrame output; native and GPA-injected producer bytes/images checked on twelve frames each. Overlap cases use nonuniform source pixels.",
+      "device_scope": "Producer device IDs in retained oracle; original player adapter unidentified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "controls": [],
+      "boundaries": [
+        {
+          "event": 4,
+          "resource": 7,
+          "expect_stable": true,
+          "expected_storage_sha256": "71ada778b19d493433080558309249a62e04fed05f645eec955589570bbe5001"
+        }
+      ]
+    },
+    {
+      "id": "texture_creation_3d_overlapping_slices",
+      "path": "38/capture.gpa_frame",
+      "sha256": "f041250541090e58e6b0d32f79ad1204d72f919a71f0aac1f2048aa1fc57e323",
+      "bytes": 66693,
+      "family": "texture_creation_dimensions",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified CaptureNextFrame output; native and GPA-injected producer bytes/images checked on twelve frames each. Overlap cases use nonuniform source pixels.",
+      "device_scope": "Producer device IDs in retained oracle; original player adapter unidentified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "controls": [],
+      "boundaries": [
+        {
+          "event": 4,
+          "resource": 7,
+          "expect_stable": true,
+          "expected_storage_sha256": "bc0d642714ab8772f4df4dd13406485e3b7ced048094b96e317c14bc3c8a4292"
+        }
+      ]
+    }
+  ],
+  "source_manifest": {
+    "path": "artifacts\\m2-texture-dimensions-final\\manifest.json",
+    "sha256": "dab924b2b40532853c737d54a6dd51ed139d5e2e6f17042b00711c93a67eb10e"
+  }
+}
