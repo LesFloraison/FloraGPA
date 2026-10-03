@@ -110,3 +110,9 @@ claims about newly captured creation layouts. Class-linkage creation, extended
 interface/version layouts, general identity/version reconstruction and deferred
 execution remain open. Missing frame-before resources/counters remain separate
 M4 work. M2 and M3–M6 are incomplete; module migration counts stay unchanged.
+
+Subsequent work: [CLASS_CREATION_AUDIT.md](CLASS_CREATION_AUDIT.md) adds checked
+linkage/instance creation and narrowly evidenced linkage aliases. It also records
+a dynamic-CS binding failure in the development original-player path; those
+thirteen new images are not counted as original-player parity. The geometry/SO
+coverage limits above remain unchanged.

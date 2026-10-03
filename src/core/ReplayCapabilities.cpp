@@ -1,4 +1,5 @@
 #include "ReplayCapabilities.h"
+#include "ClassCreation.h"
 #include "Commands.h"
 #include "Contexts.h"
 #include "CopyCommands.h"
@@ -21,6 +22,11 @@ bool in(uint16_t t, std::initializer_list<uint16_t> values) {
 }
 } // namespace
 ReplayCapability replayCapability(uint16_t t) {
+    if (isClassCreation(t) || in(t, {0x3112, 0x3113, 0x3114, 0x311a, 0x311b, 0x311c, 0x318e, 0x318f, 0x3190}))
+        return {isClassCreation(t) ? "execute" : "metadata",
+                "src/core/ClassCreation.cpp;src/core/ClassLinkage.cpp;src/replay/ClassCreation.cpp;src/core/"
+                "InspectionRecords.cpp",
+                "tests/ClassCreationTests.cpp;docs/CLASS_CREATION_AUDIT.md"};
     if (isPipelineCreation(t))
         return {"execute", "src/core/PipelineCreation.cpp;src/replay/PipelineCreation.cpp",
                 "tests/PipelineCreationTests.cpp;tests/GeometryCreationTests.cpp;docs/"

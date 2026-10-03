@@ -1,0 +1,297 @@
+{
+  "schema": "FloraGPA compatibility corpus 1",
+  "profile": "GPA 2025 R1 legacy DX11 / IGPA v3",
+  "root_parameter": "--captures-root",
+  "cases": [
+    {
+      "id": "class_creation_0",
+      "path": "0/capture.gpa_frame",
+      "sha256": "5c73be05da965f483c109ac4b5b15d32b890d0d39f2291c66e783c72e591fe7d",
+      "bytes": 116743,
+      "family": "class_creation",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified CaptureNextFrame output; native and GPA-injected producer image oracle on twelve frames each. Dynamic class dispatch bytes independently checked; names, indices and explicit CB/vector offsets exercised.",
+      "device_scope": "Producer device IDs retained; original player adapter unidentified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 78,
+          "repeat": 2,
+          "expected_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+          "purpose": "Diagnostic-only Draw/Dispatch omission; original shaders/files unchanged."
+        }
+      ],
+      "boundaries": []
+    },
+    {
+      "id": "class_creation_1",
+      "path": "1/capture.gpa_frame",
+      "sha256": "a479f60ca80a29746b7802e7ad3aa48b52c8aeb50be9dfafe80dd4bcad53872b",
+      "bytes": 116747,
+      "family": "class_creation",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified CaptureNextFrame output; native and GPA-injected producer image oracle on twelve frames each. Dynamic class dispatch bytes independently checked; names, indices and explicit CB/vector offsets exercised.",
+      "device_scope": "Producer device IDs retained; original player adapter unidentified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 78,
+          "repeat": 2,
+          "expected_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+          "purpose": "Diagnostic-only Draw/Dispatch omission; original shaders/files unchanged."
+        }
+      ],
+      "boundaries": []
+    },
+    {
+      "id": "class_creation_2",
+      "path": "2/capture.gpa_frame",
+      "sha256": "adbaf7a6adb2ecbfee1ca47f9dcef292e493d2057aeacc8a07834ee2e23434f2",
+      "bytes": 117215,
+      "family": "class_creation",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified CaptureNextFrame output; native and GPA-injected producer image oracle on twelve frames each. Dynamic class dispatch bytes independently checked; names, indices and explicit CB/vector offsets exercised.",
+      "device_scope": "Producer device IDs retained; original player adapter unidentified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 88,
+          "repeat": 2,
+          "expected_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+          "purpose": "Diagnostic-only Draw/Dispatch omission; original shaders/files unchanged."
+        }
+      ],
+      "boundaries": []
+    },
+    {
+      "id": "class_creation_3",
+      "path": "3/capture.gpa_frame",
+      "sha256": "4995f104f2c3aeb38784bd173ce62b6bf89f8f354129d911fbab4473c0a317ad",
+      "bytes": 116743,
+      "family": "class_creation",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified CaptureNextFrame output; native and GPA-injected producer image oracle on twelve frames each. Dynamic class dispatch bytes independently checked; names, indices and explicit CB/vector offsets exercised.",
+      "device_scope": "Producer device IDs retained; original player adapter unidentified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 78,
+          "repeat": 2,
+          "expected_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+          "purpose": "Diagnostic-only Draw/Dispatch omission; original shaders/files unchanged."
+        }
+      ],
+      "boundaries": []
+    },
+    {
+      "id": "class_creation_4",
+      "path": "4/capture.gpa_frame",
+      "sha256": "bb6a9e757d985c50098ffe33874a084e34036ec3357032dcf9e3df8154045c58",
+      "bytes": 116747,
+      "family": "class_creation",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified CaptureNextFrame output; native and GPA-injected producer image oracle on twelve frames each. Dynamic class dispatch bytes independently checked; names, indices and explicit CB/vector offsets exercised.",
+      "device_scope": "Producer device IDs retained; original player adapter unidentified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 78,
+          "repeat": 2,
+          "expected_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+          "purpose": "Diagnostic-only Draw/Dispatch omission; original shaders/files unchanged."
+        }
+      ],
+      "boundaries": []
+    },
+    {
+      "id": "class_creation_10",
+      "path": "10/capture.gpa_frame",
+      "sha256": "76ed54314259358998d965c7f46efc3ef40ba6cbaa86cf1c4c03256ec6b8dec8",
+      "bytes": 100886,
+      "family": "class_creation",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified CaptureNextFrame output; native and GPA-injected producer image oracle on twelve frames each. Dynamic class dispatch bytes independently checked; names, indices and explicit CB/vector offsets exercised.",
+      "device_scope": "Producer device IDs retained; original player adapter unidentified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 62,
+          "repeat": 2,
+          "expected_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+          "purpose": "Diagnostic-only Draw/Dispatch omission; original shaders/files unchanged."
+        }
+      ],
+      "boundaries": []
+    },
+    {
+      "id": "class_creation_11",
+      "path": "11/capture.gpa_frame",
+      "sha256": "8262721a2b2ca1ef22b5c469b500941564b1367fb677ccb25e254cc87547905a",
+      "bytes": 101430,
+      "family": "class_creation",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified CaptureNextFrame output; native and GPA-injected producer image oracle on twelve frames each. Dynamic class dispatch bytes independently checked; names, indices and explicit CB/vector offsets exercised.",
+      "device_scope": "Producer device IDs retained; original player adapter unidentified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 74,
+          "repeat": 2,
+          "expected_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+          "purpose": "Diagnostic-only Draw/Dispatch omission; original shaders/files unchanged."
+        }
+      ],
+      "boundaries": []
+    },
+    {
+      "id": "class_creation_12",
+      "path": "12/capture.gpa_frame",
+      "sha256": "62b21096895f27a84f49124de0560531296cf799eb3aa43b7423687facd89d51",
+      "bytes": 101518,
+      "family": "class_creation",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified CaptureNextFrame output; native and GPA-injected producer image oracle on twelve frames each. Dynamic class dispatch bytes independently checked; names, indices and explicit CB/vector offsets exercised.",
+      "device_scope": "Producer device IDs retained; original player adapter unidentified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 76,
+          "repeat": 2,
+          "expected_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+          "purpose": "Diagnostic-only Draw/Dispatch omission; original shaders/files unchanged."
+        }
+      ],
+      "boundaries": []
+    },
+    {
+      "id": "class_creation_13",
+      "path": "13/capture.gpa_frame",
+      "sha256": "30b82aa4034f4de63f1c1910129ced680a873063350f259abfcc027d43ddcd39",
+      "bytes": 124503,
+      "family": "class_creation",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified CaptureNextFrame output; native and GPA-injected producer image oracle on twelve frames each. Dynamic class dispatch bytes independently checked; names, indices and explicit CB/vector offsets exercised.",
+      "device_scope": "Producer device IDs retained; original player adapter unidentified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 86,
+          "repeat": 2,
+          "expected_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+          "purpose": "Diagnostic-only Draw/Dispatch omission; original shaders/files unchanged."
+        }
+      ],
+      "boundaries": []
+    },
+    {
+      "id": "class_creation_20",
+      "path": "20/capture.gpa_frame",
+      "sha256": "b25810fae6f7abccf6599321f33a5987be58887583cc4ddf2a1f5fa138f67a00",
+      "bytes": 100890,
+      "family": "class_creation",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified CaptureNextFrame output; native and GPA-injected producer image oracle on twelve frames each. Dynamic class dispatch bytes independently checked; names, indices and explicit CB/vector offsets exercised.",
+      "device_scope": "Producer device IDs retained; original player adapter unidentified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 62,
+          "repeat": 2,
+          "expected_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+          "purpose": "Diagnostic-only Draw/Dispatch omission; original shaders/files unchanged."
+        }
+      ],
+      "boundaries": []
+    },
+    {
+      "id": "class_creation_21",
+      "path": "21/capture.gpa_frame",
+      "sha256": "ef8b01923d4fc35e2ab444dd4da24228c986b7cf006af49c09cb5ee54c8857af",
+      "bytes": 101446,
+      "family": "class_creation",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified CaptureNextFrame output; native and GPA-injected producer image oracle on twelve frames each. Dynamic class dispatch bytes independently checked; names, indices and explicit CB/vector offsets exercised.",
+      "device_scope": "Producer device IDs retained; original player adapter unidentified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 74,
+          "repeat": 2,
+          "expected_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+          "purpose": "Diagnostic-only Draw/Dispatch omission; original shaders/files unchanged."
+        }
+      ],
+      "boundaries": []
+    },
+    {
+      "id": "class_creation_22",
+      "path": "22/capture.gpa_frame",
+      "sha256": "8a8f584540cdb29970a55412a762055bb55ce3c5f7fe358b8d24bedc2371a3dd",
+      "bytes": 101534,
+      "family": "class_creation",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified CaptureNextFrame output; native and GPA-injected producer image oracle on twelve frames each. Dynamic class dispatch bytes independently checked; names, indices and explicit CB/vector offsets exercised.",
+      "device_scope": "Producer device IDs retained; original player adapter unidentified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 76,
+          "repeat": 2,
+          "expected_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+          "purpose": "Diagnostic-only Draw/Dispatch omission; original shaders/files unchanged."
+        }
+      ],
+      "boundaries": []
+    },
+    {
+      "id": "class_creation_23",
+      "path": "23/capture.gpa_frame",
+      "sha256": "88a20060999227f70daeb901b8cb5bef8ecd7a68aa7af30833af00a821fc2385",
+      "bytes": 124599,
+      "family": "class_creation",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified CaptureNextFrame output; native and GPA-injected producer image oracle on twelve frames each. Dynamic class dispatch bytes independently checked; names, indices and explicit CB/vector offsets exercised.",
+      "device_scope": "Producer device IDs retained; original player adapter unidentified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 88,
+          "repeat": 2,
+          "expected_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+          "purpose": "Diagnostic-only Draw/Dispatch omission; original shaders/files unchanged."
+        }
+      ],
+      "boundaries": []
+    }
+  ],
+  "source_manifest": {
+    "path": "artifacts\\m2-class-creation-originals-verified\\manifest.json",
+    "sha256": "ac42c7c0aa6b5a39ecc87f282245338d4d52d0b77300084602a43787b0d62e61"
+  }
+}

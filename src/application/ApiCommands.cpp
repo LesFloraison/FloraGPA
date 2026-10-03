@@ -1,4 +1,5 @@
 #include "ApiCommands.h"
+#include "core/ClassCreation.h"
 #include "core/Contexts.h"
 #include "core/PipelineCreation.h"
 #include "core/TextureCreation.h"
@@ -534,11 +535,19 @@ Json inspectCommand(const Frame &frame, Id id) {
                 r.id("view");
                 r.array("values", t == 0x33 ? "I" : "f", 4);
             } else if (t == 0x242 || t == 0x244) {
-            } else if (in(t, {0x3013, 0x3014, 0x3250, 0x3251, 0x3576, 0x3577}))
+            } else if (in(t,
+                          {0x3113, 0x3114, 0x318f, 0x3190, 0x3013, 0x3014, 0x3250, 0x3251, 0x3576, 0x3577}))
                 r.u("return_ref_count");
-            else if (t == 0x3019 || t == 0x3146)
+            else if (t == 0x311a) {
+                if (r.flag("descriptor_present"))
+                    r.field("class_descriptor", "8I");
+            } else if (t == 0x311b || t == 0x311c) {
+                auto length = r.flag("length_present") ? r.field("returned_length", "Q").get<uint64_t>() : 0;
+                if (r.flag("name_present"))
+                    r.field("name_bytes", std::to_string(length) + "s");
+            } else if (t == 0x3019 || t == 0x3146)
                 r.array("resource_dimension", "I", 1);
-            else if (in(t, {0x3012, 0x324f, 0x3256, 0x3575})) {
+            else if (in(t, {0x3112, 0x318e, 0x3012, 0x324f, 0x3256, 0x3575})) {
                 r.field("hresult", "i");
                 r.field("interface_guid", "16s");
                 r.id("returned_object");
@@ -595,6 +604,15 @@ Json inspectCommand(const Frame &frame, Id id) {
                     r.u("view_dimension");
                     r.field("descriptor_union", "4I");
                 }
+            } else if (isClassCreation(t)) {
+                readClassCreation(t, raw);
+                r.field("hresult", "i");
+                if (t == 0x3195)
+                    r.u("instance_index");
+                if (t == 0x3196)
+                    r.values("IIII",
+                             {"constant_buffer", "constant_vector", "texture_offset", "sampler_offset"});
+                r.id("returned_resource");
             } else if (isPipelineCreation(t)) {
                 const auto creation = readPipelineCreation(t, raw);
                 r.field("hresult", "i");

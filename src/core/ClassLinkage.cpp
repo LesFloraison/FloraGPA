@@ -1,6 +1,51 @@
 #include "ClassLinkage.h"
+#include "PipelineCreation.h"
 #include <algorithm>
 namespace flora {
+ClassIdentityAudit auditClassIdentities(const Frame &frame) {
+    ClassIdentityAudit out;
+    auto alias = [&](Id source, Id target) {
+        if (!source || !target)
+            throw std::runtime_error("Missing class linkage identity");
+        frame.payload(target, 5, 0x97);
+        if (source != target && frame.entries().contains(source))
+            throw std::runtime_error("Class linkage alias conflicts with an existing resource identity");
+        auto [it, added] = out.aliases.emplace(source, target);
+        if (!added && it->second != target)
+            throw std::runtime_error("Conflicting class linkage identity mapping");
+    };
+    for (const auto &[id, e] : frame.entries())
+        if (e.category == 7) {
+            try {
+                if (e.type == 0x3195 || e.type == 0x3196) {
+                    Reader r(frame.payload(id));
+                    r.skip(8);
+                    auto owner = r.read<Id>();
+                    auto result = r.read<int32_t>();
+                    r.skip(e.type == 0x3195 ? 4 : 16);
+                    auto returned = r.read<Id>();
+                    r.end();
+                    if (result == 0 && returned && frame.entries().contains(returned))
+                        alias(owner, readClassRecord(frame, returned).linkage);
+                } else if (isPipelineCreation(e.type) && pipelineCreatedType(e.type) >= 0x90 &&
+                           pipelineCreatedType(e.type) <= 0x95) {
+                    const auto c = readPipelineCreation(e.type, frame.payload(id));
+                    if (!c.result && c.linkage && frame.entries().contains(c.resource))
+                        alias(c.linkage, shaderClassLinkage(frame, c.resource));
+                }
+            } catch (const std::exception &error) {
+                out.errors[id] = error.what();
+            }
+        }
+    return out;
+}
+Id canonicalClassLinkage(const ClassIdentityAudit &a, Id id) {
+    if (!a.errors.empty())
+        throw std::runtime_error("Class identity event " + std::to_string(a.errors.begin()->first) + ": " +
+                                 a.errors.begin()->second);
+    const auto it = a.aliases.find(id);
+    return it == a.aliases.end() ? id : it->second;
+}
 ClassRecord readClassRecord(const Frame &frame, Id id) {
     const auto &entry = frame.entry(id);
     if (entry.category != 5 || (entry.type != 0x97 && entry.type != 0x98))

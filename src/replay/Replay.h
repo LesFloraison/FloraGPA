@@ -1,5 +1,6 @@
 #pragma once
 #include "core/BufferCreation.h"
+#include "core/ClassCreation.h"
 #include "core/ConstantBufferBindings.h"
 #include "core/Frame.h"
 #include "core/IaBindings.h"
@@ -159,6 +160,8 @@ class Replay {
     std::optional<MapRecordAudit> mapRecordAudit_;
     std::optional<BufferCreationAudit> bufferCreationAudit_;
     std::optional<TextureCreationAudit> textureCreationAudit_;
+    std::optional<ClassCreationAudit> classCreationAudit_;
+    void classCreation(const Entry &);
     std::optional<PipelineCreationAudit> pipelineCreationAudit_;
     void pipelineCreation(const Entry &entry);
     Com<IUnknown> createCapturedShader(Id id, uint16_t type, Bytes data, Id linkage, Id so);

@@ -1,0 +1,1241 @@
+{
+  "schema": "FloraGPA class linkage and instance creation acceptance 1",
+  "completion": "M2 in progress; M3-M6 incomplete",
+  "scope": "Device5 linkage and ClassLinkage Get/Create instance, evidence-based linkage alias mapping, late shader registration and checked class observations",
+  "package": "out\\FloraGPA-class-creation-final-20261003",
+  "package_sha256": {
+    "FloraGPA.exe": "cbbc5171f341e1220672edb64f49a43cb951f2d13ef4a8ee19a5e9e3f03ff7e7",
+    "FloraGPA.Cli.exe": "50306ae04751da35787d3e7d750b387d7e049c9ec3c2e1ed0df6c7739590491f",
+    "FloraGPA.Worker.exe": "d632c9d1db92101a14183c4d72aad944a8f93659fc539ef85e6609e304336419",
+    "FloraGPA.Rdc.exe": "f4d21d43e661d24d392e91fc1a1f1460a20d1377fcf5075c57083ad289e82773",
+    "FloraGPA.Metrics.dll": "58b6278f2a93e783b1e8bb1290e9b0e51745f1a36825f296584f52159fd7c6db"
+  },
+  "native_runs": 488,
+  "file_outcomes": {
+    "repeat_stable": 243,
+    "repeat_variable": 1
+  },
+  "prior_stable_images_unchanged": 230,
+  "corpus_controls": 253,
+  "boundary_runs": 88,
+  "new_original_player_runs": 26,
+  "producer_frame_checks": 312,
+  "hardware_warp_original_creation_runs": 26,
+  "golden_controls": [
+    {
+      "case": "gf2",
+      "rgba_sha256": "2e1abc5eacb0bbfd801f9fe059c305baa9a0786c384b36a42fa5a323dd979fd1",
+      "passed": true,
+      "counts": {
+        "ClearDepthStencilView": 2,
+        "ClearRenderTargetView": 1,
+        "CreateBuffer": 2,
+        "DrawIndexed": 72,
+        "Map": 44,
+        "Present": 1,
+        "buffers_created_without_initial_data": 2,
+        "object_observation_records": 49,
+        "pipeline_setter_records": 142,
+        "private_data_observations": 4,
+        "query_metadata_records": 2,
+        "state_or_auxiliary_records": 551,
+        "unmap_observations": 44
+      }
+    },
+    {
+      "case": "gf2-negative",
+      "rgba_sha256": "b2c5548a51715f581c4591acc266ac7a0c65b54b7ecd9a49f43499fa9b76c5f1",
+      "passed": true,
+      "counts": {
+        "ClearDepthStencilView": 2,
+        "ClearRenderTargetView": 1,
+        "CreateBuffer": 2,
+        "Map": 44,
+        "Present": 1,
+        "buffers_created_without_initial_data": 2,
+        "object_observation_records": 49,
+        "pipeline_setter_records": 142,
+        "private_data_observations": 4,
+        "query_metadata_records": 2,
+        "state_or_auxiliary_records": 551,
+        "unmap_observations": 44
+      }
+    },
+    {
+      "case": "bf1",
+      "rgba_sha256": "1f724d1840652f66afd26dd30c95aecd5c1b4932eede56109198f15a8f57a2f6",
+      "passed": true,
+      "counts": {
+        "ClearDepthStencilView": 10,
+        "ClearRenderTargetView": 10,
+        "ClearUnorderedAccessViewFloat": 1,
+        "CopyResource": 2,
+        "CopyStructureCount": 6,
+        "CopySubresourceRegion": 7,
+        "Dispatch": 60,
+        "DispatchIndirect": 13,
+        "Draw": 79,
+        "DrawIndexed": 41,
+        "DrawIndexedInstanced": 1053,
+        "DrawInstanced": 29,
+        "GenerateMips": 2,
+        "Map": 4151,
+        "Present": 1,
+        "UpdateSubresource": 27,
+        "map_read_observations": 2,
+        "object_observation_records": 28,
+        "pipeline_setter_records": 2221,
+        "query_metadata_records": 17,
+        "state_or_auxiliary_records": 7354,
+        "unmap_observations": 4153,
+        "unresolved_input_layout_setters": 2,
+        "unresolved_output_setters": 6,
+        "unresolved_shader_setters": 4,
+        "unresolved_srv_setters": 2
+      }
+    },
+    {
+      "case": "bf1-negative",
+      "rgba_sha256": "cd3a3066f984b1c317fbeefec2836503f32078321d3dc1f367465f2c06d435bf",
+      "passed": true,
+      "counts": {
+        "ClearDepthStencilView": 10,
+        "ClearRenderTargetView": 10,
+        "ClearUnorderedAccessViewFloat": 1,
+        "CopyResource": 2,
+        "CopyStructureCount": 6,
+        "CopySubresourceRegion": 7,
+        "Dispatch": 60,
+        "DispatchIndirect": 13,
+        "GenerateMips": 2,
+        "Map": 4151,
+        "Present": 1,
+        "UpdateSubresource": 27,
+        "map_read_observations": 2,
+        "object_observation_records": 28,
+        "pipeline_setter_records": 2221,
+        "query_metadata_records": 17,
+        "state_or_auxiliary_records": 7354,
+        "unmap_observations": 4153,
+        "unresolved_input_layout_setters": 2,
+        "unresolved_output_setters": 6,
+        "unresolved_shader_setters": 4,
+        "unresolved_srv_setters": 2
+      }
+    }
+  ],
+  "results": {
+    "corpus": {
+      "path": "artifacts\\m2-class-creation-final-release-corpus\\validation.json",
+      "sha256": "23179fe1a0f60c4ef40ef26826c283ce93c8cb8b4e6dbf28a412697f9ab72bc6",
+      "counts": {
+        "repeat_stable": 90,
+        "repeat_variable": 1
+      }
+    },
+    "originals": {
+      "path": "artifacts\\m2-class-creation-final-release-originals\\validation.json",
+      "sha256": "fee61916096f9b47946372e81be4a9b7ae1948e18061a17f72a654d435e211dc",
+      "counts": {
+        "repeat_stable": 11
+      }
+    },
+    "copy": {
+      "path": "artifacts\\m2-class-creation-final-release-copy\\validation.json",
+      "sha256": "cc5b515dbc14b4f094e31acd106693d9e165745f6ff207472eee6ca28742c6ef",
+      "counts": {
+        "repeat_stable": 6
+      }
+    },
+    "present": {
+      "path": "artifacts\\m2-class-creation-final-release-present\\validation.json",
+      "sha256": "a330ab5b3674ea14d0dec2c82975ea15517d96cba247583d4c193b844c112249",
+      "counts": {
+        "repeat_stable": 5
+      }
+    },
+    "buffer": {
+      "path": "artifacts\\m2-class-creation-final-release-buffer\\validation.json",
+      "sha256": "0c7cf88bc4e44310123e5ad61b5ef06fc570e43f2990c0b9af36e0cb7139e5b5",
+      "counts": {
+        "repeat_stable": 5
+      }
+    },
+    "pipeline": {
+      "path": "artifacts\\m2-class-creation-final-release-pipeline\\validation.json",
+      "sha256": "b9b51ede20df976bf5c96c28cc5a48095c49138861041d787e37461f804e0140",
+      "counts": {
+        "repeat_stable": 5
+      }
+    },
+    "creation": {
+      "path": "artifacts\\m2-class-creation-final-release-creation\\validation.json",
+      "sha256": "92ec0fafa1e40a91a5a20b591a12df0f7c71acc43e7aa5083f1b3cbd22f90b60",
+      "counts": {
+        "repeat_stable": 7
+      }
+    },
+    "discovery": {
+      "path": "artifacts\\m2-class-creation-final-release-discovery\\validation.json",
+      "sha256": "19a5ffd905efd9321e205a2a1ecff6bd34160671fe42fe76993ee5972c1bb833",
+      "counts": {
+        "repeat_stable": 1
+      }
+    },
+    "dimensions": {
+      "path": "artifacts\\m2-class-creation-final-release-dimensions\\validation.json",
+      "sha256": "cfa889ea19066cb9eb0285e12286c525dee862569f743797debe37dde0f8f027",
+      "counts": {
+        "repeat_stable": 17
+      }
+    },
+    "views": {
+      "path": "artifacts\\m2-class-creation-final-release-views\\validation.json",
+      "sha256": "d4cdbbf235c39a2179c752a9505658f89c8324fa06c8ce689e32a2312b84ec4c",
+      "counts": {
+        "repeat_stable": 12
+      }
+    },
+    "buffer-views": {
+      "path": "artifacts\\m2-class-creation-final-release-buffer-views\\validation.json",
+      "sha256": "f904cccaeb3868a1067e7c8cabad117b02c62704989ca5d265f8873879642962",
+      "counts": {
+        "repeat_stable": 19
+      }
+    },
+    "pipeline-creation": {
+      "path": "artifacts\\m2-class-creation-final-release-pipeline-creation\\validation.json",
+      "sha256": "6879a97edc8abcb00ead090cec309709d5db160398fe595f2168d327dd2ce11c",
+      "counts": {
+        "repeat_stable": 32
+      }
+    },
+    "geometry-creation": {
+      "path": "artifacts\\m2-class-creation-final-release-geometry-creation\\validation.json",
+      "sha256": "65f2a4c921558ca9c9123d806db616c2df1c9853f819ef05e26f8bc2b30187a7",
+      "counts": {
+        "repeat_stable": 20
+      }
+    },
+    "class-creation": {
+      "path": "artifacts\\m2-class-creation-final-release-class-creation\\validation.json",
+      "sha256": "ce808430b90550b6ed06c5091d7eaec8cd9119c769eab1dae30bdcff616df382",
+      "counts": {
+        "repeat_stable": 13
+      }
+    }
+  },
+  "ctest": {
+    "path": "artifacts/ctest-m2-class-creation.log",
+    "sha256": "251f87edba75243464e8782222aa1e4e32d7ffc7185137c2d4375149592194f1",
+    "suites": 29,
+    "qt_details": {
+      "class-creation": {
+        "path": "artifacts\\m2-class-creation-qt-results\\class-creation-Release.txt",
+        "sha256": "de58dad4359ac42fbe3465f6bc92312af65185bb3623e9dcd4a1d4c2c84a9211",
+        "cases": 33
+      },
+      "geometry-creation": {
+        "path": "artifacts\\m2-class-creation-qt-results\\geometry-creation-Release.txt",
+        "sha256": "782312ba27ab37b2684b28352cf2413260719021a7bd99268fee2db730b72f17",
+        "cases": 45
+      },
+      "class-linkage": {
+        "path": "artifacts\\m2-class-creation-qt-results\\class-linkage-Release.txt",
+        "sha256": "28c71d3bb6b1cd5435470a663e5093d50aa87bcaa53a8137cbb538aa64d72225",
+        "cases": 10
+      },
+      "pipeline-creation": {
+        "path": "artifacts\\m2-class-creation-qt-results\\pipeline-creation-Release.txt",
+        "sha256": "921e3643ea52f5d31165fd921b268fe6d3c4a6fb9b9f15bef0e7c9c9a98e5275",
+        "cases": 70
+      },
+      "buffer-view-creation": {
+        "path": "artifacts\\m2-class-creation-qt-results\\buffer-view-creation-Release.txt",
+        "sha256": "4c1fdd1a673fbb95d552e77a5ccce535efb71caf752a8d4dc160640775efdbff",
+        "cases": 42
+      },
+      "view-creation": {
+        "path": "artifacts\\m2-class-creation-qt-results\\view-creation-Release.txt",
+        "sha256": "b0f8914fc28f5515744b530f0e77b6e3849388c773f9b4ee8bbaac8991db981e",
+        "cases": 32
+      },
+      "texture-creation": {
+        "path": "artifacts\\m2-class-creation-qt-results\\texture-creation-Release.txt",
+        "sha256": "ac60b166a086da0e23c90f39aeedd083387c1be569f964b6ee9de47baebda2fd",
+        "cases": 55
+      },
+      "ui": {
+        "path": "artifacts\\m2-class-creation-qt-results\\ui-Release.txt",
+        "sha256": "8b7d5a6df2ae74f7baafe3c8aa4be9cb835b64eec4f99841f0ef022da2ee47e1",
+        "cases": 55
+      },
+      "texture-edit-replay": {
+        "path": "artifacts\\m2-class-creation-qt-results\\texture-edit-replay-Release.txt",
+        "sha256": "fbcd6ed9b0c40bc5d28d838e34f179e836b13b569970cd72b0c097428bfc9dcb",
+        "cases": 34
+      }
+    }
+  },
+  "sources": {
+    "src/core/ClassCreation.cpp": "dd57d66832b11ed6433ad86cbec38061b573895e99b91d26f83c4582a8b0c6c8",
+    "src/core/ClassCreation.h": "0914e7525981d635d5b750de6021d13187ee6ce893ec52d50531032421064cf7",
+    "src/core/ClassLinkage.cpp": "d027b8ea4bde3b9dbe7930b5e94cbdad9e634af326a3a4d1385f102eff2a5860",
+    "src/core/ClassLinkage.h": "ee73d15a55cfc7fa5de253fa852d39852a3433c7e6c5c8417fcf8059f62ce9f4",
+    "src/replay/ClassCreation.cpp": "9ddeb5b955dca3dbd937ebdb84f8e2791249c12dcb78261161c82383ec87d85a",
+    "src/core/InspectionRecords.cpp": "f5c7706e3c8fe3334ac3cd2e418d923dcdc0d7ea76435c0269e8d029d0137b0b",
+    "tests/ClassCreationTests.cpp": "e5d9ca2ace24097b65e69d7cf4701bb857477c956be453827de7b768965e5c5e",
+    "tools/native/class_creation_probe.cpp": "a8e2a24fe3c0bdd5b96b5a80f566e3023a2fef4b4edd3202f6e47f1304c19729",
+    "tools/native/geometry_creation_probe.cpp": "e9e1ffad88ab98b21ef2a34ecfd6443c8c392475d4ad249cc60a0006d2eb9024",
+    "tests/GeometryCreationTests.cpp": "3f7a77c30ea9e35ee51673afc25704e01e7827c7e9d573d216907853460b2b6d",
+    "src/core/PipelineCreation.cpp": "f2dd93985d39fb51597309d5c137f8aff87ad421a2f52ceb154f4094750974a6",
+    "src/core/PipelineCreation.h": "32952207bef9e7e790780795cab046f7f638f6431c49916b98694ad1c5c596e4",
+    "src/replay/PipelineCreation.cpp": "b82759db625be98c0bb4135332bcb4490d3a5a150265a0b3e28d36ce55f45e93",
+    "tests/PipelineCreationTests.cpp": "275a4b74c77496387b6ab0170a149f55a5bdfd31a36991b5f9827aa6ef57bade",
+    "tests/ClassLinkageTests.cpp": "224af0b602c737d20b22b57d8755c8d6161675f015816ac4728411562b19e92b",
+    "tools/native/pipeline_creation_probe.cpp": "16c8be8306839383f3336c0ce1258946573575096f3baba27b76339de7c5d3a0",
+    "src/core/TextureCreation.cpp": "d1e4f432623abbe6e92f24835418712b78d840a95aed4182c6496e1dffaff968",
+    "src/core/TextureCreation.h": "36ef4d1e15123303e8623ac3e4e370d1ca73d3b6180191ee7a4cd15a16a279e8",
+    "src/application/ApiCommands.cpp": "bf64f46fbb83f7e4a5d7b470bd1147f0a24cf667dc5f37630512bdbfc1f61937",
+    "src/application/FrameValidation.cpp": "0ad856c98cd01ef5f6bf232f6f10385c8a1bcb8788dc32a948b5b05b0dfa4959",
+    "src/core/ReplayCapabilities.cpp": "658ab55f05b62205a3cfad8daffa35a4d15b88209bf0c01594651f3abdd4a725",
+    "src/core/CommandNames.inc": "14878afa0e1ff6e3ff6eeb7458ee9998884b31e3245ea9b049713eed21e27426",
+    "src/replay/Replay.cpp": "80c7571c26fdfd0d1847b0e22a14cbab05be90c54b10264a486d524e5d715bc5",
+    "src/replay/Replay.h": "e1a0d1213fbd7435ebbb4a60f515a34bb714242d8ae91852755a9acee0d11f7e",
+    "tests/TextureCreationTests.cpp": "b13daad41d1e879936c95e8a25cb83020b1d7a3cded44eb8ee9d1eda997c88fb",
+    "tests/ViewCreationTests.cpp": "a15e68efc4bfddadc74302574f4626e2a72daa06f6ff627217bedbd74978e5e9",
+    "tests/BufferViewCreationTests.cpp": "ea1c45be4d1bdb1a713c549954b3ec876b778a63fe2df2eb516efaf299eaaeb3",
+    "src/replay/UavCounters.cpp": "6f6fcad030c94f7525d89fb4ae2fffe710bd3e785cd7567c8a7e920dfb537055",
+    "tools/native/view_creation_probe.cpp": "a812ae2877d211d23d4b859e2aabad8c498483b7266938ba825726d07b90ef1e",
+    "tools/native/buffer_view_creation_probe.cpp": "0935d7a436c2b31513632af21e961767733d8d0d4a507a672c77360d5edcfe24",
+    "tools/native/texture_creation_probe.cpp": "2c825ccee1b698d2be2090f00b1a4b05305e839cd2008e9f8e0baa2007d89c8d",
+    "tools/native/texture_probe_helpers.h": "30abcac380d84d505fd344d4083d97300f50df5b2e5cc7dffb11ea03c6d6ee3d",
+    "tools/native/texture_copy_probe.cpp": "9713f07b873a1700bae72e6397c7189e3b2325ea076de3aaff8fe0fa64cde1cb",
+    "tools/native/present_capture_probe.cpp": "7c29f1e572ab16a5bc497d39eef8198d79056877a9e1d3fff3f7ed530a32c4e3",
+    "CMakeLists.txt": "6b93617fb6957e234ad0f9ce422353d8949e89ff78f903244ea2ba8eff06bcac",
+    "tools/probe_original_classes.py": "84f966d7e08fa44052c7b9abbe622f5f94d148e8a80fe18263d5d8929d5e10be"
+  },
+  "evidence": {
+    "artifacts/m2-class-creation-wrappers.c": "0c123a4cf6aa36a1ae2a12e4deb6e23cc9764fda01f55159cb1708bb744b3d6d",
+    "artifacts/m2-class-creation-ghidra.log": "5e544552af054db13563ff90ecdb5355c45037e3f08e7cffbcc0c1dc761ce01b",
+    "artifacts/m2-class-creation-string-rvas.json": "f3cf2c4b385496e352d8ac200e4c692b65264bb4ac6c1ec32e89b145378a44d4",
+    "artifacts/m2-class-observation-wrappers.c": "f4fedf246e2ff462e424e6f72813bbb5743c10b4a7bf91b856b063b5db008f5e",
+    "artifacts/m2-class-observation-ghidra.log": "fdb64afc2b8e74e509756c0ad13fd3838ffb4a186f9992d6fcff7687bf021797",
+    "artifacts/m2-class-observation-string-rvas.json": "5bab91105d42b911ab089123d3a1519e7ef054031e193cd9917270bbc58d655e",
+    "artifacts/m2-class-creation-originals-verified/manifest.json": "ac42c7c0aa6b5a39ecc87f282245338d4d52d0b77300084602a43787b0d62e61",
+    "artifacts/m2-class-creation-before/validation.json": "6e92a042cb45f9365c38cc93257a847be598873c0baad68b89881eaa61d9e9f9",
+    "artifacts/capture-class-creations.log": "c95e0556b5b8d2806153d15221f8fe30d5fe9acba2ae15152c22f6ab7daa1ea9",
+    "artifacts/m2-class-name-result-11/error.txt": "694053f702ea38bc4be287ca212075bca2c025a11cdb00f73ea809a2693239b7"
+  },
+  "limits": [
+    "General corpus original-player adapter unidentified; the 13 diagnostic class runs independently identify the RTX 3070 Laptop GPU. Original GUI paths were not tested.",
+    "Frame-before counter recovery, other device layouts, identity versioning and deferred execution remain incomplete",
+    "These fixtures do not certify all formats/usages/sample counts",
+    "Known Helldivers variability unchanged; missing contents are not synthesized",
+    "Unused instance creation without its name snapshot is metadata; required state/runtime use rejected",
+    "Only paired returned-resource linkage aliases are recovered; conflicting aliases and repeated creation identities are rejected",
+    "Failed/noncreating status records have synthetic coverage; unregistered names in actual files create unused objects successfully",
+    "Broader dynamic-linkage combinations, extended layouts and deferred execution remain incomplete"
+  ],
+  "original_player_comparison": {
+    "completed_uninstrumented_runs": 26,
+    "byte_equal_files": 0,
+    "different_files": 13,
+    "instrumented_diagnostic_runs": 13,
+    "classification": "Development original-player path omits dynamic CS class instances; native producer and FloraGPA hardware/WARP agree",
+    "observations": {
+      "0": {
+        "path": "artifacts\\m2-class-creation-original-audit-final\\0\\observation.json",
+        "sha256": "0775f46a9a85f1f25d7f4eb04809142d93938e75851cce1c2fdd2085e638166a",
+        "restoration_sha256": "69dbdcee1d9116e9c435b62a4633e97509aff41c13617d0a0197ef20840db20f",
+        "adapter": {
+          "description": "NVIDIA GeForce RTX 3070 Laptop GPU",
+          "vendor_id": 4318,
+          "device_id": 9373,
+          "revision": 161,
+          "dedicated_video_memory": 8409579520,
+          "shared_system_memory": 16980924416
+        },
+        "dispatches": 1
+      },
+      "1": {
+        "path": "artifacts\\m2-class-creation-original-audit-final\\1\\observation.json",
+        "sha256": "10855a7f481cc35230be14f17da5441f54e02e4d851e171969bb09984db77953",
+        "restoration_sha256": "69dbdcee1d9116e9c435b62a4633e97509aff41c13617d0a0197ef20840db20f",
+        "adapter": {
+          "description": "NVIDIA GeForce RTX 3070 Laptop GPU",
+          "vendor_id": 4318,
+          "device_id": 9373,
+          "revision": 161,
+          "dedicated_video_memory": 8409579520,
+          "shared_system_memory": 16980924416
+        },
+        "dispatches": 1
+      },
+      "2": {
+        "path": "artifacts\\m2-class-creation-original-audit-final\\2\\observation.json",
+        "sha256": "e92eea0b4dccca3d4be0efe9777eefe99f4f80a549eb85e3063be4aef8c0d92f",
+        "restoration_sha256": "69dbdcee1d9116e9c435b62a4633e97509aff41c13617d0a0197ef20840db20f",
+        "adapter": {
+          "description": "NVIDIA GeForce RTX 3070 Laptop GPU",
+          "vendor_id": 4318,
+          "device_id": 9373,
+          "revision": 161,
+          "dedicated_video_memory": 8409579520,
+          "shared_system_memory": 16980924416
+        },
+        "dispatches": 1
+      },
+      "3": {
+        "path": "artifacts\\m2-class-creation-original-audit-final\\3\\observation.json",
+        "sha256": "23e32c1e9c2846b77708893ab8d2fbbdbc92d2bd578dcf128565afdc17bd3232",
+        "restoration_sha256": "69dbdcee1d9116e9c435b62a4633e97509aff41c13617d0a0197ef20840db20f",
+        "adapter": {
+          "description": "NVIDIA GeForce RTX 3070 Laptop GPU",
+          "vendor_id": 4318,
+          "device_id": 9373,
+          "revision": 161,
+          "dedicated_video_memory": 8409579520,
+          "shared_system_memory": 16980924416
+        },
+        "dispatches": 1
+      },
+      "4": {
+        "path": "artifacts\\m2-class-creation-original-audit-final\\4\\observation.json",
+        "sha256": "8628eca0e43ee345ddc4ccd073c15e58f7b6f802474bb9a89e0f0b470635fe48",
+        "restoration_sha256": "69dbdcee1d9116e9c435b62a4633e97509aff41c13617d0a0197ef20840db20f",
+        "adapter": {
+          "description": "NVIDIA GeForce RTX 3070 Laptop GPU",
+          "vendor_id": 4318,
+          "device_id": 9373,
+          "revision": 161,
+          "dedicated_video_memory": 8409579520,
+          "shared_system_memory": 16980924416
+        },
+        "dispatches": 1
+      },
+      "10": {
+        "path": "artifacts\\m2-class-creation-original-audit-final\\10\\observation.json",
+        "sha256": "c631bf8f6026544be0639ed49e0e3aa5f2c4348e7d526a55bc99711fbe7b6f45",
+        "restoration_sha256": "69dbdcee1d9116e9c435b62a4633e97509aff41c13617d0a0197ef20840db20f",
+        "adapter": {
+          "description": "NVIDIA GeForce RTX 3070 Laptop GPU",
+          "vendor_id": 4318,
+          "device_id": 9373,
+          "revision": 161,
+          "dedicated_video_memory": 8409579520,
+          "shared_system_memory": 16980924416
+        },
+        "dispatches": 1
+      },
+      "11": {
+        "path": "artifacts\\m2-class-creation-original-audit-final\\11\\observation.json",
+        "sha256": "2458a4656d0aa0aa081c6e469ec5d267965e15e8107af4a55d4033f6f12bf0b5",
+        "restoration_sha256": "69dbdcee1d9116e9c435b62a4633e97509aff41c13617d0a0197ef20840db20f",
+        "adapter": {
+          "description": "NVIDIA GeForce RTX 3070 Laptop GPU",
+          "vendor_id": 4318,
+          "device_id": 9373,
+          "revision": 161,
+          "dedicated_video_memory": 8409579520,
+          "shared_system_memory": 16980924416
+        },
+        "dispatches": 1
+      },
+      "12": {
+        "path": "artifacts\\m2-class-creation-original-audit-final\\12\\observation.json",
+        "sha256": "57cdb4d68e2adc7e4e2cdd6ab95b6882635d402e64fe1b0de5af49d9041e7f6f",
+        "restoration_sha256": "69dbdcee1d9116e9c435b62a4633e97509aff41c13617d0a0197ef20840db20f",
+        "adapter": {
+          "description": "NVIDIA GeForce RTX 3070 Laptop GPU",
+          "vendor_id": 4318,
+          "device_id": 9373,
+          "revision": 161,
+          "dedicated_video_memory": 8409579520,
+          "shared_system_memory": 16980924416
+        },
+        "dispatches": 1
+      },
+      "13": {
+        "path": "artifacts\\m2-class-creation-original-audit-final\\13\\observation.json",
+        "sha256": "05304737930dabddb4842f592a8b254a31db79c0a02602eb7080ca360983d459",
+        "restoration_sha256": "69dbdcee1d9116e9c435b62a4633e97509aff41c13617d0a0197ef20840db20f",
+        "adapter": {
+          "description": "NVIDIA GeForce RTX 3070 Laptop GPU",
+          "vendor_id": 4318,
+          "device_id": 9373,
+          "revision": 161,
+          "dedicated_video_memory": 8409579520,
+          "shared_system_memory": 16980924416
+        },
+        "dispatches": 2
+      },
+      "20": {
+        "path": "artifacts\\m2-class-creation-original-audit-final\\20\\observation.json",
+        "sha256": "42a7c8466dcc3a8731156c72740dd6dfc2fbd42cf07b43a61ed9b63ddcb85c6a",
+        "restoration_sha256": "69dbdcee1d9116e9c435b62a4633e97509aff41c13617d0a0197ef20840db20f",
+        "adapter": {
+          "description": "NVIDIA GeForce RTX 3070 Laptop GPU",
+          "vendor_id": 4318,
+          "device_id": 9373,
+          "revision": 161,
+          "dedicated_video_memory": 8409579520,
+          "shared_system_memory": 16980924416
+        },
+        "dispatches": 1
+      },
+      "21": {
+        "path": "artifacts\\m2-class-creation-original-audit-final\\21\\observation.json",
+        "sha256": "2976747e4cf3dc191394d3a38f265c2b0f7c1448a2e3606ef127b0866d9b8a70",
+        "restoration_sha256": "69dbdcee1d9116e9c435b62a4633e97509aff41c13617d0a0197ef20840db20f",
+        "adapter": {
+          "description": "NVIDIA GeForce RTX 3070 Laptop GPU",
+          "vendor_id": 4318,
+          "device_id": 9373,
+          "revision": 161,
+          "dedicated_video_memory": 8409579520,
+          "shared_system_memory": 16980924416
+        },
+        "dispatches": 1
+      },
+      "22": {
+        "path": "artifacts\\m2-class-creation-original-audit-final\\22\\observation.json",
+        "sha256": "1b4e98b498672d1eab9c17cee8bb01a380ee1c1c7f6011456337df5bb824c9c3",
+        "restoration_sha256": "69dbdcee1d9116e9c435b62a4633e97509aff41c13617d0a0197ef20840db20f",
+        "adapter": {
+          "description": "NVIDIA GeForce RTX 3070 Laptop GPU",
+          "vendor_id": 4318,
+          "device_id": 9373,
+          "revision": 161,
+          "dedicated_video_memory": 8409579520,
+          "shared_system_memory": 16980924416
+        },
+        "dispatches": 1
+      },
+      "23": {
+        "path": "artifacts\\m2-class-creation-original-audit-final\\23\\observation.json",
+        "sha256": "7b264dcc08b9c67de652d91eaa23f9cbe5aa787d727fcbace622c233e0fcda97",
+        "restoration_sha256": "69dbdcee1d9116e9c435b62a4633e97509aff41c13617d0a0197ef20840db20f",
+        "adapter": {
+          "description": "NVIDIA GeForce RTX 3070 Laptop GPU",
+          "vendor_id": 4318,
+          "device_id": 9373,
+          "revision": 161,
+          "dedicated_video_memory": 8409579520,
+          "shared_system_memory": 16980924416
+        },
+        "dispatches": 2
+      }
+    }
+  },
+  "class_oracles": {
+    "artifacts\\m2-class-creation-originals-verified\\0\\native\\buffer1.bin": {
+      "sha256": "30d2aa19f94a7ae2ac58d3a9bc75331a33149544c58dbf8e12024f50e1973c2f",
+      "values": [
+        20,
+        21,
+        22,
+        23
+      ]
+    },
+    "artifacts\\m2-class-creation-originals-verified\\0\\captured\\buffer1.bin": {
+      "sha256": "30d2aa19f94a7ae2ac58d3a9bc75331a33149544c58dbf8e12024f50e1973c2f",
+      "values": [
+        20,
+        21,
+        22,
+        23
+      ]
+    },
+    "artifacts\\m2-class-creation-originals-verified\\1\\native\\buffer1.bin": {
+      "sha256": "519da4e33a27268a3346600471a92acf5f7590eb0fe880e13a4024c653136b3e",
+      "values": [
+        40,
+        41,
+        42,
+        43
+      ]
+    },
+    "artifacts\\m2-class-creation-originals-verified\\1\\captured\\buffer1.bin": {
+      "sha256": "519da4e33a27268a3346600471a92acf5f7590eb0fe880e13a4024c653136b3e",
+      "values": [
+        40,
+        41,
+        42,
+        43
+      ]
+    },
+    "artifacts\\m2-class-creation-originals-verified\\2\\native\\buffer1.bin": {
+      "sha256": "30d2aa19f94a7ae2ac58d3a9bc75331a33149544c58dbf8e12024f50e1973c2f",
+      "values": [
+        20,
+        21,
+        22,
+        23
+      ]
+    },
+    "artifacts\\m2-class-creation-originals-verified\\2\\captured\\buffer1.bin": {
+      "sha256": "30d2aa19f94a7ae2ac58d3a9bc75331a33149544c58dbf8e12024f50e1973c2f",
+      "values": [
+        20,
+        21,
+        22,
+        23
+      ]
+    },
+    "artifacts\\m2-class-creation-originals-verified\\3\\native\\buffer1.bin": {
+      "sha256": "30d2aa19f94a7ae2ac58d3a9bc75331a33149544c58dbf8e12024f50e1973c2f",
+      "values": [
+        20,
+        21,
+        22,
+        23
+      ]
+    },
+    "artifacts\\m2-class-creation-originals-verified\\3\\captured\\buffer1.bin": {
+      "sha256": "30d2aa19f94a7ae2ac58d3a9bc75331a33149544c58dbf8e12024f50e1973c2f",
+      "values": [
+        20,
+        21,
+        22,
+        23
+      ]
+    },
+    "artifacts\\m2-class-creation-originals-verified\\4\\native\\buffer1.bin": {
+      "sha256": "519da4e33a27268a3346600471a92acf5f7590eb0fe880e13a4024c653136b3e",
+      "values": [
+        40,
+        41,
+        42,
+        43
+      ]
+    },
+    "artifacts\\m2-class-creation-originals-verified\\4\\captured\\buffer1.bin": {
+      "sha256": "519da4e33a27268a3346600471a92acf5f7590eb0fe880e13a4024c653136b3e",
+      "values": [
+        40,
+        41,
+        42,
+        43
+      ]
+    },
+    "artifacts\\m2-class-creation-originals-verified\\10\\native\\buffer1.bin": {
+      "sha256": "30d2aa19f94a7ae2ac58d3a9bc75331a33149544c58dbf8e12024f50e1973c2f",
+      "values": [
+        20,
+        21,
+        22,
+        23
+      ]
+    },
+    "artifacts\\m2-class-creation-originals-verified\\10\\captured\\buffer1.bin": {
+      "sha256": "30d2aa19f94a7ae2ac58d3a9bc75331a33149544c58dbf8e12024f50e1973c2f",
+      "values": [
+        20,
+        21,
+        22,
+        23
+      ]
+    },
+    "artifacts\\m2-class-creation-originals-verified\\11\\native\\buffer1.bin": {
+      "sha256": "30d2aa19f94a7ae2ac58d3a9bc75331a33149544c58dbf8e12024f50e1973c2f",
+      "values": [
+        20,
+        21,
+        22,
+        23
+      ]
+    },
+    "artifacts\\m2-class-creation-originals-verified\\11\\captured\\buffer1.bin": {
+      "sha256": "30d2aa19f94a7ae2ac58d3a9bc75331a33149544c58dbf8e12024f50e1973c2f",
+      "values": [
+        20,
+        21,
+        22,
+        23
+      ]
+    },
+    "artifacts\\m2-class-creation-originals-verified\\12\\native\\buffer1.bin": {
+      "sha256": "30d2aa19f94a7ae2ac58d3a9bc75331a33149544c58dbf8e12024f50e1973c2f",
+      "values": [
+        20,
+        21,
+        22,
+        23
+      ]
+    },
+    "artifacts\\m2-class-creation-originals-verified\\12\\captured\\buffer1.bin": {
+      "sha256": "30d2aa19f94a7ae2ac58d3a9bc75331a33149544c58dbf8e12024f50e1973c2f",
+      "values": [
+        20,
+        21,
+        22,
+        23
+      ]
+    },
+    "artifacts\\m2-class-creation-originals-verified\\13\\native\\buffer0.bin": {
+      "sha256": "4b55f2919bb18010fb912098dd4f0a113102404c60e446d3a3966b2eaffd0a24",
+      "values": [
+        10,
+        11,
+        12,
+        13
+      ]
+    },
+    "artifacts\\m2-class-creation-originals-verified\\13\\native\\buffer1.bin": {
+      "sha256": "30d2aa19f94a7ae2ac58d3a9bc75331a33149544c58dbf8e12024f50e1973c2f",
+      "values": [
+        20,
+        21,
+        22,
+        23
+      ]
+    },
+    "artifacts\\m2-class-creation-originals-verified\\13\\captured\\buffer0.bin": {
+      "sha256": "4b55f2919bb18010fb912098dd4f0a113102404c60e446d3a3966b2eaffd0a24",
+      "values": [
+        10,
+        11,
+        12,
+        13
+      ]
+    },
+    "artifacts\\m2-class-creation-originals-verified\\13\\captured\\buffer1.bin": {
+      "sha256": "30d2aa19f94a7ae2ac58d3a9bc75331a33149544c58dbf8e12024f50e1973c2f",
+      "values": [
+        20,
+        21,
+        22,
+        23
+      ]
+    },
+    "artifacts\\m2-class-creation-originals-verified\\20\\native\\buffer1.bin": {
+      "sha256": "519da4e33a27268a3346600471a92acf5f7590eb0fe880e13a4024c653136b3e",
+      "values": [
+        40,
+        41,
+        42,
+        43
+      ]
+    },
+    "artifacts\\m2-class-creation-originals-verified\\20\\captured\\buffer1.bin": {
+      "sha256": "519da4e33a27268a3346600471a92acf5f7590eb0fe880e13a4024c653136b3e",
+      "values": [
+        40,
+        41,
+        42,
+        43
+      ]
+    },
+    "artifacts\\m2-class-creation-originals-verified\\21\\native\\buffer1.bin": {
+      "sha256": "519da4e33a27268a3346600471a92acf5f7590eb0fe880e13a4024c653136b3e",
+      "values": [
+        40,
+        41,
+        42,
+        43
+      ]
+    },
+    "artifacts\\m2-class-creation-originals-verified\\21\\captured\\buffer1.bin": {
+      "sha256": "519da4e33a27268a3346600471a92acf5f7590eb0fe880e13a4024c653136b3e",
+      "values": [
+        40,
+        41,
+        42,
+        43
+      ]
+    },
+    "artifacts\\m2-class-creation-originals-verified\\22\\native\\buffer1.bin": {
+      "sha256": "519da4e33a27268a3346600471a92acf5f7590eb0fe880e13a4024c653136b3e",
+      "values": [
+        40,
+        41,
+        42,
+        43
+      ]
+    },
+    "artifacts\\m2-class-creation-originals-verified\\22\\captured\\buffer1.bin": {
+      "sha256": "519da4e33a27268a3346600471a92acf5f7590eb0fe880e13a4024c653136b3e",
+      "values": [
+        40,
+        41,
+        42,
+        43
+      ]
+    },
+    "artifacts\\m2-class-creation-originals-verified\\23\\native\\buffer0.bin": {
+      "sha256": "519da4e33a27268a3346600471a92acf5f7590eb0fe880e13a4024c653136b3e",
+      "values": [
+        40,
+        41,
+        42,
+        43
+      ]
+    },
+    "artifacts\\m2-class-creation-originals-verified\\23\\native\\buffer1.bin": {
+      "sha256": "30d2aa19f94a7ae2ac58d3a9bc75331a33149544c58dbf8e12024f50e1973c2f",
+      "values": [
+        20,
+        21,
+        22,
+        23
+      ]
+    },
+    "artifacts\\m2-class-creation-originals-verified\\23\\captured\\buffer0.bin": {
+      "sha256": "519da4e33a27268a3346600471a92acf5f7590eb0fe880e13a4024c653136b3e",
+      "values": [
+        40,
+        41,
+        42,
+        43
+      ]
+    },
+    "artifacts\\m2-class-creation-originals-verified\\23\\captured\\buffer1.bin": {
+      "sha256": "30d2aa19f94a7ae2ac58d3a9bc75331a33149544c58dbf8e12024f50e1973c2f",
+      "values": [
+        20,
+        21,
+        22,
+        23
+      ]
+    }
+  },
+  "replay_class_bytes": {
+    "artifacts\\m2-class-creation-byte-oracles-final\\0-hardware-phase1.bin": {
+      "sha256": "30d2aa19f94a7ae2ac58d3a9bc75331a33149544c58dbf8e12024f50e1973c2f",
+      "values": [
+        20,
+        21,
+        22,
+        23
+      ]
+    },
+    "artifacts\\m2-class-creation-byte-oracles-final\\0-warp-phase1.bin": {
+      "sha256": "30d2aa19f94a7ae2ac58d3a9bc75331a33149544c58dbf8e12024f50e1973c2f",
+      "values": [
+        20,
+        21,
+        22,
+        23
+      ]
+    },
+    "artifacts\\m2-class-creation-byte-oracles-final\\1-hardware-phase1.bin": {
+      "sha256": "519da4e33a27268a3346600471a92acf5f7590eb0fe880e13a4024c653136b3e",
+      "values": [
+        40,
+        41,
+        42,
+        43
+      ]
+    },
+    "artifacts\\m2-class-creation-byte-oracles-final\\1-warp-phase1.bin": {
+      "sha256": "519da4e33a27268a3346600471a92acf5f7590eb0fe880e13a4024c653136b3e",
+      "values": [
+        40,
+        41,
+        42,
+        43
+      ]
+    },
+    "artifacts\\m2-class-creation-byte-oracles-final\\2-hardware-phase1.bin": {
+      "sha256": "30d2aa19f94a7ae2ac58d3a9bc75331a33149544c58dbf8e12024f50e1973c2f",
+      "values": [
+        20,
+        21,
+        22,
+        23
+      ]
+    },
+    "artifacts\\m2-class-creation-byte-oracles-final\\2-warp-phase1.bin": {
+      "sha256": "30d2aa19f94a7ae2ac58d3a9bc75331a33149544c58dbf8e12024f50e1973c2f",
+      "values": [
+        20,
+        21,
+        22,
+        23
+      ]
+    },
+    "artifacts\\m2-class-creation-byte-oracles-final\\3-hardware-phase1.bin": {
+      "sha256": "30d2aa19f94a7ae2ac58d3a9bc75331a33149544c58dbf8e12024f50e1973c2f",
+      "values": [
+        20,
+        21,
+        22,
+        23
+      ]
+    },
+    "artifacts\\m2-class-creation-byte-oracles-final\\3-warp-phase1.bin": {
+      "sha256": "30d2aa19f94a7ae2ac58d3a9bc75331a33149544c58dbf8e12024f50e1973c2f",
+      "values": [
+        20,
+        21,
+        22,
+        23
+      ]
+    },
+    "artifacts\\m2-class-creation-byte-oracles-final\\4-hardware-phase1.bin": {
+      "sha256": "519da4e33a27268a3346600471a92acf5f7590eb0fe880e13a4024c653136b3e",
+      "values": [
+        40,
+        41,
+        42,
+        43
+      ]
+    },
+    "artifacts\\m2-class-creation-byte-oracles-final\\4-warp-phase1.bin": {
+      "sha256": "519da4e33a27268a3346600471a92acf5f7590eb0fe880e13a4024c653136b3e",
+      "values": [
+        40,
+        41,
+        42,
+        43
+      ]
+    },
+    "artifacts\\m2-class-creation-byte-oracles-final\\10-hardware-phase1.bin": {
+      "sha256": "30d2aa19f94a7ae2ac58d3a9bc75331a33149544c58dbf8e12024f50e1973c2f",
+      "values": [
+        20,
+        21,
+        22,
+        23
+      ]
+    },
+    "artifacts\\m2-class-creation-byte-oracles-final\\10-warp-phase1.bin": {
+      "sha256": "30d2aa19f94a7ae2ac58d3a9bc75331a33149544c58dbf8e12024f50e1973c2f",
+      "values": [
+        20,
+        21,
+        22,
+        23
+      ]
+    },
+    "artifacts\\m2-class-creation-byte-oracles-final\\11-hardware-phase1.bin": {
+      "sha256": "30d2aa19f94a7ae2ac58d3a9bc75331a33149544c58dbf8e12024f50e1973c2f",
+      "values": [
+        20,
+        21,
+        22,
+        23
+      ]
+    },
+    "artifacts\\m2-class-creation-byte-oracles-final\\11-warp-phase1.bin": {
+      "sha256": "30d2aa19f94a7ae2ac58d3a9bc75331a33149544c58dbf8e12024f50e1973c2f",
+      "values": [
+        20,
+        21,
+        22,
+        23
+      ]
+    },
+    "artifacts\\m2-class-creation-byte-oracles-final\\12-hardware-phase1.bin": {
+      "sha256": "30d2aa19f94a7ae2ac58d3a9bc75331a33149544c58dbf8e12024f50e1973c2f",
+      "values": [
+        20,
+        21,
+        22,
+        23
+      ]
+    },
+    "artifacts\\m2-class-creation-byte-oracles-final\\12-warp-phase1.bin": {
+      "sha256": "30d2aa19f94a7ae2ac58d3a9bc75331a33149544c58dbf8e12024f50e1973c2f",
+      "values": [
+        20,
+        21,
+        22,
+        23
+      ]
+    },
+    "artifacts\\m2-class-creation-byte-oracles-final\\13-hardware-phase0.bin": {
+      "sha256": "4b55f2919bb18010fb912098dd4f0a113102404c60e446d3a3966b2eaffd0a24",
+      "values": [
+        10,
+        11,
+        12,
+        13
+      ]
+    },
+    "artifacts\\m2-class-creation-byte-oracles-final\\13-warp-phase0.bin": {
+      "sha256": "4b55f2919bb18010fb912098dd4f0a113102404c60e446d3a3966b2eaffd0a24",
+      "values": [
+        10,
+        11,
+        12,
+        13
+      ]
+    },
+    "artifacts\\m2-class-creation-byte-oracles-final\\13-hardware-phase1.bin": {
+      "sha256": "30d2aa19f94a7ae2ac58d3a9bc75331a33149544c58dbf8e12024f50e1973c2f",
+      "values": [
+        20,
+        21,
+        22,
+        23
+      ]
+    },
+    "artifacts\\m2-class-creation-byte-oracles-final\\13-warp-phase1.bin": {
+      "sha256": "30d2aa19f94a7ae2ac58d3a9bc75331a33149544c58dbf8e12024f50e1973c2f",
+      "values": [
+        20,
+        21,
+        22,
+        23
+      ]
+    },
+    "artifacts\\m2-class-creation-byte-oracles-final\\20-hardware-phase1.bin": {
+      "sha256": "519da4e33a27268a3346600471a92acf5f7590eb0fe880e13a4024c653136b3e",
+      "values": [
+        40,
+        41,
+        42,
+        43
+      ]
+    },
+    "artifacts\\m2-class-creation-byte-oracles-final\\20-warp-phase1.bin": {
+      "sha256": "519da4e33a27268a3346600471a92acf5f7590eb0fe880e13a4024c653136b3e",
+      "values": [
+        40,
+        41,
+        42,
+        43
+      ]
+    },
+    "artifacts\\m2-class-creation-byte-oracles-final\\21-hardware-phase1.bin": {
+      "sha256": "519da4e33a27268a3346600471a92acf5f7590eb0fe880e13a4024c653136b3e",
+      "values": [
+        40,
+        41,
+        42,
+        43
+      ]
+    },
+    "artifacts\\m2-class-creation-byte-oracles-final\\21-warp-phase1.bin": {
+      "sha256": "519da4e33a27268a3346600471a92acf5f7590eb0fe880e13a4024c653136b3e",
+      "values": [
+        40,
+        41,
+        42,
+        43
+      ]
+    },
+    "artifacts\\m2-class-creation-byte-oracles-final\\22-hardware-phase1.bin": {
+      "sha256": "519da4e33a27268a3346600471a92acf5f7590eb0fe880e13a4024c653136b3e",
+      "values": [
+        40,
+        41,
+        42,
+        43
+      ]
+    },
+    "artifacts\\m2-class-creation-byte-oracles-final\\22-warp-phase1.bin": {
+      "sha256": "519da4e33a27268a3346600471a92acf5f7590eb0fe880e13a4024c653136b3e",
+      "values": [
+        40,
+        41,
+        42,
+        43
+      ]
+    },
+    "artifacts\\m2-class-creation-byte-oracles-final\\23-hardware-phase0.bin": {
+      "sha256": "519da4e33a27268a3346600471a92acf5f7590eb0fe880e13a4024c653136b3e",
+      "values": [
+        40,
+        41,
+        42,
+        43
+      ]
+    },
+    "artifacts\\m2-class-creation-byte-oracles-final\\23-warp-phase0.bin": {
+      "sha256": "519da4e33a27268a3346600471a92acf5f7590eb0fe880e13a4024c653136b3e",
+      "values": [
+        40,
+        41,
+        42,
+        43
+      ]
+    },
+    "artifacts\\m2-class-creation-byte-oracles-final\\23-hardware-phase1.bin": {
+      "sha256": "30d2aa19f94a7ae2ac58d3a9bc75331a33149544c58dbf8e12024f50e1973c2f",
+      "values": [
+        20,
+        21,
+        22,
+        23
+      ]
+    },
+    "artifacts\\m2-class-creation-byte-oracles-final\\23-warp-phase1.bin": {
+      "sha256": "30d2aa19f94a7ae2ac58d3a9bc75331a33149544c58dbf8e12024f50e1973c2f",
+      "values": [
+        20,
+        21,
+        22,
+        23
+      ]
+    }
+  },
+  "previously_rejected_new_files": 13,
+  "linkage_aliases": {
+    "class_creation_0": [
+      {
+        "api_identity": 9,
+        "snapshot_identity": 45,
+        "source": "paired shader/instance creation and resource snapshot"
+      }
+    ],
+    "class_creation_1": [
+      {
+        "api_identity": 9,
+        "snapshot_identity": 45,
+        "source": "paired shader/instance creation and resource snapshot"
+      }
+    ],
+    "class_creation_2": [
+      {
+        "api_identity": 17,
+        "snapshot_identity": 58,
+        "source": "paired shader/instance creation and resource snapshot"
+      }
+    ],
+    "class_creation_3": [
+      {
+        "api_identity": 9,
+        "snapshot_identity": 46,
+        "source": "paired shader/instance creation and resource snapshot"
+      }
+    ],
+    "class_creation_4": [
+      {
+        "api_identity": 9,
+        "snapshot_identity": 48,
+        "source": "paired shader/instance creation and resource snapshot"
+      }
+    ],
+    "class_creation_10": [
+      {
+        "api_identity": 16,
+        "snapshot_identity": 32,
+        "source": "paired shader/instance creation and resource snapshot"
+      }
+    ],
+    "class_creation_11": [
+      {
+        "api_identity": 17,
+        "snapshot_identity": 44,
+        "source": "paired shader/instance creation and resource snapshot"
+      }
+    ],
+    "class_creation_12": [
+      {
+        "api_identity": 17,
+        "snapshot_identity": 46,
+        "source": "paired shader/instance creation and resource snapshot"
+      }
+    ],
+    "class_creation_13": [
+      {
+        "api_identity": 16,
+        "snapshot_identity": 41,
+        "source": "paired shader/instance creation and resource snapshot"
+      }
+    ],
+    "class_creation_20": [
+      {
+        "api_identity": 16,
+        "snapshot_identity": 32,
+        "source": "paired shader/instance creation and resource snapshot"
+      }
+    ],
+    "class_creation_21": [
+      {
+        "api_identity": 17,
+        "snapshot_identity": 44,
+        "source": "paired shader/instance creation and resource snapshot"
+      }
+    ],
+    "class_creation_22": [
+      {
+        "api_identity": 17,
+        "snapshot_identity": 46,
+        "source": "paired shader/instance creation and resource snapshot"
+      }
+    ],
+    "class_creation_23": [
+      {
+        "api_identity": 16,
+        "snapshot_identity": 41,
+        "source": "paired shader/instance creation and resource snapshot"
+      }
+    ]
+  },
+  "unmaterialized_instances": {
+    "class_creation_11": [
+      {
+        "event_id": 14,
+        "handling": "metadata",
+        "reason": "Class instance name snapshot is absent; retain unused creation as metadata and reject required use",
+        "resource_id": 21
+      }
+    ],
+    "class_creation_12": [
+      {
+        "event_id": 14,
+        "handling": "metadata",
+        "reason": "Class instance name snapshot is absent; retain unused creation as metadata and reject required use",
+        "resource_id": 21
+      }
+    ],
+    "class_creation_21": [
+      {
+        "event_id": 14,
+        "handling": "metadata",
+        "reason": "Class instance name snapshot is absent; retain unused creation as metadata and reject required use",
+        "resource_id": 21
+      }
+    ],
+    "class_creation_22": [
+      {
+        "event_id": 14,
+        "handling": "metadata",
+        "reason": "Class instance name snapshot is absent; retain unused creation as metadata and reject required use",
+        "resource_id": 21
+      }
+    ]
+  },
+  "metadata_evidence": [
+    {
+      "record_type": "0x3112",
+      "original_record_count": 19
+    },
+    {
+      "record_type": "0x3113",
+      "original_record_count": 45
+    },
+    {
+      "record_type": "0x3114",
+      "original_record_count": 45
+    },
+    {
+      "record_type": "0x311a",
+      "original_record_count": 15
+    },
+    {
+      "record_type": "0x311b",
+      "original_record_count": 15
+    },
+    {
+      "record_type": "0x311c",
+      "original_record_count": 15
+    },
+    {
+      "record_type": "0x318e",
+      "original_record_count": 30
+    },
+    {
+      "record_type": "0x318f",
+      "original_record_count": 38
+    },
+    {
+      "record_type": "0x3190",
+      "original_record_count": 38
+    }
+  ]
+}

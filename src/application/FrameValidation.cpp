@@ -2,6 +2,7 @@
 #include "ApiCommands.h"
 #include "ContextInspector.h"
 #include "core/BufferCreation.h"
+#include "core/ClassCreation.h"
 #include "core/Commands.h"
 #include "core/CopyCommands.h"
 #include "core/IaBindings.h"
@@ -55,6 +56,7 @@ Json validateFrame(const std::filesystem::path &path, const std::function<bool()
         std::optional<MapRecordAudit> mapAudit;
         std::optional<BufferCreationAudit> creationAudit;
         std::optional<TextureCreationAudit> textureCreationAudit;
+        std::optional<ClassCreationAudit> classCreationAudit;
         std::optional<PipelineCreationAudit> pipelineCreationAudit;
         auto reference = [&](const Entry &e, Id id, int category) {
             if (!id)
@@ -141,6 +143,29 @@ Json validateFrame(const std::filesystem::path &path, const std::function<bool()
                             } catch (const std::exception &error) {
                                 finding(&e, "error", "copy_command_rejected", error.what(), copy.destination);
                             }
+                        }
+                        if (isClassCreation(e.type)) {
+                            if (!classCreationAudit) {
+                                classCreationAudit = auditClassCreations(frame);
+                                for (const auto &[source, target] : classCreationAudit->identities.aliases)
+                                    if (source != target)
+                                        report["class_linkage_aliases"].push_back(
+                                            {{"api_identity", source},
+                                             {"snapshot_identity", target},
+                                             {"source",
+                                              "paired shader/instance creation and resource snapshot"}});
+                            }
+                            const auto &c = classCreationAudit->records.at(id);
+                            if (!c.error.empty())
+                                finding(&e, "error", "class_creation_rejected", c.error, c.resource);
+                            else if (!c.note.empty())
+                                finding(&e, "info", "unmaterialized_class_creation", c.note, c.resource);
+                            if (c.error.empty() && (c.result || !c.note.empty()))
+                                report["record_handling_overrides"].push_back(
+                                    {{"event_id", id},
+                                     {"resource_id", c.resource},
+                                     {"handling", "metadata"},
+                                     {"reason", c.result ? "Noncreating class call" : c.note}});
                         }
                         if (isPipelineCreation(e.type)) {
                             if (!pipelineCreationAudit)

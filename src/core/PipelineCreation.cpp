@@ -100,11 +100,14 @@ PipelineCreationRecord readPipelineCreation(uint16_t t, Bytes bytes) {
 }
 PipelineCreationAudit auditPipelineCreations(const Frame &frame) {
     PipelineCreationAudit a;
+    const auto identities = auditClassIdentities(frame);
     for (const auto &[id, e] : frame.entries())
         if (e.category == 7 && isPipelineCreation(e.type)) {
             auto &c = a.records[id];
             try {
                 c = readPipelineCreation(e.type, frame.payload(id));
+                if (c.linkage)
+                    c.linkage = canonicalClassLinkage(identities, c.linkage);
                 if (c.link)
                     throw std::runtime_error("Linked pipeline creation is unresolved");
                 if (c.result != 0) {

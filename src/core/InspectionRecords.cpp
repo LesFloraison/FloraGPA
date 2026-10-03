@@ -2,6 +2,15 @@
 namespace flora {
 bool isPassiveObjectRecord(uint16_t type) {
     switch (type) {
+    case 0x3112:
+    case 0x3113:
+    case 0x3114:
+    case 0x311a:
+    case 0x311b:
+    case 0x311c:
+    case 0x318e:
+    case 0x318f:
+    case 0x3190:
     case 0x3012:
     case 0x3013:
     case 0x3014:
@@ -28,12 +37,18 @@ bool acceptPassiveObjectRecord(uint16_t type, Bytes payload) {
     Reader r(payload);
     r.skip(16); // Captured link and owner; not native replay COM pointers.
     switch (type) {
+    case 0x3112:
+    case 0x318e:
     case 0x3012:
     case 0x324f:
     case 0x3256:
     case 0x3575:
         r.skip(4 + 16 + 8); // HRESULT, requested IID, returned object identity.
         break;
+    case 0x3113:
+    case 0x3114:
+    case 0x318f:
+    case 0x3190:
     case 0x3013:
     case 0x3014:
     case 0x3250:
@@ -42,6 +57,21 @@ bool acceptPassiveObjectRecord(uint16_t type, Bytes payload) {
     case 0x3577:
         r.skip(4); // Observed reference count, including zero. Never release replay storage.
         break;
+    case 0x311a:
+        if (r.flag())
+            r.skip(32);
+        break;
+    case 0x311b:
+    case 0x311c: {
+        const bool lengthPresent = r.flag();
+        const auto length = lengthPresent ? r.read<uint64_t>() : 0;
+        if (r.flag()) {
+            if (!lengthPresent || !length)
+                throw std::runtime_error("Class name data has no length");
+            r.skip(size_t(length));
+        }
+        break;
+    }
     case 0x3019:
     case 0x3146:
         if (r.flag())

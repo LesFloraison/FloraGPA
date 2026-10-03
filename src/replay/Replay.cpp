@@ -117,6 +117,17 @@ IUnknown *Replay::object(Id id) {
         throw std::runtime_error("Resource " + std::to_string(id) +
                                  " is not available before texture/view creation event " +
                                  std::to_string(it->second));
+    if (!classCreationAudit_)
+        classCreationAudit_ = auditClassCreations(frame_);
+    id = canonicalClassLinkage(classCreationAudit_->identities, id);
+    if (auto it = classCreationAudit_->creationEvents.find(id);
+        it != classCreationAudit_->creationEvents.end() && !objects_.contains(id)) {
+        const auto &c = requireClassCreation(*classCreationAudit_, it->second);
+        if (!c.note.empty())
+            throw std::runtime_error("Class resource " + std::to_string(id) + ": " + c.note);
+        throw std::runtime_error("Class resource " + std::to_string(id) +
+                                 " unavailable before creation event " + std::to_string(it->second));
+    }
     if (!pipelineCreationAudit_)
         pipelineCreationAudit_ = auditPipelineCreations(frame_);
     if (auto it = pipelineCreationAudit_->creationEvents.find(id);
@@ -969,6 +980,10 @@ void Replay::command(const Entry &e) {
     }
     if (acceptTextureCreationObservation(t, payload)) {
         ++counts["texture_creation_observations"];
+        return;
+    }
+    if (isClassCreation(t)) {
+        classCreation(e);
         return;
     }
     if (isPipelineCreation(t)) {

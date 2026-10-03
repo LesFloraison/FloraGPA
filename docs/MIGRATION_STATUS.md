@@ -1,5 +1,25 @@
 # FloraGPA C++ 迁移进度 — 2026-10-03
 
+2026-10-03（M2 第十五批）：接通 CreateClassLinkage、GetClassInstance 与
+CreateClassInstance 的帧内执行。通过配对创建记录与 Shader／实例快照，恢复原版
+API ID 与快照 linkage ID 的对应关系；冲突、提前使用、重复身份和缺失必要名称
+均明确拒绝。未使用且缺失名称的实例记录为只读元数据，不猜测名称。新增九类
+实例／linkage 观察记录的严格解码。13 份原版捕获、312 次生产程序帧检查、
+26 次硬件／WARP 专项重放与 30 份 Dispatch 原始字节核对通过，专项 Qt 33 项
+无跳过。当前登记 244 份文件、488 次独立重放完成：243 份重复稳定，Helldivers
+保留波动，230 份既有稳定图像哈希不变；253 次对照、88 次纹理边界导出、四项
+黄金检查与 29 套 CTest 通过，五个发布二进制与 Release 一致。
+
+本批原版内核的 26 次运行虽正常结束，13 份图像均与预期不同，**没有计为图像
+一致通过**。额外 13 次观察确认该开发调用路径向 CSSetShader 传入零个类实例，
+导致实际 Dispatch 的 CS 为空、输出缓冲区保持零。诊断设备为 RTX 3070 Laptop
+GPU；未修改文件／Shader 或放宽阈值，原版 GUI 其他执行路径仍未验证。独立版的
+正确性由原始／注入生产程序、硬件／WARP 原生绑定和精确字节共同验证。详见
+[CLASS_CREATION_AUDIT.md](CLASS_CREATION_AUDIT.md) 与
+[class-creation-baseline.json](class-creation-baseline.json)。扩展接口、一般身份版本、
+更多动态链接组合、帧前信息和 Deferred／Command List 仍未完成；M2 与 M3–M6
+保持开放，72 ported／117 partial／15 pending 的模块计数不变。
+
 2026-10-03（M2 第十四批）：补齐 Device5 的 GS／HS／DS 与带 Stream Output 的
 Shader 帧内创建，包含 VS 字节码透传 SO。原版 API 记录仅保存首个 stride 与语义
 字符串指针，现与完整 SO 声明快照核对后恢复所有步长及字符串；缺失声明的未使用
