@@ -1,0 +1,362 @@
+{
+  "schema": "FloraGPA predicate creation acceptance 1",
+  "completion": "M2 and M3-M6 incomplete",
+  "package": "out\\FloraGPA-predicate-creation-final-20261003",
+  "package_sha256": {
+    "FloraGPA.exe": "f6938557abd7d9feb27c78099609ef5d212c725ff570dcf5bc2d105f7679a92d",
+    "FloraGPA.Cli.exe": "7581e809f45e7f1009d471a8b2607a776f7ef85c5a18d333440c6fb4256c59c8",
+    "FloraGPA.Worker.exe": "996f81566526cd348d4d940a0609e4c9012e3562f659611911e4937e1c119d08",
+    "FloraGPA.Rdc.exe": "f4d21d43e661d24d392e91fc1a1f1460a20d1377fcf5075c57083ad289e82773",
+    "FloraGPA.Metrics.dll": "58b6278f2a93e783b1e8bb1290e9b0e51745f1a36825f296584f52159fd7c6db"
+  },
+  "file_outcomes": {
+    "repeat_stable": 253,
+    "repeat_variable": 1
+  },
+  "native_runs": 508,
+  "prior_stable_images_unchanged": 243,
+  "diagnostic_controls": 269,
+  "texture_boundary_exports": 88,
+  "new_original_player_runs": 20,
+  "new_original_image_equal_files": 10,
+  "producer_frame_checks": 240,
+  "hardware_warp_cases": 20,
+  "hardware_warp_unobserved_runs": 40,
+  "hardware_warp_observed_runs": 40,
+  "goldens": [
+    {
+      "case": "gf2",
+      "rgba_sha256": "2e1abc5eacb0bbfd801f9fe059c305baa9a0786c384b36a42fa5a323dd979fd1",
+      "passed": true,
+      "counts": {
+        "ClearDepthStencilView": 2,
+        "ClearRenderTargetView": 1,
+        "CreateBuffer": 2,
+        "DrawIndexed": 72,
+        "Map": 44,
+        "Present": 1,
+        "buffers_created_without_initial_data": 2,
+        "object_observation_records": 49,
+        "pipeline_setter_records": 142,
+        "private_data_observations": 4,
+        "query_metadata_records": 2,
+        "state_or_auxiliary_records": 551,
+        "unmap_observations": 44
+      }
+    },
+    {
+      "case": "gf2-negative",
+      "rgba_sha256": "b2c5548a51715f581c4591acc266ac7a0c65b54b7ecd9a49f43499fa9b76c5f1",
+      "passed": true,
+      "counts": {
+        "ClearDepthStencilView": 2,
+        "ClearRenderTargetView": 1,
+        "CreateBuffer": 2,
+        "Map": 44,
+        "Present": 1,
+        "buffers_created_without_initial_data": 2,
+        "object_observation_records": 49,
+        "pipeline_setter_records": 142,
+        "private_data_observations": 4,
+        "query_metadata_records": 2,
+        "state_or_auxiliary_records": 551,
+        "unmap_observations": 44
+      }
+    },
+    {
+      "case": "bf1",
+      "rgba_sha256": "1f724d1840652f66afd26dd30c95aecd5c1b4932eede56109198f15a8f57a2f6",
+      "passed": true,
+      "counts": {
+        "ClearDepthStencilView": 10,
+        "ClearRenderTargetView": 10,
+        "ClearUnorderedAccessViewFloat": 1,
+        "CopyResource": 2,
+        "CopyStructureCount": 6,
+        "CopySubresourceRegion": 7,
+        "Dispatch": 60,
+        "DispatchIndirect": 13,
+        "Draw": 79,
+        "DrawIndexed": 41,
+        "DrawIndexedInstanced": 1053,
+        "DrawInstanced": 29,
+        "GenerateMips": 2,
+        "Map": 4151,
+        "Present": 1,
+        "UpdateSubresource": 27,
+        "map_read_observations": 2,
+        "object_observation_records": 28,
+        "pipeline_setter_records": 2221,
+        "query_metadata_records": 17,
+        "state_or_auxiliary_records": 7354,
+        "unmap_observations": 4153,
+        "unresolved_input_layout_setters": 2,
+        "unresolved_output_setters": 6,
+        "unresolved_shader_setters": 4,
+        "unresolved_srv_setters": 2
+      }
+    },
+    {
+      "case": "bf1-negative",
+      "rgba_sha256": "cd3a3066f984b1c317fbeefec2836503f32078321d3dc1f367465f2c06d435bf",
+      "passed": true,
+      "counts": {
+        "ClearDepthStencilView": 10,
+        "ClearRenderTargetView": 10,
+        "ClearUnorderedAccessViewFloat": 1,
+        "CopyResource": 2,
+        "CopyStructureCount": 6,
+        "CopySubresourceRegion": 7,
+        "Dispatch": 60,
+        "DispatchIndirect": 13,
+        "GenerateMips": 2,
+        "Map": 4151,
+        "Present": 1,
+        "UpdateSubresource": 27,
+        "map_read_observations": 2,
+        "object_observation_records": 28,
+        "pipeline_setter_records": 2221,
+        "query_metadata_records": 17,
+        "state_or_auxiliary_records": 7354,
+        "unmap_observations": 4153,
+        "unresolved_input_layout_setters": 2,
+        "unresolved_output_setters": 6,
+        "unresolved_shader_setters": 4,
+        "unresolved_srv_setters": 2
+      }
+    }
+  ],
+  "results": {
+    "corpus": {
+      "path": "artifacts\\m2-predicate-creation-final-release-corpus\\validation.json",
+      "sha256": "2f359c64ef8f7fd3cce7f5db67c72da2d544215bb0f2d8c7786714249dae1aa5",
+      "counts": {
+        "repeat_stable": 90,
+        "repeat_variable": 1
+      },
+      "original_comparison_counts": {
+        "not_run": 91
+      }
+    },
+    "originals": {
+      "path": "artifacts\\m2-predicate-creation-final-release-originals\\validation.json",
+      "sha256": "981960b64055d0f6a57ae1eca96cb73c58526665290f327ac8a59ce49f3562aa",
+      "counts": {
+        "repeat_stable": 11
+      },
+      "original_comparison_counts": {
+        "not_run": 11
+      }
+    },
+    "copy": {
+      "path": "artifacts\\m2-predicate-creation-final-release-copy\\validation.json",
+      "sha256": "a2df13046eff068b949528daa7966ea97915b5449640f3b2d0eb9c5d66298aca",
+      "counts": {
+        "repeat_stable": 6
+      },
+      "original_comparison_counts": {
+        "not_run": 6
+      }
+    },
+    "present": {
+      "path": "artifacts\\m2-predicate-creation-final-release-present\\validation.json",
+      "sha256": "61870e8b7ba46ee8ae99b33c31cf26d8c838c52896505de31fb6ec7aa2509428",
+      "counts": {
+        "repeat_stable": 5
+      },
+      "original_comparison_counts": {
+        "not_run": 5
+      }
+    },
+    "buffer": {
+      "path": "artifacts\\m2-predicate-creation-final-release-buffer\\validation.json",
+      "sha256": "9245025c50d89f0301c1987783aafdb618e32f8b3b1e87d3cb6b8c4bf1518a8c",
+      "counts": {
+        "repeat_stable": 5
+      },
+      "original_comparison_counts": {
+        "not_run": 5
+      }
+    },
+    "pipeline": {
+      "path": "artifacts\\m2-predicate-creation-final-release-pipeline\\validation.json",
+      "sha256": "3d6b32290ea80908de010de36fe589625e2165db55d5afcc2da7e558aeb2e4cd",
+      "counts": {
+        "repeat_stable": 5
+      },
+      "original_comparison_counts": {
+        "not_run": 5
+      }
+    },
+    "creation": {
+      "path": "artifacts\\m2-predicate-creation-final-release-creation\\validation.json",
+      "sha256": "11e9b105bb22051f55d5aed2888da75dd19c483c2f052ed36b1dd251107cd622",
+      "counts": {
+        "repeat_stable": 7
+      },
+      "original_comparison_counts": {
+        "not_run": 7
+      }
+    },
+    "discovery": {
+      "path": "artifacts\\m2-predicate-creation-final-release-discovery\\validation.json",
+      "sha256": "b5a93de6c7e7bed55c6b5492f6ec7d2292c05f6a60970f5131257d4e6f9bd28a",
+      "counts": {
+        "repeat_stable": 1
+      },
+      "original_comparison_counts": {
+        "not_run": 1
+      }
+    },
+    "dimensions": {
+      "path": "artifacts\\m2-predicate-creation-final-release-dimensions\\validation.json",
+      "sha256": "13952d05b9a1a06a9f491e5057f54f3054d1557b3ed34eb85e7c231bded9c5ee",
+      "counts": {
+        "repeat_stable": 17
+      },
+      "original_comparison_counts": {
+        "not_run": 17
+      }
+    },
+    "views": {
+      "path": "artifacts\\m2-predicate-creation-final-release-views\\validation.json",
+      "sha256": "c3a7dbb73a912be91d24e17158786eaf96c0e3115f542d6d85080c5e932f753f",
+      "counts": {
+        "repeat_stable": 12
+      },
+      "original_comparison_counts": {
+        "not_run": 12
+      }
+    },
+    "buffer-views": {
+      "path": "artifacts\\m2-predicate-creation-final-release-buffer-views\\validation.json",
+      "sha256": "a45c0c6d8e8b269800fa604d75ad54005a80d32884e735e260c7aeefaf1edd27",
+      "counts": {
+        "repeat_stable": 19
+      },
+      "original_comparison_counts": {
+        "not_run": 19
+      }
+    },
+    "pipeline-creation": {
+      "path": "artifacts\\m2-predicate-creation-final-release-pipeline-creation\\validation.json",
+      "sha256": "5d60d2b305993488998c8ec1033a8bbb62b343fa7fb46c169c29c999ea1a8e08",
+      "counts": {
+        "repeat_stable": 32
+      },
+      "original_comparison_counts": {
+        "not_run": 32
+      }
+    },
+    "geometry-creation": {
+      "path": "artifacts\\m2-predicate-creation-final-release-geometry-creation\\validation.json",
+      "sha256": "ae2fac16b30b3cd2498bfc5b6c6595ca264b97a2adb976beff52925e9589228a",
+      "counts": {
+        "repeat_stable": 20
+      },
+      "original_comparison_counts": {
+        "not_run": 20
+      }
+    },
+    "class-creation": {
+      "path": "artifacts\\m2-predicate-creation-final-release-class-creation\\validation.json",
+      "sha256": "8aa54243875726cf4e3d9f8d6bcf52ef9a27b27e410ac98e89f73bd2185404a5",
+      "counts": {
+        "repeat_stable": 13
+      },
+      "original_comparison_counts": {
+        "not_run": 13
+      }
+    },
+    "predicate-creation": {
+      "path": "artifacts\\m2-predicate-creation-final-release-predicate-creation\\validation.json",
+      "sha256": "217541d72c7007b2d559d206427d61a72202417f821db30a3c69919a69271606",
+      "counts": {
+        "repeat_stable": 10
+      },
+      "original_comparison_counts": {
+        "observed_equal": 10
+      }
+    }
+  },
+  "ctest": {
+    "path": "artifacts\\ctest-m2-predicate-creation.log",
+    "sha256": "b438893d4fffc6183a00666ae3cf150ab2dc7ba317e4b0d0637ed646f1416442",
+    "suites": 31,
+    "qt": {
+      "predicate-creation": {
+        "path": "artifacts\\m2-predicate-creation-qt-results\\predicate-creation-Release.txt",
+        "sha256": "e143b2cfecfc147b00dbc94483b3952ecdbb8100acd87ce4248e57292dac6c24",
+        "passed": 25
+      },
+      "class-creation": {
+        "path": "artifacts\\m2-predicate-creation-qt-results\\class-creation-Release.txt",
+        "sha256": "2fdb6ae261f2c5dadda416d9f4cbd9553c752332aaff9c7faacef6262666151f",
+        "passed": 33
+      },
+      "geometry-creation": {
+        "path": "artifacts\\m2-predicate-creation-qt-results\\geometry-creation-Release.txt",
+        "sha256": "26ba8b1018cadd17b3c3735a442a7756c6b9c58139d0a1e15d87691fce07f9b5",
+        "passed": 45
+      },
+      "pipeline-creation": {
+        "path": "artifacts\\m2-predicate-creation-qt-results\\pipeline-creation-Release.txt",
+        "sha256": "e15b9939ecef466005e5b5696eec4a761700015539a5ce5b8c31813b9f93ca4a",
+        "passed": 70
+      },
+      "ui": {
+        "path": "artifacts\\m2-predicate-creation-qt-results\\ui-Release.txt",
+        "sha256": "4505fa753645175b4f46b7da0f1d4af17a54c644eff9f21ecae496d365897ecb",
+        "passed": 55
+      }
+    }
+  },
+  "metadata_original_record_counts": {
+    "0x3162": 0,
+    "0x3163": 0,
+    "0x3164": 0,
+    "0x3166": 9,
+    "0x3167": 22,
+    "0x3169": 10,
+    "0x316a": 10
+  },
+  "sources": {
+    "src/core/PredicateCreation.cpp": "777ca421b0a6cb9faea507396c43cf2b45b53decf1439dfdb0a5c27926c0719b",
+    "src/core/PredicateCreation.h": "70139f41d4414aca76fcea9af1bdc58fa9511f7093f81785f064ec7b5b217288",
+    "src/replay/Predication.cpp": "a8c57370f439b1f89ef52fd8479683e70932ee79d6e25b8ece9252b8087312b5",
+    "src/replay/Replay.cpp": "a7bdc15bbe73f974088cc063368b85a7a50a0d045a00f9efaae928db52368a45",
+    "src/replay/Replay.h": "fc692e9d78a6da8f519f4845e93f7e55ab2fb1aaa4d0dd358d4d6bb2ff1b032d",
+    "src/core/InspectionRecords.cpp": "f0196bf0739d7625414214853064c8adf742d028fbca2bfc9b68041efbe46f6c",
+    "src/core/CommandNames.inc": "6ecb85b5a5acf1105c36f1f904c55479cdec7ef079ea4544edc94a41be9a0b29",
+    "src/core/ReplayCapabilities.cpp": "dad42d02cdb8e69e099f73b4493da57db89dab2315731a2a5c09e2e10dabf2e7",
+    "src/application/ApiCommands.cpp": "3e0a600bb70b8dc7bff4311a127cdb23133724cd927009186ef1f61d4995c847",
+    "src/application/PredicateInspector.cpp": "dc0cbae2fdffe2f8038aec37e87a76383e0ad09c985354ebc983573e2a416acf",
+    "src/application/FrameValidation.cpp": "2ce45b043b9b63f4d727d0b00d9a888c0327b713f2a1d0fd01c6ac837031c782",
+    "tests/PredicateCreationTests.cpp": "35e7503c877ca1f83e294603831920136f9f5f39dfc04b3553ea1b0fcb256f84",
+    "tools/native/predicate_creation_probe.cpp": "5e25dc68e1408d42d8e3db06a322b910588b82c62c65180c7612aea7d7ac8a82",
+    "CMakeLists.txt": "248ad7bdd01621224154282c5eb46ca7143bbd567a0a2f43a494d676e7aab2c1",
+    "tools/validate_corpus.py": "9ca95400b3dc7d5ba8b39cea5616b155794711c063207f8430d97401e892c616"
+  },
+  "evidence": {
+    "artifacts/m2-predicate-creation-wrappers.c": "048245b024b8d4cab6091c373fede5d437b582034a877271e13f4f370c0d6dc8",
+    "artifacts/m2-predicate-creation-ghidra.log": "84c49b7d9527d80c1e8b3addfec950b87aa39c4093554da42e87d9791fe0011f",
+    "artifacts/m2-predicate-creation-string-rvas.json": "332d14be72dc2838d330301f84f9b68ecf0e995a09f76b3418fd402868d747ad",
+    "artifacts/m2-predicate-private-wrappers.c": "011c3aa9374e943ff04166ac916ae71009e547fe6ff148f2aa2385b193cd3805",
+    "artifacts/m2-predicate-private-ghidra.log": "e5ae10f3babb211d76d24d028e7ebe421ced4a97129bdba6ff6b3d78be844386",
+    "artifacts/m2-predicate-creation-originals/manifest.json": "cdba173e0d4ad8773384621a7623a7b742757f7d6ca36aef5fb692a0b5b5abd4",
+    "artifacts/m2-predicate-creation-before/validation.json": "f3d1e5705a166afa1ee350bc0d716f0944a284a80479300a5a8a81d7962cb4bc",
+    "artifacts/capture-predicate-creations.log": "81f624c92174d93c302cb6273d7c565c3504e71a40c312bd301b2628c7fe75d0",
+    "artifacts/predicate-unobserved-first.txt": "1a46590f24f4daf9d222717f57fea8b7adb3b517bab6d79b0059bc6a676e8c04",
+    "artifacts/predicate-passive.txt": "86e865dedd19baffa4eb5979cd2cbb5f843a59c1b6115b664ffef7ef1413c786",
+    "artifacts/m2-predicate-creation-release-predicate-creation/validation.json": "6570f63e2acf177743833bf2985191656e96ba5793b33a02eb934ffe175c709a",
+    "artifacts/predicate-creation-compatibility-tools.log": "b80c835d14d8dd3f5b7753cbe3b1688811f868be1818d0a6eabbb75d98d854e1"
+  },
+  "limits": [
+    "Device5 CreatePredicate only; other device/interface versions not accepted by this batch",
+    "Original generic player device/configuration equivalence not established",
+    "Snapshot-only pre-frame empty interval fallback unchanged; missing captured history is not recovered",
+    "Positive SO overflow and hint suppression are not certified by these new captures",
+    "Ordinary Query identity, missing Begin/End and partial GetData bytes remain capture information limits",
+    "Repeated identities and deferred execution remain unsupported; module counts unchanged"
+  ]
+}

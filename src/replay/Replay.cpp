@@ -104,6 +104,14 @@ void Replay::immediate(Id id) const { requireImmediateContext(frame_, id); }
 IUnknown *Replay::object(Id id) {
     if (!id)
         return nullptr;
+    if (!predicateCreationAudit_)
+        predicateCreationAudit_ = auditPredicateCreations(frame_);
+    if (auto it = predicateCreationAudit_->creationEvents.find(id);
+        it != predicateCreationAudit_->creationEvents.end() && !objects_.contains(id)) {
+        requirePredicateCreation(*predicateCreationAudit_, it->second);
+        throw std::runtime_error("Predicate " + std::to_string(id) + " unavailable before creation event " +
+                                 std::to_string(it->second));
+    }
     if (!bufferCreationAudit_)
         bufferCreationAudit_ = auditBufferCreations(frame_);
     if (auto it = bufferCreationAudit_->creationEvents.find(id);
@@ -478,7 +486,7 @@ void Replay::bind(const State &s, bool compute) {
         context_->RSSetScissorRects(0, nullptr);
     context_->OMSetBlendState(get<ID3D11BlendState>(s.blend), s.blendFactor.data(), s.sampleMask);
     context_->OMSetDepthStencilState(get<ID3D11DepthStencilState>(s.depthState), s.stencilRef);
-    const auto predicate = predicateOverride_.value_or(PredicateBinding{s.predicate, s.predicateValue});
+    const auto predicate = predicateBinding_.value_or(PredicateBinding{s.predicate, s.predicateValue});
     bindPredicate(predicate.resource, predicate.value);
     if (compute || extended || outputHistory_) {
         std::array<ID3D11UnorderedAccessView *, 64> uavs{};
@@ -720,6 +728,10 @@ void Replay::mappedWrites(const Entry &e) {
 State Replay::prepareState(const Event &event) {
     immediate(event.context);
     auto state = frame_.state(event.state);
+    if (predicateBinding_) {
+        state.predicate = predicateBinding_->resource;
+        state.predicateValue = predicateBinding_->value;
+    }
     for (const auto &[type, binding] : activePipelineBindings_)
         overlayPipelineBinding(state, binding);
     if (!outputHistory_)
@@ -911,10 +923,10 @@ void Replay::command(const Entry &e) {
             const auto binding = edit == options_.predicateSetters.end()
                                      ? PredicateBinding{captured.resource, captured.value}
                                      : edit->second;
-            // Commit the persistent edit only after native binding succeeds.
+            // Explicit setters are authoritative until the next setter/ClearState.
+            // Original captures can omit frame-created predicates from Draw snapshots.
             bindPredicate(binding.resource, binding.value);
-            predicateOverride_ =
-                edit == options_.predicateSetters.end() ? std::optional<PredicateBinding>{} : binding;
+            predicateBinding_ = binding;
             counts["SetPredication"]++;
         } else
             applyPredicate(t, payload);
@@ -980,6 +992,10 @@ void Replay::command(const Entry &e) {
     }
     if (acceptTextureCreationObservation(t, payload)) {
         ++counts["texture_creation_observations"];
+        return;
+    }
+    if (t == 0x358e) {
+        predicateCreation(e);
         return;
     }
     if (isClassCreation(t)) {
@@ -1083,7 +1099,7 @@ void Replay::command(const Entry &e) {
         ++counts[commandName(t)];
         return;
     }
-    if (t == 0x3017) {
+    if (t == 0x3017 || t == 0x3167) {
         readPrivateDataObservation(payload);
         ++counts["private_data_observations"];
         return;
@@ -1282,7 +1298,7 @@ void Replay::command(const Entry &e) {
         context_->ClearState();
         boundPredicate_ = 0;
         predicateValue_ = 0;
-        predicateOverride_.reset();
+        predicateBinding_.reset();
         samplerBindings_.clear();
         activePipelineBindings_.clear();
         srvBindings_.clear();
@@ -1332,7 +1348,7 @@ void Replay::run(const std::function<void(Id, size_t, size_t)> &progress,
         throw std::runtime_error("Stop event is not an API command");
     context_->ClearState();
     resetPredicates();
-    predicateOverride_.reset();
+    predicateBinding_.reset();
     samplerBindings_ = SamplerBindings{};
     activePipelineBindings_.clear();
     srvBindings_.clear();
@@ -1346,6 +1362,7 @@ void Replay::run(const std::function<void(Id, size_t, size_t)> &progress,
     bindingEvent_ = 0;
     clearBindingGaps();
     objects_.clear();
+    unissuedPredicates_.clear();
     undefinedCreatedCounters_.clear();
     ignoredMsaaInitial_.clear();
     planarWrites_.clear();

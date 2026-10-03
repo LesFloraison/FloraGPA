@@ -1,0 +1,216 @@
+{
+  "schema": "FloraGPA compatibility corpus 1",
+  "profile": "GPA 2025 R1 legacy DX11 / IGPA v3",
+  "cases": [
+    {
+      "id": "predicate_creation_0",
+      "path": "0/capture.gpa_frame",
+      "sha256": "7d35749368f1d073e57c09a697c5c1ababfe1841026e20ac1fe8ac0ebb26ae73",
+      "bytes": 80864,
+      "family": "predicate_creation",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified CaptureNextFrame output; native and shim-injected producer checks twelve frames each, including predicate results except hint. Modes 2/3 intentionally skip final Draw.",
+      "device_scope": "Producer device IDs retained; generic original player adapter not identified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 37,
+          "repeat": 2,
+          "expected_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+          "purpose": "Diagnostic-only final conditional Draw omission; original files and shaders unchanged."
+        }
+      ],
+      "boundaries": []
+    },
+    {
+      "id": "predicate_creation_1",
+      "path": "1/capture.gpa_frame",
+      "sha256": "4eefbc323c3f58e37b200b384b1d1b3ea5178ed4ab492d726c8100123e096b24",
+      "bytes": 80864,
+      "family": "predicate_creation",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified CaptureNextFrame output; native and shim-injected producer checks twelve frames each, including predicate results except hint. Modes 2/3 intentionally skip final Draw.",
+      "device_scope": "Producer device IDs retained; generic original player adapter not identified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 37,
+          "repeat": 2,
+          "expected_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+          "purpose": "Diagnostic-only final conditional Draw omission; original files and shaders unchanged."
+        }
+      ],
+      "boundaries": []
+    },
+    {
+      "id": "predicate_creation_2",
+      "path": "2/capture.gpa_frame",
+      "sha256": "4c64a60746f5ad71b3627b6c1b4ce98d511242fed2d181004625c6bb89bf136d",
+      "bytes": 80864,
+      "family": "predicate_creation",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified CaptureNextFrame output; native and shim-injected producer checks twelve frames each, including predicate results except hint. Modes 2/3 intentionally skip final Draw.",
+      "device_scope": "Producer device IDs retained; generic original player adapter not identified.",
+      "reference_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+      "comparison_policy": "exact_golden",
+      "controls": [],
+      "boundaries": []
+    },
+    {
+      "id": "predicate_creation_3",
+      "path": "3/capture.gpa_frame",
+      "sha256": "8f83cfec84f27833f8f30555b959b7225afe500781fd2774d262b29afdbbfb82",
+      "bytes": 80864,
+      "family": "predicate_creation",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified CaptureNextFrame output; native and shim-injected producer checks twelve frames each, including predicate results except hint. Modes 2/3 intentionally skip final Draw.",
+      "device_scope": "Producer device IDs retained; generic original player adapter not identified.",
+      "reference_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+      "comparison_policy": "exact_golden",
+      "controls": [],
+      "boundaries": []
+    },
+    {
+      "id": "predicate_creation_4",
+      "path": "4/capture.gpa_frame",
+      "sha256": "c4be1af56114ac7c3ccc5c6c8b15845a2de64c779b65ff7ef3b08583cfa5722c",
+      "bytes": 80596,
+      "family": "predicate_creation",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified CaptureNextFrame output; native and shim-injected producer checks twelve frames each, including predicate results except hint. Modes 2/3 intentionally skip final Draw.",
+      "device_scope": "Producer device IDs retained; generic original player adapter not identified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 33,
+          "repeat": 2,
+          "expected_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+          "purpose": "Diagnostic-only final conditional Draw omission; original files and shaders unchanged."
+        }
+      ],
+      "boundaries": []
+    },
+    {
+      "id": "predicate_creation_5",
+      "path": "5/capture.gpa_frame",
+      "sha256": "fcb20e98dbf9bc86527ff1e6132df6a294a600cba24003da6dedbe73b92c90c0",
+      "bytes": 80925,
+      "family": "predicate_creation",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified CaptureNextFrame output; native and shim-injected producer checks twelve frames each, including predicate results except hint. Modes 2/3 intentionally skip final Draw.",
+      "device_scope": "Producer device IDs retained; generic original player adapter not identified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 38,
+          "repeat": 2,
+          "expected_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+          "purpose": "Diagnostic-only final conditional Draw omission; original files and shaders unchanged."
+        }
+      ],
+      "boundaries": []
+    },
+    {
+      "id": "predicate_creation_6",
+      "path": "6/capture.gpa_frame",
+      "sha256": "393b389c4609cd507e45cb2bce96f90b253b9881bc20c48500cf0831165a3b39",
+      "bytes": 80925,
+      "family": "predicate_creation",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified CaptureNextFrame output; native and shim-injected producer checks twelve frames each, including predicate results except hint. Modes 2/3 intentionally skip final Draw.",
+      "device_scope": "Producer device IDs retained; generic original player adapter not identified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 38,
+          "repeat": 2,
+          "expected_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+          "purpose": "Diagnostic-only final conditional Draw omission; original files and shaders unchanged."
+        }
+      ],
+      "boundaries": []
+    },
+    {
+      "id": "predicate_creation_7",
+      "path": "7/capture.gpa_frame",
+      "sha256": "71f59bbfdafe00b08fbbf79107437d1b4a430aff1edf4a06ce1ba9ad0c28bfe3",
+      "bytes": 80925,
+      "family": "predicate_creation",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified CaptureNextFrame output; native and shim-injected producer checks twelve frames each, including predicate results except hint. Modes 2/3 intentionally skip final Draw.",
+      "device_scope": "Producer device IDs retained; generic original player adapter not identified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 39,
+          "repeat": 2,
+          "expected_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+          "purpose": "Diagnostic-only final conditional Draw omission; original files and shaders unchanged."
+        }
+      ],
+      "boundaries": []
+    },
+    {
+      "id": "predicate_creation_8",
+      "path": "8/capture.gpa_frame",
+      "sha256": "5f3109f1e0955d35f9ce08b351f840baaef39a8b4173f44ded01a519c1855c23",
+      "bytes": 80864,
+      "family": "predicate_creation",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified CaptureNextFrame output; native and shim-injected producer checks twelve frames each, including predicate results except hint. Modes 2/3 intentionally skip final Draw.",
+      "device_scope": "Producer device IDs retained; generic original player adapter not identified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 37,
+          "repeat": 2,
+          "expected_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+          "purpose": "Diagnostic-only final conditional Draw omission; original files and shaders unchanged."
+        }
+      ],
+      "boundaries": []
+    },
+    {
+      "id": "predicate_creation_9",
+      "path": "9/capture.gpa_frame",
+      "sha256": "b3974138478e425d95675bf2e7481fe2c4e387fadfbba56438e89eb9fc267e72",
+      "bytes": 103491,
+      "family": "predicate_creation",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified CaptureNextFrame output; native and shim-injected producer checks twelve frames each, including predicate results except hint. Modes 2/3 intentionally skip final Draw.",
+      "device_scope": "Producer device IDs retained; generic original player adapter not identified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 43,
+          "repeat": 2,
+          "expected_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+          "purpose": "Diagnostic-only final conditional Draw omission; original files and shaders unchanged."
+        }
+      ],
+      "boundaries": []
+    }
+  ],
+  "source_manifest": {
+    "path": "artifacts\\m2-predicate-creation-originals\\manifest.json",
+    "sha256": "cdba173e0d4ad8773384621a7623a7b742757f7d6ca36aef5fb692a0b5b5abd4"
+  }
+}

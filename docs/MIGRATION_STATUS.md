@@ -5,6 +5,31 @@
 > [Documentation](README.md)。`artifacts/`、`out/`、`build/` 及外部参考目录
 > 是未随仓库发布的本地证据位置，不代表克隆后即可访问。
 
+2026-10-03（M2 第十六批）：接通 Device5 CreatePredicate 的帧内执行，并严格
+区分实际创建、失败调用与仅验证参数的 S_FALSE。新对象保持未发起状态，不再
+用空 Begin/End 伪造初始结果；提前绑定、提前使用、描述冲突与重复身份明确拒绝。
+新增七类 Predicate 元数据解码，其中四类有原始捕获记录，另三类仅具原版写入器
+和合成边界测试证据。10 份未修改的原版专项捕获与 240 次生产程序帧检查已登记。
+
+完整 CLI 验收发现两份应跳过 Draw 的反例：原版 Draw 快照漏掉帧内新建 Predicate，
+但前面的 SetPredication 保存了正确绑定。重放曾用空快照覆盖显式绑定；现保留
+显式 setter 状态，并同步有效 Draw 状态。初版观察测试按快照是否含 Predicate
+决定是否断言，实际漏检了最终像素；现强制核对最终条件绑定与图像，并增加无
+观察器的完整重放。该问题在硬件与 WARP 上均已复现和修复，没有加入 CPU 查询
+等待、修改 Shader 或放宽阈值；失败验收记录继续保留。
+
+最终登记 254 份文件、508 次独立重放：253 份重复稳定，Helldivers 保留既有波动，
+243 份既有稳定图像哈希不变。269 次诊断对照、88 次纹理边界导出、四项黄金检查
+和 31 套 CTest 全部通过。新增 20 组硬件／WARP 样例共运行 40 次完整无观察重放
+及 40 次观察重放；Predicate 专项 25 项、Qt/Worker 55 项均无跳过。新增原版
+播放器 20 次对照均逐字节一致，但通用原版播放器的设备配置等价性仍未确认。
+此前 Class 原版播放器差异继续保留，不计入图像一致。五个发布二进制与 Release
+一致，13 项验收工具 CPU 检查通过。详见
+[PREDICATE_CREATION_AUDIT.md](PREDICATE_CREATION_AUDIT.md) 与
+[predicate-creation-baseline.json](predicate-creation-baseline.json)。帧前查询历史、
+更多接口／资源生命周期、Deferred Context 与 Command List 仍未完成；M2 与
+M3–M6 保持开放，模块统计仍为 72 ported／117 partial／15 pending。
+
 2026-10-03（M2 第十五批）：接通 CreateClassLinkage、GetClassInstance 与
 CreateClassInstance 的帧内执行。通过配对创建记录与 Shader／实例快照，恢复原版
 API ID 与快照 linkage ID 的对应关系；冲突、提前使用、重复身份和缺失必要名称

@@ -22,6 +22,10 @@ bool in(uint16_t t, std::initializer_list<uint16_t> values) {
 }
 } // namespace
 ReplayCapability replayCapability(uint16_t t) {
+    if (in(t, {0x358e, 0x3162, 0x3163, 0x3164, 0x3166, 0x3167, 0x3169, 0x316a}))
+        return {t == 0x358e ? "execute" : "metadata",
+                "src/core/PredicateCreation.cpp;src/replay/Predication.cpp;src/core/InspectionRecords.cpp",
+                "tests/PredicateCreationTests.cpp;docs/PREDICATE_CREATION_AUDIT.md"};
     if (isClassCreation(t) || in(t, {0x3112, 0x3113, 0x3114, 0x311a, 0x311b, 0x311c, 0x318e, 0x318f, 0x3190}))
         return {isClassCreation(t) ? "execute" : "metadata",
                 "src/core/ClassCreation.cpp;src/core/ClassLinkage.cpp;src/replay/ClassCreation.cpp;src/core/"

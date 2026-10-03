@@ -2,6 +2,7 @@
 #include "core/ClassCreation.h"
 #include "core/Contexts.h"
 #include "core/PipelineCreation.h"
+#include "core/PredicateCreation.h"
 #include "core/TextureCreation.h"
 #include <QChar>
 #include <QDir>
@@ -535,8 +536,8 @@ Json inspectCommand(const Frame &frame, Id id) {
                 r.id("view");
                 r.array("values", t == 0x33 ? "I" : "f", 4);
             } else if (t == 0x242 || t == 0x244) {
-            } else if (in(t,
-                          {0x3113, 0x3114, 0x318f, 0x3190, 0x3013, 0x3014, 0x3250, 0x3251, 0x3576, 0x3577}))
+            } else if (in(t, {0x3163, 0x3164, 0x3113, 0x3114, 0x318f, 0x3190, 0x3013, 0x3014, 0x3250, 0x3251,
+                              0x3576, 0x3577}))
                 r.u("return_ref_count");
             else if (t == 0x311a) {
                 if (r.flag("descriptor_present"))
@@ -547,7 +548,7 @@ Json inspectCommand(const Frame &frame, Id id) {
                     r.field("name_bytes", std::to_string(length) + "s");
             } else if (t == 0x3019 || t == 0x3146)
                 r.array("resource_dimension", "I", 1);
-            else if (in(t, {0x3112, 0x318e, 0x3012, 0x324f, 0x3256, 0x3575})) {
+            else if (in(t, {0x3162, 0x3112, 0x318e, 0x3012, 0x324f, 0x3256, 0x3575})) {
                 r.field("hresult", "i");
                 r.field("interface_guid", "16s");
                 r.id("returned_object");
@@ -583,17 +584,17 @@ Json inspectCommand(const Frame &frame, Id id) {
                                         {"descriptor_saved", false},
                                         {"returned_reference_saved", false},
                                         {"resource_replay_supported", false}};
-            } else if (t == 0x3151)
+            } else if (t == 0x3169 || t == 0x3151)
                 r.u("return_data_size");
-            else if (t == 0x3152) {
+            else if (t == 0x316a || t == 0x3152) {
                 if (r.flag("descriptor_present"))
                     r.values("II", {"query_type", "misc_flags"});
-            } else if (t == 0x3017) {
+            } else if (t == 0x3017 || t == 0x3167) {
                 r.field("hresult", "i");
                 r.field("guid", "16s");
                 r.u("data_size");
                 r.id("captured_data_pointer", false);
-            } else if (t == 0x3597) {
+            } else if (t == 0x3597 || t == 0x3166) {
                 r.field("hresult", "i");
                 r.field("guid", "16s");
                 r.array("data_size", "I", 1);
@@ -604,6 +605,12 @@ Json inspectCommand(const Frame &frame, Id id) {
                     r.u("view_dimension");
                     r.field("descriptor_union", "4I");
                 }
+            } else if (t == 0x358e) {
+                readPredicateCreation(raw);
+                r.field("hresult", "i");
+                if (r.flag("descriptor_present"))
+                    r.values("II", {"query_type", "misc_flags"});
+                r.id("returned_resource");
             } else if (isClassCreation(t)) {
                 readClassCreation(t, raw);
                 r.field("hresult", "i");

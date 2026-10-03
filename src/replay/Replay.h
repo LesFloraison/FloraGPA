@@ -8,6 +8,7 @@
 #include "core/OutputBindings.h"
 #include "core/PipelineBindings.h"
 #include "core/PipelineCreation.h"
+#include "core/PredicateCreation.h"
 #include "core/Predication.h"
 #include "core/SamplerBindings.h"
 #include "core/SrvBindings.h"
@@ -161,6 +162,9 @@ class Replay {
     std::optional<BufferCreationAudit> bufferCreationAudit_;
     std::optional<TextureCreationAudit> textureCreationAudit_;
     std::optional<ClassCreationAudit> classCreationAudit_;
+    std::optional<PredicateCreationAudit> predicateCreationAudit_;
+    std::set<Id> unissuedPredicates_;
+    void predicateCreation(const Entry &);
     void classCreation(const Entry &);
     std::optional<PipelineCreationAudit> pipelineCreationAudit_;
     void pipelineCreation(const Entry &entry);
@@ -197,7 +201,7 @@ class Replay {
     std::map<Id, PredicateInterval> activePredicates_;
     Id boundPredicate_ = 0;
     uint32_t predicateValue_ = 0;
-    std::optional<PredicateBinding> predicateOverride_;
+    std::optional<PredicateBinding> predicateBinding_;
     SamplerBindings samplerBindings_;
     std::map<uint16_t, PipelineBinding> activePipelineBindings_;
     bool pipelineSetter(const Entry &entry, Bytes payload);

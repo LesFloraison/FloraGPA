@@ -12,6 +12,12 @@ Json describePredicate(const Frame &frame, Id id) {
              {"query_name", desc.type == 5 ? "occlusion_predicate" : "so_overflow_predicate"},
              {"query_flags", desc.flags},
              {"initial_result_source", "native_player_empty_begin_end"}};
+    const auto creations = auditPredicateCreations(frame);
+    if (auto it = creations.creationEvents.find(id); it != creations.creationEvents.end()) {
+        requirePredicateCreation(creations, it->second);
+        out["creation_event"] = it->second;
+        out["initial_result_source"] = "unissued_frame_time_creation";
+    }
     Json names = Json::array();
     const auto catalog = capturedNames(frame);
     for (const auto &record : catalog["records"])

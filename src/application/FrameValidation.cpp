@@ -11,6 +11,7 @@
 #include "core/OutputBindings.h"
 #include "core/PipelineBindings.h"
 #include "core/PipelineCreation.h"
+#include "core/PredicateCreation.h"
 #include "core/Predication.h"
 #include "core/PresentRecords.h"
 #include "core/ReplayCapabilities.h"
@@ -57,6 +58,7 @@ Json validateFrame(const std::filesystem::path &path, const std::function<bool()
         std::optional<BufferCreationAudit> creationAudit;
         std::optional<TextureCreationAudit> textureCreationAudit;
         std::optional<ClassCreationAudit> classCreationAudit;
+        std::optional<PredicateCreationAudit> predicateCreationAudit;
         std::optional<PipelineCreationAudit> pipelineCreationAudit;
         auto reference = [&](const Entry &e, Id id, int category) {
             if (!id)
@@ -144,6 +146,19 @@ Json validateFrame(const std::filesystem::path &path, const std::function<bool()
                                 finding(&e, "error", "copy_command_rejected", error.what(), copy.destination);
                             }
                         }
+                        if (e.type == 0x358e) {
+                            if (!predicateCreationAudit)
+                                predicateCreationAudit = auditPredicateCreations(frame);
+                            const auto &c = predicateCreationAudit->records.at(id);
+                            if (!c.error.empty())
+                                finding(&e, "error", "predicate_creation_rejected", c.error, c.resource);
+                            else if (c.result)
+                                report["record_handling_overrides"].push_back(
+                                    {{"event_id", id},
+                                     {"resource_id", c.resource},
+                                     {"handling", "metadata"},
+                                     {"reason", "Noncreating predicate call"}});
+                        }
                         if (isClassCreation(e.type)) {
                             if (!classCreationAudit) {
                                 classCreationAudit = auditClassCreations(frame);
@@ -216,7 +231,7 @@ Json validateFrame(const std::filesystem::path &path, const std::function<bool()
                                         "writes define its contents",
                                         creation.resource);
                         }
-                        if (e.type == 0x3017) {
+                        if (e.type == 0x3017 || e.type == 0x3167) {
                             const auto data = readPrivateDataObservation(frame.payload(id));
                             if (data.result >= 0 && data.size)
                                 finding(&e, "info", "private_data_payload_not_saved",

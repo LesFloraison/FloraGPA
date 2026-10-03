@@ -4,6 +4,28 @@
 #include <chrono>
 #include <thread>
 namespace flora {
+void Replay::predicateCreation(const Entry &e) {
+    if (!predicateCreationAudit_)
+        predicateCreationAudit_ = auditPredicateCreations(frame_);
+    const auto &c = requirePredicateCreation(*predicateCreationAudit_, e.id);
+    if (c.result) {
+        ++counts["predicate_creation_observations"];
+        return;
+    }
+    if (objects_.contains(c.resource))
+        throw std::runtime_error("Predicate creation identity already materialized");
+    D3D11_QUERY_DESC desc{D3D11_QUERY(c.type), c.flags};
+    Com<ID3D11Predicate> predicate;
+    check(device_->CreatePredicate(&desc, &predicate), "Captured CreatePredicate");
+    D3D11_QUERY_DESC actual{};
+    predicate->GetDesc(&actual);
+    if (actual.Query != desc.Query || actual.MiscFlags != desc.MiscFlags ||
+        predicate->GetDataSize() != sizeof(BOOL))
+        throw std::runtime_error("Native predicate creation descriptor differs");
+    objects_[c.resource] = predicate;
+    unissuedPredicates_.insert(c.resource);
+    ++counts["CreatePredicate"];
+}
 Com<ID3D11Predicate> Replay::createPredicate(Id id, bool readable) {
     auto resource = readPredicate(frame_, id);
     D3D11_QUERY_DESC desc{D3D11_QUERY(resource.type), readable ? 0u : resource.flags};
@@ -16,6 +38,9 @@ void Replay::bindPredicate(Id id, uint32_t value) {
         readPredicate(frame_, id);
     if (activePredicates_.contains(id))
         throw std::runtime_error("Cannot bind a predicate before End");
+    if (unissuedPredicates_.contains(id))
+        throw std::runtime_error("New predicate " + std::to_string(id) +
+                                 " has no completed captured Begin/End interval");
     auto predicate = get<ID3D11Predicate>(id);
     context_->SetPredication(predicate, BOOL(value));
     boundPredicate_ = id;
@@ -103,6 +128,7 @@ void Replay::applyPredicate(uint16_t type, Bytes payload) {
             objects_.at(id) = selected;
         }
         counts["End"]++;
+        unissuedPredicates_.erase(id);
     }
 }
 void Replay::resetPredicates() {
@@ -125,6 +151,10 @@ Replay::PredicateResult Replay::readPredicateResult(Id id, unsigned timeoutMs) {
     result.predicateValue = predicateValue_;
     if (activePredicates_.contains(id)) {
         result.status = "active";
+        return result;
+    }
+    if (unissuedPredicates_.contains(id)) {
+        result.status = "unissued";
         return result;
     }
     if (desc.flags & 1) {
