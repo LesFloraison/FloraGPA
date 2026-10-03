@@ -57,7 +57,9 @@ class UiTests final : public QObject {
         auto restore =
             qScopeGuard([&] { QCoreApplication::setAttribute(Qt::AA_DontUseNativeDialogs, native); });
         bool handled = false;
-        QTimer::singleShot(0, &window, [&] {
+        QTimer dialogHandler;
+        dialogHandler.setSingleShot(true);
+        connect(&dialogHandler, &QTimer::timeout, &dialogHandler, [&] {
             auto dialog = window.findChild<QFileDialog *>();
             QVERIFY(dialog);
             QTimer::singleShot(3000, dialog, &QDialog::reject);
@@ -65,8 +67,15 @@ class UiTests final : public QObject {
             handled = true;
             QMetaObject::invokeMethod(dialog, "accept", Qt::QueuedConnection);
         });
-        window.findChild<QAction *>(actionName)->trigger();
-        QVERIFY(handled);
+        dialogHandler.start(0);
+        auto action = window.findChild<QAction *>(actionName);
+        QVERIFY(action);
+        action->trigger();
+        QVERIFY2(handled, qPrintable(QString("Action %1: enabled=%2 busy=%3 status=%4")
+                                        .arg(actionName)
+                                        .arg(action->isEnabled())
+                                        .arg(window.busy())
+                                        .arg(window.statusBar()->currentMessage())));
     }
     void snapshot(QWidget &window, const QString &name) {
         auto directory = qEnvironmentVariable("FLORA_UI_ARTIFACT_DIR");
@@ -2980,6 +2989,83 @@ class UiTests final : public QObject {
         QVERIFY(done.takeLast()[0].toBool());
         QCOMPARE(image->image().pixelColor(0, 0).red(), 0x31);
         QVERIFY(!label->toolTip().contains("Map writes Y only"));
+    }
+    void textureExportDuringRefresh() {
+        using namespace flora;
+        using namespace flora::testing;
+        QTemporaryDir dir;
+        msaaOutputCapture(false).save(dir.path() + "/msaa.gpa_frame");
+        MainWindow window;
+        window.show();
+        QSignalSpy done(&window, &MainWindow::taskFinished);
+        window.openCapture(dir.path() + "/msaa.gpa_frame");
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        done.clear();
+        auto api = window.findChild<QTableView *>("apiLog");
+        api->setCurrentIndex(api->model()->index(1, 0));
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        window.findChild<QComboBox *>("textureBoundary")->setCurrentIndex(2);
+        auto resources = window.findChild<QTableView *>("resources");
+        bool selected = false;
+        for (int row = 0; row < resources->model()->rowCount(); ++row) {
+            auto index = resources->model()->index(row, 0);
+            if (index.data(Qt::UserRole).toULongLong() == 20) {
+                resources->setCurrentIndex(index);
+                selected = true;
+                break;
+            }
+        }
+        QVERIFY(selected);
+        auto image = window.findChild<ImageView *>("textureOutput");
+        QTRY_VERIFY_WITH_TIMEOUT(!image->image().isNull(), 30000);
+        QTRY_COMPARE_WITH_TIMEOUT(image->image().pixelColor(0, 0), QColor(10, 0, 0, 255), 30000);
+        auto action = window.findChild<QAction *>("exportTexture");
+        QTRY_VERIFY_WITH_TIMEOUT(action->isEnabled() && !window.busy(), 30000);
+        const bool native = QCoreApplication::testAttribute(Qt::AA_DontUseNativeDialogs);
+        QCoreApplication::setAttribute(Qt::AA_DontUseNativeDialogs, true);
+        auto restore = qScopeGuard([&] { QCoreApplication::setAttribute(Qt::AA_DontUseNativeDialogs, native); });
+        // An edit has queued a refresh, but the displayed asset is still sample 0.
+        // Let that refresh complete inside the save dialog's nested event loop.
+        window.findChild<QSpinBox *>("textureSample")->setValue(3);
+        bool refreshed = false, dialogSeen = false;
+        QString selectedPath;
+        QTimer poll, watchdog;
+        watchdog.setSingleShot(true);
+        connect(&poll, &QTimer::timeout, &poll, [&] {
+            auto dialog = window.findChild<QFileDialog *>();
+            if (!dialog)
+                return;
+            dialogSeen = true;
+            if (!image->image().isNull() && image->image().pixelColor(0, 0) == QColor(16, 0, 0, 255)) {
+                refreshed = true;
+                poll.stop();
+                // selectFile() does not replace an active filename editor after
+                // the dialog is visible. Enter the requested path as a user would.
+                auto filename = dialog->findChild<QLineEdit *>("fileNameEdit");
+                QVERIFY(filename);
+                filename->setText(dir.path() + "/snapshot.bin");
+                selectedPath = dialog->selectedFiles().join(';');
+                QMetaObject::invokeMethod(dialog, "accept", Qt::QueuedConnection);
+            }
+        });
+        connect(&watchdog, &QTimer::timeout, &watchdog, [&] {
+            if (auto dialog = window.findChild<QFileDialog *>())
+                dialog->reject();
+        });
+        poll.start(10);
+        watchdog.start(30000);
+        action->trigger();
+        QVERIFY(dialogSeen);
+        QVERIFY(refreshed);
+        QFile exported(dir.path() + "/snapshot.bin");
+        QVERIFY2(exported.open(QIODevice::ReadOnly),
+                 qPrintable(QString("selected=%1 files=%2 status=%3")
+                                .arg(selectedPath, QDir(dir.path()).entryList(QDir::Files).join(';'),
+                                     window.statusBar()->currentMessage())));
+        QCOMPARE(exported.read(4), QByteArray::fromHex("0a0000ff"));
+        QCOMPARE(image->image().pixelColor(0, 0), QColor(16, 0, 0, 255));
     }
     void textureInspectorControls() {
         using namespace flora;

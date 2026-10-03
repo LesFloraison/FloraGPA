@@ -251,7 +251,7 @@ class MainWindow final : public QMainWindow {
     QSpinBox *textureSample_;
     QLineEdit *textureFormat_, *textureLow_, *textureHigh_;
     QJsonObject textureMetadata_;
-    std::unique_ptr<QTemporaryDir> textureDir_;
+    std::shared_ptr<QTemporaryDir> textureDir_;
     QSpinBox *mip_, *layer_, *slice_;
     QLabel *textureLabel_;
     QTimer textureTimer_;

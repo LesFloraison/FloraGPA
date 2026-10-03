@@ -2948,23 +2948,27 @@ void MainWindow::previewTexture() {
     startWorker(args, false);
 }
 void MainWindow::exportTexture() {
-    if (!textureDir_ || textureMetadata_.isEmpty() || busy())
+    if (!textureDir_ || textureMetadata_.isEmpty())
         return;
-    const bool luma = textureMetadata_["recovered_luma_only"].toBool();
+    // A save dialog runs a nested event loop. Keep the displayed asset alive
+    // even if a queued preview replaces the window's current texture cache.
+    const auto directory = textureDir_;
+    const auto metadata = textureMetadata_;
+    const bool luma = metadata["recovered_luma_only"].toBool();
     const auto label = luma ? "Y plane" : "Texture";
     const auto filters = QString("%1 DDS (*.dds);;Preview PNG (*.png);;%2 RAW (*.bin)")
                              .arg(label)
                              .arg(luma ? "Y plane" : "Subresource");
     auto path = QFileDialog::getSaveFileName(
-        this, "Export Texture", QString("texture-%1.dds").arg(textureMetadata_["resource_id"].toInteger()),
+        this, "Export Texture", QString("texture-%1.dds").arg(metadata["resource_id"].toInteger()),
         filters);
     if (path.isEmpty())
         return;
     const auto suffix = QFileInfo(path).suffix().toLower();
-    const auto files = textureMetadata_["export_files"].toObject();
+    const auto files = metadata["export_files"].toObject();
     const auto source = files.value('.' + suffix).toString(files[".dds"].toString());
     try {
-        QFile file(textureDir_->path() + "/result/" + source);
+        QFile file(directory->path() + "/result/" + source);
         if (!file.open(QIODevice::ReadOnly))
             throw std::runtime_error("Texture export asset is unavailable");
         const auto bytes = file.readAll();
