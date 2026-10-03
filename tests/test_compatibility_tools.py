@@ -9,9 +9,54 @@ import unittest
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'tools'))
 from validate_corpus import image_difference, original_rgba, summarize_native, run, prioritize, original_kernel_completed
 from catalog_captures import catalog, digest
-from validate_corpus import validation_failed
+from validate_corpus import validation_failed, original_comparison_status, record_original_comparison
 
 class CompatibilityToolsTests(unittest.TestCase):
+    def test_later_original_difference_is_not_hidden_by_first_equal_pair(self):
+        item = {'id':'dynamic', 'status':'repeat_stable', 'original_status':'repeat_stable',
+                'native':[{},{}], 'original':[{},{}],
+                'native_original_comparisons':[{'byte_equal':True},{'byte_equal':True}]}
+        self.assertEqual(original_comparison_status(item),'observed_equal')
+        item['native_original_comparisons'][1]['byte_equal'] = False
+        self.assertEqual(original_comparison_status(item),'observed_difference')
+        queue = {}
+        record_original_comparison(item,queue)
+        record_original_comparison(item,queue)
+        finding = next(iter(queue.values()))
+        self.assertEqual(finding['captures'],['dynamic'])
+        self.assertEqual(finding['occurrences'],1)
+        self.assertEqual(finding['severity'],'warning')
+        record_original_comparison(dict(item,id='second'),queue)
+        self.assertEqual(finding['captures'],['dynamic','second'])
+        self.assertEqual(finding['occurrences'],2)
+
+    def test_completed_player_without_comparable_output_is_not_equal(self):
+        good = {'status':'repeat_stable','original_status':'repeat_stable',
+                'native':[{},{}],'original':[{},{}]}
+        self.assertEqual(original_comparison_status(good),'unavailable')
+        for pairs in [[],[{'byte_equal':True}],[{'byte_equal':True},{}],
+                      [{'byte_equal':True},{'byte_equal':1}]]:
+            self.assertEqual(original_comparison_status(dict(good,native_original_comparisons=pairs)),
+                             'unavailable')
+        self.assertEqual(original_comparison_status(dict(good,original_status='not_run')),'not_run')
+        self.assertEqual(original_comparison_status(dict(good,status='preflight_only')),'not_run')
+        good['native_original_comparisons']=[{'byte_equal':True}]*2
+        for key, value in [('original_status','export_adapter_failed'),('status','replay_failed'),
+                           ('status','golden_mismatch'),('status','replayed_without_image')]:
+            self.assertEqual(original_comparison_status(dict(good,**{key:value})),'unavailable')
+
+    def test_difference_is_review_evidence_without_relaxing_golden(self):
+        item = {'id':'different','status':'repeat_stable','original_status':'repeat_stable',
+                'preflight':{'exit_code':0,'report':{'status':'checked','errors':0}},
+                'native':[{},{}],'original':[{},{}],
+                'native_original_comparisons':[{'byte_equal':False}]*2}
+        queue = {};record_original_comparison(item,queue)
+        self.assertFalse(validation_failed({'cases':[item]}))
+        self.assertEqual(item['original_comparison_status'],'observed_difference')
+        self.assertTrue(queue)
+        item['status']='golden_mismatch'
+        self.assertTrue(validation_failed({'cases':[item]}))
+
     def test_batch_exit_rejects_recorded_failures(self):
         good = {'status':'repeat_stable', 'preflight':{'exit_code':0,
                 'report':{'status':'review_required','errors':0}}, 'original_status':'not_run'}

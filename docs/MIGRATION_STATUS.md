@@ -20,6 +20,11 @@ GPU；未修改文件／Shader 或放宽阈值，原版 GUI 其他执行路径�
 更多动态链接组合、帧前信息和 Deferred／Command List 仍未完成；M2 与 M3–M6
 保持开放，72 ported／117 partial／15 pending 的模块计数不变。
 
+同日验收工具改进：原版执行状态与图像比较状态独立汇总，逐次保留所有 repeat 的
+两侧哈希，差异进入待核查队列；未运行／不可比较不会显示为一致。13 项 CPU
+回归和四种现场场景通过，另执行 9 次独立重放、7 次原版对照；未改运行时或
+放宽黄金检查。详见 [original-comparison-baseline.json](original-comparison-baseline.json)。
+
 2026-10-03（M2 第十四批）：补齐 Device5 的 GS／HS／DS 与带 Stream Output 的
 Shader 帧内创建，包含 VS 字节码透传 SO。原版 API 记录仅保存首个 stride 与语义
 字符串指针，现与完整 SO 声明快照核对后恢复所有步长及字符串；缺失声明的未使用

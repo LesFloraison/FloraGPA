@@ -1,0 +1,78 @@
+{
+  "schema": "FloraGPA original image comparison acceptance 1",
+  "runtime_changed": false,
+  "implementation_commit": "7ba1f29",
+  "cpu_tests": 13,
+  "reports": {
+    "different": {
+      "path": "artifacts\\original-comparison-different\\validation.json",
+      "sha256": "041803fd5bafec901af518e0b61324dae5d76ec585a60d5b965d40fdfc43ffee",
+      "native_outcomes": {
+        "repeat_stable": 2
+      },
+      "original_comparison_counts": {
+        "observed_difference": 2
+      },
+      "difference_findings": [
+        {
+          "kind": "original_image_difference",
+          "severity": "warning",
+          "reason": "Native/original images differ; inspect paired hashes and raw outputs. Device/configuration equivalence is not established; cause requires review.",
+          "captures": [
+            "class_creation_0",
+            "class_creation_23"
+          ],
+          "occurrences": 2,
+          "event_id": null,
+          "resource_id": null,
+          "record_type": null,
+          "priority": 2,
+          "priority_basis": "shared semantics or coverage gap"
+        }
+      ]
+    },
+    "equal": {
+      "path": "artifacts\\original-comparison-equal\\validation.json",
+      "sha256": "bb866551595893f472af96a123454aaf8405c2cfab29bcd30498403bbe0b937d",
+      "native_outcomes": {
+        "repeat_stable": 1
+      },
+      "original_comparison_counts": {
+        "observed_equal": 1
+      },
+      "difference_findings": []
+    },
+    "not-run": {
+      "path": "artifacts\\original-comparison-not-run\\validation.json",
+      "sha256": "48d40329fd0a39698d48d5de760d6c19ff93b247cc27fbcee5d908b98d53c375",
+      "native_outcomes": {
+        "repeat_stable": 1
+      },
+      "original_comparison_counts": {
+        "not_run": 1
+      },
+      "difference_findings": []
+    },
+    "preflight": {
+      "path": "artifacts\\original-comparison-preflight\\validation.json",
+      "sha256": "029559388b228585bb15e4873a1f640b677dc20690f1be4aeae85ad4ad836a1c",
+      "native_outcomes": {
+        "preflight_only": 1
+      },
+      "original_comparison_counts": {
+        "not_run": 1
+      },
+      "difference_findings": []
+    }
+  },
+  "sources": {
+    "tools/validate_corpus.py": "9ca95400b3dc7d5ba8b39cea5616b155794711c063207f8430d97401e892c616",
+    "tests/test_compatibility_tools.py": "6b720e2ba7183772d94734ecf482f07920a59c75812aa41cee56eea383e5e63b"
+  },
+  "native_runs": 9,
+  "original_runs": 7,
+  "cpu_evidence": {
+    "path": "artifacts/compatibility-original-comparison-tests.log",
+    "sha256": "2072830941a0109f497751ac4acfb6336d5f2b06f51de22cb2aa4bbf5070b8a9"
+  }
+}

@@ -76,6 +76,37 @@ def summarize_native(runs, case):
     if all(h is None for h in hashes): return 'replayed_without_image'
     return 'repeat_stable' if len(set(hashes)) == 1 else 'repeat_variable'
 
+def original_comparison_status(item):
+    """Observed paired output equality is separate from completion and equivalence."""
+    if item.get('original_status') == 'not_run' or item.get('status') == 'preflight_only':
+        return 'not_run'
+    if (item.get('status') not in {'repeat_stable', 'repeat_variable'} or
+            item.get('original_status') not in {'repeat_stable', 'repeat_variable'}):
+        return 'unavailable'
+    pairs = item.get('native_original_comparisons', [])
+    if (not pairs or len(pairs) != len(item.get('native', [])) or
+            len(pairs) != len(item.get('original', [])) or
+            any(type(p.get('byte_equal')) is not bool for p in pairs)):
+        return 'unavailable'
+    return 'observed_equal' if all(p['byte_equal'] for p in pairs) else 'observed_difference'
+
+
+def record_original_comparison(item, queue):
+    status = original_comparison_status(item)
+    item['original_comparison_status'] = status
+    if status == 'observed_difference':
+        key = ('original_image_difference', None, None)
+        if key not in queue:
+            queue[key] = {'kind': key[0], 'severity': 'warning',
+                          'reason': 'Native/original images differ; inspect paired hashes and raw outputs. '
+                                    'Device/configuration equivalence is not established; cause requires review.',
+                          'captures': [], 'occurrences': 0, 'event_id': None,
+                          'resource_id': None, 'record_type': None}
+        if item['id'] not in queue[key]['captures']:
+            queue[key]['captures'].append(item['id'])
+            queue[key]['occurrences'] += 1
+
+
 def prioritize(finding, cases):
     affected = [c for c in cases if c['id'] in finding['captures']]
     blocking = finding['severity'] == 'error'
@@ -146,7 +177,8 @@ def main():
         case_id = case['id']
         if Path(case_id).name != case_id or case_id in {'.','..'}: raise ValueError('unsafe case ID')
         directory = args.out/case_id; directory.mkdir()
-        item = {'id':case_id,'family':case['family'],'policy':case['comparison_policy'],'native':[],'original':[]}
+        item = {'id':case_id,'family':case['family'],'policy':case['comparison_policy'],'native':[],'original':[],
+                'original_comparison_status': 'unavailable' if args.oracle_tools and not args.preflight_only else 'not_run'}
         summary['cases'].append(item)
         capture = (root/case['path']).resolve()
         if not capture.is_relative_to(root) or not capture.is_file() or digest(capture) != case['sha256']:
@@ -201,6 +233,14 @@ def main():
                     if all(x is not None for x in original):
                         item['original_repeat_difference']=image_difference(original[0],original[1])
                         if raw[0].exists():item['native_original_observed_difference']=image_difference(raw[0].read_bytes(),original[0])
+                        if all(x.is_file() for x in raw):
+                            item['native_original_comparisons']=[]
+                            for i,(path,reference) in enumerate(zip(raw,original),1):
+                                pixels=path.read_bytes()
+                                item['native_original_comparisons'].append({
+                                    'repeat':i, 'native_rgba_sha256':hashlib.sha256(pixels).hexdigest(),
+                                    'original_rgba_sha256':hashlib.sha256(reference).hexdigest(),
+                                    'byte_equal':pixels==reference})
                 else:
                     item['original_status']=('export_adapter_failed' if
                         all(r['kernel_completed'] for r in item['original']) else 'replay_or_export_failed')
@@ -232,6 +272,7 @@ def main():
                     passed=complete and (stable or not boundary['expect_stable']),
                     difference=image_difference(blobs[0],blobs[1]) if complete else None))
         else:item['status']='preflight_only'
+        record_original_comparison(item,queue)
         # Runtime failures can expose semantics outside offline coverage.
         if item['status'] in {'replay_failed','golden_mismatch'}:
             queue[('runtime',case_id,0)]={'kind':item['status'],'severity':'error','reason':'See native worker logs and retained reports',
@@ -240,9 +281,13 @@ def main():
         summary['queue']=sorted((prioritize(f,cases) for f in queue.values()),
             key=lambda f:(f['priority'],f['severity']!='error',-len(f['captures']),str(f['kind'])))
         write(args.out/'validation.json',summary)
-        print(case_id,item['status'],item.get('original_status',''),flush=True)
+        print(case_id,item['status'],item.get('original_status',''),item['original_comparison_status'],flush=True)
     summary['counts']={}
     for item in summary['cases']:summary['counts'][item['status']]=summary['counts'].get(item['status'],0)+1
+    summary['original_comparison_counts']={}
+    for item in summary['cases']:
+        status=item['original_comparison_status']
+        summary['original_comparison_counts'][status]=summary['original_comparison_counts'].get(status,0)+1
     write(args.out/'validation.json',summary)
     write(args.out/'coverage.json',summary['coverage']);write(args.out/'repair-queue.json',summary['queue'])
     return int(validation_failed(summary))

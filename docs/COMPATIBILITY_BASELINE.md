@@ -215,6 +215,35 @@ flags golden/control failures, missing or changed captures, missing preflight
 reports and detected runtime dependency violations; it is not an all-cases-pass
 signal. Inspect per-case statuses and the repair queue.
 
+### Explicit original-image comparison status
+
+The class-creation investigation demonstrated that a successful original-kernel
+exit can still produce an incorrect image. The runner now separates
+`original_status` (execution/repeat outcome) from `original_comparison_status`:
+
+| Comparison status | Meaning |
+|---|---|
+| `observed_equal` | Every measured native/original repeat pair has identical RGBA bytes |
+| `observed_difference` | At least one measured pair differs; review the cause |
+| `unavailable` | Execution/export/image evidence is incomplete or failed |
+| `not_run` | No original comparison was requested, or this was preflight only |
+
+`native_original_comparisons` retains both image hashes and equality for every
+repeat, including repeats beyond the first two. `original_comparison_counts`
+summarizes these outcomes independently from native file counts. Differences
+also enter `repair-queue.json` as `original_image_difference` warnings, naming
+affected samples. They are evidence requiring review, not an automatic verdict
+about which implementation is wrong. They do not assert matched-device
+equivalence, relax any native golden/control check, or certify determinism;
+the existing repeat status remains separate. A zero process exit remains
+insufficient to claim every comparison passed.
+
+CPU regression cases cover later-repeat differences, missing exports/evidence,
+failed replay, queue aggregation, and unchanged strict golden failure. Live
+integration uses original class and geometry captures for differing/equal
+outputs, three repeats, no original run, and preflight-only operation. Evidence
+is pinned in [original-comparison-baseline.json](original-comparison-baseline.json).
+
 ## Remaining route
 
 1. **M2:** Audit remaining auxiliary records and incomplete API decoders, using
