@@ -76,6 +76,35 @@ def summarize_native(runs, case):
     if all(h is None for h in hashes): return 'replayed_without_image'
     return 'repeat_stable' if len(set(hashes)) == 1 else 'repeat_variable'
 
+def boundary_output(boundary):
+    kind = boundary.get('kind', 'texture')
+    if kind == 'texture': return 'texture-storage', 'texture.bin'
+    if kind == 'buffer': return 'buffer', 'buffer.bin'
+    raise ValueError('Unsupported boundary resource kind: ' + str(kind))
+
+def summarize_boundary(boundary, runs, blobs, repeat):
+    complete = (len(runs) == repeat and len(blobs) == repeat and
+                all(b is not None for b in blobs) and
+                all(r['exit_code'] == 0 and r.get('report', {}).get('completed') for r in runs))
+    hashes = [hashlib.sha256(b).hexdigest() if b is not None else None for b in blobs]
+    stable = complete and len(set(hashes)) == 1
+    expected = boundary.get('expected_storage_sha256')
+    golden_match = None if not expected else complete and all(h == expected for h in hashes)
+    status = ('export_failed' if not complete else 'golden_mismatch' if golden_match is False
+              else 'repeat_stable' if stable else 'repeat_variable')
+    return dict(boundary, runs=runs, complete=bool(complete), stable=bool(stable),
+                storage_sha256=hashes, golden_match=golden_match, status=status,
+                passed=bool(complete and (stable or not boundary['expect_stable']) and golden_match is not False),
+                difference=image_difference(blobs[0], blobs[1]) if complete else None)
+
+def record_boundary_failure(case_id, boundary, queue):
+    if boundary['passed']: return
+    key = ('resource_boundary_failed', case_id, boundary['resource'], boundary['event'])
+    queue[key] = {'kind': key[0], 'severity': 'error',
+                  'reason': 'Resource boundary ' + boundary['status'] + '; inspect raw exports and per-run storage hashes',
+                  'captures': [case_id], 'occurrences': 1, 'event_id': boundary['event'],
+                  'resource_id': boundary['resource'], 'record_type': None}
+
 def original_comparison_status(item):
     """Observed paired output equality is separate from completion and equivalence."""
     if item.get('original_status') == 'not_run' or item.get('status') == 'preflight_only':
@@ -152,6 +181,10 @@ def main():
     if args.repeat < 2 or args.timeout <= 5: p.error('repeat must be >=2 and timeout >5 seconds')
     manifest = load(args.manifest)
     cases = manifest['cases']
+    for case in cases:
+        for boundary in case.get('boundaries', []):
+            try: boundary_output(boundary)
+            except ValueError as error: p.error(str(error))
     if len({c['id'] for c in cases}) != len(cases): p.error('duplicate case ID')
     if set(args.case) - {c['id'] for c in cases}: p.error('unknown case ID')
     cases = [c for c in cases if not args.case or c['id'] in args.case]
@@ -259,18 +292,17 @@ def main():
             item['boundaries']=[]
             for boundary in case.get('boundaries',[]):
                 results=[]; blobs=[]
+                command, filename = boundary_output(boundary)
                 for i in range(args.repeat):
                     tag=f"boundary-{boundary['resource']}-{boundary['event']}-{i+1}"
                     output=directory/tag
-                    r=run([exe,'texture-storage',capture,'--id',boundary['resource'],'--event',boundary['event'],'--out',output],
+                    r=run([exe,command,capture,'--id',boundary['resource'],'--event',boundary['event'],'--out',output],
                           directory/(tag+'.log'),args.timeout,env)
                     r['report']=load(output/'report.json') or {}; results.append(r)
-                    if (output/'texture.bin').exists():blobs.append((output/'texture.bin').read_bytes())
-                complete=len(blobs)==args.repeat and all(r['exit_code']==0 and r['report'].get('completed') for r in results)
-                stable=complete and len({hashlib.sha256(b).hexdigest() for b in blobs})==1
-                item['boundaries'].append(dict(boundary,runs=results,complete=complete,stable=stable,
-                    passed=complete and (stable or not boundary['expect_stable']),
-                    difference=image_difference(blobs[0],blobs[1]) if complete else None))
+                    blobs.append((output/filename).read_bytes() if (output/filename).exists() else None)
+                result = summarize_boundary(boundary, results, blobs, args.repeat)
+                item['boundaries'].append(result)
+                record_boundary_failure(case_id, result, queue)
         else:item['status']='preflight_only'
         record_original_comparison(item,queue)
         # Runtime failures can expose semantics outside offline coverage.

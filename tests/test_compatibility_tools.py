@@ -1,5 +1,6 @@
 """CPU-only development harness regression checks; no GPA binaries needed."""
 import json
+import hashlib
 from pathlib import Path
 import struct
 import sys
@@ -10,8 +11,57 @@ sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'tools'))
 from validate_corpus import image_difference, original_rgba, summarize_native, run, prioritize, original_kernel_completed
 from catalog_captures import catalog, digest
 from validate_corpus import validation_failed, original_comparison_status, record_original_comparison
+from validate_corpus import boundary_output, summarize_boundary, record_boundary_failure
 
 class CompatibilityToolsTests(unittest.TestCase):
+    def test_stable_wrong_resource_bytes_fail_the_boundary_and_batch(self):
+        boundary = {'event':10,'resource':20,'expect_stable':True,
+                    'expected_storage_sha256':hashlib.sha256(b'right').hexdigest()}
+        runs = [{'exit_code':0,'report':{'completed':True}}]*2
+        result = summarize_boundary(boundary,runs,[b'wrong']*2,2)
+        self.assertTrue(result['stable'])
+        self.assertFalse(result['golden_match'])
+        self.assertFalse(result['passed'])
+        self.assertEqual(result['status'],'golden_mismatch')
+        case = {'id':'resource','status':'repeat_stable','preflight':{'exit_code':0,'report':{'errors':0}},
+                'boundaries':[result]}
+        self.assertTrue(validation_failed({'cases':[case]}))
+        queue={};record_boundary_failure('resource',result,queue)
+        finding=next(iter(queue.values()))
+        self.assertEqual((finding['event_id'],finding['resource_id'],finding['severity']),(10,20,'error'))
+
+    def test_resource_golden_checks_every_repeat_even_when_variance_is_allowed(self):
+        expected=hashlib.sha256(b'right').hexdigest()
+        boundary={'expect_stable':False,'expected_storage_sha256':expected}
+        runs=[{'exit_code':0,'report':{'completed':True}}]*3
+        result=summarize_boundary(boundary,runs,[b'right',b'right',b'wrong'],3)
+        self.assertFalse(result['passed']);self.assertFalse(result['stable'])
+        self.assertEqual(result['storage_sha256'][:2],[expected,expected])
+        result=summarize_boundary(boundary,runs,[b'right']*3,3)
+        self.assertTrue(result['passed']);self.assertTrue(result['golden_match'])
+
+    def test_boundary_exports_require_complete_process_and_file_evidence(self):
+        boundary={'expect_stable':False}
+        runs=[{'exit_code':0,'report':{'completed':True}}]*2
+        for blobs in [[None,b'x'],[b'x'],[]]:
+            self.assertFalse(summarize_boundary(boundary,runs,blobs,2)['passed'])
+        for failed in [{'exit_code':1,'report':{'completed':True}},{'exit_code':0,'report':{}}]:
+            result=summarize_boundary(boundary,[runs[0],failed],[b'x']*2,2)
+            self.assertFalse(result['passed']);self.assertEqual(result['status'],'export_failed')
+        self.assertFalse(summarize_boundary(boundary,runs[:1],[b'x']*2,2)['passed'])
+
+    def test_unconstrained_boundary_variance_remains_explicit(self):
+        runs=[{'exit_code':0,'report':{'completed':True}}]*2
+        result=summarize_boundary({'expect_stable':False},runs,[b'a',b'b'],2)
+        self.assertTrue(result['passed']);self.assertEqual(result['status'],'repeat_variable')
+        self.assertIsNone(result['golden_match'])
+        self.assertFalse(summarize_boundary({'expect_stable':True},runs,[b'a',b'b'],2)['passed'])
+
+    def test_boundary_resource_kinds_and_legacy_texture_default(self):
+        self.assertEqual(boundary_output({}),('texture-storage','texture.bin'))
+        self.assertEqual(boundary_output({'kind':'buffer'}),('buffer','buffer.bin'))
+        with self.assertRaises(ValueError): boundary_output({'kind':'unknown'})
+
     def test_later_original_difference_is_not_hidden_by_first_equal_pair(self):
         item = {'id':'dynamic', 'status':'repeat_stable', 'original_status':'repeat_stable',
                 'native':[{},{}], 'original':[{},{}],

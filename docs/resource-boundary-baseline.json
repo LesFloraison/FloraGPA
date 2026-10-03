@@ -1,0 +1,50 @@
+{
+  "schema": "FloraGPA resource boundary acceptance 1",
+  "runtime_commit": "f91ca95",
+  "runtime_exe": "out/FloraGPA-predicate-creation-final-20261003/FloraGPA.Cli.exe",
+  "runtime_exe_sha256": "7581e809f45e7f1009d471a8b2607a776f7ef85c5a18d333440c6fb4256c59c8",
+  "cpu_checks": 18,
+  "ordinary_runs": 8,
+  "resource_boundary_runs": 8,
+  "expected_negative_batches": 2,
+  "cases": [
+    {
+      "name": "texture-correct",
+      "exit_code": 0,
+      "report": "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\resource-boundary-validation-verified\\texture-correct\\validation.json",
+      "sha256": "893b161d90d1cf3fdab9f6576c24d8444533349fb038e678e97c2d73440c2b81",
+      "boundary": "repeat_stable"
+    },
+    {
+      "name": "texture-wrong",
+      "exit_code": 1,
+      "report": "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\resource-boundary-validation-verified\\texture-wrong\\validation.json",
+      "sha256": "708e4093a7a968fbf13346b13e3e349b23d58c9f7e20b9be959b66da321cc980",
+      "boundary": "golden_mismatch"
+    },
+    {
+      "name": "buffer-correct",
+      "exit_code": 0,
+      "report": "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\resource-boundary-validation-verified\\buffer-correct\\validation.json",
+      "sha256": "51876c44fa29a7aa2b07c9cc68d615c300f86176aeab229a24d194b751ca59fd",
+      "boundary": "repeat_stable"
+    },
+    {
+      "name": "buffer-wrong",
+      "exit_code": 1,
+      "report": "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\resource-boundary-validation-verified\\buffer-wrong\\validation.json",
+      "sha256": "36861824b0da825fdb194a75ec68f371b319031234ff177a3d1ab8c8f0b098ff",
+      "boundary": "golden_mismatch"
+    }
+  ],
+  "sources": {
+    "tools/validate_corpus.py": "8c8a877e3966e526280a4d6007d1cf6687a1f9d49b60540c105fac66b5fbcc6a",
+    "tests/test_compatibility_tools.py": "f97adda5d47edce63890a32b3602a84f96b2f25202ade584ba9c53d6e3cc5371"
+  },
+  "evidence": {
+    "artifacts/clear-view-compatibility-tools.log": "5956e7b381736ae442f463bdd114053b9d16cb9d64a368f10e02e961ed3abf36",
+    "artifacts/check-resource-boundary-validation-verified.log": "aabdd3ceb87bf41d7f2a076940e8e115033b824b80a3ecb90d768f7347537c6a",
+    "artifacts/resource-boundary-validation-verified/summary.json": "f32aaaa145101eefc3d06ff053953004fc003bc8f25b1d63b63950cb7aa8c79d"
+  },
+  "scope": "Tool-only change. Real texture/buffer exports using the previously accepted package; deliberately wrong reference hashes fail without changing captures, shaders or runtime. Historical batch summarizers already checked pinned resource hashes independently."
+}

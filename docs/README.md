@@ -168,6 +168,7 @@ Use the topical links in the usage/current-status guides for a shorter route.
 - [predicate-creation-corpus.json](predicate-creation-corpus.json)
 - [present-replay-baseline.json](present-replay-baseline.json)
 - [strict-dispatch-baseline.json](strict-dispatch-baseline.json)
+- [resource-boundary-baseline.json](resource-boundary-baseline.json)
 - [texture-copy-baseline.json](texture-copy-baseline.json)
 - [texture-copy-corpus.json](texture-copy-corpus.json)
 - [texture-creation-baseline.json](texture-creation-baseline.json)

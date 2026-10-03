@@ -256,6 +256,25 @@ integration uses original class and geometry captures for differing/equal
 outputs, three repeats, no original run, and preflight-only operation. Evidence
 is pinned in [original-comparison-baseline.json](original-comparison-baseline.json).
 
+## Resource boundary goldens
+
+Boundary manifests can select `kind: texture` (the backward-compatible default)
+or `kind: buffer`. Each run retains its raw export and storage SHA-256. When
+`expected_storage_sha256` is present, **every** repeat must match it, even if
+`expect_stable` is false. A stable but incorrect export fails acceptance;
+missing files/process completion also fail. Unconstrained variable boundaries,
+including the known Helldivers diagnostic, keep their separate variance policy.
+
+Boundary failures enter the repair queue with capture, event and resource IDs.
+Previously the generic runner checked repeat stability but did not enforce the
+manifest's expected resource hash. Historical batch summarizers separately
+asserted those hashes; their pinned acceptance is retained. The runner now
+performs this check directly, so a standalone batch cannot report stable wrong
+bytes as a passed boundary. Eighteen CPU checks and four live texture/buffer
+scenarios using the previously accepted package verify correct hashes and
+deliberately wrong hashes (8 ordinary and 8 boundary runs). Captures and shaders
+are unchanged. See [resource-boundary-baseline.json](resource-boundary-baseline.json).
+
 ## Remaining route
 
 1. **M2:** Audit remaining auxiliary records and incomplete API decoders, using
