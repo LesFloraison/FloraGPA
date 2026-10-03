@@ -1,4 +1,5 @@
 #include "Commands.h"
+#include "ClearView.h"
 #include <algorithm>
 #include <limits>
 
@@ -25,12 +26,16 @@ void validateAnnotationCommand(uint16_t type, Bytes payload) {
 bool isClearCommand(uint16_t type) { return type >= 0x31 && type <= 0x34; }
 bool isWritableCommand(uint16_t type) {
     return isClearCommand(type) || type == 0x3e || type == 0x3f || type == 0x40 || type == 0x42 ||
-           type == 0x245 || type == 0x246 || type == 0x247;
+           type == 0x245 || type == 0x246 || type == 0x247 || type == 0x257;
 }
 void validateWritableCommand(const Frame &frame, Id event) {
     auto &e = frame.entry(event);
     if (e.category != 7 || !isWritableCommand(e.type))
         throw std::runtime_error("Select a recovered resource-writing command");
+    if (e.type == 0x257) {
+        validateClearView(frame, readClearView(frame.payload(event)));
+        return;
+    }
     Reader r(frame.payload(event));
     r.skip(8);
     requireImmediateContext(frame, r.read<Id>());

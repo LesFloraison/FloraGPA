@@ -6,6 +6,7 @@
 #include "ReplayAnnotation.h"
 #include "Unpredicated.h"
 #include "core/ClassLinkage.h"
+#include "core/ClearView.h"
 #include "core/Commands.h"
 #include "core/CopyCommands.h"
 #include "core/Dxbc.h"
@@ -1175,7 +1176,29 @@ void Replay::command(const Entry &e) {
         return;
     }
     r.skip(16);
-    if (t == 0x32 || t == 0x33 || t == 0x34) {
+    if (t == 0x257) {
+        const auto command = readClearView(payload);
+        const auto target = validateClearView(frame_, command);
+        D3D11_FEATURE_DATA_D3D11_OPTIONS support{};
+        check(device_->CheckFeatureSupport(D3D11_FEATURE_D3D11_OPTIONS, &support, sizeof support),
+              "Check ClearView support");
+        if (!context1_ || !support.ClearView)
+            throw std::runtime_error("Replay device does not support ClearView");
+        if (target.viewType == 0x8e) {
+            D3D11_FEATURE_DATA_D3D11_OPTIONS1 depth{};
+            check(device_->CheckFeatureSupport(D3D11_FEATURE_D3D11_OPTIONS1, &depth, sizeof depth),
+                  "Check depth ClearView support");
+            if (!depth.ClearViewAlsoSupportsDepthOnlyFormats)
+                throw std::runtime_error("Replay device does not support depth-only ClearView");
+        }
+        std::vector<D3D11_RECT> rects;
+        for (const auto &rect : command.rectangles)
+            rects.push_back({rect[0], rect[1], rect[2], rect[3]});
+        const auto view = get<ID3D11View>(command.view);
+        ReplayAnnotation marker(captureAnnotation_.Get(), e.id, "ClearView");
+        context1_->ClearView(view, command.color.data(), command.hasRectangles ? rects.data() : nullptr,
+                             command.count);
+    } else if (t == 0x32 || t == 0x33 || t == 0x34) {
         auto view = r.read<Id>();
         if (!r.flag())
             throw std::runtime_error("Missing clear values");

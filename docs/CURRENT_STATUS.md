@@ -1,11 +1,11 @@
 # Current capabilities and compatibility
 
 Reviewed **2026-10-03**. Replay source and binary hashes are pinned in the
-[predicate-creation baseline](predicate-creation-baseline.json); earlier class
-acceptance is pinned by `7ba1f29`, comparison reporting by `54eb5a4`.
+[ClearView baseline](clear-view-baseline.json); earlier predicate acceptance
+is pinned by `f91ca95`, resource-boundary enforcement by `fa26cc5`.
 This is the current capability summary. Linked migration/audit documents describe
 individual batches and may retain limitations superseded by later work.
-The new predicate batch adds execution evidence, not clean-machine certification.
+The new ClearView batch adds execution evidence, not clean-machine certification.
 
 ## Supported scope
 
@@ -17,7 +17,7 @@ tested workloads; opening a file does not prove accurate replay.
 | Area | Available behavior | Boundaries and evidence |
 |---|---|---|
 | Preflight and API inspection | Offline diagnostics, decoded fields, references, coverage and Qt diagnostics | Structural success is not GPU success; metadata is not execution. [Acceptance infrastructure](COMPATIBILITY_BASELINE.md) |
-| Immediate-context replay | Captured draws/dispatches, supported setters, uploads, copies, queries/predication and presentation | Broader layouts, resource versions and some presentation/transfer cases remain incomplete. [Setters](PIPELINE_SETTER_AUDIT.md), [texture transfers](TEXTURE_COPY_AUDIT.md), [presentation](PRESENT_REPLAY_AUDIT.md) |
+| Immediate-context replay | Captured draws/dispatches, supported setters, uploads, copies, ClearView, queries/predication and presentation | Broader layouts, resource versions and some presentation/transfer cases remain incomplete. [Setters](PIPELINE_SETTER_AUDIT.md), [texture transfers](TEXTURE_COPY_AUDIT.md), [ClearView](CLEAR_VIEW_AUDIT.md), [presentation](PRESENT_REPLAY_AUDIT.md) |
 | Frame-time creation | Validated buffers, textures/views, shaders, pipeline states, class linkage/instances and predicates | Device5 coverage is not every interface version or descriptor combination; required missing data and unresolved identities are rejected. [Buffers](BUFFER_CREATION_AUDIT.md), [textures](TEXTURE_DIMENSIONS_AUDIT.md), [texture views](VIEW_CREATION_AUDIT.md), [buffer views](BUFFER_VIEW_CREATION_AUDIT.md), [pipeline](PIPELINE_CREATION_AUDIT.md), [geometry/SO](GEOMETRY_CREATION_AUDIT.md), [classes](CLASS_CREATION_AUDIT.md), [predicates](PREDICATE_CREATION_AUDIT.md) |
 | Texture and output inspection | Presentation/RTV/DSV selection, mip/layer/slice, typed/channel/range controls, supported MSAA resolve/sample and planar inspection, exports | Format/device limits remain; legacy P010/P016 initial data can contain recovered Y only. [Frame output](FRAME_OUTPUT_MIGRATION.md), [texture inspection](TEXTURE_INSPECTION_MIGRATION.md), [planar writes](PLANAR_WRITE_MIGRATION.md) |
 | Pipeline, buffers and geometry | Captured versus native replay state, before/after boundaries, constants/counters, IA and supported post-shader output | Missing state retains provenance; SO cursors have no native getter; frame-before counters require evidence or explicit experiments. [Boundaries](BEFORE_BOUNDARY_MIGRATION.md), [geometry](POST_TRANSFORM_MIGRATION.md), [HS output](HULL_OUTPUT_MIGRATION.md), [counters](BUFFER_VIEW_CREATION_AUDIT.md) |
@@ -31,25 +31,34 @@ tested workloads; opening a file does not prove accurate replay.
 
 ## Latest accepted replay matrix
 
-The [predicate-creation baseline](predicate-creation-baseline.json) records the
-latest full matrix, interpreted in the [predicate audit](PREDICATE_CREATION_AUDIT.md).
+The [ClearView baseline](clear-view-baseline.json) records the latest full matrix,
+interpreted in the [ClearView audit](CLEAR_VIEW_AUDIT.md).
 
 | Measure | Recorded result |
 |---|---|
-| Enrolled files / ordinary independent runs | 254 / 508 |
-| Repeated output | 253 stable files; one known-variable Helldivers file |
-| Previously stable image hashes | All 243 unchanged |
-| Diagnostic control runs / retained texture boundary exports | 269 / 88 |
-| New predicate-creation producer frame checks | 240 |
-| New predicate hardware/WARP cases | 20 cases; 40 unobserved and 40 observed replays |
-| New uninstrumented original-player runs | 20 completed; all ten files match expected images |
-| Related CTest suites / golden checks | 31 / 4 passed |
-| New predicate / Qt-Worker test cases | 25 / 55 passed, no skips |
-| New record-family evidence | One executed creation family; seven metadata families (four original-file, three writer/synthetic) |
+| Enrolled files / ordinary independent runs | 270 / 540 |
+| Repeated output | 269 stable files; one known-variable Helldivers file |
+| Previously stable image hashes | All 253 unchanged |
+| Diagnostic control runs / retained resource boundary exports | 293 / 120 (116 texture, four buffer) |
+| New ClearView producer frame checks | 384 |
+| New ClearView hardware/WARP cases | 32 cases; 64 unobserved, 64 observed and 32 disabled-control replays |
+| New uninstrumented original-player runs | 32 completed; all sixteen files match expected images |
+| Related CTest suites / golden checks | 32 / 4 passed |
+| New ClearView / Qt-Worker test cases | 36 / 55 passed, no skips |
+| New record-family evidence | Normalized immediate ClearView, including rectangles, array/mip views, typed buffers, depth, MSAA resolve and predication |
 
 These are separate measurements, not an overall correctness percentage. The
 matrix includes research fixtures and self-owned original captures as well as
 game frames; repeated equality alone does not certify intermediate state.
+
+Four new fixtures use constant presentation markers, so their images do not
+prove ClearView's effect. Mandatory byte goldens check the actual depth, buffer
+and 1D resources. The strengthened batch runner enforces every expected resource
+hash directly, supports buffer exports and queues located failures; 18 CPU checks
+and four live correct/wrong-hash scenarios are pinned in the
+[boundary baseline](resource-boundary-baseline.json). MSAA acceptance uses resolved
+storage; D16, video/3D views, additional format combinations and linked execution
+retain the limits described in the ClearView audit.
 
 Explicit SetPredication now survives omitted predicate fields in original Draw
 snapshots. Two intentionally suppressed-Draw originals exposed the defect;
@@ -69,7 +78,7 @@ under matched device/driver settings.
 
 [Comparison reporting](original-comparison-baseline.json) separately verifies
 execution status and image comparisons (13 CPU checks, nine independent runs,
-seven original runs). These focused runs are not added to the 508-run matrix.
+seven original runs). These focused runs are not added to the 540-run matrix.
 Helldivers' [sharpening variability](HELLDIVERS_REPLAY_FIX.md) remains visible;
 no shader modification, global tolerance or automatic event disable manufactures
 a stable result. Earlier Intel-metric batches retain their separately documented
@@ -80,7 +89,7 @@ intermittent BF1 baseline mismatch.
 | Stage | Current position and completion gate |
 |---|---|
 | M1 — Acceptance infrastructure | Minimum loop delivered: corpus, coverage, preflight, serial comparison and diagnostic queue. Extend evidence as paths arrive. |
-| M2 — Ordinary replay | In progress. Audit remaining interfaces/semantics; enrolled immediate-context paths must replay correctly or reject with reproducible, located diagnostics. |
+| M2 — Ordinary replay | In progress. Next audit CopySubresourceRegion1/UpdateSubresource1 and remaining interfaces/semantics; enrolled immediate-context paths must replay correctly or reject with reproducible, located diagnostics. |
 | M3 — Deferred Context / Command List | Incomplete. Require original captures proving identity, build order, resource versions, repeated execution, restore-state and event mapping before production support. |
 | M4 — Resources and boundaries | Incomplete. Verify saved initial/differential data, subresources, counters, Query/Predication and presentation; distinguish absent information from implementation gaps. |
 | M5 — Stable compatibility release | Incomplete. Broaden captures, repeat/long-duration checks, recovery and large-file testing; validate clean-environment build/deployment and publish a fixed matrix. |

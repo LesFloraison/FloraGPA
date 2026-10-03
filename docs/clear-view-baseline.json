@@ -1,0 +1,364 @@
+{
+  "schema": "FloraGPA ClearView acceptance 1",
+  "completion": "M2 and M3-M6 incomplete",
+  "package": "out\\FloraGPA-clear-view-20261003",
+  "package_sha256": {
+    "FloraGPA.exe": "f51467d99fc8bfb9ece215d603538558383397723c83e3c758ef86be64c11eb3",
+    "FloraGPA.Cli.exe": "a48eb57efaee135fbd369b5deecaac1d21aee30720841735d2b886e0323a8451",
+    "FloraGPA.Worker.exe": "72d62f306f393bd446e4e1f5517acc8c1906eba725006e4114f24001afde4a13",
+    "FloraGPA.Rdc.exe": "f4d21d43e661d24d392e91fc1a1f1460a20d1377fcf5075c57083ad289e82773",
+    "FloraGPA.Metrics.dll": "58b6278f2a93e783b1e8bb1290e9b0e51745f1a36825f296584f52159fd7c6db"
+  },
+  "file_outcomes": {
+    "repeat_stable": 269,
+    "repeat_variable": 1
+  },
+  "native_runs": 540,
+  "prior_stable_images_unchanged": 253,
+  "diagnostic_control_runs": 293,
+  "resource_boundary_exports": 120,
+  "buffer_boundary_exports": 4,
+  "new_original_player_runs": 32,
+  "new_original_image_equal_files": 16,
+  "producer_frame_checks": 384,
+  "hardware_warp_cases": 32,
+  "hardware_warp_unobserved_runs": 64,
+  "hardware_warp_observed_runs": 64,
+  "hardware_warp_disabled_controls": 32,
+  "goldens": [
+    {
+      "case": "gf2",
+      "rgba_sha256": "2e1abc5eacb0bbfd801f9fe059c305baa9a0786c384b36a42fa5a323dd979fd1",
+      "passed": true,
+      "counts": {
+        "ClearDepthStencilView": 2,
+        "ClearRenderTargetView": 1,
+        "CreateBuffer": 2,
+        "DrawIndexed": 72,
+        "Map": 44,
+        "Present": 1,
+        "buffers_created_without_initial_data": 2,
+        "object_observation_records": 49,
+        "pipeline_setter_records": 142,
+        "private_data_observations": 4,
+        "query_metadata_records": 2,
+        "state_or_auxiliary_records": 551,
+        "unmap_observations": 44
+      }
+    },
+    {
+      "case": "gf2-negative",
+      "rgba_sha256": "b2c5548a51715f581c4591acc266ac7a0c65b54b7ecd9a49f43499fa9b76c5f1",
+      "passed": true,
+      "counts": {
+        "ClearDepthStencilView": 2,
+        "ClearRenderTargetView": 1,
+        "CreateBuffer": 2,
+        "Map": 44,
+        "Present": 1,
+        "buffers_created_without_initial_data": 2,
+        "object_observation_records": 49,
+        "pipeline_setter_records": 142,
+        "private_data_observations": 4,
+        "query_metadata_records": 2,
+        "state_or_auxiliary_records": 551,
+        "unmap_observations": 44
+      }
+    },
+    {
+      "case": "bf1",
+      "rgba_sha256": "1f724d1840652f66afd26dd30c95aecd5c1b4932eede56109198f15a8f57a2f6",
+      "passed": true,
+      "counts": {
+        "ClearDepthStencilView": 10,
+        "ClearRenderTargetView": 10,
+        "ClearUnorderedAccessViewFloat": 1,
+        "CopyResource": 2,
+        "CopyStructureCount": 6,
+        "CopySubresourceRegion": 7,
+        "Dispatch": 60,
+        "DispatchIndirect": 13,
+        "Draw": 79,
+        "DrawIndexed": 41,
+        "DrawIndexedInstanced": 1053,
+        "DrawInstanced": 29,
+        "GenerateMips": 2,
+        "Map": 4151,
+        "Present": 1,
+        "UpdateSubresource": 27,
+        "map_read_observations": 2,
+        "object_observation_records": 28,
+        "pipeline_setter_records": 2221,
+        "query_metadata_records": 17,
+        "state_or_auxiliary_records": 7354,
+        "unmap_observations": 4153,
+        "unresolved_input_layout_setters": 2,
+        "unresolved_output_setters": 6,
+        "unresolved_shader_setters": 4,
+        "unresolved_srv_setters": 2
+      }
+    },
+    {
+      "case": "bf1-negative",
+      "rgba_sha256": "cd3a3066f984b1c317fbeefec2836503f32078321d3dc1f367465f2c06d435bf",
+      "passed": true,
+      "counts": {
+        "ClearDepthStencilView": 10,
+        "ClearRenderTargetView": 10,
+        "ClearUnorderedAccessViewFloat": 1,
+        "CopyResource": 2,
+        "CopyStructureCount": 6,
+        "CopySubresourceRegion": 7,
+        "Dispatch": 60,
+        "DispatchIndirect": 13,
+        "GenerateMips": 2,
+        "Map": 4151,
+        "Present": 1,
+        "UpdateSubresource": 27,
+        "map_read_observations": 2,
+        "object_observation_records": 28,
+        "pipeline_setter_records": 2221,
+        "query_metadata_records": 17,
+        "state_or_auxiliary_records": 7354,
+        "unmap_observations": 4153,
+        "unresolved_input_layout_setters": 2,
+        "unresolved_output_setters": 6,
+        "unresolved_shader_setters": 4,
+        "unresolved_srv_setters": 2
+      }
+    }
+  ],
+  "results": {
+    "corpus": {
+      "path": "artifacts\\m2-clear-view-release-corpus\\validation.json",
+      "sha256": "072373b05cf5321e2291d2e64dfcab2f34500859e78ec80202da06d9e16652e8",
+      "counts": {
+        "repeat_stable": 90,
+        "repeat_variable": 1
+      },
+      "original_comparison_counts": {
+        "not_run": 91
+      }
+    },
+    "originals": {
+      "path": "artifacts\\m2-clear-view-release-originals\\validation.json",
+      "sha256": "777c60a11a56d824000e1489fde1cafc21963ab0d126c3abcdc9f717d2f222ff",
+      "counts": {
+        "repeat_stable": 11
+      },
+      "original_comparison_counts": {
+        "not_run": 11
+      }
+    },
+    "copy": {
+      "path": "artifacts\\m2-clear-view-release-copy\\validation.json",
+      "sha256": "df6be3e5558c4865239345cbd11a78fbfc6ae21bc4aaf9bef0c2148dfc3293cf",
+      "counts": {
+        "repeat_stable": 6
+      },
+      "original_comparison_counts": {
+        "not_run": 6
+      }
+    },
+    "present": {
+      "path": "artifacts\\m2-clear-view-release-present\\validation.json",
+      "sha256": "5ac5e3d264c8d73363b2aff6ab130e018a7f143379eb8729b153f13fb5398b3c",
+      "counts": {
+        "repeat_stable": 5
+      },
+      "original_comparison_counts": {
+        "not_run": 5
+      }
+    },
+    "buffer": {
+      "path": "artifacts\\m2-clear-view-release-buffer\\validation.json",
+      "sha256": "d5864fce487a5ed291d098efad9442d282c6ff70f7184258b865d671563718d1",
+      "counts": {
+        "repeat_stable": 5
+      },
+      "original_comparison_counts": {
+        "not_run": 5
+      }
+    },
+    "pipeline": {
+      "path": "artifacts\\m2-clear-view-release-pipeline\\validation.json",
+      "sha256": "861959c57402c6d477306c60a6d19babad6a59be162eb00f22d83d22bddc59b2",
+      "counts": {
+        "repeat_stable": 5
+      },
+      "original_comparison_counts": {
+        "not_run": 5
+      }
+    },
+    "creation": {
+      "path": "artifacts\\m2-clear-view-release-creation\\validation.json",
+      "sha256": "a8e31694992e458aefe02263a1ac37612a0d65c35b1e720f8f6faf55b20023ca",
+      "counts": {
+        "repeat_stable": 7
+      },
+      "original_comparison_counts": {
+        "not_run": 7
+      }
+    },
+    "discovery": {
+      "path": "artifacts\\m2-clear-view-release-discovery\\validation.json",
+      "sha256": "23645ee50286d5a0a2ed27f045d63ebc79e5eba1be3cdcd0bc2275950b06df0a",
+      "counts": {
+        "repeat_stable": 1
+      },
+      "original_comparison_counts": {
+        "not_run": 1
+      }
+    },
+    "dimensions": {
+      "path": "artifacts\\m2-clear-view-release-dimensions\\validation.json",
+      "sha256": "3ba559228eea9a6a625a906c1e3e057e6b0402f5b8d2515965e7b02b71912022",
+      "counts": {
+        "repeat_stable": 17
+      },
+      "original_comparison_counts": {
+        "not_run": 17
+      }
+    },
+    "views": {
+      "path": "artifacts\\m2-clear-view-release-views\\validation.json",
+      "sha256": "bb1213a644fedcedf05ea655463171c722289b19ebf6aa71e408d9acc1383d45",
+      "counts": {
+        "repeat_stable": 12
+      },
+      "original_comparison_counts": {
+        "not_run": 12
+      }
+    },
+    "buffer-views": {
+      "path": "artifacts\\m2-clear-view-release-buffer-views\\validation.json",
+      "sha256": "4c5041660a73fee0ab2d6640b8ce06f0711e091eb262da8bd875899a4bd30579",
+      "counts": {
+        "repeat_stable": 19
+      },
+      "original_comparison_counts": {
+        "not_run": 19
+      }
+    },
+    "pipeline-creation": {
+      "path": "artifacts\\m2-clear-view-release-pipeline-creation\\validation.json",
+      "sha256": "a2e2b6dafa8482d06f1cc5c205fb4cf21dc871cccff2037a83d9e19d0899b324",
+      "counts": {
+        "repeat_stable": 32
+      },
+      "original_comparison_counts": {
+        "not_run": 32
+      }
+    },
+    "geometry-creation": {
+      "path": "artifacts\\m2-clear-view-release-geometry-creation\\validation.json",
+      "sha256": "d4ed43b6867c85b4ff7e7a1041f435bd8c96f53dc6370f251eb0cfe6f0decd40",
+      "counts": {
+        "repeat_stable": 20
+      },
+      "original_comparison_counts": {
+        "not_run": 20
+      }
+    },
+    "class-creation": {
+      "path": "artifacts\\m2-clear-view-release-class-creation\\validation.json",
+      "sha256": "5cb2e1d0a6d6bfaa9ba343109b063b13045bbfc057b0b667726dd42023e02e38",
+      "counts": {
+        "repeat_stable": 13
+      },
+      "original_comparison_counts": {
+        "not_run": 13
+      }
+    },
+    "predicate-creation": {
+      "path": "artifacts\\m2-clear-view-release-predicate-creation\\validation.json",
+      "sha256": "c1343eb0d8f256d5af9e553b522f00ec85d55d50016bf304966676794ab3b9b1",
+      "counts": {
+        "repeat_stable": 10
+      },
+      "original_comparison_counts": {
+        "not_run": 10
+      }
+    },
+    "clear-view": {
+      "path": "artifacts\\m2-clear-view-release-clear-view\\validation.json",
+      "sha256": "70726aaadf84cf0b8c0f0151da9ce16e5e2f6a20a5201b09d0162b6940e298c1",
+      "counts": {
+        "repeat_stable": 16
+      },
+      "original_comparison_counts": {
+        "observed_equal": 16
+      }
+    }
+  },
+  "ctest": {
+    "path": "artifacts\\ctest-m2-clear-view.log",
+    "sha256": "2c0b715a8a5b5e1165088410d7d4e7465407338d6077baa5f65da8e45c2024bb",
+    "suites": 32,
+    "qt": {
+      "clear-view": {
+        "path": "artifacts\\m2-clear-view-qt-results\\clear-view-Release.txt",
+        "sha256": "5fe20f4f99f64c6d7c896dc0af886f8fb815ab25347b8577ebe751a1dd96efdc",
+        "passed": 36
+      },
+      "predicate-creation": {
+        "path": "artifacts\\m2-clear-view-qt-results\\predicate-creation-Release.txt",
+        "sha256": "b45de8d237364e7b01c736d1f74fbcdd570e2ef2e4f62369bc1d4e5f2832ba25",
+        "passed": 25
+      },
+      "class-creation": {
+        "path": "artifacts\\m2-clear-view-qt-results\\class-creation-Release.txt",
+        "sha256": "d75f77efbaf61f1f5023c60d7c40a13ab2219b4744cc5282782794522fe8d713",
+        "passed": 33
+      },
+      "geometry-creation": {
+        "path": "artifacts\\m2-clear-view-qt-results\\geometry-creation-Release.txt",
+        "sha256": "42446445076244878ef63cdaeb81651d6208a955913d62f967cdd795c5aaec8e",
+        "passed": 45
+      },
+      "pipeline-creation": {
+        "path": "artifacts\\m2-clear-view-qt-results\\pipeline-creation-Release.txt",
+        "sha256": "97720a2ae4875f5f2ee15a5d486328c01b27fa9caa267c81c400c2f290ddbd4f",
+        "passed": 70
+      },
+      "ui": {
+        "path": "artifacts\\m2-clear-view-qt-results\\ui-Release.txt",
+        "sha256": "31a1720d01ba30d4f7e5542c05c54dd3c5b3575f1f31c38ef1a7c0078352212e",
+        "passed": 55
+      }
+    }
+  },
+  "sources": {
+    "src/core/ClearView.cpp": "11fb139d16237a8dd7de0aee0bec6fa182be67f056a78eb9621c9ebdd0d2c3ec",
+    "src/core/ClearView.h": "6fa6c26fcce9786c7fc2211b4d8f0e205468132975a088d894dcf78f39eddd93",
+    "src/core/Commands.cpp": "77386797fc05174656871dadd3e2abce8ab754df6146e8a805e464b2ace3502e",
+    "src/core/CommandNames.inc": "8deb392ffd6786cd26eec298bbac3c1638be63943176971f5901886fc8449c6b",
+    "src/core/ReplayCapabilities.cpp": "ec1d7840ad4d7365f1aa6714bf20ba85786aabc338b32928b32025fcf3726a00",
+    "src/replay/Replay.cpp": "9fd0d0d46e266697d671935ef3668a35a9c679d2eb7b8ea5e2addaa99721712c",
+    "src/application/ApiCommands.cpp": "5e040fe4bc9a20bae3fe6c567deb935c660fdafeda489a48275f9894bbeab21b",
+    "src/application/FrameValidation.cpp": "90e7ed2f7688eb45a193748224d34eef9ca07c9e8da7b027a5581de978b3b15f",
+    "tests/ClearViewTests.cpp": "54b5c7e3ec638d8cf637c390860b4ccbf9aa3c53986fece5caefe1b5f67eb829",
+    "tools/native/clear_view_probe.cpp": "136e6fe8550257e6d50bfab183991007f5b99a51e25c766b1d538a1c961858fa",
+    "CMakeLists.txt": "980bc910a6d1bb6ffe6e5e4b02bdb2e59569436458aedc362c3f6927d11f4836",
+    "tools/validate_corpus.py": "8c8a877e3966e526280a4d6007d1cf6687a1f9d49b60540c105fac66b5fbcc6a"
+  },
+  "evidence": {
+    "artifacts/m2-clear-view-wrapper.c": "14b17aa849494a60ebb200b2b89c0799b07fb11ded7be5876d2a1b72cd092e79",
+    "artifacts/m2-clear-view-wrapper-ghidra.log": "04c2e4848216e3696a79fdac531ce8f0bededf9100c90a1728759f147860942b",
+    "artifacts/m2-clear-view-player.c": "6b13763d2b03990e3acd98bd41b2eb87e5931626df36b559dfda35d0b3fe66d1",
+    "artifacts/m2-clear-view-player-ghidra.log": "f5b73ea4584ecec25348c738c77073d1877e08519c9d77839dd5fac19059f5fc",
+    "artifacts/m2-clear-view-writer.c": "e65c5dd802b2a0492994e9c7997ceb456c5531b7d81984203d7abde8a41fe4c7",
+    "artifacts/m2-clear-view-writer-ghidra.log": "54ac138f35bf73e309f184ae31cab9a32e7d8dd4322525e21de0e3d3bcbeb6b2",
+    "artifacts/m2-clear-view-originals/manifest.json": "efc0cf5bacc6feed153628caa2b91b283a9527d893d66f4f40278a50a0de00d1",
+    "artifacts/capture-clear-views.log": "4e4781d008659dd4589715c466df693ebeef5e7f4c8e11ff7dd931b7f3abbc67",
+    "artifacts/m2-clear-view-before/validation.json": "5a40df4d173b11f1a8dcfa1226d680a2cf193c992c0dfdcd8cef1cb51669aefe"
+  },
+  "limits": [
+    "Original-player adapter/configuration equality unproven; image equality is observed only",
+    "Depth, buffer and 1D cases have presentation markers; exact resource byte boundaries are mandatory, not inferred from these images",
+    "MSAA case checks resolved storage, not each sample separately",
+    "D16 accepted structurally/native API, not independently certified by the D32 fixture",
+    "Video, 3D, stencil/read-only depth, raw/structured/flagged buffer views and linked/deferred ClearView remain outside this batch",
+    "CopySubresourceRegion1/UpdateSubresource1, broader interfaces and resource versions remain incomplete; migration module totals unchanged"
+  ]
+}

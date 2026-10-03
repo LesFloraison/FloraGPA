@@ -12,6 +12,7 @@
 #include "core/PipelineBindings.h"
 #include "core/PipelineCreation.h"
 #include "core/PredicateCreation.h"
+#include "core/ClearView.h"
 #include "core/Predication.h"
 #include "core/PresentRecords.h"
 #include "core/ReplayCapabilities.h"
@@ -253,7 +254,14 @@ Json validateFrame(const std::filesystem::path &path, const std::function<bool()
                                 finding(&e, "error", "present_unsupported", error.what(), chain);
                             }
                         }
-                        if (isWritableCommand(e.type))
+                        if (e.type == 0x257) {
+                            const auto command = readClearView(frame.payload(id));
+                            try {
+                                validateClearView(frame, command);
+                            } catch (const std::exception &error) {
+                                finding(&e, "error", "clear_view_rejected", error.what(), command.view);
+                            }
+                        } else if (isWritableCommand(e.type))
                             validateWritableCommand(frame, id);
                         if (e.type >= 0x3278 && e.type <= 0x327e)
                             validateAnnotationCommand(e.type, frame.payload(id));

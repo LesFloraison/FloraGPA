@@ -1,0 +1,462 @@
+{
+  "schema": "FloraGPA compatibility corpus 1",
+  "profile": "GPA 2025 R1 legacy DX11 / IGPA v3",
+  "cases": [
+    {
+      "id": "clear_view_0",
+      "path": "0/capture.gpa_frame",
+      "sha256": "6f34bcd38ad886307a3e4d69e33f7307f96b72b8cef767f22e10962441301633",
+      "bytes": 8327,
+      "family": "clear_view",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified CaptureNextFrame output. Native and shim-injected producers each verify 12 frames against CPU resource byte and image oracles. Depth/buffer/1D final images are presentation markers; exact resource boundaries are mandatory.",
+      "device_scope": "Producer device IDs retained. Generic original player adapter unidentified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 10,
+          "repeat": 2,
+          "expected_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+          "purpose": "Diagnostic ClearView omission; no-op and predicated-skip cases intentionally stay unchanged."
+        }
+      ],
+      "boundaries": [
+        {
+          "kind": "texture",
+          "event": 10,
+          "resource": 5,
+          "expect_stable": true,
+          "expected_storage_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636"
+        }
+      ]
+    },
+    {
+      "id": "clear_view_1",
+      "path": "1/capture.gpa_frame",
+      "sha256": "d206781e6da9e83e53a77eb07ae6f7b59fa8c10dcd7dd9c294aedf8fe2d396a1",
+      "bytes": 8343,
+      "family": "clear_view",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified CaptureNextFrame output. Native and shim-injected producers each verify 12 frames against CPU resource byte and image oracles. Depth/buffer/1D final images are presentation markers; exact resource boundaries are mandatory.",
+      "device_scope": "Producer device IDs retained. Generic original player adapter unidentified.",
+      "reference_rgba_sha256": "c285494d29cb465c5ca5be0d566a9d4cf8f5604d173ab16aab9e96a1307fdf23",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 10,
+          "repeat": 2,
+          "expected_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+          "purpose": "Diagnostic ClearView omission; no-op and predicated-skip cases intentionally stay unchanged."
+        }
+      ],
+      "boundaries": [
+        {
+          "kind": "texture",
+          "event": 10,
+          "resource": 5,
+          "expect_stable": true,
+          "expected_storage_sha256": "c285494d29cb465c5ca5be0d566a9d4cf8f5604d173ab16aab9e96a1307fdf23"
+        }
+      ]
+    },
+    {
+      "id": "clear_view_2",
+      "path": "2/capture.gpa_frame",
+      "sha256": "e5cffd2d47260b243a9010e4c62492672cbd6237c917bd606a21bcd197d9ebd9",
+      "bytes": 8359,
+      "family": "clear_view",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified CaptureNextFrame output. Native and shim-injected producers each verify 12 frames against CPU resource byte and image oracles. Depth/buffer/1D final images are presentation markers; exact resource boundaries are mandatory.",
+      "device_scope": "Producer device IDs retained. Generic original player adapter unidentified.",
+      "reference_rgba_sha256": "e6b4a5ee5c103c37579bd3e41aa0f2b2e7fa98b880a5a38b0dd4da70d9b77c5c",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 10,
+          "repeat": 2,
+          "expected_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+          "purpose": "Diagnostic ClearView omission; no-op and predicated-skip cases intentionally stay unchanged."
+        }
+      ],
+      "boundaries": [
+        {
+          "kind": "texture",
+          "event": 10,
+          "resource": 5,
+          "expect_stable": true,
+          "expected_storage_sha256": "e6b4a5ee5c103c37579bd3e41aa0f2b2e7fa98b880a5a38b0dd4da70d9b77c5c"
+        }
+      ]
+    },
+    {
+      "id": "clear_view_3",
+      "path": "3/capture.gpa_frame",
+      "sha256": "3083d9f25b93d2ac20e2f08797d46430210566ef10326832e4737bdda7cf31bf",
+      "bytes": 8359,
+      "family": "clear_view",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified CaptureNextFrame output. Native and shim-injected producers each verify 12 frames against CPU resource byte and image oracles. Depth/buffer/1D final images are presentation markers; exact resource boundaries are mandatory.",
+      "device_scope": "Producer device IDs retained. Generic original player adapter unidentified.",
+      "reference_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 10,
+          "repeat": 2,
+          "expected_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+          "purpose": "Diagnostic ClearView omission; no-op and predicated-skip cases intentionally stay unchanged."
+        }
+      ],
+      "boundaries": [
+        {
+          "kind": "texture",
+          "event": 10,
+          "resource": 5,
+          "expect_stable": true,
+          "expected_storage_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b"
+        }
+      ]
+    },
+    {
+      "id": "clear_view_4",
+      "path": "4/capture.gpa_frame",
+      "sha256": "b415a20237d652f5cb8a0bdc95a2115cd7f6fd926fd77139522697f46a3c5d57",
+      "bytes": 16853,
+      "family": "clear_view",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified CaptureNextFrame output. Native and shim-injected producers each verify 12 frames against CPU resource byte and image oracles. Depth/buffer/1D final images are presentation markers; exact resource boundaries are mandatory.",
+      "device_scope": "Producer device IDs retained. Generic original player adapter unidentified.",
+      "reference_rgba_sha256": "c285494d29cb465c5ca5be0d566a9d4cf8f5604d173ab16aab9e96a1307fdf23",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 15,
+          "repeat": 2,
+          "expected_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+          "purpose": "Diagnostic ClearView omission; no-op and predicated-skip cases intentionally stay unchanged."
+        }
+      ],
+      "boundaries": [
+        {
+          "kind": "texture",
+          "event": 15,
+          "resource": 10,
+          "expect_stable": true,
+          "expected_storage_sha256": "39ac3d42e1c27b62dfdfe3ec7d363e8f61cf55fb312ce6a667fb25a5aab97e2f"
+        }
+      ]
+    },
+    {
+      "id": "clear_view_5",
+      "path": "5/capture.gpa_frame",
+      "sha256": "63eb7c789bd98338abda67fad86824ef6b11886a661db98d1a25ca935c8c269f",
+      "bytes": 16853,
+      "family": "clear_view",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified CaptureNextFrame output. Native and shim-injected producers each verify 12 frames against CPU resource byte and image oracles. Depth/buffer/1D final images are presentation markers; exact resource boundaries are mandatory.",
+      "device_scope": "Producer device IDs retained. Generic original player adapter unidentified.",
+      "reference_rgba_sha256": "c285494d29cb465c5ca5be0d566a9d4cf8f5604d173ab16aab9e96a1307fdf23",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 15,
+          "repeat": 2,
+          "expected_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+          "purpose": "Diagnostic ClearView omission; no-op and predicated-skip cases intentionally stay unchanged."
+        }
+      ],
+      "boundaries": [
+        {
+          "kind": "texture",
+          "event": 15,
+          "resource": 10,
+          "expect_stable": true,
+          "expected_storage_sha256": "39ac3d42e1c27b62dfdfe3ec7d363e8f61cf55fb312ce6a667fb25a5aab97e2f"
+        }
+      ]
+    },
+    {
+      "id": "clear_view_6",
+      "path": "6/capture.gpa_frame",
+      "sha256": "5033c5d3dd884a139aecf546479e86a40fb6074fc8630ca4772a2d6feb36cdb4",
+      "bytes": 16772,
+      "family": "clear_view",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified CaptureNextFrame output. Native and shim-injected producers each verify 12 frames against CPU resource byte and image oracles. Depth/buffer/1D final images are presentation markers; exact resource boundaries are mandatory.",
+      "device_scope": "Producer device IDs retained. Generic original player adapter unidentified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "controls": [],
+      "boundaries": [
+        {
+          "kind": "texture",
+          "event": 15,
+          "resource": 10,
+          "expect_stable": true,
+          "expected_storage_sha256": "49d17582cfd900ba57a4ca4972c9ebcf6ac5a0b8f0b5297927bdd23125a10096"
+        }
+      ]
+    },
+    {
+      "id": "clear_view_7",
+      "path": "7/capture.gpa_frame",
+      "sha256": "28cb20fff7e4ad4c7c482c1e570770fca01edef57581b95b1d2e14e5ae75cfe1",
+      "bytes": 8355,
+      "family": "clear_view",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified CaptureNextFrame output. Native and shim-injected producers each verify 12 frames against CPU resource byte and image oracles. Depth/buffer/1D final images are presentation markers; exact resource boundaries are mandatory.",
+      "device_scope": "Producer device IDs retained. Generic original player adapter unidentified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "controls": [],
+      "boundaries": [
+        {
+          "kind": "buffer",
+          "event": 13,
+          "resource": 10,
+          "expect_stable": true,
+          "expected_storage_sha256": "e756c1228bb761824b3a04294ae136a9137e7969f128ec6aabb1dda8eb7dc091"
+        }
+      ]
+    },
+    {
+      "id": "clear_view_8",
+      "path": "8/capture.gpa_frame",
+      "sha256": "fbdbd2e7f4f7716ee4efe394b196f78ab759187d9f88ed80ce90b1605d614bc5",
+      "bytes": 8355,
+      "family": "clear_view",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified CaptureNextFrame output. Native and shim-injected producers each verify 12 frames against CPU resource byte and image oracles. Depth/buffer/1D final images are presentation markers; exact resource boundaries are mandatory.",
+      "device_scope": "Producer device IDs retained. Generic original player adapter unidentified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "controls": [],
+      "boundaries": [
+        {
+          "kind": "buffer",
+          "event": 13,
+          "resource": 10,
+          "expect_stable": true,
+          "expected_storage_sha256": "16506356d0326b297c187367700ffaef0a06df9aa88a6293a77f657ed94a1fa0"
+        }
+      ]
+    },
+    {
+      "id": "clear_view_9",
+      "path": "9/capture.gpa_frame",
+      "sha256": "0bca517af1384cac2e93c10b3f5d4d766d9332e2ab61fc48bccb1ad750074991",
+      "bytes": 9444,
+      "family": "clear_view",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified CaptureNextFrame output. Native and shim-injected producers each verify 12 frames against CPU resource byte and image oracles. Depth/buffer/1D final images are presentation markers; exact resource boundaries are mandatory.",
+      "device_scope": "Producer device IDs retained. Generic original player adapter unidentified.",
+      "reference_rgba_sha256": "c285494d29cb465c5ca5be0d566a9d4cf8f5604d173ab16aab9e96a1307fdf23",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 13,
+          "repeat": 2,
+          "expected_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+          "purpose": "Diagnostic ClearView omission; no-op and predicated-skip cases intentionally stay unchanged."
+        }
+      ],
+      "boundaries": [
+        {
+          "kind": "texture",
+          "event": 16,
+          "resource": 17,
+          "expect_stable": true,
+          "expected_storage_sha256": "c285494d29cb465c5ca5be0d566a9d4cf8f5604d173ab16aab9e96a1307fdf23"
+        }
+      ]
+    },
+    {
+      "id": "clear_view_10",
+      "path": "10/capture.gpa_frame",
+      "sha256": "0b0b4e16628ded02d1b9a79d745f8338a61fe6adcea63e756310c18284642102",
+      "bytes": 8527,
+      "family": "clear_view",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified CaptureNextFrame output. Native and shim-injected producers each verify 12 frames against CPU resource byte and image oracles. Depth/buffer/1D final images are presentation markers; exact resource boundaries are mandatory.",
+      "device_scope": "Producer device IDs retained. Generic original player adapter unidentified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "controls": [],
+      "boundaries": [
+        {
+          "kind": "texture",
+          "event": 13,
+          "resource": 10,
+          "expect_stable": true,
+          "expected_storage_sha256": "96202a4c14eb2f38acd6fb7c529636f28e0ab750844ffde5e5335eaecabe8e6b"
+        }
+      ]
+    },
+    {
+      "id": "clear_view_11",
+      "path": "11/capture.gpa_frame",
+      "sha256": "c9fff53320e5b34893a7bb5475532814003d2f8f986883fe67df1cf8c0c07b34",
+      "bytes": 8327,
+      "family": "clear_view",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified CaptureNextFrame output. Native and shim-injected producers each verify 12 frames against CPU resource byte and image oracles. Depth/buffer/1D final images are presentation markers; exact resource boundaries are mandatory.",
+      "device_scope": "Producer device IDs retained. Generic original player adapter unidentified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 10,
+          "repeat": 2,
+          "expected_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+          "purpose": "Diagnostic ClearView omission; no-op and predicated-skip cases intentionally stay unchanged."
+        }
+      ],
+      "boundaries": [
+        {
+          "kind": "texture",
+          "event": 10,
+          "resource": 5,
+          "expect_stable": true,
+          "expected_storage_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636"
+        }
+      ]
+    },
+    {
+      "id": "clear_view_12",
+      "path": "12/capture.gpa_frame",
+      "sha256": "d5a68d58fbeb756b3d401e127254286b88b599d4c748013fd4037df53f9c21ec",
+      "bytes": 8359,
+      "family": "clear_view",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified CaptureNextFrame output. Native and shim-injected producers each verify 12 frames against CPU resource byte and image oracles. Depth/buffer/1D final images are presentation markers; exact resource boundaries are mandatory.",
+      "device_scope": "Producer device IDs retained. Generic original player adapter unidentified.",
+      "reference_rgba_sha256": "3ed465545ac2768c749756b06fbc96506760cf9c7b9956acba9c6ad0164f0883",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 10,
+          "repeat": 2,
+          "expected_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+          "purpose": "Diagnostic ClearView omission; no-op and predicated-skip cases intentionally stay unchanged."
+        }
+      ],
+      "boundaries": [
+        {
+          "kind": "texture",
+          "event": 10,
+          "resource": 5,
+          "expect_stable": true,
+          "expected_storage_sha256": "3ed465545ac2768c749756b06fbc96506760cf9c7b9956acba9c6ad0164f0883"
+        }
+      ]
+    },
+    {
+      "id": "clear_view_13",
+      "path": "13/capture.gpa_frame",
+      "sha256": "f330ed8f2ff97d707b80b8dcafde6e393373a81da66973cbe60328dbc7f7b69d",
+      "bytes": 8327,
+      "family": "clear_view",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified CaptureNextFrame output. Native and shim-injected producers each verify 12 frames against CPU resource byte and image oracles. Depth/buffer/1D final images are presentation markers; exact resource boundaries are mandatory.",
+      "device_scope": "Producer device IDs retained. Generic original player adapter unidentified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 10,
+          "repeat": 2,
+          "expected_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+          "purpose": "Diagnostic ClearView omission; no-op and predicated-skip cases intentionally stay unchanged."
+        }
+      ],
+      "boundaries": [
+        {
+          "kind": "texture",
+          "event": 10,
+          "resource": 5,
+          "expect_stable": true,
+          "expected_storage_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636"
+        }
+      ]
+    },
+    {
+      "id": "clear_view_14",
+      "path": "14/capture.gpa_frame",
+      "sha256": "30198399de0f07543ccb02828367ecad067e39827709d31554fd26c970aab8fb",
+      "bytes": 58971,
+      "family": "clear_view",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified CaptureNextFrame output. Native and shim-injected producers each verify 12 frames against CPU resource byte and image oracles. Depth/buffer/1D final images are presentation markers; exact resource boundaries are mandatory.",
+      "device_scope": "Producer device IDs retained. Generic original player adapter unidentified.",
+      "reference_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 33,
+          "repeat": 2,
+          "expected_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+          "purpose": "Diagnostic ClearView omission; no-op and predicated-skip cases intentionally stay unchanged."
+        }
+      ],
+      "boundaries": [
+        {
+          "kind": "texture",
+          "event": 33,
+          "resource": 16,
+          "expect_stable": true,
+          "expected_storage_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b"
+        }
+      ]
+    },
+    {
+      "id": "clear_view_15",
+      "path": "15/capture.gpa_frame",
+      "sha256": "43367e0572b658cbd4c25b42c5d620a4b93e653fc0f25fcd5b828f96fcaab83b",
+      "bytes": 58971,
+      "family": "clear_view",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified CaptureNextFrame output. Native and shim-injected producers each verify 12 frames against CPU resource byte and image oracles. Depth/buffer/1D final images are presentation markers; exact resource boundaries are mandatory.",
+      "device_scope": "Producer device IDs retained. Generic original player adapter unidentified.",
+      "reference_rgba_sha256": "c285494d29cb465c5ca5be0d566a9d4cf8f5604d173ab16aab9e96a1307fdf23",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 33,
+          "repeat": 2,
+          "expected_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+          "purpose": "Diagnostic ClearView omission; no-op and predicated-skip cases intentionally stay unchanged."
+        }
+      ],
+      "boundaries": [
+        {
+          "kind": "texture",
+          "event": 33,
+          "resource": 16,
+          "expect_stable": true,
+          "expected_storage_sha256": "c285494d29cb465c5ca5be0d566a9d4cf8f5604d173ab16aab9e96a1307fdf23"
+        }
+      ]
+    }
+  ],
+  "producer_manifest": {
+    "path": "artifacts\\m2-clear-view-originals\\manifest.json",
+    "sha256": "efc0cf5bacc6feed153628caa2b91b283a9527d893d66f4f40278a50a0de00d1"
+  }
+}

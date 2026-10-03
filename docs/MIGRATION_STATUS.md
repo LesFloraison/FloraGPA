@@ -5,6 +5,32 @@
 > [Documentation](README.md)。`artifacts/`、`out/`、`build/` 及外部参考目录
 > 是未随仓库发布的本地证据位置，不代表克隆后即可访问。
 
+2026-10-03（M2 第十七批）：接通标准化 immediate-context ClearView (`0x257`)，
+恢复浮点颜色、矩形、数组／mip 视图和条件执行；检查原生功能支持，非法引用、
+异常长度、反向矩形及范围外视图明确拒绝。16 份原版捕获分别验证完整／局部清除、
+重叠／空矩形、越界裁剪、二维数组 RTV/UAV、D32、typed buffer、1D array、
+MSAA resolve、非有限颜色、零数量矩形指针以及 predication。384 次原始／注入
+生产程序帧检查、32 组硬件／WARP 样例的 128 次完整／观察重放和 32 次禁用反例
+均通过。四种场景的帧末图仅为展示标记，必须核对目标资源字节，未以图像代替。
+
+本批同时修正通用验收工具：此前资源边界预期哈希由批次归档脚本严格核对，但
+通用 runner 只检查重复稳定性；现直接强制每次匹配预期字节，新增 buffer 导出，
+并将失败写入带事件／资源 ID 的队列。18 项 CPU 检查和使用上一版发布包的四组
+正确／错误哈希现场对照通过，共八次普通重放、八次边界导出；错误哈希即使重复
+稳定也必须失败。工具改动单独提交 `fa26cc5`，历史原始验收记录保持不变。
+
+最终完整矩阵为 270 份文件、540 次独立重放：269 份重复稳定，Helldivers 保留
+已知波动，253 份既有稳定图像哈希全部不变。293 次诊断对照、120 次资源边界
+导出（116 次纹理、四次 buffer）、四项黄金检查及 32 套 CTest 全部通过；新增
+ClearView 36 项与 Qt/Worker 55 项测试均无跳过。新增 32 次原版图像对照一致，
+仍不宣称通用原版播放器设备配置等价或展示标记能证明资源内容。五个发布二进制
+与 Release 一致。详见 [CLEAR_VIEW_AUDIT.md](CLEAR_VIEW_AUDIT.md)、
+[clear-view-baseline.json](clear-view-baseline.json) 和
+[resource-boundary-baseline.json](resource-boundary-baseline.json)。D16 尚无独立
+专项认证；video／3D／stencil／read-only depth、raw／structured buffer、linked
+ClearView 和一般资源版本仍在范围外。下一步审计 CopySubresourceRegion1／
+UpdateSubresource1；M2 与 M3–M6 仍未完成，模块统计不变。
+
 2026-10-03（M2 第十六批）：接通 Device5 CreatePredicate 的帧内执行，并严格
 区分实际创建、失败调用与仅验证参数的 S_FALSE。新对象保持未发起状态，不再
 用空 Begin/End 伪造初始结果；提前绑定、提前使用、描述冲突与重复身份明确拒绝。

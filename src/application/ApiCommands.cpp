@@ -1,5 +1,6 @@
 #include "ApiCommands.h"
 #include "core/ClassCreation.h"
+#include "core/ClearView.h"
 #include "core/Contexts.h"
 #include "core/PipelineCreation.h"
 #include "core/PredicateCreation.h"
@@ -535,6 +536,12 @@ Json inspectCommand(const Frame &frame, Id id) {
             else if (in(t, {0x32, 0x33, 0x34})) {
                 r.id("view");
                 r.array("values", t == 0x33 ? "I" : "f", 4);
+            } else if (t == 0x257) {
+                readClearView(raw);
+                r.id("view");
+                r.array("color", "f", 4);
+                const auto count = r.u("rectangle_count");
+                r.array("rectangles", "4i", count);
             } else if (t == 0x242 || t == 0x244) {
             } else if (in(t, {0x3163, 0x3164, 0x3113, 0x3114, 0x318f, 0x3190, 0x3013, 0x3014, 0x3250, 0x3251,
                               0x3576, 0x3577}))

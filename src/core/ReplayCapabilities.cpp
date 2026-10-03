@@ -22,6 +22,9 @@ bool in(uint16_t t, std::initializer_list<uint16_t> values) {
 }
 } // namespace
 ReplayCapability replayCapability(uint16_t t) {
+    if (t == 0x257)
+        return {"execute", "src/core/ClearView.cpp;src/replay/Replay.cpp",
+                "tests/ClearViewTests.cpp;docs/CLEAR_VIEW_AUDIT.md"};
     if (in(t, {0x358e, 0x3162, 0x3163, 0x3164, 0x3166, 0x3167, 0x3169, 0x316a}))
         return {t == 0x358e ? "execute" : "metadata",
                 "src/core/PredicateCreation.cpp;src/replay/Predication.cpp;src/core/InspectionRecords.cpp",
