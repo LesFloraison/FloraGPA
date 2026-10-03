@@ -125,8 +125,10 @@ class ClassLinkageTests final : public QObject {
             options.until = event;
             Replay replay(frame, options);
             auto report = inspectReplayPipeline(frame, replay);
-            QCOMPARE(field(report, "cs.shader")["value"], Json(event == 100 ? 15 : 0));
-            QCOMPARE(field(report, "cs.classes")["value"], event == 100 ? Json::array({62}) : Json::array());
+            // Captured setters execute at their own event; the Dispatch snapshot
+            // restores the linked shader after the explicit unbind at event 95.
+            QCOMPARE(field(report, "cs.shader")["value"], Json(event == 95 ? 0 : 15));
+            QCOMPARE(field(report, "cs.classes")["value"], event == 95 ? Json::array() : Json::array({62}));
         }
     }
     void emptyFunctionTable() {
