@@ -3,6 +3,7 @@
 #include <QApplication>
 #include <QCommandLineParser>
 #include <QFile>
+#include <QIcon>
 #include <QTimer>
 
 int main(int argc, char **argv) {
@@ -10,6 +11,7 @@ int main(int argc, char **argv) {
     app.setApplicationName("FloraGPA");
     app.setOrganizationName("FloraGPA");
     app.setApplicationVersion("0.1.0");
+    app.setWindowIcon(QIcon(":/icons/FloraGPA.ico"));
     flora::applyAppearance(app);
     QCommandLineParser p;
     p.addHelpOption();

@@ -1,0 +1,6 @@
+cmake_minimum_required(VERSION 3.25)
+project(FloraIconGenerator LANGUAGES CXX)
+set(CMAKE_CXX_STANDARD 20)
+find_package(Qt6 REQUIRED COMPONENTS Gui Svg)
+add_executable(FloraIconGenerator main.cpp)
+target_link_libraries(FloraIconGenerator PRIVATE Qt6::Gui Qt6::Svg)

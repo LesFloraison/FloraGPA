@@ -366,7 +366,6 @@ void MainWindow::buildUi() {
     resize(1680, 1000);
     setMinimumSize(1000, 640);
     setWindowTitle("FloraGPA");
-    setWindowIcon(style()->standardIcon(QStyle::SP_ComputerIcon));
     auto file = menuBar()->addMenu("&File");
     openAction_ = file->addAction("&Open Capture…", QKeySequence::Open, this, [this] {
         auto path = QFileDialog::getOpenFileName(this, "Open DX11 capture", {},
