@@ -1,0 +1,367 @@
+{
+  "schema": "FloraGPA view creation acceptance 1",
+  "completion": "M2 in progress; M3-M6 incomplete",
+  "scope": "Device5 texture RTV/DSV/UAV creation and eighteen strict view metadata layouts",
+  "package": "out\\FloraGPA-view-creation-20261003",
+  "package_sha256": {
+    "FloraGPA.exe": "059e55916816b320a3c853a8903d09d441fbd082aed42f80441a186d65fa6264",
+    "FloraGPA.Cli.exe": "2f9aebb87ef783b4650f4469044b6c35bd015839ba3343d87a10b05344e4670a",
+    "FloraGPA.Worker.exe": "63ee37c8852b55ad43cc5035d29d38e071b3f67d1e464d71c935e3a114f04491",
+    "FloraGPA.Rdc.exe": "f4d21d43e661d24d392e91fc1a1f1460a20d1377fcf5075c57083ad289e82773",
+    "FloraGPA.Metrics.dll": "58b6278f2a93e783b1e8bb1290e9b0e51745f1a36825f296584f52159fd7c6db"
+  },
+  "native_runs": 320,
+  "file_outcomes": {
+    "repeat_stable": 159,
+    "repeat_variable": 1
+  },
+  "prior_stable_images_unchanged": 147,
+  "corpus_controls": 85,
+  "boundary_runs": 88,
+  "new_original_player_runs": 24,
+  "producer_frame_checks": 288,
+  "hardware_warp_original_creation_runs": 24,
+  "golden_controls": [
+    {
+      "case": "gf2",
+      "rgba_sha256": "2e1abc5eacb0bbfd801f9fe059c305baa9a0786c384b36a42fa5a323dd979fd1",
+      "passed": true,
+      "counts": {
+        "ClearDepthStencilView": 2,
+        "ClearRenderTargetView": 1,
+        "CreateBuffer": 2,
+        "DrawIndexed": 72,
+        "Map": 44,
+        "Present": 1,
+        "buffers_created_without_initial_data": 2,
+        "object_observation_records": 49,
+        "pipeline_setter_records": 142,
+        "private_data_observations": 4,
+        "query_metadata_records": 2,
+        "state_or_auxiliary_records": 551,
+        "unmap_observations": 44
+      }
+    },
+    {
+      "case": "gf2-negative",
+      "rgba_sha256": "b2c5548a51715f581c4591acc266ac7a0c65b54b7ecd9a49f43499fa9b76c5f1",
+      "passed": true,
+      "counts": {
+        "ClearDepthStencilView": 2,
+        "ClearRenderTargetView": 1,
+        "CreateBuffer": 2,
+        "Map": 44,
+        "Present": 1,
+        "buffers_created_without_initial_data": 2,
+        "object_observation_records": 49,
+        "pipeline_setter_records": 142,
+        "private_data_observations": 4,
+        "query_metadata_records": 2,
+        "state_or_auxiliary_records": 551,
+        "unmap_observations": 44
+      }
+    },
+    {
+      "case": "bf1",
+      "rgba_sha256": "1f724d1840652f66afd26dd30c95aecd5c1b4932eede56109198f15a8f57a2f6",
+      "passed": true,
+      "counts": {
+        "ClearDepthStencilView": 10,
+        "ClearRenderTargetView": 10,
+        "ClearUnorderedAccessViewFloat": 1,
+        "CopyResource": 2,
+        "CopyStructureCount": 6,
+        "CopySubresourceRegion": 7,
+        "Dispatch": 60,
+        "DispatchIndirect": 13,
+        "Draw": 79,
+        "DrawIndexed": 41,
+        "DrawIndexedInstanced": 1053,
+        "DrawInstanced": 29,
+        "GenerateMips": 2,
+        "Map": 4151,
+        "Present": 1,
+        "UpdateSubresource": 27,
+        "map_read_observations": 2,
+        "object_observation_records": 28,
+        "pipeline_setter_records": 2221,
+        "query_metadata_records": 17,
+        "state_or_auxiliary_records": 7354,
+        "unmap_observations": 4153,
+        "unresolved_input_layout_setters": 2,
+        "unresolved_output_setters": 6,
+        "unresolved_shader_setters": 4,
+        "unresolved_srv_setters": 2
+      }
+    },
+    {
+      "case": "bf1-negative",
+      "rgba_sha256": "cd3a3066f984b1c317fbeefec2836503f32078321d3dc1f367465f2c06d435bf",
+      "passed": true,
+      "counts": {
+        "ClearDepthStencilView": 10,
+        "ClearRenderTargetView": 10,
+        "ClearUnorderedAccessViewFloat": 1,
+        "CopyResource": 2,
+        "CopyStructureCount": 6,
+        "CopySubresourceRegion": 7,
+        "Dispatch": 60,
+        "DispatchIndirect": 13,
+        "GenerateMips": 2,
+        "Map": 4151,
+        "Present": 1,
+        "UpdateSubresource": 27,
+        "map_read_observations": 2,
+        "object_observation_records": 28,
+        "pipeline_setter_records": 2221,
+        "query_metadata_records": 17,
+        "state_or_auxiliary_records": 7354,
+        "unmap_observations": 4153,
+        "unresolved_input_layout_setters": 2,
+        "unresolved_output_setters": 6,
+        "unresolved_shader_setters": 4,
+        "unresolved_srv_setters": 2
+      }
+    }
+  ],
+  "results": {
+    "corpus": {
+      "path": "artifacts\\m2-view-release-corpus\\validation.json",
+      "sha256": "31c083a1d3708f2c40c44216ad95ef506b0a9f45edd7b0634b4199bd0e38bedc",
+      "counts": {
+        "repeat_stable": 90,
+        "repeat_variable": 1
+      }
+    },
+    "originals": {
+      "path": "artifacts\\m2-view-release-originals\\validation.json",
+      "sha256": "a4a3a157af680aa00e63ea5e80779cce2f6d2cf9e576a3eaa71104ee2eb4a6fa",
+      "counts": {
+        "repeat_stable": 11
+      }
+    },
+    "copy": {
+      "path": "artifacts\\m2-view-release-copy\\validation.json",
+      "sha256": "885f4c3908d091e13ff4dab8bf6f944efe293001dedfc59893fe9c59ebbfaf23",
+      "counts": {
+        "repeat_stable": 6
+      }
+    },
+    "present": {
+      "path": "artifacts\\m2-view-release-present\\validation.json",
+      "sha256": "660d1bb2259102cdcebe740ecc249a58c78e3cb6ee43477123f9069e6b022c88",
+      "counts": {
+        "repeat_stable": 5
+      }
+    },
+    "buffer": {
+      "path": "artifacts\\m2-view-release-buffer\\validation.json",
+      "sha256": "0a0736d8f0625d9c56ef47068663fbdf04f954398e56ecb2e6481f6df2468708",
+      "counts": {
+        "repeat_stable": 5
+      }
+    },
+    "pipeline": {
+      "path": "artifacts\\m2-view-release-pipeline\\validation.json",
+      "sha256": "48fc973a799cb941488d712d7525348594ced2e39d54bfefa15ff3ad4f58195f",
+      "counts": {
+        "repeat_stable": 5
+      }
+    },
+    "creation": {
+      "path": "artifacts\\m2-view-release-creation\\validation.json",
+      "sha256": "a9b56fe86a567a1f995704d3905d9ea75053f85dccb7c06340eb43ea1214abca",
+      "counts": {
+        "repeat_stable": 7
+      }
+    },
+    "discovery": {
+      "path": "artifacts\\m2-view-release-discovery\\validation.json",
+      "sha256": "8c79537e86a955b9da9990457dd3495dd12db474c06e2b5a78398367505b4af5",
+      "counts": {
+        "repeat_stable": 1
+      }
+    },
+    "dimensions": {
+      "path": "artifacts\\m2-view-release-dimensions\\validation.json",
+      "sha256": "85c39848603ea8eaf87fee374cfb07f7c9094ccbda5eedfb1d99727d4a5caecd",
+      "counts": {
+        "repeat_stable": 17
+      }
+    },
+    "views": {
+      "path": "artifacts\\m2-view-release-views\\validation.json",
+      "sha256": "bbd984a9ce9bf5d7985152d60c188de3f74442c13a282742c58bd73d17e6b65b",
+      "counts": {
+        "repeat_stable": 12
+      }
+    }
+  },
+  "ctest": {
+    "path": "artifacts/ctest-m2-views.log",
+    "sha256": "9d8c9a7fdadc82d5336965734c6ad3161fd0fc07555241fd4d66ed5557d5f7da",
+    "suites": 15,
+    "qt_details": {
+      "view-creation": {
+        "path": "build\\vs2022\\view-creation-Release.txt",
+        "sha256": "684f3c33c85b80668f5d46d63302eba15f2b860e26098062f1524b429ab001aa",
+        "cases": 32
+      },
+      "texture-creation": {
+        "path": "build\\vs2022\\texture-creation-Release.txt",
+        "sha256": "1b4eea9e8b2322ec1422808cd9dac7d882114671085f2d79dbea8b1b17cd2bb2",
+        "cases": 55
+      },
+      "ui": {
+        "path": "build\\vs2022\\ui-Release.txt",
+        "sha256": "561d17a024e826e8d4d69efa7e499772bfecabf82700bc5b25b9b42d233f2ba5",
+        "cases": 55
+      },
+      "texture-edit-replay": {
+        "path": "build\\vs2022\\texture-edit-replay-Release.txt",
+        "sha256": "7077559653cca8c20de895542b78b65754a32b7c41ac48678b1d3799d3510243",
+        "cases": 34
+      }
+    }
+  },
+  "sources": {
+    "src/core/TextureCreation.cpp": "4bb5380259154936838a48816ba7831442d656f04d1a3bbbf64564b8fff24911",
+    "src/core/TextureCreation.h": "36ef4d1e15123303e8623ac3e4e370d1ca73d3b6180191ee7a4cd15a16a279e8",
+    "src/application/ApiCommands.cpp": "c832e685ae2319de657c26e62f2298d1ad7ad860bef53693a3f3b49cf857cc62",
+    "src/application/FrameValidation.cpp": "8cb2a88b265be4b1d2c6fb8d2be7820cf9c65a16092a1534c9ec021ccf05199f",
+    "src/core/ReplayCapabilities.cpp": "233ea5feabe3a1b7f1a0f8e4deee69879dcdbcc9323dd6fc47faa01d92cb9bac",
+    "src/core/CommandNames.inc": "e98b802c8baaadac2cb2cb48a1e76d918f1f42a8a821ff92cd052561197fff35",
+    "src/replay/Replay.cpp": "07a6918ec427fd06d8aa2d4d7caa699bffb4418d777f9aff8f7a5fd43b540767",
+    "src/replay/Replay.h": "3cdd0e9fb08c16703630a63efea02379f34907dec50a78209f7c8349fb50f0ac",
+    "tests/TextureCreationTests.cpp": "b13daad41d1e879936c95e8a25cb83020b1d7a3cded44eb8ee9d1eda997c88fb",
+    "tests/ViewCreationTests.cpp": "a15e68efc4bfddadc74302574f4626e2a72daa06f6ff627217bedbd74978e5e9",
+    "tools/native/view_creation_probe.cpp": "a812ae2877d211d23d4b859e2aabad8c498483b7266938ba825726d07b90ef1e",
+    "tools/native/texture_creation_probe.cpp": "2c825ccee1b698d2be2090f00b1a4b05305e839cd2008e9f8e0baa2007d89c8d",
+    "tools/native/texture_probe_helpers.h": "30abcac380d84d505fd344d4083d97300f50df5b2e5cc7dffb11ea03c6d6ee3d",
+    "tools/native/texture_copy_probe.cpp": "9713f07b873a1700bae72e6397c7189e3b2325ea076de3aaff8fe0fa64cde1cb",
+    "tools/native/present_capture_probe.cpp": "7c29f1e572ab16a5bc497d39eef8198d79056877a9e1d3fff3f7ed530a32c4e3",
+    "CMakeLists.txt": "f4b4d1694a9fa381674500825b40c2d5e0e85fe6bc7ab97db3044320062e593a"
+  },
+  "evidence": {
+    "artifacts/m2-next-view-creation-wrappers.c": "e2f98370791561e7cd6116011d671d250f9a9a25e13640f5fca1132b4a81ff84",
+    "artifacts/m2-next-view-creation-wrapper-index.json": "90474fc188801d6ba361eb4fc9c0c2a53faf287c8062a428591bfb08bfb84b23",
+    "artifacts/m2-view-creation-originals/manifest.json": "99cc3773c7ad6132054314b225cec54a0577a4a7589a6be037fda57457dfeb73",
+    "artifacts/m2-view-creation-before/validation.json": "6f3640f0fb2336c855ae29ad1836be4a2941b4f59c6f82aaee67fe230076ebf9"
+  },
+  "limits": [
+    "Original player adapter unidentified; observed image equality is not matched-device equivalence",
+    "Buffer view creation, other device layouts, identity versioning and deferred execution remain unsupported",
+    "These fixtures do not certify all formats/usages/sample counts",
+    "Known Helldivers variability unchanged; missing contents are not synthesized"
+  ],
+  "view_metadata_evidence": [
+    {
+      "record_type": "0x3053",
+      "original_record_count": 0,
+      "writer_evidence": true,
+      "synthetic_wire_and_inspection": true
+    },
+    {
+      "record_type": "0x3054",
+      "original_record_count": 0,
+      "writer_evidence": true,
+      "synthetic_wire_and_inspection": true
+    },
+    {
+      "record_type": "0x3055",
+      "original_record_count": 0,
+      "writer_evidence": true,
+      "synthetic_wire_and_inspection": true
+    },
+    {
+      "record_type": "0x3056",
+      "original_record_count": 0,
+      "writer_evidence": true,
+      "synthetic_wire_and_inspection": true
+    },
+    {
+      "record_type": "0x305a",
+      "original_record_count": 4,
+      "writer_evidence": true,
+      "synthetic_wire_and_inspection": true
+    },
+    {
+      "record_type": "0x305b",
+      "original_record_count": 4,
+      "writer_evidence": true,
+      "synthetic_wire_and_inspection": true
+    },
+    {
+      "record_type": "0x301d",
+      "original_record_count": 0,
+      "writer_evidence": true,
+      "synthetic_wire_and_inspection": true
+    },
+    {
+      "record_type": "0x301e",
+      "original_record_count": 0,
+      "writer_evidence": true,
+      "synthetic_wire_and_inspection": true
+    },
+    {
+      "record_type": "0x301f",
+      "original_record_count": 0,
+      "writer_evidence": true,
+      "synthetic_wire_and_inspection": true
+    },
+    {
+      "record_type": "0x3020",
+      "original_record_count": 0,
+      "writer_evidence": true,
+      "synthetic_wire_and_inspection": true
+    },
+    {
+      "record_type": "0x3024",
+      "original_record_count": 4,
+      "writer_evidence": true,
+      "synthetic_wire_and_inspection": true
+    },
+    {
+      "record_type": "0x3025",
+      "original_record_count": 4,
+      "writer_evidence": true,
+      "synthetic_wire_and_inspection": true
+    },
+    {
+      "record_type": "0x3185",
+      "original_record_count": 0,
+      "writer_evidence": true,
+      "synthetic_wire_and_inspection": true
+    },
+    {
+      "record_type": "0x3186",
+      "original_record_count": 0,
+      "writer_evidence": true,
+      "synthetic_wire_and_inspection": true
+    },
+    {
+      "record_type": "0x3187",
+      "original_record_count": 0,
+      "writer_evidence": true,
+      "synthetic_wire_and_inspection": true
+    },
+    {
+      "record_type": "0x3188",
+      "original_record_count": 0,
+      "writer_evidence": true,
+      "synthetic_wire_and_inspection": true
+    },
+    {
+      "record_type": "0x318c",
+      "original_record_count": 4,
+      "writer_evidence": true,
+      "synthetic_wire_and_inspection": true
+    },
+    {
+      "record_type": "0x318d",
+      "original_record_count": 4,
+      "writer_evidence": true,
+      "synthetic_wire_and_inspection": true
+    }
+  ]
+}

@@ -29,8 +29,8 @@ bool queryCreate(uint16_t t) { return in(t, {0x3074, 0x3235, 0x33a8, 0x3471, 0x3
 bool queryCreate1(uint16_t t) { return in(t, {0x3495, 0x34d6, 0x35b1}); }
 bool queryGet(uint16_t t) { return in(t, {0x30b4, 0x31b4, 0x331d, 0x33e3, 0x34fb}); }
 bool getter(uint16_t t) {
-    return in(t, {0x304b, 0x304c, 0x304d, 0x3528, 0x3537, 0x3539, 0x353a, 0x353d, 0x4029, 0x402a, 0x30ea, 0x31ea, 0x3353,
-                  0x3419, 0x3531, 0x313b, 0x300e, 0x359d});
+    return in(t, {0x304b, 0x304c, 0x304d, 0x3528, 0x3537, 0x3539, 0x353a, 0x353d, 0x4029, 0x402a, 0x30ea,
+                  0x31ea, 0x3353, 0x3419, 0x3531, 0x313b, 0x300e, 0x359d});
 }
 const std::map<uint16_t, int> finishes{{0x3109, 0}, {0x3209, 1}, {0x3372, 2}, {0x3438, 3}, {0x3550, 4}};
 class Wire {
@@ -213,11 +213,14 @@ void readGetter(uint16_t t, Wire &r) {
         r.id("returned_dsv");
     } else if (t == 0x3539) {
         r.id("returned_blend_state");
-        if (r.flag("blend_factor_present")) r.field("returned_blend_factor", "4f");
-        if (r.flag("sample_mask_present")) r.u("returned_sample_mask");
+        if (r.flag("blend_factor_present"))
+            r.field("returned_blend_factor", "4f");
+        if (r.flag("sample_mask_present"))
+            r.u("returned_sample_mask");
     } else if (t == 0x353a) {
         r.id("returned_depth_stencil_state");
-        if (r.flag("stencil_ref_present")) r.u("returned_stencil_ref");
+        if (r.flag("stencil_ref_present"))
+            r.u("returned_stencil_ref");
     } else if (t == 0x353d) {
         auto n = r.flag("viewport_count_present") ? r.u("returned_viewport_count") : 0;
         if (r.flag("viewports_present")) {
@@ -324,7 +327,7 @@ Json inspectCommand(const Frame &frame, Id id) {
         out["note"] = "Captured inspection/lifetime metadata; it does not set replay state.";
     if (in(t, {0x3528, 0x3537, 0x3539, 0x353a}))
         out["note"] = out["note"].get<std::string>() +
-                    " A zero returned object reference cannot distinguish an omitted "
+                      " A zero returned object reference cannot distinguish an omitted "
                       "output pointer from a null returned binding.";
     if (in(t, {0x3017, 0x3597, 0x3578}) || isTextureCreation(t))
         out["note"] = "Captured process pointers are numeric values, not resource IDs or readable addresses "
@@ -594,11 +597,11 @@ Json inspectCommand(const Frame &frame, Id id) {
             } else if (isTextureCreation(t)) {
                 const auto creation = readTextureCreation(t, raw);
                 r.field("hresult", "i");
-                if (t == 0x357c)
+                if (isViewCreation(t))
                     r.id("source_resource");
                 if (r.flag("descriptor_present"))
                     r.field("descriptor", std::to_string(creation.descriptor.size()) + "I");
-                if (t != 0x357c && r.flag("initial_data_present"))
+                if (!isViewCreation(t) && r.flag("initial_data_present"))
                     for (size_t i = 0; i < creation.initial.size(); ++i) {
                         auto prefix = "initial[" + std::to_string(i) + "].";
                         r.id(prefix + "captured_pointer", false);
@@ -608,15 +611,22 @@ Json inspectCommand(const Frame &frame, Id id) {
                 r.id("returned_resource");
             } else if (isTextureCreationObservation(t)) {
                 acceptTextureCreationObservation(t, raw);
-                if (in(t, {0x313f, 0x3134, 0x3007})) {
+                const auto view = viewCreationObservation(t);
+                if (in(t, {0x313f, 0x3134, 0x3007}) || view == ViewObservation::QueryInterface) {
                     r.field("hresult", "i");
                     r.field("iid", "16s");
                     r.id("returned_interface");
-                } else if (in(t, {0x3140, 0x3141, 0x3135, 0x3136, 0x3008, 0x3009}))
+                } else if (in(t, {0x3140, 0x3141, 0x3135, 0x3136, 0x3008, 0x3009}) ||
+                           view == ViewObservation::ReferenceCount)
                     r.u("observed_reference_count");
-                else if (in(t, {0x3142, 0x3137, 0x300a}))
+                else if (in(t, {0x3142, 0x3137, 0x300a}) || view == ViewObservation::GetDevice)
                     r.id("returned_device");
-                else if (in(t, {0x3149, 0x313e, 0x3011})) {
+                else if (view == ViewObservation::GetResource)
+                    r.id("returned_resource");
+                else if (view == ViewObservation::GetDescriptor) {
+                    if (r.flag("descriptor_present"))
+                        r.field("descriptor", t == 0x3025 ? "6I" : "5I");
+                } else if (in(t, {0x3149, 0x313e, 0x3011})) {
                     if (r.flag("descriptor_present"))
                         r.field("descriptor", t == 0x313e ? "8I" : t == 0x3011 ? "9I" : "11I");
                 } else {

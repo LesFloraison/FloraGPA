@@ -1,7 +1,77 @@
 #include "TextureCreation.h"
 #include "TextureEdits.h"
 namespace flora {
-bool isTextureCreation(uint16_t t) { return t >= 0x3579 && t <= 0x357c; }
+bool isTextureCreation(uint16_t t) { return t >= 0x3579 && t <= 0x357f; }
+bool isViewCreation(uint16_t t) { return t >= 0x357c && t <= 0x357f; }
+uint16_t viewCreationResourceType(uint16_t t) {
+    switch (t) {
+    case 0x357c:
+        return 0x8c;
+    case 0x357d:
+        return 0x8f;
+    case 0x357e:
+        return 0x8d;
+    case 0x357f:
+        return 0x8e;
+    default:
+        throw std::runtime_error("Not a recovered view creation");
+    }
+}
+unsigned viewCreationDescriptorWords(uint16_t t) {
+    viewCreationResourceType(t);
+    return t == 0x357c || t == 0x357f ? 6 : 5;
+}
+bool createdViewDescriptorEqual(uint16_t t, std::span<const uint32_t> a, std::span<const uint32_t> b) {
+    if (t == 0x357c)
+        return textureSrvDescriptorEqual(a, b);
+    const auto count = viewCreationDescriptorWords(t);
+    if (a.size() != count || b.size() != count || a[0] != b[0] || a[1] != b[1])
+        return false;
+    unsigned active = 0;
+    if (t == 0x357d) {
+        constexpr unsigned sizes[]{0, 5, 3, 5, 3, 5, 0, 0, 5};
+        if (a[1] < std::size(sizes))
+            active = sizes[a[1]];
+    } else if (t == 0x357e) {
+        constexpr unsigned sizes[]{0, 4, 3, 5, 3, 5, 2, 4, 5};
+        if (a[1] < std::size(sizes))
+            active = sizes[a[1]];
+    } else {
+        constexpr unsigned sizes[]{0, 4, 6, 4, 6, 3, 5};
+        if (a[1] < std::size(sizes))
+            active = sizes[a[1]];
+    }
+    return active && std::equal(a.begin(), a.begin() + active, b.begin());
+}
+ViewObservation viewCreationObservation(uint16_t t) {
+    switch (t) {
+    case 0x3053:
+    case 0x301d:
+    case 0x3185:
+        return ViewObservation::QueryInterface;
+    case 0x3054:
+    case 0x3055:
+    case 0x301e:
+    case 0x301f:
+    case 0x3186:
+    case 0x3187:
+        return ViewObservation::ReferenceCount;
+    case 0x3056:
+    case 0x3020:
+    case 0x3188:
+        return ViewObservation::GetDevice;
+    case 0x305a:
+    case 0x3024:
+    case 0x318c:
+        return ViewObservation::GetResource;
+    case 0x305b:
+    case 0x3025:
+    case 0x318d:
+        return ViewObservation::GetDescriptor;
+    default:
+        return ViewObservation::None;
+    }
+}
 bool textureSrvDescriptorEqual(std::span<const uint32_t> a, std::span<const uint32_t> b) {
     if (a.size() != 6 || b.size() != 6 || a[0] != b[0] || a[1] != b[1])
         return false;
@@ -21,14 +91,17 @@ TextureCreationRecord readTextureCreation(uint16_t t, Bytes bytes) {
     out.link = r.read<Id>();
     out.device = r.read<Id>();
     out.result = r.read<int32_t>();
-    if (t == 0x357c)
+    if (isViewCreation(t))
         out.source = r.read<Id>();
     out.hasDescriptor = r.flag();
-    const auto fields = t == 0x3579 ? 8 : t == 0x357a ? 11 : t == 0x357b ? 9 : 6;
+    const auto fields = t == 0x3579   ? 8u
+                        : t == 0x357a ? 11u
+                        : t == 0x357b ? 9u
+                                      : viewCreationDescriptorWords(t);
     if (out.hasDescriptor)
-        for (int i = 0; i < fields; ++i)
+        for (unsigned i = 0; i < fields; ++i)
             out.descriptor.push_back(r.read<uint32_t>());
-    if (t != 0x357c) {
+    if (!isViewCreation(t)) {
         out.hasInitial = r.flag();
         if (out.hasInitial) {
             if (!out.hasDescriptor)
@@ -70,20 +143,22 @@ TextureCreationAudit auditTextureCreations(const Frame &frame) {
             }
             frame.payload(c.device, 5, 0x81);
             const auto resource = frame.resource(c.resource);
-            if (e.type == 0x357c) {
-                Reader r(frame.capturedPayload(c.resource, 5, 0x8c));
+            if (isViewCreation(e.type)) {
+                Reader r(frame.capturedPayload(c.resource, 5, viewCreationResourceType(e.type)));
                 r.skip(16);
                 if (r.read<Id>() != c.source)
-                    throw std::runtime_error("Created SRV source differs from its saved resource");
-                const auto saved = r.array<uint32_t, 6>();
+                    throw std::runtime_error("Created view source differs from its saved resource");
+                std::vector<uint32_t> saved;
+                for (unsigned i = 0; i < viewCreationDescriptorWords(e.type); ++i)
+                    saved.push_back(r.read<uint32_t>());
                 r.end();
                 const auto source = frame.resource(c.source);
                 if (resource.device != c.device || source.device != c.device || source.type < 0x84 ||
                     source.type > 0x86)
-                    throw std::runtime_error(
-                        "Captured SRV creation requires a texture source on the recorded device");
-                if (c.hasDescriptor && !textureSrvDescriptorEqual(saved, c.descriptor))
-                    throw std::runtime_error("Created SRV descriptor differs from its saved resource");
+                    throw std::runtime_error("Captured view creation requires a texture source on the "
+                                             "recorded device; buffer view creation is not yet accepted");
+                if (c.hasDescriptor && !createdViewDescriptorEqual(e.type, saved, c.descriptor))
+                    throw std::runtime_error("Created view descriptor differs from its saved resource");
             } else {
                 if (!c.hasDescriptor || resource.type != uint16_t(0x84 + e.type - 0x3579) ||
                     resource.device != c.device)
@@ -132,15 +207,39 @@ const TextureCreationRecord &requireTextureCreation(const TextureCreationAudit &
     return c;
 }
 bool isTextureCreationObservation(uint16_t t) {
-    return t == 0x3134 || t == 0x3135 || t == 0x3136 || t == 0x3137 || t == 0x313e || t == 0x3007 ||
-           t == 0x3008 || t == 0x3009 || t == 0x300a || t == 0x3011 || t == 0x313f || t == 0x3140 ||
-           t == 0x3141 || t == 0x3142 || t == 0x3149 || t == 0x3592 || t == 0x35aa;
+    return viewCreationObservation(t) != ViewObservation::None || t == 0x3134 || t == 0x3135 || t == 0x3136 ||
+           t == 0x3137 || t == 0x313e || t == 0x3007 || t == 0x3008 || t == 0x3009 || t == 0x300a ||
+           t == 0x3011 || t == 0x313f || t == 0x3140 || t == 0x3141 || t == 0x3142 || t == 0x3149 ||
+           t == 0x3592 || t == 0x35aa;
 }
 bool acceptTextureCreationObservation(uint16_t t, Bytes bytes) {
     if (!isTextureCreationObservation(t))
         return false;
     Reader r(bytes);
     r.skip(16); // Link/owner are observations, not replay COM calls.
+    const auto view = viewCreationObservation(t);
+    if (view != ViewObservation::None) {
+        switch (view) {
+        case ViewObservation::QueryInterface:
+            r.skip(28);
+            break;
+        case ViewObservation::ReferenceCount:
+            r.skip(4);
+            break;
+        case ViewObservation::GetDevice:
+        case ViewObservation::GetResource:
+            r.skip(8);
+            break;
+        case ViewObservation::GetDescriptor:
+            if (r.flag())
+                r.skip(t == 0x3025 ? 24 : 20);
+            break;
+        default:
+            break;
+        }
+        r.end();
+        return true;
+    }
     switch (t) {
     case 0x3134:
     case 0x3007:

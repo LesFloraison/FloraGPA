@@ -1,6 +1,4 @@
 #include "Replay.h"
-#include "core/CopyCommands.h"
-#include "core/ReplayCapabilities.h"
 #include "BlendState.h"
 #include "Device.h"
 #include "NativeSample.h"
@@ -9,11 +7,13 @@
 #include "Unpredicated.h"
 #include "core/ClassLinkage.h"
 #include "core/Commands.h"
+#include "core/CopyCommands.h"
 #include "core/Dxbc.h"
 #include "core/InspectionRecords.h"
 #include "core/OutputBindings.h"
 #include "core/Predication.h"
 #include "core/PresentRecords.h"
+#include "core/ReplayCapabilities.h"
 #include "core/StreamOutput.h"
 #include "core/TextureStorage.h"
 #include <algorithm>
@@ -1052,34 +1052,60 @@ void Replay::command(const Entry &e) {
         if (objects_.contains(creation.resource))
             throw std::runtime_error("Texture/view identity already has replay storage");
         Com<IUnknown> created;
-        if (t == 0x357c) {
-            D3D11_SHADER_RESOURCE_VIEW_DESC desc{};
-            if (creation.hasDescriptor)
-                std::memcpy(&desc, creation.descriptor.data(), sizeof(desc));
-            Com<ID3D11ShaderResourceView> view;
-            check(device_->CreateShaderResourceView(get<ID3D11Resource>(creation.source),
-                                                    creation.hasDescriptor ? &desc : nullptr, &view),
-                  "Captured CreateShaderResourceView");
-            D3D11_SHADER_RESOURCE_VIEW_DESC actual{};
-            view->GetDesc(&actual);
-            std::array<uint32_t, 6> actualWords{};
-            std::memcpy(actualWords.data(), &actual, sizeof(actual));
-            Reader saved(frame_.capturedPayload(creation.resource, 5, 0x8c));
-            saved.skip(24);
-            const auto savedWords = saved.array<uint32_t, 6>();
-            saved.end();
-            if (!textureSrvDescriptorEqual(savedWords, actualWords))
-                throw std::runtime_error("Created SRV descriptor does not reproduce the saved view");
-            Reader effective(frame_.payload(creation.resource, 5, 0x8c));
-            effective.skip(24);
-            const auto effectiveWords = effective.array<uint32_t, 6>();
-            effective.end();
-            if (!textureSrvDescriptorEqual(savedWords, effectiveWords)) {
-                std::memcpy(&desc, effectiveWords.data(), sizeof(desc));
-                view.Reset();
-                check(device_->CreateShaderResourceView(get<ID3D11Resource>(creation.source), &desc, &view),
-                      "Create captured SRV with experiment overlay");
-            }
+        if (isViewCreation(t)) {
+            auto makeTyped = [&]<class View, class Desc>(auto method, const std::vector<uint32_t> *words) {
+                Desc desc{};
+                if (words)
+                    std::memcpy(&desc, words->data(), sizeof(desc));
+                Com<View> view;
+                check((device_.Get()->*method)(get<ID3D11Resource>(creation.source), words ? &desc : nullptr,
+                                               view.GetAddressOf()),
+                      "Captured view creation");
+                Desc actual{};
+                view->GetDesc(&actual);
+                std::vector<uint32_t> actualWords(sizeof(actual) / sizeof(uint32_t));
+                std::memcpy(actualWords.data(), &actual, sizeof(actual));
+                return std::pair<Com<IUnknown>, std::vector<uint32_t>>{view, std::move(actualWords)};
+            };
+            auto makeView = [&](const std::vector<uint32_t> *words) {
+                switch (t) {
+                case 0x357c:
+                    return makeTyped
+                        .template operator()<ID3D11ShaderResourceView, D3D11_SHADER_RESOURCE_VIEW_DESC>(
+                            &ID3D11Device::CreateShaderResourceView, words);
+                case 0x357d:
+                    return makeTyped
+                        .template operator()<ID3D11UnorderedAccessView, D3D11_UNORDERED_ACCESS_VIEW_DESC>(
+                            &ID3D11Device::CreateUnorderedAccessView, words);
+                case 0x357e:
+                    return makeTyped
+                        .template operator()<ID3D11RenderTargetView, D3D11_RENDER_TARGET_VIEW_DESC>(
+                            &ID3D11Device::CreateRenderTargetView, words);
+                case 0x357f:
+                    return makeTyped
+                        .template operator()<ID3D11DepthStencilView, D3D11_DEPTH_STENCIL_VIEW_DESC>(
+                            &ID3D11Device::CreateDepthStencilView, words);
+                default:
+                    throw std::runtime_error("Unknown captured view creation");
+                }
+            };
+            auto [view, actualWords] = makeView(creation.hasDescriptor ? &creation.descriptor : nullptr);
+            auto readWords = [&](Bytes bytes) {
+                Reader r(bytes);
+                r.skip(24);
+                std::vector<uint32_t> words;
+                for (unsigned i = 0; i < viewCreationDescriptorWords(t); ++i)
+                    words.push_back(r.read<uint32_t>());
+                r.end();
+                return words;
+            };
+            const auto kind = viewCreationResourceType(t);
+            const auto savedWords = readWords(frame_.capturedPayload(creation.resource, 5, kind));
+            if (!createdViewDescriptorEqual(t, savedWords, actualWords))
+                throw std::runtime_error("Created view descriptor does not reproduce the saved view");
+            const auto effectiveWords = readWords(frame_.payload(creation.resource, 5, kind));
+            if (!createdViewDescriptorEqual(t, savedWords, effectiveWords))
+                view = makeView(&effectiveWords).first;
             created = view;
         } else {
             const auto resource = frame_.resource(creation.resource);
@@ -1323,8 +1349,7 @@ void Replay::command(const Entry &e) {
         lastWorkEvent_ = e.id;
 }
 void Replay::run(const std::function<void(Id, size_t, size_t)> &progress,
-                 const ReplayBoundaryObserver &observer,
-                 const ReplayBoundaryObserver &commandObserver,
+                 const ReplayBoundaryObserver &observer, const ReplayBoundaryObserver &commandObserver,
                  const ReplayCommandScope &commandScope) {
     boundaryObserver_ = observer;
     struct ResetObserver {
@@ -1467,10 +1492,10 @@ void Replay::run(const std::function<void(Id, size_t, size_t)> &progress,
     }
     // The reference recovers missing setters from a before-draw snapshot without
     // executing that draw's experiments, recording it as work, or notifying observers.
-    const bool gaps =
-        !pipelineGaps_.empty() || outputGap_ || layoutGap_ || std::any_of(srvGaps_.begin(), srvGaps_.end(), [](const auto &stage) {
-            return std::any_of(stage.begin(), stage.end(), [](Id id) { return id != 0; });
-        });
+    const bool gaps = !pipelineGaps_.empty() || outputGap_ || layoutGap_ ||
+                      std::any_of(srvGaps_.begin(), srvGaps_.end(), [](const auto &stage) {
+                          return std::any_of(stage.begin(), stage.end(), [](Id id) { return id != 0; });
+                      });
     if (gaps && options_.before && options_.until && isDraw(frame_.entry(options_.until).type)) {
         const auto &entry = frame_.entry(options_.until);
         bind(prepareState(frame_.event(options_.until)), entry.type == 0x35 || entry.type == 0x36);

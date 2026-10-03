@@ -104,3 +104,10 @@ cross-device combination. Buffer SRV creation, other view creation, identity
 versioning and deferred/list execution remain separate work. Missing data and
 original workload races remain diagnosed separately. M2 and M3–M6 stay open;
 the next ordinary-path work is creation of RTV/DSV/UAV views with real captures.
+
+## Subsequent view creation acceptance
+
+The following M2 batch accepts captured texture RTV/DSV/UAV creation; see
+[VIEW_CREATION_AUDIT.md](VIEW_CREATION_AUDIT.md) for its twelve original fixtures,
+metadata evidence distinctions and final 160-file matrix. This does not extend
+the earlier dimension fixtures to every view shape, or accept buffer views.

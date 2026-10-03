@@ -121,19 +121,23 @@ Json validateFrame(const std::filesystem::path &path, const std::function<bool()
                         if (isPipelineSetter(e.type)) {
                             const auto binding = readPipelineSetter(e.type, frame.payload(id));
                             if (const auto missing = missingPipelineShader(frame, binding))
-                                finding(&e,"warning","shader_binding_not_saved",
-                                    "Shader identity is absent; native state remains unresolved until a later setter, ClearState or validated draw snapshot",missing);
+                                finding(&e, "warning", "shader_binding_not_saved",
+                                        "Shader identity is absent; native state remains unresolved until a "
+                                        "later setter, ClearState or validated draw snapshot",
+                                        missing);
                             else
                                 validatePipelineBinding(frame, binding);
                         }
                         if (isCopyCommand(e.type)) {
                             const auto copy = readCopyCommand(e.type, frame.payload(id));
                             try {
-                                if(validateCopyCommand(frame,copy)==CopyValidation::TextureReferences)
-                                    finding(&e,"info","texture_copy_validation_partial",
-                                        "Texture copy uses a special reinterpretation, packed or planar format; full transfer semantics require further audit",copy.destination);
-                            } catch(const std::exception &error) {
-                                finding(&e,"error","copy_command_rejected",error.what(),copy.destination);
+                                if (validateCopyCommand(frame, copy) == CopyValidation::TextureReferences)
+                                    finding(&e, "info", "texture_copy_validation_partial",
+                                            "Texture copy uses a special reinterpretation, packed or planar "
+                                            "format; full transfer semantics require further audit",
+                                            copy.destination);
+                            } catch (const std::exception &error) {
+                                finding(&e, "error", "copy_command_rejected", error.what(), copy.destination);
                             }
                         }
                         acceptTextureCreationObservation(e.type, frame.payload(id));
@@ -144,7 +148,7 @@ Json validateFrame(const std::filesystem::path &path, const std::function<bool()
                             if (!creation.error.empty())
                                 finding(&e, "error", "texture_creation_rejected", creation.error,
                                         creation.resource);
-                            else if (creation.result == 0 && !creation.hasInitial && e.type != 0x357c)
+                            else if (creation.result == 0 && !creation.hasInitial && !isViewCreation(e.type))
                                 finding(&e, "info", "texture_initial_contents_undefined",
                                         "Creation has no saved initial-data observations; a later first-use "
                                         "blob is not a creation-time initializer",
@@ -154,18 +158,25 @@ Json validateFrame(const std::filesystem::path &path, const std::function<bool()
                         acceptInspectionRecord(e.type, frame.payload(id));
                         acceptPassiveObjectRecord(e.type, frame.payload(id));
                         if (e.type == 0x3578) {
-                            if (!creationAudit) creationAudit = auditBufferCreations(frame);
+                            if (!creationAudit)
+                                creationAudit = auditBufferCreations(frame);
                             const auto &creation = creationAudit->records.at(id);
-                            if (!creation.error.empty()) finding(&e,"error","buffer_creation_rejected",creation.error,creation.resource);
+                            if (!creation.error.empty())
+                                finding(&e, "error", "buffer_creation_rejected", creation.error,
+                                        creation.resource);
                             else if (creation.result == 0 && !creation.hasInitial)
-                                finding(&e,"info","buffer_initial_contents_undefined",
-                                    "CreateBuffer requested storage without initial data; later captured writes define its contents",creation.resource);
+                                finding(&e, "info", "buffer_initial_contents_undefined",
+                                        "CreateBuffer requested storage without initial data; later captured "
+                                        "writes define its contents",
+                                        creation.resource);
                         }
                         if (e.type == 0x3017) {
                             const auto data = readPrivateDataObservation(frame.payload(id));
                             if (data.result >= 0 && data.size)
-                                finding(&e,"info","private_data_payload_not_saved",
-                                    "API record stores an opaque pointer, not private-data bytes; saved resource names are separate metadata",data.owner);
+                                finding(&e, "info", "private_data_payload_not_saved",
+                                        "API record stores an opaque pointer, not private-data bytes; saved "
+                                        "resource names are separate metadata",
+                                        data.owner);
                         }
                         if (e.type == 0x3257) {
                             try {
