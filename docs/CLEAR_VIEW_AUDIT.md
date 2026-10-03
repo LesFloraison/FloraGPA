@@ -109,3 +109,11 @@ This implements normalized immediate ClearView, not linked/deferred execution,
 video clearing, all format combinations or general resource version recovery.
 CopySubresourceRegion1/UpdateSubresource1 and broader interface semantics remain
 M2 work. M3–M6 remain incomplete; module migration totals are unchanged.
+
+Historical evidence note (subsequent Context1 transfer batch): its CTest wrapper
+accidentally overwrote this batch's aggregate `artifacts/ctest-m2-clear-view.log`.
+The old aggregate is unavailable; the baseline's original hash has not been
+rewritten. Archived per-suite Qt results, corpus reports and package/source
+evidence remain. See the [transfer audit](TRANSFER1_AUDIT.md) for the incident
+record and fresh regression evidence. The transfer batch supersedes the remaining
+CopySubresourceRegion1/UpdateSubresource1 work above within its documented scope.

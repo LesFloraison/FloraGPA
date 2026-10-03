@@ -1,5 +1,6 @@
 #include "Commands.h"
 #include "ClearView.h"
+#include "CopyCommands.h"
 #include <algorithm>
 #include <limits>
 
@@ -26,7 +27,7 @@ void validateAnnotationCommand(uint16_t type, Bytes payload) {
 bool isClearCommand(uint16_t type) { return type >= 0x31 && type <= 0x34; }
 bool isWritableCommand(uint16_t type) {
     return isClearCommand(type) || type == 0x3e || type == 0x3f || type == 0x40 || type == 0x42 ||
-           type == 0x245 || type == 0x246 || type == 0x247 || type == 0x257;
+           type == 0x245 || type == 0x246 || type == 0x247 || type == 0x255 || type == 0x256 || type == 0x257;
 }
 void validateWritableCommand(const Frame &frame, Id event) {
     auto &e = frame.entry(event);
@@ -36,8 +37,13 @@ void validateWritableCommand(const Frame &frame, Id event) {
         validateClearView(frame, readClearView(frame.payload(event)));
         return;
     }
+    if (e.type == 0x256) {
+        validateCopyCommand(frame, readCopyCommand(e.type, frame.payload(event)));
+        return;
+    }
     Reader r(frame.payload(event));
-    r.skip(8);
+    if (r.read<Id>() && e.type == 0x255)
+        throw std::runtime_error("Linked UpdateSubresource1 execution is unresolved");
     requireImmediateContext(frame, r.read<Id>());
     switch (e.type) {
     case 0x31:
@@ -71,16 +77,20 @@ void validateWritableCommand(const Frame &frame, Id event) {
         r.skip(32);
         break;
     case 0x247:
+    case 0x255:
         r.skip(12);
         if (r.flag())
             r.skip(24);
         r.skip(16);
+        if (e.type == 0x255 && r.read<uint32_t>() > 2)
+            throw std::runtime_error("Invalid UpdateSubresource1 flags");
         break;
     }
     r.end();
 }
 UpdateSourceLayout updateSourceLayout(const Frame &frame, Id event) {
-    if (frame.entry(event).type != 0x247)
+    const bool extended = frame.entry(event).type == 0x255;
+    if (frame.entry(event).type != 0x247 && !extended)
         throw std::runtime_error("Source replacement requires UpdateSubresource");
     validateWritableCommand(frame, event);
     Reader r(frame.payload(event));
@@ -93,8 +103,19 @@ UpdateSourceLayout updateSourceLayout(const Frame &frame, Id event) {
         out.box = r.array<uint32_t, 6>();
     out.data = r.read<Id>();
     r.skip(8); // Captured pitches are not pitches of the tightly packed asset.
+    if (extended)
+        out.flags = r.read<uint32_t>();
     r.end();
     auto resource = frame.resource(out.destination);
+    if (extended) {
+        if (resource.type < 0x83 || resource.type > 0x86)
+            throw std::runtime_error("UpdateSubresource1 destination is not a buffer or texture");
+        const auto usage = resource.desc.at(resource.type == 0x83 ? 1 : resource.desc.size() - 4);
+        const auto bind = resource.desc.at(resource.type == 0x83 ? 2 : resource.desc.size() - 3);
+        if (usage == 1 || usage == 2 || (bind & 64))
+            throw std::runtime_error("UpdateSubresource1 destination is immutable, dynamic or depth-stencil");
+        frame.data(out.data); // Validate the saved asset even for an empty no-op box.
+    }
     uint32_t format = 0;
     if (resource.type == 0x83) {
         if (out.subresource)
@@ -119,9 +140,18 @@ UpdateSourceLayout updateSourceLayout(const Frame &frame, Id event) {
     }
     if (out.hasBox) {
         auto [left, top, front, right, bottom, back] = out.box;
+        if (extended && (left >= right || top >= bottom || front >= back)) {
+            if (left > out.width || right > out.width || top > out.height || bottom > out.height ||
+                front > out.depth || back > out.depth)
+                throw std::runtime_error("Empty UpdateSubresource1 box has out-of-bounds coordinates");
+            out.empty = true;
+            return out;
+        }
         if (!(left < right && right <= out.width && top < bottom && bottom <= out.height && front < back &&
               back <= out.depth))
             throw std::runtime_error("Update source box must be nonempty and in bounds");
+        if (extended && resource.type == 0x83 && (resource.desc.at(2) & 4) && (left % 16 || right % 16))
+            throw std::runtime_error("Constant-buffer UpdateSubresource1 box must be 16-byte aligned");
         bool bc = (format >= 70 && format <= 84) || (format >= 94 && format <= 99);
         if (format >= 103 && format <= 105 && (left % 2 || top % 2 || right % 2 || bottom % 2))
             throw std::runtime_error("Planar Update box requires even coordinates");
@@ -140,6 +170,8 @@ UpdateSourceLayout updateSourceLayout(const Frame &frame, Id event) {
     out.rowPitch = row;
     out.slicePitch = uint32_t(slice);
     out.size = slice * out.depth;
+    if (extended && format != 104 && format != 105 && frame.data(out.data).size() != out.size)
+        throw std::runtime_error("Packed UpdateSubresource1 asset size mismatch");
     return out;
 }
 } // namespace flora

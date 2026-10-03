@@ -24,6 +24,8 @@
 {0x245, "GenerateMips"},
 {0x246, "MapCapturedWrites"},
 {0x247, "UpdateSubresource"},
+{0x255, "UpdateSubresource1"},
+{0x256, "CopySubresourceRegion1"},
 {0x248, "SetPredication"},
 {0x249, "VSSetConstantBuffers"},
 {0x24a, "HSSetConstantBuffers"},

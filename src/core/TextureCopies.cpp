@@ -94,7 +94,7 @@ CopyValidation validateTextureCopy(const Resource &source, const Resource &desti
             throw std::runtime_error("CopyResource texture dimensions, layers or mip counts differ");
         return partial ? CopyValidation::TextureReferences : CopyValidation::Texture;
     }
-    if (c.type != 0x40)
+    if (c.type != 0x40 && c.type != 0x256)
         throw std::runtime_error("Unsupported texture copy operation");
     auto sourceExtent = se, destinationExtent = de;
     if (bc(sf))
@@ -116,7 +116,7 @@ CopyValidation validateTextureCopy(const Resource &source, const Resource &desti
         throw std::runtime_error("Texture copy uses a coordinate outside its dimension");
     if (empty)
         return partial ? CopyValidation::TextureReferences : CopyValidation::Texture;
-    if (source.id == destination.id && c.sourceSubresource == c.destinationSubresource)
+    if (source.id == destination.id && c.sourceSubresource == c.destinationSubresource && c.type != 0x256)
         throw std::runtime_error("Texture region copy requires different subresources");
     if (s.info.samples > 1 || ((s.bind | d.bind) & 64)) {
         if (c.box || c.x || c.y || c.z || se != de)

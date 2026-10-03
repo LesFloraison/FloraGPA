@@ -1,11 +1,12 @@
 # Current capabilities and compatibility
 
 Reviewed **2026-10-03**. Replay source and binary hashes are pinned in the
-[ClearView baseline](clear-view-baseline.json); earlier predicate acceptance
-is pinned by `f91ca95`, resource-boundary enforcement by `fa26cc5`.
+[Context1 transfer baseline](transfer1-baseline.json); earlier ClearView
+acceptance is pinned by `e6a5642`, predicate acceptance by `f91ca95`, and
+resource-boundary enforcement by `fa26cc5`.
 This is the current capability summary. Linked migration/audit documents describe
 individual batches and may retain limitations superseded by later work.
-The new ClearView batch adds execution evidence, not clean-machine certification.
+The new Context1 transfer batch adds execution evidence, not clean-machine certification.
 
 ## Supported scope
 
@@ -17,7 +18,7 @@ tested workloads; opening a file does not prove accurate replay.
 | Area | Available behavior | Boundaries and evidence |
 |---|---|---|
 | Preflight and API inspection | Offline diagnostics, decoded fields, references, coverage and Qt diagnostics | Structural success is not GPU success; metadata is not execution. [Acceptance infrastructure](COMPATIBILITY_BASELINE.md) |
-| Immediate-context replay | Captured draws/dispatches, supported setters, uploads, copies, ClearView, queries/predication and presentation | Broader layouts, resource versions and some presentation/transfer cases remain incomplete. [Setters](PIPELINE_SETTER_AUDIT.md), [texture transfers](TEXTURE_COPY_AUDIT.md), [ClearView](CLEAR_VIEW_AUDIT.md), [presentation](PRESENT_REPLAY_AUDIT.md) |
+| Immediate-context replay | Captured draws/dispatches, supported setters, uploads, copies (including Context1 transfers), ClearView, queries/predication and presentation | Broader layouts, resource versions and some presentation/transfer cases remain incomplete. [Setters](PIPELINE_SETTER_AUDIT.md), [texture transfers](TEXTURE_COPY_AUDIT.md), [Context1 transfers](TRANSFER1_AUDIT.md), [ClearView](CLEAR_VIEW_AUDIT.md), [presentation](PRESENT_REPLAY_AUDIT.md) |
 | Frame-time creation | Validated buffers, textures/views, shaders, pipeline states, class linkage/instances and predicates | Device5 coverage is not every interface version or descriptor combination; required missing data and unresolved identities are rejected. [Buffers](BUFFER_CREATION_AUDIT.md), [textures](TEXTURE_DIMENSIONS_AUDIT.md), [texture views](VIEW_CREATION_AUDIT.md), [buffer views](BUFFER_VIEW_CREATION_AUDIT.md), [pipeline](PIPELINE_CREATION_AUDIT.md), [geometry/SO](GEOMETRY_CREATION_AUDIT.md), [classes](CLASS_CREATION_AUDIT.md), [predicates](PREDICATE_CREATION_AUDIT.md) |
 | Texture and output inspection | Presentation/RTV/DSV selection, mip/layer/slice, typed/channel/range controls, supported MSAA resolve/sample and planar inspection, exports | Format/device limits remain; legacy P010/P016 initial data can contain recovered Y only. [Frame output](FRAME_OUTPUT_MIGRATION.md), [texture inspection](TEXTURE_INSPECTION_MIGRATION.md), [planar writes](PLANAR_WRITE_MIGRATION.md) |
 | Pipeline, buffers and geometry | Captured versus native replay state, before/after boundaries, constants/counters, IA and supported post-shader output | Missing state retains provenance; SO cursors have no native getter; frame-before counters require evidence or explicit experiments. [Boundaries](BEFORE_BOUNDARY_MIGRATION.md), [geometry](POST_TRANSFORM_MIGRATION.md), [HS output](HULL_OUTPUT_MIGRATION.md), [counters](BUFFER_VIEW_CREATION_AUDIT.md) |
@@ -31,34 +32,43 @@ tested workloads; opening a file does not prove accurate replay.
 
 ## Latest accepted replay matrix
 
-The [ClearView baseline](clear-view-baseline.json) records the latest full matrix,
-interpreted in the [ClearView audit](CLEAR_VIEW_AUDIT.md).
+The [Context1 transfer baseline](transfer1-baseline.json) records the latest
+full matrix, interpreted in the [transfer audit](TRANSFER1_AUDIT.md).
 
 | Measure | Recorded result |
 |---|---|
-| Enrolled files / ordinary independent runs | 270 / 540 |
-| Repeated output | 269 stable files; one known-variable Helldivers file |
-| Previously stable image hashes | All 253 unchanged |
-| Diagnostic control runs / retained resource boundary exports | 293 / 120 (116 texture, four buffer) |
-| New ClearView producer frame checks | 384 |
-| New ClearView hardware/WARP cases | 32 cases; 64 unobserved, 64 observed and 32 disabled-control replays |
-| New uninstrumented original-player runs | 32 completed; all sixteen files match expected images |
-| Related CTest suites / golden checks | 32 / 4 passed |
-| New ClearView / Qt-Worker test cases | 36 / 55 passed, no skips |
-| New record-family evidence | Normalized immediate ClearView, including rectangles, array/mip views, typed buffers, depth, MSAA resolve and predication |
+| Enrolled files / ordinary independent runs | 310 / 620 |
+| Repeated output | 309 stable files; one known-variable Helldivers file |
+| Previously stable image hashes | All 269 unchanged |
+| Diagnostic control runs / retained resource boundary exports | 349 / 200 (180 texture, 20 buffer) |
+| New transfer producer frame checks | 624 |
+| New transfer hardware/WARP cases | 52 cases; 104 unobserved, 104 observed and 52 disabled-control replays |
+| New successful original-player comparisons | 52 runs, 26 files; all expected images match |
+| Retained original-player Open failures | 28 runs, 14 earlier context-omission files; kept separate from image comparisons |
+| Related CTest suites / golden checks | 36 / 4 passed after the UI export fix |
+| New transfer / Qt-Worker test cases | 57 / 56 passed, no skips |
+| New record-family evidence | Normalized immediate CopySubresourceRegion1 and UpdateSubresource1; copy flags, overlap, packed uploads, empty boxes and partial constant-buffer writes |
 
 These are separate measurements, not an overall correctness percentage. The
 matrix includes research fixtures and self-owned original captures as well as
 game frames; repeated equality alone does not certify intermediate state.
 
-Four new fixtures use constant presentation markers, so their images do not
-prove ClearView's effect. Mandatory byte goldens check the actual depth, buffer
-and 1D resources. The strengthened batch runner enforces every expected resource
-hash directly, supports buffer exports and queues located failures; 18 CPU checks
-and four live correct/wrong-hash scenarios are pinned in the
-[boundary baseline](resource-boundary-baseline.json). MSAA acceptance uses resolved
-storage; D16, video/3D views, additional format combinations and linked execution
-retain the limits described in the ClearView audit.
+Twelve new transfer fixtures use presentation markers, so their images alone
+cannot prove the resource writes. Exact byte boundaries verify every fixture,
+including buffers, 3D, 1D arrays/mips and BC1. DISCARD fixtures overwrite complete
+destinations; partial-discard untouched contents are not reconstructed.
+
+Fourteen earlier direct-copy captures omit the context resource. Existing checked
+Map READ/Unmap evidence permits independent replay; the original player returns
+an Open error with an inner unknown-resource-type error. These files remain
+separate controls. Adding an ordinary backbuffer clear to the producer causes
+GPA to save the context and the new originals open/replay successfully. The
+[transfer audit](TRANSFER1_AUDIT.md) retains both datasets and the failure evidence.
+
+The [ClearView acceptance](CLEAR_VIEW_AUDIT.md) remains valid, including its
+mandatory resource-byte checks, resolved-MSAA scope and uncertified D16 boundary.
+The [boundary baseline](resource-boundary-baseline.json) pins strict expected-hash
+enforcement, buffer exports, 18 CPU checks and four live correct/wrong-hash tests.
 
 Explicit SetPredication now survives omitted predicate fields in original Draw
 snapshots. Two intentionally suppressed-Draw originals exposed the defect;
@@ -78,18 +88,23 @@ under matched device/driver settings.
 
 [Comparison reporting](original-comparison-baseline.json) separately verifies
 execution status and image comparisons (13 CPU checks, nine independent runs,
-seven original runs). These focused runs are not added to the 540-run matrix.
+seven original runs). These focused runs are not added to the 620-run matrix.
 Helldivers' [sharpening variability](HELLDIVERS_REPLAY_FIX.md) remains visible;
 no shader modification, global tolerance or automatic event disable manufactures
 a stable result. Earlier Intel-metric batches retain their separately documented
 intermittent BF1 baseline mismatch.
+
+A Qt regression prompted investigation that reproduced an export/cache lifetime defect. The [export fix](TEXTURE_EXPORT_FIX.md)
+retains the selected texture across a queued refresh inside the save dialog.
+The first UI failure and corrected deterministic counterexample are retained;
+the other 35 suites passed initially and the complete UI suite passes after the fix.
 
 ## Remaining roadmap
 
 | Stage | Current position and completion gate |
 |---|---|
 | M1 — Acceptance infrastructure | Minimum loop delivered: corpus, coverage, preflight, serial comparison and diagnostic queue. Extend evidence as paths arrive. |
-| M2 — Ordinary replay | In progress. Next audit CopySubresourceRegion1/UpdateSubresource1 and remaining interfaces/semantics; enrolled immediate-context paths must replay correctly or reject with reproducible, located diagnostics. |
+| M2 — Ordinary replay | In progress. Continue auditing remaining interfaces, auxiliary records and resource semantics; enrolled immediate-context paths must replay correctly or reject with reproducible, located diagnostics. |
 | M3 — Deferred Context / Command List | Incomplete. Require original captures proving identity, build order, resource versions, repeated execution, restore-state and event mapping before production support. |
 | M4 — Resources and boundaries | Incomplete. Verify saved initial/differential data, subresources, counters, Query/Predication and presentation; distinguish absent information from implementation gaps. |
 | M5 — Stable compatibility release | Incomplete. Broaden captures, repeat/long-duration checks, recovery and large-file testing; validate clean-environment build/deployment and publish a fixed matrix. |
@@ -112,6 +127,11 @@ Paths under `artifacts/`, `out/`, `build/` and the external reference workspace
 identify local evidence, not files supplied by a clone. Original captures,
 proprietary DLLs and the recovered Python reference are not bundled. Hashes
 identify evidence; they do not make missing artifacts public.
+
+One historical aggregate log is unavailable: this batch's wrapper overwrote the
+previous ClearView CTest log. Its original hash, archived per-suite Qt results
+and corpus reports remain; the incident and current regression evidence are
+recorded in the [transfer audit](TRANSFER1_AUDIT.md).
 
 For a capability change, update this summary with a source revision and specific
 acceptance evidence. Keep original batch records and JSON; add supersession

@@ -4,7 +4,7 @@ namespace flora {
 struct CopyCommand {
     uint16_t type{};
     Id context{}, destination{}, source{};
-    uint32_t destinationSubresource{}, sourceSubresource{}, x{}, y{}, z{}, format{};
+    uint32_t destinationSubresource{}, sourceSubresource{}, x{}, y{}, z{}, format{}, flags{};
     std::optional<std::array<uint32_t, 6>> box;
 };
 enum class CopyValidation { Buffer, Texture, TextureReferences };

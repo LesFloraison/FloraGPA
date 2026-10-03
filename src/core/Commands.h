@@ -9,9 +9,9 @@ void validateAnnotationCommand(uint16_t type, Bytes payload);
 void validateWritableCommand(const Frame &frame, Id event);
 struct UpdateSourceLayout {
     Id destination{}, data{};
-    uint32_t subresource{}, width{}, height{}, depth{}, rowPitch{}, slicePitch{};
+    uint32_t subresource{}, width{}, height{}, depth{}, rowPitch{}, slicePitch{}, flags{};
     uint64_t size{};
-    bool hasBox{};
+    bool hasBox{}, empty{};
     std::array<uint32_t, 6> box{};
 };
 UpdateSourceLayout updateSourceLayout(const Frame &frame, Id event);

@@ -5,6 +5,35 @@
 > [Documentation](README.md)。`artifacts/`、`out/`、`build/` 及外部参考目录
 > 是未随仓库发布的本地证据位置，不代表克隆后即可访问。
 
+2026-10-03（M2 第十八批）：接通标准化 immediate-context
+CopySubresourceRegion1 (`0x256`) 与 UpdateSubresource1 (`0x255`)。保留原始
+copy flags，通过设备能力检查执行同子资源重叠复制和局部常量缓冲区更新；恢复
+GPA 紧密打包上传数据的真实步长，严格检查引用、长度、box、subresource、对齐
+与资源字节长度。空区域为 no-op；不为 partial DISCARD 的未写区域虚构内容。
+API 检查器增加字段，界面布局不变，linked/deferred 形式继续明确拒绝。
+
+26 份最终原版捕获覆盖普通／NO_OVERWRITE／DISCARD、纹理／buffer 重叠复制、
+空 box、padded 2D／3D 上传、1D array mip、BC1 全部／局部更新与常量缓冲区。
+624 次原始／注入程序帧检查、52 组硬件／WARP 样例的 208 次完整／观察重放和
+52 次禁用反例通过；所有资源均需精确字节检查，十二种展示标记不作资源证明。
+52 次原版重放图像对照一致，设备配置等价仍未证明。
+
+另保留十四份早期直接复制到 backbuffer、缺少 context 资源记录的原版文件。
+FloraGPA 沿用已验收的 Map READ/Unmap 证据恢复；原版播放器 Open 失败，内层
+错误为 unknown resource type。生产程序增加正常 backbuffer 清屏后重新捕获，
+原版写入明确 context，最终原版重放成功。未修改失败文件来制造通过。首次以
+未打包 CLI 在隔离 PATH 下运行产生的缺 Qt DLL 失败也保留，最终验收使用完整包。
+
+最终矩阵 310 份文件、620 次独立重放，309 份稳定、Helldivers 保留已知波动；
+269 份既有稳定哈希不变。349 次诊断对照、200 次资源边界导出（180 次纹理、
+20 次 buffer）、四项黄金检查与 36 套 CTest 通过；新 transfer 57 项与 Qt/Worker
+56 项均无跳过。首次 Qt 回归失败促成导出缓存生命周期修复；保留失败及修正测试
+后的确定性反例，其他 35 套首次通过，完整 Qt 套件修复后复验。十四份缺 context 对照的 28 次原版 Open 失败单独记录，未冒充
+图像一致。详见 [TRANSFER1_AUDIT.md](TRANSFER1_AUDIT.md) 和
+[transfer1-baseline.json](transfer1-baseline.json)。M2 后续继续接口／辅助命令／
+资源语义审计，tiled、predicated transfer 专项验收、linked/deferred 和全部格式
+组合尚未完成；M3–M6 仍未完成，72/117/15 模块统计保持不变。
+
 2026-10-03（M2 第十七批）：接通标准化 immediate-context ClearView (`0x257`)，
 恢复浮点颜色、矩形、数组／mip 视图和条件执行；检查原生功能支持，非法引用、
 异常长度、反向矩形及范围外视图明确拒绝。16 份原版捕获分别验证完整／局部清除、

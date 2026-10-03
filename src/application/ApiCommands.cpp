@@ -513,20 +513,24 @@ Json inspectCommand(const Frame &frame, Id id) {
             } else if (t == 0x246 || t == 0x34ec)
                 r.values("iQIIIQ", {"hresult", "resource", "subresource", "map_type", "map_flags", "data"},
                          {"resource", "data"});
-            else if (t == 0x247) {
+            else if (t == 0x247 || t == 0x255) {
                 r.values("QI", {"destination", "subresource"}, {"destination"});
                 r.array("box", "6I", 1);
                 r.values("QII", {"data", "row_pitch", "depth_pitch"}, {"data"});
+                if (t == 0x255)
+                    r.u("copy_flags");
             } else if (t == 0x3e)
                 r.values("QQ", {"destination", "source"}, {"destination", "source"});
             else if (t == 0x3f)
                 r.values("QIQ", {"destination", "offset", "source_uav"}, {"destination", "source_uav"});
-            else if (t == 0x40) {
+            else if (t == 0x40 || t == 0x256) {
                 r.values(
                     "QIIIIQI",
                     {"destination", "destination_subresource", "x", "y", "z", "source", "source_subresource"},
                     {"destination", "source"});
                 r.array("source_box", "6I", 1);
+                if (t == 0x256)
+                    r.u("copy_flags");
             } else if (t == 0x42)
                 r.values("QIQII",
                          {"destination", "destination_subresource", "source", "source_subresource", "format"},

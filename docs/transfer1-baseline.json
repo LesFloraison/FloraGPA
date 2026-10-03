@@ -1,0 +1,415 @@
+{
+  "schema": "FloraGPA Context1 transfer acceptance 1",
+  "completion": "M2 and M3-M6 incomplete",
+  "package": "out\\FloraGPA-transfer1-final-20261003",
+  "package_sha256": {
+    "FloraGPA.exe": "da184f8438ed6b7bb464750f47d8061c848ca04aea9fd3957975da57cb9f54d9",
+    "FloraGPA.Cli.exe": "60b9a6c27dcc6a7c075378e5da14dc4ec01481193839b2792540144579da1529",
+    "FloraGPA.Worker.exe": "51a283605832f5ed436154db43a800adf6170873fe914310aa1fb5ede3f15c46",
+    "FloraGPA.Rdc.exe": "f4d21d43e661d24d392e91fc1a1f1460a20d1377fcf5075c57083ad289e82773",
+    "FloraGPA.Metrics.dll": "58b6278f2a93e783b1e8bb1290e9b0e51745f1a36825f296584f52159fd7c6db"
+  },
+  "file_outcomes": {
+    "repeat_stable": 309,
+    "repeat_variable": 1
+  },
+  "native_runs": 620,
+  "prior_stable_images_unchanged": 269,
+  "diagnostic_control_runs": 349,
+  "resource_boundary_exports": 200,
+  "buffer_boundary_exports": 20,
+  "new_original_player_runs": 52,
+  "new_original_image_equal_files": 26,
+  "retained_original_open_failure_files": 14,
+  "retained_original_open_failure_runs": 28,
+  "context_control_runner_exit": 1,
+  "historical_artifact_issue": "artifacts/transfer1-artifact-issue.json",
+  "producer_frame_checks": 624,
+  "hardware_warp_cases": 52,
+  "hardware_warp_unobserved_runs": 104,
+  "hardware_warp_observed_runs": 104,
+  "hardware_warp_disabled_controls": 52,
+  "goldens": [
+    {
+      "case": "gf2",
+      "rgba_sha256": "2e1abc5eacb0bbfd801f9fe059c305baa9a0786c384b36a42fa5a323dd979fd1",
+      "passed": true,
+      "counts": {
+        "ClearDepthStencilView": 2,
+        "ClearRenderTargetView": 1,
+        "CreateBuffer": 2,
+        "DrawIndexed": 72,
+        "Map": 44,
+        "Present": 1,
+        "buffers_created_without_initial_data": 2,
+        "object_observation_records": 49,
+        "pipeline_setter_records": 142,
+        "private_data_observations": 4,
+        "query_metadata_records": 2,
+        "state_or_auxiliary_records": 551,
+        "unmap_observations": 44
+      }
+    },
+    {
+      "case": "gf2-negative",
+      "rgba_sha256": "b2c5548a51715f581c4591acc266ac7a0c65b54b7ecd9a49f43499fa9b76c5f1",
+      "passed": true,
+      "counts": {
+        "ClearDepthStencilView": 2,
+        "ClearRenderTargetView": 1,
+        "CreateBuffer": 2,
+        "Map": 44,
+        "Present": 1,
+        "buffers_created_without_initial_data": 2,
+        "object_observation_records": 49,
+        "pipeline_setter_records": 142,
+        "private_data_observations": 4,
+        "query_metadata_records": 2,
+        "state_or_auxiliary_records": 551,
+        "unmap_observations": 44
+      }
+    },
+    {
+      "case": "bf1",
+      "rgba_sha256": "1f724d1840652f66afd26dd30c95aecd5c1b4932eede56109198f15a8f57a2f6",
+      "passed": true,
+      "counts": {
+        "ClearDepthStencilView": 10,
+        "ClearRenderTargetView": 10,
+        "ClearUnorderedAccessViewFloat": 1,
+        "CopyResource": 2,
+        "CopyStructureCount": 6,
+        "CopySubresourceRegion": 7,
+        "Dispatch": 60,
+        "DispatchIndirect": 13,
+        "Draw": 79,
+        "DrawIndexed": 41,
+        "DrawIndexedInstanced": 1053,
+        "DrawInstanced": 29,
+        "GenerateMips": 2,
+        "Map": 4151,
+        "Present": 1,
+        "UpdateSubresource": 27,
+        "map_read_observations": 2,
+        "object_observation_records": 28,
+        "pipeline_setter_records": 2221,
+        "query_metadata_records": 17,
+        "state_or_auxiliary_records": 7354,
+        "unmap_observations": 4153,
+        "unresolved_input_layout_setters": 2,
+        "unresolved_output_setters": 6,
+        "unresolved_shader_setters": 4,
+        "unresolved_srv_setters": 2
+      }
+    },
+    {
+      "case": "bf1-negative",
+      "rgba_sha256": "cd3a3066f984b1c317fbeefec2836503f32078321d3dc1f367465f2c06d435bf",
+      "passed": true,
+      "counts": {
+        "ClearDepthStencilView": 10,
+        "ClearRenderTargetView": 10,
+        "ClearUnorderedAccessViewFloat": 1,
+        "CopyResource": 2,
+        "CopyStructureCount": 6,
+        "CopySubresourceRegion": 7,
+        "Dispatch": 60,
+        "DispatchIndirect": 13,
+        "GenerateMips": 2,
+        "Map": 4151,
+        "Present": 1,
+        "UpdateSubresource": 27,
+        "map_read_observations": 2,
+        "object_observation_records": 28,
+        "pipeline_setter_records": 2221,
+        "query_metadata_records": 17,
+        "state_or_auxiliary_records": 7354,
+        "unmap_observations": 4153,
+        "unresolved_input_layout_setters": 2,
+        "unresolved_output_setters": 6,
+        "unresolved_shader_setters": 4,
+        "unresolved_srv_setters": 2
+      }
+    }
+  ],
+  "results": {
+    "corpus": {
+      "path": "artifacts\\m2-transfer1-release-corpus\\validation.json",
+      "sha256": "a3bfa6accd879f300c669b55a496985d06f16a46b6a49e1f0c3532a4996461af",
+      "counts": {
+        "repeat_stable": 90,
+        "repeat_variable": 1
+      },
+      "original_comparison_counts": {
+        "not_run": 91
+      }
+    },
+    "originals": {
+      "path": "artifacts\\m2-transfer1-release-originals\\validation.json",
+      "sha256": "2d0665cd026ae3ad100ea19e4f80d1418016b4d9ef669a44c81fefd75d7da5a7",
+      "counts": {
+        "repeat_stable": 11
+      },
+      "original_comparison_counts": {
+        "not_run": 11
+      }
+    },
+    "copy": {
+      "path": "artifacts\\m2-transfer1-release-copy\\validation.json",
+      "sha256": "87a995c8a452a389bf136e86175d3e6da64775a128137566f7a63a78b11dc6ce",
+      "counts": {
+        "repeat_stable": 6
+      },
+      "original_comparison_counts": {
+        "not_run": 6
+      }
+    },
+    "present": {
+      "path": "artifacts\\m2-transfer1-release-present\\validation.json",
+      "sha256": "482513ba865999732c238e67d0eb02d4d1487a22281c0bbdf47f72b01399b288",
+      "counts": {
+        "repeat_stable": 5
+      },
+      "original_comparison_counts": {
+        "not_run": 5
+      }
+    },
+    "buffer": {
+      "path": "artifacts\\m2-transfer1-release-buffer\\validation.json",
+      "sha256": "418cdcf45ecda1df93e2e5a434fdeba57e328ce8481f75d25cd0e4869d83408d",
+      "counts": {
+        "repeat_stable": 5
+      },
+      "original_comparison_counts": {
+        "not_run": 5
+      }
+    },
+    "pipeline": {
+      "path": "artifacts\\m2-transfer1-release-pipeline\\validation.json",
+      "sha256": "df77a595926011fcf4d0194f4d4ff4122df4e24e4cd9369d5c6bc31c375cbb6d",
+      "counts": {
+        "repeat_stable": 5
+      },
+      "original_comparison_counts": {
+        "not_run": 5
+      }
+    },
+    "creation": {
+      "path": "artifacts\\m2-transfer1-release-creation\\validation.json",
+      "sha256": "4b402db1a47cd1988c32aaf1215a62f43d2ac562b7e95a9b6df810ebeb89c916",
+      "counts": {
+        "repeat_stable": 7
+      },
+      "original_comparison_counts": {
+        "not_run": 7
+      }
+    },
+    "discovery": {
+      "path": "artifacts\\m2-transfer1-release-discovery\\validation.json",
+      "sha256": "2a9414f580620ad5fba53f227c77b942ac7f37b22084e1becc117af9b0818940",
+      "counts": {
+        "repeat_stable": 1
+      },
+      "original_comparison_counts": {
+        "not_run": 1
+      }
+    },
+    "dimensions": {
+      "path": "artifacts\\m2-transfer1-release-dimensions\\validation.json",
+      "sha256": "862c14124aac2abd4c918a0c4e4a31b91a8050719957058263cde84284fc55dd",
+      "counts": {
+        "repeat_stable": 17
+      },
+      "original_comparison_counts": {
+        "not_run": 17
+      }
+    },
+    "views": {
+      "path": "artifacts\\m2-transfer1-release-views\\validation.json",
+      "sha256": "4c3ea9a1c5196d9141a1c40848d613fbc07b5eabe542cd82a16ec284222160f2",
+      "counts": {
+        "repeat_stable": 12
+      },
+      "original_comparison_counts": {
+        "not_run": 12
+      }
+    },
+    "buffer-views": {
+      "path": "artifacts\\m2-transfer1-release-buffer-views\\validation.json",
+      "sha256": "c5dd1836ccd90f31d0a8ba082631cc22112c9d1e6951001561bf66196b356782",
+      "counts": {
+        "repeat_stable": 19
+      },
+      "original_comparison_counts": {
+        "not_run": 19
+      }
+    },
+    "pipeline-creation": {
+      "path": "artifacts\\m2-transfer1-release-pipeline-creation\\validation.json",
+      "sha256": "61f9ee40e093e8da1ef537a717695d11da437944d3f83fd1c0bb2c7340f0e6ea",
+      "counts": {
+        "repeat_stable": 32
+      },
+      "original_comparison_counts": {
+        "not_run": 32
+      }
+    },
+    "geometry-creation": {
+      "path": "artifacts\\m2-transfer1-release-geometry-creation\\validation.json",
+      "sha256": "d975acd6515a53740eb57619cd98e4f0c3fff414dd58ed06c4a2057a200fe776",
+      "counts": {
+        "repeat_stable": 20
+      },
+      "original_comparison_counts": {
+        "not_run": 20
+      }
+    },
+    "class-creation": {
+      "path": "artifacts\\m2-transfer1-release-class-creation\\validation.json",
+      "sha256": "ea806e417c88b7d5a28ffe31fe75f675dd4f52b398791b990dc744c8656a7d7e",
+      "counts": {
+        "repeat_stable": 13
+      },
+      "original_comparison_counts": {
+        "not_run": 13
+      }
+    },
+    "predicate-creation": {
+      "path": "artifacts\\m2-transfer1-release-predicate-creation\\validation.json",
+      "sha256": "fd4934650d11730ff5acb47a0a748b1affeed1437fc879382be78f99bb8b2eb1",
+      "counts": {
+        "repeat_stable": 10
+      },
+      "original_comparison_counts": {
+        "not_run": 10
+      }
+    },
+    "clear-view": {
+      "path": "artifacts\\m2-transfer1-release-clear-view\\validation.json",
+      "sha256": "4d5b87c205fa2142ea885098830dfec39c601b96bab9b72dc0f7a7d94f82cdfb",
+      "counts": {
+        "repeat_stable": 16
+      },
+      "original_comparison_counts": {
+        "not_run": 16
+      }
+    },
+    "transfer1": {
+      "path": "artifacts\\m2-transfer1-verified-comparison\\validation.json",
+      "sha256": "14f4cb51af25ab8ea6ccf2ae93667aa5264e5e9ea6a2b5205698faa6cd6d5ed2",
+      "counts": {
+        "repeat_stable": 26
+      },
+      "original_comparison_counts": {
+        "observed_equal": 26
+      }
+    },
+    "transfer1-context": {
+      "path": "artifacts\\m2-transfer1-release-transfer1-context\\validation.json",
+      "sha256": "b537f139ee979e3fdbb1e6b99255bf440aa1f5d650f6c9bebab3d5ebc00e5c95",
+      "counts": {
+        "repeat_stable": 14
+      },
+      "original_comparison_counts": {
+        "unavailable": 14
+      }
+    }
+  },
+  "ctest": {
+    "path": "artifacts\\ctest-m2-transfer1-first.log",
+    "sha256": "edc561ee08eadfa5ae61be3f73795b645b40d1fce197eea8a630f2bf590c7282",
+    "suites": 36,
+    "initial_passed": 35,
+    "initial_failed": 1,
+    "status": "passed_after_ui_fix",
+    "followup": {
+      "path": "artifacts\\ctest-m2-transfer1-ui-final.log",
+      "sha256": "e53d785cd0a800f952867818f789e2a2937c5eba0878b4a2ee87bc7252e26419",
+      "passed_suites": 1
+    },
+    "qt": {
+      "transfer1": {
+        "path": "artifacts\\m2-transfer1-qt-results\\transfer1-Release.txt",
+        "sha256": "db28b49187c78f8a929e089a2b37eb58358ae268e1807a14ef73c639d2d21431",
+        "passed": 57
+      },
+      "clear-view": {
+        "path": "artifacts\\m2-transfer1-qt-results\\clear-view-Release.txt",
+        "sha256": "82da9306a9d5d44e215abfb8b217e6738c5b2e27d3d2f855e56cbb160166fadc",
+        "passed": 36
+      },
+      "predicate-creation": {
+        "path": "artifacts\\m2-transfer1-qt-results\\predicate-creation-Release.txt",
+        "sha256": "1429df74d22e694c4cc4f261902a25008f06d5245c03a9c57166f44f7bec0ad2",
+        "passed": 25
+      },
+      "class-creation": {
+        "path": "artifacts\\m2-transfer1-qt-results\\class-creation-Release.txt",
+        "sha256": "d303f53a605aedfe2c8994c71c711b6888a32cb87c45d08b9bb3745f598604a0",
+        "passed": 33
+      },
+      "geometry-creation": {
+        "path": "artifacts\\m2-transfer1-qt-results\\geometry-creation-Release.txt",
+        "sha256": "4f4848556401fb74efda9e2934034ad58239569a2a4843211f3d8111cd2de330",
+        "passed": 45
+      },
+      "pipeline-creation": {
+        "path": "artifacts\\m2-transfer1-qt-results\\pipeline-creation-Release.txt",
+        "sha256": "9797a225c7305ffb60022e9524d4bdb9d4d598d7b46d7906b32a433ef83b868c",
+        "passed": 70
+      },
+      "ui": {
+        "path": "artifacts\\m2-transfer1-qt-results\\ui-Release.txt",
+        "sha256": "a2dae6e0321991bb1dafe3d05e1aec7c3430babf838ad82f3aa25d79fc71bfe3",
+        "passed": 56
+      }
+    }
+  },
+  "sources": {
+    "src/app/MainWindow.cpp": "fa42bbd75a9b9e29af076a2ff11315c1ec139f696622bf00c4c366a313bc41c5",
+    "src/app/MainWindow.h": "130aafc03a8d05e594fc3e70f13148aee508956a935b2d324b66dfd7450751dc",
+    "tests/UiTests.cpp": "9576f0bccf046b90512a6e425591992f1ce52474ec6ee8a292cb2846910c629f",
+    "src/core/CopyCommands.cpp": "05ac028afc4b94252d710044737c8e0196c1bb2502ed5191fade6200568edadc",
+    "src/core/CopyCommands.h": "034d6da1d4ef5f823187cc4383b340478d5003b56f6097e431f8b03be823b5c4",
+    "src/core/TextureCopies.cpp": "c678774213b7675c7326395dcf61c6313cec71828de8fc0569de0424b602fc98",
+    "src/core/Commands.h": "b73a0d73086d83b92783db0ae8178fcf6fd30f5a0ba22a8ec58770310fc33a14",
+    "src/core/Commands.cpp": "5462b9af669eb42bd2e03032d8180978f60da263034681c96dca53beff56d505",
+    "src/core/CommandNames.inc": "10a37042380d24c25b1bb398dbb8b963006179ee79ac2cf568c38513f471e8db",
+    "src/core/ReplayCapabilities.cpp": "a18d2989f571760a9625b95f2452285caa0691034a481bebcc96e7cac41ab5d6",
+    "src/replay/Replay.cpp": "cfbc59968351dbf012dcd0a50634620dc0b77c40b78dbd9de2b3f96116fa02dd",
+    "src/application/ApiCommands.cpp": "031ec185c0a7a1a480a8ff094d0031d016e16b0b914b6a08229ee88a992a09d9",
+    "src/application/FrameValidation.cpp": "5d383cf542021560a76bd36b16d95dd1b3d381531c4d1850bf8d0fa0982b82fd",
+    "tests/Transfer1Tests.cpp": "9d19506d5fe61b35554e071a430c5979cd5419bbc30806e09bac362f78c61dc3",
+    "tools/native/transfer1_probe.cpp": "3da8e5563b0591ec0d1a404a5a3a85860c706e15c012af99c645c48ab7e4a5c4",
+    "CMakeLists.txt": "29faecad9bdba86db229892a6d58f64f07121066b5b6d7e4a83f706e2774a4da",
+    "tools/validate_corpus.py": "8c8a877e3966e526280a4d6007d1cf6687a1f9d49b60540c105fac66b5fbcc6a"
+  },
+  "evidence": {
+    "artifacts/m2-transfer1-wrapper.c": "f61a425d396e6e11ab0e87dbe136be7856062225dd15529aa4a33f445b9e7ebc",
+    "artifacts/m2-transfer1-wrapper-ghidra.log": "26ff61b16a2aa682931482ee3174717cf87c3aa2013443348b86dc67a6310711",
+    "artifacts/m2-transfer1-player.c": "54e8a4c08fcbdf9ab869863c3632c4b3aac00470f5eca0265c431e83f245e2bd",
+    "artifacts/m2-transfer1-player-ghidra.log": "0abfe80f39d5b412d69fcedf637079e784eef0462d33f8beb5817cd684bd34dd",
+    "artifacts/m2-transfer1-error-layout.c": "c2524c03afb4ae41da7010a902229b3b8cf64ba42a2ebdfb022d3698db67ed37",
+    "artifacts/m2-transfer1-error-layout-ghidra.log": "e5bb648b6ebce2d51a3911f2e9e444c6c908a00c19d2a3b51cd1ecf15e0b1107",
+    "artifacts/m2-transfer1-original-error-chain-0/error-object.json": "76119a7e731fc3fe9ac86057d1d33a5d4e255fb6e8159ae71fd6f1095d6abe76",
+    "artifacts/transfer1_original_error_adapter.py": "8845cbb1ae9e118e0c17302f35983b500e79f9468df67af73b7d8cd365da17f1",
+    "artifacts/transfer1-probe-before-context-observation.cpp": "bafc2241ba996dcd865b44b290e089248cf28e3841b10d0e27f3eea5c082ee5f",
+    "artifacts/m2-transfer1-originals-verified/manifest.json": "3360b671df407a47353f0142a9c4d9de59fbc5b4afaf9d140d5d1a5b99d60eec",
+    "artifacts/capture-transfer1-verified.log": "63d24a71143ba49824d73a10053fe2bd868db1216aa0702b37e095cce3ce96c8",
+    "artifacts/m2-transfer1-before/validation.json": "9b94ab3f388890838100cd0f6fc978901a1acdf87d6b58cc122172f0f741e801",
+    "artifacts/m2-transfer1-repack-controls/summary.json": "fefd4609fd91b43834909b580a5b4c328db55d6543cd31eb9a7990bb9ede2f24",
+    "artifacts/transfer1-artifact-issue.json": "93591bea7f509e75a14921c92881d8dae1e8779f61461d806cc81437c0f3142f",
+    "artifacts/run-transfer1-ctest-executed.ps1": "2f6edbd00cb3e405c200d96d68d8fedcd817b82fd13eaa17c5d00f2dd1f38e22",
+    "artifacts/transfer1-ui-first.txt": "f9d770462022b7072e7dba60c67fd3e3b2fe83db9a9f3ddca898955510464306",
+    "artifacts/transfer1-ui-race-before-verified.txt": "285b5db8a847ae2eab9b7ea1baf9b392da5f6f1b8eaa2e606df2e89f9b776b99",
+    "artifacts/transfer1-ui-race-after-recompiled.txt": "8c3b12012608d7469df74cc43f8d9e79c3658ff6fbc5725952a4f305d7119c3d",
+    "artifacts/transfer1-ui-race-diagnostic.txt": "62e0494a59c123bcb4d04c313b10d10b325064190d010a54cef4ff3a55b2a2e8"
+  },
+  "limits": [
+    "Original-player adapter/configuration equality unproven; image equality is observed only",
+    "Twelve primary fixtures have presentation markers; resource byte boundaries are mandatory",
+    "Fourteen earlier direct-copy files omit context resources; existing checked recovery permits native replay but original Open fails",
+    "DISCARD fixtures overwrite full destinations; untouched content after partial discard is undefined, not reconstructed",
+    "Linked/deferred transfers, tiled resources, predicated transfer acceptance and all format/usage combinations remain incomplete; M2-M6 and module totals unchanged"
+  ]
+}

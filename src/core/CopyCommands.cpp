@@ -3,7 +3,9 @@
 #include "TextureCopies.h"
 #include "UavCounters.h"
 namespace flora {
-bool isCopyCommand(uint16_t type) { return type == 0x3e || type == 0x3f || type == 0x40 || type == 0x42; }
+bool isCopyCommand(uint16_t type) {
+    return type == 0x3e || type == 0x3f || type == 0x40 || type == 0x42 || type == 0x256;
+}
 CopyCommand readCopyCommand(uint16_t type, Bytes payload) {
     if (!isCopyCommand(type))
         throw std::runtime_error("Not a copy command");
@@ -12,25 +14,31 @@ CopyCommand readCopyCommand(uint16_t type, Bytes payload) {
         throw std::runtime_error("Linked copy execution is unresolved");
     CopyCommand c;
     c.type = type;
+    const bool region = type == 0x40 || type == 0x256;
     c.context = r.read<Id>();
     c.destination = r.read<Id>();
     if (type == 0x3f)
         c.x = r.read<uint32_t>();
-    if (type == 0x40 || type == 0x42)
+    if (region || type == 0x42)
         c.destinationSubresource = r.read<uint32_t>();
-    if (type == 0x40) {
+    if (region) {
         c.x = r.read<uint32_t>();
         c.y = r.read<uint32_t>();
         c.z = r.read<uint32_t>();
     }
     c.source = r.read<Id>();
-    if (type == 0x40 || type == 0x42)
+    if (region || type == 0x42)
         c.sourceSubresource = r.read<uint32_t>();
     if (type == 0x42)
         c.format = r.read<uint32_t>();
-    if (type == 0x40) {
+    if (region) {
         if (r.flag())
             c.box = r.array<uint32_t, 6>();
+    }
+    if (type == 0x256) {
+        c.flags = r.read<uint32_t>();
+        if (c.flags > 2)
+            throw std::runtime_error("Invalid CopySubresourceRegion1 flags");
     }
     r.end();
     return c;
@@ -93,7 +101,7 @@ CopyValidation validateCopyCommand(const Frame &frame, const CopyCommand &c) {
             return CopyValidation::Buffer; // D3D11 defines bounded empty boxes as no-ops, including inverted
                                            // axes.
         }
-        if (c.source == c.destination)
+        if (c.source == c.destination && c.type != 0x256)
             throw std::runtime_error("Same-buffer region copy is outside the verified scope");
         const auto box = c.box.value_or(std::array<uint32_t, 6>{0, 0, 0, src.desc[0], 1, 1});
         if (box[1] || box[2] || box[4] != 1 || box[5] != 1 || c.y || c.z)

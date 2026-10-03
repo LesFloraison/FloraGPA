@@ -1243,7 +1243,7 @@ void Replay::command(const Entry &e) {
         const auto source = get<ID3D11UnorderedAccessView>(src);
         ReplayAnnotation marker(captureAnnotation_.Get(), e.id, commandName(t));
         context_->CopyStructureCount(destination, offset, source);
-    } else if (t == 0x40) {
+    } else if (t == 0x40 || t == 0x256) {
         auto dst = r.read<Id>();
         auto sub = r.read<UINT>(), x = r.read<UINT>(), y = r.read<UINT>(), z = r.read<UINT>();
         auto src = r.read<Id>();
@@ -1252,12 +1252,25 @@ void Replay::command(const Entry &e) {
         D3D11_BOX box{};
         if (has)
             box = r.read<D3D11_BOX>();
+        const auto flags = t == 0x256 ? r.read<UINT>() : 0;
         r.end();
         const auto destination = get<ID3D11Resource>(dst), source = get<ID3D11Resource>(src);
         ReplayAnnotation marker(captureAnnotation_.Get(), e.id, commandName(t));
         if (has && (box.left >= box.right || box.top >= box.bottom || box.front >= box.back))
             ++counts["empty_copy_regions"];
-        else
+        else if (t == 0x256) {
+            if (!context1_)
+                throw std::runtime_error("Replay device does not support Context1 transfers");
+            if (dst == src && sub == srcSub) {
+                D3D11_FEATURE_DATA_D3D11_OPTIONS support{};
+                check(device_->CheckFeatureSupport(D3D11_FEATURE_D3D11_OPTIONS, &support, sizeof support),
+                      "Check overlapping copy support");
+                if (!support.CopyWithOverlap)
+                    throw std::runtime_error("Replay device does not support same-subresource copying");
+            }
+            context1_->CopySubresourceRegion1(destination, sub, x, y, z, source, srcSub, has ? &box : nullptr,
+                                              flags);
+        } else
             context_->CopySubresourceRegion(destination, sub, x, y, z, source, srcSub, has ? &box : nullptr);
     } else if (t == 0x42) {
         auto dst = r.read<Id>();
@@ -1278,7 +1291,7 @@ void Replay::command(const Entry &e) {
         const auto view = get<ID3D11ShaderResourceView>(id);
         ReplayAnnotation marker(captureAnnotation_.Get(), e.id, commandName(t));
         context_->GenerateMips(view);
-    } else if (t == 0x247) {
+    } else if (t == 0x247 || t == 0x255) {
         auto layout = updateSourceLayout(frame_, e.id);
         const auto destination = frame_.resource(layout.destination);
         const auto format = destination.type == 0x83 ? 0 : textureInfo(destination).format;
@@ -1294,12 +1307,29 @@ void Replay::command(const Entry &e) {
             data = it->second;
         else
             data = frame_.data(layout.data);
-        if (data.size() != layout.size)
+        if (!layout.empty && data.size() != layout.size)
             throw std::runtime_error("Packed UpdateSubresource size mismatch");
         const auto destinationObject = get<ID3D11Resource>(layout.destination);
         ReplayAnnotation marker(captureAnnotation_.Get(), e.id, commandName(t));
-        context_->UpdateSubresource(destinationObject, layout.subresource, layout.hasBox ? &box : nullptr,
-                                    data.data(), layout.rowPitch, layout.slicePitch);
+        if (layout.empty)
+            ++counts["empty_update_regions"];
+        else if (t == 0x255) {
+            if (!context1_)
+                throw std::runtime_error("Replay device does not support Context1 transfers");
+            if (layout.hasBox && destination.type == 0x83 && (destination.desc.at(2) & 4)) {
+                D3D11_FEATURE_DATA_D3D11_OPTIONS support{};
+                check(device_->CheckFeatureSupport(D3D11_FEATURE_D3D11_OPTIONS, &support, sizeof support),
+                      "Check partial constant-buffer update support");
+                if (!support.ConstantBufferPartialUpdate)
+                    throw std::runtime_error(
+                        "Replay device does not support partial constant-buffer updates");
+            }
+            context1_->UpdateSubresource1(destinationObject, layout.subresource,
+                                          layout.hasBox ? &box : nullptr, data.data(), layout.rowPitch,
+                                          layout.slicePitch, layout.flags);
+        } else
+            context_->UpdateSubresource(destinationObject, layout.subresource, layout.hasBox ? &box : nullptr,
+                                        data.data(), layout.rowPitch, layout.slicePitch);
         if (format >= 103 && format <= 105) {
             PlanarWrite write;
             write.event = e.id;

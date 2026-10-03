@@ -22,6 +22,9 @@ bool in(uint16_t t, std::initializer_list<uint16_t> values) {
 }
 } // namespace
 ReplayCapability replayCapability(uint16_t t) {
+    if (t == 0x255 || t == 0x256)
+        return {"execute", "src/core/Commands.cpp;src/core/CopyCommands.cpp;src/replay/Replay.cpp",
+                "tests/Transfer1Tests.cpp;docs/TRANSFER1_AUDIT.md"};
     if (t == 0x257)
         return {"execute", "src/core/ClearView.cpp;src/replay/Replay.cpp",
                 "tests/ClearViewTests.cpp;docs/CLEAR_VIEW_AUDIT.md"};

@@ -3,6 +3,7 @@
 #include "ContextInspector.h"
 #include "core/BufferCreation.h"
 #include "core/ClassCreation.h"
+#include "core/ClearView.h"
 #include "core/Commands.h"
 #include "core/CopyCommands.h"
 #include "core/IaBindings.h"
@@ -12,7 +13,6 @@
 #include "core/PipelineBindings.h"
 #include "core/PipelineCreation.h"
 #include "core/PredicateCreation.h"
-#include "core/ClearView.h"
 #include "core/Predication.h"
 #include "core/PresentRecords.h"
 #include "core/ReplayCapabilities.h"
@@ -255,25 +255,32 @@ Json validateFrame(const std::filesystem::path &path, const std::function<bool()
                             }
                         }
                         if (e.type == 0x257) {
-                            const auto command = readClearView(frame.payload(id));
+                            const auto clear = readClearView(frame.payload(id));
                             try {
-                                validateClearView(frame, command);
+                                validateClearView(frame, clear);
                             } catch (const std::exception &error) {
-                                finding(&e, "error", "clear_view_rejected", error.what(), command.view);
+                                finding(&e, "error", "clear_view_rejected", error.what(), clear.view);
                             }
                         } else if (isWritableCommand(e.type))
                             validateWritableCommand(frame, id);
                         if (e.type >= 0x3278 && e.type <= 0x327e)
                             validateAnnotationCommand(e.type, frame.payload(id));
-                        if (e.type == 0x247) {
-                            const auto layout = updateSourceLayout(frame, id);
-                            const auto dst = frame.resource(layout.destination);
-                            if (dst.type != 0x83 &&
-                                (textureInfo(dst).format == 104 || textureInfo(dst).format == 105))
-                                finding(&e, "error", "capture_data_missing",
-                                        "Legacy P010/P016 Update requires an explicit complete source "
-                                        "replacement",
-                                        dst.id);
+                        if (e.type == 0x247 || e.type == 0x255) {
+                            Reader operand(frame.payload(id));
+                            operand.skip(16);
+                            const auto destination = operand.read<Id>();
+                            try {
+                                const auto layout = updateSourceLayout(frame, id);
+                                const auto dst = frame.resource(layout.destination);
+                                if (dst.type != 0x83 &&
+                                    (textureInfo(dst).format == 104 || textureInfo(dst).format == 105))
+                                    finding(&e, "error", "capture_data_missing",
+                                            "Legacy P010/P016 Update requires an explicit complete source "
+                                            "replacement",
+                                            dst.id);
+                            } catch (const std::exception &error) {
+                                finding(&e, "error", "update_command_rejected", error.what(), destination);
+                            }
                         }
                     }
                 } else if (e.category == 3 && e.type == 3) {

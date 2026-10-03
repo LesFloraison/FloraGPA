@@ -1,0 +1,706 @@
+{
+  "schema": "FloraGPA compatibility corpus 1",
+  "profile": "GPA 2025 R1 legacy DX11 / IGPA v3",
+  "cases": [
+    {
+      "id": "transfer1_0",
+      "path": "0/capture.gpa_frame",
+      "sha256": "b6dff3b98be50868f9574c43fa764997594a79502737f25fb483fdaa84e35ee8",
+      "bytes": 10024,
+      "family": "context1_transfer",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified original CaptureNextFrame output; native and shim-injected producers verify 12 frames each against CPU byte oracles. Marker images do not establish resource equality; mandatory boundary hashes and hardware/WARP tests do.",
+      "device_scope": "Producer uses local hardware; generic original player adapter/configuration unidentified.",
+      "reference_rgba_sha256": "3ad340264f08703aefb6a32cc3a6f16c9dc9964707ab0d01e0d3ed4368df22b0",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 25,
+          "repeat": 2,
+          "expected_rgba_sha256": "093857ba816ee9eea2dff253a48cc5d41361ac4070f9471a7326a9e83764835b",
+          "purpose": "Transfer omission; the empty-box cases intentionally remain unchanged."
+        }
+      ],
+      "boundaries": [
+        {
+          "kind": "texture",
+          "event": 25,
+          "resource": 10,
+          "expect_stable": true,
+          "expected_storage_sha256": "3ad340264f08703aefb6a32cc3a6f16c9dc9964707ab0d01e0d3ed4368df22b0"
+        }
+      ]
+    },
+    {
+      "id": "transfer1_1",
+      "path": "1/capture.gpa_frame",
+      "sha256": "3d6854816e44a26c911eadc0a6658386a8edd92a6bdabad5c8e591f2b609168e",
+      "bytes": 10048,
+      "family": "context1_transfer",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified original CaptureNextFrame output; native and shim-injected producers verify 12 frames each against CPU byte oracles. Marker images do not establish resource equality; mandatory boundary hashes and hardware/WARP tests do.",
+      "device_scope": "Producer uses local hardware; generic original player adapter/configuration unidentified.",
+      "reference_rgba_sha256": "8df7e50637271d2e3d837d0ee3185a5e57ee1a7b450fca7d16a0d8b2676f4f35",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 25,
+          "repeat": 2,
+          "expected_rgba_sha256": "093857ba816ee9eea2dff253a48cc5d41361ac4070f9471a7326a9e83764835b",
+          "purpose": "Transfer omission; the empty-box cases intentionally remain unchanged."
+        }
+      ],
+      "boundaries": [
+        {
+          "kind": "texture",
+          "event": 25,
+          "resource": 10,
+          "expect_stable": true,
+          "expected_storage_sha256": "8df7e50637271d2e3d837d0ee3185a5e57ee1a7b450fca7d16a0d8b2676f4f35"
+        }
+      ]
+    },
+    {
+      "id": "transfer1_2",
+      "path": "2/capture.gpa_frame",
+      "sha256": "b0a3a8bd674b5c15f686353660814e469ddfc18f17991f925d73ecaf34c6776b",
+      "bytes": 10024,
+      "family": "context1_transfer",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified original CaptureNextFrame output; native and shim-injected producers verify 12 frames each against CPU byte oracles. Marker images do not establish resource equality; mandatory boundary hashes and hardware/WARP tests do.",
+      "device_scope": "Producer uses local hardware; generic original player adapter/configuration unidentified.",
+      "reference_rgba_sha256": "3ad340264f08703aefb6a32cc3a6f16c9dc9964707ab0d01e0d3ed4368df22b0",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 25,
+          "repeat": 2,
+          "expected_rgba_sha256": "093857ba816ee9eea2dff253a48cc5d41361ac4070f9471a7326a9e83764835b",
+          "purpose": "Transfer omission; the empty-box cases intentionally remain unchanged."
+        }
+      ],
+      "boundaries": [
+        {
+          "kind": "texture",
+          "event": 25,
+          "resource": 10,
+          "expect_stable": true,
+          "expected_storage_sha256": "3ad340264f08703aefb6a32cc3a6f16c9dc9964707ab0d01e0d3ed4368df22b0"
+        }
+      ]
+    },
+    {
+      "id": "transfer1_3",
+      "path": "3/capture.gpa_frame",
+      "sha256": "02a9e834d7588821958c80628ca7bfba2d006d4d2909e3ba2fff48421d9eb944",
+      "bytes": 10048,
+      "family": "context1_transfer",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified original CaptureNextFrame output; native and shim-injected producers verify 12 frames each against CPU byte oracles. Marker images do not establish resource equality; mandatory boundary hashes and hardware/WARP tests do.",
+      "device_scope": "Producer uses local hardware; generic original player adapter/configuration unidentified.",
+      "reference_rgba_sha256": "8df7e50637271d2e3d837d0ee3185a5e57ee1a7b450fca7d16a0d8b2676f4f35",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 25,
+          "repeat": 2,
+          "expected_rgba_sha256": "093857ba816ee9eea2dff253a48cc5d41361ac4070f9471a7326a9e83764835b",
+          "purpose": "Transfer omission; the empty-box cases intentionally remain unchanged."
+        }
+      ],
+      "boundaries": [
+        {
+          "kind": "texture",
+          "event": 25,
+          "resource": 10,
+          "expect_stable": true,
+          "expected_storage_sha256": "8df7e50637271d2e3d837d0ee3185a5e57ee1a7b450fca7d16a0d8b2676f4f35"
+        }
+      ]
+    },
+    {
+      "id": "transfer1_4",
+      "path": "4/capture.gpa_frame",
+      "sha256": "fa88100e6a68d87297c15e6a15c01d13923fc4355c9e2cfa1acc045255c37734",
+      "bytes": 10048,
+      "family": "context1_transfer",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified original CaptureNextFrame output; native and shim-injected producers verify 12 frames each against CPU byte oracles. Marker images do not establish resource equality; mandatory boundary hashes and hardware/WARP tests do.",
+      "device_scope": "Producer uses local hardware; generic original player adapter/configuration unidentified.",
+      "reference_rgba_sha256": "d090a6a044298c041b646433d1bee7dca34565d32a1ca43b6d5959845e62f242",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 25,
+          "repeat": 2,
+          "expected_rgba_sha256": "093857ba816ee9eea2dff253a48cc5d41361ac4070f9471a7326a9e83764835b",
+          "purpose": "Transfer omission; the empty-box cases intentionally remain unchanged."
+        }
+      ],
+      "boundaries": [
+        {
+          "kind": "texture",
+          "event": 25,
+          "resource": 10,
+          "expect_stable": true,
+          "expected_storage_sha256": "d090a6a044298c041b646433d1bee7dca34565d32a1ca43b6d5959845e62f242"
+        }
+      ]
+    },
+    {
+      "id": "transfer1_5",
+      "path": "5/capture.gpa_frame",
+      "sha256": "dad0ba39d2c928b90d73bc4d0cbe684baecc74520a389b7116b1b35a7fac03ad",
+      "bytes": 10048,
+      "family": "context1_transfer",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified original CaptureNextFrame output; native and shim-injected producers verify 12 frames each against CPU byte oracles. Marker images do not establish resource equality; mandatory boundary hashes and hardware/WARP tests do.",
+      "device_scope": "Producer uses local hardware; generic original player adapter/configuration unidentified.",
+      "reference_rgba_sha256": "59a735dcced5285160caba5fbfc886049679a9e1582a8f224fd65a3000bb6918",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 25,
+          "repeat": 2,
+          "expected_rgba_sha256": "093857ba816ee9eea2dff253a48cc5d41361ac4070f9471a7326a9e83764835b",
+          "purpose": "Transfer omission; the empty-box cases intentionally remain unchanged."
+        }
+      ],
+      "boundaries": [
+        {
+          "kind": "texture",
+          "event": 25,
+          "resource": 10,
+          "expect_stable": true,
+          "expected_storage_sha256": "59a735dcced5285160caba5fbfc886049679a9e1582a8f224fd65a3000bb6918"
+        }
+      ]
+    },
+    {
+      "id": "transfer1_6",
+      "path": "6/capture.gpa_frame",
+      "sha256": "f4423ff65424057cfc7f782fce882fe26abf108b2a85b2e784e8530d8d4da262",
+      "bytes": 10048,
+      "family": "context1_transfer",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified original CaptureNextFrame output; native and shim-injected producers verify 12 frames each against CPU byte oracles. Marker images do not establish resource equality; mandatory boundary hashes and hardware/WARP tests do.",
+      "device_scope": "Producer uses local hardware; generic original player adapter/configuration unidentified.",
+      "reference_rgba_sha256": "093857ba816ee9eea2dff253a48cc5d41361ac4070f9471a7326a9e83764835b",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 25,
+          "repeat": 2,
+          "expected_rgba_sha256": "093857ba816ee9eea2dff253a48cc5d41361ac4070f9471a7326a9e83764835b",
+          "purpose": "Transfer omission; the empty-box cases intentionally remain unchanged."
+        }
+      ],
+      "boundaries": [
+        {
+          "kind": "texture",
+          "event": 25,
+          "resource": 10,
+          "expect_stable": true,
+          "expected_storage_sha256": "093857ba816ee9eea2dff253a48cc5d41361ac4070f9471a7326a9e83764835b"
+        }
+      ]
+    },
+    {
+      "id": "transfer1_7",
+      "path": "7/capture.gpa_frame",
+      "sha256": "85842d846bcbbd1a2fa1ca16e73751f0648b3341aad570ac7ed17019040a2c19",
+      "bytes": 8904,
+      "family": "context1_transfer",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified original CaptureNextFrame output; native and shim-injected producers verify 12 frames each against CPU byte oracles. Marker images do not establish resource equality; mandatory boundary hashes and hardware/WARP tests do.",
+      "device_scope": "Producer uses local hardware; generic original player adapter/configuration unidentified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "controls": [],
+      "boundaries": [
+        {
+          "kind": "buffer",
+          "event": 24,
+          "resource": 10,
+          "expect_stable": true,
+          "expected_storage_sha256": "762f08e60b344c59f52127961f27a6a0f554ad55ea9a215bb5363b4778366fa5"
+        }
+      ]
+    },
+    {
+      "id": "transfer1_8",
+      "path": "8/capture.gpa_frame",
+      "sha256": "071c385be466614141fef2fb3b2e8cf463f31d447ac2ea7be5348cb33f2ba4c6",
+      "bytes": 8928,
+      "family": "context1_transfer",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified original CaptureNextFrame output; native and shim-injected producers verify 12 frames each against CPU byte oracles. Marker images do not establish resource equality; mandatory boundary hashes and hardware/WARP tests do.",
+      "device_scope": "Producer uses local hardware; generic original player adapter/configuration unidentified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "controls": [],
+      "boundaries": [
+        {
+          "kind": "buffer",
+          "event": 24,
+          "resource": 10,
+          "expect_stable": true,
+          "expected_storage_sha256": "e0e78650b6db2a6a233cca2bae0a59698b9600162ee297f0dfa154fdc0d2b389"
+        }
+      ]
+    },
+    {
+      "id": "transfer1_9",
+      "path": "9/capture.gpa_frame",
+      "sha256": "edb63eee73c3d3a98a519d914d37aa824d4c45a7a1e3193b88898615a17deb65",
+      "bytes": 8904,
+      "family": "context1_transfer",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified original CaptureNextFrame output; native and shim-injected producers verify 12 frames each against CPU byte oracles. Marker images do not establish resource equality; mandatory boundary hashes and hardware/WARP tests do.",
+      "device_scope": "Producer uses local hardware; generic original player adapter/configuration unidentified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "controls": [],
+      "boundaries": [
+        {
+          "kind": "buffer",
+          "event": 24,
+          "resource": 10,
+          "expect_stable": true,
+          "expected_storage_sha256": "762f08e60b344c59f52127961f27a6a0f554ad55ea9a215bb5363b4778366fa5"
+        }
+      ]
+    },
+    {
+      "id": "transfer1_10",
+      "path": "10/capture.gpa_frame",
+      "sha256": "72d8c9a42eb829d9051abf09a2b04a84ee1db1ce2bda2472637ed6d6c533a899",
+      "bytes": 10300,
+      "family": "context1_transfer",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified original CaptureNextFrame output; native and shim-injected producers verify 12 frames each against CPU byte oracles. Marker images do not establish resource equality; mandatory boundary hashes and hardware/WARP tests do.",
+      "device_scope": "Producer uses local hardware; generic original player adapter/configuration unidentified.",
+      "reference_rgba_sha256": "3ad340264f08703aefb6a32cc3a6f16c9dc9964707ab0d01e0d3ed4368df22b0",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 25,
+          "repeat": 2,
+          "expected_rgba_sha256": "093857ba816ee9eea2dff253a48cc5d41361ac4070f9471a7326a9e83764835b",
+          "purpose": "Transfer omission; the empty-box cases intentionally remain unchanged."
+        }
+      ],
+      "boundaries": [
+        {
+          "kind": "texture",
+          "event": 25,
+          "resource": 10,
+          "expect_stable": true,
+          "expected_storage_sha256": "3ad340264f08703aefb6a32cc3a6f16c9dc9964707ab0d01e0d3ed4368df22b0"
+        }
+      ]
+    },
+    {
+      "id": "transfer1_11",
+      "path": "11/capture.gpa_frame",
+      "sha256": "dcd13507d239ea0cca1bfdb0ef16fe209116eb6d4b326fe6b4994faf8e6882ce",
+      "bytes": 10168,
+      "family": "context1_transfer",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified original CaptureNextFrame output; native and shim-injected producers verify 12 frames each against CPU byte oracles. Marker images do not establish resource equality; mandatory boundary hashes and hardware/WARP tests do.",
+      "device_scope": "Producer uses local hardware; generic original player adapter/configuration unidentified.",
+      "reference_rgba_sha256": "cd873d1f809b74354ae9cb9159d5085ff2df42358e75b33a866aebe1680711c5",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 25,
+          "repeat": 2,
+          "expected_rgba_sha256": "093857ba816ee9eea2dff253a48cc5d41361ac4070f9471a7326a9e83764835b",
+          "purpose": "Transfer omission; the empty-box cases intentionally remain unchanged."
+        }
+      ],
+      "boundaries": [
+        {
+          "kind": "texture",
+          "event": 25,
+          "resource": 10,
+          "expect_stable": true,
+          "expected_storage_sha256": "cd873d1f809b74354ae9cb9159d5085ff2df42358e75b33a866aebe1680711c5"
+        }
+      ]
+    },
+    {
+      "id": "transfer1_12",
+      "path": "12/capture.gpa_frame",
+      "sha256": "937ece9c9e4c22a01bf8e3aa8d9427f4591a150322025fe9263344b21fbdd91c",
+      "bytes": 10300,
+      "family": "context1_transfer",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified original CaptureNextFrame output; native and shim-injected producers verify 12 frames each against CPU byte oracles. Marker images do not establish resource equality; mandatory boundary hashes and hardware/WARP tests do.",
+      "device_scope": "Producer uses local hardware; generic original player adapter/configuration unidentified.",
+      "reference_rgba_sha256": "3ad340264f08703aefb6a32cc3a6f16c9dc9964707ab0d01e0d3ed4368df22b0",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 25,
+          "repeat": 2,
+          "expected_rgba_sha256": "093857ba816ee9eea2dff253a48cc5d41361ac4070f9471a7326a9e83764835b",
+          "purpose": "Transfer omission; the empty-box cases intentionally remain unchanged."
+        }
+      ],
+      "boundaries": [
+        {
+          "kind": "texture",
+          "event": 25,
+          "resource": 10,
+          "expect_stable": true,
+          "expected_storage_sha256": "3ad340264f08703aefb6a32cc3a6f16c9dc9964707ab0d01e0d3ed4368df22b0"
+        }
+      ]
+    },
+    {
+      "id": "transfer1_13",
+      "path": "13/capture.gpa_frame",
+      "sha256": "e8cbe8c8f1e127c769b74901e03977946e668c5ea4d9ec79b483a9a3c5fedfa4",
+      "bytes": 10168,
+      "family": "context1_transfer",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified original CaptureNextFrame output; native and shim-injected producers verify 12 frames each against CPU byte oracles. Marker images do not establish resource equality; mandatory boundary hashes and hardware/WARP tests do.",
+      "device_scope": "Producer uses local hardware; generic original player adapter/configuration unidentified.",
+      "reference_rgba_sha256": "cd873d1f809b74354ae9cb9159d5085ff2df42358e75b33a866aebe1680711c5",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 25,
+          "repeat": 2,
+          "expected_rgba_sha256": "093857ba816ee9eea2dff253a48cc5d41361ac4070f9471a7326a9e83764835b",
+          "purpose": "Transfer omission; the empty-box cases intentionally remain unchanged."
+        }
+      ],
+      "boundaries": [
+        {
+          "kind": "texture",
+          "event": 25,
+          "resource": 10,
+          "expect_stable": true,
+          "expected_storage_sha256": "cd873d1f809b74354ae9cb9159d5085ff2df42358e75b33a866aebe1680711c5"
+        }
+      ]
+    },
+    {
+      "id": "transfer1_14",
+      "path": "14/capture.gpa_frame",
+      "sha256": "c047d1de1b67e458d60bdea3aa0278fda776c85c0a28d2d94246d6499d1f4b36",
+      "bytes": 8980,
+      "family": "context1_transfer",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified original CaptureNextFrame output; native and shim-injected producers verify 12 frames each against CPU byte oracles. Marker images do not establish resource equality; mandatory boundary hashes and hardware/WARP tests do.",
+      "device_scope": "Producer uses local hardware; generic original player adapter/configuration unidentified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "controls": [],
+      "boundaries": [
+        {
+          "kind": "buffer",
+          "event": 24,
+          "resource": 10,
+          "expect_stable": true,
+          "expected_storage_sha256": "e0e78650b6db2a6a233cca2bae0a59698b9600162ee297f0dfa154fdc0d2b389"
+        }
+      ]
+    },
+    {
+      "id": "transfer1_15",
+      "path": "15/capture.gpa_frame",
+      "sha256": "ca30baed690686eee07bd66d4d1694330c09c2413d430dc9157e5289b08ed502",
+      "bytes": 8980,
+      "family": "context1_transfer",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified original CaptureNextFrame output; native and shim-injected producers verify 12 frames each against CPU byte oracles. Marker images do not establish resource equality; mandatory boundary hashes and hardware/WARP tests do.",
+      "device_scope": "Producer uses local hardware; generic original player adapter/configuration unidentified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "controls": [],
+      "boundaries": [
+        {
+          "kind": "buffer",
+          "event": 24,
+          "resource": 10,
+          "expect_stable": true,
+          "expected_storage_sha256": "e0e78650b6db2a6a233cca2bae0a59698b9600162ee297f0dfa154fdc0d2b389"
+        }
+      ]
+    },
+    {
+      "id": "transfer1_16",
+      "path": "16/capture.gpa_frame",
+      "sha256": "9a795cb3492c15d34d2c463b7c7314e1523068adb6678b60183dc04bde31379a",
+      "bytes": 8988,
+      "family": "context1_transfer",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified original CaptureNextFrame output; native and shim-injected producers verify 12 frames each against CPU byte oracles. Marker images do not establish resource equality; mandatory boundary hashes and hardware/WARP tests do.",
+      "device_scope": "Producer uses local hardware; generic original player adapter/configuration unidentified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "controls": [],
+      "boundaries": [
+        {
+          "kind": "buffer",
+          "event": 24,
+          "resource": 10,
+          "expect_stable": true,
+          "expected_storage_sha256": "762f08e60b344c59f52127961f27a6a0f554ad55ea9a215bb5363b4778366fa5"
+        }
+      ]
+    },
+    {
+      "id": "transfer1_17",
+      "path": "17/capture.gpa_frame",
+      "sha256": "d4b346a3ed99226f29600b98e84855f7585e71438e648ff04396406d401c2910",
+      "bytes": 13984,
+      "family": "context1_transfer",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified original CaptureNextFrame output; native and shim-injected producers verify 12 frames each against CPU byte oracles. Marker images do not establish resource equality; mandatory boundary hashes and hardware/WARP tests do.",
+      "device_scope": "Producer uses local hardware; generic original player adapter/configuration unidentified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "controls": [],
+      "boundaries": [
+        {
+          "kind": "texture",
+          "event": 24,
+          "resource": 10,
+          "expect_stable": true,
+          "expected_storage_sha256": "5e8871a596b1c36c4bd21e8a6f10896008eec8ee5a6903c3ea922a9f72df711a"
+        }
+      ]
+    },
+    {
+      "id": "transfer1_18",
+      "path": "18/capture.gpa_frame",
+      "sha256": "9683caff064013f071d3dd10e4e228e110b195be4bd39375197f42cd415c74f4",
+      "bytes": 10946,
+      "family": "context1_transfer",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified original CaptureNextFrame output; native and shim-injected producers verify 12 frames each against CPU byte oracles. Marker images do not establish resource equality; mandatory boundary hashes and hardware/WARP tests do.",
+      "device_scope": "Producer uses local hardware; generic original player adapter/configuration unidentified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "controls": [],
+      "boundaries": [
+        {
+          "kind": "texture",
+          "event": 45,
+          "resource": 10,
+          "expect_stable": true,
+          "expected_storage_sha256": "04b1ff2d668d664dcc7f86217e0a300e3994e25a77c91e3561ed3a9127f7b679"
+        }
+      ]
+    },
+    {
+      "id": "transfer1_19",
+      "path": "19/capture.gpa_frame",
+      "sha256": "4feea3458956a800a237e4c73064a6027a919ae9c6c9b204a83476950235bf91",
+      "bytes": 8944,
+      "family": "context1_transfer",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified original CaptureNextFrame output; native and shim-injected producers verify 12 frames each against CPU byte oracles. Marker images do not establish resource equality; mandatory boundary hashes and hardware/WARP tests do.",
+      "device_scope": "Producer uses local hardware; generic original player adapter/configuration unidentified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "controls": [],
+      "boundaries": [
+        {
+          "kind": "texture",
+          "event": 25,
+          "resource": 10,
+          "expect_stable": true,
+          "expected_storage_sha256": "6c983df9c8ebfe9068b35a90cb0b69700f8bf40bfab6585ef8ad5d99e625eb68"
+        }
+      ]
+    },
+    {
+      "id": "transfer1_20",
+      "path": "20/capture.gpa_frame",
+      "sha256": "5bd3d7329486d920fbb2a172135101ba602009a21a25d12ec2f5c6ab8dbae5c4",
+      "bytes": 10084,
+      "family": "context1_transfer",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified original CaptureNextFrame output; native and shim-injected producers verify 12 frames each against CPU byte oracles. Marker images do not establish resource equality; mandatory boundary hashes and hardware/WARP tests do.",
+      "device_scope": "Producer uses local hardware; generic original player adapter/configuration unidentified.",
+      "reference_rgba_sha256": "093857ba816ee9eea2dff253a48cc5d41361ac4070f9471a7326a9e83764835b",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 25,
+          "repeat": 2,
+          "expected_rgba_sha256": "093857ba816ee9eea2dff253a48cc5d41361ac4070f9471a7326a9e83764835b",
+          "purpose": "Transfer omission; the empty-box cases intentionally remain unchanged."
+        }
+      ],
+      "boundaries": [
+        {
+          "kind": "texture",
+          "event": 25,
+          "resource": 10,
+          "expect_stable": true,
+          "expected_storage_sha256": "093857ba816ee9eea2dff253a48cc5d41361ac4070f9471a7326a9e83764835b"
+        }
+      ]
+    },
+    {
+      "id": "transfer1_21",
+      "path": "21/capture.gpa_frame",
+      "sha256": "5c53fd9c2fecbdcafe96328ffc14280d67b38fad1bf003b2728dc82a2e62ed7c",
+      "bytes": 10024,
+      "family": "context1_transfer",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified original CaptureNextFrame output; native and shim-injected producers verify 12 frames each against CPU byte oracles. Marker images do not establish resource equality; mandatory boundary hashes and hardware/WARP tests do.",
+      "device_scope": "Producer uses local hardware; generic original player adapter/configuration unidentified.",
+      "reference_rgba_sha256": "3ad340264f08703aefb6a32cc3a6f16c9dc9964707ab0d01e0d3ed4368df22b0",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 25,
+          "repeat": 2,
+          "expected_rgba_sha256": "093857ba816ee9eea2dff253a48cc5d41361ac4070f9471a7326a9e83764835b",
+          "purpose": "Transfer omission; the empty-box cases intentionally remain unchanged."
+        }
+      ],
+      "boundaries": [
+        {
+          "kind": "texture",
+          "event": 25,
+          "resource": 10,
+          "expect_stable": true,
+          "expected_storage_sha256": "3ad340264f08703aefb6a32cc3a6f16c9dc9964707ab0d01e0d3ed4368df22b0"
+        }
+      ]
+    },
+    {
+      "id": "transfer1_22",
+      "path": "22/capture.gpa_frame",
+      "sha256": "3ddac9f5a26bf65304b868477fa9ffb567413bb9ce14fa914b7a2e6732c57d40",
+      "bytes": 8988,
+      "family": "context1_transfer",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified original CaptureNextFrame output; native and shim-injected producers verify 12 frames each against CPU byte oracles. Marker images do not establish resource equality; mandatory boundary hashes and hardware/WARP tests do.",
+      "device_scope": "Producer uses local hardware; generic original player adapter/configuration unidentified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "controls": [],
+      "boundaries": [
+        {
+          "kind": "buffer",
+          "event": 24,
+          "resource": 10,
+          "expect_stable": true,
+          "expected_storage_sha256": "762f08e60b344c59f52127961f27a6a0f554ad55ea9a215bb5363b4778366fa5"
+        }
+      ]
+    },
+    {
+      "id": "transfer1_23",
+      "path": "23/capture.gpa_frame",
+      "sha256": "3928f9d6798ab1c7cfa427586008c37e8a052939e215bf359566c6b4abe4ee15",
+      "bytes": 8928,
+      "family": "context1_transfer",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified original CaptureNextFrame output; native and shim-injected producers verify 12 frames each against CPU byte oracles. Marker images do not establish resource equality; mandatory boundary hashes and hardware/WARP tests do.",
+      "device_scope": "Producer uses local hardware; generic original player adapter/configuration unidentified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "controls": [],
+      "boundaries": [
+        {
+          "kind": "buffer",
+          "event": 24,
+          "resource": 10,
+          "expect_stable": true,
+          "expected_storage_sha256": "c207ecfe18afecd6c449a426ab628c520faaf70b856a6bfeacaa26a571549ba1"
+        }
+      ]
+    },
+    {
+      "id": "transfer1_24",
+      "path": "24/capture.gpa_frame",
+      "sha256": "60322e68f7240c37c56d409b3319099775ca012a0a772f388a64c1fc2030c146",
+      "bytes": 10300,
+      "family": "context1_transfer",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified original CaptureNextFrame output; native and shim-injected producers verify 12 frames each against CPU byte oracles. Marker images do not establish resource equality; mandatory boundary hashes and hardware/WARP tests do.",
+      "device_scope": "Producer uses local hardware; generic original player adapter/configuration unidentified.",
+      "reference_rgba_sha256": "3ad340264f08703aefb6a32cc3a6f16c9dc9964707ab0d01e0d3ed4368df22b0",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 25,
+          "repeat": 2,
+          "expected_rgba_sha256": "093857ba816ee9eea2dff253a48cc5d41361ac4070f9471a7326a9e83764835b",
+          "purpose": "Transfer omission; the empty-box cases intentionally remain unchanged."
+        }
+      ],
+      "boundaries": [
+        {
+          "kind": "texture",
+          "event": 25,
+          "resource": 10,
+          "expect_stable": true,
+          "expected_storage_sha256": "3ad340264f08703aefb6a32cc3a6f16c9dc9964707ab0d01e0d3ed4368df22b0"
+        }
+      ]
+    },
+    {
+      "id": "transfer1_25",
+      "path": "25/capture.gpa_frame",
+      "sha256": "529d19fc3e10a729af78cc069df4621cc8aaa1a9ef7d7e8ac28603a39d1895ab",
+      "bytes": 8944,
+      "family": "context1_transfer",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified original CaptureNextFrame output; native and shim-injected producers verify 12 frames each against CPU byte oracles. Marker images do not establish resource equality; mandatory boundary hashes and hardware/WARP tests do.",
+      "device_scope": "Producer uses local hardware; generic original player adapter/configuration unidentified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "controls": [],
+      "boundaries": [
+        {
+          "kind": "texture",
+          "event": 25,
+          "resource": 10,
+          "expect_stable": true,
+          "expected_storage_sha256": "c9d3c343fb2ea176387093c19744bab7f15b34287cbbf4e6216369e67cb936c4"
+        }
+      ]
+    }
+  ],
+  "producer_manifest": {
+    "path": "artifacts\\m2-transfer1-originals-verified\\manifest.json",
+    "sha256": "3360b671df407a47353f0142a9c4d9de59fbc5b4afaf9d140d5d1a5b99d60eec"
+  }
+}

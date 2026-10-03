@@ -1,0 +1,434 @@
+{
+  "schema": "FloraGPA compatibility corpus 1",
+  "profile": "GPA 2025 R1 legacy DX11 / IGPA v3",
+  "cases": [
+    {
+      "id": "transfer1_context_0",
+      "path": "0/capture.gpa_frame",
+      "sha256": "86244b4c723b83de4af8a89f56fef63323e3c94728de0f1240497e4161d2e966",
+      "bytes": 9843,
+      "family": "context1_transfer",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified original CaptureNextFrame output; native and shim-injected producers verify 12 frames each against CPU byte oracles. Marker images do not establish resource equality; mandatory boundary hashes and hardware/WARP tests do. Explicit context snapshot omitted; immediate context recovered from checked Map READ/Unmap evidence. Original player Open fails. This is a retained capture-omission control.",
+      "device_scope": "Producer uses local hardware; generic original player adapter/configuration unidentified.",
+      "reference_rgba_sha256": "3ad340264f08703aefb6a32cc3a6f16c9dc9964707ab0d01e0d3ed4368df22b0",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 20,
+          "repeat": 2,
+          "expected_rgba_sha256": "093857ba816ee9eea2dff253a48cc5d41361ac4070f9471a7326a9e83764835b",
+          "purpose": "Transfer omission; the empty-box cases intentionally remain unchanged."
+        }
+      ],
+      "boundaries": [
+        {
+          "kind": "texture",
+          "event": 20,
+          "resource": 5,
+          "expect_stable": true,
+          "expected_storage_sha256": "3ad340264f08703aefb6a32cc3a6f16c9dc9964707ab0d01e0d3ed4368df22b0"
+        }
+      ]
+    },
+    {
+      "id": "transfer1_context_1",
+      "path": "1/capture.gpa_frame",
+      "sha256": "074a8d27e23f73d60430d6e99c12587d6a6feb7a85dc182d1780c43442850590",
+      "bytes": 9867,
+      "family": "context1_transfer",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified original CaptureNextFrame output; native and shim-injected producers verify 12 frames each against CPU byte oracles. Marker images do not establish resource equality; mandatory boundary hashes and hardware/WARP tests do. Explicit context snapshot omitted; immediate context recovered from checked Map READ/Unmap evidence. Original player Open fails. This is a retained capture-omission control.",
+      "device_scope": "Producer uses local hardware; generic original player adapter/configuration unidentified.",
+      "reference_rgba_sha256": "8df7e50637271d2e3d837d0ee3185a5e57ee1a7b450fca7d16a0d8b2676f4f35",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 20,
+          "repeat": 2,
+          "expected_rgba_sha256": "093857ba816ee9eea2dff253a48cc5d41361ac4070f9471a7326a9e83764835b",
+          "purpose": "Transfer omission; the empty-box cases intentionally remain unchanged."
+        }
+      ],
+      "boundaries": [
+        {
+          "kind": "texture",
+          "event": 20,
+          "resource": 5,
+          "expect_stable": true,
+          "expected_storage_sha256": "8df7e50637271d2e3d837d0ee3185a5e57ee1a7b450fca7d16a0d8b2676f4f35"
+        }
+      ]
+    },
+    {
+      "id": "transfer1_context_2",
+      "path": "2/capture.gpa_frame",
+      "sha256": "7a8c519f85d7ebde96f0e3aff6e05622ee1a4b75eab04e68dd296457d399ec80",
+      "bytes": 9843,
+      "family": "context1_transfer",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified original CaptureNextFrame output; native and shim-injected producers verify 12 frames each against CPU byte oracles. Marker images do not establish resource equality; mandatory boundary hashes and hardware/WARP tests do. Explicit context snapshot omitted; immediate context recovered from checked Map READ/Unmap evidence. Original player Open fails. This is a retained capture-omission control.",
+      "device_scope": "Producer uses local hardware; generic original player adapter/configuration unidentified.",
+      "reference_rgba_sha256": "3ad340264f08703aefb6a32cc3a6f16c9dc9964707ab0d01e0d3ed4368df22b0",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 20,
+          "repeat": 2,
+          "expected_rgba_sha256": "093857ba816ee9eea2dff253a48cc5d41361ac4070f9471a7326a9e83764835b",
+          "purpose": "Transfer omission; the empty-box cases intentionally remain unchanged."
+        }
+      ],
+      "boundaries": [
+        {
+          "kind": "texture",
+          "event": 20,
+          "resource": 5,
+          "expect_stable": true,
+          "expected_storage_sha256": "3ad340264f08703aefb6a32cc3a6f16c9dc9964707ab0d01e0d3ed4368df22b0"
+        }
+      ]
+    },
+    {
+      "id": "transfer1_context_3",
+      "path": "3/capture.gpa_frame",
+      "sha256": "66a2a8050af821deba6b5330fc1fbc8943a02a834cebdf8bc8fec6542fe7e454",
+      "bytes": 9867,
+      "family": "context1_transfer",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified original CaptureNextFrame output; native and shim-injected producers verify 12 frames each against CPU byte oracles. Marker images do not establish resource equality; mandatory boundary hashes and hardware/WARP tests do. Explicit context snapshot omitted; immediate context recovered from checked Map READ/Unmap evidence. Original player Open fails. This is a retained capture-omission control.",
+      "device_scope": "Producer uses local hardware; generic original player adapter/configuration unidentified.",
+      "reference_rgba_sha256": "8df7e50637271d2e3d837d0ee3185a5e57ee1a7b450fca7d16a0d8b2676f4f35",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 20,
+          "repeat": 2,
+          "expected_rgba_sha256": "093857ba816ee9eea2dff253a48cc5d41361ac4070f9471a7326a9e83764835b",
+          "purpose": "Transfer omission; the empty-box cases intentionally remain unchanged."
+        }
+      ],
+      "boundaries": [
+        {
+          "kind": "texture",
+          "event": 20,
+          "resource": 5,
+          "expect_stable": true,
+          "expected_storage_sha256": "8df7e50637271d2e3d837d0ee3185a5e57ee1a7b450fca7d16a0d8b2676f4f35"
+        }
+      ]
+    },
+    {
+      "id": "transfer1_context_4",
+      "path": "4/capture.gpa_frame",
+      "sha256": "d4f4d8f8459dc1b3792e8121876ece68f77e8728723022b35b583cddcc35892c",
+      "bytes": 9867,
+      "family": "context1_transfer",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified original CaptureNextFrame output; native and shim-injected producers verify 12 frames each against CPU byte oracles. Marker images do not establish resource equality; mandatory boundary hashes and hardware/WARP tests do. Explicit context snapshot omitted; immediate context recovered from checked Map READ/Unmap evidence. Original player Open fails. This is a retained capture-omission control.",
+      "device_scope": "Producer uses local hardware; generic original player adapter/configuration unidentified.",
+      "reference_rgba_sha256": "d090a6a044298c041b646433d1bee7dca34565d32a1ca43b6d5959845e62f242",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 20,
+          "repeat": 2,
+          "expected_rgba_sha256": "093857ba816ee9eea2dff253a48cc5d41361ac4070f9471a7326a9e83764835b",
+          "purpose": "Transfer omission; the empty-box cases intentionally remain unchanged."
+        }
+      ],
+      "boundaries": [
+        {
+          "kind": "texture",
+          "event": 20,
+          "resource": 5,
+          "expect_stable": true,
+          "expected_storage_sha256": "d090a6a044298c041b646433d1bee7dca34565d32a1ca43b6d5959845e62f242"
+        }
+      ]
+    },
+    {
+      "id": "transfer1_context_5",
+      "path": "5/capture.gpa_frame",
+      "sha256": "5e3d1f40ae3a2b7bf6efdc16dc1c554fae2cbf3c3af67ff8919bdcbf183f5a6b",
+      "bytes": 9867,
+      "family": "context1_transfer",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified original CaptureNextFrame output; native and shim-injected producers verify 12 frames each against CPU byte oracles. Marker images do not establish resource equality; mandatory boundary hashes and hardware/WARP tests do. Explicit context snapshot omitted; immediate context recovered from checked Map READ/Unmap evidence. Original player Open fails. This is a retained capture-omission control.",
+      "device_scope": "Producer uses local hardware; generic original player adapter/configuration unidentified.",
+      "reference_rgba_sha256": "59a735dcced5285160caba5fbfc886049679a9e1582a8f224fd65a3000bb6918",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 20,
+          "repeat": 2,
+          "expected_rgba_sha256": "093857ba816ee9eea2dff253a48cc5d41361ac4070f9471a7326a9e83764835b",
+          "purpose": "Transfer omission; the empty-box cases intentionally remain unchanged."
+        }
+      ],
+      "boundaries": [
+        {
+          "kind": "texture",
+          "event": 20,
+          "resource": 5,
+          "expect_stable": true,
+          "expected_storage_sha256": "59a735dcced5285160caba5fbfc886049679a9e1582a8f224fd65a3000bb6918"
+        }
+      ]
+    },
+    {
+      "id": "transfer1_context_6",
+      "path": "6/capture.gpa_frame",
+      "sha256": "2a7ce2dff6ad0c914036d6de5e65a6e9b12945199a185b5b8c99a475ed0d714b",
+      "bytes": 9867,
+      "family": "context1_transfer",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified original CaptureNextFrame output; native and shim-injected producers verify 12 frames each against CPU byte oracles. Marker images do not establish resource equality; mandatory boundary hashes and hardware/WARP tests do. Explicit context snapshot omitted; immediate context recovered from checked Map READ/Unmap evidence. Original player Open fails. This is a retained capture-omission control.",
+      "device_scope": "Producer uses local hardware; generic original player adapter/configuration unidentified.",
+      "reference_rgba_sha256": "093857ba816ee9eea2dff253a48cc5d41361ac4070f9471a7326a9e83764835b",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 20,
+          "repeat": 2,
+          "expected_rgba_sha256": "093857ba816ee9eea2dff253a48cc5d41361ac4070f9471a7326a9e83764835b",
+          "purpose": "Transfer omission; the empty-box cases intentionally remain unchanged."
+        }
+      ],
+      "boundaries": [
+        {
+          "kind": "texture",
+          "event": 20,
+          "resource": 5,
+          "expect_stable": true,
+          "expected_storage_sha256": "093857ba816ee9eea2dff253a48cc5d41361ac4070f9471a7326a9e83764835b"
+        }
+      ]
+    },
+    {
+      "id": "transfer1_context_10",
+      "path": "10/capture.gpa_frame",
+      "sha256": "f01e8bad80e4b63c49a023869d5f703574df658f9509ee99667667e315e68a1f",
+      "bytes": 10119,
+      "family": "context1_transfer",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified original CaptureNextFrame output; native and shim-injected producers verify 12 frames each against CPU byte oracles. Marker images do not establish resource equality; mandatory boundary hashes and hardware/WARP tests do. Explicit context snapshot omitted; immediate context recovered from checked Map READ/Unmap evidence. Original player Open fails. This is a retained capture-omission control.",
+      "device_scope": "Producer uses local hardware; generic original player adapter/configuration unidentified.",
+      "reference_rgba_sha256": "3ad340264f08703aefb6a32cc3a6f16c9dc9964707ab0d01e0d3ed4368df22b0",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 20,
+          "repeat": 2,
+          "expected_rgba_sha256": "093857ba816ee9eea2dff253a48cc5d41361ac4070f9471a7326a9e83764835b",
+          "purpose": "Transfer omission; the empty-box cases intentionally remain unchanged."
+        }
+      ],
+      "boundaries": [
+        {
+          "kind": "texture",
+          "event": 20,
+          "resource": 5,
+          "expect_stable": true,
+          "expected_storage_sha256": "3ad340264f08703aefb6a32cc3a6f16c9dc9964707ab0d01e0d3ed4368df22b0"
+        }
+      ]
+    },
+    {
+      "id": "transfer1_context_11",
+      "path": "11/capture.gpa_frame",
+      "sha256": "4b231a95f2d4f710a5b32800d9a54c6f2b42dcc9136a353ca9b9df0e5ef272f9",
+      "bytes": 9987,
+      "family": "context1_transfer",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified original CaptureNextFrame output; native and shim-injected producers verify 12 frames each against CPU byte oracles. Marker images do not establish resource equality; mandatory boundary hashes and hardware/WARP tests do. Explicit context snapshot omitted; immediate context recovered from checked Map READ/Unmap evidence. Original player Open fails. This is a retained capture-omission control.",
+      "device_scope": "Producer uses local hardware; generic original player adapter/configuration unidentified.",
+      "reference_rgba_sha256": "cd873d1f809b74354ae9cb9159d5085ff2df42358e75b33a866aebe1680711c5",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 20,
+          "repeat": 2,
+          "expected_rgba_sha256": "093857ba816ee9eea2dff253a48cc5d41361ac4070f9471a7326a9e83764835b",
+          "purpose": "Transfer omission; the empty-box cases intentionally remain unchanged."
+        }
+      ],
+      "boundaries": [
+        {
+          "kind": "texture",
+          "event": 20,
+          "resource": 5,
+          "expect_stable": true,
+          "expected_storage_sha256": "cd873d1f809b74354ae9cb9159d5085ff2df42358e75b33a866aebe1680711c5"
+        }
+      ]
+    },
+    {
+      "id": "transfer1_context_12",
+      "path": "12/capture.gpa_frame",
+      "sha256": "b7adcd65998d83c1eff5823c54f12a674c4ac60ca858a704c4699edf5aa2de41",
+      "bytes": 10119,
+      "family": "context1_transfer",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified original CaptureNextFrame output; native and shim-injected producers verify 12 frames each against CPU byte oracles. Marker images do not establish resource equality; mandatory boundary hashes and hardware/WARP tests do. Explicit context snapshot omitted; immediate context recovered from checked Map READ/Unmap evidence. Original player Open fails. This is a retained capture-omission control.",
+      "device_scope": "Producer uses local hardware; generic original player adapter/configuration unidentified.",
+      "reference_rgba_sha256": "3ad340264f08703aefb6a32cc3a6f16c9dc9964707ab0d01e0d3ed4368df22b0",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 20,
+          "repeat": 2,
+          "expected_rgba_sha256": "093857ba816ee9eea2dff253a48cc5d41361ac4070f9471a7326a9e83764835b",
+          "purpose": "Transfer omission; the empty-box cases intentionally remain unchanged."
+        }
+      ],
+      "boundaries": [
+        {
+          "kind": "texture",
+          "event": 20,
+          "resource": 5,
+          "expect_stable": true,
+          "expected_storage_sha256": "3ad340264f08703aefb6a32cc3a6f16c9dc9964707ab0d01e0d3ed4368df22b0"
+        }
+      ]
+    },
+    {
+      "id": "transfer1_context_13",
+      "path": "13/capture.gpa_frame",
+      "sha256": "14c18af4e587317967a00792292b1f4e9481317562df92291d8dde800111eb3e",
+      "bytes": 9987,
+      "family": "context1_transfer",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified original CaptureNextFrame output; native and shim-injected producers verify 12 frames each against CPU byte oracles. Marker images do not establish resource equality; mandatory boundary hashes and hardware/WARP tests do. Explicit context snapshot omitted; immediate context recovered from checked Map READ/Unmap evidence. Original player Open fails. This is a retained capture-omission control.",
+      "device_scope": "Producer uses local hardware; generic original player adapter/configuration unidentified.",
+      "reference_rgba_sha256": "cd873d1f809b74354ae9cb9159d5085ff2df42358e75b33a866aebe1680711c5",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 20,
+          "repeat": 2,
+          "expected_rgba_sha256": "093857ba816ee9eea2dff253a48cc5d41361ac4070f9471a7326a9e83764835b",
+          "purpose": "Transfer omission; the empty-box cases intentionally remain unchanged."
+        }
+      ],
+      "boundaries": [
+        {
+          "kind": "texture",
+          "event": 20,
+          "resource": 5,
+          "expect_stable": true,
+          "expected_storage_sha256": "cd873d1f809b74354ae9cb9159d5085ff2df42358e75b33a866aebe1680711c5"
+        }
+      ]
+    },
+    {
+      "id": "transfer1_context_20",
+      "path": "20/capture.gpa_frame",
+      "sha256": "13266f1c230ca1de8e7e857c542eb7fcf33246ff244d5fd8bdf3cbb7175e3df8",
+      "bytes": 9903,
+      "family": "context1_transfer",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified original CaptureNextFrame output; native and shim-injected producers verify 12 frames each against CPU byte oracles. Marker images do not establish resource equality; mandatory boundary hashes and hardware/WARP tests do. Explicit context snapshot omitted; immediate context recovered from checked Map READ/Unmap evidence. Original player Open fails. This is a retained capture-omission control.",
+      "device_scope": "Producer uses local hardware; generic original player adapter/configuration unidentified.",
+      "reference_rgba_sha256": "093857ba816ee9eea2dff253a48cc5d41361ac4070f9471a7326a9e83764835b",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 20,
+          "repeat": 2,
+          "expected_rgba_sha256": "093857ba816ee9eea2dff253a48cc5d41361ac4070f9471a7326a9e83764835b",
+          "purpose": "Transfer omission; the empty-box cases intentionally remain unchanged."
+        }
+      ],
+      "boundaries": [
+        {
+          "kind": "texture",
+          "event": 20,
+          "resource": 5,
+          "expect_stable": true,
+          "expected_storage_sha256": "093857ba816ee9eea2dff253a48cc5d41361ac4070f9471a7326a9e83764835b"
+        }
+      ]
+    },
+    {
+      "id": "transfer1_context_21",
+      "path": "21/capture.gpa_frame",
+      "sha256": "a75929d95b280064ebea9e62b0ead54e13fe327c5ca8016476a2396989719092",
+      "bytes": 9843,
+      "family": "context1_transfer",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified original CaptureNextFrame output; native and shim-injected producers verify 12 frames each against CPU byte oracles. Marker images do not establish resource equality; mandatory boundary hashes and hardware/WARP tests do. Explicit context snapshot omitted; immediate context recovered from checked Map READ/Unmap evidence. Original player Open fails. This is a retained capture-omission control.",
+      "device_scope": "Producer uses local hardware; generic original player adapter/configuration unidentified.",
+      "reference_rgba_sha256": "3ad340264f08703aefb6a32cc3a6f16c9dc9964707ab0d01e0d3ed4368df22b0",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 20,
+          "repeat": 2,
+          "expected_rgba_sha256": "093857ba816ee9eea2dff253a48cc5d41361ac4070f9471a7326a9e83764835b",
+          "purpose": "Transfer omission; the empty-box cases intentionally remain unchanged."
+        }
+      ],
+      "boundaries": [
+        {
+          "kind": "texture",
+          "event": 20,
+          "resource": 5,
+          "expect_stable": true,
+          "expected_storage_sha256": "3ad340264f08703aefb6a32cc3a6f16c9dc9964707ab0d01e0d3ed4368df22b0"
+        }
+      ]
+    },
+    {
+      "id": "transfer1_context_24",
+      "path": "24/capture.gpa_frame",
+      "sha256": "086d1f4d7277d2eba96d741ec0e53af464bdc3620abe08c1ef07a6942fc75a86",
+      "bytes": 10119,
+      "family": "context1_transfer",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [],
+      "provenance_note": "Unmodified original CaptureNextFrame output; native and shim-injected producers verify 12 frames each against CPU byte oracles. Marker images do not establish resource equality; mandatory boundary hashes and hardware/WARP tests do. Explicit context snapshot omitted; immediate context recovered from checked Map READ/Unmap evidence. Original player Open fails. This is a retained capture-omission control.",
+      "device_scope": "Producer uses local hardware; generic original player adapter/configuration unidentified.",
+      "reference_rgba_sha256": "3ad340264f08703aefb6a32cc3a6f16c9dc9964707ab0d01e0d3ed4368df22b0",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 20,
+          "repeat": 2,
+          "expected_rgba_sha256": "093857ba816ee9eea2dff253a48cc5d41361ac4070f9471a7326a9e83764835b",
+          "purpose": "Transfer omission; the empty-box cases intentionally remain unchanged."
+        }
+      ],
+      "boundaries": [
+        {
+          "kind": "texture",
+          "event": 20,
+          "resource": 5,
+          "expect_stable": true,
+          "expected_storage_sha256": "3ad340264f08703aefb6a32cc3a6f16c9dc9964707ab0d01e0d3ed4368df22b0"
+        }
+      ]
+    }
+  ],
+  "producer_manifest": {
+    "path": "artifacts\\m2-transfer1-originals-final\\manifest.json",
+    "sha256": "3a6b41764278d60be4cf6c77dba93d7b46c82744d4fe763f4389b724641eaef1"
+  },
+  "producer_source_copy": {
+    "path": "artifacts/transfer1-probe-before-context-observation.cpp",
+    "sha256": "bafc2241ba996dcd865b44b290e089248cf28e3841b10d0e27f3eea5c082ee5f"
+  }
+}

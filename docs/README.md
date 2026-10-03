@@ -35,6 +35,10 @@ upstream repository that are not vendored here.
 
 ## Historical implementation and acceptance records
 
+- [Texture export across queued refreshes](TEXTURE_EXPORT_FIX.md).
+
+- [Context1 resource transfers](TRANSFER1_AUDIT.md), [acceptance baseline](transfer1-baseline.json), [original corpus](transfer1-corpus.json) and [retained context-omission controls](transfer1-context-corpus.json).
+
 The following index keeps the existing document locations stable for citations.
 Use the topical links in the usage/current-status guides for a shorter route.
 
