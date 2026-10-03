@@ -1,0 +1,97 @@
+# Current capabilities and compatibility
+
+Reviewed **2026-10-03** against implementation commit `ba1c468`.
+Replay acceptance is pinned by `7ba1f29`; comparison reporting by `54eb5a4`.
+This is the current capability summary. Linked migration/audit documents describe
+individual batches and may retain limitations superseded by later work.
+This documentation review adds no new execution or clean-machine certification.
+
+## Supported scope
+
+The compatibility target is **GPA 2025 R1 legacy DX11 / IGPA v3 on Windows x64**.
+Ordinary replay is native C++20/Qt and requires neither Python nor GPA.
+Support is established for specific layouts, command/resource semantics and
+tested workloads; opening a file does not prove accurate replay.
+
+| Area | Available behavior | Boundaries and evidence |
+|---|---|---|
+| Preflight and API inspection | Offline diagnostics, decoded fields, references, coverage and Qt diagnostics | Structural success is not GPU success; metadata is not execution. [Acceptance infrastructure](COMPATIBILITY_BASELINE.md) |
+| Immediate-context replay | Captured draws/dispatches, supported setters, uploads, copies, queries/predication and presentation | Broader layouts, resource versions and some presentation/transfer cases remain incomplete. [Setters](PIPELINE_SETTER_AUDIT.md), [texture transfers](TEXTURE_COPY_AUDIT.md), [presentation](PRESENT_REPLAY_AUDIT.md) |
+| Frame-time creation | Validated buffers, textures/views, shaders, pipeline states and class linkage/instances | Device5 coverage is not every interface version or descriptor combination; required missing data and unresolved identities are rejected. [Buffers](BUFFER_CREATION_AUDIT.md), [textures](TEXTURE_DIMENSIONS_AUDIT.md), [texture views](VIEW_CREATION_AUDIT.md), [buffer views](BUFFER_VIEW_CREATION_AUDIT.md), [pipeline](PIPELINE_CREATION_AUDIT.md), [geometry/SO](GEOMETRY_CREATION_AUDIT.md), [classes](CLASS_CREATION_AUDIT.md) |
+| Texture and output inspection | Presentation/RTV/DSV selection, mip/layer/slice, typed/channel/range controls, supported MSAA resolve/sample and planar inspection, exports | Format/device limits remain; legacy P010/P016 initial data can contain recovered Y only. [Frame output](FRAME_OUTPUT_MIGRATION.md), [texture inspection](TEXTURE_INSPECTION_MIGRATION.md), [planar writes](PLANAR_WRITE_MIGRATION.md) |
+| Pipeline, buffers and geometry | Captured versus native replay state, before/after boundaries, constants/counters, IA and supported post-shader output | Missing state retains provenance; SO cursors have no native getter; frame-before counters require evidence or explicit experiments. [Boundaries](BEFORE_BOUNDARY_MIGRATION.md), [geometry](POST_TRANSFORM_MIGRATION.md), [HS output](HULL_OUTPUT_MIGRATION.md), [counters](BUFFER_VIEW_CREATION_AUDIT.md) |
+| Experiments | Shader replacement, six-stage shader/IA/CB/SRV/sampler/output/SO/pipeline setter edits, buffer/texture edits and history | Event-scoped edits differ from persistent setters; consumer and format combinations retain their own limits. [Shader setters](SHADER_SETTER_MIGRATION.md), [event textures](EVENT_TEXTURE_MIGRATION.md), [reports](EXPERIMENT_REPORT_MIGRATION.md) |
+| Coverage and Quad | Native execution, Qt controls, navigation, export and cancellation | Coverage is not an overdraw counter; Quad groups are not physical hardware quad counts. Sample/order/coordinate limits remain. [Coverage](COVERAGE_UI_MIGRATION.md), [Quad](QUAD_UI_MIGRATION.md) |
+| Shader tools and debugging | DXBC/reflection, supported HLSL recovery, compilation/projects, source metadata and native GS/HS/DS checkpoint UI | Recovered HLSL is not original source; source availability and shader operations constrain debugging. [Recovery](HLSL_RECOVERY_MIGRATION.md), [projects](SHADER_PROJECT_MIGRATION.md), [checkpoints](CHECKPOINT_UI_MIGRATION.md) |
+| RenderDoc analysis | Pixel History, VS/PS/CS recorded debugging, Replay Mesh and Replay Metrics | Requires compatible external RenderDoc 1.45 release DLL; unavailable values and backend limits remain explicit. [History](PIXEL_HISTORY_UI_MIGRATION.md), [debugging](REPLAY_DEBUG_UI_MIGRATION.md), [mesh](REPLAY_MESH_MIGRATION.md), [metrics](REPLAY_METRICS_MIGRATION.md) |
+| GPU measurements | Native DX11 statistics/timing; Intel MD foundation, scheduled/uniform Qt collection and event-group CLI collection | Intel paths require supported hardware/driver. Event-group Qt/session integration, GTPin/Shader Profiler and further consumers remain incomplete. [Statistics](GPU_STATISTICS_MIGRATION.md), [timing](GPU_PROFILE_MIGRATION.md), [scheduled UI](MD_ITERATIONS_UI_MIGRATION.md), [uniform UI](UNIFORM_METRICS_UI_MIGRATION.md), [groups](MD_HOTSPOTS_MIGRATION.md) |
+| Captured contexts and command lists | Identity/evidence inspection, inventory and explicitly checked limited metadata paths | Production replay of captured Deferred Context / ExecuteCommandList semantics remains incomplete. Self-created lists in metrics/diagnostics do not establish captured-list replay support. [Context workflow](USAGE.md#contexts-and-pipeline-boundaries) |
+
+## Latest accepted replay matrix
+
+The [class-creation baseline](class-creation-baseline.json) records the latest
+full replay matrix, interpreted in the [class audit](CLASS_CREATION_AUDIT.md).
+
+| Measure | Recorded result |
+|---|---|
+| Enrolled files / ordinary independent runs | 244 / 488 |
+| Repeated output | 243 stable files; one known-variable Helldivers file |
+| Previously stable image hashes | All 230 unchanged |
+| Diagnostic control runs / retained texture boundary exports | 253 / 88 |
+| Related CTest suites / golden checks | 29 / 4 passed |
+| New class-creation producer frame checks | 312 |
+| New class-creation hardware/WARP cases / exact Dispatch dumps | 26 / 30 |
+| New uninstrumented original-player runs | 26 completed; all 13 files differ from expected images |
+
+These are separate measurements, not an overall correctness percentage. The
+matrix includes research fixtures and self-owned original captures as well as
+game frames; repeated equality alone does not certify intermediate state.
+
+The original-player class discrepancy is retained: thirteen diagnostic runs on
+the RTX 3070 Laptop GPU observe zero class instances supplied to CSSetShader,
+then a null CS and unchanged zero UAV bytes at Dispatch. Native/shim-injected
+producers and FloraGPA hardware/WARP agree on expected outputs. This localizes
+a failure in the development original-player path; it does not establish the
+behavior of every original GPA GUI path.
+
+[Comparison reporting](original-comparison-baseline.json) separately verifies
+execution status and image comparisons (13 CPU checks, nine independent runs,
+seven original runs). These focused runs are not added to the 488-run matrix.
+Helldivers' [sharpening variability](HELLDIVERS_REPLAY_FIX.md) remains visible;
+no shader modification, global tolerance or automatic event disable manufactures
+a stable result. Earlier Intel-metric batches retain their separately documented
+intermittent BF1 baseline mismatch.
+
+## Remaining roadmap
+
+| Stage | Current position and completion gate |
+|---|---|
+| M1 — Acceptance infrastructure | Minimum loop delivered: corpus, coverage, preflight, serial comparison and diagnostic queue. Extend evidence as paths arrive. |
+| M2 — Ordinary replay | In progress. Audit remaining interfaces/semantics; enrolled immediate-context paths must replay correctly or reject with reproducible, located diagnostics. |
+| M3 — Deferred Context / Command List | Incomplete. Require original captures proving identity, build order, resource versions, repeated execution, restore-state and event mapping before production support. |
+| M4 — Resources and boundaries | Incomplete. Verify saved initial/differential data, subresources, counters, Query/Predication and presentation; distinguish absent information from implementation gaps. |
+| M5 — Stable compatibility release | Incomplete. Broaden captures, repeat/long-duration checks, recovery and large-file testing; validate clean-environment build/deployment and publish a fixed matrix. |
+| M6 — Analyzer and other versions | Incomplete. Continue remaining Qt consumers, advanced profiling/debugging and version-specific adapters after core replay gates. Existing analyzer features remain available. |
+
+Forward order is **M1 → M2 → M3 → M4 → M5**, then remaining M6 work. Existing
+research/analyzer components do not complete earlier compatibility gates.
+The scope is replay of existing captures; self-owned capture probes are
+development fixtures, not a complete capture tool.
+
+The [module ledger](migration.json) remains **72 ported / 117 partial / 15 pending**
+across 204 Python modules. This is migration bookkeeping, not a denominator for
+original GPA functionality. The [Chinese development log](MIGRATION_STATUS.md)
+retains its chronology and historical counts.
+
+## Evidence and maintenance
+
+Capture names, device details, hashes and original baseline JSON remain intact.
+Paths under `artifacts/`, `out/`, `build/` and the external reference workspace
+identify local evidence, not files supplied by a clone. Original captures,
+proprietary DLLs and the recovered Python reference are not bundled. Hashes
+identify evidence; they do not make missing artifacts public.
+
+For a capability change, update this summary with a source revision and specific
+acceptance evidence. Keep original batch records and JSON; add supersession
+links instead of replacing historical results with new numbers. Independent
+clean-Windows deployment and complete M2–M6 acceptance remain open.
