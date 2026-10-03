@@ -1,5 +1,11 @@
 # M2: resource minimum LOD discovery
 
+> Historical discovery at `6c8478f`. The six files below remain unchanged.
+> Subsequent [resource LOD implementation](RESOURCE_LOD_AUDIT.md) covers them
+> and adds creation/order controls plus an explicit missing-state rejection.
+> The original failures and mismatched original-player images remain evidence;
+> they are not rewritten as historical passes.
+
 Six unmodified GPA 2025 R1 captures now demonstrate an ordinary immediate-context
 compatibility gap. This is discovery evidence, not acceptance of new replay code.
 The producer is `tools/native/min_lod_probe.cpp`; the capture registry is

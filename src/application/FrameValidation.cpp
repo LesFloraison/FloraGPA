@@ -16,6 +16,7 @@
 #include "core/Predication.h"
 #include "core/PresentRecords.h"
 #include "core/ReplayCapabilities.h"
+#include "core/ResourceLod.h"
 #include "core/SrvBindings.h"
 #include "core/StreamOutput.h"
 #include "core/TextureCreation.h"
@@ -53,6 +54,18 @@ Json validateFrame(const std::filesystem::path &path, const std::function<bool()
         Frame frame(path);
         report["entries"] = frame.entries().size();
         report["source_sha256"] = frame.sha256();
+        const auto lod = auditResourceLod(frame);
+        report["resource_lod_initial_observations"] = Json::array();
+        for (const auto &[resource, initial] : lod.initial)
+            report["resource_lod_initial_observations"].push_back(
+                {{"resource_id", resource},
+                 {"observation_event", initial.observation},
+                 {"min_lod", initial.value},
+                 {"source", "first resource LOD record is a getter; no preceding saved setter or frame-time "
+                            "creation"}});
+        for (const auto &issue : lod.issues)
+            finding(&frame.entry(issue.event), "error", "resource_lod_unresolved", issue.reason,
+                    issue.resource);
         std::map<std::pair<unsigned, unsigned>, Json> coverage;
         size_t scanned = 0;
         std::optional<MapRecordAudit> mapAudit;

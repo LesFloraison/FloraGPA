@@ -40,6 +40,8 @@
 {0x253, "PSSetConstantBuffers1"},
 {0x254, "CSSetConstantBuffers1"},
 {0x257, "ClearView"},
+{0x3515, "SetResourceMinLOD"},
+{0x3516, "GetResourceMinLOD"},
 {0x25e, "CSSetUnorderedAccessViews"},
 {0x300e, "Texture3D.GetType"},
 {0x3012, "Buffer.QueryInterface"},

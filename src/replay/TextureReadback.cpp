@@ -8,6 +8,10 @@ std::vector<uint8_t> Replay::readTexture(Id id) {
     return readTextureStorage(get<ID3D11Resource>(id), resource);
 }
 std::vector<uint8_t> Replay::readTextureStorage(ID3D11Resource *source, const Resource &resource) {
+    requireResourceLod(resource.id);
+    if (hasResourceLodClamp(resource) && resourceLods_.at(resource.id) != 0)
+        throw std::runtime_error(
+            "Full texture storage readback with nonzero resource minimum LOD is unverified");
     const auto info = textureInfo(resource);
     if (info.samples != 1 || !info.mips || info.mips > 32 || !info.layers ||
         uint64_t(info.mips) * info.layers > 30720)

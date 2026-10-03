@@ -1,0 +1,23 @@
+{
+  "schema": "FloraGPA compatibility corpus 1",
+  "profile": "GPA 2025 R1 legacy DX11 / IGPA v3",
+  "cases": [
+    {
+      "id": "minlod_6",
+      "path": "m2-minlod-boundaries/6/capture.gpa_frame",
+      "sha256": "91833a23fc09bbc49de350a2af48b959c6e01a34507e864b11845a015b465211",
+      "bytes": 58460,
+      "family": "resource_min_lod",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [
+        "artifacts\\m2-minlod-boundaries\\manifest.json"
+      ],
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "controls": [],
+      "boundaries": [],
+      "device_scope": "Hardware/WARP tests have independent producer pixels; original adapter/configuration remains unidentified.",
+      "provenance_note": "Unmodified original GPA output. Mode 6 has no saved initial LOD and is an explicit rejection control. Other nonzero modes retain original-player mip-0 discrepancies."
+    }
+  ]
+}

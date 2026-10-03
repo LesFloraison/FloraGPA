@@ -22,6 +22,9 @@ bool in(uint16_t t, std::initializer_list<uint16_t> values) {
 }
 } // namespace
 ReplayCapability replayCapability(uint16_t t) {
+    if (t == 0x3515 || t == 0x3516)
+        return {t == 0x3515 ? "execute" : "metadata", "src/core/ResourceLod.cpp;src/replay/ResourceLod.cpp",
+                "tests/ResourceLodTests.cpp;docs/MIN_LOD_DISCOVERY.md"};
     if (t == 0x255 || t == 0x256)
         return {"execute", "src/core/Commands.cpp;src/core/CopyCommands.cpp;src/replay/Replay.cpp",
                 "tests/Transfer1Tests.cpp;docs/TRANSFER1_AUDIT.md"};

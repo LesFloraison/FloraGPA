@@ -35,6 +35,8 @@ upstream repository that are not vendored here.
 
 ## Historical implementation and acceptance records
 
+- [Resource minimum LOD replay](RESOURCE_LOD_AUDIT.md), [acceptance baseline](resource-lod-baseline.json), [positive corpus](min-lod-corpus.json) and [missing-state control](min-lod-missing-state-corpus.json).
+
 - [Resource minimum LOD discovery](MIN_LOD_DISCOVERY.md), [blocked corpus](min-lod-discovery-corpus.json) and [discovery baseline](min-lod-discovery-baseline.json).
 
 - [Texture export across queued refreshes](TEXTURE_EXPORT_FIX.md).

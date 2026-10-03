@@ -349,6 +349,12 @@ IUnknown *Replay::object(Id id) {
     } catch (const std::exception &e) {
         throw std::runtime_error("Resource " + std::to_string(id) + ": " + e.what());
     }
+    if (hasResourceLodClamp(resource) && resourceLods_.contains(id)) {
+        Com<ID3D11Resource> texture;
+        check(result.As(&texture), "Query initial LOD resource");
+        context_->SetResourceMinLOD(texture.Get(), resourceLods_.at(id));
+        ++counts["resource_lod_initial_restores"];
+    }
     if (renderdoc_ && result) {
         Com<ID3D11DeviceChild> child;
         if (SUCCEEDED(result.As(&child))) {
@@ -787,6 +793,23 @@ void Replay::command(const Entry &e) {
     if (outputHistory_ && OutputBindingModel::models(e.type))
         outputHistory_->advance(e.id);
     Reader r(payload);
+    if (isResourceLodRecord(t)) {
+        if (!std::ranges::equal(payload, frame_.payload(e.id)))
+            throw std::runtime_error("Resource LOD payload experiments are not supported");
+        const auto record = readResourceLod(t, payload);
+        validateResourceLod(frame_, record);
+        for (const auto &issue : resourceLodAudit_->issues)
+            if (issue.event == e.id)
+                throw std::runtime_error(issue.reason);
+        if (options_.disabled.contains(e.id))
+            return;
+        if (record.setter) {
+            resourceLods_[record.resource] = record.value;
+            context_->SetResourceMinLOD(get<ID3D11Resource>(record.resource), record.value);
+        }
+        ++counts[commandName(t)];
+        return;
+    }
     if (t >= 0x3278 && t <= 0x327e) {
         validateAnnotationCommand(t, payload);
         ++counts["annotation_records"];
@@ -834,6 +857,7 @@ void Replay::command(const Entry &e) {
                     observe(true);
                 return false;
             }
+            requireBoundResourceLods(t == 0x35 || t == 0x36);
             if (!undefinedCreatedCounters_.empty())
                 for (const auto &counter : boundCounters(frame_, event, state))
                     requireCreatedCounter(counter.view);
@@ -1090,6 +1114,8 @@ void Replay::command(const Entry &e) {
                   "Name captured texture/view");
         }
         objects_.emplace(creation.resource, created);
+        if (!isViewCreation(t) && hasResourceLodClamp(frame_.resource(creation.resource)))
+            resourceLods_[creation.resource] = 0; // A successful native creation establishes the default.
         if (t == 0x357d && describeCounter(frame_, creation.resource)) {
             if (auto it = options_.initialUavCounters.find(creation.resource);
                 it != options_.initialUavCounters.end())
@@ -1175,6 +1201,9 @@ void Replay::command(const Entry &e) {
         ++counts["object_observation_records"];
         return;
     }
+    if (resourceLodAudit_ && !resourceLodAudit_->clamped.empty())
+        for (auto resource : resourceLodAccesses(frame_, e, payload))
+            requireResourceLod(resource);
     r.skip(16);
     if (t == 0x257) {
         const auto command = readClearView(payload);
@@ -1415,6 +1444,11 @@ void Replay::run(const std::function<void(Id, size_t, size_t)> &progress,
     bindingEvent_ = 0;
     clearBindingGaps();
     objects_.clear();
+    if (!resourceLodAudit_)
+        resourceLodAudit_ = auditResourceLod(frame_);
+    resourceLods_.clear();
+    for (const auto &[resource, initial] : resourceLodAudit_->initial)
+        resourceLods_[resource] = initial.value;
     unissuedPredicates_.clear();
     undefinedCreatedCounters_.clear();
     ignoredMsaaInitial_.clear();

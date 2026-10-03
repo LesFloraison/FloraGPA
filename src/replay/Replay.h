@@ -10,6 +10,7 @@
 #include "core/PipelineCreation.h"
 #include "core/PredicateCreation.h"
 #include "core/Predication.h"
+#include "core/ResourceLod.h"
 #include "core/SamplerBindings.h"
 #include "core/SrvBindings.h"
 #include "core/TextureCreation.h"
@@ -158,6 +159,10 @@ class Replay {
     };
     std::vector<Timestamp> timestamps_;
     const Frame &frame_;
+    std::optional<ResourceLodAudit> resourceLodAudit_;
+    std::map<Id, float> resourceLods_;
+    void requireResourceLod(Id resource) const;
+    void requireBoundResourceLods(bool compute);
     std::optional<MapRecordAudit> mapRecordAudit_;
     std::optional<BufferCreationAudit> bufferCreationAudit_;
     std::optional<TextureCreationAudit> textureCreationAudit_;

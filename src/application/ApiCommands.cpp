@@ -4,6 +4,7 @@
 #include "core/Contexts.h"
 #include "core/PipelineCreation.h"
 #include "core/PredicateCreation.h"
+#include "core/ResourceLod.h"
 #include "core/TextureCreation.h"
 #include <QChar>
 #include <QDir>
@@ -388,7 +389,13 @@ Json inspectCommand(const Frame &frame, Id id) {
                 slot = 30;
             else if (name == "SOSetTargets")
                 slot = 37;
-            if (t >= 0x3278 && t <= 0x327e)
+            if (isResourceLodRecord(t)) {
+                readResourceLod(t, raw);
+                if (t == 0x3515)
+                    r.values("Qf", {"resource", "min_lod"}, {"resource"});
+                else
+                    r.values("fQ", {"observed_min_lod", "resource"}, {"resource"});
+            } else if (t >= 0x3278 && t <= 0x327e)
                 out["annotation"] = annotation(t, r);
             else if (getter(t))
                 readGetter(t, r);

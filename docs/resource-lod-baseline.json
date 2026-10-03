@@ -1,0 +1,346 @@
+{
+  "schema": "FloraGPA resource minimum LOD acceptance 1",
+  "completion": "M2 and M3-M6 remain incomplete",
+  "inventory_files": 322,
+  "positive_files": 321,
+  "explicit_missing_state_files": 1,
+  "file_outcomes": {
+    "repeat_stable": 320,
+    "repeat_variable": 1
+  },
+  "native_runs": 642,
+  "previous_stable_hashes_unchanged": 309,
+  "diagnostic_control_runs": 353,
+  "resource_boundary_exports": 208,
+  "strict_byte_golden_exports": 204,
+  "helldivers_diagnostic_boundary_exports": 4,
+  "producer_frame_checks": 288,
+  "new_original_player_runs": 22,
+  "new_original_equal_files": 3,
+  "new_original_different_files": 8,
+  "original_configuration_equivalence": "not established; red mip-0 differences retained, producer pixels are authoritative for these self-owned programs",
+  "package": "out\\FloraGPA-minlod-final-20261004",
+  "package_sha256": {
+    "FloraGPA.exe": "e9ef07ac900ac650182ecd629d2c5da4f0ae718a785a145a19ca6e0d40a14e60",
+    "FloraGPA.Cli.exe": "f0e83ec4829370af13678d794f0f0231c77ce00d1430e55d1a53183995e5802d",
+    "FloraGPA.Worker.exe": "be1d1da18d27f0348730186594b792febc6cd1971a7e579dc635a2167d0ecc3f",
+    "FloraGPA.Rdc.exe": "f4d21d43e661d24d392e91fc1a1f1460a20d1377fcf5075c57083ad289e82773",
+    "FloraGPA.Metrics.dll": "58b6278f2a93e783b1e8bb1290e9b0e51745f1a36825f296584f52159fd7c6db"
+  },
+  "results": {
+    "corpus": {
+      "path": "artifacts\\m2-minlod-final-regression-corpus\\validation.json",
+      "sha256": "3d3ab887ac657c69e0985db916d1b3166e814d53dcd0f514949be9e43361e457",
+      "counts": {
+        "repeat_stable": 90,
+        "repeat_variable": 1
+      }
+    },
+    "originals": {
+      "path": "artifacts\\m2-minlod-final-regression-originals\\validation.json",
+      "sha256": "2a03b32232332124e989a1770f22ee76baec8e912b2c3f4fde249e50bc086cbc",
+      "counts": {
+        "repeat_stable": 11
+      }
+    },
+    "copy": {
+      "path": "artifacts\\m2-minlod-final-regression-copy\\validation.json",
+      "sha256": "b3d6394be36c96878e509f3c6942667ced99f362e7746388171a24002c5fc384",
+      "counts": {
+        "repeat_stable": 6
+      }
+    },
+    "present": {
+      "path": "artifacts\\m2-minlod-final-regression-present\\validation.json",
+      "sha256": "bcb7137667e9811940abf6eab458b098d94135c727037f718878cec256b45836",
+      "counts": {
+        "repeat_stable": 5
+      }
+    },
+    "buffer": {
+      "path": "artifacts\\m2-minlod-final-regression-buffer\\validation.json",
+      "sha256": "435859e0f9d2010009402f461fdcf733f7e3923d18af5f6e302131f2a0c525f4",
+      "counts": {
+        "repeat_stable": 5
+      }
+    },
+    "pipeline": {
+      "path": "artifacts\\m2-minlod-final-regression-pipeline\\validation.json",
+      "sha256": "0abda3a4b57da881c80b13aa394f80c4ef992440808a8cd4e38fa8dbc901dfa8",
+      "counts": {
+        "repeat_stable": 5
+      }
+    },
+    "creation": {
+      "path": "artifacts\\m2-minlod-final-regression-creation\\validation.json",
+      "sha256": "f4958c4d9e62cc80447c6a5e148e0e31503a7b40260b32b3121640d7ac799160",
+      "counts": {
+        "repeat_stable": 7
+      }
+    },
+    "discovery": {
+      "path": "artifacts\\m2-minlod-final-regression-discovery\\validation.json",
+      "sha256": "b7fa534eadb5dfe46390580eafd9490fad39b352890082b456fea28eba46230d",
+      "counts": {
+        "repeat_stable": 1
+      }
+    },
+    "dimensions": {
+      "path": "artifacts\\m2-minlod-final-regression-dimensions\\validation.json",
+      "sha256": "1219f7f6852a4845122f75694fdc1840f019a4c8adc972bdaa6e0977282a5113",
+      "counts": {
+        "repeat_stable": 17
+      }
+    },
+    "views": {
+      "path": "artifacts\\m2-minlod-final-regression-views\\validation.json",
+      "sha256": "b84546b8977d9a4a2310e88ffced0c43c8bc0c68a9c5d05c35d3df9144abe0be",
+      "counts": {
+        "repeat_stable": 12
+      }
+    },
+    "buffer-views": {
+      "path": "artifacts\\m2-minlod-final-regression-buffer-views\\validation.json",
+      "sha256": "5a74149238acf81b5996244a6dfb4ea0c2713e2e884e3ee88c947db9fceb8bfe",
+      "counts": {
+        "repeat_stable": 19
+      }
+    },
+    "pipeline-creation": {
+      "path": "artifacts\\m2-minlod-final-regression-pipeline-creation\\validation.json",
+      "sha256": "d77e87e74facd43930ecc03f90f80ca01249c6a28cca2955bd21c7f878e744fa",
+      "counts": {
+        "repeat_stable": 32
+      }
+    },
+    "geometry-creation": {
+      "path": "artifacts\\m2-minlod-final-regression-geometry-creation\\validation.json",
+      "sha256": "bac840e24b40ef3d1437998dfb0576dc25953fceebed54ca410051f37f1bee01",
+      "counts": {
+        "repeat_stable": 20
+      }
+    },
+    "class-creation": {
+      "path": "artifacts\\m2-minlod-final-regression-class-creation\\validation.json",
+      "sha256": "78aa76de30154ca70ef5496e1186d0adb47c5fcfaa54b33b141d582c4d3aacfc",
+      "counts": {
+        "repeat_stable": 13
+      }
+    },
+    "predicate-creation": {
+      "path": "artifacts\\m2-minlod-final-regression-predicate-creation\\validation.json",
+      "sha256": "cd9715eddb28ebe18c24d518f8678a0be38e81f0133439b7f3678c97aac939f5",
+      "counts": {
+        "repeat_stable": 10
+      }
+    },
+    "clear-view": {
+      "path": "artifacts\\m2-minlod-final-regression-clear-view\\validation.json",
+      "sha256": "cc05cc85ff75116732b5989df6cc31a20345dee41c7099f152e86812d8e4ac53",
+      "counts": {
+        "repeat_stable": 16
+      }
+    },
+    "transfer1": {
+      "path": "artifacts\\m2-minlod-final-regression-transfer1\\validation.json",
+      "sha256": "89e857e2dd1b78e83fe7feb9f8509754a128f841b46c48d5b36ae8d2c34131bc",
+      "counts": {
+        "repeat_stable": 26
+      }
+    },
+    "transfer1-context": {
+      "path": "artifacts\\m2-minlod-final-regression-transfer1-context\\validation.json",
+      "sha256": "132ab52628f68e781f2de44efa394acce06a4858dff1673d15c3ccae5bd24380",
+      "counts": {
+        "repeat_stable": 14
+      }
+    },
+    "minlod": {
+      "path": "artifacts\\m2-minlod-final-comparison\\validation.json",
+      "sha256": "0bd75b377a804d2a8a69a4e98cc1ca1e94959ccdc09e6b355d48a45495df0bd0",
+      "counts": {
+        "repeat_stable": 11
+      }
+    }
+  },
+  "producer_manifests": [
+    {
+      "path": "artifacts\\m2-minlod-discovery\\manifest.json",
+      "sha256": "c0224023b97d617f25810af8a28c37cbabfddaefc9d3182fdb2514f2b843b2db"
+    },
+    {
+      "path": "artifacts\\m2-minlod-boundaries\\manifest.json",
+      "sha256": "2a04a998bd88f8e49f54b458dd3a8c6b47e962d5dd6b2115fb6c150b05d3c4f9"
+    }
+  ],
+  "ctest": {
+    "path": "artifacts\\ctest-m2-minlod.log",
+    "sha256": "51983e2222be8d9f63b7cd301d6f2442477f01abf3f24e049f981fd3d52b826d",
+    "suites": 37,
+    "qt": {
+      "resource-lod": {
+        "path": "artifacts\\m2-minlod-qt-results\\resource-lod-Release.txt",
+        "sha256": "48f7b3ea72d5367999bb8386d709ab719b883b5f5d1c17e53c1a5575a59ead61",
+        "passed": 29
+      },
+      "ui": {
+        "path": "artifacts\\m2-minlod-qt-results\\ui-Release.txt",
+        "sha256": "b8866ad3ce2683032985ad77edf1317c3a06eb63cba80ebda4667f0b941e574d",
+        "passed": 56
+      },
+      "transfer1": {
+        "path": "artifacts\\m2-minlod-qt-results\\transfer1-Release.txt",
+        "sha256": "72aa238704dd5336ac484e1d65ab80d478d3315d5fa8f53ed131cb590d857998",
+        "passed": 57
+      }
+    }
+  },
+  "goldens": {
+    "path": "artifacts\\m2-minlod-final-regression-golden\\validation.json",
+    "sha256": "5e1dde1ab9876f50c472cdf84378931ffc3b5cd8e9700002b67d37bf81383ade",
+    "results": [
+      {
+        "case": "gf2",
+        "rgba_sha256": "2e1abc5eacb0bbfd801f9fe059c305baa9a0786c384b36a42fa5a323dd979fd1",
+        "passed": true,
+        "counts": {
+          "ClearDepthStencilView": 2,
+          "ClearRenderTargetView": 1,
+          "CreateBuffer": 2,
+          "DrawIndexed": 72,
+          "Map": 44,
+          "Present": 1,
+          "buffers_created_without_initial_data": 2,
+          "object_observation_records": 49,
+          "pipeline_setter_records": 142,
+          "private_data_observations": 4,
+          "query_metadata_records": 2,
+          "state_or_auxiliary_records": 551,
+          "unmap_observations": 44
+        }
+      },
+      {
+        "case": "gf2-negative",
+        "rgba_sha256": "b2c5548a51715f581c4591acc266ac7a0c65b54b7ecd9a49f43499fa9b76c5f1",
+        "passed": true,
+        "counts": {
+          "ClearDepthStencilView": 2,
+          "ClearRenderTargetView": 1,
+          "CreateBuffer": 2,
+          "Map": 44,
+          "Present": 1,
+          "buffers_created_without_initial_data": 2,
+          "object_observation_records": 49,
+          "pipeline_setter_records": 142,
+          "private_data_observations": 4,
+          "query_metadata_records": 2,
+          "state_or_auxiliary_records": 551,
+          "unmap_observations": 44
+        }
+      },
+      {
+        "case": "bf1",
+        "rgba_sha256": "1f724d1840652f66afd26dd30c95aecd5c1b4932eede56109198f15a8f57a2f6",
+        "passed": true,
+        "counts": {
+          "ClearDepthStencilView": 10,
+          "ClearRenderTargetView": 10,
+          "ClearUnorderedAccessViewFloat": 1,
+          "CopyResource": 2,
+          "CopyStructureCount": 6,
+          "CopySubresourceRegion": 7,
+          "Dispatch": 60,
+          "DispatchIndirect": 13,
+          "Draw": 79,
+          "DrawIndexed": 41,
+          "DrawIndexedInstanced": 1053,
+          "DrawInstanced": 29,
+          "GenerateMips": 2,
+          "Map": 4151,
+          "Present": 1,
+          "UpdateSubresource": 27,
+          "map_read_observations": 2,
+          "object_observation_records": 28,
+          "pipeline_setter_records": 2221,
+          "query_metadata_records": 17,
+          "state_or_auxiliary_records": 7354,
+          "unmap_observations": 4153,
+          "unresolved_input_layout_setters": 2,
+          "unresolved_output_setters": 6,
+          "unresolved_shader_setters": 4,
+          "unresolved_srv_setters": 2
+        }
+      },
+      {
+        "case": "bf1-negative",
+        "rgba_sha256": "cd3a3066f984b1c317fbeefec2836503f32078321d3dc1f367465f2c06d435bf",
+        "passed": true,
+        "counts": {
+          "ClearDepthStencilView": 10,
+          "ClearRenderTargetView": 10,
+          "ClearUnorderedAccessViewFloat": 1,
+          "CopyResource": 2,
+          "CopyStructureCount": 6,
+          "CopySubresourceRegion": 7,
+          "Dispatch": 60,
+          "DispatchIndirect": 13,
+          "GenerateMips": 2,
+          "Map": 4151,
+          "Present": 1,
+          "UpdateSubresource": 27,
+          "map_read_observations": 2,
+          "object_observation_records": 28,
+          "pipeline_setter_records": 2221,
+          "query_metadata_records": 17,
+          "state_or_auxiliary_records": 7354,
+          "unmap_observations": 4153,
+          "unresolved_input_layout_setters": 2,
+          "unresolved_output_setters": 6,
+          "unresolved_shader_setters": 4,
+          "unresolved_srv_setters": 2
+        }
+      }
+    ]
+  },
+  "sources": {
+    "CMakeLists.txt": "d4b2a0e224abd2d467d6016c761797a8e4d1520f2a441b75f34b9ede9ea7f640",
+    "src/core/ResourceLod.cpp": "96ea114b24b192937243ac1e34ed8e95c8e86b86cbb8eb228468782dd7970b16",
+    "src/core/ResourceLod.h": "bee5375af115deb62d8bab3866bd31f773d0e6282b2b0616a13dd05340269275",
+    "src/core/ReplayCapabilities.cpp": "73749952882d85e61d633d9e70da1d129ba61cabdd928cc636488598ae105d4e",
+    "src/core/CommandNames.inc": "28b4c819af8b110577afb436fe34c4f0811cdfd26d16c2a368fe1aa3ee72dc56",
+    "src/replay/ResourceLod.cpp": "7fae56208f9b04f1b488eaf81da2059fadf3a7873826408367126871608e0639",
+    "src/replay/Replay.cpp": "b8ded6c9586d149fb7e1a1e3e794cc8c1cfd4ed6ade9bd74ccebd1dbb6b0a975",
+    "src/replay/Replay.h": "dbe542ca299731a64bafcc6c9fb4f7cacf29c9adc0f12460acccd515f978da87",
+    "src/replay/TextureReadback.cpp": "19291c9768e1c611a409421dfada4cc021e748b3dffe90123b578cacffaf5e3c",
+    "src/application/FrameValidation.cpp": "f15ba85649223c838d5b9819e1b5fc15435729d1ca09e7189741c24cb140b765",
+    "src/application/ApiCommands.cpp": "93093c75e8943caebf0563fcf2ffb04faea603f35baab122e574018f355d539b",
+    "tests/ResourceLodTests.cpp": "e7e8e9f67da8d9bcc2bdc61553b33c47d3b41db933820195c48e1d3d84b5e3a3",
+    "tools/native/min_lod_probe.cpp": "29f49e457432a7690f8b27eb14ce5f0c3d251e8e64389d622c6a01d1de857d3d",
+    "tools/native/min_lod_boundary_probe.cpp": "dfd2273607ebf47fd5d75e46ab16891f9f3eca8f205fe11a041e95a461e25d85",
+    "tools/native/texture_probe_helpers.h": "30abcac380d84d505fd344d4083d97300f50df5b2e5cc7dffb11ea03c6d6ee3d",
+    "tools/native/present_capture_probe.cpp": "7c29f1e572ab16a5bc497d39eef8198d79056877a9e1d3fff3f7ed530a32c4e3"
+  },
+  "evidence": {
+    "artifacts/summarize-minlod.py": "6e5f50b1fbd36912da023262d65a9d51a66396f9cb04bdf042bd60647dacd88e",
+    "artifacts/m2-minlod-before/validation.json": "d6cdbd0870700b24bae2a97453d85ba31037d384acad27ce41b9d55b09231f94",
+    "artifacts/m2-minlod-boundary-before/validation.json": "20bbcf279d7977703586f63b7c3cd0646e0f038dbc82bdd3c4ef48c314a91d27",
+    "artifacts/m2-minlod-comparison/validation.json": "c80d0804f21a38250ff2cdf7831395aa4e0a0ffb341943549fd37957bceb15f7",
+    "artifacts/m2-minlod-final-missing-state/validation.json": "393631d771a8315f8fa24efac196fe886ffdf51076ac89826644ec15a89512b7",
+    "artifacts/minlod-tests-first.txt": "ec03e4eecda7e63db118cbc0340c8ce81833b9f436540f579a8375752004a627",
+    "artifacts/minlod-tests-second.txt": "29d500f204710afe8d86a3cf25461b424e8f428e3ad320e0826a2b8255ec0368",
+    "artifacts/minlod-tests-third.txt": "3f71e6ab756be1b3853e9d7629a602853e23de66c9b45595dc06bd460458c406",
+    "artifacts/minlod-malformed-before.txt": "7da5deb5087d1095bdb5d985088843954edaf3fcd290914e363305b123bf96ce",
+    "artifacts/minlod-resource-lod-before-malformed-fix.cpp": "dd526aa1f55ec00cb6584af027cf36810c7498771e83e0452ba1a7b55f78a8b0",
+    "artifacts/m2-minlod-wrappers.c": "bd8f8207a022277186aeb9c133989b4b0a1790bae8e71a7ff47cea106889976c",
+    "artifacts/m2-minlod-wrappers-ghidra.log": "16396f07aebd9d9425ffc8bc0f6307a4d6960d5e3f82cebb434f452807f7cae9",
+    "artifacts/run-minlod-ctest.ps1": "8c7ec86a745aacce035617ccf2c26e2873d180e5f64cb4c421c07c73c29e9eba",
+    "artifacts/run-minlod-final-regression.py": "81d13b5af0d71ff0b8db31af9cc4bd1611f023c4540bcc46c754566ffe1ef3c5",
+    "artifacts/build-minlod-final-regression.log": "74813e00652b27e57a3c9d04ebc5547503643845ef334fbd2ba16bd7517d4aac"
+  },
+  "limits": [
+    "Only verified Context4 immediate wire layouts; linked/deferred and other interface versions unresolved",
+    "Initial state requires a first getter across an understood prefix, an executed setter or frame-time creation; no assumed zero",
+    "Full storage readback with nonzero resource LOD explicitly rejected",
+    "Other texture dimensions/formats, noninteger sampling, tiled/shared interactions and advanced inspection require additional acceptance"
+  ]
+}
