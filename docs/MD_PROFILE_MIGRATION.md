@@ -1,5 +1,13 @@
 # Uniform Intel metric collection
 
+> Historical batch record. Results, package paths, module counts and remaining-work
+> statements below describe this batch. See [current status](CURRENT_STATUS.md)
+> for present support and [the documentation index](README.md) for navigation.
+> `artifacts/`, `out/`, `build/` and external-reference paths identify local
+> evidence not distributed with a clone; original JSON baselines are preserved.
+
+> **Subsequent work:** [Uniform Intel Metrics UI](UNIFORM_METRICS_UI_MIGRATION.md) subsequently connected uniform and requested-metric modes. [Event-group CLI collection](MD_HOTSPOTS_MIGRATION.md) is available, but its Qt/session owner remains pending. The intermittent BF1 comparison limitation below remains documented.
+
 `MdProfile` migrates the collection owner in `md_profile.py`. The native
 `metric-profile` CLI/worker command complements the existing `metric-catalog`
 command and the nonuniform `metric-iterations` collector. All acquisition uses

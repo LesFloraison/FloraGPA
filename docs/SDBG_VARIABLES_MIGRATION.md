@@ -1,5 +1,11 @@
 # Native SDBG source assignments
 
+> Historical batch record. Results, package paths, module counts and remaining-work
+> statements below describe this batch. See [current status](CURRENT_STATUS.md)
+> for present support and [the documentation index](README.md) for navigation.
+> `artifacts/`, `out/`, `build/` and external-reference paths identify local
+> evidence not distributed with a clone; original JSON baselines are preserved.
+
 `SdbgVariables` ports the recovered legacy GS/DS/HS symbol decoder and assignment
 history to C++. Production checkpoint exports now include the complete SDBG
 variable model and its limits. `SdbgTraceValues` reconstructs values from native
@@ -76,7 +82,10 @@ The full Python-to-C++/Qt migration remains incomplete.
 Reproduce the development-only assignment checks:
 
 ```powershell
-python tools/validate_sdbg_variables.py --reference D:/CDXrepo/FloraGPA --exe build/vs2022/Release/FloraCheckpointTests.exe --qt-bin D:/Qt/6.11.2/msvc2022_64/bin --captures artifacts/sdbg-capture-final --out artifacts/sdbg-check
+# Run from the repository root; set external paths for your environment.
+$QtRoot = 'C:/Qt/6.11.2/msvc2022_64'
+$ReferenceRoot = 'C:/reference/FloraGPA'
+python tools/validate_sdbg_variables.py --reference "$ReferenceRoot" --exe build/vs2022/Release/FloraCheckpointTests.exe --qt-bin "$QtRoot/bin" --captures artifacts/sdbg-capture-final --out artifacts/sdbg-check
 ```
 
 Use a fresh output directory. `--history-only` reuses existing captured traces

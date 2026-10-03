@@ -1,5 +1,11 @@
 # Draw resources workspace
 
+> Historical batch record. Results, package paths, module counts and remaining-work
+> statements below describe this batch. See [current status](CURRENT_STATUS.md)
+> for present support and [the documentation index](README.md) for navigation.
+> `artifacts/`, `out/`, `build/` and external-reference paths identify local
+> evidence not distributed with a clone; original JSON baselines are preserved.
+
 Implemented with C++20 / Qt Widgets and the native isolated worker. No Python
 runtime, GPA injection or changes to the reference workspace are involved.
 

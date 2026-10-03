@@ -1,5 +1,11 @@
 # Event texture edits
 
+> Historical batch record. Results, package paths, module counts and remaining-work
+> statements below describe this batch. See [current status](CURRENT_STATUS.md)
+> for present support and [the documentation index](README.md) for navigation.
+> `artifacts/`, `out/`, `build/` and external-reference paths identify local
+> evidence not distributed with a clone; original JSON baselines are preserved.
+
 Native event texture input/output edits now use the same JSON operations as the
 Python reference: `texture_input` and `texture_output`, with an embedded hashed
 RAW asset, resource, event, mip and array layer. MSAA edits additionally require

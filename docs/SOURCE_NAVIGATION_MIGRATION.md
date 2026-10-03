@@ -1,5 +1,11 @@
 # Native source navigation and watch expressions
 
+> Historical batch record. Results, package paths, module counts and remaining-work
+> statements below describe this batch. See [current status](CURRENT_STATUS.md)
+> for present support and [the documentation index](README.md) for navigation.
+> `artifacts/`, `out/`, `build/` and external-reference paths identify local
+> evidence not distributed with a clone; original JSON baselines are preserved.
+
 `DebugExpression` and `SourceTrace` port the recovered expression engine, native
 source-frame environments and invocation-local source navigation to C++.
 They were first verified as library APIs. The Qt debugger and its saved

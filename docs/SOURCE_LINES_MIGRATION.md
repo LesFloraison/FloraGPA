@@ -1,5 +1,11 @@
 # Original shader source-line mapping
 
+> Historical batch record. Results, package paths, module counts and remaining-work
+> statements below describe this batch. See [current status](CURRENT_STATUS.md)
+> for present support and [the documentation index](README.md) for navigation.
+> `artifacts/`, `out/`, `build/` and external-reference paths identify local
+> evidence not distributed with a clone; original JSON baselines are preserved.
+
 `ShaderSourceLines` now ports the recovered SPDB C13 and legacy SDBG instruction
 line readers. Checkpoint catalogs and captured reports include `source_lines`
 and unambiguous per-instruction `source_location` values. SPDB source-variable

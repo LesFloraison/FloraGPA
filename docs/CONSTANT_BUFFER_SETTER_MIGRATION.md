@@ -1,5 +1,11 @@
 # Persistent constant-buffer setter editing
 
+> Historical batch record. Results, package paths, module counts and remaining-work
+> statements below describe this batch. See [current status](CURRENT_STATUS.md)
+> for present support and [the documentation index](README.md) for navigation.
+> `artifacts/`, `out/`, `build/` and external-reference paths identify local
+> evidence not distributed with a clone; original JSON baselines are preserved.
+
 **Edit Setter** supports all six shader stages through the recovered ordinary
 player, shim and CB1 command encodings (18 wire types). The native Qt editor
 provides a start slot, buffer table and optional CB1 first/count columns.
@@ -86,11 +92,14 @@ logs remain in `artifacts/cb-setters-comparison.log` and
 `artifacts/cb-setters-final-comparison.log`.
 
 ```powershell
+# Run from the repository root; set external paths for your environment.
+$QtRoot = 'C:/Qt/6.11.2/msvc2022_64'
+$ReferenceRoot = 'C:/reference/FloraGPA'
 python tools/validate_constant_buffer_setters_port.py `
-  --reference D:/CDXrepo/FloraGPA `
+  --reference "$ReferenceRoot" `
   --exe out/FloraGPA-cb-setters-final-v2/FloraGPA.Cli.exe `
   --oracle build/vs2022/Release/FloraConstantBufferSetterTests.exe `
-  --qt-bin D:/Qt/6.11.2/msvc2022_64/bin `
+  --qt-bin "$QtRoot/bin" `
   --out artifacts/cb-setters-new
 ```
 

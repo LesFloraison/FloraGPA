@@ -1,5 +1,11 @@
 # Native checkpoint model migration
 
+> Historical batch record. Results, package paths, module counts and remaining-work
+> statements below describe this batch. See [current status](CURRENT_STATUS.md)
+> for present support and [the documentation index](README.md) for navigation.
+> `artifacts/`, `out/`, `build/` and external-reference paths identify local
+> evidence not distributed with a clone; original JSON baselines are preserved.
+
 The C++ checkpoint foundation now models the original GS/DS/HS instruction
 stream, declared inputs, indexable temporaries and exact input selectors.
 This is a dependency of the recovered register snapshot and invocation trace

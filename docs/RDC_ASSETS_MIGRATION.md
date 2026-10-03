@@ -1,5 +1,11 @@
 # Native replay inventory and raw texture access
 
+> Historical batch record. Results, package paths, module counts and remaining-work
+> statements below describe this batch. See [current status](CURRENT_STATUS.md)
+> for present support and [the documentation index](README.md) for navigation.
+> `artifacts/`, `out/`, `build/` and external-reference paths identify local
+> evidence not distributed with a clone; original JSON baselines are preserved.
+
 `FloraGPA.Rdc.exe` now implements the original `rdc_worker.py` **inventory** and
 **texture** actions through the RenderDoc 1.45 native replay controller. These
 are the existing analysis interfaces; the ordinary Qt resource/texture views
@@ -55,7 +61,9 @@ Write a UTF-8 job file; the output directory must be new or empty:
 ```
 
 ```powershell
-.\FloraGPA.Rdc.exe --job D:/jobs/inventory.json
+# Run from the repository root; set external paths for your environment.
+$JobsRoot = Join-Path (Get-Location) 'artifacts/jobs'
+.\FloraGPA.Rdc.exe --job "$JobsRoot/inventory.json"
 ```
 
 For texture access use `"action": "texture"` and optionally provide
@@ -82,13 +90,17 @@ and the maximum uint64 bit pattern. Worker tests cover conflicting event
 selectors and negative/overflowing texture indices before loading the backend.
 
 ```powershell
+# Run from the repository root; set external paths for your environment.
+$ReferenceRoot = 'C:/reference/FloraGPA'
+$FixtureRoot = 'C:/fixtures'
+$ResultsRoot = Join-Path (Get-Location) 'artifacts/results'
 python tools/validate_rdc_assets.py `
-  --reference D:/reference/FloraGPA `
+  --reference "$ReferenceRoot" `
   --exe out/FloraGPA-replay-assets/FloraGPA.Rdc.exe `
   --qt-bin out/FloraGPA-replay-assets `
-  --captures D:/fixtures/rdc-capture-package `
-  --history D:/fixtures/rdc-history-package-final `
-  --out D:/results/rdc-assets
+  --captures "$FixtureRoot/rdc-capture-package" `
+  --history "$FixtureRoot/rdc-history-package-final" `
+  --out "$ResultsRoot/rdc-assets"
 ctest --preset release -R '^(rdc_assets|rdc_worker)$' --parallel 1
 ```
 

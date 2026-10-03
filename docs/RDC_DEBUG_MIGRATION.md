@@ -1,5 +1,11 @@
 # Native RenderDoc shader debugging
 
+> Historical batch record. Results, package paths, module counts and remaining-work
+> statements below describe this batch. See [current status](CURRENT_STATUS.md)
+> for present support and [the documentation index](README.md) for navigation.
+> `artifacts/`, `out/`, `build/` and external-reference paths identify local
+> evidence not distributed with a clone; original JSON baselines are preserved.
+
 `FloraGPA.Rdc.exe --job <job.json>` now implements the reference worker's
 `debug-pixel`, `debug-vertex` and `debug-thread` branches through the selected
 RenderDoc **1.45 release** DLL. This is the backend portion of the migration.
@@ -96,7 +102,9 @@ and **6 history UI** cases passed with zero skips:
 results because this host did not forward the Qt test stdout into CTest output.
 
 ```powershell
-python tools/validate_rdc_debug.py --reference D:/CDXrepo/FloraGPA --exe out/FloraGPA-debug-backend/FloraGPA.Rdc.exe --cli out/FloraGPA-debug-backend/FloraGPA.Cli.exe --qt-bin out/FloraGPA-debug-backend --captures artifacts/rdc-capture-package --out artifacts/rdc-debug-check
+# Run from the repository root; set external paths for your environment.
+$ReferenceRoot = 'C:/reference/FloraGPA'
+python tools/validate_rdc_debug.py --reference "$ReferenceRoot" --exe out/FloraGPA-debug-backend/FloraGPA.Rdc.exe --cli out/FloraGPA-debug-backend/FloraGPA.Cli.exe --qt-bin out/FloraGPA-debug-backend --captures artifacts/rdc-capture-package --out artifacts/rdc-debug-check
 ```
 
 Use a new output directory. The capture corpus comes from the optional recapture

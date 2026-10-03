@@ -1,5 +1,13 @@
 # Native post-shader replay mesh
 
+> Historical batch record. Results, package paths, module counts and remaining-work
+> statements below describe this batch. See [current status](CURRENT_STATUS.md)
+> for present support and [the documentation index](README.md) for navigation.
+> `artifacts/`, `out/`, `build/` and external-reference paths identify local
+> evidence not distributed with a clone; original JSON baselines are preserved.
+
+> **Subsequent work:** [Scheduled Intel collection](MD_ITERATIONS_UI_MIGRATION.md) and [uniform Intel UI](UNIFORM_METRICS_UI_MIGRATION.md) provide later hardware-metric integration. They do not close the mesh or clean-machine limits below.
+
 The optional RenderDoc **postmesh** analysis is now implemented in C++ and
 connected to **Geometry → Replay Mesh**. It preserves the original Python
 advanced panel's VS output / final GS-or-DS output and instance selection,

@@ -1,5 +1,13 @@
 # Frame output migration
 
+> Historical batch record. Results, package paths, module counts and remaining-work
+> statements below describe this batch. See [current status](CURRENT_STATUS.md)
+> for present support and [the documentation index](README.md) for navigation.
+> `artifacts/`, `out/`, `build/` and external-reference paths identify local
+> evidence not distributed with a clone; original JSON baselines are preserved.
+
+> **Subsequent work:** Later batches add [event texture edits](EVENT_TEXTURE_MIGRATION.md), [texture inspection](TEXTURE_INSPECTION_MIGRATION.md), [planar writes](PLANAR_WRITE_MIGRATION.md), [Coverage](COVERAGE_UI_MIGRATION.md), [Pixel History](PIXEL_HISTORY_UI_MIGRATION.md) and [checkpoint debugging](CHECKPOINT_UI_MIGRATION.md). The older-preview and pending-consumer statements below describe this batch only.
+
 The Output tab now uses native C++ target selection, selected storage readback
 and CPU RGBA8 display conversion. It retains the GPA-style central viewport and
 compact controls. Python is used only by development comparison scripts.
@@ -96,11 +104,14 @@ all private query/counter workflows without their own validation.
 ## Reproduce
 
 ```powershell
+# Run from the repository root; set external paths for your environment.
+$QtRoot = 'C:/Qt/6.11.2/msvc2022_64'
+$ReferenceRoot = 'C:/reference/FloraGPA'
 python tools/validate_frame_output_port.py `
-  --reference D:/CDXrepo/FloraGPA `
+  --reference "$ReferenceRoot" `
   --oracle build/vs2022/Release/FloraFrameOutputTests.exe `
   --exe build/vs2022/Release/FloraGPA.Cli.exe `
-  --qt-bin D:/Qt/6.11.2/msvc2022_64/bin `
+  --qt-bin "$QtRoot/bin" `
   --out artifacts/frame-output-new-run
 ```
 

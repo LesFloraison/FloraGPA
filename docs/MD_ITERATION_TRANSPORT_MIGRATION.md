@@ -1,5 +1,11 @@
 # Native MD iteration transport
 
+> Historical batch record. Results, package paths, module counts and remaining-work
+> statements below describe this batch. See [current status](CURRENT_STATUS.md)
+> for present support and [the documentation index](README.md) for navigation.
+> `artifacts/`, `out/`, `build/` and external-reference paths identify local
+> evidence not distributed with a clone; original JSON baselines are preserved.
+
 `standalone/md_iteration_transport.py` is now implemented by
 `src/application/MdIterationTransport.{h,cpp}`. This connects the native
 descriptor planner, pass controller, probe registry, scheduled sample pool,

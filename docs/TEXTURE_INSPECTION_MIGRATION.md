@@ -1,5 +1,13 @@
 # Native Texture inspection and export
 
+> Historical batch record. Results, package paths, module counts and remaining-work
+> statements below describe this batch. See [current status](CURRENT_STATUS.md)
+> for present support and [the documentation index](README.md) for navigation.
+> `artifacts/`, `out/`, `build/` and external-reference paths identify local
+> evidence not distributed with a clone; original JSON baselines are preserved.
+
+> **Subsequent work:** Later consumer evidence includes [Coverage](COVERAGE_UI_MIGRATION.md), [Quad](QUAD_UI_MIGRATION.md), [shader recovery](HLSL_RECOVERY_MIGRATION.md) and [checkpoint UI](CHECKPOINT_UI_MIGRATION.md). Broad pending-consumer statements below are not a claim that those interfaces are absent today.
+
 The Texture pane now inspects captured initial storage and before/after-event
 storage through the native worker. Its compact controls select mip, array layer,
 3D slice, MSAA resolve or sample, typed DXGI format, Y/UV plane, channel and display

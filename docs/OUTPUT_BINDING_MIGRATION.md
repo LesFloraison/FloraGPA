@@ -1,5 +1,13 @@
 # Output binding migration
 
+> Historical batch record. Results, package paths, module counts and remaining-work
+> statements below describe this batch. See [current status](CURRENT_STATUS.md)
+> for present support and [the documentation index](README.md) for navigation.
+> `artifacts/`, `out/`, `build/` and external-reference paths identify local
+> evidence not distributed with a clone; original JSON baselines are preserved.
+
+> **Subsequent work:** Subsequent [event texture edits](EVENT_TEXTURE_MIGRATION.md), [Coverage](COVERAGE_UI_MIGRATION.md) and [Quad](QUAD_UI_MIGRATION.md) cover additional consumers. Their specific integration limits still apply; the old pending descriptions below are historical.
+
 The native `OutputBindingModel` ports the original/experimental state machine in
 `standalone/binding_model.py`. Output/SO argument validation and cached history
 now connect to experiment projects, native replay and the compact Qt setter

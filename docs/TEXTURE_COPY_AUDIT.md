@@ -1,5 +1,11 @@
 # M2: checked texture copies and ResolveSubresource
 
+> Historical batch record. Results, package paths, module counts and remaining-work
+> statements below describe this batch. See [current status](CURRENT_STATUS.md)
+> for present support and [the documentation index](README.md) for navigation.
+> `artifacts/`, `out/`, `build/` and external-reference paths identify local
+> evidence not distributed with a clone; original JSON baselines are preserved.
+
 Offline preflight and production replay now share texture transfer validation for
 `CopyResource` (0x3e), `CopySubresourceRegion` (0x40), and `ResolveSubresource`
 (0x42). Previously textures received only basic reference/usage checks, while

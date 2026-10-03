@@ -1,5 +1,11 @@
 # Captured annotations and explicit context membership
 
+> Historical batch record. Results, package paths, module counts and remaining-work
+> statements below describe this batch. See [current status](CURRENT_STATUS.md)
+> for present support and [the documentation index](README.md) for navigation.
+> `artifacts/`, `out/`, `build/` and external-reference paths identify local
+> evidence not distributed with a clone; original JSON baselines are preserved.
+
 The native inspector now restores Python's per-object annotation nesting and
 explicit QueryInterface context evidence. `FloraGPA.Cli annotations <capture>
 --out <directory>` writes the full `annotations.json` and UTF-8 BOM CSV report.

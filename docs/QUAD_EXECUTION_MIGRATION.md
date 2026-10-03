@@ -1,5 +1,13 @@
 # Native Quad diagnostic execution
 
+> Historical batch record. Results, package paths, module counts and remaining-work
+> statements below describe this batch. See [current status](CURRENT_STATUS.md)
+> for present support and [the documentation index](README.md) for navigation.
+> `artifacts/`, `out/`, `build/` and external-reference paths identify local
+> evidence not distributed with a clone; original JSON baselines are preserved.
+
+> **Subsequent work:** The subsequent [Quad UI batch](QUAD_UI_MIGRATION.md) connects the desktop consumer. Diagnostic group counts still must not be interpreted as physical GPU quad counts.
+
 `application/Quad` integrates the previously migrated target, depth, serial,
 final-geometry and private-UAV helpers into the original diagnostic workflow.
 `FloraGPA.Cli` and `FloraGPA.Worker` accept the same native `quad` command.

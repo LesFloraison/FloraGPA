@@ -1,5 +1,11 @@
 # Native hull shader outputs
 
+> Historical batch record. Results, package paths, module counts and remaining-work
+> statements below describe this batch. See [current status](CURRENT_STATUS.md)
+> for present support and [the documentation index](README.md) for navigation.
+> `artifacts/`, `out/`, `build/` and external-reference paths identify local
+> evidence not distributed with a clone; original JSON baselines are preserved.
+
 Geometry **HS output** exposes the original Python hull-output workflow through
 C++ and Qt. It retains paired HS/DS execution and observes control-point and
 patch-constant writes without recompiling the original shader math. The two
@@ -40,7 +46,10 @@ OBJ output. Qt offers **Control points** and **Patch constants** in the existing
 compact table selector and restores the selection from experiment projects.
 
 ```powershell
-.\out\FloraGPA-hull-outputs\FloraGPA.Cli.exe post-geometry D:\captures\sample.gpa_frame --event 11276 --geometry-stage hs --out D:\results\hs
+# Run from the repository root; set external paths for your environment.
+$CaptureRoot = 'C:/captures'
+$ResultsRoot = Join-Path (Get-Location) 'artifacts/results'
+.\out\FloraGPA-hull-outputs\FloraGPA.Cli.exe post-geometry "$CaptureRoot/sample.gpa_frame" --event 11276 --geometry-stage hs --out "$ResultsRoot/hs"
 ```
 
 Use `--instance N` for a zero-based instance within the original draw. HS accepts

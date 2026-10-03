@@ -1,5 +1,11 @@
 # Native RenderDoc Pixel History backend
 
+> Historical batch record. Results, package paths, module counts and remaining-work
+> statements below describe this batch. See [current status](CURRENT_STATUS.md)
+> for present support and [the documentation index](README.md) for navigation.
+> `artifacts/`, `out/`, `build/` and external-reference paths identify local
+> evidence not distributed with a clone; original JSON baselines are preserved.
+
 `FloraGPA.Rdc.exe` is an isolated C++20 process that opens the independent RDC
 produced by FloraGPA replay. It uses the optional installed RenderDoc 1.45 release
 DLL directly; no Python, qrenderdoc or GPA backend is part of its runtime.
@@ -26,7 +32,9 @@ Create a UTF-8 JSON job outside its new/empty output directory:
 ```
 
 ```powershell
-.\out\FloraGPA-history-backend\FloraGPA.Rdc.exe --job D:/results/history-job.json
+# Run from the repository root; set external paths for your environment.
+$ResultsRoot = Join-Path (Get-Location) 'artifacts/results'
+.\out\FloraGPA-history-backend\FloraGPA.Rdc.exe --job "$ResultsRoot/history-job.json"
 ```
 
 `gpa_event` selects a uniquely mapped original command. Alternatively `eid`
@@ -113,7 +121,9 @@ Qt workflow coverage is recorded separately in the UI migration document. Shared
 native module migration entries stay `partial`.
 
 ```powershell
-python tools/validate_rdc_history.py --reference D:/CDXrepo/FloraGPA --exe out/FloraGPA-history-backend/FloraGPA.Rdc.exe --cli out/FloraGPA-history-backend/FloraGPA.Cli.exe --qt-bin out/FloraGPA-history-backend --captures artifacts/rdc-capture-package --out artifacts/rdc-history-check
+# Run from the repository root; set external paths for your environment.
+$ReferenceRoot = 'C:/reference/FloraGPA'
+python tools/validate_rdc_history.py --reference "$ReferenceRoot" --exe out/FloraGPA-history-backend/FloraGPA.Rdc.exe --cli out/FloraGPA-history-backend/FloraGPA.Cli.exe --qt-bin out/FloraGPA-history-backend --captures artifacts/rdc-capture-package --out artifacts/rdc-history-check
 ```
 
 Use a fresh output directory. `--captures` points to the existing recapture

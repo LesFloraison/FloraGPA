@@ -1,5 +1,11 @@
 # RenderDoc 1.46 compatibility test — 2026-09-23
 
+> Historical batch record. Results, package paths, module counts and remaining-work
+> statements below describe this batch. See [current status](CURRENT_STATUS.md)
+> for present support and [the documentation index](README.md) for navigation.
+> `artifacts/`, `out/`, `build/` and external-reference paths identify local
+> evidence not distributed with a clone; original JSON baselines are preserved.
+
 This is an isolated test, not a change to the shipped 1.45 backend or its version
 allowlist. All experimental source copies, headers, binaries and captures are
 under ignored `build/renderdoc146/`. Experimental sources and binaries are not

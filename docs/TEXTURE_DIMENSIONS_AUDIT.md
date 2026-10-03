@@ -1,5 +1,13 @@
 # M2: creation-time Texture1D and Texture3D replay
 
+> Historical batch record. Results, package paths, module counts and remaining-work
+> statements below describe this batch. See [current status](CURRENT_STATUS.md)
+> for present support and [the documentation index](README.md) for navigation.
+> `artifacts/`, `out/`, `build/` and external-reference paths identify local
+> evidence not distributed with a clone; original JSON baselines are preserved.
+
+> **Subsequent work:** Subsequent [texture view creation](VIEW_CREATION_AUDIT.md) and [buffer view creation](BUFFER_VIEW_CREATION_AUDIT.md) cover additional view paths; their layouts and combinations remain explicitly bounded.
+
 This extends the accepted Device5 creation path to Texture1D (`0x3579`) and
 Texture3D (`0x357b`), including their explicit/default SRVs. The profile remains
 GPA 2025 R1 legacy DX11. Previously these creation records were decoded but

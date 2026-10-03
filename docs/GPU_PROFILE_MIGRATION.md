@@ -1,5 +1,11 @@
 # Repeated native GPU timing
 
+> Historical batch record. Results, package paths, module counts and remaining-work
+> statements below describe this batch. See [current status](CURRENT_STATUS.md)
+> for present support and [the documentation index](README.md) for navigation.
+> `artifacts/`, `out/`, `build/` and external-reference paths identify local
+> evidence not distributed with a clone; original JSON baselines are preserved.
+
 This migrates `gpu_profile.py` and `profile_ui.py`: repeated in-order DX11
 timestamp acquisition, warmup, inclusive API ranges, optional resource-writing
 commands, distributions, per-pass timelines, navigation and complete export.

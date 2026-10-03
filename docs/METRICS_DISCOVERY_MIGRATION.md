@@ -1,5 +1,13 @@
 # Native Metrics Discovery foundation
 
+> Historical batch record. Results, package paths, module counts and remaining-work
+> statements below describe this batch. See [current status](CURRENT_STATUS.md)
+> for present support and [the documentation index](README.md) for navigation.
+> `artifacts/`, `out/`, `build/` and external-reference paths identify local
+> evidence not distributed with a clone; original JSON baselines are preserved.
+
+> **Subsequent work:** The publisher/collector and acquisition work subsequently progressed to [scheduled collection](MD_ITERATIONS_MIGRATION.md), [scheduled UI](MD_ITERATIONS_UI_MIGRATION.md), [uniform UI](UNIFORM_METRICS_UI_MIGRATION.md) and [event-group CLI collection](MD_HOTSPOTS_MIGRATION.md). Event-group Qt/session integration and GTPin remain incomplete.
+
 This migrates `devices.py`, `metric_kinds.py` and `metrics_discovery.py` into
 native C++ components. It does not complete Intel hardware profiling: the
 publisher, collector, multi-pass scheduler and their Qt consumers still need
@@ -94,11 +102,14 @@ Initial evidence under ignored `artifacts/`:
 Reproduce native/reference comparisons with your local reference workspace:
 
 ```powershell
-python tools/validate_metrics_native.py --reference D:/CDXrepo/FloraGPA --exe build/vs2022/Release/FloraMetricsTests.exe --bridge build/vs2022/Release/FloraGPA.Metrics.dll --qt-bin D:/Qt/6.11.2/msvc2022_64/bin --out artifacts/metrics-comparison-new
+# Run from the repository root; set external paths for your environment.
+$QtRoot = 'C:/Qt/6.11.2/msvc2022_64'
+$ReferenceRoot = 'C:/reference/FloraGPA'
+python tools/validate_metrics_native.py --reference "$ReferenceRoot" --exe build/vs2022/Release/FloraMetricsTests.exe --bridge build/vs2022/Release/FloraGPA.Metrics.dll --qt-bin "$QtRoot/bin" --out artifacts/metrics-comparison-new
 $env:FLORA_TEST_INTEL_METRICS = '1'
-$env:FLORA_TEST_REFERENCE_ROOT = 'D:/CDXrepo/FloraGPA'
+$env:FLORA_TEST_REFERENCE_ROOT = "$ReferenceRoot"
 ctest --preset release -R '^metrics_discovery$'
-python tools/validate_metrics_bridge.py --reference D:/CDXrepo/FloraGPA --bridge build/vs2022/Release/FloraGPA.Metrics.dll --mode recorded --out artifacts/metrics-recorded-new
+python tools/validate_metrics_bridge.py --reference "$ReferenceRoot" --bridge build/vs2022/Release/FloraGPA.Metrics.dll --mode recorded --out artifacts/metrics-recorded-new
 ```
 
 These evidence files establish behavior on this host's Intel adapter and

@@ -1,5 +1,11 @@
 # Native DXBC output-log instrumentation
 
+> Historical batch record. Results, package paths, module counts and remaining-work
+> statements below describe this batch. See [current status](CURRENT_STATUS.md)
+> for present support and [the documentation index](README.md) for navigation.
+> `artifacts/`, `out/`, `build/` and external-reference paths identify local
+> evidence not distributed with a clone; original JSON baselines are preserved.
+
 The C++ application layer implements the Python VS/DS output-write and GS
 emission bytecode transforms. The following integration batch now exposes them
 through the production Worker, exports and Qt Geometry controls; see

@@ -1,5 +1,11 @@
 # Native checkpoint capture and export
 
+> Historical batch record. Results, package paths, module counts and remaining-work
+> statements below describe this batch. See [current status](CURRENT_STATUS.md)
+> for present support and [the documentation index](README.md) for navigation.
+> `artifacts/`, `out/`, `build/` and external-reference paths identify local
+> evidence not distributed with a clone; original JSON baselines are preserved.
+
 The C++ application layer now captures original GS/DS/HS instructions through
 `inspectCheckpoint` and the `shader-checkpoint` CLI command. This builds on the
 verified native DXBC transform. Source variables/stacks and Qt checkpoint

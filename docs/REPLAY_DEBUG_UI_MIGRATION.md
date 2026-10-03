@@ -1,5 +1,13 @@
 # Recorded shader debugging in the Qt workspace
 
+> Historical batch record. Results, package paths, module counts and remaining-work
+> statements below describe this batch. See [current status](CURRENT_STATUS.md)
+> for present support and [the documentation index](README.md) for navigation.
+> `artifacts/`, `out/`, `build/` and external-reference paths identify local
+> evidence not distributed with a clone; original JSON baselines are preserved.
+
+> **Subsequent work:** Subsequent [RDC assets](RDC_ASSETS_MIGRATION.md), [Replay Mesh](REPLAY_MESH_MIGRATION.md), [Replay Metrics](REPLAY_METRICS_MIGRATION.md) and [scheduled Intel UI](MD_ITERATIONS_UI_MIGRATION.md) have separate evidence. RenderDoc 1.45 and source/invocation limitations below still apply.
+
 The Shader Debug workspace now connects VS, PS and CS to the native RenderDoc
 worker. Its stage order is VS / HS / DS / GS / PS / CS. HS, DS and GS continue
 to use their original native checkpoint adapters; the recorded VS/PS/CS trace
@@ -87,9 +95,12 @@ Final evidence: `artifacts/build-replay-debug-delivery.log`,
 `artifacts/replay-debug-runtime-audit.json`.
 
 ```powershell
-$env:FLORA_REPLAY_DEBUG_REPORTS = 'D:/results/rdc-debug-native'
-$env:FLORA_DEBUG_SOURCE_CAPTURE = 'D:/captures/shader_sources/source.gpa_frame'
-$env:FLORA_UI_ARTIFACT_DIR = 'D:/results/replay-debug-ui'
+# Run from the repository root; set external paths for your environment.
+$CaptureRoot = 'C:/captures'
+$ResultsRoot = Join-Path (Get-Location) 'artifacts/results'
+$env:FLORA_REPLAY_DEBUG_REPORTS = "$ResultsRoot/rdc-debug-native"
+$env:FLORA_DEBUG_SOURCE_CAPTURE = "$CaptureRoot/shader_sources/source.gpa_frame"
+$env:FLORA_UI_ARTIFACT_DIR = "$ResultsRoot/replay-debug-ui"
 ctest --preset release -R '^replay_debug_(model|ui)$' --parallel 1
 ```
 

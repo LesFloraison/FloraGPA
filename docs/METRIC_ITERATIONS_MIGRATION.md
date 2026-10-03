@@ -1,5 +1,11 @@
 # Numeric metric iterations and FrameFile range indexing
 
+> Historical batch record. Results, package paths, module counts and remaining-work
+> statements below describe this batch. See [current status](CURRENT_STATUS.md)
+> for present support and [the documentation index](README.md) for navigation.
+> `artifacts/`, `out/`, `build/` and external-reference paths identify local
+> evidence not distributed with a clone; original JSON baselines are preserved.
+
 The native application library now implements `metric_outer_passes.py`,
 `metric_iterations.py`, `metric_range_mapping.py`, `metric_query_flags.py` and
 `frame_metric_index.py`. The first four retain the recovered numeric protocol
@@ -7,7 +13,10 @@ over a caller-owned transport. The frame index is also available through the
 production CLI and worker:
 
 ```powershell
-.\out\FloraGPA-metric-iterations\FloraGPA.Cli.exe metric-index D:\captures\sample.gpa_frame --out D:\results\index
+# Run from the repository root; set external paths for your environment.
+$CaptureRoot = 'C:/captures'
+$ResultsRoot = Join-Path (Get-Location) 'artifacts/results'
+.\out\FloraGPA-metric-iterations\FloraGPA.Cli.exe metric-index "$CaptureRoot/sample.gpa_frame" --out "$ResultsRoot/index"
 ```
 
 This writes `metric-index.json` and the normal native `report.json`. The output

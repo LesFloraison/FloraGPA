@@ -1,5 +1,11 @@
 # Scheduled Intel metric collection
 
+> Historical batch record. Results, package paths, module counts and remaining-work
+> statements below describe this batch. See [current status](CURRENT_STATUS.md)
+> for present support and [the documentation index](README.md) for navigation.
+> `artifacts/`, `out/`, `build/` and external-reference paths identify local
+> evidence not distributed with a clone; original JSON baselines are preserved.
+
 `MdIterations` ports the full collection owner in `md_iterations.py`. Both the
 native CLI and worker now execute its recovered weight, pass and iteration
 policy against real frame replay and write the original scheduled result
@@ -14,9 +20,12 @@ documented in [MD_ITERATION_RESULTS_MIGRATION.md](MD_ITERATION_RESULTS_MIGRATION
 ## Usage
 
 ```powershell
-.\FloraGPA.Cli.exe metric-iterations D:\captures\sample.gpa_frame `
+# Run from the repository root; set external paths for your environment.
+$CaptureRoot = 'C:/captures'
+$ResultsRoot = Join-Path (Get-Location) 'artifacts/results'
+.\FloraGPA.Cli.exe metric-iterations "$CaptureRoot/sample.gpa_frame" `
   --metric GpuTime --metric EuActive --frame-range 0 --frame-range 2 `
-  --pass all --samples 1 --warmup 1 --out D:\results\scheduled-new
+  --pass all --samples 1 --warmup 1 --out "$ResultsRoot/scheduled-new"
 ```
 
 The output directory must be new. Omit `--frame-range` to collect every

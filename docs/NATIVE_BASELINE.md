@@ -1,5 +1,11 @@
 # Native replay baseline
 
+> Historical batch record. Results, package paths, module counts and remaining-work
+> statements below describe this batch. See [current status](CURRENT_STATUS.md)
+> for present support and [the documentation index](README.md) for navigation.
+> `artifacts/`, `out/`, `build/` and external-reference paths identify local
+> evidence not distributed with a clone; original JSON baselines are preserved.
+
 Validated on NVIDIA GeForce RTX 3070 Laptop GPU using MSVC 19.44 and Qt 6.11.2.
 The native CLI and worker use Windows D3D11 directly. Python is used only by the
 development comparison script, not loaded by either executable.

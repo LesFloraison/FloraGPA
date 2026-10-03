@@ -1,5 +1,11 @@
 # M2: Map / Unmap observation audit
 
+> Historical batch record. Results, package paths, module counts and remaining-work
+> statements below describe this batch. See [current status](CURRENT_STATUS.md)
+> for present support and [the documentation index](README.md) for navigation.
+> `artifacts/`, `out/`, `build/` and external-reference paths identify local
+> evidence not distributed with a clone; original JSON baselines are preserved.
+
 This change removes API Map `0x34ec` and Unmap `0x34ed` from the unchecked
 auxiliary fallback. It does not implement deferred command lists or change the
 captured `0x246` write-copy algorithm. M2 remains in progress; Present and other
@@ -77,7 +83,9 @@ Map are compared byte-for-byte with those producer results. This development
 tool does not add Python or the producer to the application runtime.
 
 ```powershell
-python tools/validate_map_observations.py --research-root D:/CDXrepo/FloraGPA --exe out/FloraGPA-map-audit-20261003/FloraGPA.Cli.exe --out artifacts/new-map-byte-check
+# Run from the repository root; set external paths for your environment.
+$ReferenceRoot = 'C:/reference/FloraGPA'
+python tools/validate_map_observations.py --research-root "$ReferenceRoot" --exe out/FloraGPA-map-audit-20261003/FloraGPA.Cli.exe --out artifacts/new-map-byte-check
 ```
 
 The original producer source hash is

@@ -235,8 +235,9 @@ uses `--oracle-tools "$ReferenceRoot/tools"` and the pinned installed GPA build
 expected by that adapter. Python parity alone is not original-player equivalence.
 See [acceptance infrastructure](COMPATIBILITY_BASELINE.md).
 
-Historical commands may retain original workstation paths; replace these roots
-for your environment. Helpers differ in whether `--reference` expects the workspace
-or `standalone/`; consult each helper's `--help`. Local `artifacts/`, `out/` and
+Historical provenance text and JSON retain original workstation paths. Set the
+external roots in command examples for your environment. Helpers differ in whether
+`--reference` expects the workspace or `standalone/`; consult each helper's
+`--help`. Local `artifacts/`, `out/` and
 `build/` records and hashes identify evidence not distributed with a clone.
 Clean-machine deployment remains an open acceptance item.

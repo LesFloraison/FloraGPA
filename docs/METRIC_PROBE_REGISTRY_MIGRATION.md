@@ -1,5 +1,11 @@
 # Probe registry, device configuration and DX11 callback results
 
+> Historical batch record. Results, package paths, module counts and remaining-work
+> statements below describe this batch. See [current status](CURRENT_STATUS.md)
+> for present support and [the documentation index](README.md) for navigation.
+> `artifacts/`, `out/`, `build/` and external-reference paths identify local
+> evidence not distributed with a clone; original JSON baselines are preserved.
+
 `MetricProbeRegistry.h/.cpp` migrates `metric_probe_registry.py`,
 `metric_probe_config.py` and `dx11_metric_result.py` into the native application
 library. These are the remaining registry/configuration/result dependencies of

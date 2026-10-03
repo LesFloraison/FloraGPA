@@ -1,5 +1,11 @@
 # Native headless replay analysis
 
+> Historical batch record. Results, package paths, module counts and remaining-work
+> statements below describe this batch. See [current status](CURRENT_STATUS.md)
+> for present support and [the documentation index](README.md) for navigation.
+> `artifacts/`, `out/`, `build/` and external-reference paths identify local
+> evidence not distributed with a clone; original JSON baselines are preserved.
+
 `FloraGPA.Cli rdc-analyze` replaces the original `rdc_analyze.py` entry point.
 All eight original analysis actions use the sibling **FloraGPA.Rdc.exe** native
 worker and the selected RenderDoc 1.45 DLL. The product does not start Python,
@@ -9,11 +15,14 @@ validation and defaults before their existing asynchronous worker launch.
 ## Usage
 
 ```powershell
-.\FloraGPA.Cli.exe rdc-analyze D:\captures\frame.rdc postmesh `
-  --gpa-event 105 --stage VSOut --instance 0 --out D:\results\mesh
+# Run from the repository root; set external paths for your environment.
+$CaptureRoot = 'C:/captures'
+$ResultsRoot = Join-Path (Get-Location) 'artifacts/results'
+.\FloraGPA.Cli.exe rdc-analyze "$CaptureRoot/frame.rdc" postmesh `
+  --gpa-event 105 --stage VSOut --instance 0 --out "$ResultsRoot/mesh"
 
-.\FloraGPA.Cli.exe rdc-analyze D:\captures\frame.rdc debug-thread `
-  --gpa-event 51 --group 0 0 0 --thread 1 0 0 --out D:\results\thread
+.\FloraGPA.Cli.exe rdc-analyze "$CaptureRoot/frame.rdc" debug-thread `
+  --gpa-event 51 --group 0 0 0 --thread 1 0 0 --out "$ResultsRoot/thread"
 
 .\FloraGPA.Cli.exe rdc-analyze --help
 ```

@@ -1,5 +1,11 @@
 # Optional native RenderDoc recapture and command provenance
 
+> Historical batch record. Results, package paths, module counts and remaining-work
+> statements below describe this batch. See [current status](CURRENT_STATUS.md)
+> for present support and [the documentation index](README.md) for navigation.
+> `artifacts/`, `out/`, `build/` and external-reference paths identify local
+> evidence not distributed with a clone; original JSON baselines are preserved.
+
 The optional RenderDoc path from the recovered Python implementation is now
 available for native CLI replay. It uses RenderDoc's public application API 1.6.0
 to capture FloraGPA's own D3D11 device. GPA decoding, resources, experiments and
@@ -8,7 +14,10 @@ replay does not load RenderDoc, and native recapture does not launch Python,
 qrenderdoc or RenderDoc's replay API.
 
 ```powershell
-.\out\FloraGPA-rdc-capture\FloraGPA.Cli.exe replay D:/captures/frame.gpa_frame --renderdoc "C:/Program Files/RenderDoc/renderdoc.dll" --out D:/results/recapture
+# Run from the repository root; set external paths for your environment.
+$CaptureRoot = 'C:/captures'
+$ResultsRoot = Join-Path (Get-Location) 'artifacts/results'
+.\out\FloraGPA-rdc-capture\FloraGPA.Cli.exe replay "$CaptureRoot/frame.gpa_frame" --renderdoc "C:/Program Files/RenderDoc/renderdoc.dll" --out "$ResultsRoot/recapture"
 ```
 
 The output directory must be new or empty. `report.json` records the actual
@@ -88,9 +97,12 @@ oracles; the application and its recapture path do not.
 Reproduce optional recapture and event-mapping checks:
 
 ```powershell
-python tools/validate_rdc_capture.py --reference D:/CDXrepo/FloraGPA --exe build/vs2022/Release/FloraGPA.Cli.exe --qt-bin D:/Qt/6.11.2/msvc2022_64/bin --out artifacts/rdc-check
+# Run from the repository root; set external paths for your environment.
+$QtRoot = 'C:/Qt/6.11.2/msvc2022_64'
+$ReferenceRoot = 'C:/reference/FloraGPA'
+python tools/validate_rdc_capture.py --reference "$ReferenceRoot" --exe build/vs2022/Release/FloraGPA.Cli.exe --qt-bin "$QtRoot/bin" --out artifacts/rdc-check
 $events = @(Get-ChildItem artifacts/rdc-check -Filter '*-events.json' | ForEach-Object FullName)
-python tools/validate_rdc_events.py --reference D:/CDXrepo/FloraGPA --exe build/vs2022/Release/FloraRdcTests.exe --qt-bin D:/Qt/6.11.2/msvc2022_64/bin --out artifacts/rdc-map-check --real $events
+python tools/validate_rdc_events.py --reference "$ReferenceRoot" --exe build/vs2022/Release/FloraRdcTests.exe --qt-bin "$QtRoot/bin" --out artifacts/rdc-map-check --real $events
 ```
 
 The recapture check requires the optional installed RenderDoc and its Python

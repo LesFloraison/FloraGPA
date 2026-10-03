@@ -1,5 +1,13 @@
 # M2: geometry-stage and stream-output shader creation
 
+> Historical batch record. Results, package paths, module counts and remaining-work
+> statements below describe this batch. See [current status](CURRENT_STATUS.md)
+> for present support and [the documentation index](README.md) for navigation.
+> `artifacts/`, `out/`, `build/` and external-reference paths identify local
+> evidence not distributed with a clone; original JSON baselines are preserved.
+
+> **Subsequent work:** [Class creation](CLASS_CREATION_AUDIT.md) subsequently adds linkage/instance execution and narrowly evidenced aliases. Its original-player image disagreement remains explicit, and does not expand this batch's SO declaration coverage.
+
 This increment adds GPA 2025 R1 Device5 CreateGeometryShader (`3582`),
 CreateHullShader (`3585`), CreateDomainShader (`3586`), and
 CreateGeometryShaderWithStreamOutput (`3583`) to the checked pipeline-creation

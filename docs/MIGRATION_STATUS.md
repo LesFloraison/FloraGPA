@@ -1,5 +1,10 @@
 # FloraGPA C++ 迁移进度 — 2026-10-03
 
+> 本文是按批次保留的开发日志；历史数字与“尚未完成”描述对应各自批次。
+> 当前能力与限制统一参见 [Current status](CURRENT_STATUS.md)，文档入口见
+> [Documentation](README.md)。`artifacts/`、`out/`、`build/` 及外部参考目录
+> 是未随仓库发布的本地证据位置，不代表克隆后即可访问。
+
 2026-10-03（M2 第十五批）：接通 CreateClassLinkage、GetClassInstance 与
 CreateClassInstance 的帧内执行。通过配对创建记录与 Shader／实例快照，恢复原版
 API ID 与快照 linkage ID 的对应关系；冲突、提前使用、重复身份和缺失必要名称

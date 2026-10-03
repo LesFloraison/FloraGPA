@@ -1,5 +1,13 @@
 # Qt Pixel History
 
+> Historical batch record. Results, package paths, module counts and remaining-work
+> statements below describe this batch. See [current status](CURRENT_STATUS.md)
+> for present support and [the documentation index](README.md) for navigation.
+> `artifacts/`, `out/`, `build/` and external-reference paths identify local
+> evidence not distributed with a clone; original JSON baselines are preserved.
+
+> **Subsequent work:** Later batches connect [recorded debugging](REPLAY_DEBUG_UI_MIGRATION.md), [Replay Mesh](REPLAY_MESH_MIGRATION.md) and [Replay Metrics](REPLAY_METRICS_MIGRATION.md). The pending consumers below describe this earlier batch; its specific fault-injection and clean-machine gaps are not silently closed.
+
 The main-window **Pixel History** tab now drives independent GPA replay recapture
 and the native RenderDoc history worker. It retains the existing GPA-style event
 chart, API/resource browser and inspector layout. The history view uses compact
@@ -82,9 +90,12 @@ Local evidence: `artifacts/ctest-history-ui-release.log`,
 splitter/tooltip-only adjustment; the packaged focused rerun includes it.
 
 ```powershell
-$env:FLORA_HISTORY_REPORTS = 'D:/CDXrepo/FloraGPA-Cpp/artifacts/rdc-history-package-final'
-$env:FLORA_HISTORY_COMMANDS = 'D:/CDXrepo/FloraGPA-Cpp/artifacts/rdc-capture-package/commands.gpa_frame'
-$env:FLORA_UI_ARTIFACT_DIR = 'D:/results/history-ui'
+# Run from the repository root; set external paths for your environment.
+$ProjectRoot = (Get-Location).Path
+$ResultsRoot = Join-Path (Get-Location) 'artifacts/results'
+$env:FLORA_HISTORY_REPORTS = "$ProjectRoot/artifacts/rdc-history-package-final"
+$env:FLORA_HISTORY_COMMANDS = "$ProjectRoot/artifacts/rdc-capture-package/commands.gpa_frame"
+$env:FLORA_UI_ARTIFACT_DIR = "$ResultsRoot/history-ui"
 ctest --preset release -R '^history_ui$'
 ```
 

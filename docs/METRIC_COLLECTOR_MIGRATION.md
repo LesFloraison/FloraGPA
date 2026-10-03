@@ -1,5 +1,11 @@
 # Native publisher subscriptions and scheduled counter pool
 
+> Historical batch record. Results, package paths, module counts and remaining-work
+> statements below describe this batch. See [current status](CURRENT_STATUS.md)
+> for present support and [the documentation index](README.md) for navigation.
+> `artifacts/`, `out/`, `build/` and external-reference paths identify local
+> evidence not distributed with a clone; original JSON baselines are preserved.
+
 The recovered collector now has native provider binding, context slots,
 allocation/reuse and deferred notifications. Its scheduled Intel Metrics
 Discovery adapter uses the same C++ collector and the existing native bridge.
@@ -80,9 +86,12 @@ stable batch/Counter pairing, reuse counts, released ownership and restart after
 close. Hardware completion timing is not treated as a deterministic poll count.
 
 ```powershell
-python tools/validate_metric_collector.py --reference D:/CDXrepo/FloraGPA --exe build/vs2022/Release/FloraMetricCollectorTests.exe --qt-bin D:/Qt/6.11.2/msvc2022_64/bin --out artifacts/metric-collector-new --isolated-env
+# Run from the repository root; set external paths for your environment.
+$QtRoot = 'C:/Qt/6.11.2/msvc2022_64'
+$ReferenceRoot = 'C:/reference/FloraGPA'
+python tools/validate_metric_collector.py --reference "$ReferenceRoot" --exe build/vs2022/Release/FloraMetricCollectorTests.exe --qt-bin "$QtRoot/bin" --out artifacts/metric-collector-new --isolated-env
 $env:FLORA_TEST_INTEL_METRICS = '1'
-$env:FLORA_TEST_REFERENCE_ROOT = 'D:/CDXrepo/FloraGPA'
+$env:FLORA_TEST_REFERENCE_ROOT = "$ReferenceRoot"
 ctest --preset release -R '^(metric_collector|metric_core|metrics_discovery)$'
 ```
 

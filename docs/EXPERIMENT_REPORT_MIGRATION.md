@@ -1,5 +1,11 @@
 # Native experiment execution reports
 
+> Historical batch record. Results, package paths, module counts and remaining-work
+> statements below describe this batch. See [current status](CURRENT_STATUS.md)
+> for present support and [the documentation index](README.md) for navigation.
+> `artifacts/`, `out/`, `build/` and external-reference paths identify local
+> evidence not distributed with a clone; original JSON baselines are preserved.
+
 Replay and Texture exports now include the recovered Python `experiment` report:
 history cursor/revision count, applied and pending event IDs, final shader and
 initial texture SHA-256 values, effective view descriptors and complete Update

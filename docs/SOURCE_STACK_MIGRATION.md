@@ -1,5 +1,11 @@
 # Native source stacks and HS scope ownership
 
+> Historical batch record. Results, package paths, module counts and remaining-work
+> statements below describe this batch. See [current status](CURRENT_STATUS.md)
+> for present support and [the documentation index](README.md) for navigation.
+> `artifacts/`, `out/`, `build/` and external-reference paths identify local
+> evidence not distributed with a clone; original JSON baselines are preserved.
+
 `SourceStack` ports `native_source_stack.py`, `native_frame_sources.py` and
 `native_hs_scopes.py`. Checkpoint catalog/capture exports include `source_stack`,
 and their SPDB `source_variables` model now receives native HS phase ownership.

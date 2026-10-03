@@ -1,5 +1,11 @@
 # Before-event replay boundaries
 
+> Historical batch record. Results, package paths, module counts and remaining-work
+> statements below describe this batch. See [current status](CURRENT_STATUS.md)
+> for present support and [the documentation index](README.md) for navigation.
+> `artifacts/`, `out/`, `build/` and external-reference paths identify local
+> evidence not distributed with a clone; original JSON baselines are preserved.
+
 Ordinary frame output now stops before the selected command, including a draw
 or dispatch snapshot. For example, if draw 100 writes RTV A and draw 200 targets
 RTV B, Output > Before event 200 shows A. It does not bind B or apply draw 200's
@@ -71,10 +77,13 @@ Use `--real-only` to compare the first, middle and last draw/dispatch boundaries
 of the external GF2/BF1 captures, before and after each selected command.
 
 ```powershell
+# Run from the repository root; set external paths for your environment.
+$QtRoot = 'C:/Qt/6.11.2/msvc2022_64'
+$ReferenceRoot = 'C:/reference/FloraGPA'
 python tools/validate_before_boundary.py `
-  --reference D:/CDXrepo/FloraGPA `
+  --reference "$ReferenceRoot" `
   --exe build/vs2022/Release/FloraGPA.Cli.exe `
-  --qt-bin D:/Qt/6.11.2/msvc2022_64/bin `
+  --qt-bin "$QtRoot/bin" `
   --out artifacts/before-boundary-comparison
 ```
 

@@ -1,5 +1,13 @@
 # Native event and command-range GPU statistics
 
+> Historical batch record. Results, package paths, module counts and remaining-work
+> statements below describe this batch. See [current status](CURRENT_STATUS.md)
+> for present support and [the documentation index](README.md) for navigation.
+> `artifacts/`, `out/`, `build/` and external-reference paths identify local
+> evidence not distributed with a clone; original JSON baselines are preserved.
+
+> **Subsequent work:** [Repeated GPU timing](GPU_PROFILE_MIGRATION.md) subsequently added a distinct sampling/distribution workflow. Single replay statistics and timing distributions remain different measurements.
+
 The recovered `gpu_statistics.py` and `statistics_ui.py` paths now run through
 C++ DX11 queries and an isolated native Worker. The Qt **GPU Statistics** page
 provides Event, Range and Frame measurements, API-selection endpoints, structured

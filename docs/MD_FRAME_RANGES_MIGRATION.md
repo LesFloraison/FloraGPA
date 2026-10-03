@@ -1,5 +1,11 @@
 # Complete-command metric ranges
 
+> Historical batch record. Results, package paths, module counts and remaining-work
+> statements below describe this batch. See [current status](CURRENT_STATUS.md)
+> for present support and [the documentation index](README.md) for navigation.
+> `artifacts/`, `out/`, `build/` and external-reference paths identify local
+> evidence not distributed with a clone; original JSON baselines are preserved.
+
 The native `MdFrameRanges` component migrates `md_interval.py` and
 `md_frame_ranges.py`. It selects inclusive API intervals or category-2 FrameFile
 ranges and brackets complete replay commands with synchronous or callback-based

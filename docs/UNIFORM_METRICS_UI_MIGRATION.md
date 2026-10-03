@@ -1,5 +1,11 @@
 # Uniform Intel metrics in Qt
 
+> Historical batch record. Results, package paths, module counts and remaining-work
+> statements below describe this batch. See [current status](CURRENT_STATUS.md)
+> for present support and [the documentation index](README.md) for navigation.
+> `artifacts/`, `out/`, `build/` and external-reference paths identify local
+> evidence not distributed with a clone; original JSON baselines are preserved.
+
 The right-hand **Intel Metrics** inspector now contains **Metric sets**, **Metric
 request** and **Scheduled** modes. The first two connect the existing native
 `metric-profile` worker to Qt; the scheduled mode retains its original native

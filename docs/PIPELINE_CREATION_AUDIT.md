@@ -1,5 +1,13 @@
 # M2: captured shader, input layout and pipeline state creation
 
+> Historical batch record. Results, package paths, module counts and remaining-work
+> statements below describe this batch. See [current status](CURRENT_STATUS.md)
+> for present support and [the documentation index](README.md) for navigation.
+> `artifacts/`, `out/`, `build/` and external-reference paths identify local
+> evidence not distributed with a clone; original JSON baselines are preserved.
+
+> **Subsequent work:** [Geometry/SO creation](GEOMETRY_CREATION_AUDIT.md) subsequently added GS/HS/DS and SO paths; [class creation](CLASS_CREATION_AUDIT.md) added linkage/instance paths with an explicit original-player disagreement. Earlier pending lists below remain batch-specific.
+
 This increment executes eight GPA 2025 R1 Device5 creation record families at
 their captured events. It does not certify other interface/version layouts.
 

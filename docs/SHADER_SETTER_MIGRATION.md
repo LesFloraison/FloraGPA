@@ -1,5 +1,13 @@
 # Persistent shader setters
 
+> Historical batch record. Results, package paths, module counts and remaining-work
+> statements below describe this batch. See [current status](CURRENT_STATUS.md)
+> for present support and [the documentation index](README.md) for navigation.
+> `artifacts/`, `out/`, `build/` and external-reference paths identify local
+> evidence not distributed with a clone; original JSON baselines are preserved.
+
+> **Subsequent work:** Six-stage shader setter editing is available. [M2 pipeline setter execution](PIPELINE_SETTER_AUDIT.md) subsequently replaced the ordinary captured-setter dormancy described below for its validated families. [Coverage](COVERAGE_UI_MIGRATION.md), [Quad](QUAD_UI_MIGRATION.md) and [checkpoint UI](CHECKPOINT_UI_MIGRATION.md) now have separate acceptance evidence; arbitrary consumer/edit combinations are not thereby certified.
+
 API Log **Edit Setter** supports VSSetShader, HSSetShader, DSSetShader,
 GSSetShader, PSSetShader and CSSetShader. The compact Qt editor provides a
 stage-filtered shader selector (including None) and an ordered class-instance
@@ -83,11 +91,14 @@ migration. IA resource setter migration is documented in
 `docs/CONSTANT_BUFFER_SETTER_MIGRATION.md`. Passing these tests does not establish full Python feature parity.
 
 ```powershell
+# Run from the repository root; set external paths for your environment.
+$QtRoot = 'C:/Qt/6.11.2/msvc2022_64'
+$ReferenceRoot = 'C:/reference/FloraGPA'
 python tools/validate_shader_setters_port.py `
-  --reference D:/CDXrepo/FloraGPA/standalone `
+  --reference "$ReferenceRoot/standalone" `
   --exe out/FloraGPA-shader-setters/FloraGPA.Cli.exe `
   --oracle build/vs2022/Release/FloraPipelineSetterTests.exe `
-  --qt-bin D:/Qt/6.11.2/msvc2022_64/bin --isolated-env `
+  --qt-bin "$QtRoot/bin" --isolated-env `
   --out artifacts/shader-setters-new
 ```
 

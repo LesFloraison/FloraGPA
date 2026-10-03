@@ -1,5 +1,11 @@
 # Metric iteration analysis and request planning
 
+> Historical batch record. Results, package paths, module counts and remaining-work
+> statements below describe this batch. See [current status](CURRENT_STATUS.md)
+> for present support and [the documentation index](README.md) for navigation.
+> `artifacts/`, `out/`, `build/` and external-reference paths identify local
+> evidence not distributed with a clone; original JSON baselines are preserved.
+
 `MetricAnalysis` ports `metric_values.py`, `metric_passes.py` and
 `metric_planner.py` into the native application library. It also implements
 the profile projection and analysis helpers from `md_publisher_values.py`.

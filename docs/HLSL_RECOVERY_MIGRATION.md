@@ -1,5 +1,11 @@
 # Native DXBC to HLSL recovery
 
+> Historical batch record. Results, package paths, module counts and remaining-work
+> statements below describe this batch. See [current status](CURRENT_STATUS.md)
+> for present support and [the documentation index](README.md) for navigation.
+> `artifacts/`, `out/`, `build/` and external-reference paths identify local
+> evidence not distributed with a clone; original JSON baselines are preserved.
+
 The four original lowering modules (`hlsl_recover.py`, `hlsl_memory.py`,
 `hlsl_graphics.py`, `hlsl_geometry.py`) are implemented in C++. Shader → Source →
 **Recover HLSL** runs the native worker, populates the existing compact source

@@ -1,5 +1,11 @@
 # Native replay metrics
 
+> Historical batch record. Results, package paths, module counts and remaining-work
+> statements below describe this batch. See [current status](CURRENT_STATUS.md)
+> for present support and [the documentation index](README.md) for navigation.
+> `artifacts/`, `out/`, `build/` and external-reference paths identify local
+> evidence not distributed with a clone; original JSON baselines are preserved.
+
 The right-side Inspector now includes **Replay Metrics**, following the frame
 analyzer's API-log / output / metrics layout. This migrates the original
 `rdc_worker.py` counters action and its `advanced_ui.py` consumer.
@@ -62,9 +68,12 @@ exercise measurement, API navigation, shared shader-debug capture, cancel/retry,
 disable/undo, missing-backend recovery and selection changes during work.
 
 ```powershell
-$env:FLORA_COUNTER_REPORTS = 'D:/results/rdc-counters'
-$env:FLORA_DEBUG_SOURCE_CAPTURE = 'D:/captures/shader_sources/source.gpa_frame'
-$env:FLORA_UI_ARTIFACT_DIR = 'D:/results/counter-ui'
+# Run from the repository root; set external paths for your environment.
+$CaptureRoot = 'C:/captures'
+$ResultsRoot = Join-Path (Get-Location) 'artifacts/results'
+$env:FLORA_COUNTER_REPORTS = "$ResultsRoot/rdc-counters"
+$env:FLORA_DEBUG_SOURCE_CAPTURE = "$CaptureRoot/shader_sources/source.gpa_frame"
+$env:FLORA_UI_ARTIFACT_DIR = "$ResultsRoot/counter-ui"
 ctest --preset release -R '^rdc_counter(s|_ui)$' --parallel 1
 ```
 

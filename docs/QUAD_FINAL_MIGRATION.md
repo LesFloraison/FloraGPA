@@ -1,5 +1,11 @@
 # Native final-geometry submission for Quad diagnostics
 
+> Historical batch record. Results, package paths, module counts and remaining-work
+> statements below describe this batch. See [current status](CURRENT_STATUS.md)
+> for present support and [the documentation index](README.md) for navigation.
+> `artifacts/`, `out/`, `build/` and external-reference paths identify local
+> evidence not distributed with a clone; original JSON baselines are preserved.
+
 `application/QuadFinal.cpp` implements the original `quad_post_transform.py`
 helper. It complements `QuadSerial`: original HS/DS/GS/SO output, adjacency and
 pre-raster UAV writers can be captured before isolated diagnostic submission.

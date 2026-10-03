@@ -1,5 +1,11 @@
 # Native recorded counter sessions and publisher conversion
 
+> Historical batch record. Results, package paths, module counts and remaining-work
+> statements below describe this batch. See [current status](CURRENT_STATUS.md)
+> for present support and [the documentation index](README.md) for navigation.
+> `artifacts/`, `out/`, `build/` and external-reference paths identify local
+> evidence not distributed with a clone; original JSON baselines are preserved.
+
 `MdRecordedQueries` ports `md_recorded_queries.py`: owned deferred command
 lists, recorded counter scopes, repeated execution, collection, release, reports
 and JSON/CSV export. It uses the installed Intel driver through the existing
@@ -77,9 +83,12 @@ clock refresh) clear ownership and prevent failed publication; a fresh calibrate
 session subsequently produces another report.
 
 ```powershell
-python tools/validate_recorded_metrics.py --reference D:/CDXrepo/FloraGPA --exe build/vs2022/Release/FloraRecordedMetricsTests.exe --qt-bin D:/Qt/6.11.2/msvc2022_64/bin --out artifacts/recorded-metrics-new --isolated-env
+# Run from the repository root; set external paths for your environment.
+$QtRoot = 'C:/Qt/6.11.2/msvc2022_64'
+$ReferenceRoot = 'C:/reference/FloraGPA'
+python tools/validate_recorded_metrics.py --reference "$ReferenceRoot" --exe build/vs2022/Release/FloraRecordedMetricsTests.exe --qt-bin "$QtRoot/bin" --out artifacts/recorded-metrics-new --isolated-env
 $env:FLORA_TEST_INTEL_METRICS = '1'
-$env:FLORA_TEST_REFERENCE_ROOT = 'D:/CDXrepo/FloraGPA'
+$env:FLORA_TEST_REFERENCE_ROOT = "$ReferenceRoot"
 ctest --preset release -R '^(recorded_metrics|metrics_discovery|metric_core|metric_collector)$'
 ```
 

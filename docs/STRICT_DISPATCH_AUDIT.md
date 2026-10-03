@@ -1,5 +1,13 @@
 # M2: remove the obsolete auxiliary replay fallback
 
+> Historical batch record. Results, package paths, module counts and remaining-work
+> statements below describe this batch. See [current status](CURRENT_STATUS.md)
+> for present support and [the documentation index](README.md) for navigation.
+> `artifacts/`, `out/`, `build/` and external-reference paths identify local
+> evidence not distributed with a clone; original JSON baselines are preserved.
+
+> **Subsequent work:** The creation/SRV blocker discovered in this batch was subsequently addressed by [texture creation](TEXTURE_CREATION_AUDIT.md) and expanded by [texture dimensions](TEXTURE_DIMENSIONS_AUDIT.md). The original rejected run remains evidence of the earlier implementation.
+
 All twelve entries left in `isReplayAuxiliary` were already handled by checked
 production branches. Eleven are pipeline setters (six shader stages, topology,
 blend/depth state, rasterizer state and viewports); the twelfth is captured

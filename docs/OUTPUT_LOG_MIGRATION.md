@@ -1,5 +1,11 @@
 # Native VS/DS writes and GS emissions
 
+> Historical batch record. Results, package paths, module counts and remaining-work
+> statements below describe this batch. See [current status](CURRENT_STATUS.md)
+> for present support and [the documentation index](README.md) for navigation.
+> `artifacts/`, `out/`, `build/` and external-reference paths identify local
+> evidence not distributed with a clone; original JSON baselines are preserved.
+
 Geometry now provides **VS writes**, **DS writes** and **GS emissions** through
 the C++ Worker. The backend executes the selected original Draw and original
 downstream pipeline, using the native DXBC transforms documented in
@@ -54,8 +60,11 @@ and primitive connectivity, and experiment projects restore the stage/stream/
 instance choices using the existing Python stage names.
 
 ```powershell
-.\out\FloraGPA-output-logs\FloraGPA.Cli.exe post-geometry D:\captures\sample.gpa_frame --event 100 --geometry-stage vs-writes --out D:\results\vs-writes
-.\out\FloraGPA-output-logs\FloraGPA.Cli.exe post-geometry D:\captures\sample.gpa_frame --event 100 --geometry-stage gs-emits --stream 0 --out D:\results\gs-emits
+# Run from the repository root; set external paths for your environment.
+$CaptureRoot = 'C:/captures'
+$ResultsRoot = Join-Path (Get-Location) 'artifacts/results'
+.\out\FloraGPA-output-logs\FloraGPA.Cli.exe post-geometry "$CaptureRoot/sample.gpa_frame" --event 100 --geometry-stage vs-writes --out "$ResultsRoot/vs-writes"
+.\out\FloraGPA-output-logs\FloraGPA.Cli.exe post-geometry "$CaptureRoot/sample.gpa_frame" --event 100 --geometry-stage gs-emits --stream 0 --out "$ResultsRoot/gs-emits"
 ```
 
 ## Evidence and remaining work

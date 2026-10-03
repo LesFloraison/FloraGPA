@@ -1,5 +1,11 @@
 # M2: buffer creation boundaries and private-data observations
 
+> Historical batch record. Results, package paths, module counts and remaining-work
+> statements below describe this batch. See [current status](CURRENT_STATUS.md)
+> for present support and [the documentation index](README.md) for navigation.
+> `artifacts/`, `out/`, `build/` and external-reference paths identify local
+> evidence not distributed with a clone; original JSON baselines are preserved.
+
 `Device.CreateBuffer` (`0x3578`) now creates native storage at the recorded event.
 `Buffer.SetPrivateData` (`0x3017`) now has a checked CPU-observation path. Neither
 uses the unchecked auxiliary fallback. This does not complete ordinary replay,
@@ -82,9 +88,11 @@ only a constant clear. C++ tests additionally check all 64 buffer bytes at creat
 and after the final update on hardware and WARP.
 
 ```powershell
+# Run from the repository root; set external paths for your environment.
+$ReferenceRoot = 'C:/reference/FloraGPA'
 cmake --build --preset release --target FloraBufferCreationProbe FloraBufferCreationTests
 python tools/capture_buffers.py --producer build/vs2022/Release/FloraBufferCreationProbe.exe --out artifacts/new-buffer-originals
-python tools/validate_corpus.py --manifest artifacts/new-buffer-originals/manifest.json --captures-root artifacts/new-buffer-originals --exe out/FloraGPA-buffer-final-20261003/FloraGPA.Cli.exe --out artifacts/new-buffer-validation --oracle-tools D:/CDXrepo/FloraGPA/tools --timeout 60
+python tools/validate_corpus.py --manifest artifacts/new-buffer-originals/manifest.json --captures-root artifacts/new-buffer-originals --exe out/FloraGPA-buffer-final-20261003/FloraGPA.Cli.exe --out artifacts/new-buffer-validation --oracle-tools "$ReferenceRoot/tools" --timeout 60
 $env:FLORA_BUFFER_CAPTURES = "$PWD/artifacts/new-buffer-originals"
 ctest --preset release -R '^buffer_creation$' --output-on-failure
 ```

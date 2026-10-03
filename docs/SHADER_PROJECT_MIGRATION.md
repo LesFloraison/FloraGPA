@@ -1,5 +1,11 @@
 # Native multi-file shader projects
 
+> Historical batch record. Results, package paths, module counts and remaining-work
+> statements below describe this batch. See [current status](CURRENT_STATUS.md)
+> for present support and [the documentation index](README.md) for navigation.
+> `artifacts/`, `out/`, `build/` and external-reference paths identify local
+> evidence not distributed with a clone; original JSON baselines are preserved.
+
 The Shader page's **Shader Project** action opens the recovered multi-file HLSL
 workflow in Qt. Sources and Settings occupy separate tabs; the toolbar selects
 the root source and provides Compile & Apply, Save JSON and Import JSON. Settings
@@ -82,7 +88,9 @@ report retain uint64 precision.
 The reproducible model/CLI comparison command is:
 
 ```powershell
-python tools/validate_shader_project.py --reference D:/CDXrepo/FloraGPA --probe out/FloraGPA-shader-project/FloraShaderProjectTests.exe --qt-bin out/FloraGPA-shader-project --cli out/FloraGPA-shader-project/FloraGPA.Cli.exe --out artifacts/shader-project-check
+# Run from the repository root; set external paths for your environment.
+$ReferenceRoot = 'C:/reference/FloraGPA'
+python tools/validate_shader_project.py --reference "$ReferenceRoot" --probe out/FloraGPA-shader-project/FloraShaderProjectTests.exe --qt-bin out/FloraGPA-shader-project --cli out/FloraGPA-shader-project/FloraGPA.Cli.exe --out artifacts/shader-project-check
 ```
 
 The test executable and Qt6Test.dll are copied into a package only for validation

@@ -1,5 +1,11 @@
 # Native VS identity and unique output tables
 
+> Historical batch record. Results, package paths, module counts and remaining-work
+> statements below describe this batch. See [current status](CURRENT_STATUS.md)
+> for present support and [the documentation index](README.md) for navigation.
+> `artifacts/`, `out/`, `build/` and external-reference paths identify local
+> evidence not distributed with a clone; original JSON baselines are preserved.
+
 Geometry's **VS identities** stage ports the recovered `vs-index` path. It
 associates actual assembled vertex-shader output with the original instance,
 input vertex index and native VertexID. The Qt table selector exposes expanded
@@ -52,7 +58,10 @@ expanded output through `unique_vertices.bin` and `references.csv` must reproduc
 counts, native markers, original parameters and original/patched/full-output hashes.
 
 ```powershell
-.\out\FloraGPA-vs-identity\FloraGPA.Cli.exe post-geometry D:\captures\sample.gpa_frame --event 100 --geometry-stage vs-index --instance 2 --out D:\results\vs-identity
+# Run from the repository root; set external paths for your environment.
+$CaptureRoot = 'C:/captures'
+$ResultsRoot = Join-Path (Get-Location) 'artifacts/results'
+.\out\FloraGPA-vs-identity\FloraGPA.Cli.exe post-geometry "$CaptureRoot/sample.gpa_frame" --event 100 --geometry-stage vs-index --instance 2 --out "$ResultsRoot/vs-identity"
 ```
 
 ## Evidence and limits

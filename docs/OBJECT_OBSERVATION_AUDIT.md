@@ -1,5 +1,11 @@
 # M2: checked object observations and Present follow-up
 
+> Historical batch record. Results, package paths, module counts and remaining-work
+> statements below describe this batch. See [current status](CURRENT_STATUS.md)
+> for present support and [the documentation index](README.md) for navigation.
+> `artifacts/`, `out/`, `build/` and external-reference paths identify local
+> evidence not distributed with a clone; original JSON baselines are preserved.
+
 This iteration removes 15 observed object-lifetime/getter record families from
 the unchecked auxiliary fallback. It does not emulate the original application's
 COM reference counts, reconstruct its CPU control flow, or implement Present.

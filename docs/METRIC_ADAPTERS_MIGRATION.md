@@ -1,5 +1,11 @@
 # Native synchronous and FIFO counter acquisition
 
+> Historical batch record. Results, package paths, module counts and remaining-work
+> statements below describe this batch. See [current status](CURRENT_STATUS.md)
+> for present support and [the documentation index](README.md) for navigation.
+> `artifacts/`, `out/`, `build/` and external-reference paths identify local
+> evidence not distributed with a clone; original JSON baselines are preserved.
+
 Three existing Python acquisition policies now have C++ implementations in
 `src/application/MdSamplePool.h/.cpp`:
 
@@ -71,9 +77,12 @@ also execute another workload after Close. The existing scheduled policy and
 recorded bridge tests remain in the same integration test.
 
 ```powershell
-python tools/validate_metric_collector.py --reference D:/CDXrepo/FloraGPA --exe build/vs2022/Release/FloraMetricCollectorTests.exe --qt-bin D:/Qt/6.11.2/msvc2022_64/bin --out artifacts/metric-adapters-new --isolated-env
+# Run from the repository root; set external paths for your environment.
+$QtRoot = 'C:/Qt/6.11.2/msvc2022_64'
+$ReferenceRoot = 'C:/reference/FloraGPA'
+python tools/validate_metric_collector.py --reference "$ReferenceRoot" --exe build/vs2022/Release/FloraMetricCollectorTests.exe --qt-bin "$QtRoot/bin" --out artifacts/metric-adapters-new --isolated-env
 $env:FLORA_TEST_INTEL_METRICS = '1'
-$env:FLORA_TEST_REFERENCE_ROOT = 'D:/CDXrepo/FloraGPA'
+$env:FLORA_TEST_REFERENCE_ROOT = "$ReferenceRoot"
 ctest --preset release -R '^(metric_collector|metric_core|metrics_discovery)$'
 ```
 

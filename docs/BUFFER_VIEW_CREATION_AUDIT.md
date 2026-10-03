@@ -1,5 +1,13 @@
 # M2: creation-time buffer SRV, RTV and UAV replay
 
+> Historical batch record. Results, package paths, module counts and remaining-work
+> statements below describe this batch. See [current status](CURRENT_STATUS.md)
+> for present support and [the documentation index](README.md) for navigation.
+> `artifacts/`, `out/`, `build/` and external-reference paths identify local
+> evidence not distributed with a clone; original JSON baselines are preserved.
+
+> **Subsequent work:** Subsequent [pipeline creation](PIPELINE_CREATION_AUDIT.md), [geometry/SO creation](GEOMETRY_CREATION_AUDIT.md) and [class creation](CLASS_CREATION_AUDIT.md) extend frame-time object support. General versions and frame-before counters remain separate work.
+
 The recovered Device5 creation path now accepts buffer sources for SRV, RTV and
 UAV records (`357c`, `357e`, `357d`). Checked ranges use 64-bit arithmetic and
 respect typed element size, raw DWORDs or structured stride. Bind flags, view

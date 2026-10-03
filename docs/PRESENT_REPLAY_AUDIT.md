@@ -1,5 +1,13 @@
 # M2: checked Present boundaries and native binding semantics
 
+> Historical batch record. Results, package paths, module counts and remaining-work
+> statements below describe this batch. See [current status](CURRENT_STATUS.md)
+> for present support and [the documentation index](README.md) for navigation.
+> `artifacts/`, `out/`, `build/` and external-reference paths identify local
+> evidence not distributed with a clone; original JSON baselines are preserved.
+
+> **Subsequent work:** Subsequent [buffer creation](BUFFER_CREATION_AUDIT.md) and [pipeline setters](PIPELINE_SETTER_AUDIT.md) address additional paths. The unresolved presentation statuses, rotation and export-comparison limits below are not automatically closed.
+
 `SwapChain.Present` (`0x3257`) now has a checked production path instead of the
 unchecked auxiliary fallback. This recovers the observed single-frame submission
 boundary and in-frame TEST calls. It does **not** implement general multi-frame
@@ -74,10 +82,12 @@ These development-only producers are excluded from default builds, CTest and the
 deployed package. Build and reproduce with fresh output directories:
 
 ```powershell
+# Run from the repository root; set external paths for your environment.
+$ReferenceRoot = 'C:/reference/FloraGPA'
 cmake --build --preset release --target FloraPresentBoundaryProbe FloraPresentCaptureProbe FloraPresentRecordTests
 ./build/vs2022/Release/FloraPresentBoundaryProbe.exe artifacts/new-present-bindings
 python tools/capture_present.py --producer build/vs2022/Release/FloraPresentCaptureProbe.exe --out artifacts/new-present-originals
-python tools/validate_corpus.py --manifest artifacts/new-present-originals/manifest.json --captures-root artifacts/new-present-originals --exe out/FloraGPA-present-20261003/FloraGPA.Cli.exe --out artifacts/new-present-validation --oracle-tools D:/CDXrepo/FloraGPA/tools --timeout 60
+python tools/validate_corpus.py --manifest artifacts/new-present-originals/manifest.json --captures-root artifacts/new-present-originals --exe out/FloraGPA-present-20261003/FloraGPA.Cli.exe --out artifacts/new-present-validation --oracle-tools "$ReferenceRoot/tools" --timeout 60
 $env:FLORA_PRESENT_CAPTURES = "$PWD/artifacts/new-present-originals"
 ctest --preset release -R '^present_records$' --output-on-failure
 ```

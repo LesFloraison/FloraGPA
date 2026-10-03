@@ -1,5 +1,13 @@
 # DX11 compatibility baseline
 
+> Historical batch record. Results, package paths, module counts and remaining-work
+> statements below describe this batch. See [current status](CURRENT_STATUS.md)
+> for present support and [the documentation index](README.md) for navigation.
+> `artifacts/`, `out/`, `build/` and external-reference paths identify local
+> evidence not distributed with a clone; original JSON baselines are preserved.
+
+> **Subsequent work:** The M1 numbers and discovery blockers below are historical. Later [texture creation](TEXTURE_CREATION_AUDIT.md), [texture dimensions](TEXTURE_DIMENSIONS_AUDIT.md), [view creation](VIEW_CREATION_AUDIT.md), [buffer views](BUFFER_VIEW_CREATION_AUDIT.md), [pipeline creation](PIPELINE_CREATION_AUDIT.md), [geometry creation](GEOMETRY_CREATION_AUDIT.md) and [class creation](CLASS_CREATION_AUDIT.md) extend the matrix. Use the current summary for the latest 244-file acceptance; no historical table is replaced.
+
 This is the M1 acceptance infrastructure for GPA 2025 R1 legacy DX11 / IGPA v3.
 It is not a declaration that M2–M5 or the analyzer migration are complete.
 The Python module totals (72 ported, 117 partial, 15 pending) remain unchanged.
@@ -40,7 +48,9 @@ creation file is explicitly blocked and queued for M2 implementation.
 The production offline check uses the existing C++ decoders and creates no GPU device:
 
 ```powershell
-./out/FloraGPA-compatibility-20261003/FloraGPA.Cli.exe validate-frame "D:/captures/example.gpa_frame" --out artifacts/example-preflight
+# Run from the repository root; set external paths for your environment.
+$CaptureRoot = 'C:/captures'
+./out/FloraGPA-compatibility-20261003/FloraGPA.Cli.exe validate-frame "$CaptureRoot/example.gpa_frame" --out artifacts/example-preflight
 ```
 
 The output directory must be new or empty. `validation.json` includes the source
@@ -60,8 +70,10 @@ to the application runtime. The original player is optional and used only for
 development comparison:
 
 ```powershell
-python tools/catalog_captures.py --root D:/CDXrepo/FloraGPA --out docs/capture-corpus.json
-python tools/validate_corpus.py --manifest docs/capture-corpus.json --captures-root D:/CDXrepo/FloraGPA --exe out/FloraGPA-compatibility-20261003/FloraGPA.Cli.exe --out artifacts/new-compatibility-run --oracle-tools D:/CDXrepo/FloraGPA/tools --timeout 60
+# Run from the repository root; set external paths for your environment.
+$ReferenceRoot = 'C:/reference/FloraGPA'
+python tools/catalog_captures.py --root "$ReferenceRoot" --out docs/capture-corpus.json
+python tools/validate_corpus.py --manifest docs/capture-corpus.json --captures-root "$ReferenceRoot" --exe out/FloraGPA-compatibility-20261003/FloraGPA.Cli.exe --out artifacts/new-compatibility-run --oracle-tools "$ReferenceRoot/tools" --timeout 60
 python tests/test_compatibility_tools.py
 ```
 

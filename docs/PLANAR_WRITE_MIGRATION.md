@@ -1,5 +1,13 @@
 # Native planar Map and Update writes
 
+> Historical batch record. Results, package paths, module counts and remaining-work
+> statements below describe this batch. See [current status](CURRENT_STATUS.md)
+> for present support and [the documentation index](README.md) for navigation.
+> `artifacts/`, `out/`, `build/` and external-reference paths identify local
+> evidence not distributed with a clone; original JSON baselines are preserved.
+
+> **Subsequent work:** Subsequent [Coverage](COVERAGE_UI_MIGRATION.md), [Quad](QUAD_UI_MIGRATION.md), [shader projects](SHADER_PROJECT_MIGRATION.md), [checkpoint UI](CHECKPOINT_UI_MIGRATION.md) and [Intel metric UI](UNIFORM_METRICS_UI_MIGRATION.md) have independent evidence. They do not recover UV bytes absent from the original capture or complete every planar/consumer combination.
+
 Native replay now reproduces the Python implementation's recovered NV12/P010/P016
 write semantics. It distinguishes captured GenData from explicit DXGI experiment
 assets and records what was actually written. The Texture pane keeps this detail

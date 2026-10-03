@@ -1,5 +1,11 @@
 # M2: checked buffer copy commands
 
+> Historical batch record. Results, package paths, module counts and remaining-work
+> statements below describe this batch. See [current status](CURRENT_STATUS.md)
+> for present support and [the documentation index](README.md) for navigation.
+> `artifacts/`, `out/`, `build/` and external-reference paths identify local
+> evidence not distributed with a clone; original JSON baselines are preserved.
+
 `CopyResource` (`0x3e`), `CopySubresourceRegion` (`0x40`) and
 `CopyStructureCount` (`0x3f`) now share a checked decoder and resource validator
 between offline preflight and production replay. Previously only record shape

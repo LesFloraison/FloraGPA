@@ -8,9 +8,11 @@ window/title-bar/taskbar icons. Both files belong in Git.
 To regenerate after editing the SVG (development only, requires Qt Svg):
 
 ```powershell
-cmake -S tools/icon -B build/icon -G "Visual Studio 17 2022" -A x64 -DCMAKE_PREFIX_PATH=D:/Qt/6.11.2/msvc2022_64
+# Run from the repository root; set external paths for your environment.
+$QtRoot = 'C:/Qt/6.11.2/msvc2022_64'
+cmake -S tools/icon -B build/icon -G "Visual Studio 17 2022" -A x64 "-DCMAKE_PREFIX_PATH=$QtRoot"
 cmake --build build/icon --config Release
-$env:PATH = "D:/Qt/6.11.2/msvc2022_64/bin;" + $env:PATH
+$env:PATH = "$QtRoot/bin;" + $env:PATH
 ./build/icon/Release/FloraIconGenerator.exe assets/icons/FloraGPA.svg assets/icons/FloraGPA.ico
 ```
 

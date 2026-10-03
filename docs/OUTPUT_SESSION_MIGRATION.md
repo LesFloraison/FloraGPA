@@ -1,5 +1,11 @@
 # Output session and pixel navigation
 
+> Historical batch record. Results, package paths, module counts and remaining-work
+> statements below describe this batch. See [current status](CURRENT_STATUS.md)
+> for present support and [the documentation index](README.md) for navigation.
+> `artifacts/`, `out/`, `build/` and external-reference paths identify local
+> evidence not distributed with a clone; original JSON baselines are preserved.
+
 The Qt application now persists the recovered output controls in the existing
 `FloraGPA experiment 1` JSON format. The replay engine remains independent of
 Python. This work does not complete the other Python UI modules.

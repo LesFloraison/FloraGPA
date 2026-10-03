@@ -1,5 +1,13 @@
 # Global view experiments
 
+> Historical batch record. Results, package paths, module counts and remaining-work
+> statements below describe this batch. See [current status](CURRENT_STATUS.md)
+> for present support and [the documentation index](README.md) for navigation.
+> `artifacts/`, `out/`, `build/` and external-reference paths identify local
+> evidence not distributed with a clone; original JSON baselines are preserved.
+
+> **Subsequent work:** Main output selection, typed/MSAA inspection and event texture editors were subsequently connected. See [frame output](FRAME_OUTPUT_MIGRATION.md), [texture inspection](TEXTURE_INSPECTION_MIGRATION.md), [event textures](EVENT_TEXTURE_MIGRATION.md) and [planar writes](PLANAR_WRITE_MIGRATION.md) for their distinct scopes.
+
 The native implementation now accepts the Python project's `view` operations
 for SRV, RTV, DSV and UAV resources. This is part of the full migration;
 view-related consumers are not all finished.
@@ -83,9 +91,12 @@ not load or launch Python or Intel GPA.
 ## Reproduce
 
 ```powershell
+# Run from the repository root; set external paths for your environment.
+$QtRoot = 'C:/Qt/6.11.2/msvc2022_64'
+$ReferenceRoot = 'C:/reference/FloraGPA'
 ctest --preset release -R view_edits
-python tools/validate_view_codec_port.py --reference D:/CDXrepo/FloraGPA --exe build/vs2022/Release/FloraViewEditTests.exe --qt-bin D:/Qt/6.11.2/msvc2022_64/bin --out artifacts/new-view-codec --captures D:/CDXrepo/FloraGPA
-python tools/validate_view_replay_port.py --reference D:/CDXrepo/FloraGPA --exe build/vs2022/Release/FloraGPA.Cli.exe --qt-bin D:/Qt/6.11.2/msvc2022_64/bin --out artifacts/new-view-replay --captures D:/CDXrepo/FloraGPA
+python tools/validate_view_codec_port.py --reference "$ReferenceRoot" --exe build/vs2022/Release/FloraViewEditTests.exe --qt-bin "$QtRoot/bin" --out artifacts/new-view-codec --captures "$ReferenceRoot"
+python tools/validate_view_replay_port.py --reference "$ReferenceRoot" --exe build/vs2022/Release/FloraGPA.Cli.exe --qt-bin "$QtRoot/bin" --out artifacts/new-view-replay --captures "$ReferenceRoot"
 ```
 
 Always use a new artifact directory and run GPU checks serially. The advanced

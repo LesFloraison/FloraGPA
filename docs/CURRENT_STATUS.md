@@ -52,7 +52,9 @@ the RTX 3070 Laptop GPU observe zero class instances supplied to CSSetShader,
 then a null CS and unchanged zero UAV bytes at Dispatch. Native/shim-injected
 producers and FloraGPA hardware/WARP agree on expected outputs. This localizes
 a failure in the development original-player path; it does not establish the
-behavior of every original GPA GUI path.
+behavior of every original GPA GUI path. The general corpus original-player
+adapter was not identified, so those runs do not establish strict equivalence
+under matched device/driver settings.
 
 [Comparison reporting](original-comparison-baseline.json) separately verifies
 execution status and image comparisons (13 CPU checks, nine independent runs,

@@ -1,5 +1,13 @@
 # M2: creation-time Texture2D and SRV replay
 
+> Historical batch record. Results, package paths, module counts and remaining-work
+> statements below describe this batch. See [current status](CURRENT_STATUS.md)
+> for present support and [the documentation index](README.md) for navigation.
+> `artifacts/`, `out/`, `build/` and external-reference paths identify local
+> evidence not distributed with a clone; original JSON baselines are preserved.
+
+> **Subsequent work:** [Texture dimensions](TEXTURE_DIMENSIONS_AUDIT.md), [texture views](VIEW_CREATION_AUDIT.md) and [buffer views](BUFFER_VIEW_CREATION_AUDIT.md) subsequently expand creation support. Do not treat this batch's Texture1D/3D-pending statement as the current scope.
+
 This change addresses the original late-texture capture discovered during the
 strict-dispatch audit. That file previously stopped at event 4 with nine missing
 record types. It is now covered by explicit creation and observation decoders.

@@ -1,5 +1,11 @@
 # Metric pass controller and callback consumer
 
+> Historical batch record. Results, package paths, module counts and remaining-work
+> statements below describe this batch. See [current status](CURRENT_STATUS.md)
+> for present support and [the documentation index](README.md) for navigation.
+> `artifacts/`, `out/`, `build/` and external-reference paths identify local
+> evidence not distributed with a clone; original JSON baselines are preserved.
+
 `MetricPassController.h/.cpp` migrates `metric_pass_controller.py` (including
 probe fanout) and `metric_consumer.py` into the native application library.
 The controller uses the existing `MetricPriorityLock` interface, so real

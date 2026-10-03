@@ -1,5 +1,11 @@
 # Helldivers 2 capture compatibility — 2026-10-03
 
+> Historical batch record. Results, package paths, module counts and remaining-work
+> statements below describe this batch. See [current status](CURRENT_STATUS.md)
+> for present support and [the documentation index](README.md) for navigation.
+> `artifacts/`, `out/`, `build/` and external-reference paths identify local
+> evidence not distributed with a clone; original JSON baselines are preserved.
+
 ## Root cause
 
 `helldivers2_2026_04_02__18_02_58.gpa_frame` is a valid 1,581,399,564-byte
@@ -43,11 +49,13 @@ Production package: `out/FloraGPA-helldivers-20261003/`.
 Local evidence: `artifacts/helldivers-review/` (excluded from Git).
 
 ```powershell
+# Run from the repository root; set external paths for your environment.
+$CaptureRoot = 'C:/captures'
 ./out/FloraGPA-helldivers-20261003/FloraGPA.Cli.exe replay `
-  D:/CDXrepo/FloraGPA/helldivers2_2026_04_02__18_02_58.gpa_frame `
+  "$CaptureRoot/helldivers2_2026_04_02__18_02_58.gpa_frame" `
   --out artifacts/helldivers-local
 
-$env:FLORA_TEST_HELLDIVERS_CAPTURE = 'D:/CDXrepo/FloraGPA/helldivers2_2026_04_02__18_02_58.gpa_frame'
+$env:FLORA_TEST_HELLDIVERS_CAPTURE = "$CaptureRoot/helldivers2_2026_04_02__18_02_58.gpa_frame"
 ctest --test-dir build/vs2022 -C Release -R '^(stream_output|api_commands|ui|draw_resources|core)$' --output-on-failure -j 1
 ```
 

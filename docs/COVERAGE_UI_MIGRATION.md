@@ -1,5 +1,13 @@
 # Qt coverage inspection
 
+> Historical batch record. Results, package paths, module counts and remaining-work
+> statements below describe this batch. See [current status](CURRENT_STATUS.md)
+> for present support and [the documentation index](README.md) for navigation.
+> `artifacts/`, `out/`, `build/` and external-reference paths identify local
+> evidence not distributed with a clone; original JSON baselines are preserved.
+
+> **Subsequent work:** [Quad execution and UI](QUAD_UI_MIGRATION.md) were subsequently migrated. The Quad-pending statement and module totals below remain the original coverage-batch record.
+
 The central **Coverage** tab connects the existing native coverage executor to
 the Qt analyzer. Its placement retains the GPA-style API log on the left,
 image inspection in the center and resource properties on the right. Controls

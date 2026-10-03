@@ -1,5 +1,11 @@
 # Offline scheduled metric results
 
+> Historical batch record. Results, package paths, module counts and remaining-work
+> statements below describe this batch. See [current status](CURRENT_STATUS.md)
+> for present support and [the documentation index](README.md) for navigation.
+> `artifacts/`, `out/`, `build/` and external-reference paths identify local
+> evidence not distributed with a clone; original JSON baselines are preserved.
+
 `MdIterationResults` migrates `md_iteration_results.py`. Its
 `loadScheduledMetricResult(folder, profile)` API validates the saved scheduled
 collection artifacts and returns the checked publisher data without opening a

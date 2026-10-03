@@ -1,5 +1,11 @@
 # Native shader preparation for Quad diagnostics
 
+> Historical batch record. Results, package paths, module counts and remaining-work
+> statements below describe this batch. See [current status](CURRENT_STATUS.md)
+> for present support and [the documentation index](README.md) for navigation.
+> `artifacts/`, `out/`, `build/` and external-reference paths identify local
+> evidence not distributed with a clone; original JSON baselines are preserved.
+
 This stage ports two prerequisites for the original serialized Quad diagnostic.
 It does not expose a working native Quad command or Qt panel yet. The current
 delivered GUI remains `out/FloraGPA-coverage-ui/FloraGPA.exe`.

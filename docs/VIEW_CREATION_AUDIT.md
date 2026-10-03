@@ -1,5 +1,13 @@
 # M2: captured RTV, DSV and texture UAV creation
 
+> Historical batch record. Results, package paths, module counts and remaining-work
+> statements below describe this batch. See [current status](CURRENT_STATUS.md)
+> for present support and [the documentation index](README.md) for navigation.
+> `artifacts/`, `out/`, `build/` and external-reference paths identify local
+> evidence not distributed with a clone; original JSON baselines are preserved.
+
+> **Subsequent work:** [Buffer view creation](BUFFER_VIEW_CREATION_AUDIT.md) subsequently added typed/raw/structured cases. The buffer-view gap below describes this earlier batch.
+
 The GPA 2025 R1 legacy DX11 path now executes Device5 view creation at its
 recorded event. `0x357d` creates a texture UAV, `0x357e` an RTV and `0x357f` a
 DSV. These records were previously rejected. The common checked creation audit
@@ -91,7 +99,9 @@ retained in `artifacts/m2-view-creation-before/validation.json`.
 Reproduce the new corpus acceptance with the existing serial developer runner:
 
 ```powershell
-python tools/validate_corpus.py --manifest docs/view-creation-corpus.json --captures-root artifacts/m2-view-creation-originals --exe out/FloraGPA-view-creation-20261003/FloraGPA.Cli.exe --out artifacts/view-validation-fresh --repeat 2 --oracle-tools D:/CDXrepo/FloraGPA/tools
+# Run from the repository root; set external paths for your environment.
+$ReferenceRoot = 'C:/reference/FloraGPA'
+python tools/validate_corpus.py --manifest docs/view-creation-corpus.json --captures-root artifacts/m2-view-creation-originals --exe out/FloraGPA-view-creation-20261003/FloraGPA.Cli.exe --out artifacts/view-validation-fresh --repeat 2 --oracle-tools "$ReferenceRoot/tools"
 ```
 
 Build `FloraViewCreationProbe` explicitly to regenerate fixtures. Its arguments

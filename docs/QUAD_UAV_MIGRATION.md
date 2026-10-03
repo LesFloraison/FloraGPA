@@ -1,5 +1,11 @@
 # Native graphics UAV relocation for Quad
 
+> Historical batch record. Results, package paths, module counts and remaining-work
+> statements below describe this batch. See [current status](CURRENT_STATUS.md)
+> for present support and [the documentation index](README.md) for navigation.
+> `artifacts/`, `out/`, `build/` and external-reference paths identify local
+> evidence not distributed with a clone; original JSON baselines are preserved.
+
 `application/QuadUavs` migrates `pre_raster_uav.PrivateGraphicsUAVs` for native
 counter/reference and depth-preparation passes. It complements the already
 migrated Coverage RT0 relocation and PostTransform private-output isolation.

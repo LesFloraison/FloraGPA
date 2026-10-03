@@ -1,5 +1,11 @@
 # Native post-transform geometry
 
+> Historical batch record. Results, package paths, module counts and remaining-work
+> statements below describe this batch. See [current status](CURRENT_STATUS.md)
+> for present support and [the documentation index](README.md) for navigation.
+> `artifacts/`, `out/`, `build/` and external-reference paths identify local
+> evidence not distributed with a clone; original JSON baselines are preserved.
+
 The recovered `post_transform.py` path for Final, VS, DS and GS outputs now uses
 native C++ D3D11 stream output. **Geometry** combines these stages with the
 existing IA view, a stream selector (0–3), optional zero-based instance selection,
@@ -64,7 +70,10 @@ Other UI/project fields are retained. Instance values must fit uint32 for native
 draw calls. Unmigrated stage selections are not available in the current UI.
 
 ```powershell
-.\out\FloraGPA-post-transform\FloraGPA.Cli.exe post-geometry D:\captures\sample.gpa_frame --event 100 --geometry-stage final --stream 0 --out D:\results\geometry
+# Run from the repository root; set external paths for your environment.
+$CaptureRoot = 'C:/captures'
+$ResultsRoot = Join-Path (Get-Location) 'artifacts/results'
+.\out\FloraGPA-post-transform\FloraGPA.Cli.exe post-geometry "$CaptureRoot/sample.gpa_frame" --event 100 --geometry-stage final --stream 0 --out "$ResultsRoot/geometry"
 # Add --instance 2 for the third original instance, or --warp for software replay.
 ```
 

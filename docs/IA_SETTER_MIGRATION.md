@@ -1,5 +1,11 @@
 # Persistent IA setter editing
 
+> Historical batch record. Results, package paths, module counts and remaining-work
+> statements below describe this batch. See [current status](CURRENT_STATUS.md)
+> for present support and [the documentation index](README.md) for navigation.
+> `artifacts/`, `out/`, `build/` and external-reference paths identify local
+> evidence not distributed with a clone; original JSON baselines are preserved.
+
 The API Log **Edit Setter** action supports IASetInputLayout,
 IASetVertexBuffers and IASetIndexBuffer. The Qt dialog uses captured-resource
 selectors, a start-slot control, a buffer/stride/offset table and an index-format
@@ -89,11 +95,14 @@ pending their own migration. CB/CB1 setter migration is documented in
 `docs/CONSTANT_BUFFER_SETTER_MIGRATION.md`. This change does not establish complete Python feature parity.
 
 ```powershell
+# Run from the repository root; set external paths for your environment.
+$QtRoot = 'C:/Qt/6.11.2/msvc2022_64'
+$ReferenceRoot = 'C:/reference/FloraGPA'
 python tools/validate_ia_setters_port.py `
-  --reference D:/CDXrepo/FloraGPA `
+  --reference "$ReferenceRoot" `
   --exe out/FloraGPA-ia-setters-final/FloraGPA.Cli.exe `
   --oracle build/vs2022/Release/FloraIaSetterTests.exe `
-  --qt-bin D:/Qt/6.11.2/msvc2022_64/bin `
+  --qt-bin "$QtRoot/bin" `
   --out artifacts/ia-setters-new
 ```
 

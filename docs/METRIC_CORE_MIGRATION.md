@@ -1,5 +1,11 @@
 # Native publisher clock, report values and query drain
 
+> Historical batch record. Results, package paths, module counts and remaining-work
+> statements below describe this batch. See [current status](CURRENT_STATUS.md)
+> for present support and [the documentation index](README.md) for navigation.
+> `artifacts/`, `out/`, `build/` and external-reference paths identify local
+> evidence not distributed with a clone; original JSON baselines are preserved.
+
 The shared computation and query lifecycle from these original modules now live
 in C++:
 
@@ -96,9 +102,12 @@ counting failed attempts as successful checks.
 Reproduce the comparison with external reference evidence:
 
 ```powershell
-python tools/validate_metric_core.py --reference D:/CDXrepo/FloraGPA --exe build/vs2022/Release/FloraMetricCoreTests.exe --qt-bin D:/Qt/6.11.2/msvc2022_64/bin --out artifacts/metric-core-new
+# Run from the repository root; set external paths for your environment.
+$QtRoot = 'C:/Qt/6.11.2/msvc2022_64'
+$ReferenceRoot = 'C:/reference/FloraGPA'
+python tools/validate_metric_core.py --reference "$ReferenceRoot" --exe build/vs2022/Release/FloraMetricCoreTests.exe --qt-bin "$QtRoot/bin" --out artifacts/metric-core-new
 $env:FLORA_TEST_INTEL_METRICS = '1'
-$env:FLORA_TEST_REFERENCE_ROOT = 'D:/CDXrepo/FloraGPA'
+$env:FLORA_TEST_REFERENCE_ROOT = "$ReferenceRoot"
 ctest --preset release -R '^(metric_core|metrics_discovery)$'
 ```
 

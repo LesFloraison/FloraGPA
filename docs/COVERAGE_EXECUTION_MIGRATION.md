@@ -1,5 +1,13 @@
 # Native coverage execution
 
+> Historical batch record. Results, package paths, module counts and remaining-work
+> statements below describe this batch. See [current status](CURRENT_STATUS.md)
+> for present support and [the documentation index](README.md) for navigation.
+> `artifacts/`, `out/`, `build/` and external-reference paths identify local
+> evidence not distributed with a clone; original JSON baselines are preserved.
+
+> **Subsequent work:** The subsequent [Coverage UI batch](COVERAGE_UI_MIGRATION.md) connects the desktop workflow; [Quad UI](QUAD_UI_MIGRATION.md) has separate acceptance. Backend limits recorded below remain scoped to their cases.
+
 `application/Coverage.cpp` executes the original fragment and geometry coverage
 diagnostics with D3D11. The CLI and isolated native worker expose `coverage`.
 The subsequent [Qt coverage migration](COVERAGE_UI_MIGRATION.md) connects its
@@ -7,7 +15,10 @@ controls, image navigation and exports to the analyzer. Quad consumers remain
 to be migrated. This is not completion of the application.
 
 ```powershell
-.\out\FloraGPA-coverage\FloraGPA.Cli.exe coverage D:\captures\sample.gpa_frame --id 430 --out D:\results\coverage
+# Run from the repository root; set external paths for your environment.
+$CaptureRoot = 'C:/captures'
+$ResultsRoot = Join-Path (Get-Location) 'artifacts/results'
+.\out\FloraGPA-coverage\FloraGPA.Cli.exe coverage "$CaptureRoot/sample.gpa_frame" --id 430 --out "$ResultsRoot/coverage"
 ```
 
 Options: `--coverage-mode fragment|geometry`, `--coverage-target auto|depth|rt0..rt7`,

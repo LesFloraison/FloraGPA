@@ -1,5 +1,13 @@
 # Persistent pipeline setters
 
+> Historical batch record. Results, package paths, module counts and remaining-work
+> statements below describe this batch. See [current status](CURRENT_STATUS.md)
+> for present support and [the documentation index](README.md) for navigation.
+> `artifacts/`, `out/`, `build/` and external-reference paths identify local
+> evidence not distributed with a clone; original JSON baselines are preserved.
+
+> **Subsequent work:** [M2 pipeline setter execution](PIPELINE_SETTER_AUDIT.md) subsequently executes validated captured setters at their own boundaries. Retained statements about the earlier snapshot-based reference describe this batch, not all current captured-setter behavior.
+
 The existing API Log **Edit Setter** action now covers these recovered command
 arguments, using compact resource selectors, numeric fields and array tables:
 
@@ -88,11 +96,14 @@ documented in `docs/SHADER_SETTER_MIGRATION.md`. Pending coverage/debugger/priva
 still require their own migration and verification.
 
 ```powershell
+# Run from the repository root; set external paths for your environment.
+$QtRoot = 'C:/Qt/6.11.2/msvc2022_64'
+$ReferenceRoot = 'C:/reference/FloraGPA'
 python tools/validate_pipeline_setters_port.py `
-  --reference D:/CDXrepo/FloraGPA `
+  --reference "$ReferenceRoot" `
   --exe out/FloraGPA-pipeline-setters/FloraGPA.Cli.exe `
   --oracle build/vs2022/Release/FloraPipelineSetterTests.exe `
-  --qt-bin D:/Qt/6.11.2/msvc2022_64/bin `
+  --qt-bin "$QtRoot/bin" `
   --out artifacts/pipeline-setters-comparison-new
 ```
 

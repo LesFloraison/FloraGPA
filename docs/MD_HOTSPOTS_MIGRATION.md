@@ -1,5 +1,11 @@
 # Native event-group metrics
 
+> Historical batch record. Results, package paths, module counts and remaining-work
+> statements below describe this batch. See [current status](CURRENT_STATUS.md)
+> for present support and [the documentation index](README.md) for navigation.
+> `artifacts/`, `out/`, `build/` and external-reference paths identify local
+> evidence not distributed with a clone; original JSON baselines are preserved.
+
 `MdHotspots` migrates `md_hotspots.py`: group normalization, independently weighted
 aggregation, publisher conversions, CSV exports, strict publisher aggregate
 loading and the two-stage acquisition owner. CLI and worker use the same native

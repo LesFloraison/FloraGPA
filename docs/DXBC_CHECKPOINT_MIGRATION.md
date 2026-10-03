@@ -1,5 +1,11 @@
 # Native checkpoint and trace instrumentation
 
+> Historical batch record. Results, package paths, module counts and remaining-work
+> statements below describe this batch. See [current status](CURRENT_STATUS.md)
+> for present support and [the documentation index](README.md) for navigation.
+> `artifacts/`, `out/`, `build/` and external-reference paths identify local
+> evidence not distributed with a clone; original JSON baselines are preserved.
+
 `src/application/DxbcCheckpoint.{h,cpp}` now implements the recovered GS/DS/HS
 checkpoint and invocation-trace DXBC transform in C++. It uses the native
 checkpoint model and exact input selectors from the preceding batch.

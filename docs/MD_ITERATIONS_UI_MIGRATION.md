@@ -1,5 +1,13 @@
 # Scheduled Intel metrics in Qt
 
+> Historical batch record. Results, package paths, module counts and remaining-work
+> statements below describe this batch. See [current status](CURRENT_STATUS.md)
+> for present support and [the documentation index](README.md) for navigation.
+> `artifacts/`, `out/`, `build/` and external-reference paths identify local
+> evidence not distributed with a clone; original JSON baselines are preserved.
+
+> **Subsequent work:** [Uniform/requested-metric UI](UNIFORM_METRICS_UI_MIGRATION.md) and [event-group CLI collection](MD_HOTSPOTS_MIGRATION.md) followed this batch. Event-group Qt/session integration remains pending.
+
 The right-side **Inspector > Intel Metrics** panel migrates
 `md_iterations_ui.py` into Qt Widgets. It uses the existing native scheduled
 collector and offline result verifier. No Python, Tk or GPA runtime is loaded.
@@ -90,11 +98,14 @@ To reproduce the package test, copy the test executable and Qt6Test.dll beside
 the packaged application, then set these development-only fixture variables:
 
 ```powershell
+# Run from the repository root; set external paths for your environment.
+$ReferenceRoot = 'C:/reference/FloraGPA'
+$ResultsRoot = Join-Path (Get-Location) 'artifacts/results'
 $env:QT_QPA_PLATFORM = 'offscreen'
 $env:FLORA_TEST_INTEL_METRICS = '1'
-$env:FLORA_TEST_REFERENCE_ROOT = 'D:/captures-and-python-reference'
-$env:FLORA_TEST_SCHEDULED_RESULTS = 'D:/results/md-iterations-delivery-parity'
-$env:FLORA_UI_ARTIFACT_DIR = 'D:/results/scheduled-ui'
+$env:FLORA_TEST_REFERENCE_ROOT = "$ReferenceRoot"
+$env:FLORA_TEST_SCHEDULED_RESULTS = "$ResultsRoot/md-iterations-delivery-parity"
+$env:FLORA_UI_ARTIFACT_DIR = "$ResultsRoot/scheduled-ui"
 ./FloraScheduledMetricsUiTests.exe
 ```
 
