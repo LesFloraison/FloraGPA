@@ -4,7 +4,14 @@
 #include <d3dcompiler.h>
 
 namespace flora {
+void Replay::requireCreatedCounter(Id view) const {
+    if (undefinedCreatedCounters_.contains(view))
+        throw std::runtime_error(
+            "Created UAV " + std::to_string(view) +
+            " has no defined counter value; an explicit captured reset or experiment value is required");
+}
 uint32_t Replay::readCounter(Id view) {
+    requireCreatedCounter(view);
     Unpredicated guard(context_.Get());
     if (!describeCounter(frame_, view))
         throw std::runtime_error("UAV has no hidden counter");
@@ -28,6 +35,7 @@ void Replay::writeCounter(Id view, uint32_t value) {
     if (!describeCounter(frame_, view))
         throw std::runtime_error("UAV has no hidden counter");
     writeCounter(get<ID3D11UnorderedAccessView>(view), value);
+    undefinedCreatedCounters_.erase(view);
 }
 void Replay::writeCounter(ID3D11UnorderedAccessView *view, uint32_t value) {
     Unpredicated guard(context_.Get());

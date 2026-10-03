@@ -1,0 +1,350 @@
+{
+  "schema": "FloraGPA buffer view creation acceptance 1",
+  "completion": "M2 in progress; M3-M6 incomplete",
+  "scope": "Device5 buffer SRV/RTV/UAV creation; seven checked observations; explicit new counter provenance",
+  "package": "out\\FloraGPA-buffer-views-20261003",
+  "package_sha256": {
+    "FloraGPA.exe": "a54b4a60fa3b12c34bb29402ec3202376c04002673f44c9aa78e9a75b64ded1f",
+    "FloraGPA.Cli.exe": "955418662b82a40ce2e44f439b205e0feac470e6390bac4ae323142921cf305d",
+    "FloraGPA.Worker.exe": "4d14fd47d5307c3a3a9a8676f5c567cf3f8ef8ce9f7b404a808683808fb6dde6",
+    "FloraGPA.Rdc.exe": "f4d21d43e661d24d392e91fc1a1f1460a20d1377fcf5075c57083ad289e82773",
+    "FloraGPA.Metrics.dll": "58b6278f2a93e783b1e8bb1290e9b0e51745f1a36825f296584f52159fd7c6db"
+  },
+  "native_runs": 358,
+  "file_outcomes": {
+    "repeat_stable": 178,
+    "repeat_variable": 1
+  },
+  "prior_stable_images_unchanged": 159,
+  "corpus_controls": 123,
+  "boundary_runs": 88,
+  "new_original_player_runs": 38,
+  "producer_frame_checks": 456,
+  "hardware_warp_original_creation_runs": 38,
+  "golden_controls": [
+    {
+      "case": "gf2",
+      "rgba_sha256": "2e1abc5eacb0bbfd801f9fe059c305baa9a0786c384b36a42fa5a323dd979fd1",
+      "passed": true,
+      "counts": {
+        "ClearDepthStencilView": 2,
+        "ClearRenderTargetView": 1,
+        "CreateBuffer": 2,
+        "DrawIndexed": 72,
+        "Map": 44,
+        "Present": 1,
+        "buffers_created_without_initial_data": 2,
+        "object_observation_records": 49,
+        "pipeline_setter_records": 142,
+        "private_data_observations": 4,
+        "query_metadata_records": 2,
+        "state_or_auxiliary_records": 551,
+        "unmap_observations": 44
+      }
+    },
+    {
+      "case": "gf2-negative",
+      "rgba_sha256": "b2c5548a51715f581c4591acc266ac7a0c65b54b7ecd9a49f43499fa9b76c5f1",
+      "passed": true,
+      "counts": {
+        "ClearDepthStencilView": 2,
+        "ClearRenderTargetView": 1,
+        "CreateBuffer": 2,
+        "Map": 44,
+        "Present": 1,
+        "buffers_created_without_initial_data": 2,
+        "object_observation_records": 49,
+        "pipeline_setter_records": 142,
+        "private_data_observations": 4,
+        "query_metadata_records": 2,
+        "state_or_auxiliary_records": 551,
+        "unmap_observations": 44
+      }
+    },
+    {
+      "case": "bf1",
+      "rgba_sha256": "1f724d1840652f66afd26dd30c95aecd5c1b4932eede56109198f15a8f57a2f6",
+      "passed": true,
+      "counts": {
+        "ClearDepthStencilView": 10,
+        "ClearRenderTargetView": 10,
+        "ClearUnorderedAccessViewFloat": 1,
+        "CopyResource": 2,
+        "CopyStructureCount": 6,
+        "CopySubresourceRegion": 7,
+        "Dispatch": 60,
+        "DispatchIndirect": 13,
+        "Draw": 79,
+        "DrawIndexed": 41,
+        "DrawIndexedInstanced": 1053,
+        "DrawInstanced": 29,
+        "GenerateMips": 2,
+        "Map": 4151,
+        "Present": 1,
+        "UpdateSubresource": 27,
+        "map_read_observations": 2,
+        "object_observation_records": 28,
+        "pipeline_setter_records": 2221,
+        "query_metadata_records": 17,
+        "state_or_auxiliary_records": 7354,
+        "unmap_observations": 4153,
+        "unresolved_input_layout_setters": 2,
+        "unresolved_output_setters": 6,
+        "unresolved_shader_setters": 4,
+        "unresolved_srv_setters": 2
+      }
+    },
+    {
+      "case": "bf1-negative",
+      "rgba_sha256": "cd3a3066f984b1c317fbeefec2836503f32078321d3dc1f367465f2c06d435bf",
+      "passed": true,
+      "counts": {
+        "ClearDepthStencilView": 10,
+        "ClearRenderTargetView": 10,
+        "ClearUnorderedAccessViewFloat": 1,
+        "CopyResource": 2,
+        "CopyStructureCount": 6,
+        "CopySubresourceRegion": 7,
+        "Dispatch": 60,
+        "DispatchIndirect": 13,
+        "GenerateMips": 2,
+        "Map": 4151,
+        "Present": 1,
+        "UpdateSubresource": 27,
+        "map_read_observations": 2,
+        "object_observation_records": 28,
+        "pipeline_setter_records": 2221,
+        "query_metadata_records": 17,
+        "state_or_auxiliary_records": 7354,
+        "unmap_observations": 4153,
+        "unresolved_input_layout_setters": 2,
+        "unresolved_output_setters": 6,
+        "unresolved_shader_setters": 4,
+        "unresolved_srv_setters": 2
+      }
+    }
+  ],
+  "results": {
+    "corpus": {
+      "path": "artifacts\\m2-buffer-view-release-corpus\\validation.json",
+      "sha256": "3ea13ac04e902e0810a1e2fb4d564b47d495d89bb450ee0fdf4aec1ff45b96c1",
+      "counts": {
+        "repeat_stable": 90,
+        "repeat_variable": 1
+      }
+    },
+    "originals": {
+      "path": "artifacts\\m2-buffer-view-release-originals\\validation.json",
+      "sha256": "fbabcb2fc249a6689b4e7ff8df5a806f0ce6e2b6484391bc327281bd966ba6e4",
+      "counts": {
+        "repeat_stable": 11
+      }
+    },
+    "copy": {
+      "path": "artifacts\\m2-buffer-view-release-copy\\validation.json",
+      "sha256": "769864bd028dad4a7deff55f208b1792b20daf1eff0aa2d7c59ddaff112a790e",
+      "counts": {
+        "repeat_stable": 6
+      }
+    },
+    "present": {
+      "path": "artifacts\\m2-buffer-view-release-present\\validation.json",
+      "sha256": "8c89026302ae3bac067fe57d25c3e8d561003f0072f7577a9ed7ad9865699fa1",
+      "counts": {
+        "repeat_stable": 5
+      }
+    },
+    "buffer": {
+      "path": "artifacts\\m2-buffer-view-release-buffer\\validation.json",
+      "sha256": "11181b85d99a525bc72c31f529ecde6827a345796dccd22935cbce145302fc80",
+      "counts": {
+        "repeat_stable": 5
+      }
+    },
+    "pipeline": {
+      "path": "artifacts\\m2-buffer-view-release-pipeline\\validation.json",
+      "sha256": "256df9ab0a51f077b852298d5e21153838a387d497bad0bb1b1ff2948296cd7d",
+      "counts": {
+        "repeat_stable": 5
+      }
+    },
+    "creation": {
+      "path": "artifacts\\m2-buffer-view-release-creation\\validation.json",
+      "sha256": "41dc78165ed2f12b5dae3f32d1277d4e8d4baff22902dd6ad60fd70301597cd2",
+      "counts": {
+        "repeat_stable": 7
+      }
+    },
+    "discovery": {
+      "path": "artifacts\\m2-buffer-view-release-discovery\\validation.json",
+      "sha256": "26b53ea2242d6944f21f3c347723f6b60c2efa0f4f11f70e8da36655c790fb88",
+      "counts": {
+        "repeat_stable": 1
+      }
+    },
+    "dimensions": {
+      "path": "artifacts\\m2-buffer-view-release-dimensions\\validation.json",
+      "sha256": "9ed89e6b1ef2ccddebe386d6ec5f38b08d7c0798012282cee8d6e6a24c2ccc9a",
+      "counts": {
+        "repeat_stable": 17
+      }
+    },
+    "views": {
+      "path": "artifacts\\m2-buffer-view-release-views\\validation.json",
+      "sha256": "3bf882939e03b270717a9cbd15ad26b53c0c3f7b143a024429d30752c9feabd3",
+      "counts": {
+        "repeat_stable": 12
+      }
+    },
+    "buffer-views": {
+      "path": "artifacts\\m2-buffer-view-release-buffer-views\\validation.json",
+      "sha256": "22aa4c59457f705b722ca8d0ef64b37d99342463a8733b7ac1be0f4c40376be3",
+      "counts": {
+        "repeat_stable": 19
+      }
+    }
+  },
+  "ctest": {
+    "path": "artifacts/ctest-m2-buffer-views.log",
+    "sha256": "0b88841a67e0ac59f22dc1bc999fef8f111fe63f847bca1b052c9c36dce521f2",
+    "suites": 19,
+    "qt_details": {
+      "buffer-view-creation": {
+        "path": "build\\vs2022\\buffer-view-creation-Release.txt",
+        "sha256": "9abdc1a85fb96e443fae0d213210815dcf68a59836bec7ab5c2ad54629d13e10",
+        "cases": 42
+      },
+      "view-creation": {
+        "path": "build\\vs2022\\view-creation-Release.txt",
+        "sha256": "dd7deb5775da59343176c844cdd39debade808bc727286c3dfe0fe31bac8005c",
+        "cases": 32
+      },
+      "texture-creation": {
+        "path": "build\\vs2022\\texture-creation-Release.txt",
+        "sha256": "25d1b0dfdd038a67d4ae678dc3c7e95453a0e00834e4bc8c038fb50ea7ad37dd",
+        "cases": 55
+      },
+      "ui": {
+        "path": "build\\vs2022\\ui-Release.txt",
+        "sha256": "aa853577adc91bc635dd05c477d310d3543201e08ee726455da28745590c4c5a",
+        "cases": 55
+      },
+      "texture-edit-replay": {
+        "path": "build\\vs2022\\texture-edit-replay-Release.txt",
+        "sha256": "46ebddf484217f6b78773c9d89e2c0ae432259edf8b2e7d1649fafed5b6d9e8b",
+        "cases": 34
+      }
+    }
+  },
+  "sources": {
+    "src/core/TextureCreation.cpp": "d1e4f432623abbe6e92f24835418712b78d840a95aed4182c6496e1dffaff968",
+    "src/core/TextureCreation.h": "36ef4d1e15123303e8623ac3e4e370d1ca73d3b6180191ee7a4cd15a16a279e8",
+    "src/application/ApiCommands.cpp": "47a6e56f013bc065491797fddc62a48e0cc3c87b5f3732b141ceaba3f7406637",
+    "src/application/FrameValidation.cpp": "8cb2a88b265be4b1d2c6fb8d2be7820cf9c65a16092a1534c9ec021ccf05199f",
+    "src/core/ReplayCapabilities.cpp": "15187c803e80febf55017e8f0487b79d4f32a3ea79c53b0cee354fe02814cf99",
+    "src/core/CommandNames.inc": "92f95705e2d22b8d568f4d310262843677f583eb9f1b25204337706db4555715",
+    "src/replay/Replay.cpp": "0480eee1700d7d557aaede89fbb06fc56ca5adcbae74440a5396ef932171809d",
+    "src/replay/Replay.h": "aa5d717e31a011aa380fe4b1fe182494e1686dcaea2fdef0a53590435b3e916c",
+    "tests/TextureCreationTests.cpp": "b13daad41d1e879936c95e8a25cb83020b1d7a3cded44eb8ee9d1eda997c88fb",
+    "tests/ViewCreationTests.cpp": "a15e68efc4bfddadc74302574f4626e2a72daa06f6ff627217bedbd74978e5e9",
+    "tests/BufferViewCreationTests.cpp": "ea1c45be4d1bdb1a713c549954b3ec876b778a63fe2df2eb516efaf299eaaeb3",
+    "src/replay/UavCounters.cpp": "6f6fcad030c94f7525d89fb4ae2fffe710bd3e785cd7567c8a7e920dfb537055",
+    "tools/native/view_creation_probe.cpp": "a812ae2877d211d23d4b859e2aabad8c498483b7266938ba825726d07b90ef1e",
+    "tools/native/buffer_view_creation_probe.cpp": "0935d7a436c2b31513632af21e961767733d8d0d4a507a672c77360d5edcfe24",
+    "tools/native/texture_creation_probe.cpp": "2c825ccee1b698d2be2090f00b1a4b05305e839cd2008e9f8e0baa2007d89c8d",
+    "tools/native/texture_probe_helpers.h": "30abcac380d84d505fd344d4083d97300f50df5b2e5cc7dffb11ea03c6d6ee3d",
+    "tools/native/texture_copy_probe.cpp": "9713f07b873a1700bae72e6397c7189e3b2325ea076de3aaff8fe0fa64cde1cb",
+    "tools/native/present_capture_probe.cpp": "7c29f1e572ab16a5bc497d39eef8198d79056877a9e1d3fff3f7ed530a32c4e3",
+    "CMakeLists.txt": "fd2cbed124301f8fec2a67845c81dbe54d628e5cfd4a103fbe83b60d902d1e77"
+  },
+  "evidence": {
+    "artifacts/m2-buffer-view-srv-wrappers.c": "d841194a0ffb963193b0b9d016139bc4a8066e05722ecebfe474b6941e65de01",
+    "artifacts/m2-buffer-view-buffer-wrappers.c": "67114addbf54ad20c66cea4f99a75623a3417a07ca70e1e9c6f0a5d710942405",
+    "artifacts/m2-buffer-view-originals-final/manifest.json": "be9f8c1da50b8328a9991ea586639cafe8d286c6844a27d708736cedecb29ebf",
+    "artifacts/m2-buffer-view-before/validation.json": "33d205f22701244fd0573a654284a792dc4e7c4b8cf09b6ca5061ff1efea6381"
+  },
+  "limits": [
+    "Original player adapter unidentified; observed image equality is not matched-device equivalence",
+    "Frame-before counter recovery, other device layouts, identity versioning and deferred execution remain incomplete",
+    "These fixtures do not certify all formats/usages/sample counts",
+    "Known Helldivers variability unchanged; missing contents are not synthesized"
+  ],
+  "metadata_evidence": [
+    {
+      "record_type": "0x3015",
+      "original_record_count": 5,
+      "writer_evidence": true,
+      "synthetic_wire_and_inspection": true
+    },
+    {
+      "record_type": "0x301c",
+      "original_record_count": 25,
+      "writer_evidence": true,
+      "synthetic_wire_and_inspection": true
+    },
+    {
+      "record_type": "0x3026",
+      "original_record_count": 0,
+      "writer_evidence": true,
+      "synthetic_wire_and_inspection": true
+    },
+    {
+      "record_type": "0x3027",
+      "original_record_count": 0,
+      "writer_evidence": true,
+      "synthetic_wire_and_inspection": true
+    },
+    {
+      "record_type": "0x3028",
+      "original_record_count": 0,
+      "writer_evidence": true,
+      "synthetic_wire_and_inspection": true
+    },
+    {
+      "record_type": "0x3029",
+      "original_record_count": 0,
+      "writer_evidence": true,
+      "synthetic_wire_and_inspection": true
+    },
+    {
+      "record_type": "0x302d",
+      "original_record_count": 6,
+      "writer_evidence": true,
+      "synthetic_wire_and_inspection": true
+    }
+  ],
+  "counter_oracles": {
+    "artifacts\\m2-buffer-view-originals-final\\13\\native\\counter.bin": {
+      "sha256": "9d9f290527a6be626a8f5985b26e19b237b44872b03631811df4416fc1713178",
+      "value": 3
+    },
+    "artifacts\\m2-buffer-view-originals-final\\13\\captured\\counter.bin": {
+      "sha256": "9d9f290527a6be626a8f5985b26e19b237b44872b03631811df4416fc1713178",
+      "value": 3
+    },
+    "artifacts\\m2-buffer-view-originals-final\\14\\native\\counter.bin": {
+      "sha256": "9d9f290527a6be626a8f5985b26e19b237b44872b03631811df4416fc1713178",
+      "value": 3
+    },
+    "artifacts\\m2-buffer-view-originals-final\\14\\captured\\counter.bin": {
+      "sha256": "9d9f290527a6be626a8f5985b26e19b237b44872b03631811df4416fc1713178",
+      "value": 3
+    },
+    "artifacts\\m2-buffer-view-originals-final\\16\\native\\counter.bin": {
+      "sha256": "fb5e512425fc9449316ec95969ebe71e2d576dbab833d61e2a5b9330fd70ee02",
+      "value": 4
+    },
+    "artifacts\\m2-buffer-view-originals-final\\16\\captured\\counter.bin": {
+      "sha256": "fb5e512425fc9449316ec95969ebe71e2d576dbab833d61e2a5b9330fd70ee02",
+      "value": 4
+    },
+    "artifacts\\m2-buffer-view-originals-final\\17\\native\\counter.bin": {
+      "sha256": "fb5e512425fc9449316ec95969ebe71e2d576dbab833d61e2a5b9330fd70ee02",
+      "value": 4
+    },
+    "artifacts\\m2-buffer-view-originals-final\\17\\captured\\counter.bin": {
+      "sha256": "fb5e512425fc9449316ec95969ebe71e2d576dbab833d61e2a5b9330fd70ee02",
+      "value": 4
+    }
+  }
+}

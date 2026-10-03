@@ -45,10 +45,13 @@ bool createdViewDescriptorEqual(uint16_t t, std::span<const uint32_t> a, std::sp
 }
 ViewObservation viewCreationObservation(uint16_t t) {
     switch (t) {
+    case 0x3026:
     case 0x3053:
     case 0x301d:
     case 0x3185:
         return ViewObservation::QueryInterface;
+    case 0x3027:
+    case 0x3028:
     case 0x3054:
     case 0x3055:
     case 0x301e:
@@ -56,10 +59,12 @@ ViewObservation viewCreationObservation(uint16_t t) {
     case 0x3186:
     case 0x3187:
         return ViewObservation::ReferenceCount;
+    case 0x3029:
     case 0x3056:
     case 0x3020:
     case 0x3188:
         return ViewObservation::GetDevice;
+    case 0x302d:
     case 0x305a:
     case 0x3024:
     case 0x318c:
@@ -76,10 +81,12 @@ bool textureSrvDescriptorEqual(std::span<const uint32_t> a, std::span<const uint
     if (a.size() != 6 || b.size() != 6 || a[0] != b[0] || a[1] != b[1])
         return false;
     // Compare the active union only; padding and inactive descriptor members are not semantics.
-    const auto words = a[1] == 2 || a[1] == 4 || a[1] == 7 || a[1] == 8 || a[1] == 9 ? 4
-                       : a[1] == 3 || a[1] == 5 || a[1] == 10                        ? 6
-                       : a[1] == 6                                                   ? 2
-                                                                                     : 0;
+    const auto words = a[1] == 11                                                      ? 5
+                       : a[1] == 1                                                     ? 4
+                       : a[1] == 2 || a[1] == 4 || a[1] == 7 || a[1] == 8 || a[1] == 9 ? 4
+                       : a[1] == 3 || a[1] == 5 || a[1] == 10                          ? 6
+                       : a[1] == 6                                                     ? 2
+                                                                                       : 0;
     return words && std::equal(a.begin(), a.begin() + words, b.begin());
 }
 TextureCreationRecord readTextureCreation(uint16_t t, Bytes bytes) {
@@ -153,10 +160,41 @@ TextureCreationAudit auditTextureCreations(const Frame &frame) {
                     saved.push_back(r.read<uint32_t>());
                 r.end();
                 const auto source = frame.resource(c.source);
-                if (resource.device != c.device || source.device != c.device || source.type < 0x84 ||
+                if (resource.device != c.device || source.device != c.device || source.type < 0x83 ||
                     source.type > 0x86)
-                    throw std::runtime_error("Captured view creation requires a texture source on the "
-                                             "recorded device; buffer view creation is not yet accepted");
+                    throw std::runtime_error("Created view source kind or device is inconsistent");
+                if (source.type == 0x83) {
+                    if (e.type == 0x357f || (saved[1] != 1 && !(e.type == 0x357c && saved[1] == 11)))
+                        throw std::runtime_error("Buffer view has an incompatible dimension");
+                    const auto &d = source.desc;
+                    const uint32_t bind = e.type == 0x357c ? 8 : e.type == 0x357d ? 128 : 32;
+                    if (!(d.at(2) & bind))
+                        throw std::runtime_error("Buffer lacks the view bind flag");
+                    const auto flags =
+                        e.type == 0x357d || (e.type == 0x357c && saved[1] == 11) ? saved[4] : 0;
+                    if ((e.type == 0x357c && flags > 1) ||
+                        (e.type == 0x357d && flags != 0 && flags != 1 && flags != 2 && flags != 4))
+                        throw std::runtime_error("Invalid buffer view flags");
+                    uint32_t stride = 0;
+                    if (flags == 1) {
+                        if (saved[0] != 39 || !(d.at(4) & 32) || (d.at(4) & 64))
+                            throw std::runtime_error("Raw view requires a raw buffer and R32_TYPELESS");
+                        stride = 4;
+                    } else if (d.at(4) & 64) {
+                        stride = d.at(5);
+                        if (e.type == 0x357e || saved[0] != 0 || !stride || stride % 4 || stride > 2048)
+                            throw std::runtime_error("Structured view format or stride is invalid");
+                    } else {
+                        if (!saved[0] || flags)
+                            throw std::runtime_error("Typed buffer view format or counter flags are invalid");
+                        const auto layout = pitches(1, 1, saved[0]);
+                        stride = layout.first;
+                        if (layout.second != 1 || !stride || stride > 16)
+                            throw std::runtime_error("Unsupported typed buffer element layout");
+                    }
+                    if (!saved[3] || (uint64_t(saved[2]) + saved[3]) * stride > d.at(0))
+                        throw std::runtime_error("Buffer view element range exceeds saved storage");
+                }
                 if (c.hasDescriptor && !createdViewDescriptorEqual(e.type, saved, c.descriptor))
                     throw std::runtime_error("Created view descriptor differs from its saved resource");
             } else {
@@ -207,10 +245,10 @@ const TextureCreationRecord &requireTextureCreation(const TextureCreationAudit &
     return c;
 }
 bool isTextureCreationObservation(uint16_t t) {
-    return viewCreationObservation(t) != ViewObservation::None || t == 0x3134 || t == 0x3135 || t == 0x3136 ||
-           t == 0x3137 || t == 0x313e || t == 0x3007 || t == 0x3008 || t == 0x3009 || t == 0x300a ||
-           t == 0x3011 || t == 0x313f || t == 0x3140 || t == 0x3141 || t == 0x3142 || t == 0x3149 ||
-           t == 0x3592 || t == 0x35aa;
+    return t == 0x3015 || t == 0x301c || viewCreationObservation(t) != ViewObservation::None || t == 0x3134 ||
+           t == 0x3135 || t == 0x3136 || t == 0x3137 || t == 0x313e || t == 0x3007 || t == 0x3008 ||
+           t == 0x3009 || t == 0x300a || t == 0x3011 || t == 0x313f || t == 0x3140 || t == 0x3141 ||
+           t == 0x3142 || t == 0x3149 || t == 0x3592 || t == 0x35aa;
 }
 bool acceptTextureCreationObservation(uint16_t t, Bytes bytes) {
     if (!isTextureCreationObservation(t))
@@ -254,16 +292,18 @@ bool acceptTextureCreationObservation(uint16_t t, Bytes bytes) {
     case 0x3009:
         r.skip(4);
         break;
+    case 0x3015:
     case 0x3142:
     case 0x3137:
     case 0x300a:
         r.skip(8);
         break;
+    case 0x301c:
     case 0x3149:
     case 0x313e:
     case 0x3011:
         if (r.flag())
-            r.skip(t == 0x313e ? 32 : t == 0x3011 ? 36 : 44);
+            r.skip(t == 0x301c ? 24 : t == 0x313e ? 32 : t == 0x3011 ? 36 : 44);
         break;
     case 0x3592:
         r.skip(8);

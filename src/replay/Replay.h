@@ -1,7 +1,6 @@
 #pragma once
-#include "core/TextureCreation.h"
-#include "core/ConstantBufferBindings.h"
 #include "core/BufferCreation.h"
+#include "core/ConstantBufferBindings.h"
 #include "core/Frame.h"
 #include "core/IaBindings.h"
 #include "core/MapRecords.h"
@@ -10,6 +9,7 @@
 #include "core/Predication.h"
 #include "core/SamplerBindings.h"
 #include "core/SrvBindings.h"
+#include "core/TextureCreation.h"
 #include "core/TextureEdits.h"
 #define NOMINMAX
 #include <d3d11_3.h>
@@ -165,6 +165,8 @@ class Replay {
     Com<ID3D11DeviceContext> context_;
     Com<ID3D11DeviceContext1> context1_;
     std::map<Id, Com<IUnknown>> objects_;
+    std::set<Id> undefinedCreatedCounters_;
+    void requireCreatedCounter(Id view) const;
     std::vector<Id> ignoredMsaaInitial_;
     std::vector<PlanarWrite> planarWrites_;
     std::vector<Id> appliedExperimentEvents_;
@@ -306,8 +308,7 @@ class Replay {
     ~Replay();
     std::optional<std::filesystem::path> finishCapture();
     void run(const std::function<void(Id, size_t, size_t)> &progress = {},
-             const ReplayBoundaryObserver &observer = {},
-             const ReplayBoundaryObserver &commandObserver = {},
+             const ReplayBoundaryObserver &observer = {}, const ReplayBoundaryObserver &commandObserver = {},
              const ReplayCommandScope &commandScope = {});
     const ReplayOptions &options() const { return options_; }
     const std::vector<Id> &ignoredMsaaInitial() const { return ignoredMsaaInitial_; }

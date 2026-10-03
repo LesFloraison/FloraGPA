@@ -107,3 +107,11 @@ long-duration reliability. These fixtures accept the listed texture formats and
 subresource patterns, not every MSAA, volume, usage, buffer or device-interface
 combination. Buffer views, identity versioning, other creation layouts and
 Deferred/Command List remain separate work. M2 and M3–M6 remain incomplete.
+
+## Subsequent buffer view acceptance
+
+[BUFFER_VIEW_CREATION_AUDIT.md](BUFFER_VIEW_CREATION_AUDIT.md) extends creation
+to the validated typed/raw/structured buffer view paths and explicit Counter/
+Append initialization. Its original fixtures and new-counter provenance checks
+supersede this batch's blanket buffer-source rejection. Frame-before counter
+recovery and other unverified combinations remain open.

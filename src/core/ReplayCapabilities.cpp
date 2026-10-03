@@ -23,7 +23,8 @@ ReplayCapability replayCapability(uint16_t t) {
     if (isTextureCreation(t) || isTextureCreationObservation(t))
         return {isTextureCreation(t) ? "execute" : "metadata",
                 "src/core/TextureCreation.cpp;src/replay/Replay.cpp",
-                "tests/TextureCreationTests.cpp;tests/ViewCreationTests.cpp;docs/VIEW_CREATION_AUDIT.md;docs/"
+                "tests/BufferViewCreationTests.cpp;docs/BUFFER_VIEW_CREATION_AUDIT.md;tests/"
+                "TextureCreationTests.cpp;tests/ViewCreationTests.cpp;docs/VIEW_CREATION_AUDIT.md;docs/"
                 "TEXTURE_CREATION_AUDIT.md;docs/TEXTURE_DIMENSIONS_AUDIT.md"};
     if (isCopyCommand(t))
         return {"execute", "src/core/CopyCommands.cpp;src/core/TextureCopies.cpp;src/replay/Replay.cpp",

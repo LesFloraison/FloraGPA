@@ -619,16 +619,19 @@ Json inspectCommand(const Frame &frame, Id id) {
                 } else if (in(t, {0x3140, 0x3141, 0x3135, 0x3136, 0x3008, 0x3009}) ||
                            view == ViewObservation::ReferenceCount)
                     r.u("observed_reference_count");
-                else if (in(t, {0x3142, 0x3137, 0x300a}) || view == ViewObservation::GetDevice)
+                else if (in(t, {0x3015, 0x3142, 0x3137, 0x300a}) || view == ViewObservation::GetDevice)
                     r.id("returned_device");
                 else if (view == ViewObservation::GetResource)
                     r.id("returned_resource");
                 else if (view == ViewObservation::GetDescriptor) {
                     if (r.flag("descriptor_present"))
                         r.field("descriptor", t == 0x3025 ? "6I" : "5I");
-                } else if (in(t, {0x3149, 0x313e, 0x3011})) {
+                } else if (in(t, {0x301c, 0x3149, 0x313e, 0x3011})) {
                     if (r.flag("descriptor_present"))
-                        r.field("descriptor", t == 0x313e ? "8I" : t == 0x3011 ? "9I" : "11I");
+                        r.field("descriptor", t == 0x301c   ? "6I"
+                                              : t == 0x313e ? "8I"
+                                              : t == 0x3011 ? "9I"
+                                                            : "11I");
                 } else {
                     r.field("hresult", "i");
                     r.u("format");
