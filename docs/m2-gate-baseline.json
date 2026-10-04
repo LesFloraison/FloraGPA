@@ -1,0 +1,2634 @@
+{
+  "schema": "FloraGPA M2 registered compatibility gate baseline 1",
+  "previous_revision": "a28da08",
+  "registered_scope_gate": "passed",
+  "next_stage": "M3 retained-list evidence and production semantics",
+  "roadmap_complete": false,
+  "registered_cases": 388,
+  "unique_captures": 378,
+  "positive_cases": 366,
+  "rejected_cases": 22,
+  "native_attempts": 776,
+  "positive_replays": 732,
+  "located_rejections": 44,
+  "dependency_audits_passed": 732,
+  "diagnostic_controls": 353,
+  "resource_exports": 254,
+  "strict_resource_exports": 250,
+  "previous_stable_images_unchanged": 365,
+  "case_outcomes": {
+    "repeat_stable": 365,
+    "repeat_variable": 1,
+    "replay_failed": 22
+  },
+  "observed_command_families": [
+    {
+      "record_type": 49,
+      "name": "ClearDepthStencilView",
+      "handling": "execute",
+      "implementation": "src/replay/Replay.cpp;src/replay/InputBindings.cpp",
+      "evidence": "tests/ApiCommandTests.cpp;tests/StreamOutputTests.cpp;tools/validate_native.py",
+      "registered_records": 95,
+      "decoded_records": 95,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 50,
+      "name": "ClearRenderTargetView",
+      "handling": "execute",
+      "implementation": "src/replay/Replay.cpp;src/replay/InputBindings.cpp",
+      "evidence": "tests/ApiCommandTests.cpp;tests/StreamOutputTests.cpp;tools/validate_native.py",
+      "registered_records": 467,
+      "decoded_records": 467,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 51,
+      "name": "ClearUnorderedAccessViewUint",
+      "handling": "execute",
+      "implementation": "src/replay/Replay.cpp;src/replay/InputBindings.cpp",
+      "evidence": "tests/ApiCommandTests.cpp;tests/StreamOutputTests.cpp;tools/validate_native.py",
+      "registered_records": 24,
+      "decoded_records": 24,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 52,
+      "name": "ClearUnorderedAccessViewFloat",
+      "handling": "execute",
+      "implementation": "src/replay/Replay.cpp;src/replay/InputBindings.cpp",
+      "evidence": "tests/ApiCommandTests.cpp;tests/StreamOutputTests.cpp;tools/validate_native.py",
+      "registered_records": 3,
+      "decoded_records": 3,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 53,
+      "name": "Dispatch",
+      "handling": "execute",
+      "implementation": "src/replay/Replay.cpp;src/replay/InputBindings.cpp",
+      "evidence": "tests/ApiCommandTests.cpp;tests/StreamOutputTests.cpp;tools/validate_native.py",
+      "registered_records": 240,
+      "decoded_records": 240,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 54,
+      "name": "DispatchIndirect",
+      "handling": "execute",
+      "implementation": "src/replay/Replay.cpp;src/replay/InputBindings.cpp",
+      "evidence": "tests/ApiCommandTests.cpp;tests/StreamOutputTests.cpp;tools/validate_native.py",
+      "registered_records": 13,
+      "decoded_records": 13,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 55,
+      "name": "Draw",
+      "handling": "execute",
+      "implementation": "src/replay/Replay.cpp;src/replay/InputBindings.cpp",
+      "evidence": "tests/ApiCommandTests.cpp;tests/StreamOutputTests.cpp;tools/validate_native.py",
+      "registered_records": 586,
+      "decoded_records": 586,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 56,
+      "name": "DrawAuto",
+      "handling": "execute",
+      "implementation": "src/replay/Replay.cpp;src/replay/InputBindings.cpp",
+      "evidence": "tests/ApiCommandTests.cpp;tests/StreamOutputTests.cpp;tools/validate_native.py",
+      "registered_records": 6,
+      "decoded_records": 6,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 57,
+      "name": "DrawIndexed",
+      "handling": "execute",
+      "implementation": "src/replay/Replay.cpp;src/replay/InputBindings.cpp",
+      "evidence": "tests/ApiCommandTests.cpp;tests/StreamOutputTests.cpp;tools/validate_native.py",
+      "registered_records": 177,
+      "decoded_records": 177,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 58,
+      "name": "DrawIndexedInstanced",
+      "handling": "execute",
+      "implementation": "src/replay/Replay.cpp;src/replay/InputBindings.cpp",
+      "evidence": "tests/ApiCommandTests.cpp;tests/StreamOutputTests.cpp;tools/validate_native.py",
+      "registered_records": 1454,
+      "decoded_records": 1454,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 60,
+      "name": "DrawInstanced",
+      "handling": "execute",
+      "implementation": "src/replay/Replay.cpp;src/replay/InputBindings.cpp",
+      "evidence": "tests/ApiCommandTests.cpp;tests/StreamOutputTests.cpp;tools/validate_native.py",
+      "registered_records": 31,
+      "decoded_records": 31,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 62,
+      "name": "CopyResource",
+      "handling": "execute",
+      "implementation": "src/core/CopyCommands.cpp;src/core/TextureCopies.cpp;src/replay/Replay.cpp",
+      "evidence": "tests/CopyCommandTests.cpp;tests/TextureCopyTests.cpp;docs/BUFFER_COPY_AUDIT.md;docs/TEXTURE_COPY_AUDIT.md",
+      "registered_records": 720,
+      "decoded_records": 720,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 63,
+      "name": "CopyStructureCount",
+      "handling": "execute",
+      "implementation": "src/core/CopyCommands.cpp;src/core/TextureCopies.cpp;src/replay/Replay.cpp",
+      "evidence": "tests/CopyCommandTests.cpp;tests/TextureCopyTests.cpp;docs/BUFFER_COPY_AUDIT.md;docs/TEXTURE_COPY_AUDIT.md",
+      "registered_records": 26,
+      "decoded_records": 26,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 64,
+      "name": "CopySubresourceRegion",
+      "handling": "execute",
+      "implementation": "src/core/CopyCommands.cpp;src/core/TextureCopies.cpp;src/replay/Replay.cpp",
+      "evidence": "tests/CopyCommandTests.cpp;tests/TextureCopyTests.cpp;docs/BUFFER_COPY_AUDIT.md;docs/TEXTURE_COPY_AUDIT.md",
+      "registered_records": 48,
+      "decoded_records": 48,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 66,
+      "name": "ResolveSubresource",
+      "handling": "execute",
+      "implementation": "src/core/CopyCommands.cpp;src/core/TextureCopies.cpp;src/replay/Replay.cpp",
+      "evidence": "tests/CopyCommandTests.cpp;tests/TextureCopyTests.cpp;docs/BUFFER_COPY_AUDIT.md;docs/TEXTURE_COPY_AUDIT.md",
+      "registered_records": 6,
+      "decoded_records": 6,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 577,
+      "name": "Begin",
+      "handling": "execute",
+      "implementation": "src/replay/Replay.cpp;src/replay/InputBindings.cpp",
+      "evidence": "tests/ApiCommandTests.cpp;tests/StreamOutputTests.cpp;tools/validate_native.py",
+      "registered_records": 14,
+      "decoded_records": 14,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 578,
+      "name": "ClearState",
+      "handling": "execute",
+      "implementation": "src/replay/Replay.cpp;src/replay/InputBindings.cpp",
+      "evidence": "tests/ApiCommandTests.cpp;tests/StreamOutputTests.cpp;tools/validate_native.py",
+      "registered_records": 446,
+      "decoded_records": 446,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 579,
+      "name": "End",
+      "handling": "execute",
+      "implementation": "src/replay/Replay.cpp;src/replay/InputBindings.cpp",
+      "evidence": "tests/ApiCommandTests.cpp;tests/StreamOutputTests.cpp;tools/validate_native.py",
+      "registered_records": 14,
+      "decoded_records": 14,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 580,
+      "name": "Flush",
+      "handling": "execute",
+      "implementation": "src/replay/Replay.cpp;src/replay/InputBindings.cpp",
+      "evidence": "tests/ApiCommandTests.cpp;tests/StreamOutputTests.cpp;tools/validate_native.py",
+      "registered_records": 1,
+      "decoded_records": 1,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 581,
+      "name": "GenerateMips",
+      "handling": "execute",
+      "implementation": "src/replay/Replay.cpp;src/replay/InputBindings.cpp",
+      "evidence": "tests/ApiCommandTests.cpp;tests/StreamOutputTests.cpp;tools/validate_native.py",
+      "registered_records": 2,
+      "decoded_records": 2,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 582,
+      "name": "MapCapturedWrites",
+      "handling": "execute",
+      "implementation": "src/replay/Replay.cpp;src/replay/InputBindings.cpp",
+      "evidence": "tests/ApiCommandTests.cpp;tests/StreamOutputTests.cpp;tools/validate_native.py",
+      "registered_records": 6448,
+      "decoded_records": 6448,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 583,
+      "name": "UpdateSubresource",
+      "handling": "execute",
+      "implementation": "src/replay/Replay.cpp;src/replay/InputBindings.cpp",
+      "evidence": "tests/ApiCommandTests.cpp;tests/StreamOutputTests.cpp;tools/validate_native.py",
+      "registered_records": 587,
+      "decoded_records": 587,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 584,
+      "name": "SetPredication",
+      "handling": "execute",
+      "implementation": "src/replay/Replay.cpp;src/replay/InputBindings.cpp",
+      "evidence": "tests/ApiCommandTests.cpp;tests/StreamOutputTests.cpp;tools/validate_native.py",
+      "registered_records": 26,
+      "decoded_records": 26,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 585,
+      "name": "VSSetConstantBuffers",
+      "handling": "execute",
+      "implementation": "src/replay/Replay.cpp;src/replay/InputBindings.cpp",
+      "evidence": "tests/ApiCommandTests.cpp;tests/StreamOutputTests.cpp;tools/validate_native.py",
+      "registered_records": 772,
+      "decoded_records": 772,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 586,
+      "name": "HSSetConstantBuffers",
+      "handling": "execute",
+      "implementation": "src/replay/Replay.cpp;src/replay/InputBindings.cpp",
+      "evidence": "tests/ApiCommandTests.cpp;tests/StreamOutputTests.cpp;tools/validate_native.py",
+      "registered_records": 110,
+      "decoded_records": 110,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 587,
+      "name": "DSSetConstantBuffers",
+      "handling": "execute",
+      "implementation": "src/replay/Replay.cpp;src/replay/InputBindings.cpp",
+      "evidence": "tests/ApiCommandTests.cpp;tests/StreamOutputTests.cpp;tools/validate_native.py",
+      "registered_records": 110,
+      "decoded_records": 110,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 588,
+      "name": "GSSetConstantBuffers",
+      "handling": "execute",
+      "implementation": "src/replay/Replay.cpp;src/replay/InputBindings.cpp",
+      "evidence": "tests/ApiCommandTests.cpp;tests/StreamOutputTests.cpp;tools/validate_native.py",
+      "registered_records": 12,
+      "decoded_records": 12,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 589,
+      "name": "PSSetConstantBuffers",
+      "handling": "execute",
+      "implementation": "src/replay/Replay.cpp;src/replay/InputBindings.cpp",
+      "evidence": "tests/ApiCommandTests.cpp;tests/StreamOutputTests.cpp;tools/validate_native.py",
+      "registered_records": 742,
+      "decoded_records": 742,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 590,
+      "name": "CSSetConstantBuffers",
+      "handling": "execute",
+      "implementation": "src/replay/Replay.cpp;src/replay/InputBindings.cpp",
+      "evidence": "tests/ApiCommandTests.cpp;tests/StreamOutputTests.cpp;tools/validate_native.py",
+      "registered_records": 229,
+      "decoded_records": 229,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 591,
+      "name": "VSSetConstantBuffers1",
+      "handling": "execute",
+      "implementation": "src/replay/Replay.cpp;src/replay/InputBindings.cpp",
+      "evidence": "tests/ApiCommandTests.cpp;tests/StreamOutputTests.cpp;tools/validate_native.py",
+      "registered_records": 93,
+      "decoded_records": 93,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 595,
+      "name": "PSSetConstantBuffers1",
+      "handling": "execute",
+      "implementation": "src/replay/Replay.cpp;src/replay/InputBindings.cpp",
+      "evidence": "tests/ApiCommandTests.cpp;tests/StreamOutputTests.cpp;tools/validate_native.py",
+      "registered_records": 81,
+      "decoded_records": 81,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 596,
+      "name": "CSSetConstantBuffers1",
+      "handling": "execute",
+      "implementation": "src/replay/Replay.cpp;src/replay/InputBindings.cpp",
+      "evidence": "tests/ApiCommandTests.cpp;tests/StreamOutputTests.cpp;tools/validate_native.py",
+      "registered_records": 73,
+      "decoded_records": 73,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 597,
+      "name": "UpdateSubresource1",
+      "handling": "execute",
+      "implementation": "src/core/Commands.cpp;src/core/CopyCommands.cpp;src/replay/Replay.cpp",
+      "evidence": "tests/Transfer1Tests.cpp;docs/TRANSFER1_AUDIT.md",
+      "registered_records": 20,
+      "decoded_records": 20,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 598,
+      "name": "CopySubresourceRegion1",
+      "handling": "execute",
+      "implementation": "src/core/Commands.cpp;src/core/CopyCommands.cpp;src/replay/Replay.cpp",
+      "evidence": "tests/Transfer1Tests.cpp;docs/TRANSFER1_AUDIT.md",
+      "registered_records": 20,
+      "decoded_records": 20,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 599,
+      "name": "ClearView",
+      "handling": "execute",
+      "implementation": "src/core/ClearView.cpp;src/replay/Replay.cpp",
+      "evidence": "tests/ClearViewTests.cpp;docs/CLEAR_VIEW_AUDIT.md",
+      "registered_records": 16,
+      "decoded_records": 16,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 606,
+      "name": "CSSetUnorderedAccessViews",
+      "handling": "execute",
+      "implementation": "src/replay/Replay.cpp;src/replay/InputBindings.cpp",
+      "evidence": "tests/ApiCommandTests.cpp;tests/StreamOutputTests.cpp;tools/validate_native.py",
+      "registered_records": 440,
+      "decoded_records": 440,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 12295,
+      "name": "Texture3D.QueryInterface",
+      "handling": "metadata",
+      "implementation": "src/core/TextureCreation.cpp;src/replay/Replay.cpp",
+      "evidence": "tests/BufferViewCreationTests.cpp;docs/BUFFER_VIEW_CREATION_AUDIT.md;tests/TextureCreationTests.cpp;tests/ViewCreationTests.cpp;docs/VIEW_CREATION_AUDIT.md;docs/TEXTURE_CREATION_AUDIT.md;docs/TEXTURE_DIMENSIONS_AUDIT.md",
+      "registered_records": 27,
+      "decoded_records": 27,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 12296,
+      "name": "Texture3D.AddRef",
+      "handling": "metadata",
+      "implementation": "src/core/TextureCreation.cpp;src/replay/Replay.cpp",
+      "evidence": "tests/BufferViewCreationTests.cpp;docs/BUFFER_VIEW_CREATION_AUDIT.md;tests/TextureCreationTests.cpp;tests/ViewCreationTests.cpp;docs/VIEW_CREATION_AUDIT.md;docs/TEXTURE_CREATION_AUDIT.md;docs/TEXTURE_DIMENSIONS_AUDIT.md",
+      "registered_records": 27,
+      "decoded_records": 27,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 12297,
+      "name": "Texture3D.Release",
+      "handling": "metadata",
+      "implementation": "src/core/TextureCreation.cpp;src/replay/Replay.cpp",
+      "evidence": "tests/BufferViewCreationTests.cpp;docs/BUFFER_VIEW_CREATION_AUDIT.md;tests/TextureCreationTests.cpp;tests/ViewCreationTests.cpp;docs/VIEW_CREATION_AUDIT.md;docs/TEXTURE_CREATION_AUDIT.md;docs/TEXTURE_DIMENSIONS_AUDIT.md",
+      "registered_records": 27,
+      "decoded_records": 27,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 12298,
+      "name": "Texture3D.GetDevice",
+      "handling": "metadata",
+      "implementation": "src/core/TextureCreation.cpp;src/replay/Replay.cpp",
+      "evidence": "tests/BufferViewCreationTests.cpp;docs/BUFFER_VIEW_CREATION_AUDIT.md;tests/TextureCreationTests.cpp;tests/ViewCreationTests.cpp;docs/VIEW_CREATION_AUDIT.md;docs/TEXTURE_CREATION_AUDIT.md;docs/TEXTURE_DIMENSIONS_AUDIT.md",
+      "registered_records": 9,
+      "decoded_records": 9,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 12302,
+      "name": "Texture3D.GetType",
+      "handling": "metadata",
+      "implementation": "src/core/InspectionRecords.cpp;src/core/Contexts.cpp;src/core/Commands.cpp",
+      "evidence": "tests/StreamOutputTests.cpp;tests/ContextTests.cpp;tests/ApiCommandTests.cpp",
+      "registered_records": 47,
+      "decoded_records": 47,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 12305,
+      "name": "Texture3D.GetDesc",
+      "handling": "metadata",
+      "implementation": "src/core/TextureCreation.cpp;src/replay/Replay.cpp",
+      "evidence": "tests/BufferViewCreationTests.cpp;docs/BUFFER_VIEW_CREATION_AUDIT.md;tests/TextureCreationTests.cpp;tests/ViewCreationTests.cpp;docs/VIEW_CREATION_AUDIT.md;docs/TEXTURE_CREATION_AUDIT.md;docs/TEXTURE_DIMENSIONS_AUDIT.md",
+      "registered_records": 9,
+      "decoded_records": 9,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 12306,
+      "name": "Buffer.QueryInterface",
+      "handling": "metadata",
+      "implementation": "src/core/InspectionRecords.cpp;src/replay/Replay.cpp",
+      "evidence": "tests/ObjectObservationTests.cpp;docs/OBJECT_OBSERVATION_AUDIT.md",
+      "registered_records": 45,
+      "decoded_records": 45,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 12307,
+      "name": "Buffer.AddRef",
+      "handling": "metadata",
+      "implementation": "src/core/InspectionRecords.cpp;src/replay/Replay.cpp",
+      "evidence": "tests/ObjectObservationTests.cpp;docs/OBJECT_OBSERVATION_AUDIT.md",
+      "registered_records": 61,
+      "decoded_records": 61,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 12308,
+      "name": "Buffer.Release",
+      "handling": "metadata",
+      "implementation": "src/core/InspectionRecords.cpp;src/replay/Replay.cpp",
+      "evidence": "tests/ObjectObservationTests.cpp;docs/OBJECT_OBSERVATION_AUDIT.md",
+      "registered_records": 83,
+      "decoded_records": 83,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 12309,
+      "name": "Buffer.GetDevice",
+      "handling": "metadata",
+      "implementation": "src/core/TextureCreation.cpp;src/replay/Replay.cpp",
+      "evidence": "tests/BufferViewCreationTests.cpp;docs/BUFFER_VIEW_CREATION_AUDIT.md;tests/TextureCreationTests.cpp;tests/ViewCreationTests.cpp;docs/VIEW_CREATION_AUDIT.md;docs/TEXTURE_CREATION_AUDIT.md;docs/TEXTURE_DIMENSIONS_AUDIT.md",
+      "registered_records": 5,
+      "decoded_records": 5,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 12311,
+      "name": "Buffer.SetPrivateData",
+      "handling": "metadata",
+      "implementation": "src/core/BufferCreation.cpp;src/replay/Replay.cpp",
+      "evidence": "tests/BufferCreationTests.cpp;docs/BUFFER_CREATION_AUDIT.md",
+      "registered_records": 10,
+      "decoded_records": 10,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 12313,
+      "name": "Buffer.GetType",
+      "handling": "metadata",
+      "implementation": "src/core/InspectionRecords.cpp;src/replay/Replay.cpp",
+      "evidence": "tests/ObjectObservationTests.cpp;docs/OBJECT_OBSERVATION_AUDIT.md",
+      "registered_records": 222,
+      "decoded_records": 222,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 12316,
+      "name": "Buffer.GetDesc",
+      "handling": "metadata",
+      "implementation": "src/core/TextureCreation.cpp;src/replay/Replay.cpp",
+      "evidence": "tests/BufferViewCreationTests.cpp;docs/BUFFER_VIEW_CREATION_AUDIT.md;tests/TextureCreationTests.cpp;tests/ViewCreationTests.cpp;docs/VIEW_CREATION_AUDIT.md;docs/TEXTURE_CREATION_AUDIT.md;docs/TEXTURE_DIMENSIONS_AUDIT.md",
+      "registered_records": 25,
+      "decoded_records": 25,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 12324,
+      "name": "DepthStencilView.GetResource",
+      "handling": "metadata",
+      "implementation": "src/core/TextureCreation.cpp;src/replay/Replay.cpp",
+      "evidence": "tests/BufferViewCreationTests.cpp;docs/BUFFER_VIEW_CREATION_AUDIT.md;tests/TextureCreationTests.cpp;tests/ViewCreationTests.cpp;docs/VIEW_CREATION_AUDIT.md;docs/TEXTURE_CREATION_AUDIT.md;docs/TEXTURE_DIMENSIONS_AUDIT.md",
+      "registered_records": 4,
+      "decoded_records": 4,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 12325,
+      "name": "DepthStencilView.GetDesc",
+      "handling": "metadata",
+      "implementation": "src/core/TextureCreation.cpp;src/replay/Replay.cpp",
+      "evidence": "tests/BufferViewCreationTests.cpp;docs/BUFFER_VIEW_CREATION_AUDIT.md;tests/TextureCreationTests.cpp;tests/ViewCreationTests.cpp;docs/VIEW_CREATION_AUDIT.md;docs/TEXTURE_CREATION_AUDIT.md;docs/TEXTURE_DIMENSIONS_AUDIT.md",
+      "registered_records": 4,
+      "decoded_records": 4,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 12333,
+      "name": "ShaderResourceView.GetResource",
+      "handling": "metadata",
+      "implementation": "src/core/TextureCreation.cpp;src/replay/Replay.cpp",
+      "evidence": "tests/BufferViewCreationTests.cpp;docs/BUFFER_VIEW_CREATION_AUDIT.md;tests/TextureCreationTests.cpp;tests/ViewCreationTests.cpp;docs/VIEW_CREATION_AUDIT.md;docs/TEXTURE_CREATION_AUDIT.md;docs/TEXTURE_DIMENSIONS_AUDIT.md",
+      "registered_records": 6,
+      "decoded_records": 6,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 12334,
+      "name": "ShaderResourceView.GetDesc",
+      "handling": "metadata",
+      "implementation": "src/core/InspectionRecords.cpp;src/replay/Replay.cpp",
+      "evidence": "tests/ObjectObservationTests.cpp;docs/OBJECT_OBSERVATION_AUDIT.md",
+      "registered_records": 7,
+      "decoded_records": 7,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 12363,
+      "name": "CommandList.QueryInterface",
+      "handling": "metadata",
+      "implementation": "src/core/InspectionRecords.cpp;src/core/Contexts.cpp;src/core/Commands.cpp",
+      "evidence": "tests/StreamOutputTests.cpp;tests/ContextTests.cpp;tests/ApiCommandTests.cpp",
+      "registered_records": 18,
+      "decoded_records": 18,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 12365,
+      "name": "CommandList.Release",
+      "handling": "metadata",
+      "implementation": "src/core/InspectionRecords.cpp;src/core/Contexts.cpp;src/core/Commands.cpp",
+      "evidence": "tests/StreamOutputTests.cpp;tests/ContextTests.cpp;tests/ApiCommandTests.cpp",
+      "registered_records": 6,
+      "decoded_records": 6,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 12378,
+      "name": "RenderTargetView.GetResource",
+      "handling": "metadata",
+      "implementation": "src/core/TextureCreation.cpp;src/replay/Replay.cpp",
+      "evidence": "tests/BufferViewCreationTests.cpp;docs/BUFFER_VIEW_CREATION_AUDIT.md;tests/TextureCreationTests.cpp;tests/ViewCreationTests.cpp;docs/VIEW_CREATION_AUDIT.md;docs/TEXTURE_CREATION_AUDIT.md;docs/TEXTURE_DIMENSIONS_AUDIT.md",
+      "registered_records": 7,
+      "decoded_records": 7,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 12379,
+      "name": "RenderTargetView.GetDesc",
+      "handling": "metadata",
+      "implementation": "src/core/TextureCreation.cpp;src/replay/Replay.cpp",
+      "evidence": "tests/BufferViewCreationTests.cpp;docs/BUFFER_VIEW_CREATION_AUDIT.md;tests/TextureCreationTests.cpp;tests/ViewCreationTests.cpp;docs/VIEW_CREATION_AUDIT.md;docs/TEXTURE_CREATION_AUDIT.md;docs/TEXTURE_DIMENSIONS_AUDIT.md",
+      "registered_records": 7,
+      "decoded_records": 7,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 12562,
+      "name": "ClassInstance.QueryInterface",
+      "handling": "metadata",
+      "implementation": "src/core/ClassCreation.cpp;src/core/ClassLinkage.cpp;src/replay/ClassCreation.cpp;src/core/InspectionRecords.cpp",
+      "evidence": "tests/ClassCreationTests.cpp;docs/CLASS_CREATION_AUDIT.md",
+      "registered_records": 20,
+      "decoded_records": 20,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 12563,
+      "name": "ClassInstance.AddRef",
+      "handling": "metadata",
+      "implementation": "src/core/ClassCreation.cpp;src/core/ClassLinkage.cpp;src/replay/ClassCreation.cpp;src/core/InspectionRecords.cpp",
+      "evidence": "tests/ClassCreationTests.cpp;docs/CLASS_CREATION_AUDIT.md",
+      "registered_records": 47,
+      "decoded_records": 47,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 12564,
+      "name": "ClassInstance.Release",
+      "handling": "metadata",
+      "implementation": "src/core/ClassCreation.cpp;src/core/ClassLinkage.cpp;src/replay/ClassCreation.cpp;src/core/InspectionRecords.cpp",
+      "evidence": "tests/ClassCreationTests.cpp;docs/CLASS_CREATION_AUDIT.md",
+      "registered_records": 48,
+      "decoded_records": 48,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 12570,
+      "name": "ClassInstance.GetDesc",
+      "handling": "metadata",
+      "implementation": "src/core/ClassCreation.cpp;src/core/ClassLinkage.cpp;src/replay/ClassCreation.cpp;src/core/InspectionRecords.cpp",
+      "evidence": "tests/ClassCreationTests.cpp;docs/CLASS_CREATION_AUDIT.md",
+      "registered_records": 16,
+      "decoded_records": 16,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 12571,
+      "name": "ClassInstance.GetInstanceName",
+      "handling": "metadata",
+      "implementation": "src/core/ClassCreation.cpp;src/core/ClassLinkage.cpp;src/replay/ClassCreation.cpp;src/core/InspectionRecords.cpp",
+      "evidence": "tests/ClassCreationTests.cpp;docs/CLASS_CREATION_AUDIT.md",
+      "registered_records": 16,
+      "decoded_records": 16,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 12572,
+      "name": "ClassInstance.GetTypeName",
+      "handling": "metadata",
+      "implementation": "src/core/ClassCreation.cpp;src/core/ClassLinkage.cpp;src/replay/ClassCreation.cpp;src/core/InspectionRecords.cpp",
+      "evidence": "tests/ClassCreationTests.cpp;docs/CLASS_CREATION_AUDIT.md",
+      "registered_records": 16,
+      "decoded_records": 16,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 12596,
+      "name": "Texture1D.QueryInterface",
+      "handling": "metadata",
+      "implementation": "src/core/TextureCreation.cpp;src/replay/Replay.cpp",
+      "evidence": "tests/BufferViewCreationTests.cpp;docs/BUFFER_VIEW_CREATION_AUDIT.md;tests/TextureCreationTests.cpp;tests/ViewCreationTests.cpp;docs/VIEW_CREATION_AUDIT.md;docs/TEXTURE_CREATION_AUDIT.md;docs/TEXTURE_DIMENSIONS_AUDIT.md",
+      "registered_records": 21,
+      "decoded_records": 21,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 12597,
+      "name": "Texture1D.AddRef",
+      "handling": "metadata",
+      "implementation": "src/core/TextureCreation.cpp;src/replay/Replay.cpp",
+      "evidence": "tests/BufferViewCreationTests.cpp;docs/BUFFER_VIEW_CREATION_AUDIT.md;tests/TextureCreationTests.cpp;tests/ViewCreationTests.cpp;docs/VIEW_CREATION_AUDIT.md;docs/TEXTURE_CREATION_AUDIT.md;docs/TEXTURE_DIMENSIONS_AUDIT.md",
+      "registered_records": 21,
+      "decoded_records": 21,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 12598,
+      "name": "Texture1D.Release",
+      "handling": "metadata",
+      "implementation": "src/core/TextureCreation.cpp;src/replay/Replay.cpp",
+      "evidence": "tests/BufferViewCreationTests.cpp;docs/BUFFER_VIEW_CREATION_AUDIT.md;tests/TextureCreationTests.cpp;tests/ViewCreationTests.cpp;docs/VIEW_CREATION_AUDIT.md;docs/TEXTURE_CREATION_AUDIT.md;docs/TEXTURE_DIMENSIONS_AUDIT.md",
+      "registered_records": 21,
+      "decoded_records": 21,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 12599,
+      "name": "Texture1D.GetDevice",
+      "handling": "metadata",
+      "implementation": "src/core/TextureCreation.cpp;src/replay/Replay.cpp",
+      "evidence": "tests/BufferViewCreationTests.cpp;docs/BUFFER_VIEW_CREATION_AUDIT.md;tests/TextureCreationTests.cpp;tests/ViewCreationTests.cpp;docs/VIEW_CREATION_AUDIT.md;docs/TEXTURE_CREATION_AUDIT.md;docs/TEXTURE_DIMENSIONS_AUDIT.md",
+      "registered_records": 7,
+      "decoded_records": 7,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 12603,
+      "name": "Texture1D.GetType",
+      "handling": "metadata",
+      "implementation": "src/core/InspectionRecords.cpp;src/core/Contexts.cpp;src/core/Commands.cpp",
+      "evidence": "tests/StreamOutputTests.cpp;tests/ContextTests.cpp;tests/ApiCommandTests.cpp",
+      "registered_records": 40,
+      "decoded_records": 40,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 12606,
+      "name": "Texture1D.GetDesc",
+      "handling": "metadata",
+      "implementation": "src/core/TextureCreation.cpp;src/replay/Replay.cpp",
+      "evidence": "tests/BufferViewCreationTests.cpp;docs/BUFFER_VIEW_CREATION_AUDIT.md;tests/TextureCreationTests.cpp;tests/ViewCreationTests.cpp;docs/VIEW_CREATION_AUDIT.md;docs/TEXTURE_CREATION_AUDIT.md;docs/TEXTURE_DIMENSIONS_AUDIT.md",
+      "registered_records": 7,
+      "decoded_records": 7,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 12607,
+      "name": "Texture2D.QueryInterface",
+      "handling": "metadata",
+      "implementation": "src/core/TextureCreation.cpp;src/replay/Replay.cpp",
+      "evidence": "tests/BufferViewCreationTests.cpp;docs/BUFFER_VIEW_CREATION_AUDIT.md;tests/TextureCreationTests.cpp;tests/ViewCreationTests.cpp;docs/VIEW_CREATION_AUDIT.md;docs/TEXTURE_CREATION_AUDIT.md;docs/TEXTURE_DIMENSIONS_AUDIT.md",
+      "registered_records": 47,
+      "decoded_records": 47,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 12608,
+      "name": "Texture2D.AddRef",
+      "handling": "metadata",
+      "implementation": "src/core/TextureCreation.cpp;src/replay/Replay.cpp",
+      "evidence": "tests/BufferViewCreationTests.cpp;docs/BUFFER_VIEW_CREATION_AUDIT.md;tests/TextureCreationTests.cpp;tests/ViewCreationTests.cpp;docs/VIEW_CREATION_AUDIT.md;docs/TEXTURE_CREATION_AUDIT.md;docs/TEXTURE_DIMENSIONS_AUDIT.md",
+      "registered_records": 36,
+      "decoded_records": 36,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 12609,
+      "name": "Texture2D.Release",
+      "handling": "metadata",
+      "implementation": "src/core/TextureCreation.cpp;src/replay/Replay.cpp",
+      "evidence": "tests/BufferViewCreationTests.cpp;docs/BUFFER_VIEW_CREATION_AUDIT.md;tests/TextureCreationTests.cpp;tests/ViewCreationTests.cpp;docs/VIEW_CREATION_AUDIT.md;docs/TEXTURE_CREATION_AUDIT.md;docs/TEXTURE_DIMENSIONS_AUDIT.md",
+      "registered_records": 36,
+      "decoded_records": 36,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 12610,
+      "name": "Texture2D.GetDevice",
+      "handling": "metadata",
+      "implementation": "src/core/TextureCreation.cpp;src/replay/Replay.cpp",
+      "evidence": "tests/BufferViewCreationTests.cpp;docs/BUFFER_VIEW_CREATION_AUDIT.md;tests/TextureCreationTests.cpp;tests/ViewCreationTests.cpp;docs/VIEW_CREATION_AUDIT.md;docs/TEXTURE_CREATION_AUDIT.md;docs/TEXTURE_DIMENSIONS_AUDIT.md",
+      "registered_records": 11,
+      "decoded_records": 11,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 12614,
+      "name": "Texture2D.GetType",
+      "handling": "metadata",
+      "implementation": "src/core/InspectionRecords.cpp;src/replay/Replay.cpp",
+      "evidence": "tests/ObjectObservationTests.cpp;docs/OBJECT_OBSERVATION_AUDIT.md",
+      "registered_records": 607,
+      "decoded_records": 607,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 12617,
+      "name": "Texture2D.GetDesc",
+      "handling": "metadata",
+      "implementation": "src/core/TextureCreation.cpp;src/replay/Replay.cpp",
+      "evidence": "tests/BufferViewCreationTests.cpp;docs/BUFFER_VIEW_CREATION_AUDIT.md;tests/TextureCreationTests.cpp;tests/ViewCreationTests.cpp;docs/VIEW_CREATION_AUDIT.md;docs/TEXTURE_CREATION_AUDIT.md;docs/TEXTURE_DIMENSIONS_AUDIT.md",
+      "registered_records": 29,
+      "decoded_records": 29,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 12625,
+      "name": "Query.GetDataSize",
+      "handling": "metadata",
+      "implementation": "src/core/InspectionRecords.cpp;src/core/Contexts.cpp;src/core/Commands.cpp",
+      "evidence": "tests/StreamOutputTests.cpp;tests/ContextTests.cpp;tests/ApiCommandTests.cpp",
+      "registered_records": 5,
+      "decoded_records": 5,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 12626,
+      "name": "Query.GetDesc",
+      "handling": "metadata",
+      "implementation": "src/core/InspectionRecords.cpp;src/core/Contexts.cpp;src/core/Commands.cpp",
+      "evidence": "tests/StreamOutputTests.cpp;tests/ContextTests.cpp;tests/ApiCommandTests.cpp",
+      "registered_records": 5,
+      "decoded_records": 5,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 12646,
+      "name": "Predicate.GetPrivateData",
+      "handling": "metadata",
+      "implementation": "src/core/PredicateCreation.cpp;src/replay/Predication.cpp;src/core/InspectionRecords.cpp",
+      "evidence": "tests/PredicateCreationTests.cpp;docs/PREDICATE_CREATION_AUDIT.md",
+      "registered_records": 12,
+      "decoded_records": 12,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 12647,
+      "name": "Predicate.SetPrivateData",
+      "handling": "metadata",
+      "implementation": "src/core/PredicateCreation.cpp;src/replay/Predication.cpp;src/core/InspectionRecords.cpp",
+      "evidence": "tests/PredicateCreationTests.cpp;docs/PREDICATE_CREATION_AUDIT.md",
+      "registered_records": 28,
+      "decoded_records": 28,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 12649,
+      "name": "Predicate.GetDataSize",
+      "handling": "metadata",
+      "implementation": "src/core/PredicateCreation.cpp;src/replay/Predication.cpp;src/core/InspectionRecords.cpp",
+      "evidence": "tests/PredicateCreationTests.cpp;docs/PREDICATE_CREATION_AUDIT.md",
+      "registered_records": 10,
+      "decoded_records": 10,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 12650,
+      "name": "Predicate.GetDesc",
+      "handling": "metadata",
+      "implementation": "src/core/PredicateCreation.cpp;src/replay/Predication.cpp;src/core/InspectionRecords.cpp",
+      "evidence": "tests/PredicateCreationTests.cpp;docs/PREDICATE_CREATION_AUDIT.md",
+      "registered_records": 10,
+      "decoded_records": 10,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 12684,
+      "name": "UnorderedAccessView.GetResource",
+      "handling": "metadata",
+      "implementation": "src/core/TextureCreation.cpp;src/replay/Replay.cpp",
+      "evidence": "tests/BufferViewCreationTests.cpp;docs/BUFFER_VIEW_CREATION_AUDIT.md;tests/TextureCreationTests.cpp;tests/ViewCreationTests.cpp;docs/VIEW_CREATION_AUDIT.md;docs/TEXTURE_CREATION_AUDIT.md;docs/TEXTURE_DIMENSIONS_AUDIT.md",
+      "registered_records": 14,
+      "decoded_records": 14,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 12685,
+      "name": "UnorderedAccessView.GetDesc",
+      "handling": "metadata",
+      "implementation": "src/core/TextureCreation.cpp;src/replay/Replay.cpp",
+      "evidence": "tests/BufferViewCreationTests.cpp;docs/BUFFER_VIEW_CREATION_AUDIT.md;tests/TextureCreationTests.cpp;tests/ViewCreationTests.cpp;docs/VIEW_CREATION_AUDIT.md;docs/TEXTURE_CREATION_AUDIT.md;docs/TEXTURE_DIMENSIONS_AUDIT.md",
+      "registered_records": 14,
+      "decoded_records": 14,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 12686,
+      "name": "ClassLinkage.QueryInterface",
+      "handling": "metadata",
+      "implementation": "src/core/ClassCreation.cpp;src/core/ClassLinkage.cpp;src/replay/ClassCreation.cpp;src/core/InspectionRecords.cpp",
+      "evidence": "tests/ClassCreationTests.cpp;docs/CLASS_CREATION_AUDIT.md",
+      "registered_records": 31,
+      "decoded_records": 31,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 12687,
+      "name": "ClassLinkage.AddRef",
+      "handling": "metadata",
+      "implementation": "src/core/ClassCreation.cpp;src/core/ClassLinkage.cpp;src/replay/ClassCreation.cpp;src/core/InspectionRecords.cpp",
+      "evidence": "tests/ClassCreationTests.cpp;docs/CLASS_CREATION_AUDIT.md",
+      "registered_records": 39,
+      "decoded_records": 39,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 12688,
+      "name": "ClassLinkage.Release",
+      "handling": "metadata",
+      "implementation": "src/core/ClassCreation.cpp;src/core/ClassLinkage.cpp;src/replay/ClassCreation.cpp;src/core/InspectionRecords.cpp",
+      "evidence": "tests/ClassCreationTests.cpp;docs/CLASS_CREATION_AUDIT.md",
+      "registered_records": 39,
+      "decoded_records": 39,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 12693,
+      "name": "ClassLinkage.GetClassInstance",
+      "handling": "execute",
+      "implementation": "src/core/ClassCreation.cpp;src/core/ClassLinkage.cpp;src/replay/ClassCreation.cpp;src/core/InspectionRecords.cpp",
+      "evidence": "tests/ClassCreationTests.cpp;docs/CLASS_CREATION_AUDIT.md",
+      "registered_records": 11,
+      "decoded_records": 11,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 12694,
+      "name": "ClassLinkage.CreateClassInstance",
+      "handling": "execute",
+      "implementation": "src/core/ClassCreation.cpp;src/core/ClassLinkage.cpp;src/replay/ClassCreation.cpp;src/core/InspectionRecords.cpp",
+      "evidence": "tests/ClassCreationTests.cpp;docs/CLASS_CREATION_AUDIT.md",
+      "registered_records": 9,
+      "decoded_records": 9,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 12879,
+      "name": "SwapChain.QueryInterface",
+      "handling": "metadata",
+      "implementation": "src/core/InspectionRecords.cpp;src/replay/Replay.cpp",
+      "evidence": "tests/ObjectObservationTests.cpp;docs/OBJECT_OBSERVATION_AUDIT.md",
+      "registered_records": 735,
+      "decoded_records": 735,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 12880,
+      "name": "SwapChain.AddRef",
+      "handling": "metadata",
+      "implementation": "src/core/InspectionRecords.cpp;src/replay/Replay.cpp",
+      "evidence": "tests/ObjectObservationTests.cpp;docs/OBJECT_OBSERVATION_AUDIT.md",
+      "registered_records": 1470,
+      "decoded_records": 1470,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 12881,
+      "name": "SwapChain.Release",
+      "handling": "metadata",
+      "implementation": "src/core/InspectionRecords.cpp;src/replay/Replay.cpp",
+      "evidence": "tests/ObjectObservationTests.cpp;docs/OBJECT_OBSERVATION_AUDIT.md",
+      "registered_records": 735,
+      "decoded_records": 735,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 12886,
+      "name": "SwapChain.GetDevice",
+      "handling": "metadata",
+      "implementation": "src/core/InspectionRecords.cpp;src/replay/Replay.cpp",
+      "evidence": "tests/ObjectObservationTests.cpp;docs/OBJECT_OBSERVATION_AUDIT.md",
+      "registered_records": 1470,
+      "decoded_records": 1470,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 12887,
+      "name": "SwapChain.Present",
+      "handling": "execute",
+      "implementation": "src/core/PresentRecords.cpp;src/replay/Replay.cpp",
+      "evidence": "tests/PresentRecordTests.cpp;docs/PRESENT_REPLAY_AUDIT.md",
+      "registered_records": 368,
+      "decoded_records": 368,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 12897,
+      "name": "SwapChain1.GetDesc",
+      "handling": "metadata",
+      "implementation": "src/core/InspectionRecords.cpp;src/replay/Replay.cpp",
+      "evidence": "tests/ObjectObservationTests.cpp;docs/OBJECT_OBSERVATION_AUDIT.md",
+      "registered_records": 1,
+      "decoded_records": 1,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 12920,
+      "name": "Annotation.QueryInterface",
+      "handling": "metadata",
+      "implementation": "src/core/InspectionRecords.cpp;src/core/Contexts.cpp;src/core/Commands.cpp",
+      "evidence": "tests/StreamOutputTests.cpp;tests/ContextTests.cpp;tests/ApiCommandTests.cpp",
+      "registered_records": 52,
+      "decoded_records": 52,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 12921,
+      "name": "Annotation.AddRef",
+      "handling": "metadata",
+      "implementation": "src/core/InspectionRecords.cpp;src/core/Contexts.cpp;src/core/Commands.cpp",
+      "evidence": "tests/StreamOutputTests.cpp;tests/ContextTests.cpp;tests/ApiCommandTests.cpp",
+      "registered_records": 16,
+      "decoded_records": 16,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 12922,
+      "name": "Annotation.Release",
+      "handling": "metadata",
+      "implementation": "src/core/InspectionRecords.cpp;src/core/Contexts.cpp;src/core/Commands.cpp",
+      "evidence": "tests/StreamOutputTests.cpp;tests/ContextTests.cpp;tests/ApiCommandTests.cpp",
+      "registered_records": 18,
+      "decoded_records": 18,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 12923,
+      "name": "Annotation.BeginEvent",
+      "handling": "metadata",
+      "implementation": "src/core/InspectionRecords.cpp;src/core/Contexts.cpp;src/core/Commands.cpp",
+      "evidence": "tests/StreamOutputTests.cpp;tests/ContextTests.cpp;tests/ApiCommandTests.cpp",
+      "registered_records": 57,
+      "decoded_records": 57,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 12924,
+      "name": "Annotation.EndEvent",
+      "handling": "metadata",
+      "implementation": "src/core/InspectionRecords.cpp;src/core/Contexts.cpp;src/core/Commands.cpp",
+      "evidence": "tests/StreamOutputTests.cpp;tests/ContextTests.cpp;tests/ApiCommandTests.cpp",
+      "registered_records": 57,
+      "decoded_records": 57,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 12925,
+      "name": "Annotation.SetMarker",
+      "handling": "metadata",
+      "implementation": "src/core/InspectionRecords.cpp;src/core/Contexts.cpp;src/core/Commands.cpp",
+      "evidence": "tests/StreamOutputTests.cpp;tests/ContextTests.cpp;tests/ApiCommandTests.cpp",
+      "registered_records": 31,
+      "decoded_records": 31,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 13542,
+      "name": "PSSetShaderResources",
+      "handling": "execute",
+      "implementation": "src/replay/Replay.cpp;src/replay/InputBindings.cpp",
+      "evidence": "tests/ApiCommandTests.cpp;tests/StreamOutputTests.cpp;tools/validate_native.py",
+      "registered_records": 2259,
+      "decoded_records": 2259,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 13543,
+      "name": "PSSetShader",
+      "handling": "execute",
+      "implementation": "src/replay/PipelineBindings.cpp",
+      "evidence": "tests/PipelineSetterTests.cpp;tests/ShaderSetterTests.cpp",
+      "registered_records": 1403,
+      "decoded_records": 1403,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 13544,
+      "name": "PSSetSamplers",
+      "handling": "execute",
+      "implementation": "src/replay/Replay.cpp;src/replay/InputBindings.cpp",
+      "evidence": "tests/ApiCommandTests.cpp;tests/StreamOutputTests.cpp;tools/validate_native.py",
+      "registered_records": 795,
+      "decoded_records": 795,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 13545,
+      "name": "VSSetShader",
+      "handling": "execute",
+      "implementation": "src/replay/PipelineBindings.cpp",
+      "evidence": "tests/PipelineSetterTests.cpp;tests/ShaderSetterTests.cpp",
+      "registered_records": 1376,
+      "decoded_records": 1376,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 13548,
+      "name": "Map",
+      "handling": "metadata",
+      "implementation": "src/core/MapRecords.cpp;src/replay/Replay.cpp",
+      "evidence": "tests/MapRecordTests.cpp;docs/MAP_OBSERVATION_AUDIT.md",
+      "registered_records": 859,
+      "decoded_records": 859,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 13549,
+      "name": "Unmap",
+      "handling": "metadata",
+      "implementation": "src/core/MapRecords.cpp;src/replay/Replay.cpp",
+      "evidence": "tests/MapRecordTests.cpp;docs/MAP_OBSERVATION_AUDIT.md",
+      "registered_records": 7307,
+      "decoded_records": 7307,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 13551,
+      "name": "IASetInputLayout",
+      "handling": "execute",
+      "implementation": "src/replay/Replay.cpp;src/replay/InputBindings.cpp",
+      "evidence": "tests/ApiCommandTests.cpp;tests/StreamOutputTests.cpp;tools/validate_native.py",
+      "registered_records": 1056,
+      "decoded_records": 1056,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 13552,
+      "name": "IASetVertexBuffers",
+      "handling": "execute",
+      "implementation": "src/replay/Replay.cpp;src/replay/InputBindings.cpp",
+      "evidence": "tests/ApiCommandTests.cpp;tests/StreamOutputTests.cpp;tools/validate_native.py",
+      "registered_records": 1723,
+      "decoded_records": 1723,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 13553,
+      "name": "IASetIndexBuffer",
+      "handling": "execute",
+      "implementation": "src/replay/Replay.cpp;src/replay/InputBindings.cpp",
+      "evidence": "tests/ApiCommandTests.cpp;tests/StreamOutputTests.cpp;tools/validate_native.py",
+      "registered_records": 1034,
+      "decoded_records": 1034,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 13557,
+      "name": "GSSetShader",
+      "handling": "execute",
+      "implementation": "src/replay/PipelineBindings.cpp",
+      "evidence": "tests/PipelineSetterTests.cpp;tests/ShaderSetterTests.cpp",
+      "registered_records": 99,
+      "decoded_records": 99,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 13558,
+      "name": "IASetPrimitiveTopology",
+      "handling": "execute",
+      "implementation": "src/replay/PipelineBindings.cpp",
+      "evidence": "tests/PipelineSetterTests.cpp;tests/ShaderSetterTests.cpp",
+      "registered_records": 481,
+      "decoded_records": 481,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 13559,
+      "name": "VSSetShaderResources",
+      "handling": "execute",
+      "implementation": "src/replay/Replay.cpp;src/replay/InputBindings.cpp",
+      "evidence": "tests/ApiCommandTests.cpp;tests/StreamOutputTests.cpp;tools/validate_native.py",
+      "registered_records": 257,
+      "decoded_records": 257,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 13560,
+      "name": "VSSetSamplers",
+      "handling": "execute",
+      "implementation": "src/replay/Replay.cpp;src/replay/InputBindings.cpp",
+      "evidence": "tests/ApiCommandTests.cpp;tests/StreamOutputTests.cpp;tools/validate_native.py",
+      "registered_records": 54,
+      "decoded_records": 54,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 13563,
+      "name": "GetData",
+      "handling": "metadata",
+      "implementation": "src/core/InspectionRecords.cpp;src/core/Contexts.cpp;src/core/Commands.cpp",
+      "evidence": "tests/StreamOutputTests.cpp;tests/ContextTests.cpp;tests/ApiCommandTests.cpp",
+      "registered_records": 78,
+      "decoded_records": 78,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 13565,
+      "name": "GSSetShaderResources",
+      "handling": "execute",
+      "implementation": "src/replay/Replay.cpp;src/replay/InputBindings.cpp",
+      "evidence": "tests/ApiCommandTests.cpp;tests/StreamOutputTests.cpp;tools/validate_native.py",
+      "registered_records": 12,
+      "decoded_records": 12,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 13566,
+      "name": "GSSetSamplers",
+      "handling": "execute",
+      "implementation": "src/replay/Replay.cpp;src/replay/InputBindings.cpp",
+      "evidence": "tests/ApiCommandTests.cpp;tests/StreamOutputTests.cpp;tools/validate_native.py",
+      "registered_records": 12,
+      "decoded_records": 12,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 13567,
+      "name": "OMSetRenderTargets",
+      "handling": "execute",
+      "implementation": "src/replay/Replay.cpp;src/replay/InputBindings.cpp",
+      "evidence": "tests/ApiCommandTests.cpp;tests/StreamOutputTests.cpp;tools/validate_native.py",
+      "registered_records": 671,
+      "decoded_records": 671,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 13568,
+      "name": "OMSetRenderTargetsAndUnorderedAccessViews",
+      "handling": "execute",
+      "implementation": "src/replay/Replay.cpp;src/replay/InputBindings.cpp",
+      "evidence": "tests/ApiCommandTests.cpp;tests/StreamOutputTests.cpp;tools/validate_native.py",
+      "registered_records": 48,
+      "decoded_records": 48,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 13569,
+      "name": "OMSetBlendState",
+      "handling": "execute",
+      "implementation": "src/replay/PipelineBindings.cpp",
+      "evidence": "tests/PipelineSetterTests.cpp;tests/ShaderSetterTests.cpp",
+      "registered_records": 292,
+      "decoded_records": 292,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 13570,
+      "name": "OMSetDepthStencilState",
+      "handling": "execute",
+      "implementation": "src/replay/PipelineBindings.cpp",
+      "evidence": "tests/PipelineSetterTests.cpp;tests/ShaderSetterTests.cpp",
+      "registered_records": 294,
+      "decoded_records": 294,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 13571,
+      "name": "SOSetTargets",
+      "handling": "execute",
+      "implementation": "src/replay/Replay.cpp;src/replay/InputBindings.cpp",
+      "evidence": "tests/ApiCommandTests.cpp;tests/StreamOutputTests.cpp;tools/validate_native.py",
+      "registered_records": 54,
+      "decoded_records": 54,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 13577,
+      "name": "RSSetState",
+      "handling": "execute",
+      "implementation": "src/replay/PipelineBindings.cpp",
+      "evidence": "tests/PipelineSetterTests.cpp;tests/ShaderSetterTests.cpp",
+      "registered_records": 614,
+      "decoded_records": 614,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 13578,
+      "name": "RSSetViewports",
+      "handling": "execute",
+      "implementation": "src/replay/PipelineBindings.cpp",
+      "evidence": "tests/PipelineSetterTests.cpp;tests/ShaderSetterTests.cpp",
+      "registered_records": 888,
+      "decoded_records": 888,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 13579,
+      "name": "RSSetScissorRects",
+      "handling": "execute",
+      "implementation": "src/replay/PipelineBindings.cpp",
+      "evidence": "tests/PipelineSetterTests.cpp;tests/ShaderSetterTests.cpp",
+      "registered_records": 485,
+      "decoded_records": 485,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 13589,
+      "name": "SetResourceMinLOD",
+      "handling": "execute",
+      "implementation": "src/core/ResourceLod.cpp;src/replay/ResourceLod.cpp",
+      "evidence": "tests/ResourceLodTests.cpp;docs/MIN_LOD_DISCOVERY.md",
+      "registered_records": 10,
+      "decoded_records": 10,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 13590,
+      "name": "GetResourceMinLOD",
+      "handling": "metadata",
+      "implementation": "src/core/ResourceLod.cpp;src/replay/ResourceLod.cpp",
+      "evidence": "tests/ResourceLodTests.cpp;docs/MIN_LOD_DISCOVERY.md",
+      "registered_records": 11,
+      "decoded_records": 11,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 13593,
+      "name": "HSSetShaderResources",
+      "handling": "execute",
+      "implementation": "src/replay/Replay.cpp;src/replay/InputBindings.cpp",
+      "evidence": "tests/ApiCommandTests.cpp;tests/StreamOutputTests.cpp;tools/validate_native.py",
+      "registered_records": 19,
+      "decoded_records": 19,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 13594,
+      "name": "HSSetShader",
+      "handling": "execute",
+      "implementation": "src/replay/PipelineBindings.cpp",
+      "evidence": "tests/PipelineSetterTests.cpp;tests/ShaderSetterTests.cpp",
+      "registered_records": 124,
+      "decoded_records": 124,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 13595,
+      "name": "HSSetSamplers",
+      "handling": "execute",
+      "implementation": "src/replay/Replay.cpp;src/replay/InputBindings.cpp",
+      "evidence": "tests/ApiCommandTests.cpp;tests/StreamOutputTests.cpp;tools/validate_native.py",
+      "registered_records": 14,
+      "decoded_records": 14,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 13597,
+      "name": "DSSetShaderResources",
+      "handling": "execute",
+      "implementation": "src/replay/Replay.cpp;src/replay/InputBindings.cpp",
+      "evidence": "tests/ApiCommandTests.cpp;tests/StreamOutputTests.cpp;tools/validate_native.py",
+      "registered_records": 19,
+      "decoded_records": 19,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 13598,
+      "name": "DSSetShader",
+      "handling": "execute",
+      "implementation": "src/replay/PipelineBindings.cpp",
+      "evidence": "tests/PipelineSetterTests.cpp;tests/ShaderSetterTests.cpp",
+      "registered_records": 124,
+      "decoded_records": 124,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 13599,
+      "name": "DSSetSamplers",
+      "handling": "execute",
+      "implementation": "src/replay/Replay.cpp;src/replay/InputBindings.cpp",
+      "evidence": "tests/ApiCommandTests.cpp;tests/StreamOutputTests.cpp;tools/validate_native.py",
+      "registered_records": 21,
+      "decoded_records": 21,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 13601,
+      "name": "CSSetShaderResources",
+      "handling": "execute",
+      "implementation": "src/replay/Replay.cpp;src/replay/InputBindings.cpp",
+      "evidence": "tests/ApiCommandTests.cpp;tests/StreamOutputTests.cpp;tools/validate_native.py",
+      "registered_records": 637,
+      "decoded_records": 637,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 13603,
+      "name": "CSSetShader",
+      "handling": "execute",
+      "implementation": "src/replay/PipelineBindings.cpp",
+      "evidence": "tests/PipelineSetterTests.cpp;tests/ShaderSetterTests.cpp",
+      "registered_records": 242,
+      "decoded_records": 242,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 13604,
+      "name": "CSSetSamplers",
+      "handling": "execute",
+      "implementation": "src/replay/Replay.cpp;src/replay/InputBindings.cpp",
+      "evidence": "tests/ApiCommandTests.cpp;tests/StreamOutputTests.cpp;tools/validate_native.py",
+      "registered_records": 183,
+      "decoded_records": 183,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 13606,
+      "name": "VSGetConstantBuffers",
+      "handling": "metadata",
+      "implementation": "src/core/PipelineGetters.cpp;src/replay/Replay.cpp",
+      "evidence": "tests/PipelineGetterTests.cpp;docs/PIPELINE_GETTER_DISCOVERY.md",
+      "registered_records": 2,
+      "decoded_records": 2,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 13607,
+      "name": "PSGetShaderResources",
+      "handling": "metadata",
+      "implementation": "src/core/PipelineGetters.cpp;src/replay/Replay.cpp",
+      "evidence": "tests/PipelineGetterTests.cpp;docs/PIPELINE_GETTER_DISCOVERY.md",
+      "registered_records": 2,
+      "decoded_records": 2,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 13608,
+      "name": "PSGetShader",
+      "handling": "metadata",
+      "implementation": "src/core/InspectionRecords.cpp;src/core/Contexts.cpp;src/core/Commands.cpp",
+      "evidence": "tests/StreamOutputTests.cpp;tests/ContextTests.cpp;tests/ApiCommandTests.cpp",
+      "registered_records": 49,
+      "decoded_records": 49,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 13609,
+      "name": "PSGetSamplers",
+      "handling": "metadata",
+      "implementation": "src/core/PipelineGetters.cpp;src/replay/Replay.cpp",
+      "evidence": "tests/PipelineGetterTests.cpp;docs/PIPELINE_GETTER_DISCOVERY.md",
+      "registered_records": 2,
+      "decoded_records": 2,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 13610,
+      "name": "VSGetShader",
+      "handling": "metadata",
+      "implementation": "src/core/PipelineGetters.cpp;src/replay/Replay.cpp",
+      "evidence": "tests/PipelineGetterTests.cpp;docs/PIPELINE_GETTER_DISCOVERY.md",
+      "registered_records": 31,
+      "decoded_records": 31,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 13611,
+      "name": "PSGetConstantBuffers",
+      "handling": "metadata",
+      "implementation": "src/core/PipelineGetters.cpp;src/replay/Replay.cpp",
+      "evidence": "tests/PipelineGetterTests.cpp;docs/PIPELINE_GETTER_DISCOVERY.md",
+      "registered_records": 2,
+      "decoded_records": 2,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 13612,
+      "name": "IAGetInputLayout",
+      "handling": "metadata",
+      "implementation": "src/core/PipelineGetters.cpp;src/replay/Replay.cpp",
+      "evidence": "tests/PipelineGetterTests.cpp;docs/PIPELINE_GETTER_DISCOVERY.md",
+      "registered_records": 1,
+      "decoded_records": 1,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 13613,
+      "name": "IAGetVertexBuffers",
+      "handling": "metadata",
+      "implementation": "src/core/PipelineGetters.cpp;src/replay/Replay.cpp",
+      "evidence": "tests/PipelineGetterTests.cpp;docs/PIPELINE_GETTER_DISCOVERY.md",
+      "registered_records": 3,
+      "decoded_records": 3,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 13614,
+      "name": "IAGetIndexBuffer",
+      "handling": "metadata",
+      "implementation": "src/core/PipelineGetters.cpp;src/replay/Replay.cpp",
+      "evidence": "tests/PipelineGetterTests.cpp;docs/PIPELINE_GETTER_DISCOVERY.md",
+      "registered_records": 3,
+      "decoded_records": 3,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 13615,
+      "name": "GSGetConstantBuffers",
+      "handling": "metadata",
+      "implementation": "src/core/PipelineGetters.cpp;src/replay/Replay.cpp",
+      "evidence": "tests/PipelineGetterTests.cpp;docs/PIPELINE_GETTER_DISCOVERY.md",
+      "registered_records": 2,
+      "decoded_records": 2,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 13616,
+      "name": "GSGetShader",
+      "handling": "metadata",
+      "implementation": "src/core/PipelineGetters.cpp;src/replay/Replay.cpp",
+      "evidence": "tests/PipelineGetterTests.cpp;docs/PIPELINE_GETTER_DISCOVERY.md",
+      "registered_records": 1,
+      "decoded_records": 1,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 13617,
+      "name": "IAGetPrimitiveTopology",
+      "handling": "metadata",
+      "implementation": "src/core/InspectionRecords.cpp;src/core/Contexts.cpp;src/core/Commands.cpp",
+      "evidence": "tests/StreamOutputTests.cpp;tests/ContextTests.cpp;tests/ApiCommandTests.cpp",
+      "registered_records": 33,
+      "decoded_records": 33,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 13618,
+      "name": "VSGetShaderResources",
+      "handling": "metadata",
+      "implementation": "src/core/PipelineGetters.cpp;src/replay/Replay.cpp",
+      "evidence": "tests/PipelineGetterTests.cpp;docs/PIPELINE_GETTER_DISCOVERY.md",
+      "registered_records": 2,
+      "decoded_records": 2,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 13619,
+      "name": "VSGetSamplers",
+      "handling": "metadata",
+      "implementation": "src/core/PipelineGetters.cpp;src/replay/Replay.cpp",
+      "evidence": "tests/PipelineGetterTests.cpp;docs/PIPELINE_GETTER_DISCOVERY.md",
+      "registered_records": 2,
+      "decoded_records": 2,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 13620,
+      "name": "GetPredication",
+      "handling": "metadata",
+      "implementation": "src/core/PipelineGetters.cpp;src/replay/Replay.cpp",
+      "evidence": "tests/PipelineGetterTests.cpp;docs/PIPELINE_GETTER_DISCOVERY.md",
+      "registered_records": 5,
+      "decoded_records": 5,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 13621,
+      "name": "GSGetShaderResources",
+      "handling": "metadata",
+      "implementation": "src/core/PipelineGetters.cpp;src/replay/Replay.cpp",
+      "evidence": "tests/PipelineGetterTests.cpp;docs/PIPELINE_GETTER_DISCOVERY.md",
+      "registered_records": 2,
+      "decoded_records": 2,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 13622,
+      "name": "GSGetSamplers",
+      "handling": "metadata",
+      "implementation": "src/core/PipelineGetters.cpp;src/replay/Replay.cpp",
+      "evidence": "tests/PipelineGetterTests.cpp;docs/PIPELINE_GETTER_DISCOVERY.md",
+      "registered_records": 2,
+      "decoded_records": 2,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 13623,
+      "name": "OMGetRenderTargets",
+      "handling": "metadata",
+      "implementation": "src/core/InspectionRecords.cpp;src/core/Contexts.cpp;src/core/Commands.cpp",
+      "evidence": "tests/StreamOutputTests.cpp;tests/ContextTests.cpp;tests/ApiCommandTests.cpp",
+      "registered_records": 64,
+      "decoded_records": 64,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 13624,
+      "name": "OMGetRenderTargetsAndUnorderedAccessViews",
+      "handling": "metadata",
+      "implementation": "src/core/PipelineGetters.cpp;src/replay/Replay.cpp",
+      "evidence": "tests/PipelineGetterTests.cpp;docs/PIPELINE_GETTER_DISCOVERY.md",
+      "registered_records": 4,
+      "decoded_records": 4,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 13625,
+      "name": "OMGetBlendState",
+      "handling": "metadata",
+      "implementation": "src/core/InspectionRecords.cpp;src/core/Contexts.cpp;src/core/Commands.cpp",
+      "evidence": "tests/StreamOutputTests.cpp;tests/ContextTests.cpp;tests/ApiCommandTests.cpp",
+      "registered_records": 3,
+      "decoded_records": 3,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 13626,
+      "name": "OMGetDepthStencilState",
+      "handling": "metadata",
+      "implementation": "src/core/InspectionRecords.cpp;src/core/Contexts.cpp;src/core/Commands.cpp",
+      "evidence": "tests/StreamOutputTests.cpp;tests/ContextTests.cpp;tests/ApiCommandTests.cpp",
+      "registered_records": 3,
+      "decoded_records": 3,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 13627,
+      "name": "SOGetTargets",
+      "handling": "metadata",
+      "implementation": "src/core/PipelineGetters.cpp;src/replay/Replay.cpp",
+      "evidence": "tests/PipelineGetterTests.cpp;docs/PIPELINE_GETTER_DISCOVERY.md",
+      "registered_records": 14,
+      "decoded_records": 14,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 13628,
+      "name": "RSGetState",
+      "handling": "metadata",
+      "implementation": "src/core/PipelineGetters.cpp;src/replay/Replay.cpp",
+      "evidence": "tests/PipelineGetterTests.cpp;docs/PIPELINE_GETTER_DISCOVERY.md",
+      "registered_records": 1,
+      "decoded_records": 1,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 13629,
+      "name": "RSGetViewports",
+      "handling": "metadata",
+      "implementation": "src/core/InspectionRecords.cpp;src/core/Contexts.cpp;src/core/Commands.cpp",
+      "evidence": "tests/StreamOutputTests.cpp;tests/ContextTests.cpp;tests/ApiCommandTests.cpp",
+      "registered_records": 21,
+      "decoded_records": 21,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 13630,
+      "name": "RSGetScissorRects",
+      "handling": "metadata",
+      "implementation": "src/core/PipelineGetters.cpp;src/replay/Replay.cpp",
+      "evidence": "tests/PipelineGetterTests.cpp;docs/PIPELINE_GETTER_DISCOVERY.md",
+      "registered_records": 4,
+      "decoded_records": 4,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 13631,
+      "name": "HSGetShaderResources",
+      "handling": "metadata",
+      "implementation": "src/core/PipelineGetters.cpp;src/replay/Replay.cpp",
+      "evidence": "tests/PipelineGetterTests.cpp;docs/PIPELINE_GETTER_DISCOVERY.md",
+      "registered_records": 2,
+      "decoded_records": 2,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 13632,
+      "name": "HSGetShader",
+      "handling": "metadata",
+      "implementation": "src/core/PipelineGetters.cpp;src/replay/Replay.cpp",
+      "evidence": "tests/PipelineGetterTests.cpp;docs/PIPELINE_GETTER_DISCOVERY.md",
+      "registered_records": 1,
+      "decoded_records": 1,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 13633,
+      "name": "HSGetSamplers",
+      "handling": "metadata",
+      "implementation": "src/core/PipelineGetters.cpp;src/replay/Replay.cpp",
+      "evidence": "tests/PipelineGetterTests.cpp;docs/PIPELINE_GETTER_DISCOVERY.md",
+      "registered_records": 2,
+      "decoded_records": 2,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 13634,
+      "name": "HSGetConstantBuffers",
+      "handling": "metadata",
+      "implementation": "src/core/PipelineGetters.cpp;src/replay/Replay.cpp",
+      "evidence": "tests/PipelineGetterTests.cpp;docs/PIPELINE_GETTER_DISCOVERY.md",
+      "registered_records": 2,
+      "decoded_records": 2,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 13635,
+      "name": "DSGetShaderResources",
+      "handling": "metadata",
+      "implementation": "src/core/PipelineGetters.cpp;src/replay/Replay.cpp",
+      "evidence": "tests/PipelineGetterTests.cpp;docs/PIPELINE_GETTER_DISCOVERY.md",
+      "registered_records": 2,
+      "decoded_records": 2,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 13636,
+      "name": "DSGetShader",
+      "handling": "metadata",
+      "implementation": "src/core/PipelineGetters.cpp;src/replay/Replay.cpp",
+      "evidence": "tests/PipelineGetterTests.cpp;docs/PIPELINE_GETTER_DISCOVERY.md",
+      "registered_records": 1,
+      "decoded_records": 1,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 13637,
+      "name": "DSGetSamplers",
+      "handling": "metadata",
+      "implementation": "src/core/PipelineGetters.cpp;src/replay/Replay.cpp",
+      "evidence": "tests/PipelineGetterTests.cpp;docs/PIPELINE_GETTER_DISCOVERY.md",
+      "registered_records": 2,
+      "decoded_records": 2,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 13638,
+      "name": "DSGetConstantBuffers",
+      "handling": "metadata",
+      "implementation": "src/core/PipelineGetters.cpp;src/replay/Replay.cpp",
+      "evidence": "tests/PipelineGetterTests.cpp;docs/PIPELINE_GETTER_DISCOVERY.md",
+      "registered_records": 2,
+      "decoded_records": 2,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 13639,
+      "name": "CSGetShaderResources",
+      "handling": "metadata",
+      "implementation": "src/core/PipelineGetters.cpp;src/replay/Replay.cpp",
+      "evidence": "tests/PipelineGetterTests.cpp;docs/PIPELINE_GETTER_DISCOVERY.md",
+      "registered_records": 2,
+      "decoded_records": 2,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 13640,
+      "name": "CSGetUnorderedAccessViews",
+      "handling": "metadata",
+      "implementation": "src/core/PipelineGetters.cpp;src/replay/Replay.cpp",
+      "evidence": "tests/PipelineGetterTests.cpp;docs/PIPELINE_GETTER_DISCOVERY.md",
+      "registered_records": 3,
+      "decoded_records": 3,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 13641,
+      "name": "CSGetShader",
+      "handling": "metadata",
+      "implementation": "src/core/PipelineGetters.cpp;src/replay/Replay.cpp",
+      "evidence": "tests/PipelineGetterTests.cpp;docs/PIPELINE_GETTER_DISCOVERY.md",
+      "registered_records": 2,
+      "decoded_records": 2,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 13642,
+      "name": "CSGetSamplers",
+      "handling": "metadata",
+      "implementation": "src/core/PipelineGetters.cpp;src/replay/Replay.cpp",
+      "evidence": "tests/PipelineGetterTests.cpp;docs/PIPELINE_GETTER_DISCOVERY.md",
+      "registered_records": 2,
+      "decoded_records": 2,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 13643,
+      "name": "CSGetConstantBuffers",
+      "handling": "metadata",
+      "implementation": "src/core/PipelineGetters.cpp;src/replay/Replay.cpp",
+      "evidence": "tests/PipelineGetterTests.cpp;docs/PIPELINE_GETTER_DISCOVERY.md",
+      "registered_records": 2,
+      "decoded_records": 2,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 13646,
+      "name": "GetType",
+      "handling": "metadata",
+      "implementation": "src/core/PipelineGetters.cpp;src/replay/Replay.cpp",
+      "evidence": "tests/PipelineGetterTests.cpp;docs/PIPELINE_GETTER_DISCOVERY.md",
+      "registered_records": 1,
+      "decoded_records": 1,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 13647,
+      "name": "GetContextFlags",
+      "handling": "metadata",
+      "implementation": "src/core/PipelineGetters.cpp;src/replay/Replay.cpp",
+      "evidence": "tests/PipelineGetterTests.cpp;docs/PIPELINE_GETTER_DISCOVERY.md",
+      "registered_records": 1,
+      "decoded_records": 1,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 13648,
+      "name": "Context4.FinishCommandList",
+      "handling": "metadata",
+      "implementation": "src/core/InspectionRecords.cpp;src/core/Contexts.cpp;src/core/Commands.cpp",
+      "evidence": "tests/StreamOutputTests.cpp;tests/ContextTests.cpp;tests/ApiCommandTests.cpp",
+      "registered_records": 2,
+      "decoded_records": 2,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 13651,
+      "name": "DiscardResource",
+      "handling": "execute",
+      "implementation": "src/core/DiscardRecords.cpp;src/replay/Replay.cpp",
+      "evidence": "tests/DiscardTests.cpp;docs/DISCARD_AUDIT.md",
+      "registered_records": 4,
+      "decoded_records": 4,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 13652,
+      "name": "DiscardView",
+      "handling": "execute",
+      "implementation": "src/core/DiscardRecords.cpp;src/replay/Replay.cpp",
+      "evidence": "tests/DiscardTests.cpp;docs/DISCARD_AUDIT.md",
+      "registered_records": 9,
+      "decoded_records": 9,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 13665,
+      "name": "SwapDeviceContextState",
+      "handling": "unsupported",
+      "implementation": "src/core/ContextStateRecords.cpp;src/replay/Replay.cpp",
+      "evidence": "tests/ContextStateTests.cpp;docs/CONTEXT_STATE_DISCOVERY.md",
+      "registered_records": 14,
+      "decoded_records": 14,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 13667,
+      "name": "DiscardView1",
+      "handling": "execute",
+      "implementation": "src/core/DiscardRecords.cpp;src/replay/Replay.cpp",
+      "evidence": "tests/DiscardTests.cpp;docs/DISCARD_AUDIT.md",
+      "registered_records": 12,
+      "decoded_records": 12,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 13685,
+      "name": "Device.QueryInterface",
+      "handling": "metadata",
+      "implementation": "src/core/InspectionRecords.cpp;src/replay/Replay.cpp",
+      "evidence": "tests/ObjectObservationTests.cpp;docs/OBJECT_OBSERVATION_AUDIT.md",
+      "registered_records": 1472,
+      "decoded_records": 1472,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 13686,
+      "name": "Device.AddRef",
+      "handling": "metadata",
+      "implementation": "src/core/InspectionRecords.cpp;src/replay/Replay.cpp",
+      "evidence": "tests/ObjectObservationTests.cpp;docs/OBJECT_OBSERVATION_AUDIT.md",
+      "registered_records": 46,
+      "decoded_records": 46,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 13687,
+      "name": "Device.Release",
+      "handling": "metadata",
+      "implementation": "src/core/InspectionRecords.cpp;src/replay/Replay.cpp",
+      "evidence": "tests/ObjectObservationTests.cpp;docs/OBJECT_OBSERVATION_AUDIT.md",
+      "registered_records": 573,
+      "decoded_records": 573,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 13688,
+      "name": "Device.CreateBuffer",
+      "handling": "execute",
+      "implementation": "src/core/BufferCreation.cpp;src/replay/Replay.cpp",
+      "evidence": "tests/BufferCreationTests.cpp;docs/BUFFER_CREATION_AUDIT.md",
+      "registered_records": 12,
+      "decoded_records": 12,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 13689,
+      "name": "Device5.CreateTexture1D",
+      "handling": "execute",
+      "implementation": "src/core/TextureCreation.cpp;src/replay/Replay.cpp",
+      "evidence": "tests/BufferViewCreationTests.cpp;docs/BUFFER_VIEW_CREATION_AUDIT.md;tests/TextureCreationTests.cpp;tests/ViewCreationTests.cpp;docs/VIEW_CREATION_AUDIT.md;docs/TEXTURE_CREATION_AUDIT.md;docs/TEXTURE_DIMENSIONS_AUDIT.md",
+      "registered_records": 9,
+      "decoded_records": 9,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 13690,
+      "name": "Device5.CreateTexture2D",
+      "handling": "execute",
+      "implementation": "src/core/TextureCreation.cpp;src/replay/Replay.cpp",
+      "evidence": "tests/BufferViewCreationTests.cpp;docs/BUFFER_VIEW_CREATION_AUDIT.md;tests/TextureCreationTests.cpp;tests/ViewCreationTests.cpp;docs/VIEW_CREATION_AUDIT.md;docs/TEXTURE_CREATION_AUDIT.md;docs/TEXTURE_DIMENSIONS_AUDIT.md",
+      "registered_records": 14,
+      "decoded_records": 14,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 13691,
+      "name": "Device5.CreateTexture3D",
+      "handling": "execute",
+      "implementation": "src/core/TextureCreation.cpp;src/replay/Replay.cpp",
+      "evidence": "tests/BufferViewCreationTests.cpp;docs/BUFFER_VIEW_CREATION_AUDIT.md;tests/TextureCreationTests.cpp;tests/ViewCreationTests.cpp;docs/VIEW_CREATION_AUDIT.md;docs/TEXTURE_CREATION_AUDIT.md;docs/TEXTURE_DIMENSIONS_AUDIT.md",
+      "registered_records": 11,
+      "decoded_records": 11,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 13692,
+      "name": "Device5.CreateShaderResourceView",
+      "handling": "execute",
+      "implementation": "src/core/TextureCreation.cpp;src/replay/Replay.cpp",
+      "evidence": "tests/BufferViewCreationTests.cpp;docs/BUFFER_VIEW_CREATION_AUDIT.md;tests/TextureCreationTests.cpp;tests/ViewCreationTests.cpp;docs/VIEW_CREATION_AUDIT.md;docs/TEXTURE_CREATION_AUDIT.md;docs/TEXTURE_DIMENSIONS_AUDIT.md",
+      "registered_records": 35,
+      "decoded_records": 35,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 13693,
+      "name": "Device5.CreateUnorderedAccessView",
+      "handling": "execute",
+      "implementation": "src/core/TextureCreation.cpp;src/replay/Replay.cpp",
+      "evidence": "tests/BufferViewCreationTests.cpp;docs/BUFFER_VIEW_CREATION_AUDIT.md;tests/TextureCreationTests.cpp;tests/ViewCreationTests.cpp;docs/VIEW_CREATION_AUDIT.md;docs/TEXTURE_CREATION_AUDIT.md;docs/TEXTURE_DIMENSIONS_AUDIT.md",
+      "registered_records": 18,
+      "decoded_records": 18,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 13694,
+      "name": "Device5.CreateRenderTargetView",
+      "handling": "execute",
+      "implementation": "src/core/TextureCreation.cpp;src/replay/Replay.cpp",
+      "evidence": "tests/BufferViewCreationTests.cpp;docs/BUFFER_VIEW_CREATION_AUDIT.md;tests/TextureCreationTests.cpp;tests/ViewCreationTests.cpp;docs/VIEW_CREATION_AUDIT.md;docs/TEXTURE_CREATION_AUDIT.md;docs/TEXTURE_DIMENSIONS_AUDIT.md",
+      "registered_records": 11,
+      "decoded_records": 11,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 13695,
+      "name": "Device5.CreateDepthStencilView",
+      "handling": "execute",
+      "implementation": "src/core/TextureCreation.cpp;src/replay/Replay.cpp",
+      "evidence": "tests/BufferViewCreationTests.cpp;docs/BUFFER_VIEW_CREATION_AUDIT.md;tests/TextureCreationTests.cpp;tests/ViewCreationTests.cpp;docs/VIEW_CREATION_AUDIT.md;docs/TEXTURE_CREATION_AUDIT.md;docs/TEXTURE_DIMENSIONS_AUDIT.md",
+      "registered_records": 6,
+      "decoded_records": 6,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 13696,
+      "name": "Device5.CreateInputLayout",
+      "handling": "execute",
+      "implementation": "src/core/PipelineCreation.cpp;src/replay/PipelineCreation.cpp",
+      "evidence": "tests/PipelineCreationTests.cpp;tests/GeometryCreationTests.cpp;docs/PIPELINE_CREATION_AUDIT.md;docs/GEOMETRY_CREATION_AUDIT.md",
+      "registered_records": 7,
+      "decoded_records": 7,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 13697,
+      "name": "Device5.CreateVertexShader",
+      "handling": "execute",
+      "implementation": "src/core/PipelineCreation.cpp;src/replay/PipelineCreation.cpp",
+      "evidence": "tests/PipelineCreationTests.cpp;tests/GeometryCreationTests.cpp;docs/PIPELINE_CREATION_AUDIT.md;docs/GEOMETRY_CREATION_AUDIT.md",
+      "registered_records": 7,
+      "decoded_records": 7,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 13698,
+      "name": "Device5.CreateGeometryShader",
+      "handling": "execute",
+      "implementation": "src/core/PipelineCreation.cpp;src/replay/PipelineCreation.cpp",
+      "evidence": "tests/PipelineCreationTests.cpp;tests/GeometryCreationTests.cpp;docs/PIPELINE_CREATION_AUDIT.md;docs/GEOMETRY_CREATION_AUDIT.md",
+      "registered_records": 7,
+      "decoded_records": 7,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 13699,
+      "name": "Device5.CreateGeometryShaderWithStreamOutput",
+      "handling": "execute",
+      "implementation": "src/core/PipelineCreation.cpp;src/replay/PipelineCreation.cpp",
+      "evidence": "tests/PipelineCreationTests.cpp;tests/GeometryCreationTests.cpp;docs/PIPELINE_CREATION_AUDIT.md;docs/GEOMETRY_CREATION_AUDIT.md",
+      "registered_records": 14,
+      "decoded_records": 14,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 13700,
+      "name": "Device5.CreatePixelShader",
+      "handling": "execute",
+      "implementation": "src/core/PipelineCreation.cpp;src/replay/PipelineCreation.cpp",
+      "evidence": "tests/PipelineCreationTests.cpp;tests/GeometryCreationTests.cpp;docs/PIPELINE_CREATION_AUDIT.md;docs/GEOMETRY_CREATION_AUDIT.md",
+      "registered_records": 7,
+      "decoded_records": 7,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 13701,
+      "name": "Device5.CreateHullShader",
+      "handling": "execute",
+      "implementation": "src/core/PipelineCreation.cpp;src/replay/PipelineCreation.cpp",
+      "evidence": "tests/PipelineCreationTests.cpp;tests/GeometryCreationTests.cpp;docs/PIPELINE_CREATION_AUDIT.md;docs/GEOMETRY_CREATION_AUDIT.md",
+      "registered_records": 7,
+      "decoded_records": 7,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 13702,
+      "name": "Device5.CreateDomainShader",
+      "handling": "execute",
+      "implementation": "src/core/PipelineCreation.cpp;src/replay/PipelineCreation.cpp",
+      "evidence": "tests/PipelineCreationTests.cpp;tests/GeometryCreationTests.cpp;docs/PIPELINE_CREATION_AUDIT.md;docs/GEOMETRY_CREATION_AUDIT.md",
+      "registered_records": 7,
+      "decoded_records": 7,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 13703,
+      "name": "Device5.CreateComputeShader",
+      "handling": "execute",
+      "implementation": "src/core/PipelineCreation.cpp;src/replay/PipelineCreation.cpp",
+      "evidence": "tests/PipelineCreationTests.cpp;tests/GeometryCreationTests.cpp;docs/PIPELINE_CREATION_AUDIT.md;docs/GEOMETRY_CREATION_AUDIT.md",
+      "registered_records": 12,
+      "decoded_records": 12,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 13704,
+      "name": "Device5.CreateClassLinkage",
+      "handling": "execute",
+      "implementation": "src/core/ClassCreation.cpp;src/core/ClassLinkage.cpp;src/replay/ClassCreation.cpp;src/core/InspectionRecords.cpp",
+      "evidence": "tests/ClassCreationTests.cpp;docs/CLASS_CREATION_AUDIT.md",
+      "registered_records": 6,
+      "decoded_records": 6,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 13705,
+      "name": "Device5.CreateBlendState",
+      "handling": "execute",
+      "implementation": "src/core/PipelineCreation.cpp;src/replay/PipelineCreation.cpp",
+      "evidence": "tests/PipelineCreationTests.cpp;tests/GeometryCreationTests.cpp;docs/PIPELINE_CREATION_AUDIT.md;docs/GEOMETRY_CREATION_AUDIT.md",
+      "registered_records": 7,
+      "decoded_records": 7,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 13706,
+      "name": "Device5.CreateDepthStencilState",
+      "handling": "execute",
+      "implementation": "src/core/PipelineCreation.cpp;src/replay/PipelineCreation.cpp",
+      "evidence": "tests/PipelineCreationTests.cpp;tests/GeometryCreationTests.cpp;docs/PIPELINE_CREATION_AUDIT.md;docs/GEOMETRY_CREATION_AUDIT.md",
+      "registered_records": 7,
+      "decoded_records": 7,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 13707,
+      "name": "Device5.CreateRasterizerState",
+      "handling": "execute",
+      "implementation": "src/core/PipelineCreation.cpp;src/replay/PipelineCreation.cpp",
+      "evidence": "tests/PipelineCreationTests.cpp;tests/GeometryCreationTests.cpp;docs/PIPELINE_CREATION_AUDIT.md;docs/GEOMETRY_CREATION_AUDIT.md",
+      "registered_records": 7,
+      "decoded_records": 7,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 13708,
+      "name": "Device5.CreateSamplerState",
+      "handling": "execute",
+      "implementation": "src/core/PipelineCreation.cpp;src/replay/PipelineCreation.cpp",
+      "evidence": "tests/PipelineCreationTests.cpp;tests/GeometryCreationTests.cpp;docs/PIPELINE_CREATION_AUDIT.md;docs/GEOMETRY_CREATION_AUDIT.md",
+      "registered_records": 7,
+      "decoded_records": 7,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 13709,
+      "name": "Device5.CreateQuery",
+      "handling": "metadata",
+      "implementation": "src/core/InspectionRecords.cpp;src/core/Contexts.cpp;src/core/Commands.cpp",
+      "evidence": "tests/StreamOutputTests.cpp;tests/ContextTests.cpp;tests/ApiCommandTests.cpp",
+      "registered_records": 6,
+      "decoded_records": 6,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 13710,
+      "name": "Device5.CreatePredicate",
+      "handling": "execute",
+      "implementation": "src/core/PredicateCreation.cpp;src/replay/Predication.cpp;src/core/InspectionRecords.cpp",
+      "evidence": "tests/PredicateCreationTests.cpp;docs/PREDICATE_CREATION_AUDIT.md",
+      "registered_records": 13,
+      "decoded_records": 13,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 13714,
+      "name": "Device5.CheckFormatSupport",
+      "handling": "metadata",
+      "implementation": "src/core/TextureCreation.cpp;src/replay/Replay.cpp",
+      "evidence": "tests/BufferViewCreationTests.cpp;docs/BUFFER_VIEW_CREATION_AUDIT.md;tests/TextureCreationTests.cpp;tests/ViewCreationTests.cpp;docs/VIEW_CREATION_AUDIT.md;docs/TEXTURE_CREATION_AUDIT.md;docs/TEXTURE_DIMENSIONS_AUDIT.md",
+      "registered_records": 34,
+      "decoded_records": 34,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 13719,
+      "name": "Device.GetPrivateData",
+      "handling": "metadata",
+      "implementation": "src/core/InspectionRecords.cpp;src/replay/Replay.cpp",
+      "evidence": "tests/ObjectObservationTests.cpp;docs/OBJECT_OBSERVATION_AUDIT.md",
+      "registered_records": 3,
+      "decoded_records": 3,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 13723,
+      "name": "GetCreationFlags",
+      "handling": "metadata",
+      "implementation": "src/core/ContextStateRecords.cpp;src/replay/Replay.cpp",
+      "evidence": "tests/ContextStateTests.cpp;docs/CONTEXT_STATE_DISCOVERY.md",
+      "registered_records": 2,
+      "decoded_records": 2,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 13725,
+      "name": "Device5.GetImmediateContext",
+      "handling": "metadata",
+      "implementation": "src/core/InspectionRecords.cpp;src/core/Contexts.cpp;src/core/Commands.cpp",
+      "evidence": "tests/StreamOutputTests.cpp;tests/ContextTests.cpp;tests/ApiCommandTests.cpp",
+      "registered_records": 1,
+      "decoded_records": 1,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 13732,
+      "name": "CreateDeviceContextState",
+      "handling": "unsupported",
+      "implementation": "src/core/ContextStateRecords.cpp;src/replay/Replay.cpp",
+      "evidence": "tests/ContextStateTests.cpp;docs/CONTEXT_STATE_DISCOVERY.md",
+      "registered_records": 2,
+      "decoded_records": 2,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 13738,
+      "name": "Device5.CheckMultisampleQualityLevels1",
+      "handling": "metadata",
+      "implementation": "src/core/TextureCreation.cpp;src/replay/Replay.cpp",
+      "evidence": "tests/BufferViewCreationTests.cpp;docs/BUFFER_VIEW_CREATION_AUDIT.md;tests/TextureCreationTests.cpp;tests/ViewCreationTests.cpp;docs/VIEW_CREATION_AUDIT.md;docs/TEXTURE_CREATION_AUDIT.md;docs/TEXTURE_DIMENSIONS_AUDIT.md",
+      "registered_records": 14,
+      "decoded_records": 14,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 16425,
+      "name": "Factory3.AddRef",
+      "handling": "metadata",
+      "implementation": "src/core/InspectionRecords.cpp;src/core/Contexts.cpp;src/core/Commands.cpp",
+      "evidence": "tests/StreamOutputTests.cpp;tests/ContextTests.cpp;tests/ApiCommandTests.cpp",
+      "registered_records": 720,
+      "decoded_records": 720,
+      "unchecked_records": 0
+    },
+    {
+      "record_type": 16426,
+      "name": "Factory3.Release",
+      "handling": "metadata",
+      "implementation": "src/core/InspectionRecords.cpp;src/core/Contexts.cpp;src/core/Commands.cpp",
+      "evidence": "tests/StreamOutputTests.cpp;tests/ContextTests.cpp;tests/ApiCommandTests.cpp",
+      "registered_records": 720,
+      "decoded_records": 720,
+      "unchecked_records": 0
+    }
+  ],
+  "negative_cases": [
+    {
+      "suite": "missing-state",
+      "id": "minlod_6",
+      "findings": [
+        {
+          "kind": "resource_lod_unresolved",
+          "event_id": 22,
+          "resource_id": 23,
+          "record_type": 55
+        }
+      ],
+      "runtime_error": "Event 22 (Draw): Resource 23: initial minimum LOD is unresolved at this access"
+    },
+    {
+      "suite": "usage",
+      "id": "minlod_usage_4",
+      "findings": [
+        {
+          "kind": "resource_lod_unresolved",
+          "event_id": 22,
+          "resource_id": 23,
+          "record_type": 55
+        }
+      ],
+      "runtime_error": "Event 22 (Draw): Resource 23: initial minimum LOD is unresolved at this access"
+    },
+    {
+      "suite": "usage",
+      "id": "minlod_usage_5",
+      "findings": [
+        {
+          "kind": "resource_lod_unresolved",
+          "event_id": 22,
+          "resource_id": 23,
+          "record_type": 55
+        }
+      ],
+      "runtime_error": "Event 22 (Draw): Resource 23: initial minimum LOD is unresolved at this access"
+    },
+    {
+      "suite": "usage",
+      "id": "minlod_usage_8",
+      "findings": [
+        {
+          "kind": "resource_lod_unresolved",
+          "event_id": 33,
+          "resource_id": 23,
+          "record_type": 55
+        }
+      ],
+      "runtime_error": "Event 33 (Draw): Resource 23: initial minimum LOD is unresolved at this access"
+    },
+    {
+      "suite": "context",
+      "id": "context_state_preframe_swap",
+      "findings": [
+        {
+          "kind": "context_state_identity_unresolved",
+          "event_id": 22,
+          "resource_id": null,
+          "record_type": 13665
+        },
+        {
+          "kind": "context_state_identity_unresolved",
+          "event_id": 42,
+          "resource_id": null,
+          "record_type": 13665
+        }
+      ],
+      "runtime_error": "Event 22 (SwapDeviceContextState): Event 22: SwapDeviceContextState input identity is zero: this GPA serializer also writes zero for unregistered non-null state objects. A null no-op cannot be proven; swapped pipeline state and subsequent draw snapshots cannot be trusted"
+    },
+    {
+      "suite": "context",
+      "id": "context_state_clear_swapped_state",
+      "findings": [
+        {
+          "kind": "context_state_identity_unresolved",
+          "event_id": 22,
+          "resource_id": null,
+          "record_type": 13665
+        },
+        {
+          "kind": "context_state_identity_unresolved",
+          "event_id": 53,
+          "resource_id": null,
+          "record_type": 13665
+        }
+      ],
+      "runtime_error": "Event 22 (SwapDeviceContextState): Event 22: SwapDeviceContextState input identity is zero: this GPA serializer also writes zero for unregistered non-null state objects. A null no-op cannot be proven; swapped pipeline state and subsequent draw snapshots cannot be trusted"
+    },
+    {
+      "suite": "context",
+      "id": "context_state_frame_create",
+      "findings": [
+        {
+          "kind": "context_state_identity_unresolved",
+          "event_id": 22,
+          "resource_id": null,
+          "record_type": 13732
+        },
+        {
+          "kind": "context_state_identity_unresolved",
+          "event_id": 24,
+          "resource_id": null,
+          "record_type": 13665
+        },
+        {
+          "kind": "context_state_identity_unresolved",
+          "event_id": 54,
+          "resource_id": null,
+          "record_type": 13665
+        }
+      ],
+      "runtime_error": "Event 22 (CreateDeviceContextState): Event 22: CreateDeviceContextState succeeded but saved no returned object identity. The original serializer can lose a non-null state object; creation arguments cannot recover subsequent state identity or pipeline contents"
+    },
+    {
+      "suite": "context",
+      "id": "context_state_restore_default",
+      "findings": [
+        {
+          "kind": "context_state_identity_unresolved",
+          "event_id": 22,
+          "resource_id": null,
+          "record_type": 13732
+        },
+        {
+          "kind": "context_state_identity_unresolved",
+          "event_id": 24,
+          "resource_id": null,
+          "record_type": 13665
+        },
+        {
+          "kind": "context_state_identity_unresolved",
+          "event_id": 54,
+          "resource_id": null,
+          "record_type": 13665
+        }
+      ],
+      "runtime_error": "Event 22 (CreateDeviceContextState): Event 22: CreateDeviceContextState succeeded but saved no returned object identity. The original serializer can lose a non-null state object; creation arguments cannot recover subsequent state identity or pipeline contents"
+    },
+    {
+      "suite": "context",
+      "id": "context_state_three_states",
+      "findings": [
+        {
+          "kind": "context_state_identity_unresolved",
+          "event_id": 22,
+          "resource_id": null,
+          "record_type": 13665
+        },
+        {
+          "kind": "context_state_identity_unresolved",
+          "event_id": 42,
+          "resource_id": null,
+          "record_type": 13665
+        },
+        {
+          "kind": "context_state_identity_unresolved",
+          "event_id": 56,
+          "resource_id": null,
+          "record_type": 13665
+        }
+      ],
+      "runtime_error": "Event 22 (SwapDeviceContextState): Event 22: SwapDeviceContextState input identity is zero: this GPA serializer also writes zero for unregistered non-null state objects. A null no-op cannot be proven; swapped pipeline state and subsequent draw snapshots cannot be trusted"
+    },
+    {
+      "suite": "context",
+      "id": "context_state_null_swap",
+      "findings": [
+        {
+          "kind": "context_state_identity_unresolved",
+          "event_id": 22,
+          "resource_id": null,
+          "record_type": 13665
+        }
+      ],
+      "runtime_error": "Event 22 (SwapDeviceContextState): Event 22: SwapDeviceContextState input identity is zero: this GPA serializer also writes zero for unregistered non-null state objects. A null no-op cannot be proven; swapped pipeline state and subsequent draw snapshots cannot be trusted"
+    },
+    {
+      "suite": "context",
+      "id": "context_state_no_previous_output",
+      "findings": [
+        {
+          "kind": "context_state_identity_unresolved",
+          "event_id": 22,
+          "resource_id": null,
+          "record_type": 13665
+        },
+        {
+          "kind": "context_state_identity_unresolved",
+          "event_id": 42,
+          "resource_id": null,
+          "record_type": 13665
+        }
+      ],
+      "runtime_error": "Event 22 (SwapDeviceContextState): Event 22: SwapDeviceContextState input identity is zero: this GPA serializer also writes zero for unregistered non-null state objects. A null no-op cannot be proven; swapped pipeline state and subsequent draw snapshots cannot be trusted"
+    },
+    {
+      "suite": "discards",
+      "id": "discard_null_rects",
+      "findings": [
+        {
+          "kind": "discard_rectangle_presence_unresolved",
+          "event_id": 15,
+          "resource_id": 12,
+          "record_type": 13667
+        }
+      ],
+      "runtime_error": "Event 15 (DiscardView1): DiscardView1 zero-count record lost the rectangle pointer presence: whole-view discard and an empty non-null rectangle array cannot be distinguished; safe overwrite/use has not been proven"
+    },
+    {
+      "suite": "discards",
+      "id": "discard_zero_count_nonnull",
+      "findings": [
+        {
+          "kind": "discard_rectangle_presence_unresolved",
+          "event_id": 15,
+          "resource_id": 12,
+          "record_type": 13667
+        }
+      ],
+      "runtime_error": "Event 15 (DiscardView1): DiscardView1 zero-count record lost the rectangle pointer presence: whole-view discard and an empty non-null rectangle array cannot be distinguished; safe overwrite/use has not been proven"
+    },
+    {
+      "suite": "discards",
+      "id": "discard_missing_view_rtv",
+      "findings": [
+        {
+          "kind": "discard_target_missing",
+          "event_id": 13,
+          "resource_id": 14,
+          "record_type": 13652
+        }
+      ],
+      "runtime_error": "Event 13 (DiscardView): Missing capture entry 14"
+    },
+    {
+      "suite": "discards",
+      "id": "discard_missing_view_srv",
+      "findings": [
+        {
+          "kind": "discard_target_missing",
+          "event_id": 13,
+          "resource_id": 14,
+          "record_type": 13652
+        }
+      ],
+      "runtime_error": "Event 13 (DiscardView): Missing capture entry 14"
+    },
+    {
+      "suite": "discards",
+      "id": "discard_missing_view_uav",
+      "findings": [
+        {
+          "kind": "discard_target_missing",
+          "event_id": 13,
+          "resource_id": 14,
+          "record_type": 13652
+        }
+      ],
+      "runtime_error": "Event 13 (DiscardView): Missing capture entry 14"
+    },
+    {
+      "suite": "discards",
+      "id": "discard_missing_view_rectangle",
+      "findings": [
+        {
+          "kind": "discard_target_missing",
+          "event_id": 13,
+          "resource_id": 14,
+          "record_type": 13667
+        }
+      ],
+      "runtime_error": "Event 13 (DiscardView1): Missing capture entry 14"
+    },
+    {
+      "suite": "discards",
+      "id": "discard_missing_view_overlap",
+      "findings": [
+        {
+          "kind": "discard_target_missing",
+          "event_id": 13,
+          "resource_id": 14,
+          "record_type": 13667
+        }
+      ],
+      "runtime_error": "Event 13 (DiscardView1): Missing capture entry 14"
+    },
+    {
+      "suite": "discards",
+      "id": "discard_missing_view_null_rects_nonzero_count",
+      "findings": [
+        {
+          "kind": "discard_target_missing",
+          "event_id": 13,
+          "resource_id": 14,
+          "record_type": 13667
+        }
+      ],
+      "runtime_error": "Event 13 (DiscardView1): Missing capture entry 14"
+    },
+    {
+      "suite": "discards",
+      "id": "discard_missing_view_empty_rectangle",
+      "findings": [
+        {
+          "kind": "discard_target_missing",
+          "event_id": 13,
+          "resource_id": 14,
+          "record_type": 13667
+        }
+      ],
+      "runtime_error": "Event 13 (DiscardView1): Missing capture entry 14"
+    },
+    {
+      "suite": "discards",
+      "id": "discard_missing_view_mip_array",
+      "findings": [
+        {
+          "kind": "discard_target_missing",
+          "event_id": 19,
+          "resource_id": 20,
+          "record_type": 13652
+        }
+      ],
+      "runtime_error": "Event 19 (DiscardView): Missing capture entry 20"
+    },
+    {
+      "suite": "discards",
+      "id": "discard_missing_view_buffer_rectangle",
+      "findings": [
+        {
+          "kind": "discard_target_missing",
+          "event_id": 13,
+          "resource_id": 14,
+          "record_type": 13667
+        }
+      ],
+      "runtime_error": "Event 13 (DiscardView1): Missing capture entry 14"
+    }
+  ],
+  "evidence": {
+    "artifacts\\m2-gate-corpus\\corpus\\validation.json": "1274b82a59ced835946def86e91f3e771e7ab627cea03f54e7625aeb008faf3b",
+    "artifacts\\m2-so-lifetimes-regression-corpus\\validation.json": "ea6c629867cd831d0621209905521810658fb5b0b82b3a6d90a3dff4e6e69b40",
+    "artifacts\\m2-gate-corpus\\originals\\validation.json": "13dbf3c929b4477aa2605950fafdb8802dada973c72487aa3909da70b8eceae7",
+    "artifacts\\m2-so-lifetimes-regression-originals\\validation.json": "9272a3686bc8a3d19228b2ebb677161ea8c25c9ce1b1f5ca9964a549dfcd8748",
+    "artifacts\\m2-gate-corpus\\copy\\validation.json": "42ac2c634e17c6e133ca5be9440b6a15c61d595913f1077ef13e5fb101fc2add",
+    "artifacts\\m2-so-lifetimes-regression-copy\\validation.json": "bab72cba1d0fb9e2894c2ab019a17b27ade08c3816707135e3a1c64d11737873",
+    "artifacts\\m2-gate-corpus\\present\\validation.json": "0ac337db01e35db6f0dea347e7033478a1b209e272ecd4f8ccce29e29bf3824a",
+    "artifacts\\m2-so-lifetimes-regression-present\\validation.json": "c0852af4d91ff8bce9a0d53b645b9d381dd147fb65ce46d20191ecaabbdb6182",
+    "artifacts\\m2-gate-corpus\\buffer\\validation.json": "13dad635a792b7175fe62701b5954bd007f49fb267f1d8cd5e6a67caaffde4f6",
+    "artifacts\\m2-so-lifetimes-regression-buffer\\validation.json": "cc27540b7e457cb1516876ffc2e5efd64d1b4f975b86bc788199469705c308d0",
+    "artifacts\\m2-gate-corpus\\pipeline\\validation.json": "32cf37eaa0d6e5a6853ad7a959585c8a1e936dd80061f6303b91a2c60d95d65d",
+    "artifacts\\m2-so-lifetimes-regression-pipeline\\validation.json": "744b71980f3e746126838a7a487214c3d2fe482b003a5036b731b332e8c2295b",
+    "artifacts\\m2-gate-corpus\\creation\\validation.json": "d6659dc3312025a32247209f8ccaec15ebf4da2f3b47bf00c813b94b5d196d86",
+    "artifacts\\m2-so-lifetimes-regression-creation\\validation.json": "2f232926c92ec2dca3c37f9ae6e4a1d34da847219414d46dce66ebdc3269b41c",
+    "artifacts\\m2-gate-corpus\\discovery\\validation.json": "f29e19fd77a8e53f042de2b45f1ca743d2520f324b4d61fd6e20d12cfdacf238",
+    "artifacts\\m2-so-lifetimes-regression-discovery\\validation.json": "a161c15e50ca96c677504aa2356c2b0f2d7f726219eb717db0e70dc7d741188f",
+    "artifacts\\m2-gate-corpus\\dimensions\\validation.json": "4b9053c0d6e66b4ebcc8e1c9ce042ababce0bb0034408a9cd84f744f68bc973e",
+    "artifacts\\m2-so-lifetimes-regression-dimensions\\validation.json": "33a72a28d2c98c4c99254295b8e7be720e4e28b11506ac0686e8aafcf4d3cee0",
+    "artifacts\\m2-gate-corpus\\views\\validation.json": "d6748cde281890f9e8a015390f1f7144f96c574154d698e963d24a15f13258b7",
+    "artifacts\\m2-so-lifetimes-regression-views\\validation.json": "6e63562b929cc9ec8c13ae9f7e8ebf524308143b9a020b57c1a01e10c6c31b72",
+    "artifacts\\m2-gate-corpus\\buffer-views\\validation.json": "c979fd8bb0562322084a070a33861ea5c936a874a175680a12018195cfb84208",
+    "artifacts\\m2-so-lifetimes-regression-buffer-views\\validation.json": "320e3cbf0214f0dcbc134a86bb1f956e4226a0b4c99f6292d9928ec176980f14",
+    "artifacts\\m2-gate-corpus\\pipeline-creation\\validation.json": "f97d3ef6c134a7776567971bad1326211b1a4c0b38385eb33fb3c3326ef74bc5",
+    "artifacts\\m2-so-lifetimes-regression-pipeline-creation\\validation.json": "893a2d2a31cf56549ba0a375fc273c18cc11801f7b6edb3450991b83bc974e7e",
+    "artifacts\\m2-gate-corpus\\geometry-creation\\validation.json": "2214eac4f41a1ae7baaa3313f2614b220af042c5daace735b8589509a3a2568c",
+    "artifacts\\m2-so-lifetimes-regression-geometry-creation\\validation.json": "899028bcc88155d930540b1af6bffc2c78148a59db07ea7a43501c8727127e6c",
+    "artifacts\\m2-gate-corpus\\class-creation\\validation.json": "9ef6c8c84d71ef12cfdf17f395ed8c1fc49ffd244b3c968432acdda784bd8850",
+    "artifacts\\m2-so-lifetimes-regression-class-creation\\validation.json": "b424fa7963f5fef3e8bca2087e990535377dee19ad2ea83e2d850fee70a8a6c3",
+    "artifacts\\m2-gate-corpus\\predicate-creation\\validation.json": "059aca487260c7fbad1aeb93e9b364b0cb5aada97d2ea6d0c7ad3cb421d21e80",
+    "artifacts\\m2-so-lifetimes-regression-predicate-creation\\validation.json": "137b02d9fc1aa39a91cb504228c132f83c306a5a120d534b61a078329f6de4e2",
+    "artifacts\\m2-gate-corpus\\clear-view\\validation.json": "ffb02a37fdb6e938296d994bd29f9fc5e9ebfe50ce9aab717cf67332cf4392cc",
+    "artifacts\\m2-so-lifetimes-regression-clear-view\\validation.json": "5654a04ce744407734849f7edfa82c3dac83dc3e3d86b7e47502fc6089164b5a",
+    "artifacts\\m2-gate-corpus\\transfer1-context\\validation.json": "11a6639d00b58541c8408f4418b4ec53f602129bebbfe470d29f0b7bd5ec278a",
+    "artifacts\\m2-so-lifetimes-regression-transfer1-context\\validation.json": "3ab7155ef6e3bb5ed8e85360af7a50980d3649c8f3fa19fda86c76c32ddc8b4b",
+    "artifacts\\m2-gate-corpus\\transfer1\\validation.json": "60a081b4addf25f478bd09d64635c64a8c34cb04e79e1df5378e49a0f177e01d",
+    "artifacts\\m2-so-lifetimes-regression-transfer1\\validation.json": "1c429c2a2c6c6a29afae5cd0c9348a4397926ba320b1c08cbb4b55b3dbd47a2b",
+    "artifacts\\m2-gate-corpus\\minlod\\validation.json": "da8ac254beee590ea2afeef66d217e90b996cd4ed815803798408b318c806233",
+    "artifacts\\m2-so-lifetimes-final-minlod\\validation.json": "f79b5991cc3f83ac29980882436a17d203f3da7774fba8e24df1aedbb27a7596",
+    "artifacts\\m2-gate-corpus\\missing-state\\validation.json": "e6232ca778e2dbb33e6959801824fb793ea9acd697f55d4d74b0b2bf04747913",
+    "artifacts\\m2-so-lifetimes-final-missing-state\\validation.json": "eab0ddd0a2b6cb4c5a5c3f2a9dd8bf75f84cb29d7729bf8ba8093181884e0d47",
+    "artifacts\\m2-gate-corpus\\usage\\validation.json": "f958098c7c6c05d168bc7a346ee30f134bd2fbb3a9faa8c0b29c6f3e0728d171",
+    "artifacts\\m2-so-lifetimes-final-usage\\validation.json": "171e463f2ebc5da332fd45a489fd76bb83917e2675dc5dd85a76194786fe1765",
+    "artifacts\\m2-gate-corpus\\so\\validation.json": "a70300e4c2c6c4a53810c58fab28a0c7d007dfb9f7ff9d2bb9c71e7ae1c2d56e",
+    "artifacts\\m2-so-lifetimes-accepted\\validation.json": "9ca09865d6f2c9646312a550e12394318996becda5598eb6e3714ad47f332b7b",
+    "artifacts\\m2-gate-corpus\\getters\\validation.json": "1db37df56decd1a39ce1f0ff3241d3bc7418fd97b92313ecc62702877764ad09",
+    "artifacts\\m2-so-lifetimes-getters\\validation.json": "0ebef14ff9992d6479218a0efab085c63f0a12e0f270fda3d3c8a226e542da00",
+    "artifacts\\m2-gate-corpus\\context\\validation.json": "4333d44d056e40558fdad1be13249250e39eeefa74cc9d9ef97a6352996201ed",
+    "artifacts\\m2-discards-context\\validation.json": "49b9b460ba3c78f7ee5d6138e3ae41adbfa0b52c3411993c59dcf8ff8d16ee1f",
+    "artifacts\\m2-gate-corpus\\discards\\validation.json": "f07fc3bee2ff1b1a250caba61954fbb178bf8ac38efa457bb03e5d3a644b0bd6",
+    "artifacts\\m2-discards-accepted\\validation.json": "91687676ad7bb2cf020d5eeee1fcc53853610a91c94643b3a1af48e7083c39c4",
+    "artifacts/m2-gate-corpus/gate.json": "b0624688b1078131c3d9c8f9f552d831e06ab3e812c2404d93841992fed9908f",
+    "artifacts/m3-entry-evidence.json": "ea5593108d14fa9f9b46914ad31070a297d866b5a7cedd48d1e3c43a9a71bae0",
+    "artifacts/ctest-m2-gate.log": "ea4c3607e3e1ac45ae877e2530b55b86851c637565a05317ddb55b220c89c0ca",
+    "artifacts/ctest-m2-gate-LastTest.log": "7c77f9ed86d7165312211428d795f30b90afa8fd195e5581217fba633b929218",
+    "artifacts/m2-gate-test-results/suites.json": "8d57d580803e5f6b2864a5a1457957f323628c61b9c5afde2f9995c28cd7c1b5",
+    "artifacts/ctest-m2-gate-context-final.log": "3479a2c90a55d13ff748426bfc793d8f1b5dfe80ec91352d19b455a51f821b09",
+    "artifacts/m2-gate-context-final.txt": "356aa785f82b943b846155b32b1cfa1c25e83543e8e1c75a62da43f4d670a1ef",
+    "artifacts/test-compatibility-gate.log": "2ed33c349881908e51bf8d38a459656d2bd0129de98b39096d4029093d2130cd",
+    "artifacts/test-compatibility-gate-final.log": "64bd03632af5bc438370270f2ee88f5b4fb9a6481eff10bdcec1517e90275bb9",
+    "artifacts/test-compatibility-gate-portable.log": "c212f6dd2d488872aa80d48fbdc4bec110698dfd0eb26d16b1951bc6c39b676e",
+    "artifacts/m2-gate-portable-cpu-audit.json": "d3bcbadba76d211710ad2a09a78a0727b88c244082ccde4b9f97cd04590171cb",
+    "artifacts/m2-gate-suites-run.json": "e932ac6bd8be8c83b2a17205ac0fae01287cb9119a05202e91191a21cdf1ea00",
+    "artifacts/m2-gate-final-cpu-audit.log": "a1859d908b656c112bcc7414d09b271550fa778f6d0b38997d5ef962ebe1b951",
+    "artifacts/ctest-m2-gate-context-id-collision.log": "82388bee9dad47bdace6461fa63d281e9bd22b0ce2f3d73c645ebc048368a890",
+    "artifacts/m2-gate-context-id-collision.txt": "56906d42cc734cc370d82c221b4d00259b2d8be5f78a4f248df3c8817920a0b9",
+    "artifacts/m2-gate-finish-original/validation.json": "b62222f5c904e3208d8cdb08d9f4aab27e773c15ce4b15793e3eb3b1d1ca0ca7",
+    "artifacts/m2-gate-golden/validation.json": "5e1dde1ab9876f50c472cdf84378931ffc3b5cd8e9700002b67d37bf81383ade",
+    "artifacts/build-m2-gate-regression.log": "9afd803c4fd5b165880983c7d575bcde536d705a547786864ca28f56e0b974de",
+    "artifacts/build-m2-gate-context-final.log": "2ec35a99c06ef3fc85dfd143a77a0220a3bc30d4161f2e25cf455fab46642ba4",
+    "artifacts/package-m2-gate.log": "8aa93d4a3a7bc70064ec36e7fcbe6c124e3c67e3b0f1df188e1d193a3b24013a"
+  },
+  "source_files": {
+    "src/core/Contexts.cpp": "d017c71ddce951750c5f6461300712b56df746c9aaf2532375e3e047f9e937fd",
+    "src/replay/Replay.cpp": "49d14bfff108d89d6923ce08a55ae74077ff35b982fdaffd968ef71fc2784a51",
+    "tests/ContextTests.cpp": "de6f417aef0f12683cfbe5e20bbdc3fc34ee3e7062562215c2d565398d6f7550",
+    "tools/validate_compatibility_gate.py": "605b8a5ab4d70c50fafee7defc0a2e5c44be24e4734fbbbd041d38fcf05e1c58",
+    "tools/test_compatibility_gate.py": "f92720587fb357797148616be1888541dcf0328b3fe9afbf0fbf9e770d3d9351",
+    "docs/m2-gate-suites.json": "df78ca2cd64097025c95e2a96577e5e12dbc07150f1f121981365c01a9408e4f"
+  },
+  "package_files": {
+    "FloraGPA.exe": "64b7ecb8c855139645a31816212e182c9a2bd0fa842aa2e125a5a27ec4aa2c4a",
+    "FloraGPA.Worker.exe": "621617293137e74ca246a1fbd5184b749e9bcb169d20c4947e794f6b1a6732c5",
+    "FloraGPA.Cli.exe": "5042f98b4b103fc3d23e2e6d7a270084b5d863b0711ec8e15c3f089e42dd8846",
+    "FloraGPA.Rdc.exe": "f4d21d43e661d24d392e91fc1a1f1460a20d1377fcf5075c57083ad289e82773",
+    "FloraGPA.Metrics.dll": "58b6278f2a93e783b1e8bb1290e9b0e51745f1a36825f296584f52159fd7c6db"
+  },
+  "unique_positive_captures": 356,
+  "unique_rejected_captures": 22,
+  "installed_video_controllers": [
+    {
+      "Name": "Intel(R) Iris(R) Xe Graphics",
+      "DriverVersion": "32.0.101.6790",
+      "PNPDeviceID": "PCI\\VEN_8086&DEV_46A6&SUBSYS_133D1043&REV_0C\\3&11583659&0&10"
+    },
+    {
+      "Name": "NVIDIA GeForce RTX 3070 Laptop GPU",
+      "DriverVersion": "32.0.15.8097",
+      "PNPDeviceID": "PCI\\VEN_10DE&DEV_249D&SUBSYS_133D1043&REV_A1\\4&174EDE7&0&0008"
+    }
+  ],
+  "observed_command_family_counts": {
+    "execute": 95,
+    "metadata": 117,
+    "unsupported": 2
+  },
+  "original_player_runs": 4,
+  "extra_finish_native_runs": 4,
+  "original_configuration_equivalence": "unproven",
+  "ctest_suites_passed": 41,
+  "context_tests_passed": 10,
+  "ui_worker_tests_passed": 56,
+  "cpu_gate_tests_passed": 10,
+  "isolated_game_goldens": 4,
+  "registered_command_records": 48796,
+  "decoded_command_records": 48796,
+  "unchecked_command_records": 0,
+  "limits": [
+    "Case totals retain duplicate-hash research registrations; unique file totals are separate",
+    "Observed family handling/decoding is not full API semantic coverage",
+    "22 explicit information/identity boundaries remain failures to replay",
+    "M3 traditional command-list execution and M4-M6 remain incomplete",
+    "No new original-player comparison for the full matrix; Finish subset only",
+    "Helldivers variability remains measured without shader modification/global tolerance"
+  ],
+  "replay_revision": "1a7347d"
+}

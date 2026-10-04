@@ -1,16 +1,17 @@
 # Current capabilities and compatibility
 
-Reviewed **2026-10-04**. The latest build adds
-[native discard and capture-boundary diagnostics](DISCARD_AUDIT.md), pinned
-by its [focused baseline](discard-baseline.json), following revision
-`6a04b55`. The last full replay regression remains the
-[unused SO lifetime baseline](so-lifetime-acceptance-baseline.json).
+Reviewed **2026-10-04**. The latest build completes the
+[M2 registered corpus gate](M2_ACCEPTANCE_GATE.md), pinned by its
+[full baseline](m2-gate-baseline.json), with replay correction `1a7347d`.
+FinishCommandList validation now precedes disabling and rejects unresolved links
+and payload substitutions. The next stage is M3 retained-list evidence and execution.
 
-The cumulative inventory contains **388 files: 366 positive replays and 22
-explicit rejections** (four initial LOD dependencies, seven context-state files,
-nine missing discard views and two ambiguous discard-pointer records).
-The latest focused batch adds 26 original files;
-it does not rerun the entire historical matrix. Six formerly rejected SO files now replay
+The inventory contains **388 registered cases / 378 distinct capture hashes**:
+366 positive cases (356 unique captures) and 22 explicit rejections (four initial
+LOD dependencies, seven context-state files, nine missing discard views and two
+ambiguous discard-pointer records). Earlier summaries counted registrations as
+files; ten extra registrations share hashes with other synthetic fixtures.
+The latest batch reruns all 388 cases. Six formerly rejected SO files now replay
 through proven unused binding intervals. Their absent descriptors/storage and
 intermediate native bindings remain unavailable and are explicitly reported.
 The other four new SO files verify complete resource readback and writes.
@@ -41,7 +42,33 @@ tested workloads; opening a file does not prove accurate replay.
 | Resource minimum LOD | Native setters, initial getter evidence, frame-time creation defaults, ClearState preservation and disabled-setter experiments | Missing required initial state is rejected; nonzero-LOD full storage export and UAV/output/interface guards remain boundaries. Unused static SRVs use program declarations. [LOD](RESOURCE_LOD_AUDIT.md), [shader usage](MIN_LOD_USAGE_AUDIT.md) |
 | Query and predication | Captured Query metadata/history; native predicate Begin/End, binding and Device5 frame-time creation | New predicates remain unissued until their recorded interval completes. Ordinary Query records may omit identities, intervals or full result bytes; pre-frame predicate history is not reconstructed. [Predicate creation](PREDICATE_CREATION_AUDIT.md) |
 
-## Latest focused discard validation
+## Latest full registered-scope gate
+
+The [gate baseline](m2-gate-baseline.json) records 732 positive replays and
+44 located negative attempts. All 365 previously stable case images remain
+unchanged; Helldivers is the one known-variable case. There are 353 diagnostic
+control runs and 254 resource exports, including 250 strict byte goldens and
+four Helldivers boundary observations. All 732 positive dependency audits pass.
+
+All 48,796 registered command records decode. Their 214 observed wire families
+have 95 execution classifications, 117 metadata classifications and two
+unsupported context-state classifications. These are observed type/decoder
+counts, not full semantic acceptance percentages: individual descriptors,
+identities, context kinds and execution boundaries still determine support.
+
+Forty-one related CTest suites pass. Qt/Worker has 56 passing cases; Context has
+10, including Finish disable/edit/linked/deferred counterexamples. Ten CPU gate
+tests reject incomplete evidence, changed diagnostics, crashes, timeouts and
+false determinism claims. Four isolated GF2/BF1 golden/negative checks pass.
+The two original Finish files pass four further independent and four original
+player runs with equal pixels; original adapter/configuration equivalence remains
+unproven. The original player was not rerun for the entire matrix.
+
+The registered ordinary-path M2 gate passes: cases replay or retain specific,
+reproducible rejections. Traditional lists, broader resource dependencies and
+M3–M6 completion are still open. Package: `out/FloraGPA-m2-gate-20261004/`.
+
+## Previous focused discard validation
 
 Twenty-six new originals contain fifteen positives and eleven explicit
 negatives. The completed-view producer verifies 408 native/injected frames;
@@ -83,10 +110,10 @@ serial package replays, and four GF2/BF1 golden/negative checks pass with isolat
 runtime dependencies. The [baseline](context-state-baseline.json) keeps these
 focused results separate from the older full matrix below.
 
-## Last full accepted replay matrix
+## Previous full accepted replay matrix
 
 The [SO lifetime baseline](so-lifetime-acceptance-baseline.json) records the
-complete current regression, plus focused storage/cursor and original-player
+then-current regression, plus focused storage/cursor and original-player
 checks. Historical getter and SO discovery baselines remain unchanged.
 
 | Measure | Recorded result |
@@ -160,8 +187,8 @@ the other 35 suites passed initially and the complete UI suite passes after the 
 | Stage | Current position and completion gate |
 |---|---|
 | M1 — Acceptance infrastructure | Minimum loop delivered: corpus, coverage, preflight, serial comparison and diagnostic queue. Extend evidence as paths arrive. |
-| M2 — Ordinary replay | In progress. Observed getters, proven unused SO intervals and supported discard layouts pass; missing state/view identities and discard pointer ambiguity have located rejections. Audit the remaining auxiliary/snapshot contracts and the M2 acceptance gate before production command-list work. State-object execution, mixed saved/missing SO targets and unverified lifetimes remain explicit boundaries. |
-| M3 — Deferred Context / Command List | Incomplete. Require original captures proving identity, build order, resource versions, repeated execution, restore-state and event mapping before production support. |
+| M2 — Ordinary replay | Registered-scope gate passed: 366 positive cases and 22 located rejections; auxiliary/snapshot contracts audited. This is not universal API support. State-object identity loss, mixed saved/missing SO targets and unverified lifetimes remain explicit boundaries. |
+| M3 — Deferred Context / Command List | Current next stage; incomplete. Installed DLL/evidence hashes and ten expanded legacy originals rechecked. Require original retained-list captures proving identity, build order, resource versions, repeated execution, restore-state and event mapping before production support. |
 | M4 — Resources and boundaries | Incomplete. Verify saved initial/differential data, subresources, counters, Query/Predication and presentation; distinguish absent information from implementation gaps. |
 | M5 — Stable compatibility release | Incomplete. Broaden captures, repeat/long-duration checks, recovery and large-file testing; validate clean-environment build/deployment and publish a fixed matrix. |
 | M6 — Analyzer and other versions | Incomplete. Continue remaining Qt consumers, advanced profiling/debugging and version-specific adapters after core replay gates. Existing analyzer features remain available. |

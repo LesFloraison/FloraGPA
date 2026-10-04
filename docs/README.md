@@ -35,6 +35,7 @@ upstream repository that are not vendored here.
 
 ## Historical implementation and acceptance records
 
+- [M2 registered corpus gate and M3 entry](M2_ACCEPTANCE_GATE.md), [full baseline](m2-gate-baseline.json) and [reproducible suite registry](m2-gate-suites.json).
 - [Native discard acceptance and information boundaries](DISCARD_AUDIT.md), [focused baseline](discard-baseline.json) and [original corpus](discard-corpus.json).
 - [Context-state identity loss and diagnostics](CONTEXT_STATE_DISCOVERY.md), [focused baseline](context-state-baseline.json) and [original corpus](context-state-corpus.json).
 - [Unused SO lifetime acceptance](SO_LIFETIME_AUDIT.md), [acceptance baseline](so-lifetime-acceptance-baseline.json) and [accepted original corpus](so-lifetime-accepted-corpus.json).
