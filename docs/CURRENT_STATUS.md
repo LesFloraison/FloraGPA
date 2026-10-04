@@ -1,6 +1,14 @@
 # Current capabilities and compatibility
 
-Reviewed **2026-10-04**. The latest [initialization reference recovery](INITIALIZATION_REFERENCES_AUDIT.md)
+Reviewed **2026-10-04**. The latest [initial cache recovery](INITIAL_CACHE_AUDIT.md)
+adds initial category/descriptor membership and the conditional CSUAV collector.
+Three original captures match 31,934 index records, 19,387 cache descriptors and
+all 6,597 ERG collectors. This closes the prior 224 CSUAV gaps for that initial
+scope. Full uint16 classification, original cache/collector boundary probes,
+related CTest and four goldens pass. Edited versions, other index profiles and
+traditional list execution remain unaccepted; GPU execution is unchanged.
+
+The preceding [initialization reference recovery](INITIALIZATION_REFERENCES_AUDIT.md)
 adds native read-only metadata for 25 fixed ERG collector wire types: 6,110 original
 observations match exactly and 150 original boundary probes pass. The 224 observed
 cache-dependent CSUAV collectors remain explicit gaps. API resource references and

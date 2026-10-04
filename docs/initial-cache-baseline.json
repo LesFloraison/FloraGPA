@@ -1,0 +1,114 @@
+{
+  "schema": "FloraGPA initial cache baseline 1",
+  "reviewed": "2026-10-04",
+  "implementation_commit": "6f039cae7c3bef38cdec925065f28b19fce9ea9f",
+  "production_metadata_changed": true,
+  "production_gpu_execution_changed": false,
+  "traditional_list_execution_accepted": false,
+  "registration_sequence_available": false,
+  "inventory_unchanged": {
+    "registrations": 470,
+    "unique_capture_hashes": 460
+  },
+  "initial_profile": {
+    "categories": [
+      3,
+      5,
+      7,
+      9
+    ],
+    "entry_flags": 0,
+    "file_id_bits": 32,
+    "version": 0,
+    "edited_views": false,
+    "resource_objects_validated": false
+  },
+  "counts": {
+    "captures": 3,
+    "new_accepted_original_runs": 3,
+    "reused_uninstrumented_controls": 3,
+    "preliminary_cache_only_runs_not_added_to_acceptance": 2,
+    "index_entries": 31934,
+    "descriptor_entries": 19387,
+    "category_only_ergs": 12547,
+    "exact_erg_collectors": 6597,
+    "observed_collector_wire_types": 26,
+    "prior_csuav_gaps_closed": 224,
+    "classification_inputs": 65536,
+    "native_membership_checks": 11,
+    "native_csuav_records": 28,
+    "fixed_collector_regression_calls": 150,
+    "ctest_suites": 5,
+    "new_evidence_tests": 5,
+    "existing_evidence_tests": 12,
+    "independent_golden_checks": 4
+  },
+  "evidence": {
+    "artifacts/m3-cache-comparison-final/validation.json": "e8a7137286d12bd3ebd2a6c9d1683e675a42ebadfea786cd86cb0e7e31b9d494",
+    "artifacts/m3-cache-native-probe/cache.json": "f81e33b1df563392ed5dcf995c78018aba2cef81ee102398accea56beaf52183",
+    "artifacts/m3-cache-fixed-probe-regression/collectors.json": "30aceaecf51446e367a54a81a6405156d8090cf7744beefe0d53039c817c295c",
+    "artifacts/m3-cache-goldens/validation.json": "5e1dde1ab9876f50c472cdf84378931ffc3b5cd8e9700002b67d37bf81383ade",
+    "artifacts/m3-cache-ctest.log": "f76d933610e574beee5282350410e8386d744aa1461b796397e8f8046d73f16a",
+    "artifacts/m3-cache-checker-tests.log": "1a66fe658306f2ecef2e231b19d7625247f07dcbfb18ef01608e3adc21121406",
+    "artifacts/m3-cache-reference-regression.log": "c8946341fb7f990c6b1d7dc9a2b217702ea86007a4313fe954b98c2a5ab2ae8a",
+    "artifacts/m3-cache-scheduler-regression.log": "2fb14902a66c200394543f1da88727a4d5b6f0f200362949322c3b6c234e9213",
+    "artifacts/m3-cache-population.c": "4145a0fd5ad1367a17405c2597d0855bfe379aa417a92144bd23556885c8fbaf",
+    "artifacts/m3-cache-category-callers.c": "ddb6d95805b70d11cc21b890d1a2b7ab8cd3b7d34a7095b59c0c3cf508fb64ec",
+    "artifacts/m3-cache-erg-classification.c": "6d956e745558461bca64c5da46f9761d3c7e0d94b5bf33d492b8c52cf3c016d6",
+    "artifacts/m3-cache-file-index.c": "886a19ccfdd78dc71d291f924afa0411c9602adaa9bbdb984d19377ddc0ebd3a",
+    "artifacts/m3-reference-presence.c": "3337cfae374d10e91a4c865545a5ceb878b24862ddbf58cf267ab5f990df5eb8",
+    "artifacts/m3-cache-index-trace-bf1/trace.json": "276a04b8c00593db6fc558f6484b9a3c619cceba901ebe91d215b6cfd9b74af9",
+    "artifacts/m3-cache-cpp-final-bf1/commands.json": "e27c39a395ed68a60873e048e5948620684d0d99478df6c3dcc1fe7c366b7151",
+    "artifacts/m3-cache-index-trace-32/trace.json": "8eefa8cff4dcc2941e77f519c4d7b86e0cba46336c64387c101d87f3604e01ce",
+    "artifacts/m3-cache-cpp-final-32/commands.json": "e760f3f9ef7ea4c4e436559fb23d60c049817448038626ed93ddc74d1390a99c",
+    "artifacts/m3-cache-index-trace-gf2/trace.json": "fb2d7d1ff42519aa1bb4d2fddd7a7428f0f8d6b19c841c0f2c44c4195bb7c897",
+    "artifacts/m3-cache-cpp-final-gf2/commands.json": "4641930580bd987aee739426f1e43cc7fdbdfb8f9ae769e4585349fe607119c9"
+  },
+  "sources": {
+    "src/application/ApiCommands.cpp": "681ffa4032803f6d82e4cfee25045cf41d0ca9a446ceb5aef2054f3badebdbdb",
+    "src/application/InitializationReferences.cpp": "f05823f355fd9936b92778c645c83dc8c6ed10290a7ad02b40f1df3e6ea142d1",
+    "src/application/InitializationReferences.h": "2d0ba3309254b29dd22962384cb1407a905f7072fc36f8ef6de27cc085cae1ba",
+    "tests/ApiCommandTests.cpp": "b6322582ff5b0aef7aa32ae848650a262c6367783d8db964df1f5937cc42e0b3",
+    "tests/test_initial_cache_evidence.py": "3f2acbca9b265246c0f230d321b425e440dd041c06fd791d3ca8d189c9562e03",
+    "tools/probe_original_cache_membership.py": "23660396798f5cb7b0b25e54fc5e352731f87cc164fa63bfe1bdb156bb8fcbcd",
+    "tools/probe_original_reference_collectors.py": "38d3f22ea761e71501a214e6996d0a8abce51cdd05d39fdb19d8af552171f02b",
+    "tools/trace_original_erg_initialization.py": "2bc0a1f5e3ff692c11748f98d0bcf95790d5da6fe6b32d4f3f2c68f785177eae",
+    "tools/validate_initial_cache_evidence.py": "6888ef15471be2d1cd7de4612da9ae8f866c6e8a30eb75e762b0a1ff53dd4764",
+    "tools/validate_original_reference_evidence.py": "eebb87f0a27f9d33a6bf1b1c38cb17f5e7e6ff8fb7de9f0bf85dbf8a8d932534",
+    "tools/validate_original_init_traces.py": "6144aac3e1031ac044122cbfcd98561b086419534ae4a0c082c333db78bee199"
+  },
+  "final_exports": {
+    "bf1": {
+      "original": "artifacts/m3-cache-cpp-bf1/commands.json",
+      "final": "artifacts/m3-cache-cpp-final-bf1/commands.json",
+      "sha256": "e27c39a395ed68a60873e048e5948620684d0d99478df6c3dcc1fe7c366b7151",
+      "identical": true
+    },
+    "32": {
+      "original": "artifacts/m3-cache-cpp-32/commands.json",
+      "final": "artifacts/m3-cache-cpp-final-32/commands.json",
+      "sha256": "e760f3f9ef7ea4c4e436559fb23d60c049817448038626ed93ddc74d1390a99c",
+      "identical": true
+    },
+    "gf2": {
+      "original": "artifacts/m3-cache-cpp-gf2/commands.json",
+      "final": "artifacts/m3-cache-cpp-final-gf2/commands.json",
+      "sha256": "4641930580bd987aee739426f1e43cc7fdbdfb8f9ae769e4585349fe607119c9",
+      "identical": true
+    }
+  },
+  "cli_sha256": "59287b913fad53c4f74768803291cf1de8d7679a07fb3595e57ffe9e30386c88",
+  "original_player_sha256_after": "39061ff329e4a32d0c8375ce9ee15e2017bccab0593943b962a860e11723d38b",
+  "reference_tools": {
+    "D:/CDXrepo/FloraGPA/tools/gpa_native.py": "f7ee63e82a9c8363cfde81633863a820e8f4277d0a80f0d90075b499f56bcffd",
+    "D:/CDXrepo/FloraGPA/standalone/frame.py": "3f291cf9b4037a786c46ad09878fff8d18901b7ebcd9a5aa54333fe9cce94ef2"
+  },
+  "limits": [
+    "Initial registration membership is not object validity, dependency readiness, GPU execution or list order.",
+    "Edited versions and other file index profiles remain unrecovered.",
+    "Resource/state/data collectors and traditional list execution identity remain incomplete.",
+    "Native boundary experiments are CPU-only and add no accepted captures.",
+    "The full 470-case inventory was not rerun; no release package or UI update.",
+    "Original/independent adapter equivalence is not asserted."
+  ]
+}

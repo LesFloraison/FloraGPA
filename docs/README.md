@@ -18,6 +18,7 @@ chronology remains in Chinese.
 | Merged lists and capture-side loss versus faithful replay | [Deferred merge audit](DEFERRED_MERGE_AUDIT.md) |
 | Original dependency initialization and version/list ordering | [Initialization scheduler audit](INITIALIZATION_SCHEDULER_AUDIT.md) |
 | Saved API references versus original initialization prerequisites | [Initialization reference audit](INITIALIZATION_REFERENCES_AUDIT.md) |
+| Initial cache registration and conditional CSUAV references | [Initial cache audit](INITIAL_CACHE_AUDIT.md) |
 | Omitted CB resources and proved unused binding intervals | [CB lifetime audit](CONSTANT_BUFFER_LIFETIME_AUDIT.md) |
 | Find dated changes | [Development chronology (Chinese)](MIGRATION_STATUS.md) |
 | Inspect module-level migration bookkeeping | [Module ledger](migration.json) |

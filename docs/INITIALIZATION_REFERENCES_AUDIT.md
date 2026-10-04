@@ -1,5 +1,8 @@
 # Original initialization references
 
+This is the fixed-collector batch. The subsequent [initial cache audit](INITIAL_CACHE_AUDIT.md)
+closes its CSUAV gap for the verified unmodified initial-registration scope.
+
 Reviewed 2026-10-04. This M3 batch adds read-only `original_initialization`
 metadata to the native `commands` export. It recovers the pinned GPA 2025 R1
 player's fixed reference collectors for 25 wire types. It does not change GPU
