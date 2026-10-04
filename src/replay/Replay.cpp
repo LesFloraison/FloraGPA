@@ -22,6 +22,7 @@
 #include <chrono>
 #include <d3d11sdklayers.h>
 #include <d3d11shader.h>
+#include "core/PipelineGetters.h"
 #include <d3dcompiler.h>
 #include <dxgi.h>
 #include <iostream>
@@ -793,6 +794,14 @@ void Replay::command(const Entry &e) {
     if (outputHistory_ && OutputBindingModel::models(e.type))
         outputHistory_->advance(e.id);
     Reader r(payload);
+    if (isPipelineGetter(t)) {
+        if (!std::ranges::equal(payload, frame_.payload(e.id)))
+            throw std::runtime_error("Pipeline getter payload experiments are not supported");
+        validatePipelineGetter(frame_, readPipelineGetter(t, payload));
+        if (!options_.disabled.contains(e.id))
+            ++counts["pipeline_getter_observations"];
+        return;
+    }
     if (isResourceLodRecord(t)) {
         if (!std::ranges::equal(payload, frame_.payload(e.id)))
             throw std::runtime_error("Resource LOD payload experiments are not supported");

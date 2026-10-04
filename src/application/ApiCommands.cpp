@@ -3,6 +3,7 @@
 #include "core/ClearView.h"
 #include "core/Contexts.h"
 #include "core/PipelineCreation.h"
+#include "core/PipelineGetters.h"
 #include "core/PredicateCreation.h"
 #include "core/ResourceLod.h"
 #include "core/TextureCreation.h"
@@ -330,6 +331,9 @@ Json inspectCommand(const Frame &frame, Id id) {
                       "Draw links require validated QueryInterface evidence.";
     if (getter(t))
         out["note"] = "Captured inspection/lifetime metadata; it does not set replay state.";
+    if (isPipelineGetter(t))
+        out["note"] = "Captured getter observation; it does not set replay state. A zero object ID does "
+                      "not distinguish an omitted output pointer from a null returned binding.";
     if (in(t, {0x3528, 0x3537, 0x3539, 0x353a}))
         out["note"] = out["note"].get<std::string>() +
                       " A zero returned object reference cannot distinguish an omitted "
@@ -389,7 +393,15 @@ Json inspectCommand(const Frame &frame, Id id) {
                 slot = 30;
             else if (name == "SOSetTargets")
                 slot = 37;
-            if (isResourceLodRecord(t)) {
+            if (isPipelineGetter(t)) {
+                const auto observed = readPipelineGetter(t, raw);
+                validatePipelineGetter(frame, observed);
+                for (const auto &field : observed.fields) {
+                    if (r.reader.position() != field.offset)
+                        throw std::runtime_error("Getter inspection field offset mismatch");
+                    r.field(field.name, field.format, field.reference);
+                }
+            } else if (isResourceLodRecord(t)) {
                 readResourceLod(t, raw);
                 if (t == 0x3515)
                     r.values("Qf", {"resource", "min_lod"}, {"resource"});

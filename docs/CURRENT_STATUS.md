@@ -1,17 +1,16 @@
 # Current capabilities and compatibility
 
-Reviewed **2026-10-04**. The latest accepted replay implementation is b11464c,
-with its full [LOD shader usage baseline](min-lod-usage-baseline.json).
-The subsequent [pipeline getter discovery](PIPELINE_GETTER_DISCOVERY.md) adds
-eight original captures blocked by 34 unsupported getter families; it does not
-change production replay or enlarge the accepted support scope.
+Reviewed **2026-10-04**. The latest accepted build is pinned by the
+[pipeline getter baseline](pipeline-getter-baseline.json), following discovery
+revision 656bf82. The [getter audit](PIPELINE_GETTER_AUDIT.md) records its scope.
 
-The inventory contains **340 files: 328 accepted positive replays, four explicit
-missing-information rejections and eight new implementation-blocked files**.
-The getter discovery passes 192 native/injected producer frames, 1,008 return-value
-assertions and sixteen original-player image comparisons; FloraGPA currently
-rejects those eight captures at their first unsupported getter. The accepted
-332-file matrix below remains separate from these new blockers.
+The inventory contains **345 files: 340 positive replays and five explicit
+missing-information/resource rejections**. The eight previous getter blockers
+now pass, together with four new boundary originals. One additional SO capture
+lacks its referenced buffer descriptor and remains a located negative. Original
+GPA can replay its final image; proven handling of that unused binding lifetime
+is still open, so this rejection is not a claim that its final pixels are
+fundamentally unrecoverable.
 
 ## Supported scope
 
@@ -23,6 +22,7 @@ tested workloads; opening a file does not prove accurate replay.
 | Area | Available behavior | Boundaries and evidence |
 |---|---|---|
 | Preflight and API inspection | Offline diagnostics, decoded fields, references, coverage and Qt diagnostics | Structural success is not GPU success; metadata is not execution. [Acceptance infrastructure](COMPATIBILITY_BASELINE.md) |
+| Pipeline getter observations | 34 additional checked immediate Context4 getter families; decoded optional outputs and reference details | Metadata never restores native bindings or fabricates observed objects. Nonempty SO production path remains unaccepted because its saved original lacks the buffer entry. [Getter acceptance](PIPELINE_GETTER_AUDIT.md) |
 | Immediate-context replay | Captured draws/dispatches, supported setters, uploads, copies (including Context1 transfers), ClearView, queries/predication and presentation | Broader layouts, resource versions and some presentation/transfer cases remain incomplete. [Setters](PIPELINE_SETTER_AUDIT.md), [texture transfers](TEXTURE_COPY_AUDIT.md), [Context1 transfers](TRANSFER1_AUDIT.md), [ClearView](CLEAR_VIEW_AUDIT.md), [presentation](PRESENT_REPLAY_AUDIT.md) |
 | Frame-time creation | Validated buffers, textures/views, shaders, pipeline states, class linkage/instances and predicates | Device5 coverage is not every interface version or descriptor combination; required missing data and unresolved identities are rejected. [Buffers](BUFFER_CREATION_AUDIT.md), [textures](TEXTURE_DIMENSIONS_AUDIT.md), [texture views](VIEW_CREATION_AUDIT.md), [buffer views](BUFFER_VIEW_CREATION_AUDIT.md), [pipeline](PIPELINE_CREATION_AUDIT.md), [geometry/SO](GEOMETRY_CREATION_AUDIT.md), [classes](CLASS_CREATION_AUDIT.md), [predicates](PREDICATE_CREATION_AUDIT.md) |
 | Texture and output inspection | Presentation/RTV/DSV selection, mip/layer/slice, typed/channel/range controls, supported MSAA resolve/sample and planar inspection, exports | Format/device limits remain; legacy P010/P016 initial data can contain recovered Y only. [Frame output](FRAME_OUTPUT_MIGRATION.md), [texture inspection](TEXTURE_INSPECTION_MIGRATION.md), [planar writes](PLANAR_WRITE_MIGRATION.md) |
@@ -38,23 +38,24 @@ tested workloads; opening a file does not prove accurate replay.
 
 ## Latest accepted replay matrix
 
-The [LOD shader usage baseline](min-lod-usage-baseline.json) records the latest
-full matrix and four explicit rejection controls; see the [usage audit](MIN_LOD_USAGE_AUDIT.md).
+The [getter baseline](pipeline-getter-baseline.json) records the complete current
+matrix; five missing-state/resource negatives retain explicit diagnostics.
 
 | Measure | Recorded result |
 |---|---|
-| Accepted baseline inventory / positive files / missing-state files | 332 / 328 / 4 |
-| Ordinary independent positive runs | 656 |
-| Repeated output | 327 stable files; one known-variable Helldivers file |
-| Previously stable image hashes | All 320 unchanged |
+| Enrolled inventory / positive files / explicit negatives | 345 / 340 / 5 |
+| Ordinary independent positive runs | 680 |
+| Repeated output | 339 stable files; one known-variable Helldivers file |
+| Previously stable image hashes | All 327 unchanged |
 | Diagnostic control runs | 353 |
 | Resource boundary exports | 208: 204 strict byte goldens and four Helldivers boundary diagnostics |
-| New usage producer frame checks | 240 across ten original captures |
-| New usage hardware/WARP rows | 20: 14 positive, six expected sampling-state rejections |
-| New original-player comparisons | 20 completed runs: seven files equal producer, three retain a mip-0 discrepancy |
-| Related CTest suites / golden checks | 37 / 4 passed |
-| LOD / Qt-Worker test cases | 51 / 56 passed, no skips |
-| New execution evidence | Unused PS/VS slots, null PS, stripped shaders, late shader changes and shader replacements |
+| Getter producer checks | 312 frames and 1,272 return assertions across thirteen original files |
+| Getter type coverage | 34/34 identified families decoded as metadata; 73 records including the SO negative |
+| Getter hardware/WARP positive rows | 24; two replays plus disabled-getter control per row |
+| New original-player runs | 26 completed; twelve files equal producer, one class-instance discrepancy |
+| Related CTest suites / golden checks | 38 / 4 passed |
+| Getter / Qt-Worker cases | 30 / 56 passed, no skips |
+| New rejection evidence | Missing SO buffer 44 at event 43; four prior minimum-LOD negatives retained |
 
 These are separate measurements, not an overall correctness percentage. The
 matrix includes research fixtures and self-owned original captures as well as
@@ -95,7 +96,7 @@ under matched device/driver settings.
 
 [Comparison reporting](original-comparison-baseline.json) separately verifies
 execution status and image comparisons (13 CPU checks, nine independent runs,
-seven original runs). These focused runs are not added to the 656-run matrix.
+seven original runs). These focused runs are not added to the 680-run matrix.
 Helldivers' [sharpening variability](HELLDIVERS_REPLAY_FIX.md) remains visible;
 no shader modification, global tolerance or automatic event disable manufactures
 a stable result. Earlier Intel-metric batches retain their separately documented
@@ -111,7 +112,7 @@ the other 35 suites passed initially and the complete UI suite passes after the 
 | Stage | Current position and completion gate |
 |---|---|
 | M1 — Acceptance infrastructure | Minimum loop delivered: corpus, coverage, preflight, serial comparison and diagnostic queue. Extend evidence as paths arrive. |
-| M2 — Ordinary replay | In progress. Prioritize the eight original files blocked by 34 pipeline getter families, then remaining interfaces, auxiliary records and resource semantics; enrolled immediate-context paths must replay correctly or reject with reproducible, located diagnostics. |
+| M2 — Ordinary replay | In progress. The 34 getter blockers are resolved within the observed immediate layouts. Next prove the missing-SO binding lifetime and obtain a complete SO getter capture, then audit remaining interfaces, auxiliary records and resource semantics; enrolled immediate-context paths must replay correctly or reject with reproducible, located diagnostics. |
 | M3 — Deferred Context / Command List | Incomplete. Require original captures proving identity, build order, resource versions, repeated execution, restore-state and event mapping before production support. |
 | M4 — Resources and boundaries | Incomplete. Verify saved initial/differential data, subresources, counters, Query/Predication and presentation; distinguish absent information from implementation gaps. |
 | M5 — Stable compatibility release | Incomplete. Broaden captures, repeat/long-duration checks, recovery and large-file testing; validate clean-environment build/deployment and publish a fixed matrix. |

@@ -1,0 +1,23 @@
+{
+  "schema": "FloraGPA compatibility corpus 1",
+  "profile": "GPA 2025 R1 legacy DX11 / IGPA v3",
+  "cases": [
+    {
+      "id": "pipeline_getters_missing_so",
+      "path": "m2-pipeline-getter-boundaries-final/10/capture.gpa_frame",
+      "sha256": "d5b84478abf282ef58d30e61bd2a292ad590c06720de89f6266ed72edbbc0d96",
+      "bytes": 60013,
+      "family": "bound_so_getter",
+      "origin": "self_owned_original_gpa_capture",
+      "reference_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "comparison_policy": "exact_golden",
+      "source_manifests": [
+        "artifacts\\m2-pipeline-getter-boundaries-final\\manifest.json"
+      ],
+      "controls": [],
+      "boundaries": [],
+      "provenance_note": "Unmodified original capture: SOSetTargets event 43 references buffer 44, whose resource entry is absent. Keep as an explicit diagnostic negative; getter returns do not reconstruct missing descriptors.",
+      "device_scope": "Local hardware producer; original-player adapter/configuration unproven."
+    }
+  ]
+}

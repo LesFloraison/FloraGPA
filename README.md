@@ -23,7 +23,8 @@ Some optional analysis features require separately supplied components.
   frame-bound project files.
 - Inspect Coverage and Quad diagnostics, collect DX11 timing/statistics, and
   use optional RenderDoc or Intel Metrics Discovery analysis.
-- Run offline compatibility preflight before attempting GPU replay.
+- Run offline compatibility preflight before attempting GPU replay, including
+  checked pipeline getter observations and located missing-resource diagnostics.
 
 Support depends on the recorded layout, saved resource data, command path and
 device capabilities. See [current support and limits](docs/CURRENT_STATUS.md)

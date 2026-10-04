@@ -138,6 +138,16 @@ Json validateFrame(const std::filesystem::path &path, const std::function<bool()
                             finding(&e, "error", "command_list_unsupported", ex.what());
                         }
                     } else {
+                        if (isStreamOutputTargets(e.type)) {
+                            const auto targets = readStreamOutputTargets(frame.payload(id));
+                            if (targets.buffers)
+                                for (const auto buffer : *targets.buffers)
+                                    if (buffer && !frame.entries().contains(buffer))
+                                        finding(&e, "error", "stream_output_resource_unresolved",
+                                                "SOSetTargets references an absent buffer entry; its "
+                                                "descriptor and storage cannot be validated for replay",
+                                                buffer);
+                        }
                         if (isPipelineSetter(e.type)) {
                             const auto binding = readPipelineSetter(e.type, frame.payload(id));
                             if (const auto missing = missingPipelineShader(frame, binding))

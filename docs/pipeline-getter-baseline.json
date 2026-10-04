@@ -1,0 +1,826 @@
+{
+  "schema": "FloraGPA immediate pipeline getter acceptance 1",
+  "completion": "M2 and M3-M6 incomplete",
+  "previous_accepted_implementation": "b11464c",
+  "discovery_revision": "656bf82",
+  "inventory_files": 345,
+  "positive_files": 340,
+  "explicit_missing_information_rejections": 5,
+  "file_outcomes": {
+    "repeat_stable": 339,
+    "repeat_variable": 1
+  },
+  "native_positive_runs": 680,
+  "previous_stable_hashes_unchanged": 327,
+  "diagnostic_control_runs": 353,
+  "resource_boundary_exports": 208,
+  "strict_byte_golden_exports": 204,
+  "helldivers_diagnostic_exports": 4,
+  "getter_producer_frame_checks": 312,
+  "getter_return_assertions": 1272,
+  "new_getter_families": 34,
+  "getter_records": 73,
+  "new_positive_getter_files": 12,
+  "new_missing_resource_files": 1,
+  "new_original_player_runs": 26,
+  "new_original_equals_producer_files": 12,
+  "new_original_differs_from_producer_files": 1,
+  "original_configuration_equivalence": "Not established. Nonempty class original output is magenta; native/producer image and dispatch-byte oracles agree. Original missing-SO output agrees with producer, while strict independent replay rejects the absent descriptor.",
+  "negative_cases": [
+    {
+      "id": "minlod_6",
+      "kind": "resource_lod_unresolved",
+      "event": 22,
+      "resource": 23,
+      "path": "artifacts\\m2-pipeline-getters-final-missing-state\\validation.json",
+      "sha256": "50bd0d4d7e9b7a505830e6b7b4c27450ddd1ff1575d9e89cd71831de380bb828"
+    },
+    {
+      "id": "minlod_usage_4",
+      "kind": "resource_lod_unresolved",
+      "event": 22,
+      "resource": 23,
+      "path": "artifacts\\m2-pipeline-getters-final-usage\\validation.json",
+      "sha256": "d01ab7c869a9be4d983ac016cd8eba44c5f4ab63b039e83a69ae95a982b44858"
+    },
+    {
+      "id": "minlod_usage_5",
+      "kind": "resource_lod_unresolved",
+      "event": 22,
+      "resource": 23,
+      "path": "artifacts\\m2-pipeline-getters-final-usage\\validation.json",
+      "sha256": "d01ab7c869a9be4d983ac016cd8eba44c5f4ab63b039e83a69ae95a982b44858"
+    },
+    {
+      "id": "minlod_usage_8",
+      "kind": "resource_lod_unresolved",
+      "event": 33,
+      "resource": 23,
+      "path": "artifacts\\m2-pipeline-getters-final-usage\\validation.json",
+      "sha256": "d01ab7c869a9be4d983ac016cd8eba44c5f4ab63b039e83a69ae95a982b44858"
+    },
+    {
+      "id": "pipeline_getters_missing_so",
+      "kind": "stream_output_resource_unresolved",
+      "event": 43,
+      "resource": 44,
+      "path": "artifacts\\m2-pipeline-getters-missing-so\\validation.json",
+      "sha256": "7dc1f430e2797ec53048309db198498a4c911f92d232c9de02b12db47ab1e889"
+    }
+  ],
+  "cases": [
+    {
+      "id": "pipeline_getters_0",
+      "mode": 0,
+      "status": "repeat_stable",
+      "capture_sha256": "a76e3f7a74bdf0ee114e9d3477f68c33265409d5c4683d2acf89e546db676c6a",
+      "producer_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "original_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "original_equals_producer": true,
+      "preflight_errors": 0
+    },
+    {
+      "id": "pipeline_getters_1",
+      "mode": 1,
+      "status": "repeat_stable",
+      "capture_sha256": "4e6a4c363da4422162e0929569d3cb4094b4fcabc2cf88b76bc52ca9b0f62027",
+      "producer_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "original_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "original_equals_producer": true,
+      "preflight_errors": 0
+    },
+    {
+      "id": "pipeline_getters_2",
+      "mode": 2,
+      "status": "repeat_stable",
+      "capture_sha256": "331e49b6e0eee727779e600a294c5f0b80c58835e1317f19352b91f99e7c788d",
+      "producer_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "original_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "original_equals_producer": true,
+      "preflight_errors": 0
+    },
+    {
+      "id": "pipeline_getters_3",
+      "mode": 3,
+      "status": "repeat_stable",
+      "capture_sha256": "480889dca5e33fb7fca46bbcbb6e6da9d1ca0960300134cd0953afc9f5b747a4",
+      "producer_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "original_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "original_equals_producer": true,
+      "preflight_errors": 0
+    },
+    {
+      "id": "pipeline_getters_4",
+      "mode": 4,
+      "status": "repeat_stable",
+      "capture_sha256": "e98542b193a418b5cca0a415e4cb91f8c411d41b62ba340f812b682ab5423833",
+      "producer_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "original_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "original_equals_producer": true,
+      "preflight_errors": 0
+    },
+    {
+      "id": "pipeline_getters_5",
+      "mode": 5,
+      "status": "repeat_stable",
+      "capture_sha256": "da885192ab9c440292b50fe428533c4ee8e63237d596062e060795b9a0454fe1",
+      "producer_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "original_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "original_equals_producer": true,
+      "preflight_errors": 0
+    },
+    {
+      "id": "pipeline_getters_6",
+      "mode": 6,
+      "status": "repeat_stable",
+      "capture_sha256": "ab2906396111f4b28336006771393681f731c5b5ffc0fcd700d0561bafdb66c6",
+      "producer_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "original_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "original_equals_producer": true,
+      "preflight_errors": 0
+    },
+    {
+      "id": "pipeline_getters_7",
+      "mode": 7,
+      "status": "repeat_stable",
+      "capture_sha256": "a7fdfeb98ad73daf7163651cc18392a40b36d421774057cc357524a0091f1b9e",
+      "producer_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "original_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "original_equals_producer": true,
+      "preflight_errors": 0
+    },
+    {
+      "id": "pipeline_getters_8",
+      "mode": 8,
+      "status": "repeat_stable",
+      "capture_sha256": "11370032364de3ce8cb285826945b4746c4941db40ad2e6978e50a220483bf8e",
+      "producer_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "original_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "original_equals_producer": true,
+      "preflight_errors": 0
+    },
+    {
+      "id": "pipeline_getters_9",
+      "mode": 9,
+      "status": "repeat_stable",
+      "capture_sha256": "737084053e7dfe9b81d20f67389bab3427da007f3879461450b097ad1819102d",
+      "producer_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "original_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "original_equals_producer": true,
+      "preflight_errors": 0
+    },
+    {
+      "id": "pipeline_getters_missing_so",
+      "mode": 10,
+      "status": "replay_failed",
+      "capture_sha256": "d5b84478abf282ef58d30e61bd2a292ad590c06720de89f6266ed72edbbc0d96",
+      "producer_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "original_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "original_equals_producer": true,
+      "preflight_errors": 1
+    },
+    {
+      "id": "pipeline_getters_11",
+      "mode": 11,
+      "status": "repeat_stable",
+      "capture_sha256": "6f7363a59356ee427a74f179fd1769f816b999390a7455064d636ac4a58864cb",
+      "producer_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "original_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "original_equals_producer": true,
+      "preflight_errors": 0
+    },
+    {
+      "id": "pipeline_getters_12",
+      "mode": 12,
+      "status": "repeat_stable",
+      "capture_sha256": "505652434d8eceab9691ee07b9c66748229c3ff2e58a668a10fc87dc01d90b02",
+      "producer_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "original_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+      "original_equals_producer": false,
+      "preflight_errors": 0
+    }
+  ],
+  "getter_coverage": {
+    "0x352a": {
+      "name": "VSGetShader",
+      "handling": "metadata",
+      "records": 3,
+      "cases": [
+        "pipeline_getters_0",
+        "pipeline_getters_8"
+      ]
+    },
+    "0x3530": {
+      "name": "GSGetShader",
+      "handling": "metadata",
+      "records": 1,
+      "cases": [
+        "pipeline_getters_0"
+      ]
+    },
+    "0x3540": {
+      "name": "HSGetShader",
+      "handling": "metadata",
+      "records": 1,
+      "cases": [
+        "pipeline_getters_0"
+      ]
+    },
+    "0x3544": {
+      "name": "DSGetShader",
+      "handling": "metadata",
+      "records": 1,
+      "cases": [
+        "pipeline_getters_0"
+      ]
+    },
+    "0x3549": {
+      "name": "CSGetShader",
+      "handling": "metadata",
+      "records": 2,
+      "cases": [
+        "pipeline_getters_0",
+        "pipeline_getters_12"
+      ]
+    },
+    "0x3527": {
+      "name": "PSGetShaderResources",
+      "handling": "metadata",
+      "records": 2,
+      "cases": [
+        "pipeline_getters_1"
+      ]
+    },
+    "0x3532": {
+      "name": "VSGetShaderResources",
+      "handling": "metadata",
+      "records": 2,
+      "cases": [
+        "pipeline_getters_1"
+      ]
+    },
+    "0x3535": {
+      "name": "GSGetShaderResources",
+      "handling": "metadata",
+      "records": 2,
+      "cases": [
+        "pipeline_getters_1"
+      ]
+    },
+    "0x353f": {
+      "name": "HSGetShaderResources",
+      "handling": "metadata",
+      "records": 2,
+      "cases": [
+        "pipeline_getters_1"
+      ]
+    },
+    "0x3543": {
+      "name": "DSGetShaderResources",
+      "handling": "metadata",
+      "records": 2,
+      "cases": [
+        "pipeline_getters_1"
+      ]
+    },
+    "0x3547": {
+      "name": "CSGetShaderResources",
+      "handling": "metadata",
+      "records": 2,
+      "cases": [
+        "pipeline_getters_1"
+      ]
+    },
+    "0x3526": {
+      "name": "VSGetConstantBuffers",
+      "handling": "metadata",
+      "records": 2,
+      "cases": [
+        "pipeline_getters_2"
+      ]
+    },
+    "0x352b": {
+      "name": "PSGetConstantBuffers",
+      "handling": "metadata",
+      "records": 2,
+      "cases": [
+        "pipeline_getters_2"
+      ]
+    },
+    "0x352f": {
+      "name": "GSGetConstantBuffers",
+      "handling": "metadata",
+      "records": 2,
+      "cases": [
+        "pipeline_getters_2"
+      ]
+    },
+    "0x3542": {
+      "name": "HSGetConstantBuffers",
+      "handling": "metadata",
+      "records": 2,
+      "cases": [
+        "pipeline_getters_2"
+      ]
+    },
+    "0x3546": {
+      "name": "DSGetConstantBuffers",
+      "handling": "metadata",
+      "records": 2,
+      "cases": [
+        "pipeline_getters_2"
+      ]
+    },
+    "0x354b": {
+      "name": "CSGetConstantBuffers",
+      "handling": "metadata",
+      "records": 2,
+      "cases": [
+        "pipeline_getters_2"
+      ]
+    },
+    "0x3529": {
+      "name": "PSGetSamplers",
+      "handling": "metadata",
+      "records": 2,
+      "cases": [
+        "pipeline_getters_3"
+      ]
+    },
+    "0x3533": {
+      "name": "VSGetSamplers",
+      "handling": "metadata",
+      "records": 2,
+      "cases": [
+        "pipeline_getters_3"
+      ]
+    },
+    "0x3536": {
+      "name": "GSGetSamplers",
+      "handling": "metadata",
+      "records": 2,
+      "cases": [
+        "pipeline_getters_3"
+      ]
+    },
+    "0x3541": {
+      "name": "HSGetSamplers",
+      "handling": "metadata",
+      "records": 2,
+      "cases": [
+        "pipeline_getters_3"
+      ]
+    },
+    "0x3545": {
+      "name": "DSGetSamplers",
+      "handling": "metadata",
+      "records": 2,
+      "cases": [
+        "pipeline_getters_3"
+      ]
+    },
+    "0x354a": {
+      "name": "CSGetSamplers",
+      "handling": "metadata",
+      "records": 2,
+      "cases": [
+        "pipeline_getters_3"
+      ]
+    },
+    "0x352c": {
+      "name": "IAGetInputLayout",
+      "handling": "metadata",
+      "records": 1,
+      "cases": [
+        "pipeline_getters_4"
+      ]
+    },
+    "0x352d": {
+      "name": "IAGetVertexBuffers",
+      "handling": "metadata",
+      "records": 3,
+      "cases": [
+        "pipeline_getters_4",
+        "pipeline_getters_8"
+      ]
+    },
+    "0x352e": {
+      "name": "IAGetIndexBuffer",
+      "handling": "metadata",
+      "records": 3,
+      "cases": [
+        "pipeline_getters_4",
+        "pipeline_getters_8"
+      ]
+    },
+    "0x353c": {
+      "name": "RSGetState",
+      "handling": "metadata",
+      "records": 1,
+      "cases": [
+        "pipeline_getters_5"
+      ]
+    },
+    "0x353e": {
+      "name": "RSGetScissorRects",
+      "handling": "metadata",
+      "records": 4,
+      "cases": [
+        "pipeline_getters_5",
+        "pipeline_getters_8"
+      ]
+    },
+    "0x3538": {
+      "name": "OMGetRenderTargetsAndUnorderedAccessViews",
+      "handling": "metadata",
+      "records": 4,
+      "cases": [
+        "pipeline_getters_6",
+        "pipeline_getters_9"
+      ]
+    },
+    "0x3548": {
+      "name": "CSGetUnorderedAccessViews",
+      "handling": "metadata",
+      "records": 3,
+      "cases": [
+        "pipeline_getters_6",
+        "pipeline_getters_9"
+      ]
+    },
+    "0x3534": {
+      "name": "GetPredication",
+      "handling": "metadata",
+      "records": 5,
+      "cases": [
+        "pipeline_getters_7",
+        "pipeline_getters_8",
+        "pipeline_getters_11"
+      ]
+    },
+    "0x353b": {
+      "name": "SOGetTargets",
+      "handling": "metadata",
+      "records": 3,
+      "cases": [
+        "pipeline_getters_7",
+        "pipeline_getters_missing_so"
+      ]
+    },
+    "0x354e": {
+      "name": "GetType",
+      "handling": "metadata",
+      "records": 1,
+      "cases": [
+        "pipeline_getters_7"
+      ]
+    },
+    "0x354f": {
+      "name": "GetContextFlags",
+      "handling": "metadata",
+      "records": 1,
+      "cases": [
+        "pipeline_getters_7"
+      ]
+    }
+  },
+  "results": {
+    "corpus": {
+      "path": "artifacts\\m2-pipeline-getters-regression-corpus\\validation.json",
+      "sha256": "b3c78348fa9da035310cc2afeef4e0c03854bd7fd74eb9bbe10247b3d869b7af",
+      "counts": {
+        "repeat_stable": 90,
+        "repeat_variable": 1
+      }
+    },
+    "originals": {
+      "path": "artifacts\\m2-pipeline-getters-regression-originals\\validation.json",
+      "sha256": "6a0c51af6bb6cdca9a1033991c763c069b332996573eb8dbcdb5a273b629871e",
+      "counts": {
+        "repeat_stable": 11
+      }
+    },
+    "copy": {
+      "path": "artifacts\\m2-pipeline-getters-regression-copy\\validation.json",
+      "sha256": "38e09ae667b4deda91985e3d36f1d41344b0dc10e59a8711c505796f258a9eaa",
+      "counts": {
+        "repeat_stable": 6
+      }
+    },
+    "present": {
+      "path": "artifacts\\m2-pipeline-getters-regression-present\\validation.json",
+      "sha256": "a40a369dd7b4f91f959bc5fcf57cb3d6cd16404f9ca297b7aadd5144a58b9d0e",
+      "counts": {
+        "repeat_stable": 5
+      }
+    },
+    "buffer": {
+      "path": "artifacts\\m2-pipeline-getters-regression-buffer\\validation.json",
+      "sha256": "a2245cdfe8003c2da013d77412b326555dc8a44dcb9a2dc6c6915258c087b39c",
+      "counts": {
+        "repeat_stable": 5
+      }
+    },
+    "pipeline": {
+      "path": "artifacts\\m2-pipeline-getters-regression-pipeline\\validation.json",
+      "sha256": "a56ae96ca51e2042cb862b4d7c31b2a10413fea4963947cb69166e8146b9fcba",
+      "counts": {
+        "repeat_stable": 5
+      }
+    },
+    "creation": {
+      "path": "artifacts\\m2-pipeline-getters-regression-creation\\validation.json",
+      "sha256": "c926ef05e1a8eee5f264995f2cfd10114baa52a31752a6c37c58410f4765ff07",
+      "counts": {
+        "repeat_stable": 7
+      }
+    },
+    "discovery": {
+      "path": "artifacts\\m2-pipeline-getters-regression-discovery\\validation.json",
+      "sha256": "25218db0ceab5e2b5d09d61b8dfee2afedf5545dd15109892610bb5f2d1755e8",
+      "counts": {
+        "repeat_stable": 1
+      }
+    },
+    "dimensions": {
+      "path": "artifacts\\m2-pipeline-getters-regression-dimensions\\validation.json",
+      "sha256": "2fa5b20881cecc5c0366fc67f4a55e60a4da7d34b67b42ae4340e3dc44ab01da",
+      "counts": {
+        "repeat_stable": 17
+      }
+    },
+    "views": {
+      "path": "artifacts\\m2-pipeline-getters-regression-views\\validation.json",
+      "sha256": "856ef7eac56bf17d7defde058b5777a0260aab92f7ba3901dab7301eaf6c5bee",
+      "counts": {
+        "repeat_stable": 12
+      }
+    },
+    "buffer-views": {
+      "path": "artifacts\\m2-pipeline-getters-regression-buffer-views\\validation.json",
+      "sha256": "cb1c02ab716b6be3f1c6be2148dd2f71f9c9bbe8806908952634e2714189d5ad",
+      "counts": {
+        "repeat_stable": 19
+      }
+    },
+    "pipeline-creation": {
+      "path": "artifacts\\m2-pipeline-getters-regression-pipeline-creation\\validation.json",
+      "sha256": "647b55929bb30b97fd810bf9bb8179c3cfd126c6e1d0afbcfedf60f86aec5620",
+      "counts": {
+        "repeat_stable": 32
+      }
+    },
+    "geometry-creation": {
+      "path": "artifacts\\m2-pipeline-getters-regression-geometry-creation\\validation.json",
+      "sha256": "214cdf7c19be1484f6aaf4dad92688834a794b421882958fa81936e21c148079",
+      "counts": {
+        "repeat_stable": 20
+      }
+    },
+    "class-creation": {
+      "path": "artifacts\\m2-pipeline-getters-regression-class-creation\\validation.json",
+      "sha256": "449a6d317bb81baca2d52802e5d20849e1e29aea88f5473d3f035fb10853d6c1",
+      "counts": {
+        "repeat_stable": 13
+      }
+    },
+    "predicate-creation": {
+      "path": "artifacts\\m2-pipeline-getters-regression-predicate-creation\\validation.json",
+      "sha256": "fa84ae59820503f2aa5c5d36592eda79022860da65c8175cf71af49ce0ab8a81",
+      "counts": {
+        "repeat_stable": 10
+      }
+    },
+    "clear-view": {
+      "path": "artifacts\\m2-pipeline-getters-regression-clear-view\\validation.json",
+      "sha256": "3846b98f8e5a89354af68baa77155742994a67e326690f6f0e7d9ec171b6c7b8",
+      "counts": {
+        "repeat_stable": 16
+      }
+    },
+    "transfer1": {
+      "path": "artifacts\\m2-pipeline-getters-regression-transfer1\\validation.json",
+      "sha256": "fa5b04f8502f396bba625b05bfae2626b50fcc35562c47d7be8d7c1d256c69bd",
+      "counts": {
+        "repeat_stable": 26
+      }
+    },
+    "transfer1-context": {
+      "path": "artifacts\\m2-pipeline-getters-regression-transfer1-context\\validation.json",
+      "sha256": "b4a4cbb5ff8def529f27ee6ba27c29ca6f59f6a2140a1fa042a36b8b15b6ae35",
+      "counts": {
+        "repeat_stable": 14
+      }
+    },
+    "minlod": {
+      "path": "artifacts\\m2-pipeline-getters-final-minlod\\validation.json",
+      "sha256": "978330207a07d6e9583213abff349bd3873dc4b092cd18742ed1554a70fd713f",
+      "counts": {
+        "repeat_stable": 11
+      }
+    },
+    "usage": {
+      "path": "artifacts\\m2-pipeline-getters-final-usage\\validation.json",
+      "sha256": "d01ab7c869a9be4d983ac016cd8eba44c5f4ab63b039e83a69ae95a982b44858",
+      "counts": {
+        "repeat_stable": 7,
+        "replay_failed": 3
+      }
+    },
+    "getters": {
+      "path": "artifacts\\m2-pipeline-getters-after\\validation.json",
+      "sha256": "3ab4b17b9556860911cdb00869dd0e29cd68775a33d019d09f0581ac51ea2fa6",
+      "counts": {
+        "repeat_stable": 12
+      }
+    }
+  },
+  "package": "out\\FloraGPA-pipeline-getters-20261004",
+  "package_sha256": {
+    "FloraGPA.exe": "b60fa612e45e9cddcc9c61a1907443e63a0d5ba6497f9499140a9e0f70a8d3d0",
+    "FloraGPA.Cli.exe": "fb765705669ff07b2a8dbf860eb9e29907860dc94dd91a46e05861e8a43eabe0",
+    "FloraGPA.Worker.exe": "bb0e19e1bda0d89305fb3096787c363a1572a8ad9f297dcea224042c4739c3b6",
+    "FloraGPA.Rdc.exe": "f4d21d43e661d24d392e91fc1a1f1460a20d1377fcf5075c57083ad289e82773",
+    "FloraGPA.Metrics.dll": "58b6278f2a93e783b1e8bb1290e9b0e51745f1a36825f296584f52159fd7c6db"
+  },
+  "ctest": {
+    "path": "artifacts\\ctest-m2-pipeline-getters.log",
+    "sha256": "2b13b2877e2feb44b7c8d22693dad263f1466b7b2f12dc0b1ec7843fc66d5abe",
+    "suites": 38,
+    "qt": {
+      "pipeline-getters": {
+        "path": "artifacts\\m2-pipeline-getters-qt-results\\pipeline-getters-Release.txt",
+        "sha256": "49d1340ed578eb2bbb833cae4f716ec8d72e0f7d7c00b2dc9f981af4e8a417e3",
+        "passed": 30
+      },
+      "ui": {
+        "path": "artifacts\\m2-pipeline-getters-qt-results\\ui-Release.txt",
+        "sha256": "73a4e99287504edf8ab32cfdb4b7d7b7a4c41f3c015e263f9892c8ea64f710f3",
+        "passed": 56
+      },
+      "resource-lod": {
+        "path": "artifacts\\m2-pipeline-getters-qt-results\\resource-lod-Release.txt",
+        "sha256": "f672c64968d9581e1dabcd9b451ff55fe99e54f4ac9f837d08071888aaaf44f1",
+        "passed": 51
+      },
+      "transfer1": {
+        "path": "artifacts\\m2-pipeline-getters-qt-results\\transfer1-Release.txt",
+        "sha256": "d09ce8b865d8df1030fc45c58b2803b60a0e6cf3be6ca26d51023b6d1b27ba5f",
+        "passed": 57
+      }
+    }
+  },
+  "goldens": {
+    "path": "artifacts\\m2-pipeline-getters-regression-golden\\validation.json",
+    "sha256": "5e1dde1ab9876f50c472cdf84378931ffc3b5cd8e9700002b67d37bf81383ade",
+    "results": [
+      {
+        "case": "gf2",
+        "rgba_sha256": "2e1abc5eacb0bbfd801f9fe059c305baa9a0786c384b36a42fa5a323dd979fd1",
+        "passed": true,
+        "counts": {
+          "ClearDepthStencilView": 2,
+          "ClearRenderTargetView": 1,
+          "CreateBuffer": 2,
+          "DrawIndexed": 72,
+          "Map": 44,
+          "Present": 1,
+          "buffers_created_without_initial_data": 2,
+          "object_observation_records": 49,
+          "pipeline_setter_records": 142,
+          "private_data_observations": 4,
+          "query_metadata_records": 2,
+          "state_or_auxiliary_records": 551,
+          "unmap_observations": 44
+        }
+      },
+      {
+        "case": "gf2-negative",
+        "rgba_sha256": "b2c5548a51715f581c4591acc266ac7a0c65b54b7ecd9a49f43499fa9b76c5f1",
+        "passed": true,
+        "counts": {
+          "ClearDepthStencilView": 2,
+          "ClearRenderTargetView": 1,
+          "CreateBuffer": 2,
+          "Map": 44,
+          "Present": 1,
+          "buffers_created_without_initial_data": 2,
+          "object_observation_records": 49,
+          "pipeline_setter_records": 142,
+          "private_data_observations": 4,
+          "query_metadata_records": 2,
+          "state_or_auxiliary_records": 551,
+          "unmap_observations": 44
+        }
+      },
+      {
+        "case": "bf1",
+        "rgba_sha256": "1f724d1840652f66afd26dd30c95aecd5c1b4932eede56109198f15a8f57a2f6",
+        "passed": true,
+        "counts": {
+          "ClearDepthStencilView": 10,
+          "ClearRenderTargetView": 10,
+          "ClearUnorderedAccessViewFloat": 1,
+          "CopyResource": 2,
+          "CopyStructureCount": 6,
+          "CopySubresourceRegion": 7,
+          "Dispatch": 60,
+          "DispatchIndirect": 13,
+          "Draw": 79,
+          "DrawIndexed": 41,
+          "DrawIndexedInstanced": 1053,
+          "DrawInstanced": 29,
+          "GenerateMips": 2,
+          "Map": 4151,
+          "Present": 1,
+          "UpdateSubresource": 27,
+          "map_read_observations": 2,
+          "object_observation_records": 28,
+          "pipeline_setter_records": 2221,
+          "query_metadata_records": 17,
+          "state_or_auxiliary_records": 7354,
+          "unmap_observations": 4153,
+          "unresolved_input_layout_setters": 2,
+          "unresolved_output_setters": 6,
+          "unresolved_shader_setters": 4,
+          "unresolved_srv_setters": 2
+        }
+      },
+      {
+        "case": "bf1-negative",
+        "rgba_sha256": "cd3a3066f984b1c317fbeefec2836503f32078321d3dc1f367465f2c06d435bf",
+        "passed": true,
+        "counts": {
+          "ClearDepthStencilView": 10,
+          "ClearRenderTargetView": 10,
+          "ClearUnorderedAccessViewFloat": 1,
+          "CopyResource": 2,
+          "CopyStructureCount": 6,
+          "CopySubresourceRegion": 7,
+          "Dispatch": 60,
+          "DispatchIndirect": 13,
+          "GenerateMips": 2,
+          "Map": 4151,
+          "Present": 1,
+          "UpdateSubresource": 27,
+          "map_read_observations": 2,
+          "object_observation_records": 28,
+          "pipeline_setter_records": 2221,
+          "query_metadata_records": 17,
+          "state_or_auxiliary_records": 7354,
+          "unmap_observations": 4153,
+          "unresolved_input_layout_setters": 2,
+          "unresolved_output_setters": 6,
+          "unresolved_shader_setters": 4,
+          "unresolved_srv_setters": 2
+        }
+      }
+    ]
+  },
+  "sources": {
+    "CMakeLists.txt": "02b3ca3cbc239e56a116fee614f6b915ac67e170e6791f3e791aa80f6554a823",
+    "src/core/PipelineGetters.h": "a25484e134e10d1abe8f827031481d9a652ff21cf62b6dedada5fe1331ef9ffa",
+    "src/core/PipelineGetters.cpp": "9e6845161833b07b31fcf885b1a55779d7bc0c0036afde265d3982c3534abe5d",
+    "src/core/CommandNames.inc": "0228b6f93beceb0a23c6c340e4a6f09133d7bc59980dcbea570bf09f9fe5ac3a",
+    "src/core/ReplayCapabilities.cpp": "9957a95df8ced1c697467191b3846046691b144b6a5bf416befa1c9454e06655",
+    "src/application/ApiCommands.cpp": "1bfcce40235234946a3bdaa9da938422c91113b53cb11a62e75b839ab0a0f8b6",
+    "src/application/FrameValidation.cpp": "e5a40169959b4f3be749721c6d2965c93df9f9d6a9b7be96821eff9e48c23297",
+    "src/replay/Replay.cpp": "b3c7a34fe8c53080b7c8c33c4b8f9fec697be0bb7a6df562dd613b9a25f3b442",
+    "tests/PipelineGetterTests.cpp": "12618e8c76affe383ff0f3fcd293ae68b28f1f1c188534a374f1d3350421c567",
+    "tools/native/pipeline_getter_boundary_probe.cpp": "421bc783ea14b8b13740441e87c60ae1ba0b0b1aa207b1fad1a7d23ab06bb6a1",
+    "tools/native/pipeline_getter_class_probe.cpp": "8a05aed14d00ef2eec883b5cdc8e5d657788e6db23021e6fbc03f9cb3e638686"
+  },
+  "evidence": {
+    "docs/pipeline-getter-discovery-baseline.json": "0166fdec7567b8a27bdad0f05257bd2e02e5d8c77a972b9c78453722c45aab6e",
+    "docs/pipeline-getter-corpus.json": "5aa4102030b422056605fbc20088065a8aa92e7fd504236a43d92ecffdb7c18e",
+    "docs/pipeline-getter-missing-so-corpus.json": "31414571a34762c9e72def5a5366dc859332aad8ab5ec0cf0fd26aa17fa146ec",
+    "artifacts/m2-pipeline-getters/manifest.json": "9b0d967bda97787b85dc482c96b7c45a082692a57266004ad8d50991c9e57514",
+    "artifacts/m2-pipeline-getter-boundaries-final/manifest.json": "44b2c52a736ccbb7366ec9b48ffd1bd7991eb9f97efca2f1fc19a50da859e66d",
+    "artifacts/m2-pipeline-getters-after/validation.json": "3ab4b17b9556860911cdb00869dd0e29cd68775a33d019d09f0581ac51ea2fa6",
+    "artifacts/m2-pipeline-getters-missing-so/validation.json": "7dc1f430e2797ec53048309db198498a4c911f92d232c9de02b12db47ab1e889",
+    "artifacts/capture-getter-boundaries.log": "ff3bbf1210b469baee26bab5756c91b93b3bcee51a5dd35673cabff91694f536",
+    "artifacts/capture-getter-boundaries-verified.log": "4a333f900fd8180c210d4c3cbd5788d14d7ec71bcc68ad9e4ef415faa25dd342",
+    "artifacts/capture-getter-boundaries-final.log": "f17141c601104be92669c94a4d839327bd04ae3b83d01c5a58ad8520d269aa86",
+    "artifacts/capture-getter-boundaries-acceptance.log": "f17141c601104be92669c94a4d839327bd04ae3b83d01c5a58ad8520d269aa86",
+    "artifacts/capture-getter-so-complete.log": "4f11a92d62564d6fd1397bd3cff49f92b391f3d6009efe5b747aca168b2d6819",
+    "artifacts/capture-getter-so-present-status.log": "4f11a92d62564d6fd1397bd3cff49f92b391f3d6009efe5b747aca168b2d6819",
+    "artifacts/m2-getters-so-cdrive/captured/error.txt": "2170e621f3ee0e87e8cdf1d755aecadd246c977b324057b3aad912b3df0af641",
+    "artifacts/pipeline-getters-first-qt.txt": "09264b29cf799128ed9ef4e10546d0364d3cd24d64a10dc1cb55def5257ef78f",
+    "artifacts/pipeline-getters-second-qt.txt": "d132982c0345ce6a9f5d8e688825d304e43ee1dfc5c66aeea7a7dc4b95e170f1",
+    "artifacts/run-pipeline-getters-ctest.ps1": "afeda2da35e74d2f56e123610511447c6b84b1465db87c3fded18e5bfbb72088",
+    "artifacts/run-pipeline-getters-regression.py": "d88f733daa660669f7e9904e1821d90b7bfd464cb1ef52de1e9f119ebc2eec1f",
+    "artifacts/run-pipeline-getters-all.py": "c9a06d89cea6ae5a5058a9d07ae71b9bc58d3e2665adc917e2fa02fcc8e622d9",
+    "artifacts/build-pipeline-getters-regression.log": "a6ea25dbc9e58e4e5d4f6554ecd9a7af3f50018dfcbe3b3717bb239d511bf41a",
+    "artifacts/package-pipeline-getters.log": "0f7806af26143aceac12fb195770719da6e67365487cade0126d854915def606",
+    "artifacts/verify-pipeline-getters.ps1": "3f981f0b1a7eae1661c841e699aee6964fbc19e39cc22362540fe0ef3c000451",
+    "artifacts/summarize-pipeline-getter-acceptance.py": "deda69cad7c24a03355936bb7579b21063749c1fd2fca2cc8643f91f2cf74648"
+  },
+  "limits": [
+    "Only bounded observed immediate layouts; linked/deferred and unverified versions remain rejected",
+    "Returned metadata never materializes missing resources or restores bindings",
+    "Nonempty SO saved sample lacks buffer descriptor; production path remains rejected at setter",
+    "SO readback producer passes its workload but follow-up capture delivery remains unconfirmed; attempts excluded from acceptance",
+    "Missing initial LOD/counters and workload nondeterminism retain separate limits",
+    "No overall completion percentage; analyzer migration counts stay 72/117/15"
+  ]
+}

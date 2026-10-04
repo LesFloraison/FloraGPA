@@ -1,5 +1,8 @@
 # Pipeline getter compatibility discovery
 
+This is the historical discovery record. The subsequent implementation and
+remaining boundaries are documented in [getter acceptance](PIPELINE_GETTER_AUDIT.md).
+
 Reviewed 2026-10-04 against replay revision **b11464c**. Eight new, unmodified
 GPA 2025 R1 captures expose **34 unsupported immediate Context4 getter families**.
 They are implementation gaps, not missing resource contents. Production replay

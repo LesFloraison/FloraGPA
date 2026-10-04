@@ -9,6 +9,7 @@
 #include "OutputBindings.h"
 #include "PipelineBindings.h"
 #include "PipelineCreation.h"
+#include "PipelineGetters.h"
 #include "Predication.h"
 #include "SamplerBindings.h"
 #include "SrvBindings.h"
@@ -22,6 +23,9 @@ bool in(uint16_t t, std::initializer_list<uint16_t> values) {
 }
 } // namespace
 ReplayCapability replayCapability(uint16_t t) {
+    if (isPipelineGetter(t))
+        return {"metadata", "src/core/PipelineGetters.cpp;src/replay/Replay.cpp",
+                "tests/PipelineGetterTests.cpp;docs/PIPELINE_GETTER_DISCOVERY.md"};
     if (t == 0x3515 || t == 0x3516)
         return {t == 0x3515 ? "execute" : "metadata", "src/core/ResourceLod.cpp;src/replay/ResourceLod.cpp",
                 "tests/ResourceLodTests.cpp;docs/MIN_LOD_DISCOVERY.md"};

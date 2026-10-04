@@ -35,6 +35,7 @@ upstream repository that are not vendored here.
 
 ## Historical implementation and acceptance records
 
+- [Pipeline getter acceptance](PIPELINE_GETTER_AUDIT.md), [acceptance baseline](pipeline-getter-baseline.json), [positive corpus](pipeline-getter-corpus.json) and [missing-SO negative](pipeline-getter-missing-so-corpus.json).
 - [Pipeline getter discovery](PIPELINE_GETTER_DISCOVERY.md), [discovery baseline](pipeline-getter-discovery-baseline.json) and [blocked original corpus](pipeline-getter-discovery-corpus.json).
 - [LOD shader resource usage](MIN_LOD_USAGE_AUDIT.md), [acceptance baseline](min-lod-usage-baseline.json) and [usage/negative corpus](min-lod-usage-corpus.json).
 - [Resource minimum LOD replay](RESOURCE_LOD_AUDIT.md), [acceptance baseline](resource-lod-baseline.json), [positive corpus](min-lod-corpus.json) and [missing-state control](min-lod-missing-state-corpus.json).
