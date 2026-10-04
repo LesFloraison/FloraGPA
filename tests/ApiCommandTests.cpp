@@ -158,6 +158,46 @@ Capture apiCapture() {
 class ApiCommandTests final : public QObject {
     Q_OBJECT
   private slots:
+    void initializationReferences() {
+        Capture capture;
+        // Fixed collectors retain zero IDs, duplicates and low-word truncation.
+        capture.add(100, 7, 0x3e, pack(Id(0), Id(0x100000005), Id(5), Id(0)));
+        // Map omits a zero data QWORD, but retains a nonzero QWORD with low word zero.
+        for (Id data : {Id(0), Id(0x100000000)})
+            capture.add(101 + (data != 0), 7, 0x246,
+                        pack(Id(0), Id(2), int32_t(0), Id(99), 0u, 1u, 0u, data));
+        capture.add(103, 7, 0x249, pack(Id(0), Id(2), 0u, 1u, uint8_t(1), Id(99)));
+        capture.add(104, 7, 0x36, pack(Id(88), Id(0), Id(2), Id(99), 0u));
+        // Native-cache-dependent and raw interface aliases must remain explicit gaps.
+        capture.add(105, 7, 0x25e, pack(Id(0), Id(2), 0u, 1u, uint8_t(1), Id(99), uint8_t(0)));
+        capture.add(106, 7, 0x34e5, pack(Id(0), Id(2), 0u, 1u, uint8_t(1), Id(99)));
+        QTemporaryDir dir;
+        capture.save(dir.path() + "/init.gpa_frame");
+        Frame frame((dir.path() + "/init.gpa_frame").toStdWString());
+        auto rows = inspectCommands(frame);
+        const std::vector<Json> expected{{5, 5, 0}, {2}, {2, 0}, {2}, {2}};
+        for (size_t i = 0; i < rows.size(); ++i) {
+            const auto &init = rows[i]["original_initialization"];
+            QCOMPARE(rows[i]["status"], Json("decoded"));
+            QCOMPARE(init["execution_dependencies_complete"], Json(false));
+            QCOMPARE(init["registration_sequence_available"], Json(false));
+            if (i < expected.size()) {
+                QCOMPARE(init["status"], Json("recovered"));
+                QCOMPARE(init["collector_sequence"], expected[i]);
+            } else {
+                QCOMPARE(init["status"], Json("unrecovered"));
+                QVERIFY(!init.contains("collector_sequence"));
+                QVERIFY(!init["reason"].get<std::string>().empty());
+            }
+        }
+        QCOMPARE(rows[0]["original_initialization"]["dependency_set"], Json({0, 5}));
+        QCOMPARE(rows[0]["original_initialization"]["truncated_fields"], Json({"object"}));
+        QCOMPARE(rows[2]["original_initialization"]["truncated_fields"], Json({"data"}));
+        // Omission from initialization dependencies must not remove GPU/API references.
+        for (size_t i : {size_t(1), size_t(2), size_t(3), size_t(4)})
+            QVERIFY(std::any_of(rows[i]["references"].begin(), rows[i]["references"].end(),
+                                [](const auto &reference) { return reference["id"] == 99; }));
+    }
     void wireAndReferences() {
         QTemporaryDir dir;
         auto capture = apiCapture();
@@ -165,6 +205,16 @@ class ApiCommandTests final : public QObject {
         Frame f((dir.path() + "/api.gpa_frame").toStdWString());
         auto rows = inspectCommands(f);
         QVERIFY(rows.size() > 3000);
+        size_t rejectedInitializers = 0;
+        for (const auto &row : rows) {
+            const auto &init = row["original_initialization"];
+            if (row["status"] != "decoded") {
+                QVERIFY(init["status"] != "recovered");
+                QVERIFY(!init.contains("collector_sequence"));
+                rejectedInitializers += init["status"] == "invalid_record";
+            }
+        }
+        QVERIFY(rejectedInitializers > 300);
         size_t valid = 0, invalid = 0;
         for (auto &r : rows) {
             valid += r["status"] == "decoded";

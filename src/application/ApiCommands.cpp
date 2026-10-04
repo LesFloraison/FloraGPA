@@ -1,4 +1,5 @@
 #include "ApiCommands.h"
+#include "InitializationReferences.h"
 #include "core/ClassCreation.h"
 #include "core/ClearView.h"
 #include "core/ContextStateRecords.h"
@@ -827,6 +828,7 @@ Json inspectCommand(const Frame &frame, Id id) {
     }
     out["fields"] = std::move(r.fields);
     out["references"] = std::move(r.references);
+    out["original_initialization"] = inspectInitializationReferences(out);
     return out;
 }
 

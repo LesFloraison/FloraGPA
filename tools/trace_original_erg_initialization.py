@@ -21,6 +21,7 @@ def main():
     parser.add_argument('--gpa', type=Path, default=Path('C:/Program Files/IntelSWTools/GPA'))
     parser.add_argument('--out', type=Path, required=True)
     parser.add_argument('--no-observers', action='store_true', help='Original replay control with no virtual-table changes')
+    parser.add_argument('--references', action='store_true', help='Also observe original ERG reference collectors')
     args = parser.parse_args()
     args.out.mkdir(parents=True, exist_ok=False)
     sys.path.insert(0, str(args.reference_tools.resolve(strict=True)))
@@ -35,6 +36,8 @@ def main():
                   capture_sha256=digest(args.capture), observers_enabled=not args.no_observers,
                   player_sha256=PLAYER_SHA256, observations=[], patches_restored=False,
                   scope='Process-local forwarding observers; not traditional-list GPU acceptance')
+    if args.references:
+        report['reference_collectors'] = []
     def save():
         (args.out / 'trace.json').write_text(json.dumps(report, indent=2) + '\n', encoding='utf-8')
     save()
@@ -106,6 +109,24 @@ def main():
             report['graph_before_first_erg_initialize'] = graph
         def observe_initializer(erg, wire_type):
             table = u64.from_address(erg).value
+            reference_slot = table+4*8
+            if args.references and reference_slot not in patches:
+                reference_proto = c.WINFUNCTYPE(None,ptr,ptr,ptr)
+                reference_rva = u64.from_address(reference_slot).value-base
+                original_references = reference_proto(base+reference_rva)
+                @reference_proto
+                def references(this, source, destination):
+                    original_references(this,source,destination)
+                    try:
+                        start,end,capacity = [u64.from_address(destination+offset).value for offset in [0,8,16]]
+                        if not start <= end <= capacity or (end-start)%4 or end-start>1000000:
+                            raise ValueError('Unexpected reference vector layout')
+                        report['reference_collectors'].append(dict(event=u32.from_address(this+0x10).value,
+                            wire_type=wire_type,collector_rva=hex(reference_rva),
+                            references=[u32.from_address(p).value for p in range(start,end,4)]))
+                    except Exception as error:
+                        failures.append(str(error))
+                attach(reference_slot,references)
             slot = table + 5 * 8
             if slot in patches:
                 return

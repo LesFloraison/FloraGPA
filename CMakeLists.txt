@@ -117,6 +117,7 @@ add_library(FloraExperiment src/application/Experiment.cpp src/application/Shade
 target_include_directories(FloraExperiment SYSTEM PUBLIC third_party)
 target_link_libraries(FloraExperiment PUBLIC FloraReplay Qt6::Core)
 target_sources(FloraExperiment PRIVATE src/application/DrawResources.cpp)
+target_sources(FloraExperiment PRIVATE src/application/InitializationReferences.cpp)
 target_sources(FloraExperiment PRIVATE src/application/FrameValidation.cpp)
 target_link_libraries(FloraExperiment PRIVATE Qt6::Gui)
 target_sources(FloraExperiment PRIVATE src/application/MetricKinds.cpp src/application/MetricsDiscovery.cpp)
