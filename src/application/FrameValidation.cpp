@@ -5,6 +5,7 @@
 #include "core/ClassCreation.h"
 #include "core/ClearView.h"
 #include "core/Commands.h"
+#include "core/ConstantBufferBindings.h"
 #include "core/ContextStateRecords.h"
 #include "core/CopyCommands.h"
 #include "core/DiscardRecords.h"
@@ -164,6 +165,29 @@ Json validateFrame(const std::filesystem::path &path, const std::function<bool()
                             finding(&e, "error", "command_list_unsupported", ex.what());
                         }
                     } else {
+                        if (constantBufferStage(e.type)) {
+                            const auto binding = readConstantBufferSetter(e.type, frame.payload(id));
+                            bool unresolved = false;
+                            for (const auto buffer : binding.buffers) {
+                                if (!buffer)
+                                    continue;
+                                const auto entry = frame.entries().find(buffer);
+                                if (entry == frame.entries().end() || entry->second.category != 5 ||
+                                    entry->second.type != 0x83) {
+                                    unresolved = true;
+                                    finding(&e, "error", "constant_buffer_resource_unresolved",
+                                            "Constant-buffer setter requires a saved buffer resource; "
+                                            "native binding cannot be reconstructed from this reference",
+                                            buffer);
+                                }
+                            }
+                            if (!unresolved)
+                                try {
+                                    validateConstantBufferBinding(frame, binding);
+                                } catch (const std::exception &error) {
+                                    finding(&e, "error", "constant_buffer_binding_rejected", error.what());
+                                }
+                        }
                         if (isStreamOutputTargets(e.type)) {
                             const auto targets = readStreamOutputTargets(frame.payload(id));
                             std::optional<UnusedStreamOutputLifetime> lifetime;

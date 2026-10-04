@@ -1,5 +1,6 @@
 #include "SyntheticCapture.h"
 #include "application/FrameValidation.h"
+#include "core/ConstantBufferBindings.h"
 #include "core/ReplayCapabilities.h"
 #include <QProcess>
 #include <QTemporaryDir>
@@ -9,6 +10,62 @@ using namespace flora::testing;
 class FrameValidationTests final : public QObject {
     Q_OBJECT
   private slots:
+    void constantBufferReferences_data() {
+        QTest::addColumn<unsigned>("type");
+        QTest::addColumn<int>("variant");
+        for (unsigned stage = 0; stage < 6; ++stage)
+            for (unsigned type : {0x249 + stage, 0x24f + stage, unsigned(constantBufferShimTypes[stage])})
+                for (int variant = 0; variant < 9; ++variant)
+                    QTest::newRow(qPrintable(QString("%1-%2").arg(type).arg(variant))) << type << variant;
+    }
+    void constantBufferReferences() {
+        QFETCH(unsigned, type);
+        QFETCH(int, variant);
+        QTemporaryDir dir;
+        Capture c;
+        std::vector<uint8_t> context(24);
+        if (variant == 8)
+            context[16] = 1; // Deferred context cannot execute an immediate setter.
+        c.add(1, 5, 0x127, context);
+        if (variant != 2) {
+            if (variant == 3)
+                c.add(2, 5, 0x127, std::vector<uint8_t>(24));
+            else
+                c.buffer(2, 3, variant == 4 ? D3D11_BIND_VERTEX_BUFFER : D3D11_BIND_CONSTANT_BUFFER, 0,
+                         {0, 0, 0, 0});
+        }
+        std::vector<uint8_t> raw;
+        append(raw, Id(0));
+        append(raw, Id(1));
+        append(raw, variant == 6 ? 14u : 0u);
+        append(raw, 1u);
+        append(raw, uint8_t(1));
+        append(raw, variant == 1 ? Id(0) : Id(2));
+        if (type >= 0x24f && type <= 0x254) {
+            append(raw, uint8_t(1));
+            append(raw, 0u);
+            append(raw, uint8_t(variant != 7));
+            if (variant != 7)
+                append(raw, 16u);
+        } else if (variant == 7)
+            raw.push_back(0); // Non-CB1 records reject trailing data.
+        if (variant == 5)
+            raw.pop_back();
+        c.add(100, 7, uint16_t(type), raw);
+        const auto path = dir.filePath("cb.gpa_frame");
+        c.save(path);
+        const auto report = validateFrame(path.toStdWString());
+        QCOMPARE(report["status"] == "blocked", variant >= 2);
+        QCOMPARE(report["gpu_validation"], nlohmann::json("not_run"));
+        if (variant == 2 || variant == 3) {
+            bool located = false;
+            for (const auto &finding : report["findings"])
+                located |= finding["kind"] == "constant_buffer_resource_unresolved" &&
+                           finding["event_id"] == 100 && finding["resource_id"] == 2 &&
+                           finding["record_type"] == type;
+            QVERIFY(located);
+        }
+    }
     void malformedContainer() {
         QTemporaryDir dir;
         auto result = validateFrame(dir.filePath("missing.gpa_frame").toStdWString());
