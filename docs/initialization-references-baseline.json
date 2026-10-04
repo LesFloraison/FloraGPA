@@ -1,0 +1,67 @@
+{
+  "schema": "FloraGPA initialization references baseline 1",
+  "reviewed": "2026-10-04",
+  "implementation_commit": "ace3516054e182355677bedf682f6a8fa4579ec6",
+  "production_change": "Read-only native command metadata; no GPU execution change",
+  "traditional_list_execution_accepted": false,
+  "registration_sequence_available": false,
+  "execution_dependencies_complete": false,
+  "inventory_unchanged": {
+    "registrations": 470,
+    "unique_capture_hashes": 460
+  },
+  "counts": {
+    "captures_observed": 2,
+    "new_original_observer_runs": 2,
+    "reused_uninstrumented_controls": 2,
+    "raw_image_equal_pairs": 2,
+    "observed_ergs": 6334,
+    "recovered_ergs": 6110,
+    "conditional_csuav_gaps": 224,
+    "recovered_wire_types": 25,
+    "observed_wire_types": 26,
+    "native_boundary_calls": 150,
+    "ctest_suites": 5,
+    "new_checker_tests": 5,
+    "existing_checker_tests": 7,
+    "independent_golden_checks": 4
+  },
+  "evidence": {
+    "artifacts/m3-initrefs-comparison/validation.json": "64a381b079bd8b4ee771aabd5efd303e4727bed63783b40eb9e4b0372d4750fa",
+    "artifacts/m3-initrefs-native-probe-final/collectors.json": "c8a24e1e63772947e5d10464d61a8e12767e478bbfe490fb573d4270bf19ddef",
+    "artifacts/m3-initrefs-goldens/validation.json": "5e1dde1ab9876f50c472cdf84378931ffc3b5cd8e9700002b67d37bf81383ade",
+    "artifacts/m3-initrefs-ctest.log": "78a73377361c06e7b23caa00c1b7eb178d870f7d822a9dba48d2b757a43338df",
+    "artifacts/m3-initrefs-checker-tests.log": "44894d674dcf49939fdba11edea3a61caf2667ceca48dc688ddbaaa01479a027",
+    "artifacts/m3-initrefs-init-regression.log": "628692e6bfa2451e9a5d0ff49f75c889b9615d830f19011bb0f133a531fec5af",
+    "artifacts/m3-reference-collectors-functions.c": "c143d3f93f1a60ac57460653f834c48abeffd253a7f55fc20a87c92a79a622ce",
+    "artifacts/m3-reference-presence.c": "3337cfae374d10e91a4c865545a5ceb878b24862ddbf58cf267ab5f990df5eb8",
+    "artifacts/m3-reference-collectors-bf1/trace.json": "274791710c59f657fc53d928d7f209fc3cdc55aac23c59395914d7c4b49d5ec9",
+    "artifacts/m3-reference-collectors-32/trace.json": "cafacd9501af83265bd031f0bf7ad9bce9c25b13fa5cdca913ea28a76d0541d1",
+    "artifacts/m3-initrefs-cpp-bf1/commands.json": "a6891ad90ee58bd8efbc9fecc4f57fff42257ba2b96f46e453f9f5c5a99c48df",
+    "artifacts/m3-initrefs-cpp-32/commands.json": "857de4bc6e3ef144845d17d1f8d3d70a6449ad5c577d1772d1e020f459a6ea06"
+  },
+  "sources": {
+    "src/application/InitializationReferences.cpp": "61133e29a15b5c70ca8ade4fef4c72718de89680e6b7a1cfb505ebf80db6716c",
+    "src/application/InitializationReferences.h": "fa488acc2e6063c64a63c54f970f560c0225a9584213a608308a21d36f32b290",
+    "src/application/ApiCommands.cpp": "963cf5fe86685b3ee0972a3130e8d6f870d8c41cf4cb2cfa11cae48f59e4562c",
+    "tests/ApiCommandTests.cpp": "449b227904de905c9480cdfeed7606a0fb203c75b032d9f8d899baea0b5a8412",
+    "tools/trace_original_erg_initialization.py": "90e1707dfd3b4fb50941a06e3d63ad1c86d0f6bc76d6c4c1e6c05a0eb762e990",
+    "tools/probe_original_reference_collectors.py": "029eae6fea660d61b4783f515ac40721ef50d5ea476db2b627a285a1dcc132a5",
+    "tools/validate_original_reference_evidence.py": "eebb87f0a27f9d33a6bf1b1c38cb17f5e7e6ff8fb7de9f0bf85dbf8a8d932534",
+    "tests/test_original_reference_evidence.py": "76e7ed7fc86c002dedb5b74dc866beb87f99e5d68f44ffbdf42ad3c6c1635ed7"
+  },
+  "cli_sha256": "8f90190f91f5e3329d3ea51ecba3edcbf3ddec0f10786e21d52d678e20ad43a2",
+  "original_player_sha256_after": "39061ff329e4a32d0c8375ce9ee15e2017bccab0593943b962a860e11723d38b",
+  "reference_tools": {
+    "D:/CDXrepo/FloraGPA/tools/gpa_native.py": "f7ee63e82a9c8363cfde81633863a820e8f4277d0a80f0d90075b499f56bcffd",
+    "D:/CDXrepo/FloraGPA/standalone/frame.py": "3f291cf9b4037a786c46ad09878fff8d18901b7ebcd9a5aa54333fe9cce94ef2"
+  },
+  "limits": [
+    "The observed coverage ratio is not an overall DX11 or M3 completion percentage.",
+    "CSUAV requires unproven native cache membership; no file-entry fallback is used.",
+    "Resource/state/data collectors, edited version transitions and traditional Execute identity remain unresolved.",
+    "Boundary record mutations are research-only; no new original capture or GPU acceptance is claimed.",
+    "The 470-case full inventory was not rerun. Existing package and UI are unchanged.",
+    "Original adapter/configuration equivalence with independent replay is not asserted."
+  ]
+}

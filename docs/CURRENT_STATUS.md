@@ -1,6 +1,13 @@
 # Current capabilities and compatibility
 
-Reviewed **2026-10-04**. The latest [initialization scheduler investigation](INITIALIZATION_SCHEDULER_AUDIT.md)
+Reviewed **2026-10-04**. The latest [initialization reference recovery](INITIALIZATION_REFERENCES_AUDIT.md)
+adds native read-only metadata for 25 fixed ERG collector wire types: 6,110 original
+observations match exactly and 150 original boundary probes pass. The 224 observed
+cache-dependent CSUAV collectors remain explicit gaps. API resource references and
+GPU execution are unchanged; traditional lists remain unaccepted. Related CTest
+and four GF2/BF1 golden checks pass. No new capture registrations were added.
+
+The preceding [initialization scheduler investigation](INITIALIZATION_SCHEDULER_AUDIT.md)
 observes 7,042 ERG initializations in eight unchanged captures and verifies 56
 controlled original version schedules. Original scheduler-to-list registration
 can preserve non-ID order and repeated events. Eight paired observer/control
