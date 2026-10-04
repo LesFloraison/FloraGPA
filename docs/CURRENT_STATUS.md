@@ -1,6 +1,23 @@
 # Current capabilities and compatibility
 
-Reviewed **2026-10-04**. The latest build accepts
+Reviewed **2026-10-04**. The latest [merged-list evidence batch](DEFERRED_MERGE_AUDIT.md)
+adds 64 original captures, all expanded immediate streams. All 64 pass repeated
+independent/original playback against captured application output, with 384 strict
+buffer exports and 306 diagnostic controls. In 32 dynamic-CB cases the original
+shim already loses the workload's values and saves complete zero writes; correct
+replay of those files is not recovery of the uninjected application result.
+The 32 immutable-CB controls retain correct resource/image results. Capture-side
+state restoration failures remain separately recorded in both groups.
+
+The combined inventory is now **470 registered cases / 460 distinct hashes**:
+448 replay-positive registrations (438 unique) and 22 rejection files. Of the
+new positives, 32 explicitly carry a capture-side workload-data mismatch. These
+counts measure replay of saved captures, not complete workload/API fidelity or
+M3 completion. Production code/package is unchanged in this evidence-only batch;
+the preceding 406-case GPU matrix was not rerun. See the
+[merged-list baseline](deferred-merge-baseline.json).
+
+The latest production build accepts
 [proved unused missing-CB intervals](CONSTANT_BUFFER_LIFETIME_AUDIT.md), resolving
 the nine rejection files from the [first M3 evidence batch](DEFERRED_VERSION_AUDIT.md).
 All 18 paired originals now pass repeated replay and strict intermediate byte
@@ -10,7 +27,7 @@ All 18 files contain expanded immediate commands, so traditional Command List
 execution remains unaccepted. Correction: `6bc3cca`;
 package: `out/FloraGPA-cb-lifetimes-final-20261004/`.
 
-The combined inventory is **406 registered cases / 396 distinct capture hashes**:
+The preceding CB-lifetime inventory contains **406 registered cases / 396 distinct capture hashes**:
 384 positive registrations (374 unique) and 22 rejection files. The new batch
 has 36 independent positive runs, 36 original player runs, 108 strict resource
 exports and 54 diagnostic controls. Related CTest/Qt checks and four GF2/BF1
@@ -51,7 +68,7 @@ tested workloads; opening a file does not prove accurate replay.
 | Shader tools and debugging | DXBC/reflection, supported HLSL recovery, compilation/projects, source metadata and native GS/HS/DS checkpoint UI | Recovered HLSL is not original source; source availability and shader operations constrain debugging. [Recovery](HLSL_RECOVERY_MIGRATION.md), [projects](SHADER_PROJECT_MIGRATION.md), [checkpoints](CHECKPOINT_UI_MIGRATION.md) |
 | RenderDoc analysis | Pixel History, VS/PS/CS recorded debugging, Replay Mesh and Replay Metrics | Requires compatible external RenderDoc 1.45 release DLL; unavailable values and backend limits remain explicit. [History](PIXEL_HISTORY_UI_MIGRATION.md), [debugging](REPLAY_DEBUG_UI_MIGRATION.md), [mesh](REPLAY_MESH_MIGRATION.md), [metrics](REPLAY_METRICS_MIGRATION.md) |
 | GPU measurements | Native DX11 statistics/timing; Intel MD foundation, scheduled/uniform Qt collection and event-group CLI collection | Intel paths require supported hardware/driver. Event-group Qt/session integration, GTPin/Shader Profiler and further consumers remain incomplete. [Statistics](GPU_STATISTICS_MIGRATION.md), [timing](GPU_PROFILE_MIGRATION.md), [scheduled UI](MD_ITERATIONS_UI_MIGRATION.md), [uniform UI](UNIFORM_METRICS_UI_MIGRATION.md), [groups](MD_HOTSPOTS_MIGRATION.md) |
-| Captured contexts and command lists | Identity/evidence inspection; verified expanded streams from two-context A/B/A workloads with retained CB versions and interleaved uploads | Traditional list execution remains incomplete. Original capture-side Restore=TRUE discrepancies and missing sentinel resources are separately recorded. [Deferred evidence](DEFERRED_VERSION_AUDIT.md), [context workflow](USAGE.md#contexts-and-pipeline-boundaries) |
+| Captured contexts and command lists | Identity/evidence inspection; verified expanded streams from two-context A/B/A and three-context merged-list workloads | Traditional list execution remains incomplete. Dynamic-CB merge captures can already contain wrong data; native/injected/original/independent results and restoration discrepancies remain separate. [Merge evidence](DEFERRED_MERGE_AUDIT.md), [deferred evidence](DEFERRED_VERSION_AUDIT.md), [context workflow](USAGE.md#contexts-and-pipeline-boundaries) |
 | Resource minimum LOD | Native setters, initial getter evidence, frame-time creation defaults, ClearState preservation and disabled-setter experiments | Missing required initial state is rejected; nonzero-LOD full storage export and UAV/output/interface guards remain boundaries. Unused static SRVs use program declarations. [LOD](RESOURCE_LOD_AUDIT.md), [shader usage](MIN_LOD_USAGE_AUDIT.md) |
 | Query and predication | Captured Query metadata/history; native predicate Begin/End, binding and Device5 frame-time creation | New predicates remain unissued until their recorded interval completes. Ordinary Query records may omit identities, intervals or full result bytes; pre-frame predicate history is not reconstructed. [Predicate creation](PREDICATE_CREATION_AUDIT.md) |
 

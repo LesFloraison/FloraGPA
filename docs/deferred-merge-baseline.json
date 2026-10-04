@@ -1,0 +1,66 @@
+{
+  "schema": "FloraGPA deferred merge baseline 1",
+  "reviewed": "2026-10-04",
+  "producer_commit": "2ecc281cb3d9d12a9d9cc58b43cd414467ef7cb7",
+  "runtime_change": false,
+  "production_fix_commit": "6bc3cca",
+  "production_package": "out/FloraGPA-cb-lifetimes-final-20261004",
+  "production_cli_sha256": "c218304258778eb15cab413ff6c518f765dd3630edfd5bf95f1bc7f49a97979e",
+  "completed": true,
+  "acceptance_scope": "Faithful replay of 64 saved expanded streams; not traditional Command Lists or full native-workload fidelity",
+  "counts": {
+    "cases": 64,
+    "workload_faithful_captures": 32,
+    "capture_side_mismatches": 32,
+    "producer_frames": 1536,
+    "producer_storage_checks": 4608,
+    "producer_images": 1536,
+    "sentinel_readbacks": 1536,
+    "captured_execute_state_failures": 96,
+    "captured_merge_state_failures": 48,
+    "captured_parent_finish_state_failures": 8,
+    "independent_replays": 128,
+    "original_replays": 128,
+    "strict_buffer_exports": 384,
+    "immutable_image_controls": 288,
+    "dynamic_buffer_controls": 18
+  },
+  "combined_inventory": {
+    "registrations": 470,
+    "unique_capture_hashes": 460,
+    "replay_positive_registrations": 448,
+    "unique_replay_positive_captures": 438,
+    "rejection_files": 22,
+    "new_capture_side_workload_data_mismatches": 32
+  },
+  "traditional_list_resources": 0,
+  "traditional_execute_records": 0,
+  "tests": {
+    "new_evidence_checker": 8,
+    "existing_compatibility_tools": 18
+  },
+  "corpus_sha256": "21f43a522328968023298e72e9e0aedebb892d9ce0b2d09e477f371df596f242",
+  "gate_sha256": "bd620062f846b34321ade12c17954d81527c4e9683d41487075d6f8173d7c134",
+  "evidence": {
+    "artifacts/m3-deferred-merge-originals/manifest.json": "a7a0f84029c9fd3addc517c9612da6ad5bf102151a0f1ff9bc7c47679885ee1f",
+    "artifacts/m3-deferred-merge-api/api-evidence.json": "dd9b6164dd147c2e2bb80a9575a068e7fb1348225533ddb64555d0e6dd95a109",
+    "artifacts/m3-deferred-merge-validation/validation.json": "f794de1d3d808c782be3d9140780ceb3a8cce979f3fd5aac6ef2ef5ff8f74f37",
+    "artifacts/m3-deferred-merge-audit/audit.json": "dbb0d6e87bbef86a18a14686aa6a825bd34d0b83c6c0b3930a3ea12944d0b21f",
+    "artifacts/m3-deferred-merge-checker-tests.log": "11ddc0352ef3753c924ae4f4fdee70dd315662f692342811837a7ca0a7b8c665",
+    "artifacts/m3-deferred-merge-gate-tests.log": "2765b2be5a2d8d79dcaae45519eb8554737a52471fef75ab566a5d6ebbc5e30c",
+    "artifacts/m3-deferred-manager-tables.txt": "c30308244c61c2a7eb22f72fcd277b106da5fe8009982bb4b2778518cb178c24",
+    "artifacts/m3-deferred-manager-slots.json": "d3b43c0b3aeeaf6135a8549d81145742c7b0f7a499878399054195eaaf942b63",
+    "artifacts/m3-deferred-manager-merge.c": "c92da11f908c0901c5417fd87cfefa0b535633811477ac740706ddbc1ab57606",
+    "artifacts/m3-deferred-merge-map.c": "d93821592cd302ef50397a98ee6d1e7f25a86d3bf713e171eb51a9e27b5f4d95",
+    "artifacts/m3-deferred-merge-triage/manifest.json": "c64a1fc649b395dbd13150710c9da2385bd519e8483e92d717cfe55ffac3bb93",
+    "artifacts/m3-deferred-merge-storage-control/manifest.json": "7c549b126f790d9d4c9f7f8192fd945119d4dc4a53d7186ea08b9deddcf08026"
+  },
+  "limitations": [
+    "32 dynamic-CB originals save incorrect injected application results; independent and original players faithfully reproduce those saved results.",
+    "native_workload_fidelity refers to resource/image results. Binding restoration mismatches are independently retained.",
+    "No traditional list resource or Execute path was accepted.",
+    "Original player adapter/driver configuration remains unproven.",
+    "Previous 406-case GPU matrix, Qt checks and packaging were not repeated: production code is unchanged.",
+    "Capture files, producer binaries, original GPA binaries and decompilation evidence remain local and outside Git."
+  ]
+}

@@ -1,0 +1,3911 @@
+{
+  "schema": "FloraGPA compatibility corpus 1",
+  "profile": "GPA 2025 R1 legacy DX11 / original merged lists expanded to immediate commands",
+  "acceptance_scope": "Replay of saved captures; dynamic-child captures fail uninjected workload fidelity",
+  "cases": [
+    {
+      "id": "deferred_merge_0",
+      "mode": 0,
+      "path": "m3-deferred-merge-originals/0/capture.gpa_frame",
+      "sha256": "62d118b0720fe124ad565dab219e39ae2c0b3a2638fd9e3e7a954a5adf5fd529",
+      "bytes": 294474,
+      "family": "deferred_merges",
+      "origin": "self_owned_original_gpa_capture",
+      "comparison_policy": "exact_golden",
+      "reference_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "reference_scope": "Captured application frame 6, not uninjected CPU oracle",
+      "native_workload_fidelity": "capture_side_mismatch",
+      "device_scope": "Local producer hardware; original-player adapter/configuration unproven",
+      "boundaries": [
+        {
+          "resource": 16,
+          "event": 91,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "5620a1b0e6bca98cde70d643094d21a108113d6fc82d8bba541d99a16e626e3f"
+        },
+        {
+          "resource": 16,
+          "event": 164,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "2e1cf76f6319dbc0eff4547e9a3ea3de34380df6f9a2f96f7163e061a0020628"
+        },
+        {
+          "resource": 16,
+          "event": 237,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "9f811d17ec0f927256e37189de02936e7cdd8d27493141465f8e3acf5866ff52"
+        }
+      ],
+      "controls": []
+    },
+    {
+      "id": "deferred_merge_1",
+      "mode": 1,
+      "path": "m3-deferred-merge-originals/1/capture.gpa_frame",
+      "sha256": "49eaab1ad3f7ce8cefe67a604d5b259b123be1c492f681cd1c38e799d6629da0",
+      "bytes": 294474,
+      "family": "deferred_merges",
+      "origin": "self_owned_original_gpa_capture",
+      "comparison_policy": "exact_golden",
+      "reference_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "reference_scope": "Captured application frame 6, not uninjected CPU oracle",
+      "native_workload_fidelity": "capture_side_mismatch",
+      "device_scope": "Local producer hardware; original-player adapter/configuration unproven",
+      "boundaries": [
+        {
+          "resource": 16,
+          "event": 91,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "5620a1b0e6bca98cde70d643094d21a108113d6fc82d8bba541d99a16e626e3f"
+        },
+        {
+          "resource": 16,
+          "event": 164,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "2e1cf76f6319dbc0eff4547e9a3ea3de34380df6f9a2f96f7163e061a0020628"
+        },
+        {
+          "resource": 16,
+          "event": 237,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "9f811d17ec0f927256e37189de02936e7cdd8d27493141465f8e3acf5866ff52"
+        }
+      ],
+      "controls": []
+    },
+    {
+      "id": "deferred_merge_2",
+      "mode": 2,
+      "path": "m3-deferred-merge-originals/2/capture.gpa_frame",
+      "sha256": "e73318140479834ab25f7237d7b46a8e866d6047959f49c1c3f6f93d38ddcbd8",
+      "bytes": 294474,
+      "family": "deferred_merges",
+      "origin": "self_owned_original_gpa_capture",
+      "comparison_policy": "exact_golden",
+      "reference_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "reference_scope": "Captured application frame 6, not uninjected CPU oracle",
+      "native_workload_fidelity": "capture_side_mismatch",
+      "device_scope": "Local producer hardware; original-player adapter/configuration unproven",
+      "boundaries": [
+        {
+          "resource": 16,
+          "event": 91,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "5620a1b0e6bca98cde70d643094d21a108113d6fc82d8bba541d99a16e626e3f"
+        },
+        {
+          "resource": 16,
+          "event": 164,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "2e1cf76f6319dbc0eff4547e9a3ea3de34380df6f9a2f96f7163e061a0020628"
+        },
+        {
+          "resource": 16,
+          "event": 237,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "9f811d17ec0f927256e37189de02936e7cdd8d27493141465f8e3acf5866ff52"
+        }
+      ],
+      "controls": []
+    },
+    {
+      "id": "deferred_merge_3",
+      "mode": 3,
+      "path": "m3-deferred-merge-originals/3/capture.gpa_frame",
+      "sha256": "60c62be913feb6d683c1626aa44456d2793dcd6af564dd3c1e95987a56585bf2",
+      "bytes": 294474,
+      "family": "deferred_merges",
+      "origin": "self_owned_original_gpa_capture",
+      "comparison_policy": "exact_golden",
+      "reference_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "reference_scope": "Captured application frame 6, not uninjected CPU oracle",
+      "native_workload_fidelity": "capture_side_mismatch",
+      "device_scope": "Local producer hardware; original-player adapter/configuration unproven",
+      "boundaries": [
+        {
+          "resource": 16,
+          "event": 91,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "5620a1b0e6bca98cde70d643094d21a108113d6fc82d8bba541d99a16e626e3f"
+        },
+        {
+          "resource": 16,
+          "event": 164,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "2e1cf76f6319dbc0eff4547e9a3ea3de34380df6f9a2f96f7163e061a0020628"
+        },
+        {
+          "resource": 16,
+          "event": 237,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "9f811d17ec0f927256e37189de02936e7cdd8d27493141465f8e3acf5866ff52"
+        }
+      ],
+      "controls": []
+    },
+    {
+      "id": "deferred_merge_4",
+      "mode": 4,
+      "path": "m3-deferred-merge-originals/4/capture.gpa_frame",
+      "sha256": "ac4261966fff478a32d9b29b3ed1ee6463715ed380a5c73a28a565f6aebdc6b9",
+      "bytes": 294474,
+      "family": "deferred_merges",
+      "origin": "self_owned_original_gpa_capture",
+      "comparison_policy": "exact_golden",
+      "reference_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "reference_scope": "Captured application frame 6, not uninjected CPU oracle",
+      "native_workload_fidelity": "capture_side_mismatch",
+      "device_scope": "Local producer hardware; original-player adapter/configuration unproven",
+      "boundaries": [
+        {
+          "resource": 16,
+          "event": 91,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "5620a1b0e6bca98cde70d643094d21a108113d6fc82d8bba541d99a16e626e3f"
+        },
+        {
+          "resource": 16,
+          "event": 164,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "2e1cf76f6319dbc0eff4547e9a3ea3de34380df6f9a2f96f7163e061a0020628"
+        },
+        {
+          "resource": 16,
+          "event": 237,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "9f811d17ec0f927256e37189de02936e7cdd8d27493141465f8e3acf5866ff52"
+        }
+      ],
+      "controls": []
+    },
+    {
+      "id": "deferred_merge_5",
+      "mode": 5,
+      "path": "m3-deferred-merge-originals/5/capture.gpa_frame",
+      "sha256": "4eea8beff92b7b4f6ed76110becd6a9242beb1d8db6070f1863d0516579fae20",
+      "bytes": 294474,
+      "family": "deferred_merges",
+      "origin": "self_owned_original_gpa_capture",
+      "comparison_policy": "exact_golden",
+      "reference_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "reference_scope": "Captured application frame 6, not uninjected CPU oracle",
+      "native_workload_fidelity": "capture_side_mismatch",
+      "device_scope": "Local producer hardware; original-player adapter/configuration unproven",
+      "boundaries": [
+        {
+          "resource": 16,
+          "event": 91,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "5620a1b0e6bca98cde70d643094d21a108113d6fc82d8bba541d99a16e626e3f"
+        },
+        {
+          "resource": 16,
+          "event": 164,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "2e1cf76f6319dbc0eff4547e9a3ea3de34380df6f9a2f96f7163e061a0020628"
+        },
+        {
+          "resource": 16,
+          "event": 237,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "9f811d17ec0f927256e37189de02936e7cdd8d27493141465f8e3acf5866ff52"
+        }
+      ],
+      "controls": []
+    },
+    {
+      "id": "deferred_merge_6",
+      "mode": 6,
+      "path": "m3-deferred-merge-originals/6/capture.gpa_frame",
+      "sha256": "5cdb10a80baa9bfeb6c493b46e3bc874e256a8b84b0bffb73142bf7c8d9adccb",
+      "bytes": 294474,
+      "family": "deferred_merges",
+      "origin": "self_owned_original_gpa_capture",
+      "comparison_policy": "exact_golden",
+      "reference_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "reference_scope": "Captured application frame 6, not uninjected CPU oracle",
+      "native_workload_fidelity": "capture_side_mismatch",
+      "device_scope": "Local producer hardware; original-player adapter/configuration unproven",
+      "boundaries": [
+        {
+          "resource": 16,
+          "event": 91,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "5620a1b0e6bca98cde70d643094d21a108113d6fc82d8bba541d99a16e626e3f"
+        },
+        {
+          "resource": 16,
+          "event": 164,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "2e1cf76f6319dbc0eff4547e9a3ea3de34380df6f9a2f96f7163e061a0020628"
+        },
+        {
+          "resource": 16,
+          "event": 237,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "9f811d17ec0f927256e37189de02936e7cdd8d27493141465f8e3acf5866ff52"
+        }
+      ],
+      "controls": []
+    },
+    {
+      "id": "deferred_merge_7",
+      "mode": 7,
+      "path": "m3-deferred-merge-originals/7/capture.gpa_frame",
+      "sha256": "b71be9f5cbdf7ec1a7a1f7a26fdb970e099671a175980ebab092446a4abb8702",
+      "bytes": 294474,
+      "family": "deferred_merges",
+      "origin": "self_owned_original_gpa_capture",
+      "comparison_policy": "exact_golden",
+      "reference_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "reference_scope": "Captured application frame 6, not uninjected CPU oracle",
+      "native_workload_fidelity": "capture_side_mismatch",
+      "device_scope": "Local producer hardware; original-player adapter/configuration unproven",
+      "boundaries": [
+        {
+          "resource": 16,
+          "event": 91,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "5620a1b0e6bca98cde70d643094d21a108113d6fc82d8bba541d99a16e626e3f"
+        },
+        {
+          "resource": 16,
+          "event": 164,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "2e1cf76f6319dbc0eff4547e9a3ea3de34380df6f9a2f96f7163e061a0020628"
+        },
+        {
+          "resource": 16,
+          "event": 237,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "9f811d17ec0f927256e37189de02936e7cdd8d27493141465f8e3acf5866ff52"
+        }
+      ],
+      "controls": []
+    },
+    {
+      "id": "deferred_merge_8",
+      "mode": 8,
+      "path": "m3-deferred-merge-originals/8/capture.gpa_frame",
+      "sha256": "863926785384e84662a938c5027b5c93ebe8f1bcf8dfb1aa37b4da458450bf37",
+      "bytes": 294366,
+      "family": "deferred_merges",
+      "origin": "self_owned_original_gpa_capture",
+      "comparison_policy": "exact_golden",
+      "reference_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "reference_scope": "Captured application frame 6, not uninjected CPU oracle",
+      "native_workload_fidelity": "capture_side_mismatch",
+      "device_scope": "Local producer hardware; original-player adapter/configuration unproven",
+      "boundaries": [
+        {
+          "resource": 16,
+          "event": 90,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "5620a1b0e6bca98cde70d643094d21a108113d6fc82d8bba541d99a16e626e3f"
+        },
+        {
+          "resource": 16,
+          "event": 162,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "2e1cf76f6319dbc0eff4547e9a3ea3de34380df6f9a2f96f7163e061a0020628"
+        },
+        {
+          "resource": 16,
+          "event": 234,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "9f811d17ec0f927256e37189de02936e7cdd8d27493141465f8e3acf5866ff52"
+        }
+      ],
+      "controls": []
+    },
+    {
+      "id": "deferred_merge_9",
+      "mode": 9,
+      "path": "m3-deferred-merge-originals/9/capture.gpa_frame",
+      "sha256": "6de184da591749f542e58b71016eb4312e44a5ba16b4e2564758bfd131482763",
+      "bytes": 294366,
+      "family": "deferred_merges",
+      "origin": "self_owned_original_gpa_capture",
+      "comparison_policy": "exact_golden",
+      "reference_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "reference_scope": "Captured application frame 6, not uninjected CPU oracle",
+      "native_workload_fidelity": "capture_side_mismatch",
+      "device_scope": "Local producer hardware; original-player adapter/configuration unproven",
+      "boundaries": [
+        {
+          "resource": 16,
+          "event": 90,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "5620a1b0e6bca98cde70d643094d21a108113d6fc82d8bba541d99a16e626e3f"
+        },
+        {
+          "resource": 16,
+          "event": 162,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "2e1cf76f6319dbc0eff4547e9a3ea3de34380df6f9a2f96f7163e061a0020628"
+        },
+        {
+          "resource": 16,
+          "event": 234,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "9f811d17ec0f927256e37189de02936e7cdd8d27493141465f8e3acf5866ff52"
+        }
+      ],
+      "controls": []
+    },
+    {
+      "id": "deferred_merge_10",
+      "mode": 10,
+      "path": "m3-deferred-merge-originals/10/capture.gpa_frame",
+      "sha256": "008a01600bcf18bca1313ef435a4cda689fa8ba8498c1f5a9ad65ff75b54eff7",
+      "bytes": 294366,
+      "family": "deferred_merges",
+      "origin": "self_owned_original_gpa_capture",
+      "comparison_policy": "exact_golden",
+      "reference_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "reference_scope": "Captured application frame 6, not uninjected CPU oracle",
+      "native_workload_fidelity": "capture_side_mismatch",
+      "device_scope": "Local producer hardware; original-player adapter/configuration unproven",
+      "boundaries": [
+        {
+          "resource": 16,
+          "event": 90,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "5620a1b0e6bca98cde70d643094d21a108113d6fc82d8bba541d99a16e626e3f"
+        },
+        {
+          "resource": 16,
+          "event": 162,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "2e1cf76f6319dbc0eff4547e9a3ea3de34380df6f9a2f96f7163e061a0020628"
+        },
+        {
+          "resource": 16,
+          "event": 234,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "9f811d17ec0f927256e37189de02936e7cdd8d27493141465f8e3acf5866ff52"
+        }
+      ],
+      "controls": []
+    },
+    {
+      "id": "deferred_merge_11",
+      "mode": 11,
+      "path": "m3-deferred-merge-originals/11/capture.gpa_frame",
+      "sha256": "b41fd518a75c7b0b0148f5bf25f7628c278ac9e3bae4dd1b9814c26846304a8e",
+      "bytes": 294366,
+      "family": "deferred_merges",
+      "origin": "self_owned_original_gpa_capture",
+      "comparison_policy": "exact_golden",
+      "reference_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "reference_scope": "Captured application frame 6, not uninjected CPU oracle",
+      "native_workload_fidelity": "capture_side_mismatch",
+      "device_scope": "Local producer hardware; original-player adapter/configuration unproven",
+      "boundaries": [
+        {
+          "resource": 16,
+          "event": 90,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "5620a1b0e6bca98cde70d643094d21a108113d6fc82d8bba541d99a16e626e3f"
+        },
+        {
+          "resource": 16,
+          "event": 162,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "2e1cf76f6319dbc0eff4547e9a3ea3de34380df6f9a2f96f7163e061a0020628"
+        },
+        {
+          "resource": 16,
+          "event": 234,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "9f811d17ec0f927256e37189de02936e7cdd8d27493141465f8e3acf5866ff52"
+        }
+      ],
+      "controls": []
+    },
+    {
+      "id": "deferred_merge_12",
+      "mode": 12,
+      "path": "m3-deferred-merge-originals/12/capture.gpa_frame",
+      "sha256": "7c770d0e38d6362612b1acfd6339adfb39e21f0b55af386b4169a857b08fddd5",
+      "bytes": 294366,
+      "family": "deferred_merges",
+      "origin": "self_owned_original_gpa_capture",
+      "comparison_policy": "exact_golden",
+      "reference_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "reference_scope": "Captured application frame 6, not uninjected CPU oracle",
+      "native_workload_fidelity": "capture_side_mismatch",
+      "device_scope": "Local producer hardware; original-player adapter/configuration unproven",
+      "boundaries": [
+        {
+          "resource": 16,
+          "event": 90,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "5620a1b0e6bca98cde70d643094d21a108113d6fc82d8bba541d99a16e626e3f"
+        },
+        {
+          "resource": 16,
+          "event": 162,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "2e1cf76f6319dbc0eff4547e9a3ea3de34380df6f9a2f96f7163e061a0020628"
+        },
+        {
+          "resource": 16,
+          "event": 234,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "9f811d17ec0f927256e37189de02936e7cdd8d27493141465f8e3acf5866ff52"
+        }
+      ],
+      "controls": []
+    },
+    {
+      "id": "deferred_merge_13",
+      "mode": 13,
+      "path": "m3-deferred-merge-originals/13/capture.gpa_frame",
+      "sha256": "f7d41c9d9b433bcfa7b6eb294d5f25d605e573739bb2f2e795c83a952acbf7d2",
+      "bytes": 294366,
+      "family": "deferred_merges",
+      "origin": "self_owned_original_gpa_capture",
+      "comparison_policy": "exact_golden",
+      "reference_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "reference_scope": "Captured application frame 6, not uninjected CPU oracle",
+      "native_workload_fidelity": "capture_side_mismatch",
+      "device_scope": "Local producer hardware; original-player adapter/configuration unproven",
+      "boundaries": [
+        {
+          "resource": 16,
+          "event": 90,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "5620a1b0e6bca98cde70d643094d21a108113d6fc82d8bba541d99a16e626e3f"
+        },
+        {
+          "resource": 16,
+          "event": 162,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "2e1cf76f6319dbc0eff4547e9a3ea3de34380df6f9a2f96f7163e061a0020628"
+        },
+        {
+          "resource": 16,
+          "event": 234,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "9f811d17ec0f927256e37189de02936e7cdd8d27493141465f8e3acf5866ff52"
+        }
+      ],
+      "controls": []
+    },
+    {
+      "id": "deferred_merge_14",
+      "mode": 14,
+      "path": "m3-deferred-merge-originals/14/capture.gpa_frame",
+      "sha256": "f5049a62fdb0c7ce3f4ea954920db82c56110b5a60048999fda828cbeac5906b",
+      "bytes": 294366,
+      "family": "deferred_merges",
+      "origin": "self_owned_original_gpa_capture",
+      "comparison_policy": "exact_golden",
+      "reference_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "reference_scope": "Captured application frame 6, not uninjected CPU oracle",
+      "native_workload_fidelity": "capture_side_mismatch",
+      "device_scope": "Local producer hardware; original-player adapter/configuration unproven",
+      "boundaries": [
+        {
+          "resource": 16,
+          "event": 90,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "5620a1b0e6bca98cde70d643094d21a108113d6fc82d8bba541d99a16e626e3f"
+        },
+        {
+          "resource": 16,
+          "event": 162,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "2e1cf76f6319dbc0eff4547e9a3ea3de34380df6f9a2f96f7163e061a0020628"
+        },
+        {
+          "resource": 16,
+          "event": 234,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "9f811d17ec0f927256e37189de02936e7cdd8d27493141465f8e3acf5866ff52"
+        }
+      ],
+      "controls": []
+    },
+    {
+      "id": "deferred_merge_15",
+      "mode": 15,
+      "path": "m3-deferred-merge-originals/15/capture.gpa_frame",
+      "sha256": "202ab02cf27d7d1e07e6731955611fd24c118c4bd1c68e7d0aa24d079945edca",
+      "bytes": 294366,
+      "family": "deferred_merges",
+      "origin": "self_owned_original_gpa_capture",
+      "comparison_policy": "exact_golden",
+      "reference_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "reference_scope": "Captured application frame 6, not uninjected CPU oracle",
+      "native_workload_fidelity": "capture_side_mismatch",
+      "device_scope": "Local producer hardware; original-player adapter/configuration unproven",
+      "boundaries": [
+        {
+          "resource": 16,
+          "event": 90,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "5620a1b0e6bca98cde70d643094d21a108113d6fc82d8bba541d99a16e626e3f"
+        },
+        {
+          "resource": 16,
+          "event": 162,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "2e1cf76f6319dbc0eff4547e9a3ea3de34380df6f9a2f96f7163e061a0020628"
+        },
+        {
+          "resource": 16,
+          "event": 234,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "9f811d17ec0f927256e37189de02936e7cdd8d27493141465f8e3acf5866ff52"
+        }
+      ],
+      "controls": []
+    },
+    {
+      "id": "deferred_merge_16",
+      "mode": 16,
+      "path": "m3-deferred-merge-originals/16/capture.gpa_frame",
+      "sha256": "1461ad2938cb888d175413ebf203404a2c644cdd7e89b4849f99a5077ba3654d",
+      "bytes": 295872,
+      "family": "deferred_merges",
+      "origin": "self_owned_original_gpa_capture",
+      "comparison_policy": "exact_golden",
+      "reference_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "reference_scope": "Captured application frame 6, not uninjected CPU oracle",
+      "native_workload_fidelity": "capture_side_mismatch",
+      "device_scope": "Local producer hardware; original-player adapter/configuration unproven",
+      "boundaries": [
+        {
+          "resource": 16,
+          "event": 118,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "5620a1b0e6bca98cde70d643094d21a108113d6fc82d8bba541d99a16e626e3f"
+        },
+        {
+          "resource": 16,
+          "event": 191,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "2e1cf76f6319dbc0eff4547e9a3ea3de34380df6f9a2f96f7163e061a0020628"
+        },
+        {
+          "resource": 16,
+          "event": 264,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "9f811d17ec0f927256e37189de02936e7cdd8d27493141465f8e3acf5866ff52"
+        }
+      ],
+      "controls": []
+    },
+    {
+      "id": "deferred_merge_17",
+      "mode": 17,
+      "path": "m3-deferred-merge-originals/17/capture.gpa_frame",
+      "sha256": "e279874dc8f94119fb580e7587df52addd39aca62bd1bee7dcf5a19f907a36d7",
+      "bytes": 295960,
+      "family": "deferred_merges",
+      "origin": "self_owned_original_gpa_capture",
+      "comparison_policy": "exact_golden",
+      "reference_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "reference_scope": "Captured application frame 6, not uninjected CPU oracle",
+      "native_workload_fidelity": "capture_side_mismatch",
+      "device_scope": "Local producer hardware; original-player adapter/configuration unproven",
+      "boundaries": [
+        {
+          "resource": 16,
+          "event": 120,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "5620a1b0e6bca98cde70d643094d21a108113d6fc82d8bba541d99a16e626e3f"
+        },
+        {
+          "resource": 16,
+          "event": 193,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "2e1cf76f6319dbc0eff4547e9a3ea3de34380df6f9a2f96f7163e061a0020628"
+        },
+        {
+          "resource": 16,
+          "event": 266,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "9f811d17ec0f927256e37189de02936e7cdd8d27493141465f8e3acf5866ff52"
+        }
+      ],
+      "controls": []
+    },
+    {
+      "id": "deferred_merge_18",
+      "mode": 18,
+      "path": "m3-deferred-merge-originals/18/capture.gpa_frame",
+      "sha256": "1ecc5cebefc8909f3e80c87112f3e31964e4ee71f2b64b2e7d555b69036f0aa8",
+      "bytes": 295872,
+      "family": "deferred_merges",
+      "origin": "self_owned_original_gpa_capture",
+      "comparison_policy": "exact_golden",
+      "reference_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "reference_scope": "Captured application frame 6, not uninjected CPU oracle",
+      "native_workload_fidelity": "capture_side_mismatch",
+      "device_scope": "Local producer hardware; original-player adapter/configuration unproven",
+      "boundaries": [
+        {
+          "resource": 16,
+          "event": 118,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "5620a1b0e6bca98cde70d643094d21a108113d6fc82d8bba541d99a16e626e3f"
+        },
+        {
+          "resource": 16,
+          "event": 191,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "2e1cf76f6319dbc0eff4547e9a3ea3de34380df6f9a2f96f7163e061a0020628"
+        },
+        {
+          "resource": 16,
+          "event": 264,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "9f811d17ec0f927256e37189de02936e7cdd8d27493141465f8e3acf5866ff52"
+        }
+      ],
+      "controls": []
+    },
+    {
+      "id": "deferred_merge_19",
+      "mode": 19,
+      "path": "m3-deferred-merge-originals/19/capture.gpa_frame",
+      "sha256": "da68b9841723b3f9f8e5536f0cdf5058ea45407e2fc8bddc218e0eba112b4e16",
+      "bytes": 295960,
+      "family": "deferred_merges",
+      "origin": "self_owned_original_gpa_capture",
+      "comparison_policy": "exact_golden",
+      "reference_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "reference_scope": "Captured application frame 6, not uninjected CPU oracle",
+      "native_workload_fidelity": "capture_side_mismatch",
+      "device_scope": "Local producer hardware; original-player adapter/configuration unproven",
+      "boundaries": [
+        {
+          "resource": 16,
+          "event": 120,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "5620a1b0e6bca98cde70d643094d21a108113d6fc82d8bba541d99a16e626e3f"
+        },
+        {
+          "resource": 16,
+          "event": 193,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "2e1cf76f6319dbc0eff4547e9a3ea3de34380df6f9a2f96f7163e061a0020628"
+        },
+        {
+          "resource": 16,
+          "event": 266,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "9f811d17ec0f927256e37189de02936e7cdd8d27493141465f8e3acf5866ff52"
+        }
+      ],
+      "controls": []
+    },
+    {
+      "id": "deferred_merge_20",
+      "mode": 20,
+      "path": "m3-deferred-merge-originals/20/capture.gpa_frame",
+      "sha256": "522c94afe5c053bbaf4ab70978fb02336c3eaef1378f366933cc2dfea0bc91ae",
+      "bytes": 295916,
+      "family": "deferred_merges",
+      "origin": "self_owned_original_gpa_capture",
+      "comparison_policy": "exact_golden",
+      "reference_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "reference_scope": "Captured application frame 6, not uninjected CPU oracle",
+      "native_workload_fidelity": "capture_side_mismatch",
+      "device_scope": "Local producer hardware; original-player adapter/configuration unproven",
+      "boundaries": [
+        {
+          "resource": 16,
+          "event": 119,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "5620a1b0e6bca98cde70d643094d21a108113d6fc82d8bba541d99a16e626e3f"
+        },
+        {
+          "resource": 16,
+          "event": 192,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "2e1cf76f6319dbc0eff4547e9a3ea3de34380df6f9a2f96f7163e061a0020628"
+        },
+        {
+          "resource": 16,
+          "event": 265,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "9f811d17ec0f927256e37189de02936e7cdd8d27493141465f8e3acf5866ff52"
+        }
+      ],
+      "controls": []
+    },
+    {
+      "id": "deferred_merge_21",
+      "mode": 21,
+      "path": "m3-deferred-merge-originals/21/capture.gpa_frame",
+      "sha256": "c5e010138cfe6339dc9a03e0d425d51bcb86f9a5b05c429aec46958c9d15927e",
+      "bytes": 296004,
+      "family": "deferred_merges",
+      "origin": "self_owned_original_gpa_capture",
+      "comparison_policy": "exact_golden",
+      "reference_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "reference_scope": "Captured application frame 6, not uninjected CPU oracle",
+      "native_workload_fidelity": "capture_side_mismatch",
+      "device_scope": "Local producer hardware; original-player adapter/configuration unproven",
+      "boundaries": [
+        {
+          "resource": 16,
+          "event": 121,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "5620a1b0e6bca98cde70d643094d21a108113d6fc82d8bba541d99a16e626e3f"
+        },
+        {
+          "resource": 16,
+          "event": 194,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "2e1cf76f6319dbc0eff4547e9a3ea3de34380df6f9a2f96f7163e061a0020628"
+        },
+        {
+          "resource": 16,
+          "event": 267,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "9f811d17ec0f927256e37189de02936e7cdd8d27493141465f8e3acf5866ff52"
+        }
+      ],
+      "controls": []
+    },
+    {
+      "id": "deferred_merge_22",
+      "mode": 22,
+      "path": "m3-deferred-merge-originals/22/capture.gpa_frame",
+      "sha256": "bea5b4e619e0d29899d1026c3cee1bb1feb5f7a873b2a76eb9db43d6cf27dbb7",
+      "bytes": 295916,
+      "family": "deferred_merges",
+      "origin": "self_owned_original_gpa_capture",
+      "comparison_policy": "exact_golden",
+      "reference_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "reference_scope": "Captured application frame 6, not uninjected CPU oracle",
+      "native_workload_fidelity": "capture_side_mismatch",
+      "device_scope": "Local producer hardware; original-player adapter/configuration unproven",
+      "boundaries": [
+        {
+          "resource": 16,
+          "event": 119,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "5620a1b0e6bca98cde70d643094d21a108113d6fc82d8bba541d99a16e626e3f"
+        },
+        {
+          "resource": 16,
+          "event": 192,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "2e1cf76f6319dbc0eff4547e9a3ea3de34380df6f9a2f96f7163e061a0020628"
+        },
+        {
+          "resource": 16,
+          "event": 265,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "9f811d17ec0f927256e37189de02936e7cdd8d27493141465f8e3acf5866ff52"
+        }
+      ],
+      "controls": []
+    },
+    {
+      "id": "deferred_merge_23",
+      "mode": 23,
+      "path": "m3-deferred-merge-originals/23/capture.gpa_frame",
+      "sha256": "fbb2aeee26bbdfd2404a561ad54fe87f825d340e6d1a135f959466e5ef677c02",
+      "bytes": 296004,
+      "family": "deferred_merges",
+      "origin": "self_owned_original_gpa_capture",
+      "comparison_policy": "exact_golden",
+      "reference_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "reference_scope": "Captured application frame 6, not uninjected CPU oracle",
+      "native_workload_fidelity": "capture_side_mismatch",
+      "device_scope": "Local producer hardware; original-player adapter/configuration unproven",
+      "boundaries": [
+        {
+          "resource": 16,
+          "event": 121,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "5620a1b0e6bca98cde70d643094d21a108113d6fc82d8bba541d99a16e626e3f"
+        },
+        {
+          "resource": 16,
+          "event": 194,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "2e1cf76f6319dbc0eff4547e9a3ea3de34380df6f9a2f96f7163e061a0020628"
+        },
+        {
+          "resource": 16,
+          "event": 267,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "9f811d17ec0f927256e37189de02936e7cdd8d27493141465f8e3acf5866ff52"
+        }
+      ],
+      "controls": []
+    },
+    {
+      "id": "deferred_merge_24",
+      "mode": 24,
+      "path": "m3-deferred-merge-originals/24/capture.gpa_frame",
+      "sha256": "a5475d0eb087c65965486a46c2ed42de3084e61378a6a3f6c3f459287e57a05d",
+      "bytes": 295764,
+      "family": "deferred_merges",
+      "origin": "self_owned_original_gpa_capture",
+      "comparison_policy": "exact_golden",
+      "reference_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "reference_scope": "Captured application frame 6, not uninjected CPU oracle",
+      "native_workload_fidelity": "capture_side_mismatch",
+      "device_scope": "Local producer hardware; original-player adapter/configuration unproven",
+      "boundaries": [
+        {
+          "resource": 16,
+          "event": 117,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "5620a1b0e6bca98cde70d643094d21a108113d6fc82d8bba541d99a16e626e3f"
+        },
+        {
+          "resource": 16,
+          "event": 189,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "2e1cf76f6319dbc0eff4547e9a3ea3de34380df6f9a2f96f7163e061a0020628"
+        },
+        {
+          "resource": 16,
+          "event": 261,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "9f811d17ec0f927256e37189de02936e7cdd8d27493141465f8e3acf5866ff52"
+        }
+      ],
+      "controls": []
+    },
+    {
+      "id": "deferred_merge_25",
+      "mode": 25,
+      "path": "m3-deferred-merge-originals/25/capture.gpa_frame",
+      "sha256": "afb2ad614d67c04c0a86d27a893c110b680ea79fe18c183975f35d11c7e11cd0",
+      "bytes": 295852,
+      "family": "deferred_merges",
+      "origin": "self_owned_original_gpa_capture",
+      "comparison_policy": "exact_golden",
+      "reference_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "reference_scope": "Captured application frame 6, not uninjected CPU oracle",
+      "native_workload_fidelity": "capture_side_mismatch",
+      "device_scope": "Local producer hardware; original-player adapter/configuration unproven",
+      "boundaries": [
+        {
+          "resource": 16,
+          "event": 119,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "5620a1b0e6bca98cde70d643094d21a108113d6fc82d8bba541d99a16e626e3f"
+        },
+        {
+          "resource": 16,
+          "event": 191,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "2e1cf76f6319dbc0eff4547e9a3ea3de34380df6f9a2f96f7163e061a0020628"
+        },
+        {
+          "resource": 16,
+          "event": 263,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "9f811d17ec0f927256e37189de02936e7cdd8d27493141465f8e3acf5866ff52"
+        }
+      ],
+      "controls": []
+    },
+    {
+      "id": "deferred_merge_26",
+      "mode": 26,
+      "path": "m3-deferred-merge-originals/26/capture.gpa_frame",
+      "sha256": "01bcd7cdc538f24612760de6bd02f59f11761718e976c30508f3812aecf52c19",
+      "bytes": 295764,
+      "family": "deferred_merges",
+      "origin": "self_owned_original_gpa_capture",
+      "comparison_policy": "exact_golden",
+      "reference_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "reference_scope": "Captured application frame 6, not uninjected CPU oracle",
+      "native_workload_fidelity": "capture_side_mismatch",
+      "device_scope": "Local producer hardware; original-player adapter/configuration unproven",
+      "boundaries": [
+        {
+          "resource": 16,
+          "event": 117,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "5620a1b0e6bca98cde70d643094d21a108113d6fc82d8bba541d99a16e626e3f"
+        },
+        {
+          "resource": 16,
+          "event": 189,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "2e1cf76f6319dbc0eff4547e9a3ea3de34380df6f9a2f96f7163e061a0020628"
+        },
+        {
+          "resource": 16,
+          "event": 261,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "9f811d17ec0f927256e37189de02936e7cdd8d27493141465f8e3acf5866ff52"
+        }
+      ],
+      "controls": []
+    },
+    {
+      "id": "deferred_merge_27",
+      "mode": 27,
+      "path": "m3-deferred-merge-originals/27/capture.gpa_frame",
+      "sha256": "2581b36069a66480c78923c8e4e419d1d621f863a05fb72c59c99a48ad69c025",
+      "bytes": 295852,
+      "family": "deferred_merges",
+      "origin": "self_owned_original_gpa_capture",
+      "comparison_policy": "exact_golden",
+      "reference_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "reference_scope": "Captured application frame 6, not uninjected CPU oracle",
+      "native_workload_fidelity": "capture_side_mismatch",
+      "device_scope": "Local producer hardware; original-player adapter/configuration unproven",
+      "boundaries": [
+        {
+          "resource": 16,
+          "event": 119,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "5620a1b0e6bca98cde70d643094d21a108113d6fc82d8bba541d99a16e626e3f"
+        },
+        {
+          "resource": 16,
+          "event": 191,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "2e1cf76f6319dbc0eff4547e9a3ea3de34380df6f9a2f96f7163e061a0020628"
+        },
+        {
+          "resource": 16,
+          "event": 263,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "9f811d17ec0f927256e37189de02936e7cdd8d27493141465f8e3acf5866ff52"
+        }
+      ],
+      "controls": []
+    },
+    {
+      "id": "deferred_merge_28",
+      "mode": 28,
+      "path": "m3-deferred-merge-originals/28/capture.gpa_frame",
+      "sha256": "29da8bbbd316c08203d8bdad9fa911165091f55dca346e462de19d8204be44cb",
+      "bytes": 295808,
+      "family": "deferred_merges",
+      "origin": "self_owned_original_gpa_capture",
+      "comparison_policy": "exact_golden",
+      "reference_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "reference_scope": "Captured application frame 6, not uninjected CPU oracle",
+      "native_workload_fidelity": "capture_side_mismatch",
+      "device_scope": "Local producer hardware; original-player adapter/configuration unproven",
+      "boundaries": [
+        {
+          "resource": 16,
+          "event": 118,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "5620a1b0e6bca98cde70d643094d21a108113d6fc82d8bba541d99a16e626e3f"
+        },
+        {
+          "resource": 16,
+          "event": 190,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "2e1cf76f6319dbc0eff4547e9a3ea3de34380df6f9a2f96f7163e061a0020628"
+        },
+        {
+          "resource": 16,
+          "event": 262,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "9f811d17ec0f927256e37189de02936e7cdd8d27493141465f8e3acf5866ff52"
+        }
+      ],
+      "controls": []
+    },
+    {
+      "id": "deferred_merge_29",
+      "mode": 29,
+      "path": "m3-deferred-merge-originals/29/capture.gpa_frame",
+      "sha256": "512183fd9ca89536d89b1638ea2bc8377ca24d8215afb04b7b8e5d5098e44c41",
+      "bytes": 295896,
+      "family": "deferred_merges",
+      "origin": "self_owned_original_gpa_capture",
+      "comparison_policy": "exact_golden",
+      "reference_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "reference_scope": "Captured application frame 6, not uninjected CPU oracle",
+      "native_workload_fidelity": "capture_side_mismatch",
+      "device_scope": "Local producer hardware; original-player adapter/configuration unproven",
+      "boundaries": [
+        {
+          "resource": 16,
+          "event": 120,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "5620a1b0e6bca98cde70d643094d21a108113d6fc82d8bba541d99a16e626e3f"
+        },
+        {
+          "resource": 16,
+          "event": 192,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "2e1cf76f6319dbc0eff4547e9a3ea3de34380df6f9a2f96f7163e061a0020628"
+        },
+        {
+          "resource": 16,
+          "event": 264,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "9f811d17ec0f927256e37189de02936e7cdd8d27493141465f8e3acf5866ff52"
+        }
+      ],
+      "controls": []
+    },
+    {
+      "id": "deferred_merge_30",
+      "mode": 30,
+      "path": "m3-deferred-merge-originals/30/capture.gpa_frame",
+      "sha256": "c9fc84c0bddb6f6b048cda6e2a53d3b673862f6f8b395864e508742e262f2b4e",
+      "bytes": 295808,
+      "family": "deferred_merges",
+      "origin": "self_owned_original_gpa_capture",
+      "comparison_policy": "exact_golden",
+      "reference_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "reference_scope": "Captured application frame 6, not uninjected CPU oracle",
+      "native_workload_fidelity": "capture_side_mismatch",
+      "device_scope": "Local producer hardware; original-player adapter/configuration unproven",
+      "boundaries": [
+        {
+          "resource": 16,
+          "event": 118,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "5620a1b0e6bca98cde70d643094d21a108113d6fc82d8bba541d99a16e626e3f"
+        },
+        {
+          "resource": 16,
+          "event": 190,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "2e1cf76f6319dbc0eff4547e9a3ea3de34380df6f9a2f96f7163e061a0020628"
+        },
+        {
+          "resource": 16,
+          "event": 262,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "9f811d17ec0f927256e37189de02936e7cdd8d27493141465f8e3acf5866ff52"
+        }
+      ],
+      "controls": []
+    },
+    {
+      "id": "deferred_merge_31",
+      "mode": 31,
+      "path": "m3-deferred-merge-originals/31/capture.gpa_frame",
+      "sha256": "1416d1b2e196f118c0c6c7df724f28ff0160fc02c5c633d4aeab5b5310f76055",
+      "bytes": 295896,
+      "family": "deferred_merges",
+      "origin": "self_owned_original_gpa_capture",
+      "comparison_policy": "exact_golden",
+      "reference_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "reference_scope": "Captured application frame 6, not uninjected CPU oracle",
+      "native_workload_fidelity": "capture_side_mismatch",
+      "device_scope": "Local producer hardware; original-player adapter/configuration unproven",
+      "boundaries": [
+        {
+          "resource": 16,
+          "event": 120,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "5620a1b0e6bca98cde70d643094d21a108113d6fc82d8bba541d99a16e626e3f"
+        },
+        {
+          "resource": 16,
+          "event": 192,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "2e1cf76f6319dbc0eff4547e9a3ea3de34380df6f9a2f96f7163e061a0020628"
+        },
+        {
+          "resource": 16,
+          "event": 264,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "9f811d17ec0f927256e37189de02936e7cdd8d27493141465f8e3acf5866ff52"
+        }
+      ],
+      "controls": []
+    },
+    {
+      "id": "deferred_merge_32",
+      "mode": 32,
+      "path": "m3-deferred-merge-originals/32/capture.gpa_frame",
+      "sha256": "0679841ebbb05c3cdd15a86d933445571e99636dab07d7d7dd4745c7e7499a03",
+      "bytes": 293194,
+      "family": "deferred_merges",
+      "origin": "self_owned_original_gpa_capture",
+      "comparison_policy": "exact_golden",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "reference_scope": "Captured application frame 6, not uninjected CPU oracle",
+      "native_workload_fidelity": "passed",
+      "device_scope": "Local producer hardware; original-player adapter/configuration unproven",
+      "boundaries": [
+        {
+          "resource": 16,
+          "event": 86,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "bf57d15b24a5fa2f5a70dc44c006779ad1ced8e8c5fe7a79f90b5ae98ac9c741"
+        },
+        {
+          "resource": 16,
+          "event": 150,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "14466ba6b3d9567e680d6598bc6611c51948a10b60ada7557c42460ad1d1320b"
+        },
+        {
+          "resource": 16,
+          "event": 214,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "fc8dae987123085ff66bc4926d980c2ad83e0d59ccc0476a1cbc25f6a6ebfc54"
+        }
+      ],
+      "controls": [
+        {
+          "disable_event": 54,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 71,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 86,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 122,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 136,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 150,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 186,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 200,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 214,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        }
+      ]
+    },
+    {
+      "id": "deferred_merge_33",
+      "mode": 33,
+      "path": "m3-deferred-merge-originals/33/capture.gpa_frame",
+      "sha256": "f970bfdbb785c3ffcad15bef33f63249a42ba509fe36ce8c6e3de249f93cde9a",
+      "bytes": 293194,
+      "family": "deferred_merges",
+      "origin": "self_owned_original_gpa_capture",
+      "comparison_policy": "exact_golden",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "reference_scope": "Captured application frame 6, not uninjected CPU oracle",
+      "native_workload_fidelity": "passed",
+      "device_scope": "Local producer hardware; original-player adapter/configuration unproven",
+      "boundaries": [
+        {
+          "resource": 16,
+          "event": 86,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "bf57d15b24a5fa2f5a70dc44c006779ad1ced8e8c5fe7a79f90b5ae98ac9c741"
+        },
+        {
+          "resource": 16,
+          "event": 150,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "14466ba6b3d9567e680d6598bc6611c51948a10b60ada7557c42460ad1d1320b"
+        },
+        {
+          "resource": 16,
+          "event": 214,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "fc8dae987123085ff66bc4926d980c2ad83e0d59ccc0476a1cbc25f6a6ebfc54"
+        }
+      ],
+      "controls": [
+        {
+          "disable_event": 54,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 71,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 86,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 122,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 136,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 150,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 186,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 200,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 214,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        }
+      ]
+    },
+    {
+      "id": "deferred_merge_34",
+      "mode": 34,
+      "path": "m3-deferred-merge-originals/34/capture.gpa_frame",
+      "sha256": "0e05d0c2f4fa2a4e0f3c124f39e9711d52135ec552dc30a0a89108db6f8acf18",
+      "bytes": 293194,
+      "family": "deferred_merges",
+      "origin": "self_owned_original_gpa_capture",
+      "comparison_policy": "exact_golden",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "reference_scope": "Captured application frame 6, not uninjected CPU oracle",
+      "native_workload_fidelity": "passed",
+      "device_scope": "Local producer hardware; original-player adapter/configuration unproven",
+      "boundaries": [
+        {
+          "resource": 16,
+          "event": 86,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "bf57d15b24a5fa2f5a70dc44c006779ad1ced8e8c5fe7a79f90b5ae98ac9c741"
+        },
+        {
+          "resource": 16,
+          "event": 150,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "14466ba6b3d9567e680d6598bc6611c51948a10b60ada7557c42460ad1d1320b"
+        },
+        {
+          "resource": 16,
+          "event": 214,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "fc8dae987123085ff66bc4926d980c2ad83e0d59ccc0476a1cbc25f6a6ebfc54"
+        }
+      ],
+      "controls": [
+        {
+          "disable_event": 54,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 71,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 86,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 122,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 136,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 150,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 186,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 200,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 214,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        }
+      ]
+    },
+    {
+      "id": "deferred_merge_35",
+      "mode": 35,
+      "path": "m3-deferred-merge-originals/35/capture.gpa_frame",
+      "sha256": "bf09dea99b310d6fab4fbbaec8bbc663f6b9454f2eb955c64dccbf03dcdf81d3",
+      "bytes": 293194,
+      "family": "deferred_merges",
+      "origin": "self_owned_original_gpa_capture",
+      "comparison_policy": "exact_golden",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "reference_scope": "Captured application frame 6, not uninjected CPU oracle",
+      "native_workload_fidelity": "passed",
+      "device_scope": "Local producer hardware; original-player adapter/configuration unproven",
+      "boundaries": [
+        {
+          "resource": 16,
+          "event": 86,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "bf57d15b24a5fa2f5a70dc44c006779ad1ced8e8c5fe7a79f90b5ae98ac9c741"
+        },
+        {
+          "resource": 16,
+          "event": 150,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "14466ba6b3d9567e680d6598bc6611c51948a10b60ada7557c42460ad1d1320b"
+        },
+        {
+          "resource": 16,
+          "event": 214,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "fc8dae987123085ff66bc4926d980c2ad83e0d59ccc0476a1cbc25f6a6ebfc54"
+        }
+      ],
+      "controls": [
+        {
+          "disable_event": 54,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 71,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 86,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 122,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 136,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 150,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 186,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 200,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 214,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        }
+      ]
+    },
+    {
+      "id": "deferred_merge_36",
+      "mode": 36,
+      "path": "m3-deferred-merge-originals/36/capture.gpa_frame",
+      "sha256": "48663975440403b9cc097fb89cc89665cdd2a9fe9de5804afb969b09125fde52",
+      "bytes": 293194,
+      "family": "deferred_merges",
+      "origin": "self_owned_original_gpa_capture",
+      "comparison_policy": "exact_golden",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "reference_scope": "Captured application frame 6, not uninjected CPU oracle",
+      "native_workload_fidelity": "passed",
+      "device_scope": "Local producer hardware; original-player adapter/configuration unproven",
+      "boundaries": [
+        {
+          "resource": 16,
+          "event": 86,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "bf57d15b24a5fa2f5a70dc44c006779ad1ced8e8c5fe7a79f90b5ae98ac9c741"
+        },
+        {
+          "resource": 16,
+          "event": 150,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "14466ba6b3d9567e680d6598bc6611c51948a10b60ada7557c42460ad1d1320b"
+        },
+        {
+          "resource": 16,
+          "event": 214,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "fc8dae987123085ff66bc4926d980c2ad83e0d59ccc0476a1cbc25f6a6ebfc54"
+        }
+      ],
+      "controls": [
+        {
+          "disable_event": 54,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 71,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 86,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 122,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 136,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 150,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 186,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 200,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 214,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        }
+      ]
+    },
+    {
+      "id": "deferred_merge_37",
+      "mode": 37,
+      "path": "m3-deferred-merge-originals/37/capture.gpa_frame",
+      "sha256": "0f9a12c1761e1f71b4f802e71673144d3ee49f6863301e4bfe6c45c41369a3a6",
+      "bytes": 293194,
+      "family": "deferred_merges",
+      "origin": "self_owned_original_gpa_capture",
+      "comparison_policy": "exact_golden",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "reference_scope": "Captured application frame 6, not uninjected CPU oracle",
+      "native_workload_fidelity": "passed",
+      "device_scope": "Local producer hardware; original-player adapter/configuration unproven",
+      "boundaries": [
+        {
+          "resource": 16,
+          "event": 86,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "bf57d15b24a5fa2f5a70dc44c006779ad1ced8e8c5fe7a79f90b5ae98ac9c741"
+        },
+        {
+          "resource": 16,
+          "event": 150,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "14466ba6b3d9567e680d6598bc6611c51948a10b60ada7557c42460ad1d1320b"
+        },
+        {
+          "resource": 16,
+          "event": 214,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "fc8dae987123085ff66bc4926d980c2ad83e0d59ccc0476a1cbc25f6a6ebfc54"
+        }
+      ],
+      "controls": [
+        {
+          "disable_event": 54,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 71,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 86,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 122,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 136,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 150,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 186,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 200,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 214,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        }
+      ]
+    },
+    {
+      "id": "deferred_merge_38",
+      "mode": 38,
+      "path": "m3-deferred-merge-originals/38/capture.gpa_frame",
+      "sha256": "22ce2211b3a33026fef05026776117cf6eac0c3b1319ae7e1b155356449df4d5",
+      "bytes": 293194,
+      "family": "deferred_merges",
+      "origin": "self_owned_original_gpa_capture",
+      "comparison_policy": "exact_golden",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "reference_scope": "Captured application frame 6, not uninjected CPU oracle",
+      "native_workload_fidelity": "passed",
+      "device_scope": "Local producer hardware; original-player adapter/configuration unproven",
+      "boundaries": [
+        {
+          "resource": 16,
+          "event": 86,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "bf57d15b24a5fa2f5a70dc44c006779ad1ced8e8c5fe7a79f90b5ae98ac9c741"
+        },
+        {
+          "resource": 16,
+          "event": 150,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "14466ba6b3d9567e680d6598bc6611c51948a10b60ada7557c42460ad1d1320b"
+        },
+        {
+          "resource": 16,
+          "event": 214,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "fc8dae987123085ff66bc4926d980c2ad83e0d59ccc0476a1cbc25f6a6ebfc54"
+        }
+      ],
+      "controls": [
+        {
+          "disable_event": 54,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 71,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 86,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 122,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 136,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 150,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 186,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 200,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 214,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        }
+      ]
+    },
+    {
+      "id": "deferred_merge_39",
+      "mode": 39,
+      "path": "m3-deferred-merge-originals/39/capture.gpa_frame",
+      "sha256": "f5ec73260659a15c67eed71f3a190458a810865cf5f1bad4cdc3da39e21181c4",
+      "bytes": 293194,
+      "family": "deferred_merges",
+      "origin": "self_owned_original_gpa_capture",
+      "comparison_policy": "exact_golden",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "reference_scope": "Captured application frame 6, not uninjected CPU oracle",
+      "native_workload_fidelity": "passed",
+      "device_scope": "Local producer hardware; original-player adapter/configuration unproven",
+      "boundaries": [
+        {
+          "resource": 16,
+          "event": 86,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "bf57d15b24a5fa2f5a70dc44c006779ad1ced8e8c5fe7a79f90b5ae98ac9c741"
+        },
+        {
+          "resource": 16,
+          "event": 150,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "14466ba6b3d9567e680d6598bc6611c51948a10b60ada7557c42460ad1d1320b"
+        },
+        {
+          "resource": 16,
+          "event": 214,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "fc8dae987123085ff66bc4926d980c2ad83e0d59ccc0476a1cbc25f6a6ebfc54"
+        }
+      ],
+      "controls": [
+        {
+          "disable_event": 54,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 71,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 86,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 122,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 136,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 150,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 186,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 200,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 214,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        }
+      ]
+    },
+    {
+      "id": "deferred_merge_40",
+      "mode": 40,
+      "path": "m3-deferred-merge-originals/40/capture.gpa_frame",
+      "sha256": "039bd94c3517e9261e67056a88ee8ca91bff22a899cf2eda60ec1444f5a939fe",
+      "bytes": 293086,
+      "family": "deferred_merges",
+      "origin": "self_owned_original_gpa_capture",
+      "comparison_policy": "exact_golden",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "reference_scope": "Captured application frame 6, not uninjected CPU oracle",
+      "native_workload_fidelity": "passed",
+      "device_scope": "Local producer hardware; original-player adapter/configuration unproven",
+      "boundaries": [
+        {
+          "resource": 16,
+          "event": 85,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "bf57d15b24a5fa2f5a70dc44c006779ad1ced8e8c5fe7a79f90b5ae98ac9c741"
+        },
+        {
+          "resource": 16,
+          "event": 148,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "14466ba6b3d9567e680d6598bc6611c51948a10b60ada7557c42460ad1d1320b"
+        },
+        {
+          "resource": 16,
+          "event": 211,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "fc8dae987123085ff66bc4926d980c2ad83e0d59ccc0476a1cbc25f6a6ebfc54"
+        }
+      ],
+      "controls": [
+        {
+          "disable_event": 53,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 70,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 85,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 120,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 134,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 148,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 183,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 197,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 211,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        }
+      ]
+    },
+    {
+      "id": "deferred_merge_41",
+      "mode": 41,
+      "path": "m3-deferred-merge-originals/41/capture.gpa_frame",
+      "sha256": "321ae1b2552e9e641af1ccc634bf6447e5e0f0caf3e72cc0f3374217defd484d",
+      "bytes": 293086,
+      "family": "deferred_merges",
+      "origin": "self_owned_original_gpa_capture",
+      "comparison_policy": "exact_golden",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "reference_scope": "Captured application frame 6, not uninjected CPU oracle",
+      "native_workload_fidelity": "passed",
+      "device_scope": "Local producer hardware; original-player adapter/configuration unproven",
+      "boundaries": [
+        {
+          "resource": 16,
+          "event": 85,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "bf57d15b24a5fa2f5a70dc44c006779ad1ced8e8c5fe7a79f90b5ae98ac9c741"
+        },
+        {
+          "resource": 16,
+          "event": 148,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "14466ba6b3d9567e680d6598bc6611c51948a10b60ada7557c42460ad1d1320b"
+        },
+        {
+          "resource": 16,
+          "event": 211,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "fc8dae987123085ff66bc4926d980c2ad83e0d59ccc0476a1cbc25f6a6ebfc54"
+        }
+      ],
+      "controls": [
+        {
+          "disable_event": 53,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 70,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 85,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 120,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 134,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 148,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 183,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 197,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 211,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        }
+      ]
+    },
+    {
+      "id": "deferred_merge_42",
+      "mode": 42,
+      "path": "m3-deferred-merge-originals/42/capture.gpa_frame",
+      "sha256": "88a7c39beadacc0a965cf6222f9de726a1ec805e6e8bc647760d394f0390ff92",
+      "bytes": 293086,
+      "family": "deferred_merges",
+      "origin": "self_owned_original_gpa_capture",
+      "comparison_policy": "exact_golden",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "reference_scope": "Captured application frame 6, not uninjected CPU oracle",
+      "native_workload_fidelity": "passed",
+      "device_scope": "Local producer hardware; original-player adapter/configuration unproven",
+      "boundaries": [
+        {
+          "resource": 16,
+          "event": 85,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "bf57d15b24a5fa2f5a70dc44c006779ad1ced8e8c5fe7a79f90b5ae98ac9c741"
+        },
+        {
+          "resource": 16,
+          "event": 148,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "14466ba6b3d9567e680d6598bc6611c51948a10b60ada7557c42460ad1d1320b"
+        },
+        {
+          "resource": 16,
+          "event": 211,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "fc8dae987123085ff66bc4926d980c2ad83e0d59ccc0476a1cbc25f6a6ebfc54"
+        }
+      ],
+      "controls": [
+        {
+          "disable_event": 53,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 70,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 85,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 120,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 134,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 148,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 183,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 197,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 211,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        }
+      ]
+    },
+    {
+      "id": "deferred_merge_43",
+      "mode": 43,
+      "path": "m3-deferred-merge-originals/43/capture.gpa_frame",
+      "sha256": "d3d41ef67ff6c758c4d7200bbe9ebb64dba25d7a989ee433cf0e65aeb075fa9e",
+      "bytes": 293086,
+      "family": "deferred_merges",
+      "origin": "self_owned_original_gpa_capture",
+      "comparison_policy": "exact_golden",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "reference_scope": "Captured application frame 6, not uninjected CPU oracle",
+      "native_workload_fidelity": "passed",
+      "device_scope": "Local producer hardware; original-player adapter/configuration unproven",
+      "boundaries": [
+        {
+          "resource": 16,
+          "event": 85,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "bf57d15b24a5fa2f5a70dc44c006779ad1ced8e8c5fe7a79f90b5ae98ac9c741"
+        },
+        {
+          "resource": 16,
+          "event": 148,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "14466ba6b3d9567e680d6598bc6611c51948a10b60ada7557c42460ad1d1320b"
+        },
+        {
+          "resource": 16,
+          "event": 211,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "fc8dae987123085ff66bc4926d980c2ad83e0d59ccc0476a1cbc25f6a6ebfc54"
+        }
+      ],
+      "controls": [
+        {
+          "disable_event": 53,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 70,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 85,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 120,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 134,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 148,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 183,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 197,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 211,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        }
+      ]
+    },
+    {
+      "id": "deferred_merge_44",
+      "mode": 44,
+      "path": "m3-deferred-merge-originals/44/capture.gpa_frame",
+      "sha256": "fda3f410501da651e2e16a7085e1d8955662c23e6d8347d4403e19fb1652dd11",
+      "bytes": 293086,
+      "family": "deferred_merges",
+      "origin": "self_owned_original_gpa_capture",
+      "comparison_policy": "exact_golden",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "reference_scope": "Captured application frame 6, not uninjected CPU oracle",
+      "native_workload_fidelity": "passed",
+      "device_scope": "Local producer hardware; original-player adapter/configuration unproven",
+      "boundaries": [
+        {
+          "resource": 16,
+          "event": 85,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "bf57d15b24a5fa2f5a70dc44c006779ad1ced8e8c5fe7a79f90b5ae98ac9c741"
+        },
+        {
+          "resource": 16,
+          "event": 148,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "14466ba6b3d9567e680d6598bc6611c51948a10b60ada7557c42460ad1d1320b"
+        },
+        {
+          "resource": 16,
+          "event": 211,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "fc8dae987123085ff66bc4926d980c2ad83e0d59ccc0476a1cbc25f6a6ebfc54"
+        }
+      ],
+      "controls": [
+        {
+          "disable_event": 53,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 70,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 85,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 120,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 134,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 148,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 183,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 197,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 211,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        }
+      ]
+    },
+    {
+      "id": "deferred_merge_45",
+      "mode": 45,
+      "path": "m3-deferred-merge-originals/45/capture.gpa_frame",
+      "sha256": "5222b7f608e113828594313a594276930cffec12f2f03fe6655b9512f3e121ce",
+      "bytes": 293086,
+      "family": "deferred_merges",
+      "origin": "self_owned_original_gpa_capture",
+      "comparison_policy": "exact_golden",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "reference_scope": "Captured application frame 6, not uninjected CPU oracle",
+      "native_workload_fidelity": "passed",
+      "device_scope": "Local producer hardware; original-player adapter/configuration unproven",
+      "boundaries": [
+        {
+          "resource": 16,
+          "event": 85,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "bf57d15b24a5fa2f5a70dc44c006779ad1ced8e8c5fe7a79f90b5ae98ac9c741"
+        },
+        {
+          "resource": 16,
+          "event": 148,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "14466ba6b3d9567e680d6598bc6611c51948a10b60ada7557c42460ad1d1320b"
+        },
+        {
+          "resource": 16,
+          "event": 211,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "fc8dae987123085ff66bc4926d980c2ad83e0d59ccc0476a1cbc25f6a6ebfc54"
+        }
+      ],
+      "controls": [
+        {
+          "disable_event": 53,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 70,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 85,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 120,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 134,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 148,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 183,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 197,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 211,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        }
+      ]
+    },
+    {
+      "id": "deferred_merge_46",
+      "mode": 46,
+      "path": "m3-deferred-merge-originals/46/capture.gpa_frame",
+      "sha256": "048cbc106f867cb5022dc9b55acd7b835995b064395815be239b45cd1b0276fd",
+      "bytes": 293086,
+      "family": "deferred_merges",
+      "origin": "self_owned_original_gpa_capture",
+      "comparison_policy": "exact_golden",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "reference_scope": "Captured application frame 6, not uninjected CPU oracle",
+      "native_workload_fidelity": "passed",
+      "device_scope": "Local producer hardware; original-player adapter/configuration unproven",
+      "boundaries": [
+        {
+          "resource": 16,
+          "event": 85,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "bf57d15b24a5fa2f5a70dc44c006779ad1ced8e8c5fe7a79f90b5ae98ac9c741"
+        },
+        {
+          "resource": 16,
+          "event": 148,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "14466ba6b3d9567e680d6598bc6611c51948a10b60ada7557c42460ad1d1320b"
+        },
+        {
+          "resource": 16,
+          "event": 211,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "fc8dae987123085ff66bc4926d980c2ad83e0d59ccc0476a1cbc25f6a6ebfc54"
+        }
+      ],
+      "controls": [
+        {
+          "disable_event": 53,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 70,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 85,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 120,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 134,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 148,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 183,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 197,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 211,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        }
+      ]
+    },
+    {
+      "id": "deferred_merge_47",
+      "mode": 47,
+      "path": "m3-deferred-merge-originals/47/capture.gpa_frame",
+      "sha256": "aa8d773baecb9bf311145926ac0f22c99969cff3c2a96abde2c99d0613553ccb",
+      "bytes": 293086,
+      "family": "deferred_merges",
+      "origin": "self_owned_original_gpa_capture",
+      "comparison_policy": "exact_golden",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "reference_scope": "Captured application frame 6, not uninjected CPU oracle",
+      "native_workload_fidelity": "passed",
+      "device_scope": "Local producer hardware; original-player adapter/configuration unproven",
+      "boundaries": [
+        {
+          "resource": 16,
+          "event": 85,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "bf57d15b24a5fa2f5a70dc44c006779ad1ced8e8c5fe7a79f90b5ae98ac9c741"
+        },
+        {
+          "resource": 16,
+          "event": 148,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "14466ba6b3d9567e680d6598bc6611c51948a10b60ada7557c42460ad1d1320b"
+        },
+        {
+          "resource": 16,
+          "event": 211,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "fc8dae987123085ff66bc4926d980c2ad83e0d59ccc0476a1cbc25f6a6ebfc54"
+        }
+      ],
+      "controls": [
+        {
+          "disable_event": 53,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 70,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 85,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 120,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 134,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 148,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 183,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 197,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 211,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        }
+      ]
+    },
+    {
+      "id": "deferred_merge_48",
+      "mode": 48,
+      "path": "m3-deferred-merge-originals/48/capture.gpa_frame",
+      "sha256": "741b74f94357c38f10d7758d633afa4775b7fa6dd91997695526ab3e14386deb",
+      "bytes": 293662,
+      "family": "deferred_merges",
+      "origin": "self_owned_original_gpa_capture",
+      "comparison_policy": "exact_golden",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "reference_scope": "Captured application frame 6, not uninjected CPU oracle",
+      "native_workload_fidelity": "passed",
+      "device_scope": "Local producer hardware; original-player adapter/configuration unproven",
+      "boundaries": [
+        {
+          "resource": 16,
+          "event": 95,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "bf57d15b24a5fa2f5a70dc44c006779ad1ced8e8c5fe7a79f90b5ae98ac9c741"
+        },
+        {
+          "resource": 16,
+          "event": 159,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "14466ba6b3d9567e680d6598bc6611c51948a10b60ada7557c42460ad1d1320b"
+        },
+        {
+          "resource": 16,
+          "event": 223,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "fc8dae987123085ff66bc4926d980c2ad83e0d59ccc0476a1cbc25f6a6ebfc54"
+        }
+      ],
+      "controls": [
+        {
+          "disable_event": 63,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 80,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 95,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 131,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 145,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 159,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 195,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 209,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 223,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        }
+      ]
+    },
+    {
+      "id": "deferred_merge_49",
+      "mode": 49,
+      "path": "m3-deferred-merge-originals/49/capture.gpa_frame",
+      "sha256": "e24a3e71e15d718c4d890eaa4dc14ef13c46605409cd5a0b93593fbdcca74627",
+      "bytes": 293750,
+      "family": "deferred_merges",
+      "origin": "self_owned_original_gpa_capture",
+      "comparison_policy": "exact_golden",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "reference_scope": "Captured application frame 6, not uninjected CPU oracle",
+      "native_workload_fidelity": "passed",
+      "device_scope": "Local producer hardware; original-player adapter/configuration unproven",
+      "boundaries": [
+        {
+          "resource": 16,
+          "event": 97,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "bf57d15b24a5fa2f5a70dc44c006779ad1ced8e8c5fe7a79f90b5ae98ac9c741"
+        },
+        {
+          "resource": 16,
+          "event": 161,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "14466ba6b3d9567e680d6598bc6611c51948a10b60ada7557c42460ad1d1320b"
+        },
+        {
+          "resource": 16,
+          "event": 225,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "fc8dae987123085ff66bc4926d980c2ad83e0d59ccc0476a1cbc25f6a6ebfc54"
+        }
+      ],
+      "controls": [
+        {
+          "disable_event": 66,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 82,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 97,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 133,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 147,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 161,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 197,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 211,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 225,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        }
+      ]
+    },
+    {
+      "id": "deferred_merge_50",
+      "mode": 50,
+      "path": "m3-deferred-merge-originals/50/capture.gpa_frame",
+      "sha256": "3189a1e4b77229074ab4ef4e8d22aa064b2de70f6029386a2d49e78742d44962",
+      "bytes": 293662,
+      "family": "deferred_merges",
+      "origin": "self_owned_original_gpa_capture",
+      "comparison_policy": "exact_golden",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "reference_scope": "Captured application frame 6, not uninjected CPU oracle",
+      "native_workload_fidelity": "passed",
+      "device_scope": "Local producer hardware; original-player adapter/configuration unproven",
+      "boundaries": [
+        {
+          "resource": 16,
+          "event": 95,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "bf57d15b24a5fa2f5a70dc44c006779ad1ced8e8c5fe7a79f90b5ae98ac9c741"
+        },
+        {
+          "resource": 16,
+          "event": 159,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "14466ba6b3d9567e680d6598bc6611c51948a10b60ada7557c42460ad1d1320b"
+        },
+        {
+          "resource": 16,
+          "event": 223,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "fc8dae987123085ff66bc4926d980c2ad83e0d59ccc0476a1cbc25f6a6ebfc54"
+        }
+      ],
+      "controls": [
+        {
+          "disable_event": 63,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 80,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 95,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 131,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 145,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 159,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 195,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 209,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 223,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        }
+      ]
+    },
+    {
+      "id": "deferred_merge_51",
+      "mode": 51,
+      "path": "m3-deferred-merge-originals/51/capture.gpa_frame",
+      "sha256": "683c336cc25d1cba42b4491cf9d4aa81fe3b4498c40d45aa0127a775b26102d8",
+      "bytes": 293750,
+      "family": "deferred_merges",
+      "origin": "self_owned_original_gpa_capture",
+      "comparison_policy": "exact_golden",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "reference_scope": "Captured application frame 6, not uninjected CPU oracle",
+      "native_workload_fidelity": "passed",
+      "device_scope": "Local producer hardware; original-player adapter/configuration unproven",
+      "boundaries": [
+        {
+          "resource": 16,
+          "event": 97,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "bf57d15b24a5fa2f5a70dc44c006779ad1ced8e8c5fe7a79f90b5ae98ac9c741"
+        },
+        {
+          "resource": 16,
+          "event": 161,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "14466ba6b3d9567e680d6598bc6611c51948a10b60ada7557c42460ad1d1320b"
+        },
+        {
+          "resource": 16,
+          "event": 225,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "fc8dae987123085ff66bc4926d980c2ad83e0d59ccc0476a1cbc25f6a6ebfc54"
+        }
+      ],
+      "controls": [
+        {
+          "disable_event": 66,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 82,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 97,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 133,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 147,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 161,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 197,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 211,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 225,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        }
+      ]
+    },
+    {
+      "id": "deferred_merge_52",
+      "mode": 52,
+      "path": "m3-deferred-merge-originals/52/capture.gpa_frame",
+      "sha256": "f3c08d4b60a6954ae68b752e8f0433535c315485e42937810f7b4d3901cf736a",
+      "bytes": 293706,
+      "family": "deferred_merges",
+      "origin": "self_owned_original_gpa_capture",
+      "comparison_policy": "exact_golden",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "reference_scope": "Captured application frame 6, not uninjected CPU oracle",
+      "native_workload_fidelity": "passed",
+      "device_scope": "Local producer hardware; original-player adapter/configuration unproven",
+      "boundaries": [
+        {
+          "resource": 16,
+          "event": 96,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "bf57d15b24a5fa2f5a70dc44c006779ad1ced8e8c5fe7a79f90b5ae98ac9c741"
+        },
+        {
+          "resource": 16,
+          "event": 160,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "14466ba6b3d9567e680d6598bc6611c51948a10b60ada7557c42460ad1d1320b"
+        },
+        {
+          "resource": 16,
+          "event": 224,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "fc8dae987123085ff66bc4926d980c2ad83e0d59ccc0476a1cbc25f6a6ebfc54"
+        }
+      ],
+      "controls": [
+        {
+          "disable_event": 64,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 81,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 96,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 132,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 146,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 160,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 196,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 210,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 224,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        }
+      ]
+    },
+    {
+      "id": "deferred_merge_53",
+      "mode": 53,
+      "path": "m3-deferred-merge-originals/53/capture.gpa_frame",
+      "sha256": "8681347998bd719a2ebdfa1626425464006f4ca238d78ff76016404dd76ccbf0",
+      "bytes": 293794,
+      "family": "deferred_merges",
+      "origin": "self_owned_original_gpa_capture",
+      "comparison_policy": "exact_golden",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "reference_scope": "Captured application frame 6, not uninjected CPU oracle",
+      "native_workload_fidelity": "passed",
+      "device_scope": "Local producer hardware; original-player adapter/configuration unproven",
+      "boundaries": [
+        {
+          "resource": 16,
+          "event": 98,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "bf57d15b24a5fa2f5a70dc44c006779ad1ced8e8c5fe7a79f90b5ae98ac9c741"
+        },
+        {
+          "resource": 16,
+          "event": 162,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "14466ba6b3d9567e680d6598bc6611c51948a10b60ada7557c42460ad1d1320b"
+        },
+        {
+          "resource": 16,
+          "event": 226,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "fc8dae987123085ff66bc4926d980c2ad83e0d59ccc0476a1cbc25f6a6ebfc54"
+        }
+      ],
+      "controls": [
+        {
+          "disable_event": 67,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 83,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 98,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 134,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 148,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 162,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 198,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 212,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 226,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        }
+      ]
+    },
+    {
+      "id": "deferred_merge_54",
+      "mode": 54,
+      "path": "m3-deferred-merge-originals/54/capture.gpa_frame",
+      "sha256": "8f955a141656f3e558c824355ad770044d9ca56e079c84452af0ef3c421deb09",
+      "bytes": 293706,
+      "family": "deferred_merges",
+      "origin": "self_owned_original_gpa_capture",
+      "comparison_policy": "exact_golden",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "reference_scope": "Captured application frame 6, not uninjected CPU oracle",
+      "native_workload_fidelity": "passed",
+      "device_scope": "Local producer hardware; original-player adapter/configuration unproven",
+      "boundaries": [
+        {
+          "resource": 16,
+          "event": 96,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "bf57d15b24a5fa2f5a70dc44c006779ad1ced8e8c5fe7a79f90b5ae98ac9c741"
+        },
+        {
+          "resource": 16,
+          "event": 160,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "14466ba6b3d9567e680d6598bc6611c51948a10b60ada7557c42460ad1d1320b"
+        },
+        {
+          "resource": 16,
+          "event": 224,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "fc8dae987123085ff66bc4926d980c2ad83e0d59ccc0476a1cbc25f6a6ebfc54"
+        }
+      ],
+      "controls": [
+        {
+          "disable_event": 64,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 81,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 96,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 132,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 146,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 160,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 196,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 210,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 224,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        }
+      ]
+    },
+    {
+      "id": "deferred_merge_55",
+      "mode": 55,
+      "path": "m3-deferred-merge-originals/55/capture.gpa_frame",
+      "sha256": "83b11bb9aa4b877ffaf20cc87da86f7fc6519380536615e23a4ff1eb0f526ea5",
+      "bytes": 293794,
+      "family": "deferred_merges",
+      "origin": "self_owned_original_gpa_capture",
+      "comparison_policy": "exact_golden",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "reference_scope": "Captured application frame 6, not uninjected CPU oracle",
+      "native_workload_fidelity": "passed",
+      "device_scope": "Local producer hardware; original-player adapter/configuration unproven",
+      "boundaries": [
+        {
+          "resource": 16,
+          "event": 98,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "bf57d15b24a5fa2f5a70dc44c006779ad1ced8e8c5fe7a79f90b5ae98ac9c741"
+        },
+        {
+          "resource": 16,
+          "event": 162,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "14466ba6b3d9567e680d6598bc6611c51948a10b60ada7557c42460ad1d1320b"
+        },
+        {
+          "resource": 16,
+          "event": 226,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "fc8dae987123085ff66bc4926d980c2ad83e0d59ccc0476a1cbc25f6a6ebfc54"
+        }
+      ],
+      "controls": [
+        {
+          "disable_event": 67,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 83,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 98,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 134,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 148,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 162,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 198,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 212,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 226,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        }
+      ]
+    },
+    {
+      "id": "deferred_merge_56",
+      "mode": 56,
+      "path": "m3-deferred-merge-originals/56/capture.gpa_frame",
+      "sha256": "7bbd438ff52bab9dbe5754ccc001298e85d6ad6363005c744bafa9d4333a9497",
+      "bytes": 293554,
+      "family": "deferred_merges",
+      "origin": "self_owned_original_gpa_capture",
+      "comparison_policy": "exact_golden",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "reference_scope": "Captured application frame 6, not uninjected CPU oracle",
+      "native_workload_fidelity": "passed",
+      "device_scope": "Local producer hardware; original-player adapter/configuration unproven",
+      "boundaries": [
+        {
+          "resource": 16,
+          "event": 94,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "bf57d15b24a5fa2f5a70dc44c006779ad1ced8e8c5fe7a79f90b5ae98ac9c741"
+        },
+        {
+          "resource": 16,
+          "event": 157,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "14466ba6b3d9567e680d6598bc6611c51948a10b60ada7557c42460ad1d1320b"
+        },
+        {
+          "resource": 16,
+          "event": 220,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "fc8dae987123085ff66bc4926d980c2ad83e0d59ccc0476a1cbc25f6a6ebfc54"
+        }
+      ],
+      "controls": [
+        {
+          "disable_event": 62,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 79,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 94,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 129,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 143,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 157,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 192,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 206,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 220,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        }
+      ]
+    },
+    {
+      "id": "deferred_merge_57",
+      "mode": 57,
+      "path": "m3-deferred-merge-originals/57/capture.gpa_frame",
+      "sha256": "26206d39e6204fd43605dcd4f77ea3cb8f3e692f1cc19d803f719ce2979efefb",
+      "bytes": 293642,
+      "family": "deferred_merges",
+      "origin": "self_owned_original_gpa_capture",
+      "comparison_policy": "exact_golden",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "reference_scope": "Captured application frame 6, not uninjected CPU oracle",
+      "native_workload_fidelity": "passed",
+      "device_scope": "Local producer hardware; original-player adapter/configuration unproven",
+      "boundaries": [
+        {
+          "resource": 16,
+          "event": 96,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "bf57d15b24a5fa2f5a70dc44c006779ad1ced8e8c5fe7a79f90b5ae98ac9c741"
+        },
+        {
+          "resource": 16,
+          "event": 159,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "14466ba6b3d9567e680d6598bc6611c51948a10b60ada7557c42460ad1d1320b"
+        },
+        {
+          "resource": 16,
+          "event": 222,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "fc8dae987123085ff66bc4926d980c2ad83e0d59ccc0476a1cbc25f6a6ebfc54"
+        }
+      ],
+      "controls": [
+        {
+          "disable_event": 65,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 81,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 96,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 131,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 145,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 159,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 194,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 208,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 222,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        }
+      ]
+    },
+    {
+      "id": "deferred_merge_58",
+      "mode": 58,
+      "path": "m3-deferred-merge-originals/58/capture.gpa_frame",
+      "sha256": "cac17c8e3a4e54e35b286e3a0a7d01bd47201210e25e764d44be1a34fe10addd",
+      "bytes": 293554,
+      "family": "deferred_merges",
+      "origin": "self_owned_original_gpa_capture",
+      "comparison_policy": "exact_golden",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "reference_scope": "Captured application frame 6, not uninjected CPU oracle",
+      "native_workload_fidelity": "passed",
+      "device_scope": "Local producer hardware; original-player adapter/configuration unproven",
+      "boundaries": [
+        {
+          "resource": 16,
+          "event": 94,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "bf57d15b24a5fa2f5a70dc44c006779ad1ced8e8c5fe7a79f90b5ae98ac9c741"
+        },
+        {
+          "resource": 16,
+          "event": 157,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "14466ba6b3d9567e680d6598bc6611c51948a10b60ada7557c42460ad1d1320b"
+        },
+        {
+          "resource": 16,
+          "event": 220,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "fc8dae987123085ff66bc4926d980c2ad83e0d59ccc0476a1cbc25f6a6ebfc54"
+        }
+      ],
+      "controls": [
+        {
+          "disable_event": 62,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 79,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 94,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 129,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 143,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 157,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 192,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 206,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 220,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        }
+      ]
+    },
+    {
+      "id": "deferred_merge_59",
+      "mode": 59,
+      "path": "m3-deferred-merge-originals/59/capture.gpa_frame",
+      "sha256": "e94b9bb02454e881574af7bf677f96cdec8b04fcea190236603b9bf519f9b106",
+      "bytes": 293642,
+      "family": "deferred_merges",
+      "origin": "self_owned_original_gpa_capture",
+      "comparison_policy": "exact_golden",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "reference_scope": "Captured application frame 6, not uninjected CPU oracle",
+      "native_workload_fidelity": "passed",
+      "device_scope": "Local producer hardware; original-player adapter/configuration unproven",
+      "boundaries": [
+        {
+          "resource": 16,
+          "event": 96,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "bf57d15b24a5fa2f5a70dc44c006779ad1ced8e8c5fe7a79f90b5ae98ac9c741"
+        },
+        {
+          "resource": 16,
+          "event": 159,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "14466ba6b3d9567e680d6598bc6611c51948a10b60ada7557c42460ad1d1320b"
+        },
+        {
+          "resource": 16,
+          "event": 222,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "fc8dae987123085ff66bc4926d980c2ad83e0d59ccc0476a1cbc25f6a6ebfc54"
+        }
+      ],
+      "controls": [
+        {
+          "disable_event": 65,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 81,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 96,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 131,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 145,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 159,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 194,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 208,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 222,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        }
+      ]
+    },
+    {
+      "id": "deferred_merge_60",
+      "mode": 60,
+      "path": "m3-deferred-merge-originals/60/capture.gpa_frame",
+      "sha256": "f50c24a0a0dc630cec0efcc994b2083d1916bb9fd0155750124fca78a8ad477f",
+      "bytes": 293598,
+      "family": "deferred_merges",
+      "origin": "self_owned_original_gpa_capture",
+      "comparison_policy": "exact_golden",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "reference_scope": "Captured application frame 6, not uninjected CPU oracle",
+      "native_workload_fidelity": "passed",
+      "device_scope": "Local producer hardware; original-player adapter/configuration unproven",
+      "boundaries": [
+        {
+          "resource": 16,
+          "event": 95,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "bf57d15b24a5fa2f5a70dc44c006779ad1ced8e8c5fe7a79f90b5ae98ac9c741"
+        },
+        {
+          "resource": 16,
+          "event": 158,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "14466ba6b3d9567e680d6598bc6611c51948a10b60ada7557c42460ad1d1320b"
+        },
+        {
+          "resource": 16,
+          "event": 221,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "fc8dae987123085ff66bc4926d980c2ad83e0d59ccc0476a1cbc25f6a6ebfc54"
+        }
+      ],
+      "controls": [
+        {
+          "disable_event": 63,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 80,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 95,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 130,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 144,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 158,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 193,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 207,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 221,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        }
+      ]
+    },
+    {
+      "id": "deferred_merge_61",
+      "mode": 61,
+      "path": "m3-deferred-merge-originals/61/capture.gpa_frame",
+      "sha256": "26352a48b2914672cca8dce6d7767fa1e4b3916d8a41d3074d0c70175c2c9ef2",
+      "bytes": 293686,
+      "family": "deferred_merges",
+      "origin": "self_owned_original_gpa_capture",
+      "comparison_policy": "exact_golden",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "reference_scope": "Captured application frame 6, not uninjected CPU oracle",
+      "native_workload_fidelity": "passed",
+      "device_scope": "Local producer hardware; original-player adapter/configuration unproven",
+      "boundaries": [
+        {
+          "resource": 16,
+          "event": 97,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "bf57d15b24a5fa2f5a70dc44c006779ad1ced8e8c5fe7a79f90b5ae98ac9c741"
+        },
+        {
+          "resource": 16,
+          "event": 160,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "14466ba6b3d9567e680d6598bc6611c51948a10b60ada7557c42460ad1d1320b"
+        },
+        {
+          "resource": 16,
+          "event": 223,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "fc8dae987123085ff66bc4926d980c2ad83e0d59ccc0476a1cbc25f6a6ebfc54"
+        }
+      ],
+      "controls": [
+        {
+          "disable_event": 66,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 82,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 97,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 132,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 146,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 160,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 195,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 209,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 223,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        }
+      ]
+    },
+    {
+      "id": "deferred_merge_62",
+      "mode": 62,
+      "path": "m3-deferred-merge-originals/62/capture.gpa_frame",
+      "sha256": "ebb3a0410b2d5d8e40b6eaa588b8961e9a91e1a8dbf4967eb1e44cee56a12e3b",
+      "bytes": 293598,
+      "family": "deferred_merges",
+      "origin": "self_owned_original_gpa_capture",
+      "comparison_policy": "exact_golden",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "reference_scope": "Captured application frame 6, not uninjected CPU oracle",
+      "native_workload_fidelity": "passed",
+      "device_scope": "Local producer hardware; original-player adapter/configuration unproven",
+      "boundaries": [
+        {
+          "resource": 16,
+          "event": 95,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "bf57d15b24a5fa2f5a70dc44c006779ad1ced8e8c5fe7a79f90b5ae98ac9c741"
+        },
+        {
+          "resource": 16,
+          "event": 158,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "14466ba6b3d9567e680d6598bc6611c51948a10b60ada7557c42460ad1d1320b"
+        },
+        {
+          "resource": 16,
+          "event": 221,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "fc8dae987123085ff66bc4926d980c2ad83e0d59ccc0476a1cbc25f6a6ebfc54"
+        }
+      ],
+      "controls": [
+        {
+          "disable_event": 63,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 80,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 95,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 130,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 144,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 158,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 193,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 207,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 221,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        }
+      ]
+    },
+    {
+      "id": "deferred_merge_63",
+      "mode": 63,
+      "path": "m3-deferred-merge-originals/63/capture.gpa_frame",
+      "sha256": "55b6bb43bb9aa28140906b9c36bb3b781c42290c2b319c5f0bdd39588bdfc61c",
+      "bytes": 293686,
+      "family": "deferred_merges",
+      "origin": "self_owned_original_gpa_capture",
+      "comparison_policy": "exact_golden",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "reference_scope": "Captured application frame 6, not uninjected CPU oracle",
+      "native_workload_fidelity": "passed",
+      "device_scope": "Local producer hardware; original-player adapter/configuration unproven",
+      "boundaries": [
+        {
+          "resource": 16,
+          "event": 97,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "bf57d15b24a5fa2f5a70dc44c006779ad1ced8e8c5fe7a79f90b5ae98ac9c741"
+        },
+        {
+          "resource": 16,
+          "event": 160,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "14466ba6b3d9567e680d6598bc6611c51948a10b60ada7557c42460ad1d1320b"
+        },
+        {
+          "resource": 16,
+          "event": 223,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "fc8dae987123085ff66bc4926d980c2ad83e0d59ccc0476a1cbc25f6a6ebfc54"
+        }
+      ],
+      "controls": [
+        {
+          "disable_event": 66,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 82,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 97,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 132,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 146,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 160,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 195,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 209,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 223,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "schema": "FloraGPA compatibility gate suites 1",
+  "manifest_hash_policy": "UTF-8 bytes with CRLF normalized to LF",
+  "expected_cases": 64,
+  "expected_unique_captures": 64,
+  "expected_rejections": 0,
+  "suites": [
+    {
+      "id": "deferred-merges",
+      "manifest": "docs/deferred-merge-corpus.json",
+      "manifest_sha256": "21f43a522328968023298e72e9e0aedebb892d9ce0b2d09e477f371df596f242",
+      "capture_root": "artifacts",
+      "subdirectory": "",
+      "expected_rejections": {}
+    }
+  ]
+}
