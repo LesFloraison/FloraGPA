@@ -10,6 +10,7 @@
 #include "core/Commands.h"
 #include "core/ContextStateRecords.h"
 #include "core/CopyCommands.h"
+#include "core/DiscardRecords.h"
 #include "core/Dxbc.h"
 #include "core/InspectionRecords.h"
 #include "core/OutputBindings.h"
@@ -795,6 +796,31 @@ void Replay::command(const Entry &e) {
     if (outputHistory_ && OutputBindingModel::models(e.type))
         outputHistory_->advance(e.id);
     Reader r(payload);
+    if (isDiscardRecord(t)) {
+        if (!std::ranges::equal(payload, frame_.payload(e.id)))
+            throw std::runtime_error("Discard payload experiments are not supported");
+        const auto record = readDiscardRecord(t, payload);
+        validateDiscardRecord(frame_, record);
+        if (!context1_)
+            throw std::runtime_error("Native resource discard requires ID3D11DeviceContext1");
+        if (options_.disabled.contains(e.id))
+            return;
+        ReplayAnnotation marker(captureAnnotation_.Get(), e.id, commandName(t).c_str());
+        if (t == 0x3553)
+            context1_->DiscardResource(get<ID3D11Resource>(record.target));
+        else if (t == 0x3554)
+            context1_->DiscardView(get<ID3D11View>(record.target));
+        else {
+            std::vector<D3D11_RECT> rects;
+            for (const auto &rect : record.rectangles)
+                rects.push_back({rect[0], rect[1], rect[2], rect[3]});
+            context1_->DiscardView1(get<ID3D11View>(record.target),
+                                    record.hasRectangles ? rects.data() : nullptr, record.count);
+        }
+        discardHistory_.emplace_back(e.id, record);
+        ++counts[commandName(t)];
+        return;
+    }
     if (isContextStateRecord(t)) {
         if (!std::ranges::equal(payload, frame_.payload(e.id)))
             throw std::runtime_error("Context-state payload experiments are not supported");
@@ -1506,6 +1532,7 @@ void Replay::run(const std::function<void(Id, size_t, size_t)> &progress,
             (entry.category == 5 && entry.type == 0x91 && shaderStreamOutput(frame_, id)))
             soCountEnabled_ = true;
     counts.clear();
+    discardHistory_.clear();
     for (auto &ranges : ranges_)
         ranges.clear();
     lastTarget_ = lastTargetView_ = lastEvent_ = lastWorkEvent_ = 0;

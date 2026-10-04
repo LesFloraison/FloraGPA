@@ -285,3 +285,6 @@
 {0x3561, "SwapDeviceContextState"},
 {0x35a4, "CreateDeviceContextState"},
 {0x359b, "GetCreationFlags"},
+{0x3553, "DiscardResource"},
+{0x3554, "DiscardView"},
+{0x3563, "DiscardView1"},

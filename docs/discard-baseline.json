@@ -1,0 +1,619 @@
+{
+  "schema": "FloraGPA native discard acceptance 1",
+  "preceding_revision": "6a04b55",
+  "completion": "M2 and M3-M6 incomplete; undefined-region propagation and discard information gaps remain",
+  "previous_full_matrix": "docs/so-lifetime-acceptance-baseline.json",
+  "full_historical_matrix_rerun": false,
+  "cumulative_inventory_files": 388,
+  "cumulative_positive_files": 366,
+  "cumulative_explicit_rejections": 22,
+  "new_original_files": 26,
+  "new_positive_files": 15,
+  "new_explicit_rejections": 11,
+  "original_producer_frames": 408,
+  "original_producer_storage_checks": 408,
+  "original_producer_image_checks": 408,
+  "additional_producer_srv_prefix_checks": 24,
+  "independent_matrix_attempts": 52,
+  "independent_matrix_successes": 30,
+  "independent_matrix_located_rejections": 22,
+  "strict_matrix_resource_exports": 30,
+  "original_player_runs": 52,
+  "original_equals_producer_files": 26,
+  "original_device_configuration": "Unidentified; no strict device/configuration equivalence",
+  "focused_hardware_warp_repeats": 60,
+  "focused_hardware_warp_srv_prefix_replays": 2,
+  "focused_disabled_discard_controls": 28,
+  "focused_full_storage_checks": 88,
+  "native_physical_invalidation_proven": false,
+  "native_physical_invalidation_note": "Direct Context1 API calls are counted; driver may preserve discarded memory. Later defining writes supply strict byte/image oracles.",
+  "related_ctest_suites": 12,
+  "golden_checks": 4,
+  "tests": {
+    "discards": {
+      "passed": 54,
+      "sha256": "d835e4ab7f5e1e5385ae9feecc4f0725813918cd03cdb10def61f0ec9457e99e"
+    },
+    "clear-view": {
+      "passed": 36,
+      "sha256": "5b2af4986adb579805db836e6cbc3e820a0062ed3a837ba2f44e238a164b4c7c"
+    },
+    "transfer1": {
+      "passed": 57,
+      "sha256": "fd113b2ed9ec3170c76d8b41a4d49ce4090378a4cb2a858631c707464850e210"
+    },
+    "copy-commands": {
+      "passed": 7,
+      "sha256": "2deeee132e0a04454e6afd32d2c7691e4ee03929b863a0b23a861403a185c7b5"
+    },
+    "texture-copies": {
+      "passed": 7,
+      "sha256": "6d2673afa80dd9ee30f0dd6d6de7f3ed9789ab2a1f01b8942ca44c3c219a4382"
+    },
+    "context-states": {
+      "passed": 17,
+      "sha256": "ebf7999e9539d5a9a8c430b43b2eb05d1e6cd6270cd24982fbe1cf6bd53c2331"
+    },
+    "so-lifetimes": {
+      "passed": 22,
+      "sha256": "20980d611449838c91689da88fee6eae3b5257b4da42e5d7cd2f7ccb12f4b705"
+    },
+    "pipeline-getters": {
+      "passed": 30,
+      "sha256": "5d88a9ca61ba9d987e1a99b8aa4834e667a9a02c6b841f31f5fe7eaad9bf56d8"
+    },
+    "contexts": {
+      "passed": 9,
+      "sha256": "27acba7b983c8cd747716a41212b27aa6e6d59036739b5b3766f35328de76a73"
+    },
+    "ui": {
+      "passed": 56,
+      "sha256": "f198ea7a4a2a3ed580152fcbcd60b23c470bae6492abf5e4ea8b02c63d60ede8"
+    },
+    "api_commands": {
+      "ctest_passed": true,
+      "case_count": "Not emitted by this CTest invocation"
+    },
+    "frame_validation": {
+      "ctest_passed": true,
+      "case_count": "Not emitted by this CTest invocation"
+    }
+  },
+  "regressions": {
+    "so": {
+      "files": 10,
+      "runs": 20,
+      "report": "artifacts\\m2-discards-so\\validation.json",
+      "sha256": "834960a79381c49a03d0ef76fdde8f4f33d6e637bd2b2a8d1ba06478a096acbd",
+      "outcomes": {
+        "repeat_stable": 10
+      }
+    },
+    "getters": {
+      "files": 12,
+      "runs": 24,
+      "report": "artifacts\\m2-discards-getters\\validation.json",
+      "sha256": "0144deeab2e4946f3ef95c5af10e7648d6c814813f1161142835a338870dc513",
+      "outcomes": {
+        "repeat_stable": 12
+      }
+    },
+    "context": {
+      "files": 8,
+      "runs": 16,
+      "report": "artifacts\\m2-discards-context\\validation.json",
+      "sha256": "49b9b460ba3c78f7ee5d6138e3ae41adbfa0b52c3411993c59dcf8ff8d16ee1f",
+      "outcomes": {
+        "repeat_stable": 1,
+        "replay_failed": 7
+      }
+    }
+  },
+  "cases": [
+    {
+      "id": "discard_control",
+      "capture_sha256": "4b8612125e13b7a245f73ad99914ee098a3516825e66817048ec369f39a23949",
+      "independent_status": "repeat_stable",
+      "original_equals_producer": true,
+      "preflight_errors": [],
+      "resource_boundaries": [
+        {
+          "resource": 10,
+          "event": 41,
+          "golden_sha256": "89800b469471f08c4303acf19c9bd750de3f808a54c992d8ad3cebb34ee92da9",
+          "exports": 2,
+          "golden_match": true
+        }
+      ]
+    },
+    {
+      "id": "discard_texture_resource",
+      "capture_sha256": "ef280001f7077d12d62ebc7cf96ee4d4b96d7dd89347a09929a8557fb449f58b",
+      "independent_status": "repeat_stable",
+      "original_equals_producer": true,
+      "preflight_errors": [],
+      "resource_boundaries": [
+        {
+          "resource": 10,
+          "event": 44,
+          "golden_sha256": "89800b469471f08c4303acf19c9bd750de3f808a54c992d8ad3cebb34ee92da9",
+          "exports": 2,
+          "golden_match": true
+        }
+      ]
+    },
+    {
+      "id": "discard_buffer_resource",
+      "capture_sha256": "778663dc6cf541eed5b1a7295a81c1f95d0756f3ca2e6ea93cafedbc80d2dd09",
+      "independent_status": "repeat_stable",
+      "original_equals_producer": true,
+      "preflight_errors": [],
+      "resource_boundaries": [
+        {
+          "resource": 10,
+          "event": 38,
+          "golden_sha256": "f3f9124ce5ffba7076962575188271bb76a0ba981b245f66142d0b27c3729a5f",
+          "exports": 2,
+          "golden_match": true
+        }
+      ]
+    },
+    {
+      "id": "discard_rtv",
+      "capture_sha256": "cdea4af5370fb877afb5645f1e914fd3c64168cc34f1c841811ff7a9202529bc",
+      "independent_status": "repeat_stable",
+      "original_equals_producer": true,
+      "preflight_errors": [],
+      "resource_boundaries": [
+        {
+          "resource": 10,
+          "event": 44,
+          "golden_sha256": "89800b469471f08c4303acf19c9bd750de3f808a54c992d8ad3cebb34ee92da9",
+          "exports": 2,
+          "golden_match": true
+        }
+      ]
+    },
+    {
+      "id": "discard_srv",
+      "capture_sha256": "dea972ae2c07049429d365186ec986f2b8b55e94d741217627195a4ea735195a",
+      "independent_status": "repeat_stable",
+      "original_equals_producer": true,
+      "preflight_errors": [],
+      "resource_boundaries": [
+        {
+          "resource": 10,
+          "event": 66,
+          "golden_sha256": "89800b469471f08c4303acf19c9bd750de3f808a54c992d8ad3cebb34ee92da9",
+          "exports": 2,
+          "golden_match": true
+        }
+      ]
+    },
+    {
+      "id": "discard_uav",
+      "capture_sha256": "b3ade9009bcf29e934efd550ab90995f83ca0ddbafb8779dc064a286ca2a2fd0",
+      "independent_status": "repeat_stable",
+      "original_equals_producer": true,
+      "preflight_errors": [],
+      "resource_boundaries": [
+        {
+          "resource": 10,
+          "event": 44,
+          "golden_sha256": "89800b469471f08c4303acf19c9bd750de3f808a54c992d8ad3cebb34ee92da9",
+          "exports": 2,
+          "golden_match": true
+        }
+      ]
+    },
+    {
+      "id": "discard_dsv",
+      "capture_sha256": "a02178d6b9cf597a9355a05bed1579bbfd531ec10f376121f390a75066859681",
+      "independent_status": "repeat_stable",
+      "original_equals_producer": true,
+      "preflight_errors": [],
+      "resource_boundaries": [
+        {
+          "resource": 10,
+          "event": 38,
+          "golden_sha256": "3afc4fbc010479ae0531a90bf4c473ddfe72fcccce7645874ccd36720947c336",
+          "exports": 2,
+          "golden_match": true
+        }
+      ]
+    },
+    {
+      "id": "discard_rectangle",
+      "capture_sha256": "2ef88f0faa2c865b0c0e4163cf3583a1c1fc83c61cca2997a32cb7682f4b4b98",
+      "independent_status": "repeat_stable",
+      "original_equals_producer": true,
+      "preflight_errors": [],
+      "resource_boundaries": [
+        {
+          "resource": 10,
+          "event": 44,
+          "golden_sha256": "67ada869e3e22b0bf0e020c314442c4526586cc4904666291586ec6e5ffffcd0",
+          "exports": 2,
+          "golden_match": true
+        }
+      ]
+    },
+    {
+      "id": "discard_overlap",
+      "capture_sha256": "6f6ff68e3405fbfcaeb68bce564cb9d7ad6d1fac1967dfb641c13aa4cc405683",
+      "independent_status": "repeat_stable",
+      "original_equals_producer": true,
+      "preflight_errors": [],
+      "resource_boundaries": [
+        {
+          "resource": 10,
+          "event": 46,
+          "golden_sha256": "b089b269625ba28c9b01c3eca8b3c0d35e4b8a84091fa5d9e464432d13986210",
+          "exports": 2,
+          "golden_match": true
+        }
+      ]
+    },
+    {
+      "id": "discard_null_rects",
+      "capture_sha256": "b8ffea73cbc8cc65f349018b98af450020a0c8254dd7efcfbda77c021a4ddfbd",
+      "independent_status": "replay_failed",
+      "original_equals_producer": true,
+      "preflight_errors": [
+        {
+          "category": 7,
+          "entry_id": 15,
+          "event_id": 15,
+          "kind": "discard_rectangle_presence_unresolved",
+          "reason": "DiscardView1 zero-count record lost the rectangle pointer presence: whole-view discard and an empty non-null rectangle array cannot be distinguished; safe overwrite/use has not been proven",
+          "record_type": 13667,
+          "resource_id": 12,
+          "severity": "error"
+        }
+      ],
+      "resource_boundaries": []
+    },
+    {
+      "id": "discard_null_rects_nonzero_count",
+      "capture_sha256": "04e1a096a0507b72803ec054e27b8e3202751d38ff747b84d4a11f9816134e4e",
+      "independent_status": "repeat_stable",
+      "original_equals_producer": true,
+      "preflight_errors": [],
+      "resource_boundaries": [
+        {
+          "resource": 10,
+          "event": 44,
+          "golden_sha256": "89800b469471f08c4303acf19c9bd750de3f808a54c992d8ad3cebb34ee92da9",
+          "exports": 2,
+          "golden_match": true
+        }
+      ]
+    },
+    {
+      "id": "discard_empty_rectangle",
+      "capture_sha256": "11885783fc07e9b0326d383c16c39c9070e25271d649192a7b066870e531c2ee",
+      "independent_status": "repeat_stable",
+      "original_equals_producer": true,
+      "preflight_errors": [],
+      "resource_boundaries": [
+        {
+          "resource": 10,
+          "event": 42,
+          "golden_sha256": "3eb0d49e8e7030bbdf16b08b05900c86ab09d25908203e5fc8592d99f283a04b",
+          "exports": 2,
+          "golden_match": true
+        }
+      ]
+    },
+    {
+      "id": "discard_mip_array",
+      "capture_sha256": "5d8201725eb62ddea0a697ac7b31faa3701474cdca5afd6301427f02babdf87c",
+      "independent_status": "repeat_stable",
+      "original_equals_producer": true,
+      "preflight_errors": [],
+      "resource_boundaries": [
+        {
+          "resource": 10,
+          "event": 56,
+          "golden_sha256": "c8ed9e1b0d7ac1dc4398e473cbbb476cc61756560f451c7c0e6be2500062e114",
+          "exports": 2,
+          "golden_match": true
+        }
+      ]
+    },
+    {
+      "id": "discard_buffer_rectangle",
+      "capture_sha256": "12c0d569d242bafe9a39247a499dfb104efce461598ef05e13050084cfdc9f08",
+      "independent_status": "repeat_stable",
+      "original_equals_producer": true,
+      "preflight_errors": [],
+      "resource_boundaries": [
+        {
+          "resource": 10,
+          "event": 40,
+          "golden_sha256": "c484730a546e7fc07e1743acb588d0b666d9fb72941819177765b6159d532407",
+          "exports": 2,
+          "golden_match": true
+        }
+      ]
+    },
+    {
+      "id": "discard_texture1d",
+      "capture_sha256": "b77fb39928b9431e70c4479ba1557900d6c03dca127abda9b0efc2f8204b39ed",
+      "independent_status": "repeat_stable",
+      "original_equals_producer": true,
+      "preflight_errors": [],
+      "resource_boundaries": [
+        {
+          "resource": 10,
+          "event": 38,
+          "golden_sha256": "37cc0cd0199d3a7600dfbfbfc9094ecbc6f3dd7bbdac70b1af849179d364f7b7",
+          "exports": 2,
+          "golden_match": true
+        }
+      ]
+    },
+    {
+      "id": "discard_texture3d",
+      "capture_sha256": "64e90b14587a599365c8208116686e28290810e5cff554b52dedb5b6a9362d84",
+      "independent_status": "repeat_stable",
+      "original_equals_producer": true,
+      "preflight_errors": [],
+      "resource_boundaries": [
+        {
+          "resource": 10,
+          "event": 38,
+          "golden_sha256": "a1d8c13c6caf364b555f5df6543fae28a4d27088b45502d3242c7b76c55dfd1d",
+          "exports": 2,
+          "golden_match": true
+        }
+      ]
+    },
+    {
+      "id": "discard_zero_count_nonnull",
+      "capture_sha256": "1eecc6f9cade17d5e9ebdff057f5ffa608405c4f832266f9113e3db50e3fde9f",
+      "independent_status": "replay_failed",
+      "original_equals_producer": true,
+      "preflight_errors": [
+        {
+          "category": 7,
+          "entry_id": 15,
+          "event_id": 15,
+          "kind": "discard_rectangle_presence_unresolved",
+          "reason": "DiscardView1 zero-count record lost the rectangle pointer presence: whole-view discard and an empty non-null rectangle array cannot be distinguished; safe overwrite/use has not been proven",
+          "record_type": 13667,
+          "resource_id": 12,
+          "severity": "error"
+        }
+      ],
+      "resource_boundaries": []
+    },
+    {
+      "id": "discard_missing_view_rtv",
+      "capture_sha256": "c7a8e2b7f80db9d33cc92ff46aeb697eaec17a1e3343513ed2a4b1a19408a59b",
+      "independent_status": "replay_failed",
+      "original_equals_producer": true,
+      "preflight_errors": [
+        {
+          "category": 7,
+          "entry_id": 13,
+          "event_id": 13,
+          "kind": "discard_target_missing",
+          "reason": "Missing capture entry 14",
+          "record_type": 13652,
+          "resource_id": 14,
+          "severity": "error"
+        }
+      ],
+      "resource_boundaries": []
+    },
+    {
+      "id": "discard_missing_view_srv",
+      "capture_sha256": "3187da76ddd236a76678f47ad0a9a8f72367f77f66968085c8ac5026f229c412",
+      "independent_status": "replay_failed",
+      "original_equals_producer": true,
+      "preflight_errors": [
+        {
+          "category": 7,
+          "entry_id": 13,
+          "event_id": 13,
+          "kind": "discard_target_missing",
+          "reason": "Missing capture entry 14",
+          "record_type": 13652,
+          "resource_id": 14,
+          "severity": "error"
+        }
+      ],
+      "resource_boundaries": []
+    },
+    {
+      "id": "discard_missing_view_uav",
+      "capture_sha256": "308a72497eb42bc5cf1888526609817b39a101ebb2e38c4c2bcc9364179a9426",
+      "independent_status": "replay_failed",
+      "original_equals_producer": true,
+      "preflight_errors": [
+        {
+          "category": 7,
+          "entry_id": 13,
+          "event_id": 13,
+          "kind": "discard_target_missing",
+          "reason": "Missing capture entry 14",
+          "record_type": 13652,
+          "resource_id": 14,
+          "severity": "error"
+        }
+      ],
+      "resource_boundaries": []
+    },
+    {
+      "id": "discard_missing_view_rectangle",
+      "capture_sha256": "b2a9663be0babffa21f467fecf36bb85077d10ec6827fad7c506047469512326",
+      "independent_status": "replay_failed",
+      "original_equals_producer": true,
+      "preflight_errors": [
+        {
+          "category": 7,
+          "entry_id": 13,
+          "event_id": 13,
+          "kind": "discard_target_missing",
+          "reason": "Missing capture entry 14",
+          "record_type": 13667,
+          "resource_id": 14,
+          "severity": "error"
+        }
+      ],
+      "resource_boundaries": []
+    },
+    {
+      "id": "discard_missing_view_overlap",
+      "capture_sha256": "4cbd8907783c1993b999e2a88da17e8f5f7f32e2de9f03999b95970505628ee6",
+      "independent_status": "replay_failed",
+      "original_equals_producer": true,
+      "preflight_errors": [
+        {
+          "category": 7,
+          "entry_id": 13,
+          "event_id": 13,
+          "kind": "discard_target_missing",
+          "reason": "Missing capture entry 14",
+          "record_type": 13667,
+          "resource_id": 14,
+          "severity": "error"
+        }
+      ],
+      "resource_boundaries": []
+    },
+    {
+      "id": "discard_missing_view_null_rects_nonzero_count",
+      "capture_sha256": "2a63329be55ff7adfa46b53f7026d9f6238453f190d54d306920f0aefb391da3",
+      "independent_status": "replay_failed",
+      "original_equals_producer": true,
+      "preflight_errors": [
+        {
+          "category": 7,
+          "entry_id": 13,
+          "event_id": 13,
+          "kind": "discard_target_missing",
+          "reason": "Missing capture entry 14",
+          "record_type": 13667,
+          "resource_id": 14,
+          "severity": "error"
+        }
+      ],
+      "resource_boundaries": []
+    },
+    {
+      "id": "discard_missing_view_empty_rectangle",
+      "capture_sha256": "77621ba6efe2f49b35c2f508663cf2edd6031a50382fa3b33246bf764abf1434",
+      "independent_status": "replay_failed",
+      "original_equals_producer": true,
+      "preflight_errors": [
+        {
+          "category": 7,
+          "entry_id": 13,
+          "event_id": 13,
+          "kind": "discard_target_missing",
+          "reason": "Missing capture entry 14",
+          "record_type": 13667,
+          "resource_id": 14,
+          "severity": "error"
+        }
+      ],
+      "resource_boundaries": []
+    },
+    {
+      "id": "discard_missing_view_mip_array",
+      "capture_sha256": "c62dc1f9706db0df0ec6aa30e6714cdb676ef85b1c85f158f7b49b83872e2a99",
+      "independent_status": "replay_failed",
+      "original_equals_producer": true,
+      "preflight_errors": [
+        {
+          "category": 7,
+          "entry_id": 19,
+          "event_id": 19,
+          "kind": "discard_target_missing",
+          "reason": "Missing capture entry 20",
+          "record_type": 13652,
+          "resource_id": 20,
+          "severity": "error"
+        }
+      ],
+      "resource_boundaries": []
+    },
+    {
+      "id": "discard_missing_view_buffer_rectangle",
+      "capture_sha256": "ca3812efd07dc6865b946f137fa8b8d50339002b4256a4ac6e32e8d3df80688d",
+      "independent_status": "replay_failed",
+      "original_equals_producer": true,
+      "preflight_errors": [
+        {
+          "category": 7,
+          "entry_id": 13,
+          "event_id": 13,
+          "kind": "discard_target_missing",
+          "reason": "Missing capture entry 14",
+          "record_type": 13667,
+          "resource_id": 14,
+          "severity": "error"
+        }
+      ],
+      "resource_boundaries": []
+    }
+  ],
+  "source_files": {
+    "CMakeLists.txt": "3a745ee8f3ea9578e2d82c22211bc680cbf210c94171c5530465a2ada65d5136",
+    "src/core/DiscardRecords.h": "80d3b86fbf7a8f3c0f151049058d46554449f203cc33ac361ac1a26ef9deba2b",
+    "src/core/DiscardRecords.cpp": "379d1ab404cb1f77ffaec731c85020dc4e1da7d23c5acfda5222b25bc1415965",
+    "src/core/CommandNames.inc": "fa91b410123e4c26ed9c5dcc8978ae5b3076de1f69f7971a4eb3f7236106efe7",
+    "src/core/ReplayCapabilities.cpp": "e2389f0ae399df84ae4ec27ef399f56f3b40456967405c069c86d556d583d416",
+    "src/replay/Replay.h": "0cc117f8a9bcb68b5e87b0a6881f72b4667e8de92f6de44ef3e945d727002285",
+    "src/replay/Replay.cpp": "56e4598330d9a5d237cb062d0f1adb67b4d2a7ff76627b0a05a99c7039a0857f",
+    "src/application/ApiCommands.cpp": "5e2e0cff78151599c428c18d6a94b67c4fe593d2865ce9c9f1ab07646d637be3",
+    "src/application/FrameValidation.cpp": "709d9b11038d344a6b306d9b333a503a975acc827fba0f6849318e32429c8109",
+    "src/cli/main.cpp": "d8213c5b5cf65cf490a5c96a0e9c903cc3510ece119a8678f419d9a80c2cc86d",
+    "tests/DiscardTests.cpp": "169676046bcc473306c523075fa8208aef9855a318ab1aed904216524c1dace5",
+    "tools/capture_discards.py": "4737cc2404413769797e2cd83a506f2e6756ff44de9ada701cd286f8173a2678",
+    "tools/native/discard_probe.cpp": "6b0ede02a9d0f91fb7ade82203b3993510c542b0fa2a7ae6f2954a07cbd3a4e0"
+  },
+  "evidence_files": {
+    "artifacts/discard-wrappers.c": "8147cad33263e49ac112c8073301e10a2d3795915b41ce1010cc2a9eb3809eb5",
+    "artifacts/discard-wrappers-ghidra.log": "40ef5ce4f4232946081d33736d3d5c14a7fc7d23f4fc522412270545e0c54913",
+    "artifacts/m2-discard-originals-v3/manifest.json": "81db8630b784c1587b26f130a8bd262e9ab5e0a56e2f636dd2f6177323b7180e",
+    "artifacts/m2-discard-originals-v2/manifest.json": "50ce4750edef727859ae845705ad8725c851204bb82104ee679a99dfeafa80ed",
+    "artifacts/m2-discard-originals-v3/0/captured/wrapper-rvas.txt": "b66a24470cf3b8470caf8e7a5bb60a2864d2cb1311d0beb939e852df451dbd10",
+    "artifacts/discards-first-Release.txt": "b71ca5021523df0d59697cf359dc5bbdd17a88216f842490203a58a8ccd94816",
+    "artifacts/ctest-m2-discards.log": "3e5e7a43f942488348663acd0be5464e1f9ada50eb4f82453006563f9922fbca",
+    "artifacts/ctest-discard-final.log": "f92a6145634bc5c64b337351cb42f6102e408829874fa2515190f15781a9d374",
+    "artifacts/ctest-discards-full-LastTest.log": "5e70fd6958bb6d3f118a5b9fec6f8214607bfff76a87c53743af199a1aa7605b",
+    "artifacts/m2-discards-accepted/validation.json": "91687676ad7bb2cf020d5eeee1fcc53853610a91c94643b3a1af48e7083c39c4",
+    "artifacts/build-discard-regression.log": "6a631ae681946cc5b0ba705a60df57018e94d9bbc3b5a1c282ae8117e645b09e",
+    "artifacts/build-discard-prefix-check.log": "c87fa934b54b2e76019ceed132f60c5c2a089bd838e3d1bdf53c6323ca48a5ac",
+    "artifacts/package-discards.log": "3eafd3c12fed1d8516ee443f007c237028250e26b81bac942ff0d3a320bca5e2"
+  },
+  "frozen_producer_files": {
+    "capture_discards.py": "4737cc2404413769797e2cd83a506f2e6756ff44de9ada701cd286f8173a2678",
+    "discard_probe.cpp": "6b0ede02a9d0f91fb7ade82203b3993510c542b0fa2a7ae6f2954a07cbd3a4e0",
+    "FloraDiscardProbe.exe": "ace9c070a3a83f5233a410f7b74de79e1999df48d93d8d6109d76cc42fdc2126",
+    "original_capture_control.h": "0bbda55addde2970d2775bfb633881c45f13279f61d6584b1ad297ce0b0090b8",
+    "present_capture_probe.cpp": "7c29f1e572ab16a5bc497d39eef8198d79056877a9e1d3fff3f7ed530a32c4e3",
+    "texture_probe_helpers.h": "30abcac380d84d505fd344d4083d97300f50df5b2e5cc7dffb11ea03c6d6ee3d"
+  },
+  "original_dlls": {
+    "shimloader64.dll": "af68e28ba54ab0068c95f82081828788d6f59879283127dc330b818af7369888",
+    "shimd3d64.dll": "cb0b99d113511cbf7ca9f949d97aa02e4a1f8f110b1f3ad3165d8a81035dee31"
+  },
+  "package": "out/FloraGPA-discards-20261004",
+  "executable_sha256": "0e6aa75c86ee7dbf4da472ad1ab91ec3592322b53d50c804323df78375f8b044",
+  "driver_inventory": [
+    {
+      "Name": "Intel(R) Iris(R) Xe Graphics",
+      "DriverVersion": "32.0.101.6790",
+      "PNPDeviceID": "PCI\\VEN_8086&DEV_46A6&SUBSYS_133D1043&REV_0C\\3&11583659&0&10"
+    },
+    {
+      "Name": "NVIDIA GeForce RTX 3070 Laptop GPU",
+      "DriverVersion": "32.0.15.8097",
+      "PNPDeviceID": "PCI\\VEN_10DE&DEV_249D&SUBSYS_133D1043&REV_A1\\4&174EDE7&0&0008"
+    }
+  ]
+}

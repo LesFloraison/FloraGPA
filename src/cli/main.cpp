@@ -1078,6 +1078,22 @@ int main(int argc, char **argv) {
                                             {"native_binding_recovered", false}});
             }
             report.insert("unused_stream_output_lifetimes", unusedSo);
+            QJsonArray discards;
+            for (const auto &[event, discard] : replay.discardHistory()) {
+                QJsonArray rectangles;
+                for (const auto &rect : discard.rectangles)
+                    rectangles.append(QJsonArray{rect[0], rect[1], rect[2], rect[3]});
+                discards.append(
+                    QJsonObject{{"event_id", qint64(event)},
+                                {"record_type", discard.type},
+                                {"target_id", qint64(discard.target)},
+                                {"rectangle_count", qint64(discard.count)},
+                                {"has_rectangles", discard.hasRectangles},
+                                {"rectangles", rectangles},
+                                {"contents_after_event", "Selected contents are unspecified until defining "
+                                                         "writes; no replacement bytes are synthesized"}});
+            }
+            report.insert("resource_discards", discards);
             if (auto it = replay.drawAutoResults().find(options.until);
                 it != replay.drawAutoResults().end()) {
                 const auto &parameters = it->second;

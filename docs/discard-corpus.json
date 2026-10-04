@@ -1,0 +1,724 @@
+{
+  "schema": "FloraGPA compatibility corpus 1",
+  "profile": "GPA 2025 R1 legacy DX11 / IGPA v3",
+  "cases": [
+    {
+      "id": "discard_control",
+      "mode": 0,
+      "dataset": "m2-discard-originals-v3",
+      "path": "m2-discard-originals-v3\\0\\capture.gpa_frame",
+      "sha256": "4b8612125e13b7a245f73ad99914ee098a3516825e66817048ec369f39a23949",
+      "bytes": 9366,
+      "family": "discard",
+      "origin": "self_owned_original_gpa_capture",
+      "reference_rgba_sha256": "89800b469471f08c4303acf19c9bd750de3f808a54c992d8ad3cebb34ee92da9",
+      "comparison_policy": "exact_golden",
+      "expected_diagnostic": null,
+      "discard_event": null,
+      "target_id": 10,
+      "resource_id": 10,
+      "source_manifests": [
+        "artifacts\\m2-discard-originals-v3\\manifest.json"
+      ],
+      "controls": [],
+      "boundaries": [
+        {
+          "resource": 10,
+          "event": 41,
+          "kind": "texture",
+          "expect_stable": true,
+          "expected_storage_sha256": "89800b469471f08c4303acf19c9bd750de3f808a54c992d8ad3cebb34ee92da9"
+        }
+      ],
+      "provenance_note": "Unmodified GPA output. CPU oracles verify defined bytes after original writes; the driver may ignore advisory discards. Missing-view and ambiguous-pointer originals remain explicit controls.",
+      "device_scope": "Local hardware producer; original-player adapter/configuration unproven."
+    },
+    {
+      "id": "discard_texture_resource",
+      "mode": 1,
+      "dataset": "m2-discard-originals-v3",
+      "path": "m2-discard-originals-v3\\1\\capture.gpa_frame",
+      "sha256": "ef280001f7077d12d62ebc7cf96ee4d4b96d7dd89347a09929a8557fb449f58b",
+      "bytes": 9547,
+      "family": "discard",
+      "origin": "self_owned_original_gpa_capture",
+      "reference_rgba_sha256": "89800b469471f08c4303acf19c9bd750de3f808a54c992d8ad3cebb34ee92da9",
+      "comparison_policy": "exact_golden",
+      "expected_diagnostic": null,
+      "discard_event": 15,
+      "target_id": 10,
+      "resource_id": 10,
+      "source_manifests": [
+        "artifacts\\m2-discard-originals-v3\\manifest.json"
+      ],
+      "controls": [],
+      "boundaries": [
+        {
+          "resource": 10,
+          "event": 44,
+          "kind": "texture",
+          "expect_stable": true,
+          "expected_storage_sha256": "89800b469471f08c4303acf19c9bd750de3f808a54c992d8ad3cebb34ee92da9"
+        }
+      ],
+      "provenance_note": "Unmodified GPA output. CPU oracles verify defined bytes after original writes; the driver may ignore advisory discards. Missing-view and ambiguous-pointer originals remain explicit controls.",
+      "device_scope": "Local hardware producer; original-player adapter/configuration unproven."
+    },
+    {
+      "id": "discard_buffer_resource",
+      "mode": 2,
+      "dataset": "m2-discard-originals-v3",
+      "path": "m2-discard-originals-v3\\2\\capture.gpa_frame",
+      "sha256": "778663dc6cf541eed5b1a7295a81c1f95d0756f3ca2e6ea93cafedbc80d2dd09",
+      "bytes": 8417,
+      "family": "discard",
+      "origin": "self_owned_original_gpa_capture",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "expected_diagnostic": null,
+      "discard_event": 13,
+      "target_id": 10,
+      "resource_id": 10,
+      "source_manifests": [
+        "artifacts\\m2-discard-originals-v3\\manifest.json"
+      ],
+      "controls": [],
+      "boundaries": [
+        {
+          "resource": 10,
+          "event": 38,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "f3f9124ce5ffba7076962575188271bb76a0ba981b245f66142d0b27c3729a5f"
+        }
+      ],
+      "provenance_note": "Unmodified GPA output. CPU oracles verify defined bytes after original writes; the driver may ignore advisory discards. Missing-view and ambiguous-pointer originals remain explicit controls.",
+      "device_scope": "Local hardware producer; original-player adapter/configuration unproven."
+    },
+    {
+      "id": "discard_rtv",
+      "mode": 3,
+      "dataset": "m2-discard-originals-v3",
+      "path": "m2-discard-originals-v3\\3\\capture.gpa_frame",
+      "sha256": "cdea4af5370fb877afb5645f1e914fd3c64168cc34f1c841811ff7a9202529bc",
+      "bytes": 9547,
+      "family": "discard",
+      "origin": "self_owned_original_gpa_capture",
+      "reference_rgba_sha256": "89800b469471f08c4303acf19c9bd750de3f808a54c992d8ad3cebb34ee92da9",
+      "comparison_policy": "exact_golden",
+      "expected_diagnostic": null,
+      "discard_event": 15,
+      "target_id": 12,
+      "resource_id": 10,
+      "source_manifests": [
+        "artifacts\\m2-discard-originals-v3\\manifest.json"
+      ],
+      "controls": [],
+      "boundaries": [
+        {
+          "resource": 10,
+          "event": 44,
+          "kind": "texture",
+          "expect_stable": true,
+          "expected_storage_sha256": "89800b469471f08c4303acf19c9bd750de3f808a54c992d8ad3cebb34ee92da9"
+        }
+      ],
+      "provenance_note": "Unmodified GPA output. CPU oracles verify defined bytes after original writes; the driver may ignore advisory discards. Missing-view and ambiguous-pointer originals remain explicit controls.",
+      "device_scope": "Local hardware producer; original-player adapter/configuration unproven."
+    },
+    {
+      "id": "discard_srv",
+      "mode": 4,
+      "dataset": "m2-discard-originals-v3",
+      "path": "m2-discard-originals-v3\\4\\capture.gpa_frame",
+      "sha256": "dea972ae2c07049429d365186ec986f2b8b55e94d741217627195a4ea735195a",
+      "bytes": 62237,
+      "family": "discard",
+      "origin": "self_owned_original_gpa_capture",
+      "reference_rgba_sha256": "89800b469471f08c4303acf19c9bd750de3f808a54c992d8ad3cebb34ee92da9",
+      "comparison_policy": "exact_golden",
+      "expected_diagnostic": null,
+      "discard_event": 40,
+      "target_id": 14,
+      "resource_id": 10,
+      "source_manifests": [
+        "artifacts\\m2-discard-originals-v3\\manifest.json"
+      ],
+      "controls": [],
+      "boundaries": [
+        {
+          "resource": 10,
+          "event": 66,
+          "kind": "texture",
+          "expect_stable": true,
+          "expected_storage_sha256": "89800b469471f08c4303acf19c9bd750de3f808a54c992d8ad3cebb34ee92da9"
+        }
+      ],
+      "provenance_note": "Unmodified GPA output. CPU oracles verify defined bytes after original writes; the driver may ignore advisory discards. Missing-view and ambiguous-pointer originals remain explicit controls.",
+      "device_scope": "Local hardware producer; original-player adapter/configuration unproven."
+    },
+    {
+      "id": "discard_uav",
+      "mode": 5,
+      "dataset": "m2-discard-originals-v3",
+      "path": "m2-discard-originals-v3\\5\\capture.gpa_frame",
+      "sha256": "b3ade9009bcf29e934efd550ab90995f83ca0ddbafb8779dc064a286ca2a2fd0",
+      "bytes": 9547,
+      "family": "discard",
+      "origin": "self_owned_original_gpa_capture",
+      "reference_rgba_sha256": "89800b469471f08c4303acf19c9bd750de3f808a54c992d8ad3cebb34ee92da9",
+      "comparison_policy": "exact_golden",
+      "expected_diagnostic": null,
+      "discard_event": 15,
+      "target_id": 12,
+      "resource_id": 10,
+      "source_manifests": [
+        "artifacts\\m2-discard-originals-v3\\manifest.json"
+      ],
+      "controls": [],
+      "boundaries": [
+        {
+          "resource": 10,
+          "event": 44,
+          "kind": "texture",
+          "expect_stable": true,
+          "expected_storage_sha256": "89800b469471f08c4303acf19c9bd750de3f808a54c992d8ad3cebb34ee92da9"
+        }
+      ],
+      "provenance_note": "Unmodified GPA output. CPU oracles verify defined bytes after original writes; the driver may ignore advisory discards. Missing-view and ambiguous-pointer originals remain explicit controls.",
+      "device_scope": "Local hardware producer; original-player adapter/configuration unproven."
+    },
+    {
+      "id": "discard_dsv",
+      "mode": 6,
+      "dataset": "m2-discard-originals-v3",
+      "path": "m2-discard-originals-v3\\6\\capture.gpa_frame",
+      "sha256": "a02178d6b9cf597a9355a05bed1579bbfd531ec10f376121f390a75066859681",
+      "bytes": 8749,
+      "family": "discard",
+      "origin": "self_owned_original_gpa_capture",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "expected_diagnostic": null,
+      "discard_event": 13,
+      "target_id": 12,
+      "resource_id": 10,
+      "source_manifests": [
+        "artifacts\\m2-discard-originals-v3\\manifest.json"
+      ],
+      "controls": [],
+      "boundaries": [
+        {
+          "resource": 10,
+          "event": 38,
+          "kind": "texture",
+          "expect_stable": true,
+          "expected_storage_sha256": "3afc4fbc010479ae0531a90bf4c473ddfe72fcccce7645874ccd36720947c336"
+        }
+      ],
+      "provenance_note": "Unmodified GPA output. CPU oracles verify defined bytes after original writes; the driver may ignore advisory discards. Missing-view and ambiguous-pointer originals remain explicit controls.",
+      "device_scope": "Local hardware producer; original-player adapter/configuration unproven."
+    },
+    {
+      "id": "discard_rectangle",
+      "mode": 7,
+      "dataset": "m2-discard-originals-v3",
+      "path": "m2-discard-originals-v3\\7\\capture.gpa_frame",
+      "sha256": "2ef88f0faa2c865b0c0e4163cf3583a1c1fc83c61cca2997a32cb7682f4b4b98",
+      "bytes": 9432,
+      "family": "discard",
+      "origin": "self_owned_original_gpa_capture",
+      "reference_rgba_sha256": "67ada869e3e22b0bf0e020c314442c4526586cc4904666291586ec6e5ffffcd0",
+      "comparison_policy": "exact_golden",
+      "expected_diagnostic": null,
+      "discard_event": 15,
+      "target_id": 12,
+      "resource_id": 10,
+      "source_manifests": [
+        "artifacts\\m2-discard-originals-v3\\manifest.json"
+      ],
+      "controls": [],
+      "boundaries": [
+        {
+          "resource": 10,
+          "event": 44,
+          "kind": "texture",
+          "expect_stable": true,
+          "expected_storage_sha256": "67ada869e3e22b0bf0e020c314442c4526586cc4904666291586ec6e5ffffcd0"
+        }
+      ],
+      "provenance_note": "Unmodified GPA output. CPU oracles verify defined bytes after original writes; the driver may ignore advisory discards. Missing-view and ambiguous-pointer originals remain explicit controls.",
+      "device_scope": "Local hardware producer; original-player adapter/configuration unproven."
+    },
+    {
+      "id": "discard_overlap",
+      "mode": 8,
+      "dataset": "m2-discard-originals-v3",
+      "path": "m2-discard-originals-v3\\8\\capture.gpa_frame",
+      "sha256": "6f6ff68e3405fbfcaeb68bce564cb9d7ad6d1fac1967dfb641c13aa4cc405683",
+      "bytes": 9601,
+      "family": "discard",
+      "origin": "self_owned_original_gpa_capture",
+      "reference_rgba_sha256": "b089b269625ba28c9b01c3eca8b3c0d35e4b8a84091fa5d9e464432d13986210",
+      "comparison_policy": "exact_golden",
+      "expected_diagnostic": null,
+      "discard_event": 15,
+      "target_id": 12,
+      "resource_id": 10,
+      "source_manifests": [
+        "artifacts\\m2-discard-originals-v3\\manifest.json"
+      ],
+      "controls": [],
+      "boundaries": [
+        {
+          "resource": 10,
+          "event": 46,
+          "kind": "texture",
+          "expect_stable": true,
+          "expected_storage_sha256": "b089b269625ba28c9b01c3eca8b3c0d35e4b8a84091fa5d9e464432d13986210"
+        }
+      ],
+      "provenance_note": "Unmodified GPA output. CPU oracles verify defined bytes after original writes; the driver may ignore advisory discards. Missing-view and ambiguous-pointer originals remain explicit controls.",
+      "device_scope": "Local hardware producer; original-player adapter/configuration unproven."
+    },
+    {
+      "id": "discard_null_rects",
+      "mode": 9,
+      "dataset": "m2-discard-originals-v3",
+      "path": "m2-discard-originals-v3\\9\\capture.gpa_frame",
+      "sha256": "b8ffea73cbc8cc65f349018b98af450020a0c8254dd7efcfbda77c021a4ddfbd",
+      "bytes": 9552,
+      "family": "discard",
+      "origin": "self_owned_original_gpa_capture",
+      "reference_rgba_sha256": "89800b469471f08c4303acf19c9bd750de3f808a54c992d8ad3cebb34ee92da9",
+      "comparison_policy": "exact_golden",
+      "expected_diagnostic": "discard_rectangle_presence_unresolved",
+      "discard_event": 15,
+      "target_id": 12,
+      "resource_id": 10,
+      "source_manifests": [
+        "artifacts\\m2-discard-originals-v3\\manifest.json"
+      ],
+      "controls": [],
+      "boundaries": [],
+      "provenance_note": "Unmodified GPA output. CPU oracles verify defined bytes after original writes; the driver may ignore advisory discards. Missing-view and ambiguous-pointer originals remain explicit controls.",
+      "device_scope": "Local hardware producer; original-player adapter/configuration unproven."
+    },
+    {
+      "id": "discard_null_rects_nonzero_count",
+      "mode": 10,
+      "dataset": "m2-discard-originals-v3",
+      "path": "m2-discard-originals-v3\\10\\capture.gpa_frame",
+      "sha256": "04e1a096a0507b72803ec054e27b8e3202751d38ff747b84d4a11f9816134e4e",
+      "bytes": 9552,
+      "family": "discard",
+      "origin": "self_owned_original_gpa_capture",
+      "reference_rgba_sha256": "89800b469471f08c4303acf19c9bd750de3f808a54c992d8ad3cebb34ee92da9",
+      "comparison_policy": "exact_golden",
+      "expected_diagnostic": null,
+      "discard_event": 15,
+      "target_id": 12,
+      "resource_id": 10,
+      "source_manifests": [
+        "artifacts\\m2-discard-originals-v3\\manifest.json"
+      ],
+      "controls": [],
+      "boundaries": [
+        {
+          "resource": 10,
+          "event": 44,
+          "kind": "texture",
+          "expect_stable": true,
+          "expected_storage_sha256": "89800b469471f08c4303acf19c9bd750de3f808a54c992d8ad3cebb34ee92da9"
+        }
+      ],
+      "provenance_note": "Unmodified GPA output. CPU oracles verify defined bytes after original writes; the driver may ignore advisory discards. Missing-view and ambiguous-pointer originals remain explicit controls.",
+      "device_scope": "Local hardware producer; original-player adapter/configuration unproven."
+    },
+    {
+      "id": "discard_empty_rectangle",
+      "mode": 11,
+      "dataset": "m2-discard-originals-v3",
+      "path": "m2-discard-originals-v3\\11\\capture.gpa_frame",
+      "sha256": "11885783fc07e9b0326d383c16c39c9070e25271d649192a7b066870e531c2ee",
+      "bytes": 9215,
+      "family": "discard",
+      "origin": "self_owned_original_gpa_capture",
+      "reference_rgba_sha256": "3eb0d49e8e7030bbdf16b08b05900c86ab09d25908203e5fc8592d99f283a04b",
+      "comparison_policy": "exact_golden",
+      "expected_diagnostic": null,
+      "discard_event": 15,
+      "target_id": 12,
+      "resource_id": 10,
+      "source_manifests": [
+        "artifacts\\m2-discard-originals-v3\\manifest.json"
+      ],
+      "controls": [],
+      "boundaries": [
+        {
+          "resource": 10,
+          "event": 42,
+          "kind": "texture",
+          "expect_stable": true,
+          "expected_storage_sha256": "3eb0d49e8e7030bbdf16b08b05900c86ab09d25908203e5fc8592d99f283a04b"
+        }
+      ],
+      "provenance_note": "Unmodified GPA output. CPU oracles verify defined bytes after original writes; the driver may ignore advisory discards. Missing-view and ambiguous-pointer originals remain explicit controls.",
+      "device_scope": "Local hardware producer; original-player adapter/configuration unproven."
+    },
+    {
+      "id": "discard_mip_array",
+      "mode": 12,
+      "dataset": "m2-discard-originals-v3",
+      "path": "m2-discard-originals-v3\\12\\capture.gpa_frame",
+      "sha256": "5d8201725eb62ddea0a697ac7b31faa3701474cdca5afd6301427f02babdf87c",
+      "bytes": 11025,
+      "family": "discard",
+      "origin": "self_owned_original_gpa_capture",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "expected_diagnostic": null,
+      "discard_event": 21,
+      "target_id": 12,
+      "resource_id": 10,
+      "source_manifests": [
+        "artifacts\\m2-discard-originals-v3\\manifest.json"
+      ],
+      "controls": [],
+      "boundaries": [
+        {
+          "resource": 10,
+          "event": 56,
+          "kind": "texture",
+          "expect_stable": true,
+          "expected_storage_sha256": "c8ed9e1b0d7ac1dc4398e473cbbb476cc61756560f451c7c0e6be2500062e114"
+        }
+      ],
+      "provenance_note": "Unmodified GPA output. CPU oracles verify defined bytes after original writes; the driver may ignore advisory discards. Missing-view and ambiguous-pointer originals remain explicit controls.",
+      "device_scope": "Local hardware producer; original-player adapter/configuration unproven."
+    },
+    {
+      "id": "discard_buffer_rectangle",
+      "mode": 13,
+      "dataset": "m2-discard-originals-v3",
+      "path": "m2-discard-originals-v3\\13\\capture.gpa_frame",
+      "sha256": "12c0d569d242bafe9a39247a499dfb104efce461598ef05e13050084cfdc9f08",
+      "bytes": 8563,
+      "family": "discard",
+      "origin": "self_owned_original_gpa_capture",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "expected_diagnostic": null,
+      "discard_event": 15,
+      "target_id": 12,
+      "resource_id": 10,
+      "source_manifests": [
+        "artifacts\\m2-discard-originals-v3\\manifest.json"
+      ],
+      "controls": [],
+      "boundaries": [
+        {
+          "resource": 10,
+          "event": 40,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "c484730a546e7fc07e1743acb588d0b666d9fb72941819177765b6159d532407"
+        }
+      ],
+      "provenance_note": "Unmodified GPA output. CPU oracles verify defined bytes after original writes; the driver may ignore advisory discards. Missing-view and ambiguous-pointer originals remain explicit controls.",
+      "device_scope": "Local hardware producer; original-player adapter/configuration unproven."
+    },
+    {
+      "id": "discard_texture1d",
+      "mode": 14,
+      "dataset": "m2-discard-originals-v3",
+      "path": "m2-discard-originals-v3\\14\\capture.gpa_frame",
+      "sha256": "b77fb39928b9431e70c4479ba1557900d6c03dca127abda9b0efc2f8204b39ed",
+      "bytes": 8305,
+      "family": "discard",
+      "origin": "self_owned_original_gpa_capture",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "expected_diagnostic": null,
+      "discard_event": 13,
+      "target_id": 10,
+      "resource_id": 10,
+      "source_manifests": [
+        "artifacts\\m2-discard-originals-v3\\manifest.json"
+      ],
+      "controls": [],
+      "boundaries": [
+        {
+          "resource": 10,
+          "event": 38,
+          "kind": "texture",
+          "expect_stable": true,
+          "expected_storage_sha256": "37cc0cd0199d3a7600dfbfbfc9094ecbc6f3dd7bbdac70b1af849179d364f7b7"
+        }
+      ],
+      "provenance_note": "Unmodified GPA output. CPU oracles verify defined bytes after original writes; the driver may ignore advisory discards. Missing-view and ambiguous-pointer originals remain explicit controls.",
+      "device_scope": "Local hardware producer; original-player adapter/configuration unproven."
+    },
+    {
+      "id": "discard_texture3d",
+      "mode": 15,
+      "dataset": "m2-discard-originals-v3",
+      "path": "m2-discard-originals-v3\\15\\capture.gpa_frame",
+      "sha256": "64e90b14587a599365c8208116686e28290810e5cff554b52dedb5b6a9362d84",
+      "bytes": 12281,
+      "family": "discard",
+      "origin": "self_owned_original_gpa_capture",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "expected_diagnostic": null,
+      "discard_event": 13,
+      "target_id": 10,
+      "resource_id": 10,
+      "source_manifests": [
+        "artifacts\\m2-discard-originals-v3\\manifest.json"
+      ],
+      "controls": [],
+      "boundaries": [
+        {
+          "resource": 10,
+          "event": 38,
+          "kind": "texture",
+          "expect_stable": true,
+          "expected_storage_sha256": "a1d8c13c6caf364b555f5df6543fae28a4d27088b45502d3242c7b76c55dfd1d"
+        }
+      ],
+      "provenance_note": "Unmodified GPA output. CPU oracles verify defined bytes after original writes; the driver may ignore advisory discards. Missing-view and ambiguous-pointer originals remain explicit controls.",
+      "device_scope": "Local hardware producer; original-player adapter/configuration unproven."
+    },
+    {
+      "id": "discard_zero_count_nonnull",
+      "mode": 16,
+      "dataset": "m2-discard-originals-v3",
+      "path": "m2-discard-originals-v3\\16\\capture.gpa_frame",
+      "sha256": "1eecc6f9cade17d5e9ebdff057f5ffa608405c4f832266f9113e3db50e3fde9f",
+      "bytes": 9199,
+      "family": "discard",
+      "origin": "self_owned_original_gpa_capture",
+      "reference_rgba_sha256": "3eb0d49e8e7030bbdf16b08b05900c86ab09d25908203e5fc8592d99f283a04b",
+      "comparison_policy": "exact_golden",
+      "expected_diagnostic": "discard_rectangle_presence_unresolved",
+      "discard_event": 15,
+      "target_id": 12,
+      "resource_id": 10,
+      "source_manifests": [
+        "artifacts\\m2-discard-originals-v3\\manifest.json"
+      ],
+      "controls": [],
+      "boundaries": [],
+      "provenance_note": "Unmodified GPA output. CPU oracles verify defined bytes after original writes; the driver may ignore advisory discards. Missing-view and ambiguous-pointer originals remain explicit controls.",
+      "device_scope": "Local hardware producer; original-player adapter/configuration unproven."
+    },
+    {
+      "id": "discard_missing_view_rtv",
+      "mode": 3,
+      "dataset": "m2-discard-originals-v2",
+      "path": "m2-discard-originals-v2\\3\\capture.gpa_frame",
+      "sha256": "c7a8e2b7f80db9d33cc92ff46aeb697eaec17a1e3343513ed2a4b1a19408a59b",
+      "bytes": 9414,
+      "family": "discard",
+      "origin": "self_owned_original_gpa_capture",
+      "reference_rgba_sha256": "89800b469471f08c4303acf19c9bd750de3f808a54c992d8ad3cebb34ee92da9",
+      "comparison_policy": "exact_golden",
+      "expected_diagnostic": "discard_target_missing",
+      "discard_event": 13,
+      "target_id": 14,
+      "resource_id": null,
+      "source_manifests": [
+        "artifacts\\m2-discard-originals-v2\\manifest.json"
+      ],
+      "controls": [],
+      "boundaries": [],
+      "provenance_note": "Unmodified GPA output. CPU oracles verify defined bytes after original writes; the driver may ignore advisory discards. Missing-view and ambiguous-pointer originals remain explicit controls.",
+      "device_scope": "Local hardware producer; original-player adapter/configuration unproven."
+    },
+    {
+      "id": "discard_missing_view_srv",
+      "mode": 4,
+      "dataset": "m2-discard-originals-v2",
+      "path": "m2-discard-originals-v2\\4\\capture.gpa_frame",
+      "sha256": "3187da76ddd236a76678f47ad0a9a8f72367f77f66968085c8ac5026f229c412",
+      "bytes": 9414,
+      "family": "discard",
+      "origin": "self_owned_original_gpa_capture",
+      "reference_rgba_sha256": "89800b469471f08c4303acf19c9bd750de3f808a54c992d8ad3cebb34ee92da9",
+      "comparison_policy": "exact_golden",
+      "expected_diagnostic": "discard_target_missing",
+      "discard_event": 13,
+      "target_id": 14,
+      "resource_id": null,
+      "source_manifests": [
+        "artifacts\\m2-discard-originals-v2\\manifest.json"
+      ],
+      "controls": [],
+      "boundaries": [],
+      "provenance_note": "Unmodified GPA output. CPU oracles verify defined bytes after original writes; the driver may ignore advisory discards. Missing-view and ambiguous-pointer originals remain explicit controls.",
+      "device_scope": "Local hardware producer; original-player adapter/configuration unproven."
+    },
+    {
+      "id": "discard_missing_view_uav",
+      "mode": 5,
+      "dataset": "m2-discard-originals-v2",
+      "path": "m2-discard-originals-v2\\5\\capture.gpa_frame",
+      "sha256": "308a72497eb42bc5cf1888526609817b39a101ebb2e38c4c2bcc9364179a9426",
+      "bytes": 9414,
+      "family": "discard",
+      "origin": "self_owned_original_gpa_capture",
+      "reference_rgba_sha256": "89800b469471f08c4303acf19c9bd750de3f808a54c992d8ad3cebb34ee92da9",
+      "comparison_policy": "exact_golden",
+      "expected_diagnostic": "discard_target_missing",
+      "discard_event": 13,
+      "target_id": 14,
+      "resource_id": null,
+      "source_manifests": [
+        "artifacts\\m2-discard-originals-v2\\manifest.json"
+      ],
+      "controls": [],
+      "boundaries": [],
+      "provenance_note": "Unmodified GPA output. CPU oracles verify defined bytes after original writes; the driver may ignore advisory discards. Missing-view and ambiguous-pointer originals remain explicit controls.",
+      "device_scope": "Local hardware producer; original-player adapter/configuration unproven."
+    },
+    {
+      "id": "discard_missing_view_rectangle",
+      "mode": 7,
+      "dataset": "m2-discard-originals-v2",
+      "path": "m2-discard-originals-v2\\7\\capture.gpa_frame",
+      "sha256": "b2a9663be0babffa21f467fecf36bb85077d10ec6827fad7c506047469512326",
+      "bytes": 9299,
+      "family": "discard",
+      "origin": "self_owned_original_gpa_capture",
+      "reference_rgba_sha256": "67ada869e3e22b0bf0e020c314442c4526586cc4904666291586ec6e5ffffcd0",
+      "comparison_policy": "exact_golden",
+      "expected_diagnostic": "discard_target_missing",
+      "discard_event": 13,
+      "target_id": 14,
+      "resource_id": null,
+      "source_manifests": [
+        "artifacts\\m2-discard-originals-v2\\manifest.json"
+      ],
+      "controls": [],
+      "boundaries": [],
+      "provenance_note": "Unmodified GPA output. CPU oracles verify defined bytes after original writes; the driver may ignore advisory discards. Missing-view and ambiguous-pointer originals remain explicit controls.",
+      "device_scope": "Local hardware producer; original-player adapter/configuration unproven."
+    },
+    {
+      "id": "discard_missing_view_overlap",
+      "mode": 8,
+      "dataset": "m2-discard-originals-v2",
+      "path": "m2-discard-originals-v2\\8\\capture.gpa_frame",
+      "sha256": "4cbd8907783c1993b999e2a88da17e8f5f7f32e2de9f03999b95970505628ee6",
+      "bytes": 9468,
+      "family": "discard",
+      "origin": "self_owned_original_gpa_capture",
+      "reference_rgba_sha256": "b089b269625ba28c9b01c3eca8b3c0d35e4b8a84091fa5d9e464432d13986210",
+      "comparison_policy": "exact_golden",
+      "expected_diagnostic": "discard_target_missing",
+      "discard_event": 13,
+      "target_id": 14,
+      "resource_id": null,
+      "source_manifests": [
+        "artifacts\\m2-discard-originals-v2\\manifest.json"
+      ],
+      "controls": [],
+      "boundaries": [],
+      "provenance_note": "Unmodified GPA output. CPU oracles verify defined bytes after original writes; the driver may ignore advisory discards. Missing-view and ambiguous-pointer originals remain explicit controls.",
+      "device_scope": "Local hardware producer; original-player adapter/configuration unproven."
+    },
+    {
+      "id": "discard_missing_view_null_rects_nonzero_count",
+      "mode": 10,
+      "dataset": "m2-discard-originals-v2",
+      "path": "m2-discard-originals-v2\\10\\capture.gpa_frame",
+      "sha256": "2a63329be55ff7adfa46b53f7026d9f6238453f190d54d306920f0aefb391da3",
+      "bytes": 9419,
+      "family": "discard",
+      "origin": "self_owned_original_gpa_capture",
+      "reference_rgba_sha256": "89800b469471f08c4303acf19c9bd750de3f808a54c992d8ad3cebb34ee92da9",
+      "comparison_policy": "exact_golden",
+      "expected_diagnostic": "discard_target_missing",
+      "discard_event": 13,
+      "target_id": 14,
+      "resource_id": null,
+      "source_manifests": [
+        "artifacts\\m2-discard-originals-v2\\manifest.json"
+      ],
+      "controls": [],
+      "boundaries": [],
+      "provenance_note": "Unmodified GPA output. CPU oracles verify defined bytes after original writes; the driver may ignore advisory discards. Missing-view and ambiguous-pointer originals remain explicit controls.",
+      "device_scope": "Local hardware producer; original-player adapter/configuration unproven."
+    },
+    {
+      "id": "discard_missing_view_empty_rectangle",
+      "mode": 11,
+      "dataset": "m2-discard-originals-v2",
+      "path": "m2-discard-originals-v2\\11\\capture.gpa_frame",
+      "sha256": "77621ba6efe2f49b35c2f508663cf2edd6031a50382fa3b33246bf764abf1434",
+      "bytes": 9082,
+      "family": "discard",
+      "origin": "self_owned_original_gpa_capture",
+      "reference_rgba_sha256": "3eb0d49e8e7030bbdf16b08b05900c86ab09d25908203e5fc8592d99f283a04b",
+      "comparison_policy": "exact_golden",
+      "expected_diagnostic": "discard_target_missing",
+      "discard_event": 13,
+      "target_id": 14,
+      "resource_id": null,
+      "source_manifests": [
+        "artifacts\\m2-discard-originals-v2\\manifest.json"
+      ],
+      "controls": [],
+      "boundaries": [],
+      "provenance_note": "Unmodified GPA output. CPU oracles verify defined bytes after original writes; the driver may ignore advisory discards. Missing-view and ambiguous-pointer originals remain explicit controls.",
+      "device_scope": "Local hardware producer; original-player adapter/configuration unproven."
+    },
+    {
+      "id": "discard_missing_view_mip_array",
+      "mode": 12,
+      "dataset": "m2-discard-originals-v2",
+      "path": "m2-discard-originals-v2\\12\\capture.gpa_frame",
+      "sha256": "c62dc1f9706db0df0ec6aa30e6714cdb676ef85b1c85f158f7b49b83872e2a99",
+      "bytes": 10892,
+      "family": "discard",
+      "origin": "self_owned_original_gpa_capture",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "expected_diagnostic": "discard_target_missing",
+      "discard_event": 19,
+      "target_id": 20,
+      "resource_id": null,
+      "source_manifests": [
+        "artifacts\\m2-discard-originals-v2\\manifest.json"
+      ],
+      "controls": [],
+      "boundaries": [],
+      "provenance_note": "Unmodified GPA output. CPU oracles verify defined bytes after original writes; the driver may ignore advisory discards. Missing-view and ambiguous-pointer originals remain explicit controls.",
+      "device_scope": "Local hardware producer; original-player adapter/configuration unproven."
+    },
+    {
+      "id": "discard_missing_view_buffer_rectangle",
+      "mode": 13,
+      "dataset": "m2-discard-originals-v2",
+      "path": "m2-discard-originals-v2\\13\\capture.gpa_frame",
+      "sha256": "ca3812efd07dc6865b946f137fa8b8d50339002b4256a4ac6e32e8d3df80688d",
+      "bytes": 8430,
+      "family": "discard",
+      "origin": "self_owned_original_gpa_capture",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "expected_diagnostic": "discard_target_missing",
+      "discard_event": 13,
+      "target_id": 14,
+      "resource_id": null,
+      "source_manifests": [
+        "artifacts\\m2-discard-originals-v2\\manifest.json"
+      ],
+      "controls": [],
+      "boundaries": [],
+      "provenance_note": "Unmodified GPA output. CPU oracles verify defined bytes after original writes; the driver may ignore advisory discards. Missing-view and ambiguous-pointer originals remain explicit controls.",
+      "device_scope": "Local hardware producer; original-player adapter/configuration unproven."
+    }
+  ]
+}

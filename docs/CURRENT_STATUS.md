@@ -1,14 +1,15 @@
 # Current capabilities and compatibility
 
 Reviewed **2026-10-04**. The latest build adds
-[context-state inspection and diagnostics](CONTEXT_STATE_DISCOVERY.md), pinned
-by its [focused baseline](context-state-baseline.json), following revision
-`447f478`. The last full replay regression remains the
+[native discard and capture-boundary diagnostics](DISCARD_AUDIT.md), pinned
+by its [focused baseline](discard-baseline.json), following revision
+`6a04b55`. The last full replay regression remains the
 [unused SO lifetime baseline](so-lifetime-acceptance-baseline.json).
 
-The cumulative inventory contains **362 files: 351 positive replays and eleven
-explicit rejections** (four missing initial LOD dependencies and seven unresolved
-context-state files). The latest focused batch adds eight original files;
+The cumulative inventory contains **388 files: 366 positive replays and 22
+explicit rejections** (four initial LOD dependencies, seven context-state files,
+nine missing discard views and two ambiguous discard-pointer records).
+The latest focused batch adds 26 original files;
 it does not rerun the entire historical matrix. Six formerly rejected SO files now replay
 through proven unused binding intervals. Their absent descriptors/storage and
 intermediate native bindings remain unavailable and are explicitly reported.
@@ -25,6 +26,7 @@ tested workloads; opening a file does not prove accurate replay.
 |---|---|---|
 | Preflight and API inspection | Offline diagnostics, decoded fields, references, coverage and Qt diagnostics | Structural success is not GPU success; metadata is not execution. [Acceptance infrastructure](COMPATIBILITY_BASELINE.md) |
 | Context-state objects | Checked Device5 creation/flags and Context4 swap inspection; GetCreationFlags as read-only metadata; located preflight/runtime rejection | State-object execution remains unsupported. Actual non-null swaps can serialize zero identities and stale Draw snapshots. Null input cannot be proven from zero alone. [Original evidence and boundaries](CONTEXT_STATE_DISCOVERY.md) |
+| Resource discard | Native Context1 calls for observed Context4 DiscardResource / DiscardView / DiscardView1 records; API fields, diagnostics and per-event CLI history | Missing view descriptors and zero-count pointer-presence loss reject. Discard does not define bytes; complete undefined-region propagation remains open. Tested whole-resource/view and rectangle forms have separate boundaries. [Discard acceptance](DISCARD_AUDIT.md) |
 | Pipeline getter observations | 34 additional checked immediate Context4 getter families; decoded optional outputs and reference details | Metadata never restores native bindings or fabricates observed objects. Nonempty SO getter/write originals pass; absent-only unused lifetimes have separate provenance and inspection limits. [Getter acceptance](PIPELINE_GETTER_AUDIT.md), [SO lifetimes](SO_LIFETIME_AUDIT.md) |
 | Immediate-context replay | Captured draws/dispatches, supported setters, uploads, copies (including Context1 transfers), ClearView, queries/predication and presentation | Broader layouts, resource versions and some presentation/transfer cases remain incomplete. [Setters](PIPELINE_SETTER_AUDIT.md), [texture transfers](TEXTURE_COPY_AUDIT.md), [Context1 transfers](TRANSFER1_AUDIT.md), [ClearView](CLEAR_VIEW_AUDIT.md), [presentation](PRESENT_REPLAY_AUDIT.md) |
 | Frame-time creation | Validated buffers, textures/views, shaders, pipeline states, class linkage/instances and predicates | Device5 coverage is not every interface version or descriptor combination; required missing data and unresolved identities are rejected. [Buffers](BUFFER_CREATION_AUDIT.md), [textures](TEXTURE_DIMENSIONS_AUDIT.md), [texture views](VIEW_CREATION_AUDIT.md), [buffer views](BUFFER_VIEW_CREATION_AUDIT.md), [pipeline](PIPELINE_CREATION_AUDIT.md), [geometry/SO](GEOMETRY_CREATION_AUDIT.md), [classes](CLASS_CREATION_AUDIT.md), [predicates](PREDICATE_CREATION_AUDIT.md) |
@@ -39,7 +41,29 @@ tested workloads; opening a file does not prove accurate replay.
 | Resource minimum LOD | Native setters, initial getter evidence, frame-time creation defaults, ClearState preservation and disabled-setter experiments | Missing required initial state is rejected; nonzero-LOD full storage export and UAV/output/interface guards remain boundaries. Unused static SRVs use program declarations. [LOD](RESOURCE_LOD_AUDIT.md), [shader usage](MIN_LOD_USAGE_AUDIT.md) |
 | Query and predication | Captured Query metadata/history; native predicate Begin/End, binding and Device5 frame-time creation | New predicates remain unissued until their recorded interval completes. Ordinary Query records may omit identities, intervals or full result bytes; pre-frame predicate history is not reconstructed. [Predicate creation](PREDICATE_CREATION_AUDIT.md) |
 
-## Latest focused context-state validation
+## Latest focused discard validation
+
+Twenty-six new originals contain fifteen positives and eleven explicit
+negatives. The completed-view producer verifies 408 native/injected frames;
+the first missing-view originals remain separate evidence. New package replay
+passes all fifteen positive files twice and locates all eleven rejections in
+22 attempts. Thirty post-write/pre-Present resource exports match strict CPU
+byte hashes. All 52 original-player runs match producer final images, with
+original device/configuration equivalence still unproven.
+
+Twelve related CTest suites pass. Discard tests have 54 passing cases, including
+60 repeated hardware/WARP full replays, two verified SRV-draw prefixes, 28
+disabled-discard controls and 88 full storage checks. Qt/Worker has 56 passing
+cases. Existing SO/getter files pass 44 package runs; context-state control
+passes twice and seven context-state files retain fourteen located rejections.
+Four GF2/BF1 golden/negative checks pass under isolated runtime dependencies.
+
+Calling Discard is counted separately from the driver's physical invalidation,
+which may be omitted legally. Subsequent defining writes provide the byte
+oracles. This batch does not rerun the entire historical matrix or certify
+reads from discarded contents before those writes.
+
+## Previous focused context-state validation
 
 Eight unmodified originals have 192 verified native/injected producer frames,
 2,688 binding checks and 264 exact draw-byte checks. Independent replay passes
@@ -136,7 +160,7 @@ the other 35 suites passed initially and the complete UI suite passes after the 
 | Stage | Current position and completion gate |
 |---|---|
 | M1 — Acceptance infrastructure | Minimum loop delivered: corpus, coverage, preflight, serial comparison and diagnostic queue. Extend evidence as paths arrive. |
-| M2 — Ordinary replay | In progress. Observed getters and proven unused SO intervals pass; context-state originals now expose serializer identity loss and stale snapshots with located diagnostics. State-object execution, mixed saved/missing SO targets and unverified lifetimes remain boundaries. Continue the interface/command/resource audit before production command-list work. Enrolled paths must replay correctly or reject with reproducible, located diagnostics. |
+| M2 — Ordinary replay | In progress. Observed getters, proven unused SO intervals and supported discard layouts pass; missing state/view identities and discard pointer ambiguity have located rejections. Audit the remaining auxiliary/snapshot contracts and the M2 acceptance gate before production command-list work. State-object execution, mixed saved/missing SO targets and unverified lifetimes remain explicit boundaries. |
 | M3 — Deferred Context / Command List | Incomplete. Require original captures proving identity, build order, resource versions, repeated execution, restore-state and event mapping before production support. |
 | M4 — Resources and boundaries | Incomplete. Verify saved initial/differential data, subresources, counters, Query/Predication and presentation; distinguish absent information from implementation gaps. |
 | M5 — Stable compatibility release | Incomplete. Broaden captures, repeat/long-duration checks, recovery and large-file testing; validate clean-environment build/deployment and publish a fixed matrix. |

@@ -3,6 +3,7 @@
 #include "core/ClearView.h"
 #include "core/ContextStateRecords.h"
 #include "core/Contexts.h"
+#include "core/DiscardRecords.h"
 #include "core/PipelineCreation.h"
 #include "core/PipelineGetters.h"
 #include "core/PredicateCreation.h"
@@ -394,7 +395,22 @@ Json inspectCommand(const Frame &frame, Id id) {
                 slot = 30;
             else if (name == "SOSetTargets")
                 slot = 37;
-            if (isContextStateRecord(t)) {
+            if (isDiscardRecord(t)) {
+                const auto discard = readDiscardRecord(t, raw);
+                r.id(t == 0x3553 ? "resource" : "view");
+                if (t == 0x3563) {
+                    r.u("rectangle_count");
+                    r.field("has_rectangles", "B");
+                    for (uint32_t i = 0; i < discard.rectangles.size(); ++i)
+                        r.field("rectangle[" + std::to_string(i) + "]", "4i");
+                }
+                out["note"] =
+                    "Discard permits loss of old contents; it is not a clear or a resource release. Reads "
+                    "before subsequent defining writes have no guaranteed original bytes.";
+                if (ambiguousDiscardRectangles(discard))
+                    out["note"] = "Zero rectangle count loses original pointer presence; replay requires "
+                                  "unresolved discard-scope evidence.";
+            } else if (isContextStateRecord(t)) {
                 const auto record = readContextStateRecord(t, raw);
                 validateContextStateOwner(frame, id, record);
                 out["note"] = t == 0x359b ? "Read-only device flags; does not configure replay device."

@@ -7,6 +7,7 @@
 #include "core/Commands.h"
 #include "core/ContextStateRecords.h"
 #include "core/CopyCommands.h"
+#include "core/DiscardRecords.h"
 #include "core/IaBindings.h"
 #include "core/InspectionRecords.h"
 #include "core/MapRecords.h"
@@ -118,6 +119,24 @@ Json validateFrame(const std::filesystem::path &path, const std::function<bool()
                     if (command["status"] == "invalid")
                         throw std::runtime_error(command.value("error", "Invalid command wire layout"));
                     checked = command["status"] == "decoded";
+                    if (isDiscardRecord(e.type)) {
+                        const auto discard = readDiscardRecord(e.type, frame.payload(id));
+                        try {
+                            const auto target = validateDiscardRecord(frame, discard);
+                            finding(&e, "warning", "discard_contents_undefined",
+                                    "Discard does not define replacement bytes. Native execution may "
+                                    "invalidate the selected contents; reads before defining writes are not "
+                                    "certified by structural validation",
+                                    target.resource);
+                        } catch (const std::exception &error) {
+                            finding(&e, "error",
+                                    !frame.entries().contains(discard.target) ? "discard_target_missing"
+                                    : ambiguousDiscardRectangles(discard)
+                                        ? "discard_rectangle_presence_unresolved"
+                                        : "discard_rejected",
+                                    error.what(), discard.target);
+                        }
+                    }
                     if (isContextStateRecord(e.type)) {
                         const auto record = readContextStateRecord(e.type, frame.payload(id));
                         validateContextStateOwner(frame, id, record);

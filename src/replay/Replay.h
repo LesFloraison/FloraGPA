@@ -2,6 +2,7 @@
 #include "core/BufferCreation.h"
 #include "core/ClassCreation.h"
 #include "core/ConstantBufferBindings.h"
+#include "core/DiscardRecords.h"
 #include "core/Frame.h"
 #include "core/IaBindings.h"
 #include "core/MapRecords.h"
@@ -186,6 +187,7 @@ class Replay {
     std::set<Id> undefinedCreatedCounters_;
     void requireCreatedCounter(Id view) const;
     std::vector<Id> ignoredMsaaInitial_;
+    std::vector<std::pair<Id, DiscardRecord>> discardHistory_;
     std::vector<PlanarWrite> planarWrites_;
     std::vector<Id> appliedExperimentEvents_;
     // Keep edited extension states alive while their native identities are registered.
@@ -333,6 +335,7 @@ class Replay {
              const ReplayCommandScope &commandScope = {});
     const ReplayOptions &options() const { return options_; }
     const std::vector<Id> &ignoredMsaaInitial() const { return ignoredMsaaInitial_; }
+    const auto &discardHistory() const { return discardHistory_; }
     const std::vector<PlanarWrite> &planarWrites() const { return planarWrites_; }
     const std::vector<Id> &appliedExperimentEvents() const { return appliedExperimentEvents_; }
     const Frame &frame() const { return frame_; }

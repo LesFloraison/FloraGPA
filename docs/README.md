@@ -35,6 +35,7 @@ upstream repository that are not vendored here.
 
 ## Historical implementation and acceptance records
 
+- [Native discard acceptance and information boundaries](DISCARD_AUDIT.md), [focused baseline](discard-baseline.json) and [original corpus](discard-corpus.json).
 - [Context-state identity loss and diagnostics](CONTEXT_STATE_DISCOVERY.md), [focused baseline](context-state-baseline.json) and [original corpus](context-state-corpus.json).
 - [Unused SO lifetime acceptance](SO_LIFETIME_AUDIT.md), [acceptance baseline](so-lifetime-acceptance-baseline.json) and [accepted original corpus](so-lifetime-accepted-corpus.json).
 - [SO lifetime investigation](SO_LIFETIME_DISCOVERY.md), [focused baseline](so-lifetime-baseline.json) and [original positive/blocked corpus](so-lifetime-corpus.json).

@@ -4,6 +4,7 @@
 #include "ContextStateRecords.h"
 #include "Contexts.h"
 #include "CopyCommands.h"
+#include "DiscardRecords.h"
 #include "IaBindings.h"
 #include "InspectionRecords.h"
 #include "MapRecords.h"
@@ -24,6 +25,9 @@ bool in(uint16_t t, std::initializer_list<uint16_t> values) {
 }
 } // namespace
 ReplayCapability replayCapability(uint16_t t) {
+    if (isDiscardRecord(t))
+        return {"execute", "src/core/DiscardRecords.cpp;src/replay/Replay.cpp",
+                "tests/DiscardTests.cpp;docs/DISCARD_AUDIT.md"};
     if (isContextStateRecord(t))
         return {t == 0x359b ? "metadata" : "unsupported",
                 "src/core/ContextStateRecords.cpp;src/replay/Replay.cpp",
