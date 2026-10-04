@@ -545,9 +545,25 @@ Replay::ConstantRange Replay::constantRange(unsigned stage, uint32_t slot, Id bu
 void Replay::constantBuffers(const Entry &e) {
     const auto original = readConstantBufferSetter(e.type, frame_.payload(e.id));
     const auto edited = options_.constantBufferSetters.find(e.id);
-    const auto &b = edited == options_.constantBufferSetters.end() ? original : edited->second;
+    auto b = edited == options_.constantBufferSetters.end() ? original : edited->second;
     if (b.type != e.type || b.context != original.context)
         throw std::runtime_error("CB setter type or context mismatch");
+    if (std::any_of(b.buffers.begin(), b.buffers.end(),
+                    [&](Id id) { return id && !frame_.entries().contains(id); })) {
+        if (!allowUnusedCbLifetime_)
+            throw std::runtime_error(
+                "Absent constant buffers cannot supply native command-state observations");
+        auto proof = proveUnusedConstantBufferLifetime(
+            frame_, e.id, options_.disabled, options_.commandPayloads, options_.constantBufferSetters,
+            options_.until, options_.before);
+        // These slots cannot reach GPU work or an observer before their explicit close.
+        // Null is temporary native bookkeeping, not recovered captured binding state.
+        for (auto &id : b.buffers)
+            if (id && !frame_.entries().contains(id))
+                id = 0;
+        unusedCbLifetimes_.push_back(std::move(proof));
+        ++counts["unmaterialized_constant_buffer_setters"];
+    }
     validateConstantBufferBinding(frame_, b);
     auto next = constantBufferBindings_;
     ConstantBufferObservations previous{};
@@ -1463,6 +1479,8 @@ void Replay::run(const std::function<void(Id, size_t, size_t)> &progress,
     } reset{boundaryObserver_};
     replayComplete_ = false;
     allowUnusedSoLifetime_ = !commandObserver && !commandScope;
+    allowUnusedCbLifetime_ = !commandObserver && !commandScope;
+    unusedCbLifetimes_.clear();
     unusedSoLifetimes_.clear();
     measurementResult_.reset();
     if (options_.measurement) {

@@ -270,6 +270,8 @@ class Replay {
     std::map<Id, DrawAutoParameters> soAutoResults_;
     bool soCountEnabled_ = false, soCountRequiresKnown_ = false;
     bool allowUnusedSoLifetime_ = false;
+    bool allowUnusedCbLifetime_ = false;
+    std::vector<UnusedConstantBufferLifetime> unusedCbLifetimes_;
     std::vector<UnusedStreamOutputLifetime> unusedSoLifetimes_;
     struct ActiveStream {
         uint32_t stream{}, factor{};
@@ -325,6 +327,7 @@ class Replay {
     std::map<std::string, uint64_t> counts;
     std::vector<StreamOutputCount> streamOutputHistory;
     const auto &unusedStreamOutputLifetimes() const { return unusedSoLifetimes_; }
+    const auto &unusedConstantBufferLifetimes() const { return unusedCbLifetimes_; }
     DrawAutoParameters drawAutoParameters(Id event);
     const auto &drawAutoResults() const { return soAutoResults_; }
     explicit Replay(const Frame &frame, ReplayOptions options = {});

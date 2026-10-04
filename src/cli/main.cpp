@@ -1078,6 +1078,18 @@ int main(int argc, char **argv) {
                                             {"native_binding_recovered", false}});
             }
             report.insert("unused_stream_output_lifetimes", unusedSo);
+            QJsonArray unusedCb;
+            for (const auto &lifetime : replay.unusedConstantBufferLifetimes()) {
+                QJsonArray resources;
+                for (auto id : lifetime.resources)
+                    resources.append(QString::number(id));
+                unusedCb.append(QJsonObject{{"event", QString::number(lifetime.event)},
+                                            {"closing_event", QString::number(lifetime.closingEvent)},
+                                            {"stage", int(lifetime.stage)},
+                                            {"resources", resources},
+                                            {"native_binding_recovered", false}});
+            }
+            report.insert("unused_constant_buffer_lifetimes", unusedCb);
             QJsonArray discards;
             for (const auto &[event, discard] : replay.discardHistory()) {
                 QJsonArray rectangles;

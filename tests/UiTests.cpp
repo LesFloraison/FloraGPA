@@ -3577,6 +3577,47 @@ class UiTests final : public QObject {
         filter.setFilterFixedString("DrawIndexed");
         QCOMPARE(filter.rowCount(), 72);
     }
+    void unusedConstantBufferReplayAndNavigate() {
+        const auto root = qEnvironmentVariable("FLORA_CB_LIFETIMES");
+        if (root.isEmpty())
+            QSKIP("Set FLORA_CB_LIFETIMES to the original omitted-sentinel corpus");
+        flora::MainWindow window;
+        window.resize(1440, 900);
+        window.show();
+        QSignalSpy done(&window, &flora::MainWindow::taskFinished);
+        window.openCapture(root + "/0/capture.gpa_frame");
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        auto image = window.findChild<flora::ImageView *>("frameOutput");
+        QVERIFY(image);
+        const auto pixels = image->image().convertToFormat(QImage::Format_RGBA8888);
+        QCOMPARE(pixels.size(), QSize(8, 8));
+        QCOMPARE(QCryptographicHash::hash(
+                     QByteArray(reinterpret_cast<const char *>(pixels.constBits()), pixels.sizeInBytes()),
+                     QCryptographicHash::Sha256).toHex(),
+                 QByteArray("b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636"));
+        auto preflight = window.findChild<flora::CompatibilityButton *>("captureCompatibility");
+        QVERIFY(preflight && preflight->isEnabled());
+        QSignalSpy checked(preflight, &flora::CompatibilityButton::resultReady);
+        preflight->click();
+        QTRY_COMPARE_WITH_TIMEOUT(checked.size(), 1, 30000);
+        QCOMPARE(preflight->report()["errors"], nlohmann::json(0));
+        QCOMPARE(preflight->report()["unused_constant_buffer_lifetimes"].size(), size_t(3));
+        auto dialog = preflight->findChild<QDialog *>("compatibilityDialog");
+        QVERIFY(dialog);
+        dialog->close();
+        auto api = window.findChild<QTableView *>("apiLog");
+        QVERIFY(api && api->model()->rowCount() > 1);
+        done.clear();
+        api->setCurrentIndex(api->model()->index(api->model()->rowCount() - 1, 0));
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        done.clear();
+        window.replay();
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        QVERIFY(!window.busy());
+    }
     void helldiversReplayAndNavigate() {
         const auto capture = qEnvironmentVariable("FLORA_TEST_HELLDIVERS_CAPTURE");
         if (capture.isEmpty())

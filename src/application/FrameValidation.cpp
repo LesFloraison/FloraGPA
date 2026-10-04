@@ -58,6 +58,7 @@ Json validateFrame(const std::filesystem::path &path, const std::function<bool()
         report["entries"] = frame.entries().size();
         report["source_sha256"] = frame.sha256();
         report["unused_stream_output_lifetimes"] = Json::array();
+        report["unused_constant_buffer_lifetimes"] = Json::array();
         const auto lod = auditResourceLod(frame);
         report["resource_lod_initial_observations"] = Json::array();
         for (const auto &[resource, initial] : lod.initial)
@@ -167,6 +168,35 @@ Json validateFrame(const std::filesystem::path &path, const std::function<bool()
                     } else {
                         if (constantBufferStage(e.type)) {
                             const auto binding = readConstantBufferSetter(e.type, frame.payload(id));
+                            std::optional<UnusedConstantBufferLifetime> lifetime;
+                            std::string blocked;
+                            if (std::any_of(binding.buffers.begin(), binding.buffers.end(), [&](Id buffer) {
+                                    return buffer && !frame.entries().contains(buffer);
+                                })) {
+                                try {
+                                    lifetime = proveUnusedConstantBufferLifetime(frame, id);
+                                    report["unused_constant_buffer_lifetimes"].push_back(
+                                        {{"event_id", id},
+                                         {"closing_event_id", lifetime->closingEvent},
+                                         {"stage", lifetime->stage},
+                                         {"resource_ids", lifetime->resources},
+                                         {"native_binding_recovered", false}});
+                                    report["record_handling_overrides"].push_back(
+                                        {{"event_id", id},
+                                         {"handling",
+                                          std::any_of(binding.buffers.begin(), binding.buffers.end(),
+                                                      [&](Id buffer) {
+                                                          return buffer && frame.entries().contains(buffer);
+                                                      })
+                                              ? "execute"
+                                              : "metadata"},
+                                         {"reason", "Absent CB slots close before GPU use; saved slots "
+                                                    "remain native bindings"},
+                                         {"closing_event_id", lifetime->closingEvent}});
+                                } catch (const std::exception &error) {
+                                    blocked = error.what();
+                                }
+                            }
                             bool unresolved = false;
                             for (const auto buffer : binding.buffers) {
                                 if (!buffer)
@@ -175,9 +205,19 @@ Json validateFrame(const std::filesystem::path &path, const std::function<bool()
                                 if (entry == frame.entries().end() || entry->second.category != 5 ||
                                     entry->second.type != 0x83) {
                                     unresolved = true;
-                                    finding(&e, "error", "constant_buffer_resource_unresolved",
+                                    if (lifetime)
+                                        finding(&e, "warning", "constant_buffer_unused_binding",
+                                                "Absent CB binding closes at event " +
+                                                    std::to_string(lifetime->closingEvent) +
+                                                    " before GPU use; descriptor/storage and native state "
+                                                    "inside this interval are not reconstructed",
+                                                buffer);
+                                    else
+                                        finding(
+                                            &e, "error", "constant_buffer_resource_unresolved",
                                             "Constant-buffer setter requires a saved buffer resource; "
-                                            "native binding cannot be reconstructed from this reference",
+                                            "native binding cannot be reconstructed from this reference. " +
+                                                blocked,
                                             buffer);
                                 }
                             }
