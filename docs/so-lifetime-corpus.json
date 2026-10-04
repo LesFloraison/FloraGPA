@@ -1,0 +1,168 @@
+{
+  "schema": "FloraGPA compatibility corpus 1",
+  "profile": "GPA 2025 R1 legacy DX11 / IGPA v3",
+  "cases": [
+    {
+      "id": "so_lifetime_unbind",
+      "mode": 0,
+      "path": "m2-so-lifetime-originals-v2\\0\\capture.gpa_frame",
+      "sha256": "ed7532f5b23e2218e59863ed78013f39ccdbac6d015feb715e6d7c5780ac4fa5",
+      "bytes": 58257,
+      "family": "stream_output_lifetime",
+      "origin": "self_owned_original_gpa_capture",
+      "reference_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "comparison_policy": "exact_golden",
+      "source_manifests": [
+        "artifacts\\m2-so-lifetime-originals-v2\\manifest.json"
+      ],
+      "controls": [],
+      "boundaries": [],
+      "provenance_note": "Unmodified original capture; pinned original active-swap-chain selector called under its lock before public CaptureNextFrame. Native and injected CPU image/storage/query oracles.",
+      "device_scope": "Local hardware producer; original-player adapter/configuration unproven."
+    },
+    {
+      "id": "so_lifetime_clear_state",
+      "mode": 1,
+      "path": "m2-so-lifetime-originals-v2\\1\\capture.gpa_frame",
+      "sha256": "18b2301d58a1135ef6c9afcfe5c62321faff75d6203f7970399dcfd26a3bef81",
+      "bytes": 58251,
+      "family": "stream_output_lifetime",
+      "origin": "self_owned_original_gpa_capture",
+      "reference_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "comparison_policy": "exact_golden",
+      "source_manifests": [
+        "artifacts\\m2-so-lifetime-originals-v2\\manifest.json"
+      ],
+      "controls": [],
+      "boundaries": [],
+      "provenance_note": "Unmodified original capture; pinned original active-swap-chain selector called under its lock before public CaptureNextFrame. Native and injected CPU image/storage/query oracles.",
+      "device_scope": "Local hardware producer; original-player adapter/configuration unproven."
+    },
+    {
+      "id": "so_lifetime_two_missing",
+      "mode": 2,
+      "path": "m2-so-lifetime-originals-v2\\2\\capture.gpa_frame",
+      "sha256": "fa9c5776483c66a23839285fd6c11a1b6fe76a2aced2e0d589531201c02c0ebc",
+      "bytes": 58313,
+      "family": "stream_output_lifetime",
+      "origin": "self_owned_original_gpa_capture",
+      "reference_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "comparison_policy": "exact_golden",
+      "source_manifests": [
+        "artifacts\\m2-so-lifetime-originals-v2\\manifest.json"
+      ],
+      "controls": [],
+      "boundaries": [],
+      "provenance_note": "Unmodified original capture; pinned original active-swap-chain selector called under its lock before public CaptureNextFrame. Native and injected CPU image/storage/query oracles.",
+      "device_scope": "Local hardware producer; original-player adapter/configuration unproven."
+    },
+    {
+      "id": "so_lifetime_repeat_offset",
+      "mode": 3,
+      "path": "m2-so-lifetime-originals-v2\\3\\capture.gpa_frame",
+      "sha256": "fea5a51d50940a73d623886471668c21506c16925730e21891e55b64b6a0daa2",
+      "bytes": 58436,
+      "family": "stream_output_lifetime",
+      "origin": "self_owned_original_gpa_capture",
+      "reference_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "comparison_policy": "exact_golden",
+      "source_manifests": [
+        "artifacts\\m2-so-lifetime-originals-v2\\manifest.json"
+      ],
+      "controls": [],
+      "boundaries": [],
+      "provenance_note": "Unmodified original capture; pinned original active-swap-chain selector called under its lock before public CaptureNextFrame. Native and injected CPU image/storage/query oracles.",
+      "device_scope": "Local hardware producer; original-player adapter/configuration unproven."
+    },
+    {
+      "id": "so_lifetime_null_slots",
+      "mode": 4,
+      "path": "m2-so-lifetime-originals-v2\\4\\capture.gpa_frame",
+      "sha256": "3984e81f24f6bea1259bbbd1e522e00d1991deb76ea198bc96fd858b82af2f37",
+      "bytes": 58305,
+      "family": "stream_output_lifetime",
+      "origin": "self_owned_original_gpa_capture",
+      "reference_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "comparison_policy": "exact_golden",
+      "source_manifests": [
+        "artifacts\\m2-so-lifetime-originals-v2\\manifest.json"
+      ],
+      "controls": [],
+      "boundaries": [],
+      "provenance_note": "Unmodified original capture; pinned original active-swap-chain selector called under its lock before public CaptureNextFrame. Native and injected CPU image/storage/query oracles.",
+      "device_scope": "Local hardware producer; original-player adapter/configuration unproven."
+    },
+    {
+      "id": "so_lifetime_readback",
+      "mode": 5,
+      "path": "m2-so-lifetime-originals-v2\\5\\capture.gpa_frame",
+      "sha256": "f0c4b243ecdde3f3520030dbe4f09d050d54b5dc1815ec3b3c873e03c1013192",
+      "bytes": 58810,
+      "family": "stream_output_lifetime",
+      "origin": "self_owned_original_gpa_capture",
+      "reference_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "comparison_policy": "exact_golden",
+      "source_manifests": [
+        "artifacts\\m2-so-lifetime-originals-v2\\manifest.json"
+      ],
+      "controls": [],
+      "boundaries": [],
+      "provenance_note": "Unmodified original capture; pinned original active-swap-chain selector called under its lock before public CaptureNextFrame. Native and injected CPU image/storage/query oracles.",
+      "device_scope": "Local hardware producer; original-player adapter/configuration unproven."
+    },
+    {
+      "id": "so_lifetime_mixed_append",
+      "mode": 6,
+      "path": "m2-so-lifetime-originals-v2\\6\\capture.gpa_frame",
+      "sha256": "f71261e73434fe62d3ebcfbca96bf4c548efb4f119b3ca61b249424b93de1f89",
+      "bytes": 96561,
+      "family": "stream_output_lifetime",
+      "origin": "self_owned_original_gpa_capture",
+      "reference_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "comparison_policy": "exact_golden",
+      "source_manifests": [
+        "artifacts\\m2-so-lifetime-originals-v2\\manifest.json"
+      ],
+      "controls": [],
+      "boundaries": [],
+      "provenance_note": "Unmodified original capture; pinned original active-swap-chain selector called under its lock before public CaptureNextFrame. Native and injected CPU image/storage/query oracles.",
+      "device_scope": "Local hardware producer; original-player adapter/configuration unproven."
+    },
+    {
+      "id": "so_lifetime_known_write",
+      "mode": 7,
+      "path": "m2-so-lifetime-originals-v2\\7\\capture.gpa_frame",
+      "sha256": "f8293e19fb2f392d73798737994a15633f233a2452ebd7d3e00c2d667ddcc983",
+      "bytes": 96162,
+      "family": "stream_output_lifetime",
+      "origin": "self_owned_original_gpa_capture",
+      "reference_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "comparison_policy": "exact_golden",
+      "source_manifests": [
+        "artifacts\\m2-so-lifetime-originals-v2\\manifest.json"
+      ],
+      "controls": [],
+      "boundaries": [],
+      "provenance_note": "Unmodified original capture; pinned original active-swap-chain selector called under its lock before public CaptureNextFrame. Native and injected CPU image/storage/query oracles.",
+      "device_scope": "Local hardware producer; original-player adapter/configuration unproven."
+    },
+    {
+      "id": "so_lifetime_so_only_write",
+      "mode": 8,
+      "path": "m2-so-lifetime-originals-v2\\8\\capture.gpa_frame",
+      "sha256": "cd363aa9ee90ee2b03ae7150a0146699c78f026b330dd3060acc7e26d87b0b6f",
+      "bytes": 96162,
+      "family": "stream_output_lifetime",
+      "origin": "self_owned_original_gpa_capture",
+      "reference_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "comparison_policy": "exact_golden",
+      "source_manifests": [
+        "artifacts\\m2-so-lifetime-originals-v2\\manifest.json"
+      ],
+      "controls": [],
+      "boundaries": [],
+      "provenance_note": "Unmodified original capture; pinned original active-swap-chain selector called under its lock before public CaptureNextFrame. Native and injected CPU image/storage/query oracles.",
+      "device_scope": "Local hardware producer; original-player adapter/configuration unproven."
+    }
+  ]
+}

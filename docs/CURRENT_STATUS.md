@@ -38,8 +38,17 @@ tested workloads; opening a file does not prove accurate replay.
 
 ## Latest accepted replay matrix
 
-The [getter baseline](pipeline-getter-baseline.json) records the complete current
-matrix; five missing-state/resource negatives retain explicit diagnostics.
+The subsequent [SO lifetime investigation](SO_LIFETIME_DISCOVERY.md) adds nine
+original files against the unchanged `5ebcd8f` binary: four replayable with
+hardware/WARP byte and execution-count checks, five located missing-buffer
+blockers. Original playback matches producer images for all nine. Cumulative
+inventory is 354 files (344 positive, ten explicit rejections); the full
+historical regression below remains the last complete matrix run. The
+[focused baseline](so-lifetime-baseline.json) reports the additional checks
+separately. Missing-buffer lifetime handling is still unimplemented.
+
+The [getter baseline](pipeline-getter-baseline.json) records the last full
+regression matrix; its five missing-state/resource negatives retain explicit diagnostics.
 
 | Measure | Recorded result |
 |---|---|
@@ -112,7 +121,7 @@ the other 35 suites passed initially and the complete UI suite passes after the 
 | Stage | Current position and completion gate |
 |---|---|
 | M1 — Acceptance infrastructure | Minimum loop delivered: corpus, coverage, preflight, serial comparison and diagnostic queue. Extend evidence as paths arrive. |
-| M2 — Ordinary replay | In progress. The 34 getter blockers are resolved within the observed immediate layouts. Next prove the missing-SO binding lifetime and obtain a complete SO getter capture, then audit remaining interfaces, auxiliary records and resource semantics; enrolled immediate-context paths must replay correctly or reject with reproducible, located diagnostics. |
+| M2 — Ordinary replay | In progress. The 34 getter blockers are resolved within the observed immediate layouts. Complete SO readback/write/getter originals are now verified; five new missing-buffer lifetime cases remain blocked. Next prove safe lifetime handling, then audit remaining interfaces, auxiliary records and resource semantics; enrolled immediate-context paths must replay correctly or reject with reproducible, located diagnostics. |
 | M3 — Deferred Context / Command List | Incomplete. Require original captures proving identity, build order, resource versions, repeated execution, restore-state and event mapping before production support. |
 | M4 — Resources and boundaries | Incomplete. Verify saved initial/differential data, subresources, counters, Query/Predication and presentation; distinguish absent information from implementation gaps. |
 | M5 — Stable compatibility release | Incomplete. Broaden captures, repeat/long-duration checks, recovery and large-file testing; validate clean-environment build/deployment and publish a fixed matrix. |

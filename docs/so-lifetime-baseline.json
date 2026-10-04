@@ -1,0 +1,496 @@
+{
+  "schema": "FloraGPA SO lifetime discovery 1",
+  "production_revision": "5ebcd8f",
+  "status": "Original capture delivery restored; four complete-resource positives and five missing-buffer blockers; production runtime unchanged",
+  "completion": "M2 and M3-M6 incomplete",
+  "previous_full_matrix": "docs/pipeline-getter-baseline.json",
+  "cumulative_inventory_files": 354,
+  "cumulative_positive_files": 344,
+  "cumulative_explicit_rejections": 10,
+  "new_original_files": 9,
+  "new_positive_files": 4,
+  "new_implementation_blockers": 5,
+  "full_historical_matrix_rerun": false,
+  "corpus_native_attempts": 18,
+  "corpus_native_successes": 8,
+  "original_player_runs": 18,
+  "original_equals_producer_files": 9,
+  "focused_positive_replays": 16,
+  "focused_missing_buffer_rejections": 20,
+  "focused_strict_buffer_exports": 32,
+  "focused_before_draw_exports": 12,
+  "focused_disabled_draw_controls": 12,
+  "related_ctest_suites": 2,
+  "related_ctest_cases": 49,
+  "original_device_configuration": "Unidentified; exact final images do not verify original intermediate SO state or establish device equivalence",
+  "mixed_append_capture": "Both target descriptors are saved; this is not a missing-resource mixed-binding original",
+  "image_and_bytes_caveat": "SO writer buffers already contain the final pattern before the captured draw. Actual native SO statistics and disabled-draw controls supplement byte/image checks.",
+  "producer_checks": {
+    "producer_frames": 216,
+    "getter_identity_checks": 264,
+    "producer_storage_checks": 96,
+    "producer_so_statistics_checks": 72,
+    "identity_guards": 36
+  },
+  "cases": [
+    {
+      "id": "so_lifetime_unbind",
+      "mode": 0,
+      "capture_sha256": "ed7532f5b23e2218e59863ed78013f39ccdbac6d015feb715e6d7c5780ac4fa5",
+      "native_status": "replay_failed",
+      "original_matches_producer": true,
+      "preflight_errors": [
+        {
+          "category": 7,
+          "entry_id": 19,
+          "event_id": 19,
+          "kind": "stream_output_resource_unresolved",
+          "reason": "SOSetTargets references an absent buffer entry; its descriptor and storage cannot be validated for replay",
+          "record_type": 13571,
+          "resource_id": 20,
+          "severity": "error"
+        }
+      ],
+      "resource_boundaries": {},
+      "initial_so_references": [
+        {
+          "category": 5,
+          "exists": true,
+          "field": "object",
+          "id": 2,
+          "size": 24,
+          "type": 295
+        },
+        {
+          "exists": false,
+          "field": "buffers[0]",
+          "id": 20
+        }
+      ],
+      "prefilled_before_so": false
+    },
+    {
+      "id": "so_lifetime_clear_state",
+      "mode": 1,
+      "capture_sha256": "18b2301d58a1135ef6c9afcfe5c62321faff75d6203f7970399dcfd26a3bef81",
+      "native_status": "replay_failed",
+      "original_matches_producer": true,
+      "preflight_errors": [
+        {
+          "category": 7,
+          "entry_id": 19,
+          "event_id": 19,
+          "kind": "stream_output_resource_unresolved",
+          "reason": "SOSetTargets references an absent buffer entry; its descriptor and storage cannot be validated for replay",
+          "record_type": 13571,
+          "resource_id": 20,
+          "severity": "error"
+        }
+      ],
+      "resource_boundaries": {},
+      "initial_so_references": [
+        {
+          "category": 5,
+          "exists": true,
+          "field": "object",
+          "id": 2,
+          "size": 24,
+          "type": 295
+        },
+        {
+          "exists": false,
+          "field": "buffers[0]",
+          "id": 20
+        }
+      ],
+      "prefilled_before_so": false
+    },
+    {
+      "id": "so_lifetime_two_missing",
+      "mode": 2,
+      "capture_sha256": "fa9c5776483c66a23839285fd6c11a1b6fe76a2aced2e0d589531201c02c0ebc",
+      "native_status": "replay_failed",
+      "original_matches_producer": true,
+      "preflight_errors": [
+        {
+          "category": 7,
+          "entry_id": 19,
+          "event_id": 19,
+          "kind": "stream_output_resource_unresolved",
+          "reason": "SOSetTargets references an absent buffer entry; its descriptor and storage cannot be validated for replay",
+          "record_type": 13571,
+          "resource_id": 20,
+          "severity": "error"
+        },
+        {
+          "category": 7,
+          "entry_id": 19,
+          "event_id": 19,
+          "kind": "stream_output_resource_unresolved",
+          "reason": "SOSetTargets references an absent buffer entry; its descriptor and storage cannot be validated for replay",
+          "record_type": 13571,
+          "resource_id": 21,
+          "severity": "error"
+        }
+      ],
+      "resource_boundaries": {},
+      "initial_so_references": [
+        {
+          "category": 5,
+          "exists": true,
+          "field": "object",
+          "id": 2,
+          "size": 24,
+          "type": 295
+        },
+        {
+          "exists": false,
+          "field": "buffers[0]",
+          "id": 20
+        },
+        {
+          "exists": false,
+          "field": "buffers[1]",
+          "id": 21
+        }
+      ],
+      "prefilled_before_so": false
+    },
+    {
+      "id": "so_lifetime_repeat_offset",
+      "mode": 3,
+      "capture_sha256": "fea5a51d50940a73d623886471668c21506c16925730e21891e55b64b6a0daa2",
+      "native_status": "replay_failed",
+      "original_matches_producer": true,
+      "preflight_errors": [
+        {
+          "category": 7,
+          "entry_id": 19,
+          "event_id": 19,
+          "kind": "stream_output_resource_unresolved",
+          "reason": "SOSetTargets references an absent buffer entry; its descriptor and storage cannot be validated for replay",
+          "record_type": 13571,
+          "resource_id": 20,
+          "severity": "error"
+        },
+        {
+          "category": 7,
+          "entry_id": 23,
+          "event_id": 23,
+          "kind": "stream_output_resource_unresolved",
+          "reason": "SOSetTargets references an absent buffer entry; its descriptor and storage cannot be validated for replay",
+          "record_type": 13571,
+          "resource_id": 20,
+          "severity": "error"
+        }
+      ],
+      "resource_boundaries": {},
+      "initial_so_references": [
+        {
+          "category": 5,
+          "exists": true,
+          "field": "object",
+          "id": 2,
+          "size": 24,
+          "type": 295
+        },
+        {
+          "exists": false,
+          "field": "buffers[0]",
+          "id": 20
+        }
+      ],
+      "prefilled_before_so": false
+    },
+    {
+      "id": "so_lifetime_null_slots",
+      "mode": 4,
+      "capture_sha256": "3984e81f24f6bea1259bbbd1e522e00d1991deb76ea198bc96fd858b82af2f37",
+      "native_status": "replay_failed",
+      "original_matches_producer": true,
+      "preflight_errors": [
+        {
+          "category": 7,
+          "entry_id": 19,
+          "event_id": 19,
+          "kind": "stream_output_resource_unresolved",
+          "reason": "SOSetTargets references an absent buffer entry; its descriptor and storage cannot be validated for replay",
+          "record_type": 13571,
+          "resource_id": 20,
+          "severity": "error"
+        }
+      ],
+      "resource_boundaries": {},
+      "initial_so_references": [
+        {
+          "category": 5,
+          "exists": true,
+          "field": "object",
+          "id": 2,
+          "size": 24,
+          "type": 295
+        },
+        {
+          "exists": false,
+          "field": "buffers[0]",
+          "id": 20
+        }
+      ],
+      "prefilled_before_so": false
+    },
+    {
+      "id": "so_lifetime_readback",
+      "mode": 5,
+      "capture_sha256": "f0c4b243ecdde3f3520030dbe4f09d050d54b5dc1815ec3b3c873e03c1013192",
+      "native_status": "repeat_stable",
+      "original_matches_producer": true,
+      "preflight_errors": [],
+      "resource_boundaries": {
+        "so_draw_event": null,
+        "readback_copy_event": 24,
+        "target_resource": 20,
+        "staging_resource": 26
+      },
+      "initial_so_references": [
+        {
+          "category": 5,
+          "exists": true,
+          "field": "object",
+          "id": 2,
+          "size": 24,
+          "type": 295
+        },
+        {
+          "category": 5,
+          "exists": true,
+          "field": "buffers[0]",
+          "id": 20,
+          "size": 48,
+          "type": 131
+        }
+      ],
+      "prefilled_before_so": false
+    },
+    {
+      "id": "so_lifetime_mixed_append",
+      "mode": 6,
+      "capture_sha256": "f71261e73434fe62d3ebcfbca96bf4c548efb4f119b3ca61b249424b93de1f89",
+      "native_status": "repeat_stable",
+      "original_matches_producer": true,
+      "preflight_errors": [],
+      "resource_boundaries": {
+        "so_draw_event": 31,
+        "readback_copy_event": 47,
+        "target_resource": 20,
+        "staging_resource": 49
+      },
+      "initial_so_references": [
+        {
+          "category": 5,
+          "exists": true,
+          "field": "object",
+          "id": 2,
+          "size": 24,
+          "type": 295
+        },
+        {
+          "category": 5,
+          "exists": true,
+          "field": "buffers[0]",
+          "id": 20,
+          "size": 48,
+          "type": 131
+        },
+        {
+          "category": 5,
+          "exists": true,
+          "field": "buffers[1]",
+          "id": 21,
+          "size": 48,
+          "type": 131
+        }
+      ],
+      "prefilled_before_so": true
+    },
+    {
+      "id": "so_lifetime_known_write",
+      "mode": 7,
+      "capture_sha256": "f8293e19fb2f392d73798737994a15633f233a2452ebd7d3e00c2d667ddcc983",
+      "native_status": "repeat_stable",
+      "original_matches_producer": true,
+      "preflight_errors": [],
+      "resource_boundaries": {
+        "so_draw_event": 26,
+        "readback_copy_event": 41,
+        "target_resource": 20,
+        "staging_resource": 43
+      },
+      "initial_so_references": [
+        {
+          "category": 5,
+          "exists": true,
+          "field": "object",
+          "id": 2,
+          "size": 24,
+          "type": 295
+        },
+        {
+          "category": 5,
+          "exists": true,
+          "field": "buffers[0]",
+          "id": 20,
+          "size": 48,
+          "type": 131
+        }
+      ],
+      "prefilled_before_so": true
+    },
+    {
+      "id": "so_lifetime_so_only_write",
+      "mode": 8,
+      "capture_sha256": "cd363aa9ee90ee2b03ae7150a0146699c78f026b330dd3060acc7e26d87b0b6f",
+      "native_status": "repeat_stable",
+      "original_matches_producer": true,
+      "preflight_errors": [],
+      "resource_boundaries": {
+        "so_draw_event": 26,
+        "readback_copy_event": 41,
+        "target_resource": 20,
+        "staging_resource": 43
+      },
+      "initial_so_references": [
+        {
+          "category": 5,
+          "exists": true,
+          "field": "object",
+          "id": 2,
+          "size": 24,
+          "type": 295
+        },
+        {
+          "category": 5,
+          "exists": true,
+          "field": "buffers[0]",
+          "id": 20,
+          "size": 48,
+          "type": 131
+        }
+      ],
+      "prefilled_before_so": true
+    }
+  ],
+  "evidence": [
+    {
+      "path": "artifacts/m2-so-lifetime-originals-v2/manifest.json",
+      "sha256": "ff0b6a4432353c5180d9c6aceec8f72dc150ae15cf21b5ab4e9501bda67a76f2"
+    },
+    {
+      "path": "artifacts/m2-so-lifetime-discovery/validation.json",
+      "sha256": "964faef3ffd2e15808e80b0949a03c6a59f7d1f2a941020eb7522e1360111e2f"
+    },
+    {
+      "path": "artifacts/m2-so-lifetime-boundaries-final/validation.json",
+      "sha256": "fc631195136c9a1ee6c0613bb503af466938093d1316c84f9aeabfd9aa2b6056"
+    },
+    {
+      "path": "artifacts/ctest-so-lifetime-evidence.log",
+      "sha256": "119c5f9b23080052992d9ffe127713d4e168e5a21a1a062b67a4892c20d67753"
+    },
+    {
+      "path": "docs/pipeline-getter-baseline.json",
+      "sha256": "099077ef95fac95a2a45cd90351ac7837bdbad934f6906f6a17370fe9f59dea8"
+    },
+    {
+      "path": "docs/so-lifetime-corpus.json",
+      "sha256": "663c4fda4debf458286384630d073ba802d58f481bd4e43bea2765baec765fee"
+    },
+    {
+      "path": "tools/capture_so_lifetimes.py",
+      "sha256": "f917f3f9d7ffb5642d42da1dce50aa58e34530a3dea18930ae3181998e65dfd8"
+    },
+    {
+      "path": "tools/validate_so_lifetimes.py",
+      "sha256": "b1a5d22e635fd425d33517f81db74130871b3ce31930038ead4b7ce89ec14b16"
+    },
+    {
+      "path": "tools/native/original_capture_control.h",
+      "sha256": "0bbda55addde2970d2775bfb633881c45f13279f61d6584b1ad297ce0b0090b8"
+    },
+    {
+      "path": "tools/native/so_lifetime_probe.cpp",
+      "sha256": "36e9d01a9f347147f2cda2fbecd5181d2022d9ee022f50885538dade7665b667"
+    },
+    {
+      "path": "artifacts\\m2-so-lifetime-ctest-results\\stream-output-Release.txt",
+      "sha256": "d39c096d2bedc5bb005005f8a7d2d5043aaa101c1f1d96028c54ebaf82db5362"
+    },
+    {
+      "path": "artifacts\\m2-so-lifetime-ctest-results\\pipeline-getters-Release.txt",
+      "sha256": "68245f3fbc9e3fae75bbb4c021aa81d8672fab9831ccb64870515f0a1bde2e42"
+    },
+    {
+      "path": "artifacts\\so-capture-api-kind.c",
+      "sha256": "f26a552e7a28a916153a043ad086a595a4a950c64195339a3f66a6e9565c6be4"
+    },
+    {
+      "path": "artifacts\\so-capture-arm.c",
+      "sha256": "5cc94fda05e5959c3a06d2821dfe3e2f00375b583fc316a0da188e390865d1ac"
+    },
+    {
+      "path": "artifacts\\so-capture-present-boundaries.c",
+      "sha256": "fca4dccbf349f2b69170f6a53b3302ab26c1e3be9c34f1fdefa66520178520c9"
+    },
+    {
+      "path": "artifacts\\so-capture-present.c",
+      "sha256": "c6e62408ebcf2a50597650b1b5d21100a05afb959488f1b9c48e8672b262670f"
+    },
+    {
+      "path": "artifacts\\so-capture-request.c",
+      "sha256": "ecafb3aac7960f9d79c6f0d8c62e8ff0594b3a9b9bc7c9dad935178c23311f96"
+    },
+    {
+      "path": "artifacts\\so-capture-selection-fallback.c",
+      "sha256": "48738f5f84f9d9a92e034c6c990c77c51310e827122aa91c5752b15f80e76d12"
+    },
+    {
+      "path": "artifacts\\so-capture-selection-notify.c",
+      "sha256": "cad394c482aa9f5c0f48f55e8ab18e7855197c4e622253705a7c012a5b6edd17"
+    },
+    {
+      "path": "artifacts\\so-capture-selection.c",
+      "sha256": "c2c1cd263340ef8b1b335bf7aa2b56cd278228a86615daeb79198adffd83eff7"
+    },
+    {
+      "path": "artifacts\\so-capture-api-kind-ghidra.log",
+      "sha256": "592297018698cefafe81e6f1e12c7e68c4278af7caa03f3f91f67c49ae659ee5"
+    },
+    {
+      "path": "artifacts\\so-capture-arm-ghidra.log",
+      "sha256": "baca7f29ba07f6c2e1c6589ab4dcba82a1590bece26ff53527d773f4304fc3ec"
+    },
+    {
+      "path": "artifacts\\so-capture-present-boundaries-ghidra.log",
+      "sha256": "2063e6fedc17bd26f2f86ff46d848d2e9fd6f01472ceb8516ae5236f2bd9eef9"
+    },
+    {
+      "path": "artifacts\\so-capture-present-ghidra.log",
+      "sha256": "6fcf87775f2cc06769382cb110117e6cbbde2f57f3e67af01cbd8649c4df0601"
+    },
+    {
+      "path": "artifacts\\so-capture-request-ghidra.log",
+      "sha256": "92e26c6feda98916cb15a4ebea7738c2de72e73a2cab2ee4e5139fe011be4768"
+    },
+    {
+      "path": "artifacts\\so-capture-selection-fallback-ghidra.log",
+      "sha256": "239b2d81d88f985aa86ae075692c9faca9cc0bd215390603f0e62995e7ed91e3"
+    },
+    {
+      "path": "artifacts\\so-capture-selection-ghidra.log",
+      "sha256": "53a72c6692b42af624abece4cd65526d5f83e849a0f17e2ab9d5979cf38e3bba"
+    },
+    {
+      "path": "artifacts\\so-capture-selection-notify-ghidra.log",
+      "sha256": "2ca8e9c2833eacc2a1830694af81e12b636dc06b4ac48373d6753339eaed6a77"
+    }
+  ]
+}

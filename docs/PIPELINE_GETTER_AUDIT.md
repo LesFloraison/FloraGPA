@@ -1,5 +1,10 @@
 # Immediate pipeline getter acceptance
 
+> Subsequent [SO lifetime investigation](SO_LIFETIME_DISCOVERY.md) resolves the
+> development capture-delivery issue below and verifies four resource-complete
+> SO originals. Missing-buffer lifetime support remains open. The original
+> getter baseline and historical failed-probe record are preserved.
+
 Reviewed 2026-10-04. This M2 batch implements the 34 immediate Context4 getter
 families identified in [the discovery](PIPELINE_GETTER_DISCOVERY.md). Their
 handling is **checked observation metadata**. They do not restore pipeline state,
