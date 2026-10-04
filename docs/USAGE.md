@@ -68,6 +68,16 @@ and pipeline inspection can prepare bindings before submission. See
 & $Cli replay-pipeline $Frame --event 430 --before --out ./artifacts/pipeline-new
 ```
 
+`initialization-graph` exports original initial dependency metadata without GPU,
+GPA or Python. It accepts only `--out`; inspect node statuses, missing-ID issues
+and `dependency_graph_complete` in `initialization-graph.json`. A completed export
+does not establish an execution schedule, valid GPU objects or later-version
+support. See [initial dependency graph boundaries](INITIALIZATION_GRAPH_AUDIT.md).
+
+```powershell
+& $Cli initialization-graph $Frame --out ./artifacts/initial-graph-new
+```
+
 ## Resources and geometry
 
 Resources combines draw input/output thumbnails and texture inspection. The

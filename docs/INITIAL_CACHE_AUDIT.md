@@ -1,5 +1,9 @@
 # Initial cache membership and CSUAV dependencies
 
+Follow-up: [initial dependency graph recovery](INITIALIZATION_GRAPH_AUDIT.md)
+closes the observed initial resource/state/data collector gaps below. Later
+versions and traditional-list execution remain unaccepted.
+
 Reviewed 2026-10-04. This M3 batch recovers the pinned original player's initial
 file-registration membership in C++ and uses it for the `0x25e` CSUAV reference
 collector. It closes the 224 conditional-reference gaps from the

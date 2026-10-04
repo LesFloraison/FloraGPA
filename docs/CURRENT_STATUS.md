@@ -1,6 +1,15 @@
 # Current capabilities and compatibility
 
-Reviewed **2026-10-04**. The latest [initial cache recovery](INITIAL_CACHE_AUDIT.md)
+Reviewed **2026-10-04**. The latest [initial dependency graph recovery](INITIALIZATION_GRAPH_AUDIT.md)
+adds the CPU-only `initialization-graph` command and 33 resource/state/data
+collector layouts. All 19,387 initial nodes across three unchanged captures match
+original ordered references and dependency sets; 126 native marker probes match
+C++ as well. Six CTest suites, 23 evidence tests and four serial golden/negative
+checks pass. These are initial metadata results, not traditional-list execution
+or later-version scheduling acceptance. Inventory, GPU paths, UI and package are
+unchanged. See the [baseline](initialization-graph-baseline.json).
+
+The preceding [initial cache recovery](INITIAL_CACHE_AUDIT.md)
 adds initial category/descriptor membership and the conditional CSUAV collector.
 Three original captures match 31,934 index records, 19,387 cache descriptors and
 all 6,597 ERG collectors. This closes the prior 224 CSUAV gaps for that initial
