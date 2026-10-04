@@ -24,9 +24,12 @@ def main():
     parser.add_argument('--no-observers', action='store_true', help='Original replay control with no virtual-table changes')
     parser.add_argument('--references', action='store_true', help='Also observe original ERG reference collectors')
     parser.add_argument('--cache', action='store_true', help='Observe initialization cache membership (requires --references)')
+    parser.add_argument('--all-references', action='store_true', help='Also observe resource, state and data collectors')
     args = parser.parse_args()
     if args.cache and not args.references:
         parser.error('--cache requires --references')
+    if args.all_references and not args.references:
+        parser.error('--all-references requires --references')
     args.out.mkdir(parents=True, exist_ok=False)
     sys.path.insert(0, str(args.reference_tools.resolve(strict=True)))
     from gpa_native import replay, PLAYER_SHA256
@@ -42,6 +45,9 @@ def main():
                   scope='Process-local forwarding observers; not traditional-list GPU acceptance')
     if args.references:
         report['reference_collectors'] = []
+    if args.all_references:
+        report['node_reference_collectors'] = []
+        report['node_factories'] = []
     def save():
         (args.out / 'trace.json').write_text(json.dumps(report, indent=2) + '\n', encoding='utf-8')
     save()
@@ -189,6 +195,45 @@ def main():
         if u64.from_address(factory_slot).value != base + 0x3c550:
             raise ValueError('Unexpected ERG factory slot')
         original_factory = factory_proto(u64.from_address(factory_slot).value)
+        node_identities = {}
+        def observe_node(obj, kind, ident, wire_type):
+            table = u64.from_address(obj).value
+            node_identities[obj] = dict(id=ident,kind=kind,wire_type=wire_type,vtable_rva=hex(table-base))
+            slot = table+(6 if kind=='state' else 2)*8
+            if slot in patches:
+                return
+            rva = u64.from_address(slot).value-base
+            proto = c.WINFUNCTYPE(None,ptr,ptr,ptr)
+            original = proto(base+rva)
+            @proto
+            def collect(this,source,destination):
+                original(this,source,destination)
+                try:
+                    start,end,capacity = [u64.from_address(destination+n).value for n in [0,8,16]]
+                    if not start<=end<=capacity or (end-start)%4 or end-start>1000000:
+                        raise ValueError('Unexpected node reference vector')
+                    report['node_reference_collectors'].append(dict(**node_identities[this],collector_rva=hex(rva),
+                        references=[u32.from_address(p).value for p in range(start,end,4)]))
+                except Exception as error:
+                    failures.append(str(error))
+            attach(slot,collect)
+        def attach_node_factory(index,rva,kind):
+            slot=base+0x17ae40+index*8
+            if u64.from_address(slot).value!=base+rva:
+                raise ValueError('Different node factory')
+            original=factory_proto(base+rva)
+            @factory_proto
+            def create(this,output,ident,wire_type):
+                result=original(this,output,ident,wire_type)
+                try:
+                    obj=u64.from_address(output).value
+                    report['node_factories'].append(dict(id=ident,kind=kind,wire_type=wire_type,present=bool(obj)))
+                    if obj:
+                        observe_node(obj,kind,ident,wire_type)
+                except Exception as error:
+                    failures.append(str(error))
+                return result
+            attach(slot,create)
         @factory_proto
         def factory(this, shared_output, event, wire_type):
             result = original_factory(this, shared_output, event, wire_type)
@@ -204,6 +249,9 @@ def main():
             return result
         if not args.no_observers:
             attach(factory_slot, factory)
+            if args.all_references:
+                for index,rva,kind in [(11,0x3ea00,'state'),(12,0x3d7a0,'resource'),(13,0x3bfc0,'data')]:
+                    attach_node_factory(index,rva,kind)
         try:
             report['replay'] = replay(args.capture.resolve(), args.gpa.resolve(), (args.out / 'framebuffer').resolve())
             if failures:

@@ -20,6 +20,7 @@
 #include "application/HlslCompilation.h"
 #include "application/HlslRecovery.h"
 #include "application/InvocationSelector.h"
+#include "application/InitializationGraph.h"
 #include "application/MdHotspots.h"
 #include "application/MdIterations.h"
 #include "application/MdProfile.h"
@@ -88,7 +89,7 @@ int main(int argc, char **argv) {
     p.addHelpOption();
     p.addVersionOption();
     p.addPositionalArgument(
-        "command", "validate-frame | inventory | commands | command-state | contexts | command-lists | replay | draw-resources | shader | "
+        "command", "validate-frame | inventory | commands | command-state | contexts | command-lists | initialization-graph | replay | draw-resources | shader | "
                    "buffer | texture | texture-storage | compile | compile-project | assemble | geometry | "
                    "replay-pipeline | "
                    "class-linkage | predicate | annotations | metric-index | metric-catalog | metric-profile "
@@ -223,6 +224,10 @@ int main(int argc, char **argv) {
                                 << ": " << dir.filePath("validation.json") << Qt::endl;
             return validation["status"] == "blocked" ? 2 : 0;
         }
+        if (command == "initialization-graph")
+            for (const auto &option : p.optionNames())
+                if (option != "out")
+                    throw std::runtime_error("initialization-graph accepts only --out");
         Frame frame(std::filesystem::path(args[1].toStdWString()));
         if (command != "quad" && (p.isSet("quad-depth") || p.isSet("quad-target") || p.isSet("quad-layer")))
             throw std::runtime_error("Quad options apply to quad only");
@@ -533,6 +538,12 @@ int main(int argc, char **argv) {
                 throw std::runtime_error("command-state requires --event and --out");
             auto detail = inspectCommandState(frame, parseId("event"), !p.isSet("before"));
             save(out + "/command-state.json", QByteArray::fromStdString(detail.dump(2) + "\n"));
+            report.insert("completed", true);
+        } else if (command == "initialization-graph") {
+            if (out.isEmpty())
+                throw std::runtime_error("initialization-graph requires --out");
+            auto detail = inspectInitializationGraph(frame);
+            save(out + "/initialization-graph.json", QByteArray::fromStdString(detail.dump(2) + "\n"));
             report.insert("completed", true);
         } else if (command == "contexts" || command == "command-lists") {
             if (out.isEmpty())
