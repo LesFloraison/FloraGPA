@@ -184,6 +184,8 @@ FinishCommandList readFinishCommandList(uint16_t type, Bytes bytes) {
     return out;
 }
 void acceptFinishCommandList(const Frame &frame, const FinishCommandList &command) {
+    if (command.link)
+        throw std::runtime_error("Linked FinishCommandList requires unresolved parent execution semantics");
     if (describeContext(frame, command.context).deferred || command.reference || command.hresult > 0)
         throw std::runtime_error(
             "FinishCommandList execution is not restored: only captured immediate-context no-op results with "

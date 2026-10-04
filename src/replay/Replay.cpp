@@ -796,6 +796,14 @@ void Replay::command(const Entry &e) {
     if (outputHistory_ && OutputBindingModel::models(e.type))
         outputHistory_->advance(e.id);
     Reader r(payload);
+    if (finishCommandListVersion(t)) {
+        if (!std::ranges::equal(payload, frame_.payload(e.id)))
+            throw std::runtime_error("FinishCommandList payload experiments are not supported");
+        acceptFinishCommandList(frame_, readFinishCommandList(t, payload));
+        if (!options_.disabled.contains(e.id))
+            ++counts["finish_command_list_metadata"];
+        return;
+    }
     if (isDiscardRecord(t)) {
         if (!std::ranges::equal(payload, frame_.payload(e.id)))
             throw std::runtime_error("Discard payload experiments are not supported");
@@ -1019,11 +1027,6 @@ void Replay::command(const Entry &e) {
     }
     if (t == 0x246) {
         mappedWrites(e);
-        return;
-    }
-    if (finishCommandListVersion(t)) {
-        acceptFinishCommandList(frame_, readFinishCommandList(t, payload));
-        counts["finish_command_list_metadata"]++;
         return;
     }
     if (acceptQueryMetadata(t, payload)) {

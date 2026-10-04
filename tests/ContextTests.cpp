@@ -1,6 +1,7 @@
 #include "SyntheticCapture.h"
 #include "application/ApiCommands.h"
 #include "application/ContextInspector.h"
+#include "application/FrameValidation.h"
 #include "core/Commands.h"
 #include <QDir>
 #include <QTemporaryDir>
@@ -235,6 +236,62 @@ class ContextTests final : public QObject {
             ReplayOptions options;
             options.warp = true;
             Replay replay(f, options);
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error, replay.run());
+        }
+    }
+    void finishCannotBypassValidation() {
+        QTemporaryDir dir;
+        for (uint16_t type : {0x3109, 0x3209, 0x3372, 0x3438, 0x3550}) {
+            for (int variant = 0; variant < 8; ++variant) {
+                auto c = recoveredCompute();
+                if (variant == 7)
+                    c.add(89, 5, 0x127, pack(Id(0), Id(80), 1u, 0u));
+                // Known immediate no-op is the control. None of the other records
+                // becomes a no-op merely because its event is disabled.
+                auto raw = pack(Id(variant == 1 ? 110 : 0),
+                                Id(variant == 2   ? 999
+                                   : variant == 7 ? 89
+                                                  : 1),
+                                variant == 3 ? 1 : 0, UINT32_MAX, Id(variant == 4 ? 7 : 0));
+                if (variant == 5)
+                    raw.pop_back();
+                if (variant == 6)
+                    raw.push_back(0);
+                c.add(112, 7, type, raw);
+                auto path = dir.filePath(QString("finish-%1-%2.gpa_frame").arg(type).arg(variant));
+                c.save(path);
+                Frame frame(path.toStdWString());
+                const auto validation = validateFrame(path.toStdWString());
+                bool located = false;
+                for (const auto &finding : validation["findings"])
+                    if (finding["severity"] == "error" && finding["event_id"] == 112)
+                        located = true;
+                QCOMPARE(located, variant != 0);
+                for (bool disabled : {false, true}) {
+                    ReplayOptions options;
+                    options.warp = true;
+                    if (disabled)
+                        options.disabled.insert(112);
+                    Replay replay(frame, options);
+                    if (variant)
+                        QVERIFY_THROWS_EXCEPTION(std::runtime_error, replay.run());
+                    else {
+                        replay.run();
+                        QCOMPARE(firstWord(replay, 7), 28u);
+                        QCOMPARE(replay.counts["finish_command_list_metadata"], uint64_t(!disabled));
+                    }
+                }
+            }
+            // Editing an unsupported return identity to zero must not hide it.
+            auto c = recoveredCompute();
+            c.add(112, 7, type, pack(Id(0), Id(1), 0, 0u, Id(7)));
+            auto path = dir.filePath(QString("finish-edit-%1.gpa_frame").arg(type));
+            c.save(path);
+            Frame frame(path.toStdWString());
+            ReplayOptions options;
+            options.warp = true;
+            options.commandPayloads[112] = pack(Id(0), Id(1), 0, 0u, Id(0));
+            Replay replay(frame, options);
             QVERIFY_THROWS_EXCEPTION(std::runtime_error, replay.run());
         }
     }
