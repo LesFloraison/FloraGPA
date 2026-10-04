@@ -12,6 +12,7 @@
 #include "core/Dxbc.h"
 #include "core/InspectionRecords.h"
 #include "core/OutputBindings.h"
+#include "core/PipelineGetters.h"
 #include "core/Predication.h"
 #include "core/PresentRecords.h"
 #include "core/ReplayCapabilities.h"
@@ -22,7 +23,6 @@
 #include <chrono>
 #include <d3d11sdklayers.h>
 #include <d3d11shader.h>
-#include "core/PipelineGetters.h"
 #include <d3dcompiler.h>
 #include <dxgi.h>
 #include <iostream>
@@ -941,7 +941,8 @@ void Replay::command(const Entry &e) {
         return;
     }
     if (isStreamOutputTargets(t)) {
-        applyStreamOutput(payload);
+        if (!applyStreamOutput(e.id, payload))
+            return;
         if (outputHistory_)
             verifyOutputBindings(outputHistory_->delta(e.id));
         observeSrvBindings(e.id);
@@ -1421,6 +1422,8 @@ void Replay::run(const std::function<void(Id, size_t, size_t)> &progress,
         ~ResetObserver() { value = {}; }
     } reset{boundaryObserver_};
     replayComplete_ = false;
+    allowUnusedSoLifetime_ = !commandObserver && !commandScope;
+    unusedSoLifetimes_.clear();
     measurementResult_.reset();
     if (options_.measurement) {
         const auto &m = *options_.measurement;

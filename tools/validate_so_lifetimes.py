@@ -77,16 +77,16 @@ def main():
                 driver_args = ['--warp'] if driver == 'warp' else []
                 for repeat in range(2):
                     tag = f'{driver}-{repeat + 1}'
-                    replay_dir = invoke(tag, 'replay', driver_args, fail=mode < 5)
-                    if mode < 5:
-                        error = json.loads((folder / (tag + '.log')).read_text())
-                        require(not error['completed'] and error['error'] ==
-                                f"Event {setters[0]['id']} (SOSetTargets): Missing capture entry {target}",
-                                'Missing SO descriptor unexpectedly accepted or different failure')
-                        row['runs'][-1]['report'] = error
-                        continue
+                    replay_dir = invoke(tag, 'replay', driver_args)
                     report = row['runs'][-1]['report']
                     require(report['rgba_sha256'] == case['reference_rgba_sha256'], 'Final image mismatch')
+                    if mode < 5:
+                        lifetimes = report['unused_stream_output_lifetimes']
+                        require(len(lifetimes) == (2 if mode == 3 else 1), 'Missing lifetime provenance')
+                        require(all(not p['native_binding_recovered'] and str(target) in p['resources']
+                                    for p in lifetimes), 'Unexpected recovered native binding')
+                        require(report['stream_output_history'] == [], 'Unused SO interval executed GPU work')
+                        continue
                     history = report['stream_output_history']
                     require(len(history) == (1 if mode >= 6 else 0), 'SO execution count mismatch')
                     if mode >= 6:

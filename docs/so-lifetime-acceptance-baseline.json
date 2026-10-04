@@ -1,0 +1,532 @@
+{
+  "schema": "FloraGPA unused SO lifetime acceptance 1",
+  "completion": "M2 and M3-M6 incomplete",
+  "previous_revision": "fc9e966",
+  "inventory_files": 354,
+  "positive_files": 350,
+  "explicit_missing_information_rejections": 4,
+  "file_outcomes": {
+    "repeat_stable": 349,
+    "repeat_variable": 1
+  },
+  "native_positive_runs": 700,
+  "previous_stable_hashes_unchanged": 343,
+  "diagnostic_control_runs": 353,
+  "resource_boundary_exports": 224,
+  "strict_byte_golden_exports": 220,
+  "helldivers_diagnostic_exports": 4,
+  "recovered_unused_binding_files": 6,
+  "unmaterialized_setters_across_recovered_files": 7,
+  "focused_hardware_warp_positive_runs": 36,
+  "focused_buffer_exports": 44,
+  "focused_strict_buffer_exports": 32,
+  "focused_prefilled_before_draw_observations": 12,
+  "focused_disabled_draw_controls": 12,
+  "original_player_runs": 20,
+  "original_equals_producer_files": 10,
+  "original_configuration_equivalence": "Not established; original player final images do not prove intermediate storage/cursor state",
+  "cases": [
+    {
+      "id": "so_lifetime_unbind",
+      "status": "repeat_stable",
+      "original_comparison": "observed_equal",
+      "lifetimes": [
+        {
+          "closing_event_id": 23,
+          "event_id": 19,
+          "native_binding_recovered": false,
+          "resource_ids": [
+            20
+          ]
+        }
+      ]
+    },
+    {
+      "id": "so_lifetime_clear_state",
+      "status": "repeat_stable",
+      "original_comparison": "observed_equal",
+      "lifetimes": [
+        {
+          "closing_event_id": 23,
+          "event_id": 19,
+          "native_binding_recovered": false,
+          "resource_ids": [
+            20
+          ]
+        }
+      ]
+    },
+    {
+      "id": "so_lifetime_two_missing",
+      "status": "repeat_stable",
+      "original_comparison": "observed_equal",
+      "lifetimes": [
+        {
+          "closing_event_id": 25,
+          "event_id": 19,
+          "native_binding_recovered": false,
+          "resource_ids": [
+            20,
+            21
+          ]
+        }
+      ]
+    },
+    {
+      "id": "so_lifetime_repeat_offset",
+      "status": "repeat_stable",
+      "original_comparison": "observed_equal",
+      "lifetimes": [
+        {
+          "closing_event_id": 26,
+          "event_id": 19,
+          "native_binding_recovered": false,
+          "resource_ids": [
+            20
+          ]
+        },
+        {
+          "closing_event_id": 26,
+          "event_id": 23,
+          "native_binding_recovered": false,
+          "resource_ids": [
+            20
+          ]
+        }
+      ]
+    },
+    {
+      "id": "so_lifetime_null_slots",
+      "status": "repeat_stable",
+      "original_comparison": "observed_equal",
+      "lifetimes": [
+        {
+          "closing_event_id": 23,
+          "event_id": 19,
+          "native_binding_recovered": false,
+          "resource_ids": [
+            20
+          ]
+        }
+      ]
+    },
+    {
+      "id": "so_lifetime_readback",
+      "status": "repeat_stable",
+      "original_comparison": "observed_equal",
+      "lifetimes": []
+    },
+    {
+      "id": "so_lifetime_mixed_append",
+      "status": "repeat_stable",
+      "original_comparison": "observed_equal",
+      "lifetimes": []
+    },
+    {
+      "id": "so_lifetime_known_write",
+      "status": "repeat_stable",
+      "original_comparison": "observed_equal",
+      "lifetimes": []
+    },
+    {
+      "id": "so_lifetime_so_only_write",
+      "status": "repeat_stable",
+      "original_comparison": "observed_equal",
+      "lifetimes": []
+    },
+    {
+      "id": "pipeline_getters_missing_so",
+      "status": "repeat_stable",
+      "original_comparison": "observed_equal",
+      "lifetimes": [
+        {
+          "closing_event_id": 47,
+          "event_id": 43,
+          "native_binding_recovered": false,
+          "resource_ids": [
+            44
+          ]
+        }
+      ]
+    }
+  ],
+  "negative_cases": [
+    {
+      "id": "minlod_6",
+      "kind": "resource_lod_unresolved",
+      "event": 22,
+      "resource": 23,
+      "path": "artifacts\\m2-so-lifetimes-final-missing-state\\validation.json",
+      "sha256": "eab0ddd0a2b6cb4c5a5c3f2a9dd8bf75f84cb29d7729bf8ba8093181884e0d47"
+    },
+    {
+      "id": "minlod_usage_4",
+      "kind": "resource_lod_unresolved",
+      "event": 22,
+      "resource": 23,
+      "path": "artifacts\\m2-so-lifetimes-final-usage\\validation.json",
+      "sha256": "171e463f2ebc5da332fd45a489fd76bb83917e2675dc5dd85a76194786fe1765"
+    },
+    {
+      "id": "minlod_usage_5",
+      "kind": "resource_lod_unresolved",
+      "event": 22,
+      "resource": 23,
+      "path": "artifacts\\m2-so-lifetimes-final-usage\\validation.json",
+      "sha256": "171e463f2ebc5da332fd45a489fd76bb83917e2675dc5dd85a76194786fe1765"
+    },
+    {
+      "id": "minlod_usage_8",
+      "kind": "resource_lod_unresolved",
+      "event": 33,
+      "resource": 23,
+      "path": "artifacts\\m2-so-lifetimes-final-usage\\validation.json",
+      "sha256": "171e463f2ebc5da332fd45a489fd76bb83917e2675dc5dd85a76194786fe1765"
+    }
+  ],
+  "results": {
+    "corpus": {
+      "path": "artifacts\\m2-so-lifetimes-regression-corpus\\validation.json",
+      "sha256": "ea6c629867cd831d0621209905521810658fb5b0b82b3a6d90a3dff4e6e69b40",
+      "counts": {
+        "repeat_stable": 90,
+        "repeat_variable": 1
+      }
+    },
+    "originals": {
+      "path": "artifacts\\m2-so-lifetimes-regression-originals\\validation.json",
+      "sha256": "9272a3686bc8a3d19228b2ebb677161ea8c25c9ce1b1f5ca9964a549dfcd8748",
+      "counts": {
+        "repeat_stable": 11
+      }
+    },
+    "copy": {
+      "path": "artifacts\\m2-so-lifetimes-regression-copy\\validation.json",
+      "sha256": "bab72cba1d0fb9e2894c2ab019a17b27ade08c3816707135e3a1c64d11737873",
+      "counts": {
+        "repeat_stable": 6
+      }
+    },
+    "present": {
+      "path": "artifacts\\m2-so-lifetimes-regression-present\\validation.json",
+      "sha256": "c0852af4d91ff8bce9a0d53b645b9d381dd147fb65ce46d20191ecaabbdb6182",
+      "counts": {
+        "repeat_stable": 5
+      }
+    },
+    "buffer": {
+      "path": "artifacts\\m2-so-lifetimes-regression-buffer\\validation.json",
+      "sha256": "cc27540b7e457cb1516876ffc2e5efd64d1b4f975b86bc788199469705c308d0",
+      "counts": {
+        "repeat_stable": 5
+      }
+    },
+    "pipeline": {
+      "path": "artifacts\\m2-so-lifetimes-regression-pipeline\\validation.json",
+      "sha256": "744b71980f3e746126838a7a487214c3d2fe482b003a5036b731b332e8c2295b",
+      "counts": {
+        "repeat_stable": 5
+      }
+    },
+    "creation": {
+      "path": "artifacts\\m2-so-lifetimes-regression-creation\\validation.json",
+      "sha256": "2f232926c92ec2dca3c37f9ae6e4a1d34da847219414d46dce66ebdc3269b41c",
+      "counts": {
+        "repeat_stable": 7
+      }
+    },
+    "discovery": {
+      "path": "artifacts\\m2-so-lifetimes-regression-discovery\\validation.json",
+      "sha256": "a161c15e50ca96c677504aa2356c2b0f2d7f726219eb717db0e70dc7d741188f",
+      "counts": {
+        "repeat_stable": 1
+      }
+    },
+    "dimensions": {
+      "path": "artifacts\\m2-so-lifetimes-regression-dimensions\\validation.json",
+      "sha256": "33a72a28d2c98c4c99254295b8e7be720e4e28b11506ac0686e8aafcf4d3cee0",
+      "counts": {
+        "repeat_stable": 17
+      }
+    },
+    "views": {
+      "path": "artifacts\\m2-so-lifetimes-regression-views\\validation.json",
+      "sha256": "6e63562b929cc9ec8c13ae9f7e8ebf524308143b9a020b57c1a01e10c6c31b72",
+      "counts": {
+        "repeat_stable": 12
+      }
+    },
+    "buffer-views": {
+      "path": "artifacts\\m2-so-lifetimes-regression-buffer-views\\validation.json",
+      "sha256": "320e3cbf0214f0dcbc134a86bb1f956e4226a0b4c99f6292d9928ec176980f14",
+      "counts": {
+        "repeat_stable": 19
+      }
+    },
+    "pipeline-creation": {
+      "path": "artifacts\\m2-so-lifetimes-regression-pipeline-creation\\validation.json",
+      "sha256": "893a2d2a31cf56549ba0a375fc273c18cc11801f7b6edb3450991b83bc974e7e",
+      "counts": {
+        "repeat_stable": 32
+      }
+    },
+    "geometry-creation": {
+      "path": "artifacts\\m2-so-lifetimes-regression-geometry-creation\\validation.json",
+      "sha256": "899028bcc88155d930540b1af6bffc2c78148a59db07ea7a43501c8727127e6c",
+      "counts": {
+        "repeat_stable": 20
+      }
+    },
+    "class-creation": {
+      "path": "artifacts\\m2-so-lifetimes-regression-class-creation\\validation.json",
+      "sha256": "b424fa7963f5fef3e8bca2087e990535377dee19ad2ea83e2d850fee70a8a6c3",
+      "counts": {
+        "repeat_stable": 13
+      }
+    },
+    "predicate-creation": {
+      "path": "artifacts\\m2-so-lifetimes-regression-predicate-creation\\validation.json",
+      "sha256": "137b02d9fc1aa39a91cb504228c132f83c306a5a120d534b61a078329f6de4e2",
+      "counts": {
+        "repeat_stable": 10
+      }
+    },
+    "clear-view": {
+      "path": "artifacts\\m2-so-lifetimes-regression-clear-view\\validation.json",
+      "sha256": "5654a04ce744407734849f7edfa82c3dac83dc3e3d86b7e47502fc6089164b5a",
+      "counts": {
+        "repeat_stable": 16
+      }
+    },
+    "transfer1": {
+      "path": "artifacts\\m2-so-lifetimes-regression-transfer1\\validation.json",
+      "sha256": "1c429c2a2c6c6a29afae5cd0c9348a4397926ba320b1c08cbb4b55b3dbd47a2b",
+      "counts": {
+        "repeat_stable": 26
+      }
+    },
+    "transfer1-context": {
+      "path": "artifacts\\m2-so-lifetimes-regression-transfer1-context\\validation.json",
+      "sha256": "3ab7155ef6e3bb5ed8e85360af7a50980d3649c8f3fa19fda86c76c32ddc8b4b",
+      "counts": {
+        "repeat_stable": 14
+      }
+    },
+    "minlod": {
+      "path": "artifacts\\m2-so-lifetimes-final-minlod\\validation.json",
+      "sha256": "f79b5991cc3f83ac29980882436a17d203f3da7774fba8e24df1aedbb27a7596",
+      "counts": {
+        "repeat_stable": 11
+      }
+    },
+    "usage": {
+      "path": "artifacts\\m2-so-lifetimes-final-usage\\validation.json",
+      "sha256": "171e463f2ebc5da332fd45a489fd76bb83917e2675dc5dd85a76194786fe1765",
+      "counts": {
+        "repeat_stable": 7,
+        "replay_failed": 3
+      }
+    },
+    "getters": {
+      "path": "artifacts\\m2-so-lifetimes-getters\\validation.json",
+      "sha256": "0ebef14ff9992d6479218a0efab085c63f0a12e0f270fda3d3c8a226e542da00",
+      "counts": {
+        "repeat_stable": 12
+      }
+    },
+    "so-lifetimes": {
+      "path": "artifacts\\m2-so-lifetimes-accepted\\validation.json",
+      "sha256": "9ca09865d6f2c9646312a550e12394318996becda5598eb6e3714ad47f332b7b",
+      "counts": {
+        "repeat_stable": 10
+      }
+    }
+  },
+  "package": "out\\FloraGPA-so-lifetimes-20261004",
+  "package_sha256": {
+    "FloraGPA.exe": "53f080285e72ef5a24491490c4b847b1294ca5a1b82e0d5428fe14655fb0e8e5",
+    "FloraGPA.Cli.exe": "76aca8340ef1afd1b06171d2949b027d7642620fc3b9f009e23963d0e04a8795",
+    "FloraGPA.Worker.exe": "159021118bfb88aadde0381db62c38c64102da473a77135731c01d4cdfc5f1e3",
+    "FloraGPA.Rdc.exe": "f4d21d43e661d24d392e91fc1a1f1460a20d1377fcf5075c57083ad289e82773",
+    "FloraGPA.Metrics.dll": "58b6278f2a93e783b1e8bb1290e9b0e51745f1a36825f296584f52159fd7c6db"
+  },
+  "ctest": {
+    "path": "artifacts\\ctest-m2-so-lifetimes.log",
+    "sha256": "176d57cf177657e92f8137e671a63a28a5f6c76fbff4379fcd33a1c50e2519c4",
+    "suites": 39,
+    "qt": {
+      "so-lifetimes": {
+        "path": "artifacts\\m2-so-lifetimes-qt-results\\so-lifetimes-Release.txt",
+        "sha256": "bdb08196d854c6d2477e4040cf71b06c0504be9fb00b4cec0b5592f9da0133ad",
+        "passed": 22
+      },
+      "pipeline-getters": {
+        "path": "artifacts\\m2-so-lifetimes-qt-results\\pipeline-getters-Release.txt",
+        "sha256": "4be8ac41730152da17e091c38046a41b6e57132021b6a74591a74ae9ddd54d91",
+        "passed": 30
+      },
+      "stream-output": {
+        "path": "artifacts\\m2-so-lifetimes-qt-results\\stream-output-Release.txt",
+        "sha256": "c30c200c1da9f1271904cb3381cfbf8557a1cbcc9ada4fd7e649b7b5145ac65a",
+        "passed": 19
+      },
+      "ui": {
+        "path": "artifacts\\m2-so-lifetimes-qt-results\\ui-Release.txt",
+        "sha256": "752692b13ef85ae66ccc149a7daec50126c338b0c2f8d55cac6d2e9b59a5d400",
+        "passed": 56
+      },
+      "resource-lod": {
+        "path": "artifacts\\m2-so-lifetimes-qt-results\\resource-lod-Release.txt",
+        "sha256": "c9d9fc973c1448b2b8c9330da068a1938868249311f0dc1b39263c5da1288f0d",
+        "passed": 51
+      },
+      "transfer1": {
+        "path": "artifacts\\m2-so-lifetimes-qt-results\\transfer1-Release.txt",
+        "sha256": "47795c3b882b4df9d51d0640071ba25f1c37479f97019107305c64b0c7f434fc",
+        "passed": 57
+      }
+    }
+  },
+  "goldens": {
+    "path": "artifacts\\m2-so-lifetimes-regression-golden\\validation.json",
+    "sha256": "5e1dde1ab9876f50c472cdf84378931ffc3b5cd8e9700002b67d37bf81383ade",
+    "results": [
+      {
+        "case": "gf2",
+        "rgba_sha256": "2e1abc5eacb0bbfd801f9fe059c305baa9a0786c384b36a42fa5a323dd979fd1",
+        "passed": true,
+        "counts": {
+          "ClearDepthStencilView": 2,
+          "ClearRenderTargetView": 1,
+          "CreateBuffer": 2,
+          "DrawIndexed": 72,
+          "Map": 44,
+          "Present": 1,
+          "buffers_created_without_initial_data": 2,
+          "object_observation_records": 49,
+          "pipeline_setter_records": 142,
+          "private_data_observations": 4,
+          "query_metadata_records": 2,
+          "state_or_auxiliary_records": 551,
+          "unmap_observations": 44
+        }
+      },
+      {
+        "case": "gf2-negative",
+        "rgba_sha256": "b2c5548a51715f581c4591acc266ac7a0c65b54b7ecd9a49f43499fa9b76c5f1",
+        "passed": true,
+        "counts": {
+          "ClearDepthStencilView": 2,
+          "ClearRenderTargetView": 1,
+          "CreateBuffer": 2,
+          "Map": 44,
+          "Present": 1,
+          "buffers_created_without_initial_data": 2,
+          "object_observation_records": 49,
+          "pipeline_setter_records": 142,
+          "private_data_observations": 4,
+          "query_metadata_records": 2,
+          "state_or_auxiliary_records": 551,
+          "unmap_observations": 44
+        }
+      },
+      {
+        "case": "bf1",
+        "rgba_sha256": "1f724d1840652f66afd26dd30c95aecd5c1b4932eede56109198f15a8f57a2f6",
+        "passed": true,
+        "counts": {
+          "ClearDepthStencilView": 10,
+          "ClearRenderTargetView": 10,
+          "ClearUnorderedAccessViewFloat": 1,
+          "CopyResource": 2,
+          "CopyStructureCount": 6,
+          "CopySubresourceRegion": 7,
+          "Dispatch": 60,
+          "DispatchIndirect": 13,
+          "Draw": 79,
+          "DrawIndexed": 41,
+          "DrawIndexedInstanced": 1053,
+          "DrawInstanced": 29,
+          "GenerateMips": 2,
+          "Map": 4151,
+          "Present": 1,
+          "UpdateSubresource": 27,
+          "map_read_observations": 2,
+          "object_observation_records": 28,
+          "pipeline_setter_records": 2221,
+          "query_metadata_records": 17,
+          "state_or_auxiliary_records": 7354,
+          "unmap_observations": 4153,
+          "unresolved_input_layout_setters": 2,
+          "unresolved_output_setters": 6,
+          "unresolved_shader_setters": 4,
+          "unresolved_srv_setters": 2
+        }
+      },
+      {
+        "case": "bf1-negative",
+        "rgba_sha256": "cd3a3066f984b1c317fbeefec2836503f32078321d3dc1f367465f2c06d435bf",
+        "passed": true,
+        "counts": {
+          "ClearDepthStencilView": 10,
+          "ClearRenderTargetView": 10,
+          "ClearUnorderedAccessViewFloat": 1,
+          "CopyResource": 2,
+          "CopyStructureCount": 6,
+          "CopySubresourceRegion": 7,
+          "Dispatch": 60,
+          "DispatchIndirect": 13,
+          "GenerateMips": 2,
+          "Map": 4151,
+          "Present": 1,
+          "UpdateSubresource": 27,
+          "map_read_observations": 2,
+          "object_observation_records": 28,
+          "pipeline_setter_records": 2221,
+          "query_metadata_records": 17,
+          "state_or_auxiliary_records": 7354,
+          "unmap_observations": 4153,
+          "unresolved_input_layout_setters": 2,
+          "unresolved_output_setters": 6,
+          "unresolved_shader_setters": 4,
+          "unresolved_srv_setters": 2
+        }
+      }
+    ]
+  },
+  "sources": {
+    "CMakeLists.txt": "b41818c26fe9af0a50967ce22337e59cba758c78660bf634922bb8dde3d857ba",
+    "src/core/StreamOutput.h": "ae7489f88e9bd6ee433c40c97a1920c5f82e3a2a574bfef9cfe6d97d21a8e440",
+    "src/core/StreamOutput.cpp": "d0c5b9c3a72796d8351a8dd51c2b47fed0291139b716dbab1128ea4235d69af6",
+    "src/replay/Replay.h": "6365694f0c4e245e3ec8a4a4c55346c253b739e0670773de5f1aca1d1cbc2d4d",
+    "src/replay/Replay.cpp": "7337a1012e32f6fd87f465eecd1bc62114501bf2f694d60f63c60c86157c3681",
+    "src/replay/StreamOutput.cpp": "da526c22484a3ad4fbef1de055d4af22e553e60d4366cd6deb32f45889765ebc",
+    "src/application/FrameValidation.cpp": "e1f58818f1326b3ae30d8676b57503dcf97bfb78bef93944406b7e800b2896a7",
+    "src/cli/main.cpp": "dc05d785dcb2b307968068528da2f571e7ee84611c2973b887f8ff6d7ddf5a5c",
+    "tests/SoLifetimeTests.cpp": "8b75cf7b01583e42029f690db694c7f1bc52643356ee5fcb8362e93ddd17174f",
+    "tests/PipelineGetterTests.cpp": "6cc49be7c973db5c0122b5b3d19c54a76a3565e0258a96d66adf6d1aaecc8b33",
+    "tools/validate_so_lifetimes.py": "94a69e698786b30ce2d29332a9c544d11699e7458800271702741edcdd9b2bd7"
+  },
+  "evidence": {
+    "docs/so-lifetime-baseline.json": "b34939f315f84c0d8efc328a4e20abd7003a2b6c46387cba5bf3fdce48ff3a0b",
+    "docs/so-lifetime-accepted-corpus.json": "96ff071a6a7461def37f938a8e0cb8c474bb6c097083d4aef2794bf271bd959a",
+    "artifacts/m2-so-lifetimes-storage/validation.json": "4f9e6963d005e4bc960825b1ed4225361ec47968decbd375a56e4c04fa4cf650",
+    "artifacts/ctest-so-lifetime-first.log": "5562a4494b97ff5b6fc3ec4a89feff70bf65232897d591ee5326f614b91e7b41",
+    "artifacts/ctest-so-lifetime-refcounts.log": "1b21dd7e1c2b8512340e0f119bbe528336e216d583e2bee748c8f3471172f6c3",
+    "artifacts/build-so-lifetimes-regression.log": "a8e560ccfa6833faa2501813a7878fba5f544fb3ffc7a354c330bd79866cce05",
+    "artifacts/package-so-lifetimes.log": "a05a980e5b933cc75474eea7fc870fd03edd89f73587d8cbb3cf69deb6c7631b",
+    "artifacts/build-so-lifetimes-regression.ps1": "eb5f5ee4a33ef875f919938cb8630b6bace2efb1a2ef4df60bc395cb95448e4a",
+    "artifacts/run-so-lifetimes-ctest.ps1": "6436d6c43982d2cc6615b69cce36054795eb7af873cfc773fa41af3a92a18cb5",
+    "artifacts/run-so-lifetimes-all.py": "eb322498c9ae5eb19f722f8f8804d3e7393e73b2b864f435f9a3d3efe693053e",
+    "artifacts/run-so-lifetimes-regression.py": "46188d31953ab78c33b223c11a6fc8bffd48f27e67cf484272805ab91065ed1a",
+    "artifacts/verify-so-lifetimes.ps1": "6b6ed204a23ca375714b365ad772bf36f743bb68722404240d89b71d57044dbe",
+    "artifacts/summarize-so-lifetime-acceptance.py": "b90b2e45546fb1a4524860fec2a36d0d2e2911c3ab924f3986ca1f324e67c47f"
+  },
+  "limits": [
+    "Absent-only explicitly closed intervals; descriptors/storage/native intermediate bindings remain missing",
+    "Prefixes within intervals, native command observers/scopes and missing-target output-history experiments reject",
+    "Saved/missing mixtures, GPU consumption, other commands, missing close, linked and deferred contexts reject",
+    "Missing initial LOD, counters and workload variability remain separate limits",
+    "No overall feature percentage; module ledger remains 72/117/15"
+  ]
+}

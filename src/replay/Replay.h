@@ -13,6 +13,7 @@
 #include "core/ResourceLod.h"
 #include "core/SamplerBindings.h"
 #include "core/SrvBindings.h"
+#include "core/StreamOutput.h"
 #include "core/TextureCreation.h"
 #include "core/TextureEdits.h"
 #define NOMINMAX
@@ -266,6 +267,8 @@ class Replay {
     std::map<uint32_t, Com<ID3D11Query>> soQueries_;
     std::map<Id, DrawAutoParameters> soAutoResults_;
     bool soCountEnabled_ = false, soCountRequiresKnown_ = false;
+    bool allowUnusedSoLifetime_ = false;
+    std::vector<UnusedStreamOutputLifetime> unusedSoLifetimes_;
     struct ActiveStream {
         uint32_t stream{}, factor{};
         std::map<ID3D11Buffer *, uint32_t> strides;
@@ -273,7 +276,7 @@ class Replay {
     };
     void unbindStreamOutput();
     void bindStreamOutput(const State &state);
-    void applyStreamOutput(Bytes payload);
+    bool applyStreamOutput(Id event, Bytes payload);
     void markStreamOutputOffsets(std::span<ID3D11Buffer *const> objects, std::span<const uint32_t> offsets);
     void resetStreamOutputBindings();
     std::vector<ActiveStream> beginStreamOutput(const State &state);
@@ -319,6 +322,7 @@ class Replay {
     D3D11_QUERY_DATA_PIPELINE_STATISTICS statistics{};
     std::map<std::string, uint64_t> counts;
     std::vector<StreamOutputCount> streamOutputHistory;
+    const auto &unusedStreamOutputLifetimes() const { return unusedSoLifetimes_; }
     DrawAutoParameters drawAutoParameters(Id event);
     const auto &drawAutoResults() const { return soAutoResults_; }
     explicit Replay(const Frame &frame, ReplayOptions options = {});

@@ -2,7 +2,8 @@
 
 > Subsequent [SO lifetime investigation](SO_LIFETIME_DISCOVERY.md) resolves the
 > development capture-delivery issue below and verifies four resource-complete
-> SO originals. Missing-buffer lifetime support remains open. The original
+> SO originals. The [lifetime implementation](SO_LIFETIME_AUDIT.md) subsequently
+> supports proven unused intervals while preserving missing-resource provenance. The original
 > getter baseline and historical failed-probe record are preserved.
 
 Reviewed 2026-10-04. This M2 batch implements the 34 immediate Context4 getter

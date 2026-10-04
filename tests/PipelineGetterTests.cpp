@@ -312,10 +312,10 @@ class PipelineGetterTests final : public QObject {
             QSKIP("Set original incomplete SO capture");
         Frame frame(path.toStdWString());
         const auto report = validateFrame(frame.path());
-        QCOMPARE(report["errors"], nlohmann::json(1));
+        QCOMPARE(report["errors"], nlohmann::json(0));
         bool found = false;
         for (const auto &f : report["findings"])
-            if (f["kind"] == "stream_output_resource_unresolved") {
+            if (f["kind"] == "stream_output_unused_binding") {
                 QCOMPARE(f["event_id"], nlohmann::json(43));
                 QCOMPARE(f["resource_id"], nlohmann::json(44));
                 found = true;
@@ -325,13 +325,10 @@ class PipelineGetterTests final : public QObject {
             ReplayOptions options;
             options.warp = warp;
             Replay replay(frame, options);
-            try {
-                replay.run();
-                QFAIL("Missing SO buffer must be rejected");
-            } catch (const std::runtime_error &error) {
-                QVERIFY(
-                    QByteArray(error.what()).contains("Event 43 (SOSetTargets): Missing capture entry 44"));
-            }
+            replay.run();
+            QCOMPARE(replay.unusedStreamOutputLifetimes().size(), size_t(1));
+            QCOMPARE(replay.unusedStreamOutputLifetimes()[0].closingEvent, Id(47));
+            QCOMPARE(replay.output().rgba, bytes(QFileInfo(path).path() + "/native/expected.rgba"));
         }
     }
 };

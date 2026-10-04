@@ -89,13 +89,27 @@ void Replay::bindStreamOutput(const State &state) {
     soSignature_ = std::move(signature);
     soPendingAppend_.clear();
 }
-void Replay::applyStreamOutput(Bytes payload) {
+bool Replay::applyStreamOutput(Id event, Bytes payload) {
     const auto command = readStreamOutputTargets(payload);
     immediate(command.context);
     if (command.count && !command.buffers)
         throw std::runtime_error("SOSetTargets requires a buffer array for nonzero count");
     auto ids = command.buffers.value_or(std::vector<Id>{});
     auto offsets = command.offsets.value_or(std::vector<uint32_t>(command.count, UINT32_MAX));
+    if (std::any_of(ids.begin(), ids.end(), [&](Id id) { return id && !frame_.entries().contains(id); })) {
+        if (!allowUnusedSoLifetime_ || outputHistory_)
+            throw std::runtime_error("Absent SO targets cannot supply native command-state observations or "
+                                     "output-history experiments");
+        auto proof = proveUnusedStreamOutputLifetime(
+            frame_, event, options_.disabled, options_.commandPayloads, options_.until, options_.before);
+        // Remove prior SO targets, but do not fabricate the absent destinations or
+        // reset any saved buffer's hidden cursor. No GPU work occurs before close.
+        unbindStreamOutput();
+        soPendingAppend_.clear();
+        unusedSoLifetimes_.push_back(std::move(proof));
+        ++counts["unmaterialized_stream_output_setters"];
+        return false;
+    }
     validateStreamOutputBindings(frame_, ids, offsets);
     std::vector<ID3D11Buffer *> objects;
     for (auto id : ids)
@@ -110,6 +124,7 @@ void Replay::applyStreamOutput(Bytes payload) {
     for (uint32_t i = 0; i < objects.size(); ++i)
         if (objects[i] && offsets[i] == UINT32_MAX)
             soPendingAppend_[i] = objects[i];
+    return true;
 }
 std::map<uint32_t, uint32_t> streamOutputTopologies(Bytes bytecode) {
     bool program = false;

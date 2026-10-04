@@ -1,16 +1,14 @@
 # Current capabilities and compatibility
 
 Reviewed **2026-10-04**. The latest accepted build is pinned by the
-[pipeline getter baseline](pipeline-getter-baseline.json), following discovery
-revision 656bf82. The [getter audit](PIPELINE_GETTER_AUDIT.md) records its scope.
+[unused SO lifetime baseline](so-lifetime-acceptance-baseline.json), following
+research revision `fc9e966`. The [SO audit](SO_LIFETIME_AUDIT.md) records its scope.
 
-The inventory contains **345 files: 340 positive replays and five explicit
-missing-information/resource rejections**. The eight previous getter blockers
-now pass, together with four new boundary originals. One additional SO capture
-lacks its referenced buffer descriptor and remains a located negative. Original
-GPA can replay its final image; proven handling of that unused binding lifetime
-is still open, so this rejection is not a claim that its final pixels are
-fundamentally unrecoverable.
+The inventory contains **354 files: 350 positive replays and four explicit
+missing-initial-LOD rejections**. Six formerly rejected SO files now replay
+through proven unused binding intervals. Their absent descriptors/storage and
+intermediate native bindings remain unavailable and are explicitly reported.
+The other four new SO files verify complete resource readback and writes.
 
 ## Supported scope
 
@@ -22,7 +20,7 @@ tested workloads; opening a file does not prove accurate replay.
 | Area | Available behavior | Boundaries and evidence |
 |---|---|---|
 | Preflight and API inspection | Offline diagnostics, decoded fields, references, coverage and Qt diagnostics | Structural success is not GPU success; metadata is not execution. [Acceptance infrastructure](COMPATIBILITY_BASELINE.md) |
-| Pipeline getter observations | 34 additional checked immediate Context4 getter families; decoded optional outputs and reference details | Metadata never restores native bindings or fabricates observed objects. Nonempty SO production path remains unaccepted because its saved original lacks the buffer entry. [Getter acceptance](PIPELINE_GETTER_AUDIT.md) |
+| Pipeline getter observations | 34 additional checked immediate Context4 getter families; decoded optional outputs and reference details | Metadata never restores native bindings or fabricates observed objects. Nonempty SO getter/write originals pass; absent-only unused lifetimes have separate provenance and inspection limits. [Getter acceptance](PIPELINE_GETTER_AUDIT.md), [SO lifetimes](SO_LIFETIME_AUDIT.md) |
 | Immediate-context replay | Captured draws/dispatches, supported setters, uploads, copies (including Context1 transfers), ClearView, queries/predication and presentation | Broader layouts, resource versions and some presentation/transfer cases remain incomplete. [Setters](PIPELINE_SETTER_AUDIT.md), [texture transfers](TEXTURE_COPY_AUDIT.md), [Context1 transfers](TRANSFER1_AUDIT.md), [ClearView](CLEAR_VIEW_AUDIT.md), [presentation](PRESENT_REPLAY_AUDIT.md) |
 | Frame-time creation | Validated buffers, textures/views, shaders, pipeline states, class linkage/instances and predicates | Device5 coverage is not every interface version or descriptor combination; required missing data and unresolved identities are rejected. [Buffers](BUFFER_CREATION_AUDIT.md), [textures](TEXTURE_DIMENSIONS_AUDIT.md), [texture views](VIEW_CREATION_AUDIT.md), [buffer views](BUFFER_VIEW_CREATION_AUDIT.md), [pipeline](PIPELINE_CREATION_AUDIT.md), [geometry/SO](GEOMETRY_CREATION_AUDIT.md), [classes](CLASS_CREATION_AUDIT.md), [predicates](PREDICATE_CREATION_AUDIT.md) |
 | Texture and output inspection | Presentation/RTV/DSV selection, mip/layer/slice, typed/channel/range controls, supported MSAA resolve/sample and planar inspection, exports | Format/device limits remain; legacy P010/P016 initial data can contain recovered Y only. [Frame output](FRAME_OUTPUT_MIGRATION.md), [texture inspection](TEXTURE_INSPECTION_MIGRATION.md), [planar writes](PLANAR_WRITE_MIGRATION.md) |
@@ -38,33 +36,25 @@ tested workloads; opening a file does not prove accurate replay.
 
 ## Latest accepted replay matrix
 
-The subsequent [SO lifetime investigation](SO_LIFETIME_DISCOVERY.md) adds nine
-original files against the unchanged `5ebcd8f` binary: four replayable with
-hardware/WARP byte and execution-count checks, five located missing-buffer
-blockers. Original playback matches producer images for all nine. Cumulative
-inventory is 354 files (344 positive, ten explicit rejections); the full
-historical regression below remains the last complete matrix run. The
-[focused baseline](so-lifetime-baseline.json) reports the additional checks
-separately. Missing-buffer lifetime handling is still unimplemented.
-
-The [getter baseline](pipeline-getter-baseline.json) records the last full
-regression matrix; its five missing-state/resource negatives retain explicit diagnostics.
+The [SO lifetime baseline](so-lifetime-acceptance-baseline.json) records the
+complete current regression, plus focused storage/cursor and original-player
+checks. Historical getter and SO discovery baselines remain unchanged.
 
 | Measure | Recorded result |
 |---|---|
-| Enrolled inventory / positive files / explicit negatives | 345 / 340 / 5 |
-| Ordinary independent positive runs | 680 |
-| Repeated output | 339 stable files; one known-variable Helldivers file |
-| Previously stable image hashes | All 327 unchanged |
-| Diagnostic control runs | 353 |
-| Resource boundary exports | 208: 204 strict byte goldens and four Helldivers boundary diagnostics |
-| Getter producer checks | 312 frames and 1,272 return assertions across thirteen original files |
-| Getter type coverage | 34/34 identified families decoded as metadata; 73 records including the SO negative |
-| Getter hardware/WARP positive rows | 24; two replays plus disabled-getter control per row |
-| New original-player runs | 26 completed; twelve files equal producer, one class-instance discrepancy |
-| Related CTest suites / golden checks | 38 / 4 passed |
-| Getter / Qt-Worker cases | 30 / 56 passed, no skips |
-| New rejection evidence | Missing SO buffer 44 at event 43; four prior minimum-LOD negatives retained |
+| Enrolled inventory / positive files / explicit negatives | 354 / 350 / 4 |
+| Ordinary independent positive runs | 700 |
+| Repeated output | 349 stable files; one known-variable Helldivers file |
+| Previously stable image hashes | All 343 unchanged (339 full-baseline files plus four SO discovery positives) |
+| Diagnostic control runs | 353; plus twelve focused disabled-SO-draw controls |
+| Matrix resource boundary exports | 224: 220 strict byte goldens and four Helldivers diagnostics |
+| Focused SO resource exports | 44: 32 strict final bytes and twelve prefilled before-draw observations |
+| Newly admitted unused SO files | Six original files, seven unmaterialized setters; missing resources are not fabricated |
+| SO corpus hardware/WARP runs | 36, across nine files; older getter SO file also covered by CTest and matrix |
+| New original-player runs | 20, across ten files; exact producer/native final pixels |
+| Related CTest suites / golden checks | 39 / 4 passed |
+| SO lifetime / getter / Qt-Worker cases | 22 / 30 / 56 passed, no skips |
+| Remaining enrolled rejections | Four initial minimum-LOD dependencies with precise event/resource diagnostics |
 
 These are separate measurements, not an overall correctness percentage. The
 matrix includes research fixtures and self-owned original captures as well as
@@ -105,7 +95,7 @@ under matched device/driver settings.
 
 [Comparison reporting](original-comparison-baseline.json) separately verifies
 execution status and image comparisons (13 CPU checks, nine independent runs,
-seven original runs). These focused runs are not added to the 680-run matrix.
+seven original runs). Those historical focused runs are not added to the 700-run matrix.
 Helldivers' [sharpening variability](HELLDIVERS_REPLAY_FIX.md) remains visible;
 no shader modification, global tolerance or automatic event disable manufactures
 a stable result. Earlier Intel-metric batches retain their separately documented
@@ -121,7 +111,7 @@ the other 35 suites passed initially and the complete UI suite passes after the 
 | Stage | Current position and completion gate |
 |---|---|
 | M1 — Acceptance infrastructure | Minimum loop delivered: corpus, coverage, preflight, serial comparison and diagnostic queue. Extend evidence as paths arrive. |
-| M2 — Ordinary replay | In progress. The 34 getter blockers are resolved within the observed immediate layouts. Complete SO readback/write/getter originals are now verified; five new missing-buffer lifetime cases remain blocked. Next prove safe lifetime handling, then audit remaining interfaces, auxiliary records and resource semantics; enrolled immediate-context paths must replay correctly or reject with reproducible, located diagnostics. |
+| M2 — Ordinary replay | In progress. Observed getter paths and proven unused SO intervals now pass; mixed saved/missing targets, unresolved native observations and unverified lifetimes remain explicit boundaries. Continue the interface/command/resource audit and assess the remaining M2 gate before production command-list work. Enrolled paths must replay correctly or reject with reproducible, located diagnostics. |
 | M3 — Deferred Context / Command List | Incomplete. Require original captures proving identity, build order, resource versions, repeated execution, restore-state and event mapping before production support. |
 | M4 — Resources and boundaries | Incomplete. Verify saved initial/differential data, subresources, counters, Query/Predication and presentation; distinguish absent information from implementation gaps. |
 | M5 — Stable compatibility release | Incomplete. Broaden captures, repeat/long-duration checks, recovery and large-file testing; validate clean-environment build/deployment and publish a fixed matrix. |

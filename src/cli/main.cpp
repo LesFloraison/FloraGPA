@@ -1067,6 +1067,17 @@ int main(int argc, char **argv) {
                                              {"primitives_written", QString::number(row.written)},
                                              {"primitives_storage_needed", QString::number(row.needed)}});
             report.insert("stream_output_history", soHistory);
+            QJsonArray unusedSo;
+            for (const auto &lifetime : replay.unusedStreamOutputLifetimes()) {
+                QJsonArray resources;
+                for (auto id : lifetime.resources)
+                    resources.append(QString::number(id));
+                unusedSo.append(QJsonObject{{"event", QString::number(lifetime.event)},
+                                            {"closing_event", QString::number(lifetime.closingEvent)},
+                                            {"resources", resources},
+                                            {"native_binding_recovered", false}});
+            }
+            report.insert("unused_stream_output_lifetimes", unusedSo);
             if (auto it = replay.drawAutoResults().find(options.until);
                 it != replay.drawAutoResults().end()) {
                 const auto &parameters = it->second;

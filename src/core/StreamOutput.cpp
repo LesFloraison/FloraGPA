@@ -1,4 +1,7 @@
 #include "StreamOutput.h"
+#include "Contexts.h"
+#include "InspectionRecords.h"
+#include "PipelineGetters.h"
 #include <algorithm>
 namespace flora {
 Id shaderStreamOutput(const Frame &frame, Id shader) {
@@ -62,7 +65,8 @@ bool isStreamOutputTargets(uint16_t type) {
 }
 StreamOutputTargets readStreamOutputTargets(Bytes payload) {
     Reader r(payload);
-    r.skip(8);
+    if (r.read<Id>())
+        throw std::runtime_error("Linked SOSetTargets records are not supported");
     StreamOutputTargets out;
     out.context = r.read<Id>();
     out.count = r.read<uint32_t>();
@@ -80,6 +84,102 @@ StreamOutputTargets readStreamOutputTargets(Bytes payload) {
     }
     r.end();
     return out;
+}
+UnusedStreamOutputLifetime proveUnusedStreamOutputLifetime(const Frame &frame, Id event,
+                                                           const std::set<Id> &disabled,
+                                                           const std::map<Id, std::vector<uint8_t>> &payloads,
+                                                           Id until, bool before) {
+    auto payload = [&](Id id) -> Bytes {
+        auto it = payloads.find(id);
+        return it == payloads.end() ? frame.payload(id) : Bytes(it->second);
+    };
+    const auto &entry = frame.entry(event);
+    if (entry.category != 7 || !isStreamOutputTargets(entry.type) || disabled.contains(event))
+        throw std::runtime_error("Unused SO lifetime requires an enabled SO setter");
+    const auto initial = readStreamOutputTargets(payload(event));
+    requireImmediateContext(frame, initial.context);
+    UnusedStreamOutputLifetime proof{event};
+    auto absentOnly = [&](const StreamOutputTargets &targets) {
+        if (targets.context != initial.context)
+            throw std::runtime_error("Unused SO lifetime crosses different contexts");
+        if (targets.count && !targets.buffers)
+            throw std::runtime_error("SOSetTargets requires a buffer array for nonzero count");
+        bool absent = false;
+        if (targets.buffers)
+            for (size_t i = 0; i < targets.buffers->size(); ++i) {
+                auto id = targets.buffers->at(i);
+                if (!id)
+                    continue;
+                if (frame.entries().contains(id))
+                    throw std::runtime_error(
+                        "Unused SO lifetime cannot discard a saved target or its cursor");
+                if (!targets.offsets)
+                    throw std::runtime_error("Unused SO lifetime requires explicit offsets");
+                auto offset = targets.offsets->at(i);
+                if (offset != UINT32_MAX && offset % 4)
+                    throw std::runtime_error("Unused SO lifetime has an unaligned byte offset");
+                absent = true;
+                if (std::find(proof.resources.begin(), proof.resources.end(), id) == proof.resources.end())
+                    proof.resources.push_back(id);
+            }
+        return absent;
+    };
+    if (!absentOnly(initial))
+        throw std::runtime_error("Unused SO lifetime has no absent target");
+    for (auto it = frame.entries().upper_bound(event); it != frame.entries().end(); ++it) {
+        const auto &[id, next] = *it;
+        if (next.category != 7)
+            continue;
+        if (until && (id > until || (before && id == until)))
+            break;
+        if (disabled.contains(id))
+            continue;
+        auto raw = payload(id);
+        try {
+            if (isStreamOutputTargets(next.type)) {
+                if (absentOnly(readStreamOutputTargets(raw)))
+                    continue;
+                proof.closingEvent = id;
+                return proof;
+            }
+            if (next.type == 0x242) {
+                Reader reader(raw);
+                if (reader.read<Id>() || reader.read<Id>() != initial.context)
+                    throw std::runtime_error("Closing ClearState has a link or different context");
+                reader.end();
+                proof.closingEvent = id;
+                return proof;
+            }
+            if (isPipelineGetter(next.type)) {
+                // Runtime does not accept getter payload edits, even if structurally valid.
+                if (!std::ranges::equal(raw, frame.payload(id)))
+                    throw std::runtime_error("Pipeline getter payload experiments are not supported");
+                const auto getter = readPipelineGetter(next.type, raw);
+                validatePipelineGetter(frame, getter);
+                if (getter.context != initial.context)
+                    throw std::runtime_error("Getter has a different context");
+                continue;
+            }
+            if (next.type == 0x3013 || next.type == 0x3014) {
+                acceptPassiveObjectRecord(next.type, raw);
+                Reader reader(raw);
+                const auto link = reader.read<Id>(), resource = reader.read<Id>();
+                const auto references = reader.read<uint32_t>();
+                reader.end();
+                if (link || !references ||
+                    std::find(proof.resources.begin(), proof.resources.end(), resource) ==
+                        proof.resources.end())
+                    throw std::runtime_error(
+                        "Buffer reference observation does not preserve an absent target's lifetime");
+                continue;
+            }
+            throw std::runtime_error("Command may consume or change unresolved SO state");
+        } catch (const std::exception &error) {
+            throw std::runtime_error("Unused SO lifetime blocked at event " + std::to_string(id) + ": " +
+                                     error.what());
+        }
+    }
+    throw std::runtime_error("Unused SO lifetime has no explicit close before the replay boundary");
 }
 void validateStreamOutputBindings(const Frame &frame, std::span<const Id> ids,
                                   std::span<const uint32_t> offsets) {

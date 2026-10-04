@@ -54,6 +54,7 @@ Json validateFrame(const std::filesystem::path &path, const std::function<bool()
         Frame frame(path);
         report["entries"] = frame.entries().size();
         report["source_sha256"] = frame.sha256();
+        report["unused_stream_output_lifetimes"] = Json::array();
         const auto lod = auditResourceLod(frame);
         report["resource_lod_initial_observations"] = Json::array();
         for (const auto &[resource, initial] : lod.initial)
@@ -140,13 +141,46 @@ Json validateFrame(const std::filesystem::path &path, const std::function<bool()
                     } else {
                         if (isStreamOutputTargets(e.type)) {
                             const auto targets = readStreamOutputTargets(frame.payload(id));
+                            std::optional<UnusedStreamOutputLifetime> lifetime;
+                            std::string blocked;
+                            if (targets.buffers &&
+                                std::any_of(targets.buffers->begin(), targets.buffers->end(), [&](Id buffer) {
+                                    return buffer && !frame.entries().contains(buffer);
+                                })) {
+                                try {
+                                    lifetime = proveUnusedStreamOutputLifetime(frame, id);
+                                    report["unused_stream_output_lifetimes"].push_back(
+                                        {{"event_id", id},
+                                         {"closing_event_id", lifetime->closingEvent},
+                                         {"resource_ids", lifetime->resources},
+                                         {"native_binding_recovered", false}});
+                                    report["record_handling_overrides"].push_back(
+                                        {{"event_id", id},
+                                         {"handling", "metadata"},
+                                         {"reason", "Proven unused absent-only SO target identities; native "
+                                                    "targets are not materialized"},
+                                         {"closing_event_id", lifetime->closingEvent}});
+                                } catch (const std::exception &error) {
+                                    blocked = error.what();
+                                }
+                            }
                             if (targets.buffers)
                                 for (const auto buffer : *targets.buffers)
                                     if (buffer && !frame.entries().contains(buffer))
-                                        finding(&e, "error", "stream_output_resource_unresolved",
-                                                "SOSetTargets references an absent buffer entry; its "
-                                                "descriptor and storage cannot be validated for replay",
-                                                buffer);
+                                        if (lifetime)
+                                            finding(&e, "warning", "stream_output_unused_binding",
+                                                    "Absent-only SO binding closes at event " +
+                                                        std::to_string(lifetime->closingEvent) +
+                                                        " before GPU use; descriptor/storage are not "
+                                                        "reconstructed. "
+                                                        "Replay ending inside this interval or requiring "
+                                                        "native command-state observation is unsupported",
+                                                    buffer);
+                                        else
+                                            finding(&e, "error", "stream_output_resource_unresolved",
+                                                    "SOSetTargets references an absent buffer entry; " +
+                                                        blocked,
+                                                    buffer);
                         }
                         if (isPipelineSetter(e.type)) {
                             const auto binding = readPipelineSetter(e.type, frame.payload(id));

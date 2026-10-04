@@ -1,5 +1,8 @@
 # SO lifetime evidence and original capture delivery
 
+> Subsequent [lifetime implementation](SO_LIFETIME_AUDIT.md) admits proven unused
+> absent-only intervals. The discovery outcomes and baseline below are historical.
+
 Reviewed 2026-10-04; production implementation remains `5ebcd8f`. This M2
 development batch restores a usable original-capture validation path and adds
 nine original SO lifetime files. It does **not** implement missing-buffer lifetime
