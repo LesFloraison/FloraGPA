@@ -1,5 +1,10 @@
 # Deferred resource versions and capture-side expansion
 
+**Superseded rejection outcomes:** the [CB lifetime correction](CONSTANT_BUFFER_LIFETIME_AUDIT.md)
+now accepts all nine omitted-sentinel originals through proved unused intervals.
+The counts and expected rejections below describe the preceding fixed executable;
+the original captures, binary investigation and capture-side observations remain valid.
+
 Reviewed **2026-10-04**, following the [M2 registered gate](M2_ACCEPTANCE_GATE.md).
 Production correction: `7227382`. Package: `out/FloraGPA-m3-deferred-20261004/`.
 This is an M3 evidence milestone, **not acceptance of traditional Command Lists**.

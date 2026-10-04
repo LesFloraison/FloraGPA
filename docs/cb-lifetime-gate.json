@@ -1,0 +1,17 @@
+{
+  "schema": "FloraGPA compatibility gate suites 1",
+  "manifest_hash_policy": "UTF-8 bytes with CRLF normalized to LF",
+  "expected_cases": 18,
+  "expected_unique_captures": 18,
+  "expected_rejections": 0,
+  "suites": [
+    {
+      "id": "cb-lifetimes",
+      "manifest": "docs/cb-lifetime-corpus.json",
+      "manifest_sha256": "4c9f826f1ce6419d42b8f5def558d1adfa32a2f220edefd1acba28cd8f00097d",
+      "capture_root": "artifacts",
+      "subdirectory": "",
+      "expected_rejections": {}
+    }
+  ]
+}

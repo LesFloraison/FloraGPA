@@ -1,0 +1,1032 @@
+{
+  "schema": "FloraGPA compatibility corpus 1",
+  "profile": "GPA 2025 R1 legacy DX11 / IGPA v3",
+  "cases": [
+    {
+      "id": "deferred_versions_0",
+      "mode": 0,
+      "path": "m3-deferred-version-originals\\0\\capture.gpa_frame",
+      "sha256": "e0a0f703b28b308a7f62b3de9a89fafe10a3630302b274ae9ddc832a5557d0c4",
+      "bytes": 148264,
+      "family": "deferred_versions",
+      "origin": "self_owned_original_gpa_capture",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 34,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 60,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 82,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        }
+      ],
+      "boundaries": [
+        {
+          "resource": 5,
+          "event": 34,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "374d429ee174762e85d14ea494b50c91a44a1557227814f14650940d7e283790"
+        },
+        {
+          "resource": 5,
+          "event": 60,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "37b37f613b3251716348f8bd35fedf6cbcda3d21f6e2d0f78757b44963c9c99e"
+        },
+        {
+          "resource": 5,
+          "event": 82,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "8e6473389583d03b07a6016cfa2dfeef6804b9b92eff4332009cd8226c3babbf"
+        }
+      ],
+      "source_manifests": [
+        "artifacts/m3-deferred-version-originals/manifest.json"
+      ],
+      "provenance_note": "Unmodified original with omitted CB sentinel; full replay accepted only through proved unused binding intervals. Native binding/descriptor/storage inside those intervals are unavailable.",
+      "device_scope": "Local hardware original producer; original-player adapter/configuration unproven.",
+      "expected_unused_cb_intervals": 3
+    },
+    {
+      "id": "deferred_versions_1",
+      "mode": 1,
+      "path": "m3-deferred-version-originals\\1\\capture.gpa_frame",
+      "sha256": "df9481cc4bf4a0b73884f998e2f7c991924292d036971f14a7091bda4b2fd1fc",
+      "bytes": 149966,
+      "family": "deferred_versions",
+      "origin": "self_owned_original_gpa_capture",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 40,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 77,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 110,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        }
+      ],
+      "boundaries": [
+        {
+          "resource": 5,
+          "event": 40,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "374d429ee174762e85d14ea494b50c91a44a1557227814f14650940d7e283790"
+        },
+        {
+          "resource": 5,
+          "event": 77,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "37b37f613b3251716348f8bd35fedf6cbcda3d21f6e2d0f78757b44963c9c99e"
+        },
+        {
+          "resource": 5,
+          "event": 110,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "8e6473389583d03b07a6016cfa2dfeef6804b9b92eff4332009cd8226c3babbf"
+        }
+      ],
+      "source_manifests": [
+        "artifacts/m3-deferred-version-originals/manifest.json"
+      ],
+      "provenance_note": "Unmodified original with omitted CB sentinel; full replay accepted only through proved unused binding intervals. Native binding/descriptor/storage inside those intervals are unavailable.",
+      "device_scope": "Local hardware original producer; original-player adapter/configuration unproven.",
+      "expected_unused_cb_intervals": 3
+    },
+    {
+      "id": "deferred_versions_2",
+      "mode": 2,
+      "path": "m3-deferred-version-originals\\2\\capture.gpa_frame",
+      "sha256": "54450ddb5b7f1e3841545e662f8584658f65b13aa0d7bb1c88df611c9249d3a5",
+      "bytes": 149966,
+      "family": "deferred_versions",
+      "origin": "self_owned_original_gpa_capture",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 40,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 77,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 110,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        }
+      ],
+      "boundaries": [
+        {
+          "resource": 5,
+          "event": 40,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "374d429ee174762e85d14ea494b50c91a44a1557227814f14650940d7e283790"
+        },
+        {
+          "resource": 5,
+          "event": 77,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "37b37f613b3251716348f8bd35fedf6cbcda3d21f6e2d0f78757b44963c9c99e"
+        },
+        {
+          "resource": 5,
+          "event": 110,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "8e6473389583d03b07a6016cfa2dfeef6804b9b92eff4332009cd8226c3babbf"
+        }
+      ],
+      "source_manifests": [
+        "artifacts/m3-deferred-version-originals/manifest.json"
+      ],
+      "provenance_note": "Unmodified original with omitted CB sentinel; full replay accepted only through proved unused binding intervals. Native binding/descriptor/storage inside those intervals are unavailable.",
+      "device_scope": "Local hardware original producer; original-player adapter/configuration unproven.",
+      "expected_unused_cb_intervals": 3
+    },
+    {
+      "id": "deferred_versions_3",
+      "mode": 3,
+      "path": "m3-deferred-version-originals\\3\\capture.gpa_frame",
+      "sha256": "6a8a26f9ed5914c8545aaf3594d4f7b256b9c7ed863d02a1978d05da9f6a5712",
+      "bytes": 149858,
+      "family": "deferred_versions",
+      "origin": "self_owned_original_gpa_capture",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 39,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 75,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 107,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        }
+      ],
+      "boundaries": [
+        {
+          "resource": 5,
+          "event": 39,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "374d429ee174762e85d14ea494b50c91a44a1557227814f14650940d7e283790"
+        },
+        {
+          "resource": 5,
+          "event": 75,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "37b37f613b3251716348f8bd35fedf6cbcda3d21f6e2d0f78757b44963c9c99e"
+        },
+        {
+          "resource": 5,
+          "event": 107,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "8e6473389583d03b07a6016cfa2dfeef6804b9b92eff4332009cd8226c3babbf"
+        }
+      ],
+      "source_manifests": [
+        "artifacts/m3-deferred-version-originals/manifest.json"
+      ],
+      "provenance_note": "Unmodified original with omitted CB sentinel; full replay accepted only through proved unused binding intervals. Native binding/descriptor/storage inside those intervals are unavailable.",
+      "device_scope": "Local hardware original producer; original-player adapter/configuration unproven.",
+      "expected_unused_cb_intervals": 3
+    },
+    {
+      "id": "deferred_versions_4",
+      "mode": 4,
+      "path": "m3-deferred-version-originals\\4\\capture.gpa_frame",
+      "sha256": "c756f1f59d794921ee763f24abb7b5ee15e7d2fa0a2ca6390e31a76cfdc34cde",
+      "bytes": 149858,
+      "family": "deferred_versions",
+      "origin": "self_owned_original_gpa_capture",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 39,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 75,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 107,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        }
+      ],
+      "boundaries": [
+        {
+          "resource": 5,
+          "event": 39,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "374d429ee174762e85d14ea494b50c91a44a1557227814f14650940d7e283790"
+        },
+        {
+          "resource": 5,
+          "event": 75,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "37b37f613b3251716348f8bd35fedf6cbcda3d21f6e2d0f78757b44963c9c99e"
+        },
+        {
+          "resource": 5,
+          "event": 107,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "8e6473389583d03b07a6016cfa2dfeef6804b9b92eff4332009cd8226c3babbf"
+        }
+      ],
+      "source_manifests": [
+        "artifacts/m3-deferred-version-originals/manifest.json"
+      ],
+      "provenance_note": "Unmodified original with omitted CB sentinel; full replay accepted only through proved unused binding intervals. Native binding/descriptor/storage inside those intervals are unavailable.",
+      "device_scope": "Local hardware original producer; original-player adapter/configuration unproven.",
+      "expected_unused_cb_intervals": 3
+    },
+    {
+      "id": "deferred_versions_5",
+      "mode": 5,
+      "path": "m3-deferred-version-originals\\5\\capture.gpa_frame",
+      "sha256": "1245f4a3403090cb35207881debe8f8bdcf7e421f93da5c0316caa99dd664da9",
+      "bytes": 150054,
+      "family": "deferred_versions",
+      "origin": "self_owned_original_gpa_capture",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 42,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 79,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 112,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        }
+      ],
+      "boundaries": [
+        {
+          "resource": 5,
+          "event": 42,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "374d429ee174762e85d14ea494b50c91a44a1557227814f14650940d7e283790"
+        },
+        {
+          "resource": 5,
+          "event": 79,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "37b37f613b3251716348f8bd35fedf6cbcda3d21f6e2d0f78757b44963c9c99e"
+        },
+        {
+          "resource": 5,
+          "event": 112,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "8e6473389583d03b07a6016cfa2dfeef6804b9b92eff4332009cd8226c3babbf"
+        }
+      ],
+      "source_manifests": [
+        "artifacts/m3-deferred-version-originals/manifest.json"
+      ],
+      "provenance_note": "Unmodified original with omitted CB sentinel; full replay accepted only through proved unused binding intervals. Native binding/descriptor/storage inside those intervals are unavailable.",
+      "device_scope": "Local hardware original producer; original-player adapter/configuration unproven.",
+      "expected_unused_cb_intervals": 3
+    },
+    {
+      "id": "deferred_versions_6",
+      "mode": 6,
+      "path": "m3-deferred-version-originals\\6\\capture.gpa_frame",
+      "sha256": "1356830ebc10bbcdd22625de4b77dd5e9bd72c8463efac70fe5224f2fa5b42ab",
+      "bytes": 150142,
+      "family": "deferred_versions",
+      "origin": "self_owned_original_gpa_capture",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 44,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 81,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 114,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        }
+      ],
+      "boundaries": [
+        {
+          "resource": 5,
+          "event": 44,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "374d429ee174762e85d14ea494b50c91a44a1557227814f14650940d7e283790"
+        },
+        {
+          "resource": 5,
+          "event": 81,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "37b37f613b3251716348f8bd35fedf6cbcda3d21f6e2d0f78757b44963c9c99e"
+        },
+        {
+          "resource": 5,
+          "event": 114,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "8e6473389583d03b07a6016cfa2dfeef6804b9b92eff4332009cd8226c3babbf"
+        }
+      ],
+      "source_manifests": [
+        "artifacts/m3-deferred-version-originals/manifest.json"
+      ],
+      "provenance_note": "Unmodified original with omitted CB sentinel; full replay accepted only through proved unused binding intervals. Native binding/descriptor/storage inside those intervals are unavailable.",
+      "device_scope": "Local hardware original producer; original-player adapter/configuration unproven.",
+      "expected_unused_cb_intervals": 3
+    },
+    {
+      "id": "deferred_versions_7",
+      "mode": 7,
+      "path": "m3-deferred-version-originals\\7\\capture.gpa_frame",
+      "sha256": "569f8786ee46fd8c5b8881a12fbc485c6ccaf0fd4c49423dda35bf5a0f94de23",
+      "bytes": 149946,
+      "family": "deferred_versions",
+      "origin": "self_owned_original_gpa_capture",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 41,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 77,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 109,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        }
+      ],
+      "boundaries": [
+        {
+          "resource": 5,
+          "event": 41,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "374d429ee174762e85d14ea494b50c91a44a1557227814f14650940d7e283790"
+        },
+        {
+          "resource": 5,
+          "event": 77,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "37b37f613b3251716348f8bd35fedf6cbcda3d21f6e2d0f78757b44963c9c99e"
+        },
+        {
+          "resource": 5,
+          "event": 109,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "8e6473389583d03b07a6016cfa2dfeef6804b9b92eff4332009cd8226c3babbf"
+        }
+      ],
+      "source_manifests": [
+        "artifacts/m3-deferred-version-originals/manifest.json"
+      ],
+      "provenance_note": "Unmodified original with omitted CB sentinel; full replay accepted only through proved unused binding intervals. Native binding/descriptor/storage inside those intervals are unavailable.",
+      "device_scope": "Local hardware original producer; original-player adapter/configuration unproven.",
+      "expected_unused_cb_intervals": 3
+    },
+    {
+      "id": "deferred_versions_8",
+      "mode": 8,
+      "path": "m3-deferred-version-originals\\8\\capture.gpa_frame",
+      "sha256": "5c9c0a2e4ac4f9e9dd274375c5d5902123857daf588926c3c6728165113c39fb",
+      "bytes": 150034,
+      "family": "deferred_versions",
+      "origin": "self_owned_original_gpa_capture",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 43,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 79,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 111,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        }
+      ],
+      "boundaries": [
+        {
+          "resource": 5,
+          "event": 43,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "374d429ee174762e85d14ea494b50c91a44a1557227814f14650940d7e283790"
+        },
+        {
+          "resource": 5,
+          "event": 79,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "37b37f613b3251716348f8bd35fedf6cbcda3d21f6e2d0f78757b44963c9c99e"
+        },
+        {
+          "resource": 5,
+          "event": 111,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "8e6473389583d03b07a6016cfa2dfeef6804b9b92eff4332009cd8226c3babbf"
+        }
+      ],
+      "source_manifests": [
+        "artifacts/m3-deferred-version-originals/manifest.json"
+      ],
+      "provenance_note": "Unmodified original with omitted CB sentinel; full replay accepted only through proved unused binding intervals. Native binding/descriptor/storage inside those intervals are unavailable.",
+      "device_scope": "Local hardware original producer; original-player adapter/configuration unproven.",
+      "expected_unused_cb_intervals": 3
+    },
+    {
+      "id": "deferred_versions_complete_0",
+      "mode": 0,
+      "path": "m3-deferred-version-complete\\0\\capture.gpa_frame",
+      "sha256": "38a18fb2ec657d988c3687baa5dd61b79b83e1cd9af953d92ed67474f7569e4f",
+      "bytes": 148718,
+      "family": "deferred_versions",
+      "origin": "self_owned_original_gpa_capture",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 44,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 67,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 89,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        }
+      ],
+      "boundaries": [
+        {
+          "resource": 16,
+          "event": 44,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "374d429ee174762e85d14ea494b50c91a44a1557227814f14650940d7e283790"
+        },
+        {
+          "resource": 16,
+          "event": 67,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "37b37f613b3251716348f8bd35fedf6cbcda3d21f6e2d0f78757b44963c9c99e"
+        },
+        {
+          "resource": 16,
+          "event": 89,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "8e6473389583d03b07a6016cfa2dfeef6804b9b92eff4332009cd8226c3babbf"
+        }
+      ],
+      "source_manifests": [
+        "artifacts/m3-deferred-version-complete/manifest.json"
+      ],
+      "provenance_note": "Two native deferred contexts, retained dynamic constant-buffer versions, three interleaved input uploads and repeated A/B/A execution. Final image depends on all four result words. Files unmodified; injected restore-state failures are separate recorded capture-side observations. Paired complete-sentinel producer performs verified writes/readbacks; missing-sentinel originals retained separately.",
+      "device_scope": "Local hardware original producer; original-player adapter/configuration unproven.",
+      "expected_unused_cb_intervals": 0
+    },
+    {
+      "id": "deferred_versions_complete_1",
+      "mode": 1,
+      "path": "m3-deferred-version-complete\\1\\capture.gpa_frame",
+      "sha256": "80baba217ee98af7acdf78ef1c9f01068f0eac41a044b0d5207368968d1b07f1",
+      "bytes": 150420,
+      "family": "deferred_versions",
+      "origin": "self_owned_original_gpa_capture",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 50,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 84,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 117,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        }
+      ],
+      "boundaries": [
+        {
+          "resource": 16,
+          "event": 50,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "374d429ee174762e85d14ea494b50c91a44a1557227814f14650940d7e283790"
+        },
+        {
+          "resource": 16,
+          "event": 84,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "37b37f613b3251716348f8bd35fedf6cbcda3d21f6e2d0f78757b44963c9c99e"
+        },
+        {
+          "resource": 16,
+          "event": 117,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "8e6473389583d03b07a6016cfa2dfeef6804b9b92eff4332009cd8226c3babbf"
+        }
+      ],
+      "source_manifests": [
+        "artifacts/m3-deferred-version-complete/manifest.json"
+      ],
+      "provenance_note": "Two native deferred contexts, retained dynamic constant-buffer versions, three interleaved input uploads and repeated A/B/A execution. Final image depends on all four result words. Files unmodified; injected restore-state failures are separate recorded capture-side observations. Paired complete-sentinel producer performs verified writes/readbacks; missing-sentinel originals retained separately.",
+      "device_scope": "Local hardware original producer; original-player adapter/configuration unproven.",
+      "expected_unused_cb_intervals": 0
+    },
+    {
+      "id": "deferred_versions_complete_2",
+      "mode": 2,
+      "path": "m3-deferred-version-complete\\2\\capture.gpa_frame",
+      "sha256": "39f5b0dc9c402110266026869484d4c4a01e5d874e48de9dc647d04550d0f82c",
+      "bytes": 150420,
+      "family": "deferred_versions",
+      "origin": "self_owned_original_gpa_capture",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 50,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 84,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 117,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        }
+      ],
+      "boundaries": [
+        {
+          "resource": 16,
+          "event": 50,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "374d429ee174762e85d14ea494b50c91a44a1557227814f14650940d7e283790"
+        },
+        {
+          "resource": 16,
+          "event": 84,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "37b37f613b3251716348f8bd35fedf6cbcda3d21f6e2d0f78757b44963c9c99e"
+        },
+        {
+          "resource": 16,
+          "event": 117,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "8e6473389583d03b07a6016cfa2dfeef6804b9b92eff4332009cd8226c3babbf"
+        }
+      ],
+      "source_manifests": [
+        "artifacts/m3-deferred-version-complete/manifest.json"
+      ],
+      "provenance_note": "Two native deferred contexts, retained dynamic constant-buffer versions, three interleaved input uploads and repeated A/B/A execution. Final image depends on all four result words. Files unmodified; injected restore-state failures are separate recorded capture-side observations. Paired complete-sentinel producer performs verified writes/readbacks; missing-sentinel originals retained separately.",
+      "device_scope": "Local hardware original producer; original-player adapter/configuration unproven.",
+      "expected_unused_cb_intervals": 0
+    },
+    {
+      "id": "deferred_versions_complete_3",
+      "mode": 3,
+      "path": "m3-deferred-version-complete\\3\\capture.gpa_frame",
+      "sha256": "6ca301e8137b02019e53dcce58effc4a7dcf6e0d92a599a6113f2d11224e3f60",
+      "bytes": 150312,
+      "family": "deferred_versions",
+      "origin": "self_owned_original_gpa_capture",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 49,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 82,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 114,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        }
+      ],
+      "boundaries": [
+        {
+          "resource": 16,
+          "event": 49,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "374d429ee174762e85d14ea494b50c91a44a1557227814f14650940d7e283790"
+        },
+        {
+          "resource": 16,
+          "event": 82,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "37b37f613b3251716348f8bd35fedf6cbcda3d21f6e2d0f78757b44963c9c99e"
+        },
+        {
+          "resource": 16,
+          "event": 114,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "8e6473389583d03b07a6016cfa2dfeef6804b9b92eff4332009cd8226c3babbf"
+        }
+      ],
+      "source_manifests": [
+        "artifacts/m3-deferred-version-complete/manifest.json"
+      ],
+      "provenance_note": "Two native deferred contexts, retained dynamic constant-buffer versions, three interleaved input uploads and repeated A/B/A execution. Final image depends on all four result words. Files unmodified; injected restore-state failures are separate recorded capture-side observations. Paired complete-sentinel producer performs verified writes/readbacks; missing-sentinel originals retained separately.",
+      "device_scope": "Local hardware original producer; original-player adapter/configuration unproven.",
+      "expected_unused_cb_intervals": 0
+    },
+    {
+      "id": "deferred_versions_complete_4",
+      "mode": 4,
+      "path": "m3-deferred-version-complete\\4\\capture.gpa_frame",
+      "sha256": "efd66717ee0b60d9e6cd870a4cd768f10af21dd133aa62cab547e2fb3336412a",
+      "bytes": 150312,
+      "family": "deferred_versions",
+      "origin": "self_owned_original_gpa_capture",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 49,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 82,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 114,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        }
+      ],
+      "boundaries": [
+        {
+          "resource": 16,
+          "event": 49,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "374d429ee174762e85d14ea494b50c91a44a1557227814f14650940d7e283790"
+        },
+        {
+          "resource": 16,
+          "event": 82,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "37b37f613b3251716348f8bd35fedf6cbcda3d21f6e2d0f78757b44963c9c99e"
+        },
+        {
+          "resource": 16,
+          "event": 114,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "8e6473389583d03b07a6016cfa2dfeef6804b9b92eff4332009cd8226c3babbf"
+        }
+      ],
+      "source_manifests": [
+        "artifacts/m3-deferred-version-complete/manifest.json"
+      ],
+      "provenance_note": "Two native deferred contexts, retained dynamic constant-buffer versions, three interleaved input uploads and repeated A/B/A execution. Final image depends on all four result words. Files unmodified; injected restore-state failures are separate recorded capture-side observations. Paired complete-sentinel producer performs verified writes/readbacks; missing-sentinel originals retained separately.",
+      "device_scope": "Local hardware original producer; original-player adapter/configuration unproven.",
+      "expected_unused_cb_intervals": 0
+    },
+    {
+      "id": "deferred_versions_complete_5",
+      "mode": 5,
+      "path": "m3-deferred-version-complete\\5\\capture.gpa_frame",
+      "sha256": "5e2ea4a1c917b31764d6a4fe047a7d5a9e678fd248cd60bd313198b4c1c4e356",
+      "bytes": 150508,
+      "family": "deferred_versions",
+      "origin": "self_owned_original_gpa_capture",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 52,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 86,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 119,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        }
+      ],
+      "boundaries": [
+        {
+          "resource": 16,
+          "event": 52,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "374d429ee174762e85d14ea494b50c91a44a1557227814f14650940d7e283790"
+        },
+        {
+          "resource": 16,
+          "event": 86,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "37b37f613b3251716348f8bd35fedf6cbcda3d21f6e2d0f78757b44963c9c99e"
+        },
+        {
+          "resource": 16,
+          "event": 119,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "8e6473389583d03b07a6016cfa2dfeef6804b9b92eff4332009cd8226c3babbf"
+        }
+      ],
+      "source_manifests": [
+        "artifacts/m3-deferred-version-complete/manifest.json"
+      ],
+      "provenance_note": "Two native deferred contexts, retained dynamic constant-buffer versions, three interleaved input uploads and repeated A/B/A execution. Final image depends on all four result words. Files unmodified; injected restore-state failures are separate recorded capture-side observations. Paired complete-sentinel producer performs verified writes/readbacks; missing-sentinel originals retained separately.",
+      "device_scope": "Local hardware original producer; original-player adapter/configuration unproven.",
+      "expected_unused_cb_intervals": 0
+    },
+    {
+      "id": "deferred_versions_complete_6",
+      "mode": 6,
+      "path": "m3-deferred-version-complete\\6\\capture.gpa_frame",
+      "sha256": "a2c06dd86b3e23396ebc01f9d3e91f454435ed1242af446506cf2b6bff06ad45",
+      "bytes": 150596,
+      "family": "deferred_versions",
+      "origin": "self_owned_original_gpa_capture",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 54,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 88,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 121,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        }
+      ],
+      "boundaries": [
+        {
+          "resource": 16,
+          "event": 54,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "374d429ee174762e85d14ea494b50c91a44a1557227814f14650940d7e283790"
+        },
+        {
+          "resource": 16,
+          "event": 88,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "37b37f613b3251716348f8bd35fedf6cbcda3d21f6e2d0f78757b44963c9c99e"
+        },
+        {
+          "resource": 16,
+          "event": 121,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "8e6473389583d03b07a6016cfa2dfeef6804b9b92eff4332009cd8226c3babbf"
+        }
+      ],
+      "source_manifests": [
+        "artifacts/m3-deferred-version-complete/manifest.json"
+      ],
+      "provenance_note": "Two native deferred contexts, retained dynamic constant-buffer versions, three interleaved input uploads and repeated A/B/A execution. Final image depends on all four result words. Files unmodified; injected restore-state failures are separate recorded capture-side observations. Paired complete-sentinel producer performs verified writes/readbacks; missing-sentinel originals retained separately.",
+      "device_scope": "Local hardware original producer; original-player adapter/configuration unproven.",
+      "expected_unused_cb_intervals": 0
+    },
+    {
+      "id": "deferred_versions_complete_7",
+      "mode": 7,
+      "path": "m3-deferred-version-complete\\7\\capture.gpa_frame",
+      "sha256": "09642bbfc87269603d3432245c5a74aab1c86f4f4744bf942e9ea8fd87447999",
+      "bytes": 150400,
+      "family": "deferred_versions",
+      "origin": "self_owned_original_gpa_capture",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 51,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 84,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 116,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        }
+      ],
+      "boundaries": [
+        {
+          "resource": 16,
+          "event": 51,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "374d429ee174762e85d14ea494b50c91a44a1557227814f14650940d7e283790"
+        },
+        {
+          "resource": 16,
+          "event": 84,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "37b37f613b3251716348f8bd35fedf6cbcda3d21f6e2d0f78757b44963c9c99e"
+        },
+        {
+          "resource": 16,
+          "event": 116,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "8e6473389583d03b07a6016cfa2dfeef6804b9b92eff4332009cd8226c3babbf"
+        }
+      ],
+      "source_manifests": [
+        "artifacts/m3-deferred-version-complete/manifest.json"
+      ],
+      "provenance_note": "Two native deferred contexts, retained dynamic constant-buffer versions, three interleaved input uploads and repeated A/B/A execution. Final image depends on all four result words. Files unmodified; injected restore-state failures are separate recorded capture-side observations. Paired complete-sentinel producer performs verified writes/readbacks; missing-sentinel originals retained separately.",
+      "device_scope": "Local hardware original producer; original-player adapter/configuration unproven.",
+      "expected_unused_cb_intervals": 0
+    },
+    {
+      "id": "deferred_versions_complete_8",
+      "mode": 8,
+      "path": "m3-deferred-version-complete\\8\\capture.gpa_frame",
+      "sha256": "a3adc8fcc7b974741b870ba623b896be56f362cf123e532174c628351b5147c0",
+      "bytes": 150488,
+      "family": "deferred_versions",
+      "origin": "self_owned_original_gpa_capture",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 53,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 86,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "disable_event": 118,
+          "repeat": 1,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        }
+      ],
+      "boundaries": [
+        {
+          "resource": 16,
+          "event": 53,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "374d429ee174762e85d14ea494b50c91a44a1557227814f14650940d7e283790"
+        },
+        {
+          "resource": 16,
+          "event": 86,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "37b37f613b3251716348f8bd35fedf6cbcda3d21f6e2d0f78757b44963c9c99e"
+        },
+        {
+          "resource": 16,
+          "event": 118,
+          "kind": "buffer",
+          "expect_stable": true,
+          "expected_storage_sha256": "8e6473389583d03b07a6016cfa2dfeef6804b9b92eff4332009cd8226c3babbf"
+        }
+      ],
+      "source_manifests": [
+        "artifacts/m3-deferred-version-complete/manifest.json"
+      ],
+      "provenance_note": "Two native deferred contexts, retained dynamic constant-buffer versions, three interleaved input uploads and repeated A/B/A execution. Final image depends on all four result words. Files unmodified; injected restore-state failures are separate recorded capture-side observations. Paired complete-sentinel producer performs verified writes/readbacks; missing-sentinel originals retained separately.",
+      "device_scope": "Local hardware original producer; original-player adapter/configuration unproven.",
+      "expected_unused_cb_intervals": 0
+    }
+  ]
+}

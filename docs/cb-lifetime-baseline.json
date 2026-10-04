@@ -1,0 +1,92 @@
+{
+  "schema": "FloraGPA CB lifetime acceptance baseline 1",
+  "completed": true,
+  "passed": true,
+  "counts": {
+    "cases": 18,
+    "positive_cases": 18,
+    "rejected_cases": 0,
+    "producer_frames": 432,
+    "producer_storage_checks": 1296,
+    "producer_images": 432,
+    "baseline_readbacks": 216,
+    "captured_restore_failures": 24,
+    "original_runs": 36,
+    "native_positive_runs": 36,
+    "native_rejection_attempts": 0,
+    "resource_exports": 108,
+    "diagnostic_controls": 54
+  },
+  "exe_sha256": "c218304258778eb15cab413ff6c518f765dd3630edfd5bf95f1bc7f49a97979e",
+  "corpus_sha256": "4c9f826f1ce6419d42b8f5def558d1adfa32a2f220edefd1acba28cd8f00097d",
+  "validation_sha256": "908360fe161313369737edd90193db20b8bd1e48d1572ba99bf8a9c55a1436a1",
+  "limits": [
+    "Expanded immediate streams only; traditional lists remain unsupported",
+    "Original-player adapter/configuration equivalence is unproven",
+    "Unmaterialized sentinel bindings never establish native binding recovery",
+    "Capture-side restore observations do not assert every original capture behaves this way"
+  ],
+  "production_commit": "6bc3cca",
+  "package": "out/FloraGPA-cb-lifetimes-final-20261004",
+  "producer_execution_this_batch": false,
+  "traditional_lists_accepted": false,
+  "roadmap_complete": false,
+  "combined_inventory": {
+    "registered_cases": 406,
+    "unique_capture_hashes": 396,
+    "positive_registrations": 384,
+    "unique_positive_captures": 374,
+    "rejections": 22
+  },
+  "regression": {
+    "ctest_suites": [
+      "constant_buffer_lifetimes",
+      "constant_buffer_setters",
+      "frame_validation",
+      "contexts",
+      "so_lifetimes",
+      "compatibility_ui",
+      "command_state",
+      "pipeline_getters",
+      "map_records",
+      "api_commands"
+    ],
+    "cb_lifetime_cases": 165,
+    "cb_lifetime_skipped": 0,
+    "ui_cases": 57,
+    "ui_skipped": 0,
+    "getter_cases": 30,
+    "getter_skipped": 0,
+    "gate_checker_tests": 10,
+    "isolated_golden_controls": 4,
+    "prior_preflight_cases": 388,
+    "prior_preflight_diagnostics_unchanged": true,
+    "prior_full_gpu_matrix_rerun": false
+  },
+  "local_evidence": {
+    "artifacts/m3-cb-lifetime-final-audit.json": "e2ab37a6faef0e96c8b20f5c9cd6ec64060b6a8ecb97ac4f310fdd1239fc6987",
+    "artifacts/m3-cb-lifetime-final-validation/validation.json": "908360fe161313369737edd90193db20b8bd1e48d1572ba99bf8a9c55a1436a1",
+    "artifacts/m3-cb-lifetime-prior-preflight/comparison.json": "f9e34a9b375604bdc01ee562bae3e915651c2714bf6004fe5a374d2336ea44e3",
+    "artifacts/m3-cb-lifetime-test-scope.log": "39f7655ec88e5883adaed1bb9fb56a2a0ed32e515d6acf21eedc8fadeca1df37",
+    "artifacts/m3-cb-lifetime-ctest-final.log": "5ac6c931a458627ee8bebff4c0c3d466c17755e9adc4745b838ac2e3b98b8fea",
+    "artifacts/m3-cb-getter-regression-complete.log": "425d5331e338ea80627ce695b6f5e09203a364b9412591c60289dfbf597d6a85",
+    "artifacts/m3-cb-lifetime-ui-final.log": "0ad1cce56d6a097a31d924d2632e57ce9a62c6d1a844b075e28216f1bf928b37",
+    "artifacts/m3-cb-lifetime-goldens.log": "9045dc3e3b7870e530a1c62f26394abd4443e9d3b985817f7f32052b1f0e9635",
+    "artifacts/m3-cb-lifetime-gate-tests.log": "fa69c3d6ea2abc39a83e20b56054a5988e054f755282cbb384b46389e9bab39f",
+    "artifacts/m3-cb-lifetime-historical-audit.json": "8f51d0ab64dc95ee7f970c458a0a69fe3530a711878982b80d9c1a22797f56be",
+    "artifacts/m3-cb-lifetime-ctest-results/command-state-Release.txt": "3fdf13c4f86ab7a01d67aadb3165404eb910b5098abdf5ca5e74de9042682442",
+    "artifacts/m3-cb-lifetime-ctest-results/compatibility-ui-Release.txt": "ae78455ea46d4f5716229443b2c9828c2d16511a2b75d5381ef612d0b9325aca",
+    "artifacts/m3-cb-lifetime-ctest-results/constant-buffer-lifetimes-Release.txt": "a0ea50b7e57e7ad96d06214b93e3f5e323a37c990607728f0245433cc7e73bd6",
+    "artifacts/m3-cb-lifetime-ctest-results/contexts-Release.txt": "bc7eeee6a4058666679ebb2f2df402d650d78c9f6592413f527ee678ff812616",
+    "artifacts/m3-cb-lifetime-ctest-results/map-records-Release.txt": "222b137a66c0ab77c89ac583f66468aef36b2273cd2c2056ad7fcc6a0ee7d756",
+    "artifacts/m3-cb-lifetime-ctest-results/pipeline-getters-Release.txt": "b8309625320db4d3f21d5f849742962a364a5b2dcff32ab4dea43477dddd4418",
+    "artifacts/m3-cb-lifetime-ctest-results/so-lifetimes-Release.txt": "8e4af1805830c11f52a0ac7162d189f44a9f3341825f16fe4077f946f49dc677",
+    "artifacts/m3-cb-lifetime-ctest-results/ui-Release.txt": "8683f1b0c8c148926db759260435132034e924d042681d1a68a88dd122d76043"
+  },
+  "failed_test_runs": [
+    "artifacts/m3-cb-lifetime-ctest.log",
+    "artifacts/m3-cb-lifetime-ctest-final.log",
+    "artifacts/m3-cb-lifetime-test-repair.log",
+    "artifacts/m3-cb-getter-regression-final.log"
+  ]
+}

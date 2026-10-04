@@ -1,21 +1,22 @@
 # Current capabilities and compatibility
 
-Reviewed **2026-10-04**. The latest build adds
-[M3 deferred-version evidence and CB preflight diagnostics](DEFERRED_VERSION_AUDIT.md)
-after the [M2 registered corpus gate](M2_ACCEPTANCE_GATE.md).
-Nine new complete-resource originals pass repeated replay and strict intermediate
-byte checks; nine paired missing-resource originals have located rejections.
+Reviewed **2026-10-04**. The latest build accepts
+[proved unused missing-CB intervals](CONSTANT_BUFFER_LIFETIME_AUDIT.md), resolving
+the nine rejection files from the [first M3 evidence batch](DEFERRED_VERSION_AUDIT.md).
+All 18 paired originals now pass repeated replay and strict intermediate byte
+checks. Missing buffer descriptors, storage and native bindings inside those
+intervals remain unavailable; prefixes and native observers cannot fabricate them.
 All 18 files contain expanded immediate commands, so traditional Command List
-execution remains unaccepted. Correction: `7227382`; package:
-`out/FloraGPA-m3-deferred-20261004/`.
+execution remains unaccepted. Correction: `6bc3cca`;
+package: `out/FloraGPA-cb-lifetimes-final-20261004/`.
 
 The combined inventory is **406 registered cases / 396 distinct capture hashes**:
-375 positive registrations (365 unique) and 31 rejection files. The new batch
-has 18 independent positive runs, 18 located rejection attempts, 36 original
-player runs, 54 strict resource exports and 27 diagnostic controls. Four related
-CTest suites and four GF2/BF1 checks pass. The old 388 preflight outcomes are
-unchanged; their full GPU matrix was not rerun in this batch. See the
-[new baseline](deferred-version-baseline.json) for scope and counts.
+384 positive registrations (374 unique) and 22 rejection files. The new batch
+has 36 independent positive runs, 36 original player runs, 108 strict resource
+exports and 54 diagnostic controls. Related CTest/Qt checks and four GF2/BF1
+checks pass. The old 388 preflight outcomes are unchanged; their full GPU matrix
+was not rerun in this batch. See the [current baseline](cb-lifetime-baseline.json)
+for scope and counts.
 
 The preceding fixed M2 inventory contains **388 registered cases / 378 distinct capture hashes**:
 366 positive cases (356 unique captures) and 22 explicit rejections (four initial
@@ -40,6 +41,7 @@ tested workloads; opening a file does not prove accurate replay.
 | Context-state objects | Checked Device5 creation/flags and Context4 swap inspection; GetCreationFlags as read-only metadata; located preflight/runtime rejection | State-object execution remains unsupported. Actual non-null swaps can serialize zero identities and stale Draw snapshots. Null input cannot be proven from zero alone. [Original evidence and boundaries](CONTEXT_STATE_DISCOVERY.md) |
 | Resource discard | Native Context1 calls for observed Context4 DiscardResource / DiscardView / DiscardView1 records; API fields, diagnostics and per-event CLI history | Missing view descriptors and zero-count pointer-presence loss reject. Discard does not define bytes; complete undefined-region propagation remains open. Tested whole-resource/view and rectangle forms have separate boundaries. [Discard acceptance](DISCARD_AUDIT.md) |
 | Pipeline getter observations | 34 additional checked immediate Context4 getter families; decoded optional outputs and reference details | Metadata never restores native bindings or fabricates observed objects. Nonempty SO getter/write originals pass; absent-only unused lifetimes have separate provenance and inspection limits. [Getter acceptance](PIPELINE_GETTER_AUDIT.md), [SO lifetimes](SO_LIFETIME_AUDIT.md) |
+| Omitted constant-buffer bindings | Checked per-slot lifetimes closed by explicit setters/ClearState before GPU use; mixed saved slots retain native execution | Missing descriptors/storage and in-interval native bindings are not recovered. Prefixes, native command observers and unsupported edits reject. [CB lifetimes](CONSTANT_BUFFER_LIFETIME_AUDIT.md) |
 | Immediate-context replay | Captured draws/dispatches, supported setters, uploads, copies (including Context1 transfers), ClearView, queries/predication and presentation | Broader layouts, resource versions and some presentation/transfer cases remain incomplete. [Setters](PIPELINE_SETTER_AUDIT.md), [texture transfers](TEXTURE_COPY_AUDIT.md), [Context1 transfers](TRANSFER1_AUDIT.md), [ClearView](CLEAR_VIEW_AUDIT.md), [presentation](PRESENT_REPLAY_AUDIT.md) |
 | Frame-time creation | Validated buffers, textures/views, shaders, pipeline states, class linkage/instances and predicates | Device5 coverage is not every interface version or descriptor combination; required missing data and unresolved identities are rejected. [Buffers](BUFFER_CREATION_AUDIT.md), [textures](TEXTURE_DIMENSIONS_AUDIT.md), [texture views](VIEW_CREATION_AUDIT.md), [buffer views](BUFFER_VIEW_CREATION_AUDIT.md), [pipeline](PIPELINE_CREATION_AUDIT.md), [geometry/SO](GEOMETRY_CREATION_AUDIT.md), [classes](CLASS_CREATION_AUDIT.md), [predicates](PREDICATE_CREATION_AUDIT.md) |
 | Texture and output inspection | Presentation/RTV/DSV selection, mip/layer/slice, typed/channel/range controls, supported MSAA resolve/sample and planar inspection, exports | Format/device limits remain; legacy P010/P016 initial data can contain recovered Y only. [Frame output](FRAME_OUTPUT_MIGRATION.md), [texture inspection](TEXTURE_INSPECTION_MIGRATION.md), [planar writes](PLANAR_WRITE_MIGRATION.md) |

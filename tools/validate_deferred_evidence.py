@@ -17,16 +17,19 @@ def main():
     parser.add_argument('--validation', type=Path, required=True)
     parser.add_argument('--api-evidence', type=Path, required=True)
     parser.add_argument('--out', type=Path, required=True)
+    parser.add_argument('--corpus', type=Path, default=Path('docs/deferred-version-corpus.json'))
+    parser.add_argument('--gate', type=Path, default=Path('docs/deferred-version-gate.json'))
     args = parser.parse_args()
     repo = Path(__file__).resolve().parents[1]
-    manifest_path = repo/'docs/deferred-version-corpus.json'
+    manifest_path = repo/args.corpus
     manifest = load(manifest_path)
-    gate = load(repo/'docs/deferred-version-gate.json')['suites'][0]
+    gate = load(repo/args.gate)['suites'][0]
     require(manifest_digest(manifest_path) == gate['manifest_sha256'], 'Changed corpus')
     result = load(args.validation/'validation.json')
     require(result['manifest_sha256'] == digest(manifest_path), 'Wrong validation manifest')
     require(len(result['cases']) == len(manifest['cases']) == 18, 'Incomplete corpus')
-    counts = dict(cases=18, positive_cases=9, rejected_cases=9, producer_frames=0,
+    rejected = len(gate['expected_rejections'])
+    counts = dict(cases=18, positive_cases=18-rejected, rejected_cases=rejected, producer_frames=0,
                   producer_storage_checks=0, producer_images=0, baseline_readbacks=0,
                   captured_restore_failures=0, original_runs=0, native_positive_runs=0,
                   native_rejection_attempts=0, resource_exports=0, diagnostic_controls=0)
@@ -36,6 +39,22 @@ def main():
         require(case['id'] == spec['id'], 'Reordered or missing case')
         negative = gate['expected_rejections'].get(case['id'])
         check_case(case, spec, negative, args.validation/case['id'], 2)
+        if 'expected_unused_cb_intervals' in spec:
+            expected = spec['expected_unused_cb_intervals']
+            observations = case['preflight']['report']['unused_constant_buffer_lifetimes']
+            require(len(observations) == expected and all(o['native_binding_recovered'] is False
+                    and o['event_id'] < o['closing_event_id'] for o in observations), 'Preflight CB provenance')
+            for run in case['native']:
+                lifetimes = run['report']['unused_constant_buffer_lifetimes']
+                require(len(lifetimes) == expected and
+                        run['report']['counts'].get('unmaterialized_constant_buffer_setters', 0) == expected,
+                        'Missing CB execution provenance')
+                for observed, native in zip(observations, lifetimes):
+                    require(native['native_binding_recovered'] is False and
+                            int(native['event']) == observed['event_id'] and
+                            int(native['closing_event']) == observed['closing_event_id'] and
+                            native['stage'] == observed['stage'] and
+                            list(map(int, native['resources'])) == observed['resource_ids'], 'CB provenance disagrees')
         capture = args.artifacts/spec['path']
         require(digest(capture) == spec['sha256'], 'Capture changed')
         require(case['original_status'] == 'repeat_stable' and len(case['original']) == 2,
@@ -135,7 +154,7 @@ def main():
                    corpus_sha256=digest(manifest_path), validation_sha256=digest(args.validation/'validation.json'),
                    limits=['Expanded immediate streams only; traditional lists remain unsupported',
                            'Original-player adapter/configuration equivalence is unproven',
-                           'Missing sentinel captures are explicit rejections, not accurate native bindings',
+                           'Unmaterialized sentinel bindings never establish native binding recovery',
                            'Capture-side restore observations do not assert every original capture behaves this way'])
     args.out.parent.mkdir(parents=True, exist_ok=True)
     with args.out.open('x', encoding='utf-8', newline='\n') as stream:
