@@ -304,7 +304,7 @@ void drawAuto(const Frame &frame, Id state, Json &out) {
 }
 } // namespace
 
-Json inspectCommand(const Frame &frame, Id id) {
+static Json inspectCommandWithCache(const Frame &frame, Id id, const InitializationCache *cache) {
     auto e = frame.entry(id);
     if (e.category != 7)
         throw std::runtime_error("Entry is not an API command");
@@ -828,8 +828,15 @@ Json inspectCommand(const Frame &frame, Id id) {
     }
     out["fields"] = std::move(r.fields);
     out["references"] = std::move(r.references);
-    out["original_initialization"] = inspectInitializationReferences(out);
+    out["original_initialization"] = inspectInitializationReferences(out, cache);
     return out;
+}
+
+Json inspectCommand(const Frame &frame, Id id) {
+    if (frame.entry(id).type != 0x25e)
+        return inspectCommandWithCache(frame, id, nullptr);
+    const auto cache = initialFileCache(frame);
+    return inspectCommandWithCache(frame, id, &cache);
 }
 
 bool commandMatches(const Json &command, const std::string &text, std::optional<Id> resource) {
@@ -914,9 +921,10 @@ Json commandResourceSelection(const Frame &frame, const Json &reference, const J
 void attachQueryHistory(const Frame &frame, Json &rows);
 Json inspectCommands(const Frame &frame) {
     auto rows = Json::array();
+    const auto cache = initialFileCache(frame);
     for (auto &[id, e] : frame.entries())
         if (e.category == 7)
-            rows.push_back(inspectCommand(frame, id));
+            rows.push_back(inspectCommandWithCache(frame, id, &cache));
     attachQueryHistory(frame, rows);
     return rows;
 }
@@ -955,7 +963,8 @@ void exportCommands(const Frame &frame, const std::filesystem::path &directory, 
     };
     Json report{{"frame", QString::fromStdWString(frame.path().filename().wstring()).toStdString()},
                 {"filter", {{"text", text}, {"resource", resource ? Json(*resource) : Json(nullptr)}}},
-                {"commands", selected}};
+                {"commands", selected},
+                {"original_initialization_cache", initialFileCache(frame).report()}};
     if (gpuOnly)
         report["filter"]["gpu_commands"] = true;
     write("commands.json", QByteArray::fromStdString(report.dump(2) + "\n"));

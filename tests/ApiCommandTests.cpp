@@ -1,5 +1,6 @@
 #include "SyntheticCapture.h"
 #include "application/ApiCommands.h"
+#include "application/InitializationReferences.h"
 #include <QTemporaryDir>
 #include <QtTest>
 using namespace flora;
@@ -168,14 +169,14 @@ class ApiCommandTests final : public QObject {
                         pack(Id(0), Id(2), int32_t(0), Id(99), 0u, 1u, 0u, data));
         capture.add(103, 7, 0x249, pack(Id(0), Id(2), 0u, 1u, uint8_t(1), Id(99)));
         capture.add(104, 7, 0x36, pack(Id(88), Id(0), Id(2), Id(99), 0u));
-        // Native-cache-dependent and raw interface aliases must remain explicit gaps.
+        // Missing CSUAV targets are omitted; raw interface aliases remain gaps.
         capture.add(105, 7, 0x25e, pack(Id(0), Id(2), 0u, 1u, uint8_t(1), Id(99), uint8_t(0)));
         capture.add(106, 7, 0x34e5, pack(Id(0), Id(2), 0u, 1u, uint8_t(1), Id(99)));
         QTemporaryDir dir;
         capture.save(dir.path() + "/init.gpa_frame");
         Frame frame((dir.path() + "/init.gpa_frame").toStdWString());
         auto rows = inspectCommands(frame);
-        const std::vector<Json> expected{{5, 5, 0}, {2}, {2, 0}, {2}, {2}};
+        const std::vector<Json> expected{{5, 5, 0}, {2}, {2, 0}, {2}, {2}, {2}};
         for (size_t i = 0; i < rows.size(); ++i) {
             const auto &init = rows[i]["original_initialization"];
             QCOMPARE(rows[i]["status"], Json("decoded"));
@@ -197,6 +198,64 @@ class ApiCommandTests final : public QObject {
         for (size_t i : {size_t(1), size_t(2), size_t(3), size_t(4)})
             QVERIFY(std::any_of(rows[i]["references"].begin(), rows[i]["references"].end(),
                                 [](const auto &reference) { return reference["id"] == 99; }));
+    }
+    void initialCacheMembership() {
+        Capture capture;
+        capture.add(10, 3, 3, snapshot(State{}));
+        capture.buffer(20, 40, 4, 0, {1, 2, 3, 4});
+        capture.add(30, 7, 0x242, head(20));
+        capture.add(50, 7, 0x34ed, pack(Id(0), Id(20), Id(20), 0u));
+        capture.uav(60, 20, 0);
+        auto raw = pack(Id(0), Id(20), 0u, 8u, uint8_t(1), Id(10), Id(20), Id(30), Id(40), Id(50), Id(0),
+                        Id(999), Id(0x100000014), uint8_t(0));
+        capture.add(100, 7, 0x25e, raw);
+        QTemporaryDir dir;
+        const auto path = dir.path() + "/cache.gpa_frame";
+        capture.save(path);
+        Frame frame(path.toStdWString());
+        const auto cache = initialFileCache(frame);
+        QVERIFY(cache.complete);
+        for (uint32_t id : {10u, 20u, 30u, 40u})
+            QVERIFY(cache.contains(id));
+        QVERIFY(!cache.contains(50));
+        QVERIFY(cache.categories.contains(50));
+        QVERIFY(!cache.contains(999));
+        InitializationCache inconsistent;
+        inconsistent.categories = {{10, 1}, {20, 2}, {30, 3}, {40, 9}};
+        inconsistent.descriptors = {{1, {10, 20}}, {3, {99}}, {9, {40}}};
+        QVERIFY(inconsistent.contains(10));
+        for (uint32_t id : {20u, 30u, 40u, 99u})
+            QVERIFY(!inconsistent.contains(id));
+        const auto command = inspectCommand(frame, 100);
+        const auto &init = command["original_initialization"];
+        QCOMPARE(init["status"], Json("recovered"));
+        QCOMPARE(init["collector_sequence"], Json({20, 10, 20, 30, 40, 20}));
+        QCOMPARE(init["truncated_fields"], Json({"uavs[7]"}));
+        QCOMPARE(init["membership_checks"].size(), size_t(8));
+        QCOMPARE(init["membership_checks"][4]["included"], Json(false));
+        const auto view = frame.payload(60);
+        Frame edited(frame, {{60, std::vector<uint8_t>(view.begin(), view.end())}});
+        QVERIFY(!initialFileCache(edited).complete);
+        QCOMPARE(inspectCommand(edited, 100)["original_initialization"]["status"], Json("unrecovered"));
+        for (uint32_t t = 0; t <= UINT16_MAX; ++t)
+            QCOMPARE(originalErgType(uint16_t(t)), uint16_t(t - 1) <= 0xfd || uint16_t(t - 0x201) <= 0xfd);
+        // A high saved identity can alias a native low word: do not guess membership.
+        capture.add(Id(0x100000014), 9, 0, pack(0u));
+        capture.save(dir.path() + "/wide.gpa_frame");
+        Frame wide((dir.path() + "/wide.gpa_frame").toStdWString());
+        QVERIFY(!initialFileCache(wide).complete);
+        QCOMPARE(inspectCommand(wide, 100)["original_initialization"]["status"], Json("unrecovered"));
+        capture.entries.pop_back();
+        for (bool flag : {false, true}) {
+            capture.entries[0].category = flag ? 3 : 2;
+            capture.entries[0].flags = flag ? 1 : 0;
+            auto unsupported = dir.path() + (flag ? "/flag.gpa_frame" : "/category.gpa_frame");
+            capture.save(unsupported);
+            Frame other(unsupported.toStdWString());
+            const auto report = initialFileCache(other).report();
+            QCOMPARE(report["status"], Json("unrecovered"));
+            QVERIFY(!report.contains("categories"));
+        }
     }
     void wireAndReferences() {
         QTemporaryDir dir;

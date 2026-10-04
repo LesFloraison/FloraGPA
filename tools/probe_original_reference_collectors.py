@@ -32,6 +32,7 @@ def main():
         raise ValueError('Unknown player')
     report = dict(schema='FloraGPA fixed original collector probe 1', completed=False, passed=False,
                   player_sha256=PLAYER, gpu_execution=False, cases=[], sources=[],
+                  conditional_types_excluded=[0x25e],
                   source_sha256=hashlib.sha256(Path(__file__).read_bytes()).hexdigest())
     def save():
         (args.out/'collectors.json').write_text(json.dumps(report, indent=2)+'\n', encoding='utf-8')
@@ -44,7 +45,7 @@ def main():
             commands_sha256=hashlib.sha256(Path(commands).read_bytes()).hexdigest()))
         for row in json.loads(Path(commands).read_text(encoding='utf-8'))['commands']:
             info = row['original_initialization']
-            if info['status'] == 'recovered' and row['type'] not in samples:
+            if info['status'] == 'recovered' and row['type'] != 0x25e and row['type'] not in samples:
                 raw = bytes(frame.payload(row['id']))
                 if row['status'] != 'decoded' or len(raw) != row['wire_size'] or raw != b''.join(
                         bytes.fromhex(f['hex']) for f in row['fields']):

@@ -11,6 +11,7 @@ import json
 import os
 from pathlib import Path
 import sys
+import struct
 import threading
 
 
@@ -22,7 +23,10 @@ def main():
     parser.add_argument('--out', type=Path, required=True)
     parser.add_argument('--no-observers', action='store_true', help='Original replay control with no virtual-table changes')
     parser.add_argument('--references', action='store_true', help='Also observe original ERG reference collectors')
+    parser.add_argument('--cache', action='store_true', help='Observe initialization cache membership (requires --references)')
     args = parser.parse_args()
+    if args.cache and not args.references:
+        parser.error('--cache requires --references')
     args.out.mkdir(parents=True, exist_ok=False)
     sys.path.insert(0, str(args.reference_tools.resolve(strict=True)))
     from gpa_native import replay, PLAYER_SHA256
@@ -107,6 +111,28 @@ def main():
                                       dependencies=[u32.from_address(p+28).value for p in tree_nodes(version+8)],
                                       dependents=[u32.from_address(p+28).value for p in tree_nodes(version+24)]))
             report['graph_before_first_erg_initialize'] = graph
+        def snapshot_cache(erg):
+            manager = u64.from_address(erg+0x18).value
+            cache = u64.from_address(manager+0x48).value+0x48
+            return dict(categories=[dict(id=u32.from_address(p+28).value,
+                                          kind=u32.from_address(p+32).value)
+                                    for p in tree_nodes(cache+0x48)],
+                        descriptors={name:[u32.from_address(p+32).value for p in tree_nodes(cache+offset)]
+                                     for name,offset in [('state',0x68),('resource',0x78),('erg',0x58),('data',0x88)]})
+        def snapshot_file_index(erg):
+            manager = u64.from_address(erg+0x18).value
+            file = u64.from_address(manager+0x48).value+0x1d8
+            count = u64.from_address(file+0x190).value
+            if not 0 < count <= 1000000:
+                raise ValueError('Unexpected native file index count')
+            backing = c.create_string_buffer(count*15)
+            start = c.addressof(backing)
+            vector = (u64*3)(start,start,start+count*15)
+            c.WINFUNCTYPE(None,ptr,ptr)(base+0x85de0)(file,vector)
+            if tuple(vector) != (start,start+count*15,start+count*15):
+                raise ValueError('Unexpected native file index output')
+            return [dict(id=ident,kind=kind,type=wire_type,tail_hex=tail.hex())
+                    for ident,kind,wire_type,tail in struct.iter_unpack('<IIH5s',backing.raw)]
         def observe_initializer(erg, wire_type):
             table = u64.from_address(erg).value
             reference_slot = table+4*8
@@ -116,6 +142,12 @@ def main():
                 original_references = reference_proto(base+reference_rva)
                 @reference_proto
                 def references(this, source, destination):
+                    if args.cache and 'cache_before_first_collector' not in report:
+                        try:
+                            report['cache_before_first_collector'] = snapshot_cache(this)
+                            report['original_file_index'] = snapshot_file_index(this)
+                        except Exception as error:
+                            failures.append(str(error))
                     original_references(this,source,destination)
                     try:
                         start,end,capacity = [u64.from_address(destination+offset).value for offset in [0,8,16]]
@@ -140,6 +172,8 @@ def main():
                     record('initialize_enter', event=event, initializer_rva=hex(rva), vtable_rva=hex(table-base))
                     if 'graph_before_first_erg_initialize' not in report:
                         snapshot_graph(this)
+                        if args.cache:
+                            report['cache_before_first_initialize'] = snapshot_cache(this)
                     if len(stack_samples) < 4:
                         addresses = (ptr * 64)()
                         count = capture_stack(0, 64, addresses, None)
