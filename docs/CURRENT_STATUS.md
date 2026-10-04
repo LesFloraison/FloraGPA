@@ -1,6 +1,14 @@
 # Current capabilities and compatibility
 
-Reviewed **2026-10-04**. The latest [merged-list evidence batch](DEFERRED_MERGE_AUDIT.md)
+Reviewed **2026-10-04**. The latest [initialization scheduler investigation](INITIALIZATION_SCHEDULER_AUDIT.md)
+observes 7,042 ERG initializations in eight unchanged captures and verifies 56
+controlled original version schedules. Original scheduler-to-list registration
+can preserve non-ID order and repeated events. Eight paired observer/control
+playbacks have equal raw pixels. This is development evidence: full file-to-version
+dependency recovery and traditional list execution remain open; production code
+and the compatibility counts below are unchanged.
+
+The preceding [merged-list evidence batch](DEFERRED_MERGE_AUDIT.md)
 adds 64 original captures, all expanded immediate streams. All 64 pass repeated
 independent/original playback against captured application output, with 384 strict
 buffer exports and 306 diagnostic controls. In 32 dynamic-CB cases the original

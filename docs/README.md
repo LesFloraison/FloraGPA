@@ -16,6 +16,7 @@ chronology remains in Chinese.
 | Interpret corpus results and diagnostics | [Compatibility infrastructure](COMPATIBILITY_BASELINE.md) |
 | Deferred versions, original expansion and M3 boundaries | [Deferred version audit](DEFERRED_VERSION_AUDIT.md) |
 | Merged lists and capture-side loss versus faithful replay | [Deferred merge audit](DEFERRED_MERGE_AUDIT.md) |
+| Original dependency initialization and version/list ordering | [Initialization scheduler audit](INITIALIZATION_SCHEDULER_AUDIT.md) |
 | Omitted CB resources and proved unused binding intervals | [CB lifetime audit](CONSTANT_BUFFER_LIFETIME_AUDIT.md) |
 | Find dated changes | [Development chronology (Chinese)](MIGRATION_STATUS.md) |
 | Inspect module-level migration bookkeeping | [Module ledger](migration.json) |

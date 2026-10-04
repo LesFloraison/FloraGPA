@@ -1,0 +1,51 @@
+{
+  "schema": "FloraGPA initialization scheduler baseline 1",
+  "reviewed": "2026-10-04",
+  "implementation_commit": "a21251a2e2d9005a0b8810208123b190e5e6a49b",
+  "production_runtime_changed": false,
+  "traditional_list_execution_accepted": false,
+  "registration_sequence_available": false,
+  "inventory_unchanged": {
+    "registrations": 470,
+    "unique_capture_hashes": 460
+  },
+  "original_player_sha256_after": "39061ff329e4a32d0c8375ce9ee15e2017bccab0593943b962a860e11723d38b",
+  "trace_counts": {
+    "captures": 8,
+    "paired_original_runs": 16,
+    "erg_initializations": 7042,
+    "pairs_with_equal_raw_images": 8
+  },
+  "scheduler_counts": {
+    "graphs": 28,
+    "version_schedules": 56,
+    "leaf_initializations": 662,
+    "schedules_with_repetitions": 28
+  },
+  "cpu_checker_tests": 7,
+  "evidence": {
+    "artifacts/m3-list-init-trace-validation/validation.json": "0cdf74888a7f874b875c64c76c40d612403b614f97fa31c7bfdfe4f203611448",
+    "artifacts/m3-list-init-scheduler-final/scheduler.json": "c7f3d4df07b5c1ff9ccf5fc80614259772180d99cc61918f8bdc1407aaa973be",
+    "artifacts/m3-list-init-final-cpu-audit.json": "07895a344d8d61ead8d7d47c8a0aa279f8a57e2f699795f96c7773504c56c4de",
+    "artifacts/m3-list-init-checker-tests.log": "2fb14902a66c200394543f1da88727a4d5b6f0f200362949322c3b6c234e9213",
+    "artifacts/m3-list-init-chain-functions.c": "23e01328c43927d289f6500f5f3e9519160d451626625d9f9eda6e9b67c40633",
+    "artifacts/m3-list-init-manager.c": "a0672738bb47fc5c0ee06266ce1554ea913127b615ca901faf172617f7f3ba6e"
+  },
+  "sources": {
+    "tools/trace_original_erg_initialization.py": "9bd4b8e7069650e9862737e2bb8467f9cdf05528ba19d43caf29602e02ae2806",
+    "tools/probe_original_init_scheduler.py": "487358fe156aec2dba408402a32eca35de12b7bb25d60f679dbfabea8600aeda",
+    "tools/validate_original_init_traces.py": "6144aac3e1031ac044122cbfcd98561b086419534ae4a0c082c333db78bee199",
+    "tests/test_original_init_evidence.py": "9e9d9997ed22be121bafc4e1fa562f42c1316015e9db9a473e8164c4e04d1f1c"
+  },
+  "reference_tools": {
+    "D:/CDXrepo/FloraGPA/tools/gpa_native.py": "f7ee63e82a9c8363cfde81633863a820e8f4277d0a80f0d90075b499f56bcffd"
+  },
+  "limits": [
+    "Controlled scheduler graphs are not original captures or GPU acceptance.",
+    "Actual graph snapshots cover version 0 with all non-ERG prerequisites ready; later versions in real files remain unproven.",
+    "Final CPU audit uses strengthened stack-presence checks on the retained traces; no additional GPU run was needed.",
+    "Original adapter/configuration equivalence with independent replay remains unproven.",
+    "Traditional Execute operand identity and full file-to-version dependency construction remain unresolved.",
+    "No production code, package, Qt or full regression matrix changed in this batch."
+  ]
+}
