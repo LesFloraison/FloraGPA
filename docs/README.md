@@ -14,6 +14,7 @@ chronology remains in Chinese.
 | Component responsibilities | [Architecture](ARCHITECTURE.md) |
 | Run tests and external comparisons | [Development validation](USAGE.md#development-validation) |
 | Interpret corpus results and diagnostics | [Compatibility infrastructure](COMPATIBILITY_BASELINE.md) |
+| Deferred versions, original expansion and M3 boundaries | [Deferred version audit](DEFERRED_VERSION_AUDIT.md) |
 | Find dated changes | [Development chronology (Chinese)](MIGRATION_STATUS.md) |
 | Inspect module-level migration bookkeeping | [Module ledger](migration.json) |
 | Included dependencies | [Third-party components](../THIRD_PARTY.md) |

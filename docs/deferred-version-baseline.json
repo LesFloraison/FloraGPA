@@ -1,0 +1,66 @@
+{
+  "schema": "FloraGPA deferred evidence audit 1",
+  "completed": true,
+  "passed": true,
+  "counts": {
+    "cases": 18,
+    "positive_cases": 9,
+    "rejected_cases": 9,
+    "producer_frames": 432,
+    "producer_storage_checks": 1296,
+    "producer_images": 432,
+    "baseline_readbacks": 216,
+    "captured_restore_failures": 24,
+    "original_runs": 36,
+    "native_positive_runs": 18,
+    "native_rejection_attempts": 18,
+    "resource_exports": 54,
+    "diagnostic_controls": 27
+  },
+  "exe_sha256": "4e120c99ce8a39bb189dda181441d92145e423df1a224640f3a08f7dbc85584b",
+  "corpus_sha256": "92d6110cbbb5ae3598dbf7487b446a968894d5e90d489d519dcd1238bf3f4a6d",
+  "validation_sha256": "8c433ae553edeaf989e84270812a2655bf22208bc8e9f26c35d2d5651448050b",
+  "limits": [
+    "Expanded immediate streams only; traditional lists remain unsupported",
+    "Original-player adapter/configuration equivalence is unproven",
+    "Missing sentinel captures are explicit rejections, not accurate native bindings",
+    "Capture-side restore observations do not assert every original capture behaves this way"
+  ],
+  "regression": {
+    "ctest_suites": [
+      "constant_buffer_setters",
+      "frame_validation",
+      "compatibility_ui",
+      "contexts"
+    ],
+    "new_preflight_test_rows": 162,
+    "gate_checker_tests": 10,
+    "isolated_golden_controls": 4,
+    "prior_preflight_cases": 388,
+    "prior_preflight_diagnostics_unchanged": true,
+    "prior_full_gpu_matrix_rerun": false
+  },
+  "combined_inventory": {
+    "registered_cases": 406,
+    "unique_capture_hashes": 396,
+    "positive_registrations": 375,
+    "unique_positive_captures": 365,
+    "rejections": 31
+  },
+  "production_commit": "7227382",
+  "package": "out/FloraGPA-m3-deferred-20261004",
+  "local_evidence": {
+    "artifacts/m3-deferred-evidence-audit-final.json": "2f843ef7f853775c4172769857bea663839529143eb4d3db97f4894b4caf0d45",
+    "artifacts/m3-deferred-registered-validation/validation.json": "8c433ae553edeaf989e84270812a2655bf22208bc8e9f26c35d2d5651448050b",
+    "artifacts/m3-deferred-version-originals/manifest.json": "a8e6ae01e92892feb0c644c07d6dcbdfaaa73782316f7d32e6223abbbe68eb64",
+    "artifacts/m3-deferred-version-complete/manifest.json": "c3ecd47b0763d395c8998219b44c451fac5841e60817b657a64195c93a72b12f",
+    "artifacts/m3-cb-prior-preflight-comparison.json": "3ed104c3a3f643f195e4ad8cef069acdfe98d64afe28c6ec092db42b458e7f19",
+    "artifacts/m3-cb-preflight-ctest.log": "2df2d7d9eeda450fad5901ca32a50244987d29e5a50ae251e46f88a7ed4017ed",
+    "artifacts/m3-cb-native-goldens.log": "9045dc3e3b7870e530a1c62f26394abd4443e9d3b985817f7f32052b1f0e9635",
+    "artifacts/m3-gate-checker-tests.log": "8abce0903e54e721da7707823f3498595fa400d321f7d5ea7807876220b37d48",
+    "artifacts/m3-command-list-tables.txt": "f6358299b477af97740d81be990e07e191bc70558741b26edfefd8cb19ccd029",
+    "artifacts/m3-command-list-construction.c": "6a3d3d3fe945e3ba98ae88250392b26d77b7d2aef54b03e4ea36fc198256e614",
+    "artifacts/m3-command-list-writer.c": "d703e392e91a589228b9297158156bf2284c81de1e9f7342dfcf285daaeacf06",
+    "artifacts/m3-stream-resource-routing.c": "46b252668d8ce75d6bb50ee788a19499f8a9eaf2e4c9a27742c17213082ddc95"
+  }
+}

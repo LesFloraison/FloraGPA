@@ -1,0 +1,225 @@
+{
+  "schema": "FloraGPA compatibility gate suites 1",
+  "manifest_hash_policy": "UTF-8 bytes with CRLF normalized to LF",
+  "expected_cases": 18,
+  "expected_unique_captures": 18,
+  "expected_rejections": 9,
+  "suites": [
+    {
+      "id": "deferred-versions",
+      "manifest": "docs/deferred-version-corpus.json",
+      "manifest_sha256": "92d6110cbbb5ae3598dbf7487b446a968894d5e90d489d519dcd1238bf3f4a6d",
+      "capture_root": "artifacts",
+      "subdirectory": "",
+      "expected_rejections": {
+        "deferred_versions_0": {
+          "findings": [
+            {
+              "kind": "constant_buffer_resource_unresolved",
+              "event_id": 23,
+              "resource_id": 24,
+              "record_type": 590
+            },
+            {
+              "kind": "constant_buffer_resource_unresolved",
+              "event_id": 52,
+              "resource_id": 24,
+              "record_type": 590
+            },
+            {
+              "kind": "constant_buffer_resource_unresolved",
+              "event_id": 74,
+              "resource_id": 24,
+              "record_type": 590
+            }
+          ],
+          "runtime_error": "Event 23 (CSSetConstantBuffers): Missing capture entry 24"
+        },
+        "deferred_versions_1": {
+          "findings": [
+            {
+              "kind": "constant_buffer_resource_unresolved",
+              "event_id": 23,
+              "resource_id": 24,
+              "record_type": 590
+            },
+            {
+              "kind": "constant_buffer_resource_unresolved",
+              "event_id": 63,
+              "resource_id": 24,
+              "record_type": 590
+            },
+            {
+              "kind": "constant_buffer_resource_unresolved",
+              "event_id": 96,
+              "resource_id": 24,
+              "record_type": 590
+            }
+          ],
+          "runtime_error": "Event 23 (CSSetConstantBuffers): Missing capture entry 24"
+        },
+        "deferred_versions_2": {
+          "findings": [
+            {
+              "kind": "constant_buffer_resource_unresolved",
+              "event_id": 23,
+              "resource_id": 24,
+              "record_type": 590
+            },
+            {
+              "kind": "constant_buffer_resource_unresolved",
+              "event_id": 63,
+              "resource_id": 24,
+              "record_type": 590
+            },
+            {
+              "kind": "constant_buffer_resource_unresolved",
+              "event_id": 96,
+              "resource_id": 24,
+              "record_type": 590
+            }
+          ],
+          "runtime_error": "Event 23 (CSSetConstantBuffers): Missing capture entry 24"
+        },
+        "deferred_versions_3": {
+          "findings": [
+            {
+              "kind": "constant_buffer_resource_unresolved",
+              "event_id": 23,
+              "resource_id": 24,
+              "record_type": 590
+            },
+            {
+              "kind": "constant_buffer_resource_unresolved",
+              "event_id": 62,
+              "resource_id": 24,
+              "record_type": 590
+            },
+            {
+              "kind": "constant_buffer_resource_unresolved",
+              "event_id": 94,
+              "resource_id": 24,
+              "record_type": 590
+            }
+          ],
+          "runtime_error": "Event 23 (CSSetConstantBuffers): Missing capture entry 24"
+        },
+        "deferred_versions_4": {
+          "findings": [
+            {
+              "kind": "constant_buffer_resource_unresolved",
+              "event_id": 23,
+              "resource_id": 24,
+              "record_type": 590
+            },
+            {
+              "kind": "constant_buffer_resource_unresolved",
+              "event_id": 62,
+              "resource_id": 24,
+              "record_type": 590
+            },
+            {
+              "kind": "constant_buffer_resource_unresolved",
+              "event_id": 94,
+              "resource_id": 24,
+              "record_type": 590
+            }
+          ],
+          "runtime_error": "Event 23 (CSSetConstantBuffers): Missing capture entry 24"
+        },
+        "deferred_versions_5": {
+          "findings": [
+            {
+              "kind": "constant_buffer_resource_unresolved",
+              "event_id": 25,
+              "resource_id": 26,
+              "record_type": 590
+            },
+            {
+              "kind": "constant_buffer_resource_unresolved",
+              "event_id": 65,
+              "resource_id": 26,
+              "record_type": 590
+            },
+            {
+              "kind": "constant_buffer_resource_unresolved",
+              "event_id": 98,
+              "resource_id": 26,
+              "record_type": 590
+            }
+          ],
+          "runtime_error": "Event 25 (CSSetConstantBuffers): Missing capture entry 26"
+        },
+        "deferred_versions_6": {
+          "findings": [
+            {
+              "kind": "constant_buffer_resource_unresolved",
+              "event_id": 27,
+              "resource_id": 28,
+              "record_type": 590
+            },
+            {
+              "kind": "constant_buffer_resource_unresolved",
+              "event_id": 67,
+              "resource_id": 28,
+              "record_type": 590
+            },
+            {
+              "kind": "constant_buffer_resource_unresolved",
+              "event_id": 100,
+              "resource_id": 28,
+              "record_type": 590
+            }
+          ],
+          "runtime_error": "Event 27 (CSSetConstantBuffers): Missing capture entry 28"
+        },
+        "deferred_versions_7": {
+          "findings": [
+            {
+              "kind": "constant_buffer_resource_unresolved",
+              "event_id": 25,
+              "resource_id": 26,
+              "record_type": 590
+            },
+            {
+              "kind": "constant_buffer_resource_unresolved",
+              "event_id": 64,
+              "resource_id": 26,
+              "record_type": 590
+            },
+            {
+              "kind": "constant_buffer_resource_unresolved",
+              "event_id": 96,
+              "resource_id": 26,
+              "record_type": 590
+            }
+          ],
+          "runtime_error": "Event 25 (CSSetConstantBuffers): Missing capture entry 26"
+        },
+        "deferred_versions_8": {
+          "findings": [
+            {
+              "kind": "constant_buffer_resource_unresolved",
+              "event_id": 27,
+              "resource_id": 28,
+              "record_type": 590
+            },
+            {
+              "kind": "constant_buffer_resource_unresolved",
+              "event_id": 66,
+              "resource_id": 28,
+              "record_type": 590
+            },
+            {
+              "kind": "constant_buffer_resource_unresolved",
+              "event_id": 98,
+              "resource_id": 28,
+              "record_type": 590
+            }
+          ],
+          "runtime_error": "Event 27 (CSSetConstantBuffers): Missing capture entry 28"
+        }
+      }
+    }
+  ]
+}

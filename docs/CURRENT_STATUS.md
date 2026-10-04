@@ -1,17 +1,28 @@
 # Current capabilities and compatibility
 
-Reviewed **2026-10-04**. The latest build completes the
-[M2 registered corpus gate](M2_ACCEPTANCE_GATE.md), pinned by its
-[full baseline](m2-gate-baseline.json), with replay correction `1a7347d`.
-FinishCommandList validation now precedes disabling and rejects unresolved links
-and payload substitutions. The next stage is M3 retained-list evidence and execution.
+Reviewed **2026-10-04**. The latest build adds
+[M3 deferred-version evidence and CB preflight diagnostics](DEFERRED_VERSION_AUDIT.md)
+after the [M2 registered corpus gate](M2_ACCEPTANCE_GATE.md).
+Nine new complete-resource originals pass repeated replay and strict intermediate
+byte checks; nine paired missing-resource originals have located rejections.
+All 18 files contain expanded immediate commands, so traditional Command List
+execution remains unaccepted. Correction: `7227382`; package:
+`out/FloraGPA-m3-deferred-20261004/`.
 
-The inventory contains **388 registered cases / 378 distinct capture hashes**:
+The combined inventory is **406 registered cases / 396 distinct capture hashes**:
+375 positive registrations (365 unique) and 31 rejection files. The new batch
+has 18 independent positive runs, 18 located rejection attempts, 36 original
+player runs, 54 strict resource exports and 27 diagnostic controls. Four related
+CTest suites and four GF2/BF1 checks pass. The old 388 preflight outcomes are
+unchanged; their full GPU matrix was not rerun in this batch. See the
+[new baseline](deferred-version-baseline.json) for scope and counts.
+
+The preceding fixed M2 inventory contains **388 registered cases / 378 distinct capture hashes**:
 366 positive cases (356 unique captures) and 22 explicit rejections (four initial
 LOD dependencies, seven context-state files, nine missing discard views and two
 ambiguous discard-pointer records). Earlier summaries counted registrations as
 files; ten extra registrations share hashes with other synthetic fixtures.
-The latest batch reruns all 388 cases. Six formerly rejected SO files now replay
+That M2 batch reran all 388 cases. Six formerly rejected SO files now replay
 through proven unused binding intervals. Their absent descriptors/storage and
 intermediate native bindings remain unavailable and are explicitly reported.
 The other four new SO files verify complete resource readback and writes.
@@ -38,7 +49,7 @@ tested workloads; opening a file does not prove accurate replay.
 | Shader tools and debugging | DXBC/reflection, supported HLSL recovery, compilation/projects, source metadata and native GS/HS/DS checkpoint UI | Recovered HLSL is not original source; source availability and shader operations constrain debugging. [Recovery](HLSL_RECOVERY_MIGRATION.md), [projects](SHADER_PROJECT_MIGRATION.md), [checkpoints](CHECKPOINT_UI_MIGRATION.md) |
 | RenderDoc analysis | Pixel History, VS/PS/CS recorded debugging, Replay Mesh and Replay Metrics | Requires compatible external RenderDoc 1.45 release DLL; unavailable values and backend limits remain explicit. [History](PIXEL_HISTORY_UI_MIGRATION.md), [debugging](REPLAY_DEBUG_UI_MIGRATION.md), [mesh](REPLAY_MESH_MIGRATION.md), [metrics](REPLAY_METRICS_MIGRATION.md) |
 | GPU measurements | Native DX11 statistics/timing; Intel MD foundation, scheduled/uniform Qt collection and event-group CLI collection | Intel paths require supported hardware/driver. Event-group Qt/session integration, GTPin/Shader Profiler and further consumers remain incomplete. [Statistics](GPU_STATISTICS_MIGRATION.md), [timing](GPU_PROFILE_MIGRATION.md), [scheduled UI](MD_ITERATIONS_UI_MIGRATION.md), [uniform UI](UNIFORM_METRICS_UI_MIGRATION.md), [groups](MD_HOTSPOTS_MIGRATION.md) |
-| Captured contexts and command lists | Identity/evidence inspection, inventory and explicitly checked limited metadata paths | Production replay of captured Deferred Context / ExecuteCommandList semantics remains incomplete. Self-created lists in metrics/diagnostics do not establish captured-list replay support. [Context workflow](USAGE.md#contexts-and-pipeline-boundaries) |
+| Captured contexts and command lists | Identity/evidence inspection; verified expanded streams from two-context A/B/A workloads with retained CB versions and interleaved uploads | Traditional list execution remains incomplete. Original capture-side Restore=TRUE discrepancies and missing sentinel resources are separately recorded. [Deferred evidence](DEFERRED_VERSION_AUDIT.md), [context workflow](USAGE.md#contexts-and-pipeline-boundaries) |
 | Resource minimum LOD | Native setters, initial getter evidence, frame-time creation defaults, ClearState preservation and disabled-setter experiments | Missing required initial state is rejected; nonzero-LOD full storage export and UAV/output/interface guards remain boundaries. Unused static SRVs use program declarations. [LOD](RESOURCE_LOD_AUDIT.md), [shader usage](MIN_LOD_USAGE_AUDIT.md) |
 | Query and predication | Captured Query metadata/history; native predicate Begin/End, binding and Device5 frame-time creation | New predicates remain unissued until their recorded interval completes. Ordinary Query records may omit identities, intervals or full result bytes; pre-frame predicate history is not reconstructed. [Predicate creation](PREDICATE_CREATION_AUDIT.md) |
 
