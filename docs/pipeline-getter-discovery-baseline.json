@@ -1,0 +1,589 @@
+{
+  "schema": "FloraGPA pipeline getter discovery 1",
+  "status": "Eight original captures blocked; production decoder/replay unchanged",
+  "baseline_revision": "b11464c",
+  "enrolled_inventory_files": 340,
+  "accepted_positive_files": 328,
+  "missing_information_files": 4,
+  "new_implementation_blocked_files": 8,
+  "new_producer_frame_checks": 192,
+  "new_cpu_getter_assertions": 1008,
+  "new_native_replay_runs": 16,
+  "new_native_successful_runs": 0,
+  "new_original_player_runs": 16,
+  "new_original_image_equal_files": 8,
+  "new_unsupported_record_families": 34,
+  "new_unsupported_records": 59,
+  "original_device_configuration": "Unidentified; image agreement on these fixtures does not establish general cross-player equivalence",
+  "cases": [
+    {
+      "id": "pipeline_getters_0",
+      "mode": 0,
+      "first_blocking_event": 43,
+      "first_blocking_record_type": 13610,
+      "unsupported_records": 5,
+      "producer_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "original_matches_producer": true,
+      "native_status": "explicit_implementation_gap"
+    },
+    {
+      "id": "pipeline_getters_1",
+      "mode": 1,
+      "first_blocking_event": 43,
+      "first_blocking_record_type": 13618,
+      "unsupported_records": 12,
+      "producer_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "original_matches_producer": true,
+      "native_status": "explicit_implementation_gap"
+    },
+    {
+      "id": "pipeline_getters_2",
+      "mode": 2,
+      "first_blocking_event": 43,
+      "first_blocking_record_type": 13606,
+      "unsupported_records": 12,
+      "producer_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "original_matches_producer": true,
+      "native_status": "explicit_implementation_gap"
+    },
+    {
+      "id": "pipeline_getters_3",
+      "mode": 3,
+      "first_blocking_event": 43,
+      "first_blocking_record_type": 13619,
+      "unsupported_records": 12,
+      "producer_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "original_matches_producer": true,
+      "native_status": "explicit_implementation_gap"
+    },
+    {
+      "id": "pipeline_getters_4",
+      "mode": 4,
+      "first_blocking_event": 43,
+      "first_blocking_record_type": 13613,
+      "unsupported_records": 5,
+      "producer_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "original_matches_producer": true,
+      "native_status": "explicit_implementation_gap"
+    },
+    {
+      "id": "pipeline_getters_5",
+      "mode": 5,
+      "first_blocking_event": 43,
+      "first_blocking_record_type": 13628,
+      "unsupported_records": 3,
+      "producer_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "original_matches_producer": true,
+      "native_status": "explicit_implementation_gap"
+    },
+    {
+      "id": "pipeline_getters_6",
+      "mode": 6,
+      "first_blocking_event": 43,
+      "first_blocking_record_type": 13624,
+      "unsupported_records": 4,
+      "producer_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "original_matches_producer": true,
+      "native_status": "explicit_implementation_gap"
+    },
+    {
+      "id": "pipeline_getters_7",
+      "mode": 7,
+      "first_blocking_event": 43,
+      "first_blocking_record_type": 13627,
+      "unsupported_records": 6,
+      "producer_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "original_matches_producer": true,
+      "native_status": "explicit_implementation_gap"
+    }
+  ],
+  "wrappers": {
+    "0x352a": {
+      "name": "VSGetShader",
+      "records": 1,
+      "cases": [
+        "pipeline_getters_0"
+      ],
+      "wrapper_string_rva": 4965120,
+      "wrapper_rva": 1221440,
+      "record_type_constant_present": true,
+      "sdk_vtable_byte_offset": 608,
+      "byte_offset_literal_seen_in_decompilation": true,
+      "call_path_note": "Literal search only; some wrappers use their cached-state vtable. Direct native dispatch is not asserted."
+    },
+    "0x3530": {
+      "name": "GSGetShader",
+      "records": 1,
+      "cases": [
+        "pipeline_getters_0"
+      ],
+      "wrapper_string_rva": 4966016,
+      "wrapper_rva": 1234624,
+      "record_type_constant_present": true,
+      "sdk_vtable_byte_offset": 656,
+      "byte_offset_literal_seen_in_decompilation": true,
+      "call_path_note": "Literal search only; some wrappers use their cached-state vtable. Direct native dispatch is not asserted."
+    },
+    "0x3540": {
+      "name": "HSGetShader",
+      "records": 1,
+      "cases": [
+        "pipeline_getters_0"
+      ],
+      "wrapper_string_rva": 4968208,
+      "wrapper_rva": 1267856,
+      "record_type_constant_present": true,
+      "sdk_vtable_byte_offset": 784,
+      "byte_offset_literal_seen_in_decompilation": true,
+      "call_path_note": "Literal search only; some wrappers use their cached-state vtable. Direct native dispatch is not asserted."
+    },
+    "0x3544": {
+      "name": "DSGetShader",
+      "records": 1,
+      "cases": [
+        "pipeline_getters_0"
+      ],
+      "wrapper_string_rva": 4968896,
+      "wrapper_rva": 1276832,
+      "record_type_constant_present": true,
+      "sdk_vtable_byte_offset": 816,
+      "byte_offset_literal_seen_in_decompilation": true,
+      "call_path_note": "Literal search only; some wrappers use their cached-state vtable. Direct native dispatch is not asserted."
+    },
+    "0x3549": {
+      "name": "CSGetShader",
+      "records": 1,
+      "cases": [
+        "pipeline_getters_0"
+      ],
+      "wrapper_string_rva": 4969344,
+      "wrapper_rva": 1287920,
+      "record_type_constant_present": true,
+      "sdk_vtable_byte_offset": 856,
+      "byte_offset_literal_seen_in_decompilation": true,
+      "call_path_note": "Literal search only; some wrappers use their cached-state vtable. Direct native dispatch is not asserted."
+    },
+    "0x3527": {
+      "name": "PSGetShaderResources",
+      "records": 2,
+      "cases": [
+        "pipeline_getters_1"
+      ],
+      "wrapper_string_rva": 4964544,
+      "wrapper_rva": 1214528,
+      "record_type_constant_present": true,
+      "sdk_vtable_byte_offset": 584,
+      "byte_offset_literal_seen_in_decompilation": true,
+      "call_path_note": "Literal search only; some wrappers use their cached-state vtable. Direct native dispatch is not asserted."
+    },
+    "0x3532": {
+      "name": "VSGetShaderResources",
+      "records": 2,
+      "cases": [
+        "pipeline_getters_1"
+      ],
+      "wrapper_string_rva": 4966320,
+      "wrapper_rva": 1238560,
+      "record_type_constant_present": true,
+      "sdk_vtable_byte_offset": 672,
+      "byte_offset_literal_seen_in_decompilation": true,
+      "call_path_note": "Literal search only; some wrappers use their cached-state vtable. Direct native dispatch is not asserted."
+    },
+    "0x3535": {
+      "name": "GSGetShaderResources",
+      "records": 2,
+      "cases": [
+        "pipeline_getters_1"
+      ],
+      "wrapper_string_rva": 4966640,
+      "wrapper_rva": 1244832,
+      "record_type_constant_present": true,
+      "sdk_vtable_byte_offset": 696,
+      "byte_offset_literal_seen_in_decompilation": true,
+      "call_path_note": "Literal search only; some wrappers use their cached-state vtable. Direct native dispatch is not asserted."
+    },
+    "0x353f": {
+      "name": "HSGetShaderResources",
+      "records": 2,
+      "cases": [
+        "pipeline_getters_1"
+      ],
+      "wrapper_string_rva": 4968288,
+      "wrapper_rva": 1265744,
+      "record_type_constant_present": true,
+      "sdk_vtable_byte_offset": 776,
+      "byte_offset_literal_seen_in_decompilation": true,
+      "call_path_note": "Literal search only; some wrappers use their cached-state vtable. Direct native dispatch is not asserted."
+    },
+    "0x3543": {
+      "name": "DSGetShaderResources",
+      "records": 2,
+      "cases": [
+        "pipeline_getters_1"
+      ],
+      "wrapper_string_rva": 4968576,
+      "wrapper_rva": 1274720,
+      "record_type_constant_present": true,
+      "sdk_vtable_byte_offset": 808,
+      "byte_offset_literal_seen_in_decompilation": true,
+      "call_path_note": "Literal search only; some wrappers use their cached-state vtable. Direct native dispatch is not asserted."
+    },
+    "0x3547": {
+      "name": "CSGetShaderResources",
+      "records": 2,
+      "cases": [
+        "pipeline_getters_1"
+      ],
+      "wrapper_string_rva": 4969248,
+      "wrapper_rva": 1283696,
+      "record_type_constant_present": true,
+      "sdk_vtable_byte_offset": 840,
+      "byte_offset_literal_seen_in_decompilation": true,
+      "call_path_note": "Literal search only; some wrappers use their cached-state vtable. Direct native dispatch is not asserted."
+    },
+    "0x3526": {
+      "name": "VSGetConstantBuffers",
+      "records": 2,
+      "cases": [
+        "pipeline_getters_2"
+      ],
+      "wrapper_string_rva": 4964352,
+      "wrapper_rva": 1212416,
+      "record_type_constant_present": true,
+      "sdk_vtable_byte_offset": 576,
+      "byte_offset_literal_seen_in_decompilation": true,
+      "call_path_note": "Literal search only; some wrappers use their cached-state vtable. Direct native dispatch is not asserted."
+    },
+    "0x352b": {
+      "name": "PSGetConstantBuffers",
+      "records": 2,
+      "cases": [
+        "pipeline_getters_2"
+      ],
+      "wrapper_string_rva": 4965280,
+      "wrapper_rva": 1224080,
+      "record_type_constant_present": true,
+      "sdk_vtable_byte_offset": 616,
+      "byte_offset_literal_seen_in_decompilation": true,
+      "call_path_note": "Literal search only; some wrappers use their cached-state vtable. Direct native dispatch is not asserted."
+    },
+    "0x352f": {
+      "name": "GSGetConstantBuffers",
+      "records": 2,
+      "cases": [
+        "pipeline_getters_2"
+      ],
+      "wrapper_string_rva": 4965712,
+      "wrapper_rva": 1232512,
+      "record_type_constant_present": true,
+      "sdk_vtable_byte_offset": 648,
+      "byte_offset_literal_seen_in_decompilation": true,
+      "call_path_note": "Literal search only; some wrappers use their cached-state vtable. Direct native dispatch is not asserted."
+    },
+    "0x3542": {
+      "name": "HSGetConstantBuffers",
+      "records": 2,
+      "cases": [
+        "pipeline_getters_2"
+      ],
+      "wrapper_string_rva": 4968672,
+      "wrapper_rva": 1272608,
+      "record_type_constant_present": true,
+      "sdk_vtable_byte_offset": 800,
+      "byte_offset_literal_seen_in_decompilation": false,
+      "call_path_note": "Literal search only; some wrappers use their cached-state vtable. Direct native dispatch is not asserted."
+    },
+    "0x3546": {
+      "name": "DSGetConstantBuffers",
+      "records": 2,
+      "cases": [
+        "pipeline_getters_2"
+      ],
+      "wrapper_string_rva": 4968976,
+      "wrapper_rva": 1281584,
+      "record_type_constant_present": true,
+      "sdk_vtable_byte_offset": 832,
+      "byte_offset_literal_seen_in_decompilation": true,
+      "call_path_note": "Literal search only; some wrappers use their cached-state vtable. Direct native dispatch is not asserted."
+    },
+    "0x354b": {
+      "name": "CSGetConstantBuffers",
+      "records": 2,
+      "cases": [
+        "pipeline_getters_2"
+      ],
+      "wrapper_string_rva": 4969808,
+      "wrapper_rva": 1292672,
+      "record_type_constant_present": true,
+      "sdk_vtable_byte_offset": 872,
+      "byte_offset_literal_seen_in_decompilation": true,
+      "call_path_note": "Literal search only; some wrappers use their cached-state vtable. Direct native dispatch is not asserted."
+    },
+    "0x3529": {
+      "name": "PSGetSamplers",
+      "records": 2,
+      "cases": [
+        "pipeline_getters_3"
+      ],
+      "wrapper_string_rva": 4964912,
+      "wrapper_rva": 1219280,
+      "record_type_constant_present": true,
+      "sdk_vtable_byte_offset": 600,
+      "byte_offset_literal_seen_in_decompilation": false,
+      "call_path_note": "Literal search only; some wrappers use their cached-state vtable. Direct native dispatch is not asserted."
+    },
+    "0x3533": {
+      "name": "VSGetSamplers",
+      "records": 2,
+      "cases": [
+        "pipeline_getters_3"
+      ],
+      "wrapper_string_rva": 4966240,
+      "wrapper_rva": 1240672,
+      "record_type_constant_present": true,
+      "sdk_vtable_byte_offset": 680,
+      "byte_offset_literal_seen_in_decompilation": false,
+      "call_path_note": "Literal search only; some wrappers use their cached-state vtable. Direct native dispatch is not asserted."
+    },
+    "0x3536": {
+      "name": "GSGetSamplers",
+      "records": 2,
+      "cases": [
+        "pipeline_getters_3"
+      ],
+      "wrapper_string_rva": 4966560,
+      "wrapper_rva": 1246944,
+      "record_type_constant_present": true,
+      "sdk_vtable_byte_offset": 704,
+      "byte_offset_literal_seen_in_decompilation": false,
+      "call_path_note": "Literal search only; some wrappers use their cached-state vtable. Direct native dispatch is not asserted."
+    },
+    "0x3541": {
+      "name": "HSGetSamplers",
+      "records": 2,
+      "cases": [
+        "pipeline_getters_3"
+      ],
+      "wrapper_string_rva": 4968384,
+      "wrapper_rva": 1270496,
+      "record_type_constant_present": true,
+      "sdk_vtable_byte_offset": 792,
+      "byte_offset_literal_seen_in_decompilation": true,
+      "call_path_note": "Literal search only; some wrappers use their cached-state vtable. Direct native dispatch is not asserted."
+    },
+    "0x3545": {
+      "name": "DSGetSamplers",
+      "records": 2,
+      "cases": [
+        "pipeline_getters_3"
+      ],
+      "wrapper_string_rva": 4969072,
+      "wrapper_rva": 1279472,
+      "record_type_constant_present": true,
+      "sdk_vtable_byte_offset": 824,
+      "byte_offset_literal_seen_in_decompilation": true,
+      "call_path_note": "Literal search only; some wrappers use their cached-state vtable. Direct native dispatch is not asserted."
+    },
+    "0x354a": {
+      "name": "CSGetSamplers",
+      "records": 2,
+      "cases": [
+        "pipeline_getters_3"
+      ],
+      "wrapper_string_rva": 4969520,
+      "wrapper_rva": 1290560,
+      "record_type_constant_present": true,
+      "sdk_vtable_byte_offset": 864,
+      "byte_offset_literal_seen_in_decompilation": true,
+      "call_path_note": "Literal search only; some wrappers use their cached-state vtable. Direct native dispatch is not asserted."
+    },
+    "0x352c": {
+      "name": "IAGetInputLayout",
+      "records": 1,
+      "cases": [
+        "pipeline_getters_4"
+      ],
+      "wrapper_string_rva": 4965200,
+      "wrapper_rva": 1226192,
+      "record_type_constant_present": true,
+      "sdk_vtable_byte_offset": 624,
+      "byte_offset_literal_seen_in_decompilation": true,
+      "call_path_note": "Literal search only; some wrappers use their cached-state vtable. Direct native dispatch is not asserted."
+    },
+    "0x352d": {
+      "name": "IAGetVertexBuffers",
+      "records": 2,
+      "cases": [
+        "pipeline_getters_4"
+      ],
+      "wrapper_string_rva": 4965376,
+      "wrapper_rva": 1227968,
+      "record_type_constant_present": true,
+      "sdk_vtable_byte_offset": 632,
+      "byte_offset_literal_seen_in_decompilation": false,
+      "call_path_note": "Literal search only; some wrappers use their cached-state vtable. Direct native dispatch is not asserted."
+    },
+    "0x352e": {
+      "name": "IAGetIndexBuffer",
+      "records": 2,
+      "cases": [
+        "pipeline_getters_4"
+      ],
+      "wrapper_string_rva": 4965520,
+      "wrapper_rva": 1230896,
+      "record_type_constant_present": true,
+      "sdk_vtable_byte_offset": 640,
+      "byte_offset_literal_seen_in_decompilation": true,
+      "call_path_note": "Literal search only; some wrappers use their cached-state vtable. Direct native dispatch is not asserted."
+    },
+    "0x353c": {
+      "name": "RSGetState",
+      "records": 1,
+      "cases": [
+        "pipeline_getters_5"
+      ],
+      "wrapper_string_rva": 4967856,
+      "wrapper_rva": 1260336,
+      "record_type_constant_present": true,
+      "sdk_vtable_byte_offset": 752,
+      "byte_offset_literal_seen_in_decompilation": false,
+      "call_path_note": "Literal search only; some wrappers use their cached-state vtable. Direct native dispatch is not asserted."
+    },
+    "0x353e": {
+      "name": "RSGetScissorRects",
+      "records": 2,
+      "cases": [
+        "pipeline_getters_5"
+      ],
+      "wrapper_string_rva": 4968128,
+      "wrapper_rva": 1263952,
+      "record_type_constant_present": true,
+      "sdk_vtable_byte_offset": 768,
+      "byte_offset_literal_seen_in_decompilation": false,
+      "call_path_note": "Literal search only; some wrappers use their cached-state vtable. Direct native dispatch is not asserted."
+    },
+    "0x3538": {
+      "name": "OMGetRenderTargetsAndUnorderedAccessViews",
+      "records": 2,
+      "cases": [
+        "pipeline_getters_6"
+      ],
+      "wrapper_string_rva": 4967168,
+      "wrapper_rva": 1251760,
+      "record_type_constant_present": true,
+      "sdk_vtable_byte_offset": 720,
+      "byte_offset_literal_seen_in_decompilation": true,
+      "call_path_note": "Literal search only; some wrappers use their cached-state vtable. Direct native dispatch is not asserted."
+    },
+    "0x3548": {
+      "name": "CSGetUnorderedAccessViews",
+      "records": 2,
+      "cases": [
+        "pipeline_getters_6"
+      ],
+      "wrapper_string_rva": 4969152,
+      "wrapper_rva": 1285808,
+      "record_type_constant_present": true,
+      "sdk_vtable_byte_offset": 848,
+      "byte_offset_literal_seen_in_decompilation": true,
+      "call_path_note": "Literal search only; some wrappers use their cached-state vtable. Direct native dispatch is not asserted."
+    },
+    "0x3534": {
+      "name": "GetPredication",
+      "records": 2,
+      "cases": [
+        "pipeline_getters_7"
+      ],
+      "wrapper_string_rva": 4966480,
+      "wrapper_rva": 1242816,
+      "record_type_constant_present": true,
+      "sdk_vtable_byte_offset": 688,
+      "byte_offset_literal_seen_in_decompilation": true,
+      "call_path_note": "Literal search only; some wrappers use their cached-state vtable. Direct native dispatch is not asserted."
+    },
+    "0x353b": {
+      "name": "SOGetTargets",
+      "records": 2,
+      "cases": [
+        "pipeline_getters_7"
+      ],
+      "wrapper_string_rva": 4967712,
+      "wrapper_rva": 1258304,
+      "record_type_constant_present": true,
+      "sdk_vtable_byte_offset": 744,
+      "byte_offset_literal_seen_in_decompilation": true,
+      "call_path_note": "Literal search only; some wrappers use their cached-state vtable. Direct native dispatch is not asserted."
+    },
+    "0x354e": {
+      "name": "GetType",
+      "records": 1,
+      "cases": [
+        "pipeline_getters_7"
+      ],
+      "wrapper_string_rva": 4969896,
+      "wrapper_rva": 1297648,
+      "record_type_constant_present": true,
+      "sdk_vtable_byte_offset": 896,
+      "byte_offset_literal_seen_in_decompilation": true,
+      "call_path_note": "Literal search only; some wrappers use their cached-state vtable. Direct native dispatch is not asserted."
+    },
+    "0x354f": {
+      "name": "GetContextFlags",
+      "records": 1,
+      "cases": [
+        "pipeline_getters_7"
+      ],
+      "wrapper_string_rva": 4970096,
+      "wrapper_rva": 1299072,
+      "record_type_constant_present": true,
+      "sdk_vtable_byte_offset": 904,
+      "byte_offset_literal_seen_in_decompilation": true,
+      "call_path_note": "Literal search only; some wrappers use their cached-state vtable. Direct native dispatch is not asserted."
+    }
+  },
+  "sources": {
+    "tools/native/pipeline_getter_probe.cpp": "0795e7d193c0541d0608bdde053b6ab18068bd48662359610a80841b2befbde0",
+    "tools/native/texture_probe_helpers.h": "30abcac380d84d505fd344d4083d97300f50df5b2e5cc7dffb11ea03c6d6ee3d",
+    "tools/native/present_capture_probe.cpp": "7c29f1e572ab16a5bc497d39eef8198d79056877a9e1d3fff3f7ed530a32c4e3"
+  },
+  "producer_sha256": "7d317658ab77aa0ab30838b2101439f34b27ba9d26e753bd3cd8027afa6f2d2a",
+  "cli_sha256": "0579a4a0c153a16418f0c0e7046c9c42b4c41ea5810acbed4244b1f00658405b",
+  "shim_sha256": "cb0b99d113511cbf7ca9f949d97aa02e4a1f8f110b1f3ad3165d8a81035dee31",
+  "ghidra_import_md5": "52ec50cd98aebe07b24e894beafd1f2a",
+  "sdk_header": {
+    "path": "C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.26100.0\\um\\d3d11.h",
+    "sha256": "65964c91b641d5fc93d68796183318a9ebe493e41502f61fc26fbbf34e9d3ead"
+  },
+  "evidence": {
+    "artifacts\\m2-pipeline-getters\\manifest.json": "9b0d967bda97787b85dc482c96b7c45a082692a57266004ad8d50991c9e57514",
+    "artifacts\\m2-pipeline-getters-before\\validation.json": "90c93c1b5cbe9bba6d2c75990c846fd77f5fa1c8842b8fbc5977d9bbcd19b1b9",
+    "docs\\pipeline-getter-discovery-corpus.json": "31b3549aa7768401b88ac57046f1278bdfd6b7c8bde0d53fe877cb50a555ce81",
+    "artifacts\\capture-pipeline-getters.py": "00fa41922f3ce839c828c116e2a32a186031b64461399051f69407c33fee4e65",
+    "artifacts\\capture-pipeline-getters.log": "371197daa905dd8e820a54039013f087afc1648f6111f962630f7597fd5ba62e",
+    "artifacts\\build-pipeline-getter-probe.log": "62a6237389c453d6abf5257dc93c3374a7423eb01b029aefd1b3e5648167752c",
+    "artifacts\\pipeline-getter-wire-samples.json": "d012ecfe3a6a5e74ee4f3c43406bb6491e7b3bde384bd149774034086a5b2252",
+    "artifacts\\pipeline-getter-sdk-slots.json": "957bca901bab427b528184e4693c0238892f2d2f96a41439beef7131d8d5f2d1",
+    "artifacts\\pipeline-getter-wrapper-strings.json": "6cf5fb1258fa0e122b75d3944f73330677aecd4bb52d016bf6788792b3096cb9",
+    "artifacts\\pipeline-getter-wrapper-map.json": "5f7ab7ce7b143e6e20133d103622612024f08c0339b039723a144cbfe4f72172",
+    "artifacts\\pipeline-getter-wrappers.c": "0769ef8b6b9549d106183410c6a4089da51cbbd68c31fa2c79f130c7fb64cd18",
+    "artifacts\\pipeline-getter-wrappers-ghidra.log": "923fe36d17e44c9530a423b77fa323975b0c871162735bebd3ddd165fae77f4a",
+    "artifacts\\pipeline-getter-ghidra-identity.log": "c847992c63a613f931d31c5ecfa0f209d3313ab68fe12f3be86f7b0a6b48ebf8",
+    "artifacts\\GpaGetterImageIdentity.java": "6905546417e01cc3194b86e3c25ac5b902c3d7f1ce8373caa7173d626f5b105c",
+    "artifacts\\export-pipeline-getters.py": "2cd43ddacdcf8b2f5886be2f98b71ee86edb59043d1990233d614ea9b071e7cd",
+    "artifacts\\summarize-pipeline-getters.py": "1d37192e55866794976ebf9a55c55cfeec4f4cb7a27693169c126f59066e6c42",
+    "artifacts\\m2-pipeline-getters-commands-0\\commands.json": "9c64ed07c6f64127da14a46a70421379163251652a55d109f97c237076bfcec2",
+    "artifacts\\m2-pipeline-getters-commands-1\\commands.json": "ebee326f4f2b7fd037a82e73ce54b9c2d7f595d35460f8e60e02b9b186ad5630",
+    "artifacts\\m2-pipeline-getters-commands-2\\commands.json": "69a78e3a334c026cd809d630e4f73471234bcf24dd03ea8dea2939682405bccd",
+    "artifacts\\m2-pipeline-getters-commands-3\\commands.json": "993030aa25efe65637de93ec9338d31eb3f46d633eb0a25d280183f01c1378ec",
+    "artifacts\\m2-pipeline-getters-commands-4\\commands.json": "f2020a1b82dae977802e5d1e827c8b26b152d21a148af43159c15bc4af2b70a2",
+    "artifacts\\m2-pipeline-getters-commands-5\\commands.json": "7ce784ecb69679ff9cf9f81fca587bdc86b77002a52a246a60dfc156a6d84f75",
+    "artifacts\\m2-pipeline-getters-commands-6\\commands.json": "def335fa53eed63244867438510db54fe94bacbdef4684c3b7232116f0992c9f",
+    "artifacts\\m2-pipeline-getters-commands-7\\commands.json": "ba0252796a941814eaafcf7b3bde3f4517d087fbbaf79fff7446fb34dadc9445"
+  },
+  "next_gate": [
+    "Implement checked immediate Context4 getter layouts as observed metadata, not pipeline mutations",
+    "Validate optional arrays and counts, API slot limits, truncation, invalid flags and context references",
+    "Keep original native/WARP image checks and producer oracles; add nonempty class/SO/UAV and optional-output boundary captures before extending their scope",
+    "Run related CTest and historical golden/corpus checks after production changes; M2-M6 remain incomplete"
+  ]
+}

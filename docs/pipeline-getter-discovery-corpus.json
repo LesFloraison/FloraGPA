@@ -1,0 +1,142 @@
+{
+  "schema": "FloraGPA compatibility corpus 1",
+  "profile": "GPA 2025 R1 legacy DX11 / IGPA v3",
+  "cases": [
+    {
+      "id": "pipeline_getters_0",
+      "path": "m2-pipeline-getters/0/capture.gpa_frame",
+      "sha256": "a76e3f7a74bdf0ee114e9d3477f68c33265409d5c4683d2acf89e546db676c6a",
+      "bytes": 60112,
+      "family": "shader_getters",
+      "origin": "self_owned_original_gpa_capture",
+      "reference_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "comparison_policy": "exact_golden",
+      "source_manifests": [
+        "artifacts\\m2-pipeline-getters\\manifest.json"
+      ],
+      "controls": [],
+      "boundaries": [],
+      "provenance_note": "Unmodified GPA output. Producer asserts getter return values and 12 independently expected images per native/injected run. Discovery, not a supported-scope claim.",
+      "device_scope": "Local hardware producer; original-player adapter/configuration unproven."
+    },
+    {
+      "id": "pipeline_getters_1",
+      "path": "m2-pipeline-getters/1/capture.gpa_frame",
+      "sha256": "4e6a4c363da4422162e0929569d3cb4094b4fcabc2cf88b76bc52ca9b0f62027",
+      "bytes": 60472,
+      "family": "srv_getters",
+      "origin": "self_owned_original_gpa_capture",
+      "reference_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "comparison_policy": "exact_golden",
+      "source_manifests": [
+        "artifacts\\m2-pipeline-getters\\manifest.json"
+      ],
+      "controls": [],
+      "boundaries": [],
+      "provenance_note": "Unmodified GPA output. Producer asserts getter return values and 12 independently expected images per native/injected run. Discovery, not a supported-scope claim.",
+      "device_scope": "Local hardware producer; original-player adapter/configuration unproven."
+    },
+    {
+      "id": "pipeline_getters_2",
+      "path": "m2-pipeline-getters/2/capture.gpa_frame",
+      "sha256": "331e49b6e0eee727779e600a294c5f0b80c58835e1317f19352b91f99e7c788d",
+      "bytes": 60736,
+      "family": "constant_buffer_getters",
+      "origin": "self_owned_original_gpa_capture",
+      "reference_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "comparison_policy": "exact_golden",
+      "source_manifests": [
+        "artifacts\\m2-pipeline-getters\\manifest.json"
+      ],
+      "controls": [],
+      "boundaries": [],
+      "provenance_note": "Unmodified GPA output. Producer asserts getter return values and 12 independently expected images per native/injected run. Discovery, not a supported-scope claim.",
+      "device_scope": "Local hardware producer; original-player adapter/configuration unproven."
+    },
+    {
+      "id": "pipeline_getters_3",
+      "path": "m2-pipeline-getters/3/capture.gpa_frame",
+      "sha256": "480889dca5e33fb7fca46bbcbb6e6da9d1ca0960300134cd0953afc9f5b747a4",
+      "bytes": 60472,
+      "family": "sampler_getters",
+      "origin": "self_owned_original_gpa_capture",
+      "reference_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "comparison_policy": "exact_golden",
+      "source_manifests": [
+        "artifacts\\m2-pipeline-getters\\manifest.json"
+      ],
+      "controls": [],
+      "boundaries": [],
+      "provenance_note": "Unmodified GPA output. Producer asserts getter return values and 12 independently expected images per native/injected run. Discovery, not a supported-scope claim.",
+      "device_scope": "Local hardware producer; original-player adapter/configuration unproven."
+    },
+    {
+      "id": "pipeline_getters_4",
+      "path": "m2-pipeline-getters/4/capture.gpa_frame",
+      "sha256": "e98542b193a418b5cca0a415e4cb91f8c411d41b62ba340f812b682ab5423833",
+      "bytes": 60223,
+      "family": "ia_getters",
+      "origin": "self_owned_original_gpa_capture",
+      "reference_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "comparison_policy": "exact_golden",
+      "source_manifests": [
+        "artifacts\\m2-pipeline-getters\\manifest.json"
+      ],
+      "controls": [],
+      "boundaries": [],
+      "provenance_note": "Unmodified GPA output. Producer asserts getter return values and 12 independently expected images per native/injected run. Discovery, not a supported-scope claim.",
+      "device_scope": "Local hardware producer; original-player adapter/configuration unproven."
+    },
+    {
+      "id": "pipeline_getters_5",
+      "path": "m2-pipeline-getters/5/capture.gpa_frame",
+      "sha256": "da885192ab9c440292b50fe428533c4ee8e63237d596062e060795b9a0454fe1",
+      "bytes": 60076,
+      "family": "rasterizer_getters",
+      "origin": "self_owned_original_gpa_capture",
+      "reference_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "comparison_policy": "exact_golden",
+      "source_manifests": [
+        "artifacts\\m2-pipeline-getters\\manifest.json"
+      ],
+      "controls": [],
+      "boundaries": [],
+      "provenance_note": "Unmodified GPA output. Producer asserts getter return values and 12 independently expected images per native/injected run. Discovery, not a supported-scope claim.",
+      "device_scope": "Local hardware producer; original-player adapter/configuration unproven."
+    },
+    {
+      "id": "pipeline_getters_6",
+      "path": "m2-pipeline-getters/6/capture.gpa_frame",
+      "sha256": "ab2906396111f4b28336006771393681f731c5b5ffc0fcd700d0561bafdb66c6",
+      "bytes": 60066,
+      "family": "output_uav_getters",
+      "origin": "self_owned_original_gpa_capture",
+      "reference_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "comparison_policy": "exact_golden",
+      "source_manifests": [
+        "artifacts\\m2-pipeline-getters\\manifest.json"
+      ],
+      "controls": [],
+      "boundaries": [],
+      "provenance_note": "Unmodified GPA output. Producer asserts getter return values and 12 independently expected images per native/injected run. Discovery, not a supported-scope claim.",
+      "device_scope": "Local hardware producer; original-player adapter/configuration unproven."
+    },
+    {
+      "id": "pipeline_getters_7",
+      "path": "m2-pipeline-getters/7/capture.gpa_frame",
+      "sha256": "a7fdfeb98ad73daf7163651cc18392a40b36d421774057cc357524a0091f1b9e",
+      "bytes": 60088,
+      "family": "so_predication_context_getters",
+      "origin": "self_owned_original_gpa_capture",
+      "reference_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "comparison_policy": "exact_golden",
+      "source_manifests": [
+        "artifacts\\m2-pipeline-getters\\manifest.json"
+      ],
+      "controls": [],
+      "boundaries": [],
+      "provenance_note": "Unmodified GPA output. Producer asserts getter return values and 12 independently expected images per native/injected run. Discovery, not a supported-scope claim.",
+      "device_scope": "Local hardware producer; original-player adapter/configuration unproven."
+    }
+  ]
+}

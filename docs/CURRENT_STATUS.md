@@ -1,14 +1,17 @@
 # Current capabilities and compatibility
 
-Reviewed **2026-10-04**. The latest acceptance is pinned in the
-[LOD shader usage baseline](min-lod-usage-baseline.json), following implementation
-revision 57c4d58. Earlier baselines retain their immutable evidence.
+Reviewed **2026-10-04**. The latest accepted replay implementation is b11464c,
+with its full [LOD shader usage baseline](min-lod-usage-baseline.json).
+The subsequent [pipeline getter discovery](PIPELINE_GETTER_DISCOVERY.md) adds
+eight original captures blocked by 34 unsupported getter families; it does not
+change production replay or enlarge the accepted support scope.
 
-The inventory contains **332 files: 328 positive replays and four explicit
-missing-state rejections**. Verified unused static SRVs no longer trigger false LOD errors,
-including reflection-stripped static shaders. Actual sampling still requires
-proved state; late sampling is diagnosed at its consuming draw. Original-player
-mip-0 differences remain diagnostic evidence, not equivalence claims.
+The inventory contains **340 files: 328 accepted positive replays, four explicit
+missing-information rejections and eight new implementation-blocked files**.
+The getter discovery passes 192 native/injected producer frames, 1,008 return-value
+assertions and sixteen original-player image comparisons; FloraGPA currently
+rejects those eight captures at their first unsupported getter. The accepted
+332-file matrix below remains separate from these new blockers.
 
 ## Supported scope
 
@@ -40,7 +43,7 @@ full matrix and four explicit rejection controls; see the [usage audit](MIN_LOD_
 
 | Measure | Recorded result |
 |---|---|
-| Inventory / positive files / explicit missing-state files | 332 / 328 / 4 |
+| Accepted baseline inventory / positive files / missing-state files | 332 / 328 / 4 |
 | Ordinary independent positive runs | 656 |
 | Repeated output | 327 stable files; one known-variable Helldivers file |
 | Previously stable image hashes | All 320 unchanged |
@@ -108,7 +111,7 @@ the other 35 suites passed initially and the complete UI suite passes after the 
 | Stage | Current position and completion gate |
 |---|---|
 | M1 — Acceptance infrastructure | Minimum loop delivered: corpus, coverage, preflight, serial comparison and diagnostic queue. Extend evidence as paths arrive. |
-| M2 — Ordinary replay | In progress. Continue auditing remaining interfaces, auxiliary records and resource semantics; enrolled immediate-context paths must replay correctly or reject with reproducible, located diagnostics. |
+| M2 — Ordinary replay | In progress. Prioritize the eight original files blocked by 34 pipeline getter families, then remaining interfaces, auxiliary records and resource semantics; enrolled immediate-context paths must replay correctly or reject with reproducible, located diagnostics. |
 | M3 — Deferred Context / Command List | Incomplete. Require original captures proving identity, build order, resource versions, repeated execution, restore-state and event mapping before production support. |
 | M4 — Resources and boundaries | Incomplete. Verify saved initial/differential data, subresources, counters, Query/Predication and presentation; distinguish absent information from implementation gaps. |
 | M5 — Stable compatibility release | Incomplete. Broaden captures, repeat/long-duration checks, recovery and large-file testing; validate clean-environment build/deployment and publish a fixed matrix. |

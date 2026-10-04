@@ -5,6 +5,23 @@
 > [Documentation](README.md)。`artifacts/`、`out/`、`build/` 及外部参考目录
 > 是未随仓库发布的本地证据位置，不代表克隆后即可访问。
 
+2026-10-04（M2 第二十二批，缺口发现）：继续辅助命令审计，新增八份未修改的
+原版管线 getter 捕获，覆盖 Shader/SRV/CB/Sampler、IA、光栅化、OM/CS 输出、
+SO/Predication/context 查询。192 次原生／注入生产程序帧检查和 1,008 次返回值
+断言通过；原版内核十六次重放的图像全部匹配生产程序，FloraGPA 十六次均在
+事件 43 的首个未支持 getter 明确拒绝。共定位 34 类、59 条未支持记录。
+保留完整 payload、Windows SDK 槽位及只读 Ghidra 包装函数导出；Ghidra 导入映像
+MD5 与当前 shim 相同，所有 34 个序列化类型常量与捕获对应。部分包装函数
+经过 GPA 缓存状态表，未将数值偏移匹配冒充直接原生调用的语义证明。
+
+当前登记 340 份：328 已验收正向、四份信息缺失对照、八份新增实现阻塞。
+本批未修改生产解码器或白名单，也未重新运行旧完整矩阵；已有 332 份验收基线
+保持独立，新样本不计入通过率。下一批优先接通检查型 getter 解码与元数据观察，
+补充非空 class/SO/UAV 和可空输出边界，再运行相关回归。详见
+[PIPELINE_GETTER_DISCOVERY.md](PIPELINE_GETTER_DISCOVERY.md) 和
+[pipeline-getter-discovery-baseline.json](pipeline-getter-discovery-baseline.json)。
+M2–M6 未完成，72/117/15 模块状态不变。
+
 2026-10-04（M2 第二十一批）：修正“绑定即访问”的 LOD 误判。十份未修改原版捕获、
 240 次原生／注入生产程序帧检查，覆盖未使用 PS/VS 槽位、空 PS、剥离反射及
 前后切换着色器。旧版五份成功重放文件仍预检误报，剥离常量 PS 被运行时误拒绝；
