@@ -1,6 +1,7 @@
 #include "ApiCommands.h"
 #include "core/ClassCreation.h"
 #include "core/ClearView.h"
+#include "core/ContextStateRecords.h"
 #include "core/Contexts.h"
 #include "core/PipelineCreation.h"
 #include "core/PipelineGetters.h"
@@ -393,7 +394,31 @@ Json inspectCommand(const Frame &frame, Id id) {
                 slot = 30;
             else if (name == "SOSetTargets")
                 slot = 37;
-            if (isPipelineGetter(t)) {
+            if (isContextStateRecord(t)) {
+                const auto record = readContextStateRecord(t, raw);
+                validateContextStateOwner(frame, id, record);
+                out["note"] = t == 0x359b ? "Read-only device flags; does not configure replay device."
+                                          : contextStateReplayGap(record);
+                if (t == 0x3561) {
+                    r.id("state");
+                    r.id("previous_state");
+                } else if (t == 0x359b) {
+                    r.u("creation_flags");
+                } else {
+                    r.field("result", "i");
+                    r.u("flags");
+                    r.u("feature_level_count");
+                    r.field("has_feature_levels", "B");
+                    if (record.hasLevels)
+                        r.field("feature_levels", std::to_string(record.levelCount) + "I");
+                    r.u("sdk_version");
+                    r.field("emulated_interface", "16s");
+                    r.field("has_chosen_feature_level", "B");
+                    if (record.chosenLevel)
+                        r.u("chosen_feature_level");
+                    r.id("context_state");
+                }
+            } else if (isPipelineGetter(t)) {
                 const auto observed = readPipelineGetter(t, raw);
                 validatePipelineGetter(frame, observed);
                 for (const auto &field : observed.fields) {

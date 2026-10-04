@@ -5,6 +5,7 @@
 #include "core/ClassCreation.h"
 #include "core/ClearView.h"
 #include "core/Commands.h"
+#include "core/ContextStateRecords.h"
 #include "core/CopyCommands.h"
 #include "core/IaBindings.h"
 #include "core/InspectionRecords.h"
@@ -117,7 +118,12 @@ Json validateFrame(const std::filesystem::path &path, const std::function<bool()
                     if (command["status"] == "invalid")
                         throw std::runtime_error(command.value("error", "Invalid command wire layout"));
                     checked = command["status"] == "decoded";
-                    if (std::string(cap.handling) == "unsupported")
+                    if (isContextStateRecord(e.type)) {
+                        const auto record = readContextStateRecord(e.type, frame.payload(id));
+                        validateContextStateOwner(frame, id, record);
+                        if (const auto gap = contextStateReplayGap(record); !gap.empty())
+                            finding(&e, "error", contextStateGapKind(record), gap, record.state);
+                    } else if (std::string(cap.handling) == "unsupported")
                         finding(&e, "error", "implementation_gap",
                                 "No native replay path for " + commandName(e.type));
                     else if (!checked)

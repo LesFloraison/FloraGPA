@@ -35,6 +35,7 @@ upstream repository that are not vendored here.
 
 ## Historical implementation and acceptance records
 
+- [Context-state identity loss and diagnostics](CONTEXT_STATE_DISCOVERY.md), [focused baseline](context-state-baseline.json) and [original corpus](context-state-corpus.json).
 - [Unused SO lifetime acceptance](SO_LIFETIME_AUDIT.md), [acceptance baseline](so-lifetime-acceptance-baseline.json) and [accepted original corpus](so-lifetime-accepted-corpus.json).
 - [SO lifetime investigation](SO_LIFETIME_DISCOVERY.md), [focused baseline](so-lifetime-baseline.json) and [original positive/blocked corpus](so-lifetime-corpus.json).
 - [Pipeline getter acceptance](PIPELINE_GETTER_AUDIT.md), [acceptance baseline](pipeline-getter-baseline.json), [positive corpus](pipeline-getter-corpus.json) and [missing-SO negative](pipeline-getter-missing-so-corpus.json).

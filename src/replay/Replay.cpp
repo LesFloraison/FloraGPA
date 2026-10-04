@@ -8,6 +8,7 @@
 #include "core/ClassLinkage.h"
 #include "core/ClearView.h"
 #include "core/Commands.h"
+#include "core/ContextStateRecords.h"
 #include "core/CopyCommands.h"
 #include "core/Dxbc.h"
 #include "core/InspectionRecords.h"
@@ -794,6 +795,16 @@ void Replay::command(const Entry &e) {
     if (outputHistory_ && OutputBindingModel::models(e.type))
         outputHistory_->advance(e.id);
     Reader r(payload);
+    if (isContextStateRecord(t)) {
+        if (!std::ranges::equal(payload, frame_.payload(e.id)))
+            throw std::runtime_error("Context-state payload experiments are not supported");
+        const auto record = readContextStateRecord(t, payload);
+        validateContextStateOwner(frame_, e.id, record);
+        if (const auto gap = contextStateReplayGap(record); !gap.empty())
+            throw std::runtime_error("Event " + std::to_string(e.id) + ": " + gap);
+        ++counts["device_creation_flags_observations"];
+        return;
+    }
     if (isPipelineGetter(t)) {
         if (!std::ranges::equal(payload, frame_.payload(e.id)))
             throw std::runtime_error("Pipeline getter payload experiments are not supported");

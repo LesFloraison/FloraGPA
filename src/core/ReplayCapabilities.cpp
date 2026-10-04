@@ -1,6 +1,7 @@
 #include "ReplayCapabilities.h"
 #include "ClassCreation.h"
 #include "Commands.h"
+#include "ContextStateRecords.h"
 #include "Contexts.h"
 #include "CopyCommands.h"
 #include "IaBindings.h"
@@ -23,6 +24,10 @@ bool in(uint16_t t, std::initializer_list<uint16_t> values) {
 }
 } // namespace
 ReplayCapability replayCapability(uint16_t t) {
+    if (isContextStateRecord(t))
+        return {t == 0x359b ? "metadata" : "unsupported",
+                "src/core/ContextStateRecords.cpp;src/replay/Replay.cpp",
+                "tests/ContextStateTests.cpp;docs/CONTEXT_STATE_DISCOVERY.md"};
     if (isPipelineGetter(t))
         return {"metadata", "src/core/PipelineGetters.cpp;src/replay/Replay.cpp",
                 "tests/PipelineGetterTests.cpp;docs/PIPELINE_GETTER_DISCOVERY.md"};

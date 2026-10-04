@@ -282,3 +282,6 @@
 {0x353b, "SOGetTargets"},
 {0x354e, "GetType"},
 {0x354f, "GetContextFlags"},
+{0x3561, "SwapDeviceContextState"},
+{0x35a4, "CreateDeviceContextState"},
+{0x359b, "GetCreationFlags"},

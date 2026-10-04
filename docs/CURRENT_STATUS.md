@@ -1,11 +1,15 @@
 # Current capabilities and compatibility
 
-Reviewed **2026-10-04**. The latest accepted build is pinned by the
-[unused SO lifetime baseline](so-lifetime-acceptance-baseline.json), following
-research revision `fc9e966`. The [SO audit](SO_LIFETIME_AUDIT.md) records its scope.
+Reviewed **2026-10-04**. The latest build adds
+[context-state inspection and diagnostics](CONTEXT_STATE_DISCOVERY.md), pinned
+by its [focused baseline](context-state-baseline.json), following revision
+`447f478`. The last full replay regression remains the
+[unused SO lifetime baseline](so-lifetime-acceptance-baseline.json).
 
-The inventory contains **354 files: 350 positive replays and four explicit
-missing-initial-LOD rejections**. Six formerly rejected SO files now replay
+The cumulative inventory contains **362 files: 351 positive replays and eleven
+explicit rejections** (four missing initial LOD dependencies and seven unresolved
+context-state files). The latest focused batch adds eight original files;
+it does not rerun the entire historical matrix. Six formerly rejected SO files now replay
 through proven unused binding intervals. Their absent descriptors/storage and
 intermediate native bindings remain unavailable and are explicitly reported.
 The other four new SO files verify complete resource readback and writes.
@@ -20,6 +24,7 @@ tested workloads; opening a file does not prove accurate replay.
 | Area | Available behavior | Boundaries and evidence |
 |---|---|---|
 | Preflight and API inspection | Offline diagnostics, decoded fields, references, coverage and Qt diagnostics | Structural success is not GPU success; metadata is not execution. [Acceptance infrastructure](COMPATIBILITY_BASELINE.md) |
+| Context-state objects | Checked Device5 creation/flags and Context4 swap inspection; GetCreationFlags as read-only metadata; located preflight/runtime rejection | State-object execution remains unsupported. Actual non-null swaps can serialize zero identities and stale Draw snapshots. Null input cannot be proven from zero alone. [Original evidence and boundaries](CONTEXT_STATE_DISCOVERY.md) |
 | Pipeline getter observations | 34 additional checked immediate Context4 getter families; decoded optional outputs and reference details | Metadata never restores native bindings or fabricates observed objects. Nonempty SO getter/write originals pass; absent-only unused lifetimes have separate provenance and inspection limits. [Getter acceptance](PIPELINE_GETTER_AUDIT.md), [SO lifetimes](SO_LIFETIME_AUDIT.md) |
 | Immediate-context replay | Captured draws/dispatches, supported setters, uploads, copies (including Context1 transfers), ClearView, queries/predication and presentation | Broader layouts, resource versions and some presentation/transfer cases remain incomplete. [Setters](PIPELINE_SETTER_AUDIT.md), [texture transfers](TEXTURE_COPY_AUDIT.md), [Context1 transfers](TRANSFER1_AUDIT.md), [ClearView](CLEAR_VIEW_AUDIT.md), [presentation](PRESENT_REPLAY_AUDIT.md) |
 | Frame-time creation | Validated buffers, textures/views, shaders, pipeline states, class linkage/instances and predicates | Device5 coverage is not every interface version or descriptor combination; required missing data and unresolved identities are rejected. [Buffers](BUFFER_CREATION_AUDIT.md), [textures](TEXTURE_DIMENSIONS_AUDIT.md), [texture views](VIEW_CREATION_AUDIT.md), [buffer views](BUFFER_VIEW_CREATION_AUDIT.md), [pipeline](PIPELINE_CREATION_AUDIT.md), [geometry/SO](GEOMETRY_CREATION_AUDIT.md), [classes](CLASS_CREATION_AUDIT.md), [predicates](PREDICATE_CREATION_AUDIT.md) |
@@ -34,7 +39,27 @@ tested workloads; opening a file does not prove accurate replay.
 | Resource minimum LOD | Native setters, initial getter evidence, frame-time creation defaults, ClearState preservation and disabled-setter experiments | Missing required initial state is rejected; nonzero-LOD full storage export and UAV/output/interface guards remain boundaries. Unused static SRVs use program declarations. [LOD](RESOURCE_LOD_AUDIT.md), [shader usage](MIN_LOD_USAGE_AUDIT.md) |
 | Query and predication | Captured Query metadata/history; native predicate Begin/End, binding and Device5 frame-time creation | New predicates remain unissued until their recorded interval completes. Ordinary Query records may omit identities, intervals or full result bytes; pre-frame predicate history is not reconstructed. [Predicate creation](PREDICATE_CREATION_AUDIT.md) |
 
-## Latest accepted replay matrix
+## Latest focused context-state validation
+
+Eight unmodified originals have 192 verified native/injected producer frames,
+2,688 binding checks and 264 exact draw-byte checks. Independent replay passes
+the ordinary control twice and explicitly rejects seven state-object files in
+fourteen attempts. Preflight locates fourteen ambiguous swaps and two successful
+creations with missing returned identity. Three record families are now decoded;
+state swapping itself is not counted as supported execution.
+
+Sixteen original-player runs repeat stably, but three of eight files disagree
+with their producer's final colors. A fourth file matches the final image while
+its intermediate Draw snapshots remain stale. This reinforces the need for
+resource/state evidence in addition to final image equality.
+
+Eight related CTest suites pass, including 17 context-state, 22 SO, 30 getter and
+56 Qt/Worker cases without skips. Twenty-two existing SO/getter files pass 44
+serial package replays, and four GF2/BF1 golden/negative checks pass with isolated
+runtime dependencies. The [baseline](context-state-baseline.json) keeps these
+focused results separate from the older full matrix below.
+
+## Last full accepted replay matrix
 
 The [SO lifetime baseline](so-lifetime-acceptance-baseline.json) records the
 complete current regression, plus focused storage/cursor and original-player
@@ -111,7 +136,7 @@ the other 35 suites passed initially and the complete UI suite passes after the 
 | Stage | Current position and completion gate |
 |---|---|
 | M1 — Acceptance infrastructure | Minimum loop delivered: corpus, coverage, preflight, serial comparison and diagnostic queue. Extend evidence as paths arrive. |
-| M2 — Ordinary replay | In progress. Observed getter paths and proven unused SO intervals now pass; mixed saved/missing targets, unresolved native observations and unverified lifetimes remain explicit boundaries. Continue the interface/command/resource audit and assess the remaining M2 gate before production command-list work. Enrolled paths must replay correctly or reject with reproducible, located diagnostics. |
+| M2 — Ordinary replay | In progress. Observed getters and proven unused SO intervals pass; context-state originals now expose serializer identity loss and stale snapshots with located diagnostics. State-object execution, mixed saved/missing SO targets and unverified lifetimes remain boundaries. Continue the interface/command/resource audit before production command-list work. Enrolled paths must replay correctly or reject with reproducible, located diagnostics. |
 | M3 — Deferred Context / Command List | Incomplete. Require original captures proving identity, build order, resource versions, repeated execution, restore-state and event mapping before production support. |
 | M4 — Resources and boundaries | Incomplete. Verify saved initial/differential data, subresources, counters, Query/Predication and presentation; distinguish absent information from implementation gaps. |
 | M5 — Stable compatibility release | Incomplete. Broaden captures, repeat/long-duration checks, recovery and large-file testing; validate clean-environment build/deployment and publish a fixed matrix. |

@@ -1,0 +1,378 @@
+{
+  "schema": "FloraGPA context-state diagnostics 1",
+  "preceding_revision": "447f478",
+  "completion": "M2 and M3-M6 incomplete; context-state execution is not implemented",
+  "previous_full_matrix": "docs/so-lifetime-acceptance-baseline.json",
+  "full_historical_matrix_rerun": false,
+  "cumulative_inventory_files": 362,
+  "cumulative_positive_files": 351,
+  "cumulative_explicit_rejections": 11,
+  "new_original_files": 8,
+  "new_positive_files": 1,
+  "new_identity_rejections": 7,
+  "corpus_native_attempts": 16,
+  "corpus_native_successes": 2,
+  "located_rejection_attempts": 14,
+  "original_player_runs": 16,
+  "original_matches_producer_files": 5,
+  "original_differs_from_producer_files": 3,
+  "producer_frames": 192,
+  "producer_binding_checks": 2688,
+  "producer_draw_byte_checks": 264,
+  "original_device_configuration": "Unidentified; no strict cross-implementation device equivalence",
+  "inspected_record_families": 3,
+  "native_metadata_families_added": 1,
+  "native_state_swap_support": false,
+  "cases": [
+    {
+      "id": "context_state_control",
+      "mode": 0,
+      "capture_sha256": "e5d8532b924f04aec78451fee863bdf12b88bb3c8ce196f8efbac2f127a90666",
+      "native_status": "repeat_stable",
+      "original_matches_producer": true,
+      "original_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "producer_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "preflight_errors": []
+    },
+    {
+      "id": "context_state_preframe_swap",
+      "mode": 1,
+      "capture_sha256": "5077d560f97bba3d50438ab5b4afaf2840987126f1912999d3f9a237e2d4c9c3",
+      "native_status": "replay_failed",
+      "original_matches_producer": false,
+      "original_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "producer_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "preflight_errors": [
+        {
+          "category": 7,
+          "entry_id": 22,
+          "event_id": 22,
+          "kind": "context_state_identity_unresolved",
+          "reason": "SwapDeviceContextState input identity is zero: this GPA serializer also writes zero for unregistered non-null state objects. A null no-op cannot be proven; swapped pipeline state and subsequent draw snapshots cannot be trusted",
+          "record_type": 13665,
+          "resource_id": null,
+          "severity": "error"
+        },
+        {
+          "category": 7,
+          "entry_id": 42,
+          "event_id": 42,
+          "kind": "context_state_identity_unresolved",
+          "reason": "SwapDeviceContextState input identity is zero: this GPA serializer also writes zero for unregistered non-null state objects. A null no-op cannot be proven; swapped pipeline state and subsequent draw snapshots cannot be trusted",
+          "record_type": 13665,
+          "resource_id": null,
+          "severity": "error"
+        }
+      ]
+    },
+    {
+      "id": "context_state_clear_swapped_state",
+      "mode": 2,
+      "capture_sha256": "6e12eb88091b9c2d0304f081189b674a59e02bd49f71c970970cbcc45f15c1a4",
+      "native_status": "replay_failed",
+      "original_matches_producer": true,
+      "original_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "producer_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "preflight_errors": [
+        {
+          "category": 7,
+          "entry_id": 22,
+          "event_id": 22,
+          "kind": "context_state_identity_unresolved",
+          "reason": "SwapDeviceContextState input identity is zero: this GPA serializer also writes zero for unregistered non-null state objects. A null no-op cannot be proven; swapped pipeline state and subsequent draw snapshots cannot be trusted",
+          "record_type": 13665,
+          "resource_id": null,
+          "severity": "error"
+        },
+        {
+          "category": 7,
+          "entry_id": 53,
+          "event_id": 53,
+          "kind": "context_state_identity_unresolved",
+          "reason": "SwapDeviceContextState input identity is zero: this GPA serializer also writes zero for unregistered non-null state objects. A null no-op cannot be proven; swapped pipeline state and subsequent draw snapshots cannot be trusted",
+          "record_type": 13665,
+          "resource_id": null,
+          "severity": "error"
+        }
+      ]
+    },
+    {
+      "id": "context_state_frame_create",
+      "mode": 3,
+      "capture_sha256": "2179c09d82349615f85c907a5ea7cf206e06422a244279e47bf9e21444bd4da1",
+      "native_status": "replay_failed",
+      "original_matches_producer": true,
+      "original_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "producer_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "preflight_errors": [
+        {
+          "category": 7,
+          "entry_id": 22,
+          "event_id": 22,
+          "kind": "context_state_identity_unresolved",
+          "reason": "CreateDeviceContextState succeeded but saved no returned object identity. The original serializer can lose a non-null state object; creation arguments cannot recover subsequent state identity or pipeline contents",
+          "record_type": 13732,
+          "resource_id": null,
+          "severity": "error"
+        },
+        {
+          "category": 7,
+          "entry_id": 24,
+          "event_id": 24,
+          "kind": "context_state_identity_unresolved",
+          "reason": "SwapDeviceContextState input identity is zero: this GPA serializer also writes zero for unregistered non-null state objects. A null no-op cannot be proven; swapped pipeline state and subsequent draw snapshots cannot be trusted",
+          "record_type": 13665,
+          "resource_id": null,
+          "severity": "error"
+        },
+        {
+          "category": 7,
+          "entry_id": 54,
+          "event_id": 54,
+          "kind": "context_state_identity_unresolved",
+          "reason": "SwapDeviceContextState input identity is zero: this GPA serializer also writes zero for unregistered non-null state objects. A null no-op cannot be proven; swapped pipeline state and subsequent draw snapshots cannot be trusted",
+          "record_type": 13665,
+          "resource_id": null,
+          "severity": "error"
+        }
+      ]
+    },
+    {
+      "id": "context_state_restore_default",
+      "mode": 4,
+      "capture_sha256": "9cc1bc96ec91fba2c861ff8d15ea91393e81ae461ef9e09c05545fa9954bc0db",
+      "native_status": "replay_failed",
+      "original_matches_producer": false,
+      "original_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "producer_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "preflight_errors": [
+        {
+          "category": 7,
+          "entry_id": 22,
+          "event_id": 22,
+          "kind": "context_state_identity_unresolved",
+          "reason": "CreateDeviceContextState succeeded but saved no returned object identity. The original serializer can lose a non-null state object; creation arguments cannot recover subsequent state identity or pipeline contents",
+          "record_type": 13732,
+          "resource_id": null,
+          "severity": "error"
+        },
+        {
+          "category": 7,
+          "entry_id": 24,
+          "event_id": 24,
+          "kind": "context_state_identity_unresolved",
+          "reason": "SwapDeviceContextState input identity is zero: this GPA serializer also writes zero for unregistered non-null state objects. A null no-op cannot be proven; swapped pipeline state and subsequent draw snapshots cannot be trusted",
+          "record_type": 13665,
+          "resource_id": null,
+          "severity": "error"
+        },
+        {
+          "category": 7,
+          "entry_id": 54,
+          "event_id": 54,
+          "kind": "context_state_identity_unresolved",
+          "reason": "SwapDeviceContextState input identity is zero: this GPA serializer also writes zero for unregistered non-null state objects. A null no-op cannot be proven; swapped pipeline state and subsequent draw snapshots cannot be trusted",
+          "record_type": 13665,
+          "resource_id": null,
+          "severity": "error"
+        }
+      ]
+    },
+    {
+      "id": "context_state_three_states",
+      "mode": 5,
+      "capture_sha256": "3399e649f2663c9a11d7b45a1fce62de11d0a53d03964908c4c79fc4f318f886",
+      "native_status": "replay_failed",
+      "original_matches_producer": true,
+      "original_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "producer_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "preflight_errors": [
+        {
+          "category": 7,
+          "entry_id": 22,
+          "event_id": 22,
+          "kind": "context_state_identity_unresolved",
+          "reason": "SwapDeviceContextState input identity is zero: this GPA serializer also writes zero for unregistered non-null state objects. A null no-op cannot be proven; swapped pipeline state and subsequent draw snapshots cannot be trusted",
+          "record_type": 13665,
+          "resource_id": null,
+          "severity": "error"
+        },
+        {
+          "category": 7,
+          "entry_id": 42,
+          "event_id": 42,
+          "kind": "context_state_identity_unresolved",
+          "reason": "SwapDeviceContextState input identity is zero: this GPA serializer also writes zero for unregistered non-null state objects. A null no-op cannot be proven; swapped pipeline state and subsequent draw snapshots cannot be trusted",
+          "record_type": 13665,
+          "resource_id": null,
+          "severity": "error"
+        },
+        {
+          "category": 7,
+          "entry_id": 56,
+          "event_id": 56,
+          "kind": "context_state_identity_unresolved",
+          "reason": "SwapDeviceContextState input identity is zero: this GPA serializer also writes zero for unregistered non-null state objects. A null no-op cannot be proven; swapped pipeline state and subsequent draw snapshots cannot be trusted",
+          "record_type": 13665,
+          "resource_id": null,
+          "severity": "error"
+        }
+      ]
+    },
+    {
+      "id": "context_state_null_swap",
+      "mode": 6,
+      "capture_sha256": "c1cb0253ecdb0b0a66e6d091bfb2d194a5aee1fca3f602ed0887aa8cf668b443",
+      "native_status": "replay_failed",
+      "original_matches_producer": true,
+      "original_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "producer_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "preflight_errors": [
+        {
+          "category": 7,
+          "entry_id": 22,
+          "event_id": 22,
+          "kind": "context_state_identity_unresolved",
+          "reason": "SwapDeviceContextState input identity is zero: this GPA serializer also writes zero for unregistered non-null state objects. A null no-op cannot be proven; swapped pipeline state and subsequent draw snapshots cannot be trusted",
+          "record_type": 13665,
+          "resource_id": null,
+          "severity": "error"
+        }
+      ]
+    },
+    {
+      "id": "context_state_no_previous_output",
+      "mode": 7,
+      "capture_sha256": "fa261943f722fdf497dde5ec007de243ceb7d3260ad6b54183bd264cf7d593e0",
+      "native_status": "replay_failed",
+      "original_matches_producer": false,
+      "original_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "producer_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "preflight_errors": [
+        {
+          "category": 7,
+          "entry_id": 22,
+          "event_id": 22,
+          "kind": "context_state_identity_unresolved",
+          "reason": "SwapDeviceContextState input identity is zero: this GPA serializer also writes zero for unregistered non-null state objects. A null no-op cannot be proven; swapped pipeline state and subsequent draw snapshots cannot be trusted",
+          "record_type": 13665,
+          "resource_id": null,
+          "severity": "error"
+        },
+        {
+          "category": 7,
+          "entry_id": 42,
+          "event_id": 42,
+          "kind": "context_state_identity_unresolved",
+          "reason": "SwapDeviceContextState input identity is zero: this GPA serializer also writes zero for unregistered non-null state objects. A null no-op cannot be proven; swapped pipeline state and subsequent draw snapshots cannot be trusted",
+          "record_type": 13665,
+          "resource_id": null,
+          "severity": "error"
+        }
+      ]
+    }
+  ],
+  "regressions": {
+    "so": {
+      "files": 10,
+      "runs": 20,
+      "report": "artifacts\\m2-context-states-so\\validation.json",
+      "sha256": "d607b1f0163551a21b65e74d09d7db631c9bf4a2d3165c5c14731556a4f1e1c7"
+    },
+    "getters": {
+      "files": 12,
+      "runs": 24,
+      "report": "artifacts\\m2-context-states-getters\\validation.json",
+      "sha256": "4fc58aec2947f079e1b69bceeadc5ae768865e4b79a785732e9e43e0713a337c"
+    }
+  },
+  "golden_checks": 4,
+  "ctest_suites": 8,
+  "tests": {
+    "context-states": {
+      "passed": 17,
+      "sha256": "6f1394a9af2b67715ead5a19fd8fd7a2a0f8c81e4348ce209d23f70978c6f8b0"
+    },
+    "so-lifetimes": {
+      "passed": 22,
+      "sha256": "f67456ffc8529ebbc88d6c9140e68fe3382e2e35285acca768aba3c8cd8b3c5e"
+    },
+    "pipeline-getters": {
+      "passed": 30,
+      "sha256": "cc2fcf381290791f0da0a57956ce90e6a27f15663ce53939c82153b92f4b7c10"
+    },
+    "contexts": {
+      "passed": 9,
+      "sha256": "7841f82d704196e0211339b871fb8cb288e860f43968f427f421921d938e7499"
+    },
+    "api": {
+      "ctest_passed": true,
+      "case_count": "Not emitted by this CTest invocation",
+      "sha256": "91340ff238794e9314b304df1a6a31ae05d00c8f586ef48d0669665e32b4b977"
+    },
+    "validation": {
+      "ctest_passed": true,
+      "case_count": "Not emitted by this CTest invocation",
+      "sha256": "91340ff238794e9314b304df1a6a31ae05d00c8f586ef48d0669665e32b4b977"
+    },
+    "object-observations": {
+      "passed": 7,
+      "sha256": "9c162c8956ab8976b549b1e8e30dda131866288b893922945e99e6cd6102f02b"
+    },
+    "ui": {
+      "passed": 56,
+      "sha256": "99494d8c006472b5fe1e5c3d7e3e41792b8eb585bea6c4438168f18a217b3c4e"
+    }
+  },
+  "source_files": {
+    "CMakeLists.txt": "ad33a256434668180d2c3a74fc08efe4903e606fe3bdcc5112cda3681d845089",
+    "src/core/ContextStateRecords.h": "5866e0ca803d760d8e615e772428c8114f58adc87853b03aff0cdc2bb1b48963",
+    "src/core/ContextStateRecords.cpp": "6149fea3a9c233b62dfda4367b0a9d2f5b108e2b0d4fa7b8820bab8dd6664551",
+    "src/core/ReplayCapabilities.cpp": "aacf9a088e178993d477b7f8fb7efe6042f4120525eac731969759edf902b460",
+    "src/core/CommandNames.inc": "1df689ee022b69b5c27694647bc84afac0978f7536d07a0f5b648902b12cb2e9",
+    "src/application/ApiCommands.cpp": "a62540305df88c9938ba82884351e392c36ff47d62898bd44a1a13a5914c52a3",
+    "src/application/FrameValidation.cpp": "84adc8b59b4d9f1f5462d80e01deb49e561456defba22d9f9d7df2a33aad5613",
+    "src/replay/Replay.cpp": "6eda70407c6b05b046fdd51423ecff23c0beae05142dd15f123360393700d822",
+    "tests/ContextStateTests.cpp": "c4ebaa105e66e70affecf27aa464ca3d199893c2917ccf6083ac637edee2da65",
+    "tools/capture_context_states.py": "e54fb0134ac52d83e2e9fed4706ad19ab20dfa16096a854970b161b5188fc7b4",
+    "tools/native/context_state_probe.cpp": "6b5df3173a7ea2f8d01d33817208358b666a3a897068712156df7273fe5143e3"
+  },
+  "evidence_files": {
+    "artifacts/context-state-wrappers.c": "c27ab9353a6faf56a90a386db40599fe5de9804ec2245f433ed504040fe2ff45",
+    "artifacts/context-state-wrappers-ghidra.log": "a73f99662c40983e5504239ae24205f9bc8c908de7b2dfdb90df39f9399ed82d",
+    "artifacts/context_state_vtable_probe.cpp": "3cc6325e453d5a445088a6f8df034b79114d3db1514a580eea25c3bb3116d1a4",
+    "artifacts/m2-context-state-vtable/captured/wrapper-rvas.txt": "9214ab4a838f96b7ef90de76578a36c72e91e1acc24c1c180c1f8009f9c9cb2b",
+    "artifacts/m2-context-state-originals-v2/manifest.json": "3c50683214d0207adb19a09603fd5f1cece436609930ac335dd963729c4d6e80",
+    "artifacts\\m2-context-states-diagnostics\\validation.json": "e9db344f6645de8cb5926cb1324f99227b1a0b88afc6a2bc57d06a70b036504a",
+    "artifacts/ctest-m2-context-states.log": "e8c91cb9c5acd0538a628f56b8028440c1938ff51e43eb6b00040bb4e61bb702",
+    "artifacts/m2-context-states-golden/validation.json": "5e1dde1ab9876f50c472cdf84378931ffc3b5cd8e9700002b67d37bf81383ade",
+    "artifacts/build-context-states-final.log": "eb5a7700201492a8f91d955d80d52948bb162f6b827098f8ecba35402dfacdd2",
+    "artifacts/package-context-states.log": "b5eff21405fda71112433db4de8b5d78836e4f504f512f8f6c2868b42e4d318f"
+  },
+  "frozen_producer_files": {
+    "capture_context_states.py": "e54fb0134ac52d83e2e9fed4706ad19ab20dfa16096a854970b161b5188fc7b4",
+    "context_state_probe.cpp": "6b5df3173a7ea2f8d01d33817208358b666a3a897068712156df7273fe5143e3",
+    "FloraContextStateProbe.exe": "1f635c26e3f6df934e7dc33ef36238ae134e426dd4d69b2129af936f3391c9d6",
+    "original_capture_control.h": "0bbda55addde2970d2775bfb633881c45f13279f61d6584b1ad297ce0b0090b8",
+    "present_capture_probe.cpp": "7c29f1e572ab16a5bc497d39eef8198d79056877a9e1d3fff3f7ed530a32c4e3",
+    "texture_probe_helpers.h": "30abcac380d84d505fd344d4083d97300f50df5b2e5cc7dffb11ea03c6d6ee3d"
+  },
+  "original_dlls": {
+    "shimloader64.dll": "af68e28ba54ab0068c95f82081828788d6f59879283127dc330b818af7369888",
+    "shimd3d64.dll": "cb0b99d113511cbf7ca9f949d97aa02e4a1f8f110b1f3ad3165d8a81035dee31"
+  },
+  "package": "out/FloraGPA-context-states-20261004",
+  "executable_sha256": "42984521939f865643b32fceb9b796daa9d91be547cd2942e79d4dfb6cc721b1",
+  "driver_inventory": [
+    {
+      "Name": "Intel(R) Iris(R) Xe Graphics",
+      "DriverVersion": "32.0.101.6790",
+      "PNPDeviceID": "PCI\\VEN_8086&DEV_46A6&SUBSYS_133D1043&REV_0C\\3&11583659&0&10"
+    },
+    {
+      "Name": "NVIDIA GeForce RTX 3070 Laptop GPU",
+      "DriverVersion": "32.0.15.8097",
+      "PNPDeviceID": "PCI\\VEN_10DE&DEV_249D&SUBSYS_133D1043&REV_A1\\4&174EDE7&0&0008"
+    }
+  ]
+}

@@ -5,6 +5,25 @@
 > [Documentation](README.md)。`artifacts/`、`out/`、`build/` 及外部参考目录
 > 是未随仓库发布的本地证据位置，不代表克隆后即可访问。
 
+2026-10-04（M2 第二十六批）：新增八份真实状态对象捕获，192 帧原生／注入
+生产程序通过 2,688 次绑定检查和 264 次逐 Draw 原始像素检查。只读 Ghidra
+确认 SwapDeviceContextState 将空指针和未登记的非空对象都编码为零；两次
+帧内 CreateDeviceContextState 成功返回对象，但文件内返回身份仍为零。
+原版内核十六次重复稳定，其中三份最终颜色错误；多状态往返样本的最终图
+正确，中间 Draw 快照却仍指向旧红色 PS，不能以最终图代替状态验收。
+
+新增三类 checked 解码及定位诊断；GetCreationFlags 仅作只读观察，不配置
+重放设备。零身份创建／切换报告 context_state_identity_unresolved，非零
+但未验证布局仍报告实现缺口。状态对象执行尚未恢复，真空输入样本也因文件
+无法证明其为空而明确拒绝，不靠外部样本标签放行。
+
+八套 CTest 通过：新增 17、SO 22、getter 30、Qt/Worker 56 项且无跳过；
+新包 22 份旧专项样本 44 次重放和四项 GF2/BF1 黄金／负对照通过。累计
+登记 362 份、351 正向及十一份明确拒绝；本批是聚焦回归，没有重跑历史
+全矩阵，不将旧 700 次结果计为新版本的重新验收。原始捕获、失败探针和
+失败测试日志均保留。详见 [CONTEXT_STATE_DISCOVERY.md](CONTEXT_STATE_DISCOVERY.md)
+与 [context-state-baseline.json](context-state-baseline.json)。M2–M6 未完成。
+
 2026-10-04（M2 第二十五批）：实现共享的 SO 未使用区间证明，预检与重放共同
 检查 immediate context、完整 payload、只读 getter、对应缓冲区的正引用计数
 观察和显式关闭边界。五份生命周期原版文件及旧 getter SO 文件现在通过；
