@@ -36,7 +36,8 @@ class InitializationGraphTests : public QObject {
                                                              {0x8b, 68, true},
                                                              {0x10d, 344, true},
                                                              {0x10f, 64, true},
-                                                             {0x127, 24, true}}) {
+                                                             {0x127, 24, true},
+                                                             {0x9a, 16, true}}) {
             for (Id owner : {Id(0), Id(1) << 32, Id(0xfedcba9800000007)}) {
                 Raw raw(size);
                 put(raw, 8, owner);
@@ -124,10 +125,10 @@ class InitializationGraphTests : public QObject {
     }
     void resourceAndStateLengthRejections() {
         for (auto [type, size] : std::vector<std::pair<uint16_t, size_t>>{
-                 {0x38, 88}, {0x81, 28},   {0x82, 24},  {0x83, 48}, {0x84, 56}, {0x85, 68},
-                 {0x86, 60}, {0x87, 68},   {0x88, 68},  {0x8b, 68}, {0x8c, 48}, {0x8d, 44},
-                 {0x8e, 48}, {0x8f, 44},   {0x90, 56},  {0x92, 56}, {0x93, 56}, {0x94, 56},
-                 {0x95, 56}, {0x10d, 344}, {0x10f, 64}, {0x127, 24}}) {
+                 {0x38, 88}, {0x81, 28},   {0x82, 24},  {0x83, 48},  {0x84, 56}, {0x85, 68},
+                 {0x86, 60}, {0x87, 68},   {0x88, 68},  {0x8b, 68},  {0x8c, 48}, {0x8d, 44},
+                 {0x8e, 48}, {0x8f, 44},   {0x90, 56},  {0x92, 56},  {0x93, 56}, {0x94, 56},
+                 {0x95, 56}, {0x10d, 344}, {0x10f, 64}, {0x127, 24}, {0x9a, 16}}) {
             for (size_t n = 0; n <= size + 1; ++n) {
                 if (n == size)
                     continue;
@@ -177,7 +178,7 @@ class InitializationGraphTests : public QObject {
         QVERIFY(node(3, 3, snapshot(s))["collector_sequence"] == Json::array({7}));
     }
     void unsupportedAndGraphBoundaries() {
-        QVERIFY(node(5, 0x9a, Raw(16))["status"] == "unrecovered");
+        QVERIFY(node(5, 0xffff, Raw(16))["status"] == "unrecovered");
         QVERIFY(node(9, 0x9999, Raw(4))["status"] == "unrecovered");
         QVERIFY(node(3, 4, Raw(22320))["status"] == "unrecovered");
         Capture capture;
@@ -193,11 +194,65 @@ class InitializationGraphTests : public QObject {
         QVERIFY(missing["issues"][0]["id"] == 3 && missing["issues"][0]["dependency"] == 2);
         capture.add(2, 9, 1, pack(0u));
         QVERIFY(graph(capture)["dependency_graph_complete"] == true);
-        capture.add(4, 5, 0x9a, Raw(16));
+        capture.add(4, 5, 0xffff, Raw(16));
         QVERIFY(graph(capture)["dependency_graph_complete"] == false);
         capture.entries[0].flags = 1;
         auto unsupported = graph(capture);
         QVERIFY(unsupported["dependency_graph_complete"] == false && unsupported["nodes"].empty());
+    }
+    void listDependenciesDoNotResolveExecution() {
+        for (Id owner : {Id(0), Id(1) << 32, Id(7), Id(0xfedcba9800000009)}) {
+            for (Id operand : {Id(0), Id(1) << 32, Id(7), Id(0xabcdef1200000009)}) {
+                for (uint32_t restore : {0u, 1u, 2u, UINT32_MAX}) {
+                    Capture capture;
+                    capture.add(100, 7, 0x41, pack(Id(99), owner, operand, restore));
+                    capture.add(101, 5, 0x9a, pack(operand, owner));
+                    auto result = graph(capture);
+                    QVERIFY(result["execution_supported"] == false);
+                    QVERIFY(result["initialization_schedule_available"] == false);
+                    QVERIFY(result["dependency_graph_complete"] == false);
+                    QCOMPARE(result["nodes"].size(), size_t(2));
+                    for (const auto &n : result["nodes"]) {
+                        QVERIFY(n["status"] == "recovered");
+                        QVERIFY(n["collector_sequence"] == Json::array({uint32_t(owner)}));
+                        QVERIFY(n["dependency_set"] == Json::array({uint32_t(owner)}));
+                        QVERIFY(n["references"].size() == 1);
+                        QVERIFY(n["references"][0]["captured_id"] == owner);
+                    }
+                    QVERIFY(result["nodes"][0]["collector_rva"] == "0x5bad0");
+                    QVERIFY(result["nodes"][1]["collector_rva"] == "0x23be0");
+                }
+            }
+        }
+        const auto raw = pack(Id(0), Id(7), Id(8), 1u);
+        for (size_t size = 0; size <= raw.size() + 1; ++size) {
+            if (size == raw.size())
+                continue;
+            auto bad = raw;
+            bad.resize(size);
+            Capture capture;
+            capture.add(100, 7, 0x41, bad);
+            const auto result = graph(capture);
+            QVERIFY(result["nodes"][0]["status"] == "invalid_record");
+            QVERIFY(!result["nodes"][0].contains("collector_sequence"));
+        }
+        // Even a fully resolved initial dependency graph is not execution proof.
+        Capture linked;
+        linked.add(1, 5, 0x81, Raw(28));
+        Raw context(344);
+        put(context, 8, Id(1));
+        linked.add(7, 5, 0x10d, context);
+        linked.add(101, 5, 0x9a, pack(Id(0x1234), Id(7)));
+        linked.add(100, 7, 0x41, pack(Id(0), Id(7), Id(101), 1u));
+        auto complete = graph(linked);
+        QVERIFY(complete["dependency_graph_complete"] == true);
+        QVERIFY(complete["issues"].empty());
+        QVERIFY(complete["execution_supported"] == false);
+        QVERIFY(complete["initialization_schedule_available"] == false);
+        // Raw API 0x30d1 is not an ERG descriptor, even though it has the same layout.
+        Capture capture;
+        capture.add(100, 7, 0x30d1, raw);
+        QVERIFY(graph(capture)["nodes"].empty());
     }
     void editedVersionsAreNotInitialGraphs() {
         QTemporaryDir dir;

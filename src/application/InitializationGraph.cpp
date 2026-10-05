@@ -84,7 +84,7 @@ const std::map<uint16_t, ResourceRule> resources{
     {0x8e, {48, "0x5bc10", true}},  {0x8f, {44, "0x5c390", false}},  {0x90, {56, "0x5bb20", false}},
     {0x92, {56, "0x5bb20", false}}, {0x93, {56, "0x5bb20", false}},  {0x94, {56, "0x5bb20", false}},
     {0x95, {56, "0x5bb20", false}}, {0x10d, {344, "0x5b8c0", true}}, {0x10f, {64, "0x5bfb0", true}},
-    {0x127, {24, "0x5c410", true}},
+    {0x127, {24, "0x5c410", true}}, {0x9a, {16, "0x5bad0", true}},
 };
 const std::map<uint16_t, const char *> dataCollectors{
     {1, "0x16870"},     {0x81, "0xb65f0"},  {0x84, "0x5bdd0"},  {0x86, "0xb6a80"},  {0x87, "0xba8e0"},
@@ -167,7 +167,7 @@ Json inspectInitializationNode(const Frame &frame, Id id) {
             };
             const auto t = entry.type;
             if (t != 0x38 && t != 0x81 && t != 0x82)
-                refs.add("owner", q(8), !rule.ownerAlways);
+                refs.add(t == 0x9a ? "parent_context" : "owner", q(8), !rule.ownerAlways);
             if (t >= 0x83 && t <= 0x87) {
                 refs.add("data", q(bytes.size() - 8));
                 if (t == 0x85 && (u(52) & 0x80000000u) && u(44) == 0)

@@ -26,6 +26,7 @@ const std::map<uint16_t, Rule> rules{
     {0x3e, {"0x23e20", {"object", "destination", "source"}}},
     {0x3f, {"0x23ec0", {"object", "destination", "source_uav"}}},
     {0x40, {"0x23f60", {"object", "destination", "source"}}},
+    {0x41, {"0x23be0", {"object"}}},
     {0x242, {"0x23be0", {"object"}}},
     {0x245, {"0x23da0", {"object", "view"}}},
     {0x246, {"0x24160", {"object", "data"}}},

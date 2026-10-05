@@ -14,16 +14,19 @@ from probe_original_reference_collectors import PLAYER
 
 def main():
     parser=argparse.ArgumentParser(__doc__)
-    for key in ['state','nodes','exe','qt-bin','out']:parser.add_argument('--'+key,type=Path,required=True)
+    parser.add_argument('--state', type=Path, help='Optional additional state probe report')
+    for key in ['nodes','exe','qt-bin','out']:parser.add_argument('--'+key,type=Path,required=True)
     args=parser.parse_args();args.out.mkdir(parents=True,exist_ok=False)
     records=[]
-    for path in [args.state,args.nodes]:
+    inputs = [p for p in [args.state, args.nodes] if p is not None]
+    for path in inputs:
         report=load(path)
         require(report['completed'] and report['passed'] and not report['gpu_execution'] and
                 report['player_sha256']==PLAYER,'Incomplete or different native probe')
         for row in report['cases']:
             records.append(dict(row,category=row.get('category',3),type=row.get('type',3),
                                 collector_rva=row.get('collector_rva','0x63d80')))
+    require(bool(records), 'No native probe records')
     data=bytearray(0x128);table=[]
     for ident,row in enumerate(records,1):
         raw=bytes.fromhex(row['raw_hex']);table.append((ident,len(data),len(raw),0,row['category'],row['type']))
@@ -49,7 +52,7 @@ def main():
             'Marker identities must not claim executable graph')
     write(args.out/'validation.json',dict(schema='FloraGPA node marker comparison 1',completed=True,passed=True,
         records=len(records),gpu_execution=False,capture_is_original=False,
-        evidence={str(p):digest(p) for p in [args.state,args.nodes,capture,args.out/'cpp/initialization-graph.json']},
+        evidence={str(p):digest(p) for p in inputs + [capture,args.out/'cpp/initialization-graph.json']},
         source_sha256=digest(Path(__file__)),exe_sha256=digest(args.exe)))
     print('Exact native/C++ marker collectors:',len(records))
 
