@@ -1,6 +1,15 @@
 # Current capabilities and compatibility
 
-Reviewed **2026-10-05**. The latest [initial scheduling model](INITIAL_SCHEDULE_MODEL_AUDIT.md)
+Reviewed **2026-10-05**. The latest [Execute dispatch search](EXECUTE_DISPATCH_SEARCH.md)
+rules out the pinned player's literal Execute candidate as an internal MSAA
+helper and identifies a shim forwarding thunk omitted by an unwind-only scan.
+The known traditional Execute slots remain empty; operand binding and a qualifying
+unmodified traditional-list capture remain unresolved. This is bounded static
+evidence, not a whole-program absence proof. Five new scanner tests and all 48
+related evidence tests pass; production code, corpus and package are unchanged.
+The document records a proposed M3/M4 priority exception; it has not been applied.
+
+The preceding [initial scheduling model](INITIAL_SCHEDULE_MODEL_AUDIT.md)
 adds independent C++ callback-order reconstruction under explicit successful
 initialization assumptions. All 19,387 real original callbacks across three
 unchanged captures match, including ordering that differs from category/ID sorting.

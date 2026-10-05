@@ -1,0 +1,56 @@
+{
+  "schema": "FloraGPA Execute dispatch search baseline 1",
+  "reviewed": "2026-10-05",
+  "implementation_commit": "2087def9795c531db5ad7142edcc37946bb0b9a5",
+  "production_changed": false,
+  "gpu_execution": false,
+  "traditional_list_execution_accepted": false,
+  "evidence_tests": 48,
+  "new_scanner_tests": 5,
+  "binaries": {
+    "dx11_player.dll": {
+      "sha256": "39061ff329e4a32d0c8375ce9ee15e2017bccab0593943b962a860e11723d38b",
+      "literal_transfer_candidates": 1,
+      "all_read_candidates": 26,
+      "skipped_data_records": 1257
+    },
+    "shimd3d64.dll": {
+      "sha256": "cb0b99d113511cbf7ca9f949d97aa02e4a1f8f110b1f3ad3165d8a81035dee31",
+      "literal_transfer_candidates": 17,
+      "all_read_candidates": 346,
+      "skipped_data_records": 1092
+    },
+    "dx11_playback.dll": {
+      "sha256": "0a531905386af6c5f2c0357d4179cec208bb171a287b262f3c4a5539d483bf5e",
+      "literal_transfer_candidates": 0,
+      "all_read_candidates": 15,
+      "skipped_data_records": 624
+    }
+  },
+  "sources": {
+    "tools/audit_original_execute_sites.py": "849d176613213dda648f36c46c5023348b546cbb8b64bbb6837742b29bef3d3f",
+    "tests/test_original_execute_sites.py": "30c5a509943128647ec4b1c32bb483e004751c21a43570b620f4d01bc57bf08f"
+  },
+  "evidence": {
+    "artifacts/m3-execute-sites-final/sites.json": "afb45479309042e96eba89e05ca7c48b6ab07a5b99ed0f194e7c27eadbfb3848",
+    "artifacts/m3-execute-sites-final-tests.log": "c0b7934dd56a206eacf7012255a52e6443fa578a8b0838c18b79ceafe75c9818",
+    "artifacts/m3-execute-slot-player.c": "5f86823a791a4e9192707c7130b5a95bb780f408631e19eb16b6d9e4a6420a3b",
+    "artifacts/m3-execute-slot-loads.c": "35165642083a08e1216416fd785384a09eb894e1569ab9ff67d00733cb743b54",
+    "artifacts/m3-execute-shim-record.c": "8dafbc52f80a479e015624f6cdfcee225510beaeb36d559cc670ab238cdb3d2c",
+    "artifacts/m3-execute-shim-leaf-start-refs.c": "627cb2f9441ae692ffbb420ce8988b3d52cc32c22699221fcf0bc4877770b525"
+  },
+  "prior_reference_sources": {
+    "D:/CDXrepo/FloraGPA/analysis/COMMAND_LIST_EXECUTE.md": "930483f671228537cc8abae7867e3fb30ed9dbf95aa699f0c4f2fe49cd93f6dc",
+    "D:/CDXrepo/FloraGPA/analysis/COMMAND_LIST_DISPATCH.md": "390cdbc8721cc354becaf03b863daf14495a52e35d903f08efcda312124fa609",
+    "D:/CDXrepo/FloraGPA/analysis/LEGACY_CAPTURE_VALIDATION.md": "e93ec04ed2402248ba7e4390d3513b24f7c647145e987bd2930ba2cc4981f8ff"
+  },
+  "boundaries": [
+    "Literal displacement scan only; computed dispatch may be absent from candidates.",
+    "Linear sweep includes non-code bytes; skipped bytes and raw candidates are retained.",
+    "A displacement match alone does not establish a DX11 interface call."
+  ],
+  "inventory_unchanged": {
+    "registrations": 470,
+    "unique_capture_hashes": 460
+  }
+}

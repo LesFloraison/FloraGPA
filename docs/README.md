@@ -23,6 +23,7 @@ chronology remains in Chinese.
 | Native cache version cloning, recollection and ready-dependent propagation | [Cache version lifecycle audit](INITIALIZATION_VERSIONS_AUDIT.md) |
 | Traditional list parent/owner metadata and remaining identity gap | [List dependency audit](LIST_DEPENDENCIES_AUDIT.md) |
 | Independent initial scheduling model and full native callback order | [Initial scheduling model audit](INITIAL_SCHEDULE_MODEL_AUDIT.md) |
+| Pinned Execute dispatch candidates and unresolved M3 acceptance | [Execute dispatch search](EXECUTE_DISPATCH_SEARCH.md) |
 | Omitted CB resources and proved unused binding intervals | [CB lifetime audit](CONSTANT_BUFFER_LIFETIME_AUDIT.md) |
 | Find dated changes | [Development chronology (Chinese)](MIGRATION_STATUS.md) |
 | Inspect module-level migration bookkeeping | [Module ledger](migration.json) |
