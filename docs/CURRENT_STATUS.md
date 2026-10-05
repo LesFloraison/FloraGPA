@@ -1,6 +1,15 @@
 # Current capabilities and compatibility
 
-Reviewed **2026-10-05**. The latest [traditional list dependency batch](LIST_DEPENDENCIES_AUDIT.md)
+Reviewed **2026-10-05**. The latest [initial scheduling model](INITIAL_SCHEDULE_MODEL_AUDIT.md)
+adds independent C++ callback-order reconstruction under explicit successful
+initialization assumptions. All 19,387 real original callbacks across three
+unchanged captures match, including ordering that differs from category/ID sorting.
+Another 56 native CPU schedules, seven CTest suites, 43 evidence tests and four
+serial golden/negative checks pass. This is a scheduling model, not traditional
+list GPU execution. Corpus counts, UI and package remain unchanged. See the
+[baseline](initial-schedule-model-baseline.json).
+
+The preceding [traditional list dependency batch](LIST_DEPENDENCIES_AUDIT.md)
 adds two C++ read-only collector rules: Command List parent and Execute owner.
 All 80 native marker calls match C++; 126 preceding marker cases, six CTest
 suites, 35 evidence tests and four serial golden/negative checks pass. These are

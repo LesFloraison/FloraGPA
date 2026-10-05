@@ -1,5 +1,8 @@
 # Initial dependency graph recovery
 
+Follow-up: the [independent initial scheduling model](INITIAL_SCHEDULE_MODEL_AUDIT.md)
+adds a predicted callback order under explicit successful-initialization assumptions.
+
 Follow-up: [traditional list dependency metadata](LIST_DEPENDENCIES_AUDIT.md) adds
 two native CPU-verified collector rules without enabling execution.
 

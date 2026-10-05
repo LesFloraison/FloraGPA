@@ -1,0 +1,123 @@
+{
+  "schema": "FloraGPA initial schedule model baseline 1",
+  "reviewed": "2026-10-05",
+  "implementation_commit": "a3fead3d5c72a448261f2c9d0daacabf035f4920",
+  "production_metadata_changed": true,
+  "production_gpu_execution_changed": false,
+  "traditional_list_execution_accepted": false,
+  "model_assumes_all_initializers_succeed": true,
+  "scope": "initial version with freshly collected dependencies and empty dependent sets",
+  "player_sha256": "39061ff329e4a32d0c8375ce9ee15e2017bccab0593943b962a860e11723d38b",
+  "inventory_unchanged": {
+    "registrations": 470,
+    "unique_capture_hashes": 460
+  },
+  "migration_ledger_unchanged": {
+    "ported": 72,
+    "partial": 117,
+    "pending": 15
+  },
+  "counts": {
+    "new_original_observer_runs": 3,
+    "reused_unobserved_controls": 3,
+    "exact_initialization_calls": 19387,
+    "original_captures": 3,
+    "primitive_graphs": 28,
+    "primitive_version_schedules": 56,
+    "primitive_callbacks": 662,
+    "ctest_suites": 7,
+    "evidence_tests": 43,
+    "independent_golden_checks": 4
+  },
+  "cases": [
+    {
+      "nodes": 160,
+      "calls": 160,
+      "by_kind": {
+        "data": 43,
+        "resource": 21,
+        "state": 10,
+        "erg": 86
+      },
+      "capture_sha256": "0679841ebbb05c3cdd15a86d933445571e99636dab07d7d7dd4745c7e7499a03",
+      "original_control_pixels_equal": true,
+      "evidence": {
+        "artifacts\\m3-full-schedule-32\\trace.json": "9ffdbfbf2d21e4a90a770bf13650c19c158f835c447a51cbbce1e0622500393b",
+        "artifacts\\m3-list-init-trace-validation\\merge_32-control\\trace.json": "7bf21eec91bf2141b8d81d69d4ec5c9e98bbc249aeda8d7f270a35c6f87452ed",
+        "artifacts\\m3-full-schedule-acceptance\\0\\initialization-graph.json": "00e17e582983dda7f86abe363be6211d94274dc2a40de510cf3d5face74c6be2"
+      }
+    },
+    {
+      "nodes": 889,
+      "calls": 889,
+      "by_kind": {
+        "data": 404,
+        "resource": 150,
+        "state": 72,
+        "erg": 263
+      },
+      "capture_sha256": "fc7b7f7de20a578da2977b2ff91d96f5cf80887b393bc85859be8cab1af91c8e",
+      "original_control_pixels_equal": true,
+      "evidence": {
+        "artifacts\\m3-full-schedule-gf2\\trace.json": "488b3c94bc83feeb8aaf2fca6c1792707a5ddc9001c5a35fa747739d05d9c0e0",
+        "artifacts\\m3-list-init-trace-validation\\gf2-control\\trace.json": "e6051b19dba6910dde5109fbc545f99fdba361f35076939195f7c43619426c26",
+        "artifacts\\m3-full-schedule-acceptance\\1\\initialization-graph.json": "36a171cd587ba7ae19fee42916b747e378cf96e8469324b261a9ad76af61c484"
+      }
+    },
+    {
+      "nodes": 18338,
+      "calls": 18338,
+      "by_kind": {
+        "data": 8217,
+        "resource": 2598,
+        "state": 1275,
+        "erg": 6248
+      },
+      "capture_sha256": "26044d33cb6c3087c2204b7d57664203741a679f988430b7d05b24af582e0620",
+      "original_control_pixels_equal": true,
+      "evidence": {
+        "artifacts\\m3-full-schedule-bf1\\trace.json": "87155a772c14b6970a6b9d14e2c138c7ebc3ddd067bf1266f42e7daa026066d1",
+        "artifacts\\m3-list-init-trace-validation\\bf1-control\\trace.json": "8749f2bd40508675e05ba9449a0b10cdd2098567d512dde9cbd1c6a91cce09ad",
+        "artifacts\\m3-full-schedule-acceptance\\2\\initialization-graph.json": "3f7ae1f310ab4f8fa4f2f568797891e35e2662117026e92c7b92bd47b4a1c59b"
+      }
+    }
+  ],
+  "sources": {
+    "CMakeLists.txt": "3b5e278aeee65f9a0bce3d99c4b254c3c72c833cdba28849aeb366697509a53e",
+    "src/core/InitializationSchedule.cpp": "483c3e229f8dcf322b1da7033cb515f9c82b2cbbd23becf0b1b189ed1604f04b",
+    "src/core/InitializationSchedule.h": "028602c847d4a5025dfe208c62263a757b7af1c0f952d29c4e9e15aae5dc16c9",
+    "src/application/InitializationGraph.cpp": "5b7cdafdbb8b7f255be704b5c1037113c9f4756717d9f99a49549f39d8c032e1",
+    "tests/InitializationGraphTests.cpp": "7ac7e62e74b740f3912b5c20933d0d9ee29b2df0945464041bb56c8beb5bb8b5",
+    "tests/InitializationScheduleTests.cpp": "5b2679b81569d78ce769229e392abdc3ae20afdb28b8efd82a1f65707bd925e3",
+    "tests/fixtures/initialization-schedules.json": "a6c80cad84812c63660bcf3d55afd0e2bca718df8d604ae85be5e2121a63e850",
+    "tests/test_initial_schedule_evidence.py": "5d7737a2147555fff0a5f5bf67e56393b89a8c22db0551704fd268c12d10a5b3",
+    "tools/trace_original_erg_initialization.py": "ce1e7921dfc6a4c85a31b678f2b17858b305ba22ab484ee3afe3289579879289",
+    "tools/validate_initial_schedule_evidence.py": "18b0cddbd364565e09d5193abbb1104fb15d514dab99f307dff7a75de8378ec0",
+    "tools/probe_original_init_scheduler.py": "487358fe156aec2dba408402a32eca35de12b7bb25d60f679dbfabea8600aeda",
+    "tools/validate_original_init_traces.py": "6144aac3e1031ac044122cbfcd98561b086419534ae4a0c082c333db78bee199"
+  },
+  "evidence": {
+    "artifacts/m3-full-schedule-acceptance/validation.json": "5e014f784778921dc462f6b970508b026a78c4430c3f0a9a04aecd41c6f85f57",
+    "artifacts/m3-full-schedule-primitives/scheduler.json": "c7f3d4df07b5c1ff9ccf5fc80614259772180d99cc61918f8bdc1407aaa973be",
+    "artifacts/m3-full-schedule-final-ctest.log": "4f0e304a658face76ee6a12c1c2e77b31675825a223288ae774a720c32018e32",
+    "artifacts/m3-full-schedule-evidence-tests.log": "36a72dca42d0613571cbfdd4dfcf2a146aee65a276659390f53d379cb527d9ae",
+    "artifacts/m3-full-schedule-goldens/validation.json": "5e1dde1ab9876f50c472cdf84378931ffc3b5cd8e9700002b67d37bf81383ade",
+    "artifacts/m3-full-schedule-32/trace.json": "9ffdbfbf2d21e4a90a770bf13650c19c158f835c447a51cbbce1e0622500393b",
+    "artifacts/m3-full-schedule-gf2/trace.json": "488b3c94bc83feeb8aaf2fca6c1792707a5ddc9001c5a35fa747739d05d9c0e0",
+    "artifacts/m3-full-schedule-bf1/trace.json": "87155a772c14b6970a6b9d14e2c138c7ebc3ddd067bf1266f42e7daa026066d1",
+    "artifacts/m3-full-schedule-acceptance/0/initialization-graph.json": "00e17e582983dda7f86abe363be6211d94274dc2a40de510cf3d5face74c6be2",
+    "artifacts/m3-full-schedule-acceptance/1/initialization-graph.json": "36a171cd587ba7ae19fee42916b747e378cf96e8469324b261a9ad76af61c484",
+    "artifacts/m3-full-schedule-acceptance/2/initialization-graph.json": "3f7ae1f310ab4f8fa4f2f568797891e35e2662117026e92c7b92bd47b4a1c59b"
+  },
+  "preliminary_excluded": {
+    "artifacts/m3-full-schedule-build.log": "be5e90f70fe158f998ec492c120d7555c8f461991087e17b9214b18b9dc197a2",
+    "artifacts/m3-full-schedule-first-unit.log": "57fbf3ba56eac8eff40c49c2ec46e69125a0f6ef9c45ae8a8476b27ec0061303"
+  },
+  "boundaries": [
+    "The model predicts callbacks under successful initialization; it creates no GPU objects.",
+    "Input cycles, missing identities, unsupported collectors, edited-version graphs and excessive work do not produce a complete modeled schedule.",
+    "Dependency completeness is distinct from schedule availability and executable GPU state.",
+    "Traditional list operand identity, later temporal resource versions, production execution and unmodified traditional-list capture acceptance remain open.",
+    "No new corpus registration, GUI acceptance run, full corpus run or release package in this batch."
+  ]
+}

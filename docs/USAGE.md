@@ -72,7 +72,12 @@ and pipeline inspection can prepare bindings before submission. See
 GPA or Python. It accepts only `--out`; inspect node statuses, missing-ID issues
 and `dependency_graph_complete` in `initialization-graph.json`. A completed export
 does not establish an execution schedule, valid GPU objects or later-version
-support. See [initial dependency graph boundaries](INITIALIZATION_GRAPH_AUDIT.md).
+support. For a complete dependency graph, `modeled_initialization` predicts the
+initial callback order assuming all initializers succeed. Its explicit assumptions
+and `gpu_execution_verified: false` distinguish prediction from execution. Cycles
+and excessive modeled work return an unavailable model with a reason. See
+[initial graph boundaries](INITIALIZATION_GRAPH_AUDIT.md) and the
+[scheduling model](INITIAL_SCHEDULE_MODEL_AUDIT.md).
 
 ```powershell
 & $Cli initialization-graph $Frame --out ./artifacts/initial-graph-new
