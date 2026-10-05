@@ -1,5 +1,9 @@
 # Initial dependency graph recovery
 
+Follow-up: [cache version lifecycle evidence](INITIALIZATION_VERSIONS_AUDIT.md)
+establishes selected native cloning/recollection behavior. It does not enable
+production version scheduling or traditional-list execution.
+
 Reviewed 2026-10-04. This M3 batch adds a CPU-only C++ export of initial resource,
 state, data and ERG dependencies for the pinned GPA 2025 R1 DX11 format. It builds
 on [initial cache membership](INITIAL_CACHE_AUDIT.md). All 19,387 registered nodes

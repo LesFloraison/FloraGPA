@@ -1,6 +1,15 @@
 # Current capabilities and compatibility
 
-Reviewed **2026-10-04**. The latest [initial dependency graph recovery](INITIALIZATION_GRAPH_AUDIT.md)
+Reviewed **2026-10-05**. The latest [original cache version study](INITIALIZATION_VERSIONS_AUDIT.md)
+verifies nine real-player cache clones (58,161 copied nodes), 12 identical-payload
+reloads and 18 native initialization callbacks across three unchanged captures.
+Default pixels and complete ERG dispatch counts remain equal before/after.
+Four CPU primitive cases and 35 evidence tests pass. This establishes selected
+GPA playback/experiment version semantics, not captured temporal resource history
+or traditional-list execution. Production code, corpus counts, UI and package
+are unchanged. See the [baseline](initialization-versions-baseline.json).
+
+The preceding [initial dependency graph recovery](INITIALIZATION_GRAPH_AUDIT.md)
 adds the CPU-only `initialization-graph` command and 33 resource/state/data
 collector layouts. All 19,387 initial nodes across three unchanged captures match
 original ordered references and dependency sets; 126 native marker probes match

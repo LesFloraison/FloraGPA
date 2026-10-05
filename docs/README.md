@@ -20,6 +20,7 @@ chronology remains in Chinese.
 | Saved API references versus original initialization prerequisites | [Initialization reference audit](INITIALIZATION_REFERENCES_AUDIT.md) |
 | Initial cache registration and conditional CSUAV references | [Initial cache audit](INITIAL_CACHE_AUDIT.md) |
 | Full initial resource/state/data/ERG dependency metadata | [Initial dependency graph audit](INITIALIZATION_GRAPH_AUDIT.md) |
+| Native cache version cloning, recollection and ready-dependent propagation | [Cache version lifecycle audit](INITIALIZATION_VERSIONS_AUDIT.md) |
 | Omitted CB resources and proved unused binding intervals | [CB lifetime audit](CONSTANT_BUFFER_LIFETIME_AUDIT.md) |
 | Find dated changes | [Development chronology (Chinese)](MIGRATION_STATUS.md) |
 | Inspect module-level migration bookkeeping | [Module ledger](migration.json) |

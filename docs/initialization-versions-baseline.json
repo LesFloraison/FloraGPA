@@ -1,0 +1,124 @@
+{
+  "schema": "FloraGPA original cache version baseline 1",
+  "reviewed": "2026-10-05",
+  "implementation_commit": "e22c8f0bd5bed0b610eb468ab19ca239a321fb5f",
+  "player_sha256": "39061ff329e4a32d0c8375ce9ee15e2017bccab0593943b962a860e11723d38b",
+  "production_code_changed": false,
+  "production_version_scheduling_accepted": false,
+  "traditional_list_execution_accepted": false,
+  "cloned_version_workload_playback": false,
+  "inventory_unchanged": {
+    "registrations": 470,
+    "unique_capture_hashes": 460
+  },
+  "migration_ledger_unchanged": {
+    "ported": 72,
+    "partial": 117,
+    "pending": 15
+  },
+  "counts": {
+    "unchanged_captures": 3,
+    "new_accepted_original_sessions": 3,
+    "explicit_default_playbacks": 6,
+    "reused_uninstrumented_controls": 3,
+    "initial_nodes": 19387,
+    "native_clones": 9,
+    "copied_nodes": 58161,
+    "saved_payload_reloads": 12,
+    "actual_initializer_calls": 18,
+    "kinds": 4,
+    "transitions": 32,
+    "node_snapshots": 68,
+    "new_evidence_checker_tests": 12,
+    "total_related_evidence_checker_tests": 35,
+    "preliminary_sessions_excluded": 9
+  },
+  "cases": [
+    {
+      "nodes": 160,
+      "clones": 3,
+      "copied_nodes": 480,
+      "reloads": 4,
+      "initializer_calls": 7,
+      "capture_sha256": "0679841ebbb05c3cdd15a86d933445571e99636dab07d7d7dd4745c7e7499a03",
+      "default_pixels_equal": true,
+      "evidence": {
+        "artifacts\\m3-version-audited-32\\versions.json": "cad8f321c7c7b2359c7656c49e58ba63db2c23fdd7dce04f7a6a23385d65cb5e",
+        "artifacts\\m3-list-init-trace-validation\\merge_32-control\\trace.json": "7bf21eec91bf2141b8d81d69d4ec5c9e98bbc249aeda8d7f270a35c6f87452ed",
+        "artifacts\\m3-allrefs-cpp-final-32\\initialization-graph.json": "eb28f3969618c477fb7d3023a9c10c0953d14b3798aae098608a6f8375668754"
+      }
+    },
+    {
+      "nodes": 889,
+      "clones": 3,
+      "copied_nodes": 2667,
+      "reloads": 4,
+      "initializer_calls": 5,
+      "capture_sha256": "fc7b7f7de20a578da2977b2ff91d96f5cf80887b393bc85859be8cab1af91c8e",
+      "default_pixels_equal": true,
+      "evidence": {
+        "artifacts\\m3-version-audited-gf2\\versions.json": "fb96be8d6c1aa0056b7a9da8e008bef08af7d2c254d2a5d93b1561ee2f332c72",
+        "artifacts\\m3-list-init-trace-validation\\gf2-control\\trace.json": "e6051b19dba6910dde5109fbc545f99fdba361f35076939195f7c43619426c26",
+        "artifacts\\m3-allrefs-cpp-final-gf2\\initialization-graph.json": "24a52494b0ea7793ff57a552b8eea7654b03d2b700b7ebc4225d125572e199a8"
+      }
+    },
+    {
+      "nodes": 18338,
+      "clones": 3,
+      "copied_nodes": 55014,
+      "reloads": 4,
+      "initializer_calls": 6,
+      "capture_sha256": "26044d33cb6c3087c2204b7d57664203741a679f988430b7d05b24af582e0620",
+      "default_pixels_equal": true,
+      "evidence": {
+        "artifacts\\m3-version-audited-bf1\\versions.json": "47cc8bf2482fafb8a1c48aa3a48ae6f3c3d868cf29da10490f6a4c64c1dddfd2",
+        "artifacts\\m3-list-init-trace-validation\\bf1-control\\trace.json": "8749f2bd40508675e05ba9449a0b10cdd2098567d512dde9cbd1c6a91cce09ad",
+        "artifacts\\m3-allrefs-cpp-final-bf1\\initialization-graph.json": "a94ffdce82bbd0e16cc0fc3c39a8146cf20c4ce10245f1f1a957f84ab20c1f65"
+      }
+    }
+  ],
+  "sources": {
+    "tools/probe_original_version_clones.py": "81e0cf54e5246dc906920abfc82a236fb680c699ffe8094e3cb76d20a681e2a6",
+    "tools/probe_original_version_nodes.py": "980b0ba6b660606d46f84fec12c4ad7ed746a72e7d19eeab98993f09111e3849",
+    "tools/validate_original_version_evidence.py": "3074b59abf7f02e6a567c982a5f82571c422e16a57cc1e8d8cd3f979b0671505",
+    "tests/test_original_version_evidence.py": "49943d0672c5f7a99534ba28e408cfd55a6aee99d4dd8ac6a412f10d99e52aaf",
+    "tools/validate_original_init_traces.py": "6144aac3e1031ac044122cbfcd98561b086419534ae4a0c082c333db78bee199",
+    "tools/validate_corpus.py": "8c8a877e3966e526280a4d6007d1cf6687a1f9d49b60540c105fac66b5fbcc6a"
+  },
+  "evidence": {
+    "artifacts/m3-version-acceptance/validation.json": "46b488421f278cfab345dda6a6ebe4c01ee38dfde022cf4e50a616b99e1eb65e",
+    "artifacts/m3-version-node-probe/nodes.json": "b64915f19aaffa019c440888983f28f067670497aea2c0f6c5c53f06656c6eaa",
+    "artifacts/m3-version-final-checker-tests.log": "4904dafc371a6cd6a7b79a656a89fdcf3b7b37cd5a9d122379f8005273cc6610",
+    "artifacts/m3-version-node-primitives.c": "d5ae48f28526804dc711727fb24be0c2a26af710c1dfecdb0ebd2547c43910ec",
+    "artifacts/m3-version-copy-callers.c": "8d77cfcd572b2601bedf7ce7b744e434ce11aebf0b2a3b9ddf85772830627cc7",
+    "artifacts/m3-version-collector-abi.json": "9dccb6ae442a05bc366510a0bbf518b8f2d0cba4c2657414fdfbdc3dd1fcf668",
+    "artifacts/m3-cache-category-callers.c": "ddb6d95805b70d11cc21b890d1a2b7ab8cd3b7d34a7095b59c0c3cf508fb64ec",
+    "artifacts/m3-version-audited-32/versions.json": "cad8f321c7c7b2359c7656c49e58ba63db2c23fdd7dce04f7a6a23385d65cb5e",
+    "artifacts/m3-version-audited-gf2/versions.json": "fb96be8d6c1aa0056b7a9da8e008bef08af7d2c254d2a5d93b1561ee2f332c72",
+    "artifacts/m3-version-audited-bf1/versions.json": "47cc8bf2482fafb8a1c48aa3a48ae6f3c3d868cf29da10490f6a4c64c1dddfd2"
+  },
+  "development_reference_sources": {
+    "D:/CDXrepo/FloraGPA/tools/gpa_native.py": "f7ee63e82a9c8363cfde81633863a820e8f4277d0a80f0d90075b499f56bcffd",
+    "D:/CDXrepo/FloraGPA/tools/audit_replay.py": "d18d684b8338e6f3b18c233be6b67548111d7a48e770cda6ae099b74f80b251d",
+    "D:/CDXrepo/FloraGPA/standalone/frame.py": "3f291cf9b4037a786c46ad09878fff8d18901b7ebcd9a5aa54333fe9cce94ef2"
+  },
+  "preliminary_excluded": {
+    "artifacts/m3-version-clone-32/versions.json": "123d2b8c6203d6c0485de93fdb2142048948c9308ad0bed063f1c015dbaffc93",
+    "artifacts/m3-version-reload-state-32/versions.json": "1da6351089a69a4735520c573cf5c26dad25f4f151b830b21c177bef8ca62ec6",
+    "artifacts/m3-version-reload-all-32/versions.json": "ba9e98329d88c1f521554e2c297e973ab3aa60228e695b621975a6e572054a13",
+    "artifacts/m3-version-observed-32/versions.json": "baa3040f1517c0b2a1b96fe2afbac259aee8c1316d35529d22ac5f4aabf8ae17",
+    "artifacts/m3-version-observed-gf2/versions.json": "cadd9c207dcc6b90066a2844e52076d87cb1472c9574a82ff7645ea42dbbfb68",
+    "artifacts/m3-version-observed-bf1/versions.json": "8923c5dc1af80c8097d501840a7588d42583a2aa96efaebd817ccf4b4457458e",
+    "artifacts/m3-version-final-32/versions.json": "1c49ed6160c4873c2ee0a9cffd53173aa06ce949cccc25f5d31e5919cacc9a88",
+    "artifacts/m3-version-final-gf2/versions.json": "77028dc5b4118a45d5dbdc11000df85ac9abc38845dd7f4444694abea1791a46",
+    "artifacts/m3-version-final-bf1/versions.json": "c592f4c84d836edded270b1e050bb289a86fdfa4282d60815bbd7c5412c38a1d"
+  },
+  "boundaries": [
+    "These are GPA playback/experiment cache versions, not a recovered mapping of temporal Command List resource contents.",
+    "Clones share object/control identities while independently copying dependency and dependent sets.",
+    "Only identical saved payloads are rebuilt in real version 7; arbitrary changed payloads and failure rollback are not accepted.",
+    "Version 7 initialization can create GPU objects; no cloned-version workload is submitted.",
+    "Default framebuffer and execution-count equality do not establish deep GPU resource isolation.",
+    "Production CTest, independent goldens, full corpus, GUI and packaging were not rerun; no production code changed."
+  ]
+}
