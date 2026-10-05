@@ -51,6 +51,22 @@ to `0x166a0`, whose bytes are `c2 00 00` (`ret 0`). This is a positive byte-leve
 check of those exact slots, supplementing the earlier actual native-record probe;
 it is not an inference from a missing symbol or empty search result.
 
+## Complete registered-corpus follow-up
+
+A subsequent read-only audit checked every currently registered case, not only
+the 82 deferred-specific captures. It verified the 25 pinned M2 suite manifests,
+then the two current deferred-version and deferred-merge manifests, and matched
+every capture SHA-256 before reading its index. Across 470 registrations / 460
+unique hashes, it found zero `5/0x9a` list resources and zero `7/0x41` or `7/0x30d1`
+Execute records. The registrations comprise 3 user-supplied game captures,
+379 self-owned original GPA captures and 88 local research fixtures.
+
+This eliminates a missed candidate within the registered inventory. It does not
+prove that other locations, versions or unregistered files lack traditional lists,
+nor does it imply that the original applications used only immediate contexts.
+No GPU acceptance was rerun or added. The [inventory baseline](registered-list-inventory-baseline.json)
+pins all 27 manifests, the audit script, full per-file results and reference reader.
+
 ## Why this affects the roadmap
 
 The accepted M3 criterion requires an unmodified original capture containing real

@@ -7,7 +7,11 @@ The known traditional Execute slots remain empty; operand binding and a qualifyi
 unmodified traditional-list capture remain unresolved. This is bounded static
 evidence, not a whole-program absence proof. Five new scanner tests and all 48
 related evidence tests pass; production code, corpus and package are unchanged.
-The document records a proposed M3/M4 priority exception; it has not been applied.
+A [complete registered-inventory audit](registered-list-inventory-baseline.json)
+also verifies all 470 registrations / 460 hashes across 27 manifests and finds
+zero traditional list resources or Execute records. This checks index contents,
+not GPU behavior or external files. The proposed M3/M4 priority exception remains
+unapproved and has not been applied.
 
 The preceding [initial scheduling model](INITIAL_SCHEDULE_MODEL_AUDIT.md)
 adds independent C++ callback-order reconstruction under explicit successful
