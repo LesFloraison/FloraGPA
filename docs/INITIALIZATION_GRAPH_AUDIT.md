@@ -1,5 +1,8 @@
 # Initial dependency graph recovery
 
+Follow-up: [traditional list dependency metadata](LIST_DEPENDENCIES_AUDIT.md) adds
+two native CPU-verified collector rules without enabling execution.
+
 Follow-up: [cache version lifecycle evidence](INITIALIZATION_VERSIONS_AUDIT.md)
 establishes selected native cloning/recollection behavior. It does not enable
 production version scheduling or traditional-list execution.

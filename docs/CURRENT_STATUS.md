@@ -1,6 +1,14 @@
 # Current capabilities and compatibility
 
-Reviewed **2026-10-05**. The latest [original cache version study](INITIALIZATION_VERSIONS_AUDIT.md)
+Reviewed **2026-10-05**. The latest [traditional list dependency batch](LIST_DEPENDENCIES_AUDIT.md)
+adds two C++ read-only collector rules: Command List parent and Execute owner.
+All 80 native marker calls match C++; 126 preceding marker cases, six CTest
+suites, 35 evidence tests and four serial golden/negative checks pass. These are
+metadata results, not traditional-list GPU acceptance. Counts remain 470
+registrations / 460 hashes; UI, GPU execution and package are unchanged. See the
+[baseline](list-dependencies-baseline.json).
+
+The preceding [original cache version study](INITIALIZATION_VERSIONS_AUDIT.md)
 verifies nine real-player cache clones (58,161 copied nodes), 12 identical-payload
 reloads and 18 native initialization callbacks across three unchanged captures.
 Default pixels and complete ERG dispatch counts remain equal before/after.

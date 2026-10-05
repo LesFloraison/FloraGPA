@@ -1,0 +1,60 @@
+{
+  "schema": "FloraGPA traditional list dependency baseline 1",
+  "reviewed": "2026-10-05",
+  "implementation_commit": "83ca75033f756e6efe1ed2637779384d34ff7dc3",
+  "player_sha256": "39061ff329e4a32d0c8375ce9ee15e2017bccab0593943b962a860e11723d38b",
+  "production_metadata_changed": true,
+  "production_gpu_execution_changed": false,
+  "traditional_list_execution_accepted": false,
+  "initialization_schedule_available": false,
+  "new_original_captures": 0,
+  "inventory_unchanged": {
+    "registrations": 470,
+    "unique_capture_hashes": 460
+  },
+  "migration_ledger_unchanged": {
+    "ported": 72,
+    "partial": 117,
+    "pending": 15
+  },
+  "counts": {
+    "new_collector_rules": 2,
+    "total_collector_rules": 61,
+    "original_capture_observed_rules_unchanged": 59,
+    "native_list_resource_calls": 16,
+    "native_execute_collector_calls": 64,
+    "new_exact_native_cpp_comparisons": 80,
+    "regression_native_calls": 120,
+    "reused_native_state_cases": 6,
+    "regression_cpp_comparisons": 126,
+    "related_ctest_suites": 6,
+    "evidence_tests": 35,
+    "golden_and_negative_checks": 4
+  },
+  "sources": {
+    "src/application/InitializationGraph.cpp": "9eb7cba8186b342350ab9e53926876d066791bf209722f46366b09011d060db2",
+    "src/application/InitializationReferences.cpp": "4bcda94d08b39f1ee357362644044e609ccb3f95113c6b0d1b9b7935b1e01c8c",
+    "tests/InitializationGraphTests.cpp": "2df40223562a8dd83eef7e86caab752eb7cf5f8e3038c14cc6daf355683acbdf",
+    "tools/probe_original_node_references.py": "09ec771c5ae38ac39e272e85fd2be491fb9935e1f684973c55c9775833eb0651",
+    "tools/validate_node_reference_probes.py": "4a7ea26f031fbb884db9a2af4253c30e106be42228f118098c012259c1941028"
+  },
+  "evidence": {
+    "artifacts/m3-list-dependency-native/nodes.json": "a6c1458cb3c97307cd9787f73973c6cb88c2067b2fb8ce6e1887ac9d7b1f54c1",
+    "artifacts/m3-list-dependency-comparison/validation.json": "68b2504369bfaf3235bb0282b498082af9e30cbf5e1e535a9d0a786431fb2e4b",
+    "artifacts/m3-list-dependency-comparison/cpp/initialization-graph.json": "489f05dffac0c6bf92de5fb6c5cf34ec6b0838668e81a21fe24a10958d00cef4",
+    "artifacts/m3-list-node-regression/nodes.json": "355e8762701466b007ffc29f02b5ee1e45dd3febbedaa56c22b1426187899cf8",
+    "artifacts/m3-list-node-regression-comparison/validation.json": "fb97b2248deb6823e501c073fae1ca31dd02f23bdfcff91629534750cb471cc1",
+    "artifacts/m3-list-dependency-final-ctest.log": "c233f7d2c7a8a5c6a39cdd2730552864c281f5658d09de3fe44c81cf0ba998f5",
+    "artifacts/m3-list-dependency-evidence-tests.log": "4904dafc371a6cd6a7b79a656a89fdcf3b7b37cd5a9d122379f8005273cc6610",
+    "artifacts/m3-list-dependency-goldens/validation.json": "5e1dde1ab9876f50c472cdf84378931ffc3b5cd8e9700002b67d37bf81383ade",
+    "artifacts/m3-list-setting-callers.c": "d83e015c15ffc966f40246b9898dc4d926ff3d11ed8271f4bc068c04bfe1c295",
+    "artifacts/m3-execute-shim-tables.txt": "f6358299b477af97740d81be990e07e191bc70558741b26edfefd8cb19ccd029",
+    "artifacts/m3-execute-player-tables.txt": "a6ba8f1d88f4ef17aa55e2d38393d59047af99da015402f05aa5135748a29256"
+  },
+  "boundaries": [
+    "Native marker probes and their generated C++ fixture are CPU metadata evidence, not original captured workloads.",
+    "Execute operand-to-list identity, list membership/version scheduling and GPU execution remain unaccepted.",
+    "No capture registration, GPU execution change, full corpus rerun, GUI release check or package update in this batch.",
+    "Initial dependency completeness is not a claim of executable ordering or valid GPU objects."
+  ]
+}
