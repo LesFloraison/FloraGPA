@@ -25,6 +25,7 @@ def main():
     parser.add_argument('--references', action='store_true', help='Also observe original ERG reference collectors')
     parser.add_argument('--cache', action='store_true', help='Observe initialization cache membership (requires --references)')
     parser.add_argument('--all-references', action='store_true', help='Also observe resource, state and data collectors')
+    parser.add_argument('--schedule', action='store_true', help='Observe actual version-node initialization across all four categories')
     args = parser.parse_args()
     if args.cache and not args.references:
         parser.error('--cache requires --references')
@@ -43,6 +44,8 @@ def main():
                   capture_sha256=digest(args.capture), observers_enabled=not args.no_observers,
                   player_sha256=PLAYER_SHA256, observations=[], patches_restored=False,
                   scope='Process-local forwarding observers; not traditional-list GPU acceptance')
+    if args.schedule:
+        report['node_initializations'] = []
     if args.references:
         report['reference_collectors'] = []
     if args.all_references:
@@ -100,9 +103,7 @@ def main():
             if len(nodes) != count:
                 raise ValueError('Native tree count mismatch')
             return nodes
-        def snapshot_graph(erg):
-            manager = u64.from_address(erg+0x18).value
-            cache = u64.from_address(manager+0x48).value+0x48
+        def graph_at_cache(cache):
             graph = []
             for kind, offset in [('data',0x88), ('resource',0x78), ('state',0x68), ('erg',0x58)]:
                 for node in tree_nodes(cache+offset):
@@ -116,7 +117,11 @@ def main():
                                       node_vtable_rva=hex(u64.from_address(version).value-base),
                                       dependencies=[u32.from_address(p+28).value for p in tree_nodes(version+8)],
                                       dependents=[u32.from_address(p+28).value for p in tree_nodes(version+24)]))
-            report['graph_before_first_erg_initialize'] = graph
+            return graph
+        def snapshot_graph(erg):
+            manager = u64.from_address(erg+0x18).value
+            cache = u64.from_address(manager+0x48).value+0x48
+            report['graph_before_first_erg_initialize'] = graph_at_cache(cache)
         def snapshot_cache(erg):
             manager = u64.from_address(erg+0x18).value
             cache = u64.from_address(manager+0x48).value+0x48
@@ -247,7 +252,46 @@ def main():
             except Exception as error:
                 failures.append(str(error))
             return result
+        def observe_version_initialization(table_rva, initializer_rva, kind):
+            table = base + table_rva
+            slot = table + 16
+            if u64.from_address(slot).value != base + initializer_rva:
+                raise ValueError('Unexpected version-node initializer')
+            proto = c.WINFUNCTYPE(None, ptr, u32)
+            original = proto(base + initializer_rva)
+            identity = c.WINFUNCTYPE(u32, ptr)(u64.from_address(table + 24).value)
+            @proto
+            def initialize(this, version):
+                index = None
+                try:
+                    if version != 0:
+                        raise ValueError('Only initial version observations are in scope')
+                    if 'graph_before_first_node_initialize' not in report:
+                        core = u64.from_address(base + 0x208540).value
+                        if not core:
+                            raise ValueError('Missing original playback core')
+                        manager = u64.from_address(core + 0x1b8).value
+                        cache = u64.from_address(manager + 0x48).value + 0x48
+                        report['graph_before_first_node_initialize'] = graph_at_cache(cache)
+                    row = dict(id=identity(this), kind=kind, version=version,
+                               thread=threading.get_native_id(), initializer_rva=hex(initializer_rva),
+                               before_status=u32.from_address(this + 40).value,
+                               dependencies=[u32.from_address(p+28).value for p in tree_nodes(this+8)],
+                               dependents=[u32.from_address(p+28).value for p in tree_nodes(this+24)])
+                    index = len(report['node_initializations'])
+                    report['node_initializations'].append(row)
+                except Exception as error:
+                    failures.append(str(error))
+                original(this, version)
+                if index is not None:
+                    report['node_initializations'][index]['after_status'] = u32.from_address(this + 40).value
+            attach(slot, initialize)
         if not args.no_observers:
+            if args.schedule:
+                for table, initializer, kind in [(0x183c78,0x9a6d0,'data'),
+                        (0x183be8,0x9a6d0,'resource'),(0x183b58,0x9a710,'state'),
+                        (0x183ac8,0x9a6f0,'erg')]:
+                    observe_version_initialization(table, initializer, kind)
             attach(factory_slot, factory)
             if args.all_references:
                 for index,rva,kind in [(11,0x3ea00,'state'),(12,0x3d7a0,'resource'),(13,0x3bfc0,'data')]:

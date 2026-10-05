@@ -254,6 +254,29 @@ class InitializationGraphTests : public QObject {
         capture.add(100, 7, 0x30d1, raw);
         QVERIFY(graph(capture)["nodes"].empty());
     }
+    void modeledScheduleBoundaries() {
+        Capture capture;
+        capture.add(1, 9, 0x104, pack(Id(2), 0u));
+        capture.add(2, 9, 0x104, pack(Id(1), 0u));
+        const auto cycle = graph(capture);
+        QVERIFY(cycle["dependency_graph_complete"] == true);
+        QVERIFY(cycle["modeled_initialization"]["status"] == "unavailable");
+        QVERIFY(cycle["modeled_initialization"].contains("reason"));
+        QVERIFY(!cycle["modeled_initialization"].contains("order"));
+        capture.entries.pop_back();
+        const auto missing = graph(capture);
+        QVERIFY(missing["dependency_graph_complete"] == false);
+        QVERIFY(!missing.contains("modeled_initialization"));
+        Capture valid;
+        valid.add(1, 9, 1, pack(0u));
+        valid.add(2, 9, 0x104, pack(Id(1), 0u));
+        const auto model = graph(valid).at("modeled_initialization");
+        QVERIFY(model["status"] == "modeled");
+        QVERIFY(model["order"] == Json::array({1, 2}));
+        QVERIFY(model["previous_statuses"] == Json::array({1, 1}));
+        QVERIFY(model["assumes_all_initializers_succeed"] == true);
+        QVERIFY(model["gpu_execution_verified"] == false);
+    }
     void editedVersionsAreNotInitialGraphs() {
         QTemporaryDir dir;
         Capture capture;

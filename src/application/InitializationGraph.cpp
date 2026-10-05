@@ -1,6 +1,7 @@
 #include "InitializationGraph.h"
 #include "ApiCommands.h"
 #include "InitializationReferences.h"
+#include "core/InitializationSchedule.h"
 #include <set>
 
 namespace flora {
@@ -233,6 +234,27 @@ Json inspectInitializationGraph(const Frame &frame) {
         }
     }
     out["dependency_graph_complete"] = complete;
+    if (complete) {
+        Json model{{"status", "unavailable"},
+                   {"scope", "initial_version_fresh_dependents"},
+                   {"assumes_all_initializers_succeed", true},
+                   {"gpu_execution_verified", false}};
+        try {
+            std::vector<InitializationScheduleNode> nodes;
+            const std::map<std::string, uint32_t> kinds{
+                {"state", 1}, {"resource", 2}, {"erg", 3}, {"data", 4}};
+            for (const auto &node : out["nodes"])
+                nodes.push_back({node.at("id").get<uint32_t>(), kinds.at(node.at("kind").get<std::string>()),
+                                 node.at("dependency_set").get<std::set<uint32_t>>(), false});
+            const auto schedule = modelInitializationSchedule(nodes);
+            model.update({{"status", "modeled"},
+                          {"order", schedule.order},
+                          {"previous_statuses", schedule.previousStatuses}});
+        } catch (const std::exception &error) {
+            model["reason"] = error.what();
+        }
+        out["modeled_initialization"] = std::move(model);
+    }
     return out;
 }
 } // namespace flora

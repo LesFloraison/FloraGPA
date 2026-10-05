@@ -1,0 +1,4614 @@
+{
+  "schema": "FloraGPA native scheduler CPU fixtures 1",
+  "player_sha256": "39061ff329e4a32d0c8375ce9ee15e2017bccab0593943b962a860e11723d38b",
+  "source_sha256": "c7f3d4df07b5c1ff9ccf5fc80614259772180d99cc61918f8bdc1407aaa973be",
+  "gpu_acceptance": false,
+  "cases": [
+    {
+      "name": "forward_dependency",
+      "nodes": [
+        {
+          "id": 10,
+          "kind": 3,
+          "dependencies": [
+            20
+          ]
+        },
+        {
+          "id": 20,
+          "kind": 3,
+          "dependencies": []
+        }
+      ],
+      "initially_ready": [],
+      "versions": [
+        {
+          "version": 0,
+          "original_order": [
+            20,
+            10
+          ],
+          "expected_order": [
+            20,
+            10
+          ],
+          "original_registration_groups": {
+            "600": [
+              20,
+              10
+            ]
+          },
+          "all_ready": true,
+          "repeated_ids": false
+        },
+        {
+          "version": 1,
+          "original_order": [
+            20,
+            10
+          ],
+          "expected_order": [
+            20,
+            10
+          ],
+          "original_registration_groups": {
+            "600": [
+              20,
+              10
+            ]
+          },
+          "all_ready": true,
+          "repeated_ids": false
+        }
+      ]
+    },
+    {
+      "name": "ready_forward_dependency",
+      "nodes": [
+        {
+          "id": 10,
+          "kind": 3,
+          "dependencies": [
+            20
+          ]
+        },
+        {
+          "id": 20,
+          "kind": 3,
+          "dependencies": []
+        }
+      ],
+      "initially_ready": [
+        20
+      ],
+      "versions": [
+        {
+          "version": 0,
+          "original_order": [
+            10,
+            20,
+            10
+          ],
+          "expected_order": [
+            10,
+            20,
+            10
+          ],
+          "original_registration_groups": {
+            "600": [
+              10,
+              20,
+              10
+            ]
+          },
+          "all_ready": true,
+          "repeated_ids": true
+        },
+        {
+          "version": 1,
+          "original_order": [
+            10,
+            20,
+            10
+          ],
+          "expected_order": [
+            10,
+            20,
+            10
+          ],
+          "original_registration_groups": {
+            "600": [
+              10,
+              20,
+              10
+            ]
+          },
+          "all_ready": true,
+          "repeated_ids": true
+        }
+      ]
+    },
+    {
+      "name": "cross_category",
+      "nodes": [
+        {
+          "id": 10,
+          "kind": 2,
+          "dependencies": [
+            20
+          ]
+        },
+        {
+          "id": 20,
+          "kind": 1,
+          "dependencies": []
+        },
+        {
+          "id": 30,
+          "kind": 3,
+          "dependencies": [
+            10
+          ]
+        }
+      ],
+      "initially_ready": [],
+      "versions": [
+        {
+          "version": 0,
+          "original_order": [
+            20,
+            10,
+            30
+          ],
+          "expected_order": [
+            20,
+            10,
+            30
+          ],
+          "original_registration_groups": {
+            "600": [
+              30
+            ]
+          },
+          "all_ready": true,
+          "repeated_ids": false
+        },
+        {
+          "version": 1,
+          "original_order": [
+            20,
+            10,
+            30
+          ],
+          "expected_order": [
+            20,
+            10,
+            30
+          ],
+          "original_registration_groups": {
+            "600": [
+              30
+            ]
+          },
+          "all_ready": true,
+          "repeated_ids": false
+        }
+      ]
+    },
+    {
+      "name": "diamond",
+      "nodes": [
+        {
+          "id": 1,
+          "kind": 3,
+          "dependencies": [
+            20,
+            30
+          ]
+        },
+        {
+          "id": 20,
+          "kind": 3,
+          "dependencies": [
+            40
+          ]
+        },
+        {
+          "id": 30,
+          "kind": 3,
+          "dependencies": [
+            40
+          ]
+        },
+        {
+          "id": 40,
+          "kind": 3,
+          "dependencies": []
+        }
+      ],
+      "initially_ready": [],
+      "versions": [
+        {
+          "version": 0,
+          "original_order": [
+            40,
+            20,
+            30,
+            1
+          ],
+          "expected_order": [
+            40,
+            20,
+            30,
+            1
+          ],
+          "original_registration_groups": {
+            "600": [
+              40,
+              20,
+              30
+            ],
+            "700": [
+              1
+            ]
+          },
+          "all_ready": true,
+          "repeated_ids": false
+        },
+        {
+          "version": 1,
+          "original_order": [
+            40,
+            20,
+            30,
+            1
+          ],
+          "expected_order": [
+            40,
+            20,
+            30,
+            1
+          ],
+          "original_registration_groups": {
+            "600": [
+              40,
+              20,
+              30
+            ],
+            "700": [
+              1
+            ]
+          },
+          "all_ready": true,
+          "repeated_ids": false
+        }
+      ]
+    },
+    {
+      "name": "dag_0",
+      "nodes": [
+        {
+          "id": 652,
+          "kind": 3,
+          "dependencies": []
+        },
+        {
+          "id": 904,
+          "kind": 4,
+          "dependencies": [
+            652
+          ]
+        },
+        {
+          "id": 1712,
+          "kind": 2,
+          "dependencies": [
+            652,
+            904
+          ]
+        },
+        {
+          "id": 1987,
+          "kind": 2,
+          "dependencies": []
+        },
+        {
+          "id": 348,
+          "kind": 4,
+          "dependencies": []
+        },
+        {
+          "id": 667,
+          "kind": 2,
+          "dependencies": [
+            652,
+            1987
+          ]
+        },
+        {
+          "id": 253,
+          "kind": 2,
+          "dependencies": [
+            348,
+            652
+          ]
+        },
+        {
+          "id": 930,
+          "kind": 1,
+          "dependencies": []
+        },
+        {
+          "id": 375,
+          "kind": 2,
+          "dependencies": []
+        },
+        {
+          "id": 1174,
+          "kind": 3,
+          "dependencies": [
+            1987
+          ]
+        },
+        {
+          "id": 255,
+          "kind": 1,
+          "dependencies": []
+        },
+        {
+          "id": 1602,
+          "kind": 1,
+          "dependencies": [
+            253,
+            255
+          ]
+        }
+      ],
+      "initially_ready": [],
+      "versions": [
+        {
+          "version": 0,
+          "original_order": [
+            348,
+            375,
+            1987,
+            255,
+            930,
+            652,
+            253,
+            1602,
+            667,
+            904,
+            1712,
+            1712,
+            1174
+          ],
+          "expected_order": [
+            348,
+            375,
+            1987,
+            255,
+            930,
+            652,
+            253,
+            1602,
+            667,
+            904,
+            1712,
+            1712,
+            1174
+          ],
+          "original_registration_groups": {
+            "600": [
+              652,
+              1174
+            ]
+          },
+          "all_ready": true,
+          "repeated_ids": true
+        },
+        {
+          "version": 1,
+          "original_order": [
+            348,
+            375,
+            1987,
+            255,
+            930,
+            652,
+            253,
+            1602,
+            667,
+            904,
+            1712,
+            1712,
+            1174
+          ],
+          "expected_order": [
+            348,
+            375,
+            1987,
+            255,
+            930,
+            652,
+            253,
+            1602,
+            667,
+            904,
+            1712,
+            1712,
+            1174
+          ],
+          "original_registration_groups": {
+            "600": [
+              652,
+              1174
+            ]
+          },
+          "all_ready": true,
+          "repeated_ids": true
+        }
+      ]
+    },
+    {
+      "name": "dag_1",
+      "nodes": [
+        {
+          "id": 1267,
+          "kind": 4,
+          "dependencies": []
+        },
+        {
+          "id": 1186,
+          "kind": 4,
+          "dependencies": []
+        },
+        {
+          "id": 1512,
+          "kind": 3,
+          "dependencies": [
+            1267
+          ]
+        },
+        {
+          "id": 1346,
+          "kind": 3,
+          "dependencies": [
+            1186,
+            1267,
+            1512
+          ]
+        },
+        {
+          "id": 1367,
+          "kind": 4,
+          "dependencies": [
+            1267,
+            1346,
+            1512
+          ]
+        },
+        {
+          "id": 178,
+          "kind": 3,
+          "dependencies": [
+            1367,
+            1512
+          ]
+        },
+        {
+          "id": 642,
+          "kind": 4,
+          "dependencies": [
+            178,
+            1267,
+            1367
+          ]
+        },
+        {
+          "id": 36,
+          "kind": 3,
+          "dependencies": [
+            1186,
+            1346,
+            1512
+          ]
+        },
+        {
+          "id": 865,
+          "kind": 2,
+          "dependencies": [
+            178,
+            642,
+            1186
+          ]
+        },
+        {
+          "id": 1360,
+          "kind": 2,
+          "dependencies": [
+            178,
+            1186,
+            1512
+          ]
+        },
+        {
+          "id": 1451,
+          "kind": 1,
+          "dependencies": [
+            178,
+            1267,
+            1360
+          ]
+        },
+        {
+          "id": 824,
+          "kind": 4,
+          "dependencies": [
+            178,
+            1346
+          ]
+        }
+      ],
+      "initially_ready": [],
+      "versions": [
+        {
+          "version": 0,
+          "original_order": [
+            1186,
+            1267,
+            1512,
+            1346,
+            36,
+            1367,
+            178,
+            642,
+            865,
+            824,
+            865,
+            1360,
+            1451,
+            1451,
+            642,
+            1360,
+            1367
+          ],
+          "expected_order": [
+            1186,
+            1267,
+            1512,
+            1346,
+            36,
+            1367,
+            178,
+            642,
+            865,
+            824,
+            865,
+            1360,
+            1451,
+            1451,
+            642,
+            1360,
+            1367
+          ],
+          "original_registration_groups": {
+            "600": [
+              1512,
+              1346,
+              36,
+              178
+            ]
+          },
+          "all_ready": true,
+          "repeated_ids": true
+        },
+        {
+          "version": 1,
+          "original_order": [
+            1186,
+            1267,
+            1512,
+            1346,
+            36,
+            1367,
+            178,
+            642,
+            865,
+            824,
+            865,
+            1360,
+            1451,
+            1451,
+            642,
+            1360,
+            1367
+          ],
+          "expected_order": [
+            1186,
+            1267,
+            1512,
+            1346,
+            36,
+            1367,
+            178,
+            642,
+            865,
+            824,
+            865,
+            1360,
+            1451,
+            1451,
+            642,
+            1360,
+            1367
+          ],
+          "original_registration_groups": {
+            "600": [
+              1512,
+              1346,
+              36,
+              178
+            ]
+          },
+          "all_ready": true,
+          "repeated_ids": true
+        }
+      ]
+    },
+    {
+      "name": "dag_2",
+      "nodes": [
+        {
+          "id": 1262,
+          "kind": 2,
+          "dependencies": []
+        },
+        {
+          "id": 930,
+          "kind": 4,
+          "dependencies": [
+            1262
+          ]
+        },
+        {
+          "id": 1812,
+          "kind": 4,
+          "dependencies": []
+        },
+        {
+          "id": 323,
+          "kind": 4,
+          "dependencies": []
+        },
+        {
+          "id": 1261,
+          "kind": 2,
+          "dependencies": [
+            323,
+            930,
+            1812
+          ]
+        },
+        {
+          "id": 292,
+          "kind": 4,
+          "dependencies": []
+        },
+        {
+          "id": 494,
+          "kind": 1,
+          "dependencies": [
+            1262
+          ]
+        },
+        {
+          "id": 299,
+          "kind": 3,
+          "dependencies": [
+            292,
+            494,
+            930
+          ]
+        },
+        {
+          "id": 1629,
+          "kind": 3,
+          "dependencies": [
+            1812
+          ]
+        },
+        {
+          "id": 1033,
+          "kind": 4,
+          "dependencies": []
+        },
+        {
+          "id": 672,
+          "kind": 1,
+          "dependencies": [
+            292,
+            1629
+          ]
+        },
+        {
+          "id": 1943,
+          "kind": 2,
+          "dependencies": [
+            292,
+            672
+          ]
+        }
+      ],
+      "initially_ready": [],
+      "versions": [
+        {
+          "version": 0,
+          "original_order": [
+            292,
+            323,
+            1033,
+            1812,
+            1262,
+            930,
+            1261,
+            494,
+            299,
+            1629,
+            672,
+            1943
+          ],
+          "expected_order": [
+            292,
+            323,
+            1033,
+            1812,
+            1262,
+            930,
+            1261,
+            494,
+            299,
+            1629,
+            672,
+            1943
+          ],
+          "original_registration_groups": {
+            "700": [
+              299,
+              1629
+            ]
+          },
+          "all_ready": true,
+          "repeated_ids": false
+        },
+        {
+          "version": 1,
+          "original_order": [
+            292,
+            323,
+            1033,
+            1812,
+            1262,
+            930,
+            1261,
+            494,
+            299,
+            1629,
+            672,
+            1943
+          ],
+          "expected_order": [
+            292,
+            323,
+            1033,
+            1812,
+            1262,
+            930,
+            1261,
+            494,
+            299,
+            1629,
+            672,
+            1943
+          ],
+          "original_registration_groups": {
+            "700": [
+              299,
+              1629
+            ]
+          },
+          "all_ready": true,
+          "repeated_ids": false
+        }
+      ]
+    },
+    {
+      "name": "dag_3",
+      "nodes": [
+        {
+          "id": 647,
+          "kind": 4,
+          "dependencies": []
+        },
+        {
+          "id": 1044,
+          "kind": 2,
+          "dependencies": [
+            647
+          ]
+        },
+        {
+          "id": 1880,
+          "kind": 4,
+          "dependencies": [
+            647
+          ]
+        },
+        {
+          "id": 975,
+          "kind": 4,
+          "dependencies": []
+        },
+        {
+          "id": 285,
+          "kind": 1,
+          "dependencies": [
+            647
+          ]
+        },
+        {
+          "id": 920,
+          "kind": 1,
+          "dependencies": []
+        },
+        {
+          "id": 279,
+          "kind": 3,
+          "dependencies": [
+            1044
+          ]
+        },
+        {
+          "id": 487,
+          "kind": 1,
+          "dependencies": [
+            1044
+          ]
+        },
+        {
+          "id": 203,
+          "kind": 1,
+          "dependencies": [
+            647,
+            920
+          ]
+        },
+        {
+          "id": 1057,
+          "kind": 4,
+          "dependencies": [
+            285,
+            975
+          ]
+        },
+        {
+          "id": 833,
+          "kind": 1,
+          "dependencies": [
+            203
+          ]
+        },
+        {
+          "id": 868,
+          "kind": 4,
+          "dependencies": [
+            203,
+            279,
+            1057
+          ]
+        }
+      ],
+      "initially_ready": [],
+      "versions": [
+        {
+          "version": 0,
+          "original_order": [
+            647,
+            975,
+            1880,
+            1044,
+            285,
+            1057,
+            487,
+            920,
+            203,
+            833,
+            279,
+            868
+          ],
+          "expected_order": [
+            647,
+            975,
+            1880,
+            1044,
+            285,
+            1057,
+            487,
+            920,
+            203,
+            833,
+            279,
+            868
+          ],
+          "original_registration_groups": {
+            "700": [
+              279
+            ]
+          },
+          "all_ready": true,
+          "repeated_ids": false
+        },
+        {
+          "version": 1,
+          "original_order": [
+            647,
+            975,
+            1880,
+            1044,
+            285,
+            1057,
+            487,
+            920,
+            203,
+            833,
+            279,
+            868
+          ],
+          "expected_order": [
+            647,
+            975,
+            1880,
+            1044,
+            285,
+            1057,
+            487,
+            920,
+            203,
+            833,
+            279,
+            868
+          ],
+          "original_registration_groups": {
+            "700": [
+              279
+            ]
+          },
+          "all_ready": true,
+          "repeated_ids": false
+        }
+      ]
+    },
+    {
+      "name": "dag_4",
+      "nodes": [
+        {
+          "id": 937,
+          "kind": 2,
+          "dependencies": []
+        },
+        {
+          "id": 1331,
+          "kind": 3,
+          "dependencies": []
+        },
+        {
+          "id": 420,
+          "kind": 2,
+          "dependencies": [
+            937,
+            1331
+          ]
+        },
+        {
+          "id": 1138,
+          "kind": 2,
+          "dependencies": [
+            420,
+            1331
+          ]
+        },
+        {
+          "id": 617,
+          "kind": 4,
+          "dependencies": [
+            420,
+            1138,
+            1331
+          ]
+        },
+        {
+          "id": 1003,
+          "kind": 1,
+          "dependencies": [
+            617
+          ]
+        },
+        {
+          "id": 349,
+          "kind": 2,
+          "dependencies": []
+        },
+        {
+          "id": 1007,
+          "kind": 1,
+          "dependencies": [
+            1138
+          ]
+        },
+        {
+          "id": 977,
+          "kind": 3,
+          "dependencies": [
+            1003,
+            1138
+          ]
+        },
+        {
+          "id": 802,
+          "kind": 4,
+          "dependencies": [
+            349
+          ]
+        },
+        {
+          "id": 280,
+          "kind": 3,
+          "dependencies": [
+            420,
+            617
+          ]
+        },
+        {
+          "id": 650,
+          "kind": 3,
+          "dependencies": [
+            280,
+            420
+          ]
+        }
+      ],
+      "initially_ready": [],
+      "versions": [
+        {
+          "version": 0,
+          "original_order": [
+            349,
+            802,
+            937,
+            1331,
+            420,
+            1138,
+            617,
+            280,
+            650,
+            1003,
+            977,
+            977,
+            1007,
+            617,
+            1138
+          ],
+          "expected_order": [
+            349,
+            802,
+            937,
+            1331,
+            420,
+            1138,
+            617,
+            280,
+            650,
+            1003,
+            977,
+            977,
+            1007,
+            617,
+            1138
+          ],
+          "original_registration_groups": {
+            "600": [
+              280,
+              650
+            ],
+            "700": [
+              1331,
+              977,
+              977
+            ]
+          },
+          "all_ready": true,
+          "repeated_ids": true
+        },
+        {
+          "version": 1,
+          "original_order": [
+            349,
+            802,
+            937,
+            1331,
+            420,
+            1138,
+            617,
+            280,
+            650,
+            1003,
+            977,
+            977,
+            1007,
+            617,
+            1138
+          ],
+          "expected_order": [
+            349,
+            802,
+            937,
+            1331,
+            420,
+            1138,
+            617,
+            280,
+            650,
+            1003,
+            977,
+            977,
+            1007,
+            617,
+            1138
+          ],
+          "original_registration_groups": {
+            "600": [
+              280,
+              650
+            ],
+            "700": [
+              1331,
+              977,
+              977
+            ]
+          },
+          "all_ready": true,
+          "repeated_ids": true
+        }
+      ]
+    },
+    {
+      "name": "dag_5",
+      "nodes": [
+        {
+          "id": 772,
+          "kind": 4,
+          "dependencies": []
+        },
+        {
+          "id": 451,
+          "kind": 2,
+          "dependencies": [
+            772
+          ]
+        },
+        {
+          "id": 1585,
+          "kind": 4,
+          "dependencies": [
+            772
+          ]
+        },
+        {
+          "id": 1615,
+          "kind": 3,
+          "dependencies": [
+            1585
+          ]
+        },
+        {
+          "id": 895,
+          "kind": 1,
+          "dependencies": []
+        },
+        {
+          "id": 1201,
+          "kind": 1,
+          "dependencies": [
+            1585
+          ]
+        },
+        {
+          "id": 1899,
+          "kind": 1,
+          "dependencies": [
+            451,
+            895,
+            1585
+          ]
+        },
+        {
+          "id": 795,
+          "kind": 3,
+          "dependencies": [
+            772,
+            895
+          ]
+        },
+        {
+          "id": 692,
+          "kind": 4,
+          "dependencies": [
+            1585,
+            1615,
+            1899
+          ]
+        },
+        {
+          "id": 982,
+          "kind": 3,
+          "dependencies": [
+            692,
+            795,
+            895
+          ]
+        },
+        {
+          "id": 1791,
+          "kind": 1,
+          "dependencies": [
+            1899
+          ]
+        },
+        {
+          "id": 623,
+          "kind": 4,
+          "dependencies": [
+            795,
+            1791,
+            1899
+          ]
+        }
+      ],
+      "initially_ready": [],
+      "versions": [
+        {
+          "version": 0,
+          "original_order": [
+            772,
+            1585,
+            451,
+            895,
+            1201,
+            1899,
+            1791,
+            795,
+            623,
+            1615,
+            692,
+            982
+          ],
+          "expected_order": [
+            772,
+            1585,
+            451,
+            895,
+            1201,
+            1899,
+            1791,
+            795,
+            623,
+            1615,
+            692,
+            982
+          ],
+          "original_registration_groups": {
+            "600": [
+              982
+            ],
+            "700": [
+              795,
+              1615
+            ]
+          },
+          "all_ready": true,
+          "repeated_ids": false
+        },
+        {
+          "version": 1,
+          "original_order": [
+            772,
+            1585,
+            451,
+            895,
+            1201,
+            1899,
+            1791,
+            795,
+            623,
+            1615,
+            692,
+            982
+          ],
+          "expected_order": [
+            772,
+            1585,
+            451,
+            895,
+            1201,
+            1899,
+            1791,
+            795,
+            623,
+            1615,
+            692,
+            982
+          ],
+          "original_registration_groups": {
+            "600": [
+              982
+            ],
+            "700": [
+              795,
+              1615
+            ]
+          },
+          "all_ready": true,
+          "repeated_ids": false
+        }
+      ]
+    },
+    {
+      "name": "dag_6",
+      "nodes": [
+        {
+          "id": 1744,
+          "kind": 1,
+          "dependencies": []
+        },
+        {
+          "id": 156,
+          "kind": 4,
+          "dependencies": [
+            1744
+          ]
+        },
+        {
+          "id": 1150,
+          "kind": 3,
+          "dependencies": [
+            156
+          ]
+        },
+        {
+          "id": 1592,
+          "kind": 2,
+          "dependencies": [
+            156,
+            1150,
+            1744
+          ]
+        },
+        {
+          "id": 840,
+          "kind": 4,
+          "dependencies": [
+            156,
+            1592,
+            1744
+          ]
+        },
+        {
+          "id": 1836,
+          "kind": 1,
+          "dependencies": [
+            156,
+            840,
+            1592
+          ]
+        },
+        {
+          "id": 996,
+          "kind": 2,
+          "dependencies": [
+            156,
+            840,
+            1744
+          ]
+        },
+        {
+          "id": 778,
+          "kind": 1,
+          "dependencies": [
+            156,
+            996,
+            1150
+          ]
+        },
+        {
+          "id": 1072,
+          "kind": 2,
+          "dependencies": []
+        },
+        {
+          "id": 1450,
+          "kind": 1,
+          "dependencies": [
+            1150,
+            1744
+          ]
+        },
+        {
+          "id": 114,
+          "kind": 1,
+          "dependencies": [
+            1592,
+            1744,
+            1836
+          ]
+        },
+        {
+          "id": 1539,
+          "kind": 3,
+          "dependencies": [
+            1450
+          ]
+        }
+      ],
+      "initially_ready": [],
+      "versions": [
+        {
+          "version": 0,
+          "original_order": [
+            1072,
+            1744,
+            156,
+            1150,
+            1450,
+            1592,
+            840,
+            996,
+            778,
+            1836,
+            114,
+            1836,
+            1539
+          ],
+          "expected_order": [
+            1072,
+            1744,
+            156,
+            1150,
+            1450,
+            1592,
+            840,
+            996,
+            778,
+            1836,
+            114,
+            1836,
+            1539
+          ],
+          "original_registration_groups": {
+            "600": [
+              1150
+            ],
+            "700": [
+              1539
+            ]
+          },
+          "all_ready": true,
+          "repeated_ids": true
+        },
+        {
+          "version": 1,
+          "original_order": [
+            1072,
+            1744,
+            156,
+            1150,
+            1450,
+            1592,
+            840,
+            996,
+            778,
+            1836,
+            114,
+            1836,
+            1539
+          ],
+          "expected_order": [
+            1072,
+            1744,
+            156,
+            1150,
+            1450,
+            1592,
+            840,
+            996,
+            778,
+            1836,
+            114,
+            1836,
+            1539
+          ],
+          "original_registration_groups": {
+            "600": [
+              1150
+            ],
+            "700": [
+              1539
+            ]
+          },
+          "all_ready": true,
+          "repeated_ids": true
+        }
+      ]
+    },
+    {
+      "name": "dag_7",
+      "nodes": [
+        {
+          "id": 91,
+          "kind": 4,
+          "dependencies": []
+        },
+        {
+          "id": 1960,
+          "kind": 3,
+          "dependencies": [
+            91
+          ]
+        },
+        {
+          "id": 1699,
+          "kind": 1,
+          "dependencies": [
+            91,
+            1960
+          ]
+        },
+        {
+          "id": 280,
+          "kind": 3,
+          "dependencies": [
+            1699
+          ]
+        },
+        {
+          "id": 316,
+          "kind": 1,
+          "dependencies": [
+            91,
+            280,
+            1699
+          ]
+        },
+        {
+          "id": 1653,
+          "kind": 4,
+          "dependencies": [
+            316
+          ]
+        },
+        {
+          "id": 1831,
+          "kind": 2,
+          "dependencies": []
+        },
+        {
+          "id": 415,
+          "kind": 1,
+          "dependencies": [
+            91,
+            1653
+          ]
+        },
+        {
+          "id": 986,
+          "kind": 4,
+          "dependencies": [
+            91,
+            280,
+            1653
+          ]
+        },
+        {
+          "id": 1900,
+          "kind": 2,
+          "dependencies": [
+            91,
+            316,
+            1699
+          ]
+        },
+        {
+          "id": 1661,
+          "kind": 1,
+          "dependencies": []
+        },
+        {
+          "id": 1036,
+          "kind": 4,
+          "dependencies": [
+            280,
+            415,
+            1960
+          ]
+        }
+      ],
+      "initially_ready": [],
+      "versions": [
+        {
+          "version": 0,
+          "original_order": [
+            91,
+            1831,
+            1661,
+            1960,
+            1699,
+            280,
+            316,
+            1653,
+            415,
+            1036,
+            986,
+            1900,
+            986,
+            1036,
+            316,
+            1900
+          ],
+          "expected_order": [
+            91,
+            1831,
+            1661,
+            1960,
+            1699,
+            280,
+            316,
+            1653,
+            415,
+            1036,
+            986,
+            1900,
+            986,
+            1036,
+            316,
+            1900
+          ],
+          "original_registration_groups": {
+            "600": [
+              1960,
+              280
+            ]
+          },
+          "all_ready": true,
+          "repeated_ids": true
+        },
+        {
+          "version": 1,
+          "original_order": [
+            91,
+            1831,
+            1661,
+            1960,
+            1699,
+            280,
+            316,
+            1653,
+            415,
+            1036,
+            986,
+            1900,
+            986,
+            1036,
+            316,
+            1900
+          ],
+          "expected_order": [
+            91,
+            1831,
+            1661,
+            1960,
+            1699,
+            280,
+            316,
+            1653,
+            415,
+            1036,
+            986,
+            1900,
+            986,
+            1036,
+            316,
+            1900
+          ],
+          "original_registration_groups": {
+            "600": [
+              1960,
+              280
+            ]
+          },
+          "all_ready": true,
+          "repeated_ids": true
+        }
+      ]
+    },
+    {
+      "name": "dag_8",
+      "nodes": [
+        {
+          "id": 1214,
+          "kind": 3,
+          "dependencies": []
+        },
+        {
+          "id": 1819,
+          "kind": 4,
+          "dependencies": [
+            1214
+          ]
+        },
+        {
+          "id": 587,
+          "kind": 3,
+          "dependencies": [
+            1214,
+            1819
+          ]
+        },
+        {
+          "id": 883,
+          "kind": 1,
+          "dependencies": [
+            587,
+            1214,
+            1819
+          ]
+        },
+        {
+          "id": 1285,
+          "kind": 3,
+          "dependencies": [
+            1214
+          ]
+        },
+        {
+          "id": 671,
+          "kind": 1,
+          "dependencies": []
+        },
+        {
+          "id": 182,
+          "kind": 1,
+          "dependencies": [
+            671,
+            883,
+            1819
+          ]
+        },
+        {
+          "id": 546,
+          "kind": 1,
+          "dependencies": [
+            182,
+            587
+          ]
+        },
+        {
+          "id": 650,
+          "kind": 3,
+          "dependencies": [
+            182,
+            671,
+            1214
+          ]
+        },
+        {
+          "id": 291,
+          "kind": 4,
+          "dependencies": [
+            587,
+            650,
+            1214
+          ]
+        },
+        {
+          "id": 484,
+          "kind": 2,
+          "dependencies": [
+            182,
+            291,
+            1214
+          ]
+        },
+        {
+          "id": 1132,
+          "kind": 2,
+          "dependencies": [
+            546
+          ]
+        }
+      ],
+      "initially_ready": [],
+      "versions": [
+        {
+          "version": 0,
+          "original_order": [
+            671,
+            1214,
+            1819,
+            587,
+            883,
+            182,
+            546,
+            1132,
+            650,
+            291,
+            484,
+            883,
+            1285
+          ],
+          "expected_order": [
+            671,
+            1214,
+            1819,
+            587,
+            883,
+            182,
+            546,
+            1132,
+            650,
+            291,
+            484,
+            883,
+            1285
+          ],
+          "original_registration_groups": {
+            "600": [
+              1214,
+              650
+            ],
+            "700": [
+              587,
+              1285
+            ]
+          },
+          "all_ready": true,
+          "repeated_ids": true
+        },
+        {
+          "version": 1,
+          "original_order": [
+            671,
+            1214,
+            1819,
+            587,
+            883,
+            182,
+            546,
+            1132,
+            650,
+            291,
+            484,
+            883,
+            1285
+          ],
+          "expected_order": [
+            671,
+            1214,
+            1819,
+            587,
+            883,
+            182,
+            546,
+            1132,
+            650,
+            291,
+            484,
+            883,
+            1285
+          ],
+          "original_registration_groups": {
+            "600": [
+              1214,
+              650
+            ],
+            "700": [
+              587,
+              1285
+            ]
+          },
+          "all_ready": true,
+          "repeated_ids": true
+        }
+      ]
+    },
+    {
+      "name": "dag_9",
+      "nodes": [
+        {
+          "id": 1825,
+          "kind": 1,
+          "dependencies": []
+        },
+        {
+          "id": 1678,
+          "kind": 2,
+          "dependencies": [
+            1825
+          ]
+        },
+        {
+          "id": 875,
+          "kind": 4,
+          "dependencies": [
+            1678,
+            1825
+          ]
+        },
+        {
+          "id": 560,
+          "kind": 1,
+          "dependencies": [
+            1678
+          ]
+        },
+        {
+          "id": 70,
+          "kind": 1,
+          "dependencies": [
+            875,
+            1678,
+            1825
+          ]
+        },
+        {
+          "id": 143,
+          "kind": 4,
+          "dependencies": [
+            70,
+            1678,
+            1825
+          ]
+        },
+        {
+          "id": 1643,
+          "kind": 1,
+          "dependencies": []
+        },
+        {
+          "id": 425,
+          "kind": 4,
+          "dependencies": [
+            143,
+            1678,
+            1825
+          ]
+        },
+        {
+          "id": 1417,
+          "kind": 4,
+          "dependencies": []
+        },
+        {
+          "id": 906,
+          "kind": 2,
+          "dependencies": []
+        },
+        {
+          "id": 1550,
+          "kind": 4,
+          "dependencies": []
+        },
+        {
+          "id": 1879,
+          "kind": 4,
+          "dependencies": []
+        }
+      ],
+      "initially_ready": [],
+      "versions": [
+        {
+          "version": 0,
+          "original_order": [
+            1417,
+            1550,
+            1879,
+            906,
+            1643,
+            1825,
+            1678,
+            560,
+            875,
+            70,
+            143,
+            425
+          ],
+          "expected_order": [
+            1417,
+            1550,
+            1879,
+            906,
+            1643,
+            1825,
+            1678,
+            560,
+            875,
+            70,
+            143,
+            425
+          ],
+          "original_registration_groups": {},
+          "all_ready": true,
+          "repeated_ids": false
+        },
+        {
+          "version": 1,
+          "original_order": [
+            1417,
+            1550,
+            1879,
+            906,
+            1643,
+            1825,
+            1678,
+            560,
+            875,
+            70,
+            143,
+            425
+          ],
+          "expected_order": [
+            1417,
+            1550,
+            1879,
+            906,
+            1643,
+            1825,
+            1678,
+            560,
+            875,
+            70,
+            143,
+            425
+          ],
+          "original_registration_groups": {},
+          "all_ready": true,
+          "repeated_ids": false
+        }
+      ]
+    },
+    {
+      "name": "dag_10",
+      "nodes": [
+        {
+          "id": 164,
+          "kind": 3,
+          "dependencies": []
+        },
+        {
+          "id": 619,
+          "kind": 3,
+          "dependencies": []
+        },
+        {
+          "id": 885,
+          "kind": 4,
+          "dependencies": [
+            619
+          ]
+        },
+        {
+          "id": 1129,
+          "kind": 3,
+          "dependencies": [
+            619
+          ]
+        },
+        {
+          "id": 512,
+          "kind": 1,
+          "dependencies": []
+        },
+        {
+          "id": 1021,
+          "kind": 2,
+          "dependencies": [
+            164,
+            885,
+            1129
+          ]
+        },
+        {
+          "id": 408,
+          "kind": 1,
+          "dependencies": []
+        },
+        {
+          "id": 1811,
+          "kind": 4,
+          "dependencies": [
+            512
+          ]
+        },
+        {
+          "id": 1543,
+          "kind": 2,
+          "dependencies": [
+            408,
+            1021,
+            1811
+          ]
+        },
+        {
+          "id": 431,
+          "kind": 1,
+          "dependencies": [
+            1021
+          ]
+        },
+        {
+          "id": 1333,
+          "kind": 1,
+          "dependencies": [
+            512,
+            1021,
+            1811
+          ]
+        },
+        {
+          "id": 192,
+          "kind": 4,
+          "dependencies": [
+            512,
+            1543
+          ]
+        }
+      ],
+      "initially_ready": [],
+      "versions": [
+        {
+          "version": 0,
+          "original_order": [
+            408,
+            512,
+            1811,
+            164,
+            619,
+            885,
+            1129,
+            1021,
+            431,
+            1333,
+            1543,
+            192
+          ],
+          "expected_order": [
+            408,
+            512,
+            1811,
+            164,
+            619,
+            885,
+            1129,
+            1021,
+            431,
+            1333,
+            1543,
+            192
+          ],
+          "original_registration_groups": {
+            "600": [
+              164
+            ],
+            "700": [
+              619,
+              1129
+            ]
+          },
+          "all_ready": true,
+          "repeated_ids": false
+        },
+        {
+          "version": 1,
+          "original_order": [
+            408,
+            512,
+            1811,
+            164,
+            619,
+            885,
+            1129,
+            1021,
+            431,
+            1333,
+            1543,
+            192
+          ],
+          "expected_order": [
+            408,
+            512,
+            1811,
+            164,
+            619,
+            885,
+            1129,
+            1021,
+            431,
+            1333,
+            1543,
+            192
+          ],
+          "original_registration_groups": {
+            "600": [
+              164
+            ],
+            "700": [
+              619,
+              1129
+            ]
+          },
+          "all_ready": true,
+          "repeated_ids": false
+        }
+      ]
+    },
+    {
+      "name": "dag_11",
+      "nodes": [
+        {
+          "id": 1132,
+          "kind": 1,
+          "dependencies": []
+        },
+        {
+          "id": 247,
+          "kind": 1,
+          "dependencies": [
+            1132
+          ]
+        },
+        {
+          "id": 1977,
+          "kind": 4,
+          "dependencies": [
+            247
+          ]
+        },
+        {
+          "id": 1297,
+          "kind": 1,
+          "dependencies": [
+            1977
+          ]
+        },
+        {
+          "id": 844,
+          "kind": 3,
+          "dependencies": [
+            1132
+          ]
+        },
+        {
+          "id": 732,
+          "kind": 1,
+          "dependencies": [
+            1297
+          ]
+        },
+        {
+          "id": 1625,
+          "kind": 3,
+          "dependencies": [
+            732
+          ]
+        },
+        {
+          "id": 985,
+          "kind": 2,
+          "dependencies": [
+            1297
+          ]
+        },
+        {
+          "id": 855,
+          "kind": 4,
+          "dependencies": [
+            247,
+            985,
+            1297
+          ]
+        },
+        {
+          "id": 1642,
+          "kind": 3,
+          "dependencies": [
+            1297,
+            1625
+          ]
+        },
+        {
+          "id": 915,
+          "kind": 1,
+          "dependencies": [
+            732,
+            1625
+          ]
+        },
+        {
+          "id": 1826,
+          "kind": 2,
+          "dependencies": [
+            915
+          ]
+        }
+      ],
+      "initially_ready": [],
+      "versions": [
+        {
+          "version": 0,
+          "original_order": [
+            1132,
+            247,
+            1977,
+            1297,
+            732,
+            985,
+            855,
+            844,
+            1625,
+            915,
+            1826,
+            1642
+          ],
+          "expected_order": [
+            1132,
+            247,
+            1977,
+            1297,
+            732,
+            985,
+            855,
+            844,
+            1625,
+            915,
+            1826,
+            1642
+          ],
+          "original_registration_groups": {
+            "600": [
+              844,
+              1642
+            ],
+            "700": [
+              1625
+            ]
+          },
+          "all_ready": true,
+          "repeated_ids": false
+        },
+        {
+          "version": 1,
+          "original_order": [
+            1132,
+            247,
+            1977,
+            1297,
+            732,
+            985,
+            855,
+            844,
+            1625,
+            915,
+            1826,
+            1642
+          ],
+          "expected_order": [
+            1132,
+            247,
+            1977,
+            1297,
+            732,
+            985,
+            855,
+            844,
+            1625,
+            915,
+            1826,
+            1642
+          ],
+          "original_registration_groups": {
+            "600": [
+              844,
+              1642
+            ],
+            "700": [
+              1625
+            ]
+          },
+          "all_ready": true,
+          "repeated_ids": false
+        }
+      ]
+    },
+    {
+      "name": "dag_12",
+      "nodes": [
+        {
+          "id": 1284,
+          "kind": 1,
+          "dependencies": []
+        },
+        {
+          "id": 1135,
+          "kind": 4,
+          "dependencies": [
+            1284
+          ]
+        },
+        {
+          "id": 1140,
+          "kind": 3,
+          "dependencies": []
+        },
+        {
+          "id": 1529,
+          "kind": 2,
+          "dependencies": [
+            1135,
+            1140,
+            1284
+          ]
+        },
+        {
+          "id": 243,
+          "kind": 1,
+          "dependencies": [
+            1140,
+            1529
+          ]
+        },
+        {
+          "id": 1626,
+          "kind": 3,
+          "dependencies": []
+        },
+        {
+          "id": 1872,
+          "kind": 2,
+          "dependencies": [
+            243,
+            1140
+          ]
+        },
+        {
+          "id": 455,
+          "kind": 1,
+          "dependencies": [
+            243,
+            1284,
+            1872
+          ]
+        },
+        {
+          "id": 1466,
+          "kind": 3,
+          "dependencies": [
+            243,
+            1284
+          ]
+        },
+        {
+          "id": 1945,
+          "kind": 4,
+          "dependencies": [
+            243,
+            1284,
+            1529
+          ]
+        },
+        {
+          "id": 372,
+          "kind": 2,
+          "dependencies": [
+            455,
+            1284
+          ]
+        },
+        {
+          "id": 1934,
+          "kind": 2,
+          "dependencies": [
+            372,
+            1140
+          ]
+        }
+      ],
+      "initially_ready": [],
+      "versions": [
+        {
+          "version": 0,
+          "original_order": [
+            1284,
+            1135,
+            1140,
+            1529,
+            243,
+            1872,
+            455,
+            372,
+            1934,
+            1945,
+            1945,
+            1872,
+            1934,
+            1466,
+            1626
+          ],
+          "expected_order": [
+            1284,
+            1135,
+            1140,
+            1529,
+            243,
+            1872,
+            455,
+            372,
+            1934,
+            1945,
+            1945,
+            1872,
+            1934,
+            1466,
+            1626
+          ],
+          "original_registration_groups": {
+            "600": [
+              1140,
+              1466,
+              1626
+            ]
+          },
+          "all_ready": true,
+          "repeated_ids": true
+        },
+        {
+          "version": 1,
+          "original_order": [
+            1284,
+            1135,
+            1140,
+            1529,
+            243,
+            1872,
+            455,
+            372,
+            1934,
+            1945,
+            1945,
+            1872,
+            1934,
+            1466,
+            1626
+          ],
+          "expected_order": [
+            1284,
+            1135,
+            1140,
+            1529,
+            243,
+            1872,
+            455,
+            372,
+            1934,
+            1945,
+            1945,
+            1872,
+            1934,
+            1466,
+            1626
+          ],
+          "original_registration_groups": {
+            "600": [
+              1140,
+              1466,
+              1626
+            ]
+          },
+          "all_ready": true,
+          "repeated_ids": true
+        }
+      ]
+    },
+    {
+      "name": "dag_13",
+      "nodes": [
+        {
+          "id": 1900,
+          "kind": 2,
+          "dependencies": []
+        },
+        {
+          "id": 771,
+          "kind": 3,
+          "dependencies": [
+            1900
+          ]
+        },
+        {
+          "id": 1291,
+          "kind": 3,
+          "dependencies": [
+            1900
+          ]
+        },
+        {
+          "id": 129,
+          "kind": 1,
+          "dependencies": [
+            771,
+            1291,
+            1900
+          ]
+        },
+        {
+          "id": 555,
+          "kind": 4,
+          "dependencies": [
+            129
+          ]
+        },
+        {
+          "id": 1583,
+          "kind": 4,
+          "dependencies": [
+            129,
+            555
+          ]
+        },
+        {
+          "id": 1808,
+          "kind": 2,
+          "dependencies": [
+            555
+          ]
+        },
+        {
+          "id": 1668,
+          "kind": 1,
+          "dependencies": [
+            555,
+            771,
+            1900
+          ]
+        },
+        {
+          "id": 1021,
+          "kind": 4,
+          "dependencies": [
+            555,
+            1583
+          ]
+        },
+        {
+          "id": 1371,
+          "kind": 4,
+          "dependencies": [
+            555,
+            1021
+          ]
+        },
+        {
+          "id": 1082,
+          "kind": 2,
+          "dependencies": [
+            555,
+            1291
+          ]
+        },
+        {
+          "id": 317,
+          "kind": 2,
+          "dependencies": [
+            555,
+            1668
+          ]
+        }
+      ],
+      "initially_ready": [],
+      "versions": [
+        {
+          "version": 0,
+          "original_order": [
+            1900,
+            771,
+            1291,
+            129,
+            555,
+            1082,
+            1583,
+            1021,
+            1371,
+            1668,
+            317,
+            1808,
+            1583,
+            1082
+          ],
+          "expected_order": [
+            1900,
+            771,
+            1291,
+            129,
+            555,
+            1082,
+            1583,
+            1021,
+            1371,
+            1668,
+            317,
+            1808,
+            1583,
+            1082
+          ],
+          "original_registration_groups": {
+            "700": [
+              771,
+              1291
+            ]
+          },
+          "all_ready": true,
+          "repeated_ids": true
+        },
+        {
+          "version": 1,
+          "original_order": [
+            1900,
+            771,
+            1291,
+            129,
+            555,
+            1082,
+            1583,
+            1021,
+            1371,
+            1668,
+            317,
+            1808,
+            1583,
+            1082
+          ],
+          "expected_order": [
+            1900,
+            771,
+            1291,
+            129,
+            555,
+            1082,
+            1583,
+            1021,
+            1371,
+            1668,
+            317,
+            1808,
+            1583,
+            1082
+          ],
+          "original_registration_groups": {
+            "700": [
+              771,
+              1291
+            ]
+          },
+          "all_ready": true,
+          "repeated_ids": true
+        }
+      ]
+    },
+    {
+      "name": "dag_14",
+      "nodes": [
+        {
+          "id": 1787,
+          "kind": 4,
+          "dependencies": []
+        },
+        {
+          "id": 908,
+          "kind": 3,
+          "dependencies": [
+            1787
+          ]
+        },
+        {
+          "id": 646,
+          "kind": 4,
+          "dependencies": [
+            908,
+            1787
+          ]
+        },
+        {
+          "id": 114,
+          "kind": 4,
+          "dependencies": [
+            908,
+            1787
+          ]
+        },
+        {
+          "id": 1739,
+          "kind": 4,
+          "dependencies": [
+            114,
+            646,
+            1787
+          ]
+        },
+        {
+          "id": 390,
+          "kind": 4,
+          "dependencies": [
+            646
+          ]
+        },
+        {
+          "id": 532,
+          "kind": 3,
+          "dependencies": [
+            908
+          ]
+        },
+        {
+          "id": 1797,
+          "kind": 4,
+          "dependencies": [
+            646,
+            1787
+          ]
+        },
+        {
+          "id": 1009,
+          "kind": 3,
+          "dependencies": [
+            114,
+            390,
+            1787
+          ]
+        },
+        {
+          "id": 1407,
+          "kind": 4,
+          "dependencies": [
+            390
+          ]
+        },
+        {
+          "id": 619,
+          "kind": 3,
+          "dependencies": [
+            646,
+            1787
+          ]
+        },
+        {
+          "id": 432,
+          "kind": 1,
+          "dependencies": [
+            532,
+            1407,
+            1797
+          ]
+        }
+      ],
+      "initially_ready": [],
+      "versions": [
+        {
+          "version": 0,
+          "original_order": [
+            1787,
+            908,
+            114,
+            532,
+            646,
+            390,
+            1407,
+            619,
+            1739,
+            1797,
+            432,
+            1009
+          ],
+          "expected_order": [
+            1787,
+            908,
+            114,
+            532,
+            646,
+            390,
+            1407,
+            619,
+            1739,
+            1797,
+            432,
+            1009
+          ],
+          "original_registration_groups": {
+            "600": [
+              908,
+              532
+            ],
+            "700": [
+              619,
+              1009
+            ]
+          },
+          "all_ready": true,
+          "repeated_ids": false
+        },
+        {
+          "version": 1,
+          "original_order": [
+            1787,
+            908,
+            114,
+            532,
+            646,
+            390,
+            1407,
+            619,
+            1739,
+            1797,
+            432,
+            1009
+          ],
+          "expected_order": [
+            1787,
+            908,
+            114,
+            532,
+            646,
+            390,
+            1407,
+            619,
+            1739,
+            1797,
+            432,
+            1009
+          ],
+          "original_registration_groups": {
+            "600": [
+              908,
+              532
+            ],
+            "700": [
+              619,
+              1009
+            ]
+          },
+          "all_ready": true,
+          "repeated_ids": false
+        }
+      ]
+    },
+    {
+      "name": "dag_15",
+      "nodes": [
+        {
+          "id": 846,
+          "kind": 4,
+          "dependencies": []
+        },
+        {
+          "id": 342,
+          "kind": 4,
+          "dependencies": [
+            846
+          ]
+        },
+        {
+          "id": 378,
+          "kind": 1,
+          "dependencies": [
+            342,
+            846
+          ]
+        },
+        {
+          "id": 1419,
+          "kind": 1,
+          "dependencies": [
+            378,
+            846
+          ]
+        },
+        {
+          "id": 1604,
+          "kind": 4,
+          "dependencies": []
+        },
+        {
+          "id": 1931,
+          "kind": 4,
+          "dependencies": [
+            846
+          ]
+        },
+        {
+          "id": 1002,
+          "kind": 2,
+          "dependencies": []
+        },
+        {
+          "id": 1570,
+          "kind": 1,
+          "dependencies": [
+            846,
+            1419
+          ]
+        },
+        {
+          "id": 561,
+          "kind": 3,
+          "dependencies": []
+        },
+        {
+          "id": 1369,
+          "kind": 3,
+          "dependencies": [
+            1604
+          ]
+        },
+        {
+          "id": 1197,
+          "kind": 4,
+          "dependencies": [
+            1570
+          ]
+        },
+        {
+          "id": 74,
+          "kind": 4,
+          "dependencies": [
+            378,
+            1002,
+            1369
+          ]
+        }
+      ],
+      "initially_ready": [],
+      "versions": [
+        {
+          "version": 0,
+          "original_order": [
+            846,
+            342,
+            1604,
+            1931,
+            1002,
+            378,
+            1419,
+            1570,
+            1197,
+            561,
+            1369,
+            74
+          ],
+          "expected_order": [
+            846,
+            342,
+            1604,
+            1931,
+            1002,
+            378,
+            1419,
+            1570,
+            1197,
+            561,
+            1369,
+            74
+          ],
+          "original_registration_groups": {
+            "700": [
+              561,
+              1369
+            ]
+          },
+          "all_ready": true,
+          "repeated_ids": false
+        },
+        {
+          "version": 1,
+          "original_order": [
+            846,
+            342,
+            1604,
+            1931,
+            1002,
+            378,
+            1419,
+            1570,
+            1197,
+            561,
+            1369,
+            74
+          ],
+          "expected_order": [
+            846,
+            342,
+            1604,
+            1931,
+            1002,
+            378,
+            1419,
+            1570,
+            1197,
+            561,
+            1369,
+            74
+          ],
+          "original_registration_groups": {
+            "700": [
+              561,
+              1369
+            ]
+          },
+          "all_ready": true,
+          "repeated_ids": false
+        }
+      ]
+    },
+    {
+      "name": "dag_16",
+      "nodes": [
+        {
+          "id": 554,
+          "kind": 2,
+          "dependencies": []
+        },
+        {
+          "id": 1121,
+          "kind": 3,
+          "dependencies": [
+            554
+          ]
+        },
+        {
+          "id": 214,
+          "kind": 2,
+          "dependencies": []
+        },
+        {
+          "id": 707,
+          "kind": 1,
+          "dependencies": [
+            1121
+          ]
+        },
+        {
+          "id": 88,
+          "kind": 4,
+          "dependencies": []
+        },
+        {
+          "id": 1886,
+          "kind": 4,
+          "dependencies": []
+        },
+        {
+          "id": 1647,
+          "kind": 3,
+          "dependencies": [
+            214,
+            1121
+          ]
+        },
+        {
+          "id": 1762,
+          "kind": 3,
+          "dependencies": [
+            1121,
+            1886
+          ]
+        },
+        {
+          "id": 420,
+          "kind": 3,
+          "dependencies": []
+        },
+        {
+          "id": 1633,
+          "kind": 2,
+          "dependencies": []
+        },
+        {
+          "id": 1714,
+          "kind": 1,
+          "dependencies": [
+            420,
+            554,
+            1633
+          ]
+        },
+        {
+          "id": 487,
+          "kind": 2,
+          "dependencies": [
+            707
+          ]
+        }
+      ],
+      "initially_ready": [],
+      "versions": [
+        {
+          "version": 0,
+          "original_order": [
+            88,
+            1886,
+            214,
+            554,
+            1633,
+            420,
+            1714,
+            1121,
+            707,
+            487,
+            1647,
+            1762
+          ],
+          "expected_order": [
+            88,
+            1886,
+            214,
+            554,
+            1633,
+            420,
+            1714,
+            1121,
+            707,
+            487,
+            1647,
+            1762
+          ],
+          "original_registration_groups": {
+            "600": [
+              420,
+              1762
+            ],
+            "700": [
+              1121,
+              1647
+            ]
+          },
+          "all_ready": true,
+          "repeated_ids": false
+        },
+        {
+          "version": 1,
+          "original_order": [
+            88,
+            1886,
+            214,
+            554,
+            1633,
+            420,
+            1714,
+            1121,
+            707,
+            487,
+            1647,
+            1762
+          ],
+          "expected_order": [
+            88,
+            1886,
+            214,
+            554,
+            1633,
+            420,
+            1714,
+            1121,
+            707,
+            487,
+            1647,
+            1762
+          ],
+          "original_registration_groups": {
+            "600": [
+              420,
+              1762
+            ],
+            "700": [
+              1121,
+              1647
+            ]
+          },
+          "all_ready": true,
+          "repeated_ids": false
+        }
+      ]
+    },
+    {
+      "name": "dag_17",
+      "nodes": [
+        {
+          "id": 363,
+          "kind": 1,
+          "dependencies": []
+        },
+        {
+          "id": 661,
+          "kind": 4,
+          "dependencies": [
+            363
+          ]
+        },
+        {
+          "id": 1744,
+          "kind": 3,
+          "dependencies": [
+            363,
+            661
+          ]
+        },
+        {
+          "id": 1671,
+          "kind": 1,
+          "dependencies": []
+        },
+        {
+          "id": 772,
+          "kind": 4,
+          "dependencies": [
+            661,
+            1671
+          ]
+        },
+        {
+          "id": 659,
+          "kind": 4,
+          "dependencies": [
+            661
+          ]
+        },
+        {
+          "id": 1591,
+          "kind": 3,
+          "dependencies": [
+            659,
+            1744
+          ]
+        },
+        {
+          "id": 1445,
+          "kind": 4,
+          "dependencies": []
+        },
+        {
+          "id": 862,
+          "kind": 3,
+          "dependencies": [
+            363,
+            1445
+          ]
+        },
+        {
+          "id": 1945,
+          "kind": 3,
+          "dependencies": []
+        },
+        {
+          "id": 737,
+          "kind": 3,
+          "dependencies": [
+            1945
+          ]
+        },
+        {
+          "id": 139,
+          "kind": 3,
+          "dependencies": [
+            1945
+          ]
+        }
+      ],
+      "initially_ready": [],
+      "versions": [
+        {
+          "version": 0,
+          "original_order": [
+            1445,
+            363,
+            661,
+            659,
+            1671,
+            772,
+            862,
+            1744,
+            1591,
+            1945,
+            139,
+            737
+          ],
+          "expected_order": [
+            1445,
+            363,
+            661,
+            659,
+            1671,
+            772,
+            862,
+            1744,
+            1591,
+            1945,
+            139,
+            737
+          ],
+          "original_registration_groups": {
+            "600": [
+              862,
+              1744
+            ],
+            "700": [
+              1591,
+              1945,
+              139,
+              737
+            ]
+          },
+          "all_ready": true,
+          "repeated_ids": false
+        },
+        {
+          "version": 1,
+          "original_order": [
+            1445,
+            363,
+            661,
+            659,
+            1671,
+            772,
+            862,
+            1744,
+            1591,
+            1945,
+            139,
+            737
+          ],
+          "expected_order": [
+            1445,
+            363,
+            661,
+            659,
+            1671,
+            772,
+            862,
+            1744,
+            1591,
+            1945,
+            139,
+            737
+          ],
+          "original_registration_groups": {
+            "600": [
+              862,
+              1744
+            ],
+            "700": [
+              1591,
+              1945,
+              139,
+              737
+            ]
+          },
+          "all_ready": true,
+          "repeated_ids": false
+        }
+      ]
+    },
+    {
+      "name": "dag_18",
+      "nodes": [
+        {
+          "id": 1530,
+          "kind": 3,
+          "dependencies": []
+        },
+        {
+          "id": 745,
+          "kind": 3,
+          "dependencies": [
+            1530
+          ]
+        },
+        {
+          "id": 325,
+          "kind": 4,
+          "dependencies": [
+            1530
+          ]
+        },
+        {
+          "id": 237,
+          "kind": 3,
+          "dependencies": [
+            1530
+          ]
+        },
+        {
+          "id": 1009,
+          "kind": 1,
+          "dependencies": [
+            237,
+            325,
+            745
+          ]
+        },
+        {
+          "id": 593,
+          "kind": 1,
+          "dependencies": []
+        },
+        {
+          "id": 1671,
+          "kind": 1,
+          "dependencies": [
+            237,
+            593,
+            745
+          ]
+        },
+        {
+          "id": 1446,
+          "kind": 4,
+          "dependencies": [
+            745,
+            1009,
+            1530
+          ]
+        },
+        {
+          "id": 1753,
+          "kind": 1,
+          "dependencies": []
+        },
+        {
+          "id": 739,
+          "kind": 3,
+          "dependencies": []
+        },
+        {
+          "id": 1865,
+          "kind": 2,
+          "dependencies": [
+            237,
+            593
+          ]
+        },
+        {
+          "id": 669,
+          "kind": 2,
+          "dependencies": [
+            1446,
+            1671
+          ]
+        }
+      ],
+      "initially_ready": [],
+      "versions": [
+        {
+          "version": 0,
+          "original_order": [
+            593,
+            1753,
+            739,
+            1530,
+            237,
+            1865,
+            325,
+            745,
+            1009,
+            1446,
+            1446,
+            1671,
+            669,
+            1446
+          ],
+          "expected_order": [
+            593,
+            1753,
+            739,
+            1530,
+            237,
+            1865,
+            325,
+            745,
+            1009,
+            1446,
+            1446,
+            1671,
+            669,
+            1446
+          ],
+          "original_registration_groups": {
+            "600": [
+              1530
+            ],
+            "700": [
+              739,
+              237,
+              745
+            ]
+          },
+          "all_ready": true,
+          "repeated_ids": true
+        },
+        {
+          "version": 1,
+          "original_order": [
+            593,
+            1753,
+            739,
+            1530,
+            237,
+            1865,
+            325,
+            745,
+            1009,
+            1446,
+            1446,
+            1671,
+            669,
+            1446
+          ],
+          "expected_order": [
+            593,
+            1753,
+            739,
+            1530,
+            237,
+            1865,
+            325,
+            745,
+            1009,
+            1446,
+            1446,
+            1671,
+            669,
+            1446
+          ],
+          "original_registration_groups": {
+            "600": [
+              1530
+            ],
+            "700": [
+              739,
+              237,
+              745
+            ]
+          },
+          "all_ready": true,
+          "repeated_ids": true
+        }
+      ]
+    },
+    {
+      "name": "dag_19",
+      "nodes": [
+        {
+          "id": 800,
+          "kind": 1,
+          "dependencies": []
+        },
+        {
+          "id": 1698,
+          "kind": 2,
+          "dependencies": []
+        },
+        {
+          "id": 680,
+          "kind": 4,
+          "dependencies": [
+            800,
+            1698
+          ]
+        },
+        {
+          "id": 63,
+          "kind": 2,
+          "dependencies": []
+        },
+        {
+          "id": 1719,
+          "kind": 3,
+          "dependencies": []
+        },
+        {
+          "id": 1337,
+          "kind": 1,
+          "dependencies": [
+            63,
+            800,
+            1698
+          ]
+        },
+        {
+          "id": 1093,
+          "kind": 1,
+          "dependencies": []
+        },
+        {
+          "id": 771,
+          "kind": 4,
+          "dependencies": [
+            680,
+            1698
+          ]
+        },
+        {
+          "id": 1820,
+          "kind": 4,
+          "dependencies": [
+            63,
+            1093
+          ]
+        },
+        {
+          "id": 256,
+          "kind": 3,
+          "dependencies": [
+            1093
+          ]
+        },
+        {
+          "id": 1679,
+          "kind": 4,
+          "dependencies": []
+        },
+        {
+          "id": 1462,
+          "kind": 1,
+          "dependencies": [
+            63,
+            800
+          ]
+        }
+      ],
+      "initially_ready": [],
+      "versions": [
+        {
+          "version": 0,
+          "original_order": [
+            1679,
+            63,
+            1698,
+            800,
+            680,
+            771,
+            1093,
+            1820,
+            1337,
+            1462,
+            256,
+            1719
+          ],
+          "expected_order": [
+            1679,
+            63,
+            1698,
+            800,
+            680,
+            771,
+            1093,
+            1820,
+            1337,
+            1462,
+            256,
+            1719
+          ],
+          "original_registration_groups": {
+            "600": [
+              256
+            ],
+            "700": [
+              1719
+            ]
+          },
+          "all_ready": true,
+          "repeated_ids": false
+        },
+        {
+          "version": 1,
+          "original_order": [
+            1679,
+            63,
+            1698,
+            800,
+            680,
+            771,
+            1093,
+            1820,
+            1337,
+            1462,
+            256,
+            1719
+          ],
+          "expected_order": [
+            1679,
+            63,
+            1698,
+            800,
+            680,
+            771,
+            1093,
+            1820,
+            1337,
+            1462,
+            256,
+            1719
+          ],
+          "original_registration_groups": {
+            "600": [
+              256
+            ],
+            "700": [
+              1719
+            ]
+          },
+          "all_ready": true,
+          "repeated_ids": false
+        }
+      ]
+    },
+    {
+      "name": "dag_20",
+      "nodes": [
+        {
+          "id": 817,
+          "kind": 3,
+          "dependencies": []
+        },
+        {
+          "id": 95,
+          "kind": 2,
+          "dependencies": [
+            817
+          ]
+        },
+        {
+          "id": 511,
+          "kind": 1,
+          "dependencies": [
+            95,
+            817
+          ]
+        },
+        {
+          "id": 495,
+          "kind": 3,
+          "dependencies": []
+        },
+        {
+          "id": 352,
+          "kind": 4,
+          "dependencies": [
+            495,
+            511,
+            817
+          ]
+        },
+        {
+          "id": 1391,
+          "kind": 1,
+          "dependencies": [
+            95
+          ]
+        },
+        {
+          "id": 308,
+          "kind": 4,
+          "dependencies": [
+            352,
+            511
+          ]
+        },
+        {
+          "id": 1552,
+          "kind": 4,
+          "dependencies": [
+            511
+          ]
+        },
+        {
+          "id": 299,
+          "kind": 3,
+          "dependencies": [
+            308,
+            817,
+            1552
+          ]
+        },
+        {
+          "id": 536,
+          "kind": 2,
+          "dependencies": []
+        },
+        {
+          "id": 1976,
+          "kind": 4,
+          "dependencies": [
+            1552
+          ]
+        },
+        {
+          "id": 1039,
+          "kind": 1,
+          "dependencies": []
+        }
+      ],
+      "initially_ready": [],
+      "versions": [
+        {
+          "version": 0,
+          "original_order": [
+            536,
+            1039,
+            495,
+            817,
+            95,
+            511,
+            352,
+            308,
+            1552,
+            299,
+            1976,
+            1391,
+            299,
+            352,
+            511
+          ],
+          "expected_order": [
+            536,
+            1039,
+            495,
+            817,
+            95,
+            511,
+            352,
+            308,
+            1552,
+            299,
+            1976,
+            1391,
+            299,
+            352,
+            511
+          ],
+          "original_registration_groups": {
+            "700": [
+              495,
+              817,
+              299,
+              299
+            ]
+          },
+          "all_ready": true,
+          "repeated_ids": true
+        },
+        {
+          "version": 1,
+          "original_order": [
+            536,
+            1039,
+            495,
+            817,
+            95,
+            511,
+            352,
+            308,
+            1552,
+            299,
+            1976,
+            1391,
+            299,
+            352,
+            511
+          ],
+          "expected_order": [
+            536,
+            1039,
+            495,
+            817,
+            95,
+            511,
+            352,
+            308,
+            1552,
+            299,
+            1976,
+            1391,
+            299,
+            352,
+            511
+          ],
+          "original_registration_groups": {
+            "700": [
+              495,
+              817,
+              299,
+              299
+            ]
+          },
+          "all_ready": true,
+          "repeated_ids": true
+        }
+      ]
+    },
+    {
+      "name": "dag_21",
+      "nodes": [
+        {
+          "id": 209,
+          "kind": 3,
+          "dependencies": []
+        },
+        {
+          "id": 760,
+          "kind": 3,
+          "dependencies": [
+            209
+          ]
+        },
+        {
+          "id": 965,
+          "kind": 3,
+          "dependencies": []
+        },
+        {
+          "id": 43,
+          "kind": 4,
+          "dependencies": [
+            209
+          ]
+        },
+        {
+          "id": 589,
+          "kind": 2,
+          "dependencies": []
+        },
+        {
+          "id": 1353,
+          "kind": 1,
+          "dependencies": []
+        },
+        {
+          "id": 7,
+          "kind": 2,
+          "dependencies": [
+            209,
+            589
+          ]
+        },
+        {
+          "id": 609,
+          "kind": 3,
+          "dependencies": [
+            209
+          ]
+        },
+        {
+          "id": 1422,
+          "kind": 1,
+          "dependencies": [
+            43,
+            209
+          ]
+        },
+        {
+          "id": 313,
+          "kind": 3,
+          "dependencies": [
+            589,
+            965,
+            1422
+          ]
+        },
+        {
+          "id": 1822,
+          "kind": 3,
+          "dependencies": [
+            7
+          ]
+        },
+        {
+          "id": 494,
+          "kind": 1,
+          "dependencies": [
+            43,
+            313,
+            1422
+          ]
+        }
+      ],
+      "initially_ready": [],
+      "versions": [
+        {
+          "version": 0,
+          "original_order": [
+            589,
+            1353,
+            209,
+            7,
+            43,
+            1422,
+            1422,
+            609,
+            760,
+            965,
+            313,
+            494,
+            1822
+          ],
+          "expected_order": [
+            589,
+            1353,
+            209,
+            7,
+            43,
+            1422,
+            1422,
+            609,
+            760,
+            965,
+            313,
+            494,
+            1822
+          ],
+          "original_registration_groups": {
+            "600": [
+              760,
+              1822
+            ],
+            "700": [
+              209,
+              609,
+              965,
+              313
+            ]
+          },
+          "all_ready": true,
+          "repeated_ids": true
+        },
+        {
+          "version": 1,
+          "original_order": [
+            589,
+            1353,
+            209,
+            7,
+            43,
+            1422,
+            1422,
+            609,
+            760,
+            965,
+            313,
+            494,
+            1822
+          ],
+          "expected_order": [
+            589,
+            1353,
+            209,
+            7,
+            43,
+            1422,
+            1422,
+            609,
+            760,
+            965,
+            313,
+            494,
+            1822
+          ],
+          "original_registration_groups": {
+            "600": [
+              760,
+              1822
+            ],
+            "700": [
+              209,
+              609,
+              965,
+              313
+            ]
+          },
+          "all_ready": true,
+          "repeated_ids": true
+        }
+      ]
+    },
+    {
+      "name": "dag_22",
+      "nodes": [
+        {
+          "id": 1509,
+          "kind": 2,
+          "dependencies": []
+        },
+        {
+          "id": 1221,
+          "kind": 3,
+          "dependencies": [
+            1509
+          ]
+        },
+        {
+          "id": 1183,
+          "kind": 2,
+          "dependencies": [
+            1221,
+            1509
+          ]
+        },
+        {
+          "id": 433,
+          "kind": 2,
+          "dependencies": [
+            1183,
+            1221,
+            1509
+          ]
+        },
+        {
+          "id": 650,
+          "kind": 3,
+          "dependencies": [
+            433,
+            1183,
+            1509
+          ]
+        },
+        {
+          "id": 1380,
+          "kind": 2,
+          "dependencies": [
+            650,
+            1183,
+            1221
+          ]
+        },
+        {
+          "id": 477,
+          "kind": 2,
+          "dependencies": [
+            650,
+            1509
+          ]
+        },
+        {
+          "id": 1853,
+          "kind": 1,
+          "dependencies": [
+            433,
+            1183
+          ]
+        },
+        {
+          "id": 53,
+          "kind": 3,
+          "dependencies": [
+            1183
+          ]
+        },
+        {
+          "id": 1535,
+          "kind": 3,
+          "dependencies": []
+        },
+        {
+          "id": 794,
+          "kind": 1,
+          "dependencies": [
+            1221,
+            1509
+          ]
+        },
+        {
+          "id": 357,
+          "kind": 2,
+          "dependencies": []
+        }
+      ],
+      "initially_ready": [],
+      "versions": [
+        {
+          "version": 0,
+          "original_order": [
+            357,
+            1509,
+            1221,
+            794,
+            1183,
+            53,
+            433,
+            650,
+            477,
+            1380,
+            1853,
+            650,
+            1380,
+            1853,
+            1380,
+            1535
+          ],
+          "expected_order": [
+            357,
+            1509,
+            1221,
+            794,
+            1183,
+            53,
+            433,
+            650,
+            477,
+            1380,
+            1853,
+            650,
+            1380,
+            1853,
+            1380,
+            1535
+          ],
+          "original_registration_groups": {
+            "600": [
+              650,
+              650
+            ],
+            "700": [
+              1221,
+              53,
+              1535
+            ]
+          },
+          "all_ready": true,
+          "repeated_ids": true
+        },
+        {
+          "version": 1,
+          "original_order": [
+            357,
+            1509,
+            1221,
+            794,
+            1183,
+            53,
+            433,
+            650,
+            477,
+            1380,
+            1853,
+            650,
+            1380,
+            1853,
+            1380,
+            1535
+          ],
+          "expected_order": [
+            357,
+            1509,
+            1221,
+            794,
+            1183,
+            53,
+            433,
+            650,
+            477,
+            1380,
+            1853,
+            650,
+            1380,
+            1853,
+            1380,
+            1535
+          ],
+          "original_registration_groups": {
+            "600": [
+              650,
+              650
+            ],
+            "700": [
+              1221,
+              53,
+              1535
+            ]
+          },
+          "all_ready": true,
+          "repeated_ids": true
+        }
+      ]
+    },
+    {
+      "name": "dag_23",
+      "nodes": [
+        {
+          "id": 1082,
+          "kind": 1,
+          "dependencies": []
+        },
+        {
+          "id": 1139,
+          "kind": 3,
+          "dependencies": [
+            1082
+          ]
+        },
+        {
+          "id": 1147,
+          "kind": 2,
+          "dependencies": [
+            1082,
+            1139
+          ]
+        },
+        {
+          "id": 240,
+          "kind": 1,
+          "dependencies": [
+            1082
+          ]
+        },
+        {
+          "id": 1004,
+          "kind": 2,
+          "dependencies": [
+            240,
+            1139
+          ]
+        },
+        {
+          "id": 1500,
+          "kind": 1,
+          "dependencies": [
+            1082,
+            1147
+          ]
+        },
+        {
+          "id": 1145,
+          "kind": 1,
+          "dependencies": [
+            1082,
+            1500
+          ]
+        },
+        {
+          "id": 1058,
+          "kind": 4,
+          "dependencies": []
+        },
+        {
+          "id": 1223,
+          "kind": 4,
+          "dependencies": [
+            1004,
+            1058,
+            1500
+          ]
+        },
+        {
+          "id": 573,
+          "kind": 2,
+          "dependencies": [
+            240,
+            1145
+          ]
+        },
+        {
+          "id": 1487,
+          "kind": 1,
+          "dependencies": [
+            1223
+          ]
+        },
+        {
+          "id": 1353,
+          "kind": 4,
+          "dependencies": [
+            1487,
+            1500
+          ]
+        }
+      ],
+      "initially_ready": [],
+      "versions": [
+        {
+          "version": 0,
+          "original_order": [
+            1058,
+            1082,
+            240,
+            1139,
+            1004,
+            1147,
+            1500,
+            1145,
+            573,
+            1223,
+            1487,
+            1353,
+            1353
+          ],
+          "expected_order": [
+            1058,
+            1082,
+            240,
+            1139,
+            1004,
+            1147,
+            1500,
+            1145,
+            573,
+            1223,
+            1487,
+            1353,
+            1353
+          ],
+          "original_registration_groups": {
+            "700": [
+              1139
+            ]
+          },
+          "all_ready": true,
+          "repeated_ids": true
+        },
+        {
+          "version": 1,
+          "original_order": [
+            1058,
+            1082,
+            240,
+            1139,
+            1004,
+            1147,
+            1500,
+            1145,
+            573,
+            1223,
+            1487,
+            1353,
+            1353
+          ],
+          "expected_order": [
+            1058,
+            1082,
+            240,
+            1139,
+            1004,
+            1147,
+            1500,
+            1145,
+            573,
+            1223,
+            1487,
+            1353,
+            1353
+          ],
+          "original_registration_groups": {
+            "700": [
+              1139
+            ]
+          },
+          "all_ready": true,
+          "repeated_ids": true
+        }
+      ]
+    }
+  ]
+}
