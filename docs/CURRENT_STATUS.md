@@ -1,7 +1,25 @@
 # Current capabilities and compatibility
 
 Reviewed **2026-10-06**. The user authorized M4, then M5, while keeping M3 open.
-The latest [source-build and packaging acceptance](SOURCE_BUILD_AND_PACKAGING.md)
+The latest [capture-fidelity reporting acceptance](CAPTURE_FIDELITY_REPORTING.md)
+separates native completion, original-player agreement and application fidelity.
+A fresh continuous 29-suite run passes all expected outcomes for 489 registrations
+/ 479 unique files: 463 native completions and 26 located rejections, with 978
+ordinary attempts, 674 control runs and 692 resource exports. All previous
+findings and deterministic hashes are unchanged. The completions include **33
+known capture limitations**: 32 capture-side mismatches and one missing-input
+MSAA file. They must not count as faithful application reconstruction.
+
+Capture assessment labels are 423 unassessed, 33 passed within documented scope,
+32 capture-side mismatches and one information loss. Only the two MSAA cases
+currently carry the new independent application-image reference: initialized
+matches, retained differs. Both match the original player's repeated output;
+its adapter is unidentified. A fresh uninjected producer passes 24 frames and
+all four sample-plane checks; 25 CPU harness tests pass. This batch changes
+reporting and acceptance metadata, not C++ execution. See the
+[pinned baseline](capture-fidelity-baseline.json). M3/M4/M5 remain incomplete.
+
+The preceding [source-build and packaging acceptance](SOURCE_BUILD_AND_PACKAGING.md)
 builds all production targets from 1,005 committed source files with system PATH,
 then packages with the configured Qt/VS installation instead of workstation paths.
 The 44-file package excludes host-PATH DX12 compiler DLLs, retains the DX11
@@ -9,8 +27,8 @@ compiler, and refuses occupied destinations. Four golden/negative replays, two
 actual production GUI open/replay workflows, module audits and four build-process
 checks pass. The initial harness PATHEXT error is preserved separately from the
 successful continuous run. Package: `out/FloraGPA-clean-build-20261006/`.
-No C++ runtime semantics changed; the earlier full GPU matrix is not claimed as
-newly rerun. This is clean-source validation on the developer host; independent
+That batch changed no C++ runtime semantics and did not rerun the full GPU
+matrix; the fresh continuous matrix is recorded above. This is clean-source validation on the developer host; independent
 machine deployment, broader failures and long-duration acceptance remain open.
 See the [pinned baseline](source-build-packaging-baseline.json).
 

@@ -1,0 +1,82 @@
+{
+  "schema": "FloraGPA capture fidelity reporting baseline 1",
+  "reviewed": "2026-10-06",
+  "implementation_commit": "3fa31f2fe79a198f255db4b3a6670f0ed7a896b0",
+  "runtime_semantics_changed": false,
+  "package": "out/FloraGPA-clean-build-20261006",
+  "exe_sha256": "1f39538c6989753f59c7d7a9843dece9852cd9e34d18d606d9c99f5d34201c71",
+  "continuous_gate_completed": true,
+  "suites": 29,
+  "unique_captures": 479,
+  "passed": true,
+  "cases_rechecked": 489,
+  "ordinary_attempts": 978,
+  "control_runs": 674,
+  "resource_exports": 692,
+  "findings_unchanged": true,
+  "deterministic_hashes_unchanged": true,
+  "observed_differences": [
+    [
+      "corpus",
+      "helldivers__helldivers2_2026_04_02__18_02_58",
+      "known_variable_image_hashes"
+    ]
+  ],
+  "summary": {
+    "cases": 489,
+    "positive_cases": 463,
+    "rejected_cases": 26,
+    "capture_fidelity_counts": {
+      "unassessed": 423,
+      "passed": 33,
+      "capture_information_missing": 1,
+      "capture_side_mismatch": 32
+    },
+    "application_image_comparison_counts": {
+      "not_assessed": 487,
+      "matches": 1,
+      "differs": 1
+    },
+    "completed_with_known_capture_limitations": 33
+  },
+  "unit_tests": 25,
+  "independent_producer_frames": 24,
+  "paired_original_cases": 2,
+  "paired_runs_per_implementation_per_case": 2,
+  "evidence": [
+    {
+      "path": "artifacts/m4-fidelity-gate/gate.json",
+      "sha256": "7f493430c0a0e7300c0a5f22968c0547ac1621256b4784d5bbbb0014cab77944"
+    },
+    {
+      "path": "artifacts/m4-fidelity-gate-recheck.json",
+      "sha256": "4c718b8df0db42c7da65df8b735ba8eeb81121437823e671690e89603f32787b"
+    },
+    {
+      "path": "artifacts/m4-msaa-fidelity-paired/validation.json",
+      "sha256": "bcba5d8ebe6a644aea7dfb3fb0adf45959933a0ed1e60cdfaff8f1e8a31db871"
+    },
+    {
+      "path": "artifacts/m4-msaa-initial-storage-survey.json",
+      "sha256": "b83e64cc40629984a82f4b7cec3a1f764f668ea0f2288be322069205c1c5125b"
+    },
+    {
+      "path": "artifacts/m4-msaa-native-recheck/validation.json",
+      "sha256": "29b67444e3907f82feaceac9256c6a3fe6dcd0c06b2abdaee74de7230cf5b149"
+    },
+    {
+      "path": "artifacts/m4-msaa-native-recheck/build/build.json",
+      "sha256": "e154a285500c855334d847ce418d82ae5b27908049808130f74f543b710b2e84"
+    },
+    {
+      "path": "artifacts/m4-fidelity-unit-final.log",
+      "sha256": "d1c21d9ea71f4084abafb34e8b6a0c677d62c612dee58f7708c9e71cb6adf5d3"
+    }
+  ],
+  "limits": [
+    "Original replay adapter unidentified; paired output equality is not matched-device equivalence",
+    "Capture assessments originate in manifest evidence; passed does not certify complete workload state",
+    "Only two cases currently supply the new independent application image reference field",
+    "M3, remaining M4 boundaries, independent-machine and long-duration M5 acceptance remain open"
+  ]
+}
