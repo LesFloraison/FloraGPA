@@ -1,0 +1,313 @@
+{
+  "schema": "FloraGPA compatibility corpus 1",
+  "profile": "GPA 2025 R1 legacy DX11 / IGPA v3",
+  "root_parameter": "--captures-root",
+  "producer_manifest": "artifacts/m4-initial-predicate-expanded/manifest.json",
+  "producer_manifest_sha256": "7bd422acfc8183fe54bd37ea33d785acf117b60c3e33321a809e2990ff7e8456",
+  "cases": [
+    {
+      "id": "initial_predicate_0",
+      "path": "m4-initial-predicate-expanded/0/capture.gpa_frame",
+      "sha256": "25af795bb6171d3f725ae6eb6d3010a252e4c6ec3d99cc5c4d29fd7bfa2d9262",
+      "bytes": 57775,
+      "family": "initial_predicate",
+      "origin": "self_owned_original_gpa_capture",
+      "provenance_note": "Unmodified CaptureNextFrame output; frozen producer and native/injected oracles retained.",
+      "source_manifests": [],
+      "device_scope": "Default hardware producer; original player device not identified.",
+      "reference_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+      "comparison_policy": "exact_golden",
+      "boundaries": [],
+      "controls": [],
+      "covers": [
+        "preframe-only predicate result",
+        "query=False, comparison=False"
+      ]
+    },
+    {
+      "id": "initial_predicate_1",
+      "path": "m4-initial-predicate-expanded/1/capture.gpa_frame",
+      "sha256": "240e138737aa9a883d474f6c46ccbcb391415fdd2952ae726a364f630864ba4f",
+      "bytes": 57775,
+      "family": "initial_predicate",
+      "origin": "self_owned_original_gpa_capture",
+      "provenance_note": "Unmodified CaptureNextFrame output; frozen producer and native/injected oracles retained.",
+      "source_manifests": [],
+      "device_scope": "Default hardware producer; original player device not identified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "boundaries": [],
+      "controls": [],
+      "covers": [
+        "preframe-only predicate result",
+        "query=True, comparison=False"
+      ]
+    },
+    {
+      "id": "initial_predicate_2",
+      "path": "m4-initial-predicate-expanded/2/capture.gpa_frame",
+      "sha256": "947d40cb525e9b248f446db278968397f61203be1741f41ed886ea863bf794e0",
+      "bytes": 57775,
+      "family": "initial_predicate",
+      "origin": "self_owned_original_gpa_capture",
+      "provenance_note": "Unmodified CaptureNextFrame output; frozen producer and native/injected oracles retained.",
+      "source_manifests": [],
+      "device_scope": "Default hardware producer; original player device not identified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "boundaries": [],
+      "controls": [],
+      "covers": [
+        "preframe-only predicate result",
+        "query=False, comparison=True"
+      ]
+    },
+    {
+      "id": "initial_predicate_3",
+      "path": "m4-initial-predicate-expanded/3/capture.gpa_frame",
+      "sha256": "3a6f77cadeddf456441d7c000c424e40098dfafc71b9c96ef50d8ed4742ab031",
+      "bytes": 57775,
+      "family": "initial_predicate",
+      "origin": "self_owned_original_gpa_capture",
+      "provenance_note": "Unmodified CaptureNextFrame output; frozen producer and native/injected oracles retained.",
+      "source_manifests": [],
+      "device_scope": "Default hardware producer; original player device not identified.",
+      "reference_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+      "comparison_policy": "exact_golden",
+      "boundaries": [],
+      "controls": [],
+      "covers": [
+        "preframe-only predicate result",
+        "query=True, comparison=True"
+      ]
+    },
+    {
+      "id": "initial_predicate_4",
+      "path": "m4-initial-predicate-expanded/4/capture.gpa_frame",
+      "sha256": "ec13bd9a9f219563a61dee2d6a9b6c87319089f32e97e2d4f0541fd1f5fe82c6",
+      "bytes": 80645,
+      "family": "initial_predicate",
+      "origin": "self_owned_original_gpa_capture",
+      "provenance_note": "Unmodified CaptureNextFrame output; frozen producer and native/injected oracles retained.",
+      "source_manifests": [],
+      "device_scope": "Default hardware producer; original player device not identified.",
+      "reference_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+      "comparison_policy": "exact_golden",
+      "boundaries": [],
+      "controls": [],
+      "covers": [
+        "captured Begin/End refresh",
+        "query=False, comparison=False"
+      ]
+    },
+    {
+      "id": "initial_predicate_5",
+      "path": "m4-initial-predicate-expanded/5/capture.gpa_frame",
+      "sha256": "1010e213ad29b54310dea8f8215f0cbe6671e7396b5100270a0957c8ad8447aa",
+      "bytes": 80645,
+      "family": "initial_predicate",
+      "origin": "self_owned_original_gpa_capture",
+      "provenance_note": "Unmodified CaptureNextFrame output; frozen producer and native/injected oracles retained.",
+      "source_manifests": [],
+      "device_scope": "Default hardware producer; original player device not identified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "boundaries": [],
+      "controls": [],
+      "covers": [
+        "captured Begin/End refresh",
+        "query=True, comparison=False"
+      ]
+    },
+    {
+      "id": "initial_predicate_6",
+      "path": "m4-initial-predicate-expanded/6/capture.gpa_frame",
+      "sha256": "68435013a9240221cb00922946f4de2fe013f237028400e401814dab6c7fac53",
+      "bytes": 80710,
+      "family": "initial_predicate",
+      "origin": "self_owned_original_gpa_capture",
+      "provenance_note": "Unmodified CaptureNextFrame output; frozen producer and native/injected oracles retained.",
+      "source_manifests": [],
+      "device_scope": "Default hardware producer; original player device not identified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "boundaries": [],
+      "controls": [],
+      "covers": [
+        "captured Begin/End refresh",
+        "query=False, comparison=True"
+      ]
+    },
+    {
+      "id": "initial_predicate_7",
+      "path": "m4-initial-predicate-expanded/7/capture.gpa_frame",
+      "sha256": "6f0ab04803e6e77e4382e9f8ad32c5862896d91a2d1f8782876c0f0a71db35cf",
+      "bytes": 80710,
+      "family": "initial_predicate",
+      "origin": "self_owned_original_gpa_capture",
+      "provenance_note": "Unmodified CaptureNextFrame output; frozen producer and native/injected oracles retained.",
+      "source_manifests": [],
+      "device_scope": "Default hardware producer; original player device not identified.",
+      "reference_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+      "comparison_policy": "exact_golden",
+      "boundaries": [],
+      "controls": [],
+      "covers": [
+        "captured Begin/End refresh",
+        "query=True, comparison=True"
+      ]
+    },
+    {
+      "id": "initial_predicate_8",
+      "path": "m4-initial-predicate-expanded/8/capture.gpa_frame",
+      "sha256": "07fb9a568fc0e67032f6972191cde1e3b93134577dd46672c9317bdd68c9fdf6",
+      "bytes": 57840,
+      "family": "initial_predicate",
+      "origin": "self_owned_original_gpa_capture",
+      "provenance_note": "Unmodified CaptureNextFrame output; frozen producer and native/injected oracles retained.",
+      "source_manifests": [],
+      "device_scope": "Default hardware producer; original player device not identified.",
+      "reference_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+      "comparison_policy": "exact_golden",
+      "boundaries": [],
+      "controls": [],
+      "covers": [
+        "saved GetData observation",
+        "query=False, comparison=False"
+      ]
+    },
+    {
+      "id": "initial_predicate_9",
+      "path": "m4-initial-predicate-expanded/9/capture.gpa_frame",
+      "sha256": "452545f69325e9225d45f5c4eca3c7cfdaa75a9159d02d0e3bb15454e8f406aa",
+      "bytes": 57840,
+      "family": "initial_predicate",
+      "origin": "self_owned_original_gpa_capture",
+      "provenance_note": "Unmodified CaptureNextFrame output; frozen producer and native/injected oracles retained.",
+      "source_manifests": [],
+      "device_scope": "Default hardware producer; original player device not identified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "boundaries": [],
+      "controls": [],
+      "covers": [
+        "saved GetData observation",
+        "query=True, comparison=False"
+      ]
+    },
+    {
+      "id": "initial_predicate_10",
+      "path": "m4-initial-predicate-expanded/10/capture.gpa_frame",
+      "sha256": "b7baa43b0e7353b579f2db221eccf1ccafbb66dd3e266f8570e9ea16b935b71d",
+      "bytes": 57840,
+      "family": "initial_predicate",
+      "origin": "self_owned_original_gpa_capture",
+      "provenance_note": "Unmodified CaptureNextFrame output; frozen producer and native/injected oracles retained.",
+      "source_manifests": [],
+      "device_scope": "Default hardware producer; original player device not identified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "boundaries": [],
+      "controls": [],
+      "covers": [
+        "saved GetData observation",
+        "query=False, comparison=True"
+      ]
+    },
+    {
+      "id": "initial_predicate_11",
+      "path": "m4-initial-predicate-expanded/11/capture.gpa_frame",
+      "sha256": "5a1e24bc235f684521d7dde3c1b397745e3f6d3d92431e90a13163972c19a67c",
+      "bytes": 57840,
+      "family": "initial_predicate",
+      "origin": "self_owned_original_gpa_capture",
+      "provenance_note": "Unmodified CaptureNextFrame output; frozen producer and native/injected oracles retained.",
+      "source_manifests": [],
+      "device_scope": "Default hardware producer; original player device not identified.",
+      "reference_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+      "comparison_policy": "exact_golden",
+      "boundaries": [],
+      "controls": [],
+      "covers": [
+        "saved GetData observation",
+        "query=True, comparison=True"
+      ]
+    },
+    {
+      "id": "initial_predicate_12",
+      "path": "m4-initial-predicate-expanded/12/capture.gpa_frame",
+      "sha256": "d644ebe0d0e11eec9daae6afdad908d0bfa379e607d3c83beb2a17636b021c8e",
+      "bytes": 103352,
+      "family": "initial_predicate",
+      "origin": "self_owned_original_gpa_capture",
+      "provenance_note": "Unmodified CaptureNextFrame output; frozen producer and native/injected oracles retained.",
+      "source_manifests": [],
+      "device_scope": "Default hardware producer; original player device not identified.",
+      "reference_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+      "comparison_policy": "exact_golden",
+      "boundaries": [],
+      "controls": [],
+      "covers": [
+        "first use before later Begin/End",
+        "query=False, comparison=False"
+      ]
+    },
+    {
+      "id": "initial_predicate_13",
+      "path": "m4-initial-predicate-expanded/13/capture.gpa_frame",
+      "sha256": "571b1942ccd524baf7bf0472a9b7bb2ee0f53e3e59b7d0e718a5d625fa88bc03",
+      "bytes": 103352,
+      "family": "initial_predicate",
+      "origin": "self_owned_original_gpa_capture",
+      "provenance_note": "Unmodified CaptureNextFrame output; frozen producer and native/injected oracles retained.",
+      "source_manifests": [],
+      "device_scope": "Default hardware producer; original player device not identified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "boundaries": [],
+      "controls": [],
+      "covers": [
+        "first use before later Begin/End",
+        "query=True, comparison=False"
+      ]
+    },
+    {
+      "id": "initial_predicate_14",
+      "path": "m4-initial-predicate-expanded/14/capture.gpa_frame",
+      "sha256": "972e39f906920b0974536adfb95c58b92f2b6119f4a2f9a33501cd85a08256e0",
+      "bytes": 103352,
+      "family": "initial_predicate",
+      "origin": "self_owned_original_gpa_capture",
+      "provenance_note": "Unmodified CaptureNextFrame output; frozen producer and native/injected oracles retained.",
+      "source_manifests": [],
+      "device_scope": "Default hardware producer; original player device not identified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "boundaries": [],
+      "controls": [],
+      "covers": [
+        "first use before later Begin/End",
+        "query=False, comparison=True"
+      ]
+    },
+    {
+      "id": "initial_predicate_15",
+      "path": "m4-initial-predicate-expanded/15/capture.gpa_frame",
+      "sha256": "50b70a749ea84ac6d39d32983b9b4b9d09716071824b5910f5b08eaeb623b833",
+      "bytes": 103352,
+      "family": "initial_predicate",
+      "origin": "self_owned_original_gpa_capture",
+      "provenance_note": "Unmodified CaptureNextFrame output; frozen producer and native/injected oracles retained.",
+      "source_manifests": [],
+      "device_scope": "Default hardware producer; original player device not identified.",
+      "reference_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+      "comparison_policy": "exact_golden",
+      "boundaries": [],
+      "controls": [],
+      "covers": [
+        "first use before later Begin/End",
+        "query=True, comparison=True"
+      ]
+    }
+  ]
+}
