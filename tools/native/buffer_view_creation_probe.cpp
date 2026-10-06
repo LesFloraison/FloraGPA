@@ -2,7 +2,8 @@
 #include "original_capture_control.h"
 #include "texture_probe_helpers.h"
 int wmain(int argc, wchar_t **argv) {
-    // Modes: 0..3 SRV; 10..18 UAV; 20 RTV; 30..35 failed/validation views.
+    // Modes: 0..3 SRV; 10..18 UAV; 20 RTV; 30..35 failed/validation views;
+    // 40..42 mixed-slot counter use (KEEP, explicit reset, sparse counter slot).
     if (argc != 3 && argc != 5)
         return 2;
     output = argv[1];
@@ -12,7 +13,7 @@ int wmain(int argc, wchar_t **argv) {
     try {
         const int scenario = std::stoi(argv[2]);
         if (!((scenario >= 0 && scenario <= 3) || (scenario >= 10 && scenario <= 18) || scenario == 20 ||
-              (scenario >= 30 && scenario <= 35)))
+              (scenario >= 30 && scenario <= 35) || (scenario >= 40 && scenario <= 42)))
             throw std::runtime_error("Invalid scenario");
         if (argc == 5 && !LoadLibraryExW(argv[4], nullptr, LOAD_WITH_ALTERED_SEARCH_PATH))
             throw std::runtime_error("Cannot load development shim");
@@ -37,14 +38,16 @@ int wmain(int argc, wchar_t **argv) {
 
         const bool repeated = scenario == 16 || scenario == 17;
         const bool unusedCounter = scenario == 18;
-        const int mode = (scenario == 16 || unusedCounter) ? 13
+        const bool mixedCounters = scenario >= 40 && scenario <= 42;
+        const UINT counterSlot = scenario == 42 ? 3u : 0u;
+        const int mode = (scenario == 16 || unusedCounter || mixedCounters) ? 13
                          : scenario == 17 ? 14
                          : scenario < 30  ? scenario
                          : scenario < 32  ? 0
                          : scenario < 34  ? 10
                                           : 20;
-        const bool failed = scenario >= 30 && scenario % 2 == 0,
-                   validation = scenario >= 30 && scenario % 2 == 1;
+        const bool failed = scenario >= 30 && scenario <= 35 && scenario % 2 == 0,
+                   validation = scenario >= 30 && scenario <= 35 && scenario % 2 == 1;
         const bool srvOnly = mode < 10, raw = mode == 2 || mode == 11,
                    structured = mode == 1 || mode == 3 || (mode >= 12 && mode <= 15),
                    defaults = mode == 3 || mode == 15, counter = (mode == 13 || mode == 14) && !unusedCounter;
@@ -57,6 +60,9 @@ int wmain(int argc, wchar_t **argv) {
         bd.StructureByteStride = structured ? 4 : 0;
         ComPtr<ID3D11Buffer> buffer, stage, countBuffer, countStage;
         checked(d->CreateBuffer(&bd, nullptr, &buffer));
+        ComPtr<ID3D11Buffer> indexedBuffer;
+        if (mixedCounters)
+            checked(d->CreateBuffer(&bd, nullptr, &indexedBuffer));
         auto staging = bd;
         staging.Usage = D3D11_USAGE_STAGING;
         staging.BindFlags = 0;
@@ -73,6 +79,12 @@ int wmain(int argc, wchar_t **argv) {
         for (UINT i = 0; i < 16; ++i)
             initial[i] = 0x11110000u + i;
         expected = initial;
+        auto indexedExpected = initial;
+        indexedExpected[5] = 456;
+        if (mixedCounters)
+            save(output / L"indexed-expected.bin",
+                 std::vector<uint8_t>(reinterpret_cast<uint8_t *>(indexedExpected.data()),
+                                      reinterpret_cast<uint8_t *>(indexedExpected.data()) + 64));
         const UINT first = defaults ? 0 : 4, count = defaults ? 16 : 8,
                    sampleIndex = unusedCounter ? 5
                                  : counter      ? 6
@@ -150,6 +162,10 @@ int wmain(int argc, wchar_t **argv) {
                            : (mode == 12 || unusedCounter) ? "1"
                                         : "0") +
                           "]=123;}";
+            if (mixedCounters)
+                source = "RWStructuredBuffer<uint> dest:register(u" + std::to_string(counterSlot) +
+                         ");RWStructuredBuffer<uint> indexed:register(u1);"
+                         "[numthreads(1,1,1)]void main(){dest[dest.IncrementCounter()]=123;indexed[1]=456;}";
             auto code = compile(source, "main", "cs_5_0");
             checked(d->CreateComputeShader(code->GetBufferPointer(), code->GetBufferSize(), nullptr, &cs));
         }
@@ -198,6 +214,8 @@ int wmain(int argc, wchar_t **argv) {
             }
             c->ClearState();
             c->UpdateSubresource(buffer.Get(), 0, nullptr, initial.data(), 0, 0);
+            if (mixedCounters)
+                c->UpdateSubresource(indexedBuffer.Get(), 0, nullptr, initial.data(), 0, 0);
             UINT zero = 0;
             c->UpdateSubresource(countBuffer.Get(), 0, nullptr, &zero, 0, 0);
             auto make = [&]<class View, class Desc>(auto method, Desc desc, ComPtr<View> &result) {
@@ -221,6 +239,7 @@ int wmain(int argc, wchar_t **argv) {
             };
             ComPtr<ID3D11ShaderResourceView> late;
             ComPtr<ID3D11UnorderedAccessView> uav;
+            ComPtr<ID3D11UnorderedAccessView> indexedUav;
             ComPtr<ID3D11RenderTargetView> rtv;
             if (srvOnly) {
                 make(&ID3D11Device::CreateShaderResourceView, srvDesc(false), late);
@@ -248,6 +267,14 @@ int wmain(int argc, wchar_t **argv) {
                     auto bound = uav.Get();
                     UINT initialCount = counter ? 2 : UINT_MAX;
                     c->CSSetUnorderedAccessViews(0, 1, &bound, &initialCount);
+                    if (mixedCounters) {
+                        checked(d->CreateUnorderedAccessView(indexedBuffer.Get(), &desc, &indexedUav));
+                        ID3D11UnorderedAccessView *views[4]{};
+                        UINT counts[4]{UINT_MAX, UINT_MAX, UINT_MAX, UINT_MAX};
+                        views[counterSlot] = uav.Get(); counts[counterSlot] = 2;
+                        views[1] = indexedUav.Get(); counts[1] = scenario == 41 ? 7 : UINT_MAX;
+                        c->CSSetUnorderedAccessViews(0, 4, views, counts);
+                    }
                     c->CSSetShader(cs.Get(), nullptr, 0);
                     c->Dispatch(1, 1, 1);
                     if (repeated) {
@@ -258,6 +285,14 @@ int wmain(int argc, wchar_t **argv) {
                     bound = nullptr;
                     UINT keep = UINT_MAX;
                     c->CSSetUnorderedAccessViews(0, 1, &bound, &keep);
+                    if (mixedCounters) {
+                        ID3D11UnorderedAccessView *empty[4]{};
+                        c->CSSetUnorderedAccessViews(0, 4, empty, nullptr);
+                        auto indexedBytes = readBuffer(indexedBuffer.Get(), stage.Get(), 64);
+                        if (memcmp(indexedBytes.data(), indexedExpected.data(), 64))
+                            throw std::runtime_error("Indexed companion buffer oracle mismatch");
+                        save(output / L"indexed-buffer.bin", indexedBytes);
+                    }
                     if (counter) {
                         c->CopyStructureCount(countBuffer.Get(), 0, uav.Get());
                         auto bytes = readBuffer(countBuffer.Get(), countStage.Get(), 4);
