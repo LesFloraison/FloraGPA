@@ -1,7 +1,22 @@
 # Current capabilities and compatibility
 
 Reviewed **2026-10-06**. The user authorized M4, then M5, while keeping M3 open.
-The latest [Qt action retention fix](QT_ACTION_RETENTION.md) removes repeated
+The latest [worker failure recovery correction](WORKER_FAILURE_RECOVERY.md)
+preserves unterminated final stderr errors and retains the actual timeout reason
+through worker completion. Both defects are reproduced before the fix. Eight
+fast fault cases pass; a separate native-Qt, system-PATH portable run passes nine
+cases including the real 180-second timeout. Each case retries the real Worker
+and checks the previous image exactly, completion count and restored UI actions.
+Runtime: `757e9a2`; package: `out/FloraGPA-worker-recovery-20261006/`.
+Four related UI CTest suites, both optional original-capture UI workflows and
+four packaged golden/negative checks pass. Only the GUI executable changes from
+the preceding package. These controlled
+faults expand M5 recovery evidence without changing replay compatibility. Broader
+analyzer/driver/storage failure paths, long-duration operation and independent
+clean-machine deployment remain open. See the
+[pinned baseline](worker-failure-recovery-baseline.json).
+
+The preceding [Qt action retention fix](QT_ACTION_RETENTION.md) removes repeated
 internal tool-button connections under the verified Qt 6.11.2 runtime. A direct
 counterexample and allocation-stack comparison identify the source: the selected
 live connection group grows from 1,398 to 5,926 blocks before the fix, while
@@ -265,7 +280,7 @@ tested workloads; opening a file does not prove accurate replay.
 | Resource minimum LOD | Native setters, initial getter evidence, frame-time creation defaults, ClearState preservation and disabled-setter experiments | Missing required initial state is rejected; nonzero-LOD full storage export and UAV/output/interface guards remain boundaries. Unused static SRVs use program declarations. [LOD](RESOURCE_LOD_AUDIT.md), [shader usage](MIN_LOD_USAGE_AUDIT.md) |
 | Query and predication | Captured Query metadata/history; native predicate Begin/End, binding and Device5 frame-time creation | New predicates remain unissued until their recorded interval completes. Ordinary Query records may omit identities, intervals or full result bytes; pre-frame predicate history is not reconstructed. [Predicate creation](PREDICATE_CREATION_AUDIT.md) |
 
-## Latest full registered-scope gate
+## Historical M2 registered-scope gate
 
 The [gate baseline](m2-gate-baseline.json) records 732 positive replays and
 44 located negative attempts. All 365 previously stable case images remain
@@ -413,7 +428,7 @@ the other 35 suites passed initially and the complete UI suite passes after the 
 | M2 — Ordinary replay | Registered-scope gate passed: 366 positive cases and 22 located rejections; auxiliary/snapshot contracts audited. This is not universal API support. State-object identity loss, mixed saved/missing SO targets and unverified lifetimes remain explicit boundaries. |
 | M3 — Deferred Context / Command List | Open; M4/M5 now take priority by user instruction on 2026-10-06. Require original retained-list captures proving identity, build order, resource versions, repeated execution, restore-state and event mapping before production support. |
 | M4 — Resources and boundaries | Active, incomplete. Initial texture/Map data is checked; missing initial UAV counts reject with explicit experiment recovery. Continue missing pitch/data dependencies, predicate/frame-before history, Query and presentation boundaries. |
-| M5 — Stable compatibility release | Incomplete. The 486-case registry and load-cancellation recovery are established. Continue broader recovery and large-file workflows, long-duration testing and independent clean-environment build/deployment gates. |
+| M5 — Stable compatibility release | Incomplete. The 486-case registry, load-cancellation recovery and nine controlled worker-failure cases are established. Continue specialized analyzer/driver/storage failures, large-file workflows, long-duration testing and independent clean-environment build/deployment gates. |
 | M6 — Analyzer and other versions | Incomplete. Continue remaining Qt consumers, advanced profiling/debugging and version-specific adapters after core replay gates. Existing analyzer features remain available. |
 
 The original order was **M1 → M2 → M3 → M4 → M5**. On 2026-10-06 the user

@@ -1,0 +1,93 @@
+{
+  "schema": "FloraGPA worker failure recovery baseline 1",
+  "reviewed": "2026-10-06",
+  "implementation_commit": "757e9a2636384bd034c1dcdebfdaed86acdf048a",
+  "stages_complete": {
+    "M3": false,
+    "M4": false,
+    "M5": false
+  },
+  "package": "out/FloraGPA-worker-recovery-20261006",
+  "changed_package_files": [
+    "FloraGPA.exe"
+  ],
+  "package_gui_sha256": "be1eab68f10ffb49fb6d91ac6510dd27b5a4d458bfa6797c0fd6b2e23e49a72c",
+  "package_worker_sha256": "84376b353e915dc35c339ad295ebdcec57122c1f8b18c3456c542377c44f8bfb",
+  "package_cli_sha256": "7f7212f37b54c85a6e9ac5f0d6251e80cf4cc5b9b5f2edcfb31b6562a86f2467",
+  "portable": {
+    "completed": true,
+    "exit_code": 0,
+    "seconds": 190.343,
+    "environment": "System PATH only; native Qt windows plugin; Unicode/space QA path on developer host",
+    "test_exe_sha256": "6843f642237811229e79107a8db26827bad6c34b5ff919e9129c747358025961",
+    "helper_sha256": "4306b0b343d505f1bd03ed66aa517c9b2b55ad60edd5a171a34f56d44554aa0c",
+    "worker_sha256": "84376b353e915dc35c339ad295ebdcec57122c1f8b18c3456c542377c44f8bfb"
+  },
+  "portable_fault_observations": [
+    "missing elapsed_ms 1441 Process failed to start: \u7cfb\u7edf\u627e\u4e0d\u5230\u6307\u5b9a\u7684\u6587\u4ef6\u3002?",
+    "stderr-tail elapsed_ms 81 Fault sentinel without newline?",
+    "stderr-lines elapsed_ms 91 Fault sentinel with newline?",
+    "crash elapsed_ms 92 Replay worker failed?",
+    "invalid-report elapsed_ms 97 Worker did not complete?",
+    "no-output elapsed_ms 91 Worker report is missing?",
+    "missing-image elapsed_ms 92 Worker output image is missing?",
+    "cancel elapsed_ms 217 Cancelled?",
+    "timeout elapsed_ms 180038 Worker timed out.?"
+  ],
+  "counts": {
+    "before_cases": 6,
+    "before_expected_failed_cases": 2,
+    "fast_cases": 8,
+    "portable_cases_including_timeout": 9,
+    "portable_successful_replays": 18,
+    "additional_ui_ctest_suites": 4,
+    "main_ui_passed_rows": 57,
+    "main_ui_initial_optional_skips": 2,
+    "optional_followup_passed_rows": 4,
+    "optional_followup_skips": 0,
+    "recovery_passed_rows": 7,
+    "qt_compatibility_passed_rows": 6,
+    "compatibility_ui_passed_rows": 4,
+    "golden_and_negative_checks": 4
+  },
+  "inventory_unchanged": {
+    "registrations": 486,
+    "unique_hashes": 476,
+    "positive_registrations": 460,
+    "positive_unique_hashes": 450,
+    "rejections": 26
+  },
+  "module_ledger_unchanged": {
+    "ported": 72,
+    "partial": 117,
+    "pending": 15
+  },
+  "evidence": {
+    "artifacts/m5-worker-fault-before.log": "fa090163cada9d3d277e187cc866476a7ec96dc88e227fab536f91be9b710cc8",
+    "artifacts/m5-worker-fault-before-ctest.log": "a9c312359ec9d6a0afe044e8f3fae89e421e08edaf17321cb36afae5bc3becfa",
+    "artifacts/m5-worker-fault-before-bin/FloraWorkerRecoveryTests.exe": "b97894b00d8380583f71225fca2f65b909617f432e008dc5db3f2089c2e0c04f",
+    "artifacts/m5-worker-fault-before-bin/FloraFaultWorker.exe": "74c5feb3a95283db15488417b861d25691c998dae80df8932f98279dd17fd209",
+    "artifacts/m5-worker-fault-after.log": "0115df6183d25c99270a848b6c927155b32bd27568be9ecd1482d85a85e38f78",
+    "artifacts/m5-worker-fault-after-ctest.log": "37c73330a83a844f84c257d33ea0ce18b6bd66668f7780c42d82888fda2c3f1e",
+    "artifacts/m5-worker-fault-portable/qt.log": "1852c878202a0398b2c880e383e6c03511e9f296ab75ec69ce36a93d6f368f67",
+    "artifacts/m5-worker-fault-portable/validation.json": "3287458a3935b356a9c4024c66dcc842c3abd1b740ba80619de6d6ca596631f4",
+    "artifacts/run_worker_fault_portable.py": "af58a01e1c894bccbc22d7990b7c859489542ccdcb16edcca07eef55326dac38",
+    "artifacts/run_worker_fault_regressions.ps1": "f5d49665e8a7c828fa312432365dd205bede84aff22c1c8435a1db37cbf24405",
+    "artifacts/m5-worker-fault-ui-ctest.log": "94f6185bd41f84a041a1504feeb946212221b7d9c73e1b45a7dc8573d3cc58df",
+    "artifacts/m5-worker-fault-ui.log": "29e426578b7ee8636dda459b54f19f9548c7a57b2ab296c45ef087d40404f0cf",
+    "artifacts/m5-worker-fault-recovery-ui.log": "ffd5defec3e2069d13a814a8a8128e59ac2c5004883e6d77e724fa7f0961449d",
+    "artifacts/m5-worker-fault-compatibility-ui.log": "d6d70c4d3b350db104bd48b8b5e9d15930b40d25a040d6ce6d1dadc89d4358c8",
+    "artifacts/m5-worker-fault-qt-compatibility.log": "d11ef04cac3f3daa1ae6dbe0847daadcc02d251cf450ce257be63633fde7cbf4",
+    "artifacts/m5-worker-fault-optional-ui.log": "6a95a695175beceffd4935130642ac7b29e580445f77993ca588ec46a4281cce",
+    "artifacts/m5-worker-fault-goldens/validation.json": "5e1dde1ab9876f50c472cdf84378931ffc3b5cd8e9700002b67d37bf81383ade",
+    "artifacts/m5-worker-recovery-package-files.json": "29e51802f00147873d5b84aa2b59ebf307c7285f732de2a59815d39e7f3747fd"
+  },
+  "limits": [
+    "Fault triggers are development-only fixtures, not failures observed in registered original captures.",
+    "Forced termination and a sleeping helper do not simulate every GPU/device-removal or crash-reporting path.",
+    "Each isolated case tests recovery in one reused window; this is not a long-duration soak or every analyzer failure path.",
+    "The child-only test slot deliberately skips outside the parent-owned isolation directory.",
+    "Same-host system-PATH isolation is not independent clean-machine deployment.",
+    "No full GPU corpus rerun in this GUI-only batch; packaged Worker and CLI are unchanged."
+  ]
+}
