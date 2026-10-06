@@ -1,6 +1,8 @@
 # Counter-independent UAV access
 
-Reviewed 2026-10-06. This M4 correction permits ordinary indexed access to an
+Reviewed 2026-10-06. The subsequent [per-slot correction](COUNTER_SLOT_COMPATIBILITY.md)
+extends this shader-wide absence proof to mixed-slot workloads.
+ This M4 correction permits ordinary indexed access to an
 Append/Counter UAV when checked executable shader code proves that no hidden
 counter operation can occur. It does not invent, initialize or recover the
 unavailable hidden count. M3, M4 and M5 remain open.

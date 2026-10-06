@@ -1,0 +1,148 @@
+{
+  "schema": "FloraGPA per-slot counter compatibility baseline 1",
+  "reviewed": "2026-10-06",
+  "implementation_commits": [
+    "705a4e1c48dcd20fb965d61c10ff9a7f3ab5dbdc",
+    "d09352a3e82c68561cd7261ed296dee924f7771d",
+    "58a6bcde55ba5369367baa9e43fb9a96aa8e50f2",
+    "ec94f8aba2fb69e1701faeb05ed46f9cce8ceb06"
+  ],
+  "package": "out/FloraGPA-counter-slots-20261006",
+  "package_files": 44,
+  "exe_sha256": "ead2b7d5af2d83bd489619298de674c2bad226a3842a1382b0b89850da15551f",
+  "matrix": {
+    "passed": true,
+    "previous_cases_rechecked": 489,
+    "findings_unchanged": true,
+    "deterministic_hashes_unchanged": true,
+    "changes": [
+      {
+        "case": "helldivers__helldivers2_2026_04_02__18_02_58",
+        "kind": "known_variable_image_hashes"
+      }
+    ],
+    "ordinary_attempts": 984,
+    "control_runs": 680,
+    "resource_exports": 716,
+    "unique_captures": 482,
+    "summary": {
+      "completed": true,
+      "passed": true,
+      "cases": 492,
+      "positive_cases": 466,
+      "rejected_cases": 26,
+      "capture_fidelity_counts": {
+        "unassessed": 423,
+        "passed": 36,
+        "capture_information_missing": 1,
+        "capture_side_mismatch": 32
+      },
+      "application_image_comparison_counts": {
+        "not_assessed": 487,
+        "matches": 4,
+        "differs": 1
+      },
+      "completed_with_known_capture_limitations": 33
+    }
+  },
+  "positive_unique_captures": 456,
+  "rejected_unique_captures": 26,
+  "producer_frames": 72,
+  "new_original_captures": 3,
+  "original_runs_before": 6,
+  "original_runs_after": 6,
+  "counter_test_rows": 34,
+  "qt_test_rows": 63,
+  "qt_skipped_rows": 0,
+  "related_ctest_suites": 8,
+  "package_golden_and_negative_checks": 4,
+  "portable_ui": {
+    "test_rows": 3,
+    "workflow_captures": 3,
+    "system_path_only": true,
+    "platform": "offscreen",
+    "production_ui_library_and_packaged_worker": true,
+    "production_gui_executable_launch": false
+  },
+  "evidence": [
+    {
+      "path": "artifacts/m4-counter-slots-originals/manifest.json",
+      "sha256": "6b65a42375a0bd51377b4719fad5f934218c5a277c53b16e3c6e588a322e4817"
+    },
+    {
+      "path": "artifacts/m4-counter-slots-build/build.json",
+      "sha256": "89fa51a8fbd71d9d466f7a38552f116072a613e5a73d97c920f71a4909d91190"
+    },
+    {
+      "path": "artifacts/m4-counter-slots-wire-survey.json",
+      "sha256": "9e8b3d86d753869fd6f92370ebf15a9c8c18975bf294eca990499e9e4682a7bf"
+    },
+    {
+      "path": "artifacts/m4-counter-slots-before/validation.json",
+      "sha256": "5b119c89c78de55afadfdd2da00b97877fa770055047cccd8a21db89c75cdde6"
+    },
+    {
+      "path": "artifacts/m4-counter-slots-after/validation.json",
+      "sha256": "85f64f171587844cd0921f93bfbba80ab1ed6f15946cc98deda3b3bc64035374"
+    },
+    {
+      "path": "artifacts/m4-counter-slots-tests.txt",
+      "sha256": "2c92ef4c21cfecd86391ce079460558be64ce680a420163e9a86d45de4522f3c"
+    },
+    {
+      "path": "artifacts/m4-counter-slots-harness-tests.log",
+      "sha256": "29678e7c21315bc9638eb0c60c193f7fdfba500551d7ff4aa374929fde930522"
+    },
+    {
+      "path": "artifacts/m4-counter-slots-gate/gate.json",
+      "sha256": "52ffbc25dafc62765132726bafe10ddd40fdea71e3bab49cbadb1222bec7f766"
+    },
+    {
+      "path": "artifacts/m4-counter-slots-gate-recheck.json",
+      "sha256": "b0643b71ab44cf34982faf3f512a2968aecac3bc7ec83dde0c0c8096ec24e93f"
+    },
+    {
+      "path": "artifacts/m4-counter-slots-ctest.log",
+      "sha256": "93d6885eae834885bf4c72365649789fa5196f9b6a55843e3f77f21ef11ef2b0"
+    },
+    {
+      "path": "artifacts/m4-counter-slots-ctest-detail.log",
+      "sha256": "bc152e6bec188a8d0f481b1499896719805844aa67018eb24fa885dceeec6f48"
+    },
+    {
+      "path": "artifacts/m4-counter-slots-ui-full.txt",
+      "sha256": "8f35815407b1893ac6d6c71d7e0f82ab9316ccde9f79e999613fc5ab38ace6f1"
+    },
+    {
+      "path": "artifacts/m4-counter-slots-goldens/validation.json",
+      "sha256": "5e1dde1ab9876f50c472cdf84378931ffc3b5cd8e9700002b67d37bf81383ade"
+    },
+    {
+      "path": "artifacts/m4-counter-slots-package-files.json",
+      "sha256": "8a75830a14b4cfd908b70b73920959c20a00c03179244afe170c8a2d9747a019"
+    },
+    {
+      "path": "artifacts/m4-counter-slots-portable-ui/validation.json",
+      "sha256": "f4b4a973e423310ee7e08a4838d93e99bb443f70155ddef73f42c1532542c8a5"
+    },
+    {
+      "path": "artifacts/m4-counter-slots-portable-ui/ui.txt",
+      "sha256": "023ee889534b7c033eccb1e3791a74b46257260d49786d05f274be3dd4effd1f"
+    },
+    {
+      "path": "artifacts/m4-counter-slots-portable-ui/screenshots/counter-slots-42.png",
+      "sha256": "fe1170b0370705594976c843d7737cdb627bd6f1a317c622777392e630e7f70a"
+    },
+    {
+      "path": "artifacts/m4-counter-slots-build-runtime.log",
+      "sha256": "8cf563010e21b74f876c22ecb722bdb77ccbc5c6cbd0ab8154a008e69d6556a6"
+    }
+  ],
+  "limits": [
+    "Only understood immediate UAV operands receive slot-specific proof; unfamiliar layouts retain all slots",
+    "No unreachable-branch or dynamic-linkage proof",
+    "Missing hidden counts stay unavailable and direct consumers still require a known value",
+    "Original-player adapter is unidentified; equal images do not certify matched-device equivalence",
+    "M3 and remaining M4/M5 gates are incomplete"
+  ]
+}

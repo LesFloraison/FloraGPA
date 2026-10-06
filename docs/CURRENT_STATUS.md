@@ -1,7 +1,31 @@
 # Current capabilities and compatibility
 
 Reviewed **2026-10-06**. The user authorized M4, then M5, while keeping M3 open.
-The latest [MSAA initialization notices](MSAA_INITIALIZATION_NOTICES.md) preserve
+The latest [per-slot counter correction](COUNTER_SLOT_COMPATIBILITY.md) admits
+mixed UAV workloads when checked shader code proves the unavailable hidden
+counter is not consumed at that view's bound slots. Two unmodified original
+captures reproduced false rejection; an explicit-reset companion is the control.
+Three modes pass 72 native/injected producer frames, complete buffer oracles,
+original-player comparisons and hardware/WARP tests. Direct counter consumers
+still reject missing values, including an edited shader that starts using u1.
+Unfamiliar operands and dynamic linkage remain conservative.
+
+The continuous matrix now passes **492 registrations / 482 unique captures**:
+**466 native completions (456 unique) and 26 located rejections**, in 30 suites,
+984 ordinary attempts, 680 controls and 716 resource exports. All previous 489
+findings and deterministic hashes are unchanged; Helldivers keeps its separate
+variation policy. Completions still include 33 known capture limitations. The
+new independent-image fields cover five cases: four matches, one known missing
+MSAA input difference; 487 remain unassessed on that axis.
+
+Eight related CTest suites, 34 counter rows, 63 Qt rows without skips, a portable
+three-capture UI workflow and four isolated-PATH golden/negative checks pass.
+Runtime: `d09352a`; package: `out/FloraGPA-counter-slots-20261006/` (44 files).
+The [baseline](counter-slot-baseline.json) pins the original capture and regression
+evidence. M3/M4/M5 remain incomplete; slot analysis does not prove branches
+unreachable, recover missing inputs or establish clean-machine deployment.
+
+The preceding [MSAA initialization notices](MSAA_INITIALIZATION_NOTICES.md) preserve
 materialized resource/data identities in CLI/Worker output even after Resolve
 produces a single-sample image. Qt displays a compact count and groups repeated
 reasons in its tooltip. These are resource-level notices, not proof of image
@@ -502,8 +526,8 @@ the other 35 suites passed initially and the complete UI suite passes after the 
 | M1 — Acceptance infrastructure | Minimum loop delivered: corpus, coverage, preflight, serial comparison and diagnostic queue. Extend evidence as paths arrive. |
 | M2 — Ordinary replay | Registered-scope gate passed: 366 positive cases and 22 located rejections; auxiliary/snapshot contracts audited. This is not universal API support. State-object identity loss, mixed saved/missing SO targets and unverified lifetimes remain explicit boundaries. |
 | M3 — Deferred Context / Command List | Open; M4/M5 now take priority by user instruction on 2026-10-06. Require original retained-list captures proving identity, build order, resource versions, repeated execution, restore-state and event mapping before production support. |
-| M4 — Resources and boundaries | Active, incomplete. Initial texture/Map data is checked; missing UAV counts reject on actual consumption, while proven counter-free indexed access is allowed. Continue per-slot/control-flow dependencies, missing pitch/data, predicate/frame-before history, Query and presentation boundaries. |
-| M5 — Stable compatibility release | Incomplete. The 489-case registry, clean committed-source build/package, load-cancellation recovery and nine controlled worker-failure cases are established. Continue specialized analyzer/driver/storage failures, large-file workflows, long-duration testing and independent clean-machine deployment. |
+| M4 — Resources and boundaries | Active, incomplete. Initial texture/Map data is checked; missing UAV counts reject on actual consumption, while proven counter-free indexed access is allowed. Immediate per-slot counter dependencies are checked; continue wider operand/control-flow dependencies, missing pitch/data, predicate/frame-before history, Query and presentation boundaries. |
+| M5 — Stable compatibility release | Incomplete. The 492-case registry, clean committed-source build/package, load-cancellation recovery and nine controlled worker-failure cases are established. Continue specialized analyzer/driver/storage failures, large-file workflows, long-duration testing and independent clean-machine deployment. |
 | M6 — Analyzer and other versions | Incomplete. Continue remaining Qt consumers, advanced profiling/debugging and version-specific adapters after core replay gates. Existing analyzer features remain available. |
 
 The original order was **M1 → M2 → M3 → M4 → M5**. On 2026-10-06 the user
