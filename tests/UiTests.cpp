@@ -3796,6 +3796,47 @@ class UiTests final : public QObject {
         QVERIFY(done.takeLast()[0].toBool());
         QVERIFY(!window.busy());
     }
+    void readMapSynchronizationReplayAndNavigate() {
+        const auto root = qEnvironmentVariable("FLORA_SPARSE_MAP_CAPTURES");
+        if (root.isEmpty()) QSKIP("Set original sparse Map synchronization corpus");
+        flora::MainWindow window;
+        window.resize(1440, 900); window.show();
+        QSignalSpy done(&window, &flora::MainWindow::taskFinished);
+        for (int mode : {6, 7}) {
+            const auto capture = root + '/' + QString::number(mode) + "/capture.gpa_frame";
+            flora::Frame frame(capture.toStdWString());
+            flora::Id draw = 0;
+            for (const auto &[id, entry] : frame.entries())
+                if (entry.category == 7 && entry.type == 0x37) draw = id;
+            QVERIFY(draw);
+            done.clear(); window.openCapture(capture);
+            QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+            QVERIFY(done.takeLast()[0].toBool());
+            auto output = window.findChild<flora::ImageView *>("frameOutput");
+            QVERIFY(output); QCOMPARE(output->image().size(), QSize(8, 8));
+            const auto expected = output->image();
+            for (int y = 0; y < 8; ++y) for (int x = 0; x < 8; ++x)
+                QCOMPARE(expected.pixelColor(x, y), QColor(17, 30, 43, 56));
+            auto api = window.findChild<QTableView *>("apiLog");
+            QVERIFY(api);
+            QModelIndex index;
+            for (int row = 0; row < api->model()->rowCount(); ++row)
+                if (api->model()->index(row, 0).data(Qt::UserRole).toULongLong() == draw)
+                    index = api->model()->index(row, 0);
+            QVERIFY(index.isValid());
+            done.clear(); api->setCurrentIndex(index);
+            QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+            QVERIFY(done.takeLast()[0].toBool());
+            QCOMPARE(output->image(), expected);
+            snapshot(window, QString("read-map-sync-%1").arg(mode));
+            auto boundary = window.findChild<QComboBox *>("outputBoundary");
+            QVERIFY(boundary); QCOMPARE(boundary->currentIndex(), 2);
+            done.clear(); boundary->setCurrentIndex(0);
+            QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+            QVERIFY(done.takeLast()[0].toBool());
+            QCOMPARE(output->image(), expected);
+        }
+    }
     void occludedPresentReplayAndNavigate() {
         const auto root = qEnvironmentVariable("FLORA_PRESENT_OCCLUDED_CAPTURES");
         if (root.isEmpty()) QSKIP("Set original occluded Present TEST corpus");
