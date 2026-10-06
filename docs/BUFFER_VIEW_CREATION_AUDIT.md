@@ -1,5 +1,9 @@
 # M2: creation-time buffer SRV, RTV and UAV replay
 
+> **2026-10-06:** [Initial counter provenance](INITIAL_COUNTER_BOUNDARY_AUDIT.md)
+> now diagnoses missing frame-before counts as well. The following creation-time
+> evidence remains unchanged.
+
 > Historical batch record. Results, package paths, module counts and remaining-work
 > statements below describe this batch. See [current status](CURRENT_STATUS.md)
 > for present support and [the documentation index](README.md) for navigation.

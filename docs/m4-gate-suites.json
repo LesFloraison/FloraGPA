@@ -1,0 +1,595 @@
+{
+  "schema": "FloraGPA compatibility gate suites 1",
+  "expected_cases": 470,
+  "expected_unique_captures": 460,
+  "expected_rejections": 26,
+  "suites": [
+    {
+      "id": "corpus",
+      "manifest": "docs/capture-corpus.json",
+      "manifest_sha256": "015b787045b187708306590f085034664e4f5f6e70d092e10428c6a7837cef08",
+      "capture_root": "legacy",
+      "subdirectory": "",
+      "expected_rejections": {
+        "preframe_counters2__capture__213aa7b7": {
+          "findings": [
+            {
+              "kind": "counter_initial_value_missing",
+              "event_id": 31,
+              "resource_id": 14,
+              "record_type": 55
+            },
+            {
+              "kind": "counter_initial_value_missing",
+              "event_id": 55,
+              "resource_id": 14,
+              "record_type": 63
+            }
+          ],
+          "runtime_error": "Event 31 (Draw): UAV 14 has no captured frame-initial counter; an explicit captured reset or experiment value is required"
+        },
+        "preframe_counters2__capture__68538996": {
+          "findings": [
+            {
+              "kind": "counter_initial_value_missing",
+              "event_id": 33,
+              "resource_id": 14,
+              "record_type": 55
+            },
+            {
+              "kind": "counter_initial_value_missing",
+              "event_id": 59,
+              "resource_id": 14,
+              "record_type": 63
+            }
+          ],
+          "runtime_error": "Event 33 (Draw): UAV 14 has no captured frame-initial counter; an explicit captured reset or experiment value is required"
+        },
+        "preframe_counters2__capture__b7fac0a3": {
+          "findings": [
+            {
+              "kind": "counter_initial_value_missing",
+              "event_id": 33,
+              "resource_id": 14,
+              "record_type": 55
+            },
+            {
+              "kind": "counter_initial_value_missing",
+              "event_id": 59,
+              "resource_id": 14,
+              "record_type": 63
+            }
+          ],
+          "runtime_error": "Event 33 (Draw): UAV 14 has no captured frame-initial counter; an explicit captured reset or experiment value is required"
+        },
+        "preframe_counters2__capture__0bc6288d": {
+          "findings": [
+            {
+              "kind": "counter_initial_value_missing",
+              "event_id": 32,
+              "resource_id": 14,
+              "record_type": 55
+            },
+            {
+              "kind": "counter_initial_value_missing",
+              "event_id": 57,
+              "resource_id": 14,
+              "record_type": 63
+            }
+          ],
+          "runtime_error": "Event 32 (Draw): UAV 14 has no captured frame-initial counter; an explicit captured reset or experiment value is required"
+        }
+      }
+    },
+    {
+      "id": "originals",
+      "manifest": "docs/texture-copy-corpus.json",
+      "manifest_sha256": "2b91dcb1e6c53ca1ac898be0c358345e83752375d12d209fe91abb384ba1b7c0",
+      "capture_root": "artifacts",
+      "subdirectory": "m2-texture-copy-originals-verified",
+      "expected_rejections": {}
+    },
+    {
+      "id": "copy",
+      "manifest": "docs/copy-corpus.json",
+      "manifest_sha256": "64770c6c2cadacef1bcb97028d3954e4c0feab7bf3d4930f91f4fc22e6728764",
+      "capture_root": "artifacts",
+      "subdirectory": "m2-copy-originals-verified",
+      "expected_rejections": {}
+    },
+    {
+      "id": "present",
+      "manifest": "docs/present-corpus.json",
+      "manifest_sha256": "ede3ffbbaaa96cc3b435df915b852fa39ef3f54e0f9c4f1e892ad24fca559517",
+      "capture_root": "artifacts",
+      "subdirectory": "m2-present-five-originals",
+      "expected_rejections": {}
+    },
+    {
+      "id": "buffer",
+      "manifest": "docs/buffer-corpus.json",
+      "manifest_sha256": "2fe817125b78f7821e04abb4d913839b52d4cf75db9f8ef9201f8314d21d5006",
+      "capture_root": "artifacts",
+      "subdirectory": "m2-buffer-gpu-originals",
+      "expected_rejections": {}
+    },
+    {
+      "id": "pipeline",
+      "manifest": "docs/pipeline-corpus.json",
+      "manifest_sha256": "1a4b545b7680c64109a47389d36960d2d6e1fd725a4750504b8b6b5c61c9b4d3",
+      "capture_root": "artifacts",
+      "subdirectory": "m2-pipeline-originals",
+      "expected_rejections": {}
+    },
+    {
+      "id": "creation",
+      "manifest": "docs/texture-creation-corpus.json",
+      "manifest_sha256": "b59c5874e4edbd3471b4585d3bcddd3042e1187734bac9fd3bfa08b3d2494d68",
+      "capture_root": "artifacts",
+      "subdirectory": "m2-texture-creation-acceptance",
+      "expected_rejections": {}
+    },
+    {
+      "id": "discovery",
+      "manifest": "docs/creation-discovery-corpus.json",
+      "manifest_sha256": "6994db9bba57ae3626ce6c51e2724d09eeae7183a9fabdaac089e0944a81b40c",
+      "capture_root": "artifacts",
+      "subdirectory": "m2-late-texture-layout-late",
+      "expected_rejections": {}
+    },
+    {
+      "id": "dimensions",
+      "manifest": "docs/texture-dimensions-corpus.json",
+      "manifest_sha256": "df2efa9231fa16e03e7ef12abb9c1732714dfc47f97c1c6a12ac75a68dfe06c7",
+      "capture_root": "artifacts",
+      "subdirectory": "m2-texture-dimensions-final",
+      "expected_rejections": {}
+    },
+    {
+      "id": "views",
+      "manifest": "docs/view-creation-corpus.json",
+      "manifest_sha256": "2dbd9da563099b44b4cc57b9e297302a9dfbe8c383c802e6a2e79514e4449e1e",
+      "capture_root": "artifacts",
+      "subdirectory": "m2-view-creation-originals",
+      "expected_rejections": {}
+    },
+    {
+      "id": "buffer-views",
+      "manifest": "docs/buffer-view-corpus.json",
+      "manifest_sha256": "a9032eb91f2cfe861aa02a6d1ef07876f88eb71344ba1521b7c892dd5f4da6b1",
+      "capture_root": "artifacts",
+      "subdirectory": "m2-buffer-view-originals-final",
+      "expected_rejections": {}
+    },
+    {
+      "id": "pipeline-creation",
+      "manifest": "docs/pipeline-creation-corpus.json",
+      "manifest_sha256": "ee147a56aa461bd4aa6057ccc32a2a62e29c6fb2626f30452b3e1a2b4bd9a806",
+      "capture_root": "artifacts",
+      "subdirectory": "m2-pipeline-creation-originals",
+      "expected_rejections": {}
+    },
+    {
+      "id": "geometry-creation",
+      "manifest": "docs/geometry-creation-corpus.json",
+      "manifest_sha256": "159b875c867a6668e1752d69fe86d56fad673c7150a078e92efb79b7252ff7ad",
+      "capture_root": "artifacts",
+      "subdirectory": "m2-geometry-creation-originals",
+      "expected_rejections": {}
+    },
+    {
+      "id": "class-creation",
+      "manifest": "docs/class-creation-corpus.json",
+      "manifest_sha256": "659b09c81585740ffd7cc9444c38204410cd0c63abf5d78edfb089442dec98cd",
+      "capture_root": "artifacts",
+      "subdirectory": "m2-class-creation-originals-verified",
+      "expected_rejections": {}
+    },
+    {
+      "id": "predicate-creation",
+      "manifest": "docs/predicate-creation-corpus.json",
+      "manifest_sha256": "b1e5f002ededb793183db4fa302fcd507e7217152ecae01826c449f6bc62bf55",
+      "capture_root": "artifacts",
+      "subdirectory": "m2-predicate-creation-originals",
+      "expected_rejections": {}
+    },
+    {
+      "id": "clear-view",
+      "manifest": "docs/clear-view-corpus.json",
+      "manifest_sha256": "022045d0bcf89840ed58ec02d39cfacc22889ee12ecb9964e03aabd2b1ada271",
+      "capture_root": "artifacts",
+      "subdirectory": "m2-clear-view-originals",
+      "expected_rejections": {}
+    },
+    {
+      "id": "transfer1-context",
+      "manifest": "docs/transfer1-context-corpus.json",
+      "manifest_sha256": "9eb3d089cbff21fec4b29b0b16a5edf023432d3fa8f81a77de28cef513c0869e",
+      "capture_root": "artifacts",
+      "subdirectory": "m2-transfer1-originals-final",
+      "expected_rejections": {}
+    },
+    {
+      "id": "transfer1",
+      "manifest": "docs/transfer1-corpus.json",
+      "manifest_sha256": "f2a79c5621b8afb90fe8a1aeb75630d6ef372374a3af7d8fe6e04e25c8b475fd",
+      "capture_root": "artifacts",
+      "subdirectory": "m2-transfer1-originals-verified",
+      "expected_rejections": {}
+    },
+    {
+      "id": "minlod",
+      "manifest": "docs/min-lod-corpus.json",
+      "manifest_sha256": "9688fb856dc44bd57b425f46e5757c0da73847bf32cd39f336bf3299ac00be36",
+      "capture_root": "artifacts",
+      "subdirectory": "",
+      "expected_rejections": {}
+    },
+    {
+      "id": "missing-state",
+      "manifest": "docs/min-lod-missing-state-corpus.json",
+      "manifest_sha256": "331af8e5f7f81e1f4bd092012c195b94985c416bbc61c1e10d77cc32171b6a92",
+      "capture_root": "artifacts",
+      "subdirectory": "",
+      "expected_rejections": {
+        "minlod_6": {
+          "findings": [
+            {
+              "kind": "resource_lod_unresolved",
+              "event_id": 22,
+              "resource_id": 23,
+              "record_type": 55
+            }
+          ],
+          "runtime_error": "Event 22 (Draw): Resource 23: initial minimum LOD is unresolved at this access"
+        }
+      }
+    },
+    {
+      "id": "usage",
+      "manifest": "docs/min-lod-usage-corpus.json",
+      "manifest_sha256": "1c2fba22ce8cee2676d5913e7cd4766e4a8b7eaa1a5d799d2bf3974341a7f2ac",
+      "capture_root": "artifacts",
+      "subdirectory": "",
+      "expected_rejections": {
+        "minlod_usage_4": {
+          "findings": [
+            {
+              "kind": "resource_lod_unresolved",
+              "event_id": 22,
+              "resource_id": 23,
+              "record_type": 55
+            }
+          ],
+          "runtime_error": "Event 22 (Draw): Resource 23: initial minimum LOD is unresolved at this access"
+        },
+        "minlod_usage_5": {
+          "findings": [
+            {
+              "kind": "resource_lod_unresolved",
+              "event_id": 22,
+              "resource_id": 23,
+              "record_type": 55
+            }
+          ],
+          "runtime_error": "Event 22 (Draw): Resource 23: initial minimum LOD is unresolved at this access"
+        },
+        "minlod_usage_8": {
+          "findings": [
+            {
+              "kind": "resource_lod_unresolved",
+              "event_id": 33,
+              "resource_id": 23,
+              "record_type": 55
+            }
+          ],
+          "runtime_error": "Event 33 (Draw): Resource 23: initial minimum LOD is unresolved at this access"
+        }
+      }
+    },
+    {
+      "id": "so",
+      "manifest": "docs/so-lifetime-accepted-corpus.json",
+      "manifest_sha256": "b18f24db20d1e9f02f30242de19be8d8f9a0d18c7c61d0544df554c18eab4910",
+      "capture_root": "artifacts",
+      "subdirectory": "",
+      "expected_rejections": {}
+    },
+    {
+      "id": "getters",
+      "manifest": "docs/pipeline-getter-corpus.json",
+      "manifest_sha256": "c58b246dbfd227489b622c39f05447d88c9eb172d279058fa9581aaa93e96bfe",
+      "capture_root": "artifacts",
+      "subdirectory": "",
+      "expected_rejections": {}
+    },
+    {
+      "id": "context",
+      "manifest": "docs/context-state-corpus.json",
+      "manifest_sha256": "8d2e3b80e0878592947abbbc7160920f31334f109cfe5b777736ffc252d26a6b",
+      "capture_root": "artifacts",
+      "subdirectory": "",
+      "expected_rejections": {
+        "context_state_preframe_swap": {
+          "findings": [
+            {
+              "kind": "context_state_identity_unresolved",
+              "event_id": 22,
+              "resource_id": null,
+              "record_type": 13665
+            },
+            {
+              "kind": "context_state_identity_unresolved",
+              "event_id": 42,
+              "resource_id": null,
+              "record_type": 13665
+            }
+          ],
+          "runtime_error": "Event 22 (SwapDeviceContextState): Event 22: SwapDeviceContextState input identity is zero: this GPA serializer also writes zero for unregistered non-null state objects. A null no-op cannot be proven; swapped pipeline state and subsequent draw snapshots cannot be trusted"
+        },
+        "context_state_clear_swapped_state": {
+          "findings": [
+            {
+              "kind": "context_state_identity_unresolved",
+              "event_id": 22,
+              "resource_id": null,
+              "record_type": 13665
+            },
+            {
+              "kind": "context_state_identity_unresolved",
+              "event_id": 53,
+              "resource_id": null,
+              "record_type": 13665
+            }
+          ],
+          "runtime_error": "Event 22 (SwapDeviceContextState): Event 22: SwapDeviceContextState input identity is zero: this GPA serializer also writes zero for unregistered non-null state objects. A null no-op cannot be proven; swapped pipeline state and subsequent draw snapshots cannot be trusted"
+        },
+        "context_state_frame_create": {
+          "findings": [
+            {
+              "kind": "context_state_identity_unresolved",
+              "event_id": 22,
+              "resource_id": null,
+              "record_type": 13732
+            },
+            {
+              "kind": "context_state_identity_unresolved",
+              "event_id": 24,
+              "resource_id": null,
+              "record_type": 13665
+            },
+            {
+              "kind": "context_state_identity_unresolved",
+              "event_id": 54,
+              "resource_id": null,
+              "record_type": 13665
+            }
+          ],
+          "runtime_error": "Event 22 (CreateDeviceContextState): Event 22: CreateDeviceContextState succeeded but saved no returned object identity. The original serializer can lose a non-null state object; creation arguments cannot recover subsequent state identity or pipeline contents"
+        },
+        "context_state_restore_default": {
+          "findings": [
+            {
+              "kind": "context_state_identity_unresolved",
+              "event_id": 22,
+              "resource_id": null,
+              "record_type": 13732
+            },
+            {
+              "kind": "context_state_identity_unresolved",
+              "event_id": 24,
+              "resource_id": null,
+              "record_type": 13665
+            },
+            {
+              "kind": "context_state_identity_unresolved",
+              "event_id": 54,
+              "resource_id": null,
+              "record_type": 13665
+            }
+          ],
+          "runtime_error": "Event 22 (CreateDeviceContextState): Event 22: CreateDeviceContextState succeeded but saved no returned object identity. The original serializer can lose a non-null state object; creation arguments cannot recover subsequent state identity or pipeline contents"
+        },
+        "context_state_three_states": {
+          "findings": [
+            {
+              "kind": "context_state_identity_unresolved",
+              "event_id": 22,
+              "resource_id": null,
+              "record_type": 13665
+            },
+            {
+              "kind": "context_state_identity_unresolved",
+              "event_id": 42,
+              "resource_id": null,
+              "record_type": 13665
+            },
+            {
+              "kind": "context_state_identity_unresolved",
+              "event_id": 56,
+              "resource_id": null,
+              "record_type": 13665
+            }
+          ],
+          "runtime_error": "Event 22 (SwapDeviceContextState): Event 22: SwapDeviceContextState input identity is zero: this GPA serializer also writes zero for unregistered non-null state objects. A null no-op cannot be proven; swapped pipeline state and subsequent draw snapshots cannot be trusted"
+        },
+        "context_state_null_swap": {
+          "findings": [
+            {
+              "kind": "context_state_identity_unresolved",
+              "event_id": 22,
+              "resource_id": null,
+              "record_type": 13665
+            }
+          ],
+          "runtime_error": "Event 22 (SwapDeviceContextState): Event 22: SwapDeviceContextState input identity is zero: this GPA serializer also writes zero for unregistered non-null state objects. A null no-op cannot be proven; swapped pipeline state and subsequent draw snapshots cannot be trusted"
+        },
+        "context_state_no_previous_output": {
+          "findings": [
+            {
+              "kind": "context_state_identity_unresolved",
+              "event_id": 22,
+              "resource_id": null,
+              "record_type": 13665
+            },
+            {
+              "kind": "context_state_identity_unresolved",
+              "event_id": 42,
+              "resource_id": null,
+              "record_type": 13665
+            }
+          ],
+          "runtime_error": "Event 22 (SwapDeviceContextState): Event 22: SwapDeviceContextState input identity is zero: this GPA serializer also writes zero for unregistered non-null state objects. A null no-op cannot be proven; swapped pipeline state and subsequent draw snapshots cannot be trusted"
+        }
+      }
+    },
+    {
+      "id": "discards",
+      "manifest": "docs/discard-corpus.json",
+      "manifest_sha256": "ad9f2ef36e8ac308e9eb54e252f30763b2d76bfbd5dd869df1c6703adf589225",
+      "capture_root": "artifacts",
+      "subdirectory": "",
+      "expected_rejections": {
+        "discard_null_rects": {
+          "findings": [
+            {
+              "kind": "discard_rectangle_presence_unresolved",
+              "event_id": 15,
+              "resource_id": 12,
+              "record_type": 13667
+            }
+          ],
+          "runtime_error": "Event 15 (DiscardView1): DiscardView1 zero-count record lost the rectangle pointer presence: whole-view discard and an empty non-null rectangle array cannot be distinguished; safe overwrite/use has not been proven"
+        },
+        "discard_zero_count_nonnull": {
+          "findings": [
+            {
+              "kind": "discard_rectangle_presence_unresolved",
+              "event_id": 15,
+              "resource_id": 12,
+              "record_type": 13667
+            }
+          ],
+          "runtime_error": "Event 15 (DiscardView1): DiscardView1 zero-count record lost the rectangle pointer presence: whole-view discard and an empty non-null rectangle array cannot be distinguished; safe overwrite/use has not been proven"
+        },
+        "discard_missing_view_rtv": {
+          "findings": [
+            {
+              "kind": "discard_target_missing",
+              "event_id": 13,
+              "resource_id": 14,
+              "record_type": 13652
+            }
+          ],
+          "runtime_error": "Event 13 (DiscardView): Missing capture entry 14"
+        },
+        "discard_missing_view_srv": {
+          "findings": [
+            {
+              "kind": "discard_target_missing",
+              "event_id": 13,
+              "resource_id": 14,
+              "record_type": 13652
+            }
+          ],
+          "runtime_error": "Event 13 (DiscardView): Missing capture entry 14"
+        },
+        "discard_missing_view_uav": {
+          "findings": [
+            {
+              "kind": "discard_target_missing",
+              "event_id": 13,
+              "resource_id": 14,
+              "record_type": 13652
+            }
+          ],
+          "runtime_error": "Event 13 (DiscardView): Missing capture entry 14"
+        },
+        "discard_missing_view_rectangle": {
+          "findings": [
+            {
+              "kind": "discard_target_missing",
+              "event_id": 13,
+              "resource_id": 14,
+              "record_type": 13667
+            }
+          ],
+          "runtime_error": "Event 13 (DiscardView1): Missing capture entry 14"
+        },
+        "discard_missing_view_overlap": {
+          "findings": [
+            {
+              "kind": "discard_target_missing",
+              "event_id": 13,
+              "resource_id": 14,
+              "record_type": 13667
+            }
+          ],
+          "runtime_error": "Event 13 (DiscardView1): Missing capture entry 14"
+        },
+        "discard_missing_view_null_rects_nonzero_count": {
+          "findings": [
+            {
+              "kind": "discard_target_missing",
+              "event_id": 13,
+              "resource_id": 14,
+              "record_type": 13667
+            }
+          ],
+          "runtime_error": "Event 13 (DiscardView1): Missing capture entry 14"
+        },
+        "discard_missing_view_empty_rectangle": {
+          "findings": [
+            {
+              "kind": "discard_target_missing",
+              "event_id": 13,
+              "resource_id": 14,
+              "record_type": 13667
+            }
+          ],
+          "runtime_error": "Event 13 (DiscardView1): Missing capture entry 14"
+        },
+        "discard_missing_view_mip_array": {
+          "findings": [
+            {
+              "kind": "discard_target_missing",
+              "event_id": 19,
+              "resource_id": 20,
+              "record_type": 13652
+            }
+          ],
+          "runtime_error": "Event 19 (DiscardView): Missing capture entry 20"
+        },
+        "discard_missing_view_buffer_rectangle": {
+          "findings": [
+            {
+              "kind": "discard_target_missing",
+              "event_id": 13,
+              "resource_id": 14,
+              "record_type": 13667
+            }
+          ],
+          "runtime_error": "Event 13 (DiscardView1): Missing capture entry 14"
+        }
+      }
+    },
+    {
+      "id": "deferred_versions",
+      "manifest": "docs/deferred-version-corpus.json",
+      "manifest_sha256": "92d6110cbbb5ae3598dbf7487b446a968894d5e90d489d519dcd1238bf3f4a6d",
+      "capture_root": "artifacts",
+      "subdirectory": "",
+      "expected_rejections": {}
+    },
+    {
+      "id": "deferred_merges",
+      "manifest": "docs/deferred-merge-corpus.json",
+      "manifest_sha256": "21f43a522328968023298e72e9e0aedebb892d9ce0b2d09e477f371df596f242",
+      "capture_root": "artifacts",
+      "subdirectory": "",
+      "expected_rejections": {}
+    }
+  ],
+  "manifest_hash_policy": "UTF-8 bytes with CRLF normalized to LF",
+  "scope_note": "M4 counter provenance supersedes four historical image-only positives; M3 remains unaccepted."
+}

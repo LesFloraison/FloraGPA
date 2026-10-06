@@ -1,0 +1,494 @@
+{
+  "schema": "FloraGPA initial UAV counter boundary baseline 1",
+  "reviewed": "2026-10-06",
+  "implementation_commit": "cabfb39ea064ba247aed504e15973716b92262e6",
+  "validator_commit": "4e50f9d672b9a5cc9efa6c86a162665b2819356f",
+  "scope": "Reject unavailable captured hidden counters; restore only with explicit evidence-backed experiment values",
+  "traditional_list_execution_accepted": false,
+  "stages_complete": {
+    "M3": false,
+    "M4": false,
+    "M5": false
+  },
+  "package": "out/FloraGPA-resource-boundaries-20261006",
+  "package_cli_sha256": "6f9b654ef1dcedc8e591041350dcbba84dd87be4f5bbfdb09decf47297d7f577",
+  "package_gui_sha256": "4d5ae24df1a31ff9da823f8f9f662fe754f03c942e5b98043b72c152497ddbbc",
+  "inventory": {
+    "registrations": 470,
+    "unique_hashes": 460,
+    "positive_registrations": 444,
+    "positive_unique_hashes": 434,
+    "rejections": 26,
+    "reclassified_missing_counter_originals": 4
+  },
+  "module_ledger_unchanged": {
+    "ported": 72,
+    "partial": 117,
+    "pending": 15
+  },
+  "counts": {
+    "ordinary_attempts": 940,
+    "controls": 491,
+    "control_runs": 668,
+    "boundaries": 346,
+    "boundary_runs": 692,
+    "known_variable_cases": 1,
+    "ctest_suites": 6,
+    "counter_unit_passes": 16,
+    "predicate_unit_passes": 25,
+    "buffer_view_unit_passes": 42,
+    "present_unit_passes": 25,
+    "qt_workflows": 2,
+    "original_counter_cases": 4,
+    "seeded_native_runs": 16,
+    "original_observer_runs": 4,
+    "fresh_producer_frames": 48,
+    "goldens": 4,
+    "preflight_unique_captures": 460,
+    "preflight_changed_captures": 4,
+    "wrong_player_guard_cases": 1
+  },
+  "preflight_before_after_exe_sha256": [
+    "59ce9b99a003260efdc815de2736b9430644da91909a803e8b62c6847abbc4f0",
+    "ed0190f89d1624fa3eabcd264edd87ad6dc46a22017438a3846fc1c4e3829dc5"
+  ],
+  "gate_suites": [
+    {
+      "id": "corpus",
+      "passed": true,
+      "report_sha256": "1eade9aa564bd89dcb9f40004b3fad46c9ca6f38a927fc4f618cbee12a4b0301",
+      "cases": 91,
+      "rejections": 4
+    },
+    {
+      "id": "originals",
+      "passed": true,
+      "report_sha256": "3a62548dde15aa1a32984c6947003fdd91de78d0cdbf884689ded2a1a87aaf11",
+      "cases": 11,
+      "rejections": 0
+    },
+    {
+      "id": "copy",
+      "passed": true,
+      "report_sha256": "ecf6db3c69149dc47c0347a3486b39c58ca518ed432d147d30f05050614be5c9",
+      "cases": 6,
+      "rejections": 0
+    },
+    {
+      "id": "present",
+      "passed": true,
+      "report_sha256": "9493e2dd52a75aea6dce5e09bbcb1ece80ed30b91022e19547b0dec801b23c8a",
+      "cases": 5,
+      "rejections": 0
+    },
+    {
+      "id": "buffer",
+      "passed": true,
+      "report_sha256": "e0cce2f5072b14c6b5531e871b96c69f3c0cad69beb245fe9278f924bfff1571",
+      "cases": 5,
+      "rejections": 0
+    },
+    {
+      "id": "pipeline",
+      "passed": true,
+      "report_sha256": "1b80137ab9330349d883cf07283fd573bd2c315dae44f7044551a73296b82d6b",
+      "cases": 5,
+      "rejections": 0
+    },
+    {
+      "id": "creation",
+      "passed": true,
+      "report_sha256": "7d8cb373141d7a69d0badcf9303e9219b9d3d1a0272256f6588bfe5e1a2a3516",
+      "cases": 7,
+      "rejections": 0
+    },
+    {
+      "id": "discovery",
+      "passed": true,
+      "report_sha256": "dba63aac00b59059d2db1bff908626564428824e743b59ec27c33d06448bbd78",
+      "cases": 1,
+      "rejections": 0
+    },
+    {
+      "id": "dimensions",
+      "passed": true,
+      "report_sha256": "c9110d5dd3f709a63c0ba326e6fa48492267fe2513cb9852a8ea34eee7a056a2",
+      "cases": 17,
+      "rejections": 0
+    },
+    {
+      "id": "views",
+      "passed": true,
+      "report_sha256": "3c50a01bcaa52ab003a4f29f8f01cd9bb0e1326caeb575d7e9e4fe2e4bc66cde",
+      "cases": 12,
+      "rejections": 0
+    },
+    {
+      "id": "buffer-views",
+      "passed": true,
+      "report_sha256": "b22dd40801611af3e6b177a41f22b951c379f906267e84131a147b0b463ea6c8",
+      "cases": 19,
+      "rejections": 0
+    },
+    {
+      "id": "pipeline-creation",
+      "passed": true,
+      "report_sha256": "0a94fe80fed33d256c552f905f837748aea0b7bc447c19531162f5ed21c43366",
+      "cases": 32,
+      "rejections": 0
+    },
+    {
+      "id": "geometry-creation",
+      "passed": true,
+      "report_sha256": "3333b225b3a1e1e4d50bd835dd05703b1ee7504f20fe94c7294e12269a049839",
+      "cases": 20,
+      "rejections": 0
+    },
+    {
+      "id": "class-creation",
+      "passed": true,
+      "report_sha256": "08598ad04ab0a8f81945b8f68f13ae28713b2f4100549566d01b0fcd958147a2",
+      "cases": 13,
+      "rejections": 0
+    },
+    {
+      "id": "predicate-creation",
+      "passed": true,
+      "report_sha256": "8a8aac2e8798d41eb2e5fe00da2076f188557a413ed14bbca2e9edee642db911",
+      "cases": 10,
+      "rejections": 0
+    },
+    {
+      "id": "clear-view",
+      "passed": true,
+      "report_sha256": "751a543bed0380826a1b37c2dcd70b4cbc4b42bf7bd9eb4acd09c1cd31c617ce",
+      "cases": 16,
+      "rejections": 0
+    },
+    {
+      "id": "transfer1-context",
+      "passed": true,
+      "report_sha256": "62c05dba133da554ea104279745c0ef92582a9eee3a6590ebdbdb9e6040dce05",
+      "cases": 14,
+      "rejections": 0
+    },
+    {
+      "id": "transfer1",
+      "passed": true,
+      "report_sha256": "52711f117651bd8978d8313bb7312af793b974240c1d3a0e7aad7395d9bb5b7f",
+      "cases": 26,
+      "rejections": 0
+    },
+    {
+      "id": "minlod",
+      "passed": true,
+      "report_sha256": "8d6e0438063e641cc09ffa140ee10ee6523559f3f5eb57808c486b984014a4b0",
+      "cases": 11,
+      "rejections": 0
+    },
+    {
+      "id": "missing-state",
+      "passed": true,
+      "report_sha256": "500503851643ded7b4ae5bf44f0c221e8f6e4a21b67de2cd49272eeac03d21dc",
+      "cases": 1,
+      "rejections": 1
+    },
+    {
+      "id": "usage",
+      "passed": true,
+      "report_sha256": "1058648fa7e58caf826dbb5d48f213d5afa5b434f0b1df098d98d195d96c2eaa",
+      "cases": 10,
+      "rejections": 3
+    },
+    {
+      "id": "so",
+      "passed": true,
+      "report_sha256": "ca9e5ff4057f7efccec4fa103e9137ad17cf0f1d8a73f0eb332f57acdedd56f1",
+      "cases": 10,
+      "rejections": 0
+    },
+    {
+      "id": "getters",
+      "passed": true,
+      "report_sha256": "9d5f052729a27838750564eeafe006a2867a747ab1178fc49e5ab98eb0d66699",
+      "cases": 12,
+      "rejections": 0
+    },
+    {
+      "id": "context",
+      "passed": true,
+      "report_sha256": "b8fa83e1f971abe663d108a42d5f0c38be34b587ad064607045b73a5d0bf42f6",
+      "cases": 8,
+      "rejections": 7
+    },
+    {
+      "id": "discards",
+      "passed": true,
+      "report_sha256": "a8016c155f09c596c87dde662fdf1d10ae6e32aa13c05cc68bf166fd5eb8efc2",
+      "cases": 26,
+      "rejections": 11
+    },
+    {
+      "id": "deferred_versions",
+      "passed": true,
+      "report_sha256": "12092e818ddd7b4d95807d76d92843ed99f45fda21810dde8d43d7231063234d",
+      "cases": 18,
+      "rejections": 0
+    },
+    {
+      "id": "deferred_merges",
+      "passed": true,
+      "report_sha256": "4f0339bc7b220a9056bba87579afd71399b35ccf518524958512ac05e6e34806",
+      "cases": 64,
+      "rejections": 0
+    }
+  ],
+  "cases": [
+    {
+      "name": "vs-1",
+      "capture_sha256": "4d6e1bf41f3670b6ee6989da11d6fe78d386d80b60dc299b2ef7b973c3c26f0a",
+      "checks": [
+        {
+          "tag": "hardware-0",
+          "count": 29,
+          "exact_bytes": true
+        },
+        {
+          "tag": "hardware-1",
+          "count": 29,
+          "exact_bytes": true
+        },
+        {
+          "tag": "warp-0",
+          "count": 29,
+          "exact_bytes": true
+        },
+        {
+          "tag": "warp-1",
+          "count": 29,
+          "exact_bytes": true
+        }
+      ],
+      "missing_counter_findings": [
+        {
+          "category": 7,
+          "entry_id": 31,
+          "event_id": 31,
+          "kind": "counter_initial_value_missing",
+          "reason": "No captured counter value is established before this use; KEEP and buffer contents do not recover a hidden UAV counter",
+          "record_type": 55,
+          "resource_id": 14,
+          "severity": "error",
+          "storage_id": 10
+        },
+        {
+          "category": 7,
+          "entry_id": 55,
+          "event_id": 55,
+          "kind": "counter_initial_value_missing",
+          "reason": "No captured counter value is established before this use; KEEP and buffer contents do not recover a hidden UAV counter",
+          "record_type": 63,
+          "resource_id": 14,
+          "severity": "error",
+          "storage_id": 10
+        }
+      ],
+      "default_rejected": true,
+      "producer_bytes_sha256": "bdd6dbb45d0d1723b16d22f34a9db33debdfd7c6752714d9fb2e036b52681272",
+      "original_missing_counter_reproduced": true,
+      "original_observer_sha256": "842de02b40fd1f318c20b21cef0f14df97b38a7fcc0401c8b36ccbbc8f6e2e47"
+    },
+    {
+      "name": "hs-4",
+      "capture_sha256": "77d83a7492ef391ac313f8bfab0b339cc254eab8ca2cf08f8e8c53f5d8e93219",
+      "checks": [
+        {
+          "tag": "hardware-0",
+          "count": 29,
+          "exact_bytes": true
+        },
+        {
+          "tag": "hardware-1",
+          "count": 29,
+          "exact_bytes": true
+        },
+        {
+          "tag": "warp-0",
+          "count": 29,
+          "exact_bytes": true
+        },
+        {
+          "tag": "warp-1",
+          "count": 29,
+          "exact_bytes": true
+        }
+      ],
+      "missing_counter_findings": [
+        {
+          "category": 7,
+          "entry_id": 33,
+          "event_id": 33,
+          "kind": "counter_initial_value_missing",
+          "reason": "No captured counter value is established before this use; KEEP and buffer contents do not recover a hidden UAV counter",
+          "record_type": 55,
+          "resource_id": 14,
+          "severity": "error",
+          "storage_id": 10
+        },
+        {
+          "category": 7,
+          "entry_id": 59,
+          "event_id": 59,
+          "kind": "counter_initial_value_missing",
+          "reason": "No captured counter value is established before this use; KEEP and buffer contents do not recover a hidden UAV counter",
+          "record_type": 63,
+          "resource_id": 14,
+          "severity": "error",
+          "storage_id": 10
+        }
+      ],
+      "default_rejected": true,
+      "producer_bytes_sha256": "bdd6dbb45d0d1723b16d22f34a9db33debdfd7c6752714d9fb2e036b52681272",
+      "original_missing_counter_reproduced": true,
+      "original_observer_sha256": "842de02b40fd1f318c20b21cef0f14df97b38a7fcc0401c8b36ccbbc8f6e2e47"
+    },
+    {
+      "name": "ds-8",
+      "capture_sha256": "d54cf0f75eb8f4d2e3db0f4583a6c4256a80496beb2f2edf0f2306612d9cfe2f",
+      "checks": [
+        {
+          "tag": "hardware-0",
+          "count": 29,
+          "exact_bytes": true
+        },
+        {
+          "tag": "hardware-1",
+          "count": 29,
+          "exact_bytes": true
+        },
+        {
+          "tag": "warp-0",
+          "count": 29,
+          "exact_bytes": true
+        },
+        {
+          "tag": "warp-1",
+          "count": 29,
+          "exact_bytes": true
+        }
+      ],
+      "missing_counter_findings": [
+        {
+          "category": 7,
+          "entry_id": 33,
+          "event_id": 33,
+          "kind": "counter_initial_value_missing",
+          "reason": "No captured counter value is established before this use; KEEP and buffer contents do not recover a hidden UAV counter",
+          "record_type": 55,
+          "resource_id": 14,
+          "severity": "error",
+          "storage_id": 10
+        },
+        {
+          "category": 7,
+          "entry_id": 59,
+          "event_id": 59,
+          "kind": "counter_initial_value_missing",
+          "reason": "No captured counter value is established before this use; KEEP and buffer contents do not recover a hidden UAV counter",
+          "record_type": 63,
+          "resource_id": 14,
+          "severity": "error",
+          "storage_id": 10
+        }
+      ],
+      "default_rejected": true,
+      "producer_bytes_sha256": "bdd6dbb45d0d1723b16d22f34a9db33debdfd7c6752714d9fb2e036b52681272",
+      "original_missing_counter_reproduced": true,
+      "original_observer_sha256": "842de02b40fd1f318c20b21cef0f14df97b38a7fcc0401c8b36ccbbc8f6e2e47"
+    },
+    {
+      "name": "gs-1",
+      "capture_sha256": "2b404fcd3e730f6d472405fd1dd3c8130b6af66be528ffee37d7a2223b918a57",
+      "checks": [
+        {
+          "tag": "hardware-0",
+          "count": 15,
+          "exact_bytes": true
+        },
+        {
+          "tag": "hardware-1",
+          "count": 15,
+          "exact_bytes": true
+        },
+        {
+          "tag": "warp-0",
+          "count": 15,
+          "exact_bytes": true
+        },
+        {
+          "tag": "warp-1",
+          "count": 15,
+          "exact_bytes": true
+        }
+      ],
+      "missing_counter_findings": [
+        {
+          "category": 7,
+          "entry_id": 32,
+          "event_id": 32,
+          "kind": "counter_initial_value_missing",
+          "reason": "No captured counter value is established before this use; KEEP and buffer contents do not recover a hidden UAV counter",
+          "record_type": 55,
+          "resource_id": 14,
+          "severity": "error",
+          "storage_id": 10
+        },
+        {
+          "category": 7,
+          "entry_id": 57,
+          "event_id": 57,
+          "kind": "counter_initial_value_missing",
+          "reason": "No captured counter value is established before this use; KEEP and buffer contents do not recover a hidden UAV counter",
+          "record_type": 63,
+          "resource_id": 14,
+          "severity": "error",
+          "storage_id": 10
+        }
+      ],
+      "default_rejected": true,
+      "producer_bytes_sha256": "a264884d08b9e721fa8b385f4d1402759e1a9598935a0c38f873a4c21df1b2dc",
+      "original_missing_counter_reproduced": true,
+      "original_observer_sha256": "842de02b40fd1f318c20b21cef0f14df97b38a7fcc0401c8b36ccbbc8f6e2e47"
+    }
+  ],
+  "remaining": [
+    "M4 frame-before predicate history and other resource boundaries",
+    "M5 long-duration, broader failure/cancellation and large-file checks",
+    "Independent clean-Windows build/deployment",
+    "Traditional Command List execution"
+  ],
+  "evidence": {
+    "artifacts/m4-counter-before-tests.log": "f5ed51ae03d1d8ee42e68528c7cf559db48c442b2580e9f2a37a2725c76b2826",
+    "artifacts/m4-counter-final-tests.log": "7075d5940f89355c9533c00e91819cd87f95a3a134c9edc2624aa090f84044ce",
+    "artifacts/m4-counter-original-regression.log": "171f98c84a76b88378a513bc79d84b7e65b39236550b7013bbf66c689ad894df",
+    "artifacts/m4-counter-ui-final.log": "8c7aed49fb9e8660b911caf81566ab34976a9022313acde084e8dc12f3d4243d",
+    "artifacts/m4-counter-ui-render.log": "140738182e83bedc6efe195abcb85163f3c3d59be280002950da234af1ce2f55",
+    "artifacts/m4-counter-ui-final/missing-counter-unavailable.png": "404423a98325659b9372cb8b928af0aba069e47039a501d8f373daf60ac615d1",
+    "artifacts/m4-counter-ui-final/missing-counter-seeded.png": "d0fc1dfcc697d9e0d1a2de51a7f926f4c5620fb0c5ad4eb78b933f47478d0d37",
+    "artifacts/m4-counter-preflight-audit.py": "9c3763eb216f65edae9abb6b769c3c59949f426810a2e0e51b8d79cdfbcadcf2",
+    "artifacts/m4-counter-preflight/validation.json": "6f126b78d5c96f212c5c3744ace22026f8e67f800a77ef1ce01137113c5d6e06",
+    "artifacts/m4-counter-verified-original/validation.json": "e4201245e5798cb119e9d6a72409cc11ac392cbfe970e7a50fff44db9eec74df",
+    "artifacts/m4-counter-producer-build/build.json": "68fd0a544980d6535b9f989f310b719ae66c23dafc09d944aaa9c0ba6c6a4069",
+    "artifacts/m4-counter-fresh-producer/validation.json": "884a6d8ad24635abeeafe2c2036fb9b79e821beb9579547a7ea051546c5125f7",
+    "artifacts/m4-counter-goldens/validation.json": "5e1dde1ab9876f50c472cdf84378931ffc3b5cd8e9700002b67d37bf81383ade",
+    "artifacts/m4-counter-wrong-player-guard/rejection.log": "0d1e13c3007a7c3727f2f6992802dc64d001cb6e55bf5881b1f9dd947cce6042",
+    "artifacts/m4-counter-package-files.json": "3d9fc2e63b29e339b4a189667f2a94c882d5228d7715c990f2c7c33a35ebd586",
+    "artifacts/m4-resource-gate/gate.json": "1a1c61b0c53440105e9fed9c1f7adbea56663d710bb21dc45375c42f4ba5e30a",
+    "artifacts/m4-resource-gate/counts.json": "c40b74a085ac7f5ca0f333f968b7299fd10ca7ce88982802a3964b0cc717b345",
+    "tools/validate_initial_counter_boundary.py": "43fa4f2c23edb0ebaf44d4fd1d4bec4f0598d945c5095e94521d9ab0c7ecdf59",
+    "docs/m4-gate-suites.json": "e3249884b11f253c7716aa699413aa256251d7e34d23ea5c496da3a0bfd709a9",
+    "artifacts\\m4-counter-predicate-creation-unit.txt": "e2b39110677a5bb4eff887f0f983bbc58bd5e4fb29937d057641c6dcc37ec53d",
+    "artifacts\\m4-counter-buffer-view-creation-unit.txt": "88edb2ef41a11e6d21472b8de88bd7e36ae64a877b7ba506d886ef12d6904f58",
+    "artifacts\\m4-counter-present-records-unit.txt": "c708fc808b51e96fb71e2ae5c0485f6a6d128cbd0d5ae9fdd0205c2a1b96f40b"
+  }
+}

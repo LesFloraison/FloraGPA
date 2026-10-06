@@ -1,7 +1,28 @@
 # Current capabilities and compatibility
 
 Reviewed **2026-10-06**. The user authorized prioritizing M4, then M5, while
-keeping M3 open. The latest [saved Map write correction](MAP_WRITE_DATA_AUDIT.md)
+keeping M3 open. The latest [initial-counter correction](INITIAL_COUNTER_BOUNDARY_AUDIT.md)
+rejects missing frame-before UAV counts at consumption. Buffer inspection keeps
+available bytes and displays unknown counters as Unavailable; the existing editor
+supports explicit initial values without supplying a guessed default. Four
+original captures now reject normally and recover exact bytes/counts only with
+producer-backed experiment values. The fresh original observer reproduces the
+original player's incorrect zero initialization despite equal final pixels.
+
+Current inventory is **470 registrations / 460 unique hashes**, with **444 default
+replay-positive registrations (434 unique) and 26 rejection files**. Four historical
+image-only positives are reclassified because their necessary initial counts are
+not captured. Module counts stay 72 ported / 117 partial / 15 pending.
+Package: `out/FloraGPA-resource-boundaries-20261006/`; implementation: `cabfb39`.
+The complete 27-suite package matrix passes: 940 ordinary attempts (888 positive,
+52 located rejections), 668 control runs and 692 resource-boundary exports.
+Six related CTest suites, Qt failure/recovery and counter-history checks, four
+goldens and a fresh 48-frame self-owned counter producer pass. The baseline
+keeps these results separate from the earlier CPU-only comparison.
+M4/M5 are not complete; predicate/frame-before history, broader resource boundaries,
+long-duration/recovery/large-file testing and independent deployment remain open.
+
+The preceding [saved Map write correction](MAP_WRITE_DATA_AUDIT.md)
 shares subresource/data validation between preflight and replay and rejects a
 successful Map with no saved data identity instead of silently skipping it.
 Forty-four Map cases, seven CTest suites, 192 planar comparisons and four serial
@@ -98,7 +119,7 @@ replay of those files is not recovery of the uninjected application result.
 The 32 immutable-CB controls retain correct resource/image results. Capture-side
 state restoration failures remain separately recorded in both groups.
 
-The combined inventory is now **470 registered cases / 460 distinct hashes**:
+The preceding merged-list inventory contained **470 registered cases / 460 distinct hashes**:
 448 replay-positive registrations (438 unique) and 22 rejection files. Of the
 new positives, 32 explicitly carry a capture-side workload-data mismatch. These
 counts measure replay of saved captures, not complete workload/API fidelity or
@@ -151,7 +172,7 @@ tested workloads; opening a file does not prove accurate replay.
 | Immediate-context replay | Captured draws/dispatches, supported setters, uploads, copies (including Context1 transfers), ClearView, queries/predication and presentation | Broader layouts, resource versions and some presentation/transfer cases remain incomplete. [Setters](PIPELINE_SETTER_AUDIT.md), [texture transfers](TEXTURE_COPY_AUDIT.md), [Context1 transfers](TRANSFER1_AUDIT.md), [ClearView](CLEAR_VIEW_AUDIT.md), [presentation](PRESENT_REPLAY_AUDIT.md) |
 | Frame-time creation | Validated buffers, textures/views, shaders, pipeline states, class linkage/instances and predicates | Device5 coverage is not every interface version or descriptor combination; required missing data and unresolved identities are rejected. [Buffers](BUFFER_CREATION_AUDIT.md), [textures](TEXTURE_DIMENSIONS_AUDIT.md), [texture views](VIEW_CREATION_AUDIT.md), [buffer views](BUFFER_VIEW_CREATION_AUDIT.md), [pipeline](PIPELINE_CREATION_AUDIT.md), [geometry/SO](GEOMETRY_CREATION_AUDIT.md), [classes](CLASS_CREATION_AUDIT.md), [predicates](PREDICATE_CREATION_AUDIT.md) |
 | Texture and output inspection | Presentation/RTV/DSV selection, mip/layer/slice, typed/channel/range controls, supported MSAA resolve/sample and planar inspection, exports | Format/device limits remain; legacy P010/P016 initial data can contain recovered Y only. [Frame output](FRAME_OUTPUT_MIGRATION.md), [texture inspection](TEXTURE_INSPECTION_MIGRATION.md), [planar writes](PLANAR_WRITE_MIGRATION.md) |
-| Pipeline, buffers and geometry | Captured versus native replay state, before/after boundaries, constants/counters, IA and supported post-shader output | Missing state retains provenance; SO cursors have no native getter; frame-before counters require evidence or explicit experiments. [Boundaries](BEFORE_BOUNDARY_MIGRATION.md), [geometry](POST_TRANSFORM_MIGRATION.md), [HS output](HULL_OUTPUT_MIGRATION.md), [counters](BUFFER_VIEW_CREATION_AUDIT.md) |
+| Pipeline, buffers and geometry | Captured versus native replay state, before/after boundaries, constants/counters, IA and supported post-shader output | Missing state retains provenance; SO cursors have no native getter; frame-before counters require evidence or explicit experiments. [Boundaries](BEFORE_BOUNDARY_MIGRATION.md), [geometry](POST_TRANSFORM_MIGRATION.md), [HS output](HULL_OUTPUT_MIGRATION.md), [initial counters](INITIAL_COUNTER_BOUNDARY_AUDIT.md), [created counters](BUFFER_VIEW_CREATION_AUDIT.md) |
 | Experiments | Shader replacement, six-stage shader/IA/CB/SRV/sampler/output/SO/pipeline setter edits, buffer/texture edits and history | Event-scoped edits differ from persistent setters; consumer and format combinations retain their own limits. [Shader setters](SHADER_SETTER_MIGRATION.md), [event textures](EVENT_TEXTURE_MIGRATION.md), [reports](EXPERIMENT_REPORT_MIGRATION.md) |
 | Coverage and Quad | Native execution, Qt controls, navigation, export and cancellation | Coverage is not an overdraw counter; Quad groups are not physical hardware quad counts. Sample/order/coordinate limits remain. [Coverage](COVERAGE_UI_MIGRATION.md), [Quad](QUAD_UI_MIGRATION.md) |
 | Shader tools and debugging | DXBC/reflection, supported HLSL recovery, compilation/projects, source metadata and native GS/HS/DS checkpoint UI | Recovered HLSL is not original source; source availability and shader operations constrain debugging. [Recovery](HLSL_RECOVERY_MIGRATION.md), [projects](SHADER_PROJECT_MIGRATION.md), [checkpoints](CHECKPOINT_UI_MIGRATION.md) |
@@ -308,8 +329,8 @@ the other 35 suites passed initially and the complete UI suite passes after the 
 | M1 — Acceptance infrastructure | Minimum loop delivered: corpus, coverage, preflight, serial comparison and diagnostic queue. Extend evidence as paths arrive. |
 | M2 — Ordinary replay | Registered-scope gate passed: 366 positive cases and 22 located rejections; auxiliary/snapshot contracts audited. This is not universal API support. State-object identity loss, mixed saved/missing SO targets and unverified lifetimes remain explicit boundaries. |
 | M3 — Deferred Context / Command List | Open; M4/M5 now take priority by user instruction on 2026-10-06. Require original retained-list captures proving identity, build order, resource versions, repeated execution, restore-state and event mapping before production support. |
-| M4 — Resources and boundaries | Active, incomplete. Saved single-sample initializers and Map full/differential writes now receive shared preflight/runtime storage checks. Continue missing pitch/data dependencies, counters, Query/Predication and presentation; distinguish absent information from implementation gaps. |
-| M5 — Stable compatibility release | Incomplete. Broaden captures, repeat/long-duration checks, recovery and large-file testing; validate clean-environment build/deployment and publish a fixed matrix. |
+| M4 — Resources and boundaries | Active, incomplete. Initial texture/Map data is checked; missing initial UAV counts reject with explicit experiment recovery. Continue missing pitch/data dependencies, predicate/frame-before history, Query and presentation boundaries. |
+| M5 — Stable compatibility release | Incomplete. The new package and expanded 470-case registry include corrected counter expectations. Continue long-duration, recovery, large-file and independent clean-environment build/deployment gates. |
 | M6 — Analyzer and other versions | Incomplete. Continue remaining Qt consumers, advanced profiling/debugging and version-specific adapters after core replay gates. Existing analyzer features remain available. |
 
 The original order was **M1 → M2 → M3 → M4 → M5**. On 2026-10-06 the user
