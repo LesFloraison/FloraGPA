@@ -3796,6 +3796,32 @@ class UiTests final : public QObject {
         QVERIFY(done.takeLast()[0].toBool());
         QVERIFY(!window.busy());
     }
+    void counterSlotReplayAndNavigate() {
+        const auto root = qEnvironmentVariable("FLORA_COUNTER_SLOT_CAPTURES");
+        if (root.isEmpty()) QSKIP("Set FLORA_COUNTER_SLOT_CAPTURES for mixed-slot original captures");
+        flora::MainWindow window;
+        window.resize(1440, 900); window.show();
+        QSignalSpy done(&window, &flora::MainWindow::taskFinished);
+        for (int mode : {40, 41, 42}) {
+            done.clear();
+            window.openCapture(root + '/' + QString::number(mode) + "/capture.gpa_frame");
+            QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+            QVERIFY(done.takeLast()[0].toBool());
+            auto output = window.findChild<flora::ImageView *>("frameOutput");
+            QVERIFY(output); QCOMPARE(output->image().size(), QSize(8, 8));
+            const auto expected = output->image();
+            for (int y = 0; y < 8; ++y) for (int x = 0; x < 8; ++x)
+                QCOMPARE(expected.pixelColor(x, y), QColor(0, 255, 0, 255));
+            auto api = window.findChild<QTableView *>("apiLog");
+            QVERIFY(api && api->model()->rowCount());
+            done.clear();
+            api->setCurrentIndex(api->model()->index(api->model()->rowCount() - 1, 0));
+            QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+            QVERIFY(done.takeLast()[0].toBool());
+            QCOMPARE(output->image(), expected);
+            snapshot(window, QString("counter-slots-%1").arg(mode));
+        }
+    }
     void helldiversReplayAndNavigate() {
         const auto capture = qEnvironmentVariable("FLORA_TEST_HELLDIVERS_CAPTURE");
         if (capture.isEmpty())
