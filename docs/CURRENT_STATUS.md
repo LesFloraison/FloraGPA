@@ -1,6 +1,15 @@
 # Current capabilities and compatibility
 
-Reviewed **2026-10-05**. The latest [Execute dispatch search](EXECUTE_DISPATCH_SEARCH.md)
+Reviewed **2026-10-06**. The user authorized prioritizing M4, then M5, while
+keeping M3 open. The first [texture initial-data correction](TEXTURE_INITIAL_DATA_AUDIT.md)
+rejects empty, truncated or oversized saved single-sample initializers before
+native texture creation, with texture/data identities in preflight diagnostics.
+Fourteen focused cases, nine CTest suites and four serial GF2/BF1 golden/negative
+checks pass. All 460 unique registered captures retain exactly the same preflight
+findings as before; this is CPU coverage, not a full GPU corpus rerun. Inventory,
+module ledger, UI and release package are unchanged. M4 and M5 remain incomplete.
+
+The preceding [Execute dispatch search](EXECUTE_DISPATCH_SEARCH.md)
 rules out the pinned player's literal Execute candidate as an internal MSAA
 helper and identifies a shim forwarding thunk omitted by an unwind-only scan.
 The known traditional Execute slots remain empty; operand binding and a qualifying
@@ -10,8 +19,8 @@ related evidence tests pass; production code, corpus and package are unchanged.
 A [complete registered-inventory audit](registered-list-inventory-baseline.json)
 also verifies all 470 registrations / 460 hashes across 27 manifests and finds
 zero traditional list resources or Execute records. This checks index contents,
-not GPU behavior or external files. The proposed M3/M4 priority exception remains
-unapproved and has not been applied.
+not GPU behavior or external files. The M3/M4 priority exception was subsequently
+authorized on 2026-10-06; traditional-list execution remains unaccepted.
 
 The preceding [initial scheduling model](INITIAL_SCHEDULE_MODEL_AUDIT.md)
 adds independent C++ callback-order reconstruction under explicit successful
@@ -289,13 +298,15 @@ the other 35 suites passed initially and the complete UI suite passes after the 
 |---|---|
 | M1 — Acceptance infrastructure | Minimum loop delivered: corpus, coverage, preflight, serial comparison and diagnostic queue. Extend evidence as paths arrive. |
 | M2 — Ordinary replay | Registered-scope gate passed: 366 positive cases and 22 located rejections; auxiliary/snapshot contracts audited. This is not universal API support. State-object identity loss, mixed saved/missing SO targets and unverified lifetimes remain explicit boundaries. |
-| M3 — Deferred Context / Command List | Current next stage; incomplete. Installed DLL/evidence hashes and ten expanded legacy originals rechecked. Require original retained-list captures proving identity, build order, resource versions, repeated execution, restore-state and event mapping before production support. |
-| M4 — Resources and boundaries | Incomplete. Verify saved initial/differential data, subresources, counters, Query/Predication and presentation; distinguish absent information from implementation gaps. |
+| M3 — Deferred Context / Command List | Open; M4/M5 now take priority by user instruction on 2026-10-06. Require original retained-list captures proving identity, build order, resource versions, repeated execution, restore-state and event mapping before production support. |
+| M4 — Resources and boundaries | Active, incomplete. Saved single-sample texture initializers now receive shared preflight/runtime length checks. Continue initial/differential data, subresources, counters, Query/Predication and presentation; distinguish absent information from implementation gaps. |
 | M5 — Stable compatibility release | Incomplete. Broaden captures, repeat/long-duration checks, recovery and large-file testing; validate clean-environment build/deployment and publish a fixed matrix. |
 | M6 — Analyzer and other versions | Incomplete. Continue remaining Qt consumers, advanced profiling/debugging and version-specific adapters after core replay gates. Existing analyzer features remain available. |
 
-Forward order is **M1 → M2 → M3 → M4 → M5**, then remaining M6 work. Existing
-research/analyzer components do not complete earlier compatibility gates.
+The original order was **M1 → M2 → M3 → M4 → M5**. On 2026-10-06 the user
+authorized proceeding with **M4 → M5** for the supported scope while M3 retains
+its original acceptance gate. M6 remains later work. Existing research/analyzer
+components do not complete earlier compatibility gates.
 The scope is replay of existing captures; self-owned capture probes are
 development fixtures, not a complete capture tool.
 

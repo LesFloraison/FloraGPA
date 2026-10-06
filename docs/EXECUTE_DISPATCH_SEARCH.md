@@ -1,5 +1,10 @@
 # Traditional Execute dispatch search and M3 acceptance gate
 
+**2026-10-06 priority update:** the user authorized proceeding with M4, then M5,
+for the already supported capture scope. The proposal below is now applied as
+a scheduling exception. M3 remains open; its original-capture acceptance gate
+and unsupported execution diagnostics are unchanged. See [current status](CURRENT_STATUS.md).
+
 Reviewed 2026-10-05. This batch investigates the unresolved traditional-list
 execution path in the pinned GPA 2025 R1 binaries. It rules out a concrete
 player-side candidate and documents a previously missed forwarding thunk. It
