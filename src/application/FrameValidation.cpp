@@ -111,12 +111,20 @@ Json validateFrame(const std::filesystem::path &path, const std::function<bool()
             try {
                 bool checked = false;
                 if (e.category == 7) {
-                    if (isMapObservation(e.type)) {
+                    if (isMapObservation(e.type) || e.type == 0x246) {
                         if (!mapAudit)
                             mapAudit = auditMapRecords(frame);
                         const auto &map = mapAudit->at(id);
-                        if (!map.error.empty())
-                            finding(&e, "error", "map_observation_rejected", map.error, map.resource);
+                        try {
+                            requireMapRecord(*mapAudit, id);
+                            if (e.type == 0x246)
+                                mappedWriteLayout(frame, map);
+                        } catch (const std::exception &error) {
+                            finding(&e, "error", e.type == 0x246 ? "map_write_rejected" : "map_observation_rejected",
+                                    error.what(), map.resource);
+                            if (e.type == 0x246)
+                                report["findings"].back()["data_id"] = map.data;
+                        }
                     }
                     const auto command = inspectCommand(frame, id);
                     if (command["status"] == "invalid")

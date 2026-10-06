@@ -650,63 +650,16 @@ bool Replay::outputs(const Entry &e, Bytes payload) {
     return true;
 }
 void Replay::mappedWrites(const Entry &e) {
-    Reader r(frame_.payload(e.id));
-    r.skip(8);
-    immediate(r.read<Id>());
-    auto hr = r.read<int32_t>();
-    auto id = r.read<Id>();
-    auto sub = r.read<UINT>(), kind = r.read<UINT>(), flags = r.read<UINT>();
-    auto dataId = r.read<Id>();
-    r.end();
-    if (hr < 0 || !dataId)
+    if (!mapRecordAudit_)
+        mapRecordAudit_ = auditMapRecords(frame_);
+    const auto &record = requireMapRecord(*mapRecordAudit_, e.id);
+    if (record.result < 0)
         return;
-    if (kind < 2 || kind > 5)
-        throw std::runtime_error("Invalid writable Map type");
-    auto desc = frame_.resource(id);
-    uint32_t row = 0, rows = 0, depth = 1, planarFormat = 0, planarHeight = 0;
-    uint64_t sourceRowPitch = 0;
-    size_t size = 0;
-    bool texture = desc.type != 0x83;
-    if (texture) {
-        auto info = textureInfo(desc);
-        if (info.samples != 1 || !info.mips || info.mips > 32 || sub >= uint64_t(info.mips) * info.layers ||
-            kind == 5)
-            throw std::runtime_error("Unsupported mapped texture layout");
-        if (info.format >= 103 && info.format <= 105) {
-            textureSubresources(desc);
-            planarFormat = info.format;
-            planarHeight = info.height;
-            sourceRowPitch = uint64_t(info.width) * (info.format == 103 ? 1 : 3);
-        }
-        auto mip = sub % info.mips;
-        auto pitch = pitches(std::max(1u, info.width >> mip), std::max(1u, info.height >> mip), info.format);
-        row = pitch.first;
-        rows = pitch.second;
-        depth = std::max(1u, info.depth >> mip);
-        size = size_t(row) * rows * depth;
-        if (frame_.entry(dataId).type != 1 && info.dimension != 2)
-            throw std::runtime_error("Capture mapped texture pitches are unavailable");
-    } else {
-        if (sub)
-            throw std::runtime_error("Buffer subresource must be zero");
-        size = desc.desc[0];
-    }
-    auto updates = frame_.updates(dataId, size);
-    Bytes tight;
-    std::vector<uint8_t> recoveredLuma;
-    if (texture && frame_.entry(dataId).type == 1) {
-        tight = updates.at(0).second;
-        if (planarFormat == 103) {
-            rows = planarHeight;
-            tight = tight.first(size_t(row) * rows);
-        } else if (planarFormat) {
-            auto single = desc;
-            single.desc[3] = 1;
-            recoveredLuma = capturedLuma(single, tight, 0, 0, 0, "y").bytes;
-            tight = recoveredLuma;
-            rows = planarHeight;
-        }
-    }
+    const auto layout = mappedWriteLayout(frame_, record);
+    const auto id = record.resource;
+    const auto sub = record.subresource, kind = record.kind, flags = record.flags;
+    const auto row = layout.row, rows = layout.rows, depth = layout.depth;
+    const Bytes tight = layout.recoveredLuma.empty() ? layout.tight : Bytes(layout.recoveredLuma);
     auto obj = get<ID3D11Resource>(id);
     D3D11_MAPPED_SUBRESOURCE mapped{};
     ReplayAnnotation marker(captureAnnotation_.Get(), e.id, "MapCapturedWrites");
@@ -714,7 +667,7 @@ void Replay::mappedWrites(const Entry &e) {
     try {
         if (!mapped.pData)
             throw std::runtime_error("Map returned a null data pointer");
-        if (texture && frame_.entry(dataId).type == 1) {
+        if (layout.texture && layout.full) {
             if (mapped.RowPitch < row || (depth > 1 && mapped.DepthPitch < uint64_t(mapped.RowPitch) * rows))
                 throw std::runtime_error("Mapped pitch too small");
             for (UINT z = 0; z < depth; ++z)
@@ -723,21 +676,21 @@ void Replay::mappedWrites(const Entry &e) {
                                     size_t(y) * mapped.RowPitch,
                                 tight.data() + (size_t(z) * rows + y) * row, row);
         } else
-            for (auto [offset, data] : updates)
+            for (auto [offset, data] : layout.updates)
                 std::memcpy(static_cast<uint8_t *>(mapped.pData) + offset, data.data(), data.size());
     } catch (...) {
         context_->Unmap(obj, sub);
         throw;
     }
     context_->Unmap(obj, sub);
-    if (planarFormat) {
+    if (layout.planarFormat) {
         PlanarWrite write;
         write.event = e.id;
         write.resource = id;
         write.subresource = sub;
-        write.format = planarFormat;
+        write.format = layout.planarFormat;
         write.mapType = kind;
-        write.sourceRowPitch = sourceRowPitch;
+        write.sourceRowPitch = layout.sourceRowPitch;
         write.writtenRowBytes = row;
         write.nativeRowPitch = mapped.RowPitch;
         planarWrites_.push_back(write);

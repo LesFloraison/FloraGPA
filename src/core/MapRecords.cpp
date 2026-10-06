@@ -1,5 +1,6 @@
 #include "MapRecords.h"
 #include "Contexts.h"
+#include "TextureStorage.h"
 #include <tuple>
 namespace flora {
 bool isMapObservation(uint16_t type) { return type == 0x34ec || type == 0x34ed; }
@@ -85,5 +86,50 @@ const MapRecordEvidence &requireMapRecord(const MapRecordAudit &audit, Id event)
         throw std::runtime_error("Map/Unmap event " + std::to_string(event) + ", resource " +
                                  std::to_string(record.resource) + ": " + record.error);
     return record;
+}
+MappedWriteLayout mappedWriteLayout(const Frame &frame, const MapRecordEvidence &record) {
+    MappedWriteLayout out;
+    if (record.result < 0)
+        return out;
+    const auto resource = frame.resource(record.resource);
+    size_t size = 0;
+    out.texture = resource.type != 0x83;
+    out.full = frame.entry(record.data).type == 1;
+    if (out.texture) {
+        const auto info = textureInfo(resource);
+        const auto subs = textureSubresources(resource);
+        if (info.samples != 1 || record.subresource >= subs.size() || record.kind == 5)
+            throw std::runtime_error("Unsupported mapped texture layout");
+        const auto &sub = subs.at(record.subresource);
+        out.row = sub.rowPitch;
+        out.rows = pitches(sub.width, sub.height, info.format).second;
+        out.depth = sub.depth;
+        size = size_t(sub.size);
+        if (!out.full && info.dimension != 2)
+            throw std::runtime_error("Capture mapped texture pitches are unavailable");
+        if (info.format >= 103 && info.format <= 105) {
+            out.planarFormat = info.format;
+            out.sourceRowPitch = uint64_t(info.width) * (info.format == 103 ? 1 : 3);
+        }
+    } else {
+        if (record.subresource)
+            throw std::runtime_error("Buffer subresource must be zero");
+        size = resource.desc.at(0);
+    }
+    out.updates = frame.updates(record.data, size);
+    if (out.texture && out.full) {
+        out.tight = out.updates.at(0).second;
+        if (out.planarFormat) {
+            out.rows = textureInfo(resource).height;
+            if (out.planarFormat == 103)
+                out.tight = out.tight.first(size_t(out.row) * out.rows);
+            else {
+                auto single = resource;
+                single.desc[3] = 1;
+                out.recoveredLuma = capturedLuma(single, out.tight, 0, 0, 0, "y").bytes;
+            }
+        }
+    }
+    return out;
 }
 } // namespace flora

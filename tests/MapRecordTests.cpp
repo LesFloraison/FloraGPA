@@ -33,6 +33,143 @@ Capture base(bool writable = false) {
 class MapRecordTests final : public QObject {
     Q_OBJECT
   private slots:
+    void diffBytes_data() {
+        QTest::addColumn<bool>("texture");
+        QTest::addColumn<bool>("warp");
+        for (bool texture : {false, true})
+            for (bool warp : {false, true})
+                QTest::newRow(qPrintable(QString("%1-%2").arg(texture).arg(warp))) << texture << warp;
+    }
+    void diffBytes() {
+        QFETCH(bool, texture);
+        QFETCH(bool, warp);
+        Capture c;
+        c.add(1, 5, 0x127, Raw(24));
+        auto desc = texture ? pack(D3D11_TEXTURE1D_DESC{8, 2, 2, DXGI_FORMAT_R8G8B8A8_UNORM,
+                                                        D3D11_USAGE_STAGING, 0, 0x30000, 0})
+                            : pack(D3D11_BUFFER_DESC{16, D3D11_USAGE_STAGING, 0, 0x30000, 0, 0});
+        auto resource = pack(Id(0), Id(0));
+        resource.insert(resource.end(), desc.begin(), desc.end());
+        append(resource, Id(3));
+        c.add(2, 5, texture ? 0x84 : 0x83, resource);
+        Raw initial(texture ? 96 : 16);
+        for (size_t i = 0; i < initial.size(); ++i)
+            initial[i] = uint8_t(i + 1);
+        auto data = word(uint32_t(initial.size()));
+        data.insert(data.end(), initial.begin(), initial.end());
+        c.add(3, 9, 1, data);
+        // Unsorted, overlapping ranges retain file order. The final range wins
+        // where it overlaps; untouched bytes and other subresources are retained.
+        c.add(4, 9, 0x100, pack(24u, 12u, 8u, 4u, 0u, 4u, 2u, 4u, 0xaabbccddu, 0x11223344u, 0x55667788u));
+        auto command = map(3, 0, 2, 0, 4);
+        put(command, 28, texture ? 3u : 0u);
+        c.add(10, 7, 0x246, command);
+        auto release = unmap();
+        put(release, 24, texture ? 3u : 0u);
+        c.add(11, 7, 0x34ed, release);
+        QTemporaryDir dir;
+        const auto path = dir.filePath("diff.gpa_frame");
+        c.save(path);
+        QVERIFY(validateFrame(path.toStdWString())["errors"] == 0);
+        Frame frame(path.toStdWString());
+        auto expected = initial;
+        const size_t offset = texture ? 80 : 0;
+        put(expected, offset + 8, 0xaabbccddu);
+        put(expected, offset, 0x11223344u);
+        put(expected, offset + 2, 0x55667788u);
+        ReplayOptions options;
+        options.warp = warp;
+        Replay replay(frame, options);
+        for (int repeat = 0; repeat < 2; ++repeat) {
+            replay.run();
+            QCOMPARE(texture ? replay.readTexture(2) : replay.readBuffer(2), expected);
+            QCOMPARE(replay.counts.at("Map"), uint64_t(1));
+        }
+        options.disabled.insert(10);
+        Replay disabled(frame, options);
+        disabled.run();
+        QCOMPARE(texture ? disabled.readTexture(2) : disabled.readBuffer(2), initial);
+    }
+    void failedWriteHasNoDataDependency() {
+        auto c = base(true);
+        c.add(10, 7, 0x246, map(4, int32_t(0x887a000a), 999, 0, 0));
+        QTemporaryDir dir;
+        const auto path = dir.filePath("write-failed.gpa_frame");
+        c.save(path);
+        QVERIFY(validateFrame(path.toStdWString())["errors"] == 0);
+        Frame frame(path.toStdWString());
+        ReplayOptions options;
+        options.warp = true;
+        Replay replay(frame, options);
+        replay.run();
+        QVERIFY(!replay.counts.contains("Map"));
+        QCOMPARE(replay.readBuffer(2), pack(10u, 20u, 30u, 40u));
+    }
+    void savedWriteRejections_data() {
+        QTest::addColumn<QString>("mutation");
+        for (const auto *name :
+             {"null-data", "missing-data", "short-data", "long-data", "linked", "nonzero-success",
+              "bad-flags", "read-kind", "diff-header", "diff-range", "diff-short", "diff-extra"})
+            QTest::newRow(name) << QString(name);
+    }
+    void savedWriteRejections() {
+        QFETCH(QString, mutation);
+        auto c = base(true);
+        auto command = map(4, 0, 2, 0, 4);
+        auto data = pack(16u, 1u, 2u, 3u, 4u);
+        uint16_t type = 1;
+        if (mutation == "null-data")
+            put(command, 40, Id(0));
+        if (mutation == "missing-data")
+            put(command, 40, Id(999));
+        if (mutation == "short-data")
+            data = pack(12u, 1u, 2u, 3u);
+        if (mutation == "long-data")
+            data = pack(20u, 1u, 2u, 3u, 4u, 5u);
+        if (mutation == "linked")
+            put(command, 0, Id(123));
+        if (mutation == "nonzero-success")
+            put(command, 16, 1u);
+        if (mutation == "bad-flags")
+            put(command, 36, 1u);
+        if (mutation == "read-kind")
+            put(command, 32, 1u);
+        if (mutation.startsWith("diff-")) {
+            type = 0x100;
+            data = pack(8u, 4u, 0u, 4u, 123u);
+            if (mutation == "diff-header")
+                put(data, 0, 7u);
+            if (mutation == "diff-range")
+                put(data, 8, 15u);
+            if (mutation == "diff-short")
+                put(data, 12, 8u);
+            if (mutation == "diff-extra")
+                put(data, 12, 0u);
+        }
+        c.add(4, 9, type, data);
+        c.add(10, 7, 0x246, command);
+        QTemporaryDir dir;
+        auto path = dir.filePath("write-invalid.gpa_frame");
+        c.save(path);
+        const auto report = validateFrame(path.toStdWString());
+        QVERIFY(report["errors"].get<size_t>() > 0);
+        bool located = false;
+        for (const auto &finding : report["findings"])
+            if (finding["kind"] == "map_write_rejected") {
+                QVERIFY(finding["event_id"] == 10 && finding["resource_id"] == 2);
+                QVERIFY(finding["data_id"] == (mutation == "null-data"      ? 0
+                                               : mutation == "missing-data" ? 999
+                                                                            : 4));
+                located = true;
+            }
+        QVERIFY(located);
+        Frame frame(path.toStdWString());
+        ReplayOptions options;
+        options.warp = true;
+        Replay replay(frame, options);
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, replay.run());
+        QVERIFY(!replay.counts.contains("Map"));
+    }
     void readObservations_data() {
         QTest::addColumn<bool>("warp");
         QTest::newRow("hardware") << false;
