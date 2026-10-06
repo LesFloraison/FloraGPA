@@ -1,0 +1,140 @@
+{
+  "schema": "FloraGPA MSAA initialization notice baseline 1",
+  "reviewed": "2026-10-06",
+  "implementation_commits": [
+    "b601a8a20cbe9760e185aafea8f19eadee12f99c",
+    "168fca4fbda222d8e68c9b5435dfeb1c35a8df9e",
+    "8169c14d06d7ae939ebc4a57c9bd0c0fd768d76d"
+  ],
+  "gpu_replay_semantics_changed": false,
+  "runtime_report_and_gui_changed": true,
+  "package": "out/FloraGPA-msaa-notices-final-20261006",
+  "package_files": 44,
+  "package_executables": {
+    "concrt140.dll": "2405355f0a58067b258f8df33c327e3a3d716eaac5a3a5aebb757842d85bd376",
+    "D3Dcompiler_47.dll": "e994847e01a6f1e4cbdc5a864616ac262f67ee4f14db194984661a8d927ab7f4",
+    "FloraGPA.Cli.exe": "eb978a9be2b0a00a5e8ac9d361f1d52a4f945bcb5d7cac4ee42e89470ee5a160",
+    "FloraGPA.exe": "84b334e752e089c9b0785372d7b2fb9534d530df0d57ae6e24bb7d692559e7b2",
+    "FloraGPA.Metrics.dll": "58b6278f2a93e783b1e8bb1290e9b0e51745f1a36825f296584f52159fd7c6db",
+    "FloraGPA.Rdc.exe": "f4d21d43e661d24d392e91fc1a1f1460a20d1377fcf5075c57083ad289e82773",
+    "FloraGPA.Worker.exe": "21f6848e401b7448f9368588dda7ea0a95d7782c9dbcc73f1edb19d99d7dd888",
+    "msvcp140.dll": "0f885b509a685d2bbfa652fed26b5fb31d88fbdab0a978c641d1c7b8aa460aa9",
+    "msvcp140_1.dll": "bfad5aef4c63a669e3c140655cdfdf395b6c979b400a447bd5dcb65ed8826c3d",
+    "msvcp140_2.dll": "3ea06f0ee098b4823cb79599df3780e7f23cce52c19aac31d2a0d47efe33a5e9",
+    "msvcp140_atomic_wait.dll": "640b2aefced484d0368eea5bdd06addd0658a3a70a49256e560d6923b404a479",
+    "msvcp140_codecvt_ids.dll": "f2069a52880ec885ee7f0511186100eb7fada0411a2b4948fafea7735b878a18",
+    "Qt6Core.dll": "22c113a5644b875b2c85482723cd5d2e6a3a4029169778fcc78adde08ef3b6aa",
+    "Qt6Gui.dll": "19265a4e76efc12ef5f5bcf59be6c6a5b9b59ec4c89660797738bd2da7f719cc",
+    "Qt6Network.dll": "75ff0896a618f4f5b602f391eb4917a55fd738b2e751d2cf18244a0de3619184",
+    "Qt6Svg.dll": "1052c17a9df0eb82023e0e4c369bbd0af58e4c5fea3c27a4b5ee83b60c015492",
+    "Qt6Widgets.dll": "e6d0b7e2e697de6ad985b97f9ed8b381c1c2172fcae87b6ab08455b3b7330f32",
+    "vccorlib140.dll": "19839407c3fdbc824e5bce189bf68ddf8097f12ec28b757797ffa0415c144ddd",
+    "vcruntime140.dll": "d5e4d9a3e835fa679450145d6a7d94e36573a509317111904d9b3712c30d9066",
+    "vcruntime140_1.dll": "1f2d41c4aa5db0bc33ebf7b66d72943a817d7ce6cbe880502a9403823633093f",
+    "vcruntime140_threads.dll": "219915cf20822f34d5e7c1fdd4e21ae7f3396881096c51036225fb8f84b47afa",
+    "vc_redist.x64.exe": "cc0ff0eb1dc3f5188ae6300faef32bf5beeba4bdd6e8e445a9184072096b713b"
+  },
+  "related_ctest_suites": [
+    "texture_initial_data",
+    "texture_inspector",
+    "ui",
+    "frame_output",
+    "texture_copies",
+    "compatibility_ui",
+    "map_records"
+  ],
+  "ctest_acceptance": "Five suites passed in initial batch; frame_output and map_records passed after correcting a pre-existing invalid test fixture. Initial failure retained.",
+  "frame_output_rows": 11,
+  "map_rows": 44,
+  "full_ui_run": {
+    "passed": 60,
+    "failed": 0,
+    "skipped": 1,
+    "skip": "unusedConstantBufferReplayAndNavigate separately passed in portable run"
+  },
+  "final_portable_ui": {
+    "passed": 7,
+    "failed": 0,
+    "skipped": 0,
+    "workflow_functions": 5,
+    "platform": "offscreen",
+    "system_path_only": true,
+    "production_ui_library_and_packaged_worker": true,
+    "production_gui_executable_launch": false
+  },
+  "msaa_original_cases": 2,
+  "msaa_native_attempts": 4,
+  "msaa_original_player_attempts": 4,
+  "golden_and_disabled_draw_checks": 4,
+  "bf1_materialized_msaa_notices": 20,
+  "source_ids_match_existing_preflight": true,
+  "full_registered_matrix_newly_rerun": false,
+  "evidence": [
+    {
+      "path": "artifacts/m4-msaa-notice-ctest.log",
+      "sha256": "2b5e67154fdc6ee5ece8e85c2c2079912cd35942a77deada67a04d5f9b06b03f"
+    },
+    {
+      "path": "artifacts/m4-msaa-notice-frame-output-before.txt",
+      "sha256": "8e90a96dfbc09534c57032570fdf514caa1a29fbc4d4abc2e2114983ba14a46c"
+    },
+    {
+      "path": "artifacts/m4-msaa-notice-repaired-tests.log",
+      "sha256": "90f74759671267848e510459c7899e083402f03ecbad8eea5b7f6b3d8bdab2ba"
+    },
+    {
+      "path": "artifacts/m4-msaa-notice-frame-output-final.txt",
+      "sha256": "a9c5787f18555c7ec520d963c9d175ee787cfb95af9ddf4a387f7cb684ecd9d0"
+    },
+    {
+      "path": "artifacts/m4-msaa-notice-map-records-final.txt",
+      "sha256": "b5d691eb41181b506644b44745bbf2e8f25c4daa250eef29973f24fba967e015"
+    },
+    {
+      "path": "artifacts/m4-msaa-notice-ui-full.txt",
+      "sha256": "7e61200c8bd4b042cc7d75020a87ec60b2f615ba4d2fcac3e3e873c04d4b5a3c"
+    },
+    {
+      "path": "artifacts/m4-msaa-notice-paired/validation.json",
+      "sha256": "f7ac8d570f901ab1b06003e24f172121317d78bcf6197f77cb1b9193a989c258"
+    },
+    {
+      "path": "artifacts/m4-msaa-notice-goldens/validation.json",
+      "sha256": "5e1dde1ab9876f50c472cdf84378931ffc3b5cd8e9700002b67d37bf81383ade"
+    },
+    {
+      "path": "artifacts/m4-msaa-notice-report-acceptance.json",
+      "sha256": "b86527dbc0d986e570ca59baad0614954886318f8c442664cc29af383e30fc5a"
+    },
+    {
+      "path": "artifacts/m4-msaa-notice-final-package-files.json",
+      "sha256": "3fc902cba1fbd46df063a41c7ae463b5794050a2949b5e2f824ca40f9996f1dd"
+    },
+    {
+      "path": "artifacts/m4-msaa-notice-final-portable-ui/validation.json",
+      "sha256": "cfca7635d9fd76f8182c1b214141ff33ee6e4a6b4c3bd53211f0aaf31eb6add0"
+    },
+    {
+      "path": "artifacts/m4-msaa-notice-final-portable-ui/ui.txt",
+      "sha256": "4dd504a8402e6a48ac89e89c2aec675de9fc04d389e00eb817d005c110d35e20"
+    },
+    {
+      "path": "artifacts/m4-msaa-notice-final-portable-ui/screenshots/msaa-resolved-initialized.png",
+      "sha256": "76379a2cb8ab13e69303432971a09491d8b811e956ae9e52be7b810681c46ef2"
+    },
+    {
+      "path": "artifacts/m4-msaa-notice-final-portable-ui/screenshots/msaa-resolved-retained.png",
+      "sha256": "03885b011b926ccd8be1efa438d7f60f9357ffcf1c56aefa86e792933e2770e0"
+    },
+    {
+      "path": "artifacts/m4-msaa-notice-final-portable-ui/screenshots/msaa-grouped-bf1.png",
+      "sha256": "5134e55d0b698159dc5bc23d5b51539ed29ba4aeb25a1561ddfd94492012a0eb"
+    }
+  ],
+  "limits": [
+    "Resource notices do not prove final-image dependency or complete in-frame overwrite",
+    "Original player adapter unidentified; equality remains an observation",
+    "Final package CLI/Worker hashes equal the paired/golden-tested first package; only GUI changed to group notices",
+    "M3, remaining M4 boundaries and independent-machine/long-duration M5 acceptance remain open"
+  ]
+}

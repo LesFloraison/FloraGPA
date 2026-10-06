@@ -100,12 +100,15 @@ See the [hash-bound acceptance baseline](capture-fidelity-baseline.json).
 Raw local evidence is excluded from Git. Historical reports lacking these fields
 remain historical evidence; the updated gate deliberately requires the fields.
 
-## Remaining reporting boundary
+## Reporting boundary at this baseline
+
+The following gap is now addressed by the subsequent
+[MSAA initialization notice change](MSAA_INITIALIZATION_NOTICES.md).
 
 Preflight already locates ordinary MSAA GenData limitations by resource ID.
 Texture inspection also exposes `msaa_initial_data_not_applied`. Ordinary replay
 tracks the affected IDs internally, but its final-image report does not propagate
 them when Resolve produces a single-sample output. Connecting this existing
-provenance to the final report and compact GUI diagnostics remains next work.
+provenance to the final report and compact GUI diagnostics was next work at this baseline.
 Such a warning must not imply that an in-frame fully initialized image is wrong,
 or claim that every materialized resource necessarily affects the final image.

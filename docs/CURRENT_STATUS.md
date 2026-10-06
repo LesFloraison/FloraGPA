@@ -1,7 +1,26 @@
 # Current capabilities and compatibility
 
 Reviewed **2026-10-06**. The user authorized M4, then M5, while keeping M3 open.
-The latest [capture-fidelity reporting acceptance](CAPTURE_FIDELITY_REPORTING.md)
+The latest [MSAA initialization notices](MSAA_INITIALIZATION_NOTICES.md) preserve
+materialized resource/data identities in CLI/Worker output even after Resolve
+produces a single-sample image. Qt displays a compact count and groups repeated
+reasons in its tooltip. These are resource-level notices, not proof of image
+corruption or final-output dependency. Both original MSAA captures retain exact
+prior pixels and execution counts; GF2/BF1 goldens and disabled-Draw controls pass.
+BF1 has 20 notices matching existing preflight findings; its golden is unchanged.
+
+Seven relevant CTest suites pass across the initial batch and a fixture repair;
+11 frame-output and 44 Map rows pass. The full Qt run passes 60 rows with one
+optional skip, separately exercised successfully. Final system-PATH portable
+Qt tests pass seven rows without skips, including original MSAA, BF1 grouping
+and capture-switch clearing. The initial invalid READ-as-write fixture failure
+is retained and now has an explicit negative control. Package:
+`out/FloraGPA-msaa-notices-final-20261006/`; runtime reporting `168fca4`, GUI
+`8169c14`. GPU execution semantics are unchanged; the full corpus is not newly
+rerun. See the [pinned baseline](msaa-initialization-notice-baseline.json).
+M3/M4/M5 remain incomplete.
+
+The preceding [capture-fidelity reporting acceptance](CAPTURE_FIDELITY_REPORTING.md)
 separates native completion, original-player agreement and application fidelity.
 A fresh continuous 29-suite run passes all expected outcomes for 489 registrations
 / 479 unique files: 463 native completions and 26 located rejections, with 978
