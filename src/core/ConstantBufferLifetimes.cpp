@@ -8,7 +8,11 @@ namespace flora {
 UnusedConstantBufferLifetime
 proveUnusedConstantBufferLifetime(const Frame &frame, Id event, const std::set<Id> &disabled,
                                   const std::map<Id, std::vector<uint8_t>> &payloads,
-                                  const std::map<Id, ConstantBufferBinding> &edits, Id until, bool before) {
+                                  const std::map<Id, ConstantBufferBinding> &edits, Id until, bool before,
+                                  const CancelCheck &cancelled) {
+    checkCancellation(cancelled);
+    if (cancelled)
+        frame.contextRecovery(cancelled);
     auto payload = [&](Id id) {
         const auto bytes = frame.payload(id);
         if (auto it = payloads.find(id); it != payloads.end() && !std::ranges::equal(bytes, it->second))
@@ -51,6 +55,7 @@ proveUnusedConstantBufferLifetime(const Frame &frame, Id event, const std::set<I
         throw std::runtime_error("Unused CB lifetime has no absent resource");
     std::optional<MapRecordAudit> maps;
     for (auto it = frame.entries().upper_bound(event); it != frame.entries().end(); ++it) {
+        checkCancellation(cancelled);
         const auto &[id, next] = *it;
         if (next.category != 7)
             continue;
@@ -96,7 +101,7 @@ proveUnusedConstantBufferLifetime(const Frame &frame, Id event, const std::set<I
             }
             if (next.type == 0x246 || isMapObservation(next.type)) {
                 if (!maps)
-                    maps = auditMapRecords(frame);
+                    maps = auditMapRecords(frame, cancelled);
                 const auto &map = requireMapRecord(*maps, id);
                 if (map.context != initial.context)
                     throw std::runtime_error("Map observation has a different context");
@@ -106,6 +111,8 @@ proveUnusedConstantBufferLifetime(const Frame &frame, Id event, const std::set<I
                 continue; // Saved-resource uploads/read observations do not consume CB bindings.
             }
             throw std::runtime_error("Command may consume or change unresolved CB state");
+        } catch (const OperationCancelled &) {
+            throw;
         } catch (const std::exception &error) {
             throw std::runtime_error("Unused CB lifetime blocked at event " + std::to_string(id) + ": " +
                                      error.what());

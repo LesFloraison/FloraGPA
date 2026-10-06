@@ -139,7 +139,7 @@ class Frame {
     uint32_t width() const { return width_; }
     uint32_t height() const { return height_; }
     const std::string &sha256(const CancelCheck &cancelled = {}) const;
-    const ContextRecovery &contextRecovery() const;
+    const ContextRecovery &contextRecovery(const CancelCheck &cancelled = {}) const;
     const Entry &entry(Id id) const;
     Bytes payload(Id id, int category = -1, int type = -1) const;
     Bytes capturedPayload(Id id, int category = -1, int type = -1) const;

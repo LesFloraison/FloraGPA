@@ -21,7 +21,7 @@ std::optional<unsigned> contextVersion(uint16_t type) {
     }
 }
 namespace {
-ContextRecovery recover(const Frame &frame) {
+ContextRecovery recover(const Frame &frame, const CancelCheck &cancelled) {
     ContextRecovery out;
     using Key = std::tuple<Id, Id, uint32_t>;
     std::map<Key, ContextEvidence> pending;
@@ -33,6 +33,7 @@ ContextRecovery recover(const Frame &frame) {
         out.issues.push_back({context, event, reason});
     };
     for (const auto &[id, e] : frame.entries()) {
+        checkCancellation(cancelled);
         if (e.category != 7 || (e.type != 0x34ec && e.type != 0x246 && e.type != 0x34ed))
             continue;
         auto raw = frame.payload(id);
@@ -89,13 +90,20 @@ ContextRecovery recover(const Frame &frame) {
     }
     // Python's observed pending order follows insertion/event order, not the resource ID.
     std::vector<std::pair<Id, ContextEvidence>> unmatched;
-    for (auto &[key, proof] : pending)
+    for (auto &[key, proof] : pending) {
+        checkCancellation(cancelled);
         unmatched.emplace_back(std::get<0>(key), proof);
-    std::sort(unmatched.begin(), unmatched.end(),
-              [](const auto &a, const auto &b) { return a.second.event < b.second.event; });
-    for (auto &[owner, proof] : unmatched)
+    }
+    std::sort(unmatched.begin(), unmatched.end(), [&](const auto &a, const auto &b) {
+        checkCancellation(cancelled);
+        return a.second.event < b.second.event;
+    });
+    for (auto &[owner, proof] : unmatched) {
+        checkCancellation(cancelled);
         issue(owner, proof.event, "Map READ has no matching Unmap");
+    }
     for (auto id : frame.entryOrder()) {
+        checkCancellation(cancelled);
         const auto &e = frame.entry(id);
         if (e.category == 5 && e.type == 0x9a && e.size == 16) {
             Reader r(frame.payload(id));
@@ -106,10 +114,13 @@ ContextRecovery recover(const Frame &frame) {
         }
     }
     for (auto owner : candidateOrder) {
+        checkCancellation(cancelled);
         const auto &proofs = candidates.at(owner);
         std::set<Id> devices;
-        for (const auto &p : proofs)
+        for (const auto &p : proofs) {
+            checkCancellation(cancelled);
             devices.insert(p.device);
+        }
         if (devices.size() != 1)
             issue(owner, {}, "Map READ evidence refers to different devices");
         if (!blocked.contains(owner))
@@ -118,9 +129,15 @@ ContextRecovery recover(const Frame &frame) {
     return out;
 }
 } // namespace
-const ContextRecovery &Frame::contextRecovery() const {
-    std::call_once(contextOnce_,
-                   [&] { contextRecovery_ = std::make_shared<const ContextRecovery>(recover(*this)); });
+const ContextRecovery &Frame::contextRecovery(const CancelCheck &cancelled) const {
+    checkCancellation(cancelled);
+    std::call_once(contextOnce_, [&] {
+        auto recovered = recover(*this, cancelled);
+        checkCancellation(cancelled);
+        // Publish only a complete result. A throwing call_once invocation
+        // leaves the same mapped frame available for a later retry.
+        contextRecovery_ = std::make_shared<const ContextRecovery>(std::move(recovered));
+    });
     return *contextRecovery_;
 }
 ContextDescription describeContext(const Frame &frame, Id id, bool allowRecovery) {

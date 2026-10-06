@@ -88,7 +88,11 @@ StreamOutputTargets readStreamOutputTargets(Bytes payload) {
 UnusedStreamOutputLifetime proveUnusedStreamOutputLifetime(const Frame &frame, Id event,
                                                            const std::set<Id> &disabled,
                                                            const std::map<Id, std::vector<uint8_t>> &payloads,
-                                                           Id until, bool before) {
+                                                           Id until, bool before,
+                                                           const CancelCheck &cancelled) {
+    checkCancellation(cancelled);
+    if (cancelled)
+        frame.contextRecovery(cancelled);
     auto payload = [&](Id id) -> Bytes {
         auto it = payloads.find(id);
         return it == payloads.end() ? frame.payload(id) : Bytes(it->second);
@@ -127,6 +131,7 @@ UnusedStreamOutputLifetime proveUnusedStreamOutputLifetime(const Frame &frame, I
     if (!absentOnly(initial))
         throw std::runtime_error("Unused SO lifetime has no absent target");
     for (auto it = frame.entries().upper_bound(event); it != frame.entries().end(); ++it) {
+        checkCancellation(cancelled);
         const auto &[id, next] = *it;
         if (next.category != 7)
             continue;

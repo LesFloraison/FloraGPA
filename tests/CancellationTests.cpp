@@ -1,12 +1,16 @@
 #include "NormalizedPredicateCapture.h"
 #include "SyntheticCapture.h"
+#include "application/ContextInspector.h"
 #include "application/FrameValidation.h"
 #include "core/BufferCreation.h"
 #include "core/ClassCreation.h"
+#include "core/ConstantBufferBindings.h"
+#include "core/Contexts.h"
 #include "core/MapRecords.h"
 #include "core/PipelineCreation.h"
 #include "core/PredicateCreation.h"
 #include "core/ResourceLod.h"
+#include "core/StreamOutput.h"
 #include "core/TextureCreation.h"
 #include <QCryptographicHash>
 #include <QTemporaryDir>
@@ -14,6 +18,45 @@
 
 using namespace flora;
 namespace {
+testing::Capture recoveryCapture(bool unmatched = false) {
+    using namespace testing;
+    Capture c;
+    c.add(2, 5, 0x81, std::vector<uint8_t>(28));
+    c.add(3, 5, 0x85, statePack(Id(0), Id(2), 1u, 1u, 1u, 1u, 28u, 1u, 0u, 3u, 0u, 0x20000u, 0u, Id(0)));
+    for (Id owner = 90; owner < 93; ++owner) {
+        const Id event = 100 + (owner - 90) * 2;
+        c.add(event, 7, 0x34ec, statePack(Id(0), owner, int32_t(0), Id(3), 0u, 1u, 0u, Id(777)));
+        if (!unmatched || owner == 90)
+            c.add(event + 1, 7, 0x34ed, statePack(Id(0), owner, Id(3), 0u));
+    }
+    return c;
+}
+testing::Capture lifetimeCapture(bool so, int variant = 0) {
+    using namespace testing;
+    auto c = recoveryCapture();
+    c.add(1, 5, 0x127, statePack(Id(0), Id(2), 0u, 0u));
+    c.add(10, 7, so ? 0x3503 : 0x249,
+          so ? statePack(Id(0), Id(1), 1u, uint8_t(1), Id(900), uint8_t(1), 0u)
+             : statePack(Id(0), Id(1), 0u, 1u, uint8_t(1), Id(900)));
+    if (so)
+        c.add(11, 7, 0x3013, statePack(Id(0), Id(900), 2u));
+    else {
+        // Force the lifetime proof's nested whole-file Map audit.
+        c.add(11, 7, 0x34ec, statePack(Id(0), Id(1), int32_t(0), Id(3), 0u, 1u, 0u, Id(777)));
+        c.add(12, 7, 0x34ed, statePack(Id(0), Id(1), Id(3), 0u));
+    }
+    for (Id id = 20; id < 40; ++id)
+        c.add(id, 9, 1, word(0)); // The search must also be cancellable between non-command records.
+    auto close = statePack(Id(0), Id(variant == 2 ? 999 : 1));
+    if (variant == 1)
+        close.pop_back();
+    c.add(50, 7, 0x242, close);
+    if (variant == 3)
+        for (const auto &e : c.entries)
+            if (e.id == 10)
+                put(c.bytes, size_t(e.offset) + (so ? 16 : 20), UINT32_MAX);
+    return c;
+}
 // Exercise nested identity/creation scans, unused-object state scans, all LOD
 // passes, Map pairing and normalized-predicate proof. No GPU is created here.
 testing::Capture semanticCapture() {
@@ -59,6 +102,125 @@ class CancellationTests final : public QObject {
         return false;
     }
   private slots:
+    void contextRecoveryCancellationAndRetry() {
+        QTemporaryDir dir;
+        for (bool unmatched : {false, true}) {
+            const auto path = dir.filePath("contexts.gpa_frame");
+            recoveryCapture(unmatched).save(path);
+            unsigned checkpoints = 0;
+            nlohmann::json baseline;
+            {
+                Frame frame(path.toStdWString());
+                const auto &recovery = frame.contextRecovery([&] {
+                    ++checkpoints;
+                    return false;
+                });
+                QCOMPARE(recovery.contexts.size(), size_t(unmatched ? 1 : 3));
+                QCOMPARE(recovery.issues.size(), size_t(unmatched ? 2 : 0));
+                baseline = inspectContexts(frame);
+            }
+            QVERIFY(checkpoints > 10);
+            for (unsigned stop = 1; stop <= checkpoints; ++stop) {
+                Frame frame(path.toStdWString());
+                unsigned calls = 0;
+                QVERIFY(cancelled([&] { frame.contextRecovery([&] { return ++calls == stop; }); }));
+                QCOMPARE(calls, stop);
+                // call_once must not publish an incomplete result after an exception.
+                QCOMPARE(inspectContexts(frame), baseline);
+                QVERIFY(cancelled([&] { frame.contextRecovery([] { return true; }); }));
+                QCOMPARE(inspectContexts(frame), baseline); // Cancellation also respects a populated cache.
+            }
+            qInfo("Context recovery: %u interruptions with exact same-frame retry", checkpoints);
+        }
+        const auto path = dir.filePath("empty.gpa_frame");
+        testing::Capture{}.save(path);
+        Frame empty(path.toStdWString());
+        QVERIFY(cancelled([&] { empty.contextRecovery([] { return true; }); }));
+        QVERIFY(empty.contextRecovery().contexts.empty());
+    }
+    void lifetimeCancellationAndRetry() {
+        QTemporaryDir dir;
+        for (bool so : {false, true}) {
+            const auto path = dir.filePath("lifetime.gpa_frame");
+            lifetimeCapture(so).save(path);
+            Frame frame(path.toStdWString());
+            // Warm only the shared cache, so every counted callback belongs to
+            // the lifetime path (including its nested Map audit).
+            frame.contextRecovery();
+            auto prove = [&](const CancelCheck &token) {
+                if (so) {
+                    const auto proof = proveUnusedStreamOutputLifetime(frame, 10, {}, {}, 0, false, token);
+                    QCOMPARE(proof.closingEvent, Id(50));
+                    QCOMPARE(proof.resources, std::vector<Id>{900});
+                } else {
+                    const auto proof =
+                        proveUnusedConstantBufferLifetime(frame, 10, {}, {}, {}, 0, false, token);
+                    QCOMPARE(proof.closingEvent, Id(50));
+                    QCOMPARE(proof.resources, std::vector<Id>{900});
+                }
+            };
+            unsigned checkpoints = 0;
+            prove([&] {
+                ++checkpoints;
+                return false;
+            });
+            QVERIFY(checkpoints > 20);
+            for (unsigned stop = 1; stop <= checkpoints; ++stop) {
+                unsigned calls = 0;
+                QVERIFY(cancelled([&] { prove([&] { return ++calls == stop; }); }));
+                QCOMPARE(calls, stop);
+                prove({});
+            }
+            qInfo("%s lifetime: %u interruptions with exact proof retry", so ? "SO" : "CB", checkpoints);
+        }
+    }
+    void lifetimePreflightCheckpoints_data() {
+        QTest::addColumn<bool>("so");
+        QTest::addColumn<int>("variant");
+        for (bool so : {false, true})
+            for (int variant = 0; variant < 4; ++variant)
+                QTest::newRow(qPrintable(QString("%1-%2").arg(so ? "SO" : "CB").arg(variant)))
+                    << so << variant;
+    }
+    void lifetimePreflightCheckpoints() {
+        QFETCH(bool, so);
+        QFETCH(int, variant);
+        QTemporaryDir dir;
+        const auto path = dir.filePath("lifetime.gpa_frame");
+        lifetimeCapture(so, variant).save(path);
+        const auto baseline = validateFrame(path.toStdWString());
+        QCOMPARE(baseline["errors"].get<unsigned>() == 0, variant == 0);
+        if (!variant)
+            QCOMPARE(
+                baseline[so ? "unused_stream_output_lifetimes" : "unused_constant_buffer_lifetimes"].size(),
+                size_t(1));
+        unsigned checkpoints = 0;
+        QCOMPARE(validateFrame(path.toStdWString(),
+                               [&] {
+                                   ++checkpoints;
+                                   return false;
+                               }),
+                 baseline);
+        DWORD before{}, after{};
+        QVERIFY(GetProcessHandleCount(GetCurrentProcess(), &before));
+        for (unsigned stop = 1; stop <= checkpoints; ++stop) {
+            unsigned calls = 0;
+            const auto report = validateFrame(path.toStdWString(), [&] { return ++calls == stop; });
+            QCOMPARE(calls, stop);
+            QCOMPARE(report["status"], nlohmann::json("cancelled"));
+            QCOMPARE(report["completed"], nlohmann::json(false));
+            QCOMPARE(report["gpu_validation"], nlohmann::json("not_run"));
+            for (const auto &finding : report["findings"])
+                QVERIFY(std::find(baseline["findings"].begin(), baseline["findings"].end(), finding) !=
+                        baseline["findings"].end());
+            QFile writable(path);
+            QVERIFY(writable.open(QIODevice::ReadWrite));
+        }
+        QVERIFY(GetProcessHandleCount(GetCurrentProcess(), &after));
+        QCOMPARE(after, before);
+        QCOMPARE(validateFrame(path.toStdWString()), baseline);
+        qInfo("Checked %u lifetime preflight interruptions and exact retry", checkpoints);
+    }
     void semanticAuditCheckpoints() {
         QTemporaryDir dir;
         const auto path = dir.filePath("semantic.gpa_frame");

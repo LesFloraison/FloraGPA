@@ -29,7 +29,7 @@ struct UnusedStreamOutputLifetime {
 UnusedStreamOutputLifetime
 proveUnusedStreamOutputLifetime(const Frame &frame, Id event, const std::set<Id> &disabled = {},
                                 const std::map<Id, std::vector<uint8_t>> &payloads = {}, Id until = 0,
-                                bool before = false);
+                                bool before = false, const CancelCheck &cancelled = {});
 Id shaderStreamOutput(const Frame &frame, Id shader);
 StreamOutputDeclaration readStreamOutputDeclaration(const Frame &frame, Id id);
 StreamOutputTargets readStreamOutputTargets(Bytes payload);

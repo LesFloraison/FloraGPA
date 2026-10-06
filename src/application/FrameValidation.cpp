@@ -60,6 +60,9 @@ Json validateFrame(const std::filesystem::path &path, const std::function<bool()
         Frame frame(path, cancelled);
         report["entries"] = frame.entries().size();
         report["source_sha256"] = frame.sha256(cancelled);
+        // Resolve the shared lazy cache with cancellation before any nested
+        // decoder can request implicit context identity without a token.
+        frame.contextRecovery(cancelled);
         report["unused_stream_output_lifetimes"] = Json::array();
         report["unused_constant_buffer_lifetimes"] = Json::array();
         const auto lod = auditResourceLod(frame, cancelled);
@@ -311,7 +314,8 @@ Json validateFrame(const std::filesystem::path &path, const std::function<bool()
                                     return buffer && !frame.entries().contains(buffer);
                                 })) {
                                 try {
-                                    lifetime = proveUnusedConstantBufferLifetime(frame, id);
+                                    lifetime = proveUnusedConstantBufferLifetime(frame, id, {}, {}, {}, 0,
+                                                                                 false, cancelled);
                                     report["unused_constant_buffer_lifetimes"].push_back(
                                         {{"event_id", id},
                                          {"closing_event_id", lifetime->closingEvent},
@@ -330,6 +334,8 @@ Json validateFrame(const std::filesystem::path &path, const std::function<bool()
                                          {"reason", "Absent CB slots close before GPU use; saved slots "
                                                     "remain native bindings"},
                                          {"closing_event_id", lifetime->closingEvent}});
+                                } catch (const OperationCancelled &) {
+                                    throw;
                                 } catch (const std::exception &error) {
                                     blocked = error.what();
                                 }
@@ -374,7 +380,8 @@ Json validateFrame(const std::filesystem::path &path, const std::function<bool()
                                     return buffer && !frame.entries().contains(buffer);
                                 })) {
                                 try {
-                                    lifetime = proveUnusedStreamOutputLifetime(frame, id);
+                                    lifetime = proveUnusedStreamOutputLifetime(frame, id, {}, {}, 0, false,
+                                                                               cancelled);
                                     report["unused_stream_output_lifetimes"].push_back(
                                         {{"event_id", id},
                                          {"closing_event_id", lifetime->closingEvent},
@@ -386,6 +393,8 @@ Json validateFrame(const std::filesystem::path &path, const std::function<bool()
                                          {"reason", "Proven unused absent-only SO target identities; native "
                                                     "targets are not materialized"},
                                          {"closing_event_id", lifetime->closingEvent}});
+                                } catch (const OperationCancelled &) {
+                                    throw;
                                 } catch (const std::exception &error) {
                                     blocked = error.what();
                                 }
@@ -529,7 +538,8 @@ Json validateFrame(const std::filesystem::path &path, const std::function<bool()
                                 if (present.occluded)
                                     finding(&e, "info", "present_test_occluded",
                                             "Saved blt-model Present TEST returned DXGI_STATUS_OCCLUDED; "
-                                            "no submission or binding transition is replayed", present.chain);
+                                            "no submission or binding transition is replayed",
+                                            present.chain);
                             } catch (const std::exception &error) {
                                 Id chain = 0;
                                 auto raw = frame.payload(id);
