@@ -17,6 +17,7 @@ struct UavCounter {
     std::vector<CounterBinding> bindings;
     std::vector<std::string> references;
 };
+bool capturedShadersMayUseCounters(const Frame &frame, const Event &event, const State &state);
 std::optional<UavCounter> describeCounter(const Frame &frame, Id view);
 std::vector<UavCounter> boundCounters(const Frame &frame, const Event &event, const State &state,
                                       Id resource = 0);

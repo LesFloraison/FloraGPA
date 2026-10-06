@@ -4,6 +4,28 @@
 #include <d3dcompiler.h>
 
 namespace flora {
+bool Replay::boundShadersMayUseCounters(bool compute) {
+    for (unsigned stage = compute ? 5 : 0; stage < (compute ? 6u : 5u); ++stage) {
+        Com<IUnknown> shader;
+        UINT classes = 0;
+#define COUNTER_SHADER(Stage, Type, Getter) \
+        case Stage: { Com<Type> current; context_->Getter(&current, nullptr, &classes); \
+            if (current) check(current.As(&shader), "Bound counter shader"); break; }
+        switch (stage) {
+            COUNTER_SHADER(0, ID3D11VertexShader, VSGetShader);
+            COUNTER_SHADER(1, ID3D11HullShader, HSGetShader);
+            COUNTER_SHADER(2, ID3D11DomainShader, DSGetShader);
+            COUNTER_SHADER(3, ID3D11GeometryShader, GSGetShader);
+            COUNTER_SHADER(4, ID3D11PixelShader, PSGetShader);
+            COUNTER_SHADER(5, ID3D11ComputeShader, CSGetShader);
+        }
+#undef COUNTER_SHADER
+        if (!shader) continue;
+        const auto use = shaderCounterUse_.find(shader.Get());
+        if (classes || use == shaderCounterUse_.end() || use->second) return true;
+    }
+    return false;
+}
 void Replay::requireCreatedCounter(Id view) const {
     if (missingInitialCounters_.contains(view))
         throw CounterValueUnavailable("UAV " + std::to_string(view) +

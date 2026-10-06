@@ -96,9 +96,10 @@ Com<IUnknown> Replay::createCapturedShader(Id id, uint16_t t, Bytes data, Id lin
         break;
     }
 #undef CREATE_SHADER
+    Com<IUnknown> identity;
+    check(result.As(&identity), "Shader identity");
+    shaderCounterUse_[identity.Get()] = passthrough ? true : shaderMayUseHiddenCounters(data);
     if (resourceLodAudit_ && !resourceLodAudit_->clamped.empty()) {
-        Com<IUnknown> identity;
-        check(result.As(&identity), "Shader LOD identity");
         resourceLodShaderSrvs_[identity.Get()] =
             passthrough ? std::array<bool, 128>{} : shaderSrvDeclarations(data);
     }

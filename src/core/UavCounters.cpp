@@ -1,7 +1,18 @@
 #include "UavCounters.h"
+#include "Dxbc.h"
 #include <algorithm>
 
 namespace flora {
+bool capturedShadersMayUseCounters(const Frame &frame, const Event &event, const State &state) {
+    const bool compute = event.type == 0x35 || event.type == 0x36;
+    for (unsigned stage = compute ? 5 : 0; stage < (compute ? 6u : 5u); ++stage) {
+        const auto &binding = state.stages[stage];
+        if (binding.classCount) return true;
+        if (binding.shader && shaderMayUseHiddenCounters(frame.shader(frame.resource(binding.shader).data)))
+            return true;
+    }
+    return false;
+}
 std::optional<UavCounter> describeCounter(const Frame &frame, Id view) {
     auto it = frame.entries().find(view);
     if (it == frame.entries().end() || it->second.category != 5 || it->second.type != 0x8f)

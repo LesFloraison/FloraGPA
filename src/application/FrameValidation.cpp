@@ -223,8 +223,18 @@ Json validateFrame(const std::filesystem::path &path, const std::function<bool()
                     };
                     if (isDraw(e.type)) {
                         const auto event = frame.event(id);
-                        for (const auto &counter : boundCounters(frame, event, frame.state(event.state)))
-                            requireCounter(counter.view);
+                        const auto state = frame.state(event.state);
+                        const auto counters = boundCounters(frame, event, state);
+                        if (!counters.empty()) {
+                            if (capturedShadersMayUseCounters(frame, event, state))
+                                for (const auto &counter : counters) requireCounter(counter.view);
+                            else for (const auto &counter : counters) if (!definedCounters.contains(counter.view)) {
+                                finding(&e, "info", "counter_value_not_consumed",
+                                        "Checked shader code has no hidden-counter operations; buffer access "
+                                        "does not establish the unavailable counter value", counter.view);
+                                report["findings"].back()["storage_id"] = counter.resource;
+                            }
+                        }
                     } else if (e.type == 0x3f) {
                         Reader copy(frame.payload(id));
                         copy.skip(28);

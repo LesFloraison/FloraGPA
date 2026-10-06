@@ -882,7 +882,8 @@ void Replay::command(const Entry &e) {
                 return false;
             }
             requireBoundResourceLods(t == 0x35 || t == 0x36);
-            if (!undefinedCreatedCounters_.empty() || !missingInitialCounters_.empty())
+            if ((!undefinedCreatedCounters_.empty() || !missingInitialCounters_.empty()) &&
+                boundShadersMayUseCounters(t == 0x35 || t == 0x36))
                 for (const auto &counter : boundCounters(frame_, event, state))
                     requireCreatedCounter(counter.view);
             const auto &a = event.args;
@@ -1473,6 +1474,7 @@ void Replay::run(const std::function<void(Id, size_t, size_t)> &progress,
         resourceLodAudit_ = auditResourceLod(frame_);
     resourceLods_.clear();
     resourceLodShaderSrvs_.clear();
+    shaderCounterUse_.clear();
     for (const auto &[resource, initial] : resourceLodAudit_->initial)
         resourceLods_[resource] = initial.value;
     unissuedPredicates_.clear();
