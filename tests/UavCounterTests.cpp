@@ -1,6 +1,7 @@
 #include "SyntheticCapture.h"
 #include "application/Experiment.h"
 #include "application/UavCounterInspector.h"
+#include "application/FrameValidation.h"
 #include "core/UavCounters.h"
 #include <QDir>
 #include <QTemporaryDir>
@@ -11,6 +12,43 @@ using Json = nlohmann::json;
 class UavCounterTests final : public QObject {
     Q_OBJECT
   private slots:
+    void missingInitialValue_data() { scopeAndWrap_data(); }
+    void missingInitialValue() {
+        QFETCH(bool, counter);
+        QFETCH(bool, warp);
+        QTemporaryDir dir;
+        auto capture = computeCapture(counter);
+        capture.entries.erase(std::remove_if(capture.entries.begin(), capture.entries.end(),
+                                            [](const auto &e) { return e.id == 90; }), capture.entries.end());
+        const auto path = dir.filePath("missing-initial.gpa_frame");
+        capture.save(path);
+        Frame frame(path.toStdWString());
+        const auto report = validateFrame(path.toStdWString());
+        bool located = false;
+        for (const auto &finding : report["findings"])
+            if (finding["kind"] == "counter_initial_value_missing") {
+                QVERIFY(finding["resource_id"] == 12);
+                QVERIFY(finding["storage_id"] == 10);
+                located = true;
+            }
+        QVERIFY(located);
+        ReplayOptions options;
+        options.warp = warp;
+        Replay unknown(frame, options);
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, unknown.readCounter(12));
+        const auto unavailable = inspectUavCounters(frame, unknown, 100, 10);
+        QVERIFY(unavailable.at(0)["value"].is_null());
+        QCOMPARE(unavailable.at(0)["status"], Json("counter_value_unavailable"));
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, unknown.run());
+        QVERIFY(!unknown.counts.contains("Dispatch"));
+        options.initialUavCounters[12] = 1;
+        Replay seeded(frame, options);
+        for (int repeat = 0; repeat < 2; ++repeat) {
+            seeded.run();
+            QCOMPARE(seeded.readCounter(12), 3u);
+            QCOMPARE(firstWord(seeded, 13), 3u);
+        }
+    }
     void graphics_data() { scopeAndWrap_data(); }
     void graphics() {
         QFETCH(bool, counter);

@@ -24,6 +24,7 @@
 #include "core/StreamOutput.h"
 #include "core/TextureCreation.h"
 #include "core/TextureStorage.h"
+#include "core/UavCounters.h"
 #include <map>
 namespace flora {
 using Json = nlohmann::json;
@@ -88,6 +89,7 @@ Json validateFrame(const std::filesystem::path &path, const std::function<bool()
                 finding(&e, "warning", "reference_requires_review",
                         "Missing or unexpected-category reference; runtime recovery/use must be checked", id);
         };
+        std::set<Id> definedCounters;
         for (const auto &[id, e] : frame.entries()) {
             if (cancelled && cancelled()) {
                 report["cancelled"] = true;
@@ -130,6 +132,38 @@ Json validateFrame(const std::filesystem::path &path, const std::function<bool()
                     if (command["status"] == "invalid")
                         throw std::runtime_error(command.value("error", "Invalid command wire layout"));
                     checked = command["status"] == "decoded";
+                    if (isOutputCommand(e.type)) {
+                        const auto output = readOutputCommand(e.type, frame.payload(id));
+                        validateOutputRange(e.type, output);
+                        requireImmediateContext(frame, output.context);
+                        if (output.uavs && output.initialCounts)
+                            for (size_t slot = 0; slot < output.uavs->size(); ++slot)
+                                if (output.initialCounts->at(slot) != UINT32_MAX)
+                                    definedCounters.insert(output.uavs->at(slot));
+                    }
+                    auto requireCounter = [&](Id view) {
+                        if (const auto counter = describeCounter(frame, view);
+                            counter && !definedCounters.contains(view)) {
+                            finding(&e, "error", "counter_initial_value_missing",
+                                    "No captured counter value is established before this use; KEEP and "
+                                    "buffer contents do not recover a hidden UAV counter", view);
+                            report["findings"].back()["storage_id"] = counter->resource;
+                        }
+                    };
+                    if (isDraw(e.type)) {
+                        const auto event = frame.event(id);
+                        for (const auto &counter : boundCounters(frame, event, frame.state(event.state)))
+                            requireCounter(counter.view);
+                    } else if (e.type == 0x3f) {
+                        Reader copy(frame.payload(id));
+                        copy.skip(28);
+                        requireCounter(copy.read<Id>());
+                        copy.end();
+                    } else if (e.type == 0x357d) {
+                        const auto creation = readTextureCreation(e.type, frame.payload(id));
+                        if (!creation.result && creation.resource)
+                            definedCounters.erase(creation.resource);
+                    }
                     if (isDiscardRecord(e.type)) {
                         const auto discard = readDiscardRecord(e.type, frame.payload(id));
                         try {

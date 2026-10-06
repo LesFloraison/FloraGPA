@@ -185,6 +185,7 @@ class Replay {
     Com<ID3D11DeviceContext1> context1_;
     std::map<Id, Com<IUnknown>> objects_;
     std::set<Id> undefinedCreatedCounters_;
+    std::set<Id> missingInitialCounters_;
     void requireCreatedCounter(Id view) const;
     std::vector<Id> ignoredMsaaInitial_;
     std::vector<std::pair<Id, DiscardRecord>> discardHistory_;

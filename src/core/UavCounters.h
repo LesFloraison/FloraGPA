@@ -3,6 +3,10 @@
 #include <optional>
 
 namespace flora {
+class CounterValueUnavailable : public std::runtime_error {
+  public:
+    using std::runtime_error::runtime_error;
+};
 struct CounterBinding {
     std::string stage;
     uint32_t slot;

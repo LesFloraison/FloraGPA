@@ -24,7 +24,13 @@ nlohmann::json inspectUavCounters(const Frame &, Replay &replay, Id id, Id resou
                   {"flags", info.flags},
                   {"kind", info.flags == 2 ? "append_consume" : "counter"},
                   {"bindings", Json::array()},
-                  {"value", replay.readCounter(info.view)}};
+                  {"value", nullptr}};
+        try {
+            item["value"] = replay.readCounter(info.view);
+        } catch (const CounterValueUnavailable &error) {
+            item["status"] = "counter_value_unavailable";
+            item["reason"] = error.what();
+        }
         for (const auto &binding : info.bindings)
             item["bindings"].push_back({{"stage", binding.stage}, {"slot", binding.slot}});
         if (!draw) {

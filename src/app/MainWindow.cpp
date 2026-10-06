@@ -3212,10 +3212,11 @@ void MainWindow::showBufferDetails(const QJsonObject &report) {
             counters_, {QString::number(counter["view"].toInteger()),
                         counter["kind"].toString() == "append_consume" ? "Append / Consume" : "Counter",
                         bindings.isEmpty() ? "Command reference" : bindings.join(", "),
-                        QString::number(counter["value"].toInteger()),
+                        counter["value"].isNull() ? "Unavailable" : QString::number(counter["value"].toInteger()),
                         QString::number(counter["num_elements"].toInteger()),
                         QString::number(counter["stride"].toInteger())});
         item->setData(0, Qt::UserRole, counter);
+        item->setToolTip(3, counter["reason"].toString());
         item->setToolTip(4, QString("First element %1").arg(counter["first_element"].toInteger()));
         QStringList references;
         for (const auto &field : counter["reference_fields"].toArray())
@@ -3240,21 +3241,22 @@ void MainWindow::editCounter() {
     form->addRow("Buffer", new QLabel(QString::number(resource)));
     auto scope = new QComboBox;
     scope->setObjectName("counterScope");
-    const bool eventEditable = isDraw(frame_->entry(event).type) && !counter["bindings"].toArray().isEmpty();
+    const bool eventEditable = isDraw(frame_->entry(event).type) && !counter["bindings"].toArray().isEmpty() &&
+                               !counter["value"].isNull();
     if (eventEditable)
         scope->addItem("Before event", false);
     scope->addItem("Frame initial", true);
     scope->setToolTip(
         "Frame initial applies when the view is created. Captured resets still take precedence.");
     form->addRow("Scope", scope);
-    auto value = new QLineEdit(QString::number(counter["value"].toInteger()));
+    const auto observedValue = counter["value"].isNull() ? QString{} : QString::number(counter["value"].toInteger());
+    auto value = new QLineEdit(observedValue);
     value->setObjectName("counterValue");
     value->setToolTip("Unsigned 32-bit counter (decimal or 0x hex)");
     form->addRow("Value", value);
     connect(scope, &QComboBox::currentIndexChanged, &dialog, [&] {
         auto seed = experiment_->initialUavCounter(view);
-        value->setText(
-            QString::number(scope->currentData().toBool() && seed ? *seed : counter["value"].toInteger()));
+        value->setText(scope->currentData().toBool() && seed ? QString::number(*seed) : observedValue);
     });
     auto error = new QLabel;
     error->setWordWrap(true);

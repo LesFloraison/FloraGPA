@@ -254,6 +254,8 @@ IUnknown *Replay::object(Id id) {
                 if (auto initial = options_.initialUavCounters.find(id);
                     initial != options_.initialUavCounters.end())
                     writeCounter(obj.Get(), initial->second);
+                else if (describeCounter(frame_, id))
+                    missingInitialCounters_.insert(id);
                 result = obj;
             }
         } else if (t == 0x96) {
@@ -645,8 +647,10 @@ bool Replay::outputs(const Entry &e, Bytes payload) {
     else
         context_->CSSetUnorderedAccessViews(start, count, ua.data(), init);
     for (size_t i = 0; i < uavs.size() && i < initial.size(); ++i)
-        if (initial[i] != UINT_MAX)
+        if (initial[i] != UINT_MAX) {
             undefinedCreatedCounters_.erase(uavs[i]);
+            missingInitialCounters_.erase(uavs[i]);
+        }
     return true;
 }
 void Replay::mappedWrites(const Entry &e) {
@@ -875,7 +879,7 @@ void Replay::command(const Entry &e) {
                 return false;
             }
             requireBoundResourceLods(t == 0x35 || t == 0x36);
-            if (!undefinedCreatedCounters_.empty())
+            if (!undefinedCreatedCounters_.empty() || !missingInitialCounters_.empty())
                 for (const auto &counter : boundCounters(frame_, event, state))
                     requireCreatedCounter(counter.view);
             const auto &a = event.args;
@@ -1281,8 +1285,8 @@ void Replay::command(const Entry &e) {
         auto src = r.read<Id>();
         r.end();
         const auto destination = get<ID3D11Buffer>(dst);
-        requireCreatedCounter(src);
         const auto source = get<ID3D11UnorderedAccessView>(src);
+        requireCreatedCounter(src);
         ReplayAnnotation marker(captureAnnotation_.Get(), e.id, commandName(t));
         context_->CopyStructureCount(destination, offset, source);
     } else if (t == 0x40 || t == 0x256) {
@@ -1469,6 +1473,7 @@ void Replay::run(const std::function<void(Id, size_t, size_t)> &progress,
         resourceLods_[resource] = initial.value;
     unissuedPredicates_.clear();
     undefinedCreatedCounters_.clear();
+    missingInitialCounters_.clear();
     ignoredMsaaInitial_.clear();
     planarWrites_.clear();
     appliedExperimentEvents_.clear();

@@ -2838,6 +2838,62 @@ class UiTests final : public QObject {
         stateView->findChild<QLineEdit *>("stateSearch")->setText("ps.");
         snapshot(window, "state-gf2-pipeline");
     }
+    void missingCounterCanBeSeeded() {
+        using namespace flora;
+        using namespace flora::testing;
+        QTemporaryDir directory;
+        auto capture = graphicsCounterCapture(false);
+        capture.entries.erase(std::remove_if(capture.entries.begin(), capture.entries.end(),
+                                            [](const auto &e) { return e.id == 190; }), capture.entries.end());
+        const auto path = directory.filePath("missing-counter.gpa_frame");
+        capture.save(path);
+        MainWindow window;
+        window.show();
+        QSignalSpy done(&window, &MainWindow::taskFinished);
+        window.openCapture(path);
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 60000);
+        QVERIFY(!done.takeLast()[0].toBool());
+        auto select = [](QTableView *table, qulonglong id) {
+            for (int row = 0; row < table->model()->rowCount(); ++row) {
+                auto index = table->model()->index(row, 0);
+                if (index.data(Qt::UserRole).toULongLong() == id) {
+                    table->setCurrentIndex(index);
+                    return true;
+                }
+            }
+            return false;
+        };
+        QVERIFY(select(window.findChild<QTableView *>("apiLog"), 200));
+        QVERIFY(select(window.findChild<QTableView *>("resources"), 10));
+        window.findChild<QComboBox *>("bufferBoundary")->setCurrentIndex(1);
+        auto counters = window.findChild<QTreeWidget *>("uavCounters");
+        QTRY_COMPARE_WITH_TIMEOUT(counters->topLevelItemCount(), 1, 60000);
+        QCOMPARE(counters->topLevelItem(0)->text(3), QString("Unavailable"));
+        QVERIFY(!counters->topLevelItem(0)->toolTip(3).isEmpty());
+        window.findChild<QTabWidget *>("bufferTabs")->setCurrentIndex(2);
+        snapshot(window, "missing-counter-unavailable");
+        counters->setCurrentItem(counters->topLevelItem(0));
+        auto edit = window.findChild<QAction *>("editCounter");
+        QVERIFY(edit->isEnabled());
+        bool entered = false;
+        QTimer::singleShot(0, &window, [&] {
+            auto dialog = window.findChild<QDialog *>("counterDialog");
+            QVERIFY(dialog);
+            QTimer::singleShot(3000, dialog, &QDialog::reject);
+            auto scope = dialog->findChild<QComboBox *>("counterScope");
+            QCOMPARE(scope->currentText(), QString("Frame initial"));
+            auto value = dialog->findChild<QLineEdit *>("counterValue");
+            QVERIFY(value->text().isEmpty());
+            value->setText("0"); // An explicit experiment value, never an inferred default.
+            entered = true;
+            QTest::mouseClick(dialog->findChild<QDialogButtonBox *>()->button(QDialogButtonBox::Ok), Qt::LeftButton);
+        });
+        edit->trigger();
+        QVERIFY(entered);
+        QTRY_VERIFY_WITH_TIMEOUT(counters->topLevelItemCount() == 1 &&
+                                  counters->topLevelItem(0)->text(3) == "0", 60000);
+        snapshot(window, "missing-counter-seeded");
+    }
     void counterEditorHistory() {
         auto captures = qEnvironmentVariable("FLORA_TEST_CAPTURE_DIR");
         if (captures.isEmpty())

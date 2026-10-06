@@ -5,17 +5,21 @@
 
 namespace flora {
 void Replay::requireCreatedCounter(Id view) const {
+    if (missingInitialCounters_.contains(view))
+        throw CounterValueUnavailable("UAV " + std::to_string(view) +
+                                 " has no captured frame-initial counter; an explicit captured reset or "
+                                 "experiment value is required");
     if (undefinedCreatedCounters_.contains(view))
-        throw std::runtime_error(
+        throw CounterValueUnavailable(
             "Created UAV " + std::to_string(view) +
             " has no defined counter value; an explicit captured reset or experiment value is required");
 }
 uint32_t Replay::readCounter(Id view) {
-    requireCreatedCounter(view);
     Unpredicated guard(context_.Get());
     if (!describeCounter(frame_, view))
         throw std::runtime_error("UAV has no hidden counter");
     auto uav = get<ID3D11UnorderedAccessView>(view);
+    requireCreatedCounter(view);
     D3D11_BUFFER_DESC desc{4, D3D11_USAGE_DEFAULT, 0, 0, 0, 0};
     Com<ID3D11Buffer> target, staging;
     check(device_->CreateBuffer(&desc, nullptr, &target), "Create counter readback target");
@@ -36,6 +40,7 @@ void Replay::writeCounter(Id view, uint32_t value) {
         throw std::runtime_error("UAV has no hidden counter");
     writeCounter(get<ID3D11UnorderedAccessView>(view), value);
     undefinedCreatedCounters_.erase(view);
+    missingInitialCounters_.erase(view);
 }
 void Replay::writeCounter(ID3D11UnorderedAccessView *view, uint32_t value) {
     Unpredicated guard(context_.Get());
