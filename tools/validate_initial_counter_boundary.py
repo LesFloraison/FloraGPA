@@ -29,6 +29,10 @@ def main():
     out.mkdir(parents=True, exist_ok=False)
     samples = root / 'analysis/capture_samples/preframe_counters2'
     manifest = json.loads((samples / 'manifest.json').read_text())
+    if a.original:
+        player = Path('C:/Program Files/IntelSWTools/GPA/dx11_player.dll')
+        if digest(player) != manifest['producer_sha256']['dx11_player.dll']:
+            raise ValueError('Original observer requires the pinned GPA player binary')
     for name, expected in manifest['sources'].items():
         if digest(root / name) != expected:
             raise ValueError('Producer source changed: ' + name)
@@ -102,6 +106,9 @@ def main():
             run([sys.executable, observer, capture, '--slot', case['slot'], '--out', folder / 'original'],
                 folder / 'original.log')
             original = json.loads((folder / 'original/result.json').read_text())
+            assert original['player_sha256'] == manifest['producer_sha256']['dx11_player.dll']
+            assert original['open_status'] == original['playback_status'] == 0
+            assert original['closed'] is True and original['callbacks'] == []
             audit = original['audit']
             assert not audit['errors'] and len(audit['draws']) == 1
             draw = audit['draws'][0]
