@@ -1,5 +1,9 @@
 # Worker shutdown ownership and recovery-memory evidence
 
+Follow-up: [Qt action retention audit](QT_ACTION_RETENTION.md) identifies and fixes
+one source of the heap growth recorded below. These earlier measurements remain
+unchanged as the before-fix baseline; the shutdown correction still applies.
+
 Reviewed 2026-10-06. Runtime change: `4495d73`. This M5 batch fixes an invalid
 Windows handle close during window destruction and narrows the outstanding
 memory investigation. It does not expand replay compatibility.

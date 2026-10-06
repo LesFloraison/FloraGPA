@@ -1,0 +1,303 @@
+{
+  "schema": "FloraGPA Qt action retention baseline 1",
+  "reviewed": "2026-10-06",
+  "implementation_commit": "4b858b619fced9168843d076635e18378b8567ae",
+  "stages_complete": {
+    "M3": false,
+    "M4": false,
+    "M5": false
+  },
+  "package": "out\\FloraGPA-qt-action-recovery-20261006",
+  "changed_package_files": [
+    "FloraGPA.exe"
+  ],
+  "package_gui_sha256": "74b8a3438d1fa8d43b5ffd70c36118f867afc958d63d343461e661046bf90e99",
+  "package_cli_sha256": "7f7212f37b54c85a6e9ac5f0d6251e80cf4cc5b9b5f2edcfb31b6562a86f2467",
+  "package_worker_sha256": "84376b353e915dc35c339ad295ebdcec57122c1f8b18c3456c542377c44f8bfb",
+  "qt_widgets_sha256": "e6d0b7e2e697de6ad985b97f9ed8b381c1c2172fcae87b6ab08455b3b7330f32",
+  "inventory_unchanged": {
+    "registrations": 486,
+    "unique_hashes": 476,
+    "positive_registrations": 460,
+    "positive_unique_hashes": 450,
+    "rejections": 26
+  },
+  "module_ledger_unchanged": {
+    "ported": 72,
+    "partial": 117,
+    "pending": 15
+  },
+  "stack_comparison": [
+    {
+      "phase": "m5-heap-stacks",
+      "epoch": 2,
+      "dropped": 0,
+      "blocks": 1398,
+      "bytes": 134208
+    },
+    {
+      "phase": "m5-heap-stacks",
+      "epoch": 6,
+      "dropped": 0,
+      "blocks": 3662,
+      "bytes": 351552
+    },
+    {
+      "phase": "m5-heap-stacks",
+      "epoch": 10,
+      "dropped": 0,
+      "blocks": 5926,
+      "bytes": 568896
+    },
+    {
+      "phase": "m5-heap-stacks-after",
+      "epoch": 2,
+      "dropped": 0,
+      "blocks": 304,
+      "bytes": 29184
+    },
+    {
+      "phase": "m5-heap-stacks-after",
+      "epoch": 6,
+      "dropped": 0,
+      "blocks": 304,
+      "bytes": 29184
+    },
+    {
+      "phase": "m5-heap-stacks-after",
+      "epoch": 10,
+      "dropped": 0,
+      "blocks": 304,
+      "bytes": 29184
+    }
+  ],
+  "heap_comparison": {
+    "m5-heap-probe": {
+      "cycles": 40,
+      "seconds": 259.774,
+      "heap_walk_complete": true,
+      "captures": {
+        "GF2_Exilium_2026_03_03__00_19_35.gpa_frame": {
+          "first": {
+            "iteration": 0,
+            "handles": 317,
+            "gdi_objects": 3,
+            "user_objects": 34,
+            "heap_busy_bytes": 39456160,
+            "heap_busy_blocks": 79829,
+            "log_blocks": 3,
+            "log_characters": 291
+          },
+          "warm": {
+            "iteration": 1,
+            "handles": 324,
+            "gdi_objects": 11,
+            "user_objects": 34,
+            "heap_busy_bytes": 41289594,
+            "heap_busy_blocks": 82846,
+            "log_blocks": 9,
+            "log_characters": 803
+          },
+          "last": {
+            "iteration": 19,
+            "handles": 324,
+            "gdi_objects": 11,
+            "user_objects": 34,
+            "heap_busy_bytes": 44422851,
+            "heap_busy_blocks": 124348,
+            "log_blocks": 117,
+            "log_characters": 10019
+          },
+          "qobjects": 4555,
+          "class_counts_constant": true
+        },
+        "bf1_2026_01_21__16_53_05.gpa_frame": {
+          "first": {
+            "iteration": 0,
+            "handles": 324,
+            "gdi_objects": 11,
+            "user_objects": 34,
+            "heap_busy_bytes": 50629936,
+            "heap_busy_blocks": 110681,
+            "log_blocks": 6,
+            "log_characters": 512
+          },
+          "warm": {
+            "iteration": 1,
+            "handles": 324,
+            "gdi_objects": 11,
+            "user_objects": 34,
+            "heap_busy_bytes": 50811608,
+            "heap_busy_blocks": 112987,
+            "log_blocks": 12,
+            "log_characters": 1024
+          },
+          "last": {
+            "iteration": 19,
+            "handles": 324,
+            "gdi_objects": 11,
+            "user_objects": 34,
+            "heap_busy_bytes": 53943146,
+            "heap_busy_blocks": 154489,
+            "log_blocks": 120,
+            "log_characters": 10240
+          },
+          "qobjects": 4555,
+          "class_counts_constant": true
+        }
+      },
+      "log_clear": {
+        "after": {
+          "heap_busy_bytes": 53198760,
+          "heap_busy_blocks": 153894,
+          "log_blocks": 1,
+          "log_characters": 1
+        },
+        "before": {
+          "heap_busy_bytes": 53941728,
+          "heap_busy_blocks": 154455,
+          "log_blocks": 120,
+          "log_characters": 10240
+        }
+      }
+    },
+    "m5-heap-probe-after": {
+      "cycles": 40,
+      "seconds": 258.864,
+      "heap_walk_complete": true,
+      "captures": {
+        "GF2_Exilium_2026_03_03__00_19_35.gpa_frame": {
+          "first": {
+            "iteration": 0,
+            "handles": 317,
+            "gdi_objects": 3,
+            "user_objects": 34,
+            "heap_busy_bytes": 39412632,
+            "heap_busy_blocks": 79011,
+            "log_blocks": 3,
+            "log_characters": 291
+          },
+          "warm": {
+            "iteration": 1,
+            "handles": 324,
+            "gdi_objects": 11,
+            "user_objects": 34,
+            "heap_busy_bytes": 41104392,
+            "heap_busy_blocks": 79689,
+            "log_blocks": 9,
+            "log_characters": 803
+          },
+          "last": {
+            "iteration": 19,
+            "handles": 324,
+            "gdi_objects": 11,
+            "user_objects": 34,
+            "heap_busy_bytes": 41791346,
+            "heap_busy_blocks": 80439,
+            "log_blocks": 117,
+            "log_characters": 10019
+          },
+          "qobjects": 4556,
+          "class_counts_constant": true
+        },
+        "bf1_2026_01_21__16_53_05.gpa_frame": {
+          "first": {
+            "iteration": 0,
+            "handles": 324,
+            "gdi_objects": 11,
+            "user_objects": 34,
+            "heap_busy_bytes": 50524918,
+            "heap_busy_blocks": 108682,
+            "log_blocks": 6,
+            "log_characters": 512
+          },
+          "warm": {
+            "iteration": 1,
+            "handles": 324,
+            "gdi_objects": 11,
+            "user_objects": 34,
+            "heap_busy_bytes": 50562558,
+            "heap_busy_blocks": 108724,
+            "log_blocks": 12,
+            "log_characters": 1024
+          },
+          "last": {
+            "iteration": 19,
+            "handles": 324,
+            "gdi_objects": 11,
+            "user_objects": 34,
+            "heap_busy_bytes": 51246928,
+            "heap_busy_blocks": 109474,
+            "log_blocks": 120,
+            "log_characters": 10240
+          },
+          "qobjects": 4556,
+          "class_counts_constant": true
+        }
+      },
+      "log_clear": {
+        "after": {
+          "heap_busy_bytes": 50502702,
+          "heap_busy_blocks": 108881,
+          "log_blocks": 1,
+          "log_characters": 1
+        },
+        "before": {
+          "heap_busy_bytes": 51245510,
+          "heap_busy_blocks": 109440,
+          "log_blocks": 120,
+          "log_characters": 10240
+        }
+      }
+    }
+  },
+  "evidence": {
+    "artifacts/m5-qt-stack-comparison.json": "80dee63cc36a6d00f125d294923f988e5259295dab0eb0be23ca983795d47684",
+    "artifacts/m5-qt-heap-comparison.json": "17a79657d9f9b01d1c8248387bcb151bbb554c60d7f7192c85856dcb0dc94f58",
+    "artifacts/m5-heap-stacks.log": "edc8a4ee1dd693e639029219b996c9f9ac603785aac4264fe8681a0779ee73fc",
+    "artifacts/m5-heap-stacks-after.log": "6171acde2509e8513882b95327dfcc02d592f2a66f76be5d0620b570879b6481",
+    "artifacts/m5-heap-probe-after/validation.json": "99f16fe081841244ca005e0bfe840335ca1e4488e842fd70901a7e4474e31069",
+    "artifacts/m5-heap-probe-after/qt.log": "938d00b5f40a52d8d6c2b504b9e18ffa68def6d039d52f5399cf45635298a478",
+    "artifacts/run_m5_heap_probe_after.py": "ff52037d271f319b0fb354b0e8481eb3713848aa523832108be454578bba0784",
+    "artifacts/analyze_qt_heap.py": "8b867654e059fa6c5517094967dd4e638780d91c75b03b8da0063894eb36b996",
+    "artifacts/analyze_qt_heap_walk.py": "3ff730b9ffb5c8d82752e0fc7f4aeb3c46f0784c9b9aaacb05ed72fcd8272618",
+    "artifacts/m5-qt-ui-ctest.log": "d750f15378a010ba5a4231f5323fd3f24f9cb567d71306caa72e696cce8d9df2",
+    "artifacts/m5-qt-ui.log": "1177821daf374569be82a7cc95d527d158efdfec7ff0a16be0e464d8e1f97feb",
+    "artifacts/m5-qt-recovery-ui.log": "75cec84b24b4ade0fa21dbe5e9a3fcb78ddc16ab8f6d8fcdf18aea18c676471e",
+    "artifacts/m5-qt-compatibility-ui.log": "54a346351bc26ae72be066686642a928431009dd6be0ee09c9270814093e7dcf",
+    "artifacts/m5-qt-qt-compatibility.log": "4e58d945d2261d1868a60bd6e4bfdcc6a915d690f151c082a435b180c31e46cd",
+    "artifacts/m5-qt-optional-ui.log": "9ed19c62ce3ee50fb475ab13f3f1aa9852f7f7b8d50caf924cc32f9ccd585990",
+    "artifacts/m5-qt-goldens/validation.json": "5e1dde1ab9876f50c472cdf84378931ffc3b5cd8e9700002b67d37bf81383ade",
+    "artifacts/m5-qt-action-package-files.json": "54c2048f4f3a9961dd1a101390477e66e63626f4194095aef87a44f55d1d0dd0",
+    "artifacts/m5-qt-source/qtoolbutton-6.11.2.cpp": "79cde2407aee5f4c358d17227c9c90be380af8989e163a61986f8b3ef1e0cd85",
+    "artifacts/run_qt_action_regressions.ps1": "f908768410e16396b93ba136662560f9ed4fdd7f8aa67c0c2146534f34202971",
+    "artifacts/m5-heap-stacks/heap-2.json": "cc321265d3b8ed7d100a7741bbb67c8f48fa7543ba94f35430500c55fae27a3b",
+    "artifacts/m5-heap-stacks/heap-6.json": "dc4af2bd9176ef89ab16747e3878885f7a74c0954c861611a978f11416db8466",
+    "artifacts/m5-heap-stacks/heap-10.json": "6b4c20d793a2948729efb8062f65dcd9aa2fa556fdef562702abb550edb532ab",
+    "artifacts/m5-heap-stacks-after/heap-2.json": "c3a592274ea1421c17ef53086a10e33fedeff043e63d6af23f6c102d5eaa19cb",
+    "artifacts/m5-heap-stacks-after/heap-6.json": "9e1d43413ca83bd1aeb83d9c6fbc71d7cbb72973ac717459015042cf6af43bf1",
+    "artifacts/m5-heap-stacks-after/heap-10.json": "5c942c6cf2def5548a41c53ccf00936c22946ee6ff567c636d7a79894a908200"
+  },
+  "limits": [
+    "Exact Qt 6.11.2 workaround; no claim for other Qt versions.",
+    "Cleanup is coalesced at event-loop return, not a bound during a blocked UI turn.",
+    "UCRT import observer is test-only and does not cover every allocation/free path.",
+    "A 40-cycle same-host recovery test is not a long-duration or independent clean-machine certification.",
+    "No full GPU corpus rerun in this GUI-only change; CLI, Worker and other package files are byte-identical."
+  ],
+  "counts": {
+    "ui_ctest_suites": 4,
+    "main_ui_passed_rows": 57,
+    "main_ui_initial_optional_skips": 2,
+    "optional_followup_passed_rows": 4,
+    "optional_followup_skips": 0,
+    "recovery_passed_rows": 7,
+    "qt_compatibility_passed_rows": 6,
+    "compatibility_ui_passed_rows": 4,
+    "golden_and_negative_checks": 4,
+    "stack_profile_cycles_per_comparison_run": 10,
+    "stack_profile_final_hash_checks_per_run": 20,
+    "separate_heap_cycles": 40,
+    "separate_heap_final_hash_checks": 80
+  }
+}

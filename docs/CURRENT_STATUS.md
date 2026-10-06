@@ -1,7 +1,26 @@
 # Current capabilities and compatibility
 
 Reviewed **2026-10-06**. The user authorized M4, then M5, while keeping M3 open.
-The latest [worker shutdown correction](WORKER_SHUTDOWN_AND_RETENTION.md)
+The latest [Qt action retention fix](QT_ACTION_RETENTION.md) removes repeated
+internal tool-button connections under the verified Qt 6.11.2 runtime. A direct
+counterexample and allocation-stack comparison identify the source: the selected
+live connection group grows from 1,398 to 5,926 blocks before the fix, while
+remaining at 304 blocks after it. Dynamic menus, user callbacks and action state
+are covered by regression tests. The fix is scoped to the MainWindow subtree and
+coalesces cleanup after normal event processing; Qt DLLs are unchanged.
+
+A separate portable 40-cycle recovery run passes 80 strict GF2/BF1 Final-image
+checks. BF1 heap growth falls from 3.31 MB to 0.72 MB; clearing only retained logs
+releases 0.74 MB. Warmed handles, GDI/USER objects and Qt object class counts stay
+fixed. This closes the identified connection accumulation, not every potential
+memory issue. Runtime: `4b858b6`; package:
+`out/FloraGPA-qt-action-recovery-20261006/`. Only the GUI executable differs from
+the preceding package. Four UI CTest suites, both optional original-capture UI
+workflows and four packaged golden/negative checks pass. See the
+[pinned baseline](qt-action-retention-baseline.json).
+M3/M4/M5 and independent long-duration/clean-machine acceptance remain open.
+
+The preceding [worker shutdown correction](WORKER_SHUTDOWN_AND_RETENTION.md)
 prevents a second close of the Windows Job handle when waiting for the worker
 reenters its completion callback. A before/after API-result observer verifies
 the defect and fix; child termination, three CTest UI suites, both optional
@@ -11,8 +30,9 @@ shutdown checks pass. Runtime: `4495d73`; package:
 the preceding package. The [baseline](worker-shutdown-retention-baseline.json)
 also pins a 40-cycle heap investigation: QObject counts stay constant, while
 heap busy allocations grow and clearing logs explains only part of the increase.
-Allocation-source/lifetime attribution and longer-duration acceptance remain
-open; this is not a declaration of leak-free behavior or a completed M5.
+The Qt connection allocation source is now attributed and corrected above;
+broader lifetime and longer-duration acceptance remain open. This is not a
+declaration of leak-free behavior or a completed M5.
 
 The preceding [capture-load recovery change](CAPTURE_LOAD_RECOVERY.md) makes the
 container scan and full-file hash cancellable, discards cancelled queued results,
