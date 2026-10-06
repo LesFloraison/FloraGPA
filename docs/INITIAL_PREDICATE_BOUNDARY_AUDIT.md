@@ -30,6 +30,11 @@ In particular, rejecting all preframe Predicates or deleting empty initializatio
 would break four valid original captures. Matching output also does not recover
 the application's historical query value.
 
+Modes 8–11 really do save the successful four-byte BOOL in Context4 GetData
+(`0x34fb`). The validator checks those bytes against the producer. The missing
+piece in those files is the Predicate descriptor/identity record, not the BOOL;
+the two kinds of missing information must not be conflated.
+
 The existing reverse-engineering evidence in the reference workspace's
 `analysis/PREDICATION.md` identifies the player's 24-byte `0x96` descriptor,
 factory `0x3d7a0`, reader `0xb6170`, writer `0xbbd40` and native creator `0x574a0`.
@@ -74,12 +79,21 @@ Eight files match producer pixels in both repetitions; eight fail at the documen
 missing descriptor. Another 32 hardware/WARP inspection processes verify query
 values and provenance at first-use and completed-interval boundaries.
 
+The full deployed-package gate passes **28 suites / 486 registrations / 476 hashes**:
+452 replay-positive registrations (442 unique) and 34 rejection files. It retains
+972 ordinary attempts, 668 control runs and 692 resource exports. All previous
+470 registrations have unchanged preflight findings and deterministic image
+hashes. Helldivers remains the single separately scoped variable case. Four
+GF2/BF1 ordinary/disabled-Draw golden checks also pass in the isolated package
+configuration. Results and binary/evidence hashes are pinned in
+[initial-predicate-boundary-baseline.json](initial-predicate-boundary-baseline.json).
+
 Local evidence:
 
 - `artifacts/m4-initial-predicate-expanded/manifest.json`: original captures and frozen producer.
 - `artifacts/m4-initial-predicate-expanded-before/`: previous package comparison.
 - `artifacts/m4-initial-predicate-package/`: final package paired comparison.
-- `artifacts/m4-initial-predicate-package-inspection/validation.json`: wire truth table and inspections.
+- `artifacts/m4-initial-predicate-final-inspection/validation.json`: wire truth table and inspections.
 - `artifacts/m4-predicate-ui.log` and `artifacts/m4-predicate-ui/`: Qt results/screenshots.
 
 An intermediate attempt to run the undeployed build through the isolated batch

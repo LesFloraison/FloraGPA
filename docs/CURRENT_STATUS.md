@@ -1,7 +1,31 @@
 # Current capabilities and compatibility
 
-Reviewed **2026-10-06**. The user authorized prioritizing M4, then M5, while
-keeping M3 open. The latest [initial-counter correction](INITIAL_COUNTER_BOUNDARY_AUDIT.md)
+Reviewed **2026-10-06**. The user authorized M4, then M5, while keeping M3 open.
+The latest [Predicate boundary audit](INITIAL_PREDICATE_BOUNDARY_AUDIT.md) adds
+16 original captures and separates a replay baseline from an application query
+result. Eight missing-descriptor captures receive located errors, including four
+that retain GetData BOOL bytes but lack the Predicate descriptor. Eight positives
+match the producer and original player, including four that need the original
+empty-query baseline with normalized saved control. That baseline is preserved;
+inspection now returns null with a compact **Replay baseline** status until a
+captured interval supplies a real GPU result.
+
+Inventory is **486 registrations / 476 unique hashes**, with **452 default
+replay-positive registrations (442 unique) and 34 rejection files**. This is a
+sample matrix, not full API coverage. The 32 dynamic-CB loss cases still validate
+only saved contents. Module counts remain 72 ported / 117 partial / 15 pending.
+Package: `out/FloraGPA-predicate-boundaries-20261006/`; runtime: `140cec7`.
+The complete 28-suite package matrix passes: 972 ordinary attempts (904 positive,
+68 located rejections), 668 control runs and 692 resource exports. All previous
+470 registrations retain their preflight findings and deterministic image hashes;
+Helldivers retains its separate variability policy. The paired original comparison,
+32 hardware/WARP inspections, four related CTests, two Qt workflows and four
+GF2/BF1 golden/negative checks pass. The producer passed 384 native/injected frames.
+See the [pinned baseline](initial-predicate-boundary-baseline.json). M3/M4/M5 are not
+complete: general Predicate normalization, broader resource/query boundaries,
+long-duration recovery, large-file experience and independent deployment remain open.
+
+The preceding [initial-counter correction](INITIAL_COUNTER_BOUNDARY_AUDIT.md)
 rejects missing frame-before UAV counts at consumption. Buffer inspection keeps
 available bytes and displays unknown counters as Unavailable; the existing editor
 supports explicit initial values without supplying a guessed default. Four
@@ -9,7 +33,7 @@ original captures now reject normally and recover exact bytes/counts only with
 producer-backed experiment values. The fresh original observer reproduces the
 original player's incorrect zero initialization despite equal final pixels.
 
-Current inventory is **470 registrations / 460 unique hashes**, with **444 default
+That batch had **470 registrations / 460 unique hashes**, with **444 default
 replay-positive registrations (434 unique) and 26 rejection files**. Four historical
 image-only positives are reclassified because their necessary initial counts are
 not captured. Module counts stay 72 ported / 117 partial / 15 pending.

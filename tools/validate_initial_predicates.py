@@ -46,7 +46,8 @@ def main():
     assert manifest['completed'] and len(manifest['cases']) == 16
     for name, digest in manifest['producer_files'].items():
         assert sha(root/'producer'/name) == digest
-    report = dict(completed=False, exe_sha256=sha(exe), manifest_sha256=sha(root/'manifest.json'),
+    report = dict(completed=False, exe_sha256=sha(exe), validator_sha256=sha(Path(__file__)),
+                  manifest_sha256=sha(root/'manifest.json'),
                   comparison_sha256=sha(a.comparison/'validation.json'), cases=[])
     env = dict(os.environ)
     env.pop('GPA_LOCAL_INJECT', None)
@@ -70,6 +71,17 @@ def main():
             assert (resource in entries) == present
             if present:
                 assert entries[resource][:2] == (5, 0x96) and len(entries[resource][2]) == 24
+            observations = []
+            for i, (cat, kind, raw) in sorted(entries.items()):
+                if cat == 7 and kind in (0x30b4, 0x31b4, 0x331d, 0x33e3, 0x34fb):
+                    assert len(raw) == 41
+                    link, owner, hr, query, has_word, word, size, flags = struct.unpack('<QQiQBIII', raw)
+                    assert link == 0 and owner == context and query == resource
+                    assert has_word == 1 and size == 4 and flags == 0
+                    observations.append(dict(event=i, hresult=hr, captured_word=word))
+            assert bool(observations) == (mode//4 in (1, 2))
+            if observations:
+                assert any(o['hresult'] == 0 and bool(o['captured_word']) == visible for o in observations)
             measured = next(c for c in comparison['cases'] if c['id'] == case['id'])
             if present:
                 assert measured['status'] == measured['original_status'] == 'repeat_stable'
@@ -83,7 +95,8 @@ def main():
                     assert 'Open failed: status=13' in worker
             row = dict(id=case['id'], resource=resource, first_set=event, descriptor_present=present,
                        producer_query_value=visible, producer_comparison=comparison_value,
-                       saved_comparison=saved, captured_interval_before_use=refresh, inspections=[])
+                       saved_comparison=saved, captured_interval_before_use=refresh,
+                       captured_get_data=observations, inspections=[])
             report['cases'].append(row)
             if present:
                 ends = [i for i, (cat, kind, raw) in entries.items() if cat == 7 and kind == 0x243]

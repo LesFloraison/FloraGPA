@@ -1,0 +1,64 @@
+{
+  "schema": "FloraGPA initial predicate boundary baseline 1",
+  "reviewed": "2026-10-06",
+  "implementation_commit": "140cec7dfc1985fdfee73e2b40c2819959b5f2c6",
+  "producer_commit": "60eae224c2175825b11e2b5199f4f74117b53458",
+  "scope": "Preserve measured replay initialization; distinguish application query results and locate missing descriptors",
+  "stages_complete": {
+    "M3": false,
+    "M4": false,
+    "M5": false
+  },
+  "package": "out/FloraGPA-predicate-boundaries-20261006",
+  "package_cli_sha256": "94638ef3590dd90685fed2cc9a315f467a6564a51ef08b7d51719aac414b9a88",
+  "package_gui_sha256": "48575e7fe6031e67f1e10b34dc8d2c0624ff1a144282ef5422ca3e7051a0364b",
+  "inventory": {
+    "registrations": 486,
+    "unique_hashes": 476,
+    "positive_registrations": 452,
+    "positive_unique_hashes": 442,
+    "rejections": 34
+  },
+  "module_ledger_unchanged": {
+    "ported": 72,
+    "partial": 117,
+    "pending": 15
+  },
+  "counts": {
+    "ordinary_attempts": 972,
+    "controls": 491,
+    "control_runs": 668,
+    "boundary_runs": 692,
+    "known_variable_cases": 1,
+    "ctest_suites": 4,
+    "predication_unit_passes": 43,
+    "predicate_creation_unit_passes": 25,
+    "qt_workflows": 2,
+    "producer_frames": 384,
+    "original_capture_cases": 16,
+    "paired_original_attempts": 32,
+    "hardware_warp_inspections": 32,
+    "goldens": 4
+  },
+  "matrix_passed": true,
+  "evidence": {
+    "artifacts/m4-predicate-gate/gate.json": "5c46b5799d86f581a47575f711b80430e933232d567e2c6791edc19ff097a435",
+    "artifacts/m4-predicate-previous-comparison.json": "9539309f6f172de4e54a5c34d99fe535a04d669eaebf07422a092d6bf6a8e04d",
+    "artifacts/m4-initial-predicate-expanded/manifest.json": "7bd422acfc8183fe54bd37ea33d785acf117b60c3e33321a809e2990ff7e8456",
+    "artifacts/m4-initial-predicate-package/validation.json": "311fda171604d1babff633d71244db9daf69b0bfbd0602162aee15396416fa1d",
+    "artifacts/m4-initial-predicate-final-inspection/validation.json": "b7564d0e5459dbca89dd790cedba805baf2faf9655c990758259a59bfe2a2751",
+    "artifacts/m4-predicate-ui.log": "636ec4fb0941cd5bfe3552c6fe94d551f13901702eba4b3c8f694654920a1046",
+    "artifacts/m4-predicate-package-files.json": "60f8d95dea4fa0e6da473976fc06c50bb01c242300dece2159037a70ffd0b2b1",
+    "artifacts/m4-predicate-goldens/validation.json": "5e1dde1ab9876f50c472cdf84378931ffc3b5cd8e9700002b67d37bf81383ade",
+    "artifacts/m4-predicate-ctest.log": "9f27b4c98d3c172456b84529875abed49063026da85d0f94857d630bb807c7bc",
+    "artifacts/m4-predication-unit.log": "cf6964a8a4552ca2a06727e0887d0482d3ff5d72ea628fb889e04aff0d4197b0",
+    "artifacts/m4-predicate-creation-unit.log": "86a150ce529c892ef8824fdb513cfc1da9295b839bab0e5c75bb9c2808fc7b1e"
+  },
+  "limits": [
+    "Original player adapter is not identified; no matched-device equivalence claim.",
+    "Observed BOOL normalization is scoped to the pinned occlusion producer cases.",
+    "Eight new files lack the Predicate descriptor; four of those retain a GetData BOOL.",
+    "The existing 32 dynamic-CB loss cases cover saved contents only.",
+    "The undeployed build run under m4-initial-predicate-after failed DLL loading and is excluded."
+  ]
+}

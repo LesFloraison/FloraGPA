@@ -126,3 +126,7 @@ Broader device/interface layouts, positive SO-overflow creation cases, general
 resource lifetime/version reuse, missing frame-before results and deferred
 execution remain incomplete. Ordinary Query results/control flow are not
 synthesized. M2 and M3–M6 remain open; module migration counts are unchanged.
+
+The later [M4 initial Predicate audit](INITIAL_PREDICATE_BOUNDARY_AUDIT.md)
+adds original preframe cases, keeps the measured empty-query replay convention,
+and distinguishes baseline inspection from application query values.
