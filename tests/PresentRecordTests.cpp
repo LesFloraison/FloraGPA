@@ -113,11 +113,12 @@ class PresentRecordTests final : public QObject {
                 Replay replay(frame, options);
                 for (unsigned repeat = 0; repeat < 2; ++repeat) {
                     unsigned observations = 0;
-                    replay.run({}, {}, [&](Id event, bool after, ID3D11DeviceContext *context, const auto &) {
+                    replay.run({}, {}, [&](Id event, bool after, ID3D11DeviceContext *context, const auto &objects) {
                         if (event != 27) return;
                         Com<ID3D11RenderTargetView> view;
                         context->OMGetRenderTargets(1, &view, nullptr);
                         QVERIFY(view);
+                        QCOMPARE(static_cast<IUnknown *>(view.Get()), objects.at(5).Get());
                         QCOMPARE(bytes(replay.readTexture(7)), red);
                         ++observations;
                     });

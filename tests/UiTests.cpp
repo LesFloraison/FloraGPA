@@ -3796,6 +3796,45 @@ class UiTests final : public QObject {
         QVERIFY(done.takeLast()[0].toBool());
         QVERIFY(!window.busy());
     }
+    void occludedPresentReplayAndNavigate() {
+        const auto root = qEnvironmentVariable("FLORA_PRESENT_OCCLUDED_CAPTURES");
+        if (root.isEmpty()) QSKIP("Set original occluded Present TEST corpus");
+        flora::MainWindow window;
+        window.resize(1440, 900); window.show();
+        QSignalSpy done(&window, &flora::MainWindow::taskFinished);
+        for (int mode : {5, 7}) {
+            done.clear();
+            window.openCapture(root + '/' + QString::number(mode) + "/capture.gpa_frame");
+            QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+            QVERIFY(done.takeLast()[0].toBool());
+            auto output = window.findChild<flora::ImageView *>("frameOutput");
+            QVERIFY(output); QCOMPARE(output->image().size(), QSize(8, 8));
+            const auto final = output->image();
+            for (int y = 0; y < 8; ++y) for (int x = 0; x < 8; ++x)
+                QCOMPARE(final.pixelColor(x, y), QColor(0, 255, 0, 255));
+            auto kinds = window.findChild<QComboBox *>("apiKinds");
+            QVERIFY(kinds); kinds->setCurrentIndex(1); // Present is in All API calls.
+            auto api = window.findChild<QTableView *>("apiLog");
+            QVERIFY(api);
+            QModelIndex test;
+            for (int row = 0; row < api->model()->rowCount(); ++row)
+                if (api->model()->index(row, 0).data(Qt::UserRole).toULongLong() == 27)
+                    test = api->model()->index(row, 0);
+            QVERIFY(test.isValid());
+            done.clear(); api->setCurrentIndex(test);
+            QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+            QVERIFY(done.takeLast()[0].toBool());
+            for (int y = 0; y < 8; ++y) for (int x = 0; x < 8; ++x)
+                QCOMPARE(output->image().pixelColor(x, y), QColor(255, 0, 0, 255));
+            snapshot(window, QString("occluded-present-%1").arg(mode));
+            auto boundary = window.findChild<QComboBox *>("outputBoundary");
+            QVERIFY(boundary); QCOMPARE(boundary->currentIndex(), 2);
+            done.clear(); boundary->setCurrentIndex(0);
+            QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+            QVERIFY(done.takeLast()[0].toBool());
+            QCOMPARE(output->image(), final);
+        }
+    }
     void counterSlotReplayAndNavigate() {
         const auto root = qEnvironmentVariable("FLORA_COUNTER_SLOT_CAPTURES");
         if (root.isEmpty()) QSKIP("Set FLORA_COUNTER_SLOT_CAPTURES for mixed-slot original captures");
