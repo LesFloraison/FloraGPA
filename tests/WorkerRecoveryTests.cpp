@@ -1,6 +1,10 @@
 #include "MsaaCapture.h"
 #include "app/MainWindow.h"
 #include <QDirIterator>
+#include <QCryptographicHash>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QLabel>
 #include <QAction>
 #include <QElapsedTimer>
 #include <QFileInfo>
@@ -15,7 +19,7 @@ class WorkerRecoveryTests final : public QObject {
   private slots:
     void isolatedRecovery_data() {
         QTest::addColumn<QString>("mode");
-        for (const auto mode : {"missing", "stderr-tail", "stderr-lines", "crash", "invalid-report", "no-output", "missing-image", "cancel"})
+        for (const auto mode : {"missing", "stderr-tail", "stderr-lines", "crash", "invalid-report", "no-output", "missing-image", "cancel", "image-size", "image-pixels", "image-raw-missing", "image-raw-short", "image-raw-long", "image-raw-hash", "image-hash-missing", "image-unavailable-files", "image-unavailable-type", "image-valid"})
             QTest::newRow(mode) << QString(mode);
         if (qEnvironmentVariableIsSet("FLORA_TEST_WORKER_TIMEOUT")) QTest::newRow("timeout") << QString("timeout");
     }
@@ -72,6 +76,37 @@ class WorkerRecoveryTests final : public QObject {
         const auto image = window.findChild<ImageView *>("frameOutput");
         QVERIFY(image && !image->image().isNull());
         const auto expected = image->image();
+        const auto label = window.findChild<QLabel *>("frameOutputLabel");
+        QVERIFY(label);
+        const auto expectedLabel = label->text(), expectedTooltip = label->toolTip();
+        if (mode.startsWith("image-")) {
+            const auto fixture = QDir(root).filePath("fault-output");
+            QVERIFY(QDir().mkpath(fixture));
+            qputenv("FLORA_FAULT_IMAGE_ROOT", fixture.toUtf8());
+            auto rgba = expected.convertToFormat(QImage::Format_RGBA8888);
+            QByteArray raw;
+            for (int y = 0; y < rgba.height(); ++y)
+                raw.append(reinterpret_cast<const char *>(rgba.constScanLine(y)), rgba.width() * 4);
+            QJsonObject report{{"completed", true}, {"image_available", true},
+                               {"width", rgba.width()}, {"height", rgba.height()},
+                               {"rgba_sha256", QString::fromLatin1(QCryptographicHash::hash(raw, QCryptographicHash::Sha256).toHex())}};
+            if (mode == "image-size") report["width"] = rgba.width() + 1;
+            if (mode == "image-hash-missing") report.remove("rgba_sha256");
+            if (mode == "image-unavailable-files") report["image_available"] = false;
+            if (mode == "image-unavailable-type") report["image_available"] = "false";
+            if (mode == "image-pixels") rgba.bits()[0] ^= 0xff;
+            QVERIFY(rgba.save(fixture + "/frame.png"));
+            if (mode == "image-raw-short") raw.chop(1);
+            if (mode == "image-raw-long") raw.append('x');
+            if (mode == "image-raw-hash") raw[0] = char(raw[0] ^ 0xff);
+            if (mode != "image-raw-missing") {
+                QFile file(fixture + "/frame.rgba"); QVERIFY(file.open(QIODevice::WriteOnly));
+                QCOMPARE(file.write(raw), raw.size());
+            }
+            QFile file(fixture + "/report.json"); QVERIFY(file.open(QIODevice::WriteOnly));
+            const auto bytes = QJsonDocument(report).toJson();
+            QCOMPARE(file.write(bytes), bytes.size());
+        }
         QVERIFY(QFile::remove(worker));
         if (mode != "missing") QVERIFY(QFile::copy(qEnvironmentVariable("FLORA_FAULT_WORKER"), worker));
         done.clear();
@@ -87,7 +122,7 @@ class WorkerRecoveryTests final : public QObject {
             cancel->trigger();
         }
         QTRY_COMPARE_WITH_TIMEOUT(done.size(), 1, mode == "timeout" ? 210000 : 30000);
-        QVERIFY(!done.last()[0].toBool());
+        QCOMPARE(done.last()[0].toBool(), mode == "image-valid");
         QVERIFY(!window.busy());
         unsigned checkedActions = 0;
         for (auto action : window.findChildren<QAction *>()) {
@@ -106,6 +141,12 @@ class WorkerRecoveryTests final : public QObject {
         }
         if (mode == "cancel") QCOMPARE(error, QString("Cancelled"));
         QCOMPARE(image->image(), expected); // A failure never accepts a replacement image.
+        if (mode != "image-valid") {
+            QCOMPARE(label->text(), expectedLabel);
+            QCOMPARE(label->toolTip(), expectedTooltip);
+        }
+        if (mode.startsWith("image-") && mode != "image-valid")
+            QVERIFY2(error.startsWith("Worker "), qPrintable(error));
         qInfo().noquote() << "fault_observation" << mode << "elapsed_ms" << elapsed.elapsed() << error;
         if (QFile::exists(worker)) QVERIFY(QFile::remove(worker));
         QVERIFY(QFile::copy(qEnvironmentVariable("FLORA_REAL_WORKER"), worker));

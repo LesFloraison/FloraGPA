@@ -1,4 +1,5 @@
 #include "MainWindow.h"
+#include "WorkerImage.h"
 #include "QtCompatibility.h"
 #include "CompatibilityButton.h"
 #include "AnnotationsView.h"
@@ -2108,7 +2109,7 @@ void MainWindow::finishWorker(int code, QProcess::ExitStatus status) {
             emit taskFinished(true);
             return;
         }
-        QImage result(jobDir_->path() + "/result/frame.png");
+        QImage result = readWorkerImage(jobDir_->path() + "/result", report_, runningKind_ == "replay");
         const bool outputAvailable = runningKind_ != "replay" || report_["image_available"].toBool(true);
         if (result.isNull() && outputAvailable)
             throw std::runtime_error("Worker output image is missing");
