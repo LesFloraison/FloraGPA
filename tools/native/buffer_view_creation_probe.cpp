@@ -1,7 +1,8 @@
 // Original GPA buffer-view fixtures; development only.
+#include "original_capture_control.h"
 #include "texture_probe_helpers.h"
 int wmain(int argc, wchar_t **argv) {
-    // Modes: 0..3 SRV; 10..15 UAV; 20 RTV; 30..35 failed/validation views.
+    // Modes: 0..3 SRV; 10..18 UAV; 20 RTV; 30..35 failed/validation views.
     if (argc != 3 && argc != 5)
         return 2;
     output = argv[1];
@@ -10,7 +11,7 @@ int wmain(int argc, wchar_t **argv) {
     fs::create_directories(output);
     try {
         const int scenario = std::stoi(argv[2]);
-        if (!((scenario >= 0 && scenario <= 3) || (scenario >= 10 && scenario <= 17) || scenario == 20 ||
+        if (!((scenario >= 0 && scenario <= 3) || (scenario >= 10 && scenario <= 18) || scenario == 20 ||
               (scenario >= 30 && scenario <= 35)))
             throw std::runtime_error("Invalid scenario");
         if (argc == 5 && !LoadLibraryExW(argv[4], nullptr, LOAD_WITH_ALTERED_SEARCH_PATH))
@@ -35,7 +36,8 @@ int wmain(int argc, wchar_t **argv) {
         createChain(chain, d.Get(), factory.Get(), DXGI_SWAP_EFFECT_DISCARD);
 
         const bool repeated = scenario == 16 || scenario == 17;
-        const int mode = scenario == 16   ? 13
+        const bool unusedCounter = scenario == 18;
+        const int mode = (scenario == 16 || unusedCounter) ? 13
                          : scenario == 17 ? 14
                          : scenario < 30  ? scenario
                          : scenario < 32  ? 0
@@ -45,7 +47,7 @@ int wmain(int argc, wchar_t **argv) {
                    validation = scenario >= 30 && scenario % 2 == 1;
         const bool srvOnly = mode < 10, raw = mode == 2 || mode == 11,
                    structured = mode == 1 || mode == 3 || (mode >= 12 && mode <= 15),
-                   defaults = mode == 3 || mode == 15, counter = mode == 13 || mode == 14;
+                   defaults = mode == 3 || mode == 15, counter = (mode == 13 || mode == 14) && !unusedCounter;
         D3D11_BUFFER_DESC bd{64, D3D11_USAGE_DEFAULT, D3D11_BIND_SHADER_RESOURCE, 0, 0, 0};
         if (mode >= 10)
             bd.BindFlags |= mode == 20 ? D3D11_BIND_RENDER_TARGET : D3D11_BIND_UNORDERED_ACCESS;
@@ -72,7 +74,8 @@ int wmain(int argc, wchar_t **argv) {
             initial[i] = 0x11110000u + i;
         expected = initial;
         const UINT first = defaults ? 0 : 4, count = defaults ? 16 : 8,
-                   sampleIndex = counter      ? 6
+                   sampleIndex = unusedCounter ? 5
+                                 : counter      ? 6
                                  : mode == 12 ? 5
                                  : defaults   ? 0
                                               : 4;
@@ -143,8 +146,8 @@ int wmain(int argc, wchar_t **argv) {
                       "main(){dest.Append(123);}"
                     : std::string(
                           "RWStructuredBuffer<uint> dest:register(u0);[numthreads(1,1,1)]void main(){dest[") +
-                          (mode == 13   ? "dest.IncrementCounter()"
-                           : mode == 12 ? "1"
+                          (mode == 13 && !unusedCounter ? "dest.IncrementCounter()"
+                           : (mode == 12 || unusedCounter) ? "1"
                                         : "0") +
                           "]=123;}";
             auto code = compile(source, "main", "cs_5_0");
@@ -190,6 +193,7 @@ int wmain(int argc, wchar_t **argv) {
                          : nullptr;
                 if (!request)
                     throw std::runtime_error("CaptureNextFrame unavailable");
+                flora::research::selectOriginalPrimarySwapChain(shim, chain.swap.Get());
                 request(argv[3], captured);
             }
             c->ClearState();
