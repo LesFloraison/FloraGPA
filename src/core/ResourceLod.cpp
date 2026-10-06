@@ -96,10 +96,12 @@ std::set<Id> resourceLodAccesses(const Frame &frame, const Entry &entry, Bytes p
     }
     return result;
 }
-ResourceLodAudit auditResourceLod(const Frame &frame) {
+ResourceLodAudit auditResourceLod(const Frame &frame, const CancelCheck &cancelled) {
+    checkCancellation(cancelled);
     ResourceLodAudit out;
     bool anyClamp = false, anyCreation = false;
     for (const auto &[id, e] : frame.entries()) {
+        checkCancellation(cancelled);
         if (e.category == 5 && e.type >= 0x84 && e.type <= 0x86) {
             try {
                 if (hasResourceLodClamp(frame.resource(id))) {
@@ -134,14 +136,17 @@ ResourceLodAudit auditResourceLod(const Frame &frame) {
     if (!anyClamp)
         return out;
     if (anyCreation) {
-        for (const auto &[event, record] : auditTextureCreations(frame).records)
+        for (const auto &[event, record] : auditTextureCreations(frame, cancelled).records) {
+            checkCancellation(cancelled);
             if (record.error.empty() && !record.result && record.resource && !isViewCreation(record.type) &&
                 hasResourceLodClamp(frame.resource(record.resource)))
                 out.creations[record.resource] = event;
+        }
     }
     std::set<Id> seen;
     bool opaquePrefix = false;
     for (const auto &[event, e] : frame.entries()) {
+        checkCancellation(cancelled);
         if (e.category != 7)
             continue;
         if (std::string(replayCapability(e.type).handling) == "unsupported")
@@ -159,14 +164,19 @@ ResourceLodAudit auditResourceLod(const Frame &frame) {
             out.initial[r.resource] = {r.value, event};
     }
     std::map<Id, float> known;
-    for (const auto &[resource, initial] : out.initial)
+    for (const auto &[resource, initial] : out.initial) {
+        checkCancellation(cancelled);
         known[resource] = initial.value;
+    }
     for (const auto &[id, e] : frame.entries()) {
+        checkCancellation(cancelled);
         if (e.category != 7)
             continue;
-        for (const auto &[resource, creation] : out.creations)
+        for (const auto &[resource, creation] : out.creations) {
+            checkCancellation(cancelled);
             if (creation == id)
                 known[resource] = 0;
+        }
         if (auto it = out.records.find(id); it != out.records.end()) {
             const auto &r = it->second;
             if (r.setter)

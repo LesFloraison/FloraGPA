@@ -62,7 +62,7 @@ Json validateFrame(const std::filesystem::path &path, const std::function<bool()
         report["source_sha256"] = frame.sha256(cancelled);
         report["unused_stream_output_lifetimes"] = Json::array();
         report["unused_constant_buffer_lifetimes"] = Json::array();
-        const auto lod = auditResourceLod(frame);
+        const auto lod = auditResourceLod(frame, cancelled);
         report["resource_lod_initial_observations"] = Json::array();
         for (const auto &[resource, initial] : lod.initial)
             report["resource_lod_initial_observations"].push_back(
@@ -93,13 +93,10 @@ Json validateFrame(const std::filesystem::path &path, const std::function<bool()
         std::set<Id> definedCounters;
         std::set<Id> completedPredicates, activePredicates;
         std::optional<PredicateBinding> predicateBinding;
-        const auto normalizedPredication = auditNormalizedPredication(frame);
+        const auto normalizedPredication = auditNormalizedPredication(frame, cancelled);
         Id normalizedBinding = 0;
         for (const auto &[id, e] : frame.entries()) {
-            if (cancelled && cancelled()) {
-                report["cancelled"] = true;
-                break;
-            }
+            checkCancellation(cancelled);
             ++scanned;
             auto cap = e.category == 7 ? replayCapability(e.type) : ReplayCapability{"not_evaluated", "", ""};
             auto &row = coverage[{e.category, e.type}];
@@ -120,14 +117,15 @@ Json validateFrame(const std::filesystem::path &path, const std::function<bool()
                 if (e.category == 7) {
                     if (isMapObservation(e.type) || e.type == 0x246) {
                         if (!mapAudit)
-                            mapAudit = auditMapRecords(frame);
+                            mapAudit = auditMapRecords(frame, cancelled);
                         const auto &map = mapAudit->at(id);
                         try {
                             requireMapRecord(*mapAudit, id);
                             if (e.type == 0x246)
                                 mappedWriteLayout(frame, map);
                         } catch (const std::exception &error) {
-                            finding(&e, "error", e.type == 0x246 ? "map_write_rejected" : "map_observation_rejected",
+                            finding(&e, "error",
+                                    e.type == 0x246 ? "map_write_rejected" : "map_observation_rejected",
                                     error.what(), map.resource);
                             if (e.type == 0x246)
                                 report["findings"].back()["data_id"] = map.data;
@@ -156,13 +154,14 @@ Json validateFrame(const std::filesystem::path &path, const std::function<bool()
                             return;
                         }
                         if (!predicateCreationAudit)
-                            predicateCreationAudit = auditPredicateCreations(frame);
+                            predicateCreationAudit = auditPredicateCreations(frame, cancelled);
                         const auto created = predicateCreationAudit->creationEvents.find(resource);
                         if (created != predicateCreationAudit->creationEvents.end()) {
                             if (binding && !completedPredicates.contains(resource))
-                                finding(&e, "error", "predicate_interval_missing",
-                                        "Frame-created predicate has no completed captured Begin/End interval",
-                                        resource);
+                                finding(
+                                    &e, "error", "predicate_interval_missing",
+                                    "Frame-created predicate has no completed captured Begin/End interval",
+                                    resource);
                             return;
                         }
                         if (binding && !completedPredicates.contains(resource) &&
@@ -170,7 +169,8 @@ Json validateFrame(const std::filesystem::path &path, const std::function<bool()
                             finding(&e, "warning", "predicate_replay_baseline",
                                     "Uses the original player's empty-query baseline before a captured "
                                     "Begin/End interval. Saved control may be normalized; this is not a "
-                                    "restored application query result", resource);
+                                    "restored application query result",
+                                    resource);
                     };
                     if (const auto operation = predicateOperation(e.type)) {
                         const auto p = readPredicateCommand(e.type, frame.payload(id));
@@ -180,10 +180,11 @@ Json validateFrame(const std::filesystem::path &path, const std::function<bool()
                             if (const auto proof = normalizedPredication.find(id);
                                 proof != normalizedPredication.end()) {
                                 normalizedBinding = p.resource;
-                                finding(&e, "warning", "captured_predicate_condition",
-                                        "Linked failed marker lookup proves normalized conditional execution. "
-                                        "Predicate descriptor and original query value remain unavailable",
-                                        p.resource);
+                                finding(
+                                    &e, "warning", "captured_predicate_condition",
+                                    "Linked failed marker lookup proves normalized conditional execution. "
+                                    "Predicate descriptor and original query value remain unavailable",
+                                    p.resource);
                                 report["findings"].back()["witness_event"] = proof->second.witness;
                             }
                         }
@@ -217,7 +218,8 @@ Json validateFrame(const std::filesystem::path &path, const std::function<bool()
                             counter && !definedCounters.contains(view)) {
                             finding(&e, "error", "counter_initial_value_missing",
                                     "No captured counter value is established before this use; KEEP and "
-                                    "buffer contents do not recover a hidden UAV counter", view);
+                                    "buffer contents do not recover a hidden UAV counter",
+                                    view);
                             report["findings"].back()["storage_id"] = counter->resource;
                         }
                     };
@@ -232,13 +234,16 @@ Json validateFrame(const std::filesystem::path &path, const std::function<bool()
                                                 [&](const auto &binding) { return slots.at(binding.slot); }))
                                     requireCounter(counter.view);
                                 else if (!definedCounters.contains(counter.view)) {
-                                    const bool any = std::any_of(slots.begin(), slots.end(), [](bool x) { return x; });
+                                    const bool any =
+                                        std::any_of(slots.begin(), slots.end(), [](bool x) { return x; });
                                     finding(&e, "info", "counter_value_not_consumed",
                                             any ? "Checked shader code has no hidden-counter operations for "
                                                   "this UAV's bound slots; buffer access does not establish "
                                                   "the unavailable counter value"
-                                                : "Checked shader code has no hidden-counter operations; buffer access "
-                                                  "does not establish the unavailable counter value", counter.view);
+                                                : "Checked shader code has no hidden-counter operations; "
+                                                  "buffer access "
+                                                  "does not establish the unavailable counter value",
+                                            counter.view);
                                     report["findings"].back()["storage_id"] = counter.resource;
                                 }
                             }
@@ -427,7 +432,7 @@ Json validateFrame(const std::filesystem::path &path, const std::function<bool()
                         }
                         if (e.type == 0x358e) {
                             if (!predicateCreationAudit)
-                                predicateCreationAudit = auditPredicateCreations(frame);
+                                predicateCreationAudit = auditPredicateCreations(frame, cancelled);
                             const auto &c = predicateCreationAudit->records.at(id);
                             if (!c.error.empty())
                                 finding(&e, "error", "predicate_creation_rejected", c.error, c.resource);
@@ -440,7 +445,7 @@ Json validateFrame(const std::filesystem::path &path, const std::function<bool()
                         }
                         if (isClassCreation(e.type)) {
                             if (!classCreationAudit) {
-                                classCreationAudit = auditClassCreations(frame);
+                                classCreationAudit = auditClassCreations(frame, cancelled);
                                 for (const auto &[source, target] : classCreationAudit->identities.aliases)
                                     if (source != target)
                                         report["class_linkage_aliases"].push_back(
@@ -463,7 +468,7 @@ Json validateFrame(const std::filesystem::path &path, const std::function<bool()
                         }
                         if (isPipelineCreation(e.type)) {
                             if (!pipelineCreationAudit)
-                                pipelineCreationAudit = auditPipelineCreations(frame);
+                                pipelineCreationAudit = auditPipelineCreations(frame, cancelled);
                             const auto &creation = pipelineCreationAudit->records.at(id);
                             if (!creation.error.empty())
                                 finding(&e, "error", "pipeline_creation_rejected", creation.error,
@@ -483,7 +488,7 @@ Json validateFrame(const std::filesystem::path &path, const std::function<bool()
                         acceptTextureCreationObservation(e.type, frame.payload(id));
                         if (isTextureCreation(e.type)) {
                             if (!textureCreationAudit)
-                                textureCreationAudit = auditTextureCreations(frame);
+                                textureCreationAudit = auditTextureCreations(frame, cancelled);
                             const auto &creation = textureCreationAudit->records.at(id);
                             if (!creation.error.empty())
                                 finding(&e, "error", "texture_creation_rejected", creation.error,
@@ -499,7 +504,7 @@ Json validateFrame(const std::filesystem::path &path, const std::function<bool()
                         acceptPassiveObjectRecord(e.type, frame.payload(id));
                         if (e.type == 0x3578) {
                             if (!creationAudit)
-                                creationAudit = auditBufferCreations(frame);
+                                creationAudit = auditBufferCreations(frame, cancelled);
                             const auto &creation = creationAudit->records.at(id);
                             if (!creation.error.empty())
                                 finding(&e, "error", "buffer_creation_rejected", creation.error,
@@ -642,6 +647,8 @@ Json validateFrame(const std::filesystem::path &path, const std::function<bool()
                 }
                 const auto key = checked ? "decoded_records" : "unchecked_records";
                 row[key] = row[key].get<size_t>() + 1;
+            } catch (const OperationCancelled &) {
+                throw;
             } catch (const std::exception &ex) {
                 finding(&e, "error", "record_rejected", ex.what());
             }
@@ -663,6 +670,7 @@ Json validateFrame(const std::filesystem::path &path, const std::function<bool()
             "Unrecognized non-command payloads and descriptor-specific semantics remain outside offline "
             "coverage",
             "Reports inspect original capture data, not an experiment project"};
+        checkCancellation(cancelled);
     } catch (const OperationCancelled &) {
         report["cancelled"] = true;
         report["completed"] = false;

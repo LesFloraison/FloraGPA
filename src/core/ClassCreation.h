@@ -16,6 +16,6 @@ struct ClassCreationAudit {
 };
 bool isClassCreation(uint16_t);
 ClassCreationRecord readClassCreation(uint16_t, Bytes);
-ClassCreationAudit auditClassCreations(const Frame &);
+ClassCreationAudit auditClassCreations(const Frame &, const CancelCheck &cancelled = {});
 const ClassCreationRecord &requireClassCreation(const ClassCreationAudit &, Id);
 } // namespace flora

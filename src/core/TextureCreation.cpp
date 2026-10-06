@@ -125,9 +125,11 @@ TextureCreationRecord readTextureCreation(uint16_t t, Bytes bytes) {
     r.end();
     return out;
 }
-TextureCreationAudit auditTextureCreations(const Frame &frame) {
+TextureCreationAudit auditTextureCreations(const Frame &frame, const CancelCheck &cancelled) {
+    checkCancellation(cancelled);
     TextureCreationAudit audit;
     for (const auto &[id, e] : frame.entries()) {
+        checkCancellation(cancelled);
         if (e.category != 7 || !isTextureCreation(e.type))
             continue;
         auto &c = audit.records[id];

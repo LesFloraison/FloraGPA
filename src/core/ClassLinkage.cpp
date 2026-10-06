@@ -2,7 +2,8 @@
 #include "PipelineCreation.h"
 #include <algorithm>
 namespace flora {
-ClassIdentityAudit auditClassIdentities(const Frame &frame) {
+ClassIdentityAudit auditClassIdentities(const Frame &frame, const CancelCheck &cancelled) {
+    checkCancellation(cancelled);
     ClassIdentityAudit out;
     auto alias = [&](Id source, Id target) {
         if (!source || !target)
@@ -14,7 +15,8 @@ ClassIdentityAudit auditClassIdentities(const Frame &frame) {
         if (!added && it->second != target)
             throw std::runtime_error("Conflicting class linkage identity mapping");
     };
-    for (const auto &[id, e] : frame.entries())
+    for (const auto &[id, e] : frame.entries()) {
+        checkCancellation(cancelled);
         if (e.category == 7) {
             try {
                 if (e.type == 0x3195 || e.type == 0x3196) {
@@ -37,6 +39,7 @@ ClassIdentityAudit auditClassIdentities(const Frame &frame) {
                 out.errors[id] = error.what();
             }
         }
+    }
     return out;
 }
 Id canonicalClassLinkage(const ClassIdentityAudit &a, Id id) {

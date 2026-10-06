@@ -26,7 +26,7 @@ struct ResourceLodAudit {
     std::map<Id, Id> creations;
     std::vector<Issue> issues;
 };
-ResourceLodAudit auditResourceLod(const Frame &frame);
+ResourceLodAudit auditResourceLod(const Frame &frame, const CancelCheck &cancelled = {});
 // GPU-access operands of the supported original stream. Binding alone is not access.
 std::set<Id> resourceLodAccesses(const Frame &frame, const Entry &entry, Bytes payload = {});
 } // namespace flora

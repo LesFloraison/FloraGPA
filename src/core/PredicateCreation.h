@@ -13,6 +13,6 @@ struct PredicateCreationAudit {
     std::map<Id, Id> creationEvents;
 };
 PredicateCreationRecord readPredicateCreation(Bytes);
-PredicateCreationAudit auditPredicateCreations(const Frame &);
+PredicateCreationAudit auditPredicateCreations(const Frame &, const CancelCheck &cancelled = {});
 const PredicateCreationRecord &requirePredicateCreation(const PredicateCreationAudit &, Id);
 } // namespace flora

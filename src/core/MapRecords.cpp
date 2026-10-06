@@ -4,11 +4,13 @@
 #include <tuple>
 namespace flora {
 bool isMapObservation(uint16_t type) { return type == 0x34ec || type == 0x34ed; }
-MapRecordAudit auditMapRecords(const Frame &frame) {
+MapRecordAudit auditMapRecords(const Frame &frame, const CancelCheck &cancelled) {
+    checkCancellation(cancelled);
     MapRecordAudit out;
     using Key = std::tuple<Id, Id, uint32_t>;
     std::map<Key, Id> pending;
     for (const auto &[id, entry] : frame.entries()) {
+        checkCancellation(cancelled);
         if (entry.category != 7 || (entry.type != 0x246 && !isMapObservation(entry.type)))
             continue;
         auto &record = out[id];
@@ -75,9 +77,11 @@ MapRecordAudit auditMapRecords(const Frame &frame) {
             record.error = error.what();
         }
     }
-    for (const auto &[key, id] : pending)
+    for (const auto &[key, id] : pending) {
+        checkCancellation(cancelled);
         if (frame.entry(id).type == 0x34ec && out.at(id).error.empty())
             out.at(id).error = "Successful READ Map has no matching captured Unmap";
+    }
     return out;
 }
 const MapRecordEvidence &requireMapRecord(const MapRecordAudit &audit, Id event) {

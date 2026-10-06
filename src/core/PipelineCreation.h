@@ -29,6 +29,6 @@ bool isPipelineCreation(uint16_t type);
 bool isStateCreation(uint16_t type);
 uint16_t pipelineCreatedType(uint16_t type);
 PipelineCreationRecord readPipelineCreation(uint16_t type, Bytes bytes);
-PipelineCreationAudit auditPipelineCreations(const Frame &frame);
+PipelineCreationAudit auditPipelineCreations(const Frame &frame, const CancelCheck &cancelled = {});
 const PipelineCreationRecord &requirePipelineCreation(const PipelineCreationAudit &, Id event);
 } // namespace flora

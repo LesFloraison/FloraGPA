@@ -98,10 +98,12 @@ PipelineCreationRecord readPipelineCreation(uint16_t t, Bytes bytes) {
     r.end();
     return c;
 }
-PipelineCreationAudit auditPipelineCreations(const Frame &frame) {
+PipelineCreationAudit auditPipelineCreations(const Frame &frame, const CancelCheck &cancelled) {
+    checkCancellation(cancelled);
     PipelineCreationAudit a;
-    const auto identities = auditClassIdentities(frame);
-    for (const auto &[id, e] : frame.entries())
+    const auto identities = auditClassIdentities(frame, cancelled);
+    for (const auto &[id, e] : frame.entries()) {
+        checkCancellation(cancelled);
         if (e.category == 7 && isPipelineCreation(e.type)) {
             auto &c = a.records[id];
             try {
@@ -219,9 +221,12 @@ PipelineCreationAudit auditPipelineCreations(const Frame &frame) {
                 c.error = error.what();
             }
         }
-    for (auto &[event, creation] : a.records)
+    }
+    for (auto &[event, creation] : a.records) {
+        checkCancellation(cancelled);
         if (!creation.note.empty() && creation.error.empty()) {
-            for (const auto &[id, entry] : frame.entries())
+            for (const auto &[id, entry] : frame.entries()) {
+                checkCancellation(cancelled);
                 if (entry.category == 3 && entry.type == 3) {
                     try {
                         const auto state = frame.state(id);
@@ -237,7 +242,9 @@ PipelineCreationAudit auditPipelineCreations(const Frame &frame) {
                         break;
                     }
                 }
+            }
         }
+    }
     return a;
 }
 const PipelineCreationRecord &requirePipelineCreation(const PipelineCreationAudit &a, Id event) {

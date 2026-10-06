@@ -12,7 +12,7 @@ struct BufferCreationAudit {
     std::map<Id, BufferCreationRecord> records;
     std::map<Id, Id> creationEvents;
 };
-BufferCreationAudit auditBufferCreations(const Frame &frame);
+BufferCreationAudit auditBufferCreations(const Frame &frame, const CancelCheck &cancelled = {});
 const BufferCreationRecord &requireBufferCreation(const BufferCreationAudit &audit, Id event);
 struct PrivateDataObservation {
     Id owner{}, pointer{};

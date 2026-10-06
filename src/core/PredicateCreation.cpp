@@ -15,9 +15,11 @@ PredicateCreationRecord readPredicateCreation(Bytes bytes) {
     r.end();
     return c;
 }
-PredicateCreationAudit auditPredicateCreations(const Frame &frame) {
+PredicateCreationAudit auditPredicateCreations(const Frame &frame, const CancelCheck &cancelled) {
+    checkCancellation(cancelled);
     PredicateCreationAudit a;
     for (const auto &[id, e] : frame.entries()) {
+        checkCancellation(cancelled);
         if (e.category != 7 || e.type != 0x358e)
             continue;
         auto &c = a.records[id];

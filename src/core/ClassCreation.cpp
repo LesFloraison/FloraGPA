@@ -18,10 +18,12 @@ ClassCreationRecord readClassCreation(uint16_t t, Bytes b) {
     r.end();
     return c;
 }
-ClassCreationAudit auditClassCreations(const Frame &frame) {
+ClassCreationAudit auditClassCreations(const Frame &frame, const CancelCheck &cancelled) {
+    checkCancellation(cancelled);
     ClassCreationAudit a;
-    a.identities = auditClassIdentities(frame);
-    for (const auto &[id, e] : frame.entries())
+    a.identities = auditClassIdentities(frame, cancelled);
+    for (const auto &[id, e] : frame.entries()) {
+        checkCancellation(cancelled);
         if (e.category == 7 && isClassCreation(e.type)) {
             auto &c = a.records[id];
             try {
@@ -80,10 +82,13 @@ ClassCreationAudit auditClassCreations(const Frame &frame) {
                 c.error = error.what();
             }
         }
-    for (auto &[event, c] : a.records)
+    }
+    for (auto &[event, c] : a.records) {
+        checkCancellation(cancelled);
         if (c.error.empty() && !c.note.empty()) {
             try {
-                for (const auto &[id, e] : frame.entries())
+                for (const auto &[id, e] : frame.entries()) {
+                    checkCancellation(cancelled);
                     if (e.category == 3 && e.type == 3) {
                         const auto state = frame.state(id);
                         for (const auto &s : state.stages) {
@@ -96,10 +101,14 @@ ClassCreationAudit auditClassCreations(const Frame &frame) {
                                         std::to_string(id));
                         }
                     }
+                }
+            } catch (const OperationCancelled &) {
+                throw;
             } catch (const std::exception &error) {
                 c.error = error.what();
             }
         }
+    }
     return a;
 }
 const ClassCreationRecord &requireClassCreation(const ClassCreationAudit &a, Id id) {

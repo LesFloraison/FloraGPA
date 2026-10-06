@@ -1,8 +1,10 @@
 #include "BufferCreation.h"
 namespace flora {
-BufferCreationAudit auditBufferCreations(const Frame &frame) {
+BufferCreationAudit auditBufferCreations(const Frame &frame, const CancelCheck &cancelled) {
+    checkCancellation(cancelled);
     BufferCreationAudit audit;
     for (const auto &[id, entry] : frame.entries()) {
+        checkCancellation(cancelled);
         if (entry.category != 7 || entry.type != 0x3578)
             continue;
         auto &out = audit.records[id];

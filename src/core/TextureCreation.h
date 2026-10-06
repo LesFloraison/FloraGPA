@@ -26,7 +26,7 @@ bool createdViewDescriptorEqual(uint16_t type, std::span<const uint32_t> a, std:
 enum class ViewObservation { None, QueryInterface, ReferenceCount, GetDevice, GetResource, GetDescriptor };
 ViewObservation viewCreationObservation(uint16_t type);
 TextureCreationRecord readTextureCreation(uint16_t type, Bytes payload);
-TextureCreationAudit auditTextureCreations(const Frame &frame);
+TextureCreationAudit auditTextureCreations(const Frame &frame, const CancelCheck &cancelled = {});
 const TextureCreationRecord &requireTextureCreation(const TextureCreationAudit &, Id event);
 bool isTextureCreationObservation(uint16_t type);
 bool acceptTextureCreationObservation(uint16_t type, Bytes payload);
