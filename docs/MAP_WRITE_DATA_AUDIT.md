@@ -1,5 +1,11 @@
 # Saved Map write data and subresource boundaries
 
+> **2026-10-06 correction:** [READ Map synchronization](MAP_READ_SYNCHRONIZATION.md)
+> supersedes the observation-only treatment of successful `0x34ec` READ Maps.
+> They execute a native Map/Unmap to preserve saved resource readiness before
+> later writes. Failed Maps and captured Unmap retain their checked metadata
+> behavior; the historical results below remain unchanged.
+
 Reviewed 2026-10-06. Implementation: `2824a62`. This is M4 resource-boundary
 work; M3 remains open and M5 deployment/stability acceptance is not implied.
 See the [baseline](map-write-data-baseline.json) for hashes and counts.

@@ -21,6 +21,7 @@ chronology remains in Chinese.
 | Distinguish successful replay from application fidelity | [Capture fidelity reporting](CAPTURE_FIDELITY_REPORTING.md) |
 | MSAA initialization notices after Resolve and in Qt | [MSAA initialization notices](MSAA_INITIALIZATION_NOTICES.md) |
 | Saved texture initializer validation and malformed-data boundaries | [Texture initial-data audit](TEXTURE_INITIAL_DATA_AUDIT.md) |
+| Successful READ Map ordering and sparse-write resource oracles | [READ Map synchronization](MAP_READ_SYNCHRONIZATION.md) |
 | Saved Map writes, differential storage and subresource validation | [Map write-data audit](MAP_WRITE_DATA_AUDIT.md) |
 | Missing initial counters and the updated compatibility matrix | [Initial counter boundary audit](INITIAL_COUNTER_BOUNDARY_AUDIT.md) |
 | Mixed UAV slots with independent hidden-counter dependencies | [Per-slot counter compatibility](COUNTER_SLOT_COMPATIBILITY.md) |

@@ -1,0 +1,554 @@
+{
+  "schema": "FloraGPA compatibility corpus 1",
+  "profile": "GPA 2025 R1 legacy DX11 / IGPA v3",
+  "cases": [
+    {
+      "id": "sparse_map_0",
+      "path": "m4-read-map-sync-originals/0/capture.gpa_frame",
+      "sha256": "7dcd91e714e65b86a8376209a07cac533fdf105445c74ffb90e6559eaeaae9af",
+      "bytes": 9387,
+      "family": "map_read_sync",
+      "origin": "self_owned_original_gpa_capture",
+      "provenance_note": "Unmodified original capture with pinned primary selector; full sparse-write byte oracles, not texture differential data.",
+      "device_scope": "Native hardware/WARP identities recorded; original-player adapter unverified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "controls": [],
+      "boundaries": [
+        {
+          "kind": "texture",
+          "resource": 5,
+          "event": 4,
+          "repeat": 2,
+          "expect_stable": true,
+          "expected_storage_sha256": "7ecc68b539f9ff00d6b17f19dc11c88e4b197d982313b01ed113be680eff1f1c"
+        },
+        {
+          "kind": "texture",
+          "resource": 5,
+          "event": 17,
+          "repeat": 2,
+          "expect_stable": true,
+          "expected_storage_sha256": "8ca7c9384ac250582c4adbda6779849a62259a1900d27c12750054b2e3020462"
+        },
+        {
+          "kind": "texture",
+          "resource": 11,
+          "event": 9,
+          "repeat": 2,
+          "expect_stable": true,
+          "expected_storage_sha256": "7ecc68b539f9ff00d6b17f19dc11c88e4b197d982313b01ed113be680eff1f1c"
+        },
+        {
+          "kind": "texture",
+          "resource": 11,
+          "event": 20,
+          "repeat": 2,
+          "expect_stable": true,
+          "expected_storage_sha256": "8ca7c9384ac250582c4adbda6779849a62259a1900d27c12750054b2e3020462"
+        },
+        {
+          "kind": "texture",
+          "resource": 11,
+          "event": 17,
+          "repeat": 2,
+          "expect_stable": true,
+          "expected_storage_sha256": "7ecc68b539f9ff00d6b17f19dc11c88e4b197d982313b01ed113be680eff1f1c"
+        }
+      ],
+      "covers": [
+        "Full Map reset and sparse change",
+        "Staging READ_WRITE preservation"
+      ],
+      "native_workload_fidelity": "passed",
+      "fidelity_reason": "Full resource byte oracles across native hardware/WARP and original-injected producer; image is only a presentation marker for modes 0..5.",
+      "source_manifests": [
+        {
+          "path": "m4-read-map-sync-originals/manifest.json",
+          "sha256": "6202f8fd4d89a527ee0dcdb5a16107622e5abd6076acd5a4d416e19fae260032"
+        }
+      ]
+    },
+    {
+      "id": "sparse_map_1",
+      "path": "m4-read-map-sync-originals/1/capture.gpa_frame",
+      "sha256": "55c2d041adafd14da388f713cb92bfef277b9d70a829ae6d650691c1cefe7b5a",
+      "bytes": 319531,
+      "family": "map_read_sync",
+      "origin": "self_owned_original_gpa_capture",
+      "provenance_note": "Unmodified original capture with pinned primary selector; full sparse-write byte oracles, not texture differential data.",
+      "device_scope": "Native hardware/WARP identities recorded; original-player adapter unverified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "controls": [],
+      "boundaries": [
+        {
+          "kind": "texture",
+          "resource": 5,
+          "event": 4,
+          "repeat": 2,
+          "expect_stable": true,
+          "expected_storage_sha256": "0e0e8475d4a8986a65c3f388fec872e4db9b2f56941d5be7ea81ec62aca7b3ee"
+        },
+        {
+          "kind": "texture",
+          "resource": 5,
+          "event": 17,
+          "repeat": 2,
+          "expect_stable": true,
+          "expected_storage_sha256": "a723b0a9718347f5833cec92b09e2f23b3ebfc4a14c5e62e9ccc384984d041e0"
+        },
+        {
+          "kind": "texture",
+          "resource": 11,
+          "event": 9,
+          "repeat": 2,
+          "expect_stable": true,
+          "expected_storage_sha256": "0e0e8475d4a8986a65c3f388fec872e4db9b2f56941d5be7ea81ec62aca7b3ee"
+        },
+        {
+          "kind": "texture",
+          "resource": 11,
+          "event": 20,
+          "repeat": 2,
+          "expect_stable": true,
+          "expected_storage_sha256": "a723b0a9718347f5833cec92b09e2f23b3ebfc4a14c5e62e9ccc384984d041e0"
+        },
+        {
+          "kind": "texture",
+          "resource": 11,
+          "event": 17,
+          "repeat": 2,
+          "expect_stable": true,
+          "expected_storage_sha256": "0e0e8475d4a8986a65c3f388fec872e4db9b2f56941d5be7ea81ec62aca7b3ee"
+        }
+      ],
+      "covers": [
+        "Full Map reset and sparse change",
+        "Staging READ_WRITE preservation"
+      ],
+      "native_workload_fidelity": "passed",
+      "fidelity_reason": "Full resource byte oracles across native hardware/WARP and original-injected producer; image is only a presentation marker for modes 0..5.",
+      "source_manifests": [
+        {
+          "path": "m4-read-map-sync-originals/manifest.json",
+          "sha256": "6202f8fd4d89a527ee0dcdb5a16107622e5abd6076acd5a4d416e19fae260032"
+        }
+      ]
+    },
+    {
+      "id": "sparse_map_2",
+      "path": "m4-read-map-sync-originals/2/capture.gpa_frame",
+      "sha256": "4d703d2697b1549aa3a832cd68027666463f68f13d8a489df4aad6051d2d9ecb",
+      "bytes": 15107,
+      "family": "map_read_sync",
+      "origin": "self_owned_original_gpa_capture",
+      "provenance_note": "Unmodified original capture with pinned primary selector; full sparse-write byte oracles, not texture differential data.",
+      "device_scope": "Native hardware/WARP identities recorded; original-player adapter unverified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "controls": [],
+      "boundaries": [
+        {
+          "kind": "texture",
+          "resource": 5,
+          "event": 4,
+          "repeat": 2,
+          "expect_stable": true,
+          "expected_storage_sha256": "859473592a0dbe9dfeb054b817466886b9f2fa8c7baf2f2229d3c5a4db28f367"
+        },
+        {
+          "kind": "texture",
+          "resource": 5,
+          "event": 16,
+          "repeat": 2,
+          "expect_stable": true,
+          "expected_storage_sha256": "fec3e83e2f4fb8475f81a15b42b0e38068439f97f318455311e2372ac36363f2"
+        },
+        {
+          "kind": "texture",
+          "resource": 11,
+          "event": 9,
+          "repeat": 2,
+          "expect_stable": true,
+          "expected_storage_sha256": "859473592a0dbe9dfeb054b817466886b9f2fa8c7baf2f2229d3c5a4db28f367"
+        },
+        {
+          "kind": "texture",
+          "resource": 11,
+          "event": 19,
+          "repeat": 2,
+          "expect_stable": true,
+          "expected_storage_sha256": "fec3e83e2f4fb8475f81a15b42b0e38068439f97f318455311e2372ac36363f2"
+        },
+        {
+          "kind": "texture",
+          "resource": 11,
+          "event": 16,
+          "repeat": 2,
+          "expect_stable": true,
+          "expected_storage_sha256": "859473592a0dbe9dfeb054b817466886b9f2fa8c7baf2f2229d3c5a4db28f367"
+        }
+      ],
+      "covers": [
+        "Full Map reset and sparse change",
+        "Staging READ_WRITE preservation"
+      ],
+      "native_workload_fidelity": "passed",
+      "fidelity_reason": "Full resource byte oracles across native hardware/WARP and original-injected producer; image is only a presentation marker for modes 0..5.",
+      "source_manifests": [
+        {
+          "path": "m4-read-map-sync-originals/manifest.json",
+          "sha256": "6202f8fd4d89a527ee0dcdb5a16107622e5abd6076acd5a4d416e19fae260032"
+        }
+      ]
+    },
+    {
+      "id": "sparse_map_3",
+      "path": "m4-read-map-sync-originals/3/capture.gpa_frame",
+      "sha256": "c7a2077e10d0a565ec6022cc8cabdc9e0d86644c6b0ed0d3066e7785678ea8bf",
+      "bytes": 8139,
+      "family": "map_read_sync",
+      "origin": "self_owned_original_gpa_capture",
+      "provenance_note": "Unmodified original capture with pinned primary selector; full sparse-write byte oracles, not texture differential data.",
+      "device_scope": "Native hardware/WARP identities recorded; original-player adapter unverified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "controls": [],
+      "boundaries": [
+        {
+          "kind": "texture",
+          "resource": 5,
+          "event": 4,
+          "repeat": 2,
+          "expect_stable": true,
+          "expected_storage_sha256": "d4595dd38c3a65928ae392072d8308a3105f9867ff14613845d98d0f2edbe697"
+        },
+        {
+          "kind": "texture",
+          "resource": 5,
+          "event": 17,
+          "repeat": 2,
+          "expect_stable": true,
+          "expected_storage_sha256": "9ab36703803092b4bb3a0682bb3276f0972cd1cad613ee92e4fdc5576e84c8f6"
+        },
+        {
+          "kind": "texture",
+          "resource": 11,
+          "event": 9,
+          "repeat": 2,
+          "expect_stable": true,
+          "expected_storage_sha256": "d4595dd38c3a65928ae392072d8308a3105f9867ff14613845d98d0f2edbe697"
+        },
+        {
+          "kind": "texture",
+          "resource": 11,
+          "event": 20,
+          "repeat": 2,
+          "expect_stable": true,
+          "expected_storage_sha256": "9ab36703803092b4bb3a0682bb3276f0972cd1cad613ee92e4fdc5576e84c8f6"
+        },
+        {
+          "kind": "texture",
+          "resource": 11,
+          "event": 17,
+          "repeat": 2,
+          "expect_stable": true,
+          "expected_storage_sha256": "d4595dd38c3a65928ae392072d8308a3105f9867ff14613845d98d0f2edbe697"
+        }
+      ],
+      "covers": [
+        "Full Map reset and sparse change",
+        "Staging READ_WRITE preservation"
+      ],
+      "native_workload_fidelity": "passed",
+      "fidelity_reason": "Full resource byte oracles across native hardware/WARP and original-injected producer; image is only a presentation marker for modes 0..5.",
+      "source_manifests": [
+        {
+          "path": "m4-read-map-sync-originals/manifest.json",
+          "sha256": "6202f8fd4d89a527ee0dcdb5a16107622e5abd6076acd5a4d416e19fae260032"
+        }
+      ]
+    },
+    {
+      "id": "sparse_map_4",
+      "path": "m4-read-map-sync-originals/4/capture.gpa_frame",
+      "sha256": "0f602464ec8516276868226e872c1b4e108e249a3160965a2a6f9c4127dc12c5",
+      "bytes": 269947,
+      "family": "map_read_sync",
+      "origin": "self_owned_original_gpa_capture",
+      "provenance_note": "Unmodified original capture with pinned primary selector; full sparse-write byte oracles, not texture differential data.",
+      "device_scope": "Native hardware/WARP identities recorded; original-player adapter unverified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "controls": [],
+      "boundaries": [
+        {
+          "kind": "buffer",
+          "resource": 5,
+          "event": 4,
+          "repeat": 2,
+          "expect_stable": true,
+          "expected_storage_sha256": "3f0209a900098706e9b9f00980a8d4811e872c42afc4ee7bd78e1f92280feefc"
+        },
+        {
+          "kind": "buffer",
+          "resource": 5,
+          "event": 16,
+          "repeat": 2,
+          "expect_stable": true,
+          "expected_storage_sha256": "267b8ba8f8d132e735bbc5e66081f8fcb90b9f81cddb9edaf5be9bded0d9e9ff"
+        },
+        {
+          "kind": "buffer",
+          "resource": 11,
+          "event": 9,
+          "repeat": 2,
+          "expect_stable": true,
+          "expected_storage_sha256": "3f0209a900098706e9b9f00980a8d4811e872c42afc4ee7bd78e1f92280feefc"
+        },
+        {
+          "kind": "buffer",
+          "resource": 11,
+          "event": 19,
+          "repeat": 2,
+          "expect_stable": true,
+          "expected_storage_sha256": "267b8ba8f8d132e735bbc5e66081f8fcb90b9f81cddb9edaf5be9bded0d9e9ff"
+        },
+        {
+          "kind": "buffer",
+          "resource": 11,
+          "event": 16,
+          "repeat": 2,
+          "expect_stable": true,
+          "expected_storage_sha256": "3f0209a900098706e9b9f00980a8d4811e872c42afc4ee7bd78e1f92280feefc"
+        }
+      ],
+      "covers": [
+        "Full Map reset and sparse change",
+        "Staging READ_WRITE preservation"
+      ],
+      "native_workload_fidelity": "passed",
+      "fidelity_reason": "Full resource byte oracles across native hardware/WARP and original-injected producer; image is only a presentation marker for modes 0..5.",
+      "source_manifests": [
+        {
+          "path": "m4-read-map-sync-originals/manifest.json",
+          "sha256": "6202f8fd4d89a527ee0dcdb5a16107622e5abd6076acd5a4d416e19fae260032"
+        }
+      ]
+    },
+    {
+      "id": "sparse_map_5",
+      "path": "m4-read-map-sync-originals/5/capture.gpa_frame",
+      "sha256": "0068052195f04a7a7dcac8fabc82653ea34be887fd3351dfdd009df091c1ea0d",
+      "bytes": 269947,
+      "family": "map_read_sync",
+      "origin": "self_owned_original_gpa_capture",
+      "provenance_note": "Unmodified original capture with pinned primary selector; full sparse-write byte oracles, not texture differential data.",
+      "device_scope": "Native hardware/WARP identities recorded; original-player adapter unverified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "controls": [],
+      "boundaries": [
+        {
+          "kind": "buffer",
+          "resource": 5,
+          "event": 4,
+          "repeat": 2,
+          "expect_stable": true,
+          "expected_storage_sha256": "3f0209a900098706e9b9f00980a8d4811e872c42afc4ee7bd78e1f92280feefc"
+        },
+        {
+          "kind": "buffer",
+          "resource": 5,
+          "event": 16,
+          "repeat": 2,
+          "expect_stable": true,
+          "expected_storage_sha256": "267b8ba8f8d132e735bbc5e66081f8fcb90b9f81cddb9edaf5be9bded0d9e9ff"
+        },
+        {
+          "kind": "buffer",
+          "resource": 11,
+          "event": 9,
+          "repeat": 2,
+          "expect_stable": true,
+          "expected_storage_sha256": "3f0209a900098706e9b9f00980a8d4811e872c42afc4ee7bd78e1f92280feefc"
+        },
+        {
+          "kind": "buffer",
+          "resource": 11,
+          "event": 19,
+          "repeat": 2,
+          "expect_stable": true,
+          "expected_storage_sha256": "267b8ba8f8d132e735bbc5e66081f8fcb90b9f81cddb9edaf5be9bded0d9e9ff"
+        },
+        {
+          "kind": "buffer",
+          "resource": 11,
+          "event": 16,
+          "repeat": 2,
+          "expect_stable": true,
+          "expected_storage_sha256": "3f0209a900098706e9b9f00980a8d4811e872c42afc4ee7bd78e1f92280feefc"
+        }
+      ],
+      "covers": [
+        "Full Map reset and sparse change",
+        "Original read synchronization and NO_OVERWRITE"
+      ],
+      "native_workload_fidelity": "passed",
+      "fidelity_reason": "Full resource byte oracles across native hardware/WARP and original-injected producer; image is only a presentation marker for modes 0..5.",
+      "source_manifests": [
+        {
+          "path": "m4-read-map-sync-originals/manifest.json",
+          "sha256": "6202f8fd4d89a527ee0dcdb5a16107622e5abd6076acd5a4d416e19fae260032"
+        }
+      ]
+    },
+    {
+      "id": "sparse_map_6",
+      "path": "m4-read-map-sync-originals/6/capture.gpa_frame",
+      "sha256": "0f07df047ef4dc46f6bbf2ae3d08a2f7b182f9319c99885cf0487089eb8414dd",
+      "bytes": 469134,
+      "family": "map_read_sync",
+      "origin": "self_owned_original_gpa_capture",
+      "provenance_note": "Unmodified original capture with pinned primary selector; full sparse-write byte oracles, not texture differential data.",
+      "device_scope": "Native hardware/WARP identities recorded; original-player adapter unverified.",
+      "reference_rgba_sha256": "e887048c7cb81839843ace2938854ff7f749dfb6cf8e6235ed54c0ce9ce4b232",
+      "comparison_policy": "exact_golden",
+      "controls": [],
+      "boundaries": [
+        {
+          "kind": "buffer",
+          "resource": 5,
+          "event": 4,
+          "repeat": 2,
+          "expect_stable": true,
+          "expected_storage_sha256": "5975aeae812d124cba139f30be4b0c7ecc93e8470fed479014b4defbb8c0181c"
+        },
+        {
+          "kind": "buffer",
+          "resource": 5,
+          "event": 16,
+          "repeat": 2,
+          "expect_stable": true,
+          "expected_storage_sha256": "2eb05de9e5200f488e48fecf07dba28856dd07477a79c6f28ca650e1dede95a9"
+        },
+        {
+          "kind": "buffer",
+          "resource": 11,
+          "event": 9,
+          "repeat": 2,
+          "expect_stable": true,
+          "expected_storage_sha256": "5975aeae812d124cba139f30be4b0c7ecc93e8470fed479014b4defbb8c0181c"
+        },
+        {
+          "kind": "buffer",
+          "resource": 21,
+          "event": 19,
+          "repeat": 2,
+          "expect_stable": true,
+          "expected_storage_sha256": "2eb05de9e5200f488e48fecf07dba28856dd07477a79c6f28ca650e1dede95a9"
+        },
+        {
+          "kind": "buffer",
+          "resource": 11,
+          "event": 16,
+          "repeat": 2,
+          "expect_stable": true,
+          "expected_storage_sha256": "5975aeae812d124cba139f30be4b0c7ecc93e8470fed479014b4defbb8c0181c"
+        }
+      ],
+      "covers": [
+        "Full Map reset and sparse change",
+        "Original read synchronization and NO_OVERWRITE"
+      ],
+      "native_workload_fidelity": "passed",
+      "fidelity_reason": "Full resource byte oracles across native hardware/WARP and original-injected producer; image is only a presentation marker for modes 0..5.",
+      "application_reference_rgba_sha256": "e887048c7cb81839843ace2938854ff7f749dfb6cf8e6235ed54c0ce9ce4b232",
+      "application_reference_scope": "Full 8x8 GPU image driven by the earlier buffer copy; exact CPU oracle plus 36 hardware/WARP/injected producer frames.",
+      "application_reference_evidence": {
+        "path": "m4-read-map-sync-originals/6/hardware/image-0.rgba",
+        "sha256": "e887048c7cb81839843ace2938854ff7f749dfb6cf8e6235ed54c0ce9ce4b232"
+      },
+      "source_manifests": [
+        {
+          "path": "m4-read-map-sync-originals/manifest.json",
+          "sha256": "6202f8fd4d89a527ee0dcdb5a16107622e5abd6076acd5a4d416e19fae260032"
+        }
+      ]
+    },
+    {
+      "id": "sparse_map_7",
+      "path": "m4-read-map-sync-originals/7/capture.gpa_frame",
+      "sha256": "2b73dacdf5f7ea0ef7871d82ae9963fd35c3baab6a4eb667f295c610ee1ad83b",
+      "bytes": 469430,
+      "family": "map_read_sync",
+      "origin": "self_owned_original_gpa_capture",
+      "provenance_note": "Unmodified original capture with pinned primary selector; full sparse-write byte oracles, not texture differential data.",
+      "device_scope": "Native hardware/WARP identities recorded; original-player adapter unverified.",
+      "reference_rgba_sha256": "e887048c7cb81839843ace2938854ff7f749dfb6cf8e6235ed54c0ce9ce4b232",
+      "comparison_policy": "exact_golden",
+      "controls": [],
+      "boundaries": [
+        {
+          "kind": "buffer",
+          "resource": 5,
+          "event": 4,
+          "repeat": 2,
+          "expect_stable": true,
+          "expected_storage_sha256": "5975aeae812d124cba139f30be4b0c7ecc93e8470fed479014b4defbb8c0181c"
+        },
+        {
+          "kind": "buffer",
+          "resource": 5,
+          "event": 18,
+          "repeat": 2,
+          "expect_stable": true,
+          "expected_storage_sha256": "2eb05de9e5200f488e48fecf07dba28856dd07477a79c6f28ca650e1dede95a9"
+        },
+        {
+          "kind": "buffer",
+          "resource": 11,
+          "event": 9,
+          "repeat": 2,
+          "expect_stable": true,
+          "expected_storage_sha256": "5975aeae812d124cba139f30be4b0c7ecc93e8470fed479014b4defbb8c0181c"
+        },
+        {
+          "kind": "buffer",
+          "resource": 23,
+          "event": 21,
+          "repeat": 2,
+          "expect_stable": true,
+          "expected_storage_sha256": "2eb05de9e5200f488e48fecf07dba28856dd07477a79c6f28ca650e1dede95a9"
+        },
+        {
+          "kind": "buffer",
+          "resource": 11,
+          "event": 18,
+          "repeat": 2,
+          "expect_stable": true,
+          "expected_storage_sha256": "5975aeae812d124cba139f30be4b0c7ecc93e8470fed479014b4defbb8c0181c"
+        }
+      ],
+      "covers": [
+        "Full Map reset and sparse change",
+        "Original read synchronization and NO_OVERWRITE"
+      ],
+      "native_workload_fidelity": "passed",
+      "fidelity_reason": "Full resource byte oracles across native hardware/WARP and original-injected producer; image is only a presentation marker for modes 0..5.",
+      "application_reference_rgba_sha256": "e887048c7cb81839843ace2938854ff7f749dfb6cf8e6235ed54c0ce9ce4b232",
+      "application_reference_scope": "Full 8x8 GPU image driven by the earlier buffer copy; exact CPU oracle plus 36 hardware/WARP/injected producer frames.",
+      "application_reference_evidence": {
+        "path": "m4-read-map-sync-originals/7/hardware/image-0.rgba",
+        "sha256": "e887048c7cb81839843ace2938854ff7f749dfb6cf8e6235ed54c0ce9ce4b232"
+      },
+      "source_manifests": [
+        {
+          "path": "m4-read-map-sync-originals/manifest.json",
+          "sha256": "6202f8fd4d89a527ee0dcdb5a16107622e5abd6076acd5a4d416e19fae260032"
+        }
+      ]
+    }
+  ]
+}

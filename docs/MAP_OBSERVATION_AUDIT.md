@@ -1,5 +1,11 @@
 # M2: Map / Unmap observation audit
 
+> **2026-10-06 correction:** [READ Map synchronization](MAP_READ_SYNCHRONIZATION.md)
+> supersedes the observation-only treatment of successful `0x34ec` READ Maps.
+> They execute a native Map/Unmap to preserve saved resource readiness before
+> later writes. Failed Maps and captured Unmap retain their checked metadata
+> behavior; the historical results below remain unchanged.
+
 > **2026-10-06 follow-up:** [Saved Map write validation](MAP_WRITE_DATA_AUDIT.md)
 > now applies the record audit to writable `0x246` execution and shares checked
 > storage/subresource layout between preflight and replay. The results below

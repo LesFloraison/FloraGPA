@@ -1,7 +1,29 @@
 # Current capabilities and compatibility
 
 Reviewed **2026-10-06**. The user authorized M4, then M5, while keeping M3 open.
-The latest [context/lifetime cancellation](LIFETIME_AUDIT_CANCELLATION.md) covers
+The latest [READ Map synchronization correction](MAP_READ_SYNCHRONIZATION.md)
+restores saved CPU/GPU ordering before later NO_OVERWRITE writes. Eight untouched
+original captures pass independent native hardware/WARP resource oracles; two
+also expose wrong earlier-copy images in the previous replay and local original
+private player. Corrected replay matches the application. The original GUI and
+its selected adapter were not verified; this is not a blanket original-GPA claim.
+
+The resumed 32-suite matrix passes **502 registrations / 492 unique files**:
+**476 native completions (466 unique)** and **26 located rejections**, with 1,004
+ordinary attempts, 684 controls and 808 resource exports. Previous 494 cases keep
+their outcomes, deterministic images and existing execution counts. READ coverage
+changes from metadata to execute; no other full preflight fields change. The 33
+known capture limitations remain separate from replay completion. Fidelity has
+46 assessed passes, 32 capture-side mismatches, one information-missing case and
+423 unassessed registrations; these are not an overall correctness percentage.
+
+Seven related CTest suites, 60 Map rows, 65 Qt rows, four packaged golden/negative
+checks and the relocated Draw/Final workflow pass without skips. Runtime:
+`15ddac1`; package: `out/FloraGPA-read-map-sync-20261006/` (44 files).
+Missing texture-diff pitches, retained command-list semantics, complete M4/M5
+acceptance and independent clean-machine deployment remain open.
+
+The preceding [context/lifetime cancellation](LIFETIME_AUDIT_CANCELLATION.md) covers
 implicit context recovery and unused SO/CB searches, including nested Map audit
 and safe cache publication. Eight new lifetime fixtures cover 1,969 preflight
 interruptions; the five preceding semantic fixtures cover 6,530. Direct context

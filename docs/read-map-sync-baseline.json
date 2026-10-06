@@ -1,0 +1,490 @@
+{
+  "schema": "FloraGPA READ Map synchronization baseline 1",
+  "reviewed": "2026-10-06",
+  "commits": {
+    "producer": "3868e844e574c54eb73a925ae74b674a2e7d1096",
+    "implementation": "15ddac140d6b4c1794c8f8192bf06e4a1311ddf2",
+    "ui_regression": "6d07974de29d437b74a0953de26ac3e6ce84741b"
+  },
+  "package": "out/FloraGPA-read-map-sync-20261006",
+  "package_files": [
+    {
+      "path": "concrt140.dll",
+      "sha256": "2405355f0a58067b258f8df33c327e3a3d716eaac5a3a5aebb757842d85bd376"
+    },
+    {
+      "path": "D3Dcompiler_47.dll",
+      "sha256": "e994847e01a6f1e4cbdc5a864616ac262f67ee4f14db194984661a8d927ab7f4"
+    },
+    {
+      "path": "FloraGPA.Cli.exe",
+      "sha256": "f5681bedc3d1952212ff3c30de9c6f642318620a763afedf212c328669b2c424"
+    },
+    {
+      "path": "FloraGPA.exe",
+      "sha256": "0bd6f15cdeab50abf1dc1bd6c50c48c646d7e27622bf8d00d76357453b5298b5"
+    },
+    {
+      "path": "FloraGPA.Metrics.dll",
+      "sha256": "58b6278f2a93e783b1e8bb1290e9b0e51745f1a36825f296584f52159fd7c6db"
+    },
+    {
+      "path": "FloraGPA.Rdc.exe",
+      "sha256": "f4d21d43e661d24d392e91fc1a1f1460a20d1377fcf5075c57083ad289e82773"
+    },
+    {
+      "path": "FloraGPA.Worker.exe",
+      "sha256": "99d82cd5e5a1ef09e6ac601e4230d701f1f70babf95e8ab71eb8049a6ebd57a6"
+    },
+    {
+      "path": "generic/qtuiotouchplugin.dll",
+      "sha256": "a0b971771417d60c6c2dedf66d06f6e99bd3236aa1aa6949c7e4e08d51fb69f9"
+    },
+    {
+      "path": "iconengines/qsvgicon.dll",
+      "sha256": "7879ba1d2f293ad09c515de736add8c1023b0a4e80e2301d1283555efc2e8828"
+    },
+    {
+      "path": "imageformats/qgif.dll",
+      "sha256": "de1c1ea34cbc4156ce452023470e2145af4855128756d081d56e9a0997d0dda8"
+    },
+    {
+      "path": "imageformats/qico.dll",
+      "sha256": "af98cacb134525fab15cf2146a4e6b90266f14493e72e4d51df89a5caadea157"
+    },
+    {
+      "path": "imageformats/qjpeg.dll",
+      "sha256": "a8854ac38d2bb83e8018bdcbfc93420a876251b3d2a79933e1a3c9a8ed2a24cb"
+    },
+    {
+      "path": "imageformats/qsvg.dll",
+      "sha256": "486b395e23e258d03d54cdba045f129e9b1321f9ff12f99fe58293e0351b8caf"
+    },
+    {
+      "path": "licenses/COPYING.txt",
+      "sha256": "eb7e9ab9690124c5c9f42bdc81383d886a3dede26345b6ed15bbad7caf81f7ea"
+    },
+    {
+      "path": "licenses/Copyright.txt",
+      "sha256": "d1f5b8f5eba2e9073463bc29b30572d84033f59e8d8057a95dff37c3414305b9"
+    },
+    {
+      "path": "licenses/GPL-3.0-only.txt",
+      "sha256": "8ceb4b9ee5adedde47b31e975c1d90c73ad27b6b165a1dcd80c7c545eb65b903"
+    },
+    {
+      "path": "licenses/intel-metrics-discovery-MIT.txt",
+      "sha256": "653129790534d6a3e843eaafc62cf04299e7e238f6f411173e85ea7fc315c8ac"
+    },
+    {
+      "path": "licenses/LGPL-3.0-only.txt",
+      "sha256": "da7eabb7bafdf7d3ae5e9f223aa5bdc1eece45ac569dc21b3b037520b4464768"
+    },
+    {
+      "path": "licenses/LICENSE",
+      "sha256": "2004ee3ef8282a85f7dbd035dfacf63cf03d569537bc08655ffeb140ea3671c5"
+    },
+    {
+      "path": "licenses/LICENSE.FDL",
+      "sha256": "c256483c2d1e8a51b62fc7a44a58f21cb4ef23fa840c7d33e3658035fd8cf62f"
+    },
+    {
+      "path": "licenses/nlohmann-json-MIT.txt",
+      "sha256": "46a65cffd1ea955132d95a8dd921640714a8d6b537d2e4e482d31145ae95b603"
+    },
+    {
+      "path": "licenses/renderdoc-api-MIT.txt",
+      "sha256": "e3dccfaa75440c693b18fd2332347e3c810829bf55ec68302ea5a11db9951997"
+    },
+    {
+      "path": "msvcp140.dll",
+      "sha256": "0f885b509a685d2bbfa652fed26b5fb31d88fbdab0a978c641d1c7b8aa460aa9"
+    },
+    {
+      "path": "msvcp140_1.dll",
+      "sha256": "bfad5aef4c63a669e3c140655cdfdf395b6c979b400a447bd5dcb65ed8826c3d"
+    },
+    {
+      "path": "msvcp140_2.dll",
+      "sha256": "3ea06f0ee098b4823cb79599df3780e7f23cce52c19aac31d2a0d47efe33a5e9"
+    },
+    {
+      "path": "msvcp140_atomic_wait.dll",
+      "sha256": "640b2aefced484d0368eea5bdd06addd0658a3a70a49256e560d6923b404a479"
+    },
+    {
+      "path": "msvcp140_codecvt_ids.dll",
+      "sha256": "f2069a52880ec885ee7f0511186100eb7fada0411a2b4948fafea7735b878a18"
+    },
+    {
+      "path": "networkinformation/qnetworklistmanager.dll",
+      "sha256": "2f7c43bb4ec05e9f23a326ac69e84a6df071cdf7cc0bf87cde98f81958ad9bae"
+    },
+    {
+      "path": "platforms/qoffscreen.dll",
+      "sha256": "95391476bba1d0b50cc822b93d7509341024cc7c18cd615f82e471a3e3a61caa"
+    },
+    {
+      "path": "platforms/qwindows.dll",
+      "sha256": "d94c584a18829d11fbf3aefd07e7b1e189e0cf063a0515826960037efa7465df"
+    },
+    {
+      "path": "Qt6Core.dll",
+      "sha256": "22c113a5644b875b2c85482723cd5d2e6a3a4029169778fcc78adde08ef3b6aa"
+    },
+    {
+      "path": "Qt6Gui.dll",
+      "sha256": "19265a4e76efc12ef5f5bcf59be6c6a5b9b59ec4c89660797738bd2da7f719cc"
+    },
+    {
+      "path": "Qt6Network.dll",
+      "sha256": "75ff0896a618f4f5b602f391eb4917a55fd738b2e751d2cf18244a0de3619184"
+    },
+    {
+      "path": "Qt6Svg.dll",
+      "sha256": "1052c17a9df0eb82023e0e4c369bbd0af58e4c5fea3c27a4b5ee83b60c015492"
+    },
+    {
+      "path": "Qt6Widgets.dll",
+      "sha256": "e6d0b7e2e697de6ad985b97f9ed8b381c1c2172fcae87b6ab08455b3b7330f32"
+    },
+    {
+      "path": "styles/qmodernwindowsstyle.dll",
+      "sha256": "f6b88d403d7175f5b830d4958264690e5c8bbaf0148e1ccf42d52704b0480792"
+    },
+    {
+      "path": "THIRD_PARTY.md",
+      "sha256": "343009c9e4761e1c1dc645bd72fd470001c3a4e269384f0dfc4b0bf69c10f6ec"
+    },
+    {
+      "path": "tls/qcertonlybackend.dll",
+      "sha256": "ff0f1a60ec60fc23ec74ff5d325ddef05c1ed68fc89466bffc1d874c7c544adb"
+    },
+    {
+      "path": "tls/qschannelbackend.dll",
+      "sha256": "761178263b47a5f05e151806bb5854d9e5c9cbc67d08187724d80f9e317471f8"
+    },
+    {
+      "path": "vc_redist.x64.exe",
+      "sha256": "cc0ff0eb1dc3f5188ae6300faef32bf5beeba4bdd6e8e445a9184072096b713b"
+    },
+    {
+      "path": "vccorlib140.dll",
+      "sha256": "19839407c3fdbc824e5bce189bf68ddf8097f12ec28b757797ffa0415c144ddd"
+    },
+    {
+      "path": "vcruntime140.dll",
+      "sha256": "d5e4d9a3e835fa679450145d6a7d94e36573a509317111904d9b3712c30d9066"
+    },
+    {
+      "path": "vcruntime140_1.dll",
+      "sha256": "1f2d41c4aa5db0bc33ebf7b66d72943a817d7ce6cbe880502a9403823633093f"
+    },
+    {
+      "path": "vcruntime140_threads.dll",
+      "sha256": "219915cf20822f34d5e7c1fdd4e21ae7f3396881096c51036225fb8f84b47afa"
+    }
+  ],
+  "verification": {
+    "suites": 32,
+    "registrations": 502,
+    "unique_captures": 492,
+    "completed_registrations": 476,
+    "completed_unique_captures": 466,
+    "located_rejections": 26,
+    "counts": {
+      "ordinary_attempts": 1004,
+      "control_runs": 684,
+      "resource_exports": 808
+    },
+    "previous_cases_rechecked": 494,
+    "preflight_unique_files": 484,
+    "read_map_coverage_changed_files": 472,
+    "producer_frames": 288,
+    "producer_full_readbacks": 576,
+    "producer_image_checks": 72,
+    "ctest_suites": 7,
+    "qt_rows": {
+      "map": 60,
+      "ui": 65,
+      "frame_validation": 173,
+      "constant_buffer_lifetimes": 165,
+      "so_lifetimes": 22,
+      "copy_commands": 7,
+      "contexts": 10
+    },
+    "skipped_rows": 0,
+    "focused_native_runs": 16,
+    "focused_original_completions": 16,
+    "focused_resource_exports": 80,
+    "package_goldens_and_controls": 4,
+    "portable_ui_rows": 3
+  },
+  "gate_resumption": {
+    "reason": "New manifest registration hash was stale; no prior suite rerun needed",
+    "interrupted_gate_sha256": "f5dd14099d43ad4c6f9c70d3f31c17ebfda099264e923fc767c42df5fc05f3e6",
+    "prior_reports_revalidated": 31,
+    "new_suites_executed": 1
+  },
+  "evidence": [
+    {
+      "path": "D:/CDXrepo/FloraGPA/analysis/mapped_textures/execution.c",
+      "sha256": "63b69c900395c569638b45853c83b9e9e2d77a6c436ad9c0f3c2cb14d1ea8191"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA/analysis/mapped_textures/rows_slices.c",
+      "sha256": "3badef08ea4375e6d2dca795bf88115fd1be8803a19e7314c1168100d8a66314"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA/analysis/standalone/data_diff.c",
+      "sha256": "4148dab2827d786ac4e6ce0c4748d9b9820fcb9dab875589cba01f7ef8c7f675"
+    },
+    {
+      "path": "artifacts/check_read_map_sync_gate.py",
+      "sha256": "d942be347d92c2f962b0d96188b5339873da08cdbb382a2aa752d34194623ff0"
+    },
+    {
+      "path": "artifacts/check_read_map_sync_portable.py",
+      "sha256": "d4ea52cd1d6318e89cd595381f30c76a07bf99973d8b152f7893e10aa6f12cf2"
+    },
+    {
+      "path": "artifacts/check_read_map_sync_preflight.py",
+      "sha256": "ae1b2b2ebc2d55aefb31a3a1e7a442815fb9c0efbd38f10aededc3c8c30da986"
+    },
+    {
+      "path": "artifacts/inventory_sparse_map_records.py",
+      "sha256": "27d6969c3050202c073a7dd8245c575651bec87112729c136bf7ca8bd604fd68"
+    },
+    {
+      "path": "artifacts/m4-read-map-sync-after/validation.json",
+      "sha256": "8603ff8116415473f9b9b0dce04e31f7f39f0f169a0480b26920cacc3f9273b0"
+    },
+    {
+      "path": "artifacts/m4-read-map-sync-after.log",
+      "sha256": "d48c0d1af57e8dea3fede609f27cf39bd0b9c3daed799f9e0407945a14c9a136"
+    },
+    {
+      "path": "artifacts/m4-read-map-sync-build.log",
+      "sha256": "1957576dd83a28406b8cb3b915039f9ca8b33a48acb47ce662c2177798e46e8e"
+    },
+    {
+      "path": "artifacts/m4-read-map-sync-ctest-detail.log",
+      "sha256": "4ac1b1b8544298c129fc078c44b2783f0eb9742bf36109f58d6532a6814b047f"
+    },
+    {
+      "path": "artifacts/m4-read-map-sync-ctest.log",
+      "sha256": "69b178fcbcb049418a52234285c7e5f363c16a1917c821a2148a7b198462549a"
+    },
+    {
+      "path": "artifacts/m4-read-map-sync-final-build.log",
+      "sha256": "37db8ad720459a2751ed0c423414aef6c933fab03fa5af04836e3bd6707765a2"
+    },
+    {
+      "path": "artifacts/m4-read-map-sync-gate/gate.json",
+      "sha256": "8c5d63c4a4f0be1d865a961ae7d66f630e6e4d954754be5a051856b41ee521f3"
+    },
+    {
+      "path": "artifacts/m4-read-map-sync-gate/interrupted-gate.json",
+      "sha256": "f5dd14099d43ad4c6f9c70d3f31c17ebfda099264e923fc767c42df5fc05f3e6"
+    },
+    {
+      "path": "artifacts/m4-read-map-sync-gate/recheck.json",
+      "sha256": "fad7e0ea2b18820a5246e708874b039e576e1e3bd38f99ad18f3e0c54ac1d95c"
+    },
+    {
+      "path": "artifacts/m4-read-map-sync-gate.log",
+      "sha256": "8c83381474e0e3307619dc179f44fc0656a4384bd27efd1ad8aeb4c5ee81a9a9"
+    },
+    {
+      "path": "artifacts/m4-read-map-sync-goldens/validation.json",
+      "sha256": "f646942f9aa848209a86c4b89bc3f93d52d2f6cdb805ab081485734938e8900b"
+    },
+    {
+      "path": "artifacts/m4-read-map-sync-originals/manifest.json",
+      "sha256": "6202f8fd4d89a527ee0dcdb5a16107622e5abd6076acd5a4d416e19fae260032"
+    },
+    {
+      "path": "artifacts/m4-read-map-sync-originals-index.json",
+      "sha256": "710e5f357f025a970cca9359a6419e94799f6fde95cc9c13ed8dae756112edb2"
+    },
+    {
+      "path": "artifacts/m4-read-map-sync-originals.log",
+      "sha256": "1e3108201d0ffa3d0ae9876acf1f0cd4e6df8a57f1c4f4f6f6340ee948e18cf7"
+    },
+    {
+      "path": "artifacts/m4-read-map-sync-package.log",
+      "sha256": "75c76dcd1f3598b77d016c0ee81df062c6f147b9c0883c92a1f708d96c3dac95"
+    },
+    {
+      "path": "artifacts/m4-read-map-sync-portable-ui/process.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/m4-read-map-sync-portable-ui/screenshots/read-map-sync-6.png",
+      "sha256": "f39f7cd590c90f344d57dc80f0807bbbeed111715455e96b64960b84b6ea2d84"
+    },
+    {
+      "path": "artifacts/m4-read-map-sync-portable-ui/screenshots/read-map-sync-7.png",
+      "sha256": "4fd70c3bb65db6fe146dfe73f49a8c72144fbee28aa3d93ddfcab8691258bcda"
+    },
+    {
+      "path": "artifacts/m4-read-map-sync-portable-ui/ui.txt",
+      "sha256": "d6a30aa40743e7f9556948cd9d3e4e5797d986e0b5c58ad9876d617f277a63a1"
+    },
+    {
+      "path": "artifacts/m4-read-map-sync-portable-ui/validation.json",
+      "sha256": "9d97d15e2da2ce715f9c210b31aa169ab52d86b487ef6242e71cf73fab71f5a2"
+    },
+    {
+      "path": "artifacts/m4-read-map-sync-preflight/comparison.json",
+      "sha256": "64303772fb4c18642a2426a067d1ddd928f6b05109d089c0e609930fd484cc5d"
+    },
+    {
+      "path": "artifacts/m4-read-map-sync-preflight.log",
+      "sha256": "47b0ed5fe6d279729f2995241fb3387bb3ab8c4e11de6b9ed69350327bb46cf0"
+    },
+    {
+      "path": "artifacts/m4-read-map-sync-probe-build.log",
+      "sha256": "fae5ab5b56e29502e847bc6410275b72b556f22766f32205ad312c9adb8e3496"
+    },
+    {
+      "path": "artifacts/m4-read-map-sync-qt-results/constant-buffer-lifetimes-Release.txt",
+      "sha256": "d90efcc8008e20778178679ce04085ea08396a723c81b7a4dd88edc529949e80"
+    },
+    {
+      "path": "artifacts/m4-read-map-sync-qt-results/contexts-Release.txt",
+      "sha256": "c8e723519b8111c610de674df7d1733cb247ff87207125ebc4a79d200fbcd36f"
+    },
+    {
+      "path": "artifacts/m4-read-map-sync-qt-results/copy-commands-Release.txt",
+      "sha256": "bdfddc1ac45ec3f1d44397aceaba4e6bf9bf3ad0057cadb4826f7fdf110fc067"
+    },
+    {
+      "path": "artifacts/m4-read-map-sync-qt-results/frame_validation.txt",
+      "sha256": "a24214c1795f837ce035912b3f8e556a8b1f658df1533739baad376954dff2c6"
+    },
+    {
+      "path": "artifacts/m4-read-map-sync-qt-results/map-records-Release.txt",
+      "sha256": "56e0b9c3a5c377a96ae8581887f32893de2fbf25eddc670dcadb8a2289f62a9b"
+    },
+    {
+      "path": "artifacts/m4-read-map-sync-qt-results/so-lifetimes-Release.txt",
+      "sha256": "56a233d124f44e2d0e431e3d654efd21c0b0663f144724a0837a98ddfc39d54d"
+    },
+    {
+      "path": "artifacts/m4-read-map-sync-qt-results/ui-Release.txt",
+      "sha256": "ea87715ecf259b05b20ba78f77265954a6def5aaec37d56b719c84535ef6a4f3"
+    },
+    {
+      "path": "artifacts/m4-read-map-sync-related-build.log",
+      "sha256": "f876cdb8ef704b3961a66f110e8594eef64d414f09d1514c9c8ab8eb29fe8812"
+    },
+    {
+      "path": "artifacts/m4-read-map-sync-tests.txt",
+      "sha256": "6e0a8c179865a9ee83a678b91b1b62e40bea574d0d989fe7ea1f7f0e8160e4b5"
+    },
+    {
+      "path": "artifacts/m4-sparse-map-before/validation.json",
+      "sha256": "931ab9d1000696895f9fee361855c108b13bae065d1a72e06baed5f15c1125c5"
+    },
+    {
+      "path": "artifacts/m4-sparse-map-before.log",
+      "sha256": "be7aa5df732607b697c4794103d7066c88619215a7e59ec396ba86db5e73507c"
+    },
+    {
+      "path": "artifacts/m4-sparse-map-build-debug.log",
+      "sha256": "fae5ab5b56e29502e847bc6410275b72b556f22766f32205ad312c9adb8e3496"
+    },
+    {
+      "path": "artifacts/m4-sparse-map-build-final-image.log",
+      "sha256": "fae5ab5b56e29502e847bc6410275b72b556f22766f32205ad312c9adb8e3496"
+    },
+    {
+      "path": "artifacts/m4-sparse-map-build-final.log",
+      "sha256": "fae5ab5b56e29502e847bc6410275b72b556f22766f32205ad312c9adb8e3496"
+    },
+    {
+      "path": "artifacts/m4-sparse-map-build-image.log",
+      "sha256": "079d6a5e40698d66ced8793647c9e93e1ac6dd6c527f2560cc7a7badd5749524"
+    },
+    {
+      "path": "artifacts/m4-sparse-map-build-observed.log",
+      "sha256": "fae5ab5b56e29502e847bc6410275b72b556f22766f32205ad312c9adb8e3496"
+    },
+    {
+      "path": "artifacts/m4-sparse-map-build-stride.log",
+      "sha256": "fae5ab5b56e29502e847bc6410275b72b556f22766f32205ad312c9adb8e3496"
+    },
+    {
+      "path": "artifacts/m4-sparse-map-build.log",
+      "sha256": "ec8a4f3ef50ae63cebf0237503816aaa22e16c2621afd0ae7bfa4951364370f8"
+    },
+    {
+      "path": "artifacts/m4-sparse-map-debug-control/debug.txt",
+      "sha256": "cfbe972920b17d82874ed31b5a1e03c3f778f0e25bb86a0316eb8bbea56b8caf"
+    },
+    {
+      "path": "artifacts/m4-sparse-map-debug-final/debug.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/m4-sparse-map-final-originals.log",
+      "sha256": "61239b8e251d05e40a8f3488ece864c15342ce3eec46e47a60ab9329ac22cfc3"
+    },
+    {
+      "path": "artifacts/m4-sparse-map-image-originals.log",
+      "sha256": "ab701ff8e085168e0a24592c305f3f50dcb27aff4033961c95d3531a45fab282"
+    },
+    {
+      "path": "artifacts/m4-sparse-map-inventory.json",
+      "sha256": "a0d46f492aefc76c791dd7e89b553bc76e4022f17dbe50e9ebeda48e9042a721"
+    },
+    {
+      "path": "artifacts/m4-sparse-map-observed-originals.log",
+      "sha256": "7cabb8c363eb3013ee4c4052f49f35f39178f4a1c76ecb255c41982577c8f016"
+    },
+    {
+      "path": "artifacts/m4-sparse-map-originals-v2.log",
+      "sha256": "7cabb8c363eb3013ee4c4052f49f35f39178f4a1c76ecb255c41982577c8f016"
+    },
+    {
+      "path": "artifacts/m4-sparse-map-originals.log",
+      "sha256": "13e04eaddc8b14e71981b32af06a07f66fe1e81e49b72dc50c72631fa2847520"
+    },
+    {
+      "path": "artifacts/m4-sparse-map-tests-build.log",
+      "sha256": "69c024229c773d445a45cf30b7d9ed559f6222777b2eda928cebdb8834125c83"
+    },
+    {
+      "path": "artifacts/m4-sparse-map-tests.txt",
+      "sha256": "8935396dfafff7d58bf21333a6cbf3865bb72f55cfe592ace15d56f5d2e2ce01"
+    },
+    {
+      "path": "artifacts/resume_read_map_sync_gate.py",
+      "sha256": "3fecaaa4176bce06e4707baa05c835a3a86af103e23a70468037dd4edda2265d"
+    },
+    {
+      "path": "artifacts/run_read_map_sync_ctest.ps1",
+      "sha256": "519200e19206fd6b05ebb3953784d1c655d16717a31132f3cf6c9dd6ccfa8686"
+    }
+  ],
+  "repository_manifests": [
+    {
+      "path": "docs/read-map-sync-corpus.json",
+      "normalized_lf_sha256": "b30cd9fba384c28709be86350b2811e6400bc592fc907434184090934db0d17c"
+    },
+    {
+      "path": "docs/m4-gate-suites.json",
+      "normalized_lf_sha256": "fed30b5a7de0f41f13a7bd8c0eae5bb726ea00deeffdb820b6f6dd1719f9a927"
+    }
+  ],
+  "limits": [
+    "Original private player disagrees on two image-dependent originals; native hardware/WARP and injected application oracles agree with corrected FloraGPA",
+    "Original GUI and original-player selected adapter were not verified",
+    "Saved successful DO_NOT_WAIT reproduces readiness, not original polling timing or CPU control flow",
+    "No original texture GenDataDiff pitch evidence; unsupported layouts still reject",
+    "33 known capture limitations remain; replay completion is not application fidelity",
+    "Same-host isolated PATH and relocated Qt harness do not establish independent clean-machine deployment",
+    "M3/M4/M5 remain incomplete; module ledger unchanged"
+  ]
+}
