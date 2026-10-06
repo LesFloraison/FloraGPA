@@ -70,7 +70,25 @@ class FrameOutputTests : public QObject {
         capture.add(5, 9, 1, statePack(16u, 11u, 22u, 33u, 44u));
         capture.add(100, 7, 0x246, statePack(Id(0), Id(1), int32_t(0), Id(2), 0u, 4u, 0u, Id(5)));
         capture.add(110, 7, 0x246, statePack(Id(0), Id(1), int32_t(-1), Id(2), 0u, 4u, 0u, Id(5)));
-        capture.add(120, 7, 0x246, statePack(Id(0), Id(1), int32_t(0), Id(2), 0u, 1u, 0u, Id(0)));
+        // The old fixture encoded a successful READ as a captured write. Keep
+        // that malformed layout as a negative control for the Map audit.
+        auto malformed = capture;
+        malformed.add(120, 7, 0x246, statePack(Id(0), Id(1), int32_t(0), Id(2), 0u, 1u, 0u, Id(0)));
+        const auto invalidPath = dir.filePath("read-as-write.gpa_frame");
+        malformed.save(invalidPath);
+        Frame invalidFrame(invalidPath.toStdWString());
+        ReplayOptions invalidOptions;
+        invalidOptions.warp = true;
+        Replay invalidReplay(invalidFrame, invalidOptions);
+        try {
+            invalidReplay.run();
+            QFAIL("A READ in a captured-write record must be rejected");
+        } catch (const std::runtime_error &error) {
+            QVERIFY(QString::fromUtf8(error.what()).contains("Captured write record contains a READ Map"));
+        }
+        capture.add(6, 5, 0x83, statePack(Id(0), Id(0), 16u, 3u, 0u, 0x20000u, 0u, 0u, Id(0)));
+        capture.add(120, 7, 0x34ec, statePack(Id(0), Id(1), int32_t(0), Id(6), 0u, 1u, 0u, Id(777)));
+        capture.add(130, 7, 0x34ed, statePack(Id(0), Id(1), Id(6), 0u));
         const auto path = dir.path() + "/mapped.gpa_frame";
         capture.save(path);
         Frame frame(path.toStdWString());
@@ -78,7 +96,7 @@ class FrameOutputTests : public QObject {
         options.warp = true;
         Replay replay(frame, options);
         replay.run();
-        QCOMPARE(replay.lastEvent(), Id(120));
+        QCOMPARE(replay.lastEvent(), Id(130));
         QCOMPARE(replay.lastWorkEvent(), Id(100));
         QCOMPARE(replay.counts.at("Map"), uint64_t(1));
         QCOMPARE(replay.readBuffer(2), statePack(11u, 22u, 33u, 44u));
