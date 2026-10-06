@@ -1544,6 +1544,63 @@ class UiTests final : public QObject {
         QVERIFY(done.takeLast()[0].toBool());
         QCOMPARE(output->image().pixelColor(0, 0), QColor(191, 0, 0, 255));
     }
+    void msaaInitializationNotice() {
+        using namespace flora;
+        QTemporaryDir dir;
+        testing::msaaOutputCapture(false, true).save(dir.filePath("initial.gpa_frame"));
+        testing::msaaOutputCapture(false).save(dir.filePath("no-data.gpa_frame"));
+        testing::srvCapture().save(dir.filePath("single.gpa_frame"));
+        MainWindow window;
+        window.resize(1500, 950);
+        window.show();
+        QSignalSpy done(&window, &MainWindow::taskFinished);
+        auto label = window.findChild<QLabel *>("frameOutputLabel");
+        auto output = window.findChild<ImageView *>("frameOutput");
+        QVERIFY(label && output);
+        for (const auto &name : {"initial", "no-data", "initial", "single"}) {
+            done.clear();
+            window.openCapture(dir.filePath(QString(name) + ".gpa_frame"));
+            QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+            QVERIFY(done.takeLast()[0].toBool());
+            QVERIFY(!output->image().isNull());
+            const bool warning = QString(name) == "initial";
+            QCOMPARE(label->text().contains("Initial data"), warning);
+            QCOMPARE(label->toolTip().contains("T:20 · Data:60"), warning);
+            QCOMPARE(label->toolTip().contains("output on unwritten samples has not been assessed"), warning);
+            if (QString(name) != "single")
+                QCOMPARE(output->image().pixelColor(0, 0), QColor(30, 0, 0, 255));
+            if (warning)
+                snapshot(window, "msaa-initial-data-notice");
+        }
+    }
+    void msaaResolvedInitializationNotice() {
+        const auto root = qEnvironmentVariable("FLORA_TEST_MSAA_DIR");
+        if (root.isEmpty())
+            QSKIP("Set FLORA_TEST_MSAA_DIR for original GPA MSAA captures");
+        flora::MainWindow window;
+        window.resize(1500, 950);
+        window.show();
+        QSignalSpy done(&window, &flora::MainWindow::taskFinished);
+        for (const auto &name : {"initialized", "retained"}) {
+            done.clear();
+            window.openCapture(root + '/' + name + ".gpa_frame");
+            QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+            QVERIFY(done.takeLast()[0].toBool());
+            auto label = window.findChild<QLabel *>("frameOutputLabel");
+            auto image = window.findChild<flora::ImageView *>("frameOutput");
+            QVERIFY(label && image);
+            QVERIFY(label->text().contains("Initial data"));
+            const bool initialized = QString(name) == "initialized";
+            QVERIFY(label->toolTip().contains(initialized ? "T:2 · Data:4" : "T:16 · Data:19"));
+            auto pixels = image->image().convertToFormat(QImage::Format_RGBA8888);
+            QCOMPARE(pixels.size(), QSize(64, 64));
+            const QByteArray raw(reinterpret_cast<const char *>(pixels.constBits()), pixels.sizeInBytes());
+            const auto hash = QCryptographicHash::hash(raw, QCryptographicHash::Sha256).toHex();
+            QCOMPARE(hash == "ec34dbda4becc0cdcd86793e44cffecd10dcf40dbbb577adf2da0b4c5721cd97",
+                     initialized);
+            snapshot(window, QString("msaa-resolved-") + name);
+        }
+    }
     void outputSelectionControls() {
         using namespace flora;
         QTemporaryDir dir;

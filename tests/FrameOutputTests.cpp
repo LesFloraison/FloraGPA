@@ -5,6 +5,7 @@
 #include "application/SessionUi.h"
 #include <QCoreApplication>
 #include <QTemporaryDir>
+#include <QProcess>
 #include <QtTest>
 #include <fstream>
 #include <iostream>
@@ -62,6 +63,48 @@ void oracle(const QString &path) {
 class FrameOutputTests : public QObject {
     Q_OBJECT
   private slots:
+    void resolvedInitializationReport() {
+        QTemporaryDir dir;
+        for (bool initial : {true, false}) {
+            const auto name = initial ? "initial" : "no-data";
+            const auto path = dir.filePath(QString(name) + ".gpa_frame");
+            resolvedMsaaOutputCapture(initial).save(path);
+            for (const auto &target : {"resolved", "unbound", "samples"}) {
+                const auto out = dir.filePath(QString(name) + '-' + target);
+                QStringList args{"replay", path, "--warp", "--out", out};
+                if (QString(target) == "unbound")
+                    args << "--output-target" << "rt7";
+                else
+                    args << "--id" << (QString(target) == "resolved" ? "70" : "20");
+                QProcess child;
+                child.start(QCoreApplication::applicationDirPath() + "/FloraGPA.Cli.exe", args);
+                QVERIFY(child.waitForStarted());
+                QVERIFY(child.waitForFinished(30000));
+                QVERIFY2(child.exitCode() == 0, child.readAllStandardError().constData());
+                std::ifstream stream((out + "/report.json").toStdWString());
+                Json report; stream >> report;
+                QVERIFY(report.at("completed").get<bool>());
+                const auto &notices = report.at("replay_resource_notices");
+                QCOMPARE(notices.size(), initial ? size_t(1) : size_t(0));
+                if (initial) {
+                    QCOMPARE(notices[0]["resource_id"], Json("20"));
+                    QCOMPARE(notices[0]["data_id"], Json("60"));
+                    QCOMPARE(notices[0]["kind"], Json("msaa_initial_data_not_applied"));
+                    QCOMPARE(notices[0]["scope"], Json("materialized_resource"));
+                    QCOMPARE(notices[0]["output_dependency"], Json("not_assessed"));
+                }
+                QCOMPARE(report["output_msaa"].is_null(), QString(target) != "samples");
+                QCOMPARE(report["image_available"], Json(QString(target) != "unbound"));
+                if (QString(target) != "unbound") {
+                    QFile raw(out + "/frame.rgba"); QVERIFY(raw.open(QIODevice::ReadOnly));
+                    const auto bytes = raw.readAll();
+                    QCOMPARE(bytes.size(), qsizetype(7 * 5 * 4));
+                    for (int offset = 0; offset < bytes.size(); offset += 4)
+                        QCOMPARE(bytes.mid(offset, 4), QByteArray::fromHex("0a0000ff"));
+                }
+            }
+        }
+    }
     void mappedWriteNavigation() {
         QTemporaryDir dir;
         Capture capture;

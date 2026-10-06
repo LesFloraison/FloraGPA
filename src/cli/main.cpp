@@ -1068,6 +1068,22 @@ int main(int argc, char **argv) {
             for (auto &[key, value] : replay.counts)
                 counts.insert(QString::fromStdString(key), qint64(value));
             report.insert("counts", counts);
+            QJsonArray resourceNotices;
+            for (auto id : replay.ignoredMsaaInitial()) {
+                const auto notice = QJsonObject{
+                    {"kind", "msaa_initial_data_not_applied"},
+                    {"severity", "warning"},
+                    {"resource_id", QString::number(id)},
+                    {"data_id", QString::number(frame.resource(id).data)},
+                    {"scope", "materialized_resource"},
+                    {"output_dependency", "not_assessed"},
+                    {"reason", "Ordinary MSAA GenData cannot initialize individual samples. Recorded "
+                               "writes may fully initialize this resource; dependence of the selected "
+                               "output on unwritten samples has not been assessed."}};
+                if (!resourceNotices.contains(notice))
+                    resourceNotices.append(notice);
+            }
+            report.insert("replay_resource_notices", resourceNotices);
             planarWrites = planarWriteReport(replay);
             experiment = experimentReport(replay);
             QJsonArray soHistory;

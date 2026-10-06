@@ -656,6 +656,7 @@ void MainWindow::buildUi() {
     imageSpacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
     displayBar->addWidget(imageSpacer);
     imageLabel_ = new QLabel("—");
+    imageLabel_->setObjectName("frameOutputLabel");
     displayBar->addWidget(imageLabel_);
     outputLayout->addWidget(imageBar);
     outputLayout->addWidget(displayBar);
@@ -2156,6 +2157,17 @@ void MainWindow::finishWorker(int code, QProcess::ExitStatus status) {
         const auto msaa = report_["output_msaa"].toObject();
         if (!msaa.isEmpty())
             imageLabel_->setToolTip(imageLabel_->toolTip() + "\n" + msaa["initialization_note"].toString());
+        const auto resourceNotices = report_["replay_resource_notices"].toArray();
+        if (!resourceNotices.isEmpty()) {
+            imageLabel_->setText(imageLabel_->text() + " · Initial data");
+            for (const auto &value : resourceNotices) {
+                const auto notice = value.toObject();
+                imageLabel_->setToolTip(imageLabel_->toolTip() +
+                                       QString("\nT:%1 · Data:%2 — %3")
+                                           .arg(notice["resource_id"].toString(),
+                                                notice["data_id"].toString(), notice["reason"].toString()));
+            }
+        }
         outputReport_ = outputAvailable ? nlohmann::json::parse(reportBytes.constData(),
                                                                 reportBytes.constData() + reportBytes.size())
                                         : nlohmann::json();

@@ -1,7 +1,7 @@
 #pragma once
 #include "StateCapture.h"
 namespace flora::testing {
-inline Capture msaaOutputCapture(bool integer = true) {
+inline Capture msaaOutputCapture(bool integer = true, bool ordinaryInitialData = false) {
     Capture c;
     c.add(1, 5, 0x127, std::vector<uint8_t>(24));
     auto shader = [&](Id id, uint16_t type, const char *profile, const std::string &text) {
@@ -21,7 +21,14 @@ inline Capture msaaOutputCapture(bool integer = true) {
     shader(10, 0x90, "vs_5_0",
            "float4 main(uint i:SV_VertexID):SV_Position{return float4(i==2?3:-1,i==1?3:-1,0,1);}");
     c.add(20, 5, 0x85,
-          statePack(Id(0), Id(0), 7u, 5u, 1u, 2u, integer ? 3u : 28u, 4u, 0u, 0u, 32u, 0u, 0u, Id(0)));
+          statePack(Id(0), Id(0), 7u, 5u, 1u, 2u, integer ? 3u : 28u, 4u, 0u, 0u, 32u, 0u, 0u,
+                    ordinaryInitialData ? Id(60) : Id(0)));
+    if (ordinaryInitialData) {
+        const uint32_t size = 7 * 5 * 2 * (integer ? 16 : 4);
+        auto data = statePack(size);
+        data.resize(4 + size);
+        c.add(60, 9, 1, data);
+    }
     c.add(50, 9, 0x87, statePack(1u, 0.f, 0.f, 7.f, 5.f, 0.f, 1.f));
     c.add(52, 5, 0x89, statePack(Id(0), Id(0), 3u, 1u, 0u, 0, 0.f, 0.f, 1u, 0u, 1u, 0u));
     for (uint32_t layer = 0; layer < 2; ++layer) {
@@ -45,6 +52,15 @@ inline Capture msaaOutputCapture(bool integer = true) {
         c.add(event - 1, 3, 3, snapshot(s));
         c.add(event, 7, 0x37, statePack(event - 1, Id(0), Id(1), 3u, 0u));
     }
+    return c;
+}
+inline Capture resolvedMsaaOutputCapture(bool ordinaryInitialData) {
+    auto c = msaaOutputCapture(false, ordinaryInitialData);
+    c.add(70, 5, 0x85,
+          statePack(Id(0), Id(0), 7u, 5u, 1u, 2u, 28u, 1u, 0u, 0u, 32u, 0u, 0u, Id(0)));
+    for (uint32_t layer = 0; layer < 2; ++layer)
+        c.add(120 + layer, 7, 0x42,
+              statePack(Id(0), Id(1), Id(70), layer, Id(20), layer, 28u));
     return c;
 }
 } // namespace flora::testing
