@@ -1,7 +1,20 @@
 # Current capabilities and compatibility
 
-Reviewed **2026-10-06**. The user authorized M4, then M5, while keeping M3 open.
-The latest [READ Map synchronization correction](MAP_READ_SYNCHRONIZATION.md)
+Reviewed **2026-10-07**. The user authorized M4, then M5, while keeping M3 open.
+The latest [worker image integrity correction](WORKER_IMAGE_INTEGRITY.md) rejects
+nine malformed display-artifact combinations previously accepted as successful
+replay. PNG dimensions/pixels, raw RGBA length/hash and report availability must
+agree before Qt replaces an output. Failure preserves the previous image and
+label, and real-Worker retry succeeds. Five CTest suites pass; relocated system-
+PATH checks pass 27 artifact rows, 18 worker scenarios and four real GF2/BF1
+recovery cycles. Four packaged golden/negative checks also pass. Runtime GUI:
+`ea98485`; package: `out/FloraGPA-worker-image-20261006/` (44 files). Only the GUI
+binary changes; CLI/Worker and all other deployed files retain identical hashes.
+No full GPU matrix rerun or expanded format support is claimed. Specialized
+analyzer/storage failures, synchronous image-processing latency and independent
+clean-machine acceptance remain open.
+
+The preceding [READ Map synchronization correction](MAP_READ_SYNCHRONIZATION.md)
 restores saved CPU/GPU ordering before later NO_OVERWRITE writes. Eight untouched
 original captures pass independent native hardware/WARP resource oracles; two
 also expose wrong earlier-copy images in the previous replay and local original
@@ -585,7 +598,7 @@ the other 35 suites passed initially and the complete UI suite passes after the 
 | M2 — Ordinary replay | Registered-scope gate passed: 366 positive cases and 22 located rejections; auxiliary/snapshot contracts audited. This is not universal API support. State-object identity loss, mixed saved/missing SO targets and unverified lifetimes remain explicit boundaries. |
 | M3 — Deferred Context / Command List | Open; M4/M5 now take priority by user instruction on 2026-10-06. Require original retained-list captures proving identity, build order, resource versions, repeated execution, restore-state and event mapping before production support. |
 | M4 — Resources and boundaries | Active, incomplete. Initial texture/Map data is checked; missing UAV counts reject on actual consumption, while proven counter-free indexed access is allowed. Per-slot counter dependencies and saved blt-model occluded Present TEST are checked; continue wider operand/control-flow dependencies, missing pitch/data, predicate/frame-before history, Query and other presentation boundaries. |
-| M5 — Stable compatibility release | Incomplete. The 494-case registry, clean committed-source build/package, load/semantic-audit cancellation and nine controlled worker-failure cases are established. Continue specialized analyzer/driver/storage failures, large-file workflows, long-duration testing and independent clean-machine deployment. |
+| M5 — Stable compatibility release | Incomplete. The 502-case registry, clean committed-source build/package, load/semantic-audit cancellation, worker recovery and checked display-artifact acceptance are established. Continue specialized analyzer/driver/storage failures, large-file workflows, long-duration testing and independent clean-machine deployment. |
 | M6 — Analyzer and other versions | Incomplete. Continue remaining Qt consumers, advanced profiling/debugging and version-specific adapters after core replay gates. Existing analyzer features remain available. |
 
 The original order was **M1 → M2 → M3 → M4 → M5**. On 2026-10-06 the user

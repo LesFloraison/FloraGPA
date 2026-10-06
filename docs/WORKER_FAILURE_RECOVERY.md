@@ -1,5 +1,10 @@
 # Worker failure diagnostics and recovery
 
+> **2026-10-07 follow-up:** [Worker image integrity](WORKER_IMAGE_INTEGRITY.md)
+> adds nine previously accepted malformed-image faults, a valid-image control,
+> checked PNG/RGBA/report consistency, and preserve/retry assertions. The original
+> nine-case and timeout measurements below retain their historical scope.
+
 Reviewed 2026-10-06. This M5 batch expands worker-failure acceptance and corrects
 two reproduced diagnostic defects. It does not alter DX11 execution, resource
 restoration, capture parsing or the supported capture inventory.
