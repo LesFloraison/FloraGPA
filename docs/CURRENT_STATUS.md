@@ -1,7 +1,20 @@
 # Current capabilities and compatibility
 
 Reviewed **2026-10-06**. The user authorized M4, then M5, while keeping M3 open.
-The latest [capture-load recovery change](CAPTURE_LOAD_RECOVERY.md) makes the
+The latest [worker shutdown correction](WORKER_SHUTDOWN_AND_RETENTION.md)
+prevents a second close of the Windows Job handle when waiting for the worker
+reenters its completion callback. A before/after API-result observer verifies
+the defect and fix; child termination, three CTest UI suites, both optional
+original-capture UI workflows, four packaged goldens/negatives and five portable
+shutdown checks pass. Runtime: `4495d73`; package:
+`out/FloraGPA-worker-shutdown-20261006/`. Only the GUI executable changes from
+the preceding package. The [baseline](worker-shutdown-retention-baseline.json)
+also pins a 40-cycle heap investigation: QObject counts stay constant, while
+heap busy allocations grow and clearing logs explains only part of the increase.
+Allocation-source/lifetime attribution and longer-duration acceptance remain
+open; this is not a declaration of leak-free behavior or a completed M5.
+
+The preceding [capture-load recovery change](CAPTURE_LOAD_RECOVERY.md) makes the
 container scan and full-file hash cancellable, discards cancelled queued results,
 and preserves the current capture and its compatibility report after cancelled or
 failed opens. Specific parser errors survive the asynchronous boundary. Runtime:
