@@ -525,7 +525,11 @@ Json validateFrame(const std::filesystem::path &path, const std::function<bool()
                         }
                         if (e.type == 0x3257) {
                             try {
-                                validatePresentRecord(frame, id);
+                                const auto present = validatePresentRecord(frame, id);
+                                if (present.occluded)
+                                    finding(&e, "info", "present_test_occluded",
+                                            "Saved blt-model Present TEST returned DXGI_STATUS_OCCLUDED; "
+                                            "no submission or binding transition is replayed", present.chain);
                             } catch (const std::exception &error) {
                                 Id chain = 0;
                                 auto raw = frame.payload(id);

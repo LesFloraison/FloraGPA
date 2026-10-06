@@ -13,7 +13,8 @@ PresentRecord validatePresentRecord(const Frame &frame, Id event) {
     r.end();
     if (parent)
         throw std::runtime_error("Linked Present requires unresolved parent execution semantics");
-    if (result != 0)
+    out.occluded = result == 0x087a0001;
+    if (result != 0 && !(out.occluded && out.flags == 1))
         throw std::runtime_error("Present HRESULT other than S_OK requires unverified status semantics");
     if (out.syncInterval > 4 || (out.flags != 0 && out.flags != 1 && out.flags != 0x200))
         throw std::runtime_error("Present sync interval or flags are outside the verified replay scope");
@@ -34,6 +35,8 @@ PresentRecord validatePresentRecord(const Frame &frame, Id event) {
     chain.skip(4);
     chain.end();
     const bool flip = out.swapEffect == 3 || out.swapEffect == 4;
+    if (out.occluded && flip)
+        throw std::runtime_error("Occluded Present TEST requires a verified blt-model swap chain");
     if (!width || !height || !samples || !buffers || windowed > 1 ||
         (out.swapEffect != 0 && out.swapEffect != 1 && !flip) ||
         (flip && (samples != 1 || quality || buffers < 2)))

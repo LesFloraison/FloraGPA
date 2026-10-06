@@ -61,6 +61,99 @@ Raw raw(const Capture &c, Id id) {
 class PresentRecordTests final : public QObject {
     Q_OBJECT
   private slots:
+    void occludedStatusLimits() {
+        QTemporaryDir dir;
+        for (const auto effect : {0u, 1u, 3u, 4u})
+            for (const auto flags : {0u, 1u, 2u, 8u, 0x201u}) {
+                auto c = makeCapture(effect, flags);
+                auto wire = present(flags);
+                put(wire, 16, 0x087a0001u);
+                replace(c, 200, wire);
+                c.add(201, 7, 0x242, pack(Id(0), Id(1)));
+                const auto path = dir.filePath("occluded.gpa_frame");
+                c.save(path);
+                Frame frame(path.toStdWString());
+                const bool supported = effect < 3 && flags == 1;
+                const auto report = validateFrame(frame.path());
+                QCOMPARE(report["errors"].get<unsigned>() == 0, supported);
+                if (supported) {
+                    const auto p = validatePresentRecord(frame, 200);
+                    QVERIFY(p.test && p.occluded && !p.unbindRtv);
+                } else {
+                    QVERIFY_THROWS_EXCEPTION(std::runtime_error, validatePresentRecord(frame, 200));
+                    bool located = false;
+                    for (const auto &f : report["findings"])
+                        located |= f["kind"] == "present_unsupported" && f["event_id"] == 200 &&
+                                   f["resource_id"] == 2;
+                    QVERIFY(located);
+                }
+            }
+    }
+    void originalOccludedCaptures() {
+        const auto root = qEnvironmentVariable("FLORA_PRESENT_OCCLUDED_CAPTURES");
+        if (root.isEmpty())
+            QSKIP("Set original occluded Present TEST corpus");
+        QTemporaryDir dir;
+        for (const int mode : {5, 7}) {
+            Frame frame((root + QString("/%1/capture.gpa_frame").arg(mode)).toStdWString());
+            QCOMPARE(validateFrame(frame.path())["errors"], nlohmann::json(0));
+            const auto p = validatePresentRecord(frame, 27);
+            QVERIFY(p.occluded && p.test && !p.unbindRtv);
+            QCOMPARE(p.swapEffect, mode == 5 ? 0u : 1u);
+            QFile oracle(root + QString("/%1/hardware/before-6.rgba").arg(mode));
+            QVERIFY(oracle.open(QIODevice::ReadOnly));
+            const auto red = oracle.readAll();
+            QFile final(root + QString("/%1/hardware/oracle.rgba").arg(mode));
+            QVERIFY(final.open(QIODevice::ReadOnly));
+            const auto green = final.readAll();
+            auto bytes = [](const auto &v) { return QByteArray(reinterpret_cast<const char *>(v.data()), qsizetype(v.size())); };
+            for (const bool warp : {false, true}) {
+                ReplayOptions options;
+                options.warp = warp;
+                Replay replay(frame, options);
+                for (unsigned repeat = 0; repeat < 2; ++repeat) {
+                    unsigned observations = 0;
+                    replay.run({}, {}, [&](Id event, bool after, ID3D11DeviceContext *context, const auto &) {
+                        if (event != 27) return;
+                        Com<ID3D11RenderTargetView> view;
+                        context->OMGetRenderTargets(1, &view, nullptr);
+                        QVERIFY(view);
+                        QCOMPARE(bytes(replay.readTexture(7)), red);
+                        ++observations;
+                    });
+                    QCOMPARE(observations, 2u);
+                    QCOMPARE(bytes(replay.readTexture(7)), green);
+                    QCOMPARE(replay.counts.at("present_tests"), uint64_t(1));
+                    QCOMPARE(replay.counts.at("present_occluded_tests"), uint64_t(1));
+                    QCOMPARE(replay.counts.at("Present"), uint64_t(1));
+                }
+            }
+            // Preserve original inputs; local counterexamples exercise exact
+            // envelope boundaries and an unexpected status at the saved event.
+            const auto source = frame.payload(27);
+            for (size_t n = 0; n <= source.size(); ++n) {
+                Capture broken;
+                for (const auto &[id, e] : frame.entries()) {
+                    const auto b = frame.payload(id);
+                    Raw replacement(b.begin(), b.end());
+                    if (id == 27) {
+                        if (n < source.size()) replacement.resize(n);
+                        else put(replacement, 16, 0x087a0007u);
+                    }
+                    broken.add(id, e.category, e.type, replacement);
+                }
+                const auto path = dir.filePath("broken.gpa_frame");
+                broken.save(path);
+                Frame invalid(path.toStdWString());
+                QVERIFY_THROWS_EXCEPTION(std::runtime_error, validatePresentRecord(invalid, 27));
+                const auto report = validateFrame(invalid.path());
+                bool located = false;
+                for (const auto &f : report["findings"])
+                    located |= f["severity"] == "error" && f["event_id"] == 27;
+                QVERIFY2(located, qPrintable(QString("Missing location for Present prefix %1").arg(n)));
+            }
+        }
+    }
     void checkedLayoutsAndRejections() {
         QTemporaryDir dir;
         auto check = [&](Capture c, bool accepted) {

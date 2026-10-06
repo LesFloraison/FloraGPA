@@ -1220,6 +1220,8 @@ void Replay::command(const Entry &e) {
             }
         }
         ++counts[present.test ? "present_tests" : "Present"];
+        if (present.occluded)
+            ++counts["present_occluded_tests"];
         return;
     }
     if (acceptPassiveObjectRecord(t, payload)) {
