@@ -129,6 +129,7 @@ void Replay::applyPredicate(uint16_t type, Bytes payload) {
         }
         counts["End"]++;
         unissuedPredicates_.erase(id);
+        baselinePredicates_.erase(id);
     }
 }
 void Replay::resetPredicates() {
@@ -155,6 +156,12 @@ Replay::PredicateResult Replay::readPredicateResult(Id id, unsigned timeoutMs) {
     }
     if (unissuedPredicates_.contains(id)) {
         result.status = "unissued";
+        return result;
+    }
+    if (baselinePredicates_.contains(id)) {
+        // This native initialization is part of the original player's replay
+        // convention. It is not an observation of the application's old query.
+        result.status = "replay_baseline";
         return result;
     }
     if (desc.flags & 1) {

@@ -18,6 +18,9 @@ inline Capture predicateCapture(bool visible = true, uint32_t value = 0, bool hi
     shader(32, "float4 main():SV_Target{return float4(1,0,0,1);}");
     shader(80, "float4 main():SV_Target{return float4(0,1,0,1);}");
     c.add(600, 5, 0x96, statePack(Id(0), Id(0), 5u, hint ? 1u : 0u));
+    // This fixture includes a later append dispatch; specify its independent
+    // initial counter rather than depending on an undefined native value.
+    c.add(700, 7, 0x25e, statePack(Id(0), Id(1), 1u, 1u, uint8_t(1), Id(12), uint8_t(1), 0u));
     c.add(800, 7, 0x32, statePack(Id(0), Id(1), Id(21), uint8_t(1), 0.f, 0.f, 0.f, 1.f));
     if (!seed)
         c.add(900, 7, 0x241, statePack(Id(0), Id(1), Id(600)));

@@ -263,6 +263,7 @@ IUnknown *Replay::object(Id id) {
             Unpredicated guard(context_.Get());
             context_->Begin(predicate.Get());
             context_->End(predicate.Get());
+            baselinePredicates_.insert(id);
             result = predicate;
         } else if (t == 0x97) {
             readClassRecord(frame_, id);
@@ -1472,6 +1473,7 @@ void Replay::run(const std::function<void(Id, size_t, size_t)> &progress,
     for (const auto &[resource, initial] : resourceLodAudit_->initial)
         resourceLods_[resource] = initial.value;
     unissuedPredicates_.clear();
+    baselinePredicates_.clear();
     undefinedCreatedCounters_.clear();
     missingInitialCounters_.clear();
     ignoredMsaaInitial_.clear();

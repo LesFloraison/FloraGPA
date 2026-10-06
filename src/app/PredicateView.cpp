@@ -109,7 +109,7 @@ bool PredicateView::finish(uint64_t request, const nlohmann::json &result) {
         emit inspectionFinished(false);
         return true;
     }
-    add("Status", result["status"]);
+    add("Status", result["status"] == "replay_baseline" ? nlohmann::json("Replay baseline") : result["status"]);
     add("Result", result["value"]);
     add("Bound", result["bound"]);
     add("Predicate value", result["predicate_value"]);
@@ -117,7 +117,9 @@ bool PredicateView::finish(uint64_t request, const nlohmann::json &result) {
     add("Flags", result["resource"]["query_flags"]);
     add("Source", result["source"])
         ->setToolTip(1,
-                     "Actual GPU query at the selected boundary; captured return values are not restored.");
+                     result["status"] == "replay_baseline"
+                         ? "Empty query initialized for replay. The application's earlier query result is unknown."
+                         : "Actual GPU query at the selected boundary; captured return values are not restored.");
     updateActions();
     emit inspectionFinished(true);
     return true;

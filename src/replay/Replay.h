@@ -172,6 +172,7 @@ class Replay {
     std::optional<ClassCreationAudit> classCreationAudit_;
     std::optional<PredicateCreationAudit> predicateCreationAudit_;
     std::set<Id> unissuedPredicates_;
+    std::set<Id> baselinePredicates_;
     void predicateCreation(const Entry &);
     void classCreation(const Entry &);
     std::optional<PipelineCreationAudit> pipelineCreationAudit_;

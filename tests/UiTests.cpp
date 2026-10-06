@@ -2202,15 +2202,18 @@ class UiTests final : public QObject {
         QSignalSpy inspected(view, &PredicateView::inspectionFinished);
         auto frame = std::make_shared<Frame>((dir.path() + "/predicate.gpa_frame").toStdWString());
         // Drive explicit boundaries through the real isolated worker.
-        for (auto event : {1000u, 1100u, 1200u}) {
+        for (auto event : {800u, 1000u, 1100u, 1200u}) {
             view->setSelection(frame, event);
             boundary->setCurrentIndex(1);
             QTRY_VERIFY_WITH_TIMEOUT(read->isEnabled(), 30000);
             read->trigger();
             QTRY_VERIFY_WITH_TIMEOUT(!inspected.empty(), 30000);
             QVERIFY(inspected.takeLast()[0].toBool());
-            QCOMPARE(fields->topLevelItem(0)->text(1), event == 1000 ? QString("active") : QString("ready"));
-            QCOMPARE(fields->topLevelItem(1)->text(1), event == 1000 ? QString("—") : QString("false"));
+            QCOMPARE(fields->topLevelItem(0)->text(1), event == 800 ? QString("Replay baseline")
+                                                     : event == 1000 ? QString("active") : QString("ready"));
+            QCOMPARE(fields->topLevelItem(1)->text(1), event <= 1000 ? QString("—") : QString("false"));
+            if (event == 800)
+                snapshot(window, "predicate-replay-baseline");
             QCOMPARE(fields->topLevelItem(2)->text(1), event == 1200 ? QString("true") : QString("false"));
         }
         snapshot(window, "predicate-inspector");

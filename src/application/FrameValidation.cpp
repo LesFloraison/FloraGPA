@@ -90,6 +90,8 @@ Json validateFrame(const std::filesystem::path &path, const std::function<bool()
                         "Missing or unexpected-category reference; runtime recovery/use must be checked", id);
         };
         std::set<Id> definedCounters;
+        std::set<Id> completedPredicates, activePredicates;
+        std::optional<PredicateBinding> predicateBinding;
         for (const auto &[id, e] : frame.entries()) {
             if (cancelled && cancelled()) {
                 report["cancelled"] = true;
@@ -132,6 +134,57 @@ Json validateFrame(const std::filesystem::path &path, const std::function<bool()
                     if (command["status"] == "invalid")
                         throw std::runtime_error(command.value("error", "Invalid command wire layout"));
                     checked = command["status"] == "decoded";
+                    auto predicateReference = [&](Id resource, bool binding) {
+                        if (!resource)
+                            return;
+                        if (!frame.entries().contains(resource)) {
+                            finding(&e, "error", "predicate_resource_missing",
+                                    "Predicate descriptor is absent from the capture; saved control or "
+                                    "GetData observations do not identify a native predicate descriptor",
+                                    resource);
+                            return;
+                        }
+                        try {
+                            readPredicate(frame, resource);
+                        } catch (const std::exception &error) {
+                            finding(&e, "error", "predicate_resource_invalid", error.what(), resource);
+                            return;
+                        }
+                        if (!predicateCreationAudit)
+                            predicateCreationAudit = auditPredicateCreations(frame);
+                        const auto created = predicateCreationAudit->creationEvents.find(resource);
+                        if (created != predicateCreationAudit->creationEvents.end()) {
+                            if (binding && !completedPredicates.contains(resource))
+                                finding(&e, "error", "predicate_interval_missing",
+                                        "Frame-created predicate has no completed captured Begin/End interval",
+                                        resource);
+                            return;
+                        }
+                        if (binding && !completedPredicates.contains(resource) &&
+                            !activePredicates.contains(resource))
+                            finding(&e, "warning", "predicate_replay_baseline",
+                                    "Uses the original player's empty-query baseline before a captured "
+                                    "Begin/End interval. Saved control may be normalized; this is not a "
+                                    "restored application query result", resource);
+                    };
+                    if (const auto operation = predicateOperation(e.type)) {
+                        const auto p = readPredicateCommand(e.type, frame.payload(id));
+                        requireImmediateContext(frame, p.context);
+                        predicateReference(p.resource, *operation == PredicateOperation::Set);
+                        if (*operation == PredicateOperation::Set)
+                            predicateBinding = PredicateBinding{p.resource, p.value};
+                        else if (*operation == PredicateOperation::Begin) {
+                            activePredicates.insert(p.resource);
+                            completedPredicates.erase(p.resource);
+                        } else if (activePredicates.erase(p.resource))
+                            completedPredicates.insert(p.resource);
+                    } else if (e.type == 0x242)
+                        predicateBinding.reset();
+                    else if (isDraw(e.type)) {
+                        const auto state = frame.state(frame.event(id).state);
+                        predicateReference(predicateBinding ? predicateBinding->resource : state.predicate,
+                                           true);
+                    }
                     if (isOutputCommand(e.type)) {
                         const auto output = readOutputCommand(e.type, frame.payload(id));
                         validateOutputRange(e.type, output);

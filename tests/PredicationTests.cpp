@@ -2,6 +2,7 @@
 #include "StreamCapture.h"
 #include "application/Experiment.h"
 #include "application/PredicateInspector.h"
+#include "application/FrameValidation.h"
 #include "application/SetterEdits.h"
 #include <QTemporaryDir>
 #include <QtTest>
@@ -10,6 +11,70 @@ using namespace flora::testing;
 class PredicationTests final : public QObject {
     Q_OBJECT
   private slots:
+    void replayBaselineIsNotCapturedResult() {
+        for (bool warp : {false, true}) {
+            auto c = predicateCapture(false, 1, false, true);
+            c.add(3100, 7, 0x248, statePack(Id(0), Id(1), Id(0), 0u));
+            c.add(3200, 7, 0x241, statePack(Id(0), Id(1), Id(600)));
+            c.add(3300, 7, 0x243, statePack(Id(0), Id(1), Id(600)));
+            QTemporaryDir dir;
+            const auto path = dir.filePath("baseline.gpa_frame");
+            c.save(path);
+            Frame frame(path.toStdWString());
+            const auto report = validateFrame(path.toStdWString());
+            bool located = false;
+            for (const auto &f : report["findings"])
+                located |= f["kind"] == "predicate_replay_baseline" && f["event_id"] == 1200 &&
+                           f["resource_id"] == 600;
+            QVERIFY(located);
+            ReplayOptions options;
+            options.warp = warp;
+            options.until = 3300;
+            Replay replay(frame, options);
+            for (int repeat = 0; repeat < 2; ++repeat) {
+                replay.run({}, [&](Id event, bool after, auto *, const auto &) {
+                    if (event == 1200 && after) {
+                        const auto result = inspectPredicate(frame, replay, 600);
+                        QCOMPARE(result["status"], nlohmann::json("replay_baseline"));
+                        QVERIFY(result["value"].is_null());
+                        QCOMPARE(result["source"], nlohmann::json("native_player_empty_begin_end"));
+                    }
+                });
+                QCOMPARE(replay.readPredicateResult(600).status, std::string("ready"));
+                QCOMPARE(replay.readPredicateResult(600).value, std::optional<bool>(false));
+            }
+        }
+    }
+    void missingPredicateIsLocated() {
+        for (int variant = 0; variant < 3; ++variant) {
+            auto c = predicateCapture(false, 1, false, true);
+            for (auto &e : c.entries)
+                if (e.id == 600) {
+                    if (variant == 1)
+                        e.type = 0x127;
+                    else if (variant == 2)
+                        --e.size;
+                }
+            if (variant == 0)
+                c.entries.erase(std::remove_if(c.entries.begin(), c.entries.end(),
+                                                [](const auto &e) { return e.id == 600; }), c.entries.end());
+            QTemporaryDir dir;
+            const auto path = dir.filePath("missing.gpa_frame");
+            c.save(path);
+            const auto report = validateFrame(path.toStdWString());
+            bool located = false;
+            for (const auto &f : report["findings"])
+                located |= f["kind"] == (variant ? "predicate_resource_invalid" : "predicate_resource_missing") &&
+                           f["event_id"] == 1200 && f["resource_id"] == 600 && f["record_type"] == 0x248;
+            QVERIFY(located);
+            Frame frame(path.toStdWString());
+            ReplayOptions options;
+            options.warp = true;
+            options.until = 1200;
+            Replay replay(frame, options);
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error, replay.run());
+        }
+    }
     void setterHistory() {
         auto c = predicateCapture(true, 0);
         QTemporaryDir dir;

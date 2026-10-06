@@ -1,6 +1,9 @@
 #include "Predication.h"
 namespace flora {
 PredicateDescriptor readPredicate(const Frame &frame, Id id) {
+    if (!frame.entries().contains(id))
+        throw std::runtime_error("Predicate resource " + std::to_string(id) +
+                                 " is absent from the capture; its descriptor cannot be reconstructed");
     Reader r(frame.payload(id, 5, 0x96));
     PredicateDescriptor out{id, r.read<Id>(), r.read<Id>(), r.read<uint32_t>(), r.read<uint32_t>()};
     r.end();

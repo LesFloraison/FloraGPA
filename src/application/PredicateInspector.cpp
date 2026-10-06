@@ -34,7 +34,8 @@ Json inspectPredicate(const Frame &frame, Replay &replay, Id id) {
             {"resource", describePredicate(frame, id)},
             {"value", value.value ? Json(*value.value) : Json(nullptr)},
             {"status", value.status},
-            {"source", "replayed_gpu_query"},
+            {"source", value.status == "replay_baseline" ? "native_player_empty_begin_end"
+                                                       : "replayed_gpu_query"},
             {"captured_result_restored", false},
             {"bound", value.bound},
             {"predicate_value", value.predicateValue}};
