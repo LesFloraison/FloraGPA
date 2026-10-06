@@ -76,6 +76,54 @@ def summarize_native(runs, case):
     if all(h is None for h in hashes): return 'replayed_without_image'
     return 'repeat_stable' if len(set(hashes)) == 1 else 'repeat_variable'
 
+def fidelity_result(case, item):
+    """Capture fidelity and uninjected application pixels are separate evidence axes."""
+    assessment = case.get('native_workload_fidelity', 'unassessed')
+    if assessment not in {'unassessed', 'passed', 'capture_side_mismatch', 'capture_information_missing'}:
+        raise ValueError('Unknown capture fidelity assessment: ' + str(assessment))
+    expected = case.get('application_reference_rgba_sha256')
+    if expected is not None:
+        if (not isinstance(expected, str) or len(expected) != 64 or
+                any(c not in '0123456789abcdef' for c in expected) or
+                not case.get('application_reference_scope') or
+                not case.get('application_reference_evidence')):
+            raise ValueError('Application pixel reference requires a SHA-256, scope and evidence pointer')
+    runs = item.get('native', [])
+    complete = bool(runs) and all(r.get('exit_code') == 0 and r.get('report', {}).get('completed')
+                                 and r['report'].get('rgba_sha256') for r in runs)
+    matches = ([r['report']['rgba_sha256'] == expected for r in runs]
+               if complete and expected else [])
+    comparison = ('not_assessed' if not expected else 'not_run' if not runs else
+                  'unavailable' if not complete else 'matches' if all(matches) else 'differs')
+    return dict(capture_assessment=assessment, assessment_source='corpus_manifest',
+                reason=case.get('fidelity_reason'), replay_reference_scope=case.get('reference_scope'),
+                application_image_comparison=comparison, application_reference_sha256=expected,
+                application_reference_scope=case.get('application_reference_scope'),
+                application_reference_evidence=case.get('application_reference_evidence'),
+                per_run_application_match=matches, full_workload_equivalence_proven=False)
+
+
+def record_fidelity(case, item, queue):
+    fidelity = fidelity_result(case, item)
+    item['fidelity'] = fidelity
+    known = fidelity['capture_assessment'] in {'capture_side_mismatch', 'capture_information_missing'}
+    if known or fidelity['application_image_comparison'] == 'differs':
+        kind = fidelity['capture_assessment'] if known else 'application_image_difference'
+        queue[(kind, case['id'], None)] = dict(
+            kind=kind, severity='warning' if known else 'error', captures=[case['id']], occurrences=1,
+            event_id=None, resource_id=None, record_type=None,
+            reason=fidelity['reason'] or ('Capture fidelity differs from replay completion; inspect the '
+                'corpus evidence and independent application reference.'))
+
+
+def reference_evidence_valid(case, root):
+    evidence = case.get('application_reference_evidence')
+    if not evidence:
+        return True
+    path = (root / evidence['path']).resolve()
+    return path.is_relative_to(root) and path.is_file() and digest(path) == evidence['sha256']
+
+
 def boundary_output(boundary):
     kind = boundary.get('kind', 'texture')
     if kind == 'texture': return 'texture-storage', 'texture.bin'
@@ -161,6 +209,9 @@ def validation_failed(summary):
                 report.get('errors', 0) or
                 case.get('original_status') in {'replay_or_export_failed', 'export_adapter_failed'} or
                 any(x.get('runtime_dependency_audit') == 'failed' for x in case.get('native', [])) or
+                (case.get('fidelity', {}).get('application_image_comparison') == 'differs' and
+                 case['fidelity']['capture_assessment'] not in
+                 {'capture_side_mismatch', 'capture_information_missing'}) or
                 any(not x['passed'] for x in case.get('boundaries', [])) or
                 any(not x['passed'] for x in case.get('controls', []))):
             return True
@@ -182,6 +233,7 @@ def main():
     manifest = load(args.manifest)
     cases = manifest['cases']
     for case in cases:
+        fidelity_result(case, {}) # Reject malformed assessments/references before GPU work.
         for boundary in case.get('boundaries', []):
             try: boundary_output(boundary)
             except ValueError as error: p.error(str(error))
@@ -212,10 +264,15 @@ def main():
         directory = args.out/case_id; directory.mkdir()
         item = {'id':case_id,'family':case['family'],'policy':case['comparison_policy'],'native':[],'original':[],
                 'original_comparison_status': 'unavailable' if args.oracle_tools and not args.preflight_only else 'not_run'}
+        item['fidelity'] = fidelity_result(case, item)
         summary['cases'].append(item)
         capture = (root/case['path']).resolve()
         if not capture.is_relative_to(root) or not capture.is_file() or digest(capture) != case['sha256']:
             item['status']='capture_missing_or_hash_mismatch'
+            write(args.out/'validation.json',summary)
+            print(case_id,item['status'],flush=True); continue
+        if not reference_evidence_valid(case, root):
+            item['status']='reference_evidence_missing_or_hash_mismatch'
             write(args.out/'validation.json',summary)
             print(case_id,item['status'],flush=True); continue
         check = run([exe,'validate-frame',capture,'--out',directory/'preflight'],directory/'preflight.log',args.timeout,env)
@@ -305,6 +362,7 @@ def main():
                 record_boundary_failure(case_id, result, queue)
         else:item['status']='preflight_only'
         record_original_comparison(item,queue)
+        record_fidelity(case,item,queue)
         # Runtime failures can expose semantics outside offline coverage.
         if item['status'] in {'replay_failed','golden_mismatch'}:
             queue[('runtime',case_id,0)]={'kind':item['status'],'severity':'error','reason':'See native worker logs and retained reports',
@@ -317,9 +375,15 @@ def main():
     summary['counts']={}
     for item in summary['cases']:summary['counts'][item['status']]=summary['counts'].get(item['status'],0)+1
     summary['original_comparison_counts']={}
+    summary['capture_fidelity_counts']={}
+    summary['application_image_comparison_counts']={}
     for item in summary['cases']:
         status=item['original_comparison_status']
         summary['original_comparison_counts'][status]=summary['original_comparison_counts'].get(status,0)+1
+        for field,key in [('capture_fidelity_counts','capture_assessment'),
+                          ('application_image_comparison_counts','application_image_comparison')]:
+            value=item['fidelity'][key]
+            summary[field][value]=summary[field].get(value,0)+1
     write(args.out/'validation.json',summary)
     write(args.out/'coverage.json',summary['coverage']);write(args.out/'repair-queue.json',summary['queue'])
     return int(validation_failed(summary))

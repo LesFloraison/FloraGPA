@@ -585,10 +585,18 @@
         }
       ],
       "device_scope": "Record the actual replay adapter; fixture provenance may constrain interpretation.",
-      "reference_rgba_sha256": null,
-      "comparison_policy": "observe",
+      "reference_rgba_sha256": "ec34dbda4becc0cdcd86793e44cffecd10dcf40dbbb577adf2da0b4c5721cd97",
+      "comparison_policy": "exact_golden",
       "boundaries": [],
-      "controls": []
+      "controls": [],
+      "native_workload_fidelity": "passed",
+      "application_reference_rgba_sha256": "ec34dbda4becc0cdcd86793e44cffecd10dcf40dbbb577adf2da0b4c5721cd97",
+      "application_reference_scope": "Uninjected producer CPU oracle, also checked under capture injection; full 64x64 RGBA image",
+      "application_reference_evidence": {
+        "path": "analysis/capture_samples/msaa/manifest.json",
+        "sha256": "8951a6a7040ef9ffabf0a7ae2352bb9a150f8d02689b7b61f2099fa1893868f1"
+      },
+      "fidelity_reason": "Complete in-frame sample initialization matches the producer oracle"
     },
     {
       "id": "msaa__retained__3cc74122",
@@ -609,7 +617,15 @@
       "reference_rgba_sha256": null,
       "comparison_policy": "observe",
       "boundaries": [],
-      "controls": []
+      "controls": [],
+      "native_workload_fidelity": "capture_information_missing",
+      "application_reference_rgba_sha256": "ec34dbda4becc0cdcd86793e44cffecd10dcf40dbbb577adf2da0b4c5721cd97",
+      "application_reference_scope": "Uninjected producer CPU oracle, also checked under capture injection; full 64x64 RGBA image",
+      "application_reference_evidence": {
+        "path": "analysis/capture_samples/msaa/manifest.json",
+        "sha256": "8951a6a7040ef9ffabf0a7ae2352bb9a150f8d02689b7b61f2099fa1893868f1"
+      },
+      "fidelity_reason": "Frame-before per-sample contents were not saved; ordinary zero GenData cannot restore the retained MSAA samples. Original-player agreement does not restore the uninjected workload."
     },
     {
       "id": "no_draw__compute__6193260f",

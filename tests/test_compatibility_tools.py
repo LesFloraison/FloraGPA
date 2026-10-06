@@ -12,8 +12,85 @@ from validate_corpus import image_difference, original_rgba, summarize_native, r
 from catalog_captures import catalog, digest
 from validate_corpus import validation_failed, original_comparison_status, record_original_comparison
 from validate_corpus import boundary_output, summarize_boundary, record_boundary_failure
+from validate_corpus import fidelity_result, record_fidelity, reference_evidence_valid
+from validate_compatibility_gate import check_case
 
 class CompatibilityToolsTests(unittest.TestCase):
+    def application_case(self, assessment='passed'):
+        return dict(id='sample', native_workload_fidelity=assessment,
+                    application_reference_rgba_sha256='a'*64,
+                    application_reference_scope='Uninjected producer oracle',
+                    application_reference_evidence={'path':'oracle.json','sha256':'b'*64})
+
+    def replay_item(self, hashes):
+        return dict(id='sample',status='repeat_stable',original_comparison_status='observed_equal',
+                    preflight={'exit_code':0,'report':{'errors':0}},
+                    native=[dict(exit_code=0,report={'completed':True,'rgba_sha256':h}) for h in hashes])
+
+    def test_original_equality_does_not_prove_application_fidelity(self):
+        item=self.replay_item(['b'*64]*2);queue={}
+        record_fidelity(self.application_case(),item,queue)
+        self.assertEqual(item['fidelity']['application_image_comparison'],'differs')
+        self.assertFalse(item['fidelity']['full_workload_equivalence_proven'])
+        self.assertTrue(validation_failed({'cases':[item]}))
+        self.assertEqual(next(iter(queue.values()))['severity'],'error')
+
+    def test_gate_does_not_hide_application_mismatch_in_a_negative_suite(self):
+        spec=self.application_case();item=self.replay_item(['b'*64]*2)
+        record_fidelity(spec,item,{})
+        # A suite with an expected rejection already exits nonzero. Check each
+        # application's mismatch independently of that aggregate process exit.
+        with self.assertRaisesRegex(ValueError,'Unexpected independent application'):
+            check_case(item,spec,None,Path('.'),2)
+
+    def test_known_loss_keeps_its_classification_even_if_pixels_match(self):
+        case=self.application_case('capture_information_missing')
+        for pixels,comparison in [('a','matches'),('b','differs')]:
+            item=self.replay_item([pixels*64]*2);queue={};record_fidelity(case,item,queue)
+            self.assertEqual(item['fidelity']['capture_assessment'],'capture_information_missing')
+            self.assertEqual(item['fidelity']['application_image_comparison'],comparison)
+            self.assertFalse(validation_failed({'cases':[item]}))
+            self.assertEqual(next(iter(queue.values()))['severity'],'warning')
+            item['status']='golden_mismatch'
+            self.assertTrue(validation_failed({'cases':[item]}))
+
+    def test_capture_side_mismatch_metadata_is_not_lost(self):
+        item=self.replay_item(['a'*64]*2)
+        case={'id':'sample','native_workload_fidelity':'capture_side_mismatch',
+              'reference_scope':'Captured frame, not uninjected oracle'}
+        queue={};record_fidelity(case,item,queue)
+        self.assertEqual(item['fidelity']['capture_assessment'],'capture_side_mismatch')
+        self.assertEqual(item['fidelity']['application_image_comparison'],'not_assessed')
+        self.assertFalse(item['fidelity']['full_workload_equivalence_proven'])
+        self.assertEqual(len(queue),1)
+
+    def test_fidelity_checks_all_repeats_and_requires_completed_images(self):
+        case=self.application_case()
+        item=self.replay_item(['a'*64,'b'*64])
+        self.assertEqual(fidelity_result(case,item)['per_run_application_match'],[True,False])
+        item['native'][1]['exit_code']=1
+        self.assertEqual(fidelity_result(case,item)['application_image_comparison'],'unavailable')
+        item=self.replay_item([None,None])
+        self.assertEqual(fidelity_result(case,item)['application_image_comparison'],'unavailable')
+        self.assertEqual(fidelity_result(case,{})['application_image_comparison'],'not_run')
+        self.assertEqual(fidelity_result({},self.replay_item(['a'*64]*2))['capture_assessment'],'unassessed')
+
+    def test_fidelity_manifest_rejects_unknown_and_unlocated_assertions(self):
+        with self.assertRaises(ValueError):fidelity_result({'native_workload_fidelity':'probably'}, {})
+        case=self.application_case();case['application_reference_evidence']=None
+        with self.assertRaises(ValueError):fidelity_result(case,{})
+        case=self.application_case();case['application_reference_rgba_sha256']='invalid'
+        with self.assertRaises(ValueError):fidelity_result(case,{})
+
+    def test_application_reference_evidence_is_hash_bound_and_contained(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root=Path(temporary).resolve();file=root/'oracle.json';file.write_bytes(b'proof')
+            case={'application_reference_evidence':{'path':'oracle.json','sha256':digest(file)}}
+            self.assertTrue(reference_evidence_valid(case,root))
+            file.write_bytes(b'changed');self.assertFalse(reference_evidence_valid(case,root))
+            case['application_reference_evidence']['path']='../oracle.json'
+            self.assertFalse(reference_evidence_valid(case,root))
+
     def test_stable_wrong_resource_bytes_fail_the_boundary_and_batch(self):
         boundary = {'event':10,'resource':20,'expect_stable':True,
                     'expected_storage_sha256':hashlib.sha256(b'right').hexdigest()}

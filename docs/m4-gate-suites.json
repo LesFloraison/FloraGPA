@@ -7,7 +7,7 @@
     {
       "id": "corpus",
       "manifest": "docs/capture-corpus.json",
-      "manifest_sha256": "015b787045b187708306590f085034664e4f5f6e70d092e10428c6a7837cef08",
+      "manifest_sha256": "3f2fc9c86a70c4fe77f8debae643b74fcfe3ef2d0c6c24f686044336fa15e655",
       "capture_root": "legacy",
       "subdirectory": "",
       "expected_rejections": {

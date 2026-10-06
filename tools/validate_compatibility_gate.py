@@ -9,6 +9,7 @@ import json
 from pathlib import Path
 import subprocess
 import sys
+from validate_corpus import fidelity_result
 
 
 def load(path):
@@ -33,6 +34,12 @@ def require(condition, reason):
 
 def check_case(case, specification, negative, directory, repeat):
     """Check actual reports and logs, including count/completion/dependency evidence."""
+    require(case.get('fidelity') == fidelity_result(specification, case),
+            'Capture/application fidelity assessment missing or changed')
+    require(case['fidelity']['application_image_comparison'] != 'differs' or
+            case['fidelity']['capture_assessment'] in
+            {'capture_side_mismatch', 'capture_information_missing'},
+            'Unexpected independent application image difference')
     preflight = case.get('preflight', {})
     report = preflight.get('report') or {}
     require(not preflight.get('timed_out') and report.get('completed') is True and
@@ -129,6 +136,8 @@ def main():
     summary = dict(schema='FloraGPA compatibility gate 1', completed=False, passed=False,
                    exe_sha256=digest(exe), suites_sha256=digest(args.suites),
                    repeat=2, suites=[], cases=0, positive_cases=0, rejected_cases=0,
+                   capture_fidelity_counts={}, application_image_comparison_counts={},
+                   completed_with_known_capture_limitations=0,
                    unique_capture_sha256={}, limits=[
                        'Registered corpus gate, not complete API/version coverage',
                        'No original-player comparison is newly performed by this runner',
@@ -167,6 +176,14 @@ def main():
                 summary['cases'] += 1
                 summary['rejected_cases' if case['id'] in suite['expected_rejections']
                         else 'positive_cases'] += 1
+                for field, key in [('capture_fidelity_counts', 'capture_assessment'),
+                                   ('application_image_comparison_counts', 'application_image_comparison')]:
+                    value = case['fidelity'][key]
+                    summary[field][value] = summary[field].get(value, 0) + 1
+                if (case['id'] not in suite['expected_rejections'] and
+                        case['fidelity']['capture_assessment'] in
+                        {'capture_side_mismatch', 'capture_information_missing'}):
+                    summary['completed_with_known_capture_limitations'] += 1
                 summary['unique_capture_sha256'].setdefault(spec['sha256'], []).append(name+'/'+case['id'])
             summary['suites'].append(dict(id=name, passed=True, report_sha256=digest(output/'validation.json'),
                                          cases=len(specifications), rejections=len(suite['expected_rejections'])))
