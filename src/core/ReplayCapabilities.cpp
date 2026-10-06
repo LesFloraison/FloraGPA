@@ -77,7 +77,7 @@ ReplayCapability replayCapability(uint16_t t) {
         return {"metadata", "src/core/InspectionRecords.cpp;src/replay/Replay.cpp",
                 "tests/ObjectObservationTests.cpp;docs/OBJECT_OBSERVATION_AUDIT.md"};
     if (isMapObservation(t))
-        return {"metadata", "src/core/MapRecords.cpp;src/replay/Replay.cpp",
+        return {t == 0x34ec ? "execute" : "metadata", "src/core/MapRecords.cpp;src/replay/Replay.cpp",
                 "tests/MapRecordTests.cpp;docs/MAP_OBSERVATION_AUDIT.md"};
     if ((t >= 0x3278 && t <= 0x327e) || finishCommandListVersion(t) ||
         in(t, {0x304b, 0x304c, 0x304d, 0x3528, 0x3537, 0x3539, 0x353a, 0x353d, 0x4029, 0x402a, 0x30ea, 0x31ea,

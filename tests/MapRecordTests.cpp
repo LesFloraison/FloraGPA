@@ -1,5 +1,6 @@
 #include "SyntheticCapture.h"
 #include "application/FrameValidation.h"
+#include "core/CopyCommands.h"
 #include "core/MapRecords.h"
 #include "core/ReplayCapabilities.h"
 #include <QTemporaryDir>
@@ -33,6 +34,105 @@ Capture base(bool writable = false) {
 class MapRecordTests final : public QObject {
     Q_OBJECT
   private slots:
+    void sparseOriginals_data() {
+        QTest::addColumn<int>("mode");
+        QTest::addColumn<bool>("warp");
+        for (int mode = 0; mode < 8; ++mode)
+            for (bool warp : {false, true})
+                QTest::newRow(qPrintable(QString("%1-%2").arg(mode).arg(warp))) << mode << warp;
+    }
+    void sparseOriginals() {
+        QFETCH(int, mode);
+        QFETCH(bool, warp);
+        const auto root = qEnvironmentVariable("FLORA_SPARSE_MAP_CAPTURES");
+        if (root.isEmpty())
+            QSKIP("Set FLORA_SPARSE_MAP_CAPTURES to the original sparse Map corpus");
+        const auto folder = root + QString("/%1/").arg(mode);
+        auto bytes = [&](const QString &name) {
+            QFile file(folder + "hardware/" + name);
+            if (!file.open(QIODevice::ReadOnly))
+                throw std::runtime_error("Missing sparse Map producer oracle");
+            const auto data = file.readAll();
+            return Raw(reinterpret_cast<const uint8_t *>(data.data()),
+                       reinterpret_cast<const uint8_t *>(data.data()) + data.size());
+        };
+        const auto initial = bytes("before.bin"), expected = bytes("after.bin");
+        QVERIFY(initial != expected);
+        Frame frame((folder + "capture.gpa_frame").toStdWString());
+        const auto audit = auditMapRecords(frame);
+        if (mode == 7) {
+            unsigned noWaitSuccess = 0;
+            for (const auto &[id, record] : audit)
+                if (frame.entry(id).type == 0x34ec && record.result == 0 && record.flags == 0x100000)
+                    ++noWaitSuccess;
+            QCOMPARE(noWaitSuccess, 2u);
+        }
+        std::vector<Id> writes;
+        for (const auto &[id, entry] : frame.entries()) {
+            if (entry.category == 7 && entry.type == 0x246)
+                writes.push_back(id);
+        }
+        QCOMPARE(writes.size(), size_t(2));
+        const auto &first = requireMapRecord(audit, writes[0]);
+        const auto &second = requireMapRecord(audit, writes[1]);
+        QCOMPARE(first.resource, second.resource);
+        QCOMPARE(first.kind, mode >= 5 ? 4u : 2u);
+        QCOMPARE(second.kind, mode >= 5 ? 5u : 3u);
+        std::vector<Id> copyTargets;
+        for (const auto &[id, entry] : frame.entries())
+            if (entry.category == 7 && entry.type == 0x3e) {
+                const auto copy = readCopyCommand(entry.type, frame.payload(id));
+                if (copy.source == first.resource)
+                    copyTargets.push_back(copy.destination);
+            }
+        QCOMPARE(copyTargets.size(), size_t(2));
+        const Id copyTarget = copyTargets.front();
+        // These originals store full GenData even though the application writes
+        // only four pixels. They are not evidence for texture GenDataDiff.
+        for (unsigned n = 0; n < 2; ++n) {
+            const auto &record = requireMapRecord(audit, writes[n]);
+            QCOMPARE(frame.entry(record.data).type, uint16_t(1));
+            const auto saved = frame.data(record.data);
+            QCOMPARE(Raw(saved.begin(), saved.end()), n ? expected : initial);
+        }
+        QCOMPARE(validateFrame(frame.path())["errors"], nlohmann::json(0));
+        auto storage = [&](Replay &replay, Id resource) {
+            return mode >= 4 ? replay.readBuffer(resource) : replay.readTexture(resource);
+        };
+        ReplayOptions options;
+        options.warp = warp;
+        Replay replay(frame, options);
+        for (unsigned repeat = 0; repeat < 2; ++repeat) {
+            replay.run();
+            QCOMPARE(storage(replay, first.resource), expected);
+            QCOMPARE(storage(replay, copyTarget), mode >= 6 ? initial : expected);
+            QCOMPARE(storage(replay, copyTargets.back()), expected);
+            QCOMPARE(replay.counts.at("Map"), uint64_t(2));
+            QCOMPARE(replay.counts.at("CopyResource"), uint64_t(mode >= 6 ? 4 : 2));
+            QCOMPARE(replay.counts.at("map_read_synchronizations"), uint64_t(mode >= 6 ? 3 : 2));
+            if (mode >= 6) {
+                Raw image;
+                for (unsigned pixel = 0; pixel < 64; ++pixel)
+                    image.insert(image.end(), initial.begin(), initial.begin() + 4);
+                QCOMPARE(replay.output().rgba, image);
+            }
+        }
+        for (bool before : {true, false}) {
+            options.until = writes[1];
+            options.before = before;
+            Replay prefix(frame, options);
+            prefix.run();
+            QCOMPARE(storage(prefix, first.resource), before ? initial : expected);
+            QCOMPARE(storage(prefix, copyTarget), initial); // The second copy has not run.
+        }
+        options.until = 0;
+        options.before = false;
+        options.disabled.insert(writes[1]);
+        Replay omitted(frame, options);
+        omitted.run();
+        QCOMPARE(storage(omitted, first.resource), initial);
+        QCOMPARE(storage(omitted, copyTarget), initial);
+    }
     void diffBytes_data() {
         QTest::addColumn<bool>("texture");
         QTest::addColumn<bool>("warp");
@@ -197,9 +297,10 @@ class MapRecordTests final : public QObject {
             replay.run();
             QCOMPARE(replay.readBuffer(2), pack(10u, 20u, 30u, 40u));
             QCOMPARE(replay.counts.at("map_read_observations"), uint64_t(1));
+            QCOMPARE(replay.counts.at("map_read_synchronizations"), uint64_t(1));
             QCOMPARE(replay.counts.at("unmap_observations"), uint64_t(1));
         }
-        QCOMPARE(std::string(replayCapability(0x34ec).handling), std::string("metadata"));
+        QCOMPARE(std::string(replayCapability(0x34ec).handling), std::string("execute"));
         QCOMPARE(std::string(replayCapability(0x34ed).handling), std::string("metadata"));
     }
     void writesStillExecute_data() { readObservations_data(); }
@@ -306,6 +407,11 @@ class MapRecordTests final : public QObject {
         QCOMPARE(record.pairedEvent, Id(0));
         QVERIFY(record.result < 0);
         QCOMPARE(validateFrame(path.toStdWString())["errors"], nlohmann::json(0));
+        ReplayOptions options;
+        options.warp = true;
+        Replay replay(f, options);
+        replay.run();
+        QVERIFY(!replay.counts.contains("map_read_synchronizations"));
     }
     void prefixAndPayloadOverride() {
         auto c = base();

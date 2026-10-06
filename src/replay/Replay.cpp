@@ -202,10 +202,11 @@ IUnknown *Replay::object(Id id) {
             if ((resource.data && info.samples == 1) || options_.textures.contains(id)) {
                 try {
                     for (const auto &sub : textureInitialSubresources(resource, data))
-                        initial.push_back({data.data() + size_t(sub.offset), sub.rowPitch, UINT(sub.slicePitch)});
+                        initial.push_back(
+                            {data.data() + size_t(sub.offset), sub.rowPitch, UINT(sub.slicePitch)});
                 } catch (const std::exception &error) {
-                    throw std::runtime_error("Texture initial data " + std::to_string(resource.data) +
-                                             ": " + error.what());
+                    throw std::runtime_error("Texture initial data " + std::to_string(resource.data) + ": " +
+                                             error.what());
                 }
             }
             auto init = initial.empty() ? nullptr : initial.data();
@@ -844,9 +845,24 @@ void Replay::command(const Entry &e) {
             throw std::runtime_error("Map observation payload edits are not supported");
         if (!mapRecordAudit_)
             mapRecordAudit_ = auditMapRecords(frame_);
-        requireMapRecord(*mapRecordAudit_, e.id);
-        // CPU READ results cannot change GPU storage. Writable 0x246 playback
-        // already maps, copies saved bytes and unmaps at its own event boundary.
+        const auto &record = requireMapRecord(*mapRecordAudit_, e.id);
+        if (t == 0x34ec && record.result == 0) {
+            // A successful CPU read also waits for the resource's preceding GPU
+            // use. Omitting that wait lets later NO_OVERWRITE writes race an
+            // earlier queued copy. Reproduce availability, not captured pointers
+            // or CPU data. A saved DO_NOT_WAIT success is made ready on this
+            // device as well; its scheduling may differ from the capture device.
+            auto resource = get<ID3D11Resource>(record.resource);
+            D3D11_MAPPED_SUBRESOURCE mapped{};
+            ReplayAnnotation marker(captureAnnotation_.Get(), e.id, "MapReadSynchronization");
+            const auto operation = "Map READ synchronization at event " + std::to_string(e.id) +
+                                   ", resource " + std::to_string(record.resource);
+            check(context_->Map(resource, record.subresource, D3D11_MAP_READ, 0, &mapped), operation.c_str());
+            context_->Unmap(resource, record.subresource);
+            ++counts["map_read_synchronizations"];
+        }
+        // Writable 0x246 and the READ synchronization above each close their
+        // native mapping at the event boundary. Do not unmap them a second time.
         ++counts[t == 0x34ec ? "map_read_observations" : "unmap_observations"];
         return;
     }
