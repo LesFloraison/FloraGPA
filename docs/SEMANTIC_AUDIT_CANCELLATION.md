@@ -1,5 +1,9 @@
 # Cancel offline semantic scans and retry
 
+Update: the subsequent [context and lifetime cancellation work](LIFETIME_AUDIT_CANCELLATION.md)
+covers implicit context recovery and SO/CB lifetime searches. The counts and
+remaining limits below describe this earlier batch; its baseline is preserved.
+
 Reviewed 2026-10-06. Runtime commit: `14a7860`. This M5 change extends the
 [capture-load cancellation work](CAPTURE_LOAD_RECOVERY.md) into nine bulk
 semantic audits. It changes neither saved-data interpretation nor GPU execution.

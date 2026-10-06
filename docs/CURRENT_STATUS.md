@@ -1,7 +1,19 @@
 # Current capabilities and compatibility
 
 Reviewed **2026-10-06**. The user authorized M4, then M5, while keeping M3 open.
-The latest [occluded Present TEST correction](OCCLUDED_PRESENT_TEST.md) admits
+The latest [context/lifetime cancellation](LIFETIME_AUDIT_CANCELLATION.md) covers
+implicit context recovery and unused SO/CB searches, including nested Map audit
+and safe cache publication. Eight new lifetime fixtures cover 1,969 preflight
+interruptions; the five preceding semantic fixtures cover 6,530. Direct context
+and lifetime tests interrupt 129 additional positions with same-frame retry.
+Seven CTest suites, four packaged golden/negative checks and the portable Qt
+preflight panel pass without skipped rows. All 484 unique files retain exactly
+equal full preflight reports and exit codes. Runtime: `f940832`; package:
+`out/FloraGPA-lifetime-cancel-20261006/` (44 files). No new replay capability or
+full GPU matrix rerun is claimed. Individual decoders, synchronous I/O and GUI
+model population still prevent a universal cancellation latency bound.
+
+The preceding [occluded Present TEST correction](OCCLUDED_PRESENT_TEST.md) admits
 two original blt-model captures previously rejected at event 27. Saved
 `DXGI_STATUS_OCCLUDED` with TEST preserves RTV identity/storage and permits later
 in-frame writes; ordinary non-S_OK Present and unverified flags still reject.
@@ -21,8 +33,8 @@ retry; nine related CTest suites and four packaged golden/negative checks pass.
 Complete preflight reports for all 482 unique registered files are unchanged.
 The portable preflight-panel harness also passes failure/cancel/switch/retry.
 Runtime: `14a7860`; package: `out/FloraGPA-semantic-cancel-20261006/` (44 files).
-Cancellation within individual decoders, implicit recovery/lifetime searches and
-GUI model population remains incomplete. No new replay capability is claimed;
+Its implicit recovery/lifetime gap is covered by the newer batch above;
+individual decoders and GUI model population remain incomplete. No new replay capability is claimed;
 the preceding complete GPU matrix remains authoritative, and M3/M4/M5 stay open.
 
 The preceding [per-slot counter correction](COUNTER_SLOT_COMPATIBILITY.md) admits

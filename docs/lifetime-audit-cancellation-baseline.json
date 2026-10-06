@@ -1,0 +1,282 @@
+{
+  "schema": "FloraGPA context and lifetime audit cancellation baseline 1",
+  "reviewed": "2026-10-06",
+  "implementation_commit": "f94083262b75299e5250fbd31524ad727baef37a",
+  "package": "out/FloraGPA-lifetime-cancel-20261006",
+  "package_files": [
+    {
+      "path": "concrt140.dll",
+      "sha256": "2405355f0a58067b258f8df33c327e3a3d716eaac5a3a5aebb757842d85bd376"
+    },
+    {
+      "path": "D3Dcompiler_47.dll",
+      "sha256": "e994847e01a6f1e4cbdc5a864616ac262f67ee4f14db194984661a8d927ab7f4"
+    },
+    {
+      "path": "FloraGPA.Cli.exe",
+      "sha256": "d0921bebf7b3828ed2fe58d2c36151d4d2b84d9c7cecde3890c33340ed95e3bc"
+    },
+    {
+      "path": "FloraGPA.exe",
+      "sha256": "0de545cc2a8341febf8f8f3c8fe4b71c2160279c8f6e1783f2c736fdb6ea372a"
+    },
+    {
+      "path": "FloraGPA.Metrics.dll",
+      "sha256": "58b6278f2a93e783b1e8bb1290e9b0e51745f1a36825f296584f52159fd7c6db"
+    },
+    {
+      "path": "FloraGPA.Rdc.exe",
+      "sha256": "f4d21d43e661d24d392e91fc1a1f1460a20d1377fcf5075c57083ad289e82773"
+    },
+    {
+      "path": "FloraGPA.Worker.exe",
+      "sha256": "76758c6edd11ea3ba17972b235b9870a95056777c4cf552c75256314af4871e4"
+    },
+    {
+      "path": "generic/qtuiotouchplugin.dll",
+      "sha256": "a0b971771417d60c6c2dedf66d06f6e99bd3236aa1aa6949c7e4e08d51fb69f9"
+    },
+    {
+      "path": "iconengines/qsvgicon.dll",
+      "sha256": "7879ba1d2f293ad09c515de736add8c1023b0a4e80e2301d1283555efc2e8828"
+    },
+    {
+      "path": "imageformats/qgif.dll",
+      "sha256": "de1c1ea34cbc4156ce452023470e2145af4855128756d081d56e9a0997d0dda8"
+    },
+    {
+      "path": "imageformats/qico.dll",
+      "sha256": "af98cacb134525fab15cf2146a4e6b90266f14493e72e4d51df89a5caadea157"
+    },
+    {
+      "path": "imageformats/qjpeg.dll",
+      "sha256": "a8854ac38d2bb83e8018bdcbfc93420a876251b3d2a79933e1a3c9a8ed2a24cb"
+    },
+    {
+      "path": "imageformats/qsvg.dll",
+      "sha256": "486b395e23e258d03d54cdba045f129e9b1321f9ff12f99fe58293e0351b8caf"
+    },
+    {
+      "path": "licenses/COPYING.txt",
+      "sha256": "eb7e9ab9690124c5c9f42bdc81383d886a3dede26345b6ed15bbad7caf81f7ea"
+    },
+    {
+      "path": "licenses/Copyright.txt",
+      "sha256": "d1f5b8f5eba2e9073463bc29b30572d84033f59e8d8057a95dff37c3414305b9"
+    },
+    {
+      "path": "licenses/GPL-3.0-only.txt",
+      "sha256": "8ceb4b9ee5adedde47b31e975c1d90c73ad27b6b165a1dcd80c7c545eb65b903"
+    },
+    {
+      "path": "licenses/intel-metrics-discovery-MIT.txt",
+      "sha256": "653129790534d6a3e843eaafc62cf04299e7e238f6f411173e85ea7fc315c8ac"
+    },
+    {
+      "path": "licenses/LGPL-3.0-only.txt",
+      "sha256": "da7eabb7bafdf7d3ae5e9f223aa5bdc1eece45ac569dc21b3b037520b4464768"
+    },
+    {
+      "path": "licenses/LICENSE",
+      "sha256": "2004ee3ef8282a85f7dbd035dfacf63cf03d569537bc08655ffeb140ea3671c5"
+    },
+    {
+      "path": "licenses/LICENSE.FDL",
+      "sha256": "c256483c2d1e8a51b62fc7a44a58f21cb4ef23fa840c7d33e3658035fd8cf62f"
+    },
+    {
+      "path": "licenses/nlohmann-json-MIT.txt",
+      "sha256": "46a65cffd1ea955132d95a8dd921640714a8d6b537d2e4e482d31145ae95b603"
+    },
+    {
+      "path": "licenses/renderdoc-api-MIT.txt",
+      "sha256": "e3dccfaa75440c693b18fd2332347e3c810829bf55ec68302ea5a11db9951997"
+    },
+    {
+      "path": "msvcp140.dll",
+      "sha256": "0f885b509a685d2bbfa652fed26b5fb31d88fbdab0a978c641d1c7b8aa460aa9"
+    },
+    {
+      "path": "msvcp140_1.dll",
+      "sha256": "bfad5aef4c63a669e3c140655cdfdf395b6c979b400a447bd5dcb65ed8826c3d"
+    },
+    {
+      "path": "msvcp140_2.dll",
+      "sha256": "3ea06f0ee098b4823cb79599df3780e7f23cce52c19aac31d2a0d47efe33a5e9"
+    },
+    {
+      "path": "msvcp140_atomic_wait.dll",
+      "sha256": "640b2aefced484d0368eea5bdd06addd0658a3a70a49256e560d6923b404a479"
+    },
+    {
+      "path": "msvcp140_codecvt_ids.dll",
+      "sha256": "f2069a52880ec885ee7f0511186100eb7fada0411a2b4948fafea7735b878a18"
+    },
+    {
+      "path": "networkinformation/qnetworklistmanager.dll",
+      "sha256": "2f7c43bb4ec05e9f23a326ac69e84a6df071cdf7cc0bf87cde98f81958ad9bae"
+    },
+    {
+      "path": "platforms/qoffscreen.dll",
+      "sha256": "95391476bba1d0b50cc822b93d7509341024cc7c18cd615f82e471a3e3a61caa"
+    },
+    {
+      "path": "platforms/qwindows.dll",
+      "sha256": "d94c584a18829d11fbf3aefd07e7b1e189e0cf063a0515826960037efa7465df"
+    },
+    {
+      "path": "Qt6Core.dll",
+      "sha256": "22c113a5644b875b2c85482723cd5d2e6a3a4029169778fcc78adde08ef3b6aa"
+    },
+    {
+      "path": "Qt6Gui.dll",
+      "sha256": "19265a4e76efc12ef5f5bcf59be6c6a5b9b59ec4c89660797738bd2da7f719cc"
+    },
+    {
+      "path": "Qt6Network.dll",
+      "sha256": "75ff0896a618f4f5b602f391eb4917a55fd738b2e751d2cf18244a0de3619184"
+    },
+    {
+      "path": "Qt6Svg.dll",
+      "sha256": "1052c17a9df0eb82023e0e4c369bbd0af58e4c5fea3c27a4b5ee83b60c015492"
+    },
+    {
+      "path": "Qt6Widgets.dll",
+      "sha256": "e6d0b7e2e697de6ad985b97f9ed8b381c1c2172fcae87b6ab08455b3b7330f32"
+    },
+    {
+      "path": "styles/qmodernwindowsstyle.dll",
+      "sha256": "f6b88d403d7175f5b830d4958264690e5c8bbaf0148e1ccf42d52704b0480792"
+    },
+    {
+      "path": "THIRD_PARTY.md",
+      "sha256": "343009c9e4761e1c1dc645bd72fd470001c3a4e269384f0dfc4b0bf69c10f6ec"
+    },
+    {
+      "path": "tls/qcertonlybackend.dll",
+      "sha256": "ff0f1a60ec60fc23ec74ff5d325ddef05c1ed68fc89466bffc1d874c7c544adb"
+    },
+    {
+      "path": "tls/qschannelbackend.dll",
+      "sha256": "761178263b47a5f05e151806bb5854d9e5c9cbc67d08187724d80f9e317471f8"
+    },
+    {
+      "path": "vc_redist.x64.exe",
+      "sha256": "cc0ff0eb1dc3f5188ae6300faef32bf5beeba4bdd6e8e445a9184072096b713b"
+    },
+    {
+      "path": "vccorlib140.dll",
+      "sha256": "19839407c3fdbc824e5bce189bf68ddf8097f12ec28b757797ffa0415c144ddd"
+    },
+    {
+      "path": "vcruntime140.dll",
+      "sha256": "d5e4d9a3e835fa679450145d6a7d94e36573a509317111904d9b3712c30d9066"
+    },
+    {
+      "path": "vcruntime140_1.dll",
+      "sha256": "1f2d41c4aa5db0bc33ebf7b66d72943a817d7ce6cbe880502a9403823633093f"
+    },
+    {
+      "path": "vcruntime140_threads.dll",
+      "sha256": "219915cf20822f34d5e7c1fdd4e21ae7f3396881096c51036225fb8f84b47afa"
+    }
+  ],
+  "verification": {
+    "ctest_suites": 7,
+    "cancellation_rows": 21,
+    "new_lifetime_preflight_interruptions": 1969,
+    "preceding_semantic_preflight_interruptions": 6530,
+    "context_recovery_interruptions": 46,
+    "lifetime_proof_interruptions": 83,
+    "unique_capture_preflights": 484,
+    "changed_reports": 0,
+    "package_goldens_and_controls": 4,
+    "portable_preflight_ui_rows": 4,
+    "full_gpu_corpus_rerun": false
+  },
+  "evidence": [
+    {
+      "path": "artifacts/m5-lifetime-cancel-build.log",
+      "sha256": "32ba287920f7418626f82a130f40ec92b107e1c1f896a362d554516c601f220c"
+    },
+    {
+      "path": "artifacts/m5-lifetime-cancel-final-build.log",
+      "sha256": "f40e3cdfb48788026ba7b209b00e215c0959e874e7647d765de9ee9752ab89f5"
+    },
+    {
+      "path": "artifacts/m5-lifetime-cancel-tests-initial.txt",
+      "sha256": "be61f9fccdaa649bdf1d0b1689ee30ce5a64a714e69999dc329ac6695ab7a64b"
+    },
+    {
+      "path": "artifacts/m5-lifetime-cancel-tests-final.txt",
+      "sha256": "27393715dff1dae62c85b8dca7cd739c30624c75232609fd6b53a83c259b2197"
+    },
+    {
+      "path": "artifacts/m5-lifetime-cancel-frame-validation.txt",
+      "sha256": "1d5bd63841348aaa4d6a40c7109be773e35f4bc0a384b7bd46e1d02b9986b521"
+    },
+    {
+      "path": "artifacts/m5-lifetime-cancel-ctest.log",
+      "sha256": "1c69b10254563e4e0d30a5ec20c8305fbbab25b18be3d8d9c2bd5aa1730c8cf5"
+    },
+    {
+      "path": "artifacts/m5-lifetime-cancel-ctest-detail.log",
+      "sha256": "64a4d5fda0efcad1600932e03c6d7782e64484b78611d49d38cd714d3b4d1b0d"
+    },
+    {
+      "path": "artifacts/run_m5_lifetime_ctest.ps1",
+      "sha256": "12fd5356a6e426edca0af7fd772c9cb72dcab9751f9be3067e60e6a2cff69bf6"
+    },
+    {
+      "path": "artifacts/check_m5_lifetime_preflight.py",
+      "sha256": "45f1baaf45c887d2f41996de0fcb2728f9780102cf16c7b89308a32e015d2b0c"
+    },
+    {
+      "path": "artifacts/m5-lifetime-cancel-preflight/comparison.json",
+      "sha256": "2cbac07ea39fc0c4cf5fca0198fea78e4176eaa3247dbbb1e3ff76b631ba63b7"
+    },
+    {
+      "path": "artifacts/m5-lifetime-cancel-goldens/validation.json",
+      "sha256": "5e1dde1ab9876f50c472cdf84378931ffc3b5cd8e9700002b67d37bf81383ade"
+    },
+    {
+      "path": "artifacts/m5-lifetime-cancel-package.log",
+      "sha256": "af57f76906d3fad4e084ba37a3acd9c8662a14793d8b3faf5b3381c519a3e46b"
+    },
+    {
+      "path": "artifacts/m5-lifetime-cancel-portable-ui/validation.json",
+      "sha256": "4528757029b9fd18f3fe926ae5775f1e9435fff9a184528a8756620079e2aaed"
+    },
+    {
+      "path": "artifacts/m5-lifetime-cancel-portable-ui/preflight-ui.txt",
+      "sha256": "acf1a5372ebb51d760c8dfa3681661d31831214b42f281bcd66e142f1448a32a"
+    },
+    {
+      "path": "artifacts/m5-lifetime-cancel-qt-results/compatibility-ui-Release.txt",
+      "sha256": "81821672be2c765dec13dfce57e6ba2a516547f2f0cf6cf3d17cb27ceb4809c8"
+    },
+    {
+      "path": "artifacts/m5-lifetime-cancel-qt-results/constant-buffer-lifetimes-Release.txt",
+      "sha256": "0cb20ba2e5b2df56e4eec2002957e3c72681b59680b07cfc85f66bf206155160"
+    },
+    {
+      "path": "artifacts/m5-lifetime-cancel-qt-results/contexts-Release.txt",
+      "sha256": "de4ec2da110e27d7fd8747d1d707827de1160ad42a7dc6bcb270b1fdf79c2f01"
+    },
+    {
+      "path": "artifacts/m5-lifetime-cancel-qt-results/map-records-Release.txt",
+      "sha256": "deac9e233a79d3b25b9b21e54d0d7ebe068e9c71679376d568ea8920975d14c9"
+    },
+    {
+      "path": "artifacts/m5-lifetime-cancel-qt-results/so-lifetimes-Release.txt",
+      "sha256": "e6bdb73f4f566b8d0c9a62f2e1f2cba64bf0b58736e2310c880d6c0839d34d94"
+    }
+  ],
+  "limits": [
+    "Cooperative cancellation; no general latency bound",
+    "Individual decoders, copies, report/UI model construction and synchronous I/O retain uninterruptible work",
+    "An in-progress call_once from another thread is not preempted",
+    "Native offscreen Qt panel tests are not clean-machine or full production-GUI acceptance",
+    "No new replay capability; M3/M4/M5 remain open"
+  ]
+}
