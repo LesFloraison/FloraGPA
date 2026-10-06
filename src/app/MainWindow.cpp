@@ -369,8 +369,11 @@ MainWindow::~MainWindow() {
         loadCancel_->store(true);
     replayTimer_.stop();
     timeout_.stop();
-    if (job_)
+    if (job_) {
         CloseHandle(job_);
+        // waitForFinished may deliver finishWorker synchronously below.
+        job_ = nullptr;
+    }
     process_.kill();
     process_.waitForFinished(3000);
     loader_.waitForFinished();

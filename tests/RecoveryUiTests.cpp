@@ -7,11 +7,66 @@
 #include <QElapsedTimer>
 #include <QCryptographicHash>
 #include <Psapi.h>
+#include <TlHelp32.h>
+#include <QScopeGuard>
+
+// Observe the test executable's import used by the statically linked FloraUi.
+// No production binary on disk or other process is modified.
+extern "C" BOOL (WINAPI *__imp_CloseHandle)(HANDLE);
+static BOOL (WINAPI *nativeCloseHandle)(HANDLE) = nullptr;
+static volatile LONG failedCloseCalls = 0;
+static BOOL WINAPI observedCloseHandle(HANDLE handle) {
+    const BOOL result = nativeCloseHandle(handle);
+    const auto error = GetLastError();
+    if (!result && error == ERROR_INVALID_HANDLE)
+        InterlockedIncrement(&failedCloseCalls);
+    SetLastError(error);
+    return result;
+}
 #include <QtTest>
 
 using namespace flora;
 class RecoveryUiTests final : public QObject {
     Q_OBJECT
+    nlohmann::json ownership(MainWindow &window) {
+        nlohmann::json classes = nlohmann::json::object();
+        for (auto object : window.findChildren<QObject *>()) {
+            auto &count = classes[object->metaObject()->className()];
+            count = count.is_null() ? 1 : count.get<unsigned>() + 1;
+        }
+        auto log = window.findChild<QPlainTextEdit *>("taskLog");
+        nlohmann::json result{{"qobjects", classes},
+            {"log_blocks", log ? log->document()->blockCount() : 0},
+            {"log_characters", log ? log->document()->characterCount() : 0}};
+        if (!qEnvironmentVariableIsSet("FLORA_RECOVERY_HEAP"))
+            return result;
+        // Test-only snapshot: no allocation or Qt calls while a heap is locked.
+        std::vector<HANDLE> heaps(GetProcessHeaps(0, nullptr) + 32);
+        const auto count = GetProcessHeaps(DWORD(heaps.size()), heaps.data());
+        if (count > heaps.size()) {
+            result["heap_walk_complete"] = false;
+            return result;
+        }
+        uint64_t bytes = 0, blocks = 0;
+        bool complete = true;
+        for (DWORD i = 0; i < count; ++i) {
+            if (!HeapLock(heaps[i])) { complete = false; continue; }
+            PROCESS_HEAP_ENTRY entry{};
+            while (HeapWalk(heaps[i], &entry))
+                if (entry.wFlags & PROCESS_HEAP_ENTRY_BUSY) {
+                    bytes += entry.cbData;
+                    ++blocks;
+                }
+            const auto error = GetLastError();
+            HeapUnlock(heaps[i]);
+            complete = complete && error == ERROR_NO_MORE_ITEMS;
+        }
+        result["heap_walk_complete"] = complete;
+        result["heap_busy_bytes"] = bytes;
+        result["heap_busy_blocks"] = blocks;
+        result["heap_count"] = count;
+        return result;
+    }
     QAction *cancelAction(MainWindow &window) {
         for (auto action : window.findChildren<QAction *>())
             if (action->shortcut() == QKeySequence(Qt::Key_Escape))
@@ -29,6 +84,58 @@ class RecoveryUiTests final : public QObject {
         return hash.result().toHex();
     }
   private slots:
+    void closeActiveWorkerWithoutInvalidHandles() {
+        const auto root = qEnvironmentVariable("FLORA_TEST_CAPTURE_DIR");
+        if (root.isEmpty())
+            QSKIP("Set FLORA_TEST_CAPTURE_DIR for active original-worker shutdown");
+        nativeCloseHandle = __imp_CloseHandle;
+        DWORD oldProtection{};
+        QVERIFY(VirtualProtect(&__imp_CloseHandle, sizeof __imp_CloseHandle, PAGE_READWRITE, &oldProtection));
+        __imp_CloseHandle = observedCloseHandle;
+        const auto restore = qScopeGuard([&] {
+            __imp_CloseHandle = nativeCloseHandle;
+            DWORD ignored{};
+            VirtualProtect(&__imp_CloseHandle, sizeof __imp_CloseHandle, oldProtection, &ignored);
+        });
+        const auto probe = CreateEventW(nullptr, FALSE, FALSE, nullptr);
+        QVERIFY(probe);
+        CloseHandle(probe);
+        CloseHandle(probe);
+        QCOMPARE(LONG(failedCloseCalls), LONG(1)); // Negative control proves the observer works.
+        InterlockedExchange(&failedCloseCalls, 0);
+        auto window = std::make_unique<MainWindow>();
+        QSignalSpy done(window.get(), &MainWindow::taskFinished);
+        window->openCapture(root + "/bf1_2026_01_21__16_53_05.gpa_frame");
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 60000);
+        QVERIFY(done.last()[0].toBool());
+        window->replay();
+        HANDLE worker = nullptr;
+        auto locate = [&] {
+            const auto snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+            if (snapshot == INVALID_HANDLE_VALUE)
+                return false;
+            PROCESSENTRY32W entry{};
+            entry.dwSize = sizeof entry;
+            if (Process32FirstW(snapshot, &entry))
+                do {
+                    if (entry.th32ParentProcessID == GetCurrentProcessId() &&
+                        QString::fromWCharArray(entry.szExeFile) == "FloraGPA.Worker.exe") {
+                        worker = OpenProcess(SYNCHRONIZE | PROCESS_QUERY_LIMITED_INFORMATION, FALSE, entry.th32ProcessID);
+                        if (worker) break;
+                    }
+                } while (Process32NextW(snapshot, &entry));
+            CloseHandle(snapshot);
+            return worker != nullptr;
+        };
+        QTRY_VERIFY_WITH_TIMEOUT(locate(), 5000);
+        const auto release = qScopeGuard([&] { CloseHandle(worker); });
+        QTest::qWait(50); // Deliver QProcess::started and the job assignment.
+        QVERIFY(window->busy());
+        QCOMPARE(WaitForSingleObject(worker, 0), DWORD(WAIT_TIMEOUT));
+        window.reset();
+        QCOMPARE(WaitForSingleObject(worker, 5000), DWORD(WAIT_OBJECT_0));
+        QCOMPARE(LONG(failedCloseCalls), LONG(0));
+    }
     void cancelOpenThenRetry() {
         QTemporaryDir dir;
         const auto path = dir.filePath("frame.gpa_frame");
@@ -188,9 +295,16 @@ class RecoveryUiTests final : public QObject {
                     {"working_set", memory.WorkingSetSize}, {"handles", handles},
                     {"gdi_objects", GetGuiResources(GetCurrentProcess(), 0)},
                     {"user_objects", GetGuiResources(GetCurrentProcess(), 1)},
-                    {"rgba_sha256", golden.toStdString()}};
+                    {"rgba_sha256", golden.toStdString()}, {"ownership", ownership(window)}};
                 qInfo().noquote() << "recovery_observation" << QString::fromStdString(observation.dump());
             }
+        }
+        if (qEnvironmentVariableIsSet("FLORA_RECOVERY_HEAP")) {
+            const auto before = ownership(window);
+            window.findChild<QPlainTextEdit *>("taskLog")->clear();
+            QCoreApplication::sendPostedEvents(nullptr, QEvent::DeferredDelete);
+            qInfo().noquote() << "log_clear_control" << QString::fromStdString(
+                nlohmann::json({{"before", before}, {"after", ownership(window)}}).dump());
         }
         qInfo() << "Original recovery cycles:" << count * files.size();
     }
