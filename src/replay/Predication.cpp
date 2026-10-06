@@ -4,6 +4,31 @@
 #include <chrono>
 #include <thread>
 namespace flora {
+void Replay::prepareNormalizedPredicate(Id event, Id resource) {
+    if (!resource || frame_.entries().contains(resource))
+        return;
+    if (!normalizedPredication_)
+        normalizedPredication_ = auditNormalizedPredication(frame_);
+    const auto found = normalizedPredication_->find(event);
+    if (found == normalizedPredication_->end() || found->second.resource != resource)
+        readPredicate(frame_, resource); // Preserve the located missing-descriptor refusal.
+    if (!conditionPredicates_.contains(resource)) {
+        if (objects_.contains(resource))
+            throw std::runtime_error("Predicate condition identity collides with an existing replay object");
+        // Internal condition carrier, not a reconstructed captured descriptor.
+        // The witness proves value = (original comparison != completed result).
+        // An empty FALSE query therefore executes exactly when value is TRUE.
+        D3D11_QUERY_DESC desc{D3D11_QUERY_OCCLUSION_PREDICATE, 0};
+        Com<ID3D11Predicate> predicate;
+        check(device_->CreatePredicate(&desc, &predicate), "Create normalized condition carrier");
+        Unpredicated guard(context_.Get());
+        context_->Begin(predicate.Get());
+        context_->End(predicate.Get());
+        objects_[resource] = predicate;
+        conditionPredicates_.insert(resource);
+    }
+    ++counts["captured_predicate_conditions"];
+}
 void Replay::predicateCreation(const Entry &e) {
     if (!predicateCreationAudit_)
         predicateCreationAudit_ = auditPredicateCreations(frame_);
@@ -34,7 +59,7 @@ Com<ID3D11Predicate> Replay::createPredicate(Id id, bool readable) {
     return predicate;
 }
 void Replay::bindPredicate(Id id, uint32_t value) {
-    if (id)
+    if (id && !conditionPredicates_.contains(id))
         readPredicate(frame_, id);
     if (activePredicates_.contains(id))
         throw std::runtime_error("Cannot bind a predicate before End");
@@ -145,6 +170,13 @@ void Replay::resetPredicates() {
     predicateIsolationDepth_ = 0;
 }
 Replay::PredicateResult Replay::readPredicateResult(Id id, unsigned timeoutMs) {
+    if (conditionPredicates_.contains(id)) {
+        PredicateResult result;
+        result.status = "captured_condition";
+        result.bound = boundPredicate_ == id;
+        result.predicateValue = predicateValue_;
+        return result;
+    }
     auto desc = readPredicate(frame_, id);
     auto predicate = get<ID3D11Predicate>(id);
     PredicateResult result;

@@ -6,6 +6,7 @@
 #include "core/Frame.h"
 #include "core/IaBindings.h"
 #include "core/MapRecords.h"
+#include "core/NormalizedPredication.h"
 #include "core/OutputBindings.h"
 #include "core/PipelineBindings.h"
 #include "core/PipelineCreation.h"
@@ -173,6 +174,9 @@ class Replay {
     std::optional<PredicateCreationAudit> predicateCreationAudit_;
     std::set<Id> unissuedPredicates_;
     std::set<Id> baselinePredicates_;
+    std::optional<std::map<Id, NormalizedPredicateProof>> normalizedPredication_;
+    std::set<Id> conditionPredicates_;
+    void prepareNormalizedPredicate(Id event, Id resource);
     void predicateCreation(const Entry &);
     void classCreation(const Entry &);
     std::optional<PipelineCreationAudit> pipelineCreationAudit_;

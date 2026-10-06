@@ -3907,7 +3907,11 @@ void MainWindow::editSetter() {
         const auto id = values.at("predicate").get<Id>();
         int index = predicate->findData(QVariant::fromValue(qulonglong(id)));
         if (index < 0) {
-            predicate->addItem(QString("Missing %1").arg(id), QVariant::fromValue(qulonglong(id)));
+            const auto proofs = auditNormalizedPredication(*frame_);
+            const auto proof = proofs.find(event);
+            const bool condition = proof != proofs.end() && proof->second.resource == id;
+            predicate->addItem(QString(condition ? "Condition %1" : "Missing %1").arg(id),
+                               QVariant::fromValue(qulonglong(id)));
             index = predicate->count() - 1;
         }
         predicate->setCurrentIndex(index);

@@ -12,6 +12,7 @@
 #include "core/IaBindings.h"
 #include "core/InspectionRecords.h"
 #include "core/MapRecords.h"
+#include "core/NormalizedPredication.h"
 #include "core/OutputBindings.h"
 #include "core/PipelineBindings.h"
 #include "core/PipelineCreation.h"
@@ -92,6 +93,8 @@ Json validateFrame(const std::filesystem::path &path, const std::function<bool()
         std::set<Id> definedCounters;
         std::set<Id> completedPredicates, activePredicates;
         std::optional<PredicateBinding> predicateBinding;
+        const auto normalizedPredication = auditNormalizedPredication(frame);
+        Id normalizedBinding = 0;
         for (const auto &[id, e] : frame.entries()) {
             if (cancelled && cancelled()) {
                 report["cancelled"] = true;
@@ -138,6 +141,8 @@ Json validateFrame(const std::filesystem::path &path, const std::function<bool()
                         if (!resource)
                             return;
                         if (!frame.entries().contains(resource)) {
+                            if (binding && normalizedBinding == resource)
+                                return;
                             finding(&e, "error", "predicate_resource_missing",
                                     "Predicate descriptor is absent from the capture; saved control or "
                                     "GetData observations do not identify a native predicate descriptor",
@@ -170,6 +175,18 @@ Json validateFrame(const std::filesystem::path &path, const std::function<bool()
                     if (const auto operation = predicateOperation(e.type)) {
                         const auto p = readPredicateCommand(e.type, frame.payload(id));
                         requireImmediateContext(frame, p.context);
+                        if (*operation == PredicateOperation::Set) {
+                            normalizedBinding = 0;
+                            if (const auto proof = normalizedPredication.find(id);
+                                proof != normalizedPredication.end()) {
+                                normalizedBinding = p.resource;
+                                finding(&e, "warning", "captured_predicate_condition",
+                                        "Linked failed marker lookup proves normalized conditional execution. "
+                                        "Predicate descriptor and original query value remain unavailable",
+                                        p.resource);
+                                report["findings"].back()["witness_event"] = proof->second.witness;
+                            }
+                        }
                         predicateReference(p.resource, *operation == PredicateOperation::Set);
                         if (*operation == PredicateOperation::Set)
                             predicateBinding = PredicateBinding{p.resource, p.value};
@@ -178,9 +195,10 @@ Json validateFrame(const std::filesystem::path &path, const std::function<bool()
                             completedPredicates.erase(p.resource);
                         } else if (activePredicates.erase(p.resource))
                             completedPredicates.insert(p.resource);
-                    } else if (e.type == 0x242)
+                    } else if (e.type == 0x242) {
                         predicateBinding.reset();
-                    else if (isDraw(e.type)) {
+                        normalizedBinding = 0;
+                    } else if (isDraw(e.type)) {
                         const auto state = frame.state(frame.event(id).state);
                         predicateReference(predicateBinding ? predicateBinding->resource : state.predicate,
                                            true);

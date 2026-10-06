@@ -494,6 +494,8 @@ void Replay::bind(const State &s, bool compute) {
     context_->OMSetBlendState(get<ID3D11BlendState>(s.blend), s.blendFactor.data(), s.sampleMask);
     context_->OMSetDepthStencilState(get<ID3D11DepthStencilState>(s.depthState), s.stencilRef);
     const auto predicate = predicateBinding_.value_or(PredicateBinding{s.predicate, s.predicateValue});
+    if (conditionPredicates_.contains(predicate.resource) && !predicateBinding_)
+        throw std::runtime_error("Missing Predicate snapshot has no established normalized setter");
     bindPredicate(predicate.resource, predicate.value);
     if (compute || extended || outputHistory_) {
         std::array<ID3D11UnorderedAccessView *, 64> uavs{};
@@ -973,6 +975,7 @@ void Replay::command(const Entry &e) {
                                      : edit->second;
             // Explicit setters are authoritative until the next setter/ClearState.
             // Original captures can omit frame-created predicates from Draw snapshots.
+            prepareNormalizedPredicate(e.id, binding.resource);
             bindPredicate(binding.resource, binding.value);
             predicateBinding_ = binding;
             counts["SetPredication"]++;
@@ -1474,6 +1477,7 @@ void Replay::run(const std::function<void(Id, size_t, size_t)> &progress,
         resourceLods_[resource] = initial.value;
     unissuedPredicates_.clear();
     baselinePredicates_.clear();
+    conditionPredicates_.clear();
     undefinedCreatedCounters_.clear();
     missingInitialCounters_.clear();
     ignoredMsaaInitial_.clear();

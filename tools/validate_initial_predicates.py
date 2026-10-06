@@ -38,6 +38,8 @@ def main():
     p = argparse.ArgumentParser(__doc__)
     for name in ('captures', 'comparison', 'exe', 'qt-bin', 'out'):
         p.add_argument('--'+name, type=Path, required=True)
+    p.add_argument('--recovered-conditions', action='store_true',
+                   help='Require proof-backed condition replay for missing-descriptor originals')
     a = p.parse_args()
     root, exe, out = a.captures.resolve(), a.exe.resolve(strict=True), a.out.resolve()
     out.mkdir(parents=True, exist_ok=False)
@@ -48,7 +50,8 @@ def main():
         assert sha(root/'producer'/name) == digest
     report = dict(completed=False, exe_sha256=sha(exe), validator_sha256=sha(Path(__file__)),
                   manifest_sha256=sha(root/'manifest.json'),
-                  comparison_sha256=sha(a.comparison/'validation.json'), cases=[])
+                  comparison_sha256=sha(a.comparison/'validation.json'),
+                  recovered_conditions=a.recovered_conditions, cases=[])
     env = dict(os.environ)
     env.pop('GPA_LOCAL_INJECT', None)
     env['PATH'] = str(a.qt_bin.resolve())+os.pathsep+env['PATH']
@@ -88,8 +91,10 @@ def main():
                 assert measured['original_comparison_status'] == 'observed_equal'
                 assert all(r['report']['rgba_sha256'] == case['reference_rgba_sha256'] for r in measured['native'])
             else:
-                assert measured['status'] == 'replay_failed'
+                assert measured['status'] == ('repeat_stable' if a.recovered_conditions else 'replay_failed')
                 assert measured['original_status'] == 'replay_or_export_failed'
+                if a.recovered_conditions:
+                    assert all(r['report']['rgba_sha256'] == case['reference_rgba_sha256'] for r in measured['native'])
                 for n in (1, 2):
                     worker = (a.comparison/case['id']/f'original-{n}'/'worker.log').read_text(errors='replace')
                     assert 'Open failed: status=13' in worker
@@ -98,10 +103,22 @@ def main():
                        saved_comparison=saved, captured_interval_before_use=refresh,
                        captured_get_data=observations, inspections=[])
             report['cases'].append(row)
-            if present:
+            if present or a.recovered_conditions:
                 ends = [i for i, (cat, kind, raw) in entries.items() if cat == 7 and kind == 0x243]
-                boundaries = [('first_use', event, 'ready' if refresh else 'replay_baseline'),
-                              ('completed_interval', max(ends), 'ready')]
+                boundaries = [('first_use', event, 'captured_condition' if not present else
+                               'ready' if refresh else 'replay_baseline')]
+                if present:
+                    boundaries.append(('completed_interval', max(ends), 'ready'))
+                else:
+                    witnesses = [(i, struct.unpack('<QQi16sBIQ', raw))
+                                 for i, (cat, kind, raw) in entries.items() if cat == 7 and kind == 0x3166
+                                 and struct.unpack_from('<Q', raw)[0] == event]
+                    assert len(witnesses) == 1
+                    witness, fields = witnesses[0]
+                    assert fields[1] == resource and fields[2] & 0xffffffff == 0x887a0002
+                    assert fields[3].hex() == '00df6068758ab648a15ea89f698bf81f'
+                    assert fields[4:6] == (1, 0) and fields[6] != 0
+                    row['normalization_witness'] = witness
                 for warp in (False, True):
                     for label, at, status in boundaries:
                         folder = out/f'{mode}-{label}-{"warp" if warp else "hardware"}'
@@ -113,7 +130,13 @@ def main():
                         result = load(folder/'predicate.json')
                         assert result['status'] == status and result['captured_result_restored'] is False
                         assert result['value'] == (visible if status == 'ready' else None)
-                        assert result['source'] == ('replayed_gpu_query' if status == 'ready' else 'native_player_empty_begin_end')
+                        assert result['source'] == ('replayed_gpu_query' if status == 'ready' else
+                                                    'captured_normalized_predication' if status == 'captured_condition' else
+                                                    'native_player_empty_begin_end')
+                        if status == 'captured_condition':
+                            assert result['resource']['descriptor_available'] is False
+                            assert result['condition_allows_execution'] == (visible != comparison_value)
+                            assert result['resource']['condition_proofs'] == [dict(event=event, witness_event=witness, captured_value=saved)]
                         row['inspections'].append(dict(event=at, warp=warp, status=status, value=result['value']))
             save()
         report['completed'] = True

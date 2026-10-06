@@ -1,3 +1,4 @@
+#include "NormalizedPredicateCapture.h"
 #include "ClassCapture.h"
 #include "ConstantBufferCapture.h"
 #include "DepthStencilCapture.h"
@@ -2222,6 +2223,45 @@ class UiTests final : public QObject {
         QTRY_VERIFY_WITH_TIMEOUT(read->isEnabled(), 30000);
         QCOMPARE(fields->topLevelItemCount(), 0);
         QVERIFY(inspected.empty());
+    }
+    void normalizedPredicateInspection() {
+        using namespace flora;
+        QTemporaryDir dir;
+        const auto path = dir.filePath("normalized.gpa_frame");
+        testing::normalizedPredicateCapture().save(path);
+        MainWindow window;
+        window.resize(1500, 950);
+        window.show();
+        QSignalSpy done(&window, &MainWindow::taskFinished);
+        window.openCapture(path);
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        auto view = window.findChild<PredicateView *>("predicatePane");
+        auto tabs = window.findChild<QTabWidget *>("pipelineTabs");
+        window.findChild<QTabWidget *>("analysisTabs")->setCurrentWidget(tabs);
+        tabs->setCurrentWidget(view);
+        auto frame = std::make_shared<Frame>(path.toStdWString());
+        view->setSelection(frame, 1200);
+        auto resource = view->findChild<QComboBox *>("predicateResource");
+        QCOMPARE(resource->currentText(), QString("Condition 600"));
+        auto boundary = view->findChild<QComboBox *>("predicateBoundary");
+        auto read = view->findChild<QAction *>("readPredicate");
+        auto fields = view->findChild<QTreeWidget *>("predicateFields");
+        QSignalSpy inspected(view, &PredicateView::inspectionFinished);
+        for (int after : {0, 1}) {
+            boundary->setCurrentIndex(after);
+            QTRY_VERIFY_WITH_TIMEOUT(read->isEnabled(), 30000);
+            read->trigger();
+            QTRY_VERIFY_WITH_TIMEOUT(!inspected.empty(), 30000);
+            QCOMPARE(inspected.takeLast()[0].toBool(), bool(after));
+            if (after) {
+                QCOMPARE(fields->topLevelItem(0)->text(1), QString("Captured condition"));
+                QCOMPARE(fields->topLevelItem(1)->text(1), QString("—"));
+                QCOMPARE(fields->topLevelItem(7)->text(1), QString("true"));
+                snapshot(window, "normalized-predicate-condition");
+            } else
+                QCOMPARE(fields->topLevelItem(0)->text(0), QString("Error"));
+        }
     }
     void predicateStaleResult() {
         using namespace flora;

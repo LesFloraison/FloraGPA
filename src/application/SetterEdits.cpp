@@ -1,4 +1,5 @@
 #include "SetterEdits.h"
+#include "core/NormalizedPredication.h"
 #include "ApiCommands.h"
 #include "OutputEdits.h"
 #include "RasterizerEdits.h"
@@ -244,8 +245,14 @@ PredicateBinding validatePredicateSetter(const Frame &frame, Id event, const nlo
         throw std::runtime_error("Provide all and only the selected setter arguments");
     PredicateBinding result{integer(values["predicate"], UINT64_MAX),
                             uint32_t(integer(values["predicate_value"], UINT32_MAX))};
-    if (result.resource)
-        readPredicate(frame, result.resource);
+    if (result.resource) {
+        const auto proofs = !frame.entries().contains(result.resource)
+                                ? auditNormalizedPredication(frame)
+                                : std::map<Id, NormalizedPredicateProof>{};
+        const auto proof = proofs.find(event);
+        if (proof == proofs.end() || proof->second.resource != result.resource)
+            readPredicate(frame, result.resource);
+    }
     return result;
 }
 SamplerBinding validateSamplerSetter(const Frame &frame, Id event, const nlohmann::json &values) {

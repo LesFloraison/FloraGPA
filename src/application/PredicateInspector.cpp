@@ -3,6 +3,18 @@
 namespace flora {
 using Json = nlohmann::json;
 Json describePredicate(const Frame &frame, Id id) {
+    if (!frame.entries().contains(id)) {
+        Json proofs = Json::array();
+        for (const auto &[event, proof] : auditNormalizedPredication(frame))
+            if (proof.resource == id)
+                proofs.push_back({{"event", event}, {"witness_event", proof.witness},
+                                  {"captured_value", proof.value}});
+        if (!proofs.empty())
+            return {{"id", id}, {"type", nullptr}, {"query_type", nullptr},
+                    {"query_name", "unavailable"}, {"query_flags", nullptr},
+                    {"descriptor_available", false}, {"condition_proofs", proofs},
+                    {"initial_result_source", "captured_normalized_predication"}};
+    }
     auto desc = readPredicate(frame, id);
     Json out{{"id", id},
              {"type", 0x96},
@@ -30,14 +42,18 @@ Json describePredicate(const Frame &frame, Id id) {
 }
 Json inspectPredicate(const Frame &frame, Replay &replay, Id id) {
     auto value = replay.readPredicateResult(id);
-    return {{"resource_id", id},
+    Json result{{"resource_id", id},
             {"resource", describePredicate(frame, id)},
             {"value", value.value ? Json(*value.value) : Json(nullptr)},
             {"status", value.status},
-            {"source", value.status == "replay_baseline" ? "native_player_empty_begin_end"
+            {"source", value.status == "captured_condition" ? "captured_normalized_predication"
+                       : value.status == "replay_baseline" ? "native_player_empty_begin_end"
                                                        : "replayed_gpu_query"},
             {"captured_result_restored", false},
             {"bound", value.bound},
             {"predicate_value", value.predicateValue}};
+    if (value.status == "captured_condition")
+        result["condition_allows_execution"] = value.bound ? Json(value.predicateValue != 0) : Json(nullptr);
+    return result;
 }
 } // namespace flora

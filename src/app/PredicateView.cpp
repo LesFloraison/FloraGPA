@@ -1,5 +1,6 @@
 #include "PredicateView.h"
 #include "application/PredicateInspector.h"
+#include "core/NormalizedPredication.h"
 #include <QAction>
 #include <QComboBox>
 #include <QFileDialog>
@@ -70,6 +71,11 @@ void PredicateView::setSelection(std::shared_ptr<const Frame> frame, Id event) {
             for (const auto &[id, e] : frame_->entries())
                 if (e.category == 5 && e.type == 0x96)
                     resources_->addItem(QString("Predicate %1").arg(id), QVariant::fromValue(qulonglong(id)));
+        if (frame_)
+            for (const auto &[bindingEvent, proof] : auditNormalizedPredication(*frame_))
+                if (resources_->findData(QVariant::fromValue(qulonglong(proof.resource))) < 0)
+                    resources_->addItem(QString("Condition %1").arg(proof.resource),
+                                        QVariant::fromValue(qulonglong(proof.resource)));
     }
     event_ = event;
     invalidate();
@@ -109,7 +115,8 @@ bool PredicateView::finish(uint64_t request, const nlohmann::json &result) {
         emit inspectionFinished(false);
         return true;
     }
-    add("Status", result["status"] == "replay_baseline" ? nlohmann::json("Replay baseline") : result["status"]);
+    add("Status", result["status"] == "captured_condition" ? nlohmann::json("Captured condition")
+                  : result["status"] == "replay_baseline" ? nlohmann::json("Replay baseline") : result["status"]);
     add("Result", result["value"]);
     add("Bound", result["bound"]);
     add("Predicate value", result["predicate_value"]);
@@ -117,9 +124,13 @@ bool PredicateView::finish(uint64_t request, const nlohmann::json &result) {
     add("Flags", result["resource"]["query_flags"]);
     add("Source", result["source"])
         ->setToolTip(1,
-                     result["status"] == "replay_baseline"
+                     result["status"] == "captured_condition"
+                         ? "Execution follows a proven saved condition. The captured Predicate descriptor and query result are unavailable."
+                     : result["status"] == "replay_baseline"
                          ? "Empty query initialized for replay. The application's earlier query result is unknown."
                          : "Actual GPU query at the selected boundary; captured return values are not restored.");
+    if (result.contains("condition_allows_execution"))
+        add("Allows execution", result["condition_allows_execution"]);
     updateActions();
     emit inspectionFinished(true);
     return true;
