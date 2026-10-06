@@ -1,0 +1,95 @@
+{
+  "schema": "FloraGPA counter usage compatibility baseline 1",
+  "reviewed": "2026-10-06",
+  "implementation_commit": "c386d3a48092a28fb852fc4beaab51815827b868",
+  "producer_commit": "96caae35106bd1506a4567c4dcf6f19aee96c77b",
+  "stages_complete": {
+    "M3": false,
+    "M4": false,
+    "M5": false
+  },
+  "package": "out/FloraGPA-counter-usage-20261006",
+  "package_files": 45,
+  "changed_package_files": [
+    "FloraGPA.Cli.exe",
+    "FloraGPA.exe",
+    "FloraGPA.Worker.exe"
+  ],
+  "package_executables": {
+    "FloraGPA.Cli.exe": "c8e1f0d320fdae324faee99f00f315560f3c30fad24089c5a5ec4639ab0b83af",
+    "FloraGPA.exe": "3e692b6a925016cea547cad7d30454c097dde4960be71183a2a2f203148bbdf7",
+    "FloraGPA.Worker.exe": "8923509c3f64b19121193a887190ca1cf9fb794b7bf8e20cae5cbbd09abf5bf7"
+  },
+  "inventory": {
+    "registrations": 489,
+    "unique_hashes": 479,
+    "positive_registrations": 463,
+    "positive_unique_hashes": 453,
+    "rejections": 26
+  },
+  "module_ledger_unchanged": {
+    "ported": 72,
+    "partial": 117,
+    "pending": 15
+  },
+  "counts": {
+    "ordinary_attempts": 978,
+    "positive_attempts": 926,
+    "rejection_attempts": 52,
+    "controls": 494,
+    "control_runs": 674,
+    "boundary_runs": 692,
+    "suites": 29,
+    "ctest_suites": 11,
+    "counter_unit_passed_rows": 27,
+    "ui_passed_rows": 59,
+    "ui_skips": 0,
+    "producer_frames": 72,
+    "original_captures": 3,
+    "paired_flora_attempts": 6,
+    "paired_original_attempts": 6,
+    "goldens": 4
+  },
+  "matrix_passed": true,
+  "matrix_assembly": "First serial runner passed 28 suites then rejected the last manifest before execution because its hash used CRLF bytes. Corrected LF hash; ran last suite separately with the identical binary. Rechecked all reports through the same check_case verifier and rehashed native artifacts. Original interrupted gate remains incomplete and preserved.",
+  "previous_comparison": {
+    "registrations": 486,
+    "preflight_changes": [],
+    "status_changes": [],
+    "deterministic_image_changes": []
+  },
+  "evidence": {
+    "artifacts/m4-counter-usage-originals-final/manifest.json": "1d3664a2fa07ec717568de323c033c6a2d7a9682f49897a5da8319d2893bf778",
+    "artifacts/m4-counter-usage-before/validation.json": "a2f73288350ba9b92c8ec6d4bfd669a9de23415968448e2c53c56e444b49694f",
+    "artifacts/m4-counter-usage-after/validation.json": "a0f1a4f30ba0c60e7c365d8579ebcbe312e82cc1f9a2ee9a000e1fb605cb2497",
+    "artifacts/m4-counter-usage-gate/gate.json": "e2820b37d370182ecb54cffc3888cf853d5fe91475e8fa1aa483dffcec140315",
+    "artifacts/m4-counter-usage-final-suite/gate.json": "e4e44ffeb56d6efbdd70e2402f32b083702cc21e23f1066e8d69aab2598594a8",
+    "artifacts/m4-counter-usage-only-suites.json": "4275c1611f155b5fc14e929143ce2cfca1464506dc82f4d311cede7db2522962",
+    "artifacts/m4-counter-usage-verified-gate.json": "a2b26330e8e876bb731560ec07b9fb65324a79a7b51349034f32a9474d596fe1",
+    "artifacts/verify_counter_usage_batches.py": "72d3e0eb6b1868a940694bf34ce8110c5c8996b66de07e7e02ea1a7a04a4e88f",
+    "artifacts/compare_counter_usage_gate.py": "47335fd1f09ad518e756c6131d0fcb973dc78b1d2398331a178aca2dc6b6412e",
+    "artifacts/m4-counter-usage-previous-comparison.json": "e07f38c58449b5a361709e416ecd6d9d1691d7ff344505b958226efc6765373b",
+    "artifacts/m4-counter-usage-ctest.log": "b6b388f2633bebcad06aaad4925ed16ca698e04d7aa968d72c9b4cf67612e1ba",
+    "artifacts/m4-counter-usage-accepted-unit.log": "1fe6eef78757f8f2fb2c8e81b7c869ec5ed091ae36e630e453d32320ab862cbb",
+    "artifacts/m4-counter-usage-ui.log": "87960fc87fd911d00aeb938c490e275867bf90e06fd9c96ea79ee16b44576211",
+    "artifacts/m4-counter-usage-class-creation.log": "63526b3c43a7aaf9c8c1710290e9adad82d1131c1735d38f701ca20ee98e68da",
+    "artifacts/m4-counter-usage-class-linkage.log": "319b9e26bef04fae9eff7abd721adcfcd0c2d92e684992b2f8ad7b22c20e9e9d",
+    "artifacts/m4-counter-usage-pipeline-creation.log": "9d57bbf0cf973c0f906b17e488f52839b2266bb758541d42a3516457abc6d421",
+    "artifacts/m4-counter-usage-replay-pipeline.log": "41730b2ea3445a86f8e436e473f45221aade69b5e9ded5450a636fcb962b2ead",
+    "artifacts/m4-counter-usage-resource-lod.log": "11d20a31db7bd9a0e5fa49ad6474760d906b25a273137a00d54a664a6df5dda4",
+    "artifacts/m4-counter-usage-buffer-view-creation.log": "4291d27bd087c05f246c6f38469bf75646eead42159f4276cf2439b53a853c3c",
+    "artifacts/m4-counter-usage-goldens/validation.json": "5e1dde1ab9876f50c472cdf84378931ffc3b5cd8e9700002b67d37bf81383ade",
+    "artifacts/m4-counter-usage-package-files.json": "f3f330fb1ceac03eb9287dfc9b3b9e40c64120da218f4f83a2b8609a47b4f630",
+    "artifacts/m4-counter-token-format.hpp": "5862ef7c8b819f0d02ba73563a9df4dc0e89f11fe59d8f598def39122273c626",
+    "artifacts/m4-counter-usage-related-build.log": "ca74bd8ed2856b4c8463a2239b4b7e929990084b6ff77f99e0e68a21cd019440",
+    "artifacts/m4-counter-usage-last-test-build.log": "f774d09199856d2f7b4cacfee9bad76dd4a541c5f2626a4b2ca128a5de5abd37"
+  },
+  "limits": [
+    "Original player adapter unidentified; repeated image equality is not matched-device equivalence.",
+    "Unknown hidden counter values remain unavailable; no implicit reset or guessed count.",
+    "Whole-pipeline absence proof only; no per-slot or control-flow counter analysis.",
+    "Unknown/native private shader objects, dynamic linkage, custom data and opcode extensions retain conservative requirements.",
+    "The matrix covers registered GPA 2025 R1 legacy DX11 captures, not every API or format version.",
+    "Developer-host isolated PATH checks do not establish independent clean-machine deployment or long-duration stability."
+  ]
+}

@@ -1,5 +1,9 @@
 # M2: creation-time buffer SRV, RTV and UAV replay
 
+> Follow-up: [counter-independent access](COUNTER_USAGE_COMPATIBILITY.md) removes
+> the blanket rejection of counter-free indexed writes to newly created Counter
+> views. It preserves unknown-count diagnostics for reads and actual consumption.
+
 > **2026-10-06:** [Initial counter provenance](INITIAL_COUNTER_BOUNDARY_AUDIT.md)
 > now diagnoses missing frame-before counts as well. The following creation-time
 > evidence remains unchanged.

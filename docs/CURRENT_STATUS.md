@@ -1,7 +1,32 @@
 # Current capabilities and compatibility
 
 Reviewed **2026-10-06**. The user authorized M4, then M5, while keeping M3 open.
-The latest [worker failure recovery correction](WORKER_FAILURE_RECOVERY.md)
+The latest [counter-usage correction](COUNTER_USAGE_COMPATIBILITY.md) permits
+indexed access to a Counter UAV when checked executable shader code proves the
+hidden counter unused. Three new unmodified original captures include the
+previously rejected trigger and two controls. All match the producer's exact
+buffer/image oracle and the original player's repeated image output; its replay
+adapter remains unidentified. Actual counter consumption, CopyStructureCount
+and counter inspection still require a known value. Shader replacements are
+checked against their actual native bindings. No counter value is invented.
+
+The registry now contains **489 registrations / 479 unique hashes**, including
+**463 default replay-positive registrations (453 unique) and 26 rejection
+files**. All 29 suites pass their expected outcomes: 978 ordinary attempts,
+674 diagnostic control runs and 692 resource exports. The preceding 486
+registrations retain their diagnostic findings, outcomes and deterministic
+image hashes. Helldivers retains its separate variability policy. A final-suite
+manifest newline-hash error interrupted the first runner after 28 passing suites;
+that suite was run separately after correction and all saved results were
+rechecked. This is a composed serial acceptance record, not a claim that the
+interrupted runner completed successfully. Package:
+`out/FloraGPA-counter-usage-20261006/`. The module ledger remains
+72 ported / 117 partial / 15 pending. Runtime: `c386d3a`. Eleven related CTest
+suites, 27 counter rows, 59 Qt interaction rows without skips and four isolated
+PATH package golden/negative checks pass. See the
+[pinned baseline](counter-usage-baseline.json). M3/M4/M5 remain incomplete.
+
+The preceding [worker failure recovery correction](WORKER_FAILURE_RECOVERY.md)
 preserves unterminated final stderr errors and retains the actual timeout reason
 through worker completion. Both defects are reproduced before the fix. Eight
 fast fault cases pass; a separate native-Qt, system-PATH portable run passes nine
@@ -74,7 +99,7 @@ descriptor or historical query value. Preflight locates the proof; Qt displays
 **Captured condition** and keeps the query result unavailable. Missing or
 ambiguous proof still rejects. This is scoped to pinned GPA 2025 R1 evidence.
 
-Inventory is **486 registrations / 476 unique hashes**, with **460 default
+That batch had **486 registrations / 476 unique hashes**, with **460 default
 replay-positive registrations (450 unique) and 26 rejection files**. This is a
 sample matrix, not full API coverage. The 32 dynamic-CB loss cases still validate
 only saved contents. Module counts remain 72 ported / 117 partial / 15 pending.
@@ -427,8 +452,8 @@ the other 35 suites passed initially and the complete UI suite passes after the 
 | M1 — Acceptance infrastructure | Minimum loop delivered: corpus, coverage, preflight, serial comparison and diagnostic queue. Extend evidence as paths arrive. |
 | M2 — Ordinary replay | Registered-scope gate passed: 366 positive cases and 22 located rejections; auxiliary/snapshot contracts audited. This is not universal API support. State-object identity loss, mixed saved/missing SO targets and unverified lifetimes remain explicit boundaries. |
 | M3 — Deferred Context / Command List | Open; M4/M5 now take priority by user instruction on 2026-10-06. Require original retained-list captures proving identity, build order, resource versions, repeated execution, restore-state and event mapping before production support. |
-| M4 — Resources and boundaries | Active, incomplete. Initial texture/Map data is checked; missing initial UAV counts reject with explicit experiment recovery. Continue missing pitch/data dependencies, predicate/frame-before history, Query and presentation boundaries. |
-| M5 — Stable compatibility release | Incomplete. The 486-case registry, load-cancellation recovery and nine controlled worker-failure cases are established. Continue specialized analyzer/driver/storage failures, large-file workflows, long-duration testing and independent clean-environment build/deployment gates. |
+| M4 — Resources and boundaries | Active, incomplete. Initial texture/Map data is checked; missing UAV counts reject on actual consumption, while proven counter-free indexed access is allowed. Continue per-slot/control-flow dependencies, missing pitch/data, predicate/frame-before history, Query and presentation boundaries. |
+| M5 — Stable compatibility release | Incomplete. The 489-case registry, load-cancellation recovery and nine controlled worker-failure cases are established. Continue specialized analyzer/driver/storage failures, large-file workflows, long-duration testing and independent clean-environment build/deployment gates. |
 | M6 — Analyzer and other versions | Incomplete. Continue remaining Qt consumers, advanced profiling/debugging and version-specific adapters after core replay gates. Existing analyzer features remain available. |
 
 The original order was **M1 → M2 → M3 → M4 → M5**. On 2026-10-06 the user

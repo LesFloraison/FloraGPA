@@ -1,0 +1,98 @@
+{
+  "schema": "FloraGPA compatibility corpus 1",
+  "profile": "GPA 2025 R1 legacy DX11 / IGPA v3",
+  "producer_files": {
+    "buffer_view_creation_probe.cpp": "bef48006a5a6990bbc19bc3466abeaf84f54adbcbe35069579e11a2be0b6c385",
+    "capture_counter_usage.py": "eea26940a553691621636579f25cb8b1dc7cb31d6737008cc6037b24182cffd8",
+    "FloraBufferViewCreationProbe.exe": "c44dd6658f9b93f881ed5d1dfc4875736ca09884ce6b45ce920dc3c737773a17",
+    "original_capture_control.h": "0bbda55addde2970d2775bfb633881c45f13279f61d6584b1ad297ce0b0090b8",
+    "present_capture_probe.cpp": "7c29f1e572ab16a5bc497d39eef8198d79056877a9e1d3fff3f7ed530a32c4e3",
+    "texture_probe_helpers.h": "30abcac380d84d505fd344d4083d97300f50df5b2e5cc7dffb11ea03c6d6ee3d"
+  },
+  "gpa_sha256": {
+    "shimloader64.dll": "af68e28ba54ab0068c95f82081828788d6f59879283127dc330b818af7369888",
+    "shimd3d64.dll": "cb0b99d113511cbf7ca9f949d97aa02e4a1f8f110b1f3ad3165d8a81035dee31",
+    "dx11_player.dll": "39061ff329e4a32d0c8375ce9ee15e2017bccab0593943b962a860e11723d38b"
+  },
+  "cases": [
+    {
+      "id": "counter_usage_12",
+      "path": "m4-counter-usage-originals-final/12/capture.gpa_frame",
+      "sha256": "1834bca7d4dc56fcdf50a086a007c7509dd92afbfcc8d569d25a8277086ad130",
+      "bytes": 95397,
+      "family": "counter_usage",
+      "origin": "self_owned_original_gpa_capture",
+      "provenance_note": "Unmodified CaptureNextFrame output; native and injected full buffer/image oracles retained.",
+      "device_scope": "Producer adapter recorded; original replay adapter not yet identified.",
+      "source_manifests": [],
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "reference_buffer_sha256": "2b918dd320fc21c2503729e1dfbe8e5fbf22a9032f282f034f7ddc7cc90657f5",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 26,
+          "repeat": 2,
+          "expected_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+          "purpose": "Diagnostic-only Dispatch omission; original file and shader remain unchanged."
+        }
+      ],
+      "boundaries": [],
+      "covers": [
+        "Ordinary structured UAV indexed store control"
+      ]
+    },
+    {
+      "id": "counter_usage_13",
+      "path": "m4-counter-usage-originals-final/13/capture.gpa_frame",
+      "sha256": "a1d5871673e3bb6a967e5812d1ecffa6542c5766c4af435ee219437393b166ed",
+      "bytes": 98162,
+      "family": "counter_usage",
+      "origin": "self_owned_original_gpa_capture",
+      "provenance_note": "Unmodified CaptureNextFrame output; native and injected full buffer/image oracles retained.",
+      "device_scope": "Producer adapter recorded; original replay adapter not yet identified.",
+      "source_manifests": [],
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "reference_buffer_sha256": "f50400f71ee85b785650d4af4bd2273d166389b09947b2d7d15a7be9db4b7656",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 29,
+          "repeat": 2,
+          "expected_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+          "purpose": "Diagnostic-only Dispatch omission; original file and shader remain unchanged."
+        }
+      ],
+      "boundaries": [],
+      "covers": [
+        "Initialized IncrementCounter control"
+      ]
+    },
+    {
+      "id": "counter_usage_18",
+      "path": "m4-counter-usage-originals-final/18/capture.gpa_frame",
+      "sha256": "9fcf8730bb30502ef1a5e907b3e55d1d6be2fbb8d08e284f21e64c06154e278e",
+      "bytes": 95537,
+      "family": "counter_usage",
+      "origin": "self_owned_original_gpa_capture",
+      "provenance_note": "Unmodified CaptureNextFrame output; native and injected full buffer/image oracles retained.",
+      "device_scope": "Producer adapter recorded; original replay adapter not yet identified.",
+      "source_manifests": [],
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "reference_buffer_sha256": "2b918dd320fc21c2503729e1dfbe8e5fbf22a9032f282f034f7ddc7cc90657f5",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 29,
+          "repeat": 2,
+          "expected_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+          "purpose": "Diagnostic-only Dispatch omission; original file and shader remain unchanged."
+        }
+      ],
+      "boundaries": [],
+      "covers": [
+        "Counter UAV with indexed store and KEEP, no hidden counter read"
+      ]
+    }
+  ],
+  "evidence_manifest": "artifacts/m4-counter-usage-originals-final/manifest.json"
+}

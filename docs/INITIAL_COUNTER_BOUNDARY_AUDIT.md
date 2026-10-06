@@ -1,5 +1,11 @@
 # Initial UAV counter provenance and explicit recovery
 
+> Follow-up: [counter-independent access](COUNTER_USAGE_COMPATIBILITY.md) now
+> permits indexed buffer access when executable shader code proves the hidden
+> counter is unused. Unknown counts remain unavailable; actual consumption still
+> requires captured state or an explicit experiment. The evidence below records
+> the earlier conservative bound-view implementation.
+
 Reviewed 2026-10-06. Implementation: `cabfb39`. This M4 correction distinguishes
 original-player pixel equality from restoration of application counter state.
 See the [baseline](initial-counter-boundary-baseline.json) and

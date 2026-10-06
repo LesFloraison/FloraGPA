@@ -1,7 +1,7 @@
 {
   "schema": "FloraGPA compatibility gate suites 1",
-  "expected_cases": 486,
-  "expected_unique_captures": 476,
+  "expected_cases": 489,
+  "expected_unique_captures": 479,
   "expected_rejections": 26,
   "suites": [
     {
@@ -596,8 +596,16 @@
       "capture_root": "artifacts",
       "subdirectory": "",
       "expected_rejections": {}
+    },
+    {
+      "id": "counter_usage",
+      "manifest": "docs/counter-usage-corpus.json",
+      "manifest_sha256": "b54b6f43b3d2137057fcc8018b3587a5479b866d47cd2aa52ff2f3e411692e9f",
+      "capture_root": "artifacts",
+      "subdirectory": "",
+      "expected_rejections": {}
     }
   ],
   "manifest_hash_policy": "UTF-8 bytes with CRLF normalized to LF",
-  "scope_note": "M4 counter provenance and predicate conditions backed by linked normalization witnesses; descriptors/results remain unknown when absent. M3 remains unaccepted."
+  "scope_note": "M4 counter provenance and predicate conditions backed by linked normalization witnesses; descriptors/results remain unknown when absent. M3 remains unaccepted. Counter-free executable shader proof permits indexed access without claiming an unavailable hidden count."
 }
