@@ -1601,6 +1601,28 @@ class UiTests final : public QObject {
             snapshot(window, QString("msaa-resolved-") + name);
         }
     }
+    void msaaNoticeGrouping() {
+        const auto root = qEnvironmentVariable("FLORA_TEST_CAPTURE_DIR");
+        if (root.isEmpty())
+            QSKIP("Set FLORA_TEST_CAPTURE_DIR for BF1 MSAA notice grouping");
+        flora::MainWindow window;
+        window.resize(1500, 950);
+        window.show();
+        QSignalSpy done(&window, &flora::MainWindow::taskFinished);
+        window.openCapture(root + "/bf1_2026_01_21__16_53_05.gpa_frame");
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        auto label = window.findChild<QLabel *>("frameOutputLabel");
+        QVERIFY(label);
+        QVERIFY(label->text().contains("Initial data (20)"));
+        QCOMPARE(label->toolTip().count("Ordinary MSAA GenData"), 1);
+        for (int i = 0; i < 10; ++i) {
+            QVERIFY(label->toolTip().contains(QString("T:%1 · Data:%2").arg(877 + 2 * i).arg(968 + 2 * i)));
+            QVERIFY(label->toolTip().contains(QString("T:%1 · Data:%2").arg(915 + 2 * i).arg(1006 + 2 * i)));
+        }
+        QVERIFY(label->toolTip().size() < 1024);
+        snapshot(window, "msaa-grouped-bf1");
+    }
     void outputSelectionControls() {
         using namespace flora;
         QTemporaryDir dir;

@@ -2159,14 +2159,17 @@ void MainWindow::finishWorker(int code, QProcess::ExitStatus status) {
             imageLabel_->setToolTip(imageLabel_->toolTip() + "\n" + msaa["initialization_note"].toString());
         const auto resourceNotices = report_["replay_resource_notices"].toArray();
         if (!resourceNotices.isEmpty()) {
-            imageLabel_->setText(imageLabel_->text() + " · Initial data");
+            imageLabel_->setText(imageLabel_->text() + QString(" · Initial data (%1)").arg(resourceNotices.size()));
+            QMap<QString, QStringList> groups;
             for (const auto &value : resourceNotices) {
                 const auto notice = value.toObject();
-                imageLabel_->setToolTip(imageLabel_->toolTip() +
-                                       QString("\nT:%1 · Data:%2 — %3")
-                                           .arg(notice["resource_id"].toString(),
-                                                notice["data_id"].toString(), notice["reason"].toString()));
+                groups[notice["reason"].toString()].append(
+                    QString("T:%1 · Data:%2").arg(notice["resource_id"].toString(),
+                                                 notice["data_id"].toString()));
             }
+            for (auto it = groups.cbegin(); it != groups.cend(); ++it)
+                imageLabel_->setToolTip(imageLabel_->toolTip() +
+                                       '\n' + it.key() + '\n' + it.value().join(", "));
         }
         outputReport_ = outputAvailable ? nlohmann::json::parse(reportBytes.constData(),
                                                                 reportBytes.constData() + reportBytes.size())
