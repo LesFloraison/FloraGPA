@@ -1,6 +1,7 @@
 #include "MsaaCapture.h"
 #include "app/CompatibilityButton.h"
 #include "app/MainWindow.h"
+#include "HeapRetentionProbe.h"
 #include <QAction>
 #include <QSignalSpy>
 #include <QStatusBar>
@@ -230,6 +231,10 @@ class RecoveryUiTests final : public QObject {
         const auto root = qEnvironmentVariable("FLORA_TEST_CAPTURE_DIR");
         if (root.isEmpty())
             QSKIP("Set FLORA_TEST_CAPTURE_DIR for original GF2/BF1 recovery checks");
+        const auto trace = qEnvironmentVariable("FLORA_HEAP_TRACE_DIR");
+        if (!trace.isEmpty()) testing::heapProbe::start();
+        const auto stopTrace = qScopeGuard([&] { if (!trace.isEmpty()) testing::heapProbe::stop(); });
+        if (!trace.isEmpty()) QVERIFY2(testing::heapProbe::selfCheck(), "UCRT allocation/free observer self-check");
         MainWindow window;
         QSignalSpy done(&window, &MainWindow::taskFinished);
         QSignalSpy loaded(&window, &MainWindow::captureLoaded);
@@ -238,6 +243,8 @@ class RecoveryUiTests final : public QObject {
         const int count = iterations > 0 ? iterations : 2;
         for (int repeat = 0; repeat < count; ++repeat) {
             for (const auto &name : files) {
+                const unsigned epoch = unsigned(repeat * files.size() + files.indexOf(name) + 1);
+                if (!trace.isEmpty()) testing::heapProbe::mark(epoch);
                 QElapsedTimer elapsed;
                 elapsed.start();
                 const auto path = root + '/' + name;
@@ -297,6 +304,8 @@ class RecoveryUiTests final : public QObject {
                     {"user_objects", GetGuiResources(GetCurrentProcess(), 1)},
                     {"rgba_sha256", golden.toStdString()}, {"ownership", ownership(window)}};
                 qInfo().noquote() << "recovery_observation" << QString::fromStdString(observation.dump());
+                if (!trace.isEmpty() && (epoch == 2 || epoch == 6 || epoch == unsigned(count * files.size())))
+                    testing::heapProbe::snapshot(trace, epoch);
             }
         }
         if (qEnvironmentVariableIsSet("FLORA_RECOVERY_HEAP")) {

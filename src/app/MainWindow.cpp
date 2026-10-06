@@ -1,4 +1,5 @@
 #include "MainWindow.h"
+#include "QtCompatibility.h"
 #include "CompatibilityButton.h"
 #include "AnnotationsView.h"
 #include "BlendDialog.h"
@@ -136,6 +137,7 @@ QString boundaryLabel(const QJsonObject &report) {
 } // namespace
 MainWindow::MainWindow() {
     buildUi();
+    installToolButtonConnectionGuard(this);
     loadSettings();
     replayTimer_.setSingleShot(true);
     replayTimer_.setInterval(180);
