@@ -1,7 +1,18 @@
 # Current capabilities and compatibility
 
 Reviewed **2026-10-06**. The user authorized M4, then M5, while keeping M3 open.
-The latest [per-slot counter correction](COUNTER_SLOT_COMPATIBILITY.md) admits
+The latest [semantic audit cancellation](SEMANTIC_AUDIT_CANCELLATION.md) extends
+preflight cancellation through nine bulk audit families. All 6,012 injected
+preflight cancellation positions preserve honest diagnostics and permit exact
+retry; nine related CTest suites and four packaged golden/negative checks pass.
+Complete preflight reports for all 482 unique registered files are unchanged.
+The portable preflight-panel harness also passes failure/cancel/switch/retry.
+Runtime: `14a7860`; package: `out/FloraGPA-semantic-cancel-20261006/` (44 files).
+Cancellation within individual decoders, implicit recovery/lifetime searches and
+GUI model population remains incomplete. No new replay capability is claimed;
+the preceding complete GPU matrix remains authoritative, and M3/M4/M5 stay open.
+
+The preceding [per-slot counter correction](COUNTER_SLOT_COMPATIBILITY.md) admits
 mixed UAV workloads when checked shader code proves the unavailable hidden
 counter is not consumed at that view's bound slots. Two unmodified original
 captures reproduced false rejection; an explicit-reset companion is the control.

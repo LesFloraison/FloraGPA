@@ -15,6 +15,7 @@ chronology remains in Chinese.
 | Run tests and external comparisons | [Development validation](USAGE.md#development-validation) |
 | Build committed source with an isolated process environment and package it | [Source build and packaging](SOURCE_BUILD_AND_PACKAGING.md) |
 | Interpret corpus results and diagnostics | [Compatibility infrastructure](COMPATIBILITY_BASELINE.md) |
+| Cancel bulk preflight audits and retry without corruption diagnostics | [Semantic audit cancellation](SEMANTIC_AUDIT_CANCELLATION.md) |
 | Distinguish successful replay from application fidelity | [Capture fidelity reporting](CAPTURE_FIDELITY_REPORTING.md) |
 | MSAA initialization notices after Resolve and in Qt | [MSAA initialization notices](MSAA_INITIALIZATION_NOTICES.md) |
 | Saved texture initializer validation and malformed-data boundaries | [Texture initial-data audit](TEXTURE_INITIAL_DATA_AUDIT.md) |

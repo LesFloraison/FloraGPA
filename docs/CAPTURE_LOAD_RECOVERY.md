@@ -4,6 +4,10 @@ Reviewed 2026-10-06. This M5 change addresses cancellation during the container
 scan and full-file SHA-256 calculation. It does not change GPU replay semantics
 or broaden the supported capture format.
 
+Follow-up: [semantic audit cancellation](SEMANTIC_AUDIT_CANCELLATION.md) adds
+checkpoints to nine offline audit families. The historical scope and results
+below describe this earlier container/hash batch.
+
 ## Reproduced problem
 
 Opening a capture ran `Frame` construction and hashing on a QtConcurrent thread,
