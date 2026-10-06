@@ -1,4 +1,5 @@
 #pragma once
+#include "Cancellation.h"
 #include <array>
 #include <cstdint>
 #include <cstring>
@@ -125,7 +126,7 @@ class Frame {
     void close() noexcept;
 
   public:
-    explicit Frame(const std::filesystem::path &path);
+    explicit Frame(const std::filesystem::path &path, const CancelCheck &cancelled = {});
     // Shares immutable capture storage; overlays own their replacement bytes and caches.
     Frame(const Frame &capture, std::map<Id, std::vector<uint8_t>> viewPayloads);
     ~Frame() { close(); }
@@ -137,7 +138,7 @@ class Frame {
     uint64_t size() const { return size_; }
     uint32_t width() const { return width_; }
     uint32_t height() const { return height_; }
-    const std::string &sha256() const;
+    const std::string &sha256(const CancelCheck &cancelled = {}) const;
     const ContextRecovery &contextRecovery() const;
     const Entry &entry(Id id) const;
     Bytes payload(Id id, int category = -1, int type = -1) const;
@@ -152,7 +153,7 @@ class Frame {
     std::vector<std::pair<size_t, Bytes>> updates(Id id, size_t resourceSize) const;
 };
 bool isDraw(uint16_t type);
-std::string sha256(Bytes bytes);
+std::string sha256(Bytes bytes, const CancelCheck &cancelled = {});
 std::string commandName(uint16_t type);
 std::string resourceName(uint16_t type);
 TextureInfo textureInfo(const Resource &resource);

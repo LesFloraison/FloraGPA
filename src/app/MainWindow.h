@@ -20,6 +20,7 @@
 #include <QTreeWidget>
 #include <QStackedWidget>
 #include "ResourceBrowser.h"
+#include <atomic>
 
 namespace flora {
 class CommandStateView;
@@ -44,7 +45,7 @@ class MainWindow final : public QMainWindow {
     ~MainWindow() override;
     void openCapture(const QString &path);
     void replay(bool timings = false);
-    bool busy() const { return process_.state() != QProcess::NotRunning || loader_.isRunning(); }
+    bool busy() const { return process_.state() != QProcess::NotRunning || bool(loadCancel_); }
     QString capturePath() const { return capturePath_; }
     void setShaderTool(const QString &path) { shaderTool_ = path; }
   signals:
@@ -271,7 +272,13 @@ class MainWindow final : public QMainWindow {
     QAction *openAction_, *replayAction_, *collectAction_, *cancelAction_, *exportAction_;
     QDockWidget *logDock_;
     QProcess process_;
-    QFutureWatcher<std::shared_ptr<const Frame>> loader_;
+    struct CaptureLoadResult {
+        std::shared_ptr<const Frame> frame;
+        QString error;
+        bool cancelled = false;
+    };
+    QFutureWatcher<CaptureLoadResult> loader_;
+    std::shared_ptr<std::atomic_bool> loadCancel_;
     std::unique_ptr<QTemporaryDir> jobDir_;
     QTimer replayTimer_, timeout_;
     QByteArray stderrBuffer_;

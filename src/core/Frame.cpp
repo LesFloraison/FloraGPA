@@ -21,8 +21,9 @@ void Frame::close() noexcept {
     mapping_ = nullptr;
     file_ = nullptr;
 }
-Frame::Frame(const std::filesystem::path &path) : path_(path) {
+Frame::Frame(const std::filesystem::path &path, const CancelCheck &cancelled) : path_(path) {
     try {
+        checkCancellation(cancelled);
         file_ = CreateFileW(path.c_str(), GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING,
                             FILE_ATTRIBUTE_NORMAL, nullptr);
         if (file_ == INVALID_HANDLE_VALUE)
@@ -54,6 +55,8 @@ Frame::Frame(const std::filesystem::path &path) : path_(path) {
         height_ = tail.read<uint32_t>();
         Reader entries({data_ + table, size_t(count) * 24});
         for (uint32_t i = 0; i < count; ++i) {
+            if (i % 1024 == 0)
+                checkCancellation(cancelled);
             Entry e{entries.read<Id>(),      entries.read<uint64_t>(), entries.read<uint32_t>(),
                     entries.read<uint8_t>(), entries.read<uint8_t>(),  entries.read<uint16_t>()};
             if (e.offset < 0x128 || e.offset > table || e.size > table - e.offset ||
@@ -61,6 +64,7 @@ Frame::Frame(const std::filesystem::path &path) : path_(path) {
                 throw std::runtime_error("Invalid or duplicate entry " + std::to_string(e.id));
             entryOrder_.push_back(e.id);
         }
+        checkCancellation(cancelled);
         // Transfer the mapping only after parsing succeeds. Shared ownership lets
         // an overlay outlive its source Frame without remapping or copying bytes.
         auto file = file_, mapping = mapping_;

@@ -152,11 +152,22 @@ MainWindow::MainWindow() {
         cancel();
         showError("Worker timed out.");
     });
-    connect(&loader_, &QFutureWatcher<std::shared_ptr<const Frame>>::finished, this, [this] {
+    connect(&loader_, &QFutureWatcher<CaptureLoadResult>::finished, this, [this] {
+        const bool cancelled = loadCancel_ && loadCancel_->load();
+        loadCancel_.reset();
         try {
             auto loaded = loader_.result();
-            frame_ = std::move(loaded);
+            if (cancelled || loaded.cancelled) {
+                setBusy(process_.state() != QProcess::NotRunning);
+                statusBar()->showMessage("Opening cancelled.");
+                emit taskFinished(false);
+                return;
+            }
+            if (!loaded.error.isEmpty())
+                throw std::runtime_error(loaded.error.toStdString());
+            frame_ = std::move(loaded.frame);
             capturePath_ = pendingPath_;
+            compatibility_->setCapture(capturePath_);
             ++revision_;
             selectedEvent_ = selectedResource_ = 0;
             selectedBinding_.reset(); pendingPixel_ = nullptr;
@@ -354,6 +365,8 @@ MainWindow::MainWindow() {
             &MainWindow::finishWorker);
 }
 MainWindow::~MainWindow() {
+    if (loadCancel_)
+        loadCancel_->store(true);
     replayTimer_.stop();
     timeout_.stop();
     if (job_)
@@ -1368,7 +1381,7 @@ void MainWindow::closeEvent(QCloseEvent *e) {
     e->accept();
 }
 void MainWindow::setBusy(bool busy) {
-    busy = busy && runningKind_ != "draw-resources";
+    busy = bool(loadCancel_) || (busy && runningKind_ != "draw-resources");
     shader_->setReadOnly(busy);
     sourceEditor_->setReadOnly(busy);
     shaderEntry_->setEnabled(!busy);
@@ -1411,7 +1424,7 @@ void MainWindow::setBusy(bool busy) {
     viewAction_->setEnabled(!busy && frame_ && experiment_);
     replayAction_->setEnabled(!busy && bool(frame_));
     collectAction_->setEnabled(!busy && bool(frame_));
-    cancelAction_->setEnabled(busy && !loader_.isRunning());
+    cancelAction_->setEnabled(busy && (!loadCancel_ || !loadCancel_->load()));
     progress_->setVisible(busy);
     if (busy) {
         progress_->setRange(0, 0);
@@ -1557,22 +1570,33 @@ void MainWindow::openCapture(const QString &path) {
         if (answer == QMessageBox::Cancel || (answer == QMessageBox::Save && !saveExperiment()))
             return;
     }
-    if (loader_.isRunning())
+    if (loadCancel_)
         return;
     cancel();
     replayTimer_.stop();
     pendingPath_ = path;
-    compatibility_->setCapture(path);
+    auto token = std::make_shared<std::atomic_bool>(false);
+    loadCancel_ = token;
     setBusy(true);
     statusBar()->showMessage("Opening capture…");
-    loader_.setFuture(QtConcurrent::run([path] {
-        auto frame = std::make_shared<Frame>(std::filesystem::path(path.toStdWString()));
-        frame->sha256();
-        return std::shared_ptr<const Frame>(frame);
+    loader_.setFuture(QtConcurrent::run([path, token] {
+        CaptureLoadResult result;
+        try {
+            const CancelCheck cancelled = [token] { return token->load(); };
+            auto frame = std::make_shared<Frame>(std::filesystem::path(path.toStdWString()), cancelled);
+            frame->sha256(cancelled);
+            result.frame = std::move(frame);
+        } catch (const OperationCancelled &) {
+            result.cancelled = true;
+        } catch (const std::exception &e) {
+            // Preserve the parser's message across QtConcurrent's exception boundary.
+            result.error = QString::fromUtf8(e.what());
+        }
+        return result;
     }));
 }
 void MainWindow::replay(bool timings) {
-    if (!frame_ || loader_.isRunning())
+    if (!frame_ || loadCancel_)
         return;
     if (process_.state() != QProcess::NotRunning) {
         cancel();
@@ -1696,6 +1720,11 @@ void MainWindow::startWorker(QStringList args, bool timings) {
     process_.start(QCoreApplication::applicationDirPath() + "/FloraGPA.Worker.exe", args);
 }
 void MainWindow::cancel() {
+    if (loadCancel_) {
+        loadCancel_->store(true);
+        cancelAction_->setEnabled(false);
+        statusBar()->showMessage("Cancelling open…");
+    }
     ++revision_;
     replayTimer_.stop();
     textureTimer_.stop();

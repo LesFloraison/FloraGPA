@@ -5,7 +5,8 @@
 #include <bcrypt.h>
 
 namespace flora {
-std::string sha256(Bytes bytes) {
+std::string sha256(Bytes bytes, const CancelCheck &cancelled) {
+    checkCancellation(cancelled);
     struct Algorithm {
         BCRYPT_ALG_HANDLE value{};
         ~Algorithm() {
@@ -27,10 +28,12 @@ std::string sha256(Bytes bytes) {
     check(BCryptOpenAlgorithmProvider(&algorithm.value, BCRYPT_SHA256_ALGORITHM, nullptr, 0));
     check(BCryptCreateHash(algorithm.value, &hash.value, nullptr, 0, nullptr, 0, 0));
     while (!bytes.empty()) {
+        checkCancellation(cancelled);
         auto size = ULONG(std::min<size_t>(bytes.size(), 16 * 1024 * 1024));
         check(BCryptHashData(hash.value, const_cast<PUCHAR>(bytes.data()), size, 0));
         bytes = bytes.subspan(size);
     }
+    checkCancellation(cancelled);
     std::array<uint8_t, 32> digest{};
     check(BCryptFinishHash(hash.value, digest.data(), ULONG(digest.size()), 0));
     std::string result;
@@ -41,8 +44,11 @@ std::string sha256(Bytes bytes) {
     }
     return result;
 }
-const std::string &Frame::sha256() const {
-    std::call_once(hashOnce_, [this] { hash_ = flora::sha256({data_, size_t(size_)}); });
+const std::string &Frame::sha256(const CancelCheck &cancelled) const {
+    checkCancellation(cancelled);
+    // An interrupted call_once is retryable; never publish a partial digest.
+    std::call_once(hashOnce_, [this, &cancelled] { hash_ = flora::sha256({data_, size_t(size_)}, cancelled); });
+    checkCancellation(cancelled);
     return hash_;
 }
 } // namespace flora

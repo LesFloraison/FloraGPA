@@ -57,9 +57,9 @@ Json validateFrame(const std::filesystem::path &path, const std::function<bool()
                                                                             : Json(nullptr)}});
     };
     try {
-        Frame frame(path);
+        Frame frame(path, cancelled);
         report["entries"] = frame.entries().size();
-        report["source_sha256"] = frame.sha256();
+        report["source_sha256"] = frame.sha256(cancelled);
         report["unused_stream_output_lifetimes"] = Json::array();
         report["unused_constant_buffer_lifetimes"] = Json::array();
         const auto lod = auditResourceLod(frame);
@@ -645,6 +645,9 @@ Json validateFrame(const std::filesystem::path &path, const std::function<bool()
             "Unrecognized non-command payloads and descriptor-specific semantics remain outside offline "
             "coverage",
             "Reports inspect original capture data, not an experiment project"};
+    } catch (const OperationCancelled &) {
+        report["cancelled"] = true;
+        report["completed"] = false;
     } catch (const std::exception &ex) {
         finding(nullptr, "error", "container_rejected", ex.what());
     }
