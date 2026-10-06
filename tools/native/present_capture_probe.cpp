@@ -9,6 +9,9 @@
 #include <string>
 #include <vector>
 #include <wrl/client.h>
+#ifndef wmain
+#include "original_capture_control.h"
+#endif
 using Microsoft::WRL::ComPtr;
 namespace fs = std::filesystem;
 namespace {
@@ -54,8 +57,12 @@ void createChain(Chain &chain, ID3D11Device *device, IDXGIFactory *factory, DXGI
     checked(device->CreateRenderTargetView(chain.buffer.Get(), nullptr, &chain.rtv));
 }
 } // namespace
+// Other development probes include the shared helpers with wmain renamed.
+// Do not compile this standalone entry point or its capture selector for them.
+#ifndef wmain
 int wmain(int argc, wchar_t **argv) {
-    // output mode(0=TEST,1=flip sequential,2=discard,3=flip discard,4=tearing) [capture shimloader]
+    // Modes 0..4 retain the original corpus. 5..8 inspect minimized blt-model
+    // TEST/ordinary statuses; 9..11 inspect DO_NOT_SEQUENCE on flip/discard/sequential.
     if (argc != 3 && argc != 5)
         return 2;
     output = argv[1];
@@ -64,7 +71,7 @@ int wmain(int argc, wchar_t **argv) {
     fs::create_directories(output);
     try {
         int mode = std::stoi(argv[2]);
-        if (mode < 0 || mode > 4)
+        if (mode < 0 || mode > 11)
             throw std::runtime_error("Invalid mode");
         if (argc == 5 && !LoadLibraryExW(argv[4], nullptr, LOAD_WITH_ALTERED_SEARCH_PATH))
             throw std::runtime_error("Cannot load research shimloader");
@@ -76,7 +83,8 @@ int wmain(int argc, wchar_t **argv) {
             throw std::runtime_error("RegisterClass failed");
         ComPtr<ID3D11Device> device;
         ComPtr<ID3D11DeviceContext> context;
-        checked(D3D11CreateDevice(nullptr, D3D_DRIVER_TYPE_HARDWARE, nullptr, 0, nullptr, 0,
+        const bool warp = GetEnvironmentVariableW(L"FLORA_PRESENT_WARP", nullptr, 0) != 0;
+        checked(D3D11CreateDevice(nullptr, warp ? D3D_DRIVER_TYPE_WARP : D3D_DRIVER_TYPE_HARDWARE, nullptr, 0, nullptr, 0,
                                   D3D11_SDK_VERSION, &device, nullptr, &context));
         ComPtr<IDXGIDevice> dxgi;
         ComPtr<IDXGIAdapter> adapter;
@@ -86,13 +94,20 @@ int wmain(int argc, wchar_t **argv) {
         checked(adapter->GetParent(IID_PPV_ARGS(&factory)));
         Chain main, secondary;
         createChain(main, device.Get(), factory.Get(),
-                    mode == 0 ? DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL : DXGI_SWAP_EFFECT_DISCARD);
-        if (mode)
+                    mode == 0 || mode == 9 ? DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL
+                    : mode == 7 || mode == 8 || mode == 11 ? DXGI_SWAP_EFFECT_SEQUENTIAL
+                    : DXGI_SWAP_EFFECT_DISCARD);
+        if (mode && mode < 5)
             createChain(secondary, device.Get(), factory.Get(),
-                        mode == 2   ? DXGI_SWAP_EFFECT_DISCARD
+                        mode == 2 ? DXGI_SWAP_EFFECT_DISCARD
                         : mode == 3 ? DXGI_SWAP_EFFECT(4)
                                     : DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL,
                         mode == 4);
+        // DO_NOT_SEQUENCE on the first call can be ignored by DXGI. Establish
+        // a current buffer before testing it; this happens before capture request.
+        HRESULT warmup = S_OK;
+        if (mode >= 9)
+            warmup = main.swap->Present(0, 0);
         ComPtr<ID3D11Texture2D> staging;
         D3D11_TEXTURE2D_DESC td{};
         main.buffer->GetDesc(&td);
@@ -102,8 +117,15 @@ int wmain(int argc, wchar_t **argv) {
         checked(device->CreateTexture2D(&td, nullptr, &staging));
         std::ofstream report(output / L"oracle.json");
         report.exceptions(std::ios::badbit | std::ios::failbit);
-        report << "{\"mode\":" << mode << ",\"frames\":[";
+        DXGI_ADAPTER_DESC adapterDesc{};
+        checked(adapter->GetDesc(&adapterDesc));
+        report << "{\"mode\":" << mode << ",\"warp\":" << (warp ? "true" : "false")
+               << ",\"vendor_id\":" << adapterDesc.VendorId << ",\"device_id\":" << adapterDesc.DeviceId
+               << ",\"adapter_luid_low\":" << adapterDesc.AdapterLuid.LowPart
+               << ",\"adapter_luid_high\":" << adapterDesc.AdapterLuid.HighPart
+               << ",\"warmup_hresult\":" << int32_t(warmup) << ",\"frames\":[";
         bool requested = false;
+        bool selected = false;
         unsigned failures = 0;
         for (unsigned frame = 0; frame < 12; ++frame) {
             MSG msg{};
@@ -113,6 +135,8 @@ int wmain(int argc, wchar_t **argv) {
             }
             HMODULE shim = GetModuleHandleW(L"shimd3d64.dll");
             if (argc == 5 && frame == 5 && shim) {
+                if (mode >= 5)
+                    selected = flora::research::selectOriginalPrimarySwapChain(shim, main.swap.Get());
                 auto request =
                     reinterpret_cast<void(WINAPI *)(const wchar_t *, void(WINAPI *)(const wchar_t *))>(
                         GetProcAddress(shim, "CaptureNextFrame"));
@@ -122,15 +146,41 @@ int wmain(int argc, wchar_t **argv) {
                 requested = true;
             }
             context->ClearState();
-            Chain &observed = mode ? secondary : main;
+            Chain &observed = mode && mode < 5 ? secondary : main;
+            if (mode >= 5 && mode <= 8)
+                ShowWindow(observed.window, SW_SHOWMINNOACTIVE);
+            const bool minimized = IsIconic(observed.window) != 0;
             auto rtv = observed.rtv.Get();
             context->OMSetRenderTargets(1, &rtv, nullptr);
             const float red[]{1, 0, 0, 1}, green[]{0, 1, 0, 1};
             context->ClearRenderTargetView(rtv, red);
             ComPtr<ID3D11RenderTargetView> before, after;
             context->OMGetRenderTargets(1, &before, nullptr);
-            auto result = observed.swap->Present(0, mode == 0 ? DXGI_PRESENT_TEST : mode == 4 ? 0x200 : 0);
+            auto observe = [&](const char *phase) {
+                context->CopyResource(staging.Get(), observed.buffer.Get());
+                D3D11_MAPPED_SUBRESOURCE mapped{};
+                checked(context->Map(staging.Get(), 0, D3D11_MAP_READ, 0, &mapped));
+                std::vector<unsigned char> bytes(256);
+                for (unsigned row = 0; row < 8; ++row)
+                    memcpy(bytes.data() + row * 32, static_cast<char *>(mapped.pData) + row * mapped.RowPitch, 32);
+                context->Unmap(staging.Get(), 0);
+                std::ofstream data(output / (std::string(phase) + "-" + std::to_string(frame) + ".rgba"), std::ios::binary);
+                data.exceptions(std::ios::badbit | std::ios::failbit);
+                data.write(reinterpret_cast<const char *>(bytes.data()), bytes.size());
+            };
+            if (mode >= 5)
+                observe("before");
+            const UINT flags = mode == 0 || mode == 5 || mode == 7 ? DXGI_PRESENT_TEST
+                               : mode == 4 ? 0x200
+                               : mode >= 9 ? DXGI_PRESENT_DO_NOT_SEQUENCE : 0;
+            auto result = observed.swap->Present(0, flags);
             context->OMGetRenderTargets(1, &after, nullptr);
+            if (mode >= 5)
+                observe("after");
+            if (mode >= 5 && mode <= 8) {
+                ShowWindow(observed.window, SW_SHOWNOACTIVATE);
+                ShowWindow(observed.window, SW_HIDE);
+            }
             // Subsequent work must be visible in the saved stream, not inferred from frame-tail pixels.
             context->ClearRenderTargetView(main.rtv.Get(), green);
             context->CopyResource(staging.Get(), main.buffer.Get());
@@ -150,12 +200,14 @@ int wmain(int argc, wchar_t **argv) {
             if (frame)
                 report << ',';
             report << "{\"frame\":" << frame << ",\"hresult\":" << int32_t(result)
+                   << ",\"flags\":" << flags << ",\"minimized\":" << (minimized ? "true" : "false")
                    << ",\"before\":" << (before.Get() == rtv ? "true" : "false")
                    << ",\"after\":" << (after.Get() == rtv ? "true" : "false")
                    << ",\"terminal_hresult\":" << int32_t(terminal) << '}';
             Sleep(25);
         }
         report << "],\"capture_requested\":" << (requested ? "true" : "false")
+               << ",\"original_primary_selected\":" << (selected ? "true" : "false")
                << ",\"pixel_failures\":" << failures << ",\"completed\":true}\n";
         context->ClearState();
         return failures ? 3 : 0;
@@ -164,3 +216,4 @@ int wmain(int argc, wchar_t **argv) {
         return 1;
     }
 }
+#endif
