@@ -1,0 +1,239 @@
+{
+  "schema": "FloraGPA compatibility corpus 1",
+  "profile": "GPA 2025 R1 legacy DX11 / IGPA v3",
+  "producer_files": {
+    "buffer_view_creation_probe.cpp": "99643ca383a2daf490ade5f29be36349007aa9c5ed11c6861c1586fafadce081",
+    "capture_counter_usage.py": "52a3f28159635bbb89716ae8619ed945e9256ac830ad13b9a1fc0c2c3851c3ca",
+    "FloraCounterSlotsProbe.exe": "1db8879805a670c50069546dcf8d518e00cb6d837054621fdbd419e7feb86beb",
+    "original_capture_control.h": "0bbda55addde2970d2775bfb633881c45f13279f61d6584b1ad297ce0b0090b8",
+    "present_capture_probe.cpp": "7c29f1e572ab16a5bc497d39eef8198d79056877a9e1d3fff3f7ed530a32c4e3",
+    "texture_probe_helpers.h": "30abcac380d84d505fd344d4083d97300f50df5b2e5cc7dffb11ea03c6d6ee3d"
+  },
+  "gpa_sha256": {
+    "shimloader64.dll": "af68e28ba54ab0068c95f82081828788d6f59879283127dc330b818af7369888",
+    "shimd3d64.dll": "cb0b99d113511cbf7ca9f949d97aa02e4a1f8f110b1f3ad3165d8a81035dee31",
+    "dx11_player.dll": "39061ff329e4a32d0c8375ce9ee15e2017bccab0593943b962a860e11723d38b"
+  },
+  "cases": [
+    {
+      "id": "counter_usage_40",
+      "path": "m4-counter-slots-originals/40/capture.gpa_frame",
+      "sha256": "d86a90bb5b215bbb323eeb208059474fff31fa5c18a308862660eaa2b26854e7",
+      "bytes": 99649,
+      "family": "counter_usage",
+      "origin": "self_owned_original_gpa_capture",
+      "provenance_note": "Unmodified CaptureNextFrame output; native and injected full buffer/image oracles retained.",
+      "device_scope": "Producer adapter recorded; original replay adapter not yet identified.",
+      "source_manifests": [
+        {
+          "path": "m4-counter-slots-originals/manifest.json",
+          "sha256": "6b65a42375a0bd51377b4719fad5f934218c5a277c53b16e3c6e588a322e4817"
+        }
+      ],
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "reference_buffer_sha256": "f50400f71ee85b785650d4af4bd2273d166389b09947b2d7d15a7be9db4b7656",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 45,
+          "repeat": 2,
+          "expected_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+          "purpose": "Diagnostic-only Dispatch omission; original capture and shaders unchanged"
+        }
+      ],
+      "boundaries": [
+        {
+          "kind": "buffer",
+          "resource": 5,
+          "event": 43,
+          "repeat": 2,
+          "expect_stable": true,
+          "expected_storage_sha256": "2600d18f45ae0e0a1d5e9004609fbd6e29ad7d15b27a60b1f956cf83b4a2126b"
+        },
+        {
+          "kind": "buffer",
+          "resource": 5,
+          "event": 45,
+          "repeat": 2,
+          "expect_stable": true,
+          "expected_storage_sha256": "f50400f71ee85b785650d4af4bd2273d166389b09947b2d7d15a7be9db4b7656"
+        },
+        {
+          "kind": "buffer",
+          "resource": 9,
+          "event": 43,
+          "repeat": 2,
+          "expect_stable": true,
+          "expected_storage_sha256": "2600d18f45ae0e0a1d5e9004609fbd6e29ad7d15b27a60b1f956cf83b4a2126b"
+        },
+        {
+          "kind": "buffer",
+          "resource": 9,
+          "event": 45,
+          "repeat": 2,
+          "expect_stable": true,
+          "expected_storage_sha256": "4eac2b01b6d68073360f4118cf160b48a51877308040b24c29a548449bd28644"
+        }
+      ],
+      "covers": [
+        "Counter operation on u0 with counter-independent u1 KEEP"
+      ],
+      "reference_indexed_buffer_sha256": "4eac2b01b6d68073360f4118cf160b48a51877308040b24c29a548449bd28644",
+      "native_workload_fidelity": "passed",
+      "fidelity_reason": "Both native and injected producers verify complete bytes of both buffers and final pixels on twelve frames each.",
+      "application_reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "application_reference_scope": "Uninjected CPU-checked producer image, 8x8 RGBA; separate full-byte buffer oracles",
+      "application_reference_evidence": {
+        "path": "m4-counter-slots-originals/manifest.json",
+        "sha256": "6b65a42375a0bd51377b4719fad5f934218c5a277c53b16e3c6e588a322e4817"
+      }
+    },
+    {
+      "id": "counter_usage_41",
+      "path": "m4-counter-slots-originals/41/capture.gpa_frame",
+      "sha256": "1f1c00ed4b27d03cb04a6f04fa08e00564f4f88a4078057bf8ede54136484196",
+      "bytes": 99649,
+      "family": "counter_usage",
+      "origin": "self_owned_original_gpa_capture",
+      "provenance_note": "Unmodified CaptureNextFrame output; native and injected full buffer/image oracles retained.",
+      "device_scope": "Producer adapter recorded; original replay adapter not yet identified.",
+      "source_manifests": [
+        {
+          "path": "m4-counter-slots-originals/manifest.json",
+          "sha256": "6b65a42375a0bd51377b4719fad5f934218c5a277c53b16e3c6e588a322e4817"
+        }
+      ],
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "reference_buffer_sha256": "f50400f71ee85b785650d4af4bd2273d166389b09947b2d7d15a7be9db4b7656",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 45,
+          "repeat": 2,
+          "expected_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+          "purpose": "Diagnostic-only Dispatch omission; original capture and shaders unchanged"
+        }
+      ],
+      "boundaries": [
+        {
+          "kind": "buffer",
+          "resource": 5,
+          "event": 43,
+          "repeat": 2,
+          "expect_stable": true,
+          "expected_storage_sha256": "2600d18f45ae0e0a1d5e9004609fbd6e29ad7d15b27a60b1f956cf83b4a2126b"
+        },
+        {
+          "kind": "buffer",
+          "resource": 5,
+          "event": 45,
+          "repeat": 2,
+          "expect_stable": true,
+          "expected_storage_sha256": "f50400f71ee85b785650d4af4bd2273d166389b09947b2d7d15a7be9db4b7656"
+        },
+        {
+          "kind": "buffer",
+          "resource": 9,
+          "event": 43,
+          "repeat": 2,
+          "expect_stable": true,
+          "expected_storage_sha256": "2600d18f45ae0e0a1d5e9004609fbd6e29ad7d15b27a60b1f956cf83b4a2126b"
+        },
+        {
+          "kind": "buffer",
+          "resource": 9,
+          "event": 45,
+          "repeat": 2,
+          "expect_stable": true,
+          "expected_storage_sha256": "4eac2b01b6d68073360f4118cf160b48a51877308040b24c29a548449bd28644"
+        }
+      ],
+      "covers": [
+        "Known counters in both slots, indexed access to u1"
+      ],
+      "reference_indexed_buffer_sha256": "4eac2b01b6d68073360f4118cf160b48a51877308040b24c29a548449bd28644",
+      "native_workload_fidelity": "passed",
+      "fidelity_reason": "Both native and injected producers verify complete bytes of both buffers and final pixels on twelve frames each.",
+      "application_reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "application_reference_scope": "Uninjected CPU-checked producer image, 8x8 RGBA; separate full-byte buffer oracles",
+      "application_reference_evidence": {
+        "path": "m4-counter-slots-originals/manifest.json",
+        "sha256": "6b65a42375a0bd51377b4719fad5f934218c5a277c53b16e3c6e588a322e4817"
+      }
+    },
+    {
+      "id": "counter_usage_42",
+      "path": "m4-counter-slots-originals/42/capture.gpa_frame",
+      "sha256": "8a6aa90e6cd20d12d95ba9692de28870fd94daeb1d96611b3c82d84f2d5a6e74",
+      "bytes": 99649,
+      "family": "counter_usage",
+      "origin": "self_owned_original_gpa_capture",
+      "provenance_note": "Unmodified CaptureNextFrame output; native and injected full buffer/image oracles retained.",
+      "device_scope": "Producer adapter recorded; original replay adapter not yet identified.",
+      "source_manifests": [
+        {
+          "path": "m4-counter-slots-originals/manifest.json",
+          "sha256": "6b65a42375a0bd51377b4719fad5f934218c5a277c53b16e3c6e588a322e4817"
+        }
+      ],
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "reference_buffer_sha256": "f50400f71ee85b785650d4af4bd2273d166389b09947b2d7d15a7be9db4b7656",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 45,
+          "repeat": 2,
+          "expected_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+          "purpose": "Diagnostic-only Dispatch omission; original capture and shaders unchanged"
+        }
+      ],
+      "boundaries": [
+        {
+          "kind": "buffer",
+          "resource": 5,
+          "event": 43,
+          "repeat": 2,
+          "expect_stable": true,
+          "expected_storage_sha256": "2600d18f45ae0e0a1d5e9004609fbd6e29ad7d15b27a60b1f956cf83b4a2126b"
+        },
+        {
+          "kind": "buffer",
+          "resource": 5,
+          "event": 45,
+          "repeat": 2,
+          "expect_stable": true,
+          "expected_storage_sha256": "f50400f71ee85b785650d4af4bd2273d166389b09947b2d7d15a7be9db4b7656"
+        },
+        {
+          "kind": "buffer",
+          "resource": 9,
+          "event": 43,
+          "repeat": 2,
+          "expect_stable": true,
+          "expected_storage_sha256": "2600d18f45ae0e0a1d5e9004609fbd6e29ad7d15b27a60b1f956cf83b4a2126b"
+        },
+        {
+          "kind": "buffer",
+          "resource": 9,
+          "event": 45,
+          "repeat": 2,
+          "expect_stable": true,
+          "expected_storage_sha256": "4eac2b01b6d68073360f4118cf160b48a51877308040b24c29a548449bd28644"
+        }
+      ],
+      "covers": [
+        "Counter operation on u3 with counter-independent u1 KEEP"
+      ],
+      "reference_indexed_buffer_sha256": "4eac2b01b6d68073360f4118cf160b48a51877308040b24c29a548449bd28644",
+      "native_workload_fidelity": "passed",
+      "fidelity_reason": "Both native and injected producers verify complete bytes of both buffers and final pixels on twelve frames each.",
+      "application_reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "application_reference_scope": "Uninjected CPU-checked producer image, 8x8 RGBA; separate full-byte buffer oracles",
+      "application_reference_evidence": {
+        "path": "m4-counter-slots-originals/manifest.json",
+        "sha256": "6b65a42375a0bd51377b4719fad5f934218c5a277c53b16e3c6e588a322e4817"
+      }
+    }
+  ],
+  "evidence_manifest": "artifacts/m4-counter-slots-originals/manifest.json"
+}
