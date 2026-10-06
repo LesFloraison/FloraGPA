@@ -1,0 +1,356 @@
+{
+  "schema": "FloraGPA occluded Present TEST acceptance baseline 1",
+  "reviewed": "2026-10-06",
+  "implementation_commits": [
+    "64029c77ceeb032b93998d0b70b9084f792d96f4",
+    "f46197f4e997b59db43731ec7bd926c0536ca777",
+    "14e25ab163cc1ff32355987ad5f1bcb9d640d37d"
+  ],
+  "package": "out/FloraGPA-occluded-present-20261006",
+  "package_files": [
+    {
+      "path": "concrt140.dll",
+      "sha256": "2405355f0a58067b258f8df33c327e3a3d716eaac5a3a5aebb757842d85bd376"
+    },
+    {
+      "path": "D3Dcompiler_47.dll",
+      "sha256": "e994847e01a6f1e4cbdc5a864616ac262f67ee4f14db194984661a8d927ab7f4"
+    },
+    {
+      "path": "FloraGPA.Cli.exe",
+      "sha256": "f453ba29551d014d8e49a5cabf25a46cbdd9077a596b13d54b8a7b16dd77f96e"
+    },
+    {
+      "path": "FloraGPA.exe",
+      "sha256": "1260abb2e7af6b24c55f366d3162702dacb9f37f77ad71e84ccd25fb6cea67cc"
+    },
+    {
+      "path": "FloraGPA.Metrics.dll",
+      "sha256": "58b6278f2a93e783b1e8bb1290e9b0e51745f1a36825f296584f52159fd7c6db"
+    },
+    {
+      "path": "FloraGPA.Rdc.exe",
+      "sha256": "f4d21d43e661d24d392e91fc1a1f1460a20d1377fcf5075c57083ad289e82773"
+    },
+    {
+      "path": "FloraGPA.Worker.exe",
+      "sha256": "7ce36b583e42e4a60abc2ec8fbfe6fd4ade9ade7a5e914b0b3c4fa57ef60b5b8"
+    },
+    {
+      "path": "generic/qtuiotouchplugin.dll",
+      "sha256": "a0b971771417d60c6c2dedf66d06f6e99bd3236aa1aa6949c7e4e08d51fb69f9"
+    },
+    {
+      "path": "iconengines/qsvgicon.dll",
+      "sha256": "7879ba1d2f293ad09c515de736add8c1023b0a4e80e2301d1283555efc2e8828"
+    },
+    {
+      "path": "imageformats/qgif.dll",
+      "sha256": "de1c1ea34cbc4156ce452023470e2145af4855128756d081d56e9a0997d0dda8"
+    },
+    {
+      "path": "imageformats/qico.dll",
+      "sha256": "af98cacb134525fab15cf2146a4e6b90266f14493e72e4d51df89a5caadea157"
+    },
+    {
+      "path": "imageformats/qjpeg.dll",
+      "sha256": "a8854ac38d2bb83e8018bdcbfc93420a876251b3d2a79933e1a3c9a8ed2a24cb"
+    },
+    {
+      "path": "imageformats/qsvg.dll",
+      "sha256": "486b395e23e258d03d54cdba045f129e9b1321f9ff12f99fe58293e0351b8caf"
+    },
+    {
+      "path": "licenses/COPYING.txt",
+      "sha256": "eb7e9ab9690124c5c9f42bdc81383d886a3dede26345b6ed15bbad7caf81f7ea"
+    },
+    {
+      "path": "licenses/Copyright.txt",
+      "sha256": "d1f5b8f5eba2e9073463bc29b30572d84033f59e8d8057a95dff37c3414305b9"
+    },
+    {
+      "path": "licenses/GPL-3.0-only.txt",
+      "sha256": "8ceb4b9ee5adedde47b31e975c1d90c73ad27b6b165a1dcd80c7c545eb65b903"
+    },
+    {
+      "path": "licenses/intel-metrics-discovery-MIT.txt",
+      "sha256": "653129790534d6a3e843eaafc62cf04299e7e238f6f411173e85ea7fc315c8ac"
+    },
+    {
+      "path": "licenses/LGPL-3.0-only.txt",
+      "sha256": "da7eabb7bafdf7d3ae5e9f223aa5bdc1eece45ac569dc21b3b037520b4464768"
+    },
+    {
+      "path": "licenses/LICENSE",
+      "sha256": "2004ee3ef8282a85f7dbd035dfacf63cf03d569537bc08655ffeb140ea3671c5"
+    },
+    {
+      "path": "licenses/LICENSE.FDL",
+      "sha256": "c256483c2d1e8a51b62fc7a44a58f21cb4ef23fa840c7d33e3658035fd8cf62f"
+    },
+    {
+      "path": "licenses/nlohmann-json-MIT.txt",
+      "sha256": "46a65cffd1ea955132d95a8dd921640714a8d6b537d2e4e482d31145ae95b603"
+    },
+    {
+      "path": "licenses/renderdoc-api-MIT.txt",
+      "sha256": "e3dccfaa75440c693b18fd2332347e3c810829bf55ec68302ea5a11db9951997"
+    },
+    {
+      "path": "msvcp140.dll",
+      "sha256": "0f885b509a685d2bbfa652fed26b5fb31d88fbdab0a978c641d1c7b8aa460aa9"
+    },
+    {
+      "path": "msvcp140_1.dll",
+      "sha256": "bfad5aef4c63a669e3c140655cdfdf395b6c979b400a447bd5dcb65ed8826c3d"
+    },
+    {
+      "path": "msvcp140_2.dll",
+      "sha256": "3ea06f0ee098b4823cb79599df3780e7f23cce52c19aac31d2a0d47efe33a5e9"
+    },
+    {
+      "path": "msvcp140_atomic_wait.dll",
+      "sha256": "640b2aefced484d0368eea5bdd06addd0658a3a70a49256e560d6923b404a479"
+    },
+    {
+      "path": "msvcp140_codecvt_ids.dll",
+      "sha256": "f2069a52880ec885ee7f0511186100eb7fada0411a2b4948fafea7735b878a18"
+    },
+    {
+      "path": "networkinformation/qnetworklistmanager.dll",
+      "sha256": "2f7c43bb4ec05e9f23a326ac69e84a6df071cdf7cc0bf87cde98f81958ad9bae"
+    },
+    {
+      "path": "platforms/qoffscreen.dll",
+      "sha256": "95391476bba1d0b50cc822b93d7509341024cc7c18cd615f82e471a3e3a61caa"
+    },
+    {
+      "path": "platforms/qwindows.dll",
+      "sha256": "d94c584a18829d11fbf3aefd07e7b1e189e0cf063a0515826960037efa7465df"
+    },
+    {
+      "path": "Qt6Core.dll",
+      "sha256": "22c113a5644b875b2c85482723cd5d2e6a3a4029169778fcc78adde08ef3b6aa"
+    },
+    {
+      "path": "Qt6Gui.dll",
+      "sha256": "19265a4e76efc12ef5f5bcf59be6c6a5b9b59ec4c89660797738bd2da7f719cc"
+    },
+    {
+      "path": "Qt6Network.dll",
+      "sha256": "75ff0896a618f4f5b602f391eb4917a55fd738b2e751d2cf18244a0de3619184"
+    },
+    {
+      "path": "Qt6Svg.dll",
+      "sha256": "1052c17a9df0eb82023e0e4c369bbd0af58e4c5fea3c27a4b5ee83b60c015492"
+    },
+    {
+      "path": "Qt6Widgets.dll",
+      "sha256": "e6d0b7e2e697de6ad985b97f9ed8b381c1c2172fcae87b6ab08455b3b7330f32"
+    },
+    {
+      "path": "styles/qmodernwindowsstyle.dll",
+      "sha256": "f6b88d403d7175f5b830d4958264690e5c8bbaf0148e1ccf42d52704b0480792"
+    },
+    {
+      "path": "THIRD_PARTY.md",
+      "sha256": "343009c9e4761e1c1dc645bd72fd470001c3a4e269384f0dfc4b0bf69c10f6ec"
+    },
+    {
+      "path": "tls/qcertonlybackend.dll",
+      "sha256": "ff0f1a60ec60fc23ec74ff5d325ddef05c1ed68fc89466bffc1d874c7c544adb"
+    },
+    {
+      "path": "tls/qschannelbackend.dll",
+      "sha256": "761178263b47a5f05e151806bb5854d9e5c9cbc67d08187724d80f9e317471f8"
+    },
+    {
+      "path": "vc_redist.x64.exe",
+      "sha256": "cc0ff0eb1dc3f5188ae6300faef32bf5beeba4bdd6e8e445a9184072096b713b"
+    },
+    {
+      "path": "vccorlib140.dll",
+      "sha256": "19839407c3fdbc824e5bce189bf68ddf8097f12ec28b757797ffa0415c144ddd"
+    },
+    {
+      "path": "vcruntime140.dll",
+      "sha256": "d5e4d9a3e835fa679450145d6a7d94e36573a509317111904d9b3712c30d9066"
+    },
+    {
+      "path": "vcruntime140_1.dll",
+      "sha256": "1f2d41c4aa5db0bc33ebf7b66d72943a817d7ce6cbe880502a9403823633093f"
+    },
+    {
+      "path": "vcruntime140_threads.dll",
+      "sha256": "219915cf20822f34d5e7c1fdd4e21ae7f3396881096c51036225fb8f84b47afa"
+    }
+  ],
+  "matrix": {
+    "completed": true,
+    "previous_cases": 492,
+    "complete_preflight_reports_unchanged": true,
+    "execution_counts_unchanged": true,
+    "deterministic_images_unchanged": true,
+    "variable_changes": [
+      {
+        "case": "helldivers__helldivers2_2026_04_02__18_02_58",
+        "kind": "known_variable_image"
+      },
+      {
+        "case": "helldivers__helldivers2_2026_04_02__18_02_58",
+        "kind": "known_variable_image"
+      }
+    ],
+    "counts": {
+      "ordinary_attempts": 988,
+      "control_runs": 684,
+      "resource_exports": 728
+    },
+    "positive_unique": 458,
+    "matrix": {
+      "cases": 494,
+      "positive_cases": 468,
+      "rejected_cases": 26,
+      "capture_fidelity_counts": {
+        "unassessed": 423,
+        "passed": 38,
+        "capture_information_missing": 1,
+        "capture_side_mismatch": 32
+      },
+      "application_image_comparison_counts": {
+        "not_assessed": 487,
+        "matches": 6,
+        "differs": 1
+      },
+      "completed_with_known_capture_limitations": 33
+    }
+  },
+  "unique_captures": 484,
+  "suites": 31,
+  "accepted_original_captures": 2,
+  "accepted_producer_frames": 72,
+  "before_after_rgba_observations": 144,
+  "original_player_runs": 4,
+  "new_resource_exports": 12,
+  "present_qt_rows": 27,
+  "ui_qt_rows": 64,
+  "portable_ui_qt_rows": 3,
+  "evidence": [
+    {
+      "path": "artifacts/m4-present-status-discovery/summary.json",
+      "sha256": "e6d2500e16b584c584de10df2f667bc654f0da04d3d12521c8c2e9adcfe5fb68"
+    },
+    {
+      "path": "artifacts/m4-present-status-originals/discovery.json",
+      "sha256": "8e75e12e1555eb0ba9f5f0dc1cd328f8750f14173ed53ec8380e22a99ce54740"
+    },
+    {
+      "path": "artifacts/m4-present-status-selected-originals/discovery.json",
+      "sha256": "e9e3470c0548ebe564f35641c1c239f41507eae54a52624fa8462494a5ad000f"
+    },
+    {
+      "path": "artifacts/m4-present-status-primary-originals/discovery.json",
+      "sha256": "38d2e4e4563bbb211f5510e27fe819f35187637cdae1485e88444fc2a1da56fb"
+    },
+    {
+      "path": "artifacts/m4-present-status-primary-wire.json",
+      "sha256": "8321c127757acf3c3a19f799664c20a8e1467b2e8548719c1934e3e80bbf61a4"
+    },
+    {
+      "path": "artifacts/m4-present-occluded-originals-final/manifest.json",
+      "sha256": "e05269326c22a447024cf88eea8fa5dfc1b3a22860b158638a67cce640299145"
+    },
+    {
+      "path": "artifacts/m4-present-occluded-reproduction/manifest.json",
+      "sha256": "5ba33e1b1344f8a149bb229115c5e1d9519c591f13a437dabf0bcc0fd036b259"
+    },
+    {
+      "path": "artifacts/m4-present-occluded-tool-controls.json",
+      "sha256": "7af3a75f8d98caa4779979e694faad943ee8ea8ad560bcca841a5b17d4d17a4b"
+    },
+    {
+      "path": "artifacts/m4-present-occluded-before/validation.json",
+      "sha256": "961e0cac4b161b6c841d364b776e7a7316b92c4a3f94cf604d44d5d0ca1023a0"
+    },
+    {
+      "path": "artifacts/m4-present-occluded-final-before/5/validation.json",
+      "sha256": "0a8794a53da7ed18c82d82ee42a78b83d3d72f873fdfbb9f0c3b4334831f30dd"
+    },
+    {
+      "path": "artifacts/m4-present-occluded-final-before/7/validation.json",
+      "sha256": "5682bb793290ef9da858e793ed75180eb0547ad40331c6252711c08e7c39acec"
+    },
+    {
+      "path": "artifacts/m4-present-occluded-after/validation.json",
+      "sha256": "06d458b6b3c2fd899cc85a422ffdef466701ff791d0d74bb8c9313d84b9f4d68"
+    },
+    {
+      "path": "artifacts/m4-present-occluded-gate/gate.json",
+      "sha256": "47c89e1d49ab2d35c447a81b763cd13d790172fbb647792cfeae55b904864c98"
+    },
+    {
+      "path": "artifacts/m4-present-occluded-gate/recheck.json",
+      "sha256": "b9cbd91b5bdc67bb50043d6ac425148a8fb4722187487037ce4109779ef32b97"
+    },
+    {
+      "path": "artifacts/check_m4_present_occluded_gate.py",
+      "sha256": "fb525414e985080cb3733ec1fa72276ee2f3d3c67b56524fa02965b2da76c68c"
+    },
+    {
+      "path": "artifacts/m4-present-occluded-tests.txt",
+      "sha256": "8d2a8084295125c4d381c7e6f7a15c4730fb59b0fda31e3aac5ecedb17a0b5e3"
+    },
+    {
+      "path": "artifacts/m4-present-occluded-binding-tests.txt",
+      "sha256": "14d1f0bc1cea3536033ea94cdc6059f4f6ddc0f042b7bde521fdf9b4a3d48d1b"
+    },
+    {
+      "path": "artifacts/m4-present-occluded-ctest.log",
+      "sha256": "66059d22a0616b859ec9f1e281cc085f561b9213f7ecb1c7301488e09e82af6b"
+    },
+    {
+      "path": "artifacts/m4-present-occluded-ui-full.txt",
+      "sha256": "86b66e58fe26d3297f9f215ddf432efd2158c523b855554bf8ca58c9e48752f0"
+    },
+    {
+      "path": "artifacts/m4-present-occluded-ui-ctest.log",
+      "sha256": "78608b565006515036c83fab9628cc1b9b2751b482e62d358d36735b4fe145c8"
+    },
+    {
+      "path": "artifacts/m4-present-occluded-portable-ui/ui.txt",
+      "sha256": "fa1a6543b4d30fa81757c440f9e55c87df2c2529bac6aff4d769502a899d8998"
+    },
+    {
+      "path": "artifacts/m4-present-occluded-portable-ui-final/ui.txt",
+      "sha256": "8e4215a5c3d6c64312c12af024d60344df350dec0fe6a94e628ec0e393ba81a5"
+    },
+    {
+      "path": "artifacts/m4-present-occluded-portable-ui-final/validation.json",
+      "sha256": "44d798688609a4af01061e763ebe64766edda157750a1086b7b5a3c4d65e9768"
+    },
+    {
+      "path": "artifacts/m4-present-occluded-portable-ui-final/screenshots/occluded-present-5.png",
+      "sha256": "b5d3b612cc294fb655dee8c157616c9c03e4871b7e53ba33a41e54a65f5e9021"
+    },
+    {
+      "path": "artifacts/m4-present-occluded-portable-ui-final/screenshots/occluded-present-7.png",
+      "sha256": "d5d3df0c7541e2a16fed33472dcade5c0ad016065f7d7c849db2fec36ca0d6d8"
+    },
+    {
+      "path": "artifacts/m4-present-occluded-goldens/validation.json",
+      "sha256": "5e1dde1ab9876f50c472cdf84378931ffc3b5cd8e9700002b67d37bf81383ade"
+    },
+    {
+      "path": "artifacts/m4-present-occluded-probe-build.log",
+      "sha256": "1831dfb6dd4cc7c500c9c2bb0c76377e88a4250fe0cb5733df0bf060752bb49f"
+    }
+  ],
+  "limits": [
+    "Only saved DXGI_STATUS_OCCLUDED with TEST on checked blt-model swap chains is newly accepted",
+    "Ordinary non-S_OK Present, other flags and buffer rotation remain unverified",
+    "Discovery files omitting the target status are not accepted as capability evidence",
+    "Original-player adapter unidentified; observed equality is not matched-device equivalence",
+    "Portable native Qt harness on the development host, not independent clean-machine certification",
+    "M3/M4/M5 incomplete; 33 existing capture limitations remain separate from native completion"
+  ]
+}

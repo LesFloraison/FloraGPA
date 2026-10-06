@@ -1,0 +1,1082 @@
+{
+  "schema": "FloraGPA compatibility corpus 1",
+  "profile": "GPA 2025 R1 legacy DX11 / IGPA v3",
+  "completed": true,
+  "producer_files": {
+    "capture_occluded_present.py": "a1e2dc0451585a93fb859836443f439aa4a3f35e4655d6f55987b0cf2b6c06fe",
+    "FloraPresentCaptureProbe.exe": "803b96d0a0eb23cd9a53adfdd2ae5b977d8560ee14a94bcd58ffb6d78331361b",
+    "original_capture_control.h": "0bbda55addde2970d2775bfb633881c45f13279f61d6584b1ad297ce0b0090b8",
+    "present_capture_probe.cpp": "832a72af837821b7ed976a7f00d23c12c703d2d93d4b7c2ca9271a50c6c2df92"
+  },
+  "gpa_sha256": {
+    "shimloader64.dll": "af68e28ba54ab0068c95f82081828788d6f59879283127dc330b818af7369888",
+    "shimd3d64.dll": "cb0b99d113511cbf7ca9f949d97aa02e4a1f8f110b1f3ad3165d8a81035dee31",
+    "dx11_player.dll": "39061ff329e4a32d0c8375ce9ee15e2017bccab0593943b962a860e11723d38b"
+  },
+  "producer_runs": [
+    {
+      "mode": 5,
+      "backend": "hardware",
+      "exit_code": 0,
+      "oracle": {
+        "mode": 5,
+        "warp": false,
+        "vendor_id": 4318,
+        "device_id": 9373,
+        "adapter_luid_low": 56225,
+        "adapter_luid_high": 0,
+        "warmup_hresult": 0,
+        "frames": [
+          {
+            "frame": 0,
+            "hresult": 142213121,
+            "flags": 1,
+            "minimized": true,
+            "before": true,
+            "after": true,
+            "terminal_hresult": 0
+          },
+          {
+            "frame": 1,
+            "hresult": 142213121,
+            "flags": 1,
+            "minimized": true,
+            "before": true,
+            "after": true,
+            "terminal_hresult": 0
+          },
+          {
+            "frame": 2,
+            "hresult": 142213121,
+            "flags": 1,
+            "minimized": true,
+            "before": true,
+            "after": true,
+            "terminal_hresult": 0
+          },
+          {
+            "frame": 3,
+            "hresult": 142213121,
+            "flags": 1,
+            "minimized": true,
+            "before": true,
+            "after": true,
+            "terminal_hresult": 0
+          },
+          {
+            "frame": 4,
+            "hresult": 142213121,
+            "flags": 1,
+            "minimized": true,
+            "before": true,
+            "after": true,
+            "terminal_hresult": 0
+          },
+          {
+            "frame": 5,
+            "hresult": 142213121,
+            "flags": 1,
+            "minimized": true,
+            "before": true,
+            "after": true,
+            "terminal_hresult": 0
+          },
+          {
+            "frame": 6,
+            "hresult": 142213121,
+            "flags": 1,
+            "minimized": true,
+            "before": true,
+            "after": true,
+            "terminal_hresult": 0
+          },
+          {
+            "frame": 7,
+            "hresult": 142213121,
+            "flags": 1,
+            "minimized": true,
+            "before": true,
+            "after": true,
+            "terminal_hresult": 0
+          },
+          {
+            "frame": 8,
+            "hresult": 142213121,
+            "flags": 1,
+            "minimized": true,
+            "before": true,
+            "after": true,
+            "terminal_hresult": 0
+          },
+          {
+            "frame": 9,
+            "hresult": 142213121,
+            "flags": 1,
+            "minimized": true,
+            "before": true,
+            "after": true,
+            "terminal_hresult": 0
+          },
+          {
+            "frame": 10,
+            "hresult": 142213121,
+            "flags": 1,
+            "minimized": true,
+            "before": true,
+            "after": true,
+            "terminal_hresult": 0
+          },
+          {
+            "frame": 11,
+            "hresult": 142213121,
+            "flags": 1,
+            "minimized": true,
+            "before": true,
+            "after": true,
+            "terminal_hresult": 0
+          }
+        ],
+        "capture_requested": false,
+        "original_primary_selected": false,
+        "pixel_failures": 0,
+        "completed": true
+      },
+      "raw_images": {
+        "after-0.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "after-1.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "after-10.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "after-11.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "after-2.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "after-3.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "after-4.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "after-5.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "after-6.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "after-7.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "after-8.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "after-9.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "before-0.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "before-1.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "before-10.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "before-11.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "before-2.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "before-3.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "before-4.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "before-5.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "before-6.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "before-7.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "before-8.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "before-9.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "oracle.rgba": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636"
+      }
+    },
+    {
+      "mode": 5,
+      "backend": "warp",
+      "exit_code": 0,
+      "oracle": {
+        "mode": 5,
+        "warp": true,
+        "vendor_id": 5140,
+        "device_id": 140,
+        "adapter_luid_low": 67146,
+        "adapter_luid_high": 0,
+        "warmup_hresult": 0,
+        "frames": [
+          {
+            "frame": 0,
+            "hresult": 142213121,
+            "flags": 1,
+            "minimized": true,
+            "before": true,
+            "after": true,
+            "terminal_hresult": 0
+          },
+          {
+            "frame": 1,
+            "hresult": 142213121,
+            "flags": 1,
+            "minimized": true,
+            "before": true,
+            "after": true,
+            "terminal_hresult": 0
+          },
+          {
+            "frame": 2,
+            "hresult": 142213121,
+            "flags": 1,
+            "minimized": true,
+            "before": true,
+            "after": true,
+            "terminal_hresult": 0
+          },
+          {
+            "frame": 3,
+            "hresult": 142213121,
+            "flags": 1,
+            "minimized": true,
+            "before": true,
+            "after": true,
+            "terminal_hresult": 0
+          },
+          {
+            "frame": 4,
+            "hresult": 142213121,
+            "flags": 1,
+            "minimized": true,
+            "before": true,
+            "after": true,
+            "terminal_hresult": 0
+          },
+          {
+            "frame": 5,
+            "hresult": 142213121,
+            "flags": 1,
+            "minimized": true,
+            "before": true,
+            "after": true,
+            "terminal_hresult": 0
+          },
+          {
+            "frame": 6,
+            "hresult": 142213121,
+            "flags": 1,
+            "minimized": true,
+            "before": true,
+            "after": true,
+            "terminal_hresult": 0
+          },
+          {
+            "frame": 7,
+            "hresult": 142213121,
+            "flags": 1,
+            "minimized": true,
+            "before": true,
+            "after": true,
+            "terminal_hresult": 0
+          },
+          {
+            "frame": 8,
+            "hresult": 142213121,
+            "flags": 1,
+            "minimized": true,
+            "before": true,
+            "after": true,
+            "terminal_hresult": 0
+          },
+          {
+            "frame": 9,
+            "hresult": 142213121,
+            "flags": 1,
+            "minimized": true,
+            "before": true,
+            "after": true,
+            "terminal_hresult": 0
+          },
+          {
+            "frame": 10,
+            "hresult": 142213121,
+            "flags": 1,
+            "minimized": true,
+            "before": true,
+            "after": true,
+            "terminal_hresult": 0
+          },
+          {
+            "frame": 11,
+            "hresult": 142213121,
+            "flags": 1,
+            "minimized": true,
+            "before": true,
+            "after": true,
+            "terminal_hresult": 0
+          }
+        ],
+        "capture_requested": false,
+        "original_primary_selected": false,
+        "pixel_failures": 0,
+        "completed": true
+      },
+      "raw_images": {
+        "after-0.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "after-1.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "after-10.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "after-11.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "after-2.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "after-3.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "after-4.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "after-5.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "after-6.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "after-7.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "after-8.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "after-9.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "before-0.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "before-1.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "before-10.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "before-11.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "before-2.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "before-3.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "before-4.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "before-5.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "before-6.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "before-7.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "before-8.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "before-9.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "oracle.rgba": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636"
+      }
+    },
+    {
+      "mode": 5,
+      "backend": "captured",
+      "exit_code": 0,
+      "oracle": {
+        "mode": 5,
+        "warp": false,
+        "vendor_id": 4318,
+        "device_id": 9373,
+        "adapter_luid_low": 56225,
+        "adapter_luid_high": 0,
+        "warmup_hresult": 0,
+        "frames": [
+          {
+            "frame": 0,
+            "hresult": 142213121,
+            "flags": 1,
+            "minimized": true,
+            "before": true,
+            "after": true,
+            "terminal_hresult": 0
+          },
+          {
+            "frame": 1,
+            "hresult": 142213121,
+            "flags": 1,
+            "minimized": true,
+            "before": true,
+            "after": true,
+            "terminal_hresult": 0
+          },
+          {
+            "frame": 2,
+            "hresult": 142213121,
+            "flags": 1,
+            "minimized": true,
+            "before": true,
+            "after": true,
+            "terminal_hresult": 0
+          },
+          {
+            "frame": 3,
+            "hresult": 142213121,
+            "flags": 1,
+            "minimized": true,
+            "before": true,
+            "after": true,
+            "terminal_hresult": 0
+          },
+          {
+            "frame": 4,
+            "hresult": 142213121,
+            "flags": 1,
+            "minimized": true,
+            "before": true,
+            "after": true,
+            "terminal_hresult": 0
+          },
+          {
+            "frame": 5,
+            "hresult": 142213121,
+            "flags": 1,
+            "minimized": true,
+            "before": true,
+            "after": true,
+            "terminal_hresult": 0
+          },
+          {
+            "frame": 6,
+            "hresult": 142213121,
+            "flags": 1,
+            "minimized": true,
+            "before": true,
+            "after": true,
+            "terminal_hresult": 0
+          },
+          {
+            "frame": 7,
+            "hresult": 142213121,
+            "flags": 1,
+            "minimized": true,
+            "before": true,
+            "after": true,
+            "terminal_hresult": 0
+          },
+          {
+            "frame": 8,
+            "hresult": 142213121,
+            "flags": 1,
+            "minimized": true,
+            "before": true,
+            "after": true,
+            "terminal_hresult": 0
+          },
+          {
+            "frame": 9,
+            "hresult": 142213121,
+            "flags": 1,
+            "minimized": true,
+            "before": true,
+            "after": true,
+            "terminal_hresult": 0
+          },
+          {
+            "frame": 10,
+            "hresult": 142213121,
+            "flags": 1,
+            "minimized": true,
+            "before": true,
+            "after": true,
+            "terminal_hresult": 0
+          },
+          {
+            "frame": 11,
+            "hresult": 142213121,
+            "flags": 1,
+            "minimized": true,
+            "before": true,
+            "after": true,
+            "terminal_hresult": 0
+          }
+        ],
+        "capture_requested": true,
+        "original_primary_selected": true,
+        "pixel_failures": 0,
+        "completed": true
+      },
+      "raw_images": {
+        "after-0.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "after-1.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "after-10.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "after-11.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "after-2.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "after-3.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "after-4.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "after-5.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "after-6.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "after-7.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "after-8.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "after-9.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "before-0.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "before-1.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "before-10.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "before-11.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "before-2.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "before-3.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "before-4.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "before-5.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "before-6.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "before-7.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "before-8.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "before-9.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "oracle.rgba": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636"
+      }
+    },
+    {
+      "mode": 7,
+      "backend": "hardware",
+      "exit_code": 0,
+      "oracle": {
+        "mode": 7,
+        "warp": false,
+        "vendor_id": 4318,
+        "device_id": 9373,
+        "adapter_luid_low": 56225,
+        "adapter_luid_high": 0,
+        "warmup_hresult": 0,
+        "frames": [
+          {
+            "frame": 0,
+            "hresult": 142213121,
+            "flags": 1,
+            "minimized": true,
+            "before": true,
+            "after": true,
+            "terminal_hresult": 0
+          },
+          {
+            "frame": 1,
+            "hresult": 142213121,
+            "flags": 1,
+            "minimized": true,
+            "before": true,
+            "after": true,
+            "terminal_hresult": 0
+          },
+          {
+            "frame": 2,
+            "hresult": 142213121,
+            "flags": 1,
+            "minimized": true,
+            "before": true,
+            "after": true,
+            "terminal_hresult": 0
+          },
+          {
+            "frame": 3,
+            "hresult": 142213121,
+            "flags": 1,
+            "minimized": true,
+            "before": true,
+            "after": true,
+            "terminal_hresult": 0
+          },
+          {
+            "frame": 4,
+            "hresult": 142213121,
+            "flags": 1,
+            "minimized": true,
+            "before": true,
+            "after": true,
+            "terminal_hresult": 0
+          },
+          {
+            "frame": 5,
+            "hresult": 142213121,
+            "flags": 1,
+            "minimized": true,
+            "before": true,
+            "after": true,
+            "terminal_hresult": 0
+          },
+          {
+            "frame": 6,
+            "hresult": 142213121,
+            "flags": 1,
+            "minimized": true,
+            "before": true,
+            "after": true,
+            "terminal_hresult": 0
+          },
+          {
+            "frame": 7,
+            "hresult": 142213121,
+            "flags": 1,
+            "minimized": true,
+            "before": true,
+            "after": true,
+            "terminal_hresult": 0
+          },
+          {
+            "frame": 8,
+            "hresult": 142213121,
+            "flags": 1,
+            "minimized": true,
+            "before": true,
+            "after": true,
+            "terminal_hresult": 0
+          },
+          {
+            "frame": 9,
+            "hresult": 142213121,
+            "flags": 1,
+            "minimized": true,
+            "before": true,
+            "after": true,
+            "terminal_hresult": 0
+          },
+          {
+            "frame": 10,
+            "hresult": 142213121,
+            "flags": 1,
+            "minimized": true,
+            "before": true,
+            "after": true,
+            "terminal_hresult": 0
+          },
+          {
+            "frame": 11,
+            "hresult": 142213121,
+            "flags": 1,
+            "minimized": true,
+            "before": true,
+            "after": true,
+            "terminal_hresult": 0
+          }
+        ],
+        "capture_requested": false,
+        "original_primary_selected": false,
+        "pixel_failures": 0,
+        "completed": true
+      },
+      "raw_images": {
+        "after-0.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "after-1.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "after-10.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "after-11.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "after-2.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "after-3.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "after-4.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "after-5.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "after-6.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "after-7.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "after-8.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "after-9.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "before-0.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "before-1.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "before-10.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "before-11.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "before-2.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "before-3.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "before-4.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "before-5.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "before-6.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "before-7.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "before-8.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "before-9.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "oracle.rgba": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636"
+      }
+    },
+    {
+      "mode": 7,
+      "backend": "warp",
+      "exit_code": 0,
+      "oracle": {
+        "mode": 7,
+        "warp": true,
+        "vendor_id": 5140,
+        "device_id": 140,
+        "adapter_luid_low": 67146,
+        "adapter_luid_high": 0,
+        "warmup_hresult": 0,
+        "frames": [
+          {
+            "frame": 0,
+            "hresult": 142213121,
+            "flags": 1,
+            "minimized": true,
+            "before": true,
+            "after": true,
+            "terminal_hresult": 0
+          },
+          {
+            "frame": 1,
+            "hresult": 142213121,
+            "flags": 1,
+            "minimized": true,
+            "before": true,
+            "after": true,
+            "terminal_hresult": 0
+          },
+          {
+            "frame": 2,
+            "hresult": 142213121,
+            "flags": 1,
+            "minimized": true,
+            "before": true,
+            "after": true,
+            "terminal_hresult": 0
+          },
+          {
+            "frame": 3,
+            "hresult": 142213121,
+            "flags": 1,
+            "minimized": true,
+            "before": true,
+            "after": true,
+            "terminal_hresult": 0
+          },
+          {
+            "frame": 4,
+            "hresult": 142213121,
+            "flags": 1,
+            "minimized": true,
+            "before": true,
+            "after": true,
+            "terminal_hresult": 0
+          },
+          {
+            "frame": 5,
+            "hresult": 142213121,
+            "flags": 1,
+            "minimized": true,
+            "before": true,
+            "after": true,
+            "terminal_hresult": 0
+          },
+          {
+            "frame": 6,
+            "hresult": 142213121,
+            "flags": 1,
+            "minimized": true,
+            "before": true,
+            "after": true,
+            "terminal_hresult": 0
+          },
+          {
+            "frame": 7,
+            "hresult": 142213121,
+            "flags": 1,
+            "minimized": true,
+            "before": true,
+            "after": true,
+            "terminal_hresult": 0
+          },
+          {
+            "frame": 8,
+            "hresult": 142213121,
+            "flags": 1,
+            "minimized": true,
+            "before": true,
+            "after": true,
+            "terminal_hresult": 0
+          },
+          {
+            "frame": 9,
+            "hresult": 142213121,
+            "flags": 1,
+            "minimized": true,
+            "before": true,
+            "after": true,
+            "terminal_hresult": 0
+          },
+          {
+            "frame": 10,
+            "hresult": 142213121,
+            "flags": 1,
+            "minimized": true,
+            "before": true,
+            "after": true,
+            "terminal_hresult": 0
+          },
+          {
+            "frame": 11,
+            "hresult": 142213121,
+            "flags": 1,
+            "minimized": true,
+            "before": true,
+            "after": true,
+            "terminal_hresult": 0
+          }
+        ],
+        "capture_requested": false,
+        "original_primary_selected": false,
+        "pixel_failures": 0,
+        "completed": true
+      },
+      "raw_images": {
+        "after-0.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "after-1.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "after-10.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "after-11.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "after-2.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "after-3.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "after-4.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "after-5.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "after-6.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "after-7.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "after-8.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "after-9.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "before-0.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "before-1.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "before-10.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "before-11.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "before-2.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "before-3.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "before-4.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "before-5.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "before-6.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "before-7.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "before-8.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "before-9.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "oracle.rgba": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636"
+      }
+    },
+    {
+      "mode": 7,
+      "backend": "captured",
+      "exit_code": 0,
+      "oracle": {
+        "mode": 7,
+        "warp": false,
+        "vendor_id": 4318,
+        "device_id": 9373,
+        "adapter_luid_low": 56225,
+        "adapter_luid_high": 0,
+        "warmup_hresult": 0,
+        "frames": [
+          {
+            "frame": 0,
+            "hresult": 142213121,
+            "flags": 1,
+            "minimized": true,
+            "before": true,
+            "after": true,
+            "terminal_hresult": 0
+          },
+          {
+            "frame": 1,
+            "hresult": 142213121,
+            "flags": 1,
+            "minimized": true,
+            "before": true,
+            "after": true,
+            "terminal_hresult": 0
+          },
+          {
+            "frame": 2,
+            "hresult": 142213121,
+            "flags": 1,
+            "minimized": true,
+            "before": true,
+            "after": true,
+            "terminal_hresult": 0
+          },
+          {
+            "frame": 3,
+            "hresult": 142213121,
+            "flags": 1,
+            "minimized": true,
+            "before": true,
+            "after": true,
+            "terminal_hresult": 0
+          },
+          {
+            "frame": 4,
+            "hresult": 142213121,
+            "flags": 1,
+            "minimized": true,
+            "before": true,
+            "after": true,
+            "terminal_hresult": 0
+          },
+          {
+            "frame": 5,
+            "hresult": 142213121,
+            "flags": 1,
+            "minimized": true,
+            "before": true,
+            "after": true,
+            "terminal_hresult": 0
+          },
+          {
+            "frame": 6,
+            "hresult": 142213121,
+            "flags": 1,
+            "minimized": true,
+            "before": true,
+            "after": true,
+            "terminal_hresult": 0
+          },
+          {
+            "frame": 7,
+            "hresult": 142213121,
+            "flags": 1,
+            "minimized": true,
+            "before": true,
+            "after": true,
+            "terminal_hresult": 0
+          },
+          {
+            "frame": 8,
+            "hresult": 142213121,
+            "flags": 1,
+            "minimized": true,
+            "before": true,
+            "after": true,
+            "terminal_hresult": 0
+          },
+          {
+            "frame": 9,
+            "hresult": 142213121,
+            "flags": 1,
+            "minimized": true,
+            "before": true,
+            "after": true,
+            "terminal_hresult": 0
+          },
+          {
+            "frame": 10,
+            "hresult": 142213121,
+            "flags": 1,
+            "minimized": true,
+            "before": true,
+            "after": true,
+            "terminal_hresult": 0
+          },
+          {
+            "frame": 11,
+            "hresult": 142213121,
+            "flags": 1,
+            "minimized": true,
+            "before": true,
+            "after": true,
+            "terminal_hresult": 0
+          }
+        ],
+        "capture_requested": true,
+        "original_primary_selected": true,
+        "pixel_failures": 0,
+        "completed": true
+      },
+      "raw_images": {
+        "after-0.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "after-1.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "after-10.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "after-11.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "after-2.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "after-3.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "after-4.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "after-5.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "after-6.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "after-7.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "after-8.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "after-9.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "before-0.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "before-1.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "before-10.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "before-11.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "before-2.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "before-3.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "before-4.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "before-5.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "before-6.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "before-7.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "before-8.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "before-9.rgba": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+        "oracle.rgba": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636"
+      }
+    }
+  ],
+  "cases": [
+    {
+      "id": "present_occluded_test_5",
+      "path": "m4-present-occluded-originals-final/5/capture.gpa_frame",
+      "sha256": "6b34813fc57e39de0ada36a191df6b3ddd23d323a82bb803a5914f6cd42cb037",
+      "bytes": 8804,
+      "family": "present_occluded",
+      "origin": "self_owned_original_gpa_capture",
+      "provenance_note": "Unmodified original CaptureNextFrame output with pinned primary selector; saved occlusion status checked.",
+      "source_manifests": [
+        {
+          "path": "m4-present-occluded-originals-final/manifest.json",
+          "sha256": "e05269326c22a447024cf88eea8fa5dfc1b3a22860b158638a67cce640299145"
+        }
+      ],
+      "device_scope": "Producer hardware/WARP adapter IDs recorded; original-player adapter unidentified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 34,
+          "repeat": 2,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+          "purpose": "Omit later green clear; retain red storage across TEST"
+        }
+      ],
+      "boundaries": [
+        {
+          "kind": "texture",
+          "resource": 7,
+          "event": 26,
+          "repeat": 2,
+          "expect_stable": true,
+          "expected_storage_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "kind": "texture",
+          "resource": 7,
+          "event": 27,
+          "repeat": 2,
+          "expect_stable": true,
+          "expected_storage_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "kind": "texture",
+          "resource": 7,
+          "event": 34,
+          "repeat": 2,
+          "expect_stable": true,
+          "expected_storage_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636"
+        }
+      ],
+      "covers": [
+        "Occluded blt-model Present TEST",
+        "Retained RTV/storage and later in-frame writes"
+      ],
+      "present_event": 27,
+      "swap_chain": 8,
+      "native_workload_fidelity": "passed",
+      "application_reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "application_reference_scope": "Full 8x8 RGBA CPU oracle checked on uninjected hardware, WARP and shim-injected producer; TEST storage boundaries also checked.",
+      "application_reference_evidence": {
+        "path": "m4-present-occluded-originals-final/5/hardware/oracle.rgba",
+        "sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636"
+      },
+      "fidelity_reason": "Saved occluded TEST retains binding/storage and later green clear matches the independent producer."
+    },
+    {
+      "id": "present_occluded_test_7",
+      "path": "m4-present-occluded-originals-final/7/capture.gpa_frame",
+      "sha256": "6b511b7f161e50cdcceec7ba16ae401030fb29d200e54283e279a634551a38c9",
+      "bytes": 8804,
+      "family": "present_occluded",
+      "origin": "self_owned_original_gpa_capture",
+      "provenance_note": "Unmodified original CaptureNextFrame output with pinned primary selector; saved occlusion status checked.",
+      "source_manifests": [
+        {
+          "path": "m4-present-occluded-originals-final/manifest.json",
+          "sha256": "e05269326c22a447024cf88eea8fa5dfc1b3a22860b158638a67cce640299145"
+        }
+      ],
+      "device_scope": "Producer hardware/WARP adapter IDs recorded; original-player adapter unidentified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 34,
+          "repeat": 2,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+          "purpose": "Omit later green clear; retain red storage across TEST"
+        }
+      ],
+      "boundaries": [
+        {
+          "kind": "texture",
+          "resource": 7,
+          "event": 26,
+          "repeat": 2,
+          "expect_stable": true,
+          "expected_storage_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "kind": "texture",
+          "resource": 7,
+          "event": 27,
+          "repeat": 2,
+          "expect_stable": true,
+          "expected_storage_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        },
+        {
+          "kind": "texture",
+          "resource": 7,
+          "event": 34,
+          "repeat": 2,
+          "expect_stable": true,
+          "expected_storage_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636"
+        }
+      ],
+      "covers": [
+        "Occluded blt-model Present TEST",
+        "Retained RTV/storage and later in-frame writes"
+      ],
+      "present_event": 27,
+      "swap_chain": 8,
+      "native_workload_fidelity": "passed",
+      "application_reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "application_reference_scope": "Full 8x8 RGBA CPU oracle checked on uninjected hardware, WARP and shim-injected producer; TEST storage boundaries also checked.",
+      "application_reference_evidence": {
+        "path": "m4-present-occluded-originals-final/7/hardware/oracle.rgba",
+        "sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636"
+      },
+      "fidelity_reason": "Saved occluded TEST retains binding/storage and later green clear matches the independent producer."
+    }
+  ]
+}

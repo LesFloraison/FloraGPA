@@ -8,6 +8,10 @@
 
 > **Subsequent work:** Subsequent [buffer creation](BUFFER_CREATION_AUDIT.md) and [pipeline setters](PIPELINE_SETTER_AUDIT.md) address additional paths. The unresolved presentation statuses, rotation and export-comparison limits below are not automatically closed.
 
+Follow-up: [occluded Present TEST](OCCLUDED_PRESENT_TEST.md) adds checked
+`DXGI_STATUS_OCCLUDED` for blt-model TEST calls using two unmodified originals.
+Other unsupported status/rotation boundaries below remain open.
+
 `SwapChain.Present` (`0x3257`) now has a checked production path instead of the
 unchecked auxiliary fallback. This recovers the observed single-frame submission
 boundary and in-frame TEST calls. It does **not** implement general multi-frame

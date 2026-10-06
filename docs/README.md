@@ -10,6 +10,7 @@ chronology remains in Chinese.
 |---|---|
 | Build, package and start | [Project README](../README.md#build) |
 | Replay, inspect and edit | [Usage guide](USAGE.md) |
+| Saved occluded Present TEST and original resource/binding evidence | [Occluded Present TEST](OCCLUDED_PRESENT_TEST.md) |
 | Current capabilities and known limits | [Current status](CURRENT_STATUS.md) |
 | Component responsibilities | [Architecture](ARCHITECTURE.md) |
 | Run tests and external comparisons | [Development validation](USAGE.md#development-validation) |

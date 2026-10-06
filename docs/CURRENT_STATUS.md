@@ -1,7 +1,20 @@
 # Current capabilities and compatibility
 
 Reviewed **2026-10-06**. The user authorized M4, then M5, while keeping M3 open.
-The latest [semantic audit cancellation](SEMANTIC_AUDIT_CANCELLATION.md) extends
+The latest [occluded Present TEST correction](OCCLUDED_PRESENT_TEST.md) admits
+two original blt-model captures previously rejected at event 27. Saved
+`DXGI_STATUS_OCCLUDED` with TEST preserves RTV identity/storage and permits later
+in-frame writes; ordinary non-S_OK Present and unverified flags still reject.
+Native hardware/WARP and injected producer bytes, original-player comparisons,
+27 Present test rows and 64 UI rows without skips pass. The full 31-suite matrix
+passes 494 registrations / 484 unique files: 468 native completions (458 unique)
+and 26 located rejections, including 988 ordinary attempts, 684 controls and 728
+resource exports. All preceding 492 cases retain complete preflight reports,
+execution counts and deterministic image hashes. The 33 known capture limitations
+remain separately reported. Runtime: `f46197f`; package:
+`out/FloraGPA-occluded-present-20261006/` (44 files). M3/M4/M5 remain open.
+
+The preceding [semantic audit cancellation](SEMANTIC_AUDIT_CANCELLATION.md) extends
 preflight cancellation through nine bulk audit families. All 6,012 injected
 preflight cancellation positions preserve honest diagnostics and permit exact
 retry; nine related CTest suites and four packaged golden/negative checks pass.
@@ -537,8 +550,8 @@ the other 35 suites passed initially and the complete UI suite passes after the 
 | M1 — Acceptance infrastructure | Minimum loop delivered: corpus, coverage, preflight, serial comparison and diagnostic queue. Extend evidence as paths arrive. |
 | M2 — Ordinary replay | Registered-scope gate passed: 366 positive cases and 22 located rejections; auxiliary/snapshot contracts audited. This is not universal API support. State-object identity loss, mixed saved/missing SO targets and unverified lifetimes remain explicit boundaries. |
 | M3 — Deferred Context / Command List | Open; M4/M5 now take priority by user instruction on 2026-10-06. Require original retained-list captures proving identity, build order, resource versions, repeated execution, restore-state and event mapping before production support. |
-| M4 — Resources and boundaries | Active, incomplete. Initial texture/Map data is checked; missing UAV counts reject on actual consumption, while proven counter-free indexed access is allowed. Immediate per-slot counter dependencies are checked; continue wider operand/control-flow dependencies, missing pitch/data, predicate/frame-before history, Query and presentation boundaries. |
-| M5 — Stable compatibility release | Incomplete. The 492-case registry, clean committed-source build/package, load-cancellation recovery and nine controlled worker-failure cases are established. Continue specialized analyzer/driver/storage failures, large-file workflows, long-duration testing and independent clean-machine deployment. |
+| M4 — Resources and boundaries | Active, incomplete. Initial texture/Map data is checked; missing UAV counts reject on actual consumption, while proven counter-free indexed access is allowed. Per-slot counter dependencies and saved blt-model occluded Present TEST are checked; continue wider operand/control-flow dependencies, missing pitch/data, predicate/frame-before history, Query and other presentation boundaries. |
+| M5 — Stable compatibility release | Incomplete. The 494-case registry, clean committed-source build/package, load/semantic-audit cancellation and nine controlled worker-failure cases are established. Continue specialized analyzer/driver/storage failures, large-file workflows, long-duration testing and independent clean-machine deployment. |
 | M6 — Analyzer and other versions | Incomplete. Continue remaining Qt consumers, advanced profiling/debugging and version-specific adapters after core replay gates. Existing analyzer features remain available. |
 
 The original order was **M1 → M2 → M3 → M4 → M5**. On 2026-10-06 the user
