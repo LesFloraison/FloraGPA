@@ -1,5 +1,11 @@
 # Initial Predicate state: replay baseline versus application result
 
+Historical baseline. The later [normalization audit](NORMALIZED_PREDICATION_AUDIT.md)
+supersedes the eight missing-descriptor rejections below when an exact linked
+capture-marker witness proves the saved execution condition. Those original
+files now replay without reconstructing their absent descriptors or historical
+query values. The measurements below describe the preceding implementation.
+
 Reviewed 2026-10-06. This M4 change improves diagnostics and inspection; it does
 not remove the original player's empty Begin/End initialization or manufacture
 a missing Predicate descriptor. Runtime remains C++/Qt with no GPA/Python backend.

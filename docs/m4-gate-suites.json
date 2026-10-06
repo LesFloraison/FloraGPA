@@ -2,7 +2,7 @@
   "schema": "FloraGPA compatibility gate suites 1",
   "expected_cases": 486,
   "expected_unique_captures": 476,
-  "expected_rejections": 34,
+  "expected_rejections": 26,
   "suites": [
     {
       "id": "corpus",
@@ -595,146 +595,9 @@
       "manifest_sha256": "41fa59e8e5205158adadd67e97e7bbff524f4f7de4bc19f7793a6a36caf2eefb",
       "capture_root": "artifacts",
       "subdirectory": "",
-      "expected_rejections": {
-        "initial_predicate_0": {
-          "findings": [
-            {
-              "kind": "predicate_resource_missing",
-              "event_id": 18,
-              "resource_id": 20,
-              "record_type": 584
-            },
-            {
-              "kind": "predicate_resource_missing",
-              "event_id": 21,
-              "resource_id": 20,
-              "record_type": 55
-            }
-          ],
-          "runtime_error": "Event 18 (SetPredication): Predicate resource 20 is absent from the capture; its descriptor cannot be reconstructed"
-        },
-        "initial_predicate_1": {
-          "findings": [
-            {
-              "kind": "predicate_resource_missing",
-              "event_id": 18,
-              "resource_id": 20,
-              "record_type": 584
-            },
-            {
-              "kind": "predicate_resource_missing",
-              "event_id": 21,
-              "resource_id": 20,
-              "record_type": 55
-            }
-          ],
-          "runtime_error": "Event 18 (SetPredication): Predicate resource 20 is absent from the capture; its descriptor cannot be reconstructed"
-        },
-        "initial_predicate_2": {
-          "findings": [
-            {
-              "kind": "predicate_resource_missing",
-              "event_id": 18,
-              "resource_id": 20,
-              "record_type": 584
-            },
-            {
-              "kind": "predicate_resource_missing",
-              "event_id": 21,
-              "resource_id": 20,
-              "record_type": 55
-            }
-          ],
-          "runtime_error": "Event 18 (SetPredication): Predicate resource 20 is absent from the capture; its descriptor cannot be reconstructed"
-        },
-        "initial_predicate_3": {
-          "findings": [
-            {
-              "kind": "predicate_resource_missing",
-              "event_id": 18,
-              "resource_id": 20,
-              "record_type": 584
-            },
-            {
-              "kind": "predicate_resource_missing",
-              "event_id": 21,
-              "resource_id": 20,
-              "record_type": 55
-            }
-          ],
-          "runtime_error": "Event 18 (SetPredication): Predicate resource 20 is absent from the capture; its descriptor cannot be reconstructed"
-        },
-        "initial_predicate_8": {
-          "findings": [
-            {
-              "kind": "predicate_resource_missing",
-              "event_id": 20,
-              "resource_id": 15,
-              "record_type": 584
-            },
-            {
-              "kind": "predicate_resource_missing",
-              "event_id": 22,
-              "resource_id": 15,
-              "record_type": 55
-            }
-          ],
-          "runtime_error": "Event 20 (SetPredication): Predicate resource 15 is absent from the capture; its descriptor cannot be reconstructed"
-        },
-        "initial_predicate_9": {
-          "findings": [
-            {
-              "kind": "predicate_resource_missing",
-              "event_id": 20,
-              "resource_id": 15,
-              "record_type": 584
-            },
-            {
-              "kind": "predicate_resource_missing",
-              "event_id": 22,
-              "resource_id": 15,
-              "record_type": 55
-            }
-          ],
-          "runtime_error": "Event 20 (SetPredication): Predicate resource 15 is absent from the capture; its descriptor cannot be reconstructed"
-        },
-        "initial_predicate_10": {
-          "findings": [
-            {
-              "kind": "predicate_resource_missing",
-              "event_id": 20,
-              "resource_id": 15,
-              "record_type": 584
-            },
-            {
-              "kind": "predicate_resource_missing",
-              "event_id": 22,
-              "resource_id": 15,
-              "record_type": 55
-            }
-          ],
-          "runtime_error": "Event 20 (SetPredication): Predicate resource 15 is absent from the capture; its descriptor cannot be reconstructed"
-        },
-        "initial_predicate_11": {
-          "findings": [
-            {
-              "kind": "predicate_resource_missing",
-              "event_id": 20,
-              "resource_id": 15,
-              "record_type": 584
-            },
-            {
-              "kind": "predicate_resource_missing",
-              "event_id": 22,
-              "resource_id": 15,
-              "record_type": 55
-            }
-          ],
-          "runtime_error": "Event 20 (SetPredication): Predicate resource 15 is absent from the capture; its descriptor cannot be reconstructed"
-        }
-      }
+      "expected_rejections": {}
     }
   ],
   "manifest_hash_policy": "UTF-8 bytes with CRLF normalized to LF",
-  "scope_note": "M4 counter provenance and predicate resource boundaries; baseline-query values are not captured results. M3 remains unaccepted."
+  "scope_note": "M4 counter provenance and predicate conditions backed by linked normalization witnesses; descriptors/results remain unknown when absent. M3 remains unaccepted."
 }

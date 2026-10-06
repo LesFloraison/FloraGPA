@@ -104,6 +104,21 @@ API parsing and offline validation tests pass. Three Qt workflows verify the
 new condition, failure then retry, baseline inspection and stale-result handling;
 the rendered condition pane has been inspected.
 
+The final deployed package passes the complete 28-suite compatibility gate:
+**486 registrations / 476 unique hashes**, comprising **460 replay-positive
+registrations (450 unique) and 26 explicit rejection files**. This includes 972
+ordinary attempts, 668 control runs and 692 resource-boundary exports. Compared
+with the preceding package, only the eight recovered files change their preflight
+findings and replay outcome; every previously deterministic image hash remains
+equal. Helldivers keeps its separate measured-variability policy. Four additional
+GF2/BF1 golden and suppressed-Draw checks pass with Windows system paths only.
+
+Runtime commit: `c4e3146`. Package:
+`out/FloraGPA-captured-conditions-final-20261006/`. The
+[pinned baseline](normalized-predication-baseline.json) records package and
+evidence hashes. Passing expected rejections is diagnostic acceptance, not
+successful replay; these corpus counts are not overall API completion percentages.
+
 ## Reproduction and remaining work
 
 ```powershell

@@ -1,29 +1,39 @@
 # Current capabilities and compatibility
 
 Reviewed **2026-10-06**. The user authorized M4, then M5, while keeping M3 open.
-The latest [Predicate boundary audit](INITIAL_PREDICATE_BOUNDARY_AUDIT.md) adds
-16 original captures and separates a replay baseline from an application query
-result. Eight missing-descriptor captures receive located errors, including four
-that retain GetData BOOL bytes but lack the Predicate descriptor. Eight positives
-match the producer and original player, including four that need the original
-empty-query baseline with normalized saved control. That baseline is preserved;
-inspection now returns null with a compact **Replay baseline** status until a
-captured interval supplies a real GPU result.
+The latest [normalized predication recovery](NORMALIZED_PREDICATION_AUDIT.md)
+restores eight unchanged original captures that previously failed because the
+Predicate descriptor was absent. A linked capture-marker record proves that GPA
+normalized the saved comparison using a completed query. FloraGPA now replays
+that recorded condition through native predication without inventing the absent
+descriptor or historical query value. Preflight locates the proof; Qt displays
+**Captured condition** and keeps the query result unavailable. Missing or
+ambiguous proof still rejects. This is scoped to pinned GPA 2025 R1 evidence.
 
-Inventory is **486 registrations / 476 unique hashes**, with **452 default
-replay-positive registrations (442 unique) and 34 rejection files**. This is a
+Inventory is **486 registrations / 476 unique hashes**, with **460 default
+replay-positive registrations (450 unique) and 26 rejection files**. This is a
 sample matrix, not full API coverage. The 32 dynamic-CB loss cases still validate
 only saved contents. Module counts remain 72 ported / 117 partial / 15 pending.
-Package: `out/FloraGPA-predicate-boundaries-20261006/`; runtime: `140cec7`.
-The complete 28-suite package matrix passes: 972 ordinary attempts (904 positive,
-68 located rejections), 668 control runs and 692 resource exports. All previous
-470 registrations retain their preflight findings and deterministic image hashes;
-Helldivers retains its separate variability policy. The paired original comparison,
-32 hardware/WARP inspections, four related CTests, two Qt workflows and four
-GF2/BF1 golden/negative checks pass. The producer passed 384 native/injected frames.
-See the [pinned baseline](initial-predicate-boundary-baseline.json). M3/M4/M5 are not
-complete: general Predicate normalization, broader resource/query boundaries,
-long-duration recovery, large-file experience and independent deployment remain open.
+Package: `out/FloraGPA-captured-conditions-final-20261006/`; runtime: `c4e3146`.
+The complete 28-suite package matrix passes: 972 ordinary attempts (920 positive,
+52 located rejections), 668 control runs and 692 resource exports. Only the eight
+recovered files change their preflight findings; all previous deterministic image
+hashes remain equal. Helldivers retains its separate variability policy. All 16
+Predicate files match producer pixels twice; the original player still fails to
+open the eight missing-descriptor files and agrees on the other eight. No
+matched-device equivalence is asserted. Another 32 hardware/WARP original runs,
+48 inspections, five related CTests, three Qt workflows and four GF2/BF1
+golden/negative checks pass. The producer passed 384 native/injected frames.
+See the [pinned baseline](normalized-predication-baseline.json). M3/M4/M5 are not
+complete: unproven Predicate normalization branches, broader resource/query
+boundaries, long-duration recovery, large-file experience and independent
+deployment remain open.
+
+The preceding [Predicate boundary audit](INITIAL_PREDICATE_BOUNDARY_AUDIT.md)
+added the 16 original files and distinguished replay baseline values from actual
+query results. Its package `out/FloraGPA-predicate-boundaries-20261006/` (runtime
+`140cec7`) had 452 positives and 34 rejections. Those historical rejection counts
+are superseded above; its captured-result provenance remains in force.
 
 The preceding [initial-counter correction](INITIAL_COUNTER_BOUNDARY_AUDIT.md)
 rejects missing frame-before UAV counts at consumption. Buffer inspection keeps

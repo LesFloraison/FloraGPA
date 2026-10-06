@@ -1,0 +1,86 @@
+{
+  "schema": "FloraGPA normalized predication baseline 1",
+  "reviewed": "2026-10-06",
+  "implementation_commit": "c4e314642ee1a3758d3d54adbdd098d1c661ed64",
+  "scope": "Replay missing-descriptor Predicate conditions only with linked proof of capture normalization; preserve unknown descriptor and historical result",
+  "stages_complete": {
+    "M3": false,
+    "M4": false,
+    "M5": false
+  },
+  "package": "out/FloraGPA-captured-conditions-final-20261006",
+  "package_cli_sha256": "c2a2567ad54ab268de9cc1b140d43c5ff469d3b2214ffcd64bc007496bf61d5d",
+  "package_gui_sha256": "042be6b92fbbb67e126c1b2a60976150e0af54fa2afa084004bd835b349c6304",
+  "inventory": {
+    "registrations": 486,
+    "unique_hashes": 476,
+    "positive_registrations": 460,
+    "positive_unique_hashes": 450,
+    "rejections": 26
+  },
+  "module_ledger_unchanged": {
+    "ported": 72,
+    "partial": 117,
+    "pending": 15
+  },
+  "counts": {
+    "ordinary_attempts": 972,
+    "positive_attempts": 920,
+    "rejection_attempts": 52,
+    "controls": 491,
+    "control_runs": 668,
+    "boundary_runs": 692,
+    "suites": 28,
+    "known_variable_cases": 1,
+    "ctest_suites": 5,
+    "normalized_predication_unit_passes": 7,
+    "predication_unit_passes": 43,
+    "predicate_creation_unit_passes": 25,
+    "qt_workflows": 3,
+    "producer_frames": 384,
+    "original_capture_cases": 16,
+    "paired_flora_attempts": 32,
+    "paired_original_attempts": 32,
+    "paired_original_open_failures": 16,
+    "hardware_warp_unobserved_original_runs": 32,
+    "hardware_warp_inspections": 48,
+    "goldens": 4
+  },
+  "matrix_passed": true,
+  "recovered_cases": [
+    "initial_predicates/initial_predicate_0",
+    "initial_predicates/initial_predicate_1",
+    "initial_predicates/initial_predicate_2",
+    "initial_predicates/initial_predicate_3",
+    "initial_predicates/initial_predicate_8",
+    "initial_predicates/initial_predicate_9",
+    "initial_predicates/initial_predicate_10",
+    "initial_predicates/initial_predicate_11"
+  ],
+  "evidence": {
+    "artifacts/m4-normalized-predicate-gate/gate.json": "b86c07e53e1a690ad6d7289a153a7886469dc416e8d3871655e67c8a4b3e6521",
+    "artifacts/m4-normalized-predicate-previous-comparison.json": "d343c77d3ad4d91bcbef56a355946694b8cb8116b3cd522c4cab629c8a29c7ef",
+    "artifacts/compare_normalized_gate.py": "0db47abfe98ad04f0874c4b64b0ec36cf3a0eb78836e103ab8dba73c575eb46f",
+    "artifacts/m4-predicate-normalization/evidence.json": "5a4456a09a8c5de968b0aef346588e5b27650079903b5fb9d6c38906415e7b59",
+    "artifacts/m4-initial-predicate-expanded/manifest.json": "7bd422acfc8183fe54bd37ea33d785acf117b60c3e33321a809e2990ff7e8456",
+    "artifacts/m4-normalized-predicate-final/validation.json": "9558278ff0e889a70b8dec6833844649e238c6322fb8657af548c6f9826e4365",
+    "artifacts/m4-normalized-predicate-inspection/validation.json": "be955ac9438e961996c3677a3716014606ce98df52bfefacc4831d19693dd851",
+    "artifacts/m4-normalized-predicate-package-files.json": "fe67eef51b1af27b69a2b01d53e1afab187fe82b8e3924ee97f803d5ffc99f23",
+    "artifacts/m4-normalized-predicate-goldens/validation.json": "5e1dde1ab9876f50c472cdf84378931ffc3b5cd8e9700002b67d37bf81383ade",
+    "artifacts/m4-normalized-predicate-ctest.log": "c8e597fc79d779f42cde91040bb25af978dc07a177ea5e475a0c6b1e0fe77ac2",
+    "artifacts/m4-normalized-normalized-predication-unit.log": "f9ee642ff1366c4c15665126247f06b1ca4e8cafad25e47b06d9a3b8b18f70c2",
+    "artifacts/m4-normalized-predication-unit.log": "df087232250671453bdbeb3bff77e45c7e6c26a6555fba2e2c3042bee2488adf",
+    "artifacts/m4-normalized-predicate-creation-unit.log": "b01949437488a525d07cdfcda45a01fbc791169f5c6a8884e520628c7769655b",
+    "artifacts/m4-normalized-predicate-ui.log": "99ebd2d5ee89186ec2404c5c40d1ca66cf84e59cc9d5cd5bb10383c3af52fc9c",
+    "artifacts/m4-normalized-predicate-ui/normalized-predicate-condition.png": "20893e9041e995a060660914fe5a9a6e529963c422f1fddfda391c4d9544c6b8"
+  },
+  "limits": [
+    "Original player still fails to open the eight missing-descriptor files; recovery is independently checked against the producer.",
+    "Original player adapter is not identified; no matched-device equivalence claim.",
+    "Proof is limited to pinned GPA 2025 R1 linked failed marker lookup, canonical saved control and an unambiguous identity/lifecycle.",
+    "Successful marker lookup or absent witness cannot prove normalization and retains rejection.",
+    "Captured descriptor, historical query value and original comparison argument are not reconstructed. Four recovered files retain independent GetData BOOL observations.",
+    "The existing 32 dynamic-CB loss cases cover saved contents only.",
+    "Serial registered-corpus validation and an isolated PATH do not establish long-duration reliability or clean-machine deployment."
+  ]
+}
