@@ -127,6 +127,7 @@ class MainWindow final : public QMainWindow {
     void startWorker(QStringList args, bool timings);
     void readScheduledMetrics(bool catalog, uint64_t serial);
     void finishWorker(int, QProcess::ExitStatus);
+    void consumeWorkerError(bool flush);
     void cancel();
     void showError(const QString &error);
     void exportImage();
@@ -283,6 +284,7 @@ class MainWindow final : public QMainWindow {
     QTimer replayTimer_, timeout_;
     QByteArray stderrBuffer_;
     QString errorText_;
+    bool workerTimedOut_ = false;
     void *job_ = nullptr;
     uint64_t revision_ = 0, runningRevision_ = 0;
     Id selectedEvent_ = 0, selectedResource_ = 0;

@@ -151,6 +151,7 @@ MainWindow::MainWindow() {
     timeout_.setSingleShot(true);
     timeout_.setInterval(180000);
     connect(&timeout_, &QTimer::timeout, this, [this] {
+        workerTimedOut_ = true;
         cancel();
         showError("Worker timed out.");
     });
@@ -287,30 +288,8 @@ MainWindow::MainWindow() {
             }
         }
     });
-    connect(&process_, &QProcess::readyReadStandardError, this, [this] {
-        const auto chunk = process_.readAllStandardError();
-        if (runningKind_ == "metric-iterations" || runningKind_ == "metric-profile" ||
-            runningKind_ == "metric-catalog")
-            scheduledLog_ += chunk;
-        stderrBuffer_ += chunk;
-        for (;;) {
-            auto newline = stderrBuffer_.indexOf('\n');
-            if (newline < 0)
-                break;
-            auto line = QString::fromUtf8(stderrBuffer_.left(newline)).trimmed();
-            stderrBuffer_.remove(0, newline + 1);
-            if (line.startsWith("progress ")) {
-                auto values = line.split(' ');
-                if (values.size() == 4) {
-                    progress_->setRange(0, 100);
-                    progress_->setValue(int(values[2].toDouble() / std::max(1., values[3].toDouble()) * 100));
-                }
-            } else if (!line.isEmpty()) {
-                errorText_ = line;
-                log_->appendPlainText(line);
-            }
-        }
-    });
+    connect(&process_, &QProcess::readyReadStandardError, this,
+            [this] { consumeWorkerError(false); });
     connect(&process_, &QProcess::readyReadStandardOutput, this, [this] {
         const auto chunk = process_.readAllStandardOutput();
         if (runningKind_ != "metric-iterations" && runningKind_ != "metric-profile" &&
@@ -1560,6 +1539,7 @@ void MainWindow::startHistoryWorker() {
     runningKind_ = "history";
     stderrBuffer_.clear();
     errorText_.clear();
+    workerTimedOut_ = false;
     setBusy(true);
     statusBar()->showMessage(runningAnalysis_ == RdcAnalysis::Mesh       ? "Reading post-shader mesh…"
                              : runningAnalysis_ == RdcAnalysis::Counters ? "Measuring replay counters…"
@@ -1714,6 +1694,7 @@ void MainWindow::startWorker(QStringList args, bool timings) {
     runningKind_ = args.first();
     stderrBuffer_.clear();
     errorText_.clear();
+    workerTimedOut_ = false;
     scheduledLog_.clear();
     scheduledStdout_.clear();
     setBusy(true);
@@ -1741,36 +1722,63 @@ void MainWindow::cancel() {
     }
     timeout_.stop();
 }
+void MainWindow::consumeWorkerError(bool flush) {
+    const auto chunk = process_.readAllStandardError();
+    if (runningKind_ == "metric-iterations" || runningKind_ == "metric-profile" ||
+        runningKind_ == "metric-catalog")
+        scheduledLog_ += chunk;
+    stderrBuffer_ += chunk;
+    for (;;) {
+        auto newline = stderrBuffer_.indexOf('\n');
+        if (newline < 0 && (!flush || stderrBuffer_.isEmpty()))
+            break;
+        const auto length = newline < 0 ? stderrBuffer_.size() : newline;
+        auto line = QString::fromUtf8(stderrBuffer_.left(length)).trimmed();
+        stderrBuffer_.remove(0, length + (newline < 0 ? 0 : 1));
+        if (line.startsWith("progress ")) {
+            auto values = line.split(' ');
+            if (values.size() == 4) {
+                progress_->setRange(0, 100);
+                progress_->setValue(int(values[2].toDouble() / std::max(1., values[3].toDouble()) * 100));
+            }
+        } else if (!line.isEmpty()) {
+            errorText_ = line;
+            log_->appendPlainText(line);
+        }
+    }
+}
 void MainWindow::finishWorker(int code, QProcess::ExitStatus status) {
     timeout_.stop();
+    consumeWorkerError(true);
     if (job_) {
         CloseHandle(job_);
         job_ = nullptr;
     }
     setBusy(false);
     if (runningRevision_ != revision_) {
+        const char *reason = workerTimedOut_ ? "Worker timed out." : "Cancelled";
         if (runningKind_ == "draw-resources") {
-            resourceBrowser_->failPreviews(runningResourceKey_, "Selection changed");
+            resourceBrowser_->failPreviews(runningResourceKey_, workerTimedOut_ ? reason : "Selection changed");
             resourceTimer_.start(); return;
         }
         if (runningKind_ == "metric-iterations" || runningKind_ == "metric-profile" ||
             runningKind_ == "metric-catalog")
-            scheduledMetrics_->finish(runningScheduledRequest_, {{"error", "Cancelled"}});
+            scheduledMetrics_->finish(runningScheduledRequest_, {{"error", reason}});
         if (runningKind_ == "history" || runningKind_ == "history-capture")
-            finishRdcAnalysis({{"ok", false}, {"error", "Cancelled"}});
+            finishRdcAnalysis({{"ok", false}, {"error", reason}});
         if (runningKind_ == "statistics")
-            gpuStatistics_->finish(runningStatisticsRequest_, {{"error", "Cancelled"}});
+            gpuStatistics_->finish(runningStatisticsRequest_, {{"error", reason}});
         if (runningKind_ == "timings")
-            gpuProfile_->finish(runningProfileRequest_, {{"error", "Cancelled"}});
+            gpuProfile_->finish(runningProfileRequest_, {{"error", reason}});
         if (runningKind_ == "coverage")
-            coverage_->finish(runningCoverageRequest_, {{"error", "Cancelled"}});
+            coverage_->finish(runningCoverageRequest_, {{"error", reason}});
         if (runningKind_ == "quad")
-            quad_->finish(runningQuadRequest_, {{"error", "Cancelled"}});
+            quad_->finish(runningQuadRequest_, {{"error", reason}});
         if (runningKind_ == "predicate")
-            predicateView_->finish(runningPredicateRequest_, {{"error", "Cancelled"}});
+            predicateView_->finish(runningPredicateRequest_, {{"error", reason}});
         if (runningKind_ == "replay-pipeline")
-            replayedState_->finishReplay(runningPipelineRequest_, {{"error", "Cancelled"}});
-        statusBar()->showMessage("Cancelled", 2000);
+            replayedState_->finishReplay(runningPipelineRequest_, {{"error", reason}});
+        statusBar()->showMessage(reason, workerTimedOut_ ? 0 : 2000);
         emit taskFinished(false);
         return;
     }
