@@ -1,5 +1,10 @@
 # M2: Map / Unmap observation audit
 
+> **2026-10-06 follow-up:** [Saved Map write validation](MAP_WRITE_DATA_AUDIT.md)
+> now applies the record audit to writable `0x246` execution and shares checked
+> storage/subresource layout between preflight and replay. The results below
+> remain the original observation-only batch evidence.
+
 > Historical batch record. Results, package paths, module counts and remaining-work
 > statements below describe this batch. See [current status](CURRENT_STATUS.md)
 > for present support and [the documentation index](README.md) for navigation.

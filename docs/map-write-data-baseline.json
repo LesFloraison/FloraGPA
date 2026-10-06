@@ -1,0 +1,194 @@
+{
+  "schema": "FloraGPA saved Map write baseline 1",
+  "reviewed": "2026-10-06",
+  "implementation_commit": "2824a62ee56412541d7a8261b9c4f4853e28dd91",
+  "scope": "Shared saved Map full/differential storage validation and rejection of invalid successful write records",
+  "traditional_list_execution_accepted": false,
+  "inventory_unchanged": {
+    "registrations": 470,
+    "unique_capture_hashes": 460
+  },
+  "migration_ledger_unchanged": {
+    "ported": 72,
+    "partial": 117,
+    "pending": 15
+  },
+  "counts": {
+    "before_fix_negative_preflight_failures": 12,
+    "final_map_test_passes_including_setup_cleanup": 44,
+    "ctest_suites_passed": 7,
+    "preflight_unique_captures": 460,
+    "preflight_invocations": 920,
+    "changed_preflight_results": 0,
+    "original_capture_cases": 4,
+    "producer_frames": 48,
+    "strict_native_resource_boundary_checks": 16,
+    "independent_full_runs": 8,
+    "original_player_runs": 8,
+    "planar_checks_passed": 192,
+    "planar_successful_comparisons": 125,
+    "planar_expected_rejections": 67,
+    "golden_checks_passed": 4
+  },
+  "preflight_exe_sha256_before_after": [
+    "6e9d98744a1966790486a5a9387823b614a33d96ba14169144a36a12d417312f",
+    "59ce9b99a003260efdc815de2736b9430644da91909a803e8b62c6847abbc4f0"
+  ],
+  "runtime_cli_sha256": "59ce9b99a003260efdc815de2736b9430644da91909a803e8b62c6847abbc4f0",
+  "original_comparison_scope": "not_asserted_without_matched_device_and_configuration",
+  "original_cases": [
+    {
+      "id": "texture_maps__array-mip__d18215cf",
+      "native_status": "repeat_stable",
+      "original_status": "repeat_stable",
+      "comparison": "observed_equal"
+    },
+    {
+      "id": "texture_maps__dynamic-1d__cfa2f862",
+      "native_status": "repeat_stable",
+      "original_status": "repeat_stable",
+      "comparison": "observed_equal"
+    },
+    {
+      "id": "texture_maps__dynamic-2d__940dc713",
+      "native_status": "repeat_stable",
+      "original_status": "repeat_stable",
+      "comparison": "observed_equal"
+    },
+    {
+      "id": "texture_maps__volume-mip__6a1cca0c",
+      "native_status": "repeat_stable",
+      "original_status": "repeat_stable",
+      "comparison": "observed_equal"
+    }
+  ],
+  "goldens": [
+    {
+      "case": "gf2",
+      "rgba_sha256": "2e1abc5eacb0bbfd801f9fe059c305baa9a0786c384b36a42fa5a323dd979fd1",
+      "passed": true,
+      "counts": {
+        "ClearDepthStencilView": 2,
+        "ClearRenderTargetView": 1,
+        "CreateBuffer": 2,
+        "DrawIndexed": 72,
+        "Map": 44,
+        "Present": 1,
+        "buffers_created_without_initial_data": 2,
+        "object_observation_records": 49,
+        "pipeline_setter_records": 142,
+        "private_data_observations": 4,
+        "query_metadata_records": 2,
+        "state_or_auxiliary_records": 551,
+        "unmap_observations": 44
+      }
+    },
+    {
+      "case": "gf2-negative",
+      "rgba_sha256": "b2c5548a51715f581c4591acc266ac7a0c65b54b7ecd9a49f43499fa9b76c5f1",
+      "passed": true,
+      "counts": {
+        "ClearDepthStencilView": 2,
+        "ClearRenderTargetView": 1,
+        "CreateBuffer": 2,
+        "Map": 44,
+        "Present": 1,
+        "buffers_created_without_initial_data": 2,
+        "object_observation_records": 49,
+        "pipeline_setter_records": 142,
+        "private_data_observations": 4,
+        "query_metadata_records": 2,
+        "state_or_auxiliary_records": 551,
+        "unmap_observations": 44
+      }
+    },
+    {
+      "case": "bf1",
+      "rgba_sha256": "1f724d1840652f66afd26dd30c95aecd5c1b4932eede56109198f15a8f57a2f6",
+      "passed": true,
+      "counts": {
+        "ClearDepthStencilView": 10,
+        "ClearRenderTargetView": 10,
+        "ClearUnorderedAccessViewFloat": 1,
+        "CopyResource": 2,
+        "CopyStructureCount": 6,
+        "CopySubresourceRegion": 7,
+        "Dispatch": 60,
+        "DispatchIndirect": 13,
+        "Draw": 79,
+        "DrawIndexed": 41,
+        "DrawIndexedInstanced": 1053,
+        "DrawInstanced": 29,
+        "GenerateMips": 2,
+        "Map": 4151,
+        "Present": 1,
+        "UpdateSubresource": 27,
+        "map_read_observations": 2,
+        "object_observation_records": 28,
+        "pipeline_setter_records": 2221,
+        "query_metadata_records": 17,
+        "state_or_auxiliary_records": 7354,
+        "unmap_observations": 4153,
+        "unresolved_input_layout_setters": 2,
+        "unresolved_output_setters": 6,
+        "unresolved_shader_setters": 4,
+        "unresolved_srv_setters": 2
+      }
+    },
+    {
+      "case": "bf1-negative",
+      "rgba_sha256": "cd3a3066f984b1c317fbeefec2836503f32078321d3dc1f367465f2c06d435bf",
+      "passed": true,
+      "counts": {
+        "ClearDepthStencilView": 10,
+        "ClearRenderTargetView": 10,
+        "ClearUnorderedAccessViewFloat": 1,
+        "CopyResource": 2,
+        "CopyStructureCount": 6,
+        "CopySubresourceRegion": 7,
+        "Dispatch": 60,
+        "DispatchIndirect": 13,
+        "GenerateMips": 2,
+        "Map": 4151,
+        "Present": 1,
+        "UpdateSubresource": 27,
+        "map_read_observations": 2,
+        "object_observation_records": 28,
+        "pipeline_setter_records": 2221,
+        "query_metadata_records": 17,
+        "state_or_auxiliary_records": 7354,
+        "unmap_observations": 4153,
+        "unresolved_input_layout_setters": 2,
+        "unresolved_output_setters": 6,
+        "unresolved_shader_setters": 4,
+        "unresolved_srv_setters": 2
+      }
+    }
+  ],
+  "remaining_boundaries": [
+    "Unavailable captured 2D/3D differential Map pitches",
+    "Missing initial/UV/discarded contents",
+    "Other descriptor/device combinations",
+    "Traditional Command List execution",
+    "M4 remaining resource/counter/query/presentation audit",
+    "M5 full matrix, GUI, deployment and stability"
+  ],
+  "not_run": [
+    "Full-corpus GPU matrix",
+    "GUI validation",
+    "release packaging"
+  ],
+  "evidence": {
+    "artifacts/m4-map-before-tests.log": "e210127c0b072eb34505872a8883337d2320a9ddf81110afbbbf2b5ba6b72880",
+    "artifacts/m4-map-tests.log": "ce48fdc98c536ec42ed9d2a677c97f2486cd3ebee263a81f49a8115cfc987b19",
+    "artifacts/m4-map-regression.log": "bb22e63811d02c1b8ebaff4311ea00fb38a7f7396b15926cf400cd857f3fee0d",
+    "artifacts/m4-map-preflight-audit.py": "714e5c9cdcc4eaab59ad7c02303f3b47094f179c37dad56f3d4cd661b374e770",
+    "artifacts/m4-map-preflight/validation.json": "10f1c3c183af3282ef284fe4b750a2091751dd0cdc92f21f2492e3244c64e216",
+    "artifacts/m4-map-producer/validation.json": "e14b224355f44bc331c8bdb6b9cd2b1ccb4a1f382af0c459ce9f8c037cf43d01",
+    "artifacts/m4-map-producer/producer/build.json": "2b3e38960ff19b7929f60701a7332f7f635376f41678fef59a59389ed66c1972",
+    "artifacts/m4-map-original/validation.json": "30f9d6c364f2c62d409952c054231f5738d496366b98f45dc038b061f9f97d3e",
+    "artifacts/m4-map-planar/validation.json": "a0c84657b5218961a75cccec7272c2aa305d19a8caec8d7bc4ead2303306d8b7",
+    "artifacts/m4-map-goldens/validation.json": "5e1dde1ab9876f50c472cdf84378931ffc3b5cd8e9700002b67d37bf81383ade",
+    "D:/CDXrepo/FloraGPA/analysis/capture_samples/texture_maps/manifest.json": "20c367ab18b2cfeaa4dac49da9f0e4a01c7cea438b9a072d460a89707dbe6ec9"
+  }
+}

@@ -1,7 +1,16 @@
 # Current capabilities and compatibility
 
 Reviewed **2026-10-06**. The user authorized prioritizing M4, then M5, while
-keeping M3 open. The first [texture initial-data correction](TEXTURE_INITIAL_DATA_AUDIT.md)
+keeping M3 open. The latest [saved Map write correction](MAP_WRITE_DATA_AUDIT.md)
+shares subresource/data validation between preflight and replay and rejects a
+successful Map with no saved data identity instead of silently skipping it.
+Forty-four Map cases, seven CTest suites, 192 planar comparisons and four serial
+GF2/BF1 checks pass. Four unchanged original Map captures also pass 16 strict
+producer/native resource comparisons and eight fresh original-player runs.
+All 460 registered unique captures retain their prior preflight findings. This
+does not certify all GPU paths, unsaved pitches, M3 or M5 deployment/stability.
+
+The preceding [texture initial-data correction](TEXTURE_INITIAL_DATA_AUDIT.md)
 rejects empty, truncated or oversized saved single-sample initializers before
 native texture creation, with texture/data identities in preflight diagnostics.
 Fourteen focused cases, nine CTest suites and four serial GF2/BF1 golden/negative
@@ -299,7 +308,7 @@ the other 35 suites passed initially and the complete UI suite passes after the 
 | M1 — Acceptance infrastructure | Minimum loop delivered: corpus, coverage, preflight, serial comparison and diagnostic queue. Extend evidence as paths arrive. |
 | M2 — Ordinary replay | Registered-scope gate passed: 366 positive cases and 22 located rejections; auxiliary/snapshot contracts audited. This is not universal API support. State-object identity loss, mixed saved/missing SO targets and unverified lifetimes remain explicit boundaries. |
 | M3 — Deferred Context / Command List | Open; M4/M5 now take priority by user instruction on 2026-10-06. Require original retained-list captures proving identity, build order, resource versions, repeated execution, restore-state and event mapping before production support. |
-| M4 — Resources and boundaries | Active, incomplete. Saved single-sample texture initializers now receive shared preflight/runtime length checks. Continue initial/differential data, subresources, counters, Query/Predication and presentation; distinguish absent information from implementation gaps. |
+| M4 — Resources and boundaries | Active, incomplete. Saved single-sample initializers and Map full/differential writes now receive shared preflight/runtime storage checks. Continue missing pitch/data dependencies, counters, Query/Predication and presentation; distinguish absent information from implementation gaps. |
 | M5 — Stable compatibility release | Incomplete. Broaden captures, repeat/long-duration checks, recovery and large-file testing; validate clean-environment build/deployment and publish a fixed matrix. |
 | M6 — Analyzer and other versions | Incomplete. Continue remaining Qt consumers, advanced profiling/debugging and version-specific adapters after core replay gates. Existing analyzer features remain available. |
 

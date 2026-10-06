@@ -15,6 +15,7 @@ chronology remains in Chinese.
 | Run tests and external comparisons | [Development validation](USAGE.md#development-validation) |
 | Interpret corpus results and diagnostics | [Compatibility infrastructure](COMPATIBILITY_BASELINE.md) |
 | Saved texture initializer validation and malformed-data boundaries | [Texture initial-data audit](TEXTURE_INITIAL_DATA_AUDIT.md) |
+| Saved Map writes, differential storage and subresource validation | [Map write-data audit](MAP_WRITE_DATA_AUDIT.md) |
 | Deferred versions, original expansion and M3 boundaries | [Deferred version audit](DEFERRED_VERSION_AUDIT.md) |
 | Merged lists and capture-side loss versus faithful replay | [Deferred merge audit](DEFERRED_MERGE_AUDIT.md) |
 | Original dependency initialization and version/list ordering | [Initialization scheduler audit](INITIALIZATION_SCHEDULER_AUDIT.md) |
