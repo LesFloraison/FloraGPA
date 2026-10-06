@@ -165,8 +165,8 @@ class Replay {
     std::optional<ResourceLodAudit> resourceLodAudit_;
     std::map<Id, float> resourceLods_;
     std::map<IUnknown *, std::array<bool, 128>> resourceLodShaderSrvs_;
-    std::map<IUnknown *, bool> shaderCounterUse_;
-    bool boundShadersMayUseCounters(bool compute);
+    std::map<IUnknown *, std::array<bool, 64>> shaderCounterUse_;
+    std::array<bool, 64> boundShaderCounterSlots(bool compute);
     void requireResourceLod(Id resource) const;
     void requireBoundResourceLods(bool compute);
     std::optional<MapRecordAudit> mapRecordAudit_;

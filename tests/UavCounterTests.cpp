@@ -44,6 +44,88 @@ class UavCounterTests final : public QObject {
         return c;
     }
   private slots:
+    void hiddenCounterSlots() {
+        for (bool strip : {false, true}) {
+            const auto usedSlots = shaderHiddenCounterSlots(code("data[0]=data.IncrementCounter();", strip));
+            for (size_t slot = 0; slot < usedSlots.size(); ++slot) QCOMPARE(usedSlots[slot], slot == 1);
+            const auto unused = shaderHiddenCounterSlots(code("data[0]=55;", strip));
+            for (bool value : unused) QVERIFY(!value);
+        }
+        const auto original = code("data[0]=data.DecrementCounter();");
+        for (const auto &[tag, body] : readDxbcParts(original)) {
+            if (tag != 0x58454853 && tag != 0x52444853) continue;
+            const auto program = readDxbcProgram(body);
+            for (int mutation = 0; mutation < 5; ++mutation) {
+                auto changed = program;
+                bool found = false;
+                for (auto &row : changed.instructions) if ((row[0] & 0x7ff) == 179) {
+                    QCOMPARE(row.size(), size_t(5)); found = true;
+                    if (mutation == 0) row[4] = 64; // Invalid UAV slot.
+                    if (mutation == 1) row[3] |= 0x80000000; // Extended UAV operand.
+                    if (mutation == 2) row[3] |= 1u << 22; // Non-immediate UAV index.
+                    if (mutation == 3) row[1] |= 0x80000000; // Extended destination.
+                    if (mutation == 4) row[1] = 0x00100032; // Non-scalar destination mask.
+                }
+                QVERIFY(found);
+                auto raw = writeDxbcProgram(changed);
+                for (bool used : shaderHiddenCounterSlots(makeDxbc({{tag, raw}}))) QVERIFY(used);
+            }
+        }
+    }
+    void originalMixedCounterSlots_data() {
+        QTest::addColumn<int>("mode"); QTest::addColumn<bool>("warp");
+        for (int mode : {40, 41, 42}) for (bool warp : {false, true})
+            QTest::newRow(qPrintable(QString("mode=%1,warp=%2").arg(mode).arg(warp))) << mode << warp;
+    }
+    void originalMixedCounterSlots() {
+        QFETCH(int, mode); QFETCH(bool, warp);
+        const auto root = qEnvironmentVariable("FLORA_COUNTER_SLOT_CAPTURES");
+        if (root.isEmpty()) QSKIP("Set FLORA_COUNTER_SLOT_CAPTURES for original mixed-slot captures");
+        const auto dir = root + '/' + QString::number(mode);
+        Frame frame((dir + "/capture.gpa_frame").toStdWString());
+        std::vector<std::pair<Id, Id>> views;
+        Id dispatch = 0, shader = 0;
+        for (const auto &[id, e] : frame.entries()) {
+            if (e.category == 7 && e.type == 0x357d) {
+                const auto creation = readTextureCreation(e.type, frame.payload(id));
+                views.emplace_back(creation.resource, creation.source);
+            }
+            if (e.category == 7 && e.type == 0x35) {
+                dispatch = id; shader = frame.state(frame.event(id).state).stages[5].shader;
+            }
+        }
+        QCOMPARE(views.size(), size_t(2)); QVERIFY(dispatch && shader);
+        QCOMPARE(validateFrame((dir + "/capture.gpa_frame").toStdWString())["errors"], Json(0));
+        ReplayOptions options; options.warp = warp;
+        Replay replay(frame, options);
+        for (int repeat = 0; repeat < 2; ++repeat) {
+            replay.run();
+            for (size_t i = 0; i < views.size(); ++i) {
+                QFile expected(dir + (i ? "/native/indexed-expected.bin" : "/native/expected.bin"));
+                QVERIFY(expected.open(QIODevice::ReadOnly));
+                const auto bytes = expected.readAll();
+                QCOMPARE(replay.readBuffer(views[i].second), std::vector<uint8_t>(bytes.begin(), bytes.end()));
+            }
+            QCOMPARE(replay.readCounter(views[0].first), 3u);
+            if (mode == 41) QCOMPARE(replay.readCounter(views[1].first), 7u);
+            else QVERIFY_THROWS_EXCEPTION(CounterValueUnavailable, replay.readCounter(views[1].first));
+        }
+        if (mode != 41) {
+            options.shaders[shader] = code("data[0]=data.IncrementCounter();", true);
+            Replay consumes(frame, options);
+            try {
+                consumes.run();
+                QFAIL("A replacement consuming the unknown counter must reject");
+            } catch (const std::runtime_error &error) {
+                const auto message = QString::fromUtf8(error.what());
+                QVERIFY(message.contains(QString("Event %1 (Dispatch)").arg(dispatch)));
+                QVERIFY(message.contains(QString("UAV %1").arg(views[1].first)));
+            }
+            options.initialUavCounters[views[1].first] = 7;
+            Replay seeded(frame, options); seeded.run();
+            QCOMPARE(seeded.readCounter(views[1].first), 8u);
+        }
+    }
     void originalIndexedCounter_data() {
         QTest::addColumn<int>("mode");
         QTest::addColumn<bool>("warp");

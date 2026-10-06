@@ -3,15 +3,18 @@
 #include <algorithm>
 
 namespace flora {
-bool capturedShadersMayUseCounters(const Frame &frame, const Event &event, const State &state) {
+std::array<bool, 64> capturedShaderCounterSlots(const Frame &frame, const Event &event, const State &state) {
+    std::array<bool, 64> used{};
     const bool compute = event.type == 0x35 || event.type == 0x36;
     for (unsigned stage = compute ? 5 : 0; stage < (compute ? 6u : 5u); ++stage) {
         const auto &binding = state.stages[stage];
-        if (binding.classCount) return true;
-        if (binding.shader && shaderMayUseHiddenCounters(frame.shader(frame.resource(binding.shader).data)))
-            return true;
+        if (binding.classCount) { used.fill(true); return used; }
+        if (binding.shader) {
+            const auto slots = shaderHiddenCounterSlots(frame.shader(frame.resource(binding.shader).data));
+            for (size_t i = 0; i < used.size(); ++i) used[i] = used[i] || slots[i];
+        }
     }
-    return false;
+    return used;
 }
 std::optional<UavCounter> describeCounter(const Frame &frame, Id view) {
     auto it = frame.entries().find(view);

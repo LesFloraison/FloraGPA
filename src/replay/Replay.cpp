@@ -882,10 +882,13 @@ void Replay::command(const Entry &e) {
                 return false;
             }
             requireBoundResourceLods(t == 0x35 || t == 0x36);
-            if ((!undefinedCreatedCounters_.empty() || !missingInitialCounters_.empty()) &&
-                boundShadersMayUseCounters(t == 0x35 || t == 0x36))
+            if (!undefinedCreatedCounters_.empty() || !missingInitialCounters_.empty()) {
+                const auto slots = boundShaderCounterSlots(t == 0x35 || t == 0x36);
                 for (const auto &counter : boundCounters(frame_, event, state))
-                    requireCreatedCounter(counter.view);
+                    if (std::any_of(counter.bindings.begin(), counter.bindings.end(),
+                                    [&](const auto &binding) { return slots.at(binding.slot); }))
+                        requireCreatedCounter(counter.view);
+            }
             const auto &a = event.args;
             if (t != 0x35 && t != 0x36)
                 validateRasterizer(state);

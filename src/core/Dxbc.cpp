@@ -46,29 +46,53 @@ std::array<bool, 128> shaderSrvDeclarations(Bytes bytes) {
     }
     return used;
 }
-bool shaderMayUseHiddenCounters(Bytes bytes) {
+std::array<bool, 64> shaderHiddenCounterSlots(Bytes bytes) {
+    std::array<bool, 64> used{};
+    auto unknown = [&] { used.fill(true); return used; };
     Bytes code;
     bool found = false;
     for (const auto &[tag, body] : readDxbcParts(bytes)) {
-        if (tag == 0x45434649) return true; // Dynamic linkage has separate binding semantics.
+        if (tag == 0x45434649) return unknown(); // Dynamic linkage has separate binding semantics.
         if (tag == 0x52444853 || tag == 0x58454853) {
             if (found) throw std::runtime_error("Ambiguous DXBC executable chunks");
             found = true; code = body;
         }
     }
-    if (!found) return true;
+    if (!found) return unknown();
     const auto program = readDxbcProgram(code);
     const auto version = program.header[0] & 0xffff;
     if (program.instructions.empty() || (version != 0x40 && version != 0x41 && version != 0x50) || (program.header[0] >> 16) > 5)
-        return true;
+        return unknown();
     for (const auto &row : program.instructions) {
         const auto op = row[0] & 0x7ff;
         // IMM_ATOMIC_ALLOC / IMM_ATOMIC_CONSUME. Other atomics access buffer
         // words, not the separate hidden counter attached to a UAV view.
-        if (op == 53 || op == 178 || op == 179 || op >= 206 || op == 107 || op == 112 ||
+        if (op == 53 || op >= 206 || op == 107 || op == 112 ||
             op == 120 || op == 144 || op == 145 || op == 146 || (row[0] & 0x80000000u))
-            return true;
+            return unknown();
+        if (op == 178 || op == 179) {
+            // SM5: destination temp register (single component) or null,
+            // followed by one immediate UAV register. Relative/extended or
+            // unfamiliar operand layouts cannot prove a slot independent.
+            if (row.size() < 4) return unknown();
+            const auto dest = row[1];
+            size_t uav = 0;
+            if (dest == 0x0000d000u && row.size() == 4)
+                uav = 2;
+            else if ((dest & ~0xf0u) == 0x00100002u &&
+                     std::has_single_bit((dest >> 4) & 15u) && row.size() == 5 && row[2] < 4096)
+                uav = 3;
+            else
+                return unknown();
+            if (row[uav] != 0x0011e000u || row[uav + 1] >= used.size()) return unknown();
+            used[row[uav + 1]] = true;
+        }
     }
+    return used;
+}
+bool shaderMayUseHiddenCounters(Bytes bytes) {
+    const auto slots = shaderHiddenCounterSlots(bytes);
+    for (bool used : slots) if (used) return true;
     return false;
 }
 DxbcParts readDxbcParts(Bytes bytes) {

@@ -17,4 +17,6 @@ std::array<bool, 128> shaderSrvDeclarations(Bytes bytes);
 // False only proves absence of hidden-counter instructions in checked SM4/5 code.
 // Unknown versions, opcodes, interfaces and extensions remain conservative.
 bool shaderMayUseHiddenCounters(Bytes bytes);
+// Per-UAV-register version of the same proof; unknown operands retain all slots.
+std::array<bool, 64> shaderHiddenCounterSlots(Bytes bytes);
 } // namespace flora

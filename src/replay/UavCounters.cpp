@@ -4,7 +4,8 @@
 #include <d3dcompiler.h>
 
 namespace flora {
-bool Replay::boundShadersMayUseCounters(bool compute) {
+std::array<bool, 64> Replay::boundShaderCounterSlots(bool compute) {
+    std::array<bool, 64> used{};
     for (unsigned stage = compute ? 5 : 0; stage < (compute ? 6u : 5u); ++stage) {
         Com<IUnknown> shader;
         UINT classes = 0;
@@ -22,9 +23,10 @@ bool Replay::boundShadersMayUseCounters(bool compute) {
 #undef COUNTER_SHADER
         if (!shader) continue;
         const auto use = shaderCounterUse_.find(shader.Get());
-        if (classes || use == shaderCounterUse_.end() || use->second) return true;
+        if (classes || use == shaderCounterUse_.end()) { used.fill(true); return used; }
+        for (size_t i = 0; i < used.size(); ++i) used[i] = used[i] || use->second[i];
     }
-    return false;
+    return used;
 }
 void Replay::requireCreatedCounter(Id view) const {
     if (missingInitialCounters_.contains(view))

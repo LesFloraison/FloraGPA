@@ -226,13 +226,21 @@ Json validateFrame(const std::filesystem::path &path, const std::function<bool()
                         const auto state = frame.state(event.state);
                         const auto counters = boundCounters(frame, event, state);
                         if (!counters.empty()) {
-                            if (capturedShadersMayUseCounters(frame, event, state))
-                                for (const auto &counter : counters) requireCounter(counter.view);
-                            else for (const auto &counter : counters) if (!definedCounters.contains(counter.view)) {
-                                finding(&e, "info", "counter_value_not_consumed",
-                                        "Checked shader code has no hidden-counter operations; buffer access "
-                                        "does not establish the unavailable counter value", counter.view);
-                                report["findings"].back()["storage_id"] = counter.resource;
+                            const auto slots = capturedShaderCounterSlots(frame, event, state);
+                            for (const auto &counter : counters) {
+                                if (std::any_of(counter.bindings.begin(), counter.bindings.end(),
+                                                [&](const auto &binding) { return slots.at(binding.slot); }))
+                                    requireCounter(counter.view);
+                                else if (!definedCounters.contains(counter.view)) {
+                                    const bool any = std::any_of(slots.begin(), slots.end(), [](bool x) { return x; });
+                                    finding(&e, "info", "counter_value_not_consumed",
+                                            any ? "Checked shader code has no hidden-counter operations for "
+                                                  "this UAV's bound slots; buffer access does not establish "
+                                                  "the unavailable counter value"
+                                                : "Checked shader code has no hidden-counter operations; buffer access "
+                                                  "does not establish the unavailable counter value", counter.view);
+                                    report["findings"].back()["storage_id"] = counter.resource;
+                                }
                             }
                         }
                     } else if (e.type == 0x3f) {
