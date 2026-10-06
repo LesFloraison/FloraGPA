@@ -8,6 +8,11 @@ $ErrorActionPreference = 'Stop'
 $repo = Split-Path -Parent $PSScriptRoot
 $build = Join-Path $repo "build\vs2022\$Configuration"
 $destination = if ($OutputDirectory) { [System.IO.Path]::GetFullPath($OutputDirectory) } else { Join-Path $repo 'out\FloraGPA' }
+if ((Test-Path -LiteralPath $destination) -and
+    ((-not (Test-Path -LiteralPath $destination -PathType Container)) -or
+     @(Get-ChildItem -LiteralPath $destination -Force).Count)) {
+    throw 'Package output must be an empty directory. Choose a new -OutputDirectory.'
+}
 $cache = @{}
 $cachePath = Join-Path $repo 'build\vs2022\CMakeCache.txt'
 if (Test-Path -LiteralPath $cachePath -PathType Leaf) {
@@ -55,7 +60,9 @@ $previousVc = $env:VCINSTALLDIR
 try {
     $env:VSINSTALLDIR = $VisualStudioRoot
     $env:VCINSTALLDIR = $vcRoot
-    & $deploy --release --compiler-runtime --include-plugins qoffscreen --no-translations --no-opengl-sw (Join-Path $destination 'FloraGPA.exe')
+    # DX11 uses D3DCompiler_47. Do not collect optional DX12 compiler DLLs from
+    # whichever SDK/tool directories happen to be present on the caller's PATH.
+    & $deploy --release --compiler-runtime --include-plugins qoffscreen --no-system-dxc-compiler --no-translations --no-opengl-sw (Join-Path $destination 'FloraGPA.exe')
     if ($LASTEXITCODE -ne 0) { throw 'Qt deployment failed.' }
 } finally {
     $env:VSINSTALLDIR = $previousVs
