@@ -8,6 +8,9 @@ struct TexturePlane {
 };
 std::optional<TexturePlane> texturePlane(const Resource &resource, uint32_t mip, uint32_t layer,
                                          const std::string &plane, std::optional<uint32_t> typedFormat = {});
+// Complete standard single-sample storage only; an empty referenced blob is
+// different from the absence of a captured initial-data identity.
+std::vector<TextureSubresource> textureInitialSubresources(const Resource &resource, Bytes storage);
 uint32_t defaultTextureFormat(uint32_t format);
 std::vector<uint8_t> textureDds(const Resource &resource, Bytes storage);
 struct CapturedLuma {

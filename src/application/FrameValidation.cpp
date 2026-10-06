@@ -23,6 +23,7 @@
 #include "core/SrvBindings.h"
 #include "core/StreamOutput.h"
 #include "core/TextureCreation.h"
+#include "core/TextureStorage.h"
 #include <map>
 namespace flora {
 using Json = nlohmann::json;
@@ -467,8 +468,18 @@ Json validateFrame(const std::filesystem::path &path, const std::function<bool()
                             throw std::runtime_error("Buffer initial data length does not match descriptor");
                     } else if (e.type >= 0x84 && e.type <= 0x87) {
                         const auto info = textureInfo(r);
-                        if (r.data)
-                            frame.data(r.data);
+                        if (r.data) {
+                            if (e.type != 0x87 && info.samples == 1 && info.format != 104 &&
+                                info.format != 105) {
+                                try {
+                                    textureInitialSubresources(r, frame.data(r.data));
+                                } catch (const std::exception &error) {
+                                    finding(&e, "error", "texture_initial_data_invalid", error.what());
+                                    report["findings"].back()["data_id"] = r.data;
+                                }
+                            } else
+                                frame.data(r.data);
+                        }
                         checked = true;
                         if (info.samples > 1 && r.data)
                             finding(&e, "warning", "capture_data_limit",

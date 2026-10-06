@@ -1,6 +1,19 @@
 #include "TextureStorage.h"
 #include <algorithm>
 namespace flora {
+std::vector<TextureSubresource> textureInitialSubresources(const Resource &resource, Bytes storage) {
+    if (textureInfo(resource).samples != 1)
+        throw std::runtime_error("Initial storage is not a per-sample MSAA initializer");
+    auto subs = textureSubresources(resource);
+    const auto expected = subs.back().offset + subs.back().size;
+    if (storage.size() != expected)
+        throw std::runtime_error("Texture initial storage length mismatch: expected " +
+                                 std::to_string(expected) + ", got " + std::to_string(storage.size()));
+    for (const auto &sub : subs)
+        if (sub.slicePitch > UINT32_MAX)
+            throw std::runtime_error("Texture initial slice pitch exceeds the native API limit");
+    return subs;
+}
 uint32_t defaultTextureFormat(uint32_t format) {
     static const std::map<uint32_t, uint32_t> formats{
         {1, 2},   {5, 6},   {9, 10},  {15, 16}, {19, 21}, {23, 24}, {27, 28}, {33, 34},

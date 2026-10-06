@@ -199,21 +199,15 @@ IUnknown *Replay::object(Id id) {
             if (uint64_t(info.mips) * info.layers > 30720)
                 throw std::runtime_error("Too many texture subresources");
             std::vector<D3D11_SUBRESOURCE_DATA> initial;
-            size_t offset = 0;
-            if (!data.empty())
-                for (uint32_t layer = 0; layer < info.layers; ++layer)
-                    for (uint32_t mip = 0; mip < info.mips; ++mip) {
-                        auto [pitch, rows] = pitches(std::max(1u, info.width >> mip),
-                                                     std::max(1u, info.height >> mip), info.format);
-                        uint64_t slice = uint64_t(pitch) * rows,
-                                 size = slice * std::max(1u, info.depth >> mip);
-                        if (slice > UINT32_MAX || offset > data.size() || size > data.size() - offset)
-                            throw std::runtime_error("Texture initial size mismatch");
-                        initial.push_back({data.data() + offset, pitch, UINT(slice)});
-                        offset += size;
-                    }
-            if (!data.empty() && offset != data.size())
-                throw std::runtime_error("Texture initial trailing bytes");
+            if ((resource.data && info.samples == 1) || options_.textures.contains(id)) {
+                try {
+                    for (const auto &sub : textureInitialSubresources(resource, data))
+                        initial.push_back({data.data() + size_t(sub.offset), sub.rowPitch, UINT(sub.slicePitch)});
+                } catch (const std::exception &error) {
+                    throw std::runtime_error("Texture initial data " + std::to_string(resource.data) +
+                                             ": " + error.what());
+                }
+            }
             auto init = initial.empty() ? nullptr : initial.data();
             Bytes descBytes(reinterpret_cast<const uint8_t *>(d.data()), d.size() * 4);
             if (t == 0x84) {
