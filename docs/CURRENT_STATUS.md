@@ -1,7 +1,23 @@
 # Current capabilities and compatibility
 
 Reviewed **2026-10-06**. The user authorized M4, then M5, while keeping M3 open.
-The latest [normalized predication recovery](NORMALIZED_PREDICATION_AUDIT.md)
+The latest [capture-load recovery change](CAPTURE_LOAD_RECOVERY.md) makes the
+container scan and full-file hash cancellable, discards cancelled queued results,
+and preserves the current capture and its compatibility report after cancelled or
+failed opens. Specific parser errors survive the asynchronous boundary. Runtime:
+`3b45d40`; package: `out/FloraGPA-load-recovery-20261006/`. All 476 unique captures
+retain identical complete preflight reports, and four packaged GF2/BF1 golden
+and negative checks pass. A synthetic sparse file verifies record addressing
+beyond 4 GiB and full-file SHA-256 against an independent oracle. This change
+does not broaden replay compatibility or re-run the preceding full GPU matrix.
+Six relevant CTest suites pass; both initially skipped optional UI workflows
+also pass with their original fixtures. A 258.78-second portable test completes
+40 cancel/retry/navigation cycles and 80 strict Final-image checks. Warmed handle
+and GUI-object counts stay fixed, while private-memory growth remains an open
+heap/retention investigation. See the [pinned baseline](capture-load-recovery-baseline.json).
+M5 still needs longer runs, broader recovery coverage and independent deployment.
+
+The preceding [normalized predication recovery](NORMALIZED_PREDICATION_AUDIT.md)
 restores eight unchanged original captures that previously failed because the
 Predicate descriptor was absent. A linked capture-marker record proves that GPA
 normalized the saved comparison using a completed query. FloraGPA now replays
@@ -364,7 +380,7 @@ the other 35 suites passed initially and the complete UI suite passes after the 
 | M2 — Ordinary replay | Registered-scope gate passed: 366 positive cases and 22 located rejections; auxiliary/snapshot contracts audited. This is not universal API support. State-object identity loss, mixed saved/missing SO targets and unverified lifetimes remain explicit boundaries. |
 | M3 — Deferred Context / Command List | Open; M4/M5 now take priority by user instruction on 2026-10-06. Require original retained-list captures proving identity, build order, resource versions, repeated execution, restore-state and event mapping before production support. |
 | M4 — Resources and boundaries | Active, incomplete. Initial texture/Map data is checked; missing initial UAV counts reject with explicit experiment recovery. Continue missing pitch/data dependencies, predicate/frame-before history, Query and presentation boundaries. |
-| M5 — Stable compatibility release | Incomplete. The new package and expanded 470-case registry include corrected counter expectations. Continue long-duration, recovery, large-file and independent clean-environment build/deployment gates. |
+| M5 — Stable compatibility release | Incomplete. The 486-case registry and load-cancellation recovery are established. Continue broader recovery and large-file workflows, long-duration testing and independent clean-environment build/deployment gates. |
 | M6 — Analyzer and other versions | Incomplete. Continue remaining Qt consumers, advanced profiling/debugging and version-specific adapters after core replay gates. Existing analyzer features remain available. |
 
 The original order was **M1 → M2 → M3 → M4 → M5**. On 2026-10-06 the user

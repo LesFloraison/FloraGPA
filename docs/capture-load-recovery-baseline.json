@@ -1,0 +1,175 @@
+{
+  "schema": "FloraGPA capture load recovery baseline 1",
+  "reviewed": "2026-10-06",
+  "implementation_commit": "3b45d40d0ec518188a5fe659c74d4d0d8854fa1e",
+  "stages_complete": {
+    "M3": false,
+    "M4": false,
+    "M5": false
+  },
+  "package": "out/FloraGPA-load-recovery-20261006",
+  "package_cli_sha256": "7f7212f37b54c85a6e9ac5f0d6251e80cf4cc5b9b5f2edcfb31b6562a86f2467",
+  "package_gui_sha256": "2701a74dd963f14e0046f9d87714c053405754ee52219d035edac558773ebce7",
+  "package_worker_sha256": "84376b353e915dc35c339ad295ebdcec57122c1f8b18c3456c542377c44f8bfb",
+  "inventory_unchanged": {
+    "registrations": 486,
+    "unique_hashes": 476,
+    "positive_registrations": 460,
+    "positive_unique_hashes": 450,
+    "rejections": 26
+  },
+  "module_ledger_unchanged": {
+    "ported": 72,
+    "partial": 117,
+    "pending": 15
+  },
+  "counts": {
+    "ctest_suites": 6,
+    "main_ui_rows_passed": 57,
+    "main_ui_initial_skips": 2,
+    "optional_ui_followup_rows_passed": 4,
+    "optional_ui_followup_skips": 0,
+    "cancelled_index_scans": 100,
+    "unchanged_preflight_reports": 476,
+    "goldens": 4,
+    "portable_recovery_cycles": 40,
+    "portable_successful_task_checks": 120,
+    "portable_cancelled_replay_attempts": 40,
+    "portable_cancelled_opens": 40,
+    "portable_golden_image_checks": 80
+  },
+  "sparse_large_file": {
+    "completed": true,
+    "synthetic_sparse": true,
+    "file_size": 4294967624,
+    "payload_offset": 4294967592,
+    "entry_table_offset": 4294967600,
+    "sha256": "0f5ea88361fc3cb90310d3334266d0536bfe51a7611d93bb771f61fd043ad3b3",
+    "decoded_records": 1,
+    "seconds": 4.549,
+    "exe_sha256": "7f7212f37b54c85a6e9ac5f0d6251e80cf4cc5b9b5f2edcfb31b6562a86f2467",
+    "scope": "64-bit mapped record addressing and full-file hashing; no GPU or original capture claim"
+  },
+  "portable_recovery_seconds": 258.78,
+  "portable_memory_observations": {
+    "GF2_Exilium_2026_03_03__00_19_35.gpa_frame": {
+      "private_bytes": {
+        "first": 47833088,
+        "last": 56434688,
+        "minimum": 47833088,
+        "maximum": 56557568,
+        "after_warmup_minimum": 52076544,
+        "after_warmup_maximum": 56557568
+      },
+      "working_set": {
+        "first": 202575872,
+        "last": 212041728,
+        "minimum": 202575872,
+        "maximum": 212041728,
+        "after_warmup_minimum": 208437248,
+        "after_warmup_maximum": 212041728
+      },
+      "handles": {
+        "first": 317,
+        "last": 324,
+        "minimum": 317,
+        "maximum": 324,
+        "after_warmup_minimum": 324,
+        "after_warmup_maximum": 324
+      },
+      "gdi_objects": {
+        "first": 3,
+        "last": 11,
+        "minimum": 3,
+        "maximum": 11,
+        "after_warmup_minimum": 11,
+        "after_warmup_maximum": 11
+      },
+      "user_objects": {
+        "first": 34,
+        "last": 34,
+        "minimum": 34,
+        "maximum": 34,
+        "after_warmup_minimum": 34,
+        "after_warmup_maximum": 34
+      }
+    },
+    "bf1_2026_01_21__16_53_05.gpa_frame": {
+      "private_bytes": {
+        "first": 63504384,
+        "last": 69152768,
+        "minimum": 63504384,
+        "maximum": 69152768,
+        "after_warmup_minimum": 65826816,
+        "after_warmup_maximum": 69152768
+      },
+      "working_set": {
+        "first": 1687982080,
+        "last": 1693646848,
+        "minimum": 1687982080,
+        "maximum": 1693646848,
+        "after_warmup_minimum": 1690230784,
+        "after_warmup_maximum": 1693646848
+      },
+      "handles": {
+        "first": 324,
+        "last": 324,
+        "minimum": 324,
+        "maximum": 324,
+        "after_warmup_minimum": 324,
+        "after_warmup_maximum": 324
+      },
+      "gdi_objects": {
+        "first": 11,
+        "last": 11,
+        "minimum": 11,
+        "maximum": 11,
+        "after_warmup_minimum": 11,
+        "after_warmup_maximum": 11
+      },
+      "user_objects": {
+        "first": 34,
+        "last": 34,
+        "minimum": 34,
+        "maximum": 34,
+        "after_warmup_minimum": 34,
+        "after_warmup_maximum": 34
+      }
+    }
+  },
+  "open_findings": [
+    "Private memory has not demonstrated a plateau: BF1 rises from 60.56 to 65.95 MiB over 20 same-capture observations; investigate allocator/cache versus retained allocations before a long-duration acceptance claim."
+  ],
+  "evidence": {
+    "artifacts/m5-open-cancel-before.log": "d106515f32e36b2033e3ebc771640e25760dda0cf17b2da8788ae6f590d822a3",
+    "artifacts/m5-open-cancel-before-binary.json": "bf18d28ad46c0ffdd9f1722fdc0b7902fc7b1342a4d10393acf791ba3655519c",
+    "artifacts/m5-final-related-ctest.log": "8660f079419dc95a747019ad5d2df69a2d504eeb95dd6d52848b35eef4e40d46",
+    "artifacts/m5-recovery-focused.log": "e0b22ca2186afde71967cd3cc231c393d05effcf84a70a43cf32fbe53385e3ad",
+    "artifacts/m5-compatibility-focused.log": "6277b71f8026780f118daa4fe72662b48ba28d3924549a1ad08cce35753b08ca",
+    "artifacts/m5-main-ui-ctest.log": "8234fb25585962e9f9d5f63a6051e0015ba9bff1c07e68eb5e9402b49408281b",
+    "artifacts/m5-main-ui.log": "c0fee8e69e7eb225cae4e16fff78bab1b7678bb80784f0e79c8a0ddc5681e3cf",
+    "artifacts/m5-optional-ui.log": "a2748f53431f060e150e87f878299f4c10db4fb4b1f1516b93ed1086e31b534d",
+    "artifacts/m5-cancellation-preflight/comparison.json": "58203c34230c406283d7e2f5be768a758992f0b26ad7a32096862775df82092d",
+    "artifacts/check_m5_preflight.py": "f26b55efa312248251612d6d12821d806e0cf0e7e3ca1110aa3f6b3342945b23",
+    "artifacts/m5-large-file/evidence.json": "616c95408bd1f78e82588c679f87178e64e1c5fca77d31efed0d323a74587a3c",
+    "artifacts/m5-large-file/preflight/validation.json": "745c8b0b6c757a784c7bf229c26c37667af55f4085f33665b3e126927caf69a9",
+    "artifacts/check_m5_large_file.py": "3889399c3858c80ae66977e7d115d9072713fe4368aadbc4e57905ff29e2df97",
+    "artifacts/m5-load-recovery-goldens/validation.json": "5e1dde1ab9876f50c472cdf84378931ffc3b5cd8e9700002b67d37bf81383ade",
+    "artifacts/m5-load-recovery-package-files.json": "ebabe2e4dde8f56b70b67189a2aedc02d508805225f61f00a7a7473d3d22f2e2",
+    "artifacts/m5-recovery-soak/validation.json": "ace41b2f25700a8cab9bde50fb6724f47ba7dec04c292a18912eeccbdaabf256",
+    "artifacts/m5-recovery-navigation-oracle-before.log": "9b4c6bef7850800abf7d6453005905ae9afe545fa4a309fbf10262280e39f3ad",
+    "artifacts/m5-recovery-soak-final/validation.json": "84ff642fa9f5ae96110404d4ebcae8deb24b80463a791ea78b089287d61a5071",
+    "artifacts/m5-recovery-soak-final/qt.log": "8d229ebf29096cf2d58fea5662816ce562b73b2921cc536892fba22f979c0f8a",
+    "artifacts/run_m5_recovery_soak.py": "a588d80e611f07388e73cd28b0310861938585c6c329359bfa5ab19510cb6458",
+    "artifacts/pin_m5_load_recovery.py": "fa35a90cfe5b48211a830d8cafee6bc603ada4c1a9bcb2a71c8dd78a02692693"
+  },
+  "limits": [
+    "The previous 28-suite GPU compatibility matrix was not rerun; current preflight reports are identical.",
+    "The first portable attempt lacks its Qt stdout log and is excluded from cycle and memory evidence.",
+    "The after-event/final image oracle mistake is retained in the test log; only the test was corrected.",
+    "Observed handles and memory are bounded-run measurements, not proof against every leak or long-duration failure.",
+    "Windows system PATH isolation and a relocated package do not establish an independent clean OS/build environment.",
+    "The >4 GiB sparse fixture proves addressing and hashing only; it is not an original capture or GPU workload.",
+    "Cancellation is cooperative at scan/hash checkpoints; OS calls and other semantic/model-building phases are not made preemptible."
+  ]
+}
