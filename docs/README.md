@@ -13,6 +13,7 @@ chronology remains in Chinese.
 | Current capabilities and known limits | [Current status](CURRENT_STATUS.md) |
 | Component responsibilities | [Architecture](ARCHITECTURE.md) |
 | Run tests and external comparisons | [Development validation](USAGE.md#development-validation) |
+| Build committed source with an isolated process environment and package it | [Source build and packaging](SOURCE_BUILD_AND_PACKAGING.md) |
 | Interpret corpus results and diagnostics | [Compatibility infrastructure](COMPATIBILITY_BASELINE.md) |
 | Saved texture initializer validation and malformed-data boundaries | [Texture initial-data audit](TEXTURE_INITIAL_DATA_AUDIT.md) |
 | Saved Map writes, differential storage and subresource validation | [Map write-data audit](MAP_WRITE_DATA_AUDIT.md) |

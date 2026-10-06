@@ -1,0 +1,135 @@
+{
+  "schema": "FloraGPA committed source and packaging baseline 1",
+  "reviewed": "2026-10-06",
+  "implementation_commits": [
+    "93c84bf976974060a9edaf44d55a989bcbda2348",
+    "232a207126dec04ff540ad4a2b49fbfc96530b78",
+    "f24006981e9c2fa9fd31595757f65fb049bfccf6"
+  ],
+  "runtime_source_unchanged_from": "c386d3a48092a28fb852fc4beaab51815827b868",
+  "validated_source_commit": "232a207126dec04ff540ad4a2b49fbfc96530b78",
+  "source_archive_sha256": "fff46e70a1e03df9d109166a7af4e2595b453d679b2dedbf9e5e2d7f11d72210",
+  "source_files": 1005,
+  "package": "out/FloraGPA-clean-build-20261006",
+  "package_files": 44,
+  "package_executables": {
+    "FloraGPA.Cli.exe": "1f39538c6989753f59c7d7a9843dece9852cd9e34d18d606d9c99f5d34201c71",
+    "FloraGPA.exe": "bc1524c302c375185b7670dbfad681b7e4d2e30ab869ca4bafc258e667d95db3",
+    "FloraGPA.Metrics.dll": "c705177f429b73813c36b7072880f024301cfcf23d2496518ab085d5d31d9642",
+    "FloraGPA.Rdc.exe": "ecd5d8571b7eecf08ded47c11b3d0800c718437a5854ff321b3ab31cfa4a173c",
+    "FloraGPA.Worker.exe": "f92219495906c1403706f300191c0133a47af1eb22643ebdf3053b313b0cc08f"
+  },
+  "toolchain": {
+    "compiler": "MSVC 19.44.35227.0",
+    "qt": "6.11.2 msvc2022_64",
+    "platform": "Windows x64",
+    "build_testing": false,
+    "edition_actually_tested": "Visual Studio 2022 Community"
+  },
+  "steps": [
+    {
+      "name": "configure",
+      "command": [
+        "C:\\Program Files\\CMake\\bin\\cmake.exe",
+        "--preset",
+        "vs2022",
+        "-DCMAKE_PREFIX_PATH=D:\\Qt\\6.11.2\\msvc2022_64",
+        "-DBUILD_TESTING=OFF"
+      ],
+      "exit_code": 0,
+      "seconds": 3.574
+    },
+    {
+      "name": "build",
+      "command": [
+        "C:\\Program Files\\CMake\\bin\\cmake.exe",
+        "--build",
+        "--preset",
+        "release",
+        "--parallel",
+        "4"
+      ],
+      "exit_code": 0,
+      "seconds": 220.297
+    },
+    {
+      "name": "package",
+      "command": [
+        "C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\m5-clean-source-final\\source workspace\\tools\\package.ps1",
+        "-OutputDirectory",
+        "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\m5-clean-source-final\\portable"
+      ],
+      "exit_code": 0,
+      "seconds": 0.455
+    }
+  ],
+  "verification": {
+    "source_archive_excludes_local_content": true,
+    "generated_solution": true,
+    "clean_build": true,
+    "clean_package": true,
+    "golden_and_negative_checks": 4,
+    "production_gui_workflows": 2,
+    "runtime_module_audits": 4,
+    "process_checks": 4,
+    "forbidden_runtime_dependencies": [],
+    "helper_successful_integration_sha256": "4b018736ef4169deea01b5b37296aaf4eda23087be2ced0b0a2e656e4a9d9336",
+    "final_helper_sha256": "83ff8fb4b4151fcb724fcdce8dd0380c37e082be1bfa797674368218ea72f7f1",
+    "helper_followup": "After the successful integration, timeout handling was changed to stop the full child tree. Normal/nonzero exits, a timed-out parent+child and a real CMake version command pass independently."
+  },
+  "inventory_unchanged": {
+    "registrations": 489,
+    "unique_hashes": 479,
+    "positive_registrations": 463,
+    "positive_unique_hashes": 453,
+    "rejections": 26
+  },
+  "module_ledger_unchanged": {
+    "ported": 72,
+    "partial": 117,
+    "pending": 15
+  },
+  "stages_complete": {
+    "M3": false,
+    "M4": false,
+    "M5": false
+  },
+  "evidence": {
+    "artifacts/m5-clean-source-final/validation.json": "fce2df62085a437847b02e2b96334569f54d3d21475d5c3861d0672bcab3b52a",
+    "artifacts/m5-clean-source-final/configure.log": "b854b25f9d10082e60b9abff1f158f05ea8e7d83d729a52817ea42f5804c51aa",
+    "artifacts/m5-clean-source-final/build.log": "36c1c55b736356e070d0b9980e5ea89670fbf882a6b37ea5c58444fb4424ea24",
+    "artifacts/m5-clean-source-final/package.log": "5cf056a47f85f80a0dac7bbe327673d44c6085a4f439c18bb77c222b893ab4f0",
+    "artifacts/validate_source_build_accepted.py": "4b018736ef4169deea01b5b37296aaf4eda23087be2ced0b0a2e656e4a9d9336",
+    "artifacts/m5-clean-package-files.json": "35b938de102f9f8f456a12bd2f6af46830745555fd94cc7f8a9886c03bdd6187",
+    "artifacts/m5-clean-final-goldens/validation.json": "5e1dde1ab9876f50c472cdf84378931ffc3b5cd8e9700002b67d37bf81383ade",
+    "artifacts/m5-clean-final-runtime/gui-validation.json": "992f6883970ca7acedfd3eb2e4011eef065465e9c30610f994872362e4c90a7c",
+    "artifacts/m5-clean-final-runtime/module-audit.json": "e0858d65aa8792e624d462cd2d70cd414b44dd4ec8e9ae7fc7d71eeae8b66b46",
+    "artifacts/m5-clean-final-runtime/gf2-gui.png": "2a9753182337a38d8a5b961df2c3ba9730bcea16901f7fbb88e0c8e9d1c3bce5",
+    "artifacts/m5-clean-final-runtime/bf1-gui.png": "c74ffb237ffb57916e4bc11c8a443b22e98e34ca1834e985cf7aa13beff3bfd8",
+    "artifacts/m5-build-process-check/validation.json": "953d7ae4f2581464d085b9470f567fa37b50b4867c7dfc517892b3195c30b5e8",
+    "artifacts/m5-build-process-check/timeout.log": "8ae00eae96ac2e3c5e8445a63ded64335281549f9a63f34f96bc8303779bbdfd",
+    "artifacts/m5-package-rejections.json": "ca2f1e947995965a8e989cd77679ea1aa38ccc3d76938e019d22e0331e2a6f67",
+    "artifacts/m5-package-occupied.txt": "6bb74df3308201ff3817cdea4cb2e44ed106de5c1cd2fec912d58270d9f5fe1f",
+    "artifacts/m5-verifier-occupied.json": "ff6349659e2553d23a9e6e17f06190953cf7c0f45c378c30465e438b7e7c7659",
+    "artifacts/m5-package-discovery.log": "afcafc6a712b081ff96f2bd6c97fd2954667d988f507ac15c3fcf0005861fda7",
+    "artifacts/m5-package-discovery-files.json": "f3f330fb1ceac03eb9287dfc9b3b9e40c64120da218f4f83a2b8609a47b4f630",
+    "artifacts/m5-package-ps51.log": "44d614508ccfdd395dac556bc6458cce5e24c34fbc39868002d9ca0f379860e0",
+    "artifacts/m5-clean-build/manifest.json": "1bfaa4a9309c05d3911df87b5680b980c179aefa2f47a5b7262f170649f04b3c",
+    "artifacts/m5-pathext-probe.json": "6a84bc0247b5fa60ff3ee212accd65b8ad0b949078272188bea35ed953d32494",
+    "artifacts/m5-deployer-loader-probe.json": "0e6de8e2e4e790f34f7ad2862cbef4156aa827fe0bac71eb4cc4217a10eff99a",
+    "artifacts/m5-clean-build/accepted.json": "29ab6da5348a3b823ccae139baa1bbe0e068fdc29ea4b1be2bd92f3b99964646"
+  },
+  "limits": [
+    "This is the developer host with installed compiler, Windows SDK, Qt and graphics driver, not an independent clean machine.",
+    "Only the Community installation physically tested; configured paths and explicit overrides replace the edition-specific constant.",
+    "No C++ replay semantics changed and the entire GPU corpus was not rerun; the previous registered matrix remains source-level evidence.",
+    "A pre-existing C4018 warning remains in TextureCopies.cpp.",
+    "Application state settings and installed machine registry/system components were not erased.",
+    "Two production GUI workflows exercise startup/open/replay/rendering, not complete analyzer/navigation/recovery acceptance."
+  ]
+}

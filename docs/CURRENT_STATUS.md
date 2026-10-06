@@ -1,7 +1,20 @@
 # Current capabilities and compatibility
 
 Reviewed **2026-10-06**. The user authorized M4, then M5, while keeping M3 open.
-The latest [counter-usage correction](COUNTER_USAGE_COMPATIBILITY.md) permits
+The latest [source-build and packaging acceptance](SOURCE_BUILD_AND_PACKAGING.md)
+builds all production targets from 1,005 committed source files with system PATH,
+then packages with the configured Qt/VS installation instead of workstation paths.
+The 44-file package excludes host-PATH DX12 compiler DLLs, retains the DX11
+compiler, and refuses occupied destinations. Four golden/negative replays, two
+actual production GUI open/replay workflows, module audits and four build-process
+checks pass. The initial harness PATHEXT error is preserved separately from the
+successful continuous run. Package: `out/FloraGPA-clean-build-20261006/`.
+No C++ runtime semantics changed; the earlier full GPU matrix is not claimed as
+newly rerun. This is clean-source validation on the developer host; independent
+machine deployment, broader failures and long-duration acceptance remain open.
+See the [pinned baseline](source-build-packaging-baseline.json).
+
+The preceding [counter-usage correction](COUNTER_USAGE_COMPATIBILITY.md) permits
 indexed access to a Counter UAV when checked executable shader code proves the
 hidden counter unused. Three new unmodified original captures include the
 previously rejected trigger and two controls. All match the producer's exact
@@ -453,7 +466,7 @@ the other 35 suites passed initially and the complete UI suite passes after the 
 | M2 — Ordinary replay | Registered-scope gate passed: 366 positive cases and 22 located rejections; auxiliary/snapshot contracts audited. This is not universal API support. State-object identity loss, mixed saved/missing SO targets and unverified lifetimes remain explicit boundaries. |
 | M3 — Deferred Context / Command List | Open; M4/M5 now take priority by user instruction on 2026-10-06. Require original retained-list captures proving identity, build order, resource versions, repeated execution, restore-state and event mapping before production support. |
 | M4 — Resources and boundaries | Active, incomplete. Initial texture/Map data is checked; missing UAV counts reject on actual consumption, while proven counter-free indexed access is allowed. Continue per-slot/control-flow dependencies, missing pitch/data, predicate/frame-before history, Query and presentation boundaries. |
-| M5 — Stable compatibility release | Incomplete. The 489-case registry, load-cancellation recovery and nine controlled worker-failure cases are established. Continue specialized analyzer/driver/storage failures, large-file workflows, long-duration testing and independent clean-environment build/deployment gates. |
+| M5 — Stable compatibility release | Incomplete. The 489-case registry, clean committed-source build/package, load-cancellation recovery and nine controlled worker-failure cases are established. Continue specialized analyzer/driver/storage failures, large-file workflows, long-duration testing and independent clean-machine deployment. |
 | M6 — Analyzer and other versions | Incomplete. Continue remaining Qt consumers, advanced profiling/debugging and version-specific adapters after core replay gates. Existing analyzer features remain available. |
 
 The original order was **M1 → M2 → M3 → M4 → M5**. On 2026-10-06 the user

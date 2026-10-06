@@ -79,13 +79,24 @@ For the default GUI build, use the same Qt installation for deployment:
 ./out/FloraGPA/FloraGPA.exe
 ```
 
-The current packaging helper locates the VC143 redistributable under the
-standard VS2022 Community installation directory. Other Visual Studio editions
-or custom installation paths need a packaging-script path adjustment.
+The packaging helper reads the Qt kit and Visual Studio instance from
+`build/vs2022/CMakeCache.txt`, so it uses the toolchain selected by your build.
+`-QtRoot` is optional after configuration. To override the Visual Studio location,
+pass `-VisualStudioRoot 'C:/path/to/Visual Studio/2022/BuildTools'`; the selected
+installation must include the x64 VC143 redistributable. Missing toolchain files
+and release binaries are reported before creating the output directory. The
+helper restores the caller's Visual Studio environment variables after Qt deployment.
 
 Keep the entire output directory together: GUI, CLI, workers, bridge, Qt plugins
 and app-local VC runtime DLLs. Do not distribute only `FloraGPA.exe`.
-To package while another copy is running, choose a fresh output directory.
+Use a new or empty output directory. Packaging rejects existing contents so that
+DLLs from older packages cannot silently remain in the release. It does not
+collect optional DX12 compiler DLLs from the host PATH; the DX11 compiler remains
+included. A failed deployment may leave a partial directory; retry with a fresh
+output path and retain the failure log.
+
+For a repeatable developer check that builds an archived commit without local
+caches or machine presets, see [source-build validation](docs/SOURCE_BUILD_AND_PACKAGING.md).
 
 Open a capture through **File > Open Capture…** or pass its path to the GUI.
 Use **F5** to replay, **F6** for **Collect GPU Metrics**, and **Escape** to cancel.
