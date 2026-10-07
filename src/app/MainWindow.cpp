@@ -1882,62 +1882,38 @@ void MainWindow::acceptWorkerReport(WorkerReport result) {
             return;
         }
         if (runningKind_ == "quad") {
-            QFile quadFile(jobDir_->filePath("result/quad.json"));
-            if (!quadFile.open(QIODevice::ReadOnly)) throw std::runtime_error("Quad output is missing");
-            const auto result = nlohmann::json::parse(quadFile.readAll().toStdString());
-            const bool accepted = quad_->finish(runningQuadRequest_, result, jobDir_->filePath("result"));
+            const bool accepted = quad_->finish(runningQuadRequest_, result.payload, jobDir_->filePath("result"));
             statusBar()->showMessage(accepted ? "Quad ready" : "Quad result discarded", 3000);
             emit taskFinished(accepted);
             return;
         }
         if (runningKind_ == "coverage") {
-            QFile coverageFile(jobDir_->filePath("result/coverage.json"));
-            if (!coverageFile.open(QIODevice::ReadOnly)) throw std::runtime_error("Coverage output is missing");
-            const auto result = nlohmann::json::parse(coverageFile.readAll().toStdString());
-            const bool accepted = coverage_->finish(runningCoverageRequest_, result, jobDir_->filePath("result"));
+            const bool accepted = coverage_->finish(runningCoverageRequest_, result.payload, jobDir_->filePath("result"));
             applyCoverageOverlay();
             statusBar()->showMessage(accepted ? "Coverage ready" : "Coverage result discarded", 3000);
             emit taskFinished(accepted);
             return;
         }
         if (runningKind_ == "timings") {
-            QFile profileFile(jobDir_->filePath("result/profile.json"));
-            if(!profileFile.open(QIODevice::ReadOnly))throw std::runtime_error("GPU profile output is missing");
-            auto result=nlohmann::json::parse(profileFile.readAll().toStdString());
-            result["loaded_modules"]=nlohmann::json::parse(QJsonDocument(report_["loaded_modules"].toArray()).toJson().toStdString());
-            const bool accepted=gpuProfile_->finish(runningProfileRequest_,result);
+            result.payload["loaded_modules"]=nlohmann::json::parse(QJsonDocument(report_["loaded_modules"].toArray()).toJson().toStdString());
+            const bool accepted=gpuProfile_->finish(runningProfileRequest_,result.payload);
             statusBar()->showMessage(accepted?"GPU timing ready":"GPU timing result discarded",3000);
             emit taskFinished(accepted);return;
         }
         if (runningKind_ == "statistics") {
-            QFile statisticsFile(jobDir_->path() + "/result/statistics.json");
-            if (!statisticsFile.open(QIODevice::ReadOnly))
-                throw std::runtime_error("Statistics output is missing");
-            auto bytes = statisticsFile.readAll();
-            auto result = nlohmann::json::parse(bytes.constData(), bytes.constData() + bytes.size());
-            const auto accepted = gpuStatistics_->finish(runningStatisticsRequest_, result);
+            const auto accepted = gpuStatistics_->finish(runningStatisticsRequest_, result.payload);
             statusBar()->showMessage(accepted ? "GPU statistics ready" : "Statistics result discarded", 3000);
             emit taskFinished(accepted);
             return;
         }
         if (runningKind_ == "replay-pipeline") {
-            QFile stateFile(jobDir_->path() + "/result/replay-pipeline.json");
-            if (!stateFile.open(QIODevice::ReadOnly))
-                throw std::runtime_error("Pipeline state output is missing");
-            auto bytes = stateFile.readAll();
-            auto state = nlohmann::json::parse(bytes.constData(), bytes.constData() + bytes.size());
-            auto accepted = replayedState_->finishReplay(runningPipelineRequest_, std::move(state));
+            auto accepted = replayedState_->finishReplay(runningPipelineRequest_, std::move(result.payload));
             statusBar()->showMessage(accepted ? "Replay state ready" : "Pipeline result discarded", 3000);
             emit taskFinished(accepted);
             return;
         }
         if (runningKind_ == "predicate") {
-            QFile predicateFile(jobDir_->path() + "/result/predicate.json");
-            if (!predicateFile.open(QIODevice::ReadOnly))
-                throw std::runtime_error("Predicate output is missing");
-            auto bytes = predicateFile.readAll();
-            auto result = nlohmann::json::parse(bytes.constData(), bytes.constData() + bytes.size());
-            auto accepted = predicateView_->finish(runningPredicateRequest_, result);
+            auto accepted = predicateView_->finish(runningPredicateRequest_, result.payload);
             statusBar()->showMessage(accepted ? "Predicate ready" : "Predicate result discarded", 3000);
             emit taskFinished(accepted);
             return;
@@ -2055,15 +2031,7 @@ void MainWindow::acceptWorkerReport(WorkerReport result) {
         }
         if (runningKind_ == "geometry" || runningKind_ == "post-geometry") {
             const bool post = runningKind_ == "post-geometry";
-            QFile geometryFile(jobDir_->path() +
-                               (post ? "/result/geometry-ui.json" : "/result/geometry.json"));
-            if (!geometryFile.open(QIODevice::ReadOnly))
-                throw std::runtime_error("Geometry output is missing");
-            QJsonParseError parseError;
-            auto geometry = QJsonDocument::fromJson(geometryFile.readAll(), &parseError);
-            if (parseError.error != QJsonParseError::NoError)
-                throw std::runtime_error("Invalid geometry result");
-            geometry_ = geometry.object();
+            geometry_ = std::move(result.geometry);
             geometryModel_->setTable(
                 geometry_["tables"].toObject()[geometryTable_->currentData().toString()].toObject());
             mesh_->setMesh(geometry_["mesh"].toObject());

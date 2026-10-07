@@ -15,6 +15,7 @@
 #include <QtTest>
 using namespace flora;
 #include "BufferRecovery.h"
+#include "PayloadRecovery.h"
 class WorkerRecoveryTests final : public QObject {
     Q_OBJECT
   private slots:
@@ -29,6 +30,10 @@ class WorkerRecoveryTests final : public QObject {
         for (auto mode : {"report-valid", "report-syntax", "report-root", "report-completed",
                           "report-async-cancel", "report-async-switch", "report-async-close",
                           "report-async-destroy", "report-async-success"})
+            QTest::newRow(mode) << QString(mode);
+        for (auto mode : {"payload-valid", "payload-missing", "payload-syntax", "payload-root",
+                          "payload-async-cancel", "payload-async-switch", "payload-async-close",
+                          "payload-async-destroy", "payload-async-success"})
             QTest::newRow(mode) << QString(mode);
         if (qEnvironmentVariableIsSet("FLORA_TEST_WORKER_TIMEOUT")) QTest::newRow("timeout") << QString("timeout");
     }
@@ -57,7 +62,7 @@ class WorkerRecoveryTests final : public QObject {
         child.setProcessEnvironment(env);
         child.setCreateProcessArgumentsModifier([](QProcess::CreateProcessArguments *args) { args->flags |= CREATE_NO_WINDOW; });
         const auto log = isolation.filePath("child.txt");
-        child.start(executable, {mode.startsWith("buffer-") ? "exerciseBufferRecovery" : "exerciseRecovery", "-o", log + ",txt"});
+        child.start(executable, {mode.startsWith("payload-") ? "exercisePayloadRecovery" : mode.startsWith("buffer-") ? "exerciseBufferRecovery" : "exerciseRecovery", "-o", log + ",txt"});
         QVERIFY(child.waitForStarted());
         const auto cleanup = qScopeGuard([&] { if (child.state() != QProcess::NotRunning) { child.kill(); child.waitForFinished(); } });
         QTRY_COMPARE_WITH_TIMEOUT(child.state(), QProcess::NotRunning, 240000);
@@ -68,6 +73,7 @@ class WorkerRecoveryTests final : public QObject {
         QCOMPARE(child.exitCode(), 0);
     }
     void exerciseBufferRecovery() { ::exerciseBufferRecovery(); }
+    void exercisePayloadRecovery() { ::exercisePayloadRecovery(); }
     void exerciseRecovery() {
         const auto root = qEnvironmentVariable("FLORA_FAULT_ROOT");
         if (root.isEmpty()) QSKIP("Runs only inside the parent-owned temporary executable directory");

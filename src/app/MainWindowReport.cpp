@@ -41,7 +41,7 @@ void MainWindow::loadWorkerReport() {
     watcher->setFuture(QtConcurrent::run([job] {
         auto result = std::make_shared<ReportResult>();
         try {
-            result->value = readWorkerReport(job->directory->filePath("result"), job->kind == "replay",
+            result->value = readWorkerOutput(job->directory->filePath("result"), job->kind,
                                              [job] { return job->cancelled.load(); });
         } catch (const OperationCancelled &) {
             result->cancelled = true;

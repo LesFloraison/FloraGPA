@@ -13,6 +13,68 @@ void save(const QString &directory, const QByteArray &bytes) {
 class WorkerReportTests final : public QObject {
     Q_OBJECT
   private slots:
+    void analyzerPayload_data() {
+        QTest::addColumn<QString>("kind");
+        QTest::addColumn<QString>("filename");
+        for (const auto &pair : {qMakePair("quad", "quad.json"), qMakePair("coverage", "coverage.json"),
+             qMakePair("timings", "profile.json"), qMakePair("statistics", "statistics.json"),
+             qMakePair("replay-pipeline", "replay-pipeline.json"), qMakePair("predicate", "predicate.json"),
+             qMakePair("geometry", "geometry.json"), qMakePair("post-geometry", "geometry-ui.json")})
+            QTest::newRow(pair.first) << QString(pair.first) << QString(pair.second);
+    }
+    void analyzerPayload() {
+        QFETCH(QString, kind);
+        QFETCH(QString, filename);
+        QTemporaryDir dir;
+        save(dir.path(), "{\"completed\":true}");
+        auto write = [&](const QByteArray &bytes) {
+            QFile file(dir.filePath(filename));
+            QVERIFY(file.open(QIODevice::WriteOnly));
+            QCOMPARE(file.write(bytes), bytes.size());
+        };
+        // Completed envelope cannot conceal a missing, truncated or non-object payload.
+        QVERIFY_THROWS_EXCEPTION(std::exception, readWorkerOutput(dir.path(), kind));
+        const QByteArray good("{\"event\":\"18446744073709551615\",\"counter\":18446744073709551615,\"signed\":-9223372036854775808,\"items\":[1,2,3]}");
+        for (qsizetype n = 0; n < good.size(); ++n) {
+            write(good.left(n));
+            QVERIFY_THROWS_EXCEPTION(std::exception, readWorkerOutput(dir.path(), kind));
+        }
+        for (const auto &bad : {QByteArray("[]"), QByteArray("true"), good + 'x',
+                               QByteArray("{\"x\":") + QByteArray(1100, '[') + '0' + QByteArray(1100, ']') + '}',
+                               QByteArray("{\"s\":\"") + char(-1) + "\"}"}) {
+            write(bad);
+            try {
+                readWorkerOutput(dir.path(), kind);
+                QFAIL("Invalid analyzer payload accepted");
+            } catch (const std::exception &error) {
+                QVERIFY2(QString::fromUtf8(error.what()).contains(filename), error.what());
+            }
+        }
+        write(good);
+        auto accepted = readWorkerOutput(dir.path(), kind);
+        if (kind.contains("geometry")) {
+            QCOMPARE(accepted.geometry["event"].toString(), QString("18446744073709551615"));
+            QCOMPARE(accepted.geometry["items"].toArray().size(), 3);
+            QVERIFY(accepted.payload.is_null());
+        } else {
+            QCOMPARE(accepted.payload.at("counter").get<uint64_t>(), UINT64_MAX);
+            QCOMPARE(accepted.payload.at("signed").get<int64_t>(), INT64_MIN);
+        }
+        const auto large = QByteArray("{\"padding\":\"") + QByteArray(2*1024*1024+17, 'x') +
+                           "\",\"items\":[" + QByteArray("1,").repeated(1024) + "2]}";
+        write(large);
+        int checks = 0;
+        readWorkerOutput(dir.path(), kind, [&] { ++checks; return false; });
+        QVERIFY(checks > 10);
+        for (int stop = 1; stop <= checks; ++stop) {
+            int at = 0;
+            QVERIFY_THROWS_EXCEPTION(OperationCancelled,
+                readWorkerOutput(dir.path(), kind, [&] { return ++at == stop; }));
+        }
+        write(good);
+        accepted = readWorkerOutput(dir.path(), kind);
+        QVERIFY(!accepted.geometry.isEmpty() || accepted.payload.is_object());
+    }
     void valid_data() {
         QTest::addColumn<int>("mode");
         QTest::newRow("replay-export-integers") << 0;
