@@ -1,0 +1,486 @@
+{
+  "schema": "FloraGPA Query completion baseline 1",
+  "reviewed": "2026-10-07",
+  "commits": {
+    "producer": "1459b73bfd5e6f339191aa1c6765413eac51d8dd",
+    "implementation": "c7cb7cd3b41a71cd83ef6b1f2855890661c9d2a1",
+    "ui": "734b35943f2f87d0cd0b3d5cb715c052026960b4"
+  },
+  "package": "out/FloraGPA-query-sync-final-20261007",
+  "package_files": [
+    {
+      "path": "concrt140.dll",
+      "sha256": "2405355f0a58067b258f8df33c327e3a3d716eaac5a3a5aebb757842d85bd376"
+    },
+    {
+      "path": "D3Dcompiler_47.dll",
+      "sha256": "e994847e01a6f1e4cbdc5a864616ac262f67ee4f14db194984661a8d927ab7f4"
+    },
+    {
+      "path": "FloraGPA.Cli.exe",
+      "sha256": "3bdbb81d4e89837f244130e53aecd77d50557380e1e016e8f99c9517be1e9d4d"
+    },
+    {
+      "path": "FloraGPA.exe",
+      "sha256": "74789497d50bb76fdda8d576d0bed3aac7558a70d7a79006eb4127480d176fc5"
+    },
+    {
+      "path": "FloraGPA.Metrics.dll",
+      "sha256": "58b6278f2a93e783b1e8bb1290e9b0e51745f1a36825f296584f52159fd7c6db"
+    },
+    {
+      "path": "FloraGPA.Rdc.exe",
+      "sha256": "f4d21d43e661d24d392e91fc1a1f1460a20d1377fcf5075c57083ad289e82773"
+    },
+    {
+      "path": "FloraGPA.Worker.exe",
+      "sha256": "a452a74449e6da0a2cc4aa78bf01285ebef2cf7938fdf584e853d00ae58a78fa"
+    },
+    {
+      "path": "generic/qtuiotouchplugin.dll",
+      "sha256": "a0b971771417d60c6c2dedf66d06f6e99bd3236aa1aa6949c7e4e08d51fb69f9"
+    },
+    {
+      "path": "iconengines/qsvgicon.dll",
+      "sha256": "7879ba1d2f293ad09c515de736add8c1023b0a4e80e2301d1283555efc2e8828"
+    },
+    {
+      "path": "imageformats/qgif.dll",
+      "sha256": "de1c1ea34cbc4156ce452023470e2145af4855128756d081d56e9a0997d0dda8"
+    },
+    {
+      "path": "imageformats/qico.dll",
+      "sha256": "af98cacb134525fab15cf2146a4e6b90266f14493e72e4d51df89a5caadea157"
+    },
+    {
+      "path": "imageformats/qjpeg.dll",
+      "sha256": "a8854ac38d2bb83e8018bdcbfc93420a876251b3d2a79933e1a3c9a8ed2a24cb"
+    },
+    {
+      "path": "imageformats/qsvg.dll",
+      "sha256": "486b395e23e258d03d54cdba045f129e9b1321f9ff12f99fe58293e0351b8caf"
+    },
+    {
+      "path": "licenses/COPYING.txt",
+      "sha256": "eb7e9ab9690124c5c9f42bdc81383d886a3dede26345b6ed15bbad7caf81f7ea"
+    },
+    {
+      "path": "licenses/Copyright.txt",
+      "sha256": "d1f5b8f5eba2e9073463bc29b30572d84033f59e8d8057a95dff37c3414305b9"
+    },
+    {
+      "path": "licenses/GPL-3.0-only.txt",
+      "sha256": "8ceb4b9ee5adedde47b31e975c1d90c73ad27b6b165a1dcd80c7c545eb65b903"
+    },
+    {
+      "path": "licenses/intel-metrics-discovery-MIT.txt",
+      "sha256": "653129790534d6a3e843eaafc62cf04299e7e238f6f411173e85ea7fc315c8ac"
+    },
+    {
+      "path": "licenses/LGPL-3.0-only.txt",
+      "sha256": "da7eabb7bafdf7d3ae5e9f223aa5bdc1eece45ac569dc21b3b037520b4464768"
+    },
+    {
+      "path": "licenses/LICENSE",
+      "sha256": "2004ee3ef8282a85f7dbd035dfacf63cf03d569537bc08655ffeb140ea3671c5"
+    },
+    {
+      "path": "licenses/LICENSE.FDL",
+      "sha256": "c256483c2d1e8a51b62fc7a44a58f21cb4ef23fa840c7d33e3658035fd8cf62f"
+    },
+    {
+      "path": "licenses/nlohmann-json-MIT.txt",
+      "sha256": "46a65cffd1ea955132d95a8dd921640714a8d6b537d2e4e482d31145ae95b603"
+    },
+    {
+      "path": "licenses/renderdoc-api-MIT.txt",
+      "sha256": "e3dccfaa75440c693b18fd2332347e3c810829bf55ec68302ea5a11db9951997"
+    },
+    {
+      "path": "msvcp140.dll",
+      "sha256": "0f885b509a685d2bbfa652fed26b5fb31d88fbdab0a978c641d1c7b8aa460aa9"
+    },
+    {
+      "path": "msvcp140_1.dll",
+      "sha256": "bfad5aef4c63a669e3c140655cdfdf395b6c979b400a447bd5dcb65ed8826c3d"
+    },
+    {
+      "path": "msvcp140_2.dll",
+      "sha256": "3ea06f0ee098b4823cb79599df3780e7f23cce52c19aac31d2a0d47efe33a5e9"
+    },
+    {
+      "path": "msvcp140_atomic_wait.dll",
+      "sha256": "640b2aefced484d0368eea5bdd06addd0658a3a70a49256e560d6923b404a479"
+    },
+    {
+      "path": "msvcp140_codecvt_ids.dll",
+      "sha256": "f2069a52880ec885ee7f0511186100eb7fada0411a2b4948fafea7735b878a18"
+    },
+    {
+      "path": "networkinformation/qnetworklistmanager.dll",
+      "sha256": "2f7c43bb4ec05e9f23a326ac69e84a6df071cdf7cc0bf87cde98f81958ad9bae"
+    },
+    {
+      "path": "platforms/qoffscreen.dll",
+      "sha256": "95391476bba1d0b50cc822b93d7509341024cc7c18cd615f82e471a3e3a61caa"
+    },
+    {
+      "path": "platforms/qwindows.dll",
+      "sha256": "d94c584a18829d11fbf3aefd07e7b1e189e0cf063a0515826960037efa7465df"
+    },
+    {
+      "path": "Qt6Core.dll",
+      "sha256": "22c113a5644b875b2c85482723cd5d2e6a3a4029169778fcc78adde08ef3b6aa"
+    },
+    {
+      "path": "Qt6Gui.dll",
+      "sha256": "19265a4e76efc12ef5f5bcf59be6c6a5b9b59ec4c89660797738bd2da7f719cc"
+    },
+    {
+      "path": "Qt6Network.dll",
+      "sha256": "75ff0896a618f4f5b602f391eb4917a55fd738b2e751d2cf18244a0de3619184"
+    },
+    {
+      "path": "Qt6Svg.dll",
+      "sha256": "1052c17a9df0eb82023e0e4c369bbd0af58e4c5fea3c27a4b5ee83b60c015492"
+    },
+    {
+      "path": "Qt6Widgets.dll",
+      "sha256": "e6d0b7e2e697de6ad985b97f9ed8b381c1c2172fcae87b6ab08455b3b7330f32"
+    },
+    {
+      "path": "styles/qmodernwindowsstyle.dll",
+      "sha256": "f6b88d403d7175f5b830d4958264690e5c8bbaf0148e1ccf42d52704b0480792"
+    },
+    {
+      "path": "THIRD_PARTY.md",
+      "sha256": "343009c9e4761e1c1dc645bd72fd470001c3a4e269384f0dfc4b0bf69c10f6ec"
+    },
+    {
+      "path": "tls/qcertonlybackend.dll",
+      "sha256": "ff0f1a60ec60fc23ec74ff5d325ddef05c1ed68fc89466bffc1d874c7c544adb"
+    },
+    {
+      "path": "tls/qschannelbackend.dll",
+      "sha256": "761178263b47a5f05e151806bb5854d9e5c9cbc67d08187724d80f9e317471f8"
+    },
+    {
+      "path": "vc_redist.x64.exe",
+      "sha256": "cc0ff0eb1dc3f5188ae6300faef32bf5beeba4bdd6e8e445a9184072096b713b"
+    },
+    {
+      "path": "vccorlib140.dll",
+      "sha256": "19839407c3fdbc824e5bce189bf68ddf8097f12ec28b757797ffa0415c144ddd"
+    },
+    {
+      "path": "vcruntime140.dll",
+      "sha256": "d5e4d9a3e835fa679450145d6a7d94e36573a509317111904d9b3712c30d9066"
+    },
+    {
+      "path": "vcruntime140_1.dll",
+      "sha256": "1f2d41c4aa5db0bc33ebf7b66d72943a817d7ce6cbe880502a9403823633093f"
+    },
+    {
+      "path": "vcruntime140_threads.dll",
+      "sha256": "219915cf20822f34d5e7c1fdd4e21ae7f3396881096c51036225fb8f84b47afa"
+    }
+  ],
+  "verification": {
+    "suites": 33,
+    "registrations": 505,
+    "unique_captures": 495,
+    "completed_registrations": 479,
+    "completed_unique_captures": 469,
+    "located_rejections": 26,
+    "counts": {
+      "ordinary_attempts": 1010,
+      "control_runs": 684,
+      "resource_exports": 826
+    },
+    "previous_cases_rechecked": 502,
+    "offline_unique_files": 492,
+    "offline_changed_files": 26,
+    "added_offline_notices": 41,
+    "producer_frames": 108,
+    "producer_full_readbacks": 216,
+    "producer_full_images": 108,
+    "focused_native_runs": 6,
+    "focused_original_completions": 6,
+    "focused_resource_exports": 18,
+    "ctest_suites": 6,
+    "qt_rows": {
+      "query_completion": 33,
+      "predication": 43,
+      "stream_output": 19,
+      "frame_validation": 173,
+      "cancellation": 21,
+      "ui": 66
+    },
+    "final_skipped_rows": 0,
+    "package_goldens_and_controls": 4,
+    "portable_ui_rows": 4
+  },
+  "fidelity": {
+    "capture_fidelity_counts": {
+      "unassessed": 423,
+      "passed": 47,
+      "capture_information_missing": 3,
+      "capture_side_mismatch": 32
+    },
+    "application_image_comparison_counts": {
+      "not_assessed": 493,
+      "matches": 9,
+      "differs": 3
+    },
+    "completed_with_known_capture_limitations": 35
+  },
+  "evidence": [
+    {
+      "path": "D:/CDXrepo/FloraGPA/analysis/query_resources/get_data.c",
+      "sha256": "a94fe89c5c21fea836693448e7d6bd15ea79f66f3479da57a8b73745f8f9e5f7"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA/analysis/query_resources/id_manager.c",
+      "sha256": "2ce450343d6796a071395b8b18e0a99721dc4bd994341da3b71ee55eec924f02"
+    },
+    {
+      "path": "D:/CDXrepo/FloraGPA/analysis/query_resources/README.md",
+      "sha256": "191f2ef7599e48b648724e3fea7d514938934e45d4e2c2938c5afc8452217e2a"
+    },
+    {
+      "path": "artifacts/check_query_sync_before.py",
+      "sha256": "e94d8a2a836b458c9752d812d9aebfd6ff4dee913494db1128f274ddf2d24922"
+    },
+    {
+      "path": "artifacts/check_query_sync_comparison.py",
+      "sha256": "2e9e1fc18e5074946848845b5030671899e9a92387ada5bc94337afa8b43f3f6"
+    },
+    {
+      "path": "artifacts/check_query_sync_gate.py",
+      "sha256": "77e4a1608003adf3336988c50040536cd2cede8a44c7b83d08bb85179fc942c4"
+    },
+    {
+      "path": "artifacts/check_query_sync_portable.py",
+      "sha256": "70dd5ae5e652db4223de9008efdc66712fe190f6f86ccbc4d2256200f78db3f0"
+    },
+    {
+      "path": "artifacts/check_query_sync_preflight.py",
+      "sha256": "64b5688375b36774bd6f17ecfb5e10fa61e02a37d80104afb8f30acd5afd5bdb"
+    },
+    {
+      "path": "artifacts/inventory_query_completion.py",
+      "sha256": "bbd1a9c37245677bb7b9c53c7f2883c817390a3437c3b36557872d067b3c164a"
+    },
+    {
+      "path": "artifacts/m4-query-sync-before/evidence.json",
+      "sha256": "9be99480ae709ea07c582dd22034996eb73cf1e40bb1ec082281dee5cba4f36f"
+    },
+    {
+      "path": "artifacts/m4-query-sync-build.log",
+      "sha256": "7fe259fcf9014bf447011190a9ec873d6e00434564ccb19aae0172d753636d1c"
+    },
+    {
+      "path": "artifacts/m4-query-sync-cancellation.txt",
+      "sha256": "c3d71368f88e0b9b2f80a2a987f3661972c60aa3b83e6321a70d307d3b9211c6"
+    },
+    {
+      "path": "artifacts/m4-query-sync-comparison-summary.json",
+      "sha256": "5b7130e09ee3928bcd48e9f8c3ac96a2f55d1eb387cc6543af8f7b687b3baf18"
+    },
+    {
+      "path": "artifacts/m4-query-sync-ctest-detail.log",
+      "sha256": "65e0237c6ebcde4982740cd0409cb6962ab9343d8b04d1fb0fc5caa8982eac8f"
+    },
+    {
+      "path": "artifacts/m4-query-sync-ctest.log",
+      "sha256": "7131f08412eeb18ba76f1e961f6fa045c5cc9e2740517163e61ba6e5d6bae307"
+    },
+    {
+      "path": "artifacts/m4-query-sync-final-build.log",
+      "sha256": "a6b58e3eb681a367d77f9a7b0ab29612bf96703c447f16235712c2e0aa198613"
+    },
+    {
+      "path": "artifacts/m4-query-sync-final-package.log",
+      "sha256": "8b583c6caa24aa5feedea8d1be6319d51a2ef3f6333c54cd736605480a71c7fc"
+    },
+    {
+      "path": "artifacts/m4-query-sync-frame-validation.txt",
+      "sha256": "1732597d7759d54d05695adce03542cba83945a1d38014f129c72ce5b467fc24"
+    },
+    {
+      "path": "artifacts/m4-query-sync-gate/gate.json",
+      "sha256": "af9f3c4d57844253b5f221474802a316e7f2a431521d2d20614e87899463f8b7"
+    },
+    {
+      "path": "artifacts/m4-query-sync-gate/recheck.json",
+      "sha256": "b03c2352311f5f88a6f1be5c45aadd6f1d2b0c1141d1bf9a86bdc565e41072a2"
+    },
+    {
+      "path": "artifacts/m4-query-sync-gate.log",
+      "sha256": "50b1585a206d9b06aab8004dfe4ead38fb7ebac9d13d4832347ce954da4bf34a"
+    },
+    {
+      "path": "artifacts/m4-query-sync-goldens/validation.json",
+      "sha256": "a1f6d11deab2e8324c8626ab359b139abf8a83257d06874c3cb6a251a357b84a"
+    },
+    {
+      "path": "artifacts/m4-query-sync-goldens.log",
+      "sha256": "9045dc3e3b7870e530a1c62f26394abd4443e9d3b985817f7f32052b1f0e9635"
+    },
+    {
+      "path": "artifacts/m4-query-sync-inventory.json",
+      "sha256": "79d0b5ebc525ffe60456de634645fba860e332d19e5b1eed24c6c6651a68c7e4"
+    },
+    {
+      "path": "artifacts/m4-query-sync-original-comparison/validation.json",
+      "sha256": "d95b19b6ba14fd13d7afd24a3b45dde93d0e08a94935dcbd2e23ec9187b34ce5"
+    },
+    {
+      "path": "artifacts/m4-query-sync-original-comparison.log",
+      "sha256": "a651d3f3fe09e5092ffc75bf4a0079397aae2dc9ef2b6f40b108961fc5786a35"
+    },
+    {
+      "path": "artifacts/m4-query-sync-originals/manifest.json",
+      "sha256": "9a841d898e362c57a7fa67a50265e4113966e6aa7b6356da4e4eeff65627fb74"
+    },
+    {
+      "path": "artifacts/m4-query-sync-originals-index.json",
+      "sha256": "22aced2e1cb2c32ba71e4aba9bff120d5bbb25578398783a61735470cbf0ae33"
+    },
+    {
+      "path": "artifacts/m4-query-sync-originals.log",
+      "sha256": "08d272cdac6e29ffa4f38a64481b702597bb2c9685c513ebbaabe7b83a2ddd8e"
+    },
+    {
+      "path": "artifacts/m4-query-sync-package.log",
+      "sha256": "fc1d17c343f6f5ce169c22aa55cf789ab8a27fb4c44637884a26d98df280a4bc"
+    },
+    {
+      "path": "artifacts/m4-query-sync-portable QA \u4e2d\u6587/process.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/m4-query-sync-portable QA \u4e2d\u6587/screenshots/msaa-grouped-bf1.png",
+      "sha256": "1ee9f9de0c67608667130172545a745891c340b186f26105416032309bbdead5"
+    },
+    {
+      "path": "artifacts/m4-query-sync-portable QA \u4e2d\u6587/screenshots/query-completion-10.png",
+      "sha256": "fda2672fe21b91f31147d93f9a52e2e28d8ec60660c60c86b8199a4a0d3d07e9"
+    },
+    {
+      "path": "artifacts/m4-query-sync-portable QA \u4e2d\u6587/screenshots/query-completion-8.png",
+      "sha256": "2f35b98101a20a6c1dbada2328611013c5cd3fc29fec9a3d8cdde90dc9fbf936"
+    },
+    {
+      "path": "artifacts/m4-query-sync-portable QA \u4e2d\u6587/screenshots/query-completion-9.png",
+      "sha256": "661bc19cf66813f829c5a494c666886cb27cdbe82b4b63d58c7afc2cde887245"
+    },
+    {
+      "path": "artifacts/m4-query-sync-portable QA \u4e2d\u6587/ui.txt",
+      "sha256": "81461cdda8cdc9d013f8e3c0544b32feae4208e742446c14270ff91794bb7089"
+    },
+    {
+      "path": "artifacts/m4-query-sync-portable QA \u4e2d\u6587/validation.json",
+      "sha256": "ec82af805a5257a927413ea23b4505ce3c802632d08171bc54c9c2c35519c373"
+    },
+    {
+      "path": "artifacts/m4-query-sync-portable.log",
+      "sha256": "9308290a638b56a3d758be2c2e3e6519309185f21d471287cd7cdb35af3c3a14"
+    },
+    {
+      "path": "artifacts/m4-query-sync-preflight-v2.log",
+      "sha256": "7d7b7a2e055558c0a0d77a2d4251f64121bf83b58359413459fe52148db0528e"
+    },
+    {
+      "path": "artifacts/m4-query-sync-preflight-v3/comparison.json",
+      "sha256": "86023205705c9e2491d5d994f96e7246e5932e8ed8fe0f68879c1ad2b2bcb303"
+    },
+    {
+      "path": "artifacts/m4-query-sync-preflight-v3.log",
+      "sha256": "f285123c9ba957c411fbf0e318f054909acdb227b36ecd5aa06a315e7691e765"
+    },
+    {
+      "path": "artifacts/m4-query-sync-preflight.log",
+      "sha256": "da11d24ba4d818d7e882611e4bf4234e51f7ccec0594b11ae30b50cfa79afb1a"
+    },
+    {
+      "path": "artifacts/m4-query-sync-probe-build.log",
+      "sha256": "fae5ab5b56e29502e847bc6410275b72b556f22766f32205ad312c9adb8e3496"
+    },
+    {
+      "path": "artifacts/m4-query-sync-qt-results/predication-Release.txt",
+      "sha256": "0b2a954c194b2bae0edaddcfb5f4d2d96dbbdfa88aa694625f3b7259d8e07dbb"
+    },
+    {
+      "path": "artifacts/m4-query-sync-qt-results/query-completion-Release.txt",
+      "sha256": "9d012f3ef4b4dfb0d4560e693972132d563c9b0635fc71f721efc114cb067b21"
+    },
+    {
+      "path": "artifacts/m4-query-sync-qt-results/stream-output-Release.txt",
+      "sha256": "6173e408a204bf472b656a9664d46243668966bd3a766bddab4aa0063b0d6750"
+    },
+    {
+      "path": "artifacts/m4-query-sync-qt-results/ui-Release.txt",
+      "sha256": "d09d9eb3052ebba45ca9e4181e2bb68a31f6b4c062b8574b549ea4d89b5828da"
+    },
+    {
+      "path": "artifacts/m4-query-sync-tests-initial.txt",
+      "sha256": "3fc798368754f1d4d83a092a42095329c5b9ef4bb72d1f66a8f97d0d4f6f6951"
+    },
+    {
+      "path": "artifacts/m4-query-sync-ui-build.log",
+      "sha256": "71ff0c0c510611fcea9591ffbb7570bde1dc41a3c4684ca6ae42cade4bf87f4e"
+    },
+    {
+      "path": "artifacts/m4-query-sync-ui-final-ctest-detail.log",
+      "sha256": "154521b3b6813e54d955ca4b2c610186d42c4064ee78dd7b3372eafb63870a17"
+    },
+    {
+      "path": "artifacts/m4-query-sync-ui-final-ctest.log",
+      "sha256": "6f81b3954b228b8d27d9f3fa61a3f8b3c1a532020bf93bec3bf267c55e83b88b"
+    },
+    {
+      "path": "artifacts/m4-query-sync-ui-final-results/ui-Release.txt",
+      "sha256": "08437b55d77f2c5715ae322f87a55d2f7bec592406fc20f49d6fe4bb0bb71f83"
+    },
+    {
+      "path": "artifacts/m4-query-sync-ui-focused-final.txt",
+      "sha256": "631508ad64e9cc621ecc5219400b018b1e44a81153ded11899729a84ba17ee65"
+    },
+    {
+      "path": "artifacts/m4-query-sync-ui-focused.txt",
+      "sha256": "60ab604d5d54a3a63a679e3740f283b84fda67f731daf9d60e9816f254a86f3a"
+    },
+    {
+      "path": "artifacts/register_query_completion.py",
+      "sha256": "c100f6242ec352280f5897ee39abb1f2cdf4098edf9947125fb0aec3b9f94e0b"
+    },
+    {
+      "path": "artifacts/run_query_sync_ctest.ps1",
+      "sha256": "35d488e7d0f53286c616dca1d496be6898006087ef423fe2f12c517ab1a7a10f"
+    },
+    {
+      "path": "artifacts/run_query_sync_ui_final.ps1",
+      "sha256": "393a2793560c4d5c2eaa1b8be0776da0174d20697b89e91ce81c5f81460e518e"
+    }
+  ],
+  "repository_manifests": [
+    {
+      "path": "docs/query-completion-corpus.json",
+      "normalized_lf_sha256": "a244530e9cf6a4fb7c431836cc90e0384d1730289b5ea0bdacfd42c37097cc18"
+    },
+    {
+      "path": "docs/m4-gate-suites.json",
+      "normalized_lf_sha256": "f7d82edbed8d5d4a0f79892ed8185b2daf2f442917efdc6b51151ba39e81308a"
+    }
+  ],
+  "limits": [
+    "Ordinary Query resources and End boundaries absent in modes 8/9; diagnosed best-effort completion is not application-fidelity acceptance",
+    "Mode 9 repeated replay varied; this is omitted capture synchronization, not proof of original-workload nondeterminism",
+    "The original private player differs from the application in all three focused captures; original GUI and adapter unverified",
+    "Successful saved predicate completion restores readiness, not CPU branches, original polling timing or large query output values",
+    "Initial Qt tooltip-length failure and incomplete-environment focused skip are preserved; corrected full Qt and portable checks have no failures or skips",
+    "Same-host isolated PATH and relocated Qt harness are not independent clean-machine acceptance",
+    "M3/M4/M5 remain open; module ledger unchanged"
+  ]
+}

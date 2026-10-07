@@ -8,6 +8,11 @@
 
 > **Subsequent work:** The M1 numbers and discovery blockers below are historical. Later [texture creation](TEXTURE_CREATION_AUDIT.md), [texture dimensions](TEXTURE_DIMENSIONS_AUDIT.md), [view creation](VIEW_CREATION_AUDIT.md), [buffer views](BUFFER_VIEW_CREATION_AUDIT.md), [pipeline creation](PIPELINE_CREATION_AUDIT.md), [geometry creation](GEOMETRY_CREATION_AUDIT.md) and [class creation](CLASS_CREATION_AUDIT.md) extend the matrix. Use the current summary for the latest 244-file acceptance; no historical table is replaced.
 
+The subsequent [Query completion audit](QUERY_COMPLETION.md) executes successful
+GetData when a complete saved predicate interval proves the completion boundary.
+Failed/pending observations remain metadata; omitted ordinary Query/End boundaries
+are located information-missing notices, not newly accepted image fidelity.
+
 This is the M1 acceptance infrastructure for GPA 2025 R1 legacy DX11 / IGPA v3.
 It is not a declaration that M2–M5 or the analyzer migration are complete.
 The Python module totals (72 ported, 117 partial, 15 pending) remain unchanged.

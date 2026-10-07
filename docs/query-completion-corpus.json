@@ -1,0 +1,180 @@
+{
+  "schema": "FloraGPA compatibility corpus 1",
+  "profile": "GPA 2025 R1 legacy DX11 / IGPA v3",
+  "cases": [
+    {
+      "id": "query_sync_8",
+      "path": "m4-query-sync-originals/8/capture.gpa_frame",
+      "sha256": "39510aa38da0c512da4f9f3dd0cb2e71915b9254f85d8a8cd261f8bde59d4747",
+      "bytes": 469329,
+      "family": "query_completion",
+      "origin": "self_owned_original_gpa_capture",
+      "provenance_note": "Untouched GPA 2025 R1 capture; source/binary and native hardware/WARP/injected resource and image oracles frozen.",
+      "device_scope": "Original player adapter unverified; native hardware and WARP identities recorded.",
+      "reference_rgba_sha256": null,
+      "reference_scope": "Completion with explicitly diagnosed missing ordinary Query/End; image fidelity is not accepted.",
+      "comparison_policy": "known_variable",
+      "controls": [],
+      "boundaries": [
+        {
+          "kind": "buffer",
+          "resource": 5,
+          "event": 4,
+          "repeat": 2,
+          "expect_stable": true,
+          "expected_storage_sha256": "5975aeae812d124cba139f30be4b0c7ecc93e8470fed479014b4defbb8c0181c"
+        },
+        {
+          "kind": "buffer",
+          "resource": 5,
+          "event": 17,
+          "repeat": 2,
+          "expect_stable": true,
+          "expected_storage_sha256": "2eb05de9e5200f488e48fecf07dba28856dd07477a79c6f28ca650e1dede95a9"
+        }
+      ],
+      "covers": [
+        "Successful GetData completion before NO_OVERWRITE",
+        "Missing ordinary Query End boundary"
+      ],
+      "native_workload_fidelity": "capture_information_missing",
+      "fidelity_reason": "Original file omits query resource and End; successful GetData cannot identify the required GPU completion point. Old-copy output differs despite complete saved Map writes.",
+      "application_reference_rgba_sha256": "e887048c7cb81839843ace2938854ff7f749dfb6cf8e6235ed54c0ce9ce4b232",
+      "application_reference_scope": "Full 8x8 application image; 36 hardware/WARP/injected frames per mode plus before/after complete buffer bytes.",
+      "application_reference_evidence": {
+        "path": "m4-query-sync-originals/8/hardware/image-0.rgba",
+        "sha256": "e887048c7cb81839843ace2938854ff7f749dfb6cf8e6235ed54c0ce9ce4b232"
+      },
+      "source_manifests": [
+        {
+          "path": "m4-query-sync-originals/manifest.json",
+          "sha256": "9a841d898e362c57a7fa67a50265e4113966e6aa7b6356da4e4eeff65627fb74"
+        }
+      ]
+    },
+    {
+      "id": "query_sync_9",
+      "path": "m4-query-sync-originals/9/capture.gpa_frame",
+      "sha256": "0cb5a893307d8f47d44ea2e239ebfbee30df0354687ba0a1a8a9bddedaa4dbeb",
+      "bytes": 469296,
+      "family": "query_completion",
+      "origin": "self_owned_original_gpa_capture",
+      "provenance_note": "Untouched GPA 2025 R1 capture; source/binary and native hardware/WARP/injected resource and image oracles frozen.",
+      "device_scope": "Original player adapter unverified; native hardware and WARP identities recorded.",
+      "reference_rgba_sha256": null,
+      "reference_scope": "Completion with explicitly diagnosed missing ordinary Query/End; image fidelity is not accepted.",
+      "comparison_policy": "known_variable",
+      "controls": [],
+      "boundaries": [
+        {
+          "kind": "buffer",
+          "resource": 5,
+          "event": 4,
+          "repeat": 2,
+          "expect_stable": true,
+          "expected_storage_sha256": "5975aeae812d124cba139f30be4b0c7ecc93e8470fed479014b4defbb8c0181c"
+        },
+        {
+          "kind": "buffer",
+          "resource": 5,
+          "event": 17,
+          "repeat": 2,
+          "expect_stable": true,
+          "expected_storage_sha256": "2eb05de9e5200f488e48fecf07dba28856dd07477a79c6f28ca650e1dede95a9"
+        }
+      ],
+      "covers": [
+        "Successful GetData completion before NO_OVERWRITE",
+        "Missing ordinary Query End boundary"
+      ],
+      "native_workload_fidelity": "capture_information_missing",
+      "fidelity_reason": "Original file omits query resource and End; successful GetData cannot identify the required GPU completion point. Old-copy output differs despite complete saved Map writes.",
+      "application_reference_rgba_sha256": "e887048c7cb81839843ace2938854ff7f749dfb6cf8e6235ed54c0ce9ce4b232",
+      "application_reference_scope": "Full 8x8 application image; 36 hardware/WARP/injected frames per mode plus before/after complete buffer bytes.",
+      "application_reference_evidence": {
+        "path": "m4-query-sync-originals/9/hardware/image-0.rgba",
+        "sha256": "e887048c7cb81839843ace2938854ff7f749dfb6cf8e6235ed54c0ce9ce4b232"
+      },
+      "source_manifests": [
+        {
+          "path": "m4-query-sync-originals/manifest.json",
+          "sha256": "9a841d898e362c57a7fa67a50265e4113966e6aa7b6356da4e4eeff65627fb74"
+        }
+      ]
+    },
+    {
+      "id": "query_sync_10",
+      "path": "m4-query-sync-originals/10/capture.gpa_frame",
+      "sha256": "88ca1a4b56a53a83586048c3e44a5934bd2677b0a89a0679b84b25a8d8077b07",
+      "bytes": 469617,
+      "family": "query_completion",
+      "origin": "self_owned_original_gpa_capture",
+      "provenance_note": "Untouched GPA 2025 R1 capture; source/binary and native hardware/WARP/injected resource and image oracles frozen.",
+      "device_scope": "Original player adapter unverified; native hardware and WARP identities recorded.",
+      "reference_rgba_sha256": "e887048c7cb81839843ace2938854ff7f749dfb6cf8e6235ed54c0ce9ce4b232",
+      "reference_scope": "Full native application image",
+      "comparison_policy": "exact_golden",
+      "controls": [],
+      "boundaries": [
+        {
+          "kind": "buffer",
+          "resource": 5,
+          "event": 4,
+          "repeat": 2,
+          "expect_stable": true,
+          "expected_storage_sha256": "5975aeae812d124cba139f30be4b0c7ecc93e8470fed479014b4defbb8c0181c"
+        },
+        {
+          "kind": "buffer",
+          "resource": 5,
+          "event": 21,
+          "repeat": 2,
+          "expect_stable": true,
+          "expected_storage_sha256": "2eb05de9e5200f488e48fecf07dba28856dd07477a79c6f28ca650e1dede95a9"
+        },
+        {
+          "kind": "buffer",
+          "resource": 14,
+          "event": 12,
+          "repeat": 2,
+          "expect_stable": true,
+          "expected_storage_sha256": "5975aeae812d124cba139f30be4b0c7ecc93e8470fed479014b4defbb8c0181c"
+        },
+        {
+          "kind": "buffer",
+          "resource": 14,
+          "event": 21,
+          "repeat": 2,
+          "expect_stable": true,
+          "expected_storage_sha256": "5975aeae812d124cba139f30be4b0c7ecc93e8470fed479014b4defbb8c0181c"
+        },
+        {
+          "kind": "buffer",
+          "resource": 29,
+          "event": 27,
+          "repeat": 2,
+          "expect_stable": true,
+          "expected_storage_sha256": "2eb05de9e5200f488e48fecf07dba28856dd07477a79c6f28ca650e1dede95a9"
+        }
+      ],
+      "covers": [
+        "Successful GetData completion before NO_OVERWRITE",
+        "Saved predicate Begin/End"
+      ],
+      "native_workload_fidelity": "passed",
+      "fidelity_reason": "Saved predicate interval permits native completion wait",
+      "application_reference_rgba_sha256": "e887048c7cb81839843ace2938854ff7f749dfb6cf8e6235ed54c0ce9ce4b232",
+      "application_reference_scope": "Full 8x8 application image; 36 hardware/WARP/injected frames per mode plus before/after complete buffer bytes.",
+      "application_reference_evidence": {
+        "path": "m4-query-sync-originals/10/hardware/image-0.rgba",
+        "sha256": "e887048c7cb81839843ace2938854ff7f749dfb6cf8e6235ed54c0ce9ce4b232"
+      },
+      "source_manifests": [
+        {
+          "path": "m4-query-sync-originals/manifest.json",
+          "sha256": "9a841d898e362c57a7fa67a50265e4113966e6aa7b6356da4e4eeff65627fb74"
+        }
+      ]
+    }
+  ]
+}

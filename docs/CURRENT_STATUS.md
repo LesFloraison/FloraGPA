@@ -1,7 +1,36 @@
 # Current capabilities and compatibility
 
 Reviewed **2026-10-07**. The user authorized M4, then M5, while keeping M3 open.
-The latest [worker image integrity correction](WORKER_IMAGE_INTEGRITY.md) rejects
+The latest [Query completion correction](QUERY_COMPLETION.md) restores CPU/GPU
+ordering for successful GetData with a complete saved predicate interval. Three
+untouched original captures reproduce earlier-copy corruption despite complete
+Map payloads. Corrected predicate replay matches the independent application's
+full image and buffer oracle. Two ordinary Query captures omit the query/End
+boundary; they retain located preflight/runtime notices and compact Qt warnings,
+and are **not accepted as application-faithful**. Local original-player outputs
+also differ from the application; its GUI and selected adapter remain unverified.
+
+The 33-suite matrix passes **505 registrations / 495 unique files**: **479 native
+completions (469 unique)** and **26 located rejections**, with 1,010 ordinary
+attempts, 684 controls and 826 strict resource exports. All preceding 502 cases
+retain outcomes, deterministic images and existing execution counts. Offline
+comparison checks all 492 prior unique files; only GetData handling and 41
+missing-completion warnings change. The 35 known capture limitations remain
+separate from completion. Capture-fidelity assessments are 47 passes, 32 known
+capture-side mismatches, three information-missing cases and 423 unassessed
+registrations; these are not an overall correctness percentage.
+
+Six relevant CTest suites pass after correcting a tooltip-length regression:
+33 Query, 43 predication, 19 SO, 173 preflight, 21 cancellation and 66 Qt rows,
+with no final skips. Four packaged golden/negative checks and four relocated
+system-PATH Qt rows pass. Runtime: `c7cb7cd`; GUI: `734b359`; package:
+`out/FloraGPA-query-sync-final-20261007/` (44 files). The [pinned baseline](query-completion-baseline.json)
+retains original capture hashes, failed intermediate checks and final evidence.
+Missing ordinary Query boundaries, texture-diff pitches, retained command-list
+semantics, general cancellation latency and independent clean-machine acceptance
+remain open. M3/M4/M5 and the 72/117/15 module ledger remain incomplete.
+
+The preceding [worker image integrity correction](WORKER_IMAGE_INTEGRITY.md) rejects
 nine malformed display-artifact combinations previously accepted as successful
 replay. PNG dimensions/pixels, raw RGBA length/hash and report availability must
 agree before Qt replaces an output. Failure preserves the previous image and

@@ -1,7 +1,7 @@
 {
   "schema": "FloraGPA compatibility gate suites 1",
-  "expected_cases": 502,
-  "expected_unique_captures": 492,
+  "expected_cases": 505,
+  "expected_unique_captures": 495,
   "expected_rejections": 26,
   "suites": [
     {
@@ -625,6 +625,14 @@
       "id": "read_map_sync",
       "manifest": "docs/read-map-sync-corpus.json",
       "manifest_sha256": "b30cd9fba384c28709be86350b2811e6400bc592fc907434184090934db0d17c",
+      "capture_root": "artifacts",
+      "subdirectory": "",
+      "expected_rejections": {}
+    },
+    {
+      "id": "query_completion",
+      "manifest": "docs/query-completion-corpus.json",
+      "manifest_sha256": "a244530e9cf6a4fb7c431836cc90e0384d1730289b5ea0bdacfd42c37097cc18",
       "capture_root": "artifacts",
       "subdirectory": "",
       "expected_rejections": {}
