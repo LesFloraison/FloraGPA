@@ -1,0 +1,748 @@
+{
+  "schema": "FloraGPA recovery retention control baseline 1",
+  "reviewed": "2026-10-08",
+  "harness_commit": "af5f3fa17b9e544e31c7db0a96a4606d941f68e4",
+  "production_unchanged": true,
+  "package": "out/FloraGPA-clean-build-20261008",
+  "package_files": [
+    {
+      "path": "concrt140.dll",
+      "sha256": "2405355f0a58067b258f8df33c327e3a3d716eaac5a3a5aebb757842d85bd376"
+    },
+    {
+      "path": "D3Dcompiler_47.dll",
+      "sha256": "e994847e01a6f1e4cbdc5a864616ac262f67ee4f14db194984661a8d927ab7f4"
+    },
+    {
+      "path": "FloraGPA.Cli.exe",
+      "sha256": "beb5cf2135d1fa2e8e722df18ac614e89f29a8311dc63ef617635602063e2629"
+    },
+    {
+      "path": "FloraGPA.exe",
+      "sha256": "af84f4093c94ff422bdc27b8dfe5da46c8ec4ea1ecdd99f674953832d85fb459"
+    },
+    {
+      "path": "FloraGPA.Metrics.dll",
+      "sha256": "70fc46ece56cf9f4a61f23d908d36828a24d7f35f0eaa969765c981b7e5cb147"
+    },
+    {
+      "path": "FloraGPA.Rdc.exe",
+      "sha256": "0e1407465e63c054697fd37abb7387896d630d37ac3382a35f55dfd5ec1e6ca0"
+    },
+    {
+      "path": "FloraGPA.Worker.exe",
+      "sha256": "beb5cf2135d1fa2e8e722df18ac614e89f29a8311dc63ef617635602063e2629"
+    },
+    {
+      "path": "generic/qtuiotouchplugin.dll",
+      "sha256": "a0b971771417d60c6c2dedf66d06f6e99bd3236aa1aa6949c7e4e08d51fb69f9"
+    },
+    {
+      "path": "iconengines/qsvgicon.dll",
+      "sha256": "7879ba1d2f293ad09c515de736add8c1023b0a4e80e2301d1283555efc2e8828"
+    },
+    {
+      "path": "imageformats/qgif.dll",
+      "sha256": "de1c1ea34cbc4156ce452023470e2145af4855128756d081d56e9a0997d0dda8"
+    },
+    {
+      "path": "imageformats/qico.dll",
+      "sha256": "af98cacb134525fab15cf2146a4e6b90266f14493e72e4d51df89a5caadea157"
+    },
+    {
+      "path": "imageformats/qjpeg.dll",
+      "sha256": "a8854ac38d2bb83e8018bdcbfc93420a876251b3d2a79933e1a3c9a8ed2a24cb"
+    },
+    {
+      "path": "imageformats/qsvg.dll",
+      "sha256": "486b395e23e258d03d54cdba045f129e9b1321f9ff12f99fe58293e0351b8caf"
+    },
+    {
+      "path": "licenses/COPYING.txt",
+      "sha256": "eb7e9ab9690124c5c9f42bdc81383d886a3dede26345b6ed15bbad7caf81f7ea"
+    },
+    {
+      "path": "licenses/Copyright.txt",
+      "sha256": "d1f5b8f5eba2e9073463bc29b30572d84033f59e8d8057a95dff37c3414305b9"
+    },
+    {
+      "path": "licenses/GPL-3.0-only.txt",
+      "sha256": "8ceb4b9ee5adedde47b31e975c1d90c73ad27b6b165a1dcd80c7c545eb65b903"
+    },
+    {
+      "path": "licenses/intel-metrics-discovery-MIT.txt",
+      "sha256": "653129790534d6a3e843eaafc62cf04299e7e238f6f411173e85ea7fc315c8ac"
+    },
+    {
+      "path": "licenses/LGPL-3.0-only.txt",
+      "sha256": "da7eabb7bafdf7d3ae5e9f223aa5bdc1eece45ac569dc21b3b037520b4464768"
+    },
+    {
+      "path": "licenses/LICENSE",
+      "sha256": "2004ee3ef8282a85f7dbd035dfacf63cf03d569537bc08655ffeb140ea3671c5"
+    },
+    {
+      "path": "licenses/LICENSE.FDL",
+      "sha256": "c256483c2d1e8a51b62fc7a44a58f21cb4ef23fa840c7d33e3658035fd8cf62f"
+    },
+    {
+      "path": "licenses/nlohmann-json-MIT.txt",
+      "sha256": "46a65cffd1ea955132d95a8dd921640714a8d6b537d2e4e482d31145ae95b603"
+    },
+    {
+      "path": "licenses/renderdoc-api-MIT.txt",
+      "sha256": "bc7497320109a35a0b1cc090072961dcacf3a153b2f0a91de5909ce5944d9c43"
+    },
+    {
+      "path": "msvcp140.dll",
+      "sha256": "0f885b509a685d2bbfa652fed26b5fb31d88fbdab0a978c641d1c7b8aa460aa9"
+    },
+    {
+      "path": "msvcp140_1.dll",
+      "sha256": "bfad5aef4c63a669e3c140655cdfdf395b6c979b400a447bd5dcb65ed8826c3d"
+    },
+    {
+      "path": "msvcp140_2.dll",
+      "sha256": "3ea06f0ee098b4823cb79599df3780e7f23cce52c19aac31d2a0d47efe33a5e9"
+    },
+    {
+      "path": "msvcp140_atomic_wait.dll",
+      "sha256": "640b2aefced484d0368eea5bdd06addd0658a3a70a49256e560d6923b404a479"
+    },
+    {
+      "path": "msvcp140_codecvt_ids.dll",
+      "sha256": "f2069a52880ec885ee7f0511186100eb7fada0411a2b4948fafea7735b878a18"
+    },
+    {
+      "path": "networkinformation/qnetworklistmanager.dll",
+      "sha256": "2f7c43bb4ec05e9f23a326ac69e84a6df071cdf7cc0bf87cde98f81958ad9bae"
+    },
+    {
+      "path": "platforms/qoffscreen.dll",
+      "sha256": "95391476bba1d0b50cc822b93d7509341024cc7c18cd615f82e471a3e3a61caa"
+    },
+    {
+      "path": "platforms/qwindows.dll",
+      "sha256": "d94c584a18829d11fbf3aefd07e7b1e189e0cf063a0515826960037efa7465df"
+    },
+    {
+      "path": "Qt6Core.dll",
+      "sha256": "22c113a5644b875b2c85482723cd5d2e6a3a4029169778fcc78adde08ef3b6aa"
+    },
+    {
+      "path": "Qt6Gui.dll",
+      "sha256": "19265a4e76efc12ef5f5bcf59be6c6a5b9b59ec4c89660797738bd2da7f719cc"
+    },
+    {
+      "path": "Qt6Network.dll",
+      "sha256": "75ff0896a618f4f5b602f391eb4917a55fd738b2e751d2cf18244a0de3619184"
+    },
+    {
+      "path": "Qt6Svg.dll",
+      "sha256": "1052c17a9df0eb82023e0e4c369bbd0af58e4c5fea3c27a4b5ee83b60c015492"
+    },
+    {
+      "path": "Qt6Widgets.dll",
+      "sha256": "e6d0b7e2e697de6ad985b97f9ed8b381c1c2172fcae87b6ab08455b3b7330f32"
+    },
+    {
+      "path": "styles/qmodernwindowsstyle.dll",
+      "sha256": "f6b88d403d7175f5b830d4958264690e5c8bbaf0148e1ccf42d52704b0480792"
+    },
+    {
+      "path": "THIRD_PARTY.md",
+      "sha256": "343009c9e4761e1c1dc645bd72fd470001c3a4e269384f0dfc4b0bf69c10f6ec"
+    },
+    {
+      "path": "tls/qcertonlybackend.dll",
+      "sha256": "ff0f1a60ec60fc23ec74ff5d325ddef05c1ed68fc89466bffc1d874c7c544adb"
+    },
+    {
+      "path": "tls/qschannelbackend.dll",
+      "sha256": "761178263b47a5f05e151806bb5854d9e5c9cbc67d08187724d80f9e317471f8"
+    },
+    {
+      "path": "vc_redist.x64.exe",
+      "sha256": "cc0ff0eb1dc3f5188ae6300faef32bf5beeba4bdd6e8e445a9184072096b713b"
+    },
+    {
+      "path": "vccorlib140.dll",
+      "sha256": "19839407c3fdbc824e5bce189bf68ddf8097f12ec28b757797ffa0415c144ddd"
+    },
+    {
+      "path": "vcruntime140.dll",
+      "sha256": "d5e4d9a3e835fa679450145d6a7d94e36573a509317111904d9b3712c30d9066"
+    },
+    {
+      "path": "vcruntime140_1.dll",
+      "sha256": "1f2d41c4aa5db0bc33ebf7b66d72943a817d7ce6cbe880502a9403823633093f"
+    },
+    {
+      "path": "vcruntime140_threads.dll",
+      "sha256": "219915cf20822f34d5e7c1fdd4e21ae7f3396881096c51036225fb8f84b47afa"
+    }
+  ],
+  "final_recovery_qt_rows": 8,
+  "runs": [
+    {
+      "directory": "artifacts/m5-retention-control-40 QA \u4e2d\u6587",
+      "cycles": 40,
+      "milliseconds": 292903,
+      "strict_replay_image_checks": 120,
+      "control_output_unchanged": true,
+      "allocation_trace": false,
+      "results": {
+        "cycles": 40,
+        "milliseconds": 292903,
+        "control": {
+          "after_log_clear": {
+            "heap_busy_bytes": 35622225,
+            "heap_busy_blocks": 110144,
+            "private_bytes": 50114560,
+            "working_set": 1666121728,
+            "log_blocks": 1,
+            "log_characters": 1
+          },
+          "after_test_history_clear": {
+            "heap_busy_bytes": 36459169,
+            "heap_busy_blocks": 111116,
+            "private_bytes": 50114560,
+            "working_set": 1666117632,
+            "log_blocks": 160,
+            "log_characters": 11360
+          },
+          "before": {
+            "heap_busy_bytes": 36849281,
+            "heap_busy_blocks": 117150,
+            "private_bytes": 50114560,
+            "working_set": 1666117632,
+            "log_blocks": 160,
+            "log_characters": 11360
+          }
+        },
+        "families": {
+          "GF2_Exilium_2026_03_03__00_19_35.gpa_frame": {
+            "cycles": 20,
+            "first_heap_bytes": 44882631,
+            "last_heap_bytes": 47710601,
+            "heap_difference": 2827970,
+            "all_heap_walks_complete": true
+          },
+          "bf1_2026_01_21__16_53_05.gpa_frame": {
+            "cycles": 20,
+            "first_heap_bytes": 34274857,
+            "last_heap_bytes": 36840625,
+            "heap_difference": 2565768,
+            "all_heap_walks_complete": true
+          }
+        },
+        "test_history_release_bytes": 390112,
+        "log_release_bytes": 836944,
+        "remaining_difference_from_first_bf1": 1347368
+      }
+    },
+    {
+      "directory": "artifacts/m5-retention-control-2 QA \u4e2d\u6587",
+      "cycles": 2,
+      "milliseconds": 14273,
+      "strict_replay_image_checks": 6,
+      "control_output_unchanged": true,
+      "allocation_trace": false,
+      "results": {
+        "cycles": 2,
+        "milliseconds": 14273,
+        "control": {
+          "after_log_clear": {
+            "heap_busy_bytes": 34249249,
+            "heap_busy_blocks": 109289,
+            "private_bytes": 46030848,
+            "working_set": 1662275584,
+            "log_blocks": 1,
+            "log_characters": 1
+          },
+          "after_test_history_clear": {
+            "heap_busy_bytes": 34280953,
+            "heap_busy_blocks": 109197,
+            "private_bytes": 46030848,
+            "working_set": 1662271488,
+            "log_blocks": 8,
+            "log_characters": 568
+          },
+          "before": {
+            "heap_busy_bytes": 34291881,
+            "heap_busy_blocks": 109367,
+            "private_bytes": 46030848,
+            "working_set": 1662271488,
+            "log_blocks": 8,
+            "log_characters": 568
+          }
+        },
+        "families": {
+          "GF2_Exilium_2026_03_03__00_19_35.gpa_frame": {
+            "cycles": 1,
+            "first_heap_bytes": 44882399,
+            "last_heap_bytes": 44882399,
+            "heap_difference": 0,
+            "all_heap_walks_complete": true
+          },
+          "bf1_2026_01_21__16_53_05.gpa_frame": {
+            "cycles": 1,
+            "first_heap_bytes": 34283209,
+            "last_heap_bytes": 34283209,
+            "heap_difference": 0,
+            "all_heap_walks_complete": true
+          }
+        },
+        "test_history_release_bytes": 10928,
+        "log_release_bytes": 31704,
+        "remaining_difference_from_first_bf1": -33960
+      }
+    },
+    {
+      "directory": "artifacts/m5-retention-trace-10 QA \u4e2d\u6587",
+      "cycles": 10,
+      "milliseconds": 91345,
+      "strict_replay_image_checks": 30,
+      "control_output_unchanged": true,
+      "allocation_trace": true,
+      "results": {
+        "cycles": 10,
+        "milliseconds": 91345,
+        "control": {
+          "after_log_clear": {
+            "heap_busy_bytes": 34548776,
+            "heap_busy_blocks": 109505,
+            "private_bytes": 134799360,
+            "working_set": 1749078016,
+            "log_blocks": 1,
+            "log_characters": 1
+          },
+          "after_test_history_clear": {
+            "heap_busy_bytes": 34746240,
+            "heap_busy_blocks": 109637,
+            "private_bytes": 132931584,
+            "working_set": 1749024768,
+            "log_blocks": 40,
+            "log_characters": 2840
+          },
+          "before": {
+            "heap_busy_bytes": 34837008,
+            "heap_busy_blocks": 111041,
+            "private_bytes": 135380992,
+            "working_set": 1750081536,
+            "log_blocks": 40,
+            "log_characters": 2840
+          }
+        },
+        "families": {
+          "GF2_Exilium_2026_03_03__00_19_35.gpa_frame": {
+            "cycles": 5,
+            "first_heap_bytes": 44886473,
+            "last_heap_bytes": 45689888,
+            "heap_difference": 803415,
+            "all_heap_walks_complete": true
+          },
+          "bf1_2026_01_21__16_53_05.gpa_frame": {
+            "cycles": 5,
+            "first_heap_bytes": 34279675,
+            "last_heap_bytes": 34828288,
+            "heap_difference": 548613,
+            "all_heap_walks_complete": true
+          }
+        },
+        "test_history_release_bytes": 90768,
+        "log_release_bytes": 197464,
+        "remaining_difference_from_first_bf1": 269101
+      }
+    },
+    {
+      "directory": "artifacts/m5-retention-cache-trace-10 QA \u4e2d\u6587",
+      "cycles": 10,
+      "milliseconds": 90424,
+      "strict_replay_image_checks": 30,
+      "control_output_unchanged": true,
+      "allocation_trace": true,
+      "results": {
+        "cycles": 10,
+        "milliseconds": 90424,
+        "control": {
+          "after_log_clear": {
+            "heap_busy_bytes": 34538021,
+            "heap_busy_blocks": 109466,
+            "private_bytes": 134918144,
+            "working_set": 1749102592,
+            "log_blocks": 1,
+            "log_characters": 1
+          },
+          "after_pixmap_cache_clear": {
+            "heap_busy_bytes": 33905765,
+            "heap_busy_blocks": 109140,
+            "private_bytes": 133582848,
+            "working_set": 1749643264,
+            "log_blocks": 1,
+            "log_characters": 1
+          },
+          "after_test_history_clear": {
+            "heap_busy_bytes": 34735485,
+            "heap_busy_blocks": 109598,
+            "private_bytes": 133378048,
+            "working_set": 1749303296,
+            "log_blocks": 40,
+            "log_characters": 2840
+          },
+          "before": {
+            "heap_busy_bytes": 34826477,
+            "heap_busy_blocks": 111006,
+            "private_bytes": 132145152,
+            "working_set": 1748803584,
+            "log_blocks": 40,
+            "log_characters": 2840
+          }
+        },
+        "families": {
+          "GF2_Exilium_2026_03_03__00_19_35.gpa_frame": {
+            "cycles": 5,
+            "first_heap_bytes": 44884747,
+            "last_heap_bytes": 45680821,
+            "heap_difference": 796074,
+            "all_heap_walks_complete": true
+          },
+          "bf1_2026_01_21__16_53_05.gpa_frame": {
+            "cycles": 5,
+            "first_heap_bytes": 34285117,
+            "last_heap_bytes": 34817757,
+            "heap_difference": 532640,
+            "all_heap_walks_complete": true
+          }
+        },
+        "test_history_release_bytes": 90992,
+        "log_release_bytes": 197464,
+        "remaining_difference_from_first_bf1": 252904,
+        "pixmap_cache_limit_kib": 10240,
+        "pixmap_cache_release_bytes": 632256,
+        "remaining_after_cache_clear_from_first_bf1": -379352
+      }
+    },
+    {
+      "directory": "artifacts/m5-retention-cache-control-40 QA \u4e2d\u6587",
+      "cycles": 40,
+      "milliseconds": 292182,
+      "strict_replay_image_checks": 120,
+      "control_output_unchanged": true,
+      "allocation_trace": false,
+      "results": {
+        "cycles": 40,
+        "milliseconds": 292182,
+        "control": {
+          "after_log_clear": {
+            "heap_busy_bytes": 35625809,
+            "heap_busy_blocks": 110158,
+            "private_bytes": 48447488,
+            "working_set": 1664823296,
+            "log_blocks": 1,
+            "log_characters": 1
+          },
+          "after_pixmap_cache_clear": {
+            "heap_busy_bytes": 33904369,
+            "heap_busy_blocks": 109137,
+            "private_bytes": 47505408,
+            "working_set": 1663463424,
+            "log_blocks": 1,
+            "log_characters": 1
+          },
+          "after_test_history_clear": {
+            "heap_busy_bytes": 36462753,
+            "heap_busy_blocks": 111130,
+            "private_bytes": 50753536,
+            "working_set": 1666768896,
+            "log_blocks": 160,
+            "log_characters": 11360
+          },
+          "before": {
+            "heap_busy_bytes": 36853089,
+            "heap_busy_blocks": 117168,
+            "private_bytes": 50753536,
+            "working_set": 1666764800,
+            "log_blocks": 160,
+            "log_characters": 11360
+          }
+        },
+        "families": {
+          "GF2_Exilium_2026_03_03__00_19_35.gpa_frame": {
+            "cycles": 20,
+            "first_heap_bytes": 44887495,
+            "last_heap_bytes": 47716713,
+            "heap_difference": 2829218,
+            "all_heap_walks_complete": true
+          },
+          "bf1_2026_01_21__16_53_05.gpa_frame": {
+            "cycles": 20,
+            "first_heap_bytes": 34275889,
+            "last_heap_bytes": 36844433,
+            "heap_difference": 2568544,
+            "all_heap_walks_complete": true
+          }
+        },
+        "test_history_release_bytes": 390336,
+        "log_release_bytes": 836944,
+        "remaining_difference_from_first_bf1": 1349920,
+        "pixmap_cache_limit_kib": 10240,
+        "pixmap_cache_release_bytes": 1721440,
+        "remaining_after_cache_clear_from_first_bf1": -371520
+      }
+    }
+  ],
+  "evidence": [
+    {
+      "path": "artifacts/m5-retention-control-40 QA \u4e2d\u6587/validation.json",
+      "sha256": "52b01b0793e7e7d0e2f97007463ba3eded3d3657563c04bbb6d00425a886157a"
+    },
+    {
+      "path": "artifacts/m5-retention-control-40 QA \u4e2d\u6587/journal.json",
+      "sha256": "2c6b84a61fe7e6871f5053457fc8ca74c9acb42a6d52acf156c82137c4f1f2fe"
+    },
+    {
+      "path": "artifacts/m5-retention-control-40 QA \u4e2d\u6587/journal.json.retained.json",
+      "sha256": "bf0d6a59a119ac871a224a5b716ecebbb3c4c881099ebf63bd199d97a6b3db0f"
+    },
+    {
+      "path": "artifacts/m5-retention-control-40 QA \u4e2d\u6587/qt-results.txt",
+      "sha256": "6333a93f2c5f0859382050c7b3853e596964f62c1b59e836a7816a474af4b1be"
+    },
+    {
+      "path": "artifacts/m5-retention-control-40 QA \u4e2d\u6587/process.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/m5-retention-control-40 QA \u4e2d\u6587/retention-summary.json",
+      "sha256": "70c725100172a992bb6cde013c0bc677b5899251caa629529851dcc30a49cf81"
+    },
+    {
+      "path": "artifacts/m5-retention-control-40 QA \u4e2d\u6587/progress-manifest.json",
+      "sha256": "bd02028993571662d7e2f57df70b4045eb5d5440d7646fc834457e95d6aebc83"
+    },
+    {
+      "path": "artifacts/m5-retention-control-2 QA \u4e2d\u6587/validation.json",
+      "sha256": "654105750b0e61fedc6d86875c4cda670b9324541988244e6fdb98ff97ac23bd"
+    },
+    {
+      "path": "artifacts/m5-retention-control-2 QA \u4e2d\u6587/journal.json",
+      "sha256": "d5cfb5d9ac5879d58b6d125ed053cacc997d7c8362255b0b6fee6e7067cd7bdd"
+    },
+    {
+      "path": "artifacts/m5-retention-control-2 QA \u4e2d\u6587/journal.json.retained.json",
+      "sha256": "cfb6d64483ca5dc38094caf99455797ca7fe9473246f35c757e5460b558f2440"
+    },
+    {
+      "path": "artifacts/m5-retention-control-2 QA \u4e2d\u6587/qt-results.txt",
+      "sha256": "f7230b5e73a4c543aa0202ff20d570befbb9dffac6b300cc88a36bf4c4743914"
+    },
+    {
+      "path": "artifacts/m5-retention-control-2 QA \u4e2d\u6587/process.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/m5-retention-control-2 QA \u4e2d\u6587/retention-summary.json",
+      "sha256": "b1787f65e44d309c26d693b2667fad075f97e03ccc811ab3d9740ce510ab778e"
+    },
+    {
+      "path": "artifacts/m5-retention-control-2 QA \u4e2d\u6587/progress-manifest.json",
+      "sha256": "34c6c060c8f30aae8278429da865312d9786f2bb17f31b56c75864772e372e0f"
+    },
+    {
+      "path": "artifacts/m5-retention-trace-10 QA \u4e2d\u6587/allocation-stacks/heap-2.json",
+      "sha256": "ed5e1c8fb587021131a75a33f76e8a4b0e8eeffcbd75bb7cc41894945227b9a9"
+    },
+    {
+      "path": "artifacts/m5-retention-trace-10 QA \u4e2d\u6587/allocation-stacks/heap-6.json",
+      "sha256": "4b5eb7e950899201fe4d08f5161baf007bb0ff9b740e714e47c4b6731046424d"
+    },
+    {
+      "path": "artifacts/m5-retention-trace-10 QA \u4e2d\u6587/allocation-stacks/heap-10.json",
+      "sha256": "7801592795cb30cf9755dec989d25df061620c2c858c8e1ac285fd98b0a48d1e"
+    },
+    {
+      "path": "artifacts/m5-retention-trace-10 QA \u4e2d\u6587/allocation-stacks/heap-11.json",
+      "sha256": "1c0c16085f0498c332f6235c5217830dbbe55fa085430be1dec6224e09456385"
+    },
+    {
+      "path": "artifacts/m5-retention-trace-10 QA \u4e2d\u6587/allocation-stacks/heap-12.json",
+      "sha256": "f35f17bf759b0701221c84ac23aba2a64aad8dbf4dfd69382eaa96535d3e4d5e"
+    },
+    {
+      "path": "artifacts/m5-retention-trace-10 QA \u4e2d\u6587/allocation-stacks/heap-13.json",
+      "sha256": "01b4bb40ee8a76ebce7767fb0fa2f1b9b3d645ad2c5a3aac5f4ebd5cd0f0eb39"
+    },
+    {
+      "path": "artifacts/m5-retention-trace-10 QA \u4e2d\u6587/validation.json",
+      "sha256": "4e8f2862fe8d983abe08d03a6266b5c050eb4955658cddd172284b88bde634ac"
+    },
+    {
+      "path": "artifacts/m5-retention-trace-10 QA \u4e2d\u6587/journal.json",
+      "sha256": "36f9dbaabbc06c779677cd40eb3fae0e1f77def671fa4d230b1ab19bbd97e75d"
+    },
+    {
+      "path": "artifacts/m5-retention-trace-10 QA \u4e2d\u6587/journal.json.retained.json",
+      "sha256": "e167bfe03bf9cf97963130b71b4b5ce2d2d3d4f865b0e72e28d16fc7aeffc1dd"
+    },
+    {
+      "path": "artifacts/m5-retention-trace-10 QA \u4e2d\u6587/qt-results.txt",
+      "sha256": "d5e42b8c7bf106cc80ba28e5f02e6d126f609d045076034c8e3536a45c6181bd"
+    },
+    {
+      "path": "artifacts/m5-retention-trace-10 QA \u4e2d\u6587/process.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/m5-retention-trace-10 QA \u4e2d\u6587/retention-summary.json",
+      "sha256": "e62261fd90872d35273bc6cd34ae775dc2de9cef8cdcbcee781fccd4217c642f"
+    },
+    {
+      "path": "artifacts/m5-retention-trace-10 QA \u4e2d\u6587/progress-manifest.json",
+      "sha256": "af0dc2b3ab54e5fb02af29a202c0d0b1ea5702f73c45ee6dad418f3a75f2dfaa"
+    },
+    {
+      "path": "artifacts/m5-retention-trace-10 QA \u4e2d\u6587/stack-summary.json",
+      "sha256": "87d6fcc69af8312b27bd6cc001e1af252cb43ffecd55191a4ce6ece8c3591a7f"
+    },
+    {
+      "path": "artifacts/m5-retention-cache-trace-10 QA \u4e2d\u6587/allocation-stacks/heap-2.json",
+      "sha256": "d93309242214bf9b90a4588932beff6309dbc1d547e853bbb3b7951217888355"
+    },
+    {
+      "path": "artifacts/m5-retention-cache-trace-10 QA \u4e2d\u6587/allocation-stacks/heap-6.json",
+      "sha256": "667449fe3cfe88451c914a1346ffd63693f3b55592cb869130fa22b303ebc702"
+    },
+    {
+      "path": "artifacts/m5-retention-cache-trace-10 QA \u4e2d\u6587/allocation-stacks/heap-10.json",
+      "sha256": "c38b09cf9d3bfefc3a2ebbe7bd2f35eb00d487092602c14b49c7ec275edbf74e"
+    },
+    {
+      "path": "artifacts/m5-retention-cache-trace-10 QA \u4e2d\u6587/allocation-stacks/heap-11.json",
+      "sha256": "caa9df048ee241cdcc10d3749847abbfda2d69a2be30bb456ecec18657d15381"
+    },
+    {
+      "path": "artifacts/m5-retention-cache-trace-10 QA \u4e2d\u6587/allocation-stacks/heap-12.json",
+      "sha256": "e10192c26916c1cbdb9a41140bf52c1f1597ec4eb34c3c58d3553b71811178e9"
+    },
+    {
+      "path": "artifacts/m5-retention-cache-trace-10 QA \u4e2d\u6587/allocation-stacks/heap-13.json",
+      "sha256": "c4376754cd5c72d46a123935308e99fcee3bf1a5d7b14d71ee40b8295d143c7b"
+    },
+    {
+      "path": "artifacts/m5-retention-cache-trace-10 QA \u4e2d\u6587/allocation-stacks/heap-14.json",
+      "sha256": "1bee2994790d5fbf33ddc2c13ee33ec738919619efc8ef9a3c91d2b7cf58a1ac"
+    },
+    {
+      "path": "artifacts/m5-retention-cache-trace-10 QA \u4e2d\u6587/validation.json",
+      "sha256": "afcd708a19f5a2642f9ae68e751eda7bc4f5995e92e2dac4bf8ad4870186a933"
+    },
+    {
+      "path": "artifacts/m5-retention-cache-trace-10 QA \u4e2d\u6587/journal.json",
+      "sha256": "258a3a4aa8cd560a6e6d45b76efe17f2bc09e034862da81620a63beee2b1839c"
+    },
+    {
+      "path": "artifacts/m5-retention-cache-trace-10 QA \u4e2d\u6587/journal.json.retained.json",
+      "sha256": "e25f29dff2fe2f836bef14d6b1dce1505549be7a69b144c92489472145fa8be4"
+    },
+    {
+      "path": "artifacts/m5-retention-cache-trace-10 QA \u4e2d\u6587/qt-results.txt",
+      "sha256": "265e0dc90c829877cd31dc49a342d894778d69c08bb416045621937fae95e028"
+    },
+    {
+      "path": "artifacts/m5-retention-cache-trace-10 QA \u4e2d\u6587/process.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/m5-retention-cache-trace-10 QA \u4e2d\u6587/retention-summary.json",
+      "sha256": "371ed90d9bd9993fd9a18b6174590159273540216e4708f5f8f10daffb975816"
+    },
+    {
+      "path": "artifacts/m5-retention-cache-trace-10 QA \u4e2d\u6587/progress-manifest.json",
+      "sha256": "20e55f432d4bd0b34e2f025ec79bb5730c48dd773b81e63af72f6c93160cedac"
+    },
+    {
+      "path": "artifacts/m5-retention-cache-trace-10 QA \u4e2d\u6587/stack-summary.json",
+      "sha256": "1385d024302972af7f5748b706e2b86c1ca990ef7007e09ba11a542ae391288a"
+    },
+    {
+      "path": "artifacts/m5-retention-cache-control-40 QA \u4e2d\u6587/validation.json",
+      "sha256": "b6264f8db5e15a5df1140c924f71e5a628e15c77f729a09ed100104aea22e2ec"
+    },
+    {
+      "path": "artifacts/m5-retention-cache-control-40 QA \u4e2d\u6587/journal.json",
+      "sha256": "99d730e7fe44511d5fe98b0dbe512b1c94b09844a901850f832e258618f577e1"
+    },
+    {
+      "path": "artifacts/m5-retention-cache-control-40 QA \u4e2d\u6587/journal.json.retained.json",
+      "sha256": "8d39f2434f62f6aad5239a108c3ad7de9c27105c1076176f4b926d710f6afc80"
+    },
+    {
+      "path": "artifacts/m5-retention-cache-control-40 QA \u4e2d\u6587/qt-results.txt",
+      "sha256": "4dd961d9acc56e35e47f8d086cae5f12e0f948dc6b799ea94f1c60716fad92e1"
+    },
+    {
+      "path": "artifacts/m5-retention-cache-control-40 QA \u4e2d\u6587/process.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/m5-retention-cache-control-40 QA \u4e2d\u6587/retention-summary.json",
+      "sha256": "8e50010e61e28538cdf9ac16ea3c794ee1933912e654f5a37f3bfd8056fd91e4"
+    },
+    {
+      "path": "artifacts/m5-retention-cache-control-40 QA \u4e2d\u6587/progress-manifest.json",
+      "sha256": "69807be5ccc3c753b4e08a9047e02ac0a796f33740ba8cbaf06a1a32c519d3e7"
+    },
+    {
+      "path": "artifacts/m5-retention-control-build.log",
+      "sha256": "b420da8154a5de1b404b83293707cf807e8248592ebdb960cb66c5f5a6e9a4c7"
+    },
+    {
+      "path": "artifacts/m5-retention-trace-build.log",
+      "sha256": "37212cac33237619e3358bc87ade5231e639bac315ff15edd83e820764762d59"
+    },
+    {
+      "path": "artifacts/m5-retention-cache-build.log",
+      "sha256": "37212cac33237619e3358bc87ade5231e639bac315ff15edd83e820764762d59"
+    },
+    {
+      "path": "artifacts/m5-retention-control-ctest.log",
+      "sha256": "1ef4f9e9f73954d24807f251bf969a7764014dd03f487d3d7259567eaafe099c"
+    },
+    {
+      "path": "artifacts/m5-retention-control-ui.txt",
+      "sha256": "2e9d86c5e9207de6a559b8b712ea5c13bcb1b5741c132c91e592b2271a9e42b8"
+    },
+    {
+      "path": "artifacts/m5-retention-cache-ctest.log",
+      "sha256": "89a9050aa7e24eade11806efc68f447ea5bed098e71d1237f542c6ba7d3d9e4f"
+    },
+    {
+      "path": "artifacts/m5-retention-cache-ui.txt",
+      "sha256": "e627923e3ef680f3ede6d9c9fcdc288a3cf795540bb942b8cd231f9543cf06f8"
+    },
+    {
+      "path": "artifacts/m5-retention-trace-10.map",
+      "sha256": "7ba44cb5a7ebbb616cdd48adfb84af364372ce73674cf4eb4714563986cf259d"
+    },
+    {
+      "path": "artifacts/m5-retention-cache-trace-10.map",
+      "sha256": "21bca8424232602b420700057835a31fd6ee06bbfe2f79f36dcec1a66a922116"
+    },
+    {
+      "path": "artifacts/summarize_retention_control.py",
+      "sha256": "d61d646da98e10ecbc54d218c87338bd44b359b7db4d46ceae12d72504e091f6"
+    },
+    {
+      "path": "artifacts/analyze_retention_stacks.py",
+      "sha256": "ef7dd2c3d2bf5601ce5b22b6fb0aa6a162960e2740ee6bd4fedab063cc49a414"
+    }
+  ],
+  "limits": [
+    "Same host/adapter and GF2/BF1 workflow; no universal leak-free claim",
+    "Short intervention controls explain selected live heap growth, not every byte of the earlier 30-minute private-memory increase",
+    "HeapWalk and UCRT import observation do not cover every allocation mechanism; stack observation changes overhead",
+    "Qt pixmap cache cost is bounded; this is not a bound on all heap metadata, allocator capacity or process private bytes",
+    "No production cache/log clearing or image-threshold change; M3/M4/M5 and clean-machine acceptance remain open"
+  ]
+}

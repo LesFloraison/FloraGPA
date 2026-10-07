@@ -114,7 +114,10 @@ capture observations. After omitting each family's first two cycles, the last
 five versus first five medians rise by 20.4 and 17.1 MiB. This run neither
 attributes all growth to logs/test evidence nor proves a production leak.
 Separating retained journal/log/test history, allocator capacity and live
-application allocations remains a follow-up. The prior
+application allocations is investigated in the subsequent
+[retention controls](QT_RETENTION_CONTROL.md): test history/logs and bounded Qt
+icon-cache ownership explain the measured short-run heap growth, without claiming
+to account for every private byte in this 30-minute run. The prior
 [allocation-stack and log-clear control](QT_ACTION_RETENTION.md) remains separate
 evidence; its short native-window results are not substituted for this run.
 The offscreen plugin explains why these GDI/USER counts do not represent a normal
