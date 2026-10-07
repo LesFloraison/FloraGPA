@@ -22,6 +22,7 @@ chronology remains in Chinese.
 | Component responsibilities | [Architecture](ARCHITECTURE.md) |
 | Run tests and external comparisons | [Development validation](USAGE.md#development-validation) |
 | Build committed source with an isolated process environment and package it | [Source build and packaging](SOURCE_BUILD_AND_PACKAGING.md) |
+| Track the latest same-source package, tests and full replay matrix | [Current-source acceptance](CURRENT_SOURCE_RELEASE_ACCEPTANCE.md) |
 | Exercise one Qt window through repeated load, cancel, failure and replay | [Persistent Qt recovery soak](PERSISTENT_QT_SOAK.md) |
 | Separate test history, log and pixmap-cache memory retention | [Qt retention controls](QT_RETENTION_CONTROL.md) |
 | Interpret corpus results and diagnostics | [Compatibility infrastructure](COMPATIBILITY_BASELINE.md) |

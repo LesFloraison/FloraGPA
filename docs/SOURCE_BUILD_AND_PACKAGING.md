@@ -9,6 +9,11 @@ also builds current production sources from revision `0db936e`: 1,049 archived
 files and a 44-file package, with fresh golden, mip-count and GUI startup checks.
 The original source-build evidence below remains unchanged.
 
+The [latest source acceptance](CURRENT_SOURCE_RELEASE_ACCEPTANCE.md) builds
+revision `078d638`, with 1,081 files, the 44-file package and acceptance tests from
+one archive. Its short runtime checks and complete 525-registration matrix pass;
+its renewed sustained recovery check remains pending at this checkpoint.
+
 ## Packaging changes
 
 `tools/package.ps1` now reads `Qt6_DIR` and `CMAKE_GENERATOR_INSTANCE` from the
