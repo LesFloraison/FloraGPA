@@ -1,5 +1,6 @@
 // Development-only originals: mip-count metadata versus missing resource LOD.
 #include "texture_probe_helpers.h"
+#include "original_capture_control.h"
 int wmain(int argc, wchar_t **argv) {
     if (argc != 3 && argc != 5)
         return 2;
@@ -9,8 +10,10 @@ int wmain(int argc, wchar_t **argv) {
     fs::create_directories(output);
     try {
         const int mode = std::stoi(argv[2]);
-        if (mode < 0 || mode > 5)
+        if (mode < 0 || mode > 11)
             throw std::runtime_error("Invalid mode");
+        const int behavior = mode % 6;
+        const char *profile = mode < 6 ? "ps_5_0" : "ps_4_0";
         if (argc == 5 && !LoadLibraryExW(argv[4], nullptr, LOAD_WITH_ALTERED_SEARCH_PATH))
             throw std::runtime_error("Cannot load development shim");
         WNDCLASSW wc{};
@@ -100,11 +103,11 @@ int wmain(int argc, wchar_t **argv) {
             return code;
         };
         auto vsCode = compile("vs", "vs_5_0", false);
-        auto psCode = compile(mode < 2    ? "count"
-                              : mode == 2 ? "dimensions"
-                              : mode == 3 ? "mixed"
+        auto psCode = compile(behavior < 2    ? "count"
+                              : behavior == 2 ? "dimensions"
+                              : behavior == 3 ? "mixed"
                                           : "dependent",
-                              "ps_5_0", mode == 1);
+                              profile, behavior == 1);
         ComPtr<ID3D11VertexShader> vs;
         ComPtr<ID3D11PixelShader> ps;
         checked(d->CreateVertexShader(vsCode->GetBufferPointer(), vsCode->GetBufferSize(), nullptr, &vs));
@@ -120,8 +123,8 @@ int wmain(int argc, wchar_t **argv) {
         screen.mips = screen.layers = 1;
         auto stage = create(d.Get(), screen, true);
         auto pixels = storage(screen, false);
-        const std::array<uint8_t, 4> expected = mode < 2    ? std::array<uint8_t, 4>{255, 0, 0, 255}
-                                                : mode == 2 ? std::array<uint8_t, 4>{255, 255, 255, 255}
+        const std::array<uint8_t, 4> expected = behavior < 2    ? std::array<uint8_t, 4>{255, 0, 0, 255}
+                                                : behavior == 2 ? std::array<uint8_t, 4>{255, 255, 255, 255}
                                                             : std::array<uint8_t, 4>{255, 255, 0, 255};
         for (size_t p = 0; p < pixels[0].bytes.size(); p += 4)
             memcpy(pixels[0].bytes.data() + p, expected.data(), 4);
@@ -133,8 +136,10 @@ int wmain(int argc, wchar_t **argv) {
         DXGI_ADAPTER_DESC adapterDesc{};
         checked(adapter->GetDesc(&adapterDesc));
         report << "{\"mode\":" << mode << ",\"warp\":" << (warp ? "true" : "false")
+               << ",\"profile\":\"" << profile << '"'
                << ",\"vendor_id\":" << adapterDesc.VendorId << ",\"device_id\":" << adapterDesc.DeviceId
                << ",\"frames\":[";
+        bool primaryChanged = false;
         for (unsigned frame = 0; frame < 12; ++frame) {
             MSG msg{};
             while (PeekMessageW(&msg, nullptr, 0, 0, PM_REMOVE)) {
@@ -149,6 +154,7 @@ int wmain(int argc, wchar_t **argv) {
                          : nullptr;
                 if (!request)
                     throw std::runtime_error("CaptureNextFrame unavailable");
+                primaryChanged = flora::research::selectOriginalPrimarySwapChain(shim, chain.swap.Get());
                 request(argv[3], captured);
             }
             c->ClearState();
@@ -166,7 +172,7 @@ int wmain(int argc, wchar_t **argv) {
             c->PSSetShaderResources(0, 2, inputs);
             auto sam = sampler.Get();
             c->PSSetSamplers(0, 1, &sam);
-            if (mode == 5)
+            if (behavior == 5)
                 c->SetResourceMinLOD(texture.Get(), 1);
             c->Draw(3, 0);
             c->CopyResource(stage.Get(), chain.buffer.Get());
@@ -180,7 +186,11 @@ int wmain(int argc, wchar_t **argv) {
             report << "{\"frame\":" << frame << ",\"image_verified\":true}";
             Sleep(25);
         }
-        report << "],\"completed\":true}\n";
+        if (argc == 5 && !fs::is_regular_file(argv[3]))
+            throw std::runtime_error("Original capture request produced no frame file");
+        report << "],\"capture_requested\":" << (argc == 5 ? "true" : "false")
+               << ",\"primary_changed\":" << (primaryChanged ? "true" : "false")
+               << ",\"completed\":true}\n";
         return 0;
     } catch (const std::exception &e) {
         std::ofstream(output / L"error.txt") << e.what();
