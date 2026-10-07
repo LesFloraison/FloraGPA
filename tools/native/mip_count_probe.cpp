@@ -10,9 +10,10 @@ int wmain(int argc, wchar_t **argv) {
     fs::create_directories(output);
     try {
         const int mode = std::stoi(argv[2]);
-        if (mode < 0 || mode > 19)
+        if (mode < 0 || mode > 27)
             throw std::runtime_error("Invalid mode");
-        const int behavior = mode < 18 ? mode % 6 : 0;
+        const int switchBehaviors[]{0, 1, 2, 2, 4, 5, 0, 0};
+        const int behavior = mode >= 20 ? switchBehaviors[mode - 20] : mode < 18 ? mode % 6 : 0;
         const char *profile = mode < 6 ? "ps_5_0" : "ps_4_0";
         if (argc == 5 && !LoadLibraryExW(argv[4], nullptr, LOAD_WITH_ALTERED_SEARCH_PATH))
             throw std::runtime_error("Cannot load development shim");
@@ -95,7 +96,27 @@ int wmain(int argc, wchar_t **argv) {
             "[branch]if(n>2){[branch]if(n==4)r=float4(n/4.0,0,0,1);else r=float4(0,0,1,1);}"
             "else r=float4(0,1,0,1);return r;}"
             "float4 noElse():SV_Target{uint w,h,n;tex.GetDimensions(0,w,h,n);float4 r=float4(0,1,0,1);"
-            "[branch]if(n==4)r=float4(n/4.0,0,0,1);return r;}";
+            "[branch]if(n==4)r=float4(n/4.0,0,0,1);return r;}"
+            "float4 switched():SV_Target{uint w,h,n;tex.GetDimensions(0,w,h,n);float4 r;"
+            "[forcecase]switch(n){case 4:r=float4(n/4.0,0,0,1);break;"
+            "case 3:r=float4(0,n/4.0,0,1);break;default:r=float4(0,0,n/4.0,1);break;}return r;}"
+            "float4 switchWidth():SV_Target{uint w,h,n;tex.GetDimensions(1,w,h,n);float4 r;"
+            "[forcecase]switch(n){case 4:r=float4(w==4,h==4,n==4,1);break;"
+            "case 3:r=float4(0,n/4.0,0,1);break;default:r=float4(0,0,0,1);break;}return r;}"
+            "float4 defaultWidth():SV_Target{uint w,h,n;tex.GetDimensions(1,w,h,n);float4 r;"
+            "[forcecase]switch(n){case 0:r=float4(0,0,0,1);break;case 3:r=float4(0,0,1,1);break;"
+            "default:r=float4(w==4,h==4,n==4,1);break;}return r;}"
+            "float4 switchSample():SV_Target{uint w,h,n;tex.GetDimensions(0,w,h,n);float4 r;"
+            "[forcecase]switch(n){case 4:r=float4(n/4.0,tex.Sample(sam,float2(.5,.5)).g,0,1);break;"
+            "case 3:r=float4(0,n/4.0,0,1);break;default:r=float4(0,0,0,1);break;}return r;}"
+            "float4 nestedSwitch():SV_Target{uint w,h,n;tex.GetDimensions(0,w,h,n);float4 r;"
+            "[forcecase]switch(n){case 4:{uint a,b,m;normal.GetDimensions(0,a,b,m);"
+            "[forcecase]switch(m){case 4:r=float4(m/4.0,0,0,1);break;case 3:r=float4(0,0,1,1);break;"
+            "default:r=float4(0,1,0,1);break;}}break;case 3:r=float4(0,0,n/4.0,1);break;"
+            "default:r=float4(0,1,0,1);break;}return r;}"
+            "float4 sharedCase():SV_Target{uint w,h,n;tex.GetDimensions(0,w,h,n);float4 r;"
+            "[forcecase]switch(n){case 3:case 4:r=float4(n/4.0,0,0,1);break;"
+            "default:r=float4(0,n/4.0,0,1);break;}return r;}";
         auto compile = [&](const char *entry, const char *target, bool strip) {
             ComPtr<ID3DBlob> code, errors;
             checked(D3DCompile(shader.data(), shader.size(), nullptr, nullptr, nullptr, entry, target, 0, 0,
@@ -119,7 +140,9 @@ int wmain(int argc, wchar_t **argv) {
         auto vsCode = compile("vs", "vs_5_0", false);
         const char *branchEntries[]{"branched", "branched", "branchWidth", "elseWidth",
                                     "branchSample", "branchSample", "nested", "noElse"};
-        auto psCode = compile(mode >= 12 ? branchEntries[mode - 12] : behavior < 2    ? "count"
+        const char *switchEntries[]{"switched", "switched", "switchWidth", "defaultWidth",
+                                   "switchSample", "switchSample", "nestedSwitch", "sharedCase"};
+        auto psCode = compile(mode >= 20 ? switchEntries[mode - 20] : mode >= 12 ? branchEntries[mode - 12] : behavior < 2    ? "count"
                               : behavior == 2 ? "dimensions"
                               : behavior == 3 ? "mixed"
                                           : "dependent",
