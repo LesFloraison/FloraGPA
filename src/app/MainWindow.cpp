@@ -338,8 +338,8 @@ MainWindow::MainWindow() {
             &MainWindow::finishWorker);
 }
 MainWindow::~MainWindow() {
-    if (imageJob_)
-        imageJob_->cancelled.store(true);
+    if (artifactJob_)
+        artifactJob_->cancelled.store(true);
     if (loadCancel_)
         loadCancel_->store(true);
     replayTimer_.stop();
@@ -901,7 +901,7 @@ void MainWindow::buildUi() {
     bufferLength_->setPlaceholderText("To end");
     bufferLength_->setToolTip("Byte length (empty reads to the end)");
     bufferBar->addWidget(bufferLength_);
-    bufferBar->addAction("Read", this, &MainWindow::previewBuffer);
+    bufferBar->addAction("Read", this, &MainWindow::previewBuffer)->setObjectName("readBuffer");
     bufferBar->addAction("Export", this, &MainWindow::exportBuffer);
     bufferEditAction_ = bufferBar->addAction("Edit Bytes…", this, [this] { editBuffer(); });
     bufferEditAction_->setObjectName("editBuffer");
@@ -1277,7 +1277,7 @@ void MainWindow::buildUi() {
             return;
         ++revision_;
         ++outputGeneration_;
-        if (process_.state() != QProcess::NotRunning || imageJob_)
+        if (process_.state() != QProcess::NotRunning || artifactJob_)
             cancel();
         replayTimer_.start();
     };
@@ -1298,7 +1298,7 @@ void MainWindow::buildUi() {
     connect(boundary_, &QComboBox::currentIndexChanged, this, [this] {
         if (frame_) {
             ++revision_;
-            if (process_.state() != QProcess::NotRunning || imageJob_)
+            if (process_.state() != QProcess::NotRunning || artifactJob_)
                 cancel();
             replayTimer_.start();
         }
@@ -1311,7 +1311,7 @@ void MainWindow::buildUi() {
         predicateView_->invalidate();
         gpuStatistics_->invalidate();
         ++revision_;
-        if (process_.state() != QProcess::NotRunning || imageJob_)
+        if (process_.state() != QProcess::NotRunning || artifactJob_)
             cancel();
         chart_->clear();
         if (frame_)
@@ -1360,7 +1360,7 @@ void MainWindow::closeEvent(QCloseEvent *e) {
     e->accept();
 }
 void MainWindow::setBusy(bool busy) {
-    busy = bool(loadCancel_) || bool(imageJob_) || (busy && runningKind_ != "draw-resources");
+    busy = bool(loadCancel_) || bool(artifactJob_) || (busy && runningKind_ != "draw-resources");
     shader_->setReadOnly(busy);
     sourceEditor_->setReadOnly(busy);
     shaderEntry_->setEnabled(!busy);
@@ -1404,7 +1404,7 @@ void MainWindow::setBusy(bool busy) {
     replayAction_->setEnabled(!busy && bool(frame_));
     collectAction_->setEnabled(!busy && bool(frame_));
     cancelAction_->setEnabled(busy && (!loadCancel_ || !loadCancel_->load()) &&
-                              (!imageJob_ || !imageJob_->cancelled.load()));
+                              (!artifactJob_ || !artifactJob_->cancelled.load()));
     progress_->setVisible(busy);
     if (busy) {
         progress_->setRange(0, 0);
@@ -1579,7 +1579,7 @@ void MainWindow::openCapture(const QString &path) {
 void MainWindow::replay(bool timings) {
     if (!frame_ || loadCancel_)
         return;
-    if (process_.state() != QProcess::NotRunning || imageJob_) {
+    if (process_.state() != QProcess::NotRunning || artifactJob_) {
         cancel();
         replayTimer_.start();
         return;
@@ -1621,7 +1621,7 @@ void MainWindow::readScheduledMetrics(bool catalog, uint64_t serial) {
     }
 }
 void MainWindow::startWorker(QStringList args, bool timings) {
-    if (process_.state() != QProcess::NotRunning || imageJob_)
+    if (process_.state() != QProcess::NotRunning || artifactJob_)
         return;
     runningRecover_ = args.first() == "shader" && args.contains("--recover");
     if (args.first() == "shader" || args.first() == "compile" || args.first() == "compile-project" || args.first() == "assemble")
@@ -1702,10 +1702,11 @@ void MainWindow::startWorker(QStringList args, bool timings) {
     process_.start(QCoreApplication::applicationDirPath() + "/FloraGPA.Worker.exe", args);
 }
 void MainWindow::cancel() {
-    if (imageJob_) {
-        imageJob_->cancelled.store(true);
+    if (artifactJob_) {
+        artifactJob_->cancelled.store(true);
         cancelAction_->setEnabled(false);
-        statusBar()->showMessage("Cancelling image validation…");
+        statusBar()->showMessage(artifactJob_->kind == "buffer" ? "Cancelling buffer validation…"
+                                                               : "Cancelling image validation…");
     }
     if (loadCancel_) {
         loadCancel_->store(true);
@@ -2093,22 +2094,7 @@ void MainWindow::finishWorker(int code, QProcess::ExitStatus status) {
             emit taskFinished(true);
             return;
         }
-        if (runningKind_ == "buffer") {
-            QFile bufferFile(jobDir_->path() + "/result/buffer.bin");
-            if (!bufferFile.open(QIODevice::ReadOnly))
-                throw std::runtime_error("Buffer output is missing");
-            bufferModel_->setBytes(bufferFile.readAll(), uint64_t(report_["offset"].toInteger()));
-            displayedBuffer_ = report_["resource"].toString().toULongLong();
-            showBufferDetails(report_);
-            bufferLabel_->setText(QString("  B:%1 · %2 bytes · %3")
-                                      .arg(displayedBuffer_)
-                                      .arg(report_["length"].toInteger())
-                                      .arg(boundaryLabel(report_)));
-            statusBar()->showMessage("Buffer ready", 3000);
-            emit taskFinished(true);
-            return;
-        }
-        validateWorkerImage(reportBytes);
+        validateWorkerArtifact(reportBytes);
     } catch (const std::exception &e) {
         if (runningKind_ == "draw-resources") {
             resourceBrowser_->failPreviews(runningResourceKey_, QString::fromUtf8(e.what()));
@@ -2206,7 +2192,7 @@ void MainWindow::selectEvent(Id id) {
         QSignalBlocker blocker(boundary_);
         boundary_->setCurrentIndex(2);
     }
-    if (process_.state() != QProcess::NotRunning || imageJob_)
+    if (process_.state() != QProcess::NotRunning || artifactJob_)
         cancel();
     updateResourceContext(true);
     if (!selectedBinding_) { resourceImages_->setCurrentIndex(0); replayTimer_.start(); }
@@ -2471,7 +2457,7 @@ void MainWindow::inspectResource(Id id) {
         if (selectedResource_ != id) {
             clearBufferDetails();
             ++revision_;
-            if (process_.state() != QProcess::NotRunning || imageJob_)
+            if (process_.state() != QProcess::NotRunning || artifactJob_)
                 cancel();
             textureTimer_.stop();
             bufferTimer_.stop();
@@ -2874,7 +2860,7 @@ void MainWindow::previewTexture() {
     const auto &entry = frame_->entry(selectedResource_);
     if (entry.type < 0x84 || entry.type > 0x87)
         return;
-    if (process_.state() != QProcess::NotRunning || imageJob_) {
+    if (process_.state() != QProcess::NotRunning || artifactJob_) {
         cancel();
         textureTimer_.start();
         return;
@@ -2950,7 +2936,7 @@ void MainWindow::exportTexture() {
 void MainWindow::previewBuffer() {
     if (!frame_ || !selectedResource_ || frame_->entry(selectedResource_).type != 0x83)
         return;
-    if (process_.state() != QProcess::NotRunning || imageJob_) {
+    if (process_.state() != QProcess::NotRunning || artifactJob_) {
         cancel();
         bufferTimer_.start();
         return;
@@ -2963,6 +2949,12 @@ void MainWindow::previewBuffer() {
     }
     QStringList args{"buffer",   capturePath_,           "--id", QString::number(selectedResource_),
                      "--offset", QString::number(offset)};
+    const auto byteWidth = frame_->resource(selectedResource_).desc.at(0);
+    if (offset > byteWidth) {
+        showError("Buffer offset exceeds resource size.");
+        return;
+    }
+    BufferRequest request{selectedResource_, offset, byteWidth - offset};
     if (!bufferLength_->text().trimmed().isEmpty()) {
         auto length = bufferLength_->text().toULongLong(&valid, 0);
         if (!valid) {
@@ -2970,6 +2962,11 @@ void MainWindow::previewBuffer() {
             return;
         }
         args << "--length" << QString::number(length);
+        if (length > byteWidth - offset) {
+            showError("Buffer range exceeds resource size.");
+            return;
+        }
+        request.length = length;
     }
     if (bufferBoundary_->currentIndex()) {
         if (!selectedEvent_) {
@@ -2977,6 +2974,8 @@ void MainWindow::previewBuffer() {
             return;
         }
         args << "--event" << QString::number(selectedEvent_);
+        request.event = selectedEvent_;
+        request.before = bufferBoundary_->currentIndex() == 1;
         if (bufferBoundary_->currentIndex() == 1)
             args << "--before";
     }
@@ -2985,6 +2984,7 @@ void MainWindow::previewBuffer() {
     clearBufferDetails();
     displayedBuffer_ = 0;
     bufferLabel_->clear();
+    runningBuffer_ = request;
     startWorker(args, false);
 }
 void MainWindow::exportBuffer() {
@@ -3095,7 +3095,7 @@ void MainWindow::experimentChanged() {
             }
         }
     }
-    if (process_.state() != QProcess::NotRunning || imageJob_)
+    if (process_.state() != QProcess::NotRunning || artifactJob_)
         cancel();
     if (selectedResource_) {
         auto type = frame_->entry(selectedResource_).type;

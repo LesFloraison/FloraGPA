@@ -14,12 +14,17 @@
 #include <QStatusBar>
 #include <QtTest>
 using namespace flora;
+#include "BufferRecovery.h"
 class WorkerRecoveryTests final : public QObject {
     Q_OBJECT
   private slots:
     void isolatedRecovery_data() {
         QTest::addColumn<QString>("mode");
         for (const auto mode : {"missing", "stderr-tail", "stderr-lines", "crash", "invalid-report", "no-output", "missing-image", "cancel", "image-size", "image-pixels", "image-raw-missing", "image-raw-short", "image-raw-long", "image-raw-hash", "image-hash-missing", "image-unavailable-files", "image-unavailable-type", "image-valid", "image-async-cancel", "image-async-switch", "image-async-close", "image-async-destroy", "image-async-success"})
+            QTest::newRow(mode) << QString(mode);
+        for (auto mode : {"buffer-valid", "buffer-short", "buffer-hash", "buffer-resource", "buffer-range",
+                          "buffer-boundary", "buffer-async-cancel", "buffer-async-switch", "buffer-async-close",
+                          "buffer-async-destroy", "buffer-async-success"})
             QTest::newRow(mode) << QString(mode);
         if (qEnvironmentVariableIsSet("FLORA_TEST_WORKER_TIMEOUT")) QTest::newRow("timeout") << QString("timeout");
     }
@@ -48,7 +53,7 @@ class WorkerRecoveryTests final : public QObject {
         child.setProcessEnvironment(env);
         child.setCreateProcessArgumentsModifier([](QProcess::CreateProcessArguments *args) { args->flags |= CREATE_NO_WINDOW; });
         const auto log = isolation.filePath("child.txt");
-        child.start(executable, {"exerciseRecovery", "-o", log + ",txt"});
+        child.start(executable, {mode.startsWith("buffer-") ? "exerciseBufferRecovery" : "exerciseRecovery", "-o", log + ",txt"});
         QVERIFY(child.waitForStarted());
         const auto cleanup = qScopeGuard([&] { if (child.state() != QProcess::NotRunning) { child.kill(); child.waitForFinished(); } });
         QTRY_COMPARE_WITH_TIMEOUT(child.state(), QProcess::NotRunning, 240000);
@@ -58,6 +63,7 @@ class WorkerRecoveryTests final : public QObject {
         QCOMPARE(child.exitStatus(), QProcess::NormalExit);
         QCOMPARE(child.exitCode(), 0);
     }
+    void exerciseBufferRecovery() { ::exerciseBufferRecovery(); }
     void exerciseRecovery() {
         const auto root = qEnvironmentVariable("FLORA_FAULT_ROOT");
         if (root.isEmpty()) QSKIP("Runs only inside the parent-owned temporary executable directory");

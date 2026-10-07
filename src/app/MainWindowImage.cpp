@@ -10,8 +10,9 @@
 
 namespace flora {
 namespace {
-struct ImageResult {
+struct ArtifactResult {
     PreparedImage image;
+    QByteArray buffer;
     QString error;
     bool cancelled = false;
 };
@@ -25,24 +26,25 @@ QString MainWindow::boundaryLabel(const QJsonObject &report) {
         return "Final";
     return (when == "before_event" ? QString("Before %1") : QString("After %1")).arg(event);
 }
-void MainWindow::validateWorkerImage(const QByteArray &reportBytes) {
-    auto job = std::make_shared<ImageJob>();
+void MainWindow::validateWorkerArtifact(const QByteArray &reportBytes) {
+    auto job = std::make_shared<ArtifactJob>();
     job->directory = std::move(jobDir_);
     job->report = report_;
     job->reportBytes = reportBytes;
     job->kind = runningKind_;
     job->revision = runningRevision_;
     job->timings = runningTimings_;
-    imageJob_ = job;
+    job->buffer = runningBuffer_;
+    artifactJob_ = job;
     setBusy(true);
-    auto watcher = new QFutureWatcher<ImageResult>(this);
-    watcher->setObjectName("imageValidation");
-    connect(watcher, &QFutureWatcher<ImageResult>::finished, this, [this, watcher, job] {
+    auto watcher = new QFutureWatcher<ArtifactResult>(this);
+    watcher->setObjectName(job->kind == "buffer" ? "bufferValidation" : "imageValidation");
+    connect(watcher, &QFutureWatcher<ArtifactResult>::finished, this, [this, watcher, job] {
         watcher->deleteLater();
         const auto result = watcher->result();
-        if (imageJob_ != job)
+        if (artifactJob_ != job)
             return;
-        imageJob_.reset();
+        artifactJob_.reset();
         setBusy(false);
         if (job->cancelled.load() || result.cancelled || job->revision != revision_) {
             if (!loadCancel_)
@@ -60,6 +62,18 @@ void MainWindow::validateWorkerImage(const QByteArray &reportBytes) {
         runningTimings_ = job->timings;
         jobDir_ = std::move(job->directory);
         try {
+            if (job->kind == "buffer") {
+                bufferModel_->setBytes(result.buffer, job->buffer.offset);
+                displayedBuffer_ = job->buffer.resource;
+                showBufferDetails(report_);
+                bufferLabel_->setText(QString("  B:%1 · %2 bytes · %3")
+                                          .arg(displayedBuffer_)
+                                          .arg(job->buffer.length)
+                                          .arg(boundaryLabel(report_)));
+                statusBar()->showMessage("Buffer ready", 3000);
+                emit taskFinished(true);
+                return;
+            }
             acceptWorkerImage(result.image, job->reportBytes);
         } catch (const std::exception &error) {
             showError(QString::fromUtf8(error.what()));
@@ -69,12 +83,17 @@ void MainWindow::validateWorkerImage(const QByteArray &reportBytes) {
     // Capture only immutable request data and its owned directory. Closing the
     // window cancels the token; a pending decoder never dereferences the window.
     watcher->setFuture(QtConcurrent::run([job] {
-        ImageResult result;
+        ArtifactResult result;
         try {
             const auto cancelled = [job] { return job->cancelled.load(); };
-            auto image = readWorkerImage(job->directory->filePath("result"), job->report,
-                                         job->kind == "replay", cancelled);
-            result.image = prepareImageForDisplay(std::move(image), cancelled);
+            if (job->kind == "buffer")
+                result.buffer = readWorkerBuffer(job->directory->filePath("result"), job->report,
+                                                job->buffer, cancelled);
+            else {
+                auto image = readWorkerImage(job->directory->filePath("result"), job->report,
+                                            job->kind == "replay", cancelled);
+                result.image = prepareImageForDisplay(std::move(image), cancelled);
+            }
         } catch (const OperationCancelled &) {
             result.cancelled = true;
         } catch (const std::exception &error) {
@@ -82,7 +101,7 @@ void MainWindow::validateWorkerImage(const QByteArray &reportBytes) {
         }
         return result;
     }));
-    statusBar()->showMessage("Validating image…");
+    statusBar()->showMessage(job->kind == "buffer" ? "Validating buffer…" : "Validating image…");
 }
 void MainWindow::acceptWorkerImage(PreparedImage result, const QByteArray &reportBytes) {
     const bool outputAvailable = runningKind_ != "replay" || report_["image_available"].toBool(true);
