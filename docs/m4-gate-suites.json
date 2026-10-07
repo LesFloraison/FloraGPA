@@ -1,8 +1,8 @@
 {
   "schema": "FloraGPA compatibility gate suites 1",
-  "expected_cases": 511,
-  "expected_unique_captures": 501,
-  "expected_rejections": 28,
+  "expected_cases": 517,
+  "expected_unique_captures": 507,
+  "expected_rejections": 30,
   "suites": [
     {
       "id": "corpus",
@@ -656,6 +656,37 @@
           "runtime_error": "Event 23 (Draw): Resource 24: initial minimum LOD is unresolved at this access"
         },
         "mip_count_4": {
+          "findings": [
+            {
+              "kind": "resource_lod_unresolved",
+              "event_id": 23,
+              "resource_id": 24,
+              "record_type": 55
+            }
+          ],
+          "runtime_error": "Event 23 (Draw): Resource 24: initial minimum LOD is unresolved at this access"
+        }
+      }
+    },
+    {
+      "id": "sm40_mip",
+      "manifest": "docs/sm40-mip-corpus.json",
+      "manifest_sha256": "060fcd02e3aa728c4d57926790f90da89e6182206d1f941cfc93a1d0a814d86b",
+      "capture_root": "artifacts",
+      "subdirectory": "",
+      "expected_rejections": {
+        "sm40_mip_8": {
+          "findings": [
+            {
+              "kind": "resource_lod_unresolved",
+              "event_id": 23,
+              "resource_id": 24,
+              "record_type": 55
+            }
+          ],
+          "runtime_error": "Event 23 (Draw): Resource 24: initial minimum LOD is unresolved at this access"
+        },
+        "sm40_mip_10": {
           "findings": [
             {
               "kind": "resource_lod_unresolved",

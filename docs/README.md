@@ -34,6 +34,7 @@ chronology remains in Chinese.
 | Mixed UAV slots with independent hidden-counter dependencies | [Per-slot counter compatibility](COUNTER_SLOT_COMPATIBILITY.md) |
 | Indexed UAV access without consuming an unavailable hidden count | [Counter usage compatibility](COUNTER_USAGE_COMPATIBILITY.md) |
 | Mip-count metadata without consuming omitted initial MinLOD | [Mip-count compatibility](MIP_COUNT_LOD_COMPATIBILITY.md) |
+| SM4.0 full-vector mip queries with provably unused dimension lanes | [SM4.0 mip dimension proof](SM40_MIP_DIMENSIONS.md) |
 | Deferred versions, original expansion and M3 boundaries | [Deferred version audit](DEFERRED_VERSION_AUDIT.md) |
 | Merged lists and capture-side loss versus faithful replay | [Deferred merge audit](DEFERRED_MERGE_AUDIT.md) |
 | Original dependency initialization and version/list ordering | [Initialization scheduler audit](INITIALIZATION_SCHEDULER_AUDIT.md) |

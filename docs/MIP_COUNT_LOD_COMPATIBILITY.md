@@ -1,5 +1,9 @@
 # Mip-count metadata without an initial resource MinLOD
 
+The later [SM4.0 dimension-lane proof](SM40_MIP_DIMENSIONS.md) supersedes this
+batch's full-vector SM4.0 limitation for a checked straight-line subset. The
+counts and remaining limits below describe this original batch.
+
 Reviewed 2026-10-08. This M4 correction removes three demonstrated false
 rejections. It neither reconstructs omitted MinLOD state nor changes a shader,
 event, texture byte or global image-comparison threshold.

@@ -1,0 +1,198 @@
+{
+  "schema": "FloraGPA compatibility corpus 1",
+  "profile": "GPA 2025 R1 legacy DX11 / IGPA v3",
+  "cases": [
+    {
+      "id": "sm40_mip_6",
+      "path": "m4-sm40-mip-originals-final/6/capture.gpa_frame",
+      "sha256": "35ff71e4df0167003bb37f5d9bcc2399cb994c44626fcba50a6dd184e7f88c10",
+      "bytes": 60992,
+      "family": "sm40_mip",
+      "origin": "self_owned_original_gpa_capture",
+      "provenance_note": "Untouched GPA 2025 R1 capture; native hardware/WARP and injected producer check 12 full images each.",
+      "device_scope": "Producer hardware/WARP identities recorded; original player adapter unverified.",
+      "reference_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "reference_scope": "Full 8x8 native application image",
+      "comparison_policy": "exact_golden",
+      "controls": [],
+      "boundaries": [],
+      "covers": [
+        "SM4.0 Mip-count only"
+      ],
+      "native_workload_fidelity": "passed",
+      "fidelity_reason": "Saved count and proven unused dimension lanes do not consume omitted MinLOD",
+      "application_reference_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "application_reference_scope": "Full native hardware/WARP/injected application images: 36 per mode",
+      "application_reference_evidence": {
+        "path": "m4-sm40-mip-originals-final/6/hardware/expected.rgba",
+        "sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+      },
+      "source_manifests": [
+        {
+          "path": "m4-sm40-mip-originals-final/manifest.json",
+          "sha256": "0695fd2f93a47a51322bb7ec3fe760cbc6d3b17c85fb24eb595e599cd31ecb38"
+        }
+      ]
+    },
+    {
+      "id": "sm40_mip_7",
+      "path": "m4-sm40-mip-originals-final/7/capture.gpa_frame",
+      "sha256": "6b0f20ddc3328a5d4ddbe8bf88a21f12cb188125f8ac8083dee3bb93606d14dd",
+      "bytes": 60748,
+      "family": "sm40_mip",
+      "origin": "self_owned_original_gpa_capture",
+      "provenance_note": "Untouched GPA 2025 R1 capture; native hardware/WARP and injected producer check 12 full images each.",
+      "device_scope": "Producer hardware/WARP identities recorded; original player adapter unverified.",
+      "reference_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "reference_scope": "Full 8x8 native application image",
+      "comparison_policy": "exact_golden",
+      "controls": [],
+      "boundaries": [],
+      "covers": [
+        "SM4.0 Reflection-stripped mip-count only"
+      ],
+      "native_workload_fidelity": "passed",
+      "fidelity_reason": "Saved count and proven unused dimension lanes do not consume omitted MinLOD",
+      "application_reference_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "application_reference_scope": "Full native hardware/WARP/injected application images: 36 per mode",
+      "application_reference_evidence": {
+        "path": "m4-sm40-mip-originals-final/7/hardware/expected.rgba",
+        "sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+      },
+      "source_manifests": [
+        {
+          "path": "m4-sm40-mip-originals-final/manifest.json",
+          "sha256": "0695fd2f93a47a51322bb7ec3fe760cbc6d3b17c85fb24eb595e599cd31ecb38"
+        }
+      ]
+    },
+    {
+      "id": "sm40_mip_8",
+      "path": "m4-sm40-mip-originals-final/8/capture.gpa_frame",
+      "sha256": "caede2587e430040c2c43f606a0261c09d45a4ffc13aff0b024350b4ed27a372",
+      "bytes": 61012,
+      "family": "sm40_mip",
+      "origin": "self_owned_original_gpa_capture",
+      "provenance_note": "Untouched GPA 2025 R1 capture; native hardware/WARP and injected producer check 12 full images each.",
+      "device_scope": "Producer hardware/WARP identities recorded; original player adapter unverified.",
+      "reference_rgba_sha256": "3d6876a0146de8576eb2395a858de1213d1b92c65b779df3a331cfd5a4584546",
+      "reference_scope": "Full 8x8 native application image",
+      "comparison_policy": "exact_golden",
+      "controls": [],
+      "boundaries": [],
+      "covers": [
+        "SM4.0 Mip dimensions depend on unknown clamp"
+      ],
+      "native_workload_fidelity": "capture_information_missing",
+      "fidelity_reason": "Initial LOD omitted but consumed by dimensions or sampling",
+      "application_reference_rgba_sha256": "3d6876a0146de8576eb2395a858de1213d1b92c65b779df3a331cfd5a4584546",
+      "application_reference_scope": "Full native hardware/WARP/injected application images: 36 per mode",
+      "application_reference_evidence": {
+        "path": "m4-sm40-mip-originals-final/8/hardware/expected.rgba",
+        "sha256": "3d6876a0146de8576eb2395a858de1213d1b92c65b779df3a331cfd5a4584546"
+      },
+      "source_manifests": [
+        {
+          "path": "m4-sm40-mip-originals-final/manifest.json",
+          "sha256": "0695fd2f93a47a51322bb7ec3fe760cbc6d3b17c85fb24eb595e599cd31ecb38"
+        }
+      ]
+    },
+    {
+      "id": "sm40_mip_9",
+      "path": "m4-sm40-mip-originals-final/9/capture.gpa_frame",
+      "sha256": "c2b3560c582aa8362b0683a8b9d73b85f77205d6751e3d15839604688909b6e2",
+      "bytes": 61164,
+      "family": "sm40_mip",
+      "origin": "self_owned_original_gpa_capture",
+      "provenance_note": "Untouched GPA 2025 R1 capture; native hardware/WARP and injected producer check 12 full images each.",
+      "device_scope": "Producer hardware/WARP identities recorded; original player adapter unverified.",
+      "reference_rgba_sha256": "95b955e50330dfa31fbe29cfc3d2b1b68cf9c46bb369bfa126f01741c152fd52",
+      "reference_scope": "Full 8x8 native application image",
+      "comparison_policy": "exact_golden",
+      "controls": [],
+      "boundaries": [],
+      "covers": [
+        "SM4.0 Mip-count with ordinary-resource sampling"
+      ],
+      "native_workload_fidelity": "passed",
+      "fidelity_reason": "Saved count and proven unused dimension lanes do not consume omitted MinLOD",
+      "application_reference_rgba_sha256": "95b955e50330dfa31fbe29cfc3d2b1b68cf9c46bb369bfa126f01741c152fd52",
+      "application_reference_scope": "Full native hardware/WARP/injected application images: 36 per mode",
+      "application_reference_evidence": {
+        "path": "m4-sm40-mip-originals-final/9/hardware/expected.rgba",
+        "sha256": "95b955e50330dfa31fbe29cfc3d2b1b68cf9c46bb369bfa126f01741c152fd52"
+      },
+      "source_manifests": [
+        {
+          "path": "m4-sm40-mip-originals-final/manifest.json",
+          "sha256": "0695fd2f93a47a51322bb7ec3fe760cbc6d3b17c85fb24eb595e599cd31ecb38"
+        }
+      ]
+    },
+    {
+      "id": "sm40_mip_10",
+      "path": "m4-sm40-mip-originals-final/10/capture.gpa_frame",
+      "sha256": "f3246e9bfbfb3535a98e30d6815c6e15473b0e1369b8a31bf73d7144a75eb0d9",
+      "bytes": 61108,
+      "family": "sm40_mip",
+      "origin": "self_owned_original_gpa_capture",
+      "provenance_note": "Untouched GPA 2025 R1 capture; native hardware/WARP and injected producer check 12 full images each.",
+      "device_scope": "Producer hardware/WARP identities recorded; original player adapter unverified.",
+      "reference_rgba_sha256": "95b955e50330dfa31fbe29cfc3d2b1b68cf9c46bb369bfa126f01741c152fd52",
+      "reference_scope": "Full 8x8 native application image",
+      "comparison_policy": "exact_golden",
+      "controls": [],
+      "boundaries": [],
+      "covers": [
+        "SM4.0 Mip-count plus sampling the same clamped resource"
+      ],
+      "native_workload_fidelity": "capture_information_missing",
+      "fidelity_reason": "Initial LOD omitted but consumed by dimensions or sampling",
+      "application_reference_rgba_sha256": "95b955e50330dfa31fbe29cfc3d2b1b68cf9c46bb369bfa126f01741c152fd52",
+      "application_reference_scope": "Full native hardware/WARP/injected application images: 36 per mode",
+      "application_reference_evidence": {
+        "path": "m4-sm40-mip-originals-final/10/hardware/expected.rgba",
+        "sha256": "95b955e50330dfa31fbe29cfc3d2b1b68cf9c46bb369bfa126f01741c152fd52"
+      },
+      "source_manifests": [
+        {
+          "path": "m4-sm40-mip-originals-final/manifest.json",
+          "sha256": "0695fd2f93a47a51322bb7ec3fe760cbc6d3b17c85fb24eb595e599cd31ecb38"
+        }
+      ]
+    },
+    {
+      "id": "sm40_mip_11",
+      "path": "m4-sm40-mip-originals-final/11/capture.gpa_frame",
+      "sha256": "4f2fa7f48a55313a35498cbee6c1a9cef3705d47a35639a49a78ba196090f108",
+      "bytes": 61160,
+      "family": "sm40_mip",
+      "origin": "self_owned_original_gpa_capture",
+      "provenance_note": "Untouched GPA 2025 R1 capture; native hardware/WARP and injected producer check 12 full images each.",
+      "device_scope": "Producer hardware/WARP identities recorded; original player adapter unverified.",
+      "reference_rgba_sha256": "95b955e50330dfa31fbe29cfc3d2b1b68cf9c46bb369bfa126f01741c152fd52",
+      "reference_scope": "Full 8x8 native application image",
+      "comparison_policy": "exact_golden",
+      "controls": [],
+      "boundaries": [],
+      "covers": [
+        "SM4.0 Explicit saved LOD setter control"
+      ],
+      "native_workload_fidelity": "passed",
+      "fidelity_reason": "Saved count and proven unused dimension lanes do not consume omitted MinLOD",
+      "application_reference_rgba_sha256": "95b955e50330dfa31fbe29cfc3d2b1b68cf9c46bb369bfa126f01741c152fd52",
+      "application_reference_scope": "Full native hardware/WARP/injected application images: 36 per mode",
+      "application_reference_evidence": {
+        "path": "m4-sm40-mip-originals-final/11/hardware/expected.rgba",
+        "sha256": "95b955e50330dfa31fbe29cfc3d2b1b68cf9c46bb369bfa126f01741c152fd52"
+      },
+      "source_manifests": [
+        {
+          "path": "m4-sm40-mip-originals-final/manifest.json",
+          "sha256": "0695fd2f93a47a51322bb7ec3fe760cbc6d3b17c85fb24eb595e599cd31ecb38"
+        }
+      ]
+    }
+  ]
+}
