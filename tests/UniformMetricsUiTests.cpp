@@ -1,3 +1,4 @@
+#include "MetricFileDialog.h"
 #include "app/Appearance.h"
 #include "app/FrameRangeDialog.h"
 #include "app/IntelMetricsView.h"
@@ -51,20 +52,7 @@ void copyTree(const QString &from, const QString &to) {
     }
 }
 void fileAction(MainWindow &window, const char *name, const QString &path) {
-    bool handled = false;
-    QTimer timer;
-    QObject::connect(&timer, &QTimer::timeout, &window, [&] {
-        auto d = window.findChild<QFileDialog *>();
-        if (!d || !d->isVisible())
-            return;
-        timer.stop();
-        d->selectFile(path);
-        handled = true;
-        QMetaObject::invokeMethod(d, "accept", Qt::QueuedConnection);
-    });
-    timer.start(20);
-    window.findChild<QAction *>(name)->trigger();
-    QVERIFY(handled);
+    testing::metricFileAction(window, name, path);
 }
 } // namespace
 class UniformMetricsUiTests : public QObject {

@@ -1,3 +1,4 @@
+#include "MetricFileDialog.h"
 #include "app/Appearance.h"
 #include "app/IntelMetricsView.h"
 #include "app/MainWindow.h"
@@ -31,20 +32,7 @@ void save(const QString &path, const Json &value) {
     f.write(QByteArray::fromStdString(value.dump(2)));
 }
 void fileAction(MainWindow &window, const char *name, const QString &path) {
-    bool handled = false;
-    QTimer timer;
-    QObject::connect(&timer, &QTimer::timeout, &window, [&] {
-        auto dialog = window.findChild<QFileDialog *>();
-        if (!dialog || !dialog->isVisible())
-            return;
-        timer.stop();
-        dialog->selectFile(path);
-        handled = true;
-        QMetaObject::invokeMethod(dialog, "accept", Qt::QueuedConnection);
-    });
-    timer.start(20);
-    window.findChild<QAction *>(name)->trigger();
-    QVERIFY(handled);
+    testing::metricFileAction(window, name, path);
 }
 } // namespace
 class ScheduledMetricsUiTests : public QObject {
