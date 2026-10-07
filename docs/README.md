@@ -16,6 +16,7 @@ chronology remains in Chinese.
 | Read common Worker reports with cancellation and prepare replay export JSON | [Worker report acceptance](WORKER_REPORT_ACCEPTANCE.md) |
 | Read geometry, state, predicate and numeric analyzer payloads in background jobs | [Analyzer payload acceptance](ANALYZER_PAYLOAD_ACCEPTANCE.md) |
 | Validate Coverage/Quad attachments and prepare diagnostic pixels before publication | [Diagnostic attachment acceptance](DIAGNOSTIC_ATTACHMENT_ACCEPTANCE.md) |
+| Prepare resource thumbnails in the background and reject incomplete or mismatched batches | [Thumbnail acceptance](THUMBNAIL_ACCEPTANCE.md) |
 | Keep image validation responsive and discard cancelled results | [Asynchronous image validation](ASYNC_IMAGE_VALIDATION.md) |
 | Prepare replay/texture painting pixels before publishing them to Qt | [Image display preparation](IMAGE_DISPLAY_PREPARATION.md) |
 | Current capabilities and known limits | [Current status](CURRENT_STATUS.md) |

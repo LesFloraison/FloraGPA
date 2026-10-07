@@ -6,6 +6,9 @@ Quad attachment reading, validation and image preparation. It does not add a
 capture format, replay command or new analysis metric.
 Implementation: `6b01ad8`.
 
+The subsequent [thumbnail batch](THUMBNAIL_ACCEPTANCE.md) changes the GUI again.
+The package and observations below remain the evidence for this diagnostic batch.
+
 ## Contract
 
 The existing request-owned report job reads fixed filenames and returns owned
