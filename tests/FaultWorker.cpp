@@ -21,6 +21,10 @@ int wmain(int argc, wchar_t **argv) {
         std::filesystem::create_directories(out);
         for (const auto &file : std::filesystem::directory_iterator(root))
             std::filesystem::copy_file(file.path(), out / file.path().filename());
+        // Test-owned evidence for cleanup after destroying a validating window.
+        if (mode == "image-async-destroy")
+            std::ofstream(std::filesystem::path(root) / "validation-directory.txt", std::ios::binary)
+                << out.generic_string();
         return 0;
     }
     if (mode == "invalid-report") {

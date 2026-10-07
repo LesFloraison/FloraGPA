@@ -10,6 +10,43 @@ using namespace flora;
 class WorkerImageTests final : public QObject {
     Q_OBJECT
   private slots:
+    void cancellation() {
+        QTemporaryDir dir;
+        QVERIFY(dir.isValid());
+        // Cross a raw hashing chunk boundary and include RGB-to-RGBA conversion.
+        QImage image(131073, 3, QImage::Format_RGB888);
+        image.fill(QColor(17, 38, 91));
+        QVERIFY(image.save(dir.filePath("frame.png")));
+        const auto rgba = image.convertToFormat(QImage::Format_RGBA8888);
+        QByteArray bytes;
+        for (int y = 0; y < rgba.height(); ++y)
+            bytes.append(reinterpret_cast<const char *>(rgba.constScanLine(y)), rgba.width() * 4);
+        QFile raw(dir.filePath("frame.rgba"));
+        QVERIFY(raw.open(QIODevice::WriteOnly));
+        QCOMPARE(raw.write(bytes), bytes.size());
+        raw.close();
+        QJsonObject report{
+            {"image_available", true},
+            {"width", image.width()},
+            {"height", image.height()},
+            {"rgba_sha256",
+             QString::fromLatin1(QCryptographicHash::hash(bytes, QCryptographicHash::Sha256).toHex())}};
+        unsigned checks = 0;
+        QCOMPARE(readWorkerImage(dir.path(), report, true,
+                                 [&] {
+                                     ++checks;
+                                     return false;
+                                 }),
+                 rgba);
+        QVERIFY(checks >= 10);
+        for (unsigned stop = 1; stop <= checks; ++stop) {
+            unsigned at = 0;
+            QVERIFY_EXCEPTION_THROWN(readWorkerImage(dir.path(), report, true, [&] { return ++at == stop; }),
+                                     OperationCancelled);
+            QCOMPARE(readWorkerImage(dir.path(), report, true), rgba);
+        }
+        qInfo() << "Image interruption/retry positions" << checks;
+    }
     void artifacts_data() {
         QTest::addColumn<QString>("mode");
         for (const auto mode : {"rgba",

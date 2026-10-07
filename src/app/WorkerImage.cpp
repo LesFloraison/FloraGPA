@@ -19,7 +19,9 @@ int dimension(const QJsonValue &value) {
     return int(n);
 }
 } // namespace
-QImage readWorkerImage(const QString &directory, const QJsonObject &report, bool replay) {
+QImage readWorkerImage(const QString &directory, const QJsonObject &report, bool replay,
+                       const CancelCheck &cancelled) {
+    checkCancellation(cancelled);
     const QDir root(directory);
     const auto png = root.filePath("frame.png"), rawPath = root.filePath("frame.rgba");
     if (replay && !report["image_available"].isBool())
@@ -40,6 +42,7 @@ QImage readWorkerImage(const QString &directory, const QJsonObject &report, bool
     QImageReader reader(png, "png");
     if (reader.size() != size)
         throw std::runtime_error("Worker PNG dimensions do not match the report");
+    checkCancellation(cancelled);
     // Hash the raw file without allocating a second full-sized image buffer.
     const auto length = qint64(size.width()) * size.height() * 4;
     QFile raw(rawPath);
@@ -48,21 +51,34 @@ QImage readWorkerImage(const QString &directory, const QJsonObject &report, bool
     if (raw.size() != length)
         throw std::runtime_error("Worker RGBA length does not match the report");
     QCryptographicHash rawHash(QCryptographicHash::Sha256);
-    if (!rawHash.addData(&raw) || raw.pos() != length || raw.size() != length ||
-        raw.error() != QFileDevice::NoError)
+    QByteArray chunk(1024 * 1024, Qt::Uninitialized);
+    while (raw.pos() < length) {
+        checkCancellation(cancelled);
+        const auto count = raw.read(chunk.data(), std::min<qint64>(chunk.size(), length - raw.pos()));
+        if (count <= 0)
+            throw std::runtime_error("Cannot read complete worker RGBA output");
+        rawHash.addData(QByteArrayView(chunk.constData(), count));
+    }
+    checkCancellation(cancelled);
+    if (raw.pos() != length || raw.size() != length || raw.error() != QFileDevice::NoError)
         throw std::runtime_error("Cannot read complete worker RGBA output");
     if (rawHash.result().toHex() != expectedHash)
         throw std::runtime_error("Worker RGBA hash does not match the report");
     auto image = reader.read();
+    checkCancellation(cancelled);
     if (image.isNull() || image.size() != size)
         throw std::runtime_error("Worker PNG output is incomplete or unreadable");
     image = image.convertToFormat(QImage::Format_RGBA8888);
+    checkCancellation(cancelled);
     if (image.isNull())
         throw std::runtime_error("Cannot allocate worker image conversion");
     QCryptographicHash imageHash(QCryptographicHash::Sha256);
-    for (int y = 0; y < image.height(); ++y)
+    for (int y = 0; y < image.height(); ++y) {
+        checkCancellation(cancelled);
         imageHash.addData(QByteArrayView(reinterpret_cast<const char *>(image.constScanLine(y)),
                                          qsizetype(image.width()) * 4));
+    }
+    checkCancellation(cancelled);
     if (imageHash.result().toHex() != expectedHash)
         throw std::runtime_error("Worker PNG pixels do not match the report");
     return image;

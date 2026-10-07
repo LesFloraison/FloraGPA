@@ -45,7 +45,7 @@ class MainWindow final : public QMainWindow {
     ~MainWindow() override;
     void openCapture(const QString &path);
     void replay(bool timings = false);
-    bool busy() const { return process_.state() != QProcess::NotRunning || bool(loadCancel_); }
+    bool busy() const { return process_.state() != QProcess::NotRunning || bool(loadCancel_) || bool(imageJob_); }
     QString capturePath() const { return capturePath_; }
     void setShaderTool(const QString &path) { shaderTool_ = path; }
   signals:
@@ -127,6 +127,9 @@ class MainWindow final : public QMainWindow {
     void startWorker(QStringList args, bool timings);
     void readScheduledMetrics(bool catalog, uint64_t serial);
     void finishWorker(int, QProcess::ExitStatus);
+    void validateWorkerImage(const QByteArray &reportBytes);
+    void acceptWorkerImage(QImage result, const QByteArray &reportBytes);
+    static QString boundaryLabel(const QJsonObject &report);
     void consumeWorkerError(bool flush);
     void cancel();
     void showError(const QString &error);
@@ -280,6 +283,16 @@ class MainWindow final : public QMainWindow {
     };
     QFutureWatcher<CaptureLoadResult> loader_;
     std::shared_ptr<std::atomic_bool> loadCancel_;
+    struct ImageJob {
+        std::unique_ptr<QTemporaryDir> directory;
+        QJsonObject report;
+        QByteArray reportBytes;
+        QString kind;
+        uint64_t revision{};
+        bool timings{};
+        std::atomic_bool cancelled{false};
+    };
+    std::shared_ptr<ImageJob> imageJob_;
     std::unique_ptr<QTemporaryDir> jobDir_;
     QTimer replayTimer_, timeout_;
     QByteArray stderrBuffer_;

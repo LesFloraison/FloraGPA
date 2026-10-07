@@ -19,7 +19,7 @@ class WorkerRecoveryTests final : public QObject {
   private slots:
     void isolatedRecovery_data() {
         QTest::addColumn<QString>("mode");
-        for (const auto mode : {"missing", "stderr-tail", "stderr-lines", "crash", "invalid-report", "no-output", "missing-image", "cancel", "image-size", "image-pixels", "image-raw-missing", "image-raw-short", "image-raw-long", "image-raw-hash", "image-hash-missing", "image-unavailable-files", "image-unavailable-type", "image-valid"})
+        for (const auto mode : {"missing", "stderr-tail", "stderr-lines", "crash", "invalid-report", "no-output", "missing-image", "cancel", "image-size", "image-pixels", "image-raw-missing", "image-raw-short", "image-raw-long", "image-raw-hash", "image-hash-missing", "image-unavailable-files", "image-unavailable-type", "image-valid", "image-async-cancel", "image-async-switch", "image-async-close", "image-async-destroy", "image-async-success"})
             QTest::newRow(mode) << QString(mode);
         if (qEnvironmentVariableIsSet("FLORA_TEST_WORKER_TIMEOUT")) QTest::newRow("timeout") << QString("timeout");
     }
@@ -67,7 +67,8 @@ class WorkerRecoveryTests final : public QObject {
         const auto mode = qEnvironmentVariable("FLORA_FAULT_MODE");
         const auto path = QDir(root).filePath("frame.gpa_frame");
         testing::msaaOutputCapture(false).save(path);
-        MainWindow window;
+        auto owner = std::make_unique<MainWindow>();
+        auto &window = *owner;
         QSignalSpy done(&window, &MainWindow::taskFinished);
         QVERIFY(QFile::copy(qEnvironmentVariable("FLORA_REAL_WORKER"), worker));
         window.openCapture(path);
@@ -84,6 +85,10 @@ class WorkerRecoveryTests final : public QObject {
             QVERIFY(QDir().mkpath(fixture));
             qputenv("FLORA_FAULT_IMAGE_ROOT", fixture.toUtf8());
             auto rgba = expected.convertToFormat(QImage::Format_RGBA8888);
+            if (mode.startsWith("image-async-")) {
+                rgba = QImage(4096, 4096, QImage::Format_RGBA8888);
+                rgba.fill(QColor(53, 97, 179, 211));
+            }
             QByteArray raw;
             for (int y = 0; y < rgba.height(); ++y)
                 raw.append(reinterpret_cast<const char *>(rgba.constScanLine(y)), rgba.width() * 4);
@@ -111,6 +116,47 @@ class WorkerRecoveryTests final : public QObject {
         if (mode != "missing") QVERIFY(QFile::copy(qEnvironmentVariable("FLORA_FAULT_WORKER"), worker));
         done.clear();
         QElapsedTimer elapsed; elapsed.start();
+        bool validationSeen = false, heartbeat = false;
+        QString switchedPath, validationDirectory;
+        QElapsedTimer validationElapsed;
+        const auto observer = connect(window.statusBar(), &QStatusBar::messageChanged, &window,
+            [&](const QString &message) {
+                if (!mode.startsWith("image-async-") || message != "Validating image…" || validationSeen)
+                    return;
+                validationSeen = true;
+                validationElapsed.start();
+                QVERIFY(window.busy());
+                // The event loop must run while image validation still owns the
+                // request. Cancel also wins if its finished signal is queued.
+                QTimer::singleShot(0, &window, [&] {
+                    heartbeat = true;
+                    QVERIFY(window.busy());
+                    if (mode == "image-async-destroy") {
+                        QFile pathFile(QDir(root).filePath("fault-output/validation-directory.txt"));
+                        QVERIFY(pathFile.open(QIODevice::ReadOnly));
+                        validationDirectory = QString::fromLocal8Bit(pathFile.readAll());
+                        QVERIFY(QFileInfo::exists(validationDirectory));
+                        owner.reset();
+                    } else if (mode == "image-async-success") {
+                        // Leave the validator running; it must accept the full
+                        // large image, not just yield and bypass verification.
+                    } else if (mode == "image-async-close") {
+                        window.close();
+                    } else if (mode == "image-async-switch") {
+                        QVERIFY(QFile::remove(worker));
+                        QVERIFY(QFile::copy(qEnvironmentVariable("FLORA_REAL_WORKER"), worker));
+                        switchedPath = QDir(root).filePath("second.gpa_frame");
+                        testing::msaaOutputCapture(false).save(switchedPath);
+                        window.openCapture(switchedPath);
+                    } else {
+                        for (auto action : window.findChildren<QAction *>())
+                            if (action->shortcut() == QKeySequence(Qt::Key_Escape)) {
+                                QVERIFY(action->isEnabled());
+                                action->trigger();
+                            }
+                    }
+                });
+            });
         window.replay();
         if (mode == "cancel") {
             QTest::qWait(100);
@@ -121,8 +167,30 @@ class WorkerRecoveryTests final : public QObject {
             QVERIFY(cancel && cancel->isEnabled());
             cancel->trigger();
         }
-        QTRY_COMPARE_WITH_TIMEOUT(done.size(), 1, mode == "timeout" ? 210000 : 30000);
-        QCOMPARE(done.last()[0].toBool(), mode == "image-valid");
+        if (mode == "image-async-destroy") {
+            QTRY_VERIFY_WITH_TIMEOUT(!owner, 30000);
+            QVERIFY(validationSeen && heartbeat);
+            QTRY_VERIFY_WITH_TIMEOUT(!QFileInfo::exists(validationDirectory), 30000);
+            QCOMPARE(done.size(), 0);
+            qInfo() << "Destroyed validating window; directory released after" << validationElapsed.elapsed() << "ms";
+            return;
+        }
+        QTRY_COMPARE_WITH_TIMEOUT(done.size(), mode == "image-async-switch" ? 2 : 1, mode == "timeout" ? 210000 : 30000);
+        disconnect(observer);
+        if (mode.startsWith("image-async-")) {
+            QVERIFY(validationSeen && heartbeat);
+            QCOMPARE(done.first()[0].toBool(), mode == "image-async-success");
+            qInfo() << "Image event loop heartbeat; completion after" << validationElapsed.elapsed() << "ms";
+        }
+        if (mode == "image-async-switch") {
+            QVERIFY(done.last()[0].toBool());
+            QCOMPARE(window.capturePath(), switchedPath);
+            QCOMPARE(image->image(), expected);
+            QTest::qWait(100);
+            QCOMPARE(done.size(), 2);
+            return;
+        }
+        QCOMPARE(done.last()[0].toBool(), mode == "image-valid" || mode == "image-async-success");
         QVERIFY(!window.busy());
         unsigned checkedActions = 0;
         for (auto action : window.findChildren<QAction *>()) {
@@ -140,12 +208,17 @@ class WorkerRecoveryTests final : public QObject {
             QCOMPARE(error, QString("Worker timed out."));
         }
         if (mode == "cancel") QCOMPARE(error, QString("Cancelled"));
-        QCOMPARE(image->image(), expected); // A failure never accepts a replacement image.
-        if (mode != "image-valid") {
+        if (mode == "image-async-success") {
+            QImage large(4096, 4096, QImage::Format_RGBA8888);
+            large.fill(QColor(53, 97, 179, 211));
+            QCOMPARE(image->image(), large);
+        } else
+            QCOMPARE(image->image(), expected); // A failure never accepts a replacement image.
+        if (mode != "image-valid" && mode != "image-async-success") {
             QCOMPARE(label->text(), expectedLabel);
             QCOMPARE(label->toolTip(), expectedTooltip);
         }
-        if (mode.startsWith("image-") && mode != "image-valid")
+        if (mode.startsWith("image-") && mode != "image-valid" && !mode.startsWith("image-async-"))
             QVERIFY2(error.startsWith("Worker "), qPrintable(error));
         qInfo().noquote() << "fault_observation" << mode << "elapsed_ms" << elapsed.elapsed() << error;
         if (QFile::exists(worker)) QVERIFY(QFile::remove(worker));

@@ -126,15 +126,6 @@ QString hex(Bytes bytes, size_t limit = 256) {
         QByteArray(reinterpret_cast<const char *>(bytes.data()), qsizetype(std::min(limit, bytes.size())))
             .toHex(' '));
 }
-QString boundaryLabel(const QJsonObject &report) {
-    auto when = report["value_time"].toString();
-    if (when == "capture_initial")
-        return "Initial";
-    auto event = report["event"].toString();
-    if (event.isEmpty())
-        return "Final";
-    return (when == "before_event" ? QString("Before %1") : QString("After %1")).arg(event);
-}
 } // namespace
 MainWindow::MainWindow() {
     buildUi();
@@ -347,6 +338,8 @@ MainWindow::MainWindow() {
             &MainWindow::finishWorker);
 }
 MainWindow::~MainWindow() {
+    if (imageJob_)
+        imageJob_->cancelled.store(true);
     if (loadCancel_)
         loadCancel_->store(true);
     replayTimer_.stop();
@@ -1284,7 +1277,7 @@ void MainWindow::buildUi() {
             return;
         ++revision_;
         ++outputGeneration_;
-        if (process_.state() != QProcess::NotRunning)
+        if (process_.state() != QProcess::NotRunning || imageJob_)
             cancel();
         replayTimer_.start();
     };
@@ -1305,7 +1298,7 @@ void MainWindow::buildUi() {
     connect(boundary_, &QComboBox::currentIndexChanged, this, [this] {
         if (frame_) {
             ++revision_;
-            if (process_.state() != QProcess::NotRunning)
+            if (process_.state() != QProcess::NotRunning || imageJob_)
                 cancel();
             replayTimer_.start();
         }
@@ -1318,7 +1311,7 @@ void MainWindow::buildUi() {
         predicateView_->invalidate();
         gpuStatistics_->invalidate();
         ++revision_;
-        if (process_.state() != QProcess::NotRunning)
+        if (process_.state() != QProcess::NotRunning || imageJob_)
             cancel();
         chart_->clear();
         if (frame_)
@@ -1367,7 +1360,7 @@ void MainWindow::closeEvent(QCloseEvent *e) {
     e->accept();
 }
 void MainWindow::setBusy(bool busy) {
-    busy = bool(loadCancel_) || (busy && runningKind_ != "draw-resources");
+    busy = bool(loadCancel_) || bool(imageJob_) || (busy && runningKind_ != "draw-resources");
     shader_->setReadOnly(busy);
     sourceEditor_->setReadOnly(busy);
     shaderEntry_->setEnabled(!busy);
@@ -1410,7 +1403,8 @@ void MainWindow::setBusy(bool busy) {
     viewAction_->setEnabled(!busy && frame_ && experiment_);
     replayAction_->setEnabled(!busy && bool(frame_));
     collectAction_->setEnabled(!busy && bool(frame_));
-    cancelAction_->setEnabled(busy && (!loadCancel_ || !loadCancel_->load()));
+    cancelAction_->setEnabled(busy && (!loadCancel_ || !loadCancel_->load()) &&
+                              (!imageJob_ || !imageJob_->cancelled.load()));
     progress_->setVisible(busy);
     if (busy) {
         progress_->setRange(0, 0);
@@ -1585,7 +1579,7 @@ void MainWindow::openCapture(const QString &path) {
 void MainWindow::replay(bool timings) {
     if (!frame_ || loadCancel_)
         return;
-    if (process_.state() != QProcess::NotRunning) {
+    if (process_.state() != QProcess::NotRunning || imageJob_) {
         cancel();
         replayTimer_.start();
         return;
@@ -1627,7 +1621,7 @@ void MainWindow::readScheduledMetrics(bool catalog, uint64_t serial) {
     }
 }
 void MainWindow::startWorker(QStringList args, bool timings) {
-    if (process_.state() != QProcess::NotRunning)
+    if (process_.state() != QProcess::NotRunning || imageJob_)
         return;
     runningRecover_ = args.first() == "shader" && args.contains("--recover");
     if (args.first() == "shader" || args.first() == "compile" || args.first() == "compile-project" || args.first() == "assemble")
@@ -1708,6 +1702,11 @@ void MainWindow::startWorker(QStringList args, bool timings) {
     process_.start(QCoreApplication::applicationDirPath() + "/FloraGPA.Worker.exe", args);
 }
 void MainWindow::cancel() {
+    if (imageJob_) {
+        imageJob_->cancelled.store(true);
+        cancelAction_->setEnabled(false);
+        statusBar()->showMessage("Cancelling image validation…");
+    }
     if (loadCancel_) {
         loadCancel_->store(true);
         cancelAction_->setEnabled(false);
@@ -2109,112 +2108,7 @@ void MainWindow::finishWorker(int code, QProcess::ExitStatus status) {
             emit taskFinished(true);
             return;
         }
-        QImage result = readWorkerImage(jobDir_->path() + "/result", report_, runningKind_ == "replay");
-        const bool outputAvailable = runningKind_ != "replay" || report_["image_available"].toBool(true);
-        if (result.isNull() && outputAvailable)
-            throw std::runtime_error("Worker output image is missing");
-        if (runningKind_ == "texture") {
-            textureImage_->setImage(std::move(result));
-            textureImage_->channel("RGBA");
-            textureMetadata_ = report_["texture"].toObject();
-            resourceImagePending_ = false; resourceImageContext_ = historyContextKey();
-            textureDir_ = std::move(jobDir_);
-            textureExportAction_->setEnabled(true);
-            textureLabel_->setText(QString("%1 × %2 · %3")
-                                       .arg(report_["width"].toInt())
-                                       .arg(report_["height"].toInt())
-                                       .arg(boundaryLabel(report_)));
-            if (textureMetadata_.contains("selected_plane")) {
-                const auto plane = textureMetadata_["selected_plane"].toObject();
-                textureLabel_->setText(textureLabel_->text() + " · " + plane["name"].toString().toUpper());
-                textureLabel_->setToolTip(textureMetadata_["capture_plane_notice"].toString());
-            } else
-                textureLabel_->setToolTip(
-                    textureMetadata_["msaa"].toObject()["initialization_note"].toString());
-            statusBar()->showMessage("Texture ready", 3000);
-            const auto planarNotice = textureMetadata_["planar_write_notice"].toString();
-            if (!planarNotice.isEmpty())
-                textureLabel_->setToolTip(textureLabel_->toolTip() + '\n' + planarNotice);
-            emit taskFinished(true);
-            return;
-        }
-        image_->setImage(std::move(result));
-        image_->channel("RGBA");
-        imageLabel_->setText(QString("T:%1  ·  %2 × %3 · %4")
-                                 .arg(report_["resource"].toString())
-                                 .arg(report_["width"].toInt())
-                                 .arg(report_["height"].toInt())
-                                 .arg(boundaryLabel(report_)));
-        const auto display = report_["output_display"].toObject();
-        if (outputAvailable && !display.isEmpty())
-            imageLabel_->setText(imageLabel_->text() + QString(" · M%1 L%2")
-                                                           .arg(display["mip"].toInt())
-                                                           .arg(display["slice"].toInt()
-                                                                    ? display["slice"].toInt()
-                                                                    : display["layer"].toInt()));
-        if (!outputAvailable)
-            imageLabel_->setText("No output image");
-        imageLabel_->setToolTip(report_["image_status"].toString());
-        const auto msaa = report_["output_msaa"].toObject();
-        if (!msaa.isEmpty())
-            imageLabel_->setToolTip(imageLabel_->toolTip() + "\n" + msaa["initialization_note"].toString());
-        const auto resourceNotices = report_["replay_resource_notices"].toArray();
-        if (!resourceNotices.isEmpty()) {
-            imageLabel_->setText(imageLabel_->text() + QString(" · Initial data (%1)").arg(resourceNotices.size()));
-            QMap<QString, QStringList> groups;
-            for (const auto &value : resourceNotices) {
-                const auto notice = value.toObject();
-                groups[notice["reason"].toString()].append(
-                    QString("T:%1 · Data:%2").arg(notice["resource_id"].toString(),
-                                                 notice["data_id"].toString()));
-            }
-            for (auto it = groups.cbegin(); it != groups.cend(); ++it)
-                imageLabel_->setToolTip(imageLabel_->toolTip() +
-                                       '\n' + it.key() + '\n' + it.value().join(", "));
-        }
-        const auto queryNotices = report_["replay_query_notices"].toArray();
-        if (!queryNotices.isEmpty()) {
-            imageLabel_->setText(imageLabel_->text() + QString(" · Sync limits (%1)").arg(queryNotices.size()));
-            QMap<QString, QStringList> groups;
-            for (const auto &value : queryNotices) {
-                const auto notice = value.toObject();
-                groups[notice["reason"].toString()].append(
-                    QString("E:%1 Q:%2").arg(notice["event_id"].toString(), notice["resource_id"].toString()));
-            }
-            for (auto it = groups.cbegin(); it != groups.cend(); ++it) {
-                auto references = it.value().mid(0, 8).join(", ");
-                if (it.value().size() > 8) references += QString(" … (+%1)").arg(it.value().size() - 8);
-                imageLabel_->setToolTip(imageLabel_->toolTip() + '\n' + it.key() + '\n' + references);
-            }
-        }
-        outputReport_ = outputAvailable ? nlohmann::json::parse(reportBytes.constData(),
-                                                                reportBytes.constData() + reportBytes.size())
-                                        : nlohmann::json();
-        displayedOutputGeneration_ = outputGeneration_;
-        resourceImagePending_ = false; resourceImageContext_ = historyContextKey();
-        outputDir_ = std::move(jobDir_);
-        outputStorageAction_->setEnabled(outputAvailable);
-        if (runningTimings_) {
-            findChild<QTabWidget *>("inspectorTabs")->setCurrentWidget(metrics_);
-            chart_->setTimings(report_["timings"].toArray());
-            metrics_->clear();
-            auto stats = report_["pipeline_statistics"].toObject();
-            auto group = new QTreeWidgetItem(metrics_, {"Pipeline Statistics", ""});
-            for (auto it = stats.begin(); it != stats.end(); ++it)
-                new QTreeWidgetItem(group, {it.key(), it.value().toString()});
-            group->setExpanded(true);
-            double total = 0;
-            for (auto x : report_["timings"].toArray())
-                total += x.toObject()["microseconds"].toDouble();
-            row(metrics_, "GPU work (µs)", QString::number(total, 'f', 3));
-        }
-        exportAction_->setEnabled(outputAvailable);
-        statusBar()->showMessage(report_["adapter"].toString() + "  ·  Replay complete", 7000);
-        log_->appendPlainText(QString("Replay complete · %1 × %2 · %3")
-                                  .arg(report_["width"].toInt())
-                                  .arg(report_["height"].toInt())
-                                  .arg(report_["rgba_sha256"].toString()));
-        emit taskFinished(true);
+        validateWorkerImage(reportBytes);
     } catch (const std::exception &e) {
         if (runningKind_ == "draw-resources") {
             resourceBrowser_->failPreviews(runningResourceKey_, QString::fromUtf8(e.what()));
@@ -2312,7 +2206,7 @@ void MainWindow::selectEvent(Id id) {
         QSignalBlocker blocker(boundary_);
         boundary_->setCurrentIndex(2);
     }
-    if (process_.state() != QProcess::NotRunning)
+    if (process_.state() != QProcess::NotRunning || imageJob_)
         cancel();
     updateResourceContext(true);
     if (!selectedBinding_) { resourceImages_->setCurrentIndex(0); replayTimer_.start(); }
@@ -2577,7 +2471,7 @@ void MainWindow::inspectResource(Id id) {
         if (selectedResource_ != id) {
             clearBufferDetails();
             ++revision_;
-            if (process_.state() != QProcess::NotRunning)
+            if (process_.state() != QProcess::NotRunning || imageJob_)
                 cancel();
             textureTimer_.stop();
             bufferTimer_.stop();
@@ -2980,7 +2874,7 @@ void MainWindow::previewTexture() {
     const auto &entry = frame_->entry(selectedResource_);
     if (entry.type < 0x84 || entry.type > 0x87)
         return;
-    if (process_.state() != QProcess::NotRunning) {
+    if (process_.state() != QProcess::NotRunning || imageJob_) {
         cancel();
         textureTimer_.start();
         return;
@@ -3056,7 +2950,7 @@ void MainWindow::exportTexture() {
 void MainWindow::previewBuffer() {
     if (!frame_ || !selectedResource_ || frame_->entry(selectedResource_).type != 0x83)
         return;
-    if (process_.state() != QProcess::NotRunning) {
+    if (process_.state() != QProcess::NotRunning || imageJob_) {
         cancel();
         bufferTimer_.start();
         return;
@@ -3201,7 +3095,7 @@ void MainWindow::experimentChanged() {
             }
         }
     }
-    if (process_.state() != QProcess::NotRunning)
+    if (process_.state() != QProcess::NotRunning || imageJob_)
         cancel();
     if (selectedResource_) {
         auto type = frame_->entry(selectedResource_).type;
