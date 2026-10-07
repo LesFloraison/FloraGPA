@@ -153,6 +153,9 @@ The [SM4.0 mip-query acceptance record](docs/SM40_MIP_DIMENSIONS.md) includes
 original captures, bounded shader dependency checks and the expanded M4 matrix.
 Replay completion and fidelity to the original application are reported separately.
 
+[Common Worker report acceptance](docs/WORKER_REPORT_ACCEPTANCE.md) documents
+background parsing, cancellation, malformed-report recovery and portable GUI checks.
+
 Captured Deferred Context / Command List execution, broader interface layouts,
 resource identity/version behavior and missing pre-frame information remain
 compatibility work. Missing captured bytes cannot be reconstructed by assumption.

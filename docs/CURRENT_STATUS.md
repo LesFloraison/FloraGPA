@@ -1,7 +1,37 @@
 # Current capabilities and compatibility
 
 Reviewed **2026-10-08**. The user authorized M4, then M5, while keeping M3 open.
-The latest [SM4.0 mip-query correction](SM40_MIP_DIMENSIONS.md) proves that
+The latest [common Worker report change](WORKER_REPORT_ACCEPTANCE.md) moves
+report I/O and Qt/native JSON parsing off the event thread, reusing the prepared
+native replay report for export. Request-owned cancellation, revision checks and
+directory lifetime prevent obsolete publication. Implementation `5f1464e`; test
+synchronization `c4dd4d4`. The 21 reader rows and 43 isolated Worker scenarios
+pass, including nine new report cases and five 64 MiB success/cancel/switch/close/
+destroy workflows. Focused and relocated Windows runs record maximum busy
+heartbeat intervals of 15 and 13 ms; these are host observations, not latency
+bounds or full large-file acceptance.
+
+All 24 distinct related CTest suites eventually pass, including 68 main-UI rows
+and eight real-frame recovery cycles / 24 strict images. Initial failures and
+retries are preserved: a short counter fixture set, import tests racing an active
+preview, a file-picker helper waiting with no selected filename, and a reused
+Quad output directory. One identified waiting test process was deliberately
+stopped. Final tests wait for preview completion and use bounded filename entry;
+production import guards remain unchanged. Two optional Intel live-collection
+cases remain skipped, as do two intentional child-only recovery entrypoints in
+the parent CTest. The relocated parent-only selector has no skips.
+
+Package `out/FloraGPA-report-20261008/` has 44 files; only the GUI binary changes
+from the preceding SM4.0 package. Five relocated-package checks, actual Windows
+GUI GF2/BF1 screenshots, four golden/negative checks and four further recovery
+cycles / twelve strict images pass. CLI and Worker remain byte-identical, so the
+517-registration matrix below is retained, not rerun in this batch. See the
+[report acceptance baseline](worker-report-acceptance-baseline.json). Specialized
+payload parsing, model/widget publication, exports, wider sustained testing and
+independent clean-machine acceptance remain open. Qt's single parse call is not
+interruptible; cancellation is checked around it. M3/M4/M5 remain incomplete.
+
+The preceding [SM4.0 mip-query correction](SM40_MIP_DIMENSIONS.md) proves that
 dimension lanes from a full-vector RESINFO are unused within a bounded,
 understood straight-line program. Three untouched-original workloads previously
 rejected now match complete application images; live dimensions and same-texture
@@ -748,7 +778,7 @@ the other 35 suites passed initially and the complete UI suite passes after the 
 | M2 — Ordinary replay | Registered-scope gate passed: 366 positive cases and 22 located rejections; auxiliary/snapshot contracts audited. This is not universal API support. State-object identity loss, mixed saved/missing SO targets and unverified lifetimes remain explicit boundaries. |
 | M3 — Deferred Context / Command List | Open; M4/M5 now take priority by user instruction on 2026-10-06. Require original retained-list captures proving identity, build order, resource versions, repeated execution, restore-state and event mapping before production support. |
 | M4 — Resources and boundaries | Active, incomplete. Initial texture/Map data is checked; missing UAV counts reject on actual consumption, while proven counter-free indexed access is allowed. Verified mip-count-only reads, including proved unused SM4.0 dimension lanes, do not consume missing MinLOD. Per-slot counter dependencies and saved blt-model occluded Present TEST are checked; continue wider operand/control-flow dependencies, missing pitch/data, predicate/frame-before history, Query and other presentation boundaries. |
-| M5 — Stable compatibility release | Incomplete. The 517-case registry, committed-source build/package, load/semantic-audit cancellation, worker recovery, checked background buffer acceptance and background replay/texture validation plus display preparation are established. A preceding 30-minute/246-cycle Qt recovery run passes; short-run heap controls identify history/log and bounded icon-cache retention. Continue broader memory attribution, specialized analyzer/driver/storage failures, other synchronous diagnostic image/model work, large-file workflows, broader sustained testing and independent clean-machine deployment. |
+| M5 — Stable compatibility release | Incomplete. The 517-case registry, committed-source build/package, load/semantic-audit cancellation, worker recovery, background common-report parsing, checked buffer acceptance and background replay/texture validation plus display preparation are established. A preceding 30-minute/246-cycle Qt recovery run passes; short-run heap controls identify history/log and bounded icon-cache retention. Continue broader memory attribution, specialized payload parsing, analyzer/driver/storage failures, synchronous diagnostic image/model publication and exports, large-file workflows, broader sustained testing and independent clean-machine deployment. |
 | M6 — Analyzer and other versions | Incomplete. Continue remaining Qt consumers, advanced profiling/debugging and version-specific adapters after core replay gates. Existing analyzer features remain available. |
 
 The original order was **M1 → M2 → M3 → M4 → M5**. On 2026-10-06 the user

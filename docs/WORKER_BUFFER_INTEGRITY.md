@@ -4,6 +4,10 @@ Reviewed 2026-10-08. This M5 change checks the existing native buffer inspection
 result before publishing bytes to the Qt table. It changes neither DX11 execution
 nor the CLI artifact format. Implementation: `4fe2ee7`.
 
+Subsequent work moves the common report phase into a background job; see
+[report acceptance](WORKER_REPORT_ACCEPTANCE.md). Specialized payload readers
+and model publication retain the boundaries described in that later record.
+
 ## Problem and contract
 
 The Worker already saves `buffer.bin` with a SHA-256, resource identity, byte
