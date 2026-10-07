@@ -1,6 +1,21 @@
 # Current capabilities and compatibility
 
 Reviewed **2026-10-08**. The user authorized M4, then M5, while keeping M3 open.
+The latest [process-memory attribution](PROCESS_MEMORY_ATTRIBUTION.md), harness
+`bfc7cc8`, adds test-only address/heap metadata and independent evidence checks.
+A short control and a 611.793-second/84-cycle recovery run pass 264 strict images
+in total; all twelve memory snapshots are complete with no unassociated blocks.
+After history/log/cache clears, the sustained run has 355,864 fewer busy heap
+bytes than its first paired baseline, but 2,129,920 more bytes of process commit.
+The residual is concentrated in heap-associated committed allocations; it is
+not an equivalent increase in observed live heap data. Observer effects, address
+reuse and copy-on-write ownership limit further attribution. CPU controls and
+the ordinary eight-row recovery CTest pass. The existing switch-mip package's
+44 hashes are unchanged, so replay scope and matrix results remain as below.
+The [baseline](process-memory-baseline.json) pins 662 evidence files. This does
+not explain every byte of the separate prior 30-minute run or complete M5,
+independent clean-host deployment or wider sustained workflows.
+
 The latest [SM4.0 switch correction](SM40_SWITCH_MIP.md), implementation
 `6cb0893`, removes four demonstrated false missing-MinLOD rejections. Checked
 SWITCH/CASE/DEFAULT/BREAK paths preserve any queried dimension lane still live

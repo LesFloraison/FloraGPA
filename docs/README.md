@@ -28,6 +28,7 @@ chronology remains in Chinese.
 | Track the latest same-source package, tests and full replay matrix | [Current-source acceptance](CURRENT_SOURCE_RELEASE_ACCEPTANCE.md) |
 | Exercise one Qt window through repeated load, cancel, failure and replay | [Persistent Qt recovery soak](PERSISTENT_QT_SOAK.md) |
 | Separate test history, log and pixmap-cache memory retention | [Qt retention controls](QT_RETENTION_CONTROL.md) |
+| Compare process commitment, address regions and observed busy heap blocks | [Process memory attribution](PROCESS_MEMORY_ATTRIBUTION.md) |
 | Interpret corpus results and diagnostics | [Compatibility infrastructure](COMPATIBILITY_BASELINE.md) |
 | Cancel bulk preflight audits and retry without corruption diagnostics | [Semantic audit cancellation](SEMANTIC_AUDIT_CANCELLATION.md) |
 | Cancel implicit context recovery and unused SO/CB searches | [Lifetime audit cancellation](LIFETIME_AUDIT_CANCELLATION.md) |
