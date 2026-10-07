@@ -68,14 +68,14 @@ class ResourceLodTests final : public QObject {
     void mipCountOriginals_data() {
         QTest::addColumn<int>("mode");
         QTest::addColumn<bool>("warp");
-        for (int mode = 0; mode < 12; ++mode)
+        for (int mode = 0; mode < 20; ++mode)
             for (bool warp : {false, true})
                 QTest::newRow(qPrintable(QString("%1-%2").arg(mode).arg(warp))) << mode << warp;
     }
     void mipCountOriginals() {
         QFETCH(int, mode);
         QFETCH(bool, warp);
-        const auto root = qEnvironmentVariable(mode < 6 ? "FLORA_MIP_COUNT_CAPTURES" : "FLORA_SM40_MIP_CAPTURES");
+        const auto root = qEnvironmentVariable(mode < 6 ? "FLORA_MIP_COUNT_CAPTURES" : mode < 12 ? "FLORA_SM40_MIP_CAPTURES" : "FLORA_BRANCH_MIP_CAPTURES");
         if (root.isEmpty())
             QSKIP("Set FLORA_MIP_COUNT_CAPTURES for original mip-count captures");
         const auto folder = root + QString("/%1/").arg(mode);
@@ -84,7 +84,7 @@ class ResourceLodTests final : public QObject {
         QVERIFY(audit.initial.empty());
         QVERIFY(!audit.clamped.empty());
         const auto behavior = mode % 6;
-        const bool missing = behavior == 2 || behavior == 4;
+        const bool missing = mode < 12 ? behavior == 2 || behavior == 4 : mode >= 14 && mode <= 16;
         QCOMPARE(audit.issues.size(), size_t(missing));
         QCOMPARE(validateFrame(frame.path())["errors"].get<unsigned>(), unsigned(missing));
         ReplayOptions options;
@@ -98,16 +98,16 @@ class ResourceLodTests final : public QObject {
                 QCOMPARE(replay.output().rgba, bytes(folder + "hardware/expected.rgba"));
             }
         }
-        if (behavior == 0 || behavior == 4) {
+        if ((mode < 12 && (behavior == 0 || behavior == 4)) || mode == 12 || mode == 16) {
             Id shader = 0;
             for (const auto &[id, e] : frame.entries())
                 if (e.category == 7 && isDraw(e.type))
                     shader = frame.state(frame.event(id).state).stages[4].shader;
             QVERIFY(shader);
-            const auto base = mode < 6 ? 0 : 6;
+            const auto base = mode < 6 ? 0 : mode < 12 ? 6 : 12;
             options.shaders[shader] = bytes(root + QString("/%1/hardware/%2.dxbc")
                                                        .arg(base + (behavior == 0 ? 4 : 0))
-                                                       .arg(behavior == 0 ? "dependent" : "count"));
+                                                       .arg(mode < 12 ? (behavior == 0 ? "dependent" : "count") : (behavior == 0 ? "branchSample" : "branched")));
             Replay edited(frame, options);
             if (behavior == 0) {
                 QVERIFY_EXCEPTION_THROWN(edited.run(), std::runtime_error);
@@ -116,6 +116,69 @@ class ResourceLodTests final : public QObject {
                 QCOMPARE(edited.output().rgba, bytes(root + QString("/%1/hardware/expected.rgba").arg(base)));
             }
         }
+    }
+    void sm40BranchProofBounds() {
+        const auto root = qEnvironmentVariable("FLORA_BRANCH_MIP_CAPTURES");
+        if (root.isEmpty()) QSKIP("Set original SM4.0 branch capture directory");
+        const auto source = bytes(root + "/12/hardware/branched.dxbc");
+        QVERIFY(!shaderSrvLodDependencies(source)[0]);
+        for (size_t length = 0; length < source.size(); ++length)
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error, shaderSrvLodDependencies(Bytes(source).first(length)));
+        auto parts = readDxbcParts(source);
+        auto found = std::find_if(parts.begin(), parts.end(), [](auto &p) { return p.first == 0x52444853; });
+        QVERIFY(found != parts.end());
+        const auto original = readDxbcProgram(found->second);
+        auto indexOf = [&](unsigned op) {
+            for (size_t i = 0; i < original.instructions.size(); ++i)
+                if ((original.instructions[i][0] & 2047) == op) return i;
+            throw std::runtime_error("Missing branch proof instruction");
+        };
+        const auto branch = indexOf(31), alternative = indexOf(18), join = indexOf(21);
+        auto required = [&](const DxbcProgram &program) {
+            auto code = writeDxbcProgram(program);
+            found->second = code;
+            return shaderSrvLodDependencies(makeDxbc(parts))[0];
+        };
+        for (int mode = 0; mode < 18; ++mode) {
+            auto p = original;
+            auto &r = p.instructions[branch];
+            if (mode == 0) r[1] = 0x0010001a; // IF reads still-live y.
+            if (mode == 1) p.instructions[branch + 1][1] = 0x00100012; // Only then x overwritten; y survives join.
+            if (mode == 2) p.instructions[indexOf(56)][1] = 0x00100042; // Else no longer overwrites y.
+            if (mode == 3) p.instructions.erase(p.instructions.begin() + join);
+            if (mode == 4) p.instructions[alternative] = {0x01000015}; // Orphan second ENDIF.
+            if (mode == 5) p.instructions.insert(p.instructions.begin() + alternative, {0x01000012});
+            if (mode == 6) r[1] = 0x00100006; // Four-component condition, not select-one.
+            if (mode == 7) r[1] |= 0x80000000u;
+            if (mode == 8) r[1] |= 1u << 22;
+            if (mode == 9) r[2] = 4096;
+            if (mode == 10) r[0] |= 1u << 13;
+            if (mode == 11) { r.push_back(0); r[0] += 1u << 24; }
+            if (mode == 12) { r.pop_back(); r[0] -= 1u << 24; }
+            if (mode == 13) p.instructions[alternative][0] |= 1u << 18;
+            if (mode == 14) p.instructions.insert(p.instructions.begin(), {0x01000015});
+            if (mode == 15) p.instructions.insert(p.instructions.begin() + branch + 1, {0x0100003e});
+            if (mode == 16) {
+                p.instructions.insert(p.instructions.begin() + branch, 64, original.instructions[branch]);
+                p.instructions.insert(p.instructions.end() - 1, 64, {0x01000015});
+            }
+            if (mode == 17) {
+                // Without ELSE the false path retains y, even though the true
+                // path overwrites it. A linear scan would unsafely drop it.
+                p.instructions.erase(p.instructions.begin() + alternative, p.instructions.begin() + join);
+            }
+            QVERIFY2(required(p), qPrintable(QString("branch mutation %1").arg(mode)));
+        }
+        auto flipped = original;
+        flipped.instructions[branch][0] ^= 1u << 18; // Both outcomes have the same non-use proof.
+        QVERIFY(!required(flipped));
+        auto optional = original;
+        // An optional branch is safe if its false edge is also followed by an
+        // unconditional overwrite before the queried lanes are consumed.
+        optional.instructions.erase(optional.instructions.begin() + alternative, optional.instructions.begin() + join);
+        optional.instructions.insert(optional.instructions.begin() + alternative + 1,
+                                     {0x08000036, 0x00100032, 0, 0x00004002, 0, 0, 0, 0});
+        QVERIFY(!required(optional));
     }
     void sm40DimensionProofBounds() {
         const auto root = qEnvironmentVariable("FLORA_SM40_MIP_CAPTURES");

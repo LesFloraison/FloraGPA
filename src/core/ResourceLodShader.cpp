@@ -28,26 +28,56 @@ std::optional<MipQuery> mipQuery(const std::vector<uint32_t> &row, size_t operan
 struct RegisterUse {
     unsigned type{}, index{}, lanes{};
 };
-struct LinearOperation {
+struct FlowOperation {
     RegisterUse destination;
     std::vector<RegisterUse> sources;
+    std::vector<size_t> successors;
 };
-// Deliberately bounded, straight-line SM4.0 proof. No jumps, calls, relative
+// Deliberately bounded, acyclic SM4.0 proof. Structured IF/ELSE/ENDIF only;
+// no loops, calls, relative
 // operands, instruction/operand extensions, memory stores or unfamiliar ALU
 // operations are admitted. This is not a general shader optimizer.
-std::optional<std::vector<LinearOperation>> linearSm40(const DxbcProgram &program) {
+std::optional<std::vector<FlowOperation>> boundedSm40(const DxbcProgram &program) {
     if (program.instructions.empty() || program.instructions.size() > 256)
         return {};
-    std::vector<LinearOperation> result;
+    std::vector<FlowOperation> result;
+    struct Branch { size_t condition; std::optional<size_t> otherwise; };
+    std::vector<Branch> branches;
     for (size_t i = 0; i < program.instructions.size(); ++i) {
         const auto &row = program.instructions[i];
         const auto op = row[0] & 0x7ff;
         if (row[0] & 0x80000000u)
             return {};
-        LinearOperation instruction;
+        FlowOperation instruction;
+        instruction.successors = {i + 1};
         if (op == 62) {
-            if (row.size() != 1 || i + 1 != program.instructions.size())
+            if (row.size() != 1 || i + 1 != program.instructions.size() || !branches.empty())
                 return {};
+            instruction.successors.clear();
+        } else if (op == 31) {
+            // IF tests one component; consider both outcomes, without guessing
+            // values or pruning paths based on an observed application image.
+            if (row.size() != 3 || (row[0] & 0x00fbf800u) || branches.size() >= 64)
+                return {};
+            const auto token = row[1], type = (token >> 12) & 255;
+            if ((type != 0 && type != 1) ||
+                (token & ~0x30u) != (0x0010000au | (type << 12)) || row[2] >= 4096)
+                return {};
+            instruction.sources.push_back({type, row[2], 1u << ((token >> 4) & 3)});
+            branches.push_back({i, {}});
+        } else if (op == 18 || op == 21) {
+            if (row.size() != 1 || (row[0] & 0x00fff800u) || branches.empty())
+                return {};
+            auto &branch = branches.back();
+            if (op == 18) {
+                if (branch.otherwise) return {};
+                branch.otherwise = i;
+                result[branch.condition].successors.push_back(i + 1);
+            } else {
+                if (branch.otherwise) result[*branch.otherwise].successors = {i + 1};
+                else result[branch.condition].successors.push_back(i + 1);
+                branches.pop_back();
+            }
         } else if (op == 88 || op == 90 || op == 101 || op == 104 || op == 106) {
             // Resource declarations are checked by shaderSrvDeclarations;
             // the other accepted declarations neither read nor write temps.
@@ -56,7 +86,7 @@ std::optional<std::vector<LinearOperation>> linearSm40(const DxbcProgram &progra
                 return {};
         } else {
             const unsigned count = (op == 54 || op == 86) ? 1
-                                   : (op == 0 || op == 1 || op == 32 || op == 45 || op == 56 || op == 61) ? 2
+                                   : (op == 0 || op == 1 || op == 32 || op == 45 || op == 56 || op == 61 || op == 79) ? 2
                                    : op == 69 ? 3 : 0;
             if (!count || row.size() < 3)
                 return {};
@@ -102,9 +132,14 @@ std::optional<std::vector<LinearOperation>> linearSm40(const DxbcProgram &progra
         return {};
     return result;
 }
-bool dimensionsUnused(const std::vector<LinearOperation> &program, size_t at, MipQuery query) {
-    auto pending = query.dimensions;
+bool dimensionsUnused(const std::vector<FlowOperation> &program, size_t at, MipQuery query) {
+    // All edges point forward. Union at each join retains any dimension lane
+    // still live on either path; an overwrite on just one path is insufficient.
+    std::vector<unsigned> incoming(program.size());
+    if (at + 1 < program.size()) incoming[at + 1] = query.dimensions;
     for (size_t i = at + 1; i < program.size(); ++i) {
+        auto pending = incoming[i];
+        if (!pending) continue;
         const auto &operation = program[i];
         // Sources are read before a destination overwrites the same register.
         // Source swizzles are conservatively read in full, even for masked ALU.
@@ -114,6 +149,8 @@ bool dimensionsUnused(const std::vector<LinearOperation> &program, size_t at, Mi
         const auto &dest = operation.destination;
         if (dest.type == 0 && dest.index == query.temporary)
             pending &= ~dest.lanes;
+        for (const auto successor : operation.successors)
+            if (successor < program.size()) incoming[successor] |= pending;
     }
     return true; // Any remaining lanes die at the checked final RET.
 }
@@ -134,7 +171,7 @@ std::array<bool, 128> shaderSrvLodDependencies(Bytes bytes) {
     if ((version != 0x40 && version != 0x41 && version != 0x50) || (program.header[0] >> 16) > 5)
         return required;
     std::array<bool, 128> metadata{}, other{};
-    const auto linear = version == 0x40 ? linearSm40(program) : std::nullopt;
+    const auto flow = version == 0x40 ? boundedSm40(program) : std::nullopt;
     for (size_t instruction = 0; instruction < program.instructions.size(); ++instruction) {
         const auto &row = program.instructions[instruction];
         const auto op = row[0] & 0x7ff;
@@ -154,7 +191,7 @@ std::array<bool, 128> shaderSrvLodDependencies(Bytes bytes) {
             extended = token & 0x80000000u;
         }
         if (const auto query = mipQuery(row, operands)) {
-            if (!query->dimensions || (linear && dimensionsUnused(*linear, instruction, *query))) {
+            if (!query->dimensions || (flow && dimensionsUnused(*flow, instruction, *query))) {
                 if (!required[query->slot])
                     return required;
                 metadata[query->slot] = true;
