@@ -30,6 +30,10 @@ def main():
     parser.add_argument('--out', type=Path, required=True)
     parser.add_argument('--seconds', type=int, default=1800)
     parser.add_argument('--pairs', type=int, default=20)
+    parser.add_argument('--retention-control', action='store_true',
+                        help='Measure heap bytes after separately clearing test history, application log and Qt pixmap cache')
+    parser.add_argument('--trace-allocations', action='store_true',
+                        help='Enable the test-only UCRT allocation-stack observer; changes measurement overhead')
     args = parser.parse_args()
     if not 0 <= args.seconds <= 86400 or not 1 <= args.pairs <= 10000:
         parser.error('seconds must be 0..86400 and pairs must be 1..10000')
@@ -37,6 +41,8 @@ def main():
     root.mkdir(parents=True, exist_ok=False)
     report = dict(schema='FloraGPA persistent Qt soak runner 1', completed=False,
                   passed=False, minimum_seconds=args.seconds, minimum_pairs=args.pairs,
+                  retention_control=args.retention_control,
+                  trace_allocations=args.trace_allocations,
                   scope='Same-host offscreen Qt window, system-only PATH, serial production workers; not clean-machine or all-workflow certification')
 
     def save():
@@ -86,6 +92,10 @@ def main():
                    FLORA_RECOVERY_MIN_SECONDS=str(args.seconds),
                    FLORA_RECOVERY_ITERATIONS=str(args.pairs),
                    FLORA_RECOVERY_JOURNAL=str(root / 'journal.json'))
+        if args.retention_control:
+            env.update(FLORA_RECOVERY_HEAP='1', FLORA_RECOVERY_RETENTION_CONTROL='1')
+        if args.trace_allocations:
+            env['FLORA_HEAP_TRACE_DIR'] = str(root / 'allocation-stacks')
         report['test_environment'] = {k: v for k, v in env.items() if k.startswith(('FLORA_', 'QT')) or k == 'PATH'}
         command = [str(executable), 'originalCaptureRecovery', '-o', str(root / 'qt-results.txt') + ',txt']
         report['command'] = command
@@ -108,6 +118,28 @@ def main():
             case = wanted[index % 2]
             assert row['capture'] == Path(case['path']).name and row['iteration'] == index // 2
             assert row['rgba_sha256'] == case['reference_rgba_sha256']
+        if args.retention_control:
+            controls = journal['retention_control']
+            assert set(controls) == {'before', 'after_test_history_clear', 'after_log_clear',
+                                    'after_pixmap_cache_clear'}
+            assert all(sample['heap_walk_complete'] for sample in controls.values())
+            assert all(row['ownership']['heap_walk_complete'] for row in rows)
+            retained = root / 'journal.json.retained.json'
+            saved = json.loads(retained.read_text(encoding='utf-8'))
+            assert not saved['completed'] and saved['observations'] == rows
+            report['retained_journal_sha256'] = digest(retained)
+        if args.trace_allocations:
+            expected_epochs = {2, args.pairs * 2}
+            if len(rows) >= 6:
+                expected_epochs.add(6)
+            if args.retention_control:
+                expected_epochs.update(range(len(rows) + 1, len(rows) + 5))
+            report['allocation_stacks'] = {}
+            for epoch in sorted(expected_epochs):
+                path = root / 'allocation-stacks' / f'heap-{epoch}.json'
+                snapshot = json.loads(path.read_text(encoding='utf-8'))
+                assert snapshot['epoch'] == epoch and snapshot['dropped'] == 0
+                report['allocation_stacks'][path.relative_to(root).as_posix()] = digest(path)
         report.update(completed=True, passed=True, cycles=len(rows), elapsed_ms=journal['elapsed_ms'],
                       journal_sha256=digest(root / 'journal.json'), qt_result_sha256=digest(root / 'qt-results.txt'))
         print(json.dumps({k: report[k] for k in ['passed', 'cycles', 'elapsed_ms']}, indent=2), flush=True)

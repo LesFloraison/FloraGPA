@@ -13,6 +13,7 @@
 #include <QScopeGuard>
 #include <QSaveFile>
 #include <QDateTime>
+#include <QPixmapCache>
 
 // Observe the test executable's import used by the statically linked FloraUi.
 // No production binary on disk or other process is modified.
@@ -288,6 +289,8 @@ class RecoveryUiTests final : public QObject {
         const int minimumSeconds = qEnvironmentVariableIntValue("FLORA_RECOVERY_MIN_SECONDS");
         QVERIFY(minimumSeconds >= 0 && minimumSeconds <= 86400);
         const auto journalPath = qEnvironmentVariable("FLORA_RECOVERY_JOURNAL");
+        const bool retentionControl = qEnvironmentVariableIsSet("FLORA_RECOVERY_RETENTION_CONTROL");
+        QVERIFY(!retentionControl || (!journalPath.isEmpty() && qEnvironmentVariableIsSet("FLORA_RECOVERY_HEAP")));
         QVERIFY(journalPath.isEmpty() || !QFile::exists(journalPath));
         if (!journalPath.isEmpty()) {
             window.resize(1440, 900);
@@ -298,6 +301,7 @@ class RecoveryUiTests final : public QObject {
         nlohmann::json journal{{"schema", "FloraGPA persistent Qt recovery soak 1"},
             {"started_utc", QDateTime::currentDateTimeUtc().toString(Qt::ISODate).toStdString()},
             {"completed", false}, {"minimum_seconds", minimumSeconds},
+            {"pixmap_cache_limit_kib", QPixmapCache::cacheLimit()},
             {"minimum_pairs", count}, {"observations", nlohmann::json::array()}};
         testing::RecoveryJournal journalWriter(journalPath);
         auto save = [&](const char *phase) {
@@ -405,7 +409,61 @@ class RecoveryUiTests final : public QObject {
                     testing::heapProbe::snapshot(trace, epoch);
             }
         }
-        if (qEnvironmentVariableIsSet("FLORA_RECOVERY_HEAP")) {
+        if (retentionControl) {
+            // Persist the original observations before isolating test-owned history.
+            // Restore them after measurement; never discard evidence to pass a soak.
+            const auto retainedPath = journalPath + ".retained.json";
+            QVERIFY(!QFile::exists(retainedPath));
+            {
+                QSaveFile retained(retainedPath);
+                QVERIFY(retained.open(QIODevice::WriteOnly));
+                const auto bytes = journal.dump(2);
+                QCOMPARE(retained.write(bytes.data(), qint64(bytes.size())), qint64(bytes.size()));
+                QVERIFY2(retained.commit(), qPrintable(retained.errorString()));
+            }
+            const auto expectedPath = window.capturePath();
+            const auto expectedImage = outputHash(window);
+            auto sample = [&] {
+                PROCESS_MEMORY_COUNTERS_EX memory{};
+                if (!GetProcessMemoryInfo(GetCurrentProcess(), reinterpret_cast<PROCESS_MEMORY_COUNTERS *>(&memory), sizeof memory))
+                    return nlohmann::json{{"sample_failed", true}};
+                auto result = ownership(window);
+                result["private_bytes"] = memory.PrivateUsage;
+                result["working_set"] = memory.WorkingSetSize;
+                return result;
+            };
+            nlohmann::json control{{"before", sample()}};
+            if (!trace.isEmpty()) {
+                testing::heapProbe::snapshot(trace, cycles + 1);
+                testing::heapProbe::mark(cycles + 1);
+            }
+            journal["observations"] = nlohmann::json::array();
+            loaded.clear();
+            done.clear();
+            QCoreApplication::sendPostedEvents(nullptr, QEvent::DeferredDelete);
+            control["after_test_history_clear"] = sample();
+            if (!trace.isEmpty()) testing::heapProbe::snapshot(trace, cycles + 2);
+            window.findChild<QPlainTextEdit *>("taskLog")->clear();
+            QCoreApplication::sendPostedEvents(nullptr, QEvent::DeferredDelete);
+            control["after_log_clear"] = sample();
+            if (!trace.isEmpty()) testing::heapProbe::snapshot(trace, cycles + 3);
+            QPixmapCache::clear();
+            control["after_pixmap_cache_clear"] = sample();
+            if (!trace.isEmpty()) testing::heapProbe::snapshot(trace, cycles + 4);
+            for (const auto &value : control)
+                QVERIFY(value.value("heap_walk_complete", false));
+            QCOMPARE(window.capturePath(), expectedPath);
+            QCOMPARE(outputHash(window), expectedImage);
+            {
+                QFile retained(retainedPath);
+                QVERIFY(retained.open(QIODevice::ReadOnly));
+                auto restored = nlohmann::json::parse(retained.readAll().toStdString());
+                QCOMPARE(restored.at("observations").size(), size_t(cycles));
+                journal["observations"] = std::move(restored["observations"]);
+            }
+            journal["retention_control"] = control;
+            qInfo().noquote() << "retention_control" << QString::fromStdString(control.dump());
+        } else if (qEnvironmentVariableIsSet("FLORA_RECOVERY_HEAP")) {
             const auto before = ownership(window);
             window.findChild<QPlainTextEdit *>("taskLog")->clear();
             QCoreApplication::sendPostedEvents(nullptr, QEvent::DeferredDelete);
