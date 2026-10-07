@@ -4,6 +4,11 @@ Reviewed 2026-10-06. This M5 work removes workstation-specific deployment paths
 and establishes a source-only build check. It does not broaden DX11 replay
 compatibility or complete M5's independent-machine and long-duration gates.
 
+Superseded build inventory: the [2026-10-08 recovery batch](PERSISTENT_QT_SOAK.md)
+also builds current production sources from revision `0db936e`: 1,049 archived
+files and a 44-file package, with fresh golden, mip-count and GUI startup checks.
+The original source-build evidence below remains unchanged.
+
 ## Packaging changes
 
 `tools/package.ps1` now reads `Qt6_DIR` and `CMAKE_GENERATOR_INSTANCE` from the

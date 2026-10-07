@@ -230,6 +230,10 @@ variables. GF2/BF1 checks use the CMake cache variable `FLORA_TEST_CAPTURE_DIR`.
 Other fixture/evidence variables are documented by their batch/test sources.
 Skipped external checks are not acceptance.
 
+The optional [persistent recovery runner](PERSISTENT_QT_SOAK.md) exercises one
+Qt window for a requested duration and saves immutable progress snapshots.
+Its default 30-minute workload is explicit and is not part of ordinary CTest.
+
 Python comparison tools are development oracles, not application backends.
 The recovered reference workspace and original captures are not supplied.
 If available, configure paths explicitly:

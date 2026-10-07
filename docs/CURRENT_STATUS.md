@@ -1,7 +1,25 @@
 # Current capabilities and compatibility
 
 Reviewed **2026-10-08**. The user authorized M4, then M5, while keeping M3 open.
-The latest [mip-count compatibility correction](MIP_COUNT_LOD_COMPATIBILITY.md)
+The latest [persistent Qt recovery batch](PERSISTENT_QT_SOAK.md) passes 246 cycles
+in 30 minutes 5 seconds, with 738 strict GF2/BF1 image checks. One QtTest window
+exercises production UI/Workers through cancellation, failed open, retry, event
+navigation and Final replay. Immutable progress evidence and timeout process-tree
+cleanup have separate negative controls. Eight recovery Qt rows and three CPU
+process controls pass. The first progress-write failure is preserved as a failed
+run, not included in successful acceptance. Private memory grows by about
+19–24 MiB; retained test history/logs and live application allocations remain
+to be separated. Handles and QObject counts show no sustained accumulation.
+
+Fresh committed-source configure/build/package passes on this host: 1,049 files
+at `0db936e`, 44 packaged files, four golden/negative checks, the six-case mip gate
+and two shipping-GUI startup checks. Current package:
+`out/FloraGPA-clean-build-20261008/`. Production replay source is unchanged.
+The full 511-registration matrix below is not claimed rerun on these fresh
+binaries. Offscreen QtTest recovery does not certify every shipping-GUI workflow
+or independent clean-machine deployment. M3/M4/M5 remain open.
+
+The preceding [mip-count compatibility correction](MIP_COUNT_LOD_COMPATIBILITY.md)
 allows verified RESINFO count-only reads despite omitted initial resource MinLOD.
 Three untouched-original modes previously rejected now match full application
 images; dimensions and sampling the same clamped resource still reject when
@@ -18,7 +36,7 @@ deterministic images. Thirty-five completed cases still have known capture
 limitations. Capture-fidelity assessments remain separate: 51 passes, 32 known
 capture-side mismatches, five information-missing cases and 423 unassessed
 registrations. These counts are not a GPA feature-completeness percentage.
-Current package: `out/FloraGPA-mip-count-20261008/` (44 files).
+That batch's package: `out/FloraGPA-mip-count-20261008/` (44 files).
 Implementation: `d340c8d`; five related CTest suites pass, including 76 resource
 LOD and 67 Qt rows. Four packaged golden/negative checks and relocated
 system-PATH Qt retry checks pass. Evidence and remaining proof limits are pinned
@@ -36,7 +54,8 @@ have no skips; four packaged golden/negative checks also pass. Implementation:
 `72404ff`; package: `out/FloraGPA-image-async-20261007/` (44 files). Only the GUI
 binary changed in that batch; the new mip-count matrix above now supersedes
 its 505-registration / 495-file baseline. Mid-call decode/I/O cancellation, synchronous ImageView/model
-work, long-duration and independent clean-machine acceptance remain open.
+work and independent clean-machine acceptance remain open; the sustained recovery
+batch above adds a scoped 30-minute check, not general long-duration acceptance.
 
 The preceding [Query completion correction](QUERY_COMPLETION.md) restores CPU/GPU
 ordering for successful GetData with a complete saved predicate interval. Three
@@ -664,7 +683,7 @@ the other 35 suites passed initially and the complete UI suite passes after the 
 | M2 — Ordinary replay | Registered-scope gate passed: 366 positive cases and 22 located rejections; auxiliary/snapshot contracts audited. This is not universal API support. State-object identity loss, mixed saved/missing SO targets and unverified lifetimes remain explicit boundaries. |
 | M3 — Deferred Context / Command List | Open; M4/M5 now take priority by user instruction on 2026-10-06. Require original retained-list captures proving identity, build order, resource versions, repeated execution, restore-state and event mapping before production support. |
 | M4 — Resources and boundaries | Active, incomplete. Initial texture/Map data is checked; missing UAV counts reject on actual consumption, while proven counter-free indexed access is allowed. Verified mip-count-only reads do not consume missing MinLOD. Per-slot counter dependencies and saved blt-model occluded Present TEST are checked; continue wider operand/control-flow dependencies, missing pitch/data, predicate/frame-before history, Query and other presentation boundaries. |
-| M5 — Stable compatibility release | Incomplete. The 511-case registry, earlier clean committed-source build/package, load/semantic-audit cancellation, worker recovery and asynchronous checked display-artifact acceptance are established. Continue specialized analyzer/driver/storage failures, synchronous image/model work, large-file workflows, long-duration testing and independent clean-machine deployment. |
+| M5 — Stable compatibility release | Incomplete. The 511-case registry, current committed-source build/package, load/semantic-audit cancellation, worker recovery and asynchronous checked display-artifact acceptance are established. A 30-minute/246-cycle Qt recovery run passes; memory growth still needs attribution. Continue specialized analyzer/driver/storage failures, synchronous image/model work, large-file workflows, broader sustained testing and independent clean-machine deployment. |
 | M6 — Analyzer and other versions | Incomplete. Continue remaining Qt consumers, advanced profiling/debugging and version-specific adapters after core replay gates. Existing analyzer features remain available. |
 
 The original order was **M1 → M2 → M3 → M4 → M5**. On 2026-10-06 the user

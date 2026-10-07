@@ -17,6 +17,7 @@ chronology remains in Chinese.
 | Component responsibilities | [Architecture](ARCHITECTURE.md) |
 | Run tests and external comparisons | [Development validation](USAGE.md#development-validation) |
 | Build committed source with an isolated process environment and package it | [Source build and packaging](SOURCE_BUILD_AND_PACKAGING.md) |
+| Exercise one Qt window through repeated load, cancel, failure and replay | [Persistent Qt recovery soak](PERSISTENT_QT_SOAK.md) |
 | Interpret corpus results and diagnostics | [Compatibility infrastructure](COMPATIBILITY_BASELINE.md) |
 | Cancel bulk preflight audits and retry without corruption diagnostics | [Semantic audit cancellation](SEMANTIC_AUDIT_CANCELLATION.md) |
 | Cancel implicit context recovery and unused SO/CB searches | [Lifetime audit cancellation](LIFETIME_AUDIT_CANCELLATION.md) |
