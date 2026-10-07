@@ -70,6 +70,17 @@ The second command uses external developer fixtures; those files are not part of
 the source archive or release. Ordinary users can build and package with the
 PowerShell/CMake commands in the project README without this Python verifier.
 
+For runtime acceptance using test executables from the same committed source,
+append one or more `--test-target` arguments, for example
+`--test-target FloraRecoveryUiTests --test-target FloraWorkerRecoveryTests`.
+The verifier first builds and packages production with tests disabled, then
+enables tests and builds only the requested targets and their dependencies.
+Repeated target names are deduplicated. Test executable hashes (including helper
+executables) are recorded separately in `test_files`; they are not shipped in
+the portable package. The check fails if building tests changes any packaged
+production binary or package file. Compilation alone does not run or accept
+these tests: run the selected workflows separately, serializing GPU checks.
+
 ## Accepted evidence
 
 The final continuous configure/build/package run uses source commit `232a207`,

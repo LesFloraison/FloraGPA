@@ -8,6 +8,7 @@ import hashlib
 import json
 import os
 from pathlib import Path
+import re
 import shutil
 import subprocess
 import time
@@ -47,9 +48,14 @@ def main():
     parser.add_argument('--out', type=Path, required=True)
     parser.add_argument('--cmake', type=Path)
     parser.add_argument('--jobs', type=int, default=4)
+    parser.add_argument('--test-target', action='append', default=[],
+                        help='Also build this Qt test target from the same archive (repeatable; does not run tests)')
     args = parser.parse_args()
     if not 1 <= args.jobs <= 64:
         parser.error('--jobs must be between 1 and 64')
+    if any(not re.fullmatch(r'Flora[A-Za-z0-9]+Tests', name) for name in args.test_target):
+        parser.error('--test-target must be a Flora...Tests CMake target')
+    test_targets = list(dict.fromkeys(args.test_target))
     repo = Path(__file__).resolve().parents[1]
     qt = args.qt_root.resolve(strict=True)
     if not (qt/'bin/windeployqt.exe').is_file():
@@ -66,6 +72,7 @@ def main():
     archive = output/'source.zip'
     report = dict(schema='FloraGPA committed source build 1', completed=False,
                   source_commit=commit, verifier_sha256=digest(Path(__file__)),
+                  test_targets=test_targets,
                   steps=[], limits=[
                       'Committed source only; uncommitted changes are not included',
                       'Fresh source and process environment on this host, not a clean-machine certification',
@@ -130,6 +137,27 @@ def main():
                         source/'tools/package.ps1', '-OutputDirectory', package])
         report['package_files'] = {p.relative_to(package).as_posix(): digest(p)
                                    for p in package.rglob('*') if p.is_file()}
+        if test_targets:
+            # Package production first, then build selected tests against exactly
+            # these sources. Never attach test executables from the caller's
+            # incremental workspace build to the committed-source evidence.
+            release = source/'build/vs2022/Release'
+            production = {name: digest(release/name) for name in report['package_files']
+                          if name.startswith('FloraGPA.') and (release/name).is_file()}
+            run('configure-tests', [cmake, '--preset', 'vs2022',
+                                    '-DCMAKE_PREFIX_PATH='+str(qt), '-DBUILD_TESTING=ON'])
+            run('build-tests', [cmake, '--build', '--preset', 'release', '--parallel',
+                                args.jobs, '--target', *test_targets])
+            report['test_files'] = {p.name: digest(p) for p in sorted(release.glob('Flora*.exe'))
+                                    if not p.name.startswith('FloraGPA.')}
+            for target in test_targets:
+                if target+'.exe' not in report['test_files']:
+                    raise RuntimeError('Requested test executable is missing: '+target)
+            if any(digest(release/name) != expected for name, expected in production.items()):
+                raise RuntimeError('Building tests changed a packaged production binary')
+            if any(digest(package/name) != expected for name, expected in report['package_files'].items()):
+                raise RuntimeError('Building tests changed the portable package')
+            report['production_unchanged_after_test_build'] = True
         report['completed'] = True
     except Exception as error:
         report['error'] = str(error)
