@@ -1,5 +1,9 @@
 # Background acceptance of common Worker reports
 
+The subsequent [analyzer payload extension](ANALYZER_PAYLOAD_ACCEPTANCE.md)
+moves eight additional JSON output paths into this request-owned background job.
+The evidence below describes the preceding common-envelope implementation.
+
 Reviewed 2026-10-08. Implementation: `5f1464e`; UI test synchronization:
 `c4dd4d4`. This M5 change follows the checked image and buffer readers. The
 common `report.json` was still read and parsed on the Qt event thread after the

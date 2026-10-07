@@ -14,6 +14,7 @@ chronology remains in Chinese.
 | Reject incomplete or inconsistent worker images and retry | [Worker image integrity](WORKER_IMAGE_INTEGRITY.md) |
 | Check buffer bytes, identity and range without blocking the event thread | [Worker buffer integrity](WORKER_BUFFER_INTEGRITY.md) |
 | Read common Worker reports with cancellation and prepare replay export JSON | [Worker report acceptance](WORKER_REPORT_ACCEPTANCE.md) |
+| Read geometry, state, predicate and numeric analyzer payloads in background jobs | [Analyzer payload acceptance](ANALYZER_PAYLOAD_ACCEPTANCE.md) |
 | Keep image validation responsive and discard cancelled results | [Asynchronous image validation](ASYNC_IMAGE_VALIDATION.md) |
 | Prepare replay/texture painting pixels before publishing them to Qt | [Image display preparation](IMAGE_DISPLAY_PREPARATION.md) |
 | Current capabilities and known limits | [Current status](CURRENT_STATUS.md) |

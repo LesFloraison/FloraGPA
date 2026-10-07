@@ -155,6 +155,8 @@ Replay completion and fidelity to the original application are reported separate
 
 [Common Worker report acceptance](docs/WORKER_REPORT_ACCEPTANCE.md) documents
 background parsing, cancellation, malformed-report recovery and portable GUI checks.
+The subsequent [analyzer payload extension](docs/ANALYZER_PAYLOAD_ACCEPTANCE.md)
+covers eight geometry, state and numeric analysis output paths.
 
 Captured Deferred Context / Command List execution, broader interface layouts,
 resource identity/version behavior and missing pre-frame information remain

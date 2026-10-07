@@ -1,7 +1,26 @@
 # Current capabilities and compatibility
 
 Reviewed **2026-10-08**. The user authorized M4, then M5, while keeping M3 open.
-The latest [common Worker report change](WORKER_REPORT_ACCEPTANCE.md) moves
+The latest [analyzer payload extension](ANALYZER_PAYLOAD_ACCEPTANCE.md),
+implementation `f70d65a`, moves eight additional output files off the event
+thread: Quad, coverage, timings, statistics, replayed pipeline, predication, IA
+geometry and shader output geometry. Missing, truncated, malformed and non-object
+payloads fail before publication. Native payloads retain full integer precision;
+the existing request-owned cancellation and revision guard applies throughout.
+29 reader rows and 52 isolated Worker scenarios pass, including nine new geometry
+cases. Seven consumer CTest suites pass, including 68 main-UI rows and eight
+GF2/BF1 recovery cycles / 24 strict image checks. The recovery parent has three
+intentional child-entrypoint skips. No execution semantics or supported capture
+scope changed; the 72/117/15 module ledger remains unchanged. Model/widget
+publication, retained JSON memory, other specialized readers and exports remain
+separate work. See the linked acceptance record for package evidence and limits.
+Package `out/FloraGPA-payload-20261008/` passes five relocated system-PATH checks,
+four golden/negative checks with unchanged hashes/counts, and four further
+recovery cycles / twelve strict images in 28.940 seconds. Only the GUI executable
+differs from the preceding report package. This is same-host short-run evidence,
+not independent clean-machine deployment or renewed sustained-soak certification.
+
+The preceding [common Worker report change](WORKER_REPORT_ACCEPTANCE.md) moves
 report I/O and Qt/native JSON parsing off the event thread, reusing the prepared
 native replay report for export. Request-owned cancellation, revision checks and
 directory lifetime prevent obsolete publication. Implementation `5f1464e`; test
