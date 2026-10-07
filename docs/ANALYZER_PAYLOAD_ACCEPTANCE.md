@@ -5,6 +5,11 @@ Reviewed 2026-10-08. This M5 iteration extends
 that were still read and parsed synchronously after `report.json` passed.
 Implementation: `f70d65a`.
 
+The subsequent [diagnostic attachment acceptance](DIAGNOSTIC_ATTACHMENT_ACCEPTANCE.md),
+implementation `6b01ad8`, moves the remaining Coverage/Quad file reads, PNG
+decoding and diagnostic image preparation into the same cancellable job.
+The evidence and counts below describe the earlier JSON-only batch.
+
 ## Scope and contract
 
 | Worker request | Prepared output | Consumer |
@@ -32,12 +37,13 @@ files until reading completes, including after window destruction. An array-root
 geometry payload previously became an empty object through Qt conversion; it is
 now rejected before replacing the displayed geometry.
 
-This is first-stage JSON preparation, not asynchronous acceptance of every
-consumer artifact. `CoverageView::finish` still rereads `coverage.json` and three
-attachments, compares the report and decodes the overlay on the UI thread.
-`QuadView::finish` likewise rereads `quad.json`, loads six attachments and decodes
-its preview synchronously. Both then use the synchronous image setter. The
-geometry heartbeat measurements below do not cover these remaining paths.
+At this batch's revision, this was first-stage JSON preparation, not asynchronous
+acceptance of every consumer artifact. `CoverageView::finish` reread `coverage.json` and three
+attachments, compared the report and decoded the overlay on the UI thread.
+`QuadView::finish` likewise reread `quad.json`, loaded six attachments and decoded
+its preview synchronously. Both used the synchronous image setter. The geometry
+heartbeat measurements below do not cover those paths; their later migration
+has separate evidence linked above.
 
 ## Validation
 

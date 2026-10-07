@@ -1,7 +1,22 @@
 # Current capabilities and compatibility
 
 Reviewed **2026-10-08**. The user authorized M4, then M5, while keeping M3 open.
-The latest [same-source release acceptance](CURRENT_SOURCE_RELEASE_ACCEPTANCE.md)
+The latest [diagnostic attachment acceptance](DIAGNOSTIC_ATTACHMENT_ACCEPTANCE.md),
+implementation `6b01ad8`, reads Coverage/Quad attachments and prepares their
+diagnostic images in cancellable background jobs. It rejects overflowing Quad
+histogram lengths before multiplication. Eight relevant CTest suites pass with
+217 top-level Qt rows, including all 75 isolated Worker scenarios (23 new).
+The initial missing-file assertion mismatch is preserved and corrected; no
+production rejection was relaxed. The 44-file package
+`out/FloraGPA-diagnostic-20261008/` passes seven relocated-system-PATH checks and
+four golden/control replays. Only its GUI differs from the matrix-tested
+branch-mip package; no new core replay coverage or full-matrix rerun is claimed.
+Build and relocated recovery each check four GF2/BF1 cycles and twelve strict
+images. This is not a renewed 30-minute soak. Other specialized consumers,
+large model/text publication, exports, broader memory attribution and independent
+clean-host deployment remain open. M3/M4/M5 are incomplete.
+
+The preceding [same-source release acceptance](CURRENT_SOURCE_RELEASE_ACCEPTANCE.md)
 builds production and eight selected test targets from archived revision
 `078d638`. The 44-file package `out/FloraGPA-verified-source-20261008/` passes
 334 relocated Qt rows, four further Windows-platform large-output checks, two
@@ -11,11 +26,11 @@ Helldivers and information-missing `query_sync_9` retain their variable policies
 A new 30-minute/248-cycle recovery run passes 744 strict image checks and all
 1,737 immutable progress snapshots. Process handles start/end at 248; private
 bytes rise about 23.3 MiB (GF2) and 19.2 MiB (BF1), without complete attribution.
-This establishes current-build evidence on this host, not independent clean-host
-deployment or a leak-free claim. Runtime sources and compatibility scope are
-unchanged. Coverage/Quad attachment preparation and an independently reproduced
-malformed histogram-length boundary remain next M5 work; a CPU-only prototype
-is not yet part of this accepted package. M3/M4/M5 remain incomplete.
+This establishes evidence for that build on this host, not independent clean-host
+deployment or a leak-free claim. Runtime sources and compatibility scope were
+unchanged within that batch. Coverage/Quad attachment preparation and an independently reproduced
+malformed histogram-length boundary were still prototype work in that package;
+the later accepted GUI correction is recorded above. M3/M4/M5 remain incomplete.
 
 The latest [SM4.0 branch correction](SM40_BRANCH_MIP.md), implementation
 `b8ab3dc`, removes four demonstrated false missing-MinLOD rejections. Checked
@@ -838,7 +853,7 @@ the other 35 suites passed initially and the complete UI suite passes after the 
 | M2 — Ordinary replay | Registered-scope gate passed: 366 positive cases and 22 located rejections; auxiliary/snapshot contracts audited. This is not universal API support. State-object identity loss, mixed saved/missing SO targets and unverified lifetimes remain explicit boundaries. |
 | M3 — Deferred Context / Command List | Open; M4/M5 now take priority by user instruction on 2026-10-06. Require original retained-list captures proving identity, build order, resource versions, repeated execution, restore-state and event mapping before production support. |
 | M4 — Resources and boundaries | Active, incomplete. Initial texture/Map data is checked; missing UAV counts reject on actual consumption, while proven counter-free indexed access is allowed. Verified mip-count-only reads, including proved unused SM4.0 dimension lanes across checked branches, do not consume missing MinLOD. Per-slot counter dependencies and saved blt-model occluded Present TEST are checked; continue wider operand/control-flow dependencies, missing pitch/data, predicate/frame-before history, Query and other presentation boundaries. |
-| M5 — Stable compatibility release | Incomplete. The 525-case registry, committed-source build/package, load/semantic-audit cancellation, worker recovery, background common-report parsing, checked buffer acceptance and background replay/texture validation plus display preparation are established. The latest same-source 30-minute/248-cycle Qt recovery run passes 744 strict image checks; short-run heap controls identify history/log and bounded icon-cache retention. Continue broader memory attribution, specialized payload parsing, analyzer/driver/storage failures, synchronous diagnostic image/model publication and exports, large-file workflows, broader sustained testing and independent clean-machine deployment. Coverage/Quad background attachment preparation and histogram-length overflow checks remain an unapplied prototype. [Latest acceptance](CURRENT_SOURCE_RELEASE_ACCEPTANCE.md) |
+| M5 — Stable compatibility release | Incomplete. The 525-case registry, committed-source build/package, load/semantic-audit cancellation, worker recovery, background common-report parsing, checked buffer acceptance and background replay/texture validation plus display preparation are established. Coverage/Quad attachments now have checked background reading and diagnostic paint preparation, including histogram overflow refusal and 23 new isolated recovery cases. The preceding same-source 30-minute/248-cycle run passes 744 strict image checks; it does not certify the later GUI. Continue broader memory attribution, other specialized readers, analyzer/driver/storage failures, model/text publication and exports, large-file workflows, broader sustained testing and independent clean-machine deployment. [Latest GUI acceptance](DIAGNOSTIC_ATTACHMENT_ACCEPTANCE.md), [source-build acceptance](CURRENT_SOURCE_RELEASE_ACCEPTANCE.md) |
 | M6 — Analyzer and other versions | Incomplete. Continue remaining Qt consumers, advanced profiling/debugging and version-specific adapters after core replay gates. Existing analyzer features remain available. |
 
 The original order was **M1 → M2 → M3 → M4 → M5**. On 2026-10-06 the user

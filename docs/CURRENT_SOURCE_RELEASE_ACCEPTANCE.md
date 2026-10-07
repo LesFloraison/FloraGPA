@@ -7,6 +7,10 @@ have completed. The package is `out/FloraGPA-verified-source-20261008/`; the
 [baseline](current-source-release-baseline.json) pins 272 local evidence files.
 M3/M4/M5 remain incomplete.
 
+This package predates the [diagnostic attachment correction](DIAGNOSTIC_ATTACHMENT_ACCEPTANCE.md)
+in `6b01ad8`. Its synchronous-attachment and Quad overflow limitations below
+remain historical facts for this package; the new GUI has separate acceptance.
+
 ## Build and provenance
 
 `validate_source_build.py --test-target` builds selected acceptance tests from
