@@ -29,6 +29,7 @@ chronology remains in Chinese.
 | Missing initial counters and the updated compatibility matrix | [Initial counter boundary audit](INITIAL_COUNTER_BOUNDARY_AUDIT.md) |
 | Mixed UAV slots with independent hidden-counter dependencies | [Per-slot counter compatibility](COUNTER_SLOT_COMPATIBILITY.md) |
 | Indexed UAV access without consuming an unavailable hidden count | [Counter usage compatibility](COUNTER_USAGE_COMPATIBILITY.md) |
+| Mip-count metadata without consuming omitted initial MinLOD | [Mip-count compatibility](MIP_COUNT_LOD_COMPATIBILITY.md) |
 | Deferred versions, original expansion and M3 boundaries | [Deferred version audit](DEFERRED_VERSION_AUDIT.md) |
 | Merged lists and capture-side loss versus faithful replay | [Deferred merge audit](DEFERRED_MERGE_AUDIT.md) |
 | Original dependency initialization and version/list ordering | [Initialization scheduler audit](INITIALIZATION_SCHEDULER_AUDIT.md) |

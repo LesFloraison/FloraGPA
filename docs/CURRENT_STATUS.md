@@ -1,7 +1,30 @@
 # Current capabilities and compatibility
 
-Reviewed **2026-10-07**. The user authorized M4, then M5, while keeping M3 open.
-The latest [asynchronous image validation](ASYNC_IMAGE_VALIDATION.md) moves
+Reviewed **2026-10-08**. The user authorized M4, then M5, while keeping M3 open.
+The latest [mip-count compatibility correction](MIP_COUNT_LOD_COMPATIBILITY.md)
+allows verified RESINFO count-only reads despite omitted initial resource MinLOD.
+Three untouched-original modes previously rejected now match full application
+images; dimensions and sampling the same clamped resource still reject when
+LOD is missing. SM4.0 full-vector lowering remains conservative. Six originals,
+216 hardware/WARP/injected producer images, actual replacement shaders
+and malformed programs define this narrow boundary. Original-player equality
+is observed for the three corrected modes, not asserted for all configurations.
+
+The current 34-suite matrix passes **511 registrations / 501 unique files**:
+**483 native completions (473 unique)** and **28 located rejections**, with
+1,022 ordinary attempts, 684 controls and 826 strict resource exports. All prior
+505 cases retain their complete preflight reports, execution counts and
+deterministic images. Thirty-five completed cases still have known capture
+limitations. Capture-fidelity assessments remain separate: 51 passes, 32 known
+capture-side mismatches, five information-missing cases and 423 unassessed
+registrations. These counts are not a GPA feature-completeness percentage.
+Current package: `out/FloraGPA-mip-count-20261008/` (44 files).
+Implementation: `d340c8d`; five related CTest suites pass, including 76 resource
+LOD and 67 Qt rows. Four packaged golden/negative checks and relocated
+system-PATH Qt retry checks pass. Evidence and remaining proof limits are pinned
+in the [mip-count baseline](mip-count-lod-baseline.json).
+
+The preceding [asynchronous image validation](ASYNC_IMAGE_VALIDATION.md) moves
 replay/texture artifact hashing and decoding off the Qt event thread. Pending
 validation remains busy and cancellable; superseded results cannot replace the
 retained replay image. Request-owned temporary storage survives window closure
@@ -11,8 +34,8 @@ boundary interruption positions allow exact retry. Five CTest suites pass,
 including 66 Qt rows and 23 Worker fault scenarios. Relocated system-PATH checks
 have no skips; four packaged golden/negative checks also pass. Implementation:
 `72404ff`; package: `out/FloraGPA-image-async-20261007/` (44 files). Only the GUI
-binary changes, so the preceding 505-registration / 495-file GPU matrix remains
-authoritative. Mid-call decode/I/O cancellation, synchronous ImageView/model
+binary changed in that batch; the new mip-count matrix above now supersedes
+its 505-registration / 495-file baseline. Mid-call decode/I/O cancellation, synchronous ImageView/model
 work, long-duration and independent clean-machine acceptance remain open.
 
 The preceding [Query completion correction](QUERY_COMPLETION.md) restores CPU/GPU
@@ -24,7 +47,7 @@ boundary; they retain located preflight/runtime notices and compact Qt warnings,
 and are **not accepted as application-faithful**. Local original-player outputs
 also differ from the application; its GUI and selected adapter remain unverified.
 
-The 33-suite matrix passes **505 registrations / 495 unique files**: **479 native
+That revision's 33-suite matrix passed **505 registrations / 495 unique files**: **479 native
 completions (469 unique)** and **26 located rejections**, with 1,010 ordinary
 attempts, 684 controls and 826 strict resource exports. All preceding 502 cases
 retain outcomes, deterministic images and existing execution counts. Offline
@@ -640,8 +663,8 @@ the other 35 suites passed initially and the complete UI suite passes after the 
 | M1 — Acceptance infrastructure | Minimum loop delivered: corpus, coverage, preflight, serial comparison and diagnostic queue. Extend evidence as paths arrive. |
 | M2 — Ordinary replay | Registered-scope gate passed: 366 positive cases and 22 located rejections; auxiliary/snapshot contracts audited. This is not universal API support. State-object identity loss, mixed saved/missing SO targets and unverified lifetimes remain explicit boundaries. |
 | M3 — Deferred Context / Command List | Open; M4/M5 now take priority by user instruction on 2026-10-06. Require original retained-list captures proving identity, build order, resource versions, repeated execution, restore-state and event mapping before production support. |
-| M4 — Resources and boundaries | Active, incomplete. Initial texture/Map data is checked; missing UAV counts reject on actual consumption, while proven counter-free indexed access is allowed. Per-slot counter dependencies and saved blt-model occluded Present TEST are checked; continue wider operand/control-flow dependencies, missing pitch/data, predicate/frame-before history, Query and other presentation boundaries. |
-| M5 — Stable compatibility release | Incomplete. The 505-case registry, clean committed-source build/package, load/semantic-audit cancellation, worker recovery and asynchronous checked display-artifact acceptance are established. Continue specialized analyzer/driver/storage failures, synchronous image/model work, large-file workflows, long-duration testing and independent clean-machine deployment. |
+| M4 — Resources and boundaries | Active, incomplete. Initial texture/Map data is checked; missing UAV counts reject on actual consumption, while proven counter-free indexed access is allowed. Verified mip-count-only reads do not consume missing MinLOD. Per-slot counter dependencies and saved blt-model occluded Present TEST are checked; continue wider operand/control-flow dependencies, missing pitch/data, predicate/frame-before history, Query and other presentation boundaries. |
+| M5 — Stable compatibility release | Incomplete. The 511-case registry, earlier clean committed-source build/package, load/semantic-audit cancellation, worker recovery and asynchronous checked display-artifact acceptance are established. Continue specialized analyzer/driver/storage failures, synchronous image/model work, large-file workflows, long-duration testing and independent clean-machine deployment. |
 | M6 — Analyzer and other versions | Incomplete. Continue remaining Qt consumers, advanced profiling/debugging and version-specific adapters after core replay gates. Existing analyzer features remain available. |
 
 The original order was **M1 → M2 → M3 → M4 → M5**. On 2026-10-06 the user

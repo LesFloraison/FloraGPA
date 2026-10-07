@@ -1,0 +1,198 @@
+{
+  "schema": "FloraGPA compatibility corpus 1",
+  "profile": "GPA 2025 R1 legacy DX11 / IGPA v3",
+  "cases": [
+    {
+      "id": "mip_count_0",
+      "path": "m4-mip-count-originals-final/0/capture.gpa_frame",
+      "sha256": "b10331f653cf3b219aab70493ae4433ba68e9d34b45c21610aa61a44032794b7",
+      "bytes": 61068,
+      "family": "mip_count",
+      "origin": "self_owned_original_gpa_capture",
+      "provenance_note": "Untouched GPA 2025 R1 capture; native hardware/WARP and injected producer check 12 full images each.",
+      "device_scope": "Producer hardware/WARP identities recorded; original player adapter unverified.",
+      "reference_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "reference_scope": "Full 8x8 native application image",
+      "comparison_policy": "exact_golden",
+      "controls": [],
+      "boundaries": [],
+      "covers": [
+        "Mip-count only"
+      ],
+      "native_workload_fidelity": "passed",
+      "fidelity_reason": "Saved mip count is independent of the omitted resource LOD",
+      "application_reference_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "application_reference_scope": "Full native hardware/WARP/injected application images: 36 per mode",
+      "application_reference_evidence": {
+        "path": "m4-mip-count-originals-final/0/hardware/expected.rgba",
+        "sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+      },
+      "source_manifests": [
+        {
+          "path": "m4-mip-count-originals-final/manifest.json",
+          "sha256": "0517d18dc3fe6075b3a6ce165f2efddb1bcbdf7a5096bec79fbf8adbf50579fd"
+        }
+      ]
+    },
+    {
+      "id": "mip_count_1",
+      "path": "m4-mip-count-originals-final/1/capture.gpa_frame",
+      "sha256": "900dfa16997566b1d9b47a2669be1b64e924d7268d5e0b2cd601906bb8897c4e",
+      "bytes": 60760,
+      "family": "mip_count",
+      "origin": "self_owned_original_gpa_capture",
+      "provenance_note": "Untouched GPA 2025 R1 capture; native hardware/WARP and injected producer check 12 full images each.",
+      "device_scope": "Producer hardware/WARP identities recorded; original player adapter unverified.",
+      "reference_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "reference_scope": "Full 8x8 native application image",
+      "comparison_policy": "exact_golden",
+      "controls": [],
+      "boundaries": [],
+      "covers": [
+        "Reflection-stripped mip-count only"
+      ],
+      "native_workload_fidelity": "passed",
+      "fidelity_reason": "Saved mip count is independent of the omitted resource LOD",
+      "application_reference_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "application_reference_scope": "Full native hardware/WARP/injected application images: 36 per mode",
+      "application_reference_evidence": {
+        "path": "m4-mip-count-originals-final/1/hardware/expected.rgba",
+        "sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+      },
+      "source_manifests": [
+        {
+          "path": "m4-mip-count-originals-final/manifest.json",
+          "sha256": "0517d18dc3fe6075b3a6ce165f2efddb1bcbdf7a5096bec79fbf8adbf50579fd"
+        }
+      ]
+    },
+    {
+      "id": "mip_count_2",
+      "path": "m4-mip-count-originals-final/2/capture.gpa_frame",
+      "sha256": "f7921486521f090ea2ff5ca8dd341d646c97ed1901513341c63df47f28fc6110",
+      "bytes": 61088,
+      "family": "mip_count",
+      "origin": "self_owned_original_gpa_capture",
+      "provenance_note": "Untouched GPA 2025 R1 capture; native hardware/WARP and injected producer check 12 full images each.",
+      "device_scope": "Producer hardware/WARP identities recorded; original player adapter unverified.",
+      "reference_rgba_sha256": "3d6876a0146de8576eb2395a858de1213d1b92c65b779df3a331cfd5a4584546",
+      "reference_scope": "Full 8x8 native application image",
+      "comparison_policy": "exact_golden",
+      "controls": [],
+      "boundaries": [],
+      "covers": [
+        "Mip dimensions depend on unknown clamp"
+      ],
+      "native_workload_fidelity": "capture_information_missing",
+      "fidelity_reason": "Missing initial resource LOD is still consumed by this shader",
+      "application_reference_rgba_sha256": "3d6876a0146de8576eb2395a858de1213d1b92c65b779df3a331cfd5a4584546",
+      "application_reference_scope": "Full native hardware/WARP/injected application images: 36 per mode",
+      "application_reference_evidence": {
+        "path": "m4-mip-count-originals-final/2/hardware/expected.rgba",
+        "sha256": "3d6876a0146de8576eb2395a858de1213d1b92c65b779df3a331cfd5a4584546"
+      },
+      "source_manifests": [
+        {
+          "path": "m4-mip-count-originals-final/manifest.json",
+          "sha256": "0517d18dc3fe6075b3a6ce165f2efddb1bcbdf7a5096bec79fbf8adbf50579fd"
+        }
+      ]
+    },
+    {
+      "id": "mip_count_3",
+      "path": "m4-mip-count-originals-final/3/capture.gpa_frame",
+      "sha256": "8f8a6e47b489d42d32b136b8af56fa356c0105ef84e07486fcf0b0da826298bf",
+      "bytes": 61248,
+      "family": "mip_count",
+      "origin": "self_owned_original_gpa_capture",
+      "provenance_note": "Untouched GPA 2025 R1 capture; native hardware/WARP and injected producer check 12 full images each.",
+      "device_scope": "Producer hardware/WARP identities recorded; original player adapter unverified.",
+      "reference_rgba_sha256": "95b955e50330dfa31fbe29cfc3d2b1b68cf9c46bb369bfa126f01741c152fd52",
+      "reference_scope": "Full 8x8 native application image",
+      "comparison_policy": "exact_golden",
+      "controls": [],
+      "boundaries": [],
+      "covers": [
+        "Mip-count with ordinary-resource sampling"
+      ],
+      "native_workload_fidelity": "passed",
+      "fidelity_reason": "Saved mip count is independent of the omitted resource LOD",
+      "application_reference_rgba_sha256": "95b955e50330dfa31fbe29cfc3d2b1b68cf9c46bb369bfa126f01741c152fd52",
+      "application_reference_scope": "Full native hardware/WARP/injected application images: 36 per mode",
+      "application_reference_evidence": {
+        "path": "m4-mip-count-originals-final/3/hardware/expected.rgba",
+        "sha256": "95b955e50330dfa31fbe29cfc3d2b1b68cf9c46bb369bfa126f01741c152fd52"
+      },
+      "source_manifests": [
+        {
+          "path": "m4-mip-count-originals-final/manifest.json",
+          "sha256": "0517d18dc3fe6075b3a6ce165f2efddb1bcbdf7a5096bec79fbf8adbf50579fd"
+        }
+      ]
+    },
+    {
+      "id": "mip_count_4",
+      "path": "m4-mip-count-originals-final/4/capture.gpa_frame",
+      "sha256": "2acd521c711e4b98e4778c3da157cd2340711ba01d2816be9ecb5b9acac7534f",
+      "bytes": 61192,
+      "family": "mip_count",
+      "origin": "self_owned_original_gpa_capture",
+      "provenance_note": "Untouched GPA 2025 R1 capture; native hardware/WARP and injected producer check 12 full images each.",
+      "device_scope": "Producer hardware/WARP identities recorded; original player adapter unverified.",
+      "reference_rgba_sha256": "95b955e50330dfa31fbe29cfc3d2b1b68cf9c46bb369bfa126f01741c152fd52",
+      "reference_scope": "Full 8x8 native application image",
+      "comparison_policy": "exact_golden",
+      "controls": [],
+      "boundaries": [],
+      "covers": [
+        "Mip-count plus sampling the same clamped resource"
+      ],
+      "native_workload_fidelity": "capture_information_missing",
+      "fidelity_reason": "Missing initial resource LOD is still consumed by this shader",
+      "application_reference_rgba_sha256": "95b955e50330dfa31fbe29cfc3d2b1b68cf9c46bb369bfa126f01741c152fd52",
+      "application_reference_scope": "Full native hardware/WARP/injected application images: 36 per mode",
+      "application_reference_evidence": {
+        "path": "m4-mip-count-originals-final/4/hardware/expected.rgba",
+        "sha256": "95b955e50330dfa31fbe29cfc3d2b1b68cf9c46bb369bfa126f01741c152fd52"
+      },
+      "source_manifests": [
+        {
+          "path": "m4-mip-count-originals-final/manifest.json",
+          "sha256": "0517d18dc3fe6075b3a6ce165f2efddb1bcbdf7a5096bec79fbf8adbf50579fd"
+        }
+      ]
+    },
+    {
+      "id": "mip_count_5",
+      "path": "m4-mip-count-originals-final/5/capture.gpa_frame",
+      "sha256": "61cfb58ef3156d81ab02e942002e6a39a2cde6466a355f70f07cb419dcf3d9f7",
+      "bytes": 61244,
+      "family": "mip_count",
+      "origin": "self_owned_original_gpa_capture",
+      "provenance_note": "Untouched GPA 2025 R1 capture; native hardware/WARP and injected producer check 12 full images each.",
+      "device_scope": "Producer hardware/WARP identities recorded; original player adapter unverified.",
+      "reference_rgba_sha256": "95b955e50330dfa31fbe29cfc3d2b1b68cf9c46bb369bfa126f01741c152fd52",
+      "reference_scope": "Full 8x8 native application image",
+      "comparison_policy": "exact_golden",
+      "controls": [],
+      "boundaries": [],
+      "covers": [
+        "Explicit saved LOD setter control"
+      ],
+      "native_workload_fidelity": "passed",
+      "fidelity_reason": "Saved setter establishes resource LOD",
+      "application_reference_rgba_sha256": "95b955e50330dfa31fbe29cfc3d2b1b68cf9c46bb369bfa126f01741c152fd52",
+      "application_reference_scope": "Full native hardware/WARP/injected application images: 36 per mode",
+      "application_reference_evidence": {
+        "path": "m4-mip-count-originals-final/5/hardware/expected.rgba",
+        "sha256": "95b955e50330dfa31fbe29cfc3d2b1b68cf9c46bb369bfa126f01741c152fd52"
+      },
+      "source_manifests": [
+        {
+          "path": "m4-mip-count-originals-final/manifest.json",
+          "sha256": "0517d18dc3fe6075b3a6ce165f2efddb1bcbdf7a5096bec79fbf8adbf50579fd"
+        }
+      ]
+    }
+  ]
+}

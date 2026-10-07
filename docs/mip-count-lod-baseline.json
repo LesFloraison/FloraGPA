@@ -1,0 +1,589 @@
+{
+  "schema": "FloraGPA mip-count LOD compatibility baseline 1",
+  "reviewed": "2026-10-08",
+  "implementation_revision": "30e8ec387006903813ae1aaa841a9e7cfaf23463",
+  "package": "out/FloraGPA-mip-count-20261008",
+  "package_files": [
+    {
+      "path": "concrt140.dll",
+      "sha256": "2405355f0a58067b258f8df33c327e3a3d716eaac5a3a5aebb757842d85bd376"
+    },
+    {
+      "path": "D3Dcompiler_47.dll",
+      "sha256": "e994847e01a6f1e4cbdc5a864616ac262f67ee4f14db194984661a8d927ab7f4"
+    },
+    {
+      "path": "FloraGPA.Cli.exe",
+      "sha256": "c11e90604ff79c51ee138ad20f8cc598c71b220e76041ec4486e2f4f9255c4b6"
+    },
+    {
+      "path": "FloraGPA.exe",
+      "sha256": "aaefccc3ab6b8e92bde15c5877841ff201fcc424b6a589ac9258b497ec9e1589"
+    },
+    {
+      "path": "FloraGPA.Metrics.dll",
+      "sha256": "58b6278f2a93e783b1e8bb1290e9b0e51745f1a36825f296584f52159fd7c6db"
+    },
+    {
+      "path": "FloraGPA.Rdc.exe",
+      "sha256": "f4d21d43e661d24d392e91fc1a1f1460a20d1377fcf5075c57083ad289e82773"
+    },
+    {
+      "path": "FloraGPA.Worker.exe",
+      "sha256": "dc79881621bc587f3bfca773e8a436d6aa7922507881ca0cbc028c7b1bde3639"
+    },
+    {
+      "path": "generic/qtuiotouchplugin.dll",
+      "sha256": "a0b971771417d60c6c2dedf66d06f6e99bd3236aa1aa6949c7e4e08d51fb69f9"
+    },
+    {
+      "path": "iconengines/qsvgicon.dll",
+      "sha256": "7879ba1d2f293ad09c515de736add8c1023b0a4e80e2301d1283555efc2e8828"
+    },
+    {
+      "path": "imageformats/qgif.dll",
+      "sha256": "de1c1ea34cbc4156ce452023470e2145af4855128756d081d56e9a0997d0dda8"
+    },
+    {
+      "path": "imageformats/qico.dll",
+      "sha256": "af98cacb134525fab15cf2146a4e6b90266f14493e72e4d51df89a5caadea157"
+    },
+    {
+      "path": "imageformats/qjpeg.dll",
+      "sha256": "a8854ac38d2bb83e8018bdcbfc93420a876251b3d2a79933e1a3c9a8ed2a24cb"
+    },
+    {
+      "path": "imageformats/qsvg.dll",
+      "sha256": "486b395e23e258d03d54cdba045f129e9b1321f9ff12f99fe58293e0351b8caf"
+    },
+    {
+      "path": "licenses/COPYING.txt",
+      "sha256": "eb7e9ab9690124c5c9f42bdc81383d886a3dede26345b6ed15bbad7caf81f7ea"
+    },
+    {
+      "path": "licenses/Copyright.txt",
+      "sha256": "d1f5b8f5eba2e9073463bc29b30572d84033f59e8d8057a95dff37c3414305b9"
+    },
+    {
+      "path": "licenses/GPL-3.0-only.txt",
+      "sha256": "8ceb4b9ee5adedde47b31e975c1d90c73ad27b6b165a1dcd80c7c545eb65b903"
+    },
+    {
+      "path": "licenses/intel-metrics-discovery-MIT.txt",
+      "sha256": "653129790534d6a3e843eaafc62cf04299e7e238f6f411173e85ea7fc315c8ac"
+    },
+    {
+      "path": "licenses/LGPL-3.0-only.txt",
+      "sha256": "da7eabb7bafdf7d3ae5e9f223aa5bdc1eece45ac569dc21b3b037520b4464768"
+    },
+    {
+      "path": "licenses/LICENSE",
+      "sha256": "2004ee3ef8282a85f7dbd035dfacf63cf03d569537bc08655ffeb140ea3671c5"
+    },
+    {
+      "path": "licenses/LICENSE.FDL",
+      "sha256": "c256483c2d1e8a51b62fc7a44a58f21cb4ef23fa840c7d33e3658035fd8cf62f"
+    },
+    {
+      "path": "licenses/nlohmann-json-MIT.txt",
+      "sha256": "46a65cffd1ea955132d95a8dd921640714a8d6b537d2e4e482d31145ae95b603"
+    },
+    {
+      "path": "licenses/renderdoc-api-MIT.txt",
+      "sha256": "e3dccfaa75440c693b18fd2332347e3c810829bf55ec68302ea5a11db9951997"
+    },
+    {
+      "path": "msvcp140.dll",
+      "sha256": "0f885b509a685d2bbfa652fed26b5fb31d88fbdab0a978c641d1c7b8aa460aa9"
+    },
+    {
+      "path": "msvcp140_1.dll",
+      "sha256": "bfad5aef4c63a669e3c140655cdfdf395b6c979b400a447bd5dcb65ed8826c3d"
+    },
+    {
+      "path": "msvcp140_2.dll",
+      "sha256": "3ea06f0ee098b4823cb79599df3780e7f23cce52c19aac31d2a0d47efe33a5e9"
+    },
+    {
+      "path": "msvcp140_atomic_wait.dll",
+      "sha256": "640b2aefced484d0368eea5bdd06addd0658a3a70a49256e560d6923b404a479"
+    },
+    {
+      "path": "msvcp140_codecvt_ids.dll",
+      "sha256": "f2069a52880ec885ee7f0511186100eb7fada0411a2b4948fafea7735b878a18"
+    },
+    {
+      "path": "networkinformation/qnetworklistmanager.dll",
+      "sha256": "2f7c43bb4ec05e9f23a326ac69e84a6df071cdf7cc0bf87cde98f81958ad9bae"
+    },
+    {
+      "path": "platforms/qoffscreen.dll",
+      "sha256": "95391476bba1d0b50cc822b93d7509341024cc7c18cd615f82e471a3e3a61caa"
+    },
+    {
+      "path": "platforms/qwindows.dll",
+      "sha256": "d94c584a18829d11fbf3aefd07e7b1e189e0cf063a0515826960037efa7465df"
+    },
+    {
+      "path": "Qt6Core.dll",
+      "sha256": "22c113a5644b875b2c85482723cd5d2e6a3a4029169778fcc78adde08ef3b6aa"
+    },
+    {
+      "path": "Qt6Gui.dll",
+      "sha256": "19265a4e76efc12ef5f5bcf59be6c6a5b9b59ec4c89660797738bd2da7f719cc"
+    },
+    {
+      "path": "Qt6Network.dll",
+      "sha256": "75ff0896a618f4f5b602f391eb4917a55fd738b2e751d2cf18244a0de3619184"
+    },
+    {
+      "path": "Qt6Svg.dll",
+      "sha256": "1052c17a9df0eb82023e0e4c369bbd0af58e4c5fea3c27a4b5ee83b60c015492"
+    },
+    {
+      "path": "Qt6Widgets.dll",
+      "sha256": "e6d0b7e2e697de6ad985b97f9ed8b381c1c2172fcae87b6ab08455b3b7330f32"
+    },
+    {
+      "path": "styles/qmodernwindowsstyle.dll",
+      "sha256": "f6b88d403d7175f5b830d4958264690e5c8bbaf0148e1ccf42d52704b0480792"
+    },
+    {
+      "path": "THIRD_PARTY.md",
+      "sha256": "343009c9e4761e1c1dc645bd72fd470001c3a4e269384f0dfc4b0bf69c10f6ec"
+    },
+    {
+      "path": "tls/qcertonlybackend.dll",
+      "sha256": "ff0f1a60ec60fc23ec74ff5d325ddef05c1ed68fc89466bffc1d874c7c544adb"
+    },
+    {
+      "path": "tls/qschannelbackend.dll",
+      "sha256": "761178263b47a5f05e151806bb5854d9e5c9cbc67d08187724d80f9e317471f8"
+    },
+    {
+      "path": "vc_redist.x64.exe",
+      "sha256": "cc0ff0eb1dc3f5188ae6300faef32bf5beeba4bdd6e8e445a9184072096b713b"
+    },
+    {
+      "path": "vccorlib140.dll",
+      "sha256": "19839407c3fdbc824e5bce189bf68ddf8097f12ec28b757797ffa0415c144ddd"
+    },
+    {
+      "path": "vcruntime140.dll",
+      "sha256": "d5e4d9a3e835fa679450145d6a7d94e36573a509317111904d9b3712c30d9066"
+    },
+    {
+      "path": "vcruntime140_1.dll",
+      "sha256": "1f2d41c4aa5db0bc33ebf7b66d72943a817d7ce6cbe880502a9403823633093f"
+    },
+    {
+      "path": "vcruntime140_threads.dll",
+      "sha256": "219915cf20822f34d5e7c1fdd4e21ae7f3396881096c51036225fb8f84b47afa"
+    }
+  ],
+  "verification": {
+    "matrix": {
+      "cases": 511,
+      "positive_cases": 483,
+      "rejected_cases": 28,
+      "capture_fidelity_counts": {
+        "unassessed": 423,
+        "passed": 51,
+        "capture_information_missing": 5,
+        "capture_side_mismatch": 32
+      },
+      "application_image_comparison_counts": {
+        "not_assessed": 493,
+        "matches": 13,
+        "differs": 3,
+        "unavailable": 2
+      },
+      "completed_with_known_capture_limitations": 35
+    },
+    "unique_captures": 501,
+    "unique_completions": 473,
+    "attempt_counts": {
+      "ordinary_attempts": 1022,
+      "control_runs": 684,
+      "resource_exports": 826
+    },
+    "producer_runs": 18,
+    "producer_full_image_checks": 216,
+    "focused_proof_rows": 27,
+    "ctest_suites": 5,
+    "qt_test_totals": {
+      "frame-validation.txt": [
+        {
+          "passed": 173,
+          "failed": 0,
+          "skipped": 0
+        }
+      ],
+      "pipeline-creation-Release.txt": [
+        {
+          "passed": 70,
+          "failed": 0,
+          "skipped": 0
+        }
+      ],
+      "resource-lod-Release.txt": [
+        {
+          "passed": 76,
+          "failed": 0,
+          "skipped": 0
+        }
+      ],
+      "shader-setters.txt": [
+        {
+          "passed": 5,
+          "failed": 0,
+          "skipped": 0
+        }
+      ],
+      "ui-Release.txt": [
+        {
+          "passed": 67,
+          "failed": 0,
+          "skipped": 0
+        }
+      ]
+    },
+    "portable_rows": 3,
+    "packaged_golden_and_negative_checks": 4,
+    "previous_cases_unchanged": 505
+  },
+  "evidence": [
+    {
+      "path": "artifacts/check_mip_count_gate.py",
+      "sha256": "41191baf6927a7fbeccd7df6cd480f202d390c5efa52a61e1bba3ae41430a53b"
+    },
+    {
+      "path": "artifacts/check_mip_count_portable.py",
+      "sha256": "7e8061e791063bc0b28039c2916aad26af07b8c55e5ebfa8820c774a3df3b4e0"
+    },
+    {
+      "path": "artifacts/inspect_mip_sm4.py",
+      "sha256": "3d17099613bb2f57606addeac23688b17a42a55cd68ee504c6de880789b84c2e"
+    },
+    {
+      "path": "artifacts/m4-mip-count-after/validation.json",
+      "sha256": "af7c7c954ceb72ebf313b2681ea8aca1fe9d99e469924e25ec432fc1b1b77a22"
+    },
+    {
+      "path": "artifacts/m4-mip-count-after.log",
+      "sha256": "cbc10b36e803ceeac8ca16a35c87767eefac853cb8ede0c925a76f24a165ae6d"
+    },
+    {
+      "path": "artifacts/m4-mip-count-before/validation.json",
+      "sha256": "4e99d8cc23ef8aac639f69bb3d9da5b1d3554ed7dbdc0a1a4f779dd61e1b8234"
+    },
+    {
+      "path": "artifacts/m4-mip-count-before.log",
+      "sha256": "9c6bf90343a9023a6c594e472010afc744240cd48ef85b90227a00c9d01e0f65"
+    },
+    {
+      "path": "artifacts/m4-mip-count-build.log",
+      "sha256": "b5656ebbe8c583ce6b456be7a0a678d67a89ee91842ebf42a997dc97beb9c8d4"
+    },
+    {
+      "path": "artifacts/m4-mip-count-ctest-detail.log",
+      "sha256": "96da1b5a6ebc4df51eb03bd601997b263be0f436c911b7ac285c62c93efa3f03"
+    },
+    {
+      "path": "artifacts/m4-mip-count-ctest.log",
+      "sha256": "d80685dac2ad08d10b006301c57c1dc9e777e566f8ffa7645987cdfa1ff92073"
+    },
+    {
+      "path": "artifacts/m4-mip-count-focused-summary.json",
+      "sha256": "6563668de39704cedd287a4684fa27d2b27bf767a517a6c84b40140f86423fdb"
+    },
+    {
+      "path": "artifacts/m4-mip-count-gate/buffer/validation.json",
+      "sha256": "966a1f2b7217e354d5fd65df7a6b983f082df55624711ba710495d72469d3b6c"
+    },
+    {
+      "path": "artifacts/m4-mip-count-gate/buffer-views/validation.json",
+      "sha256": "dd43294549c35854e7a9e1e7d0f8dc088d77c64c40df5be6c1bc5dcc14d2d64e"
+    },
+    {
+      "path": "artifacts/m4-mip-count-gate/class-creation/validation.json",
+      "sha256": "4a022f9d28becd8ec5a1bc640c7cb3653e990ad2e40e9a38067c4b135275e16a"
+    },
+    {
+      "path": "artifacts/m4-mip-count-gate/clear-view/validation.json",
+      "sha256": "69e2b3ada5d8b6cee8e8b7517a273231e7e70854e8635b706832a322292a56e5"
+    },
+    {
+      "path": "artifacts/m4-mip-count-gate/context/validation.json",
+      "sha256": "78aeeaccaa542b9a6d2c9787ab3f7ac6febaf0d39e6ee5126ee810e2b1020e51"
+    },
+    {
+      "path": "artifacts/m4-mip-count-gate/copy/validation.json",
+      "sha256": "03db21c93201e44959ea7d9a56ad60ae097c5105aa77749b35f79645df52de06"
+    },
+    {
+      "path": "artifacts/m4-mip-count-gate/corpus/validation.json",
+      "sha256": "6af63b1a3c1c299af9a33571c103faca27dc40f11192cf3bb8df6f0bde867137"
+    },
+    {
+      "path": "artifacts/m4-mip-count-gate/counter_slots/validation.json",
+      "sha256": "bc0c905f1c38077702fc3473cf5e398d8f61ea551dcd0b10b791ffba3d03350b"
+    },
+    {
+      "path": "artifacts/m4-mip-count-gate/counter_usage/validation.json",
+      "sha256": "386519a4513ba7ff12fe3764461af6a8e9bc9ac0f7fa80029b2e9a3334a402ce"
+    },
+    {
+      "path": "artifacts/m4-mip-count-gate/creation/validation.json",
+      "sha256": "6d62d712d52c66f7976926a858d6b14e1eff75e16ee5cf2314e1dc793afb6010"
+    },
+    {
+      "path": "artifacts/m4-mip-count-gate/deferred_merges/validation.json",
+      "sha256": "6aa9817f6833ebab7eedaf39ba86afcdb4bcfa6b586051f3b301b746c2ebd459"
+    },
+    {
+      "path": "artifacts/m4-mip-count-gate/deferred_versions/validation.json",
+      "sha256": "41e932c6acdc439ab04d6a9e232124343f23b1512da8970c8ee330c2d8e82d28"
+    },
+    {
+      "path": "artifacts/m4-mip-count-gate/dimensions/validation.json",
+      "sha256": "4315bc047aa0d6dbb6d27be91aabf0948376d77459f1cc87594e049630b2fee4"
+    },
+    {
+      "path": "artifacts/m4-mip-count-gate/discards/validation.json",
+      "sha256": "50a07a2a139f877ba080c541d67563f96f8165e470bcf69edd5eded2f5da96ff"
+    },
+    {
+      "path": "artifacts/m4-mip-count-gate/discovery/validation.json",
+      "sha256": "b71fae8ca350761c05ec067f6bba819b1a540e268b86f4ed51a1c213eebd21f5"
+    },
+    {
+      "path": "artifacts/m4-mip-count-gate/gate.json",
+      "sha256": "eb65f85018ea2b696f948bf2ecea674b99e0510b49849659fd5d7ad0a92209bd"
+    },
+    {
+      "path": "artifacts/m4-mip-count-gate/geometry-creation/validation.json",
+      "sha256": "f6fe048ff33f2a6532e4ec5a8753302f2173f579479180e438cdad1dbad1d620"
+    },
+    {
+      "path": "artifacts/m4-mip-count-gate/getters/validation.json",
+      "sha256": "3745179f8bacb97b98c6f9bca88f05437000c1b6f12347207ca1e53cb0c74186"
+    },
+    {
+      "path": "artifacts/m4-mip-count-gate/initial_predicates/validation.json",
+      "sha256": "d217315666f50eb700f6e6e1b0b3311dc3d0c0c27e2b9c4f6c98fd12d11c6f1a"
+    },
+    {
+      "path": "artifacts/m4-mip-count-gate/minlod/validation.json",
+      "sha256": "49f1498ef46a50a852b70daa7131b9b790bf4954261d8fd878749c63beb70157"
+    },
+    {
+      "path": "artifacts/m4-mip-count-gate/mip_count/validation.json",
+      "sha256": "b479952f911aaba7a989b257f2b15c606e25c406cd16b63677a844a6d11004bf"
+    },
+    {
+      "path": "artifacts/m4-mip-count-gate/missing-state/validation.json",
+      "sha256": "e4a0aca42302af1a86ba8352526775afe727c798abb6b4fc3db2e79a485fc53c"
+    },
+    {
+      "path": "artifacts/m4-mip-count-gate/occluded_present/validation.json",
+      "sha256": "097d1c2ec7e1882f4654c923392f5ca2f829df0e54db12404f7141966d3f7ede"
+    },
+    {
+      "path": "artifacts/m4-mip-count-gate/originals/validation.json",
+      "sha256": "117b3666c0422490ff75d63019d640aa5ee6a6c58ecedce6f9dcc2fce71ff7b3"
+    },
+    {
+      "path": "artifacts/m4-mip-count-gate/pipeline/validation.json",
+      "sha256": "7e49493cba7930635316343aaabebaf693be8253ef8b961d74408f758163d1d5"
+    },
+    {
+      "path": "artifacts/m4-mip-count-gate/pipeline-creation/validation.json",
+      "sha256": "f1b85743dfd92138a51b0e5a9526779e9d8bad94933186faf171052b41a230ad"
+    },
+    {
+      "path": "artifacts/m4-mip-count-gate/predicate-creation/validation.json",
+      "sha256": "9f3b06690d295c9ee443cbf0e91243013c5bfe1e3971f8b28a3c6ce7919aac92"
+    },
+    {
+      "path": "artifacts/m4-mip-count-gate/present/validation.json",
+      "sha256": "6a544e31aa8886abc21f80af42990d32ce4815b3915a7dd5a5e4134c6c3b7878"
+    },
+    {
+      "path": "artifacts/m4-mip-count-gate/query_completion/validation.json",
+      "sha256": "af3a74f4dbe3fc9b0d040e09529ee45a7bd62c7ce47952bccef693290b6a856d"
+    },
+    {
+      "path": "artifacts/m4-mip-count-gate/read_map_sync/validation.json",
+      "sha256": "b4f89f0cd4eabd2cd89a30da3207ec02060ff016b25f2e1d3ef646193c94157c"
+    },
+    {
+      "path": "artifacts/m4-mip-count-gate/recheck.json",
+      "sha256": "5e4a589e54fcbf69a65b0da7daa8b754e8ba432168dcac87aadfdf58ee1131c7"
+    },
+    {
+      "path": "artifacts/m4-mip-count-gate/so/validation.json",
+      "sha256": "95697b3c2e397a28e2ef39174c059c6992de96ca8b6a61d34cd46185e24d782e"
+    },
+    {
+      "path": "artifacts/m4-mip-count-gate/transfer1/validation.json",
+      "sha256": "a3f34dc8da8dc38ad6fcb7054e15502c46e9dc193ea6974cb8d1557887fe129c"
+    },
+    {
+      "path": "artifacts/m4-mip-count-gate/transfer1-context/validation.json",
+      "sha256": "05939063c78b32dd394468773ea6f1998d4909a3e04ebbe0b610f6393de0dfa9"
+    },
+    {
+      "path": "artifacts/m4-mip-count-gate/usage/validation.json",
+      "sha256": "a142820169be3ad1ce87292003a7c50fdd09f4ac92a3646c6bc2b47802b63fe4"
+    },
+    {
+      "path": "artifacts/m4-mip-count-gate/views/validation.json",
+      "sha256": "41d857d1ad391f83bd4cba93eeb86953c47413a29ae46c74f7e808c72f70ec67"
+    },
+    {
+      "path": "artifacts/m4-mip-count-gate.log",
+      "sha256": "926826081745b5c7ffc776977712522eb7652fec2f9838304bfbdeb47d3786e8"
+    },
+    {
+      "path": "artifacts/m4-mip-count-goldens/validation.json",
+      "sha256": "a1f6d11deab2e8324c8626ab359b139abf8a83257d06874c3cb6a251a357b84a"
+    },
+    {
+      "path": "artifacts/m4-mip-count-goldens.log",
+      "sha256": "9045dc3e3b7870e530a1c62f26394abd4443e9d3b985817f7f32052b1f0e9635"
+    },
+    {
+      "path": "artifacts/m4-mip-count-originals/manifest.json",
+      "sha256": "f03d5d2cb84aebe4ebd3034e536633a0a35fddc484b9b30ecfd7332b19af6dfc"
+    },
+    {
+      "path": "artifacts/m4-mip-count-originals-final/manifest.json",
+      "sha256": "0517d18dc3fe6075b3a6ce165f2efddb1bcbdf7a5096bec79fbf8adbf50579fd"
+    },
+    {
+      "path": "artifacts/m4-mip-count-originals-final.log",
+      "sha256": "17a32368b3d999c898262f6cf9e3e3d97ac13e6a809a3bb6ad04051f64a222c7"
+    },
+    {
+      "path": "artifacts/m4-mip-count-originals.log",
+      "sha256": "3c5bf8d54eba8066be1af556fbe01e1b9680bdb38d4510dfafd138995c81466f"
+    },
+    {
+      "path": "artifacts/m4-mip-count-package-comparison.json",
+      "sha256": "e9771558215fbf0aec09e27cdfa24194818b9eda498cf9ca8e392d799c163062"
+    },
+    {
+      "path": "artifacts/m4-mip-count-package.log",
+      "sha256": "b28f9f1d8c36b3f0eed5c3ffcda9b0b62ed9e216cd6b7cbf6d30e8040cccc8ce"
+    },
+    {
+      "path": "artifacts/m4-mip-count-portable QA \u4e2d\u6587/qt-results.txt",
+      "sha256": "4cb74e5bcb139ee93fdf338ba5e6cda438b9ec67ab1a58e202487dcb05bf0085"
+    },
+    {
+      "path": "artifacts/m4-mip-count-portable QA \u4e2d\u6587/run.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/m4-mip-count-portable QA \u4e2d\u6587/screenshots/mip-count-0.png",
+      "sha256": "05ea2dc11eb7afc51488679cd39d5070d31f15c5217fb6770ad007bff711c06a"
+    },
+    {
+      "path": "artifacts/m4-mip-count-portable QA \u4e2d\u6587/screenshots/mip-count-1.png",
+      "sha256": "8a81e0149ea46ca417024a02118f02d101cffe3e77d4bb2559535571234bddb0"
+    },
+    {
+      "path": "artifacts/m4-mip-count-portable QA \u4e2d\u6587/screenshots/mip-count-3.png",
+      "sha256": "12f453dc9008020a08e41edb250858dfe0984926fe43743614577aaee33501b2"
+    },
+    {
+      "path": "artifacts/m4-mip-count-portable QA \u4e2d\u6587/screenshots/mip-count-5.png",
+      "sha256": "f68230964d5c562d49b1df850a8672cc4f361e42352427f635d048155cfefd42"
+    },
+    {
+      "path": "artifacts/m4-mip-count-portable QA \u4e2d\u6587/validation.json",
+      "sha256": "3ad7484dec4e20b50a97a5c9c3dd25ecd0138672ed21852ce89f6ece617dd89b"
+    },
+    {
+      "path": "artifacts/m4-mip-count-portable.log",
+      "sha256": "741adcad1b8cace82f71907c4cd5027fdc73d613c4f826d6587127859d2a4af2"
+    },
+    {
+      "path": "artifacts/m4-mip-count-probe-build.log",
+      "sha256": "5975c39b8197fdca4cacaf564d329d8df8d0041039ad0ec25a7d60b1c7b4e385"
+    },
+    {
+      "path": "artifacts/m4-mip-count-probe-final-build.log",
+      "sha256": "ae1e898ad4e80dc3d913510f5ae94ab607916249106bbced744be3b8f1b03b5f"
+    },
+    {
+      "path": "artifacts/m4-mip-count-qt-results/frame-validation.txt",
+      "sha256": "74426b58ae4b4a783395688b906ec26f3e0cb6ddb7fd95bcd8b6da71ba0eb97d"
+    },
+    {
+      "path": "artifacts/m4-mip-count-qt-results/pipeline-creation-Release.txt",
+      "sha256": "62e9e9071ce5f0be44e1eb2638e229f293aba82ded72dd4aeeca06b95139326c"
+    },
+    {
+      "path": "artifacts/m4-mip-count-qt-results/resource-lod-Release.txt",
+      "sha256": "bc01d64a4750a34cbd05c91fa2badb282485e0e5692a217cb0074fa9c6131099"
+    },
+    {
+      "path": "artifacts/m4-mip-count-qt-results/shader-setters.txt",
+      "sha256": "469a23b72947a3ad077bc43a398ccdfb19a56d5b56819170dba6ebab2f5cd2c9"
+    },
+    {
+      "path": "artifacts/m4-mip-count-qt-results/ui-Release.txt",
+      "sha256": "e488a860851ca2b35bcdd54757a092b8730ff33fa7bd7cc7f658ae0ee0cd2759"
+    },
+    {
+      "path": "artifacts/m4-mip-count-tests-build.log",
+      "sha256": "241d26df60bd0b54788a6485849c33305a71f5f28166e34a0a898627a165279c"
+    },
+    {
+      "path": "artifacts/m4-mip-count-tests-final.txt",
+      "sha256": "fe4bcb99288c907cc46ef087711cadaa0d1685df7ce46ea7bdac93e8df69b2da"
+    },
+    {
+      "path": "artifacts/m4-mip-count-tests-initial.txt",
+      "sha256": "7023f173d86aec2553dd60bfc330e2f2f0ae05f7877034413f8b4de48b34a528"
+    },
+    {
+      "path": "artifacts/m4-mip-count-ui-focused.txt",
+      "sha256": "5c99f9e6bb8ffcbbad2a5f3c6217490ed5c440070e8109440fab9913921c9a27"
+    },
+    {
+      "path": "artifacts/minlod-usage-token-format.hpp",
+      "sha256": "5862ef7c8b819f0d02ba73563a9df4dc0e89f11fe59d8f598def39122273c626"
+    },
+    {
+      "path": "artifacts/ps_4_0-mip.dxbc",
+      "sha256": "da4892c2b79abf93d5b581ab947097f669ad994bfbd550e37d14b400a5bf3036"
+    },
+    {
+      "path": "artifacts/ps_4_1-mip.dxbc",
+      "sha256": "0d504a7a1ed32248cdb804e9d0610534ff9e197f9fdc9e701d9e8da971869040"
+    },
+    {
+      "path": "artifacts/ps_5_0-mip.dxbc",
+      "sha256": "12c37846c15b814b47f7827d30d6dcb229ade5fffc4706a6d6eb151295187425"
+    },
+    {
+      "path": "artifacts/run_mip_count_ctest.ps1",
+      "sha256": "97cbdf61d98491aed2796808d995df552e44b6e96ad9a34c2d8f837c70dccb63"
+    },
+    {
+      "path": "artifacts/summarize_mip_count_evidence.py",
+      "sha256": "a1bdd9e2ab7eaf7707f90159d5ce57685c194b0405fec7538332fc5d77aa309f"
+    }
+  ],
+  "limits": [
+    "Count-only immediate SRV proof; full-vector dimensions, other access, unfamiliar operands/versions and dynamic linkage remain guarded",
+    "Local SM4.0 compiler emits full-vector RESINFO; no dead-component data-flow proof",
+    "Original player adapter and GUI unverified; mode 5 differs from independent application",
+    "Initial MinLOD is not reconstructed, shaders and image thresholds are not changed",
+    "Same-host Unicode/system-PATH tests are not independent clean-machine acceptance",
+    "M3/M4/M5 and long-duration testing remain incomplete; module ledger unchanged"
+  ]
+}
