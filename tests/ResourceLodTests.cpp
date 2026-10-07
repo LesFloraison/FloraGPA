@@ -31,6 +31,7 @@ void copy(const Frame &frame, const QString &path, Id edited, const std::vector<
     out.save(path);
 }
 } // namespace
+#include "ResourceLodSwitchTests.h"
 class ResourceLodTests final : public QObject {
     Q_OBJECT
   private slots:
@@ -68,14 +69,14 @@ class ResourceLodTests final : public QObject {
     void mipCountOriginals_data() {
         QTest::addColumn<int>("mode");
         QTest::addColumn<bool>("warp");
-        for (int mode = 0; mode < 20; ++mode)
+        for (int mode = 0; mode < 28; ++mode)
             for (bool warp : {false, true})
                 QTest::newRow(qPrintable(QString("%1-%2").arg(mode).arg(warp))) << mode << warp;
     }
     void mipCountOriginals() {
         QFETCH(int, mode);
         QFETCH(bool, warp);
-        const auto root = qEnvironmentVariable(mode < 6 ? "FLORA_MIP_COUNT_CAPTURES" : mode < 12 ? "FLORA_SM40_MIP_CAPTURES" : "FLORA_BRANCH_MIP_CAPTURES");
+        const auto root = qEnvironmentVariable(mode < 6 ? "FLORA_MIP_COUNT_CAPTURES" : mode < 12 ? "FLORA_SM40_MIP_CAPTURES" : mode < 20 ? "FLORA_BRANCH_MIP_CAPTURES" : "FLORA_SWITCH_MIP_CAPTURES");
         if (root.isEmpty())
             QSKIP("Set FLORA_MIP_COUNT_CAPTURES for original mip-count captures");
         const auto folder = root + QString("/%1/").arg(mode);
@@ -84,7 +85,7 @@ class ResourceLodTests final : public QObject {
         QVERIFY(audit.initial.empty());
         QVERIFY(!audit.clamped.empty());
         const auto behavior = mode % 6;
-        const bool missing = mode < 12 ? behavior == 2 || behavior == 4 : mode >= 14 && mode <= 16;
+        const bool missing = mode < 12 ? behavior == 2 || behavior == 4 : mode < 20 ? mode >= 14 && mode <= 16 : mode >= 22 && mode <= 24;
         QCOMPARE(audit.issues.size(), size_t(missing));
         QCOMPARE(validateFrame(frame.path())["errors"].get<unsigned>(), unsigned(missing));
         ReplayOptions options;
@@ -116,7 +117,22 @@ class ResourceLodTests final : public QObject {
                 QCOMPARE(edited.output().rgba, bytes(root + QString("/%1/hardware/expected.rgba").arg(base)));
             }
         }
+        if (mode == 20 || mode == 24) {
+            Id shader = 0;
+            for (const auto &[id, e] : frame.entries())
+                if (e.category == 7 && isDraw(e.type))
+                    shader = frame.state(frame.event(id).state).stages[4].shader;
+            QVERIFY(shader);
+            options.shaders[shader] = bytes(root + (mode == 20 ? "/24/hardware/switchSample.dxbc" : "/20/hardware/switched.dxbc"));
+            Replay edited(frame, options);
+            if (mode == 20) QVERIFY_EXCEPTION_THROWN(edited.run(), std::runtime_error);
+            else {
+                edited.run();
+                QCOMPARE(edited.output().rgba, bytes(root + "/20/hardware/expected.rgba"));
+            }
+        }
     }
+    void sm40SwitchProofBounds() { exerciseSm40SwitchProofBounds(); }
     void sm40BranchProofBounds() {
         const auto root = qEnvironmentVariable("FLORA_BRANCH_MIP_CAPTURES");
         if (root.isEmpty()) QSKIP("Set original SM4.0 branch capture directory");

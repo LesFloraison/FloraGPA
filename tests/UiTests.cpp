@@ -3801,26 +3801,27 @@ class UiTests final : public QObject {
         QTest::newRow("sm5") << 0;
         QTest::newRow("sm4") << 6;
         QTest::newRow("sm4-branches") << 12;
+        QTest::newRow("sm4-switches") << 20;
     }
     void mipCountReplayAndRetry() {
         QFETCH(int, base);
-        const auto root = qEnvironmentVariable(base == 12 ? "FLORA_BRANCH_MIP_CAPTURES" : base ? "FLORA_SM40_MIP_CAPTURES" : "FLORA_MIP_COUNT_CAPTURES");
+        const auto root = qEnvironmentVariable(base == 20 ? "FLORA_SWITCH_MIP_CAPTURES" : base == 12 ? "FLORA_BRANCH_MIP_CAPTURES" : base ? "FLORA_SM40_MIP_CAPTURES" : "FLORA_MIP_COUNT_CAPTURES");
         if (root.isEmpty()) QSKIP("Set original mip-count corpus");
         flora::MainWindow window;
         window.resize(1440, 900); window.show();
         QSignalSpy done(&window, &flora::MainWindow::taskFinished);
-        const auto modes = base == 12 ? std::vector<int>{0, 2, 1, 3, 6, 4, 7, 5} : std::vector<int>{0, 2, 1, 4, 3, 5};
+        const auto modes = base >= 12 ? std::vector<int>{0, 2, 1, 3, 6, 4, 7, 5} : std::vector<int>{0, 2, 1, 4, 3, 5};
         for (int mode : modes) {
             done.clear();
             window.openCapture(root + '/' + QString::number(base + mode) + "/capture.gpa_frame");
             QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
-            const bool missing = mode == 2 || mode == 4 || (base == 12 && mode == 3);
+            const bool missing = mode == 2 || mode == 4 || (base >= 12 && mode == 3);
             QCOMPARE(done.takeLast()[0].toBool(), !missing);
             QVERIFY(!window.busy());
             if (missing) continue;
             auto output = window.findChild<flora::ImageView *>("frameOutput");
             QVERIFY(output); QCOMPARE(output->image().size(), QSize(8, 8));
-            const auto expected = QColor(255, (base == 12 ? mode == 5 : mode >= 3) ? 255 : 0, 0, 255);
+            const auto expected = QColor(255, (base >= 12 ? mode == 5 : mode >= 3) ? 255 : 0, 0, 255);
             for (int y = 0; y < 8; ++y) for (int x = 0; x < 8; ++x)
                 QCOMPARE(output->image().pixelColor(x, y), expected);
             done.clear(); window.replay();

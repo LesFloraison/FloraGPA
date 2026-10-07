@@ -33,7 +33,7 @@ struct FlowOperation {
     std::vector<RegisterUse> sources;
     std::vector<size_t> successors;
 };
-// Deliberately bounded, acyclic SM4.0 proof. Structured IF/ELSE/ENDIF only;
+// Deliberately bounded, acyclic SM4.0 proof. Checked IF and SWITCH blocks only;
 // no loops, calls, relative
 // operands, instruction/operand extensions, memory stores or unfamiliar ALU
 // operations are admitted. This is not a general shader optimizer.
@@ -41,7 +41,14 @@ std::optional<std::vector<FlowOperation>> boundedSm40(const DxbcProgram &program
     if (program.instructions.empty() || program.instructions.size() > 256)
         return {};
     std::vector<FlowOperation> result;
-    struct Branch { size_t condition; std::optional<size_t> otherwise; };
+    struct Branch {
+        size_t condition;
+        std::optional<size_t> otherwise;
+        bool selection = false, hasLabel = false, hasDefault = false;
+        bool caseHasCode = false, caseTerminated = false;
+        std::vector<uint32_t> cases;
+        std::vector<size_t> breaks;
+    };
     std::vector<Branch> branches;
     for (size_t i = 0; i < program.instructions.size(); ++i) {
         const auto &row = program.instructions[i];
@@ -50,23 +57,35 @@ std::optional<std::vector<FlowOperation>> boundedSm40(const DxbcProgram &program
             return {};
         FlowOperation instruction;
         instruction.successors = {i + 1};
+        if (!branches.empty() && branches.back().selection && op != 6 && op != 10 && op != 23) {
+            auto &selection = branches.back();
+            // Accept empty shared labels, but require a direct unconditional
+            // BREAK after each nonempty case. No executable fallthrough or
+            // code before the first label / after a terminating BREAK.
+            if (!selection.hasLabel || selection.caseTerminated) return {};
+            selection.caseHasCode = true;
+        }
         if (op == 62) {
             if (row.size() != 1 || i + 1 != program.instructions.size() || !branches.empty())
                 return {};
             instruction.successors.clear();
-        } else if (op == 31) {
-            // IF tests one component; consider both outcomes, without guessing
-            // values or pruning paths based on an observed application image.
-            if (row.size() != 3 || (row[0] & 0x00fbf800u) || branches.size() >= 64)
+        } else if (op == 31 || op == 76) {
+            // Conditions/selectors use one component. Visit every outcome,
+            // without pruning paths from a presumed value or observed image.
+            if (row.size() != 3 || (row[0] & (op == 31 ? 0x00fbf800u : 0x00fff800u)) || branches.size() >= 64)
                 return {};
             const auto token = row[1], type = (token >> 12) & 255;
-            if ((type != 0 && type != 1) ||
+            if (op == 76 && token == 0x00004001u) {
+                // Still visit every case; literal selector values do not prune
+                // a path from this dependency proof.
+            } else if ((type != 0 && type != 1) ||
                 (token & ~0x30u) != (0x0010000au | (type << 12)) || row[2] >= 4096)
                 return {};
-            instruction.sources.push_back({type, row[2], 1u << ((token >> 4) & 3)});
-            branches.push_back({i, {}});
+            else instruction.sources.push_back({type, row[2], 1u << ((token >> 4) & 3)});
+            branches.push_back({i, {}, op == 76});
+            if (op == 76) instruction.successors.clear();
         } else if (op == 18 || op == 21) {
-            if (row.size() != 1 || (row[0] & 0x00fff800u) || branches.empty())
+            if (row.size() != 1 || (row[0] & 0x00fff800u) || branches.empty() || branches.back().selection)
                 return {};
             auto &branch = branches.back();
             if (op == 18) {
@@ -78,6 +97,38 @@ std::optional<std::vector<FlowOperation>> boundedSm40(const DxbcProgram &program
                 else result[branch.condition].successors.push_back(i + 1);
                 branches.pop_back();
             }
+        } else if (op == 6 || op == 10 || op == 23) {
+            if (branches.empty() || !branches.back().selection || (row[0] & 0x00fff800u) ||
+                row.size() != (op == 6 ? 3 : 1)) return {};
+            auto &selection = branches.back();
+            if (selection.caseHasCode && !selection.caseTerminated) return {};
+            if (op == 23) {
+                if (!selection.hasLabel) return {};
+                if (!selection.hasDefault) result[selection.condition].successors.push_back(i + 1);
+                for (const auto at : selection.breaks) result[at].successors = {i + 1};
+                branches.pop_back();
+            } else {
+                if (op == 6) {
+                    if (row[1] != 0x00004001u ||
+                        std::find(selection.cases.begin(), selection.cases.end(), row[2]) != selection.cases.end())
+                        return {};
+                    selection.cases.push_back(row[2]);
+                } else {
+                    if (selection.hasDefault) return {};
+                    selection.hasDefault = true;
+                }
+                selection.hasLabel = true;
+                selection.caseHasCode = selection.caseTerminated = false;
+                result[selection.condition].successors.push_back(i + 1);
+            }
+        } else if (op == 2) {
+            if (row.size() != 1 || (row[0] & 0x00fff800u)) return {};
+            const auto selection = std::find_if(branches.rbegin(), branches.rend(),
+                                                [](const auto &block) { return block.selection; });
+            if (selection == branches.rend() || !selection->hasLabel) return {};
+            selection->breaks.push_back(i);
+            if (branches.back().selection) selection->caseTerminated = true;
+            instruction.successors.clear(); // Patched to the owning ENDSWITCH.
         } else if (op == 88 || op == 90 || op == 101 || op == 104 || op == 106) {
             // Resource declarations are checked by shaderSrvDeclarations;
             // the other accepted declarations neither read nor write temps.
