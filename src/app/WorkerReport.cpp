@@ -1,17 +1,23 @@
 #include "WorkerReport.h"
+#include <QBuffer>
 #include <QDir>
 #include <QFile>
 #include <QFileInfo>
 #include <QJsonDocument>
+#include <QImageReader>
+#include <limits>
 
 namespace flora {
 namespace {
-QByteArray readBytes(const QString &path, const CancelCheck &cancelled) {
+QByteArray readBytes(const QString &path, const CancelCheck &cancelled,
+                     std::optional<uint64_t> expected = {}) {
     checkCancellation(cancelled);
     QFile file(path);
     if (!file.open(QIODevice::ReadOnly))
         throw std::runtime_error(("Worker output is missing or unreadable: " + QFileInfo(path).fileName()).toStdString());
     const auto length = file.size();
+    if (length < 0 || (expected && uint64_t(length) != *expected))
+        throw std::runtime_error(("Worker output length mismatch: " + QFileInfo(path).fileName()).toStdString());
     QByteArray bytes;
     while (bytes.size() < length) {
         checkCancellation(cancelled);
@@ -47,6 +53,111 @@ nlohmann::json nativeObject(const QByteArray &bytes, const CancelCheck &cancelle
     if (!result.is_object()) throw std::runtime_error("Worker output is not an object");
     return result;
 }
+uint64_t unsignedValue(const nlohmann::json &value) {
+    if (value.is_number_unsigned()) return value.get<uint64_t>();
+    if (value.is_number_integer() && value.get<int64_t>() >= 0) return uint64_t(value.get<int64_t>());
+    throw std::runtime_error("Diagnostic size is not an unsigned integer");
+}
+int dimension(const nlohmann::json &value) {
+    const auto n = unsignedValue(value);
+    if (!n || n > uint64_t(std::numeric_limits<int>::max() / 4))
+        throw std::runtime_error("Diagnostic image dimension is invalid");
+    return int(n);
+}
+QSize imageSize(const nlohmann::json &object, const char *width = "width", const char *height = "height") {
+    return {dimension(object.at(width)), dimension(object.at(height))};
+}
+QImage decodeImage(const QByteArray &bytes, const QSize &size, const char *name,
+                    const CancelCheck &cancelled) {
+    checkCancellation(cancelled);
+    QBuffer buffer;
+    buffer.setData(bytes);
+    if (!buffer.open(QIODevice::ReadOnly)) throw std::runtime_error("Cannot read diagnostic image bytes");
+    QImageReader reader(&buffer, "png");
+    if (reader.size() != size)
+        throw std::runtime_error(std::string(name) + ": PNG dimensions do not match the report");
+    checkCancellation(cancelled);
+    auto image = reader.read();
+    checkCancellation(cancelled);
+    if (image.isNull() || image.size() != size)
+        throw std::runtime_error(std::string(name) + ": PNG is incomplete or unreadable");
+    return image;
+}
+PreparedImage opaqueDiagnostic(QImage original, const CancelCheck &cancelled) {
+    checkCancellation(cancelled);
+    auto opaque = original.convertToFormat(QImage::Format_RGBA8888);
+    checkCancellation(cancelled);
+    if (opaque.isNull()) throw std::runtime_error("Cannot allocate diagnostic display conversion");
+    for (int y = 0; y < opaque.height(); ++y) {
+        checkCancellation(cancelled);
+        auto row = opaque.scanLine(y);
+        for (int x = 0; x < opaque.width(); ++x) row[x * 4 + 3] = 255;
+    }
+    auto result = prepareImageForDisplay(std::move(opaque), cancelled);
+    result.original = std::move(original);
+    return result;
+}
+QImage coverageTint(const QImage &mask, const CancelCheck &cancelled) {
+    checkCancellation(cancelled);
+    auto tint = mask.convertToFormat(QImage::Format_RGBA8888);
+    checkCancellation(cancelled);
+    if (tint.isNull()) throw std::runtime_error("Cannot allocate coverage mask conversion");
+    for (int y = 0; y < tint.height(); ++y) {
+        checkCancellation(cancelled);
+        auto row = tint.scanLine(y);
+        for (int x = 0; x < tint.width(); ++x) {
+            const bool covered = row[x * 4] != 0;
+            row[x * 4] = 255; row[x * 4 + 1] = 0; row[x * 4 + 2] = 255;
+            row[x * 4 + 3] = covered ? 255 : 0;
+        }
+    }
+    return prepareImageForDisplay(std::move(tint), cancelled).display;
+}
+}
+CoverageOutput readCoverageOutput(const QString &directory, const CancelCheck &cancelled) {
+    CoverageOutput result;
+    const QDir root(directory);
+    result.files[0] = readBytes(root.filePath(coverageOutputFiles[0]), cancelled);
+    result.report = nativeObject(result.files[0], cancelled);
+    const auto kind = result.report.at("target_kind").get<std::string>();
+    const auto &shape = kind == "viewport" ? result.report :
+                        kind == "buffer" ? result.report.at("target_buffer_view") :
+                        result.report.at("target_subresource");
+    if (kind != "viewport" && kind != "buffer" && kind != "color" && kind != "depth")
+        throw std::runtime_error("Unknown coverage target kind");
+    const auto size = imageSize(shape);
+    for (size_t i = 1; i < result.files.size(); ++i) {
+        result.files[i] = readBytes(root.filePath(coverageOutputFiles[i]), cancelled);
+        auto image = decodeImage(result.files[i], size, coverageOutputFiles[i], cancelled);
+        if (i == 1) result.mask = std::move(image);
+        if (i == 3) result.diagnostic = opaqueDiagnostic(std::move(image), cancelled);
+    }
+    result.maskDisplay = coverageTint(result.mask, cancelled);
+    checkCancellation(cancelled);
+    return result;
+}
+QuadOutput readQuadOutput(const QString &directory, const QString &contextKey,
+                          const CancelCheck &cancelled) {
+    QuadOutput result;
+    const QDir root(directory);
+    result.report = nativeObject(readBytes(root.filePath("quad.json"), cancelled), cancelled);
+    const auto size = imageSize(result.report, "quad_width", "quad_height");
+    const auto sourceSize = imageSize(result.report);
+    if (size.width() != (sourceSize.width() + 1) / 2 || size.height() != (sourceSize.height() + 1) / 2)
+        throw std::runtime_error("Quad grid dimensions do not match source dimensions");
+    const auto capacity = unsignedValue(result.report.at("histogram_capacity"));
+    if (!capacity || capacity > uint64_t(std::numeric_limits<qint64>::max()) / 4)
+        throw std::runtime_error("Quad histogram byte length overflows");
+    const auto cells = uint64_t(size.width()) * uint64_t(size.height()) * 4;
+    const std::array<uint64_t, 5> lengths{cells, cells, cells, capacity * 4, 16};
+    for (size_t i = 0; i < lengths.size(); ++i)
+        result.files[i] = readBytes(root.filePath(quadOutputFiles[i]), cancelled, lengths[i]);
+    result.files[5] = readBytes(root.filePath(quadOutputFiles[5]), cancelled);
+    result.image = opaqueDiagnostic(decodeImage(result.files[5], size, quadOutputFiles[5], cancelled), cancelled);
+    result.report["experiment_key"] = contextKey.toStdString();
+    result.reportText = QString::fromStdString(result.report.dump(2));
+    checkCancellation(cancelled);
+    return result;
 }
 WorkerReport readWorkerReport(const QString &directory, bool replay, const CancelCheck &cancelled) {
     const auto bytes = readBytes(QDir(directory).filePath("report.json"), cancelled);
@@ -60,7 +171,8 @@ WorkerReport readWorkerReport(const QString &directory, bool replay, const Cance
     checkCancellation(cancelled);
     return result;
 }
-WorkerReport readWorkerOutput(const QString &directory, const QString &kind, const CancelCheck &cancelled) {
+WorkerReport readWorkerOutput(const QString &directory, const QString &kind, const CancelCheck &cancelled,
+                              const QString &diagnosticKey) {
     auto result = readWorkerReport(directory, kind == "replay", cancelled);
     QString filename;
     if (kind == "quad") filename = "quad.json";
@@ -73,9 +185,13 @@ WorkerReport readWorkerOutput(const QString &directory, const QString &kind, con
     else if (kind == "post-geometry") filename = "geometry-ui.json";
     if (!filename.isEmpty()) {
         try {
-            const auto bytes = readBytes(QDir(directory).filePath(filename), cancelled);
-            if (kind == "geometry" || kind == "post-geometry") result.geometry = qtObject(bytes, cancelled);
-            else result.payload = nativeObject(bytes, cancelled);
+            if (kind == "coverage") result.coverage = readCoverageOutput(directory, cancelled);
+            else if (kind == "quad") result.quad = readQuadOutput(directory, diagnosticKey, cancelled);
+            else {
+                const auto bytes = readBytes(QDir(directory).filePath(filename), cancelled);
+                if (kind == "geometry" || kind == "post-geometry") result.geometry = qtObject(bytes, cancelled);
+                else result.payload = nativeObject(bytes, cancelled);
+            }
         } catch (const OperationCancelled &) {
             throw;
         } catch (const std::exception &error) {

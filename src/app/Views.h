@@ -42,6 +42,7 @@ class ImageView final : public QGraphicsView {
     void fit();
     void actualSize();
     void setOverlayMask(const QImage &mask);
+    void setPreparedOverlay(QImage image);
     void clearOverlay();
     void setPixelPicking(bool enabled);
     void setSelectedPixel(std::optional<QPoint> pixel);

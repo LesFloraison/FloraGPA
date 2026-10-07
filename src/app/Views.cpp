@@ -149,6 +149,18 @@ void ImageView::setPreparedImage(PreparedImage image) {
 void ImageView::clearOverlay() {
     overlay_->setPixmap({});
 }
+void ImageView::setPreparedOverlay(QImage image) {
+    if (!image.isNull() && image.format() != QImage::Format_ARGB32_Premultiplied)
+        throw std::runtime_error("Invalid prepared overlay format");
+    if (image.isNull() || image.size() != image_.size()) {
+        clearOverlay();
+        return;
+    }
+    const auto pixmap = QPixmap::fromImage(std::move(image), Qt::NoFormatConversion);
+    if (pixmap.isNull()) throw std::runtime_error("Cannot allocate overlay pixmap");
+    overlay_->setPixmap(pixmap);
+    overlay_->setOpacity(1.);
+}
 void ImageView::setOverlayMask(const QImage &mask) {
     clearOverlay();
     if (mask.isNull() || mask.size() != image_.size())

@@ -16,18 +16,7 @@
 namespace flora {
 using Json = nlohmann::json;
 namespace {
-const std::array<const char *, 6> names{"data/locks.u32le",     "data/counts.u32le",
-                                        "data/live.u32le",      "data/histogram.u32le",
-                                        "data/reference.u32le", "data/quad_counts.png"};
-QByteArray readFile(const QDir &root, const QString &name) {
-    QFile file(root.filePath(name));
-    if (!file.open(QIODevice::ReadOnly))
-        throw std::runtime_error("Quad output is missing");
-    const auto data = file.readAll();
-    if (file.error() != QFileDevice::NoError)
-        throw std::runtime_error("Cannot read Quad output");
-    return data;
-}
+constexpr auto &names = quadOutputFiles;
 } // namespace
 QuadView::QuadView(QWidget *parent) : QWidget(parent) {
     setObjectName("quadView");
@@ -235,7 +224,7 @@ void QuadView::read() {
         summary_->setToolTip(QString::fromUtf8(e.what()));
     }
 }
-bool QuadView::finish(uint64_t request, const Json &result, const QString &directory) {
+bool QuadView::finish(uint64_t request, const Json &result) {
     if (request != revision_)
         return false;
     pending_ = false;
@@ -245,33 +234,23 @@ bool QuadView::finish(uint64_t request, const Json &result, const QString &direc
         updateActions();
         return false;
     }
+    throw std::runtime_error("Quad result has no prepared attachments");
+}
+bool QuadView::accept(uint64_t request, QuadOutput output) {
+    if (request != revision_) return false;
+    pending_ = false;
+    const auto &result = output.report;
     if (result.at("event_id").get<Id>() != event_)
         throw std::runtime_error("Quad event does not match the selection");
-    const QDir root(directory);
-    if (Json::parse(readFile(root, "quad.json").toStdString()) != result)
-        throw std::runtime_error("Quad report mismatch");
-    std::array<QByteArray, 6> files;
-    for (size_t i = 0; i < names.size(); ++i)
-        files[i] = readFile(root, names[i]);
+    if (result.at("experiment_key") != key_.toStdString())
+        throw std::runtime_error("Quad experiment does not match the selection");
+    if (output.image.original.isNull()) throw std::runtime_error("Quad result has no prepared image");
     const auto width = result.at("quad_width").get<uint64_t>(),
                height = result.at("quad_height").get<uint64_t>();
-    const auto image = QImage::fromData(files[5], "PNG");
-    if (image.isNull() || width != uint64_t(image.width()) || height != uint64_t(image.height()))
-        throw std::runtime_error("Quad preview dimensions do not match its report");
-    for (int i = 0; i < 3; ++i)
-        if (uint64_t(files[i].size()) != width * height * 4)
-            throw std::runtime_error("Quad cell storage is truncated");
-    if (uint64_t(files[3].size()) != result.at("histogram_capacity").get<uint64_t>() * 4 ||
-        files[4].size() != 16)
-        throw std::runtime_error("Quad reference storage is truncated");
-    result_ = result;
-    result_["experiment_key"] = key_.toStdString();
-    files_ = std::move(files);
-    image_->setImage(image);
-    summary_->setText(QString("Draw %1 · %2 groups · %3 reference writes")
+    const auto summary = QString("Draw %1 · %2 groups · %3 reference writes")
                           .arg(event_)
                           .arg(result.at("counter_sum").get<uint64_t>())
-                          .arg(result.at("reference_fragment_writes").get<uint64_t>()));
+                          .arg(result.at("reference_fragment_writes").get<uint64_t>());
     QStringList notes{QString("%1 · %2 · %3× samples · %4 × %5 · %6 submissions")
                           .arg(QString::fromStdString(result.at("depth_mode").get<std::string>()),
                                QString::fromStdString(result.at("driver").get<std::string>()))
@@ -287,15 +266,19 @@ bool QuadView::finish(uint64_t request, const Json &result, const QString &direc
         notes << QString::fromStdString(result.at("target_buffer_view").dump());
     for (const auto &note : result.at("limitations"))
         notes << QString::fromStdString(note.get<std::string>());
-    summary_->setToolTip(notes.join('\n'));
     const bool accounting = result.at("histogram_accounting_matches_reference");
+    image_->setPreparedImage(std::move(output.image));
+    result_ = std::move(output.report);
+    files_ = std::move(output.files);
+    summary_->setText(summary);
+    summary_->setToolTip(notes.join('\n'));
     accounting_->setText(accounting ? "Accounting OK" : "Accounting mismatch");
     accounting_->setStyleSheet(accounting ? QString() : "color:#fabe23");
     accounting_->setToolTip(
         accounting
             ? "Histogram accounting matches the reference atomic writes; this is not a physical quad count."
             : "Histogram accounting differs from reference atomic writes. Counts may be lost.");
-    details_->setPlainText(QString::fromStdString(result_.dump(2)));
+    details_->setPlainText(output.reportText);
     cell_->setText("Select a cell");
     updateActions();
     return true;

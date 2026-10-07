@@ -174,7 +174,7 @@ class QuadUiTests final : public QObject {
         }
         layer->clear();
         capture->trigger();
-        QVERIFY(view.finish(requests.takeLast()[1].toULongLong(), result.report, dir.filePath("result")));
+        QVERIFY(view.accept(requests.takeLast()[1].toULongLong(), readQuadOutput(dir.filePath("result"), view.contextKey())));
         auto image = view.findChild<ImageView *>("quadImage");
         QCOMPARE(
             image->image().convertToFormat(QImage::Format_RGBA8888),
@@ -207,21 +207,21 @@ class QuadUiTests final : public QObject {
         result.report["histogram_accounting_matches_reference"] = false;
         save(dir.filePath("result/quad.json"), QByteArray::fromStdString(result.report.dump()));
         capture->trigger();
-        QVERIFY(view.finish(requests.takeLast()[1].toULongLong(), result.report, dir.filePath("result")));
+        QVERIFY(view.accept(requests.takeLast()[1].toULongLong(), readQuadOutput(dir.filePath("result"), view.contextKey())));
         emit image->pixelSelected(0, 0, Qt::white);
         QVERIFY(view.findChild<QLabel *>("quadCell")->text().endsWith("Count 4294967295"));
         QCOMPARE(view.findChild<QLabel *>("quadAccounting")->text(), QString("Accounting mismatch"));
         capture->trigger();
         const auto stale = requests.takeLast()[1].toULongLong();
         view.setContext(frame, 1000, "edited:0", state);
-        QVERIFY(!view.finish(stale, result.report, dir.filePath("result")));
+        QVERIFY(!view.accept(stale, {}));
         QVERIFY(image->image().isNull());
         QVERIFY(!view.findChild<QAction *>("exportQuad")->isEnabled());
         save(dir.filePath("result/data/counts.u32le"), QByteArray(3, 0));
         capture->trigger();
         const auto serial = requests.takeLast()[1].toULongLong();
         QVERIFY_THROWS_EXCEPTION(std::runtime_error,
-                                 view.finish(serial, result.report, dir.filePath("result")));
+                                 view.accept(serial, readQuadOutput(dir.filePath("result"), view.contextKey())));
         view.finish(serial, {{"error", "Truncated result"}});
         QVERIFY(capture->isEnabled());
         QVERIFY(image->image().isNull());
@@ -243,7 +243,7 @@ class QuadUiTests final : public QObject {
             view.setContext(frame, 100, key, frame->state(99));
             QSignalSpy requests(&view, &QuadView::readRequested);
             view.findChild<QAction *>("captureQuad")->trigger();
-            QVERIFY(view.finish(requests.takeLast()[1].toULongLong(), result.report, output));
+            QVERIFY(view.accept(requests.takeLast()[1].toULongLong(), readQuadOutput(output, view.contextKey())));
             auto image = view.findChild<ImageView *>("quadImage");
             emit image->pixelSelected(1, 0, Qt::white);
             const auto text = view.findChild<QLabel *>("quadCell")->text();

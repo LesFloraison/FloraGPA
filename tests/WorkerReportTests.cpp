@@ -1,4 +1,6 @@
 #include "app/WorkerReport.h"
+#include <QBuffer>
+#include <QDir>
 #include <QFile>
 #include <QTemporaryDir>
 #include <QtTest>
@@ -34,7 +36,23 @@ class WorkerReportTests final : public QObject {
         };
         // Completed envelope cannot conceal a missing, truncated or non-object payload.
         QVERIFY_THROWS_EXCEPTION(std::exception, readWorkerOutput(dir.path(), kind));
-        const QByteArray good("{\"event\":\"18446744073709551615\",\"counter\":18446744073709551615,\"signed\":-9223372036854775808,\"items\":[1,2,3]}");
+        const QByteArray good("{\"event\":\"18446744073709551615\",\"counter\":18446744073709551615,\"signed\":-9223372036854775808,\"items\":[1,2,3],\"target_kind\":\"viewport\",\"width\":1,\"height\":1,\"quad_width\":1,\"quad_height\":1,\"histogram_capacity\":4}");
+        if (kind == "coverage" || kind == "quad") {
+            QImage image(1,1,QImage::Format_RGBA8888); image.fill(QColor(53,97,179,112));
+            QByteArray png; QBuffer buffer(&png); QVERIFY(buffer.open(QIODevice::WriteOnly));
+            QVERIFY(image.save(&buffer,"PNG"));
+            auto attachment = [&](const QString &name, const QByteArray &data) {
+                QVERIFY(QDir().mkpath(QFileInfo(dir.filePath(name)).path()));
+                QFile file(dir.filePath(name)); QVERIFY(file.open(QIODevice::WriteOnly));
+                QCOMPARE(file.write(data),data.size());
+            };
+            if (kind == "coverage") {
+                for (size_t i=1;i<coverageOutputFiles.size();++i) attachment(coverageOutputFiles[i],png);
+            } else {
+                for (size_t i=0;i<5;++i) attachment(quadOutputFiles[i],QByteArray(i<3?4:16,0));
+                attachment(quadOutputFiles[5],png);
+            }
+        }
         for (qsizetype n = 0; n < good.size(); ++n) {
             write(good.left(n));
             QVERIFY_THROWS_EXCEPTION(std::exception, readWorkerOutput(dir.path(), kind));
@@ -57,11 +75,13 @@ class WorkerReportTests final : public QObject {
             QCOMPARE(accepted.geometry["items"].toArray().size(), 3);
             QVERIFY(accepted.payload.is_null());
         } else {
-            QCOMPARE(accepted.payload.at("counter").get<uint64_t>(), UINT64_MAX);
-            QCOMPARE(accepted.payload.at("signed").get<int64_t>(), INT64_MIN);
+            const auto &payload = accepted.coverage ? accepted.coverage->report :
+                                  accepted.quad ? accepted.quad->report : accepted.payload;
+            QCOMPARE(payload.at("counter").get<uint64_t>(), UINT64_MAX);
+            QCOMPARE(payload.at("signed").get<int64_t>(), INT64_MIN);
         }
-        const auto large = QByteArray("{\"padding\":\"") + QByteArray(2*1024*1024+17, 'x') +
-                           "\",\"items\":[" + QByteArray("1,").repeated(1024) + "2]}";
+        const auto large = good.left(good.size()-1) + QByteArray(",\"padding\":\"") + QByteArray(2*1024*1024+17, 'x') +
+                           "\",\"many\":[" + QByteArray("1,").repeated(1024) + "2]}";
         write(large);
         int checks = 0;
         readWorkerOutput(dir.path(), kind, [&] { ++checks; return false; });
@@ -73,7 +93,7 @@ class WorkerReportTests final : public QObject {
         }
         write(good);
         accepted = readWorkerOutput(dir.path(), kind);
-        QVERIFY(!accepted.geometry.isEmpty() || accepted.payload.is_object());
+        QVERIFY(!accepted.geometry.isEmpty() || accepted.payload.is_object() || accepted.coverage || accepted.quad);
     }
     void valid_data() {
         QTest::addColumn<int>("mode");

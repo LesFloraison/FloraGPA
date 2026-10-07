@@ -14,7 +14,7 @@
 namespace flora {
 using Json = nlohmann::json;
 namespace {
-const std::array<const char *, 4> names{"coverage.json", "coverage.png", "after_draw.png", "overlay.png"};
+constexpr auto &names = coverageOutputFiles;
 }
 CoverageView::CoverageView(QWidget *parent) : QWidget(parent) {
     setObjectName("coverageView");
@@ -110,6 +110,9 @@ void CoverageView::invalidate() {
     pending_ = false;
     result_ = nullptr;
     files_ = {};
+    diagnostic_ = {};
+    mask_ = {};
+    maskDisplay_ = {};
     image_->setImage({});
     pixel_->clear();
     zoom_->clear();
@@ -200,7 +203,7 @@ void CoverageView::read() {
         summary_->setToolTip(QString::fromUtf8(e.what()));
     }
 }
-bool CoverageView::finish(uint64_t request, const Json &result, const QString &directory) {
+bool CoverageView::finish(uint64_t request, const Json &result) {
     if (request != revision_)
         return false;
     pending_ = false;
@@ -210,23 +213,17 @@ bool CoverageView::finish(uint64_t request, const Json &result, const QString &d
         updateActions();
         return false;
     }
+    throw std::runtime_error("Coverage result has no prepared attachments");
+}
+bool CoverageView::accept(uint64_t request, CoverageOutput output) {
+    if (request != revision_) return false;
+    pending_ = false;
+    const auto &result = output.report;
     if (result.at("event").at("id").get<Id>() != event_)
         throw std::runtime_error("Coverage event does not match the selection");
-    std::array<QByteArray, 4> files;
-    for (size_t i = 0; i < names.size(); ++i) {
-        QFile file(QDir(directory).filePath(names[i]));
-        if (!file.open(QIODevice::ReadOnly))
-            throw std::runtime_error("Coverage output is missing");
-        files[i] = file.readAll();
-    }
-    if (Json::parse(files[0].toStdString()) != result)
-        throw std::runtime_error("Coverage report mismatch");
-    const auto overlay = QImage::fromData(files[3], "PNG");
-    if (overlay.isNull())
-        throw std::runtime_error("Coverage overlay is invalid");
-    result_ = result;
-    files_ = std::move(files);
-    image_->setImage(overlay);
+    if (output.diagnostic.original.isNull() || output.mask.isNull() || output.maskDisplay.isNull() ||
+        output.mask.size() != output.diagnostic.original.size() || output.mask.size() != output.maskDisplay.size())
+        throw std::runtime_error("Coverage result has no prepared images");
     QString target;
     const auto kind = result.at("target_kind").get<std::string>();
     if (kind == "viewport")
@@ -251,10 +248,10 @@ bool CoverageView::finish(uint64_t request, const Json &result, const QString &d
         coordinates = QString(" · first %1 / %2 elements")
                           .arg(result.at("target_buffer_view").at("first_element").get<uint32_t>())
                           .arg(result.at("target_buffer_view").at("element_count").get<uint32_t>());
-    summary_->setText(QString("Draw %1 · %2%3 · %4 covered")
+    const auto summary = QString("Draw %1 · %2%3 · %4 covered")
                           .arg(event_)
                           .arg(target, coordinates)
-                          .arg(result.at("covered_pixels").get<uint64_t>()));
+                          .arg(result.at("covered_pixels").get<uint64_t>());
     QStringList notes;
     for (const auto &line : result.at("limitations"))
         notes << QString::fromStdString(line.get<std::string>());
@@ -262,7 +259,14 @@ bool CoverageView::finish(uint64_t request, const Json &result, const QString &d
         notes << QString::fromStdString(line.get<std::string>());
     if (result.contains("initialization_note"))
         notes << QString::fromStdString(result.at("initialization_note").get<std::string>());
-    summary_->setToolTip(summary_->text() + "\n" + notes.join('\n'));
+    image_->setPreparedImage(output.diagnostic);
+    diagnostic_ = std::move(output.diagnostic);
+    mask_ = std::move(output.mask);
+    maskDisplay_ = std::move(output.maskDisplay);
+    result_ = std::move(output.report);
+    files_ = std::move(output.files);
+    summary_->setText(summary);
+    summary_->setToolTip(summary + "\n" + notes.join('\n'));
     updateActions();
     return true;
 }

@@ -1,5 +1,6 @@
 #pragma once
 #include "Views.h"
+#include "DiagnosticOutput.h"
 #include <array>
 #include <nlohmann/json.hpp>
 class QAction;
@@ -17,7 +18,9 @@ class QuadView final : public QWidget {
     void restoreSettings(const nlohmann::json &ui);
     nlohmann::json settings() const;
     void setWorkerBusy(bool busy);
-    bool finish(uint64_t request, const nlohmann::json &result, const QString &directory = {});
+    bool finish(uint64_t request, const nlohmann::json &error);
+    bool accept(uint64_t request, QuadOutput output);
+    QString contextKey() const { return key_; }
     void exportResult(const QString &path) const;
   signals:
     void readRequested(const QString &request, qulonglong serial);

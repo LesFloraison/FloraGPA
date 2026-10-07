@@ -16,6 +16,7 @@
 using namespace flora;
 #include "BufferRecovery.h"
 #include "PayloadRecovery.h"
+#include "DiagnosticRecovery.h"
 class WorkerRecoveryTests final : public QObject {
     Q_OBJECT
   private slots:
@@ -34,6 +35,15 @@ class WorkerRecoveryTests final : public QObject {
         for (auto mode : {"payload-valid", "payload-missing", "payload-syntax", "payload-root",
                           "payload-async-cancel", "payload-async-switch", "payload-async-close",
                           "payload-async-destroy", "payload-async-success"})
+            QTest::newRow(mode) << QString(mode);
+        for (const auto kind : {QString("coverage"), QString("quad")}) {
+            for (const auto suffix : {"valid", "missing", "corrupt", "dimensions", "event",
+                                      "async-cancel", "async-switch", "async-close", "async-destroy", "async-success"}) {
+                const auto mode = kind + '-' + suffix;
+                QTest::newRow(qPrintable(mode)) << mode;
+            }
+        }
+        for (const auto mode : {"quad-short", "quad-long", "quad-overflow"})
             QTest::newRow(mode) << QString(mode);
         if (qEnvironmentVariableIsSet("FLORA_TEST_WORKER_TIMEOUT")) QTest::newRow("timeout") << QString("timeout");
     }
@@ -62,7 +72,10 @@ class WorkerRecoveryTests final : public QObject {
         child.setProcessEnvironment(env);
         child.setCreateProcessArgumentsModifier([](QProcess::CreateProcessArguments *args) { args->flags |= CREATE_NO_WINDOW; });
         const auto log = isolation.filePath("child.txt");
-        child.start(executable, {mode.startsWith("payload-") ? "exercisePayloadRecovery" : mode.startsWith("buffer-") ? "exerciseBufferRecovery" : "exerciseRecovery", "-o", log + ",txt"});
+        const auto exercise = mode.startsWith("coverage-") || mode.startsWith("quad-") ? "exerciseDiagnosticRecovery" :
+                              mode.startsWith("payload-") ? "exercisePayloadRecovery" :
+                              mode.startsWith("buffer-") ? "exerciseBufferRecovery" : "exerciseRecovery";
+        child.start(executable, {exercise, "-o", log + ",txt"});
         QVERIFY(child.waitForStarted());
         const auto cleanup = qScopeGuard([&] { if (child.state() != QProcess::NotRunning) { child.kill(); child.waitForFinished(); } });
         QTRY_COMPARE_WITH_TIMEOUT(child.state(), QProcess::NotRunning, 240000);
@@ -74,6 +87,7 @@ class WorkerRecoveryTests final : public QObject {
     }
     void exerciseBufferRecovery() { ::exerciseBufferRecovery(); }
     void exercisePayloadRecovery() { ::exercisePayloadRecovery(); }
+    void exerciseDiagnosticRecovery() { ::exerciseDiagnosticRecovery(); }
     void exerciseRecovery() {
         const auto root = qEnvironmentVariable("FLORA_FAULT_ROOT");
         if (root.isEmpty()) QSKIP("Runs only inside the parent-owned temporary executable directory");

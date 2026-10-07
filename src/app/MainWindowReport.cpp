@@ -1,4 +1,5 @@
 #include "MainWindow.h"
+#include "QuadView.h"
 #include <QStatusBar>
 #include <QtConcurrent/QtConcurrentRun>
 
@@ -38,11 +39,12 @@ void MainWindow::loadWorkerReport() {
         jobDir_ = std::move(job->directory);
         acceptWorkerReport(std::move(result->value));
     });
-    watcher->setFuture(QtConcurrent::run([job] {
+    const auto diagnosticKey = job->kind == "quad" ? quad_->contextKey() : QString{};
+    watcher->setFuture(QtConcurrent::run([job, diagnosticKey] {
         auto result = std::make_shared<ReportResult>();
         try {
             result->value = readWorkerOutput(job->directory->filePath("result"), job->kind,
-                                             [job] { return job->cancelled.load(); });
+                                             [job] { return job->cancelled.load(); }, diagnosticKey);
         } catch (const OperationCancelled &) {
             result->cancelled = true;
         } catch (const std::exception &error) {

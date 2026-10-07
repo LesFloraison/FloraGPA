@@ -105,7 +105,7 @@ class CoverageUiTests final : public QObject {
         capture->trigger();
         QCOMPARE(requests.size(), 1);
         const auto serial = requests.takeLast()[1].toULongLong();
-        QVERIFY(view.finish(serial, result.report, dir.filePath("result")));
+        QVERIFY(view.accept(serial, readCoverageOutput(dir.filePath("result"))));
         auto image = view.findChild<ImageView *>("coverageImage");
         QCOMPARE(image->image().convertToFormat(QImage::Format_RGBA8888),
                  QImage(dir.filePath("result/overlay.png")).convertToFormat(QImage::Format_RGBA8888));
@@ -127,7 +127,7 @@ class CoverageUiTests final : public QObject {
         capture->trigger();
         const auto stale = requests.takeLast()[1].toULongLong();
         view.setContext(frame, 1000, "edited", state);
-        QVERIFY(!view.finish(stale, result.report, dir.filePath("result")));
+        QVERIFY(!view.accept(stale, {}));
         QVERIFY(image->image().isNull());
         QVERIFY(!view.findChild<QAction *>("exportCoverage")->isEnabled());
         target->setCurrentIndex(target->findData("depth"));
@@ -270,7 +270,7 @@ class CoverageUiTests final : public QObject {
             pixels(&viewport, &CoverageView::pixelRequested);
         viewport.findChild<QAction *>("captureCoverage")->trigger();
         QVERIFY(
-            viewport.finish(requests.takeLast()[1].toULongLong(), result.report, dir.filePath("viewport")));
+            viewport.accept(requests.takeLast()[1].toULongLong(), readCoverageOutput(dir.filePath("viewport"))));
         emit viewport.findChild<ImageView *>("coverageImage")->pixelSelected(2, 0, Qt::white);
         QCOMPARE(pixels.size(), 0);
     }

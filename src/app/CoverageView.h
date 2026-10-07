@@ -1,5 +1,6 @@
 #pragma once
 #include "Views.h"
+#include "DiagnosticOutput.h"
 #include <array>
 #include <nlohmann/json.hpp>
 class QAction;
@@ -15,14 +16,17 @@ class CoverageView final : public QWidget {
     void setContext(std::shared_ptr<const Frame> frame, Id event, const QString &key,
                     std::optional<State> state, const QString &error = {});
     void setWorkerBusy(bool busy);
-    bool finish(uint64_t request, const nlohmann::json &result, const QString &directory = {});
+    bool finish(uint64_t request, const nlohmann::json &error);
+    bool accept(uint64_t request, CoverageOutput output);
     void exportResult(const QString &path) const;
     void setEmbedded();
     void captureTarget(const QString &target, uint32_t layer);
     nlohmann::json settings() const;
     const nlohmann::json &result() const { return result_; }
-    QImage mask() const { return QImage::fromData(files_[1], "PNG"); }
-    QImage diagnostic() const { return QImage::fromData(files_[3], "PNG"); }
+    QImage mask() const { return mask_; }
+    QImage diagnostic() const { return diagnostic_.original; }
+    PreparedImage preparedDiagnostic() const { return diagnostic_; }
+    QImage preparedMask() const { return maskDisplay_; }
   signals:
     void readRequested(const QString &request, qulonglong serial);
     void cancelRequested();
@@ -41,6 +45,8 @@ class CoverageView final : public QWidget {
     bool available_{}, busy_{}, pending_{};
     nlohmann::json result_;
     std::array<QByteArray, 4> files_;
+    PreparedImage diagnostic_;
+    QImage mask_, maskDisplay_;
     QAction *read_, *cancel_, *export_;
     QComboBox *mode_, *target_;
     QLineEdit *layer_;

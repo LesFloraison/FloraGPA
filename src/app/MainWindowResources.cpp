@@ -93,14 +93,14 @@ void MainWindow::buildResourceWorkspace(QWidget *output) {
         resourceTimer_.start();
     });
     connect(coverage_, &CoverageView::diagnosticRequested, this, [this] {
-        const auto diagnostic = coverage_->diagnostic();
-        if (diagnostic.isNull()) {
+        auto diagnostic = coverage_->preparedDiagnostic();
+        if (diagnostic.original.isNull()) {
             resourceStatus_->setText("Capture a coverage diagnostic first");
             return;
         }
         resourceImages_->setCurrentIndex(0);
         outputReport_ = nullptr;
-        image_->setImage(diagnostic);
+        image_->setPreparedImage(std::move(diagnostic));
         resourceImagePending_ = true;
         imageLabel_->setText("Coverage diagnostic · not a resource image");
         resourceStatus_->setText("Diagnostic image · select a resource to return");
@@ -325,7 +325,7 @@ void MainWindow::applyCoverageOverlay() {
     const auto layer = sub.value("layer_kind", "") == "w_slice" ? display.at("slice") : display.at("layer");
     if (sub.at("mip") != display.at("mip") || sub.at("layer") != layer)
         return;
-    image_->setOverlayMask(coverage_->mask());
+    image_->setPreparedOverlay(coverage_->preparedMask());
     if (image_->hasOverlay())
         resourceStatus_->setText(
             QString("Coverage · %1 pixels%2")

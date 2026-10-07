@@ -1882,13 +1882,15 @@ void MainWindow::acceptWorkerReport(WorkerReport result) {
             return;
         }
         if (runningKind_ == "quad") {
-            const bool accepted = quad_->finish(runningQuadRequest_, result.payload, jobDir_->filePath("result"));
+            if (!result.quad) throw std::runtime_error("Missing prepared Quad result");
+            const bool accepted = quad_->accept(runningQuadRequest_, std::move(*result.quad));
             statusBar()->showMessage(accepted ? "Quad ready" : "Quad result discarded", 3000);
             emit taskFinished(accepted);
             return;
         }
         if (runningKind_ == "coverage") {
-            const bool accepted = coverage_->finish(runningCoverageRequest_, result.payload, jobDir_->filePath("result"));
+            if (!result.coverage) throw std::runtime_error("Missing prepared coverage result");
+            const bool accepted = coverage_->accept(runningCoverageRequest_, std::move(*result.coverage));
             applyCoverageOverlay();
             statusBar()->showMessage(accepted ? "Coverage ready" : "Coverage result discarded", 3000);
             emit taskFinished(accepted);
