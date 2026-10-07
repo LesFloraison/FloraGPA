@@ -104,7 +104,7 @@ Com<IUnknown> Replay::createCapturedShader(Id id, uint16_t t, Bytes data, Id lin
         shaderCounterUse_[identity.Get()] = shaderHiddenCounterSlots(data);
     if (resourceLodAudit_ && !resourceLodAudit_->clamped.empty()) {
         resourceLodShaderSrvs_[identity.Get()] =
-            passthrough ? std::array<bool, 128>{} : shaderSrvDeclarations(data);
+            passthrough ? std::array<bool, 128>{} : shaderSrvLodDependencies(data);
     }
     return result;
 }

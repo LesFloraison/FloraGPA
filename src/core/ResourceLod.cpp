@@ -65,7 +65,7 @@ std::set<Id> resourceLodAccesses(const Frame &frame, const Entry &entry, Bytes p
         for (unsigned stage = compute ? 5 : 0; stage < (compute ? 6u : 5u); ++stage) {
             const auto &binding = s.stages[stage];
             if (binding.shader) {
-                auto used = shaderSrvDeclarations(frame.shader(frame.resource(binding.shader).data));
+                auto used = shaderSrvLodDependencies(frame.shader(frame.resource(binding.shader).data));
                 if (binding.classCount)
                     used.fill(true);
                 for (size_t slot = 0; slot < binding.srv.size(); ++slot)

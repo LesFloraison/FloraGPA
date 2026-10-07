@@ -34,6 +34,138 @@ void copy(const Frame &frame, const QString &path, Id edited, const std::vector<
 class ResourceLodTests final : public QObject {
     Q_OBJECT
   private slots:
+    void mipCountPrograms_data() {
+        QTest::addColumn<QString>("profile");
+        QTest::addColumn<int>("mode");
+        for (const auto profile : {"ps_4_0", "ps_4_1", "ps_5_0"})
+            for (int mode = 0; mode < 4; ++mode)
+                QTest::newRow(qPrintable(QString("%1-%2").arg(profile).arg(mode)))
+                    << QString(profile) << mode;
+    }
+    void mipCountPrograms() {
+        QFETCH(QString, profile);
+        QFETCH(int, mode);
+        const std::array<std::string, 4> expressions{"n", "w", "n+tex.Load(int3(0,0,0)).x",
+                                                     "n+other.Load(int3(0,0,0)).x"};
+        const auto source = "Texture2D<float4> tex:register(t3);Texture2D<float4> other:register(t5);"
+                            "float4 main():SV_Target{uint w,h,n;tex.GetDimensions(0,w,h,n);return " +
+                            expressions[mode] + ";}";
+        Com<ID3DBlob> code, errors, stripped;
+        check(D3DCompile(source.data(), source.size(), nullptr, nullptr, nullptr, "main",
+                         profile.toLatin1().constData(), 0, 0, &code, &errors),
+              "Compile mip-count proof");
+        check(D3DStripShader(code->GetBufferPointer(), code->GetBufferSize(),
+                             D3DCOMPILER_STRIP_REFLECTION_DATA, &stripped),
+              "Strip mip-count proof");
+        for (auto blob : {code.Get(), stripped.Get()}) {
+            const Bytes data(static_cast<const uint8_t *>(blob->GetBufferPointer()), blob->GetBufferSize());
+            const auto declared = shaderSrvDeclarations(data), required = shaderSrvLodDependencies(data);
+            QVERIFY(declared[3]);
+            // SM4.0 emits a full xyzw RESINFO even when HLSL only consumes
+            // the mip count. Proving its dimension lanes dead requires a
+            // separate data-flow analysis; retain the conservative guard.
+            QCOMPARE(required[3], profile == "ps_4_0" || mode == 1 || mode == 2);
+            QCOMPARE(required[5], mode == 3);
+        }
+    }
+    void mipCountOriginals_data() {
+        QTest::addColumn<int>("mode");
+        QTest::addColumn<bool>("warp");
+        for (int mode = 0; mode < 6; ++mode)
+            for (bool warp : {false, true})
+                QTest::newRow(qPrintable(QString("%1-%2").arg(mode).arg(warp))) << mode << warp;
+    }
+    void mipCountOriginals() {
+        QFETCH(int, mode);
+        QFETCH(bool, warp);
+        const auto root = qEnvironmentVariable("FLORA_MIP_COUNT_CAPTURES");
+        if (root.isEmpty())
+            QSKIP("Set FLORA_MIP_COUNT_CAPTURES for original mip-count captures");
+        const auto folder = root + QString("/%1/").arg(mode);
+        Frame frame((folder + "capture.gpa_frame").toStdWString());
+        const auto audit = auditResourceLod(frame);
+        QVERIFY(audit.initial.empty());
+        QVERIFY(!audit.clamped.empty());
+        const bool missing = mode == 2 || mode == 4;
+        QCOMPARE(audit.issues.size(), size_t(missing));
+        QCOMPARE(validateFrame(frame.path())["errors"].get<unsigned>(), unsigned(missing));
+        ReplayOptions options;
+        options.warp = warp;
+        Replay replay(frame, options);
+        for (int repeat = 0; repeat < 2; ++repeat) {
+            if (missing) {
+                QVERIFY_EXCEPTION_THROWN(replay.run(), std::runtime_error);
+            } else {
+                replay.run();
+                QCOMPARE(replay.output().rgba, bytes(folder + "hardware/expected.rgba"));
+            }
+        }
+        if (mode == 0 || mode == 4) {
+            Id shader = 0;
+            for (const auto &[id, e] : frame.entries())
+                if (e.category == 7 && isDraw(e.type))
+                    shader = frame.state(frame.event(id).state).stages[4].shader;
+            QVERIFY(shader);
+            options.shaders[shader] =
+                bytes(root + (mode == 0 ? "/4/hardware/dependent.dxbc" : "/0/hardware/count.dxbc"));
+            Replay edited(frame, options);
+            if (mode == 0) {
+                QVERIFY_EXCEPTION_THROWN(edited.run(), std::runtime_error);
+            } else {
+                edited.run();
+                QCOMPARE(edited.output().rgba, bytes(root + "/0/hardware/expected.rgba"));
+            }
+        }
+    }
+    void mipCountProofBounds() {
+        const auto root = qEnvironmentVariable("FLORA_MIP_COUNT_CAPTURES");
+        if (root.isEmpty())
+            QSKIP("Set original mip-count capture directory");
+        const auto source = bytes(root + "/0/hardware/count.dxbc");
+        QVERIFY(!shaderSrvLodDependencies(source)[0]);
+        for (size_t n = 0; n < source.size(); ++n)
+            QVERIFY_EXCEPTION_THROWN(shaderSrvLodDependencies(Bytes(source).first(n)), std::runtime_error);
+        auto parts = readDxbcParts(source);
+        auto found = std::find_if(parts.begin(), parts.end(), [](auto &p) { return p.first == 0x58454853; });
+        QVERIFY(found != parts.end());
+        const auto original = readDxbcProgram(found->second);
+        auto info = std::find_if(original.instructions.begin(), original.instructions.end(),
+                                 [](auto &r) { return (r[0] & 2047) == 61; });
+        QVERIFY(info != original.instructions.end());
+        const auto index = size_t(info - original.instructions.begin());
+        for (int mode = 0; mode < 9; ++mode) {
+            auto changed = original;
+            auto &r = changed.instructions[index];
+            QCOMPARE(r.size(), size_t(9));
+            if (mode == 0)
+                r[7] &= ~0x30u; // x instead of mip-count w.
+            if (mode == 1)
+                r[7] |= 0x80000000u;
+            if (mode == 2)
+                r[7] |= 1u << 22;
+            if (mode == 3)
+                r[8] = 128;
+            if (mode == 4)
+                r[1] = (r[1] & ~63u) | 4; // Unknown opcode extension.
+            if (mode == 5)
+                r[0] = (r[0] & ~2047u) | 206; // Unknown instruction.
+            if (mode == 6)
+                changed.header[0] = (changed.header[0] & 0xffff0000) | 0x51;
+            if (mode == 7) {
+                r[3] |= 0x20;
+            } // Also writes a dimension lane.
+            if (mode == 8) {
+                r[5] = 0x00208001;
+            } // Unverified mip operand form.
+            const auto program = writeDxbcProgram(changed);
+            found->second = program;
+            QVERIFY(shaderSrvLodDependencies(makeDxbc(parts))[0]);
+        }
+        const auto program = writeDxbcProgram(original);
+        found->second = program;
+        parts.emplace_back(0x45434649, Bytes{});
+        QVERIFY(shaderSrvLodDependencies(makeDxbc(parts))[0]);
+    }
     void compiledSrvDeclarations() {
         const std::string source =
             "Texture2D<float4> tex:register(t3); ByteAddressBuffer raw:register(t5);"
