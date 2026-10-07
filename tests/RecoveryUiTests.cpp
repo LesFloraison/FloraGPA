@@ -2,6 +2,7 @@
 #include "app/CompatibilityButton.h"
 #include "app/MainWindow.h"
 #include "HeapRetentionProbe.h"
+#include "RecoveryJournal.h"
 #include <QAction>
 #include <QSignalSpy>
 #include <QStatusBar>
@@ -87,6 +88,47 @@ class RecoveryUiTests final : public QObject {
         return hash.result().toHex();
     }
   private slots:
+    void journalSnapshotsRemainReadable() {
+        QTemporaryDir directory;
+        QVERIFY(directory.isValid());
+        const auto path = directory.filePath("journal.json");
+        testing::RecoveryJournal writer(path);
+        nlohmann::json state{{"completed", false}, {"phase", "starting"},
+                             {"observations", nlohmann::json::array()}};
+        QVERIFY2(writer.save(state), qPrintable(writer.error()));
+        const auto first = path + ".progress/00000001.json";
+        const HANDLE reader = CreateFileW(reinterpret_cast<LPCWSTR>(first.utf16()), GENERIC_READ,
+                                          FILE_SHARE_READ, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
+        QVERIFY(reader != INVALID_HANDLE_VALUE);
+        const auto close = qScopeGuard([&] { CloseHandle(reader); });
+        // This deliberately restrictive observer reproduces replacement failure.
+        QSaveFile overwrite(first);
+        QVERIFY(overwrite.open(QIODevice::WriteOnly));
+        QCOMPARE(overwrite.write("changed"), qint64(7));
+        QVERIFY(!overwrite.commit());
+        qInfo().noquote() << "Locked replacement negative control:" << overwrite.errorString();
+        state["phase"] = "cycle_complete";
+        state["observations"].push_back({{"iteration", 0}, {"rgba_sha256", "checked"}});
+        QVERIFY2(writer.save(state), qPrintable(writer.error()));
+        QVERIFY(QFileInfo::exists(path + ".progress/00000002.json"));
+        state["completed"] = true;
+        QVERIFY2(writer.save(state), qPrintable(writer.error()));
+        QFile final(path);
+        QVERIFY(final.open(QIODevice::ReadOnly));
+        QCOMPARE(nlohmann::json::parse(final.readAll().toStdString()), state);
+        QVERIFY(!writer.save(state));
+        testing::RecoveryJournal duplicate(path);
+        QVERIFY(!duplicate.save(state));
+        const auto badPath = directory.filePath("failure.json");
+        testing::RecoveryJournal failure(badPath);
+        state["completed"] = false;
+        QVERIFY(failure.save(state));
+        QVERIFY(QDir().mkdir(badPath + ".progress/00000002.json"));
+        QVERIFY(!failure.save(state));
+        QVERIFY(failure.error().contains("already exists"));
+        QVERIFY(!QFileInfo::exists(badPath));
+        QVERIFY(QFileInfo::exists(badPath + ".progress/00000001.json"));
+    }
     void closeActiveWorkerWithoutInvalidHandles() {
         const auto root = qEnvironmentVariable("FLORA_TEST_CAPTURE_DIR");
         if (root.isEmpty())
@@ -257,14 +299,12 @@ class RecoveryUiTests final : public QObject {
             {"started_utc", QDateTime::currentDateTimeUtc().toString(Qt::ISODate).toStdString()},
             {"completed", false}, {"minimum_seconds", minimumSeconds},
             {"minimum_pairs", count}, {"observations", nlohmann::json::array()}};
+        testing::RecoveryJournal journalWriter(journalPath);
         auto save = [&](const char *phase) {
             if (journalPath.isEmpty()) return true;
             journal["phase"] = phase;
             journal["elapsed_ms"] = duration.elapsed();
-            const auto bytes = journal.dump(2);
-            QSaveFile file(journalPath);
-            return file.open(QIODevice::WriteOnly) &&
-                file.write(bytes.data(), qint64(bytes.size())) == qint64(bytes.size()) && file.commit();
+            return journalWriter.save(journal);
         };
         QTemporaryDir brokenDir;
         QVERIFY(brokenDir.isValid());
@@ -274,7 +314,7 @@ class RecoveryUiTests final : public QObject {
         QCOMPARE(broken.write("IGPA"), qint64(4));
         broken.close();
         unsigned cycles = 0;
-        QVERIFY(save("starting"));
+        QVERIFY2(save("starting"), qPrintable(journalWriter.error()));
         for (int repeat = 0; repeat < count || duration.elapsed() < qint64(minimumSeconds) * 1000; ++repeat) {
             for (const auto &name : files) {
                 const unsigned epoch = unsigned(repeat * files.size() + files.indexOf(name) + 1);
@@ -290,7 +330,7 @@ class RecoveryUiTests final : public QObject {
                 const auto before = loaded.size();
                 journal["active_capture"] = name.toStdString();
                 journal["active_pair"] = repeat;
-                QVERIFY(save("cancel_open"));
+                QVERIFY2(save("cancel_open"), qPrintable(journalWriter.error()));
                 done.clear();
                 window.openCapture(path);
                 QVERIFY(window.busy());
@@ -299,7 +339,7 @@ class RecoveryUiTests final : public QObject {
                 QVERIFY(!done.last()[0].toBool());
                 QCOMPARE(window.capturePath(), previous);
                 QCOMPARE(loaded.size(), before);
-                QVERIFY(save("open"));
+                QVERIFY2(save("open"), qPrintable(journalWriter.error()));
                 done.clear();
                 window.openCapture(path);
                 QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 60000);
@@ -308,7 +348,7 @@ class RecoveryUiTests final : public QObject {
                 QVERIFY(!window.busy());
                 QCOMPARE(window.capturePath(), path);
                 QCOMPARE(outputHash(window), golden);
-                QVERIFY(save("failed_open"));
+                QVERIFY2(save("failed_open"), qPrintable(journalWriter.error()));
                 done.clear();
                 window.openCapture(brokenPath);
                 QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 10000);
@@ -318,14 +358,14 @@ class RecoveryUiTests final : public QObject {
                 QCOMPARE(loaded.size(), before + 1);
                 QCOMPARE(outputHash(window), golden);
                 QVERIFY(!window.busy());
-                QVERIFY(save("cancel_replay"));
+                QVERIFY2(save("cancel_replay"), qPrintable(journalWriter.error()));
                 done.clear();
                 window.replay();
                 cancelAction(window)->trigger();
                 QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 10000);
                 QVERIFY(!done.last()[0].toBool());
                 QVERIFY(!window.busy());
-                QVERIFY(save("navigate"));
+                QVERIFY2(save("navigate"), qPrintable(journalWriter.error()));
                 done.clear();
                 auto api = window.findChild<QTableView *>("apiLog");
                 QVERIFY(api && api->model()->rowCount() > 0);
@@ -339,7 +379,7 @@ class RecoveryUiTests final : public QObject {
                 auto boundary = window.findChild<QComboBox *>("outputBoundary");
                 QVERIFY(boundary);
                 QCOMPARE(boundary->currentIndex(), 2);
-                QVERIFY(save("final_replay"));
+                QVERIFY2(save("final_replay"), qPrintable(journalWriter.error()));
                 boundary->setCurrentIndex(0);
                 QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 60000);
                 QVERIFY2(done.last()[0].toBool(), qPrintable(window.statusBar()->currentMessage()));
@@ -360,7 +400,7 @@ class RecoveryUiTests final : public QObject {
                 ++cycles;
                 journal["observations"].push_back(observation);
                 journal["completed_cycles"] = cycles;
-                QVERIFY(save("cycle_complete"));
+                QVERIFY2(save("cycle_complete"), qPrintable(journalWriter.error()));
                 if (!trace.isEmpty() && (epoch == 2 || epoch == 6 || epoch == unsigned(count * files.size())))
                     testing::heapProbe::snapshot(trace, epoch);
             }
@@ -373,7 +413,7 @@ class RecoveryUiTests final : public QObject {
                 nlohmann::json({{"before", before}, {"after", ownership(window)}}).dump());
         }
         journal["completed"] = true;
-        QVERIFY(save("complete"));
+        QVERIFY2(save("complete"), qPrintable(journalWriter.error()));
         qInfo() << "Original recovery cycles:" << cycles;
     }
 };

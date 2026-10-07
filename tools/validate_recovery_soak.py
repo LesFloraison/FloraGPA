@@ -1,7 +1,8 @@
 """Development-only persistent Qt recovery soak against a relocated release package.
 
 One test process owns one MainWindow for the whole run. GPU workers are serial.
-The journal is atomic and remains incomplete on failure; do not resume or replace
+Progress snapshots are immutable; the final journal exists only on completion.
+Do not resume or replace
 a failed run's directory. Resource observations are evidence, not a leak-free proof.
 """
 import argparse
@@ -60,7 +61,8 @@ def main():
         report['package_files'] = {p.relative_to(package).as_posix(): digest(p)
                                    for p in sorted(package.rglob('*')) if p.is_file()}
         report['sources'] = {}
-        for name in ['tests/RecoveryUiTests.cpp', 'tests/HeapRetentionProbe.h', 'tools/validate_recovery_soak.py']:
+        for name in ['tests/RecoveryUiTests.cpp', 'tests/RecoveryJournal.h',
+                     'tests/HeapRetentionProbe.h', 'tools/validate_recovery_soak.py']:
             frozen = root / 'sources' / name
             frozen.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(repo / name, frozen)
@@ -93,7 +95,7 @@ def main():
                                     timeout=args.seconds + args.pairs * 180 + 900)
         report.update(exit_code=result.returncode, process_seconds=time.monotonic() - start)
         save()
-        assert result.returncode == 0, 'Qt recovery test failed; inspect qt-results.txt and journal.json'
+        assert result.returncode == 0, 'Qt recovery test failed; inspect qt-results.txt and journal.json.progress'
         text = (root / 'qt-results.txt').read_text(encoding='utf-8')
         assert 'Totals: 3 passed, 0 failed, 0 skipped' in text, 'Missing complete Qt result'
         journal = json.loads((root / 'journal.json').read_text(encoding='utf-8'))
