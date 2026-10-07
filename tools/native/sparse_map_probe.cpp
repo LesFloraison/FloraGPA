@@ -24,7 +24,7 @@ int wmain(int argc, wchar_t **argv) {
     fs::create_directories(output);
     try {
         const int mode = std::stoi(argv[2]);
-        if (mode < 0 || mode > 7)
+        if (mode < 0 || mode > 10)
             throw std::runtime_error("Invalid sparse Map mode");
         if (argc == 5 && !LoadLibraryExW(argv[4], nullptr, LOAD_WITH_ALTERED_SEARCH_PATH))
             throw std::runtime_error("Cannot load research shimloader");
@@ -142,13 +142,24 @@ int wmain(int argc, wchar_t **argv) {
             image.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
             checked(device->CreateTexture2D(&image, nullptr, &imageReadback));
         }
+        ComPtr<ID3D11Query> completion;
+        if (mode >= 8) {
+            const D3D11_QUERY_DESC desc{mode == 10 ? D3D11_QUERY_OCCLUSION_PREDICATE : D3D11_QUERY_EVENT, 0};
+            if (mode == 10) {
+                ComPtr<ID3D11Predicate> predicate;
+                checked(device->CreatePredicate(&desc, &predicate));
+                checked(predicate.As(&completion));
+            } else
+                checked(device->CreateQuery(&desc, &completion));
+        }
         auto address = [&](const D3D11_MAPPED_SUBRESOURCE &mapped, size_t pixel) {
             const size_t z = pixel / (size_t(width) * height), y = (pixel / width) % height,
                          x = pixel % width;
             return static_cast<uint8_t *>(mapped.pData) + z * mapped.DepthPitch + y * mapped.RowPitch + x * 4;
         };
-        auto observe = [&](ID3D11Resource *target) {
-            context->CopyResource(target, resource.Get());
+        auto observe = [&](ID3D11Resource *target, bool copy = true) {
+            if (copy)
+                context->CopyResource(target, resource.Get());
             D3D11_MAPPED_SUBRESOURCE mapped{};
             if (mode == 7) {
                 context->Flush();
@@ -206,10 +217,29 @@ int wmain(int argc, wchar_t **argv) {
                     std::memcpy(address(mapped, (size_t(z) * height + y) * width),
                                 initial.data() + (size_t(z) * height + y) * width * 4, width * 4);
             context->Unmap(resource.Get(), 0);
-            const auto before = observe(readback.Get());
-            if (before != initial)
-                ++failures;
-            save(output / (L"before-" + std::to_wstring(frame) + L".bin"), before);
+            std::vector<uint8_t> before;
+            unsigned polls = 0;
+            if (mode >= 8) {
+                if (mode == 10)
+                    context->Begin(completion.Get());
+                context->CopyResource(readback.Get(), resource.Get());
+                context->End(completion.Get());
+                if (mode == 9)
+                    context->Flush();
+                HRESULT status = S_FALSE;
+                BOOL ready = FALSE;
+                for (; polls < 10000 && status == S_FALSE; ++polls) {
+                    status = context->GetData(completion.Get(), mode == 9 ? nullptr : &ready,
+                                              mode == 9 ? 0 : sizeof ready,
+                                              mode == 9 ? D3D11_ASYNC_GETDATA_DONOTFLUSH : 0);
+                    if (status == S_FALSE)
+                        Sleep(1);
+                }
+                checked(status);
+                if (status != S_OK || (mode == 8 && !ready))
+                    throw std::runtime_error("Query completion timeout or invalid event result");
+            } else
+                before = observe(readback.Get());
             // Blocking readback completes the copy before WRITE_NO_OVERWRITE
             // changes source bytes that the GPU previously consumed.
             checked(context->Map(resource.Get(), 0,
@@ -218,11 +248,18 @@ int wmain(int argc, wchar_t **argv) {
             for (const auto pixel : pixels)
                 std::memcpy(address(mapped, pixel), expected.data() + pixel * 4, 4);
             context->Unmap(resource.Get(), 0);
+            // Query modes observe the OLD copy only after the later CPU write.
+            // No READ Map may provide the missing synchronization before it.
+            if (mode >= 8)
+                before = observe(readback.Get(), false);
+            if (before != initial)
+                ++failures;
+            save(output / (L"before-" + std::to_wstring(frame) + L".bin"), before);
             const auto actual = observe(afterReadback.Get());
             if (actual != expected)
                 ++failures;
             save(output / (L"actual-" + std::to_wstring(frame) + L".bin"), actual);
-            // Modes 0..5 have marker images; 6..7 draw from the earlier copy.
+            // Modes 0..5 have marker images; 6..10 draw from the earlier copy.
             const float color[]{0, 1, 0, 1};
             context->ClearRenderTargetView(chain.rtv.Get(), color);
             if (drawSnapshot) {
@@ -254,7 +291,7 @@ int wmain(int argc, wchar_t **argv) {
             }
             checked(chain.swap->Present(0, 0));
             report << (frame ? "," : "") << "{\"frame\":" << frame << ",\"row_pitch\":" << row
-                   << ",\"depth_pitch\":" << slice << "}";
+                   << ",\"depth_pitch\":" << slice << ",\"query_polls\":" << polls << "}";
             Sleep(20);
         }
         report << "],\"capture_requested\":" << (requested ? "true" : "false") << ",\"failures\":" << failures

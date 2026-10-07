@@ -1,6 +1,6 @@
 """Development-only original capture discovery for sparse mapped resource writes.
 
-Modes 0..5 have marker images and require full resource-byte oracles. Modes 6..7
+Modes 0..5 have marker images and require full resource-byte oracles. Modes 6..10
 also draw from an earlier buffer copy. Never used by FloraGPA runtime.
 """
 import argparse
@@ -68,7 +68,10 @@ def main():
     parser.add_argument('--producer', type=Path, required=True)
     parser.add_argument('--out', type=Path, required=True)
     parser.add_argument('--gpa-dir', type=Path, default=Path('C:/Program Files/IntelSWTools/GPA'))
+    parser.add_argument('--modes', type=int, nargs='+', default=list(range(8)))
     args = parser.parse_args()
+    if len(set(args.modes)) != len(args.modes) or any(n < 0 or n > 10 for n in args.modes):
+        parser.error('Choose distinct modes 0..10')
     root = args.out.resolve()
     root.mkdir(parents=True, exist_ok=False)
     repo = Path(__file__).resolve().parents[1]
@@ -89,7 +92,7 @@ def main():
         (root / 'manifest.json').write_text(json.dumps(manifest, indent=2) + '\n', encoding='utf-8')
 
     try:
-        for mode in range(8):
+        for mode in args.modes:
             folder = root / str(mode)
             folder.mkdir()
             capture = folder / 'capture.gpa_frame'
