@@ -3796,6 +3796,43 @@ class UiTests final : public QObject {
         QVERIFY(done.takeLast()[0].toBool());
         QVERIFY(!window.busy());
     }
+    void queryCompletionNoticesAndNavigate() {
+        const auto root = qEnvironmentVariable("FLORA_QUERY_SYNC_CAPTURES");
+        if (root.isEmpty()) QSKIP("Set original query completion corpus");
+        flora::MainWindow window;
+        window.resize(1440, 900); window.show();
+        QSignalSpy done(&window, &flora::MainWindow::taskFinished);
+        for (int mode : {8, 10, 9, 10}) {
+            const auto path = root + '/' + QString::number(mode) + "/capture.gpa_frame";
+            done.clear(); window.openCapture(path);
+            QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+            QVERIFY2(done.takeLast()[0].toBool(), qPrintable(window.statusBar()->currentMessage()));
+            auto label = window.findChild<QLabel *>("frameOutputLabel");
+            auto output = window.findChild<flora::ImageView *>("frameOutput");
+            QVERIFY(label && output); QCOMPARE(output->image().size(), QSize(8, 8));
+            QCOMPARE(label->text().contains("Sync limits (1)"), mode != 10);
+            QCOMPARE(label->toolTip().contains("no saved query resource or End boundary"), mode != 10);
+            if (mode == 10) {
+                for (int y = 0; y < 8; ++y) for (int x = 0; x < 8; ++x)
+                    QCOMPARE(output->image().pixelColor(x, y), QColor(17, 30, 43, 56));
+                const auto expected = output->image();
+                flora::Frame frame(path.toStdWString()); flora::Id draw = 0;
+                for (const auto &[id, entry] : frame.entries()) if (entry.category == 7 && entry.type == 0x37) draw = id;
+                auto api = window.findChild<QTableView *>("apiLog"); QVERIFY(api && draw);
+                QModelIndex selected;
+                for (int row = 0; row < api->model()->rowCount(); ++row)
+                    if (api->model()->index(row, 0).data(Qt::UserRole).toULongLong() == draw) selected = api->model()->index(row, 0);
+                QVERIFY(selected.isValid()); done.clear(); api->setCurrentIndex(selected);
+                QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000); QVERIFY(done.takeLast()[0].toBool());
+                QCOMPARE(output->image(), expected);
+                auto boundary = window.findChild<QComboBox *>("outputBoundary"); QVERIFY(boundary);
+                done.clear(); boundary->setCurrentIndex(0);
+                QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000); QVERIFY(done.takeLast()[0].toBool());
+                QCOMPARE(output->image(), expected);
+            }
+            snapshot(window, QString("query-completion-%1").arg(mode));
+        }
+    }
     void readMapSynchronizationReplayAndNavigate() {
         const auto root = qEnvironmentVariable("FLORA_SPARSE_MAP_CAPTURES");
         if (root.isEmpty()) QSKIP("Set original sparse Map synchronization corpus");

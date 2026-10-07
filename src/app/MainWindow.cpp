@@ -2172,6 +2172,21 @@ void MainWindow::finishWorker(int code, QProcess::ExitStatus status) {
                 imageLabel_->setToolTip(imageLabel_->toolTip() +
                                        '\n' + it.key() + '\n' + it.value().join(", "));
         }
+        const auto queryNotices = report_["replay_query_notices"].toArray();
+        if (!queryNotices.isEmpty()) {
+            imageLabel_->setText(imageLabel_->text() + QString(" · Sync limits (%1)").arg(queryNotices.size()));
+            QMap<QString, QStringList> groups;
+            for (const auto &value : queryNotices) {
+                const auto notice = value.toObject();
+                groups[notice["reason"].toString()].append(
+                    QString("E:%1 Q:%2").arg(notice["event_id"].toString(), notice["resource_id"].toString()));
+            }
+            for (auto it = groups.cbegin(); it != groups.cend(); ++it) {
+                auto references = it.value().mid(0, 8).join(", ");
+                if (it.value().size() > 8) references += QString(" … (+%1)").arg(it.value().size() - 8);
+                imageLabel_->setToolTip(imageLabel_->toolTip() + '\n' + it.key() + '\n' + references);
+            }
+        }
         outputReport_ = outputAvailable ? nlohmann::json::parse(reportBytes.constData(),
                                                                 reportBytes.constData() + reportBytes.size())
                                         : nlohmann::json();
