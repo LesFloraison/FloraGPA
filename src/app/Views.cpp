@@ -128,6 +128,24 @@ void ImageView::setImage(QImage image) {
     channel("RGB");
     fit();
 }
+void ImageView::setPreparedImage(PreparedImage image) {
+    if (image.original.isNull() != image.display.isNull() ||
+        image.original.size() != image.display.size() ||
+        (!image.display.isNull() && image.display.format() != QImage::Format_ARGB32_Premultiplied))
+        throw std::runtime_error("Invalid prepared image display");
+    // The paint format was prepared off-thread. Avoid both another conversion
+    // and an opaque-pixel scan here; retain the original pixels for inspection.
+    auto pixmap = QPixmap::fromImage(std::move(image.display), Qt::NoFormatConversion);
+    if (!image.original.isNull() && pixmap.isNull())
+        throw std::runtime_error("Cannot allocate image display pixmap");
+    clearOverlay();
+    selectedPixel_.reset();
+    pixelClick_ = false;
+    image_ = std::move(image.original);
+    item_->setPixmap(pixmap);
+    scene_.setSceneRect(item_->boundingRect());
+    fit();
+}
 void ImageView::clearOverlay() {
     overlay_->setPixmap({});
 }

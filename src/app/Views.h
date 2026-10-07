@@ -1,5 +1,6 @@
 #pragma once
 #include "core/Frame.h"
+#include "ImagePresentation.h"
 #include <QGraphicsPixmapItem>
 #include <QGraphicsView>
 #include <QJsonArray>
@@ -34,6 +35,7 @@ class ImageView final : public QGraphicsView {
   public:
     explicit ImageView(QWidget *parent = nullptr);
     void setImage(QImage image);
+    void setPreparedImage(PreparedImage image);
     const QImage &image() const { return image_; }
     QImage displayImage() const { return item_->pixmap().toImage(); }
     void channel(const QString &channel);

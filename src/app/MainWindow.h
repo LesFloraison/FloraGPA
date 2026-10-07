@@ -128,7 +128,7 @@ class MainWindow final : public QMainWindow {
     void readScheduledMetrics(bool catalog, uint64_t serial);
     void finishWorker(int, QProcess::ExitStatus);
     void validateWorkerImage(const QByteArray &reportBytes);
-    void acceptWorkerImage(QImage result, const QByteArray &reportBytes);
+    void acceptWorkerImage(PreparedImage result, const QByteArray &reportBytes);
     static QString boundaryLabel(const QJsonObject &report);
     void consumeWorkerError(bool flush);
     void cancel();

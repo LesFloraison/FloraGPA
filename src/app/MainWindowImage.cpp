@@ -11,7 +11,7 @@
 namespace flora {
 namespace {
 struct ImageResult {
-    QImage image;
+    PreparedImage image;
     QString error;
     bool cancelled = false;
 };
@@ -71,8 +71,10 @@ void MainWindow::validateWorkerImage(const QByteArray &reportBytes) {
     watcher->setFuture(QtConcurrent::run([job] {
         ImageResult result;
         try {
-            result.image = readWorkerImage(job->directory->filePath("result"), job->report,
-                                           job->kind == "replay", [job] { return job->cancelled.load(); });
+            const auto cancelled = [job] { return job->cancelled.load(); };
+            auto image = readWorkerImage(job->directory->filePath("result"), job->report,
+                                         job->kind == "replay", cancelled);
+            result.image = prepareImageForDisplay(std::move(image), cancelled);
         } catch (const OperationCancelled &) {
             result.cancelled = true;
         } catch (const std::exception &error) {
@@ -82,13 +84,12 @@ void MainWindow::validateWorkerImage(const QByteArray &reportBytes) {
     }));
     statusBar()->showMessage("Validating image…");
 }
-void MainWindow::acceptWorkerImage(QImage result, const QByteArray &reportBytes) {
+void MainWindow::acceptWorkerImage(PreparedImage result, const QByteArray &reportBytes) {
     const bool outputAvailable = runningKind_ != "replay" || report_["image_available"].toBool(true);
-    if (result.isNull() && outputAvailable)
+    if (result.original.isNull() && outputAvailable)
         throw std::runtime_error("Worker output image is missing");
     if (runningKind_ == "texture") {
-        textureImage_->setImage(std::move(result));
-        textureImage_->channel("RGBA");
+        textureImage_->setPreparedImage(std::move(result));
         textureMetadata_ = report_["texture"].toObject();
         resourceImagePending_ = false;
         resourceImageContext_ = historyContextKey();
@@ -111,8 +112,7 @@ void MainWindow::acceptWorkerImage(QImage result, const QByteArray &reportBytes)
         emit taskFinished(true);
         return;
     }
-    image_->setImage(std::move(result));
-    image_->channel("RGBA");
+    image_->setPreparedImage(std::move(result));
     imageLabel_->setText(QString("T:%1  ·  %2 × %3 · %4")
                              .arg(report_["resource"].toString())
                              .arg(report_["width"].toInt())
