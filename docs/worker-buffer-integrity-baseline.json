@@ -1,0 +1,802 @@
+{
+  "schema": "FloraGPA checked buffer acceptance baseline 1",
+  "reviewed": "2026-10-08",
+  "implementation_commit": "4fe2ee71d0a8d5ead0af41ff1260855f5f6ad7a0",
+  "scope": "Same-host GUI buffer artifact validation, request matching and cancellation; unchanged replay execution",
+  "package": "out/FloraGPA-buffer-20261008",
+  "package_files": {
+    "concrt140.dll": "2405355f0a58067b258f8df33c327e3a3d716eaac5a3a5aebb757842d85bd376",
+    "D3Dcompiler_47.dll": "e994847e01a6f1e4cbdc5a864616ac262f67ee4f14db194984661a8d927ab7f4",
+    "FloraGPA.Cli.exe": "c11e90604ff79c51ee138ad20f8cc598c71b220e76041ec4486e2f4f9255c4b6",
+    "FloraGPA.exe": "b04b29c0fbaa1b865e132ba47bd098f0b895b67851e672ae422edf924d336400",
+    "FloraGPA.Metrics.dll": "58b6278f2a93e783b1e8bb1290e9b0e51745f1a36825f296584f52159fd7c6db",
+    "FloraGPA.Rdc.exe": "f4d21d43e661d24d392e91fc1a1f1460a20d1377fcf5075c57083ad289e82773",
+    "FloraGPA.Worker.exe": "dc79881621bc587f3bfca773e8a436d6aa7922507881ca0cbc028c7b1bde3639",
+    "generic/qtuiotouchplugin.dll": "a0b971771417d60c6c2dedf66d06f6e99bd3236aa1aa6949c7e4e08d51fb69f9",
+    "iconengines/qsvgicon.dll": "7879ba1d2f293ad09c515de736add8c1023b0a4e80e2301d1283555efc2e8828",
+    "imageformats/qgif.dll": "de1c1ea34cbc4156ce452023470e2145af4855128756d081d56e9a0997d0dda8",
+    "imageformats/qico.dll": "af98cacb134525fab15cf2146a4e6b90266f14493e72e4d51df89a5caadea157",
+    "imageformats/qjpeg.dll": "a8854ac38d2bb83e8018bdcbfc93420a876251b3d2a79933e1a3c9a8ed2a24cb",
+    "imageformats/qsvg.dll": "486b395e23e258d03d54cdba045f129e9b1321f9ff12f99fe58293e0351b8caf",
+    "licenses/COPYING.txt": "eb7e9ab9690124c5c9f42bdc81383d886a3dede26345b6ed15bbad7caf81f7ea",
+    "licenses/Copyright.txt": "d1f5b8f5eba2e9073463bc29b30572d84033f59e8d8057a95dff37c3414305b9",
+    "licenses/GPL-3.0-only.txt": "8ceb4b9ee5adedde47b31e975c1d90c73ad27b6b165a1dcd80c7c545eb65b903",
+    "licenses/intel-metrics-discovery-MIT.txt": "653129790534d6a3e843eaafc62cf04299e7e238f6f411173e85ea7fc315c8ac",
+    "licenses/LGPL-3.0-only.txt": "da7eabb7bafdf7d3ae5e9f223aa5bdc1eece45ac569dc21b3b037520b4464768",
+    "licenses/LICENSE": "2004ee3ef8282a85f7dbd035dfacf63cf03d569537bc08655ffeb140ea3671c5",
+    "licenses/LICENSE.FDL": "c256483c2d1e8a51b62fc7a44a58f21cb4ef23fa840c7d33e3658035fd8cf62f",
+    "licenses/nlohmann-json-MIT.txt": "46a65cffd1ea955132d95a8dd921640714a8d6b537d2e4e482d31145ae95b603",
+    "licenses/renderdoc-api-MIT.txt": "e3dccfaa75440c693b18fd2332347e3c810829bf55ec68302ea5a11db9951997",
+    "msvcp140.dll": "0f885b509a685d2bbfa652fed26b5fb31d88fbdab0a978c641d1c7b8aa460aa9",
+    "msvcp140_1.dll": "bfad5aef4c63a669e3c140655cdfdf395b6c979b400a447bd5dcb65ed8826c3d",
+    "msvcp140_2.dll": "3ea06f0ee098b4823cb79599df3780e7f23cce52c19aac31d2a0d47efe33a5e9",
+    "msvcp140_atomic_wait.dll": "640b2aefced484d0368eea5bdd06addd0658a3a70a49256e560d6923b404a479",
+    "msvcp140_codecvt_ids.dll": "f2069a52880ec885ee7f0511186100eb7fada0411a2b4948fafea7735b878a18",
+    "networkinformation/qnetworklistmanager.dll": "2f7c43bb4ec05e9f23a326ac69e84a6df071cdf7cc0bf87cde98f81958ad9bae",
+    "platforms/qoffscreen.dll": "95391476bba1d0b50cc822b93d7509341024cc7c18cd615f82e471a3e3a61caa",
+    "platforms/qwindows.dll": "d94c584a18829d11fbf3aefd07e7b1e189e0cf063a0515826960037efa7465df",
+    "Qt6Core.dll": "22c113a5644b875b2c85482723cd5d2e6a3a4029169778fcc78adde08ef3b6aa",
+    "Qt6Gui.dll": "19265a4e76efc12ef5f5bcf59be6c6a5b9b59ec4c89660797738bd2da7f719cc",
+    "Qt6Network.dll": "75ff0896a618f4f5b602f391eb4917a55fd738b2e751d2cf18244a0de3619184",
+    "Qt6Svg.dll": "1052c17a9df0eb82023e0e4c369bbd0af58e4c5fea3c27a4b5ee83b60c015492",
+    "Qt6Widgets.dll": "e6d0b7e2e697de6ad985b97f9ed8b381c1c2172fcae87b6ab08455b3b7330f32",
+    "styles/qmodernwindowsstyle.dll": "f6b88d403d7175f5b830d4958264690e5c8bbaf0148e1ccf42d52704b0480792",
+    "THIRD_PARTY.md": "343009c9e4761e1c1dc645bd72fd470001c3a4e269384f0dfc4b0bf69c10f6ec",
+    "tls/qcertonlybackend.dll": "ff0f1a60ec60fc23ec74ff5d325ddef05c1ed68fc89466bffc1d874c7c544adb",
+    "tls/qschannelbackend.dll": "761178263b47a5f05e151806bb5854d9e5c9cbc67d08187724d80f9e317471f8",
+    "vc_redist.x64.exe": "cc0ff0eb1dc3f5188ae6300faef32bf5beeba4bdd6e8e445a9184072096b713b",
+    "vccorlib140.dll": "19839407c3fdbc824e5bce189bf68ddf8097f12ec28b757797ffa0415c144ddd",
+    "vcruntime140.dll": "d5e4d9a3e835fa679450145d6a7d94e36573a509317111904d9b3712c30d9066",
+    "vcruntime140_1.dll": "1f2d41c4aa5db0bc33ebf7b66d72943a817d7ce6cbe880502a9403823633093f",
+    "vcruntime140_threads.dll": "219915cf20822f34d5e7c1fdd4e21ae7f3396881096c51036225fb8f84b47afa"
+  },
+  "package_comparison": {
+    "previous_package": "out/FloraGPA-image-display-20261008",
+    "package": "out/FloraGPA-buffer-20261008",
+    "files": 44,
+    "added": [],
+    "removed": [],
+    "changed": [
+      "FloraGPA.exe"
+    ]
+  },
+  "related_ctest": {
+    "suites": 8,
+    "passed": 8,
+    "failed": 0,
+    "rows": {
+      "ui": {
+        "passed": 67,
+        "failed": 0,
+        "skipped": 0
+      },
+      "draw-resources": {
+        "passed": 10,
+        "failed": 0,
+        "skipped": 0
+      },
+      "frame-output": {
+        "passed": 11,
+        "failed": 0,
+        "skipped": 0
+      },
+      "worker-buffer": {
+        "passed": 29,
+        "failed": 0,
+        "skipped": 0
+      },
+      "image-display": {
+        "passed": 11,
+        "failed": 0,
+        "skipped": 0
+      },
+      "worker-image": {
+        "passed": 28,
+        "failed": 0,
+        "skipped": 0
+      },
+      "worker-recovery": {
+        "passed": 36,
+        "failed": 0,
+        "skipped": 2
+      },
+      "recovery-ui": {
+        "passed": 8,
+        "failed": 0,
+        "skipped": 0
+      }
+    },
+    "worker_child_scenarios": 34,
+    "new_buffer_child_scenarios": 11,
+    "parent_skips_are_child_only_entrypoints": true
+  },
+  "buffer_reader": {
+    "valid_layouts": 5,
+    "rejection_cases": 21,
+    "cancellation_positions": 5,
+    "retry_after_each_rejection_or_cancellation": true,
+    "gui_async_control_buffer_byte_width": 33554432,
+    "gui_async_control_offset": 3
+  },
+  "portable": {
+    "directory": "artifacts/m5-buffer-portable QA 中文",
+    "completed": true,
+    "checks": [
+      {
+        "name": "display-offscreen",
+        "command": [
+          "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\m5-buffer-portable QA 中文\\runtime\\FloraImageDisplayTests.exe",
+          "-o",
+          "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\m5-buffer-portable QA 中文\\display-offscreen.txt,txt"
+        ],
+        "platform": "offscreen",
+        "exit_code": 0
+      },
+      {
+        "name": "display-windows",
+        "command": [
+          "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\m5-buffer-portable QA 中文\\runtime\\FloraImageDisplayTests.exe",
+          "-o",
+          "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\m5-buffer-portable QA 中文\\display-windows.txt,txt"
+        ],
+        "platform": "windows",
+        "exit_code": 0
+      },
+      {
+        "name": "artifact",
+        "command": [
+          "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\m5-buffer-portable QA 中文\\runtime\\FloraWorkerImageTests.exe",
+          "-o",
+          "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\m5-buffer-portable QA 中文\\artifact.txt,txt"
+        ],
+        "platform": "offscreen",
+        "exit_code": 0
+      },
+      {
+        "name": "buffer",
+        "command": [
+          "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\m5-buffer-portable QA 中文\\runtime\\FloraWorkerBufferTests.exe",
+          "-o",
+          "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\m5-buffer-portable QA 中文\\buffer.txt,txt"
+        ],
+        "platform": "offscreen",
+        "exit_code": 0
+      },
+      {
+        "name": "recovery",
+        "command": [
+          "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\m5-buffer-portable QA 中文\\runtime\\FloraWorkerRecoveryTests.exe",
+          "isolatedRecovery",
+          "-o",
+          "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\m5-buffer-portable QA 中文\\recovery.txt,txt"
+        ],
+        "platform": "offscreen",
+        "exit_code": 0
+      },
+      {
+        "name": "gf2",
+        "command": [
+          "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\m5-buffer-portable QA 中文\\runtime\\FloraGPA.exe",
+          "D:\\CDXrepo\\FloraGPA\\GF2_Exilium_2026_03_03__00_19_35.gpa_frame",
+          "--size",
+          "1440x900",
+          "--screenshot",
+          "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\m5-buffer-portable QA 中文\\gf2.png"
+        ],
+        "platform": "offscreen",
+        "exit_code": 0,
+        "image_sha256": "67d4650f24bfb52f9efe2e6aaaf2a673170d1153524167bb18c245fcc28d40c0"
+      },
+      {
+        "name": "bf1",
+        "command": [
+          "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\m5-buffer-portable QA 中文\\runtime\\FloraGPA.exe",
+          "D:\\CDXrepo\\FloraGPA\\bf1_2026_01_21__16_53_05.gpa_frame",
+          "--size",
+          "1440x900",
+          "--screenshot",
+          "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\m5-buffer-portable QA 中文\\bf1.png"
+        ],
+        "platform": "offscreen",
+        "exit_code": 0,
+        "image_sha256": "0725e6c30142a9a66843c5fe6bd4c888fdcff16d6a5af2be2e00ab36d134df77"
+      }
+    ],
+    "runtime_files": {
+      "concrt140.dll": "2405355f0a58067b258f8df33c327e3a3d716eaac5a3a5aebb757842d85bd376",
+      "D3Dcompiler_47.dll": "e994847e01a6f1e4cbdc5a864616ac262f67ee4f14db194984661a8d927ab7f4",
+      "FloraFaultWorker.exe": "d17cbbe08f53f2a84ebdbd5014a1d13c981f3d6c72d575f24812e7214e3909a8",
+      "FloraGPA.Cli.exe": "c11e90604ff79c51ee138ad20f8cc598c71b220e76041ec4486e2f4f9255c4b6",
+      "FloraGPA.exe": "b04b29c0fbaa1b865e132ba47bd098f0b895b67851e672ae422edf924d336400",
+      "FloraGPA.Metrics.dll": "58b6278f2a93e783b1e8bb1290e9b0e51745f1a36825f296584f52159fd7c6db",
+      "FloraGPA.Rdc.exe": "f4d21d43e661d24d392e91fc1a1f1460a20d1377fcf5075c57083ad289e82773",
+      "FloraGPA.Worker.exe": "dc79881621bc587f3bfca773e8a436d6aa7922507881ca0cbc028c7b1bde3639",
+      "FloraImageDisplayTests.exe": "63dea4a62b26636f29f1fa0911540b4387bc58fd31bb5c204025533e94c3a890",
+      "FloraWorkerBufferTests.exe": "9799cdfce26141c07b2a962e930e498167ea99c88848233be0fbddb9035b04f5",
+      "FloraWorkerImageTests.exe": "4c8e1a272e79f2ea8d69a2f82205a71f234e125008a04b599455ecaefa53d7f0",
+      "FloraWorkerRecoveryTests.exe": "9b126fb4e58ca07c665d14d4b7d0100d0dc93b712843f191897feebcb28ff65a",
+      "msvcp140.dll": "0f885b509a685d2bbfa652fed26b5fb31d88fbdab0a978c641d1c7b8aa460aa9",
+      "msvcp140_1.dll": "bfad5aef4c63a669e3c140655cdfdf395b6c979b400a447bd5dcb65ed8826c3d",
+      "msvcp140_2.dll": "3ea06f0ee098b4823cb79599df3780e7f23cce52c19aac31d2a0d47efe33a5e9",
+      "msvcp140_atomic_wait.dll": "640b2aefced484d0368eea5bdd06addd0658a3a70a49256e560d6923b404a479",
+      "msvcp140_codecvt_ids.dll": "f2069a52880ec885ee7f0511186100eb7fada0411a2b4948fafea7735b878a18",
+      "Qt6Core.dll": "22c113a5644b875b2c85482723cd5d2e6a3a4029169778fcc78adde08ef3b6aa",
+      "Qt6Gui.dll": "19265a4e76efc12ef5f5bcf59be6c6a5b9b59ec4c89660797738bd2da7f719cc",
+      "Qt6Network.dll": "75ff0896a618f4f5b602f391eb4917a55fd738b2e751d2cf18244a0de3619184",
+      "Qt6Svg.dll": "1052c17a9df0eb82023e0e4c369bbd0af58e4c5fea3c27a4b5ee83b60c015492",
+      "Qt6Test.dll": "43601fc45d2f4e4def09c744914b864a26b82d5193418913191678ebc3a437fb",
+      "Qt6Widgets.dll": "e6d0b7e2e697de6ad985b97f9ed8b381c1c2172fcae87b6ab08455b3b7330f32",
+      "THIRD_PARTY.md": "343009c9e4761e1c1dc645bd72fd470001c3a4e269384f0dfc4b0bf69c10f6ec",
+      "vccorlib140.dll": "19839407c3fdbc824e5bce189bf68ddf8097f12ec28b757797ffa0415c144ddd",
+      "vcruntime140.dll": "d5e4d9a3e835fa679450145d6a7d94e36573a509317111904d9b3712c30d9066",
+      "vcruntime140_1.dll": "1f2d41c4aa5db0bc33ebf7b66d72943a817d7ce6cbe880502a9403823633093f",
+      "vcruntime140_threads.dll": "219915cf20822f34d5e7c1fdd4e21ae7f3396881096c51036225fb8f84b47afa",
+      "vc_redist.x64.exe": "cc0ff0eb1dc3f5188ae6300faef32bf5beeba4bdd6e8e445a9184072096b713b",
+      "generic/qtuiotouchplugin.dll": "a0b971771417d60c6c2dedf66d06f6e99bd3236aa1aa6949c7e4e08d51fb69f9",
+      "iconengines/qsvgicon.dll": "7879ba1d2f293ad09c515de736add8c1023b0a4e80e2301d1283555efc2e8828",
+      "imageformats/qgif.dll": "de1c1ea34cbc4156ce452023470e2145af4855128756d081d56e9a0997d0dda8",
+      "imageformats/qico.dll": "af98cacb134525fab15cf2146a4e6b90266f14493e72e4d51df89a5caadea157",
+      "imageformats/qjpeg.dll": "a8854ac38d2bb83e8018bdcbfc93420a876251b3d2a79933e1a3c9a8ed2a24cb",
+      "imageformats/qsvg.dll": "486b395e23e258d03d54cdba045f129e9b1321f9ff12f99fe58293e0351b8caf",
+      "licenses/COPYING.txt": "eb7e9ab9690124c5c9f42bdc81383d886a3dede26345b6ed15bbad7caf81f7ea",
+      "licenses/Copyright.txt": "d1f5b8f5eba2e9073463bc29b30572d84033f59e8d8057a95dff37c3414305b9",
+      "licenses/GPL-3.0-only.txt": "8ceb4b9ee5adedde47b31e975c1d90c73ad27b6b165a1dcd80c7c545eb65b903",
+      "licenses/intel-metrics-discovery-MIT.txt": "653129790534d6a3e843eaafc62cf04299e7e238f6f411173e85ea7fc315c8ac",
+      "licenses/LGPL-3.0-only.txt": "da7eabb7bafdf7d3ae5e9f223aa5bdc1eece45ac569dc21b3b037520b4464768",
+      "licenses/LICENSE": "2004ee3ef8282a85f7dbd035dfacf63cf03d569537bc08655ffeb140ea3671c5",
+      "licenses/LICENSE.FDL": "c256483c2d1e8a51b62fc7a44a58f21cb4ef23fa840c7d33e3658035fd8cf62f",
+      "licenses/nlohmann-json-MIT.txt": "46a65cffd1ea955132d95a8dd921640714a8d6b537d2e4e482d31145ae95b603",
+      "licenses/renderdoc-api-MIT.txt": "e3dccfaa75440c693b18fd2332347e3c810829bf55ec68302ea5a11db9951997",
+      "networkinformation/qnetworklistmanager.dll": "2f7c43bb4ec05e9f23a326ac69e84a6df071cdf7cc0bf87cde98f81958ad9bae",
+      "platforms/qoffscreen.dll": "95391476bba1d0b50cc822b93d7509341024cc7c18cd615f82e471a3e3a61caa",
+      "platforms/qwindows.dll": "d94c584a18829d11fbf3aefd07e7b1e189e0cf063a0515826960037efa7465df",
+      "styles/qmodernwindowsstyle.dll": "f6b88d403d7175f5b830d4958264690e5c8bbaf0148e1ccf42d52704b0480792",
+      "tls/qcertonlybackend.dll": "ff0f1a60ec60fc23ec74ff5d325ddef05c1ed68fc89466bffc1d874c7c544adb",
+      "tls/qschannelbackend.dll": "761178263b47a5f05e151806bb5854d9e5c9cbc67d08187724d80f9e317471f8"
+    },
+    "parent_entrypoint_only_skips": 0
+  },
+  "goldens": [
+    {
+      "case": "gf2",
+      "rgba_sha256": "2e1abc5eacb0bbfd801f9fe059c305baa9a0786c384b36a42fa5a323dd979fd1",
+      "passed": true,
+      "counts": {
+        "ClearDepthStencilView": 2,
+        "ClearRenderTargetView": 1,
+        "CreateBuffer": 2,
+        "DrawIndexed": 72,
+        "Map": 44,
+        "Present": 1,
+        "buffers_created_without_initial_data": 2,
+        "object_observation_records": 49,
+        "pipeline_setter_records": 142,
+        "private_data_observations": 4,
+        "query_completion_unresolved": 1,
+        "query_metadata_records": 2,
+        "state_or_auxiliary_records": 551,
+        "unmap_observations": 44
+      }
+    },
+    {
+      "case": "gf2-negative",
+      "rgba_sha256": "b2c5548a51715f581c4591acc266ac7a0c65b54b7ecd9a49f43499fa9b76c5f1",
+      "passed": true,
+      "counts": {
+        "ClearDepthStencilView": 2,
+        "ClearRenderTargetView": 1,
+        "CreateBuffer": 2,
+        "Map": 44,
+        "Present": 1,
+        "buffers_created_without_initial_data": 2,
+        "object_observation_records": 49,
+        "pipeline_setter_records": 142,
+        "private_data_observations": 4,
+        "query_completion_unresolved": 1,
+        "query_metadata_records": 2,
+        "state_or_auxiliary_records": 551,
+        "unmap_observations": 44
+      }
+    },
+    {
+      "case": "bf1",
+      "rgba_sha256": "1f724d1840652f66afd26dd30c95aecd5c1b4932eede56109198f15a8f57a2f6",
+      "passed": true,
+      "counts": {
+        "ClearDepthStencilView": 10,
+        "ClearRenderTargetView": 10,
+        "ClearUnorderedAccessViewFloat": 1,
+        "CopyResource": 2,
+        "CopyStructureCount": 6,
+        "CopySubresourceRegion": 7,
+        "Dispatch": 60,
+        "DispatchIndirect": 13,
+        "Draw": 79,
+        "DrawIndexed": 41,
+        "DrawIndexedInstanced": 1053,
+        "DrawInstanced": 29,
+        "GenerateMips": 2,
+        "Map": 4151,
+        "Present": 1,
+        "UpdateSubresource": 27,
+        "map_read_observations": 2,
+        "map_read_synchronizations": 2,
+        "object_observation_records": 28,
+        "pipeline_setter_records": 2221,
+        "query_completion_unresolved": 17,
+        "query_metadata_records": 17,
+        "state_or_auxiliary_records": 7354,
+        "unmap_observations": 4153,
+        "unresolved_input_layout_setters": 2,
+        "unresolved_output_setters": 6,
+        "unresolved_shader_setters": 4,
+        "unresolved_srv_setters": 2
+      }
+    },
+    {
+      "case": "bf1-negative",
+      "rgba_sha256": "cd3a3066f984b1c317fbeefec2836503f32078321d3dc1f367465f2c06d435bf",
+      "passed": true,
+      "counts": {
+        "ClearDepthStencilView": 10,
+        "ClearRenderTargetView": 10,
+        "ClearUnorderedAccessViewFloat": 1,
+        "CopyResource": 2,
+        "CopyStructureCount": 6,
+        "CopySubresourceRegion": 7,
+        "Dispatch": 60,
+        "DispatchIndirect": 13,
+        "GenerateMips": 2,
+        "Map": 4151,
+        "Present": 1,
+        "UpdateSubresource": 27,
+        "map_read_observations": 2,
+        "map_read_synchronizations": 2,
+        "object_observation_records": 28,
+        "pipeline_setter_records": 2221,
+        "query_completion_unresolved": 17,
+        "query_metadata_records": 17,
+        "state_or_auxiliary_records": 7354,
+        "unmap_observations": 4153,
+        "unresolved_input_layout_setters": 2,
+        "unresolved_output_setters": 6,
+        "unresolved_shader_setters": 4,
+        "unresolved_srv_setters": 2
+      }
+    }
+  ],
+  "recovery": {
+    "directory": "artifacts/m5-buffer-recovery QA 中文",
+    "cycles": 4,
+    "strict_image_checks": 12,
+    "elapsed_ms": 28517,
+    "retention_control": false,
+    "trace_allocations": false
+  },
+  "visually_reviewed": [
+    "artifacts/m5-buffer-ui/buffer.png",
+    "artifacts/m5-buffer-portable QA 中文/gf2.png",
+    "artifacts/m5-buffer-portable QA 中文/bf1.png"
+  ],
+  "limitations": [
+    "Artifact consistency is not proof of correct GPU execution or capture fidelity",
+    "Report parsing, metadata/model publication, other analyzer payloads and exports remain separate work",
+    "The validated buffer remains resident; no absolute interruption-time or maximum-buffer memory bound is claimed",
+    "Full replay matrix retained for byte-identical replay binaries, not rerun in this batch",
+    "No independent clean Windows host; M3/M4/M5 remain incomplete"
+  ],
+  "evidence": [
+    {
+      "path": "artifacts/build_buffer_baseline.py",
+      "sha256": "890ceddb5d53d2e2ab0f6a05a9ff66f4831050570df86f9ff7e4e01b0aa49e06"
+    },
+    {
+      "path": "artifacts/m5-buffer-build.log",
+      "sha256": "e5c5458ee5c53c649491dff9195155d99262deb1a613005fed8ef43a9e4b6501"
+    },
+    {
+      "path": "artifacts/m5-buffer-ctest-detail.log",
+      "sha256": "2e462fe6f283ad2908e1f8e0ec35757edc0125fb9fae14f8363918abfaabfee6"
+    },
+    {
+      "path": "artifacts/m5-buffer-ctest.log",
+      "sha256": "6fcb0fd2e6b051be198c0a968c71effb7b7102906acba05cfb6e0cceb2abdb2c"
+    },
+    {
+      "path": "artifacts/m5-buffer-draw-resources.txt",
+      "sha256": "2ae522e22aeff2976b7019d05713bab52d913c1a1ad96b13ca261c8fcba6d755"
+    },
+    {
+      "path": "artifacts/m5-buffer-final-build.log",
+      "sha256": "1e259ddcaae40d7f86a02fa4e8728ebdc0cb0e243837e3dfc350c7b17b87a822"
+    },
+    {
+      "path": "artifacts/m5-buffer-frame-output.txt",
+      "sha256": "3e2c189b7e332526cd22a50929c510b7807dbb38e9c3e654f646fde3a43c78c2"
+    },
+    {
+      "path": "artifacts/m5-buffer-goldens/bf1/frame.png",
+      "sha256": "0314fe863971c4f3be12bfa5e0bb657b4efbebdb4637e956b788db6f7ff610c5"
+    },
+    {
+      "path": "artifacts/m5-buffer-goldens/bf1/frame.rgba",
+      "sha256": "1f724d1840652f66afd26dd30c95aecd5c1b4932eede56109198f15a8f57a2f6"
+    },
+    {
+      "path": "artifacts/m5-buffer-goldens/bf1/output_storage.bin",
+      "sha256": "1f724d1840652f66afd26dd30c95aecd5c1b4932eede56109198f15a8f57a2f6"
+    },
+    {
+      "path": "artifacts/m5-buffer-goldens/bf1/output_storage.json",
+      "sha256": "0d2253d424c5663ea1c7acb679572b9ca18e2ed0f69fdfeed5f0cb1d2e438a68"
+    },
+    {
+      "path": "artifacts/m5-buffer-goldens/bf1/report.json",
+      "sha256": "60ec23f38810eeafa54284922c6614bf423e968d01d2b5f06db5377f6ac72cca"
+    },
+    {
+      "path": "artifacts/m5-buffer-goldens/bf1-negative/frame.png",
+      "sha256": "a8f750cfa6c7c98e262009b2e3cab627cfa7845abd96633fc132028b3a438cc0"
+    },
+    {
+      "path": "artifacts/m5-buffer-goldens/bf1-negative/frame.rgba",
+      "sha256": "cd3a3066f984b1c317fbeefec2836503f32078321d3dc1f367465f2c06d435bf"
+    },
+    {
+      "path": "artifacts/m5-buffer-goldens/bf1-negative/output_storage.bin",
+      "sha256": "cd3a3066f984b1c317fbeefec2836503f32078321d3dc1f367465f2c06d435bf"
+    },
+    {
+      "path": "artifacts/m5-buffer-goldens/bf1-negative/output_storage.json",
+      "sha256": "21c410abd9d2cf5448da5733274f51d6d8f7b025009c2ca878e873bd0e62a36c"
+    },
+    {
+      "path": "artifacts/m5-buffer-goldens/bf1-negative/report.json",
+      "sha256": "1f48e73ffae25438689c7401d7bb1781d833ed90409c11d0682f9e8f22dca43e"
+    },
+    {
+      "path": "artifacts/m5-buffer-goldens/bf1-negative.log",
+      "sha256": "eae578f2e127551bd2ebbaa059093d0cf26d3b84928eba5dcf5e76e68bb3148e"
+    },
+    {
+      "path": "artifacts/m5-buffer-goldens/bf1.log",
+      "sha256": "eae578f2e127551bd2ebbaa059093d0cf26d3b84928eba5dcf5e76e68bb3148e"
+    },
+    {
+      "path": "artifacts/m5-buffer-goldens/gf2/frame.png",
+      "sha256": "d8f528bbc774646f9383c2d67d143a92c5593ae6dae77b955d8538ea3ed3c112"
+    },
+    {
+      "path": "artifacts/m5-buffer-goldens/gf2/frame.rgba",
+      "sha256": "2e1abc5eacb0bbfd801f9fe059c305baa9a0786c384b36a42fa5a323dd979fd1"
+    },
+    {
+      "path": "artifacts/m5-buffer-goldens/gf2/output_storage.bin",
+      "sha256": "2e1abc5eacb0bbfd801f9fe059c305baa9a0786c384b36a42fa5a323dd979fd1"
+    },
+    {
+      "path": "artifacts/m5-buffer-goldens/gf2/output_storage.json",
+      "sha256": "6ddd28c6e623e17a2996c917d9259fc2c0633aa6eefa538c50626ce994fa5df3"
+    },
+    {
+      "path": "artifacts/m5-buffer-goldens/gf2/report.json",
+      "sha256": "416a368f971b56774155977aa4c7aebbdbdf4bf5532f779ca8532f1143dba370"
+    },
+    {
+      "path": "artifacts/m5-buffer-goldens/gf2-negative/frame.png",
+      "sha256": "b935cef09d465779571f9acc7d475fd7a9f490c3219115a478ae0d30a8e62b10"
+    },
+    {
+      "path": "artifacts/m5-buffer-goldens/gf2-negative/frame.rgba",
+      "sha256": "b2c5548a51715f581c4591acc266ac7a0c65b54b7ecd9a49f43499fa9b76c5f1"
+    },
+    {
+      "path": "artifacts/m5-buffer-goldens/gf2-negative/output_storage.bin",
+      "sha256": "b2c5548a51715f581c4591acc266ac7a0c65b54b7ecd9a49f43499fa9b76c5f1"
+    },
+    {
+      "path": "artifacts/m5-buffer-goldens/gf2-negative/output_storage.json",
+      "sha256": "1f2e9d0fa02fb623369c97181f49b8752790cc06757d7534ee741350f3a685f6"
+    },
+    {
+      "path": "artifacts/m5-buffer-goldens/gf2-negative/report.json",
+      "sha256": "b7e52e8e424b4475946fb21ecd6edec757597b5783c492c8d01d8df496570b47"
+    },
+    {
+      "path": "artifacts/m5-buffer-goldens/gf2-negative.log",
+      "sha256": "bf3404bbc64f692c67e3c103b344419a5d137abb2955951e58a0fc8143dfd2fb"
+    },
+    {
+      "path": "artifacts/m5-buffer-goldens/gf2.log",
+      "sha256": "bf3404bbc64f692c67e3c103b344419a5d137abb2955951e58a0fc8143dfd2fb"
+    },
+    {
+      "path": "artifacts/m5-buffer-goldens/validation.json",
+      "sha256": "a1f6d11deab2e8324c8626ab359b139abf8a83257d06874c3cb6a251a357b84a"
+    },
+    {
+      "path": "artifacts/m5-buffer-goldens.log",
+      "sha256": "9045dc3e3b7870e530a1c62f26394abd4443e9d3b985817f7f32052b1f0e9635"
+    },
+    {
+      "path": "artifacts/m5-buffer-image-display.txt",
+      "sha256": "2391d901d8d6125acee4695da4ab140ea54f262eb326ba8c9afa5d0cd5ae725e"
+    },
+    {
+      "path": "artifacts/m5-buffer-package-comparison.json",
+      "sha256": "4f738abfdcfc01e554ba48d390cc2fdb0aeb10c7a1bbd4f9fc67b38afd3e3e67"
+    },
+    {
+      "path": "artifacts/m5-buffer-package.log",
+      "sha256": "a52735ad9c08e8df62954d76ebb0f442c31692e57ccde04a56c03dc158a1a598"
+    },
+    {
+      "path": "artifacts/m5-buffer-portable QA 中文/artifact.process.log",
+      "sha256": "da2d8d064b853dba3dbb0d49be6c55443fc585bb5f78eaac7c5c94efcf9ec534"
+    },
+    {
+      "path": "artifacts/m5-buffer-portable QA 中文/artifact.txt",
+      "sha256": "06586dffc77abc47cbdf1aa78eccebb121151ca540da77dd432c196d41a91983"
+    },
+    {
+      "path": "artifacts/m5-buffer-portable QA 中文/bf1.png",
+      "sha256": "0725e6c30142a9a66843c5fe6bd4c888fdcff16d6a5af2be2e00ab36d134df77"
+    },
+    {
+      "path": "artifacts/m5-buffer-portable QA 中文/bf1.process.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/m5-buffer-portable QA 中文/buffer.process.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/m5-buffer-portable QA 中文/buffer.txt",
+      "sha256": "955c2366647a2007d077d2ad06da4a6a98c99ad0e280889ad30544e966336c04"
+    },
+    {
+      "path": "artifacts/m5-buffer-portable QA 中文/display-offscreen.process.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/m5-buffer-portable QA 中文/display-offscreen.txt",
+      "sha256": "d19e229d5ff8d3eb8491a1290a24965f68682c968d80dc12525d38ae1353eb6a"
+    },
+    {
+      "path": "artifacts/m5-buffer-portable QA 中文/display-windows.process.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/m5-buffer-portable QA 中文/display-windows.txt",
+      "sha256": "0df0f8dc1c8b83387423b5cff44bdc6612ab2e00dde22f1066dfda237af4f0f0"
+    },
+    {
+      "path": "artifacts/m5-buffer-portable QA 中文/gf2.png",
+      "sha256": "67d4650f24bfb52f9efe2e6aaaf2a673170d1153524167bb18c245fcc28d40c0"
+    },
+    {
+      "path": "artifacts/m5-buffer-portable QA 中文/gf2.process.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/m5-buffer-portable QA 中文/recovery.process.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/m5-buffer-portable QA 中文/recovery.txt",
+      "sha256": "49de5e7c4897bbdd2766da50b5f5277510d5a4903bdbe4df7b10b05bddfdb9a7"
+    },
+    {
+      "path": "artifacts/m5-buffer-portable QA 中文/validation.json",
+      "sha256": "af465ec2c1247921d358c6502bb96ba4ecb167dd36b7af68446aa4a00e4e0f95"
+    },
+    {
+      "path": "artifacts/m5-buffer-portable.log",
+      "sha256": "62de4b3876b35b781235c4f5bf597d7198344a6eeeed3a545f62cf929f4be427"
+    },
+    {
+      "path": "artifacts/m5-buffer-reader-ctest.log",
+      "sha256": "32c1a751ed022ad33e5d2188edc2e04ba49e8bb9284cbd611c00f67b930e2904"
+    },
+    {
+      "path": "artifacts/m5-buffer-reader.txt",
+      "sha256": "502b13517fcace086f76d1c12d3a414945aa4cf947753eb58f26dc4feaf4e1cc"
+    },
+    {
+      "path": "artifacts/m5-buffer-recovery QA 中文/journal.json",
+      "sha256": "6719b7e3433b960786218abdda3c4fd2494a7648b103359b9da51b6c305df40d"
+    },
+    {
+      "path": "artifacts/m5-buffer-recovery QA 中文/journal.json.progress/00000001.json",
+      "sha256": "29452ba69966f6e3c9874b48b5808c0a3f152b333544793f93804aeabcaa77f2"
+    },
+    {
+      "path": "artifacts/m5-buffer-recovery QA 中文/journal.json.progress/00000002.json",
+      "sha256": "ca75a0cf91d0c2bca018ea4bf2dd4cd03210192c2724ca299125a82d4ba92418"
+    },
+    {
+      "path": "artifacts/m5-buffer-recovery QA 中文/journal.json.progress/00000003.json",
+      "sha256": "a7a8a2a073ab910b4b724ce975ee04951c97db51fccd3642e9bcd01a78ac8c62"
+    },
+    {
+      "path": "artifacts/m5-buffer-recovery QA 中文/journal.json.progress/00000004.json",
+      "sha256": "d65bb02b075580de9e419bd835705922893c7baff5189e3c9d113ae9dc432a7f"
+    },
+    {
+      "path": "artifacts/m5-buffer-recovery QA 中文/journal.json.progress/00000005.json",
+      "sha256": "9de24ef6601bdd9d4cfac86d35c2ebc01b7b4b5f727f5c3c8250cd60e70aad2b"
+    },
+    {
+      "path": "artifacts/m5-buffer-recovery QA 中文/journal.json.progress/00000006.json",
+      "sha256": "4b06caca8ab6534933638cccae72dbeb8cf00ed5c8076794f9719f7af1c425d3"
+    },
+    {
+      "path": "artifacts/m5-buffer-recovery QA 中文/journal.json.progress/00000007.json",
+      "sha256": "6d4ec4b6e102c4eaeb0766a7c5ceae763375db909c66517741979d688a18fc97"
+    },
+    {
+      "path": "artifacts/m5-buffer-recovery QA 中文/journal.json.progress/00000008.json",
+      "sha256": "22a77793827c690944e03d4ea082dd70a2741eb37662ca30818d9efca3741565"
+    },
+    {
+      "path": "artifacts/m5-buffer-recovery QA 中文/journal.json.progress/00000009.json",
+      "sha256": "d823a75197b6dc9c853779f788fd5cdc90edce38d6c0ddf63da8c65eb2e58e2e"
+    },
+    {
+      "path": "artifacts/m5-buffer-recovery QA 中文/journal.json.progress/00000010.json",
+      "sha256": "f9465df21b7791c9af003c98052e50e2b40af49211ac4b38a1d093c8f3ec84ec"
+    },
+    {
+      "path": "artifacts/m5-buffer-recovery QA 中文/journal.json.progress/00000011.json",
+      "sha256": "159001faa268431681814ce20ffff8d450bbd22f39d8cccda8577812bfe316a7"
+    },
+    {
+      "path": "artifacts/m5-buffer-recovery QA 中文/journal.json.progress/00000012.json",
+      "sha256": "795d6552e2ef8c45c4700c3a67f389bc28902e9db75ff52f1da7e005eb8dd636"
+    },
+    {
+      "path": "artifacts/m5-buffer-recovery QA 中文/journal.json.progress/00000013.json",
+      "sha256": "7bc7108a2071ea3676deeea369a8cb1feca71b249f4bbf203112612427e020b3"
+    },
+    {
+      "path": "artifacts/m5-buffer-recovery QA 中文/journal.json.progress/00000014.json",
+      "sha256": "a8d64a3a5b5890eb55b740fbf2fdd1182be3fdfd5e49849691633f9a8d8dfbe0"
+    },
+    {
+      "path": "artifacts/m5-buffer-recovery QA 中文/journal.json.progress/00000015.json",
+      "sha256": "ca4c93d5eefa82a3eeb0ade6fb6ff15f09ac06af7dec6e8b9e53f96a99d983ff"
+    },
+    {
+      "path": "artifacts/m5-buffer-recovery QA 中文/journal.json.progress/00000016.json",
+      "sha256": "58d2fa016105ad81307342ff82ea7c71a32e3bf26faf600d95fa998c34488fc5"
+    },
+    {
+      "path": "artifacts/m5-buffer-recovery QA 中文/journal.json.progress/00000017.json",
+      "sha256": "557c5cbe4f30a508c8918c06c0117f4b70fb7ebab3715e11cc20fd93cfb9a3d6"
+    },
+    {
+      "path": "artifacts/m5-buffer-recovery QA 中文/journal.json.progress/00000018.json",
+      "sha256": "5c2bee0ccb13e23aaf8be8d1927dcbb9d7e5257bd5dc01185f118b157c05689b"
+    },
+    {
+      "path": "artifacts/m5-buffer-recovery QA 中文/journal.json.progress/00000019.json",
+      "sha256": "2bb3122b7a648ea95bdb34627456e0811bb006db389c5b2e5b2919847428f155"
+    },
+    {
+      "path": "artifacts/m5-buffer-recovery QA 中文/journal.json.progress/00000020.json",
+      "sha256": "52deaeece1e7fbe6f6534d78c94524dee813f530ddfe10c5d821978746f77b51"
+    },
+    {
+      "path": "artifacts/m5-buffer-recovery QA 中文/journal.json.progress/00000021.json",
+      "sha256": "583b0cb1cd493cfbed577e4a6d8235b3a2cac42bd9f9f0dc606eb7978eda148d"
+    },
+    {
+      "path": "artifacts/m5-buffer-recovery QA 中文/journal.json.progress/00000022.json",
+      "sha256": "26392d8462d4e13f6079a9b2fb83d8c4a3484ea96f2c170bd818872213e8bac1"
+    },
+    {
+      "path": "artifacts/m5-buffer-recovery QA 中文/journal.json.progress/00000023.json",
+      "sha256": "791cb0a5e949fa1fa22685cf60dcfb60099c0b8fd4584e3a02c8bd09256bb472"
+    },
+    {
+      "path": "artifacts/m5-buffer-recovery QA 中文/journal.json.progress/00000024.json",
+      "sha256": "c18079092a7fb4b88ddd8378c83c1c072e1e18fcef7f36474aee7709ccd81278"
+    },
+    {
+      "path": "artifacts/m5-buffer-recovery QA 中文/journal.json.progress/00000025.json",
+      "sha256": "db7f245564aadd9726b1283f293cf230c19de275c54e2a78717bece0473197b7"
+    },
+    {
+      "path": "artifacts/m5-buffer-recovery QA 中文/journal.json.progress/00000026.json",
+      "sha256": "5c694a02e706170c53fe2068e5cbb914faa3af200c4948ee904cad84ae351d85"
+    },
+    {
+      "path": "artifacts/m5-buffer-recovery QA 中文/journal.json.progress/00000027.json",
+      "sha256": "c3abad362d4270dc42da0ce0387a89ba5686fb3a9f70151280d9cbeb06ed7e31"
+    },
+    {
+      "path": "artifacts/m5-buffer-recovery QA 中文/journal.json.progress/00000028.json",
+      "sha256": "c0072d87820600bb9baa28e1fa0b9e90bf8a285b96885421f2b8b34c2c8a33c5"
+    },
+    {
+      "path": "artifacts/m5-buffer-recovery QA 中文/journal.json.progress/00000029.json",
+      "sha256": "9e2006e2b4811d823802751117c34a581384970f0622419fe31ce8b24054d947"
+    },
+    {
+      "path": "artifacts/m5-buffer-recovery QA 中文/process.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/m5-buffer-recovery QA 中文/qt-results.txt",
+      "sha256": "6897a73618e2b8129b80c8d4958dd3d5df77a7f86262c83971aeafcd8e97efab"
+    },
+    {
+      "path": "artifacts/m5-buffer-recovery QA 中文/sources/tests/HeapRetentionProbe.h",
+      "sha256": "098574a5f83bfb7e4e992476c6d0223011a4ca5af40d3df39aa82e0b0a93060c"
+    },
+    {
+      "path": "artifacts/m5-buffer-recovery QA 中文/sources/tests/RecoveryJournal.h",
+      "sha256": "7962d45701e2bee52261f1a460f1ffcb5878157c2cc289c90511eeada58bfab9"
+    },
+    {
+      "path": "artifacts/m5-buffer-recovery QA 中文/sources/tests/RecoveryUiTests.cpp",
+      "sha256": "a03c13a1efde43d46bbe9621b089661c8cdb31558482bb594235a3aac4965cf9"
+    },
+    {
+      "path": "artifacts/m5-buffer-recovery QA 中文/sources/tools/validate_recovery_soak.py",
+      "sha256": "15776bbf4cb463e6a0097c1b1c66e4e8e664ca8f93645abf219198c4b74598c3"
+    },
+    {
+      "path": "artifacts/m5-buffer-recovery QA 中文/sources/tools/validate_source_build.py",
+      "sha256": "83ff8fb4b4151fcb724fcdce8dd0380c37e082be1bfa797674368218ea72f7f1"
+    },
+    {
+      "path": "artifacts/m5-buffer-recovery QA 中文/validation.json",
+      "sha256": "fa1e0f58fd10271e3637facd649bc84fb75cf91be5b2845922c8da94c60443dd"
+    },
+    {
+      "path": "artifacts/m5-buffer-recovery-build.log",
+      "sha256": "3b07ad3a9731a2efb32277a6bc031821384d21ee6160bbedb9a575de48ab6724"
+    },
+    {
+      "path": "artifacts/m5-buffer-recovery-focused.txt",
+      "sha256": "ed7764a2b40dde539beb0e0800b3dbfb1e5540a025646a2888a979ee7cb15d7f"
+    },
+    {
+      "path": "artifacts/m5-buffer-recovery-ui.txt",
+      "sha256": "f98be378a54c226e84080c79b45e4c16dee03d1d62766b9cb12b8190b8969c2a"
+    },
+    {
+      "path": "artifacts/m5-buffer-recovery.log",
+      "sha256": "eb5738f2c506ccf77163d5c4e79d1ebcc435e3bc83c7010757a97bdd3f371063"
+    },
+    {
+      "path": "artifacts/m5-buffer-ui/buffer.png",
+      "sha256": "b38afcdf9493782ab44d82275808179b005ac1ce7868b52e318f679a98c78d55"
+    },
+    {
+      "path": "artifacts/m5-buffer-ui.txt",
+      "sha256": "da79663fcbaeaa4a13234d9efb92f789255d57934baf161f19fd7016b3b460f9"
+    },
+    {
+      "path": "artifacts/m5-buffer-worker-buffer.txt",
+      "sha256": "b7aeb00d336ce576a11ab66df62b47b0b721c3725031f6aac5f09f107ab49d2b"
+    },
+    {
+      "path": "artifacts/m5-buffer-worker-image.txt",
+      "sha256": "d5f137bf8f0db437699f65eee5c3e143fe20d4380844802b90e81a1dac435001"
+    },
+    {
+      "path": "artifacts/m5-buffer-worker-recovery.txt",
+      "sha256": "aeeafcb5e344672e03820dab51f62565ead33a2a5194062c34782a4c650d928f"
+    },
+    {
+      "path": "artifacts/run_buffer_ctest.ps1",
+      "sha256": "e724d7a2314a20788dcfc7001a187f8a9c276f37077cf92d57136e88cfa5748e"
+    },
+    {
+      "path": "artifacts/run_buffer_portable.py",
+      "sha256": "e18c1feec5da03423cf452803c39d18a04145dbc3f8fa9fade41707e93fa1c8a"
+    }
+  ]
+}

@@ -1,7 +1,22 @@
 # Current capabilities and compatibility
 
 Reviewed **2026-10-08**. The user authorized M4, then M5, while keeping M3 open.
-The latest [display preparation change](IMAGE_DISPLAY_PREPARATION.md) removes a
+The latest [buffer acceptance change](WORKER_BUFFER_INTEGRITY.md) moves buffer
+reads and SHA-256 checks off the event thread. It rejects inconsistent file
+lengths/hashes and metadata that does not match the requested resource, range or
+event boundary. Shared cancellation/revision guards prevent obsolete publication.
+Eight related suites pass, including 29 reader rows and 34 isolated Worker fault/
+recovery scenarios. Implementation `4fe2ee7`; the 44-file package is
+`out/FloraGPA-buffer-20261008/`. Only the GUI binary changes from the preceding
+display-preparation package; replay semantics and the 511-registration matrix
+remain unchanged. Report/model work and other analyzer payloads remain outside
+this background byte reader.
+
+Seven relocated-package checks also pass with system-only PATH, as do four
+golden/negative checks and four GF2/BF1 recovery cycles with twelve strict image
+checks. See the [buffer acceptance baseline](worker-buffer-integrity-baseline.json).
+
+The preceding [display preparation change](IMAGE_DISPLAY_PREPARATION.md) removes a
 discarded RGB conversion before replay/texture RGBA publication and prepares the
 Qt painting format in the existing background validation task. Original pixels,
 image-integrity checks and cancellation/revision guards remain intact. An
@@ -703,7 +718,7 @@ the other 35 suites passed initially and the complete UI suite passes after the 
 | M2 — Ordinary replay | Registered-scope gate passed: 366 positive cases and 22 located rejections; auxiliary/snapshot contracts audited. This is not universal API support. State-object identity loss, mixed saved/missing SO targets and unverified lifetimes remain explicit boundaries. |
 | M3 — Deferred Context / Command List | Open; M4/M5 now take priority by user instruction on 2026-10-06. Require original retained-list captures proving identity, build order, resource versions, repeated execution, restore-state and event mapping before production support. |
 | M4 — Resources and boundaries | Active, incomplete. Initial texture/Map data is checked; missing UAV counts reject on actual consumption, while proven counter-free indexed access is allowed. Verified mip-count-only reads do not consume missing MinLOD. Per-slot counter dependencies and saved blt-model occluded Present TEST are checked; continue wider operand/control-flow dependencies, missing pitch/data, predicate/frame-before history, Query and other presentation boundaries. |
-| M5 — Stable compatibility release | Incomplete. The 511-case registry, committed-source build/package, load/semantic-audit cancellation, worker recovery and background replay/texture validation plus display preparation are established. A 30-minute/246-cycle Qt recovery run passes; short-run heap controls identify history/log and bounded icon-cache retention. Continue broader memory attribution, specialized analyzer/driver/storage failures, other synchronous diagnostic image/model work, large-file workflows, broader sustained testing and independent clean-machine deployment. |
+| M5 — Stable compatibility release | Incomplete. The 511-case registry, committed-source build/package, load/semantic-audit cancellation, worker recovery, checked background buffer acceptance and background replay/texture validation plus display preparation are established. A 30-minute/246-cycle Qt recovery run passes; short-run heap controls identify history/log and bounded icon-cache retention. Continue broader memory attribution, specialized analyzer/driver/storage failures, other synchronous diagnostic image/model work, large-file workflows, broader sustained testing and independent clean-machine deployment. |
 | M6 — Analyzer and other versions | Incomplete. Continue remaining Qt consumers, advanced profiling/debugging and version-specific adapters after core replay gates. Existing analyzer features remain available. |
 
 The original order was **M1 → M2 → M3 → M4 → M5**. On 2026-10-06 the user

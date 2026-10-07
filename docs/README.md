@@ -12,6 +12,7 @@ chronology remains in Chinese.
 | Replay, inspect and edit | [Usage guide](USAGE.md) |
 | Saved occluded Present TEST and original resource/binding evidence | [Occluded Present TEST](OCCLUDED_PRESENT_TEST.md) |
 | Reject incomplete or inconsistent worker images and retry | [Worker image integrity](WORKER_IMAGE_INTEGRITY.md) |
+| Check buffer bytes, identity and range without blocking the event thread | [Worker buffer integrity](WORKER_BUFFER_INTEGRITY.md) |
 | Keep image validation responsive and discard cancelled results | [Asynchronous image validation](ASYNC_IMAGE_VALIDATION.md) |
 | Prepare replay/texture painting pixels before publishing them to Qt | [Image display preparation](IMAGE_DISPLAY_PREPARATION.md) |
 | Current capabilities and known limits | [Current status](CURRENT_STATUS.md) |
