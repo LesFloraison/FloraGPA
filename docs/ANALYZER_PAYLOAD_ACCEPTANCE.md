@@ -32,6 +32,13 @@ files until reading completes, including after window destruction. An array-root
 geometry payload previously became an empty object through Qt conversion; it is
 now rejected before replacing the displayed geometry.
 
+This is first-stage JSON preparation, not asynchronous acceptance of every
+consumer artifact. `CoverageView::finish` still rereads `coverage.json` and three
+attachments, compares the report and decodes the overlay on the UI thread.
+`QuadView::finish` likewise rereads `quad.json`, loads six attachments and decodes
+its preview synchronously. Both then use the synchronous image setter. The
+geometry heartbeat measurements below do not cover these remaining paths.
+
 ## Validation
 
 The reader suite adds all eight output paths. Each checks missing files, every
@@ -80,7 +87,9 @@ images in 28.940 seconds. It is not a sustained soak. The baseline verifies
 
 This changes GUI result acceptance, not DX11 execution or capture fidelity.
 Consumers still publish models/widgets and may retain or copy large objects on
-the UI thread. Thumbnail/catalog/history, shader/checkpoint payloads, metric
+the UI thread. Coverage/Quad report revalidation, binary/image attachment loading,
+PNG decoding and display preparation remain synchronous, as described above.
+Thumbnail/catalog/history, shader/checkpoint payloads, metric
 collection acceptance and exports have separate readers. This batch does not
 claim all analysis workflows asynchronous or memory-bounded. Cancellation cannot
 interrupt a single Qt parse, allocation, file-system operation or native JSON

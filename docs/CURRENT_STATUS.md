@@ -29,6 +29,9 @@ thread: Quad, coverage, timings, statistics, replayed pipeline, predication, IA
 geometry and shader output geometry. Missing, truncated, malformed and non-object
 payloads fail before publication. Native payloads retain full integer precision;
 the existing request-owned cancellation and revision guard applies throughout.
+This prepares the first JSON read; Coverage and Quad still reread their reports,
+load attachments and decode diagnostic images synchronously in their consumers.
+Those paths are not covered by the geometry responsiveness measurements.
 29 reader rows and 52 isolated Worker scenarios pass, including nine new geometry
 cases. Seven consumer CTest suites pass, including 68 main-UI rows and eight
 GF2/BF1 recovery cycles / 24 strict image checks. The recovery parent has three
