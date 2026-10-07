@@ -10,6 +10,8 @@
 #include <Psapi.h>
 #include <TlHelp32.h>
 #include <QScopeGuard>
+#include <QSaveFile>
+#include <QDateTime>
 
 // Observe the test executable's import used by the statically linked FloraUi.
 // No production binary on disk or other process is modified.
@@ -241,7 +243,39 @@ class RecoveryUiTests final : public QObject {
         const QStringList files{"GF2_Exilium_2026_03_03__00_19_35.gpa_frame", "bf1_2026_01_21__16_53_05.gpa_frame"};
         const int iterations = qEnvironmentVariableIntValue("FLORA_RECOVERY_ITERATIONS");
         const int count = iterations > 0 ? iterations : 2;
-        for (int repeat = 0; repeat < count; ++repeat) {
+        const int minimumSeconds = qEnvironmentVariableIntValue("FLORA_RECOVERY_MIN_SECONDS");
+        QVERIFY(minimumSeconds >= 0 && minimumSeconds <= 86400);
+        const auto journalPath = qEnvironmentVariable("FLORA_RECOVERY_JOURNAL");
+        QVERIFY(journalPath.isEmpty() || !QFile::exists(journalPath));
+        if (!journalPath.isEmpty()) {
+            window.resize(1440, 900);
+            window.show();
+        }
+        QElapsedTimer duration;
+        duration.start();
+        nlohmann::json journal{{"schema", "FloraGPA persistent Qt recovery soak 1"},
+            {"started_utc", QDateTime::currentDateTimeUtc().toString(Qt::ISODate).toStdString()},
+            {"completed", false}, {"minimum_seconds", minimumSeconds},
+            {"minimum_pairs", count}, {"observations", nlohmann::json::array()}};
+        auto save = [&](const char *phase) {
+            if (journalPath.isEmpty()) return true;
+            journal["phase"] = phase;
+            journal["elapsed_ms"] = duration.elapsed();
+            const auto bytes = journal.dump(2);
+            QSaveFile file(journalPath);
+            return file.open(QIODevice::WriteOnly) &&
+                file.write(bytes.data(), qint64(bytes.size())) == qint64(bytes.size()) && file.commit();
+        };
+        QTemporaryDir brokenDir;
+        QVERIFY(brokenDir.isValid());
+        const auto brokenPath = brokenDir.filePath("truncated.gpa_frame");
+        QFile broken(brokenPath);
+        QVERIFY(broken.open(QIODevice::WriteOnly));
+        QCOMPARE(broken.write("IGPA"), qint64(4));
+        broken.close();
+        unsigned cycles = 0;
+        QVERIFY(save("starting"));
+        for (int repeat = 0; repeat < count || duration.elapsed() < qint64(minimumSeconds) * 1000; ++repeat) {
             for (const auto &name : files) {
                 const unsigned epoch = unsigned(repeat * files.size() + files.indexOf(name) + 1);
                 if (!trace.isEmpty()) testing::heapProbe::mark(epoch);
@@ -254,6 +288,9 @@ class RecoveryUiTests final : public QObject {
                 QVERIFY(QFile::exists(path));
                 const auto previous = window.capturePath();
                 const auto before = loaded.size();
+                journal["active_capture"] = name.toStdString();
+                journal["active_pair"] = repeat;
+                QVERIFY(save("cancel_open"));
                 done.clear();
                 window.openCapture(path);
                 QVERIFY(window.busy());
@@ -262,6 +299,7 @@ class RecoveryUiTests final : public QObject {
                 QVERIFY(!done.last()[0].toBool());
                 QCOMPARE(window.capturePath(), previous);
                 QCOMPARE(loaded.size(), before);
+                QVERIFY(save("open"));
                 done.clear();
                 window.openCapture(path);
                 QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 60000);
@@ -270,12 +308,24 @@ class RecoveryUiTests final : public QObject {
                 QVERIFY(!window.busy());
                 QCOMPARE(window.capturePath(), path);
                 QCOMPARE(outputHash(window), golden);
+                QVERIFY(save("failed_open"));
+                done.clear();
+                window.openCapture(brokenPath);
+                QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 10000);
+                QVERIFY(!done.last()[0].toBool());
+                QCOMPARE(window.statusBar()->currentMessage(), QString("Capture header is truncated"));
+                QCOMPARE(window.capturePath(), path);
+                QCOMPARE(loaded.size(), before + 1);
+                QCOMPARE(outputHash(window), golden);
+                QVERIFY(!window.busy());
+                QVERIFY(save("cancel_replay"));
                 done.clear();
                 window.replay();
                 cancelAction(window)->trigger();
                 QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 10000);
                 QVERIFY(!done.last()[0].toBool());
                 QVERIFY(!window.busy());
+                QVERIFY(save("navigate"));
                 done.clear();
                 auto api = window.findChild<QTableView *>("apiLog");
                 QVERIFY(api && api->model()->rowCount() > 0);
@@ -289,10 +339,12 @@ class RecoveryUiTests final : public QObject {
                 auto boundary = window.findChild<QComboBox *>("outputBoundary");
                 QVERIFY(boundary);
                 QCOMPARE(boundary->currentIndex(), 2);
+                QVERIFY(save("final_replay"));
                 boundary->setCurrentIndex(0);
                 QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 60000);
                 QVERIFY2(done.last()[0].toBool(), qPrintable(window.statusBar()->currentMessage()));
                 QCOMPARE(outputHash(window), golden);
+                QCoreApplication::sendPostedEvents(nullptr, QEvent::DeferredDelete);
                 PROCESS_MEMORY_COUNTERS_EX memory{};
                 DWORD handles{};
                 QVERIFY(GetProcessMemoryInfo(GetCurrentProcess(), reinterpret_cast<PROCESS_MEMORY_COUNTERS *>(&memory), sizeof memory));
@@ -302,8 +354,13 @@ class RecoveryUiTests final : public QObject {
                     {"working_set", memory.WorkingSetSize}, {"handles", handles},
                     {"gdi_objects", GetGuiResources(GetCurrentProcess(), 0)},
                     {"user_objects", GetGuiResources(GetCurrentProcess(), 1)},
+                    {"replay_status", window.statusBar()->currentMessage().toStdString()},
                     {"rgba_sha256", golden.toStdString()}, {"ownership", ownership(window)}};
                 qInfo().noquote() << "recovery_observation" << QString::fromStdString(observation.dump());
+                ++cycles;
+                journal["observations"].push_back(observation);
+                journal["completed_cycles"] = cycles;
+                QVERIFY(save("cycle_complete"));
                 if (!trace.isEmpty() && (epoch == 2 || epoch == 6 || epoch == unsigned(count * files.size())))
                     testing::heapProbe::snapshot(trace, epoch);
             }
@@ -315,7 +372,9 @@ class RecoveryUiTests final : public QObject {
             qInfo().noquote() << "log_clear_control" << QString::fromStdString(
                 nlohmann::json({{"before", before}, {"after", ownership(window)}}).dump());
         }
-        qInfo() << "Original recovery cycles:" << count * files.size();
+        journal["completed"] = true;
+        QVERIFY(save("complete"));
+        qInfo() << "Original recovery cycles:" << cycles;
     }
 };
 QTEST_MAIN(RecoveryUiTests)
