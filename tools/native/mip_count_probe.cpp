@@ -10,9 +10,9 @@ int wmain(int argc, wchar_t **argv) {
     fs::create_directories(output);
     try {
         const int mode = std::stoi(argv[2]);
-        if (mode < 0 || mode > 11)
+        if (mode < 0 || mode > 19)
             throw std::runtime_error("Invalid mode");
-        const int behavior = mode % 6;
+        const int behavior = mode < 18 ? mode % 6 : 0;
         const char *profile = mode < 6 ? "ps_5_0" : "ps_4_0";
         if (argc == 5 && !LoadLibraryExW(argv[4], nullptr, LOAD_WITH_ALTERED_SEARCH_PATH))
             throw std::runtime_error("Cannot load development shim");
@@ -81,7 +81,21 @@ int wmain(int argc, wchar_t **argv) {
             "float4 mixed():SV_Target{uint w,h,n;tex.GetDimensions(0,w,h,n);return "
             "float4(n/4.0,normal.Sample(sam,float2(.5,.5)).r,0,1);}"
             "float4 dependent():SV_Target{uint w,h,n;tex.GetDimensions(0,w,h,n);return "
-            "float4(n/4.0,tex.Sample(sam,float2(.5,.5)).g,0,1);}";
+            "float4(n/4.0,tex.Sample(sam,float2(.5,.5)).g,0,1);}"
+            "float4 branched():SV_Target{uint w,h,n;tex.GetDimensions(0,w,h,n);float4 r;"
+            "[branch]if(n==4)r=float4(n/4.0,0,0,1);else r=float4(0,n/4.0,0,1);return r;}"
+            "float4 branchWidth():SV_Target{uint w,h,n;tex.GetDimensions(1,w,h,n);float4 r;"
+            "[branch]if(n==4)r=float4(w==4,h==4,n==4,1);else r=float4(0,0,0,1);return r;}"
+            "float4 elseWidth():SV_Target{uint w,h,n;tex.GetDimensions(1,w,h,n);float4 r;"
+            "[branch]if(n==0)r=float4(0,0,0,1);else r=float4(w==4,h==4,n==4,1);return r;}"
+            "float4 branchSample():SV_Target{uint w,h,n;tex.GetDimensions(0,w,h,n);float4 r;"
+            "[branch]if(n==4)r=float4(n/4.0,tex.Sample(sam,float2(.5,.5)).g,0,1);"
+            "else r=float4(0,0,0,1);return r;}"
+            "float4 nested():SV_Target{uint w,h,n;tex.GetDimensions(0,w,h,n);float4 r;"
+            "[branch]if(n>2){[branch]if(n==4)r=float4(n/4.0,0,0,1);else r=float4(0,0,1,1);}"
+            "else r=float4(0,1,0,1);return r;}"
+            "float4 noElse():SV_Target{uint w,h,n;tex.GetDimensions(0,w,h,n);float4 r=float4(0,1,0,1);"
+            "[branch]if(n==4)r=float4(n/4.0,0,0,1);return r;}";
         auto compile = [&](const char *entry, const char *target, bool strip) {
             ComPtr<ID3DBlob> code, errors;
             checked(D3DCompile(shader.data(), shader.size(), nullptr, nullptr, nullptr, entry, target, 0, 0,
@@ -103,7 +117,9 @@ int wmain(int argc, wchar_t **argv) {
             return code;
         };
         auto vsCode = compile("vs", "vs_5_0", false);
-        auto psCode = compile(behavior < 2    ? "count"
+        const char *branchEntries[]{"branched", "branched", "branchWidth", "elseWidth",
+                                    "branchSample", "branchSample", "nested", "noElse"};
+        auto psCode = compile(mode >= 12 ? branchEntries[mode - 12] : behavior < 2    ? "count"
                               : behavior == 2 ? "dimensions"
                               : behavior == 3 ? "mixed"
                                           : "dependent",
@@ -124,7 +140,7 @@ int wmain(int argc, wchar_t **argv) {
         auto stage = create(d.Get(), screen, true);
         auto pixels = storage(screen, false);
         const std::array<uint8_t, 4> expected = behavior < 2    ? std::array<uint8_t, 4>{255, 0, 0, 255}
-                                                : behavior == 2 ? std::array<uint8_t, 4>{255, 255, 255, 255}
+                                                : behavior == 2 || mode == 15 ? std::array<uint8_t, 4>{255, 255, 255, 255}
                                                             : std::array<uint8_t, 4>{255, 255, 0, 255};
         for (size_t p = 0; p < pixels[0].bytes.size(); p += 4)
             memcpy(pixels[0].bytes.data() + p, expected.data(), 4);
