@@ -3,6 +3,7 @@
 #include "app/MainWindow.h"
 #include "HeapRetentionProbe.h"
 #include "RecoveryJournal.h"
+#include "ProcessMemorySnapshot.h"
 #include <QAction>
 #include <QSignalSpy>
 #include <QStatusBar>
@@ -291,6 +292,8 @@ class RecoveryUiTests final : public QObject {
         const auto journalPath = qEnvironmentVariable("FLORA_RECOVERY_JOURNAL");
         const bool retentionControl = qEnvironmentVariableIsSet("FLORA_RECOVERY_RETENTION_CONTROL");
         QVERIFY(!retentionControl || (!journalPath.isEmpty() && qEnvironmentVariableIsSet("FLORA_RECOVERY_HEAP")));
+        const auto memoryDirectory = qEnvironmentVariable("FLORA_MEMORY_MAP_DIR");
+        QVERIFY(memoryDirectory.isEmpty() || (retentionControl && trace.isEmpty()));
         QVERIFY(journalPath.isEmpty() || !QFile::exists(journalPath));
         if (!journalPath.isEmpty()) {
             window.resize(1440, 900);
@@ -304,6 +307,17 @@ class RecoveryUiTests final : public QObject {
             {"pixmap_cache_limit_kib", QPixmapCache::cacheLimit()},
             {"minimum_pairs", count}, {"observations", nlohmann::json::array()}};
         testing::RecoveryJournal journalWriter(journalPath);
+        std::unique_ptr<testing::ProcessMemorySnapshot> memoryMaps;
+        if (!memoryDirectory.isEmpty()) {
+            QVERIFY(QDir().mkpath(memoryDirectory));
+            memoryMaps = std::make_unique<testing::ProcessMemorySnapshot>();
+        }
+        auto memorySnapshot = [&](const char *name) {
+            if (!memoryMaps) return true;
+            const auto result = memoryMaps->save(QDir(memoryDirectory).filePath(QString::fromLatin1(name) + ".json"));
+            journal["memory_maps"][name] = result;
+            return result["address_walk_complete"].get<bool>() && result["heap_walk_complete"].get<bool>();
+        };
         auto save = [&](const char *phase) {
             if (journalPath.isEmpty()) return true;
             journal["phase"] = phase;
@@ -318,6 +332,7 @@ class RecoveryUiTests final : public QObject {
         QCOMPARE(broken.write("IGPA"), qint64(4));
         broken.close();
         unsigned cycles = 0;
+        QVERIFY(memorySnapshot("warmup"));
         QVERIFY2(save("starting"), qPrintable(journalWriter.error()));
         for (int repeat = 0; repeat < count || duration.elapsed() < qint64(minimumSeconds) * 1000; ++repeat) {
             for (const auto &name : files) {
@@ -402,6 +417,7 @@ class RecoveryUiTests final : public QObject {
                     {"rgba_sha256", golden.toStdString()}, {"ownership", ownership(window)}};
                 qInfo().noquote() << "recovery_observation" << QString::fromStdString(observation.dump());
                 ++cycles;
+                if (cycles == 2) QVERIFY(memorySnapshot("baseline"));
                 journal["observations"].push_back(observation);
                 journal["completed_cycles"] = cycles;
                 QVERIFY2(save("cycle_complete"), qPrintable(journalWriter.error()));
@@ -433,6 +449,7 @@ class RecoveryUiTests final : public QObject {
                 return result;
             };
             nlohmann::json control{{"before", sample()}};
+            QVERIFY(memorySnapshot("before_clear"));
             if (!trace.isEmpty()) {
                 testing::heapProbe::snapshot(trace, cycles + 1);
                 testing::heapProbe::mark(cycles + 1);
@@ -442,13 +459,16 @@ class RecoveryUiTests final : public QObject {
             done.clear();
             QCoreApplication::sendPostedEvents(nullptr, QEvent::DeferredDelete);
             control["after_test_history_clear"] = sample();
+            QVERIFY(memorySnapshot("after_history_clear"));
             if (!trace.isEmpty()) testing::heapProbe::snapshot(trace, cycles + 2);
             window.findChild<QPlainTextEdit *>("taskLog")->clear();
             QCoreApplication::sendPostedEvents(nullptr, QEvent::DeferredDelete);
             control["after_log_clear"] = sample();
+            QVERIFY(memorySnapshot("after_log_clear"));
             if (!trace.isEmpty()) testing::heapProbe::snapshot(trace, cycles + 3);
             QPixmapCache::clear();
             control["after_pixmap_cache_clear"] = sample();
+            QVERIFY(memorySnapshot("after_pixmap_cache_clear"));
             if (!trace.isEmpty()) testing::heapProbe::snapshot(trace, cycles + 4);
             for (const auto &value : control)
                 QVERIFY(value.value("heap_walk_complete", false));

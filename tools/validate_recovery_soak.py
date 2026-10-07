@@ -34,15 +34,20 @@ def main():
                         help='Measure heap bytes after separately clearing test history, application log and Qt pixmap cache')
     parser.add_argument('--trace-allocations', action='store_true',
                         help='Enable the test-only UCRT allocation-stack observer; changes measurement overhead')
+    parser.add_argument('--memory-maps', action='store_true',
+                        help='Save address-space and heap association metadata during retention control')
     args = parser.parse_args()
     if not 0 <= args.seconds <= 86400 or not 1 <= args.pairs <= 10000:
         parser.error('seconds must be 0..86400 and pairs must be 1..10000')
+    if args.memory_maps and (not args.retention_control or args.trace_allocations):
+        parser.error('memory-maps requires retention-control and must not be combined with trace-allocations')
     root = args.out.resolve()
     root.mkdir(parents=True, exist_ok=False)
     report = dict(schema='FloraGPA persistent Qt soak runner 1', completed=False,
                   passed=False, minimum_seconds=args.seconds, minimum_pairs=args.pairs,
                   retention_control=args.retention_control,
                   trace_allocations=args.trace_allocations,
+                  memory_maps=args.memory_maps,
                   scope='Same-host offscreen Qt window, system-only PATH, serial production workers; not clean-machine or all-workflow certification')
 
     def save():
@@ -69,7 +74,7 @@ def main():
                                    for p in sorted(package.rglob('*')) if p.is_file()}
         report['sources'] = {}
         for name in ['tests/RecoveryUiTests.cpp', 'tests/RecoveryJournal.h',
-                     'tests/HeapRetentionProbe.h', 'tools/validate_recovery_soak.py',
+                     'tests/HeapRetentionProbe.h', 'tests/ProcessMemorySnapshot.h', 'tools/validate_recovery_soak.py',
                      'tools/validate_source_build.py']:
             frozen = root / 'sources' / name
             frozen.parent.mkdir(parents=True, exist_ok=True)
@@ -96,6 +101,8 @@ def main():
             env.update(FLORA_RECOVERY_HEAP='1', FLORA_RECOVERY_RETENTION_CONTROL='1')
         if args.trace_allocations:
             env['FLORA_HEAP_TRACE_DIR'] = str(root / 'allocation-stacks')
+        if args.memory_maps:
+            env['FLORA_MEMORY_MAP_DIR'] = str(root / 'memory-maps')
         report['test_environment'] = {k: v for k, v in env.items() if k.startswith(('FLORA_', 'QT')) or k == 'PATH'}
         command = [str(executable), 'originalCaptureRecovery', '-o', str(root / 'qt-results.txt') + ',txt']
         report['command'] = command
@@ -128,6 +135,20 @@ def main():
             saved = json.loads(retained.read_text(encoding='utf-8'))
             assert not saved['completed'] and saved['observations'] == rows
             report['retained_journal_sha256'] = digest(retained)
+        if args.memory_maps:
+            names = {'warmup','baseline','before_clear','after_history_clear','after_log_clear','after_pixmap_cache_clear'}
+            assert set(journal['memory_maps']) == names
+            report['memory_map_files'] = {}
+            for name in sorted(names):
+                path = root / 'memory-maps' / (name + '.json')
+                snapshot = json.loads(path.read_text(encoding='utf-8'))
+                sample = snapshot['summary']
+                assert sample == journal['memory_maps'][name]
+                assert sample['address_walk_complete'] and sample['heap_walk_complete']
+                assert sum(a['private_committed'] for a in snapshot['allocations']) == sample['private_committed']
+                assert sum(a['private_committed'] for a in snapshot['allocations'] if a['heap_busy_blocks']) == sample['private_committed_in_heap_allocations']
+                assert sum(r['heap_busy_blocks'] for r in snapshot['regions']) + sample['unmapped_heap_blocks'] == sample['heap_busy_blocks']
+                report['memory_map_files'][path.relative_to(root).as_posix()] = digest(path)
         if args.trace_allocations:
             expected_epochs = {2, args.pairs * 2}
             if len(rows) >= 6:
