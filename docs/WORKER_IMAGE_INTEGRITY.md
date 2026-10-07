@@ -1,5 +1,10 @@
 # Worker image integrity and recovery
 
+> **2026-10-07 follow-up:** [Asynchronous image validation](ASYNC_IMAGE_VALIDATION.md)
+> moves display-artifact reads, decoding and hashes off the GUI thread, adds
+> cancellable hashing and request-owned temporary storage, and preserves the
+> integrity contract below. The historical verification remains unchanged.
+
 Reviewed 2026-10-07. This M5 change validates completed worker image artifacts
 before the Qt frontend replaces its displayed replay or texture output. It does
 not change capture decoding, GPU execution, or the compatibility scope.

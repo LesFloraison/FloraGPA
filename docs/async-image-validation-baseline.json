@@ -1,0 +1,327 @@
+{
+  "schema": "FloraGPA asynchronous image validation baseline 1",
+  "reviewed": "2026-10-07",
+  "implementation_commit": "72404ffe8f1cd0beff04a69854b0c106934685be",
+  "package": "out/FloraGPA-image-async-20261007",
+  "package_files": [
+    {
+      "path": "concrt140.dll",
+      "sha256": "2405355f0a58067b258f8df33c327e3a3d716eaac5a3a5aebb757842d85bd376"
+    },
+    {
+      "path": "D3Dcompiler_47.dll",
+      "sha256": "e994847e01a6f1e4cbdc5a864616ac262f67ee4f14db194984661a8d927ab7f4"
+    },
+    {
+      "path": "FloraGPA.Cli.exe",
+      "sha256": "3bdbb81d4e89837f244130e53aecd77d50557380e1e016e8f99c9517be1e9d4d"
+    },
+    {
+      "path": "FloraGPA.exe",
+      "sha256": "930042c270a774445c7b2733103caa6e3ab28d68eb3ef176b2f38519f518ee34"
+    },
+    {
+      "path": "FloraGPA.Metrics.dll",
+      "sha256": "58b6278f2a93e783b1e8bb1290e9b0e51745f1a36825f296584f52159fd7c6db"
+    },
+    {
+      "path": "FloraGPA.Rdc.exe",
+      "sha256": "f4d21d43e661d24d392e91fc1a1f1460a20d1377fcf5075c57083ad289e82773"
+    },
+    {
+      "path": "FloraGPA.Worker.exe",
+      "sha256": "a452a74449e6da0a2cc4aa78bf01285ebef2cf7938fdf584e853d00ae58a78fa"
+    },
+    {
+      "path": "generic/qtuiotouchplugin.dll",
+      "sha256": "a0b971771417d60c6c2dedf66d06f6e99bd3236aa1aa6949c7e4e08d51fb69f9"
+    },
+    {
+      "path": "iconengines/qsvgicon.dll",
+      "sha256": "7879ba1d2f293ad09c515de736add8c1023b0a4e80e2301d1283555efc2e8828"
+    },
+    {
+      "path": "imageformats/qgif.dll",
+      "sha256": "de1c1ea34cbc4156ce452023470e2145af4855128756d081d56e9a0997d0dda8"
+    },
+    {
+      "path": "imageformats/qico.dll",
+      "sha256": "af98cacb134525fab15cf2146a4e6b90266f14493e72e4d51df89a5caadea157"
+    },
+    {
+      "path": "imageformats/qjpeg.dll",
+      "sha256": "a8854ac38d2bb83e8018bdcbfc93420a876251b3d2a79933e1a3c9a8ed2a24cb"
+    },
+    {
+      "path": "imageformats/qsvg.dll",
+      "sha256": "486b395e23e258d03d54cdba045f129e9b1321f9ff12f99fe58293e0351b8caf"
+    },
+    {
+      "path": "licenses/COPYING.txt",
+      "sha256": "eb7e9ab9690124c5c9f42bdc81383d886a3dede26345b6ed15bbad7caf81f7ea"
+    },
+    {
+      "path": "licenses/Copyright.txt",
+      "sha256": "d1f5b8f5eba2e9073463bc29b30572d84033f59e8d8057a95dff37c3414305b9"
+    },
+    {
+      "path": "licenses/GPL-3.0-only.txt",
+      "sha256": "8ceb4b9ee5adedde47b31e975c1d90c73ad27b6b165a1dcd80c7c545eb65b903"
+    },
+    {
+      "path": "licenses/intel-metrics-discovery-MIT.txt",
+      "sha256": "653129790534d6a3e843eaafc62cf04299e7e238f6f411173e85ea7fc315c8ac"
+    },
+    {
+      "path": "licenses/LGPL-3.0-only.txt",
+      "sha256": "da7eabb7bafdf7d3ae5e9f223aa5bdc1eece45ac569dc21b3b037520b4464768"
+    },
+    {
+      "path": "licenses/LICENSE",
+      "sha256": "2004ee3ef8282a85f7dbd035dfacf63cf03d569537bc08655ffeb140ea3671c5"
+    },
+    {
+      "path": "licenses/LICENSE.FDL",
+      "sha256": "c256483c2d1e8a51b62fc7a44a58f21cb4ef23fa840c7d33e3658035fd8cf62f"
+    },
+    {
+      "path": "licenses/nlohmann-json-MIT.txt",
+      "sha256": "46a65cffd1ea955132d95a8dd921640714a8d6b537d2e4e482d31145ae95b603"
+    },
+    {
+      "path": "licenses/renderdoc-api-MIT.txt",
+      "sha256": "e3dccfaa75440c693b18fd2332347e3c810829bf55ec68302ea5a11db9951997"
+    },
+    {
+      "path": "msvcp140.dll",
+      "sha256": "0f885b509a685d2bbfa652fed26b5fb31d88fbdab0a978c641d1c7b8aa460aa9"
+    },
+    {
+      "path": "msvcp140_1.dll",
+      "sha256": "bfad5aef4c63a669e3c140655cdfdf395b6c979b400a447bd5dcb65ed8826c3d"
+    },
+    {
+      "path": "msvcp140_2.dll",
+      "sha256": "3ea06f0ee098b4823cb79599df3780e7f23cce52c19aac31d2a0d47efe33a5e9"
+    },
+    {
+      "path": "msvcp140_atomic_wait.dll",
+      "sha256": "640b2aefced484d0368eea5bdd06addd0658a3a70a49256e560d6923b404a479"
+    },
+    {
+      "path": "msvcp140_codecvt_ids.dll",
+      "sha256": "f2069a52880ec885ee7f0511186100eb7fada0411a2b4948fafea7735b878a18"
+    },
+    {
+      "path": "networkinformation/qnetworklistmanager.dll",
+      "sha256": "2f7c43bb4ec05e9f23a326ac69e84a6df071cdf7cc0bf87cde98f81958ad9bae"
+    },
+    {
+      "path": "platforms/qoffscreen.dll",
+      "sha256": "95391476bba1d0b50cc822b93d7509341024cc7c18cd615f82e471a3e3a61caa"
+    },
+    {
+      "path": "platforms/qwindows.dll",
+      "sha256": "d94c584a18829d11fbf3aefd07e7b1e189e0cf063a0515826960037efa7465df"
+    },
+    {
+      "path": "Qt6Core.dll",
+      "sha256": "22c113a5644b875b2c85482723cd5d2e6a3a4029169778fcc78adde08ef3b6aa"
+    },
+    {
+      "path": "Qt6Gui.dll",
+      "sha256": "19265a4e76efc12ef5f5bcf59be6c6a5b9b59ec4c89660797738bd2da7f719cc"
+    },
+    {
+      "path": "Qt6Network.dll",
+      "sha256": "75ff0896a618f4f5b602f391eb4917a55fd738b2e751d2cf18244a0de3619184"
+    },
+    {
+      "path": "Qt6Svg.dll",
+      "sha256": "1052c17a9df0eb82023e0e4c369bbd0af58e4c5fea3c27a4b5ee83b60c015492"
+    },
+    {
+      "path": "Qt6Widgets.dll",
+      "sha256": "e6d0b7e2e697de6ad985b97f9ed8b381c1c2172fcae87b6ab08455b3b7330f32"
+    },
+    {
+      "path": "styles/qmodernwindowsstyle.dll",
+      "sha256": "f6b88d403d7175f5b830d4958264690e5c8bbaf0148e1ccf42d52704b0480792"
+    },
+    {
+      "path": "THIRD_PARTY.md",
+      "sha256": "343009c9e4761e1c1dc645bd72fd470001c3a4e269384f0dfc4b0bf69c10f6ec"
+    },
+    {
+      "path": "tls/qcertonlybackend.dll",
+      "sha256": "ff0f1a60ec60fc23ec74ff5d325ddef05c1ed68fc89466bffc1d874c7c544adb"
+    },
+    {
+      "path": "tls/qschannelbackend.dll",
+      "sha256": "761178263b47a5f05e151806bb5854d9e5c9cbc67d08187724d80f9e317471f8"
+    },
+    {
+      "path": "vc_redist.x64.exe",
+      "sha256": "cc0ff0eb1dc3f5188ae6300faef32bf5beeba4bdd6e8e445a9184072096b713b"
+    },
+    {
+      "path": "vccorlib140.dll",
+      "sha256": "19839407c3fdbc824e5bce189bf68ddf8097f12ec28b757797ffa0415c144ddd"
+    },
+    {
+      "path": "vcruntime140.dll",
+      "sha256": "d5e4d9a3e835fa679450145d6a7d94e36573a509317111904d9b3712c30d9066"
+    },
+    {
+      "path": "vcruntime140_1.dll",
+      "sha256": "1f2d41c4aa5db0bc33ebf7b66d72943a817d7ce6cbe880502a9403823633093f"
+    },
+    {
+      "path": "vcruntime140_threads.dll",
+      "sha256": "219915cf20822f34d5e7c1fdd4e21ae7f3396881096c51036225fb8f84b47afa"
+    }
+  ],
+  "previous_package": "out/FloraGPA-query-sync-final-20261007",
+  "changed_package_files": [
+    "FloraGPA.exe"
+  ],
+  "verification": {
+    "ctest_suites": 5,
+    "image_artifact_rows": 28,
+    "image_cancellation_positions": 11,
+    "qt_ui_rows": 66,
+    "frame_output_rows": 11,
+    "recovery_ui_rows": 7,
+    "worker_fault_scenarios": 23,
+    "worker_parent_rows": 25,
+    "worker_parent_child_only_skips": 1,
+    "worker_child_skips": 0,
+    "large_image_width": 4096,
+    "large_image_height": 4096,
+    "large_image_raw_bytes": 67108864,
+    "portable_artifact_rows": 28,
+    "portable_worker_parent_rows": 25,
+    "portable_recovery_ui_rows": 3,
+    "portable_skips": 0,
+    "packaged_golden_and_negative_checks": 4
+  },
+  "evidence": [
+    {
+      "path": "artifacts/check_image_async_package.py",
+      "sha256": "f8721271c311bb70c54211d28bcf63b478f92a663ac9b26997a54af44886db1f"
+    },
+    {
+      "path": "artifacts/check_image_async_portable.py",
+      "sha256": "3bc5014af8e779685b6a8249ecaf3780ea51c0d122f1f4e5b5710d501dcd4663"
+    },
+    {
+      "path": "artifacts/m5-image-async-build.log",
+      "sha256": "463264f3e342d7ef1047f3f6976642056053796cae5274b63cd9a3479d0fcefc"
+    },
+    {
+      "path": "artifacts/m5-image-async-ctest-detail.log",
+      "sha256": "597195a871747e3f4c4a64698d6e83085edcd88e3c3e8a627942bc2544ba936a"
+    },
+    {
+      "path": "artifacts/m5-image-async-ctest.log",
+      "sha256": "039f8dc5c2433c97319f73f07b9e48261c2ae0e5ef65c2e48fbc95ca5331008f"
+    },
+    {
+      "path": "artifacts/m5-image-async-final-build.log",
+      "sha256": "cc38f228a0a45b496abca7a9b9a3fa7e29d1fb9d86e887b74ffd102e959f3b7e"
+    },
+    {
+      "path": "artifacts/m5-image-async-focused.txt",
+      "sha256": "775fb70b1858ce8b36a9cc6118174658bd284f486d9290c602c79f66a20dff0e"
+    },
+    {
+      "path": "artifacts/m5-image-async-goldens/validation.json",
+      "sha256": "a1f6d11deab2e8324c8626ab359b139abf8a83257d06874c3cb6a251a357b84a"
+    },
+    {
+      "path": "artifacts/m5-image-async-goldens.log",
+      "sha256": "9045dc3e3b7870e530a1c62f26394abd4443e9d3b985817f7f32052b1f0e9635"
+    },
+    {
+      "path": "artifacts/m5-image-async-lifetime.txt",
+      "sha256": "a897592999f4b00c29fad26745061f19ef81eba6df16e0c6ef2ac5fbab411a89"
+    },
+    {
+      "path": "artifacts/m5-image-async-package-comparison.json",
+      "sha256": "f8a576f40e019ffbb26f5c6064f9185ea2d41d8a34752305c5e14f5afa27bc23"
+    },
+    {
+      "path": "artifacts/m5-image-async-package.log",
+      "sha256": "301157ffbd11152b99021b5a37b4d042b3fb73b078324097243b30925d296419"
+    },
+    {
+      "path": "artifacts/m5-image-async-portable QA \u4e2d\u6587/run-0.log",
+      "sha256": "da2d8d064b853dba3dbb0d49be6c55443fc585bb5f78eaac7c5c94efcf9ec534"
+    },
+    {
+      "path": "artifacts/m5-image-async-portable QA \u4e2d\u6587/run-0.txt",
+      "sha256": "f3f8253e16986471145887ecf0dea3d0dda174b8efcd0209dd8601e1ddc51e19"
+    },
+    {
+      "path": "artifacts/m5-image-async-portable QA \u4e2d\u6587/run-1.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/m5-image-async-portable QA \u4e2d\u6587/run-1.txt",
+      "sha256": "776bcaedfc7ce9c5870564963810cb614d0a2c76414e29884fea3cf519f8189a"
+    },
+    {
+      "path": "artifacts/m5-image-async-portable QA \u4e2d\u6587/run-2.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "artifacts/m5-image-async-portable QA \u4e2d\u6587/run-2.txt",
+      "sha256": "f4a416bd83571f1aea49dbdafd9dbc5fcb3cf142e9edbe300e72b501274a503a"
+    },
+    {
+      "path": "artifacts/m5-image-async-portable QA \u4e2d\u6587/validation.json",
+      "sha256": "ee73fb4e243710c43e4a62bd29e671ccf356d8e4fc79cc8d53df3908e428b1f4"
+    },
+    {
+      "path": "artifacts/m5-image-async-portable.log",
+      "sha256": "3eeaa2c6fab69f6082e859984042cf8c89641732d762282422c566184eba9085"
+    },
+    {
+      "path": "artifacts/m5-image-async-qt-results/frame-output-Release.txt",
+      "sha256": "49a0873e72a9c0ac9af5d23609277daf28de4cc3d7db0dfc56c44d3eeeb5cd0f"
+    },
+    {
+      "path": "artifacts/m5-image-async-qt-results/recovery-ui-Release.txt",
+      "sha256": "3cbadd50d26a51ccd003ffc38494e5975c8220705f2387efbe55e491073604b7"
+    },
+    {
+      "path": "artifacts/m5-image-async-qt-results/ui-Release.txt",
+      "sha256": "a0781bac63217b2def808936245fbd0788788ee32329f7e100af427b1c2bfe8e"
+    },
+    {
+      "path": "artifacts/m5-image-async-qt-results/worker-image-Release.txt",
+      "sha256": "734b60a60c317b2ff763287d8c560af3ac612ebfe96dd9c3d6785c642c84fc12"
+    },
+    {
+      "path": "artifacts/m5-image-async-qt-results/worker-recovery-Release.txt",
+      "sha256": "b2730bb75eb5e59ab1970e9d96e18dff10ac4d3eb827f9aa869b36b483c682cb"
+    },
+    {
+      "path": "artifacts/m5-image-async-unit.txt",
+      "sha256": "87cd420881c99aabf4404b552dbe096d22ee1e047ce34a8ac000a878f026e8ab"
+    },
+    {
+      "path": "artifacts/run_image_async_ctest.ps1",
+      "sha256": "f873f183fdf7b845fe33e85b4f1fa6c10601a854846effd778bcb06bcab281b0"
+    }
+  ],
+  "limits": [
+    "PNG decode/conversion and individual I/O calls do not provide mid-call cancellation; background completion can still wait for them",
+    "ImageView processing and GUI model population remain synchronous; no universal large-file response or cancellation bound",
+    "No changed allocation limit or added format/execution support",
+    "CLI/Worker and other package files unchanged; prior 505-registration/495-file GPU matrix retained, not rerun",
+    "Same-host system-PATH/Unicode-path checks do not prove independent clean-machine deployment",
+    "The production worker timeout is unchanged and its 180-second timeout scenario was not repeated",
+    "M3/M4/M5 and long-duration acceptance remain incomplete; module ledger unchanged"
+  ]
+}
