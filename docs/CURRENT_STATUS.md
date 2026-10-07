@@ -1,7 +1,22 @@
 # Current capabilities and compatibility
 
 Reviewed **2026-10-08**. The user authorized M4, then M5, while keeping M3 open.
-The latest [persistent Qt recovery batch](PERSISTENT_QT_SOAK.md) passes 246 cycles
+The latest [display preparation change](IMAGE_DISPLAY_PREPARATION.md) removes a
+discarded RGB conversion before replay/texture RGBA publication and prepares the
+Qt painting format in the existing background validation task. Original pixels,
+image-integrity checks and cancellation/revision guards remain intact. An
+8192×4096 comparison measures about 650–680 ms for the old GUI path and 23–25 ms
+for prepared publication; these are host observations, not a general latency bound.
+Seven related suites pass after correcting one resource-test fixture selection;
+native Windows/offscreen portable checks, 23 Worker fault scenarios, four golden/
+negative checks and relocated GF2/BF1 recovery pass. Package:
+`out/FloraGPA-image-display-20261008/` (44 files), implementation `8c02de4`.
+Only the GUI binary changes from the previous same-workspace mip-count package.
+Replay compatibility remains the 511-registration scope below; no full GPU matrix
+rerun or new format support is claimed. Other diagnostic image paths, overlays,
+models and general UI latency still require work.
+
+The preceding [persistent Qt recovery batch](PERSISTENT_QT_SOAK.md) passes 246 cycles
 in 30 minutes 5 seconds, with 738 strict GF2/BF1 image checks. One QtTest window
 exercises production UI/Workers through cancellation, failed open, retry, event
 navigation and Final replay. Immutable progress evidence and timeout process-tree
@@ -18,7 +33,7 @@ show no sustained accumulation.
 
 Fresh committed-source configure/build/package passes on this host: 1,049 files
 at `0db936e`, 44 packaged files, four golden/negative checks, the six-case mip gate
-and two shipping-GUI startup checks. Current package:
+and two shipping-GUI startup checks. That batch's package:
 `out/FloraGPA-clean-build-20261008/`. Production replay source is unchanged.
 The full 511-registration matrix below is not claimed rerun on these fresh
 binaries. Offscreen QtTest recovery does not certify every shipping-GUI workflow
@@ -688,7 +703,7 @@ the other 35 suites passed initially and the complete UI suite passes after the 
 | M2 — Ordinary replay | Registered-scope gate passed: 366 positive cases and 22 located rejections; auxiliary/snapshot contracts audited. This is not universal API support. State-object identity loss, mixed saved/missing SO targets and unverified lifetimes remain explicit boundaries. |
 | M3 — Deferred Context / Command List | Open; M4/M5 now take priority by user instruction on 2026-10-06. Require original retained-list captures proving identity, build order, resource versions, repeated execution, restore-state and event mapping before production support. |
 | M4 — Resources and boundaries | Active, incomplete. Initial texture/Map data is checked; missing UAV counts reject on actual consumption, while proven counter-free indexed access is allowed. Verified mip-count-only reads do not consume missing MinLOD. Per-slot counter dependencies and saved blt-model occluded Present TEST are checked; continue wider operand/control-flow dependencies, missing pitch/data, predicate/frame-before history, Query and other presentation boundaries. |
-| M5 — Stable compatibility release | Incomplete. The 511-case registry, current committed-source build/package, load/semantic-audit cancellation, worker recovery and asynchronous checked display-artifact acceptance are established. A 30-minute/246-cycle Qt recovery run passes; short-run heap controls identify history/log and bounded icon-cache retention. Continue broader memory attribution, specialized analyzer/driver/storage failures, synchronous image/model work, large-file workflows, broader sustained testing and independent clean-machine deployment. |
+| M5 — Stable compatibility release | Incomplete. The 511-case registry, committed-source build/package, load/semantic-audit cancellation, worker recovery and background replay/texture validation plus display preparation are established. A 30-minute/246-cycle Qt recovery run passes; short-run heap controls identify history/log and bounded icon-cache retention. Continue broader memory attribution, specialized analyzer/driver/storage failures, other synchronous diagnostic image/model work, large-file workflows, broader sustained testing and independent clean-machine deployment. |
 | M6 — Analyzer and other versions | Incomplete. Continue remaining Qt consumers, advanced profiling/debugging and version-specific adapters after core replay gates. Existing analyzer features remain available. |
 
 The original order was **M1 → M2 → M3 → M4 → M5**. On 2026-10-06 the user

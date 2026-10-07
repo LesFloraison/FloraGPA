@@ -4,6 +4,12 @@ Reviewed 2026-10-07. This M5 batch moves replay/texture display-artifact validat
 off the Qt event thread. It retains the existing image integrity contract and
 does not change DX11 decoding, execution, capture fidelity or format support.
 
+The subsequent [display preparation batch](IMAGE_DISPLAY_PREPARATION.md) also
+moves replay/texture painting-format preparation into this background request and
+removes the discarded default RGB display. Diagnostic/overlay image paths and
+model population remain outside those two changes. The historical measurements
+below are retained unchanged.
+
 ## Problem and ownership
 
 The preceding image-integrity implementation called `readWorkerImage` directly

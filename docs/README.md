@@ -13,6 +13,7 @@ chronology remains in Chinese.
 | Saved occluded Present TEST and original resource/binding evidence | [Occluded Present TEST](OCCLUDED_PRESENT_TEST.md) |
 | Reject incomplete or inconsistent worker images and retry | [Worker image integrity](WORKER_IMAGE_INTEGRITY.md) |
 | Keep image validation responsive and discard cancelled results | [Asynchronous image validation](ASYNC_IMAGE_VALIDATION.md) |
+| Prepare replay/texture painting pixels before publishing them to Qt | [Image display preparation](IMAGE_DISPLAY_PREPARATION.md) |
 | Current capabilities and known limits | [Current status](CURRENT_STATUS.md) |
 | Component responsibilities | [Architecture](ARCHITECTURE.md) |
 | Run tests and external comparisons | [Development validation](USAGE.md#development-validation) |
