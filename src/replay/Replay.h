@@ -12,6 +12,7 @@
 #include "core/PipelineCreation.h"
 #include "core/PredicateCreation.h"
 #include "core/Predication.h"
+#include "core/QueryCompletion.h"
 #include "core/ResourceLod.h"
 #include "core/SamplerBindings.h"
 #include "core/SrvBindings.h"
@@ -174,6 +175,8 @@ class Replay {
     std::optional<TextureCreationAudit> textureCreationAudit_;
     std::optional<ClassCreationAudit> classCreationAudit_;
     std::optional<PredicateCreationAudit> predicateCreationAudit_;
+    std::optional<QueryCompletionAudit> queryCompletionAudit_;
+    QueryCompletionAudit unresolvedQueryCompletions_;
     std::set<Id> unissuedPredicates_;
     std::set<Id> baselinePredicates_;
     std::optional<std::map<Id, NormalizedPredicateProof>> normalizedPredication_;
@@ -376,6 +379,7 @@ class Replay {
         uint32_t predicateValue{};
     };
     PredicateResult readPredicateResult(Id resource, unsigned timeoutMs = 1000);
+    const auto &unresolvedQueryCompletions() const { return unresolvedQueryCompletions_; }
     void inspectEventInputs(Id event, const std::function<void()> &inspect);
     // Borrowed native objects, valid only during the callback. The observer must not mutate state.
     using NativeStateObserver =

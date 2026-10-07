@@ -18,6 +18,7 @@
 #include "core/PipelineCreation.h"
 #include "core/PredicateCreation.h"
 #include "core/Predication.h"
+#include "core/QueryCompletion.h"
 #include "core/PresentRecords.h"
 #include "core/ReplayCapabilities.h"
 #include "core/ResourceLod.h"
@@ -84,6 +85,7 @@ Json validateFrame(const std::filesystem::path &path, const std::function<bool()
         std::optional<TextureCreationAudit> textureCreationAudit;
         std::optional<ClassCreationAudit> classCreationAudit;
         std::optional<PredicateCreationAudit> predicateCreationAudit;
+        std::optional<QueryCompletionAudit> queryCompletionAudit;
         std::optional<PipelineCreationAudit> pipelineCreationAudit;
         auto reference = [&](const Entry &e, Id id, int category) {
             if (!id)
@@ -509,6 +511,19 @@ Json validateFrame(const std::filesystem::path &path, const std::function<bool()
                                         creation.resource);
                         }
                         acceptQueryMetadata(e.type, frame.payload(id));
+                        if (isQueryGetData(e.type)) {
+                            if (!queryCompletionAudit)
+                                queryCompletionAudit = auditQueryCompletions(frame, cancelled);
+                            const auto &q = queryCompletionAudit->at(id);
+                            if (!q.error.empty())
+                                finding(&e, "error", "query_completion_rejected", q.error, q.resource);
+                            else if (!q.missing.empty())
+                                finding(&e, "warning", "query_completion_not_saved", q.missing, q.resource);
+                            if (!q.end)
+                                report["record_handling_overrides"].push_back(
+                                    {{"event_id", id}, {"resource_id", q.resource}, {"handling", "metadata"},
+                                     {"reason", q.missing.empty() ? "No successful saved query completion" : q.missing}});
+                        }
                         acceptInspectionRecord(e.type, frame.payload(id));
                         acceptPassiveObjectRecord(e.type, frame.payload(id));
                         if (e.type == 0x3578) {

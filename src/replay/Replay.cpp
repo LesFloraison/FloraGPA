@@ -1020,6 +1020,37 @@ void Replay::command(const Entry &e) {
         mappedWrites(e);
         return;
     }
+    if (isQueryGetData(t)) {
+        if (!std::ranges::equal(payload, frame_.payload(e.id)))
+            throw std::runtime_error("GetData observation payload edits are not supported");
+        if (!queryCompletionAudit_)
+            queryCompletionAudit_ = auditQueryCompletions(frame_);
+        const auto &q = requireQueryCompletion(*queryCompletionAudit_, e.id);
+        if (q.end) {
+            if (options_.disabled.contains(q.end) || activePredicates_.contains(q.resource) ||
+                unissuedPredicates_.contains(q.resource) || baselinePredicates_.contains(q.resource))
+                throw std::runtime_error("GetData completion requires its captured predicate interval");
+            auto predicate = get<ID3D11Predicate>(q.resource);
+            ReplayAnnotation marker(captureAnnotation_.Get(), e.id, "GetDataSynchronization");
+            const auto operation = "GetData synchronization at event " + std::to_string(e.id) +
+                                   ", query " + std::to_string(q.resource);
+            const auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(10);
+            for (;;) {
+                const auto hr = context_->GetData(predicate, nullptr, 0, 0);
+                check(hr, operation.c_str());
+                if (hr == S_OK) break;
+                if (std::chrono::steady_clock::now() >= deadline)
+                    throw std::runtime_error(operation + ": completion timeout");
+                std::this_thread::sleep_for(std::chrono::milliseconds(1));
+            }
+            ++counts["query_completion_synchronizations"];
+        } else if (!q.missing.empty()) {
+            ++counts["query_completion_unresolved"];
+            unresolvedQueryCompletions_.emplace(e.id, q);
+        }
+        ++counts["query_metadata_records"];
+        return;
+    }
     if (acceptQueryMetadata(t, payload)) {
         counts["query_metadata_records"]++;
         return;
@@ -1534,6 +1565,7 @@ void Replay::run(const std::function<void(Id, size_t, size_t)> &progress,
             (entry.category == 5 && entry.type == 0x91 && shaderStreamOutput(frame_, id)))
             soCountEnabled_ = true;
     counts.clear();
+    unresolvedQueryCompletions_.clear();
     discardHistory_.clear();
     for (auto &ranges : ranges_)
         ranges.clear();

@@ -1,4 +1,5 @@
 #include "ReplayCapabilities.h"
+#include "QueryCompletion.h"
 #include "ClassCreation.h"
 #include "Commands.h"
 #include "ContextStateRecords.h"
@@ -25,6 +26,9 @@ bool in(uint16_t t, std::initializer_list<uint16_t> values) {
 }
 } // namespace
 ReplayCapability replayCapability(uint16_t t) {
+    if (isQueryGetData(t))
+        return {"execute", "src/core/QueryCompletion.cpp;src/replay/Replay.cpp",
+                "tests/QueryCompletionTests.cpp;docs/QUERY_COMPLETION.md"};
     if (isDiscardRecord(t))
         return {"execute", "src/core/DiscardRecords.cpp;src/replay/Replay.cpp",
                 "tests/DiscardTests.cpp;docs/DISCARD_AUDIT.md"};

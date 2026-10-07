@@ -1084,6 +1084,15 @@ int main(int argc, char **argv) {
                     resourceNotices.append(notice);
             }
             report.insert("replay_resource_notices", resourceNotices);
+            QJsonArray queryNotices;
+            for (const auto &[event, query] : replay.unresolvedQueryCompletions())
+                queryNotices.append(QJsonObject{{"kind", "query_completion_not_saved"},
+                                               {"severity", "warning"},
+                                               {"event_id", QString::number(event)},
+                                               {"resource_id", QString::number(query.resource)},
+                                               {"reason", QString::fromStdString(query.missing)},
+                                               {"output_dependency", "not_assessed"}});
+            report.insert("replay_query_notices", queryNotices);
             planarWrites = planarWriteReport(replay);
             experiment = experimentReport(replay);
             QJsonArray soHistory;

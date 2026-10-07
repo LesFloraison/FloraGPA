@@ -191,7 +191,7 @@ class StreamOutputTests final : public QObject {
         auto capture = streamCapture();
         std::vector<std::pair<uint16_t, std::vector<uint8_t>>> records;
         auto add = [&](uint16_t type, const std::vector<uint8_t> &tail) {
-            auto raw = statePack(Id(0), Id(UINT64_MAX));
+            auto raw = statePack(Id(0), Id(1));
             raw.insert(raw.end(), tail.begin(), tail.end());
             records.emplace_back(type, raw);
             capture.add(300 + records.size(), 7, type, raw);
