@@ -1,8 +1,8 @@
 {
   "schema": "FloraGPA compatibility gate suites 1",
-  "expected_cases": 525,
-  "expected_unique_captures": 515,
-  "expected_rejections": 33,
+  "expected_cases": 533,
+  "expected_unique_captures": 523,
+  "expected_rejections": 36,
   "suites": [
     {
       "id": "corpus",
@@ -729,6 +729,48 @@
           "runtime_error": "Event 23 (Draw): Resource 24: initial minimum LOD is unresolved at this access"
         },
         "branch_mip_16": {
+          "findings": [
+            {
+              "kind": "resource_lod_unresolved",
+              "event_id": 23,
+              "resource_id": 24,
+              "record_type": 55
+            }
+          ],
+          "runtime_error": "Event 23 (Draw): Resource 24: initial minimum LOD is unresolved at this access"
+        }
+      }
+    },
+    {
+      "id": "switch_mip",
+      "manifest": "docs/switch-mip-corpus.json",
+      "manifest_sha256": "ae3624e00869b6dd3355d7ce3a08d89ac335f95c42eb5243dfc90cdea40340a1",
+      "capture_root": "artifacts",
+      "subdirectory": "",
+      "expected_rejections": {
+        "switch_mip_22": {
+          "findings": [
+            {
+              "kind": "resource_lod_unresolved",
+              "event_id": 23,
+              "resource_id": 24,
+              "record_type": 55
+            }
+          ],
+          "runtime_error": "Event 23 (Draw): Resource 24: initial minimum LOD is unresolved at this access"
+        },
+        "switch_mip_23": {
+          "findings": [
+            {
+              "kind": "resource_lod_unresolved",
+              "event_id": 23,
+              "resource_id": 24,
+              "record_type": 55
+            }
+          ],
+          "runtime_error": "Event 23 (Draw): Resource 24: initial minimum LOD is unresolved at this access"
+        },
+        "switch_mip_24": {
           "findings": [
             {
               "kind": "resource_lod_unresolved",
