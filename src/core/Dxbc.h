@@ -15,6 +15,7 @@ std::vector<uint8_t> addEmptyInputSignature(Bytes bytes);
 // conservatively retain every slot; this is not full shader validation.
 std::array<bool, 128> shaderSrvDeclarations(Bytes bytes);
 // A checked RESINFO mip-count-only use does not consume missing MinLOD state.
+// Bounded straight-line SM4.0 can also prove its dimension results unread.
 // Dimensions/sampling, ambiguous operands and dynamic linkage remain guarded.
 std::array<bool, 128> shaderSrvLodDependencies(Bytes bytes);
 // False only proves absence of hidden-counter instructions in checked SM4/5 code.

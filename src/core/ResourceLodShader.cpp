@@ -3,8 +3,12 @@ namespace flora {
 namespace {
 // RESINFO returns a view's total mip count in .w independently of resource
 // MinLOD. Dimensions in .xyz do not have that guarantee. Accept only checked
-// immediate-register forms and only lanes selecting .w.
-std::optional<unsigned> mipCountOnly(const std::vector<uint32_t> &row, size_t operands) {
+// immediate-register forms. SM4.0 sometimes writes all four lanes even for a
+// count-only HLSL query; dimension lanes then need a separate non-use proof.
+struct MipQuery {
+    unsigned slot, temporary, dimensions;
+};
+std::optional<MipQuery> mipQuery(const std::vector<uint32_t> &row, size_t operands) {
     if ((row[0] & 0x7ff) != 61 || ((row[0] >> 11) & 3) == 3 || (row[0] & 0x007fe000u) ||
         row.size() != operands + 6)
         return {};
@@ -15,10 +19,103 @@ std::optional<unsigned> mipCountOnly(const std::vector<uint32_t> &row, size_t op
         return {};
     if ((resource & ~0xff0u) != 0x00107006u || row[operands + 5] >= 128)
         return {};
+    unsigned dimensions = 0;
     for (unsigned lane = 0; lane < 4; ++lane)
         if ((dest & (1u << (4 + lane))) && ((resource >> (4 + 2 * lane)) & 3) != 3)
+            dimensions |= 1u << lane;
+    return MipQuery{row[operands + 5], row[operands + 1], dimensions};
+}
+struct RegisterUse {
+    unsigned type{}, index{}, lanes{};
+};
+struct LinearOperation {
+    RegisterUse destination;
+    std::vector<RegisterUse> sources;
+};
+// Deliberately bounded, straight-line SM4.0 proof. No jumps, calls, relative
+// operands, instruction/operand extensions, memory stores or unfamiliar ALU
+// operations are admitted. This is not a general shader optimizer.
+std::optional<std::vector<LinearOperation>> linearSm40(const DxbcProgram &program) {
+    if (program.instructions.empty() || program.instructions.size() > 256)
+        return {};
+    std::vector<LinearOperation> result;
+    for (size_t i = 0; i < program.instructions.size(); ++i) {
+        const auto &row = program.instructions[i];
+        const auto op = row[0] & 0x7ff;
+        if (row[0] & 0x80000000u)
             return {};
-    return row[operands + 5];
+        LinearOperation instruction;
+        if (op == 62) {
+            if (row.size() != 1 || i + 1 != program.instructions.size())
+                return {};
+        } else if (op == 88 || op == 90 || op == 101 || op == 104 || op == 106) {
+            // Resource declarations are checked by shaderSrvDeclarations;
+            // the other accepted declarations neither read nor write temps.
+            const size_t size = op == 88 ? 4 : op == 104 ? 2 : op == 106 ? 1 : 3;
+            if (row.size() != size)
+                return {};
+        } else {
+            const unsigned count = (op == 54 || op == 86) ? 1
+                                   : (op == 0 || op == 1 || op == 32 || op == 45 || op == 56 || op == 61) ? 2
+                                   : op == 69 ? 3 : 0;
+            if (!count || row.size() < 3)
+                return {};
+            const auto dest = row[1];
+            const auto type = (dest >> 12) & 255;
+            if ((type != 0 && type != 2) || (dest & ~0xf0u) != (0x00100002u | (type << 12)) ||
+                !(dest & 0xf0) || row[2] >= 4096)
+                return {};
+            instruction.destination = {type, row[2], (dest >> 4) & 15};
+            size_t pos = 3;
+            for (unsigned source = 0; source < count; ++source) {
+                if (pos == row.size())
+                    return {};
+                const auto token = row[pos++];
+                if (token == 0x00004001u || token == 0x00004002u) {
+                    const size_t words = token == 0x00004001u ? 1 : 4;
+                    if (words > row.size() - pos)
+                        return {};
+                    pos += words; // Literal bit patterns are not operands.
+                    continue;
+                }
+                const auto sourceType = (token >> 12) & 255;
+                if (sourceType != 0 && sourceType != 1 && sourceType != 6 && sourceType != 7)
+                    return {};
+                unsigned lanes = 0;
+                if ((token & ~0xff0u) == (0x00100006u | (sourceType << 12))) {
+                    for (unsigned lane = 0; lane < 4; ++lane)
+                        lanes |= 1u << ((token >> (4 + 2 * lane)) & 3);
+                } else if ((token & ~0x30u) == (0x0010000au | (sourceType << 12)))
+                    lanes = 1u << ((token >> 4) & 3);
+                else if (sourceType != 6 || token != 0x00106000u)
+                    return {};
+                if (pos == row.size() || row[pos] >= 4096)
+                    return {};
+                instruction.sources.push_back({sourceType, row[pos++], lanes});
+            }
+            if (pos != row.size())
+                return {};
+        }
+        result.push_back(std::move(instruction));
+    }
+    if ((program.instructions.back()[0] & 0x7ff) != 62)
+        return {};
+    return result;
+}
+bool dimensionsUnused(const std::vector<LinearOperation> &program, size_t at, MipQuery query) {
+    auto pending = query.dimensions;
+    for (size_t i = at + 1; i < program.size(); ++i) {
+        const auto &operation = program[i];
+        // Sources are read before a destination overwrites the same register.
+        // Source swizzles are conservatively read in full, even for masked ALU.
+        for (const auto &source : operation.sources)
+            if (source.type == 0 && source.index == query.temporary && (source.lanes & pending))
+                return false;
+        const auto &dest = operation.destination;
+        if (dest.type == 0 && dest.index == query.temporary)
+            pending &= ~dest.lanes;
+    }
+    return true; // Any remaining lanes die at the checked final RET.
 }
 } // namespace
 std::array<bool, 128> shaderSrvLodDependencies(Bytes bytes) {
@@ -37,7 +134,9 @@ std::array<bool, 128> shaderSrvLodDependencies(Bytes bytes) {
     if ((version != 0x40 && version != 0x41 && version != 0x50) || (program.header[0] >> 16) > 5)
         return required;
     std::array<bool, 128> metadata{}, other{};
-    for (const auto &row : program.instructions) {
+    const auto linear = version == 0x40 ? linearSm40(program) : std::nullopt;
+    for (size_t instruction = 0; instruction < program.instructions.size(); ++instruction) {
+        const auto &row = program.instructions[instruction];
         const auto op = row[0] & 0x7ff;
         if (op == 53 || op >= 206 || op == 107 || op == 112 || op == 120 || op == 144 || op == 145 ||
             op == 146)
@@ -54,11 +153,13 @@ std::array<bool, 128> shaderSrvLodDependencies(Bytes bytes) {
                 return required;
             extended = token & 0x80000000u;
         }
-        if (const auto slot = mipCountOnly(row, operands)) {
-            if (!required[*slot])
-                return required;
-            metadata[*slot] = true;
-            continue;
+        if (const auto query = mipQuery(row, operands)) {
+            if (!query->dimensions || (linear && dimensionsUnused(*linear, instruction, *query))) {
+                if (!required[query->slot])
+                    return required;
+                metadata[query->slot] = true;
+                continue;
+            }
         }
         // Every direct SM4/5 SRV reference carries a RESOURCE operand token.
         // Scan conservatively: a literal that resembles one can retain a

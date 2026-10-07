@@ -61,24 +61,21 @@ class ResourceLodTests final : public QObject {
             const Bytes data(static_cast<const uint8_t *>(blob->GetBufferPointer()), blob->GetBufferSize());
             const auto declared = shaderSrvDeclarations(data), required = shaderSrvLodDependencies(data);
             QVERIFY(declared[3]);
-            // SM4.0 emits a full xyzw RESINFO even when HLSL only consumes
-            // the mip count. Proving its dimension lanes dead requires a
-            // separate data-flow analysis; retain the conservative guard.
-            QCOMPARE(required[3], profile == "ps_4_0" || mode == 1 || mode == 2);
+            QCOMPARE(required[3], mode == 1 || mode == 2);
             QCOMPARE(required[5], mode == 3);
         }
     }
     void mipCountOriginals_data() {
         QTest::addColumn<int>("mode");
         QTest::addColumn<bool>("warp");
-        for (int mode = 0; mode < 6; ++mode)
+        for (int mode = 0; mode < 12; ++mode)
             for (bool warp : {false, true})
                 QTest::newRow(qPrintable(QString("%1-%2").arg(mode).arg(warp))) << mode << warp;
     }
     void mipCountOriginals() {
         QFETCH(int, mode);
         QFETCH(bool, warp);
-        const auto root = qEnvironmentVariable("FLORA_MIP_COUNT_CAPTURES");
+        const auto root = qEnvironmentVariable(mode < 6 ? "FLORA_MIP_COUNT_CAPTURES" : "FLORA_SM40_MIP_CAPTURES");
         if (root.isEmpty())
             QSKIP("Set FLORA_MIP_COUNT_CAPTURES for original mip-count captures");
         const auto folder = root + QString("/%1/").arg(mode);
@@ -86,7 +83,8 @@ class ResourceLodTests final : public QObject {
         const auto audit = auditResourceLod(frame);
         QVERIFY(audit.initial.empty());
         QVERIFY(!audit.clamped.empty());
-        const bool missing = mode == 2 || mode == 4;
+        const auto behavior = mode % 6;
+        const bool missing = behavior == 2 || behavior == 4;
         QCOMPARE(audit.issues.size(), size_t(missing));
         QCOMPARE(validateFrame(frame.path())["errors"].get<unsigned>(), unsigned(missing));
         ReplayOptions options;
@@ -100,22 +98,76 @@ class ResourceLodTests final : public QObject {
                 QCOMPARE(replay.output().rgba, bytes(folder + "hardware/expected.rgba"));
             }
         }
-        if (mode == 0 || mode == 4) {
+        if (behavior == 0 || behavior == 4) {
             Id shader = 0;
             for (const auto &[id, e] : frame.entries())
                 if (e.category == 7 && isDraw(e.type))
                     shader = frame.state(frame.event(id).state).stages[4].shader;
             QVERIFY(shader);
-            options.shaders[shader] =
-                bytes(root + (mode == 0 ? "/4/hardware/dependent.dxbc" : "/0/hardware/count.dxbc"));
+            const auto base = mode < 6 ? 0 : 6;
+            options.shaders[shader] = bytes(root + QString("/%1/hardware/%2.dxbc")
+                                                       .arg(base + (behavior == 0 ? 4 : 0))
+                                                       .arg(behavior == 0 ? "dependent" : "count"));
             Replay edited(frame, options);
-            if (mode == 0) {
+            if (behavior == 0) {
                 QVERIFY_EXCEPTION_THROWN(edited.run(), std::runtime_error);
             } else {
                 edited.run();
-                QCOMPARE(edited.output().rgba, bytes(root + "/0/hardware/expected.rgba"));
+                QCOMPARE(edited.output().rgba, bytes(root + QString("/%1/hardware/expected.rgba").arg(base)));
             }
         }
+    }
+    void sm40DimensionProofBounds() {
+        const auto root = qEnvironmentVariable("FLORA_SM40_MIP_CAPTURES");
+        if (root.isEmpty()) QSKIP("Set original SM4.0 mip-count capture directory");
+        const auto source = bytes(root + "/6/hardware/count.dxbc");
+        QVERIFY(!shaderSrvLodDependencies(source)[0]);
+        for (size_t length = 0; length < source.size(); ++length)
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error, shaderSrvLodDependencies(Bytes(source).first(length)));
+        auto parts = readDxbcParts(source);
+        auto found = std::find_if(parts.begin(), parts.end(), [](auto &p) { return p.first == 0x52444853; });
+        QVERIFY(found != parts.end());
+        const auto original = readDxbcProgram(found->second);
+        auto findOp = [](DxbcProgram &program, unsigned op) -> std::vector<uint32_t> & {
+            auto found = std::find_if(program.instructions.begin(), program.instructions.end(),
+                                       [op](auto &row) { return (row[0] & 2047) == op; });
+            if (found == program.instructions.end()) throw std::runtime_error("Missing proof instruction");
+            return *found;
+        };
+        for (int mode = 0; mode < 18; ++mode) {
+            auto changed = original;
+            auto &conversion = findOp(changed, 86);
+            // Each candidate preserves a dimension dependency or leaves the
+            // checked straight-line grammar. No edited file is an original.
+            if (mode == 0) conversion[3] = 0x0010000a; // Read x before overwriting x.
+            if (mode == 1) conversion[1] = 0x00100062; // Overwrite yz; later MUL still reads old x.
+            if (mode == 2) conversion[3] |= 0x80000000u;
+            if (mode == 3) conversion[3] |= 1u << 22;
+            if (mode == 4) conversion[4] = 4096;
+            if (mode == 5) conversion[0] |= 0x80000000u;
+            if (mode == 6) conversion[0] = (conversion[0] & ~2047u) | 58u; // Unverified NOP shape.
+            if (mode == 7) conversion[1] = 0x00100006u; // Source-swizzle operand in destination.
+            if (mode == 8) { conversion.push_back(0); conversion[0] += 1u << 24; }
+            if (mode == 9) { conversion.pop_back(); conversion[0] -= 1u << 24; }
+            if (mode == 10) changed.instructions.pop_back(); // Missing return.
+            if (mode == 11) changed.instructions.push_back({0x0100003eu}); // Multiple returns.
+            if (mode == 12) changed.instructions.insert(changed.instructions.begin() + 3, {0x01000030u}); // LOOP.
+            if (mode == 13) changed.instructions.back() = {0x0200003eu, 0};
+            if (mode == 14) conversion[3] = 0x00208001u; // Unproved CB/relative source.
+            if (mode == 15) {
+                auto &mul = findOp(changed, 56);
+                mul[5] = 0x00004002u; // Four-literal token with one saved literal.
+            }
+            if (mode == 16) changed.instructions.insert(changed.instructions.begin(), 257, original.instructions[0]);
+            if (mode == 17) changed.header[0] = (changed.header[0] & 0xffff0000) | 0x51;
+            const auto program = writeDxbcProgram(changed);
+            found->second = program;
+            QVERIFY2(shaderSrvLodDependencies(makeDxbc(parts))[0], qPrintable(QString::number(mode)));
+        }
+        const auto program = writeDxbcProgram(original);
+        found->second = program;
+        parts.emplace_back(0x45434649, Bytes{});
+        QVERIFY(shaderSrvLodDependencies(makeDxbc(parts))[0]);
     }
     void mipCountProofBounds() {
         const auto root = qEnvironmentVariable("FLORA_MIP_COUNT_CAPTURES");

@@ -3796,15 +3796,21 @@ class UiTests final : public QObject {
         QVERIFY(done.takeLast()[0].toBool());
         QVERIFY(!window.busy());
     }
+    void mipCountReplayAndRetry_data() {
+        QTest::addColumn<int>("base");
+        QTest::newRow("sm5") << 0;
+        QTest::newRow("sm4") << 6;
+    }
     void mipCountReplayAndRetry() {
-        const auto root = qEnvironmentVariable("FLORA_MIP_COUNT_CAPTURES");
+        QFETCH(int, base);
+        const auto root = qEnvironmentVariable(base ? "FLORA_SM40_MIP_CAPTURES" : "FLORA_MIP_COUNT_CAPTURES");
         if (root.isEmpty()) QSKIP("Set original mip-count corpus");
         flora::MainWindow window;
         window.resize(1440, 900); window.show();
         QSignalSpy done(&window, &flora::MainWindow::taskFinished);
         for (int mode : {0, 2, 1, 4, 3, 5}) {
             done.clear();
-            window.openCapture(root + '/' + QString::number(mode) + "/capture.gpa_frame");
+            window.openCapture(root + '/' + QString::number(base + mode) + "/capture.gpa_frame");
             QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
             const bool missing = mode == 2 || mode == 4;
             QCOMPARE(done.takeLast()[0].toBool(), !missing);
@@ -3820,7 +3826,7 @@ class UiTests final : public QObject {
             QVERIFY(done.takeLast()[0].toBool());
             for (int y = 0; y < 8; ++y) for (int x = 0; x < 8; ++x)
                 QCOMPARE(output->image().pixelColor(x, y), expected);
-            snapshot(window, QString("mip-count-%1").arg(mode));
+            snapshot(window, QString("mip-count-%1").arg(base + mode));
         }
     }
     void queryCompletionNoticesAndNavigate() {
