@@ -1836,14 +1836,6 @@ void MainWindow::finishWorker(int code, QProcess::ExitStatus status) {
             emit taskFinished(accepted);
             return;
         }
-        if (runningKind_ == "draw-resources") {
-            QFile thumbnails(jobDir_->filePath("result/report.json"));
-            if (!thumbnails.open(QIODevice::ReadOnly)) throw std::runtime_error("Thumbnail report is missing");
-            resourceBrowser_->acceptPreviews(runningResourceKey_, nlohmann::json::parse(thumbnails.readAll().toStdString()), jobDir_->filePath("result"));
-            thumbnails.close();
-            statusBar()->showMessage("Thumbnails ready", 2000);
-            jobDir_.reset(); resourceTimer_.start(); return;
-        }
         loadWorkerReport();
     } catch (const std::exception &e) {
         failWorkerResult(QString::fromUtf8(e.what()));
@@ -1851,6 +1843,12 @@ void MainWindow::finishWorker(int code, QProcess::ExitStatus status) {
 }
 void MainWindow::acceptWorkerReport(WorkerReport result) {
     try {
+        if (runningKind_ == "draw-resources") {
+            if (!result.thumbnails) throw std::runtime_error("Missing prepared thumbnails");
+            resourceBrowser_->acceptPreviews(runningResourceKey_, std::move(*result.thumbnails));
+            statusBar()->showMessage("Thumbnails ready", 2000);
+            jobDir_.reset(); resourceTimer_.start(); return;
+        }
         report_ = std::move(result.report);
         if (report_["experiment"].isObject()) {
             const auto experiment = report_["experiment"].toObject();
@@ -2073,7 +2071,7 @@ void MainWindow::acceptWorkerReport(WorkerReport result) {
 void MainWindow::failWorkerResult(const QString &error, bool cancelled) {
     const auto message = error.toStdString();
     if (runningKind_ == "draw-resources") {
-        resourceBrowser_->failPreviews(runningResourceKey_, error);
+        resourceBrowser_->failPreviews(runningResourceKey_, cancelled ? "Selection changed" : error);
         resourceTimer_.start(); return;
     }
     if (!cancelled) showError(error);

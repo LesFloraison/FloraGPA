@@ -1,6 +1,7 @@
 #pragma once
 #include "core/Frame.h"
 #include "DiagnosticOutput.h"
+#include "ThumbnailOutput.h"
 #include <QJsonObject>
 #include <QString>
 #include <nlohmann/json.hpp>
@@ -14,6 +15,7 @@ struct WorkerReport {
     QJsonObject geometry;
     std::optional<CoverageOutput> coverage;
     std::optional<QuadOutput> quad;
+    std::optional<ThumbnailOutput> thumbnails;
 };
 // Common report only; analyzer-specific payloads have separate readers.
 WorkerReport readWorkerReport(const QString &directory, bool replay,

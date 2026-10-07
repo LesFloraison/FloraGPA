@@ -16,7 +16,7 @@ int wmain(int argc, wchar_t **argv) {
     if (mode == "timeout" || mode == "cancel") { Sleep(INFINITE); return 99; }
     if (out.empty()) return 98;
     if (mode.starts_with("image-") || mode.starts_with("buffer-") || mode.starts_with("report-") || mode.starts_with("payload-") ||
-        mode.starts_with("coverage-") || mode.starts_with("quad-")) {
+        mode.starts_with("coverage-") || mode.starts_with("quad-") || mode.starts_with("thumbnail-")) {
         wchar_t root[32768]{};
         if (!GetEnvironmentVariableW(L"FLORA_FAULT_IMAGE_ROOT", root, DWORD(std::size(root)))) return 97;
         std::filesystem::create_directories(out);

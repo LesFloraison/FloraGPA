@@ -1,5 +1,4 @@
 #include "ResourceBrowser.h"
-#include <QDir>
 #include <QHeaderView>
 #include <QLabel>
 #include <QScrollBar>
@@ -53,6 +52,7 @@ QString ResourceBrowser::cacheKey(const DrawResourceBinding &b) const {
 void ResourceBrowser::clear(const QString &message) {
     QSignalBlocker block(tree_);
     contextKey_.clear();
+    event_ = 0;
     bindings_.clear();
     items_.clear();
     done_.clear();
@@ -65,6 +65,7 @@ void ResourceBrowser::setContext(const QString &key, std::vector<DrawResourceBin
         return;
     clear();
     contextKey_ = key;
+    event_ = event;
     bindings_ = std::move(bindings);
     QSignalBlocker block(tree_);
     const auto inventory = drawResourceInventory(bindings_, event);
@@ -133,7 +134,7 @@ bool ResourceBrowser::select(const std::string &key, bool notify) {
 void ResourceBrowser::showCached() {
     for (const auto &b : bindings_)
         if (auto cached = cache_.object(cacheKey(b))) {
-            items_.at(b.key)->setIcon(0, QPixmap::fromImage(*cached));
+            items_.at(b.key)->setIcon(0, QPixmap::fromImage(*cached, Qt::NoFormatConversion));
             done_.insert(b.key);
         }
 }
@@ -156,32 +157,48 @@ Json ResourceBrowser::nextPreviews() {
             add(b);
     return {{"previews", keys}};
 }
-void ResourceBrowser::acceptPreviews(const QString &key, const Json &result, const QString &directory) {
+void ResourceBrowser::acceptPreviews(const QString &key, ThumbnailOutput result) {
     if (key != contextKey_)
         return;
-    for (const auto &r : result.at("bindings")) {
-        const auto bindingKey = r.at("key").get<std::string>();
-        if (!pending_.contains(bindingKey) || !items_.contains(bindingKey))
-            continue;
+    if (result.event != event_) throw std::runtime_error("Thumbnail report event changed");
+    struct Ready { QTreeWidgetItem *item; QString cacheKey, tooltip; QImage image; QIcon icon; };
+    std::vector<Ready> ready;
+    // Validate the entire requested batch and allocate paint objects before any
+    // item/cache changes. A later invalid binding must not publish earlier rows.
+    for (const auto &bindingKey : pending_) {
+        const auto found = result.rows.find(bindingKey);
+        if (found == result.rows.end() || !items_.contains(bindingKey))
+            throw std::runtime_error("Requested thumbnail binding is missing: " + bindingKey);
+        const auto &r = found->second;
         const auto row = std::find_if(bindings_.begin(), bindings_.end(),
                                       [&](const auto &b) { return b.key == bindingKey; });
-        if (row == bindings_.end() || r.at("resource") != row->image.resource ||
-            r.at("view") != row->image.view || r.at("event") != row->image.event)
-            throw std::runtime_error("Thumbnail binding identity changed");
-        if (r.contains("preview")) {
-            const auto name = QString::fromStdString(r.at("preview").get<std::string>());
-            if (QFileInfo(name).fileName() != name || !name.endsWith(".png"))
-                throw std::runtime_error("Invalid thumbnail path");
-            QImage image(QDir(directory).filePath(name));
-            if (image.isNull() || image.width() > 96 || image.height() > 96)
-                throw std::runtime_error("Invalid thumbnail");
-            items_.at(bindingKey)->setIcon(0, QPixmap::fromImage(image));
-            const int cost = int(std::max<qsizetype>(1, (image.sizeInBytes() + 1023) / 1024));
-            cache_.insert(cacheKey(*row), new QImage(image), cost);
-        } else if (r.contains("preview_error")) {
-            items_.at(bindingKey)
-                ->setToolTip(0, QString::fromStdString(r.at("preview_error").get<std::string>()));
-            items_.at(bindingKey)->setIcon(0, style()->standardIcon(QStyle::SP_MessageBoxWarning));
+        if (row == bindings_.end() || r.resource != row->image.resource ||
+            r.view != row->image.view || r.event != row->image.event)
+            throw std::runtime_error("Thumbnail binding identity changed: " + bindingKey);
+        const auto identity = drawResourceJson(*row);
+        if (r.identity != identity) throw std::runtime_error("Thumbnail subresource or binding identity changed: " + bindingKey);
+        Ready item{items_.at(bindingKey), cacheKey(*row)};
+        if (!r.display.isNull()) {
+            if (r.error || r.display.width() > 96 || r.display.height() > 96 ||
+                r.display.format() != QImage::Format_ARGB32_Premultiplied)
+                throw std::runtime_error("Invalid prepared thumbnail: " + bindingKey);
+            auto pixmap = QPixmap::fromImage(r.display, Qt::NoFormatConversion);
+            if (pixmap.isNull()) throw std::runtime_error("Cannot allocate thumbnail pixmap");
+            item.icon = QIcon(pixmap); item.image = r.display;
+            item.tooltip = QString::fromStdString(identity.dump(2));
+        } else if (r.error) {
+            item.tooltip = *r.error;
+            item.icon = style()->standardIcon(QStyle::SP_MessageBoxWarning);
+        } else {
+            throw std::runtime_error("Requested thumbnail has no preview or error: " + bindingKey);
+        }
+        ready.push_back(std::move(item));
+    }
+    for (auto &item : ready) {
+        item.item->setIcon(0, item.icon); item.item->setToolTip(0, item.tooltip);
+        if (!item.image.isNull()) {
+            const int cost = int(std::max<qsizetype>(1, (item.image.sizeInBytes() + 1023) / 1024));
+            cache_.insert(item.cacheKey, new QImage(std::move(item.image)), cost);
         }
     }
     done_.insert(pending_.begin(), pending_.end());

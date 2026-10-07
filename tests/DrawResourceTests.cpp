@@ -11,6 +11,7 @@
 #include <QSignalSpy>
 #include <QTabWidget>
 #include <QTemporaryDir>
+#include <QTreeWidgetItemIterator>
 #include <QtTest>
 using namespace flora;
 using namespace flora::testing;
@@ -136,11 +137,42 @@ class DrawResourceTests final : public QObject {
         browser.select(b.key);
         QVERIFY(!browser.nextPreviews()["previews"].empty());
         browser.setContext("second", {b}, 1);
-        browser.acceptPreviews("first", nullptr, "missing"); // No stale file access.
+        browser.acceptPreviews("first", {}); // Stale prepared results are ignored.
         QCOMPARE(browser.contextKey(), QString("second"));
         QVERIFY(!browser.nextPreviews()["previews"].empty());
         browser.failPreviews("second", "Selection changed");
         QVERIFY(!browser.nextPreviews()["previews"].empty());
+    }
+    void invalidThumbnailBatchDoesNotPublish() {
+        QTemporaryDir dir;
+        ResourceBrowser browser;
+        browser.resize(350, 700); browser.show();
+        std::vector<DrawResourceBinding> bindings(2);
+        for (unsigned i = 0; i < bindings.size(); ++i) {
+            auto &b = bindings[i];
+            b.key = "in/PS/SRV/" + std::to_string(i);
+            b.kind = "SRV"; b.stage = "PS"; b.slot = i; b.texture = true;
+            b.width = b.height = 32; b.image.event = 1; b.image.resource = 10 + i;
+        }
+        browser.setContext("atomic", bindings, 1);
+        browser.select(bindings[0].key);
+        QCOMPARE(browser.nextPreviews().at("previews").size(), size_t(2));
+        auto tree = browser.findChild<QTreeWidget *>("drawResources");
+        QTreeWidgetItem *first = nullptr;
+        for (QTreeWidgetItemIterator it(tree); *it; ++it)
+            if ((*it)->data(0, Qt::UserRole).toString() == QString::fromStdString(bindings[0].key)) first = *it;
+        QVERIFY(first);
+        const auto originalIcon = first->icon(0).cacheKey();
+        QImage image(32, 32, QImage::Format_RGBA8888); image.fill(Qt::red);
+        QVERIFY(image.save(dir.filePath("first.png")));
+        auto report = drawResourceInventory(bindings, 1);
+        report["bindings"][0]["preview"] = "first.png";
+        report["bindings"][1]["preview"] = "missing.png";
+        QFile file(dir.filePath("report.json")); QVERIFY(file.open(QIODevice::WriteOnly));
+        const auto bytes = QByteArray::fromStdString(report.dump());
+        QCOMPARE(file.write(bytes), bytes.size()); file.close();
+        QVERIFY_THROWS_EXCEPTION(std::exception, browser.acceptPreviews("atomic", readThumbnailOutput(dir.path())));
+        QCOMPARE(first->icon(0).cacheKey(), originalIcon);
     }
     void boundaryPreviews() {
         QTemporaryDir dir;

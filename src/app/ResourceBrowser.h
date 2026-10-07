@@ -1,5 +1,6 @@
 #pragma once
 #include "application/DrawResources.h"
+#include "ThumbnailOutput.h"
 #include <QCache>
 #include <QImage>
 #include <QTreeWidget>
@@ -19,7 +20,7 @@ class ResourceBrowser final : public QWidget {
     std::optional<DrawResourceBinding> selected() const;
     bool select(const std::string &key, bool notify = false);
     nlohmann::json nextPreviews();
-    void acceptPreviews(const QString &key, const nlohmann::json &result, const QString &directory);
+    void acceptPreviews(const QString &key, ThumbnailOutput result);
     void failPreviews(const QString &key, const QString &error);
   signals:
     void bindingSelected(const QString &key);
@@ -31,6 +32,7 @@ class ResourceBrowser final : public QWidget {
     QTreeWidget *tree_;
     QLabel *summary_;
     QString contextKey_;
+    Id event_{};
     std::vector<DrawResourceBinding> bindings_;
     std::map<std::string, QTreeWidgetItem *> items_;
     std::set<std::string> done_, pending_;

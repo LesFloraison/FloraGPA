@@ -53,10 +53,10 @@ nlohmann::json nativeObject(const QByteArray &bytes, const CancelCheck &cancelle
     if (!result.is_object()) throw std::runtime_error("Worker output is not an object");
     return result;
 }
-uint64_t unsignedValue(const nlohmann::json &value) {
+uint64_t unsignedValue(const nlohmann::json &value, const char *field = "Diagnostic size") {
     if (value.is_number_unsigned()) return value.get<uint64_t>();
     if (value.is_number_integer() && value.get<int64_t>() >= 0) return uint64_t(value.get<int64_t>());
-    throw std::runtime_error("Diagnostic size is not an unsigned integer");
+    throw std::runtime_error(std::string(field) + " is not an unsigned integer");
 }
 int dimension(const nlohmann::json &value) {
     const auto n = unsignedValue(value);
@@ -159,6 +159,60 @@ QuadOutput readQuadOutput(const QString &directory, const QString &contextKey,
     checkCancellation(cancelled);
     return result;
 }
+ThumbnailOutput readThumbnailOutput(const QString &directory, const CancelCheck &cancelled) {
+    const QDir root(directory);
+    const auto report = nativeObject(readBytes(root.filePath("report.json"), cancelled), cancelled);
+    if (!report.at("completed").is_boolean() || !report.at("completed").get<bool>())
+        throw std::runtime_error("Thumbnail worker did not complete");
+    if (!report.at("bindings").is_array()) throw std::runtime_error("Thumbnail bindings are not an array");
+    ThumbnailOutput result;
+    result.event = unsignedValue(report.at("event"), "Thumbnail event");
+    std::map<QString, QImage> images;
+    for (const auto &binding : report.at("bindings")) {
+        checkCancellation(cancelled);
+        const auto key = binding.at("key").get<std::string>();
+        if (key.empty() || result.rows.contains(key)) throw std::runtime_error("Invalid or duplicate thumbnail binding key");
+        ThumbnailRow row;
+        row.identity = nlohmann::json::object();
+        for (const auto field : {"slot", "event", "resource", "view", "format", "mip", "layer", "slice",
+                                 "width", "height", "samples", "mip_end", "layer_end", "slice_end"})
+            row.identity[field] = unsignedValue(binding.at(field), field);
+        for (const auto field : {"key", "role", "kind", "stage", "boundary", "error"})
+            row.identity[field] = binding.at(field).get<std::string>();
+        row.identity["texture"] = binding.at("texture").get<bool>();
+        row.identity["sample"] = binding.at("sample").is_null() ? nlohmann::json(nullptr) :
+                                  nlohmann::json(unsignedValue(binding.at("sample"), "sample"));
+        row.resource = unsignedValue(binding.at("resource"), "Thumbnail resource");
+        row.view = unsignedValue(binding.at("view"), "Thumbnail view");
+        row.event = unsignedValue(binding.at("event"), "Thumbnail binding event");
+        if (row.event != result.event) throw std::runtime_error("Thumbnail binding event differs from report");
+        if (binding.contains("preview") && binding.contains("preview_error"))
+            throw std::runtime_error("Thumbnail has both a preview and an error");
+        if (binding.contains("preview")) {
+            const auto name = QString::fromStdString(binding.at("preview").get<std::string>());
+            if (name.isEmpty() || name.contains('/') || name.contains('\\') || name.contains(':') ||
+                QFileInfo(name).fileName() != name || !name.endsWith(".png"))
+                throw std::runtime_error("Invalid thumbnail path");
+            if (const auto found = images.find(name); found != images.end()) row.display = found->second;
+            else {
+                const auto bytes = readBytes(root.filePath(name), cancelled);
+                QBuffer buffer; buffer.setData(bytes);
+                if (!buffer.open(QIODevice::ReadOnly)) throw std::runtime_error("Cannot read thumbnail bytes");
+                QImageReader reader(&buffer, "png");
+                const auto size = reader.size();
+                if (size.width() <= 0 || size.height() <= 0 || size.width() > 96 || size.height() > 96)
+                    throw std::runtime_error(("Invalid thumbnail dimensions: " + name).toStdString());
+                auto decoded = decodeImage(bytes, size, name.toUtf8().constData(), cancelled);
+                row.display = prepareImageForDisplay(std::move(decoded), cancelled).display;
+                images.emplace(name, row.display);
+            }
+        } else if (binding.contains("preview_error"))
+            row.error = QString::fromStdString(binding.at("preview_error").get<std::string>());
+        result.rows.emplace(key, std::move(row));
+    }
+    checkCancellation(cancelled);
+    return result;
+}
 WorkerReport readWorkerReport(const QString &directory, bool replay, const CancelCheck &cancelled) {
     const auto bytes = readBytes(QDir(directory).filePath("report.json"), cancelled);
     WorkerReport result;
@@ -173,6 +227,17 @@ WorkerReport readWorkerReport(const QString &directory, bool replay, const Cance
 }
 WorkerReport readWorkerOutput(const QString &directory, const QString &kind, const CancelCheck &cancelled,
                               const QString &diagnosticKey) {
+    if (kind == "draw-resources") {
+        // The native report is the complete envelope and contains precise IDs.
+        // Do not parse it again through QJson or overwrite the main replay report.
+        WorkerReport result;
+        try { result.thumbnails = readThumbnailOutput(directory, cancelled); }
+        catch (const OperationCancelled &) { throw; }
+        catch (const std::exception &error) {
+            throw std::runtime_error(std::string("Worker thumbnail report.json: ") + error.what());
+        }
+        return result;
+    }
     auto result = readWorkerReport(directory, kind == "replay", cancelled);
     QString filename;
     if (kind == "quad") filename = "quad.json";
