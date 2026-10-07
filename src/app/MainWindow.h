@@ -2,6 +2,7 @@
 #include "Models.h"
 #include "Views.h"
 #include "WorkerBuffer.h"
+#include "WorkerReport.h"
 #include "application/Experiment.h"
 #include <QComboBox>
 #include <QDockWidget>
@@ -128,8 +129,11 @@ class MainWindow final : public QMainWindow {
     void startWorker(QStringList args, bool timings);
     void readScheduledMetrics(bool catalog, uint64_t serial);
     void finishWorker(int, QProcess::ExitStatus);
-    void validateWorkerArtifact(const QByteArray &reportBytes);
-    void acceptWorkerImage(PreparedImage result, const QByteArray &reportBytes);
+    void loadWorkerReport();
+    void acceptWorkerReport(WorkerReport result);
+    void failWorkerResult(const QString &error, bool cancelled = false);
+    void validateWorkerArtifact(nlohmann::json replayReport);
+    void acceptWorkerImage(PreparedImage result, nlohmann::json replayReport);
     static QString boundaryLabel(const QJsonObject &report);
     void consumeWorkerError(bool flush);
     void cancel();
@@ -287,7 +291,8 @@ class MainWindow final : public QMainWindow {
     struct ArtifactJob {
         std::unique_ptr<QTemporaryDir> directory;
         QJsonObject report;
-        QByteArray reportBytes;
+        nlohmann::json replayReport;
+        bool readingReport = false;
         QString kind;
         uint64_t revision{};
         bool timings{};

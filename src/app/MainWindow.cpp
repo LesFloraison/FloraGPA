@@ -1705,7 +1705,8 @@ void MainWindow::cancel() {
     if (artifactJob_) {
         artifactJob_->cancelled.store(true);
         cancelAction_->setEnabled(false);
-        statusBar()->showMessage(artifactJob_->kind == "buffer" ? "Cancelling buffer validation…"
+        statusBar()->showMessage(artifactJob_->readingReport ? "Cancelling report…"
+                                       : artifactJob_->kind == "buffer" ? "Cancelling buffer validation…"
                                                                : "Cancelling image validation…");
     }
     if (loadCancel_) {
@@ -1843,14 +1844,14 @@ void MainWindow::finishWorker(int code, QProcess::ExitStatus status) {
             statusBar()->showMessage("Thumbnails ready", 2000);
             jobDir_.reset(); resourceTimer_.start(); return;
         }
-        QFile file(jobDir_->path() + "/result/report.json");
-        if (!file.open(QIODevice::ReadOnly))
-            throw std::runtime_error("Worker report is missing");
-        QJsonParseError error;
-        const auto reportBytes = file.readAll();
-        report_ = QJsonDocument::fromJson(reportBytes, &error).object();
-        if (error.error != QJsonParseError::NoError || !report_["completed"].toBool())
-            throw std::runtime_error("Worker did not complete");
+        loadWorkerReport();
+    } catch (const std::exception &e) {
+        failWorkerResult(QString::fromUtf8(e.what()));
+    }
+}
+void MainWindow::acceptWorkerReport(WorkerReport result) {
+    try {
+        report_ = std::move(result.report);
         if (report_["experiment"].isObject()) {
             const auto experiment = report_["experiment"].toObject();
             log_->appendPlainText(QString("Experiment r%1/%2 · %3 applied · %4 pending")
@@ -2094,32 +2095,37 @@ void MainWindow::finishWorker(int code, QProcess::ExitStatus status) {
             emit taskFinished(true);
             return;
         }
-        validateWorkerArtifact(reportBytes);
+        validateWorkerArtifact(std::move(result.replayReport));
     } catch (const std::exception &e) {
-        if (runningKind_ == "draw-resources") {
-            resourceBrowser_->failPreviews(runningResourceKey_, QString::fromUtf8(e.what()));
-            resourceTimer_.start(); return;
-        }
-        showError(QString::fromUtf8(e.what()));
-        if (runningKind_ == "metric-iterations" || runningKind_ == "metric-profile" ||
-            runningKind_ == "metric-catalog")
-            scheduledMetrics_->finish(runningScheduledRequest_, {{"error", e.what()}});
-        if (runningKind_ == "history" || runningKind_ == "history-capture")
-            finishRdcAnalysis({{"ok", false}, {"error", e.what()}});
-        if (runningKind_ == "timings")
-            gpuProfile_->finish(runningProfileRequest_, {{"error",e.what()}});
-        if (runningKind_ == "coverage")
-            coverage_->finish(runningCoverageRequest_, {{"error",e.what()}});
-        if (runningKind_ == "quad")
-            quad_->finish(runningQuadRequest_, {{"error",e.what()}});
-        if (runningKind_ == "statistics")
-            gpuStatistics_->finish(runningStatisticsRequest_, {{"error", e.what()}});
-        if (runningKind_ == "replay-pipeline")
-            replayedState_->finishReplay(runningPipelineRequest_, {{"error", e.what()}});
-        if (runningKind_ == "predicate")
-            predicateView_->finish(runningPredicateRequest_, {{"error", e.what()}});
-        emit taskFinished(false);
+        failWorkerResult(QString::fromUtf8(e.what()));
     }
+}
+void MainWindow::failWorkerResult(const QString &error, bool cancelled) {
+    const auto message = error.toStdString();
+    if (runningKind_ == "draw-resources") {
+        resourceBrowser_->failPreviews(runningResourceKey_, error);
+        resourceTimer_.start(); return;
+    }
+    if (!cancelled) showError(error);
+    else if (!loadCancel_) statusBar()->showMessage(error, 2000);
+    if (runningKind_ == "metric-iterations" || runningKind_ == "metric-profile" ||
+        runningKind_ == "metric-catalog")
+        scheduledMetrics_->finish(runningScheduledRequest_, {{"error", message}});
+    if (runningKind_ == "history" || runningKind_ == "history-capture")
+        finishRdcAnalysis({{"ok", false}, {"error", message}});
+    if (runningKind_ == "timings")
+        gpuProfile_->finish(runningProfileRequest_, {{"error",message}});
+    if (runningKind_ == "coverage")
+        coverage_->finish(runningCoverageRequest_, {{"error",message}});
+    if (runningKind_ == "quad")
+        quad_->finish(runningQuadRequest_, {{"error",message}});
+    if (runningKind_ == "statistics")
+        gpuStatistics_->finish(runningStatisticsRequest_, {{"error", message}});
+    if (runningKind_ == "replay-pipeline")
+        replayedState_->finishReplay(runningPipelineRequest_, {{"error", message}});
+    if (runningKind_ == "predicate")
+        predicateView_->finish(runningPredicateRequest_, {{"error", message}});
+    emit taskFinished(false);
 }
 void MainWindow::showError(const QString &error) {
     log_->appendPlainText(error);

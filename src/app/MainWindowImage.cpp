@@ -26,11 +26,11 @@ QString MainWindow::boundaryLabel(const QJsonObject &report) {
         return "Final";
     return (when == "before_event" ? QString("Before %1") : QString("After %1")).arg(event);
 }
-void MainWindow::validateWorkerArtifact(const QByteArray &reportBytes) {
+void MainWindow::validateWorkerArtifact(nlohmann::json replayReport) {
     auto job = std::make_shared<ArtifactJob>();
     job->directory = std::move(jobDir_);
     job->report = report_;
-    job->reportBytes = reportBytes;
+    job->replayReport = std::move(replayReport);
     job->kind = runningKind_;
     job->revision = runningRevision_;
     job->timings = runningTimings_;
@@ -74,7 +74,7 @@ void MainWindow::validateWorkerArtifact(const QByteArray &reportBytes) {
                 emit taskFinished(true);
                 return;
             }
-            acceptWorkerImage(result.image, job->reportBytes);
+            acceptWorkerImage(result.image, std::move(job->replayReport));
         } catch (const std::exception &error) {
             showError(QString::fromUtf8(error.what()));
             emit taskFinished(false);
@@ -103,7 +103,7 @@ void MainWindow::validateWorkerArtifact(const QByteArray &reportBytes) {
     }));
     statusBar()->showMessage(job->kind == "buffer" ? "Validating buffer…" : "Validating image…");
 }
-void MainWindow::acceptWorkerImage(PreparedImage result, const QByteArray &reportBytes) {
+void MainWindow::acceptWorkerImage(PreparedImage result, nlohmann::json replayReport) {
     const bool outputAvailable = runningKind_ != "replay" || report_["image_available"].toBool(true);
     if (result.original.isNull() && outputAvailable)
         throw std::runtime_error("Worker output image is missing");
@@ -180,9 +180,7 @@ void MainWindow::acceptWorkerImage(PreparedImage result, const QByteArray &repor
             imageLabel_->setToolTip(imageLabel_->toolTip() + '\n' + it.key() + '\n' + references);
         }
     }
-    outputReport_ = outputAvailable ? nlohmann::json::parse(reportBytes.constData(),
-                                                            reportBytes.constData() + reportBytes.size())
-                                    : nlohmann::json();
+    outputReport_ = std::move(replayReport);
     displayedOutputGeneration_ = outputGeneration_;
     resourceImagePending_ = false;
     resourceImageContext_ = historyContextKey();

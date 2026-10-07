@@ -15,14 +15,14 @@ int wmain(int argc, wchar_t **argv) {
     if (mode == "crash") { TerminateProcess(GetCurrentProcess(), 0xc0000005); return 99; }
     if (mode == "timeout" || mode == "cancel") { Sleep(INFINITE); return 99; }
     if (out.empty()) return 98;
-    if (mode.starts_with("image-") || mode.starts_with("buffer-")) {
+    if (mode.starts_with("image-") || mode.starts_with("buffer-") || mode.starts_with("report-")) {
         wchar_t root[32768]{};
         if (!GetEnvironmentVariableW(L"FLORA_FAULT_IMAGE_ROOT", root, DWORD(std::size(root)))) return 97;
         std::filesystem::create_directories(out);
         for (const auto &file : std::filesystem::directory_iterator(root))
             std::filesystem::copy_file(file.path(), out / file.path().filename());
         // Test-owned evidence for cleanup after destroying a validating window.
-        if (mode == "image-async-destroy" || mode == "buffer-async-destroy")
+        if (mode == "image-async-destroy" || mode == "buffer-async-destroy" || mode == "report-async-destroy")
             std::ofstream(std::filesystem::path(root) / "validation-directory.txt", std::ios::binary)
                 << out.generic_string();
         return 0;
