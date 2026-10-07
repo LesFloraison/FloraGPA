@@ -1,5 +1,9 @@
 # Unused SM4.0 RESINFO dimension results
 
+The subsequent [structured-branch proof](SM40_BRANCH_MIP.md) adds bounded
+IF/ELSE/ENDIF handling. This document retains the original straight-line batch
+and its evidence; its control-flow restriction is historical.
+
 Reviewed 2026-10-08. This M4 correction follows the
 [mip-count-only dependency proof](MIP_COUNT_LOD_COMPATIBILITY.md). SM4.0 compilation
 can emit `resinfo r0.xyzw` even when HLSL only consumes the total mip count.

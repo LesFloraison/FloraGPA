@@ -1,7 +1,29 @@
 # Current capabilities and compatibility
 
 Reviewed **2026-10-08**. The user authorized M4, then M5, while keeping M3 open.
-The latest [analyzer payload extension](ANALYZER_PAYLOAD_ACCEPTANCE.md),
+The latest [SM4.0 branch correction](SM40_BRANCH_MIP.md), implementation
+`b8ab3dc`, removes four demonstrated false missing-MinLOD rejections. Checked
+IF/ELSE/ENDIF edges track unused dimension lanes across both outcomes and joins;
+one-arm overwrites do not erase another path's dependency. Eight untouched
+original captures pass 288 producer image checks across hardware, WARP and
+injected runs. Four new count-only workloads now match the application and
+observed original-player images; three true missing-state cases still reject at
+Draw 23 / resource 24. Explicit-LOD mode 17 remains equal to the application and
+different from the local original player. Adapter/GUI equivalence is unverified.
+Five related CTest suites pass, including 106 resource-LOD and 69 main-UI rows.
+The proof remains bounded to 256 instructions and 64 nested IF blocks, with no
+loops, calls or guessed branch outcomes. Missing data is not reconstructed.
+The full 36-suite gate passes 525 registrations / 515 unique captures: 492
+completions (482 unique) and 33 located rejections, from 1,050 ordinary attempts,
+684 controls and 826 resource exports. All preceding 517 preflight reports,
+execution counts and deterministic images remain unchanged. Fidelity assessments
+are 60 passed / 32 capture-side mismatches / 10 information-missing / 423
+unassessed; 35 completed cases retain known capture limitations. Package
+`out/FloraGPA-branch-mip-20261008/` passes relocated system-PATH Qt retry workflows
+and four unchanged golden/negative checks. See the
+[pinned baseline](branch-mip-baseline.json); M3/M4/M5 remain incomplete.
+
+The preceding [analyzer payload extension](ANALYZER_PAYLOAD_ACCEPTANCE.md),
 implementation `f70d65a`, moves eight additional output files off the event
 thread: Quad, coverage, timings, statistics, replayed pipeline, predication, IA
 geometry and shader output geometry. Missing, truncated, malformed and non-object
@@ -796,8 +818,8 @@ the other 35 suites passed initially and the complete UI suite passes after the 
 | M1 — Acceptance infrastructure | Minimum loop delivered: corpus, coverage, preflight, serial comparison and diagnostic queue. Extend evidence as paths arrive. |
 | M2 — Ordinary replay | Registered-scope gate passed: 366 positive cases and 22 located rejections; auxiliary/snapshot contracts audited. This is not universal API support. State-object identity loss, mixed saved/missing SO targets and unverified lifetimes remain explicit boundaries. |
 | M3 — Deferred Context / Command List | Open; M4/M5 now take priority by user instruction on 2026-10-06. Require original retained-list captures proving identity, build order, resource versions, repeated execution, restore-state and event mapping before production support. |
-| M4 — Resources and boundaries | Active, incomplete. Initial texture/Map data is checked; missing UAV counts reject on actual consumption, while proven counter-free indexed access is allowed. Verified mip-count-only reads, including proved unused SM4.0 dimension lanes, do not consume missing MinLOD. Per-slot counter dependencies and saved blt-model occluded Present TEST are checked; continue wider operand/control-flow dependencies, missing pitch/data, predicate/frame-before history, Query and other presentation boundaries. |
-| M5 — Stable compatibility release | Incomplete. The 517-case registry, committed-source build/package, load/semantic-audit cancellation, worker recovery, background common-report parsing, checked buffer acceptance and background replay/texture validation plus display preparation are established. A preceding 30-minute/246-cycle Qt recovery run passes; short-run heap controls identify history/log and bounded icon-cache retention. Continue broader memory attribution, specialized payload parsing, analyzer/driver/storage failures, synchronous diagnostic image/model publication and exports, large-file workflows, broader sustained testing and independent clean-machine deployment. |
+| M4 — Resources and boundaries | Active, incomplete. Initial texture/Map data is checked; missing UAV counts reject on actual consumption, while proven counter-free indexed access is allowed. Verified mip-count-only reads, including proved unused SM4.0 dimension lanes across checked branches, do not consume missing MinLOD. Per-slot counter dependencies and saved blt-model occluded Present TEST are checked; continue wider operand/control-flow dependencies, missing pitch/data, predicate/frame-before history, Query and other presentation boundaries. |
+| M5 — Stable compatibility release | Incomplete. The 525-case registry, committed-source build/package, load/semantic-audit cancellation, worker recovery, background common-report parsing, checked buffer acceptance and background replay/texture validation plus display preparation are established. A preceding 30-minute/246-cycle Qt recovery run passes; short-run heap controls identify history/log and bounded icon-cache retention. Continue broader memory attribution, specialized payload parsing, analyzer/driver/storage failures, synchronous diagnostic image/model publication and exports, large-file workflows, broader sustained testing and independent clean-machine deployment. |
 | M6 — Analyzer and other versions | Incomplete. Continue remaining Qt consumers, advanced profiling/debugging and version-specific adapters after core replay gates. Existing analyzer features remain available. |
 
 The original order was **M1 → M2 → M3 → M4 → M5**. On 2026-10-06 the user

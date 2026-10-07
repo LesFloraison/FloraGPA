@@ -18,6 +18,7 @@ chronology remains in Chinese.
 | Keep image validation responsive and discard cancelled results | [Asynchronous image validation](ASYNC_IMAGE_VALIDATION.md) |
 | Prepare replay/texture painting pixels before publishing them to Qt | [Image display preparation](IMAGE_DISPLAY_PREPARATION.md) |
 | Current capabilities and known limits | [Current status](CURRENT_STATUS.md) |
+| Mip-count-only queries across checked SM4.0 branches | [Structured-branch resource proof](SM40_BRANCH_MIP.md) |
 | Component responsibilities | [Architecture](ARCHITECTURE.md) |
 | Run tests and external comparisons | [Development validation](USAGE.md#development-validation) |
 | Build committed source with an isolated process environment and package it | [Source build and packaging](SOURCE_BUILD_AND_PACKAGING.md) |

@@ -149,7 +149,7 @@ For GF2/BF1 checks, configure `-DFLORA_TEST_CAPTURE_DIR=<your-fixture-directory>
 See [development validation](docs/USAGE.md#development-validation) for other
 fixture requirements and reference comparisons.
 
-The [SM4.0 mip-query acceptance record](docs/SM40_MIP_DIMENSIONS.md) includes
+The [SM4.0 structured-branch acceptance record](docs/SM40_BRANCH_MIP.md) includes
 original captures, bounded shader dependency checks and the expanded M4 matrix.
 Replay completion and fidelity to the original application are reported separately.
 
