@@ -99,6 +99,8 @@ For a repeatable developer check that builds an archived commit without local
 caches or machine presets, see [source-build validation](docs/SOURCE_BUILD_AND_PACKAGING.md).
 For development checks that repeatedly load, cancel, fail and retry in one Qt
 window, see [persistent recovery validation](docs/PERSISTENT_QT_SOAK.md).
+The latest [same-source release acceptance](docs/CURRENT_SOURCE_RELEASE_ACCEPTANCE.md)
+records the 525-case matrix, 248 recovery cycles and remaining release boundaries.
 
 Open a capture through **File > Open Capture…** or pass its path to the GUI.
 Use **F5** to replay, **F6** for **Collect GPU Metrics**, and **Escape** to cancel.

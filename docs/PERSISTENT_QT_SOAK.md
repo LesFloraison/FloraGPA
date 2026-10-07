@@ -1,5 +1,10 @@
 # Persistent Qt recovery soak and current-source packaging
 
+Historical batch: the newer [same-source release acceptance](CURRENT_SOURCE_RELEASE_ACCEPTANCE.md)
+records the 525-case matrix and a renewed 248-cycle / 744-image recovery run
+using tests built from the release archive. The 246-cycle results below remain
+evidence for this preceding batch.
+
 Reviewed 2026-10-08. This M5 batch extends recovery evidence to sustained use of
 one Qt process/window and verifies the current production source from a fresh
 archive. It does not change production replay code, shaders, formats or UI.

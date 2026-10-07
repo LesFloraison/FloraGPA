@@ -11,8 +11,9 @@ The original source-build evidence below remains unchanged.
 
 The [latest source acceptance](CURRENT_SOURCE_RELEASE_ACCEPTANCE.md) builds
 revision `078d638`, with 1,081 files, the 44-file package and acceptance tests from
-one archive. Its short runtime checks and complete 525-registration matrix pass;
-its renewed sustained recovery check remains pending at this checkpoint.
+one archive. Its short runtime checks, complete 525-registration matrix and
+renewed 30-minute/248-cycle recovery check pass. Independent-host deployment
+and the broader M5 gates remain open.
 
 ## Packaging changes
 
