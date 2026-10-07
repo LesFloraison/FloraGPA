@@ -15,6 +15,64 @@ void save(const QString &directory, const QByteArray &bytes) {
 class WorkerReportTests final : public QObject {
     Q_OBJECT
   private slots:
+    void metricCatalog() {
+        using Json = nlohmann::json;
+        QTemporaryDir dir;
+        auto write = [&](const QByteArray &bytes) {
+            QFile file(dir.filePath("catalog.json")); QVERIFY(file.open(QIODevice::WriteOnly));
+            QCOMPARE(file.write(bytes), bytes.size());
+        };
+        const Json good{{"sets", {{{"name", "SetA"}, {"metrics", {{{"name", "Time"}, {"label", "Time"}, {"unit", "ns"}}}}}}},
+                        {"precise_id", UINT64_MAX}};
+        const auto bytes = QByteArray::fromStdString(good.dump());
+        QVERIFY_THROWS_EXCEPTION(std::exception, readWorkerOutput(dir.path(), "metric-catalog"));
+        for (qsizetype n=0; n<bytes.size(); ++n) {
+            write(bytes.left(n));
+            QVERIFY_THROWS_EXCEPTION(std::exception, readWorkerOutput(dir.path(), "metric-catalog"));
+        }
+        for (int mode=0; mode<13; ++mode) {
+            auto bad=good;
+            switch(mode) {
+            case 0: bad=Json::array(); break;
+            case 1: bad.erase("sets"); break;
+            case 2: bad["sets"]=Json::object(); break;
+            case 3: bad["sets"][0]["name"]=""; break;
+            case 4: bad["sets"][0]["name"]=42; break;
+            case 5: bad["sets"][0].erase("metrics"); break;
+            case 6: bad["sets"][0]["metrics"]=Json::object(); break;
+            case 7: bad["sets"][0]["metrics"][0]["name"]=""; break;
+            case 8: bad["sets"][0]["metrics"][0]["name"]=42; break;
+            case 9: bad["sets"][0]["metrics"][0].erase("label"); break;
+            case 10: bad["sets"][0]["metrics"][0]["unit"]=42; break;
+            case 11: bad["sets"].push_back(bad["sets"][0]); break;
+            case 12: bad["sets"][0]["metrics"].push_back(bad["sets"][0]["metrics"][0]); break;
+            }
+            write(QByteArray::fromStdString(bad.dump()));
+            try { readWorkerOutput(dir.path(), "metric-catalog"); QFAIL("Malformed catalog accepted"); }
+            catch(const std::exception &e) { QVERIFY2(QString::fromUtf8(e.what()).contains("catalog.json"),e.what()); }
+        }
+        for(const auto &bad : {QByteArray("{\"sets\":[]}")+"x",
+            QByteArray("{\"s\":\"")+char(-1)+"\",\"sets\":[]}",
+            QByteArray("{\"sets\":[],\"v\":")+QByteArray(1100,'[')+'0'+QByteArray(1100,']')+'}'}) {
+            write(bad); QVERIFY_THROWS_EXCEPTION(std::exception,readWorkerOutput(dir.path(),"metric-catalog"));
+        }
+        write(bytes);
+        const auto result=readWorkerOutput(dir.path(),"metric-catalog");
+        QCOMPARE(result.payload,good); QVERIFY(result.report.isEmpty());
+        auto shared=good; shared["sets"].push_back(good["sets"][0]); shared["sets"][1]["name"]="SetB";
+        write(QByteArray::fromStdString(shared.dump()));
+        QCOMPARE(readWorkerOutput(dir.path(),"metric-catalog").payload,shared); // Same symbol across distinct sets is valid.
+        write("{\"sets\":[]}"); QVERIFY(readWorkerOutput(dir.path(),"metric-catalog").payload["sets"].empty());
+        auto large=good; large["padding"]=std::string(2*1024*1024+17,'x');
+        write(QByteArray::fromStdString(large.dump()));
+        int checks=0; readWorkerOutput(dir.path(),"metric-catalog",[&]{++checks;return false;});
+        QVERIFY(checks>4);
+        for(int stop=1;stop<=checks;++stop) {
+            int count=0;
+            QVERIFY_THROWS_EXCEPTION(OperationCancelled,readWorkerOutput(dir.path(),"metric-catalog",[&]{return ++count==stop;}));
+        }
+        write(bytes); QCOMPARE(readWorkerOutput(dir.path(),"metric-catalog").payload,good);
+    }
     void analyzerPayload_data() {
         QTest::addColumn<QString>("kind");
         QTest::addColumn<QString>("filename");

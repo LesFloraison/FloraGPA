@@ -1794,14 +1794,7 @@ void MainWindow::finishWorker(int code, QProcess::ExitStatus status) {
             throw std::runtime_error((error.isEmpty() ? "Replay worker failed" : error).toStdString());
         }
         if (runningKind_ == "metric-catalog") {
-            QFile file(jobDir_->filePath("result/catalog.json"));
-            if (!file.open(QIODevice::ReadOnly))
-                throw std::runtime_error("Intel catalog is missing");
-            const bool accepted = scheduledMetrics_->finishCatalog(
-                runningScheduledRequest_, nlohmann::json::parse(file.readAll().toStdString()),
-                runningScheduledBridge_);
-            statusBar()->showMessage(accepted ? "Intel catalog ready" : "Intel catalog discarded", 3000);
-            emit taskFinished(accepted);
+            loadWorkerReport();
             return;
         }
         if (runningKind_ == "metric-iterations" || runningKind_ == "metric-profile") {
@@ -1843,6 +1836,13 @@ void MainWindow::finishWorker(int code, QProcess::ExitStatus status) {
 }
 void MainWindow::acceptWorkerReport(WorkerReport result) {
     try {
+        if (runningKind_ == "metric-catalog") {
+            const bool accepted = scheduledMetrics_->finishCatalog(
+                runningScheduledRequest_, result.payload, runningScheduledBridge_);
+            statusBar()->showMessage(accepted ? "Intel catalog ready" : "Intel catalog discarded", 3000);
+            emit taskFinished(accepted);
+            return;
+        }
         if (runningKind_ == "draw-resources") {
             if (!result.thumbnails) throw std::runtime_error("Missing prepared thumbnails");
             resourceBrowser_->acceptPreviews(runningResourceKey_, std::move(*result.thumbnails));

@@ -6,6 +6,7 @@
 #include <QJsonDocument>
 #include <QImageReader>
 #include <limits>
+#include <set>
 
 namespace flora {
 namespace {
@@ -227,6 +228,48 @@ WorkerReport readWorkerReport(const QString &directory, bool replay, const Cance
 }
 WorkerReport readWorkerOutput(const QString &directory, const QString &kind, const CancelCheck &cancelled,
                               const QString &diagnosticKey) {
+    if (kind == "metric-catalog") {
+        // Catalog workers have no common report.json envelope. Validate every
+        // display/selection field before any of the three metric views changes.
+        WorkerReport result;
+        try {
+            result.payload = nativeObject(readBytes(QDir(directory).filePath("catalog.json"), cancelled), cancelled);
+            const auto &sets = result.payload.at("sets");
+            if (!sets.is_array()) throw std::runtime_error("sets is not an array");
+            std::set<std::string> setNames;
+            auto name = [](const nlohmann::json &object, const std::string &where) {
+                if (!object.is_object() || !object.contains("name") || !object.at("name").is_string() ||
+                    object.at("name").get_ref<const std::string &>().empty())
+                    throw std::runtime_error(where + ".name is not a nonempty string");
+                return object.at("name").get<std::string>();
+            };
+            for (size_t i=0; i<sets.size(); ++i) {
+                checkCancellation(cancelled);
+                const auto where = "sets[" + std::to_string(i) + "]";
+                const auto &set = sets[i];
+                if (!setNames.insert(name(set, where)).second)
+                    throw std::runtime_error(where + ".name is duplicated");
+                if (!set.contains("metrics") || !set.at("metrics").is_array())
+                    throw std::runtime_error(where + ".metrics is not an array");
+                std::set<std::string> symbols;
+                for (size_t j=0; j<set.at("metrics").size(); ++j) {
+                    checkCancellation(cancelled);
+                    const auto field = where + ".metrics[" + std::to_string(j) + "]";
+                    const auto &metric = set.at("metrics")[j];
+                    if (!symbols.insert(name(metric, field)).second)
+                        throw std::runtime_error(field + ".name is duplicated");
+                    for (const auto key : {"label", "unit"})
+                        if (!metric.contains(key) || !metric.at(key).is_string())
+                            throw std::runtime_error(field + "." + key + " is not a string");
+                }
+            }
+            checkCancellation(cancelled);
+        } catch (const OperationCancelled &) { throw; }
+        catch (const std::exception &error) {
+            throw std::runtime_error(std::string("Worker catalog.json: ") + error.what());
+        }
+        return result;
+    }
     if (kind == "draw-resources") {
         // The native report is the complete envelope and contains precise IDs.
         // Do not parse it again through QJson or overwrite the main replay report.
