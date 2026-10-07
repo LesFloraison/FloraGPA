@@ -3796,6 +3796,33 @@ class UiTests final : public QObject {
         QVERIFY(done.takeLast()[0].toBool());
         QVERIFY(!window.busy());
     }
+    void mipCountReplayAndRetry() {
+        const auto root = qEnvironmentVariable("FLORA_MIP_COUNT_CAPTURES");
+        if (root.isEmpty()) QSKIP("Set original mip-count corpus");
+        flora::MainWindow window;
+        window.resize(1440, 900); window.show();
+        QSignalSpy done(&window, &flora::MainWindow::taskFinished);
+        for (int mode : {0, 2, 1, 4, 3, 5}) {
+            done.clear();
+            window.openCapture(root + '/' + QString::number(mode) + "/capture.gpa_frame");
+            QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+            const bool missing = mode == 2 || mode == 4;
+            QCOMPARE(done.takeLast()[0].toBool(), !missing);
+            QVERIFY(!window.busy());
+            if (missing) continue;
+            auto output = window.findChild<flora::ImageView *>("frameOutput");
+            QVERIFY(output); QCOMPARE(output->image().size(), QSize(8, 8));
+            const auto expected = QColor(255, mode >= 3 ? 255 : 0, 0, 255);
+            for (int y = 0; y < 8; ++y) for (int x = 0; x < 8; ++x)
+                QCOMPARE(output->image().pixelColor(x, y), expected);
+            done.clear(); window.replay();
+            QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+            QVERIFY(done.takeLast()[0].toBool());
+            for (int y = 0; y < 8; ++y) for (int x = 0; x < 8; ++x)
+                QCOMPARE(output->image().pixelColor(x, y), expected);
+            snapshot(window, QString("mip-count-%1").arg(mode));
+        }
+    }
     void queryCompletionNoticesAndNavigate() {
         const auto root = qEnvironmentVariable("FLORA_QUERY_SYNC_CAPTURES");
         if (root.isEmpty()) QSKIP("Set original query completion corpus");
