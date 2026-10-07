@@ -14,6 +14,7 @@
 #include <QLineEdit>
 #include <QMessageBox>
 #include <QSignalSpy>
+#include <QStatusBar>
 #include <QTabWidget>
 #include <QTemporaryDir>
 #include <QTreeWidget>
@@ -34,20 +35,39 @@ void save(const QString &path, const Json &value) {
     f.write(QByteArray::fromStdString(value.dump(2)));
 }
 void fileAction(MainWindow &window, const char *name, const QString &path) {
-    bool handled = false;
-    QTimer choose;
+    bool handled = false, timedOut = false;
+    unsigned attempts = 0;
+    QTimer choose, deadline;
     QObject::connect(&choose, &QTimer::timeout, &window, [&] {
-        auto dialog = window.findChild<QFileDialog *>();
-        if (!dialog || !dialog->isVisible())
-            return;
-        choose.stop();
-        dialog->selectFile(path);
-        handled = true;
-        QMetaObject::invokeMethod(dialog, "accept", Qt::QueuedConnection);
+        for (auto dialog : window.findChildren<QFileDialog *>()) {
+            if (!dialog->isVisible()) continue;
+            // selectFile() may leave an active filename editor unchanged.
+            // Enter the path as a user would, as other UI fixtures already do.
+            auto filename = dialog->findChild<QLineEdit *>("fileNameEdit");
+            QVERIFY(filename);
+            filename->setText(path);
+            handled = true;
+            ++attempts;
+            QMetaObject::invokeMethod(dialog, "accept", Qt::QueuedConnection);
+            break;
+        }
+    });
+    deadline.setSingleShot(true);
+    QObject::connect(&deadline, &QTimer::timeout, &window, [&] {
+        timedOut = true;
+        for (auto dialog : window.findChildren<QFileDialog *>()) {
+            if (!dialog->isVisible()) continue;
+            qWarning() << "File dialog timeout" << name << dialog->windowTitle() << dialog->selectedFiles();
+            dialog->reject();
+        }
     });
     choose.start(20);
+    deadline.start(10000);
     window.findChild<QAction *>(name)->trigger();
-    QVERIFY(handled);
+    choose.stop();
+    deadline.stop();
+    qInfo() << "File dialog" << name << "attempts" << attempts;
+    QVERIFY(handled && !timedOut);
 }
 Json run(const Json &job) {
     if (job.at("action") == "distribution")
@@ -242,6 +262,10 @@ class GpuProfileTests final : public QObject {
         fileAction(window, "saveExperiment", project);
         QCOMPARE(load(project).at("ui").at("gpu_profile"), settings);
         view->findChild<QLineEdit *>("profileSamples")->setText("7");
+        // Saving enters a dialog event loop, where a queued preview can start.
+        // Experiment import requires that preview and report acceptance to finish.
+        qInfo() << "Before experiment import" << window.busy() << window.statusBar()->currentMessage();
+        QTRY_VERIFY_WITH_TIMEOUT(!window.busy(), 30000);
         done.clear();
         fileAction(window, "openExperiment", project);
         QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
