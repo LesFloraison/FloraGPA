@@ -11,8 +11,9 @@ import json
 import os
 from pathlib import Path
 import shutil
-import subprocess
 import time
+
+from validate_source_build import run_process
 
 
 def digest(path):
@@ -62,7 +63,8 @@ def main():
                                    for p in sorted(package.rglob('*')) if p.is_file()}
         report['sources'] = {}
         for name in ['tests/RecoveryUiTests.cpp', 'tests/RecoveryJournal.h',
-                     'tests/HeapRetentionProbe.h', 'tools/validate_recovery_soak.py']:
+                     'tests/HeapRetentionProbe.h', 'tools/validate_recovery_soak.py',
+                     'tools/validate_source_build.py']:
             frozen = root / 'sources' / name
             frozen.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(repo / name, frozen)
@@ -90,12 +92,11 @@ def main():
         save()
         start = time.monotonic()
         with (root / 'process.log').open('wb') as log:
-            result = subprocess.run(command, cwd=runtime, env=env, stdout=log,
-                                    stderr=subprocess.STDOUT, creationflags=subprocess.CREATE_NO_WINDOW,
-                                    timeout=args.seconds + args.pairs * 180 + 900)
-        report.update(exit_code=result.returncode, process_seconds=time.monotonic() - start)
+            code = run_process(command, runtime, env, log,
+                               timeout=args.seconds + args.pairs * 180 + 900)
+        report.update(exit_code=code, process_seconds=time.monotonic() - start)
         save()
-        assert result.returncode == 0, 'Qt recovery test failed; inspect qt-results.txt and journal.json.progress'
+        assert code == 0, 'Qt recovery test failed; inspect qt-results.txt and journal.json.progress'
         text = (root / 'qt-results.txt').read_text(encoding='utf-8')
         assert 'Totals: 3 passed, 0 failed, 0 skipped' in text, 'Missing complete Qt result'
         journal = json.loads((root / 'journal.json').read_text(encoding='utf-8'))
