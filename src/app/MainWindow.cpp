@@ -339,6 +339,8 @@ MainWindow::MainWindow() {
             &MainWindow::finishWorker);
 }
 MainWindow::~MainWindow() {
+    if (exportCancel_)
+        exportCancel_->store(true);
     if (artifactJob_)
         artifactJob_->cancelled.store(true);
     if (loadCancel_)
@@ -1366,7 +1368,7 @@ void MainWindow::closeEvent(QCloseEvent *e) {
     e->accept();
 }
 void MainWindow::setBusy(bool busy) {
-    busy = bool(loadCancel_) || bool(artifactJob_) || (busy && runningKind_ != "draw-resources");
+    busy = bool(loadCancel_) || bool(artifactJob_) || bool(exportCancel_) || (busy && runningKind_ != "draw-resources");
     shader_->setReadOnly(busy);
     sourceEditor_->setReadOnly(busy);
     shaderEntry_->setEnabled(!busy);
@@ -1708,6 +1710,11 @@ void MainWindow::startWorker(QStringList args, bool timings) {
     process_.start(QCoreApplication::applicationDirPath() + "/FloraGPA.Worker.exe", args);
 }
 void MainWindow::cancel() {
+    if (exportCancel_) {
+        exportCancel_->store(true);
+        cancelAction_->setEnabled(false);
+        statusBar()->showMessage("Cancelling export…");
+    }
     if (artifactJob_) {
         artifactJob_->cancelled.store(true);
         cancelAction_->setEnabled(false);
@@ -4135,28 +4142,6 @@ bool MainWindow::saveExperiment() {
     } catch (const std::exception &e) {
         showError(QString::fromUtf8(e.what()));
         return false;
-    }
-}
-void MainWindow::exportOutputStorage() {
-    if (!outputDir_ || !outputStorageAction_->isEnabled())
-        return;
-    const auto directory = outputDir_;
-    const auto path =
-        QFileDialog::getSaveFileName(this, "Export Output Storage", "output.bin", "Binary data (*.bin)");
-    if (path.isEmpty())
-        return;
-    try {
-        QFile source(directory->path() + "/result/output_storage.bin");
-        if (!source.open(QIODevice::ReadOnly))
-            throw std::runtime_error("Output storage is unavailable");
-        writeFile(path, source.readAll());
-        QFile metadata(directory->path() + "/result/output_storage.json");
-        if (!metadata.open(QIODevice::ReadOnly))
-            throw std::runtime_error("Output metadata is unavailable");
-        writeFile(path + ".json", metadata.readAll());
-        statusBar()->showMessage("Output storage exported", 3000);
-    } catch (const std::exception &e) {
-        showError(QString::fromUtf8(e.what()));
     }
 }
 void MainWindow::selectOutputPixel(int x, int y, const QColor &color) {

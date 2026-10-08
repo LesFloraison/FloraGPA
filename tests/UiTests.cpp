@@ -3232,6 +3232,7 @@ class UiTests final : public QObject {
         QCoreApplication::setAttribute(Qt::AA_DontUseNativeDialogs, true);
         auto restore = qScopeGuard([&] { QCoreApplication::setAttribute(Qt::AA_DontUseNativeDialogs, native); });
         auto runExport = [&](const QString &root, bool replace) {
+            QSignalSpy exported(&window, &MainWindow::exportFinished);
             QVERIFY(QDir().mkpath(root));
             const auto destination = kind == "geometry" ? root : root + (kind == "image" ? "/asset.png" : "/asset.bin");
             bool seen = false, switched = false, accepted = false;
@@ -3263,6 +3264,10 @@ class UiTests final : public QObject {
             watchdog.start(30000);
             action->trigger();
             QVERIFY(seen && accepted);
+            if (kind == "storage") {
+                QTRY_COMPARE_WITH_TIMEOUT(exported.size(), 1, 30000);
+                QVERIFY(exported.last()[0].toBool());
+            }
             QCOMPARE(switched, replace);
         };
         runExport(dir.filePath("before"), false);

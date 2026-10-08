@@ -47,12 +47,13 @@ class MainWindow final : public QMainWindow {
     ~MainWindow() override;
     void openCapture(const QString &path);
     void replay(bool timings = false);
-    bool busy() const { return process_.state() != QProcess::NotRunning || bool(loadCancel_) || bool(artifactJob_); }
+    bool busy() const { return process_.state() != QProcess::NotRunning || bool(loadCancel_) || bool(artifactJob_) || bool(exportCancel_); }
     QString capturePath() const { return capturePath_; }
     void setShaderTool(const QString &path) { shaderTool_ = path; }
   signals:
     void captureLoaded();
     void taskFinished(bool success);
+    void exportFinished(bool success);
 
   protected:
     void closeEvent(QCloseEvent *) override;
@@ -302,6 +303,7 @@ class MainWindow final : public QMainWindow {
         std::atomic_bool cancelled{false};
     };
     std::shared_ptr<ArtifactJob> artifactJob_;
+    std::shared_ptr<std::atomic_bool> exportCancel_;
     BufferRequest runningBuffer_;
     std::unique_ptr<QTemporaryDir> jobDir_;
     QTimer replayTimer_, timeout_;

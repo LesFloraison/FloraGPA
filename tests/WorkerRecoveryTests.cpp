@@ -19,11 +19,15 @@ using namespace flora;
 #include "DiagnosticRecovery.h"
 #include "ThumbnailRecovery.h"
 #include "CatalogRecovery.h"
+#include "ExportRecovery.h"
 class WorkerRecoveryTests final : public QObject {
     Q_OBJECT
   private slots:
     void isolatedRecovery_data() {
         QTest::addColumn<QString>("mode");
+        for (const auto mode : {"export-valid", "export-short", "export-long", "export-hash", "export-metadata", "export-missing-metadata",
+                               "export-async-cancel", "export-async-switch", "export-async-close", "export-async-destroy", "export-async-success"})
+            QTest::newRow(mode) << QString(mode);
         for (const auto mode : {"image-resource-missing", "image-resource-unknown", "image-resource-kind"})
             QTest::newRow(mode) << QString(mode);
         for (const auto mode : {"missing", "stderr-tail", "stderr-lines", "crash", "invalid-report", "no-output", "missing-image", "cancel", "image-size", "image-pixels", "image-raw-missing", "image-raw-short", "image-raw-long", "image-raw-hash", "image-hash-missing", "image-unavailable-files", "image-unavailable-type", "image-valid", "image-async-cancel", "image-async-switch", "image-async-close", "image-async-destroy", "image-async-success"})
@@ -85,7 +89,8 @@ class WorkerRecoveryTests final : public QObject {
         child.setProcessEnvironment(env);
         child.setCreateProcessArgumentsModifier([](QProcess::CreateProcessArguments *args) { args->flags |= CREATE_NO_WINDOW; });
         const auto log = isolation.filePath("child.txt");
-        const auto exercise = mode.startsWith("catalog-") ? "exerciseCatalogRecovery" :
+        const auto exercise = mode.startsWith("export-") ? "exerciseExportRecovery" :
+                              mode.startsWith("catalog-") ? "exerciseCatalogRecovery" :
                               mode.startsWith("thumbnail-") ? "exerciseThumbnailRecovery" :
                               mode.startsWith("coverage-") || mode.startsWith("quad-") ? "exerciseDiagnosticRecovery" :
                               mode.startsWith("payload-") ? "exercisePayloadRecovery" :
@@ -105,6 +110,7 @@ class WorkerRecoveryTests final : public QObject {
     void exerciseDiagnosticRecovery() { ::exerciseDiagnosticRecovery(); }
     void exerciseThumbnailRecovery() { ::exerciseThumbnailRecovery(); }
     void exerciseCatalogRecovery() { ::exerciseCatalogRecovery(); }
+    void exerciseExportRecovery() { ::exerciseExportRecovery(); }
     void exerciseRecovery() {
         const auto root = qEnvironmentVariable("FLORA_FAULT_ROOT");
         if (root.isEmpty()) QSKIP("Runs only inside the parent-owned temporary executable directory");
