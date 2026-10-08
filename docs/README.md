@@ -56,6 +56,7 @@ chronology remains in Chinese.
 | Saved GetData completion ordering and missing ordinary Query boundaries | [Query completion](QUERY_COMPLETION.md) |
 | Replay saved per-stream SO overflow Queries with exact native byte/image oracles | [Stream Query compatibility](STREAM_QUERY_COMPATIBILITY.md) |
 | Successful READ Map ordering and sparse-write resource oracles | [READ Map synchronization](MAP_READ_SYNCHRONIZATION.md) |
+| Preserve saved writable DO_NOT_WAIT success across different replay scheduling | [Writable Map readiness](MAP_NOWAIT_READINESS.md) |
 | Saved Map writes, differential storage and subresource validation | [Map write-data audit](MAP_WRITE_DATA_AUDIT.md) |
 | Missing initial counters and the updated compatibility matrix | [Initial counter boundary audit](INITIAL_COUNTER_BOUNDARY_AUDIT.md) |
 | Mixed UAV slots with independent hidden-counter dependencies | [Per-slot counter compatibility](COUNTER_SLOT_COMPATIBILITY.md) |

@@ -1,5 +1,11 @@
 # Saved Map write data and subresource boundaries
 
+> **2026-10-08 follow-up:** [Writable Map readiness](MAP_NOWAIT_READINESS.md)
+> preserves captured successful DO_NOT_WAIT writes using blocking native Map,
+> while failed calls remain without storage effects. It also documents fresh
+> capture-writer evidence and a 611-file layout survey; the earlier scoped
+> results below remain historical evidence.
+
 > **2026-10-06 correction:** [READ Map synchronization](MAP_READ_SYNCHRONIZATION.md)
 > supersedes the observation-only treatment of successful `0x34ec` READ Maps.
 > They execute a native Map/Unmap to preserve saved resource readiness before

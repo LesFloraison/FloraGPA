@@ -1,5 +1,10 @@
 # Preserve successful READ Map synchronization
 
+Follow-up 2026-10-08: [writable Map readiness](MAP_NOWAIT_READINESS.md) applies
+the saved-success readiness rule to WRITE/READ_WRITE DO_NOT_WAIT captures.
+It retains failed-call behavior and rejects invalid successful flag/type pairs.
+The earlier READ evidence below is unchanged.
+
 Reviewed 2026-10-06. This M4 correction restores a CPU/GPU ordering dependency
 that was incorrectly classified as read-only metadata. It neither supplies
 missing resource bytes nor modifies captured shaders.

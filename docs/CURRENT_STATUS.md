@@ -1,7 +1,29 @@
 # Current capabilities and compatibility
 
 Reviewed **2026-10-08**. The user authorized M4, then M5, while keeping M3 open.
-The latest [stream Query compatibility increment](STREAM_QUERY_COMPATIBILITY.md),
+The latest [writable Map readiness correction](MAP_NOWAIT_READINESS.md),
+implementation `ebfbc48`, preserves captured successful DO_NOT_WAIT writes under
+replay scheduling while keeping original failures without write/retry effects.
+Eight original captures previously passed preflight but failed all 16 replays
+at Map with HRESULT 0x887a000a. They now pass 16 replays and 32 exact before/after
+resource exports. Twenty-eight new Qt rows, six related CTest suites, five
+Windows navigation rows, eight recovery rows and four golden/control checks
+pass. The candidate is `out/FloraGPA-map-nowait-20261008/`; its expanded 42-suite
+matrix passes 621 registrations / 611 unique captures, with 582 completions /
+572 unique completions and 39 located refusals. All 613 previous full preflight
+reports, execution counts, refusal diagnostics and deterministic images match;
+registered Helldivers variation remains separate. Capture-fidelity assessments
+are 150 passed / 32 capture-side mismatch / 16 information missing / 423
+unassessed; 35 completed registrations retain known capture limitations. A fresh
+1,209-file archive of `ebfbc48` builds/packages successfully; its separately
+rebuilt, relocated package passes 28 Map rows, five Windows UI rows and four
+strict golden/control checks. The full matrix uses the incremental candidate.
+New long-soak and independent clean-host acceptance remain open. The 611-file
+layout survey and fresh writer reverse analysis find Buffer differences and full texture
+data, with no texture differences in the surveyed corpus; unverified layouts
+still reject. M3/M4/M5 and the module ledger remain incomplete.
+
+The preceding [stream Query compatibility increment](STREAM_QUERY_COMPATIBILITY.md),
 implementation `7a52359`, restores saved per-stream SO overflow Queries in the
 legacy `0x96` family using CreateQuery and their recorded Begin/End intervals.
 They remain unissued until their captured interval completes and cannot be bound
@@ -1056,6 +1078,7 @@ tested workloads; opening a file does not prove accurate replay.
 | Immediate-context replay | Captured draws/dispatches, supported setters, uploads, copies (including Context1 transfers), ClearView, queries/predication and presentation | Broader layouts, resource versions and some presentation/transfer cases remain incomplete. [Setters](PIPELINE_SETTER_AUDIT.md), [texture transfers](TEXTURE_COPY_AUDIT.md), [Context1 transfers](TRANSFER1_AUDIT.md), [ClearView](CLEAR_VIEW_AUDIT.md), [presentation](PRESENT_REPLAY_AUDIT.md) |
 | Frame-time creation | Validated buffers, textures/views, shaders, pipeline states, class linkage/instances and predicates | Device5 coverage is not every interface version or descriptor combination; required missing data and unresolved identities are rejected. [Buffers](BUFFER_CREATION_AUDIT.md), [textures](TEXTURE_DIMENSIONS_AUDIT.md), [texture views](VIEW_CREATION_AUDIT.md), [buffer views](BUFFER_VIEW_CREATION_AUDIT.md), [pipeline](PIPELINE_CREATION_AUDIT.md), [geometry/SO](GEOMETRY_CREATION_AUDIT.md), [classes](CLASS_CREATION_AUDIT.md), [predicates](PREDICATE_CREATION_AUDIT.md) |
 | Texture and output inspection | Presentation/RTV/DSV selection, mip/layer/slice, typed/channel/range controls, supported MSAA resolve/sample and planar inspection, exports | Format/device limits remain; legacy P010/P016 initial data can contain recovered Y only. [Frame output](FRAME_OUTPUT_MIGRATION.md), [texture inspection](TEXTURE_INSPECTION_MIGRATION.md), [planar writes](PLANAR_WRITE_MIGRATION.md) |
+| Map resource readiness | Checked saved full/differential writes and successful READ/WRITE/READ_WRITE readiness on the replay device; failed Maps have no retry/write effects | Saved successful DO_NOT_WAIT writes wait without reproducing CPU polling. Illegal successful flag/type pairs reject; missing initial bytes and unverified texture-difference pitches are not invented. [Writable readiness](MAP_NOWAIT_READINESS.md), [READ readiness](MAP_READ_SYNCHRONIZATION.md) |
 | Pipeline, buffers and geometry | Captured versus native replay state, before/after boundaries, constants/counters, IA and supported post-shader output | Missing state retains provenance; SO cursors have no native getter; frame-before counters require evidence or explicit experiments. [Boundaries](BEFORE_BOUNDARY_MIGRATION.md), [geometry](POST_TRANSFORM_MIGRATION.md), [HS output](HULL_OUTPUT_MIGRATION.md), [initial counters](INITIAL_COUNTER_BOUNDARY_AUDIT.md), [created counters](BUFFER_VIEW_CREATION_AUDIT.md) |
 | Experiments | Shader replacement, six-stage shader/IA/CB/SRV/sampler/output/SO/pipeline setter edits, buffer/texture edits and history | Event-scoped edits differ from persistent setters; consumer and format combinations retain their own limits. [Shader setters](SHADER_SETTER_MIGRATION.md), [event textures](EVENT_TEXTURE_MIGRATION.md), [reports](EXPERIMENT_REPORT_MIGRATION.md) |
 | Coverage and Quad | Native execution, Qt controls, navigation, export and cancellation | Coverage is not an overdraw counter; Quad groups are not physical hardware quad counts. Sample/order/coordinate limits remain. [Coverage](COVERAGE_UI_MIGRATION.md), [Quad](QUAD_UI_MIGRATION.md) |
@@ -1213,7 +1236,7 @@ the other 35 suites passed initially and the complete UI suite passes after the 
 | M1 — Acceptance infrastructure | Minimum loop delivered: corpus, coverage, preflight, serial comparison and diagnostic queue. Extend evidence as paths arrive. |
 | M2 — Ordinary replay | Registered-scope gate passed: 366 positive cases and 22 located rejections; auxiliary/snapshot contracts audited. This is not universal API support. State-object identity loss, mixed saved/missing SO targets and unverified lifetimes remain explicit boundaries. |
 | M3 — Deferred Context / Command List | Open; M4/M5 now take priority by user instruction on 2026-10-06. Require original retained-list captures proving identity, build order, resource versions, repeated execution, restore-state and event mapping before production support. |
-| M4 — Resources and boundaries | Active, incomplete. Initial texture/Map data, per-slot counter dependencies, proved counter-free indexed accesses and mip-only reads, nonzero-MinLOD storage/clone paths and saved occluded Present TEST have scoped acceptance. Saved per-stream SO overflow Queries now execute their recorded intervals. Continue missing texture pitches/data, absent ordinary Query boundaries, frame-before counters/results, wider shader dependency proofs and remaining presentation paths. [Stream Query scope](STREAM_QUERY_COMPATIBILITY.md) |
+| M4 — Resources and boundaries | Active, incomplete. Initial texture/Map data, successful writable DO_NOT_WAIT readiness, per-slot counter dependencies, proved counter-free indexed accesses and mip-only reads, nonzero-MinLOD storage/clone paths and saved occluded Present TEST have scoped acceptance. Saved per-stream SO overflow Queries execute their recorded intervals. Continue demonstrated resource/data gaps, absent ordinary Query boundaries, frame-before counters/results, wider shader dependency proofs and remaining presentation paths. Unobserved texture-difference layouts retain rejection rather than guessed pitches. [Map readiness and survey](MAP_NOWAIT_READINESS.md), [Stream Query scope](STREAM_QUERY_COMPATIBILITY.md) |
 | M5 — Stable compatibility release | Incomplete. See the current increment above for package/matrix evidence. The previous same-source 30.1-minute/162-cycle run passed 648 strict image checks. Full-log detail retention was subsequently addressed by compact search and a 128-row ordinary-detail bound; the 48-cycle control reduced BF1 busy heap, without proving all memory growth resolved. Broader model publication, analyzer/export/driver/storage failures, memory attribution, renewed release soak and independent clean-host deployment remain open. [Search acceptance](API_SEARCH_INDEX_ACCEPTANCE.md), [previous same-source acceptance](WORKFLOW_SOURCE_RELEASE_ACCEPTANCE.md) |
 | M6 — Analyzer and other versions | Incomplete. Continue remaining Qt consumers, advanced profiling/debugging and version-specific adapters after core replay gates. Existing analyzer features remain available. |
 

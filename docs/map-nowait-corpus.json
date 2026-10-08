@@ -1,0 +1,375 @@
+{
+  "schema": "FloraGPA compatibility corpus 1",
+  "profile": "GPA 2025 R1 legacy DX11 / IGPA v3",
+  "source_manifest_sha256": "81c66020daa03baf5f4ca9c9589e65d26c921a4ab77a5c44d651a05e8e587977",
+  "cases": [
+    {
+      "id": "map_nowait_0",
+      "path": "0/capture.gpa_frame",
+      "sha256": "637c56d47df4844dcd8e6a64aa8c7a6ee57f85cb60aa430b235a205d92168b24",
+      "bytes": 1062786,
+      "family": "map_nowait",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [
+        {
+          "path": "manifest.json",
+          "sha256": "81c66020daa03baf5f4ca9c9589e65d26c921a4ab77a5c44d651a05e8e587977",
+          "contains_capture_hash": true
+        }
+      ],
+      "provenance_note": "Unmodified original capture; full native hardware/WARP and injected buffer/texture byte oracles.",
+      "device_scope": "Default hardware capture; native hardware/WARP verified; original player device not matched.",
+      "comparison_policy": "exact_golden",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "reference_scope": "Green present marker only; Map fidelity requires before/after complete resource byte boundaries.",
+      "boundaries": [
+        {
+          "kind": "buffer",
+          "resource": 6,
+          "expect_stable": true,
+          "event": 137,
+          "expected_storage_sha256": "8a7bba86d28b6cf9b99a3a9a5fc1ca02620627d8faff12a01297a88a5b36bd43"
+        },
+        {
+          "kind": "buffer",
+          "resource": 6,
+          "expect_stable": true,
+          "event": 139,
+          "expected_storage_sha256": "dd7a06155bc4bc4dcb8db0efe0faa91d9082badf6d2253ac2b811c17244e7939"
+        }
+      ],
+      "controls": [],
+      "covers": [
+        "dimension 0",
+        "Map kind 2",
+        "saved failed polling attempts",
+        "successful writable DO_NOT_WAIT",
+        "padded native storage"
+      ],
+      "native_workload_fidelity": "passed",
+      "fidelity_reason": "Saved full/differential write bytes and copy-source bytes match native hardware/WARP/injected CPU oracles; marker alone is insufficient."
+    },
+    {
+      "id": "map_nowait_1",
+      "path": "1/capture.gpa_frame",
+      "sha256": "ec09f782190b3f26ffe4ff111399e6c6cce403092f4382c52a886526587ffc84",
+      "bytes": 145270,
+      "family": "map_nowait",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [
+        {
+          "path": "manifest.json",
+          "sha256": "81c66020daa03baf5f4ca9c9589e65d26c921a4ab77a5c44d651a05e8e587977",
+          "contains_capture_hash": true
+        }
+      ],
+      "provenance_note": "Unmodified original capture; full native hardware/WARP and injected buffer/texture byte oracles.",
+      "device_scope": "Default hardware capture; native hardware/WARP verified; original player device not matched.",
+      "comparison_policy": "exact_golden",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "reference_scope": "Green present marker only; Map fidelity requires before/after complete resource byte boundaries.",
+      "boundaries": [
+        {
+          "kind": "texture",
+          "resource": 6,
+          "expect_stable": true,
+          "event": 137,
+          "expected_storage_sha256": "706ea1e0b361f41c329962cb230c89fab8c8490404f46fa46ffa6eb024c02549"
+        },
+        {
+          "kind": "texture",
+          "resource": 6,
+          "expect_stable": true,
+          "event": 139,
+          "expected_storage_sha256": "1748c13a323a1fb9bb6b91a1dcfb1eff31d7a0f3ac0f889291a68b85c349e00d"
+        }
+      ],
+      "controls": [],
+      "covers": [
+        "dimension 1",
+        "Map kind 2",
+        "saved failed polling attempts",
+        "successful writable DO_NOT_WAIT",
+        "padded native storage"
+      ],
+      "native_workload_fidelity": "passed",
+      "fidelity_reason": "Saved full/differential write bytes and copy-source bytes match native hardware/WARP/injected CPU oracles; marker alone is insufficient."
+    },
+    {
+      "id": "map_nowait_2",
+      "path": "2/capture.gpa_frame",
+      "sha256": "ca17b01faac1967d88c0d37fd03298c507ee8bcdf334bec3102e076c7897f29f",
+      "bytes": 2099894,
+      "family": "map_nowait",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [
+        {
+          "path": "manifest.json",
+          "sha256": "81c66020daa03baf5f4ca9c9589e65d26c921a4ab77a5c44d651a05e8e587977",
+          "contains_capture_hash": true
+        }
+      ],
+      "provenance_note": "Unmodified original capture; full native hardware/WARP and injected buffer/texture byte oracles.",
+      "device_scope": "Default hardware capture; native hardware/WARP verified; original player device not matched.",
+      "comparison_policy": "exact_golden",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "reference_scope": "Green present marker only; Map fidelity requires before/after complete resource byte boundaries.",
+      "boundaries": [
+        {
+          "kind": "texture",
+          "resource": 6,
+          "expect_stable": true,
+          "event": 201,
+          "expected_storage_sha256": "321c799af4572dd48ebc0cd0ccb22e72d7aca57284a956898e1afb6cd04f00f0"
+        },
+        {
+          "kind": "texture",
+          "resource": 6,
+          "expect_stable": true,
+          "event": 203,
+          "expected_storage_sha256": "68dfd7b73ccdde4915bdaf602726f3779fea04f660b79cc966d6ae99f02640bd"
+        }
+      ],
+      "controls": [],
+      "covers": [
+        "dimension 2",
+        "Map kind 2",
+        "saved failed polling attempts",
+        "successful writable DO_NOT_WAIT",
+        "padded native storage"
+      ],
+      "native_workload_fidelity": "passed",
+      "fidelity_reason": "Saved full/differential write bytes and copy-source bytes match native hardware/WARP/injected CPU oracles; marker alone is insufficient."
+    },
+    {
+      "id": "map_nowait_3",
+      "path": "3/capture.gpa_frame",
+      "sha256": "e4009b75833f38e0c9ca7293c3864a6226b48380791ae000093811e77829e183",
+      "bytes": 239890,
+      "family": "map_nowait",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [
+        {
+          "path": "manifest.json",
+          "sha256": "81c66020daa03baf5f4ca9c9589e65d26c921a4ab77a5c44d651a05e8e587977",
+          "contains_capture_hash": true
+        }
+      ],
+      "provenance_note": "Unmodified original capture; full native hardware/WARP and injected buffer/texture byte oracles.",
+      "device_scope": "Default hardware capture; native hardware/WARP verified; original player device not matched.",
+      "comparison_policy": "exact_golden",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "reference_scope": "Green present marker only; Map fidelity requires before/after complete resource byte boundaries.",
+      "boundaries": [
+        {
+          "kind": "texture",
+          "resource": 6,
+          "expect_stable": true,
+          "event": 137,
+          "expected_storage_sha256": "5404fbdb592a60c215656b3447da20ffc244dc9fe51316f60f5fc83036beaada"
+        },
+        {
+          "kind": "texture",
+          "resource": 6,
+          "expect_stable": true,
+          "event": 139,
+          "expected_storage_sha256": "fd840e4709198c3158dde66c8ecba831355a203f645ef4b2a2d43fc3e50b0785"
+        }
+      ],
+      "controls": [],
+      "covers": [
+        "dimension 3",
+        "Map kind 2",
+        "saved failed polling attempts",
+        "successful writable DO_NOT_WAIT",
+        "padded native storage"
+      ],
+      "native_workload_fidelity": "passed",
+      "fidelity_reason": "Saved full/differential write bytes and copy-source bytes match native hardware/WARP/injected CPU oracles; marker alone is insufficient."
+    },
+    {
+      "id": "map_nowait_4",
+      "path": "4/capture.gpa_frame",
+      "sha256": "dd71ff054684abdbbd3d6825434fc1466159351da74112e779c50ac22ee59d9d",
+      "bytes": 997242,
+      "family": "map_nowait",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [
+        {
+          "path": "manifest.json",
+          "sha256": "81c66020daa03baf5f4ca9c9589e65d26c921a4ab77a5c44d651a05e8e587977",
+          "contains_capture_hash": true
+        }
+      ],
+      "provenance_note": "Unmodified original capture; full native hardware/WARP and injected buffer/texture byte oracles.",
+      "device_scope": "Default hardware capture; native hardware/WARP verified; original player device not matched.",
+      "comparison_policy": "exact_golden",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "reference_scope": "Green present marker only; Map fidelity requires before/after complete resource byte boundaries.",
+      "boundaries": [
+        {
+          "kind": "buffer",
+          "resource": 6,
+          "expect_stable": true,
+          "event": 137,
+          "expected_storage_sha256": "8a7bba86d28b6cf9b99a3a9a5fc1ca02620627d8faff12a01297a88a5b36bd43"
+        },
+        {
+          "kind": "buffer",
+          "resource": 6,
+          "expect_stable": true,
+          "event": 139,
+          "expected_storage_sha256": "e02702c151d458dac96c79051e11068d957597f966f794feb453fd50284e6cd8"
+        }
+      ],
+      "controls": [],
+      "covers": [
+        "dimension 0",
+        "Map kind 3",
+        "saved failed polling attempts",
+        "successful writable DO_NOT_WAIT",
+        "padded native storage"
+      ],
+      "native_workload_fidelity": "passed",
+      "fidelity_reason": "Saved full/differential write bytes and copy-source bytes match native hardware/WARP/injected CPU oracles; marker alone is insufficient."
+    },
+    {
+      "id": "map_nowait_5",
+      "path": "5/capture.gpa_frame",
+      "sha256": "799f4b0dff195f3f6801426bf44fafc2716a51f6c6390467c31fb9dbb2369ed0",
+      "bytes": 145270,
+      "family": "map_nowait",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [
+        {
+          "path": "manifest.json",
+          "sha256": "81c66020daa03baf5f4ca9c9589e65d26c921a4ab77a5c44d651a05e8e587977",
+          "contains_capture_hash": true
+        }
+      ],
+      "provenance_note": "Unmodified original capture; full native hardware/WARP and injected buffer/texture byte oracles.",
+      "device_scope": "Default hardware capture; native hardware/WARP verified; original player device not matched.",
+      "comparison_policy": "exact_golden",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "reference_scope": "Green present marker only; Map fidelity requires before/after complete resource byte boundaries.",
+      "boundaries": [
+        {
+          "kind": "texture",
+          "resource": 6,
+          "expect_stable": true,
+          "event": 137,
+          "expected_storage_sha256": "706ea1e0b361f41c329962cb230c89fab8c8490404f46fa46ffa6eb024c02549"
+        },
+        {
+          "kind": "texture",
+          "resource": 6,
+          "expect_stable": true,
+          "event": 139,
+          "expected_storage_sha256": "6f2aca97f3a0fb5808453cfe20f0e7fea5db7dfe682011f93967fef74862d136"
+        }
+      ],
+      "controls": [],
+      "covers": [
+        "dimension 1",
+        "Map kind 3",
+        "saved failed polling attempts",
+        "successful writable DO_NOT_WAIT",
+        "padded native storage"
+      ],
+      "native_workload_fidelity": "passed",
+      "fidelity_reason": "Saved full/differential write bytes and copy-source bytes match native hardware/WARP/injected CPU oracles; marker alone is insufficient."
+    },
+    {
+      "id": "map_nowait_6",
+      "path": "6/capture.gpa_frame",
+      "sha256": "1be9e05b771a2560342756541e39d779cbf874b6781da37a41f2cdbc4382b7b0",
+      "bytes": 2099894,
+      "family": "map_nowait",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [
+        {
+          "path": "manifest.json",
+          "sha256": "81c66020daa03baf5f4ca9c9589e65d26c921a4ab77a5c44d651a05e8e587977",
+          "contains_capture_hash": true
+        }
+      ],
+      "provenance_note": "Unmodified original capture; full native hardware/WARP and injected buffer/texture byte oracles.",
+      "device_scope": "Default hardware capture; native hardware/WARP verified; original player device not matched.",
+      "comparison_policy": "exact_golden",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "reference_scope": "Green present marker only; Map fidelity requires before/after complete resource byte boundaries.",
+      "boundaries": [
+        {
+          "kind": "texture",
+          "resource": 6,
+          "expect_stable": true,
+          "event": 201,
+          "expected_storage_sha256": "321c799af4572dd48ebc0cd0ccb22e72d7aca57284a956898e1afb6cd04f00f0"
+        },
+        {
+          "kind": "texture",
+          "resource": 6,
+          "expect_stable": true,
+          "event": 203,
+          "expected_storage_sha256": "ddfe4b2582e503153a820038e3762f2aa77013dbd229ee75916188a5298668a5"
+        }
+      ],
+      "controls": [],
+      "covers": [
+        "dimension 2",
+        "Map kind 3",
+        "saved failed polling attempts",
+        "successful writable DO_NOT_WAIT",
+        "padded native storage"
+      ],
+      "native_workload_fidelity": "passed",
+      "fidelity_reason": "Saved full/differential write bytes and copy-source bytes match native hardware/WARP/injected CPU oracles; marker alone is insufficient."
+    },
+    {
+      "id": "map_nowait_7",
+      "path": "7/capture.gpa_frame",
+      "sha256": "0cb332115c5761d7a4c0cc72da8f2ab4100330b595dfe1046fecee43654d65be",
+      "bytes": 239890,
+      "family": "map_nowait",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [
+        {
+          "path": "manifest.json",
+          "sha256": "81c66020daa03baf5f4ca9c9589e65d26c921a4ab77a5c44d651a05e8e587977",
+          "contains_capture_hash": true
+        }
+      ],
+      "provenance_note": "Unmodified original capture; full native hardware/WARP and injected buffer/texture byte oracles.",
+      "device_scope": "Default hardware capture; native hardware/WARP verified; original player device not matched.",
+      "comparison_policy": "exact_golden",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "reference_scope": "Green present marker only; Map fidelity requires before/after complete resource byte boundaries.",
+      "boundaries": [
+        {
+          "kind": "texture",
+          "resource": 6,
+          "expect_stable": true,
+          "event": 137,
+          "expected_storage_sha256": "5404fbdb592a60c215656b3447da20ffc244dc9fe51316f60f5fc83036beaada"
+        },
+        {
+          "kind": "texture",
+          "resource": 6,
+          "expect_stable": true,
+          "event": 139,
+          "expected_storage_sha256": "92c71df713ea4ceefcca6a6a5050a501a89b57da03bdcec7ad9a09e47f11f58d"
+        }
+      ],
+      "controls": [],
+      "covers": [
+        "dimension 3",
+        "Map kind 3",
+        "saved failed polling attempts",
+        "successful writable DO_NOT_WAIT",
+        "padded native storage"
+      ],
+      "native_workload_fidelity": "passed",
+      "fidelity_reason": "Saved full/differential write bytes and copy-source bytes match native hardware/WARP/injected CPU oracles; marker alone is insufficient."
+    }
+  ]
+}

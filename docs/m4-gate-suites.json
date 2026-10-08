@@ -1,7 +1,7 @@
 {
   "schema": "FloraGPA compatibility gate suites 1",
-  "expected_cases": 613,
-  "expected_unique_captures": 603,
+  "expected_cases": 621,
+  "expected_unique_captures": 611,
   "expected_rejections": 39,
   "suites": [
     {
@@ -847,6 +847,14 @@
       "manifest_sha256": "b6811c5671d94fb686f130072fe8f6e9e145c28bb257e6dd3f0614e5379c883d",
       "capture_root": "artifacts",
       "subdirectory": "m4-stream-predicate-originals",
+      "expected_rejections": {}
+    },
+    {
+      "id": "map_nowait",
+      "manifest": "docs/map-nowait-corpus.json",
+      "manifest_sha256": "00594eb8f22f4f06d672b2efa36c5166f184ebce49fc3b48783166a3c8d73f58",
+      "capture_root": "artifacts",
+      "subdirectory": "m4-map-nowait-originals",
       "expected_rejections": {}
     }
   ],
