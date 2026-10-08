@@ -23,6 +23,7 @@
 #include <QStackedWidget>
 #include "ResourceBrowser.h"
 #include <atomic>
+#include <functional>
 
 namespace flora {
 class CommandStateView;
@@ -143,6 +144,8 @@ class MainWindow final : public QMainWindow {
     void showError(const QString &error);
     void exportImage();
     void exportOutputStorage();
+    void startExport(const QString &progress, const QString &complete,
+                     std::function<void(const CancelCheck &)> operation);
     void selectOutputPixel(int x, int y, const QColor &color);
     void exportBytes();
     void setBusy(bool);

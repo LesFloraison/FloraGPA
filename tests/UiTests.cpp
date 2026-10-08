@@ -3264,7 +3264,7 @@ class UiTests final : public QObject {
             watchdog.start(30000);
             action->trigger();
             QVERIFY(seen && accepted);
-            if (kind == "storage") {
+            if (kind == "storage" || kind == "buffer" || kind == "resource") {
                 QTRY_COMPARE_WITH_TIMEOUT(exported.size(), 1, 30000);
                 QVERIFY(exported.last()[0].toBool());
             }

@@ -2984,21 +2984,6 @@ void MainWindow::previewBuffer() {
     runningBuffer_ = request;
     startWorker(args, false);
 }
-void MainWindow::exportBuffer() {
-    if (!displayedBuffer_)
-        return;
-    const auto bytes = bufferModel_->bytes();
-    auto path = QFileDialog::getSaveFileName(
-        this, "Export buffer", QString("buffer-%1.bin").arg(displayedBuffer_), "Binary data (*.bin)");
-    if (path.isEmpty())
-        return;
-    try {
-        writeFile(path, bytes);
-        statusBar()->showMessage("Buffer exported", 3000);
-    } catch (const std::exception &error) {
-        showError(QString::fromUtf8(error.what()));
-    }
-}
 void MainWindow::updateExperimentActions() {
     if (!undoAction_)
         return;
@@ -4259,32 +4244,5 @@ void MainWindow::exportImage() {
         showError("Cannot save image.");
     else
         statusBar()->showMessage("Image exported", 3000);
-}
-void MainWindow::exportBytes() {
-    if (!frame_ || !selectedResource_)
-        return;
-    // Non-shader spans below borrow mapped capture storage across the dialog.
-    const auto frame = frame_;
-    try {
-        auto r = frame->resource(selectedResource_);
-        Bytes bytes;
-        std::vector<uint8_t> effective;
-        if (r.type >= 0x90 && r.type <= 0x95) {
-            effective = experiment_->shaderBytes(*frame, selectedResource_);
-            bytes = effective;
-        } else if (r.data)
-            bytes = frame->data(r.data);
-        else
-            bytes = frame->payload(selectedResource_);
-        auto path = QFileDialog::getSaveFileName(this, "Export resource",
-                                                 QString("resource-%1.bin").arg(selectedResource_),
-                                                 "Binary data (*.bin *.dxbc)");
-        if (path.isEmpty())
-            return;
-        writeFile(path, QByteArray(reinterpret_cast<const char *>(bytes.data()), qsizetype(bytes.size())));
-        statusBar()->showMessage("Resource exported", 3000);
-    } catch (const std::exception &e) {
-        showError(QString::fromUtf8(e.what()));
-    }
 }
 } // namespace flora
