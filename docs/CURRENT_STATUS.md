@@ -1,7 +1,21 @@
 # Current capabilities and compatibility
 
 Reviewed **2026-10-08**. The user authorized M4, then M5, while keeping M3 open.
-The latest [SM4.0 loop correction](SM40_LOOP_MIP.md), implementation `4c429d2`,
+The latest [background byte export correction](BYTE_EXPORT_ACCEPTANCE.md),
+implementation `d8f13a1`, moves buffer and raw-resource writes off the UI thread.
+Immutable owners survive selection/capture changes, and cancellable 1 MiB staged
+writes preserve prior targets on cancellation or failure. Texture export becomes
+available again only for the same accepted asset and revision. Six serial CTest
+suites pass 270 top-level Qt rows without failures/skips. The 44-file
+`out/FloraGPA-byte-export-20261008/` package passes six relocated checks and four
+golden/control replays. Only the GUI changes; the 565-registration matrix below
+is inherited through unchanged CLI/Worker and 43 identical package files, not
+rerun. The baseline pins 203 local evidence files. This does not change replay
+semantics or complete M3/M4/M5, clean-host deployment or renewed long-soak
+acceptance. The unnecessary full Worker buffer CSV remains the next large-file
+improvement; the module migration ledger is unchanged.
+
+The preceding [SM4.0 loop correction](SM40_LOOP_MIP.md), implementation `4c429d2`,
 removes four false missing-MinLOD rejections. Checked LOOP/ENDLOOP and
 BREAK/CONTINUE paths use a bounded worklist; dimensions read through backedges
 still require saved state. Eight untouched original captures pass 288 producer
@@ -1011,7 +1025,7 @@ the other 35 suites passed initially and the complete UI suite passes after the 
 | M2 — Ordinary replay | Registered-scope gate passed: 366 positive cases and 22 located rejections; auxiliary/snapshot contracts audited. This is not universal API support. State-object identity loss, mixed saved/missing SO targets and unverified lifetimes remain explicit boundaries. |
 | M3 — Deferred Context / Command List | Open; M4/M5 now take priority by user instruction on 2026-10-06. Require original retained-list captures proving identity, build order, resource versions, repeated execution, restore-state and event mapping before production support. |
 | M4 — Resources and boundaries | Active, incomplete. Initial texture/Map data is checked; missing UAV counts reject on actual consumption, while proven counter-free indexed access is allowed. Verified mip-count-only reads, including proved unused SM4.0 dimension lanes across checked IF, SWITCH and LOOP blocks, do not consume missing MinLOD. Known nonzero-MinLOD storage copies and input-clone inheritance are accepted in their recorded scope. Per-slot counter dependencies and saved blt-model occluded Present TEST are checked; continue wider operand/control-flow dependencies, missing pitch/data, predicate/frame-before history, Query and other presentation boundaries. |
-| M5 — Stable compatibility release | Incomplete. The 565-case registry, preceding committed-source build/package, load/semantic-audit cancellation, worker recovery, background common-report parsing, checked buffer acceptance and background replay/texture validation plus display preparation are established. Coverage/Quad attachments have checked background reading and diagnostic paint preparation. Thumbnail reports validate complete binding identity and the entire requested batch before publication, with 12 new isolated recovery cases. The preceding same-source 30-minute/248-cycle run passes 744 strict image checks; it does not certify the later GUI. Continue broader memory attribution, other specialized readers, analyzer/driver/storage failures, model/text publication and exports, large-file workflows, broader sustained testing and independent clean-machine deployment. [Thumbnail acceptance](THUMBNAIL_ACCEPTANCE.md), [latest package](SM40_LOOP_MIP.md), [source-build acceptance](CURRENT_SOURCE_RELEASE_ACCEPTANCE.md) |
+| M5 — Stable compatibility release | Incomplete. The 565-case registry, preceding committed-source build/package, load/semantic-audit cancellation, worker recovery, background common-report parsing, checked buffer acceptance and background replay/texture validation plus display preparation are established. Coverage/Quad attachments have checked background reading and diagnostic paint preparation. Thumbnail reports validate complete binding identity and the entire requested batch before publication, with 12 new isolated recovery cases. The preceding same-source 30-minute/248-cycle run passes 744 strict image checks; it does not certify the later GUI. Continue broader memory attribution, other specialized readers, analyzer/driver/storage failures, model/text publication and exports, large-file workflows, broader sustained testing and independent clean-machine deployment. [Thumbnail acceptance](THUMBNAIL_ACCEPTANCE.md), [latest package](BYTE_EXPORT_ACCEPTANCE.md), [source-build acceptance](CURRENT_SOURCE_RELEASE_ACCEPTANCE.md) |
 | M6 — Analyzer and other versions | Incomplete. Continue remaining Qt consumers, advanced profiling/debugging and version-specific adapters after core replay gates. Existing analyzer features remain available. |
 
 The original order was **M1 → M2 → M3 → M4 → M5**. On 2026-10-06 the user
