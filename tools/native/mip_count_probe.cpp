@@ -10,10 +10,11 @@ int wmain(int argc, wchar_t **argv) {
     fs::create_directories(output);
     try {
         const int mode = std::stoi(argv[2]);
-        if (mode < 0 || mode > 27)
+        if (mode < 0 || mode > 35)
             throw std::runtime_error("Invalid mode");
         const int switchBehaviors[]{0, 1, 2, 2, 4, 5, 0, 0};
-        const int behavior = mode >= 20 ? switchBehaviors[mode - 20] : mode < 18 ? mode % 6 : 0;
+        const int loopBehaviors[]{0, 1, 2, 4, 4, 5, 0, 0};
+        const int behavior = mode >= 28 ? loopBehaviors[mode - 28] : mode >= 20 ? switchBehaviors[mode - 20] : mode < 18 ? mode % 6 : 0;
         const char *profile = mode < 6 ? "ps_5_0" : "ps_4_0";
         if (argc == 5 && !LoadLibraryExW(argv[4], nullptr, LOAD_WITH_ALTERED_SEARCH_PATH))
             throw std::runtime_error("Cannot load development shim");
@@ -116,7 +117,20 @@ int wmain(int argc, wchar_t **argv) {
             "default:r=float4(0,1,0,1);break;}return r;}"
             "float4 sharedCase():SV_Target{uint w,h,n;tex.GetDimensions(0,w,h,n);float4 r;"
             "[forcecase]switch(n){case 3:case 4:r=float4(n/4.0,0,0,1);break;"
-            "default:r=float4(0,n/4.0,0,1);break;}return r;}";
+            "default:r=float4(0,n/4.0,0,1);break;}return r;}"
+            "float4 loopCount():SV_Target{uint w,h,n;tex.GetDimensions(0,w,h,n);uint a=0;"
+            "[loop]for(uint i=0;i<n;++i){a+=1;}return float4(a/4.0,0,0,1);}"
+            "float4 loopWidth():SV_Target{uint w,h,n;tex.GetDimensions(1,w,h,n);uint a=0;"
+            "[loop]for(uint i=0;i<n;++i){a+=w;}return float4(a==16,h==4,n==4,1);}"
+            "float4 loopCondition():SV_Target{uint w,h,n;tex.GetDimensions(1,w,h,n);uint a=0;"
+            "[loop]for(uint i=0;i<w;++i){a+=1;}return float4(a==4,n==4,0,1);}"
+            "float4 loopSample():SV_Target{uint w,h,n;tex.GetDimensions(0,w,h,n);float a=0;"
+            "[loop]for(uint i=0;i<n;++i){a+=tex.SampleLevel(sam,float2(.5,.5),0).g;}"
+            "return float4(n/4.0,a/4.0,0,1);}"
+            "float4 nestedLoop():SV_Target{uint w,h,n;tex.GetDimensions(0,w,h,n);uint a=0;"
+            "[loop]for(uint i=0;i<n;++i){[loop]for(uint j=0;j<n;++j){a+=1;}}return float4(a/16.0,0,0,1);}"
+            "float4 continueLoop():SV_Target{uint w,h,n;tex.GetDimensions(0,w,h,n);uint a=0;"
+            "[loop]for(uint i=0;i<n;++i){[branch]if(i==1)continue;a+=1;}return float4(a/3.0,0,0,1);}";
         auto compile = [&](const char *entry, const char *target, bool strip) {
             ComPtr<ID3DBlob> code, errors;
             checked(D3DCompile(shader.data(), shader.size(), nullptr, nullptr, nullptr, entry, target, 0, 0,
@@ -142,7 +156,9 @@ int wmain(int argc, wchar_t **argv) {
                                     "branchSample", "branchSample", "nested", "noElse"};
         const char *switchEntries[]{"switched", "switched", "switchWidth", "defaultWidth",
                                    "switchSample", "switchSample", "nestedSwitch", "sharedCase"};
-        auto psCode = compile(mode >= 20 ? switchEntries[mode - 20] : mode >= 12 ? branchEntries[mode - 12] : behavior < 2    ? "count"
+        const char *loopEntries[]{"loopCount", "loopCount", "loopWidth", "loopCondition",
+                                  "loopSample", "loopSample", "nestedLoop", "continueLoop"};
+        auto psCode = compile(mode >= 28 ? loopEntries[mode - 28] : mode >= 20 ? switchEntries[mode - 20] : mode >= 12 ? branchEntries[mode - 12] : behavior < 2    ? "count"
                               : behavior == 2 ? "dimensions"
                               : behavior == 3 ? "mixed"
                                           : "dependent",
