@@ -1,8 +1,8 @@
 {
   "schema": "FloraGPA compatibility gate suites 1",
-  "expected_cases": 621,
-  "expected_unique_captures": 611,
-  "expected_rejections": 39,
+  "expected_cases": 629,
+  "expected_unique_captures": 619,
+  "expected_rejections": 42,
   "suites": [
     {
       "id": "corpus",

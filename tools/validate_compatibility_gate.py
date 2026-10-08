@@ -32,6 +32,25 @@ def require(condition, reason):
         raise ValueError(reason)
 
 
+def check_registry_totals(config, repo):
+    """Reject stale declarations before launching any GPU process."""
+    cases = 0
+    captures = set()
+    rejections = 0
+    for suite in config['suites']:
+        manifest = repo / suite['manifest']
+        require(manifest_digest(manifest) == suite['manifest_sha256'], 'Changed corpus manifest: ' + suite['id'])
+        rows = load(manifest)['cases']
+        require(set(suite['expected_rejections']) <= {row['id'] for row in rows}, 'Unknown expected rejection')
+        cases += len(rows)
+        captures.update(row['sha256'] for row in rows)
+        rejections += len(suite['expected_rejections'])
+    for key, actual in [('expected_cases', cases), ('expected_unique_captures', len(captures)),
+                        ('expected_rejections', rejections)]:
+        require(type(config[key]) is int and config[key] == actual,
+                f'Corpus registry {key} is {config[key]!r}, but manifests declare {actual}')
+
+
 def check_case(case, specification, negative, directory, repeat):
     """Check actual reports and logs, including count/completion/dependency evidence."""
     require(case.get('fidelity') == fidelity_result(specification, case),
@@ -129,6 +148,7 @@ def main():
     config = load(args.suites)
     require(config.get('manifest_hash_policy') == 'UTF-8 bytes with CRLF normalized to LF',
             'Unknown manifest hash policy')
+    check_registry_totals(config, repo)
     exe = args.exe.resolve(strict=True)
     roots = {'legacy': args.legacy_root.resolve(strict=True),
              'artifacts': args.artifacts_root.resolve(strict=True)}
