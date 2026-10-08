@@ -98,6 +98,10 @@ The Predicate Getter history gap recorded below is subsequently resolved by
 [Predicate Getter history acceptance](PREDICATE_QUERY_HISTORY.md); other limits
 and the historical evidence in this document remain unchanged.
 
+The synchronous capture-structure workflow mentioned below is subsequently
+addressed by [structure inspection acceptance](STRUCTURE_INSPECTION_ACCEPTANCE.md).
+Its memory/cancellation boundaries and other remaining work are recorded there.
+
 ## Remaining boundaries
 
 Preparation is cooperative between records; it cannot preempt one decoder or

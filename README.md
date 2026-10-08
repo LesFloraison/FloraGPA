@@ -119,6 +119,8 @@ Captured GetData details are prepared during background loading; cancelled
 completed loads release their candidate capture. See [Query inspection acceptance](docs/QUERY_INSPECTION_ACCEPTANCE.md).
 Predicate GetDesc/GetDataSize observations now supply event provenance and
 conflict diagnostics for captured results; see [Predicate history acceptance](docs/PREDICATE_QUERY_HISTORY.md).
+Contexts and Command Lists inspection/export now supports background cancellation,
+on-demand tree rows and protected JSON publication. See [structure inspection acceptance](docs/STRUCTURE_INSPECTION_ACCEPTANCE.md).
 
 ## Preflight and command-line replay
 

@@ -98,6 +98,10 @@ original-capture hashes and 986 local evidence files. All 1,074 checked inherite
 evidence/package hashes also remain intact. Captures, original GPA components
 and generated outputs remain outside Git.
 
+The synchronous capture-structure workflow mentioned below is subsequently
+addressed by [structure inspection acceptance](STRUCTURE_INSPECTION_ACCEPTANCE.md).
+Its memory/cancellation boundaries and other remaining work are recorded there.
+
 ## Limits
 
 This restores captured-result interpretation and diagnostics; it adds no new
