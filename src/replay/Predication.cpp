@@ -51,16 +51,24 @@ void Replay::predicateCreation(const Entry &e) {
     unissuedPredicates_.insert(c.resource);
     ++counts["CreatePredicate"];
 }
-Com<ID3D11Predicate> Replay::createPredicate(Id id, bool readable) {
+Com<ID3D11Query> Replay::createPredicate(Id id, bool readable) {
     auto resource = readPredicate(frame_, id);
     D3D11_QUERY_DESC desc{D3D11_QUERY(resource.type), readable ? 0u : resource.flags};
+    if (isStreamOverflowQuery(resource.type)) {
+        Com<ID3D11Query> query;
+        check(device_->CreateQuery(&desc, &query), "Create saved stream overflow query");
+        return query;
+    }
     Com<ID3D11Predicate> predicate;
     check(device_->CreatePredicate(&desc, &predicate), "Create predicate");
-    return predicate;
+    Com<ID3D11Query> query;
+    check(predicate.As(&query), "Read predicate query interface");
+    return query;
 }
 void Replay::bindPredicate(Id id, uint32_t value) {
     if (id && !conditionPredicates_.contains(id))
-        readPredicate(frame_, id);
+        if (isStreamOverflowQuery(readPredicate(frame_, id).type))
+            throw std::runtime_error("Stream overflow query " + std::to_string(id) + " cannot be bound as a predicate");
     if (activePredicates_.contains(id))
         throw std::runtime_error("Cannot bind a predicate before End");
     if (unissuedPredicates_.contains(id))
@@ -100,7 +108,7 @@ void Replay::applyPredicate(uint16_t type, Bytes payload) {
     if (!id)
         throw std::runtime_error("Begin/End requires a nonzero predicate resource");
     auto desc = readPredicate(frame_, id);
-    auto predicate = get<ID3D11Predicate>(id);
+    auto predicate = get<ID3D11Query>(id);
     if (boundPredicate_ == id)
         throw std::runtime_error("Unbind predicate before Begin or End");
     if (command.operation == PredicateOperation::Begin) {
@@ -132,7 +140,7 @@ void Replay::applyPredicate(uint16_t type, Bytes payload) {
             if (!waitIdle(10000))
                 throw std::runtime_error("Predicate segment completion timeout");
             auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds(10);
-            Com<ID3D11Predicate> selected = last.native;
+            Com<ID3D11Query> selected = last.native;
             for (const auto &segment : segments) {
                 BOOL value = FALSE;
                 for (;;) {
@@ -178,7 +186,7 @@ Replay::PredicateResult Replay::readPredicateResult(Id id, unsigned timeoutMs) {
         return result;
     }
     auto desc = readPredicate(frame_, id);
-    auto predicate = get<ID3D11Predicate>(id);
+    auto predicate = get<ID3D11Query>(id);
     PredicateResult result;
     result.bound = boundPredicate_ == id;
     result.predicateValue = predicateValue_;

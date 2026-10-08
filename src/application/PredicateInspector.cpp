@@ -24,6 +24,11 @@ Json describePredicate(const Frame &frame, Id id) {
              {"query_name", desc.type == 5 ? "occlusion_predicate" : "so_overflow_predicate"},
              {"query_flags", desc.flags},
              {"initial_result_source", "native_player_empty_begin_end"}};
+    if (isStreamOverflowQuery(desc.type)) {
+        out["query_name"] = "so_overflow_query_stream" + std::to_string((desc.type - 9) / 2);
+        out["initial_result_source"] = "unissued_saved_stream_query";
+        out["bindable_predicate"] = false;
+    }
     const auto creations = auditPredicateCreations(frame);
     if (auto it = creations.creationEvents.find(id); it != creations.creationEvents.end()) {
         requirePredicateCreation(creations, it->second);

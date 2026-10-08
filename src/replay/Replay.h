@@ -212,7 +212,7 @@ class Replay {
     void validateBlendOutputs(const State &state, ID3D11BlendState *blend);
     void applyBlendEdit(Id event, const State &state);
     struct PredicateSegment {
-        Com<ID3D11Predicate> native, mirror;
+        Com<ID3D11Query> native, mirror;
     };
     struct PredicateInterval {
         PredicateSegment current;
@@ -264,7 +264,7 @@ class Replay {
         PredicateIsolation(const PredicateIsolation &) = delete;
         PredicateIsolation &operator=(const PredicateIsolation &) = delete;
     };
-    Com<ID3D11Predicate> createPredicate(Id id, bool readable = false);
+    Com<ID3D11Query> createPredicate(Id id, bool readable = false);
     void bindPredicate(Id id, uint32_t value);
     void applyPredicate(uint16_t type, Bytes payload);
     void resetPredicates();

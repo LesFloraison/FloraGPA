@@ -69,8 +69,16 @@ void PredicateView::setSelection(std::shared_ptr<const Frame> frame, Id event) {
         resources_->clear();
         if (frame_)
             for (const auto &[id, e] : frame_->entries())
-                if (e.category == 5 && e.type == 0x96)
-                    resources_->addItem(QString("Predicate %1").arg(id), QVariant::fromValue(qulonglong(id)));
+                if (e.category == 5 && e.type == 0x96) {
+                    QString name = QString("Predicate %1").arg(id);
+                    try {
+                        if (isStreamOverflowQuery(readPredicate(*frame_, id).type))
+                            name = QString("Query %1").arg(id);
+                    } catch (const std::exception &) {
+                        // Keep malformed resources selectable for located inspection errors.
+                    }
+                    resources_->addItem(name, QVariant::fromValue(qulonglong(id)));
+                }
         if (frame_)
             for (const auto &[bindingEvent, proof] : auditNormalizedPredication(*frame_))
                 if (resources_->findData(QVariant::fromValue(qulonglong(proof.resource))) < 0)

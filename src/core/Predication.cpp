@@ -1,5 +1,6 @@
 #include "Predication.h"
 namespace flora {
+bool isStreamOverflowQuery(uint32_t type) { return type == 9 || type == 11 || type == 13 || type == 15; }
 PredicateDescriptor readPredicate(const Frame &frame, Id id) {
     if (!frame.entries().contains(id))
         throw std::runtime_error("Predicate resource " + std::to_string(id) +
@@ -7,7 +8,8 @@ PredicateDescriptor readPredicate(const Frame &frame, Id id) {
     Reader r(frame.payload(id, 5, 0x96));
     PredicateDescriptor out{id, r.read<Id>(), r.read<Id>(), r.read<uint32_t>(), r.read<uint32_t>()};
     r.end();
-    if ((out.type != 5 && out.type != 7) || (out.flags & ~1u) || (out.flags && out.type != 5))
+    if ((out.type != 5 && out.type != 7 && !isStreamOverflowQuery(out.type)) ||
+        (out.flags & ~1u) || (out.flags && out.type != 5))
         throw std::runtime_error("Unsupported predicate query type or misc flags");
     return out;
 }

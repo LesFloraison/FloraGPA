@@ -153,7 +153,9 @@ Json validateFrame(const std::filesystem::path &path, const std::function<bool()
                             return;
                         }
                         try {
-                            readPredicate(frame, resource);
+                            const auto descriptor = readPredicate(frame, resource);
+                            if (binding && isStreamOverflowQuery(descriptor.type))
+                                throw std::runtime_error("Stream overflow query cannot be bound as a predicate");
                         } catch (const std::exception &error) {
                             finding(&e, "error", "predicate_resource_invalid", error.what(), resource);
                             return;

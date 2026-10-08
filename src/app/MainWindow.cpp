@@ -2405,8 +2405,10 @@ void MainWindow::inspectResource(Id id) {
         auto resource = frame_->resource(id);
         if (e.type == 0x96) {
             auto descriptor = readPredicate(*frame_, id);
-            properties("Predicate", {{"ID", QString::number(id)},
-                                     {"Query", descriptor.type == 5 ? "Occlusion" : "SO overflow"},
+            const bool streamQuery = isStreamOverflowQuery(descriptor.type);
+            properties(streamQuery ? "Query" : "Predicate", {{"ID", QString::number(id)},
+                                     {"Query", streamQuery ? QString("SO overflow · Stream %1").arg((descriptor.type - 9) / 2)
+                                                           : descriptor.type == 5 ? "Occlusion" : "SO overflow"},
                                      {"Flags", QString::number(descriptor.flags)}});
             predicateView_->selectResource(id);
             auto tabs = findChild<QTabWidget *>("pipelineTabs");

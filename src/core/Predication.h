@@ -18,6 +18,9 @@ struct PredicateCommand {
     uint32_t value{};
 };
 PredicateDescriptor readPredicate(const Frame &frame, Id id);
+// GPA's 0x96 family also stores BOOL stream queries created with CreateQuery.
+// Those resources support Begin/End/GetData, never SetPredication.
+bool isStreamOverflowQuery(uint32_t type);
 std::optional<PredicateOperation> predicateOperation(uint16_t type);
 PredicateCommand readPredicateCommand(uint16_t type, Bytes payload);
 } // namespace flora

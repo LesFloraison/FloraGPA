@@ -2267,6 +2267,38 @@ class UiTests final : public QObject {
         QVERIFY(done.takeLast()[0].toBool());
         checkValue("1");
     }
+    void originalStreamQueryInspector_data() {
+        QTest::addColumn<int>("mode");
+        for(int mode:{4,8,29,47})QTest::newRow(qPrintable(QString::number(mode)))<<mode;
+    }
+    void originalStreamQueryInspector() {
+        using namespace flora;
+        const auto root=qEnvironmentVariable("FLORA_STREAM_QUERY_CAPTURES");
+        if(root.isEmpty())QSKIP("Set original stream Query corpus");
+        QFETCH(int,mode);const auto path=root+'/'+QString::number(mode)+"/capture.gpa_frame";
+        auto frame=std::make_shared<Frame>(path.toStdWString());Id resource=0,begin=0,end=0;
+        for(const auto &[id,e]:frame->entries())if(e.category==5&&e.type==0x96&&isStreamOverflowQuery(readPredicate(*frame,id).type))resource=id;
+        for(const auto &[id,e]:frame->entries())if(e.category==7&&predicateOperation(e.type)){
+            const auto call=readPredicateCommand(e.type,frame->payload(id));if(call.resource!=resource)continue;
+            if(call.operation==PredicateOperation::Begin)begin=id;if(call.operation==PredicateOperation::End)end=id;
+        }
+        QVERIFY(resource&&begin&&end);MainWindow window;window.show();QSignalSpy done(&window,&MainWindow::taskFinished);
+        window.openCapture(path);QTRY_VERIFY_WITH_TIMEOUT(!done.empty()&&!window.busy(),30000);QVERIFY(done.last()[0].toBool());
+        auto view=window.findChild<PredicateView *>("predicatePane");QVERIFY(view);
+        auto tabs=window.findChild<QTabWidget *>("pipelineTabs");window.findChild<QTabWidget *>("analysisTabs")->setCurrentWidget(tabs);tabs->setCurrentWidget(view);
+        auto read=view->findChild<QAction *>("readPredicate");auto boundary=view->findChild<QComboBox *>("predicateBoundary");
+        auto fields=view->findChild<QTreeWidget *>("predicateFields");QSignalSpy inspected(view,&PredicateView::inspectionFinished);
+        for(int phase=0;phase<3;++phase){
+            view->setSelection(frame,phase==2?end:begin);view->selectResource(resource);boundary->setCurrentIndex(phase!=0);
+            QCOMPARE(view->findChild<QComboBox *>("predicateResource")->currentText(),QString("Query %1").arg(resource));
+            QTRY_VERIFY_WITH_TIMEOUT(read->isEnabled(),30000);read->trigger();QTRY_VERIFY_WITH_TIMEOUT(!inspected.empty(),30000);
+            QVERIFY(inspected.takeLast()[0].toBool());
+            QCOMPARE(fields->topLevelItem(0)->text(1),QString(phase==0?"unissued":phase==1?"active":"ready"));
+            QCOMPARE(fields->topLevelItem(1)->text(1),phase<2?QString("—"):QString((mode/4)%3==1?"true":"false"));
+            QCOMPARE(fields->topLevelItem(2)->text(1),QString("false"));
+        }
+        snapshot(window,QString("stream-query-%1").arg(mode));
+    }
     void predicateInspector() {
         using namespace flora;
         auto capture = testing::predicateCapture(false, 0);

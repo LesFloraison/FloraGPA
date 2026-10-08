@@ -261,10 +261,15 @@ IUnknown *Replay::object(Id id) {
             }
         } else if (t == 0x96) {
             auto predicate = createPredicate(id);
-            Unpredicated guard(context_.Get());
-            context_->Begin(predicate.Get());
-            context_->End(predicate.Get());
-            baselinePredicates_.insert(id);
+            if (isStreamOverflowQuery(readPredicate(frame_, id).type)) {
+                // A saved descriptor is not evidence of a frame-before result.
+                unissuedPredicates_.insert(id);
+            } else {
+                Unpredicated guard(context_.Get());
+                context_->Begin(predicate.Get());
+                context_->End(predicate.Get());
+                baselinePredicates_.insert(id);
+            }
             result = predicate;
         } else if (t == 0x97) {
             readClassRecord(frame_, id);
@@ -1030,7 +1035,7 @@ void Replay::command(const Entry &e) {
             if (options_.disabled.contains(q.end) || activePredicates_.contains(q.resource) ||
                 unissuedPredicates_.contains(q.resource) || baselinePredicates_.contains(q.resource))
                 throw std::runtime_error("GetData completion requires its captured predicate interval");
-            auto predicate = get<ID3D11Predicate>(q.resource);
+            auto predicate = get<ID3D11Query>(q.resource);
             ReplayAnnotation marker(captureAnnotation_.Get(), e.id, "GetDataSynchronization");
             const auto operation = "GetData synchronization at event " + std::to_string(e.id) +
                                    ", query " + std::to_string(q.resource);

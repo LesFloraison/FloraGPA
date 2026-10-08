@@ -251,7 +251,8 @@ PredicateBinding validatePredicateSetter(const Frame &frame, Id event, const nlo
                                 : std::map<Id, NormalizedPredicateProof>{};
         const auto proof = proofs.find(event);
         if (proof == proofs.end() || proof->second.resource != result.resource)
-            readPredicate(frame, result.resource);
+            if (isStreamOverflowQuery(readPredicate(frame, result.resource).type))
+                throw std::runtime_error("Stream overflow query cannot be bound as a predicate");
     }
     return result;
 }
