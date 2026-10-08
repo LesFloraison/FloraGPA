@@ -9,7 +9,7 @@ import sys
 import tempfile
 import unittest
 
-from validate_recovery_soak import digest, run_process, validate_workflows, validate_platform, validate_gui_resources
+from validate_recovery_soak import digest, run_process, validate_workflows, validate_platform, validate_gui_resources, GUI_WORKFLOW_STAGES
 
 
 class GuiResourceTests(unittest.TestCase):
@@ -66,6 +66,40 @@ class GuiResourceTests(unittest.TestCase):
     def test_modified_summary(self):
         self.journal['gui_before_window']=dict(before={},after={},native_windows_complete=True,modules_complete=True)
         with self.assertRaisesRegex(ValueError,'summary differs'):
+            validate_gui_resources(self.root,self.journal)
+
+    def add_stages(self):
+        self.journal['gui_workflow_stages'] = True
+        snapshot = json.loads((self.root/'cycle-000001.json').read_text())
+        stages = [dict(stage=name, elapsed_ms=index, snapshot=self.journal['gui_before_window'])
+                  for index, name in enumerate(GUI_WORKFLOW_STAGES)]
+        self.journal['observations'][0]['workflows'] = dict(gui_stages=stages)
+        for stage in stages:
+            (self.root/f"workflow-000001-{stage['stage']}.json").write_text(json.dumps(snapshot), encoding='utf-8')
+        return stages
+
+    def test_complete_stages(self):
+        self.add_stages()
+        self.assertEqual(len(validate_gui_resources(self.root,self.journal)),16)
+
+    def test_missing_or_reordered_stages(self):
+        stages = self.add_stages()
+        for changed in [stages[:-1], stages[::-1], []]:
+            self.journal['observations'][0]['workflows']['gui_stages'] = changed
+            with self.assertRaisesRegex(ValueError,'operation order'):
+                validate_gui_resources(self.root,self.journal)
+
+    def test_bad_stage_time(self):
+        stages = self.add_stages()
+        for value in [-1, True, 0.5, '1']:
+            stages[-1]['elapsed_ms'] = value
+            with self.subTest(value=value), self.assertRaisesRegex(ValueError,'stage times'):
+                validate_gui_resources(self.root,self.journal)
+
+    def test_unrequested_stages(self):
+        self.add_stages()
+        self.journal['gui_workflow_stages'] = False
+        with self.assertRaisesRegex(ValueError,'Unexpected GUI'):
             validate_gui_resources(self.root,self.journal)
 
 

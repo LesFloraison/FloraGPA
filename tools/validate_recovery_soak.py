@@ -16,6 +16,10 @@ import time
 
 from validate_source_build import run_process
 
+GUI_WORKFLOW_STAGES = ['before_query', 'after_query', 'after_api_cancel', 'after_api_export',
+                       'structure_open', 'after_structure_cancel', 'after_contexts_export',
+                       'after_lists_export', 'after_structure_close']
+
 
 def digest(path):
     with path.open('rb') as stream:
@@ -37,6 +41,19 @@ def validate_gui_resources(root, journal):
     expected = {'before_window.json': journal['gui_before_window'],
                 'after_window_destroy.json': journal['gui_after_window_destroy']}
     for index, row in enumerate(journal['observations'], 1):
+        stages = row.get('workflows', {}).get('gui_stages', [])
+        if journal.get('gui_workflow_stages'):
+            if [stage['stage'] for stage in stages] != GUI_WORKFLOW_STAGES:
+                raise ValueError('GUI workflow stages differ from required operation order')
+            previous = 0
+            for stage in stages:
+                elapsed = stage['elapsed_ms']
+                if type(elapsed) is not int or elapsed < previous:
+                    raise ValueError('GUI workflow stage times are invalid or unordered')
+                previous = elapsed
+                expected[f"workflow-{index:06d}-{stage['stage']}.json"] = stage['snapshot']
+        elif stages:
+            raise ValueError('Unexpected GUI workflow stages')
         expected[f'cycle-{index:06d}.json'] = row['gui_snapshot']
     for key in ['before', 'after_test_history_clear', 'after_log_clear', 'after_pixmap_cache_clear']:
         expected[f'control-{key}.json'] = journal['retention_control'][key]['gui_snapshot']
@@ -147,6 +164,7 @@ def main():
                   workflows=args.workflows,
                   qt_platform=args.platform,
                   gui_resources=args.gui_resources,
+                  gui_workflow_stages=args.gui_resources and args.workflows,
                   scope=f'Same-host {args.platform} Qt window, system-only PATH, serial production workers; not clean-machine or all-workflow certification')
 
     def save():
@@ -224,6 +242,7 @@ def main():
         assert journal['completed'] and journal['phase'] == 'complete'
         validate_platform(args.platform, journal)
         assert journal['workflows'] == args.workflows
+        assert journal['gui_workflow_stages'] == (args.gui_resources and args.workflows)
         assert journal['elapsed_ms'] >= args.seconds * 1000
         rows = journal['observations']
         assert len(rows) == journal['completed_cycles'] and len(rows) >= args.pairs * 2 and len(rows) % 2 == 0

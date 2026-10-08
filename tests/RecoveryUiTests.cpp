@@ -320,6 +320,7 @@ class RecoveryUiTests final : public QObject {
             {"pixmap_cache_limit_kib", QPixmapCache::cacheLimit()},
             {"minimum_pairs", count}, {"observations", nlohmann::json::array()}};
         journal["workflows"] = !workflows.isEmpty();
+        journal["gui_workflow_stages"] = !guiDirectory.isEmpty() && !workflows.isEmpty();
         if (!guiDirectory.isEmpty()) journal["gui_before_window"] = beforeWindow;
         testing::RecoveryJournal journalWriter(journalPath);
         std::unique_ptr<testing::ProcessMemorySnapshot> memoryMaps;
@@ -387,7 +388,15 @@ class RecoveryUiTests final : public QObject {
                     QVERIFY2(save("inspect_export"), qPrintable(journalWriter.error()));
                     bool passed = false;
                     const auto relative = QString("%1").arg(epoch, 6, 10, QChar('0'));
-                    testing::recoveryWorkflows(window, QDir(workflows).filePath(relative), workflow, passed);
+                    std::function<void(const char *)> observe;
+                    QElapsedTimer workflowTimer;
+                    workflowTimer.start();
+                    if (!guiDirectory.isEmpty()) observe = [&](const char *stage) {
+                        const auto summary = guiSnapshot("workflow-" + relative + '-' + stage);
+                        workflow["gui_stages"].push_back({{"stage", stage},
+                            {"elapsed_ms", workflowTimer.elapsed()}, {"snapshot", summary}});
+                    };
+                    testing::recoveryWorkflows(window, QDir(workflows).filePath(relative), workflow, passed, observe);
                     QVERIFY(passed);
                     workflow["directory"] = relative.toStdString();
                     QCOMPARE(outputHash(window), golden);

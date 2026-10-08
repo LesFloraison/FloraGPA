@@ -5,7 +5,7 @@ import tempfile
 import unittest
 
 from analyze_gui_resources import summarize
-from validate_recovery_soak import digest, validate_gui_resources
+from validate_recovery_soak import digest, validate_gui_resources, GUI_WORKFLOW_STAGES
 
 
 class AnalysisTests(unittest.TestCase):
@@ -85,6 +85,24 @@ class AnalysisTests(unittest.TestCase):
         (self.gui / 'before_window.json').unlink()
         with self.assertRaisesRegex(ValueError, 'inventory differs'):
             summarize(self.root)
+
+    def test_stages_precede_cycle_and_follow_operations(self):
+        snapshot = json.loads((self.gui / 'cycle-000001.json').read_text())
+        self.journal['gui_workflow_stages'] = True
+        stages = [dict(stage=name, elapsed_ms=index,
+                       snapshot=self.journal['observations'][0]['gui_snapshot'])
+                  for index, name in enumerate(GUI_WORKFLOW_STAGES)]
+        self.journal['observations'][0]['workflows'] = dict(gui_stages=stages)
+        for stage in stages:
+            self.write(self.gui / f"workflow-000001-{stage['stage']}.json", snapshot)
+        self.write(self.root / 'journal.json', self.journal)
+        self.report['journal_sha256'] = digest(self.root / 'journal.json')
+        self.report['gui_resource_files'] = validate_gui_resources(self.gui, self.journal)
+        self.write(self.root / 'validation.json', self.report)
+        rows = summarize(self.root)['observations']
+        self.assertEqual([row['snapshot'] for row in rows[1:10]],
+                         [f'workflow-000001-{stage}.json' for stage in GUI_WORKFLOW_STAGES])
+        self.assertEqual(rows[10]['snapshot'], 'cycle-000001.json')
 
 
 if __name__ == '__main__':

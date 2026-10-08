@@ -44,9 +44,12 @@ inline void recoveryChoose(QWidget &owner, const QString &path, const std::funct
 }
 
 inline void recoveryWorkflows(MainWindow &window, const QString &directory,
-                              nlohmann::json &evidence, bool &passed) {
+                              nlohmann::json &evidence, bool &passed,
+                              const std::function<void(const char *)> &observe = {}) {
     passed = false;
     QVERIFY(QDir().mkpath(directory));
+    const auto snapshot = [&](const char *stage) { if (observe) observe(stage); };
+    snapshot("before_query");
     QCoreApplication::setAttribute(Qt::AA_DontUseNativeDialogs, true);
     const auto frame = std::make_shared<Frame>(window.capturePath().toStdWString());
     const auto queries = QueryInspection::prepare(frame);
@@ -79,12 +82,14 @@ inline void recoveryWorkflows(MainWindow &window, const QString &directory,
     boundary->setCurrentIndex(0);
     QTRY_VERIFY_WITH_TIMEOUT(!replayed.empty() && !window.busy(), 60000);
     QVERIFY(replayed.last()[0].toBool());
+    snapshot("after_query");
     QSignalSpy exported(&window, &MainWindow::exportFinished);
     auto exportApi = window.findChild<QAction *>("exportApiLog");
     QVERIFY(exportApi);
     bool chosen = false;
     recoveryChoose(window, {}, [&] { exportApi->trigger(); }, chosen);
     QVERIFY(chosen); QCOMPARE(exported.size(), 0); QVERIFY(!window.busy());
+    snapshot("after_api_cancel");
     const auto apiPath = directory + "/api";
     QVERIFY(QDir().mkpath(apiPath));
     recoveryChoose(window, apiPath, [&] { exportApi->trigger(); }, chosen);
@@ -96,6 +101,7 @@ inline void recoveryWorkflows(MainWindow &window, const QString &directory,
     exportCommands(*frame, expected.path().toStdWString(), "GetData");
     for (const auto name : {"commands.json", "commands.csv"})
         QCOMPARE(recoveryRead(apiPath + '/' + name), recoveryRead(expected.filePath(name)));
+    snapshot("after_api_export");
 
     auto structure = window.findChild<QAction *>("inspectCaptureStructure");
     QVERIFY(structure);
@@ -108,12 +114,14 @@ inline void recoveryWorkflows(MainWindow &window, const QString &directory,
         auto lists = dialog->findChild<QTreeView *>("commandListInventory");
         QVERIFY(inventory && lists);
         QTRY_VERIFY_WITH_TIMEOUT(!dialog->busy() && inventory->model() && lists->model(), 30000);
+        snapshot("structure_open");
         auto tabs = dialog->findChild<QTabWidget *>();
         auto button = dialog->findChild<QPushButton *>("exportCaptureStructure");
         QVERIFY(tabs && button && button->isEnabled());
         QSignalSpy saved(dialog, &CaptureStructureDialog::exportFinished);
         recoveryChoose(*dialog, {}, [&] { button->click(); }, chosen);
         QVERIFY(chosen); QCOMPARE(saved.size(), 0); QVERIFY(!dialog->busy());
+        snapshot("after_structure_cancel");
         for (int tab = 0; tab < 2; ++tab) {
             tabs->setCurrentIndex(tab); saved.clear();
             const auto target = directory + (tab ? "/command-lists.json" : "/contexts.json");
@@ -123,6 +131,7 @@ inline void recoveryWorkflows(MainWindow &window, const QString &directory,
             QVERIFY(saved.last()[0].toBool()); QVERIFY(!dialog->busy());
             const auto document = tab ? inspectCommandLists(*frame) : inspectContexts(*frame);
             QCOMPARE(recoveryRead(target), QByteArray::fromStdString(document.dump(2) + "\n"));
+            snapshot(tab ? "after_lists_export" : "after_contexts_export");
         }
         inspected = true;
     });
@@ -130,6 +139,7 @@ inline void recoveryWorkflows(MainWindow &window, const QString &directory,
     QVERIFY(inspected);
     QCoreApplication::sendPostedEvents(nullptr, QEvent::DeferredDelete);
     QVERIFY(!window.findChild<CaptureStructureDialog *>());
+    snapshot("after_structure_close");
     evidence["files"] = nlohmann::json::object();
     for (const auto name : {"api/commands.json", "api/commands.csv", "contexts.json", "command-lists.json"}) {
         const auto bytes = recoveryRead(directory + '/' + name);

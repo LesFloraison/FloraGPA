@@ -36,7 +36,10 @@ def summarize(root):
     if actual != report['gui_resource_files']:
         raise ValueError('GUI snapshot identity differs from accepted run')
     names = ['before_window.json']
-    names += [f'cycle-{index:06d}.json' for index in range(1, len(journal['observations']) + 1)]
+    for index, observation in enumerate(journal['observations'], 1):
+        names += [f"workflow-{index:06d}-{stage['stage']}.json"
+                  for stage in observation.get('workflows', {}).get('gui_stages', [])]
+        names.append(f'cycle-{index:06d}.json')
     names += [f'control-{key}.json' for key in
               ['before', 'after_test_history_clear', 'after_log_clear', 'after_pixmap_cache_clear']]
     names += ['after_window_destroy.json']
