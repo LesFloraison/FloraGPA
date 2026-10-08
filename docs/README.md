@@ -13,6 +13,7 @@ chronology remains in Chinese.
 | Keep direct resource, binding, project and displayed-image identity consistent | [Resource selection acceptance](RESOURCE_SELECTION_IDENTITY.md) |
 | Preserve the requested export while a file chooser processes a capture switch | [Export asset ownership](EXPORT_ASSET_OWNERSHIP.md) |
 | Encode display images and copy texture assets in cancellable background jobs | [Background image exports](IMAGE_EXPORT_ACCEPTANCE.md) |
+| Publish a complete geometry export directory after cancellable background copies | [Geometry export acceptance](GEOMETRY_EXPORT_ACCEPTANCE.md) |
 | Export buffer CSV without accumulating its complete text | [Streamed CSV acceptance](CSV_STREAM_ACCEPTANCE.md) |
 | Avoid unused CSV generation during large-buffer inspection | [Buffer CSV acceptance](BUFFER_CSV_ACCEPTANCE.md) |
 | Export buffer and raw-resource bytes with cancellation and retained ownership | [Background byte exports](BYTE_EXPORT_ACCEPTANCE.md) |

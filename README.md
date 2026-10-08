@@ -110,6 +110,8 @@ See the [usage guide](docs/USAGE.md) for inspection and editing workflows.
 Display-image and texture exports run in cancellable background jobs and keep
 the requested snapshot across preview changes. See [image export acceptance](docs/IMAGE_EXPORT_ACCEPTANCE.md)
 for atomic single-file publication, validation and remaining boundaries.
+Geometry exports similarly retain the requested assets and publish their event
+directory only after every background copy succeeds; see [geometry export acceptance](docs/GEOMETRY_EXPORT_ACCEPTANCE.md).
 
 ## Preflight and command-line replay
 
