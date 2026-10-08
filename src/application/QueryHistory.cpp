@@ -1,4 +1,5 @@
 #include "ApiCommands.h"
+#include "QueryHistory.h"
 #include <QByteArray>
 #include <set>
 
@@ -155,9 +156,10 @@ Json interpret(const Json &row, const Json &fields, const Query *state) {
     return status(complete ? "complete" : "partial");
 }
 } // namespace
-void attachQueryHistory(const Frame &frame, Json &rows) {
+struct QueryHistory::State {
+    const Frame &frame;
     std::map<Id, Query> states;
-    auto state = [&](Id id) -> Query & {
+    Query &state(Id id) {
         auto [it, inserted] = states.try_emplace(id);
         auto &q = it->second;
         if (inserted) {
@@ -183,8 +185,8 @@ void attachQueryHistory(const Frame &frame, Json &rows) {
             }
         }
         return q;
-    };
-    for (auto &row : rows) {
+    }
+    void apply(Json &row) {
         Json fields = Json::object();
         for (auto &f : row["fields"])
             fields[f["name"].get<std::string>()] = f["value"];
@@ -194,7 +196,7 @@ void attachQueryHistory(const Frame &frame, Json &rows) {
             auto &q = state(owner);
             if (row["status"] != "decoded") {
                 q.invalid.push_back("Malformed query getter at " + row["id"].dump());
-                continue;
+                return;
             }
             if (kind == 0x3151)
                 q.sizes.push_back({{"event", row["id"]}, {"size", fields["return_data_size"]}});
@@ -216,5 +218,8 @@ void attachQueryHistory(const Frame &frame, Json &rows) {
             row["query_result"] =
                 interpret(row, fields, fields.value("query", Id(0)) ? &state(fields["query"]) : nullptr);
     }
-}
+};
+QueryHistory::QueryHistory(const Frame &frame) : state_(std::make_unique<State>(frame)) {}
+QueryHistory::~QueryHistory() = default;
+void QueryHistory::apply(Json &row) { state_->apply(row); }
 } // namespace flora

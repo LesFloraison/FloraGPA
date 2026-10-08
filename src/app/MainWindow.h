@@ -127,6 +127,7 @@ class MainWindow final : public QMainWindow {
     void showShaderProjectEditor(const nlohmann::json &project);
     void inspectGeometry();
     void exportGeometry();
+    void exportApiLog();
     void inspectEvent(Id id);
     void inspectCaptureStructure();
     void showPipeline(const State &state);

@@ -47,7 +47,8 @@ bool originalErgType(uint16_t type) {
     return (type >= 1 && type <= 0xfe) || (type >= 0x201 && type <= 0x2fe);
 }
 
-InitializationCache initialFileCache(const Frame &frame) {
+InitializationCache initialFileCache(const Frame &frame, const CancelCheck &cancelled) {
+    checkCancellation(cancelled);
     InitializationCache out;
     auto reject = [&](const std::string &reason) {
         out.complete = false;
@@ -57,6 +58,7 @@ InitializationCache initialFileCache(const Frame &frame) {
     if (frame.hasEditedViews())
         reject("Edited version cache transitions are not recovered");
     for (const auto &[id, entry] : frame.entries()) {
+        checkCancellation(cancelled);
         if (id > UINT32_MAX || entry.flags ||
             (entry.category != 3 && entry.category != 5 && entry.category != 7 && entry.category != 9)) {
             reject("Entry " + std::to_string(id) + " is outside the verified initial cache index profile");
@@ -78,7 +80,8 @@ bool InitializationCache::contains(uint32_t id) const {
     return descriptor != descriptors.end() && descriptor->second.contains(id);
 }
 
-Json InitializationCache::report() const {
+Json InitializationCache::report(const CancelCheck &cancelled) const {
+    checkCancellation(cancelled);
     Json out{{"scope", "unmodified_initial_file_registration"},
              {"version", 0},
              {"resource_objects_validated", false},
@@ -88,12 +91,18 @@ Json InitializationCache::report() const {
         return out;
     }
     out["categories"] = Json::array();
-    for (const auto &[id, kind] : categories)
+    for (const auto &[id, kind] : categories) {
+        checkCancellation(cancelled);
         out["categories"].push_back({{"id", id}, {"kind", kind}});
+    }
     for (const auto &[kind, name] :
          std::map<uint32_t, const char *>{{1, "state"}, {2, "resource"}, {3, "erg"}, {4, "data"}}) {
         const auto found = descriptors.find(kind);
-        out["descriptors"][name] = found == descriptors.end() ? Json::array() : Json(found->second);
+        auto &values = out["descriptors"][name] = Json::array();
+        if (found != descriptors.end()) for (const auto id : found->second) {
+            checkCancellation(cancelled);
+            values.push_back(id);
+        }
     }
     return out;
 }

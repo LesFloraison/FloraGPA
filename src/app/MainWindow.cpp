@@ -523,25 +523,7 @@ void MainWindow::buildUi() {
     auto exportApi = new QAction("Export API Log…", this);
     exportApi->setObjectName("exportApiLog");
     apiView_->addAction(exportApi);
-    connect(exportApi, &QAction::triggered, this, [this] {
-        if (!frame_)
-            return;
-        auto path = QFileDialog::getExistingDirectory(this, "Export API Log");
-        if (path.isEmpty())
-            return;
-        if ((QFile::exists(path + "/commands.json") || QFile::exists(path + "/commands.csv")) &&
-            QMessageBox::question(this, "Export API Log",
-                                  "Replace existing commands.json and commands.csv?") != QMessageBox::Yes)
-            return;
-        try {
-            exportCommands(*frame_, std::filesystem::path(path.toStdWString()),
-                           commandFilter_->searchText.toStdString(), commandFilter_->referencedResource,
-                           commandFilter_->workOnly);
-            statusBar()->showMessage("API log exported", 3000);
-        } catch (const std::exception &error) {
-            showError(QString::fromUtf8(error.what()));
-        }
-    });
+    connect(exportApi, &QAction::triggered, this, &MainWindow::exportApiLog);
     apiView_->setColumnWidth(1, 185);
     apiView_->setColumnHidden(2, true);
     resources_ = new CaptureModel(CaptureModel::Kind::Resources, this);

@@ -1,5 +1,6 @@
 #include "ApiCommands.h"
 #include "InitializationReferences.h"
+#include "QueryHistory.h"
 #include "core/ClassCreation.h"
 #include "core/ClearView.h"
 #include "core/ContextStateRecords.h"
@@ -917,57 +918,109 @@ Json commandResourceSelection(const Frame &frame, const Json &reference, const J
     }
     return result;
 }
-// Query interpretation is attached in capture order; decoding a single record never borrows future metadata.
-void attachQueryHistory(const Frame &frame, Json &rows);
-Json inspectCommands(const Frame &frame) {
+namespace {
+void visitCommands(const Frame &frame, const InitializationCache &cache,
+                   const std::function<void(Json &&)> &visit, const CancelCheck &cancelled) {
+    QueryHistory history(frame);
+    for (const auto &[id, entry] : frame.entries()) {
+        checkCancellation(cancelled);
+        if (entry.category != 7) continue;
+        auto row = inspectCommandWithCache(frame, id, &cache);
+        checkCancellation(cancelled);
+        history.apply(row);
+        visit(std::move(row));
+    }
+}
+// The bundled nlohmann serializer retains dump(2)'s exact formatting/escaping
+// while writing through a bounded adapter instead of building complete text.
+class ExportWriter final : public nlohmann::detail::output_adapter_protocol<char> {
+  public:
+    ExportWriter(QSaveFile &file, const CancelCheck &cancelled) : file_(file), cancelled_(cancelled) {
+        buffer_.reserve(limit);
+    }
+    void write_character(char c) override { write_characters(&c, 1); }
+    void write_characters(const char *data, size_t length) override {
+        while (length) {
+            const auto size = std::min<size_t>(length, size_t(limit - buffer_.size()));
+            buffer_.append(data, qsizetype(size)); data += size; length -= size;
+            if (buffer_.size() == limit) flush();
+        }
+    }
+    void text(const QByteArray &bytes) { write_characters(bytes.constData(), size_t(bytes.size())); }
+    void flush() {
+        checkCancellation(cancelled_);
+        if (!buffer_.isEmpty() && file_.write(buffer_) != buffer_.size())
+            throw std::runtime_error("Cannot stage complete API export");
+        buffer_.resize(0);
+    }
+  private:
+    static constexpr qsizetype limit = 1024 * 1024;
+    QSaveFile &file_;
+    const CancelCheck &cancelled_;
+    QByteArray buffer_;
+};
+void writeJson(const std::shared_ptr<ExportWriter> &writer, const Json &value, unsigned indent) {
+    nlohmann::detail::serializer<Json> serializer(writer, ' ');
+    serializer.dump(value, true, false, 2, indent);
+}
+}
+Json inspectCommands(const Frame &frame, const CancelCheck &cancelled) {
     auto rows = Json::array();
-    const auto cache = initialFileCache(frame);
-    for (auto &[id, e] : frame.entries())
-        if (e.category == 7)
-            rows.push_back(inspectCommandWithCache(frame, id, &cache));
-    attachQueryHistory(frame, rows);
+    const auto cache = initialFileCache(frame, cancelled);
+    visitCommands(frame, cache, [&](Json &&row) { rows.push_back(std::move(row)); }, cancelled);
     return rows;
 }
 void exportCommands(const Frame &frame, const std::filesystem::path &directory, const std::string &text,
-                    std::optional<Id> resource, bool gpuOnly) {
-    auto rows = inspectCommands(frame), selected = Json::array();
-    QByteArray csv("\xef\xbb\xbf");
-    csv += "id,api,status,wire_type,wire_bytes,referenced_ids\r\n";
+                    std::optional<Id> resource, bool gpuOnly, const CancelCheck &cancelled) {
+    checkCancellation(cancelled);
+    const auto cache = initialFileCache(frame, cancelled);
+    const auto path = QString::fromStdWString(directory.wstring());
+    if (!QDir().mkpath(path)) throw std::runtime_error("Cannot create API export directory");
+    QSaveFile jsonFile(path + "/commands.json"), csvFile(path + "/commands.csv");
+    if (!jsonFile.open(QIODevice::WriteOnly) || !csvFile.open(QIODevice::WriteOnly))
+        throw std::runtime_error("Cannot stage API export files");
+    auto json = std::make_shared<ExportWriter>(jsonFile, cancelled);
+    auto csv = std::make_shared<ExportWriter>(csvFile, cancelled);
+    json->text("{\n  \"commands\": [");
+    csv->text("\xef\xbb\xbf" "id,api,status,wire_type,wire_bytes,referenced_ids\r\n");
+    bool any = false;
     auto quote = [](QString s) {
         s.replace('"', "\"\"");
         return '"' + s + '"';
     };
-    for (auto &row : rows)
+    visitCommands(frame, cache, [&](Json &&row) {
         if ((!gpuOnly || (row["type"] >= 0x31 && row["type"] <= 0x42)) &&
             commandMatches(row, text, resource)) {
-            selected.push_back(row);
+            json->text(any ? ",\n    " : "\n    ");
+            writeJson(json, row, 4);
+            any = true;
             QStringList refs;
             for (auto &r : row["references"])
                 refs << QString::number(r["id"].get<Id>());
-            csv +=
+            csv->text(
                 (QStringList{QString::number(row["id"].get<Id>()), quote(QString::fromStdString(row["name"])),
                              QString::fromStdString(row["status"]),
                              QString("0x%1").arg(row["type"].get<uint16_t>(), 0, 16),
                              QString::number(row["wire_size"].get<size_t>()), quote(refs.join(' '))}
                      .join(',') +
                  "\r\n")
-                    .toUtf8();
+                    .toUtf8());
         }
-    auto path = QString::fromStdWString(directory.wstring());
-    if (!QDir().mkpath(path))
-        throw std::runtime_error("Cannot create API export directory");
-    auto write = [&](const QString &name, const QByteArray &data) {
-        QSaveFile file(path + '/' + name);
-        if (!file.open(QIODevice::WriteOnly) || file.write(data) != data.size() || !file.commit())
-            throw std::runtime_error("Cannot save API export");
-    };
-    Json report{{"frame", QString::fromStdWString(frame.path().filename().wstring()).toStdString()},
-                {"filter", {{"text", text}, {"resource", resource ? Json(*resource) : Json(nullptr)}}},
-                {"commands", selected},
-                {"original_initialization_cache", initialFileCache(frame).report()}};
-    if (gpuOnly)
-        report["filter"]["gpu_commands"] = true;
-    write("commands.json", QByteArray::fromStdString(report.dump(2) + "\n"));
-    write("commands.csv", csv);
+    }, cancelled);
+    json->text(any ? "\n  ],\n  \"filter\": " : "],\n  \"filter\": ");
+    Json filter{{"text", text}, {"resource", resource ? Json(*resource) : Json(nullptr)}};
+    if (gpuOnly) filter["gpu_commands"] = true;
+    writeJson(json, filter, 2);
+    json->text(",\n  \"frame\": ");
+    writeJson(json, QString::fromStdWString(frame.path().filename().wstring()).toStdString(), 2);
+    json->text(",\n  \"original_initialization_cache\": ");
+    writeJson(json, cache.report(cancelled), 2);
+    json->text("\n}\n");
+    json->flush(); csv->flush();
+    checkCancellation(cancelled);
+    // Two independently named files cannot be atomically replaced as a group.
+    // Do not honour cancellation between commits or hide partial publication.
+    if (!jsonFile.commit()) throw std::runtime_error("Cannot publish commands.json; API export was not published");
+    if (!csvFile.commit()) throw std::runtime_error("API log partially published: commands.json was replaced; commands.csv was not published");
 }
 } // namespace flora

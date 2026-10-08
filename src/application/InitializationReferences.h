@@ -14,10 +14,10 @@ struct InitializationCache {
     std::map<uint32_t, uint32_t> categories;
     std::map<uint32_t, std::set<uint32_t>> descriptors;
     bool contains(uint32_t id) const;
-    nlohmann::json report() const;
+    nlohmann::json report(const CancelCheck &cancelled = {}) const;
 };
 bool originalErgType(uint16_t type);
-InitializationCache initialFileCache(const Frame &frame);
+InitializationCache initialFileCache(const Frame &frame, const CancelCheck &cancelled = {});
 nlohmann::json inspectInitializationReferences(const nlohmann::json &command,
                                                const InitializationCache *cache = nullptr);
 } // namespace flora

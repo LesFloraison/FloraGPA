@@ -3,9 +3,11 @@
 #include "ByteExport.h"
 #include "ImageExport.h"
 #include "GeometryExport.h"
+#include "application/ApiCommands.h"
 #include <QAction>
 #include <QFileDialog>
 #include <QFileInfo>
+#include <QMessageBox>
 #include <QStatusBar>
 #include <QtConcurrent/QtConcurrentRun>
 
@@ -150,5 +152,21 @@ void MainWindow::exportGeometry() {
     } catch (const std::exception &error) {
         showError(QString::fromUtf8(error.what()));
     }
+}
+void MainWindow::exportApiLog() {
+    if (!frame_ || exportCancel_) return;
+    const auto frame = frame_;
+    const auto text = commandFilter_->searchText.toStdString();
+    const auto resource = commandFilter_->referencedResource;
+    const auto gpuOnly = commandFilter_->workOnly;
+    const auto path = QFileDialog::getExistingDirectory(this, "Export API Log");
+    if (path.isEmpty() || exportCancel_) return;
+    if ((QFile::exists(path + "/commands.json") || QFile::exists(path + "/commands.csv")) &&
+        QMessageBox::question(this, "Export API Log", "Replace existing commands.json and commands.csv?") != QMessageBox::Yes)
+        return;
+    if (exportCancel_) return;
+    startExport("Exporting API log…", "API log exported", [frame, text, resource, gpuOnly, path](const CancelCheck &cancelled) {
+        exportCommands(*frame, std::filesystem::path(path.toStdWString()), text, resource, gpuOnly, cancelled);
+    });
 }
 }
