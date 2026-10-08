@@ -11,6 +11,7 @@ chronology remains in Chinese.
 | Build, package and start | [Project README](../README.md#build) |
 | Replay, inspect and edit | [Usage guide](USAGE.md) |
 | Keep direct resource, binding, project and displayed-image identity consistent | [Resource selection acceptance](RESOURCE_SELECTION_IDENTITY.md) |
+| Preserve the requested export while a file chooser processes a capture switch | [Export asset ownership](EXPORT_ASSET_OWNERSHIP.md) |
 | Saved occluded Present TEST and original resource/binding evidence | [Occluded Present TEST](OCCLUDED_PRESENT_TEST.md) |
 | Reject incomplete or inconsistent worker images and retry | [Worker image integrity](WORKER_IMAGE_INTEGRITY.md) |
 | Check buffer bytes, identity and range without blocking the event thread | [Worker buffer integrity](WORKER_BUFFER_INTEGRITY.md) |

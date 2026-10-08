@@ -1,7 +1,20 @@
 # Current capabilities and compatibility
 
 Reviewed **2026-10-08**. The user authorized M4, then M5, while keeping M3 open.
-The latest [resource selection correction](RESOURCE_SELECTION_IDENTITY.md),
+The latest [export ownership correction](EXPORT_ASSET_OWNERSHIP.md), implementation
+`e6f6323`, retains output storage, PNG, buffer, resource-byte and geometry assets
+across capture changes inside file choosers. Old-code controls reproduce exporting
+the replacement capture's storage and PNG. Five original-GF2 cases compare all
+files and bytes before/after the switch. Three serial CTest suites pass 108 Qt
+rows without failures/skips. The 44-file `out/FloraGPA-export-owner-20261008/`
+package passes four relocated checks and four golden/control replays; only its
+GUI differs. The 557-registration matrix remains inherited through unchanged
+CLI/Worker and 43 identical package files. The baseline pins 181 evidence files.
+Large-export background I/O/cancellation, complete read integrity, multi-file
+failure recovery and other analyzer exports remain open. This is not clean-host,
+renewed long-soak or complete M3/M4/M5 acceptance.
+
+The preceding [resource selection correction](RESOURCE_SELECTION_IDENTITY.md),
 implementation `61ec9a8`, keeps direct inspection, explicit bindings, project
 restoration and accepted image identity consistent. Diagnostic and unavailable
 images cannot export the previous resource's raw bytes. Three new isolated
@@ -968,7 +981,7 @@ the other 35 suites passed initially and the complete UI suite passes after the 
 | M2 — Ordinary replay | Registered-scope gate passed: 366 positive cases and 22 located rejections; auxiliary/snapshot contracts audited. This is not universal API support. State-object identity loss, mixed saved/missing SO targets and unverified lifetimes remain explicit boundaries. |
 | M3 — Deferred Context / Command List | Open; M4/M5 now take priority by user instruction on 2026-10-06. Require original retained-list captures proving identity, build order, resource versions, repeated execution, restore-state and event mapping before production support. |
 | M4 — Resources and boundaries | Active, incomplete. Initial texture/Map data is checked; missing UAV counts reject on actual consumption, while proven counter-free indexed access is allowed. Verified mip-count-only reads, including proved unused SM4.0 dimension lanes across checked IF and SWITCH blocks, do not consume missing MinLOD. Known nonzero-MinLOD storage copies and input-clone inheritance are accepted in their recorded scope. Per-slot counter dependencies and saved blt-model occluded Present TEST are checked; continue wider operand/control-flow dependencies, missing pitch/data, predicate/frame-before history, Query and other presentation boundaries. |
-| M5 — Stable compatibility release | Incomplete. The 557-case registry, preceding committed-source build/package, load/semantic-audit cancellation, worker recovery, background common-report parsing, checked buffer acceptance and background replay/texture validation plus display preparation are established. Coverage/Quad attachments have checked background reading and diagnostic paint preparation. Thumbnail reports validate complete binding identity and the entire requested batch before publication, with 12 new isolated recovery cases. The preceding same-source 30-minute/248-cycle run passes 744 strict image checks; it does not certify the later GUI. Continue broader memory attribution, other specialized readers, analyzer/driver/storage failures, model/text publication and exports, large-file workflows, broader sustained testing and independent clean-machine deployment. [Thumbnail acceptance](THUMBNAIL_ACCEPTANCE.md), [latest package](RESOURCE_SELECTION_IDENTITY.md), [source-build acceptance](CURRENT_SOURCE_RELEASE_ACCEPTANCE.md) |
+| M5 — Stable compatibility release | Incomplete. The 557-case registry, preceding committed-source build/package, load/semantic-audit cancellation, worker recovery, background common-report parsing, checked buffer acceptance and background replay/texture validation plus display preparation are established. Coverage/Quad attachments have checked background reading and diagnostic paint preparation. Thumbnail reports validate complete binding identity and the entire requested batch before publication, with 12 new isolated recovery cases. The preceding same-source 30-minute/248-cycle run passes 744 strict image checks; it does not certify the later GUI. Continue broader memory attribution, other specialized readers, analyzer/driver/storage failures, model/text publication and exports, large-file workflows, broader sustained testing and independent clean-machine deployment. [Thumbnail acceptance](THUMBNAIL_ACCEPTANCE.md), [latest package](EXPORT_ASSET_OWNERSHIP.md), [source-build acceptance](CURRENT_SOURCE_RELEASE_ACCEPTANCE.md) |
 | M6 — Analyzer and other versions | Incomplete. Continue remaining Qt consumers, advanced profiling/debugging and version-specific adapters after core replay gates. Existing analyzer features remain available. |
 
 The original order was **M1 → M2 → M3 → M4 → M5**. On 2026-10-06 the user
