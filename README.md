@@ -117,6 +117,8 @@ background with cancellation. See [API export acceptance](docs/API_EXPORT_ACCEPT
 for byte equivalence, memory measurements and partial-publication diagnostics.
 Captured GetData details are prepared during background loading; cancelled
 completed loads release their candidate capture. See [Query inspection acceptance](docs/QUERY_INSPECTION_ACCEPTANCE.md).
+Predicate GetDesc/GetDataSize observations now supply event provenance and
+conflict diagnostics for captured results; see [Predicate history acceptance](docs/PREDICATE_QUERY_HISTORY.md).
 
 ## Preflight and command-line replay
 

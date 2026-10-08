@@ -94,6 +94,10 @@ The [pinned baseline](query-inspection-baseline.json) records source, tests,
 package identity and 1013 local evidence files. Captures, generated
 reports and proprietary reference components remain outside Git.
 
+The Predicate Getter history gap recorded below is subsequently resolved by
+[Predicate Getter history acceptance](PREDICATE_QUERY_HISTORY.md); other limits
+and the historical evidence in this document remain unchanged.
+
 ## Remaining boundaries
 
 Preparation is cooperative between records; it cannot preempt one decoder or
