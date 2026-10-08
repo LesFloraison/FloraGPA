@@ -1,6 +1,23 @@
 # Current capabilities and compatibility
 
 Reviewed **2026-10-08**. The user authorized M4, then M5, while keeping M3 open.
+The latest [metric catalog acceptance](METRIC_CATALOG_ACCEPTANCE.md), implementation
+`b2d7562`, moves catalog reading/parsing and complete display-field validation
+into cancellable background jobs. A preserved old-code control reproduces
+partial publication after a later malformed metric. Ten new isolated scenarios
+cover failure, cancellation, switching, close/destruction and retry. Five
+relevant suites ultimately pass 150 top-level Qt rows, including all 97 isolated
+Worker scenarios and real Intel collection/export checks. The initial live UI
+tests timed out in their file-dialog driver; exact-path/accepted-signal correction
+`6198c8d` resolves the reproduced focus/selection issue without changing production
+dialogs or weakening assertions. All failures and diagnostics are retained.
+The 44-file `out/FloraGPA-catalog-20261008/` package changes only its GUI. Seven
+relocated/system-PATH checks and four golden/control replays pass; 101 evidence
+files are pinned. Replay scope and the 533-case matrix below remain inherited
+through identical CLI/Worker files. Synchronous model publication, metric-result
+acceptance, other specialized readers, wider sustained testing and clean-host
+deployment remain open. This does not complete M3/M4/M5 or expand module coverage.
+
 The latest [process-memory attribution](PROCESS_MEMORY_ATTRIBUTION.md), harness
 `bfc7cc8`, adds test-only address/heap metadata and independent evidence checks.
 A short control and a 611.793-second/84-cycle recovery run pass 264 strict images
