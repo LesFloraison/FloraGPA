@@ -33,6 +33,45 @@ def validate_platform(requested, journal):
             raise ValueError('Missing native Windows GUI resource observations')
 
 
+def validate_gui_resources(root, journal):
+    expected = {'before_window.json': journal['gui_before_window'],
+                'after_window_destroy.json': journal['gui_after_window_destroy']}
+    for index, row in enumerate(journal['observations'], 1):
+        expected[f'cycle-{index:06d}.json'] = row['gui_snapshot']
+    for key in ['before', 'after_test_history_clear', 'after_log_clear', 'after_pixmap_cache_clear']:
+        expected[f'control-{key}.json'] = journal['retention_control'][key]['gui_snapshot']
+    if {p.name for p in root.iterdir()} != set(expected):
+        raise ValueError('GUI resource snapshot inventory differs from journal')
+    files, pid = {}, None
+    for name, summary in expected.items():
+        path = root / name
+        snapshot = json.loads(path.read_text(encoding='utf-8'))
+        if (snapshot['schema'] != 'FloraGPA GUI resource snapshot 1' or snapshot['qt_platform'] != 'windows' or
+                snapshot['native_windows_complete'] is not True or snapshot['modules_complete'] is not True):
+            raise ValueError('Incomplete or wrong-platform GUI resource snapshot')
+        if type(snapshot['process_id']) is not int or snapshot['process_id'] <= 0:
+            raise ValueError('Invalid GUI snapshot process identity')
+        if pid is None:
+            pid = snapshot['process_id']
+        if snapshot['process_id'] != pid:
+            raise ValueError('GUI snapshots belong to different processes')
+        for stage in ['before', 'after']:
+            for key in ['handles', 'gdi_objects', 'user_objects']:
+                value = snapshot[stage][key]
+                if type(value) is not int or value < 0:
+                    raise ValueError('Invalid GUI resource count')
+        for key in ['native_top_windows', 'qt_top_widgets', 'qt_windows', 'modules']:
+            if not isinstance(snapshot[key], list):
+                raise ValueError('Invalid GUI snapshot inventory')
+        if not snapshot['modules']:
+            raise ValueError('Missing GUI snapshot modules')
+        keys = ['before', 'after', 'native_windows_complete', 'modules_complete']
+        if summary != {key: snapshot[key] for key in keys}:
+            raise ValueError('GUI resource summary differs from saved snapshot')
+        files[name] = digest(path)
+    return files
+
+
 def validate_workflows(root, rows):
     """Audit retained exports, their UI event inventory and per-capture stability."""
     expected = {'api/commands.json', 'api/commands.csv', 'contexts.json', 'command-lists.json'}
@@ -81,6 +120,8 @@ def main():
     parser.add_argument('--pairs', type=int, default=20)
     parser.add_argument('--platform', choices=['offscreen', 'windows'], default='offscreen',
                         help='Qt platform to exercise; the test must report the same actual platform')
+    parser.add_argument('--gui-resources', action='store_true',
+                        help='Save current-process window/module/count snapshots and observe after MainWindow destruction')
     parser.add_argument('--workflows', action='store_true',
                         help='Also repeat Query navigation, filtered API export and both structure exports; retain every cycle')
     parser.add_argument('--retention-control', action='store_true',
@@ -94,6 +135,8 @@ def main():
         parser.error('seconds must be 0..86400 and pairs must be 1..10000')
     if args.memory_maps and (not args.retention_control or args.trace_allocations):
         parser.error('memory-maps requires retention-control and must not be combined with trace-allocations')
+    if args.gui_resources and (args.platform != 'windows' or not args.retention_control or args.trace_allocations):
+        parser.error('gui-resources requires windows and retention-control, without trace-allocations')
     root = args.out.resolve()
     root.mkdir(parents=True, exist_ok=False)
     report = dict(schema='FloraGPA persistent Qt soak runner 1', completed=False,
@@ -103,6 +146,7 @@ def main():
                   memory_maps=args.memory_maps,
                   workflows=args.workflows,
                   qt_platform=args.platform,
+                  gui_resources=args.gui_resources,
                   scope=f'Same-host {args.platform} Qt window, system-only PATH, serial production workers; not clean-machine or all-workflow certification')
 
     def save():
@@ -130,6 +174,7 @@ def main():
         report['sources'] = {}
         for name in ['tests/RecoveryUiTests.cpp', 'tests/RecoveryJournal.h', 'tests/RecoveryWorkflows.h',
                      'tests/HeapRetentionProbe.h', 'tests/ProcessMemorySnapshot.h', 'tools/validate_recovery_soak.py',
+                     'tests/GuiResourceSnapshot.h', 'tests/GuiResourceTests.cpp',
                      'tools/test_recovery_soak.py', 'tools/validate_source_build.py']:
             frozen = root / 'sources' / name
             frozen.parent.mkdir(parents=True, exist_ok=True)
@@ -158,6 +203,8 @@ def main():
             env['FLORA_HEAP_TRACE_DIR'] = str(root / 'allocation-stacks')
         if args.memory_maps:
             env['FLORA_MEMORY_MAP_DIR'] = str(root / 'memory-maps')
+        if args.gui_resources:
+            env['FLORA_GUI_RESOURCE_DIR'] = str(root / 'gui-resources')
         if args.workflows:
             env['FLORA_RECOVERY_WORKFLOWS'] = str(root / 'workflows')
         report['test_environment'] = {k: v for k, v in env.items() if k.startswith(('FLORA_', 'QT')) or k == 'PATH'}
@@ -186,6 +233,8 @@ def main():
             assert row['rgba_sha256'] == case['reference_rgba_sha256']
         if args.workflows:
             report['workflow_files'] = validate_workflows(root / 'workflows', rows)
+        if args.gui_resources:
+            report['gui_resource_files'] = validate_gui_resources(root / 'gui-resources', journal)
         if args.retention_control:
             controls = journal['retention_control']
             assert set(controls) == {'before', 'after_test_history_clear', 'after_log_clear',

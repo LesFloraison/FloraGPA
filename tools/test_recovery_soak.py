@@ -9,7 +9,64 @@ import sys
 import tempfile
 import unittest
 
-from validate_recovery_soak import digest, run_process, validate_workflows, validate_platform
+from validate_recovery_soak import digest, run_process, validate_workflows, validate_platform, validate_gui_resources
+
+
+class GuiResourceTests(unittest.TestCase):
+    def setUp(self):
+        self.temp = tempfile.TemporaryDirectory(prefix='Flora GUI resource audit ')
+        self.addCleanup(self.temp.cleanup)
+        self.root = Path(self.temp.name)
+        counts = dict(handles=10, gdi_objects=2, user_objects=1)
+        snapshot = dict(schema='FloraGPA GUI resource snapshot 1', process_id=42,
+                        qt_platform='windows', before=counts, after=counts,
+                        native_windows_complete=True, modules_complete=True,
+                        native_top_windows=[], qt_top_widgets=[], qt_windows=[],
+                        modules=[dict(name='test.exe', path='C:/self/test.exe')])
+        summary = {k:snapshot[k] for k in ['before','after','native_windows_complete','modules_complete']}
+        self.journal = dict(gui_before_window=summary, gui_after_window_destroy=summary,
+                            observations=[dict(gui_snapshot=summary)], retention_control={})
+        names = ['before_window.json','after_window_destroy.json','cycle-000001.json']
+        for key in ['before','after_test_history_clear','after_log_clear','after_pixmap_cache_clear']:
+            self.journal['retention_control'][key] = dict(gui_snapshot=summary)
+            names.append(f'control-{key}.json')
+        for name in names:
+            (self.root/name).write_text(json.dumps(snapshot), encoding='utf-8')
+
+    def test_complete(self):
+        self.assertEqual(len(validate_gui_resources(self.root,self.journal)),7)
+
+    def test_missing_or_extra_snapshot(self):
+        (self.root/'unknown.json').write_text('{}',encoding='utf-8')
+        with self.assertRaisesRegex(ValueError,'inventory differs'):
+            validate_gui_resources(self.root,self.journal)
+        (self.root/'unknown.json').unlink()
+        (self.root/'before_window.json').unlink()
+        with self.assertRaisesRegex(ValueError,'inventory differs'):
+            validate_gui_resources(self.root,self.journal)
+
+    def test_incomplete_wrong_platform_or_other_process(self):
+        path=self.root/'after_window_destroy.json';original=json.loads(path.read_text())
+        for key,value,reason in [('modules_complete',False,'Incomplete'),
+                                 ('native_windows_complete',False,'Incomplete'),
+                                 ('qt_platform','offscreen','wrong-platform'),
+                                 ('process_id',99,'different processes')]:
+            with self.subTest(key=key):
+                path.write_text(json.dumps(original|{key:value}),encoding='utf-8')
+                with self.assertRaisesRegex(ValueError,reason):
+                    validate_gui_resources(self.root,self.journal)
+
+    def test_invalid_count(self):
+        path=self.root/'cycle-000001.json';snapshot=json.loads(path.read_text())
+        snapshot['after']['gdi_objects']=-1
+        path.write_text(json.dumps(snapshot),encoding='utf-8')
+        with self.assertRaisesRegex(ValueError,'Invalid GUI resource count'):
+            validate_gui_resources(self.root,self.journal)
+
+    def test_modified_summary(self):
+        self.journal['gui_before_window']=dict(before={},after={},native_windows_complete=True,modules_complete=True)
+        with self.assertRaisesRegex(ValueError,'summary differs'):
+            validate_gui_resources(self.root,self.journal)
 
 
 class PlatformTests(unittest.TestCase):

@@ -5,6 +5,7 @@
 #include "RecoveryJournal.h"
 #include "RecoveryWorkflows.h"
 #include "ProcessMemorySnapshot.h"
+#include "GuiResourceSnapshot.h"
 #include <QAction>
 #include <QSignalSpy>
 #include <QStatusBar>
@@ -283,7 +284,15 @@ class RecoveryUiTests final : public QObject {
         if (!trace.isEmpty()) testing::heapProbe::start();
         const auto stopTrace = qScopeGuard([&] { if (!trace.isEmpty()) testing::heapProbe::stop(); });
         if (!trace.isEmpty()) QVERIFY2(testing::heapProbe::selfCheck(), "UCRT allocation/free observer self-check");
-        MainWindow window;
+        const auto guiDirectory = qEnvironmentVariable("FLORA_GUI_RESOURCE_DIR");
+        QVERIFY(guiDirectory.isEmpty() || QDir().mkpath(guiDirectory));
+        auto guiSnapshot = [&](const QString &name) {
+            return guiDirectory.isEmpty() ? nlohmann::json{} :
+                testing::GuiResourceSnapshot::save(QDir(guiDirectory).filePath(name + ".json"));
+        };
+        const auto beforeWindow = guiSnapshot("before_window");
+        auto ownedWindow = std::make_unique<MainWindow>();
+        MainWindow &window = *ownedWindow;
         QSignalSpy done(&window, &MainWindow::taskFinished);
         QSignalSpy loaded(&window, &MainWindow::captureLoaded);
         const QStringList files{"GF2_Exilium_2026_03_03__00_19_35.gpa_frame", "bf1_2026_01_21__16_53_05.gpa_frame"};
@@ -311,6 +320,7 @@ class RecoveryUiTests final : public QObject {
             {"pixmap_cache_limit_kib", QPixmapCache::cacheLimit()},
             {"minimum_pairs", count}, {"observations", nlohmann::json::array()}};
         journal["workflows"] = !workflows.isEmpty();
+        if (!guiDirectory.isEmpty()) journal["gui_before_window"] = beforeWindow;
         testing::RecoveryJournal journalWriter(journalPath);
         std::unique_ptr<testing::ProcessMemorySnapshot> memoryMaps;
         if (!memoryDirectory.isEmpty()) {
@@ -433,6 +443,8 @@ class RecoveryUiTests final : public QObject {
                     {"replay_status", window.statusBar()->currentMessage().toStdString()},
                     {"rgba_sha256", golden.toStdString()}, {"ownership", ownership(window)}};
                 if (!workflows.isEmpty()) observation["workflows"] = std::move(workflow);
+                if (!guiDirectory.isEmpty()) observation["gui_snapshot"] =
+                    guiSnapshot(QString("cycle-%1").arg(cycles + 1, 6, 10, QChar('0')));
                 qInfo().noquote() << "recovery_observation" << QString::fromStdString(observation.dump());
                 ++cycles;
                 if (cycles == 2) QVERIFY(memorySnapshot("baseline"));
@@ -457,16 +469,17 @@ class RecoveryUiTests final : public QObject {
             }
             const auto expectedPath = window.capturePath();
             const auto expectedImage = outputHash(window);
-            auto sample = [&] {
+            auto sample = [&](const QString &name) {
                 PROCESS_MEMORY_COUNTERS_EX memory{};
                 if (!GetProcessMemoryInfo(GetCurrentProcess(), reinterpret_cast<PROCESS_MEMORY_COUNTERS *>(&memory), sizeof memory))
                     return nlohmann::json{{"sample_failed", true}};
                 auto result = ownership(window);
                 result["private_bytes"] = memory.PrivateUsage;
                 result["working_set"] = memory.WorkingSetSize;
+                if (!guiDirectory.isEmpty()) result["gui_snapshot"] = guiSnapshot("control-" + name);
                 return result;
             };
-            nlohmann::json control{{"before", sample()}};
+            nlohmann::json control{{"before", sample("before")}};
             QVERIFY(memorySnapshot("before_clear"));
             if (!trace.isEmpty()) {
                 testing::heapProbe::snapshot(trace, cycles + 1);
@@ -476,16 +489,16 @@ class RecoveryUiTests final : public QObject {
             loaded.clear();
             done.clear();
             QCoreApplication::sendPostedEvents(nullptr, QEvent::DeferredDelete);
-            control["after_test_history_clear"] = sample();
+            control["after_test_history_clear"] = sample("after_test_history_clear");
             QVERIFY(memorySnapshot("after_history_clear"));
             if (!trace.isEmpty()) testing::heapProbe::snapshot(trace, cycles + 2);
             window.findChild<QPlainTextEdit *>("taskLog")->clear();
             QCoreApplication::sendPostedEvents(nullptr, QEvent::DeferredDelete);
-            control["after_log_clear"] = sample();
+            control["after_log_clear"] = sample("after_log_clear");
             QVERIFY(memorySnapshot("after_log_clear"));
             if (!trace.isEmpty()) testing::heapProbe::snapshot(trace, cycles + 3);
             QPixmapCache::clear();
-            control["after_pixmap_cache_clear"] = sample();
+            control["after_pixmap_cache_clear"] = sample("after_pixmap_cache_clear");
             QVERIFY(memorySnapshot("after_pixmap_cache_clear"));
             if (!trace.isEmpty()) testing::heapProbe::snapshot(trace, cycles + 4);
             for (const auto &value : control)
@@ -507,6 +520,12 @@ class RecoveryUiTests final : public QObject {
             QCoreApplication::sendPostedEvents(nullptr, QEvent::DeferredDelete);
             qInfo().noquote() << "log_clear_control" << QString::fromStdString(
                 nlohmann::json({{"before", before}, {"after", ownership(window)}}).dump());
+        }
+        if (!guiDirectory.isEmpty()) {
+            ownedWindow.reset();
+            QCoreApplication::sendPostedEvents(nullptr, QEvent::DeferredDelete);
+            QCoreApplication::processEvents(QEventLoop::AllEvents, 50);
+            journal["gui_after_window_destroy"] = guiSnapshot("after_window_destroy");
         }
         journal["completed"] = true;
         QVERIFY2(save("complete"), qPrintable(journalWriter.error()));
