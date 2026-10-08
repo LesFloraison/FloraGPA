@@ -1,7 +1,22 @@
 # Current capabilities and compatibility
 
 Reviewed **2026-10-08**. The user authorized M4, then M5, while keeping M3 open.
-The latest [same-source workflow release](WORKFLOW_SOURCE_RELEASE_ACCEPTANCE.md)
+The subsequent [compact API search update](API_SEARCH_INDEX_ACCEPTANCE.md),
+implementation `d3a5930`, prepares a cancellable search index during loading and
+bounds ordinary selected-command details to 128 rows. All 555 registered captures
+pass index preparation and 4,746,469 comparisons with the existing search matcher.
+Eight relevant CTest suites pass 340 top-level Qt rows; six direct Windows
+navigation rows and two shipping-GUI capture opens also pass.
+The 48-cycle workflow control passes 192 strict images, one post-clear image and
+192 exports identical to the preceding control. BF1's first completed-cycle busy
+heap falls from 181.94 to 39.81 MiB; this is not total memory or a leak-free claim.
+The incremental candidate is `out/FloraGPA-api-search-20261008/`.
+Only the GUI differs from the accepted structure package; its 43 other files,
+including CLI/Worker, are identical, so replay matrix evidence is inherited.
+The new GUI has not renewed the following archived-source or 30-minute gates.
+No new execution path is accepted; M3/M4/M5 and the module ledger remain open.
+
+The preceding [same-source workflow release](WORKFLOW_SOURCE_RELEASE_ACCEPTANCE.md)
 rebuilds `b20efc4` from a 1,190-file Git archive and packages
 `out/FloraGPA-workflow-source-20261008/`. Nine same-source test targets produce
 363 passed top-level Qt rows across ten direct invocations; two Windows shipping
@@ -12,8 +27,8 @@ passes 162 cycles / 648 strict image checks, retaining 648 API/structure exports
 This validates the recent loading, inspection and export workflows for GF2/BF1
 with offscreen Qt; it is not every-workflow, leak-free or clean-host certification.
 Private commit rises substantially; a separate 48-cycle heap control is recorded.
-Full-log filtering retains decoded command details and is the next concrete
-model-memory optimization target, alongside broader memory attribution.
+That run identified full-log command-detail retention, addressed by the later
+compact search update above. Broader memory attribution remains open.
 Production semantics and the module ledger are unchanged. M3/M4/M5 remain open.
 
 The preceding [capture structure workflow](STRUCTURE_INSPECTION_ACCEPTANCE.md),

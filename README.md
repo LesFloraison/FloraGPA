@@ -101,6 +101,9 @@ For development checks that repeatedly load, cancel, fail and retry in one Qt
 window, see [persistent recovery validation](docs/PERSISTENT_QT_SOAK.md).
 The latest [same-source release acceptance](docs/WORKFLOW_SOURCE_RELEASE_ACCEPTANCE.md)
 records the 565-registration matrix, 162 enhanced recovery cycles and remaining release boundaries.
+The subsequent [API search update](docs/API_SEARCH_INDEX_ACCEPTANCE.md) bounds
+command-detail retention, checks all 555 capture indexes and records a separate
+48-cycle memory/workflow control; its incremental GUI candidate has narrower release evidence.
 The earlier [diagnostic attachment update](docs/DIAGNOSTIC_ATTACHMENT_ACCEPTANCE.md)
 covers background Coverage/Quad loading, malformed-output rejection and GUI recovery.
 

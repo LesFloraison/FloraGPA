@@ -17,6 +17,7 @@ chronology remains in Chinese.
 | Inspect/export contexts and command lists without synchronous parsing or a fully built tree | [Capture structure workflow](STRUCTURE_INSPECTION_ACCEPTANCE.md) |
 | Reconcile captured Predicate Getter observations and expose conflicts | [Predicate Getter history](PREDICATE_QUERY_HISTORY.md) |
 | Prepare captured Query results without a first-selection full-log parse and release cancelled loads | [Query inspection acceptance](QUERY_INSPECTION_ACCEPTANCE.md) |
+| Search the API log without retaining every decoded command | [Compact search and bounded details](API_SEARCH_INDEX_ACCEPTANCE.md) |
 | Retain API-log ownership and stream identical JSON/CSV with cancellation | [API export acceptance](API_EXPORT_ACCEPTANCE.md) |
 | Export buffer CSV without accumulating its complete text | [Streamed CSV acceptance](CSV_STREAM_ACCEPTANCE.md) |
 | Avoid unused CSV generation during large-buffer inspection | [Buffer CSV acceptance](BUFFER_CSV_ACCEPTANCE.md) |

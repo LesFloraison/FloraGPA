@@ -1,5 +1,10 @@
 # Same-source release and sustained workflow acceptance
 
+The subsequent [compact API search update](API_SEARCH_INDEX_ACCEPTANCE.md)
+addresses the command-detail retention identified here. Its incremental GUI,
+corpus-index checks and 48-cycle control have their own evidence; the fresh-build
+and 30-minute results below remain specific to this earlier package.
+
 Reviewed **2026-10-08**. Source revision **`b20efc4`** adds
 development-only sustained workflow checks. Production replay/UI semantics are
 unchanged from the preceding structure-inspection implementation. The accepted
