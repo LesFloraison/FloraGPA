@@ -221,5 +221,15 @@ struct QueryHistory::State {
 };
 QueryHistory::QueryHistory(const Frame &frame) : state_(std::make_unique<State>(frame)) {}
 QueryHistory::~QueryHistory() = default;
+bool QueryHistory::observes(uint16_t type) {
+    switch (type) {
+    case 0x3151: case 0x3152:
+    case 0x3074: case 0x3235: case 0x33a8: case 0x3471: case 0x34b2: case 0x358d:
+    case 0x30b4: case 0x31b4: case 0x331d: case 0x33e3: case 0x34fb:
+        return true;
+    default:
+        return false;
+    }
+}
 void QueryHistory::apply(Json &row) { state_->apply(row); }
 } // namespace flora

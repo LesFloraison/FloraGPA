@@ -127,7 +127,8 @@ QString hex(Bytes bytes, size_t limit = 256) {
             .toHex(' '));
 }
 } // namespace
-MainWindow::MainWindow() {
+MainWindow::MainWindow() : loader_(this) {
+    loader_.setObjectName("captureLoader");
     buildUi();
     installToolButtonConnectionGuard(this);
     loadSettings();
@@ -147,11 +148,16 @@ MainWindow::MainWindow() {
         cancel();
         showError("Worker timed out.");
     });
+    connect(&loader_, &QFutureWatcher<CaptureLoadResult>::progressTextChanged, this, [this](const QString &text) {
+        if (loadCancel_ && !loadCancel_->load() && !text.isEmpty()) statusBar()->showMessage(text);
+    });
     connect(&loader_, &QFutureWatcher<CaptureLoadResult>::finished, this, [this] {
         const bool cancelled = loadCancel_ && loadCancel_->load();
         loadCancel_.reset();
         try {
-            auto loaded = loader_.result();
+            // Consume the completed result: a cancelled candidate must not stay
+            // mapped through the watcher's future until the next open.
+            auto loaded = loader_.future().takeResult();
             if (cancelled || loaded.cancelled) {
                 setBusy(process_.state() != QProcess::NotRunning);
                 statusBar()->showMessage("Opening cancelled.");
@@ -179,7 +185,7 @@ MainWindow::MainWindow() {
             projectPath_.clear();
             projectDirty_ = false;
             updateExperimentActions();
-            commands_->setFrame(frame_);
+            commands_->setFrame(frame_, std::move(loaded.queries));
             annotations_->setFrame(frame_);
             gpuStatistics_->setSelection(frame_, 0);
             updateProfileContext();
@@ -354,7 +360,7 @@ MainWindow::~MainWindow() {
     }
     process_.kill();
     process_.waitForFinished(3000);
-    loader_.waitForFinished();
+    if (loader_.future().isValid()) loader_.waitForFinished();
 }
 void MainWindow::buildUi() {
     resize(1680, 1000);
@@ -1553,12 +1559,15 @@ void MainWindow::openCapture(const QString &path) {
     loadCancel_ = token;
     setBusy(true);
     statusBar()->showMessage("Opening capture…");
-    loader_.setFuture(QtConcurrent::run([path, token] {
+    loader_.setFuture(QtConcurrent::run([path, token](QPromise<CaptureLoadResult> &promise) {
         CaptureLoadResult result;
         try {
+            promise.setProgressRange(0, 2);
             const CancelCheck cancelled = [token] { return token->load(); };
             auto frame = std::make_shared<Frame>(std::filesystem::path(path.toStdWString()), cancelled);
             frame->sha256(cancelled);
+            promise.setProgressValueAndText(1, "Reading Query history…");
+            result.queries = QueryInspection::prepare(frame, cancelled);
             result.frame = std::move(frame);
         } catch (const OperationCancelled &) {
             result.cancelled = true;
@@ -1566,7 +1575,7 @@ void MainWindow::openCapture(const QString &path) {
             // Preserve the parser's message across QtConcurrent's exception boundary.
             result.error = QString::fromUtf8(e.what());
         }
-        return result;
+        promise.addResult(std::move(result));
     }));
 }
 void MainWindow::replay(bool timings) {

@@ -21,9 +21,14 @@ QVariant GeometryModel::headerData(int section, Qt::Orientation orientation, int
         return {};
     return orientation == Qt::Horizontal ? QVariant(columns_.at(section).toString()) : QVariant(section + 1);
 }
-void CaptureModel::setFrame(std::shared_ptr<const Frame> frame) {
+void CaptureModel::setFrame(std::shared_ptr<const Frame> frame, std::shared_ptr<const QueryInspection> queries) {
+    if (queries && queries->frame() != frame.get())
+        throw std::invalid_argument("Query inspection belongs to another capture");
+    if (frame && kind_ == Kind::Commands && !queries)
+        throw std::invalid_argument("Command model requires prepared Query inspection");
     beginResetModel();
     frame_ = std::move(frame);
+    queries_ = std::move(queries);
     ids_.clear();
     names_.clear();
     commandDetails_.clear();
@@ -47,18 +52,14 @@ int CaptureModel::rowOf(Id id) const {
     return it != ids_.end() && *it == id ? int(it - ids_.begin()) : -1;
 }
 const nlohmann::json &CaptureModel::command(Id id) const {
+    if (!frame_) throw std::runtime_error("Command capture is unavailable");
+    if (queries_)
+        if (const auto row = queries_->find(id)) return *row;
     auto found = commandDetails_.find(id);
     if (found == commandDetails_.end()) {
         auto details = inspectCommand(*frame_, id);
-        if (details["name"] == "GetData") {
-            // Only GetData requires preceding same-ID metadata; cache the resulting query rows.
-            for (auto &row : inspectCommands(*frame_))
-                if (row.contains("query_result"))
-                    commandDetails_.emplace(row["id"].get<Id>(), row);
-            found = commandDetails_.find(id);
-            if (found != commandDetails_.end())
-                return found->second;
-        }
+        if (details["name"] == "GetData")
+            throw std::runtime_error("Captured Query result was not prepared");
         found = commandDetails_.emplace(id, std::move(details)).first;
     }
     return found->second;

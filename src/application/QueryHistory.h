@@ -8,6 +8,8 @@ class QueryHistory final {
   public:
     explicit QueryHistory(const Frame &frame);
     ~QueryHistory();
+    // Every wire family that can contribute to a captured Query result.
+    static bool observes(uint16_t type);
     void apply(nlohmann::json &row);
   private:
     struct State;

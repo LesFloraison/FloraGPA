@@ -290,6 +290,7 @@ class MainWindow final : public QMainWindow {
     QProcess process_;
     struct CaptureLoadResult {
         std::shared_ptr<const Frame> frame;
+        std::shared_ptr<const QueryInspection> queries;
         QString error;
         bool cancelled = false;
     };

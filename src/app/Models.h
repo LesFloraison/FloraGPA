@@ -1,6 +1,7 @@
 #pragma once
 #include "application/ApiCommands.h"
 #include "core/Frame.h"
+#include "QueryInspection.h"
 #include <QAbstractTableModel>
 #include <QJsonArray>
 #include <QJsonObject>
@@ -12,7 +13,7 @@ class CaptureModel final : public QAbstractTableModel {
   public:
     enum class Kind { Commands, Resources };
     explicit CaptureModel(Kind kind, QObject *parent = nullptr) : QAbstractTableModel(parent), kind_(kind) {}
-    void setFrame(std::shared_ptr<const Frame> frame);
+    void setFrame(std::shared_ptr<const Frame> frame, std::shared_ptr<const QueryInspection> queries = {});
     int rowCount(const QModelIndex &parent = {}) const override {
         return parent.isValid() ? 0 : int(ids_.size());
     }
@@ -31,6 +32,7 @@ class CaptureModel final : public QAbstractTableModel {
   private:
     Kind kind_;
     std::shared_ptr<const Frame> frame_;
+    std::shared_ptr<const QueryInspection> queries_;
     std::vector<Id> ids_;
     std::map<Id, QStringList> names_;
     mutable std::map<Id, nlohmann::json> commandDetails_;

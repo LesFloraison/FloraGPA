@@ -3879,7 +3879,7 @@ class UiTests final : public QObject {
             std::filesystem::path((captures + "/GF2_Exilium_2026_03_03__00_19_35.gpa_frame").toStdWString()));
         flora::CaptureModel model(flora::CaptureModel::Kind::Commands);
         QAbstractItemModelTester tester(&model, QAbstractItemModelTester::FailureReportingMode::QtTest);
-        model.setFrame(frame);
+        model.setFrame(frame, flora::QueryInspection::prepare(frame));
         QCOMPARE(model.rowCount(), 920);
         QCOMPARE(model.idAt(model.rowOf(1455)), flora::Id(1455));
         flora::CaptureFilter filter;
