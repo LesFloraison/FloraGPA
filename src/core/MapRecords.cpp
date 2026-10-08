@@ -49,6 +49,8 @@ MapRecordAudit auditMapRecords(const Frame &frame, const CancelCheck &cancelled)
                 continue; // Failed calls have no mapped storage or CPU write to replay.
             if (record.result != 0)
                 throw std::runtime_error("Map success status other than S_OK is unverified");
+            if (record.flags && (record.kind == 4 || record.kind == 5))
+                throw std::runtime_error("Successful DO_NOT_WAIT Map cannot use WRITE_DISCARD or WRITE_NO_OVERWRITE");
             if (entry.type == 0x34ec && record.kind != 1)
                 throw std::runtime_error("Writable API Map cannot be skipped as read-only metadata");
             if (entry.type == 0x246 && record.kind == 1)

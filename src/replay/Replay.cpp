@@ -676,7 +676,11 @@ void Replay::mappedWrites(const Entry &e) {
     auto obj = get<ID3D11Resource>(id);
     D3D11_MAPPED_SUBRESOURCE mapped{};
     ReplayAnnotation marker(captureAnnotation_.Get(), e.id, "MapCapturedWrites");
-    check(context_->Map(obj, sub, D3D11_MAP(kind), flags, &mapped), "Map captured writes");
+    // The capture records a successful mapping, not a request to repeat its
+    // original polling timing. Wait for this resource on the replay device.
+    // Failed calls returned above; illegal successful flag/type pairs reject
+    // in the shared audit before they can be normalized here.
+    check(context_->Map(obj, sub, D3D11_MAP(kind), 0, &mapped), "Map captured writes");
     try {
         if (!mapped.pData)
             throw std::runtime_error("Map returned a null data pointer");
@@ -709,6 +713,8 @@ void Replay::mappedWrites(const Entry &e) {
         planarWrites_.push_back(write);
     }
     counts["Map"]++;
+    if (flags & D3D11_MAP_FLAG_DO_NOT_WAIT)
+        ++counts["map_write_readiness_waits"];
     lastWorkEvent_ = e.id;
 }
 State Replay::prepareState(const Event &event) {
