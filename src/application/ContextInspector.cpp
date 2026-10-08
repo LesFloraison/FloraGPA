@@ -4,7 +4,8 @@
 
 namespace flora {
 using Json = nlohmann::json;
-Json contextJson(const ContextDescription &context) {
+Json contextJson(const ContextDescription &context, const CancelCheck &cancelled) {
+    checkCancellation(cancelled);
     Json out{{"id", context.id},
              {"interface_version", context.version ? Json(*context.version) : Json(nullptr)},
              {"device", context.device},
@@ -15,7 +16,8 @@ Json contextJson(const ContextDescription &context) {
         out["provenance"] = "inferred_successful_staging_map_read";
         out["missing_fields"] = {"interface_version", "creation_flags", "captured_pointer"};
         out["evidence"] = Json::array();
-        for (const auto &e : context.evidence)
+        for (const auto &e : context.evidence) {
+            checkCancellation(cancelled);
             out["evidence"].push_back({{"event", e.event},
                                        {"wire_type", e.wireType},
                                        {"resource", e.resource},
@@ -25,11 +27,12 @@ Json contextJson(const ContextDescription &context) {
                                        {"map_type", e.mapType},
                                        {"data_identity", e.data},
                                        {"unmap_event", e.unmap}});
+        }
     }
     return out;
 }
-Json inspectContexts(const Frame &frame) {
-    const auto &recovery = frame.contextRecovery();
+Json inspectContexts(const Frame &frame, const CancelCheck &cancelled) {
+    const auto &recovery = frame.contextRecovery(cancelled);
     Json out{{"contexts", Json::array()}, {"invalid", Json::array()}};
     Json report{{"contexts", Json::array()},
                 {"issues", Json::array()},
@@ -37,30 +40,37 @@ Json inspectContexts(const Frame &frame) {
                 {"assumption", "Captured successful calls obey D3D11 Map semantics; this does not "
                                "authenticate a modified capture."}};
     for (auto id : frame.entryOrder()) {
+        checkCancellation(cancelled);
         auto &e = frame.entry(id);
         if (e.category != 5 || !contextVersion(e.type))
             continue;
         try {
-            out["contexts"].push_back(contextJson(describeContext(frame, id)));
+            out["contexts"].push_back(contextJson(describeContext(frame, id), cancelled));
+        } catch (const OperationCancelled &) {
+            throw;
         } catch (const std::exception &error) {
             out["invalid"].push_back({{"id", id}, {"error", error.what()}});
         }
     }
     for (const auto &context : recovery.contexts) {
-        auto value = contextJson(context);
+        auto value = contextJson(context, cancelled);
         report["contexts"].push_back(value);
         out["contexts"].push_back(value);
     }
     for (const auto &issue : recovery.issues) {
+        checkCancellation(cancelled);
         Json item{{"context", issue.context}, {"reason", issue.reason}};
         if (issue.event)
             item["event"] = *issue.event;
         report["issues"].push_back(item);
     }
-    out["recovery"] = report;
+    out["recovery"] = std::move(report);
+    checkCancellation(cancelled);
     return out;
 }
-Json inspectCommandList(const Frame &frame, Id id) {
+Json inspectCommandList(const Frame &frame, Id id, const CancelCheck &cancelled) {
+    checkCancellation(cancelled);
+    frame.contextRecovery(cancelled);
     auto found = frame.entries().find(id);
     if (found == frame.entries().end() || found->second.category != 5 || found->second.type != 0x9a)
         throw std::runtime_error("Expected a command-list resource");
@@ -85,27 +95,30 @@ Json inspectCommandList(const Frame &frame, Id id) {
             {"original_player_truncated_fields", truncated},
             {"parent_context_type", owner ? (owner->deferred ? "deferred" : "immediate") : "unresolved"},
             {"interface_version", owner && owner->version ? Json(*owner->version) : Json(nullptr)},
-            {"original_player_parent", contextJson(native)},
+            {"original_player_parent", contextJson(native, cancelled)},
             {"native_build_context_valid", native.deferred},
             {"native_build_finish_restore", true}};
 }
-Json inspectCommandLists(const Frame &frame) {
+Json inspectCommandLists(const Frame &frame, const CancelCheck &cancelled) {
+    checkCancellation(cancelled);
     auto lists = Json::array(), executions = Json::array(), finishes = Json::array();
     std::map<Id, size_t> index;
     for (auto id : frame.entryOrder()) {
+        checkCancellation(cancelled);
         auto &e = frame.entry(id);
         if (e.category != 5 || e.type != 0x9a)
             continue;
-        auto info = inspectCommandList(frame, id);
+        auto info = inspectCommandList(frame, id, cancelled);
         info.update({{"recorded_events", Json::array()},
                      {"recorded_event_order", "capture_id_inventory_only"},
                      {"recorded_event_owner_domain", "original_player_uint32"},
                      {"original_builder_order", "registration_append_order_with_duplicates"},
                      {"registration_sequence_available", false}});
         index.emplace(id, lists.size());
-        lists.push_back(info);
+        lists.push_back(std::move(info));
     }
     for (auto &[id, e] : frame.entries()) {
+        checkCancellation(cancelled);
         if (e.category != 7)
             continue;
         if (finishCommandListVersion(e.type)) {
@@ -142,9 +155,11 @@ Json inspectCommandLists(const Frame &frame) {
             auto info = row["command_list"];
             auto operand = info["command_list_operand"].get<Id>();
             auto pointers = Json::array();
-            for (auto &list : lists)
+            for (auto &list : lists) {
+                checkCancellation(cancelled);
                 if (list["captured_pointer"] == operand)
                     pointers.push_back(list["id"]);
+            }
             info.update({{"event", id},
                          {"id_candidate", index.contains(operand) ? Json(operand) : Json(nullptr)},
                          {"pointer_candidates", pointers},
@@ -152,9 +167,10 @@ Json inspectCommandLists(const Frame &frame) {
             executions.push_back(info);
         }
     }
-    return {{"command_lists", lists},
-            {"execute_commands", executions},
-            {"finish_commands", finishes},
+    checkCancellation(cancelled);
+    return {{"command_lists", std::move(lists)},
+            {"execute_commands", std::move(executions)},
+            {"finish_commands", std::move(finishes)},
             {"execution_supported", false},
             {"source", "recovered_resource_parent_and_erg_owner_fields"},
             {"limits",

@@ -1,4 +1,6 @@
 #include "MainWindow.h"
+#include "CaptureStructureDialog.h"
+#include <QPointer>
 #include "WorkerImage.h"
 #include "QtCompatibility.h"
 #include "CompatibilityButton.h"
@@ -2277,95 +2279,20 @@ void MainWindow::inspectEvent(Id id) {
     }
 }
 void MainWindow::inspectCaptureStructure() {
-    if (!frame_)
+    if (!frame_) return;
+    const auto frame = frame_;
+    const QPointer<MainWindow> alive(this);
+    QPointer<CaptureStructureDialog> dialog = new CaptureStructureDialog(frame, this);
+    dialog->exec();
+    if (!alive || !dialog) return;
+    const auto event = dialog->selectedEvent();
+    dialog->deleteLater();
+    if (!event) return;
+    if (frame_ != frame) {
+        showError("Capture changed; reopen its structure to locate an event");
         return;
-    auto contexts = inspectContexts(*frame_);
-    nlohmann::json lists;
-    try {
-        lists = inspectCommandLists(*frame_);
-    } catch (const std::exception &error) {
-        lists = {{"error", error.what()}};
     }
-    QDialog dialog(this);
-    dialog.setObjectName("captureStructureDialog");
-    dialog.setWindowTitle("Contexts and Command Lists");
-    dialog.resize(840, 600);
-    auto layout = new QVBoxLayout(&dialog);
-    auto tabs = new QTabWidget;
-    layout->addWidget(tabs);
-    auto add = [&](const QString &title, const nlohmann::json &document) {
-        auto view = tree({"Field", "Value"});
-        view->setObjectName(title == "Contexts" ? "contextInventory" : "commandListInventory");
-        view->setColumnWidth(0, 290);
-        std::function<void(QTreeWidgetItem *, const nlohmann::json &)> fill;
-        fill = [&](QTreeWidgetItem *parent, const nlohmann::json &value) {
-            auto item = [&](const QString &key, const nlohmann::json &child) {
-                if (key == "assumption" || key == "scope" || key == "limits" || key == "note" ||
-                    key == "source") {
-                    auto detail =
-                        QString::fromStdString(child.is_string() ? child.get<std::string>() : child.dump(2));
-                    if (parent)
-                        parent->setToolTip(0, parent->toolTip(0) + '\n' + detail);
-                    else
-                        view->setToolTip(view->toolTip() + '\n' + detail);
-                    return;
-                }
-                auto label =
-                    child.is_structured()
-                        ? QString{}
-                        : QString::fromStdString(child.is_string() ? child.get<std::string>() : child.dump());
-                auto row = parent ? new QTreeWidgetItem(parent, {key, label})
-                                  : new QTreeWidgetItem(view, {key, label});
-                if (child.is_structured())
-                    fill(row, child);
-                if (child.is_number_unsigned() && (key == "event" || key == "unmap_event" || key == "id")) {
-                    auto id = child.get<Id>();
-                    auto found = frame_->entries().find(id);
-                    if (found != frame_->entries().end() && found->second.category == 7) {
-                        row->setData(1, Qt::UserRole, QVariant::fromValue<qulonglong>(id));
-                        row->setToolTip(1, "Double-click to locate API event");
-                    }
-                }
-            };
-            if (value.is_object())
-                for (auto it = value.begin(); it != value.end(); ++it)
-                    item(QString::fromStdString(it.key()), it.value());
-            else if (value.is_array())
-                for (size_t i = 0; i < value.size(); ++i)
-                    item(QString::number(i), value[i]);
-        };
-        fill(nullptr, document);
-        view->expandToDepth(1);
-        tabs->addTab(view, title);
-        connect(view, &QTreeWidget::itemDoubleClicked, &dialog, [&dialog, this](QTreeWidgetItem *item, int) {
-            auto id = item->data(1, Qt::UserRole).toULongLong();
-            if (id) {
-                dialog.accept();
-                locateEvent(id);
-            }
-        });
-    };
-    add("Contexts", contexts);
-    add("Command Lists", lists);
-    auto buttons = new QDialogButtonBox(QDialogButtonBox::Close);
-    auto exportButton = buttons->addButton("Export JSON…", QDialogButtonBox::ActionRole);
-    exportButton->setObjectName("exportCaptureStructure");
-    layout->addWidget(buttons);
-    connect(buttons, &QDialogButtonBox::rejected, &dialog, &QDialog::reject);
-    connect(exportButton, &QPushButton::clicked, &dialog, [&] {
-        auto commandLists = tabs->currentIndex() == 1;
-        auto path = QFileDialog::getSaveFileName(&dialog, "Export Capture Structure",
-                                                 commandLists ? "command-lists.json" : "contexts.json",
-                                                 "JSON (*.json)");
-        if (path.isEmpty())
-            return;
-        try {
-            writeFile(path, QByteArray::fromStdString((commandLists ? lists : contexts).dump(2) + "\n"));
-        } catch (const std::exception &error) {
-            showError(QString::fromUtf8(error.what()));
-        }
-    });
-    dialog.exec();
+    locateEvent(event);
 }
 void MainWindow::showPipeline(const State &s) {
     pipeline_->clear();

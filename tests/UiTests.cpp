@@ -1,4 +1,6 @@
 #include "NormalizedPredicateCapture.h"
+#include "StructureViewHelpers.h"
+#include <QTreeView>
 #include "ClassCapture.h"
 #include "ConstantBufferCapture.h"
 #include "DepthStencilCapture.h"
@@ -2735,7 +2737,13 @@ class UiTests final : public QObject {
         QCOMPARE(fields->topLevelItemCount(), 0);
         QCOMPARE(view.findChild<QLabel *>("stateSummary")->text(), QString("State unavailable"));
     }
+    void inferredContextNavigation_data() {
+        QTest::addColumn<bool>("stale");
+        QTest::newRow("same-capture") << false;
+        QTest::newRow("replaced-capture") << true;
+    }
     void inferredContextNavigation() {
+        QFETCH(bool, stale);
         using namespace flora;
         using namespace flora::testing;
         auto capture = graphicsCounterCapture(false);
@@ -2769,6 +2777,11 @@ class UiTests final : public QObject {
         capture.add(83, 7, 0x34ed, unmap);
         QTemporaryDir dir;
         capture.save(dir.path() + "/inferred.gpa_frame");
+        auto replacement = msaaOutputCapture(false);
+        std::vector<uint8_t> clear(16); put(clear, 8, Id(1));
+        replacement.add(82, 7, 0x242, clear);
+        const auto replacementPath = dir.filePath("replacement.gpa_frame");
+        replacement.save(replacementPath);
         MainWindow window;
         window.resize(1440, 900);
         window.show();
@@ -2787,23 +2800,29 @@ class UiTests final : public QObject {
             if (!dialog)
                 return;
             QTimer::singleShot(3000, dialog, &QDialog::reject);
-            auto tree = dialog->findChild<QTreeWidget *>("contextInventory");
+            auto tree = dialog->findChild<QTreeView *>("contextInventory");
             QVERIFY(tree);
-            QTreeWidgetItem *target = nullptr;
-            for (QTreeWidgetItemIterator it(tree); *it; ++it)
-                if ((*it)->text(0) == "event" && (*it)->data(1, Qt::UserRole).toULongLong() == 82) {
-                    target = *it;
-                    break;
-                }
-            QVERIFY(target);
-            tree->expandAll();
-            tree->scrollToItem(target);
+            QTRY_VERIFY_WITH_TIMEOUT(tree->model(), 30000);
+            auto target = flora::testing::structureEvent(tree->model(), 82);
+            QVERIFY(target.isValid());
+            tree->expandAll(); tree->scrollTo(target);
             snapshot(*dialog, "context-inferred-evidence");
-            navigated = QMetaObject::invokeMethod(tree, "itemDoubleClicked", Qt::DirectConnection,
-                                                  Q_ARG(QTreeWidgetItem *, target), Q_ARG(int, 1));
+            if (stale) {
+                done.clear(); window.openCapture(replacementPath);
+                QTRY_VERIFY_WITH_TIMEOUT(!done.empty() && !window.busy(), 30000);
+                QVERIFY(done.last()[0].toBool());
+            }
+            navigated = QMetaObject::invokeMethod(tree, "doubleClicked", Qt::DirectConnection,
+                                                  Q_ARG(QModelIndex, target));
         });
         action->trigger();
         QVERIFY(navigated);
+        if (stale) {
+            QCOMPARE(window.capturePath(), replacementPath);
+            QVERIFY(window.findChild<QPlainTextEdit *>("taskLog")->toPlainText().contains("Capture changed"));
+            QVERIFY(window.findChild<QTableView *>("apiLog")->currentIndex().data(Qt::UserRole).toULongLong() != 82);
+            return;
+        }
         QCOMPARE(window.findChild<QComboBox *>("apiKinds")->currentIndex(), 1);
         QVERIFY(window.findChild<QLineEdit *>("apiSearch")->text().isEmpty());
         QVERIFY(window.findChild<QLineEdit *>("apiResourceFilter")->text().isEmpty());
@@ -2919,27 +2938,28 @@ class UiTests final : public QObject {
             auto tabs = dialog->findChild<QTabWidget *>();
             QVERIFY(tabs);
             QCOMPARE(tabs->count(), 2);
-            auto inventory = dialog->findChild<QTreeWidget *>("contextInventory");
-            auto lists = dialog->findChild<QTreeWidget *>("commandListInventory");
+            auto inventory = dialog->findChild<QTreeView *>("contextInventory");
+            auto lists = dialog->findChild<QTreeView *>("commandListInventory");
             QVERIFY(inventory && lists);
-            auto contexts = fieldNamed(inventory->invisibleRootItem(), "contexts");
-            QVERIFY(contexts);
-            QCOMPARE(contexts->childCount(), 1);
-            auto contextKind = fieldNamed(contexts->child(0), "context_type");
-            QVERIFY(contextKind);
-            QCOMPARE(contextKind->text(1), QString("immediate"));
-            auto recovery = fieldNamed(inventory->invisibleRootItem(), "recovery");
-            QVERIFY(recovery);
-            QVERIFY(!fieldNamed(recovery, "assumption"));
-            QVERIFY(!recovery->toolTip(0).isEmpty());
+            QTRY_VERIFY_WITH_TIMEOUT(inventory->model() && lists->model(), 30000);
+            auto contexts = flora::testing::structureField(inventory->model(), "contexts");
+            QVERIFY(contexts.isValid());
+            QCOMPARE(inventory->model()->rowCount(contexts), 1);
+            auto context = inventory->model()->index(0, 0, contexts);
+            auto contextKind = flora::testing::structureField(inventory->model(), "context_type", context);
+            QCOMPARE(contextKind.siblingAtColumn(1).data().toString(), QString("immediate"));
+            auto recovery = flora::testing::structureField(inventory->model(), "recovery");
+            QVERIFY(recovery.isValid());
+            QVERIFY(!flora::testing::structureField(inventory->model(), "assumption", recovery).isValid());
+            QVERIFY(!recovery.data(Qt::ToolTipRole).toString().isEmpty());
             QVERIFY(dialog->findChild<QPushButton *>("exportCaptureStructure"));
-            contexts->child(0)->setExpanded(true);
+            inventory->expand(context);
             snapshot(*dialog, "context-inventory");
             tabs->setCurrentIndex(1);
-            auto execution = fieldNamed(lists->invisibleRootItem(), "execution_supported");
-            QVERIFY(execution);
-            QCOMPARE(execution->text(1), QString("false"));
-            QVERIFY(!fieldNamed(lists->invisibleRootItem(), "limits"));
+            auto execution = flora::testing::structureField(lists->model(), "execution_supported");
+            QVERIFY(execution.isValid());
+            QCOMPARE(execution.siblingAtColumn(1).data().toString(), QString("false"));
+            QVERIFY(!flora::testing::structureField(lists->model(), "limits").isValid());
             QVERIFY(!lists->toolTip().isEmpty());
             snapshot(*dialog, "command-list-inventory");
             inspected = true;
