@@ -1,7 +1,21 @@
 # Current capabilities and compatibility
 
-Reviewed **2026-10-08**. The user authorized M4, then M5, while keeping M3 open.
-The latest [writable Map readiness correction](MAP_NOWAIT_READINESS.md),
+Reviewed **2026-10-09**. The user authorized M4, then M5, while keeping M3 open.
+The latest [native Windows sustained acceptance](NATIVE_WINDOWS_SOAK_ACCEPTANCE.md),
+harness `58a35d4`, verifies the actual Windows Qt platform, exposed windows and
+native GDI/USER observations. The unchanged Map readiness package completes
+140 GF2/BF1 cycles in 30.394 minutes, 560 strict per-cycle images plus
+one post-clear image, and 560 exact retained exports. All 1121 immutable
+progress snapshots, package/test identities and complete memory snapshots are
+rechecked. Seventeen runner checks, eight recovery Qt rows, a four-cycle native
+pilot and a two-cycle offscreen control pass. The 42-suite replay matrix is
+inherited from the unchanged package. Memory growth and clearing observations
+remain scoped evidence, not a leak-free claim. Cycle 96 shows a GDI step from
+56 to 65 whose cause is unresolved; cleared busy heap returns near baseline,
+but private commit retains extra heap capacity. Independent clean-Windows and
+broader workflow/driver/capture coverage remain open. M3/M4/M5 are incomplete.
+
+The preceding [writable Map readiness correction](MAP_NOWAIT_READINESS.md),
 implementation `ebfbc48`, preserves captured successful DO_NOT_WAIT writes under
 replay scheduling while keeping original failures without write/retry effects.
 Eight original captures previously passed preflight but failed all 16 replays
@@ -1237,7 +1251,7 @@ the other 35 suites passed initially and the complete UI suite passes after the 
 | M2 — Ordinary replay | Registered-scope gate passed: 366 positive cases and 22 located rejections; auxiliary/snapshot contracts audited. This is not universal API support. State-object identity loss, mixed saved/missing SO targets and unverified lifetimes remain explicit boundaries. |
 | M3 — Deferred Context / Command List | Open; M4/M5 now take priority by user instruction on 2026-10-06. Require original retained-list captures proving identity, build order, resource versions, repeated execution, restore-state and event mapping before production support. |
 | M4 — Resources and boundaries | Active, incomplete. Initial texture/Map data, successful writable DO_NOT_WAIT readiness, per-slot counter dependencies, proved counter-free indexed accesses and mip-only reads, nonzero-MinLOD storage/clone paths and saved occluded Present TEST have scoped acceptance. Saved per-stream SO overflow Queries execute their recorded intervals. Continue demonstrated resource/data gaps, absent ordinary Query boundaries, frame-before counters/results, wider shader dependency proofs and remaining presentation paths. Unobserved texture-difference layouts retain rejection rather than guessed pitches. [Map readiness and survey](MAP_NOWAIT_READINESS.md), [Stream Query scope](STREAM_QUERY_COMPATIBILITY.md) |
-| M5 — Stable compatibility release | Incomplete. See the current increment above for package/matrix evidence. The previous same-source 30.1-minute/162-cycle run passed 648 strict image checks. Full-log detail retention was subsequently addressed by compact search and a 128-row ordinary-detail bound; the 48-cycle control reduced BF1 busy heap, without proving all memory growth resolved. Broader model publication, analyzer/export/driver/storage failures, memory attribution, renewed release soak and independent clean-host deployment remain open. [Search acceptance](API_SEARCH_INDEX_ACCEPTANCE.md), [previous same-source acceptance](WORKFLOW_SOURCE_RELEASE_ACCEPTANCE.md) |
+| M5 — Stable compatibility release | Incomplete. See the current increment above for package/matrix evidence. The previous same-source 30.1-minute/162-cycle run passed 648 strict image checks. Full-log detail retention was subsequently addressed by compact search and a 128-row ordinary-detail bound; the 48-cycle control reduced BF1 busy heap, without proving all memory growth resolved. Broader model publication, analyzer/export/driver/storage failures, memory attribution, broader sustained coverage and independent clean-host deployment remain open. The current native Windows GF2/BF1 gate has scoped renewed acceptance. [Search acceptance](API_SEARCH_INDEX_ACCEPTANCE.md), [previous same-source acceptance](WORKFLOW_SOURCE_RELEASE_ACCEPTANCE.md) |
 | M6 — Analyzer and other versions | Incomplete. Continue remaining Qt consumers, advanced profiling/debugging and version-specific adapters after core replay gates. Existing analyzer features remain available. |
 
 The original order was **M1 → M2 → M3 → M4 → M5**. On 2026-10-06 the user

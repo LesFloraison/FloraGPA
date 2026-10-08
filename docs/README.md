@@ -44,6 +44,7 @@ chronology remains in Chinese.
 | Build committed source with an isolated process environment and package it | [Source build and packaging](SOURCE_BUILD_AND_PACKAGING.md) |
 | Track the latest same-source package, tests and full replay matrix | [Same-source workflow acceptance](WORKFLOW_SOURCE_RELEASE_ACCEPTANCE.md) |
 | Repeat Query/API/structure workflows with retained per-cycle exports | [Workflow soak scope](RECOVERY_WORKFLOW_SOAK.md) |
+| Verify native Windows platform, exposed windows and sustained GUI resource observations | [Native Windows workflow acceptance](NATIVE_WINDOWS_SOAK_ACCEPTANCE.md) |
 | Exercise one Qt window through repeated load, cancel, failure and replay | [Persistent Qt recovery soak](PERSISTENT_QT_SOAK.md) |
 | Separate test history, log and pixmap-cache memory retention | [Qt retention controls](QT_RETENTION_CONTROL.md) |
 | Compare process commitment, address regions and observed busy heap blocks | [Process memory attribution](PROCESS_MEMORY_ATTRIBUTION.md) |
