@@ -79,6 +79,10 @@ independent clean-host or renewed long-duration acceptance.
 
 ## Remaining boundaries
 
+The API-log follow-up described below is subsequently addressed by
+[API export acceptance](API_EXPORT_ACCEPTANCE.md); the original batch record
+and its inherited matrix are retained here.
+
 Length/read checks do not authenticate same-length external mutations against
 accepted asset hashes. The export inventory is the accepted cache's supported
 file set, not a semantic proof that every stage-specific optional artifact was

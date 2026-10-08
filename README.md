@@ -112,6 +112,9 @@ the requested snapshot across preview changes. See [image export acceptance](doc
 for atomic single-file publication, validation and remaining boundaries.
 Geometry exports similarly retain the requested assets and publish their event
 directory only after every background copy succeeds; see [geometry export acceptance](docs/GEOMETRY_EXPORT_ACCEPTANCE.md).
+API-log exports retain the selected capture/filter and stream JSON/CSV in the
+background with cancellation. See [API export acceptance](docs/API_EXPORT_ACCEPTANCE.md)
+for byte equivalence, memory measurements and partial-publication diagnostics.
 
 ## Preflight and command-line replay
 
