@@ -18,10 +18,10 @@ def main():
     parser.add_argument('--out', type=Path, required=True)
     parser.add_argument('--gpa-dir', type=Path, default=Path('C:/Program Files/IntelSWTools/GPA'))
     parser.add_argument('--modes', type=int, nargs='+', default=list(range(6)),
-                        help='0..5 SM5, 6..11 SM4.0, 12..19 branches, 20..27 switches, 28..35 loops')
+                        help='0..5 SM5, 6..11 SM4.0, 12..19 branches, 20..27 switches, 28..35 loops, 36..43 early returns')
     args = parser.parse_args()
-    if len(set(args.modes)) != len(args.modes) or any(n < 0 or n > 35 for n in args.modes):
-        parser.error('Choose distinct modes 0..35')
+    if len(set(args.modes)) != len(args.modes) or any(n < 0 or n > 43 for n in args.modes):
+        parser.error('Choose distinct modes 0..43')
     root = args.out.resolve()
     root.mkdir(parents=True, exist_ok=False)
     frozen = root / 'producer'

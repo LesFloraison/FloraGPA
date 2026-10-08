@@ -1,0 +1,247 @@
+{
+  "schema": "FloraGPA compatibility corpus 1",
+  "profile": "GPA 2025 R1 legacy DX11 / IGPA v3",
+  "note": "Discovery queue only. Not enrolled in the accepted compatibility gate; no new production support claimed.",
+  "cases": [
+    {
+      "id": "return_mip_36",
+      "path": "m4-return-mip-originals/36/capture.gpa_frame",
+      "sha256": "6ec854bb2193389c4ca24f8c37a9f1c9b280603c0c313286cb834e33428685a1",
+      "bytes": 77408,
+      "family": "return_mip_discovery",
+      "origin": "self_owned_original_gpa_capture",
+      "provenance_note": "Untouched original capture; 12 full-image checks on each native hardware, WARP and GPA-injected producer run",
+      "device_scope": "Producer adapter identities recorded; private original-player adapter/configuration unverified",
+      "reference_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "reference_scope": "Full native 8x8 application image",
+      "comparison_policy": "exact_golden",
+      "controls": [],
+      "boundaries": [],
+      "covers": [
+        "count return"
+      ],
+      "application_reference_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "application_reference_scope": "Native hardware/WARP/injected producer only; production replay acceptance pending",
+      "application_reference_evidence": {
+        "path": "m4-return-mip-originals/36/hardware/expected.rgba",
+        "sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+      },
+      "source_manifests": [
+        {
+          "path": "m4-return-mip-originals/manifest.json",
+          "sha256": "c1d269ee2df550da202bf828d086fb5399f7943a0c2ba021e4565f01c09a038e"
+        }
+      ]
+    },
+    {
+      "id": "return_mip_37",
+      "path": "m4-return-mip-originals/37/capture.gpa_frame",
+      "sha256": "639692ef28185d3734b21ed7d57c0d690891c5b390410eedbcc25e72cfbac736",
+      "bytes": 77164,
+      "family": "return_mip_discovery",
+      "origin": "self_owned_original_gpa_capture",
+      "provenance_note": "Untouched original capture; 12 full-image checks on each native hardware, WARP and GPA-injected producer run",
+      "device_scope": "Producer adapter identities recorded; private original-player adapter/configuration unverified",
+      "reference_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "reference_scope": "Full native 8x8 application image",
+      "comparison_policy": "exact_golden",
+      "controls": [],
+      "boundaries": [],
+      "covers": [
+        "count return stripped"
+      ],
+      "application_reference_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "application_reference_scope": "Native hardware/WARP/injected producer only; production replay acceptance pending",
+      "application_reference_evidence": {
+        "path": "m4-return-mip-originals/37/hardware/expected.rgba",
+        "sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+      },
+      "source_manifests": [
+        {
+          "path": "m4-return-mip-originals/manifest.json",
+          "sha256": "c1d269ee2df550da202bf828d086fb5399f7943a0c2ba021e4565f01c09a038e"
+        }
+      ]
+    },
+    {
+      "id": "return_mip_38",
+      "path": "m4-return-mip-originals/38/capture.gpa_frame",
+      "sha256": "45dd32cc043bbc7d3e7f62447b49a3b00caa30559e5cd177ec15534a32c9e102",
+      "bytes": 77488,
+      "family": "return_mip_discovery",
+      "origin": "self_owned_original_gpa_capture",
+      "provenance_note": "Untouched original capture; 12 full-image checks on each native hardware, WARP and GPA-injected producer run",
+      "device_scope": "Producer adapter identities recorded; private original-player adapter/configuration unverified",
+      "reference_rgba_sha256": "3d6876a0146de8576eb2395a858de1213d1b92c65b779df3a331cfd5a4584546",
+      "reference_scope": "Full native 8x8 application image",
+      "comparison_policy": "exact_golden",
+      "controls": [],
+      "boundaries": [],
+      "covers": [
+        "dimensions used before return"
+      ],
+      "application_reference_rgba_sha256": "3d6876a0146de8576eb2395a858de1213d1b92c65b779df3a331cfd5a4584546",
+      "application_reference_scope": "Native hardware/WARP/injected producer only; production replay acceptance pending",
+      "application_reference_evidence": {
+        "path": "m4-return-mip-originals/38/hardware/expected.rgba",
+        "sha256": "3d6876a0146de8576eb2395a858de1213d1b92c65b779df3a331cfd5a4584546"
+      },
+      "source_manifests": [
+        {
+          "path": "m4-return-mip-originals/manifest.json",
+          "sha256": "c1d269ee2df550da202bf828d086fb5399f7943a0c2ba021e4565f01c09a038e"
+        }
+      ]
+    },
+    {
+      "id": "return_mip_39",
+      "path": "m4-return-mip-originals/39/capture.gpa_frame",
+      "sha256": "4bc7286023a038ebd41e6f734f7e16a24edbb992cd36be65c003e6e5669f34cf",
+      "bytes": 77456,
+      "family": "return_mip_discovery",
+      "origin": "self_owned_original_gpa_capture",
+      "provenance_note": "Untouched original capture; 12 full-image checks on each native hardware, WARP and GPA-injected producer run",
+      "device_scope": "Producer adapter identities recorded; private original-player adapter/configuration unverified",
+      "reference_rgba_sha256": "3d6876a0146de8576eb2395a858de1213d1b92c65b779df3a331cfd5a4584546",
+      "reference_scope": "Full native 8x8 application image",
+      "comparison_policy": "exact_golden",
+      "controls": [],
+      "boundaries": [],
+      "covers": [
+        "dimension controls return"
+      ],
+      "application_reference_rgba_sha256": "3d6876a0146de8576eb2395a858de1213d1b92c65b779df3a331cfd5a4584546",
+      "application_reference_scope": "Native hardware/WARP/injected producer only; production replay acceptance pending",
+      "application_reference_evidence": {
+        "path": "m4-return-mip-originals/39/hardware/expected.rgba",
+        "sha256": "3d6876a0146de8576eb2395a858de1213d1b92c65b779df3a331cfd5a4584546"
+      },
+      "source_manifests": [
+        {
+          "path": "m4-return-mip-originals/manifest.json",
+          "sha256": "c1d269ee2df550da202bf828d086fb5399f7943a0c2ba021e4565f01c09a038e"
+        }
+      ]
+    },
+    {
+      "id": "return_mip_40",
+      "path": "m4-return-mip-originals/40/capture.gpa_frame",
+      "sha256": "7c234ac3daac461567c9a0740485131a0abfb82a285cc7202791bd8035208350",
+      "bytes": 77532,
+      "family": "return_mip_discovery",
+      "origin": "self_owned_original_gpa_capture",
+      "provenance_note": "Untouched original capture; 12 full-image checks on each native hardware, WARP and GPA-injected producer run",
+      "device_scope": "Producer adapter identities recorded; private original-player adapter/configuration unverified",
+      "reference_rgba_sha256": "95b955e50330dfa31fbe29cfc3d2b1b68cf9c46bb369bfa126f01741c152fd52",
+      "reference_scope": "Full native 8x8 application image",
+      "comparison_policy": "exact_golden",
+      "controls": [],
+      "boundaries": [],
+      "covers": [
+        "sampling before return with missing LOD"
+      ],
+      "application_reference_rgba_sha256": "95b955e50330dfa31fbe29cfc3d2b1b68cf9c46bb369bfa126f01741c152fd52",
+      "application_reference_scope": "Native hardware/WARP/injected producer only; production replay acceptance pending",
+      "application_reference_evidence": {
+        "path": "m4-return-mip-originals/40/hardware/expected.rgba",
+        "sha256": "95b955e50330dfa31fbe29cfc3d2b1b68cf9c46bb369bfa126f01741c152fd52"
+      },
+      "source_manifests": [
+        {
+          "path": "m4-return-mip-originals/manifest.json",
+          "sha256": "c1d269ee2df550da202bf828d086fb5399f7943a0c2ba021e4565f01c09a038e"
+        }
+      ]
+    },
+    {
+      "id": "return_mip_41",
+      "path": "m4-return-mip-originals/41/capture.gpa_frame",
+      "sha256": "018ca7211d77017615c9c986ea77eb4883aeb2ef95f26445c075ae9e2a99a362",
+      "bytes": 77584,
+      "family": "return_mip_discovery",
+      "origin": "self_owned_original_gpa_capture",
+      "provenance_note": "Untouched original capture; 12 full-image checks on each native hardware, WARP and GPA-injected producer run",
+      "device_scope": "Producer adapter identities recorded; private original-player adapter/configuration unverified",
+      "reference_rgba_sha256": "95b955e50330dfa31fbe29cfc3d2b1b68cf9c46bb369bfa126f01741c152fd52",
+      "reference_scope": "Full native 8x8 application image",
+      "comparison_policy": "exact_golden",
+      "controls": [],
+      "boundaries": [],
+      "covers": [
+        "sampling before return with saved setter"
+      ],
+      "application_reference_rgba_sha256": "95b955e50330dfa31fbe29cfc3d2b1b68cf9c46bb369bfa126f01741c152fd52",
+      "application_reference_scope": "Native hardware/WARP/injected producer only; production replay acceptance pending",
+      "application_reference_evidence": {
+        "path": "m4-return-mip-originals/41/hardware/expected.rgba",
+        "sha256": "95b955e50330dfa31fbe29cfc3d2b1b68cf9c46bb369bfa126f01741c152fd52"
+      },
+      "source_manifests": [
+        {
+          "path": "m4-return-mip-originals/manifest.json",
+          "sha256": "c1d269ee2df550da202bf828d086fb5399f7943a0c2ba021e4565f01c09a038e"
+        }
+      ]
+    },
+    {
+      "id": "return_mip_42",
+      "path": "m4-return-mip-originals/42/capture.gpa_frame",
+      "sha256": "215e3f5eab871e036179cd297de0f7b83f269e2f8bca603ba97331a13814b99e",
+      "bytes": 77488,
+      "family": "return_mip_discovery",
+      "origin": "self_owned_original_gpa_capture",
+      "provenance_note": "Untouched original capture; 12 full-image checks on each native hardware, WARP and GPA-injected producer run",
+      "device_scope": "Producer adapter identities recorded; private original-player adapter/configuration unverified",
+      "reference_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "reference_scope": "Full native 8x8 application image",
+      "comparison_policy": "exact_golden",
+      "controls": [],
+      "boundaries": [],
+      "covers": [
+        "nested returns"
+      ],
+      "application_reference_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "application_reference_scope": "Native hardware/WARP/injected producer only; production replay acceptance pending",
+      "application_reference_evidence": {
+        "path": "m4-return-mip-originals/42/hardware/expected.rgba",
+        "sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+      },
+      "source_manifests": [
+        {
+          "path": "m4-return-mip-originals/manifest.json",
+          "sha256": "c1d269ee2df550da202bf828d086fb5399f7943a0c2ba021e4565f01c09a038e"
+        }
+      ]
+    },
+    {
+      "id": "return_mip_43",
+      "path": "m4-return-mip-originals/43/capture.gpa_frame",
+      "sha256": "40cf67e0a8d8669abc65a40d89230e7113792f19bb9da3ed69f9de7adc04bed5",
+      "bytes": 77572,
+      "family": "return_mip_discovery",
+      "origin": "self_owned_original_gpa_capture",
+      "provenance_note": "Untouched original capture; 12 full-image checks on each native hardware, WARP and GPA-injected producer run",
+      "device_scope": "Producer adapter identities recorded; private original-player adapter/configuration unverified",
+      "reference_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "reference_scope": "Full native 8x8 application image",
+      "comparison_policy": "exact_golden",
+      "controls": [],
+      "boundaries": [],
+      "covers": [
+        "return inside loop"
+      ],
+      "application_reference_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "application_reference_scope": "Native hardware/WARP/injected producer only; production replay acceptance pending",
+      "application_reference_evidence": {
+        "path": "m4-return-mip-originals/43/hardware/expected.rgba",
+        "sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+      },
+      "source_manifests": [
+        {
+          "path": "m4-return-mip-originals/manifest.json",
+          "sha256": "c1d269ee2df550da202bf828d086fb5399f7943a0c2ba021e4565f01c09a038e"
+        }
+      ]
+    }
+  ]
+}
