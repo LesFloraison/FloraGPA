@@ -1,5 +1,11 @@
 # GetData completion ordering and missing Query boundaries
 
+Follow-up 2026-10-08: [stream Query compatibility](STREAM_QUERY_COMPATIBILITY.md)
+restores types 9/11/13/15 when the original file saves their `0x96` descriptor
+and Begin/End interval. They use CreateQuery, remain non-bindable and start
+unissued. The absent ordinary Query identities/End records discussed below
+remain unresolved; the older evidence and counts are retained as recorded.
+
 Reviewed 2026-10-07. This M4 batch separates a restorable predicate completion
 wait from an ordinary-query synchronization boundary that the original capture
 omits. It does not reconstruct CPU branches or substitute newly measured values

@@ -1,0 +1,3368 @@
+{
+  "schema": "FloraGPA compatibility corpus 1",
+  "profile": "GPA 2025 R1 legacy DX11 / IGPA v3",
+  "source_manifest_sha256": "05ea7a3d420d3a0eb230b8add10935fbc663e4b290b9a7592c662d52781e8420",
+  "exe_sha256": "c22cbdc89fad23c445dcc7e18197154d9a0a548e667298fbe7a5b9671945ea3b",
+  "cases": [
+    {
+      "id": "stream_predicate_0",
+      "path": "0/capture.gpa_frame",
+      "sha256": "633e2c637580b6b188c54ffadba0ae9023c4f9b2cab62639a146fcb1a16d6ab6",
+      "bytes": 98743,
+      "family": "stream_predicate",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [
+        {
+          "path": "manifest.json",
+          "sha256": "05ea7a3d420d3a0eb230b8add10935fbc663e4b290b9a7592c662d52781e8420",
+          "contains_capture_hash": true
+        }
+      ],
+      "provenance_note": "Unmodified original CaptureNextFrame; native hardware/WARP debug and CPU image/buffer oracles frozen.",
+      "device_scope": "Default hardware capture, native hardware/WARP verified; original player adapter not matched.",
+      "reference_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+      "comparison_policy": "exact_golden",
+      "boundaries": [
+        {
+          "kind": "buffer",
+          "resource": 22,
+          "event": 30,
+          "expect_stable": true,
+          "expected_storage_sha256": "a5cf86cc36c6ec14fc6a45ac86a4f2b34d4684669e08a469cc7a8e9f0f1619fe"
+        },
+        {
+          "kind": "buffer",
+          "resource": 23,
+          "event": 30,
+          "expect_stable": true,
+          "expected_storage_sha256": "6af40de2d7183605cbee5331ef6ca83b90d5927442b7aec8e25b4263721ee157"
+        },
+        {
+          "kind": "buffer",
+          "resource": 24,
+          "event": 30,
+          "expect_stable": true,
+          "expected_storage_sha256": "ecfbd9435b029b25d0d0cf5ac8ea8e21e83685d8d97edd469b574765b0f03eba"
+        },
+        {
+          "kind": "buffer",
+          "resource": 25,
+          "event": 30,
+          "expect_stable": true,
+          "expected_storage_sha256": "d5371af02b60127bcc0c7ac483b909907763dccd73eba006e71128a76ea9d53c"
+        }
+      ],
+      "controls": [
+        {
+          "disable_event": 30,
+          "repeat": 2,
+          "expected_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b"
+        }
+      ],
+      "covers": [
+        "Query stream 0",
+        "overflow stream -1",
+        "comparison False",
+        "preframe-created refreshed interval"
+      ],
+      "native_workload_fidelity": "passed",
+      "application_reference_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+      "application_reference_scope": "Full 8x8 conditional output plus all four SO buffers; 12 frames on native hardware/WARP and original capture injection.",
+      "application_reference_evidence": {
+        "path": "manifest.json",
+        "sha256": "05ea7a3d420d3a0eb230b8add10935fbc663e4b290b9a7592c662d52781e8420"
+      },
+      "fidelity_reason": "Saved per-stream BOOL query descriptor and interval restored; exact independent images, buffer bytes and disabled-work controls required."
+    },
+    {
+      "id": "stream_predicate_1",
+      "path": "1/capture.gpa_frame",
+      "sha256": "17d7dd8cd785d56609de522f61e7aa44ad057316ca4d27498707baa2615fb13e",
+      "bytes": 98743,
+      "family": "stream_predicate",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [
+        {
+          "path": "manifest.json",
+          "sha256": "05ea7a3d420d3a0eb230b8add10935fbc663e4b290b9a7592c662d52781e8420",
+          "contains_capture_hash": true
+        }
+      ],
+      "provenance_note": "Unmodified original CaptureNextFrame; native hardware/WARP debug and CPU image/buffer oracles frozen.",
+      "device_scope": "Default hardware capture, native hardware/WARP verified; original player adapter not matched.",
+      "reference_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+      "comparison_policy": "exact_golden",
+      "boundaries": [
+        {
+          "kind": "buffer",
+          "resource": 22,
+          "event": 30,
+          "expect_stable": true,
+          "expected_storage_sha256": "a5cf86cc36c6ec14fc6a45ac86a4f2b34d4684669e08a469cc7a8e9f0f1619fe"
+        },
+        {
+          "kind": "buffer",
+          "resource": 23,
+          "event": 30,
+          "expect_stable": true,
+          "expected_storage_sha256": "6af40de2d7183605cbee5331ef6ca83b90d5927442b7aec8e25b4263721ee157"
+        },
+        {
+          "kind": "buffer",
+          "resource": 24,
+          "event": 30,
+          "expect_stable": true,
+          "expected_storage_sha256": "ecfbd9435b029b25d0d0cf5ac8ea8e21e83685d8d97edd469b574765b0f03eba"
+        },
+        {
+          "kind": "buffer",
+          "resource": 25,
+          "event": 30,
+          "expect_stable": true,
+          "expected_storage_sha256": "d5371af02b60127bcc0c7ac483b909907763dccd73eba006e71128a76ea9d53c"
+        }
+      ],
+      "controls": [
+        {
+          "disable_event": 30,
+          "repeat": 2,
+          "expected_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b"
+        }
+      ],
+      "covers": [
+        "Query stream 1",
+        "overflow stream -1",
+        "comparison False",
+        "preframe-created refreshed interval"
+      ],
+      "native_workload_fidelity": "passed",
+      "application_reference_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+      "application_reference_scope": "Full 8x8 conditional output plus all four SO buffers; 12 frames on native hardware/WARP and original capture injection.",
+      "application_reference_evidence": {
+        "path": "manifest.json",
+        "sha256": "05ea7a3d420d3a0eb230b8add10935fbc663e4b290b9a7592c662d52781e8420"
+      },
+      "fidelity_reason": "Saved per-stream BOOL query descriptor and interval restored; exact independent images, buffer bytes and disabled-work controls required."
+    },
+    {
+      "id": "stream_predicate_2",
+      "path": "2/capture.gpa_frame",
+      "sha256": "4bf037c2ee62b5b2644d4d7e63f46436d5ba2eef9327601744a16d8770f68c5e",
+      "bytes": 98743,
+      "family": "stream_predicate",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [
+        {
+          "path": "manifest.json",
+          "sha256": "05ea7a3d420d3a0eb230b8add10935fbc663e4b290b9a7592c662d52781e8420",
+          "contains_capture_hash": true
+        }
+      ],
+      "provenance_note": "Unmodified original CaptureNextFrame; native hardware/WARP debug and CPU image/buffer oracles frozen.",
+      "device_scope": "Default hardware capture, native hardware/WARP verified; original player adapter not matched.",
+      "reference_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+      "comparison_policy": "exact_golden",
+      "boundaries": [
+        {
+          "kind": "buffer",
+          "resource": 22,
+          "event": 30,
+          "expect_stable": true,
+          "expected_storage_sha256": "a5cf86cc36c6ec14fc6a45ac86a4f2b34d4684669e08a469cc7a8e9f0f1619fe"
+        },
+        {
+          "kind": "buffer",
+          "resource": 23,
+          "event": 30,
+          "expect_stable": true,
+          "expected_storage_sha256": "6af40de2d7183605cbee5331ef6ca83b90d5927442b7aec8e25b4263721ee157"
+        },
+        {
+          "kind": "buffer",
+          "resource": 24,
+          "event": 30,
+          "expect_stable": true,
+          "expected_storage_sha256": "ecfbd9435b029b25d0d0cf5ac8ea8e21e83685d8d97edd469b574765b0f03eba"
+        },
+        {
+          "kind": "buffer",
+          "resource": 25,
+          "event": 30,
+          "expect_stable": true,
+          "expected_storage_sha256": "d5371af02b60127bcc0c7ac483b909907763dccd73eba006e71128a76ea9d53c"
+        }
+      ],
+      "controls": [
+        {
+          "disable_event": 30,
+          "repeat": 2,
+          "expected_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b"
+        }
+      ],
+      "covers": [
+        "Query stream 2",
+        "overflow stream -1",
+        "comparison False",
+        "preframe-created refreshed interval"
+      ],
+      "native_workload_fidelity": "passed",
+      "application_reference_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+      "application_reference_scope": "Full 8x8 conditional output plus all four SO buffers; 12 frames on native hardware/WARP and original capture injection.",
+      "application_reference_evidence": {
+        "path": "manifest.json",
+        "sha256": "05ea7a3d420d3a0eb230b8add10935fbc663e4b290b9a7592c662d52781e8420"
+      },
+      "fidelity_reason": "Saved per-stream BOOL query descriptor and interval restored; exact independent images, buffer bytes and disabled-work controls required."
+    },
+    {
+      "id": "stream_predicate_3",
+      "path": "3/capture.gpa_frame",
+      "sha256": "f4ad5a2acb25f5419111d1048cd9466678ea92315f7de83ec59fa4405bb2b3be",
+      "bytes": 98743,
+      "family": "stream_predicate",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [
+        {
+          "path": "manifest.json",
+          "sha256": "05ea7a3d420d3a0eb230b8add10935fbc663e4b290b9a7592c662d52781e8420",
+          "contains_capture_hash": true
+        }
+      ],
+      "provenance_note": "Unmodified original CaptureNextFrame; native hardware/WARP debug and CPU image/buffer oracles frozen.",
+      "device_scope": "Default hardware capture, native hardware/WARP verified; original player adapter not matched.",
+      "reference_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+      "comparison_policy": "exact_golden",
+      "boundaries": [
+        {
+          "kind": "buffer",
+          "resource": 22,
+          "event": 30,
+          "expect_stable": true,
+          "expected_storage_sha256": "a5cf86cc36c6ec14fc6a45ac86a4f2b34d4684669e08a469cc7a8e9f0f1619fe"
+        },
+        {
+          "kind": "buffer",
+          "resource": 23,
+          "event": 30,
+          "expect_stable": true,
+          "expected_storage_sha256": "6af40de2d7183605cbee5331ef6ca83b90d5927442b7aec8e25b4263721ee157"
+        },
+        {
+          "kind": "buffer",
+          "resource": 24,
+          "event": 30,
+          "expect_stable": true,
+          "expected_storage_sha256": "ecfbd9435b029b25d0d0cf5ac8ea8e21e83685d8d97edd469b574765b0f03eba"
+        },
+        {
+          "kind": "buffer",
+          "resource": 25,
+          "event": 30,
+          "expect_stable": true,
+          "expected_storage_sha256": "d5371af02b60127bcc0c7ac483b909907763dccd73eba006e71128a76ea9d53c"
+        }
+      ],
+      "controls": [
+        {
+          "disable_event": 30,
+          "repeat": 2,
+          "expected_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b"
+        }
+      ],
+      "covers": [
+        "Query stream 3",
+        "overflow stream -1",
+        "comparison False",
+        "preframe-created refreshed interval"
+      ],
+      "native_workload_fidelity": "passed",
+      "application_reference_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+      "application_reference_scope": "Full 8x8 conditional output plus all four SO buffers; 12 frames on native hardware/WARP and original capture injection.",
+      "application_reference_evidence": {
+        "path": "manifest.json",
+        "sha256": "05ea7a3d420d3a0eb230b8add10935fbc663e4b290b9a7592c662d52781e8420"
+      },
+      "fidelity_reason": "Saved per-stream BOOL query descriptor and interval restored; exact independent images, buffer bytes and disabled-work controls required."
+    },
+    {
+      "id": "stream_predicate_4",
+      "path": "4/capture.gpa_frame",
+      "sha256": "0384fb1b5c1d7cdb9c48d012cd2f71b58d5a39979846bfb587fe97aed6ac95e8",
+      "bytes": 98711,
+      "family": "stream_predicate",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [
+        {
+          "path": "manifest.json",
+          "sha256": "05ea7a3d420d3a0eb230b8add10935fbc663e4b290b9a7592c662d52781e8420",
+          "contains_capture_hash": true
+        }
+      ],
+      "provenance_note": "Unmodified original CaptureNextFrame; native hardware/WARP debug and CPU image/buffer oracles frozen.",
+      "device_scope": "Default hardware capture, native hardware/WARP verified; original player adapter not matched.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "boundaries": [
+        {
+          "kind": "buffer",
+          "resource": 22,
+          "event": 30,
+          "expect_stable": true,
+          "expected_storage_sha256": "24509b6c9451b5e63c62932f45650ddc5b422b1f31d5b10b2d9805c6ae873278"
+        },
+        {
+          "kind": "buffer",
+          "resource": 23,
+          "event": 30,
+          "expect_stable": true,
+          "expected_storage_sha256": "6af40de2d7183605cbee5331ef6ca83b90d5927442b7aec8e25b4263721ee157"
+        },
+        {
+          "kind": "buffer",
+          "resource": 24,
+          "event": 30,
+          "expect_stable": true,
+          "expected_storage_sha256": "ecfbd9435b029b25d0d0cf5ac8ea8e21e83685d8d97edd469b574765b0f03eba"
+        },
+        {
+          "kind": "buffer",
+          "resource": 25,
+          "event": 30,
+          "expect_stable": true,
+          "expected_storage_sha256": "d5371af02b60127bcc0c7ac483b909907763dccd73eba006e71128a76ea9d53c"
+        }
+      ],
+      "controls": [
+        {
+          "disable_event": 30,
+          "repeat": 2,
+          "expected_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b"
+        }
+      ],
+      "covers": [
+        "Query stream 0",
+        "overflow stream 0",
+        "comparison False",
+        "preframe-created refreshed interval"
+      ],
+      "native_workload_fidelity": "passed",
+      "application_reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "application_reference_scope": "Full 8x8 conditional output plus all four SO buffers; 12 frames on native hardware/WARP and original capture injection.",
+      "application_reference_evidence": {
+        "path": "manifest.json",
+        "sha256": "05ea7a3d420d3a0eb230b8add10935fbc663e4b290b9a7592c662d52781e8420"
+      },
+      "fidelity_reason": "Saved per-stream BOOL query descriptor and interval restored; exact independent images, buffer bytes and disabled-work controls required."
+    },
+    {
+      "id": "stream_predicate_5",
+      "path": "5/capture.gpa_frame",
+      "sha256": "f23c8d351eff6f93e7069ae3313a8217cf266a6d4b6bb71fb25ab56144b2964b",
+      "bytes": 98711,
+      "family": "stream_predicate",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [
+        {
+          "path": "manifest.json",
+          "sha256": "05ea7a3d420d3a0eb230b8add10935fbc663e4b290b9a7592c662d52781e8420",
+          "contains_capture_hash": true
+        }
+      ],
+      "provenance_note": "Unmodified original CaptureNextFrame; native hardware/WARP debug and CPU image/buffer oracles frozen.",
+      "device_scope": "Default hardware capture, native hardware/WARP verified; original player adapter not matched.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "boundaries": [
+        {
+          "kind": "buffer",
+          "resource": 22,
+          "event": 30,
+          "expect_stable": true,
+          "expected_storage_sha256": "a5cf86cc36c6ec14fc6a45ac86a4f2b34d4684669e08a469cc7a8e9f0f1619fe"
+        },
+        {
+          "kind": "buffer",
+          "resource": 23,
+          "event": 30,
+          "expect_stable": true,
+          "expected_storage_sha256": "7fa788538162a0d003a2ec27b3a596be9f5aba9a67cd78fc19c5a657f32c661f"
+        },
+        {
+          "kind": "buffer",
+          "resource": 24,
+          "event": 30,
+          "expect_stable": true,
+          "expected_storage_sha256": "ecfbd9435b029b25d0d0cf5ac8ea8e21e83685d8d97edd469b574765b0f03eba"
+        },
+        {
+          "kind": "buffer",
+          "resource": 25,
+          "event": 30,
+          "expect_stable": true,
+          "expected_storage_sha256": "d5371af02b60127bcc0c7ac483b909907763dccd73eba006e71128a76ea9d53c"
+        }
+      ],
+      "controls": [
+        {
+          "disable_event": 30,
+          "repeat": 2,
+          "expected_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b"
+        }
+      ],
+      "covers": [
+        "Query stream 1",
+        "overflow stream 1",
+        "comparison False",
+        "preframe-created refreshed interval"
+      ],
+      "native_workload_fidelity": "passed",
+      "application_reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "application_reference_scope": "Full 8x8 conditional output plus all four SO buffers; 12 frames on native hardware/WARP and original capture injection.",
+      "application_reference_evidence": {
+        "path": "manifest.json",
+        "sha256": "05ea7a3d420d3a0eb230b8add10935fbc663e4b290b9a7592c662d52781e8420"
+      },
+      "fidelity_reason": "Saved per-stream BOOL query descriptor and interval restored; exact independent images, buffer bytes and disabled-work controls required."
+    },
+    {
+      "id": "stream_predicate_6",
+      "path": "6/capture.gpa_frame",
+      "sha256": "b1e990fdc2aa712b6eb0548dc571cfe84202e664c76195962d0bb63d79673404",
+      "bytes": 98711,
+      "family": "stream_predicate",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [
+        {
+          "path": "manifest.json",
+          "sha256": "05ea7a3d420d3a0eb230b8add10935fbc663e4b290b9a7592c662d52781e8420",
+          "contains_capture_hash": true
+        }
+      ],
+      "provenance_note": "Unmodified original CaptureNextFrame; native hardware/WARP debug and CPU image/buffer oracles frozen.",
+      "device_scope": "Default hardware capture, native hardware/WARP verified; original player adapter not matched.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "boundaries": [
+        {
+          "kind": "buffer",
+          "resource": 22,
+          "event": 30,
+          "expect_stable": true,
+          "expected_storage_sha256": "a5cf86cc36c6ec14fc6a45ac86a4f2b34d4684669e08a469cc7a8e9f0f1619fe"
+        },
+        {
+          "kind": "buffer",
+          "resource": 23,
+          "event": 30,
+          "expect_stable": true,
+          "expected_storage_sha256": "6af40de2d7183605cbee5331ef6ca83b90d5927442b7aec8e25b4263721ee157"
+        },
+        {
+          "kind": "buffer",
+          "resource": 24,
+          "event": 30,
+          "expect_stable": true,
+          "expected_storage_sha256": "8f7e73183722c7d03e1eb50fda14c9d7d81f45106981e65f8656aa95ef04d1b4"
+        },
+        {
+          "kind": "buffer",
+          "resource": 25,
+          "event": 30,
+          "expect_stable": true,
+          "expected_storage_sha256": "d5371af02b60127bcc0c7ac483b909907763dccd73eba006e71128a76ea9d53c"
+        }
+      ],
+      "controls": [
+        {
+          "disable_event": 30,
+          "repeat": 2,
+          "expected_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b"
+        }
+      ],
+      "covers": [
+        "Query stream 2",
+        "overflow stream 2",
+        "comparison False",
+        "preframe-created refreshed interval"
+      ],
+      "native_workload_fidelity": "passed",
+      "application_reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "application_reference_scope": "Full 8x8 conditional output plus all four SO buffers; 12 frames on native hardware/WARP and original capture injection.",
+      "application_reference_evidence": {
+        "path": "manifest.json",
+        "sha256": "05ea7a3d420d3a0eb230b8add10935fbc663e4b290b9a7592c662d52781e8420"
+      },
+      "fidelity_reason": "Saved per-stream BOOL query descriptor and interval restored; exact independent images, buffer bytes and disabled-work controls required."
+    },
+    {
+      "id": "stream_predicate_7",
+      "path": "7/capture.gpa_frame",
+      "sha256": "32ad0f7723f6e3c19f5d1a93718edb8e262c5cad88692ad8c9afa55d9f248127",
+      "bytes": 98711,
+      "family": "stream_predicate",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [
+        {
+          "path": "manifest.json",
+          "sha256": "05ea7a3d420d3a0eb230b8add10935fbc663e4b290b9a7592c662d52781e8420",
+          "contains_capture_hash": true
+        }
+      ],
+      "provenance_note": "Unmodified original CaptureNextFrame; native hardware/WARP debug and CPU image/buffer oracles frozen.",
+      "device_scope": "Default hardware capture, native hardware/WARP verified; original player adapter not matched.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "boundaries": [
+        {
+          "kind": "buffer",
+          "resource": 22,
+          "event": 30,
+          "expect_stable": true,
+          "expected_storage_sha256": "a5cf86cc36c6ec14fc6a45ac86a4f2b34d4684669e08a469cc7a8e9f0f1619fe"
+        },
+        {
+          "kind": "buffer",
+          "resource": 23,
+          "event": 30,
+          "expect_stable": true,
+          "expected_storage_sha256": "6af40de2d7183605cbee5331ef6ca83b90d5927442b7aec8e25b4263721ee157"
+        },
+        {
+          "kind": "buffer",
+          "resource": 24,
+          "event": 30,
+          "expect_stable": true,
+          "expected_storage_sha256": "ecfbd9435b029b25d0d0cf5ac8ea8e21e83685d8d97edd469b574765b0f03eba"
+        },
+        {
+          "kind": "buffer",
+          "resource": 25,
+          "event": 30,
+          "expect_stable": true,
+          "expected_storage_sha256": "4132f34ae1ffc37f84f0b3143f58324d6c2be5f573b2c74b667200cc79fa75f9"
+        }
+      ],
+      "controls": [
+        {
+          "disable_event": 30,
+          "repeat": 2,
+          "expected_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b"
+        }
+      ],
+      "covers": [
+        "Query stream 3",
+        "overflow stream 3",
+        "comparison False",
+        "preframe-created refreshed interval"
+      ],
+      "native_workload_fidelity": "passed",
+      "application_reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "application_reference_scope": "Full 8x8 conditional output plus all four SO buffers; 12 frames on native hardware/WARP and original capture injection.",
+      "application_reference_evidence": {
+        "path": "manifest.json",
+        "sha256": "05ea7a3d420d3a0eb230b8add10935fbc663e4b290b9a7592c662d52781e8420"
+      },
+      "fidelity_reason": "Saved per-stream BOOL query descriptor and interval restored; exact independent images, buffer bytes and disabled-work controls required."
+    },
+    {
+      "id": "stream_predicate_8",
+      "path": "8/capture.gpa_frame",
+      "sha256": "c08984bdb227de2204760495113cf51160b0c8b6ab2e2f029e5d024413c463a5",
+      "bytes": 98711,
+      "family": "stream_predicate",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [
+        {
+          "path": "manifest.json",
+          "sha256": "05ea7a3d420d3a0eb230b8add10935fbc663e4b290b9a7592c662d52781e8420",
+          "contains_capture_hash": true
+        }
+      ],
+      "provenance_note": "Unmodified original CaptureNextFrame; native hardware/WARP debug and CPU image/buffer oracles frozen.",
+      "device_scope": "Default hardware capture, native hardware/WARP verified; original player adapter not matched.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "boundaries": [
+        {
+          "kind": "buffer",
+          "resource": 22,
+          "event": 30,
+          "expect_stable": true,
+          "expected_storage_sha256": "a5cf86cc36c6ec14fc6a45ac86a4f2b34d4684669e08a469cc7a8e9f0f1619fe"
+        },
+        {
+          "kind": "buffer",
+          "resource": 23,
+          "event": 30,
+          "expect_stable": true,
+          "expected_storage_sha256": "7fa788538162a0d003a2ec27b3a596be9f5aba9a67cd78fc19c5a657f32c661f"
+        },
+        {
+          "kind": "buffer",
+          "resource": 24,
+          "event": 30,
+          "expect_stable": true,
+          "expected_storage_sha256": "ecfbd9435b029b25d0d0cf5ac8ea8e21e83685d8d97edd469b574765b0f03eba"
+        },
+        {
+          "kind": "buffer",
+          "resource": 25,
+          "event": 30,
+          "expect_stable": true,
+          "expected_storage_sha256": "d5371af02b60127bcc0c7ac483b909907763dccd73eba006e71128a76ea9d53c"
+        }
+      ],
+      "controls": [
+        {
+          "disable_event": 30,
+          "repeat": 2,
+          "expected_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b"
+        }
+      ],
+      "covers": [
+        "Query stream 0",
+        "overflow stream 1",
+        "comparison False",
+        "preframe-created refreshed interval"
+      ],
+      "native_workload_fidelity": "passed",
+      "application_reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "application_reference_scope": "Full 8x8 conditional output plus all four SO buffers; 12 frames on native hardware/WARP and original capture injection.",
+      "application_reference_evidence": {
+        "path": "manifest.json",
+        "sha256": "05ea7a3d420d3a0eb230b8add10935fbc663e4b290b9a7592c662d52781e8420"
+      },
+      "fidelity_reason": "Saved per-stream BOOL query descriptor and interval restored; exact independent images, buffer bytes and disabled-work controls required."
+    },
+    {
+      "id": "stream_predicate_9",
+      "path": "9/capture.gpa_frame",
+      "sha256": "57fd5b9d5325f21e399a4e50b4ce813d450479262c5c1246830af03605bb431d",
+      "bytes": 98776,
+      "family": "stream_predicate",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [
+        {
+          "path": "manifest.json",
+          "sha256": "05ea7a3d420d3a0eb230b8add10935fbc663e4b290b9a7592c662d52781e8420",
+          "contains_capture_hash": true
+        }
+      ],
+      "provenance_note": "Unmodified original CaptureNextFrame; native hardware/WARP debug and CPU image/buffer oracles frozen.",
+      "device_scope": "Default hardware capture, native hardware/WARP verified; original player adapter not matched.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "boundaries": [
+        {
+          "kind": "buffer",
+          "resource": 22,
+          "event": 30,
+          "expect_stable": true,
+          "expected_storage_sha256": "a5cf86cc36c6ec14fc6a45ac86a4f2b34d4684669e08a469cc7a8e9f0f1619fe"
+        },
+        {
+          "kind": "buffer",
+          "resource": 23,
+          "event": 30,
+          "expect_stable": true,
+          "expected_storage_sha256": "6af40de2d7183605cbee5331ef6ca83b90d5927442b7aec8e25b4263721ee157"
+        },
+        {
+          "kind": "buffer",
+          "resource": 24,
+          "event": 30,
+          "expect_stable": true,
+          "expected_storage_sha256": "8f7e73183722c7d03e1eb50fda14c9d7d81f45106981e65f8656aa95ef04d1b4"
+        },
+        {
+          "kind": "buffer",
+          "resource": 25,
+          "event": 30,
+          "expect_stable": true,
+          "expected_storage_sha256": "d5371af02b60127bcc0c7ac483b909907763dccd73eba006e71128a76ea9d53c"
+        }
+      ],
+      "controls": [
+        {
+          "disable_event": 30,
+          "repeat": 2,
+          "expected_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b"
+        }
+      ],
+      "covers": [
+        "Query stream 1",
+        "overflow stream 2",
+        "comparison False",
+        "preframe-created refreshed interval"
+      ],
+      "native_workload_fidelity": "passed",
+      "application_reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "application_reference_scope": "Full 8x8 conditional output plus all four SO buffers; 12 frames on native hardware/WARP and original capture injection.",
+      "application_reference_evidence": {
+        "path": "manifest.json",
+        "sha256": "05ea7a3d420d3a0eb230b8add10935fbc663e4b290b9a7592c662d52781e8420"
+      },
+      "fidelity_reason": "Saved per-stream BOOL query descriptor and interval restored; exact independent images, buffer bytes and disabled-work controls required."
+    },
+    {
+      "id": "stream_predicate_10",
+      "path": "10/capture.gpa_frame",
+      "sha256": "4b9ba50de139f38befbb0a3e9e3c5f27b95507ccac24c40415e2477ad8c4a614",
+      "bytes": 98711,
+      "family": "stream_predicate",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [
+        {
+          "path": "manifest.json",
+          "sha256": "05ea7a3d420d3a0eb230b8add10935fbc663e4b290b9a7592c662d52781e8420",
+          "contains_capture_hash": true
+        }
+      ],
+      "provenance_note": "Unmodified original CaptureNextFrame; native hardware/WARP debug and CPU image/buffer oracles frozen.",
+      "device_scope": "Default hardware capture, native hardware/WARP verified; original player adapter not matched.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "boundaries": [
+        {
+          "kind": "buffer",
+          "resource": 22,
+          "event": 30,
+          "expect_stable": true,
+          "expected_storage_sha256": "a5cf86cc36c6ec14fc6a45ac86a4f2b34d4684669e08a469cc7a8e9f0f1619fe"
+        },
+        {
+          "kind": "buffer",
+          "resource": 23,
+          "event": 30,
+          "expect_stable": true,
+          "expected_storage_sha256": "6af40de2d7183605cbee5331ef6ca83b90d5927442b7aec8e25b4263721ee157"
+        },
+        {
+          "kind": "buffer",
+          "resource": 24,
+          "event": 30,
+          "expect_stable": true,
+          "expected_storage_sha256": "ecfbd9435b029b25d0d0cf5ac8ea8e21e83685d8d97edd469b574765b0f03eba"
+        },
+        {
+          "kind": "buffer",
+          "resource": 25,
+          "event": 30,
+          "expect_stable": true,
+          "expected_storage_sha256": "4132f34ae1ffc37f84f0b3143f58324d6c2be5f573b2c74b667200cc79fa75f9"
+        }
+      ],
+      "controls": [
+        {
+          "disable_event": 30,
+          "repeat": 2,
+          "expected_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b"
+        }
+      ],
+      "covers": [
+        "Query stream 2",
+        "overflow stream 3",
+        "comparison False",
+        "preframe-created refreshed interval"
+      ],
+      "native_workload_fidelity": "passed",
+      "application_reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "application_reference_scope": "Full 8x8 conditional output plus all four SO buffers; 12 frames on native hardware/WARP and original capture injection.",
+      "application_reference_evidence": {
+        "path": "manifest.json",
+        "sha256": "05ea7a3d420d3a0eb230b8add10935fbc663e4b290b9a7592c662d52781e8420"
+      },
+      "fidelity_reason": "Saved per-stream BOOL query descriptor and interval restored; exact independent images, buffer bytes and disabled-work controls required."
+    },
+    {
+      "id": "stream_predicate_11",
+      "path": "11/capture.gpa_frame",
+      "sha256": "013cbf2d73e5c4a803bb5fbd68f24af3f18ed7a044057a94fbf0fbf2e5ffec0c",
+      "bytes": 98711,
+      "family": "stream_predicate",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [
+        {
+          "path": "manifest.json",
+          "sha256": "05ea7a3d420d3a0eb230b8add10935fbc663e4b290b9a7592c662d52781e8420",
+          "contains_capture_hash": true
+        }
+      ],
+      "provenance_note": "Unmodified original CaptureNextFrame; native hardware/WARP debug and CPU image/buffer oracles frozen.",
+      "device_scope": "Default hardware capture, native hardware/WARP verified; original player adapter not matched.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "boundaries": [
+        {
+          "kind": "buffer",
+          "resource": 22,
+          "event": 30,
+          "expect_stable": true,
+          "expected_storage_sha256": "24509b6c9451b5e63c62932f45650ddc5b422b1f31d5b10b2d9805c6ae873278"
+        },
+        {
+          "kind": "buffer",
+          "resource": 23,
+          "event": 30,
+          "expect_stable": true,
+          "expected_storage_sha256": "6af40de2d7183605cbee5331ef6ca83b90d5927442b7aec8e25b4263721ee157"
+        },
+        {
+          "kind": "buffer",
+          "resource": 24,
+          "event": 30,
+          "expect_stable": true,
+          "expected_storage_sha256": "ecfbd9435b029b25d0d0cf5ac8ea8e21e83685d8d97edd469b574765b0f03eba"
+        },
+        {
+          "kind": "buffer",
+          "resource": 25,
+          "event": 30,
+          "expect_stable": true,
+          "expected_storage_sha256": "d5371af02b60127bcc0c7ac483b909907763dccd73eba006e71128a76ea9d53c"
+        }
+      ],
+      "controls": [
+        {
+          "disable_event": 30,
+          "repeat": 2,
+          "expected_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b"
+        }
+      ],
+      "covers": [
+        "Query stream 3",
+        "overflow stream 0",
+        "comparison False",
+        "preframe-created refreshed interval"
+      ],
+      "native_workload_fidelity": "passed",
+      "application_reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "application_reference_scope": "Full 8x8 conditional output plus all four SO buffers; 12 frames on native hardware/WARP and original capture injection.",
+      "application_reference_evidence": {
+        "path": "manifest.json",
+        "sha256": "05ea7a3d420d3a0eb230b8add10935fbc663e4b290b9a7592c662d52781e8420"
+      },
+      "fidelity_reason": "Saved per-stream BOOL query descriptor and interval restored; exact independent images, buffer bytes and disabled-work controls required."
+    },
+    {
+      "id": "stream_predicate_12",
+      "path": "12/capture.gpa_frame",
+      "sha256": "f27c72bfeed71923bfa7485fdefb0f0cdf0decd4c75dad483f5f2c9b3912b50a",
+      "bytes": 98743,
+      "family": "stream_predicate",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [
+        {
+          "path": "manifest.json",
+          "sha256": "05ea7a3d420d3a0eb230b8add10935fbc663e4b290b9a7592c662d52781e8420",
+          "contains_capture_hash": true
+        }
+      ],
+      "provenance_note": "Unmodified original CaptureNextFrame; native hardware/WARP debug and CPU image/buffer oracles frozen.",
+      "device_scope": "Default hardware capture, native hardware/WARP verified; original player adapter not matched.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "boundaries": [
+        {
+          "kind": "buffer",
+          "resource": 22,
+          "event": 30,
+          "expect_stable": true,
+          "expected_storage_sha256": "a5cf86cc36c6ec14fc6a45ac86a4f2b34d4684669e08a469cc7a8e9f0f1619fe"
+        },
+        {
+          "kind": "buffer",
+          "resource": 23,
+          "event": 30,
+          "expect_stable": true,
+          "expected_storage_sha256": "6af40de2d7183605cbee5331ef6ca83b90d5927442b7aec8e25b4263721ee157"
+        },
+        {
+          "kind": "buffer",
+          "resource": 24,
+          "event": 30,
+          "expect_stable": true,
+          "expected_storage_sha256": "ecfbd9435b029b25d0d0cf5ac8ea8e21e83685d8d97edd469b574765b0f03eba"
+        },
+        {
+          "kind": "buffer",
+          "resource": 25,
+          "event": 30,
+          "expect_stable": true,
+          "expected_storage_sha256": "d5371af02b60127bcc0c7ac483b909907763dccd73eba006e71128a76ea9d53c"
+        }
+      ],
+      "controls": [
+        {
+          "disable_event": 30,
+          "repeat": 2,
+          "expected_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636"
+        }
+      ],
+      "covers": [
+        "Query stream 0",
+        "overflow stream -1",
+        "comparison True",
+        "preframe-created refreshed interval"
+      ],
+      "native_workload_fidelity": "passed",
+      "application_reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "application_reference_scope": "Full 8x8 conditional output plus all four SO buffers; 12 frames on native hardware/WARP and original capture injection.",
+      "application_reference_evidence": {
+        "path": "manifest.json",
+        "sha256": "05ea7a3d420d3a0eb230b8add10935fbc663e4b290b9a7592c662d52781e8420"
+      },
+      "fidelity_reason": "Saved per-stream BOOL query descriptor and interval restored; exact independent images, buffer bytes and disabled-work controls required."
+    },
+    {
+      "id": "stream_predicate_13",
+      "path": "13/capture.gpa_frame",
+      "sha256": "0bca2eda2aa10f3e2731d1b8216848724a2331e7abb5429ff5a4a5a60e0551e5",
+      "bytes": 98808,
+      "family": "stream_predicate",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [
+        {
+          "path": "manifest.json",
+          "sha256": "05ea7a3d420d3a0eb230b8add10935fbc663e4b290b9a7592c662d52781e8420",
+          "contains_capture_hash": true
+        }
+      ],
+      "provenance_note": "Unmodified original CaptureNextFrame; native hardware/WARP debug and CPU image/buffer oracles frozen.",
+      "device_scope": "Default hardware capture, native hardware/WARP verified; original player adapter not matched.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "boundaries": [
+        {
+          "kind": "buffer",
+          "resource": 22,
+          "event": 30,
+          "expect_stable": true,
+          "expected_storage_sha256": "a5cf86cc36c6ec14fc6a45ac86a4f2b34d4684669e08a469cc7a8e9f0f1619fe"
+        },
+        {
+          "kind": "buffer",
+          "resource": 23,
+          "event": 30,
+          "expect_stable": true,
+          "expected_storage_sha256": "6af40de2d7183605cbee5331ef6ca83b90d5927442b7aec8e25b4263721ee157"
+        },
+        {
+          "kind": "buffer",
+          "resource": 24,
+          "event": 30,
+          "expect_stable": true,
+          "expected_storage_sha256": "ecfbd9435b029b25d0d0cf5ac8ea8e21e83685d8d97edd469b574765b0f03eba"
+        },
+        {
+          "kind": "buffer",
+          "resource": 25,
+          "event": 30,
+          "expect_stable": true,
+          "expected_storage_sha256": "d5371af02b60127bcc0c7ac483b909907763dccd73eba006e71128a76ea9d53c"
+        }
+      ],
+      "controls": [
+        {
+          "disable_event": 30,
+          "repeat": 2,
+          "expected_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636"
+        }
+      ],
+      "covers": [
+        "Query stream 1",
+        "overflow stream -1",
+        "comparison True",
+        "preframe-created refreshed interval"
+      ],
+      "native_workload_fidelity": "passed",
+      "application_reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "application_reference_scope": "Full 8x8 conditional output plus all four SO buffers; 12 frames on native hardware/WARP and original capture injection.",
+      "application_reference_evidence": {
+        "path": "manifest.json",
+        "sha256": "05ea7a3d420d3a0eb230b8add10935fbc663e4b290b9a7592c662d52781e8420"
+      },
+      "fidelity_reason": "Saved per-stream BOOL query descriptor and interval restored; exact independent images, buffer bytes and disabled-work controls required."
+    },
+    {
+      "id": "stream_predicate_14",
+      "path": "14/capture.gpa_frame",
+      "sha256": "c45ae837a99dc9da43714044ba5f0be16cca4ecaf9bd8775ff4ea68bebe368fe",
+      "bytes": 98743,
+      "family": "stream_predicate",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [
+        {
+          "path": "manifest.json",
+          "sha256": "05ea7a3d420d3a0eb230b8add10935fbc663e4b290b9a7592c662d52781e8420",
+          "contains_capture_hash": true
+        }
+      ],
+      "provenance_note": "Unmodified original CaptureNextFrame; native hardware/WARP debug and CPU image/buffer oracles frozen.",
+      "device_scope": "Default hardware capture, native hardware/WARP verified; original player adapter not matched.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "boundaries": [
+        {
+          "kind": "buffer",
+          "resource": 22,
+          "event": 30,
+          "expect_stable": true,
+          "expected_storage_sha256": "a5cf86cc36c6ec14fc6a45ac86a4f2b34d4684669e08a469cc7a8e9f0f1619fe"
+        },
+        {
+          "kind": "buffer",
+          "resource": 23,
+          "event": 30,
+          "expect_stable": true,
+          "expected_storage_sha256": "6af40de2d7183605cbee5331ef6ca83b90d5927442b7aec8e25b4263721ee157"
+        },
+        {
+          "kind": "buffer",
+          "resource": 24,
+          "event": 30,
+          "expect_stable": true,
+          "expected_storage_sha256": "ecfbd9435b029b25d0d0cf5ac8ea8e21e83685d8d97edd469b574765b0f03eba"
+        },
+        {
+          "kind": "buffer",
+          "resource": 25,
+          "event": 30,
+          "expect_stable": true,
+          "expected_storage_sha256": "d5371af02b60127bcc0c7ac483b909907763dccd73eba006e71128a76ea9d53c"
+        }
+      ],
+      "controls": [
+        {
+          "disable_event": 30,
+          "repeat": 2,
+          "expected_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636"
+        }
+      ],
+      "covers": [
+        "Query stream 2",
+        "overflow stream -1",
+        "comparison True",
+        "preframe-created refreshed interval"
+      ],
+      "native_workload_fidelity": "passed",
+      "application_reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "application_reference_scope": "Full 8x8 conditional output plus all four SO buffers; 12 frames on native hardware/WARP and original capture injection.",
+      "application_reference_evidence": {
+        "path": "manifest.json",
+        "sha256": "05ea7a3d420d3a0eb230b8add10935fbc663e4b290b9a7592c662d52781e8420"
+      },
+      "fidelity_reason": "Saved per-stream BOOL query descriptor and interval restored; exact independent images, buffer bytes and disabled-work controls required."
+    },
+    {
+      "id": "stream_predicate_15",
+      "path": "15/capture.gpa_frame",
+      "sha256": "8d736b2b8827af24bd7da57bba2b05e0d3f11d0d26de33a069acb89c10bbf4b7",
+      "bytes": 98743,
+      "family": "stream_predicate",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [
+        {
+          "path": "manifest.json",
+          "sha256": "05ea7a3d420d3a0eb230b8add10935fbc663e4b290b9a7592c662d52781e8420",
+          "contains_capture_hash": true
+        }
+      ],
+      "provenance_note": "Unmodified original CaptureNextFrame; native hardware/WARP debug and CPU image/buffer oracles frozen.",
+      "device_scope": "Default hardware capture, native hardware/WARP verified; original player adapter not matched.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "boundaries": [
+        {
+          "kind": "buffer",
+          "resource": 22,
+          "event": 30,
+          "expect_stable": true,
+          "expected_storage_sha256": "a5cf86cc36c6ec14fc6a45ac86a4f2b34d4684669e08a469cc7a8e9f0f1619fe"
+        },
+        {
+          "kind": "buffer",
+          "resource": 23,
+          "event": 30,
+          "expect_stable": true,
+          "expected_storage_sha256": "6af40de2d7183605cbee5331ef6ca83b90d5927442b7aec8e25b4263721ee157"
+        },
+        {
+          "kind": "buffer",
+          "resource": 24,
+          "event": 30,
+          "expect_stable": true,
+          "expected_storage_sha256": "ecfbd9435b029b25d0d0cf5ac8ea8e21e83685d8d97edd469b574765b0f03eba"
+        },
+        {
+          "kind": "buffer",
+          "resource": 25,
+          "event": 30,
+          "expect_stable": true,
+          "expected_storage_sha256": "d5371af02b60127bcc0c7ac483b909907763dccd73eba006e71128a76ea9d53c"
+        }
+      ],
+      "controls": [
+        {
+          "disable_event": 30,
+          "repeat": 2,
+          "expected_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636"
+        }
+      ],
+      "covers": [
+        "Query stream 3",
+        "overflow stream -1",
+        "comparison True",
+        "preframe-created refreshed interval"
+      ],
+      "native_workload_fidelity": "passed",
+      "application_reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "application_reference_scope": "Full 8x8 conditional output plus all four SO buffers; 12 frames on native hardware/WARP and original capture injection.",
+      "application_reference_evidence": {
+        "path": "manifest.json",
+        "sha256": "05ea7a3d420d3a0eb230b8add10935fbc663e4b290b9a7592c662d52781e8420"
+      },
+      "fidelity_reason": "Saved per-stream BOOL query descriptor and interval restored; exact independent images, buffer bytes and disabled-work controls required."
+    },
+    {
+      "id": "stream_predicate_16",
+      "path": "16/capture.gpa_frame",
+      "sha256": "2630f1336ce5f6d58e9e12e8495ce3e49a8d5c2db2d3a6be324b65a775d13ad1",
+      "bytes": 98711,
+      "family": "stream_predicate",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [
+        {
+          "path": "manifest.json",
+          "sha256": "05ea7a3d420d3a0eb230b8add10935fbc663e4b290b9a7592c662d52781e8420",
+          "contains_capture_hash": true
+        }
+      ],
+      "provenance_note": "Unmodified original CaptureNextFrame; native hardware/WARP debug and CPU image/buffer oracles frozen.",
+      "device_scope": "Default hardware capture, native hardware/WARP verified; original player adapter not matched.",
+      "reference_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+      "comparison_policy": "exact_golden",
+      "boundaries": [
+        {
+          "kind": "buffer",
+          "resource": 22,
+          "event": 30,
+          "expect_stable": true,
+          "expected_storage_sha256": "24509b6c9451b5e63c62932f45650ddc5b422b1f31d5b10b2d9805c6ae873278"
+        },
+        {
+          "kind": "buffer",
+          "resource": 23,
+          "event": 30,
+          "expect_stable": true,
+          "expected_storage_sha256": "6af40de2d7183605cbee5331ef6ca83b90d5927442b7aec8e25b4263721ee157"
+        },
+        {
+          "kind": "buffer",
+          "resource": 24,
+          "event": 30,
+          "expect_stable": true,
+          "expected_storage_sha256": "ecfbd9435b029b25d0d0cf5ac8ea8e21e83685d8d97edd469b574765b0f03eba"
+        },
+        {
+          "kind": "buffer",
+          "resource": 25,
+          "event": 30,
+          "expect_stable": true,
+          "expected_storage_sha256": "d5371af02b60127bcc0c7ac483b909907763dccd73eba006e71128a76ea9d53c"
+        }
+      ],
+      "controls": [
+        {
+          "disable_event": 30,
+          "repeat": 2,
+          "expected_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636"
+        }
+      ],
+      "covers": [
+        "Query stream 0",
+        "overflow stream 0",
+        "comparison True",
+        "preframe-created refreshed interval"
+      ],
+      "native_workload_fidelity": "passed",
+      "application_reference_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+      "application_reference_scope": "Full 8x8 conditional output plus all four SO buffers; 12 frames on native hardware/WARP and original capture injection.",
+      "application_reference_evidence": {
+        "path": "manifest.json",
+        "sha256": "05ea7a3d420d3a0eb230b8add10935fbc663e4b290b9a7592c662d52781e8420"
+      },
+      "fidelity_reason": "Saved per-stream BOOL query descriptor and interval restored; exact independent images, buffer bytes and disabled-work controls required."
+    },
+    {
+      "id": "stream_predicate_17",
+      "path": "17/capture.gpa_frame",
+      "sha256": "565a31134236f3da0fba44aa2d97c987bfd94cfa19a0c2552dbceabbc992ddab",
+      "bytes": 98711,
+      "family": "stream_predicate",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [
+        {
+          "path": "manifest.json",
+          "sha256": "05ea7a3d420d3a0eb230b8add10935fbc663e4b290b9a7592c662d52781e8420",
+          "contains_capture_hash": true
+        }
+      ],
+      "provenance_note": "Unmodified original CaptureNextFrame; native hardware/WARP debug and CPU image/buffer oracles frozen.",
+      "device_scope": "Default hardware capture, native hardware/WARP verified; original player adapter not matched.",
+      "reference_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+      "comparison_policy": "exact_golden",
+      "boundaries": [
+        {
+          "kind": "buffer",
+          "resource": 22,
+          "event": 30,
+          "expect_stable": true,
+          "expected_storage_sha256": "a5cf86cc36c6ec14fc6a45ac86a4f2b34d4684669e08a469cc7a8e9f0f1619fe"
+        },
+        {
+          "kind": "buffer",
+          "resource": 23,
+          "event": 30,
+          "expect_stable": true,
+          "expected_storage_sha256": "7fa788538162a0d003a2ec27b3a596be9f5aba9a67cd78fc19c5a657f32c661f"
+        },
+        {
+          "kind": "buffer",
+          "resource": 24,
+          "event": 30,
+          "expect_stable": true,
+          "expected_storage_sha256": "ecfbd9435b029b25d0d0cf5ac8ea8e21e83685d8d97edd469b574765b0f03eba"
+        },
+        {
+          "kind": "buffer",
+          "resource": 25,
+          "event": 30,
+          "expect_stable": true,
+          "expected_storage_sha256": "d5371af02b60127bcc0c7ac483b909907763dccd73eba006e71128a76ea9d53c"
+        }
+      ],
+      "controls": [
+        {
+          "disable_event": 30,
+          "repeat": 2,
+          "expected_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636"
+        }
+      ],
+      "covers": [
+        "Query stream 1",
+        "overflow stream 1",
+        "comparison True",
+        "preframe-created refreshed interval"
+      ],
+      "native_workload_fidelity": "passed",
+      "application_reference_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+      "application_reference_scope": "Full 8x8 conditional output plus all four SO buffers; 12 frames on native hardware/WARP and original capture injection.",
+      "application_reference_evidence": {
+        "path": "manifest.json",
+        "sha256": "05ea7a3d420d3a0eb230b8add10935fbc663e4b290b9a7592c662d52781e8420"
+      },
+      "fidelity_reason": "Saved per-stream BOOL query descriptor and interval restored; exact independent images, buffer bytes and disabled-work controls required."
+    },
+    {
+      "id": "stream_predicate_18",
+      "path": "18/capture.gpa_frame",
+      "sha256": "49936f9588500e0f7903f923697e536ba445c682e540aa69e2df3a96d7ab7d70",
+      "bytes": 98711,
+      "family": "stream_predicate",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [
+        {
+          "path": "manifest.json",
+          "sha256": "05ea7a3d420d3a0eb230b8add10935fbc663e4b290b9a7592c662d52781e8420",
+          "contains_capture_hash": true
+        }
+      ],
+      "provenance_note": "Unmodified original CaptureNextFrame; native hardware/WARP debug and CPU image/buffer oracles frozen.",
+      "device_scope": "Default hardware capture, native hardware/WARP verified; original player adapter not matched.",
+      "reference_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+      "comparison_policy": "exact_golden",
+      "boundaries": [
+        {
+          "kind": "buffer",
+          "resource": 22,
+          "event": 30,
+          "expect_stable": true,
+          "expected_storage_sha256": "a5cf86cc36c6ec14fc6a45ac86a4f2b34d4684669e08a469cc7a8e9f0f1619fe"
+        },
+        {
+          "kind": "buffer",
+          "resource": 23,
+          "event": 30,
+          "expect_stable": true,
+          "expected_storage_sha256": "6af40de2d7183605cbee5331ef6ca83b90d5927442b7aec8e25b4263721ee157"
+        },
+        {
+          "kind": "buffer",
+          "resource": 24,
+          "event": 30,
+          "expect_stable": true,
+          "expected_storage_sha256": "8f7e73183722c7d03e1eb50fda14c9d7d81f45106981e65f8656aa95ef04d1b4"
+        },
+        {
+          "kind": "buffer",
+          "resource": 25,
+          "event": 30,
+          "expect_stable": true,
+          "expected_storage_sha256": "d5371af02b60127bcc0c7ac483b909907763dccd73eba006e71128a76ea9d53c"
+        }
+      ],
+      "controls": [
+        {
+          "disable_event": 30,
+          "repeat": 2,
+          "expected_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636"
+        }
+      ],
+      "covers": [
+        "Query stream 2",
+        "overflow stream 2",
+        "comparison True",
+        "preframe-created refreshed interval"
+      ],
+      "native_workload_fidelity": "passed",
+      "application_reference_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+      "application_reference_scope": "Full 8x8 conditional output plus all four SO buffers; 12 frames on native hardware/WARP and original capture injection.",
+      "application_reference_evidence": {
+        "path": "manifest.json",
+        "sha256": "05ea7a3d420d3a0eb230b8add10935fbc663e4b290b9a7592c662d52781e8420"
+      },
+      "fidelity_reason": "Saved per-stream BOOL query descriptor and interval restored; exact independent images, buffer bytes and disabled-work controls required."
+    },
+    {
+      "id": "stream_predicate_19",
+      "path": "19/capture.gpa_frame",
+      "sha256": "b52b9267e1092b4b6a1433c95d3249310230bd897bd9c4a9713fbffa5e7c48ed",
+      "bytes": 98711,
+      "family": "stream_predicate",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [
+        {
+          "path": "manifest.json",
+          "sha256": "05ea7a3d420d3a0eb230b8add10935fbc663e4b290b9a7592c662d52781e8420",
+          "contains_capture_hash": true
+        }
+      ],
+      "provenance_note": "Unmodified original CaptureNextFrame; native hardware/WARP debug and CPU image/buffer oracles frozen.",
+      "device_scope": "Default hardware capture, native hardware/WARP verified; original player adapter not matched.",
+      "reference_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+      "comparison_policy": "exact_golden",
+      "boundaries": [
+        {
+          "kind": "buffer",
+          "resource": 22,
+          "event": 30,
+          "expect_stable": true,
+          "expected_storage_sha256": "a5cf86cc36c6ec14fc6a45ac86a4f2b34d4684669e08a469cc7a8e9f0f1619fe"
+        },
+        {
+          "kind": "buffer",
+          "resource": 23,
+          "event": 30,
+          "expect_stable": true,
+          "expected_storage_sha256": "6af40de2d7183605cbee5331ef6ca83b90d5927442b7aec8e25b4263721ee157"
+        },
+        {
+          "kind": "buffer",
+          "resource": 24,
+          "event": 30,
+          "expect_stable": true,
+          "expected_storage_sha256": "ecfbd9435b029b25d0d0cf5ac8ea8e21e83685d8d97edd469b574765b0f03eba"
+        },
+        {
+          "kind": "buffer",
+          "resource": 25,
+          "event": 30,
+          "expect_stable": true,
+          "expected_storage_sha256": "4132f34ae1ffc37f84f0b3143f58324d6c2be5f573b2c74b667200cc79fa75f9"
+        }
+      ],
+      "controls": [
+        {
+          "disable_event": 30,
+          "repeat": 2,
+          "expected_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636"
+        }
+      ],
+      "covers": [
+        "Query stream 3",
+        "overflow stream 3",
+        "comparison True",
+        "preframe-created refreshed interval"
+      ],
+      "native_workload_fidelity": "passed",
+      "application_reference_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+      "application_reference_scope": "Full 8x8 conditional output plus all four SO buffers; 12 frames on native hardware/WARP and original capture injection.",
+      "application_reference_evidence": {
+        "path": "manifest.json",
+        "sha256": "05ea7a3d420d3a0eb230b8add10935fbc663e4b290b9a7592c662d52781e8420"
+      },
+      "fidelity_reason": "Saved per-stream BOOL query descriptor and interval restored; exact independent images, buffer bytes and disabled-work controls required."
+    },
+    {
+      "id": "stream_predicate_20",
+      "path": "20/capture.gpa_frame",
+      "sha256": "ece51a80008c3f7343adb0f95d616aaf6d9ce4ffd25c0d2f64939afd970df36e",
+      "bytes": 98711,
+      "family": "stream_predicate",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [
+        {
+          "path": "manifest.json",
+          "sha256": "05ea7a3d420d3a0eb230b8add10935fbc663e4b290b9a7592c662d52781e8420",
+          "contains_capture_hash": true
+        }
+      ],
+      "provenance_note": "Unmodified original CaptureNextFrame; native hardware/WARP debug and CPU image/buffer oracles frozen.",
+      "device_scope": "Default hardware capture, native hardware/WARP verified; original player adapter not matched.",
+      "reference_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+      "comparison_policy": "exact_golden",
+      "boundaries": [
+        {
+          "kind": "buffer",
+          "resource": 22,
+          "event": 30,
+          "expect_stable": true,
+          "expected_storage_sha256": "a5cf86cc36c6ec14fc6a45ac86a4f2b34d4684669e08a469cc7a8e9f0f1619fe"
+        },
+        {
+          "kind": "buffer",
+          "resource": 23,
+          "event": 30,
+          "expect_stable": true,
+          "expected_storage_sha256": "7fa788538162a0d003a2ec27b3a596be9f5aba9a67cd78fc19c5a657f32c661f"
+        },
+        {
+          "kind": "buffer",
+          "resource": 24,
+          "event": 30,
+          "expect_stable": true,
+          "expected_storage_sha256": "ecfbd9435b029b25d0d0cf5ac8ea8e21e83685d8d97edd469b574765b0f03eba"
+        },
+        {
+          "kind": "buffer",
+          "resource": 25,
+          "event": 30,
+          "expect_stable": true,
+          "expected_storage_sha256": "d5371af02b60127bcc0c7ac483b909907763dccd73eba006e71128a76ea9d53c"
+        }
+      ],
+      "controls": [
+        {
+          "disable_event": 30,
+          "repeat": 2,
+          "expected_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636"
+        }
+      ],
+      "covers": [
+        "Query stream 0",
+        "overflow stream 1",
+        "comparison True",
+        "preframe-created refreshed interval"
+      ],
+      "native_workload_fidelity": "passed",
+      "application_reference_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+      "application_reference_scope": "Full 8x8 conditional output plus all four SO buffers; 12 frames on native hardware/WARP and original capture injection.",
+      "application_reference_evidence": {
+        "path": "manifest.json",
+        "sha256": "05ea7a3d420d3a0eb230b8add10935fbc663e4b290b9a7592c662d52781e8420"
+      },
+      "fidelity_reason": "Saved per-stream BOOL query descriptor and interval restored; exact independent images, buffer bytes and disabled-work controls required."
+    },
+    {
+      "id": "stream_predicate_21",
+      "path": "21/capture.gpa_frame",
+      "sha256": "762de1e4594c7de9e8fd4c6baf9332a8e0473ebeaded00b2d12c991ec721429a",
+      "bytes": 98711,
+      "family": "stream_predicate",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [
+        {
+          "path": "manifest.json",
+          "sha256": "05ea7a3d420d3a0eb230b8add10935fbc663e4b290b9a7592c662d52781e8420",
+          "contains_capture_hash": true
+        }
+      ],
+      "provenance_note": "Unmodified original CaptureNextFrame; native hardware/WARP debug and CPU image/buffer oracles frozen.",
+      "device_scope": "Default hardware capture, native hardware/WARP verified; original player adapter not matched.",
+      "reference_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+      "comparison_policy": "exact_golden",
+      "boundaries": [
+        {
+          "kind": "buffer",
+          "resource": 22,
+          "event": 30,
+          "expect_stable": true,
+          "expected_storage_sha256": "a5cf86cc36c6ec14fc6a45ac86a4f2b34d4684669e08a469cc7a8e9f0f1619fe"
+        },
+        {
+          "kind": "buffer",
+          "resource": 23,
+          "event": 30,
+          "expect_stable": true,
+          "expected_storage_sha256": "6af40de2d7183605cbee5331ef6ca83b90d5927442b7aec8e25b4263721ee157"
+        },
+        {
+          "kind": "buffer",
+          "resource": 24,
+          "event": 30,
+          "expect_stable": true,
+          "expected_storage_sha256": "8f7e73183722c7d03e1eb50fda14c9d7d81f45106981e65f8656aa95ef04d1b4"
+        },
+        {
+          "kind": "buffer",
+          "resource": 25,
+          "event": 30,
+          "expect_stable": true,
+          "expected_storage_sha256": "d5371af02b60127bcc0c7ac483b909907763dccd73eba006e71128a76ea9d53c"
+        }
+      ],
+      "controls": [
+        {
+          "disable_event": 30,
+          "repeat": 2,
+          "expected_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636"
+        }
+      ],
+      "covers": [
+        "Query stream 1",
+        "overflow stream 2",
+        "comparison True",
+        "preframe-created refreshed interval"
+      ],
+      "native_workload_fidelity": "passed",
+      "application_reference_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+      "application_reference_scope": "Full 8x8 conditional output plus all four SO buffers; 12 frames on native hardware/WARP and original capture injection.",
+      "application_reference_evidence": {
+        "path": "manifest.json",
+        "sha256": "05ea7a3d420d3a0eb230b8add10935fbc663e4b290b9a7592c662d52781e8420"
+      },
+      "fidelity_reason": "Saved per-stream BOOL query descriptor and interval restored; exact independent images, buffer bytes and disabled-work controls required."
+    },
+    {
+      "id": "stream_predicate_22",
+      "path": "22/capture.gpa_frame",
+      "sha256": "8356226d5585766b87c4f0cecf715e3ecbd14e4589e65a9182aafcbf9d96459d",
+      "bytes": 98711,
+      "family": "stream_predicate",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [
+        {
+          "path": "manifest.json",
+          "sha256": "05ea7a3d420d3a0eb230b8add10935fbc663e4b290b9a7592c662d52781e8420",
+          "contains_capture_hash": true
+        }
+      ],
+      "provenance_note": "Unmodified original CaptureNextFrame; native hardware/WARP debug and CPU image/buffer oracles frozen.",
+      "device_scope": "Default hardware capture, native hardware/WARP verified; original player adapter not matched.",
+      "reference_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+      "comparison_policy": "exact_golden",
+      "boundaries": [
+        {
+          "kind": "buffer",
+          "resource": 22,
+          "event": 30,
+          "expect_stable": true,
+          "expected_storage_sha256": "a5cf86cc36c6ec14fc6a45ac86a4f2b34d4684669e08a469cc7a8e9f0f1619fe"
+        },
+        {
+          "kind": "buffer",
+          "resource": 23,
+          "event": 30,
+          "expect_stable": true,
+          "expected_storage_sha256": "6af40de2d7183605cbee5331ef6ca83b90d5927442b7aec8e25b4263721ee157"
+        },
+        {
+          "kind": "buffer",
+          "resource": 24,
+          "event": 30,
+          "expect_stable": true,
+          "expected_storage_sha256": "ecfbd9435b029b25d0d0cf5ac8ea8e21e83685d8d97edd469b574765b0f03eba"
+        },
+        {
+          "kind": "buffer",
+          "resource": 25,
+          "event": 30,
+          "expect_stable": true,
+          "expected_storage_sha256": "4132f34ae1ffc37f84f0b3143f58324d6c2be5f573b2c74b667200cc79fa75f9"
+        }
+      ],
+      "controls": [
+        {
+          "disable_event": 30,
+          "repeat": 2,
+          "expected_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636"
+        }
+      ],
+      "covers": [
+        "Query stream 2",
+        "overflow stream 3",
+        "comparison True",
+        "preframe-created refreshed interval"
+      ],
+      "native_workload_fidelity": "passed",
+      "application_reference_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+      "application_reference_scope": "Full 8x8 conditional output plus all four SO buffers; 12 frames on native hardware/WARP and original capture injection.",
+      "application_reference_evidence": {
+        "path": "manifest.json",
+        "sha256": "05ea7a3d420d3a0eb230b8add10935fbc663e4b290b9a7592c662d52781e8420"
+      },
+      "fidelity_reason": "Saved per-stream BOOL query descriptor and interval restored; exact independent images, buffer bytes and disabled-work controls required."
+    },
+    {
+      "id": "stream_predicate_23",
+      "path": "23/capture.gpa_frame",
+      "sha256": "7e159aa03b4a02279e8fdcbd3cbc7152b83fd1783c96b0c0cf69897786eb22e8",
+      "bytes": 98711,
+      "family": "stream_predicate",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [
+        {
+          "path": "manifest.json",
+          "sha256": "05ea7a3d420d3a0eb230b8add10935fbc663e4b290b9a7592c662d52781e8420",
+          "contains_capture_hash": true
+        }
+      ],
+      "provenance_note": "Unmodified original CaptureNextFrame; native hardware/WARP debug and CPU image/buffer oracles frozen.",
+      "device_scope": "Default hardware capture, native hardware/WARP verified; original player adapter not matched.",
+      "reference_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+      "comparison_policy": "exact_golden",
+      "boundaries": [
+        {
+          "kind": "buffer",
+          "resource": 22,
+          "event": 30,
+          "expect_stable": true,
+          "expected_storage_sha256": "24509b6c9451b5e63c62932f45650ddc5b422b1f31d5b10b2d9805c6ae873278"
+        },
+        {
+          "kind": "buffer",
+          "resource": 23,
+          "event": 30,
+          "expect_stable": true,
+          "expected_storage_sha256": "6af40de2d7183605cbee5331ef6ca83b90d5927442b7aec8e25b4263721ee157"
+        },
+        {
+          "kind": "buffer",
+          "resource": 24,
+          "event": 30,
+          "expect_stable": true,
+          "expected_storage_sha256": "ecfbd9435b029b25d0d0cf5ac8ea8e21e83685d8d97edd469b574765b0f03eba"
+        },
+        {
+          "kind": "buffer",
+          "resource": 25,
+          "event": 30,
+          "expect_stable": true,
+          "expected_storage_sha256": "d5371af02b60127bcc0c7ac483b909907763dccd73eba006e71128a76ea9d53c"
+        }
+      ],
+      "controls": [
+        {
+          "disable_event": 30,
+          "repeat": 2,
+          "expected_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636"
+        }
+      ],
+      "covers": [
+        "Query stream 3",
+        "overflow stream 0",
+        "comparison True",
+        "preframe-created refreshed interval"
+      ],
+      "native_workload_fidelity": "passed",
+      "application_reference_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+      "application_reference_scope": "Full 8x8 conditional output plus all four SO buffers; 12 frames on native hardware/WARP and original capture injection.",
+      "application_reference_evidence": {
+        "path": "manifest.json",
+        "sha256": "05ea7a3d420d3a0eb230b8add10935fbc663e4b290b9a7592c662d52781e8420"
+      },
+      "fidelity_reason": "Saved per-stream BOOL query descriptor and interval restored; exact independent images, buffer bytes and disabled-work controls required."
+    },
+    {
+      "id": "stream_predicate_24",
+      "path": "24/capture.gpa_frame",
+      "sha256": "971334b750061036ce19ce0081ba8b54bd31dce0551cc75fafb9925bee53d665",
+      "bytes": 98930,
+      "family": "stream_predicate",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [
+        {
+          "path": "manifest.json",
+          "sha256": "05ea7a3d420d3a0eb230b8add10935fbc663e4b290b9a7592c662d52781e8420",
+          "contains_capture_hash": true
+        }
+      ],
+      "provenance_note": "Unmodified original CaptureNextFrame; native hardware/WARP debug and CPU image/buffer oracles frozen.",
+      "device_scope": "Default hardware capture, native hardware/WARP verified; original player adapter not matched.",
+      "reference_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+      "comparison_policy": "exact_golden",
+      "boundaries": [
+        {
+          "kind": "buffer",
+          "resource": 24,
+          "event": 32,
+          "expect_stable": true,
+          "expected_storage_sha256": "a5cf86cc36c6ec14fc6a45ac86a4f2b34d4684669e08a469cc7a8e9f0f1619fe"
+        },
+        {
+          "kind": "buffer",
+          "resource": 25,
+          "event": 32,
+          "expect_stable": true,
+          "expected_storage_sha256": "6af40de2d7183605cbee5331ef6ca83b90d5927442b7aec8e25b4263721ee157"
+        },
+        {
+          "kind": "buffer",
+          "resource": 26,
+          "event": 32,
+          "expect_stable": true,
+          "expected_storage_sha256": "ecfbd9435b029b25d0d0cf5ac8ea8e21e83685d8d97edd469b574765b0f03eba"
+        },
+        {
+          "kind": "buffer",
+          "resource": 27,
+          "event": 32,
+          "expect_stable": true,
+          "expected_storage_sha256": "d5371af02b60127bcc0c7ac483b909907763dccd73eba006e71128a76ea9d53c"
+        }
+      ],
+      "controls": [
+        {
+          "disable_event": 32,
+          "repeat": 2,
+          "expected_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b"
+        }
+      ],
+      "covers": [
+        "Query stream 0",
+        "overflow stream -1",
+        "comparison False",
+        "frame-created"
+      ],
+      "native_workload_fidelity": "passed",
+      "application_reference_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+      "application_reference_scope": "Full 8x8 conditional output plus all four SO buffers; 12 frames on native hardware/WARP and original capture injection.",
+      "application_reference_evidence": {
+        "path": "manifest.json",
+        "sha256": "05ea7a3d420d3a0eb230b8add10935fbc663e4b290b9a7592c662d52781e8420"
+      },
+      "fidelity_reason": "Saved per-stream BOOL query descriptor and interval restored; exact independent images, buffer bytes and disabled-work controls required."
+    },
+    {
+      "id": "stream_predicate_25",
+      "path": "25/capture.gpa_frame",
+      "sha256": "b8df8d4580933a734b68c6ce946daef8e30243f9fb68af256bd353de72d81cb5",
+      "bytes": 98865,
+      "family": "stream_predicate",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [
+        {
+          "path": "manifest.json",
+          "sha256": "05ea7a3d420d3a0eb230b8add10935fbc663e4b290b9a7592c662d52781e8420",
+          "contains_capture_hash": true
+        }
+      ],
+      "provenance_note": "Unmodified original CaptureNextFrame; native hardware/WARP debug and CPU image/buffer oracles frozen.",
+      "device_scope": "Default hardware capture, native hardware/WARP verified; original player adapter not matched.",
+      "reference_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+      "comparison_policy": "exact_golden",
+      "boundaries": [
+        {
+          "kind": "buffer",
+          "resource": 24,
+          "event": 32,
+          "expect_stable": true,
+          "expected_storage_sha256": "a5cf86cc36c6ec14fc6a45ac86a4f2b34d4684669e08a469cc7a8e9f0f1619fe"
+        },
+        {
+          "kind": "buffer",
+          "resource": 25,
+          "event": 32,
+          "expect_stable": true,
+          "expected_storage_sha256": "6af40de2d7183605cbee5331ef6ca83b90d5927442b7aec8e25b4263721ee157"
+        },
+        {
+          "kind": "buffer",
+          "resource": 26,
+          "event": 32,
+          "expect_stable": true,
+          "expected_storage_sha256": "ecfbd9435b029b25d0d0cf5ac8ea8e21e83685d8d97edd469b574765b0f03eba"
+        },
+        {
+          "kind": "buffer",
+          "resource": 27,
+          "event": 32,
+          "expect_stable": true,
+          "expected_storage_sha256": "d5371af02b60127bcc0c7ac483b909907763dccd73eba006e71128a76ea9d53c"
+        }
+      ],
+      "controls": [
+        {
+          "disable_event": 32,
+          "repeat": 2,
+          "expected_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b"
+        }
+      ],
+      "covers": [
+        "Query stream 1",
+        "overflow stream -1",
+        "comparison False",
+        "frame-created"
+      ],
+      "native_workload_fidelity": "passed",
+      "application_reference_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+      "application_reference_scope": "Full 8x8 conditional output plus all four SO buffers; 12 frames on native hardware/WARP and original capture injection.",
+      "application_reference_evidence": {
+        "path": "manifest.json",
+        "sha256": "05ea7a3d420d3a0eb230b8add10935fbc663e4b290b9a7592c662d52781e8420"
+      },
+      "fidelity_reason": "Saved per-stream BOOL query descriptor and interval restored; exact independent images, buffer bytes and disabled-work controls required."
+    },
+    {
+      "id": "stream_predicate_26",
+      "path": "26/capture.gpa_frame",
+      "sha256": "f837a7d1c38503c52e1489ecca7b20aa5b5cabd4cecb2fd7db1ade1da3ba1739",
+      "bytes": 98930,
+      "family": "stream_predicate",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [
+        {
+          "path": "manifest.json",
+          "sha256": "05ea7a3d420d3a0eb230b8add10935fbc663e4b290b9a7592c662d52781e8420",
+          "contains_capture_hash": true
+        }
+      ],
+      "provenance_note": "Unmodified original CaptureNextFrame; native hardware/WARP debug and CPU image/buffer oracles frozen.",
+      "device_scope": "Default hardware capture, native hardware/WARP verified; original player adapter not matched.",
+      "reference_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+      "comparison_policy": "exact_golden",
+      "boundaries": [
+        {
+          "kind": "buffer",
+          "resource": 24,
+          "event": 32,
+          "expect_stable": true,
+          "expected_storage_sha256": "a5cf86cc36c6ec14fc6a45ac86a4f2b34d4684669e08a469cc7a8e9f0f1619fe"
+        },
+        {
+          "kind": "buffer",
+          "resource": 25,
+          "event": 32,
+          "expect_stable": true,
+          "expected_storage_sha256": "6af40de2d7183605cbee5331ef6ca83b90d5927442b7aec8e25b4263721ee157"
+        },
+        {
+          "kind": "buffer",
+          "resource": 26,
+          "event": 32,
+          "expect_stable": true,
+          "expected_storage_sha256": "ecfbd9435b029b25d0d0cf5ac8ea8e21e83685d8d97edd469b574765b0f03eba"
+        },
+        {
+          "kind": "buffer",
+          "resource": 27,
+          "event": 32,
+          "expect_stable": true,
+          "expected_storage_sha256": "d5371af02b60127bcc0c7ac483b909907763dccd73eba006e71128a76ea9d53c"
+        }
+      ],
+      "controls": [
+        {
+          "disable_event": 32,
+          "repeat": 2,
+          "expected_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b"
+        }
+      ],
+      "covers": [
+        "Query stream 2",
+        "overflow stream -1",
+        "comparison False",
+        "frame-created"
+      ],
+      "native_workload_fidelity": "passed",
+      "application_reference_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+      "application_reference_scope": "Full 8x8 conditional output plus all four SO buffers; 12 frames on native hardware/WARP and original capture injection.",
+      "application_reference_evidence": {
+        "path": "manifest.json",
+        "sha256": "05ea7a3d420d3a0eb230b8add10935fbc663e4b290b9a7592c662d52781e8420"
+      },
+      "fidelity_reason": "Saved per-stream BOOL query descriptor and interval restored; exact independent images, buffer bytes and disabled-work controls required."
+    },
+    {
+      "id": "stream_predicate_27",
+      "path": "27/capture.gpa_frame",
+      "sha256": "01ac989ad0abd386a5d14a4f3dd3a1c78d110a2f698f41b71633be1f01c3e538",
+      "bytes": 98865,
+      "family": "stream_predicate",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [
+        {
+          "path": "manifest.json",
+          "sha256": "05ea7a3d420d3a0eb230b8add10935fbc663e4b290b9a7592c662d52781e8420",
+          "contains_capture_hash": true
+        }
+      ],
+      "provenance_note": "Unmodified original CaptureNextFrame; native hardware/WARP debug and CPU image/buffer oracles frozen.",
+      "device_scope": "Default hardware capture, native hardware/WARP verified; original player adapter not matched.",
+      "reference_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+      "comparison_policy": "exact_golden",
+      "boundaries": [
+        {
+          "kind": "buffer",
+          "resource": 24,
+          "event": 32,
+          "expect_stable": true,
+          "expected_storage_sha256": "a5cf86cc36c6ec14fc6a45ac86a4f2b34d4684669e08a469cc7a8e9f0f1619fe"
+        },
+        {
+          "kind": "buffer",
+          "resource": 25,
+          "event": 32,
+          "expect_stable": true,
+          "expected_storage_sha256": "6af40de2d7183605cbee5331ef6ca83b90d5927442b7aec8e25b4263721ee157"
+        },
+        {
+          "kind": "buffer",
+          "resource": 26,
+          "event": 32,
+          "expect_stable": true,
+          "expected_storage_sha256": "ecfbd9435b029b25d0d0cf5ac8ea8e21e83685d8d97edd469b574765b0f03eba"
+        },
+        {
+          "kind": "buffer",
+          "resource": 27,
+          "event": 32,
+          "expect_stable": true,
+          "expected_storage_sha256": "d5371af02b60127bcc0c7ac483b909907763dccd73eba006e71128a76ea9d53c"
+        }
+      ],
+      "controls": [
+        {
+          "disable_event": 32,
+          "repeat": 2,
+          "expected_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b"
+        }
+      ],
+      "covers": [
+        "Query stream 3",
+        "overflow stream -1",
+        "comparison False",
+        "frame-created"
+      ],
+      "native_workload_fidelity": "passed",
+      "application_reference_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+      "application_reference_scope": "Full 8x8 conditional output plus all four SO buffers; 12 frames on native hardware/WARP and original capture injection.",
+      "application_reference_evidence": {
+        "path": "manifest.json",
+        "sha256": "05ea7a3d420d3a0eb230b8add10935fbc663e4b290b9a7592c662d52781e8420"
+      },
+      "fidelity_reason": "Saved per-stream BOOL query descriptor and interval restored; exact independent images, buffer bytes and disabled-work controls required."
+    },
+    {
+      "id": "stream_predicate_28",
+      "path": "28/capture.gpa_frame",
+      "sha256": "04e9e9efcaa57eacc32576d98d5d2a410073cd36c53784d295aacd467ddf283f",
+      "bytes": 98898,
+      "family": "stream_predicate",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [
+        {
+          "path": "manifest.json",
+          "sha256": "05ea7a3d420d3a0eb230b8add10935fbc663e4b290b9a7592c662d52781e8420",
+          "contains_capture_hash": true
+        }
+      ],
+      "provenance_note": "Unmodified original CaptureNextFrame; native hardware/WARP debug and CPU image/buffer oracles frozen.",
+      "device_scope": "Default hardware capture, native hardware/WARP verified; original player adapter not matched.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "boundaries": [
+        {
+          "kind": "buffer",
+          "resource": 24,
+          "event": 32,
+          "expect_stable": true,
+          "expected_storage_sha256": "24509b6c9451b5e63c62932f45650ddc5b422b1f31d5b10b2d9805c6ae873278"
+        },
+        {
+          "kind": "buffer",
+          "resource": 25,
+          "event": 32,
+          "expect_stable": true,
+          "expected_storage_sha256": "6af40de2d7183605cbee5331ef6ca83b90d5927442b7aec8e25b4263721ee157"
+        },
+        {
+          "kind": "buffer",
+          "resource": 26,
+          "event": 32,
+          "expect_stable": true,
+          "expected_storage_sha256": "ecfbd9435b029b25d0d0cf5ac8ea8e21e83685d8d97edd469b574765b0f03eba"
+        },
+        {
+          "kind": "buffer",
+          "resource": 27,
+          "event": 32,
+          "expect_stable": true,
+          "expected_storage_sha256": "d5371af02b60127bcc0c7ac483b909907763dccd73eba006e71128a76ea9d53c"
+        }
+      ],
+      "controls": [
+        {
+          "disable_event": 32,
+          "repeat": 2,
+          "expected_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b"
+        }
+      ],
+      "covers": [
+        "Query stream 0",
+        "overflow stream 0",
+        "comparison False",
+        "frame-created"
+      ],
+      "native_workload_fidelity": "passed",
+      "application_reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "application_reference_scope": "Full 8x8 conditional output plus all four SO buffers; 12 frames on native hardware/WARP and original capture injection.",
+      "application_reference_evidence": {
+        "path": "manifest.json",
+        "sha256": "05ea7a3d420d3a0eb230b8add10935fbc663e4b290b9a7592c662d52781e8420"
+      },
+      "fidelity_reason": "Saved per-stream BOOL query descriptor and interval restored; exact independent images, buffer bytes and disabled-work controls required."
+    },
+    {
+      "id": "stream_predicate_29",
+      "path": "29/capture.gpa_frame",
+      "sha256": "43829fedeeecece58b20977e2d6e05bbb33317461bec115ec44a1e4f66d48c80",
+      "bytes": 98833,
+      "family": "stream_predicate",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [
+        {
+          "path": "manifest.json",
+          "sha256": "05ea7a3d420d3a0eb230b8add10935fbc663e4b290b9a7592c662d52781e8420",
+          "contains_capture_hash": true
+        }
+      ],
+      "provenance_note": "Unmodified original CaptureNextFrame; native hardware/WARP debug and CPU image/buffer oracles frozen.",
+      "device_scope": "Default hardware capture, native hardware/WARP verified; original player adapter not matched.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "boundaries": [
+        {
+          "kind": "buffer",
+          "resource": 24,
+          "event": 32,
+          "expect_stable": true,
+          "expected_storage_sha256": "a5cf86cc36c6ec14fc6a45ac86a4f2b34d4684669e08a469cc7a8e9f0f1619fe"
+        },
+        {
+          "kind": "buffer",
+          "resource": 25,
+          "event": 32,
+          "expect_stable": true,
+          "expected_storage_sha256": "7fa788538162a0d003a2ec27b3a596be9f5aba9a67cd78fc19c5a657f32c661f"
+        },
+        {
+          "kind": "buffer",
+          "resource": 26,
+          "event": 32,
+          "expect_stable": true,
+          "expected_storage_sha256": "ecfbd9435b029b25d0d0cf5ac8ea8e21e83685d8d97edd469b574765b0f03eba"
+        },
+        {
+          "kind": "buffer",
+          "resource": 27,
+          "event": 32,
+          "expect_stable": true,
+          "expected_storage_sha256": "d5371af02b60127bcc0c7ac483b909907763dccd73eba006e71128a76ea9d53c"
+        }
+      ],
+      "controls": [
+        {
+          "disable_event": 32,
+          "repeat": 2,
+          "expected_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b"
+        }
+      ],
+      "covers": [
+        "Query stream 1",
+        "overflow stream 1",
+        "comparison False",
+        "frame-created"
+      ],
+      "native_workload_fidelity": "passed",
+      "application_reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "application_reference_scope": "Full 8x8 conditional output plus all four SO buffers; 12 frames on native hardware/WARP and original capture injection.",
+      "application_reference_evidence": {
+        "path": "manifest.json",
+        "sha256": "05ea7a3d420d3a0eb230b8add10935fbc663e4b290b9a7592c662d52781e8420"
+      },
+      "fidelity_reason": "Saved per-stream BOOL query descriptor and interval restored; exact independent images, buffer bytes and disabled-work controls required."
+    },
+    {
+      "id": "stream_predicate_30",
+      "path": "30/capture.gpa_frame",
+      "sha256": "48dcd01b1f41e9482fd71ee0056934ac46b3fa21681ec548597083d0a2a4e578",
+      "bytes": 98833,
+      "family": "stream_predicate",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [
+        {
+          "path": "manifest.json",
+          "sha256": "05ea7a3d420d3a0eb230b8add10935fbc663e4b290b9a7592c662d52781e8420",
+          "contains_capture_hash": true
+        }
+      ],
+      "provenance_note": "Unmodified original CaptureNextFrame; native hardware/WARP debug and CPU image/buffer oracles frozen.",
+      "device_scope": "Default hardware capture, native hardware/WARP verified; original player adapter not matched.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "boundaries": [
+        {
+          "kind": "buffer",
+          "resource": 24,
+          "event": 32,
+          "expect_stable": true,
+          "expected_storage_sha256": "a5cf86cc36c6ec14fc6a45ac86a4f2b34d4684669e08a469cc7a8e9f0f1619fe"
+        },
+        {
+          "kind": "buffer",
+          "resource": 25,
+          "event": 32,
+          "expect_stable": true,
+          "expected_storage_sha256": "6af40de2d7183605cbee5331ef6ca83b90d5927442b7aec8e25b4263721ee157"
+        },
+        {
+          "kind": "buffer",
+          "resource": 26,
+          "event": 32,
+          "expect_stable": true,
+          "expected_storage_sha256": "8f7e73183722c7d03e1eb50fda14c9d7d81f45106981e65f8656aa95ef04d1b4"
+        },
+        {
+          "kind": "buffer",
+          "resource": 27,
+          "event": 32,
+          "expect_stable": true,
+          "expected_storage_sha256": "d5371af02b60127bcc0c7ac483b909907763dccd73eba006e71128a76ea9d53c"
+        }
+      ],
+      "controls": [
+        {
+          "disable_event": 32,
+          "repeat": 2,
+          "expected_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b"
+        }
+      ],
+      "covers": [
+        "Query stream 2",
+        "overflow stream 2",
+        "comparison False",
+        "frame-created"
+      ],
+      "native_workload_fidelity": "passed",
+      "application_reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "application_reference_scope": "Full 8x8 conditional output plus all four SO buffers; 12 frames on native hardware/WARP and original capture injection.",
+      "application_reference_evidence": {
+        "path": "manifest.json",
+        "sha256": "05ea7a3d420d3a0eb230b8add10935fbc663e4b290b9a7592c662d52781e8420"
+      },
+      "fidelity_reason": "Saved per-stream BOOL query descriptor and interval restored; exact independent images, buffer bytes and disabled-work controls required."
+    },
+    {
+      "id": "stream_predicate_31",
+      "path": "31/capture.gpa_frame",
+      "sha256": "2a05e1c0065bb3185a896c75a9157ce38ead26e1b89bd4005f2d88078acb29b0",
+      "bytes": 98833,
+      "family": "stream_predicate",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [
+        {
+          "path": "manifest.json",
+          "sha256": "05ea7a3d420d3a0eb230b8add10935fbc663e4b290b9a7592c662d52781e8420",
+          "contains_capture_hash": true
+        }
+      ],
+      "provenance_note": "Unmodified original CaptureNextFrame; native hardware/WARP debug and CPU image/buffer oracles frozen.",
+      "device_scope": "Default hardware capture, native hardware/WARP verified; original player adapter not matched.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "boundaries": [
+        {
+          "kind": "buffer",
+          "resource": 24,
+          "event": 32,
+          "expect_stable": true,
+          "expected_storage_sha256": "a5cf86cc36c6ec14fc6a45ac86a4f2b34d4684669e08a469cc7a8e9f0f1619fe"
+        },
+        {
+          "kind": "buffer",
+          "resource": 25,
+          "event": 32,
+          "expect_stable": true,
+          "expected_storage_sha256": "6af40de2d7183605cbee5331ef6ca83b90d5927442b7aec8e25b4263721ee157"
+        },
+        {
+          "kind": "buffer",
+          "resource": 26,
+          "event": 32,
+          "expect_stable": true,
+          "expected_storage_sha256": "ecfbd9435b029b25d0d0cf5ac8ea8e21e83685d8d97edd469b574765b0f03eba"
+        },
+        {
+          "kind": "buffer",
+          "resource": 27,
+          "event": 32,
+          "expect_stable": true,
+          "expected_storage_sha256": "4132f34ae1ffc37f84f0b3143f58324d6c2be5f573b2c74b667200cc79fa75f9"
+        }
+      ],
+      "controls": [
+        {
+          "disable_event": 32,
+          "repeat": 2,
+          "expected_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b"
+        }
+      ],
+      "covers": [
+        "Query stream 3",
+        "overflow stream 3",
+        "comparison False",
+        "frame-created"
+      ],
+      "native_workload_fidelity": "passed",
+      "application_reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "application_reference_scope": "Full 8x8 conditional output plus all four SO buffers; 12 frames on native hardware/WARP and original capture injection.",
+      "application_reference_evidence": {
+        "path": "manifest.json",
+        "sha256": "05ea7a3d420d3a0eb230b8add10935fbc663e4b290b9a7592c662d52781e8420"
+      },
+      "fidelity_reason": "Saved per-stream BOOL query descriptor and interval restored; exact independent images, buffer bytes and disabled-work controls required."
+    },
+    {
+      "id": "stream_predicate_32",
+      "path": "32/capture.gpa_frame",
+      "sha256": "935579f4f358d31ced84ee7ce8905ff9014b8163f5ef84202db39b2f7f99a947",
+      "bytes": 98833,
+      "family": "stream_predicate",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [
+        {
+          "path": "manifest.json",
+          "sha256": "05ea7a3d420d3a0eb230b8add10935fbc663e4b290b9a7592c662d52781e8420",
+          "contains_capture_hash": true
+        }
+      ],
+      "provenance_note": "Unmodified original CaptureNextFrame; native hardware/WARP debug and CPU image/buffer oracles frozen.",
+      "device_scope": "Default hardware capture, native hardware/WARP verified; original player adapter not matched.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "boundaries": [
+        {
+          "kind": "buffer",
+          "resource": 24,
+          "event": 32,
+          "expect_stable": true,
+          "expected_storage_sha256": "a5cf86cc36c6ec14fc6a45ac86a4f2b34d4684669e08a469cc7a8e9f0f1619fe"
+        },
+        {
+          "kind": "buffer",
+          "resource": 25,
+          "event": 32,
+          "expect_stable": true,
+          "expected_storage_sha256": "7fa788538162a0d003a2ec27b3a596be9f5aba9a67cd78fc19c5a657f32c661f"
+        },
+        {
+          "kind": "buffer",
+          "resource": 26,
+          "event": 32,
+          "expect_stable": true,
+          "expected_storage_sha256": "ecfbd9435b029b25d0d0cf5ac8ea8e21e83685d8d97edd469b574765b0f03eba"
+        },
+        {
+          "kind": "buffer",
+          "resource": 27,
+          "event": 32,
+          "expect_stable": true,
+          "expected_storage_sha256": "d5371af02b60127bcc0c7ac483b909907763dccd73eba006e71128a76ea9d53c"
+        }
+      ],
+      "controls": [
+        {
+          "disable_event": 32,
+          "repeat": 2,
+          "expected_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b"
+        }
+      ],
+      "covers": [
+        "Query stream 0",
+        "overflow stream 1",
+        "comparison False",
+        "frame-created"
+      ],
+      "native_workload_fidelity": "passed",
+      "application_reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "application_reference_scope": "Full 8x8 conditional output plus all four SO buffers; 12 frames on native hardware/WARP and original capture injection.",
+      "application_reference_evidence": {
+        "path": "manifest.json",
+        "sha256": "05ea7a3d420d3a0eb230b8add10935fbc663e4b290b9a7592c662d52781e8420"
+      },
+      "fidelity_reason": "Saved per-stream BOOL query descriptor and interval restored; exact independent images, buffer bytes and disabled-work controls required."
+    },
+    {
+      "id": "stream_predicate_33",
+      "path": "33/capture.gpa_frame",
+      "sha256": "0aa8caa0048b1d2074ce4f4531b401c6a9d31f449ec53428ea5ca135512589f9",
+      "bytes": 98833,
+      "family": "stream_predicate",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [
+        {
+          "path": "manifest.json",
+          "sha256": "05ea7a3d420d3a0eb230b8add10935fbc663e4b290b9a7592c662d52781e8420",
+          "contains_capture_hash": true
+        }
+      ],
+      "provenance_note": "Unmodified original CaptureNextFrame; native hardware/WARP debug and CPU image/buffer oracles frozen.",
+      "device_scope": "Default hardware capture, native hardware/WARP verified; original player adapter not matched.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "boundaries": [
+        {
+          "kind": "buffer",
+          "resource": 24,
+          "event": 32,
+          "expect_stable": true,
+          "expected_storage_sha256": "a5cf86cc36c6ec14fc6a45ac86a4f2b34d4684669e08a469cc7a8e9f0f1619fe"
+        },
+        {
+          "kind": "buffer",
+          "resource": 25,
+          "event": 32,
+          "expect_stable": true,
+          "expected_storage_sha256": "6af40de2d7183605cbee5331ef6ca83b90d5927442b7aec8e25b4263721ee157"
+        },
+        {
+          "kind": "buffer",
+          "resource": 26,
+          "event": 32,
+          "expect_stable": true,
+          "expected_storage_sha256": "8f7e73183722c7d03e1eb50fda14c9d7d81f45106981e65f8656aa95ef04d1b4"
+        },
+        {
+          "kind": "buffer",
+          "resource": 27,
+          "event": 32,
+          "expect_stable": true,
+          "expected_storage_sha256": "d5371af02b60127bcc0c7ac483b909907763dccd73eba006e71128a76ea9d53c"
+        }
+      ],
+      "controls": [
+        {
+          "disable_event": 32,
+          "repeat": 2,
+          "expected_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b"
+        }
+      ],
+      "covers": [
+        "Query stream 1",
+        "overflow stream 2",
+        "comparison False",
+        "frame-created"
+      ],
+      "native_workload_fidelity": "passed",
+      "application_reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "application_reference_scope": "Full 8x8 conditional output plus all four SO buffers; 12 frames on native hardware/WARP and original capture injection.",
+      "application_reference_evidence": {
+        "path": "manifest.json",
+        "sha256": "05ea7a3d420d3a0eb230b8add10935fbc663e4b290b9a7592c662d52781e8420"
+      },
+      "fidelity_reason": "Saved per-stream BOOL query descriptor and interval restored; exact independent images, buffer bytes and disabled-work controls required."
+    },
+    {
+      "id": "stream_predicate_34",
+      "path": "34/capture.gpa_frame",
+      "sha256": "c39aa88eb96c6ac44e451bd6a0b02ff9eadac54faee41d5fff4fe702b2e3c438",
+      "bytes": 98833,
+      "family": "stream_predicate",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [
+        {
+          "path": "manifest.json",
+          "sha256": "05ea7a3d420d3a0eb230b8add10935fbc663e4b290b9a7592c662d52781e8420",
+          "contains_capture_hash": true
+        }
+      ],
+      "provenance_note": "Unmodified original CaptureNextFrame; native hardware/WARP debug and CPU image/buffer oracles frozen.",
+      "device_scope": "Default hardware capture, native hardware/WARP verified; original player adapter not matched.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "boundaries": [
+        {
+          "kind": "buffer",
+          "resource": 24,
+          "event": 32,
+          "expect_stable": true,
+          "expected_storage_sha256": "a5cf86cc36c6ec14fc6a45ac86a4f2b34d4684669e08a469cc7a8e9f0f1619fe"
+        },
+        {
+          "kind": "buffer",
+          "resource": 25,
+          "event": 32,
+          "expect_stable": true,
+          "expected_storage_sha256": "6af40de2d7183605cbee5331ef6ca83b90d5927442b7aec8e25b4263721ee157"
+        },
+        {
+          "kind": "buffer",
+          "resource": 26,
+          "event": 32,
+          "expect_stable": true,
+          "expected_storage_sha256": "ecfbd9435b029b25d0d0cf5ac8ea8e21e83685d8d97edd469b574765b0f03eba"
+        },
+        {
+          "kind": "buffer",
+          "resource": 27,
+          "event": 32,
+          "expect_stable": true,
+          "expected_storage_sha256": "4132f34ae1ffc37f84f0b3143f58324d6c2be5f573b2c74b667200cc79fa75f9"
+        }
+      ],
+      "controls": [
+        {
+          "disable_event": 32,
+          "repeat": 2,
+          "expected_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b"
+        }
+      ],
+      "covers": [
+        "Query stream 2",
+        "overflow stream 3",
+        "comparison False",
+        "frame-created"
+      ],
+      "native_workload_fidelity": "passed",
+      "application_reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "application_reference_scope": "Full 8x8 conditional output plus all four SO buffers; 12 frames on native hardware/WARP and original capture injection.",
+      "application_reference_evidence": {
+        "path": "manifest.json",
+        "sha256": "05ea7a3d420d3a0eb230b8add10935fbc663e4b290b9a7592c662d52781e8420"
+      },
+      "fidelity_reason": "Saved per-stream BOOL query descriptor and interval restored; exact independent images, buffer bytes and disabled-work controls required."
+    },
+    {
+      "id": "stream_predicate_35",
+      "path": "35/capture.gpa_frame",
+      "sha256": "20a395f95ee13480918dc18f4d3af5bf9c30f1386872428dc3f429a7f93a3ffa",
+      "bytes": 98833,
+      "family": "stream_predicate",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [
+        {
+          "path": "manifest.json",
+          "sha256": "05ea7a3d420d3a0eb230b8add10935fbc663e4b290b9a7592c662d52781e8420",
+          "contains_capture_hash": true
+        }
+      ],
+      "provenance_note": "Unmodified original CaptureNextFrame; native hardware/WARP debug and CPU image/buffer oracles frozen.",
+      "device_scope": "Default hardware capture, native hardware/WARP verified; original player adapter not matched.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "boundaries": [
+        {
+          "kind": "buffer",
+          "resource": 24,
+          "event": 32,
+          "expect_stable": true,
+          "expected_storage_sha256": "24509b6c9451b5e63c62932f45650ddc5b422b1f31d5b10b2d9805c6ae873278"
+        },
+        {
+          "kind": "buffer",
+          "resource": 25,
+          "event": 32,
+          "expect_stable": true,
+          "expected_storage_sha256": "6af40de2d7183605cbee5331ef6ca83b90d5927442b7aec8e25b4263721ee157"
+        },
+        {
+          "kind": "buffer",
+          "resource": 26,
+          "event": 32,
+          "expect_stable": true,
+          "expected_storage_sha256": "ecfbd9435b029b25d0d0cf5ac8ea8e21e83685d8d97edd469b574765b0f03eba"
+        },
+        {
+          "kind": "buffer",
+          "resource": 27,
+          "event": 32,
+          "expect_stable": true,
+          "expected_storage_sha256": "d5371af02b60127bcc0c7ac483b909907763dccd73eba006e71128a76ea9d53c"
+        }
+      ],
+      "controls": [
+        {
+          "disable_event": 32,
+          "repeat": 2,
+          "expected_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b"
+        }
+      ],
+      "covers": [
+        "Query stream 3",
+        "overflow stream 0",
+        "comparison False",
+        "frame-created"
+      ],
+      "native_workload_fidelity": "passed",
+      "application_reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "application_reference_scope": "Full 8x8 conditional output plus all four SO buffers; 12 frames on native hardware/WARP and original capture injection.",
+      "application_reference_evidence": {
+        "path": "manifest.json",
+        "sha256": "05ea7a3d420d3a0eb230b8add10935fbc663e4b290b9a7592c662d52781e8420"
+      },
+      "fidelity_reason": "Saved per-stream BOOL query descriptor and interval restored; exact independent images, buffer bytes and disabled-work controls required."
+    },
+    {
+      "id": "stream_predicate_36",
+      "path": "36/capture.gpa_frame",
+      "sha256": "483c7895bf4b2d3488bfef766fe3b229c3d4ca3a8cdb29c1b4a588f3c1366a9e",
+      "bytes": 98865,
+      "family": "stream_predicate",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [
+        {
+          "path": "manifest.json",
+          "sha256": "05ea7a3d420d3a0eb230b8add10935fbc663e4b290b9a7592c662d52781e8420",
+          "contains_capture_hash": true
+        }
+      ],
+      "provenance_note": "Unmodified original CaptureNextFrame; native hardware/WARP debug and CPU image/buffer oracles frozen.",
+      "device_scope": "Default hardware capture, native hardware/WARP verified; original player adapter not matched.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "boundaries": [
+        {
+          "kind": "buffer",
+          "resource": 24,
+          "event": 32,
+          "expect_stable": true,
+          "expected_storage_sha256": "a5cf86cc36c6ec14fc6a45ac86a4f2b34d4684669e08a469cc7a8e9f0f1619fe"
+        },
+        {
+          "kind": "buffer",
+          "resource": 25,
+          "event": 32,
+          "expect_stable": true,
+          "expected_storage_sha256": "6af40de2d7183605cbee5331ef6ca83b90d5927442b7aec8e25b4263721ee157"
+        },
+        {
+          "kind": "buffer",
+          "resource": 26,
+          "event": 32,
+          "expect_stable": true,
+          "expected_storage_sha256": "ecfbd9435b029b25d0d0cf5ac8ea8e21e83685d8d97edd469b574765b0f03eba"
+        },
+        {
+          "kind": "buffer",
+          "resource": 27,
+          "event": 32,
+          "expect_stable": true,
+          "expected_storage_sha256": "d5371af02b60127bcc0c7ac483b909907763dccd73eba006e71128a76ea9d53c"
+        }
+      ],
+      "controls": [
+        {
+          "disable_event": 32,
+          "repeat": 2,
+          "expected_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636"
+        }
+      ],
+      "covers": [
+        "Query stream 0",
+        "overflow stream -1",
+        "comparison True",
+        "frame-created"
+      ],
+      "native_workload_fidelity": "passed",
+      "application_reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "application_reference_scope": "Full 8x8 conditional output plus all four SO buffers; 12 frames on native hardware/WARP and original capture injection.",
+      "application_reference_evidence": {
+        "path": "manifest.json",
+        "sha256": "05ea7a3d420d3a0eb230b8add10935fbc663e4b290b9a7592c662d52781e8420"
+      },
+      "fidelity_reason": "Saved per-stream BOOL query descriptor and interval restored; exact independent images, buffer bytes and disabled-work controls required."
+    },
+    {
+      "id": "stream_predicate_37",
+      "path": "37/capture.gpa_frame",
+      "sha256": "2a0a4769445431c54f924817c1ed36781369b1b80ce8e598a80b26163dfdb39a",
+      "bytes": 98865,
+      "family": "stream_predicate",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [
+        {
+          "path": "manifest.json",
+          "sha256": "05ea7a3d420d3a0eb230b8add10935fbc663e4b290b9a7592c662d52781e8420",
+          "contains_capture_hash": true
+        }
+      ],
+      "provenance_note": "Unmodified original CaptureNextFrame; native hardware/WARP debug and CPU image/buffer oracles frozen.",
+      "device_scope": "Default hardware capture, native hardware/WARP verified; original player adapter not matched.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "boundaries": [
+        {
+          "kind": "buffer",
+          "resource": 24,
+          "event": 32,
+          "expect_stable": true,
+          "expected_storage_sha256": "a5cf86cc36c6ec14fc6a45ac86a4f2b34d4684669e08a469cc7a8e9f0f1619fe"
+        },
+        {
+          "kind": "buffer",
+          "resource": 25,
+          "event": 32,
+          "expect_stable": true,
+          "expected_storage_sha256": "6af40de2d7183605cbee5331ef6ca83b90d5927442b7aec8e25b4263721ee157"
+        },
+        {
+          "kind": "buffer",
+          "resource": 26,
+          "event": 32,
+          "expect_stable": true,
+          "expected_storage_sha256": "ecfbd9435b029b25d0d0cf5ac8ea8e21e83685d8d97edd469b574765b0f03eba"
+        },
+        {
+          "kind": "buffer",
+          "resource": 27,
+          "event": 32,
+          "expect_stable": true,
+          "expected_storage_sha256": "d5371af02b60127bcc0c7ac483b909907763dccd73eba006e71128a76ea9d53c"
+        }
+      ],
+      "controls": [
+        {
+          "disable_event": 32,
+          "repeat": 2,
+          "expected_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636"
+        }
+      ],
+      "covers": [
+        "Query stream 1",
+        "overflow stream -1",
+        "comparison True",
+        "frame-created"
+      ],
+      "native_workload_fidelity": "passed",
+      "application_reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "application_reference_scope": "Full 8x8 conditional output plus all four SO buffers; 12 frames on native hardware/WARP and original capture injection.",
+      "application_reference_evidence": {
+        "path": "manifest.json",
+        "sha256": "05ea7a3d420d3a0eb230b8add10935fbc663e4b290b9a7592c662d52781e8420"
+      },
+      "fidelity_reason": "Saved per-stream BOOL query descriptor and interval restored; exact independent images, buffer bytes and disabled-work controls required."
+    },
+    {
+      "id": "stream_predicate_38",
+      "path": "38/capture.gpa_frame",
+      "sha256": "7415a50fe42f7b36f83b9063ac45d4e527213678362b55b9f694a43f9e7f9fd7",
+      "bytes": 98865,
+      "family": "stream_predicate",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [
+        {
+          "path": "manifest.json",
+          "sha256": "05ea7a3d420d3a0eb230b8add10935fbc663e4b290b9a7592c662d52781e8420",
+          "contains_capture_hash": true
+        }
+      ],
+      "provenance_note": "Unmodified original CaptureNextFrame; native hardware/WARP debug and CPU image/buffer oracles frozen.",
+      "device_scope": "Default hardware capture, native hardware/WARP verified; original player adapter not matched.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "boundaries": [
+        {
+          "kind": "buffer",
+          "resource": 24,
+          "event": 32,
+          "expect_stable": true,
+          "expected_storage_sha256": "a5cf86cc36c6ec14fc6a45ac86a4f2b34d4684669e08a469cc7a8e9f0f1619fe"
+        },
+        {
+          "kind": "buffer",
+          "resource": 25,
+          "event": 32,
+          "expect_stable": true,
+          "expected_storage_sha256": "6af40de2d7183605cbee5331ef6ca83b90d5927442b7aec8e25b4263721ee157"
+        },
+        {
+          "kind": "buffer",
+          "resource": 26,
+          "event": 32,
+          "expect_stable": true,
+          "expected_storage_sha256": "ecfbd9435b029b25d0d0cf5ac8ea8e21e83685d8d97edd469b574765b0f03eba"
+        },
+        {
+          "kind": "buffer",
+          "resource": 27,
+          "event": 32,
+          "expect_stable": true,
+          "expected_storage_sha256": "d5371af02b60127bcc0c7ac483b909907763dccd73eba006e71128a76ea9d53c"
+        }
+      ],
+      "controls": [
+        {
+          "disable_event": 32,
+          "repeat": 2,
+          "expected_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636"
+        }
+      ],
+      "covers": [
+        "Query stream 2",
+        "overflow stream -1",
+        "comparison True",
+        "frame-created"
+      ],
+      "native_workload_fidelity": "passed",
+      "application_reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "application_reference_scope": "Full 8x8 conditional output plus all four SO buffers; 12 frames on native hardware/WARP and original capture injection.",
+      "application_reference_evidence": {
+        "path": "manifest.json",
+        "sha256": "05ea7a3d420d3a0eb230b8add10935fbc663e4b290b9a7592c662d52781e8420"
+      },
+      "fidelity_reason": "Saved per-stream BOOL query descriptor and interval restored; exact independent images, buffer bytes and disabled-work controls required."
+    },
+    {
+      "id": "stream_predicate_39",
+      "path": "39/capture.gpa_frame",
+      "sha256": "cf59b91e7fd03485b8247ab34ca86176744352bf8242a40dcad6379f1cc178c0",
+      "bytes": 98865,
+      "family": "stream_predicate",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [
+        {
+          "path": "manifest.json",
+          "sha256": "05ea7a3d420d3a0eb230b8add10935fbc663e4b290b9a7592c662d52781e8420",
+          "contains_capture_hash": true
+        }
+      ],
+      "provenance_note": "Unmodified original CaptureNextFrame; native hardware/WARP debug and CPU image/buffer oracles frozen.",
+      "device_scope": "Default hardware capture, native hardware/WARP verified; original player adapter not matched.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "boundaries": [
+        {
+          "kind": "buffer",
+          "resource": 24,
+          "event": 32,
+          "expect_stable": true,
+          "expected_storage_sha256": "a5cf86cc36c6ec14fc6a45ac86a4f2b34d4684669e08a469cc7a8e9f0f1619fe"
+        },
+        {
+          "kind": "buffer",
+          "resource": 25,
+          "event": 32,
+          "expect_stable": true,
+          "expected_storage_sha256": "6af40de2d7183605cbee5331ef6ca83b90d5927442b7aec8e25b4263721ee157"
+        },
+        {
+          "kind": "buffer",
+          "resource": 26,
+          "event": 32,
+          "expect_stable": true,
+          "expected_storage_sha256": "ecfbd9435b029b25d0d0cf5ac8ea8e21e83685d8d97edd469b574765b0f03eba"
+        },
+        {
+          "kind": "buffer",
+          "resource": 27,
+          "event": 32,
+          "expect_stable": true,
+          "expected_storage_sha256": "d5371af02b60127bcc0c7ac483b909907763dccd73eba006e71128a76ea9d53c"
+        }
+      ],
+      "controls": [
+        {
+          "disable_event": 32,
+          "repeat": 2,
+          "expected_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636"
+        }
+      ],
+      "covers": [
+        "Query stream 3",
+        "overflow stream -1",
+        "comparison True",
+        "frame-created"
+      ],
+      "native_workload_fidelity": "passed",
+      "application_reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "application_reference_scope": "Full 8x8 conditional output plus all four SO buffers; 12 frames on native hardware/WARP and original capture injection.",
+      "application_reference_evidence": {
+        "path": "manifest.json",
+        "sha256": "05ea7a3d420d3a0eb230b8add10935fbc663e4b290b9a7592c662d52781e8420"
+      },
+      "fidelity_reason": "Saved per-stream BOOL query descriptor and interval restored; exact independent images, buffer bytes and disabled-work controls required."
+    },
+    {
+      "id": "stream_predicate_40",
+      "path": "40/capture.gpa_frame",
+      "sha256": "f7cfefd662ba60b4f55723b7fe5d63d6d86b1847782ef89396b319988dab1237",
+      "bytes": 98833,
+      "family": "stream_predicate",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [
+        {
+          "path": "manifest.json",
+          "sha256": "05ea7a3d420d3a0eb230b8add10935fbc663e4b290b9a7592c662d52781e8420",
+          "contains_capture_hash": true
+        }
+      ],
+      "provenance_note": "Unmodified original CaptureNextFrame; native hardware/WARP debug and CPU image/buffer oracles frozen.",
+      "device_scope": "Default hardware capture, native hardware/WARP verified; original player adapter not matched.",
+      "reference_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+      "comparison_policy": "exact_golden",
+      "boundaries": [
+        {
+          "kind": "buffer",
+          "resource": 24,
+          "event": 32,
+          "expect_stable": true,
+          "expected_storage_sha256": "24509b6c9451b5e63c62932f45650ddc5b422b1f31d5b10b2d9805c6ae873278"
+        },
+        {
+          "kind": "buffer",
+          "resource": 25,
+          "event": 32,
+          "expect_stable": true,
+          "expected_storage_sha256": "6af40de2d7183605cbee5331ef6ca83b90d5927442b7aec8e25b4263721ee157"
+        },
+        {
+          "kind": "buffer",
+          "resource": 26,
+          "event": 32,
+          "expect_stable": true,
+          "expected_storage_sha256": "ecfbd9435b029b25d0d0cf5ac8ea8e21e83685d8d97edd469b574765b0f03eba"
+        },
+        {
+          "kind": "buffer",
+          "resource": 27,
+          "event": 32,
+          "expect_stable": true,
+          "expected_storage_sha256": "d5371af02b60127bcc0c7ac483b909907763dccd73eba006e71128a76ea9d53c"
+        }
+      ],
+      "controls": [
+        {
+          "disable_event": 32,
+          "repeat": 2,
+          "expected_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636"
+        }
+      ],
+      "covers": [
+        "Query stream 0",
+        "overflow stream 0",
+        "comparison True",
+        "frame-created"
+      ],
+      "native_workload_fidelity": "passed",
+      "application_reference_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+      "application_reference_scope": "Full 8x8 conditional output plus all four SO buffers; 12 frames on native hardware/WARP and original capture injection.",
+      "application_reference_evidence": {
+        "path": "manifest.json",
+        "sha256": "05ea7a3d420d3a0eb230b8add10935fbc663e4b290b9a7592c662d52781e8420"
+      },
+      "fidelity_reason": "Saved per-stream BOOL query descriptor and interval restored; exact independent images, buffer bytes and disabled-work controls required."
+    },
+    {
+      "id": "stream_predicate_41",
+      "path": "41/capture.gpa_frame",
+      "sha256": "a18fc1fa8aae69959589cfa786327658406787850f18bca9a9b0cb32ec6e19e3",
+      "bytes": 98833,
+      "family": "stream_predicate",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [
+        {
+          "path": "manifest.json",
+          "sha256": "05ea7a3d420d3a0eb230b8add10935fbc663e4b290b9a7592c662d52781e8420",
+          "contains_capture_hash": true
+        }
+      ],
+      "provenance_note": "Unmodified original CaptureNextFrame; native hardware/WARP debug and CPU image/buffer oracles frozen.",
+      "device_scope": "Default hardware capture, native hardware/WARP verified; original player adapter not matched.",
+      "reference_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+      "comparison_policy": "exact_golden",
+      "boundaries": [
+        {
+          "kind": "buffer",
+          "resource": 24,
+          "event": 32,
+          "expect_stable": true,
+          "expected_storage_sha256": "a5cf86cc36c6ec14fc6a45ac86a4f2b34d4684669e08a469cc7a8e9f0f1619fe"
+        },
+        {
+          "kind": "buffer",
+          "resource": 25,
+          "event": 32,
+          "expect_stable": true,
+          "expected_storage_sha256": "7fa788538162a0d003a2ec27b3a596be9f5aba9a67cd78fc19c5a657f32c661f"
+        },
+        {
+          "kind": "buffer",
+          "resource": 26,
+          "event": 32,
+          "expect_stable": true,
+          "expected_storage_sha256": "ecfbd9435b029b25d0d0cf5ac8ea8e21e83685d8d97edd469b574765b0f03eba"
+        },
+        {
+          "kind": "buffer",
+          "resource": 27,
+          "event": 32,
+          "expect_stable": true,
+          "expected_storage_sha256": "d5371af02b60127bcc0c7ac483b909907763dccd73eba006e71128a76ea9d53c"
+        }
+      ],
+      "controls": [
+        {
+          "disable_event": 32,
+          "repeat": 2,
+          "expected_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636"
+        }
+      ],
+      "covers": [
+        "Query stream 1",
+        "overflow stream 1",
+        "comparison True",
+        "frame-created"
+      ],
+      "native_workload_fidelity": "passed",
+      "application_reference_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+      "application_reference_scope": "Full 8x8 conditional output plus all four SO buffers; 12 frames on native hardware/WARP and original capture injection.",
+      "application_reference_evidence": {
+        "path": "manifest.json",
+        "sha256": "05ea7a3d420d3a0eb230b8add10935fbc663e4b290b9a7592c662d52781e8420"
+      },
+      "fidelity_reason": "Saved per-stream BOOL query descriptor and interval restored; exact independent images, buffer bytes and disabled-work controls required."
+    },
+    {
+      "id": "stream_predicate_42",
+      "path": "42/capture.gpa_frame",
+      "sha256": "b0d74f9d59895653697529d17ccfc18769bd4492a078494c58b356d02c6cd2ac",
+      "bytes": 98833,
+      "family": "stream_predicate",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [
+        {
+          "path": "manifest.json",
+          "sha256": "05ea7a3d420d3a0eb230b8add10935fbc663e4b290b9a7592c662d52781e8420",
+          "contains_capture_hash": true
+        }
+      ],
+      "provenance_note": "Unmodified original CaptureNextFrame; native hardware/WARP debug and CPU image/buffer oracles frozen.",
+      "device_scope": "Default hardware capture, native hardware/WARP verified; original player adapter not matched.",
+      "reference_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+      "comparison_policy": "exact_golden",
+      "boundaries": [
+        {
+          "kind": "buffer",
+          "resource": 24,
+          "event": 32,
+          "expect_stable": true,
+          "expected_storage_sha256": "a5cf86cc36c6ec14fc6a45ac86a4f2b34d4684669e08a469cc7a8e9f0f1619fe"
+        },
+        {
+          "kind": "buffer",
+          "resource": 25,
+          "event": 32,
+          "expect_stable": true,
+          "expected_storage_sha256": "6af40de2d7183605cbee5331ef6ca83b90d5927442b7aec8e25b4263721ee157"
+        },
+        {
+          "kind": "buffer",
+          "resource": 26,
+          "event": 32,
+          "expect_stable": true,
+          "expected_storage_sha256": "8f7e73183722c7d03e1eb50fda14c9d7d81f45106981e65f8656aa95ef04d1b4"
+        },
+        {
+          "kind": "buffer",
+          "resource": 27,
+          "event": 32,
+          "expect_stable": true,
+          "expected_storage_sha256": "d5371af02b60127bcc0c7ac483b909907763dccd73eba006e71128a76ea9d53c"
+        }
+      ],
+      "controls": [
+        {
+          "disable_event": 32,
+          "repeat": 2,
+          "expected_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636"
+        }
+      ],
+      "covers": [
+        "Query stream 2",
+        "overflow stream 2",
+        "comparison True",
+        "frame-created"
+      ],
+      "native_workload_fidelity": "passed",
+      "application_reference_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+      "application_reference_scope": "Full 8x8 conditional output plus all four SO buffers; 12 frames on native hardware/WARP and original capture injection.",
+      "application_reference_evidence": {
+        "path": "manifest.json",
+        "sha256": "05ea7a3d420d3a0eb230b8add10935fbc663e4b290b9a7592c662d52781e8420"
+      },
+      "fidelity_reason": "Saved per-stream BOOL query descriptor and interval restored; exact independent images, buffer bytes and disabled-work controls required."
+    },
+    {
+      "id": "stream_predicate_43",
+      "path": "43/capture.gpa_frame",
+      "sha256": "8c20a8d15350577377f9fba41e71f446df4bf563e0b85dfc2988ce1b2029ad56",
+      "bytes": 98833,
+      "family": "stream_predicate",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [
+        {
+          "path": "manifest.json",
+          "sha256": "05ea7a3d420d3a0eb230b8add10935fbc663e4b290b9a7592c662d52781e8420",
+          "contains_capture_hash": true
+        }
+      ],
+      "provenance_note": "Unmodified original CaptureNextFrame; native hardware/WARP debug and CPU image/buffer oracles frozen.",
+      "device_scope": "Default hardware capture, native hardware/WARP verified; original player adapter not matched.",
+      "reference_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+      "comparison_policy": "exact_golden",
+      "boundaries": [
+        {
+          "kind": "buffer",
+          "resource": 24,
+          "event": 32,
+          "expect_stable": true,
+          "expected_storage_sha256": "a5cf86cc36c6ec14fc6a45ac86a4f2b34d4684669e08a469cc7a8e9f0f1619fe"
+        },
+        {
+          "kind": "buffer",
+          "resource": 25,
+          "event": 32,
+          "expect_stable": true,
+          "expected_storage_sha256": "6af40de2d7183605cbee5331ef6ca83b90d5927442b7aec8e25b4263721ee157"
+        },
+        {
+          "kind": "buffer",
+          "resource": 26,
+          "event": 32,
+          "expect_stable": true,
+          "expected_storage_sha256": "ecfbd9435b029b25d0d0cf5ac8ea8e21e83685d8d97edd469b574765b0f03eba"
+        },
+        {
+          "kind": "buffer",
+          "resource": 27,
+          "event": 32,
+          "expect_stable": true,
+          "expected_storage_sha256": "4132f34ae1ffc37f84f0b3143f58324d6c2be5f573b2c74b667200cc79fa75f9"
+        }
+      ],
+      "controls": [
+        {
+          "disable_event": 32,
+          "repeat": 2,
+          "expected_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636"
+        }
+      ],
+      "covers": [
+        "Query stream 3",
+        "overflow stream 3",
+        "comparison True",
+        "frame-created"
+      ],
+      "native_workload_fidelity": "passed",
+      "application_reference_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+      "application_reference_scope": "Full 8x8 conditional output plus all four SO buffers; 12 frames on native hardware/WARP and original capture injection.",
+      "application_reference_evidence": {
+        "path": "manifest.json",
+        "sha256": "05ea7a3d420d3a0eb230b8add10935fbc663e4b290b9a7592c662d52781e8420"
+      },
+      "fidelity_reason": "Saved per-stream BOOL query descriptor and interval restored; exact independent images, buffer bytes and disabled-work controls required."
+    },
+    {
+      "id": "stream_predicate_44",
+      "path": "44/capture.gpa_frame",
+      "sha256": "6ab39b281ef7ea5f7d289f66917463768214ec4e085aa76acbe4c1f60b2f6468",
+      "bytes": 98833,
+      "family": "stream_predicate",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [
+        {
+          "path": "manifest.json",
+          "sha256": "05ea7a3d420d3a0eb230b8add10935fbc663e4b290b9a7592c662d52781e8420",
+          "contains_capture_hash": true
+        }
+      ],
+      "provenance_note": "Unmodified original CaptureNextFrame; native hardware/WARP debug and CPU image/buffer oracles frozen.",
+      "device_scope": "Default hardware capture, native hardware/WARP verified; original player adapter not matched.",
+      "reference_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+      "comparison_policy": "exact_golden",
+      "boundaries": [
+        {
+          "kind": "buffer",
+          "resource": 24,
+          "event": 32,
+          "expect_stable": true,
+          "expected_storage_sha256": "a5cf86cc36c6ec14fc6a45ac86a4f2b34d4684669e08a469cc7a8e9f0f1619fe"
+        },
+        {
+          "kind": "buffer",
+          "resource": 25,
+          "event": 32,
+          "expect_stable": true,
+          "expected_storage_sha256": "7fa788538162a0d003a2ec27b3a596be9f5aba9a67cd78fc19c5a657f32c661f"
+        },
+        {
+          "kind": "buffer",
+          "resource": 26,
+          "event": 32,
+          "expect_stable": true,
+          "expected_storage_sha256": "ecfbd9435b029b25d0d0cf5ac8ea8e21e83685d8d97edd469b574765b0f03eba"
+        },
+        {
+          "kind": "buffer",
+          "resource": 27,
+          "event": 32,
+          "expect_stable": true,
+          "expected_storage_sha256": "d5371af02b60127bcc0c7ac483b909907763dccd73eba006e71128a76ea9d53c"
+        }
+      ],
+      "controls": [
+        {
+          "disable_event": 32,
+          "repeat": 2,
+          "expected_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636"
+        }
+      ],
+      "covers": [
+        "Query stream 0",
+        "overflow stream 1",
+        "comparison True",
+        "frame-created"
+      ],
+      "native_workload_fidelity": "passed",
+      "application_reference_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+      "application_reference_scope": "Full 8x8 conditional output plus all four SO buffers; 12 frames on native hardware/WARP and original capture injection.",
+      "application_reference_evidence": {
+        "path": "manifest.json",
+        "sha256": "05ea7a3d420d3a0eb230b8add10935fbc663e4b290b9a7592c662d52781e8420"
+      },
+      "fidelity_reason": "Saved per-stream BOOL query descriptor and interval restored; exact independent images, buffer bytes and disabled-work controls required."
+    },
+    {
+      "id": "stream_predicate_45",
+      "path": "45/capture.gpa_frame",
+      "sha256": "d2c196ef37f47796c38cd79d359bcf6b6ddc18ec3ce22692e0305fa6abca67e0",
+      "bytes": 98833,
+      "family": "stream_predicate",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [
+        {
+          "path": "manifest.json",
+          "sha256": "05ea7a3d420d3a0eb230b8add10935fbc663e4b290b9a7592c662d52781e8420",
+          "contains_capture_hash": true
+        }
+      ],
+      "provenance_note": "Unmodified original CaptureNextFrame; native hardware/WARP debug and CPU image/buffer oracles frozen.",
+      "device_scope": "Default hardware capture, native hardware/WARP verified; original player adapter not matched.",
+      "reference_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+      "comparison_policy": "exact_golden",
+      "boundaries": [
+        {
+          "kind": "buffer",
+          "resource": 24,
+          "event": 32,
+          "expect_stable": true,
+          "expected_storage_sha256": "a5cf86cc36c6ec14fc6a45ac86a4f2b34d4684669e08a469cc7a8e9f0f1619fe"
+        },
+        {
+          "kind": "buffer",
+          "resource": 25,
+          "event": 32,
+          "expect_stable": true,
+          "expected_storage_sha256": "6af40de2d7183605cbee5331ef6ca83b90d5927442b7aec8e25b4263721ee157"
+        },
+        {
+          "kind": "buffer",
+          "resource": 26,
+          "event": 32,
+          "expect_stable": true,
+          "expected_storage_sha256": "8f7e73183722c7d03e1eb50fda14c9d7d81f45106981e65f8656aa95ef04d1b4"
+        },
+        {
+          "kind": "buffer",
+          "resource": 27,
+          "event": 32,
+          "expect_stable": true,
+          "expected_storage_sha256": "d5371af02b60127bcc0c7ac483b909907763dccd73eba006e71128a76ea9d53c"
+        }
+      ],
+      "controls": [
+        {
+          "disable_event": 32,
+          "repeat": 2,
+          "expected_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636"
+        }
+      ],
+      "covers": [
+        "Query stream 1",
+        "overflow stream 2",
+        "comparison True",
+        "frame-created"
+      ],
+      "native_workload_fidelity": "passed",
+      "application_reference_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+      "application_reference_scope": "Full 8x8 conditional output plus all four SO buffers; 12 frames on native hardware/WARP and original capture injection.",
+      "application_reference_evidence": {
+        "path": "manifest.json",
+        "sha256": "05ea7a3d420d3a0eb230b8add10935fbc663e4b290b9a7592c662d52781e8420"
+      },
+      "fidelity_reason": "Saved per-stream BOOL query descriptor and interval restored; exact independent images, buffer bytes and disabled-work controls required."
+    },
+    {
+      "id": "stream_predicate_46",
+      "path": "46/capture.gpa_frame",
+      "sha256": "5714b3fe38cc6b05d98b8ba61f2fc1fbf322220c3d63ce9fab288cf3e1800ba8",
+      "bytes": 98833,
+      "family": "stream_predicate",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [
+        {
+          "path": "manifest.json",
+          "sha256": "05ea7a3d420d3a0eb230b8add10935fbc663e4b290b9a7592c662d52781e8420",
+          "contains_capture_hash": true
+        }
+      ],
+      "provenance_note": "Unmodified original CaptureNextFrame; native hardware/WARP debug and CPU image/buffer oracles frozen.",
+      "device_scope": "Default hardware capture, native hardware/WARP verified; original player adapter not matched.",
+      "reference_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+      "comparison_policy": "exact_golden",
+      "boundaries": [
+        {
+          "kind": "buffer",
+          "resource": 24,
+          "event": 32,
+          "expect_stable": true,
+          "expected_storage_sha256": "a5cf86cc36c6ec14fc6a45ac86a4f2b34d4684669e08a469cc7a8e9f0f1619fe"
+        },
+        {
+          "kind": "buffer",
+          "resource": 25,
+          "event": 32,
+          "expect_stable": true,
+          "expected_storage_sha256": "6af40de2d7183605cbee5331ef6ca83b90d5927442b7aec8e25b4263721ee157"
+        },
+        {
+          "kind": "buffer",
+          "resource": 26,
+          "event": 32,
+          "expect_stable": true,
+          "expected_storage_sha256": "ecfbd9435b029b25d0d0cf5ac8ea8e21e83685d8d97edd469b574765b0f03eba"
+        },
+        {
+          "kind": "buffer",
+          "resource": 27,
+          "event": 32,
+          "expect_stable": true,
+          "expected_storage_sha256": "4132f34ae1ffc37f84f0b3143f58324d6c2be5f573b2c74b667200cc79fa75f9"
+        }
+      ],
+      "controls": [
+        {
+          "disable_event": 32,
+          "repeat": 2,
+          "expected_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636"
+        }
+      ],
+      "covers": [
+        "Query stream 2",
+        "overflow stream 3",
+        "comparison True",
+        "frame-created"
+      ],
+      "native_workload_fidelity": "passed",
+      "application_reference_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+      "application_reference_scope": "Full 8x8 conditional output plus all four SO buffers; 12 frames on native hardware/WARP and original capture injection.",
+      "application_reference_evidence": {
+        "path": "manifest.json",
+        "sha256": "05ea7a3d420d3a0eb230b8add10935fbc663e4b290b9a7592c662d52781e8420"
+      },
+      "fidelity_reason": "Saved per-stream BOOL query descriptor and interval restored; exact independent images, buffer bytes and disabled-work controls required."
+    },
+    {
+      "id": "stream_predicate_47",
+      "path": "47/capture.gpa_frame",
+      "sha256": "08ec378c0f6e62080075539e968ebf3106a5f4885c41ecc638297db8e72e0a21",
+      "bytes": 98833,
+      "family": "stream_predicate",
+      "origin": "self_owned_original_gpa_capture",
+      "source_manifests": [
+        {
+          "path": "manifest.json",
+          "sha256": "05ea7a3d420d3a0eb230b8add10935fbc663e4b290b9a7592c662d52781e8420",
+          "contains_capture_hash": true
+        }
+      ],
+      "provenance_note": "Unmodified original CaptureNextFrame; native hardware/WARP debug and CPU image/buffer oracles frozen.",
+      "device_scope": "Default hardware capture, native hardware/WARP verified; original player adapter not matched.",
+      "reference_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+      "comparison_policy": "exact_golden",
+      "boundaries": [
+        {
+          "kind": "buffer",
+          "resource": 24,
+          "event": 32,
+          "expect_stable": true,
+          "expected_storage_sha256": "24509b6c9451b5e63c62932f45650ddc5b422b1f31d5b10b2d9805c6ae873278"
+        },
+        {
+          "kind": "buffer",
+          "resource": 25,
+          "event": 32,
+          "expect_stable": true,
+          "expected_storage_sha256": "6af40de2d7183605cbee5331ef6ca83b90d5927442b7aec8e25b4263721ee157"
+        },
+        {
+          "kind": "buffer",
+          "resource": 26,
+          "event": 32,
+          "expect_stable": true,
+          "expected_storage_sha256": "ecfbd9435b029b25d0d0cf5ac8ea8e21e83685d8d97edd469b574765b0f03eba"
+        },
+        {
+          "kind": "buffer",
+          "resource": 27,
+          "event": 32,
+          "expect_stable": true,
+          "expected_storage_sha256": "d5371af02b60127bcc0c7ac483b909907763dccd73eba006e71128a76ea9d53c"
+        }
+      ],
+      "controls": [
+        {
+          "disable_event": 32,
+          "repeat": 2,
+          "expected_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636"
+        }
+      ],
+      "covers": [
+        "Query stream 3",
+        "overflow stream 0",
+        "comparison True",
+        "frame-created"
+      ],
+      "native_workload_fidelity": "passed",
+      "application_reference_rgba_sha256": "9fe1c615fd67b5a72dad5c4ecc274ecde2c73ee4873d34cf96996261cc44539b",
+      "application_reference_scope": "Full 8x8 conditional output plus all four SO buffers; 12 frames on native hardware/WARP and original capture injection.",
+      "application_reference_evidence": {
+        "path": "manifest.json",
+        "sha256": "05ea7a3d420d3a0eb230b8add10935fbc663e4b290b9a7592c662d52781e8420"
+      },
+      "fidelity_reason": "Saved per-stream BOOL query descriptor and interval restored; exact independent images, buffer bytes and disabled-work controls required."
+    }
+  ]
+}

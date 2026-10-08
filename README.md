@@ -25,6 +25,8 @@ Some optional analysis features require separately supplied components.
   use optional RenderDoc or Intel Metrics Discovery analysis.
 - Run offline compatibility preflight before attempting GPU replay, including
   checked pipeline getter observations and located missing-resource diagnostics.
+- Replay saved per-stream SO overflow Query intervals and inspect their results;
+  see the [accepted scope and original capture evidence](docs/STREAM_QUERY_COMPATIBILITY.md).
 
 Support depends on the recorded layout, saved resource data, command path and
 device capabilities. See [current support and limits](docs/CURRENT_STATUS.md)

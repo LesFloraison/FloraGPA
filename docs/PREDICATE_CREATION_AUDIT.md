@@ -76,6 +76,10 @@ Non-hint query values are independently checked against the known work; expected
 RGBA is generated on the CPU. Modes 2/3 expect magenta; the other eight expect
 green. Hint mode only verifies the permitted rendering case. This does not
 certify hint suppression or positive SO overflow in a newly created object.
+The later [stream Query corpus](STREAM_QUERY_COMPATIBILITY.md) adds real positive
+SO overflow with pre-frame and in-frame CreatePredicate(7), both comparisons,
+strict four-buffer/image oracles and disabled-work controls. It does not expand
+this earlier corpus's hint-suppression evidence.
 
 Hardware/WARP tests run two unobserved/observed replay pairs per file on the same
 Replay instance, verify

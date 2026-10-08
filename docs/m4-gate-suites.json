@@ -1,7 +1,7 @@
 {
   "schema": "FloraGPA compatibility gate suites 1",
-  "expected_cases": 565,
-  "expected_unique_captures": 555,
+  "expected_cases": 613,
+  "expected_unique_captures": 603,
   "expected_rejections": 39,
   "suites": [
     {
@@ -840,6 +840,14 @@
           "runtime_error": "Event 23 (Draw): Resource 24: initial minimum LOD is unresolved at this access"
         }
       }
+    },
+    {
+      "id": "stream_queries",
+      "manifest": "docs/stream-query-corpus.json",
+      "manifest_sha256": "b6811c5671d94fb686f130072fe8f6e9e145c28bb257e6dd3f0614e5379c883d",
+      "capture_root": "artifacts",
+      "subdirectory": "m4-stream-predicate-originals",
+      "expected_rejections": {}
     }
   ],
   "manifest_hash_policy": "UTF-8 bytes with CRLF normalized to LF",

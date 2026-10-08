@@ -1,7 +1,30 @@
 # Current capabilities and compatibility
 
 Reviewed **2026-10-08**. The user authorized M4, then M5, while keeping M3 open.
-The subsequent [compact API search update](API_SEARCH_INDEX_ACCEPTANCE.md),
+The latest [stream Query compatibility increment](STREAM_QUERY_COMPATIBILITY.md),
+implementation `7a52359`, restores saved per-stream SO overflow Queries in the
+legacy `0x96` family using CreateQuery and their recorded Begin/End intervals.
+They remain unissued until their captured interval completes and cannot be bound
+as Predicates. Forty-eight untouched original captures pass independent image
+and four-buffer byte oracles; 105 stream Query test rows, seven related CTest
+suites, nine relocated Windows UI rows and four golden/control runs pass.
+The focused corpus passes 96 replays, 96 disabled-work controls and 384 exports.
+The pinned original private player fails Open/status 87 on all 96 attempts;
+its adapter is unidentified, so no original-image equivalence is asserted.
+The candidate is `out/FloraGPA-stream-queries-final-20261008/`; its expanded
+41-suite matrix passes 613 registrations / 603 unique captures, 574 completions /
+564 unique completions and 39 located refusals. All 565 previous full preflight
+reports, execution counts, refusal diagnostics and deterministic images match;
+the registered Helldivers variation remains. Capture-fidelity assessments are
+142 passed / 32 capture-side mismatch / 16 information missing / 423 unassessed;
+35 completed registrations have known capture limitations. A completion is not
+full application fidelity. A fresh 1,202-file archive of `7a52359` builds/packages
+successfully; its separately rebuilt, relocated package passes 105 Query rows,
+nine Windows UI rows and four golden/control checks. The full matrix uses the
+incremental candidate. Renewed long-soak and independent clean-host gates remain
+open. M3/M4/M5 and the module ledger remain incomplete.
+
+The preceding [compact API search update](API_SEARCH_INDEX_ACCEPTANCE.md),
 implementation `d3a5930`, prepares a cancellable search index during loading and
 bounds ordinary selected-command details to 128 rows. All 555 registered captures
 pass index preparation and 4,746,469 comparisons with the existing search matcher.
@@ -1041,7 +1064,7 @@ tested workloads; opening a file does not prove accurate replay.
 | GPU measurements | Native DX11 statistics/timing; Intel MD foundation, scheduled/uniform Qt collection and event-group CLI collection | Intel paths require supported hardware/driver. Event-group Qt/session integration, GTPin/Shader Profiler and further consumers remain incomplete. [Statistics](GPU_STATISTICS_MIGRATION.md), [timing](GPU_PROFILE_MIGRATION.md), [scheduled UI](MD_ITERATIONS_UI_MIGRATION.md), [uniform UI](UNIFORM_METRICS_UI_MIGRATION.md), [groups](MD_HOTSPOTS_MIGRATION.md) |
 | Captured contexts and command lists | Identity/evidence inspection; verified expanded streams from two-context A/B/A and three-context merged-list workloads | Traditional list execution remains incomplete. Dynamic-CB merge captures can already contain wrong data; native/injected/original/independent results and restoration discrepancies remain separate. [Merge evidence](DEFERRED_MERGE_AUDIT.md), [deferred evidence](DEFERRED_VERSION_AUDIT.md), [context workflow](USAGE.md#contexts-and-pipeline-boundaries) |
 | Resource minimum LOD | Native setters, initial getter evidence, frame-time creation defaults, ClearState preservation and disabled-setter experiments; bounded SM4.0 IF/SWITCH/LOOP proofs for unused queried dimensions | Full storage inspection/export and input clones preserve proved current MinLOD. Missing required initial state and wider UAV/output/interface dependencies remain boundaries. [Clone inheritance](LOD_CLONE_INHERITANCE.md). Unused static SRVs use program declarations. [Storage](LOD_STORAGE_READBACK.md). [LOD](RESOURCE_LOD_AUDIT.md), [shader usage](MIN_LOD_USAGE_AUDIT.md), [loop proof](SM40_LOOP_MIP.md) |
-| Query and predication | Captured Query metadata/history; native predicate Begin/End, binding and Device5 frame-time creation | New predicates remain unissued until their recorded interval completes. Ordinary Query records may omit identities, intervals or full result bytes; pre-frame predicate history is not reconstructed. [Predicate creation](PREDICATE_CREATION_AUDIT.md) |
+| Query and predication | Captured Query metadata/history; native predicate Begin/End, binding and Device5 frame-time creation; saved per-stream SO overflow Queries through CreateQuery | Saved stream Queries start unissued and cannot bind as Predicates. Ordinary Query records may omit identities, intervals or full result bytes; pre-frame history is not reconstructed. [Stream Query scope](STREAM_QUERY_COMPATIBILITY.md), [Predicate creation](PREDICATE_CREATION_AUDIT.md) |
 
 ## Historical M2 registered-scope gate
 
@@ -1190,8 +1213,8 @@ the other 35 suites passed initially and the complete UI suite passes after the 
 | M1 — Acceptance infrastructure | Minimum loop delivered: corpus, coverage, preflight, serial comparison and diagnostic queue. Extend evidence as paths arrive. |
 | M2 — Ordinary replay | Registered-scope gate passed: 366 positive cases and 22 located rejections; auxiliary/snapshot contracts audited. This is not universal API support. State-object identity loss, mixed saved/missing SO targets and unverified lifetimes remain explicit boundaries. |
 | M3 — Deferred Context / Command List | Open; M4/M5 now take priority by user instruction on 2026-10-06. Require original retained-list captures proving identity, build order, resource versions, repeated execution, restore-state and event mapping before production support. |
-| M4 — Resources and boundaries | Active, incomplete. Initial texture/Map data is checked; missing UAV counts reject on actual consumption, while proven counter-free indexed access is allowed. Verified mip-count-only reads, including proved unused SM4.0 dimension lanes across checked IF, SWITCH and LOOP blocks, do not consume missing MinLOD. Known nonzero-MinLOD storage copies and input-clone inheritance are accepted in their recorded scope. Per-slot counter dependencies and saved blt-model occluded Present TEST are checked; continue wider operand/control-flow dependencies, missing pitch/data, predicate/frame-before history, Query and other presentation boundaries. |
-| M5 — Stable compatibility release | Incomplete. The 565-registration matrix and latest committed-source package pass. The renewed 30.1-minute/162-cycle same-window run covers load/retry, Query viewing, API export and both structure exports with 648 strict image checks. A 48-cycle heap control follows substantial private-commit growth; full-log filtering retains decoded command details and is a concrete next optimization. Broader model publication, analyzer/export/driver/storage failures, memory attribution and independent clean-host deployment remain open. [Latest acceptance](WORKFLOW_SOURCE_RELEASE_ACCEPTANCE.md), [runner scope](RECOVERY_WORKFLOW_SOAK.md) |
+| M4 — Resources and boundaries | Active, incomplete. Initial texture/Map data, per-slot counter dependencies, proved counter-free indexed accesses and mip-only reads, nonzero-MinLOD storage/clone paths and saved occluded Present TEST have scoped acceptance. Saved per-stream SO overflow Queries now execute their recorded intervals. Continue missing texture pitches/data, absent ordinary Query boundaries, frame-before counters/results, wider shader dependency proofs and remaining presentation paths. [Stream Query scope](STREAM_QUERY_COMPATIBILITY.md) |
+| M5 — Stable compatibility release | Incomplete. See the current increment above for package/matrix evidence. The previous same-source 30.1-minute/162-cycle run passed 648 strict image checks. Full-log detail retention was subsequently addressed by compact search and a 128-row ordinary-detail bound; the 48-cycle control reduced BF1 busy heap, without proving all memory growth resolved. Broader model publication, analyzer/export/driver/storage failures, memory attribution, renewed release soak and independent clean-host deployment remain open. [Search acceptance](API_SEARCH_INDEX_ACCEPTANCE.md), [previous same-source acceptance](WORKFLOW_SOURCE_RELEASE_ACCEPTANCE.md) |
 | M6 — Analyzer and other versions | Incomplete. Continue remaining Qt consumers, advanced profiling/debugging and version-specific adapters after core replay gates. Existing analyzer features remain available. |
 
 The original order was **M1 → M2 → M3 → M4 → M5**. On 2026-10-06 the user
