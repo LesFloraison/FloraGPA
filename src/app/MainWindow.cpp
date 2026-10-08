@@ -2945,7 +2945,7 @@ void MainWindow::previewBuffer() {
         return;
     }
     QStringList args{"buffer",   capturePath_,           "--id", QString::number(selectedResource_),
-                     "--offset", QString::number(offset)};
+                     "--offset", QString::number(offset), "--no-buffer-csv"};
     const auto byteWidth = frame_->resource(selectedResource_).desc.at(0);
     if (offset > byteWidth) {
         showError("Buffer offset exceeds resource size.");

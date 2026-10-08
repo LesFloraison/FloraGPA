@@ -173,6 +173,7 @@ int main(int argc, char **argv) {
     p.addOption({"preview-request", "Draw resource preview request JSON", "path"});
     p.addOption({"offset", "Buffer byte offset", "bytes", "0"});
     p.addOption({"length", "Buffer byte length (default: remaining bytes)", "bytes"});
+    p.addOption({"no-buffer-csv", "Omit words.csv from buffer output"});
     p.addOption({"suppress-draws", "Disable draw submissions (negative control)"});
     p.addOption({"disable", "Comma-separated disabled event IDs", "ids"});
     p.process(app);
@@ -181,6 +182,8 @@ int main(int argc, char **argv) {
         if (args.isEmpty())
             throw std::runtime_error("Expected command");
         auto command = args[0];
+        if (p.isSet("no-buffer-csv") && command != "buffer")
+            throw std::runtime_error("--no-buffer-csv applies to buffer only");
         if (p.isSet("preview-request") && command != "draw-resources")
             throw std::runtime_error("--preview-request requires draw-resources");
         if (p.isSet("groups") && command != "metric-groups")
@@ -928,24 +931,26 @@ int main(int argc, char **argv) {
                 report.insert("length", qint64(length));
                 report.insert("value_time", options.until ? (options.before ? "before_event" : "after_event")
                                                           : "capture_initial");
-                QByteArray csv = "byte_offset,hex_bytes,uint32,int32,float32\n";
-                for (qsizetype pos = 0; pos < raw.size(); pos += 4) {
-                    auto word = raw.mid(pos, 4);
-                    csv += QByteArray::number(offset + pos) + ',' + word.toHex();
-                    if (word.size() == 4) {
-                        uint32_t u;
-                        int32_t i;
-                        float f;
-                        std::memcpy(&u, word.constData(), 4);
-                        std::memcpy(&i, word.constData(), 4);
-                        std::memcpy(&f, word.constData(), 4);
-                        csv += ',' + QByteArray::number(u) + ',' + QByteArray::number(i) + ',' +
-                               QByteArray::number(double(f), 'g', 17);
-                    } else
-                        csv += ",,,";
-                    csv += '\n';
+                if (!p.isSet("no-buffer-csv")) {
+                    QByteArray csv = "byte_offset,hex_bytes,uint32,int32,float32\n";
+                    for (qsizetype pos = 0; pos < raw.size(); pos += 4) {
+                        auto word = raw.mid(pos, 4);
+                        csv += QByteArray::number(offset + pos) + ',' + word.toHex();
+                        if (word.size() == 4) {
+                            uint32_t u;
+                            int32_t i;
+                            float f;
+                            std::memcpy(&u, word.constData(), 4);
+                            std::memcpy(&i, word.constData(), 4);
+                            std::memcpy(&f, word.constData(), 4);
+                            csv += ',' + QByteArray::number(u) + ',' + QByteArray::number(i) + ',' +
+                                   QByteArray::number(double(f), 'g', 17);
+                        } else
+                            csv += ",,,";
+                        csv += '\n';
+                    }
+                    save(out + "/words.csv", csv);
                 }
-                save(out + "/words.csv", csv);
             } else if (command == "texture-storage") {
                 const auto id = parseId("id");
                 std::vector<uint8_t> bytes;

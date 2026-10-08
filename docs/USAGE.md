@@ -98,6 +98,10 @@ semantics; unsaved contents are not inferred. See
 [texture inspection](TEXTURE_INSPECTION_MIGRATION.md) and [planar writes](PLANAR_WRITE_MIGRATION.md).
 
 Buffer reads initial/before/after bytes as hex, ASCII or 32-bit words.
+The Qt inspector requests raw bytes and a report without generating a CSV.
+CLI `buffer` still exports `buffer.bin`, `words.csv` and `report.json` by default;
+use `--no-buffer-csv` to omit only `words.csv` when reading large buffers.
+The option applies to `buffer` only and leaves range/error checks unchanged.
 **Constants** uses reflected types and CB1 windows; stripped variable names can
 leave no fields. **UAV Counters** inspects supported hidden counts. Missing
 frame-before bytes/counter values remain unknown unless explicitly supplied
