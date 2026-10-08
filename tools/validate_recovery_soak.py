@@ -6,6 +6,7 @@ Do not resume or replace
 a failed run's directory. Resource observations are evidence, not a leak-free proof.
 """
 import argparse
+import csv
 import hashlib
 import json
 import os
@@ -21,6 +22,43 @@ def digest(path):
         return hashlib.file_digest(stream, 'sha256').hexdigest()
 
 
+def validate_workflows(root, rows):
+    """Audit retained exports, their UI event inventory and per-capture stability."""
+    expected = {'api/commands.json', 'api/commands.csv', 'contexts.json', 'command-lists.json'}
+    files, baselines = {}, {}
+    for index, row in enumerate(rows, 1):
+        evidence = row['workflows']
+        directory = f'{index:06d}'
+        if evidence['directory'] != directory or evidence['cancelled_choosers'] != 2:
+            raise ValueError('Workflow cycle or cancelled chooser count mismatch')
+        if set(evidence['files']) != expected:
+            raise ValueError('Incomplete workflow exports')
+        actual = {}
+        for name in sorted(expected):
+            path = root / directory / name
+            actual[name] = dict(bytes=path.stat().st_size, sha256=digest(path))
+            if actual[name] != evidence['files'][name]:
+                raise ValueError('Workflow export identity mismatch: ' + str(path))
+            files[f'{directory}/{name}'] = actual[name]
+        commands = json.loads((root / directory / 'api/commands.json').read_text(encoding='utf-8'))
+        ids = evidence['query_events']
+        if not ids or len(set(ids)) != len(ids) or [r['id'] for r in commands['commands']] != ids:
+            raise ValueError('Query UI and exported event inventory differ')
+        if commands['frame'] != row['capture'] or commands['filter'] != dict(text='GetData', resource=None):
+            raise ValueError('API export capture/filter mismatch')
+        with (root / directory / 'api/commands.csv').open(encoding='utf-8-sig', newline='') as stream:
+            if [int(r['id']) for r in csv.DictReader(stream)] != ids:
+                raise ValueError('CSV and JSON event inventories differ')
+        for name in ['contexts.json', 'command-lists.json']:
+            document = json.loads((root / directory / name).read_text(encoding='utf-8'))
+            if not isinstance(document, dict) or 'error' in document:
+                raise ValueError('Structure export did not complete: ' + name)
+        baseline = baselines.setdefault(row['capture'], (actual, ids))
+        if baseline != (actual, ids):
+            raise ValueError('Repeated workflow export differs for ' + row['capture'])
+    return files
+
+
 def main():
     parser = argparse.ArgumentParser(__doc__)
     parser.add_argument('--package', type=Path, required=True)
@@ -30,6 +68,8 @@ def main():
     parser.add_argument('--out', type=Path, required=True)
     parser.add_argument('--seconds', type=int, default=1800)
     parser.add_argument('--pairs', type=int, default=20)
+    parser.add_argument('--workflows', action='store_true',
+                        help='Also repeat Query navigation, filtered API export and both structure exports; retain every cycle')
     parser.add_argument('--retention-control', action='store_true',
                         help='Measure heap bytes after separately clearing test history, application log and Qt pixmap cache')
     parser.add_argument('--trace-allocations', action='store_true',
@@ -48,6 +88,7 @@ def main():
                   retention_control=args.retention_control,
                   trace_allocations=args.trace_allocations,
                   memory_maps=args.memory_maps,
+                  workflows=args.workflows,
                   scope='Same-host offscreen Qt window, system-only PATH, serial production workers; not clean-machine or all-workflow certification')
 
     def save():
@@ -73,9 +114,9 @@ def main():
         report['package_files'] = {p.relative_to(package).as_posix(): digest(p)
                                    for p in sorted(package.rglob('*')) if p.is_file()}
         report['sources'] = {}
-        for name in ['tests/RecoveryUiTests.cpp', 'tests/RecoveryJournal.h',
+        for name in ['tests/RecoveryUiTests.cpp', 'tests/RecoveryJournal.h', 'tests/RecoveryWorkflows.h',
                      'tests/HeapRetentionProbe.h', 'tests/ProcessMemorySnapshot.h', 'tools/validate_recovery_soak.py',
-                     'tools/validate_source_build.py']:
+                     'tools/test_recovery_soak.py', 'tools/validate_source_build.py']:
             frozen = root / 'sources' / name
             frozen.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(repo / name, frozen)
@@ -103,6 +144,8 @@ def main():
             env['FLORA_HEAP_TRACE_DIR'] = str(root / 'allocation-stacks')
         if args.memory_maps:
             env['FLORA_MEMORY_MAP_DIR'] = str(root / 'memory-maps')
+        if args.workflows:
+            env['FLORA_RECOVERY_WORKFLOWS'] = str(root / 'workflows')
         report['test_environment'] = {k: v for k, v in env.items() if k.startswith(('FLORA_', 'QT')) or k == 'PATH'}
         command = [str(executable), 'originalCaptureRecovery', '-o', str(root / 'qt-results.txt') + ',txt']
         report['command'] = command
@@ -118,6 +161,7 @@ def main():
         assert 'Totals: 3 passed, 0 failed, 0 skipped' in text, 'Missing complete Qt result'
         journal = json.loads((root / 'journal.json').read_text(encoding='utf-8'))
         assert journal['completed'] and journal['phase'] == 'complete'
+        assert journal['workflows'] == args.workflows
         assert journal['elapsed_ms'] >= args.seconds * 1000
         rows = journal['observations']
         assert len(rows) == journal['completed_cycles'] and len(rows) >= args.pairs * 2 and len(rows) % 2 == 0
@@ -125,6 +169,8 @@ def main():
             case = wanted[index % 2]
             assert row['capture'] == Path(case['path']).name and row['iteration'] == index // 2
             assert row['rgba_sha256'] == case['reference_rgba_sha256']
+        if args.workflows:
+            report['workflow_files'] = validate_workflows(root / 'workflows', rows)
         if args.retention_control:
             controls = journal['retention_control']
             assert set(controls) == {'before', 'after_test_history_clear', 'after_log_clear',

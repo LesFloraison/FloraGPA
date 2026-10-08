@@ -3,6 +3,7 @@
 #include "app/MainWindow.h"
 #include "HeapRetentionProbe.h"
 #include "RecoveryJournal.h"
+#include "RecoveryWorkflows.h"
 #include "ProcessMemorySnapshot.h"
 #include <QAction>
 #include <QSignalSpy>
@@ -290,6 +291,7 @@ class RecoveryUiTests final : public QObject {
         const int minimumSeconds = qEnvironmentVariableIntValue("FLORA_RECOVERY_MIN_SECONDS");
         QVERIFY(minimumSeconds >= 0 && minimumSeconds <= 86400);
         const auto journalPath = qEnvironmentVariable("FLORA_RECOVERY_JOURNAL");
+        const auto workflows = qEnvironmentVariable("FLORA_RECOVERY_WORKFLOWS");
         const bool retentionControl = qEnvironmentVariableIsSet("FLORA_RECOVERY_RETENTION_CONTROL");
         QVERIFY(!retentionControl || (!journalPath.isEmpty() && qEnvironmentVariableIsSet("FLORA_RECOVERY_HEAP")));
         const auto memoryDirectory = qEnvironmentVariable("FLORA_MEMORY_MAP_DIR");
@@ -306,6 +308,7 @@ class RecoveryUiTests final : public QObject {
             {"completed", false}, {"minimum_seconds", minimumSeconds},
             {"pixmap_cache_limit_kib", QPixmapCache::cacheLimit()},
             {"minimum_pairs", count}, {"observations", nlohmann::json::array()}};
+        journal["workflows"] = !workflows.isEmpty();
         testing::RecoveryJournal journalWriter(journalPath);
         std::unique_ptr<testing::ProcessMemorySnapshot> memoryMaps;
         if (!memoryDirectory.isEmpty()) {
@@ -367,6 +370,16 @@ class RecoveryUiTests final : public QObject {
                 QVERIFY(!window.busy());
                 QCOMPARE(window.capturePath(), path);
                 QCOMPARE(outputHash(window), golden);
+                nlohmann::json workflow;
+                if (!workflows.isEmpty()) {
+                    QVERIFY2(save("inspect_export"), qPrintable(journalWriter.error()));
+                    bool passed = false;
+                    const auto relative = QString("%1").arg(epoch, 6, 10, QChar('0'));
+                    testing::recoveryWorkflows(window, QDir(workflows).filePath(relative), workflow, passed);
+                    QVERIFY(passed);
+                    workflow["directory"] = relative.toStdString();
+                    QCOMPARE(outputHash(window), golden);
+                }
                 QVERIFY2(save("failed_open"), qPrintable(journalWriter.error()));
                 done.clear();
                 window.openCapture(brokenPath);
@@ -408,13 +421,14 @@ class RecoveryUiTests final : public QObject {
                 DWORD handles{};
                 QVERIFY(GetProcessMemoryInfo(GetCurrentProcess(), reinterpret_cast<PROCESS_MEMORY_COUNTERS *>(&memory), sizeof memory));
                 QVERIFY(GetProcessHandleCount(GetCurrentProcess(), &handles));
-                const nlohmann::json observation{{"iteration", repeat}, {"capture", name.toStdString()},
+                nlohmann::json observation{{"iteration", repeat}, {"capture", name.toStdString()},
                     {"elapsed_ms", elapsed.elapsed()}, {"private_bytes", memory.PrivateUsage},
                     {"working_set", memory.WorkingSetSize}, {"handles", handles},
                     {"gdi_objects", GetGuiResources(GetCurrentProcess(), 0)},
                     {"user_objects", GetGuiResources(GetCurrentProcess(), 1)},
                     {"replay_status", window.statusBar()->currentMessage().toStdString()},
                     {"rgba_sha256", golden.toStdString()}, {"ownership", ownership(window)}};
+                if (!workflows.isEmpty()) observation["workflows"] = std::move(workflow);
                 qInfo().noquote() << "recovery_observation" << QString::fromStdString(observation.dump());
                 ++cycles;
                 if (cycles == 2) QVERIFY(memorySnapshot("baseline"));

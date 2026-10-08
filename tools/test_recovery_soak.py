@@ -9,7 +9,74 @@ import sys
 import tempfile
 import unittest
 
-from validate_recovery_soak import run_process
+from validate_recovery_soak import digest, run_process, validate_workflows
+
+
+class WorkflowTests(unittest.TestCase):
+    def setUp(self):
+        self.temp = tempfile.TemporaryDirectory(prefix='Flora workflow audit ')
+        self.addCleanup(self.temp.cleanup)
+        self.root = Path(self.temp.name)
+        self.rows = []
+        for index in range(1, 3):
+            path = self.root / f'{index:06d}'
+            (path / 'api').mkdir(parents=True)
+            commands = dict(frame='original.gpa_frame', filter=dict(text='GetData', resource=None),
+                            commands=[dict(id=42)])
+            (path / 'api/commands.json').write_text(json.dumps(commands), encoding='utf-8')
+            (path / 'api/commands.csv').write_text('id,api\n42,GetData\n', encoding='utf-8-sig')
+            for name in ['contexts.json', 'command-lists.json']:
+                (path / name).write_text('{}', encoding='utf-8')
+            self.rows.append(dict(capture='original.gpa_frame', workflows=dict(
+                directory=path.name, cancelled_choosers=2, query_events=[42], files={})))
+            self.refresh(index - 1)
+
+    def refresh(self, index):
+        row = self.rows[index]['workflows']
+        row['files'] = {p.relative_to(self.root / row['directory']).as_posix():
+                        dict(bytes=p.stat().st_size, sha256=digest(p))
+                        for p in (self.root / row['directory']).rglob('*') if p.is_file()}
+
+    def test_complete(self):
+        self.assertEqual(len(validate_workflows(self.root, self.rows)), 8)
+
+    def test_modified_bytes(self):
+        (self.root / '000001/contexts.json').write_text('{"modified":true}', encoding='utf-8')
+        with self.assertRaisesRegex(ValueError, 'identity mismatch'):
+            validate_workflows(self.root, self.rows)
+
+    def test_missing_file(self):
+        (self.root / '000001/contexts.json').unlink()
+        with self.assertRaises(FileNotFoundError):
+            validate_workflows(self.root, self.rows)
+
+    def test_wrong_ui_inventory(self):
+        self.rows[0]['workflows']['query_events'] = [43]
+        with self.assertRaisesRegex(ValueError, 'event inventory'):
+            validate_workflows(self.root, self.rows)
+
+    def test_wrong_csv(self):
+        (self.root / '000001/api/commands.csv').write_text('id,api\n43,GetData\n', encoding='utf-8')
+        self.refresh(0)
+        with self.assertRaisesRegex(ValueError, 'CSV and JSON'):
+            validate_workflows(self.root, self.rows)
+
+    def test_valid_but_unstable_structure(self):
+        (self.root / '000002/contexts.json').write_text('{"changed":true}', encoding='utf-8')
+        self.refresh(1)
+        with self.assertRaisesRegex(ValueError, 'Repeated workflow'):
+            validate_workflows(self.root, self.rows)
+
+    def test_structure_error(self):
+        (self.root / '000001/command-lists.json').write_text('{"error":"failed"}', encoding='utf-8')
+        self.refresh(0)
+        with self.assertRaisesRegex(ValueError, 'did not complete'):
+            validate_workflows(self.root, self.rows)
+
+    def test_cycle_path_escape(self):
+        self.rows[0]['workflows']['directory'] = '../outside'
+        with self.assertRaisesRegex(ValueError, 'cycle'):
+            validate_workflows(self.root, self.rows)
 
 
 @unittest.skipUnless(os.name == 'nt', 'Windows process-tree semantics')
