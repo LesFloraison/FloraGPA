@@ -37,6 +37,7 @@ chronology remains in Chinese.
 | Mip-count-only queries across checked SM4.0 branches | [Structured-branch resource proof](SM40_BRANCH_MIP.md) |
 | Mip-count-only queries across checked SM4.0 switches | [Switch resource proof](SM40_SWITCH_MIP.md) |
 | Mip-count-only queries across checked SM4.0 loops and backedges | [Loop resource proof](SM40_LOOP_MIP.md) |
+| Mip-count-only queries with checked SM4.0 unconditional early returns | [Early-return resource proof](SM40_RETURN_MIP.md) |
 | Preserve current resource MinLOD in input texture experiments | [Clone LOD inheritance](LOD_CLONE_INHERITANCE.md) |
 | Inspect/export complete texture storage while preserving nonzero MinLOD | [Clamped texture storage](LOD_STORAGE_READBACK.md) |
 | Component responsibilities | [Architecture](ARCHITECTURE.md) |

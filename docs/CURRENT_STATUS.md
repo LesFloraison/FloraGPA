@@ -1,7 +1,29 @@
 # Current capabilities and compatibility
 
 Reviewed **2026-10-09**. The user authorized M4, then M5, while keeping M3 open.
-The latest [operation-level GUI controls](GUI_WORKFLOW_STAGES.md), implementation
+The latest [SM4.0 early-return compatibility increment](SM40_RETURN_MIP.md),
+implementation `42b86c2`, removes four false missing-MinLOD refusals by following
+checked unconditional RET endpoints. Dimension reads and sampling that need
+omitted state still reject; shaders and missing state are unchanged. Eight new
+untouched original captures have 288 producer image checks and 168 prior-mode
+regression checks. The 181-row LOD suite, eight Windows UI rows, preflight CTest
+and four packaged game golden/control checks pass. All 43 GPU sub-suites satisfy
+their criteria: 629 registrations / 619 unique captures, 587 completions / 577
+unique completions, and 42 located refusals. The first wrapper fails only on
+stale global registry totals; `5382cb5` corrects them and adds a pre-run check.
+Separate revalidation of all retained results uses unchanged per-case rules;
+the failed wrapper report is preserved. All 621 previous full preflights, counts,
+refusal messages and deterministic images match. Fidelity assessments are 155
+passed / 32 capture-side mismatch / 19 information missing / 423 unassessed;
+35 completed registrations retain known capture limitations. A fresh 1,225-file
+archive builds/packages successfully; its relocated package passes 19 LOD rows,
+three Windows UI rows and four game checks. Compiled sources match the current
+tree; the archive predates the development-only totals fix. The full matrix uses
+`out/FloraGPA-return-mip-20261009/`. Renewed sustained and independent clean-host
+acceptance remain open, as do the earlier GDI observations. M3/M4/M5 and the
+72/117/15 ledger remain incomplete.
+
+The preceding [operation-level GUI controls](GUI_WORKFLOW_STAGES.md), implementation
 `9cb01ed`, add nine named snapshots per optional workflow. Two independent-process
 eight-cycle runs pass 64 strict per-cycle images, two post-clear images and 64
 exports identical to the prior baseline. All 172 GUI inventories and 130 progress

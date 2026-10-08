@@ -5,6 +5,11 @@ missing-MinLOD rejections by following checked loop backedges in the existing
 dimension non-use proof. It leaves captured shaders and omitted resource state
 unchanged. Producer revision: `dc4e644`; implementation: `4c429d2`.
 
+Follow-up: [checked unconditional early returns](SM40_RETURN_MIP.md) extends
+this proof on 2026-10-09. The early-return restriction below describes this
+historical loop batch; conditional RETC and unverified call forms remain outside
+the accepted grammar.
+
 ## Dependency proof
 
 The [RESINFO contract](https://learn.microsoft.com/en-us/windows/win32/direct3dhlsl/resinfo--sm4---asm-)
