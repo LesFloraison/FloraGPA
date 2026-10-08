@@ -86,25 +86,14 @@ class ResourceLodTests final : public QObject {
                 QCOMPARE(replay.output().rgba, expected);
             }
         }
-        // Removing the storage-export guard must not silently enable input
-        // clones that currently discard RESOURCE_CLAMP and start at LOD zero.
+        // An identity input patch must preserve resource LOD and sampling.
         TexturePatch patch;
         const auto first = textureSubresources(frame.resource(resource)).front();
         patch.bytes.assign(storage.begin(), storage.begin() + size_t(first.size));
         options.textureInputs[25][resource] = {patch};
         Replay edited(frame, options);
-        if (lods[mode % 4] != 0) {
-            try {
-                edited.run();
-                QFAIL("Nonzero LOD input clone unexpectedly accepted");
-            } catch (const std::runtime_error &error) {
-                QVERIFY(QString::fromUtf8(error.what()).contains(
-                    "Input texture experiments with nonzero resource minimum LOD are unverified"));
-            }
-        } else {
-            edited.run();
-            QCOMPARE(edited.output().rgba, expected);
-        }
+        edited.run();
+        QCOMPARE(edited.output().rgba, expected);
         replay.run();
         QCOMPARE(replay.readTexture(resource), storage);
         QCOMPARE(replay.output().rgba, expected);

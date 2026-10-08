@@ -93,22 +93,21 @@ void Replay::applyTextureEdits(const Event &event, const State &state, std::map<
             d[d.size() - 3] = D3D11_BIND_SHADER_RESOURCE |
                               (info.samples > 1 ? d[d.size() - 3] & D3D11_BIND_DEPTH_STENCIL : 0);
             d[d.size() - 2] = 0;
-            d.back() = info.samples > 1 ? 0 : d.back() & D3D11_RESOURCE_MISC_TEXTURECUBE;
+            d.back() = info.samples > 1 ? 0 : d.back() &
+                (D3D11_RESOURCE_MISC_TEXTURECUBE | D3D11_RESOURCE_MISC_RESOURCE_CLAMP);
             Com<ID3D11Resource> clone;
             if (info.samples == 1) {
-                // Input clones currently keep only TEXTURECUBE in MiscFlags and
-                // do not inherit resource LOD. Keep the former readback boundary
-                // here until clone sampling semantics have separate acceptance.
-                requireResourceLod(id);
-                if (hasResourceLodClamp(resource) && resourceLods_.at(id) != 0)
-                    throw std::runtime_error(
-                        "Input texture experiments with nonzero resource minimum LOD are unverified");
                 auto bytes = readTextureStorage(target.Get(), resource);
                 for (const auto &patch : patches) {
                     const auto sub = validateTexturePatch(resource, patch);
                     std::copy(patch.bytes.begin(), patch.bytes.end(), bytes.begin() + size_t(sub.offset));
                 }
                 clone = createEditTexture(cloneResource, Bytes(bytes));
+                // Resource creation starts at LOD zero. The input clone must
+                // inherit the proved current value, not a captured future getter
+                // or a disabled setter. Readback above rejects unresolved state.
+                if (hasResourceLodClamp(resource))
+                    context_->SetResourceMinLOD(clone.Get(), resourceLods_.at(id));
             } else {
                 clone = createEditTexture(cloneResource);
                 {

@@ -3869,6 +3869,120 @@ class UiTests final : public QObject {
         QVERIFY(done.takeLast()[0].toBool());
         QCOMPARE(output->image().pixelColor(0, 0), expected);
     }
+    void lodCloneEditing_data() {
+        QTest::addColumn<int>("mode");
+        for (int mode : {2, 3, 6, 7, 10, 11})
+            QTest::newRow(qPrintable(QString::number(mode))) << mode;
+    }
+    void lodCloneEditing() {
+        QFETCH(int, mode);
+        const auto root = qEnvironmentVariable("FLORA_LOD_STORAGE_CAPTURES");
+        if (root.isEmpty())
+            QSKIP("Set original resource LOD storage corpus");
+        QTemporaryDir dir;
+        flora::MainWindow window;
+        window.resize(1440, 900);
+        window.show();
+        QSignalSpy done(&window, &flora::MainWindow::taskFinished);
+        window.openCapture(root + '/' + QString::number(mode) + "/capture.gpa_frame");
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY2(done.takeLast()[0].toBool(), qPrintable(window.statusBar()->currentMessage()));
+        auto output = window.findChild<flora::ImageView *>("frameOutput");
+        const auto expected = mode % 4 == 3 ? QColor(0, 0, 0, 0) : QColor(0, 255, 0, 255);
+        QVERIFY(output);
+        QCOMPARE(output->image().size(), QSize(8, 8));
+        for (int y = 0; y < 8; ++y)
+            for (int x = 0; x < 8; ++x)
+                QCOMPARE(output->image().pixelColor(x, y), expected);
+        auto api = window.findChild<QTableView *>("apiLog");
+        QVERIFY(api);
+        QModelIndex draw;
+        for (int row = 0; row < api->model()->rowCount(); ++row)
+            if (api->model()->index(row, 0).data(Qt::UserRole).toULongLong() == 25)
+                draw = api->model()->index(row, 0);
+        QVERIFY(draw.isValid());
+        done.clear();
+        api->setCurrentIndex(draw);
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        auto resources = window.findChild<QTableView *>("resources");
+        QVERIFY(resources);
+        QModelIndex resource;
+        for (int row = 0; row < resources->model()->rowCount(); ++row)
+            if (resources->model()->index(row, 0).data(Qt::UserRole).toULongLong() == 10)
+                resource = resources->model()->index(row, 0);
+        QVERIFY(resource.isValid());
+        done.clear();
+        resources->setCurrentIndex(resource);
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        auto boundary = window.findChild<QComboBox *>("textureBoundary");
+        QVERIFY(boundary);
+        done.clear();
+        boundary->setCurrentIndex(2);
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY2(done.takeLast()[0].toBool(), qPrintable(window.statusBar()->currentMessage()));
+        auto texture = window.findChild<flora::ImageView *>("textureOutput");
+        QVERIFY(texture);
+        QCOMPARE(texture->image().pixelColor(0, 0), QColor(255, 0, 0, 255));
+        done.clear();
+        boundary->setCurrentIndex(1);
+        auto mip = window.findChild<QSpinBox *>("textureMip");
+        QVERIFY(mip);
+        mip->setValue(1);
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        QCOMPARE(texture->image().pixelColor(0, 0), QColor(0, 255, 0, 255));
+        const int pixels = mode < 4 ? 4 : mode < 8 ? 16 : 64;
+        const auto rawPath = dir.path() + "/cyan.raw";
+        QFile raw(rawPath);
+        QVERIFY(raw.open(QIODevice::WriteOnly));
+        QCOMPARE(raw.write(QByteArray::fromHex("00ffffff").repeated(pixels)), qint64(pixels * 4));
+        raw.close();
+        auto edit = window.findChild<QAction *>("importTextureInput");
+        QVERIFY(edit && edit->isEnabled());
+        bool entered = false;
+        QTimer::singleShot(0, &window, [&] {
+            auto dialog = window.findChild<QDialog *>("textureEditDialog");
+            if (!dialog) return;
+            dialog->findChild<QLineEdit *>("textureEditFile")->setText(rawPath);
+            entered = true;
+            QTest::mouseClick(dialog->findChild<QDialogButtonBox *>()->button(QDialogButtonBox::Ok), Qt::LeftButton);
+        });
+        done.clear();
+        edit->trigger();
+        QVERIFY(entered);
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY2(done.takeLast()[0].toBool(), qPrintable(window.statusBar()->currentMessage()));
+        const auto edited = texture->image();
+        QCOMPARE(edited.pixelColor(0, 0), QColor(0, 255, 255, 255));
+        QAction *undo = nullptr, *redo = nullptr;
+        for (auto action : window.findChildren<QAction *>()) {
+            if (action->shortcut() == QKeySequence::Undo) undo = action;
+            if (action->shortcut() == QKeySequence::Redo) redo = action;
+        }
+        QVERIFY(undo && redo);
+        done.clear(); undo->trigger();
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        QCOMPARE(texture->image().pixelColor(0, 0), QColor(0, 255, 0, 255));
+        done.clear(); redo->trigger();
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        QCOMPARE(texture->image(), edited);
+        done.clear(); window.replay();
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        const auto rendered = mode % 4 == 3 ? QColor(0, 0, 0, 0) : QColor(0, 255, 255, 255);
+        for (int y = 0; y < 8; ++y)
+            for (int x = 0; x < 8; ++x)
+                QCOMPARE(output->image().pixelColor(x, y), rendered);
+        done.clear(); boundary->setCurrentIndex(2);
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        QCOMPARE(texture->image().pixelColor(0, 0), QColor(0, 255, 0, 255));
+        snapshot(window, QString("lod-clone-%1").arg(mode));
+    }
     void mipCountReplayAndRetry_data() {
         QTest::addColumn<int>("base");
         QTest::newRow("sm5") << 0;
