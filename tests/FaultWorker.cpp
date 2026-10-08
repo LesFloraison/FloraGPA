@@ -15,7 +15,7 @@ int wmain(int argc, wchar_t **argv) {
     if (mode == "crash") { TerminateProcess(GetCurrentProcess(), 0xc0000005); return 99; }
     if (mode == "timeout" || mode == "cancel") { Sleep(INFINITE); return 99; }
     if (out.empty()) return 98;
-    if (mode.starts_with("image-") || mode.starts_with("buffer-") || mode.starts_with("report-") || mode.starts_with("payload-") ||
+    if (mode.starts_with("geometry-export-") || mode.starts_with("image-") || mode.starts_with("buffer-") || mode.starts_with("report-") || mode.starts_with("payload-") ||
         mode.starts_with("coverage-") || mode.starts_with("quad-") || mode.starts_with("thumbnail-") || mode.starts_with("catalog-") || mode.starts_with("export-")) {
         wchar_t root[32768]{};
         if (!GetEnvironmentVariableW(L"FLORA_FAULT_IMAGE_ROOT", root, DWORD(std::size(root)))) return 97;
@@ -23,7 +23,7 @@ int wmain(int argc, wchar_t **argv) {
         for (const auto &file : std::filesystem::directory_iterator(root))
             std::filesystem::copy(file.path(), out / file.path().filename(), std::filesystem::copy_options::recursive);
         // Test-owned evidence for cleanup after destroying a validating window.
-        if (mode.ends_with("-async-destroy"))
+        if (mode.ends_with("-async-destroy") || mode.starts_with("geometry-export-"))
             std::ofstream(std::filesystem::path(root) / "validation-directory.txt", std::ios::binary)
                 << out.generic_string();
         return 0;

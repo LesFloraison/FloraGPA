@@ -2,6 +2,7 @@
 #include "OutputStorageExport.h"
 #include "ByteExport.h"
 #include "ImageExport.h"
+#include "GeometryExport.h"
 #include <QAction>
 #include <QFileDialog>
 #include <QFileInfo>
@@ -131,5 +132,23 @@ void MainWindow::exportImage() {
     startExport("Exporting image…", "Image exported", [image, path](const CancelCheck &cancelled) {
         exportImageFile(path, image, cancelled);
     });
+}
+void MainWindow::exportGeometry() {
+    if (!geometryDir_ || exportCancel_) return;
+    const auto directory = geometryDir_;
+    bool valid = false;
+    const auto event = geometry_["event"].toString().toULongLong(&valid);
+    try {
+        if (!valid || !event) throw std::runtime_error("Geometry export event is unavailable");
+        const auto source = directory->filePath("result");
+        const auto assets = geometryExportAssets(source);
+        const auto root = QFileDialog::getExistingDirectory(this, "Export geometry");
+        if (root.isEmpty() || exportCancel_) return;
+        startExport("Exporting geometry…", "Geometry exported", [directory, source, assets, event, root](const CancelCheck &cancelled) {
+            exportGeometryDirectory(source, assets, event, root, cancelled);
+        });
+    } catch (const std::exception &error) {
+        showError(QString::fromUtf8(error.what()));
+    }
 }
 }

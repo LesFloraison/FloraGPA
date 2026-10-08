@@ -58,26 +58,26 @@ void exportImageFile(const QString &path, const QImage &image, const CancelCheck
 void copyExportFile(const QString &source, const QString &path, const CancelCheck &cancelled) {
     checkCancellation(cancelled);
     QFile input(source);
-    if (!input.open(QIODevice::ReadOnly)) throw std::runtime_error("Texture export asset is unavailable");
+    if (!input.open(QIODevice::ReadOnly)) throw std::runtime_error("Export asset is unavailable");
     const auto size = input.size();
-    if (size < 0) throw std::runtime_error("Texture export length is invalid");
+    if (size < 0) throw std::runtime_error("Export asset length is invalid");
     QSaveFile output(path);
-    if (!output.open(QIODevice::WriteOnly)) throw std::runtime_error("Cannot stage texture export");
+    if (!output.open(QIODevice::WriteOnly)) throw std::runtime_error("Cannot stage asset export");
     QByteArray chunk(1024 * 1024, Qt::Uninitialized);
     qint64 copied = 0;
     while (copied < size) {
         checkCancellation(cancelled);
         const auto read = input.read(chunk.data(), std::min<qint64>(chunk.size(), size - copied));
         if (read <= 0 || input.error() != QFileDevice::NoError)
-            throw std::runtime_error("Cannot read complete texture asset");
+            throw std::runtime_error("Cannot read complete export asset");
         if (output.write(chunk.constData(), read) != read)
-            throw std::runtime_error("Cannot stage complete texture asset");
+            throw std::runtime_error("Cannot stage complete export asset");
         copied += read;
     }
     if (input.error() != QFileDevice::NoError || input.pos() != size || input.size() != size)
-        throw std::runtime_error("Texture export asset length changed");
+        throw std::runtime_error("Export asset length changed");
     input.close();
     checkCancellation(cancelled);
-    if (!output.commit()) throw std::runtime_error("Cannot publish texture export");
+    if (!output.commit()) throw std::runtime_error("Cannot publish export asset");
 }
 }

@@ -20,11 +20,16 @@ using namespace flora;
 #include "ThumbnailRecovery.h"
 #include "CatalogRecovery.h"
 #include "ExportRecovery.h"
+#include "GeometryExportRecovery.h"
 class WorkerRecoveryTests final : public QObject {
     Q_OBJECT
   private slots:
     void isolatedRecovery_data() {
         QTest::addColumn<QString>("mode");
+        for (const auto suffix : {"success", "cancel", "switch", "close", "destroy", "missing", "grow", "source-lock"}) {
+            const auto mode = QString("geometry-export-") + suffix;
+            QTest::newRow(qPrintable(mode)) << mode;
+        }
         for (const auto mode : {"export-valid", "export-short", "export-long", "export-hash", "export-metadata", "export-missing-metadata",
                                "export-async-cancel", "export-async-switch", "export-async-close", "export-async-destroy", "export-async-success"})
             QTest::newRow(mode) << QString(mode);
@@ -89,7 +94,8 @@ class WorkerRecoveryTests final : public QObject {
         child.setProcessEnvironment(env);
         child.setCreateProcessArgumentsModifier([](QProcess::CreateProcessArguments *args) { args->flags |= CREATE_NO_WINDOW; });
         const auto log = isolation.filePath("child.txt");
-        const auto exercise = mode.startsWith("export-") ? "exerciseExportRecovery" :
+        const auto exercise = mode.startsWith("geometry-export-") ? "exerciseGeometryExportRecovery" :
+                              mode.startsWith("export-") ? "exerciseExportRecovery" :
                               mode.startsWith("catalog-") ? "exerciseCatalogRecovery" :
                               mode.startsWith("thumbnail-") ? "exerciseThumbnailRecovery" :
                               mode.startsWith("coverage-") || mode.startsWith("quad-") ? "exerciseDiagnosticRecovery" :
@@ -111,6 +117,7 @@ class WorkerRecoveryTests final : public QObject {
     void exerciseThumbnailRecovery() { ::exerciseThumbnailRecovery(); }
     void exerciseCatalogRecovery() { ::exerciseCatalogRecovery(); }
     void exerciseExportRecovery() { ::exerciseExportRecovery(); }
+    void exerciseGeometryExportRecovery() { ::exerciseGeometryExportRecovery(); }
     void exerciseRecovery() {
         const auto root = qEnvironmentVariable("FLORA_FAULT_ROOT");
         if (root.isEmpty()) QSKIP("Runs only inside the parent-owned temporary executable directory");

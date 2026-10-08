@@ -2826,34 +2826,6 @@ void MainWindow::inspectGeometry() {
     }
     startWorker(args, false);
 }
-void MainWindow::exportGeometry() {
-    if (!geometryDir_)
-        return;
-    // The chooser processes queued capture/inspection completions. Retain the
-    // asset and its identity from the moment Export was requested.
-    const auto directory = geometryDir_;
-    const auto event = geometry_["event"].toString();
-    auto root = QFileDialog::getExistingDirectory(this, "Export geometry");
-    if (root.isEmpty())
-        return;
-    auto base = root + "/FloraGPA-Geometry-" + event, path = base;
-    for (int i = 1; QFileInfo::exists(path); ++i)
-        path = base + '-' + QString::number(i);
-    if (!QDir().mkpath(path)) {
-        showError("Cannot create export directory.");
-        return;
-    }
-    QDir source(directory->path() + "/result");
-    for (auto file :
-         source.entryList({"*.csv", "geometry.json", "geometry.obj", "vertices.bin", "vertices.validity.bin",
-                           "unique_vertices.bin", "patch_constants.bin", "patch_constants.validity.bin"},
-                          QDir::Files))
-        if (!QFile::copy(source.filePath(file), path + '/' + file)) {
-            showError("Geometry export failed.");
-            return;
-        }
-    statusBar()->showMessage("Geometry exported", 3000);
-}
 void MainWindow::previewTexture() {
     if (!frame_ || !selectedResource_)
         return;
