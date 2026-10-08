@@ -1,7 +1,9 @@
 # M2: resource minimum LOD replay
 
 > Unused static SRV checks are superseded by the [shader usage audit](MIN_LOD_USAGE_AUDIT.md).
-> This batch's baseline remains unchanged. UAV/output/interface and storage limits still apply.
+> This batch's baseline remains unchanged. The later [storage readback correction](LOD_STORAGE_READBACK.md)
+> supersedes its nonzero-LOD export restriction. Input-experiment clone and unknown-state
+> boundaries remain; UAV/output/interface dependencies need their own evidence.
 
 The immediate Context4 records `SetResourceMinLOD` (`0x3515`) and
 `GetResourceMinLOD` (`0x3516`) now have checked decoding. The setter calls the

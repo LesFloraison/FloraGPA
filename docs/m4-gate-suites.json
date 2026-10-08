@@ -1,7 +1,7 @@
 {
   "schema": "FloraGPA compatibility gate suites 1",
-  "expected_cases": 533,
-  "expected_unique_captures": 523,
+  "expected_cases": 545,
+  "expected_unique_captures": 535,
   "expected_rejections": 36,
   "suites": [
     {
@@ -220,7 +220,7 @@
     {
       "id": "minlod",
       "manifest": "docs/min-lod-corpus.json",
-      "manifest_sha256": "9688fb856dc44bd57b425f46e5757c0da73847bf32cd39f336bf3299ac00be36",
+      "manifest_sha256": "6a0fa6ef8394a5681e8950047eef779b7a22fc1d53a840a3b39de21c6f677939",
       "capture_root": "artifacts",
       "subdirectory": "",
       "expected_rejections": {}
@@ -782,6 +782,14 @@
           "runtime_error": "Event 23 (Draw): Resource 24: initial minimum LOD is unresolved at this access"
         }
       }
+    },
+    {
+      "id": "lod_storage",
+      "manifest": "docs/lod-storage-corpus.json",
+      "manifest_sha256": "728390b1e7f7e9e38f5035d3ffac5fa892d57ca98905d2e97bf57c00697e2dbd",
+      "capture_root": "artifacts",
+      "subdirectory": "",
+      "expected_rejections": {}
     }
   ],
   "manifest_hash_policy": "UTF-8 bytes with CRLF normalized to LF",

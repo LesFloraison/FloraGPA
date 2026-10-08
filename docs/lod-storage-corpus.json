@@ -1,0 +1,594 @@
+{
+  "schema": "FloraGPA compatibility corpus 1",
+  "profile": "GPA 2025 R1 legacy DX11 / IGPA v3",
+  "cases": [
+    {
+      "id": "lod_storage_0",
+      "path": "m4-lod-storage-originals/0/capture.gpa_frame",
+      "sha256": "162fc39af9e7ce06afd80077e309891cd9187a19ad5be3dac172ee5817723a0a",
+      "bytes": 59705,
+      "family": "lod_storage",
+      "origin": "self_owned_original_gpa_capture",
+      "provenance_note": "Untouched GPA 2025 R1 output; native hardware, WARP and injected producer each verify 12 images, full storage bytes and unchanged resource LOD.",
+      "device_scope": "Producer hardware/WARP vendor and device identities recorded. Original player adapter/configuration unverified.",
+      "reference_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 25,
+          "repeat": 2,
+          "expected_rgba_sha256": "2c893cd47b6757133987906e00c55e6dcce3c567b9df9e7f91ffecd3604cc6a6"
+        }
+      ],
+      "boundaries": [
+        {
+          "kind": "texture",
+          "event": 25,
+          "resource": 10,
+          "expect_stable": true,
+          "expected_storage_sha256": "a443b8cef0918b8f02020762f287de5d8eb8bb011de8af027ec311a9e52a961e"
+        },
+        {
+          "kind": "texture",
+          "event": 93,
+          "resource": 10,
+          "expect_stable": true,
+          "expected_storage_sha256": "a443b8cef0918b8f02020762f287de5d8eb8bb011de8af027ec311a9e52a961e"
+        }
+      ],
+      "native_workload_fidelity": "passed",
+      "fidelity_reason": "Exact native hardware/WARP producer and replay pixels and packed mip bytes; inspection before/after Draw preserves LOD and SRV binding.",
+      "application_reference_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "application_reference_scope": "36 application images per capture across hardware, WARP and injected hardware",
+      "application_reference_evidence": {
+        "path": "m4-lod-storage-originals/0/hardware/expected.rgba",
+        "sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+      },
+      "source_manifests": [
+        {
+          "path": "m4-lod-storage-originals/manifest.json",
+          "sha256": "c4711b8c6565711d88e8dc357d105b6e8f2d1e3fa525f4f7165a154861343998"
+        }
+      ]
+    },
+    {
+      "id": "lod_storage_1",
+      "path": "m4-lod-storage-originals/1/capture.gpa_frame",
+      "sha256": "a93e59f3e55d5fadfce15074daaeb3464efda9be6fd500e962bef755186ff434",
+      "bytes": 59705,
+      "family": "lod_storage",
+      "origin": "self_owned_original_gpa_capture",
+      "provenance_note": "Untouched GPA 2025 R1 output; native hardware, WARP and injected producer each verify 12 images, full storage bytes and unchanged resource LOD.",
+      "device_scope": "Producer hardware/WARP vendor and device identities recorded. Original player adapter/configuration unverified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 25,
+          "repeat": 2,
+          "expected_rgba_sha256": "2c893cd47b6757133987906e00c55e6dcce3c567b9df9e7f91ffecd3604cc6a6"
+        }
+      ],
+      "boundaries": [
+        {
+          "kind": "texture",
+          "event": 25,
+          "resource": 10,
+          "expect_stable": true,
+          "expected_storage_sha256": "a443b8cef0918b8f02020762f287de5d8eb8bb011de8af027ec311a9e52a961e"
+        },
+        {
+          "kind": "texture",
+          "event": 93,
+          "resource": 10,
+          "expect_stable": true,
+          "expected_storage_sha256": "a443b8cef0918b8f02020762f287de5d8eb8bb011de8af027ec311a9e52a961e"
+        }
+      ],
+      "native_workload_fidelity": "passed",
+      "fidelity_reason": "Exact native hardware/WARP producer and replay pixels and packed mip bytes; inspection before/after Draw preserves LOD and SRV binding.",
+      "application_reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "application_reference_scope": "36 application images per capture across hardware, WARP and injected hardware",
+      "application_reference_evidence": {
+        "path": "m4-lod-storage-originals/1/hardware/expected.rgba",
+        "sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636"
+      },
+      "source_manifests": [
+        {
+          "path": "m4-lod-storage-originals/manifest.json",
+          "sha256": "c4711b8c6565711d88e8dc357d105b6e8f2d1e3fa525f4f7165a154861343998"
+        }
+      ]
+    },
+    {
+      "id": "lod_storage_2",
+      "path": "m4-lod-storage-originals/2/capture.gpa_frame",
+      "sha256": "937e3a606cc3a6b236fde0c3bd25f7fed0b12eeabad3b3d449a0024fe012af5d",
+      "bytes": 59705,
+      "family": "lod_storage",
+      "origin": "self_owned_original_gpa_capture",
+      "provenance_note": "Untouched GPA 2025 R1 output; native hardware, WARP and injected producer each verify 12 images, full storage bytes and unchanged resource LOD.",
+      "device_scope": "Producer hardware/WARP vendor and device identities recorded. Original player adapter/configuration unverified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 25,
+          "repeat": 2,
+          "expected_rgba_sha256": "2c893cd47b6757133987906e00c55e6dcce3c567b9df9e7f91ffecd3604cc6a6"
+        }
+      ],
+      "boundaries": [
+        {
+          "kind": "texture",
+          "event": 25,
+          "resource": 10,
+          "expect_stable": true,
+          "expected_storage_sha256": "a443b8cef0918b8f02020762f287de5d8eb8bb011de8af027ec311a9e52a961e"
+        },
+        {
+          "kind": "texture",
+          "event": 93,
+          "resource": 10,
+          "expect_stable": true,
+          "expected_storage_sha256": "a443b8cef0918b8f02020762f287de5d8eb8bb011de8af027ec311a9e52a961e"
+        }
+      ],
+      "native_workload_fidelity": "passed",
+      "fidelity_reason": "Exact native hardware/WARP producer and replay pixels and packed mip bytes; inspection before/after Draw preserves LOD and SRV binding.",
+      "application_reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "application_reference_scope": "36 application images per capture across hardware, WARP and injected hardware",
+      "application_reference_evidence": {
+        "path": "m4-lod-storage-originals/2/hardware/expected.rgba",
+        "sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636"
+      },
+      "source_manifests": [
+        {
+          "path": "m4-lod-storage-originals/manifest.json",
+          "sha256": "c4711b8c6565711d88e8dc357d105b6e8f2d1e3fa525f4f7165a154861343998"
+        }
+      ]
+    },
+    {
+      "id": "lod_storage_3",
+      "path": "m4-lod-storage-originals/3/capture.gpa_frame",
+      "sha256": "d176942a997aa6be20ed1d9208baee7ae098911e4dce44f9f98bfa2b45746456",
+      "bytes": 59705,
+      "family": "lod_storage",
+      "origin": "self_owned_original_gpa_capture",
+      "provenance_note": "Untouched GPA 2025 R1 output; native hardware, WARP and injected producer each verify 12 images, full storage bytes and unchanged resource LOD.",
+      "device_scope": "Producer hardware/WARP vendor and device identities recorded. Original player adapter/configuration unverified.",
+      "reference_rgba_sha256": "5341e6b2646979a70e57653007a1f310169421ec9bdd9f1a5648f75ade005af1",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 25,
+          "repeat": 2,
+          "expected_rgba_sha256": "2c893cd47b6757133987906e00c55e6dcce3c567b9df9e7f91ffecd3604cc6a6"
+        }
+      ],
+      "boundaries": [
+        {
+          "kind": "texture",
+          "event": 25,
+          "resource": 10,
+          "expect_stable": true,
+          "expected_storage_sha256": "a443b8cef0918b8f02020762f287de5d8eb8bb011de8af027ec311a9e52a961e"
+        },
+        {
+          "kind": "texture",
+          "event": 93,
+          "resource": 10,
+          "expect_stable": true,
+          "expected_storage_sha256": "a443b8cef0918b8f02020762f287de5d8eb8bb011de8af027ec311a9e52a961e"
+        }
+      ],
+      "native_workload_fidelity": "passed",
+      "fidelity_reason": "Exact native hardware/WARP producer and replay pixels and packed mip bytes; inspection before/after Draw preserves LOD and SRV binding.",
+      "application_reference_rgba_sha256": "5341e6b2646979a70e57653007a1f310169421ec9bdd9f1a5648f75ade005af1",
+      "application_reference_scope": "36 application images per capture across hardware, WARP and injected hardware",
+      "application_reference_evidence": {
+        "path": "m4-lod-storage-originals/3/hardware/expected.rgba",
+        "sha256": "5341e6b2646979a70e57653007a1f310169421ec9bdd9f1a5648f75ade005af1"
+      },
+      "source_manifests": [
+        {
+          "path": "m4-lod-storage-originals/manifest.json",
+          "sha256": "c4711b8c6565711d88e8dc357d105b6e8f2d1e3fa525f4f7165a154861343998"
+        }
+      ]
+    },
+    {
+      "id": "lod_storage_4",
+      "path": "m4-lod-storage-originals/4/capture.gpa_frame",
+      "sha256": "b9b4a6c077757301e655897fda78b4873da344ae9b0681269b88797ea025fbd1",
+      "bytes": 60893,
+      "family": "lod_storage",
+      "origin": "self_owned_original_gpa_capture",
+      "provenance_note": "Untouched GPA 2025 R1 output; native hardware, WARP and injected producer each verify 12 images, full storage bytes and unchanged resource LOD.",
+      "device_scope": "Producer hardware/WARP vendor and device identities recorded. Original player adapter/configuration unverified.",
+      "reference_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 25,
+          "repeat": 2,
+          "expected_rgba_sha256": "2c893cd47b6757133987906e00c55e6dcce3c567b9df9e7f91ffecd3604cc6a6"
+        }
+      ],
+      "boundaries": [
+        {
+          "kind": "texture",
+          "event": 25,
+          "resource": 10,
+          "expect_stable": true,
+          "expected_storage_sha256": "0198b146b02b7c9a8a7f86795408c68b88c5ec0f5f876b780221a70cb58852ba"
+        },
+        {
+          "kind": "texture",
+          "event": 94,
+          "resource": 10,
+          "expect_stable": true,
+          "expected_storage_sha256": "0198b146b02b7c9a8a7f86795408c68b88c5ec0f5f876b780221a70cb58852ba"
+        }
+      ],
+      "native_workload_fidelity": "passed",
+      "fidelity_reason": "Exact native hardware/WARP producer and replay pixels and packed mip bytes; inspection before/after Draw preserves LOD and SRV binding.",
+      "application_reference_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "application_reference_scope": "36 application images per capture across hardware, WARP and injected hardware",
+      "application_reference_evidence": {
+        "path": "m4-lod-storage-originals/4/hardware/expected.rgba",
+        "sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+      },
+      "source_manifests": [
+        {
+          "path": "m4-lod-storage-originals/manifest.json",
+          "sha256": "c4711b8c6565711d88e8dc357d105b6e8f2d1e3fa525f4f7165a154861343998"
+        }
+      ]
+    },
+    {
+      "id": "lod_storage_5",
+      "path": "m4-lod-storage-originals/5/capture.gpa_frame",
+      "sha256": "a0eef1354769876f33631f56ae69e780ecc6d3b6d15ccbdd9a0b10381918dbca",
+      "bytes": 60893,
+      "family": "lod_storage",
+      "origin": "self_owned_original_gpa_capture",
+      "provenance_note": "Untouched GPA 2025 R1 output; native hardware, WARP and injected producer each verify 12 images, full storage bytes and unchanged resource LOD.",
+      "device_scope": "Producer hardware/WARP vendor and device identities recorded. Original player adapter/configuration unverified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 25,
+          "repeat": 2,
+          "expected_rgba_sha256": "2c893cd47b6757133987906e00c55e6dcce3c567b9df9e7f91ffecd3604cc6a6"
+        }
+      ],
+      "boundaries": [
+        {
+          "kind": "texture",
+          "event": 25,
+          "resource": 10,
+          "expect_stable": true,
+          "expected_storage_sha256": "0198b146b02b7c9a8a7f86795408c68b88c5ec0f5f876b780221a70cb58852ba"
+        },
+        {
+          "kind": "texture",
+          "event": 94,
+          "resource": 10,
+          "expect_stable": true,
+          "expected_storage_sha256": "0198b146b02b7c9a8a7f86795408c68b88c5ec0f5f876b780221a70cb58852ba"
+        }
+      ],
+      "native_workload_fidelity": "passed",
+      "fidelity_reason": "Exact native hardware/WARP producer and replay pixels and packed mip bytes; inspection before/after Draw preserves LOD and SRV binding.",
+      "application_reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "application_reference_scope": "36 application images per capture across hardware, WARP and injected hardware",
+      "application_reference_evidence": {
+        "path": "m4-lod-storage-originals/5/hardware/expected.rgba",
+        "sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636"
+      },
+      "source_manifests": [
+        {
+          "path": "m4-lod-storage-originals/manifest.json",
+          "sha256": "c4711b8c6565711d88e8dc357d105b6e8f2d1e3fa525f4f7165a154861343998"
+        }
+      ]
+    },
+    {
+      "id": "lod_storage_6",
+      "path": "m4-lod-storage-originals/6/capture.gpa_frame",
+      "sha256": "319f807e2adb2a411d9954a92ec20b2e60756d8300b0e61d445a888303923d6a",
+      "bytes": 60893,
+      "family": "lod_storage",
+      "origin": "self_owned_original_gpa_capture",
+      "provenance_note": "Untouched GPA 2025 R1 output; native hardware, WARP and injected producer each verify 12 images, full storage bytes and unchanged resource LOD.",
+      "device_scope": "Producer hardware/WARP vendor and device identities recorded. Original player adapter/configuration unverified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 25,
+          "repeat": 2,
+          "expected_rgba_sha256": "2c893cd47b6757133987906e00c55e6dcce3c567b9df9e7f91ffecd3604cc6a6"
+        }
+      ],
+      "boundaries": [
+        {
+          "kind": "texture",
+          "event": 25,
+          "resource": 10,
+          "expect_stable": true,
+          "expected_storage_sha256": "0198b146b02b7c9a8a7f86795408c68b88c5ec0f5f876b780221a70cb58852ba"
+        },
+        {
+          "kind": "texture",
+          "event": 94,
+          "resource": 10,
+          "expect_stable": true,
+          "expected_storage_sha256": "0198b146b02b7c9a8a7f86795408c68b88c5ec0f5f876b780221a70cb58852ba"
+        }
+      ],
+      "native_workload_fidelity": "passed",
+      "fidelity_reason": "Exact native hardware/WARP producer and replay pixels and packed mip bytes; inspection before/after Draw preserves LOD and SRV binding.",
+      "application_reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "application_reference_scope": "36 application images per capture across hardware, WARP and injected hardware",
+      "application_reference_evidence": {
+        "path": "m4-lod-storage-originals/6/hardware/expected.rgba",
+        "sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636"
+      },
+      "source_manifests": [
+        {
+          "path": "m4-lod-storage-originals/manifest.json",
+          "sha256": "c4711b8c6565711d88e8dc357d105b6e8f2d1e3fa525f4f7165a154861343998"
+        }
+      ]
+    },
+    {
+      "id": "lod_storage_7",
+      "path": "m4-lod-storage-originals/7/capture.gpa_frame",
+      "sha256": "4558968c2df49898e13e14417c9493832783a70de6eaa80a297fcc93c64e65df",
+      "bytes": 60893,
+      "family": "lod_storage",
+      "origin": "self_owned_original_gpa_capture",
+      "provenance_note": "Untouched GPA 2025 R1 output; native hardware, WARP and injected producer each verify 12 images, full storage bytes and unchanged resource LOD.",
+      "device_scope": "Producer hardware/WARP vendor and device identities recorded. Original player adapter/configuration unverified.",
+      "reference_rgba_sha256": "5341e6b2646979a70e57653007a1f310169421ec9bdd9f1a5648f75ade005af1",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 25,
+          "repeat": 2,
+          "expected_rgba_sha256": "2c893cd47b6757133987906e00c55e6dcce3c567b9df9e7f91ffecd3604cc6a6"
+        }
+      ],
+      "boundaries": [
+        {
+          "kind": "texture",
+          "event": 25,
+          "resource": 10,
+          "expect_stable": true,
+          "expected_storage_sha256": "0198b146b02b7c9a8a7f86795408c68b88c5ec0f5f876b780221a70cb58852ba"
+        },
+        {
+          "kind": "texture",
+          "event": 94,
+          "resource": 10,
+          "expect_stable": true,
+          "expected_storage_sha256": "0198b146b02b7c9a8a7f86795408c68b88c5ec0f5f876b780221a70cb58852ba"
+        }
+      ],
+      "native_workload_fidelity": "passed",
+      "fidelity_reason": "Exact native hardware/WARP producer and replay pixels and packed mip bytes; inspection before/after Draw preserves LOD and SRV binding.",
+      "application_reference_rgba_sha256": "5341e6b2646979a70e57653007a1f310169421ec9bdd9f1a5648f75ade005af1",
+      "application_reference_scope": "36 application images per capture across hardware, WARP and injected hardware",
+      "application_reference_evidence": {
+        "path": "m4-lod-storage-originals/7/hardware/expected.rgba",
+        "sha256": "5341e6b2646979a70e57653007a1f310169421ec9bdd9f1a5648f75ade005af1"
+      },
+      "source_manifests": [
+        {
+          "path": "m4-lod-storage-originals/manifest.json",
+          "sha256": "c4711b8c6565711d88e8dc357d105b6e8f2d1e3fa525f4f7165a154861343998"
+        }
+      ]
+    },
+    {
+      "id": "lod_storage_8",
+      "path": "m4-lod-storage-originals/8/capture.gpa_frame",
+      "sha256": "f694d08b4e835958867744a46a6662ab6e8fc46e8a3f3ab7c705b7f4a100d89a",
+      "bytes": 63657,
+      "family": "lod_storage",
+      "origin": "self_owned_original_gpa_capture",
+      "provenance_note": "Untouched GPA 2025 R1 output; native hardware, WARP and injected producer each verify 12 images, full storage bytes and unchanged resource LOD.",
+      "device_scope": "Producer hardware/WARP vendor and device identities recorded. Original player adapter/configuration unverified.",
+      "reference_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 25,
+          "repeat": 2,
+          "expected_rgba_sha256": "2c893cd47b6757133987906e00c55e6dcce3c567b9df9e7f91ffecd3604cc6a6"
+        }
+      ],
+      "boundaries": [
+        {
+          "kind": "texture",
+          "event": 25,
+          "resource": 10,
+          "expect_stable": true,
+          "expected_storage_sha256": "8f203b998655efec5ef8f61649ec4bf75a01a5fd7211e0be191fff890477d49a"
+        },
+        {
+          "kind": "texture",
+          "event": 81,
+          "resource": 10,
+          "expect_stable": true,
+          "expected_storage_sha256": "8f203b998655efec5ef8f61649ec4bf75a01a5fd7211e0be191fff890477d49a"
+        }
+      ],
+      "native_workload_fidelity": "passed",
+      "fidelity_reason": "Exact native hardware/WARP producer and replay pixels and packed mip bytes; inspection before/after Draw preserves LOD and SRV binding.",
+      "application_reference_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "application_reference_scope": "36 application images per capture across hardware, WARP and injected hardware",
+      "application_reference_evidence": {
+        "path": "m4-lod-storage-originals/8/hardware/expected.rgba",
+        "sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+      },
+      "source_manifests": [
+        {
+          "path": "m4-lod-storage-originals/manifest.json",
+          "sha256": "c4711b8c6565711d88e8dc357d105b6e8f2d1e3fa525f4f7165a154861343998"
+        }
+      ]
+    },
+    {
+      "id": "lod_storage_9",
+      "path": "m4-lod-storage-originals/9/capture.gpa_frame",
+      "sha256": "3f4b02c2d41ba24dc9bd9ceeac4fc374d6fdf74770f48cbb0dd374959b735561",
+      "bytes": 63657,
+      "family": "lod_storage",
+      "origin": "self_owned_original_gpa_capture",
+      "provenance_note": "Untouched GPA 2025 R1 output; native hardware, WARP and injected producer each verify 12 images, full storage bytes and unchanged resource LOD.",
+      "device_scope": "Producer hardware/WARP vendor and device identities recorded. Original player adapter/configuration unverified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 25,
+          "repeat": 2,
+          "expected_rgba_sha256": "2c893cd47b6757133987906e00c55e6dcce3c567b9df9e7f91ffecd3604cc6a6"
+        }
+      ],
+      "boundaries": [
+        {
+          "kind": "texture",
+          "event": 25,
+          "resource": 10,
+          "expect_stable": true,
+          "expected_storage_sha256": "8f203b998655efec5ef8f61649ec4bf75a01a5fd7211e0be191fff890477d49a"
+        },
+        {
+          "kind": "texture",
+          "event": 81,
+          "resource": 10,
+          "expect_stable": true,
+          "expected_storage_sha256": "8f203b998655efec5ef8f61649ec4bf75a01a5fd7211e0be191fff890477d49a"
+        }
+      ],
+      "native_workload_fidelity": "passed",
+      "fidelity_reason": "Exact native hardware/WARP producer and replay pixels and packed mip bytes; inspection before/after Draw preserves LOD and SRV binding.",
+      "application_reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "application_reference_scope": "36 application images per capture across hardware, WARP and injected hardware",
+      "application_reference_evidence": {
+        "path": "m4-lod-storage-originals/9/hardware/expected.rgba",
+        "sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636"
+      },
+      "source_manifests": [
+        {
+          "path": "m4-lod-storage-originals/manifest.json",
+          "sha256": "c4711b8c6565711d88e8dc357d105b6e8f2d1e3fa525f4f7165a154861343998"
+        }
+      ]
+    },
+    {
+      "id": "lod_storage_10",
+      "path": "m4-lod-storage-originals/10/capture.gpa_frame",
+      "sha256": "720d53c6731d9bd55899c9fce493f914fd07437b3c33131395b86aa0275789c1",
+      "bytes": 63657,
+      "family": "lod_storage",
+      "origin": "self_owned_original_gpa_capture",
+      "provenance_note": "Untouched GPA 2025 R1 output; native hardware, WARP and injected producer each verify 12 images, full storage bytes and unchanged resource LOD.",
+      "device_scope": "Producer hardware/WARP vendor and device identities recorded. Original player adapter/configuration unverified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 25,
+          "repeat": 2,
+          "expected_rgba_sha256": "2c893cd47b6757133987906e00c55e6dcce3c567b9df9e7f91ffecd3604cc6a6"
+        }
+      ],
+      "boundaries": [
+        {
+          "kind": "texture",
+          "event": 25,
+          "resource": 10,
+          "expect_stable": true,
+          "expected_storage_sha256": "8f203b998655efec5ef8f61649ec4bf75a01a5fd7211e0be191fff890477d49a"
+        },
+        {
+          "kind": "texture",
+          "event": 81,
+          "resource": 10,
+          "expect_stable": true,
+          "expected_storage_sha256": "8f203b998655efec5ef8f61649ec4bf75a01a5fd7211e0be191fff890477d49a"
+        }
+      ],
+      "native_workload_fidelity": "passed",
+      "fidelity_reason": "Exact native hardware/WARP producer and replay pixels and packed mip bytes; inspection before/after Draw preserves LOD and SRV binding.",
+      "application_reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "application_reference_scope": "36 application images per capture across hardware, WARP and injected hardware",
+      "application_reference_evidence": {
+        "path": "m4-lod-storage-originals/10/hardware/expected.rgba",
+        "sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636"
+      },
+      "source_manifests": [
+        {
+          "path": "m4-lod-storage-originals/manifest.json",
+          "sha256": "c4711b8c6565711d88e8dc357d105b6e8f2d1e3fa525f4f7165a154861343998"
+        }
+      ]
+    },
+    {
+      "id": "lod_storage_11",
+      "path": "m4-lod-storage-originals/11/capture.gpa_frame",
+      "sha256": "450399866a361cd26c66afad066d12c164a44fbfdbfb5f4b7f0e14d41b6671aa",
+      "bytes": 63657,
+      "family": "lod_storage",
+      "origin": "self_owned_original_gpa_capture",
+      "provenance_note": "Untouched GPA 2025 R1 output; native hardware, WARP and injected producer each verify 12 images, full storage bytes and unchanged resource LOD.",
+      "device_scope": "Producer hardware/WARP vendor and device identities recorded. Original player adapter/configuration unverified.",
+      "reference_rgba_sha256": "5341e6b2646979a70e57653007a1f310169421ec9bdd9f1a5648f75ade005af1",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 25,
+          "repeat": 2,
+          "expected_rgba_sha256": "2c893cd47b6757133987906e00c55e6dcce3c567b9df9e7f91ffecd3604cc6a6"
+        }
+      ],
+      "boundaries": [
+        {
+          "kind": "texture",
+          "event": 25,
+          "resource": 10,
+          "expect_stable": true,
+          "expected_storage_sha256": "8f203b998655efec5ef8f61649ec4bf75a01a5fd7211e0be191fff890477d49a"
+        },
+        {
+          "kind": "texture",
+          "event": 81,
+          "resource": 10,
+          "expect_stable": true,
+          "expected_storage_sha256": "8f203b998655efec5ef8f61649ec4bf75a01a5fd7211e0be191fff890477d49a"
+        }
+      ],
+      "native_workload_fidelity": "passed",
+      "fidelity_reason": "Exact native hardware/WARP producer and replay pixels and packed mip bytes; inspection before/after Draw preserves LOD and SRV binding.",
+      "application_reference_rgba_sha256": "5341e6b2646979a70e57653007a1f310169421ec9bdd9f1a5648f75ade005af1",
+      "application_reference_scope": "36 application images per capture across hardware, WARP and injected hardware",
+      "application_reference_evidence": {
+        "path": "m4-lod-storage-originals/11/hardware/expected.rgba",
+        "sha256": "5341e6b2646979a70e57653007a1f310169421ec9bdd9f1a5648f75ade005af1"
+      },
+      "source_manifests": [
+        {
+          "path": "m4-lod-storage-originals/manifest.json",
+          "sha256": "c4711b8c6565711d88e8dc357d105b6e8f2d1e3fa525f4f7165a154861343998"
+        }
+      ]
+    }
+  ]
+}

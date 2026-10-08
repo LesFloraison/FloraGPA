@@ -40,7 +40,15 @@
       "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
       "comparison_policy": "exact_golden",
       "controls": [],
-      "boundaries": [],
+      "boundaries": [
+        {
+          "kind": "texture",
+          "event": 64,
+          "resource": 10,
+          "expect_stable": true,
+          "expected_storage_sha256": "33f53725216979b0ae0bb23ef3b1c011768726fec999b4f58f2c2100bdc7729f"
+        }
+      ],
       "device_scope": "Hardware/WARP tests have independent producer pixels; original adapter/configuration remains unidentified.",
       "provenance_note": "Unmodified original GPA output. Mode 6 has no saved initial LOD and is an explicit rejection control. Other nonzero modes retain original-player mip-0 discrepancies."
     },
@@ -57,7 +65,15 @@
       "reference_rgba_sha256": "c262b5c549abc0f3f8a81ef1672eda4d07f475f7c97cc37afab49b47d79ba935",
       "comparison_policy": "exact_golden",
       "controls": [],
-      "boundaries": [],
+      "boundaries": [
+        {
+          "kind": "texture",
+          "event": 64,
+          "resource": 10,
+          "expect_stable": true,
+          "expected_storage_sha256": "33f53725216979b0ae0bb23ef3b1c011768726fec999b4f58f2c2100bdc7729f"
+        }
+      ],
       "device_scope": "Hardware/WARP tests have independent producer pixels; original adapter/configuration remains unidentified.",
       "provenance_note": "Unmodified original GPA output. Mode 6 has no saved initial LOD and is an explicit rejection control. Other nonzero modes retain original-player mip-0 discrepancies."
     },
@@ -99,7 +115,15 @@
       "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
       "comparison_policy": "exact_golden",
       "controls": [],
-      "boundaries": [],
+      "boundaries": [
+        {
+          "kind": "texture",
+          "event": 65,
+          "resource": 10,
+          "expect_stable": true,
+          "expected_storage_sha256": "33f53725216979b0ae0bb23ef3b1c011768726fec999b4f58f2c2100bdc7729f"
+        }
+      ],
       "device_scope": "Hardware/WARP tests have independent producer pixels; original adapter/configuration remains unidentified.",
       "provenance_note": "Unmodified original GPA output. Mode 6 has no saved initial LOD and is an explicit rejection control. Other nonzero modes retain original-player mip-0 discrepancies."
     },
@@ -116,7 +140,15 @@
       "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
       "comparison_policy": "exact_golden",
       "controls": [],
-      "boundaries": [],
+      "boundaries": [
+        {
+          "kind": "texture",
+          "event": 63,
+          "resource": 10,
+          "expect_stable": true,
+          "expected_storage_sha256": "33f53725216979b0ae0bb23ef3b1c011768726fec999b4f58f2c2100bdc7729f"
+        }
+      ],
       "device_scope": "Hardware/WARP tests have independent producer pixels; original adapter/configuration remains unidentified.",
       "provenance_note": "Unmodified original GPA output. Mode 6 has no saved initial LOD and is an explicit rejection control. Other nonzero modes retain original-player mip-0 discrepancies."
     },
@@ -133,7 +165,15 @@
       "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
       "comparison_policy": "exact_golden",
       "controls": [],
-      "boundaries": [],
+      "boundaries": [
+        {
+          "kind": "texture",
+          "event": 63,
+          "resource": 23,
+          "expect_stable": true,
+          "expected_storage_sha256": "33f53725216979b0ae0bb23ef3b1c011768726fec999b4f58f2c2100bdc7729f"
+        }
+      ],
       "device_scope": "Hardware/WARP tests have independent producer pixels; original adapter/configuration remains unidentified.",
       "provenance_note": "Unmodified original GPA output. Mode 6 has no saved initial LOD and is an explicit rejection control. Other nonzero modes retain original-player mip-0 discrepancies."
     },
@@ -214,7 +254,15 @@
           "purpose": "Disable nonzero setter without a later getter undoing the experiment; initial state is proved by a getter or in-frame creation."
         }
       ],
-      "boundaries": [],
+      "boundaries": [
+        {
+          "kind": "texture",
+          "event": 84,
+          "resource": 13,
+          "expect_stable": true,
+          "expected_storage_sha256": "33f53725216979b0ae0bb23ef3b1c011768726fec999b4f58f2c2100bdc7729f"
+        }
+      ],
       "device_scope": "Hardware/WARP tests have independent producer pixels; original adapter/configuration remains unidentified.",
       "provenance_note": "Unmodified original GPA output. Mode 6 has no saved initial LOD and is an explicit rejection control. Other nonzero modes retain original-player mip-0 discrepancies."
     },
@@ -231,7 +279,15 @@
       "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
       "comparison_policy": "exact_golden",
       "controls": [],
-      "boundaries": [],
+      "boundaries": [
+        {
+          "kind": "texture",
+          "event": 65,
+          "resource": 12,
+          "expect_stable": true,
+          "expected_storage_sha256": "33f53725216979b0ae0bb23ef3b1c011768726fec999b4f58f2c2100bdc7729f"
+        }
+      ],
       "device_scope": "Hardware/WARP tests have independent producer pixels; original adapter/configuration remains unidentified.",
       "provenance_note": "Unmodified original GPA output. Mode 6 has no saved initial LOD and is an explicit rejection control. Other nonzero modes retain original-player mip-0 discrepancies."
     }
