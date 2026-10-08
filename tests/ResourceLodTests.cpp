@@ -34,6 +34,7 @@ void copy(const Frame &frame, const QString &path, Id edited, const std::vector<
 #include "ResourceLodSwitchTests.h"
 #include "ResourceLodLoopTests.h"
 #include "ResourceLodReturnTests.h"
+#include "ResourceLodDiscardTests.h"
 class ResourceLodTests final : public QObject {
     Q_OBJECT
   private slots:
@@ -134,14 +135,14 @@ class ResourceLodTests final : public QObject {
     void mipCountOriginals_data() {
         QTest::addColumn<int>("mode");
         QTest::addColumn<bool>("warp");
-        for (int mode = 0; mode < 44; ++mode)
+        for (int mode = 0; mode < 52; ++mode)
             for (bool warp : {false, true})
                 QTest::newRow(qPrintable(QString("%1-%2").arg(mode).arg(warp))) << mode << warp;
     }
     void mipCountOriginals() {
         QFETCH(int, mode);
         QFETCH(bool, warp);
-        const auto root = qEnvironmentVariable(mode < 6 ? "FLORA_MIP_COUNT_CAPTURES" : mode < 12 ? "FLORA_SM40_MIP_CAPTURES" : mode < 20 ? "FLORA_BRANCH_MIP_CAPTURES" : mode < 28 ? "FLORA_SWITCH_MIP_CAPTURES" : mode < 36 ? "FLORA_LOOP_MIP_CAPTURES" : "FLORA_RETURN_MIP_CAPTURES");
+        const auto root = qEnvironmentVariable(mode < 6 ? "FLORA_MIP_COUNT_CAPTURES" : mode < 12 ? "FLORA_SM40_MIP_CAPTURES" : mode < 20 ? "FLORA_BRANCH_MIP_CAPTURES" : mode < 28 ? "FLORA_SWITCH_MIP_CAPTURES" : mode < 36 ? "FLORA_LOOP_MIP_CAPTURES" : mode < 44 ? "FLORA_RETURN_MIP_CAPTURES" : "FLORA_DISCARD_MIP_CAPTURES");
         if (root.isEmpty())
             QSKIP("Set FLORA_MIP_COUNT_CAPTURES for original mip-count captures");
         const auto folder = root + QString("/%1/").arg(mode);
@@ -150,7 +151,7 @@ class ResourceLodTests final : public QObject {
         QVERIFY(audit.initial.empty());
         QVERIFY(!audit.clamped.empty());
         const auto behavior = mode % 6;
-        const bool missing = mode < 12 ? behavior == 2 || behavior == 4 : mode < 20 ? mode >= 14 && mode <= 16 : mode < 28 ? mode >= 22 && mode <= 24 : mode < 36 ? mode >= 30 && mode <= 32 : mode >= 38 && mode <= 40;
+        const bool missing = mode < 12 ? behavior == 2 || behavior == 4 : mode < 20 ? mode >= 14 && mode <= 16 : mode < 28 ? mode >= 22 && mode <= 24 : mode < 36 ? mode >= 30 && mode <= 32 : mode < 44 ? mode >= 38 && mode <= 40 : mode >= 46 && mode <= 48;
         QCOMPARE(audit.issues.size(), size_t(missing));
         QCOMPARE(validateFrame(frame.path())["errors"].get<unsigned>(), unsigned(missing));
         ReplayOptions options;
@@ -190,24 +191,59 @@ class ResourceLodTests final : public QObject {
                 QCOMPARE(edited.output().rgba, bytes(root + QString("/%1/hardware/expected.rgba").arg(base)));
             }
         }
-        if (mode == 20 || mode == 24 || mode == 28 || mode == 32 || mode == 36 || mode == 40) {
+        if (mode == 20 || mode == 24 || mode == 28 || mode == 32 || mode == 36 || mode == 40 || mode == 44 || mode == 48) {
             Id shader = 0;
             for (const auto &[id, e] : frame.entries())
                 if (e.category == 7 && isDraw(e.type))
                     shader = frame.state(frame.event(id).state).stages[4].shader;
             QVERIFY(shader);
-            options.shaders[shader] = bytes(root + (mode == 20 ? "/24/hardware/switchSample.dxbc" : mode == 24 ? "/20/hardware/switched.dxbc" : mode == 28 ? "/32/hardware/loopSample.dxbc" : mode == 32 ? "/28/hardware/loopCount.dxbc" : mode == 36 ? "/40/hardware/returnSample.dxbc" : "/36/hardware/returnCount.dxbc"));
+            options.shaders[shader] = bytes(root + (mode == 20 ? "/24/hardware/switchSample.dxbc" : mode == 24 ? "/20/hardware/switched.dxbc" : mode == 28 ? "/32/hardware/loopSample.dxbc" : mode == 32 ? "/28/hardware/loopCount.dxbc" : mode == 36 ? "/40/hardware/returnSample.dxbc" : mode == 40 ? "/36/hardware/returnCount.dxbc" : mode == 44 ? "/48/hardware/discardSample.dxbc" : "/44/hardware/discardKeep.dxbc"));
             Replay edited(frame, options);
-            if (mode == 20 || mode == 28 || mode == 36) QVERIFY_EXCEPTION_THROWN(edited.run(), std::runtime_error);
+            if (mode == 20 || mode == 28 || mode == 36 || mode == 44) QVERIFY_EXCEPTION_THROWN(edited.run(), std::runtime_error);
             else {
                 edited.run();
-                QCOMPARE(edited.output().rgba, bytes(root + (mode < 28 ? "/20/hardware/expected.rgba" : mode < 36 ? "/28/hardware/expected.rgba" : "/36/hardware/expected.rgba")));
+                QCOMPARE(edited.output().rgba, bytes(root + (mode < 28 ? "/20/hardware/expected.rgba" : mode < 36 ? "/28/hardware/expected.rgba" : mode < 44 ? "/36/hardware/expected.rgba" : "/44/hardware/expected.rgba")));
             }
+        }
+    }
+    void discardOutputControls_data() {
+        QTest::addColumn<bool>("warp");
+        QTest::newRow("hardware") << false;
+        QTest::newRow("warp") << true;
+    }
+    void discardOutputControls() {
+        QFETCH(bool, warp);
+        const auto root = qEnvironmentVariable("FLORA_DISCARD_MIP_CAPTURES");
+        if (root.isEmpty()) QSKIP("Set original SM4.0 discard capture directory");
+        // A black Final alone cannot distinguish DISCARD from a skipped Draw.
+        // Exchange independently compiled keep/discard shaders on both original
+        // frames; the entire output must change, then return to the original.
+        for (int mode : {44, 50}) {
+            Frame frame((root + QString("/%1/capture.gpa_frame").arg(mode)).toStdWString());
+            Id shader = 0;
+            for (const auto &[id, entry] : frame.entries())
+                if (entry.category == 7 && isDraw(entry.type))
+                    shader = frame.state(frame.event(id).state).stages[4].shader;
+            QVERIFY(shader);
+            ReplayOptions options;
+            options.warp = warp;
+            const int other = mode == 44 ? 50 : 44;
+            options.shaders[shader] = bytes(root + QString("/%1/hardware/%2.dxbc")
+                .arg(other).arg(other == 44 ? "discardKeep" : "discardAll"));
+            Replay edited(frame, options);
+            edited.run();
+            QCOMPARE(edited.output().rgba, bytes(root + QString("/%1/hardware/expected.rgba").arg(other)));
+            options.shaders.clear();
+            Replay original(frame, options);
+            original.run();
+            QCOMPARE(original.output().rgba, bytes(root + QString("/%1/hardware/expected.rgba").arg(mode)));
+            QVERIFY(edited.output().rgba != original.output().rgba);
         }
     }
     void sm40SwitchProofBounds() { exerciseSm40SwitchProofBounds(); }
     void sm40LoopProofBounds() { exerciseSm40LoopProofBounds(); }
     void sm40ReturnProofBounds() { exerciseSm40ReturnProofBounds(); }
+    void sm40DiscardProofBounds() { exerciseSm40DiscardProofBounds(); }
     void sm40BranchProofBounds() {
         const auto root = qEnvironmentVariable("FLORA_BRANCH_MIP_CAPTURES");
         if (root.isEmpty()) QSKIP("Set original SM4.0 branch capture directory");

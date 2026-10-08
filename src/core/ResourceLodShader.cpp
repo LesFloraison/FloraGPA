@@ -33,7 +33,7 @@ struct FlowOperation {
     std::vector<RegisterUse> sources;
     std::vector<size_t> successors;
 };
-// Deliberately bounded SM4.0 proof. Checked IF, SWITCH, LOOP and unconditional RET;
+// Deliberately bounded SM4.0 proof. Checked IF, SWITCH, LOOP, RET and pixel DISCARD;
 // no calls, relative
 // operands, instruction/operand extensions, memory stores or unfamiliar ALU
 // operations are admitted. This is not a general shader optimizer.
@@ -72,6 +72,16 @@ std::optional<std::vector<FlowOperation>> boundedSm40(const DxbcProgram &program
             if (row.size() != 1 || (row[0] & 0x00fff800u))
                 return {};
             instruction.successors.clear();
+        } else if (op == 13) { // DISCARD marks pixel outputs, but execution continues.
+            if ((program.header[0] >> 16) != 0 || row.size() != 3 || (row[0] & 0x00fbf800u))
+                return {};
+            const auto token = row[1], type = (token >> 12) & 255;
+            if ((type != 0 && type != 1) ||
+                (token & ~0x30u) != (0x0010000au | (type << 12)) || row[2] >= 4096)
+                return {};
+            instruction.sources.push_back({type, row[2], 1u << ((token >> 4) & 3)});
+            // Keep the successor even when the current capture discards every
+            // pixel. Later dimensions/samples still require their dependencies.
         } else if (op == 31 || op == 76) {
             // Conditions/selectors use one component. Visit every outcome,
             // without pruning paths from a presumed value or observed image.
