@@ -95,6 +95,51 @@ class QueryInspectionUiTests final : public QObject {
             QVERIFY(!properties->findItems("query_result",Qt::MatchExactly).empty());
         }
     }
+    void predicate_data() {
+        QTest::addColumn<int>("mode");
+        QTest::newRow("occlusion-true")<<1;
+        QTest::newRow("overflow-false")<<8;
+    }
+    void predicate() {
+        QFETCH(int,mode);
+        const auto root=qEnvironmentVariable("FLORA_PREDICATE_CREATION_CAPTURES");
+        if(root.isEmpty())QSKIP("Set FLORA_PREDICATE_CREATION_CAPTURES for original Predicate navigation");
+        MainWindow window;window.show();QSignalSpy done(&window,&MainWindow::taskFinished);
+        window.openCapture(root+'/'+QString::number(mode)+"/capture.gpa_frame");
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty()&&!window.busy(),30000);QVERIFY(done.last()[0].toBool());
+        window.findChild<QComboBox *>("apiKinds")->setCurrentIndex(1);
+        window.findChild<QLineEdit *>("apiSearch")->setText("GetData");
+        auto table=window.findChild<QTableView *>("apiLog");
+        auto properties=window.findChild<QTreeWidget *>("properties");QVERIFY(properties);
+        size_t complete=0;
+        for(int row=0;row<table->model()->rowCount();++row) {
+            const auto index=table->model()->index(row,0);const auto id=index.data(Qt::UserRole).toULongLong();
+            table->setCurrentIndex(index);const auto details=model(window)->command(id);
+            if(!details.contains("query_result"))continue; // GetDataSize also matches the filter.
+            const auto &query=details["query_result"];QVERIFY(query["issues"].empty());
+            QCOMPARE(query["query_type"],nlohmann::json(mode==8?7:5));
+            bool desc=false,size=false;
+            for(const auto &metadata:query["metadata"]) {
+                if(metadata["event"].is_null())continue;
+                const auto getter=model(window)->command(metadata["event"].get<Id>());
+                QVERIFY(metadata["event"].get<Id>()<id);
+                if(metadata["source"]=="same_id_GetDesc") {QCOMPARE(getter["type"],nlohmann::json(0x316a));desc=true;}
+                if(metadata["source"]=="same_id_GetDataSize") {QCOMPARE(getter["type"],nlohmann::json(0x3169));size=true;}
+            }
+            QVERIFY(desc&&size);
+            // Check the visible properties tree, not just the prepared model.
+            auto items=properties->findItems("source",Qt::MatchExactly|Qt::MatchRecursive);
+            bool visibleDesc=false,visibleSize=false;
+            for(auto item:items) {
+                visibleDesc|=item->text(1)=="same_id_GetDesc";
+                visibleSize|=item->text(1)=="same_id_GetDataSize";
+            }
+            QVERIFY(visibleDesc&&visibleSize);
+            if(query["status"]=="complete") {++complete;QCOMPARE(query["fields"][0]["value"],nlohmann::json(mode==1));}
+            else QCOMPARE(query["status"],nlohmann::json("not_ready"));
+        }
+        QVERIFY(complete>0);
+    }
 };
 QTEST_MAIN(QueryInspectionUiTests)
 #include "QueryInspectionUiTests.moc"

@@ -1,11 +1,17 @@
 #include "ApiCommands.h"
 #include "QueryHistory.h"
+#include "core/QueryCompletion.h"
 #include <QByteArray>
 #include <set>
 
 namespace flora {
 using Json = nlohmann::json;
 namespace {
+bool sizeGetter(uint16_t type) { return type == 0x3151 || type == 0x3169; }
+bool descriptorGetter(uint16_t type) { return type == 0x3152 || type == 0x316a; }
+bool queryCreation(uint16_t type) {
+    return type == 0x3074 || type == 0x3235 || type == 0x33a8 || type == 0x3471 || type == 0x34b2 || type == 0x358d;
+}
 const std::vector<std::string> names{"EVENT",
                                      "OCCLUSION",
                                      "TIMESTAMP",
@@ -192,21 +198,20 @@ struct QueryHistory::State {
             fields[f["name"].get<std::string>()] = f["value"];
         auto kind = row["type"].get<uint16_t>();
         auto owner = fields.value("object", Id(0));
-        if ((kind == 0x3151 || kind == 0x3152) && owner) {
+        if ((sizeGetter(kind) || descriptorGetter(kind)) && owner) {
             auto &q = state(owner);
             if (row["status"] != "decoded") {
                 q.invalid.push_back("Malformed query getter at " + row["id"].dump());
                 return;
             }
-            if (kind == 0x3151)
+            if (sizeGetter(kind))
                 q.sizes.push_back({{"event", row["id"]}, {"size", fields["return_data_size"]}});
             else if (fields["descriptor_present"] != 0)
                 q.descriptors.push_back({{"event", row["id"]},
                                          {"source", "same_id_GetDesc"},
                                          {"query_type", fields["query_type"]},
                                          {"misc_flags", fields["misc_flags"]}});
-        } else if ((kind == 0x3074 || kind == 0x3235 || kind == 0x33a8 || kind == 0x3471 || kind == 0x34b2 ||
-                    kind == 0x358d) &&
+        } else if (queryCreation(kind) &&
                    row["status"] == "decoded" && fields["hresult"] == 0 && fields["returned_query"] != 0 &&
                    fields["descriptor_present"] != 0)
             state(fields["returned_query"])
@@ -214,7 +219,7 @@ struct QueryHistory::State {
                                         {"source", "explicit_CreateQuery_return"},
                                         {"query_type", fields["query_type"]},
                                         {"misc_flags", fields["misc_flags"]}});
-        else if (kind == 0x30b4 || kind == 0x31b4 || kind == 0x331d || kind == 0x33e3 || kind == 0x34fb)
+        else if (isQueryGetData(kind))
             row["query_result"] =
                 interpret(row, fields, fields.value("query", Id(0)) ? &state(fields["query"]) : nullptr);
     }
@@ -222,14 +227,7 @@ struct QueryHistory::State {
 QueryHistory::QueryHistory(const Frame &frame) : state_(std::make_unique<State>(frame)) {}
 QueryHistory::~QueryHistory() = default;
 bool QueryHistory::observes(uint16_t type) {
-    switch (type) {
-    case 0x3151: case 0x3152:
-    case 0x3074: case 0x3235: case 0x33a8: case 0x3471: case 0x34b2: case 0x358d:
-    case 0x30b4: case 0x31b4: case 0x331d: case 0x33e3: case 0x34fb:
-        return true;
-    default:
-        return false;
-    }
+    return sizeGetter(type) || descriptorGetter(type) || queryCreation(type) || isQueryGetData(type);
 }
 void QueryHistory::apply(Json &row) { state_->apply(row); }
 } // namespace flora

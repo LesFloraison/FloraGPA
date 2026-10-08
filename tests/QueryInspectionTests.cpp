@@ -11,8 +11,8 @@ using Json = nlohmann::json;
 namespace {
 using Raw = std::vector<uint8_t>;
 Raw wire(uint16_t type) {
-    if (type == 0x3151) return apiExportPack(Id(0), Id(50), 4u);
-    if (type == 0x3152) return apiExportPack(Id(0), Id(50), uint8_t(1), 0u, 0u);
+    if (type == 0x3151 || type == 0x3169) return apiExportPack(Id(0), Id(50), 4u);
+    if (type == 0x3152 || type == 0x316a) return apiExportPack(Id(0), Id(50), uint8_t(1), 0u, 0u);
     if (type == 0x3074 || type == 0x3235 || type == 0x33a8 || type == 0x3471 || type == 0x34b2 || type == 0x358d)
         return apiExportPack(Id(0), Id(1), 0, uint8_t(1), 0u, 0u, Id(50));
     return apiExportPack(Id(0), Id(1), 0, Id(50), uint8_t(1), 1u, 4u, 0u);
@@ -54,7 +54,7 @@ class QueryInspectionTests final : public QObject {
     }
     void malformed_data() {
         QTest::addColumn<int>("type");
-        for (int type : {0x3151,0x3152,0x3074,0x3235,0x33a8,0x3471,0x34b2,0x358d,0x30b4,0x31b4,0x331d,0x33e3,0x34fb})
+        for (int type : {0x3151,0x3152,0x3169,0x316a,0x3074,0x3235,0x33a8,0x3471,0x34b2,0x358d,0x30b4,0x31b4,0x331d,0x33e3,0x34fb})
             QTest::newRow(qPrintable(QString::number(type,16))) << type;
     }
     void malformed() {
