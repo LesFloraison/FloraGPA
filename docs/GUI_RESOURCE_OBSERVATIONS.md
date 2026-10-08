@@ -96,6 +96,10 @@ file choosers, exports, input methods, timing or any individual module.
 
 ## Reproduction and remaining boundary
 
+The subsequent [operation-level controls](GUI_WORKFLOW_STAGES.md) extend this
+probe with nine observations per optional workflow. The original two pilots
+above remain unchanged; newer tools still reproduce their complete analyses.
+
 Build `FloraRecoveryUiTests` and `FloraGuiResourceTests` with the release preset,
 then run GPU tests serially. For a new, non-existing output directory:
 

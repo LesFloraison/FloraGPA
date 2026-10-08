@@ -1,7 +1,19 @@
 # Current capabilities and compatibility
 
 Reviewed **2026-10-09**. The user authorized M4, then M5, while keeping M3 open.
-The latest [GUI resource observation controls](GUI_RESOURCE_OBSERVATIONS.md),
+The latest [operation-level GUI controls](GUI_WORKFLOW_STAGES.md), implementation
+`9cb01ed`, add nine named snapshots per optional workflow. Two independent-process
+eight-cycle runs pass 64 strict per-cycle images, two post-clear images and 64
+exports identical to the prior baseline. All 172 GUI inventories and 130 progress
+snapshots are rechecked; six native GUI rows, eight recovery rows, 26 runner and
+six analyzer CPU tests pass. Both runs observe +36 GDI during the first Command
+Lists export interval; all 16 structure-dialog opens/closes show +2/-2. Smaller
++3 changes occur at different times, with completed-cycle counts reaching 65
+in one process and 59 in the other. Correlation does not identify allocation
+owners or establish a leak, and the prior long-run cause remains unresolved.
+Production/package/replay scope is unchanged; M3/M4/M5 remain incomplete.
+
+The preceding [GUI resource observation controls](GUI_RESOURCE_OBSERVATIONS.md),
 harness `5774174`, add immutable current-process window/module/count snapshots
 and hash-checked analysis. Two serial eight-cycle GF2/BF1 pilots pass 56 strict
 per-cycle images plus two post-clear checks; 32 optional-workflow exports match

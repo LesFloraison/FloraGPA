@@ -42,6 +42,7 @@ chronology remains in Chinese.
 | Component responsibilities | [Architecture](ARCHITECTURE.md) |
 | Run tests and external comparisons | [Development validation](USAGE.md#development-validation) |
 | Observe current-process native GUI resources and audit lifecycle snapshots | [GUI resource controls](GUI_RESOURCE_OBSERVATIONS.md) |
+| Locate GUI resource changes between Query navigation, choosers and structure exports | [Operation-level GUI controls](GUI_WORKFLOW_STAGES.md) |
 | Build committed source with an isolated process environment and package it | [Source build and packaging](SOURCE_BUILD_AND_PACKAGING.md) |
 | Track the latest same-source package, tests and full replay matrix | [Same-source workflow acceptance](WORKFLOW_SOURCE_RELEASE_ACCEPTANCE.md) |
 | Repeat Query/API/structure workflows with retained per-cycle exports | [Workflow soak scope](RECOVERY_WORKFLOW_SOAK.md) |
