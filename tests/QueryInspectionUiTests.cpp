@@ -23,11 +23,18 @@ class QueryInspectionUiTests final : public QObject {
         QCoreApplication::setOrganizationName("FloraGPA-QueryInspectionTests");
         QCoreApplication::setApplicationName("FloraGPA-QueryInspectionTests");applyAppearance(*qApp);
     }
-    void lifecycle_data() { QTest::addColumn<QString>("mode");for(const auto name:{"success","cancel","late-cancel","switch","close","destroy"})QTest::newRow(name)<<QString(name); }
+    void lifecycle_data() {
+        QTest::addColumn<QString>("mode");QTest::addColumn<bool>("indexPhase");
+        for(bool index:{false,true})for(const auto name:{"success","cancel","late-cancel","switch","close","destroy"})
+            QTest::newRow(qPrintable(QString(index?"index-":"query-")+name))<<QString(name)<<index;
+    }
     void lifecycle() {
-        QFETCH(QString,mode); QTemporaryDir root;
+        QFETCH(QString,mode);QFETCH(bool,indexPhase); QTemporaryDir root;
         const auto baseline=root.filePath("baseline.gpa_frame"),large=root.filePath("large.gpa_frame");
-        testing::queryInspectionCapture(1,2).save(baseline);testing::queryInspectionCapture().save(large);
+        testing::queryInspectionCapture(1,2).save(baseline);auto candidate=testing::queryInspectionCapture();
+        if(indexPhase)for(size_t i=0;i<50000;++i)
+            candidate.add(Id(100000+i),7,0x3151,testing::apiExportPack(Id(0),Id(400),4u));
+        candidate.save(large);
         auto owner=std::make_unique<MainWindow>(); auto &window=*owner;window.show();
         QSignalSpy done(&window,&MainWindow::taskFinished),loaded(&window,&MainWindow::captureLoaded);
         window.openCapture(baseline);QTRY_VERIFY_WITH_TIMEOUT(!done.empty()&&!window.busy(),30000);QVERIFY(done.last()[0].toBool());
@@ -35,7 +42,7 @@ class QueryInspectionUiTests final : public QObject {
         done.clear();loaded.clear();int ticks=0;bool phase=false,acted=false;QTimer pulse;
         connect(&pulse,&QTimer::timeout,&pulse,[&]{if(owner&&owner->busy())++ticks;});
         const auto connection=connect(window.statusBar(),&QStatusBar::messageChanged,&window,[&](const QString &text){
-            if(phase||text!="Reading Query history…")return;
+            if(phase||text!=(indexPhase?"Indexing API commands…":"Reading Query history…"))return;
             phase=true;pulse.start(1);
             if(mode=="late-cancel") {
                 // Finish the producer without delivering its queued completion.
@@ -62,7 +69,9 @@ class QueryInspectionUiTests final : public QObject {
             QCOMPARE(model(window)->command(1000)["query_result"]["query_type"],nlohmann::json(0));
             window.findChild<QComboBox *>("apiKinds")->setCurrentIndex(1);
             window.findChild<QLineEdit *>("apiSearch")->setText("GetData");
-            auto table=window.findChild<QTableView *>("apiLog");QCOMPARE(table->model()->rowCount(),20000);
+            // GetData also matches GetDataSize: account for the added index load.
+            auto table=window.findChild<QTableView *>("apiLog");QCOMPARE(table->model()->rowCount(),indexPhase?70000:20000);
+            QCOMPARE(model(window)->cachedCommandCount(),size_t(0));
             table->setCurrentIndex(table->model()->index(0,0));
             auto properties=window.findChild<QTreeWidget *>("properties");QVERIFY(properties);
             QVERIFY(!properties->findItems("query_result",Qt::MatchExactly).empty());

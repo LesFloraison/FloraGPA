@@ -89,14 +89,15 @@ class QueryInspectionTests final : public QObject {
         auto queries=QueryInspection::prepare(a); CaptureModel model(CaptureModel::Kind::Commands);
         QAbstractItemModelTester tester(&model,QAbstractItemModelTester::FailureReportingMode::QtTest);
         QVERIFY_THROWS_EXCEPTION(std::invalid_argument,model.setFrame(a));
-        model.setFrame(a,queries); const auto *first=&model.command(102);const auto expected=*first;
+        auto search=CommandSearchIndex::prepare(a,queries);
+        model.setFrame(a,queries,search);const auto expected=model.command(102);
         QVERIFY_THROWS_EXCEPTION(std::invalid_argument,model.setFrame(b,queries));
-        QCOMPARE(&model.command(102),first);QCOMPARE(model.command(102),expected);
-        std::weak_ptr<const Frame> lifetime=a; a.reset();queries.reset();QVERIFY(!lifetime.expired());
+        QCOMPARE(model.command(102),expected);
+        std::weak_ptr<const Frame> lifetime=a; a.reset();queries.reset();search.reset();QVERIFY(!lifetime.expired());
         QCOMPARE(model.command(102),expected);model.setFrame(nullptr);QVERIFY(lifetime.expired());
         QVERIFY_THROWS_EXCEPTION(std::runtime_error,model.command(102));
         QVERIFY_THROWS_EXCEPTION(std::invalid_argument,QueryInspection::prepare(nullptr));
-        model.setFrame(b,QueryInspection::prepare(b));QCOMPARE(model.command(102),expected);
+        auto other=QueryInspection::prepare(b);model.setFrame(b,other,CommandSearchIndex::prepare(b,other));QCOMPARE(model.command(102),expected);
     }
     void cancellation_data() { QTest::addColumn<QString>("mode");for(const auto name:{"before","records","before-publish"})QTest::newRow(name)<<QString(name); }
     void cancellation() {
@@ -119,8 +120,8 @@ class QueryInspectionTests final : public QObject {
         if(root.isEmpty())QSKIP("Set FLORA_TEST_CAPTURE_DIR for original Query inspection");
         auto frame=std::make_shared<Frame>((root+'/'+name).toStdWString());equivalent(frame);
         QElapsedTimer timer;timer.start();const auto prepared=QueryInspection::prepare(frame);const auto preparation=timer.nsecsElapsed();
-        CaptureModel model(CaptureModel::Kind::Commands);model.setFrame(frame,prepared);timer.restart();size_t count=0;
-        for(const auto &[id,e]:frame->entries())if(prepared->find(id)){QCOMPARE(&model.command(id),prepared->find(id));++count;}
+        CaptureModel model(CaptureModel::Kind::Commands);model.setFrame(frame,prepared,CommandSearchIndex::prepare(frame,prepared));timer.restart();size_t count=0;
+        for(const auto &[id,e]:frame->entries())if(prepared->find(id)){QCOMPARE(model.command(id),*prepared->find(id));++count;}
         qInfo()<<name<<"Query rows"<<count<<"preparation ns"<<preparation<<"lookup ns"<<timer.nsecsElapsed();
         QVERIFY(count>0);
     }

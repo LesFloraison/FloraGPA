@@ -187,7 +187,7 @@ MainWindow::MainWindow() : loader_(this) {
             projectPath_.clear();
             projectDirty_ = false;
             updateExperimentActions();
-            commands_->setFrame(frame_, std::move(loaded.queries));
+            commands_->setFrame(frame_, std::move(loaded.queries), std::move(loaded.search));
             annotations_->setFrame(frame_);
             gpuStatistics_->setSelection(frame_, 0);
             updateProfileContext();
@@ -1564,12 +1564,14 @@ void MainWindow::openCapture(const QString &path) {
     loader_.setFuture(QtConcurrent::run([path, token](QPromise<CaptureLoadResult> &promise) {
         CaptureLoadResult result;
         try {
-            promise.setProgressRange(0, 2);
+            promise.setProgressRange(0, 3);
             const CancelCheck cancelled = [token] { return token->load(); };
             auto frame = std::make_shared<Frame>(std::filesystem::path(path.toStdWString()), cancelled);
             frame->sha256(cancelled);
             promise.setProgressValueAndText(1, "Reading Query history…");
             result.queries = QueryInspection::prepare(frame, cancelled);
+            promise.setProgressValueAndText(2, "Indexing API commands…");
+            result.search = CommandSearchIndex::prepare(frame, result.queries, cancelled);
             result.frame = std::move(frame);
         } catch (const OperationCancelled &) {
             result.cancelled = true;

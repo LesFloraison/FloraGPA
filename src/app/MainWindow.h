@@ -291,6 +291,7 @@ class MainWindow final : public QMainWindow {
     struct CaptureLoadResult {
         std::shared_ptr<const Frame> frame;
         std::shared_ptr<const QueryInspection> queries;
+        std::shared_ptr<const CommandSearchIndex> search;
         QString error;
         bool cancelled = false;
     };

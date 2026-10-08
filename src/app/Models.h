@@ -2,10 +2,13 @@
 #include "application/ApiCommands.h"
 #include "core/Frame.h"
 #include "QueryInspection.h"
+#include "CommandSearchIndex.h"
 #include <QAbstractTableModel>
 #include <QJsonArray>
 #include <QJsonObject>
 #include <QSortFilterProxyModel>
+#include <QRegularExpression>
+#include <deque>
 #include <memory>
 
 namespace flora {
@@ -13,7 +16,8 @@ class CaptureModel final : public QAbstractTableModel {
   public:
     enum class Kind { Commands, Resources };
     explicit CaptureModel(Kind kind, QObject *parent = nullptr) : QAbstractTableModel(parent), kind_(kind) {}
-    void setFrame(std::shared_ptr<const Frame> frame, std::shared_ptr<const QueryInspection> queries = {});
+    void setFrame(std::shared_ptr<const Frame> frame, std::shared_ptr<const QueryInspection> queries = {},
+                  std::shared_ptr<const CommandSearchIndex> search = {});
     int rowCount(const QModelIndex &parent = {}) const override {
         return parent.isValid() ? 0 : int(ids_.size());
     }
@@ -22,7 +26,12 @@ class CaptureModel final : public QAbstractTableModel {
     QVariant headerData(int, Qt::Orientation, int role) const override;
     Id idAt(int row) const { return row >= 0 && row < int(ids_.size()) ? ids_[row] : 0; }
     int rowOf(Id id) const;
-    const nlohmann::json &command(Id id) const;
+    // Return an owned value: cache eviction or capture replacement cannot
+    // invalidate a caller's selected command document.
+    nlohmann::json command(Id id) const;
+    bool matchesCommand(Id id, const QStringList &words, std::optional<Id> resource) const;
+    static constexpr size_t detailCacheLimit = 128;
+    size_t cachedCommandCount() const { return commandDetails_.size(); }
     bool isCommands() const { return kind_ == Kind::Commands; }
     QString debugNames(Id id) const {
         auto found = names_.find(id);
@@ -33,9 +42,11 @@ class CaptureModel final : public QAbstractTableModel {
     Kind kind_;
     std::shared_ptr<const Frame> frame_;
     std::shared_ptr<const QueryInspection> queries_;
+    std::shared_ptr<const CommandSearchIndex> search_;
     std::vector<Id> ids_;
     std::map<Id, QStringList> names_;
     mutable std::map<Id, nlohmann::json> commandDetails_;
+    mutable std::deque<Id> detailOrder_;
 };
 class CaptureFilter final : public QSortFilterProxyModel {
   public:
@@ -45,6 +56,7 @@ class CaptureFilter final : public QSortFilterProxyModel {
     QString searchText;
     void setFilterFixedString(const QString &text) {
         searchText = text;
+        searchWords_ = text.toCaseFolded().split(QRegularExpression("\\s+"), Qt::SkipEmptyParts);
         QSortFilterProxyModel::setFilterFixedString(text);
     }
     using QSortFilterProxyModel::QSortFilterProxyModel;
@@ -55,6 +67,8 @@ class CaptureFilter final : public QSortFilterProxyModel {
 
   protected:
     bool filterAcceptsRow(int row, const QModelIndex &parent) const override;
+  private:
+    QStringList searchWords_;
 };
 class BufferModel final : public QAbstractTableModel {
   public:

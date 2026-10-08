@@ -21,17 +21,24 @@ QVariant GeometryModel::headerData(int section, Qt::Orientation orientation, int
         return {};
     return orientation == Qt::Horizontal ? QVariant(columns_.at(section).toString()) : QVariant(section + 1);
 }
-void CaptureModel::setFrame(std::shared_ptr<const Frame> frame, std::shared_ptr<const QueryInspection> queries) {
+void CaptureModel::setFrame(std::shared_ptr<const Frame> frame, std::shared_ptr<const QueryInspection> queries,
+                           std::shared_ptr<const CommandSearchIndex> search) {
     if (queries && queries->frame() != frame.get())
         throw std::invalid_argument("Query inspection belongs to another capture");
     if (frame && kind_ == Kind::Commands && !queries)
         throw std::invalid_argument("Command model requires prepared Query inspection");
+    if (search && search->frame() != frame.get())
+        throw std::invalid_argument("API search belongs to another capture");
+    if (frame && kind_ == Kind::Commands && !search)
+        throw std::invalid_argument("Command model requires prepared API search");
     beginResetModel();
     frame_ = std::move(frame);
     queries_ = std::move(queries);
+    search_ = std::move(search);
     ids_.clear();
     names_.clear();
     commandDetails_.clear();
+    detailOrder_.clear();
     if (frame_)
         for (auto &[id, e] : frame_->entries())
             if (e.category == (kind_ == Kind::Commands ? 7 : 5))
@@ -51,7 +58,7 @@ int CaptureModel::rowOf(Id id) const {
     auto it = std::lower_bound(ids_.begin(), ids_.end(), id);
     return it != ids_.end() && *it == id ? int(it - ids_.begin()) : -1;
 }
-const nlohmann::json &CaptureModel::command(Id id) const {
+nlohmann::json CaptureModel::command(Id id) const {
     if (!frame_) throw std::runtime_error("Command capture is unavailable");
     if (queries_)
         if (const auto row = queries_->find(id)) return *row;
@@ -60,9 +67,17 @@ const nlohmann::json &CaptureModel::command(Id id) const {
         auto details = inspectCommand(*frame_, id);
         if (details["name"] == "GetData")
             throw std::runtime_error("Captured Query result was not prepared");
-        found = commandDetails_.emplace(id, std::move(details)).first;
+        if (commandDetails_.size() == detailCacheLimit) {
+            commandDetails_.erase(detailOrder_.front()); detailOrder_.pop_front();
+        }
+        detailOrder_.push_back(id);
+        try { found = commandDetails_.emplace(id, std::move(details)).first; }
+        catch (...) { detailOrder_.pop_back(); throw; }
     }
     return found->second;
+}
+bool CaptureModel::matchesCommand(Id id, const QStringList &words, std::optional<Id> resource) const {
+    return search_ && search_->matches(id, words, resource);
 }
 QVariant CaptureModel::data(const QModelIndex &index, int role) const {
     if (!index.isValid() || index.row() >= int(ids_.size()) || !frame_)
@@ -140,7 +155,7 @@ bool CaptureFilter::filterAcceptsRow(int row, const QModelIndex &parent) const {
         return false;
     auto model = static_cast<const CaptureModel *>(sourceModel());
     if (model->isCommands() && (referencedResource || !filterRegularExpression().pattern().isEmpty())) {
-        return commandMatches(model->command(model->idAt(row)), searchText.toStdString(), referencedResource);
+        return model->matchesCommand(model->idAt(row), searchWords_, referencedResource);
     }
     return QSortFilterProxyModel::filterAcceptsRow(row, parent);
 }
