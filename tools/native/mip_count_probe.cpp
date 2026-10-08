@@ -10,12 +10,13 @@ int wmain(int argc, wchar_t **argv) {
     fs::create_directories(output);
     try {
         const int mode = std::stoi(argv[2]);
-        if (mode < 0 || mode > 43)
+        if (mode < 0 || mode > 51)
             throw std::runtime_error("Invalid mode");
         const int switchBehaviors[]{0, 1, 2, 2, 4, 5, 0, 0};
         const int loopBehaviors[]{0, 1, 2, 4, 4, 5, 0, 0};
         const int returnBehaviors[]{0, 1, 2, 2, 4, 5, 0, 0};
-        const int behavior = mode >= 36 ? returnBehaviors[mode - 36] : mode >= 28 ? loopBehaviors[mode - 28] : mode >= 20 ? switchBehaviors[mode - 20] : mode < 18 ? mode % 6 : 0;
+        const int discardBehaviors[]{0, 1, 0, 0, 4, 5, 0, 0};
+        const int behavior = mode >= 44 ? discardBehaviors[mode - 44] : mode >= 36 ? returnBehaviors[mode - 36] : mode >= 28 ? loopBehaviors[mode - 28] : mode >= 20 ? switchBehaviors[mode - 20] : mode < 18 ? mode % 6 : 0;
         const char *profile = mode < 6 ? "ps_5_0" : "ps_4_0";
         if (argc == 5 && !LoadLibraryExW(argv[4], nullptr, LOAD_WITH_ALTERED_SEARCH_PATH))
             throw std::runtime_error("Cannot load development shim");
@@ -146,7 +147,19 @@ int wmain(int argc, wchar_t **argv) {
             "return float4(0,0,1,1);}"
             "float4 loopReturn():SV_Target{uint w,h,n;tex.GetDimensions(0,w,h,n);"
             "[loop]for(uint i=0;i<n;++i){[branch]if(i==2)return float4(n/4.0,0,0,1);}"
-            "return float4(0,1,0,1);}";
+            "return float4(0,1,0,1);}"
+            "float4 discardKeep():SV_Target{uint w,h,n;tex.GetDimensions(0,w,h,n);"
+            "if(n==3)discard;return float4(n/4.0,0,0,1);}"
+            "float4 discardCondition():SV_Target{uint w,h,n;tex.GetDimensions(0,w,h,n);"
+            "if(w==3)discard;return float4(n/4.0,0,0,1);}"
+            "float4 discardAfter():SV_Target{uint w,h,n;tex.GetDimensions(0,w,h,n);"
+            "if(n==4)discard;return float4(w/8.0,h/8.0,n/4.0,1);}"
+            "float4 discardSample():SV_Target{uint w,h,n;tex.GetDimensions(0,w,h,n);"
+            "if(n==3)discard;return float4(n/4.0,tex.SampleLevel(sam,float2(.5,.5),0).g,0,1);}"
+            "float4 discardAll():SV_Target{uint w,h,n;tex.GetDimensions(0,w,h,n);"
+            "if(n==4)discard;return float4(n/4.0,0,0,1);}"
+            "float4 discardLoop():SV_Target{uint w,h,n;tex.GetDimensions(0,w,h,n);"
+            "[loop]for(uint i=0;i<n;++i){if(n==3)discard;}return float4(n/4.0,0,0,1);}";
         auto compile = [&](const char *entry, const char *target, bool strip) {
             ComPtr<ID3DBlob> code, errors;
             checked(D3DCompile(shader.data(), shader.size(), nullptr, nullptr, nullptr, entry, target, 0, 0,
@@ -176,7 +189,9 @@ int wmain(int argc, wchar_t **argv) {
                                   "loopSample", "loopSample", "nestedLoop", "continueLoop"};
         const char *returnEntries[]{"returnCount", "returnCount", "returnWidth", "returnCondition",
                                    "returnSample", "returnSample", "nestedReturn", "loopReturn"};
-        auto psCode = compile(mode >= 36 ? returnEntries[mode - 36] : mode >= 28 ? loopEntries[mode - 28] : mode >= 20 ? switchEntries[mode - 20] : mode >= 12 ? branchEntries[mode - 12] : behavior < 2    ? "count"
+        const char *discardEntries[]{"discardKeep", "discardKeep", "discardCondition", "discardAfter",
+                                    "discardSample", "discardSample", "discardAll", "discardLoop"};
+        auto psCode = compile(mode >= 44 ? discardEntries[mode - 44] : mode >= 36 ? returnEntries[mode - 36] : mode >= 28 ? loopEntries[mode - 28] : mode >= 20 ? switchEntries[mode - 20] : mode >= 12 ? branchEntries[mode - 12] : behavior < 2    ? "count"
                               : behavior == 2 ? "dimensions"
                               : behavior == 3 ? "mixed"
                                           : "dependent",
@@ -196,7 +211,8 @@ int wmain(int argc, wchar_t **argv) {
         screen.mips = screen.layers = 1;
         auto stage = create(d.Get(), screen, true);
         auto pixels = storage(screen, false);
-        const std::array<uint8_t, 4> expected = behavior < 2    ? std::array<uint8_t, 4>{255, 0, 0, 255}
+        const std::array<uint8_t, 4> expected = mode == 47 || mode == 50 ? std::array<uint8_t, 4>{0, 0, 0, 255}
+                                                : behavior < 2    ? std::array<uint8_t, 4>{255, 0, 0, 255}
                                                 : behavior == 2 || mode == 15 ? std::array<uint8_t, 4>{255, 255, 255, 255}
                                                             : std::array<uint8_t, 4>{255, 255, 0, 255};
         for (size_t p = 0; p < pixels[0].bytes.size(); p += 4)
