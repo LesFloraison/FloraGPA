@@ -16,6 +16,7 @@
 #include <QSaveFile>
 #include <QDateTime>
 #include <QPixmapCache>
+#include <QWindow>
 
 // Observe the test executable's import used by the statically linked FloraUi.
 // No production binary on disk or other process is modified.
@@ -304,6 +305,7 @@ class RecoveryUiTests final : public QObject {
         QElapsedTimer duration;
         duration.start();
         nlohmann::json journal{{"schema", "FloraGPA persistent Qt recovery soak 1"},
+            {"qt_platform", QGuiApplication::platformName().toStdString()},
             {"started_utc", QDateTime::currentDateTimeUtc().toString(Qt::ISODate).toStdString()},
             {"completed", false}, {"minimum_seconds", minimumSeconds},
             {"pixmap_cache_limit_kib", QPixmapCache::cacheLimit()},
@@ -426,6 +428,8 @@ class RecoveryUiTests final : public QObject {
                     {"working_set", memory.WorkingSetSize}, {"handles", handles},
                     {"gdi_objects", GetGuiResources(GetCurrentProcess(), 0)},
                     {"user_objects", GetGuiResources(GetCurrentProcess(), 1)},
+                    {"window_visible", window.isVisible()},
+                    {"window_exposed", window.windowHandle() && window.windowHandle()->isExposed()},
                     {"replay_status", window.statusBar()->currentMessage().toStdString()},
                     {"rgba_sha256", golden.toStdString()}, {"ownership", ownership(window)}};
                 if (!workflows.isEmpty()) observation["workflows"] = std::move(workflow);

@@ -9,7 +9,38 @@ import sys
 import tempfile
 import unittest
 
-from validate_recovery_soak import digest, run_process, validate_workflows
+from validate_recovery_soak import digest, run_process, validate_workflows, validate_platform
+
+
+class PlatformTests(unittest.TestCase):
+    def journal(self, **changes):
+        row = dict(window_visible=True, window_exposed=True, gdi_objects=12, user_objects=9)
+        row.update(changes)
+        return dict(qt_platform='windows', observations=[row])
+
+    def test_native_window(self):
+        validate_platform('windows', self.journal())
+
+    def test_platform_substitution(self):
+        with self.assertRaisesRegex(ValueError, 'platform differs'):
+            validate_platform('offscreen', self.journal())
+
+    def test_missing_actual_platform(self):
+        with self.assertRaisesRegex(ValueError, 'platform differs'):
+            validate_platform('windows', dict(observations=[]))
+
+    def test_hidden_or_unexposed(self):
+        for field in ['window_visible', 'window_exposed']:
+            with self.subTest(field=field), self.assertRaisesRegex(ValueError, 'visible and exposed'):
+                validate_platform('windows', self.journal(**{field:False}))
+
+    def test_empty_or_missing_native_resources(self):
+        for rows in [[], self.journal(gdi_objects=0)['observations'], self.journal(user_objects=0)['observations']]:
+            with self.subTest(rows=rows), self.assertRaises(ValueError):
+                validate_platform('windows', dict(qt_platform='windows', observations=rows))
+
+    def test_offscreen_does_not_claim_native_resources(self):
+        validate_platform('offscreen', dict(qt_platform='offscreen', observations=[dict(gdi_objects=0)]))
 
 
 class WorkflowTests(unittest.TestCase):

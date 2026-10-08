@@ -22,6 +22,17 @@ def digest(path):
         return hashlib.file_digest(stream, 'sha256').hexdigest()
 
 
+def validate_platform(requested, journal):
+    if requested not in {'offscreen', 'windows'} or journal.get('qt_platform') != requested:
+        raise ValueError('Actual Qt platform differs from requested platform')
+    if requested == 'windows':
+        rows = journal['observations']
+        if not rows or not all(row.get('window_visible') and row.get('window_exposed') for row in rows):
+            raise ValueError('Native window was not visible and exposed at every observation')
+        if not all(row['gdi_objects'] > 0 and row['user_objects'] > 0 for row in rows):
+            raise ValueError('Missing native Windows GUI resource observations')
+
+
 def validate_workflows(root, rows):
     """Audit retained exports, their UI event inventory and per-capture stability."""
     expected = {'api/commands.json', 'api/commands.csv', 'contexts.json', 'command-lists.json'}
@@ -68,6 +79,8 @@ def main():
     parser.add_argument('--out', type=Path, required=True)
     parser.add_argument('--seconds', type=int, default=1800)
     parser.add_argument('--pairs', type=int, default=20)
+    parser.add_argument('--platform', choices=['offscreen', 'windows'], default='offscreen',
+                        help='Qt platform to exercise; the test must report the same actual platform')
     parser.add_argument('--workflows', action='store_true',
                         help='Also repeat Query navigation, filtered API export and both structure exports; retain every cycle')
     parser.add_argument('--retention-control', action='store_true',
@@ -89,7 +102,8 @@ def main():
                   trace_allocations=args.trace_allocations,
                   memory_maps=args.memory_maps,
                   workflows=args.workflows,
-                  scope='Same-host offscreen Qt window, system-only PATH, serial production workers; not clean-machine or all-workflow certification')
+                  qt_platform=args.platform,
+                  scope=f'Same-host {args.platform} Qt window, system-only PATH, serial production workers; not clean-machine or all-workflow certification')
 
     def save():
         temporary = root / 'validation.pending.json'
@@ -132,7 +146,7 @@ def main():
                {'SYSTEMROOT', 'WINDIR', 'COMSPEC', 'TEMP', 'TMP', 'LOCALAPPDATA', 'APPDATA'}}
         windows = Path(os.environ['WINDIR'])
         env.update(PATH=str(windows / 'System32') + os.pathsep + str(windows),
-                   QT_QPA_PLATFORM='offscreen',
+                   QT_QPA_PLATFORM=args.platform,
                    QTEST_FUNCTION_TIMEOUT=str((args.seconds + args.pairs * 180 + 600) * 1000),
                    FLORA_TEST_CAPTURE_DIR=str(args.captures.resolve()),
                    FLORA_RECOVERY_MIN_SECONDS=str(args.seconds),
@@ -161,6 +175,7 @@ def main():
         assert 'Totals: 3 passed, 0 failed, 0 skipped' in text, 'Missing complete Qt result'
         journal = json.loads((root / 'journal.json').read_text(encoding='utf-8'))
         assert journal['completed'] and journal['phase'] == 'complete'
+        validate_platform(args.platform, journal)
         assert journal['workflows'] == args.workflows
         assert journal['elapsed_ms'] >= args.seconds * 1000
         rows = journal['observations']

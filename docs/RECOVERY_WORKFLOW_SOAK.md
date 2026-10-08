@@ -33,13 +33,25 @@ python tools/validate_recovery_soak.py `
   --seconds 1800 --pairs 20 --workflows
 ```
 
+The default platform is `offscreen`. Add `--platform windows` to exercise a
+visible native Windows window. The journal records `QGuiApplication::platformName()`;
+the runner rejects a different actual platform instead of trusting the environment
+alone. Native acceptance also requires a visible, exposed window and nonzero
+GDI/USER observations at every completed cycle. Hiding/minimizing the window can
+invalidate that scope; such a run is retained as failed, not reclassified as an
+offscreen success. No platform-dependent image tolerance is introduced.
+
 Keep GPU checks serial. The test owns one MainWindow throughout; auxiliary
 decoder comparisons and journal history also allocate in that process. Memory
 observations cannot by themselves establish absence of application leaks.
-The offscreen Qt run does not certify native Windows GDI behavior, every
-analysis/export workflow, other captures, other drivers or a clean host.
+An offscreen run does not certify native Windows GDI behavior. Neither platform
+certifies every analysis/export workflow, other captures, other drivers or a
+clean host. GDI/USER counts and platform identity are observations, not proof of
+leak-free behavior.
 
 `python tools/test_recovery_soak.py -v` checks complete/modified/missing exports,
 UI/CSV inventory conflicts, structure errors, per-capture instability and cycle
 path escapes, as well as process success/failure and timed-out process-tree
 termination. Failed runs are retained; never reuse their output directories.
+Platform counterexamples cover substitution, missing identity, hidden/unexposed
+windows and absent native GUI resource observations.
