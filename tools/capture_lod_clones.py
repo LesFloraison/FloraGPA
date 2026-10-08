@@ -1,0 +1,111 @@
+"""Development-only original captures: input clone storage and resource LOD."""
+import argparse
+import hashlib
+import json
+import os
+from pathlib import Path
+import shutil
+import subprocess
+
+
+def sha(path):
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def main():
+    parser = argparse.ArgumentParser(__doc__)
+    parser.add_argument('--producer', type=Path, required=True)
+    parser.add_argument('--out', type=Path, required=True)
+    parser.add_argument('--gpa-dir', type=Path, default=Path('C:/Program Files/IntelSWTools/GPA'))
+    parser.add_argument('--modes', type=int, nargs='+', default=list(range(12)),
+                        help='0..11: 1D/2D arrays and 3D, LOD 0/.75/1/4')
+    args = parser.parse_args()
+    if len(set(args.modes)) != len(args.modes) or any(n < 0 or n > 11 for n in args.modes):
+        parser.error('Choose distinct modes 0..11')
+    root = args.out.resolve()
+    root.mkdir(parents=True, exist_ok=False)
+    frozen = root / 'producer'
+    frozen.mkdir()
+    repo = Path(__file__).resolve().parents[1]
+    for name in ['tools/capture_lod_clones.py', 'tools/native/min_lod_clone_probe.cpp',
+                 'tools/native/texture_probe_helpers.h', 'tools/native/present_capture_probe.cpp',
+                 'tools/native/original_capture_control.h']:
+        shutil.copy2(repo / name, frozen / Path(name).name)
+    shutil.copy2(args.producer.resolve(strict=True), frozen / args.producer.name)
+    exe = frozen / args.producer.name
+    manifest = dict(schema='FloraGPA LOD clone original capture batch 1', completed=False,
+                    producer_files={p.name: sha(p) for p in frozen.iterdir()},
+                    gpa_sha256={n: sha(args.gpa_dir / n) for n in
+                                ['shimloader64.dll', 'shimd3d64.dll', 'dx11_player.dll']},
+                    producer_runs=[], captures=[])
+
+    def save():
+        (root / 'manifest.json').write_text(json.dumps(manifest, indent=2) + '\n')
+
+    try:
+        for mode in args.modes:
+            folder = root / str(mode)
+            folder.mkdir()
+            capture = folder / 'capture.gpa_frame'
+            for backend in ['hardware', 'warp', 'captured']:
+                env = dict(os.environ)
+                env.pop('GPA_LOCAL_INJECT', None)
+                env.pop('FLORA_MINLOD_WARP', None)
+                command = [str(exe), str(folder / backend), str(mode)]
+                if backend == 'warp':
+                    env['FLORA_MINLOD_WARP'] = '1'
+                if backend == 'captured':
+                    command += [str(capture), str(args.gpa_dir / 'shimloader64.dll')]
+                    env['GPA_LOCAL_INJECT'] = 'true'
+                row = dict(mode=mode, backend=backend, command=command)
+                manifest['producer_runs'].append(row)
+                save()
+                with (folder / (backend + '.log')).open('wb') as log:
+                    result = subprocess.run(command, env=env, stdout=log, stderr=subprocess.STDOUT,
+                                            creationflags=subprocess.CREATE_NO_WINDOW, timeout=60)
+                row['exit_code'] = result.returncode
+                save()
+                if result.returncode:
+                    raise RuntimeError(f'Producer failed: {mode}/{backend}')
+                oracle = json.loads((folder / backend / 'oracle.json').read_text())
+                assert oracle['completed'] and len(oracle['frames']) == 12
+                assert oracle['mode'] == mode and oracle['warp'] == (backend == 'warp')
+                assert oracle['dimension'] == 1 + mode // 4
+                assert oracle['lod'] == [0, .75, 1, 4][mode % 4]
+                assert oracle['capture_requested'] == (backend == 'captured')
+                assert all(frame['image_verified'] and frame['storage_verified'] and frame['lod_preserved']
+                           for frame in oracle['frames'])
+                assert (folder / backend / 'storage.bin').read_bytes() == (folder / backend / 'expected-storage.bin').read_bytes()
+                row['storage_sha256'] = sha(folder / backend / 'storage.bin')
+                assert row['storage_sha256'] == sha(folder / 'hardware/expected-storage.bin')
+                assert (folder / backend / 'frame.rgba').read_bytes() == (folder / backend / 'expected.rgba').read_bytes()
+                assert all(frame['clone_checks'] == 5 for frame in oracle['frames'])
+                row['clones'] = []
+                for variant in range(5):
+                    hashes = {}
+                    for extension in ['rgba', 'bin']:
+                        name = f'clone-{variant}.{extension}'
+                        actual = folder / backend / name
+                        assert actual.read_bytes() == (folder / backend / ('expected-' + name)).read_bytes()
+                        assert sha(actual) == sha(folder / 'hardware' / name)
+                        hashes[extension] = sha(actual)
+                    row['clones'].append(hashes)
+                row['oracle'] = oracle
+                row['image_sha256'] = sha(folder / backend / 'frame.rgba')
+                assert row['image_sha256'] == sha(folder / 'hardware/expected.rgba')
+                save()
+            assert capture.is_file()
+            manifest['captures'].append(dict(mode=mode, path=f'{mode}/capture.gpa_frame',
+                                             sha256=sha(capture), bytes=capture.stat().st_size))
+            save()
+            print(mode, 'native hardware/WARP and original capture verified', flush=True)
+        manifest['completed'] = True
+    except Exception as error:
+        manifest['error'] = str(error)
+        raise
+    finally:
+        save()
+
+
+if __name__ == '__main__':
+    main()
