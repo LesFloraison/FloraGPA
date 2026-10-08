@@ -1,0 +1,930 @@
+{
+  "schema": "FloraGPA compatibility corpus 1",
+  "profile": "GPA 2025 R1 legacy DX11 / IGPA v3",
+  "cases": [
+    {
+      "id": "lod_clone_0",
+      "path": "m4-lod-clone-originals/0/capture.gpa_frame",
+      "sha256": "9ddbe398fd948022e93954f5de8af9399bab8a462dc459b0d3ed14a0804aeae7",
+      "bytes": 181397,
+      "family": "lod_clone",
+      "origin": "self_owned_original_gpa_capture",
+      "provenance_note": "Untouched GPA 2025 R1 output; hardware, WARP and injected producer each verify 12 original and 60 clone images, full storage bytes and resource LOD.",
+      "device_scope": "Producer hardware/WARP identities recorded; original player adapter/configuration unverified.",
+      "reference_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 207,
+          "repeat": 2,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        }
+      ],
+      "boundaries": [
+        {
+          "kind": "texture",
+          "event": 29,
+          "resource": 26,
+          "expect_stable": true,
+          "expected_storage_sha256": "a443b8cef0918b8f02020762f287de5d8eb8bb011de8af027ec311a9e52a961e"
+        },
+        {
+          "kind": "texture",
+          "event": 78,
+          "resource": 75,
+          "expect_stable": true,
+          "expected_storage_sha256": "a07a293626cdc91ad29632f524f450a5c3813bd74b76f8635bb8aad7163d4edc"
+        },
+        {
+          "kind": "texture",
+          "event": 111,
+          "resource": 108,
+          "expect_stable": true,
+          "expected_storage_sha256": "175416aea1c9d3c876f2d95c010b7c18058a6351827b45afe2cf965683dbd27d"
+        },
+        {
+          "kind": "texture",
+          "event": 144,
+          "resource": 141,
+          "expect_stable": true,
+          "expected_storage_sha256": "eb2b074101bed5cbfa603d086019f4a506ee0cc09e59bff59a0b8714fbb3ae7e"
+        },
+        {
+          "kind": "texture",
+          "event": 177,
+          "resource": 174,
+          "expect_stable": true,
+          "expected_storage_sha256": "a443b8cef0918b8f02020762f287de5d8eb8bb011de8af027ec311a9e52a961e"
+        },
+        {
+          "kind": "texture",
+          "event": 207,
+          "resource": 10,
+          "expect_stable": true,
+          "expected_storage_sha256": "a443b8cef0918b8f02020762f287de5d8eb8bb011de8af027ec311a9e52a961e"
+        }
+      ],
+      "native_workload_fidelity": "passed",
+      "fidelity_reason": "Exact CPU/native hardware/WARP image and packed-byte checks at all six Draws; not just the final restored image. Independent input-edit tests verify clone LOD and original lifetimes.",
+      "application_reference_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "application_reference_scope": "36 final and 180 clone image/storage/LOD checks across hardware, WARP and injected hardware per capture",
+      "application_reference_evidence": {
+        "path": "m4-lod-clone-originals/0/hardware/expected.rgba",
+        "sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+      },
+      "source_manifests": [
+        {
+          "path": "m4-lod-clone-originals/manifest.json",
+          "sha256": "6dd041dcce703183fcbc41357e0143ef14619129ff02b62352a7c7c27d13ce18"
+        }
+      ]
+    },
+    {
+      "id": "lod_clone_1",
+      "path": "m4-lod-clone-originals/1/capture.gpa_frame",
+      "sha256": "b36d0c9acd456043ebcfe179c3cf95dabfd40a77683efe3da23cd5f531bc5dbb",
+      "bytes": 181397,
+      "family": "lod_clone",
+      "origin": "self_owned_original_gpa_capture",
+      "provenance_note": "Untouched GPA 2025 R1 output; hardware, WARP and injected producer each verify 12 original and 60 clone images, full storage bytes and resource LOD.",
+      "device_scope": "Producer hardware/WARP identities recorded; original player adapter/configuration unverified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 207,
+          "repeat": 2,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        }
+      ],
+      "boundaries": [
+        {
+          "kind": "texture",
+          "event": 29,
+          "resource": 26,
+          "expect_stable": true,
+          "expected_storage_sha256": "a443b8cef0918b8f02020762f287de5d8eb8bb011de8af027ec311a9e52a961e"
+        },
+        {
+          "kind": "texture",
+          "event": 78,
+          "resource": 75,
+          "expect_stable": true,
+          "expected_storage_sha256": "a07a293626cdc91ad29632f524f450a5c3813bd74b76f8635bb8aad7163d4edc"
+        },
+        {
+          "kind": "texture",
+          "event": 111,
+          "resource": 108,
+          "expect_stable": true,
+          "expected_storage_sha256": "175416aea1c9d3c876f2d95c010b7c18058a6351827b45afe2cf965683dbd27d"
+        },
+        {
+          "kind": "texture",
+          "event": 144,
+          "resource": 141,
+          "expect_stable": true,
+          "expected_storage_sha256": "eb2b074101bed5cbfa603d086019f4a506ee0cc09e59bff59a0b8714fbb3ae7e"
+        },
+        {
+          "kind": "texture",
+          "event": 177,
+          "resource": 174,
+          "expect_stable": true,
+          "expected_storage_sha256": "a443b8cef0918b8f02020762f287de5d8eb8bb011de8af027ec311a9e52a961e"
+        },
+        {
+          "kind": "texture",
+          "event": 207,
+          "resource": 10,
+          "expect_stable": true,
+          "expected_storage_sha256": "a443b8cef0918b8f02020762f287de5d8eb8bb011de8af027ec311a9e52a961e"
+        }
+      ],
+      "native_workload_fidelity": "passed",
+      "fidelity_reason": "Exact CPU/native hardware/WARP image and packed-byte checks at all six Draws; not just the final restored image. Independent input-edit tests verify clone LOD and original lifetimes.",
+      "application_reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "application_reference_scope": "36 final and 180 clone image/storage/LOD checks across hardware, WARP and injected hardware per capture",
+      "application_reference_evidence": {
+        "path": "m4-lod-clone-originals/1/hardware/expected.rgba",
+        "sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636"
+      },
+      "source_manifests": [
+        {
+          "path": "m4-lod-clone-originals/manifest.json",
+          "sha256": "6dd041dcce703183fcbc41357e0143ef14619129ff02b62352a7c7c27d13ce18"
+        }
+      ]
+    },
+    {
+      "id": "lod_clone_2",
+      "path": "m4-lod-clone-originals/2/capture.gpa_frame",
+      "sha256": "ba8d59a38e76dfbc0a5d765f9abf6352c73f5c4b3c31a66a3c197705f20d1cbc",
+      "bytes": 181397,
+      "family": "lod_clone",
+      "origin": "self_owned_original_gpa_capture",
+      "provenance_note": "Untouched GPA 2025 R1 output; hardware, WARP and injected producer each verify 12 original and 60 clone images, full storage bytes and resource LOD.",
+      "device_scope": "Producer hardware/WARP identities recorded; original player adapter/configuration unverified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 207,
+          "repeat": 2,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        }
+      ],
+      "boundaries": [
+        {
+          "kind": "texture",
+          "event": 29,
+          "resource": 26,
+          "expect_stable": true,
+          "expected_storage_sha256": "a443b8cef0918b8f02020762f287de5d8eb8bb011de8af027ec311a9e52a961e"
+        },
+        {
+          "kind": "texture",
+          "event": 78,
+          "resource": 75,
+          "expect_stable": true,
+          "expected_storage_sha256": "a07a293626cdc91ad29632f524f450a5c3813bd74b76f8635bb8aad7163d4edc"
+        },
+        {
+          "kind": "texture",
+          "event": 111,
+          "resource": 108,
+          "expect_stable": true,
+          "expected_storage_sha256": "175416aea1c9d3c876f2d95c010b7c18058a6351827b45afe2cf965683dbd27d"
+        },
+        {
+          "kind": "texture",
+          "event": 144,
+          "resource": 141,
+          "expect_stable": true,
+          "expected_storage_sha256": "eb2b074101bed5cbfa603d086019f4a506ee0cc09e59bff59a0b8714fbb3ae7e"
+        },
+        {
+          "kind": "texture",
+          "event": 177,
+          "resource": 174,
+          "expect_stable": true,
+          "expected_storage_sha256": "a443b8cef0918b8f02020762f287de5d8eb8bb011de8af027ec311a9e52a961e"
+        },
+        {
+          "kind": "texture",
+          "event": 207,
+          "resource": 10,
+          "expect_stable": true,
+          "expected_storage_sha256": "a443b8cef0918b8f02020762f287de5d8eb8bb011de8af027ec311a9e52a961e"
+        }
+      ],
+      "native_workload_fidelity": "passed",
+      "fidelity_reason": "Exact CPU/native hardware/WARP image and packed-byte checks at all six Draws; not just the final restored image. Independent input-edit tests verify clone LOD and original lifetimes.",
+      "application_reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "application_reference_scope": "36 final and 180 clone image/storage/LOD checks across hardware, WARP and injected hardware per capture",
+      "application_reference_evidence": {
+        "path": "m4-lod-clone-originals/2/hardware/expected.rgba",
+        "sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636"
+      },
+      "source_manifests": [
+        {
+          "path": "m4-lod-clone-originals/manifest.json",
+          "sha256": "6dd041dcce703183fcbc41357e0143ef14619129ff02b62352a7c7c27d13ce18"
+        }
+      ]
+    },
+    {
+      "id": "lod_clone_3",
+      "path": "m4-lod-clone-originals/3/capture.gpa_frame",
+      "sha256": "0a870fb106873f18b879ae48a496e7e85dece96351b96589d4bca3f2870c5746",
+      "bytes": 181397,
+      "family": "lod_clone",
+      "origin": "self_owned_original_gpa_capture",
+      "provenance_note": "Untouched GPA 2025 R1 output; hardware, WARP and injected producer each verify 12 original and 60 clone images, full storage bytes and resource LOD.",
+      "device_scope": "Producer hardware/WARP identities recorded; original player adapter/configuration unverified.",
+      "reference_rgba_sha256": "5341e6b2646979a70e57653007a1f310169421ec9bdd9f1a5648f75ade005af1",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 207,
+          "repeat": 2,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        }
+      ],
+      "boundaries": [
+        {
+          "kind": "texture",
+          "event": 29,
+          "resource": 26,
+          "expect_stable": true,
+          "expected_storage_sha256": "a443b8cef0918b8f02020762f287de5d8eb8bb011de8af027ec311a9e52a961e"
+        },
+        {
+          "kind": "texture",
+          "event": 78,
+          "resource": 75,
+          "expect_stable": true,
+          "expected_storage_sha256": "a07a293626cdc91ad29632f524f450a5c3813bd74b76f8635bb8aad7163d4edc"
+        },
+        {
+          "kind": "texture",
+          "event": 111,
+          "resource": 108,
+          "expect_stable": true,
+          "expected_storage_sha256": "175416aea1c9d3c876f2d95c010b7c18058a6351827b45afe2cf965683dbd27d"
+        },
+        {
+          "kind": "texture",
+          "event": 144,
+          "resource": 141,
+          "expect_stable": true,
+          "expected_storage_sha256": "eb2b074101bed5cbfa603d086019f4a506ee0cc09e59bff59a0b8714fbb3ae7e"
+        },
+        {
+          "kind": "texture",
+          "event": 177,
+          "resource": 174,
+          "expect_stable": true,
+          "expected_storage_sha256": "a443b8cef0918b8f02020762f287de5d8eb8bb011de8af027ec311a9e52a961e"
+        },
+        {
+          "kind": "texture",
+          "event": 207,
+          "resource": 10,
+          "expect_stable": true,
+          "expected_storage_sha256": "a443b8cef0918b8f02020762f287de5d8eb8bb011de8af027ec311a9e52a961e"
+        }
+      ],
+      "native_workload_fidelity": "passed",
+      "fidelity_reason": "Exact CPU/native hardware/WARP image and packed-byte checks at all six Draws; not just the final restored image. Independent input-edit tests verify clone LOD and original lifetimes.",
+      "application_reference_rgba_sha256": "5341e6b2646979a70e57653007a1f310169421ec9bdd9f1a5648f75ade005af1",
+      "application_reference_scope": "36 final and 180 clone image/storage/LOD checks across hardware, WARP and injected hardware per capture",
+      "application_reference_evidence": {
+        "path": "m4-lod-clone-originals/3/hardware/expected.rgba",
+        "sha256": "5341e6b2646979a70e57653007a1f310169421ec9bdd9f1a5648f75ade005af1"
+      },
+      "source_manifests": [
+        {
+          "path": "m4-lod-clone-originals/manifest.json",
+          "sha256": "6dd041dcce703183fcbc41357e0143ef14619129ff02b62352a7c7c27d13ce18"
+        }
+      ]
+    },
+    {
+      "id": "lod_clone_4",
+      "path": "m4-lod-clone-originals/4/capture.gpa_frame",
+      "sha256": "cbf3debae81b3cee358ccc617c035011d66e50b2846caffc9bff5b0c9761ff4f",
+      "bytes": 185665,
+      "family": "lod_clone",
+      "origin": "self_owned_original_gpa_capture",
+      "provenance_note": "Untouched GPA 2025 R1 output; hardware, WARP and injected producer each verify 12 original and 60 clone images, full storage bytes and resource LOD.",
+      "device_scope": "Producer hardware/WARP identities recorded; original player adapter/configuration unverified.",
+      "reference_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 212,
+          "repeat": 2,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        }
+      ],
+      "boundaries": [
+        {
+          "kind": "texture",
+          "event": 29,
+          "resource": 26,
+          "expect_stable": true,
+          "expected_storage_sha256": "0198b146b02b7c9a8a7f86795408c68b88c5ec0f5f876b780221a70cb58852ba"
+        },
+        {
+          "kind": "texture",
+          "event": 79,
+          "resource": 76,
+          "expect_stable": true,
+          "expected_storage_sha256": "341222d9cd7eca612c8a990ee2605d1f8f0f595bab1d762bcd36e5d03e3962e9"
+        },
+        {
+          "kind": "texture",
+          "event": 113,
+          "resource": 110,
+          "expect_stable": true,
+          "expected_storage_sha256": "199749f01585d6ce59855d8efc6c195c641b1700d12b981c4a96d6eee4363159"
+        },
+        {
+          "kind": "texture",
+          "event": 147,
+          "resource": 144,
+          "expect_stable": true,
+          "expected_storage_sha256": "054521e0cbb0611f2bbe9678aa527cac6b14431f7f451b42354a9b0da26285fc"
+        },
+        {
+          "kind": "texture",
+          "event": 181,
+          "resource": 178,
+          "expect_stable": true,
+          "expected_storage_sha256": "0198b146b02b7c9a8a7f86795408c68b88c5ec0f5f876b780221a70cb58852ba"
+        },
+        {
+          "kind": "texture",
+          "event": 212,
+          "resource": 10,
+          "expect_stable": true,
+          "expected_storage_sha256": "0198b146b02b7c9a8a7f86795408c68b88c5ec0f5f876b780221a70cb58852ba"
+        }
+      ],
+      "native_workload_fidelity": "passed",
+      "fidelity_reason": "Exact CPU/native hardware/WARP image and packed-byte checks at all six Draws; not just the final restored image. Independent input-edit tests verify clone LOD and original lifetimes.",
+      "application_reference_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "application_reference_scope": "36 final and 180 clone image/storage/LOD checks across hardware, WARP and injected hardware per capture",
+      "application_reference_evidence": {
+        "path": "m4-lod-clone-originals/4/hardware/expected.rgba",
+        "sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+      },
+      "source_manifests": [
+        {
+          "path": "m4-lod-clone-originals/manifest.json",
+          "sha256": "6dd041dcce703183fcbc41357e0143ef14619129ff02b62352a7c7c27d13ce18"
+        }
+      ]
+    },
+    {
+      "id": "lod_clone_5",
+      "path": "m4-lod-clone-originals/5/capture.gpa_frame",
+      "sha256": "d399582e12fb90b1149fec4140f2948eca1213ee88e66c112b2289d8c239953f",
+      "bytes": 185665,
+      "family": "lod_clone",
+      "origin": "self_owned_original_gpa_capture",
+      "provenance_note": "Untouched GPA 2025 R1 output; hardware, WARP and injected producer each verify 12 original and 60 clone images, full storage bytes and resource LOD.",
+      "device_scope": "Producer hardware/WARP identities recorded; original player adapter/configuration unverified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 212,
+          "repeat": 2,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        }
+      ],
+      "boundaries": [
+        {
+          "kind": "texture",
+          "event": 29,
+          "resource": 26,
+          "expect_stable": true,
+          "expected_storage_sha256": "0198b146b02b7c9a8a7f86795408c68b88c5ec0f5f876b780221a70cb58852ba"
+        },
+        {
+          "kind": "texture",
+          "event": 79,
+          "resource": 76,
+          "expect_stable": true,
+          "expected_storage_sha256": "341222d9cd7eca612c8a990ee2605d1f8f0f595bab1d762bcd36e5d03e3962e9"
+        },
+        {
+          "kind": "texture",
+          "event": 113,
+          "resource": 110,
+          "expect_stable": true,
+          "expected_storage_sha256": "199749f01585d6ce59855d8efc6c195c641b1700d12b981c4a96d6eee4363159"
+        },
+        {
+          "kind": "texture",
+          "event": 147,
+          "resource": 144,
+          "expect_stable": true,
+          "expected_storage_sha256": "054521e0cbb0611f2bbe9678aa527cac6b14431f7f451b42354a9b0da26285fc"
+        },
+        {
+          "kind": "texture",
+          "event": 181,
+          "resource": 178,
+          "expect_stable": true,
+          "expected_storage_sha256": "0198b146b02b7c9a8a7f86795408c68b88c5ec0f5f876b780221a70cb58852ba"
+        },
+        {
+          "kind": "texture",
+          "event": 212,
+          "resource": 10,
+          "expect_stable": true,
+          "expected_storage_sha256": "0198b146b02b7c9a8a7f86795408c68b88c5ec0f5f876b780221a70cb58852ba"
+        }
+      ],
+      "native_workload_fidelity": "passed",
+      "fidelity_reason": "Exact CPU/native hardware/WARP image and packed-byte checks at all six Draws; not just the final restored image. Independent input-edit tests verify clone LOD and original lifetimes.",
+      "application_reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "application_reference_scope": "36 final and 180 clone image/storage/LOD checks across hardware, WARP and injected hardware per capture",
+      "application_reference_evidence": {
+        "path": "m4-lod-clone-originals/5/hardware/expected.rgba",
+        "sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636"
+      },
+      "source_manifests": [
+        {
+          "path": "m4-lod-clone-originals/manifest.json",
+          "sha256": "6dd041dcce703183fcbc41357e0143ef14619129ff02b62352a7c7c27d13ce18"
+        }
+      ]
+    },
+    {
+      "id": "lod_clone_6",
+      "path": "m4-lod-clone-originals/6/capture.gpa_frame",
+      "sha256": "6b27e32ecfb224f51d668eca8a50c98b934ac86f4a1eea84ec1433dd992584eb",
+      "bytes": 185665,
+      "family": "lod_clone",
+      "origin": "self_owned_original_gpa_capture",
+      "provenance_note": "Untouched GPA 2025 R1 output; hardware, WARP and injected producer each verify 12 original and 60 clone images, full storage bytes and resource LOD.",
+      "device_scope": "Producer hardware/WARP identities recorded; original player adapter/configuration unverified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 212,
+          "repeat": 2,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        }
+      ],
+      "boundaries": [
+        {
+          "kind": "texture",
+          "event": 29,
+          "resource": 26,
+          "expect_stable": true,
+          "expected_storage_sha256": "0198b146b02b7c9a8a7f86795408c68b88c5ec0f5f876b780221a70cb58852ba"
+        },
+        {
+          "kind": "texture",
+          "event": 79,
+          "resource": 76,
+          "expect_stable": true,
+          "expected_storage_sha256": "341222d9cd7eca612c8a990ee2605d1f8f0f595bab1d762bcd36e5d03e3962e9"
+        },
+        {
+          "kind": "texture",
+          "event": 113,
+          "resource": 110,
+          "expect_stable": true,
+          "expected_storage_sha256": "199749f01585d6ce59855d8efc6c195c641b1700d12b981c4a96d6eee4363159"
+        },
+        {
+          "kind": "texture",
+          "event": 147,
+          "resource": 144,
+          "expect_stable": true,
+          "expected_storage_sha256": "054521e0cbb0611f2bbe9678aa527cac6b14431f7f451b42354a9b0da26285fc"
+        },
+        {
+          "kind": "texture",
+          "event": 181,
+          "resource": 178,
+          "expect_stable": true,
+          "expected_storage_sha256": "0198b146b02b7c9a8a7f86795408c68b88c5ec0f5f876b780221a70cb58852ba"
+        },
+        {
+          "kind": "texture",
+          "event": 212,
+          "resource": 10,
+          "expect_stable": true,
+          "expected_storage_sha256": "0198b146b02b7c9a8a7f86795408c68b88c5ec0f5f876b780221a70cb58852ba"
+        }
+      ],
+      "native_workload_fidelity": "passed",
+      "fidelity_reason": "Exact CPU/native hardware/WARP image and packed-byte checks at all six Draws; not just the final restored image. Independent input-edit tests verify clone LOD and original lifetimes.",
+      "application_reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "application_reference_scope": "36 final and 180 clone image/storage/LOD checks across hardware, WARP and injected hardware per capture",
+      "application_reference_evidence": {
+        "path": "m4-lod-clone-originals/6/hardware/expected.rgba",
+        "sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636"
+      },
+      "source_manifests": [
+        {
+          "path": "m4-lod-clone-originals/manifest.json",
+          "sha256": "6dd041dcce703183fcbc41357e0143ef14619129ff02b62352a7c7c27d13ce18"
+        }
+      ]
+    },
+    {
+      "id": "lod_clone_7",
+      "path": "m4-lod-clone-originals/7/capture.gpa_frame",
+      "sha256": "8707f4244f1bb6a1c246bf623235717212785f1c4fe56ee001f37224281bb658",
+      "bytes": 185665,
+      "family": "lod_clone",
+      "origin": "self_owned_original_gpa_capture",
+      "provenance_note": "Untouched GPA 2025 R1 output; hardware, WARP and injected producer each verify 12 original and 60 clone images, full storage bytes and resource LOD.",
+      "device_scope": "Producer hardware/WARP identities recorded; original player adapter/configuration unverified.",
+      "reference_rgba_sha256": "5341e6b2646979a70e57653007a1f310169421ec9bdd9f1a5648f75ade005af1",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 212,
+          "repeat": 2,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        }
+      ],
+      "boundaries": [
+        {
+          "kind": "texture",
+          "event": 29,
+          "resource": 26,
+          "expect_stable": true,
+          "expected_storage_sha256": "0198b146b02b7c9a8a7f86795408c68b88c5ec0f5f876b780221a70cb58852ba"
+        },
+        {
+          "kind": "texture",
+          "event": 79,
+          "resource": 76,
+          "expect_stable": true,
+          "expected_storage_sha256": "341222d9cd7eca612c8a990ee2605d1f8f0f595bab1d762bcd36e5d03e3962e9"
+        },
+        {
+          "kind": "texture",
+          "event": 113,
+          "resource": 110,
+          "expect_stable": true,
+          "expected_storage_sha256": "199749f01585d6ce59855d8efc6c195c641b1700d12b981c4a96d6eee4363159"
+        },
+        {
+          "kind": "texture",
+          "event": 147,
+          "resource": 144,
+          "expect_stable": true,
+          "expected_storage_sha256": "054521e0cbb0611f2bbe9678aa527cac6b14431f7f451b42354a9b0da26285fc"
+        },
+        {
+          "kind": "texture",
+          "event": 181,
+          "resource": 178,
+          "expect_stable": true,
+          "expected_storage_sha256": "0198b146b02b7c9a8a7f86795408c68b88c5ec0f5f876b780221a70cb58852ba"
+        },
+        {
+          "kind": "texture",
+          "event": 212,
+          "resource": 10,
+          "expect_stable": true,
+          "expected_storage_sha256": "0198b146b02b7c9a8a7f86795408c68b88c5ec0f5f876b780221a70cb58852ba"
+        }
+      ],
+      "native_workload_fidelity": "passed",
+      "fidelity_reason": "Exact CPU/native hardware/WARP image and packed-byte checks at all six Draws; not just the final restored image. Independent input-edit tests verify clone LOD and original lifetimes.",
+      "application_reference_rgba_sha256": "5341e6b2646979a70e57653007a1f310169421ec9bdd9f1a5648f75ade005af1",
+      "application_reference_scope": "36 final and 180 clone image/storage/LOD checks across hardware, WARP and injected hardware per capture",
+      "application_reference_evidence": {
+        "path": "m4-lod-clone-originals/7/hardware/expected.rgba",
+        "sha256": "5341e6b2646979a70e57653007a1f310169421ec9bdd9f1a5648f75ade005af1"
+      },
+      "source_manifests": [
+        {
+          "path": "m4-lod-clone-originals/manifest.json",
+          "sha256": "6dd041dcce703183fcbc41357e0143ef14619129ff02b62352a7c7c27d13ce18"
+        }
+      ]
+    },
+    {
+      "id": "lod_clone_8",
+      "path": "m4-lod-clone-originals/8/capture.gpa_frame",
+      "sha256": "ab257b7ead0b611e36a407d0053efe68b4266f4d3b53467cba0074a42feeeba8",
+      "bytes": 193989,
+      "family": "lod_clone",
+      "origin": "self_owned_original_gpa_capture",
+      "provenance_note": "Untouched GPA 2025 R1 output; hardware, WARP and injected producer each verify 12 original and 60 clone images, full storage bytes and resource LOD.",
+      "device_scope": "Producer hardware/WARP identities recorded; original player adapter/configuration unverified.",
+      "reference_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 163,
+          "repeat": 2,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        }
+      ],
+      "boundaries": [
+        {
+          "kind": "texture",
+          "event": 29,
+          "resource": 26,
+          "expect_stable": true,
+          "expected_storage_sha256": "8f203b998655efec5ef8f61649ec4bf75a01a5fd7211e0be191fff890477d49a"
+        },
+        {
+          "kind": "texture",
+          "event": 66,
+          "resource": 63,
+          "expect_stable": true,
+          "expected_storage_sha256": "a881ad9e4260ef8988bd0bfeacc22b7a936440224b69efd0d0426cb2515c113b"
+        },
+        {
+          "kind": "texture",
+          "event": 91,
+          "resource": 88,
+          "expect_stable": true,
+          "expected_storage_sha256": "5ce5ceee32873f43c8a6fae1279575376a2a7a69d5a7faf374805cc5cb7506c3"
+        },
+        {
+          "kind": "texture",
+          "event": 116,
+          "resource": 113,
+          "expect_stable": true,
+          "expected_storage_sha256": "e0a4353c524600dd7fec063f9b6d202d3803dff7fcd55081968dcf3b7ab345bb"
+        },
+        {
+          "kind": "texture",
+          "event": 141,
+          "resource": 138,
+          "expect_stable": true,
+          "expected_storage_sha256": "8f203b998655efec5ef8f61649ec4bf75a01a5fd7211e0be191fff890477d49a"
+        },
+        {
+          "kind": "texture",
+          "event": 163,
+          "resource": 10,
+          "expect_stable": true,
+          "expected_storage_sha256": "8f203b998655efec5ef8f61649ec4bf75a01a5fd7211e0be191fff890477d49a"
+        }
+      ],
+      "native_workload_fidelity": "passed",
+      "fidelity_reason": "Exact CPU/native hardware/WARP image and packed-byte checks at all six Draws; not just the final restored image. Independent input-edit tests verify clone LOD and original lifetimes.",
+      "application_reference_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001",
+      "application_reference_scope": "36 final and 180 clone image/storage/LOD checks across hardware, WARP and injected hardware per capture",
+      "application_reference_evidence": {
+        "path": "m4-lod-clone-originals/8/hardware/expected.rgba",
+        "sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+      },
+      "source_manifests": [
+        {
+          "path": "m4-lod-clone-originals/manifest.json",
+          "sha256": "6dd041dcce703183fcbc41357e0143ef14619129ff02b62352a7c7c27d13ce18"
+        }
+      ]
+    },
+    {
+      "id": "lod_clone_9",
+      "path": "m4-lod-clone-originals/9/capture.gpa_frame",
+      "sha256": "b817fb76a06d889229481dbbfbc73a8abd6a8597d847e5061c2b22c81253fe38",
+      "bytes": 193989,
+      "family": "lod_clone",
+      "origin": "self_owned_original_gpa_capture",
+      "provenance_note": "Untouched GPA 2025 R1 output; hardware, WARP and injected producer each verify 12 original and 60 clone images, full storage bytes and resource LOD.",
+      "device_scope": "Producer hardware/WARP identities recorded; original player adapter/configuration unverified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 163,
+          "repeat": 2,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        }
+      ],
+      "boundaries": [
+        {
+          "kind": "texture",
+          "event": 29,
+          "resource": 26,
+          "expect_stable": true,
+          "expected_storage_sha256": "8f203b998655efec5ef8f61649ec4bf75a01a5fd7211e0be191fff890477d49a"
+        },
+        {
+          "kind": "texture",
+          "event": 66,
+          "resource": 63,
+          "expect_stable": true,
+          "expected_storage_sha256": "a881ad9e4260ef8988bd0bfeacc22b7a936440224b69efd0d0426cb2515c113b"
+        },
+        {
+          "kind": "texture",
+          "event": 91,
+          "resource": 88,
+          "expect_stable": true,
+          "expected_storage_sha256": "5ce5ceee32873f43c8a6fae1279575376a2a7a69d5a7faf374805cc5cb7506c3"
+        },
+        {
+          "kind": "texture",
+          "event": 116,
+          "resource": 113,
+          "expect_stable": true,
+          "expected_storage_sha256": "e0a4353c524600dd7fec063f9b6d202d3803dff7fcd55081968dcf3b7ab345bb"
+        },
+        {
+          "kind": "texture",
+          "event": 141,
+          "resource": 138,
+          "expect_stable": true,
+          "expected_storage_sha256": "8f203b998655efec5ef8f61649ec4bf75a01a5fd7211e0be191fff890477d49a"
+        },
+        {
+          "kind": "texture",
+          "event": 163,
+          "resource": 10,
+          "expect_stable": true,
+          "expected_storage_sha256": "8f203b998655efec5ef8f61649ec4bf75a01a5fd7211e0be191fff890477d49a"
+        }
+      ],
+      "native_workload_fidelity": "passed",
+      "fidelity_reason": "Exact CPU/native hardware/WARP image and packed-byte checks at all six Draws; not just the final restored image. Independent input-edit tests verify clone LOD and original lifetimes.",
+      "application_reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "application_reference_scope": "36 final and 180 clone image/storage/LOD checks across hardware, WARP and injected hardware per capture",
+      "application_reference_evidence": {
+        "path": "m4-lod-clone-originals/9/hardware/expected.rgba",
+        "sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636"
+      },
+      "source_manifests": [
+        {
+          "path": "m4-lod-clone-originals/manifest.json",
+          "sha256": "6dd041dcce703183fcbc41357e0143ef14619129ff02b62352a7c7c27d13ce18"
+        }
+      ]
+    },
+    {
+      "id": "lod_clone_10",
+      "path": "m4-lod-clone-originals/10/capture.gpa_frame",
+      "sha256": "601950524190c0c178ef3a02f9ccefc7ef9c0ca68900736ed8f00289673c7568",
+      "bytes": 193989,
+      "family": "lod_clone",
+      "origin": "self_owned_original_gpa_capture",
+      "provenance_note": "Untouched GPA 2025 R1 output; hardware, WARP and injected producer each verify 12 original and 60 clone images, full storage bytes and resource LOD.",
+      "device_scope": "Producer hardware/WARP identities recorded; original player adapter/configuration unverified.",
+      "reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 163,
+          "repeat": 2,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        }
+      ],
+      "boundaries": [
+        {
+          "kind": "texture",
+          "event": 29,
+          "resource": 26,
+          "expect_stable": true,
+          "expected_storage_sha256": "8f203b998655efec5ef8f61649ec4bf75a01a5fd7211e0be191fff890477d49a"
+        },
+        {
+          "kind": "texture",
+          "event": 66,
+          "resource": 63,
+          "expect_stable": true,
+          "expected_storage_sha256": "a881ad9e4260ef8988bd0bfeacc22b7a936440224b69efd0d0426cb2515c113b"
+        },
+        {
+          "kind": "texture",
+          "event": 91,
+          "resource": 88,
+          "expect_stable": true,
+          "expected_storage_sha256": "5ce5ceee32873f43c8a6fae1279575376a2a7a69d5a7faf374805cc5cb7506c3"
+        },
+        {
+          "kind": "texture",
+          "event": 116,
+          "resource": 113,
+          "expect_stable": true,
+          "expected_storage_sha256": "e0a4353c524600dd7fec063f9b6d202d3803dff7fcd55081968dcf3b7ab345bb"
+        },
+        {
+          "kind": "texture",
+          "event": 141,
+          "resource": 138,
+          "expect_stable": true,
+          "expected_storage_sha256": "8f203b998655efec5ef8f61649ec4bf75a01a5fd7211e0be191fff890477d49a"
+        },
+        {
+          "kind": "texture",
+          "event": 163,
+          "resource": 10,
+          "expect_stable": true,
+          "expected_storage_sha256": "8f203b998655efec5ef8f61649ec4bf75a01a5fd7211e0be191fff890477d49a"
+        }
+      ],
+      "native_workload_fidelity": "passed",
+      "fidelity_reason": "Exact CPU/native hardware/WARP image and packed-byte checks at all six Draws; not just the final restored image. Independent input-edit tests verify clone LOD and original lifetimes.",
+      "application_reference_rgba_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636",
+      "application_reference_scope": "36 final and 180 clone image/storage/LOD checks across hardware, WARP and injected hardware per capture",
+      "application_reference_evidence": {
+        "path": "m4-lod-clone-originals/10/hardware/expected.rgba",
+        "sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636"
+      },
+      "source_manifests": [
+        {
+          "path": "m4-lod-clone-originals/manifest.json",
+          "sha256": "6dd041dcce703183fcbc41357e0143ef14619129ff02b62352a7c7c27d13ce18"
+        }
+      ]
+    },
+    {
+      "id": "lod_clone_11",
+      "path": "m4-lod-clone-originals/11/capture.gpa_frame",
+      "sha256": "9ad1a455d7a97a14cfb1a64149465b0fd51f46c3b57b256a5a51aaefc1dbd45d",
+      "bytes": 193989,
+      "family": "lod_clone",
+      "origin": "self_owned_original_gpa_capture",
+      "provenance_note": "Untouched GPA 2025 R1 output; hardware, WARP and injected producer each verify 12 original and 60 clone images, full storage bytes and resource LOD.",
+      "device_scope": "Producer hardware/WARP identities recorded; original player adapter/configuration unverified.",
+      "reference_rgba_sha256": "5341e6b2646979a70e57653007a1f310169421ec9bdd9f1a5648f75ade005af1",
+      "comparison_policy": "exact_golden",
+      "controls": [
+        {
+          "disable_event": 163,
+          "repeat": 2,
+          "expected_rgba_sha256": "0d1b5807a072040df4aab5871837e4296ddafc56a83226a1d098e6e86961c001"
+        }
+      ],
+      "boundaries": [
+        {
+          "kind": "texture",
+          "event": 29,
+          "resource": 26,
+          "expect_stable": true,
+          "expected_storage_sha256": "8f203b998655efec5ef8f61649ec4bf75a01a5fd7211e0be191fff890477d49a"
+        },
+        {
+          "kind": "texture",
+          "event": 66,
+          "resource": 63,
+          "expect_stable": true,
+          "expected_storage_sha256": "a881ad9e4260ef8988bd0bfeacc22b7a936440224b69efd0d0426cb2515c113b"
+        },
+        {
+          "kind": "texture",
+          "event": 91,
+          "resource": 88,
+          "expect_stable": true,
+          "expected_storage_sha256": "5ce5ceee32873f43c8a6fae1279575376a2a7a69d5a7faf374805cc5cb7506c3"
+        },
+        {
+          "kind": "texture",
+          "event": 116,
+          "resource": 113,
+          "expect_stable": true,
+          "expected_storage_sha256": "e0a4353c524600dd7fec063f9b6d202d3803dff7fcd55081968dcf3b7ab345bb"
+        },
+        {
+          "kind": "texture",
+          "event": 141,
+          "resource": 138,
+          "expect_stable": true,
+          "expected_storage_sha256": "8f203b998655efec5ef8f61649ec4bf75a01a5fd7211e0be191fff890477d49a"
+        },
+        {
+          "kind": "texture",
+          "event": 163,
+          "resource": 10,
+          "expect_stable": true,
+          "expected_storage_sha256": "8f203b998655efec5ef8f61649ec4bf75a01a5fd7211e0be191fff890477d49a"
+        }
+      ],
+      "native_workload_fidelity": "passed",
+      "fidelity_reason": "Exact CPU/native hardware/WARP image and packed-byte checks at all six Draws; not just the final restored image. Independent input-edit tests verify clone LOD and original lifetimes.",
+      "application_reference_rgba_sha256": "5341e6b2646979a70e57653007a1f310169421ec9bdd9f1a5648f75ade005af1",
+      "application_reference_scope": "36 final and 180 clone image/storage/LOD checks across hardware, WARP and injected hardware per capture",
+      "application_reference_evidence": {
+        "path": "m4-lod-clone-originals/11/hardware/expected.rgba",
+        "sha256": "5341e6b2646979a70e57653007a1f310169421ec9bdd9f1a5648f75ade005af1"
+      },
+      "source_manifests": [
+        {
+          "path": "m4-lod-clone-originals/manifest.json",
+          "sha256": "6dd041dcce703183fcbc41357e0143ef14619129ff02b62352a7c7c27d13ce18"
+        }
+      ]
+    }
+  ]
+}

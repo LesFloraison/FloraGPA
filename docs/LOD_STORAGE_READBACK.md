@@ -4,6 +4,9 @@ Reviewed 2026-10-08. Implementation `22fdac3`; producer `60c9371`.
 The [acceptance baseline](lod-storage-baseline.json) pins 1,906 evidence files.
 This completes this correction batch, not M3/M4/M5.
 
+> Historical batch: [input clone LOD inheritance](LOD_CLONE_INHERITANCE.md) now
+> supersedes the input-experiment refusal described below. This baseline is unchanged.
+
 ## Corrected boundary
 
 Full texture inspection/export previously rejected every nonzero resource

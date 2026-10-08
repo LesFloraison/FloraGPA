@@ -23,6 +23,7 @@ chronology remains in Chinese.
 | Current capabilities and known limits | [Current status](CURRENT_STATUS.md) |
 | Mip-count-only queries across checked SM4.0 branches | [Structured-branch resource proof](SM40_BRANCH_MIP.md) |
 | Mip-count-only queries across checked SM4.0 switches | [Switch resource proof](SM40_SWITCH_MIP.md) |
+| Preserve current resource MinLOD in input texture experiments | [Clone LOD inheritance](LOD_CLONE_INHERITANCE.md) |
 | Inspect/export complete texture storage while preserving nonzero MinLOD | [Clamped texture storage](LOD_STORAGE_READBACK.md) |
 | Component responsibilities | [Architecture](ARCHITECTURE.md) |
 | Run tests and external comparisons | [Development validation](USAGE.md#development-validation) |

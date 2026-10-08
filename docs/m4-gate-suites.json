@@ -1,7 +1,7 @@
 {
   "schema": "FloraGPA compatibility gate suites 1",
-  "expected_cases": 545,
-  "expected_unique_captures": 535,
+  "expected_cases": 557,
+  "expected_unique_captures": 547,
   "expected_rejections": 36,
   "suites": [
     {
@@ -787,6 +787,14 @@
       "id": "lod_storage",
       "manifest": "docs/lod-storage-corpus.json",
       "manifest_sha256": "728390b1e7f7e9e38f5035d3ffac5fa892d57ca98905d2e97bf57c00697e2dbd",
+      "capture_root": "artifacts",
+      "subdirectory": "",
+      "expected_rejections": {}
+    },
+    {
+      "id": "lod_clone",
+      "manifest": "docs/lod-clone-corpus.json",
+      "manifest_sha256": "ff22d09bc84dc6133e6efd0393796f67da6f0fe4136881510ea7b0b925ad7a0a",
       "capture_root": "artifacts",
       "subdirectory": "",
       "expected_rejections": {}
