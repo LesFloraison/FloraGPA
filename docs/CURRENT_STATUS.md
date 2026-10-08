@@ -1,7 +1,20 @@
 # Current capabilities and compatibility
 
 Reviewed **2026-10-08**. The user authorized M4, then M5, while keeping M3 open.
-The latest [input clone LOD correction](LOD_CLONE_INHERITANCE.md), implementation
+The latest [resource selection correction](RESOURCE_SELECTION_IDENTITY.md),
+implementation `61ec9a8`, keeps direct inspection, explicit bindings, project
+restoration and accepted image identity consistent. Diagnostic and unavailable
+images cannot export the previous resource's raw bytes. Three new isolated
+controls reject invalid image resource IDs and verify retry. Seven serial CTest
+suites pass 250 top-level Qt rows without failures/skips. The 44-file
+`out/FloraGPA-resource-selection-20261008/` package passes five relocated checks
+and four golden/control replays; only the GUI changed. The 557-registration
+matrix below is inherited through identical CLI/Worker and 43 unchanged files,
+not rerun. The baseline pins 344 evidence files. No project-format expansion,
+clean-host deployment or renewed long-soak acceptance is claimed; M3/M4/M5 and
+module totals remain incomplete.
+
+The preceding [input clone LOD correction](LOD_CLONE_INHERITANCE.md), implementation
 `1c84431`, restores input texture experiments at proved current nonzero MinLOD.
 Clones retain RESOURCE_CLAMP and inherit current LOD; unknown initial state
 still refuses. Twelve original captures check five clone variants and the
@@ -15,8 +28,9 @@ preflight reports, execution counts and deterministic images remain unchanged.
 The baseline pins 2,285 evidence files. The original private-player nonzero-LOD
 discrepancy remains diagnostic, with device/configuration equivalence unverified.
 This is not clean-host, renewed long-soak or complete M3/M4/M5 acceptance.
-The existing resource-table selection caption issue remains; module totals do
-not change. Completion remains separate from fidelity and missing information.
+Its resource-table selection caption issue is resolved by `61ec9a8` above;
+module totals do not change. Completion remains separate from fidelity and
+missing information.
 
 The preceding [clamped texture storage acceptance](LOD_STORAGE_READBACK.md),
 implementation `22fdac3`, restores full inspection/export at known nonzero
@@ -954,7 +968,7 @@ the other 35 suites passed initially and the complete UI suite passes after the 
 | M2 — Ordinary replay | Registered-scope gate passed: 366 positive cases and 22 located rejections; auxiliary/snapshot contracts audited. This is not universal API support. State-object identity loss, mixed saved/missing SO targets and unverified lifetimes remain explicit boundaries. |
 | M3 — Deferred Context / Command List | Open; M4/M5 now take priority by user instruction on 2026-10-06. Require original retained-list captures proving identity, build order, resource versions, repeated execution, restore-state and event mapping before production support. |
 | M4 — Resources and boundaries | Active, incomplete. Initial texture/Map data is checked; missing UAV counts reject on actual consumption, while proven counter-free indexed access is allowed. Verified mip-count-only reads, including proved unused SM4.0 dimension lanes across checked IF and SWITCH blocks, do not consume missing MinLOD. Known nonzero-MinLOD storage copies and input-clone inheritance are accepted in their recorded scope. Per-slot counter dependencies and saved blt-model occluded Present TEST are checked; continue wider operand/control-flow dependencies, missing pitch/data, predicate/frame-before history, Query and other presentation boundaries. |
-| M5 — Stable compatibility release | Incomplete. The 557-case registry, preceding committed-source build/package, load/semantic-audit cancellation, worker recovery, background common-report parsing, checked buffer acceptance and background replay/texture validation plus display preparation are established. Coverage/Quad attachments have checked background reading and diagnostic paint preparation. Thumbnail reports validate complete binding identity and the entire requested batch before publication, with 12 new isolated recovery cases. The preceding same-source 30-minute/248-cycle run passes 744 strict image checks; it does not certify the later GUI. Continue broader memory attribution, other specialized readers, analyzer/driver/storage failures, model/text publication and exports, large-file workflows, broader sustained testing and independent clean-machine deployment. [Thumbnail acceptance](THUMBNAIL_ACCEPTANCE.md), [latest package](LOD_CLONE_INHERITANCE.md), [source-build acceptance](CURRENT_SOURCE_RELEASE_ACCEPTANCE.md) |
+| M5 — Stable compatibility release | Incomplete. The 557-case registry, preceding committed-source build/package, load/semantic-audit cancellation, worker recovery, background common-report parsing, checked buffer acceptance and background replay/texture validation plus display preparation are established. Coverage/Quad attachments have checked background reading and diagnostic paint preparation. Thumbnail reports validate complete binding identity and the entire requested batch before publication, with 12 new isolated recovery cases. The preceding same-source 30-minute/248-cycle run passes 744 strict image checks; it does not certify the later GUI. Continue broader memory attribution, other specialized readers, analyzer/driver/storage failures, model/text publication and exports, large-file workflows, broader sustained testing and independent clean-machine deployment. [Thumbnail acceptance](THUMBNAIL_ACCEPTANCE.md), [latest package](RESOURCE_SELECTION_IDENTITY.md), [source-build acceptance](CURRENT_SOURCE_RELEASE_ACCEPTANCE.md) |
 | M6 — Analyzer and other versions | Incomplete. Continue remaining Qt consumers, advanced profiling/debugging and version-specific adapters after core replay gates. Existing analyzer features remain available. |
 
 The original order was **M1 → M2 → M3 → M4 → M5**. On 2026-10-06 the user
