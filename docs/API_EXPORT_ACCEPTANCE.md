@@ -95,6 +95,10 @@ outside Git.
 
 ## Remaining scope
 
+The first-GetData lookup identified below is subsequently addressed by
+[background Query inspection](QUERY_INSPECTION_ACCEPTANCE.md). This original
+batch record is retained; capture-structure export remains separate.
+
 These changes improve export ownership, memory use and responsiveness. The
 first GetData lookup in CaptureModel still calls full inspectCommands on the
 event thread, and capture-structure JSON export still serializes/writes

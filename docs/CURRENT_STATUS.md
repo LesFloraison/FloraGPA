@@ -1,7 +1,25 @@
 # Current capabilities and compatibility
 
 Reviewed **2026-10-08**. The user authorized M4, then M5, while keeping M3 open.
-The latest [API-log export correction](API_EXPORT_ACCEPTANCE.md), implementation
+The latest [background Query inspection](QUERY_INSPECTION_ACCEPTANCE.md),
+implementation `b4a9e44`, prepares capture-owned GetData rows during cancellable
+loading. First Query lookup/filtering no longer parses the complete API log on
+the event thread. A completed-result cancellation counterexample also fixes
+Future retention of the abandoned capture and Query cache. Eight final serial
+CTest suites pass 326 top-level Qt rows without failures/skips. The 44-file
+`out/FloraGPA-query-inspection-final-20261008/` package passes six relocated
+checks, four golden/control replays and all 40 matrix suites: 565 registrations /
+555 captures, 526 completions / 516 unique completions and 39 located refusals.
+Complete preflight reports, execution counts and deterministic images remain
+unchanged; registered Helldivers variation remains. GUI/CLI/Worker change;
+41 other package files are identical. The baseline pins 1013 local evidence files.
+Per-record preparation, history memory, ordinary command filtering and model/text
+publication retain their limits. Original predicate events 6/7 versus GetData
+31–33 establish a separate history/diagnostic gap for ID 5; they do not prove a
+new GPU replay failure. Capture-structure exports, clean-host and renewed long-soak
+acceptance remain open. M3/M4/M5 and module totals are unchanged.
+
+The preceding [API-log export correction](API_EXPORT_ACCEPTANCE.md), implementation
 `ae36217`, retains capture/filter ownership before nested dialogs, interprets
 Query history before filtering and streams JSON/CSV in cancellable background
 jobs. Nine old/new comparisons preserve exact bytes; the local BF1 peak working
@@ -1105,7 +1123,7 @@ the other 35 suites passed initially and the complete UI suite passes after the 
 | M2 — Ordinary replay | Registered-scope gate passed: 366 positive cases and 22 located rejections; auxiliary/snapshot contracts audited. This is not universal API support. State-object identity loss, mixed saved/missing SO targets and unverified lifetimes remain explicit boundaries. |
 | M3 — Deferred Context / Command List | Open; M4/M5 now take priority by user instruction on 2026-10-06. Require original retained-list captures proving identity, build order, resource versions, repeated execution, restore-state and event mapping before production support. |
 | M4 — Resources and boundaries | Active, incomplete. Initial texture/Map data is checked; missing UAV counts reject on actual consumption, while proven counter-free indexed access is allowed. Verified mip-count-only reads, including proved unused SM4.0 dimension lanes across checked IF, SWITCH and LOOP blocks, do not consume missing MinLOD. Known nonzero-MinLOD storage copies and input-clone inheritance are accepted in their recorded scope. Per-slot counter dependencies and saved blt-model occluded Present TEST are checked; continue wider operand/control-flow dependencies, missing pitch/data, predicate/frame-before history, Query and other presentation boundaries. |
-| M5 — Stable compatibility release | Incomplete. The 565-case registry, preceding committed-source build/package, load/semantic-audit cancellation, worker recovery, background common-report parsing, checked buffer acceptance and background replay/texture validation plus display preparation are established. Coverage/Quad attachments have checked background reading and diagnostic paint preparation. Thumbnail reports validate complete binding identity and the entire requested batch before publication, with 12 new isolated recovery cases. The preceding same-source 30-minute/248-cycle run passes 744 strict image checks; it does not certify the later GUI. Continue broader memory attribution, other specialized readers, analyzer/driver/storage failures, model/text publication and exports, large-file workflows, broader sustained testing and independent clean-machine deployment. [Thumbnail acceptance](THUMBNAIL_ACCEPTANCE.md), [latest package](API_EXPORT_ACCEPTANCE.md), [source-build acceptance](CURRENT_SOURCE_RELEASE_ACCEPTANCE.md) |
+| M5 — Stable compatibility release | Incomplete. The 565-case registry, preceding committed-source build/package, load/semantic-audit cancellation, worker recovery, background common-report parsing, checked buffer acceptance and background replay/texture validation plus display preparation are established. Coverage/Quad attachments have checked background reading and diagnostic paint preparation. Thumbnail reports validate complete binding identity and the entire requested batch before publication, with 12 new isolated recovery cases. The preceding same-source 30-minute/248-cycle run passes 744 strict image checks; it does not certify the later GUI. Continue broader memory attribution, other specialized readers, analyzer/driver/storage failures, model/text publication and exports, large-file workflows, broader sustained testing and independent clean-machine deployment. [Thumbnail acceptance](THUMBNAIL_ACCEPTANCE.md), [latest package](QUERY_INSPECTION_ACCEPTANCE.md), [source-build acceptance](CURRENT_SOURCE_RELEASE_ACCEPTANCE.md) |
 | M6 — Analyzer and other versions | Incomplete. Continue remaining Qt consumers, advanced profiling/debugging and version-specific adapters after core replay gates. Existing analyzer features remain available. |
 
 The original order was **M1 → M2 → M3 → M4 → M5**. On 2026-10-06 the user

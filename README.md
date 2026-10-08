@@ -115,6 +115,8 @@ directory only after every background copy succeeds; see [geometry export accept
 API-log exports retain the selected capture/filter and stream JSON/CSV in the
 background with cancellation. See [API export acceptance](docs/API_EXPORT_ACCEPTANCE.md)
 for byte equivalence, memory measurements and partial-publication diagnostics.
+Captured GetData details are prepared during background loading; cancelled
+completed loads release their candidate capture. See [Query inspection acceptance](docs/QUERY_INSPECTION_ACCEPTANCE.md).
 
 ## Preflight and command-line replay
 
