@@ -166,6 +166,7 @@ MainWindow::MainWindow() {
             ++revision_;
             selectedEvent_ = selectedResource_ = 0;
             selectedBinding_.reset(); pendingPixel_ = nullptr;
+            resourceStatus_->setText("Final frame");
             resourceBrowser_->clear(); resourceImages_->setCurrentIndex(0); invalidateResourceImage();
             { QSignalBlocker a(outputLayer_), b(outputSample_);
               outputLayer_->setRange(-1, 65535); outputLayer_->setValue(-1);
@@ -1327,6 +1328,11 @@ void MainWindow::buildUi() {
                 if (current.isValid())
                     inspectResource(current.data(Qt::UserRole).toULongLong());
             });
+    connect(resourceView_, &QTableView::clicked, this, [this](const QModelIndex &current) {
+        // A binding selection can leave the resource-table row already current.
+        if (current.isValid() && selectedBinding_)
+            inspectResource(current.data(Qt::UserRole).toULongLong());
+    });
     connect(pipeline_, &QTreeWidget::itemDoubleClicked, this, [this](QTreeWidgetItem *item, int) {
         auto id = item->data(1, Qt::UserRole).toULongLong();
         if (id) {
@@ -2428,7 +2434,7 @@ void MainWindow::inspectResource(Id id) {
         auto &e = frame_->entry(id);
         if (e.category != 5)
             return;
-        if (selectedResource_ != id) {
+        if (selectedResource_ != id || (!resourceSelecting_ && selectedBinding_)) {
             clearBufferDetails();
             ++revision_;
             if (process_.state() != QProcess::NotRunning || artifactJob_)
@@ -2437,6 +2443,10 @@ void MainWindow::inspectResource(Id id) {
             bufferTimer_.stop();
         }
         selectedResource_ = id;
+        if (!resourceSelecting_) {
+            clearResourceBinding();
+            resourceStatus_->setText(QString("Resource %1").arg(id));
+        }
         updateExperimentActions();
         if (contextVersion(e.type)) {
             auto context = describeContext(*frame_, id);
@@ -2632,7 +2642,9 @@ void MainWindow::inspectResource(Id id) {
             layer_->setValue(0);
             slice_->setValue(0);
             textureImage_->setImage({});
-            if (!resourceSelecting_) selectedBinding_.reset();
+            if (!resourceSelecting_) {
+                resourceStatus_->setText(QString("Texture %1").arg(id));
+            }
             invalidateResourceImage();
             resourceImages_->setCurrentWidget(texturePane_);
             centerTabs_->setCurrentWidget(resourceWorkspace_);
@@ -4044,12 +4056,22 @@ void MainWindow::openExperiment() {
                 : 0);
         if (settings.event)
             locateEvent(settings.event);
+        // Event navigation may choose a default binding. It must not override
+        // the saved unbound output selection or become the project's binding.
+        clearResourceBinding();
+        selectedResource_ = 0;
         {
-            QSignalBlocker boundary(boundary_);
+            QSignalBlocker boundary(boundary_), target(outputTarget_), layer(outputLayer_), sample(outputSample_);
+            outputTarget_->setCurrentIndex(outputTarget_->findData(QString::fromStdString(settings.target)));
+            outputLayer_->setRange(-1, 65535);
+            outputLayer_->setValue(settings.layer ? int(*settings.layer) : -1);
+            outputSample_->setRange(-1, 31);
+            outputSample_->setValue(settings.sample ? int(*settings.sample) : -1);
             boundary_->setCurrentIndex(settings.boundary);
         }
         centerTabs_->setCurrentWidget(resourceWorkspace_);
         resourceImages_->setCurrentIndex(0);
+        resourceStatus_->setText("Replay pending");
         experimentChanged();
         const auto resourceUi = ui.value("flora_resources", nlohmann::json::object());
         if (resourceUi.is_object()) {

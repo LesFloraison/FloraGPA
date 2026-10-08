@@ -17,6 +17,30 @@ bool MainWindow::textureMode() const {
     return resourceImages_ && resourceImages_->currentWidget() == texturePane_;
 }
 bool MainWindow::historyBackendReady() const { return historyBackendCompatible(history_->backendPath()); }
+void MainWindow::clearResourceBinding() {
+    selectedBinding_.reset();
+    resourceBrowser_->clearSelection();
+}
+void MainWindow::publishResourceSelection(Id resource, const QString &boundary) {
+    // A background frame replay must not replace a shader/buffer editor's selection.
+    if (centerTabs_->currentWidget() != resourceWorkspace_)
+        return;
+    if (selectedBinding_ && selectedBinding_->image.resource != resource)
+        clearResourceBinding();
+    QString label;
+    if (selectedBinding_) {
+        const auto &binding = *selectedBinding_;
+        label = QString("%1 %2%3 · ")
+                    .arg(QString::fromStdString(binding.stage), QString::fromStdString(binding.kind))
+                    .arg(binding.slot);
+    }
+    resourceStatus_->setText(resource ? label + QString("Texture %1 · %2").arg(resource).arg(boundary)
+                                     : QString("No output image"));
+    if (selectedResource_ != resource)
+        clearBufferDetails();
+    selectedResource_ = resource;
+    updateExperimentActions();
+}
 void MainWindow::buildResourceWorkspace(QWidget *output) {
     resourceWorkspace_ = new QWidget;
     resourceWorkspace_->setObjectName("resourceWorkspace");
@@ -99,14 +123,21 @@ void MainWindow::buildResourceWorkspace(QWidget *output) {
             return;
         }
         resourceImages_->setCurrentIndex(0);
+        clearResourceBinding();
+        selectedResource_ = 0;
+        updateExperimentActions();
         outputReport_ = nullptr;
+        outputStorageAction_->setEnabled(false);
+        textureExportAction_->setEnabled(false);
         image_->setPreparedImage(std::move(diagnostic));
         resourceImagePending_ = true;
         imageLabel_->setText("Coverage diagnostic · not a resource image");
         resourceStatus_->setText("Diagnostic image · select a resource to return");
     });
     connect(final, &QAction::triggered, this, [this] {
-        selectedBinding_.reset();
+        clearResourceBinding();
+        selectedResource_ = 0;
+        resourceStatus_->setText("Final frame");
         resourceImages_->setCurrentIndex(0);
         {
             QSignalBlocker a(boundary_), b(outputTarget_), c(outputLayer_), d(outputSample_);
@@ -121,7 +152,17 @@ void MainWindow::buildResourceWorkspace(QWidget *output) {
         cancel();
         replayTimer_.start();
         centerTabs_->setCurrentWidget(resourceWorkspace_);
+        updateExperimentActions();
     });
+    for (auto combo : {boundary_, outputTarget_})
+        connect(combo, &QComboBox::currentIndexChanged, this, [this] {
+            if (!textureMode()) {
+                clearResourceBinding();
+                selectedResource_ = 0;
+                resourceStatus_->setText("Replay pending");
+                updateExperimentActions();
+            }
+        });
     for (auto combo :
          {boundary_, outputTarget_, channels_, textureBoundary_, textureChannels_, texturePlane_})
         connect(combo, &QComboBox::currentIndexChanged, this, &MainWindow::invalidateResourceImage);
@@ -146,6 +187,7 @@ void MainWindow::updateResourceContext(bool chooseDefault) {
     if (!frame_ || !selectedEvent_ || !isDraw(frame_->entry(selectedEvent_).type)) {
         resourceBrowser_->clear();
         selectedBinding_.reset();
+        resourceStatus_->setText("Select a draw to inspect bound resources");
         return;
     }
     const ResourceRequestContext context{frame_->sha256(), historyContextKey().section(':', 2).toStdString(),
@@ -185,8 +227,10 @@ void MainWindow::updateResourceContext(bool chooseDefault) {
     }
     if (next)
         selectDrawResource(QString::fromStdString(next->key));
-    else
-        selectedBinding_.reset();
+    else {
+        clearResourceBinding();
+        resourceStatus_->setText("No texture binding");
+    }
 }
 void MainWindow::selectDrawResource(const QString &key) {
     if (!frame_)
@@ -203,11 +247,25 @@ void MainWindow::selectDrawResource(const QString &key) {
     selectedBinding_ = binding;
     centerTabs_->setCurrentWidget(resourceWorkspace_);
     if (!binding.error.empty()) {
+        selectedResource_ = 0;
+        image_->setImage({});
+        textureImage_->setImage({});
+        outputReport_ = nullptr;
+        textureMetadata_ = {};
+        exportAction_->setEnabled(false);
+        outputStorageAction_->setEnabled(false);
+        textureExportAction_->setEnabled(false);
+        updateExperimentActions();
         resourceStatus_->setText(QString::fromStdString(binding.error));
         return;
     }
     if (!binding.texture) {
+        resourceStatus_->setText(QString("%1 %2%3 · Resource %4")
+                                     .arg(QString::fromStdString(binding.stage), QString::fromStdString(binding.kind))
+                                     .arg(binding.slot).arg(binding.image.resource));
+        resourceSelecting_ = true;
         inspectResource(binding.image.resource);
+        resourceSelecting_ = false;
         return;
     }
     resourceStatus_->setText(

@@ -303,6 +303,86 @@ class DrawResourceTests final : public QObject {
         QVERIFY(browser->select("out/OM/RTV/0", true));
         QTRY_VERIFY_WITH_TIMEOUT(image->hasOverlay(), 30000);
         QCOMPARE(browser->selected()->image.resource, Id(20));
+        window.findChild<QAction *>("toggleResourceCoverage")->setChecked(false);
+        QVERIFY(QMetaObject::invokeMethod(window.findChild<QWidget *>("coverageView"), "diagnosticRequested"));
+        QVERIFY(!browser->selected());
+        QVERIFY(!window.findChild<QAction *>("importTextureInput")->isEnabled());
+        QVERIFY(!window.findChild<QAction *>("exportOutputStorage")->isEnabled());
+        QVERIFY(!window.findChild<QAction *>("exportTexture")->isEnabled());
+        QVERIFY(!image->image().isNull()); // The diagnostic still supports PNG export.
+        tasks.clear();
+        QVERIFY(browser->select("out/OM/RTV/0", true));
+        QTRY_VERIFY_WITH_TIMEOUT(!tasks.empty(), 30000);
+        QVERIFY(tasks.takeLast()[0].toBool());
+        QVERIFY(browser->selected());
+        QVERIFY(window.findChild<QAction *>("exportOutputStorage")->isEnabled());
+    }
+    void directResourceDoesNotChooseAnAlias() {
+        QTemporaryDir dir;
+        fixture().save(dir.filePath("frame.gpa_frame"));
+        MainWindow window;
+        window.show();
+        QSignalSpy tasks(&window, &MainWindow::taskFinished);
+        window.openCapture(dir.filePath("frame.gpa_frame"));
+        QTRY_VERIFY_WITH_TIMEOUT(!tasks.empty(), 30000);
+        QVERIFY(tasks.takeLast()[0].toBool());
+        auto api = window.findChild<QTableView *>("apiLog");
+        tasks.clear();
+        for (int row = 0; row < api->model()->rowCount(); ++row)
+            if (api->model()->index(row, 0).data(Qt::UserRole).toULongLong() == 1000)
+                api->setCurrentIndex(api->model()->index(row, 0));
+        QTRY_VERIFY_WITH_TIMEOUT(!tasks.empty(), 30000);
+        QVERIFY(tasks.takeLast()[0].toBool());
+        auto browser = window.findChild<ResourceBrowser *>();
+        QVERIFY(browser->selected());
+        QCOMPARE(browser->selected()->kind, std::string("RTV"));
+        size_t aliases = 0;
+        for (const auto &binding : browser->bindings())
+            if (binding.image.resource == 20) ++aliases;
+        QCOMPARE(aliases, size_t(2)); // Same storage has both RTV and SRV identities.
+        auto resources = window.findChild<QTableView *>("resources");
+        tasks.clear();
+        for (int row = 0; row < resources->model()->rowCount(); ++row)
+            if (resources->model()->index(row, 0).data(Qt::UserRole).toULongLong() == 20)
+                resources->setCurrentIndex(resources->model()->index(row, 0));
+        QVERIFY(!browser->selected());
+        auto status = window.findChild<QLabel *>("resourceStatus");
+        QVERIFY(status->text().contains("Texture 20"));
+        QTRY_VERIFY_WITH_TIMEOUT(!tasks.empty(), 30000);
+        QVERIFY(!tasks.takeLast()[0].toBool());
+        const auto failure = window.findChild<QPlainTextEdit *>("taskLog")->toPlainText();
+        QVERIFY2(failure.contains("Texture has no captured initial bytes; select an event"), qPrintable(failure));
+        tasks.clear();
+        window.findChild<QComboBox *>("textureBoundary")->setCurrentIndex(2);
+        QTRY_VERIFY_WITH_TIMEOUT(!tasks.empty(), 30000);
+        QVERIFY(tasks.takeLast()[0].toBool());
+        QVERIFY(!browser->selected());
+        QVERIFY(!status->text().contains("RTV") && !status->text().contains("SRV"));
+        tasks.clear();
+        QVERIFY(browser->select("in/PS/SRV/0", true));
+        QTRY_VERIFY_WITH_TIMEOUT(!tasks.empty(), 30000);
+        QVERIFY(tasks.takeLast()[0].toBool());
+        QCOMPARE(browser->selected()->kind, std::string("SRV"));
+        QVERIFY(status->text().contains("PS SRV0"));
+        const auto rows = browser->bindings();
+        const auto context = browser->contextKey();
+        auto unavailable = *browser->selected();
+        unavailable.error = "Unavailable binding control";
+        browser->setContext("unavailable", {unavailable}, 1000);
+        QVERIFY(browser->select(unavailable.key, true));
+        QCOMPARE(status->text(), QString("Unavailable binding control"));
+        QVERIFY(window.findChild<ImageView *>("frameOutput")->image().isNull());
+        QVERIFY(window.findChild<ImageView *>("textureOutput")->image().isNull());
+        QVERIFY(!window.findChild<QAction *>("importTextureInput")->isEnabled());
+        QVERIFY(!window.findChild<QAction *>("exportTexture")->isEnabled());
+        browser->setContext(context, rows, 1000);
+        tasks.clear();
+        QVERIFY(browser->select("out/OM/RTV/0", true));
+        QTRY_VERIFY_WITH_TIMEOUT(!tasks.empty(), 30000);
+        QVERIFY(tasks.takeLast()[0].toBool());
+        QCOMPARE(browser->selected()->kind, std::string("RTV"));
+        QVERIFY(!window.findChild<ImageView *>("frameOutput")->image().isNull());
+        QVERIFY(window.findChild<QAction *>("importTextureInput")->isEnabled());
     }
     void realCaptureScreenshots() {
         const auto capture = qEnvironmentVariable("FLORA_RESOURCE_CAPTURE");

@@ -107,6 +107,17 @@ void MainWindow::acceptWorkerImage(PreparedImage result, nlohmann::json replayRe
     const bool outputAvailable = runningKind_ != "replay" || report_["image_available"].toBool(true);
     if (result.original.isNull() && outputAvailable)
         throw std::runtime_error("Worker output image is missing");
+    Id resource = 0;
+    if (outputAvailable) {
+        bool valid = false;
+        resource = report_["resource"].toString().toULongLong(&valid);
+        if (!valid || !resource || !frame_ || !frame_->entries().contains(resource))
+            throw std::runtime_error("Worker image resource is missing or unknown");
+        const auto &entry = frame_->entry(resource);
+        if (entry.category != 5 || entry.type < 0x83 || entry.type > 0x87 ||
+            (runningKind_ == "texture" && resource != selectedResource_))
+            throw std::runtime_error("Worker image resource does not match the inspection");
+    }
     if (runningKind_ == "texture") {
         textureImage_->setPreparedImage(std::move(result));
         textureMetadata_ = report_["texture"].toObject();
@@ -125,6 +136,8 @@ void MainWindow::acceptWorkerImage(PreparedImage result, nlohmann::json replayRe
         } else
             textureLabel_->setToolTip(textureMetadata_["msaa"].toObject()["initialization_note"].toString());
         statusBar()->showMessage("Texture ready", 3000);
+        if (textureMode())
+            publishResourceSelection(resource, boundaryLabel(report_));
         const auto planarNotice = textureMetadata_["planar_write_notice"].toString();
         if (!planarNotice.isEmpty())
             textureLabel_->setToolTip(textureLabel_->toolTip() + '\n' + planarNotice);
@@ -181,6 +194,8 @@ void MainWindow::acceptWorkerImage(PreparedImage result, nlohmann::json replayRe
         }
     }
     outputReport_ = std::move(replayReport);
+    if (!textureMode())
+        publishResourceSelection(resource, boundaryLabel(report_));
     displayedOutputGeneration_ = outputGeneration_;
     resourceImagePending_ = false;
     resourceImageContext_ = historyContextKey();

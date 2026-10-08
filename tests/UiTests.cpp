@@ -3801,6 +3801,146 @@ class UiTests final : public QObject {
         for (int mode : {2, 3, 6, 7, 10, 11})
             QTest::newRow(qPrintable(QString::number(mode))) << mode;
     }
+    void resourceSelectionIdentity() {
+        const int mode = 6;
+        const auto root = qEnvironmentVariable("FLORA_LOD_STORAGE_CAPTURES");
+        if (root.isEmpty())
+            QSKIP("Set original resource LOD storage corpus");
+        QTemporaryDir dir;
+        flora::MainWindow window;
+        window.resize(1440, 900);
+        window.show();
+        QSignalSpy done(&window, &flora::MainWindow::taskFinished);
+        window.openCapture(root + '/' + QString::number(mode) + "/capture.gpa_frame");
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY2(done.takeLast()[0].toBool(), qPrintable(window.statusBar()->currentMessage()));
+        auto output = window.findChild<flora::ImageView *>("frameOutput");
+        const auto expected = mode % 4 == 3 ? QColor(0, 0, 0, 0) : QColor(0, 255, 0, 255);
+        QVERIFY(output);
+        QCOMPARE(output->image().size(), QSize(8, 8));
+        for (int y = 0; y < 8; ++y)
+            for (int x = 0; x < 8; ++x)
+                QCOMPARE(output->image().pixelColor(x, y), expected);
+        auto api = window.findChild<QTableView *>("apiLog");
+        QVERIFY(api);
+        QModelIndex draw;
+        for (int row = 0; row < api->model()->rowCount(); ++row)
+            if (api->model()->index(row, 0).data(Qt::UserRole).toULongLong() == 25)
+                draw = api->model()->index(row, 0);
+        QVERIFY(draw.isValid());
+        done.clear();
+        api->setCurrentIndex(draw);
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        auto resources = window.findChild<QTableView *>("resources");
+        QVERIFY(resources);
+        QModelIndex resource;
+        for (int row = 0; row < resources->model()->rowCount(); ++row)
+            if (resources->model()->index(row, 0).data(Qt::UserRole).toULongLong() == 10)
+                resource = resources->model()->index(row, 0);
+        QVERIFY(resource.isValid());
+        done.clear();
+        resources->setCurrentIndex(resource);
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        auto boundary = window.findChild<QComboBox *>("textureBoundary");
+        QVERIFY(boundary);
+        done.clear();
+        boundary->setCurrentIndex(2);
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY2(done.takeLast()[0].toBool(), qPrintable(window.statusBar()->currentMessage()));
+        auto texture = window.findChild<flora::ImageView *>("textureOutput");
+        QVERIFY(texture);
+        QCOMPARE(texture->image().pixelColor(0, 0), QColor(255, 0, 0, 255));
+        auto browser = window.findChild<flora::ResourceBrowser *>();
+        auto status = window.findChild<QLabel *>("resourceStatus");
+        QVERIFY(browser && status);
+        QVERIFY(!browser->selected());
+        QVERIFY2(status->text().contains("Texture 10"), qPrintable(status->text()));
+        done.clear();
+        QVERIFY(browser->select("in/PS/SRV/0", true));
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        QVERIFY(browser->selected());
+        QCOMPARE(browser->selected()->kind, std::string("SRV"));
+        // This row is already current: a real click must still leave binding mode.
+        QTRY_VERIFY_WITH_TIMEOUT(!window.busy(), 30000);
+        for (auto tabs : window.findChildren<QTabWidget *>())
+            for (int i = 0; i < tabs->count(); ++i)
+                if (tabs->widget(i)->isAncestorOf(resources) || tabs->widget(i) == resources)
+                    tabs->setCurrentIndex(i);
+        resources->scrollTo(resource);
+        done.clear();
+        QTest::mouseClick(resources->viewport(), Qt::LeftButton, Qt::NoModifier,
+                          resources->visualRect(resource).center());
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        QVERIFY(!browser->selected());
+        QVERIFY(status->text().contains("Texture 10"));
+        done.clear();
+        QVERIFY(browser->select("out/OM/RTV/0", true));
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        auto outputBoundary = window.findChild<QComboBox *>("outputBoundary");
+        auto target = window.findChild<QComboBox *>("outputTarget");
+        done.clear(); outputBoundary->setCurrentIndex(1);
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        QVERIFY(!browser->selected());
+        QCOMPARE(output->image().pixelColor(0, 0), QColor(0, 0, 0, 255));
+        QVERIFY(status->text().contains("Before"));
+        done.clear(); target->setCurrentIndex(target->findData("rt7"));
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        QVERIFY(!browser->selected());
+        QVERIFY(output->image().isNull());
+        QVERIFY(!window.findChild<QAction *>("importTextureInput")->isEnabled());
+        done.clear();
+        window.findChild<QAction *>("finalFrame")->trigger();
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        QVERIFY(!browser->selected());
+        QCOMPARE(outputBoundary->currentIndex(), 0);
+        QCOMPARE(output->image().pixelColor(0, 0), expected);
+        QVERIFY(status->text().contains("Final"));
+        QTRY_VERIFY_WITH_TIMEOUT(!window.busy(), 30000);
+        const auto project = dir.path() + "/selection.json";
+        projectFile(window, "saveExperiment", project);
+        QFile saved(project); QVERIFY(saved.open(QIODevice::ReadOnly));
+        const auto document = nlohmann::json::parse(saved.readAll().toStdString()); saved.close();
+        QCOMPARE(document["ui"]["flora_resources"]["binding"], nlohmann::json(""));
+        done.clear();
+        for (int row = 0; row < api->model()->rowCount(); ++row)
+            if (api->model()->index(row, 0).data(Qt::UserRole).toULongLong() == 4)
+                api->setCurrentIndex(api->model()->index(row, 0));
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        QTRY_VERIFY_WITH_TIMEOUT(!window.busy(), 30000);
+        done.clear(); projectFile(window, "openExperiment", project);
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        QVERIFY(!browser->selected());
+        QCOMPARE(target->currentData().toString(), QString("auto"));
+        QCOMPARE(outputBoundary->currentIndex(), 0);
+        QCOMPARE(output->image().pixelColor(0, 0), expected);
+        done.clear(); QVERIFY(browser->select("in/PS/SRV/0", true));
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        QTRY_VERIFY_WITH_TIMEOUT(!window.busy(), 30000);
+        window.findChild<QAction *>("saveExperiment")->trigger();
+        done.clear(); window.findChild<QAction *>("finalFrame")->trigger();
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        QTRY_VERIFY_WITH_TIMEOUT(!window.busy(), 30000);
+        done.clear(); projectFile(window, "openExperiment", project);
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        QVERIFY(browser->selected());
+        QCOMPARE(browser->selected()->key, std::string("in/PS/SRV/0"));
+        QCOMPARE(texture->image().pixelColor(0, 0), QColor(255, 0, 0, 255));
+        QVERIFY(status->text().contains("PS SRV0"));
+        snapshot(window, "resource-selection-restored");
+    }
     void lodStorageInspection() {
         QFETCH(int, mode);
         const auto root = qEnvironmentVariable("FLORA_LOD_STORAGE_CAPTURES");

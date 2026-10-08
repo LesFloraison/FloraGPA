@@ -63,6 +63,8 @@ class MainWindow final : public QMainWindow {
     void buildResourceWorkspace(QWidget *output);
     void updateResourceContext(bool chooseDefault = false);
     void selectDrawResource(const QString &key);
+    void clearResourceBinding();
+    void publishResourceSelection(Id resource, const QString &boundary);
     void pumpResourceJobs();
     void invalidateResourceImage();
     void applyCoverageOverlay();

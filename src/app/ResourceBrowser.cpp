@@ -131,6 +131,11 @@ bool ResourceBrowser::select(const std::string &key, bool notify) {
     tree_->scrollToItem(found->second);
     return true;
 }
+void ResourceBrowser::clearSelection() {
+    QSignalBlocker block(tree_);
+    tree_->clearSelection();
+    tree_->setCurrentItem(nullptr);
+}
 void ResourceBrowser::showCached() {
     for (const auto &b : bindings_)
         if (auto cached = cache_.object(cacheKey(b))) {

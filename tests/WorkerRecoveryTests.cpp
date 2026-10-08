@@ -24,6 +24,8 @@ class WorkerRecoveryTests final : public QObject {
   private slots:
     void isolatedRecovery_data() {
         QTest::addColumn<QString>("mode");
+        for (const auto mode : {"image-resource-missing", "image-resource-unknown", "image-resource-kind"})
+            QTest::newRow(mode) << QString(mode);
         for (const auto mode : {"missing", "stderr-tail", "stderr-lines", "crash", "invalid-report", "no-output", "missing-image", "cancel", "image-size", "image-pixels", "image-raw-missing", "image-raw-short", "image-raw-long", "image-raw-hash", "image-hash-missing", "image-unavailable-files", "image-unavailable-type", "image-valid", "image-async-cancel", "image-async-switch", "image-async-close", "image-async-destroy", "image-async-success"})
             QTest::newRow(mode) << QString(mode);
         for (auto mode : {"buffer-valid", "buffer-short", "buffer-hash", "buffer-resource", "buffer-range",
@@ -144,9 +146,13 @@ class WorkerRecoveryTests final : public QObject {
             for (int y = 0; y < rgba.height(); ++y)
                 raw.append(reinterpret_cast<const char *>(rgba.constScanLine(y)), rgba.width() * 4);
             QJsonObject report{{"completed", true}, {"image_available", true},
+                               {"resource", "20"},
                                {"width", rgba.width()}, {"height", rgba.height()},
                                {"rgba_sha256", QString::fromLatin1(QCryptographicHash::hash(raw, QCryptographicHash::Sha256).toHex())}};
             if (mode == "image-size") report["width"] = rgba.width() + 1;
+            if (mode == "image-resource-missing") report.remove("resource");
+            if (mode == "image-resource-unknown") report["resource"] = "18446744073709551615";
+            if (mode == "image-resource-kind") report["resource"] = "1";
             if (mode == "image-hash-missing") report.remove("rgba_sha256");
             if (mode == "image-unavailable-files") report["image_available"] = false;
             if (mode == "image-unavailable-type") report["image_available"] = "false";

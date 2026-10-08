@@ -19,6 +19,7 @@ class ResourceBrowser final : public QWidget {
     const std::vector<DrawResourceBinding> &bindings() const { return bindings_; }
     std::optional<DrawResourceBinding> selected() const;
     bool select(const std::string &key, bool notify = false);
+    void clearSelection();
     nlohmann::json nextPreviews();
     void acceptPreviews(const QString &key, ThumbnailOutput result);
     void failPreviews(const QString &key, const QString &error);
