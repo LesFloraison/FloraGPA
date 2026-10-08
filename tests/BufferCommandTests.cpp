@@ -60,10 +60,15 @@ class BufferCommandTests final : public QObject {
             QCOMPARE(QFileInfo::exists(out + "/words.csv"), !skip);
             reports[skip] = QJsonDocument::fromJson(load(out + "/report.json")).object();
             QVERIFY(reports[skip]["completed"].toBool());
-            // Windows may load the same modules in a different order in each
-            // child. Compare their complete sorted paths, not loader order.
+            // Loader order varies. Windows also transiently loads its own
+            // apphelp.dll for a newly relocated executable. Keep every other
+            // path in the comparison, including application dependencies.
             QStringList modules;
-            for (const auto &module : reports[skip]["loaded_modules"].toArray()) modules << module.toString();
+            const auto appHelp = QDir(qEnvironmentVariable("WINDIR")).filePath("System32/apphelp.dll");
+            for (const auto &module : reports[skip]["loaded_modules"].toArray()) {
+                const auto path = QDir::fromNativeSeparators(module.toString());
+                if (path.compare(appHelp, Qt::CaseInsensitive) != 0) modules << path;
+            }
             QVERIFY(!modules.empty()); modules.sort();
             reports[skip]["loaded_modules"] = QJsonArray::fromStringList(modules);
             if (!skip) {
