@@ -86,9 +86,10 @@ class ImageExportUiTests final : public QObject {
         QTRY_VERIFY_WITH_TIMEOUT(textureAction->isEnabled() && !window.busy(), 30000);
         auto viewer = window.findChild<ImageView *>("textureOutput");
         QCOMPARE(viewer->image().pixelColor(0, 0), QColor(10, 0, 0, 255));
-        // Keep encoding busy while a real small texture preview is accepted.
-        // This display-only fixture does not change capture/replay semantics.
-        QImage image(4096, 4096, QImage::Format_RGB32);
+        // The progress signal below holds the registered export pending while
+        // a real preview is accepted. Do not depend on codec/driver speed to
+        // establish ordering, which differs between offscreen and Windows.
+        QImage image(64, 64, QImage::Format_RGB32);
         quint32 random = 19;
         for (int y = 0; y < image.height(); ++y) {
             auto row = reinterpret_cast<QRgb *>(image.scanLine(y));
@@ -103,11 +104,12 @@ class ImageExportUiTests final : public QObject {
         connect(window.statusBar(), &QStatusBar::messageChanged, &window, [&](const QString &message) {
             if (launched || message != "Exporting image…") return;
             launched = true;
-            QTimer::singleShot(0, &window, [&] { window.findChild<QSpinBox *>("textureSample")->setValue(3); });
+            window.findChild<QSpinBox *>("textureSample")->setValue(3);
+            QTRY_VERIFY_WITH_TIMEOUT(overlapped, 30000);
         });
         connect(&window, &MainWindow::taskFinished, &window, [&](bool success) {
             if (success && !viewer->image().isNull() && viewer->image().pixelColor(0, 0) == QColor(16, 0, 0, 255))
-                overlapped = exported.empty() && window.busy() && !textureAction->isEnabled();
+                overlapped |= exported.empty() && window.busy() && !textureAction->isEnabled();
         });
         const auto path = root.filePath("snapshot.png");
         choose(window, exportAction(window, "image"), path);
