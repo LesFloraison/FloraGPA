@@ -4256,10 +4256,11 @@ class UiTests final : public QObject {
         QTest::newRow("sm4") << 6;
         QTest::newRow("sm4-branches") << 12;
         QTest::newRow("sm4-switches") << 20;
+        QTest::newRow("sm4-loops") << 28;
     }
     void mipCountReplayAndRetry() {
         QFETCH(int, base);
-        const auto root = qEnvironmentVariable(base == 20 ? "FLORA_SWITCH_MIP_CAPTURES" : base == 12 ? "FLORA_BRANCH_MIP_CAPTURES" : base ? "FLORA_SM40_MIP_CAPTURES" : "FLORA_MIP_COUNT_CAPTURES");
+        const auto root = qEnvironmentVariable(base == 28 ? "FLORA_LOOP_MIP_CAPTURES" : base == 20 ? "FLORA_SWITCH_MIP_CAPTURES" : base == 12 ? "FLORA_BRANCH_MIP_CAPTURES" : base ? "FLORA_SM40_MIP_CAPTURES" : "FLORA_MIP_COUNT_CAPTURES");
         if (root.isEmpty()) QSKIP("Set original mip-count corpus");
         flora::MainWindow window;
         window.resize(1440, 900); window.show();

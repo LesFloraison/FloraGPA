@@ -33,8 +33,8 @@ struct FlowOperation {
     std::vector<RegisterUse> sources;
     std::vector<size_t> successors;
 };
-// Deliberately bounded, acyclic SM4.0 proof. Checked IF and SWITCH blocks only;
-// no loops, calls, relative
+// Deliberately bounded SM4.0 proof. Checked IF, SWITCH and LOOP blocks only;
+// no calls, relative
 // operands, instruction/operand extensions, memory stores or unfamiliar ALU
 // operations are admitted. This is not a general shader optimizer.
 std::optional<std::vector<FlowOperation>> boundedSm40(const DxbcProgram &program) {
@@ -44,7 +44,7 @@ std::optional<std::vector<FlowOperation>> boundedSm40(const DxbcProgram &program
     struct Branch {
         size_t condition;
         std::optional<size_t> otherwise;
-        bool selection = false, hasLabel = false, hasDefault = false;
+        bool selection = false, hasLabel = false, hasDefault = false, loop = false;
         bool caseHasCode = false, caseTerminated = false;
         std::vector<uint32_t> cases;
         std::vector<size_t> breaks;
@@ -84,8 +84,23 @@ std::optional<std::vector<FlowOperation>> boundedSm40(const DxbcProgram &program
             else instruction.sources.push_back({type, row[2], 1u << ((token >> 4) & 3)});
             branches.push_back({i, {}, op == 76});
             if (op == 76) instruction.successors.clear();
+        } else if (op == 48 || op == 22) { // LOOP / ENDLOOP.
+            if (row.size() != 1 || (row[0] & 0x00fff800u)) return {};
+            if (op == 48) {
+                if (branches.size() >= 64) return {};
+                Branch loop{i};
+                loop.loop = true;
+                branches.push_back(std::move(loop));
+            } else {
+                if (branches.empty() || !branches.back().loop) return {};
+                const auto &loop = branches.back();
+                instruction.successors = {loop.condition + 1};
+                for (const auto at : loop.breaks) result[at].successors.push_back(i + 1);
+                branches.pop_back();
+            }
         } else if (op == 18 || op == 21) {
-            if (row.size() != 1 || (row[0] & 0x00fff800u) || branches.empty() || branches.back().selection)
+            if (row.size() != 1 || (row[0] & 0x00fff800u) || branches.empty() ||
+                branches.back().selection || branches.back().loop)
                 return {};
             auto &branch = branches.back();
             if (op == 18) {
@@ -105,7 +120,7 @@ std::optional<std::vector<FlowOperation>> boundedSm40(const DxbcProgram &program
             if (op == 23) {
                 if (!selection.hasLabel) return {};
                 if (!selection.hasDefault) result[selection.condition].successors.push_back(i + 1);
-                for (const auto at : selection.breaks) result[at].successors = {i + 1};
+                for (const auto at : selection.breaks) result[at].successors.push_back(i + 1);
                 branches.pop_back();
             } else {
                 if (op == 6) {
@@ -121,14 +136,25 @@ std::optional<std::vector<FlowOperation>> boundedSm40(const DxbcProgram &program
                 selection.caseHasCode = selection.caseTerminated = false;
                 result[selection.condition].successors.push_back(i + 1);
             }
-        } else if (op == 2) {
-            if (row.size() != 1 || (row[0] & 0x00fff800u)) return {};
-            const auto selection = std::find_if(branches.rbegin(), branches.rend(),
-                                                [](const auto &block) { return block.selection; });
-            if (selection == branches.rend() || !selection->hasLabel) return {};
-            selection->breaks.push_back(i);
-            if (branches.back().selection) selection->caseTerminated = true;
-            instruction.successors.clear(); // Patched to the owning ENDSWITCH.
+        } else if (op == 2 || op == 3 || op == 7 || op == 8) { // BREAK[C] / CONTINUE[C].
+            const bool conditional = op == 3 || op == 8, continuing = op == 7 || op == 8;
+            if (row.size() != (conditional ? 3 : 1) ||
+                (row[0] & (conditional ? 0x00fbf800u : 0x00fff800u))) return {};
+            if (conditional) {
+                const auto token = row[1], type = (token >> 12) & 255;
+                if ((type != 0 && type != 1) ||
+                    (token & ~0x30u) != (0x0010000au | (type << 12)) || row[2] >= 4096)
+                    return {};
+                instruction.sources.push_back({type, row[2], 1u << ((token >> 4) & 3)});
+            } else instruction.successors.clear();
+            const auto owner = std::find_if(branches.rbegin(), branches.rend(),
+                [continuing](const auto &block) { return block.loop || (!continuing && block.selection); });
+            if (owner == branches.rend() || (owner->selection && !owner->hasLabel)) return {};
+            if (continuing) instruction.successors.push_back(owner->condition + 1);
+            else {
+                owner->breaks.push_back(i); // Patched to after the owning ENDLOOP/ENDSWITCH.
+                if (!conditional && branches.back().selection) owner->caseTerminated = true;
+            }
         } else if (op == 88 || op == 90 || op == 101 || op == 104 || op == 106) {
             // Resource declarations are checked by shaderSrvDeclarations;
             // the other accepted declarations neither read nor write temps.
@@ -137,7 +163,7 @@ std::optional<std::vector<FlowOperation>> boundedSm40(const DxbcProgram &program
                 return {};
         } else {
             const unsigned count = (op == 54 || op == 86) ? 1
-                                   : (op == 0 || op == 1 || op == 32 || op == 45 || op == 56 || op == 61 || op == 79) ? 2
+                                   : (op == 0 || op == 1 || op == 30 || op == 32 || op == 45 || op == 56 || op == 61 || op == 79 || op == 80) ? 2
                                    : op == 69 ? 3 : 0;
             if (!count || row.size() < 3)
                 return {};
@@ -184,11 +210,17 @@ std::optional<std::vector<FlowOperation>> boundedSm40(const DxbcProgram &program
     return result;
 }
 bool dimensionsUnused(const std::vector<FlowOperation> &program, size_t at, MipQuery query) {
-    // All edges point forward. Union at each join retains any dimension lane
-    // still live on either path; an overwrite on just one path is insufficient.
+    // Monotone union also follows loop backedges. Each node gains at most four
+    // lanes, so the worklist has at most 4 * instruction-count insertions.
+    // An overwrite on just one incoming path cannot erase another path's lane.
     std::vector<unsigned> incoming(program.size());
-    if (at + 1 < program.size()) incoming[at + 1] = query.dimensions;
-    for (size_t i = at + 1; i < program.size(); ++i) {
+    std::vector<size_t> work;
+    if (at + 1 < program.size()) {
+        incoming[at + 1] = query.dimensions;
+        work.push_back(at + 1);
+    }
+    for (size_t next = 0; next < work.size(); ++next) {
+        const auto i = work[next];
         auto pending = incoming[i];
         if (!pending) continue;
         const auto &operation = program[i];
@@ -201,7 +233,10 @@ bool dimensionsUnused(const std::vector<FlowOperation> &program, size_t at, MipQ
         if (dest.type == 0 && dest.index == query.temporary)
             pending &= ~dest.lanes;
         for (const auto successor : operation.successors)
-            if (successor < program.size()) incoming[successor] |= pending;
+            if (successor < program.size() && (pending & ~incoming[successor])) {
+                incoming[successor] |= pending;
+                work.push_back(successor);
+            }
     }
     return true; // Any remaining lanes die at the checked final RET.
 }
