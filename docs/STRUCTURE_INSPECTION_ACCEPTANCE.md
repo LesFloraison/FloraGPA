@@ -1,5 +1,9 @@
 # Background capture structure inspection and export
 
+The subsequent [same-source workflow release](WORKFLOW_SOURCE_RELEASE_ACCEPTANCE.md)
+renews fresh-build and sustained-run evidence for the later GUI. The results
+and limits below remain specific to this earlier acceptance.
+
 This M5 change moves parsing and JSON export in **Contexts and Command Lists**
 off the event thread. It preserves the inspection schema, captured/inferred values,
 command-list limitations and event navigation; it adds no Command List replay

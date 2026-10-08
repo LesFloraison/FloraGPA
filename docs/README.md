@@ -41,7 +41,8 @@ chronology remains in Chinese.
 | Component responsibilities | [Architecture](ARCHITECTURE.md) |
 | Run tests and external comparisons | [Development validation](USAGE.md#development-validation) |
 | Build committed source with an isolated process environment and package it | [Source build and packaging](SOURCE_BUILD_AND_PACKAGING.md) |
-| Track the latest same-source package, tests and full replay matrix | [Current-source acceptance](CURRENT_SOURCE_RELEASE_ACCEPTANCE.md) |
+| Track the latest same-source package, tests and full replay matrix | [Same-source workflow acceptance](WORKFLOW_SOURCE_RELEASE_ACCEPTANCE.md) |
+| Repeat Query/API/structure workflows with retained per-cycle exports | [Workflow soak scope](RECOVERY_WORKFLOW_SOAK.md) |
 | Exercise one Qt window through repeated load, cancel, failure and replay | [Persistent Qt recovery soak](PERSISTENT_QT_SOAK.md) |
 | Separate test history, log and pixmap-cache memory retention | [Qt retention controls](QT_RETENTION_CONTROL.md) |
 | Compare process commitment, address regions and observed busy heap blocks | [Process memory attribution](PROCESS_MEMORY_ATTRIBUTION.md) |

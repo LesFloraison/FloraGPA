@@ -1,5 +1,9 @@
 # Current-source release acceptance
 
+The subsequent [same-source workflow release](WORKFLOW_SOURCE_RELEASE_ACCEPTANCE.md)
+renews fresh-build and sustained-run evidence for the later GUI. The results
+and limits below remain specific to this earlier acceptance.
+
 Reviewed 2026-10-08. This M5 batch rebuilds and checks source revision `078d638`.
 Production replay and UI source are unchanged from the structured-branch batch.
 The full replay matrix, short runtime checks and renewed 30-minute recovery run
