@@ -42,6 +42,7 @@
 #include <QDialog>
 #include <QDialogButtonBox>
 #include <QFileDialog>
+#include <QDirIterator>
 #include <QPushButton>
 #include <QScopeGuard>
 #include <QSignalSpy>
@@ -3167,6 +3168,127 @@ class UiTests final : public QObject {
         QVERIFY(done.takeLast()[0].toBool());
         QCOMPARE(image->image().pixelColor(0, 0).red(), 0x31);
         QVERIFY(!label->toolTip().contains("Map writes Y only"));
+    }
+    void exportDuringCaptureSwitch_data() {
+        QTest::addColumn<QString>("kind");
+        for (const auto kind : {"storage", "image", "buffer", "resource", "geometry"})
+            QTest::newRow(kind) << QString(kind);
+    }
+    void exportDuringCaptureSwitch() {
+        QFETCH(QString, kind);
+        using namespace flora;
+        const auto captures = qEnvironmentVariable("FLORA_TEST_CAPTURE_DIR");
+        if (captures.isEmpty()) QSKIP("Set FLORA_TEST_CAPTURE_DIR for original export lifetime checks");
+        QTemporaryDir dir;
+        testing::srvCapture().save(dir.filePath("replacement.gpa_frame"));
+        MainWindow window;
+        window.show();
+        QSignalSpy done(&window, &MainWindow::taskFinished);
+        window.openCapture(captures + "/GF2_Exilium_2026_03_03__00_19_35.gpa_frame");
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY(done.takeLast()[0].toBool());
+        if (kind == "buffer" || kind == "resource" || kind == "geometry") {
+            done.clear();
+            auto api = window.findChild<QTableView *>("apiLog");
+            api->setCurrentIndex(api->model()->index(2, 0));
+            QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+            QVERIFY(done.takeLast()[0].toBool());
+            done.clear();
+            if (kind == "geometry") {
+                window.findChild<QAction *>("inspectGeometry")->trigger();
+            } else {
+                auto resources = window.findChild<QTableView *>("resources");
+                bool found = false;
+                for (int i = 0; i < resources->model()->rowCount(); ++i) {
+                    auto index = resources->model()->index(i, 0);
+                    if (index.data(Qt::UserRole).toULongLong() == 104) {
+                        resources->setCurrentIndex(index);
+                        found = true;
+                        break;
+                    }
+                }
+                QVERIFY(found);
+            }
+            QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+            QVERIFY(done.takeLast()[0].toBool());
+        }
+        QTRY_VERIFY_WITH_TIMEOUT(!window.busy(), 30000);
+        QAction *action = nullptr;
+        if (kind == "storage") action = window.findChild<QAction *>("exportOutputStorage");
+        if (kind == "geometry") action = window.findChild<QAction *>("exportGeometry");
+        for (auto candidate : window.findChildren<QAction *>()) {
+            if (kind == "image" && candidate->shortcut() == QKeySequence("Ctrl+Shift+S")) action = candidate;
+            if (kind == "resource" && candidate->text() == "Export Resource…") action = candidate;
+        }
+        if (kind == "buffer") {
+            auto read = window.findChild<QAction *>("readBuffer");
+            QVERIFY(read);
+            for (auto candidate : read->parent()->findChildren<QAction *>())
+                if (candidate->text() == "Export") action = candidate;
+        }
+        QVERIFY(action);
+        QVERIFY(action->isEnabled());
+        const bool native = QCoreApplication::testAttribute(Qt::AA_DontUseNativeDialogs);
+        QCoreApplication::setAttribute(Qt::AA_DontUseNativeDialogs, true);
+        auto restore = qScopeGuard([&] { QCoreApplication::setAttribute(Qt::AA_DontUseNativeDialogs, native); });
+        auto runExport = [&](const QString &root, bool replace) {
+            QVERIFY(QDir().mkpath(root));
+            const auto destination = kind == "geometry" ? root : root + (kind == "image" ? "/asset.png" : "/asset.bin");
+            bool seen = false, switched = false, accepted = false;
+            QTimer poll, watchdog;
+            watchdog.setSingleShot(true);
+            connect(&poll, &QTimer::timeout, &poll, [&] {
+                auto dialog = window.findChild<QFileDialog *>();
+                if (!dialog) return;
+                seen = true;
+                if (replace && !switched) {
+                    switched = true;
+                    done.clear();
+                    window.openCapture(dir.filePath("replacement.gpa_frame"));
+                    return;
+                }
+                if (replace && (done.empty() || window.busy())) return;
+                poll.stop();
+                if (replace) QVERIFY(done.last()[0].toBool());
+                auto filename = dialog->findChild<QLineEdit *>("fileNameEdit");
+                QVERIFY(filename);
+                filename->setText(destination);
+                accepted = true;
+                QMetaObject::invokeMethod(dialog, "accept", Qt::QueuedConnection);
+            });
+            connect(&watchdog, &QTimer::timeout, &watchdog, [&] {
+                if (auto dialog = window.findChild<QFileDialog *>()) dialog->reject();
+            });
+            poll.start(10);
+            watchdog.start(30000);
+            action->trigger();
+            QVERIFY(seen && accepted);
+            QCOMPARE(switched, replace);
+        };
+        runExport(dir.filePath("before"), false);
+        runExport(dir.filePath("after"), true);
+        auto collect = [](const QString &root) {
+            QMap<QString, QByteArray> files;
+            QDirIterator entries(root, QDir::Files, QDirIterator::Subdirectories);
+            while (entries.hasNext()) {
+                QFile file(entries.next());
+                if (!file.open(QIODevice::ReadOnly)) return QMap<QString, QByteArray>{};
+                files.insert(QDir(root).relativeFilePath(file.fileName()), file.readAll());
+            }
+            return files;
+        };
+        const auto before = collect(dir.filePath("before"));
+        const auto after = collect(dir.filePath("after"));
+        QVERIFY(!before.isEmpty());
+        if (kind == "storage") QCOMPARE(before.size(), 2);
+        if (kind == "geometry") QVERIFY(before.size() >= 3);
+        QCOMPARE(after.keys(), before.keys());
+        for (auto it = before.begin(); it != before.end(); ++it) {
+            QVERIFY(!it.value().isEmpty());
+            QCOMPARE(after.value(it.key()), it.value());
+        }
+        QCOMPARE(window.capturePath(), dir.filePath("replacement.gpa_frame"));
+        QVERIFY(!window.busy());
     }
     void textureExportDuringRefresh() {
         using namespace flora;

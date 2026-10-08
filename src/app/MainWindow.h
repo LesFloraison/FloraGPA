@@ -254,7 +254,7 @@ class MainWindow final : public QMainWindow {
     QLineEdit *geometryInstance_;
     QLabel *geometryLabel_;
     QJsonObject geometry_;
-    std::unique_ptr<QTemporaryDir> geometryDir_;
+    std::shared_ptr<QTemporaryDir> geometryDir_;
     ImageView *image_;
     ImageView *textureImage_;
     QWidget *texturePane_;
@@ -276,7 +276,7 @@ class MainWindow final : public QMainWindow {
     QSpinBox *outputLayer_, *outputSample_;
     QLineEdit *outputLow_, *outputHigh_;
     QAction *outputStorageAction_;
-    std::unique_ptr<QTemporaryDir> outputDir_;
+    std::shared_ptr<QTemporaryDir> outputDir_;
     nlohmann::json outputReport_;
     uint64_t outputGeneration_ = 0, displayedOutputGeneration_ = 0;
     QProgressBar *progress_;

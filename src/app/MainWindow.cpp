@@ -2819,17 +2819,21 @@ void MainWindow::inspectGeometry() {
 void MainWindow::exportGeometry() {
     if (!geometryDir_)
         return;
+    // The chooser processes queued capture/inspection completions. Retain the
+    // asset and its identity from the moment Export was requested.
+    const auto directory = geometryDir_;
+    const auto event = geometry_["event"].toString();
     auto root = QFileDialog::getExistingDirectory(this, "Export geometry");
     if (root.isEmpty())
         return;
-    auto base = root + "/FloraGPA-Geometry-" + geometry_["event"].toString(), path = base;
+    auto base = root + "/FloraGPA-Geometry-" + event, path = base;
     for (int i = 1; QFileInfo::exists(path); ++i)
         path = base + '-' + QString::number(i);
     if (!QDir().mkpath(path)) {
         showError("Cannot create export directory.");
         return;
     }
-    QDir source(geometryDir_->path() + "/result");
+    QDir source(directory->path() + "/result");
     for (auto file :
          source.entryList({"*.csv", "geometry.json", "geometry.obj", "vertices.bin", "vertices.validity.bin",
                            "unique_vertices.bin", "patch_constants.bin", "patch_constants.validity.bin"},
@@ -2976,12 +2980,13 @@ void MainWindow::previewBuffer() {
 void MainWindow::exportBuffer() {
     if (!displayedBuffer_)
         return;
+    const auto bytes = bufferModel_->bytes();
     auto path = QFileDialog::getSaveFileName(
         this, "Export buffer", QString("buffer-%1.bin").arg(displayedBuffer_), "Binary data (*.bin)");
     if (path.isEmpty())
         return;
     try {
-        writeFile(path, bufferModel_->bytes());
+        writeFile(path, bytes);
         statusBar()->showMessage("Buffer exported", 3000);
     } catch (const std::exception &error) {
         showError(QString::fromUtf8(error.what()));
@@ -4135,16 +4140,17 @@ bool MainWindow::saveExperiment() {
 void MainWindow::exportOutputStorage() {
     if (!outputDir_ || !outputStorageAction_->isEnabled())
         return;
+    const auto directory = outputDir_;
     const auto path =
         QFileDialog::getSaveFileName(this, "Export Output Storage", "output.bin", "Binary data (*.bin)");
     if (path.isEmpty())
         return;
     try {
-        QFile source(outputDir_->path() + "/result/output_storage.bin");
+        QFile source(directory->path() + "/result/output_storage.bin");
         if (!source.open(QIODevice::ReadOnly))
             throw std::runtime_error("Output storage is unavailable");
         writeFile(path, source.readAll());
-        QFile metadata(outputDir_->path() + "/result/output_storage.json");
+        QFile metadata(directory->path() + "/result/output_storage.json");
         if (!metadata.open(QIODevice::ReadOnly))
             throw std::runtime_error("Output metadata is unavailable");
         writeFile(path + ".json", metadata.readAll());
@@ -4260,10 +4266,11 @@ void MainWindow::exportImage() {
     auto viewer = textureMode() ? textureImage_ : image_;
     if (viewer->image().isNull())
         return;
+    const auto image = viewer->displayImage();
     auto path = QFileDialog::getSaveFileName(this, "Export output", {}, "PNG image (*.png)");
     if (path.isEmpty())
         return;
-    if (!viewer->displayImage().save(path))
+    if (!image.save(path))
         showError("Cannot save image.");
     else
         statusBar()->showMessage("Image exported", 3000);
@@ -4271,17 +4278,19 @@ void MainWindow::exportImage() {
 void MainWindow::exportBytes() {
     if (!frame_ || !selectedResource_)
         return;
+    // Non-shader spans below borrow mapped capture storage across the dialog.
+    const auto frame = frame_;
     try {
-        auto r = frame_->resource(selectedResource_);
+        auto r = frame->resource(selectedResource_);
         Bytes bytes;
         std::vector<uint8_t> effective;
         if (r.type >= 0x90 && r.type <= 0x95) {
-            effective = experiment_->shaderBytes(*frame_, selectedResource_);
+            effective = experiment_->shaderBytes(*frame, selectedResource_);
             bytes = effective;
         } else if (r.data)
-            bytes = frame_->data(r.data);
+            bytes = frame->data(r.data);
         else
-            bytes = frame_->payload(selectedResource_);
+            bytes = frame->payload(selectedResource_);
         auto path = QFileDialog::getSaveFileName(this, "Export resource",
                                                  QString("resource-%1.bin").arg(selectedResource_),
                                                  "Binary data (*.bin *.dxbc)");
