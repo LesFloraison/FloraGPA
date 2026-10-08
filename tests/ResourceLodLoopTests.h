@@ -57,7 +57,7 @@ inline void exerciseSm40LoopProofBounds() {
         if (mode == 25) p.instructions.insert(p.instructions.begin() + end, {0x03040008, 0x00100006, 0});
         if (mode == 26) p.instructions[indexOf(30)][3] |= 0x80000000u; // Extended IADD source.
         if (mode == 27) p.instructions[indexOf(80)][4] = 4096; // Invalid UGE register index.
-        QVERIFY2(required(p), qPrintable(QString("loop mutation %1").arg(mode)));
+        QCOMPARE(required(p), mode != 20); // An unconditional RET legally exits the loop.
     }
     auto flipped = original;
     flipped.instructions[branch][0] ^= 1u << 18;

@@ -33,6 +33,7 @@ void copy(const Frame &frame, const QString &path, Id edited, const std::vector<
 } // namespace
 #include "ResourceLodSwitchTests.h"
 #include "ResourceLodLoopTests.h"
+#include "ResourceLodReturnTests.h"
 class ResourceLodTests final : public QObject {
     Q_OBJECT
   private slots:
@@ -133,14 +134,14 @@ class ResourceLodTests final : public QObject {
     void mipCountOriginals_data() {
         QTest::addColumn<int>("mode");
         QTest::addColumn<bool>("warp");
-        for (int mode = 0; mode < 36; ++mode)
+        for (int mode = 0; mode < 44; ++mode)
             for (bool warp : {false, true})
                 QTest::newRow(qPrintable(QString("%1-%2").arg(mode).arg(warp))) << mode << warp;
     }
     void mipCountOriginals() {
         QFETCH(int, mode);
         QFETCH(bool, warp);
-        const auto root = qEnvironmentVariable(mode < 6 ? "FLORA_MIP_COUNT_CAPTURES" : mode < 12 ? "FLORA_SM40_MIP_CAPTURES" : mode < 20 ? "FLORA_BRANCH_MIP_CAPTURES" : mode < 28 ? "FLORA_SWITCH_MIP_CAPTURES" : "FLORA_LOOP_MIP_CAPTURES");
+        const auto root = qEnvironmentVariable(mode < 6 ? "FLORA_MIP_COUNT_CAPTURES" : mode < 12 ? "FLORA_SM40_MIP_CAPTURES" : mode < 20 ? "FLORA_BRANCH_MIP_CAPTURES" : mode < 28 ? "FLORA_SWITCH_MIP_CAPTURES" : mode < 36 ? "FLORA_LOOP_MIP_CAPTURES" : "FLORA_RETURN_MIP_CAPTURES");
         if (root.isEmpty())
             QSKIP("Set FLORA_MIP_COUNT_CAPTURES for original mip-count captures");
         const auto folder = root + QString("/%1/").arg(mode);
@@ -149,7 +150,7 @@ class ResourceLodTests final : public QObject {
         QVERIFY(audit.initial.empty());
         QVERIFY(!audit.clamped.empty());
         const auto behavior = mode % 6;
-        const bool missing = mode < 12 ? behavior == 2 || behavior == 4 : mode < 20 ? mode >= 14 && mode <= 16 : mode < 28 ? mode >= 22 && mode <= 24 : mode >= 30 && mode <= 32;
+        const bool missing = mode < 12 ? behavior == 2 || behavior == 4 : mode < 20 ? mode >= 14 && mode <= 16 : mode < 28 ? mode >= 22 && mode <= 24 : mode < 36 ? mode >= 30 && mode <= 32 : mode >= 38 && mode <= 40;
         QCOMPARE(audit.issues.size(), size_t(missing));
         QCOMPARE(validateFrame(frame.path())["errors"].get<unsigned>(), unsigned(missing));
         ReplayOptions options;
@@ -189,23 +190,24 @@ class ResourceLodTests final : public QObject {
                 QCOMPARE(edited.output().rgba, bytes(root + QString("/%1/hardware/expected.rgba").arg(base)));
             }
         }
-        if (mode == 20 || mode == 24 || mode == 28 || mode == 32) {
+        if (mode == 20 || mode == 24 || mode == 28 || mode == 32 || mode == 36 || mode == 40) {
             Id shader = 0;
             for (const auto &[id, e] : frame.entries())
                 if (e.category == 7 && isDraw(e.type))
                     shader = frame.state(frame.event(id).state).stages[4].shader;
             QVERIFY(shader);
-            options.shaders[shader] = bytes(root + (mode == 20 ? "/24/hardware/switchSample.dxbc" : mode == 24 ? "/20/hardware/switched.dxbc" : mode == 28 ? "/32/hardware/loopSample.dxbc" : "/28/hardware/loopCount.dxbc"));
+            options.shaders[shader] = bytes(root + (mode == 20 ? "/24/hardware/switchSample.dxbc" : mode == 24 ? "/20/hardware/switched.dxbc" : mode == 28 ? "/32/hardware/loopSample.dxbc" : mode == 32 ? "/28/hardware/loopCount.dxbc" : mode == 36 ? "/40/hardware/returnSample.dxbc" : "/36/hardware/returnCount.dxbc"));
             Replay edited(frame, options);
-            if (mode == 20 || mode == 28) QVERIFY_EXCEPTION_THROWN(edited.run(), std::runtime_error);
+            if (mode == 20 || mode == 28 || mode == 36) QVERIFY_EXCEPTION_THROWN(edited.run(), std::runtime_error);
             else {
                 edited.run();
-                QCOMPARE(edited.output().rgba, bytes(root + (mode < 28 ? "/20/hardware/expected.rgba" : "/28/hardware/expected.rgba")));
+                QCOMPARE(edited.output().rgba, bytes(root + (mode < 28 ? "/20/hardware/expected.rgba" : mode < 36 ? "/28/hardware/expected.rgba" : "/36/hardware/expected.rgba")));
             }
         }
     }
     void sm40SwitchProofBounds() { exerciseSm40SwitchProofBounds(); }
     void sm40LoopProofBounds() { exerciseSm40LoopProofBounds(); }
+    void sm40ReturnProofBounds() { exerciseSm40ReturnProofBounds(); }
     void sm40BranchProofBounds() {
         const auto root = qEnvironmentVariable("FLORA_BRANCH_MIP_CAPTURES");
         if (root.isEmpty()) QSKIP("Set original SM4.0 branch capture directory");
@@ -256,7 +258,7 @@ class ResourceLodTests final : public QObject {
                 // path overwrites it. A linear scan would unsafely drop it.
                 p.instructions.erase(p.instructions.begin() + alternative, p.instructions.begin() + join);
             }
-            QVERIFY2(required(p), qPrintable(QString("branch mutation %1").arg(mode)));
+            QCOMPARE(required(p), mode != 15); // RET ends the true path; the other path still kills dimensions.
         }
         auto flipped = original;
         flipped.instructions[branch][0] ^= 1u << 18; // Both outcomes have the same non-use proof.
@@ -302,7 +304,7 @@ class ResourceLodTests final : public QObject {
             if (mode == 8) { conversion.push_back(0); conversion[0] += 1u << 24; }
             if (mode == 9) { conversion.pop_back(); conversion[0] -= 1u << 24; }
             if (mode == 10) changed.instructions.pop_back(); // Missing return.
-            if (mode == 11) changed.instructions.push_back({0x0100003eu}); // Multiple returns.
+            if (mode == 11) changed.instructions.push_back({0x0100003eu}); // Legal unreachable return.
             if (mode == 12) changed.instructions.insert(changed.instructions.begin() + 3, {0x01000030u}); // LOOP.
             if (mode == 13) changed.instructions.back() = {0x0200003eu, 0};
             if (mode == 14) conversion[3] = 0x00208001u; // Unproved CB/relative source.
@@ -314,7 +316,7 @@ class ResourceLodTests final : public QObject {
             if (mode == 17) changed.header[0] = (changed.header[0] & 0xffff0000) | 0x51;
             const auto program = writeDxbcProgram(changed);
             found->second = program;
-            QVERIFY2(shaderSrvLodDependencies(makeDxbc(parts))[0], qPrintable(QString::number(mode)));
+            QCOMPARE(shaderSrvLodDependencies(makeDxbc(parts))[0], mode != 11);
         }
         const auto program = writeDxbcProgram(original);
         found->second = program;

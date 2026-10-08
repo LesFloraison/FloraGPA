@@ -33,7 +33,7 @@ struct FlowOperation {
     std::vector<RegisterUse> sources;
     std::vector<size_t> successors;
 };
-// Deliberately bounded SM4.0 proof. Checked IF, SWITCH and LOOP blocks only;
+// Deliberately bounded SM4.0 proof. Checked IF, SWITCH, LOOP and unconditional RET;
 // no calls, relative
 // operands, instruction/operand extensions, memory stores or unfamiliar ALU
 // operations are admitted. This is not a general shader optimizer.
@@ -66,7 +66,10 @@ std::optional<std::vector<FlowOperation>> boundedSm40(const DxbcProgram &program
             selection.caseHasCode = true;
         }
         if (op == 62) {
-            if (row.size() != 1 || i + 1 != program.instructions.size() || !branches.empty())
+            // Calls and labels are rejected by this grammar, so RET terminates
+            // the invocation even inside a branch or loop. Still parse the
+            // remaining instructions and require balanced structured blocks.
+            if (row.size() != 1 || (row[0] & 0x00fff800u))
                 return {};
             instruction.successors.clear();
         } else if (op == 31 || op == 76) {
@@ -205,7 +208,7 @@ std::optional<std::vector<FlowOperation>> boundedSm40(const DxbcProgram &program
         }
         result.push_back(std::move(instruction));
     }
-    if ((program.instructions.back()[0] & 0x7ff) != 62)
+    if (!branches.empty() || (program.instructions.back()[0] & 0x7ff) != 62)
         return {};
     return result;
 }
@@ -238,7 +241,7 @@ bool dimensionsUnused(const std::vector<FlowOperation> &program, size_t at, MipQ
                 work.push_back(successor);
             }
     }
-    return true; // Any remaining lanes die at the checked final RET.
+    return true; // Remaining lanes die on checked RET paths or have no reachable use.
 }
 } // namespace
 std::array<bool, 128> shaderSrvLodDependencies(Bytes bytes) {
