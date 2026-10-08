@@ -1,4 +1,5 @@
 #include "RdcAnalyzeCli.h"
+#include "BufferCsv.h"
 #include "application/Annotations.h"
 #include "application/DrawResources.h"
 #include "application/ApiCommands.h"
@@ -931,26 +932,8 @@ int main(int argc, char **argv) {
                 report.insert("length", qint64(length));
                 report.insert("value_time", options.until ? (options.before ? "before_event" : "after_event")
                                                           : "capture_initial");
-                if (!p.isSet("no-buffer-csv")) {
-                    QByteArray csv = "byte_offset,hex_bytes,uint32,int32,float32\n";
-                    for (qsizetype pos = 0; pos < raw.size(); pos += 4) {
-                        auto word = raw.mid(pos, 4);
-                        csv += QByteArray::number(offset + pos) + ',' + word.toHex();
-                        if (word.size() == 4) {
-                            uint32_t u;
-                            int32_t i;
-                            float f;
-                            std::memcpy(&u, word.constData(), 4);
-                            std::memcpy(&i, word.constData(), 4);
-                            std::memcpy(&f, word.constData(), 4);
-                            csv += ',' + QByteArray::number(u) + ',' + QByteArray::number(i) + ',' +
-                                   QByteArray::number(double(f), 'g', 17);
-                        } else
-                            csv += ",,,";
-                        csv += '\n';
-                    }
-                    save(out + "/words.csv", csv);
-                }
+                if (!p.isSet("no-buffer-csv"))
+                    saveBufferCsv(out + "/words.csv", raw, offset);
             } else if (command == "texture-storage") {
                 const auto id = parseId("id");
                 std::vector<uint8_t> bytes;
