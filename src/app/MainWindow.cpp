@@ -1389,8 +1389,11 @@ void MainWindow::setBusy(bool busy) {
     for (auto view : replayDebug_)
         if (view)
             view->setWorkerBusy(busy);
-    if (busy && textureExportAction_)
-        textureExportAction_->setEnabled(false);
+    // A preview may replace the texture while an independent export is running.
+    // Restore availability from the currently accepted asset, not the old job.
+    if (textureExportAction_)
+        textureExportAction_->setEnabled(!busy && textureDir_ && !textureMetadata_.isEmpty() &&
+                                         !textureImage_->image().isNull());
     replayedState_->setWorkerBusy(busy);
     predicateView_->setWorkerBusy(busy);
     annotations_->setWorkerBusy(busy);
@@ -2897,39 +2900,6 @@ void MainWindow::previewTexture() {
     }
     startWorker(args, false);
 }
-void MainWindow::exportTexture() {
-    if (!textureDir_ || textureMetadata_.isEmpty())
-        return;
-    // A save dialog runs a nested event loop. Keep the displayed asset alive
-    // even if a queued preview replaces the window's current texture cache.
-    const auto directory = textureDir_;
-    const auto metadata = textureMetadata_;
-    const bool luma = metadata["recovered_luma_only"].toBool();
-    const auto label = luma ? "Y plane" : "Texture";
-    const auto filters = QString("%1 DDS (*.dds);;Preview PNG (*.png);;%2 RAW (*.bin)")
-                             .arg(label)
-                             .arg(luma ? "Y plane" : "Subresource");
-    auto path = QFileDialog::getSaveFileName(
-        this, "Export Texture", QString("texture-%1.dds").arg(metadata["resource_id"].toInteger()),
-        filters);
-    if (path.isEmpty())
-        return;
-    const auto suffix = QFileInfo(path).suffix().toLower();
-    const auto files = metadata["export_files"].toObject();
-    const auto source = files.value('.' + suffix).toString(files[".dds"].toString());
-    try {
-        QFile file(directory->path() + "/result/" + source);
-        if (!file.open(QIODevice::ReadOnly))
-            throw std::runtime_error("Texture export asset is unavailable");
-        const auto bytes = file.readAll();
-        if (bytes.size() != file.size())
-            throw std::runtime_error("Cannot read complete texture asset");
-        writeFile(path, bytes);
-        statusBar()->showMessage("Texture exported", 3000);
-    } catch (const std::exception &e) {
-        showError(QString::fromUtf8(e.what()));
-    }
-}
 void MainWindow::previewBuffer() {
     if (!frame_ || !selectedResource_ || frame_->entry(selectedResource_).type != 0x83)
         return;
@@ -4231,18 +4201,5 @@ void MainWindow::selectOutputPixel(int x, int y, const QColor &color) {
     } catch (const std::exception &e) {
         showError(QString::fromUtf8(e.what()));
     }
-}
-void MainWindow::exportImage() {
-    auto viewer = textureMode() ? textureImage_ : image_;
-    if (viewer->image().isNull())
-        return;
-    const auto image = viewer->displayImage();
-    auto path = QFileDialog::getSaveFileName(this, "Export output", {}, "PNG image (*.png)");
-    if (path.isEmpty())
-        return;
-    if (!image.save(path))
-        showError("Cannot save image.");
-    else
-        statusBar()->showMessage("Image exported", 3000);
 }
 } // namespace flora

@@ -124,7 +124,7 @@ void MainWindow::acceptWorkerImage(PreparedImage result, nlohmann::json replayRe
         resourceImagePending_ = false;
         resourceImageContext_ = historyContextKey();
         textureDir_ = std::move(jobDir_);
-        textureExportAction_->setEnabled(true);
+        textureExportAction_->setEnabled(!busy());
         textureLabel_->setText(QString("%1 × %2 · %3")
                                    .arg(report_["width"].toInt())
                                    .arg(report_["height"].toInt())

@@ -72,7 +72,12 @@ class UiTests final : public QObject {
         dialogHandler.start(0);
         auto action = window.findChild<QAction *>(actionName);
         QVERIFY(action);
+        QSignalSpy exported(&window, &flora::MainWindow::exportFinished);
         action->trigger();
+        if (QByteArray(actionName) == "exportTexture") {
+            QTRY_COMPARE_WITH_TIMEOUT(exported.size(), 1, 30000);
+            QVERIFY(exported.last()[0].toBool());
+        }
         QVERIFY2(handled, qPrintable(QString("Action %1: enabled=%2 busy=%3 status=%4")
                                         .arg(actionName)
                                         .arg(action->isEnabled())
@@ -3264,7 +3269,7 @@ class UiTests final : public QObject {
             watchdog.start(30000);
             action->trigger();
             QVERIFY(seen && accepted);
-            if (kind == "storage" || kind == "buffer" || kind == "resource") {
+            if (kind != "geometry") {
                 QTRY_COMPARE_WITH_TIMEOUT(exported.size(), 1, 30000);
                 QVERIFY(exported.last()[0].toBool());
             }
@@ -3361,7 +3366,10 @@ class UiTests final : public QObject {
         });
         poll.start(10);
         watchdog.start(30000);
+        QSignalSpy exportDone(&window, &MainWindow::exportFinished);
         action->trigger();
+        QTRY_COMPARE_WITH_TIMEOUT(exportDone.size(), 1, 30000);
+        QVERIFY(exportDone.last()[0].toBool());
         QVERIFY(dialogSeen);
         QVERIFY(refreshed);
         QFile exported(dir.path() + "/snapshot.bin");
@@ -3445,6 +3453,9 @@ class UiTests final : public QObject {
         QImage png(dir.path() + "/sample.png");
         QCOMPARE(png.pixelColor(0, 0), QColor(72, 72, 72, 255));
         snapshot(window, "texture-msaa-inspection");
+        // Snapshot/event processing can start the refresh queued by the chooser.
+        // An independent export completing does not mean that preview is idle.
+        QTRY_VERIFY_WITH_TIMEOUT(!window.busy() && exportAction->isEnabled(), 30000);
         bool inherited = false;
         QTimer::singleShot(0, &window, [&] {
             auto dialog = window.findChild<QDialog *>("textureEditDialog");

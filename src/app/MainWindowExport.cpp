@@ -1,8 +1,10 @@
 #include "MainWindow.h"
 #include "OutputStorageExport.h"
 #include "ByteExport.h"
+#include "ImageExport.h"
 #include <QAction>
 #include <QFileDialog>
+#include <QFileInfo>
 #include <QStatusBar>
 #include <QtConcurrent/QtConcurrentRun>
 
@@ -17,13 +19,10 @@ void MainWindow::startExport(const QString &progress, const QString &complete,
                              std::function<void(const CancelCheck &)> operation) {
     if (exportCancel_) return;
     const auto token = std::make_shared<std::atomic_bool>(false);
-    const auto texture = textureDir_;
-    const auto revision = revision_;
-    const bool restoreTexture = textureExportAction_->isEnabled();
     exportCancel_ = token;
     auto watcher = new QFutureWatcher<ExportResult>(this);
     watcher->setObjectName("assetExport");
-    connect(watcher, &QFutureWatcher<ExportResult>::finished, this, [this, watcher, token, complete, texture, revision, restoreTexture] {
+    connect(watcher, &QFutureWatcher<ExportResult>::finished, this, [this, watcher, token, complete] {
         const auto result = watcher->result();
         watcher->deleteLater();
         if (exportCancel_ != token) return;
@@ -31,8 +30,6 @@ void MainWindow::startExport(const QString &progress, const QString &complete,
         setBusy(process_.state() != QProcess::NotRunning);
         outputStorageAction_->setEnabled(outputDir_ && outputReport_.is_object() &&
                                         outputReport_.value("image_available", false));
-        if (!busy() && restoreTexture && textureDir_ == texture && revision_ == revision)
-            textureExportAction_->setEnabled(true);
         if (!result.error.isEmpty()) showError(result.error);
         else if (!busy()) statusBar()->showMessage(result.cancelled ? "Export cancelled" : complete, 3000);
         emit exportFinished(result.error.isEmpty() && !result.cancelled);
@@ -98,5 +95,41 @@ void MainWindow::exportBytes() {
     } catch (const std::exception &error) {
         showError(QString::fromUtf8(error.what()));
     }
+}
+void MainWindow::exportTexture() {
+    if (!textureDir_ || textureMetadata_.isEmpty() || exportCancel_)
+        return;
+    // A save dialog runs a nested event loop. Keep the displayed asset alive
+    // even if a queued preview replaces the window's current texture cache.
+    const auto directory = textureDir_;
+    const auto metadata = textureMetadata_;
+    const bool luma = metadata["recovered_luma_only"].toBool();
+    const auto label = luma ? "Y plane" : "Texture";
+    const auto filters = QString("%1 DDS (*.dds);;Preview PNG (*.png);;%2 RAW (*.bin)")
+                             .arg(label)
+                             .arg(luma ? "Y plane" : "Subresource");
+    auto path = QFileDialog::getSaveFileName(
+        this, "Export Texture", QString("texture-%1.dds").arg(metadata["resource_id"].toInteger()),
+        filters);
+    if (path.isEmpty() || exportCancel_)
+        return;
+    const auto suffix = QFileInfo(path).suffix().toLower();
+    const auto files = metadata["export_files"].toObject();
+    const auto source = files.value('.' + suffix).toString(files[".dds"].toString());
+    startExport("Exporting texture…", "Texture exported", [directory, source, path](const CancelCheck &cancelled) {
+        copyExportFile(directory->filePath("result/" + source), path, cancelled);
+    });
+}
+void MainWindow::exportImage() {
+    auto viewer = textureMode() ? textureImage_ : image_;
+    if (viewer->image().isNull() || exportCancel_)
+        return;
+    const auto image = viewer->displayImage();
+    auto path = QFileDialog::getSaveFileName(this, "Export output", {}, "PNG image (*.png)");
+    if (path.isEmpty() || exportCancel_)
+        return;
+    startExport("Exporting image…", "Image exported", [image, path](const CancelCheck &cancelled) {
+        exportImageFile(path, image, cancelled);
+    });
 }
 }
