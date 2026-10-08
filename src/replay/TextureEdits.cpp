@@ -96,6 +96,13 @@ void Replay::applyTextureEdits(const Event &event, const State &state, std::map<
             d.back() = info.samples > 1 ? 0 : d.back() & D3D11_RESOURCE_MISC_TEXTURECUBE;
             Com<ID3D11Resource> clone;
             if (info.samples == 1) {
+                // Input clones currently keep only TEXTURECUBE in MiscFlags and
+                // do not inherit resource LOD. Keep the former readback boundary
+                // here until clone sampling semantics have separate acceptance.
+                requireResourceLod(id);
+                if (hasResourceLodClamp(resource) && resourceLods_.at(id) != 0)
+                    throw std::runtime_error(
+                        "Input texture experiments with nonzero resource minimum LOD are unverified");
                 auto bytes = readTextureStorage(target.Get(), resource);
                 for (const auto &patch : patches) {
                     const auto sub = validateTexturePatch(resource, patch);

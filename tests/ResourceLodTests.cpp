@@ -35,6 +35,80 @@ void copy(const Frame &frame, const QString &path, Id edited, const std::vector<
 class ResourceLodTests final : public QObject {
     Q_OBJECT
   private slots:
+    void storageOriginals_data() {
+        QTest::addColumn<int>("mode");
+        QTest::addColumn<bool>("warp");
+        for (int mode = 0; mode < 12; ++mode)
+            for (bool warp : {false, true})
+                QTest::newRow(qPrintable(QString("%1-%2").arg(mode).arg(warp))) << mode << warp;
+    }
+    void storageOriginals() {
+        QFETCH(int, mode);
+        QFETCH(bool, warp);
+        const auto root = qEnvironmentVariable("FLORA_LOD_STORAGE_CAPTURES");
+        if (root.isEmpty())
+            QSKIP("Set original resource LOD storage corpus");
+        const auto folder = root + QString("/%1/").arg(mode);
+        Frame frame((folder + "capture.gpa_frame").toStdWString());
+        const auto audit = auditResourceLod(frame);
+        QCOMPARE(audit.clamped.size(), size_t(1));
+        QVERIFY(audit.issues.empty());
+        const auto validation = validateFrame(frame.path());
+        QVERIFY2(validation["errors"] == 0, validation.dump(2).c_str());
+        const Id resource = *audit.clamped.begin();
+        const auto expected = bytes(folder + "hardware/expected.rgba");
+        const auto storage = bytes(folder + "hardware/expected-storage.bin");
+        const float lods[]{0, .75f, 1, 4};
+        ReplayOptions options;
+        options.warp = warp;
+        Replay replay(frame, options);
+        for (int repeat = 0; repeat < 2; ++repeat) {
+            replay.run();
+            QCOMPARE(replay.output().rgba, expected);
+            QCOMPARE(replay.readTexture(resource), storage);
+            for (bool inspectAfter : {false, true}) {
+                unsigned observations = 0;
+                replay.run({}, {}, [&](Id id, bool after, auto *context, const auto &objects) {
+                    if (after != inspectAfter || frame.entry(id).type != 0x37)
+                        return;
+                    Com<ID3D11Resource> texture;
+                    check(objects.at(resource).As(&texture), "Storage LOD resource");
+                    Com<ID3D11ShaderResourceView> before, next;
+                    context->PSGetShaderResources(0, 1, &before);
+                    QCOMPARE(context->GetResourceMinLOD(texture.Get()), lods[mode % 4]);
+                    QCOMPARE(replay.readTexture(resource), storage);
+                    QCOMPARE(context->GetResourceMinLOD(texture.Get()), lods[mode % 4]);
+                    context->PSGetShaderResources(0, 1, &next);
+                    QCOMPARE(before.Get(), next.Get());
+                    ++observations;
+                });
+                QCOMPARE(observations, 1u);
+                QCOMPARE(replay.output().rgba, expected);
+            }
+        }
+        // Removing the storage-export guard must not silently enable input
+        // clones that currently discard RESOURCE_CLAMP and start at LOD zero.
+        TexturePatch patch;
+        const auto first = textureSubresources(frame.resource(resource)).front();
+        patch.bytes.assign(storage.begin(), storage.begin() + size_t(first.size));
+        options.textureInputs[25][resource] = {patch};
+        Replay edited(frame, options);
+        if (lods[mode % 4] != 0) {
+            try {
+                edited.run();
+                QFAIL("Nonzero LOD input clone unexpectedly accepted");
+            } catch (const std::runtime_error &error) {
+                QVERIFY(QString::fromUtf8(error.what()).contains(
+                    "Input texture experiments with nonzero resource minimum LOD are unverified"));
+            }
+        } else {
+            edited.run();
+            QCOMPARE(edited.output().rgba, expected);
+        }
+        replay.run();
+        QCOMPARE(replay.readTexture(resource), storage);
+        QCOMPARE(replay.output().rgba, expected);
+    }
     void mipCountPrograms_data() {
         QTest::addColumn<QString>("profile");
         QTest::addColumn<int>("mode");
@@ -462,6 +536,7 @@ class ResourceLodTests final : public QObject {
             QVERIFY(!audit.issues.empty());
             QVERIFY(validation["errors"] != 0);
             QVERIFY_THROWS_EXCEPTION(std::runtime_error, replay.run());
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error, replay.readTexture(*audit.clamped.begin()));
             return;
         }
         QVERIFY2(audit.issues.empty(), audit.issues.empty() ? "" : audit.issues.front().reason.c_str());
@@ -507,9 +582,7 @@ class ResourceLodTests final : public QObject {
                 QCOMPARE(image[p + 3], uint8_t(255));
             }
         }
-        if (mode == 1 || mode == 2 || mode == 4 || mode == 5 || mode == 7 || mode == 10 || mode == 11)
-            QVERIFY_THROWS_EXCEPTION(std::runtime_error, replay.readTexture(*audit.clamped.begin()));
-        else {
+        {
             std::vector<uint8_t> expectedStorage;
             const std::array<std::array<uint8_t, 4>, 4> colors{
                 {{255, 0, 0, 255}, {0, 255, 0, 255}, {0, 0, 255, 255}, {255, 255, 255, 255}}};
