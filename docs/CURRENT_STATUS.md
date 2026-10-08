@@ -1,7 +1,19 @@
 # Current capabilities and compatibility
 
 Reviewed **2026-10-09**. The user authorized M4, then M5, while keeping M3 open.
-The latest [native Windows sustained acceptance](NATIVE_WINDOWS_SOAK_ACCEPTANCE.md),
+The latest [GUI resource observation controls](GUI_RESOURCE_OBSERVATIONS.md),
+harness `5774174`, add immutable current-process window/module/count snapshots
+and hash-checked analysis. Two serial eight-cycle GF2/BF1 pilots pass 56 strict
+per-cycle images plus two post-clear checks; 32 optional-workflow exports match
+the prior baseline. Six native GUI test rows, eight recovery rows, 22 runner and
+five analyzer CPU tests pass. With/without optional workflows, GDI counts after
+MainWindow destruction are 54/22 while Qt top-level widgets return to zero.
+This narrows investigation but establishes neither allocation ownership nor a
+leak; QApplication remains alive. The earlier late GDI step is unresolved and
+these short controls do not replace sustained acceptance. Production package,
+replay coverage and the 72/117/15 module ledger are unchanged.
+
+The preceding [native Windows sustained acceptance](NATIVE_WINDOWS_SOAK_ACCEPTANCE.md),
 harness `58a35d4`, verifies the actual Windows Qt platform, exposed windows and
 native GDI/USER observations. The unchanged Map readiness package completes
 140 GF2/BF1 cycles in 30.394 minutes, 560 strict per-cycle images plus

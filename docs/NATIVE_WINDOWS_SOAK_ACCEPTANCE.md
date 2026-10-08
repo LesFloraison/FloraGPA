@@ -125,6 +125,11 @@ and do not establish whether the GDI step is reclaimed before process exit.
 
 ## Remaining scope and follow-up
 
+The subsequent [GUI resource controls](GUI_RESOURCE_OBSERVATIONS.md) add window,
+module and GDI/USER observations through MainWindow destruction. Two short
+controls pass but do not reproduce or explain this run's late GDI step; the
+original long-run evidence and unresolved boundary remain unchanged.
+
 The workload covers GF2/BF1 and the listed inspection/export/recovery flows on
 this host. Helldivers, other analyzers, additional drivers, all resource/storage
 failure paths and longer periods require their own evidence. Heap, private
