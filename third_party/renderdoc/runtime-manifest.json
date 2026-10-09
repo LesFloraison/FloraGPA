@@ -1,0 +1,65 @@
+{
+  "version": "1.45",
+  "architecture": "x64",
+  "source_url": "https://renderdoc.org/stable/1.45/RenderDoc_1.45_64.zip",
+  "archive_sha256": "bd665c348a8245d10a1f513e35b83603edc1a78006277583d09ec0769286eea4",
+  "commit": "2fc0bc04cb95499635f63986a55bc6f67849dd9f",
+  "files": {
+    "renderdoc.dll": "313f450bfa1f7f7d5f50cc7ee80d9f99b68d3fe873e25eb865ff0433e359f7b3"
+  },
+  "license_source": "https://github.com/baldurk/renderdoc/tree/v1.45",
+  "licenses": [
+    {
+      "path": "LICENSE.md",
+      "sha256": "ba3b05b7f5bfdb4b4917bf8ea3aa9c4ea4c20ff6522de9109a6cc982c5c35730"
+    },
+    {
+      "path": "docs/credits_acknowledgements.rst",
+      "sha256": "92508c32f1cd4abf3435f39fe0fa5578939c5592c541835c1fb9cbec889081ff"
+    },
+    {
+      "path": "util/installer/LICENSE.rtf",
+      "sha256": "d9ddff326fa8918ea2d90bf0ea974cc337a302da1d747ce7f6c70a4f4415370e"
+    },
+    {
+      "path": "renderdoc/3rdparty/breakpad/LICENSE",
+      "sha256": "f9752a0a4ac5215eaa3a4f0ec29cd52563c883de5d7870525cc0bc3a21cb8e15"
+    },
+    {
+      "path": "renderdoc/3rdparty/catch/LICENSE.txt",
+      "sha256": "c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566"
+    },
+    {
+      "path": "renderdoc/3rdparty/glslang/LICENSE.txt",
+      "sha256": "17e70c676e1521ff3e4686f04a2053d93a7e28a33be8de7ec37ab0ff72feb677"
+    },
+    {
+      "path": "renderdoc/3rdparty/half/LICENSE.txt",
+      "sha256": "d098b70e0b195ce538efa38b73c02fccbae89d169126efea7546892c7a3d5d9d"
+    },
+    {
+      "path": "renderdoc/3rdparty/include-bin/LICENSE",
+      "sha256": "c5385fe1cfe1652b3dd93b49bc3493aff78bf975031e8fc151a035961aedb496"
+    },
+    {
+      "path": "renderdoc/3rdparty/interceptor-lib/LICENSE",
+      "sha256": "a1e4522979cd422b42d0b464072eb7d0d218651659f56bf09f8c147384e3f105"
+    },
+    {
+      "path": "renderdoc/3rdparty/jpeg-compressor/LICENSE.txt",
+      "sha256": "8430eedb203de1670b52779eb06d9e2bfae83740f8e1ba05dcb1f5d2cfd6381c"
+    },
+    {
+      "path": "renderdoc/3rdparty/lz4/LICENSE",
+      "sha256": "d15d99c8dc6b0ec22174c0e563a95bc40f9363ca7f9d9d793bb5c5a8e8d0af71"
+    },
+    {
+      "path": "renderdoc/3rdparty/pugixml/LICENSE.md",
+      "sha256": "e35adb9dc50ddec38ed207af7f3a14a8197ae815a43f98b90ad297d5e509297a"
+    },
+    {
+      "path": "renderdoc/3rdparty/zstd/LICENSE",
+      "sha256": "2c1a7fa704df8f3a606f6fc010b8b5aaebf403f3aeec339a12048f1ba7331a0b"
+    }
+  ]
+}

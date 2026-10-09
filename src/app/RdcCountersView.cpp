@@ -1,4 +1,5 @@
 #include "RdcCountersView.h"
+#include "application/RenderDocLibrary.h"
 #include <QAction>
 #include <QComboBox>
 #include <QDir>
@@ -159,19 +160,15 @@ RdcCountersView::RdcCountersView(QWidget *parent) : QWidget(parent) {
             emit eventRequested(item->data(0, Qt::UserRole).toULongLong());
     });
     connect(values_, &QTreeWidget::itemDoubleClicked, this, [this] { locate_->trigger(); });
-    setBackendPath(
-        QSettings()
-            .value("analysis/renderdoc", QDir(qEnvironmentVariable("ProgramFiles", "C:/Program Files"))
-                                             .filePath("RenderDoc/renderdoc.dll"))
-            .toString());
+    setBackendPath(configuredRenderDocLibrary(), false);
     updateActions();
 }
-void RdcCountersView::setBackendPath(const QString &path) {
+void RdcCountersView::setBackendPath(const QString &path, bool persist) {
     if (path == backendPath_)
         return;
     backendPath_ = path;
     backend_->setToolTip(path);
-    QSettings().setValue("analysis/renderdoc", path);
+    if (persist) QSettings().setValue("analysis/renderdoc", path);
     invalidate();
 }
 void RdcCountersView::setContext(const QString &key, qulonglong event) {

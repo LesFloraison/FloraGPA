@@ -1,4 +1,5 @@
 #include "ReplayMeshView.h"
+#include "application/RenderDocLibrary.h"
 #include "Views.h"
 #include "application/ReplayMesh.h"
 #include <QAbstractTableModel>
@@ -138,11 +139,7 @@ ReplayMeshView::ReplayMeshView(QWidget *parent) : QWidget(parent) {
             emit error(QString::fromUtf8(e.what()));
         }
     });
-    setBackendPath(
-        QSettings()
-            .value("analysis/renderdoc", QDir(qEnvironmentVariable("ProgramFiles", "C:/Program Files"))
-                                             .filePath("RenderDoc/renderdoc.dll"))
-            .toString());
+    setBackendPath(configuredRenderDocLibrary(), false);
     updateActions();
 }
 void ReplayMeshView::invalidate() {
@@ -163,12 +160,12 @@ void ReplayMeshView::setContext(const QString &key, qulonglong event) {
     event_ = event;
     invalidate();
 }
-void ReplayMeshView::setBackendPath(const QString &path) {
+void ReplayMeshView::setBackendPath(const QString &path, bool persist) {
     if (path == backendPath_)
         return;
     backendPath_ = path;
     backend_->setToolTip(path);
-    QSettings().setValue("analysis/renderdoc", path);
+    if (persist) QSettings().setValue("analysis/renderdoc", path);
     invalidate();
 }
 void ReplayMeshView::setWorkerBusy(bool busy) {

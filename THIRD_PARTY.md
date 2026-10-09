@@ -30,8 +30,15 @@
   RenderDoc 1.45 source snapshot's `renderdoc/api/app/renderdoc_app.h`.
   Header SHA-256: `b7005e7dc34c3635046868bbd76d81b9b055aede0f56daa0bd39fedee0639ffb`.
   FloraGPA requests public application API 1.6.0 and only loads RenderDoc when
-  explicitly selected for optional recapture. No RenderDoc binary or Python
-  runtime is redistributed with FloraGPA.
+  requested for analysis recapture. The portable package bundles the official
+  RenderDoc 1.45 x64 release DLL, pinned in `runtime-manifest.json`, without
+  QRenderDoc, Python, Qt5 or vendor-specific optional plugins. The runtime is not
+  tracked in Git. Its SHA-256 is
+  `313f450bfa1f7f7d5f50cc7ee80d9f99b68d3fe873e25eb865ff0433e359f7b3`.
+  The official archive URL/hash, upstream commit, MIT license, acknowledgements
+  and upstream third-party notice files accompany it under `RenderDoc/`.
+  Ordinary replay remains independent of this backend. No Python runtime is
+  redistributed with FloraGPA.
 - RenderDoc 1.45 public replay headers are vendored under
   `third_party/renderdoc/replay/` for the isolated native analysis worker.
   MIT, Copyright (c) 2015-2026 Baldur Karlsson and (c) 2014 Crytek; per-file

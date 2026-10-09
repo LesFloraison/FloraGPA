@@ -2,6 +2,10 @@
 #include "app/Appearance.h"
 #include "app/MainWindow.h"
 #include "app/PixelHistoryView.h"
+#include "app/ReplayDebugView.h"
+#include "app/ReplayMeshView.h"
+#include "app/RdcCountersView.h"
+#include "application/RenderDocLibrary.h"
 #include <QAction>
 #include <QApplication>
 #include <QComboBox>
@@ -51,6 +55,21 @@ class HistoryUiTests : public QObject {
         output_ = qEnvironmentVariable("FLORA_UI_ARTIFACT_DIR");
         if (!output_.isEmpty())
             QVERIFY(QDir().mkpath(output_));
+    }
+    void bundledDefaults() {
+        const auto bundled = QDir(QCoreApplication::applicationDirPath()).filePath("RenderDoc/renderdoc.dll");
+        if (!QFileInfo::exists(bundled)) QSKIP("Deploy the pinned runtime beside the test");
+        QSettings().remove("analysis/renderdoc");
+        PixelHistoryView history;
+        ReplayDebugView debug("ps");
+        ReplayMeshView mesh;
+        RdcCountersView counters;
+        QCOMPARE(history.backendPath(), bundled);
+        QCOMPARE(debug.backendPath(), bundled);
+        QCOMPARE(mesh.backendPath(), bundled);
+        QCOMPARE(counters.backendPath(), bundled);
+        QVERIFY(historyBackendCompatible(bundled));
+        QVERIFY(!QSettings().contains("analysis/renderdoc"));
     }
     void backendReports() {
         const auto root = qEnvironmentVariable("FLORA_HISTORY_REPORTS");
@@ -114,7 +133,7 @@ class HistoryUiTests : public QObject {
     }
     void cpuWriteMainWindow() {
         const auto path = qEnvironmentVariable("FLORA_HISTORY_COMMANDS");
-        if (path.isEmpty() || !flora::historyBackendCompatible("C:/Program Files/RenderDoc/renderdoc.dll"))
+        if (path.isEmpty() || !flora::historyBackendCompatible(flora::defaultRenderDocLibrary()))
             QSKIP("Set FLORA_HISTORY_COMMANDS to the command fixture and install RenderDoc 1.45");
         MainWindow window;
         window.resize(1600, 950);
@@ -169,7 +188,7 @@ class HistoryUiTests : public QObject {
     }
     void mainWindow() {
         QFETCH(bool, warp);
-        if (!flora::historyBackendCompatible("C:/Program Files/RenderDoc/renderdoc.dll"))
+        if (!flora::historyBackendCompatible(flora::defaultRenderDocLibrary()))
             QSKIP("Optional RenderDoc 1.45 is not installed");
         QTemporaryDir directory;
         const auto frame = directory.path() + "/msaa.gpa_frame";
@@ -301,7 +320,7 @@ class HistoryUiTests : public QObject {
         readAction->trigger();
         QCOMPARE(tasks.size(), 1);
         QVERIFY(!tasks.takeLast()[0].toBool());
-        history->setBackendPath("C:/Program Files/RenderDoc/renderdoc.dll");
+        history->setBackendPath(flora::defaultRenderDocLibrary());
         readAction->trigger();
         QTRY_VERIFY_WITH_TIMEOUT(!tasks.empty(), 120000);
         QVERIFY(tasks.takeLast()[0].toBool());

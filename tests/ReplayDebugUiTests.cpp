@@ -1,3 +1,4 @@
+#include "application/RenderDocLibrary.h"
 #include "app/Appearance.h"
 #include "app/MainWindow.h"
 #include "app/PixelHistoryView.h"
@@ -354,7 +355,7 @@ class ReplayDebugUiTests : public QObject {
                 view->findChild<QLineEdit *>("debugVertex")->setText("2");
             if (QString(stage) == "ps")
                 view->selectPixel(48, 32, 0);
-            view->setBackendPath("C:/Program Files/RenderDoc/renderdoc.dll");
+            view->setBackendPath(flora::defaultRenderDocLibrary());
             action(*view, "replayDebugRead")->trigger();
             QTRY_VERIFY_WITH_TIMEOUT(!tasks.empty(), 120000);
             QVERIFY2(tasks.takeLast()[0].toBool(), qPrintable(dialogs.join('\n')));
@@ -428,7 +429,7 @@ class ReplayDebugUiTests : public QObject {
         QCOMPARE(tasks.size(), 1);
         QVERIFY(!tasks.takeLast()[0].toBool());
         QVERIFY(!view->model());
-        view->setBackendPath("C:/Program Files/RenderDoc/renderdoc.dll");
+        view->setBackendPath(flora::defaultRenderDocLibrary());
         action(*view, "replayDebugRead")->trigger();
         QTRY_VERIFY_WITH_TIMEOUT(!tasks.empty(), 120000);
         QVERIFY(tasks.takeLast()[0].toBool());

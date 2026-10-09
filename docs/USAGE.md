@@ -180,14 +180,16 @@ ordering and coordinate limits.
 
 ### Optional RenderDoc analysis
 
-A separately selected compatible RenderDoc 1.45 release DLL provides recapture
-and analysis; it is not bundled. Pixel History offers pixel picking, before/after
+The portable package automatically selects its bundled RenderDoc 1.45 release
+DLL for recapture and analysis. A saved existing manual path takes precedence;
+a vanished path falls back to the bundle, then the Program Files installation.
+Explicitly selected incompatible libraries produce an error. Pixel History offers pixel picking, before/after
 values, navigation and export. Recorded VS/PS/CS debugging, Replay Mesh and
 Replay Metrics share native worker/caching infrastructure. Neither Python nor
 qrenderdoc is an application dependency.
 
 ```powershell
-$RenderDocDll = 'C:/Program Files/RenderDoc/renderdoc.dll' # Supply a compatible 1.45 build.
+$RenderDocDll = './out/FloraGPA/RenderDoc/renderdoc.dll' # Bundled pinned backend.
 & $Cli replay $Frame --renderdoc $RenderDocDll --out ./artifacts/recapture-new
 & $Cli rdc-analyze --help
 ```

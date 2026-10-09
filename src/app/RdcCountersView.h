@@ -15,7 +15,7 @@ class RdcCountersView final : public QWidget {
     explicit RdcCountersView(QWidget *parent = nullptr);
     void setContext(const QString &key, qulonglong event);
     void setWorkerBusy(bool busy);
-    void setBackendPath(const QString &path);
+    void setBackendPath(const QString &path, bool persist = true);
     QString backendPath() const { return backendPath_; }
     uint64_t requestId() const { return requestId_; }
     Json request() const;

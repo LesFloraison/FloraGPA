@@ -1,4 +1,5 @@
 #include "PixelHistoryView.h"
+#include "application/RenderDocLibrary.h"
 #include <QAction>
 #include <QDir>
 #include <QFileDialog>
@@ -211,11 +212,7 @@ PixelHistoryView::PixelHistoryView(QWidget *parent) : QWidget(parent) {
         if (!path.isEmpty())
             setBackendPath(path);
     });
-    setBackendPath(
-        QSettings()
-            .value("analysis/renderdoc", QDir(qEnvironmentVariable("ProgramFiles", "C:/Program Files"))
-                                             .filePath("RenderDoc/renderdoc.dll"))
-            .toString());
+    setBackendPath(configuredRenderDocLibrary(), false);
     updateActions();
 }
 void PixelHistoryView::setContext(const QString &key, qulonglong event) {
@@ -233,11 +230,11 @@ void PixelHistoryView::setContext(const QString &key, qulonglong event) {
     }
     updateActions();
 }
-void PixelHistoryView::setBackendPath(const QString &path) {
+void PixelHistoryView::setBackendPath(const QString &path, bool persist) {
     if (backendPath_ == path)
         return;
     backendPath_ = path;
-    QSettings().setValue("analysis/renderdoc", path);
+    if (persist) QSettings().setValue("analysis/renderdoc", path);
     backend_->setToolTip(path);
     invalidate();
 }

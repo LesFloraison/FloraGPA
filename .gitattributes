@@ -9,3 +9,6 @@ src/application/shaders/quad_counter.hlsl -text whitespace=cr-at-eol
 third_party/renderdoc/replay/*.h whitespace=-blank-at-eol
 # Preserve pinned Intel public interface bytes for provenance comparisons.
 third_party/metrics-discovery/* -text whitespace=-blank-at-eol
+
+# Keep upstream runtime notice bytes identical to the pinned manifest.
+third_party/renderdoc/runtime-licenses/** -text whitespace=-blank-at-eol

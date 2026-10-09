@@ -2,7 +2,8 @@ param(
     [string]$QtRoot = '',
     [ValidateSet('Release')][string]$Configuration = 'Release',
     [string]$OutputDirectory = '',
-    [string]$VisualStudioRoot = ''
+    [string]$VisualStudioRoot = '',
+    [string]$RenderDocRoot = ''
 )
 $ErrorActionPreference = 'Stop'
 $repo = Split-Path -Parent $PSScriptRoot
@@ -14,6 +15,29 @@ if ((Test-Path -LiteralPath $destination) -and
     throw 'Package output must be an empty directory. Choose a new -OutputDirectory.'
 }
 $cache = @{}
+# Bundle the exact native replay ABI accepted by FloraGPA, never whichever DLL
+# happens to be first on PATH. Validate before creating a partial package.
+if (-not $RenderDocRoot) { $RenderDocRoot = Join-Path $env:ProgramFiles 'RenderDoc' }
+$RenderDocRoot = [System.IO.Path]::GetFullPath($RenderDocRoot)
+$rdcManifestPath = Join-Path $repo 'third_party\renderdoc\runtime-manifest.json'
+$rdcManifest = Get-Content -LiteralPath $rdcManifestPath -Raw | ConvertFrom-Json
+foreach ($file in $rdcManifest.files.PSObject.Properties) {
+    $candidate = Join-Path $RenderDocRoot $file.Name
+    if (-not (Test-Path -LiteralPath $candidate -PathType Leaf)) {
+        throw "RenderDoc runtime is missing: $candidate. Pass -RenderDocRoot pointing to the official 1.45 x64 ZIP contents."
+    }
+    if ((Get-FileHash -LiteralPath $candidate -Algorithm SHA256).Hash -ne $file.Value) {
+        throw "RenderDoc runtime differs from the pinned official 1.45 x64 build: $candidate"
+    }
+}
+$rdcLicenses = Join-Path $repo 'third_party\renderdoc\runtime-licenses'
+foreach ($file in $rdcManifest.licenses) {
+    $candidate = Join-Path $rdcLicenses $file.path
+    if (-not (Test-Path -LiteralPath $candidate -PathType Leaf) -or
+        (Get-FileHash -LiteralPath $candidate -Algorithm SHA256).Hash -ne $file.sha256) {
+        throw "RenderDoc runtime notice is missing or modified: $($file.path)"
+    }
+}
 $cachePath = Join-Path $repo 'build\vs2022\CMakeCache.txt'
 if (Test-Path -LiteralPath $cachePath -PathType Leaf) {
     foreach ($line in Get-Content -LiteralPath $cachePath) {
@@ -69,6 +93,13 @@ try {
     $env:VCINSTALLDIR = $previousVc
 }
 Copy-Item -Path (Join-Path $crt '*.dll') -Destination $destination -Force
+$rdcDestination = Join-Path $destination 'RenderDoc'
+New-Item -ItemType Directory -Path $rdcDestination | Out-Null
+foreach ($file in $rdcManifest.files.PSObject.Properties) {
+    Copy-Item -LiteralPath (Join-Path $RenderDocRoot $file.Name) -Destination $rdcDestination
+}
+Copy-Item -LiteralPath $rdcManifestPath -Destination (Join-Path $rdcDestination 'runtime-manifest.json')
+Copy-Item -LiteralPath $rdcLicenses -Destination (Join-Path $rdcDestination 'licenses') -Recurse
 Copy-Item -LiteralPath (Join-Path $repo 'THIRD_PARTY.md') -Destination $destination -Force
 $licenses = Join-Path $destination 'licenses'
 New-Item -ItemType Directory -Path $licenses -Force | Out-Null

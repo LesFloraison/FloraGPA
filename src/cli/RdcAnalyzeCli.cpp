@@ -1,4 +1,5 @@
 #include "RdcAnalyzeCli.h"
+#include "application/RenderDocLibrary.h"
 #include "application/RdcJobs.h"
 #include <QCommandLineParser>
 #include <QCoreApplication>
@@ -33,8 +34,7 @@ int rdcAnalyzeCli(QStringList args) {
                                           "debug-thread | counters | texture");
         p.addOption({"out", "New or empty output directory", "path"});
         p.addOption({"renderdoc", "RenderDoc 1.45 native library", "path",
-                     QDir(qEnvironmentVariable("ProgramFiles", "C:/Program Files"))
-                         .filePath("RenderDoc/renderdoc.dll")});
+                     flora::defaultRenderDocLibrary()});
         p.addOption({"timeout", "Worker timeout in seconds", "seconds", "180"});
         for (const auto &[key, description] :
              {std::pair{"gpa-event", "Original GPA draw, dispatch or resource-write command ID"},

@@ -19,7 +19,7 @@ class ReplayMeshView final : public QWidget {
     void setContext(const QString &key, qulonglong event);
     void setWorkerBusy(bool busy);
     QString backendPath() const { return backendPath_; }
-    void setBackendPath(const QString &path);
+    void setBackendPath(const QString &path, bool persist = true);
     Json request() const;
     uint64_t requestId() const { return requestId_; }
     bool finish(uint64_t request, const Json &result, const QString &directory);

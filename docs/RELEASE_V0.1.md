@@ -28,7 +28,7 @@ output. Images, resource bytes and analysis reports can be exported.
 - Supported shader/resource/pipeline experiments, undo/redo and frame-bound
   project files.
 - Native Coverage/Quad diagnostics and supported DX11 timing/statistics queries.
-- Optional RenderDoc and Intel Metrics Discovery integration.
+- Bundled RenderDoc 1.45 analysis and optional Intel Metrics Discovery integration.
 
 The final replay implementation is based on `3186c82`, including the correction
 that preserves execution after pixel discard in SM4.0 mip dependency analysis.
@@ -46,9 +46,12 @@ continues to produce a located refusal. Game shaders are not patched.
   workload. This release does not promise a fixed final-image hash or silently
   disable the event.
 - Pixel History, recorded shader debugging, Replay Mesh and Replay Metrics
-  require a separately supplied compatible **RenderDoc 1.45** DLL. Intel hardware
-  metrics require a supported Intel GPU and its Metrics Discovery driver.
-  These external binaries are not bundled or required for ordinary replay.
+  automatically use the bundled, pinned **RenderDoc 1.45 x64 Release** DLL on
+  first launch. No separate RenderDoc installation or Python is needed. A saved
+  existing manual path takes precedence; a missing path falls back to the bundle.
+  Intel hardware metrics still require a supported Intel GPU and its driver.
+  Ordinary replay does not load or require the RenderDoc backend. Vendor-specific
+  optional RenderDoc plugins are not bundled; available counters depend on the device.
 - Package isolation is checked on the development Windows host. A separate
   clean Windows installation and broader driver/device coverage are not certified.
 - Earlier GUI GDI-count observations have no established allocation-owner or
@@ -70,7 +73,10 @@ Three evidence scopes are intentionally separate:
 3. **Final release:** the separately published `RELEASE_VALIDATION.json` records
    the committed source build, focused checks, GF2/BF1 golden and negative
    controls, Helldivers boundary/control checks, desktop recovery and relocated
-   package checks actually completed for the distributed binary.
+   package checks actually completed for the distributed binary. The repackaged
+   baseline also records bundled-backend resolution, recapture, Pixel History,
+   recorded shader debugging, mesh and counter analysis checks. Prior core replay
+   evidence is identified separately from checks repeated on this package.
 
 `BUILD_INFO.json` in the portable package identifies its source commit and build
 toolchain. `SHA256SUMS.txt` on the release identifies the final downloadable
@@ -83,6 +89,10 @@ The tag provides CMake source for VS2022 x64, C++20 and Qt 6.11 or newer
 (validated kit: Qt 6.11.2 MSVC2022 x64). Generated `.sln` files are created by
 CMake and are intentionally not versioned. See the repository README for build
 commands and `THIRD_PARTY.md` for included components and notices.
+
+The first local package without RenderDoc was superseded before public release.
+The bundled official runtime SHA-256 and upstream commit are pinned in
+`RenderDoc/runtime-manifest.json`; upstream licenses accompany the DLL.
 
 This release does not change the project's existing licensing terms.
 Blocking fixes will use v0.1.x; expanded compatibility and analysis work belong

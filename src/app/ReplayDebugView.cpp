@@ -1,4 +1,5 @@
 #include "ReplayDebugView.h"
+#include "application/RenderDocLibrary.h"
 #include "application/NativeDebugConfig.h"
 #include <QAction>
 #include <QComboBox>
@@ -442,11 +443,7 @@ ReplayDebugView::ReplayDebugView(QString stage, QWidget *parent) : QWidget(paren
         }
     });
     split->setSizes({540, 480});
-    setBackendPath(
-        QSettings()
-            .value("analysis/renderdoc", QDir(qEnvironmentVariable("ProgramFiles", "C:/Program Files"))
-                                             .filePath("RenderDoc/renderdoc.dll"))
-            .toString());
+    setBackendPath(configuredRenderDocLibrary(), false);
     updateActions();
 }
 void ReplayDebugView::invoke(const std::function<void()> &fn) {
@@ -469,12 +466,12 @@ void ReplayDebugView::setWorkerBusy(bool busy) {
     busy_ = busy;
     updateActions();
 }
-void ReplayDebugView::setBackendPath(const QString &path) {
+void ReplayDebugView::setBackendPath(const QString &path, bool persist) {
     if (path == backendPath_)
         return;
     backendPath_ = path;
     backend_->setToolTip(path);
-    QSettings().setValue("analysis/renderdoc", path);
+    if (persist) QSettings().setValue("analysis/renderdoc", path);
     invalidate();
 }
 void ReplayDebugView::selectPixel(int x, int y, int sample) {

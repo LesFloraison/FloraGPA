@@ -19,7 +19,7 @@ class PixelHistoryView final : public QWidget {
     void queryPixel(qulonglong event, qulonglong resource, int x, int y, int mip, int layer, int sample);
     void setNotice(const QString &notice);
     QString backendPath() const { return backendPath_; }
-    void setBackendPath(const QString &path);
+    void setBackendPath(const QString &path, bool persist = true);
     nlohmann::json request() const;
     uint64_t requestId() const { return requestId_; }
     bool finish(uint64_t request, const nlohmann::json &result);
