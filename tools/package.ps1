@@ -15,6 +15,13 @@ if ((Test-Path -LiteralPath $destination) -and
     throw 'Package output must be an empty directory. Choose a new -OutputDirectory.'
 }
 $cache = @{}
+function Get-PackageSha256([string]$Path) {
+    # Avoid module auto-loading differences between Windows PowerShell and pwsh.
+    $stream = [System.IO.File]::OpenRead($Path)
+    $algorithm = [System.Security.Cryptography.SHA256]::Create()
+    try { return ([BitConverter]::ToString($algorithm.ComputeHash($stream))).Replace('-', '').ToLowerInvariant() }
+    finally { $stream.Dispose(); $algorithm.Dispose() }
+}
 # Bundle the exact native replay ABI accepted by FloraGPA, never whichever DLL
 # happens to be first on PATH. Validate before creating a partial package.
 if (-not $RenderDocRoot) { $RenderDocRoot = Join-Path $env:ProgramFiles 'RenderDoc' }
@@ -26,7 +33,7 @@ foreach ($file in $rdcManifest.files.PSObject.Properties) {
     if (-not (Test-Path -LiteralPath $candidate -PathType Leaf)) {
         throw "RenderDoc runtime is missing: $candidate. Pass -RenderDocRoot pointing to the official 1.45 x64 ZIP contents."
     }
-    if ((Get-FileHash -LiteralPath $candidate -Algorithm SHA256).Hash -ne $file.Value) {
+    if ((Get-PackageSha256 $candidate) -ne $file.Value) {
         throw "RenderDoc runtime differs from the pinned official 1.45 x64 build: $candidate"
     }
 }
@@ -34,7 +41,7 @@ $rdcLicenses = Join-Path $repo 'third_party\renderdoc\runtime-licenses'
 foreach ($file in $rdcManifest.licenses) {
     $candidate = Join-Path $rdcLicenses $file.path
     if (-not (Test-Path -LiteralPath $candidate -PathType Leaf) -or
-        (Get-FileHash -LiteralPath $candidate -Algorithm SHA256).Hash -ne $file.sha256) {
+        (Get-PackageSha256 $candidate) -ne $file.sha256) {
         throw "RenderDoc runtime notice is missing or modified: $($file.path)"
     }
 }
