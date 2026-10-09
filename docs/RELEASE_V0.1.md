@@ -47,7 +47,9 @@ continues to produce a located refusal. Game shaders are not patched.
   disable the event.
 - Pixel History, recorded shader debugging, Replay Mesh and Replay Metrics
   automatically use the bundled, pinned **RenderDoc 1.45 x64 Release** DLL on
-  first launch. No separate RenderDoc installation or Python is needed. A saved
+  first launch. The official native `renderdoccmd.exe` helper is included for
+  replay initialization/crash handling. No separate RenderDoc installation or
+  Python is needed. A saved
   existing manual path takes precedence; a missing path falls back to the bundle.
   Intel hardware metrics still require a supported Intel GPU and its driver.
   Ordinary replay does not load or require the RenderDoc backend. Vendor-specific

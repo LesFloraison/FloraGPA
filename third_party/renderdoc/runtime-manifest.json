@@ -5,7 +5,8 @@
   "archive_sha256": "bd665c348a8245d10a1f513e35b83603edc1a78006277583d09ec0769286eea4",
   "commit": "2fc0bc04cb95499635f63986a55bc6f67849dd9f",
   "files": {
-    "renderdoc.dll": "313f450bfa1f7f7d5f50cc7ee80d9f99b68d3fe873e25eb865ff0433e359f7b3"
+    "renderdoc.dll": "313f450bfa1f7f7d5f50cc7ee80d9f99b68d3fe873e25eb865ff0433e359f7b3",
+    "renderdoccmd.exe": "273352017e23e890fe9134de0157d1fe556676a4c6004bfe3265db1a4648ed07"
   },
   "license_source": "https://github.com/baldurk/renderdoc/tree/v1.45",
   "licenses": [
@@ -61,5 +62,6 @@
       "path": "renderdoc/3rdparty/zstd/LICENSE",
       "sha256": "2c1a7fa704df8f3a606f6fc010b8b5aaebf403f3aeec339a12048f1ba7331a0b"
     }
-  ]
+  ],
+  "helper_purpose": "Native crash-handling server required by the official replay runtime; no QRenderDoc UI or Python."
 }

@@ -105,6 +105,11 @@ New-Item -ItemType Directory -Path $rdcDestination | Out-Null
 foreach ($file in $rdcManifest.files.PSObject.Properties) {
     Copy-Item -LiteralPath (Join-Path $RenderDocRoot $file.Name) -Destination $rdcDestination
 }
+# The official native crash server is a separate EXE in this subdirectory.
+# Give it app-local CRTs as well; its working directory is not a dependency path.
+foreach ($name in @('msvcp140.dll','vcruntime140.dll')) {
+    Copy-Item -LiteralPath (Join-Path $crt $name) -Destination $rdcDestination
+}
 Copy-Item -LiteralPath $rdcManifestPath -Destination (Join-Path $rdcDestination 'runtime-manifest.json')
 Copy-Item -LiteralPath $rdcLicenses -Destination (Join-Path $rdcDestination 'licenses') -Recurse
 Copy-Item -LiteralPath (Join-Path $repo 'THIRD_PARTY.md') -Destination $destination -Force
