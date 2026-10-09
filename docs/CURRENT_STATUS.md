@@ -1,6 +1,13 @@
 # Current capabilities and compatibility
 
-Reviewed **2026-10-09**. The user authorized M4, then M5, while keeping M3 open.
+Reviewed **2026-10-10**. The project is freezing the [v0.1 stable baseline](RELEASE_V0.1.md)
+from replay implementation `3186c82`. The discard correction has focused LOD,
+Windows UI and preflight evidence; its previous full gate and archived build
+were incomplete. The v0.1 release validation records the final package separately.
+The historical full-matrix figures below apply to the earlier early-return
+package, not automatically to the current source or release binary.
+
+Previous baseline reviewed **2026-10-09**. The user authorized M4, then M5, while keeping M3 open.
 The latest [SM4.0 early-return compatibility increment](SM40_RETURN_MIP.md),
 implementation `42b86c2`, removes four false missing-MinLOD refusals by following
 checked unconditional RET endpoints. Dimension reads and sampling that need

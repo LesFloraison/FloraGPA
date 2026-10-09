@@ -14,6 +14,15 @@ complete replacement for every GPA feature or capture format.
 Ordinary replay runs in native C++ without Python or an Intel GPA installation.
 Some optional analysis features require separately supplied components.
 
+## Download v0.1
+
+Get the portable **Windows x64** ZIP from
+[FloraGPA v0.1](https://github.com/LesFloraison/FloraGPA/releases/tag/v0.1.0).
+Extract the entire directory and run `FloraGPA.exe`; no separate GPA, Python,
+Qt or Visual Studio installation is needed for ordinary replay.
+The release includes SHA-256 checksums and a validation summary.
+See [supported capabilities and known limits](docs/RELEASE_V0.1.md).
+
 ## Capabilities
 
 - Replay captured DX11 work and navigate API events and annotations.
@@ -97,35 +106,9 @@ collect optional DX12 compiler DLLs from the host PATH; the DX11 compiler remain
 included. A failed deployment may leave a partial directory; retry with a fresh
 output path and retain the failure log.
 
-For a repeatable developer check that builds an archived commit without local
-caches or machine presets, see [source-build validation](docs/SOURCE_BUILD_AND_PACKAGING.md).
-For development checks that repeatedly load, cancel, fail and retry in one Qt
-window, see [persistent recovery validation](docs/PERSISTENT_QT_SOAK.md).
-The latest [same-source release acceptance](docs/WORKFLOW_SOURCE_RELEASE_ACCEPTANCE.md)
-records the 565-registration matrix, 162 enhanced recovery cycles and remaining release boundaries.
-The subsequent [API search update](docs/API_SEARCH_INDEX_ACCEPTANCE.md) bounds
-command-detail retention, checks all 555 capture indexes and records a separate
-48-cycle memory/workflow control; its incremental GUI candidate has narrower release evidence.
-The earlier [diagnostic attachment update](docs/DIAGNOSTIC_ATTACHMENT_ACCEPTANCE.md)
-covers background Coverage/Quad loading, malformed-output rejection and GUI recovery.
-
 Open a capture through **File > Open Capture…** or pass its path to the GUI.
 Use **F5** to replay, **F6** for **Collect GPU Metrics**, and **Escape** to cancel.
-See the [usage guide](docs/USAGE.md) for inspection and editing workflows.
-Display-image and texture exports run in cancellable background jobs and keep
-the requested snapshot across preview changes. See [image export acceptance](docs/IMAGE_EXPORT_ACCEPTANCE.md)
-for atomic single-file publication, validation and remaining boundaries.
-Geometry exports similarly retain the requested assets and publish their event
-directory only after every background copy succeeds; see [geometry export acceptance](docs/GEOMETRY_EXPORT_ACCEPTANCE.md).
-API-log exports retain the selected capture/filter and stream JSON/CSV in the
-background with cancellation. See [API export acceptance](docs/API_EXPORT_ACCEPTANCE.md)
-for byte equivalence, memory measurements and partial-publication diagnostics.
-Captured GetData details are prepared during background loading; cancelled
-completed loads release their candidate capture. See [Query inspection acceptance](docs/QUERY_INSPECTION_ACCEPTANCE.md).
-Predicate GetDesc/GetDataSize observations now supply event provenance and
-conflict diagnostics for captured results; see [Predicate history acceptance](docs/PREDICATE_QUERY_HISTORY.md).
-Contexts and Command Lists inspection/export now supports background cancellation,
-on-demand tree rows and protected JSON publication. See [structure inspection acceptance](docs/STRUCTURE_INSPECTION_ACCEPTANCE.md).
+See the [usage guide](docs/USAGE.md) for inspection, experiments and exports.
 
 ## Preflight and command-line replay
 
@@ -172,24 +155,14 @@ For GF2/BF1 checks, configure `-DFLORA_TEST_CAPTURE_DIR=<your-fixture-directory>
 See [development validation](docs/USAGE.md#development-validation) for other
 fixture requirements and reference comparisons.
 
-The [SM4.0 structured-branch acceptance record](docs/SM40_BRANCH_MIP.md) includes
-original captures, bounded shader dependency checks and the expanded M4 matrix.
-Replay completion and fidelity to the original application are reported separately.
+See the [v0.1 release record](docs/RELEASE_V0.1.md) for the fixed support scope,
+known limitations and the distinction between earlier full-matrix acceptance,
+the latest targeted fixes and final-package validation. Release completion is
+not a claim of fidelity to every original application.
 
-[Common Worker report acceptance](docs/WORKER_REPORT_ACCEPTANCE.md) documents
-background parsing, cancellation, malformed-report recovery and portable GUI checks.
-The subsequent [analyzer payload extension](docs/ANALYZER_PAYLOAD_ACCEPTANCE.md)
-covers eight geometry, state and numeric analysis output paths.
-
-Captured Deferred Context / Command List execution, broader interface layouts,
-resource identity/version behavior and missing pre-frame information remain
-compatibility work. Missing captured bytes cannot be reconstructed by assumption.
-Helldivers retains documented workload variability. Original-player comparisons
-also have explicitly recorded disagreements and configuration limits.
-
-Package isolation has been exercised on the development host; deployment on a
-separate clean Windows installation is not yet certified. Existing validation
-records describe their own builds, not every future build or arbitrary capture.
+Traditional Deferred Context / Command List execution and missing pre-frame
+information remain important boundaries. Helldivers retains documented workload
+variability. A separate clean Windows installation is not yet certified.
 
 ## Documentation
 
