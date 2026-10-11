@@ -3857,5 +3857,22 @@
         "docs/COVERAGE_UI_MIGRATION.md: native coverage controls, shared experiment/device context, isolated cancellation/retry, overlay pixel/buffer navigation and original artifact export are integrated; this shared module retains other unported responsibilities."
       ]
     }
-  ]
+  ],
+  "independent_capture": {
+    "status": "partial",
+    "profile": "GPA 2025 R1 legacy DX11 / IGPA v3",
+    "production_frame_capture": false,
+    "format_boundary": "checked container reader extracted; writer separate from replay",
+    "validation": [
+      "docs/INDEPENDENT_CAPTURE.md",
+      "Five relevant CTest registrations and four native golden/negative controls passed."
+    ],
+    "pending": [
+      "Complete Device/Context/resource tracking",
+      "Live command and initial-state serialization",
+      "Dual-player acceptance of generated live captures",
+      "Two GF2 launches with three frames each across two scenes"
+    ],
+    "note": "New capture work is separate from legacy Python module migration; no full parity claim."
+  }
 }

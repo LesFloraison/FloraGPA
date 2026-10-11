@@ -1,5 +1,6 @@
 #pragma once
 #include "Cancellation.h"
+#include "format/Container.h"
 #include <array>
 #include <cstdint>
 #include <cstring>
@@ -17,53 +18,8 @@ namespace flora {
 struct ContextRecovery;
 using Id = uint64_t;
 using Bytes = std::span<const uint8_t>;
-class Reader {
-    Bytes bytes_;
-    size_t pos_ = 0;
-
-  public:
-    explicit Reader(Bytes bytes) : bytes_(bytes) {}
-    size_t position() const { return pos_; }
-    size_t remaining() const { return bytes_.size() - pos_; }
-    Bytes take(size_t n) {
-        if (n > remaining())
-            throw std::runtime_error("Truncated capture record at byte " + std::to_string(pos_));
-        auto out = bytes_.subspan(pos_, n);
-        pos_ += n;
-        return out;
-    }
-    void skip(size_t n) { take(n); }
-    template <class T> T read() {
-        static_assert(std::is_trivially_copyable_v<T>);
-        T value{};
-        auto b = take(sizeof(T));
-        std::memcpy(&value, b.data(), sizeof(T));
-        return value;
-    }
-    template <class T, size_t N> std::array<T, N> array() {
-        std::array<T, N> out{};
-        for (auto &value : out)
-            value = read<T>();
-        return out;
-    }
-    bool flag() {
-        auto x = read<uint8_t>();
-        if (x > 1)
-            throw std::runtime_error("Invalid optional field flag");
-        return x != 0;
-    }
-    void end() const {
-        if (remaining())
-            throw std::runtime_error("Unexpected trailing capture bytes");
-    }
-};
-struct Entry {
-    Id id;
-    uint64_t offset;
-    uint32_t size;
-    uint8_t flags, category;
-    uint16_t type;
-};
+using Reader = format::Reader;
+using Entry = format::Entry;
 struct Resource {
     Id id{}, original{}, device{}, data{};
     uint16_t type{};
@@ -109,35 +65,26 @@ struct Event {
     Id argumentBuffer{};
 };
 class Frame {
-    void *file_ = nullptr;
-    void *mapping_ = nullptr;
-    const uint8_t *data_ = nullptr;
-    std::shared_ptr<const uint8_t> storage_;
+    std::shared_ptr<const format::Container> container_;
     std::map<Id, std::vector<uint8_t>> viewPayloads_;
-    uint64_t size_ = 0;
-    std::map<Id, Entry> entries_;
-    std::vector<Id> entryOrder_;
-    std::filesystem::path path_;
-    uint32_t width_{}, height_{};
     mutable std::once_flag hashOnce_;
     mutable std::string hash_;
     mutable std::once_flag contextOnce_;
     mutable std::shared_ptr<const ContextRecovery> contextRecovery_;
-    void close() noexcept;
 
   public:
     explicit Frame(const std::filesystem::path &path, const CancelCheck &cancelled = {});
     // Shares immutable capture storage; overlays own their replacement bytes and caches.
     Frame(const Frame &capture, std::map<Id, std::vector<uint8_t>> viewPayloads);
-    ~Frame() { close(); }
+    ~Frame() = default;
     Frame(const Frame &) = delete;
     Frame &operator=(const Frame &) = delete;
-    const auto &entries() const { return entries_; }
-    const auto &entryOrder() const { return entryOrder_; }
-    const auto &path() const { return path_; }
-    uint64_t size() const { return size_; }
-    uint32_t width() const { return width_; }
-    uint32_t height() const { return height_; }
+    const auto &entries() const { return container_->entries(); }
+    const auto &entryOrder() const { return container_->entryOrder(); }
+    const auto &path() const { return container_->path(); }
+    uint64_t size() const { return container_->size(); }
+    uint32_t width() const { return container_->width(); }
+    uint32_t height() const { return container_->height(); }
     const std::string &sha256(const CancelCheck &cancelled = {}) const;
     const ContextRecovery &contextRecovery(const CancelCheck &cancelled = {}) const;
     const Entry &entry(Id id) const;

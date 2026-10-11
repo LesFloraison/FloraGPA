@@ -6,86 +6,10 @@
 #include <limits>
 
 namespace flora {
-void Frame::close() noexcept {
-    if (storage_) {
-        storage_.reset();
-        data_ = nullptr;
-    }
-    if (data_)
-        UnmapViewOfFile(data_);
-    if (mapping_)
-        CloseHandle(mapping_);
-    if (file_ && file_ != INVALID_HANDLE_VALUE)
-        CloseHandle(file_);
-    data_ = nullptr;
-    mapping_ = nullptr;
-    file_ = nullptr;
-}
-Frame::Frame(const std::filesystem::path &path, const CancelCheck &cancelled) : path_(path) {
-    try {
-        checkCancellation(cancelled);
-        file_ = CreateFileW(path.c_str(), GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING,
-                            FILE_ATTRIBUTE_NORMAL, nullptr);
-        if (file_ == INVALID_HANDLE_VALUE)
-            throw std::runtime_error("Cannot open capture (Windows error " + std::to_string(GetLastError()) +
-                                     ")");
-        LARGE_INTEGER length{};
-        if (!GetFileSizeEx(file_, &length) || length.QuadPart < 0x128)
-            throw std::runtime_error("Capture header is truncated");
-        size_ = static_cast<uint64_t>(length.QuadPart);
-        mapping_ = CreateFileMappingW(file_, nullptr, PAGE_READONLY, 0, 0, nullptr);
-        if (!mapping_)
-            throw std::runtime_error("Cannot map capture");
-        data_ = static_cast<const uint8_t *>(MapViewOfFile(mapping_, FILE_MAP_READ, 0, 0, 0));
-        if (!data_)
-            throw std::runtime_error("Cannot read capture mapping");
-        Reader header({data_, 0x128});
-        if (header.read<uint32_t>() != 0x41504749 || header.read<uint32_t>() != 0x128 ||
-            header.read<uint32_t>() != 3)
-            throw std::runtime_error("Unsupported IGPA header");
-        auto count = header.read<uint32_t>();
-        if (std::memcmp(data_ + 0x44, "DX11", 4))
-            throw std::runtime_error("Not a DX11 capture");
-        Reader tail({data_ + 0xf4, 0x34});
-        auto table = tail.read<uint64_t>();
-        if (count > 1'000'000 || table < 0x128 || table > size_ || uint64_t(count) * 24 > size_ - table)
-            throw std::runtime_error("Invalid entry table bounds");
-        tail.skip(0x120 - 0xfc);
-        width_ = tail.read<uint32_t>();
-        height_ = tail.read<uint32_t>();
-        Reader entries({data_ + table, size_t(count) * 24});
-        for (uint32_t i = 0; i < count; ++i) {
-            if (i % 1024 == 0)
-                checkCancellation(cancelled);
-            Entry e{entries.read<Id>(),      entries.read<uint64_t>(), entries.read<uint32_t>(),
-                    entries.read<uint8_t>(), entries.read<uint8_t>(),  entries.read<uint16_t>()};
-            if (e.offset < 0x128 || e.offset > table || e.size > table - e.offset ||
-                !entries_.emplace(e.id, e).second)
-                throw std::runtime_error("Invalid or duplicate entry " + std::to_string(e.id));
-            entryOrder_.push_back(e.id);
-        }
-        checkCancellation(cancelled);
-        // Transfer the mapping only after parsing succeeds. Shared ownership lets
-        // an overlay outlive its source Frame without remapping or copying bytes.
-        auto file = file_, mapping = mapping_;
-        const auto *mapped = data_;
-        file_ = mapping_ = nullptr;
-        data_ = nullptr;
-        storage_ = std::shared_ptr<const uint8_t>(mapped, [file, mapping](const uint8_t *data) {
-            UnmapViewOfFile(data);
-            CloseHandle(mapping);
-            CloseHandle(file);
-        });
-        data_ = mapped;
-    } catch (...) {
-        close();
-        throw;
-    }
-}
+Frame::Frame(const std::filesystem::path &path, const CancelCheck &cancelled)
+    : container_(std::make_shared<format::Container>(path, [&] { checkCancellation(cancelled); })) {}
 Frame::Frame(const Frame &capture, std::map<Id, std::vector<uint8_t>> viewPayloads)
-    : data_(capture.data_), storage_(capture.storage_), size_(capture.size_), entries_(capture.entries_),
-      entryOrder_(capture.entryOrder_), path_(capture.path_), width_(capture.width_),
-      height_(capture.height_) {
+    : container_(capture.container_) {
     for (auto &[id, bytes] : viewPayloads) {
         const auto &e = entry(id);
         if (e.category != 5 || e.type < 0x8c || e.type > 0x8f)
@@ -98,17 +22,9 @@ Frame::Frame(const Frame &capture, std::map<Id, std::vector<uint8_t>> viewPayloa
         viewPayloads_[id] = std::move(bytes);
     }
 }
-const Entry &Frame::entry(Id id) const {
-    auto it = entries_.find(id);
-    if (it == entries_.end())
-        throw std::runtime_error("Missing capture entry " + std::to_string(id));
-    return it->second;
-}
+const Entry &Frame::entry(Id id) const { return container_->entry(id); }
 Bytes Frame::capturedPayload(Id id, int category, int type) const {
-    const auto &e = entry(id);
-    if ((category >= 0 && e.category != category) || (type >= 0 && e.type != type))
-        throw std::runtime_error("Unexpected record type for " + std::to_string(id));
-    return {data_ + e.offset, e.size};
+    return container_->payload(id, category, type);
 }
 Bytes Frame::payload(Id id, int category, int type) const {
     auto original = capturedPayload(id, category, type);

@@ -47,7 +47,7 @@ std::string sha256(Bytes bytes, const CancelCheck &cancelled) {
 const std::string &Frame::sha256(const CancelCheck &cancelled) const {
     checkCancellation(cancelled);
     // An interrupted call_once is retryable; never publish a partial digest.
-    std::call_once(hashOnce_, [this, &cancelled] { hash_ = flora::sha256({data_, size_t(size_)}, cancelled); });
+    std::call_once(hashOnce_, [this, &cancelled] { hash_ = flora::sha256(container_->bytes(), cancelled); });
     checkCancellation(cancelled);
     return hash_;
 }
