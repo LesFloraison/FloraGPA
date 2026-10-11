@@ -765,3 +765,11 @@ CTests and eleven Qt cases. The final scoped and injected interop reruns retain
 The previous source-build result is historical; this iteration's archive/package
 result is recorded after the implementation commit below.
 All 44 native/injected factory and swap-chain forwarding comparisons also pass.
+
+Commit `63aff5a` passes all six isolated source-build/package steps, including 22
+serial CTests, packaged bootstrap control and 65 packaged live files over thirteen
+launches. System-only PATH discovers no Qt and loads no GPA, Qt, RenderDoc or
+Python in the runtime audits. Evidence is `artifacts/capture-map-source-build`.
+Its NO_OVERWRITE pixel fixture maps unused storage before its first Draw only;
+broader streaming use requires sparse patches so unchanged bytes still in GPU
+use are not rewritten during playback. That follow-up remains necessary.
