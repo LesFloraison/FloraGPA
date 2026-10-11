@@ -9,7 +9,7 @@
     "B": "native launch/control and capture-only package validated",
     "C": "partial: persistent native identity, descriptor graph and owned buffer/texture/shader/input-layout/SO creation metadata validated; other creation paths pending",
     "D": "pending: no intercepted frame serialization",
-    "E": "partial foundation: resource readback and per-view UAV counters validated; no frame initial-state assembly or context synchronization",
+    "E": "partial foundation: resource readback, per-view UAV counters and bound pipeline snapshots validated; no frame assembler or context synchronization",
     "F": "partial: Qt control lifecycle validated; actual capture/completion unavailable",
     "G": "pending: no six-frame GF2 or original GUI capture acceptance"
   },
@@ -26,9 +26,10 @@
     "existing_golden_controls": 4,
     "native_authored_interop_checks": 22,
     "source_build_steps": 5,
-    "capture_only_ctest": 10,
-    "full_profile_capture_ctest": 8,
-    "native_object_lifetimes": 36
+    "capture_only_ctest": 12,
+    "full_profile_capture_ctest": 10,
+    "native_object_lifetimes": 36,
+    "additional_existing_structure_ctest": 2
   },
   "source_build_commit": "343d7cb33ede4dcc983e3adeeac303db1bcc58e5",
   "local_evidence_sha256": {
@@ -67,7 +68,14 @@
     "capture-resource-gf2-2/unity.log": "a8e8a948dbb1f69b75bea2c848b53c7b3c870b5d525c4137d57761278a1da693",
     "capture-resource-gf2-2/exit.json": "0967dd41904f59b10fac1994c08251d10c681b5e68ede401580724be8613678e",
     "capture-resource-validation.json": "287f146bf2441003d213e04bfdc328ad28debcb8ad1694e105eb3b75902ebb45",
-    "capture-resource-source-build/validation.json": "98628010e2c322df8dc0fda874421bb07c78cacc3d5fd67d0d28a4f0c58382f3"
+    "capture-resource-source-build/validation.json": "98628010e2c322df8dc0fda874421bb07c78cacc3d5fd67d0d28a4f0c58382f3",
+    "capture-context-ctest.txt": "b18eaa3124c45dbf51c93fb33afc129050646b502bf332c283e742839bf7cb64",
+    "capture-context-native-log.txt": "e9389f6f9e33d36b106859ccd423603d34f9f4378158c3c78f5245089e808848",
+    "capture-context-full-ctest.txt": "795201fb30d88a4c56f8bd3e4973e5126ff39f4899712d8a5610a6ebfb6e003d",
+    "capture-context-full-native-log.txt": "6f5f789faeaa273f9278af1631d93e8ea2b9ddb89e621922a734bbadb7e1cce9",
+    "capture-context-qt.txt": "30f3f58d94df8a6dfd1881bff5f2f163e47438d944716b6e97a714414b4d5110",
+    "capture-context-hardware-initial-failure.txt": "4c39267201ce023d1d5e341bf2989f09274b779ee2bffd4b70feaa04eafe35ad",
+    "capture-context-validation.json": "2af5b3bec6e0dbd22fe0636898126b14dccd50c059fb3c0f170b054886b222ec"
   },
   "limitations": [
     "GPA original-player checks use a development-only private ABI harness.",
@@ -109,5 +117,26 @@
       "No frame command recording or encoding"
     ],
     "gf2_diagnostic": "67,800 then 164,810 Presents, no registry gaps, capture rejected, disconnected and closed; Unity managed exceptions observed; no scene or pixel acceptance"
+  },
+  "pipeline_bindings": {
+    "standalone_helper": true,
+    "native_reference_retention": true,
+    "six_shader_stage_bindings": true,
+    "constant_buffer_ranges": true,
+    "resource_min_lod": true,
+    "hardware_and_warp_levels": [
+      "11.0",
+      "11.1"
+    ],
+    "exact_draw_and_dispatch": "passed",
+    "present_integration": false,
+    "command_recording": false,
+    "gaps": [
+      "SO absolute append position",
+      "Predicate query reconstruction",
+      "Dynamic shader linkage reconstruction",
+      "Hardware protection",
+      "Active queries and unbound hidden state require frame-level tracking"
+    ]
   }
 }

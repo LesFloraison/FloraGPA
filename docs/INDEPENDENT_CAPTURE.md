@@ -201,6 +201,50 @@ correctness. The first attempt exited because its Unity log path collided with
 the controller's target.log; both attempts and the exact runtime hash are retained.
 Accepted GF2 frames remain zero.
 
+## Bound pipeline state
+
+`runtime/context_state` samples immediate-context bindings into capture-owned
+`PipelineBindings`, independently of replay and the GPA wire state block. It
+reads all six shader stages, constant-buffer ranges, SRVs/samplers, IA buffers
+and offsets, topology, rasterizer/viewports/scissors, OM states and factors,
+RTV/DSV bindings, CS/OM UAV slots and resource minimum LOD. UAV slot limits follow
+the sampled feature level (8 at 11.0, 64 at 11.1+), rather than interface version.
+Constant ranges use the native Context1 getters when available. Separate OM UAV
+queries avoid losing slots below the eight-RTV array capacity.
+
+The runtime-side snapshot retains canonical native references, deduplicated by
+persistent capture ID, and follows each view to its resource. These temporary
+leases keep the sampled objects available for later initial-data collection;
+the persistent metadata records still own no native references. Getter results
+are released per returned slot, including aliases and exception paths. Only the
+value model is intended for eventual encoding; native leases belong to capture.
+
+Bound SO buffers, predicates, dynamic shader linkage and hardware protection
+produce explicit reconstruction gaps. In particular, SOGetTargets exposes no
+recoverable absolute append position; the getter's append convention is not
+treated as captured data. Active queries, unbound objects' hidden state,
+resource bytes and UAV counter values are outside this binding snapshot and
+require the separate frame assembler. The helper requires an exclusive calling
+context, rejects deferred contexts and pre-11.0 feature levels, and does not
+establish multicontext synchronization or command-list execution ordering.
+
+Native WARP/hardware tests exercise both 11.0 and 11.1. The test-only consumer
+rebinds captured values after the original application references are released,
+then checks indexed Draw pixels and Dispatch integers against independent CPU
+expectations. Tests cover six stages' high slots, offset constant buffers,
+ResourceMinLOD, CS slot 63, OM slot 3, independent counters remaining unchanged,
+explicit SO/predicate/deferred gaps, LastError and native lifetime cleanup.
+An initial 0.5-to-UNORM color oracle exposed hardware rounding to 127 versus
+WARP's 128. That failure is retained; the final integer oracle uses exact color
+endpoints (yellow shader output blended to green), with no comparison tolerance.
+No file replay, Present integration or live-frame acceptance is claimed.
+
+This iteration passes twelve capture-only CTests and ten independent-capture
+full-profile CTests, including ten Qt cases. The selected full-profile run also
+passes two existing capture-structure tests. Evidence and hashes are summarized
+in `artifacts/capture-context-validation.json` and the development baseline.
+No new GF2 diagnostic is claimed for this standalone helper.
+
 ## Build and control
 
 ```powershell
