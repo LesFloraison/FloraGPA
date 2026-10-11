@@ -3879,24 +3879,26 @@
       "Pipeline binding snapshots: twelve capture-only CTests, ten independent-capture full-profile CTests and two existing structure CTests passed; Qt ten cases passed. Native reference lifetimes, high slots, constant ranges, minimum LOD and explicit hidden-state gaps covered. Exact integer oracle uses representable endpoints after preserving the initial UNORM half-way rounding difference.",
       "Command recording: fourteen capture-only CTests, twelve full-profile capture CTests, ten Qt cases and 44 injected factory/swap comparisons passed. WARP/hardware observations rebuild exact Draw/Dispatch outputs on a fresh WARP device after all source GPU objects die; two execution-removal negative controls pass. Unsupported GPU calls and context/thread/mapping/query gaps fail the model while preserving application forwarding.",
       "Observed-model encoder: fifteen capture-only CTests, thirteen full-profile capture CTests and 94 serial dual-player/CPU checks passed. All source GPU objects die before encoding. Draw/Dispatch removal controls retain captured reference pixels but execute to black. Native event inventory and shader exports pass; presentation is synthetic, no Present/IPC capture or original GUI acceptance.",
-      "Real Present transaction through internal control API: sixteen capture-only and fourteen full-profile capture CTests, 44 injected factory/swap comparisons and 22 dual-player checks passed. Three consecutive actual swap-chain files (including empty Present1) match exact CPU/backbuffer pixels. TEST, resize, busy, separate control thread, cancel/publication races, unsupported Update and writer failure gates pass. Occlusion/device removal are injected HRESULTs only. No private IPC capture or GF2 acceptance."
+      "Real Present transaction through internal control API: sixteen capture-only and fourteen full-profile capture CTests, 44 injected factory/swap comparisons and 22 dual-player checks passed. Three consecutive actual swap-chain files (including empty Present1) match exact CPU/backbuffer pixels. TEST, resize, busy, separate control thread, cancel/publication races, unsupported Update and writer failure gates pass. Occlusion/device removal are injected HRESULTs only. No private IPC capture or GF2 acceptance.",
+      "Startup-injected CLI and Qt: seventeen capture-only CTests, fifteen full-profile capture CTests, eleven Qt cases and 44 forwarding comparisons passed. Ten self-owned files pass 65 serial dual-player/module/CPU checks. Eight malformed identity cases per launch reject; busy/cancel, Update rejection/recovery, target exit and completed-file UI routing pass. GF2 diagnostic identified two-buffer FLIP_SEQUENTIAL: capture explicitly rejected, zero accepted GF2 frames; normal close after disconnect. Signal-file race in test harness corrected and original failure retained."
     ],
     "pending": [
       "Remaining creation paths and class-instance metadata",
-      "Private IPC routing/default swap selection, expanded frame-boundary synchronization, Map writes and remaining hidden states",
+      "Flip/multiple-buffer frame boundaries, synchronization, Map/Update/Copy and remaining hidden states",
       "Remaining command/state wire layouts and real swap-chain presentation serialization",
-      "Dual-player acceptance of generated live captures",
+      "Broader generated-capture dual-player and original GUI acceptance beyond the self-owned single-buffer profile",
       "Two GF2 launches with three frames each across two scenes"
     ],
     "note": "New capture work is separate from legacy Python module migration; no full parity claim.",
     "bootstrap": "native x64 launch/control and Factory0-7/SwapChain0-4 wrappers validated",
-    "qt_controls": "async CLI composition; live capture and open-result controls remain unavailable",
+    "qt_controls": "Async launch/capture/cancel/disconnect and completed-file handoff tested against real injected target; limited profile, no full release acceptance",
     "object_forwarding": "37 families / 78 declared public interfaces, native C++ build generator, canonical IUnknown and typed input/output forwarding; not command recording",
     "native_metadata": "Persistent native IDs and descriptor graph; owned buffer/texture initial bytes, shader DXBC and input-layout/SO parameters; not frame serialization",
     "resource_readback": "Capture-owned staging snapshots and independent APPEND/COUNTER UAV values; WARP/hardware byte checks; no Present integration or multicontext barrier",
     "pipeline_bindings": "Capture-owned six-stage/IA/RS/OM values and retained native reference graph; WARP/hardware 11.0/11.1 exact Draw/Dispatch oracles; no frame assembly or command recording",
     "command_model": "Generated COM observers own Clear/Draw/Dispatch arguments, per-command bindings/counters and first-use GPU bytes; fresh-device CPU-model reconstruction and negative controls pass; GPA encoding available to the test probe; no Present/controller integration",
-    "encoder": "Independent CPU model to legacy GPA records, strict reference/type and layout checks, transactional writer; scoped Clear/Draw/Dispatch dual-player validation only",
-    "present_transaction": "Internal control API: application-thread Present boundaries and GPU leases, background CPU encoder, cancellation/publication gate; CLI remains unavailable"
+    "encoder": "Independent CPU encoder connected to native background writer and private IPC; limited injected Draw profile passes dual-player execution",
+    "present_transaction": "Real Present boundaries with application-thread GPU work and background CPU writing; protocol v2 binds session/PIDs, reports outcomes and defaults to unique eligible foreground swap",
+    "limited_cli_frame_capture": true
   }
 }

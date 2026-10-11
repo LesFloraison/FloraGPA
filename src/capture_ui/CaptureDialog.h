@@ -26,6 +26,6 @@ class CaptureDialog final : public QDialog {
     QPushButton *launch_, *capture_, *cancel_, *disconnect_, *open_;
     QPlainTextEdit *log_;
     bool available_ = false, activeCapture_ = false;
-    QString completed_;
+    QString completed_, lastResult_;
 };
 }

@@ -38,15 +38,16 @@ void ensure_x64(const fs::path& path){
        !f.read(reinterpret_cast<char*>(&header),sizeof(header)) || header.Machine!=IMAGE_FILE_MACHINE_AMD64)
         throw std::invalid_argument("Only Windows x64 targets are supported");
 }
-std::vector<wchar_t> environment(const std::string& session){
+std::vector<wchar_t> environment(const std::string& session,const fs::path& output){
     LPWCH raw=GetEnvironmentStringsW();if(!raw)win_error("Read environment");
     std::vector<std::wstring> entries;
     try{
         for(const wchar_t* p=raw;*p;p+=wcslen(p)+1)
-            if(_wcsnicmp(p,L"FLORAGPA_CAPTURE_SESSION=",24)!=0)entries.emplace_back(p);
+            if(_wcsnicmp(p,L"FLORAGPA_CAPTURE_",17)!=0)entries.emplace_back(p);
     }catch(...){FreeEnvironmentStringsW(raw);throw;}
     FreeEnvironmentStringsW(raw);
     entries.push_back(L"FLORAGPA_CAPTURE_SESSION="+std::wstring(session.begin(),session.end()));
+    entries.push_back(L"FLORAGPA_CAPTURE_OUTPUT="+output.wstring());
     std::sort(entries.begin(),entries.end(),[](const auto& a,const auto& b){return _wcsicmp(a.c_str(),b.c_str())<0;});
     std::vector<wchar_t> result;
     for(const auto& entry:entries){result.insert(result.end(),entry.begin(),entry.end());result.push_back(0);}
@@ -84,7 +85,7 @@ struct InheritedHandles {
 int wmain(int argc,wchar_t** argv){
     try{
         if(argc<2 || std::wstring(argv[1])==L"--help"){
-            std::cout<<"FloraCapture native bootstrap (frame capture is not yet available)\n"
+            std::cout<<"FloraCapture native DX11 capture (limited profile; inspect status)\n"
                      <<"launch --exe FILE --out NEW_DIRECTORY [--cwd DIRECTORY] [-- target arguments]\n"
                      <<"status|capture|cancel|disconnect --session SESSION_JSON [capture: --swap-chain ID]\n";
             return argc<2?2:0;
@@ -130,7 +131,7 @@ int wmain(int argc,wchar_t** argv){
         const auto out=fs::absolute(options.at(L"--out"));
         if(fs::exists(out))throw std::invalid_argument("Session directory must be new");
         fs::create_directories(out);
-        const auto session=uuid();auto env=environment(session);
+        const auto session=uuid();auto env=environment(session,out);
         std::wstring line=quote(exe.wstring());for(const auto& arg:arguments)line+=L" "+quote(arg);
         STARTUPINFOEXW startup{};startup.StartupInfo.cb=sizeof(startup);PROCESS_INFORMATION child{};
         // The target must not keep the controller's redirected stdout/stderr
@@ -158,7 +159,7 @@ int wmain(int argc,wchar_t** argv){
         Json manifest={{"version",protocol_version},{"session_id",session},{"pid",child.dwProcessId},
                        {"process_created",creation_time(process.value)},
                        {"executable",utf8(exe.wstring())},{"runtime",utf8(runtime.wstring())},
-                       {"capture_available",false},{"milestone","native_bootstrap_only"}};
+                       {"output_directory",utf8(out.wstring())},{"milestone","native_present_capture"}};
         save(out/L"session.json",manifest);
         if(ResumeThread(thread.value)==DWORD(-1))win_error("Resume injected target");
         pending.resumed=true;

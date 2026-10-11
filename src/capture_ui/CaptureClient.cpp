@@ -42,7 +42,7 @@ void CaptureClient::finish(int exitCode, QProcess::ExitStatus exitStatus) {
     if (result.value("ok").toBool() != (exitCode == 0)) { emit failed("Capture controller result disagrees with its exit code"); return; }
     if (command == "launch" && result.value("ok").toBool()) {
         const auto file = result.value("session_file").toString();
-        if (result.value("version").toInt() != 1 || file.isEmpty() || !QFileInfo(file).isFile()) {
+        if (result.value("version").toInt() != 2 || file.isEmpty() || !QFileInfo(file).isFile()) {
             emit failed("Invalid capture session manifest"); return;
         }
         session_ = file; connected_ = true;

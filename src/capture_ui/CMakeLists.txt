@@ -14,10 +14,11 @@ if(BUILD_TESTING)
   set_tests_properties(capture_ui PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen"
     ENVIRONMENT_MODIFICATION "PATH=path_list_prepend:$<TARGET_FILE_DIR:Qt6::Core>")
   if(TARGET FloraCapture)
-    add_dependencies(FloraCaptureUiTests FloraCapture FloraCaptureRuntime FloraCaptureFactoryProbe)
+    add_dependencies(FloraCaptureUiTests FloraCapture FloraCaptureRuntime FloraCaptureFactoryProbe FloraCaptureLiveTarget)
     set_property(TEST capture_ui APPEND PROPERTY ENVIRONMENT
       "FLORA_NATIVE_CAPTURE_CONTROLLER=$<TARGET_FILE:FloraCapture>"
-      "FLORA_NATIVE_CAPTURE_PROBE=$<TARGET_FILE:FloraCaptureFactoryProbe>")
+      "FLORA_NATIVE_CAPTURE_PROBE=$<TARGET_FILE:FloraCaptureFactoryProbe>"
+      "FLORA_NATIVE_LIVE_TARGET=$<TARGET_FILE:FloraCaptureLiveTarget>")
     set_tests_properties(capture_ui PROPERTIES RUN_SERIAL TRUE)
   endif()
 endif()

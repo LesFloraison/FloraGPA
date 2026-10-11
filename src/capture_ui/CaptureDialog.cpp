@@ -27,10 +27,11 @@ CaptureDialog::CaptureDialog(const QString &controller, QWidget *parent) : QDial
         if (!path.isEmpty()) { exe_->setText(path); cwd_->setText(QFileInfo(path).absolutePath()); }
     });
     form->addRow("Application",row);
-    arguments_=new QLineEdit(this); arguments_->setToolTip("Use quotes around arguments containing spaces."); form->addRow("Arguments",arguments_);
-    cwd_=new QLineEdit(this); form->addRow("Working directory",cwd_);
+    arguments_=new QLineEdit(this); arguments_->setObjectName("captureArguments"); arguments_->setToolTip("Use quotes around arguments containing spaces."); form->addRow("Arguments",arguments_);
+    cwd_=new QLineEdit(this); cwd_->setObjectName("captureWorkingDirectory"); form->addRow("Working directory",cwd_);
     out_=new QLineEdit(QDir(QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation)).filePath(
         "FloraGPA/Captures/"+QDateTime::currentDateTime().toString("yyyyMMdd-HHmmss-zzz")),this);
+    out_->setObjectName("captureOutput");
     out_->setToolTip("A new session directory. Existing directories are preserved."); form->addRow("Output",out_);
     swaps_=new QComboBox(this); swaps_->setObjectName("captureSwapChains"); form->addRow("Swap chain",swaps_);
     layout->addLayout(form);
@@ -38,6 +39,7 @@ CaptureDialog::CaptureDialog(const QString &controller, QWidget *parent) : QDial
     auto actions = new QHBoxLayout;
     launch_=new QPushButton("Launch",this); capture_=new QPushButton("Capture Next Frame",this); cancel_=new QPushButton("Cancel",this);
     disconnect_=new QPushButton("Disconnect",this); open_=new QPushButton("Open Capture",this);
+    cancel_->setObjectName("captureCancel"); disconnect_->setObjectName("captureDisconnect");
     launch_->setObjectName("captureLaunch"); capture_->setObjectName("captureNext"); open_->setObjectName("captureOpen");
     for(auto button:{launch_,capture_,cancel_,disconnect_,open_})actions->addWidget(button);
     layout->addLayout(actions);
@@ -45,7 +47,7 @@ CaptureDialog::CaptureDialog(const QString &controller, QWidget *parent) : QDial
     auto logs=new QVBoxLayout(details); log_=new QPlainTextEdit(this); log_->setReadOnly(true); log_->setMaximumBlockCount(300);
     log_->hide(); logs->addWidget(log_); connect(details,&QGroupBox::toggled,log_,&QWidget::setVisible); layout->addWidget(details);
     connect(launch_,&QPushButton::clicked,this,[this] {
-        completed_.clear(); available_=false;
+        completed_.clear(); lastResult_.clear(); available_=false;
         client_.launch(exe_->text(),cwd_->text(),out_->text(),QProcess::splitCommand(arguments_->text()));
     });
     connect(capture_,&QPushButton::clicked,this,[this] { client_.capture(swaps_->currentData().toString()); });
@@ -61,7 +63,7 @@ CaptureDialog::CaptureDialog(const QString &controller, QWidget *parent) : QDial
 void CaptureDialog::showResponse(const QString &command,const QJsonObject &result) {
     const auto state = command=="launch" ? result.value("status").toObject() : result;
     const auto phase=state.value("state").toString();
-    activeCapture_=phase=="Armed" || phase=="Capturing" || phase=="Finalizing";
+    activeCapture_=state.value("capture_progress").toObject().value("busy").toBool() || phase=="Armed" || phase=="Capturing" || phase=="Finalizing";
     available_=state.value("capture_available").toBool();
     if(!result.value("ok").toBool())status_->setText(result.value("error").toString("Capture request failed"));
     else status_->setText(available_?phase:phase+" — frame capture unavailable");
@@ -69,6 +71,7 @@ void CaptureDialog::showResponse(const QString &command,const QJsonObject &resul
     status_->setToolTip(gaps.join('\n'));
     if(command!="status" || !result.value("ok").toBool())log_->appendPlainText(QString::fromUtf8(QJsonDocument(result).toJson(QJsonDocument::Compact)));
     const auto selected=swaps_->currentData().toString(); swaps_->clear();
+    swaps_->addItem("Automatic (foreground)",QString());
     for(const auto &value:state.value("swap_chains").toObject().value("active").toArray()) {
         const auto swap=value.toObject(); const auto id=QString::number(swap.value("id").toInteger());
         swaps_->addItem(QString("%1 · %2 × %3").arg(id).arg(swap.value("width").toInt()).arg(swap.value("height").toInt()),id);
@@ -76,9 +79,21 @@ void CaptureDialog::showResponse(const QString &command,const QJsonObject &resul
     const int index=swaps_->findData(selected); if(index>=0)swaps_->setCurrentIndex(index);
     // Only an explicitly completed result may cross into replay.
     const auto completion=state.value("last_capture").toObject();
-    if(completion.value("state").toString()=="Completed") {
-        const auto path=completion.value("path").toString(); if(QFileInfo(path).isFile())completed_=path;
+    if(!completion.isEmpty()) {
+        const auto encoded=QString::fromUtf8(QJsonDocument(completion).toJson(QJsonDocument::Compact));
+        if(encoded!=lastResult_){lastResult_=encoded;log_->appendPlainText(encoded);}
+        const auto outcome=completion.value("state").toString();
+        if(outcome=="Completed") {
+            const auto path=completion.value("path").toString();const QFileInfo file(path);
+            if(file.isAbsolute() && file.suffix()=="gpa_frame" && file.isFile()) {
+                completed_=path;if(!activeCapture_ && result.value("ok").toBool())status_->setText("Capture completed");
+            } else status_->setText("Invalid completed capture path");
+        } else if(!activeCapture_ && result.value("ok").toBool()) {
+            status_->setText(outcome=="Cancelled"?"Capture cancelled":"Capture failed");
+            if(completion.contains("error"))status_->setToolTip(completion.value("error").toString());
+        }
     }
+    if(command=="disconnect" && result.value("ok").toBool())status_->setText("Disconnected");
     updateControls();
 }
 void CaptureDialog::updateControls() {

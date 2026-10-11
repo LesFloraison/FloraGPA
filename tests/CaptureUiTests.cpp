@@ -4,6 +4,9 @@
 #include <QFile>
 #include <QFileInfo>
 #include <QPushButton>
+#include <QLineEdit>
+#include <QComboBox>
+#include <QLabel>
 #include <QSignalSpy>
 #include <QTemporaryDir>
 #include <QtTest>
@@ -54,6 +57,28 @@ class CaptureUiTests final : public QObject {
         QTemporaryDir dir;CaptureClient client;client.setController(controller());QSignalSpy responses(&client,&CaptureClient::response);
         client.launch("target.exe",{},dir.path(),{});QTRY_COMPARE(responses.size(),1);
         qputenv("FLORA_CAPTURE_MOCK","exited");client.status();QTRY_COMPARE(responses.size(),2);QVERIFY(!client.connected());
+    }
+    void nativeCaptureDialog() {
+        const auto native=qEnvironmentVariable("FLORA_NATIVE_CAPTURE_CONTROLLER"), target=qEnvironmentVariable("FLORA_NATIVE_LIVE_TARGET");
+        if(native.isEmpty() || target.isEmpty())QSKIP("Native capture dialog requires capture-full");
+        QTemporaryDir dir;QVERIFY(dir.isValid());const auto oracle=dir.path()+"/target";
+        struct Cleanup {QString oracle;HANDLE process=nullptr;~Cleanup(){QFile done(oracle+"/finish.signal");if(done.open(QIODevice::WriteOnly))done.close();if(process){WaitForSingleObject(process,10000);CloseHandle(process);}}} cleanup{oracle};
+        CaptureDialog dialog(native);auto* client=dialog.findChild<CaptureClient*>();QVERIFY(client);
+        QSignalSpy responses(client,&CaptureClient::response),errors(client,&CaptureClient::failed),opened(&dialog,&CaptureDialog::openCaptureRequested);
+        dialog.findChild<QLineEdit*>("captureExecutable")->setText(target);
+        dialog.findChild<QLineEdit*>("captureOutput")->setText(dir.path()+"/session");
+        dialog.findChild<QLineEdit*>("captureArguments")->setText("\""+oracle+"\" 0");
+        dialog.findChild<QPushButton*>("captureLaunch")->click();
+        QTRY_VERIFY_WITH_TIMEOUT(!responses.empty(),20000);const auto launched=responses.first()[1].toJsonObject();QVERIFY(launched.value("ok").toBool());
+        cleanup.process=OpenProcess(SYNCHRONIZE,FALSE,DWORD(launched.value("pid").toInteger()));QVERIFY(cleanup.process);
+        auto* capture=dialog.findChild<QPushButton*>("captureNext");auto* open=dialog.findChild<QPushButton*>("captureOpen");
+        QTRY_VERIFY_WITH_TIMEOUT(capture->isEnabled(),20000);auto* swaps=dialog.findChild<QComboBox*>("captureSwapChains");QVERIFY(swaps->findData("1")>=0);swaps->setCurrentIndex(swaps->findData("1"));
+        capture->click();QTRY_VERIFY_WITH_TIMEOUT(open->isEnabled(),20000);open->click();QCOMPARE(opened.size(),1);
+        const auto path=opened.first()[0].toString();QVERIFY(QFileInfo(path).isAbsolute());QVERIFY(QFileInfo(path).isFile());QCOMPARE(QFileInfo(path).suffix(),"gpa_frame");
+        QFile unsupported(oracle+"/update.signal");QVERIFY(unsupported.open(QIODevice::WriteOnly));unsupported.close();
+        QTRY_VERIFY(capture->isEnabled());capture->click();auto* status=dialog.findChild<QLabel*>("captureStatus");QTRY_COMPARE_WITH_TIMEOUT(status->text(),"Capture failed",20000);
+        QVERIFY(status->toolTip().contains("UpdateSubresource"));QVERIFY(open->isEnabled());open->click();QCOMPARE(opened.last()[0].toString(),path);
+        dialog.findChild<QPushButton*>("captureDisconnect")->click();QTRY_VERIFY(!client->connected());QCOMPARE(WaitForSingleObject(cleanup.process,0),DWORD(WAIT_TIMEOUT));QCOMPARE(errors.size(),0);
     }
     void nativeLifecycle() {
         const auto native=qEnvironmentVariable("FLORA_NATIVE_CAPTURE_CONTROLLER");

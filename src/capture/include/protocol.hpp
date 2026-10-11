@@ -9,7 +9,7 @@
 
 namespace flora::capture {
 using Json=nlohmann::json;
-inline constexpr std::uint32_t protocol_version=1;
+inline constexpr std::uint32_t protocol_version=2;
 inline constexpr std::uint32_t max_message=65536;
 inline constexpr DWORD io_timeout=5000;
 class Handle {
@@ -77,8 +77,9 @@ inline Json request(const std::string& session,const Json& message,DWORD expecte
     ULONG server_pid=0;
     if(!GetNamedPipeServerProcessId(pipe.value,&server_pid))win_error("Identify capture session");
     if(server_pid!=expected_pid)throw std::runtime_error("Capture session process identity mismatch");
-    send(pipe.value,message);auto answer=receive(pipe.value);
-    if(answer.value("version",0u)!=protocol_version || answer.value("request_id",std::string())!=message.value("request_id",std::string()))
+    auto authenticated=message;authenticated["session_id"]=session;authenticated["client_pid"]=GetCurrentProcessId();authenticated["target_pid"]=expected_pid;
+    send(pipe.value,authenticated);auto answer=receive(pipe.value);
+    if(answer.value("session_id",std::string())!=session || answer.value("pid",0u)!=expected_pid || answer.value("version",0u)!=protocol_version || answer.value("request_id",std::string())!=message.value("request_id",std::string()))
         throw std::runtime_error("Capture response identity mismatch");
     send(pipe.value,Json{{"request_id",message.value("request_id",std::string())}});
     return answer;

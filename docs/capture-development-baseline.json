@@ -2,15 +2,15 @@
   "schema": 1,
   "profile": "GPA 2025 R1 legacy DX11 / IGPA v3",
   "status": "partial",
-  "live_capture_available": false,
+  "live_capture_available": true,
   "accepted_gf2_frames": 0,
   "stages": {
     "A": "checked format boundary and native authored writer validated",
     "B": "native launch/control and capture-only package validated",
     "C": "partial: persistent native identity, descriptor graph and owned buffer/texture/shader/input-layout/SO creation metadata validated; other creation paths pending",
-    "D": "partial: real Present/Present1 transactions record three frames and pass dual-player CPU checks through internal control API; private IPC still rejects capture",
+    "D": "partial: startup-injected CLI capture works for limited single-buffer Draw profile; ten self-owned frames pass dual-player execution; GF2 flip profile rejected",
     "E": "partial: first-use resources, per-command bindings/counters and query/mapping guards validated; mutation, deferred and multithread coverage pending",
-    "F": "partial: Qt control lifecycle validated; actual capture/completion unavailable",
+    "F": "partial: native CLI and asynchronous Qt capture/cancel/disconnect/completed-file opening tested; full profile/deployment acceptance pending",
     "G": "pending: no six-frame GF2 or original GUI capture acceptance"
   },
   "checks": {
@@ -19,19 +19,21 @@
     "swap_chain_comparisons": 20,
     "factory_comparisons": 24,
     "qt_cases": {
-      "passed": 10,
+      "passed": 11,
       "failed": 0,
       "skipped": 0
     },
     "existing_golden_controls": 4,
     "native_authored_interop_checks": 22,
     "source_build_steps": 5,
-    "capture_only_ctest": 16,
-    "full_profile_capture_ctest": 14,
+    "capture_only_ctest": 17,
+    "full_profile_capture_ctest": 15,
     "native_object_lifetimes": 36,
     "additional_existing_structure_ctest": 2,
     "observed_model_interop_checks": 94,
-    "present_transaction_interop_checks": 22
+    "present_transaction_interop_checks": 22,
+    "startup_injected_interop_checks": 65,
+    "startup_injected_dual_player_frames": 10
   },
   "source_build_commit": "2b6c43244605b78dd7f5d59edba2d7f1a0529aa0",
   "local_evidence_sha256": {
@@ -106,7 +108,24 @@
     "capture-present-interop-final/native/results.json": "42a753e32b809e8e2fbcf18b0423af662a385baed17756da8dd2ae78775dbd91",
     "capture-present-factories/validation.json": "e2e96acab25e71ffbce3b435dbda260e92de9b8cda0d95c3af77cb47a9010182",
     "capture-present-swaps/validation.json": "f5dfc04cac0e6c63ce920bedb1beafa99f7a014c74a2bdeb2447cc2c4f73c005",
-    "capture-present-source-build/validation.json": "00c3638171fc900df5f94015b89adcb79b349117d3a43da02dbc68868540bf22"
+    "capture-present-source-build/validation.json": "00c3638171fc900df5f94015b89adcb79b349117d3a43da02dbc68868540bf22",
+    "capture-ipc-ctest.txt": "8aa7db56756878396eee402bf927bb1c9e4ed582dc7bc84994586848c368dbc0",
+    "capture-ipc-full-ctest.txt": "b1116c21c9a4908103584d91848a6e9a468dc65170fa229b57ec992b93b2fca8",
+    "capture-ipc-full-final-ctest.txt": "bf9bb7344ff28e6eb46ceebe3c8b5079bb809d051b379af86aee9ec96d7540d0",
+    "capture-ipc-qt.txt": "6a064b0ccb2437cc4c4681a6d20d0006678ae4081ce22e81093d48ef8eb9e082",
+    "capture-ipc-final-ctest.txt": "94862df05a508feaeb33cd23092530c42d13a86bbc37715448adbc2c574a0371",
+    "capture-ipc-signal-ctest.txt": "8493c2e3f991cb293c19ad815a8731ca753dea15edb234cbf05c0fd75c6159e3",
+    "capture-ipc-interop/validation.json": "2747fae923f4e51c0661d4f00816fb5ae575d3efa46931e190caef3bdcca1653",
+    "capture-ipc-interop/inputs.json": "04dd53443b75ec5a36c797ab3b20bd98a4f7431740844c2e2cabccf101517748",
+    "capture-ipc-factories/validation.json": "e2e96acab25e71ffbce3b435dbda260e92de9b8cda0d95c3af77cb47a9010182",
+    "capture-ipc-swaps/validation.json": "f5dfc04cac0e6c63ce920bedb1beafa99f7a014c74a2bdeb2447cc2c4f73c005",
+    "capture-ipc-gf2/status-1.json": "85301b4f0995acef6be17590335e2c9d10a235dc79841de8c8484dda2a8755c2",
+    "capture-ipc-gf2/status-2.json": "f92ebc28ca6841bde9b448c134effbd8b8c8eedf40f4b07987bb9c763277fd6c",
+    "capture-ipc-gf2/capture.json": "e7f33d03bddf72325c395166cefc778a4785c11774029f6d9df7233454a40caa",
+    "capture-ipc-gf2/disconnect.json": "0501677f4e3944b81504684f7554f8be5f20537cad80f5b35a24c84fd49b2dcf",
+    "capture-ipc-gf2/exit.json": "50e1eabb7855813fcc781851b252c6c7dabb1bd3aa3a3277a6da624e038be4fc",
+    "capture-ipc-gf2/binaries.json": "5159e1fdaa26bf86f3c3751a2c1bd04f75530c46b08f2159fd1e0c1ea173658b",
+    "capture-ipc-gf2/unity.log": "a3d349ec1f02e492a185852c31b69cd7da307e48fcdf3026ffac76a08077230a"
   },
   "limitations": [
     "GPA original-player checks use a development-only private ABI harness.",
@@ -170,7 +189,7 @@
     ]
   },
   "command_recording": {
-    "available_to_controller": false,
+    "available_to_controller": true,
     "scope": "Explicit single-thread immediate-context recorder called by native tests",
     "draw_variants": 4,
     "dispatch": true,
@@ -183,7 +202,6 @@
     "negative_controls": 2,
     "failure_keeps_native_forwarding": true,
     "pending": [
-      "Private IPC transaction routing and default swap selection",
       "Map/Update/Copy and indirect commands",
       "Deferred expansion and multicontext ordering",
       "Individual state-setter event serialization",
@@ -192,7 +210,7 @@
     ]
   },
   "encoder": {
-    "controller_integration": false,
+    "controller_integration": true,
     "cpu_model_only": true,
     "source_gpu_objects_destroyed_before_encoding": true,
     "observed_modes": [
@@ -206,7 +224,7 @@
     "original_player_sha256": "39061ff329e4a32d0c8375ce9ee15e2017bccab0593943b962a860e11723d38b",
     "original_gui_inspection": false,
     "pending": [
-      "Private IPC capture integration and expanded presentation profiles",
+      "Flip/multiple-buffer presentation profiles",
       "Physical disk-full/target-exit finalization and shutdown tests",
       "Additional resource/state/command wire interoperability",
       "Map/Update/Copy, deferred ordering, hidden-state restoration",
@@ -214,7 +232,7 @@
     ]
   },
   "present_transaction": {
-    "controller_integration": false,
+    "controller_integration": true,
     "actual_swap_descriptor": true,
     "background_cpu_encoder": true,
     "gpu_work_on_application_thread": true,
@@ -234,11 +252,23 @@
     "occlusion_and_device_loss": "HRESULT injection only",
     "profile": "one immediate-context thread; one DISCARD/SEQUENTIAL buffer; single-sample RGBA8/BGRA8; zero Present flags; empty Present1",
     "pending": [
-      "Private IPC routing/default selection/results",
       "Target exit and real device-loss/occlusion",
       "Flip/multiple buffers and dirty Present1",
       "Multicontext synchronization and deferred/mutation recording",
       "GF2 six-frame acceptance"
     ]
+  },
+  "controller_capture": {
+    "protocol_version": 2,
+    "identity_rejection_cases_per_launch": 8,
+    "default_selection": "unique eligible foreground swap, otherwise explicit selection required",
+    "target_creation_paths": [
+      "D3D11CreateDeviceAndSwapChain",
+      "D3D11CreateDevice plus DXGI factory"
+    ],
+    "dual_player_files": 10,
+    "original_gui_inspection": false,
+    "gf2_accepted_frames": 0,
+    "gf2_diagnostic": "41,453 -> 154,531 Presents; two-buffer FLIP_SEQUENTIAL; capture rejected; normal close after disconnect; Unity exceptions observed"
   }
 }

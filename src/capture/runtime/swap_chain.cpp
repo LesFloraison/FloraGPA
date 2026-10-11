@@ -15,7 +15,8 @@ namespace {
 class SwapChain;
 struct Observation {
     std::uint64_t id=0;
-    UINT width=0,height=0,format=0;
+    UINT width=0,height=0,format=0,buffers=0,samples=0,effect=0;
+    uint64_t last_present_tick=0;
     std::uintptr_t window=0;
     std::uint64_t present_calls=0,present1_calls=0,present_tests=0,presented=0;
     std::uint64_t unsuccessful_presents=0,resizes=0,failed_resizes=0,escape_count=0;
@@ -76,7 +77,7 @@ class SwapChain final:public IDXGISwapChain4,public IDXGISwapChainMedia {
         observe([&](Observation& o){
             ++o.present_calls;if(extended_call)++o.present1_calls;o.last_present=result;
             if(flags&DXGI_PRESENT_TEST)++o.present_tests;
-            else if(result==S_OK)++o.presented;
+            else if(result==S_OK){++o.presented;o.last_present_tick=GetTickCount64();}
             else ++o.unsuccessful_presents;
         });
     }
@@ -85,7 +86,7 @@ class SwapChain final:public IDXGISwapChain4,public IDXGISwapChainMedia {
         const bool have_desc=SUCCEEDED(result) && SUCCEEDED(real_->GetDesc(&desc));
         observe([&](Observation& o){
             ++o.resizes;o.last_resize=result;if(FAILED(result))++o.failed_resizes;
-            if(have_desc){o.width=desc.BufferDesc.Width;o.height=desc.BufferDesc.Height;o.format=desc.BufferDesc.Format;o.window=reinterpret_cast<std::uintptr_t>(desc.OutputWindow);}
+            if(have_desc){o.width=desc.BufferDesc.Width;o.height=desc.BufferDesc.Height;o.format=desc.BufferDesc.Format;o.buffers=desc.BufferCount;o.samples=desc.SampleDesc.Count;o.effect=desc.SwapEffect;o.window=reinterpret_cast<std::uintptr_t>(desc.OutputWindow);}
         });SetLastError(error);
     }
 public:
@@ -225,7 +226,7 @@ void wrap_swap_chain(IDXGISwapChain** output) noexcept {
         else{
             const auto id=r.next_id++;auto wrapper=std::make_unique<SwapChain>(real,identity,id);
             Observation o;o.id=id;o.width=desc.BufferDesc.Width;o.height=desc.BufferDesc.Height;
-            o.format=desc.BufferDesc.Format;o.window=reinterpret_cast<std::uintptr_t>(desc.OutputWindow);
+            o.format=desc.BufferDesc.Format;o.buffers=desc.BufferCount;o.samples=desc.SampleDesc.Count;o.effect=desc.SwapEffect;o.window=reinterpret_cast<std::uintptr_t>(desc.OutputWindow);
             r.observations.emplace(id,std::move(o));
             try{
                 r.objects.emplace(identity,wrapper.get());r.wrappers.emplace(wrapper.get(),wrapper.get());
@@ -241,6 +242,9 @@ Json swap_chain_status(){
     Json result={{"created",r.created},{"destroyed",r.destroyed},{"tracking_failures",tracking_failures.load()},{"active",Json::array()}};
     for(const auto& pair:r.observations){const auto& o=pair.second;
         result["active"].push_back({{"id",o.id},{"width",o.width},{"height",o.height},{"format",o.format},{"window",o.window},
+            {"buffer_count",o.buffers},{"samples",o.samples},{"swap_effect",o.effect},
+            {"recent_present",o.last_present_tick!=0 && GetTickCount64()-o.last_present_tick<5000},
+            {"foreground",o.window!=0 && o.window==reinterpret_cast<uintptr_t>(GetForegroundWindow())},
             {"present_calls",o.present_calls},{"present1_calls",o.present1_calls},{"test_presents",o.present_tests},
             {"successful_presents",o.presented},{"unsuccessful_presents",o.unsuccessful_presents},
             {"last_present_result",static_cast<std::uint32_t>(o.last_present)},{"resize_calls",o.resizes},

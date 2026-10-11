@@ -33,7 +33,7 @@ def main():
     env['PATH']=str(Path(os.environ['WINDIR'])/'System32')
     env['CL']='/MP4'
     build=out/'build';package=out/'package'
-    evidence=dict(commit=commit,passed=False,scope='Native bootstrap only; not live frame capture',steps=[],
+    evidence=dict(commit=commit,passed=False,scope='Native bootstrap and limited self-owned startup-injected capture; not GF2 acceptance',steps=[],
                   validator_sha256=hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),environment_keys=sorted(env))
 
     def save():
@@ -67,6 +67,14 @@ def main():
     forbidden=[m for m in status['loaded_modules'] if any(s in m.replace('\\','/').lower()
         for s in ('intelswtools/gpa/','python3','qt6','renderdoc'))]
     if forbidden:raise RuntimeError('Unexpected packaged runtime dependencies: '+repr(forbidden))
+    run('package-live-control',[build/'capture/Release/FloraCaptureControllerTests.exe',package/'FloraCapture.exe',
+        build/'capture/Release/FloraCaptureLiveTarget.exe',out/'packaged-live'])
+    live=json.loads((out/'packaged-live/results.json').read_text())
+    for session in live:
+        forbidden=[m for m in session['module_status']['loaded_modules'] if any(s in m.replace('\\','/').lower()
+            for s in ('intelswtools/gpa/','python3','qt6','renderdoc'))]
+        if forbidden:raise RuntimeError('Unexpected packaged live dependencies: '+repr(forbidden))
+    evidence['packaged_live_frames']=sum(len(session['frames']) for session in live)
     evidence['package_files']={p.relative_to(package).as_posix():hashlib.sha256(p.read_bytes()).hexdigest()
         for p in package.rglob('*') if p.is_file()}
     evidence.update(passed=True,no_qt_discovery=True,system_path_only=True,loaded_modules=status['loaded_modules'])

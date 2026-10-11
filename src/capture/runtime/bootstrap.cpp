@@ -1,9 +1,11 @@
-// Native injection/transport milestone. Intentionally refuses frame requests
-// until object tracking and complete command/resource serialization exist.
+// Native startup injection and private capture control. Unsupported profiles
+// remain explicit failures; only completed files cross into replay.
 #include "protocol.hpp"
 #include "swap_chain.hpp"
 #include "factory.hpp"
 #include "objects.hpp"
+#include "capture_session.hpp"
+#include <filesystem>
 #include <d3d11.h>
 #include <detours.h>
 #include <sddl.h>
@@ -33,7 +35,7 @@ HRESULT WINAPI create_device(IDXGIAdapter* adapter,D3D_DRIVER_TYPE type,HMODULE 
     ++creation_depth; NativeCall internal;
     const HRESULT result=real_create(unwrap(adapter),type,software,flags,levels,count,sdk,device,selected,context);
     const DWORD error=GetLastError();record_creation(result,selected);
-    if(SUCCEEDED(result)){wrap_object(device,"D3D11CreateDevice");wrap_object(context,"D3D11CreateDevice");}
+    if(SUCCEEDED(result)){if(!selected && device && *device)level=(*device)->GetFeatureLevel();wrap_object(device,"D3D11CreateDevice");wrap_object(context,"D3D11CreateDevice");}
     --creation_depth;SetLastError(error);return result;
 }
 HRESULT WINAPI create_swap(IDXGIAdapter* adapter,D3D_DRIVER_TYPE type,HMODULE software,UINT flags,
@@ -44,6 +46,7 @@ HRESULT WINAPI create_swap(IDXGIAdapter* adapter,D3D_DRIVER_TYPE type,HMODULE so
     const HRESULT result=real_create_swap(unwrap(adapter),type,software,flags,levels,count,sdk,desc,swap,device,selected,context);
     const DWORD error=GetLastError();record_creation(result,selected);
     if(SUCCEEDED(result) && creation_depth==1){
+        if(!selected && device && *device)level=(*device)->GetFeatureLevel();
         wrap_swap_chain(swap);wrap_object(device,"D3D11CreateDeviceAndSwapChain");wrap_object(context,"D3D11CreateDeviceAndSwapChain");
     }
     --creation_depth;SetLastError(error);return result;
@@ -67,19 +70,60 @@ struct Security {
     }
     ~Security(){if(descriptor)LocalFree(descriptor);}
 };
-Json response(const Json& message){
+std::string service_session;
+std::filesystem::path capture_directory;
+bool service_disconnected=false;
+bool eligible(const Json& row){
+    return row.value("recent_present",false) && row.value("successful_presents",0ull)>=2 &&
+        row.value("buffer_count",0u)==1 && row.value("samples",0u)==1 && row.value("swap_effect",99u)<=1 &&
+        (row.value("format",0u)==DXGI_FORMAT_R8G8B8A8_UNORM || row.value("format",0u)==DXGI_FORMAT_B8G8R8A8_UNORM);
+}
+Json response(const Json& message,ULONG client_pid){
     Json result={{"ok",false},{"version",protocol_version},{"request_id",message.value("request_id",std::string())},
-                 {"pid",GetCurrentProcessId()},{"state",creations.load()?"Tracking":"Starting"},
-                 {"device_creations",creations.load()},{"creation_failures",failures.load()},
-                 {"feature_level",level.load()},{"hook_status",hook_status.load()},
-                 {"capture_available",false},{"capability_gaps",{"COM object tracking","Present boundaries","resource snapshots","command serialization"}}};
-    if(message.value("version",0u)!=protocol_version){result["error"]="protocol_version_mismatch";return result;}
+                 {"session_id",service_session},{"pid",GetCurrentProcessId()}};
+    const auto number_matches=[&](const char* key,uint64_t value){return message.contains(key) && message[key].is_number_unsigned() && message[key].get<uint64_t>()==value;};
+    if(!number_matches("version",protocol_version)){result["error"]="protocol_version_mismatch";return result;}
+    if(message.value("session_id",std::string())!=service_session || !number_matches("target_pid",GetCurrentProcessId()) || !number_matches("client_pid",client_pid)){result["error"]="session_process_mismatch";return result;}
+    if(message.contains("swap_chain") && (!message["swap_chain"].is_number_unsigned() || message["swap_chain"].get<uint64_t>()==0)){result["error"]="invalid_swap_chain";return result;}
+    // Validate the UUID before using it as a file name. Paths never come from IPC.
+    pipe_name(message.at("request_id").get<std::string>());
     const auto command=message.value("command",std::string());
+    const auto swaps=swap_chain_status();const auto objects=object_status();
+    bool available=false;
+    for(const auto& row:swaps["active"])available=available || eligible(row);
+    available=available && objects.value("interface_gaps",0ull)==0 && swaps.value("tracking_failures",0u)==0 && !service_disconnected;
+    result["ok"]=true;
+    if(command=="capture"){
+        if(service_disconnected){result["ok"]=false;result["error"]="disconnected";}
+        else if(capture_progress().value("busy",false)){result["ok"]=false;result["error"]="busy";}
+        else if(!available){result["ok"]=false;result["error"]="capture_capability_incomplete";}
+        else{
+            uint64_t selected=message.value("swap_chain",0ull);std::vector<uint64_t> candidates;
+            for(const auto& row:swaps["active"])if(eligible(row) && (selected?row["id"]==selected:row.value("foreground",false)))candidates.push_back(row["id"].get<uint64_t>());
+            if(candidates.size()!=1){result["ok"]=false;result["error"]=selected?"swap_chain_unavailable":"swap_chain_selection_required";}
+            else{
+                const auto name="frame-"+message.at("request_id").get<std::string>()+".gpa_frame";
+                const auto armed=arm_capture(candidates.front(),capture_directory/name);
+                result["ok"]=armed.value("ok",false);if(armed.contains("error"))result["error"]=armed["error"];
+            }
+        }
+    }else if(command=="cancel"){
+        const auto cancelled=cancel_capture();result["cancelled"]=cancelled.value("cancelled",false);
+    }else if(command=="disconnect"){
+        disconnect_capture();service_disconnected=true;available=false;
+    }else if(command!="status"){result["ok"]=false;result["error"]="unknown_command";}
+    const auto progress=capture_progress();const auto phase=progress.value("state",std::string("Tracking"));
+    result["state"]=service_disconnected?"Disconnected":progress.value("busy",false)?phase:creations.load()?"Tracking":"Starting";
+    result["capture_progress"]=progress;
+    if(phase=="Completed" || phase=="Cancelled" || phase=="Failed"){
+        result["last_capture"]=progress;
+        if(progress.contains("file"))result["last_capture"]["path"]=progress["file"];
+    }
+    result["capture_available"]=available;result["swap_chains"]=swaps;result["objects"]=objects;
+    result["device_creations"]=creations.load();result["creation_failures"]=failures.load();result["feature_level"]=level.load();result["hook_status"]=hook_status.load();
+    result["capability_gaps"]={"Single-buffer non-flip RGBA8/BGRA8 only","Map/Update/Copy, deferred contexts and hidden states are incomplete","Single immediate-context application thread only"};
     if(command=="status"){
-        result["ok"]=true;
-        result["swap_chains"]=swap_chain_status();
         result["factories"]=factory_status();
-        result["objects"]=object_status();
         HMODULE modules[1024]{};DWORD needed=0;
         if(K32EnumProcessModules(GetCurrentProcess(),modules,sizeof(modules),&needed) && needed<=sizeof(modules)){
             result["loaded_modules"]=Json::array();
@@ -92,22 +136,21 @@ Json response(const Json& message){
             }
         }else{result["ok"]=false;result["error"]="module_inventory_failed";}
     }
-    else if(command=="cancel"){result["ok"]=true;result["cancelled"]=false;}
-    else if(command=="disconnect"){result["ok"]=true;result["state"]="Disconnected";}
-    else if(command=="capture"){result["ok"]=false;result["error"]="capture_capability_incomplete";}
-    else {result["ok"]=false;result["error"]="unknown_command";}
     return result;
 }
 DWORD WINAPI serve(void*){
     try{
         char session[64]{};DWORD n=GetEnvironmentVariableA("FLORAGPA_CAPTURE_SESSION",session,sizeof(session));
         if(!n || n>=sizeof(session))return ERROR_INVALID_PARAMETER;
+        service_session=session;
+        wchar_t output[32768]{};const auto count=GetEnvironmentVariableW(L"FLORAGPA_CAPTURE_OUTPUT",output,32768);
+        if(!count || count>=32768)return ERROR_INVALID_PARAMETER;
+        capture_directory=output;if(!capture_directory.is_absolute() || !std::filesystem::is_directory(capture_directory))return ERROR_INVALID_PARAMETER;
         const auto name=pipe_name(session);Security security;
         Handle pipe(CreateNamedPipeW(name.c_str(),PIPE_ACCESS_DUPLEX|FILE_FLAG_OVERLAPPED|FILE_FLAG_FIRST_PIPE_INSTANCE,
             PIPE_TYPE_BYTE|PIPE_READMODE_BYTE|PIPE_WAIT|PIPE_REJECT_REMOTE_CLIENTS,1,max_message,max_message,0,&security.attributes));
         if(pipe.value==INVALID_HANDLE_VALUE)return GetLastError();
-        bool disconnected=false;
-        while(!disconnected){
+        for(;;){
             Handle event(CreateEventW(nullptr,TRUE,FALSE,nullptr));if(!event.value)return GetLastError();
             OVERLAPPED ov{};ov.hEvent=event.value;
             if(!ConnectNamedPipe(pipe.value,&ov)){
@@ -116,8 +159,8 @@ DWORD WINAPI serve(void*){
                 else if(error!=ERROR_PIPE_CONNECTED)return error;
             }
             try{
-                auto message=receive(pipe.value);auto answer=response(message);send(pipe.value,answer);
-                disconnected=answer.value("ok",false) && message.value("command",std::string())=="disconnect";
+                ULONG client_pid=0;if(!GetNamedPipeClientProcessId(pipe.value,&client_pid) || !client_pid)throw std::runtime_error("Cannot identify control client");
+                auto message=receive(pipe.value);auto answer=response(message,client_pid);send(pipe.value,answer);
                 // Client acknowledges consumption, avoiding synchronous FlushFileBuffers.
                 auto ack=receive(pipe.value);
                 if(ack.value("request_id",std::string())!=answer.value("request_id",std::string()))throw std::runtime_error("Ack mismatch");

@@ -11,7 +11,7 @@ int main(int argc,char **argv) {
     if(mode=="malformed") { std::puts("not-json"); return 0; }
     if(mode=="oversized") { QByteArray data(2*1024*1024,'x'); fwrite(data.data(),1,data.size(),stdout); return 0; }
     if(mode=="slow")QThread::msleep(300);
-    QJsonObject result{{"ok",true},{"version",1},{"state","Tracking"},{"capture_available",false}};
+    QJsonObject result{{"ok",true},{"version",2},{"state","Tracking"},{"capture_available",false}};
     if(command=="launch") {
         const auto path=args.value(args.indexOf("--out")+1)+"/session.json";
         QFile file(path);if(!file.open(QIODevice::WriteOnly))return 2;file.write("{}");file.close();
