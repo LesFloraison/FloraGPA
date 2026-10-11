@@ -241,6 +241,19 @@ public:
                 add(7,w[1]==D3D11_MAP_READ?0x34ec:0x246,Payload{}.q({0,1}).value(command.result).value(resource).u({w[0],w[1],w[2]}).value(data));continue;
             }
             require(mappings.empty(),"Encoder GPU execution with open Map unsupported");
+            if(command.kind==CommandKind::update_subresource){
+                require(command.bindings.context==context_ && command.bindings.device==device_,"Encoder Update context mismatch");
+                require(command.completed && command.operand && w[3]<=1 && !w[4],"Encoder incomplete or invalid Update");
+                require(!command.bindings.predicate,"Encoder predicated Update is unsupported");
+                const auto destination=resource_ref(command.operand);const auto& resource=frame_.initial_resources.at(command.operand);
+                const auto layout=update_layout(resource.shape,frame_.objects.at(command.operand).descriptor,w[0]);
+                require(command.data.size()==layout.slice_bytes*layout.depth && command.before_data.empty(),"Encoder Update payload size mismatch");
+                require(layout.rows<=1 || w[1]>=layout.row_bytes,"Encoder Update row pitch too small");
+                require(layout.depth<=1 || uint64_t(w[2])>=uint64_t(layout.rows-1)*w[1]+layout.row_bytes,"Encoder Update depth pitch too small");
+                const auto data=blob(command.data);Payload payload;
+                payload.q({0,1,destination}).value(w[0]).value<uint8_t>(0).value(data).u({w[1],w[2]});
+                if(w[3])payload.value(w[4]);add(7,w[3]?0x255:0x247,std::move(payload));continue;
+            }
             if(command.kind==CommandKind::copy_resource){
                 require(command.bindings.context==context_ && command.bindings.device==device_,"Encoder copy context mismatch");
                 require(!command.bindings.predicate,"Encoder predicated copy is unsupported");

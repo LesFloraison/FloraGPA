@@ -136,7 +136,7 @@ RecordedFrame FrameRecording::finish(){
     auto& r=registry();{std::lock_guard guard(r.mutex);if(auto active=r.active.lock();active.get()==this){r.active.reset();r.enabled.store(false);}}
     return std::move(p.frame);
 }
-void FrameRecording::observe(ID3D11DeviceContext* context,const char* api,CommandKind kind,const std::array<uint32_t,5>& words,IUnknown* operand,const float* floats,const UINT* integers,IUnknown* source) {
+void FrameRecording::observe(ID3D11DeviceContext* context,const char* api,CommandKind kind,const std::array<uint32_t,5>& words,IUnknown* operand,const float* floats,const UINT* integers,IUnknown* source,const UpdateSource* update) {
     auto& p=*impl_;
     // Never wait behind capture readback while a foreign caller may own the
     // driver's ID3D11Multithread lock. Mark failure and forward immediately.
@@ -158,6 +158,7 @@ void FrameRecording::observe(ID3D11DeviceContext* context,const char* api,Comman
         if(kind==CommandKind::map && (!operand || words[1]<1 || words[1]>5 || (words[2]&~D3D11_MAP_FLAG_DO_NOT_WAIT)))throw std::runtime_error("Invalid Map arguments");
         if(kind==CommandKind::copy_resource && (!operand || !source))throw std::runtime_error("CopyResource operand is missing");
         const bool clear=kind==CommandKind::clear_rtv || kind==CommandKind::clear_dsv || kind==CommandKind::clear_uav_uint || kind==CommandKind::clear_uav_float;
+        if(kind==CommandKind::update_subresource && (!operand || !update || !update->data || update->box || update->flags))throw std::runtime_error("UpdateSubresource requires nonnull data, no box and zero copy flags");
         if(clear && !operand)throw std::runtime_error("Clear operand is missing");
         if(clear && (kind==CommandKind::clear_uav_uint?!integers:!floats))throw std::runtime_error("Clear value is missing");
         if(p.frame.commands.size()>=p.options.command_limit)throw std::runtime_error("Frame command limit exceeded");
@@ -190,6 +191,14 @@ void FrameRecording::observe(ID3D11DeviceContext* context,const char* api,Comman
         if(kind==CommandKind::copy_resource){
             const auto& destination=p.frame.initial_resources.at(command.operand);
             validate_copy_resource(destination.shape,destination.record->descriptor,p.frame.initial_resources.at(command.source).shape);
+        }
+        if(kind==CommandKind::update_subresource){
+            const auto& destination=p.frame.initial_resources.at(command.operand);
+            auto layout=update_layout(destination.shape,destination.record->descriptor,words[0]);
+            if(layout.slice_bytes*layout.depth>p.options.byte_limit-p.frame.initial_bytes-p.payload_bytes)throw std::runtime_error("Update payload byte limit exceeded");
+            copy_pitched(layout,update->data,update->row_pitch,update->depth_pitch);
+            command.data=std::move(layout.bytes);p.payload_bytes+=command.data.size();command.completed=true;
+            command.words={words[0],update->row_pitch,update->depth_pitch,UINT(update->extended),update->flags};
         }
         if(kind==CommandKind::map){
             const auto& shape=p.frame.initial_resources.at(command.operand).shape;
@@ -335,13 +344,13 @@ void record_query_observation(ID3D11DeviceContext* context,ID3D11Asynchronous* a
         if(active)active->query(context,async,kind,result,data,size,flags);
     }catch(...){object_gap("Query observation",__uuidof(ID3D11DeviceContext),"Frame observer failed");}
 }
-void record_context_call(ID3D11DeviceContext* context,const char* api,CommandKind kind,std::array<uint32_t,5> words,IUnknown* operand,const float* floats,const UINT* integers,IUnknown* source) noexcept {
+void record_context_call(ID3D11DeviceContext* context,const char* api,CommandKind kind,std::array<uint32_t,5> words,IUnknown* operand,const float* floats,const UINT* integers,IUnknown* source,const UpdateSource* update) noexcept {
     capture_context_activity();
     auto& r=registry();if(!r.enabled.load(std::memory_order_relaxed))return;
     LastErrorScope last_error;
     try {
         std::shared_ptr<FrameRecording> active;{std::lock_guard lock(r.mutex);active=r.active.lock();}
-        if(active)active->observe(context,api,kind,words,operand,floats,integers,source);
+        if(active)active->observe(context,api,kind,words,operand,floats,integers,source,update);
     }catch(...){object_gap(api,__uuidof(ID3D11DeviceContext),"Frame observer failed");}
 }
 }

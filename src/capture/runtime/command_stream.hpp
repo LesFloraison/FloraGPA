@@ -22,6 +22,8 @@ struct RecordingOptions {
 // Run on the application thread before handing CPU data to a background writer.
 // Validates the model and releases every retained native reference on success.
 FrozenFrame freeze_frame(RecordedFrame&& frame,ObjectId output,ResourceSnapshot&& final_output);
+// Borrowed only during the pre-native observer; no pointer enters RecordedFrame.
+struct UpdateSource {const void* data;const D3D11_BOX* box;UINT row_pitch,depth_pitch,flags;bool extended;};
 class FrameRecording {
     struct Impl;
     std::unique_ptr<Impl> impl_;
@@ -33,7 +35,7 @@ public:
     void cancel() noexcept;
     RecordedFrame finish();
     void observe(ID3D11DeviceContext*,const char*,CommandKind,const std::array<uint32_t,5>&,
-        IUnknown*,const float*,const UINT*,IUnknown* source=nullptr);
+        IUnknown*,const float*,const UINT*,IUnknown* source=nullptr,const UpdateSource* update=nullptr);
     void mapped(ID3D11DeviceContext*,ID3D11Resource*,UINT,HRESULT,const D3D11_MAPPED_SUBRESOURCE*);
     void unmap(ID3D11DeviceContext*,ID3D11Resource*,UINT);
     void query(ID3D11DeviceContext*,ID3D11Asynchronous*,CommandKind,HRESULT,const void*,UINT,UINT);
@@ -47,7 +49,7 @@ std::shared_ptr<FrameRecording> begin_recording(ID3D11DeviceContext*,const Recor
 // forwarding, including on recording errors. Pointer arguments are transient.
 // api must be a static string literal, as emitted by the proxy generator.
 void record_context_call(ID3D11DeviceContext*,const char*,CommandKind,
-    std::array<uint32_t,5> words={},IUnknown* operand=nullptr,const float* floats=nullptr,const UINT* integers=nullptr,IUnknown* source=nullptr) noexcept;
+    std::array<uint32_t,5> words={},IUnknown* operand=nullptr,const float* floats=nullptr,const UINT* integers=nullptr,IUnknown* source=nullptr,const UpdateSource* update=nullptr) noexcept;
 void record_map_result(ID3D11DeviceContext*,ID3D11Resource*,UINT,HRESULT,const D3D11_MAPPED_SUBRESOURCE*) noexcept;
 void record_unmap(ID3D11DeviceContext*,ID3D11Resource*,UINT) noexcept;
 // Post-native only. Never read pending/failed output or retain caller pointers.

@@ -64,7 +64,7 @@ struct PipelineBindings {
 };
 enum class CommandKind { unsupported, read, binding, draw, draw_indexed, draw_instanced,
     draw_indexed_instanced, dispatch, clear_rtv, clear_dsv, clear_uav_uint, clear_uav_float, map, unmap, copy_resource,
-    query_end, query_get_data };
+    query_end, query_get_data, update_subresource };
 // CPU observation history, not a cross-thread/context GPU ordering proof.
 struct QueryEndStamp {
     uint64_t generation=0;
@@ -95,6 +95,7 @@ struct RecordedCommand {
     ObjectId operand=0;
     ObjectId source=0; // CopyResource: operand is destination; no native pointer survives.
     std::optional<QueryObservation> query;
+    // Update uses words {subresource, original row pitch, depth pitch, extended, flags}; packed owned bytes.
     // Map uses words {subresource, type, flags}; bytes own the completed CPU write.
     int32_t result=0;
     bool completed=false;

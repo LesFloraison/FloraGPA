@@ -54,7 +54,7 @@ void scopes(){
     require(independent.observations[0].prefix->copies.size()==1 && independent.observations[1].prefix->copies.size()==2,"Interleaved queries conflated their copy prefixes");
 }
 void gaps(){
-    for(auto kind:{CommandKind::draw,CommandKind::draw_indexed,CommandKind::draw_instanced,CommandKind::draw_indexed_instanced,CommandKind::dispatch,CommandKind::clear_rtv,CommandKind::clear_dsv,CommandKind::clear_uav_uint,CommandKind::clear_uav_float,CommandKind::map,CommandKind::unmap,CommandKind::unsupported,CommandKind::binding,CommandKind::read}){
+    for(auto kind:{CommandKind::draw,CommandKind::draw_indexed,CommandKind::draw_instanced,CommandKind::draw_indexed_instanced,CommandKind::dispatch,CommandKind::clear_rtv,CommandKind::clear_dsv,CommandKind::clear_uav_uint,CommandKind::clear_uav_float,CommandKind::map,CommandKind::unmap,CommandKind::update_subresource,CommandKind::unsupported,CommandKind::binding,CommandKind::read}){
         auto f=base();append(f,kind);end(f);get(f,{1,2,7,true},1);
         const auto p=analyze_event_dependencies(f).observations[0].prefix;require(p->uncovered_commands==1 && p->first_uncovered_sequence==0 && p->copies.empty(),"Unknown operation silently covered by query wait");
     }

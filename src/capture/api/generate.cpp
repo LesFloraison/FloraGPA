@@ -126,7 +126,9 @@ void method(std::ostream& out, const std::string& iface, const Json& m) {
         else if(name.find("Get")!=std::string::npos || name=="Flush" || name=="Flush1")kind="read";
         else if(name=="ClearState" || name=="SetPredication" || name=="SetResourceMinLOD" ||
             std::regex_match(name,std::regex("(VS|HS|DS|GS|PS|CS|IA|RS|OM|SO)Set.*")))kind="binding";
-        if(name=="Unmap")out << "record_unmap(this, pResource, Subresource);\n";
+        if(name=="UpdateSubresource" || name=="UpdateSubresource1")
+            out << "UpdateSource update{pSrcData,pDstBox,SrcRowPitch,SrcDepthPitch," << (name=="UpdateSubresource1"?"CopyFlags,true":"0,false") << "};\nrecord_context_call(this, \"" << api << "\", CommandKind::update_subresource, {DstSubresource}, pDstResource, nullptr, nullptr, nullptr, &update);\n";
+        else if(name=="Unmap")out << "record_unmap(this, pResource, Subresource);\n";
         else out << "record_context_call(this, \"" << api << "\", CommandKind::" << kind << ", " << words << ", " << operand << ", " << floats << ", " << integers << ", " << source << ");\n";
     }
     else if(name=="WriteToSubresource" || name=="Map" || name=="Unmap" || name=="GetDC" || name=="ReleaseDC" ||

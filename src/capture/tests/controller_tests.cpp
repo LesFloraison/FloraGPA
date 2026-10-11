@@ -55,7 +55,7 @@ struct Harness {
 }
 int wmain(int argc,wchar_t** argv){try{
     require(argc==4,"Expected controller, target and new output directory");const auto out=fs::absolute(argv[3]);require(!signal_exists(out),"Output exists");Json results=Json::array();
-    for(unsigned mode=0;mode<13;++mode){
+    for(unsigned mode=0;mode<15;++mode){
         Harness h(fs::absolute(argv[1]),fs::absolute(argv[2]),out/std::to_wstring(mode));h.launch(mode);h.reject_bad_identity();
         auto status=h.call(L"status");require(status["capture_available"],"Live target profile was not available");const auto id=std::to_wstring(status["swap_chains"]["active"][0]["id"].get<uint64_t>());
         h.pause();h.call(L"capture",0,id);require(h.call(L"capture",3,id)["error"]=="busy","Duplicate request was not busy");require(h.call(L"cancel")["cancelled"],"Armed cancel failed");h.resume();
@@ -66,7 +66,7 @@ int wmain(int argc,wchar_t** argv){try{
         const auto automatic=h.call(L"capture",-1);bool foreground=automatic["ok"].get<bool>();
         if(foreground){require(automatic["swap_chains"]["active"][0]["foreground"],"Default selected a non-foreground swap");const auto done=h.settle();require(done["last_capture"]["state"]=="Completed","Automatic foreground capture failed");frames.push_back(done["last_capture"]);}
         else require(automatic["error"]=="swap_chain_selection_required","Ambiguous default did not request selection");
-        h.pause();signal(h.oracle/L"update.signal");h.call(L"capture",0,id);h.resume();const auto failed=h.settle();require(failed["last_capture"]["state"]=="Failed" && failed["last_capture"].value("error",std::string()).find("UpdateSubresource")!=std::string::npos,"Unrecorded update was not identified");fs::remove(h.oracle/L"update.signal");
+        h.pause();signal(h.oracle/L"update.signal");h.call(L"capture",0,id);h.resume();const auto failed=h.settle();require(failed["last_capture"]["state"]=="Failed" && failed["last_capture"].value("error",std::string()).find("UpdateSubresource")!=std::string::npos,"Unsupported boxed update was not identified");fs::remove(h.oracle/L"update.signal");
         h.pause();h.call(L"capture",0,id);h.resume();const auto recovered=h.settle();require(recovered["last_capture"]["state"]=="Completed","Capture did not recover after rejection");frames.push_back(recovered["last_capture"]);
         h.pause();h.call(L"capture",0,id);require(h.call(L"disconnect")["state"]=="Disconnected","Disconnect not reported");h.resume();Sleep(100);status=h.call(L"status");require(status["state"]=="Disconnected" && !status["capture_available"].get<bool>(),"Disconnected status is incorrect");require(h.call(L"capture",3,id)["error"]=="disconnected","Disconnected capture accepted");require(WaitForSingleObject(h.process.value,0)==WAIT_TIMEOUT,"Disconnect killed target");
         signal(h.oracle/L"finish.signal");require(WaitForSingleObject(h.process.value,10000)==WAIT_OBJECT_0,"Target did not exit");require(h.call(L"status",3)["state"]=="Exited","Target exit not reported");
@@ -75,5 +75,5 @@ int wmain(int argc,wchar_t** argv){try{
         require(exit["identity_checks"]==exit["frames"],"Backbuffer identity observations missing");if(mode>=2 && mode!=8)require(exit["unbind_checks"]==exit["frames"],"Flip unbind observations missing");
         results.push_back({{"mode",mode},{"frames",frames},{"target_exit",exit},{"automatic_foreground",foreground},{"failure",failed["last_capture"]},{"module_status",status}});
     }
-    std::ofstream report(out/L"results.json");report<<results.dump(2);std::cout<<Json{{"passed",true},{"launches",13},{"scope","Startup injection and native private IPC"}}.dump()<<'\n';return 0;
+    std::ofstream report(out/L"results.json");report<<results.dump(2);std::cout<<Json{{"passed",true},{"launches",15},{"scope","Startup injection and native private IPC"}}.dump()<<'\n';return 0;
 }catch(const std::exception& e){std::cerr<<e.what()<<'\n';return 1;}}

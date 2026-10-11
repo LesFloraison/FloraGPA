@@ -71,6 +71,24 @@ std::vector<SubresourceData> resource_layout(const ResourceShape& s,size_t byte_
     }
     return result;
 }
+SubresourceData update_layout(const ResourceShape& shape,std::span<const uint8_t> descriptor,uint32_t subresource){
+    size_t offset=0,expected=0;
+    switch(shape.dimension){
+    case D3D11_RESOURCE_DIMENSION_BUFFER:offset=offsetof(D3D11_BUFFER_DESC,Usage);expected=sizeof(D3D11_BUFFER_DESC);break;
+    case D3D11_RESOURCE_DIMENSION_TEXTURE1D:offset=offsetof(D3D11_TEXTURE1D_DESC,Usage);expected=sizeof(D3D11_TEXTURE1D_DESC);break;
+    case D3D11_RESOURCE_DIMENSION_TEXTURE2D:offset=offsetof(D3D11_TEXTURE2D_DESC,Usage);expected=sizeof(D3D11_TEXTURE2D_DESC);break;
+    case D3D11_RESOURCE_DIMENSION_TEXTURE3D:offset=offsetof(D3D11_TEXTURE3D_DESC,Usage);expected=sizeof(D3D11_TEXTURE3D_DESC);break;
+    default:throw std::runtime_error("Update destination is not a buffer or texture");
+    }
+    // Extended texture descriptors have one trailing TextureLayout field.
+    if(descriptor.size()!=expected && !(shape.dimension>=D3D11_RESOURCE_DIMENSION_TEXTURE2D && descriptor.size()==expected+4))throw std::runtime_error("Update descriptor size mismatch");
+    D3D11_USAGE usage{};UINT bind=0;memcpy(&usage,descriptor.data()+offset,4);memcpy(&bind,descriptor.data()+offset+4,4);
+    if(usage!=D3D11_USAGE_DEFAULT || (bind&D3D11_BIND_DEPTH_STENCIL))throw std::runtime_error("Update requires DEFAULT non-depth-stencil storage");
+    if(shape.format>=DXGI_FORMAT_NV12 && shape.format<=DXGI_FORMAT_P016)throw std::runtime_error("Planar Update wire layout is not verified");
+    auto layout=resource_layout(shape);
+    if(subresource>=layout.size())throw std::runtime_error("Update subresource is out of range");
+    return std::move(layout[subresource]);
+}
 void copy_pitched(SubresourceData& target,const void* source,size_t row_pitch,size_t slice_pitch){
     if(!source)throw std::runtime_error("Missing subresource data pointer");
     if(!target.row_bytes || !target.rows || !target.depth || target.slice_bytes!=multiply(target.row_bytes,target.rows))

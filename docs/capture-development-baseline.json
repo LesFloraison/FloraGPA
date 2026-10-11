@@ -644,5 +644,31 @@
     "packaged_live_frames": 65,
     "packaged_launches": 13,
     "runtime_module_audit": "no GPA, Qt, RenderDoc or Python in captured module inventories"
+  },
+  "whole_subresource_updates": {
+    "status": "implemented and dual-player verified within the stated profile",
+    "apis": [
+      "UpdateSubresource",
+      "UpdateSubresource1 with zero flags"
+    ],
+    "destination": "DEFAULT, non-depth-stencil, single-sample buffer or texture",
+    "null_box_only": true,
+    "source_ownership": "packed bytes copied before native call; original row/depth pitches retained",
+    "initial_contents": "GPU contents before first recorded use; not creation or final bytes",
+    "dual_player_files": 16,
+    "dual_player_checks": 272,
+    "negative_execution_controls": 8,
+    "injected_launches": 15,
+    "injected_files": 75,
+    "injected_update_files": 10,
+    "injected_checks": 481,
+    "encoder_rejection_cases": 12,
+    "pending": [
+      "boxes",
+      "copy flags",
+      "planar layouts",
+      "broader deferred and hidden state support",
+      "EVENT serialization and GF2 acceptance"
+    ]
   }
 }

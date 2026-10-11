@@ -6,7 +6,7 @@ captures a limited blit/flip DX11 profile through private IPC. Completed
 Unsupported profiles fail explicitly. Qt exposes the same workflow and passes
 only completed file paths into replay. The full planned release, original GUI
 inspection and GF2 six-frame gate remain incomplete. GF2 passes its two-buffer
-FLIP_SEQUENTIAL / ALLOW_TEARING boundary and mapped writes, then rejects End/query recording.
+FLIP_SEQUENTIAL / ALLOW_TEARING boundary and mapped writes, then rejects EVENT serialization.
 
 ## Architectural contract
 
@@ -1227,3 +1227,56 @@ inventories contain no GPA, Qt, RenderDoc or Python. The source-build manifest i
 `artifacts/capture-frame-start-source-build/validation.json`. These additional
 checks cover the committed frame-start implementation; they do not add EVENT
 encoding, dual-player query evidence or accepted GF2 frames.
+
+## Whole-subresource CPU updates
+
+Capture now records `UpdateSubresource` and `UpdateSubresource1` with zero copy
+flags for a complete subresource (null destination box). The supported destination
+is DEFAULT, non-depth-stencil, single-sample storage. Buffers and 1D/2D/3D textures
+use the Capture-owned layout model; no Replay/Core helpers are linked or included.
+The observer copies logical rows/depth slices before forwarding the application
+call and charges them to the recording budget. The model retains original pitches
+and API version, but owns packed bytes rather than caller pointers or row padding.
+This follows the [native source lifetime contract](https://learn.microsoft.com/en-us/windows/win32/api/d3d11/nf-d3d11-id3d11devicecontext-updatesubresource).
+
+The encoder validates destination identity, context, usage, subresource, pitches
+and payload length, then emits `7/0x247` or `7/0x255` referencing packed `9/1` data.
+Initial GPU contents remain separate from creation data, update payloads and the
+final image. Boxes, nonzero copy flags, planar formats, predication, MSAA and
+non-DEFAULT destinations remain explicitly unsupported. Existing rejection and
+recovery fixtures now use a valid partial boxed Update, preserving native
+forwarding while exercising an actual remaining capability gap. EVENT dependency
+inspection marks Update work uncovered; query publication remains guarded.
+
+WARP and hardware tests cover buffer and texture updates, mip/array/depth storage,
+padded rows and slices, immediate caller-memory reuse, byte-budget rejection,
+native partial-update forwarding and subsequent recovery. The initial resource
+is GPU-updated from creation blue to yellow before recording; two recorded updates
+then produce green and red halves through Draw. All source GPU objects die before
+encoding. Twelve malformed encoder cases reject without final or temporary files.
+The first invalid-context negative test changed the frame's first context and hit
+an earlier identity check; it was corrected to change a later Update. Its original
+failure log is retained.
+
+The direct dual-player matrix has sixteen files and 272 checks: both APIs across
+Buffer/Texture1D/Texture2D/Texture3D, with eight positive files and eight variants
+that remove the updates but retain the original reference image. Positive outputs
+match the independent green/red image exactly; the negative executions remain
+yellow. Actual event counts and exported DXBC are checked. Three-dimensional
+fixtures sample the second slice, exposing incorrect depth-pitch handling.
+
+The independent startup target also exercises both Update APIs through the CLI,
+injected DLL and private IPC. Fifteen launches produce 75 files and pass 481
+serial dual-player/CPU/module checks; ten of those files use the two new Update
+modes. Busy, cancellation, boxed-update refusal, retry, disconnect and target exit
+remain covered. The actual loaded target modules contain no GPA, Qt, RenderDoc
+or Python. Final regression passes 32 capture-only and 30 full-profile capture
+CTests, including eleven Qt cases without skips.
+
+Evidence and hashes are in `artifacts/capture-update-validation.json`,
+`artifacts/capture-update-all-dimensions-interop` and
+`artifacts/capture-update-injected-interop`. All 91 saved original-player reports
+identify the pinned GPA 2025 R1 player hash. That oracle remains the development
+private-ABI runner, not GUI/adapter acceptance. No Replay/shared-format code
+changed; golden evidence retains its previous scope. This batch does not rerun
+GF2 or establish query compatibility; accepted GF2 captures remain zero.
