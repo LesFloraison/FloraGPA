@@ -32,11 +32,11 @@ int wmain(int argc,wchar_t** argv){if(argc!=3)return 2;const fs::path out=fs::ab
     HWND window=CreateWindowW(cls.lpszClassName,L"Flora native capture target",WS_OVERLAPPEDWINDOW,0,0,160,160,nullptr,nullptr,cls.hInstance,nullptr);if(!window)throw std::runtime_error("Target window creation failed");ShowWindow(window,SW_SHOW);SetForegroundWindow(window);
     ComPtr<ID3D11Device> device;ComPtr<ID3D11DeviceContext> context;ComPtr<IDXGISwapChain> swap;
     DXGI_SWAP_CHAIN_DESC d{};d.BufferDesc.Width=d.BufferDesc.Height=8;d.BufferDesc.Format=DXGI_FORMAT_R8G8B8A8_UNORM;d.SampleDesc.Count=1;d.BufferUsage=DXGI_USAGE_RENDER_TARGET_OUTPUT;d.BufferCount=1;d.OutputWindow=window;d.Windowed=TRUE;
-    const bool tearing=mode==9 || mode==10;const bool flip=mode>=2 && mode!=8;
+    const bool tearing=mode==9 || mode==10 || mode==11 || mode==12;const bool flip=mode>=2 && mode!=8;
     if(flip){d.BufferCount=(mode==6 || mode==7)?16:((mode==3 || mode==5 || mode==10)?3:2);d.SwapEffect=(mode==2 || mode==3 || mode==6 || mode==9)?DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL:DXGI_SWAP_EFFECT_FLIP_DISCARD;}
     if(tearing){ComPtr<IDXGIFactory5> features;check(CreateDXGIFactory1(IID_PPV_ARGS(&features)));BOOL supported=FALSE;check(features->CheckFeatureSupport(DXGI_FEATURE_PRESENT_ALLOW_TEARING,&supported,sizeof(supported)));if(!supported)throw std::runtime_error("Tearing is unsupported on this host");d.Flags=DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING;}
     if(mode==8){d.BufferCount=3;d.SwapEffect=DXGI_SWAP_EFFECT_SEQUENTIAL;}
-    if(mode==3 || mode==5 || mode==6 || mode==7 || mode==9){
+    if(mode==3 || mode==5 || mode==6 || mode==7 || mode==9 || mode==12){
         check(D3D11CreateDevice(nullptr,D3D_DRIVER_TYPE_HARDWARE,nullptr,0,nullptr,0,D3D11_SDK_VERSION,&device,nullptr,&context));ComPtr<IDXGIFactory2> factory;check(CreateDXGIFactory1(IID_PPV_ARGS(&factory)));
         DXGI_SWAP_CHAIN_DESC1 modern{};modern.Width=modern.Height=8;modern.Format=d.BufferDesc.Format;modern.SampleDesc=d.SampleDesc;modern.BufferUsage=d.BufferUsage;modern.BufferCount=d.BufferCount;modern.SwapEffect=d.SwapEffect;modern.AlphaMode=DXGI_ALPHA_MODE_IGNORE;modern.Flags=d.Flags;
         ComPtr<IDXGISwapChain1> created;check(factory->CreateSwapChainForHwnd(device.Get(),window,&modern,nullptr,nullptr,&created));check(created.As(&swap));
@@ -48,6 +48,8 @@ int wmain(int argc,wchar_t** argv){if(argc!=3)return 2;const fs::path out=fs::ab
     code=shader("float4 main():SV_Target{return float4(1,0,0,1);}","ps_5_0");ComPtr<ID3D11PixelShader> ps;check(device->CreatePixelShader(code->GetBufferPointer(),code->GetBufferSize(),nullptr,&ps));context->PSSetShader(ps.Get(),nullptr,0);
     const std::array<const char*,5> colors{"1,0,0,1","0,1,0,1","0,0,1,1","1,1,1,1","0,1,1,1"};std::array<ComPtr<ID3D11PixelShader>,5> cycle;
     for(size_t i=0;i<colors.size();++i){const auto source=std::string("float4 main():SV_Target{return float4(")+colors[i]+");}";auto bytes=shader(source.c_str(),"ps_5_0");check(device->CreatePixelShader(bytes->GetBufferPointer(),bytes->GetBufferSize(),nullptr,&cycle[i]));}
+    ComPtr<ID3D11Buffer> mapped_color;ComPtr<ID3D11PixelShader> mapped_shader;
+    if(mode>=11){D3D11_BUFFER_DESC bd{};bd.ByteWidth=16;bd.Usage=D3D11_USAGE_DYNAMIC;bd.CPUAccessFlags=D3D11_CPU_ACCESS_WRITE;bd.BindFlags=D3D11_BIND_CONSTANT_BUFFER;const float blue[]{0,0,1,1};D3D11_SUBRESOURCE_DATA initial{blue,0,0};check(device->CreateBuffer(&bd,&initial,&mapped_color));auto bytes=shader("cbuffer C:register(b0){float4 color;}float4 main():SV_Target{return color;}","ps_5_0");check(device->CreatePixelShader(bytes->GetBufferPointer(),bytes->GetBufferSize(),nullptr,&mapped_shader));auto* cb=mapped_color.Get();context->PSSetConstantBuffers(0,1,&cb);}
     ComPtr<IUnknown> initial_identity;check(buffer.As(&initial_identity));uint64_t identity_checks=0,unbind_checks=0;
     context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);D3D11_VIEWPORT vp{0,0,8,8,0,1};context->RSSetViewports(1,&vp);
     ComPtr<IDXGISwapChain1> swap1;check(swap.As(&swap1));uint64_t frames=0;const auto deadline=GetTickCount64()+120000;
@@ -57,7 +59,9 @@ int wmain(int argc,wchar_t** argv){if(argc!=3)return 2;const fs::path out=fs::ab
         if(signal_exists(out/L"pause.signal")){if(!signal_exists(out/L"paused.signal"))save(out/L"paused.signal",{{"frames",frames}});Sleep(5);continue;}
         if(signal_exists(out/L"paused.signal"))fs::remove(out/L"paused.signal");
         context->OMSetRenderTargets(1,&view,nullptr);context->PSSetShader(mode>=2?cycle[frames%5].Get():ps.Get(),nullptr,0);
-        const float black[]{0,0,0,1};context->ClearRenderTargetView(rtv.Get(),black);context->Draw(3,0);
+        const float black[]{0,0,0,1};context->ClearRenderTargetView(rtv.Get(),black);
+        if(mode>=11){static const float values[5][4]{{1,0,0,1},{0,1,0,1},{0,0,1,1},{1,1,1,1},{0,1,1,1}};D3D11_MAPPED_SUBRESOURCE mapped{};check(context->Map(mapped_color.Get(),0,D3D11_MAP_WRITE_DISCARD,0,&mapped));memcpy(mapped.pData,values[frames%5],16);context->Unmap(mapped_color.Get(),0);context->PSSetShader(mapped_shader.Get(),nullptr,0);}
+        context->Draw(3,0);
         if(signal_exists(out/L"update.signal")){UINT pixels[64]{};context->UpdateSubresource(buffer.Get(),0,nullptr,pixels,32,256);}
         const UINT present_flags=tearing?DXGI_PRESENT_ALLOW_TEARING:0;
         HRESULT presented=S_OK;if(mode){DXGI_PRESENT_PARAMETERS parameters{};presented=swap1->Present1(0,present_flags,&parameters);}else presented=swap->Present(0,present_flags);

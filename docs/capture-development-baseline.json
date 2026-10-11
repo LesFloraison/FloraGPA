@@ -8,8 +8,8 @@
     "A": "checked format boundary and native authored writer validated",
     "B": "native launch/control and capture-only package validated",
     "C": "partial: persistent native identity, descriptor graph and owned buffer/texture/shader/input-layout/SO creation metadata validated; other creation paths pending",
-    "D": "partial: native startup-injected blit/flip and tearing capture; 55 self-owned files pass dual-player execution; GF2 reaches unsupported Map",
-    "E": "partial: first-use resources, per-command bindings/counters and query/mapping guards validated; mutation, deferred and multithread coverage pending",
+    "D": "partial: startup-injected blit/flip/tearing capture with dynamic mapped constants; dual-player execution verified on self-owned targets",
+    "E": "partial: immediate-context Map/Unmap payloads and initial resources validated; GF2 now rejects End/query; Update/Copy, deferred and hidden-state coverage pending",
     "F": "partial: native CLI and asynchronous Qt capture/cancel/disconnect/completed-file opening tested; full profile/deployment acceptance pending",
     "G": "pending: no six-frame GF2 or original GUI capture acceptance"
   },
@@ -26,15 +26,16 @@
     "existing_golden_controls": 4,
     "native_authored_interop_checks": 22,
     "source_build_steps": 6,
-    "capture_only_ctest": 19,
-    "full_profile_capture_ctest": 17,
+    "capture_only_ctest": 22,
+    "full_profile_capture_ctest": 20,
     "native_object_lifetimes": 36,
     "additional_existing_structure_ctest": 2,
     "observed_model_interop_checks": 94,
     "present_transaction_interop_checks": 22,
-    "startup_injected_interop_checks": 353,
-    "startup_injected_dual_player_frames": 55,
-    "packaged_live_frames": 55
+    "startup_injected_interop_checks": 417,
+    "startup_injected_dual_player_frames": 65,
+    "packaged_live_frames": 55,
+    "mapped_frame_interop_checks": 84
   },
   "source_build_commit": "7d36fd495081181545b46023e857e738d77d4446",
   "local_evidence_sha256": {
@@ -144,7 +145,28 @@
     "capture-flip-qt.txt": "447645d429492c5d3103fcc8afaae0b8855510f45eaa5a630d0cc4c089af42bb",
     "capture-flip-factories/validation.json": "e2e96acab25e71ffbce3b435dbda260e92de9b8cda0d95c3af77cb47a9010182",
     "capture-flip-swaps/validation.json": "f5dfc04cac0e6c63ce920bedb1beafa99f7a014c74a2bdeb2447cc2c4f73c005",
-    "capture-flip-source-build/validation.json": "d82907a8cbd2957042f498d3bb2f8d709db2c4ac1a8b7812e36a8531f8fd66f4"
+    "capture-flip-source-build/validation.json": "d82907a8cbd2957042f498d3bb2f8d709db2c4ac1a8b7812e36a8531f8fd66f4",
+    "capture-map-interop-verified/validation.json": "5b85cab38091d0e528c4df9d05e9a663eb2a3d1bf457fd6dab7f6d7b047bc6f8",
+    "capture-map-interop-verified/inputs.json": "bc83018e5a1117c12edd70c6f7862704c1f48ab5973424a0575f0e92a2f5c9d5",
+    "capture-map-live-interop/validation.json": "82495e63774777a065d7a0f5555c833f5929ff21b6ee0a7351aea3371ede50e7",
+    "capture-map-live-interop/inputs.json": "faaea3c5ce4e306ad6c582cc50105e9a84faa3e37745278d0100a232c2b489b0",
+    "capture-map-interop-1/validation.json": "66341cc4d9e7282bcf740eab54bc11d5a8fc3fa877abbc8d03f0bb3bf8c0402c",
+    "capture-map-interop-final/validation.json": "6b456b720b56ea2f8879233e1ec38c7355289364b2abdca91b931d514a45b766",
+    "capture-map-release-ctest.txt": "0c6fbc8ad58981c32ae95b3959de524d1b4b6f0d05542a1c68d5caeb88a0b62a",
+    "capture-map-gf2/binaries.json": "2aac45b3e020e2f53bbb5e87527efd5c854ffc411c192b074cdec5ee7dd19a7d",
+    "capture-map-gf2/status-before.json": "540ea0e897f8d215d992b66c2ee38def529b2193064dac0d5c8dd96eb43d8d2d",
+    "capture-map-gf2/status-after.json": "afad3a84851fd6837e7b54c4b88c8e6b35287aa346a16aff48668b93378f1e28",
+    "capture-map-gf2/request.json": "6ef223d2aec52987006d9af3cd1e9e7f98a2170a56d2655ff8a1cd4fef8c52a7",
+    "capture-map-gf2/exit.json": "b01c992f084130f688fba4bfeaf4d5f50fdc7e5776b6499e2593d55e26cc21e9",
+    "capture-map-gf2/unity.log": "2c3c5d3177d4cefc67e06c06a6808b6d6ae507799bc4c1ab6e9635131a0e26ab",
+    "capture-map-release-full-ctest.txt": "d0bddefa23fb0f74e252ae57607c133c2dde4118d814dd9b3b4f161483c144c7",
+    "capture-map-release-qt.txt": "b250ad4d4f30a334f90f23fd172a6857a2e16655948237c008e893fa9d69ca9b",
+    "capture-map-release-interop/validation.json": "5b85cab38091d0e528c4df9d05e9a663eb2a3d1bf457fd6dab7f6d7b047bc6f8",
+    "capture-map-release-interop/inputs.json": "58e8b3557509da79d862bbe3d958b0a8ec80b24e1326091c53c57f3837cf86f7",
+    "capture-map-release-live-interop/validation.json": "82495e63774777a065d7a0f5555c833f5929ff21b6ee0a7351aea3371ede50e7",
+    "capture-map-release-live-interop/inputs.json": "fbceb1bf30937559cdfd537faa8c71b050074b829144f0a876bea758dbca73c0",
+    "capture-map-release-factories/validation.json": "e2e96acab25e71ffbce3b435dbda260e92de9b8cda0d95c3af77cb47a9010182",
+    "capture-map-release-swaps/validation.json": "f5dfc04cac0e6c63ce920bedb1beafa99f7a014c74a2bdeb2447cc2c4f73c005"
   },
   "limitations": [
     "GPA original-player checks use a development-only private ABI harness.",
@@ -209,7 +231,7 @@
   },
   "command_recording": {
     "available_to_controller": true,
-    "scope": "Explicit single-thread immediate-context recorder called by native tests",
+    "scope": "single-thread immediate-context observations integrated into Present/CLI capture",
     "draw_variants": 4,
     "dispatch": true,
     "clear_variants": 4,
@@ -221,7 +243,7 @@
     "negative_controls": 2,
     "failure_keeps_native_forwarding": true,
     "pending": [
-      "Map/Update/Copy and indirect commands",
+      "Query/End, Update/Copy, indirect commands and additional Map profiles",
       "Deferred expansion and multicontext ordering",
       "Individual state-setter event serialization",
       "GF2 six-frame dual-player acceptance",
@@ -235,7 +257,9 @@
     "observed_modes": [
       "ClearRenderTargetView",
       "Draw",
-      "Dispatch"
+      "Dispatch",
+      "Map",
+      "Unmap"
     ],
     "negative_execution_controls": 2,
     "presentation": "actual blit/flip descriptor and zero/ALLOW_TEARING flags for live capture; synthetic descriptor only for offscreen probes",
@@ -245,7 +269,7 @@
     "pending": [
       "Physical disk-full/target-exit finalization and shutdown tests",
       "Additional resource/state/command wire interoperability",
-      "Map/Update/Copy, deferred ordering, hidden-state restoration",
+      "Query/End, Update/Copy and additional Map profiles, deferred ordering, hidden-state restoration",
       "GF2 six-frame acceptance"
     ]
   },
@@ -285,10 +309,10 @@
       "D3D11CreateDevice plus legacy DXGI factory",
       "CreateSwapChainForHwnd"
     ],
-    "dual_player_files": 55,
+    "dual_player_files": 65,
     "original_gui_inspection": false,
     "gf2_accepted_frames": 0,
-    "gf2_diagnostic": "49,422 successful Presents; FLIP_SEQUENTIAL 2 buffers / ALLOW_TEARING; frame explicitly rejected at ID3D11DeviceContext::Map; no file published; normal close after disconnect; Unity exceptions remain"
+    "gf2_diagnostic": "45,111 successful Presents; Map no longer first gap; frame explicitly rejected at ID3D11DeviceContext::End; zero published files; normal exit after disconnect; Unity exceptions remain"
   },
   "flip_presentation": {
     "launch_modes": 11,
@@ -305,6 +329,33 @@
     ],
     "logical_identity_checks": "every native test Present",
     "implicit_rtv_unbind_checks": "every native flip test Present",
-    "gf2_next_gap": "ID3D11DeviceContext::Map"
+    "gf2_next_gap": "ID3D11DeviceContext::End"
+  },
+  "mapped_resources": {
+    "cpu_owned_payloads": true,
+    "map_types": [
+      "READ",
+      "WRITE",
+      "READ_WRITE",
+      "WRITE_DISCARD",
+      "buffer WRITE_NO_OVERWRITE"
+    ],
+    "tested_wire_layouts": [
+      "16-byte buffer",
+      "8x8 RGBA8 texture"
+    ],
+    "original_native_objects_dead_before_encoding": true,
+    "negative_execution_controls": 2,
+    "encoder_rejection_cases": 8,
+    "failed_map_native": "READ of write-only dynamic buffer",
+    "readiness_failure": "Injected WAS_STILL_DRAWING only",
+    "cross_thread_unmap": "reject and cease pointer access",
+    "gaps": [
+      "planar mapped wire layout",
+      "null-storage default-resource mapping",
+      "deferred and multithread ordering",
+      "GPU work while resource mapping is open",
+      "additional mapped resource layouts"
+    ]
   }
 }

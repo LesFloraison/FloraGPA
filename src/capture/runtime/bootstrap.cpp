@@ -122,7 +122,7 @@ Json response(const Json& message,ULONG client_pid){
     }
     result["capture_available"]=available;result["swap_chains"]=swaps;result["objects"]=objects;
     result["device_creations"]=creations.load();result["creation_failures"]=failures.load();result["feature_level"]=level.load();result["hook_status"]=hook_status.load();
-    result["capability_gaps"]={"Single-sample RGBA8/BGRA8; dirty/scroll and flags other than ALLOW_TEARING unsupported","Map/Update/Copy, deferred contexts and hidden states are incomplete","Single immediate-context application thread only"};
+    result["capability_gaps"]={"Single-sample RGBA8/BGRA8; dirty/scroll and flags other than ALLOW_TEARING unsupported","Update/Copy, deferred contexts, planar Map and hidden states are incomplete","Single immediate-context application thread only"};
     if(command=="status"){
         result["factories"]=factory_status();
         HMODULE modules[1024]{};DWORD needed=0;

@@ -6,7 +6,7 @@ captures a limited blit/flip DX11 profile through private IPC. Completed
 Unsupported profiles fail explicitly. Qt exposes the same workflow and passes
 only completed file paths into replay. The full planned release, original GUI
 inspection and GF2 six-frame gate remain incomplete. GF2 passes its two-buffer
-FLIP_SEQUENTIAL / ALLOW_TEARING boundary, then rejects the first unsupported Map.
+FLIP_SEQUENTIAL / ALLOW_TEARING boundary and mapped writes, then rejects End/query recording.
 
 ## Architectural contract
 
@@ -689,3 +689,79 @@ and both runtime audits observe no GPA, Qt, RenderDoc or Python. Evidence is
 `artifacts/capture-flip-source-build/validation.json`. The 353-check interop run
 above supplies the separate original-player and exact CPU execution evidence;
 this package result does not establish broader application or GF2 acceptance.
+
+## Map/Unmap recording
+
+The immediate-context recorder now owns successful READ, WRITE, READ_WRITE,
+WRITE_DISCARD and buffer WRITE_NO_OVERWRITE observations. Map snapshots preserve
+first-use initial GPU contents before native mapping; post-Map observation keeps
+the actual HRESULT and valid returned layout. Immediately before native Unmap,
+the runtime copies checked logical rows/slices into owned CPU bytes, excluding
+pitch padding. These transient pointers never enter FrozenFrame or the writer.
+Failed Map outputs are not dereferenced. Frame boundaries reject preexisting or
+unfinished mappings; cancellation and unsupported thread handoff stop pointer
+access while native calls still forward. Initial resources and mapped payloads
+share the frame byte budget.
+
+The encoder emits legacy writable Map records (0x246), READ observations
+(0x34ec), Unmap observations (0x34ed) and owned GenData. It validates completed
+calls, context/resource identities, subresource bounds, flags, byte lengths and
+successful Map/Unmap pairs before opening a writer transaction. Runtime and
+encoder use capture-owned data only. No replay, core, shared-format or private
+GPA implementation was added to the capture dependency graph.
+
+The Map pointer lifetime follows Microsoft's
+[Map](https://learn.microsoft.com/en-us/windows/win32/api/d3d11/nf-d3d11-id3d11devicecontext-map)
+and [Unmap](https://learn.microsoft.com/en-us/windows/win32/api/d3d11/nf-d3d11-id3d11devicecontext-unmap)
+contracts. Snapshot readback and copying write-combined mappings can stall the
+application; this milestone establishes correctness for tested profiles, not
+capture throughput. Planar mappings, null-storage default-resource mapping,
+deferred contexts, GPU execution while another resource is mapped, and broader
+multithread ordering still fail explicitly. More resource layouts need their own
+wire interoperability evidence rather than extrapolation from RGBA8.
+
+Native WARP/hardware tests cover all five Map types, owned successive values,
+initial contents, pitched RGBA8 rows, cancellation, preexisting/unfinished maps,
+foreign-thread Unmap and budget exhaustion. An actual invalid READ mapping of
+a write-only resource preserves the returned failure. WAS_STILL_DRAWING is a
+separate injected observer result, not a hardware scheduling claim. Eight encoder
+negative cases reject malformed data, completion, subresource, type, flags,
+result and pairing without publishing or leaking partial files.
+
+Six scoped files pass 84 serial native/original-player checks: dynamic constants
+produce separate red/green halves, a dynamic RGBA8 texture produces alternating
+rows, NO_OVERWRITE targets unused storage before its first Draw, and staging
+READ/READ_WRITE/WRITE calls execute alongside Draw. Removing Map/Unmap leaves
+initial blue data while retaining the original final reference image; both
+players execute the changed output. All original native objects die before
+encoding. Event inventories and shader DXBC/disassembly are inspected. Evidence:
+`artifacts/capture-map-interop-verified/{validation,inputs}.json`. Initial
+validator failures used an incorrect Unmap diagnostic key and omitted the
+existing READ synchronization counter; preserved directories are
+`capture-map-interop-1` and `capture-map-interop-final`. Pixel rules were unchanged.
+
+The real injected CLI fixture adds dynamic constant-buffer Map/Unmap on direct
+and factory-created tearing flip chains. Thirteen launch modes generate 65 files
+and pass 417 serial dual-player/CPU/module checks in the initial integration run
+(`artifacts/capture-map-live-interop`). Final guarded-code regression evidence is
+recorded below. This remains a self-owned oracle, not original GUI acceptance.
+
+GF2 diagnostic evidence is `artifacts/capture-map-gf2`: 45,111 successful Presents
+before the request, zero interface gaps, then an explicit
+`ID3D11DeviceContext::End: GPU call recording is not implemented` failure.
+Map is no longer the first gap. No frame was published; disconnect and normal
+window close succeeded. Binary hashes identify this run before the subsequent
+foreign-thread pointer guard hardening. Unity exceptions remain and no gameplay
+scene success is claimed. Accepted GF2 frames remain zero. Query/End recording,
+Update/Copy, deferred ordering, remaining hidden state and the six-frame/GUI
+release gates remain incomplete.
+
+Final pointer-guard code passes 22 capture-only CTests, 20 full-profile capture
+CTests and eleven Qt cases. The final scoped and injected interop reruns retain
+84 and 417 passing checks, respectively, with 65 injected files. Evidence is
+`artifacts/capture-map-release-{ctest,full-ctest,qt}.txt`,
+`artifacts/capture-map-release-interop/{validation,inputs}.json` and
+`artifacts/capture-map-release-live-interop/{validation,inputs}.json`.
+The previous source-build result is historical; this iteration's archive/package
+result is recorded after the implementation commit below.
+All 44 native/injected factory and swap-chain forwarding comparisons also pass.

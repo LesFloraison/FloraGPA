@@ -31,6 +31,9 @@ struct FrameRecording::Impl {
     // call without allocation or waiting for the application/driver lock.
     std::atomic<const char*> foreign_call=nullptr,reentrant_call=nullptr;
     bool finished=false;
+    struct Mapping {size_t command;D3D11_MAPPED_SUBRESOURCE mapped{};};
+    std::map<std::pair<ObjectId,UINT>,Mapping> mappings;
+    size_t payload_bytes=0;
     RecordedFrame frame;
     void gap(const char* api,const char* reason) noexcept {
         frame.failed=true;
@@ -43,6 +46,7 @@ FrameRecording::FrameRecording(ID3D11DeviceContext* context,const RecordingOptio
     if(unwrap(context)->GetType()!=D3D11_DEVICE_CONTEXT_IMMEDIATE)throw std::runtime_error("Recording requires an immediate context");
     {std::lock_guard lock(record->mutex);if(!record->active_queries.empty())throw std::runtime_error("Recording cannot start inside an active query");}
     if(has_external_mapping())throw std::runtime_error("Recording cannot start with an active DXGI mapping");
+    if(has_external_mapping(true))throw std::runtime_error("Recording cannot start with an active resource mapping");
     if(object_status().at("interface_gaps").get<uint64_t>())throw std::runtime_error("Recording has prior interface capability gaps");
     impl_->context=context;impl_->context_id=record->id;impl_->options=options;
 }
@@ -87,6 +91,8 @@ RecordedFrame FrameRecording::finish(){
     ComPtr<ID3D11Device> device;unwrap(p.context.Get())->GetDevice(&device);
     if(FAILED(device->GetDeviceRemovedReason()))p.gap("finish","Device removed during recording");
     if(object_status().at("interface_gaps").get<uint64_t>())p.gap("finish","Interface capability gap during recording");
+    if(!p.mappings.empty())p.gap("finish","Frame ends with an active resource mapping");
+    p.mappings.clear(); // No mapped pointer escapes the application-thread recording.
     p.finished=true;p.frame.cancelled=p.cancelled.load();
     auto& r=registry();{std::lock_guard guard(r.mutex);if(auto active=r.active.lock();active.get()==this){r.active.reset();r.enabled.store(false);}}
     return std::move(p.frame);
@@ -98,12 +104,14 @@ void FrameRecording::observe(ID3D11DeviceContext* context,const char* api,Comman
     if(GetCurrentThreadId()!=p.thread){const char* empty=nullptr;p.foreign_call.compare_exchange_strong(empty,api);return;}
     if(native_call_depth>1){const char* empty=nullptr;p.reentrant_call.compare_exchange_strong(empty,api);return;}
     std::lock_guard lock(p.mutex);
-    if(p.finished || p.frame.failed || p.cancelled.load())return;
+    if(p.finished || p.frame.failed || p.cancelled.load() || p.foreign_call.load() || p.reentrant_call.load())return;
     try {
         auto record=object_record(context);
         if(!record || record->id!=p.context_id)throw std::runtime_error("Multiple context execution requires ordered command-list support");
         if(kind==CommandKind::read || kind==CommandKind::binding)return;
         if(kind==CommandKind::unsupported)throw std::runtime_error("GPU call recording is not implemented");
+        if(!p.mappings.empty() && kind!=CommandKind::map)throw std::runtime_error("GPU execution while a resource is mapped is unsupported");
+        if(kind==CommandKind::map && (!operand || words[1]<1 || words[1]>5 || (words[2]&~D3D11_MAP_FLAG_DO_NOT_WAIT)))throw std::runtime_error("Invalid Map arguments");
         const bool clear=kind==CommandKind::clear_rtv || kind==CommandKind::clear_dsv || kind==CommandKind::clear_uav_uint || kind==CommandKind::clear_uav_float;
         if(clear && !operand)throw std::runtime_error("Clear operand is missing");
         if(clear && (kind==CommandKind::clear_uav_uint?!integers:!floats))throw std::runtime_error("Clear value is missing");
@@ -117,7 +125,7 @@ void FrameRecording::observe(ID3D11DeviceContext* context,const char* api,Comman
         for(const auto& [id,object]:snapshot.objects){
             ComPtr<ID3D11Resource> resource;
             if(SUCCEEDED(object.native.As(&resource)) && !p.frame.initial_resources.contains(id)){
-                options.byte_limit=p.options.byte_limit-p.frame.initial_bytes;
+                options.byte_limit=p.options.byte_limit-p.frame.initial_bytes-p.payload_bytes;
                 auto data=snapshot_resource(context,resource.Get(),options);
                 for(const auto& sub:data.subresources)p.frame.initial_bytes+=sub.bytes.size();
                 p.frame.initial_resources.emplace(id,std::move(data));
@@ -130,15 +138,72 @@ void FrameRecording::observe(ID3D11DeviceContext* context,const char* api,Comman
                 }
             }
         }
+        if(kind==CommandKind::map){
+            const auto& shape=p.frame.initial_resources.at(command.operand).shape;
+            const auto layout=resource_layout(shape);
+            if(words[0]>=layout.size())throw std::runtime_error("Map subresource is out of range");
+            if(shape.format>=DXGI_FORMAT_NV12 && shape.format<=DXGI_FORMAT_P016)throw std::runtime_error("Planar Map wire layout is not verified");
+            const auto key=std::pair{command.operand,words[0]};
+            if(!p.mappings.emplace(key,Impl::Mapping{p.frame.commands.size()}).second)throw std::runtime_error("Overlapping Map calls");
+        }
         command.bindings=std::move(snapshot.bindings);p.frame.objects.merge(snapshot.objects);
         p.frame.commands.push_back(std::move(command));
     }catch(const std::exception& e){p.gap(api,e.what());}catch(...){p.gap(api,"Command observation failed");}
+}
+void FrameRecording::mapped(ID3D11DeviceContext* context,ID3D11Resource* resource,UINT subresource,HRESULT result,const D3D11_MAPPED_SUBRESOURCE* mapped){
+    auto& p=*impl_;constexpr auto api="ID3D11DeviceContext::Map";
+    if(GetCurrentThreadId()!=p.thread){const char* empty=nullptr;p.foreign_call.compare_exchange_strong(empty,api);return;}
+    if(native_call_depth>1){const char* empty=nullptr;p.reentrant_call.compare_exchange_strong(empty,api);return;}
+    std::lock_guard lock(p.mutex);if(p.finished || p.frame.failed || p.cancelled || p.foreign_call.load() || p.reentrant_call.load())return;
+    try{
+        auto c=object_record(context),r=object_record(resource);
+        if(!c || c->id!=p.context_id || !r)throw std::runtime_error("Map context/resource identity mismatch");
+        auto found=p.mappings.find({r->id,subresource});if(found==p.mappings.end())throw std::runtime_error("Map result has no recorded call");
+        auto& command=p.frame.commands.at(found->second.command);command.result=result;
+        if(FAILED(result)){command.completed=true;p.mappings.erase(found);return;}
+        if(result!=S_OK || !mapped || !mapped->pData)throw std::runtime_error("Successful Map without CPU storage is unsupported");
+        if(command.words[2] && command.words[1]>=D3D11_MAP_WRITE_DISCARD)throw std::runtime_error("Invalid successful Map flags/type");
+        found->second.mapped=*mapped;
+    }catch(const std::exception& e){p.gap(api,e.what());}catch(...){p.gap(api,"Map result observation failed");}
+}
+void FrameRecording::unmap(ID3D11DeviceContext* context,ID3D11Resource* resource,UINT subresource){
+    auto& p=*impl_;constexpr auto api="ID3D11DeviceContext::Unmap";
+    if(GetCurrentThreadId()!=p.thread){const char* empty=nullptr;p.foreign_call.compare_exchange_strong(empty,api);return;}
+    if(native_call_depth>1){const char* empty=nullptr;p.reentrant_call.compare_exchange_strong(empty,api);return;}
+    std::lock_guard lock(p.mutex);if(p.finished || p.frame.failed || p.cancelled || p.foreign_call.load() || p.reentrant_call.load()){p.mappings.clear();return;}
+    try{
+        auto c=object_record(context),r=object_record(resource);
+        if(!c || c->id!=p.context_id || !r)throw std::runtime_error("Unmap context/resource identity mismatch");
+        auto found=p.mappings.find({r->id,subresource});if(found==p.mappings.end())throw std::runtime_error("Unmap has no recorded successful Map");
+        if(p.frame.commands.size()>=p.options.command_limit)throw std::runtime_error("Frame command limit exceeded");
+        auto& command=p.frame.commands.at(found->second.command);const auto& mapped=found->second.mapped;
+        auto sub=resource_layout(p.frame.initial_resources.at(r->id).shape).at(subresource);
+        const size_t bytes=sub.slice_bytes*sub.depth;
+        if(bytes>p.options.byte_limit-p.frame.initial_bytes-p.payload_bytes)throw std::runtime_error("Mapped data byte limit exceeded");
+        // Copy before native Unmap invalidates the application's returned pointer.
+        // Padding is excluded; only checked logical rows/slices enter the CPU model.
+        copy_pitched(sub,mapped.pData,mapped.RowPitch,mapped.DepthPitch);
+        command.data=std::move(sub.bytes);command.completed=true;p.payload_bytes+=bytes;
+        RecordedCommand end;end.kind=CommandKind::unmap;end.api=api;end.sequence=p.frame.commands.size();end.operand=r->id;end.words[0]=subresource;
+        end.bindings.context=command.bindings.context;end.bindings.device=command.bindings.device;end.completed=true;
+        p.frame.commands.push_back(std::move(end));p.mappings.erase(found);
+    }catch(const std::exception& e){p.mappings.clear();p.gap(api,e.what());}catch(...){p.mappings.clear();p.gap(api,"Mapped data capture failed");}
 }
 void FrameRecording::reject_external(const char* api) {
     auto& p=*impl_;
     if(GetCurrentThreadId()!=p.thread){const char* empty=nullptr;p.foreign_call.compare_exchange_strong(empty,api);return;}
     if(native_call_depth>1){const char* empty=nullptr;p.reentrant_call.compare_exchange_strong(empty,api);return;}
     std::lock_guard lock(p.mutex);if(!p.finished)p.gap(api,"External resource mutation or synchronization is not recorded");
+}
+void record_map_result(ID3D11DeviceContext* context,ID3D11Resource* resource,UINT subresource,HRESULT result,const D3D11_MAPPED_SUBRESOURCE* mapped) noexcept {
+    auto& r=registry();if(!r.enabled.load(std::memory_order_relaxed))return;LastErrorScope error;
+    try{std::shared_ptr<FrameRecording> active;{std::lock_guard lock(r.mutex);active=r.active.lock();}if(active)active->mapped(context,resource,subresource,result,mapped);}
+    catch(...){object_gap("Map",__uuidof(ID3D11DeviceContext),"Map observer failed");}
+}
+void record_unmap(ID3D11DeviceContext* context,ID3D11Resource* resource,UINT subresource) noexcept {
+    capture_context_activity();auto& r=registry();if(!r.enabled.load(std::memory_order_relaxed))return;LastErrorScope error;
+    try{std::shared_ptr<FrameRecording> active;{std::lock_guard lock(r.mutex);active=r.active.lock();}if(active)active->unmap(context,resource,subresource);}
+    catch(...){object_gap("Unmap",__uuidof(ID3D11DeviceContext),"Unmap observer failed");}
 }
 void record_external_call(const char* api) noexcept {
     capture_context_activity();

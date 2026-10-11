@@ -179,11 +179,11 @@ void track_external_mapping(const void* proxy,bool mapped) noexcept {
         std::lock_guard lock(record->mutex);record->external_mapping=mapped;
     }catch(...){object_gap("DXGI mapping",__uuidof(IDXGISurface),"External mapping state unavailable");}
 }
-bool has_external_mapping(){
+bool has_external_mapping(bool include_resource_mappings){
     auto& r=registry();std::vector<std::shared_ptr<Entry>> entries;
     {std::lock_guard lock(r.mutex);for(const auto& [identity,entry]:r.objects){(void)identity;entries.push_back(entry);}}
     for(const auto& entry:entries){std::shared_ptr<ObjectRecord> record;{std::lock_guard lock(entry->mutex);record=entry->record.lock();}
-        if(record && record->alive){std::lock_guard lock(record->mutex);if(record->external_mapping)return true;}}
+        if(record && record->alive){std::lock_guard lock(record->mutex);if(record->external_mapping || (include_resource_mappings && !record->mapped_subresources.empty()))return true;}}
     return false;
 }
 Json metadata_status() {

@@ -110,10 +110,12 @@ void method(std::ostream& out, const std::string& iface, const Json& m) {
         else if(name=="ClearDepthStencilView") {kind="clear_dsv";operand="pDepthStencilView";words="{ClearFlags,Stencil}";floats="std::array<float,4>{Depth,0,0,0}.data()";}
         else if(name=="ClearUnorderedAccessViewUint") {kind="clear_uav_uint";operand="pUnorderedAccessView";integers="Values";}
         else if(name=="ClearUnorderedAccessViewFloat") {kind="clear_uav_float";operand="pUnorderedAccessView";floats="Values";}
+        else if(name=="Map") {kind="map";operand="pResource";words="{Subresource,UINT(MapType),MapFlags}";}
         else if(name.find("Get")!=std::string::npos || name=="Flush" || name=="Flush1")kind="read";
         else if(name=="ClearState" || name=="SetPredication" || name=="SetResourceMinLOD" ||
             std::regex_match(name,std::regex("(VS|HS|DS|GS|PS|CS|IA|RS|OM|SO)Set.*")))kind="binding";
-        out << "record_context_call(this, \"" << api << "\", CommandKind::" << kind << ", " << words << ", " << operand << ", " << floats << ", " << integers << ");\n";
+        if(name=="Unmap")out << "record_unmap(this, pResource, Subresource);\n";
+        else out << "record_context_call(this, \"" << api << "\", CommandKind::" << kind << ", " << words << ", " << operand << ", " << floats << ", " << integers << ");\n";
     }
     else if(name=="WriteToSubresource" || name=="Map" || name=="Unmap" || name=="GetDC" || name=="ReleaseDC" ||
         name.starts_with("OfferResources") || name.starts_with("ReclaimResources") || name=="Trim" ||
@@ -121,6 +123,7 @@ void method(std::ostream& out, const std::string& iface, const Json& m) {
         out << "record_external_call(\"" << api << "\");\n";
     if (result != "void") out << "auto result = ";
     out << "target->" << name << "(" << args << ");\nconst DWORD after = GetLastError();\n";
+    if(iface=="ID3D11DeviceContext" && name=="Map")out << "record_map_result(this, pResource, Subresource, result, pMappedResource);\n";
     if (!post.empty()) {
         if (result == "HRESULT") out << "if (SUCCEEDED(result)) {\n";
         out << post;

@@ -3881,11 +3881,12 @@
       "Observed-model encoder: fifteen capture-only CTests, thirteen full-profile capture CTests and 94 serial dual-player/CPU checks passed. All source GPU objects die before encoding. Draw/Dispatch removal controls retain captured reference pixels but execute to black. Native event inventory and shader exports pass; presentation is synthetic, no Present/IPC capture or original GUI acceptance.",
       "Real Present transaction through internal control API: sixteen capture-only and fourteen full-profile capture CTests, 44 injected factory/swap comparisons and 22 dual-player checks passed. Three consecutive actual swap-chain files (including empty Present1) match exact CPU/backbuffer pixels. TEST, resize, busy, separate control thread, cancel/publication races, unsupported Update and writer failure gates pass. Occlusion/device removal are injected HRESULTs only. No private IPC capture or GF2 acceptance.",
       "Startup-injected CLI and Qt: seventeen capture-only CTests, fifteen full-profile capture CTests, eleven Qt cases and 44 forwarding comparisons passed. Ten self-owned files pass 65 serial dual-player/module/CPU checks. Eight malformed identity cases per launch reject; busy/cancel, Update rejection/recovery, target exit and completed-file UI routing pass. GF2 diagnostic identified two-buffer FLIP_SEQUENTIAL: capture explicitly rejected, zero accepted GF2 frames; normal close after disconnect. Signal-file race in test harness corrected and original failure retained.",
-      "Flip/tearing boundary: 55 self-owned startup-injected frames across eleven creation/presentation modes pass 353 serial dual-player/CPU checks with a five-color oracle. GF2 passes two-buffer FLIP_SEQUENTIAL / ALLOW_TEARING then explicitly rejects Map; zero accepted GF2 frames, no failure publication and normal window exit. See INDEPENDENT_CAPTURE.md."
+      "Flip/tearing boundary: 55 self-owned startup-injected frames across eleven creation/presentation modes pass 353 serial dual-player/CPU checks with a five-color oracle. GF2 passes two-buffer FLIP_SEQUENTIAL / ALLOW_TEARING then explicitly rejects Map; zero accepted GF2 frames, no failure publication and normal window exit. See INDEPENDENT_CAPTURE.md.",
+      "Map/Unmap: capture-owned row/slice copies, actual HRESULTs, initial resource contents, pair/length/identity validation and pointer lifetime guards. Six scoped files pass 84 dual-player/CPU/shader/inventory checks; two remove-map negatives execute blue despite retained final references. Thirteen injected CLI modes yield 65 files / 417 checks. GF2 reaches End/query, explicitly fails without publication and exits normally; zero accepted GF2 frames."
     ],
     "pending": [
       "Remaining creation paths and class-instance metadata",
-      "Map/Unmap/Update/Copy, multicontext synchronization, deferred ordering and remaining hidden states",
+      "Query/End, Update/Copy and additional Map profiles, multicontext synchronization, deferred ordering and remaining hidden states",
       "Remaining command/state wire layouts and real swap-chain presentation serialization",
       "Broader generated-capture dual-player and original GUI acceptance beyond the self-owned blit/flip Draw profile",
       "Two GF2 launches with three frames each across two scenes"
@@ -3895,9 +3896,9 @@
     "qt_controls": "Async launch/capture/cancel/disconnect and completed-file handoff tested against real injected target; limited profile, no full release acceptance",
     "object_forwarding": "37 families / 78 declared public interfaces, native C++ build generator, canonical IUnknown and typed input/output forwarding; not command recording",
     "native_metadata": "Persistent native IDs and descriptor graph; owned buffer/texture initial bytes, shader DXBC and input-layout/SO parameters; not frame serialization",
-    "resource_readback": "Capture-owned staging snapshots and independent APPEND/COUNTER UAV values; WARP/hardware byte checks; no Present integration or multicontext barrier",
-    "pipeline_bindings": "Capture-owned six-stage/IA/RS/OM values and retained native reference graph; WARP/hardware 11.0/11.1 exact Draw/Dispatch oracles; no frame assembly or command recording",
-    "command_model": "Generated COM observers own Clear/Draw/Dispatch arguments, per-command bindings/counters and first-use GPU bytes; fresh-device CPU-model reconstruction and negative controls pass; GPA encoding available to the test probe; no Present/controller integration",
+    "resource_readback": "Capture-owned staging snapshots and independent APPEND/COUNTER UAV values integrated into immediate-context frame recording; broader multicontext barriers pending",
+    "pipeline_bindings": "Capture-owned six-stage/IA/RS/OM values retained per command; WARP/hardware 11.0/11.1 exact Draw/Dispatch oracles; hidden state gaps remain",
+    "command_model": "Generated COM observers own Clear/Draw/Dispatch and Map/Unmap data, per-command bindings/counters and first-use GPU bytes; integrated into native Present and private IPC; unsupported commands reject",
     "encoder": "Independent CPU encoder connected to native background writer and private IPC; limited injected Draw profile passes dual-player execution",
     "present_transaction": "Real Present boundaries with application-thread GPU work and background CPU writing; protocol v2 binds session/PIDs, reports outcomes and defaults to unique eligible foreground swap",
     "limited_cli_frame_capture": true

@@ -178,9 +178,33 @@ public:
         add(3,5,0x38,std::move(swap));
         for(const auto& [id,o]:frame_.objects)object(id,o);
         for(const auto& [id,data]:frame_.initial_resources){(void)data;require(frame_.objects.contains(id),"Encoder orphan initial resource");resource_ref(id);}
+        std::map<std::pair<ObjectId,UINT>,bool> mappings;
         uint64_t sequence=0;
         for(const auto& command:frame_.commands){
             require(command.sequence==sequence++,"Encoder command sequence mismatch");const auto& w=command.words;Payload p;uint16_t type=0;
+            if(command.kind==CommandKind::map || command.kind==CommandKind::unmap){
+                require(command.bindings.context==context_ && command.bindings.device==device_,"Encoder Map context mismatch");
+                require(command.completed && command.operand,"Encoder incomplete Map/Unmap");const auto resource=resource_ref(command.operand);
+                require(frame_.initial_resources.contains(command.operand),"Encoder Map resource data missing");
+                const auto& mapped_shape=frame_.initial_resources.at(command.operand).shape;const auto layout=resource_layout(mapped_shape);
+                require(w[0]<layout.size(),"Encoder Map subresource out of range");const auto key=std::pair{command.operand,w[0]};
+                if(command.kind==CommandKind::unmap){
+                    require(mappings.erase(key)==1 && command.data.empty(),"Encoder Unmap has no successful Map");
+                    add(7,0x34ed,Payload{}.q({0,1,resource}).value(w[0]));continue;
+                }
+                require(w[1]>=1 && w[1]<=5 && !(w[2]&~D3D11_MAP_FLAG_DO_NOT_WAIT),"Encoder invalid Map type/flags");
+                uint64_t data=0;
+                if(command.result<0)require(command.data.empty(),"Encoder failed Map has data");
+                else{
+                    require(command.result==S_OK && (!w[2] || w[1]<D3D11_MAP_WRITE_DISCARD),"Encoder invalid successful Map");
+                    require(!(mapped_shape.format>=DXGI_FORMAT_NV12 && mapped_shape.format<=DXGI_FORMAT_P016),"Encoder planar Map layout unverified");
+                    require(mapped_shape.dimension==D3D11_RESOURCE_DIMENSION_BUFFER || w[1]!=D3D11_MAP_WRITE_NO_OVERWRITE,"Encoder texture NO_OVERWRITE unsupported");
+                    const auto& sub=layout.at(w[0]);require(command.data.size()==sub.slice_bytes*sub.depth,"Encoder Map data length mismatch");
+                    require(mappings.emplace(key,true).second,"Encoder overlapping Map calls");data=blob(command.data);
+                }
+                add(7,w[1]==D3D11_MAP_READ?0x34ec:0x246,Payload{}.q({0,1}).value(command.result).value(resource).u({w[0],w[1],w[2]}).value(data));continue;
+            }
+            require(mappings.empty(),"Encoder GPU execution with open Map unsupported");
             switch(command.kind){
             case CommandKind::draw:type=0x37;break;case CommandKind::draw_indexed:type=0x39;break;
             case CommandKind::draw_instanced:type=0x3c;break;case CommandKind::draw_indexed_instanced:type=0x3a;break;case CommandKind::dispatch:type=0x35;break;
@@ -193,6 +217,7 @@ public:
                 else{p.value<uint8_t>(1);if(type==0x33)for(size_t i=0;i<4;++i)p.value(w[i]);else for(auto v:command.floats)p.value(v);}
             }add(7,type,std::move(p));
         }
+        require(mappings.empty(),"Encoder frame has unpaired Map");
         const auto reference_data=blob(final);add(5,0x87,Payload{}.q({UINT64_MAX-1,3}).raw(output_desc).value(reference_data));
         add(7,0x3257,Payload{}.q({0,3}).u({0,frame_.presentation?frame_.presentation->sync_interval:1,frame_.presentation?frame_.presentation->flags:0}));
         Header header{};memcpy(header.data(),"IGPA",4);wire_write<uint32_t>(header.data()+4,HEADER_SIZE);wire_write<uint32_t>(header.data()+8,VERSION);
