@@ -33,7 +33,7 @@
     "observed_model_interop_checks": 94,
     "present_transaction_interop_checks": 22
   },
-  "source_build_commit": "e8c5576fa75486a74d0545391f595be1267bea17",
+  "source_build_commit": "2b6c43244605b78dd7f5d59edba2d7f1a0529aa0",
   "local_evidence_sha256": {
     "capture-format-goldens/validation.json": "a1f6d11deab2e8324c8626ab359b139abf8a83257d06874c3cb6a251a357b84a",
     "capture-bootstrap/swap-chains-final/validation.json": "abb5d8dc35668a54bf6747dd8e9ffdc82b497d2298d19b59a33176a5cf07bda0",
@@ -105,7 +105,8 @@
     "capture-present-interop-final/inputs.json": "75dd121e5e24bf49c817c51876c1d67232d0dd5c71e32453490faef81ec1eee8",
     "capture-present-interop-final/native/results.json": "42a753e32b809e8e2fbcf18b0423af662a385baed17756da8dd2ae78775dbd91",
     "capture-present-factories/validation.json": "e2e96acab25e71ffbce3b435dbda260e92de9b8cda0d95c3af77cb47a9010182",
-    "capture-present-swaps/validation.json": "f5dfc04cac0e6c63ce920bedb1beafa99f7a014c74a2bdeb2447cc2c4f73c005"
+    "capture-present-swaps/validation.json": "f5dfc04cac0e6c63ce920bedb1beafa99f7a014c74a2bdeb2447cc2c4f73c005",
+    "capture-present-source-build/validation.json": "00c3638171fc900df5f94015b89adcb79b349117d3a43da02dbc68868540bf22"
   },
   "limitations": [
     "GPA original-player checks use a development-only private ABI harness.",

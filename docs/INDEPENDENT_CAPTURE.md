@@ -536,3 +536,12 @@ Present1, nonzero Present flags, broader state/mutation/deferred support and
 original GUI inspection. Current boundary support requires single-buffer DISCARD
 or SEQUENTIAL, one sample, RGBA8/BGRA8, and one immediate-context application
 thread. The full plan and six-frame GF2 gate remain incomplete.
+
+The Present-transaction commit `2b6c432` passes all five isolated source-build
+steps, including sixteen serial CTests and packaged native control. The native
+source copy discovers no Qt and the packaged runtime module audit observes no
+GPA, Qt, RenderDoc or Python. Evidence is
+`artifacts/capture-present-source-build/validation.json`. Its package-control
+step still validates the bootstrap protocol, while the separate native probe
+validates Present transactions through the internal API; injected CLI capture
+remains pending.
