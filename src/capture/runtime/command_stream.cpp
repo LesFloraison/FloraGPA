@@ -158,12 +158,13 @@ void FrameRecording::observe(ID3D11DeviceContext* context,const char* api,Comman
         if(kind==CommandKind::map && (!operand || words[1]<1 || words[1]>5 || (words[2]&~D3D11_MAP_FLAG_DO_NOT_WAIT)))throw std::runtime_error("Invalid Map arguments");
         if(kind==CommandKind::copy_resource && (!operand || !source))throw std::runtime_error("CopyResource operand is missing");
         const bool clear=kind==CommandKind::clear_rtv || kind==CommandKind::clear_dsv || kind==CommandKind::clear_uav_uint || kind==CommandKind::clear_uav_float;
-        if(kind==CommandKind::update_subresource && (!operand || !update || !update->data || update->box || update->flags))throw std::runtime_error("UpdateSubresource requires nonnull data, no box and zero copy flags");
+        if(kind==CommandKind::update_subresource && (!operand || !update || !update->data || update->flags))throw std::runtime_error("UpdateSubresource requires nonnull data and zero copy flags");
         if(clear && !operand)throw std::runtime_error("Clear operand is missing");
         if(clear && (kind==CommandKind::clear_uav_uint?!integers:!floats))throw std::runtime_error("Clear value is missing");
         if(p.frame.commands.size()>=p.options.command_limit)throw std::runtime_error("Frame command limit exceeded");
         auto snapshot=snapshot_context(context);snapshot.require_supported_bindings();
         RecordedCommand command;command.kind=kind;command.api=api;command.sequence=p.frame.commands.size();command.words=words;
+        if(kind==CommandKind::update_subresource && update->box){command.update_box.emplace();static_assert(sizeof(ResourceBox)==sizeof(D3D11_BOX));memcpy(command.update_box->data(),update->box,sizeof(D3D11_BOX));}
         if(floats)std::copy_n(floats,4,command.floats.begin());
         if(integers)std::copy_n(integers,4,command.words.begin());
         command.operand=retain(snapshot,operand);
@@ -194,7 +195,7 @@ void FrameRecording::observe(ID3D11DeviceContext* context,const char* api,Comman
         }
         if(kind==CommandKind::update_subresource){
             const auto& destination=p.frame.initial_resources.at(command.operand);
-            auto layout=update_layout(destination.shape,destination.record->descriptor,words[0]);
+            auto layout=update_layout(destination.shape,destination.record->descriptor,words[0],command.update_box?&*command.update_box:nullptr);
             if(layout.slice_bytes*layout.depth>p.options.byte_limit-p.frame.initial_bytes-p.payload_bytes)throw std::runtime_error("Update payload byte limit exceeded");
             copy_pitched(layout,update->data,update->row_pitch,update->depth_pitch);
             command.data=std::move(layout.bytes);p.payload_bytes+=command.data.size();command.completed=true;

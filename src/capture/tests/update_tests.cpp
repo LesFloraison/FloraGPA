@@ -90,9 +90,9 @@ void runtime_failures(bool hardware){
     RecordingOptions limit;limit.byte_limit=31;auto recording=begin_recording(f.context.Get(),limit);
     f.context->UpdateSubresource(buffer.Get(),0,nullptr,words,0,0);auto limited=recording->finish();rejects([&]{limited.require_complete();},"byte limit");
     auto data=snapshot_resource(f.context.Get(),buffer.Get());require(!memcmp(data.subresources[0].bytes.data(),words,16),"Budget refusal changed application Update");
-    recording.reset();recording=begin_recording(f.context.Get());D3D11_BOX box{4,0,0,8,1,1};UINT replacement=99;
-    f.context->UpdateSubresource(buffer.Get(),0,&box,&replacement,0,0);auto boxed=recording->finish();rejects([&]{boxed.require_complete();},"no box");
-    data=snapshot_resource(f.context.Get(),buffer.Get());words[1]=replacement;require(!memcmp(data.subresources[0].bytes.data(),words,16),"Box refusal changed native partial Update");
+    recording.reset();recording=begin_recording(f.context.Get());D3D11_BOX box{4,0,0,4,1,1};UINT replacement=99;
+    f.context->UpdateSubresource(buffer.Get(),0,&box,&replacement,0,0);auto boxed=recording->finish();rejects([&]{boxed.require_complete();},"nonempty");
+    data=snapshot_resource(f.context.Get(),buffer.Get());require(!memcmp(data.subresources[0].bytes.data(),words,16),"Empty-box refusal changed native no-op");
     recording.reset();recording=begin_recording(f.context.Get());f.context->UpdateSubresource(buffer.Get(),0,nullptr,zero,0,0);recording->finish().require_complete();
 }
 void failures(const std::filesystem::path& out){

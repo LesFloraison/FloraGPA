@@ -86,6 +86,7 @@ struct QueryObservation {
     bool has_output=false;
     std::optional<uint32_t> value; // EVENT BOOL, owned only after native S_OK.
 };
+using ResourceBox = std::array<uint32_t,6>; // left, top, front, right, bottom, back
 struct RecordedCommand {
     CommandKind kind=CommandKind::unsupported;
     std::string api;
@@ -95,6 +96,7 @@ struct RecordedCommand {
     ObjectId operand=0;
     ObjectId source=0; // CopyResource: operand is destination; no native pointer survives.
     std::optional<QueryObservation> query;
+    std::optional<ResourceBox> update_box;
     // Update uses words {subresource, original row pitch, depth pitch, extended, flags}; packed owned bytes.
     // Map uses words {subresource, type, flags}; bytes own the completed CPU write.
     int32_t result=0;

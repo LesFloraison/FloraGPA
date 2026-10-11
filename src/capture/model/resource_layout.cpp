@@ -71,7 +71,7 @@ std::vector<SubresourceData> resource_layout(const ResourceShape& s,size_t byte_
     }
     return result;
 }
-SubresourceData update_layout(const ResourceShape& shape,std::span<const uint8_t> descriptor,uint32_t subresource){
+SubresourceData update_layout(const ResourceShape& shape,std::span<const uint8_t> descriptor,uint32_t subresource,const ResourceBox* box){
     size_t offset=0,expected=0;
     switch(shape.dimension){
     case D3D11_RESOURCE_DIMENSION_BUFFER:offset=offsetof(D3D11_BUFFER_DESC,Usage);expected=sizeof(D3D11_BUFFER_DESC);break;
@@ -87,7 +87,28 @@ SubresourceData update_layout(const ResourceShape& shape,std::span<const uint8_t
     if(shape.format>=DXGI_FORMAT_NV12 && shape.format<=DXGI_FORMAT_P016)throw std::runtime_error("Planar Update wire layout is not verified");
     auto layout=resource_layout(shape);
     if(subresource>=layout.size())throw std::runtime_error("Update subresource is out of range");
-    return std::move(layout[subresource]);
+    auto out=std::move(layout[subresource]);
+    if(box){
+        const auto [left,top,front,right,bottom,back]=*box;
+        if(!(left<right && top<bottom && front<back && right<=out.width && bottom<=out.height && back<=out.depth))
+            throw std::runtime_error("Update box must be nonempty and in bounds");
+        if(bind&D3D11_BIND_CONSTANT_BUFFER)throw std::runtime_error("Boxed constant-buffer Update is not verified");
+        if(shape.dimension==D3D11_RESOURCE_DIMENSION_BUFFER){
+            D3D11_BUFFER_DESC d{};memcpy(&d,descriptor.data(),sizeof d);
+            if((d.MiscFlags&D3D11_RESOURCE_MISC_BUFFER_STRUCTURED) && (!d.StructureByteStride || left%d.StructureByteStride || right%d.StructureByteStride))
+                throw std::runtime_error("Structured Update box requires complete structures");
+        }
+        const auto format=UINT(shape.format);
+        const bool bc=(format>=70 && format<=84) || (format>=94 && format<=99);
+        if(bc && (left%4 || top%4 || right%4 || bottom%4))
+            throw std::runtime_error("BC Update box requires block alignment");
+        if(format==66 || format==68 || format==69 || (format>=107 && format<=109))
+            throw std::runtime_error("Bit/packed Update box layout is not verified");
+        out.width=right-left;out.height=bottom-top;out.depth=back-front;
+        if(shape.dimension==D3D11_RESOURCE_DIMENSION_BUFFER)out.row_bytes=out.slice_bytes=out.width;
+        else surface(out,shape.format);
+    }
+    return out;
 }
 void copy_pitched(SubresourceData& target,const void* source,size_t row_pitch,size_t slice_pitch){
     if(!source)throw std::runtime_error("Missing subresource data pointer");

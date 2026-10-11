@@ -669,6 +669,63 @@
       "planar layouts",
       "broader deferred and hidden state support",
       "EVENT serialization and GF2 acceptance"
-    ]
+    ],
+    "source_package": {
+      "revision": "c7512da998b19e82b698a5466ad7cbd30dda3971",
+      "steps": 6,
+      "ctest": 32,
+      "launches": 15,
+      "frames": 75,
+      "system_path_only": true,
+      "no_qt_discovery": true,
+      "module_audit": "no GPA, Qt, RenderDoc or Python",
+      "evidence": "artifacts/capture-update-source-build/validation.json"
+    }
+  },
+  "boxed_updates": {
+    "status": "implemented and dual-player verified within the stated profile",
+    "apis": [
+      "UpdateSubresource",
+      "UpdateSubresource1 with zero flags"
+    ],
+    "model": "owned box coordinates and packed source region; original pitches; separate initial GPU bytes",
+    "verified_native": [
+      "Buffer",
+      "Texture1D",
+      "Texture2D",
+      "Texture3D",
+      "BC1 mip and array block-aligned regions"
+    ],
+    "direct_dual_player_files": 20,
+    "direct_dual_player_checks": 380,
+    "negative_execution_controls": 10,
+    "injected_launches": 17,
+    "injected_files": 85,
+    "injected_boxed_files": 10,
+    "injected_checks": 545,
+    "encoder_rejection_cases": 9,
+    "bc_failure": "unaligned 6x6 mip edges are native no-ops with debug-layer errors; now refused, original logs retained",
+    "pending": [
+      "empty boxes",
+      "boxed constant buffers",
+      "boxed bit/packed formats",
+      "copy flags",
+      "planar layouts",
+      "format-by-format BC compatibility beyond BC1",
+      "EVENT serialization and GF2 six-frame acceptance"
+    ],
+    "evidence": [
+      "artifacts/capture-box-update-final-interop",
+      "artifacts/capture-box-injected-interop",
+      "artifacts/capture-box-bc-debuglayer.log",
+      "artifacts/capture-box-update-validation.json"
+    ],
+    "capture_only_ctest": 36,
+    "capture_only_ctest_note": "35 in final sweep plus corrected targeted encoder rerun",
+    "full_capture_ctest": 34,
+    "legacy_structure_ctest": 2,
+    "qt_cases": 11,
+    "qt_skipped": 0,
+    "full_application_build": true
   }
 }

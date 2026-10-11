@@ -1280,3 +1280,72 @@ identify the pinned GPA 2025 R1 player hash. That oracle remains the development
 private-ABI runner, not GUI/adapter acceptance. No Replay/shared-format code
 changed; golden evidence retains its previous scope. This batch does not rerun
 GF2 or establish query compatibility; accepted GF2 captures remain zero.
+
+The committed whole-subresource revision `c7512da` also passes a fresh source
+archive build in `artifacts/capture-update-source-build`: six configure/build/
+test/package/control steps, 32 CTests and 75 packaged captures in fifteen launches.
+The package runs with system-only PATH, does not discover Qt, and its loaded
+module inventories contain no GPA, Qt, RenderDoc or Python. This evidence is
+specific to that revision and does not cover the boxed extension below.
+
+## Boxed CPU updates
+
+The Capture-owned model now stores destination box coordinates by value and
+copies only the logical source region before forwarding `UpdateSubresource` or
+zero-flag `UpdateSubresource1`. Buffer coordinates use bytes; texture coordinates
+use texels. The encoder emits the box-presence byte and six coordinates in the
+existing Update record, retaining original pitches and API version. Initial GPU
+contents are captured separately, so untouched destination regions survive.
+Runtime and encoder share only Capture's layout validation, with no new Core,
+Replay, Qt or original GPA dependency.
+
+Validation checks the selected mip, array subresource, nonempty bounds, complete
+structured-buffer elements and BC block alignment before reading source bytes.
+The original empty-box no-op is forwarded but remains an explicit capture
+refusal. Boxed constant buffers, bit/packed formats, planar formats and nonzero
+copy flags are also refused. The existing DEFAULT/non-depth/single-sample and
+immediate-context restrictions remain. Deferred-context source-offset behavior
+is not claimed; see Microsoft's
+[UpdateSubresource contract](https://learn.microsoft.com/en-us/windows/win32/api/d3d11/nf-d3d11-id3d11devicecontext-updatesubresource).
+
+WARP and hardware fixtures exercise nonzero buffer, 1D/2D/3D origins, overlapping
+updates, padded rows/slices, reused caller box/data memory and unchanged exterior
+bytes. BC1 additionally updates mip 1 of array layer 1 and checks every compressed
+block in every subresource. An initial test used an unaligned 6x6 mip edge; both
+native drivers left it unchanged and the DX11 debug layer reported invalid block
+coordinates. The validator now rejects that case, and the execution fixture uses
+aligned 8x8 mip regions. Original failure/debug-layer logs are retained in
+`artifacts/capture-box-bc-*`; the failed case is not counted as supported.
+
+The serial direct matrix in `artifacts/capture-box-update-final-interop` contains
+twenty files and 380 checks, covering both APIs across four resource dimensions
+plus BC1 mip/array storage. Exact CPU images, executed event counts, DXBC exports,
+the pinned original-player hash and dead source-object lifetimes are checked.
+Ten negative variants remove Update while retaining the positive reference image;
+both players then execute the initial yellow contents. Nine malformed boxed
+encoder models refuse publication with no final or temporary files. The new
+structured-buffer negative initially changed only its descriptor and hit the
+earlier descriptor/shape consistency guard; synchronizing its shape metadata
+makes the test exercise the intended element-alignment refusal. Its failed
+regression log is retained.
+
+The actual startup-injection target now includes boxed texture updates for both
+APIs. Seventeen launches produce 85 files, including ten boxed-update files,
+and pass 545 serial dual-player/CPU/module checks in
+`artifacts/capture-box-injected-interop`. Repeated capture, busy/cancel, empty-box
+refusal and retry, disconnect and normal target exit pass. Loaded target modules
+contain no GPA, Qt, RenderDoc or Python. All 105 direct and injected original-player
+reports identify the pinned GPA 2025 R1 kernel.
+
+The complete application builds successfully. Regression covers all 36
+capture-only suites (35 in the final sweep plus the corrected encoder case's
+targeted rerun), 34 full-profile capture suites and two existing structure suites.
+The Qt suite reports eleven passes without skips. Summary/hashes and retained
+failure paths are in `artifacts/capture-box-update-validation.json`. Replay and
+shared-format sources are unchanged, so existing golden-frame evidence is not
+reclassified or replaced by these tests.
+
+This remains scoped compatibility evidence from the development original-player
+private-ABI runner, not original GUI or adapter acceptance. Other BC formats have
+layout handling but no new format-by-format dual-player evidence. General EVENT
+serialization remains guarded and accepted GF2 frames remain **0/6**.

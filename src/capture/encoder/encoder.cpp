@@ -216,6 +216,7 @@ public:
         uint64_t sequence=0;
         for(const auto& command:frame_.commands){
             require(command.sequence==sequence++,"Encoder command sequence mismatch");const auto& w=command.words;Payload p;uint16_t type=0;
+            require(command.kind==CommandKind::update_subresource || !command.update_box,"Encoder box attached to non-Update command");
             if(command.kind==CommandKind::map || command.kind==CommandKind::unmap){
                 require(command.bindings.context==context_ && command.bindings.device==device_,"Encoder Map context mismatch");
                 require(command.completed && command.operand,"Encoder incomplete Map/Unmap");const auto resource=resource_ref(command.operand);
@@ -246,12 +247,14 @@ public:
                 require(command.completed && command.operand && w[3]<=1 && !w[4],"Encoder incomplete or invalid Update");
                 require(!command.bindings.predicate,"Encoder predicated Update is unsupported");
                 const auto destination=resource_ref(command.operand);const auto& resource=frame_.initial_resources.at(command.operand);
-                const auto layout=update_layout(resource.shape,frame_.objects.at(command.operand).descriptor,w[0]);
+                const auto layout=update_layout(resource.shape,frame_.objects.at(command.operand).descriptor,w[0],command.update_box?&*command.update_box:nullptr);
                 require(command.data.size()==layout.slice_bytes*layout.depth && command.before_data.empty(),"Encoder Update payload size mismatch");
                 require(layout.rows<=1 || w[1]>=layout.row_bytes,"Encoder Update row pitch too small");
                 require(layout.depth<=1 || uint64_t(w[2])>=uint64_t(layout.rows-1)*w[1]+layout.row_bytes,"Encoder Update depth pitch too small");
                 const auto data=blob(command.data);Payload payload;
-                payload.q({0,1,destination}).value(w[0]).value<uint8_t>(0).value(data).u({w[1],w[2]});
+                payload.q({0,1,destination}).value(w[0]).value<uint8_t>(command.update_box?1:0);
+                if(command.update_box)for(auto coordinate:*command.update_box)payload.value(coordinate);
+                payload.value(data).u({w[1],w[2]});
                 if(w[3])payload.value(w[4]);add(7,w[3]?0x255:0x247,std::move(payload));continue;
             }
             if(command.kind==CommandKind::copy_resource){
