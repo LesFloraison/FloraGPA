@@ -217,6 +217,15 @@ public:
                 add(7,w[1]==D3D11_MAP_READ?0x34ec:0x246,Payload{}.q({0,1}).value(command.result).value(resource).u({w[0],w[1],w[2]}).value(data));continue;
             }
             require(mappings.empty(),"Encoder GPU execution with open Map unsupported");
+            if(command.kind==CommandKind::copy_resource){
+                require(command.bindings.context==context_ && command.bindings.device==device_,"Encoder copy context mismatch");
+                require(!command.bindings.predicate,"Encoder predicated copy is unsupported");
+                require(command.operand && command.source && command.operand!=command.source,"Encoder copy operands are missing or alias");
+                const auto destination=resource_ref(command.operand),source=resource_ref(command.source);
+                const auto& d=frame_.initial_resources.at(command.operand);
+                validate_copy_resource(d.shape,frame_.objects.at(command.operand).descriptor,frame_.initial_resources.at(command.source).shape);
+                add(7,0x3e,Payload{}.q({0,1,destination,source}));continue;
+            }
             switch(command.kind){
             case CommandKind::draw:type=0x37;break;case CommandKind::draw_indexed:type=0x39;break;
             case CommandKind::draw_instanced:type=0x3c;break;case CommandKind::draw_indexed_instanced:type=0x3a;break;case CommandKind::dispatch:type=0x35;break;

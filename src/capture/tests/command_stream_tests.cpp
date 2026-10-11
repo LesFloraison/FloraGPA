@@ -128,7 +128,7 @@ void failures(bool hardware){
     Fixture f(hardware);auto run=[&](auto action,const char* reason,RecordingOptions options=RecordingOptions{}){
         auto recording=begin_recording(f.context.Get(),options);action(recording);auto frame=recording->finish();rejects([&]{frame.require_complete();},reason);
     };
-    run([&](auto){f.context->CopyResource(f.destination.Get(),f.source.Get());},"CopyResource");
+    run([&](auto){f.context->CopySubresourceRegion(f.destination.Get(),0,0,0,0,f.source.Get(),0,nullptr);},"CopySubresourceRegion");
     const auto copied=read(unwrap(f.device.Get()),unwrap(f.context.Get()),unwrap(f.destination.Get()));const UINT expected[]{17,17,17,17};require(!memcmp(copied.data(),expected,sizeof(expected)),"Rejected recorder suppressed native CopyResource");
     run([&](auto recording){recording->cancel();f.context->Draw(3,0);},"cancelled");
     RecordingOptions limit;limit.byte_limit=1;run([&](auto){f.context->Draw(3,0);},"byte limit",limit);

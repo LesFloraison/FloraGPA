@@ -182,7 +182,7 @@ Json object_status() {
     {
         std::lock_guard lock(r.mutex);
         result = {{"created",r.created}, {"destroyed",r.destroyed}, {"active",r.native.size()},
-            {"interface_gaps",r.gaps}, {"last_gap",r.last_gap}, {"lost_diagnostics",lost_diagnostics.load()}, {"recording_profile","immediate Clear/Draw/Dispatch/Map/Unmap; unsupported GPU calls reject"}};
+            {"interface_gaps",r.gaps}, {"last_gap",r.last_gap}, {"lost_diagnostics",lost_diagnostics.load()}, {"recording_profile","immediate Clear/Draw/Dispatch/Map/Unmap/CopyResource; unsupported GPU calls reject"}};
     }
     result["metadata"] = metadata_status(); return result;
 }

@@ -9,7 +9,7 @@
     "B": "native launch/control and capture-only package validated",
     "C": "partial: persistent native identity, descriptor graph and owned buffer/texture/shader/input-layout/SO creation metadata validated; other creation paths pending",
     "D": "partial: startup-injected blit/flip/tearing capture with dynamic mapped constants; dual-player execution verified on self-owned targets",
-    "E": "partial: Map/Unmap and initial resources validated; GF2 explicitly rejects EVENT GetData completion; Query, Update/Copy, deferred and hidden-state coverage pending",
+    "E": "partial: Map/Unmap, initial resources and same-format whole CopyResource validated; GF2 explicitly rejects EVENT GetData; Query, Update/region copies, deferred and hidden-state coverage pending",
     "F": "partial: native CLI and asynchronous Qt capture/cancel/disconnect/completed-file opening tested; full profile/deployment acceptance pending",
     "G": "pending: no six-frame GF2 or original GUI capture acceptance"
   },
@@ -26,8 +26,8 @@
     "existing_golden_controls": 4,
     "native_authored_interop_checks": 22,
     "source_build_steps": 6,
-    "capture_only_ctest": 22,
-    "full_profile_capture_ctest": 20,
+    "capture_only_ctest": 25,
+    "full_profile_capture_ctest": 23,
     "native_object_lifetimes": 36,
     "additional_existing_structure_ctest": 2,
     "observed_model_interop_checks": 94,
@@ -35,7 +35,8 @@
     "startup_injected_interop_checks": 417,
     "startup_injected_dual_player_frames": 65,
     "packaged_live_frames": 65,
-    "mapped_frame_interop_checks": 97
+    "mapped_frame_interop_checks": 97,
+    "copy_frame_interop_checks": 68
   },
   "source_build_commit": "e804b955c747d264348d7396b0f91004a5f81730",
   "local_evidence_sha256": {
@@ -200,7 +201,19 @@
     "capture-query-gf2/request.json": "61485712d48b6c18d8ac4f956bf88a49004fd7b4d0b474e7df39ec65afdf44e4",
     "capture-query-gf2/session.json": "132e4d901666797e18c88b1fa2f7264bcb3e5ffb3d9bf5087ba507beec78ae36",
     "capture-query-gf2/status-after.json": "9e0dd30cd4aa13deb192b76e267d1f28b94b9072a056304a13b4a56aa5c71943",
-    "capture-query-gf2/status-before.json": "290146824db68267dd9230c9c3f397f536408ece1477e095238c6425c296a796"
+    "capture-query-gf2/status-before.json": "290146824db68267dd9230c9c3f397f536408ece1477e095238c6425c296a796",
+    "capture-copy-build.txt": "2097e84e3698e2e0f3769973f603f9edcfcfe8e11ec31f3c75e9ce2fecabbf95",
+    "capture-copy-final-build.txt": "ff6e83677d4d0087e066c588a2e4814dcd94fb6332192e93a28c514d218d0bbb",
+    "capture-copy-full-build.txt": "3230fb367fb23362d539b386a5ff0b03cc710e4e795791b072d7b65b95c540db",
+    "capture-copy-focused-tests.txt": "645d76d57783ea14fc79c293700623ba5c6df5da324e2e2ec43c8be7b0f52dd8",
+    "capture-copy-all-tests.txt": "5856102d0c248cd6199562fe7ae199be9403d2a80387d8c6326f83df5456fdda",
+    "capture-copy-full-tests.txt": "2780110bc357ec3b482d8d980d9928214b01c27f4ee06c2ae7b32dbf00fdd468",
+    "capture-copy-encoder-fixed.txt": "11400f8bb962c17d0e6bacaf1bd7c672cb3a55e59d56684822c158adbec5e3fd",
+    "capture-copy-encoder-final.txt": "9a16e11e346bc33fc463cf8c5c16abcaed6d8608cff04f5fba7d9752a0475209",
+    "capture-copy-encoder-full-final.txt": "7c2584ef61235d401170347b0d7220b2707b5901cf371b4f07dfd6d08e954a9e",
+    "capture-copy-ui.txt": "2f8c0048b636b6eb0467d612d411acd617a3c2481b965b60d4873400982f5e5f",
+    "capture-copy-final-interop/validation.json": "426547b2c53f5c15c18ddad0388d41f8879df60e3a0d834f2341d5d4c5f3f57a",
+    "capture-copy-final-interop/inputs.json": "9d08d730ff5f0f549422d236846c09c8f04fd4f79144c33eb2b41c98723778fb"
   },
   "limitations": [
     "GPA original-player checks use a development-only private ABI harness.",
@@ -422,5 +435,33 @@
     "gf2_published_frames": 0,
     "gf2_normal_exit": true,
     "query_serialization_verified": false
+  },
+  "whole_resource_copy": {
+    "status": "partial",
+    "cpu_owned_two_operand_ids": true,
+    "wire": "7/0x3e: parent, context, destination, source (four QWORDs)",
+    "native_backends": [
+      "WARP",
+      "hardware"
+    ],
+    "native_storage": [
+      "buffer",
+      "Texture1D array/mips",
+      "Texture2D array/mips",
+      "Texture3D depth/mips"
+    ],
+    "dual_player_files": 4,
+    "dual_player_checks": 68,
+    "negative_execution_controls": 2,
+    "encoder_rejection_cases": 8,
+    "source_gpu_objects_dead_before_encoding": true,
+    "pending": [
+      "format reinterpretation",
+      "MSAA",
+      "CopySubresourceRegion",
+      "CopyStructureCount",
+      "ResolveSubresource",
+      "startup-injected copy workload and original GUI acceptance"
+    ]
   }
 }

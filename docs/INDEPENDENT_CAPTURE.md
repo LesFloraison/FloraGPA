@@ -889,3 +889,51 @@ pass serially, including eleven Qt cases with no failures or skips. Logs and
 input hashes are registered in `capture-development-baseline.json`. Prior
 dual-player and committed-source package results retain their original commit
 scope; this guard-only batch does not claim a new dual-player/package run.
+
+## Whole-resource copies
+
+Generated proxies now record `CopyResource` with two persistent object IDs.
+The recorder retains both operands, including unbound resources, snapshots
+their initial GPU contents before the first recorded use, and preserves call
+order alongside Draw, Clear and Map/Unmap. The frozen model contains no native
+pointer. The encoder emits the verified legacy `7/0x3e` envelope containing
+link=0, context, destination and source. Capture still does not depend on
+Replay/Core or load the original GPA runtime.
+
+This increment supports matching-format, matching-shape, single-sample whole
+copies. Shape mismatch, missing/aliased operands, another device, an immutable
+destination and unsupported predication reject. Existing mapping, thread,
+deferred-context and hidden-state guards continue to apply. Format-family
+reinterpretation, MSAA, CopySubresourceRegion, CopyStructureCount and Resolve
+remain pending; a whole-copy implementation does not establish those paths.
+The [Microsoft CopyResource contract](https://learn.microsoft.com/en-us/windows/win32/api/d3d11/nf-d3d11-id3d11devicecontext-copyresource)
+permits some of those broader cases, so the explicit format/MSAA rejections
+describe the current capture scope, not an API prohibition.
+
+The WARP/hardware fixtures copy buffers and RGBA8 textures after their source
+has changed from its creation data, then change it again between two copies
+and Draws. Exact green/red output and the preserved blue destination initial
+bytes prove ordering and initial-data capture. Separate unbound-resource
+tests compare all subresource bytes of 1D/2D arrays and 3D textures with three
+mips. These latter storage tests are native tests, not dual-player texture
+dimension acceptance.
+
+`tools/validate_capture_copies.py` produces four scoped COM-observed files:
+buffer and texture cases plus controls that remove only CopyResource while
+retaining the captured final reference. FloraGPA and the original private-ABI
+player execute both positives to exact green/red pixels and both controls to
+exact blue. The 68 checks include bounded independent copy-record/reference
+parsing, executed event counts, shader bytecode/disassembly, resource inventory
+and destruction of all source GPU objects before encoding. Evidence is
+`artifacts/capture-copy-final-interop`; original GUI and startup-injected Copy
+workload acceptance are not claimed by this fixture.
+
+The regression covers 25 capture-only and 23 full-profile capture suites,
+including eleven Qt cases. Eight encoder negatives verify located rejection
+and absence of published/temporary files. The initial negative tests selected
+an earlier missing-context/initial-resource guard; the corrected inputs now
+exercise their intended copy-context and reference checks. Initial failures
+and passing targeted reruns are retained in the baseline. No Replay/shared
+format source changed, so existing golden frames were not rerun for this
+increment. Query completion remains explicitly unsupported; GF2 acceptance
+is still zero and this batch does not repeat the game diagnostic.

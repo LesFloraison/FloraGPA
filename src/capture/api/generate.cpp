@@ -98,7 +98,7 @@ void method(std::ostream& out, const std::string& iface, const Json& m) {
         << "if (!target) throw std::runtime_error(\"Native interface disappeared\");\n"
         << "NativeCall internal;\nSetLastError(before);\n";
     if (iface.starts_with("ID3D11DeviceContext")) {
-        std::string kind="unsupported",words="{}",operand="nullptr",floats="nullptr",integers="nullptr";
+        std::string kind="unsupported",words="{}",operand="nullptr",floats="nullptr",integers="nullptr",source="nullptr";
         const std::map<std::string,std::string> draws{{"Draw","draw"},{"DrawIndexed","draw_indexed"},
             {"DrawInstanced","draw_instanced"},{"DrawIndexedInstanced","draw_indexed_instanced"},{"Dispatch","dispatch"}};
         if (draws.contains(name)) {
@@ -111,6 +111,7 @@ void method(std::ostream& out, const std::string& iface, const Json& m) {
         else if(name=="ClearUnorderedAccessViewUint") {kind="clear_uav_uint";operand="pUnorderedAccessView";integers="Values";}
         else if(name=="ClearUnorderedAccessViewFloat") {kind="clear_uav_float";operand="pUnorderedAccessView";floats="Values";}
         else if(name=="Map") {kind="map";operand="pResource";words="{Subresource,UINT(MapType),MapFlags}";}
+        else if(name=="CopyResource") {kind="copy_resource";operand="pDstResource";source="pSrcResource";}
         // GetData observes completion and can order later CPU writes. It is not
         // a passive state getter, even when the query End preceded this frame.
         else if(name=="Begin" || name=="End" || name=="GetData") {
@@ -121,7 +122,7 @@ void method(std::ostream& out, const std::string& iface, const Json& m) {
         else if(name=="ClearState" || name=="SetPredication" || name=="SetResourceMinLOD" ||
             std::regex_match(name,std::regex("(VS|HS|DS|GS|PS|CS|IA|RS|OM|SO)Set.*")))kind="binding";
         if(name=="Unmap")out << "record_unmap(this, pResource, Subresource);\n";
-        else out << "record_context_call(this, \"" << api << "\", CommandKind::" << kind << ", " << words << ", " << operand << ", " << floats << ", " << integers << ");\n";
+        else out << "record_context_call(this, \"" << api << "\", CommandKind::" << kind << ", " << words << ", " << operand << ", " << floats << ", " << integers << ", " << source << ");\n";
     }
     else if(name=="WriteToSubresource" || name=="Map" || name=="Unmap" || name=="GetDC" || name=="ReleaseDC" ||
         name.starts_with("OfferResources") || name.starts_with("ReclaimResources") || name=="Trim" ||

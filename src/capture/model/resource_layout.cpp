@@ -4,6 +4,24 @@
 #include <limits>
 #include <stdexcept>
 namespace flora::capture {
+void validate_copy_resource(const ResourceShape& d,std::span<const uint8_t> descriptor,const ResourceShape& s){
+    if(d.dimension!=s.dimension || d.width!=s.width || d.height!=s.height || d.depth!=s.depth ||
+       d.mip_levels!=s.mip_levels || d.array_size!=s.array_size || d.samples!=s.samples)
+        throw std::runtime_error("CopyResource shapes differ");
+    if(d.format!=s.format)throw std::runtime_error("CopyResource format reinterpretation is not verified");
+    if(d.samples!=1)throw std::runtime_error("CopyResource MSAA capture is not verified");
+    size_t offset=0;
+    switch(d.dimension){
+    case D3D11_RESOURCE_DIMENSION_BUFFER:offset=offsetof(D3D11_BUFFER_DESC,Usage);break;
+    case D3D11_RESOURCE_DIMENSION_TEXTURE1D:offset=offsetof(D3D11_TEXTURE1D_DESC,Usage);break;
+    case D3D11_RESOURCE_DIMENSION_TEXTURE2D:offset=offsetof(D3D11_TEXTURE2D_DESC,Usage);break;
+    case D3D11_RESOURCE_DIMENSION_TEXTURE3D:offset=offsetof(D3D11_TEXTURE3D_DESC,Usage);break;
+    default:throw std::runtime_error("CopyResource operand is not a buffer or texture");
+    }
+    if(descriptor.size()<offset+sizeof(D3D11_USAGE))throw std::runtime_error("CopyResource descriptor is truncated");
+    D3D11_USAGE usage{};memcpy(&usage,descriptor.data()+offset,sizeof(usage));
+    if(usage==D3D11_USAGE_IMMUTABLE)throw std::runtime_error("CopyResource destination is immutable");
+}
 namespace {
 size_t multiply(size_t a,size_t b){if(b && a>SIZE_MAX/b)throw std::runtime_error("Resource size overflow");return a*b;}
 size_t add(size_t a,size_t b){if(a>SIZE_MAX-b)throw std::runtime_error("Resource size overflow");return a+b;}

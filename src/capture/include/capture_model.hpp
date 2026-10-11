@@ -63,7 +63,7 @@ struct PipelineBindings {
     std::map<ObjectId,float> resource_min_lod;
 };
 enum class CommandKind { unsupported, read, binding, draw, draw_indexed, draw_instanced,
-    draw_indexed_instanced, dispatch, clear_rtv, clear_dsv, clear_uav_uint, clear_uav_float, map, unmap };
+    draw_indexed_instanced, dispatch, clear_rtv, clear_dsv, clear_uav_uint, clear_uav_float, map, unmap, copy_resource };
 struct RecordedCommand {
     CommandKind kind=CommandKind::unsupported;
     std::string api;
@@ -71,6 +71,7 @@ struct RecordedCommand {
     std::array<uint32_t,5> words{};
     std::array<float,4> floats{};
     ObjectId operand=0;
+    ObjectId source=0; // CopyResource: operand is destination; no native pointer survives.
     // Map uses words {subresource, type, flags}; bytes own the completed CPU write.
     int32_t result=0;
     bool completed=false;
