@@ -3,6 +3,7 @@
 #include "protocol.hpp"
 #include "swap_chain.hpp"
 #include "factory.hpp"
+#include "objects.hpp"
 #include <d3d11.h>
 #include <detours.h>
 #include <sddl.h>
@@ -28,17 +29,23 @@ void record_creation(HRESULT hr,D3D_FEATURE_LEVEL* selected){
 HRESULT WINAPI create_device(IDXGIAdapter* adapter,D3D_DRIVER_TYPE type,HMODULE software,UINT flags,
     const D3D_FEATURE_LEVEL* levels,UINT count,UINT sdk,ID3D11Device** device,D3D_FEATURE_LEVEL* selected,
     ID3D11DeviceContext** context){
-    ++creation_depth;
-    const HRESULT result=real_create(adapter,type,software,flags,levels,count,sdk,device,selected,context);
-    const DWORD error=GetLastError();record_creation(result,selected);--creation_depth;SetLastError(error);return result;
+    if(native_call_depth)return real_create(adapter,type,software,flags,levels,count,sdk,device,selected,context);
+    ++creation_depth; NativeCall internal;
+    const HRESULT result=real_create(unwrap(adapter),type,software,flags,levels,count,sdk,device,selected,context);
+    const DWORD error=GetLastError();record_creation(result,selected);
+    if(SUCCEEDED(result)){wrap_object(device,"D3D11CreateDevice");wrap_object(context,"D3D11CreateDevice");}
+    --creation_depth;SetLastError(error);return result;
 }
 HRESULT WINAPI create_swap(IDXGIAdapter* adapter,D3D_DRIVER_TYPE type,HMODULE software,UINT flags,
     const D3D_FEATURE_LEVEL* levels,UINT count,UINT sdk,const DXGI_SWAP_CHAIN_DESC* desc,IDXGISwapChain** swap,
     ID3D11Device** device,D3D_FEATURE_LEVEL* selected,ID3D11DeviceContext** context){
-    ++creation_depth;
-    const HRESULT result=real_create_swap(adapter,type,software,flags,levels,count,sdk,desc,swap,device,selected,context);
+    if(native_call_depth)return real_create_swap(adapter,type,software,flags,levels,count,sdk,desc,swap,device,selected,context);
+    ++creation_depth; NativeCall internal;
+    const HRESULT result=real_create_swap(unwrap(adapter),type,software,flags,levels,count,sdk,desc,swap,device,selected,context);
     const DWORD error=GetLastError();record_creation(result,selected);
-    if(SUCCEEDED(result) && creation_depth==1)wrap_swap_chain(swap);
+    if(SUCCEEDED(result) && creation_depth==1){
+        wrap_swap_chain(swap);wrap_object(device,"D3D11CreateDeviceAndSwapChain");wrap_object(context,"D3D11CreateDeviceAndSwapChain");
+    }
     --creation_depth;SetLastError(error);return result;
 }
 struct Security {
@@ -72,6 +79,7 @@ Json response(const Json& message){
         result["ok"]=true;
         result["swap_chains"]=swap_chain_status();
         result["factories"]=factory_status();
+        result["objects"]=object_status();
         HMODULE modules[1024]{};DWORD needed=0;
         if(K32EnumProcessModules(GetCurrentProcess(),modules,sizeof(modules),&needed) && needed<=sizeof(modules)){
             result["loaded_modules"]=Json::array();

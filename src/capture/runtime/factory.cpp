@@ -1,5 +1,6 @@
 #include "factory.hpp"
 #include "swap_chain.hpp"
+#include "objects.hpp"
 #include <detours.h>
 #include <atomic>
 #include <map>
@@ -25,8 +26,8 @@ bool known(REFIID iid) {
            iid == __uuidof(IDXGIFactory4) || iid == __uuidof(IDXGIFactory5) ||
            iid == __uuidof(IDXGIFactory6) || iid == __uuidof(IDXGIFactory7);
 }
-template<class T> HRESULT observed(HRESULT hr, T **output) {
-    if (SUCCEEDED(hr) && output && *output) ++escapes;
+template<class T> HRESULT observed(HRESULT hr, T **output, const char* api) {
+    if (SUCCEEDED(hr)) wrap_object(output, api);
     return hr;
 }
 template<class T> HRESULT wrapped(HRESULT hr, T **output) {
@@ -73,7 +74,7 @@ class Factory final : public IDXGIFactory7 {
         if (SUCCEEDED(hr) && output && *output) {
             if (known(iid)) {
                 AddRef(); static_cast<IUnknown *>(*output)->Release(); *output = static_cast<IDXGIFactory7 *>(this);
-            } else ++escapes;
+            } else { ++escapes; object_gap("IDXGIFactory::QueryInterface", iid, "Interface forwarding is not implemented"); }
         }
         SetLastError(error); return hr;
     }
@@ -90,28 +91,33 @@ class Factory final : public IDXGIFactory7 {
         if (destroy) delete this; SetLastError(after); return count;
     }
     HRESULT STDMETHODCALLTYPE CreateSwapChain(IUnknown *device, DXGI_SWAP_CHAIN_DESC *desc, IDXGISwapChain **out) override {
-        return wrapped(real_->CreateSwapChain(device, desc, out), out);
+        NativeCall internal;
+        return wrapped(real_->CreateSwapChain(unwrap(device), desc, out), out);
     }
     HRESULT STDMETHODCALLTYPE CreateSwapChainForHwnd(IUnknown *device, HWND window, const DXGI_SWAP_CHAIN_DESC1 *desc,
         const DXGI_SWAP_CHAIN_FULLSCREEN_DESC *fullscreen, IDXGIOutput *restrictOutput, IDXGISwapChain1 **out) override {
-        return wrapped(extended<IDXGIFactory2>([&](auto *p) { return p->CreateSwapChainForHwnd(device, window, desc, fullscreen, restrictOutput, out); }), out);
+        NativeCall internal;
+        return wrapped(extended<IDXGIFactory2>([&](auto *p) { return p->CreateSwapChainForHwnd(unwrap(device), window, desc, fullscreen, unwrap(restrictOutput), out); }), out);
     }
     HRESULT STDMETHODCALLTYPE CreateSwapChainForCoreWindow(IUnknown *device, IUnknown *window, const DXGI_SWAP_CHAIN_DESC1 *desc,
         IDXGIOutput *restrictOutput, IDXGISwapChain1 **out) override {
-        return wrapped(extended<IDXGIFactory2>([&](auto *p) { return p->CreateSwapChainForCoreWindow(device, window, desc, restrictOutput, out); }), out);
+        NativeCall internal;
+        return wrapped(extended<IDXGIFactory2>([&](auto *p) { return p->CreateSwapChainForCoreWindow(unwrap(device), window, desc, unwrap(restrictOutput), out); }), out);
     }
     HRESULT STDMETHODCALLTYPE CreateSwapChainForComposition(IUnknown *device, const DXGI_SWAP_CHAIN_DESC1 *desc,
         IDXGIOutput *restrictOutput, IDXGISwapChain1 **out) override {
-        return wrapped(extended<IDXGIFactory2>([&](auto *p) { return p->CreateSwapChainForComposition(device, desc, restrictOutput, out); }), out);
+        NativeCall internal;
+        return wrapped(extended<IDXGIFactory2>([&](auto *p) { return p->CreateSwapChainForComposition(unwrap(device), desc, unwrap(restrictOutput), out); }), out);
     }
 #define BASE(result,name,args,call) result STDMETHODCALLTYPE name args override { return real_->name call; }
 #define EXT(v,result,name,args,call) result STDMETHODCALLTYPE name args override { return extended<IDXGIFactory##v>([&](auto *p) { return p->name call; }); }
-#define ESCBASE(name,args,call,out) HRESULT STDMETHODCALLTYPE name args override { return observed(real_->name call, out); }
-#define ESCEXT(v,name,args,call,out) HRESULT STDMETHODCALLTYPE name args override { return observed(extended<IDXGIFactory##v>([&](auto *p) { return p->name call; }),out); }
+#define ESCBASE(name,args,call,out) HRESULT STDMETHODCALLTYPE name args override { return observed(real_->name call, out, "IDXGIFactory::" #name); }
+#define ESCEXT(v,name,args,call,out) HRESULT STDMETHODCALLTYPE name args override { return observed(extended<IDXGIFactory##v>([&](auto *p) { return p->name call; }),out,"IDXGIFactory::" #name); }
+#define IIDEXT(v,name,args,call) HRESULT STDMETHODCALLTYPE name args override { auto hr = extended<IDXGIFactory##v>([&](auto *p) { return p->name call; }); if(SUCCEEDED(hr)) wrap_object(iid,out,"IDXGIFactory::" #name); return hr; }
     BASE(HRESULT,SetPrivateData,(REFGUID name,UINT size,const void *data),(name,size,data))
     BASE(HRESULT,SetPrivateDataInterface,(REFGUID name,const IUnknown *object),(name,object))
     BASE(HRESULT,GetPrivateData,(REFGUID name,UINT *size,void *data),(name,size,data))
-    ESCBASE(GetParent,(REFIID iid,void **out),(iid,out),out)
+    HRESULT STDMETHODCALLTYPE GetParent(REFIID iid, void** out) override { auto hr=real_->GetParent(iid,out);if(SUCCEEDED(hr))wrap_object(iid,out,"IDXGIFactory::GetParent");return hr; }
     ESCBASE(EnumAdapters,(UINT index,IDXGIAdapter **out),(index,out),out)
     ESCBASE(CreateSoftwareAdapter,(HMODULE module,IDXGIAdapter **out),(module,out),out)
     BASE(HRESULT,MakeWindowAssociation,(HWND window,UINT flags),(window,flags))
@@ -127,32 +133,36 @@ class Factory final : public IDXGIFactory7 {
     EXT(2,HRESULT,RegisterOcclusionStatusEvent,(HANDLE event,DWORD *cookie),(event,cookie))
     EXT(2,void,UnregisterOcclusionStatus,(DWORD cookie),(cookie))
     EXT(3,UINT,GetCreationFlags,(),())
-    ESCEXT(4,EnumAdapterByLuid,(LUID luid,REFIID iid,void **out),(luid,iid,out),out)
-    ESCEXT(4,EnumWarpAdapter,(REFIID iid,void **out),(iid,out),out)
+    IIDEXT(4,EnumAdapterByLuid,(LUID luid,REFIID iid,void **out),(luid,iid,out))
+    IIDEXT(4,EnumWarpAdapter,(REFIID iid,void **out),(iid,out))
     EXT(5,HRESULT,CheckFeatureSupport,(DXGI_FEATURE feature,void *data,UINT size),(feature,data,size))
-    ESCEXT(6,EnumAdapterByGpuPreference,(UINT index,DXGI_GPU_PREFERENCE pref,REFIID iid,void **out),(index,pref,iid,out),out)
+    IIDEXT(6,EnumAdapterByGpuPreference,(UINT index,DXGI_GPU_PREFERENCE pref,REFIID iid,void **out),(index,pref,iid,out))
     EXT(7,HRESULT,RegisterAdaptersChangedEvent,(HANDLE event,DWORD *cookie),(event,cookie))
     EXT(7,HRESULT,UnregisterAdaptersChangedEvent,(DWORD cookie),(cookie))
 #undef BASE
 #undef EXT
 #undef ESCBASE
 #undef ESCEXT
+#undef IIDEXT
 };
 decltype(&CreateDXGIFactory) original0 = CreateDXGIFactory;
 decltype(&CreateDXGIFactory1) original1 = CreateDXGIFactory1;
 decltype(&CreateDXGIFactory2) original2 = CreateDXGIFactory2;
 thread_local unsigned creationDepth = 0;
 HRESULT WINAPI create0(REFIID iid, void **out) {
+    if(native_call_depth)return original0(iid,out);
     ++creationDepth; auto hr = original0(iid, out);
     if (--creationDepth == 0 && SUCCEEDED(hr)) wrap_factory(iid, out);
     return hr;
 }
 HRESULT WINAPI create1(REFIID iid, void **out) {
+    if(native_call_depth)return original1(iid,out);
     ++creationDepth; auto hr = original1(iid, out);
     if (--creationDepth == 0 && SUCCEEDED(hr)) wrap_factory(iid, out);
     return hr;
 }
 HRESULT WINAPI create2(UINT flags, REFIID iid, void **out) {
+    if(native_call_depth)return original2(flags,iid,out);
     ++creationDepth; auto hr = original2(flags, iid, out);
     if (--creationDepth == 0 && SUCCEEDED(hr)) wrap_factory(iid, out);
     return hr;
@@ -160,7 +170,7 @@ HRESULT WINAPI create2(UINT flags, REFIID iid, void **out) {
 }
 void wrap_factory(REFIID iid, void **out) noexcept {
     if (!out || !*out) return;
-    if (!known(iid)) { ++escapes; return; }
+    if (!known(iid)) { ++escapes; object_gap("CreateDXGIFactory/GetParent",iid,"Factory interface forwarding is not implemented"); return; }
     const DWORD error = GetLastError(); IDXGIFactory *base = nullptr; IUnknown *identity = nullptr;
     try {
         auto &r = registry();

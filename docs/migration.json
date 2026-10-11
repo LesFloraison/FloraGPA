@@ -3872,16 +3872,18 @@
       "Full Qt GUI and Worker build; capture_ui has 10 passes, no failures/skips, including native launch/status/refusal/cancel/disconnect.",
       "Existing view_edits mapping/overlay lifetime regression passed.",
       "Native authored Clear/Draw/negative fixtures pass 22 dual-player/CPU checks; this is a format oracle, not live capture acceptance.",
-      "docs/capture-development-baseline.json: committed-source bootstrap build/test/package passes; full frame capture remains unavailable."
+      "docs/capture-development-baseline.json: committed-source bootstrap build/test/package passes; full frame capture remains unavailable.",
+      "Native COM forwarding: seven capture-only CTests, five full-profile capture CTests, 24 factory checks, 20 swap checks, exact Draw/Dispatch/deferred oracle, 36 closed wrapper lifetimes, and system-PATH packaged object test passed. GF2 launch/Present diagnostic passed; zero accepted captures."
     ],
     "pending": [
-      "Complete Device/Context/resource tracking",
+      "Persistent native resource lifetimes and creation metadata; remaining interface gaps",
       "Live command and initial-state serialization",
       "Dual-player acceptance of generated live captures",
       "Two GF2 launches with three frames each across two scenes"
     ],
     "note": "New capture work is separate from legacy Python module migration; no full parity claim.",
     "bootstrap": "native x64 launch/control and Factory0-7/SwapChain0-4 wrappers validated",
-    "qt_controls": "async CLI composition; live capture and open-result controls remain unavailable"
+    "qt_controls": "async CLI composition; live capture and open-result controls remain unavailable",
+    "object_forwarding": "37 families / 78 declared public interfaces, native C++ build generator, canonical IUnknown and typed input/output forwarding; not command recording"
   }
 }

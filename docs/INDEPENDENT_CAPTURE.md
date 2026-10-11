@@ -54,15 +54,47 @@ hooks resident until normal target exit.
 CreateDXGIFactory/1/2 now wrap Factory through Factory7 and interpose legacy,
 HWND and composition swap-chain creation. Swap-chain GetParent preserves the
 factory wrapper identity. CoreWindow creation forwards through the same wrapper
-but has not been exercised by a real CoreWindow oracle. Adapter, Device, Context
-and resource interfaces remain incomplete; unknown interface escape never enables
-frame capture. The runtime reports swap-chain API/IID escape diagnostics.
+but has not been exercised by a real CoreWindow oracle. Device, Context, resource,
+view, shader, state, CommandList and related DXGI forwarding now use a shared
+COM registry. The checked API description has 37 families, 78 public interfaces
+and 330 declared methods; this is forwarding coverage, not recording coverage.
+Unknown interface escape never enables frame capture and reports an API/IID gap.
 
-Validation with the final native build: 19 swap-chain comparisons, 24 factory
+Earlier bootstrap validation: 19 swap-chain comparisons, 24 factory
 comparisons and the `capture_bootstrap` CTest pass. These include native/injected
 pixels, COM identities, reference observations, concurrent QI, TEST Present,
 failed/successful resize and explicit frame-request refusal. Local results are
 `artifacts/capture-bootstrap/{swap-chains-final,factories-final}/`.
+
+The object-forwarding iteration passes seven capture-only CTests, 24 factory
+comparisons and 20 updated swap-chain checks. The independent WARP application
+compares native/injected device and context versions, D3D11/DXGI identity,
+concurrent QueryInterface, GetDevice/GetResource, private interface data, input
+and getter arrays, dynamic Map data, Dispatch values, deferred Draw reuse and
+ExecuteCommandList state restoration. Its 36 application wrapper lifetimes all
+close. The registry unit test also exercises successful unknown interfaces,
+failed queries, LastError preservation and native references outliving wrappers.
+Full-profile capture tests, including Qt controls, pass as well.
+
+Native interface caches hold real COM references; diagnostic AddRef/Release
+numbers are not expected to match an unwrapped device. Application-visible
+IUnknown identity is stable across implemented interfaces while references are
+live. Wrapper generations are not yet persistent capture resource IDs: native
+objects retained only by driver bindings need separate lifetime metadata before
+command recording. Returned unsupported interfaces remain native and their
+subsequent calls/identity queries are outside tracking. This keeps stage C partial.
+
+The generator is native C++20 and emits only into the build directory. See
+`src/capture/api/README.md` for ABI description and array-handling rules. Neither
+the generator nor the test programs are included in the capture package.
+
+GF2 object-forwarding diagnostic evidence is in `artifacts/capture-objects-gf2-1`.
+Two observations show 130,216 then 213,006 successful Presents, 138 created
+wrappers and no reported interface gaps or swap tracking failures. Capture was
+rejected, disconnect succeeded and the game exited through CloseMainWindow.
+This tests that launch path only; no scene or image comparison was performed,
+and no generated frame is accepted. The diagnostic preceded subsequent forwarding
+hardening edits and did not retain a hash of its exact runtime binary.
 
 An earlier build launched the specified GF2 executable and observed two successful
 device creations and a 2560x1440 swap chain with 43,564 successful Present calls,

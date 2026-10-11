@@ -7,7 +7,7 @@
   "stages": {
     "A": "checked format boundary and native authored writer validated",
     "B": "native launch/control and capture-only package validated",
-    "C": "factory and swap-chain subset validated; device/context/resource tracking pending",
+    "C": "partial: Device/Context/resource COM forwarding validated; persistent capture identity and creation metadata pending",
     "D": "pending: no intercepted frame serialization",
     "E": "pending: initial resource and hidden state capture",
     "F": "partial: Qt control lifecycle validated; actual capture/completion unavailable",
@@ -16,7 +16,7 @@
   "checks": {
     "core_and_format_ctest": 5,
     "view_overlay_ctest": "passed",
-    "swap_chain_comparisons": 19,
+    "swap_chain_comparisons": 20,
     "factory_comparisons": 24,
     "qt_cases": {
       "passed": 10,
@@ -25,7 +25,10 @@
     },
     "existing_golden_controls": 4,
     "native_authored_interop_checks": 22,
-    "source_build_steps": 5
+    "source_build_steps": 5,
+    "capture_only_ctest": 7,
+    "full_profile_capture_ctest": 5,
+    "native_object_lifetimes": 36
   },
   "source_build_commit": "df850545ecc0af85322bfcf7a20dc7fc4f097334",
   "local_evidence_sha256": {
@@ -33,7 +36,13 @@
     "capture-bootstrap/swap-chains-final/validation.json": "abb5d8dc35668a54bf6747dd8e9ffdc82b497d2298d19b59a33176a5cf07bda0",
     "capture-bootstrap/factories-lifecycle-fix/validation.json": "e2e96acab25e71ffbce3b435dbda260e92de9b8cda0d95c3af77cb47a9010182",
     "capture-authored-interop/validation.json": "a5506fea7b28b1a4aae1635d6d9e96f5a0791567a2d1ad05b048ee287f6b1b9b",
-    "capture-source-build-2/validation.json": "9abdf2471c7451224a09dc92ade6ddc2256ad152ecff387b277c73a007864593"
+    "capture-source-build-2/validation.json": "9abdf2471c7451224a09dc92ade6ddc2256ad152ecff387b277c73a007864593",
+    "capture-object-forwarding.json": "a36558a4ff42f6acbeae3b9350fa14bd21ff1de85d0d9722224a42647ebff998",
+    "capture-object-factories-final/validation.json": "e2e96acab25e71ffbce3b435dbda260e92de9b8cda0d95c3af77cb47a9010182",
+    "capture-object-swaps-final/validation.json": "f5dfc04cac0e6c63ce920bedb1beafa99f7a014c74a2bdeb2447cc2c4f73c005",
+    "capture-object-package-final/manifest.json": "3d670ad5ea3c07718377ce294bd5e8b7493814cf880ab1524f81b039f894e90d",
+    "capture-object-ctest.txt": "3fa150987e819d122afdbf13f02b8408f323fb09570ca4177cdcb3768c68bdac",
+    "capture-object-full-ctest.txt": "a5def8aa5f50b96c42a699d9bd431dd54e053a4874270207a124e9032219965f"
   },
   "limitations": [
     "GPA original-player checks use a development-only private ABI harness.",
@@ -41,5 +50,13 @@
     "GF2 bootstrap diagnostic observed Present, but capture requests were rejected.",
     "Runtime registration/COM forwarding tests do not establish full DX11 compatibility.",
     "No complete corpus, full existing CTest matrix or independent-host acceptance is claimed."
-  ]
+  ],
+  "object_forwarding": {
+    "families": 37,
+    "interfaces": 78,
+    "declared_methods": 330,
+    "recording_available": false,
+    "package_system_only_path": "passed",
+    "gf2_diagnostic": "successful launch/Present/disconnect; no accepted frames; diagnostic binary hash not retained before rebuild"
+  }
 }

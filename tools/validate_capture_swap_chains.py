@@ -51,7 +51,8 @@ def main():
     check('Present and Present1 each observed once',first['present_calls']==len(after['presents'])+present1 and first['present1_calls']==present1)
     check('TEST Present excluded from completed frame boundaries',first['test_presents']==1+present1 and first['successful_presents']==successful and first['unsuccessful_presents']==unsuccessful)
     check('Failed Resize does not replace descriptor; valid Resize updates it',first['resize_calls']==2 and first['failed_resizes']==1 and (first['width'],first['height'])==(80,48))
-    check('Unwrapped resource/device outputs explicitly reported',first['interface_escapes']>=3 and 'GetBuffer' in first['last_interface_escape'])
+    objects=command('status')['objects']
+    check('Resource/device getters wrapped without interface gaps',first['interface_escapes']==0 and objects['created']>0 and objects['interface_gaps']==0)
     (injected/'release.signal').touch();wait_file(injected,'released.json')
     released=command('status')['swap_chains'];check('Last application Release unregisters wrapper',released['destroyed']==1 and released['active']==[])
     (injected/'recreate.signal').touch();second=wait_file(injected,'second.json')

@@ -1,5 +1,6 @@
 #include "swap_chain.hpp"
 #include "factory.hpp"
+#include "objects.hpp"
 #include <atomic>
 #include <map>
 #include <memory>
@@ -101,7 +102,7 @@ public:
                 AddRef();static_cast<IUnknown*>(*output)->Release();
                 if(iid==__uuidof(IDXGISwapChainMedia))*output=static_cast<IDXGISwapChainMedia*>(this);
                 else *output=static_cast<IDXGISwapChain4*>(this);
-            }else escaped("QueryInterface",iid,result,output);
+            }else { escaped("QueryInterface",iid,result,output); object_gap("IDXGISwapChain::QueryInterface",iid,"Interface forwarding is not implemented"); }
         }
         SetLastError(error);return result;
     }
@@ -126,20 +127,20 @@ public:
         return result;
     }
     HRESULT STDMETHODCALLTYPE GetDevice(REFIID iid,void** output) override {
-        const auto result=real_->GetDevice(iid,output);escaped("GetDevice (device not wrapped)",iid,result,output);return result;
+        const auto result=real_->GetDevice(iid,output);if(SUCCEEDED(result))wrap_object(iid,output,"IDXGISwapChain::GetDevice");return result;
     }
     HRESULT STDMETHODCALLTYPE GetBuffer(UINT index,REFIID iid,void** output) override {
-        const auto result=real_->GetBuffer(index,iid,output);escaped("GetBuffer (resource not wrapped)",iid,result,output);return result;
+        const auto result=real_->GetBuffer(index,iid,output);if(SUCCEEDED(result))wrap_object(iid,output,"IDXGISwapChain::GetBuffer");return result;
     }
     HRESULT STDMETHODCALLTYPE GetContainingOutput(IDXGIOutput** output) override {
-        const auto result=real_->GetContainingOutput(output);escaped("GetContainingOutput (output not wrapped)",__uuidof(IDXGIOutput),result,output);return result;
+        const auto result=real_->GetContainingOutput(output);if(SUCCEEDED(result))wrap_object(output,"IDXGISwapChain::GetContainingOutput");return result;
     }
     HRESULT STDMETHODCALLTYPE GetFullscreenState(BOOL* fullscreen,IDXGIOutput** output) override {
-        const auto result=real_->GetFullscreenState(fullscreen,output);escaped("GetFullscreenState (output not wrapped)",__uuidof(IDXGIOutput),result,output);return result;
+        const auto result=real_->GetFullscreenState(fullscreen,output);if(SUCCEEDED(result))wrap_object(output,"IDXGISwapChain::GetFullscreenState");return result;
     }
     HRESULT STDMETHODCALLTYPE GetRestrictToOutput(IDXGIOutput** output) override {
         const auto result=extended<IDXGISwapChain1>([&](auto* p){return p->GetRestrictToOutput(output);});
-        escaped("GetRestrictToOutput (output not wrapped)",__uuidof(IDXGIOutput),result,output);return result;
+        if(SUCCEEDED(result))wrap_object(output,"IDXGISwapChain::GetRestrictToOutput");return result;
     }
     HRESULT STDMETHODCALLTYPE GetCoreWindow(REFIID iid,void** output) override {
         const auto result=extended<IDXGISwapChain1>([&](auto* p){return p->GetCoreWindow(iid,output);});
@@ -173,7 +174,7 @@ public:
     BASE(HRESULT,SetPrivateData,(REFGUID name,UINT size,const void* data),(name,size,data))
     BASE(HRESULT,SetPrivateDataInterface,(REFGUID name,const IUnknown* object),(name,object))
     BASE(HRESULT,GetPrivateData,(REFGUID name,UINT* size,void* data),(name,size,data))
-    BASE(HRESULT,SetFullscreenState,(BOOL fullscreen,IDXGIOutput* output),(fullscreen,output))
+    BASE(HRESULT,SetFullscreenState,(BOOL fullscreen,IDXGIOutput* output),(fullscreen,unwrap(output)))
     BASE(HRESULT,GetDesc,(DXGI_SWAP_CHAIN_DESC* desc),(desc))
     BASE(HRESULT,ResizeTarget,(const DXGI_MODE_DESC* desc),(desc))
     BASE(HRESULT,GetFrameStatistics,(DXGI_FRAME_STATISTICS* stats),(stats))
