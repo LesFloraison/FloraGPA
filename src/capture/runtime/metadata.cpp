@@ -161,6 +161,31 @@ std::shared_ptr<ObjectRecord> track_native_object(IUnknown* identity) {
         }
     }
 }
+std::shared_ptr<ObjectRecord> find_native_record(IUnknown* identity) {
+    auto& r=registry();std::shared_ptr<Entry> entry;
+    {std::lock_guard lock(r.mutex);auto it=r.objects.find(identity);if(it==r.objects.end())return {};entry=it->second;}
+    std::lock_guard lock(entry->mutex);return entry->record.lock();
+}
+void track_query(const void* context_proxy,IUnknown* query,bool begin) noexcept {
+    try {
+        auto context=object_record(context_proxy),record=object_record(query);
+        if(!context || !record)throw std::runtime_error("Query/context metadata unavailable");
+        std::lock_guard lock(context->mutex);
+        if(begin)context->active_queries.insert(record->id);else context->active_queries.erase(record->id);
+    } catch (...) {object_gap(begin?"Begin":"End",__uuidof(ID3D11Asynchronous),"Query activity tracking failed");}
+}
+void track_external_mapping(const void* proxy,bool mapped) noexcept {
+    try{auto record=object_record(proxy);if(!record)throw std::runtime_error("Surface metadata unavailable");
+        std::lock_guard lock(record->mutex);record->external_mapping=mapped;
+    }catch(...){object_gap("DXGI mapping",__uuidof(IDXGISurface),"External mapping state unavailable");}
+}
+bool has_external_mapping(){
+    auto& r=registry();std::vector<std::shared_ptr<Entry>> entries;
+    {std::lock_guard lock(r.mutex);for(const auto& [identity,entry]:r.objects){(void)identity;entries.push_back(entry);}}
+    for(const auto& entry:entries){std::shared_ptr<ObjectRecord> record;{std::lock_guard lock(entry->mutex);record=entry->record.lock();}
+        if(record && record->alive){std::lock_guard lock(record->mutex);if(record->external_mapping)return true;}}
+    return false;
+}
 Json metadata_status() {
     auto& r = registry(); uint64_t created, destroyed; std::vector<std::shared_ptr<Entry>> entries;
     {

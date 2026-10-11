@@ -41,6 +41,11 @@ void resource_flags(UINT flags){
     if(flags & ~supported)throw std::runtime_error("Resource sharing, tiling or special flags require additional capture support");
 }
 struct LastErrorScope{DWORD value=GetLastError();~LastErrorScope(){SetLastError(value);}};
+std::shared_ptr<ObjectRecord> existing_record(IUnknown* object){
+    if(auto record=object_record(object))return record;
+    ComPtr<IUnknown> identity;check(object->QueryInterface(IID_PPV_ARGS(&identity)),"Snapshot identity");
+    return find_native_record(identity.Get());
+}
 struct PredicationScope{
     ID3D11DeviceContext* context;ComPtr<ID3D11Predicate> predicate;BOOL value=FALSE;
     explicit PredicationScope(ID3D11DeviceContext* c):context(c){context->GetPredication(&predicate,&value);context->SetPredication(nullptr,FALSE);}
@@ -148,7 +153,7 @@ void track_mapping(const void* context_proxy,ID3D11Resource* resource,UINT subre
 ResourceSnapshot snapshot_resource(ID3D11DeviceContext* context,ID3D11Resource* resource,const SnapshotOptions& options){
     LastErrorScope last_error;NativeCall internal;
     if(!context || !resource)throw std::runtime_error("Snapshot requires a context and resource");
-    auto record=object_record(resource);if(!record)throw std::runtime_error("Snapshot resource is not tracked");
+    auto record=existing_record(resource);if(!record)throw std::runtime_error("Snapshot resource is not tracked");
     {std::lock_guard lock(record->mutex);if(!record->mapped_subresources.empty())throw std::runtime_error("Cannot snapshot an application-mapped resource");}
     auto* native_context=unwrap(context);auto* native_resource=unwrap(resource);
     auto device=snapshot_device(native_context,native_resource);
@@ -171,7 +176,7 @@ ResourceSnapshot snapshot_resource(ID3D11DeviceContext* context,ID3D11Resource* 
 UavCounterSnapshot snapshot_uav_counter(ID3D11DeviceContext* context,ID3D11UnorderedAccessView* view,const SnapshotOptions& options){
     LastErrorScope last_error;NativeCall internal;
     if(!context || !view)throw std::runtime_error("Counter snapshot requires a context and view");
-    UavCounterSnapshot result;result.view=object_record(view);if(!result.view)throw std::runtime_error("Counter view is not tracked");
+    UavCounterSnapshot result;result.view=existing_record(view);if(!result.view)throw std::runtime_error("Counter view is not tracked");
     auto* native_context=unwrap(context);auto* native_view=unwrap(view);
     D3D11_UNORDERED_ACCESS_VIEW_DESC desc{};native_view->GetDesc(&desc);
     if(desc.ViewDimension!=D3D11_UAV_DIMENSION_BUFFER || !(desc.Buffer.Flags&(D3D11_BUFFER_UAV_FLAG_APPEND|D3D11_BUFFER_UAV_FLAG_COUNTER)))

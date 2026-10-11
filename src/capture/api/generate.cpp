@@ -76,6 +76,11 @@ void method(std::ostream& out, const std::string& iface, const Json& m) {
     }
     if (iface == "ID3D11DeviceContext" && (name == "Map" || name == "Unmap"))
         post += "track_mapping(static_cast<IUnknown*>(&owner_), pResource, Subresource, " + std::string(name=="Map"?"true":"false") + ");\n";
+    if (iface == "ID3D11DeviceContext" && (name == "Begin" || name == "End"))
+        post += "track_query(static_cast<IUnknown*>(&owner_), pAsync, " + std::string(name=="Begin"?"true":"false") + ");\n";
+    if ((iface=="IDXGISurface" && (name=="Map" || name=="Unmap")) ||
+        (iface=="IDXGISurface1" && (name=="GetDC" || name=="ReleaseDC")))
+        post += "track_external_mapping(static_cast<IUnknown*>(&owner_), " + std::string(name=="Map" || name=="GetDC"?"true":"false") + ");\n";
     if (iface == "ID3D11Device" && name == "CreateInputLayout")
         post += "remember_input_layout(ppInputLayout ? *ppInputLayout : nullptr, pInputElementDescs, NumElements, pShaderBytecodeWithInputSignature, BytecodeLength);\n";
     if (iface == "ID3D11Device" && name == "CreateGeometryShaderWithStreamOutput")
@@ -92,6 +97,28 @@ void method(std::ostream& out, const std::string& iface, const Json& m) {
         << "auto* target = owner_.native<" << iface << ">();\n"
         << "if (!target) throw std::runtime_error(\"Native interface disappeared\");\n"
         << "NativeCall internal;\nSetLastError(before);\n";
+    if (iface.starts_with("ID3D11DeviceContext")) {
+        std::string kind="unsupported",words="{}",operand="nullptr",floats="nullptr",integers="nullptr";
+        const std::map<std::string,std::string> draws{{"Draw","draw"},{"DrawIndexed","draw_indexed"},
+            {"DrawInstanced","draw_instanced"},{"DrawIndexedInstanced","draw_indexed_instanced"},{"Dispatch","dispatch"}};
+        if (draws.contains(name)) {
+            kind=draws.at(name);words="{";
+            bool firstWord=true;
+            for(const auto& p:parameters){if(!firstWord)words+=",";firstWord=false;words+="uint32_t("+p.at("name").get<std::string>()+")";}
+            words+="}";
+        } else if(name=="ClearRenderTargetView") {kind="clear_rtv";operand="pRenderTargetView";floats="ColorRGBA";}
+        else if(name=="ClearDepthStencilView") {kind="clear_dsv";operand="pDepthStencilView";words="{ClearFlags,Stencil}";floats="std::array<float,4>{Depth,0,0,0}.data()";}
+        else if(name=="ClearUnorderedAccessViewUint") {kind="clear_uav_uint";operand="pUnorderedAccessView";integers="Values";}
+        else if(name=="ClearUnorderedAccessViewFloat") {kind="clear_uav_float";operand="pUnorderedAccessView";floats="Values";}
+        else if(name.find("Get")!=std::string::npos || name=="Flush" || name=="Flush1")kind="read";
+        else if(name=="ClearState" || name=="SetPredication" || name=="SetResourceMinLOD" ||
+            std::regex_match(name,std::regex("(VS|HS|DS|GS|PS|CS|IA|RS|OM|SO)Set.*")))kind="binding";
+        out << "record_context_call(this, \"" << api << "\", CommandKind::" << kind << ", " << words << ", " << operand << ", " << floats << ", " << integers << ");\n";
+    }
+    else if(name=="WriteToSubresource" || name=="Map" || name=="Unmap" || name=="GetDC" || name=="ReleaseDC" ||
+        name.starts_with("OfferResources") || name.starts_with("ReclaimResources") || name=="Trim" ||
+        name.starts_with("GetDisplaySurfaceData") || name=="SetDisplaySurface")
+        out << "record_external_call(\"" << api << "\");\n";
     if (result != "void") out << "auto result = ";
     out << "target->" << name << "(" << args << ");\nconst DWORD after = GetLastError();\n";
     if (!post.empty()) {
@@ -113,7 +140,7 @@ int main(int argc, char** argv) {
         std::ifstream input(argv[1]); const Json spec = Json::parse(input);
         if (spec.at("schema") != 1) throw std::runtime_error("Unsupported API schema");
         std::ostringstream out;
-        out << "// Generated from capture/api/interfaces.json. Do not edit.\n#include \"objects.hpp\"\nnamespace flora::capture {\nnamespace {\n";
+        out << "// Generated from capture/api/interfaces.json. Do not edit.\n#include \"objects.hpp\"\n#include \"command_stream.hpp\"\nnamespace flora::capture {\nnamespace {\n";
         for (const auto& family : spec.at("families")) {
             const std::string name = family; auto chain = ancestry(spec, name);
             out << "class Proxy_" << name << " final : public " << name << ", public Proxy {\nObject& owner_;\npublic:\n"

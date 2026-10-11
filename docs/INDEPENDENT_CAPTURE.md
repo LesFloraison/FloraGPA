@@ -245,6 +245,66 @@ passes two existing capture-structure tests. Evidence and hashes are summarized
 in `artifacts/capture-context-validation.json` and the development baseline.
 No new GF2 diagnostic is claimed for this standalone helper.
 
+## Intercepted command model
+
+Generated Context proxies now observe calls before native execution. A temporary
+`FrameRecording` scope assembles capture-owned commands, pipeline values, object
+references and first-use GPU resource contents. Supported command kinds are
+Draw, DrawIndexed, DrawInstanced, DrawIndexedInstanced, Dispatch, ClearRTV,
+ClearDSV and uint/float ClearUAV. Scalar arguments (including signed base-vertex
+bits) and clear arrays are owned immediately. Binding setters are folded into
+the actual pipeline state at each GPU command; they are not yet serialized as
+individual setter events. Resources are sampled before their first recorded
+read/write, rather than taking final images or assuming creation bytes remain
+current. Each command also samples bound/explicit UAV counters, including after
+KEEP or reset bindings.
+
+This recorder is intentionally not connected to the controller or Present yet.
+Its caller must establish an exclusive single-thread immediate-context boundary.
+Other contexts/threads, reentry, deferred/indirect execution, Map/Update/Copy and
+other unimplemented GPU commands reject the whole model with an API and reason.
+Query Begin/End and DXGI mapping lifetimes are tracked outside recording, so an
+active query or DXGI mapping prevents starting. Surface/DC mapping, device direct
+subresource writes and resource offer/reclaim paths during recording also reject.
+Foreign/reentrant callers mark failure without waiting for the recording mutex,
+avoiding a wait behind readback while holding a driver's multithread lock. This
+is not a general cross-context capture barrier.
+
+Only one scope can be active, repeated start returns busy, cancellation stops
+collection, and finish detects device loss and interface gaps. Recording errors
+do not suppress the native call or replace its HRESULT/LastError. Command counts
+and cumulative initial-resource bytes are bounded. Native staging/getter calls
+do not enter the event stream. First-use sampling is valid only within this
+restricted observed scope: unsupported resource mutations cannot be silently
+omitted. File transactions, target exit and cancel/publication races remain the
+future session/encoder responsibility.
+
+The WARP/hardware command tests exercise the actual generated COM observers.
+They record eight calls, release every source native reference and confirm that
+all original GPU objects have died. A fixture-scoped independent test consumer
+then creates a new WARP device from CPU descriptors, DXBC and initial bytes and
+executes the recorded commands. Draw pixels and Dispatch integers match CPU
+oracles exactly; removing all Draws or Dispatch produces the expected negative
+result. The initial image is blue while the final image is green, and a source
+buffer updated before recording contains 17 rather than its creation values.
+Separate counter checks observe 3, 5 and 1 before successive Dispatch calls,
+not guessed KEEP values. Failure tests cover limits, busy/cancel/retry,
+abandonment, active queries, DXGI maps, foreign threads, reentry and unsupported
+CopyResource while verifying that the native copy still executes.
+
+This proves a limited command model, not an injected CLI capture or GPA file.
+The test consumer neither implements the product replay nor invokes it. The
+encoder, full-frame Present transaction, expanded mutation/command-list support
+and dual-player/GF2 acceptance are still pending. Controller capture remains
+explicitly unavailable, and accepted GF2 frames remain zero.
+
+Fourteen capture-only CTests, twelve independent-capture full-profile CTests
+(ten Qt cases), 24 factory comparisons and 20 swap-chain comparisons pass. Added
+unbound depth/float-clear cases also pass in both build profiles and on both
+source devices. Evidence is `artifacts/capture-stream-validation.json`; native
+output and input hashes are retained separately. No new GF2 diagnostic or
+dual-player file test is claimed for this command-model iteration.
+
 ## Build and control
 
 ```powershell

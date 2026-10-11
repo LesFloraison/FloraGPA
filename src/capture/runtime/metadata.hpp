@@ -34,6 +34,8 @@ struct ObjectRecord {
     std::vector<uint8_t> creation_bytes;
     std::vector<SubresourceData> creation_subresources;
     std::set<std::pair<uint64_t,UINT>> mapped_subresources;
+    std::set<uint64_t> active_queries;
+    bool external_mapping=false;
     std::vector<InputElementRecord> input_elements;
     std::vector<StreamElementRecord> stream_elements;
     std::vector<UINT> stream_strides;
@@ -43,6 +45,10 @@ struct ObjectRecord {
     explicit ObjectRecord(uint64_t value) : id(value) {}
 };
 std::shared_ptr<ObjectRecord> track_native_object(IUnknown* identity);
+std::shared_ptr<ObjectRecord> find_native_record(IUnknown* identity);
+void track_query(const void* context_proxy, IUnknown* query, bool begin) noexcept;
+void track_external_mapping(const void* proxy,bool mapped) noexcept;
+bool has_external_mapping();
 Json metadata_status();
 void observe_private_data(REFGUID key, const char* api) noexcept;
 // Input is an application proxy; these functions never issue GPU commands.

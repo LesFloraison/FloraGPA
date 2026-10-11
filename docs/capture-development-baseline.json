@@ -8,8 +8,8 @@
     "A": "checked format boundary and native authored writer validated",
     "B": "native launch/control and capture-only package validated",
     "C": "partial: persistent native identity, descriptor graph and owned buffer/texture/shader/input-layout/SO creation metadata validated; other creation paths pending",
-    "D": "pending: no intercepted frame serialization",
-    "E": "partial foundation: resource readback, per-view UAV counters and bound pipeline snapshots validated; no frame assembler or context synchronization",
+    "D": "partial: generated COM observers assemble Clear/Draw/Dispatch models; fresh-device CPU-model reconstruction passes; no GPA serialization or Present integration",
+    "E": "partial: first-use resources, per-command bindings/counters and query/mapping guards validated; mutation, deferred and multithread coverage pending",
     "F": "partial: Qt control lifecycle validated; actual capture/completion unavailable",
     "G": "pending: no six-frame GF2 or original GUI capture acceptance"
   },
@@ -26,8 +26,8 @@
     "existing_golden_controls": 4,
     "native_authored_interop_checks": 22,
     "source_build_steps": 5,
-    "capture_only_ctest": 12,
-    "full_profile_capture_ctest": 10,
+    "capture_only_ctest": 14,
+    "full_profile_capture_ctest": 12,
     "native_object_lifetimes": 36,
     "additional_existing_structure_ctest": 2
   },
@@ -76,7 +76,19 @@
     "capture-context-qt.txt": "30f3f58d94df8a6dfd1881bff5f2f163e47438d944716b6e97a714414b4d5110",
     "capture-context-hardware-initial-failure.txt": "4c39267201ce023d1d5e341bf2989f09274b779ee2bffd4b70feaa04eafe35ad",
     "capture-context-validation.json": "2af5b3bec6e0dbd22fe0636898126b14dccd50c059fb3c0f170b054886b222ec",
-    "capture-context-source-build/validation.json": "06d5134fcbd71c37dcfc485196913f68049fa5b946ebaa64599abf3571a18e6a"
+    "capture-context-source-build/validation.json": "06d5134fcbd71c37dcfc485196913f68049fa5b946ebaa64599abf3571a18e6a",
+    "capture-stream-ctest-release.txt": "3e0f02a4f6b8c7f3eba794ad9bb6469b20da8e33cb93bd92437399c6c196797d",
+    "capture-stream-native-log-release.txt": "ece1e70924d2ed2489a3be69fda1d2bf9f61be48a1fa3a6879e0302d899bf729",
+    "capture-stream-clear-ctest.txt": "bd12737f5950a509ae95f0eb002f17b6869d91ef84c9341cffa74cbbc1382e88",
+    "capture-stream-clear-native-log.txt": "937b3de0e70866fb4b7b57d2cb50e47a217917335e497a02703d6d74965efe41",
+    "capture-stream-full-ctest.txt": "62048b9f410ccec65f0b38f518f09abb0ee185d45ce721ffee1c182955f8fd72",
+    "capture-stream-full-native-log.txt": "358c6b6e7b0ada93ba28a904400a7dbde373939aa41392922217b0e64029c627",
+    "capture-stream-full-clear-ctest.txt": "5b72cfb9a0f982583b30485cf0318526c32eea327277b97ccdc5ab7acf0f580c",
+    "capture-stream-full-clear-native-log.txt": "e5832151ac8853da877b600061084b6c2ae0d709658a162fe977a004e062c7fe",
+    "capture-stream-qt.txt": "62efb5f19613a03156c8365c632b3000b3d2e7f8b0c17e7e611e05e06ec0e33d",
+    "capture-stream-factories-release/validation.json": "e2e96acab25e71ffbce3b435dbda260e92de9b8cda0d95c3af77cb47a9010182",
+    "capture-stream-swaps-release/validation.json": "f5dfc04cac0e6c63ce920bedb1beafa99f7a014c74a2bdeb2447cc2c4f73c005",
+    "capture-stream-validation.json": "101bd4dc5439952bd2467e838f068bd2119e201bc9a26b875b5aca2122376278"
   },
   "limitations": [
     "GPA original-player checks use a development-only private ABI harness.",
@@ -138,6 +150,28 @@
       "Dynamic shader linkage reconstruction",
       "Hardware protection",
       "Active queries and unbound hidden state require frame-level tracking"
+    ]
+  },
+  "command_recording": {
+    "available_to_controller": false,
+    "scope": "Explicit single-thread immediate-context recorder called by native tests",
+    "draw_variants": 4,
+    "dispatch": true,
+    "clear_variants": 4,
+    "owned_arguments": true,
+    "first_use_initial_resources": true,
+    "per_command_uav_counters": true,
+    "original_gpu_objects_destroyed_before_test_reconstruction": true,
+    "fresh_warp_device_reconstruction": true,
+    "negative_controls": 2,
+    "failure_keeps_native_forwarding": true,
+    "pending": [
+      "Present transaction",
+      "GPA encoder",
+      "Map/Update/Copy and indirect commands",
+      "Deferred expansion and multicontext ordering",
+      "Individual state-setter event serialization",
+      "GF2 six-frame dual-player acceptance"
     ]
   }
 }

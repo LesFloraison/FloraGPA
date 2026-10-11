@@ -36,6 +36,8 @@ struct ResourceSnapshot {
 // Called at an exclusive application-context boundary, never by the IPC thread.
 // No replay helpers; no binding changes except scoped predication suppression.
 // Callers must synchronize all contexts that can mutate the resource.
+// A retained native resource/view is accepted only if its identity is already
+// registered; readback never registers an unknown native object implicitly.
 ResourceSnapshot snapshot_resource(ID3D11DeviceContext* context, ID3D11Resource* resource, const SnapshotOptions& options={});
 struct UavCounterSnapshot { std::shared_ptr<ObjectRecord> view; uint32_t value=0; };
 UavCounterSnapshot snapshot_uav_counter(ID3D11DeviceContext* context, ID3D11UnorderedAccessView* view, const SnapshotOptions& options={});
