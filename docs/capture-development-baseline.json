@@ -34,9 +34,9 @@
     "present_transaction_interop_checks": 22,
     "startup_injected_interop_checks": 353,
     "startup_injected_dual_player_frames": 55,
-    "packaged_live_frames": 10
+    "packaged_live_frames": 55
   },
-  "source_build_commit": "98dd26781eeae9bf8496efc4a7f22a03f2476a32",
+  "source_build_commit": "7d36fd495081181545b46023e857e738d77d4446",
   "local_evidence_sha256": {
     "capture-format-goldens/validation.json": "a1f6d11deab2e8324c8626ab359b139abf8a83257d06874c3cb6a251a357b84a",
     "capture-bootstrap/swap-chains-final/validation.json": "abb5d8dc35668a54bf6747dd8e9ffdc82b497d2298d19b59a33176a5cf07bda0",
@@ -143,7 +143,8 @@
     "capture-flip-full-ctest.txt": "482742560891cef641a565323d4639380873bf17d1572a774da4fdeaaedacf71",
     "capture-flip-qt.txt": "447645d429492c5d3103fcc8afaae0b8855510f45eaa5a630d0cc4c089af42bb",
     "capture-flip-factories/validation.json": "e2e96acab25e71ffbce3b435dbda260e92de9b8cda0d95c3af77cb47a9010182",
-    "capture-flip-swaps/validation.json": "f5dfc04cac0e6c63ce920bedb1beafa99f7a014c74a2bdeb2447cc2c4f73c005"
+    "capture-flip-swaps/validation.json": "f5dfc04cac0e6c63ce920bedb1beafa99f7a014c74a2bdeb2447cc2c4f73c005",
+    "capture-flip-source-build/validation.json": "d82907a8cbd2957042f498d3bb2f8d709db2c4ac1a8b7812e36a8531f8fd66f4"
   },
   "limitations": [
     "GPA original-player checks use a development-only private ABI harness.",

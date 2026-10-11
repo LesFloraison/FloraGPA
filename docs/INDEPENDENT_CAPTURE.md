@@ -680,3 +680,12 @@ unknown effects and invalid tearing configurations without publishing a file.
 The previous committed-source package result above is historical; this exact
 iteration's isolated archive/package result is recorded separately after commit.
 The native/injected factory and swap-chain comparisons also pass all 44 checks.
+
+Commit `7d36fd4` passes all six isolated committed-source steps:
+configure, build, 19 serial CTests, package, packaged bootstrap control and
+packaged live capture. The system-PATH package run completes eleven independent
+target launches and 55 native-validated files. Configuration discovers no Qt,
+and both runtime audits observe no GPA, Qt, RenderDoc or Python. Evidence is
+`artifacts/capture-flip-source-build/validation.json`. The 353-check interop run
+above supplies the separate original-player and exact CPU execution evidence;
+this package result does not establish broader application or GF2 acceptance.
