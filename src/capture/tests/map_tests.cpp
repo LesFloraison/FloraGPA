@@ -41,9 +41,14 @@ FrozenFrame observed(bool hardware,bool texture,bool nooverwrite=false,bool stag
             D3D11_TEXTURE2D_DESC d{};d.Width=d.Height=8;d.MipLevels=d.ArraySize=d.SampleDesc.Count=1;d.Format=DXGI_FORMAT_R8G8B8A8_UNORM;d.Usage=D3D11_USAGE_DYNAMIC;d.CPUAccessFlags=D3D11_CPU_ACCESS_WRITE;d.BindFlags=D3D11_BIND_SHADER_RESOURCE;
             UINT blue[64];std::fill_n(blue,64,0xffff0000u);D3D11_SUBRESOURCE_DATA initial{blue,32,256};check(f.device->CreateTexture2D(&d,&initial,&input));check(f.device->CreateShaderResourceView(input.Get(),nullptr,&srv));auto* v=srv.Get();f.context->PSSetShaderResources(0,1,&v);
             f.pixel("Texture2D<float4> t:register(t0);float4 main(float4 p:SV_Position):SV_Target{return t.Load(int3(int2(p.xy),0));}");
+        }else if(nooverwrite){
+            D3D11_FEATURE_DATA_D3D11_OPTIONS options{};check(f.device->CheckFeatureSupport(D3D11_FEATURE_D3D11_OPTIONS,&options,sizeof(options)));require(options.MapNoOverwriteOnDynamicBufferSRV,"Host lacks buffer-SRV NO_OVERWRITE");
+            D3D11_BUFFER_DESC d{};d.ByteWidth=32;d.Usage=D3D11_USAGE_DYNAMIC;d.CPUAccessFlags=D3D11_CPU_ACCESS_WRITE;d.BindFlags=D3D11_BIND_SHADER_RESOURCE;
+            const float blue[]{0,0,1,1,0,0,1,1};D3D11_SUBRESOURCE_DATA initial{blue,0,0};check(f.device->CreateBuffer(&d,&initial,&cb));
+            D3D11_SHADER_RESOURCE_VIEW_DESC view{};view.Format=DXGI_FORMAT_R32G32B32A32_FLOAT;view.ViewDimension=D3D11_SRV_DIMENSION_BUFFER;view.Buffer.NumElements=2;check(f.device->CreateShaderResourceView(cb.Get(),&view,&srv));auto* v=srv.Get();f.context->PSSetShaderResources(0,1,&v);
+            f.pixel("Buffer<float4> b:register(t0);float4 main():SV_Target{return b.Load(0);}");
         }else{
             cb=f.buffer(D3D11_USAGE_DYNAMIC,D3D11_CPU_ACCESS_WRITE,D3D11_BIND_CONSTANT_BUFFER);auto* b=cb.Get();f.context->PSSetConstantBuffers(0,1,&b);f.pixel("cbuffer C:register(b0){float4 color;}float4 main():SV_Target{return color;}");
-            if(nooverwrite){D3D11_FEATURE_DATA_D3D11_OPTIONS options{};check(f.device->CheckFeatureSupport(D3D11_FEATURE_D3D11_OPTIONS,&options,sizeof(options)));require(options.MapNoOverwriteOnDynamicConstantBuffer,"Host lacks constant-buffer NO_OVERWRITE");}
         }
         auto recording=begin_recording(f.context.Get());f.context->ClearRenderTargetView(f.rtv.Get(),black);
         if(staging){
@@ -57,7 +62,11 @@ FrozenFrame observed(bool hardware,bool texture,bool nooverwrite=false,bool stag
             for(UINT y=0;y<8;++y){const UINT color=y%2?0xff00ff00u:0xff0000ffu;for(UINT x=0;x<8;++x)memcpy(static_cast<uint8_t*>(mapped.pData)+y*mapped.RowPitch+x*4,&color,4);}
             f.context->Unmap(input.Get(),0);f.draw();
         }else{
-            for(UINT pass=0;pass<2;++pass){D3D11_MAPPED_SUBRESOURCE mapped{};check(f.context->Map(cb.Get(),0,(nooverwrite && pass==0)?D3D11_MAP_WRITE_NO_OVERWRITE:D3D11_MAP_WRITE_DISCARD,0,&mapped));const float color[]{pass?0.f:1.f,pass?1.f:0.f,0,1};memcpy(mapped.pData,color,16);f.context->Unmap(cb.Get(),0);f.draw(float(pass*4),4);}
+            for(UINT pass=0;pass<2;++pass){
+                D3D11_MAPPED_SUBRESOURCE mapped{};check(f.context->Map(cb.Get(),0,nooverwrite?D3D11_MAP_WRITE_NO_OVERWRITE:D3D11_MAP_WRITE_DISCARD,0,&mapped));const float color[]{pass?0.f:1.f,pass?1.f:0.f,0,1};memcpy(static_cast<uint8_t*>(mapped.pData)+(nooverwrite?pass*16:0),color,16);f.context->Unmap(cb.Get(),0);
+                if(nooverwrite && pass)f.pixel("Buffer<float4> b:register(t0);float4 main():SV_Target{return b.Load(1);}");f.draw(float(pass*4),4);
+            }
+            if(nooverwrite){D3D11_MAPPED_SUBRESOURCE mapped{};check(f.context->Map(cb.Get(),0,D3D11_MAP_WRITE_NO_OVERWRITE,0,&mapped));f.context->Unmap(cb.Get(),0);}
         }
         auto frame=recording->finish();frame.require_complete();auto final=snapshot_resource(f.context.Get(),f.output.Get());const auto id=final.record->id;
         frozen=freeze_frame(std::move(frame),id,std::move(final));oracle(frozen.final_output,texture);
@@ -97,6 +106,7 @@ void encoder_failures(const std::filesystem::path& out){
         for(size_t j=0;j<bad.commands.size();++j)bad.commands[j].sequence=j;
         const auto path=out/(std::to_wstring(i)+L".gpa_frame");rejects([&]{encode_frame(bad,path);},"Map");require(!std::filesystem::exists(path),"Invalid Map frame was published");
     }
+    auto missing=observed(true,false,true);auto mapping=std::find_if(missing.commands.begin(),missing.commands.end(),[](const auto& c){return c.kind==CommandKind::map;});mapping->before_data.clear();rejects([&]{encode_frame(missing,out/L"baseline.gpa_frame");},"baseline");
     require(std::filesystem::is_empty(out),"Rejected Map frame leaked temporary output");
 }
 }

@@ -49,6 +49,16 @@ class Encoder {
     }
     uint64_t resource_ref(ObjectId id){return typed(id,{"buffer","texture1d","texture2d","texture2d1","texture3d","texture3d1"});}
     uint64_t blob(std::span<const uint8_t> bytes){return add(9,1,Payload{}.value(narrow(bytes.size())).bytes(bytes));}
+    uint64_t mapped_diff(std::span<const uint8_t> before,std::span<const uint8_t> after){
+        require(before.size()==after.size(),"Encoder NO_OVERWRITE baseline length mismatch");Payload ranges,bytes;
+        for(size_t at=0;at<after.size();){
+            checkpoint();if(before[at]==after[at]){++at;continue;}
+            const auto begin=at;while(at<after.size() && before[at]!=after[at])++at;
+            ranges.u({narrow(begin),narrow(at-begin)});bytes.bytes(after.subspan(begin,at-begin));
+            require(bytes.size()<=UINT32_MAX-8 && ranges.size()<=UINT32_MAX-8-bytes.size(),"Encoder mapped diff size overflow");
+        }
+        return add(9,0x100,Payload{}.u({narrow(ranges.size()),narrow(bytes.size())}).bytes(ranges).bytes(bytes));
+    }
     ByteBuffer contents(const ResourceContents& data){
         const auto layout=resource_layout(data.shape);require(layout.size()==data.subresources.size(),"Encoder subresource count mismatch");
         ByteBuffer bytes;
@@ -194,13 +204,15 @@ public:
                 }
                 require(w[1]>=1 && w[1]<=5 && !(w[2]&~D3D11_MAP_FLAG_DO_NOT_WAIT),"Encoder invalid Map type/flags");
                 uint64_t data=0;
-                if(command.result<0)require(command.data.empty(),"Encoder failed Map has data");
+                if(command.result<0)require(command.data.empty() && command.before_data.empty(),"Encoder failed Map has data");
                 else{
                     require(command.result==S_OK && (!w[2] || w[1]<D3D11_MAP_WRITE_DISCARD),"Encoder invalid successful Map");
                     require(!(mapped_shape.format>=DXGI_FORMAT_NV12 && mapped_shape.format<=DXGI_FORMAT_P016),"Encoder planar Map layout unverified");
                     require(mapped_shape.dimension==D3D11_RESOURCE_DIMENSION_BUFFER || w[1]!=D3D11_MAP_WRITE_NO_OVERWRITE,"Encoder texture NO_OVERWRITE unsupported");
                     const auto& sub=layout.at(w[0]);require(command.data.size()==sub.slice_bytes*sub.depth,"Encoder Map data length mismatch");
-                    require(mappings.emplace(key,true).second,"Encoder overlapping Map calls");data=blob(command.data);
+                    require(mappings.emplace(key,true).second,"Encoder overlapping Map calls");
+                    if(w[1]==D3D11_MAP_WRITE_NO_OVERWRITE)data=mapped_diff(command.before_data,command.data);
+                    else{require(command.before_data.empty(),"Encoder unexpected Map baseline");data=blob(command.data);}
                 }
                 add(7,w[1]==D3D11_MAP_READ?0x34ec:0x246,Payload{}.q({0,1}).value(command.result).value(resource).u({w[0],w[1],w[2]}).value(data));continue;
             }

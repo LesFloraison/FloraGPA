@@ -773,3 +773,54 @@ Python in the runtime audits. Evidence is `artifacts/capture-map-source-build`.
 Its NO_OVERWRITE pixel fixture maps unused storage before its first Draw only;
 broader streaming use requires sparse patches so unchanged bytes still in GPU
 use are not rewritten during playback. That follow-up remains necessary.
+
+## Sparse NO_OVERWRITE updates
+
+NO_OVERWRITE now takes a fresh buffer baseline before each native Map and emits
+only byte runs that actually changed, using legacy GenData differential records
+(9/0x100). Unchanged bytes potentially still referenced by earlier GPU work are
+not rewritten by playback. The baseline and final mapping bytes both count
+against the frame budget; failed mappings discard their unused baseline. The
+extra readback can stall capture and does not establish a performance claim.
+
+The new streaming fixture reads the first float4 in a Draw, updates the second
+float4 through NO_OVERWRITE, then draws from that second element. A third Map
+makes no change. An independent wire parser verifies all three differential
+records, restricts each patch to its newly written region, applies patches to
+the known initial bytes, and confirms the empty patch. The original GPA kernel
+and FloraGPA execute all six scoped files correctly, including the preserved
+negative controls: 97 checks pass in `artifacts/capture-map-sparse-interop`.
+A ninth encoder negative rejects a missing NO_OVERWRITE baseline. The C++ Map
+suite also passes on WARP and hardware. This closes the full-buffer rewrite gap
+identified above; other mapped layouts and application/query coverage remain
+partial. No replay or shared-format source changed.
+
+### Concurrent wrapper release regression
+
+The first full-profile sparse-map regression hit a metadata-test access violation.
+Repeated native execution reproduced it, and AddressSanitizer identified
+`Object::Release` reading `impl_` after a second thread deleted that wrapper.
+The forwarding reference still keeps the native COM object alive; the wrapper
+itself is no longer safe to access after decrementing under the registry lock.
+Release now saves the native identity inside that lock and uses only the saved
+pointer afterward. Factory/swap wrappers already used this pattern.
+
+The fixed original concurrency fixture passes 500 serial ASan runs. The fixture
+now synchronizes eight rewrapping threads at each release boundary, forcing
+wrapper generations to lose their references together; 100 further ASan runs
+pass. Both successes and original failures are retained under
+`artifacts/capture-map-metadata-*`, summarized with hashes in
+`artifacts/capture-map-release-race.json`. ASan is development-only and is not
+linked into the packaged runtime. This failure was fixed, not waived as flaky.
+
+The sanitizer reproduction uses a separate capture-only CMake build with MSVC
+Release flags `/O1 /DNDEBUG /Zi /fsanitize=address` and executable linker flags
+`/DEBUG /INCREMENTAL:NO`, targets `FloraCaptureMetadataTests`, and runs
+`ctest -C Release -R '^capture_metadata$' --repeat until-fail:100 -j1` with the
+matching VS x64 ASan runtime directory on PATH. Normal packages retain ordinary
+Release flags. The strengthened test is part of normal CTest too.
+
+After the concurrency fix, the combined sparse-map code passes all 22 capture-only
+and 20 full-profile capture CTests, eleven Qt cases, 97 scoped dual-player checks
+and 44 native/injected factory/swap comparisons. Final logs and hashes are under
+`artifacts/capture-map-fixed-*`. No sanitizer dependency enters these binaries.

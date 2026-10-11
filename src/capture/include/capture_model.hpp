@@ -75,6 +75,7 @@ struct RecordedCommand {
     int32_t result=0;
     bool completed=false;
     std::vector<uint8_t> data;
+    std::vector<uint8_t> before_data; // NO_OVERWRITE baseline for sparse byte patches.
     PipelineBindings bindings;
     std::map<ObjectId,uint32_t> uav_counters;
 };

@@ -143,6 +143,12 @@ void FrameRecording::observe(ID3D11DeviceContext* context,const char* api,Comman
             const auto layout=resource_layout(shape);
             if(words[0]>=layout.size())throw std::runtime_error("Map subresource is out of range");
             if(shape.format>=DXGI_FORMAT_NV12 && shape.format<=DXGI_FORMAT_P016)throw std::runtime_error("Planar Map wire layout is not verified");
+            if(words[1]==D3D11_MAP_WRITE_NO_OVERWRITE){
+                if(shape.dimension!=D3D11_RESOURCE_DIMENSION_BUFFER)throw std::runtime_error("Texture NO_OVERWRITE is unsupported");
+                ComPtr<ID3D11Resource> resource;if(FAILED(unwrap(operand)->QueryInterface(IID_PPV_ARGS(&resource))))throw std::runtime_error("Map operand is not a resource");
+                options.byte_limit=p.options.byte_limit-p.frame.initial_bytes-p.payload_bytes;
+                auto before=snapshot_resource(context,resource.Get(),options);command.before_data=std::move(before.subresources.at(words[0]).bytes);p.payload_bytes+=command.before_data.size();
+            }
             const auto key=std::pair{command.operand,words[0]};
             if(!p.mappings.emplace(key,Impl::Mapping{p.frame.commands.size()}).second)throw std::runtime_error("Overlapping Map calls");
         }
@@ -160,7 +166,7 @@ void FrameRecording::mapped(ID3D11DeviceContext* context,ID3D11Resource* resourc
         if(!c || c->id!=p.context_id || !r)throw std::runtime_error("Map context/resource identity mismatch");
         auto found=p.mappings.find({r->id,subresource});if(found==p.mappings.end())throw std::runtime_error("Map result has no recorded call");
         auto& command=p.frame.commands.at(found->second.command);command.result=result;
-        if(FAILED(result)){command.completed=true;p.mappings.erase(found);return;}
+        if(FAILED(result)){p.payload_bytes-=command.before_data.size();command.before_data.clear();command.completed=true;p.mappings.erase(found);return;}
         if(result!=S_OK || !mapped || !mapped->pData)throw std::runtime_error("Successful Map without CPU storage is unsupported");
         if(command.words[2] && command.words[1]>=D3D11_MAP_WRITE_DISCARD)throw std::runtime_error("Invalid successful Map flags/type");
         found->second.mapped=*mapped;

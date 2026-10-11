@@ -35,7 +35,7 @@
     "startup_injected_interop_checks": 417,
     "startup_injected_dual_player_frames": 65,
     "packaged_live_frames": 65,
-    "mapped_frame_interop_checks": 84
+    "mapped_frame_interop_checks": 97
   },
   "source_build_commit": "63aff5a836feef134f103a21bc492bfc09c935a4",
   "local_evidence_sha256": {
@@ -167,7 +167,23 @@
     "capture-map-release-live-interop/inputs.json": "fbceb1bf30937559cdfd537faa8c71b050074b829144f0a876bea758dbca73c0",
     "capture-map-release-factories/validation.json": "e2e96acab25e71ffbce3b435dbda260e92de9b8cda0d95c3af77cb47a9010182",
     "capture-map-release-swaps/validation.json": "f5dfc04cac0e6c63ce920bedb1beafa99f7a014c74a2bdeb2447cc2c4f73c005",
-    "capture-map-source-build/validation.json": "ff8002d1f159287b3b375e732e97aaa2d6146f674028a502d58a19cee766cec3"
+    "capture-map-source-build/validation.json": "ff8002d1f159287b3b375e732e97aaa2d6146f674028a502d58a19cee766cec3",
+    "capture-map-sparse-interop/validation.json": "658c03f767c9264b234b1f88ac5b2739e8789e26c7d8f26468bae19472f240bd",
+    "capture-map-sparse-interop/inputs.json": "c8a31a0b192bdc5d04372aa2a67454ff0e68a8f1addb0c056b5edfed5f498225",
+    "capture-map-sparse-ctest.txt": "58eb8776c04e2906c1afc1744f6b17ddc2882d20e0ae9274b5db7891d8900c74",
+    "capture-map-release-race.json": "beb82db7f974a29263692c74a1c1ee0ffa6afc08cb9e610a21962e5234b4b8a6",
+    "capture-map-sparse-full-ctest.txt": "8c6dbf0e80700633f4f1f401544974c4f24c4bb43f627febed907a70df18190a",
+    "capture-map-metadata-asan-failure.txt": "b1df6d851a71fffe25c7f617f77311adf183e6d9769ecfbb0c9afd4fda514cfb",
+    "capture-map-metadata-asan-fixed.txt": "3fa9132e8415168b4865b2034c49a928cc45f611e8d445810f1b4730f1187498",
+    "capture-map-metadata-asan-barrier.txt": "4c1dd5ec7326b1c3b4bed584044294b2eb1fe3ec73ba53dbc79cab3658eaccec",
+    "capture-map-metadata-stress.txt": "dfb21141f9430279388461b209e26d401306aae226dc2a9b44c89690cb45887b",
+    "capture-map-fixed-all-ctest.txt": "74d8c675cb0617cf0fa502427b0dc7b67f4e9f16b77d548781498770a2368e23",
+    "capture-map-fixed-full-ctest.txt": "da9b4e26209b8b586feb2a02491acea12871c547fa73b7213663e29fe8488e25",
+    "capture-map-fixed-qt.txt": "833a1e65dc11420d4630d5b04358327e5e55299e0d760952392b11649a762575",
+    "capture-map-fixed-interop/validation.json": "658c03f767c9264b234b1f88ac5b2739e8789e26c7d8f26468bae19472f240bd",
+    "capture-map-fixed-interop/inputs.json": "c5e0821b898261deebfac0eb64440204a50f655005e8b6510d76cb0f2a37167e",
+    "capture-map-fixed-factories/validation.json": "e2e96acab25e71ffbce3b435dbda260e92de9b8cda0d95c3af77cb47a9010182",
+    "capture-map-fixed-swaps/validation.json": "f5dfc04cac0e6c63ce920bedb1beafa99f7a014c74a2bdeb2447cc2c4f73c005"
   },
   "limitations": [
     "GPA original-player checks use a development-only private ABI harness.",
@@ -347,7 +363,7 @@
     ],
     "original_native_objects_dead_before_encoding": true,
     "negative_execution_controls": 2,
-    "encoder_rejection_cases": 8,
+    "encoder_rejection_cases": 9,
     "failed_map_native": "READ of write-only dynamic buffer",
     "readiness_failure": "Injected WAS_STILL_DRAWING only",
     "cross_thread_unmap": "reject and cease pointer access",
@@ -357,6 +373,17 @@
       "deferred and multithread ordering",
       "GPU work while resource mapping is open",
       "additional mapped resource layouts"
-    ]
+    ],
+    "sparse_nooverwrite": true,
+    "nooverwrite_baseline": "fresh GPU buffer bytes before each Map; charged to frame budget",
+    "nooverwrite_test": "two disjoint float4 updates between Draws and one unchanged Map; independent patch range and byte verification"
+  },
+  "concurrent_release_regression": {
+    "status": "fixed",
+    "root_cause": "wrapper member read after concurrent last Release deleted the wrapper",
+    "asan_ordinary_repetitions": 500,
+    "asan_barrier_repetitions": 100,
+    "barrier_threads": 8,
+    "barrier_rounds_per_test": 200
   }
 }
