@@ -1,6 +1,7 @@
 #include "command_stream.hpp"
 #include "objects.hpp"
 #include "encoder.hpp"
+#include "query_dependencies.hpp"
 #include <algorithm>
 #include <cstring>
 #include <iostream>
@@ -77,17 +78,22 @@ FrozenFrame frozen(){
     {
         Fixture f(true);auto event=f.event();D3D11_TEXTURE2D_DESC d{};d.Width=d.Height=4;d.MipLevels=d.ArraySize=d.SampleDesc.Count=1;d.Format=DXGI_FORMAT_R8G8B8A8_UNORM;d.BindFlags=D3D11_BIND_RENDER_TARGET;
         UINT blue[16];std::fill_n(blue,16,0xffff0000u);D3D11_SUBRESOURCE_DATA data{blue,16,64};ComPtr<ID3D11Texture2D> texture;check(f.device->CreateTexture2D(&d,&data,&texture));ComPtr<ID3D11RenderTargetView> view;check(f.device->CreateRenderTargetView(texture.Get(),nullptr,&view));
-        auto recording=begin_recording(f.context.Get());f.context->End(event.Get());f.wait(event.Get());BOOL ready=FALSE;check(f.context->GetData(event.Get(),&ready,4,0));
+        D3D11_BUFFER_DESC bd{16,D3D11_USAGE_DEFAULT,0,0,0,0};UINT sourceWords[]{7,11,13,17},zeroWords[4]{};D3D11_SUBRESOURCE_DATA sourceData{sourceWords,0,0},zeroData{zeroWords,0,0};ComPtr<ID3D11Buffer> source,staging;check(f.device->CreateBuffer(&bd,&sourceData,&source));bd.Usage=D3D11_USAGE_STAGING;bd.CPUAccessFlags=D3D11_CPU_ACCESS_READ;check(f.device->CreateBuffer(&bd,&zeroData,&staging));
+        auto recording=begin_recording(f.context.Get());f.context->CopyResource(staging.Get(),source.Get());f.context->End(event.Get());f.wait(event.Get());BOOL ready=FALSE;check(f.context->GetData(event.Get(),&ready,4,0));
         const float green[]{0,1,0,1};f.context->ClearRenderTargetView(view.Get(),green);auto frame=recording->finish();auto final=snapshot_resource(f.context.Get(),texture.Get());const auto id=final.record->id;result=freeze_frame(std::move(frame),id,std::move(final));
+        const auto copied=snapshot_resource(f.context.Get(),staging.Get());require(copied.subresources[0].bytes.size()==sizeof sourceWords && !memcmp(copied.subresources[0].bytes.data(),sourceWords,sizeof sourceWords),"Native copy/query ordering changed application bytes");
     }
     require(object_status().at("active")==0 && metadata_status().at("alive")==0,"Frozen query model retained native objects");
-    require(result.commands[1].query->value==TRUE && result.commands[1].query->end_sequence==0,"Frozen query result/history changed");return result;
+    require(result.commands[2].query->value==TRUE && result.commands[2].query->end_sequence==1,"Frozen query result/history changed");
+    const auto dependencies=analyze_event_dependencies(result);
+    require(dependencies.ends==1 && dependencies.observations.size()==1 && dependencies.observations[0].scope==EventObservationScope::recorded_prefix && dependencies.observations[0].prefix->uncovered_commands==0,"Frozen End included a later Clear or lost its scope");
+    const auto& copies=dependencies.observations[0].prefix->copies;require(copies.size()==1 && copies[0].sequence==0 && copies[0].source==result.commands[0].source && copies[0].destination==result.commands[0].operand,"Frozen native copy dependency lost");return result;
 }
 }
 int wmain(int argc,wchar_t** argv){try{
     if(argc==3 && std::wstring(argv[2])==L"self-test"){
         const std::filesystem::path out=argv[1];require(!std::filesystem::exists(out),"Query output exists");std::filesystem::create_directories(out);const auto frame=frozen();
-        const auto reason="EVENT query serialization is not verified; frame not published (ID3D11DeviceContext::End, object="+std::to_string(frame.commands[0].operand)+", sequence=0)";
+        const auto reason="EVENT query serialization is not verified; frame not published (ID3D11DeviceContext::End, object="+std::to_string(frame.commands[1].operand)+", sequence=1)";
         rejects([&]{encode_frame(frame,out/L"query.gpa_frame");},reason.c_str());require(std::filesystem::is_empty(out),"Unsupported query published/leaked a file");std::cout<<"Owned EVENT freeze and located encoder rejection passed\n";
     }else{const bool hardware=argc==2 && std::wstring(argv[1])==L"--hardware";observations(hardware);failures(hardware);require(object_status().at("active")==0 && metadata_status().at("alive")==0 && object_status().at("interface_gaps")==0,"Query tracking leaked native objects or capabilities");std::cout<<"EVENT generations, output ownership, pre-frame history and failure boundaries passed\n";}
     return 0;

@@ -1114,3 +1114,57 @@ event counts. Evidence and binary hashes are registered in
 `artifacts/capture-query-read-erg-validation.json`. Capture runtime, encoder
 and package results retain their previous commit scope; no new GF2 capture
 attempt or full original-GUI acceptance is claimed.
+
+## Capture-owned EVENT dependency inspection
+
+`FloraCaptureModel` now analyzes the frozen Capture model without Replay/Core,
+the format reader, COM objects or GPU calls. Each End receives an immutable
+snapshot of the preceding recorded operations. Successful GetData observations
+must match the same query ID, generation, context, thread provenance and earlier
+End sequence. Repeated successful polling shares that snapshot; a subsequent
+End receives its own. Later Draws cannot retroactively enter an earlier interval.
+
+The report distinguishes pending, failed, unissued, pre-frame, deferred,
+foreign-context and recorded-prefix observations. Only unpredicated whole buffer
+copies into a read-only staging buffer become candidate READ dependencies,
+retaining source/destination IDs and command order. Reference, descriptor, shape,
+context and query-profile checks bound that scope. Other copies, Draw/Dispatch,
+Clears and CPU mapping hazards remain explicitly uncovered. This is dependency
+inspection, not complete frame validation or permission to encode a query.
+
+An entry budget bounds accumulated prefix snapshots and observations; cancellation
+is checked throughout. The encoder runs this inspection before its existing
+EVENT refusal and reports interval counts, the latest matching prefix, candidate
+copy waits and the first uncovered operation. It still publishes no query frame,
+even for a prefix containing only supported copies: unrecorded work before the
+frame and general EVENT completion are not proven by this report.
+
+The CPU-only dependency test covers both query descriptors, interleaved identities,
+reused intervals, all observation scopes, invalid/stale associations, uncovered
+command kinds, unsafe copy destinations, cancellation and bounded allocation.
+The native query fixture now copies known buffer words, completes an EVENT and
+checks the application's bytes. After all original GPU objects die, its frozen
+model retains the copy edge and excludes a later Clear from the End prefix;
+the encoder continues to reject without temporary or final files.
+
+Regression passes 29 capture-only and 27 full-profile capture CTests, including
+eleven Qt cases without skips. Additional interleaved-query and sequence-zero
+cases pass targeted tests in both profiles. The standalone dependency test has
+only Windows/CRT imports. The first /WX build found a signed comparison against
+an optional unsigned BOOL; the corrected unsigned comparison and original
+failure log are retained. Replay/shared format code is unchanged in this batch,
+so the prior golden and dual-player evidence retains its commit scope.
+
+Two consecutive GF2 diagnostic requests fail safely at Present ordinals 43,700
+and 73,165. Each records one End and three GetData calls. The first has two
+pending observations and one successful pre-frame observation; the second has
+one pending and two successful pre-frame observations. Neither has a successful
+GetData associated with the frame's later End. Saved status shows continuing
+rendering through 48,304 and 77,254 Presents. No file is published; disconnect
+and normal window exit succeed. Evidence is
+`artifacts/capture-query-dependencies-validation.json`.
+
+The next required evidence is the completion/initialization boundary at frame
+start for these pre-frame observations. Reusing a later in-frame End or treating
+a copy-only recorded prefix as proof about preceding frames would be incorrect.
+Accepted GF2 captures remain zero.

@@ -1,5 +1,6 @@
 #include "encoder.hpp"
 #include "resource_layout.hpp"
+#include "query_dependencies.hpp"
 #include "format/Writer.h"
 #include <algorithm>
 #include <cstring>
@@ -160,9 +161,27 @@ public:
     void write(const std::filesystem::path& path){
         checkpoint();
         for(const auto& command:frame_.commands)
-            if(command.kind==CommandKind::query_end || command.kind==CommandKind::query_get_data)
+            if(command.kind==CommandKind::query_end || command.kind==CommandKind::query_get_data){
+                EventDependencyOptions analysis_options;analysis_options.cancelled=options_.cancelled;
+                const auto dependencies=analyze_event_dependencies(frame_,analysis_options);
+                std::string detail="; End observations="+std::to_string(dependencies.ends)+", GetData observations="+std::to_string(dependencies.observations.size());
+                std::array<size_t,7> scopes{};
+                const EventDependencyObservation* latest=nullptr;
+                for(const auto& observed:dependencies.observations){
+                    ++scopes.at(size_t(observed.scope));
+                    if(observed.prefix && (!latest || observed.end_sequence>latest->end_sequence))latest=&observed;
+                }
+                constexpr const char* scope_names[]{"pending","failed","unissued","pre-frame","deferred","foreign-context","recorded-prefix"};
+                for(size_t i=0;i<scopes.size();++i)if(scopes[i])detail+=", "+std::string(scope_names[i])+"="+std::to_string(scopes[i]);
+                if(latest){
+                    const auto& prefix=*latest->prefix;
+                    detail+="; latest recorded End="+std::to_string(*latest->end_sequence)+", candidate copy waits="+std::to_string(prefix.copies.size())+", uncovered commands="+std::to_string(prefix.uncovered_commands);
+                    if(prefix.first_uncovered_sequence)detail+="; first uncovered sequence="+std::to_string(*prefix.first_uncovered_sequence)+": "+prefix.first_uncovered_reason;
+                }
+                detail+="; whole EVENT completion remains unverified";
                 throw std::runtime_error("EVENT query serialization is not verified; frame not published ("+
-                    command.api+", object="+std::to_string(command.operand)+", sequence="+std::to_string(command.sequence)+")");
+                    command.api+", object="+std::to_string(command.operand)+", sequence="+std::to_string(command.sequence)+")"+detail);
+            }
         require(!frame_.commands.empty(),"Encoder requires recorded commands");context_=frame_.commands.front().bindings.context;device_=frame_.commands.front().bindings.device;
         require(context_ && device_ && context_!=device_,"Encoder invalid context/device identities");
         ids_.emplace(context_,1);ids_.emplace(device_,2);
