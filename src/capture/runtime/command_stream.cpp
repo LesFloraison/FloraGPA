@@ -9,6 +9,29 @@ namespace {
 struct Registry {std::mutex mutex;std::weak_ptr<FrameRecording> active;std::atomic<bool> enabled=false;};
 Registry& registry(){static Registry value;return value;}
 struct LastErrorScope{DWORD value=GetLastError();~LastErrorScope(){SetLastError(value);}};
+std::string query_gap(IUnknown* object,const char* api,const std::array<uint32_t,5>& words){
+    std::string reason="Query recording is not implemented";
+    auto record=object_record(object);
+    if(!record)return reason+" (untracked asynchronous object)";
+    std::lock_guard lock(record->mutex);
+    reason+=" (object="+std::to_string(record->id)+", kind="+record->kind;
+    if((record->kind=="query" || record->kind=="query1") && record->descriptor.size()>=sizeof(D3D11_QUERY_DESC)){
+        D3D11_QUERY_DESC desc{};memcpy(&desc,record->descriptor.data(),sizeof(desc));
+        constexpr const char* names[]{"EVENT","OCCLUSION","TIMESTAMP","TIMESTAMP_DISJOINT","PIPELINE_STATISTICS",
+            "OCCLUSION_PREDICATE","SO_STATISTICS","SO_OVERFLOW_PREDICATE","SO_STATISTICS_STREAM0",
+            "SO_OVERFLOW_PREDICATE_STREAM0","SO_STATISTICS_STREAM1","SO_OVERFLOW_PREDICATE_STREAM1",
+            "SO_STATISTICS_STREAM2","SO_OVERFLOW_PREDICATE_STREAM2","SO_STATISTICS_STREAM3","SO_OVERFLOW_PREDICATE_STREAM3"};
+        reason+=", type="+std::string(UINT(desc.Query)<std::size(names)?names[UINT(desc.Query)]:"UNKNOWN")+
+            "("+std::to_string(UINT(desc.Query))+"), misc_flags="+std::to_string(desc.MiscFlags);
+        if(record->kind=="query1" && record->descriptor.size()>=sizeof(D3D11_QUERY_DESC1)){
+            D3D11_QUERY_DESC1 extended{};memcpy(&extended,record->descriptor.data(),sizeof(extended));
+            reason+=", context_type="+std::to_string(UINT(extended.ContextType));
+        }
+    }
+    if(std::string_view(api).ends_with("::GetData"))
+        reason+=", data_size="+std::to_string(words[0])+", getdata_flags="+std::to_string(words[1]);
+    return reason+"): query intervals, result observations and completion dependencies require verified GPA encoding";
+}
 ObjectId retain(ContextSnapshot& snapshot,IUnknown* object){
     if(!object)return 0;
     ComPtr<IUnknown> native;
@@ -109,7 +132,12 @@ void FrameRecording::observe(ID3D11DeviceContext* context,const char* api,Comman
         auto record=object_record(context);
         if(!record || record->id!=p.context_id)throw std::runtime_error("Multiple context execution requires ordered command-list support");
         if(kind==CommandKind::read || kind==CommandKind::binding)return;
-        if(kind==CommandKind::unsupported)throw std::runtime_error("GPU call recording is not implemented");
+        if(kind==CommandKind::unsupported){
+            const std::string_view name=api;
+            if(name.ends_with("::Begin") || name.ends_with("::End") || name.ends_with("::GetData"))
+                throw std::runtime_error(query_gap(operand,api,words));
+            throw std::runtime_error("GPU call recording is not implemented");
+        }
         if(!p.mappings.empty() && kind!=CommandKind::map)throw std::runtime_error("GPU execution while a resource is mapped is unsupported");
         if(kind==CommandKind::map && (!operand || words[1]<1 || words[1]>5 || (words[2]&~D3D11_MAP_FLAG_DO_NOT_WAIT)))throw std::runtime_error("Invalid Map arguments");
         const bool clear=kind==CommandKind::clear_rtv || kind==CommandKind::clear_dsv || kind==CommandKind::clear_uav_uint || kind==CommandKind::clear_uav_float;

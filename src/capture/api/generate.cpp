@@ -111,6 +111,12 @@ void method(std::ostream& out, const std::string& iface, const Json& m) {
         else if(name=="ClearUnorderedAccessViewUint") {kind="clear_uav_uint";operand="pUnorderedAccessView";integers="Values";}
         else if(name=="ClearUnorderedAccessViewFloat") {kind="clear_uav_float";operand="pUnorderedAccessView";floats="Values";}
         else if(name=="Map") {kind="map";operand="pResource";words="{Subresource,UINT(MapType),MapFlags}";}
+        // GetData observes completion and can order later CPU writes. It is not
+        // a passive state getter, even when the query End preceded this frame.
+        else if(name=="Begin" || name=="End" || name=="GetData") {
+            operand="pAsync";
+            if(name=="GetData")words="{DataSize,GetDataFlags}";
+        }
         else if(name.find("Get")!=std::string::npos || name=="Flush" || name=="Flush1")kind="read";
         else if(name=="ClearState" || name=="SetPredication" || name=="SetResourceMinLOD" ||
             std::regex_match(name,std::regex("(VS|HS|DS|GS|PS|CS|IA|RS|OM|SO)Set.*")))kind="binding";

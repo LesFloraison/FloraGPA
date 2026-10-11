@@ -840,3 +840,52 @@ null output; the second returns S_FALSE. Evidence is
 `artifacts/capture-query-next-wire.json`. This observation does not justify
 silently dropping the live End call or guessing its completion dependency;
 query wire/initial-state behavior still needs independent experiments.
+
+## Query completion capture boundary
+
+The generator now treats `GetData` as an unsupported query operation rather
+than a passive getter. An End issued before the captured frame can make a
+frame-local GetData establish a CPU/GPU completion dependency; omitting that
+call would incorrectly report a complete capture. Begin, End and GetData now
+reject with the API, persistent object ID, query descriptor and, for GetData,
+requested size/flags. Native forwarding and returned data are preserved. No
+caller output pointer is read by this diagnostic, and no query is converted
+to a predicate or assigned a guessed result.
+
+This boundary follows the existing original-capture experiments in
+[Query completion](QUERY_COMPLETION.md), not just inspection of the GF2 file.
+The preserved reference `analysis/query_resources/README.md`, `id_manager.c`
+and `get_data.c` identify omitted ordinary-query resources/End records and
+four-byte-only GetData observations in the pinned shim. Its original-player
+resource factory uses CreatePredicate for family 0x96; inventing an EVENT
+descriptor in that family is not a verified compatibility path. Existing
+EVENT completion fixtures have demonstrated wrong original-player output.
+The input hashes and RVAs consulted here are retained in
+`artifacts/capture-query-research.json`; this batch reuses those reverse
+engineering results and does not claim a new Ghidra analysis.
+
+WARP and hardware tests cover rejection of all sixteen D3D11 query types,
+including End-only EVENT/TIMESTAMP. Two additional cases per device complete
+an EVENT before recording and call GetData during recording with either BOOL
+output or status-only output. Both must reject while preserving native S_OK
+and the BOOL result. A subsequent ordinary Draw capture succeeds. These are
+scope/failure tests, not query serialization or dual-player acceptance.
+
+A fresh GF2 diagnostic reaches 182,857 successful Presents before requesting
+capture. Its first rejected operation is GetData on tracked object 137,
+`query1`, EVENT(0), MiscFlags=0, ContextType=ALL, null output, size=0, flags=0.
+The error does not claim a captured HRESULT: rejection occurs before native
+forwarding. No frame is published. Disconnect and normal window close both
+succeed. Exact binaries, request/status and process-exit evidence are retained
+under `artifacts/capture-query-gf2`; accepted GF2 captures remain **zero**.
+
+Query encoding and completion preservation remain open. Compatibility must
+be demonstrated with a real ordering-dependent oracle in both players before
+removing this guard. Replay, shared format code and the old migration parity
+ledger are unchanged by this correction.
+
+Regression: all 22 capture-only CTests and all 20 full-profile capture CTests
+pass serially, including eleven Qt cases with no failures or skips. Logs and
+input hashes are registered in `capture-development-baseline.json`. Prior
+dual-player and committed-source package results retain their original commit
+scope; this guard-only batch does not claim a new dual-player/package run.

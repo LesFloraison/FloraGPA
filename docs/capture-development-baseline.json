@@ -9,7 +9,7 @@
     "B": "native launch/control and capture-only package validated",
     "C": "partial: persistent native identity, descriptor graph and owned buffer/texture/shader/input-layout/SO creation metadata validated; other creation paths pending",
     "D": "partial: startup-injected blit/flip/tearing capture with dynamic mapped constants; dual-player execution verified on self-owned targets",
-    "E": "partial: immediate-context Map/Unmap payloads and initial resources validated; GF2 now rejects End/query; Update/Copy, deferred and hidden-state coverage pending",
+    "E": "partial: Map/Unmap and initial resources validated; GF2 explicitly rejects EVENT GetData completion; Query, Update/Copy, deferred and hidden-state coverage pending",
     "F": "partial: native CLI and asynchronous Qt capture/cancel/disconnect/completed-file opening tested; full profile/deployment acceptance pending",
     "G": "pending: no six-frame GF2 or original GUI capture acceptance"
   },
@@ -185,7 +185,22 @@
     "capture-map-fixed-factories/validation.json": "e2e96acab25e71ffbce3b435dbda260e92de9b8cda0d95c3af77cb47a9010182",
     "capture-map-fixed-swaps/validation.json": "f5dfc04cac0e6c63ce920bedb1beafa99f7a014c74a2bdeb2447cc2c4f73c005",
     "capture-map-sparse-source-build/validation.json": "7cf782e0865d9886fb3f5265326e7a12fe90df461a46679e4bc19127b4f3be19",
-    "capture-query-next-wire.json": "2b9dab6bf8d0ac3af3385f91b1b287154d89ccaab912d4d6d5505ad73cd308d7"
+    "capture-query-next-wire.json": "2b9dab6bf8d0ac3af3385f91b1b287154d89ccaab912d4d6d5505ad73cd308d7",
+    "capture-query-guard-build.txt": "b9dd93181495c5b024e19b5e3e55c66ad02f6f025ec1f38488b1bc166c3d2c44",
+    "capture-query-guard-tests.txt": "4805a6f2517d36b6a4c797727ae97a4832b1d37080706aaf0211c9f71ed2b6b8",
+    "capture-query-all-tests.txt": "0c5de455a0ff11aec4aff2cc3e99aeb0f0481197750fef493404d3cac8730726",
+    "capture-query-full-build-all.txt": "bba337a03e4db225c61fffa7269da643c98eab6fe9e6e8666bf70abd0c2e6186",
+    "capture-query-full-tests.txt": "0717ac27e73a4f212aab524592c5154c0290f19197f14f323d1966aa590ed7bf",
+    "capture-query-ui.txt": "a756c6557fbac04f27225f2ecb3e30d8655e4c058fd931e03ab0c7b88c83acf8",
+    "capture-query-research.json": "f403221e0689da4110d9d0081863052a46c66f716c447974441c38fbe370711c",
+    "capture-query-gf2/binaries.json": "099c1ac8b1d0651e887e5650494a0137790ede7c8d06bd3d8dd4635d44edd453",
+    "capture-query-gf2/close.json": "a25f701fb31af163881828db2bc40555a6d7ef4dabf43fbe755f41af36ad5b15",
+    "capture-query-gf2/disconnect.json": "070d980715adf194843105deb4bdf4920d1af5a9384d79f5612325b28a8b7da3",
+    "capture-query-gf2/launch.json": "39859c6889c381820dbd5f1b4a012ef69896de02717307a5670d051eabbe7c20",
+    "capture-query-gf2/request.json": "61485712d48b6c18d8ac4f956bf88a49004fd7b4d0b474e7df39ec65afdf44e4",
+    "capture-query-gf2/session.json": "132e4d901666797e18c88b1fa2f7264bcb3e5ffb3d9bf5087ba507beec78ae36",
+    "capture-query-gf2/status-after.json": "9e0dd30cd4aa13deb192b76e267d1f28b94b9072a056304a13b4a56aa5c71943",
+    "capture-query-gf2/status-before.json": "290146824db68267dd9230c9c3f397f536408ece1477e095238c6425c296a796"
   },
   "limitations": [
     "GPA original-player checks use a development-only private ABI harness.",
@@ -387,5 +402,25 @@
     "asan_barrier_repetitions": 100,
     "barrier_threads": 8,
     "barrier_rounds_per_test": 200
+  },
+  "query_capture_boundary": {
+    "status": "explicitly unsupported",
+    "passive_getdata_omission_fixed": true,
+    "native_backends": [
+      "WARP",
+      "hardware"
+    ],
+    "query_types_per_backend": 16,
+    "preframe_event_getdata_cases_per_backend": 2,
+    "native_return_and_bool_preserved": true,
+    "recovery_draw_passed": true,
+    "gf2_query_type": "EVENT",
+    "gf2_first_rejection": "ID3D11DeviceContext::GetData",
+    "gf2_requested_bytes": 0,
+    "gf2_getdata_flags": 0,
+    "gf2_hresult_observed": false,
+    "gf2_published_frames": 0,
+    "gf2_normal_exit": true,
+    "query_serialization_verified": false
   }
 }

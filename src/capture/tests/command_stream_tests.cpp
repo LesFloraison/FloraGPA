@@ -143,6 +143,44 @@ void failures(bool hardware){
     run([&](auto){check(surface->Map(&mapped,DXGI_MAP_WRITE));memset(mapped.pBits,0,4*4);check(surface->Unmap());},"IDXGISurface::Map");
     auto dropped=begin_recording(f.context.Get());dropped.reset();auto retry=begin_recording(f.context.Get());f.context->Draw(3,0);retry->finish().require_complete();
 }
+void query_boundaries(bool hardware){
+    Fixture f(hardware);
+    for(UINT type=0;type<16;++type){
+        D3D11_QUERY_DESC desc{D3D11_QUERY(type),0};ComPtr<ID3D11Query> query;
+        if(type==5 || type==7){ComPtr<ID3D11Predicate> predicate;check(f.device->CreatePredicate(&desc,&predicate));check(predicate.As(&query));}
+        else check(f.device->CreateQuery(&desc,&query));
+        const auto identity=object_record(query.Get())->id;
+        auto recording=begin_recording(f.context.Get());
+        // EVENT and TIMESTAMP are End-only. Other query types require Begin.
+        if(type!=0 && type!=2)f.context->Begin(query.Get());
+        f.context->End(query.Get());
+        const auto frame=recording->finish();
+        rejects([&]{frame.require_complete();},"Query recording is not implemented");
+        require(frame.commands.empty() && frame.gaps.size()==1,"Rejected query escaped into the command model");
+        const auto& gap=frame.gaps.front();
+        require(gap.find(type==0 || type==2?"::End:":"::Begin:")!=std::string::npos &&
+            gap.find("object="+std::to_string(identity)+",")!=std::string::npos &&
+            gap.find("("+std::to_string(type)+"), misc_flags=0")!=std::string::npos,
+            "Query failure omitted its API, identity or descriptor");
+    }
+    D3D11_QUERY_DESC desc{D3D11_QUERY_EVENT,0};ComPtr<ID3D11Query> event;check(f.device->CreateQuery(&desc,&event));
+    f.context->End(event.Get());
+    const auto deadline=GetTickCount64()+5000;
+    while(unwrap(f.context.Get())->GetData(unwrap(event.Get()),nullptr,0,0)==S_FALSE){
+        require(GetTickCount64()<deadline,"Native event query did not complete");Sleep(1);
+    }
+    // The End occurred before recording: GetData alone must invalidate the
+    // frame rather than silently lose the application's completion dependency.
+    for(bool status_only:{false,true}){
+        auto recording=begin_recording(f.context.Get());BOOL ready=FALSE;
+        const auto result=f.context->GetData(event.Get(),status_only?nullptr:&ready,status_only?0:sizeof(ready),D3D11_ASYNC_GETDATA_DONOTFLUSH);
+        require(result==S_OK && (status_only || ready==TRUE),"Query rejection changed the native result/output");
+        const auto frame=recording->finish();rejects([&]{frame.require_complete();},"ID3D11DeviceContext::GetData");
+        require(frame.gaps.front().find(status_only?"data_size=0, getdata_flags=1":"data_size=4, getdata_flags=1")!=std::string::npos,
+            "GetData failure omitted arguments");
+    }
+    auto recovery=begin_recording(f.context.Get());f.context->Draw(3,0);recovery->finish().require_complete();
+}
 void counters(bool hardware){
     Fixture f(hardware);D3D11_BUFFER_DESC d{};d.ByteWidth=64;d.StructureByteStride=4;d.BindFlags=D3D11_BIND_UNORDERED_ACCESS;d.MiscFlags=D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
     UINT zeros[16]{};D3D11_SUBRESOURCE_DATA initial{zeros,0,0};ComPtr<ID3D11Buffer> buffer;check(f.device->CreateBuffer(&d,&initial,&buffer));
@@ -172,7 +210,7 @@ void explicit_clears(bool hardware){
 }
 #ifndef FLORA_ENCODE_PROBE
 int main(int argc,char** argv){try{
-    const bool hardware=argc==2 && std::string(argv[1])=="--hardware";record_and_recreate(hardware);explicit_clears(hardware);counters(hardware);failures(hardware);
+    const bool hardware=argc==2 && std::string(argv[1])=="--hardware";record_and_recreate(hardware);explicit_clears(hardware);counters(hardware);failures(hardware);query_boundaries(hardware);
     require(object_status().at("active")==0 && metadata_status().at("alive")==0 && object_status().at("interface_gaps")==0,"Recorder lifetime or capability leak");
     std::cout<<Json({{"passed",true},{"hardware",hardware},{"commands",8},{"fresh_device_reconstruction",true},{"negative_controls",2},{"scope","hook-observed model; no GPA file or Present boundary"}}).dump()<<'\n';return 0;
 }catch(const std::exception& e){std::cerr<<e.what()<<'\n';return 1;}}
