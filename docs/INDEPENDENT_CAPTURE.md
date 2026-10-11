@@ -299,3 +299,10 @@ steps, now including eight serial CTests. The resulting package controls a nativ
 target with system-only PATH and no Qt, GPA, RenderDoc or Python modules. Evidence
 is `artifacts/capture-metadata-source-build/validation.json`; this remains a
 metadata/bootstrap gate, not live-frame acceptance.
+
+The resource-readback commit `343d7cb` passes all five isolated source-build
+steps, including ten serial CTests. Native control through the resulting package
+passes with system-only PATH, no Qt discovery and no GPA, Qt, RenderDoc or Python
+modules. Evidence is `artifacts/capture-resource-source-build/validation.json`.
+This verifies the new source/generator dependency closure and native package;
+frame capture and dual-player live-frame acceptance remain pending.
