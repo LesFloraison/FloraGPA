@@ -824,3 +824,19 @@ After the concurrency fix, the combined sparse-map code passes all 22 capture-on
 and 20 full-profile capture CTests, eleven Qt cases, 97 scoped dual-player checks
 and 44 native/injected factory/swap comparisons. Final logs and hashes are under
 `artifacts/capture-map-fixed-*`. No sanitizer dependency enters these binaries.
+
+The final sparse-map/concurrency commit `e804b95` passes all six fresh
+committed-source configure/build/test/package steps, including 22 serial CTests
+and 65 packaged live files across thirteen launch modes. Configuration finds no
+Qt; system-only PATH runtime audits load no GPA, Qt, RenderDoc or Python.
+Evidence is `artifacts/capture-map-sparse-source-build/validation.json`.
+The separate scoped interop run establishes sparse-map execution; the packaged
+live fixture's mapped writes currently use WRITE_DISCARD.
+
+Next query investigation: read-only inspection of the preserved original GF2
+frame finds two 0x34fb GetData observations and no saved 0x96 query/predicate
+resource or recognized Begin/End record. The first GetData returns S_OK with
+null output; the second returns S_FALSE. Evidence is
+`artifacts/capture-query-next-wire.json`. This observation does not justify
+silently dropping the live End call or guessing its completion dependency;
+query wire/initial-state behavior still needs independent experiments.

@@ -37,7 +37,7 @@
     "packaged_live_frames": 65,
     "mapped_frame_interop_checks": 97
   },
-  "source_build_commit": "63aff5a836feef134f103a21bc492bfc09c935a4",
+  "source_build_commit": "e804b955c747d264348d7396b0f91004a5f81730",
   "local_evidence_sha256": {
     "capture-format-goldens/validation.json": "a1f6d11deab2e8324c8626ab359b139abf8a83257d06874c3cb6a251a357b84a",
     "capture-bootstrap/swap-chains-final/validation.json": "abb5d8dc35668a54bf6747dd8e9ffdc82b497d2298d19b59a33176a5cf07bda0",
@@ -183,7 +183,9 @@
     "capture-map-fixed-interop/validation.json": "658c03f767c9264b234b1f88ac5b2739e8789e26c7d8f26468bae19472f240bd",
     "capture-map-fixed-interop/inputs.json": "c5e0821b898261deebfac0eb64440204a50f655005e8b6510d76cb0f2a37167e",
     "capture-map-fixed-factories/validation.json": "e2e96acab25e71ffbce3b435dbda260e92de9b8cda0d95c3af77cb47a9010182",
-    "capture-map-fixed-swaps/validation.json": "f5dfc04cac0e6c63ce920bedb1beafa99f7a014c74a2bdeb2447cc2c4f73c005"
+    "capture-map-fixed-swaps/validation.json": "f5dfc04cac0e6c63ce920bedb1beafa99f7a014c74a2bdeb2447cc2c4f73c005",
+    "capture-map-sparse-source-build/validation.json": "7cf782e0865d9886fb3f5265326e7a12fe90df461a46679e4bc19127b4f3be19",
+    "capture-query-next-wire.json": "2b9dab6bf8d0ac3af3385f91b1b287154d89ccaab912d4d6d5505ad73cd308d7"
   },
   "limitations": [
     "GPA original-player checks use a development-only private ABI harness.",
