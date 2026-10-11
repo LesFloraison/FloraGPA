@@ -215,7 +215,12 @@
     "capture-copy-final-interop/validation.json": "426547b2c53f5c15c18ddad0388d41f8879df60e3a0d834f2341d5d4c5f3f57a",
     "capture-copy-final-interop/inputs.json": "9d08d730ff5f0f549422d236846c09c8f04fd4f79144c33eb2b41c98723778fb",
     "capture-copy-source-build/validation.json": "8cabd4870af713d7eac2631c0f501913b2b2c521e9b96ad4679dbb0045b895d4",
-    "capture-copy-source-build/ctest.log": "944d30adcf636534e4dcc202d2f336ec62eb6cacbf357e8e3ebab4bbf71d6ed4"
+    "capture-copy-source-build/ctest.log": "944d30adcf636534e4dcc202d2f336ec62eb6cacbf357e8e3ebab4bbf71d6ed4",
+    "capture-query-player-research/summary.json": "6491699c8acaadeb662d1a5b54f28efb43f446359a32ed89da4a75b291d51f1e",
+    "capture-query-renaming/validation.json": "4ee11291686cf44501a07bd44ac9754ca86b8cce0bddfea75b3905e8f05becd6",
+    "capture-query-renaming-final/validation.json": "b12b3fa8e627f1da577fe2283a92f5172fdcbd6c4c2c7131489faaa924b005ca",
+    "capture-query-renaming-bounded/validation.json": "e5f6cd9e103ee0dc7aae76768236f16524bf1cda61db37b29f5b406a05ec42cf",
+    "capture-query-renaming-verified/validation.json": "f1cdaa757c83b2a899ff7278214c7004f629c5d4cd08f2bec00173f582217dbd"
   },
   "limitations": [
     "GPA original-player checks use a development-only private ABI harness.",
@@ -465,5 +470,22 @@
       "ResolveSubresource",
       "startup-injected copy workload and original GUI acceptance"
     ]
+  },
+  "query_renaming_research": {
+    "status": "experimental only; production guard retained",
+    "ghidra_readonly": true,
+    "player_erg_classes": 48,
+    "runs": 44,
+    "original_baseline_attempts": 12,
+    "original_baseline_mismatches": 11,
+    "renamed_exact_attempts": 12,
+    "draw_zero_exact_attempts": 12,
+    "original_end_api_acceptances": 2,
+    "expected_missing_query_rejections": 6,
+    "changed_map_type": "NO_OVERWRITE to DISCARD; complete 65536-byte vertex-buffer payload",
+    "query_wait_executed": false,
+    "original_api_provenance_preserved": false,
+    "original_gui_verified": false,
+    "gf2_acceptance": false
   }
 }

@@ -945,3 +945,62 @@ launches under a system-only PATH; configuration discovers no Qt and module
 audits load no GPA, Qt, RenderDoc or Python. This verifies package independence
 and the existing live profile; its workload does not yet exercise CopyResource.
 Evidence is `artifacts/capture-copy-source-build/validation.json`.
+
+## EVENT query compatibility research
+
+Fresh read-only Ghidra inspection of the installed `dx11_player.dll` enumerates
+48 D3D11-manager Erg class tables. No standalone EVENT/GetData wait executor
+appears in that set. At RVA `0x574a0`, the predicate resource factory calls
+CreatePredicate, followed by an empty Begin/End. End execution at `0x27b20`
+requires D3D11PredicateRsc; Flush at `0x283a0` only forwards native Flush.
+The project MD5 matches the installed DLL; its SHA-256 remains
+`39061ff329e4a32d0c8375ce9ee15e2017bccab0593943b962a860e11723d38b`.
+Class tables, decompilation, program identity and hashes are retained in
+`artifacts/capture-query-player-research/summary.json`. These conclusions cover
+the inspected installed paths, not every possible GPA version/mode.
+
+`tools/validate_capture_query_renaming.py` tests a different execution strategy
+using the two hash-pinned original EVENT completion fixtures. Both save a full
+65,536-byte dynamic vertex buffer. The experiment changes exactly one byte:
+the second Map's type from NO_OVERWRITE to DISCARD. It preserves every payload,
+resource, query observation, Draw and preview. Microsoft's
+[dynamic buffer documentation](https://learn.microsoft.com/en-us/windows/win32/direct3d11/how-to--use-dynamic-resources)
+explains that DISCARD can supply new storage while pending GPU work continues
+using the previous storage. It discards the entire buffer, so applying this
+transformation to a sparse patch without recovering the full contents is unsafe.
+This is a candidate resource-versioning strategy, not an encoded query wait.
+
+The final experiment performs 44 serial runs:
+
+- Twelve untouched-original observations reproduce eleven incorrect outputs
+  (six original-player and five FloraGPA); one FloraGPA run happens to match.
+  The original missing-boundary behavior is timing-sensitive, not accepted.
+- Twelve renamed executions across both players match the independent
+  application image exactly. Twelve Draw-zero controls produce the expected
+  clear color despite retaining the original captured reference image.
+- Two original-player runs accept an authored `0x34fa` End API record referring
+  to the omitted query and still produce correct renamed output. FloraGPA
+  rejects both with the located missing-predicate diagnostic. This experimental
+  record replaces incidental nested GetDesc metadata at event 10; it is not
+  claimed to have been saved by the original capture.
+- Changing that record to the executable `0x243` End Erg rejects in both
+  tools: two original Open/status-13 failures and two FloraGPA missing-resource
+  failures. Accepting an API observation does not establish an executable End.
+
+The final report is `artifacts/capture-query-renaming-verified/validation.json`.
+The original player still uses the development private-ABI runner; its selected
+adapter and GUI are not verified. Earlier experiments and their failures remain
+available. In particular, the first End-record builder appended payload beyond
+the index; the checked reader correctly rejected it. The corrected builder puts
+payload before the index and adjusts index/preview offsets, retaining the
+failure log rather than relaxing reader validation.
+
+Production query rejection remains enabled. This research does **not** restore
+the original query object/End/completion state and is not GF2 acceptance. Before
+considering resource versioning for live capture, the capture-owned model must
+record real EVENT lifetimes and returned BOOL/status observations, preserve
+original API provenance, and establish correctness for repeated/pre-frame
+queries and vertex/index/constant/SRV buffer use. The encoder must reject any
+case whose semantics cannot be expressed and verified. No runtime, replay or
+format code changed in this research batch; native CTest/goldens/package results
+retain their previous commit scope.
