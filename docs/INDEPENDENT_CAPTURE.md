@@ -937,3 +937,11 @@ and passing targeted reruns are retained in the baseline. No Replay/shared
 format source changed, so existing golden frames were not rerun for this
 increment. Query completion remains explicitly unsupported; GF2 acceptance
 is still zero and this batch does not repeat the game diagnostic.
+
+Commit `61ca31c` subsequently passes all six fresh committed-source build and
+package steps, including a single successful run of all 25 serial CTests.
+The packaged live regression produces 65 native-validated frames in thirteen
+launches under a system-only PATH; configuration discovers no Qt and module
+audits load no GPA, Qt, RenderDoc or Python. This verifies package independence
+and the existing live profile; its workload does not yet exercise CopyResource.
+Evidence is `artifacts/capture-copy-source-build/validation.json`.

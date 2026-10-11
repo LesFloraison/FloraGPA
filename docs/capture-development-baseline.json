@@ -38,7 +38,7 @@
     "mapped_frame_interop_checks": 97,
     "copy_frame_interop_checks": 68
   },
-  "source_build_commit": "e804b955c747d264348d7396b0f91004a5f81730",
+  "source_build_commit": "61ca31c062ab3012a0df23dd14768694d181c81c",
   "local_evidence_sha256": {
     "capture-format-goldens/validation.json": "a1f6d11deab2e8324c8626ab359b139abf8a83257d06874c3cb6a251a357b84a",
     "capture-bootstrap/swap-chains-final/validation.json": "abb5d8dc35668a54bf6747dd8e9ffdc82b497d2298d19b59a33176a5cf07bda0",
@@ -213,7 +213,9 @@
     "capture-copy-encoder-full-final.txt": "7c2584ef61235d401170347b0d7220b2707b5901cf371b4f07dfd6d08e954a9e",
     "capture-copy-ui.txt": "2f8c0048b636b6eb0467d612d411acd617a3c2481b965b60d4873400982f5e5f",
     "capture-copy-final-interop/validation.json": "426547b2c53f5c15c18ddad0388d41f8879df60e3a0d834f2341d5d4c5f3f57a",
-    "capture-copy-final-interop/inputs.json": "9d08d730ff5f0f549422d236846c09c8f04fd4f79144c33eb2b41c98723778fb"
+    "capture-copy-final-interop/inputs.json": "9d08d730ff5f0f549422d236846c09c8f04fd4f79144c33eb2b41c98723778fb",
+    "capture-copy-source-build/validation.json": "8cabd4870af713d7eac2631c0f501913b2b2c521e9b96ad4679dbb0045b895d4",
+    "capture-copy-source-build/ctest.log": "944d30adcf636534e4dcc202d2f336ec62eb6cacbf357e8e3ebab4bbf71d6ed4"
   },
   "limitations": [
     "GPA original-player checks use a development-only private ABI harness.",
