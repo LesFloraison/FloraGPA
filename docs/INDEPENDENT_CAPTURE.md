@@ -416,3 +416,11 @@ steps, including twelve serial CTests and native packaged control with system-on
 PATH. No Qt is discovered and module observations contain no GPA, Qt, RenderDoc
 or Python. Evidence is `artifacts/capture-context-source-build/validation.json`;
 this remains a source/package gate, not a generated-frame acceptance result.
+
+The command-model commit `3c6c40b` passes all five isolated source-build steps,
+including fourteen serial CTests and the packaged native control lifecycle.
+The build discovers no Qt; system-only PATH module observations contain no GPA,
+Qt, RenderDoc or Python. Evidence is
+`artifacts/capture-stream-source-build/validation.json`. This verifies the new
+observer and model sources independently of cached builds; it does not establish
+GPA encoding, Present integration or formal live-frame acceptance.

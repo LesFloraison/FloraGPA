@@ -31,7 +31,7 @@
     "native_object_lifetimes": 36,
     "additional_existing_structure_ctest": 2
   },
-  "source_build_commit": "3ee4b0cf17cdc94f5484bcdf92d642fa431f7be1",
+  "source_build_commit": "3c6c40b7bfeac6ef7d1f458a899da2722dbee4a6",
   "local_evidence_sha256": {
     "capture-format-goldens/validation.json": "a1f6d11deab2e8324c8626ab359b139abf8a83257d06874c3cb6a251a357b84a",
     "capture-bootstrap/swap-chains-final/validation.json": "abb5d8dc35668a54bf6747dd8e9ffdc82b497d2298d19b59a33176a5cf07bda0",
@@ -88,7 +88,8 @@
     "capture-stream-qt.txt": "62efb5f19613a03156c8365c632b3000b3d2e7f8b0c17e7e611e05e06ec0e33d",
     "capture-stream-factories-release/validation.json": "e2e96acab25e71ffbce3b435dbda260e92de9b8cda0d95c3af77cb47a9010182",
     "capture-stream-swaps-release/validation.json": "f5dfc04cac0e6c63ce920bedb1beafa99f7a014c74a2bdeb2447cc2c4f73c005",
-    "capture-stream-validation.json": "101bd4dc5439952bd2467e838f068bd2119e201bc9a26b875b5aca2122376278"
+    "capture-stream-validation.json": "101bd4dc5439952bd2467e838f068bd2119e201bc9a26b875b5aca2122376278",
+    "capture-stream-source-build/validation.json": "da5c6e957e8d20adfbd12c2fb1ecc3b5fe3fcca048821e5022bc81399e7ff812"
   },
   "limitations": [
     "GPA original-player checks use a development-only private ABI harness.",
