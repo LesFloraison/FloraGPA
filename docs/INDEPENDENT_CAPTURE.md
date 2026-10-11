@@ -350,3 +350,9 @@ passes with system-only PATH, no Qt discovery and no GPA, Qt, RenderDoc or Pytho
 modules. Evidence is `artifacts/capture-resource-source-build/validation.json`.
 This verifies the new source/generator dependency closure and native package;
 frame capture and dual-player live-frame acceptance remain pending.
+
+The pipeline-binding commit `3ee4b0c` also passes all five isolated source-build
+steps, including twelve serial CTests and native packaged control with system-only
+PATH. No Qt is discovered and module observations contain no GPA, Qt, RenderDoc
+or Python. Evidence is `artifacts/capture-context-source-build/validation.json`;
+this remains a source/package gate, not a generated-frame acceptance result.
