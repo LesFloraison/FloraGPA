@@ -1432,3 +1432,72 @@ warnings for resource families without complete offline descriptor validation.
 These checks do not replace original GUI inspection or the missing scene tests.
 The most recent source-archive package proof still covers the earlier whole-Update
 revision; this EVENT revision has build/test and live-module evidence only.
+
+## Subresource region copies
+
+Capture now records `CopySubresourceRegion` and `CopySubresourceRegion1` with
+zero copy flags. Its own model owns the source box, destination origin, both
+subresource indexes and stable object identities. The initial GPU contents of
+both operands are retained before execution. The encoder writes the existing
+`7/0x40` and `7/0x256` wire layouts without linking Core or Replay; those modules
+and the shared format sources are unchanged.
+
+The supported profile uses matching buffer/texture dimensions and exact formats,
+single-sample resources and DEFAULT or STAGING destinations. Coordinate checks
+use subtraction after validating the destination origin, avoiding integer wrap.
+Different subresources of the same resource are allowed. Same-subresource copies,
+nonzero flags, format reinterpretation, empty boxes, depth/constant-buffer storage
+and block/packed/planar layouts remain explicit failures. Structured buffers
+additionally require matching strides and whole-element source bounds and
+destination offsets. Native application calls
+continue forwarding even when capture refuses a frame. The distinction between
+different-subresource copies and driver-dependent overlap follows the documented
+[CopySubresourceRegion](https://learn.microsoft.com/en-us/windows/win32/api/d3d11/nf-d3d11-id3d11devicecontext-copysubresourceregion)
+and [CopySubresourceRegion1](https://learn.microsoft.com/en-us/windows/win32/api/d3d11_1/nf-d3d11_1-id3d11devicecontext1-copysubresourceregion1)
+contracts; the implementation does not infer overlapping-copy support.
+
+The native fixture exercises Buffer, Texture1D, Texture2D and Texture3D using
+different source/destination extents, nonzero destination origins, null and owned
+source boxes, source updates between copies, and Draws between operations.
+WARP and hardware results match independently computed bytes, including the
+destination exterior. Initial data differs from creation data, and every source
+COM object is dead before encoding. Additional native checks copy between mips
+and array layers of one resource and compare all subresources; these storage
+checks do not claim separate dual-player mip/array coverage.
+
+Sixteen direct files pass 320 serial dual-player/CPU/wire/shader checks in
+`artifacts/capture-region-interop`. Eight negative files remove copies while
+retaining the final reference image; both players execute the unchanged yellow
+destination. Eleven malformed encoder models reject without publishing or
+leaking a temporary file. The first context-mismatch negative changed the initial
+context and therefore hit the earlier object-reference guard; it was corrected
+to alter the later copy. Both logs are retained. The existing generic recorder
+failure test now uses an unsupported empty region followed by a valid copy,
+checking continued native forwarding after capture failure.
+
+Separately, the committed EVENT revision `28ba156` passes all six clean
+source-archive configure/build/test/package/control steps, all 36 serial CTests
+and nineteen packaged launches producing 95 native-validated files. The package
+runs with system-only PATH, no Qt discovery, and no GPA/Qt/RenderDoc/Python in
+target module inventories. This updates the earlier package evidence for EVENT
+and boxed Updates; it does not yet establish packaged region-copy support.
+Evidence is in `artifacts/capture-event-source-build/validation.json`.
+
+The current region-copy injection matrix completes 21 launches and 105 files,
+including ten new region-copy files combined with changing texture updates,
+Draw and preceding-frame EVENT observations. All 673 serial dual-player/CPU/module
+checks pass, including repeated captures, busy/cancel, unsupported-call refusal,
+retry, disconnect and normal exit. None of the target module inventories contain
+GPA, Qt, RenderDoc or Python. All 121 direct/injected original-player reports
+identify the pinned GPA 2025 R1 kernel. This remains development private-ABI oracle
+evidence, not original GUI or adapter-selection acceptance.
+
+All 39 capture-only CTests and 41 relevant full-profile suites pass, including
+37 capture suites, two existing structure suites and two checked-format suites.
+The Qt workflow reports eleven cases without skips. A full-build attempt overlapped
+CTest and could not replace the running `FloraStructureUiTests.exe`; the failure
+is preserved. After the test process exited, the full build passed and both
+structure suites passed their serial rerun. Evidence hashes and retained failures
+are in `artifacts/capture-region-validation.json`. Shared format and replay sources
+are unchanged, so the preceding golden-frame evidence remains applicable rather
+than being counted as a new run. GF2 scene acceptance remains **0/6**.

@@ -8,4 +8,6 @@ SubresourceData update_layout(const ResourceShape&, std::span<const uint8_t> des
 void copy_pitched(SubresourceData& target, const void* source, size_t row_pitch, size_t slice_pitch);
 void validate_copy_resource(const ResourceShape& destination, std::span<const uint8_t> descriptor,
     const ResourceShape& source);
+void validate_copy_region(const ResourceShape& destination, std::span<const uint8_t> destination_descriptor,
+    const ResourceShape& source, std::span<const uint8_t> source_descriptor, const CopyRegion&, bool same_resource);
 }

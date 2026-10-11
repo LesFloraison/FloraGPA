@@ -110,6 +110,45 @@ SubresourceData update_layout(const ResourceShape& shape,std::span<const uint8_t
     }
     return out;
 }
+void validate_copy_region(const ResourceShape& d,std::span<const uint8_t> dd,const ResourceShape& s,
+    std::span<const uint8_t> sd,const CopyRegion& r,bool same_resource){
+    if(r.flags)throw std::runtime_error("CopySubresourceRegion flags are not verified");
+    if(d.dimension!=s.dimension || d.format!=s.format)throw std::runtime_error("CopySubresourceRegion dimension/format conversion is not verified");
+    if(d.samples!=1 || s.samples!=1)throw std::runtime_error("CopySubresourceRegion MSAA is not verified");
+    if(same_resource && r.destination_subresource==r.source_subresource)throw std::runtime_error("CopySubresourceRegion same-subresource overlap is not verified");
+    auto storage=[](const ResourceShape& shape,std::span<const uint8_t> bytes,bool destination){
+        size_t at=0,size=0;
+        switch(shape.dimension){
+        case D3D11_RESOURCE_DIMENSION_BUFFER:at=offsetof(D3D11_BUFFER_DESC,Usage);size=sizeof(D3D11_BUFFER_DESC);break;
+        case D3D11_RESOURCE_DIMENSION_TEXTURE1D:at=offsetof(D3D11_TEXTURE1D_DESC,Usage);size=sizeof(D3D11_TEXTURE1D_DESC);break;
+        case D3D11_RESOURCE_DIMENSION_TEXTURE2D:at=offsetof(D3D11_TEXTURE2D_DESC,Usage);size=sizeof(D3D11_TEXTURE2D_DESC);break;
+        case D3D11_RESOURCE_DIMENSION_TEXTURE3D:at=offsetof(D3D11_TEXTURE3D_DESC,Usage);size=sizeof(D3D11_TEXTURE3D_DESC);break;
+        default:throw std::runtime_error("CopySubresourceRegion resource kind unsupported");
+        }
+        if(bytes.size()!=size && !(shape.dimension>=D3D11_RESOURCE_DIMENSION_TEXTURE2D && bytes.size()==size+4))throw std::runtime_error("CopySubresourceRegion descriptor size mismatch");
+        D3D11_USAGE usage{};UINT bind=0;memcpy(&usage,bytes.data()+at,4);memcpy(&bind,bytes.data()+at+4,4);
+        if(destination && usage!=D3D11_USAGE_DEFAULT && usage!=D3D11_USAGE_STAGING)throw std::runtime_error("CopySubresourceRegion destination usage unsupported");
+        if(bind&(D3D11_BIND_DEPTH_STENCIL|D3D11_BIND_CONSTANT_BUFFER))throw std::runtime_error("CopySubresourceRegion depth/constant storage is not verified");
+        UINT stride=1;
+        if(shape.dimension==D3D11_RESOURCE_DIMENSION_BUFFER){D3D11_BUFFER_DESC desc{};memcpy(&desc,bytes.data(),sizeof desc);
+            if(desc.MiscFlags&D3D11_RESOURCE_MISC_BUFFER_STRUCTURED){stride=desc.StructureByteStride;if(!stride)throw std::runtime_error("CopySubresourceRegion structured stride is zero");}}
+        return stride;
+    };
+    const auto ds=storage(d,dd,true),ss=storage(s,sd,false);
+    const auto dl=resource_layout(d),sl=resource_layout(s);
+    if(r.destination_subresource>=dl.size() || r.source_subresource>=sl.size())throw std::runtime_error("CopySubresourceRegion subresource is out of range");
+    const auto& dst=dl[r.destination_subresource];const auto& src=sl[r.source_subresource];
+    const auto box=r.box.value_or(ResourceBox{0,0,0,src.width,src.height,src.depth});
+    const auto [left,top,front,right,bottom,back]=box;
+    if(!(left<right && top<bottom && front<back && right<=src.width && bottom<=src.height && back<=src.depth))throw std::runtime_error("CopySubresourceRegion source box must be nonempty and in bounds");
+    // Subtraction after the origin check avoids wrapped destination coordinates.
+    if(r.x>dst.width || r.y>dst.height || r.z>dst.depth || right-left>dst.width-r.x || bottom-top>dst.height-r.y || back-front>dst.depth-r.z)
+        throw std::runtime_error("CopySubresourceRegion destination region is out of bounds");
+    if(ds!=ss || left%ss || right%ss || r.x%ds)throw std::runtime_error("CopySubresourceRegion structured alignment mismatch");
+    const UINT f=UINT(s.format);
+    if(f==66 || f==68 || f==69 || (f>=70 && f<=84) || (f>=94 && f<=99) || (f>=103 && f<=109))
+        throw std::runtime_error("CopySubresourceRegion block/packed/planar layout is not verified");
+}
 void copy_pitched(SubresourceData& target,const void* source,size_t row_pitch,size_t slice_pitch){
     if(!source)throw std::runtime_error("Missing subresource data pointer");
     if(!target.row_bytes || !target.rows || !target.depth || target.slice_bytes!=multiply(target.row_bytes,target.rows))

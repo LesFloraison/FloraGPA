@@ -237,6 +237,7 @@ public:
         for(const auto& command:frame_.commands){
             require(command.sequence==sequence++,"Encoder command sequence mismatch");const auto& w=command.words;Payload p;uint16_t type=0;
             require(command.kind==CommandKind::update_subresource || !command.update_box,"Encoder box attached to non-Update command");
+            require(command.kind==CommandKind::copy_region || !command.copy_region,"Encoder region attached to non-copy command");
             if(command.kind==CommandKind::query_end || command.kind==CommandKind::query_get_data){
                 require(command.query.has_value() && command.completed && command.bindings.context==context_ && command.bindings.device==device_,"Encoder query observation mismatch");
                 const auto query=typed(command.operand,{"query","query1"});
@@ -284,6 +285,19 @@ public:
                 if(command.update_box)for(auto coordinate:*command.update_box)payload.value(coordinate);
                 payload.value(data).u({w[1],w[2]});
                 if(w[3])payload.value(w[4]);add(7,w[3]?0x255:0x247,std::move(payload));continue;
+            }
+            if(command.kind==CommandKind::copy_region){
+                require(command.bindings.context==context_ && command.bindings.device==device_,"Encoder region copy context mismatch");
+                require(!command.bindings.predicate,"Encoder predicated region copy is unsupported");
+                require(command.completed && command.copy_region && command.operand && command.source,"Encoder region copy data missing");
+                require(command.data.empty() && command.before_data.empty(),"Encoder region copy has unexpected CPU bytes");
+                const auto destination=resource_ref(command.operand),source=resource_ref(command.source);
+                const auto& d=frame_.initial_resources.at(command.operand);const auto& s=frame_.initial_resources.at(command.source);const auto& c=*command.copy_region;
+                validate_copy_region(d.shape,frame_.objects.at(command.operand).descriptor,s.shape,frame_.objects.at(command.source).descriptor,c,command.operand==command.source);
+                p.q({0,1,destination}).u({c.destination_subresource,c.x,c.y,c.z}).value(source).value(c.source_subresource).value<uint8_t>(c.box?1:0);
+                if(c.box)for(auto v:*c.box)p.value(v);
+                if(c.extended)p.value(c.flags);
+                add(7,c.extended?0x256:0x40,std::move(p));continue;
             }
             if(command.kind==CommandKind::copy_resource){
                 require(command.bindings.context==context_ && command.bindings.device==device_,"Encoder copy context mismatch");

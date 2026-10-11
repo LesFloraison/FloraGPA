@@ -136,7 +136,7 @@ RecordedFrame FrameRecording::finish(){
     auto& r=registry();{std::lock_guard guard(r.mutex);if(auto active=r.active.lock();active.get()==this){r.active.reset();r.enabled.store(false);}}
     return std::move(p.frame);
 }
-void FrameRecording::observe(ID3D11DeviceContext* context,const char* api,CommandKind kind,const std::array<uint32_t,5>& words,IUnknown* operand,const float* floats,const UINT* integers,IUnknown* source,const UpdateSource* update) {
+void FrameRecording::observe(ID3D11DeviceContext* context,const char* api,CommandKind kind,const std::array<uint32_t,5>& words,IUnknown* operand,const float* floats,const UINT* integers,IUnknown* source,const UpdateSource* update,const CopyRegion* region) {
     auto& p=*impl_;
     // Never wait behind capture readback while a foreign caller may own the
     // driver's ID3D11Multithread lock. Mark failure and forward immediately.
@@ -156,7 +156,8 @@ void FrameRecording::observe(ID3D11DeviceContext* context,const char* api,Comman
         }
         if(!p.mappings.empty() && kind!=CommandKind::map)throw std::runtime_error("GPU execution while a resource is mapped is unsupported");
         if(kind==CommandKind::map && (!operand || words[1]<1 || words[1]>5 || (words[2]&~D3D11_MAP_FLAG_DO_NOT_WAIT)))throw std::runtime_error("Invalid Map arguments");
-        if(kind==CommandKind::copy_resource && (!operand || !source))throw std::runtime_error("CopyResource operand is missing");
+        if((kind==CommandKind::copy_resource || kind==CommandKind::copy_region) && (!operand || !source))throw std::runtime_error("CopyResource operand is missing");
+        if(kind==CommandKind::copy_region && !region)throw std::runtime_error("CopySubresourceRegion coordinates missing");
         const bool clear=kind==CommandKind::clear_rtv || kind==CommandKind::clear_dsv || kind==CommandKind::clear_uav_uint || kind==CommandKind::clear_uav_float;
         if(kind==CommandKind::update_subresource && (!operand || !update || !update->data || update->flags))throw std::runtime_error("UpdateSubresource requires nonnull data and zero copy flags");
         if(clear && !operand)throw std::runtime_error("Clear operand is missing");
@@ -165,6 +166,7 @@ void FrameRecording::observe(ID3D11DeviceContext* context,const char* api,Comman
         auto snapshot=snapshot_context(context);snapshot.require_supported_bindings();
         RecordedCommand command;command.kind=kind;command.api=api;command.sequence=p.frame.commands.size();command.words=words;
         if(kind==CommandKind::update_subresource && update->box){command.update_box.emplace();static_assert(sizeof(ResourceBox)==sizeof(D3D11_BOX));memcpy(command.update_box->data(),update->box,sizeof(D3D11_BOX));}
+        if(kind==CommandKind::copy_region){command.copy_region=*region;command.completed=true;}
         if(floats)std::copy_n(floats,4,command.floats.begin());
         if(integers)std::copy_n(integers,4,command.words.begin());
         command.operand=retain(snapshot,operand);
@@ -192,6 +194,11 @@ void FrameRecording::observe(ID3D11DeviceContext* context,const char* api,Comman
         if(kind==CommandKind::copy_resource){
             const auto& destination=p.frame.initial_resources.at(command.operand);
             validate_copy_resource(destination.shape,destination.record->descriptor,p.frame.initial_resources.at(command.source).shape);
+        }
+        if(kind==CommandKind::copy_region){
+            const auto& destination=p.frame.initial_resources.at(command.operand);
+            const auto& source_data=p.frame.initial_resources.at(command.source);
+            validate_copy_region(destination.shape,destination.record->descriptor,source_data.shape,source_data.record->descriptor,*command.copy_region,command.operand==command.source);
         }
         if(kind==CommandKind::update_subresource){
             const auto& destination=p.frame.initial_resources.at(command.operand);
@@ -345,13 +352,13 @@ void record_query_observation(ID3D11DeviceContext* context,ID3D11Asynchronous* a
         if(active)active->query(context,async,kind,result,data,size,flags);
     }catch(...){object_gap("Query observation",__uuidof(ID3D11DeviceContext),"Frame observer failed");}
 }
-void record_context_call(ID3D11DeviceContext* context,const char* api,CommandKind kind,std::array<uint32_t,5> words,IUnknown* operand,const float* floats,const UINT* integers,IUnknown* source,const UpdateSource* update) noexcept {
+void record_context_call(ID3D11DeviceContext* context,const char* api,CommandKind kind,std::array<uint32_t,5> words,IUnknown* operand,const float* floats,const UINT* integers,IUnknown* source,const UpdateSource* update,const CopyRegion* region) noexcept {
     capture_context_activity();
     auto& r=registry();if(!r.enabled.load(std::memory_order_relaxed))return;
     LastErrorScope last_error;
     try {
         std::shared_ptr<FrameRecording> active;{std::lock_guard lock(r.mutex);active=r.active.lock();}
-        if(active)active->observe(context,api,kind,words,operand,floats,integers,source,update);
+        if(active)active->observe(context,api,kind,words,operand,floats,integers,source,update,region);
     }catch(...){object_gap(api,__uuidof(ID3D11DeviceContext),"Frame observer failed");}
 }
 }

@@ -9,7 +9,7 @@
     "B": "native launch/control and capture-only package validated",
     "C": "partial: persistent native identity, descriptor graph and owned buffer/texture/shader/input-layout/SO creation metadata validated; other creation paths pending",
     "D": "partial: startup-injected blit/flip/tearing capture with dynamic mapped constants; dual-player execution verified on self-owned targets",
-    "E": "partial: Map/Unmap, initial resources, whole CopyResource, whole/boxed zero-flag Updates and scoped EVENT observations verified; successful in-frame waits, region copies, deferred and hidden-state coverage pending",
+    "E": "partial: initial resources, Map/Unmap, whole and bounded region copies, whole/boxed zero-flag Updates and scoped EVENT observations verified; successful in-frame waits, deferred and hidden-state coverage pending",
     "F": "partial: native CLI and asynchronous Qt capture/cancel/disconnect/completed-file opening tested; full profile/deployment acceptance pending",
     "G": "pending: no six-frame GF2 or original GUI capture acceptance"
   },
@@ -280,7 +280,9 @@
     "capture-query-dependencies-gf2/target.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "capture-query-dependencies-gf2/unity.log": "e48b6da7f973a8ddb245bdce6c212cae648004ac3fb5cdea82600e71964447ac",
     "capture-query-dependencies-validation.json": "a11682a894afb12beb72059a79f6e8efc2e5590583823f2edd366831aad1fcfa",
-    "capture-event-observation-validation.json": "28c38dd81f915f947dc61add4c68acad3b6caea7ba637f790b99a4b95e7a4ffc"
+    "capture-event-observation-validation.json": "28c38dd81f915f947dc61add4c68acad3b6caea7ba637f790b99a4b95e7a4ffc",
+    "capture-event-source-build/validation.json": "f0b5893094e78262300019ed98fe5c23a69bf5f9fd6881264521fe7dcec9636f",
+    "capture-region-validation.json": "2b7621fa7228613246df0731e4438b41eeeef9fb3a9c35a3c37f96f58c414d8c"
   },
   "limitations": [
     "GPA original-player checks use a development-only private ABI harness.",
@@ -774,9 +776,63 @@
       "Successful in-frame EVENT completion lowering",
       "Other query types and deferred/multicontext ordering",
       "Two real GF2 scene launches and six accepted frames",
-      "Original GPA GUI inspection and explicit adapter verification",
-      "New source-archive/package validation for this revision"
+      "Original GPA GUI inspection and explicit adapter verification"
     ],
-    "evidence": "artifacts/capture-event-observation-validation.json"
+    "evidence": "artifacts/capture-event-observation-validation.json",
+    "source_package": {
+      "revision": "28ba1566834a42110f42bea49773fc70bfd53f2a",
+      "steps": 6,
+      "ctest": 36,
+      "launches": 19,
+      "frames": 95,
+      "system_path_only": true,
+      "no_qt_discovery": true,
+      "module_audit": "no GPA, Qt, RenderDoc or Python",
+      "evidence": "artifacts\\capture-event-source-build\\validation.json"
+    }
+  },
+  "subresource_region_copies": {
+    "status": "implemented for zero-flag matching-format single-sample region copies",
+    "apis": [
+      "CopySubresourceRegion",
+      "CopySubresourceRegion1 flags zero"
+    ],
+    "owned_model": "Source/destination identities, subresources, destination origin and optional source box; separate initial GPU bytes",
+    "direct_dimensions": [
+      "Buffer",
+      "Texture1D",
+      "Texture2D",
+      "Texture3D"
+    ],
+    "native_additional": "Same-resource different mip/array subresources; all byte storage compared on WARP and hardware",
+    "direct_files": 16,
+    "direct_checks": 320,
+    "negative_execution_controls": 8,
+    "encoder_rejection_cases": 11,
+    "injected_launches": 21,
+    "injected_files": 105,
+    "injected_region_files": 10,
+    "injected_checks": 673,
+    "capture_only_ctest": 39,
+    "full_profile_ctest": 41,
+    "full_profile_scope": "37 independent capture suites, two existing structure suites and two checked-format suites",
+    "qt_cases": 11,
+    "qt_skipped": 0,
+    "full_application_build": true,
+    "original_player_reports": 121,
+    "original_player_sha256": "39061ff329e4a32d0c8375ce9ee15e2017bccab0593943b962a860e11723d38b",
+    "replay_and_format_sources": "unchanged",
+    "pending": [
+      "Same-subresource and overlapping copies",
+      "Nonzero copy flags",
+      "Format reinterpretation",
+      "Empty boxes",
+      "Depth/constant-buffer copy storage",
+      "Block/packed/planar layouts",
+      "Broader deferred/multicontext and hidden state",
+      "New region revision source-package proof",
+      "GF2 six-frame scene and original GUI acceptance"
+    ],
+    "evidence": "artifacts/capture-region-validation.json"
   }
 }
