@@ -146,7 +146,15 @@ void validate_copy_region(const ResourceShape& d,std::span<const uint8_t> dd,con
         throw std::runtime_error("CopySubresourceRegion destination region is out of bounds");
     if(ds!=ss || left%ss || right%ss || r.x%ds)throw std::runtime_error("CopySubresourceRegion structured alignment mismatch");
     const UINT f=UINT(s.format);
-    if(f==66 || f==68 || f==69 || (f>=70 && f<=84) || (f>=94 && f<=99) || (f>=103 && f<=109))
+    if(f>=70 && f<=84){
+        if(s.dimension!=D3D11_RESOURCE_DIMENSION_TEXTURE2D)throw std::runtime_error("BC region copy requires Texture2D storage");
+        const bool whole=!r.box && !r.x && !r.y && !r.z && src.width==dst.width && src.height==dst.height;
+        // A whole-subresource copy includes the physical block padding of small
+        // mips. Partial copies require complete blocks in texel coordinates.
+        if(!whole && (left%4 || top%4 || right%4 || bottom%4 || r.x%4 || r.y%4))
+            throw std::runtime_error("BC region copy requires block alignment");
+    }
+    if(f==66 || f==68 || f==69 || (f>=94 && f<=99) || (f>=103 && f<=109))
         throw std::runtime_error("CopySubresourceRegion block/packed/planar layout is not verified");
 }
 void copy_pitched(SubresourceData& target,const void* source,size_t row_pitch,size_t slice_pitch){

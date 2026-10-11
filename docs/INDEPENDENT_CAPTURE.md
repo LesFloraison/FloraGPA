@@ -1501,3 +1501,63 @@ structure suites passed their serial rerun. Evidence hashes and retained failure
 are in `artifacts/capture-region-validation.json`. Shared format and replay sources
 are unchanged, so the preceding golden-frame evidence remains applicable rather
 than being counted as a new run. GF2 scene acceptance remains **0/6**.
+
+## BC region copies and complete tail mips
+
+The capture-owned region validator now accepts BC1–BC5 Texture2D block layouts.
+Partial copies require block-aligned source bounds and destination origins.
+A null-box, zero-offset copy between equally sized subresources preserves the
+complete physical blocks, including padding in small mips. This distinction
+follows the documented separation between logical mip dimensions and physical
+block storage in Microsoft's
+[block-compression description](https://learn.microsoft.com/en-us/windows/win32/direct3d10/d3d10-graphics-programming-guide-resources-block-compression).
+BC6H/BC7, packed/planar layouts, nonzero flags, format reinterpretation and
+same-subresource copies remain guarded. Encoding, format and replay code are
+unchanged; only the capture model's geometry validation gains this support.
+
+The new self-owned fixture covers BC1, BC2, BC3, BC4 and BC5 UNORM, both region
+APIs, separate resources and different subresources of one resource. It copies
+aligned blocks between array layers at mip 1 and whole 2x2/1x1 tail mips, updates
+the source between copies, and draws between operations. All ten subresources'
+compressed bytes are compared with independently constructed block data. Initial
+GPU bytes differ from creation data, and the encoder runs after every source COM
+object has died. The pixel shader samples both tail mips as well as the edited
+8x8 surface. BC4 scalar classification uses thresholds fixed in the test source;
+all exported RGBA comparisons are exact bytes without tolerance adjustments.
+
+WARP and hardware native tests pass. Separate Debug Layer runs exercise twenty
+format/API/identity combinations on each device without any warning or error.
+Six malformed source-bound/destination-origin models fail the encoder's block
+alignment checks without publishing or leaking temporary files. The direct
+matrix in `artifacts/capture-bc-region-interop` passes 1,000 serial checks across
+forty files, including twenty copy-removal controls that retain the final reference
+but execute yellow in both players. It verifies command payloads, alias identities,
+mip/array indexes, exact pixels, shader exports and the pinned original kernel.
+This adds dual-player evidence for same-resource subresource copies, previously
+tested only against native storage. New format-specific execution evidence covers
+the five UNORM variants; typeless, sRGB and SNORM variants share the block geometry
+but have no new variant-specific oracle in this iteration.
+
+The preceding region revision `abf5730` also passes six clean source/archive/package
+steps, all 39 serial CTests and 21 packaged launches producing 105 native-validated
+files. It discovers no Qt, runs with system-only PATH and has no GPA, Qt, RenderDoc
+or Python in target module inventories. Evidence is retained in
+`artifacts/capture-region-source-build/validation.json`; this proves the earlier
+region package, not the new BC revision's package.
+
+The new injection modes use BC1/BC3 mip-array storage with a changing source
+block, a region copy, Draw, and a preceding-frame EVENT. Twenty-three launches
+produce 115 files (ten new BC files) and pass all 737 serial dual-player/CPU/module
+checks, including busy/cancel, failure/retry, disconnect and normal exit. Target
+module inventories contain no GPA, Qt, RenderDoc or Python. All 155 original-player
+reports from the direct and injected matrices identify the pinned kernel.
+
+The complete application builds successfully. All 42 capture-only and 44 relevant
+full-profile CTests pass, including forty independent capture suites, two existing
+structure suites and two format suites in the full configuration. The Qt workflow
+has eleven cases without skips. GPU checks ran serially, and the full build finished
+before its CTest run. Evidence hashes are recorded in
+`artifacts/capture-bc-region-validation.json`. No new golden-frame run is claimed
+because replay/shared-format code is unchanged. Original GUI acceptance, adapter
+verification and the GF2 two-scene/six-frame gate remain incomplete; accepted GF2
+frames stay **0/6**.

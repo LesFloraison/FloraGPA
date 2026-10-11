@@ -9,7 +9,7 @@
     "B": "native launch/control and capture-only package validated",
     "C": "partial: persistent native identity, descriptor graph and owned buffer/texture/shader/input-layout/SO creation metadata validated; other creation paths pending",
     "D": "partial: startup-injected blit/flip/tearing capture with dynamic mapped constants; dual-player execution verified on self-owned targets",
-    "E": "partial: initial resources, Map/Unmap, whole and bounded region copies, whole/boxed zero-flag Updates and scoped EVENT observations verified; successful in-frame waits, deferred and hidden-state coverage pending",
+    "E": "partial: initial resources, Map/Unmap, whole and bounded region copies including BC1-5, whole/boxed zero-flag Updates and scoped EVENT observations verified; successful in-frame waits, deferred and hidden-state coverage pending",
     "F": "partial: native CLI and asynchronous Qt capture/cancel/disconnect/completed-file opening tested; full profile/deployment acceptance pending",
     "G": "pending: no six-frame GF2 or original GUI capture acceptance"
   },
@@ -282,7 +282,9 @@
     "capture-query-dependencies-validation.json": "a11682a894afb12beb72059a79f6e8efc2e5590583823f2edd366831aad1fcfa",
     "capture-event-observation-validation.json": "28c38dd81f915f947dc61add4c68acad3b6caea7ba637f790b99a4b95e7a4ffc",
     "capture-event-source-build/validation.json": "f0b5893094e78262300019ed98fe5c23a69bf5f9fd6881264521fe7dcec9636f",
-    "capture-region-validation.json": "2b7621fa7228613246df0731e4438b41eeeef9fb3a9c35a3c37f96f58c414d8c"
+    "capture-region-validation.json": "2b7621fa7228613246df0731e4438b41eeeef9fb3a9c35a3c37f96f58c414d8c",
+    "capture-region-source-build/validation.json": "9b006fd0a0aa45510166e978905ef0d36556bc77470f312c362c008a4a6a8277",
+    "capture-bc-region-validation.json": "ce6ff28dde5e1972e8c16491cdc34e8890b2c10804346982357cfc661d883cbc"
   },
   "limitations": [
     "GPA original-player checks use a development-only private ABI harness.",
@@ -830,9 +832,69 @@
       "Depth/constant-buffer copy storage",
       "Block/packed/planar layouts",
       "Broader deferred/multicontext and hidden state",
-      "New region revision source-package proof",
       "GF2 six-frame scene and original GUI acceptance"
     ],
-    "evidence": "artifacts/capture-region-validation.json"
+    "evidence": "artifacts/capture-region-validation.json",
+    "source_package": {
+      "revision": "abf57305b591edf8bd74a430f2707e2d79881d13",
+      "steps": 6,
+      "ctest": 39,
+      "launches": 21,
+      "frames": 105,
+      "system_path_only": true,
+      "no_qt_discovery": true,
+      "module_audit": "no GPA, Qt, RenderDoc or Python",
+      "evidence": "artifacts/capture-region-source-build/validation.json"
+    }
+  },
+  "bc_region_copies": {
+    "status": "BC1-5 Texture2D region geometry implemented; five UNORM variants dual-player verified",
+    "formats": [
+      "BC1_UNORM",
+      "BC2_UNORM",
+      "BC3_UNORM",
+      "BC4_UNORM",
+      "BC5_UNORM"
+    ],
+    "geometry": "Aligned partial blocks and null-box, zero-offset equally-sized whole subresources including tail padding",
+    "identity": "Separate resources and same-resource distinct mip/array subresources",
+    "native_byte_oracle": "Every block in all ten subresources; initial GPU data differs from creation; zero source COM lifetimes at encoding",
+    "sampled_tail_mips": [
+      "2x2",
+      "1x1"
+    ],
+    "direct_files": 40,
+    "direct_checks": 1000,
+    "negative_execution_controls": 20,
+    "encoder_rejection_cases": 6,
+    "debug_layer_combinations_per_device": 20,
+    "debug_layer_devices": [
+      "WARP",
+      "hardware"
+    ],
+    "debug_layer_warnings_or_errors": 0,
+    "injected_launches": 23,
+    "injected_files": 115,
+    "injected_bc_files": 10,
+    "injected_checks": 737,
+    "capture_only_ctest": 42,
+    "full_profile_ctest": 44,
+    "full_profile_scope": "40 independent capture suites, two existing structure suites and two checked-format suites",
+    "qt_cases": 11,
+    "qt_skipped": 0,
+    "full_application_build": true,
+    "original_player_reports": 155,
+    "original_player_sha256": "39061ff329e4a32d0c8375ce9ee15e2017bccab0593943b962a860e11723d38b",
+    "replay_encoder_and_format_sources": "unchanged",
+    "pending": [
+      "BC6H/BC7 region support",
+      "Typeless/sRGB/SNORM variant-specific evidence",
+      "Packed/planar region layouts",
+      "Overlap, copy flags and format reinterpretation",
+      "Broader deferred/multicontext and hidden state",
+      "New BC revision source-package proof",
+      "GF2 six-frame scene and original GUI acceptance"
+    ],
+    "evidence": "artifacts/capture-bc-region-validation.json"
   }
 }
