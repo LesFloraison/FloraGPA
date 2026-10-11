@@ -1218,3 +1218,12 @@ window exit succeed. Evidence and hashes are in
 six-frame acceptance. Replay/shared format is unchanged; previous golden,
 dual-player and committed-source package evidence retains its earlier scope.
 The next requirement is verified GPA EVENT initialization/completion semantics.
+
+The subsequent isolated source build of `deca0ab` passes all six configure,
+build, test, package and control steps, including 29 serial CTests. Its archive
+build discovers no Qt; the package runs with system-only PATH and produces 65
+native-validated existing-profile files in thirteen launches. Captured module
+inventories contain no GPA, Qt, RenderDoc or Python. The source-build manifest is
+`artifacts/capture-frame-start-source-build/validation.json`. These additional
+checks cover the committed frame-start implementation; they do not add EVENT
+encoding, dual-player query evidence or accepted GF2 frames.

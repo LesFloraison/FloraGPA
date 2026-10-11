@@ -637,7 +637,12 @@
     ],
     "gf2_published_frames": 0,
     "gf2_normal_exit": true,
-    "source_package_revision": "unchanged; prior ca7e8d4 evidence only",
-    "next": "verify GPA EVENT initialization/completion representation before publication"
+    "source_package_revision": "deca0abfa2b2e1bf4e9de6fd89f96150ea303726",
+    "next": "verify GPA EVENT initialization/completion representation before publication",
+    "source_build_steps": 6,
+    "source_ctest": 29,
+    "packaged_live_frames": 65,
+    "packaged_launches": 13,
+    "runtime_module_audit": "no GPA, Qt, RenderDoc or Python in captured module inventories"
   }
 }
