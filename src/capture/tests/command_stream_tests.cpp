@@ -155,6 +155,7 @@ void query_boundaries(bool hardware){
         if(type!=0 && type!=2)f.context->Begin(query.Get());
         f.context->End(query.Get());
         const auto frame=recording->finish();
+        if(type==0){frame.require_complete();require(frame.commands.size()==1 && frame.commands[0].kind==CommandKind::query_end && frame.commands[0].query->last_end.generation==1,"EVENT End was not observed");continue;}
         rejects([&]{frame.require_complete();},"Query recording is not implemented");
         require(frame.commands.empty() && frame.gaps.size()==1,"Rejected query escaped into the command model");
         const auto& gap=frame.gaps.front();
@@ -169,15 +170,15 @@ void query_boundaries(bool hardware){
     while(unwrap(f.context.Get())->GetData(unwrap(event.Get()),nullptr,0,0)==S_FALSE){
         require(GetTickCount64()<deadline,"Native event query did not complete");Sleep(1);
     }
-    // The End occurred before recording: GetData alone must invalidate the
-    // frame rather than silently lose the application's completion dependency.
+    // End preceded recording: retain the actual observation and its pre-frame
+    // history. The encoder still refuses EVENT serialization.
     for(bool status_only:{false,true}){
         auto recording=begin_recording(f.context.Get());BOOL ready=FALSE;
         const auto result=f.context->GetData(event.Get(),status_only?nullptr:&ready,status_only?0:sizeof(ready),D3D11_ASYNC_GETDATA_DONOTFLUSH);
         require(result==S_OK && (status_only || ready==TRUE),"Query rejection changed the native result/output");
-        const auto frame=recording->finish();rejects([&]{frame.require_complete();},"ID3D11DeviceContext::GetData");
-        require(frame.gaps.front().find(status_only?"data_size=0, getdata_flags=1":"data_size=4, getdata_flags=1")!=std::string::npos,
-            "GetData failure omitted arguments");
+        const auto frame=recording->finish();frame.require_complete();require(frame.commands.size()==1,"GetData was omitted");
+        const auto& command=frame.commands[0];require(command.kind==CommandKind::query_get_data && command.result==result && command.words[0]==(status_only?0:4) && command.words[1]==1,"GetData arguments/result changed");
+        require(command.query && !command.query->end_sequence && command.query->last_end.generation==1 && command.query->has_output==!status_only && command.query->value==(status_only?std::optional<uint32_t>{}:std::optional<uint32_t>{uint32_t(ready)}),"Pre-frame EVENT history/result lost");
     }
     auto recovery=begin_recording(f.context.Get());f.context->Draw(3,0);recovery->finish().require_complete();
 }

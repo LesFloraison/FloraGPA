@@ -1004,3 +1004,50 @@ queries and vertex/index/constant/SRV buffer use. The encoder must reject any
 case whose semantics cannot be expressed and verified. No runtime, replay or
 format code changed in this research batch; native CTest/goldens/package results
 retain their previous commit scope.
+
+## Capture-owned EVENT observations
+
+The generated End and GetData proxies now retain EVENT observations after the
+native call. Each query has a persistent End generation and the issuing context,
+thread and immediate/deferred provenance. GetData stores its real HRESULT,
+DataSize, flags and output-pointer presence. Only S_OK with a valid EVENT output
+size copies an owned BOOL. Pending and failed calls never read the output pointer.
+A matching End in the same frame has an explicit command sequence; a pre-frame,
+unobserved or deferred End does not acquire an invented in-frame execution order.
+These are CPU observations, not a cross-context GPU completion proof.
+
+The observer performs identity/get-device operations only: it does not snapshot
+resources, poll queries, flush or enqueue GPU work before/after GetData. Query
+objects are retained until freezing, and the frozen model contains only owned
+values and stable IDs. Capture and its encoder remain independent of Replay/Core.
+CreateQuery and CreateQuery1 EVENT/ALL with zero miscellaneous flags are covered;
+other query types and Begin semantics still reject with located diagnostics.
+
+The encoder rejects every frame containing an EVENT observation before creating
+a temporary or final file. Recording a true completion result does not yet give
+the legacy GPA player an executable wait, so query serialization is still
+unsupported. The resource-renaming research above is not enabled in production.
+
+`FloraCaptureQueryTests` covers WARP and hardware, both query creation interfaces,
+repeated End, pre-frame results, deferred provenance, actual failed GetData,
+owned output after caller mutation, byte/command budgets, foreign-thread and
+reentrant calls, cancellation, native-object destruction and encoder refusal.
+Injected pending/failed callbacks use an inaccessible output address, never
+passed to D3D, to detect accidental reads deterministically. Native readiness is
+recorded as observed rather than asserting a timing-sensitive S_FALSE.
+
+Regression passes 28 capture-only and 26 full-profile capture CTests, including
+eleven Qt cases without skips. Query1 coverage added after the broad capture-only
+run passes three targeted suites; the subsequent located encoder error passes
+both profile checks. An initial invalid build-preset invocation and its corrected
+build are retained. Shared format and Replay code did not change, so no new
+golden or dual-player result is claimed. The previous committed-source package
+evidence retains its original commit scope.
+
+One fresh GF2 startup diagnostic reaches encoder rejection at selected-chain
+Present 238. The game continues presenting (3,517 successful Presents in the
+saved status), publishes no frame, disconnects and exits through normal window
+close. This is an early startup frame, not scene/dual-player acceptance. Its DLL
+hash predates the subsequent diagnostic-only addition of API/object/sequence to
+the rejection message. Logs, input hashes and scope are recorded in
+`artifacts/capture-event-model-validation.json`; accepted GF2 frames remain zero.

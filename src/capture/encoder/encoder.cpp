@@ -158,7 +158,12 @@ class Encoder {
 public:
     Encoder(const FrozenFrame& frame,const EncodeOptions& options):frame_(frame),options_(options){}
     void write(const std::filesystem::path& path){
-        checkpoint();require(!frame_.commands.empty(),"Encoder requires recorded commands");context_=frame_.commands.front().bindings.context;device_=frame_.commands.front().bindings.device;
+        checkpoint();
+        for(const auto& command:frame_.commands)
+            if(command.kind==CommandKind::query_end || command.kind==CommandKind::query_get_data)
+                throw std::runtime_error("EVENT query serialization is not verified; frame not published ("+
+                    command.api+", object="+std::to_string(command.operand)+", sequence="+std::to_string(command.sequence)+")");
+        require(!frame_.commands.empty(),"Encoder requires recorded commands");context_=frame_.commands.front().bindings.context;device_=frame_.commands.front().bindings.device;
         require(context_ && device_ && context_!=device_,"Encoder invalid context/device identities");
         ids_.emplace(context_,1);ids_.emplace(device_,2);
         for(const auto& [id,o]:frame_.objects){require(id && id==o.id,"Encoder object key/identity mismatch");if(!ids_.contains(id))ids_.emplace(id,allocate());}

@@ -56,6 +56,7 @@ struct FrameRecording::Impl {
     bool finished=false;
     struct Mapping {size_t command;D3D11_MAPPED_SUBRESOURCE mapped{};};
     std::map<std::pair<ObjectId,UINT>,Mapping> mappings;
+    std::map<ObjectId,std::pair<uint64_t,uint64_t>> query_ends; // generation, command sequence
     size_t payload_bytes=0;
     RecordedFrame frame;
     void gap(const char* api,const char* reason) noexcept {
@@ -193,6 +194,62 @@ void FrameRecording::observe(ID3D11DeviceContext* context,const char* api,Comman
         p.frame.commands.push_back(std::move(command));
     }catch(const std::exception& e){p.gap(api,e.what());}catch(...){p.gap(api,"Command observation failed");}
 }
+void FrameRecording::query(ID3D11DeviceContext* context,ID3D11Asynchronous* async,CommandKind kind,HRESULT result,const void* data,UINT size,UINT flags){
+    auto& p=*impl_;const auto* api=kind==CommandKind::query_end?"ID3D11DeviceContext::End":"ID3D11DeviceContext::GetData";
+    if(GetCurrentThreadId()!=p.thread){const char* empty=nullptr;p.foreign_call.compare_exchange_strong(empty,api);return;}
+    if(native_call_depth>1){const char* empty=nullptr;p.reentrant_call.compare_exchange_strong(empty,api);return;}
+    std::lock_guard lock(p.mutex);
+    if(p.finished || p.frame.failed || p.cancelled || p.foreign_call.load() || p.reentrant_call.load())return;
+    try{
+        if(kind!=CommandKind::query_end && kind!=CommandKind::query_get_data)throw std::runtime_error("Invalid query observation kind");
+        auto c=object_record(context),q=object_record(async);
+        if(!c || c->id!=p.context_id)throw std::runtime_error("Multiple context query execution is unsupported");
+        if(!q || q->device!=c->device)throw std::runtime_error("Query identity/device mismatch");
+        D3D11_QUERY_DESC desc{};QueryObservation observation;bool supported=false;
+        {
+            std::lock_guard query_lock(q->mutex);
+            if((q->kind=="query" || q->kind=="query1") && q->descriptor.size()>=sizeof(desc)){
+                memcpy(&desc,q->descriptor.data(),sizeof(desc));supported=desc.Query==D3D11_QUERY_EVENT && desc.MiscFlags==0;
+                if(q->kind=="query1"){
+                    if(q->descriptor.size()!=sizeof(D3D11_QUERY_DESC1))supported=false;
+                    else{D3D11_QUERY_DESC1 extended{};memcpy(&extended,q->descriptor.data(),sizeof(extended));supported=supported && extended.ContextType==D3D11_CONTEXT_TYPE_ALL;}
+                }
+            }
+            observation.last_end=q->last_query_end;
+        }
+        if(!supported)throw std::runtime_error(query_gap(async,api,{size,flags}));
+        if(p.frame.commands.size()>=p.options.command_limit)throw std::runtime_error("Frame command limit exceeded");
+        const auto& stamp=observation.last_end;
+        if(kind==CommandKind::query_end){
+            if(!stamp.generation || stamp.context!=p.context_id || stamp.thread!=p.thread || !stamp.immediate)
+                throw std::runtime_error("EVENT End observation does not match native history");
+            observation.end_sequence=p.frame.commands.size();
+        }else{
+            if(result>=0 && result!=S_OK && result!=S_FALSE)throw std::runtime_error("Unexpected GetData success status");
+            if(flags&~D3D11_ASYNC_GETDATA_DONOTFLUSH)throw std::runtime_error("Unsupported GetData flags");
+            observation.has_output=data!=nullptr;
+            if(result==S_OK){
+                if((data && size!=sizeof(BOOL)) || (!data && size))throw std::runtime_error("Invalid successful EVENT GetData output size");
+                if(data){
+                    if(p.options.byte_limit-p.frame.initial_bytes-p.payload_bytes<sizeof(BOOL))throw std::runtime_error("Query result exceeds frame byte limit");
+                    uint32_t value;memcpy(&value,data,sizeof(value));observation.value=value;
+                }
+            }
+            if(auto end=p.query_ends.find(q->id);end!=p.query_ends.end() && end->second.first==stamp.generation)
+                observation.end_sequence=end->second.second;
+        }
+        // These getters/identity operations issue no GPU work. In particular,
+        // do not call snapshot_context/resource or poll the query internally.
+        ContextSnapshot held;held.bindings.context=p.context_id;held.bindings.device=c->device;
+        retain(held,context);retain(held,async);ComPtr<ID3D11Device> device;unwrap(context)->GetDevice(&device);retain(held,device.Get());
+        RecordedCommand command;command.kind=kind;command.api=api;command.sequence=p.frame.commands.size();
+        command.operand=q->id;command.words={size,flags};command.result=result;command.completed=true;
+        command.query=observation;command.bindings=std::move(held.bindings);
+        p.frame.commands.push_back(std::move(command));p.frame.objects.merge(held.objects);
+        if(observation.value)p.payload_bytes+=sizeof(BOOL);
+        if(kind==CommandKind::query_end)p.query_ends[q->id]={stamp.generation,p.frame.commands.back().sequence};
+    }catch(const std::exception& e){p.gap(api,e.what());}catch(...){p.gap(api,"Query observation failed");}
+}
 void FrameRecording::mapped(ID3D11DeviceContext* context,ID3D11Resource* resource,UINT subresource,HRESULT result,const D3D11_MAPPED_SUBRESOURCE* mapped){
     auto& p=*impl_;constexpr auto api="ID3D11DeviceContext::Map";
     if(GetCurrentThreadId()!=p.thread){const char* empty=nullptr;p.foreign_call.compare_exchange_strong(empty,api);return;}
@@ -254,6 +311,13 @@ void record_external_call(const char* api) noexcept {
     LastErrorScope last_error;
     try{std::shared_ptr<FrameRecording> active;{std::lock_guard lock(r.mutex);active=r.active.lock();}if(active)active->reject_external(api);}
     catch(...){object_gap(api,__uuidof(IUnknown),"External frame observer failed");}
+}
+void record_query_observation(ID3D11DeviceContext* context,ID3D11Asynchronous* async,CommandKind kind,HRESULT result,const void* data,UINT size,UINT flags) noexcept {
+    capture_context_activity();auto& r=registry();if(!r.enabled.load(std::memory_order_relaxed))return;
+    LastErrorScope last_error;
+    try{std::shared_ptr<FrameRecording> active;{std::lock_guard lock(r.mutex);active=r.active.lock();}
+        if(active)active->query(context,async,kind,result,data,size,flags);
+    }catch(...){object_gap("Query observation",__uuidof(ID3D11DeviceContext),"Frame observer failed");}
 }
 void record_context_call(ID3D11DeviceContext* context,const char* api,CommandKind kind,std::array<uint32_t,5> words,IUnknown* operand,const float* floats,const UINT* integers,IUnknown* source) noexcept {
     capture_context_activity();

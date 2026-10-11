@@ -9,7 +9,7 @@
     "B": "native launch/control and capture-only package validated",
     "C": "partial: persistent native identity, descriptor graph and owned buffer/texture/shader/input-layout/SO creation metadata validated; other creation paths pending",
     "D": "partial: startup-injected blit/flip/tearing capture with dynamic mapped constants; dual-player execution verified on self-owned targets",
-    "E": "partial: Map/Unmap, initial resources and same-format whole CopyResource validated; GF2 explicitly rejects EVENT GetData; Query, Update/region copies, deferred and hidden-state coverage pending",
+    "E": "partial: Map/Unmap, initial resources and whole CopyResource validated; EVENT observations retained but serialization rejects; Update/region copies, deferred and hidden-state coverage pending",
     "F": "partial: native CLI and asynchronous Qt capture/cancel/disconnect/completed-file opening tested; full profile/deployment acceptance pending",
     "G": "pending: no six-frame GF2 or original GUI capture acceptance"
   },
@@ -26,8 +26,8 @@
     "existing_golden_controls": 4,
     "native_authored_interop_checks": 22,
     "source_build_steps": 6,
-    "capture_only_ctest": 25,
-    "full_profile_capture_ctest": 23,
+    "capture_only_ctest": 28,
+    "full_profile_capture_ctest": 26,
     "native_object_lifetimes": 36,
     "additional_existing_structure_ctest": 2,
     "observed_model_interop_checks": 94,
@@ -220,7 +220,31 @@
     "capture-query-renaming/validation.json": "4ee11291686cf44501a07bd44ac9754ca86b8cce0bddfea75b3905e8f05becd6",
     "capture-query-renaming-final/validation.json": "b12b3fa8e627f1da577fe2283a92f5172fdcbd6c4c2c7131489faaa924b005ca",
     "capture-query-renaming-bounded/validation.json": "e5f6cd9e103ee0dc7aae76768236f16524bf1cda61db37b29f5b406a05ec42cf",
-    "capture-query-renaming-verified/validation.json": "f1cdaa757c83b2a899ff7278214c7004f629c5d4cd08f2bec00173f582217dbd"
+    "capture-query-renaming-verified/validation.json": "f1cdaa757c83b2a899ff7278214c7004f629c5d4cd08f2bec00173f582217dbd",
+    "capture-event-model-ctest.txt": "e5d2bdfb8429ae68ff435a8c7a4155d0a5d4d1d8253c0f7952af2c5811a01249",
+    "capture-event-model-query1-ctest.txt": "031788e1aaf052fcce6a917bff99f815203409748c62f7d9b43ff1d6bf4397d8",
+    "capture-event-model-full-ctest.txt": "2817969f9890728444ef6b2bd7caa448fefb313e3dcfb0393af1082fa2916ad8",
+    "capture-event-model-qt.txt": "d472217407e84c77413eac00982f58aeaab277e0ea897d746b6f25dff15b37bb",
+    "capture-event-model-diagnostic-ctest.txt": "e828f1258584353b667f4f85c2dae8aca22c62cc5b14c29ad5684e3724962e7e",
+    "capture-event-model-diagnostic-full-ctest.txt": "db5af17d0f78dea8db3848115e92a5a0009a249200e56eafadd93bc024f57ddf",
+    "capture-event-model-build.txt": "63339373fad7fdabe6b2dfc274b8bec4c36cddd107ffeb5c0a13cada229e9985",
+    "capture-event-model-full-build.txt": "717eef5c1c0f61573f231c8209cc0678d76c98a579a7aae09061920a35b5d146",
+    "capture-event-model-full-build-corrected.txt": "246c2b1330f0f91fac31d5922bb01c6728e0e6f4fcb5f796a476e39ffdbf590b",
+    "capture-event-model-query1-build.txt": "4c5b85cc27eddcb582d3dc99ccf140fb3114388b83b68be643a67f43192b72f6",
+    "capture-event-model-query1-full-build.txt": "b86f0e7d1a7c011564c1a3a7462b2acba2fb77c404e3ff1994f13ed874a9e8e7",
+    "capture-event-model-diagnostic-build.txt": "90d9c20369fe5cb00a3fcd09699a5589b801b01be624b973808fdb8eae03df0a",
+    "capture-event-model-diagnostic-full-build.txt": "5b6a96ab0dca416af565dd731e9a558ee3c9c5b73c4ec5c41b3a3ca4a86687aa",
+    "capture-event-model-gf2/binaries.json": "c07dfe95cba60c2953235b6293f6cf27dd99c527df3d0c1acadbf5169d524d73",
+    "capture-event-model-gf2/close.json": "e2cca8190b61db5667828f76fc42546b6633d6b5afc1db4ba87bb00e5b31e742",
+    "capture-event-model-gf2/disconnect.json": "ae9186bb1b16b88a77ca44720107d4d4827042a49d62f0bf7032fc88a3dc09be",
+    "capture-event-model-gf2/launch.json": "dc3740cd107e56d0527ed91a540d9dbbe06f661fdf48604cc2c28395fdaf3add",
+    "capture-event-model-gf2/request.json": "f5b1f2b62a16cbd2f910d37528078bdf286ac2accf51ece1fa8e8680e0a57f62",
+    "capture-event-model-gf2/session.json": "14724195e9b3fe063f4143d5def8b3b3cd7b5d9e5c361614f31efd50ef706ebb",
+    "capture-event-model-gf2/status-after.json": "0c958af0d8262a22a7caa71b7883dea29e59f81d9db70f3c5e4f8bf88616499b",
+    "capture-event-model-gf2/status-before.json": "95358566d6860868c2264760d6a45141d57c22a465d52fd094c8b5a6336d1ca7",
+    "capture-event-model-gf2/target.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "capture-event-model-gf2/unity.log": "514a286e6a60b4e549fb651364f6ded8dbb72917696767bae56ee08200071faa",
+    "capture-event-model-validation.json": "cb2f65e87b4a5f312dec743bfaf9e559aee53ab4ae22af24ad000bc594e7f523"
   },
   "limitations": [
     "GPA original-player checks use a development-only private ABI harness.",
@@ -487,5 +511,28 @@
     "original_api_provenance_preserved": false,
     "original_gui_verified": false,
     "gf2_acceptance": false
+  },
+  "event_query_model": {
+    "status": "owned observations implemented; serialization explicitly unsupported",
+    "backends": [
+      "WARP",
+      "hardware"
+    ],
+    "query_creation": [
+      "CreateQuery",
+      "CreateQuery1(EVENT/ALL)"
+    ],
+    "end_generations": true,
+    "preframe_and_deferred_provenance": true,
+    "getdata_native_hresult": true,
+    "bool_copied_only_after_s_ok": true,
+    "pending_and_failed_output_not_read": true,
+    "observer_gpu_work": false,
+    "frozen_native_objects_dead": true,
+    "encoder_rejects_before_file_creation": true,
+    "gf2_scope": "one early startup frame reaches encoder and rejects; no acceptance",
+    "gf2_present_ordinal": 238,
+    "gf2_published_frames": 0,
+    "gf2_normal_exit": true
   }
 }

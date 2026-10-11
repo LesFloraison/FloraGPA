@@ -169,9 +169,16 @@ std::shared_ptr<ObjectRecord> find_native_record(IUnknown* identity) {
 void track_query(const void* context_proxy,IUnknown* query,bool begin) noexcept {
     try {
         auto context=object_record(context_proxy),record=object_record(query);
-        if(!context || !record)throw std::runtime_error("Query/context metadata unavailable");
-        std::lock_guard lock(context->mutex);
-        if(begin)context->active_queries.insert(record->id);else context->active_queries.erase(record->id);
+        if(!context || !record || context==record)throw std::runtime_error("Query/context metadata unavailable");
+        std::scoped_lock lock(context->mutex,record->mutex);
+        if(begin)context->active_queries.insert(record->id);
+        else{
+            context->active_queries.erase(record->id);
+            if(record->last_query_end.generation==UINT64_MAX || context->descriptor.size()!=sizeof(ContextRecordDesc))
+                throw std::runtime_error("Query End history unavailable");
+            ContextRecordDesc desc{};memcpy(&desc,context->descriptor.data(),sizeof(desc));
+            record->last_query_end={record->last_query_end.generation+1,context->id,GetCurrentThreadId(),desc.type==D3D11_DEVICE_CONTEXT_IMMEDIATE};
+        }
     } catch (...) {object_gap(begin?"Begin":"End",__uuidof(ID3D11Asynchronous),"Query activity tracking failed");}
 }
 void track_external_mapping(const void* proxy,bool mapped) noexcept {

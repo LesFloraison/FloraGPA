@@ -33,6 +33,7 @@ public:
         IUnknown*,const float*,const UINT*,IUnknown* source=nullptr);
     void mapped(ID3D11DeviceContext*,ID3D11Resource*,UINT,HRESULT,const D3D11_MAPPED_SUBRESOURCE*);
     void unmap(ID3D11DeviceContext*,ID3D11Resource*,UINT);
+    void query(ID3D11DeviceContext*,ID3D11Asynchronous*,CommandKind,HRESULT,const void*,UINT,UINT);
     void reject_external(const char*);
 };
 // Temporary single-thread/immediate-context recorder. Caller owns the frame
@@ -46,5 +47,8 @@ void record_context_call(ID3D11DeviceContext*,const char*,CommandKind,
     std::array<uint32_t,5> words={},IUnknown* operand=nullptr,const float* floats=nullptr,const UINT* integers=nullptr,IUnknown* source=nullptr) noexcept;
 void record_map_result(ID3D11DeviceContext*,ID3D11Resource*,UINT,HRESULT,const D3D11_MAPPED_SUBRESOURCE*) noexcept;
 void record_unmap(ID3D11DeviceContext*,ID3D11Resource*,UINT) noexcept;
+// Post-native only. Never read pending/failed output or retain caller pointers.
+void record_query_observation(ID3D11DeviceContext*,ID3D11Asynchronous*,CommandKind,
+    HRESULT result=S_OK,const void* data=nullptr,UINT size=0,UINT flags=0) noexcept;
 void record_external_call(const char* api) noexcept;
 }

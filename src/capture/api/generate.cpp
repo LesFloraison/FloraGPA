@@ -78,6 +78,8 @@ void method(std::ostream& out, const std::string& iface, const Json& m) {
         post += "track_mapping(static_cast<IUnknown*>(&owner_), pResource, Subresource, " + std::string(name=="Map"?"true":"false") + ");\n";
     if (iface == "ID3D11DeviceContext" && (name == "Begin" || name == "End"))
         post += "track_query(static_cast<IUnknown*>(&owner_), pAsync, " + std::string(name=="Begin"?"true":"false") + ");\n";
+    if (iface == "ID3D11DeviceContext" && name == "End")
+        post += "record_query_observation(this, pAsync, CommandKind::query_end);\n";
     if ((iface=="IDXGISurface" && (name=="Map" || name=="Unmap")) ||
         (iface=="IDXGISurface1" && (name=="GetDC" || name=="ReleaseDC")))
         post += "track_external_mapping(static_cast<IUnknown*>(&owner_), " + std::string(name=="Map" || name=="GetDC"?"true":"false") + ");\n";
@@ -116,6 +118,9 @@ void method(std::ostream& out, const std::string& iface, const Json& m) {
         // a passive state getter, even when the query End preceded this frame.
         else if(name=="Begin" || name=="End" || name=="GetData") {
             operand="pAsync";
+            // End/GetData have mandatory post-native observers. Do not sample
+            // resources or issue GPU work before the application's GetData.
+            if(name!="Begin")kind="read";
             if(name=="GetData")words="{DataSize,GetDataFlags}";
         }
         else if(name.find("Get")!=std::string::npos || name=="Flush" || name=="Flush1")kind="read";
@@ -131,6 +136,7 @@ void method(std::ostream& out, const std::string& iface, const Json& m) {
     if (result != "void") out << "auto result = ";
     out << "target->" << name << "(" << args << ");\nconst DWORD after = GetLastError();\n";
     if(iface=="ID3D11DeviceContext" && name=="Map")out << "record_map_result(this, pResource, Subresource, result, pMappedResource);\n";
+    if(iface=="ID3D11DeviceContext" && name=="GetData")out << "record_query_observation(this, pAsync, CommandKind::query_get_data, result, pData, DataSize, GetDataFlags);\n";
     if (!post.empty()) {
         if (result == "HRESULT") out << "if (SUCCEEDED(result)) {\n";
         out << post;
