@@ -11,6 +11,7 @@ using namespace flora::capture;
 using Microsoft::WRL::ComPtr;
 namespace fs=std::filesystem;
 namespace {
+DXGI_SWAP_EFFECT test_effect=DXGI_SWAP_EFFECT_DISCARD;UINT test_buffers=1;
 void require(bool v,const char* why){if(!v)throw std::runtime_error(why);}
 void check(HRESULT hr){require(SUCCEEDED(hr),"Present oracle HRESULT failed");}
 LRESULT CALLBACK proc(HWND w,UINT m,WPARAM a,LPARAM b){return DefWindowProcW(w,m,a,b);}
@@ -21,7 +22,7 @@ struct Fixture {
     Fixture(){
         WNDCLASSW cls{};cls.lpfnWndProc=proc;cls.hInstance=GetModuleHandleW(nullptr);cls.lpszClassName=L"FloraPresentCaptureOracle";RegisterClassW(&cls);
         window=CreateWindowW(cls.lpszClassName,L"Flora capture boundary test",WS_OVERLAPPEDWINDOW,0,0,160,160,nullptr,nullptr,cls.hInstance,nullptr);require(window!=nullptr,"Cannot create capture test window");ShowWindow(window,SW_SHOWNOACTIVATE);
-        DXGI_SWAP_CHAIN_DESC d{};d.BufferDesc.Width=d.BufferDesc.Height=8;d.BufferDesc.Format=DXGI_FORMAT_R8G8B8A8_UNORM;d.SampleDesc.Count=1;d.BufferUsage=DXGI_USAGE_RENDER_TARGET_OUTPUT;d.BufferCount=1;d.OutputWindow=window;d.Windowed=TRUE;d.SwapEffect=DXGI_SWAP_EFFECT_DISCARD;
+        DXGI_SWAP_CHAIN_DESC d{};d.BufferDesc.Width=d.BufferDesc.Height=8;d.BufferDesc.Format=DXGI_FORMAT_R8G8B8A8_UNORM;d.SampleDesc.Count=1;d.BufferUsage=DXGI_USAGE_RENDER_TARGET_OUTPUT;d.BufferCount=test_buffers;d.OutputWindow=window;d.Windowed=TRUE;d.SwapEffect=test_effect;
         check(D3D11CreateDeviceAndSwapChain(nullptr,D3D_DRIVER_TYPE_HARDWARE,nullptr,0,nullptr,0,D3D11_SDK_VERSION,&d,&swap,&device,nullptr,&context));
         wrap_swap_chain(swap.GetAddressOf());wrap_object(device.GetAddressOf(),"PresentTest::Device");wrap_object(context.GetAddressOf(),"PresentTest::Context");
         const auto observed=swap_chain_status();for(const auto& row:observed["active"])if(row["window"]==reinterpret_cast<uintptr_t>(window))id=row["id"].get<uint64_t>();require(id!=0,"Missing observed swap identity");
@@ -32,7 +33,7 @@ struct Fixture {
         context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);D3D11_VIEWPORT viewport{0,0,8,8,0,1};context->RSSetViewports(1,&viewport);
     }
     void target(){ComPtr<ID3D11Texture2D> buffer;check(swap->GetBuffer(0,IID_PPV_ARGS(&buffer)));check(device->CreateRenderTargetView(buffer.Get(),nullptr,&rtv));auto* view=rtv.Get();context->OMSetRenderTargets(1,&view,nullptr);}
-    void draw(){const float black[]{0,0,0,1};context->ClearRenderTargetView(rtv.Get(),black);context->Draw(3,0);}
+    void draw(){auto* view=rtv.Get();context->OMSetRenderTargets(1,&view,nullptr);const float black[]{0,0,0,1};context->ClearRenderTargetView(rtv.Get(),black);context->Draw(3,0);}
     void present(bool extended=false,UINT flags=0){if(extended){ComPtr<IDXGISwapChain1> v;check(swap.As(&v));DXGI_PRESENT_PARAMETERS p{};check(v->Present1(0,flags,&p));}else check(swap->Present(0,flags));}
     ~Fixture(){context->ClearState();context->Flush();rtv.Reset();swap.Reset();context.Reset();device.Reset();DestroyWindow(window);}
 };
@@ -41,7 +42,7 @@ Json control_cancel(){return std::async(std::launch::async,[]{return cancel_capt
 Json settled(){for(unsigned i=0;i<1000;++i){auto p=capture_progress();if(!p.value("busy",false))return p;Sleep(5);}throw std::runtime_error("Capture transaction did not settle");}
 }
 int wmain(int argc,wchar_t** argv){try{
-    require(argc==2,"Expected new output directory");const auto out=fs::absolute(argv[1]);require(!fs::exists(out),"Test output directory must be new");fs::create_directories(out);Json results=Json::array(),races=Json::array(),faults=Json::array();
+    require(argc==2 || argc==3,"Expected new output directory and optional flip mode");if(argc==3){const auto mode=std::stoul(argv[2]);test_effect=mode==1?DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL:DXGI_SWAP_EFFECT_FLIP_DISCARD;test_buffers=mode==1?2:3;}const auto out=fs::absolute(argv[1]);require(!fs::exists(out),"Test output directory must be new");fs::create_directories(out);Json results=Json::array(),races=Json::array(),faults=Json::array();
     {
         Fixture f;f.draw();f.present();require(!control_arm(UINT64_MAX,out/L"unknown.gpa_frame")["ok"],"Unknown swap accepted");
         for(unsigned i=0;i<3;++i){
@@ -54,7 +55,7 @@ int wmain(int argc,wchar_t** argv){try{
         require(!control_arm(f.id,out/L"frame-0.gpa_frame")["ok"],"Existing capture accepted");
         require(control_arm(f.id,out/L"cancel-armed.gpa_frame")["ok"],"Cannot arm cancellation test");require(control_cancel()["cancelled"],"Armed cancellation failed");
         require(control_arm(f.id,out/L"cancel-recording.gpa_frame")["ok"],"Cannot arm active cancellation");f.present();f.draw();control_cancel();require(capture_progress()["busy"],"Cancelled GPU model released on control path");f.present();require(settled()["state"]=="Cancelled","Active cancellation not settled");
-        require(control_arm(f.id,out/L"resize.gpa_frame")["ok"],"Cannot arm resize test");f.present();f.draw();f.context->OMSetRenderTargets(0,nullptr,nullptr);f.rtv.Reset();check(f.swap->ResizeBuffers(1,8,8,DXGI_FORMAT_R8G8B8A8_UNORM,0));require(settled()["state"]=="Failed","Resize did not reject frame");f.target();
+        require(control_arm(f.id,out/L"resize.gpa_frame")["ok"],"Cannot arm resize test");f.present();f.draw();f.context->OMSetRenderTargets(0,nullptr,nullptr);f.rtv.Reset();check(f.swap->ResizeBuffers(0,8,8,DXGI_FORMAT_R8G8B8A8_UNORM,0));require(settled()["state"]=="Failed","Resize did not reject frame");f.target();
         require(control_arm(f.id,out/L"unsupported.gpa_frame")["ok"],"Cannot arm unsupported test");f.present();f.draw();{ComPtr<ID3D11Texture2D> buffer;check(f.swap->GetBuffer(0,IID_PPV_ARGS(&buffer)));std::array<UINT,64> pixels{};f.context->UpdateSubresource(buffer.Get(),0,nullptr,pixels.data(),32,256);}f.present();require(settled()["state"]=="Failed","Unsupported call was silently omitted");
         require(control_arm(f.id,out/L"boundary-gap.gpa_frame")["ok"],"Cannot arm boundary gap test");f.present();f.draw();capture_before_present(f.id,nullptr,0,false);f.draw();capture_after_present(f.id,nullptr,0,0,false,S_OK);require(settled()["state"]=="Failed","Context call inside Present boundary was omitted");
         for(unsigned i=0;i<12;++i){

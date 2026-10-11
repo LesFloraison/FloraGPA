@@ -16,6 +16,7 @@ struct Request {
     std::filesystem::path output;
     std::mutex operation,publication,report;
     std::atomic<bool> cancelled=false,published=false,released=false,writing=false,aborted=false;
+    std::atomic<uint64_t> present_ordinal=0;
     Phase phase=Phase::Armed;
     std::string error;
     DWORD owner=0;
@@ -43,6 +44,7 @@ Json progress(const std::shared_ptr<Request>& r){
     const bool terminal=r->phase==Phase::Completed || r->phase==Phase::Cancelled || r->phase==Phase::Failed;
     Json result={{"state",name(r->phase)},{"swap_chain",r->id},{"busy",!terminal || !r->released.load()},{"cancel_requested",r->cancelled.load()}};
     if(r->published){result["state"]="Completed";const auto path=r->output.u8string();result["file"]=std::string(path.begin(),path.end());}
+    if(r->present_ordinal)result["present_ordinal"]=r->present_ordinal.load();
     if(!r->error.empty())result["error"]=r->error;
     return result;
 }
@@ -50,8 +52,8 @@ void stopped(Request& r,const char* reason){boundary_open=false;r.cancelled=true
 void start(Request& r,IDXGISwapChain* swap){
     check(swap->GetDesc(&r.descriptor),"Cannot query capture swap-chain descriptor");
     const auto& d=r.descriptor;
-    if((d.SwapEffect!=DXGI_SWAP_EFFECT_DISCARD && d.SwapEffect!=DXGI_SWAP_EFFECT_SEQUENTIAL) || d.BufferCount!=1 || d.SampleDesc.Count!=1)
-        throw std::runtime_error("Flip/multiple-buffer/MSAA capture is not implemented");
+    if(!supported_swap_buffers(d.SwapEffect,d.BufferCount) || d.SampleDesc.Count!=1 || d.SampleDesc.Quality!=0)
+        throw std::runtime_error("Unsupported swap effect/buffer count or MSAA");
     if(d.BufferDesc.Format!=DXGI_FORMAT_R8G8B8A8_UNORM && d.BufferDesc.Format!=DXGI_FORMAT_B8G8R8A8_UNORM)
         throw std::runtime_error("Capture output format is not implemented");
     ComPtr<ID3D11Device> device;check(swap->GetDevice(IID_PPV_ARGS(&device)),"Swap chain has no DX11 device");
@@ -59,7 +61,13 @@ void start(Request& r,IDXGISwapChain* swap){
     check(swap->GetBuffer(0,IID_PPV_ARGS(&r.buffer)),"Cannot get capture backbuffer");wrap_object(r.buffer.GetAddressOf(),"Capture::Backbuffer");
     r.owner=GetCurrentThreadId();r.recording=begin_recording(r.context.Get());r.state(Phase::Capturing);
 }
-void finish(Request& r){
+void finish(Request& r,IDXGISwapChain* swap){
+    if(swap){
+        ComPtr<IUnknown> current,retained;
+        check(swap->GetBuffer(0,IID_PPV_ARGS(&current)),"Cannot identify ending backbuffer");
+        check(unwrap(r.buffer.Get())->QueryInterface(IID_PPV_ARGS(&retained)),"Cannot identify retained backbuffer");
+        if(current!=retained)throw std::runtime_error("DX11 logical backbuffer identity changed during capture");
+    }
     if(r.owner!=GetCurrentThreadId())throw std::runtime_error("Present moved to another application thread");
     boundary_open=true;
     auto frame=r.recording->finish();frame.require_complete();
@@ -105,7 +113,7 @@ Json cancel_capture(){
     auto result=progress(r);result["ok"]=true;result["cancelled"]=r->state()==Phase::Cancelled;return result;
 }
 void disconnect_capture(){auto& s=service();{std::lock_guard lock(s.mutex);s.disconnected=true;}cancel_capture();}
-void capture_before_present(uint64_t id,IDXGISwapChain*,UINT flags,bool partial) noexcept {
+void capture_before_present(uint64_t id,IDXGISwapChain* native,UINT flags,bool partial) noexcept {
     LastErrorScope error;if(flags&DXGI_PRESENT_TEST)return;
     auto r=active();if(!r || r->terminal() || r->writing)return;
     if(r->id!=id){record_external_call("Other swap-chain Present during capture");return;}
@@ -114,13 +122,13 @@ void capture_before_present(uint64_t id,IDXGISwapChain*,UINT flags,bool partial)
     try{
         if(r->aborted)throw std::runtime_error("Concurrent swap-chain callback is unsupported");
         if(r->cancelled){stopped(*r,"Capture cancelled");return;}
-        if(flags)throw std::runtime_error("Nonzero Present flags capture is not implemented");
+        if(flags&~DXGI_PRESENT_ALLOW_TEARING)throw std::runtime_error("Unsupported Present flags: "+std::to_string(flags));
         if(partial)throw std::runtime_error("Dirty/scroll Present1 capture is not implemented");
-        if(r->state()==Phase::Capturing)finish(*r);
+        if(r->state()==Phase::Capturing)finish(*r,native);
     }catch(const std::exception& e){boundary_open=false;r->release();r->pending.reset();r->fail(e.what());}
     catch(...){boundary_open=false;r->release();r->pending.reset();r->fail("Present snapshot failed");}
 }
-void capture_after_present(uint64_t id,IDXGISwapChain* native,UINT interval,UINT flags,bool extended,HRESULT result) noexcept {
+void capture_after_present(uint64_t id,IDXGISwapChain* native,UINT interval,UINT flags,bool extended,HRESULT result,uint64_t present_ordinal) noexcept {
     LastErrorScope error;if(flags&DXGI_PRESENT_TEST)return;
     auto r=active();if(!r || r->id!=id || r->terminal() || r->writing)return;
     std::unique_lock operation(r->operation,std::try_to_lock);
@@ -132,6 +140,7 @@ void capture_after_present(uint64_t id,IDXGISwapChain* native,UINT interval,UINT
         if(result!=S_OK){boundary_open=false;r->release();r->pending.reset();r->fail("Present failed or was occluded");return;}
         if(r->state()==Phase::Armed)start(*r,native);
         else if(r->state()==Phase::Finalizing && r->pending){
+            r->present_ordinal=present_ordinal;
             r->pending->presentation=Presentation{r->descriptor,interval,flags,extended};publish(r);
         }
     }catch(const std::exception& e){boundary_open=false;r->release();r->pending.reset();r->fail(e.what());}

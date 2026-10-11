@@ -15,7 +15,7 @@ namespace {
 class SwapChain;
 struct Observation {
     std::uint64_t id=0;
-    UINT width=0,height=0,format=0,buffers=0,samples=0,effect=0;
+    UINT width=0,height=0,format=0,buffers=0,samples=0,effect=0,last_flags=0,last_interval=0;
     uint64_t last_present_tick=0;
     std::uintptr_t window=0;
     std::uint64_t present_calls=0,present1_calls=0,present_tests=0,presented=0;
@@ -73,13 +73,15 @@ class SwapChain final:public IDXGISwapChain4,public IDXGISwapChainMedia {
         SetLastError(before);auto result=f(view);const DWORD after=GetLastError();
         view->Release();SetLastError(after);return result;
     }
-    void presented(UINT flags,HRESULT result,bool extended_call) noexcept {
+    uint64_t presented(UINT flags,HRESULT result,bool extended_call,UINT interval) noexcept {
+        uint64_t ordinal=0;
         observe([&](Observation& o){
-            ++o.present_calls;if(extended_call)++o.present1_calls;o.last_present=result;
+            o.last_flags=flags;o.last_interval=interval;++o.present_calls;if(extended_call)++o.present1_calls;o.last_present=result;
             if(flags&DXGI_PRESENT_TEST)++o.present_tests;
             else if(result==S_OK){++o.presented;o.last_present_tick=GetTickCount64();}
             else ++o.unsuccessful_presents;
-        });
+            ordinal=o.presented;
+        });return ordinal;
     }
     void resized(HRESULT result) noexcept {
         const DWORD error=GetLastError();DXGI_SWAP_CHAIN_DESC desc{};
@@ -151,13 +153,13 @@ public:
     }
     HRESULT STDMETHODCALLTYPE Present(UINT interval,UINT flags) override {
         capture_before_present(id_,real_,flags,false);
-        const auto result=real_->Present(interval,flags);presented(flags,result,false);
-        capture_after_present(id_,real_,interval,flags,false,result);return result;
+        const auto result=real_->Present(interval,flags);const auto ordinal=presented(flags,result,false,interval);
+        capture_after_present(id_,real_,interval,flags,false,result,ordinal);return result;
     }
     HRESULT STDMETHODCALLTYPE Present1(UINT interval,UINT flags,const DXGI_PRESENT_PARAMETERS* parameters) override {
         capture_before_present(id_,real_,flags,parameters && (parameters->DirtyRectsCount || parameters->pScrollRect || parameters->pScrollOffset));
         const auto result=extended<IDXGISwapChain1>([&](auto* p){return p->Present1(interval,flags,parameters);});
-        presented(flags,result,true);capture_after_present(id_,real_,interval,flags,true,result);return result;
+        const auto ordinal=presented(flags,result,true,interval);capture_after_present(id_,real_,interval,flags,true,result,ordinal);return result;
     }
     HRESULT STDMETHODCALLTYPE ResizeBuffers(UINT count,UINT width,UINT height,DXGI_FORMAT format,UINT flags) override {
         capture_invalidate_swap(id_,"ResizeBuffers interrupted capture");
@@ -245,7 +247,7 @@ Json swap_chain_status(){
             {"buffer_count",o.buffers},{"samples",o.samples},{"swap_effect",o.effect},
             {"recent_present",o.last_present_tick!=0 && GetTickCount64()-o.last_present_tick<5000},
             {"foreground",o.window!=0 && o.window==reinterpret_cast<uintptr_t>(GetForegroundWindow())},
-            {"present_calls",o.present_calls},{"present1_calls",o.present1_calls},{"test_presents",o.present_tests},
+            {"last_present_flags",o.last_flags},{"last_sync_interval",o.last_interval},{"present_calls",o.present_calls},{"present1_calls",o.present1_calls},{"test_presents",o.present_tests},
             {"successful_presents",o.presented},{"unsuccessful_presents",o.unsuccessful_presents},
             {"last_present_result",static_cast<std::uint32_t>(o.last_present)},{"resize_calls",o.resizes},
             {"failed_resizes",o.failed_resizes},{"last_resize_result",static_cast<std::uint32_t>(o.last_resize)},

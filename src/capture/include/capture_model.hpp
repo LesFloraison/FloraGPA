@@ -85,6 +85,13 @@ struct FrozenObject {
     bool creation_observed=false;
 };
 struct ResourceContents { ResourceShape shape; std::vector<SubresourceData> subresources; };
+// Native DX11 exposes logical backbuffer zero across presentation. Buffer count
+// and swap effect remain the actual application descriptor in the wire record.
+inline bool supported_swap_buffers(UINT effect,UINT count){
+    if(effect==DXGI_SWAP_EFFECT_DISCARD || effect==DXGI_SWAP_EFFECT_SEQUENTIAL)return count>=1 && count<=16;
+    if(effect==DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL || effect==DXGI_SWAP_EFFECT_FLIP_DISCARD)return count>=2 && count<=16;
+    return false;
+}
 struct Presentation {
     DXGI_SWAP_CHAIN_DESC descriptor{};
     UINT sync_interval=0,flags=0;

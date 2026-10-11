@@ -55,7 +55,7 @@ struct Harness {
 }
 int wmain(int argc,wchar_t** argv){try{
     require(argc==4,"Expected controller, target and new output directory");const auto out=fs::absolute(argv[3]);require(!signal_exists(out),"Output exists");Json results=Json::array();
-    for(unsigned mode=0;mode<2;++mode){
+    for(unsigned mode=0;mode<11;++mode){
         Harness h(fs::absolute(argv[1]),fs::absolute(argv[2]),out/std::to_wstring(mode));h.launch(mode);h.reject_bad_identity();
         auto status=h.call(L"status");require(status["capture_available"],"Live target profile was not available");const auto id=std::to_wstring(status["swap_chains"]["active"][0]["id"].get<uint64_t>());
         h.pause();h.call(L"capture",0,id);require(h.call(L"capture",3,id)["error"]=="busy","Duplicate request was not busy");require(h.call(L"cancel")["cancelled"],"Armed cancel failed");h.resume();
@@ -71,7 +71,9 @@ int wmain(int argc,wchar_t** argv){try{
         h.pause();h.call(L"capture",0,id);require(h.call(L"disconnect")["state"]=="Disconnected","Disconnect not reported");h.resume();Sleep(100);status=h.call(L"status");require(status["state"]=="Disconnected" && !status["capture_available"].get<bool>(),"Disconnected status is incorrect");require(h.call(L"capture",3,id)["error"]=="disconnected","Disconnected capture accepted");require(WaitForSingleObject(h.process.value,0)==WAIT_TIMEOUT,"Disconnect killed target");
         signal(h.oracle/L"finish.signal");require(WaitForSingleObject(h.process.value,10000)==WAIT_OBJECT_0,"Target did not exit");require(h.call(L"status",3)["state"]=="Exited","Target exit not reported");
         for(const auto& entry:fs::directory_iterator(h.session))require(entry.path().extension()!=L".partial","Transaction leaked partial output");
-        results.push_back({{"mode",mode},{"frames",frames},{"automatic_foreground",foreground},{"failure",failed["last_capture"]},{"module_status",status}});
+        std::ifstream exit_file(h.oracle/L"exit.json");Json exit;exit_file>>exit;
+        require(exit["identity_checks"]==exit["frames"],"Backbuffer identity observations missing");if(mode>=2 && mode!=8)require(exit["unbind_checks"]==exit["frames"],"Flip unbind observations missing");
+        results.push_back({{"mode",mode},{"frames",frames},{"target_exit",exit},{"automatic_foreground",foreground},{"failure",failed["last_capture"]},{"module_status",status}});
     }
-    std::ofstream report(out/L"results.json");report<<results.dump(2);std::cout<<Json{{"passed",true},{"launches",2},{"scope","Startup injection and native private IPC"}}.dump()<<'\n';return 0;
+    std::ofstream report(out/L"results.json");report<<results.dump(2);std::cout<<Json{{"passed",true},{"launches",11},{"scope","Startup injection and native private IPC"}}.dump()<<'\n';return 0;
 }catch(const std::exception& e){std::cerr<<e.what()<<'\n';return 1;}}

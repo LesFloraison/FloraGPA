@@ -5,6 +5,7 @@
 #include "factory.hpp"
 #include "objects.hpp"
 #include "capture_session.hpp"
+#include "capture_model.hpp"
 #include <filesystem>
 #include <d3d11.h>
 #include <detours.h>
@@ -75,7 +76,7 @@ std::filesystem::path capture_directory;
 bool service_disconnected=false;
 bool eligible(const Json& row){
     return row.value("recent_present",false) && row.value("successful_presents",0ull)>=2 &&
-        row.value("buffer_count",0u)==1 && row.value("samples",0u)==1 && row.value("swap_effect",99u)<=1 &&
+        supported_swap_buffers(row.value("swap_effect",99u),row.value("buffer_count",0u)) && row.value("samples",0u)==1 &&
         (row.value("format",0u)==DXGI_FORMAT_R8G8B8A8_UNORM || row.value("format",0u)==DXGI_FORMAT_B8G8R8A8_UNORM);
 }
 Json response(const Json& message,ULONG client_pid){
@@ -121,7 +122,7 @@ Json response(const Json& message,ULONG client_pid){
     }
     result["capture_available"]=available;result["swap_chains"]=swaps;result["objects"]=objects;
     result["device_creations"]=creations.load();result["creation_failures"]=failures.load();result["feature_level"]=level.load();result["hook_status"]=hook_status.load();
-    result["capability_gaps"]={"Single-buffer non-flip RGBA8/BGRA8 only","Map/Update/Copy, deferred contexts and hidden states are incomplete","Single immediate-context application thread only"};
+    result["capability_gaps"]={"Single-sample RGBA8/BGRA8; dirty/scroll and flags other than ALLOW_TEARING unsupported","Map/Update/Copy, deferred contexts and hidden states are incomplete","Single immediate-context application thread only"};
     if(command=="status"){
         result["factories"]=factory_status();
         HMODULE modules[1024]{};DWORD needed=0;

@@ -30,9 +30,11 @@ def main():
             frame=Path(item['path']);name=mode+'-'+str(index);total+=1
             run(name+'-flora',[a.replay.resolve(),'replay',frame,'--out',out/(name+'-flora')])
             run(name+'-original',[sys.executable,a.oracle_tools.resolve()/'replay_frame.py',frame,'--out',out/(name+'-original'),'--timeout','60'])
-            flora=json.loads((out/(name+'-flora/report.json')).read_text());original=json.loads((out/(name+'-original/replay_report.json')).read_text());expected=bytes((255,0,0,255))*64
+            flora=json.loads((out/(name+'-flora/report.json')).read_text());original=json.loads((out/(name+'-original/replay_report.json')).read_text());expected=bytes(((255,0,0,255),(0,255,0,255),(0,0,255,255),(255,255,255,255),(0,255,255,255))[(item['present_ordinal']-1)%5] if session['mode']>=2 else (255,0,0,255))*64
             check(name+'-both-players-exact-cpu',(out/(name+'-flora/frame.rgba')).read_bytes()==expected and original['replayed_rgba_sha256']==hashlib.sha256(expected).hexdigest())
-            check(name+'-actual-events',flora['counts']=={'ClearRenderTargetView':1,'Draw':1,'Present':1})
+            counts={'ClearRenderTargetView':1,'Draw':1,'Present':1}
+            if session['mode']>=2 and session['mode']!=8:counts['present_rtv_unbinds']=1
+            check(name+'-actual-events',flora['counts']==counts)
             check(name+'-execution-not-reference',flora['reference_pixels_used'] is False and original['new_framebuffer_count']>0 and original['native']['open_status']==0 and original['native']['playback_status']==0 and original['native']['closed'])
             check(name+'-captured-backbuffer-equal',original['comparison_to_captured_resource']['rgba_equal'] is True)
     evidence={str(path):hashlib.sha256(path.read_bytes()).hexdigest() for path in (binary/'FloraCapture.exe',binary/'FloraCaptureRuntime.dll',binary/'FloraCaptureControllerTests.exe',binary/'FloraCaptureLiveTarget.exe',a.replay,a.oracle_tools/'replay_frame.py')}

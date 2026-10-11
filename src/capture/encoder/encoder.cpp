@@ -169,8 +169,9 @@ public:
         if(frame_.presentation){
             const auto& d=frame_.presentation->descriptor;
             require(d.BufferDesc.Width==shape.width && d.BufferDesc.Height==shape.height && d.BufferDesc.Format==shape.format && d.SampleDesc.Count==1 && d.SampleDesc.Quality==0,"Encoder presentation/output mismatch");
-            require((d.SwapEffect==DXGI_SWAP_EFFECT_DISCARD || d.SwapEffect==DXGI_SWAP_EFFECT_SEQUENTIAL) && d.BufferCount==1,"Flip/multiple-buffer presentation encoding pending");
-            require(!(frame_.presentation->flags&DXGI_PRESENT_TEST),"TEST cannot end a capture");
+            require(supported_swap_buffers(d.SwapEffect,d.BufferCount),"Unsupported swap effect/buffer count");
+            require(!(frame_.presentation->flags&~DXGI_PRESENT_ALLOW_TEARING),"Unsupported encoded Present flags");
+            if(frame_.presentation->flags&DXGI_PRESENT_ALLOW_TEARING)require((d.Flags&DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING) && d.Windowed && frame_.presentation->sync_interval==0 && (d.SwapEffect==DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL || d.SwapEffect==DXGI_SWAP_EFFECT_FLIP_DISCARD),"Invalid tearing presentation configuration");
             static_assert(sizeof(DXGI_SWAP_CHAIN_DESC)==72);
             memcpy(swap.data()+16,&d,sizeof(d));
         }

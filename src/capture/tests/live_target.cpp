@@ -7,6 +7,7 @@
 #include <filesystem>
 #include <fstream>
 #include <iostream>
+#include <array>
 using namespace flora::capture;
 using Microsoft::WRL::ComPtr;
 namespace fs=std::filesystem;
@@ -31,12 +32,23 @@ int wmain(int argc,wchar_t** argv){if(argc!=3)return 2;const fs::path out=fs::ab
     HWND window=CreateWindowW(cls.lpszClassName,L"Flora native capture target",WS_OVERLAPPEDWINDOW,0,0,160,160,nullptr,nullptr,cls.hInstance,nullptr);if(!window)throw std::runtime_error("Target window creation failed");ShowWindow(window,SW_SHOW);SetForegroundWindow(window);
     ComPtr<ID3D11Device> device;ComPtr<ID3D11DeviceContext> context;ComPtr<IDXGISwapChain> swap;
     DXGI_SWAP_CHAIN_DESC d{};d.BufferDesc.Width=d.BufferDesc.Height=8;d.BufferDesc.Format=DXGI_FORMAT_R8G8B8A8_UNORM;d.SampleDesc.Count=1;d.BufferUsage=DXGI_USAGE_RENDER_TARGET_OUTPUT;d.BufferCount=1;d.OutputWindow=window;d.Windowed=TRUE;
-    if(mode){check(D3D11CreateDevice(nullptr,D3D_DRIVER_TYPE_HARDWARE,nullptr,0,nullptr,0,D3D11_SDK_VERSION,&device,nullptr,&context));ComPtr<IDXGIFactory> factory;check(CreateDXGIFactory1(IID_PPV_ARGS(&factory)));check(factory->CreateSwapChain(device.Get(),&d,&swap));}
+    const bool tearing=mode==9 || mode==10;const bool flip=mode>=2 && mode!=8;
+    if(flip){d.BufferCount=(mode==6 || mode==7)?16:((mode==3 || mode==5 || mode==10)?3:2);d.SwapEffect=(mode==2 || mode==3 || mode==6 || mode==9)?DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL:DXGI_SWAP_EFFECT_FLIP_DISCARD;}
+    if(tearing){ComPtr<IDXGIFactory5> features;check(CreateDXGIFactory1(IID_PPV_ARGS(&features)));BOOL supported=FALSE;check(features->CheckFeatureSupport(DXGI_FEATURE_PRESENT_ALLOW_TEARING,&supported,sizeof(supported)));if(!supported)throw std::runtime_error("Tearing is unsupported on this host");d.Flags=DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING;}
+    if(mode==8){d.BufferCount=3;d.SwapEffect=DXGI_SWAP_EFFECT_SEQUENTIAL;}
+    if(mode==3 || mode==5 || mode==6 || mode==7 || mode==9){
+        check(D3D11CreateDevice(nullptr,D3D_DRIVER_TYPE_HARDWARE,nullptr,0,nullptr,0,D3D11_SDK_VERSION,&device,nullptr,&context));ComPtr<IDXGIFactory2> factory;check(CreateDXGIFactory1(IID_PPV_ARGS(&factory)));
+        DXGI_SWAP_CHAIN_DESC1 modern{};modern.Width=modern.Height=8;modern.Format=d.BufferDesc.Format;modern.SampleDesc=d.SampleDesc;modern.BufferUsage=d.BufferUsage;modern.BufferCount=d.BufferCount;modern.SwapEffect=d.SwapEffect;modern.AlphaMode=DXGI_ALPHA_MODE_IGNORE;modern.Flags=d.Flags;
+        ComPtr<IDXGISwapChain1> created;check(factory->CreateSwapChainForHwnd(device.Get(),window,&modern,nullptr,nullptr,&created));check(created.As(&swap));
+    }else if(mode==1 || mode==8){check(D3D11CreateDevice(nullptr,D3D_DRIVER_TYPE_HARDWARE,nullptr,0,nullptr,0,D3D11_SDK_VERSION,&device,nullptr,&context));ComPtr<IDXGIFactory> factory;check(CreateDXGIFactory1(IID_PPV_ARGS(&factory)));check(factory->CreateSwapChain(device.Get(),&d,&swap));}
     else check(D3D11CreateDeviceAndSwapChain(nullptr,D3D_DRIVER_TYPE_HARDWARE,nullptr,0,nullptr,0,D3D11_SDK_VERSION,&d,&swap,&device,nullptr,&context));
     ComPtr<ID3D11Texture2D> buffer;check(swap->GetBuffer(0,IID_PPV_ARGS(&buffer)));ComPtr<ID3D11RenderTargetView> rtv;check(device->CreateRenderTargetView(buffer.Get(),nullptr,&rtv));auto* view=rtv.Get();context->OMSetRenderTargets(1,&view,nullptr);
     const auto shader=[&](const char* text,const char* profile){ComPtr<ID3DBlob> code;check(D3DCompile(text,strlen(text),"live-capture",nullptr,nullptr,"main",profile,0,0,&code,nullptr));return code;};
     auto code=shader("float4 main(uint v:SV_VertexID):SV_Position{return float4(v==2?3:-1,v==1?3:-1,.5,1);}","vs_5_0");ComPtr<ID3D11VertexShader> vs;check(device->CreateVertexShader(code->GetBufferPointer(),code->GetBufferSize(),nullptr,&vs));context->VSSetShader(vs.Get(),nullptr,0);
     code=shader("float4 main():SV_Target{return float4(1,0,0,1);}","ps_5_0");ComPtr<ID3D11PixelShader> ps;check(device->CreatePixelShader(code->GetBufferPointer(),code->GetBufferSize(),nullptr,&ps));context->PSSetShader(ps.Get(),nullptr,0);
+    const std::array<const char*,5> colors{"1,0,0,1","0,1,0,1","0,0,1,1","1,1,1,1","0,1,1,1"};std::array<ComPtr<ID3D11PixelShader>,5> cycle;
+    for(size_t i=0;i<colors.size();++i){const auto source=std::string("float4 main():SV_Target{return float4(")+colors[i]+");}";auto bytes=shader(source.c_str(),"ps_5_0");check(device->CreatePixelShader(bytes->GetBufferPointer(),bytes->GetBufferSize(),nullptr,&cycle[i]));}
+    ComPtr<IUnknown> initial_identity;check(buffer.As(&initial_identity));uint64_t identity_checks=0,unbind_checks=0;
     context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);D3D11_VIEWPORT vp{0,0,8,8,0,1};context->RSSetViewports(1,&vp);
     ComPtr<IDXGISwapChain1> swap1;check(swap.As(&swap1));uint64_t frames=0;const auto deadline=GetTickCount64()+120000;
     while(!signal_exists(out/L"finish.signal")){
@@ -44,11 +56,16 @@ int wmain(int argc,wchar_t** argv){if(argc!=3)return 2;const fs::path out=fs::ab
         MSG msg{};while(PeekMessageW(&msg,nullptr,0,0,PM_REMOVE)){TranslateMessage(&msg);DispatchMessageW(&msg);}
         if(signal_exists(out/L"pause.signal")){if(!signal_exists(out/L"paused.signal"))save(out/L"paused.signal",{{"frames",frames}});Sleep(5);continue;}
         if(signal_exists(out/L"paused.signal"))fs::remove(out/L"paused.signal");
+        context->OMSetRenderTargets(1,&view,nullptr);context->PSSetShader(mode>=2?cycle[frames%5].Get():ps.Get(),nullptr,0);
         const float black[]{0,0,0,1};context->ClearRenderTargetView(rtv.Get(),black);context->Draw(3,0);
         if(signal_exists(out/L"update.signal")){UINT pixels[64]{};context->UpdateSubresource(buffer.Get(),0,nullptr,pixels,32,256);}
-        if(mode){DXGI_PRESENT_PARAMETERS parameters{};check(swap1->Present1(0,0,&parameters));}else check(swap->Present(0,0));
+        const UINT present_flags=tearing?DXGI_PRESENT_ALLOW_TEARING:0;
+        HRESULT presented=S_OK;if(mode){DXGI_PRESENT_PARAMETERS parameters{};presented=swap1->Present1(0,present_flags,&parameters);}else presented=swap->Present(0,present_flags);
+        check(presented);if(presented!=S_OK)throw std::runtime_error("Live oracle requires successful visible presentation");
+        ComPtr<ID3D11Texture2D> current;check(swap->GetBuffer(0,IID_PPV_ARGS(&current)));ComPtr<IUnknown> identity;check(current.As(&identity));if(identity!=initial_identity)throw std::runtime_error("Logical backbuffer identity changed");++identity_checks;
+        ComPtr<ID3D11RenderTargetView> bound;context->OMGetRenderTargets(1,&bound,nullptr);if(flip && bound)throw std::runtime_error("Flip Present did not unbind backbuffer");if(flip)++unbind_checks;
         ++frames;if(frames==3)save(out/L"ready.json",{{"frames",frames},{"mode",mode},{"window",reinterpret_cast<uintptr_t>(window)}});
         Sleep(10);
     }
-    context->ClearState();context->Flush();save(out/L"exit.json",{{"frames",frames},{"ok",true}});DestroyWindow(window);return 0;
+    context->ClearState();context->Flush();save(out/L"exit.json",{{"frames",frames},{"ok",true},{"identity_checks",identity_checks},{"unbind_checks",unbind_checks}});DestroyWindow(window);return 0;
 }catch(const std::exception& e){save(out/L"error.json",{{"error",e.what()}});std::cerr<<e.what()<<'\n';return 1;}}

@@ -209,6 +209,15 @@ int wmain(int argc,wchar_t** argv){try{
         bad=frame;bad.commands.back().bindings.shaders[size_t(ShaderStage::pixel)].shader=bad.commands.back().bindings.shaders[size_t(ShaderStage::vertex)].shader;reject(std::move(bad),"wrong kind",L"shader-stage.gpa_frame");
         bad=frame;bad.commands.front().operand=frame.output;reject(std::move(bad),"wrong kind",L"clear-kind.gpa_frame");
         bad=frame;bad.initial_resources[frame.commands.front().operand]=frame.final_output;reject(std::move(bad),"wrong kind",L"initial-kind.gpa_frame");
+        for(const auto [effect,count]:{std::pair{DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL,1u},std::pair{DXGI_SWAP_EFFECT_FLIP_DISCARD,17u},std::pair{DXGI_SWAP_EFFECT(2),2u}}){
+            bad=frame;Presentation presentation;auto& d=presentation.descriptor;d.BufferDesc.Width=d.BufferDesc.Height=8;d.BufferDesc.Format=DXGI_FORMAT_R8G8B8A8_UNORM;d.SampleDesc.Count=1;d.BufferCount=count;d.SwapEffect=effect;bad.presentation=presentation;
+            reject(std::move(bad),"buffer count",(L"bad-presentation-"+std::to_wstring(effect)+L".gpa_frame").c_str());
+        }
+        for(unsigned invalid=0;invalid<5;++invalid){
+            bad=frame;Presentation presentation;auto& d=presentation.descriptor;d.BufferDesc.Width=d.BufferDesc.Height=8;d.BufferDesc.Format=DXGI_FORMAT_R8G8B8A8_UNORM;d.SampleDesc.Count=1;d.BufferCount=2;d.SwapEffect=DXGI_SWAP_EFFECT_FLIP_DISCARD;d.Windowed=TRUE;d.Flags=DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING;presentation.flags=DXGI_PRESENT_ALLOW_TEARING;
+            if(invalid==0)d.Flags=0;else if(invalid==1)presentation.sync_interval=1;else if(invalid==2)d.Windowed=FALSE;else if(invalid==3)d.SwapEffect=DXGI_SWAP_EFFECT_SEQUENTIAL;else presentation.flags|=DXGI_PRESENT_DO_NOT_SEQUENCE;
+            bad.presentation=presentation;reject(std::move(bad),invalid==4?"Present flags":"tearing",(L"bad-tearing-"+std::to_wstring(invalid)+L".gpa_frame").c_str());
+        }
         EncodeOptions cancelled;cancelled.cancelled=[] {return true;};rejects([&]{encode_frame(frame,output/L"cancel.gpa_frame",cancelled);},"cancelled");require(!std::filesystem::exists(output/L"cancel.gpa_frame"),"Cancelled output published");
         bool saw_partial=false;EncodeOptions interrupted;interrupted.cancelled=[&]{for(const auto& entry:std::filesystem::directory_iterator(output))if(entry.path().extension()==L".partial"){saw_partial=true;return true;}return false;};
         rejects([&]{encode_frame(frame,output/L"interrupted.gpa_frame",interrupted);},"cancelled");require(saw_partial && !std::filesystem::exists(output/L"interrupted.gpa_frame"),"Interrupted writer published output");

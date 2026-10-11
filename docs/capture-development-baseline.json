@@ -8,7 +8,7 @@
     "A": "checked format boundary and native authored writer validated",
     "B": "native launch/control and capture-only package validated",
     "C": "partial: persistent native identity, descriptor graph and owned buffer/texture/shader/input-layout/SO creation metadata validated; other creation paths pending",
-    "D": "partial: startup-injected CLI capture works for limited single-buffer Draw profile; ten self-owned frames pass dual-player execution; GF2 flip profile rejected",
+    "D": "partial: native startup-injected blit/flip and tearing capture; 55 self-owned files pass dual-player execution; GF2 reaches unsupported Map",
     "E": "partial: first-use resources, per-command bindings/counters and query/mapping guards validated; mutation, deferred and multithread coverage pending",
     "F": "partial: native CLI and asynchronous Qt capture/cancel/disconnect/completed-file opening tested; full profile/deployment acceptance pending",
     "G": "pending: no six-frame GF2 or original GUI capture acceptance"
@@ -26,14 +26,14 @@
     "existing_golden_controls": 4,
     "native_authored_interop_checks": 22,
     "source_build_steps": 6,
-    "capture_only_ctest": 17,
-    "full_profile_capture_ctest": 15,
+    "capture_only_ctest": 19,
+    "full_profile_capture_ctest": 17,
     "native_object_lifetimes": 36,
     "additional_existing_structure_ctest": 2,
     "observed_model_interop_checks": 94,
     "present_transaction_interop_checks": 22,
-    "startup_injected_interop_checks": 65,
-    "startup_injected_dual_player_frames": 10,
+    "startup_injected_interop_checks": 353,
+    "startup_injected_dual_player_frames": 55,
     "packaged_live_frames": 10
   },
   "source_build_commit": "98dd26781eeae9bf8496efc4a7f22a03f2476a32",
@@ -127,7 +127,23 @@
     "capture-ipc-gf2/exit.json": "50e1eabb7855813fcc781851b252c6c7dabb1bd3aa3a3277a6da624e038be4fc",
     "capture-ipc-gf2/binaries.json": "5159e1fdaa26bf86f3c3751a2c1bd04f75530c46b08f2159fd1e0c1ea173658b",
     "capture-ipc-gf2/unity.log": "a3d349ec1f02e492a185852c31b69cd7da307e48fcdf3026ffac76a08077230a",
-    "capture-ipc-source-build/validation.json": "2b0c5169a0ca40ba92a139fcd885ca3ce65c54cf5fffb7f0c3791b96eaf5cabb"
+    "capture-ipc-source-build/validation.json": "2b0c5169a0ca40ba92a139fcd885ca3ce65c54cf5fffb7f0c3791b96eaf5cabb",
+    "capture-flip-tearing-interop/validation.json": "6daabdd07bd2152384d6289493c3df7e7a6b36cf35c2c6930fe78a6e5eb81f6a",
+    "capture-flip-tearing-interop/inputs.json": "8a9df310b42b09d95be187a46256140120c17c1b55227331f7ccc4bf25e4ffff",
+    "capture-flip-interop/validation.json": "5200dbc4fe97791dffe17f172eed4ee9edf73f670b10d2a1bd94d9afcd80790f",
+    "capture-flip-original-descriptors.json": "e25f701e5b7bda733db40039c83f2e9183af22164f368d31ec0bbb6cfdc97fbd",
+    "capture-flip-original-present.json": "87c85368ecd2c57c4f2c596b198812c8456dbd26fee43345dd9ab5c22c19772a",
+    "capture-flip-tearing-gf2/binaries.json": "ed2f12c962a3b41418ef4db3f9d93be1190f474e090040eb5695ae188309fb3b",
+    "capture-flip-tearing-gf2/status-before.json": "632e3567e795c7c1874e9565687fc202f4f54e7bc5fdada9e34137e0cb0100be",
+    "capture-flip-tearing-gf2/status-after.json": "ccc024acbbd9e40efeaf32aefcabee7fa3e34e58ce6fd8b642f660fce5c26e81",
+    "capture-flip-tearing-gf2/request.json": "60c012979c4b034e30c34b057201552c6aee3e0e9a500f8decb187e3f9fdc252",
+    "capture-flip-tearing-gf2/exit.json": "a6861113161377387a46e002a18aaabbec13316d3942ae5515d6d9b4b37b1105",
+    "capture-flip-tearing-gf2/unity.log": "0420356507dc59aacb45db8c106ca61ae3eec803c6f3e63d604035e0bbe7f4d4",
+    "capture-flip-final-ctest.txt": "32546263be9d8ee4e0ebf951ced255af62548a88a62c6834244f1ebb782b8fc1",
+    "capture-flip-full-ctest.txt": "482742560891cef641a565323d4639380873bf17d1572a774da4fdeaaedacf71",
+    "capture-flip-qt.txt": "447645d429492c5d3103fcc8afaae0b8855510f45eaa5a630d0cc4c089af42bb",
+    "capture-flip-factories/validation.json": "e2e96acab25e71ffbce3b435dbda260e92de9b8cda0d95c3af77cb47a9010182",
+    "capture-flip-swaps/validation.json": "f5dfc04cac0e6c63ce920bedb1beafa99f7a014c74a2bdeb2447cc2c4f73c005"
   },
   "limitations": [
     "GPA original-player checks use a development-only private ABI harness.",
@@ -221,12 +237,11 @@
       "Dispatch"
     ],
     "negative_execution_controls": 2,
-    "presentation": "synthetic metadata for offscreen single-sample RGBA8 output",
+    "presentation": "actual blit/flip descriptor and zero/ALLOW_TEARING flags for live capture; synthetic descriptor only for offscreen probes",
     "dual_player_checks": 94,
     "original_player_sha256": "39061ff329e4a32d0c8375ce9ee15e2017bccab0593943b962a860e11723d38b",
     "original_gui_inspection": false,
     "pending": [
-      "Flip/multiple-buffer presentation profiles",
       "Physical disk-full/target-exit finalization and shutdown tests",
       "Additional resource/state/command wire interoperability",
       "Map/Update/Copy, deferred ordering, hidden-state restoration",
@@ -252,10 +267,10 @@
     "resize_recovery": "passed",
     "disk_failure": "missing destination directory; physical disk-full not tested",
     "occlusion_and_device_loss": "HRESULT injection only",
-    "profile": "one immediate-context thread; one DISCARD/SEQUENTIAL buffer; single-sample RGBA8/BGRA8; zero Present flags; empty Present1",
+    "profile": "one immediate-context thread; DISCARD/SEQUENTIAL 1-16 or FLIP_SEQUENTIAL/FLIP_DISCARD 2-16 buffers; single-sample RGBA8/BGRA8; zero/ALLOW_TEARING flags; empty Present1",
     "pending": [
       "Target exit and real device-loss/occlusion",
-      "Flip/multiple buffers and dirty Present1",
+      "Dirty Present1 and other Present flags",
       "Multicontext synchronization and deferred/mutation recording",
       "GF2 six-frame acceptance"
     ]
@@ -266,11 +281,29 @@
     "default_selection": "unique eligible foreground swap, otherwise explicit selection required",
     "target_creation_paths": [
       "D3D11CreateDeviceAndSwapChain",
-      "D3D11CreateDevice plus DXGI factory"
+      "D3D11CreateDevice plus legacy DXGI factory",
+      "CreateSwapChainForHwnd"
     ],
-    "dual_player_files": 10,
+    "dual_player_files": 55,
     "original_gui_inspection": false,
     "gf2_accepted_frames": 0,
-    "gf2_diagnostic": "41,453 -> 154,531 Presents; two-buffer FLIP_SEQUENTIAL; capture rejected; normal close after disconnect; Unity exceptions observed"
+    "gf2_diagnostic": "49,422 successful Presents; FLIP_SEQUENTIAL 2 buffers / ALLOW_TEARING; frame explicitly rejected at ID3D11DeviceContext::Map; no file published; normal close after disconnect; Unity exceptions remain"
+  },
+  "flip_presentation": {
+    "launch_modes": 11,
+    "buffer_counts_exercised": [
+      1,
+      2,
+      3,
+      16
+    ],
+    "color_cycle_length": 5,
+    "tearing_effects": [
+      "FLIP_SEQUENTIAL",
+      "FLIP_DISCARD"
+    ],
+    "logical_identity_checks": "every native test Present",
+    "implicit_rtv_unbind_checks": "every native flip test Present",
+    "gf2_next_gap": "ID3D11DeviceContext::Map"
   }
 }

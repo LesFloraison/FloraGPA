@@ -1,12 +1,12 @@
 # Independent DX11 capture
 
 Implementation is **partial**. The native controller now launches, injects and
-captures a limited single-buffer DX11 profile through private IPC. Completed
+captures a limited blit/flip DX11 profile through private IPC. Completed
 `.gpa_frame` files execute in FloraGPA and the installed original GPA kernel.
 Unsupported profiles fail explicitly. Qt exposes the same workflow and passes
 only completed file paths into replay. The full planned release, original GUI
-inspection and GF2 six-frame gate remain incomplete. GF2 currently uses a
-2-buffer FLIP_SEQUENTIAL swap chain, which this milestone explicitly rejects.
+inspection and GF2 six-frame gate remain incomplete. GF2 passes its two-buffer
+FLIP_SEQUENTIAL / ALLOW_TEARING boundary, then rejects the first unsupported Map.
 
 ## Architectural contract
 
@@ -622,3 +622,61 @@ RenderDoc or Python. Evidence is
 covered by native control checks; the separate interop run above provides the
 original-player/CPU execution evidence. Independent-host and GF2 acceptance remain
 pending.
+
+## Flip presentation and tearing
+
+The current boundary profile supports DISCARD/SEQUENTIAL with 1–16 buffers and
+FLIP_SEQUENTIAL/FLIP_DISCARD with 2–16 buffers, one sample, RGBA8/BGRA8, empty
+Present1 parameters and one immediate-context application thread. Present flags
+may be zero or ALLOW_TEARING; other flags reject, while TEST never advances the
+boundary. The encoder validates tearing's creation flag, windowed mode, zero
+sync interval and flip effect before publishing. The actual descriptor and flags
+are preserved in the existing legacy wire records; replay and format sources
+are unchanged in this iteration.
+
+DX11 retains logical backbuffer zero across flip presentation and unbinds its
+writable pipeline binding on a successful flip. This follows Microsoft's
+[DXGI guidance](https://learn.microsoft.com/en-us/windows/win32/direct3ddxgi/d3d10-graphics-programming-guide-dxgi).
+The capture transaction checks canonical backbuffer identity at frame end;
+it does not infer a DX12-style physical buffer index. The native oracle checks
+identity and the implicit RTV unbind after every Present, explicitly rebinding
+before the next Draw. Tearing restrictions follow the documented
+[Present flags contract](https://learn.microsoft.com/en-us/windows/win32/direct3ddxgi/dxgi-present).
+Status now exposes last Present flags/interval and the completed frame's
+successful non-TEST Present ordinal.
+
+Eleven independent target launches cover direct creation, legacy factories and
+CreateSwapChainForHwnd, including flip counts 2, 3 and 16, blit SEQUENTIAL count 3,
+and both flip effects with tearing. Multi-buffer targets cycle five distinct
+exact RGBA colors; the independent CPU oracle derives the expected color from
+the captured Present ordinal. The retained run produced 55 files and passed
+353 serial checks in FloraGPA and the original GPA playback kernel, including
+captured-backbuffer equality and target module audits. Evidence is
+`artifacts/capture-flip-tearing-interop/{validation,inputs}.json`. This is still
+a small self-owned Draw oracle, not original GUI or GF2 scene acceptance.
+An earlier run's expected event inventory omitted the existing replay diagnostic
+`present_rtv_unbinds`; the preserved failure is `artifacts/capture-flip-interop`.
+The corrected expectation never relaxes pixel comparisons.
+
+Read-only inspection of the preserved original GF2 frame confirms an 88-byte
+swap descriptor with BufferCount 2 / SwapEffect 3 and a 28-byte Present record
+with SyncInterval 0 / flags 0x200. Evidence is
+`artifacts/capture-flip-original-{descriptors,present}.json`.
+A new GF2 diagnostic observes 49,422 successful Presents with these actual
+runtime values and no interface gaps. Capture advances past presentation setup
+and explicitly fails at `ID3D11DeviceContext::Map: GPU call recording is not
+implemented`. No frame is published. Disconnect and normal window close succeed;
+Unity exceptions remain, so no gameplay/scene success is claimed. Hashes, status,
+request, exit and logs are under `artifacts/capture-flip-tearing-gf2`.
+Accepted GF2 frames remain zero. Map/Unmap and other mutations, deferred ordering,
+remaining hidden state, dirty Present1, physical disk-full/device-loss/shutdown
+races and original GUI/six-frame GF2 acceptance remain incomplete.
+
+The updated native gates pass 19 capture-only CTests and 17 full-profile capture
+CTests, including eleven Qt cases. Additional Present transaction cases run the
+cancel/publication, resize, TEST, unsupported-call and failure checks on
+FLIP_SEQUENTIAL and FLIP_DISCARD. Encoder negatives reject invalid buffer counts,
+unknown effects and invalid tearing configurations without publishing a file.
+The previous committed-source package result above is historical; this exact
+iteration's isolated archive/package result is recorded separately after commit.
+The native/injected factory and swap-chain comparisons also pass all 44 checks.
