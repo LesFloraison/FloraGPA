@@ -25,7 +25,7 @@
     },
     "existing_golden_controls": 4,
     "native_authored_interop_checks": 22,
-    "source_build_steps": 5,
+    "source_build_steps": 6,
     "capture_only_ctest": 17,
     "full_profile_capture_ctest": 15,
     "native_object_lifetimes": 36,
@@ -33,9 +33,10 @@
     "observed_model_interop_checks": 94,
     "present_transaction_interop_checks": 22,
     "startup_injected_interop_checks": 65,
-    "startup_injected_dual_player_frames": 10
+    "startup_injected_dual_player_frames": 10,
+    "packaged_live_frames": 10
   },
-  "source_build_commit": "2b6c43244605b78dd7f5d59edba2d7f1a0529aa0",
+  "source_build_commit": "98dd26781eeae9bf8496efc4a7f22a03f2476a32",
   "local_evidence_sha256": {
     "capture-format-goldens/validation.json": "a1f6d11deab2e8324c8626ab359b139abf8a83257d06874c3cb6a251a357b84a",
     "capture-bootstrap/swap-chains-final/validation.json": "abb5d8dc35668a54bf6747dd8e9ffdc82b497d2298d19b59a33176a5cf07bda0",
@@ -125,7 +126,8 @@
     "capture-ipc-gf2/disconnect.json": "0501677f4e3944b81504684f7554f8be5f20537cad80f5b35a24c84fd49b2dcf",
     "capture-ipc-gf2/exit.json": "50e1eabb7855813fcc781851b252c6c7dabb1bd3aa3a3277a6da624e038be4fc",
     "capture-ipc-gf2/binaries.json": "5159e1fdaa26bf86f3c3751a2c1bd04f75530c46b08f2159fd1e0c1ea173658b",
-    "capture-ipc-gf2/unity.log": "a3d349ec1f02e492a185852c31b69cd7da307e48fcdf3026ffac76a08077230a"
+    "capture-ipc-gf2/unity.log": "a3d349ec1f02e492a185852c31b69cd7da307e48fcdf3026ffac76a08077230a",
+    "capture-ipc-source-build/validation.json": "2b0c5169a0ca40ba92a139fcd885ca3ce65c54cf5fffb7f0c3791b96eaf5cabb"
   },
   "limitations": [
     "GPA original-player checks use a development-only private ABI harness.",

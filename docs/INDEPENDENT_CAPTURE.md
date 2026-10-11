@@ -611,3 +611,14 @@ work must address real flip/backbuffer semantics before GF2 can reach command
 coverage validation. Map/Update/Copy, deferred ordering, remaining hidden states,
 actual device-loss/disk-full/shutdown races, original GUI inspection and GF2's
 six dual-player frames remain release gates.
+
+The CLI/Qt commit `98dd267` passes all six isolated source-build steps, including
+seventeen serial CTests, bootstrap package control and the new packaged live
+capture gate. With system-only PATH, the packaged controller/runtime generated
+10 self-owned frame files across both creation paths and passed native outcome
+checks. The clean build discovers no Qt; both module audits observe no GPA, Qt,
+RenderDoc or Python. Evidence is
+`artifacts/capture-ipc-source-build/validation.json`. These packaged files are
+covered by native control checks; the separate interop run above provides the
+original-player/CPU execution evidence. Independent-host and GF2 acceptance remain
+pending.
