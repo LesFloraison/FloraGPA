@@ -10,17 +10,6 @@
 #include <vector>
 
 namespace flora::capture {
-struct DeviceRecordDesc { uint32_t feature_level, creation_flags; };
-struct ContextRecordDesc { uint32_t type, flags; };
-struct InputElementRecord {
-    std::string semantic;
-    uint32_t semantic_index, format, slot, offset, slot_class, step_rate;
-};
-struct StreamElementRecord {
-    std::string semantic;
-    bool has_semantic;
-    uint32_t stream, semantic_index, start_component, component_count, output_slot;
-};
 // Capture-owned model. No replay objects, GPU executors or wire record types.
 // Holding a record never holds a native COM object alive.
 struct ObjectRecord {

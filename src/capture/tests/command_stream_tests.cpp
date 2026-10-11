@@ -4,6 +4,10 @@
 #include <iostream>
 #include <thread>
 #include <cstring>
+#ifdef FLORA_ENCODE_PROBE
+#include "encoder.hpp"
+#include <fstream>
+#endif
 using namespace flora::capture;
 using Microsoft::WRL::ComPtr;
 namespace {
@@ -17,10 +21,10 @@ struct Fixture {
     ComPtr<ID3D11Buffer> source,destination,indices;
     ComPtr<ID3D11ShaderResourceView> srv;ComPtr<ID3D11UnorderedAccessView> uav;
     ObjectId texture_id=0,source_id=0,destination_id=0;
-    explicit Fixture(bool hardware){
+    explicit Fixture(bool hardware,bool compute_target=false){
         check(D3D11CreateDevice(nullptr,hardware?D3D_DRIVER_TYPE_HARDWARE:D3D_DRIVER_TYPE_WARP,nullptr,0,nullptr,0,D3D11_SDK_VERSION,&device,nullptr,&context));
         wrap_object(device.GetAddressOf(),"test::Device");wrap_object(context.GetAddressOf(),"test::Context");
-        D3D11_TEXTURE2D_DESC td{};td.Width=td.Height=8;td.MipLevels=td.ArraySize=td.SampleDesc.Count=1;td.Format=DXGI_FORMAT_R8G8B8A8_UNORM;td.BindFlags=D3D11_BIND_RENDER_TARGET;
+        D3D11_TEXTURE2D_DESC td{};td.Width=td.Height=8;td.MipLevels=td.ArraySize=td.SampleDesc.Count=1;td.Format=DXGI_FORMAT_R8G8B8A8_UNORM;td.BindFlags=D3D11_BIND_RENDER_TARGET|(compute_target?D3D11_BIND_UNORDERED_ACCESS:0);
         check(device->CreateTexture2D(&td,nullptr,&texture));check(device->CreateRenderTargetView(texture.Get(),nullptr,&rtv));texture_id=object_record(texture.Get())->id;
         const float blue[]{0,0,1,1};context->ClearRenderTargetView(rtv.Get(),blue);
         D3D11_BUFFER_DESC bd{};bd.ByteWidth=16;bd.BindFlags=D3D11_BIND_SHADER_RESOURCE;UINT initial[]{1,2,3,4};D3D11_SUBRESOURCE_DATA data{initial,0,0};
@@ -166,8 +170,53 @@ void explicit_clears(bool hardware){
     for(size_t i=0;i<64;i+=4){float a,b;memcpy(&a,depth_bytes.data()+i,4);memcpy(&b,target_bytes.data()+i,4);require(a==.25f && b==.5f,"Recorder changed native depth/float clear result");}
 }
 }
+#ifndef FLORA_ENCODE_PROBE
 int main(int argc,char** argv){try{
     const bool hardware=argc==2 && std::string(argv[1])=="--hardware";record_and_recreate(hardware);explicit_clears(hardware);counters(hardware);failures(hardware);
     require(object_status().at("active")==0 && metadata_status().at("alive")==0 && object_status().at("interface_gaps")==0,"Recorder lifetime or capability leak");
     std::cout<<Json({{"passed",true},{"hardware",hardware},{"commands",8},{"fresh_device_reconstruction",true},{"negative_controls",2},{"scope","hook-observed model; no GPA file or Present boundary"}}).dump()<<'\n';return 0;
 }catch(const std::exception& e){std::cerr<<e.what()<<'\n';return 1;}}
+#else
+FrozenFrame observed_frame(const std::wstring& mode){
+    const bool compute=mode==L"dispatch" || mode==L"dispatch-negative";
+    require(compute || mode==L"clear" || mode==L"draw" || mode==L"negative","Unknown encoder probe mode");FrozenFrame frozen;
+    {
+        Fixture f(true,compute);auto recording=begin_recording(f.context.Get());const float black[]{0,0,0,1};f.context->ClearRenderTargetView(f.rtv.Get(),black);
+        if(compute){
+            auto code=compile("RWTexture2D<float4> image:register(u0);[numthreads(1,1,1)]void main(uint3 id:SV_DispatchThreadID){image[id.xy]=float4(0,1,0,1);}","cs_5_0");
+            ComPtr<ID3D11ComputeShader> cs;check(f.device->CreateComputeShader(code->GetBufferPointer(),code->GetBufferSize(),nullptr,&cs));ComPtr<ID3D11UnorderedAccessView> uav;check(f.device->CreateUnorderedAccessView(f.texture.Get(),nullptr,&uav));
+            f.context->OMSetRenderTargets(0,nullptr,nullptr);f.context->CSSetShader(cs.Get(),nullptr,0);auto* view=uav.Get();f.context->CSSetUnorderedAccessViews(0,1,&view,nullptr);f.context->Dispatch(8,8,1);
+        }else if(mode!=L"clear")f.context->Draw(3,0);
+        auto frame=recording->finish();auto final_output=snapshot_resource(f.context.Get(),f.texture.Get());frozen=freeze_frame(std::move(frame),f.texture_id,std::move(final_output));
+    }
+    require(object_status().at("active")==0 && metadata_status().at("alive")==0,"Encoder input retained original GPU objects");
+    if(mode==L"negative" || mode==L"dispatch-negative")frozen.commands.pop_back();
+    for(size_t i=0;i<frozen.commands.size();++i)frozen.commands[i].sequence=i;
+    return frozen;
+}
+int wmain(int argc,wchar_t** argv){try{
+    require(argc==3,"Expected output path and mode");const std::filesystem::path output=argv[1];const std::wstring mode=argv[2];
+    if(mode==L"self-test"){
+        require(!std::filesystem::exists(output),"Encoder test directory must be new");std::filesystem::create_directories(output);
+        auto frame=observed_frame(L"draw");encode_frame(frame,output/L"valid.gpa_frame");rejects([&]{encode_frame(frame,output/L"valid.gpa_frame");},"exists");
+        auto reject=[&](FrozenFrame bad,const char* reason,const wchar_t* file){const auto path=output/file;rejects([&]{encode_frame(bad,path);},reason);require(!std::filesystem::exists(path),"Encoder published a rejected frame");};
+        auto bad=frame;bad.commands.back().bindings.index_buffer=UINT64_MAX;reject(std::move(bad),"reference",L"reference.gpa_frame");
+        bad=frame;bad.objects.begin()->second.id=UINT64_MAX;reject(std::move(bad),"identity",L"identity.gpa_frame");
+        bad=frame;bad.initial_resources.at(frame.output).subresources[0].bytes.pop_back();reject(std::move(bad),"length",L"truncated.gpa_frame");
+        bad=frame;bad.commands.back().sequence=99;reject(std::move(bad),"sequence",L"sequence.gpa_frame");
+        bad=frame;bad.commands.back().bindings.resource_min_lod[frame.output]=1;reject(std::move(bad),"LOD",L"lod.gpa_frame");
+        bad=frame;bad.commands.back().bindings.vertices[0]=frame.output;reject(std::move(bad),"wrong kind",L"vertex-kind.gpa_frame");
+        bad=frame;bad.commands.back().bindings.shaders[size_t(ShaderStage::pixel)].shader=bad.commands.back().bindings.shaders[size_t(ShaderStage::vertex)].shader;reject(std::move(bad),"wrong kind",L"shader-stage.gpa_frame");
+        bad=frame;bad.commands.front().operand=frame.output;reject(std::move(bad),"wrong kind",L"clear-kind.gpa_frame");
+        bad=frame;bad.initial_resources[frame.commands.front().operand]=frame.final_output;reject(std::move(bad),"wrong kind",L"initial-kind.gpa_frame");
+        EncodeOptions cancelled;cancelled.cancelled=[] {return true;};rejects([&]{encode_frame(frame,output/L"cancel.gpa_frame",cancelled);},"cancelled");require(!std::filesystem::exists(output/L"cancel.gpa_frame"),"Cancelled output published");
+        bool saw_partial=false;EncodeOptions interrupted;interrupted.cancelled=[&]{for(const auto& entry:std::filesystem::directory_iterator(output))if(entry.path().extension()==L".partial"){saw_partial=true;return true;}return false;};
+        rejects([&]{encode_frame(frame,output/L"interrupted.gpa_frame",interrupted);},"cancelled");require(saw_partial && !std::filesystem::exists(output/L"interrupted.gpa_frame"),"Interrupted writer published output");
+        for(const auto& entry:std::filesystem::directory_iterator(output))require(entry.path().extension()!=L".partial","Encoder leaked a partial transaction");
+        std::cout<<"Encoder validation/failure gates passed; no end-to-end capture claimed\n";
+    }else{
+        const auto frame=observed_frame(mode);encode_frame(frame,output);std::cout<<Json({{"observed_commands",frame.commands.size()},{"initial_resources",frame.initial_resources.size()},{"objects",frame.objects.size()},{"source_gpu_objects_alive",0},{"scope","Observed model encoded; no Present/CLI integration"}}).dump()<<'\n';
+    }
+    return 0;
+}catch(const std::exception& e){std::cerr<<e.what()<<'\n';return 1;}}
+#endif

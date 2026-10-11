@@ -3,18 +3,6 @@
 #include <atomic>
 
 namespace flora::capture {
-enum class CommandKind { unsupported, read, binding, draw, draw_indexed, draw_instanced,
-    draw_indexed_instanced, dispatch, clear_rtv, clear_dsv, clear_uav_uint, clear_uav_float };
-struct RecordedCommand {
-    CommandKind kind=CommandKind::unsupported;
-    std::string api;
-    uint64_t sequence=0;
-    std::array<uint32_t,5> words{};
-    std::array<float,4> floats{};
-    ObjectId operand=0;
-    PipelineBindings bindings;
-    std::map<ObjectId,uint32_t> uav_counters;
-};
 struct RecordedFrame {
     std::map<ObjectId,RetainedObject> objects;
     std::map<ObjectId,ResourceSnapshot> initial_resources;
@@ -29,6 +17,9 @@ struct RecordingOptions {
     size_t command_limit=100000;
     uint32_t readback_timeout_ms=5000;
 };
+// Run on the application thread before handing CPU data to a background writer.
+// Validates the model and releases every retained native reference on success.
+FrozenFrame freeze_frame(RecordedFrame&& frame,ObjectId output,ResourceSnapshot&& final_output);
 class FrameRecording {
     struct Impl;
     std::unique_ptr<Impl> impl_;

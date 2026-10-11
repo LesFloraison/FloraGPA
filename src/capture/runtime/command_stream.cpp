@@ -51,6 +51,23 @@ void RecordedFrame::require_complete() const {
     if(cancelled)throw std::runtime_error("Frame recording cancelled");
     if(failed)throw std::runtime_error(gaps.empty()?"Frame recording failed":gaps.front());
 }
+FrozenFrame freeze_frame(RecordedFrame&& frame,ObjectId output,ResourceSnapshot&& final_output){
+    frame.require_complete();
+    if(!final_output.record || final_output.record->id!=output || !frame.initial_resources.contains(output))
+        throw std::runtime_error("Frame output lacks matching initial/final resource data");
+    FrozenFrame result;result.output=output;
+    for(const auto& [id,held]:frame.objects){
+        auto& r=*held.record;std::lock_guard lock(r.mutex);
+        FrozenObject object;object.id=id;object.device=r.device;object.resource=r.resource;object.class_linkage=r.class_linkage;
+        object.kind=r.kind;object.descriptor=r.descriptor;object.creation_bytes=r.creation_bytes;
+        object.input_elements=r.input_elements;object.stream_elements=r.stream_elements;object.stream_strides=r.stream_strides;
+        object.rasterized_stream=r.rasterized_stream;object.creation_observed=r.creation_observed;
+        result.objects.emplace(id,std::move(object));
+    }
+    for(auto& [id,resource]:frame.initial_resources)result.initial_resources.emplace(id,ResourceContents{resource.shape,std::move(resource.subresources)});
+    result.commands=std::move(frame.commands);result.final_output={final_output.shape,std::move(final_output.subresources)};
+    frame.objects.clear();frame.initial_resources.clear();return result;
+}
 std::shared_ptr<FrameRecording> begin_recording(ID3D11DeviceContext* context,const RecordingOptions& options){
     LastErrorScope last_error;
     auto next=std::shared_ptr<FrameRecording>(new FrameRecording(context,options));

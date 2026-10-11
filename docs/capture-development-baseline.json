@@ -8,7 +8,7 @@
     "A": "checked format boundary and native authored writer validated",
     "B": "native launch/control and capture-only package validated",
     "C": "partial: persistent native identity, descriptor graph and owned buffer/texture/shader/input-layout/SO creation metadata validated; other creation paths pending",
-    "D": "partial: generated COM observers assemble Clear/Draw/Dispatch models; fresh-device CPU-model reconstruction passes; no GPA serialization or Present integration",
+    "D": "partial: hook-observed scoped Clear/Draw/Dispatch models encode IGPA v3 and pass dual-player CPU oracles; synthetic presentation, no Present/controller integration",
     "E": "partial: first-use resources, per-command bindings/counters and query/mapping guards validated; mutation, deferred and multithread coverage pending",
     "F": "partial: Qt control lifecycle validated; actual capture/completion unavailable",
     "G": "pending: no six-frame GF2 or original GUI capture acceptance"
@@ -26,10 +26,11 @@
     "existing_golden_controls": 4,
     "native_authored_interop_checks": 22,
     "source_build_steps": 5,
-    "capture_only_ctest": 14,
-    "full_profile_capture_ctest": 12,
+    "capture_only_ctest": 15,
+    "full_profile_capture_ctest": 13,
     "native_object_lifetimes": 36,
-    "additional_existing_structure_ctest": 2
+    "additional_existing_structure_ctest": 2,
+    "observed_model_interop_checks": 94
   },
   "source_build_commit": "3c6c40b7bfeac6ef7d1f458a899da2722dbee4a6",
   "local_evidence_sha256": {
@@ -89,7 +90,12 @@
     "capture-stream-factories-release/validation.json": "e2e96acab25e71ffbce3b435dbda260e92de9b8cda0d95c3af77cb47a9010182",
     "capture-stream-swaps-release/validation.json": "f5dfc04cac0e6c63ce920bedb1beafa99f7a014c74a2bdeb2447cc2c4f73c005",
     "capture-stream-validation.json": "101bd4dc5439952bd2467e838f068bd2119e201bc9a26b875b5aca2122376278",
-    "capture-stream-source-build/validation.json": "da5c6e957e8d20adfbd12c2fb1ecc3b5fe3fcca048821e5022bc81399e7ff812"
+    "capture-stream-source-build/validation.json": "da5c6e957e8d20adfbd12c2fb1ecc3b5fe3fcca048821e5022bc81399e7ff812",
+    "capture-encoder-ctest-final.txt": "eb09a27a569734a70f7dc6dd2097063d66b216ccca4675ad82e05064f9a7e74d",
+    "capture-encoder-full-ctest.txt": "2fcc8441440c4ec57545e1b14c61a161f60859b655065790bb7b7c891b0b4453",
+    "capture-encoder-fault-ctest.txt": "0581d3e396073d66b40d1e0d977a4ce3d7fb59c855b711c40140aa18f5b77e15",
+    "capture-encoder-interop-final/validation.json": "31ffa98a2f1532599d7c58c8dbffbbe6e18252eb109e06715d8e60a8bd3d703d",
+    "capture-encoder-interop-final/inputs.json": "9bfe77d7c6ba3b6efb4626ce8dd9a961b43b847603676829953356ffcb93bc16"
   },
   "limitations": [
     "GPA original-player checks use a development-only private ABI harness.",
@@ -127,8 +133,7 @@
       "No multicontext capture barrier",
       "No sample-preserving MSAA",
       "No shared/tiled/protected resource capture",
-      "SO append position and live query/predicate reconstruction pending",
-      "No frame command recording or encoding"
+      "SO append position and live query/predicate reconstruction pending"
     ],
     "gf2_diagnostic": "67,800 then 164,810 Presents, no registry gaps, capture rejected, disconnected and closed; Unity managed exceptions observed; no scene or pixel acceptance"
   },
@@ -144,7 +149,7 @@
     ],
     "exact_draw_and_dispatch": "passed",
     "present_integration": false,
-    "command_recording": false,
+    "command_recording": true,
     "gaps": [
       "SO absolute append position",
       "Predicate query reconstruction",
@@ -168,11 +173,33 @@
     "failure_keeps_native_forwarding": true,
     "pending": [
       "Present transaction",
-      "GPA encoder",
       "Map/Update/Copy and indirect commands",
       "Deferred expansion and multicontext ordering",
       "Individual state-setter event serialization",
-      "GF2 six-frame dual-player acceptance"
+      "GF2 six-frame dual-player acceptance",
+      "Remaining wire profiles and original GUI validation"
+    ]
+  },
+  "encoder": {
+    "controller_integration": false,
+    "cpu_model_only": true,
+    "source_gpu_objects_destroyed_before_encoding": true,
+    "observed_modes": [
+      "ClearRenderTargetView",
+      "Draw",
+      "Dispatch"
+    ],
+    "negative_execution_controls": 2,
+    "presentation": "synthetic metadata for offscreen single-sample RGBA8 output",
+    "dual_player_checks": 94,
+    "original_player_sha256": "39061ff329e4a32d0c8375ce9ee15e2017bccab0593943b962a860e11723d38b",
+    "original_gui_inspection": false,
+    "pending": [
+      "Present/IPC transaction and background writing",
+      "Cancel/publication outcome linearization",
+      "Additional resource/state/command wire interoperability",
+      "Map/Update/Copy, deferred ordering, hidden-state restoration",
+      "GF2 six-frame acceptance"
     ]
   }
 }

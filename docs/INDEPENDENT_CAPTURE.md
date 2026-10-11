@@ -18,7 +18,7 @@ and edited-view overlays; it shares the immutable reader between overlays.
 Replay links the reader, not the writer. Existing RenderDoc recapture remains
 an optional replay-analysis feature.
 
-The native capture controller/runtime and future encoder must not include or
+The native capture controller/runtime and encoder must not include or
 link FloraCore, FloraReplay, FloraExperiment or Qt. They use their own recording
 model; only pure wire layouts may be shared. A configure-time transitive target
 check and the `capture_boundaries` CTest enforce these constraints. Runtime
@@ -424,3 +424,51 @@ Qt, RenderDoc or Python. Evidence is
 `artifacts/capture-stream-source-build/validation.json`. This verifies the new
 observer and model sources independently of cached builds; it does not establish
 GPA encoding, Present integration or formal live-frame acceptance.
+
+## Observed-model encoder milestone
+
+`FloraCaptureModel` holds CPU values, owned DXBC/descriptors, resource bytes and
+commands. GPU layout arithmetic moved into this library without changing its
+checked size rules. `freeze_frame` copies persistent metadata and releases the
+frame's native reference graph on the caller thread. `FloraCaptureEncoder` links
+only this model, `FloraGpaWriter` and Windows GUID generation. It cannot link the
+runtime/object registry, reader, replay, Qt or D3D execution libraries. The runtime
+is not yet linked to the encoder; only the native probe composes these pieces.
+
+The encoder validates identity/type references, sequence, descriptor/resource
+shapes, tight subresource lengths and supported state before opening a writer.
+Missing hidden UAV counts, unsupported state and unavailable initial bytes reject
+explicitly. Fault gates cover existing destinations, wrong object kinds/shader
+stages, missing references, truncated data, sequence errors, unsupported LOD,
+pre-cancellation and interruption after temporary-file creation. Interrupted
+transactions leave neither a published frame nor a partial file.
+
+`FloraCaptureEncodeProbe` observes actual hardware Clear/Draw/Dispatch calls through
+COM wrappers under an explicit recorder scope. All source GPU objects die before
+encoding. Five generated files (including removed-Draw and removed-Dispatch
+controls) pass 94 serial CPU/native/original-player checks in
+`artifacts/capture-encoder-interop-final/validation.json`. Black/red/green 8x8 RGBA
+bytes match exactly. Negative files retain the original red/green reference image
+but execute to black in both players. Native event inventory and shader DXBC /
+disassembly exports also pass. The original GPA kernel hash is
+`39061ff329e4a32d0c8375ce9ee15e2017bccab0593943b962a860e11723d38b`.
+
+Reproduce with `tools/validate_capture_encoding.py --probe <FloraCaptureEncodeProbe.exe>
+--replay <FloraGPA.Cli.exe> --oracle-tools <reference tools> --qt-bin <Qt bin>
+--out <new directory>`. This is a development validator; neither encoder nor
+capture product uses Python or original GPA. Capture-only passes fifteen CTests;
+the full profile passes thirteen capture CTests. No replay/format source changed
+in this milestone; existing golden evidence is not presented as a fresh run.
+
+This is a limited encoding milestone, not stage D completion: presentation
+metadata is synthesized for a normal offscreen output texture. There is no real
+swap-chain boundary, IPC activation, background writer or cancel/publication
+linearization yet. State setters are represented by per-command snapshots rather
+than individual events. The dual-player matrix covers only Clear RTV, Draw and
+Dispatch with ordinary buffers and single-sample RGBA8 textures; other implemented
+record layouts still require interoperability cases. Shader auxiliary qwords are
+opaque and zero only under this tested profile. Constant-buffer subranges,
+nonzero resource LOD, dynamic linkage, predicates/SO, high UAV slots, nonzero view
+planes, special texture layouts, MSAA/shared/tiled/protected resources reject.
+Map/Update/Copy, deferred execution, original GUI inspection and six GF2 frames
+remain pending. Controller capture requests still fail explicitly.

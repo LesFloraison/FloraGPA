@@ -3877,12 +3877,13 @@
       "Native lifetime/creation metadata: eight capture-only CTests, six full-profile capture tests, 44 factory/swap checks, actual WARP binding retention, owned DXBC/buffer/input-layout/SO data and exact recreated SO output passed. GF2 diagnostic retained the DLL hash; live capture still rejected.",
       "Resource data foundation: ten capture-only CTests, eight full-profile capture tests including ten Qt cases, and 44 injected comparisons passed. Independent WARP/hardware resource bytes and GPU-modified per-view UAV counters pass. Hardware P016 explicitly unsupported; GF2 Present diagnostic only, no accepted frames. See capture-development-baseline.json.",
       "Pipeline binding snapshots: twelve capture-only CTests, ten independent-capture full-profile CTests and two existing structure CTests passed; Qt ten cases passed. Native reference lifetimes, high slots, constant ranges, minimum LOD and explicit hidden-state gaps covered. Exact integer oracle uses representable endpoints after preserving the initial UNORM half-way rounding difference.",
-      "Command recording: fourteen capture-only CTests, twelve full-profile capture CTests, ten Qt cases and 44 injected factory/swap comparisons passed. WARP/hardware observations rebuild exact Draw/Dispatch outputs on a fresh WARP device after all source GPU objects die; two execution-removal negative controls pass. Unsupported GPU calls and context/thread/mapping/query gaps fail the model while preserving application forwarding."
+      "Command recording: fourteen capture-only CTests, twelve full-profile capture CTests, ten Qt cases and 44 injected factory/swap comparisons passed. WARP/hardware observations rebuild exact Draw/Dispatch outputs on a fresh WARP device after all source GPU objects die; two execution-removal negative controls pass. Unsupported GPU calls and context/thread/mapping/query gaps fail the model while preserving application forwarding.",
+      "Observed-model encoder: fifteen capture-only CTests, thirteen full-profile capture CTests and 94 serial dual-player/CPU checks passed. All source GPU objects die before encoding. Draw/Dispatch removal controls retain captured reference pixels but execute to black. Native event inventory and shader exports pass; presentation is synthetic, no Present/IPC capture or original GUI acceptance."
     ],
     "pending": [
       "Remaining creation paths and class-instance metadata",
       "Frame-boundary synchronization, initial-state assembly, Map write recording and remaining hidden states",
-      "Live command and initial-state serialization",
+      "Remaining command/state wire layouts and real swap-chain presentation serialization",
       "Dual-player acceptance of generated live captures",
       "Two GF2 launches with three frames each across two scenes"
     ],
@@ -3893,6 +3894,7 @@
     "native_metadata": "Persistent native IDs and descriptor graph; owned buffer/texture initial bytes, shader DXBC and input-layout/SO parameters; not frame serialization",
     "resource_readback": "Capture-owned staging snapshots and independent APPEND/COUNTER UAV values; WARP/hardware byte checks; no Present integration or multicontext barrier",
     "pipeline_bindings": "Capture-owned six-stage/IA/RS/OM values and retained native reference graph; WARP/hardware 11.0/11.1 exact Draw/Dispatch oracles; no frame assembly or command recording",
-    "command_model": "Generated COM observers own Clear/Draw/Dispatch arguments, per-command bindings/counters and first-use GPU bytes; fresh-device CPU-model reconstruction and negative controls pass; no Present or GPA encoding"
+    "command_model": "Generated COM observers own Clear/Draw/Dispatch arguments, per-command bindings/counters and first-use GPU bytes; fresh-device CPU-model reconstruction and negative controls pass; GPA encoding available to the test probe; no Present/controller integration",
+    "encoder": "Independent CPU model to legacy GPA records, strict reference/type and layout checks, transactional writer; scoped Clear/Draw/Dispatch dual-player validation only"
   }
 }
