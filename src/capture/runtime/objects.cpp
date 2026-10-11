@@ -87,16 +87,19 @@ ULONG Object::AddRef() {
 }
 ULONG Object::Release() {
     const DWORD before = GetLastError();
-    auto& r = registry(); bool destroy = false;
+    auto& r = registry(); bool destroy = false; IUnknown* identity = nullptr;
     {
         std::lock_guard lock(r.mutex);
+        // Another Release can delete this wrapper after the lock is dropped.
+        // This call still owns its native reference; retain only that pointer.
+        identity = impl_->identity;
         if (--impl_->refs == 0) {
             r.native.erase(impl_->identity); r.proxies.erase(static_cast<IUnknown*>(this));
             for (auto& proxy : impl_->proxies) r.proxies.erase(proxy->primary());
             ++r.destroyed; destroy = true;
         }
     }
-    SetLastError(before); const auto count = impl_->identity->Release(); const DWORD after = GetLastError();
+    SetLastError(before); const auto count = identity->Release(); const DWORD after = GetLastError();
     if (destroy) delete this;
     SetLastError(after); return count;
 }

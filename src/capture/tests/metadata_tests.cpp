@@ -4,6 +4,7 @@
 #include <array>
 #include <iostream>
 #include <thread>
+#include <barrier>
 using namespace flora::capture;
 using Microsoft::WRL::ComPtr;
 namespace {
@@ -85,11 +86,15 @@ void run(){
         // of a separately held native identity is concurrent.
         ComPtr<ID3D11ShaderResourceView> recovered;context->CSGetShaderResources(0,1,&recovered);
         ComPtr<IUnknown> native;check(unwrap(recovered.Get())->QueryInterface(IID_PPV_ARGS(&native)));recovered.Reset();
+        std::barrier release_round(8);
         for(unsigned t=0;t<8;++t)threads.emplace_back([&]{for(unsigned i=0;i<200;++i){
             ID3D11ShaderResourceView* pointer=nullptr;
-            if(FAILED(native->QueryInterface(IID_PPV_ARGS(&pointer)))){++failures;continue;}
+            if(FAILED(native->QueryInterface(IID_PPV_ARGS(&pointer)))){++failures;release_round.arrive_and_wait();release_round.arrive_and_wait();continue;}
             wrap_object(&pointer,"test::ConcurrentRewrap");
-            auto record=object_record(pointer);if(record!=viewRecord)++failures;pointer->Release();
+            auto record=object_record(pointer);if(record!=viewRecord)++failures;
+            // Force each wrapper generation to lose its last references together.
+            // A Release already forwarding must not inspect a deleted wrapper.
+            release_round.arrive_and_wait();pointer->Release();release_round.arrive_and_wait();
         }});
         for(auto& thread:threads)thread.join();native.Reset();require(failures==0,"Concurrent native identity changed");
         context->CSGetShaderResources(0,1,&recovered);require(object_record(recovered.Get())==viewRecord,"View getter lost native identity");
