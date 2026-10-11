@@ -20,6 +20,7 @@ def main():
     out.mkdir(parents=True, exist_ok=False)
     env = dict(os.environ)
     env.pop('GPA_LOCAL_INJECT', None)
+    env['PYTHONDONTWRITEBYTECODE'] = '1'
     env['PATH'] = str(a.qt_bin.resolve()) + os.pathsep + env['PATH']
     checks = []
 

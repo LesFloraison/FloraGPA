@@ -1,0 +1,45 @@
+{
+  "schema": 1,
+  "profile": "GPA 2025 R1 legacy DX11 / IGPA v3",
+  "status": "partial",
+  "live_capture_available": false,
+  "accepted_gf2_frames": 0,
+  "stages": {
+    "A": "checked format boundary and native authored writer validated",
+    "B": "native launch/control and capture-only package validated",
+    "C": "factory and swap-chain subset validated; device/context/resource tracking pending",
+    "D": "pending: no intercepted frame serialization",
+    "E": "pending: initial resource and hidden state capture",
+    "F": "partial: Qt control lifecycle validated; actual capture/completion unavailable",
+    "G": "pending: no six-frame GF2 or original GUI capture acceptance"
+  },
+  "checks": {
+    "core_and_format_ctest": 5,
+    "view_overlay_ctest": "passed",
+    "swap_chain_comparisons": 19,
+    "factory_comparisons": 24,
+    "qt_cases": {
+      "passed": 10,
+      "failed": 0,
+      "skipped": 0
+    },
+    "existing_golden_controls": 4,
+    "native_authored_interop_checks": 22,
+    "source_build_steps": 5
+  },
+  "source_build_commit": "df850545ecc0af85322bfcf7a20dc7fc4f097334",
+  "local_evidence_sha256": {
+    "capture-format-goldens/validation.json": "a1f6d11deab2e8324c8626ab359b139abf8a83257d06874c3cb6a251a357b84a",
+    "capture-bootstrap/swap-chains-final/validation.json": "abb5d8dc35668a54bf6747dd8e9ffdc82b497d2298d19b59a33176a5cf07bda0",
+    "capture-bootstrap/factories-lifecycle-fix/validation.json": "e2e96acab25e71ffbce3b435dbda260e92de9b8cda0d95c3af77cb47a9010182",
+    "capture-authored-interop/validation.json": "a5506fea7b28b1a4aae1635d6d9e96f5a0791567a2d1ad05b048ee287f6b1b9b",
+    "capture-source-build-2/validation.json": "9abdf2471c7451224a09dc92ade6ddc2256ad152ecff387b277c73a007864593"
+  },
+  "limitations": [
+    "GPA original-player checks use a development-only private ABI harness.",
+    "Native writer fixtures are authored, not hook-captured.",
+    "GF2 bootstrap diagnostic observed Present, but capture requests were rejected.",
+    "Runtime registration/COM forwarding tests do not establish full DX11 compatibility.",
+    "No complete corpus, full existing CTest matrix or independent-host acceptance is claimed."
+  ]
+}

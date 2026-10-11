@@ -28,10 +28,13 @@ def main():
             raise RuntimeError('Archived dependency hash mismatch: '+name)
     env={k:v for k,v in os.environ.items() if k.upper() in {
         'SYSTEMROOT','WINDIR','COMSPEC','TEMP','TMP','APPDATA','LOCALAPPDATA','USERPROFILE',
-        'PROGRAMFILES','PROGRAMFILES(X86)','PROGRAMW6432','PATHEXT'}}
+        'PROGRAMFILES','PROGRAMFILES(X86)','PROGRAMW6432','PATHEXT','PROGRAMDATA','ALLUSERSPROFILE',
+        'HOMEDRIVE','HOMEPATH','NUMBER_OF_PROCESSORS','PROCESSOR_ARCHITECTURE','OS','SYSTEMDRIVE','PUBLIC','USERNAME','USERDOMAIN'}}
     env['PATH']=str(Path(os.environ['WINDIR'])/'System32')
+    env['CL']='/MP4'
     build=out/'build';package=out/'package'
-    evidence=dict(commit=commit,passed=False,scope='Native bootstrap only; not live frame capture',steps=[])
+    evidence=dict(commit=commit,passed=False,scope='Native bootstrap only; not live frame capture',steps=[],
+                  validator_sha256=hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),environment_keys=sorted(env))
 
     def save():
         (out/'validation.json').write_text(json.dumps(evidence,indent=2)+'\n')

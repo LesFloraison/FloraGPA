@@ -141,3 +141,21 @@ must reject explicitly, and no preview image can substitute for actual replay.
 Original GPA binaries and Ghidra are development oracles only. The old workspace
 and evidence are unchanged. Generated captures, builds and raw analysis stay
 outside Git. Commits use the user's configured Git identity.
+
+## Committed-source acceptance
+
+`tools/validate_capture_source_build.py --out <new-directory>` archives HEAD,
+verifies the original dependency bytes, configures without Qt/replay, builds,
+runs serial CTest, packages through Windows PowerShell and controls a self-owned
+target through the packaged controller with system-only PATH. The accepted run
+uses source commit `df85054`; all five steps pass and package module observations
+contain no GPA, Qt, Python or RenderDoc. Evidence is in
+`artifacts/capture-source-build-2/validation.json` and summarized in
+`capture-development-baseline.json`.
+
+The first source-build attempt failed because the verifier removed the Windows
+ProgramData environment needed by Visual Studio discovery. That failure is
+retained separately. The corrected verifier preserves standard Windows setup
+variables, records its own hash separately from the source commit and still
+excludes Qt/SDK/reference paths. This validates the native bootstrap package on
+this host, not live capture or independent-host deployment.
