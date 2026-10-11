@@ -28,6 +28,20 @@ The Qt capture client belongs to the application composition layer. It uses
 asynchronous CLI calls and shares only a completed file path with replay. It
 never handles target COM pointers or writes GPA records.
 
+The full profile exposes **File > Capture Application…**. The dialog supplies
+application/arguments/working directory/output, swap-chain observations, launch
+and disconnect controls, and a collapsed task log. Capture and open-result actions
+remain disabled while frame recording is unavailable. The session persists when
+the modeless dialog is hidden; disconnect is explicit and does not kill the game.
+The controller path is the app-local `FloraCapture.exe`.
+
+The Qt client suite passes malformed/oversized/conflicting CLI responses,
+concurrent request rejection, target exit and a real native-controller lifecycle.
+The full-profile run has no skips; standalone UI-only tests intentionally omit
+the native-controller case when capture binaries are not configured. The full
+GUI and Worker compile, and the existing view-overlay tests pass. None of this
+constitutes acceptance of the unimplemented frame pipeline.
+
 ## Evidence and remaining gates
 
 The C++20 native bootstrap uses pinned Detours 4.0.1 and the existing repository

@@ -16,7 +16,8 @@
       "binaryDir": "${sourceDir}/build/capture",
       "cacheVariables": {
         "FLORA_BUILD_REPLAY": "OFF",
-        "FLORA_BUILD_CAPTURE": "ON"
+        "FLORA_BUILD_CAPTURE": "ON",
+        "FLORA_BUILD_CAPTURE_UI": "OFF"
       }
     },
     {
@@ -25,7 +26,18 @@
       "binaryDir": "${sourceDir}/build/replay",
       "cacheVariables": {
         "FLORA_BUILD_REPLAY": "ON",
-        "FLORA_BUILD_CAPTURE": "OFF"
+        "FLORA_BUILD_CAPTURE": "OFF",
+        "FLORA_BUILD_CAPTURE_UI": "OFF"
+      }
+    },
+    {
+      "name": "capture-full",
+      "inherits": "vs2022",
+      "binaryDir": "${sourceDir}/build/vs2022",
+      "cacheVariables": {
+        "FLORA_BUILD_REPLAY": "ON",
+        "FLORA_BUILD_CAPTURE": "ON",
+        "FLORA_BUILD_CAPTURE_UI": "ON"
       }
     }
   ],
@@ -48,6 +60,11 @@
     {
       "name": "replay-only-release",
       "configurePreset": "replay-only",
+      "configuration": "Release"
+    },
+    {
+      "name": "capture-full-release",
+      "configurePreset": "capture-full",
       "configuration": "Release"
     }
   ],
@@ -82,6 +99,17 @@
     {
       "name": "replay-only-release",
       "configurePreset": "replay-only",
+      "configuration": "Release",
+      "output": {
+        "outputOnFailure": true
+      },
+      "execution": {
+        "jobs": 1
+      }
+    },
+    {
+      "name": "capture-full-release",
+      "configurePreset": "capture-full",
       "configuration": "Release",
       "output": {
         "outputOnFailure": true

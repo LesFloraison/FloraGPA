@@ -1,4 +1,7 @@
 #include "MainWindow.h"
+#ifdef FLORA_CAPTURE_UI
+#include "capture_ui/CaptureDialog.h"
+#endif
 #include "CaptureStructureDialog.h"
 #include <QPointer>
 #include "WorkerImage.h"
@@ -376,6 +379,16 @@ void MainWindow::buildUi() {
             openCapture(path);
     });
     openAction_->setIcon(style()->standardIcon(QStyle::SP_DialogOpenButton));
+#ifdef FLORA_CAPTURE_UI
+    auto captureDialog = new capture_ui::CaptureDialog(
+        QCoreApplication::applicationDirPath() + "/FloraCapture.exe", this);
+    connect(captureDialog, &capture_ui::CaptureDialog::openCaptureRequested, this, [this](const QString &path) {
+        if (!busy()) openCapture(path);
+    });
+    file->addAction("Capture Application…", captureDialog, [captureDialog] {
+        captureDialog->show(); captureDialog->raise(); captureDialog->activateWindow();
+    })->setObjectName("captureApplication");
+#endif
     file->addAction("Open Experiment…", this, &MainWindow::openExperiment)->setObjectName("openExperiment");
     file->addAction("Save Experiment…", QKeySequence::Save, this, [this] { saveExperiment(); })
         ->setObjectName("saveExperiment");

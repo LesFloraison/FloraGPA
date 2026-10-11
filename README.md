@@ -11,6 +11,11 @@ Its current compatibility work targets **GPA 2025 R1 legacy DX11 / IGPA v3**.
 Compatibility and analyzer migration are still in progress; this is not a
 complete replacement for every GPA feature or capture format.
 
+Independent native capture is under development. The optional `capture-only`
+and `capture-full` CMake presets provide launch/injection, DXGI tracking and a
+Qt control entry. **Live frame recording is not available yet**: capture requests
+reject explicitly. See [capture architecture, validation and remaining gates](docs/INDEPENDENT_CAPTURE.md).
+
 Ordinary replay runs in native C++ without Python or an Intel GPA installation.
 The portable package includes the pinned RenderDoc 1.45 backend for Pixel History,
 recorded shader debugging, Replay Mesh and Replay Metrics. Intel hardware metrics

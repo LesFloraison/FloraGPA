@@ -3868,7 +3868,9 @@
       "Five relevant CTest registrations and four native golden/negative controls passed.",
       "19 native/injected swap-chain comparisons, 24 factory comparisons, and native control CTest passed.",
       "Capture-only package launch/control passed with system-only PATH and no GPA, Qt, Python or RenderDoc modules.",
-      "GF2 diagnostic launch observed rendering; frame capture explicitly rejected; zero accepted new frames."
+      "GF2 diagnostic launch observed rendering; frame capture explicitly rejected; zero accepted new frames.",
+      "Full Qt GUI and Worker build; capture_ui has 10 passes, no failures/skips, including native launch/status/refusal/cancel/disconnect.",
+      "Existing view_edits mapping/overlay lifetime regression passed."
     ],
     "pending": [
       "Complete Device/Context/resource tracking",
@@ -3877,6 +3879,7 @@
       "Two GF2 launches with three frames each across two scenes"
     ],
     "note": "New capture work is separate from legacy Python module migration; no full parity claim.",
-    "bootstrap": "native x64 launch/control and Factory0-7/SwapChain0-4 wrappers validated"
+    "bootstrap": "native x64 launch/control and Factory0-7/SwapChain0-4 wrappers validated",
+    "qt_controls": "async CLI composition; live capture and open-result controls remain unavailable"
   }
 }
