@@ -30,6 +30,66 @@ never handles target COM pointers or writes GPA records.
 
 ## Evidence and remaining gates
 
+The C++20 native bootstrap uses pinned Detours 4.0.1 and the existing repository
+nlohmann/json 3.12.0. The upstream Detours target alone needs MSVC permissive mode;
+Flora capture sources use strict conformance. There are no runtime Python or GPA
+dependencies. Controller sessions validate PID and process creation time, and
+their local named pipe admits only the current user. Disconnect leaves transparent
+hooks resident until normal target exit.
+
+CreateDXGIFactory/1/2 now wrap Factory through Factory7 and interpose legacy,
+HWND and composition swap-chain creation. Swap-chain GetParent preserves the
+factory wrapper identity. CoreWindow creation forwards through the same wrapper
+but has not been exercised by a real CoreWindow oracle. Adapter, Device, Context
+and resource interfaces remain incomplete; unknown interface escape never enables
+frame capture. The runtime reports swap-chain API/IID escape diagnostics.
+
+Validation with the final native build: 19 swap-chain comparisons, 24 factory
+comparisons and the `capture_bootstrap` CTest pass. These include native/injected
+pixels, COM identities, reference observations, concurrent QI, TEST Present,
+failed/successful resize and explicit frame-request refusal. Local results are
+`artifacts/capture-bootstrap/{swap-chains-final,factories-final}/`.
+
+An earlier build launched the specified GF2 executable and observed two successful
+device creations and a 2560x1440 swap chain with 43,564 successful Present calls,
+without hook/registry errors. GetBuffer exposed the known missing resource wrapper.
+Capture was explicitly rejected, the session disconnected and the game closed
+normally. This is an injection diagnostic, **zero accepted captured frames**.
+Its local report is `artifacts/capture-bootstrap/gf2-diagnostic-1/status.json`;
+the later controller session-identity and JSON dependency changes were validated
+with self-owned probes, not another GF2 run.
+
+## Build and control
+
+```powershell
+cmake --preset capture-only
+cmake --build --preset capture-only-release
+ctest --preset capture-only-release
+./tools/package_capture.ps1 -OutputDirectory out/capture-bootstrap-new
+```
+
+Capture-only configure/build does not find Qt or build replay. Replay-only and
+full composition configurations are `replay-only` and `capture-full`; supply
+the installed Qt MSVC directory with `-DCMAKE_PREFIX_PATH` for those presets.
+The full profile shares the existing `build/vs2022` directory. A packaged native
+bootstrap contains the controller, runtime, app-local VC143 CRT, dependency
+manifest and licenses; its manifest explicitly records no live frame capability.
+Installation of the bootstrap currently requires an ASCII path; target executable,
+arguments and working directory are Unicode.
+
+```powershell
+FloraCapture.exe launch --exe C:\Samples\Demo.exe --out C:\Captures\new-session -- "argument with spaces"
+FloraCapture.exe status --session C:\Captures\new-session\session.json
+FloraCapture.exe capture --session C:\Captures\new-session\session.json --swap-chain 1
+FloraCapture.exe cancel --session C:\Captures\new-session\session.json
+FloraCapture.exe disconnect --session C:\Captures\new-session\session.json
+```
+
+The capture command currently rejects explicitly; idle cancel is not evidence of
+working cancellation during capture. Exit codes are 0 for success, 3 for a rejected
+session request and 2 for parameter/transport failures. Session directories must
+be new. No command overwrites the target's executable or existing captures.
+
 The checked-reader extraction passes `core`, `format_container`, `format_codecs`,
 `format_writer` and `capture_boundaries`. Container tests cover truncation,
 invalid index bounds, duplicate identities, bad payload ranges, cancellation

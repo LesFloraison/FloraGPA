@@ -77,6 +77,9 @@ foreach ($name in @('msvcp140.dll','vcruntime140.dll','vcruntime140_1.dll')) {
     if (-not (Test-Path -LiteralPath (Join-Path $crt $name) -PathType Leaf)) { throw "Incomplete x64 VC143 runtime: $name" }
 }
 $binaries = @('FloraGPA.exe','FloraGPA.Worker.exe','FloraGPA.Cli.exe','FloraGPA.Rdc.exe','FloraGPA.Metrics.dll')
+if ($cache['FLORA_BUILD_CAPTURE'] -eq 'ON') {
+    $binaries += @('FloraCapture.exe','FloraCaptureRuntime.dll')
+}
 foreach ($name in $binaries) {
     if (-not (Test-Path -LiteralPath (Join-Path $build $name) -PathType Leaf)) {
         throw "Release binary is missing: $name. Build the GUI configuration before packaging."
@@ -116,6 +119,10 @@ Copy-Item -LiteralPath (Join-Path $repo 'THIRD_PARTY.md') -Destination $destinat
 $licenses = Join-Path $destination 'licenses'
 New-Item -ItemType Directory -Path $licenses -Force | Out-Null
 Copy-Item -LiteralPath (Join-Path $repo 'third_party\nlohmann\LICENSE.MIT') -Destination (Join-Path $licenses 'nlohmann-json-MIT.txt') -Force
+if ($cache['FLORA_BUILD_CAPTURE'] -eq 'ON') {
+    Copy-Item -LiteralPath (Join-Path $repo 'third_party\detours\LICENSE.md') -Destination (Join-Path $licenses 'detours-MIT.txt')
+    Copy-Item -LiteralPath (Join-Path $repo 'src\capture\dependencies.json') -Destination (Join-Path $destination 'capture-dependencies.json')
+}
 Copy-Item -LiteralPath (Join-Path $repo 'third_party\renderdoc\LICENSE.MIT') -Destination (Join-Path $licenses 'renderdoc-api-MIT.txt') -Force
 Copy-Item -LiteralPath (Join-Path $repo 'third_party\metrics-discovery\LICENSE.md') -Destination (Join-Path $licenses 'intel-metrics-discovery-MIT.txt') -Force
 Copy-Item -Path (Join-Path $repo 'third_party\qt\*.txt') -Destination $licenses -Force

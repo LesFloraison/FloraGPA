@@ -1,0 +1,57 @@
+set(CMAKE_AUTOMOC OFF)
+if(FLORA_BUILD_REPLAY)
+  set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}")
+else()
+  set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/capture")
+endif()
+# Offline build: vendor changes must be reviewed and repinned explicitly.
+file(READ "${CMAKE_CURRENT_SOURCE_DIR}/dependencies.json" DEPENDENCY_MANIFEST)
+string(JSON PIN_COUNT LENGTH "${DEPENDENCY_MANIFEST}" sha256)
+math(EXPR PIN_LAST "${PIN_COUNT} - 1")
+foreach(INDEX RANGE ${PIN_LAST})
+  string(JSON FILE_NAME MEMBER "${DEPENDENCY_MANIFEST}" sha256 ${INDEX})
+  string(JSON EXPECTED GET "${DEPENDENCY_MANIFEST}" sha256 "${FILE_NAME}")
+  file(SHA256 "${PROJECT_SOURCE_DIR}/${FILE_NAME}" ACTUAL)
+  if(NOT ACTUAL STREQUAL EXPECTED)
+    message(FATAL_ERROR "Pinned dependency changed: ${FILE_NAME}")
+  endif()
+endforeach()
+set(DETOURS_ROOT "${PROJECT_SOURCE_DIR}/third_party/detours")
+add_library(flora_detours STATIC
+  ${DETOURS_ROOT}/src/detours.cpp ${DETOURS_ROOT}/src/modules.cpp
+  ${DETOURS_ROOT}/src/disasm.cpp ${DETOURS_ROOT}/src/image.cpp
+  ${DETOURS_ROOT}/src/creatwth.cpp ${DETOURS_ROOT}/src/disolx86.cpp
+  ${DETOURS_ROOT}/src/disolx64.cpp ${DETOURS_ROOT}/src/disolia64.cpp
+  ${DETOURS_ROOT}/src/disolarm.cpp ${DETOURS_ROOT}/src/disolarm64.cpp)
+target_include_directories(flora_detours PUBLIC ${DETOURS_ROOT}/src)
+target_compile_definitions(flora_detours PRIVATE WIN32_LEAN_AND_MEAN _WIN32_WINNT=0x0601)
+if(MSVC)
+  # Upstream Detours uses legacy goto initialization accepted by MSVC's
+  # permissive mode. Keep pinned upstream bytes unchanged; our code is strict.
+  target_compile_options(flora_detours PRIVATE /permissive)
+endif()
+add_library(capture_protocol INTERFACE)
+target_include_directories(capture_protocol INTERFACE include ${PROJECT_SOURCE_DIR}/third_party)
+target_compile_definitions(capture_protocol INTERFACE UNICODE _UNICODE WIN32_LEAN_AND_MEAN NOMINMAX)
+add_library(FloraCaptureRuntime SHARED runtime/bootstrap.cpp runtime/swap_chain.cpp runtime/factory.cpp runtime/exports.def)
+target_link_libraries(FloraCaptureRuntime PRIVATE flora_detours capture_protocol d3d11 dxgi advapi32)
+add_executable(FloraCapture controller/main.cpp)
+target_link_libraries(FloraCapture PRIVATE flora_detours capture_protocol ole32)
+if(MSVC)
+  target_compile_options(FloraCaptureRuntime PRIVATE /W4 /WX /EHsc /permissive- /utf-8)
+  target_compile_options(FloraCapture PRIVATE /W4 /WX /EHsc /permissive- /utf-8)
+endif()
+include(CTest)
+if(BUILD_TESTING)
+  add_executable(FloraCaptureFactoryProbe tests/factory_probe.cpp)
+  target_link_libraries(FloraCaptureFactoryProbe PRIVATE capture_protocol d3d11 dxgi user32)
+  add_test(NAME capture_bootstrap COMMAND ${CMAKE_COMMAND}
+    "-DCONTROLLER=$<TARGET_FILE:FloraCapture>" "-DPROBE=$<TARGET_FILE:FloraCaptureFactoryProbe>"
+    "-DOUTPUT=${CMAKE_CURRENT_BINARY_DIR}/bootstrap-tests" -P "${PROJECT_SOURCE_DIR}/tests/CaptureBootstrap.cmake")
+  set_tests_properties(capture_bootstrap PROPERTIES RUN_SERIAL TRUE TIMEOUT 90)
+  add_executable(FloraCaptureSwapChainProbe tests/swap_chain_probe.cpp)
+  target_link_libraries(FloraCaptureSwapChainProbe PRIVATE capture_protocol d3d11 dxgi user32)
+  if(MSVC)
+    target_compile_options(FloraCaptureSwapChainProbe PRIVATE /W4 /WX /EHsc)
+  endif()
+endif()

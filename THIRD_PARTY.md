@@ -1,5 +1,11 @@
 # Third-party components
 
+- Microsoft Detours v4.0.1: MIT, pinned commit
+  `e4bfd6b03e50de46b47abfbd1e46b384f0c5f833`. Capture-only native injection;
+  source and license are in `third_party/detours/`. Its source hashes and the
+  capture JSON dependency are checked by `src/capture/dependencies.json` during
+  configuration. Upstream: https://github.com/microsoft/Detours.
+
 - Intel Metrics Discovery public interface: MIT, Copyright (c) 2019-2026 Intel
   Corporation. Vendored header and license are in `third_party/metrics-discovery/`.
   Pinned upstream commit: `b798d05c3c535d3840eccbba23670584c26dd1a9`;

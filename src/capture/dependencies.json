@@ -1,0 +1,31 @@
+{
+  "detours": {
+    "url": "https://github.com/microsoft/Detours",
+    "tag": "v4.0.1",
+    "commit": "e4bfd6b03e50de46b47abfbd1e46b384f0c5f833",
+    "license": "MIT"
+  },
+  "json": {
+    "url": "https://github.com/nlohmann/json",
+    "tag": "v3.12.0",
+    "license": "MIT"
+  },
+  "sha256": {
+    "third_party/detours/src/creatwth.cpp": "c77edffae9f5c91f5a6d6acb5d994b5a421550552a1446acefcb0fa104ec0d33",
+    "third_party/detours/src/detours.cpp": "0af9c49f1b5a7d42f0dd2739e3e09d8d11ac230b71c8847dbdbc8e869e1c5a91",
+    "third_party/detours/src/disasm.cpp": "1084f5e0d3b236a71c46f2c98ff6b44cd2af35b6a100bc823ec33e34e26b3208",
+    "third_party/detours/src/disolarm.cpp": "9d0d2519a8e45809b9dc7aa69fbabbe4dd1657c0bec6fb1595d664cd0fe57746",
+    "third_party/detours/src/disolarm64.cpp": "9d90e7d1890c89285f4666c61f4323ecc98f5b05ebab7041967d8211723728ce",
+    "third_party/detours/src/disolia64.cpp": "7e76161e2af3140598306f947f51388ce4b7bede3028fdeaf9163a59c1df080b",
+    "third_party/detours/src/disolx64.cpp": "508e36655e69e9340d9cb6a170ea7d8d3ead5f3ae3725b298696407e7edc9251",
+    "third_party/detours/src/disolx86.cpp": "2ca65c70c08f451473ac04871adfb2cd223e62144fe99458b8991c393c29cac7",
+    "third_party/detours/src/image.cpp": "9f4c21eca192c6303c2934f0f027f3f5964f4e05034c71056ea51d6801720c10",
+    "third_party/detours/src/modules.cpp": "642ad5043e1010d7ba2edc9c3c7c8a82b1aed8e6e5c22e9643c5e701f345f979",
+    "third_party/detours/src/uimports.cpp": "e98d2b368c28d3f6329bad45dd53b5841d5f58c56c5d79ae0c13fd4a726c7898",
+    "third_party/detours/src/detours.h": "d9870cd2815958a335ff041c4d53d1951a8b7014a84d1c6e1b689b91607e09c9",
+    "third_party/detours/src/detver.h": "030559dacbf2a3672b65f305be62175f8e6b8693b11885fc73c217350ba4a92f",
+    "third_party/detours/LICENSE.md": "f854ae8aabc0404652b48a2b3bf7f21ec174c69d73f5596934c20884eb0639ef",
+    "third_party/nlohmann/json.hpp": "aaf127c04cb31c406e5b04a63f1ae89369fccde6d8fa7cdda1ed4f32dfc5de63",
+    "third_party/nlohmann/LICENSE.MIT": "46a65cffd1ea955132d95a8dd921640714a8d6b537d2e4e482d31145ae95b603"
+  }
+}

@@ -1,6 +1,94 @@
 {
   "version": 6,
-  "configurePresets": [{"name":"vs2022","generator":"Visual Studio 17 2022","architecture":"x64","binaryDir":"${sourceDir}/build/vs2022","cacheVariables":{"BUILD_TESTING":"ON"}}],
-  "buildPresets": [{"name":"release","configurePreset":"vs2022","configuration":"Release"},{"name":"debug","configurePreset":"vs2022","configuration":"Debug"}],
-  "testPresets": [{"name":"release","configurePreset":"vs2022","configuration":"Release","output":{"outputOnFailure":true}},{"name":"debug","configurePreset":"vs2022","configuration":"Debug","output":{"outputOnFailure":true}}]
+  "configurePresets": [
+    {
+      "name": "vs2022",
+      "generator": "Visual Studio 17 2022",
+      "architecture": "x64",
+      "binaryDir": "${sourceDir}/build/vs2022",
+      "cacheVariables": {
+        "BUILD_TESTING": "ON"
+      }
+    },
+    {
+      "name": "capture-only",
+      "inherits": "vs2022",
+      "binaryDir": "${sourceDir}/build/capture",
+      "cacheVariables": {
+        "FLORA_BUILD_REPLAY": "OFF",
+        "FLORA_BUILD_CAPTURE": "ON"
+      }
+    },
+    {
+      "name": "replay-only",
+      "inherits": "vs2022",
+      "binaryDir": "${sourceDir}/build/replay",
+      "cacheVariables": {
+        "FLORA_BUILD_REPLAY": "ON",
+        "FLORA_BUILD_CAPTURE": "OFF"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "release",
+      "configurePreset": "vs2022",
+      "configuration": "Release"
+    },
+    {
+      "name": "debug",
+      "configurePreset": "vs2022",
+      "configuration": "Debug"
+    },
+    {
+      "name": "capture-only-release",
+      "configurePreset": "capture-only",
+      "configuration": "Release"
+    },
+    {
+      "name": "replay-only-release",
+      "configurePreset": "replay-only",
+      "configuration": "Release"
+    }
+  ],
+  "testPresets": [
+    {
+      "name": "release",
+      "configurePreset": "vs2022",
+      "configuration": "Release",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "debug",
+      "configurePreset": "vs2022",
+      "configuration": "Debug",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "capture-only-release",
+      "configurePreset": "capture-only",
+      "configuration": "Release",
+      "output": {
+        "outputOnFailure": true
+      },
+      "execution": {
+        "jobs": 1
+      }
+    },
+    {
+      "name": "replay-only-release",
+      "configurePreset": "replay-only",
+      "configuration": "Release",
+      "output": {
+        "outputOnFailure": true
+      },
+      "execution": {
+        "jobs": 1
+      }
+    }
+  ]
 }

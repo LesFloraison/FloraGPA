@@ -3865,7 +3865,10 @@
     "format_boundary": "checked container reader extracted; writer separate from replay",
     "validation": [
       "docs/INDEPENDENT_CAPTURE.md",
-      "Five relevant CTest registrations and four native golden/negative controls passed."
+      "Five relevant CTest registrations and four native golden/negative controls passed.",
+      "19 native/injected swap-chain comparisons, 24 factory comparisons, and native control CTest passed.",
+      "Capture-only package launch/control passed with system-only PATH and no GPA, Qt, Python or RenderDoc modules.",
+      "GF2 diagnostic launch observed rendering; frame capture explicitly rejected; zero accepted new frames."
     ],
     "pending": [
       "Complete Device/Context/resource tracking",
@@ -3873,6 +3876,7 @@
       "Dual-player acceptance of generated live captures",
       "Two GF2 launches with three frames each across two scenes"
     ],
-    "note": "New capture work is separate from legacy Python module migration; no full parity claim."
+    "note": "New capture work is separate from legacy Python module migration; no full parity claim.",
+    "bootstrap": "native x64 launch/control and Factory0-7/SwapChain0-4 wrappers validated"
   }
 }
