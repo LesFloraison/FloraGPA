@@ -191,3 +191,9 @@ retained separately. The corrected verifier preserves standard Windows setup
 variables, records its own hash separately from the source commit and still
 excludes Qt/SDK/reference paths. This validates the native bootstrap package on
 this host, not live capture or independent-host deployment.
+
+The object-forwarding commit `d8a144d` also passes all five isolated source-build
+steps, including seven CTests and packaged native control. This clean build
+regenerates every COM proxy without Qt discovery or pre-existing generated files.
+The new evidence is `artifacts/capture-object-source-build/validation.json`;
+its source commit and evidence hash are recorded in the development baseline.
