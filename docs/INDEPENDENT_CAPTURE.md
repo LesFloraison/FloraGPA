@@ -242,3 +242,9 @@ steps, including seven CTests and packaged native control. This clean build
 regenerates every COM proxy without Qt discovery or pre-existing generated files.
 The new evidence is `artifacts/capture-object-source-build/validation.json`;
 its source commit and evidence hash are recorded in the development baseline.
+
+The native-metadata commit `c8255aa` passes the same five isolated source-build
+steps, now including eight serial CTests. The resulting package controls a native
+target with system-only PATH and no Qt, GPA, RenderDoc or Python modules. Evidence
+is `artifacts/capture-metadata-source-build/validation.json`; this remains a
+metadata/bootstrap gate, not live-frame acceptance.
