@@ -33,6 +33,38 @@ Raw get(int32_t hr = 0, Id query = 2, bool data = true, uint32_t flags = 0) {
 class QueryCompletionTests final : public QObject {
     Q_OBJECT
   private slots:
+    void ordinaryEndObservations() {
+        auto c=base();
+        c.add(5,7,0x3152,pack(Id(0),Id(99),uint8_t(1),0u,0u));
+        c.add(15,7,0x34fa,pack(Id(0),Id(1),Id(99)));
+        c.add(30,7,0x34fb,get());
+        c.add(31,7,0x34fb,get(0,99,false));
+        QTemporaryDir dir;const auto path=dir.filePath("ordinary.gpa_frame");c.save(path);Frame f(path.toStdWString());
+        QCOMPARE(auditEventEndObservations(f),std::set<Id>{15});
+        QCOMPARE(validateFrame(f.path())["errors"],nlohmann::json(0));
+        const auto audit=auditQueryCompletions(f);
+        QCOMPARE(requireQueryCompletion(audit,30).end,Id(20));
+        QVERIFY(!requireQueryCompletion(audit,31).missing.empty());
+        ReplayOptions o;o.warp=true;Replay replay(f,o);replay.run();
+        QCOMPARE(replay.counts.at("query_end_observations"),uint64_t(1));
+        QCOMPARE(replay.counts.at("query_completion_synchronizations"),uint64_t(1));
+        QCOMPARE(replay.counts.at("query_completion_unresolved"),uint64_t(1));
+    }
+    void ordinaryEndGuards_data() {
+        QTest::addColumn<QString>("mode");
+        for(const auto mode:{"absent","future","flags","other-type","nested","conflict","erg","deferred"})QTest::newRow(mode)<<QString(mode);
+    }
+    void ordinaryEndGuards() {
+        QFETCH(QString,mode);auto c=base();
+        if(mode!="absent")c.add(mode=="future"?25:5,7,0x3152,pack(Id(0),Id(99),uint8_t(1),mode=="other-type"?2u:0u,mode=="flags"?1u:0u));
+        if(mode=="conflict")c.add(6,7,0x3152,pack(Id(0),Id(99),uint8_t(1),2u,0u));
+        if(mode=="deferred"){auto raw=Raw(24);put<uint32_t>(raw,16,1);c.add(7,5,0x127,raw);}
+        c.add(15,7,mode=="erg"?0x243:0x34fa,pack(Id(mode=="nested"?10:0),Id(mode=="deferred"?7:1),Id(99)));
+        QTemporaryDir dir;const auto path=dir.filePath("guard.gpa_frame");c.save(path);Frame f(path.toStdWString());
+        if(mode=="deferred")QVERIFY_THROWS_EXCEPTION(std::runtime_error,auditEventEndObservations(f));
+        else QVERIFY(auditEventEndObservations(f).empty());
+        ReplayOptions o;o.warp=true;Replay replay(f,o);QVERIFY_THROWS_EXCEPTION(std::runtime_error,replay.run());
+    }
     void versions_data() {
         QTest::addColumn<int>("type");
         QTest::addColumn<bool>("statusOnly");

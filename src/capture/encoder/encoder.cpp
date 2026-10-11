@@ -89,6 +89,14 @@ class Encoder {
     void object(ObjectId id,const FrozenObject& o){
         if(id==device_ || id==context_)return;
         require(o.device==device_,"Encoder object belongs to another device");
+        if(o.kind=="query" || o.kind=="query1"){
+            const auto d=descriptor<D3D11_QUERY_DESC>(o);
+            require(d.Query==D3D11_QUERY_EVENT && !d.MiscFlags,"Encoder ordinary query profile unsupported");
+            if(o.kind=="query1")require(descriptor<D3D11_QUERY_DESC1>(o).ContextType==D3D11_CONTEXT_TYPE_ALL,"Encoder Query1 context profile unsupported");
+            // Descriptor observation identifies an ordinary query without inventing
+            // a GPA predicate resource. Query identity is reserved but not materialized.
+            add(7,0x3152,Payload{}.q({0,ref(id)}).value<uint8_t>(1).u({0,0}));return;
+        }
         if(o.kind=="buffer" || o.kind=="texture1d" || o.kind=="texture2d" || o.kind=="texture2d1" || o.kind=="texture3d" || o.kind=="texture3d1"){resource(id,o);return;}
         Payload p;p.q({ref(id),2});uint16_t type=0;
         if(o.resource){
@@ -164,6 +172,18 @@ public:
             if(command.kind==CommandKind::query_end || command.kind==CommandKind::query_get_data){
                 EventDependencyOptions analysis_options;analysis_options.cancelled=options_.cancelled;
                 const auto dependencies=analyze_event_dependencies(frame_,analysis_options);
+                bool observations_only=frame_.start_completion.has_value();
+                for(const auto& observed:dependencies.observations){
+                    const auto& c=frame_.commands.at(observed.sequence);const auto& q=*c.query;
+                    const bool pending=observed.scope==EventObservationScope::pending && q.end_sequence &&
+                        q.last_end.immediate && q.last_end.context==c.bindings.context &&
+                        !q.has_output && c.words[0]==0;
+                    observations_only=observations_only && (observed.scope==EventObservationScope::preframe_completed || pending);
+                }
+                // No in-frame successful completion is lowered here. Pre-frame
+                // work was drained before the initial state; a pending observation
+                // and an End alone promise no GPU completion during this frame.
+                if(observations_only)break;
                 std::string detail="; End observations="+std::to_string(dependencies.ends)+", GetData observations="+std::to_string(dependencies.observations.size());
                 std::array<size_t,8> scopes{};
                 const EventDependencyObservation* latest=nullptr;
@@ -217,6 +237,14 @@ public:
         for(const auto& command:frame_.commands){
             require(command.sequence==sequence++,"Encoder command sequence mismatch");const auto& w=command.words;Payload p;uint16_t type=0;
             require(command.kind==CommandKind::update_subresource || !command.update_box,"Encoder box attached to non-Update command");
+            if(command.kind==CommandKind::query_end || command.kind==CommandKind::query_get_data){
+                require(command.query.has_value() && command.completed && command.bindings.context==context_ && command.bindings.device==device_,"Encoder query observation mismatch");
+                const auto query=typed(command.operand,{"query","query1"});
+                if(command.kind==CommandKind::query_end)add(7,0x34fa,Payload{}.q({0,1,query}));
+                else{const auto& q=*command.query;p.q({0,1}).value(command.result).value(query).value<uint8_t>(q.has_output?1:0);
+                    if(q.has_output){require(q.value.has_value(),"Encoder query output bytes unavailable");p.value(*q.value);}p.u({w[0],w[1]});add(7,0x34fb,std::move(p));}
+                continue;
+            }
             if(command.kind==CommandKind::map || command.kind==CommandKind::unmap){
                 require(command.bindings.context==context_ && command.bindings.device==device_,"Encoder Map context mismatch");
                 require(command.completed && command.operand,"Encoder incomplete Map/Unmap");const auto resource=resource_ref(command.operand);

@@ -1,6 +1,6 @@
 // Self-owned rendering target. No capture/replay runtime linkage or direct hook calls.
 #include "protocol.hpp"
-#include <d3d11_1.h>
+#include <d3d11_3.h>
 #include <dxgi1_6.h>
 #include <d3dcompiler.h>
 #include <wrl/client.h>
@@ -53,6 +53,11 @@ int wmain(int argc,wchar_t** argv){if(argc!=3)return 2;const fs::path out=fs::ab
     ComPtr<ID3D11Texture1D> boxed_color;ComPtr<ID3D11ShaderResourceView> boxed_view;
     if(mode>=15){D3D11_TEXTURE1D_DESC td{4,1,1,DXGI_FORMAT_R32G32B32A32_FLOAT,D3D11_USAGE_DEFAULT,D3D11_BIND_SHADER_RESOURCE,0,0};const float initial[16]{};D3D11_SUBRESOURCE_DATA data{initial,64,64};check(device->CreateTexture1D(&td,&data,&boxed_color));check(device->CreateShaderResourceView(boxed_color.Get(),nullptr,&boxed_view));auto* srv=boxed_view.Get();context->PSSetShaderResources(0,1,&srv);auto bytes=shader("Texture1D<float4> t;float4 main():SV_Target{return t.Load(int2(1,0));}","ps_5_0");check(device->CreatePixelShader(bytes->GetBufferPointer(),bytes->GetBufferSize(),nullptr,&mapped_shader));}
     ComPtr<ID3D11DeviceContext1> update_context;check(context.As(&update_context));
+    ComPtr<ID3D11Query> frame_event;
+    if(mode>=17){
+        if(mode==18){ComPtr<ID3D11Device3> device3;check(device.As(&device3));ComPtr<ID3D11Query1> event;D3D11_QUERY_DESC1 q{D3D11_QUERY_EVENT,0,D3D11_CONTEXT_TYPE_ALL};check(device3->CreateQuery1(&q,&event));check(event.As(&frame_event));}
+        else{D3D11_QUERY_DESC q{D3D11_QUERY_EVENT,0};check(device->CreateQuery(&q,&frame_event));}
+    }
     ComPtr<IUnknown> initial_identity;check(buffer.As(&initial_identity));uint64_t identity_checks=0,unbind_checks=0;
     context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);D3D11_VIEWPORT vp{0,0,8,8,0,1};context->RSSetViewports(1,&vp);
     ComPtr<IDXGISwapChain1> swap1;check(swap.As(&swap1));uint64_t frames=0;const auto deadline=GetTickCount64()+120000;
@@ -61,13 +66,15 @@ int wmain(int argc,wchar_t** argv){if(argc!=3)return 2;const fs::path out=fs::ab
         MSG msg{};while(PeekMessageW(&msg,nullptr,0,0,PM_REMOVE)){TranslateMessage(&msg);DispatchMessageW(&msg);}
         if(signal_exists(out/L"pause.signal")){if(!signal_exists(out/L"paused.signal"))save(out/L"paused.signal",{{"frames",frames}});Sleep(5);continue;}
         if(signal_exists(out/L"paused.signal"))fs::remove(out/L"paused.signal");
+        if(frame_event && frames){const auto until=GetTickCount64()+5000;for(;;){const auto hr=context->GetData(frame_event.Get(),nullptr,0,0);check(hr);if(hr==S_OK)break;if(GetTickCount64()>until)throw std::runtime_error("Target previous-frame EVENT timed out");Sleep(1);}}
         context->OMSetRenderTargets(1,&view,nullptr);context->PSSetShader(mode>=2?cycle[frames%5].Get():ps.Get(),nullptr,0);
         const float black[]{0,0,0,1};context->ClearRenderTargetView(rtv.Get(),black);
-        if(mode>=11){static const float values[5][4]{{1,0,0,1},{0,1,0,1},{0,0,1,1},{1,1,1,1},{0,1,1,1}};if(mode>=15){float color[4];memcpy(color,values[frames%5],16);D3D11_BOX box{1,0,0,2,1,1};if(mode==16)update_context->UpdateSubresource1(boxed_color.Get(),0,&box,color,16,16,0);else context->UpdateSubresource(boxed_color.Get(),0,&box,color,16,16);memset(color,0xcd,sizeof color);memset(&box,0,sizeof box);}
+        if(mode>=11){static const float values[5][4]{{1,0,0,1},{0,1,0,1},{0,0,1,1},{1,1,1,1},{0,1,1,1}};if(mode>=15){float color[4];memcpy(color,values[frames%5],16);D3D11_BOX box{1,0,0,2,1,1};if(mode==16 || mode==18)update_context->UpdateSubresource1(boxed_color.Get(),0,&box,color,16,16,0);else context->UpdateSubresource(boxed_color.Get(),0,&box,color,16,16);memset(color,0xcd,sizeof color);memset(&box,0,sizeof box);}
             else if(mode>=13){float color[4];memcpy(color,values[frames%5],16);if(mode==14)update_context->UpdateSubresource1(mapped_color.Get(),0,nullptr,color,0,0,0);else context->UpdateSubresource(mapped_color.Get(),0,nullptr,color,0,0);memset(color,0xcd,sizeof color);}
             else{D3D11_MAPPED_SUBRESOURCE mapped{};check(context->Map(mapped_color.Get(),0,D3D11_MAP_WRITE_DISCARD,0,&mapped));memcpy(mapped.pData,values[frames%5],16);context->Unmap(mapped_color.Get(),0);}context->PSSetShader(mapped_shader.Get(),nullptr,0);}
         context->Draw(3,0);
         if(signal_exists(out/L"update.signal")){UINT pixels[64]{};D3D11_BOX box{0,0,0,0,4,1};context->UpdateSubresource(buffer.Get(),0,&box,pixels,32,256);}
+        if(frame_event)context->End(frame_event.Get());
         const UINT present_flags=tearing?DXGI_PRESENT_ALLOW_TEARING:0;
         HRESULT presented=S_OK;if(mode){DXGI_PRESENT_PARAMETERS parameters{};presented=swap1->Present1(0,present_flags,&parameters);}else presented=swap->Present(0,present_flags);
         check(presented);if(presented!=S_OK)throw std::runtime_error("Live oracle requires successful visible presentation");

@@ -1,5 +1,15 @@
 # GetData completion ordering and missing Query boundaries
 
+Follow-up 2026-10-12: descriptor-identified ordinary EVENT API End records are
+now retained as observations. A preceding top-level `Query.GetDesc` must identify
+EVENT with zero flags, the identity must not be a materialized resource, and the
+context must be immediate. Executable `0x243` End, missing/conflicting descriptors,
+nested records and other query types do not use this path. This neither constructs
+a predicate nor provides a native wait. Successful GetData without a saved native
+completion interval still produces the existing completion warning. See
+[independent capture](INDEPENDENT_CAPTURE.md) for the encoder's narrower
+pre-frame-completed/status-only-pending publication checks.
+
 Follow-up 2026-10-08: [stream Query compatibility](STREAM_QUERY_COMPATIBILITY.md)
 restores types 9/11/13/15 when the original file saves their `0x96` descriptor
 and Begin/End interval. They use CreateQuery, remain non-bindable and start

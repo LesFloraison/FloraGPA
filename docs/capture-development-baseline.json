@@ -9,7 +9,7 @@
     "B": "native launch/control and capture-only package validated",
     "C": "partial: persistent native identity, descriptor graph and owned buffer/texture/shader/input-layout/SO creation metadata validated; other creation paths pending",
     "D": "partial: startup-injected blit/flip/tearing capture with dynamic mapped constants; dual-player execution verified on self-owned targets",
-    "E": "partial: Map/Unmap, initial resources and whole CopyResource validated; EVENT observations retained but serialization rejects; Update/region copies, deferred and hidden-state coverage pending",
+    "E": "partial: Map/Unmap, initial resources, whole CopyResource, whole/boxed zero-flag Updates and scoped EVENT observations verified; successful in-frame waits, region copies, deferred and hidden-state coverage pending",
     "F": "partial: native CLI and asynchronous Qt capture/cancel/disconnect/completed-file opening tested; full profile/deployment acceptance pending",
     "G": "pending: no six-frame GF2 or original GUI capture acceptance"
   },
@@ -279,7 +279,8 @@
     "capture-query-dependencies-gf2/status-before-1.json": "db26c13306b299a6936fc06ea54aa8d940e0c74582523ba203f55ee8cfe1c528",
     "capture-query-dependencies-gf2/target.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "capture-query-dependencies-gf2/unity.log": "e48b6da7f973a8ddb245bdce6c212cae648004ac3fb5cdea82600e71964447ac",
-    "capture-query-dependencies-validation.json": "a11682a894afb12beb72059a79f6e8efc2e5590583823f2edd366831aad1fcfa"
+    "capture-query-dependencies-validation.json": "a11682a894afb12beb72059a79f6e8efc2e5590583823f2edd366831aad1fcfa",
+    "capture-event-observation-validation.json": "28c38dd81f915f947dc61add4c68acad3b6caea7ba637f790b99a4b95e7a4ffc"
   },
   "limitations": [
     "GPA original-player checks use a development-only private ABI harness.",
@@ -727,5 +728,55 @@
     "qt_cases": 11,
     "qt_skipped": 0,
     "full_application_build": true
+  },
+  "ordinary_event_observations": {
+    "status": "implemented for pre-frame-completed and in-frame pending status-only EVENT observations",
+    "apis": [
+      "CreateQuery EVENT",
+      "CreateQuery1 EVENT/ALL"
+    ],
+    "frame_start": "Owned native S_OK/TRUE completion proof required; same immediate context and ordered End history",
+    "wire": "Ordinary GetDesc/End/GetData API observations with reserved non-resource query IDs; no fabricated predicate or native in-frame wait",
+    "direct_files": 4,
+    "direct_checks": 60,
+    "negative_execution_controls": 2,
+    "encoder_refusal_cases": 6,
+    "injected_launches": 19,
+    "injected_files": 95,
+    "injected_query_files": 10,
+    "injected_checks": 609,
+    "capture_only_ctest": 36,
+    "relevant_full_ctest": 11,
+    "final_workflow_ctest": 4,
+    "query_completion_cases": 42,
+    "query_completion_skipped": 0,
+    "qt_cases": 11,
+    "qt_skipped": 0,
+    "golden_controls": 4,
+    "original_player_reports": 102,
+    "original_player_sha256": "39061ff329e4a32d0c8375ce9ee15e2017bccab0593943b962a860e11723d38b",
+    "gf2": {
+      "diagnostic_launches": 1,
+      "diagnostic_files": 3,
+      "exact_dual_player_outputs": 3,
+      "accepted_frames": 0,
+      "image": "All-black startup frames; not scene acceptance",
+      "blocker": "Game initialization fails with LocalCache UnauthorizedAccessException under current medium-integrity token; permissions unchanged",
+      "inspection": "42 resources, six DXBC exports and three DrawIndexed states per file; Flora inspection only",
+      "validation_errors_per_file": 0,
+      "validation_warnings_per_file": {
+        "query_completion_not_saved": 1,
+        "offline_coverage_gap": 10
+      },
+      "normal_close": true
+    },
+    "pending": [
+      "Successful in-frame EVENT completion lowering",
+      "Other query types and deferred/multicontext ordering",
+      "Two real GF2 scene launches and six accepted frames",
+      "Original GPA GUI inspection and explicit adapter verification",
+      "New source-archive/package validation for this revision"
+    ],
+    "evidence": "artifacts/capture-event-observation-validation.json"
   }
 }

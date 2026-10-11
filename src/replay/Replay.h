@@ -176,6 +176,7 @@ class Replay {
     std::optional<ClassCreationAudit> classCreationAudit_;
     std::optional<PredicateCreationAudit> predicateCreationAudit_;
     std::optional<QueryCompletionAudit> queryCompletionAudit_;
+    std::optional<std::set<Id>> eventEndObservations_;
     QueryCompletionAudit unresolvedQueryCompletions_;
     std::set<Id> unissuedPredicates_;
     std::set<Id> baselinePredicates_;

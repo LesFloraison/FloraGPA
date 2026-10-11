@@ -6,7 +6,10 @@ captures a limited blit/flip DX11 profile through private IPC. Completed
 Unsupported profiles fail explicitly. Qt exposes the same workflow and passes
 only completed file paths into replay. The full planned release, original GUI
 inspection and GF2 six-frame gate remain incomplete. GF2 passes its two-buffer
-FLIP_SEQUENTIAL / ALLOW_TEARING boundary and mapped writes, then rejects EVENT serialization.
+FLIP_SEQUENTIAL / ALLOW_TEARING boundary and mapped writes. Limited pre-frame
+EVENT observations now serialize; in-frame successful completion still rejects.
+Three new GF2 startup captures replay exactly, but game-cache access failures
+leave them black, so they do not establish scene acceptance.
 
 ## Architectural contract
 
@@ -1349,3 +1352,83 @@ This remains scoped compatibility evidence from the development original-player
 private-ABI runner, not original GUI or adapter acceptance. Other BC formats have
 layout handling but no new format-by-format dual-player evidence. General EVENT
 serialization remains guarded and accepted GF2 frames remain **0/6**.
+
+
+## Ordinary EVENT observations with a completed frame start
+
+The encoder now accepts a strictly bounded observational query profile. The
+existing private frame-start EVENT must prove S_OK/TRUE on the recorded immediate
+context. A successful application GetData is accepted only when its matching End
+preceded that boundary. In-frame End is preserved as an API observation. An
+in-frame S_FALSE is accepted only when it matches a recorded End and has null
+output with zero size. These observations promise no in-frame GPU completion.
+Successful in-frame GetData, unissued/foreign/deferred histories, failed calls,
+missing start proof and unavailable pending output bytes continue to reject
+publication. The existing executable-resource-read experiments are not enabled
+as a general query wait.
+
+Query identities remain stable, reserved non-resource IDs. A `7/0x3152`
+Query.GetDesc observation stores EVENT/zero flags; `7/0x34fa` retains End; and
+`7/0x34fb` retains actual HRESULT, output presence/BOOL, size and flags. No query
+is fabricated as a GPA predicate. Query1/ALL uses the same ordinary query
+semantics. Capture owns this encoding and never calls Core or Replay helpers.
+The reader independently recognizes an API End only after unambiguous EVENT
+metadata on an immediate context. It rejects edited End payloads, does not treat
+executable End as metadata, and does not disturb real predicate intervals.
+Frame validation labels these End observations explicitly. The existing
+`query_completion_not_saved` warning is retained for successful GetData because
+the file does not materialize a native query completion wait; no new wait count
+is invented.
+
+The self-owned native fixture drains an EVENT before recording, captures its
+actual completed observation, copies data, clears an output and ends the query
+again. Both CreateQuery and CreateQuery1 are exercised after source COM objects
+have died. Negative files remove Clear but retain the final reference image;
+both players execute the initial blue contents. Six encoder guards reject with
+no file publication. The startup-injected target additionally uses an EVENT from
+the preceding frame with changing texture updates and Draw output. Nineteen
+launches produce 95 files, including ten query-mode files, and pass 609 serial
+dual-player/CPU/module checks. Evidence is in `artifacts/capture-event-injected-interop`.
+
+A fresh GF2 launch (PID 34332) produced three files at selected-chain Presents
+71071, 157985 and 161265. Each preserves one pre-frame S_OK status-only GetData,
+one End and one in-frame S_FALSE status-only GetData, three DrawIndexed calls,
+six Map/Unmap pairs and the observed Clears. Both players execute all three files
+with exact RGBA equality to the captured backbuffer under a zero-tolerance rule
+fixed before replay. The game continued presenting between captures, disconnected
+and exited through CloseMainWindow. Runtime hashes, query values, images and
+results are retained in `artifacts/capture-event-observation-gf2`.
+
+All three images are black. The game's own log reports UnauthorizedAccessException
+while writing LocalCache logs and deleting a LocalCache code file; initialization
+then fails. The current token has medium integrity and the inherited Users ACL
+on that directory grants ReadAndExecute, not write access. No game permissions or
+cache files were changed. These are startup diagnostic files, not accepted scene
+captures: GF2 remains **0/6**, the second launch/two scenes and original GUI
+inspection remain pending. The original kernel oracle still uses the development
+private-ABI runner with its pinned player hash and unverified default adapter.
+
+The first launch command mistakenly reused its evidence directory and was refused
+before a process started; the corrected invocation used a new session subdirectory.
+A predicate regression initially selected the older corpus lacking modes 8–11;
+the existing expanded corpus passes the corrected run. These failures are retained.
+The only compile repairs were a shadowed payload variable and the test target's
+D3D11.3 header for Query1. No original workspace evidence was modified.
+
+Final regression passes all 36 capture-only suites, eleven distinct relevant
+full-profile suites after the corrected corpus rerun, and four final workflow
+suites after rebuilding frame validation. Query completion has 42 cases and the
+Qt capture workflow has eleven, both without skips. All four existing GF2/BF1
+golden and negative controls pass. The four direct observation files pass 60
+checks, including two execution-removal controls. All 102 original-player reports
+from the direct, injected and GF2 diagnostic matrices identify the pinned kernel.
+The evidence hashes and retained failures are summarized in
+`artifacts/capture-event-observation-validation.json`.
+
+Each GF2 file exposes 42 resources, six exported/disassembled DXBC shaders and
+three DrawIndexed pipeline states in Flora. Offline validation reports zero
+errors, one `query_completion_not_saved` warning and ten `offline_coverage_gap`
+warnings for resource families without complete offline descriptor validation.
+These checks do not replace original GUI inspection or the missing scene tests.
+The most recent source-archive package proof still covers the earlier whole-Update
+revision; this EVENT revision has build/test and live-module evidence only.

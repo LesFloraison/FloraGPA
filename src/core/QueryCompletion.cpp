@@ -20,8 +20,39 @@ QueryCompletion readQueryGetData(Bytes bytes) {
     r.end();
     return q;
 }
+std::set<Id> auditEventEndObservations(const Frame &frame, const CancelCheck &cancelled) {
+    checkCancellation(cancelled);
+    std::map<Id, bool> descriptors;
+    std::set<Id> result;
+    for (const auto &[id, e] : frame.entries()) {
+        checkCancellation(cancelled);
+        if (e.category != 7) continue;
+        if (e.type == 0x3152) {
+            Reader r(frame.payload(id));
+            const auto link = r.read<Id>(), query = r.read<Id>();
+            const bool present = r.flag();
+            uint32_t type = UINT32_MAX, flags = UINT32_MAX;
+            if (present) { type = r.read<uint32_t>(); flags = r.read<uint32_t>(); }
+            r.end();
+            const bool event = !link && query && present && type == 0 && flags == 0 && !frame.entries().contains(query);
+            const auto found = descriptors.find(query);
+            // Conflicting metadata cannot establish an ordinary-query identity.
+            descriptors[query] = event && (found == descriptors.end() || found->second);
+        } else if (e.type != 0x243 && predicateOperation(e.type) == PredicateOperation::End) {
+            Reader r(frame.payload(id));
+            const auto link = r.read<Id>(), context = r.read<Id>(), query = r.read<Id>();
+            r.end();
+            if (!link && descriptors.contains(query) && descriptors.at(query)) {
+                requireImmediateContext(frame, context);
+                result.insert(id);
+            }
+        }
+    }
+    return result;
+}
 QueryCompletionAudit auditQueryCompletions(const Frame &frame, const CancelCheck &cancelled) {
     checkCancellation(cancelled);
+    const auto eventEnds = auditEventEndObservations(frame, cancelled);
     struct Interval {
         Id context{}, end{};
         bool active{};
@@ -33,7 +64,7 @@ QueryCompletionAudit auditQueryCompletions(const Frame &frame, const CancelCheck
         if (e.category != 7)
             continue;
         const auto operation = predicateOperation(e.type);
-        if (operation && *operation != PredicateOperation::Set) {
+        if (operation && *operation != PredicateOperation::Set && !eventEnds.contains(id)) {
             // Invalid predicate commands are independently rejected by replay.
             // Never use a malformed or unmatched interval as a completion proof.
             try {

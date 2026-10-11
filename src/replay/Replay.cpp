@@ -999,6 +999,13 @@ void Replay::command(const Entry &e) {
         return;
     }
     if (predicateOperation(t)) {
+        if (!eventEndObservations_) eventEndObservations_ = auditEventEndObservations(frame_);
+        if (eventEndObservations_->contains(e.id)) {
+            if (!std::ranges::equal(payload, frame_.payload(e.id)))
+                throw std::runtime_error("EVENT End observation edits are not supported");
+            ++counts["query_end_observations"];
+            return;
+        }
         if (predicateOperation(t) == PredicateOperation::Set) {
             auto captured = readPredicateCommand(t, payload);
             immediate(captured.context);

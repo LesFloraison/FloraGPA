@@ -99,6 +99,7 @@ Json validateFrame(const std::filesystem::path &path, const std::function<bool()
         std::set<Id> completedPredicates, activePredicates;
         std::optional<PredicateBinding> predicateBinding;
         const auto normalizedPredication = auditNormalizedPredication(frame, cancelled);
+        const auto eventEndObservations = auditEventEndObservations(frame, cancelled);
         Id normalizedBinding = 0;
         for (const auto &[id, e] : frame.entries()) {
             checkCancellation(cancelled);
@@ -179,7 +180,12 @@ Json validateFrame(const std::filesystem::path &path, const std::function<bool()
                                     "restored application query result",
                                     resource);
                     };
-                    if (const auto operation = predicateOperation(e.type)) {
+                    if (eventEndObservations.contains(id)) {
+                        const auto observed = readPredicateCommand(e.type, frame.payload(id));
+                        finding(&e, "info", "ordinary_event_end_observation",
+                                "Descriptor identifies an ordinary EVENT; API End is an observation, not a native predicate or completion wait",
+                                observed.resource);
+                    } else if (const auto operation = predicateOperation(e.type)) {
                         const auto p = readPredicateCommand(e.type, frame.payload(id));
                         requireImmediateContext(frame, p.context);
                         if (*operation == PredicateOperation::Set) {
