@@ -3,6 +3,7 @@
 #include <nlohmann/json.hpp>
 #include <fstream>
 #include <iostream>
+#include <map>
 #include <regex>
 #include <set>
 #include <sstream>
@@ -29,6 +30,9 @@ void method(std::ostream& out, const std::string& iface, const Json& m) {
     const auto& parameters = m.at("parameters");
     std::string args, pre, post, iid;
     for (const auto& p : parameters) if (p.at("type") == "REFIID") iid = p.at("name");
+    if (name == "SetPrivateData" || name == "SetPrivateDataInterface" || name == "GetPrivateData")
+        for (const auto& p : parameters) if (p.at("type") == "REFGUID")
+            pre += "observe_private_data(" + p.at("name").get<std::string>() + ", \"" + api + "\");\n";
     out << result << " STDMETHODCALLTYPE " << name << "(";
     bool first = true;
     for (const auto& p : parameters) {
@@ -61,6 +65,20 @@ void method(std::ostream& out, const std::string& iface, const Json& m) {
             post += "wrap_object(" + iid + ", " + pname + ", \"" + api + "\");\n";
         }
         if (!args.empty()) args += ", "; args += arg;
+    }
+    if (iface == "ID3D11Device" && name == "CreateBuffer")
+        post += "remember_buffer(ppBuffer ? *ppBuffer : nullptr, pDesc, pInitialData);\n";
+    if (iface == "ID3D11Device" && name == "CreateInputLayout")
+        post += "remember_input_layout(ppInputLayout ? *ppInputLayout : nullptr, pInputElementDescs, NumElements, pShaderBytecodeWithInputSignature, BytecodeLength);\n";
+    if (iface == "ID3D11Device" && name == "CreateGeometryShaderWithStreamOutput")
+        post += "remember_stream_output(ppGeometryShader ? *ppGeometryShader : nullptr, pShaderBytecode, BytecodeLength, pSODeclaration, NumEntries, pBufferStrides, NumStrides, RasterizedStream, pClassLinkage);\n";
+    const std::map<std::string, std::string> shaderOutputs{
+        {"CreateVertexShader","ppVertexShader"},{"CreatePixelShader","ppPixelShader"},
+        {"CreateGeometryShader","ppGeometryShader"},{"CreateHullShader","ppHullShader"},
+        {"CreateDomainShader","ppDomainShader"},{"CreateComputeShader","ppComputeShader"}};
+    if (iface == "ID3D11Device" && shaderOutputs.contains(name)) {
+        const auto& output = shaderOutputs.at(name);
+        post += "remember_shader(" + output + " ? *" + output + " : nullptr, \"" + api + "\", pShaderBytecode, BytecodeLength, pClassLinkage);\n";
     }
     out << ") override {\nconst DWORD before = GetLastError();\ntry {\n" << pre
         << "auto* target = owner_.native<" << iface << ">();\n"

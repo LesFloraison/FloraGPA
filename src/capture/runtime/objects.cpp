@@ -12,7 +12,7 @@ struct Registry {
     std::recursive_mutex mutex;
     std::map<IUnknown*, Object*> native;
     std::map<const void*, Object*> proxies;
-    uint64_t created = 0, destroyed = 0, next_id = 1, gaps = 0;
+    uint64_t created = 0, destroyed = 0, gaps = 0;
     Json last_gap;
 };
 Registry& registry() { static auto* r = new Registry; return *r; }
@@ -27,10 +27,11 @@ std::string guid_text(REFIID iid) {
 struct Object::Impl {
     IUnknown* identity;
     ULONG refs = 0;
-    uint64_t id;
+    std::shared_ptr<ObjectRecord> record;
+    std::mutex record_mutex;
     std::map<GUID, IUnknown*, GuidLess> interfaces;
     std::vector<std::unique_ptr<Proxy>> proxies;
-    explicit Impl(IUnknown* value) : identity(value), id(registry().next_id++) { identity->AddRef(); }
+    explicit Impl(IUnknown* value) : identity(value) { identity->AddRef(); }
     ~Impl() {
         for (auto& [iid, pointer] : interfaces) { (void)iid; pointer->Release(); }
         identity->Release();
@@ -38,6 +39,11 @@ struct Object::Impl {
 };
 Object::Object(IUnknown* identity) : impl_(std::make_unique<Impl>(identity)) {}
 Object::~Object() = default;
+std::shared_ptr<ObjectRecord> Object::record() {
+    std::lock_guard lock(impl_->record_mutex);
+    if (!impl_->record) impl_->record = track_native_object(impl_->identity);
+    return impl_->record;
+}
 void* Object::native(REFIID iid) {
     if (iid == __uuidof(IUnknown)) return impl_->identity;
     auto& r = registry(); std::lock_guard lock(r.mutex);
@@ -119,12 +125,11 @@ void wrap_object(REFIID iid, void** output, const char* api) noexcept {
             factory->Release(); wrap_factory(iid, output); SetLastError(before); return;
         }
         if (FAILED(returned->QueryInterface(IID_PPV_ARGS(&identity)))) throw std::runtime_error("No COM identity");
-        bool transferred = false;
+        bool transferred = false; Object* owner = nullptr;
         {
             std::lock_guard lock(r.mutex);
             auto found = r.native.find(identity);
             std::unique_ptr<Object> fresh;
-            Object* owner = nullptr;
             if (found != r.native.end()) owner = found->second;
             else { fresh = std::make_unique<Object>(identity); owner = fresh.get(); }
             void* pointer = owner->view(iid);
@@ -151,7 +156,12 @@ void wrap_object(REFIID iid, void** output, const char* api) noexcept {
                 identity = nullptr; transferred = true;
             }
         }
-        if (transferred) returned->Release();
+        if (transferred) {
+            try { owner->record(); }
+            catch (const std::exception& error) { object_gap(api, iid, error.what()); }
+            catch (...) { object_gap(api, iid, "Persistent native object metadata unavailable"); }
+            returned->Release();
+        }
     } catch (...) { object_gap(api, iid, "Object registration failed"); }
     if (identity) identity->Release();
     SetLastError(before);
@@ -165,9 +175,18 @@ void* unwrap_object(const void* input, REFIID iid) {
     SetLastError(before); return result;
 }
 Json object_status() {
-    auto& r = registry(); std::lock_guard lock(r.mutex);
-    return {{"created",r.created}, {"destroyed",r.destroyed}, {"active",r.native.size()},
-        {"interface_gaps",r.gaps}, {"last_gap",r.last_gap}, {"lost_diagnostics",lost_diagnostics.load()},
-        {"recording_available",false}};
+    auto& r = registry(); Json result;
+    {
+        std::lock_guard lock(r.mutex);
+        result = {{"created",r.created}, {"destroyed",r.destroyed}, {"active",r.native.size()},
+            {"interface_gaps",r.gaps}, {"last_gap",r.last_gap}, {"lost_diagnostics",lost_diagnostics.load()}, {"recording_available",false}};
+    }
+    result["metadata"] = metadata_status(); return result;
+}
+std::shared_ptr<ObjectRecord> object_record(const void* proxy) {
+    auto& r = registry(); Object* owner = nullptr;
+    { std::lock_guard lock(r.mutex); const auto found = r.proxies.find(proxy); if (found != r.proxies.end()) owner = found->second; }
+    // The caller owns its application reference for the entire metadata lookup.
+    return owner ? owner->record() : nullptr;
 }
 }

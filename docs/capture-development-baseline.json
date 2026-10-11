@@ -7,7 +7,7 @@
   "stages": {
     "A": "checked format boundary and native authored writer validated",
     "B": "native launch/control and capture-only package validated",
-    "C": "partial: Device/Context/resource COM forwarding validated; persistent capture identity and creation metadata pending",
+    "C": "partial: persistent native identity, descriptor reference graph, buffer/shader/input-layout/SO creation metadata validated; other creation paths pending",
     "D": "pending: no intercepted frame serialization",
     "E": "pending: initial resource and hidden state capture",
     "F": "partial: Qt control lifecycle validated; actual capture/completion unavailable",
@@ -26,8 +26,8 @@
     "existing_golden_controls": 4,
     "native_authored_interop_checks": 22,
     "source_build_steps": 5,
-    "capture_only_ctest": 7,
-    "full_profile_capture_ctest": 5,
+    "capture_only_ctest": 8,
+    "full_profile_capture_ctest": 6,
     "native_object_lifetimes": 36
   },
   "source_build_commit": "d8a144d0bc23ff372b413a5e0c760139f33d924f",
@@ -43,7 +43,15 @@
     "capture-object-package-final/manifest.json": "3d670ad5ea3c07718377ce294bd5e8b7493814cf880ab1524f81b039f894e90d",
     "capture-object-ctest.txt": "3fa150987e819d122afdbf13f02b8408f323fb09570ca4177cdcb3768c68bdac",
     "capture-object-full-ctest.txt": "a5def8aa5f50b96c42a699d9bd431dd54e053a4874270207a124e9032219965f",
-    "capture-object-source-build/validation.json": "278b19679da5feadd8764dad3a403cea040ca64a8ee65d97b308fecf8ccec61d"
+    "capture-object-source-build/validation.json": "278b19679da5feadd8764dad3a403cea040ca64a8ee65d97b308fecf8ccec61d",
+    "capture-metadata-validation.json": "029d20d1619bf9250862e70d478b39335efaa00ff2644406c3d2b5b070bf38e2",
+    "capture-metadata-ctest.txt": "8a2da8025f96e6ccbaf71fb40431e9367ebbe20df8e2514ab3da22b48519a3ab",
+    "capture-metadata-full-ctest.txt": "44ff96a5699559b5ccb8f710528097aadc33c8111859a78d24eccf939706d304",
+    "capture-metadata-native-log.txt": "04c7ed13ba0520204949e19cfbd1a458cc456ec380b6c4b88ea26a830e63f28c",
+    "capture-metadata-factories-final/validation.json": "e2e96acab25e71ffbce3b435dbda260e92de9b8cda0d95c3af77cb47a9010182",
+    "capture-metadata-swaps-final/validation.json": "f5dfc04cac0e6c63ce920bedb1beafa99f7a014c74a2bdeb2447cc2c4f73c005",
+    "capture-metadata-factories-release/validation.json": "e2e96acab25e71ffbce3b435dbda260e92de9b8cda0d95c3af77cb47a9010182",
+    "capture-metadata-swaps-release/validation.json": "f5dfc04cac0e6c63ce920bedb1beafa99f7a014c74a2bdeb2447cc2c4f73c005"
   },
   "limitations": [
     "GPA original-player checks use a development-only private ABI harness.",
@@ -59,5 +67,15 @@
     "recording_available": false,
     "package_system_only_path": "passed",
     "gf2_diagnostic": "successful launch/Present/disconnect; no accepted frames; diagnostic binary hash not retained before rebuild"
+  },
+  "native_metadata": {
+    "persistent_identity": true,
+    "buffer_creation_data": true,
+    "shader_dxbc": true,
+    "input_layout": true,
+    "stream_output_declaration": true,
+    "texture_creation_data": false,
+    "frame_initial_snapshots": false,
+    "gf2_diagnostic": "launch/Present/disconnect passed; runtime hash retained; no accepted frames"
   }
 }

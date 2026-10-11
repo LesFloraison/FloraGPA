@@ -79,9 +79,8 @@ Full-profile capture tests, including Qt controls, pass as well.
 Native interface caches hold real COM references; diagnostic AddRef/Release
 numbers are not expected to match an unwrapped device. Application-visible
 IUnknown identity is stable across implemented interfaces while references are
-live. Wrapper generations are not yet persistent capture resource IDs: native
-objects retained only by driver bindings need separate lifetime metadata before
-command recording. Returned unsupported interfaces remain native and their
+live. Persistent capture identities now use native lifetime metadata, separately
+from application wrapper generations (see below). Returned unsupported interfaces remain native and their
 subsequent calls/identity queries are outside tracking. This keeps stage C partial.
 
 The generator is native C++20 and emits only into the build directory. See
@@ -95,6 +94,52 @@ rejected, disconnect succeeded and the game exited through CloseMainWindow.
 This tests that launch path only; no scene or image comparison was performed,
 and no generated frame is accepted. The diagnostic preceded subsequent forwarding
 hardening edits and did not retain a hash of its exact runtime binary.
+
+## Native identity and creation metadata
+
+The capture-owned `ObjectRecord` is independent of replay and format records.
+A private IUnknown token on each supported native object preserves its ID while
+driver bindings retain the object after all application wrappers have gone.
+The token owns metadata only: it has no native object/device/wrapper reference.
+Native destruction retires the record; retaining its CPU metadata does not keep
+the GPU object alive. Reusing a native address creates a new ID. This follows
+the public [SetPrivateDataInterface lifetime contract](https://learn.microsoft.com/en-us/windows/win32/api/d3d11/nf-d3d11-id3d11devicechild-setprivatedatainterface).
+
+Metadata holds actual resource/view/state descriptors, device IDs, view resource
+IDs, device creation flags, context kind/flags, buffer creation bytes, shader
+DXBC and class-linkage IDs, owned input-layout semantics/signatures, and owned
+stream-output declarations/strides. Null SO gap semantics and absent buffer
+initial data remain distinct. Captured buffer creation bytes are not a frame's
+initial GPU snapshot: later Map/Update/Copy/Draw operations can change them.
+Texture creation data, class-instance details, command-list contents and several
+other creation paths remain incomplete. No frame can be published yet.
+
+Initialization is serialized per native identity; descriptor queries and token
+installation do not hold the global metadata registry lock. Token destruction
+does not enter the wrapper registry. Failed storage and application access to
+the reserved lifetime GUID report a capability gap while preserving native API
+results. A pre-existing private-data value under that GUID is never overwritten. Unsupported native private-data storage is not silently treated as a
+persistent identity.
+
+`capture_metadata` verifies real WARP resource/shader bindings across wrapper
+destruction, concurrent rewrapping, copied buffer/DXBC data after caller memory
+changes, exact compute results and native teardown without token cycles. It
+recreates InputLayout and SO GeometryShader objects from retained metadata after
+their originals are released, then checks Draw-generated stream bytes exactly.
+The registry test also covers deterministic native address reuse, concurrent
+failed initialization/retry, a false-success native setter and reserved-key
+overwrites. The initial old mock lacked real private-interface retention; it
+was corrected to implement that COM contract before this gate passed.
+
+This iteration passes eight capture-only CTests, six full-profile capture tests
+(including ten Qt cases), 24 factory checks and 20 swap-chain checks. GPU tests
+run serially. GF2 diagnostics in `artifacts/capture-metadata-gf2-1` retain the
+runtime hash before launch: two samples observe 94,414 then 225,060 successful
+Presents, 138 native records created, 12 retired and no reported interface gaps.
+Capture rejects, disconnect succeeds and CloseMainWindow exits the process;
+no process exit code was recovered. This diagnostic preceded the final
+pre-existing-GUID guard; its exact older runtime hash remains recorded. No scene/pixel or dual-player acceptance is
+claimed, and accepted live GF2 captures remain zero.
 
 An earlier build launched the specified GF2 executable and observed two successful
 device creations and a 2560x1440 swap chain with 43,564 successful Present calls,
