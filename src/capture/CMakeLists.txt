@@ -45,7 +45,7 @@ set(CAPTURE_PROXIES "${CMAKE_CURRENT_BINARY_DIR}/object_proxies.cpp")
 add_custom_command(OUTPUT "${CAPTURE_PROXIES}"
   COMMAND FloraCaptureApiGenerator "${CMAKE_CURRENT_SOURCE_DIR}/api/interfaces.json" "${CAPTURE_PROXIES}"
   DEPENDS FloraCaptureApiGenerator api/interfaces.json VERBATIM)
-add_library(FloraCaptureObjects STATIC runtime/swap_chain.cpp runtime/factory.cpp runtime/objects.cpp runtime/metadata.cpp runtime/resource_data.cpp runtime/context_state.cpp runtime/command_stream.cpp runtime/capture_session.cpp "${CAPTURE_PROXIES}")
+add_library(FloraCaptureObjects STATIC runtime/swap_chain.cpp runtime/factory.cpp runtime/objects.cpp runtime/metadata.cpp runtime/resource_data.cpp runtime/frame_start.cpp runtime/context_state.cpp runtime/command_stream.cpp runtime/capture_session.cpp "${CAPTURE_PROXIES}")
 target_include_directories(FloraCaptureObjects PRIVATE runtime)
 target_link_libraries(FloraCaptureObjects PRIVATE FloraCaptureEncoder FloraCaptureModel flora_detours capture_protocol d3d11 dxgi)
 add_library(FloraCaptureRuntime SHARED runtime/bootstrap.cpp runtime/exports.def)

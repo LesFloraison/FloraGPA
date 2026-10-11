@@ -15,7 +15,7 @@ struct EventDependencyPrefix {
     std::optional<uint64_t> first_uncovered_sequence;
     std::string first_uncovered_reason;
 };
-enum class EventObservationScope { pending, failed, unissued, preframe, deferred, foreign_context, recorded_prefix };
+enum class EventObservationScope { pending, failed, unissued, preframe, deferred, foreign_context, recorded_prefix, preframe_completed };
 struct EventDependencyObservation {
     uint64_t sequence=0,generation=0;
     ObjectId query=0;

@@ -174,10 +174,10 @@ void track_query(const void* context_proxy,IUnknown* query,bool begin) noexcept 
         if(begin)context->active_queries.insert(record->id);
         else{
             context->active_queries.erase(record->id);
-            if(record->last_query_end.generation==UINT64_MAX || context->descriptor.size()!=sizeof(ContextRecordDesc))
+            if(record->last_query_end.generation==UINT64_MAX || context->query_end_serial==UINT64_MAX || context->descriptor.size()!=sizeof(ContextRecordDesc))
                 throw std::runtime_error("Query End history unavailable");
             ContextRecordDesc desc{};memcpy(&desc,context->descriptor.data(),sizeof(desc));
-            record->last_query_end={record->last_query_end.generation+1,context->id,GetCurrentThreadId(),desc.type==D3D11_DEVICE_CONTEXT_IMMEDIATE};
+            record->last_query_end={record->last_query_end.generation+1,context->id,GetCurrentThreadId(),desc.type==D3D11_DEVICE_CONTEXT_IMMEDIATE,++context->query_end_serial};
         }
     } catch (...) {object_gap(begin?"Begin":"End",__uuidof(ID3D11Asynchronous),"Query activity tracking failed");}
 }

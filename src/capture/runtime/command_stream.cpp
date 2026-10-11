@@ -1,6 +1,7 @@
 #include "command_stream.hpp"
 #include "objects.hpp"
 #include "capture_session.hpp"
+#include "frame_start.hpp"
 #include <cstring>
 
 namespace flora::capture {
@@ -53,7 +54,7 @@ struct FrameRecording::Impl {
     // Generated API names are static string literals. Retain the first failing
     // call without allocation or waiting for the application/driver lock.
     std::atomic<const char*> foreign_call=nullptr,reentrant_call=nullptr;
-    bool finished=false;
+    bool finished=false,starting=true;
     struct Mapping {size_t command;D3D11_MAPPED_SUBRESOURCE mapped{};};
     std::map<std::pair<ObjectId,UINT>,Mapping> mappings;
     std::map<ObjectId,std::pair<uint64_t,uint64_t>> query_ends; // generation, command sequence
@@ -75,6 +76,18 @@ FrameRecording::FrameRecording(ID3D11DeviceContext* context,const RecordingOptio
     impl_->context=context;impl_->context_id=record->id;impl_->options=options;
 }
 FrameRecording::~FrameRecording()=default;
+void FrameRecording::complete_start(){
+    auto& p=*impl_;FrameStartOptions options;options.timeout_ms=p.options.readback_timeout_ms;
+    options.cancelled=[&p]{
+        if(p.options.cancelled && p.options.cancelled())p.cancelled=true;
+        if(p.foreign_call.load())throw std::runtime_error("Concurrent or foreign-thread call during frame start completion");
+        if(p.reentrant_call.load())throw std::runtime_error("Reentrant application call during frame start completion");
+        return p.cancelled.load();
+    };
+    p.frame.start_completion=complete_frame_start(p.context.Get(),options);
+    if(options.cancelled())throw std::runtime_error("Frame start completion cancelled");
+    p.starting=false;
+}
 void FrameRecording::cancel() noexcept {impl_->cancelled.store(true);}
 void RecordedFrame::require_complete() const {
     if(cancelled)throw std::runtime_error("Frame recording cancelled");
@@ -84,7 +97,7 @@ FrozenFrame freeze_frame(RecordedFrame&& frame,ObjectId output,ResourceSnapshot&
     frame.require_complete();
     if(!final_output.record || final_output.record->id!=output || !frame.initial_resources.contains(output))
         throw std::runtime_error("Frame output lacks matching initial/final resource data");
-    FrozenFrame result;result.output=output;
+    FrozenFrame result;result.output=output;result.start_completion=frame.start_completion;
     for(const auto& [id,held]:frame.objects){
         auto& r=*held.record;std::lock_guard lock(r.mutex);
         FrozenObject object;object.id=id;object.device=r.device;object.resource=r.resource;object.class_linkage=r.class_linkage;
@@ -100,9 +113,11 @@ FrozenFrame freeze_frame(RecordedFrame&& frame,ObjectId output,ResourceSnapshot&
 std::shared_ptr<FrameRecording> begin_recording(ID3D11DeviceContext* context,const RecordingOptions& options){
     LastErrorScope last_error;
     auto next=std::shared_ptr<FrameRecording>(new FrameRecording(context,options));
-    auto& r=registry();std::lock_guard lock(r.mutex);
-    if(r.active.lock())throw std::runtime_error("Frame recording busy");
-    r.active=next;r.enabled.store(true);return next;
+    auto& r=registry();
+    {std::lock_guard lock(r.mutex);if(r.active.lock())throw std::runtime_error("Frame recording busy");r.active=next;r.enabled.store(true);}
+    try{next->complete_start();}
+    catch(...){std::lock_guard lock(r.mutex);if(auto active=r.active.lock();active==next){r.active.reset();r.enabled.store(false);}throw;}
+    return next;
 }
 RecordedFrame FrameRecording::finish(){
     LastErrorScope last_error;
@@ -126,7 +141,7 @@ void FrameRecording::observe(ID3D11DeviceContext* context,const char* api,Comman
     // Never wait behind capture readback while a foreign caller may own the
     // driver's ID3D11Multithread lock. Mark failure and forward immediately.
     if(GetCurrentThreadId()!=p.thread){const char* empty=nullptr;p.foreign_call.compare_exchange_strong(empty,api);return;}
-    if(native_call_depth>1){const char* empty=nullptr;p.reentrant_call.compare_exchange_strong(empty,api);return;}
+    if(native_call_depth>1 || p.starting){const char* empty=nullptr;p.reentrant_call.compare_exchange_strong(empty,api);return;}
     std::lock_guard lock(p.mutex);
     if(p.finished || p.frame.failed || p.cancelled.load() || p.foreign_call.load() || p.reentrant_call.load())return;
     try {
@@ -153,7 +168,7 @@ void FrameRecording::observe(ID3D11DeviceContext* context,const char* api,Comman
         command.operand=retain(snapshot,operand);
         command.source=retain(snapshot,source);
         if(kind==CommandKind::copy_resource && command.operand==command.source)throw std::runtime_error("CopyResource operands alias");
-        SnapshotOptions options;options.timeout_ms=p.options.readback_timeout_ms;options.cancelled=[&p]{return p.cancelled.load();};
+        SnapshotOptions options;options.timeout_ms=p.options.readback_timeout_ms;options.cancelled=[&p]{if(p.options.cancelled && p.options.cancelled())p.cancelled=true;return p.cancelled.load();};
         for(const auto& [id,object]:snapshot.objects){
             if(object.record->kind!="device" && object.record->device!=snapshot.bindings.device)
                 throw std::runtime_error("Command operand belongs to another device");
@@ -197,7 +212,7 @@ void FrameRecording::observe(ID3D11DeviceContext* context,const char* api,Comman
 void FrameRecording::query(ID3D11DeviceContext* context,ID3D11Asynchronous* async,CommandKind kind,HRESULT result,const void* data,UINT size,UINT flags){
     auto& p=*impl_;const auto* api=kind==CommandKind::query_end?"ID3D11DeviceContext::End":"ID3D11DeviceContext::GetData";
     if(GetCurrentThreadId()!=p.thread){const char* empty=nullptr;p.foreign_call.compare_exchange_strong(empty,api);return;}
-    if(native_call_depth>1){const char* empty=nullptr;p.reentrant_call.compare_exchange_strong(empty,api);return;}
+    if(native_call_depth>1 || p.starting){const char* empty=nullptr;p.reentrant_call.compare_exchange_strong(empty,api);return;}
     std::lock_guard lock(p.mutex);
     if(p.finished || p.frame.failed || p.cancelled || p.foreign_call.load() || p.reentrant_call.load())return;
     try{
@@ -253,7 +268,7 @@ void FrameRecording::query(ID3D11DeviceContext* context,ID3D11Asynchronous* asyn
 void FrameRecording::mapped(ID3D11DeviceContext* context,ID3D11Resource* resource,UINT subresource,HRESULT result,const D3D11_MAPPED_SUBRESOURCE* mapped){
     auto& p=*impl_;constexpr auto api="ID3D11DeviceContext::Map";
     if(GetCurrentThreadId()!=p.thread){const char* empty=nullptr;p.foreign_call.compare_exchange_strong(empty,api);return;}
-    if(native_call_depth>1){const char* empty=nullptr;p.reentrant_call.compare_exchange_strong(empty,api);return;}
+    if(native_call_depth>1 || p.starting){const char* empty=nullptr;p.reentrant_call.compare_exchange_strong(empty,api);return;}
     std::lock_guard lock(p.mutex);if(p.finished || p.frame.failed || p.cancelled || p.foreign_call.load() || p.reentrant_call.load())return;
     try{
         auto c=object_record(context),r=object_record(resource);
@@ -269,7 +284,7 @@ void FrameRecording::mapped(ID3D11DeviceContext* context,ID3D11Resource* resourc
 void FrameRecording::unmap(ID3D11DeviceContext* context,ID3D11Resource* resource,UINT subresource){
     auto& p=*impl_;constexpr auto api="ID3D11DeviceContext::Unmap";
     if(GetCurrentThreadId()!=p.thread){const char* empty=nullptr;p.foreign_call.compare_exchange_strong(empty,api);return;}
-    if(native_call_depth>1){const char* empty=nullptr;p.reentrant_call.compare_exchange_strong(empty,api);return;}
+    if(native_call_depth>1 || p.starting){const char* empty=nullptr;p.reentrant_call.compare_exchange_strong(empty,api);return;}
     std::lock_guard lock(p.mutex);if(p.finished || p.frame.failed || p.cancelled || p.foreign_call.load() || p.reentrant_call.load()){p.mappings.clear();return;}
     try{
         auto c=object_record(context),r=object_record(resource);
@@ -292,6 +307,7 @@ void FrameRecording::unmap(ID3D11DeviceContext* context,ID3D11Resource* resource
 void FrameRecording::reject_external(const char* api) {
     auto& p=*impl_;
     if(GetCurrentThreadId()!=p.thread){const char* empty=nullptr;p.foreign_call.compare_exchange_strong(empty,api);return;}
+    if(p.starting){const char* empty=nullptr;p.reentrant_call.compare_exchange_strong(empty,api);return;}
     if(native_call_depth>1){const char* empty=nullptr;p.reentrant_call.compare_exchange_strong(empty,api);return;}
     std::lock_guard lock(p.mutex);if(!p.finished)p.gap(api,"External resource mutation or synchronization is not recorded");
 }

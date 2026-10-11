@@ -59,7 +59,8 @@ void start(Request& r,IDXGISwapChain* swap){
     ComPtr<ID3D11Device> device;check(swap->GetDevice(IID_PPV_ARGS(&device)),"Swap chain has no DX11 device");
     device->GetImmediateContext(&r.context);wrap_object(r.context.GetAddressOf(),"Capture::ImmediateContext");
     check(swap->GetBuffer(0,IID_PPV_ARGS(&r.buffer)),"Cannot get capture backbuffer");wrap_object(r.buffer.GetAddressOf(),"Capture::Backbuffer");
-    r.owner=GetCurrentThreadId();r.recording=begin_recording(r.context.Get());r.state(Phase::Capturing);
+    RecordingOptions options;options.cancelled=[&r]{return r.cancelled.load();};
+    r.owner=GetCurrentThreadId();r.recording=begin_recording(r.context.Get(),options);r.state(Phase::Capturing);
 }
 void finish(Request& r,IDXGISwapChain* swap){
     if(swap){

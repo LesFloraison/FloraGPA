@@ -25,6 +25,7 @@ struct ObjectRecord {
     std::set<std::pair<uint64_t,UINT>> mapped_subresources;
     std::set<uint64_t> active_queries;
     QueryEndStamp last_query_end;
+    uint64_t query_end_serial=0;
     bool external_mapping=false;
     std::vector<InputElementRecord> input_elements;
     std::vector<StreamElementRecord> stream_elements;

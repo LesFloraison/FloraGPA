@@ -98,5 +98,30 @@ void malformed(){
     options={};options.cancelled=[] {return true;};rejects([&]{analyze_event_dependencies(good,options);},"cancelled");
     unsigned checks=0;options.cancelled=[&]{return ++checks>2;};rejects([&]{analyze_event_dependencies(good,options);},"cancelled");
 }
+void frame_start(){
+    auto good=base();good.start_completion=FrameStartCompletion{2,1,7,10,1,S_OK,1};
+    get(good,{3,2,7,true,9},{},S_OK,true);get(good,{3,2,8,true,10},{});
+    auto r=analyze_event_dependencies(good);
+    for(const auto& o:r.observations)require(o.scope==EventObservationScope::preframe_completed && !o.prefix,"Completed pre-frame work lost its boundary");
+    for(unsigned mode=0;mode<7;++mode){
+        auto f=good;auto& b=*f.start_completion;
+        if(mode==0)b.context=999;if(mode==1)b.device=999;if(mode==2)b.thread=0;
+        if(mode==3)b.result=S_FALSE;if(mode==4)b.value=0;
+        if(mode==5){f.objects[8]=f.objects[2];f.objects[8].id=8;b.context=8;}
+        if(mode==6){f.commands[0].result=S_FALSE;f.commands[0].query->value.reset();}
+        rejects([&]{analyze_event_dependencies(f);},mode==6?"contradicts":mode==5?"context/device mismatch":mode<2?"identity/device mismatch":"Invalid frame start");
+    }
+    for(unsigned mode=0;mode<4;++mode){
+        auto f=good;auto& s=f.commands[0].query->last_end;
+        if(mode==0)s.context_serial=0;if(mode==1)s.context_serial=11;if(mode==2)s.immediate=false;if(mode==3)s.context=9;
+        require(analyze_event_dependencies(f).observations[0].scope!=EventObservationScope::preframe_completed,"Unproven completion accepted");
+    }
+    auto f=good;end(f,4);f.commands.back().query->last_end.context_serial=11;
+    get(f,{4,2,7,true,11},2);require(analyze_event_dependencies(f).observations.back().scope==EventObservationScope::recorded_prefix,"In-frame End lost");
+    f.commands.back().query->last_end.context_serial=12;rejects([&]{analyze_event_dependencies(f);},"GetData End identity");
+    f.commands.back().query->last_end.context_serial=11;f.commands[2].query->last_end.context_serial=10;
+    rejects([&]{analyze_event_dependencies(f);},"End frame start order");
+    good.start_completion.reset();require(analyze_event_dependencies(good).observations[0].scope==EventObservationScope::preframe,"Missing native completion invented");
 }
-int main(){try{intervals();scopes();gaps();malformed();std::cout<<"EVENT dependency scopes, copy edges, bounded snapshots and rejection cases passed\n";return 0;}catch(const std::exception& e){std::cerr<<e.what()<<'\n';return 1;}}
+}
+int main(){try{intervals();scopes();gaps();malformed();frame_start();std::cout<<"EVENT dependency scopes, frame start evidence, copy edges, bounded snapshots and rejection cases passed\n";return 0;}catch(const std::exception& e){std::cerr<<e.what()<<'\n';return 1;}}

@@ -4,7 +4,7 @@
 #include <stdexcept>
 namespace flora::capture {
 namespace {
-bool same(const QueryEndStamp& a,const QueryEndStamp& b){return a.generation==b.generation && a.context==b.context && a.thread==b.thread && a.immediate==b.immediate;}
+bool same(const QueryEndStamp& a,const QueryEndStamp& b){return a.generation==b.generation && a.context==b.context && a.thread==b.thread && a.immediate==b.immediate && a.context_serial==b.context_serial;}
 template<class T>T descriptor(const FrozenObject& o){
     if(o.descriptor.size()!=sizeof(T))throw std::runtime_error("Descriptor length mismatch");
     T value;memcpy(&value,o.descriptor.data(),sizeof value);return value;
@@ -50,6 +50,16 @@ EventDependencyReport analyze_event_dependencies(const FrozenFrame& frame,const 
     struct End {QueryEndStamp stamp;uint64_t sequence;std::shared_ptr<const EventDependencyPrefix> prefix;};
     std::map<ObjectId,End> ends;
     size_t retained=0;ObjectId context=0,device=0;
+    const auto* start=frame.start_completion?&*frame.start_completion:nullptr;
+    if(start){
+        const auto& ctx=object(frame,start->context,start->device);
+        const auto dev=frame.objects.find(start->device);
+        if(!start->thread || start->result!=S_OK || start->value!=1u || ctx.kind!="context" ||
+           descriptor<ContextRecordDesc>(ctx).type!=D3D11_DEVICE_CONTEXT_IMMEDIATE ||
+           dev==frame.objects.end() || dev->second.id!=start->device || dev->second.kind!="device")
+            throw std::runtime_error("Invalid frame start completion");
+    }
+    uint64_t end_serial=start?start->last_end_serial:0;
     auto charge=[&](size_t n){if(n>options.entry_limit-retained)throw std::runtime_error("Event dependency entry limit exceeded");retained+=n;};
     auto gap=[&](const RecordedCommand& c,const std::string& reason){
         ++prefix.uncovered_commands;
@@ -63,6 +73,7 @@ EventDependencyReport analyze_event_dependencies(const FrozenFrame& frame,const 
             if(!context){context=c.bindings.context;device=c.bindings.device;}
             if(!context || !device || c.bindings.context!=context || c.bindings.device!=device)
                 throw std::runtime_error("Multiple or missing context/device identities");
+            if(start && (context!=start->context || device!=start->device))throw std::runtime_error("Frame start context/device mismatch");
             const auto dev=frame.objects.find(device);
             if(dev==frame.objects.end() || dev->second.id!=device || dev->second.kind!="device")
                 throw std::runtime_error("Device identity missing");
@@ -73,13 +84,15 @@ EventDependencyReport analyze_event_dependencies(const FrozenFrame& frame,const 
                 event_query(frame,c.operand,device);
                 if(!c.completed || !c.query)throw std::runtime_error("Query observation missing");
                 const auto& q=*c.query;const auto& stamp=q.last_end;
-                if((!stamp.generation && (stamp.context || stamp.thread || stamp.immediate || q.end_sequence)) ||
+                if((!stamp.generation && (stamp.context || stamp.thread || stamp.immediate || stamp.context_serial || q.end_sequence)) ||
                    (stamp.generation && (!stamp.context || !stamp.thread)))throw std::runtime_error("Incomplete End history");
                 if(c.kind==CommandKind::query_end){
                     if(!stamp.generation || !stamp.thread || !stamp.immediate || stamp.context!=context || q.end_sequence!=c.sequence || q.has_output || q.value)
                         throw std::runtime_error("End provenance mismatch");
                     if(auto previous=ends.find(c.operand);previous!=ends.end() && stamp.generation!=previous->second.stamp.generation+1)
                         throw std::runtime_error("End generation mismatch");
+                    if(start && (stamp.thread!=start->thread || stamp.context_serial<=end_serial))throw std::runtime_error("End frame start order mismatch");
+                    end_serial=stamp.context_serial;
                     charge(1);charge(prefix.copies.size());
                     ends[c.operand]={stamp,c.sequence,std::make_shared<const EventDependencyPrefix>(prefix)};
                     ++report.ends;continue;
@@ -95,12 +108,15 @@ EventDependencyReport analyze_event_dependencies(const FrozenFrame& frame,const 
                     if(end==ends.end() || end->second.sequence!=*q.end_sequence || !same(stamp,end->second.stamp) || *q.end_sequence>=c.sequence)
                         throw std::runtime_error("GetData End identity/generation/sequence mismatch");
                 }else if(end!=ends.end())throw std::runtime_error("GetData lost its in-frame End association");
+                const bool completed_before_frame=start && stamp.generation && stamp.immediate && stamp.context==context &&
+                    stamp.context_serial && stamp.context_serial<=start->last_end_serial && !q.end_sequence;
+                if(completed_before_frame && c.result==S_FALSE)throw std::runtime_error("Pending EVENT contradicts frame start completion");
                 if(c.result<0)observation.scope=EventObservationScope::failed;
                 else if(c.result==S_FALSE)observation.scope=EventObservationScope::pending;
                 else if(!stamp.generation)observation.scope=EventObservationScope::unissued;
                 else if(!stamp.immediate)observation.scope=EventObservationScope::deferred;
                 else if(stamp.context!=context)observation.scope=EventObservationScope::foreign_context;
-                else if(!q.end_sequence)observation.scope=EventObservationScope::preframe;
+                else if(!q.end_sequence)observation.scope=completed_before_frame?EventObservationScope::preframe_completed:EventObservationScope::preframe;
                 else{observation.scope=EventObservationScope::recorded_prefix;observation.prefix=end->second.prefix;}
                 charge(1);report.observations.push_back(std::move(observation));continue;
             }

@@ -165,13 +165,13 @@ public:
                 EventDependencyOptions analysis_options;analysis_options.cancelled=options_.cancelled;
                 const auto dependencies=analyze_event_dependencies(frame_,analysis_options);
                 std::string detail="; End observations="+std::to_string(dependencies.ends)+", GetData observations="+std::to_string(dependencies.observations.size());
-                std::array<size_t,7> scopes{};
+                std::array<size_t,8> scopes{};
                 const EventDependencyObservation* latest=nullptr;
                 for(const auto& observed:dependencies.observations){
                     ++scopes.at(size_t(observed.scope));
                     if(observed.prefix && (!latest || observed.end_sequence>latest->end_sequence))latest=&observed;
                 }
-                constexpr const char* scope_names[]{"pending","failed","unissued","pre-frame","deferred","foreign-context","recorded-prefix"};
+                constexpr const char* scope_names[]{"pending","failed","unissued","pre-frame","deferred","foreign-context","recorded-prefix","pre-frame-completed"};
                 for(size_t i=0;i<scopes.size();++i)if(scopes[i])detail+=", "+std::string(scope_names[i])+"="+std::to_string(scopes[i]);
                 if(latest){
                     const auto& prefix=*latest->prefix;

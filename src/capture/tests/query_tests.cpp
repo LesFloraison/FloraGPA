@@ -73,6 +73,41 @@ void failures(bool hardware){
     recording.reset();recording=begin_recording(f.context.Get());{NativeCall nested;f.context->GetData(event.Get(),nullptr,0,0);}auto reentrant=recording->finish();rejects([&]{reentrant.require_complete();},"Reentrant");
     recording.reset();recording=begin_recording(f.context.Get());recording->cancel();record_query_observation(f.context.Get(),event.Get(),CommandKind::query_get_data,S_OK,inaccessible,4,0);auto cancelled=recording->finish();rejects([&]{cancelled.require_complete();},"cancelled");
 }
+void frame_start(bool hardware){
+    std::cerr<<"frame start: completion\n";
+    Fixture f(hardware);auto a=f.event(),b=f.event();
+    D3D11_BUFFER_DESC desc{16,D3D11_USAGE_DEFAULT,0,0,0,0};UINT words[]{2,3,5,7};D3D11_SUBRESOURCE_DATA data{words,0,0};ComPtr<ID3D11Buffer> source,staging;
+    check(f.device->CreateBuffer(&desc,&data,&source));desc.Usage=D3D11_USAGE_STAGING;desc.CPUAccessFlags=D3D11_CPU_ACCESS_READ;check(f.device->CreateBuffer(&desc,nullptr,&staging));
+    f.context->CopyResource(staging.Get(),source.Get());f.context->End(a.Get());f.context->End(b.Get());f.context->End(a.Get());
+    require(object_record(a.Get())->last_query_end.context_serial==3 && object_record(b.Get())->last_query_end.context_serial==2,"End serial not ordered across query identities");
+    D3D11_VIEWPORT viewport{1,2,8,9,0,1};f.context->RSSetViewports(1,&viewport);
+    const auto alive=metadata_status().at("alive"),active=object_status().at("active");SetLastError(0x123456);
+    auto recording=begin_recording(f.context.Get());require(GetLastError()==0x123456,"Frame start changed LastError");
+    require(alive==metadata_status().at("alive") && active==object_status().at("active"),"Private EVENT entered object tracking");
+    BOOL ready=FALSE;require(f.context->GetData(a.Get(),&ready,4,D3D11_ASYNC_GETDATA_DONOTFLUSH)==S_OK && ready,"Frame start failed to drain earlier EVENT");
+    UINT count=1;D3D11_VIEWPORT actual{};f.context->RSGetViewports(&count,&actual);require(count==1 && !memcmp(&viewport,&actual,sizeof actual),"Frame start mutated bindings");
+    unsigned busyCalls=0;RecordingOptions busy;busy.cancelled=[&]{++busyCalls;return false;};rejects([&]{begin_recording(f.context.Get(),busy);},"busy");require(!busyCalls,"Busy recording started a second GPU wait");
+    const auto frame=recording->finish();frame.require_complete();require(frame.start_completion && frame.start_completion->last_end_serial==3 && frame.start_completion->value==1 && frame.start_completion->result==S_OK,"Actual completion evidence missing");
+    require(frame.commands.size()==1,"Private completion entered application commands");
+    D3D11_MAPPED_SUBRESOURCE mapped{};check(unwrap(f.context.Get())->Map(unwrap(staging.Get()),0,D3D11_MAP_READ,0,&mapped));require(!memcmp(mapped.pData,words,sizeof words),"Frame start changed copied bytes");unwrap(f.context.Get())->Unmap(unwrap(staging.Get()),0);
+    recording.reset();
+    auto recover=[&]{auto r=begin_recording(f.context.Get());const auto recovered=r->finish();recovered.require_complete();require(recovered.commands.empty() && recovered.start_completion.has_value(),"Startup failure poisoned next recording");};
+    std::cerr<<"frame start: timeout/cancel\n";
+    RecordingOptions options;options.readback_timeout_ms=0;rejects([&]{begin_recording(f.context.Get(),options);},"timed out");recover();
+    for(unsigned when:{1u,3u}){unsigned calls=0;options={};options.cancelled=[&]{return ++calls>=when;};rejects([&]{begin_recording(f.context.Get(),options);},"cancelled");require(calls==when,"Cancellation checkpoint skipped");recover();}
+    std::cerr<<"frame start: foreign\n";
+    options={};bool called=false;options.cancelled=[&]{if(!called){called=true;std::thread worker([&]{f.context->Flush();});worker.join();}return false;};
+    rejects([&]{begin_recording(f.context.Get(),options);},"foreign-thread");recover();
+    std::cerr<<"frame start: reentrant\n";
+    options={};called=false;options.cancelled=[&]{if(!called){called=true;f.context->Flush();}return false;};
+    rejects([&]{begin_recording(f.context.Get(),options);},"Reentrant");recover();
+    ComPtr<ID3D11DeviceContext> deferred;check(f.device->CreateDeferredContext(0,&deferred));rejects([&]{begin_recording(deferred.Get());},"immediate context");recover();
+    D3D11_QUERY_DESC pd{D3D11_QUERY_OCCLUSION_PREDICATE,0};ComPtr<ID3D11Predicate> predicate;check(f.device->CreatePredicate(&pd,&predicate));
+    f.context->Begin(predicate.Get());f.context->End(predicate.Get());f.context->SetPredication(predicate.Get(),TRUE);
+    rejects([&]{begin_recording(f.context.Get());},"predication");ComPtr<ID3D11Predicate> actualPredicate;BOOL predicateValue=FALSE;
+    f.context->GetPredication(&actualPredicate,&predicateValue);require(actualPredicate==predicate && predicateValue==TRUE,"Rejected frame start changed predication");
+    f.context->SetPredication(nullptr,FALSE);recover();
+}
 FrozenFrame frozen(){
     FrozenFrame result;
     {
@@ -85,6 +120,7 @@ FrozenFrame frozen(){
     }
     require(object_status().at("active")==0 && metadata_status().at("alive")==0,"Frozen query model retained native objects");
     require(result.commands[2].query->value==TRUE && result.commands[2].query->end_sequence==1,"Frozen query result/history changed");
+    require(result.start_completion && result.start_completion->result==S_OK && result.start_completion->value==1,"Frozen frame lost owned completion evidence");
     const auto dependencies=analyze_event_dependencies(result);
     require(dependencies.ends==1 && dependencies.observations.size()==1 && dependencies.observations[0].scope==EventObservationScope::recorded_prefix && dependencies.observations[0].prefix->uncovered_commands==0,"Frozen End included a later Clear or lost its scope");
     const auto& copies=dependencies.observations[0].prefix->copies;require(copies.size()==1 && copies[0].sequence==0 && copies[0].source==result.commands[0].source && copies[0].destination==result.commands[0].operand,"Frozen native copy dependency lost");return result;
@@ -95,6 +131,6 @@ int wmain(int argc,wchar_t** argv){try{
         const std::filesystem::path out=argv[1];require(!std::filesystem::exists(out),"Query output exists");std::filesystem::create_directories(out);const auto frame=frozen();
         const auto reason="EVENT query serialization is not verified; frame not published (ID3D11DeviceContext::End, object="+std::to_string(frame.commands[1].operand)+", sequence=1)";
         rejects([&]{encode_frame(frame,out/L"query.gpa_frame");},reason.c_str());require(std::filesystem::is_empty(out),"Unsupported query published/leaked a file");std::cout<<"Owned EVENT freeze and located encoder rejection passed\n";
-    }else{const bool hardware=argc==2 && std::wstring(argv[1])==L"--hardware";observations(hardware);failures(hardware);require(object_status().at("active")==0 && metadata_status().at("alive")==0 && object_status().at("interface_gaps")==0,"Query tracking leaked native objects or capabilities");std::cout<<"EVENT generations, output ownership, pre-frame history and failure boundaries passed\n";}
+    }else{const bool hardware=argc==2 && std::wstring(argv[1])==L"--hardware";std::cerr<<"observations\n";observations(hardware);std::cerr<<"failures\n";failures(hardware);frame_start(hardware);require(object_status().at("active")==0 && metadata_status().at("alive")==0 && object_status().at("interface_gaps")==0,"Query tracking leaked native objects or capabilities");std::cout<<"EVENT generations, output ownership, frame start completion and failure recovery passed\n";}
     return 0;
 }catch(const std::exception& e){std::cerr<<e.what()<<'\n';return 1;}}

@@ -4,6 +4,7 @@
 
 namespace flora::capture {
 struct RecordedFrame {
+    std::optional<FrameStartCompletion> start_completion;
     std::map<ObjectId,RetainedObject> objects;
     std::map<ObjectId,ResourceSnapshot> initial_resources;
     std::vector<RecordedCommand> commands;
@@ -16,6 +17,7 @@ struct RecordingOptions {
     size_t byte_limit=default_resource_byte_limit;
     size_t command_limit=100000;
     uint32_t readback_timeout_ms=5000;
+    std::function<bool()> cancelled;
 };
 // Run on the application thread before handing CPU data to a background writer.
 // Validates the model and releases every retained native reference on success.
@@ -24,6 +26,7 @@ class FrameRecording {
     struct Impl;
     std::unique_ptr<Impl> impl_;
     explicit FrameRecording(ID3D11DeviceContext*,const RecordingOptions&);
+    void complete_start();
     friend std::shared_ptr<FrameRecording> begin_recording(ID3D11DeviceContext*,const RecordingOptions&);
 public:
     ~FrameRecording();

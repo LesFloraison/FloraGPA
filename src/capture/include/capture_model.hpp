@@ -71,6 +71,14 @@ struct QueryEndStamp {
     ObjectId context=0;
     uint32_t thread=0;
     bool immediate=false;
+    uint64_t context_serial=0; // Application End order on this context only.
+};
+struct FrameStartCompletion {
+    ObjectId context=0,device=0;
+    uint32_t thread=0;
+    uint64_t last_end_serial=0,elapsed_ms=0;
+    int32_t result=E_FAIL;
+    uint32_t value=0;
 };
 struct QueryObservation {
     QueryEndStamp last_end;
@@ -119,6 +127,7 @@ struct Presentation {
     bool extended=false;
 };
 struct FrozenFrame {
+    std::optional<FrameStartCompletion> start_completion;
     std::map<ObjectId,FrozenObject> objects;
     std::map<ObjectId,ResourceContents> initial_resources;
     std::vector<RecordedCommand> commands;

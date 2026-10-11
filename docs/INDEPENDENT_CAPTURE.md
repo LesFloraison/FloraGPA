@@ -1168,3 +1168,53 @@ The next required evidence is the completion/initialization boundary at frame
 start for these pre-frame observations. Reusing a later in-frame End or treating
 a copy-only recorded prefix as proof about preceding frames would be incorrect.
 Accepted GF2 captures remain zero.
+
+## Frame-start completion evidence
+
+Recording now registers its observer before a private, unwrapped immediate-context
+EVENT is submitted. It checks cancellation, elapsed time and device removal while
+waiting for actual `S_OK` and `TRUE`. No private query object or internal command
+enters the application object registry or event stream. Failed initialization
+unregisters the recorder; a later request can start normally. IPC cancellation
+reaches this startup wait before the request owns a finished recorder. Predication
+at this boundary is explicitly unsupported and its binding is preserved.
+
+Each application End receives a context-local serial in addition to its query
+generation. The successful private completion retains the last such serial,
+context/device identities, owner thread, elapsed time and native result in the
+Capture-owned CPU model. Frozen frames retain this evidence after native objects
+die. Dependency inspection accepts `preframe_completed` only for a successful
+observation with matching immediate-context provenance and a nonzero covered
+serial. Missing evidence stays unproven; a pending result for a covered End is a
+contradiction and rejects. In-frame End serials must advance beyond the boundary.
+This evidence neither creates a GPA query object nor authorizes dropping events;
+the encoder's EVENT publication guard remains.
+
+The initial hardware regression exposed an internal polling problem. A native-only
+fixture, without Flora injection or wrappers, reproduced a stall after early
+release of a submitted EVENT when subsequent polling used `DONOTFLUSH`. The
+12-second external process deadline expired after iteration four. Allowing native
+GetData to flush completed twenty iterations, including early release, followed
+by another immediate EVENT with a live empty deferred context. The private wait
+therefore uses flags zero; application GetData arguments are unchanged. Polling
+has bounded checkpoints, but cannot preempt a native driver API call itself.
+Microsoft documents both the [GetData result contract](https://learn.microsoft.com/en-us/windows/win32/api/d3d11/nf-d3d11-id3d11devicecontext-getdata)
+and the [DONOTFLUSH progress limitation](https://learn.microsoft.com/en-us/windows/win32/api/d3d11/ne-d3d11-d3d11_async_getdata_flag).
+
+All 29 capture-only and 27 full-profile capture CTests pass, including eleven Qt
+cases with no skips. WARP/hardware tests verify copied bytes, viewport and error
+state preservation, private-query isolation, busy, timeout, cancellation before
+and after submission, foreign/reentrant calls, deferred-context refusal,
+predication preservation and recovery. CPU tests reject forged identity/result
+and serial associations. The initial missing-header build failure and hardware
+timeout logs remain in ignored evidence.
+
+Two GF2 diagnostic requests at Present ordinals 60,389 and 66,184 report one and
+two `pre-frame-completed` observations respectively, each with one pending poll
+and one in-frame End. They still refuse EVENT serialization, publish no files,
+and continue rendering through 61,096 and 66,887 Presents. Disconnect and normal
+window exit succeed. Evidence and hashes are in
+`artifacts/capture-frame-start-validation.json`. This is not original GPA GUI or
+six-frame acceptance. Replay/shared format is unchanged; previous golden,
+dual-player and committed-source package evidence retains its earlier scope.
+The next requirement is verified GPA EVENT initialization/completion semantics.

@@ -612,5 +612,32 @@
     "gf2_accepted_frames": 0,
     "gf2_normal_exit": true,
     "next": "prove frame-start completion/initialization before handling pre-frame EVENT observations"
+  },
+  "frame_start_completion": {
+    "status": "verified within the single immediate-context profile; EVENT encoding unavailable",
+    "backends": [
+      "WARP",
+      "hardware"
+    ],
+    "owned_cpu_evidence": true,
+    "context_local_end_serial": true,
+    "internal_event_unrecorded": true,
+    "polling_flags": 0,
+    "timeout_and_cancel_checkpoints": true,
+    "failed_start_recovers": true,
+    "predication": "explicit refusal; binding preserved",
+    "capture_only_ctest": 29,
+    "full_profile_capture_ctest": 27,
+    "qt_cases": 11,
+    "native_early_release_reproduction": "DONOTFLUSH stalls; flags zero completes 20 iterations and subsequent immediate wait with a live empty deferred context",
+    "gf2_diagnostic_requests": 2,
+    "gf2_preframe_completed_observations": [
+      1,
+      2
+    ],
+    "gf2_published_frames": 0,
+    "gf2_normal_exit": true,
+    "source_package_revision": "unchanged; prior ca7e8d4 evidence only",
+    "next": "verify GPA EVENT initialization/completion representation before publication"
   }
 }
