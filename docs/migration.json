@@ -3870,7 +3870,8 @@
       "Capture-only package launch/control passed with system-only PATH and no GPA, Qt, Python or RenderDoc modules.",
       "GF2 diagnostic launch observed rendering; frame capture explicitly rejected; zero accepted new frames.",
       "Full Qt GUI and Worker build; capture_ui has 10 passes, no failures/skips, including native launch/status/refusal/cancel/disconnect.",
-      "Existing view_edits mapping/overlay lifetime regression passed."
+      "Existing view_edits mapping/overlay lifetime regression passed.",
+      "Native authored Clear/Draw/negative fixtures pass 22 dual-player/CPU checks; this is a format oracle, not live capture acceptance."
     ],
     "pending": [
       "Complete Device/Context/resource tracking",

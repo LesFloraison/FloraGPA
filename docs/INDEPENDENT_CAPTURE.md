@@ -117,6 +117,21 @@ record ownership, variable layouts or full capture semantics. The previous
 minimal authored-frame experiment is reference evidence, not a new live-capture
 acceptance result in this repository.
 
+A new C++ `FloraFormatAuthorProbe` now authors Clear, Draw and negative-control
+files entirely from new records and freshly compiled shaders. All three run in
+the current native FloraGPA CLI and installed original GPA kernel, matching the
+CPU pixel oracle exactly. The negative file retains a red reference/preview but
+executes to black in both players. The 22 checks are retained in
+`artifacts/capture-authored-interop/validation.json`. These are authored format
+fixtures, not intercepted application frames; original GUI inspection, live
+Draw/Dispatch recording and GF2 six-frame acceptance remain pending.
+
+Reproduce the writer gate by explicitly building `FloraFormatAuthorProbe`, then
+running `tools/validate_authored_frames.py` with `--author`, `--replay`,
+`--oracle-tools`, `--qt-bin` and a new `--out`. Python and the original private
+player ABI are confined to this development comparison; the author and writer
+are native C++, and the replay product does not load the original player.
+
 Remaining release gates: complete Device/Context/resource tracking; initialization
 and hidden-state snapshots; immediate/deferred command recording; frame boundary
 and cancellation transactions; dual-player live-frame validation; six GF2 frames
