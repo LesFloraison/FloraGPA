@@ -67,7 +67,7 @@ class Factory final : public IDXGIFactory7 {
     }
   public:
     Factory(IDXGIFactory *real, IUnknown *identity) : real_(real), identity_(identity) {}
-    void adopt() { ++refs_; }
+    void adopt(IDXGIFactory *returned) { ++refs_; real_->AddRef(); returned->Release(); }
     HRESULT STDMETHODCALLTYPE QueryInterface(REFIID iid, void **output) override {
         auto hr = real_->QueryInterface(iid, output); const DWORD error = GetLastError();
         if (SUCCEEDED(hr) && output && *output) {
@@ -171,7 +171,7 @@ void wrap_factory(REFIID iid, void **out) noexcept {
         {
             std::lock_guard lock(r.mutex);
             const auto found = r.objects.find(identity);
-            if (found != r.objects.end()) { found->second->adopt(); *out = static_cast<IDXGIFactory7 *>(found->second); }
+            if (found != r.objects.end()) { found->second->adopt(base); *out = static_cast<IDXGIFactory7 *>(found->second); }
             else {
                 auto wrapper = std::make_unique<Factory>(base, identity);
                 r.objects.emplace(identity, wrapper.get());

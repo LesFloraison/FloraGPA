@@ -33,7 +33,11 @@ Copy-Item -LiteralPath (Join-Path $repo 'third_party\nlohmann\LICENSE.MIT') -Des
 Copy-Item -LiteralPath (Join-Path $repo 'src\capture\dependencies.json') -Destination $destination
 $hashes = @{}
 foreach ($file in Get-ChildItem -LiteralPath $destination -File -Recurse) {
-    $hashes[$file.FullName.Substring($destination.Length+1).Replace('\','/')] = (Get-FileHash -LiteralPath $file.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
+    $stream = [System.IO.File]::OpenRead($file.FullName)
+    $algorithm = [System.Security.Cryptography.SHA256]::Create()
+    try { $hash = ([BitConverter]::ToString($algorithm.ComputeHash($stream))).Replace('-', '').ToLowerInvariant() }
+    finally { $stream.Dispose(); $algorithm.Dispose() }
+    $hashes[$file.FullName.Substring($destination.Length+1).Replace('\','/')] = $hash
 }
 @{schema=1;milestone='native_bootstrap_only';capture_available=$false;files=$hashes} |
     ConvertTo-Json -Depth 5 | Set-Content -LiteralPath (Join-Path $destination 'manifest.json') -Encoding UTF8

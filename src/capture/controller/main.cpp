@@ -150,12 +150,18 @@ int wmain(int argc,wchar_t** argv){
             CREATE_SUSPENDED|CREATE_UNICODE_ENVIRONMENT|EXTENDED_STARTUPINFO_PRESENT,env.data(),cwd.c_str(),
             &startup.StartupInfo,&child,dll.c_str(),nullptr))win_error("Start injected target");
         Handle process(child.hProcess),thread(child.hThread);
+        struct PendingLaunch {
+            HANDLE process;
+            bool resumed=false;
+            ~PendingLaunch(){if(!resumed)TerminateProcess(process,ERROR_PROCESS_ABORTED);}
+        } pending{process.value};
         Json manifest={{"version",protocol_version},{"session_id",session},{"pid",child.dwProcessId},
                        {"process_created",creation_time(process.value)},
                        {"executable",utf8(exe.wstring())},{"runtime",utf8(runtime.wstring())},
                        {"capture_available",false},{"milestone","native_bootstrap_only"}};
-        try{save(out/L"session.json",manifest);}catch(...){TerminateProcess(process.value,ERROR_WRITE_FAULT);throw;}
-        if(ResumeThread(thread.value)==DWORD(-1)){TerminateProcess(process.value,ERROR_INVALID_FUNCTION);win_error("Resume injected target");}
+        save(out/L"session.json",manifest);
+        if(ResumeThread(thread.value)==DWORD(-1))win_error("Resume injected target");
+        pending.resumed=true;
         Json status;std::string error;
         const auto deadline=GetTickCount64()+10000;
         do {
