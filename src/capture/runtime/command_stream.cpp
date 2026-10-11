@@ -2,6 +2,7 @@
 #include "objects.hpp"
 #include "capture_session.hpp"
 #include "frame_start.hpp"
+#include "deferred_history.hpp"
 #include <cstring>
 
 namespace flora::capture {
@@ -150,6 +151,7 @@ void FrameRecording::observe(ID3D11DeviceContext* context,const char* api,Comman
         if(kind==CommandKind::read || kind==CommandKind::binding)return;
         if(kind==CommandKind::unsupported){
             const std::string_view name=api;
+            if(name.ends_with("::ExecuteCommandList"))throw std::runtime_error(command_list_gap(operand));
             if(name.ends_with("::Begin") || name.ends_with("::End") || name.ends_with("::GetData"))
                 throw std::runtime_error(query_gap(operand,api,words));
             throw std::runtime_error("GPU call recording is not implemented");
@@ -334,6 +336,7 @@ void record_map_result(ID3D11DeviceContext* context,ID3D11Resource* resource,UIN
     catch(...){object_gap("Map",__uuidof(ID3D11DeviceContext),"Map observer failed");}
 }
 void record_unmap(ID3D11DeviceContext* context,ID3D11Resource* resource,UINT subresource) noexcept {
+    observe_deferred_call(context,"ID3D11DeviceContext::Unmap",CommandKind::unmap,{subresource},resource,nullptr,nullptr,nullptr,nullptr,nullptr);
     capture_context_activity();auto& r=registry();if(!r.enabled.load(std::memory_order_relaxed))return;LastErrorScope error;
     try{std::shared_ptr<FrameRecording> active;{std::lock_guard lock(r.mutex);active=r.active.lock();}if(active)active->unmap(context,resource,subresource);}
     catch(...){object_gap("Unmap",__uuidof(ID3D11DeviceContext),"Unmap observer failed");}
@@ -353,6 +356,7 @@ void record_query_observation(ID3D11DeviceContext* context,ID3D11Asynchronous* a
     }catch(...){object_gap("Query observation",__uuidof(ID3D11DeviceContext),"Frame observer failed");}
 }
 void record_context_call(ID3D11DeviceContext* context,const char* api,CommandKind kind,std::array<uint32_t,5> words,IUnknown* operand,const float* floats,const UINT* integers,IUnknown* source,const UpdateSource* update,const CopyRegion* region) noexcept {
+    observe_deferred_call(context,api,kind,words,operand,floats,integers,source,update,region);
     capture_context_activity();
     auto& r=registry();if(!r.enabled.load(std::memory_order_relaxed))return;
     LastErrorScope last_error;

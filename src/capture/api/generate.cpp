@@ -113,6 +113,7 @@ void method(std::ostream& out, const std::string& iface, const Json& m) {
         else if(name=="ClearUnorderedAccessViewUint") {kind="clear_uav_uint";operand="pUnorderedAccessView";integers="Values";}
         else if(name=="ClearUnorderedAccessViewFloat") {kind="clear_uav_float";operand="pUnorderedAccessView";floats="Values";}
         else if(name=="Map") {kind="map";operand="pResource";words="{Subresource,UINT(MapType),MapFlags}";}
+        else if(name=="ExecuteCommandList") {operand="pCommandList";words="{UINT(RestoreContextState)}";}
         else if(name=="CopyResource") {kind="copy_resource";operand="pDstResource";source="pSrcResource";}
         // GetData observes completion and can order later CPU writes. It is not
         // a passive state getter, even when the query End preceded this frame.
@@ -126,6 +127,7 @@ void method(std::ostream& out, const std::string& iface, const Json& m) {
         else if(name.find("Get")!=std::string::npos || name=="Flush" || name=="Flush1")kind="read";
         else if(name=="ClearState" || name=="SetPredication" || name=="SetResourceMinLOD" ||
             std::regex_match(name,std::regex("(VS|HS|DS|GS|PS|CS|IA|RS|OM|SO)Set.*")))kind="binding";
+        if(name=="ExecuteCommandList")out << "remember_command_list_execution(this, pCommandList, RestoreContextState);\n";
         if(name=="UpdateSubresource" || name=="UpdateSubresource1")
             out << "UpdateSource update{pSrcData,pDstBox,SrcRowPitch,SrcDepthPitch," << (name=="UpdateSubresource1"?"CopyFlags,true":"0,false") << "};\nrecord_context_call(this, \"" << api << "\", CommandKind::update_subresource, {DstSubresource}, pDstResource, nullptr, nullptr, nullptr, &update);\n";
         else if(name=="CopySubresourceRegion" || name=="CopySubresourceRegion1")
@@ -146,6 +148,7 @@ void method(std::ostream& out, const std::string& iface, const Json& m) {
         out << post;
         if (result == "HRESULT") out << "}\n";
     }
+    if(iface=="ID3D11DeviceContext" && name=="FinishCommandList")out << "remember_deferred_finish(this, result, RestoreDeferredContextState, SUCCEEDED(result) && ppCommandList ? *ppCommandList : nullptr);\n";
     out << "SetLastError(after);\n";
     if (result != "void") out << "return result;\n";
     out << "} catch (...) { object_gap(\"" << api << "\", __uuidof(" << iface << "), \"COM forwarding failed\"); SetLastError(before);";
@@ -160,7 +163,7 @@ int main(int argc, char** argv) {
         std::ifstream input(argv[1]); const Json spec = Json::parse(input);
         if (spec.at("schema") != 1) throw std::runtime_error("Unsupported API schema");
         std::ostringstream out;
-        out << "// Generated from capture/api/interfaces.json. Do not edit.\n#include \"objects.hpp\"\n#include \"command_stream.hpp\"\nnamespace flora::capture {\nnamespace {\n";
+        out << "// Generated from capture/api/interfaces.json. Do not edit.\n#include \"objects.hpp\"\n#include \"command_stream.hpp\"\n#include \"deferred_history.hpp\"\nnamespace flora::capture {\nnamespace {\n";
         for (const auto& family : spec.at("families")) {
             const std::string name = family; auto chain = ancestry(spec, name);
             out << "class Proxy_" << name << " final : public " << name << ", public Proxy {\nObject& owner_;\npublic:\n"

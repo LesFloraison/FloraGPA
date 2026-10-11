@@ -10,6 +10,8 @@
 #include <vector>
 
 namespace flora::capture {
+struct DeferredHistory;
+struct DeferredCommandList;
 // Capture-owned model. No replay objects, GPU executors or wire record types.
 // Holding a record never holds a native COM object alive.
 struct ObjectRecord {
@@ -33,6 +35,9 @@ struct ObjectRecord {
     UINT rasterized_stream = 0;
     uint64_t class_linkage = 0;
     bool creation_observed = false, initial_data_supplied = false;
+    // CPU records only; these must never keep native COM objects alive.
+    std::shared_ptr<DeferredHistory> deferred_history;
+    std::shared_ptr<const DeferredCommandList> command_list;
     explicit ObjectRecord(uint64_t value) : id(value) {}
 };
 std::shared_ptr<ObjectRecord> track_native_object(IUnknown* identity);

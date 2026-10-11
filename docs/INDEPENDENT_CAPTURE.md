@@ -1561,3 +1561,50 @@ before its CTest run. Evidence hashes are recorded in
 because replay/shared-format code is unchanged. Original GUI acceptance, adapter
 verification and the GF2 two-scene/six-frame gate remain incomplete; accepted GF2
 frames stay **0/6**.
+
+## Deferred compilation history foundation
+
+Deferred contexts now keep capture-owned CPU histories outside an armed frame.
+Successful `FinishCommandList` freezes a separate immutable generation on the
+returned list; a failed HRESULT leaves the pending history intact. The generated
+wrapper never reads the output pointer after failure. Clear/copy arguments,
+resource identities, Update boxes and packed Update source bytes are owned by
+the history. Caller memory may disappear immediately after the API returns.
+No replay model, GPU executor or native COM reference is retained by this model.
+
+The bookkeeping follows Microsoft's [FinishCommandList contract](https://learn.microsoft.com/en-us/windows/win32/api/d3d11/nf-d3d11-id3d11devicecontext-finishcommandlist)
+and [ExecuteCommandList contract](https://learn.microsoft.com/en-us/windows/win32/api/d3d11/nf-d3d11-id3d11devicecontext-executecommandlist).
+Finish TRUE marks the next batch as inheriting unresolved deferred state;
+Finish FALSE starts a default-state batch. Executions retain list identity,
+generation, context-local serial, thread and restore flag, including repeated
+execution and deferred-context merges. These serials observe CPU entry order;
+they do not establish cross-context GPU ordering or query execution success.
+History is bounded to 4,096 calls and 64 MiB of owned source data per pending
+batch, sixteen gap messages, and 256 recent executions per context. Execution
+serials continue after older observations leave the bounded queue.
+
+This is a foundation, not deferred frame encoding. Pipeline state shadows,
+deferred Map data, initial GPU contents at execution, nested-list expansion,
+predicate/query dependencies and ordered lowering remain incomplete. Calls
+with incomplete arguments, inherited state, changed recording threads and
+exceeded limits carry explicit gaps. A captured ExecuteCommandList still refuses
+publication with list/context/generation/call-count diagnostics while forwarding
+the native call. CPU histories do not replace the frame-start GPU snapshots.
+
+New WARP and hardware tests compile on separate contexts/threads, overwrite the
+Update caller data, execute lists in B/A/A order, and compare exact native pixels
+and TRUE/FALSE topology restoration. They check immutable generations, actual
+null-output behavior, a synthetic failed-Finish result, nested native execution,
+Context3 creation, call/payload/execution bounds and metadata survival after all
+native objects die. No deferred `.gpa_frame` is counted as accepted.
+
+The capture-only sweep passes 44 suites; its strengthened deferred fixtures pass
+again on both devices. The full build and all 46 relevant full-profile suites
+pass, including eleven Qt cases without skips. The existing-profile injection
+regression produces 115 files in 23 launches and passes 737 serial dual-player,
+CPU and module checks. All 115 original-player reports identify the pinned kernel.
+Evidence hashes are in `artifacts/capture-deferred-history-validation.json`.
+Encoder, replay and shared-format sources are unchanged; no new golden run is
+claimed. The latest source-package proof still covers revision `abf5730`.
+Original GUI/adapter verification and GF2 scene acceptance remain pending at
+**0/6**; this iteration does not change the game's permissions or cache.

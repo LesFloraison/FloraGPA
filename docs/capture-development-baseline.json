@@ -9,7 +9,7 @@
     "B": "native launch/control and capture-only package validated",
     "C": "partial: persistent native identity, descriptor graph and owned buffer/texture/shader/input-layout/SO creation metadata validated; other creation paths pending",
     "D": "partial: startup-injected blit/flip/tearing capture with dynamic mapped constants; dual-player execution verified on self-owned targets",
-    "E": "partial: initial resources, Map/Unmap, whole and bounded region copies including BC1-5, whole/boxed zero-flag Updates and scoped EVENT observations verified; successful in-frame waits, deferred and hidden-state coverage pending",
+    "E": "partial: initial resources, Map/Unmap, whole/region BC1-5 copies, zero-flag Updates and scoped EVENT observations verified; owned deferred compilation/execution CPU histories added; deferred encoding, successful in-frame waits and hidden-state coverage pending",
     "F": "partial: native CLI and asynchronous Qt capture/cancel/disconnect/completed-file opening tested; full profile/deployment acceptance pending",
     "G": "pending: no six-frame GF2 or original GUI capture acceptance"
   },
@@ -896,5 +896,56 @@
       "GF2 six-frame scene and original GUI acceptance"
     ],
     "evidence": "artifacts/capture-bc-region-validation.json"
+  },
+  "deferred_history": {
+    "status": "Partial CPU history foundation; deferred frame publication remains refused",
+    "owned_model": "Per-context calls, immutable Finish generations, stable object IDs, packed Update bytes and original pitches; no native COM references",
+    "execution_order": "Bounded CPU context-entry observations, repeated executions retained; no cross-context GPU ordering proof",
+    "limits": {
+      "calls_per_batch": 4096,
+      "owned_bytes_per_batch": 67108864,
+      "gaps_per_batch": 16,
+      "recent_executions_per_context": 256
+    },
+    "native_devices": [
+      "WARP",
+      "hardware"
+    ],
+    "native_checks": [
+      "Separate recording contexts and threads",
+      "Caller Update storage overwritten before Finish",
+      "Native B/A/A exact pixels",
+      "Execute TRUE/FALSE topology restoration",
+      "Immutable generations and inherited-state gaps",
+      "Synthetic failed Finish retention and native null-output behavior",
+      "Nested-list native execution and explicit model gap",
+      "CreateDeferredContext3",
+      "Call/payload/execution bounds",
+      "CPU metadata survives zero native object lifetimes",
+      "Located frame refusal with native execution preserved"
+    ],
+    "capture_only_ctest": 44,
+    "strengthened_deferred_ctest": 2,
+    "full_profile_ctest": 46,
+    "full_profile_scope": "42 independent capture suites, two existing structure suites and two checked-format suites",
+    "qt_cases": 11,
+    "qt_skipped": 0,
+    "full_application_build": true,
+    "injected_launches": 23,
+    "injected_files": 115,
+    "injected_checks": 737,
+    "original_player_reports": 115,
+    "original_player_sha256": "39061ff329e4a32d0c8375ce9ee15e2017bccab0593943b962a860e11723d38b",
+    "accepted_deferred_files": 0,
+    "replay_encoder_and_format_sources": "unchanged",
+    "pending": [
+      "Deferred pipeline state shadows and Map payloads",
+      "Initial GPU contents at actual execution and repeated/nested-list lowering",
+      "Query/predicate/hidden-state and multicontext synchronization",
+      "Deferred file encoding and dual-player verification",
+      "Current revision source-package validation; latest proof covers abf5730",
+      "GF2 six scene frames and original GUI/adapter acceptance"
+    ],
+    "evidence": "artifacts/capture-deferred-history-validation.json"
   }
 }
