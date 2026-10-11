@@ -7,9 +7,9 @@
   "stages": {
     "A": "checked format boundary and native authored writer validated",
     "B": "native launch/control and capture-only package validated",
-    "C": "partial: persistent native identity, descriptor reference graph, buffer/shader/input-layout/SO creation metadata validated; other creation paths pending",
+    "C": "partial: persistent native identity, descriptor graph and owned buffer/texture/shader/input-layout/SO creation metadata validated; other creation paths pending",
     "D": "pending: no intercepted frame serialization",
-    "E": "pending: initial resource and hidden state capture",
+    "E": "partial foundation: resource readback and per-view UAV counters validated; no frame initial-state assembly or context synchronization",
     "F": "partial: Qt control lifecycle validated; actual capture/completion unavailable",
     "G": "pending: no six-frame GF2 or original GUI capture acceptance"
   },
@@ -26,8 +26,8 @@
     "existing_golden_controls": 4,
     "native_authored_interop_checks": 22,
     "source_build_steps": 5,
-    "capture_only_ctest": 8,
-    "full_profile_capture_ctest": 6,
+    "capture_only_ctest": 10,
+    "full_profile_capture_ctest": 8,
     "native_object_lifetimes": 36
   },
   "source_build_commit": "c8255aabfeb6147fdabc884861f6151ae688c66c",
@@ -52,7 +52,21 @@
     "capture-metadata-swaps-final/validation.json": "f5dfc04cac0e6c63ce920bedb1beafa99f7a014c74a2bdeb2447cc2c4f73c005",
     "capture-metadata-factories-release/validation.json": "e2e96acab25e71ffbce3b435dbda260e92de9b8cda0d95c3af77cb47a9010182",
     "capture-metadata-swaps-release/validation.json": "f5dfc04cac0e6c63ce920bedb1beafa99f7a014c74a2bdeb2447cc2c4f73c005",
-    "capture-metadata-source-build/validation.json": "b8db7b18c7f768f77c0cb98a78ea139d19276f5d3132133eac3ced76794074fc"
+    "capture-metadata-source-build/validation.json": "b8db7b18c7f768f77c0cb98a78ea139d19276f5d3132133eac3ced76794074fc",
+    "capture-resource-data-ctest.txt": "5385215a080a717cc39289cf02a803b2fd5ba6fed6c083dafd1b8a98f9fd798b",
+    "capture-resource-data-native-log.txt": "6c4833ee14ea7661772c73df2db788a8aafdb2a56e7e0f52dae66cfaf64d73ab",
+    "capture-resource-full-ctest.txt": "f800b245ae007fa6e70964cb2fee9546e98e93b4a3043791b08b213495dce961",
+    "capture-resource-full-native-log.txt": "db5f4a255af5bc6adf651c879742459ff011383c88c4bb74aa279692e93f6643",
+    "capture-resource-qt.txt": "d5c2a7c7fa9b7894e86906c4e8ca049a9124c3d148a4837a72af36de95212a8d",
+    "capture-resource-factories/validation.json": "e2e96acab25e71ffbce3b435dbda260e92de9b8cda0d95c3af77cb47a9010182",
+    "capture-resource-swaps/validation.json": "f5dfc04cac0e6c63ce920bedb1beafa99f7a014c74a2bdeb2447cc2c4f73c005",
+    "capture-resource-data-hardware-failure.txt": "d41176ca173688f749b5ae72796452d74b485b69df9e45a07442ec76e021041c",
+    "capture-resource-gf2-1/target.log": "4a9924af5706676d6785d839441f866b8993ed89f13b8c826992f9ec1ab4854c",
+    "capture-resource-gf2-2/status-1.json": "bd12cafbacd184ebdf13e56026a334aad57f6c56ef09032fd9b8175b1fa1413c",
+    "capture-resource-gf2-2/status-2.json": "a13bb83f31eecc3aab3dede66298a02aa270a1033622b9f0a5533fb1a8425850",
+    "capture-resource-gf2-2/unity.log": "a8e8a948dbb1f69b75bea2c848b53c7b3c870b5d525c4137d57761278a1da693",
+    "capture-resource-gf2-2/exit.json": "0967dd41904f59b10fac1994c08251d10c681b5e68ede401580724be8613678e",
+    "capture-resource-validation.json": "287f146bf2441003d213e04bfdc328ad28debcb8ad1694e105eb3b75902ebb45"
   },
   "limitations": [
     "GPA original-player checks use a development-only private ABI harness.",
@@ -75,8 +89,24 @@
     "shader_dxbc": true,
     "input_layout": true,
     "stream_output_declaration": true,
-    "texture_creation_data": false,
+    "texture_creation_data": true,
     "frame_initial_snapshots": false,
     "gf2_diagnostic": "launch/Present/disconnect passed; runtime hash retained; no accepted frames"
+  },
+  "resource_readback": {
+    "standalone_helper": true,
+    "frame_boundary_integration": false,
+    "mapped_write_recording": false,
+    "uav_counter_readback": true,
+    "warp": "exact tested resource bytes and counters passed",
+    "hardware": "exact tested resource bytes and counters passed; native P016 unsupported",
+    "limitations": [
+      "No multicontext capture barrier",
+      "No sample-preserving MSAA",
+      "No shared/tiled/protected resource capture",
+      "SO append position and live query/predicate reconstruction pending",
+      "No frame command recording or encoding"
+    ],
+    "gf2_diagnostic": "67,800 then 164,810 Presents, no registry gaps, capture rejected, disconnected and closed; Unity managed exceptions observed; no scene or pixel acceptance"
   }
 }

@@ -68,6 +68,14 @@ void method(std::ostream& out, const std::string& iface, const Json& m) {
     }
     if (iface == "ID3D11Device" && name == "CreateBuffer")
         post += "remember_buffer(ppBuffer ? *ppBuffer : nullptr, pDesc, pInitialData);\n";
+    if ((iface == "ID3D11Device" || iface == "ID3D11Device3") && name.starts_with("CreateTexture")) {
+        std::string output;
+        for(const auto& p:parameters)if(p.at("direction")=="out")output=p.at("name");
+        if(output.empty())throw std::runtime_error("Texture output missing in API specification");
+        post += "remember_texture(" + output + " ? *" + output + " : nullptr, pInitialData, \"" + api + "\");\n";
+    }
+    if (iface == "ID3D11DeviceContext" && (name == "Map" || name == "Unmap"))
+        post += "track_mapping(static_cast<IUnknown*>(&owner_), pResource, Subresource, " + std::string(name=="Map"?"true":"false") + ");\n";
     if (iface == "ID3D11Device" && name == "CreateInputLayout")
         post += "remember_input_layout(ppInputLayout ? *ppInputLayout : nullptr, pInputElementDescs, NumElements, pShaderBytecodeWithInputSignature, BytecodeLength);\n";
     if (iface == "ID3D11Device" && name == "CreateGeometryShaderWithStreamOutput")

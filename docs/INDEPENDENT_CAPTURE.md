@@ -111,8 +111,8 @@ DXBC and class-linkage IDs, owned input-layout semantics/signatures, and owned
 stream-output declarations/strides. Null SO gap semantics and absent buffer
 initial data remain distinct. Captured buffer creation bytes are not a frame's
 initial GPU snapshot: later Map/Update/Copy/Draw operations can change them.
-Texture creation data, class-instance details, command-list contents and several
-other creation paths remain incomplete. No frame can be published yet.
+Class-instance details, command-list contents and several other creation paths
+remain incomplete. No frame can be published yet.
 
 Initialization is serialized per native identity; descriptor queries and token
 installation do not hold the global metadata registry lock. Token destruction
@@ -149,6 +149,57 @@ normally. This is an injection diagnostic, **zero accepted captured frames**.
 Its local report is `artifacts/capture-bootstrap/gf2-diagnostic-1/status.json`;
 the later controller session-identity and JSON dependency changes were validated
 with self-owned probes, not another GF2 run.
+
+## Resource readback foundation
+
+`runtime/resource_data` owns texture creation subresources and current GPU
+readback data independently of replay and format records. Creation hooks copy
+all mip/array/volume bytes before returning to the caller, stripping row/slice
+padding. Successful Map/Unmap calls track active maps without retaining mapped
+pointers; snapshots explicitly reject application-mapped resources. This is not
+yet a recording of Map writes or Update/Copy commands.
+
+At an exclusive application-context boundary, `snapshot_resource` copies a
+buffer or single-sample texture into native staging storage and reads its actual
+contents. It supports the tested ordinary, BC, depth/stencil and NV12/P010/P016
+layouts; unknown layouts, MSAA, shared/tiled/protected resources and other special
+flags fail explicitly. Byte budgets, checked pitch arithmetic, cancellation,
+device errors and polling deadlines bound readback. A deadline cannot interrupt
+a driver call that itself hangs. Internal objects never enter the application
+registry. Scoped predication suppression preserves the exact predicate/BOOL,
+bindings and LastError, including exception paths. It follows the public
+[CopyResource restrictions](https://learn.microsoft.com/en-us/windows/win32/api/d3d11/nf-d3d11-id3d11devicecontext-copyresource)
+and [mapped pitch contract](https://learn.microsoft.com/en-us/windows/win32/api/d3d11/ns-d3d11-d3d11_mapped_subresource).
+
+`snapshot_uav_counter` separately reads each APPEND/COUNTER view's hidden value
+with CopyStructureCount. Two views sharing one buffer retain distinct counter
+identities; neither their creation parameters nor KEEP values stand in for GPU
+data. These helpers require the caller to synchronize all contexts that can
+modify the source; no Present safe point or cross-context barrier is implemented
+yet. They are never invoked by the IPC service thread and are not connected to
+frame capture, encoding or publishing. SO append position, live queries,
+predicate reconstruction and sample-preserving MSAA remain unresolved.
+
+The new WARP and hardware CTests compare bytes to independent application input,
+not to the writer/reader. They cover padded subresources, dynamic Map/Update,
+depth/stencil values, predicate restoration, preserved viewport/depth/UAV
+bindings, cancellation/retry and two GPU-modified counters. WARP supports P016
+and its bytes match; this machine's hardware rejects both P016 format support
+and texture creation. The hardware test records that rejection, not a successful
+P016 snapshot. An initial counter fixture incorrectly bound two write views of
+one buffer simultaneously; after separating the dispatches, both devices read
+the expected independent counters (5 and 7). The restriction is documented in
+the public [UAV binding rules](https://learn.microsoft.com/en-us/windows/win32/api/d3d11/nf-d3d11-id3d11devicecontext-omsetrendertargetsandunorderedaccessviews).
+
+This gate passes ten capture-only CTests, eight full-profile capture CTests
+(including ten Qt cases), 24 factory and 20 swap-chain comparisons. Local evidence
+is `artifacts/capture-resource-validation.json`. GF2 diagnostic samples observe
+67,800 and 164,810 Presents with zero reported registry gaps; capture rejects,
+disconnect succeeds and CloseMainWindow exits (exit code unavailable). The Unity
+log contains managed exceptions, so this establishes neither gameplay nor scene
+correctness. The first attempt exited because its Unity log path collided with
+the controller's target.log; both attempts and the exact runtime hash are retained.
+Accepted GF2 frames remain zero.
 
 ## Build and control
 

@@ -3874,10 +3874,12 @@
       "Native authored Clear/Draw/negative fixtures pass 22 dual-player/CPU checks; this is a format oracle, not live capture acceptance.",
       "docs/capture-development-baseline.json: committed-source bootstrap build/test/package passes; full frame capture remains unavailable.",
       "Native COM forwarding: seven capture-only CTests, five full-profile capture CTests, 24 factory checks, 20 swap checks, exact Draw/Dispatch/deferred oracle, 36 closed wrapper lifetimes, and system-PATH packaged object test passed. GF2 launch/Present diagnostic passed; zero accepted captures.",
-      "Native lifetime/creation metadata: eight capture-only CTests, six full-profile capture tests, 44 factory/swap checks, actual WARP binding retention, owned DXBC/buffer/input-layout/SO data and exact recreated SO output passed. GF2 diagnostic retained the DLL hash; live capture still rejected."
+      "Native lifetime/creation metadata: eight capture-only CTests, six full-profile capture tests, 44 factory/swap checks, actual WARP binding retention, owned DXBC/buffer/input-layout/SO data and exact recreated SO output passed. GF2 diagnostic retained the DLL hash; live capture still rejected.",
+      "Resource data foundation: ten capture-only CTests, eight full-profile capture tests including ten Qt cases, and 44 injected comparisons passed. Independent WARP/hardware resource bytes and GPU-modified per-view UAV counters pass. Hardware P016 explicitly unsupported; GF2 Present diagnostic only, no accepted frames. See capture-development-baseline.json."
     ],
     "pending": [
-      "Remaining creation paths, texture initial data and class-instance metadata",
+      "Remaining creation paths and class-instance metadata",
+      "Frame-boundary synchronization, initial-state assembly, Map write recording and remaining hidden states",
       "Live command and initial-state serialization",
       "Dual-player acceptance of generated live captures",
       "Two GF2 launches with three frames each across two scenes"
@@ -3886,6 +3888,7 @@
     "bootstrap": "native x64 launch/control and Factory0-7/SwapChain0-4 wrappers validated",
     "qt_controls": "async CLI composition; live capture and open-result controls remain unavailable",
     "object_forwarding": "37 families / 78 declared public interfaces, native C++ build generator, canonical IUnknown and typed input/output forwarding; not command recording",
-    "native_metadata": "Persistent native IDs and descriptor dependency graph; buffer initial bytes, shader DXBC, input-layout/SO creation parameters owned by capture; not frame snapshots or serialization"
+    "native_metadata": "Persistent native IDs and descriptor graph; owned buffer/texture initial bytes, shader DXBC and input-layout/SO parameters; not frame serialization",
+    "resource_readback": "Capture-owned staging snapshots and independent APPEND/COUNTER UAV values; WARP/hardware byte checks; no Present integration or multicontext barrier"
   }
 }

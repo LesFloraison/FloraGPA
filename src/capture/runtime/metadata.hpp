@@ -1,10 +1,12 @@
 #pragma once
 #include "protocol.hpp"
+#include "resource_data.hpp"
 #include <d3d11_4.h>
 #include <atomic>
 #include <memory>
 #include <mutex>
 #include <string>
+#include <set>
 #include <vector>
 
 namespace flora::capture {
@@ -30,6 +32,8 @@ struct ObjectRecord {
     std::mutex mutex;
     std::string creation_api;
     std::vector<uint8_t> creation_bytes;
+    std::vector<SubresourceData> creation_subresources;
+    std::set<std::pair<uint64_t,UINT>> mapped_subresources;
     std::vector<InputElementRecord> input_elements;
     std::vector<StreamElementRecord> stream_elements;
     std::vector<UINT> stream_strides;
