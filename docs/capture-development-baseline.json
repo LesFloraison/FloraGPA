@@ -38,7 +38,7 @@
     "mapped_frame_interop_checks": 97,
     "copy_frame_interop_checks": 68
   },
-  "source_build_commit": "61ca31c062ab3012a0df23dd14768694d181c81c",
+  "source_build_commit": "ca7e8d40c2c6d71628825a6e1323f4f83038d927",
   "local_evidence_sha256": {
     "capture-format-goldens/validation.json": "a1f6d11deab2e8324c8626ab359b139abf8a83257d06874c3cb6a251a357b84a",
     "capture-bootstrap/swap-chains-final/validation.json": "abb5d8dc35668a54bf6747dd8e9ffdc82b497d2298d19b59a33176a5cf07bda0",
@@ -244,7 +244,8 @@
     "capture-event-model-gf2/status-before.json": "95358566d6860868c2264760d6a45141d57c22a465d52fd094c8b5a6336d1ca7",
     "capture-event-model-gf2/target.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "capture-event-model-gf2/unity.log": "514a286e6a60b4e549fb651364f6ded8dbb72917696767bae56ee08200071faa",
-    "capture-event-model-validation.json": "cb2f65e87b4a5f312dec743bfaf9e559aee53ab4ae22af24ad000bc594e7f523"
+    "capture-event-model-validation.json": "cb2f65e87b4a5f312dec743bfaf9e559aee53ab4ae22af24ad000bc594e7f523",
+    "capture-event-model-source-build/validation.json": "81948f10b1538190b9fec6495781d3084c00fd3d2169b58d7aa15e1a636efbf0"
   },
   "limitations": [
     "GPA original-player checks use a development-only private ABI harness.",
@@ -533,6 +534,9 @@
     "gf2_scope": "one early startup frame reaches encoder and rejects; no acceptance",
     "gf2_present_ordinal": 238,
     "gf2_published_frames": 0,
-    "gf2_normal_exit": true
+    "gf2_normal_exit": true,
+    "committed_source_build_steps": 6,
+    "committed_source_ctest": 28,
+    "packaged_live_scope": "65 existing-profile files in thirteen native-validated launches; no EVENT serialization claim"
   }
 }

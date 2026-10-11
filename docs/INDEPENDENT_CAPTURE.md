@@ -1051,3 +1051,11 @@ close. This is an early startup frame, not scene/dual-player acceptance. Its DLL
 hash predates the subsequent diagnostic-only addition of API/object/sequence to
 the rejection message. Logs, input hashes and scope are recorded in
 `artifacts/capture-event-model-validation.json`; accepted GF2 frames remain zero.
+
+Commit `ca7e8d4` subsequently passes all six independent committed-source
+configure/build/test/package steps and all 28 serial CTests, including the final
+Query1 and located-error changes. The packaged regression produces 65
+native-validated existing-profile files across thirteen launches under a
+system-only PATH, without Qt discovery or GPA/Qt/RenderDoc/Python modules.
+Its live workload does not encode EVENT queries. Evidence is
+`artifacts/capture-event-model-source-build/validation.json`.
