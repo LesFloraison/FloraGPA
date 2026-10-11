@@ -8,7 +8,7 @@
     "A": "checked format boundary and native authored writer validated",
     "B": "native launch/control and capture-only package validated",
     "C": "partial: persistent native identity, descriptor graph and owned buffer/texture/shader/input-layout/SO creation metadata validated; other creation paths pending",
-    "D": "partial: hook-observed scoped Clear/Draw/Dispatch models encode IGPA v3 and pass dual-player CPU oracles; synthetic presentation, no Present/controller integration",
+    "D": "partial: real Present/Present1 transactions record three frames and pass dual-player CPU checks through internal control API; private IPC still rejects capture",
     "E": "partial: first-use resources, per-command bindings/counters and query/mapping guards validated; mutation, deferred and multithread coverage pending",
     "F": "partial: Qt control lifecycle validated; actual capture/completion unavailable",
     "G": "pending: no six-frame GF2 or original GUI capture acceptance"
@@ -26,11 +26,12 @@
     "existing_golden_controls": 4,
     "native_authored_interop_checks": 22,
     "source_build_steps": 5,
-    "capture_only_ctest": 15,
-    "full_profile_capture_ctest": 13,
+    "capture_only_ctest": 16,
+    "full_profile_capture_ctest": 14,
     "native_object_lifetimes": 36,
     "additional_existing_structure_ctest": 2,
-    "observed_model_interop_checks": 94
+    "observed_model_interop_checks": 94,
+    "present_transaction_interop_checks": 22
   },
   "source_build_commit": "e8c5576fa75486a74d0545391f595be1267bea17",
   "local_evidence_sha256": {
@@ -96,7 +97,15 @@
     "capture-encoder-fault-ctest.txt": "0581d3e396073d66b40d1e0d977a4ce3d7fb59c855b711c40140aa18f5b77e15",
     "capture-encoder-interop-final/validation.json": "31ffa98a2f1532599d7c58c8dbffbbe6e18252eb109e06715d8e60a8bd3d703d",
     "capture-encoder-interop-final/inputs.json": "9bfe77d7c6ba3b6efb4626ce8dd9a961b43b847603676829953356ffcb93bc16",
-    "capture-encoder-source-build/validation.json": "774c2715cb9b1f06a028852aea00dee5754349b29a467f3d99302dcd93a18e32"
+    "capture-encoder-source-build/validation.json": "774c2715cb9b1f06a028852aea00dee5754349b29a467f3d99302dcd93a18e32",
+    "capture-present-ctest.txt": "a732b4e0c4bdf92c2e6da46a8b4804a0aa24bcdfb5c18eb1b6a91497fd5e86d7",
+    "capture-present-control-ctest.txt": "9ffa87dc535ba96608fb92dec7d79210b5beb56d4f29bd2f2f4634368355b6d7",
+    "capture-present-full-ctest.txt": "27fe8ef9294bedd997de2ae7c89b8fed3a16bdea3121022ef28b7033d988f88b",
+    "capture-present-interop-final/validation.json": "2ddd156c73bbad1d1c96b8e7667a2f3f33ad74761368e84039d0abf427649a0f",
+    "capture-present-interop-final/inputs.json": "75dd121e5e24bf49c817c51876c1d67232d0dd5c71e32453490faef81ec1eee8",
+    "capture-present-interop-final/native/results.json": "42a753e32b809e8e2fbcf18b0423af662a385baed17756da8dd2ae78775dbd91",
+    "capture-present-factories/validation.json": "e2e96acab25e71ffbce3b435dbda260e92de9b8cda0d95c3af77cb47a9010182",
+    "capture-present-swaps/validation.json": "f5dfc04cac0e6c63ce920bedb1beafa99f7a014c74a2bdeb2447cc2c4f73c005"
   },
   "limitations": [
     "GPA original-player checks use a development-only private ABI harness.",
@@ -125,7 +134,7 @@
   },
   "resource_readback": {
     "standalone_helper": true,
-    "frame_boundary_integration": false,
+    "frame_boundary_integration": "internal transaction API; limited single-buffer profile",
     "mapped_write_recording": false,
     "uav_counter_readback": true,
     "warp": "exact tested resource bytes and counters passed",
@@ -149,7 +158,7 @@
       "11.1"
     ],
     "exact_draw_and_dispatch": "passed",
-    "present_integration": false,
+    "present_integration": "internal transaction API",
     "command_recording": true,
     "gaps": [
       "SO absolute append position",
@@ -173,7 +182,7 @@
     "negative_controls": 2,
     "failure_keeps_native_forwarding": true,
     "pending": [
-      "Present transaction",
+      "Private IPC transaction routing and default swap selection",
       "Map/Update/Copy and indirect commands",
       "Deferred expansion and multicontext ordering",
       "Individual state-setter event serialization",
@@ -196,10 +205,38 @@
     "original_player_sha256": "39061ff329e4a32d0c8375ce9ee15e2017bccab0593943b962a860e11723d38b",
     "original_gui_inspection": false,
     "pending": [
-      "Present/IPC transaction and background writing",
-      "Cancel/publication outcome linearization",
+      "Private IPC capture integration and expanded presentation profiles",
+      "Physical disk-full/target-exit finalization and shutdown tests",
       "Additional resource/state/command wire interoperability",
       "Map/Update/Copy, deferred ordering, hidden-state restoration",
+      "GF2 six-frame acceptance"
+    ]
+  },
+  "present_transaction": {
+    "controller_integration": false,
+    "actual_swap_descriptor": true,
+    "background_cpu_encoder": true,
+    "gpu_work_on_application_thread": true,
+    "separate_control_thread_tests": true,
+    "completed_frames": 3,
+    "dual_player_checks": 22,
+    "cancel_publication_mutex": true,
+    "race_attempts": 12,
+    "race_outcomes": {
+      "cancelled": 12,
+      "completed": 0
+    },
+    "cancel_after_completion": "passed",
+    "test_present": "does not advance boundary",
+    "resize_recovery": "passed",
+    "disk_failure": "missing destination directory; physical disk-full not tested",
+    "occlusion_and_device_loss": "HRESULT injection only",
+    "profile": "one immediate-context thread; one DISCARD/SEQUENTIAL buffer; single-sample RGBA8/BGRA8; zero Present flags; empty Present1",
+    "pending": [
+      "Private IPC routing/default selection/results",
+      "Target exit and real device-loss/occlusion",
+      "Flip/multiple buffers and dirty Present1",
+      "Multicontext synchronization and deferred/mutation recording",
       "GF2 six-frame acceptance"
     ]
   }

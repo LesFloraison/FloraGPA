@@ -1,0 +1,6 @@
+string(RANDOM LENGTH 16 ALPHABET 0123456789abcdef run)
+execute_process(COMMAND "${PROBE}" "${OUTPUT}/${run}" RESULT_VARIABLE result OUTPUT_VARIABLE output ERROR_VARIABLE error TIMEOUT 60)
+if(NOT result EQUAL 0)
+  message(FATAL_ERROR "Present capture gate failed: ${result}\n${output}\n${error}")
+endif()
+message(STATUS "${output}")

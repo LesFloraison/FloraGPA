@@ -480,3 +480,59 @@ GPA, Qt, RenderDoc or Python. Evidence is
 `artifacts/capture-encoder-source-build/validation.json`. Encoder linkage is
 validated by the independent probe; the shipped runtime remains bootstrap-only
 until Present/IPC integration is implemented.
+
+## Real Present transaction milestone
+
+The capture object layer now composes a native `capture_session` transaction with
+the independent encoder. Internal control requests select an observed swap ID
+and an absolute new output path. An accepted request arms; the next successful
+non-TEST Present starts observation, and the following non-TEST Present snapshots
+the final backbuffer and freezes the CPU model before forwarding presentation.
+Only successful presentation starts the background encoder. Actual swap-chain
+descriptors and Present interval/flags replace the probe's synthetic presentation.
+Empty Present1 follows the same legacy Present encoding; dirty/scroll metadata
+is explicitly unsupported. TEST Present neither starts nor ends recording.
+
+The application thread owns GPU snapshots and temporary COM leases. Before
+ResizeBuffers or selected swap destruction, the transaction releases those
+leases and rejects the frame, preserving normal application resizing. Cancel
+from another thread requests cancellation; active GPU leases drain at a target
+callback. The encoder and cancelling control thread share a publication mutex
+and an atomic published flag: completion wins after publication, cancellation
+wins before it. The writer never replaces an existing destination. CPU-only
+finalization can continue while the application presents subsequent frames.
+
+The native boundary probe creates a real DXGI window/swap chain and records three
+successive frames, including Present1. Control requests run on separate threads.
+It checks busy/unknown selection, TEST boundaries, early and active cancellation,
+resize/recovery, unsupported Update rejection, continued rendering after
+Disconnect, source-object lifetime closure, and absence of partial files. Twelve
+cancel/finalize race attempts check status/file agreement; the retained final run
+observed twelve cancellations. Cancellation after completed publication also
+returns completed rather than cancelled. Occlusion and device-removed HRESULTs
+are injected into the boundary callback, not induced on the physical adapter.
+A context call injected between snapshot and Present return rejects the frame;
+this guard does not establish general multithread capture ordering. Missing output
+directory tests cover writer failure, not physical disk exhaustion.
+
+All three actual boundary files execute to exact red 8x8 RGBA bytes in FloraGPA
+and the installed original GPA kernel. Their captured backbuffer bytes, native
+event counts and independent CPU oracle match. The 22 checks are retained in
+`artifacts/capture-present-interop-final/validation.json`, with request/race/fault
+outcomes in `native/results.json`. Reproduce with
+`tools/validate_capture_present.py --probe <FloraCapturePresentTests.exe> --replay
+<FloraGPA.Cli.exe> --oracle-tools <reference tools> --qt-bin <Qt bin> --out <new-dir>`.
+Sixteen capture-only CTests, fourteen full-profile capture CTests, 24 factory and
+20 swap-chain injected/native comparisons pass. An initial probe failure from
+iterating a temporary JSON object was fixed by retaining the observation value;
+the observed error was `Missing observed swap identity`.
+
+This is an internal transaction gate: the private IPC command handler still
+rejects capture, and the Qt availability flag remains false. No injected CLI
+capture or GF2 frame is accepted yet. Pending work includes controller request
+routing/default foreground selection, session result/exit reporting, timeout and
+shutdown handling, actual device loss/occlusion, flip/multiple buffers, dirty
+Present1, nonzero Present flags, broader state/mutation/deferred support and
+original GUI inspection. Current boundary support requires single-buffer DISCARD
+or SEQUENTIAL, one sample, RGBA8/BGRA8, and one immediate-context application
+thread. The full plan and six-frame GF2 gate remain incomplete.

@@ -166,6 +166,14 @@ public:
         Payload swap;swap.resize(88);wire_write<uint64_t>(swap.data(),3);wire_write<uint64_t>(swap.data()+8,2);
         const UINT usage=DXGI_USAGE_RENDER_TARGET_OUTPUT|((output_desc.BindFlags&D3D11_BIND_UNORDERED_ACCESS)?DXGI_USAGE_UNORDERED_ACCESS:0);
         for(auto [at,value]:{std::pair{16u,shape.width},{20u,shape.height},{32u,UINT(shape.format)},{44u,1u},{52u,usage},{56u,1u},{72u,1u}})wire_write(swap.data()+at,value);
+        if(frame_.presentation){
+            const auto& d=frame_.presentation->descriptor;
+            require(d.BufferDesc.Width==shape.width && d.BufferDesc.Height==shape.height && d.BufferDesc.Format==shape.format && d.SampleDesc.Count==1 && d.SampleDesc.Quality==0,"Encoder presentation/output mismatch");
+            require((d.SwapEffect==DXGI_SWAP_EFFECT_DISCARD || d.SwapEffect==DXGI_SWAP_EFFECT_SEQUENTIAL) && d.BufferCount==1,"Flip/multiple-buffer presentation encoding pending");
+            require(!(frame_.presentation->flags&DXGI_PRESENT_TEST),"TEST cannot end a capture");
+            static_assert(sizeof(DXGI_SWAP_CHAIN_DESC)==72);
+            memcpy(swap.data()+16,&d,sizeof(d));
+        }
         add(3,5,0x38,std::move(swap));
         for(const auto& [id,o]:frame_.objects)object(id,o);
         for(const auto& [id,data]:frame_.initial_resources){(void)data;require(frame_.objects.contains(id),"Encoder orphan initial resource");resource_ref(id);}
@@ -185,7 +193,7 @@ public:
             }add(7,type,std::move(p));
         }
         const auto reference_data=blob(final);add(5,0x87,Payload{}.q({UINT64_MAX-1,3}).raw(output_desc).value(reference_data));
-        add(7,0x3257,Payload{}.q({0,3}).u({0,1,0}));
+        add(7,0x3257,Payload{}.q({0,3}).u({0,frame_.presentation?frame_.presentation->sync_interval:1,frame_.presentation?frame_.presentation->flags:0}));
         Header header{};memcpy(header.data(),"IGPA",4);wire_write<uint32_t>(header.data()+4,HEADER_SIZE);wire_write<uint32_t>(header.data()+8,VERSION);
         GUID guid{};require(SUCCEEDED(CoCreateGuid(&guid)),"Frame GUID generation failed");memcpy(header.data()+0x20,&guid,16);memcpy(header.data()+API_OFFSET,"DX11",4);memcpy(header.data()+0x4c,"DX11_0",6);
         require(frame_.producer.size()<32 && frame_.producer.find('\0')==std::string::npos,"Encoder producer name is invalid");memcpy(header.data()+0xd4,frame_.producer.data(),frame_.producer.size());wire_write<uint32_t>(header.data()+0xfc,6);
@@ -193,7 +201,10 @@ public:
         ByteBuffer bmp(54+final.size());bmp[0]='B';bmp[1]='M';wire_write(bmp.data()+2,narrow(bmp.size()));wire_write<uint32_t>(bmp.data()+10,54);wire_write<uint32_t>(bmp.data()+14,40);wire_write(bmp.data()+18,shape.width);wire_write<int32_t>(bmp.data()+22,-int32_t(shape.height));wire_write<uint16_t>(bmp.data()+26,1);wire_write<uint16_t>(bmp.data()+28,32);wire_write(bmp.data()+34,narrow(final.size()));
         for(size_t i=0;i<final.size();i+=4){bmp[54+i]=final[i+(shape.format==DXGI_FORMAT_R8G8B8A8_UNORM?2:0)];bmp[55+i]=final[i+1];bmp[56+i]=final[i+(shape.format==DXGI_FORMAT_R8G8B8A8_UNORM?0:2)];bmp[57+i]=final[i+3];}
         checkpoint();ContainerWriter writer(path,header);for(const auto& [id,r]:records_){checkpoint();writer.append({id,r.category,r.type,r.bytes.data(),r.bytes.size()});}
+        std::unique_lock<std::mutex> publication;
+        if(options_.publication_mutex)publication=std::unique_lock<std::mutex>(*options_.publication_mutex);
         checkpoint();writer.finish(bmp);
+        if(options_.published)options_.published->store(true);
     }
 };
 }

@@ -1,6 +1,7 @@
 #pragma once
 // Capture-owned CPU data contract. No COM ownership, runtime helpers or replay types.
 #include <d3d11_4.h>
+#include <optional>
 #include <array>
 #include <cstdint>
 #include <map>
@@ -84,6 +85,11 @@ struct FrozenObject {
     bool creation_observed=false;
 };
 struct ResourceContents { ResourceShape shape; std::vector<SubresourceData> subresources; };
+struct Presentation {
+    DXGI_SWAP_CHAIN_DESC descriptor{};
+    UINT sync_interval=0,flags=0;
+    bool extended=false;
+};
 struct FrozenFrame {
     std::map<ObjectId,FrozenObject> objects;
     std::map<ObjectId,ResourceContents> initial_resources;
@@ -91,5 +97,6 @@ struct FrozenFrame {
     ObjectId output=0;
     ResourceContents final_output;
     std::string producer="FloraCapture";
+    std::optional<Presentation> presentation;
 };
 }

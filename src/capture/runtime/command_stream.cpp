@@ -1,5 +1,6 @@
 #include "command_stream.hpp"
 #include "objects.hpp"
+#include "capture_session.hpp"
 #include <cstring>
 
 namespace flora::capture {
@@ -140,12 +141,14 @@ void FrameRecording::reject_external(const char* api) {
     std::lock_guard lock(p.mutex);if(!p.finished)p.gap(api,"External resource mutation or synchronization is not recorded");
 }
 void record_external_call(const char* api) noexcept {
+    capture_context_activity();
     auto& r=registry();if(!r.enabled.load(std::memory_order_relaxed))return;
     LastErrorScope last_error;
     try{std::shared_ptr<FrameRecording> active;{std::lock_guard lock(r.mutex);active=r.active.lock();}if(active)active->reject_external(api);}
     catch(...){object_gap(api,__uuidof(IUnknown),"External frame observer failed");}
 }
 void record_context_call(ID3D11DeviceContext* context,const char* api,CommandKind kind,std::array<uint32_t,5> words,IUnknown* operand,const float* floats,const UINT* integers) noexcept {
+    capture_context_activity();
     auto& r=registry();if(!r.enabled.load(std::memory_order_relaxed))return;
     LastErrorScope last_error;
     try {

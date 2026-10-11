@@ -1,6 +1,7 @@
 #include "swap_chain.hpp"
 #include "factory.hpp"
 #include "objects.hpp"
+#include "capture_session.hpp"
 #include <atomic>
 #include <map>
 #include <memory>
@@ -118,6 +119,7 @@ public:
             std::lock_guard<std::mutex> lock(r.mutex);
             if(--references_==0){r.objects.erase(identity_);r.wrappers.erase(this);r.observations.erase(id_);++r.destroyed;destroy=true;}
         }
+        if(destroy)capture_invalidate_swap(id_,"Selected swap chain was destroyed");
         SetLastError(before);const ULONG result=real->Release();const DWORD after=GetLastError();
         if(destroy)delete this;SetLastError(after);return result;
     }
@@ -147,16 +149,21 @@ public:
         escaped("GetCoreWindow (window not wrapped)",iid,result,output);return result;
     }
     HRESULT STDMETHODCALLTYPE Present(UINT interval,UINT flags) override {
-        const auto result=real_->Present(interval,flags);presented(flags,result,false);return result;
+        capture_before_present(id_,real_,flags,false);
+        const auto result=real_->Present(interval,flags);presented(flags,result,false);
+        capture_after_present(id_,real_,interval,flags,false,result);return result;
     }
     HRESULT STDMETHODCALLTYPE Present1(UINT interval,UINT flags,const DXGI_PRESENT_PARAMETERS* parameters) override {
+        capture_before_present(id_,real_,flags,parameters && (parameters->DirtyRectsCount || parameters->pScrollRect || parameters->pScrollOffset));
         const auto result=extended<IDXGISwapChain1>([&](auto* p){return p->Present1(interval,flags,parameters);});
-        presented(flags,result,true);return result;
+        presented(flags,result,true);capture_after_present(id_,real_,interval,flags,true,result);return result;
     }
     HRESULT STDMETHODCALLTYPE ResizeBuffers(UINT count,UINT width,UINT height,DXGI_FORMAT format,UINT flags) override {
+        capture_invalidate_swap(id_,"ResizeBuffers interrupted capture");
         const auto result=real_->ResizeBuffers(count,width,height,format,flags);resized(result);return result;
     }
     HRESULT STDMETHODCALLTYPE ResizeBuffers1(UINT count,UINT width,UINT height,DXGI_FORMAT format,UINT flags,const UINT* masks,IUnknown* const* queues) override {
+        capture_invalidate_swap(id_,"ResizeBuffers1 interrupted capture");
         const auto result=extended<IDXGISwapChain3>([&](auto* p){return p->ResizeBuffers1(count,width,height,format,flags,masks,queues);});
         resized(result);return result;
     }
