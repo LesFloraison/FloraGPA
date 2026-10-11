@@ -53,13 +53,27 @@ MapRecordAudit auditMapRecords(const Frame &frame, const CancelCheck &cancelled)
                 throw std::runtime_error("Successful DO_NOT_WAIT Map cannot use WRITE_DISCARD or WRITE_NO_OVERWRITE");
             if (entry.type == 0x34ec && record.kind != 1)
                 throw std::runtime_error("Writable API Map cannot be skipped as read-only metadata");
-            if (entry.type == 0x246 && record.kind == 1)
-                throw std::runtime_error("Captured write record contains a READ Map");
+            const bool readErg = entry.type == 0x246 && record.kind == 1;
             if (!record.data)
                 throw std::runtime_error("Successful Map has no captured data identity");
+            if (readErg) {
+                // The legacy player executes Map/Unmap only with a nonzero
+                // saved-data reference. An empty GenDataDiff permits READ
+                // without writing to read-only memory. Other READ Erg payloads
+                // remain unsupported; API READ observations have a separate path.
+                Reader diff(frame.payload(record.data, 9, 0x100));
+                if (diff.read<uint32_t>() || diff.read<uint32_t>())
+                    throw std::runtime_error("Executable READ Map requires an empty data diff");
+                diff.end();
+                if (record.flags)
+                    throw std::runtime_error("Executable READ Map flags are unverified");
+            }
             // A READ identity is an opaque captured pointer identity, not necessarily
             // a saved GenData record. Do not invent bytes or dereference it.
             const auto resource = frame.resource(record.resource);
+            if (readErg && (resource.type != 0x83 || resource.desc.at(1) != 3 ||
+                            !(resource.desc.at(3) & 0x20000u)))
+                throw std::runtime_error("Executable READ Map requires a CPU-readable staging buffer");
             if (resource.type == 0x83) {
                 if (record.subresource)
                     throw std::runtime_error("Buffer Map subresource must be zero");
@@ -74,7 +88,11 @@ MapRecordAudit auditMapRecords(const Frame &frame, const CancelCheck &cancelled)
                 out.at(previous->second).error = "Overlapping successful Map for the same subresource";
                 throw std::runtime_error("Overlapping successful Map for the same subresource");
             }
-            pending.emplace(key, id);
+            // Executable READ with no CPU writes is an atomic Map/Unmap in the
+            // player, not an API mapping interval. Do not leave a pending READ
+            // that would overlap the application's subsequent Map observation.
+            if (!readErg)
+                pending.emplace(key, id);
         } catch (const std::exception &error) {
             record.error = error.what();
         }

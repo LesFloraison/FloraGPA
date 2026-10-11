@@ -7,7 +7,8 @@ struct MapRecordEvidence {
     int32_t result{};
     std::string error;
 };
-// Audit captured CPU Map observations separately from 0x246 GPU write playback.
+// Audit API Map observations and executable 0x246 Map/Unmap records. The latter
+// include the verified empty-diff READ profile as well as captured CPU writes.
 // Per-event errors allow a prefix replay without certifying later records.
 using MapRecordAudit = std::map<Id, MapRecordEvidence>;
 MapRecordAudit auditMapRecords(const Frame &frame, const CancelCheck &cancelled = {});

@@ -304,6 +304,68 @@ class MapRecordTests final : public QObject {
         QCOMPARE(std::string(replayCapability(0x34ed).handling), std::string("metadata"));
     }
     void writesStillExecute_data() { readObservations_data(); }
+    void executableRead_data() { readObservations_data(); }
+    void executableRead() {
+        QFETCH(bool, warp);
+        auto c = base();
+        c.add(4, 9, 0x100, pack(0u, 0u));
+        c.add(10, 7, 0x246, map(1, 0, 2, 0, 4));
+        c.add(11, 7, 0x34ec, map());
+        c.add(12, 7, 0x34ed, unmap());
+        QTemporaryDir dir;
+        const auto path = dir.filePath("read-erg.gpa_frame");
+        c.save(path);
+        Frame f(path.toStdWString());
+        const auto audit = auditMapRecords(f);
+        QCOMPARE(requireMapRecord(audit, 10).pairedEvent, Id(0));
+        QCOMPARE(requireMapRecord(audit, 11).pairedEvent, Id(12));
+        QCOMPARE(validateFrame(path.toStdWString())["errors"], nlohmann::json(0));
+        ReplayOptions options;
+        options.warp = warp;
+        Replay replay(f, options);
+        for (unsigned repeat = 0; repeat < 2; ++repeat) {
+            replay.run();
+            QCOMPARE(replay.readBuffer(2), pack(10u, 20u, 30u, 40u));
+            QCOMPARE(replay.counts.at("map_read_erg_synchronizations"), uint64_t(1));
+            QCOMPARE(replay.counts.at("map_read_synchronizations"), uint64_t(1));
+        }
+        options.disabled.insert(10);
+        Replay disabled(f, options);
+        disabled.run();
+        QVERIFY(!disabled.counts.contains("map_read_erg_synchronizations"));
+        QCOMPARE(disabled.readBuffer(2), pack(10u, 20u, 30u, 40u));
+    }
+    void rejectExecutableRead_data() {
+        QTest::addColumn<QString>("mutation");
+        for (const char* name : {"null-data", "missing-data", "full-data", "nonempty-diff", "truncated-diff",
+                                "trailing-diff", "flags", "dynamic", "unreadable", "overlap"})
+            QTest::newRow(name) << QString(name);
+    }
+    void rejectExecutableRead() {
+        QFETCH(QString, mutation);
+        auto c = base(mutation == "dynamic");
+        auto diff = pack(0u, 0u);
+        auto command = map(1, 0, 2, 0, 4);
+        if (mutation == "null-data") put(command, 40, Id(0));
+        if (mutation == "missing-data") put(command, 40, Id(999));
+        if (mutation == "full-data") put(command, 40, Id(3));
+        if (mutation == "nonempty-diff") diff = pack(8u, 4u, 0u, 4u, 0u);
+        if (mutation == "truncated-diff") diff.pop_back();
+        if (mutation == "trailing-diff") diff.push_back(0);
+        if (mutation == "flags") put(command, 36, 0x100000u);
+        if (mutation == "unreadable")
+            put(c.bytes, size_t(c.entries[1].offset) + 28, UINT(D3D11_CPU_ACCESS_WRITE));
+        if (mutation == "overlap") c.add(9, 7, 0x34ec, map());
+        c.add(4, 9, 0x100, diff);
+        c.add(10, 7, 0x246, command);
+        QTemporaryDir dir;
+        const auto path = dir.filePath("read-erg-invalid.gpa_frame");
+        c.save(path);
+        Frame f(path.toStdWString());
+        const auto audit = auditMapRecords(f);
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, requireMapRecord(audit, 10));
+        QVERIFY(validateFrame(path.toStdWString())["errors"] != 0);
+    }
     void writesStillExecute() {
         QFETCH(bool, warp);
         QTemporaryDir dir;

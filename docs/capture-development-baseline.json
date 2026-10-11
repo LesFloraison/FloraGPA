@@ -245,7 +245,17 @@
     "capture-event-model-gf2/target.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "capture-event-model-gf2/unity.log": "514a286e6a60b4e549fb651364f6ded8dbb72917696767bae56ee08200071faa",
     "capture-event-model-validation.json": "cb2f65e87b4a5f312dec743bfaf9e559aee53ab4ae22af24ad000bc594e7f523",
-    "capture-event-model-source-build/validation.json": "81948f10b1538190b9fec6495781d3084c00fd3d2169b58d7aa15e1a636efbf0"
+    "capture-event-model-source-build/validation.json": "81948f10b1538190b9fec6495781d3084c00fd3d2169b58d7aa15e1a636efbf0",
+    "capture-query-sync-research/summary.json": "fe0dba095a77ac076af5f9e94e1bb8d61a0b345e6fd22d5f803755590768ceaf",
+    "capture-query-map-wait/validation.json": "94bc3f7bd3f33a982739aab2a78510c209cd26cf416934a2653bfae3e3b455f0",
+    "capture-query-map-wait-dual/validation.json": "c518ad142d0e234a2976636749249a2669e8e61cd868679cb0996ab3c33ab595",
+    "capture-query-read-erg-goldens/validation.json": "a1f6d11deab2e8324c8626ab359b139abf8a83257d06874c3cb6a251a357b84a",
+    "capture-query-read-erg-focused.txt": "f686f8d743cd6987797e42b38ae057578ae7ef24e6d7f02a43d8eef9546c9f2c",
+    "capture-query-read-erg-ctest.txt": "2e52c22b7b8118174dcff53433379c50fac46cd1b5377eabfc4a9a741276d318",
+    "capture-query-read-erg-map-records.txt": "5d26239a0731a35b2ad346e90e04315b41ad421d0fc25677273853bf18c3038a",
+    "capture-query-read-erg-map-nowait.txt": "3c4ce0ae0335b03d51a45425cb387483bdb5fa4ea2fdf1744c66e92af0275a50",
+    "capture-query-read-erg-query-completion.txt": "c509f6859ed41eb7caa97e90a02dd0035d04518e34376e1ea70e3e52e7b5f688",
+    "capture-query-read-erg-validation.json": "cbab22c4ee095b586687e1f559f99124591b523bc958c631a29a149cf0bf27e5"
   },
   "limitations": [
     "GPA original-player checks use a development-only private ABI harness.",
@@ -538,5 +548,22 @@
     "committed_source_build_steps": 6,
     "committed_source_ctest": 28,
     "packaged_live_scope": "65 existing-profile files in thirteen native-validated launches; no EVENT serialization claim"
+  },
+  "query_read_dependency": {
+    "status": "verified wire execution primitive; not general EVENT support",
+    "wire": "7/0x246 READ with nonzero 9/0x100 empty diff",
+    "resource_profile": "CPU-readable staging buffer; zero flags; atomic Map/Unmap",
+    "resource_descriptors_preserved": true,
+    "dual_player_runs": 32,
+    "positive_exact": 12,
+    "draw_zero_exact": 12,
+    "no_data_mismatches": 6,
+    "checked_no_data_rejections": 2,
+    "ctest_suites": 8,
+    "golden_controls": 4,
+    "query_completion_unresolved": true,
+    "capture_encoder_guard_retained": true,
+    "original_gpu_commands_and_query_observations_preserved": true,
+    "replaced_record": "one incidental nested GetDesc becomes the authored READ dependency"
   }
 }

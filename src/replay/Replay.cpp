@@ -675,7 +675,7 @@ void Replay::mappedWrites(const Entry &e) {
     const Bytes tight = layout.recoveredLuma.empty() ? layout.tight : Bytes(layout.recoveredLuma);
     auto obj = get<ID3D11Resource>(id);
     D3D11_MAPPED_SUBRESOURCE mapped{};
-    ReplayAnnotation marker(captureAnnotation_.Get(), e.id, "MapCapturedWrites");
+    ReplayAnnotation marker(captureAnnotation_.Get(), e.id, kind == D3D11_MAP_READ ? "MapReadDependency" : "MapCapturedWrites");
     // The capture records a successful mapping, not a request to repeat its
     // original polling timing. Wait for this resource on the replay device.
     // Failed calls returned above; illegal successful flag/type pairs reject
@@ -713,6 +713,8 @@ void Replay::mappedWrites(const Entry &e) {
         planarWrites_.push_back(write);
     }
     counts["Map"]++;
+    if (kind == D3D11_MAP_READ)
+        ++counts["map_read_erg_synchronizations"];
     if (flags & D3D11_MAP_FLAG_DO_NOT_WAIT)
         ++counts["map_write_readiness_waits"];
     lastWorkEvent_ = e.id;

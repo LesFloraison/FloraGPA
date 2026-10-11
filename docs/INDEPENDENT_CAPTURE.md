@@ -1059,3 +1059,58 @@ native-validated existing-profile files across thirteen launches under a
 system-only PATH, without Qt discovery or GPA/Qt/RenderDoc/Python modules.
 Its live workload does not encode EVENT queries. Evidence is
 `artifacts/capture-event-model-source-build/validation.json`.
+
+## Executable resource-read dependency research
+
+Read-only Ghidra inspection of the same hash-pinned player locates the Map Erg
+executor at RVA `0x27080` and its data-reference initialization at `0x1c840`.
+Execution requires a nonzero resolved data reference. A `7/0x246` READ Map with
+a `9/0x100` GenDataDiff containing zero ranges and zero bytes calls native Map
+and Unmap without writing mapped memory. A zero data reference skips this path.
+Decompilation and the read-only invocation are retained under
+`artifacts/capture-query-sync-research`.
+
+`tools/validate_capture_query_map_wait.py` replaces only the pinned incidental
+nested GetDesc at event 10 with such an executable READ of the preceding copy's
+staging destination. It adds an empty diff, preserving every other captured
+command, resource descriptor, payload and preview. In particular it preserves
+NO_OVERWRITE and all GetData observations. The Draw-zero control additionally
+changes only Draw's vertex count. These are explicitly authored experimental
+records, not new claims about what Intel's capture shim saves.
+
+The initial 24-run experiment yields six exact original-player outputs and six
+exact Draw-zero outputs. Of six zero-data-reference controls, five reproduce
+the wrong output and one happens to match; this remains timing-dependent.
+The old FloraGPA reader explicitly rejects all six authored READ Erg variants.
+Evidence is `artifacts/capture-query-map-wait/validation.json`.
+
+The reader now recognizes only the verified executable READ profile: an empty
+diff, zero flags and a CPU-readable staging buffer. It treats the record as
+an atomic Map/Unmap, allowing later captured API Map intervals without inventing
+an unmatched mapping. Nonempty diffs, full payloads, missing data, other resource
+profiles and overlapping API mappings reject. Replay executes native READ and
+reports `map_read_erg_synchronizations`; it does not inspect Capture objects or
+its control protocol. The production Capture encoder still rejects EVENT frames.
+
+This is a resource dependency, not a general EVENT implementation. Microsoft's
+[Map contract](https://learn.microsoft.com/en-us/windows/win32/api/d3d11/nf-d3d11-id3d11devicecontext-map)
+describes access to a particular subresource, whereas an
+[EVENT query](https://learn.microsoft.com/en-us/windows/win32/api/d3d11/ne-d3d11-d3d11_query)
+reports completion of GPU commands. The experiment fixes the known copy/read
+dependency without proving completion of unrelated work, restoring the omitted
+query object/End or validating pre-frame/deferred intervals. A general lowering
+requires an explicit dependency proof and preserved provenance before production
+query capture can be enabled. Original GUI and GF2 acceptance remain pending.
+
+With the checked READ profile implemented, the follow-up experiment runs 32
+serial cases: twelve exact dual-player positive outputs, twelve exact Draw-zero
+outputs, six original-player zero-data mismatches and two checked-reader
+zero-data rejections. FloraGPA still reports the original unresolved query
+completion notices; the successful resource wait does not suppress them.
+Eight relevant CTest suites pass, including 72 Map record, 28 Map readiness and
+33 query completion cases without skips, using the existing original corpora.
+All four existing GF2/BF1 golden/Draw-suppression controls pass with unchanged
+event counts. Evidence and binary hashes are registered in
+`artifacts/capture-query-read-erg-validation.json`. Capture runtime, encoder
+and package results retain their previous commit scope; no new GF2 capture
+attempt or full original-GUI acceptance is claimed.
