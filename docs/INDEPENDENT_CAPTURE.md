@@ -472,3 +472,11 @@ nonzero resource LOD, dynamic linkage, predicates/SO, high UAV slots, nonzero vi
 planes, special texture layouts, MSAA/shared/tiled/protected resources reject.
 Map/Update/Copy, deferred execution, original GUI inspection and six GF2 frames
 remain pending. Controller capture requests still fail explicitly.
+
+The encoder/model commit `e8c5576` passes all five isolated source-build steps,
+including fifteen serial CTests, native package control and the runtime module
+audit with system-only PATH. No Qt is discovered; the packaged runtime loads no
+GPA, Qt, RenderDoc or Python. Evidence is
+`artifacts/capture-encoder-source-build/validation.json`. Encoder linkage is
+validated by the independent probe; the shipped runtime remains bootstrap-only
+until Present/IPC integration is implemented.
