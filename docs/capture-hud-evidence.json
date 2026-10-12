@@ -2,75 +2,18 @@
   "schema": 1,
   "date": "2026-10-13",
   "branch": "feature/dx11-capture",
-  "tested_source_commit": "c0d33b3",
-  "delivery": "partial; required multi-buffer and GF2 visible HUD gates remain unaccepted",
+  "tested_source_commit": "179b3597eac0a1a2250b5909464790ef7c1b0bd8",
+  "delivery": "partial; supported multi-buffer, exclusive and GF2 HUD integration verified; broader stress/failure gates remain open",
   "protocol": 3,
-  "profile": "Native single-buffer DISCARD/SEQUENTIAL, single-sample RGBA8/BGRA8, SINGLETHREADED device, no active query/predicate/mapping or interface gaps",
+  "profile": "Native clean application storage for single-sample RGBA8/BGRA8 SEQUENTIAL/FLIP_SEQUENTIAL/FLIP_DISCARD; guarded single-buffer DISCARD fallback; no active HUD query/predicate/texture mapping or interface escape",
   "comparison": "Exact integer resource and RGBA bytes; no relaxed thresholds",
-  "tests": {
-    "capture_only_ctest": 57,
-    "selected_full_ctest": 60,
-    "qt_cases": 12,
-    "failures": 0,
-    "gpu_execution": "serial",
-    "windowed_component_frames": 24,
-    "exclusive_component_frames": 24,
-    "exclusive_scope": "Single-buffer DISCARD/SEQUENTIAL; GetFullscreenState checked on every frame; foreground-dependent initial failures retained",
-    "packaged_frames": 3,
-    "packaged_checks": 82,
-    "packaged_checks_passed": true,
-    "draw_zero_controls": 3,
-    "native_exit": {
-      "exact_retained_pixels": true,
-      "frames": 803
-    },
-    "module_audit_passed": true,
-    "source_package_rebuild": "Working-source package; clean Git archive rebuild not repeated for this revision"
-  },
-  "binary_sha256": {
-    "controller": "444e70e76af37fd9ed9bb9040cbda6801495fb915d5d55ba01e4c02b52238491",
-    "runtime": "e60e273c0a56c8a3652b760a50c091d3d4a8f984d935ee479a8e65bfd6980ffb",
-    "flora_replay": "b9f35372b0e40f86ea37a482f06d6e9f82b9a83edb26e7680048bd8dd809adeb",
-    "intel_dx11_player": "39061ff329e4a32d0c8375ce9ee15e2017bccab0593943b962a860e11723d38b",
-    "intel_shim": "cb0b99d113511cbf7ca9f949d97aa02e4a1f8f110b1f3ad3165d8a81035dee31"
-  },
-  "captures": [
-    {
-      "file": "frame-3b4ac272-4c16-4798-ac47-8b6a5370cd7b.gpa_frame",
-      "sha256": "6b9033010b482744584ccd5aa5ef6abe29ed24db1ebe63350a0db449bff565a9"
-    },
-    {
-      "file": "frame-8c4feeb7-9f45-4bbd-b9d8-3c82069f9afa.gpa_frame",
-      "sha256": "0342384de2745bb8a4654819d60aa1811cc34b03356bbbae082edaad22bd2b1e"
-    },
-    {
-      "file": "frame-f9f5ca4d-bb8b-47e7-a3f1-3f93b9fbc32f.gpa_frame",
-      "sha256": "84fd4f5baaf1454fdc4de2b80c8d37c06d65bae2dd16aaf469706b1d1a162478"
-    }
-  ],
-  "gf2": {
-    "visible_hud_accepted": false,
-    "skip": "Multi-buffer HUD pixel restoration is unverified",
-    "start_frame_sha256": "cdf08bf5cd3503a5717c68adae3e84e3264b60768ad075262b46f697641abd1b",
-    "output_rgba_sha256": "49b7c2ae7cc802cd8317569488bf1e4118427b7698a929ca6c073ad9b1d5f4b1",
-    "players_equal": true,
-    "captured_resource_equal": true,
-    "reference_pixels_used": false,
-    "draw_count": 22,
-    "original_gui_this_round": false,
-    "main_result": "Explicit MSAA sample-preserving refusal; no second file",
-    "hotkey": "Ctrl+Shift+C via target-thread keyboard messages; game also receives C",
-    "disconnect": "Input hook count zero; game continued and exited normally",
-    "formal_accepted_frames": 0,
-    "formal_required_frames": 6
-  },
   "pending": [
-    "Multi-buffer/flip restoration and GF2 visible HUD",
-    "General concurrent-context isolation",
+    "General concurrent-context and external-interface stress",
     "Raw-input-only hotkeys",
-    "Explicit borderless and DPI/resolution matrix",
-    "Native long-hold/focus stress and hidden-state failure matrix",
-    "Actual driver Present failures"
+    "Broader DPI/resolution matrix",
+    "Native long-hold/focus stress and complete hidden-state failure matrix",
+    "Driver/device-loss and cancellation/cleanup failure matrix",
+    "Formal GF2 six-frame acceptance remains separate and 0/6"
   ],
   "clean_storage_experiment": {
     "runtime_enabled": false,
@@ -91,19 +34,48 @@
     "capture_only_ctest": "59/59",
     "selected_full_ctest": "62/62",
     "qt_cases": 12,
-    "complete_builds": ["capture-only", "capture-full"],
+    "complete_builds": [
+      "capture-only",
+      "capture-full"
+    ],
     "test_executable_sha256": "3981b54523ff22a4b58c5bc0f6487f785cbe6451d9d6ad03ad4bb8bb5d85afd4",
     "capture_ctest_details_sha256": "99c6a947119a638e38897d5235b9c9e3d32b861e5257e81df805efa8cde86d70",
     "full_ctest_log_sha256": "c1544d76cc364801fe62fba867eb8e65aca238cd735c9016278c16926a8068fa",
-    "verified": ["Cross-interface identity and getters", "Original DXGI usage", "Exact clean snapshot bytes", "Canonical capture resource metadata", "Native read-only view HRESULT and debug diagnostic comparison", "Indirect native Resize rejection and subsequent success"],
-    "remaining": ["Automatic swap-chain activation", "Synchronized alias registration changes on Resize", "Implicit Present unbinding", "Clean capture boundary integration", "GF2 visible HUD and frame isolation"]
+    "verified": [
+      "Cross-interface identity and getters",
+      "Original DXGI usage",
+      "Exact clean snapshot bytes",
+      "Canonical capture resource metadata",
+      "Native read-only view HRESULT and debug diagnostic comparison",
+      "Indirect native Resize rejection and subsequent success"
+    ],
+    "remaining": [
+      "Automatic swap-chain activation",
+      "Synchronized alias registration changes on Resize",
+      "Implicit Present unbinding",
+      "Clean capture boundary integration",
+      "GF2 visible HUD and frame isolation"
+    ]
   },
   "present_binding_foundation": {
     "runtime_enabled": false,
     "native_facade_pairs": 192,
-    "feature_levels": ["11.0", "11.1"],
-    "presentation_calls": ["Present", "Present1"],
-    "verified": ["Native HRESULT and Debug Layer diagnostic comparison", "Surviving original view identities", "Six-stage SRVs, RTVs, CS/OM UAVs", "Unrelated UAV counter exactly 37", "LastError", "TEST, DO_NOT_SEQUENCE and invalid sync interval"],
+    "feature_levels": [
+      "11.0",
+      "11.1"
+    ],
+    "presentation_calls": [
+      "Present",
+      "Present1"
+    ],
+    "verified": [
+      "Native HRESULT and Debug Layer diagnostic comparison",
+      "Surviving original view identities",
+      "Six-stage SRVs, RTVs, CS/OM UAVs",
+      "Unrelated UAV counter exactly 37",
+      "LastError",
+      "TEST, DO_NOT_SEQUENCE and invalid sync interval"
+    ],
     "capture_only_focused_tests": "4/4",
     "full_profile_focused_tests": "2/2",
     "capture_ctest_sha256": "5137495fdf33819705ba5c4deca76af5088afb58474eacfe2cd43a541205e0fc",
@@ -113,7 +85,11 @@
     "expanded_decorated_frames": 384,
     "expanded_retained_slot_comparisons": 600,
     "nonsequencing_storage_output_sha256": "71811a7b577cf00b337806845b1f8b60d592691789db35f6d09cc123d2e59de8",
-    "retained_failures": ["Initial OM UAV range replacement cleared an unrelated slot; fixed", "Native OCCLUDED result failed strict presentation checks; unchanged cases passed after visible window activation", "DO_NOT_SEQUENCE fixture initially compared undefined native slots; warmup corrected"],
+    "retained_failures": [
+      "Initial OM UAV range replacement cleared an unrelated slot; fixed",
+      "Native OCCLUDED result failed strict presentation checks; unchanged cases passed after visible window activation",
+      "DO_NOT_SEQUENCE fixture initially compared undefined native slots; warmup corrected"
+    ],
     "scope": "Component comparison only. Runtime activation, Resize and context serialization, capture-file integration and GF2 visible HUD are pending. No new fullscreen facade or formal GF2 acceptance."
   },
   "artifacts": [
@@ -131,6 +107,339 @@
     "artifacts/capture-hud-buffer-debug.json",
     "artifacts/capture-hud-final-20261013",
     "artifacts/capture-hud-gf2-20261013",
-    "artifacts/capture-hud-plan"
-  ]
+    "artifacts/capture-hud-plan",
+    "artifacts/capture-hud-storage-checked-tests.log",
+    "artifacts/capture-hud-predicate-tests.log",
+    "artifacts/capture-hud-final-gf2",
+    "artifacts/capture-hud-final-storage-{blt,flip,flip3,borderless,exclusive}",
+    "artifacts/capture-hud-isolated-package-check",
+    "artifacts/capture-hud-storage-final-full-tests.log"
+  ],
+  "earlier_single_buffer_tests": {
+    "capture_only_ctest": 57,
+    "selected_full_ctest": 60,
+    "qt_cases": 12,
+    "failures": 0,
+    "gpu_execution": "serial",
+    "windowed_component_frames": 24,
+    "exclusive_component_frames": 24,
+    "exclusive_scope": "Single-buffer DISCARD/SEQUENTIAL; GetFullscreenState checked on every frame; foreground-dependent initial failures retained",
+    "packaged_frames": 3,
+    "packaged_checks": 82,
+    "packaged_checks_passed": true,
+    "draw_zero_controls": 3,
+    "native_exit": {
+      "exact_retained_pixels": true,
+      "frames": 803
+    },
+    "module_audit_passed": true,
+    "source_package_rebuild": "Working-source package; clean Git archive rebuild not repeated for this revision"
+  },
+  "earlier_binary_sha256": {
+    "controller": "444e70e76af37fd9ed9bb9040cbda6801495fb915d5d55ba01e4c02b52238491",
+    "runtime": "e60e273c0a56c8a3652b760a50c091d3d4a8f984d935ee479a8e65bfd6980ffb",
+    "flora_replay": "b9f35372b0e40f86ea37a482f06d6e9f82b9a83edb26e7680048bd8dd809adeb",
+    "intel_dx11_player": "39061ff329e4a32d0c8375ce9ee15e2017bccab0593943b962a860e11723d38b",
+    "intel_shim": "cb0b99d113511cbf7ca9f949d97aa02e4a1f8f110b1f3ad3165d8a81035dee31"
+  },
+  "earlier_captures": [
+    {
+      "file": "frame-3b4ac272-4c16-4798-ac47-8b6a5370cd7b.gpa_frame",
+      "sha256": "6b9033010b482744584ccd5aa5ef6abe29ed24db1ebe63350a0db449bff565a9"
+    },
+    {
+      "file": "frame-8c4feeb7-9f45-4bbd-b9d8-3c82069f9afa.gpa_frame",
+      "sha256": "0342384de2745bb8a4654819d60aa1811cc34b03356bbbae082edaad22bd2b1e"
+    },
+    {
+      "file": "frame-f9f5ca4d-bb8b-47e7-a3f1-3f93b9fbc32f.gpa_frame",
+      "sha256": "84fd4f5baaf1454fdc4de2b80c8d37c06d65bae2dd16aaf469706b1d1a162478"
+    }
+  ],
+  "earlier_gf2": {
+    "visible_hud_accepted": false,
+    "skip": "Multi-buffer HUD pixel restoration is unverified",
+    "start_frame_sha256": "cdf08bf5cd3503a5717c68adae3e84e3264b60768ad075262b46f697641abd1b",
+    "output_rgba_sha256": "49b7c2ae7cc802cd8317569488bf1e4118427b7698a929ca6c073ad9b1d5f4b1",
+    "players_equal": true,
+    "captured_resource_equal": true,
+    "reference_pixels_used": false,
+    "draw_count": 22,
+    "original_gui_this_round": false,
+    "main_result": "Explicit MSAA sample-preserving refusal; no second file",
+    "hotkey": "Ctrl+Shift+C via target-thread keyboard messages; game also receives C",
+    "disconnect": "Input hook count zero; game continued and exited normally",
+    "formal_accepted_frames": 0,
+    "formal_required_frames": 6
+  },
+  "runtime_integration": {
+    "automatic_swap_activation": true,
+    "source_base": "c1dcb76",
+    "capture_only_ctest": "61/61 before final summary/predicate refinements; affected 7/7 rerun after refinements",
+    "full_ctest": "64/64; includes 12 Qt cases",
+    "profiles": {
+      "blt": {
+        "exit": {
+          "exact_retained_pixels": true,
+          "frames": 25,
+          "mode": "blt"
+        },
+        "checks": 82,
+        "validation_sha256": "e2b4866fe782e33a569620474866911f28c49d16f71f20e2514fdcb9730179aa",
+        "capture_sha256": {
+          "frame-5a016650-93a2-4e6e-b120-2b312a545299.gpa_frame": "1476edf40a8905b249e61c547cab9981dc032cc6642842233ba9d1b64423df3b",
+          "frame-ea86df16-802f-4f22-ae6e-712da38697ca.gpa_frame": "0fe558ff4d8f9b7e9c0c84a9a43ae708c332b18f15ac97186e9c09063681563a",
+          "frame-efaea460-f454-4b81-9165-846406a7be2a.gpa_frame": "0cc5fa4654c6787703adecd873fada7148b71dd251e4e970199f222293324dc0"
+        },
+        "exercise": {
+          "failed_present_restored": true,
+          "held_resize_rejected": true,
+          "partial_present1": true,
+          "same_size_resize": true,
+          "test_present": true
+        }
+      },
+      "flip": {
+        "exit": {
+          "exact_retained_pixels": true,
+          "frames": 27,
+          "mode": "flip"
+        },
+        "checks": 82,
+        "validation_sha256": "e2b4866fe782e33a569620474866911f28c49d16f71f20e2514fdcb9730179aa",
+        "capture_sha256": {
+          "frame-b7e3eb89-6113-4c96-97ab-ca4f38fa9559.gpa_frame": "947e5216000d962534c16dcd32b6fd4c3dfc9b5f8062d65b700757b22b25eaa4",
+          "frame-d0824aaf-7513-4e90-b39f-ead23b4aed16.gpa_frame": "c9bc4f32cfbdf2768b6f846ff8baba8e56ad8b7ffca0dba74485b833d18ee1e5",
+          "frame-e6be128c-c448-4c87-af31-f2447cfd41ca.gpa_frame": "2cc32f7af650c57d13137d5b605f3029b4389f40b7f5798a79232ae68ecab281"
+        },
+        "exercise": {
+          "failed_present_restored": true,
+          "held_resize_rejected": true,
+          "partial_present1": true,
+          "same_size_resize": true,
+          "test_present": true
+        }
+      },
+      "flip3": {
+        "exit": {
+          "exact_retained_pixels": true,
+          "frames": 30,
+          "mode": "flip3"
+        },
+        "checks": 82,
+        "validation_sha256": "e2b4866fe782e33a569620474866911f28c49d16f71f20e2514fdcb9730179aa",
+        "capture_sha256": {
+          "frame-75518305-a6ca-4297-aa86-f906e4d00711.gpa_frame": "3932bff148a9a79056dd13fb02ab80c3d5f88da7cb75771fc4e2a0c5525d6c94",
+          "frame-c5491d6e-870a-4b8d-8cfb-ee9536927c2a.gpa_frame": "6db722ab65d1d819cf6ded3843990a856c80babda91527678a456a3d394d2541",
+          "frame-e7330906-98ef-477c-a6f2-8320825ea8f3.gpa_frame": "71cc1ba4330ec05de7bf6fb378c24543e7783289820304ba87ff273dde86aa0d"
+        },
+        "exercise": {
+          "failed_present_restored": true,
+          "held_resize_rejected": true,
+          "partial_present1": true,
+          "same_size_resize": true,
+          "test_present": true
+        }
+      },
+      "borderless": {
+        "exit": {
+          "exact_retained_pixels": true,
+          "frames": 22,
+          "mode": "borderless"
+        },
+        "checks": 82,
+        "validation_sha256": "e2b4866fe782e33a569620474866911f28c49d16f71f20e2514fdcb9730179aa",
+        "capture_sha256": {
+          "frame-358a4431-1400-4725-b7aa-0e031ac1aea6.gpa_frame": "76068415fed10108f1ee4313ed66daec85d34edfad316939dff0dd3efde72133",
+          "frame-94bc56e8-90c4-4efd-ae58-4d1d757054c0.gpa_frame": "9f14b3f6dafb3cfc47e7f2e3359e10ed5f162e884f2de4ef14ab9888d10bf642",
+          "frame-cda0cf49-3f89-433f-979b-d3081b3e7bf3.gpa_frame": "6181bb5cd97eafbcf0ebf6f36f2743a48d0f5f26bc5a348340f0f198d47becea"
+        },
+        "exercise": {
+          "failed_present_restored": true,
+          "held_resize_rejected": true,
+          "partial_present1": true,
+          "same_size_resize": true,
+          "test_present": true
+        }
+      },
+      "exclusive": {
+        "exit": {
+          "exact_retained_pixels": true,
+          "frames": 20,
+          "mode": "exclusive"
+        },
+        "checks": 82,
+        "validation_sha256": "1a2b4eecef4fff0772adc04bc4dde720187bca2ceff7cd490c2c29dc3eedcf15",
+        "capture_sha256": {
+          "frame-780d532b-f96d-4c40-a0ce-a0d5f940a767.gpa_frame": "2b8ecbe1c659b4ddff225f465fa498f51e0116bf6fd1f98082eb8fb2ee7c2051",
+          "frame-7a366d4f-ec54-446d-b749-4a810baeb611.gpa_frame": "6b43855e77306dbf775f6d5728f34a5208373bd5b7cd52a0f0d9ada1b911ec45",
+          "frame-b04a950c-a749-4cbd-a1f0-48dcf74a4eea.gpa_frame": "a167693729349febd75336534ac0366e9826e30815445fe482a70be95963de4e"
+        },
+        "exercise": "Exclusive state checked each frame; no resize/failure exercise in this profile"
+      }
+    },
+    "gf2": {
+      "frame_sha256": "2a57ce2ad9af37ff83e8db1ecc4013002175f4017349b1bf756623b8a2216f45",
+      "players_equal": true,
+      "captured_resource_equal": true,
+      "preview_equal": true,
+      "reference_pixels_used": false,
+      "counts": {
+        "ClearDepthStencilView": 4,
+        "ClearRenderTargetView": 2,
+        "CopySubresourceRegion": 3,
+        "Draw": 1,
+        "DrawIndexed": 21,
+        "Map": 16,
+        "Present": 1,
+        "present_rtv_unbinds": 1,
+        "query_completion_unresolved": 1,
+        "query_end_observations": 1,
+        "query_metadata_records": 3,
+        "unmap_observations": 16
+      },
+      "original": {
+        "player_dll": "C:\\Program Files\\IntelSWTools\\GPA\\dx11_player.dll",
+        "player_sha256": "39061ff329e4a32d0c8375ce9ee15e2017bccab0593943b962a860e11723d38b",
+        "adapter_selection": "Original kernel default (undefined GpuId)",
+        "callbacks": [],
+        "open_status": 0,
+        "playback_status": 0,
+        "closed": true
+      },
+      "rgba_sha256": "b7cdae72cc2e913e022fc8095bb35ced0b84786b4132bfcfa8c5855cc011058d",
+      "visible_hud": true,
+      "scenes": [
+        "start",
+        "main",
+        "equipment"
+      ],
+      "main_result": "Visible Capture failed; MSAA sample-preserving refusal; no second file",
+      "hidden_capture_result": "Requested; equipment scene refused pre-frame Map/Unmap boundary gap",
+      "disconnect": "HUD gone, zero input hooks, continued native game then normal Alt+F4",
+      "formal_accepted_frames": 0,
+      "formal_required_frames": 6,
+      "scope": "Screenshots precede final summary-text and private-copy predicate guards; these refinements have separate native tests"
+    },
+    "source_sha256": {
+      "src/capture/api/generate.cpp": "453d936251329d3dbee2f3f12b636fe554c8bc3abfddb36bc58953016012cba2",
+      "src/capture/controller/main.cpp": "157ebace609c697d7d2b4e949bd62bcb3070a909bc15f3d19565660427cb7f9f",
+      "src/capture/encoder/encoder.cpp": "ef4a0bc1eb63ccc9ccba137123db0ccbbb8192088381cc462f36ee9cb00f47c2",
+      "src/capture/encoder/encoder.hpp": "57c5ace527fb643e84c5ebe1efc1ea59df3418c0c6bff845801c3cac3846eba7",
+      "src/capture/hud/clean_buffer_ring.cpp": "eff5014db5f0fe6392eabc57283a2a7d834605bd6e74fd2a36e3dadc4858fc09",
+      "src/capture/hud/clean_buffer_ring.hpp": "18832cdaab403890d9b41d8a5193881601060880bdf70f764f37b359c3b0a89d",
+      "src/capture/hud/hud_model.cpp": "3b366364202067f00228ecaf729cf76a9f0a22b36aaf342f5ac4324443282722",
+      "src/capture/hud/hud_model.hpp": "dd24cb5c9ea51a60eac285bd3585a25f1cb5f1639f2e9a524cd3ae29a65b82fd",
+      "src/capture/hud/hud_pixels.cpp": "223909b451ef0f37615d6e3e77c34b86f7ddbfbdaf334ba4e49574576a049689",
+      "src/capture/hud/hud_pixels.hpp": "a305de1b8b448373a9b9c444eed1053ed756e8f57c7df690f9a87c3fe916b5f7",
+      "src/capture/hud/present_bindings.cpp": "257308dc63d9eada2874c3351736ef98e753e6f26049e18dd772edb2e2cd4d91",
+      "src/capture/hud/present_bindings.hpp": "dde50f2c182c4a90edfc9ce51715a1f9f5ed8e28fd731eb6a8b6fe97e2459898",
+      "src/capture/include/capture_model.hpp": "7357a49e7d168882fbe5f2eac8e84ec42a8ab665b2f9b6fd17b3d0622c56a8cf",
+      "src/capture/include/protocol.hpp": "4de05f64e7e7b8f28ad955227e27f79bbd7991ee4e64462ee9c3faa61a74c78e",
+      "src/capture/include/query_dependencies.hpp": "76cda66bcd92f8b771a75b284912a7f56269e24f1582a869b7ce401fc9ea1a37",
+      "src/capture/include/resource_layout.hpp": "00032eed58051a73359632f81ee58ea8aa104e87a861cf5c6c591e92b839ead5",
+      "src/capture/model/query_dependencies.cpp": "eeb9b17a89828cccb927079c6a606218cb234f147b659e772959589777ea3641",
+      "src/capture/model/resource_layout.cpp": "96d34abc4d66e40ec11cef3afb93d8c8b9dc84f711b79e38dc58785a34685e24",
+      "src/capture/runtime/bootstrap.cpp": "ee16a46abdd47be4f754b37f25ed6d8eef8b56c93bc012a8ad8a6fd35d8e3b64",
+      "src/capture/runtime/capture_requests.cpp": "b70540554200349c263627ea4aa626cc4633d75fdb003c530012e42285bc35e5",
+      "src/capture/runtime/capture_requests.hpp": "e398c50fbba07feaa28bd902ac2c311791f115656851b6d88fd424b7060ff9bc",
+      "src/capture/runtime/capture_session.cpp": "1958639c4346b29e635aa064f089ab8676d0b86b6c8ebfe3014075e0541b7348",
+      "src/capture/runtime/capture_session.hpp": "e0759f8a49cdcc8adf2fb2a4c0cd2665baf88b39b5fd7b03f5a3f6a05be60e98",
+      "src/capture/runtime/command_stream.cpp": "5e94717fed7009cb464cd3119cc27bf5cb0b28421e2e466d5ef74ad7552cae25",
+      "src/capture/runtime/command_stream.hpp": "5542212c527f6deeaf1b1828c0791395bf5ccb8870c0b64fa2a64f804a44b4cb",
+      "src/capture/runtime/context_state.cpp": "d131357b0d4756b267acb1d8f34a5b034a08d80cdcc2a1c08b44a570fb1baabc",
+      "src/capture/runtime/context_state.hpp": "b83f5a9fa12cab44c4aacdb694d01896880945fdd1836ed5260788bb9564a33c",
+      "src/capture/runtime/deferred_bindings.hpp": "935147fd40c94719adbfd9556e1a7b276350cb380553c9bcc74ac2efcaeb469a",
+      "src/capture/runtime/deferred_definitions.cpp": "3c6172aaf28595fc50cb645184d21f71357d4134f5dbf386e0394cf014e14574",
+      "src/capture/runtime/deferred_definitions.hpp": "2a5cce4cf7ee8ec292ff4f73625abc2ff9bbb4056a187bd3e4ea27f047259d55",
+      "src/capture/runtime/deferred_history.cpp": "b6b39e8da14aaeead59da6794f5ad29e7eb15f0fb1e05c51fce9f2c274ae6c6a",
+      "src/capture/runtime/deferred_history.hpp": "1203f627650ebc08e2adc854c32103806cae4b6fd92e91eaa4442733e7719491",
+      "src/capture/runtime/deferred_lowering.cpp": "ea96886b2769d0b8ff5873ff17108afc7d9e1b0eee934cb4af0d5fa77b46bc27",
+      "src/capture/runtime/deferred_lowering.hpp": "49a2def388d8c2da3a403688778937d1ac7c4bb3f9093ad0169d39915874e92e",
+      "src/capture/runtime/deferred_resources.hpp": "b56640536260ad71cfa33ad90df6abc8f47f7dd2164a5d4ef403a15d64809d32",
+      "src/capture/runtime/factory.cpp": "a33f124dd6ed925f9963251b3a93b8f219ae799cea8b8a93d05a2b6d35c14bfd",
+      "src/capture/runtime/factory.hpp": "e311d8309fecff5f7e2cbbb745a2a5768f6ddd1693b06e08c451b2b7daccd369",
+      "src/capture/runtime/frame_start.cpp": "ff39b6cfeb2acec22e61595d9fbbb5dafefb7fbd990e452c959e1304948c1867",
+      "src/capture/runtime/frame_start.hpp": "112bb0bcbaad94f4e45d5ea7039d8f8146dcadd2a7248c23708ac7e61c5e8df7",
+      "src/capture/runtime/hud_control.cpp": "ed033f79d5d84f77c19567ee59fdb21f9a32de9a709104afa0e8a91606cee987",
+      "src/capture/runtime/hud_control.hpp": "b8c74c52f906b7cd131565b418106d0dc15c44f2f0cb00e621b9d1e5c8bb5a41",
+      "src/capture/runtime/metadata.cpp": "63d91a7e2e7be3ccd775348297a7e2c110902835de60642a43f6b7a8fe095e6d",
+      "src/capture/runtime/metadata.hpp": "b9b10cfdf19ec23f7d6ad3e98827556721e6750b754c808c26244d7344408016",
+      "src/capture/runtime/objects.cpp": "c40ed0875be808beb238b3633b0d8cfe7b0dd617672f3180dd9681b58a093f4c",
+      "src/capture/runtime/objects.hpp": "bcff52231a34adba36b4a4df0d56dea3a6446adde47ba8e7830ad46ae7ebd5a9",
+      "src/capture/runtime/presentation_access.hpp": "74306377f932a3de5f2aa1c45cf0028363be4483b121eebb61a5793e0f8cd822",
+      "src/capture/runtime/presentation_resources.cpp": "e574b16f17f42d7351b6e4fbb8129629d838b0bfa848d9d25210c5a1f3bea6bf",
+      "src/capture/runtime/presentation_resources.hpp": "9800b5f56b647b4a16d4cc8e3d75609f7bd1eb05d342ed6688bcbefa5997fecf",
+      "src/capture/runtime/presentation_storage.cpp": "4813cc89c4f667deb8f1b551509978fe88e3b54b67760ba722796220d31ce2e3",
+      "src/capture/runtime/presentation_storage.hpp": "7caac8667e55c493c957a20a76e21e95657619b4716cdfa955c8783369360006",
+      "src/capture/runtime/resource_data.cpp": "3bc66bfc536609a105ba4ae01ec80bcda2ba5eb74444f6f59cdfbf65bc45b146",
+      "src/capture/runtime/resource_data.hpp": "736c30b68b3fa0728d9b517bc2d3da88742896628750f59e000b9c39187f8302",
+      "src/capture/runtime/swap_chain.cpp": "9f89e4f99b37eafa735bd3019bae72de6e95e11a83ec63a5eb220def7f953bd6",
+      "src/capture/runtime/swap_chain.hpp": "f88f7a696da691afb6145aa749f8616e94d3f1a5d06594d3e584369b56e8f181",
+      "src/capture/tests/command_stream_tests.cpp": "34be59a862f4efab72356a12e8498f894b16b212f1d438f1e1d011f09a65f91d",
+      "src/capture/tests/context_state_tests.cpp": "8a0894bb1239cd12b59b1c0136e25686b19aeea29c8b41d06568096ce30dadf4",
+      "src/capture/tests/controller_tests.cpp": "3d0d4beb3cc874b67de6afabc5c21687ba7301abb58bac9b3d738161aae2df02",
+      "src/capture/tests/copy_bc_tests.cpp": "6a7c56223f438c8e7b5271c132db7d03ecc8ea97a8f9f1e6ed4cb932f4f5aebf",
+      "src/capture/tests/copy_region_tests.cpp": "f853ce904f0759dfd66685de8ed3e2c581333f768719d667b0511176d453d362",
+      "src/capture/tests/copy_tests.cpp": "06935346cbb88d3662cb7ef3a4fefa32d436886cd536aa96868737de0f81de1d",
+      "src/capture/tests/deferred_binding_tests.cpp": "85f09a1f5afa09b53cd09d80f19df310eed9f001b2dd9ce9f0385be4c4fd083b",
+      "src/capture/tests/deferred_definition_tests.cpp": "58524cbde673d54779ae02c7195de364827699a6dc777849e66ed1aac50df344",
+      "src/capture/tests/deferred_execution_tests.cpp": "3c9ad2a0f10fb83abab86034b8768a05bd36aaa3160c820893c5f800a0db5266",
+      "src/capture/tests/deferred_history_tests.cpp": "86080846a14ca0ad05a1085b2799866a95300b41eff2d20eadce39a4652bd87c",
+      "src/capture/tests/deferred_mapping_tests.cpp": "60fb14fb8876f4be924cb17c544cbca8493501b1401dec49dbb3f442aa3a21df",
+      "src/capture/tests/deferred_state_tests.cpp": "829baa484511c36585038ffa1248d1f32a067261c0ce31255dce770f3a5c7d5d",
+      "src/capture/tests/factory_probe.cpp": "c94259a22834a883f73c45b90a96c6e32e06e5f74f14257ab7d2be49274c1aff",
+      "src/capture/tests/hud_buffer_probe.cpp": "2396edeb321c22391f58a2d22be25d29f64ecb4ad07d224ea827161dc8f7cc09",
+      "src/capture/tests/hud_clean_buffers_tests.cpp": "4cb75273a12a84fe527d39b22f5d922e5aa259ace06e39058c832c1efcbb5cb4",
+      "src/capture/tests/hud_live_target.cpp": "d5528f67657d2cb988e404aab38ecbab6c436e8922d9c8c123ea31fd60173504",
+      "src/capture/tests/hud_model_tests.cpp": "53034f8d6e15e5719a6f82330723be5d575662b7605f87d931a5f0927951cde0",
+      "src/capture/tests/hud_pixels_tests.cpp": "20419905f22bede1d2a7d388879cc3323858e0d70381fe323e2ba497e8bb08c4",
+      "src/capture/tests/live_target.cpp": "c67849cd9e1a674b95799954159ed85e5e73a8fbc5265aa785e7287951579615",
+      "src/capture/tests/map_tests.cpp": "eafc14caa54117cbbf39e768d953d444a46349f3ad5f6e68d3aba389711d7c20",
+      "src/capture/tests/metadata_tests.cpp": "c7afc2d6ffc2a10173b846cc9b3caa708c998eb20baa36e4a99d0f1d0d3001c3",
+      "src/capture/tests/object_probe.cpp": "b5f1d8373defe413899c23c1683565d46484ecf53d07d6c163548330b207d5a8",
+      "src/capture/tests/object_registry_tests.cpp": "e1c1ac84843f6c50db125d33eaa1c2e21ef558174e6632686b6acc1a22a539ab",
+      "src/capture/tests/present_bindings_tests.cpp": "f5944e0ff86c4c3caa3eb5b180bbf56df29929a1ada7ad4af37cc0da4607c7d6",
+      "src/capture/tests/present_session_tests.cpp": "f3cfc0597d7908311a17b65fe8edbd7ac70745bd3e7f03788c8ca93cc7fad2ed",
+      "src/capture/tests/presentation_resources_tests.cpp": "98c96092127128b285d2e7b8c8008c6425f259b05d8eb0337cde2ef11d18631b",
+      "src/capture/tests/query_dependency_tests.cpp": "1576ece61e00fc822a6849fadb1a90a955154f00a43f20d553ce8e94252425d7",
+      "src/capture/tests/query_tests.cpp": "da7e83404d42123f349941dc635748aa56f2c7e3fc6ea93e33be3dec29e8c1fa",
+      "src/capture/tests/resource_data_tests.cpp": "fb7a04682c99cb7450612e653eab82852b4a5d34265beab76d2d614e36d85e71",
+      "src/capture/tests/swap_chain_probe.cpp": "2b68b8133a36d0851655b3e3918a0472586ad2ed0012ca1a1526f149e4391fff",
+      "src/capture/tests/update_box_tests.cpp": "833e5b686d551940b6ac9b26013c96099495c8eb82546ddfb245526503b5558b",
+      "src/capture/tests/update_layout_tests.cpp": "4b3643fb45fc5054e675bb787265509b6e241e141bb10f5ce6b75a5b57bc59a9",
+      "src/capture/tests/update_tests.cpp": "f6c8bf3f7e2a3fab0740d9efd66ddbf18bab3f565e2f6031eb4f1b56e677f8ef"
+    },
+    "binary_sha256": {
+      "FloraCapture.exe": "54716d89fd027999b0d3cb9500f90a50f3f3dab23e783ab3832558cb7f0a636c",
+      "FloraCaptureRuntime.dll": "228c3d323386c04f899efbda773cdb277477e07e38d793922ea3a8525127d49b",
+      "FloraCaptureHudLiveTarget.exe": "e4df6c8b62162c1718156179763f011efe6fd63004eaabb69dff5e004230d5be"
+    },
+    "retained_failures": [
+      "Typed UNORM clone rejected GF2 sRGB view with E_INVALIDARG; typeless storage plus native descriptor validation fixed it",
+      "Main scene HUD initially skipped unrelated buffer mappings; isolated copy-only path now permits buffer maps and tests their lifetime",
+      "Partial fixture first failed compilation because dxgi1_2.h was missing; corrected and rerun",
+      "Native private copies needed predicate isolation; both predicate values and exact restore now tested"
+    ],
+    "full_ctest_sha256": "a7838b523c97537f3ca26ca19c086bc807c48e73e810972dff9978697fd45621",
+    "implementation_commit": "179b3597eac0a1a2250b5909464790ef7c1b0bd8",
+    "independent_package": {
+      "path": "artifacts/capture-hud-isolated-package",
+      "system_only_path": true,
+      "no_forbidden_target_modules": true,
+      "oracle_fixture_added_for_test_only": true,
+      "manifest_sha256": "4d429d34f00782dbbf28c1bcd632ef122e71b62037813e033fb6572997f2b3b7",
+      "runtime_sha256": "228c3d323386c04f899efbda773cdb277477e07e38d793922ea3a8525127d49b",
+      "frames": 3,
+      "checks": 82,
+      "exit": {
+        "exact_retained_pixels": true,
+        "frames": 22,
+        "mode": "exclusive"
+      },
+      "validation_sha256": "1a2b4eecef4fff0772adc04bc4dde720187bca2ceff7cd490c2c29dc3eedcf15",
+      "status_sha256": "1e6d695bf76f298cdd6a4103b2031c8b80a7ba6809269dc2e3d427293490e9e1",
+      "clean_archive_rebuild_this_revision": false
+    }
+  }
 }

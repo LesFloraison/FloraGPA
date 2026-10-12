@@ -3860,14 +3860,14 @@
   ],
   "independent_capture": {
     "hud": {
-      "status": "partial_runtime_integration",
-      "multi_buffer_progress": "CleanBufferRing native storage primitive passes ten hardware presentation profiles, 240 decorated frames and 360 retained-slot exact comparisons with no Debug Layer warning/error. Not yet wired into runtime; COM/resource identity, Resize references, Present unbinding and concurrency integration remain required before GF2 HUD can be enabled. See CAPTURE_HUD.md.",
-      "presentation_identity_progress": "PresentationResource maps native public identity to clean GPU storage. Hardware test verifies QI/GetResource/context getters, DXGI usage, clean snapshot bytes, canonical metadata, native read-only view rejection and indirect native Resize references. Swap-chain activation, synchronized registration transitions, Present unbinding and capture boundary integration remain pending; no new GF2 acceptance claim.",
-      "present_binding_progress": "Native-only PresentBindings matches 192 native/facade hardware cases including six-stage SRVs, RTVs, CS/OM UAVs, counters, view identities, HRESULTs and Debug Layer diagnostics. Real DO_NOT_SEQUENCE extends clean-storage comparisons to sixteen profiles / 384 decorated frames / 600 retained-slot comparisons. Automatic runtime activation, serialized Resize/capture boundaries and GF2 visible HUD remain pending.",
+      "status": "partial_validation",
+      "multi_buffer_progress": "Automatic clean presentation storage enabled for guarded single-sample RGBA8/BGRA8 blt and flip profiles. Five injected profiles including monitor-sized borderless and exclusive produce 15 files / 410 dual-player checks, exact retained application bytes and no HUD commands/resources.",
+      "presentation_identity_progress": "Native public identity, DXGI usage and view restrictions remain intact. Typeless private storage preserves native sRGB/default view behavior and captured UNORM descriptors. Resize detaches aliases and reattaches on failure; success starts a fresh generation.",
+      "present_binding_progress": "192 native/facade pairs preserve surviving view identities, UAV counters, native HRESULT and diagnostics. Context gate integrates Present/capture; private copies preserve exact predicate identity/value. Broader concurrent/external-interface stress remains pending.",
       "evidence": "docs/CAPTURE_HUD.md",
       "rendering_accepted": false,
-      "blocker": "Multi-buffer Present rotates storage behind stable COM identities; submitted buffers are read-only and cannot be restored by the naive copy-back algorithm. GF2 HUD drawing remains safely skipped; raw-input-only keys and general concurrency/DPI/borderless/failure coverage remain incomplete.",
-      "validation": "Single-buffer DISCARD/SEQUENTIAL retained pixels pass windowed/exclusive tests. 57 capture-only and 60 selected full-profile CTests, 12 Qt cases, three packaged captures / 82 exact dual-player, preview, resource/shader and Draw-zero checks pass. GF2 hotkey start-screen capture replays exactly; main MSAA refusal publishes no file. See docs/capture-hud-evidence.json."
+      "blocker": "Broader DPI, raw-input-only keys, native long-hold/focus, concurrent-context and device-loss/failure matrix remain unverified. This scoped HUD progress does not complete formal GF2 capture acceptance.",
+      "validation": "61 capture-only CTests pass; final affected 7/7 pass. Five injected profiles / 15 clean captures / 410 exact dual-player checks. GF2 visibly displays HUD, hotkey start capture and preview match both players; main MSAA refusal is visible, Hidden still accepts requests, disconnect removes HUD/hooks. 64 selected full-profile CTests pass, including 12 Qt cases. Final independent package with system-only PATH passes exclusive three-frame capture / 82 checks and module audit. Implementation 179b359; see capture-hud-evidence.json."
     },
     "status": "partial",
     "profile": "GPA 2025 R1 legacy DX11 / IGPA v3",

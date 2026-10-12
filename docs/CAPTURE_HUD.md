@@ -1,5 +1,8 @@
 # Native capture HUD
 
+Current integration work is described in **Runtime clean presentation storage**
+below. Earlier sections retain their original component-only scope and evidence.
+
 Implementation branch: `feature/dx11-capture`. This work is separate from
 legacy migration parity and the six-frame GF2 acceptance. Delivery is incomplete.
 
@@ -104,12 +107,13 @@ recording and deferred history. Restore failure disables subsequent capture and
 fails the current presentation transaction without replacing the application's
 HRESULT or LastError. No backbuffer reference survives the Present transaction.
 
-Runtime drawing currently requires `D3D11_CREATE_DEVICE_SINGLETHREADED`, tracked
-interfaces, no active query/predicate and no mapped resources. Other concurrency
-models skip before drawing. Supported single-buffer blt presentation also works
-in the scoped exclusive-fullscreen component test. The flip/multi-buffer gap
-remains unresolved; GF2 therefore deliberately displays no HUD in this version.
-This is a partial implementation, not the requested complete delivery.
+The original single-buffer fallback requires `D3D11_CREATE_DEVICE_SINGLETHREADED`.
+Clean presentation storage now enables supported multi-buffer chains and serializes
+wrapped context access; see the integration section below. Active queries,
+predicates, external/texture mappings and untracked interfaces still skip HUD.
+Outstanding buffer maps are allowed only in the isolated copy-only path, which
+does not bind or access those buffers. Broader concurrency and failure coverage
+remain incomplete.
 
 Protocol **v3** rejects older manifests and requests. Launch accepts:
 
@@ -143,7 +147,7 @@ Presents contribute to FPS. Saved filenames last four seconds; errors last eight
 Request identity distinguishes repeated identical failures. Full request/error
 details remain in CLI status and the Qt task log.
 
-## Integration evidence
+## Earlier single-buffer integration evidence
 
 * Complete capture-only/full builds; **57/57** capture-only and **60/60** selected
   full-profile CTests pass, including **12 Qt cases**, no skips. Logs:
@@ -179,11 +183,11 @@ products, screenshots, captures and raw Ghidra output are not committed.
 
 ## Outstanding gates
 
-Multi-buffer/flip pixel restoration, general concurrency isolation, raw-input-only
-hotkeys, explicit borderless and DPI/resolution matrix, native long-hold/focus
-stress, active-query/hidden-state failure matrix, actual driver Present failures,
-and GF2 visible HUD acceptance. The successful single-buffer experiment cannot
-be extrapolated to read-only rotated buffers. Formal GF2 acceptance remains 0/6.
+General concurrent-context stress, raw-input-only hotkeys, the broader DPI and
+resolution matrix, native long-hold/focus stress, active-query/hidden-state failure
+matrix and actual driver failure/device-loss cases remain open. Multi-buffer,
+borderless and exclusive integration evidence is recorded below and does not
+establish those broader cases. Formal GF2 acceptance remains 0/6.
 
 ## Clean presentation storage investigation
 
@@ -298,3 +302,90 @@ cases passed. OCCLUDED is never accepted as successful presentation.
 These are component checks, not new GF2, exclusive-fullscreen facade, capture
 file or runtime concurrency acceptance. Automatic activation and capture/Resize
 transactions remain pending. Replay and shared format are unchanged.
+
+## Runtime clean presentation storage
+
+`PresentationStorage` now connects the tested clean-buffer and binding components
+to wrapped swap chains. Application GPU operands resolve to private clean storage,
+while public COM identities, descriptors and DXGI usage remain native. Capture
+freezes that clean resource before decorating the native presentation surface.
+After the real Present, surviving bindings are translated back and logical clean
+contents advance only on a successful sequencing Present. The newly writable
+native slot receives its clean contents before the next capture boundary. The
+submitted physical buffer is never assumed to be the subsequent buffer zero.
+
+Context calls and Present share a recursive exclusion gate; alias changes use a
+separate gate so unrelated CPU device creation can continue while native Present
+waits on the window thread. Resize drops aliases and native buffer references
+before DXGI. Failure reattaches the prior clean generation; success allocates a
+new generation even at unchanged dimensions. Hidden/disconnected sessions retain
+the forwarding storage needed by existing views until their lifecycle permits
+release, with no HUD or keyboard observer after disconnect.
+
+GF2 exposed a required DXGI view rule: a typed UNORM swap buffer accepts an sRGB
+RTV, but an ordinary typed UNORM clone rejects it with `E_INVALIDARG`. Clean RGBA8
+and BGRA8 textures therefore use the corresponding typeless storage. View creation
+first validates against the original resource; null descriptions are resolved from
+a temporary native view to preserve DXGI default typed views. Public descriptors
+and captured snapshot formats retain the original UNORM type. RGBA/BGRA Debug
+Layer tests compare native sRGB clear bytes, descriptors, validation-only calls,
+read-only restrictions, identity, mappings and Resize lifetimes. Earlier black
+GF2 runs and the failed view HRESULTs remain in ignored artifacts.
+
+The final injected retained-scene experiment covers two-buffer blt, two/three-
+buffer flip, monitor-sized borderless and exclusive fullscreen. Each produces
+three captures; all **15 files / 410 checks** pass both players, exact preview and
+resource comparisons, shader/resource inventory and Draw-zero negative controls.
+Application exit readbacks are exact in all five sessions. The four windowed
+profiles additionally verify retained-reference Resize rejection, TEST, real
+invalid-interval Present failure, partial Present1 and same-size Resize, reading
+the untouched HUD region after each step. Exclusive fullscreen is queried on
+every frame. This does not establish device-removal or arbitrary driver failures.
+
+Reproduce with `tools/validate_capture_hud_session.py` followed by
+`tools/validate_capture_hud.py` (use `--flip` except for blt). Evidence is under
+`artifacts/capture-hud-final-storage-{blt,flip,flip3,borderless,exclusive}`.
+The native application fixture has no Python dependency; these scripts are
+development orchestration and comparison tools. Earlier longer runtime sessions
+also retain exact readbacks and three-file dual-player results, but predate the
+sRGB correction and are not substituted for final-code checks.
+
+Private presentation copies also preserve the application's exact predication
+binding and value. DX11 predicates affect CopyResource, so internal copies run
+with predication temporarily disabled under the context gate and restore it
+before native Present/application calls. The predicate query is never polled or
+modified by production code. The native clean-ring test alternates both predicate
+values, proves that every private copy executes, and checks the same predicate
+identity/value afterward. HUD pixels remain skipped when a predicate is bound.
+See [SetPredication](https://learn.microsoft.com/en-us/windows/win32/api/d3d11/nf-d3d11-id3d11devicecontext-setpredication).
+
+GF2 now shows the HUD on both the start screen and the main scene. A fresh
+Ctrl+Shift+C start-screen capture executes 22 application Draws in both players;
+both RGBA outputs, final captured backbuffer and preview are exactly equal, and
+the inspected replay image has no HUD. Main-scene capture shows a failure and
+reports unsupported MSAA without publishing a second file. Detailed/Hidden/Compact
+cycling works; capture while Hidden still requests a frame (the equipment scene
+instead refuses its pre-existing Map/Unmap boundary gap). Disconnect removes the
+HUD and all input hooks while the game continues, followed by normal game exit.
+Evidence: `artifacts/capture-hud-final-gf2`, plus the earlier sRGB diagnostic run
+`artifacts/capture-hud-storage-gf2-srgb`. These are HUD checks, **not** formal GF2
+six-frame acceptance. The last two local refinements shorten failure messages and
+protect private copies from active predicates; the GF2 screenshots predate those
+refinements, which have their own focused native tests.
+
+Implementation commit: `179b359` (`Render an isolated DX11 capture HUD`). Complete
+capture-only/full builds pass. Capture-only regression is **61/61** before the
+final predicate/message refinements, with **7/7** affected tests rerun afterward;
+the final full build passes **64/64** selected CTests, including **12 Qt cases**.
+All GPU work is serial. Replay and shared format are unchanged.
+
+The resulting standalone package also runs with only Windows system directories
+in PATH. Its exclusive-fullscreen session produces three additional files and
+passes **82** exact dual-player/preview/inventory/Draw-zero checks, with clean
+application bytes at exit and no Qt, Replay/Core, GPA, RenderDoc or Python modules
+in the target. The native oracle executable was added only for this packaging
+test. Package evidence is `artifacts/capture-hud-isolated-package-check`; the
+working-build package manifest is hashed in `capture-hud-evidence.json`. A fresh
+Git-archive rebuild was not repeated. Broader outstanding gates above remain
+unaccepted; this evidence does not turn migration parity or formal GF2 capture
+acceptance into a completed milestone.
