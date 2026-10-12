@@ -8,16 +8,16 @@ legacy migration parity and the six-frame GF2 acceptance. Delivery is incomplete
 `FloraCaptureHud` owns mode, configurable hotkey validation, foreground/rising-edge
 input decisions, monotonic per-swap FPS samples and expiring messages. It has no
 dependency on Qt, Replay, Core, the file format, capture recording or GPA.
-Runtime composition will connect this model to presentation and capture control.
+Runtime composition connects this model to presentation and capture control.
 
-IPC and future input handling share `submit_capture_request`: one busy check,
+IPC and input handling share `submit_capture_request`: one busy check,
 capability/foreground selection, UUID validation, output naming and arm operation.
 Disconnect permanently disables the service while existing wrappers keep forwarding.
 
 Foundation verification: `capture_hud_model`, `capture_boundaries`,
 `capture_controller` and `capture_bootstrap` pass in the capture-only Release build.
 The existing injected controller matrix still runs through the shared request service.
-No HUD is drawn by this foundation change.
+The foundation commit alone draws no HUD; integration is described below.
 
 ## Native pixel component
 
@@ -93,9 +93,94 @@ Original binaries, fonts and shaders are not product dependencies or copied asse
 The [Intel HUD reference](https://www.intel.com/content/www/us/en/docs/gpa/user-guide/2025-1/heads-up-display-hud-ui-reference.html)
 describes the default mode/capture shortcuts and FPS timing.
 
+## Runtime and controls (limited profile)
+
+`HudDraw` composes the component inside Capture Runtime: input requests are
+consumed before the existing capture boundary, the clean frame is frozen before
+HUD work, the original Present/Present1 receives unchanged arguments, and the
+region is restored before `capture_after_present`. Native-only interfaces under
+`NativeCall` exclude private textures/copies from object registration, command
+recording and deferred history. Restore failure disables subsequent capture and
+fails the current presentation transaction without replacing the application's
+HRESULT or LastError. No backbuffer reference survives the Present transaction.
+
+Runtime drawing currently requires `D3D11_CREATE_DEVICE_SINGLETHREADED`, tracked
+interfaces, no active query/predicate and no mapped resources. Other concurrency
+models skip before drawing. Supported single-buffer blt presentation also works
+in the scoped exclusive-fullscreen component test. The flip/multi-buffer gap
+remains unresolved; GF2 therefore deliberately displays no HUD in this version.
+This is a partial implementation, not the requested complete delivery.
+
+Protocol **v3** rejects older manifests and requests. Launch accepts:
+
+```
+--hud compact|detailed|off
+--hud-hotkey Ctrl+F1|off
+--capture-hotkey Ctrl+Shift+C|off
+```
+
+Hotkeys accept Ctrl/Shift/Alt with A–Z, 0–9 or F1–F24. Invalid/repeated components
+and duplicate bindings reject before creating an output directory or launching
+the target. Qt has a collapsed HUD settings section using the same async CLI.
+`select --session SESSION_JSON --swap-chain ID` sets the hotkey's explicit target;
+ID 0 restores automatic unique-foreground selection. The Qt swap selector sends
+this command. It does not infer an arbitrary swap chain.
+
+A target-thread `WH_GETMESSAGE` observer records non-repeat keyboard messages
+from the foreground target process and always calls the next hook without
+modifying the message. Normal Present consumes those requests; TEST does not.
+The control worker alone performs UUID generation, selection, busy checking and
+arming; the message hook performs no GPU or disk work. Disconnect removes all
+input hooks, stops the worker/HUD and leaves COM forwarding active.
+Raw-input-only keyboard registrations are **not supported yet**. The initial
+Present-only polling approach missed short synthetic presses; the actual native
+message path was then verified with the same short key presses. Pure polling
+edge tests are not evidence of native key-repeat/focus acceptance.
+
+Status reports mode, per-swap actual visibility/skips, measured FPS, input profile,
+selected swap, request outcome and expiring messages. Only successful non-TEST
+Presents contribute to FPS. Saved filenames last four seconds; errors last eight.
+Request identity distinguishes repeated identical failures. Full request/error
+details remain in CLI status and the Qt task log.
+
+## Integration evidence
+
+* Complete capture-only/full builds; **57/57** capture-only and **60/60** selected
+  full-profile CTests pass, including **12 Qt cases**, no skips. Logs:
+  `artifacts/capture-hud-frozen-*-build.log`, `capture-hud-all-capture-tests.log`,
+  `capture-hud-full-tests.log`. Replay and shared format are unchanged, so no new
+  legacy golden-frame claim is made.
+* Native screen inspection verifies compact/detailed/hidden modes, measured FPS,
+  adapter ellipsis, capture via Ctrl+Shift+C, and capture while hidden. The test
+  application retains every pixel beneath the HUD; final reads after 8,605 and
+  7,506 frames match the CPU oracle exactly. Three initial Update-only captures
+  execute exactly in both players. These exploratory files remain ignored.
+* The final standalone package runs with system-only PATH. Three consecutive
+  files from `FloraCaptureHudLiveTarget` pass **82** serial checks: both players,
+  exact clean preview/initial retained area/final reference, one application
+  texture, two application shaders, no HUD buffers or extra Copy/Draw events,
+  shader export, and three Draw-zero controls. Zeroing only the application's
+  Draw changes the last output pixel in both players while retaining the original
+  preview/reference. Final application bytes after 803 frames are exact.
+  Evidence: `artifacts/capture-hud-final-20261013/validation`, `module-audit.json`;
+  reproducible checker: `tools/validate_capture_hud.py`. No GPA, Qt, Replay, Core,
+  RenderDoc or Python modules occur in the capture target inventory.
+* Fresh GF2 launch: the hotkey produces a start-screen frame with 22 Draws that
+  executes identically in both players and matches its captured reference. Main
+  scene hotkey capture explicitly refuses MSAA sample preservation and publishes
+  no additional file. Disconnect removes the input hook; the game continues and
+  then closes normally. The game also receives the shortcut's C key, opening its
+  equipment UI, as required by the non-consuming input policy. HUD rendering is
+  skipped with `Multi-buffer HUD pixel restoration is unverified`; this is **not**
+  GF2 HUD acceptance. Evidence: `artifacts/capture-hud-gf2-20261013`.
+
+Hashes and scoped outcomes are recorded in `capture-hud-evidence.json`. Build
+products, screenshots, captures and raw Ghidra output are not committed.
+
 ## Outstanding gates
 
-Runtime integration, protocol/configuration and Qt controls; real input and visual
-verification; captured file inventory and dual-player isolation; multi-buffer,
-broader concurrency and actual failed-Present isolation; GF2 start-screen HUD
-capture and main-scene MSAA refusal. Formal GF2 acceptance remains 0/6.
+Multi-buffer/flip pixel restoration, general concurrency isolation, raw-input-only
+hotkeys, explicit borderless and DPI/resolution matrix, native long-hold/focus
+stress, active-query/hidden-state failure matrix, actual driver Present failures,
+and GF2 visible HUD acceptance. The successful single-buffer experiment cannot
+be extrapolated to read-only rotated buffers. Formal GF2 acceptance remains 0/6.

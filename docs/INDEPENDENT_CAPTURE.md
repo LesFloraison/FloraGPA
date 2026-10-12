@@ -8,8 +8,15 @@ only completed file paths into replay. The full planned release, original GUI
 inspection and GF2 six-frame gate remain incomplete. GF2 passes its two-buffer
 FLIP_SEQUENTIAL / ALLOW_TEARING boundary and mapped writes. Limited pre-frame
 EVENT observations now serialize; in-frame successful completion still rejects.
-Three new GF2 startup captures replay exactly, but game-cache access failures
-leave them black, so they do not establish scene acceptance.
+The elevated continuation resolved game-cache access. Colored GF2 start-screen
+preflights replay exactly; the main scene still refuses MSAA sample preservation,
+and formal scene acceptance remains 0/6.
+
+Capture HUD work is tracked separately in [CAPTURE_HUD.md](CAPTURE_HUD.md).
+Protocol v3 adds configurable HUD/hotkeys and Qt settings. Drawing is currently
+limited to guarded single-buffer blt devices; flip/multi-buffer chains (including
+GF2) skip HUD because pixel isolation is not yet established. This limitation
+does not disable the in-game capture shortcut or expand capture format support.
 
 ## Architectural contract
 

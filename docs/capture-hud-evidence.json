@@ -1,0 +1,84 @@
+{
+  "schema": 1,
+  "date": "2026-10-13",
+  "branch": "feature/dx11-capture",
+  "tested_source_commit": "c0d33b3",
+  "delivery": "partial; required multi-buffer and GF2 visible HUD gates remain unaccepted",
+  "protocol": 3,
+  "profile": "Native single-buffer DISCARD/SEQUENTIAL, single-sample RGBA8/BGRA8, SINGLETHREADED device, no active query/predicate/mapping or interface gaps",
+  "comparison": "Exact integer resource and RGBA bytes; no relaxed thresholds",
+  "tests": {
+    "capture_only_ctest": 57,
+    "selected_full_ctest": 60,
+    "qt_cases": 12,
+    "failures": 0,
+    "gpu_execution": "serial",
+    "windowed_component_frames": 24,
+    "exclusive_component_frames": 24,
+    "exclusive_scope": "Single-buffer DISCARD/SEQUENTIAL; GetFullscreenState checked on every frame; foreground-dependent initial failures retained",
+    "packaged_frames": 3,
+    "packaged_checks": 82,
+    "packaged_checks_passed": true,
+    "draw_zero_controls": 3,
+    "native_exit": {
+      "exact_retained_pixels": true,
+      "frames": 803
+    },
+    "module_audit_passed": true,
+    "source_package_rebuild": "Working-source package; clean Git archive rebuild not repeated for this revision"
+  },
+  "binary_sha256": {
+    "controller": "444e70e76af37fd9ed9bb9040cbda6801495fb915d5d55ba01e4c02b52238491",
+    "runtime": "e60e273c0a56c8a3652b760a50c091d3d4a8f984d935ee479a8e65bfd6980ffb",
+    "flora_replay": "b9f35372b0e40f86ea37a482f06d6e9f82b9a83edb26e7680048bd8dd809adeb",
+    "intel_dx11_player": "39061ff329e4a32d0c8375ce9ee15e2017bccab0593943b962a860e11723d38b",
+    "intel_shim": "cb0b99d113511cbf7ca9f949d97aa02e4a1f8f110b1f3ad3165d8a81035dee31"
+  },
+  "captures": [
+    {
+      "file": "frame-3b4ac272-4c16-4798-ac47-8b6a5370cd7b.gpa_frame",
+      "sha256": "6b9033010b482744584ccd5aa5ef6abe29ed24db1ebe63350a0db449bff565a9"
+    },
+    {
+      "file": "frame-8c4feeb7-9f45-4bbd-b9d8-3c82069f9afa.gpa_frame",
+      "sha256": "0342384de2745bb8a4654819d60aa1811cc34b03356bbbae082edaad22bd2b1e"
+    },
+    {
+      "file": "frame-f9f5ca4d-bb8b-47e7-a3f1-3f93b9fbc32f.gpa_frame",
+      "sha256": "84fd4f5baaf1454fdc4de2b80c8d37c06d65bae2dd16aaf469706b1d1a162478"
+    }
+  ],
+  "gf2": {
+    "visible_hud_accepted": false,
+    "skip": "Multi-buffer HUD pixel restoration is unverified",
+    "start_frame_sha256": "cdf08bf5cd3503a5717c68adae3e84e3264b60768ad075262b46f697641abd1b",
+    "output_rgba_sha256": "49b7c2ae7cc802cd8317569488bf1e4118427b7698a929ca6c073ad9b1d5f4b1",
+    "players_equal": true,
+    "captured_resource_equal": true,
+    "reference_pixels_used": false,
+    "draw_count": 22,
+    "original_gui_this_round": false,
+    "main_result": "Explicit MSAA sample-preserving refusal; no second file",
+    "hotkey": "Ctrl+Shift+C via target-thread keyboard messages; game also receives C",
+    "disconnect": "Input hook count zero; game continued and exited normally",
+    "formal_accepted_frames": 0,
+    "formal_required_frames": 6
+  },
+  "pending": [
+    "Multi-buffer/flip restoration and GF2 visible HUD",
+    "General concurrent-context isolation",
+    "Raw-input-only hotkeys",
+    "Explicit borderless and DPI/resolution matrix",
+    "Native long-hold/focus stress and hidden-state failure matrix",
+    "Actual driver Present failures"
+  ],
+  "artifacts": [
+    "artifacts/capture-hud-all-capture-tests.log",
+    "artifacts/capture-hud-full-tests.log",
+    "artifacts/capture-hud-pixels-exclusive-verified.log",
+    "artifacts/capture-hud-buffer-debug.json",
+    "artifacts/capture-hud-final-20261013",
+    "artifacts/capture-hud-gf2-20261013",
+    "artifacts/capture-hud-plan"
+  ]
+}
