@@ -487,3 +487,49 @@ still starts a request; disconnect during that request reaches `Cancelled`,
 removes input observers and publishes no additional file. Game rendering remains
 normal until a normal close. Evidence is under `artifacts/capture-hud-layout-gf2`.
 This remains scoped HUD evidence; formal GF2 six-frame acceptance stays **0/6**.
+
+## Native multithread lock ordering
+
+A bounded native reproducer found a real deadlock in the former global context
+gate: the application owns `ID3D11Multithread::Enter`, a second thread owns the
+capture gate while waiting inside native `Flush`, and the owner cannot make its
+next wrapped context call. The original failure exits with watchdog code 86;
+`artifacts/capture-hud-concurrency-repro.log` is retained.
+
+Context/presentation gates are now per native device. Wrapped `Enter` acquires
+that device gate before entering the native critical section; matching nested
+`Leave` releases it after native Leave. Independent devices do not hold one
+process-wide gate across application synchronization barriers. The gate registry
+retains mutexes, not GPU objects. CPU view creation, view resource getters and
+swap-chain GetBuffer acquire native protection before alias registry access so
+a thread waiting in the driver cannot block the lock owner's operand lookup.
+Present itself does not add an extended native Enter scope around a possible
+message-pump wait. Protection settings and application calls remain forwarded.
+
+The new test compares unwrapped and wrapped WARP/hardware devices with the Debug
+Layer. It covers nested owner progress, waiting Flush resumption, independent
+device progress, single-thread use with protection disabled, and eight concurrent
+view-creation/operand-copy rounds per run. The enabled-protection concurrency
+cases follow Microsoft's [ID3D11Multithread contract](https://learn.microsoft.com/en-us/windows/win32/api/d3d11_4/nn-d3d11_4-id3d11multithread).
+An exploratory disabled-protection concurrent test was invalid: the unwrapped
+Debug build itself terminates that program. Its failure is retained separately;
+it is not used as a valid concurrency requirement or counted as a pass.
+
+This fixes the reproduced lock inversion. It does not establish general
+multicontext capture support or finish the HUD concurrency/failure matrix.
+Current desktop activation is unavailable: actual Present tests report
+`DXGI_STATUS_OCCLUDED`, and the computer tool cannot activate the native input
+fixture. Present, injected HUD and GF2 regressions for this revision remain
+pending an interactive desktop. Earlier successful screenshots/captures retain
+their earlier source revision and are not relabeled as this revision's evidence.
+
+Both capture-only and full builds succeed. The selected capture-only regression
+passes **62/62 of 66 configured tests**, excluding the four desktop-dependent
+`capture_present_bindings`, `capture_hud_clean_buffers`, `capture_controller`
+and `capture_present` tests. Those four remain pending, not waived. The full
+build passes **9/9** focused tests. All four WARP/hardware native/wrapped
+concurrency cases additionally pass ten serial repetitions each (**40 runs**),
+with no Debug Layer warnings/errors in the final valid test. Logs use the
+`artifacts/capture-hud-concurrency-verified-*` and
+`artifacts/capture-hud-concurrency-repeat-tests.log` paths. No new Qt lifecycle,
+packaged injection or GF2 result is claimed for this revision.

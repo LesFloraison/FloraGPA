@@ -709,5 +709,62 @@
     },
     "runtime_sha256": "64afb8680eb56248978dd7a7ac35265ffc45e54a4fc132202f2951a3a3e6af05"
   },
-  "latest_progress": "layout_progress; initial integration commit and older scoped evidence retained"
+  "latest_progress": "concurrency_progress; interactive current-revision validation is pending; earlier source evidence remains historical",
+  "concurrency_progress": {
+    "implementation_base": "1ecbb95",
+    "status": "reproduced lock inversion repaired; interactive regression pending",
+    "original_failure": {
+      "log_sha256": "f4b7628a602a1630e21a0391a1cc97f9cd57abb0b3dba6d6d2744b60bd1c281c",
+      "watchdog_exit": 86,
+      "scope": "Native Enter owner blocked by global context gate held by foreign Flush"
+    },
+    "scope": [
+      "Per-device context and explicit Enter/Leave gates",
+      "Nested owner progress and waiting caller resumption",
+      "Independent devices progress while another device is inside Enter",
+      "Eight concurrent CPU view-creation and owner CopyResource rounds per run",
+      "Protection flags retained; disabled-protection use stays on one thread in the valid debug test"
+    ],
+    "valid_concurrency_cases": 4,
+    "serial_repeat_runs": 40,
+    "repeat_log_sha256": "f742306021ff4188b1b9ace89b70a6f4a001ae2cf4d85bf470c38a0eab8641f0",
+    "capture_selected_tests": "62/62 of 66 configured",
+    "capture_log_sha256": "7633b8f102699464277708501e350d80ea264f2f5afb29311dd2f04e9896961b",
+    "full_focused_tests": "9/9",
+    "full_log_sha256": "d1b3edd9dbf43df75ea8a3b19dc4f0c83a7fff9183d58a22b476400f1380e6c9",
+    "pending_tests": [
+      "capture_present_bindings",
+      "capture_hud_clean_buffers",
+      "capture_controller",
+      "capture_present",
+      "Injected HUD and GF2 with current runtime",
+      "Qt lifecycle and current independent package"
+    ],
+    "desktop_observations": {
+      "native_present_hresult": "0x087A0001 DXGI_STATUS_OCCLUDED",
+      "computer_use_window": 1247886,
+      "computer_use_error": "failed to activate captured window",
+      "test_fixture_pid": 16472,
+      "test_fixture_cleanup": "pending interactive desktop; only this owned focus fixture remains",
+      "user_input_requested": true
+    },
+    "retained_experiments": {
+      "all_tests_before_oracle_repair": "artifacts/capture-hud-concurrency-all-tests.log",
+      "invalid_disabled_protection_debug_native_exit": 2173,
+      "invalid_native_log_sha256": "d4277eea866558846fefeeadfae9472288e5f2cac0170c322dd4e5023cfb8fbe",
+      "note": "The exploratory disabled-protection concurrent context case violates the native threading contract; it is not counted as a valid expected-success case"
+    },
+    "source_sha256": {
+      "src/capture/api/generate.cpp": "25cf7f02d37862f441c104da167468324a7671817e54de0907c0b8ce5cdb9eb3",
+      "src/capture/runtime/objects.hpp": "1f85626eebac1321b41c78fc3e8a1cca44f32a3a1786dd2e72f357f448b4f6a9",
+      "src/capture/runtime/presentation_access.hpp": "2f3bd66d3c88a4e3683d8518ab2dcb56b78fa65ccea32c1dd947dfd830390aa3",
+      "src/capture/runtime/native_presentation_scope.hpp": "e6877351755d26f2f4cf3091d79ccee11eee76a98d8ee6b19cf90d10b5b2d8c2",
+      "src/capture/runtime/swap_chain.cpp": "e799f76470b51f0d5bf6b15230ba41ad33ca592405dac00b5138e5a6e7134bf6",
+      "src/capture/tests/hud_concurrency_tests.cpp": "05a0b7c499fd15db9450b1801b575ce17d83c31e3bd3eb624eee0c168ed8e50f"
+    },
+    "binary_sha256": {
+      "FloraCaptureRuntime.dll": "814498599cdd58d009e4161470171b67e118a09bcac67c81c6acf107f8f7276f",
+      "FloraCaptureHudConcurrencyTests.exe": "992c74df066f25763a521269f1dab2c1e3d4b7a49119e2aa98c267552e06db38"
+    }
+  }
 }

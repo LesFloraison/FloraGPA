@@ -121,14 +121,16 @@ void method(std::ostream& out, const std::string& iface, const Json& m) {
         post += "remember_shader(" + output + " ? *" + output + " : nullptr, \"" + api + "\", pShaderBytecode, BytecodeLength, pClassLinkage);\n";
     }
     out << ") override {\nconst DWORD before = GetLastError();\ntry {\n";
-    if(iface.starts_with("ID3D11DeviceContext"))out<<"PresentationLock context_access(presentation_context_mutex());\n";
+    out << "auto* target = owner_.native<" << iface << ">();\n"
+        << "if (!target) throw std::runtime_error(\"Native interface disappeared\");\n";
+    if(name.starts_with("CreateRenderTargetView") || name.starts_with("CreateShaderResourceView") || name.starts_with("CreateUnorderedAccessView") || name=="CreateDepthStencilView" || name=="GetResource")
+        out<<"NativePresentationScope native_access(target);\n";
+    if(iface.starts_with("ID3D11DeviceContext") || iface=="ID3D11Multithread")out<<"std::unique_lock<std::recursive_mutex> context_access(presentation_context_mutex(target));\n";
     // Keep operand resolution and returned view registration in one alias
     // generation, without blocking unrelated CPU-only device creation in Present.
     if(name.starts_with("CreateRenderTargetView") || name.starts_with("CreateShaderResourceView") || name.starts_with("CreateUnorderedAccessView") || name=="CreateDepthStencilView" || name=="GetResource")
         out<<"PresentationLock alias_access(presentation_alias_mutex());\n";
     out << pre
-        << "auto* target = owner_.native<" << iface << ">();\n"
-        << "if (!target) throw std::runtime_error(\"Native interface disappeared\");\n"
         << "NativeCall internal;\nSetLastError(before);\n";
     const bool presentation_view=iface.starts_with("ID3D11Device") && !iface.starts_with("ID3D11DeviceContext") &&
        (name.starts_with("CreateRenderTargetView") || name.starts_with("CreateShaderResourceView") || name.starts_with("CreateUnorderedAccessView") || name=="CreateDepthStencilView");
@@ -186,6 +188,8 @@ void method(std::ostream& out, const std::string& iface, const Json& m) {
         out << "record_external_call(\"" << api << "\");\n";
     if (result != "void") out << "auto result = ";
     out << "target->" << name << "(" << args << ");\nconst DWORD after = GetLastError();\n";
+    if(iface=="ID3D11Multithread" && name=="Enter")out<<"context_access.release(); // Match the native application's explicit critical section.\n";
+    if(iface=="ID3D11Multithread" && name=="Leave")out<<"context_access.mutex()->unlock(); // Release the matching Enter, then the recursive guard.\n";
     if(presentation_view){const std::string descriptor=parameters.at(1).at("name");out<<"if(presentation_original)presentation_view_result(presentation_original.Get(),\""<<api<<"\",presentation_validation,result,"<<descriptor<<"?UINT("<<descriptor<<"->Format):0);\n";}
     if(iface=="ID3D11DeviceContext" && name=="Map")out << "record_map_result(this, pResource, Subresource, result, pMappedResource);\n";
     if(iface=="ID3D11DeviceContext" && name=="GetData")out << "record_query_observation(this, pAsync, CommandKind::query_get_data, result, pData, DataSize, GetDataFlags);\n";
