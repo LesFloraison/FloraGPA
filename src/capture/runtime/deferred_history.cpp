@@ -27,7 +27,8 @@ SubresourceData mapped_layout(ID3D11Resource* resource,const ObjectRecord& r,UIN
 }
 }
 ObjectId DeferredBindingBuilder::object_id(IUnknown* value){
-    const auto r=object_record(value);if(!r || r->device!=device_)throw std::runtime_error("Deferred binding identity/device mismatch");return r->id;
+    const auto r=object_record(value);if(!r || r->device!=device_)throw std::runtime_error("Deferred binding identity/device mismatch");
+    charge(retain_deferred_definitions(value,device_,*existing_,definitions,budget_-result.owned_bytes));return r->id;
 }
 void record_deferred_binding_impl(ID3D11DeviceContext* context,const char* api,const void* input,void(*build)(const void*,DeferredBindingBuilder&)) noexcept{
     LastError error;
@@ -41,8 +42,8 @@ void record_deferred_binding_impl(ID3D11DeviceContext* context,const char* api,c
             if(call.api!=api || call.kind!=CommandKind::binding || call.thread!=GetCurrentThreadId() || call.binding)throw std::runtime_error("Binding observation was interleaved or omitted");
             h.binding_pending.reset();
             if(b.owned_bytes>DeferredHistory::byte_limit)throw std::runtime_error("Deferred binding byte limit exceeded");
-            DeferredBindingBuilder builder(r->device,DeferredHistory::byte_limit-b.owned_bytes);build(input,builder);
-            b.owned_bytes+=builder.result.owned_bytes;call.binding=std::move(builder.result);
+            DeferredBindingBuilder builder(r->device,DeferredHistory::byte_limit-b.owned_bytes,b.definitions);build(input,builder);
+            b.owned_bytes+=builder.result.owned_bytes;call.binding=std::move(builder.result);b.definitions.merge(builder.definitions);
         }catch(const std::exception& e){gap(b,std::string(api)+": "+e.what());}
     }catch(...){object_gap(api,__uuidof(ID3D11DeviceContext),"Deferred binding metadata unavailable");}
 }
@@ -64,6 +65,16 @@ void observe_deferred_call(ID3D11DeviceContext* context,const char* api,CommandK
         if(floats)std::copy_n(floats,4,c.floats.begin());if(integers)std::copy_n(integers,4,c.words.begin());
         if(region)c.copy_region=*region;
         try{
+            // CommandList expansion has its own unresolved provenance model.
+            // Other direct operands (Clear/Copy/Map/Update/query) need the same
+            // durable creation graph as binding arguments.
+            if(!name.ends_with("::ExecuteCommandList")){
+                if(b.owned_bytes>DeferredHistory::byte_limit)throw std::runtime_error("Deferred definition byte limit exceeded");
+                DeferredDefinitionGraph added;size_t bytes=0;
+                if(operand)bytes+=retain_deferred_definitions(operand,r->device,b.definitions,added,DeferredHistory::byte_limit-b.owned_bytes);
+                if(source)bytes+=retain_deferred_definitions(source,r->device,b.definitions,added,DeferredHistory::byte_limit-b.owned_bytes-bytes);
+                b.owned_bytes+=bytes;b.definitions.merge(added);
+            }
             if(kind==CommandKind::update_subresource){
                 if(!operand || !update || !update->data || update->flags)throw std::runtime_error("Deferred Update requires data and zero flags");
                 if(update->box){c.update_box.emplace();memcpy(c.update_box->data(),update->box,sizeof(D3D11_BOX));}

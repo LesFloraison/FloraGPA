@@ -1,5 +1,6 @@
 #pragma once
 #include "capture_model.hpp"
+#include "deferred_definitions.hpp"
 #include <cstring>
 #include <stdexcept>
 #include <type_traits>
@@ -19,6 +20,7 @@ struct DeferredBinding { std::vector<BindingArgument> arguments; size_t owned_by
 class DeferredBindingBuilder {
     ObjectId device_;
     size_t budget_;
+    const DeferredDefinitionGraph* existing_;
     ObjectId object_id(IUnknown*);
     void charge(size_t bytes){if(bytes>budget_-result.owned_bytes)throw std::runtime_error("Deferred binding byte limit exceeded");result.owned_bytes+=bytes;}
     BindingArgument& add(const char* name,BindingArgumentKind kind,UINT count,UINT size,bool present,bool ignored){
@@ -26,7 +28,8 @@ class DeferredBindingBuilder {
     }
 public:
     DeferredBinding result;
-    DeferredBindingBuilder(ObjectId device,size_t budget):device_(device),budget_(budget){}
+    DeferredDefinitionGraph definitions;
+    DeferredBindingBuilder(ObjectId device,size_t budget,const DeferredDefinitionGraph& existing):device_(device),budget_(budget),existing_(&existing){}
     template<class T> void value(const char* name,const T& v,bool ignored=false){
         static_assert(std::is_trivially_copyable_v<T> && !std::is_pointer_v<T>);
         auto& a=add(name,BindingArgumentKind::value,1,sizeof(T),true,ignored);charge(sizeof(T));a.data.resize(sizeof(T));memcpy(a.data.data(),&v,sizeof(T));

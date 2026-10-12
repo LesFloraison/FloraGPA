@@ -9,7 +9,7 @@
     "B": "native launch/control and capture-only package validated",
     "C": "partial: persistent native identity, descriptor graph and owned buffer/texture/shader/input-layout/SO creation metadata validated; other creation paths pending",
     "D": "partial: startup-injected blit/flip/tearing capture with dynamic mapped constants; dual-player execution verified on self-owned targets",
-    "E": "partial: initial resources, immediate Map/Unmap, whole/region BC1-5 copies, zero-flag Updates and scoped EVENT observations verified; deferred histories own Map and binding inputs; effective state/hazards, deferred encoding, successful in-frame waits and hidden states pending",
+    "E": "partial: immediate resource/update/copy/EVENT profiles verified; deferred histories own Map/binding inputs and durable creation graphs; execution-time contents, effective state/hazards, deferred encoding and remaining hidden states pending",
     "F": "partial: native CLI and asynchronous Qt capture/cancel/disconnect/completed-file opening tested; full profile/deployment acceptance pending",
     "G": "pending: no six-frame GF2 or original GUI capture acceptance"
   },
@@ -1069,5 +1069,73 @@
       "Original GUI/adapter and six GF2 scene frames"
     ],
     "evidence": "artifacts/capture-deferred-bindings-validation.json"
+  },
+  "deferred_definitions": {
+    "status": "Durable creation graphs; execution-time resource contents/state and deferred encoding remain pending",
+    "retained_data": [
+      "Descriptors and stable IDs",
+      "View-resource and child-device edges",
+      "Shader/input-layout DXBC",
+      "Input/SO semantic strings and strides",
+      "Original buffer/texture creation data"
+    ],
+    "ownership": "Independent CPU copies; no COM references or live registry records; deduplicated within each immutable list",
+    "object_limit": 8192,
+    "payload_byte_limit": 67108864,
+    "atomic_dependency_merge": true,
+    "source_devices": [
+      "WARP",
+      "hardware"
+    ],
+    "recreation_device": "Fresh unwrapped WARP device after all source COM objects die",
+    "recreated_fixture": [
+      "Buffers",
+      "Texture2D",
+      "RTV/SRV/UAV",
+      "VS/PS/CS",
+      "Unused SO geometry shader",
+      "Input layout",
+      "Sampler/blend/depth-stencil/rasterizer states",
+      "Device metadata root"
+    ],
+    "independent_oracles": [
+      "Initial recreated texture is blue",
+      "Source Draw is green after a GPU constant-buffer update",
+      "Recreated Draw is red from original creation bytes",
+      "Both compute outputs are 18/19/20/21",
+      "Every graph node recreated and every edge resolved",
+      "Mutated caller semantics and source metadata do not alter frozen copies"
+    ],
+    "guards": [
+      "Duplicate definitions cost no additional bytes",
+      "Late dependency-budget failure commits no partial graph",
+      "Cached/uncached device mismatch",
+      "8192-object capacity",
+      "Unclassified/class-linkage creation refusal"
+    ],
+    "debug_warnings_or_errors": 0,
+    "retained_failure": "SO fixture shader compilation lacked an output semantic-bearing structure; corrected before final validation",
+    "capture_only_ctest": 50,
+    "full_profile_ctest": 52,
+    "full_profile_scope": "48 independent capture suites, two existing structure suites and two checked-format suites",
+    "qt_cases": 11,
+    "qt_skipped": 0,
+    "full_application_build": true,
+    "injected_launches": 23,
+    "injected_files": 115,
+    "injected_checks": 737,
+    "original_player_reports": 115,
+    "original_player_sha256": "39061ff329e4a32d0c8375ce9ee15e2017bccab0593943b962a860e11723d38b",
+    "accepted_deferred_files": 0,
+    "replay_encoder_and_format_sources": "unchanged",
+    "pending": [
+      "Class-instance/linkage and nested CommandList creation graphs",
+      "Effective binding/hazard reconstruction and inherited state",
+      "Execution-time GPU snapshots, predicates and hidden counters",
+      "Repeated/nested-list lowering and deferred file encoding",
+      "Current revision source-package proof; latest clean proof remains c57bd39",
+      "Original GUI/adapter and six GF2 scene frames"
+    ],
+    "evidence": "artifacts/capture-deferred-definitions-validation.json"
   }
 }

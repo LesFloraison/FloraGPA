@@ -1721,3 +1721,55 @@ exercise deferred encoding. Encoder, replay and shared-format sources are
 unchanged; no new golden run is claimed. The latest clean source-package proof
 covers `c57bd39`; the binding revision's package, original GUI/adapter and GF2
 scene gates remain pending. Accepted GF2 scene frames remain **0/6**.
+
+## Durable deferred creation graphs
+
+Deferred binding arguments and direct Clear/Copy/Map/Update/query operands now
+retain independent creation definitions. A native-only traversal closes view
+resource and child device edges while the application object is still valid.
+The journal owns descriptor bytes, shader/input-layout DXBC, semantic strings,
+stream-output declarations/strides and original resource creation data. It owns
+neither native COM objects nor live registry records. IDs are deduplicated within
+the batch; successful Finish moves the complete graph into the immutable list.
+Later metadata mutation or native destruction cannot alter that graph.
+
+Definition bytes count toward the existing 64 MiB journal payload budget, with
+an additional 8,192-object limit. New dependencies are staged before merging, so
+budget, device or unsupported-creation failures do not publish a partial graph.
+Cached identities still validate the expected device. Missing shader/layout
+creation evidence, unclassified objects and linked shaders fail explicitly;
+class-instance/linkage reconstruction and nested CommandList graphs remain
+pending. Traversal uses scoped native identity/device/resource getters, without
+GPU snapshots, pipeline changes, replay helpers or GPA modules.
+
+The new WARP/hardware fixture destroys every source COM object, then recreates
+the retained definitions on a fresh, unwrapped WARP device using CPU data only.
+It covers buffers, a Texture2D and RTV/SRV/UAV dependencies, VS/PS/CS DXBC, an
+unused geometry shader with SO declarations, input-layout semantics, sampler,
+blend, depth/stencil and rasterizer state. Every retained node is recreated and
+every device/resource edge is present. Independently expected pixels and compute
+integers validate the reconstructed objects; semantic names mutated by the
+caller and a temporarily modified source metadata blob do not change the graph.
+
+Creation data is deliberately distinguished from execution-time GPU contents.
+The reconstructed texture initially reads blue. A constant buffer was created
+red, then updated green before the source deferred Draw. Source execution draws
+green; recreation from creation definitions draws red, as independently expected.
+Both compute paths produce 18/19/20/21. This is a creation-graph oracle, not a
+complete frame replay: execution-time initial data still needs its own capture.
+
+Atomic dependency-budget failure, duplicate definitions, cached/uncached device
+mismatch, object-count overflow and unsupported class-linkage guards pass. Debug
+Layer runs on both source devices and their recreated WARP devices have no warnings
+or errors. Initial failed shader compilation is retained; the SO fixture required
+a semantic-bearing output structure, which was corrected before validation.
+
+All 50 capture-only and 52 relevant full-profile suites pass, with eleven Qt cases
+without skips and a complete application build. Existing-profile injection again
+produces 115 files in 23 launches and passes 737 serial dual-player/CPU/module
+checks. Evidence hashes are in `artifacts/capture-deferred-definitions-validation.json`.
+Encoder, replay and shared format remain unchanged; no new golden run is claimed.
+Effective state/hazards, inherited state, hidden counters, execution snapshots and
+deferred encoding remain unfinished. The latest clean source-package proof is
+`c57bd39`; current package, original GUI/adapter and GF2 scene acceptance remain
+pending. GF2 accepted scene frames remain **0/6**.

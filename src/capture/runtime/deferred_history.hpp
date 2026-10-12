@@ -26,6 +26,7 @@ struct DeferredCommandList {
     uint32_t recording_thread=0;
     bool restore_deferred_state=false,starts_default=true;
     std::vector<DeferredCall> calls;
+    DeferredDefinitionGraph definitions;
     std::vector<std::string> gaps;
     size_t owned_bytes=0;
 };
