@@ -1608,3 +1608,50 @@ Encoder, replay and shared-format sources are unchanged; no new golden run is
 claimed. The latest source-package proof still covers revision `abf5730`.
 Original GUI/adapter verification and GF2 scene acceptance remain pending at
 **0/6**; this iteration does not change the game's permissions or cache.
+
+## Deferred Map storage ownership
+
+The deferred journal now pairs Map calls with their actual HRESULT and Unmap.
+It keeps the borrowed pointer only in mutable context bookkeeping, removes it
+before native Unmap, and copies checked logical rows/slices while access is still
+valid. Immutable lists contain owned bytes, original pitches, type/flags and
+completion status. Failed Map results never inspect the output structure.
+Unfinished mappings at successful Finish, invalid pitches, mismatched threads,
+overlapping Maps and exceeded call/payload budgets produce explicit gaps and
+drop borrowed pointers. No immediate-context GPU readback is used during deferred
+compilation, and no replay or format dependency was introduced.
+
+The model follows the dynamic-resource restrictions in Microsoft's
+[deferred rendering documentation](https://learn.microsoft.com/en-us/windows/win32/direct3d11/overviews-direct3d-11-render-multi-thread-render)
+and preserves the results and pitch fields of
+[Map](https://learn.microsoft.com/en-us/windows/win32/api/d3d11/nf-d3d11-id3d11devicecontext-map).
+NO_OVERWRITE payloads are observations with an explicit unresolved-range/rename
+gap. They are not treated as full-resource writes or inferred GPU dependencies.
+Mapped write-combine memory is read only for the capture copy; its performance
+cost has not been benchmarked. Deferred frame encoding remains refused.
+
+Hardware byte oracles cover dynamic Buffer, Texture1D, Texture2D and Texture3D,
+two separately compiled DISCARD generations, B/A/A execution, native output and
+owned metadata after all source COM objects die. WARP passes Buffer and Texture1D.
+On this WARP runtime, both unwrapped and wrapped deferred Texture2D/Texture3D Map
+return zero row/depth pitch. Those cases verify explicit refusal without reading
+or guessing storage geometry; they are not successful texture captures.
+
+The initial NO_OVERWRITE fixture overwrote bytes used by its preceding whole
+CopyResource and failed the hardware oracle. Its corrected region copy reads
+only the first 48 bytes before the last 16 bytes are written, preserving the
+NO_OVERWRITE promise. The corrected native bytes and repeated execution pass on
+both devices. Original failures and WARP pitch diagnostics are retained under
+`artifacts/capture-deferred-map-*`. Separate Debug Layer runs on WARP and hardware
+report no warnings/errors. Fault tests use inaccessible sentinel addresses to
+verify failed results, byte limits, thread changes, unfinished Finish, null
+success and overlapping Map at the call limit without reading invalid storage.
+
+All 46 capture-only and 48 relevant full-profile suites pass, with eleven Qt cases
+without skips and a successful full application build. Existing-profile injected
+regression produces 115 files in 23 launches and passes 737 serial checks against
+FloraGPA, the pinned original replay kernel and independent CPU expectations.
+Evidence hashes are in `artifacts/capture-deferred-map-validation.json`.
+These files do not exercise deferred serialization. Encoder/replay/shared-format
+sources are unchanged; no new golden run is claimed. Current source-package,
+original GUI/adapter and GF2 scene acceptance remain pending; GF2 stays **0/6**.

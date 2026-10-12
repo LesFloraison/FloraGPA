@@ -1,0 +1,58 @@
+#include "deferred_history.hpp"
+#include "command_stream.hpp"
+#include "objects.hpp"
+#include <cstring>
+#include <iostream>
+#include <thread>
+#include <d3d11sdklayers.h>
+using namespace flora::capture;
+using Microsoft::WRL::ComPtr;
+namespace {
+bool debug_layer=false;
+void require(bool v,const char* why){if(!v)throw std::runtime_error(why);}
+void check(HRESULT hr){require(SUCCEEDED(hr),"Native deferred mapping fixture failed");}
+struct Fixture {
+    ComPtr<ID3D11Device> device;
+    ComPtr<ID3D11DeviceContext> immediate,deferred;
+    explicit Fixture(bool hardware){check(D3D11CreateDevice(nullptr,hardware?D3D_DRIVER_TYPE_HARDWARE:D3D_DRIVER_TYPE_WARP,nullptr,debug_layer?D3D11_CREATE_DEVICE_DEBUG:0,nullptr,0,D3D11_SDK_VERSION,&device,nullptr,&immediate));wrap_object(device.GetAddressOf(),"Map::Device");wrap_object(immediate.GetAddressOf(),"Map::Immediate");check(device->CreateDeferredContext(0,&deferred));}
+    void audit(){if(!debug_layer)return;ComPtr<ID3D11InfoQueue> info;check(device.As(&info));for(UINT64 i=0;i<info->GetNumStoredMessagesAllowedByRetrievalFilter();++i){SIZE_T length=0;check(info->GetMessage(i,nullptr,&length));std::vector<uint8_t> data(length);auto* msg=reinterpret_cast<D3D11_MESSAGE*>(data.data());check(info->GetMessage(i,msg,&length));if(msg->Severity<=D3D11_MESSAGE_SEVERITY_WARNING){std::cerr<<msg->pDescription<<std::endl;throw std::runtime_error("Deferred mapping fixture emitted Debug Layer warning/error");}}}
+    ComPtr<ID3D11Resource> create(UINT dim,bool dynamic){
+        const auto usage=dynamic?D3D11_USAGE_DYNAMIC:D3D11_USAGE_DEFAULT;const UINT cpu=dynamic?D3D11_CPU_ACCESS_WRITE:0;ComPtr<ID3D11Resource> result;
+        if(dim==1){D3D11_BUFFER_DESC d{64,usage,D3D11_BIND_VERTEX_BUFFER,cpu,0,0};ComPtr<ID3D11Buffer> p;check(device->CreateBuffer(&d,nullptr,&p));check(p.As(&result));}
+        if(dim==2){D3D11_TEXTURE1D_DESC d{7,1,1,DXGI_FORMAT_R8G8B8A8_UNORM,usage,D3D11_BIND_SHADER_RESOURCE,cpu,0};ComPtr<ID3D11Texture1D> p;check(device->CreateTexture1D(&d,nullptr,&p));check(p.As(&result));}
+        if(dim==3){D3D11_TEXTURE2D_DESC d{7,3,1,1,DXGI_FORMAT_R8G8B8A8_UNORM,{1,0},usage,D3D11_BIND_SHADER_RESOURCE,cpu,0};ComPtr<ID3D11Texture2D> p;check(device->CreateTexture2D(&d,nullptr,&p));check(p.As(&result));}
+        if(dim==4){D3D11_TEXTURE3D_DESC d{7,3,2,1,DXGI_FORMAT_R8G8B8A8_UNORM,usage,D3D11_BIND_SHADER_RESOURCE,cpu,0};ComPtr<ID3D11Texture3D> p;check(device->CreateTexture3D(&d,nullptr,&p));check(p.As(&result));}
+        return result;
+    }
+};
+std::vector<uint8_t> pattern(const SubresourceData& s,UINT seed){std::vector<uint8_t> bytes(s.slice_bytes*s.depth);for(size_t i=0;i<bytes.size();++i)bytes[i]=uint8_t((i*17+seed*31)&255);return bytes;}
+void write(const SubresourceData& s,const D3D11_MAPPED_SUBRESOURCE& mapped,const std::vector<uint8_t>& bytes){for(size_t z=0;z<s.depth;++z)for(size_t y=0;y<s.rows;++y)memcpy(static_cast<uint8_t*>(mapped.pData)+z*mapped.DepthPitch+y*mapped.RowPitch,bytes.data()+z*s.slice_bytes+y*s.row_bytes,s.row_bytes);}
+const DeferredCommandList& trace(ID3D11CommandList* list){return *object_record(list)->command_list;}
+void bytes(Fixture& f,ID3D11Resource* r,const std::vector<uint8_t>& expected){require(snapshot_resource(f.immediate.Get(),r).subresources[0].bytes==expected,"Native execution bytes differ from independent oracle");}
+void native_storage(bool hardware,UINT dim){std::cout<<"dimension="<<dim<<std::endl;Fixture f(hardware);auto source=f.create(dim,true),sink=f.create(dim,false);const auto layout=resource_layout(resource_shape(unwrap(source.Get())))[0];auto a=pattern(layout,1),b=pattern(layout,2);ComPtr<ID3D11CommandList> first,second;
+    // Compare pitches with an unwrapped native deferred context.
+    // Discard the probe's compiled work before the observed test sequence.
+    D3D11_MAPPED_SUBRESOURCE raw{};auto* native=unwrap(f.deferred.Get());check(native->Map(unwrap(source.Get()),0,D3D11_MAP_WRITE_DISCARD,0,&raw));native->Unmap(unwrap(source.Get()),0);ComPtr<ID3D11CommandList> probe;check(native->FinishCommandList(FALSE,&probe));probe.Reset();
+    if((layout.rows>1 && raw.RowPitch<layout.row_bytes) || (layout.depth>1 && raw.DepthPitch<(layout.rows-1)*raw.RowPitch+layout.row_bytes)){
+        require(!hardware && raw.RowPitch==0 && raw.DepthPitch==0,"Unexpected native layout regression");D3D11_MAPPED_SUBRESOURCE observed{};check(f.deferred->Map(source.Get(),0,D3D11_MAP_WRITE_DISCARD,0,&observed));require(observed.RowPitch==raw.RowPitch && observed.DepthPitch==raw.DepthPitch,"Wrapper changed native invalid pitches");f.deferred->Unmap(source.Get(),0);check(f.deferred->FinishCommandList(FALSE,&first));const auto& t=trace(first.Get());require(!t.gaps.empty() && t.calls[0].data.empty() && !t.calls[0].completed && object_record(f.deferred.Get())->deferred_history->mappings.empty(),"Invalid native pitches were guessed or kept live");std::cout<<"Native and wrapped invalid pitches explicitly refused: "<<raw.RowPitch<<","<<raw.DepthPitch<<std::endl;f.audit();return;
+    }
+    auto compile=[&](const std::vector<uint8_t>& data,ComPtr<ID3D11CommandList>& list){D3D11_MAPPED_SUBRESOURCE mapped{};check(f.deferred->Map(source.Get(),0,D3D11_MAP_WRITE_DISCARD,0,&mapped));std::cout<<"pitch="<<mapped.RowPitch<<" depth="<<mapped.DepthPitch<<std::endl;write(layout,mapped,data);const auto pitch=mapped.RowPitch,depth=mapped.DepthPitch;f.deferred->Unmap(source.Get(),0);require(object_record(f.deferred.Get())->deferred_history->mappings.empty(),"Unmap retained a borrowed pointer");f.deferred->CopyResource(sink.Get(),source.Get());check(f.deferred->FinishCommandList(FALSE,&list));const auto& t=trace(list.Get());for(const auto& gap:t.gaps)std::cout<<gap<<std::endl;std::cout<<"calls="<<t.calls.size()<<" bytes="<<t.calls[0].data.size()<<" expected="<<data.size()<<std::endl;require(t.gaps.empty() && t.calls.size()==3 && t.calls[0].data==data && t.calls[0].result==S_OK && t.calls[0].completed && t.calls[0].words[3]==pitch && t.calls[0].words[4]==depth,"Packed deferred Map data/result/pitches missing");};
+    compile(a,first);compile(b,second);f.immediate->ExecuteCommandList(second.Get(),FALSE);bytes(f,sink.Get(),b);f.immediate->ExecuteCommandList(first.Get(),TRUE);bytes(f,sink.Get(),a);f.immediate->ExecuteCommandList(first.Get(),FALSE);bytes(f,sink.Get(),a);
+    f.audit();auto retained=object_record(first.Get())->command_list;source.Reset();sink.Reset();first.Reset();second.Reset();f.deferred.Reset();f.immediate.Reset();f.device.Reset();require(object_status().at("active")==0 && metadata_status().at("alive")==0,"Map history retains COM objects");require(retained->calls[0].data==a,"Owned mapped data changed after object death");
+}
+void no_overwrite(bool hardware){std::cout<<"NO_OVERWRITE"<<std::endl;Fixture f(hardware);auto source=f.create(1,true),before=f.create(1,false),after=f.create(1,false);auto layout=resource_layout(resource_shape(unwrap(source.Get())))[0];auto a=pattern(layout,3),b=a;for(size_t i=48;i<64;++i)b[i]^=0xff;D3D11_MAPPED_SUBRESOURCE mapped{};check(f.deferred->Map(source.Get(),0,D3D11_MAP_WRITE_DISCARD,0,&mapped));write(layout,mapped,a);f.deferred->Unmap(source.Get(),0);std::vector<uint8_t> prior(64);f.immediate->UpdateSubresource(before.Get(),0,nullptr,prior.data(),0,0);D3D11_BOX used{0,0,0,48,1,1};f.deferred->CopySubresourceRegion(before.Get(),0,0,0,0,source.Get(),0,&used);std::copy_n(a.begin(),48,prior.begin());check(f.deferred->Map(source.Get(),0,D3D11_MAP_WRITE_NO_OVERWRITE,0,&mapped));memcpy(static_cast<uint8_t*>(mapped.pData)+48,b.data()+48,16);f.deferred->Unmap(source.Get(),0);f.deferred->CopyResource(after.Get(),source.Get());ComPtr<ID3D11CommandList> list;check(f.deferred->FinishCommandList(FALSE,&list));const auto& t=trace(list.Get());require(t.calls.size()==6 && t.calls[0].data==a && t.calls[3].data.size()==64 && !t.gaps.empty(),"NO_OVERWRITE observation or dependency gap missing");require(std::equal(b.begin()+48,b.end(),t.calls[3].data.begin()+48),"NO_OVERWRITE written bytes not owned");f.immediate->ExecuteCommandList(list.Get(),FALSE);bytes(f,before.Get(),prior);bytes(f,after.Get(),b);f.immediate->ExecuteCommandList(list.Get(),TRUE);bytes(f,before.Get(),prior);bytes(f,after.Get(),b);f.audit();}
+void faults(bool hardware){Fixture f(hardware);auto source=f.create(1,true);auto r=object_record(f.deferred.Get());
+    auto start=[&]{observe_deferred_call(f.deferred.Get(),"ID3D11DeviceContext::Map",CommandKind::map,{0,D3D11_MAP_WRITE_DISCARD,0},source.Get(),nullptr,nullptr,nullptr,nullptr,nullptr);};
+    auto finish=[&]{ComPtr<ID3D11CommandList> list;check(f.deferred->FinishCommandList(FALSE,&list));return object_record(list.Get())->command_list;};
+    // The inaccessible address proves failed results never inspect output memory.
+    start();SetLastError(0x5231);remember_deferred_map_result(f.deferred.Get(),source.Get(),0,E_FAIL,reinterpret_cast<const D3D11_MAPPED_SUBRESOURCE*>(uintptr_t(1)));require(GetLastError()==0x5231 && r->deferred_history->mappings.empty(),"Failed Map changed LastError or kept storage");auto failed=finish();require(failed->calls[0].completed && failed->calls[0].result==E_FAIL && failed->calls[0].data.empty(),"Failed Map was not retained accurately");
+    // Synthetic observations isolate cleanup guards without invalid native calls.
+    D3D11_MAPPED_SUBRESOURCE poison{reinterpret_cast<void*>(uintptr_t(1)),64,64};
+    start();remember_deferred_map_result(f.deferred.Get(),source.Get(),0,S_OK,&poison);r->deferred_history->pending.owned_bytes=DeferredHistory::byte_limit;remember_deferred_unmap(f.deferred.Get(),source.Get(),0);require(r->deferred_history->mappings.empty(),"Budget failure kept pointer");require(!finish()->gaps.empty(),"Budget refusal missing");
+    start();remember_deferred_map_result(f.deferred.Get(),source.Get(),0,S_OK,&poison);std::thread worker([&]{remember_deferred_unmap(f.deferred.Get(),source.Get(),0);});worker.join();require(r->deferred_history->mappings.empty(),"Foreign Unmap kept pointer");require(!finish()->gaps.empty(),"Foreign Unmap refusal missing");
+    start();remember_deferred_map_result(f.deferred.Get(),source.Get(),0,S_OK,&poison);auto unfinished=finish();require(r->deferred_history->mappings.empty() && !unfinished->gaps.empty() && !unfinished->calls[0].completed,"Finish read or retained unfinished mapping");
+    start();remember_deferred_map_result(f.deferred.Get(),source.Get(),0,S_OK,nullptr);require(r->deferred_history->mappings.empty() && !finish()->gaps.empty(),"Null success kept mapping");
+    start();remember_deferred_map_result(f.deferred.Get(),source.Get(),0,S_OK,&poison);r->deferred_history->pending.calls.resize(DeferredHistory::call_limit);start();require(r->deferred_history->mappings.empty(),"Overlapping Map at call limit kept stale pointer");require(!finish()->gaps.empty(),"Call limit refusal missing");f.audit();
+}
+}
+int wmain(int argc,wchar_t** argv){try{bool hardware=false;for(int i=1;i<argc;++i){hardware|=std::wstring(argv[i])==L"--hardware";debug_layer|=std::wstring(argv[i])==L"--debug";}for(UINT dim=1;dim<=4;++dim)native_storage(hardware,dim);no_overwrite(hardware);faults(hardware);require(object_status().at("active")==0 && metadata_status().at("alive")==0,"Fixture leaked native objects");std::cout<<"Deferred Map byte oracles, explicit invalid-pitch refusals, repeated execution and pointer cleanup passed\n";return 0;}catch(const std::exception& e){std::cerr<<e.what()<<'\n';return 1;}}

@@ -14,6 +14,8 @@ struct DeferredCall {
     std::optional<ResourceBox> update_box;
     std::optional<CopyRegion> copy_region;
     std::vector<uint8_t> data;
+    HRESULT result=S_OK;
+    bool completed=true;
 };
 struct DeferredCommandList {
     ObjectId context=0,device=0;
@@ -37,10 +39,21 @@ struct DeferredHistory {
     DeferredCommandList pending;
     uint64_t finishes=0,failed_finishes=0,execution_serial=0;
     std::deque<CommandListExecution> executions;
+    // Only live mappings contain borrowed pointers. Unmap removes the entry
+    // before copying; immutable command-list histories never contain pointers.
+    struct Mapping {
+        size_t command=0;
+        DWORD thread=0;
+        D3D11_MAPPED_SUBRESOURCE mapped{};
+        SubresourceData layout;
+    };
+    std::map<std::pair<ObjectId,UINT>,Mapping> mappings;
 };
 void observe_deferred_call(ID3D11DeviceContext*,const char*,CommandKind,const std::array<uint32_t,5>&,
     IUnknown*,const float*,const UINT*,IUnknown*,const UpdateSource*,const CopyRegion*) noexcept;
 void remember_deferred_finish(ID3D11DeviceContext*,HRESULT,BOOL,ID3D11CommandList*) noexcept;
+void remember_deferred_map_result(ID3D11DeviceContext*,ID3D11Resource*,UINT,HRESULT,const D3D11_MAPPED_SUBRESOURCE*) noexcept;
+void remember_deferred_unmap(ID3D11DeviceContext*,ID3D11Resource*,UINT) noexcept;
 void remember_command_list_execution(ID3D11DeviceContext*,ID3D11CommandList*,BOOL) noexcept;
 std::string command_list_gap(IUnknown*);
 }

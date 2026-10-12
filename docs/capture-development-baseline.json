@@ -9,7 +9,7 @@
     "B": "native launch/control and capture-only package validated",
     "C": "partial: persistent native identity, descriptor graph and owned buffer/texture/shader/input-layout/SO creation metadata validated; other creation paths pending",
     "D": "partial: startup-injected blit/flip/tearing capture with dynamic mapped constants; dual-player execution verified on self-owned targets",
-    "E": "partial: initial resources, Map/Unmap, whole/region BC1-5 copies, zero-flag Updates and scoped EVENT observations verified; owned deferred compilation/execution CPU histories added; deferred encoding, successful in-frame waits and hidden-state coverage pending",
+    "E": "partial: initial resources, immediate Map/Unmap, whole/region BC1-5 copies, zero-flag Updates and scoped EVENT observations verified; deferred compilation histories now own Map bytes/results; deferred state/encoding, successful in-frame waits and hidden-state coverage pending",
     "F": "partial: native CLI and asynchronous Qt capture/cancel/disconnect/completed-file opening tested; full profile/deployment acceptance pending",
     "G": "pending: no six-frame GF2 or original GUI capture acceptance"
   },
@@ -947,5 +947,61 @@
       "GF2 six scene frames and original GUI/adapter acceptance"
     ],
     "evidence": "artifacts/capture-deferred-history-validation.json"
+  },
+  "deferred_mappings": {
+    "status": "Owned deferred Map observations; CommandList frame encoding still refused",
+    "ownership": "Borrowed pointer only between successful Map and Unmap; immutable lists own logical bytes and actual HRESULT/type/flags/pitches",
+    "hardware_positive_dimensions": [
+      "Buffer",
+      "Texture1D",
+      "Texture2D",
+      "Texture3D"
+    ],
+    "warp_positive_dimensions": [
+      "Buffer",
+      "Texture1D"
+    ],
+    "warp_rejections": "Native and wrapped Texture2D/3D return zero row/depth pitches; explicit refusal without guessing layout or reading storage",
+    "native_execution": "Two DISCARD generations, B/A/A order, exact destination bytes and CPU metadata after native destruction",
+    "no_overwrite": "Valid disjoint native regions and repeated execution pass on both devices; owned byte observations carry unresolved written-range/rename gap",
+    "faults": [
+      "Failed HRESULT with inaccessible output structure",
+      "Payload budget with inaccessible storage",
+      "Foreign-thread Unmap with inaccessible storage",
+      "Successful Finish with unfinished mapping",
+      "Successful Map with null output",
+      "Overlapping Map at call limit drops stale pointer"
+    ],
+    "debug_layer_devices": [
+      "WARP",
+      "hardware"
+    ],
+    "debug_layer_warnings_or_errors": 0,
+    "retained_failures": [
+      "Initial WARP pitch refusal",
+      "Initial invalid NO_OVERWRITE fixture used a preceding whole-resource copy; corrected to a disjoint region"
+    ],
+    "capture_only_ctest": 46,
+    "full_profile_ctest": 48,
+    "full_profile_scope": "44 independent capture suites, two existing structure suites and two checked-format suites",
+    "qt_cases": 11,
+    "qt_skipped": 0,
+    "full_application_build": true,
+    "injected_launches": 23,
+    "injected_files": 115,
+    "injected_checks": 737,
+    "original_player_reports": 115,
+    "original_player_sha256": "39061ff329e4a32d0c8375ce9ee15e2017bccab0593943b962a860e11723d38b",
+    "accepted_deferred_files": 0,
+    "replay_encoder_and_format_sources": "unchanged",
+    "pending": [
+      "Deferred state shadows and initial GPU data at execution",
+      "NO_OVERWRITE written-range/rename dependencies",
+      "Repeated/nested-list lowering and deferred serialization",
+      "WARP zero-pitch texture handling beyond explicit refusal",
+      "Current revision source-package proof",
+      "Original GUI/adapter and six GF2 scene frames"
+    ],
+    "evidence": "artifacts/capture-deferred-map-validation.json"
   }
 }

@@ -331,12 +331,13 @@ void FrameRecording::reject_external(const char* api) {
     std::lock_guard lock(p.mutex);if(!p.finished)p.gap(api,"External resource mutation or synchronization is not recorded");
 }
 void record_map_result(ID3D11DeviceContext* context,ID3D11Resource* resource,UINT subresource,HRESULT result,const D3D11_MAPPED_SUBRESOURCE* mapped) noexcept {
+    remember_deferred_map_result(context,resource,subresource,result,mapped);
     auto& r=registry();if(!r.enabled.load(std::memory_order_relaxed))return;LastErrorScope error;
     try{std::shared_ptr<FrameRecording> active;{std::lock_guard lock(r.mutex);active=r.active.lock();}if(active)active->mapped(context,resource,subresource,result,mapped);}
     catch(...){object_gap("Map",__uuidof(ID3D11DeviceContext),"Map observer failed");}
 }
 void record_unmap(ID3D11DeviceContext* context,ID3D11Resource* resource,UINT subresource) noexcept {
-    observe_deferred_call(context,"ID3D11DeviceContext::Unmap",CommandKind::unmap,{subresource},resource,nullptr,nullptr,nullptr,nullptr,nullptr);
+    remember_deferred_unmap(context,resource,subresource);
     capture_context_activity();auto& r=registry();if(!r.enabled.load(std::memory_order_relaxed))return;LastErrorScope error;
     try{std::shared_ptr<FrameRecording> active;{std::lock_guard lock(r.mutex);active=r.active.lock();}if(active)active->unmap(context,resource,subresource);}
     catch(...){object_gap("Unmap",__uuidof(ID3D11DeviceContext),"Unmap observer failed");}
