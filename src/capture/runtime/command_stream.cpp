@@ -13,6 +13,13 @@ namespace {
 struct Registry {std::mutex mutex;std::weak_ptr<FrameRecording> active;std::atomic<bool> enabled=false;};
 Registry& registry(){static Registry value;return value;}
 struct LastErrorScope{DWORD value=GetLastError();~LastErrorScope(){SetLastError(value);}};
+void require_unmapped(const std::shared_ptr<ObjectRecord>& record){
+    std::lock_guard lock(record->mutex);
+    if(!record->mapped_subresources.empty()){
+        const auto [context,subresource]=*record->mapped_subresources.begin();
+        throw std::runtime_error("Command references an application-mapped resource (resource="+std::to_string(record->id)+", context="+std::to_string(context)+", subresource="+std::to_string(subresource)+")");
+    }
+}
 std::string query_gap(IUnknown* object,const char* api,const std::array<uint32_t,5>& words){
     std::string reason="Query recording is not implemented";
     auto record=object_record(object);
@@ -75,7 +82,9 @@ FrameRecording::FrameRecording(ID3D11DeviceContext* context,const RecordingOptio
     if(unwrap(context)->GetType()!=D3D11_DEVICE_CONTEXT_IMMEDIATE)throw std::runtime_error("Recording requires an immediate context");
     {std::lock_guard lock(record->mutex);if(!record->active_queries.empty())throw std::runtime_error("Recording cannot start inside an active query");}
     if(has_external_mapping())throw std::runtime_error("Recording cannot start with an active DXGI mapping");
-    if(has_external_mapping(true))throw std::runtime_error("Recording cannot start with an active resource mapping");
+    // An untouched resource may remain CPU-mapped across this frame. Each
+    // snapshot still refuses mapped dependencies, and an Unmap whose Map
+    // predates recording fails without reading an unowned pointer.
     if(object_status().at("interface_gaps").get<uint64_t>())throw std::runtime_error("Recording has prior interface capability gaps");
     impl_->context=context;impl_->context_id=record->id;impl_->options=options;
 }
@@ -156,7 +165,6 @@ void FrameRecording::observe(ID3D11DeviceContext* context,const char* api,Comman
         if(kind==CommandKind::unsupported){
             const std::string_view name=api;
             if(name.ends_with("::ExecuteCommandList")){
-                if(!p.mappings.empty())throw std::runtime_error("CommandList execution while a resource is mapped is unsupported");
                 auto list_record=object_record(operand);std::shared_ptr<const DeferredCommandList> list;
                 if(list_record){std::lock_guard guard(list_record->mutex);list=list_record->command_list;}
                 if(!list || list->device!=record->device)throw std::runtime_error("CommandList compilation metadata/device unavailable");
@@ -172,6 +180,7 @@ void FrameRecording::observe(ID3D11DeviceContext* context,const char* api,Comman
                 for(auto id:expanded.resources){
                     if(!leases || !leases->contains(id))throw std::runtime_error("CommandList resource lease missing: "+std::to_string(id));
                     auto* resource=leases->at(id).Get();if(retain(held,resource)!=id)throw std::runtime_error("CommandList resource identity changed");
+                    require_unmapped(held.objects.at(id).record);
                     if(!p.frame.initial_resources.contains(id)){
                         options.byte_limit=p.options.byte_limit-p.frame.initial_bytes-p.payload_bytes-expanded.payload_bytes;
                         auto data=snapshot_resource(context,resource,options);
@@ -188,7 +197,6 @@ void FrameRecording::observe(ID3D11DeviceContext* context,const char* api,Comman
                 throw std::runtime_error(query_gap(operand,api,words));
             throw std::runtime_error("GPU call recording is not implemented");
         }
-        if(!p.mappings.empty() && kind!=CommandKind::map)throw std::runtime_error("GPU execution while a resource is mapped is unsupported");
         if(kind==CommandKind::map && (!operand || words[1]<1 || words[1]>5 || (words[2]&~D3D11_MAP_FLAG_DO_NOT_WAIT)))throw std::runtime_error("Invalid Map arguments");
         if((kind==CommandKind::copy_resource || kind==CommandKind::copy_region) && (!operand || !source))throw std::runtime_error("CopyResource operand is missing");
         if(kind==CommandKind::copy_region && !region)throw std::runtime_error("CopySubresourceRegion coordinates missing");
@@ -197,7 +205,13 @@ void FrameRecording::observe(ID3D11DeviceContext* context,const char* api,Comman
         if(clear && !operand)throw std::runtime_error("Clear operand is missing");
         if(clear && (kind==CommandKind::clear_uav_uint?!integers:!floats))throw std::runtime_error("Clear value is missing");
         if(p.frame.commands.size()>=p.options.command_limit)throw std::runtime_error("Frame command limit exceeded");
-        auto snapshot=snapshot_context(context);snapshot.require_supported_bindings();
+        ContextSnapshot snapshot;
+        if(kind==CommandKind::map){
+            // Map touches its operand, not the currently bound graphics or
+            // compute pipeline. Other bound resources may still be mapped.
+            snapshot.bindings.context=p.context_id;snapshot.bindings.device=record->device;
+            retain(snapshot,context);ComPtr<ID3D11Device> device;unwrap(context)->GetDevice(&device);retain(snapshot,device.Get());
+        }else{snapshot=snapshot_context(context);snapshot.require_supported_bindings();}
         RecordedCommand command;command.kind=kind;command.api=api;command.sequence=p.frame.commands.size();command.words=words;
         if(kind==CommandKind::update_subresource && update->box){command.update_box.emplace();static_assert(sizeof(ResourceBox)==sizeof(D3D11_BOX));memcpy(command.update_box->data(),update->box,sizeof(D3D11_BOX));}
         if(kind==CommandKind::copy_region){command.copy_region=*region;command.completed=true;}
@@ -208,6 +222,9 @@ void FrameRecording::observe(ID3D11DeviceContext* context,const char* api,Comman
         if(kind==CommandKind::copy_resource && command.operand==command.source)throw std::runtime_error("CopyResource operands alias");
         SnapshotOptions options;options.timeout_ms=p.options.readback_timeout_ms;options.cancelled=[&p]{if(p.options.cancelled && p.options.cancelled())p.cancelled=true;return p.cancelled.load();};
         for(const auto& [id,object]:snapshot.objects){
+            // Validate on every use, even if an earlier command already saved
+            // this resource's initial data. Other mapped resources may coexist.
+            require_unmapped(object.record);
             if(object.record->kind!="device" && object.record->device!=snapshot.bindings.device)
                 throw std::runtime_error("Command operand belongs to another device");
             ComPtr<ID3D11Resource> resource;

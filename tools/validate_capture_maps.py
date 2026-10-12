@@ -12,7 +12,7 @@ def main():
         if not ok:raise AssertionError(name)
     def run(name,command):
         r=subprocess.run([str(x) for x in command],env=env,capture_output=True,timeout=90);(out/(name+'.log')).write_bytes(r.stdout+b'\n'+r.stderr);check(name,r.returncode==0)
-    for mode in ('buffer','texture','nooverwrite','buffer-negative','texture-negative','storage'):
+    for mode in ('buffer','texture','nooverwrite','buffer-negative','texture-negative','storage','interleaved'):
         frame=out/(mode+'.gpa_frame');texture=mode.startswith('texture');negative=mode.endswith('negative')
         run(mode+'-probe',[a.probe.resolve(),frame,mode])
         if mode=='nooverwrite':
@@ -45,7 +45,8 @@ def main():
         counts={'ClearRenderTargetView':1,'Draw':1 if texture else 2,'Present':1}
         if not negative:counts.update(Map=1 if texture else 2,unmap_observations=1 if texture else 2)
         if mode=='nooverwrite':counts.update(Map=3,unmap_observations=3)
-        if mode=='storage':counts.update(Map=4,unmap_observations=6,map_read_observations=2,map_read_synchronizations=2)
+        if mode in ('storage','interleaved'):counts.update(Map=4,unmap_observations=6,map_read_observations=2,map_read_synchronizations=2)
+        if mode=='interleaved':counts['ClearRenderTargetView']=5
         check(mode+'-events',native['counts']==counts)
         run(mode+'-inventory',[a.replay.resolve(),'inventory',frame,'--out',out/(mode+'-inventory')])
         inventory=json.loads((out/(mode+'-inventory/report.json')).read_text());check(mode+'-draw-inventory',inventory['draws']==(1 if texture else 2))

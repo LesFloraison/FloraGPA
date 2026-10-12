@@ -11,7 +11,7 @@
     "D": "partial: startup-injected blit/flip/tearing capture with dynamic mapped constants; dual-player execution verified on self-owned targets",
     "E": "partial: supported precompiled deferred actions expand in immediate execution order with execution-time initial GPU data and independent encoding; deferred Map/nesting/in-frame compilation, synchronization and hidden states remain pending",
     "F": "partial: native CLI and asynchronous Qt capture/cancel/disconnect/completed-file opening tested; full profile/deployment acceptance pending",
-    "G": "pending: no six-frame GF2 or original GUI capture acceptance"
+    "G": "pending: elevated GF2 start-screen preflight passes exact dual-player and original GUI checks; main scene refuses MSAA; formal accepted frames 0/6"
   },
   "checks": {
     "core_and_format_ctest": 5,
@@ -1276,5 +1276,112 @@
     "injected_deferred_files": 5,
     "accepted_deferred_files": 9,
     "original_player_reports": 128
+  },
+  "elevated_gf2_map_scope": {
+    "status": "partial; formal GF2 acceptance incomplete",
+    "administrator": true,
+    "permission_blocker_resolved": true,
+    "game_graphics_settings_changed": false,
+    "diagnostic_launches": 4,
+    "accepted_gf2_frames": 0,
+    "required_gf2_frames": 6,
+    "current_blocker": "Main scene requires MSAA sample-preserving capture and verified initialization",
+    "preflight": {
+      "scope": "Animated start screen, captured with baseline 8eea1ad; not a formal accepted scene frame",
+      "frame_sha256": "61fc593795a9fe02a2053463c6d334caccf124f86ae09c4c4d85e931db7e879f",
+      "rgba_sha256": "080045e251b46e82817935be8ac300e72f6d50ca5c4fcdc43b246a38f0bad75a",
+      "comparison": "Exact RGBA bytes against the same captured final backbuffer; zero tolerance",
+      "dimensions": [
+        2560,
+        1440
+      ],
+      "counts": {
+        "ClearDepthStencilView": 4,
+        "ClearRenderTargetView": 2,
+        "CopySubresourceRegion": 3,
+        "Draw": 1,
+        "DrawIndexed": 17,
+        "Map": 15,
+        "Present": 1,
+        "present_rtv_unbinds": 1,
+        "query_completion_unresolved": 1,
+        "query_end_observations": 1,
+        "query_metadata_records": 4,
+        "unmap_observations": 15
+      },
+      "resources": 108,
+      "draws": 18,
+      "query_notices": [
+        {
+          "event_id": "245",
+          "kind": "query_completion_not_saved",
+          "output_dependency": "not_assessed",
+          "reason": "Successful GetData has no saved query resource or End boundary; its CPU/GPU completion dependency cannot be reconstructed",
+          "resource_id": "31",
+          "severity": "warning"
+        }
+      ],
+      "original_player_sha256": "39061ff329e4a32d0c8375ce9ee15e2017bccab0593943b962a860e11723d38b",
+      "original_gui": {
+        "version": "GPA 2025 R1 25.1.1744502079",
+        "adapter": "NVIDIA GeForce RTX 3070 Laptop GPU",
+        "opened": true,
+        "api_log_events": 27,
+        "selected_event": "DrawIndexed (11)",
+        "shader": "SH:0x4, vs_4_0 DXBC, hash 0xad972429237420d4, CBV and VBV bindings visible",
+        "state": "Depth ON, ALL write mask, ALWAYS comparison; stencil OFF; rasterizer SOLID / NONE",
+        "resource": "T:0x5a SRV, 3584x2016 R8G8B8A8_UNORM_SRGB, rendered texture and histogram",
+        "final_rtv": "2560x1440 captured concert scene rendered",
+        "evidence_kind": "Observed native GUI through computer-use; images retained in task transcript",
+        "open_method": "Installed FrameAnalyzer registered file association; initial folder-dialog automation failed"
+      }
+    },
+    "map_scope": {
+      "runtime": "Per-use retained dependency checks, including cached snapshots and deferred leases; Map samples only its operand",
+      "encoder": "Independent direct/bound mapped-resource rejection with unrelated GPU work allowed",
+      "diagnostics": "Total active mappings plus at most 16 resource/context/subresource identities",
+      "remaining_guards": [
+        "Whole-resource conservative exclusion",
+        "Bound but unused resources remain conservative dependencies",
+        "Unowned pre-frame Unmap",
+        "Unfinished recorded maps",
+        "Foreign context/thread",
+        "DXGI mapping"
+      ],
+      "native_devices": [
+        "WARP",
+        "hardware"
+      ],
+      "interop_files": 7,
+      "interop_checks": 111,
+      "negative_controls": 2
+    },
+    "capture_only_ctest": 54,
+    "full_profile_selected_ctest": 57,
+    "qt_cases": 11,
+    "qt_skipped": 0,
+    "full_application_build": true,
+    "injected_launches": 24,
+    "injected_files": 120,
+    "injected_checks": 769,
+    "replay_shared_format_changed": false,
+    "new_golden_run": false,
+    "latest_clean_source_package_revision": "c57bd39",
+    "final_game_state": "Continued rendering after refusal/disconnect, then closed normally; no live process",
+    "pending": [
+      "MSAA per-sample initial state and encoding",
+      "Broader query/deferred profiles",
+      "Current clean source-package proof",
+      "Two launches, three accepted frames each, two scenes"
+    ],
+    "evidence_root": "artifacts/capture-gf2-elevated-20261012",
+    "binary_sha256": {
+      "build/capture/capture/Release/FloraCapture.exe": "21155efa6de8f0f49646c91a18e739a76dacddc9c1ed85306fbc0d43f9309cb9",
+      "build/capture/capture/Release/FloraCaptureRuntime.dll": "8e9816f43d91dceadf7a73ca274106c0b120692483938f8fbd2b85ad5d19cfe2",
+      "build/capture/capture/Release/FloraCaptureMapTests.exe": "74644af11e590919b69319f2b18304fcd14da79db87bf89a8103b94351a07207",
+      "build/vs2022/Release/FloraGPA.Cli.exe": "b9f35372b0e40f86ea37a482f06d6e9f82b9a83edb26e7680048bd8dd809adeb"
+    },
+    "evidence": "artifacts/capture-gf2-elevated-20261012/summary.json",
+    "evidence_sha256": "0f2673fa694e4ce3dc5b57055aa82ae217318a2f887ca9eea42a0bab54b2b735"
   }
 }

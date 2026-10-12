@@ -1888,3 +1888,66 @@ for the LocalCache permission blocker; the current process still reports no
 administrator membership. No game permissions were changed. The latest clean
 source-package proof remains `c57bd39`; current package proof, broader deferred
 profiles, original GUI/adapter checks and the six GF2 scene files remain pending.
+
+## Elevated GF2 preflight and mapped-resource dependencies
+
+The 2026-10-12 elevated continuation supersedes the preceding permission status.
+Administrator membership is confirmed, LocalCache initialization succeeds, and
+GF2 reaches both its animated start screen and its main scene. Four diagnostic
+launches are retained in `artifacts/capture-gf2-elevated-20261012`; they are not
+the formal two-launch, six-frame acceptance series. No game permissions or
+graphics settings were changed.
+
+The start-screen preflight file contains a colored 2560 x 1440 frame, 18 Draws,
+six Clears, three region copies and fifteen Map/Unmap pairs. Flora and the pinned
+original GPA kernel execute it and exactly reproduce its captured backbuffer:
+RGBA SHA256 `080045e251b46e82817935be8ac300e72f6d50ca5c4fcdc43b246a38f0bad75a`.
+This is a same-frame zero-tolerance comparison, not a later game screenshot.
+One existing missing-query-completion notice remains; exact pixels alone do not
+prove all query synchronization semantics.
+
+The installed GPA 2025 R1 Graphics Frame Analyzer also opens this file on
+NVIDIA GeForce RTX 3070 Laptop GPU. Its API Log shows 27 events. Selecting
+DrawIndexed event 11 exposes vertex shader SH:0x4, DXBC `vs_4_0`, constant/vertex
+bindings, depth enabled with ALWAYS/ALL, stencil disabled, and SOLID/NONE
+rasterization. Texture T:0x5a renders its 3584 x 2016 RGBA8 SRGB contents and
+histogram. The final render target displays the captured scene. These are
+actual GUI observations for this file, not GUI acceptance of the remaining
+profiles. The analyzer's initial folder dialog could not be positioned reliably
+by automation; its registered file-open command successfully opened the file.
+
+Main-scene attempts exposed overly broad mapping guards. The runtime now allows
+an untouched resource to remain mapped across a captured frame. It checks each
+retained immediate or deferred dependency on every use, including when initial
+data was already cached. Map retains only its context, device and direct operand;
+it does not sample unrelated bound pipeline resources. The encoder independently
+checks mapped direct operands and bound resources. The
+[D3D11 Map contract](https://learn.microsoft.com/en-us/windows/win32/api/d3d11/nf-d3d11-id3d11devicecontext-map)
+denies GPU access to the mapped subresource; unrelated GPU work may continue.
+Our dependency checks remain conservative at whole-resource granularity and
+include bound resources even when a particular shader might not use them.
+
+Unmap without an owned in-frame Map, unfinished recorded maps, mapped dependencies,
+foreign-context/thread execution and unsupported DXGI mappings still refuse.
+No pre-frame mapped pointer is read. Status now reports the total number of active
+mappings and at most sixteen resource/context/subresource identities. WARP and
+hardware tests check untouched CPU bytes, native red output, independent Clears
+inside Map/Unmap, concurrent maps with a bound mapped constant buffer, cached
+dependency rejection and malformed encoder ordering. Interleaved generated frames
+exercise real execution in both players; map-removal controls retain the original
+preview but produce blue output.
+
+The fourth launch passes those mapping guards and explicitly fails at
+`ID3D11DeviceContext::ClearRenderTargetView: MSAA sample-preserving capture is not implemented`.
+No main-scene file is published. The game continues rendering after refusal and
+disconnect, and exits normally. Formal GF2 acceptance remains **0/6**.
+MSAA requires independent per-sample snapshot and verified initialization records;
+ordinary legacy GenData is insufficient, as the retained-sample experiment in
+`D:/CDXrepo/FloraGPA/analysis/ACTIVE_MSAA.md` already demonstrates. Resolving the
+texture or omitting its initial contents would not satisfy this gate.
+
+Final test counts, input hashes and retained evidence paths are recorded in the
+`elevated_gf2_map_scope` section of `capture-development-baseline.json` and the
+ignored run summary. Replay and shared format sources are unchanged. The latest
+clean source-package proof remains `c57bd39`; current package validation, MSAA,
+broader query/deferred profiles and the six formal scene frames remain pending.

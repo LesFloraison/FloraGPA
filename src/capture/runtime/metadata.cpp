@@ -242,14 +242,20 @@ Json metadata_status() {
         std::lock_guard lock(r.mutex); created = r.created; destroyed = r.destroyed;
         for (const auto& [identity, entry] : r.objects) { (void)identity; entries.push_back(entry); }
     }
-    Json kinds = Json::object(); uint64_t alive = 0;
+    Json kinds = Json::object(), mappings = Json::array(); uint64_t alive = 0, mapping_count = 0;
     for (const auto& entry : entries) {
-        std::lock_guard lock(entry->mutex);
-        if (auto record = entry->record.lock(); record && record->alive) {
+        std::shared_ptr<ObjectRecord> record;
+        {std::lock_guard lock(entry->mutex);record=entry->record.lock();}
+        if (record && record->alive) {
+            std::lock_guard lock(record->mutex);
             ++alive; auto& value = kinds[record->kind]; if (value.is_null()) value = 0u; value = value.get<uint64_t>() + 1;
+            for(const auto& [context,subresource]:record->mapped_subresources){
+                ++mapping_count;
+                if(mappings.size()<16)mappings.push_back({{"resource",record->id},{"device",record->device},{"context",context},{"subresource",subresource},{"kind",record->kind}});
+            }
         }
     }
-    return {{"created",created},{"destroyed",destroyed},{"alive",alive},{"kinds",kinds}};
+    return {{"created",created},{"destroyed",destroyed},{"alive",alive},{"kinds",kinds},{"active_mapping_count",mapping_count},{"active_mappings",mappings}};
 }
 void observe_private_data(REFGUID key, const char* api) noexcept {
     if (key == lifetime_key) object_gap(api, __uuidof(IUnknown), "Application accessed reserved native lifetime metadata");

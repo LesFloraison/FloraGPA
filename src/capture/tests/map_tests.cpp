@@ -32,7 +32,7 @@ void oracle(const ResourceContents& output,bool texture){
     const auto& bytes=output.subresources.at(0).bytes;require(bytes.size()==256,"Output size mismatch");
     for(UINT y=0;y<8;++y)for(UINT x=0;x<8;++x){const bool red=texture?(y%2==0):(x<4);const uint8_t expected[]{uint8_t(red?255:0),uint8_t(red?0:255),0,255};require(!memcmp(bytes.data()+(y*8+x)*4,expected,4),"Mapped GPU output differs from CPU oracle");}
 }
-FrozenFrame observed(bool hardware,bool texture,bool nooverwrite=false,bool staging=false){
+FrozenFrame observed(bool hardware,bool texture,bool nooverwrite=false,bool staging=false,bool interleaved=false){
     FrozenFrame frozen;
     {
         Fixture f(hardware);const float black[]{0,0,0,1};
@@ -54,7 +54,7 @@ FrozenFrame observed(bool hardware,bool texture,bool nooverwrite=false,bool stag
         if(staging){
             auto data=f.buffer(D3D11_USAGE_STAGING,D3D11_CPU_ACCESS_READ|D3D11_CPU_ACCESS_WRITE,0);D3D11_MAPPED_SUBRESOURCE mapped{};
             for(const auto kind:{D3D11_MAP_READ,D3D11_MAP_READ_WRITE,D3D11_MAP_WRITE,D3D11_MAP_READ}){
-                check(f.context->Map(data.Get(),0,kind,0,&mapped));if(kind!=D3D11_MAP_READ){const float color[]{1,0,0,1};memcpy(mapped.pData,color,16);}f.context->Unmap(data.Get(),0);
+                check(f.context->Map(data.Get(),0,kind,0,&mapped));if(kind!=D3D11_MAP_READ){const float color[]{1,0,0,1};memcpy(mapped.pData,color,16);}if(interleaved)f.context->ClearRenderTargetView(f.rtv.Get(),black);f.context->Unmap(data.Get(),0);
             }
         }
         if(texture){
@@ -82,7 +82,30 @@ void storage(bool hardware){
     auto frame=recording->finish();frame.require_complete();require(frame.commands.size()==6,"Map/Unmap event sequence missing");require(!memcmp(frame.initial_resources.at(id).subresources[0].bytes.data(),blue,16),"Map lost pre-frame contents");
     require(!memcmp(frame.commands[0].data.data(),blue,16) && !memcmp(frame.commands[2].data.data(),red,16) && !memcmp(frame.commands[4].data.data(),green,16),"Map data lifetime or sequence lost");
     check(f.context->Map(b.Get(),0,D3D11_MAP_WRITE,0,&mapped));memset(mapped.pData,0,16);f.context->Unmap(b.Get(),0);require(!memcmp(frame.commands[4].data.data(),green,16),"Map record borrowed application memory");
-    check(f.context->Map(b.Get(),0,D3D11_MAP_READ,0,&mapped));rejects([&]{begin_recording(f.context.Get());},"active resource mapping");f.context->Unmap(b.Get(),0);
+    check(f.context->Map(b.Get(),0,D3D11_MAP_READ_WRITE,0,&mapped));
+    auto status=metadata_status();require(status.at("active_mapping_count")==1 && status.at("active_mappings").at(0).at("resource")==id,"Active mapping diagnostic lost identity");
+    recording.reset();recording=begin_recording(f.context.Get());const float independentRed[]{1,0,0,1};f.context->ClearRenderTargetView(f.rtv.Get(),independentRed);
+    memset(mapped.pData,0x5a,16);
+    auto independent=recording->finish();independent.require_complete();require(independent.commands.size()==1 && !independent.initial_resources.contains(id),"Unrelated pre-frame map entered capture dependencies");
+    for(size_t at=0;at<16;++at)require(static_cast<const uint8_t*>(mapped.pData)[at]==0x5a,"Capture touched unrelated mapped storage");
+    const auto image=snapshot_resource(f.context.Get(),f.output.Get());const uint8_t expectedRed[]{255,0,0,255};for(size_t at=0;at<image.subresources[0].bytes.size();at+=4)require(!memcmp(image.subresources[0].bytes.data()+at,expectedRed,4),"Capture with unrelated Map changed native output");
+    recording.reset();recording=begin_recording(f.context.Get());
+    // Exercise rejection before forwarding an invalid native GPU use of a
+    // mapped dependency. The source remains mapped and untouched throughout.
+    record_context_call(f.context.Get(),"test::mapped dependency",CommandKind::map,{0,D3D11_MAP_READ},b.Get());
+    auto mappedDependency=recording->finish();rejects([&]{mappedDependency.require_complete();},"application-mapped resource");
+    recording.reset();recording=begin_recording(f.context.Get());f.context->Unmap(b.Get(),0);auto spanning=recording->finish();rejects([&]{spanning.require_complete();},"Unmap has no recorded successful Map");
+    require(metadata_status().at("active_mapping_count")==0,"Unmap diagnostic did not clear");
+    recording.reset();recording=begin_recording(f.context.Get());check(f.context->Map(b.Get(),0,D3D11_MAP_WRITE,0,&mapped));
+    memset(mapped.pData,0x3c,16);f.context->ClearRenderTargetView(f.rtv.Get(),independentRed);f.context->Unmap(b.Get(),0);
+    auto interleaved=recording->finish();interleaved.require_complete();require(interleaved.commands.size()==3 && interleaved.commands[1].kind==CommandKind::clear_rtv && interleaved.commands[0].data[0]==0x3c,"Independent GPU work inside Map/Unmap was lost");
+    recording.reset();recording=begin_recording(f.context.Get());check(f.context->Map(b.Get(),0,D3D11_MAP_WRITE,0,&mapped));
+    record_context_call(f.context.Get(),"test::cached mapped dependency",CommandKind::map,{0,D3D11_MAP_READ},b.Get());f.context->Unmap(b.Get(),0);
+    auto cached=recording->finish();rejects([&]{cached.require_complete();},"application-mapped resource");
+    auto boundMap=f.buffer(D3D11_USAGE_DYNAMIC,D3D11_CPU_ACCESS_WRITE,D3D11_BIND_CONSTANT_BUFFER);auto* bound=boundMap.Get();f.context->PSSetConstantBuffers(0,1,&bound);
+    recording.reset();recording=begin_recording(f.context.Get());D3D11_MAPPED_SUBRESOURCE boundData{};check(f.context->Map(boundMap.Get(),0,D3D11_MAP_WRITE_DISCARD,0,&boundData));
+    memset(boundData.pData,0,16);check(f.context->Map(b.Get(),0,D3D11_MAP_READ,0,&mapped));f.context->Unmap(b.Get(),0);f.context->Unmap(boundMap.Get(),0);
+    auto parallelMaps=recording->finish();parallelMaps.require_complete();require(parallelMaps.commands.size()==4,"Map incorrectly depends on another bound mapped resource");bound=nullptr;f.context->PSSetConstantBuffers(0,1,&bound);
     recording.reset();recording=begin_recording(f.context.Get());check(f.context->Map(b.Get(),0,D3D11_MAP_READ,0,&mapped));auto unfinished=recording->finish();rejects([&]{unfinished.require_complete();},"active resource mapping");f.context->Unmap(b.Get(),0);
     recording.reset();auto write_only=f.buffer(D3D11_USAGE_DYNAMIC,D3D11_CPU_ACCESS_WRITE,D3D11_BIND_CONSTANT_BUFFER);recording=begin_recording(f.context.Get());
     const auto denied=f.context->Map(write_only.Get(),0,D3D11_MAP_READ,0,&mapped);require(FAILED(denied),"Read mapping unexpectedly accepted a write-only resource");
@@ -101,8 +124,8 @@ void storage(bool hardware){
 void encoder_failures(const std::filesystem::path& out){
     require(!std::filesystem::exists(out),"Map encoder directory must be new");std::filesystem::create_directories(out);
     const auto original=observed(true,false);
-    for(unsigned i=0;i<8;++i){auto bad=original;auto map=std::find_if(bad.commands.begin(),bad.commands.end(),[](const auto& c){return c.kind==CommandKind::map;});
-        if(i==0)map->data.pop_back();else if(i==1)map->completed=false;else if(i==2)map->words[0]=1;else if(i==3)map->words[1]=99;else if(i==4)map->words[2]=1;else if(i==5)map->result=E_FAIL;else if(i==6)bad.commands.erase(map);else bad.commands.erase(map+1);
+    for(unsigned i=0;i<9;++i){auto bad=original;auto map=std::find_if(bad.commands.begin(),bad.commands.end(),[](const auto& c){return c.kind==CommandKind::map;});
+        if(i==0)map->data.pop_back();else if(i==1)map->completed=false;else if(i==2)map->words[0]=1;else if(i==3)map->words[1]=99;else if(i==4)map->words[2]=1;else if(i==5)map->result=E_FAIL;else if(i==6)bad.commands.erase(map);else if(i==7)bad.commands.erase(map+1);else std::iter_swap(map+1,map+2);
         for(size_t j=0;j<bad.commands.size();++j)bad.commands[j].sequence=j;
         const auto path=out/(std::to_wstring(i)+L".gpa_frame");rejects([&]{encode_frame(bad,path);},"Map");require(!std::filesystem::exists(path),"Invalid Map frame was published");
     }
@@ -113,7 +136,7 @@ void encoder_failures(const std::filesystem::path& out){
 int wmain(int argc,wchar_t** argv){try{
     if(argc==3 && std::wstring(argv[2])==L"self-test"){encoder_failures(argv[1]);std::cout<<"Map reference, pair and payload failure gates passed\n";return 0;}
 
-    if(argc==3){const std::wstring mode=argv[2];const bool texture=mode==L"texture" || mode==L"texture-negative";require(texture || mode==L"buffer" || mode==L"buffer-negative" || mode==L"nooverwrite" || mode==L"storage","Unknown map mode");auto frame=observed(true,texture,mode==L"nooverwrite",mode==L"storage");
+    if(argc==3){const std::wstring mode=argv[2];const bool texture=mode==L"texture" || mode==L"texture-negative";require(texture || mode==L"buffer" || mode==L"buffer-negative" || mode==L"nooverwrite" || mode==L"storage" || mode==L"interleaved","Unknown map mode");auto frame=observed(true,texture,mode==L"nooverwrite",mode==L"storage" || mode==L"interleaved",mode==L"interleaved");
         if(mode.ends_with(L"negative")){std::erase_if(frame.commands,[](const auto& c){return c.kind==CommandKind::map || c.kind==CommandKind::unmap;});for(size_t i=0;i<frame.commands.size();++i)frame.commands[i].sequence=i;}
         encode_frame(frame,argv[1]);std::cout<<Json{{"passed",true},{"source_gpu_objects_alive",0},{"commands",frame.commands.size()}}.dump()<<'\n';
     }else{const bool hardware=argc==2 && std::wstring(argv[1])==L"--hardware";storage(hardware);observed(hardware,false);observed(hardware,true);observed(hardware,false,true);std::cout<<"Map storage, lifetime, frame boundaries and exact GPU output passed\n";}

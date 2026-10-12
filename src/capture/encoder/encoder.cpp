@@ -270,7 +270,20 @@ public:
                 }
                 add(7,w[1]==D3D11_MAP_READ?0x34ec:0x246,Payload{}.q({0,1}).value(command.result).value(resource).u({w[0],w[1],w[2]}).value(data));continue;
             }
-            require(mappings.empty(),"Encoder GPU execution with open Map unsupported");
+            if(!mappings.empty()){
+                auto unmapped=[&](ObjectId id){
+                    if(!id)return;
+                    const auto found=frame_.objects.find(id);require(found!=frame_.objects.end(),"Encoder Map dependency definition missing");
+                    const auto resource=found->second.resource?found->second.resource:id;
+                    for(const auto& [mapped,unused]:mappings){(void)unused;require(mapped.first!=resource,"Encoder GPU dependency has open Map");}
+                };
+                unmapped(command.operand);unmapped(command.source);
+                const auto& state=command.bindings;
+                for(const auto& stage:state.shaders){for(auto id:stage.buffers)unmapped(id);for(auto id:stage.resources)unmapped(id);}
+                for(auto id:state.vertices)unmapped(id);for(auto id:state.render_targets)unmapped(id);
+                for(auto id:state.stream_targets)unmapped(id);for(auto id:state.om_uavs)unmapped(id);for(auto id:state.cs_uavs)unmapped(id);
+                unmapped(state.index_buffer);unmapped(state.depth_view);
+            }
             if(command.kind==CommandKind::update_subresource){
                 require(command.bindings.context==context_ && command.bindings.device==device_,"Encoder Update context mismatch");
                 require(command.completed && command.operand && w[3]<=1 && !w[4],"Encoder incomplete or invalid Update");
