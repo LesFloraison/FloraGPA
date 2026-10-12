@@ -23,7 +23,10 @@ public:
     ~PixelTransaction();
     PixelTransaction(const PixelTransaction&)=delete;
     PixelTransaction& operator=(const PixelTransaction&)=delete;
-    bool begin(IDXGISwapChain* native,const Panel& panel,UINT flags,bool partial,std::string& reason) noexcept;
+    bool begin(IDXGISwapChain* native,const Panel& panel,UINT flags,bool partial,std::string& reason,bool isolated=false) noexcept;
     bool restore(std::string& reason) noexcept;
+    // Only for a caller owning separate clean application storage and restoring
+    // the newly writable native slot after Present, including failed Presents.
+    void discard_backup() noexcept;
 };
 }

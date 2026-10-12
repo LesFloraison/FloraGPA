@@ -51,7 +51,7 @@ void feedback(Control& c,const Json& result){
     c.last_request=result;
     if(!result.value("ok",false)){
         const auto error=result.value("error",std::string("Capture failed"));
-        const auto text=error=="busy"?"Busy":error=="swap_chain_selection_required"?"Select swap chain":"Capture failed: "+error;
+        const auto text=error=="busy"?"Busy":error=="swap_chain_selection_required"?"Select swap chain":hud::failure_summary(error);
         c.message.update("request-"+std::to_string(++c.sequence),text,GetTickCount64(),8000);
     }
 }
@@ -72,7 +72,7 @@ void progress_message(Control& c,const Json& progress){
     else if(phase=="Finalizing")c.message.update(identity,"Saving",time,0);
     else if(phase=="Completed"){const auto path=progress.value("file",std::string());const auto slash=path.find_last_of("/\\");c.message.update(identity,"Saved: "+path.substr(slash==std::string::npos?0:slash+1),time,4000);}
     else if(phase=="Cancelled")c.message.update(identity,"Cancelled",time,4000);
-    else if(phase=="Failed")c.message.update(identity,"Capture failed: "+progress.value("error",std::string()),time,8000);
+    else if(phase=="Failed")c.message.update(identity,hud::failure_summary(progress.value("error",std::string())),time,8000);
 }
 }
 void configure_hud(const hud::Settings& settings){
@@ -83,6 +83,7 @@ void configure_hud(const hud::Settings& settings){
 void disconnect_hud() noexcept {
     try{auto& c=control();std::map<DWORD,HHOOK> hooks;{std::lock_guard lock(c.mutex);c.connected=false;c.pending=false;c.mode_edge=c.capture_edge=false;hooks.swap(c.hooks);}for(const auto& [id,hook]:hooks){(void)id;UnhookWindowsHookEx(hook);}c.ready.notify_one();}catch(...){}
 }
+bool hud_connected() noexcept {try{auto& c=control();std::lock_guard lock(c.mutex);return c.connected;}catch(...){return false;}}
 void hud_input(UINT flags,IDXGISwapChain* native) noexcept {
     if(flags&DXGI_PRESENT_TEST)return;const auto error=GetLastError();
     try{
@@ -128,33 +129,40 @@ struct HudDraw::Impl {
 };
 HudDraw::HudDraw()=default;
 HudDraw::~HudDraw(){const auto error=GetLastError();restore();impl_.reset();SetLastError(error);}
-void HudDraw::begin(uint64_t swap,IDXGISwapChain* native,UINT flags,bool partial) noexcept {
+void HudDraw::begin(uint64_t swap,IDXGISwapChain* native,UINT flags,bool partial,bool isolated) noexcept {
     if(flags&DXGI_PRESENT_TEST)return;const auto error=GetLastError();
     try{
         auto& c=control();hud::Panel panel;
-        {const auto progress=capture_progress();std::lock_guard lock(c.mutex);if(!c.connected || c.settings.mode==hud::Mode::Hidden){SetLastError(error);return;}progress_message(c,progress);
+        {const auto progress=capture_progress();std::lock_guard lock(c.mutex);if(!c.connected){SetLastError(error);return;}progress_message(c,progress);if(c.settings.mode==hud::Mode::Hidden){SetLastError(error);return;}
             panel.mode=c.settings.mode;panel.fps=c.clocks[swap].value(now_ns());panel.swap=swap;
             const auto wide=[](const std::string& text){const auto length=MultiByteToWideChar(CP_UTF8,0,text.data(),int(text.size()),nullptr,0);std::wstring result(length,L'\0');MultiByteToWideChar(CP_UTF8,0,text.data(),int(text.size()),result.data(),length);return result;};
             panel.mode_key=wide(hud::hotkey_name(c.settings.mode_key));panel.capture_key=wide(hud::hotkey_name(c.settings.capture_key));panel.message=wide(c.message.value(GetTickCount64()));}
         impl_=std::make_unique<Impl>();impl_->id=swap;
         NativeCall internal;
         DXGI_SWAP_CHAIN_DESC desc{};if(FAILED(native->GetDesc(&desc)))throw std::runtime_error("HUD swap descriptor unavailable");
-        if(desc.BufferCount!=1 || (desc.SwapEffect!=DXGI_SWAP_EFFECT_DISCARD && desc.SwapEffect!=DXGI_SWAP_EFFECT_SEQUENTIAL))throw std::runtime_error("Multi-buffer HUD pixel restoration is unverified");
+        if(!isolated && (desc.BufferCount!=1 || (desc.SwapEffect!=DXGI_SWAP_EFFECT_DISCARD && desc.SwapEffect!=DXGI_SWAP_EFFECT_SEQUENTIAL)))throw std::runtime_error("Multi-buffer HUD pixel restoration is unverified");
         Microsoft::WRL::ComPtr<ID3D11Device> device;if(FAILED(native->GetDevice(IID_PPV_ARGS(&device))))throw std::runtime_error("HUD requires a native DX11 device");
-        if(!(device->GetCreationFlags()&D3D11_CREATE_DEVICE_SINGLETHREADED))throw std::runtime_error("HUD concurrency isolation requires a SINGLETHREADED device in this profile");
+        if(!isolated && !(device->GetCreationFlags()&D3D11_CREATE_DEVICE_SINGLETHREADED))throw std::runtime_error("HUD concurrency isolation requires isolated application storage in this profile");
         Microsoft::WRL::ComPtr<ID3D11DeviceContext> context;device->GetImmediateContext(&context);
         Microsoft::WRL::ComPtr<IUnknown> identity;context.As(&identity);const auto record=find_native_record(identity.Get());
         if(!record)throw std::runtime_error("HUD immediate context is untracked");
         {std::lock_guard lock(record->mutex);if(!record->active_queries.empty())throw std::runtime_error("HUD skips active queries");}
-        if(object_status().value("interface_gaps",0ull) || has_external_mapping(true))throw std::runtime_error("HUD skips untracked interfaces or mapped resources");
+        if(object_status().value("interface_gaps",0ull))throw std::runtime_error("HUD skips untracked interfaces");
+        // The isolated renderer only copies private textures and the native
+        // presentation surface. It never binds or reads application buffers;
+        // outstanding CPU buffer mappings therefore remain untouched. Texture
+        // and DXGI mappings are still excluded, as are unsynchronized paths.
+        if(has_external_mapping(true,isolated))throw std::runtime_error("HUD skips active texture or external mappings");
         Microsoft::WRL::ComPtr<ID3D11Predicate> predicate;BOOL value=FALSE;context->GetPredication(&predicate,&value);if(predicate)throw std::runtime_error("HUD skips active predication");
         Microsoft::WRL::ComPtr<IDXGIDevice> dxgi;Microsoft::WRL::ComPtr<IDXGIAdapter> adapter;DXGI_ADAPTER_DESC adapter_desc{};
         if(SUCCEEDED(device.As(&dxgi)) && SUCCEEDED(dxgi->GetAdapter(&adapter)) && SUCCEEDED(adapter->GetDesc(&adapter_desc)))panel.adapter=adapter_desc.Description;
+        const wchar_t* explicit_adapter=L"UNKNOWN";Microsoft::WRL::ComPtr<IDXGIAdapter1> adapter1;DXGI_ADAPTER_DESC1 description1{};
+        if(adapter && SUCCEEDED(adapter.As(&adapter1)) && SUCCEEDED(adapter1->GetDesc1(&description1)))explicit_adapter=(description1.Flags&DXGI_ADAPTER_FLAG_SOFTWARE)?L"SW":L"HW";
         const auto level=device->GetFeatureLevel();panel.device=L"DX "+std::to_wstring((unsigned(level)>>12)&15)+L"."+std::to_wstring((unsigned(level)>>8)&15);
         Microsoft::WRL::ComPtr<IUnknown> device_identity;device.As(&device_identity);
-        if(const auto record_device=find_native_record(device_identity.Get())){std::lock_guard lock(record_device->mutex);if(record_device->driver_type){const wchar_t* label=L"UNKNOWN";switch(*record_device->driver_type){case D3D_DRIVER_TYPE_HARDWARE:label=L"HW";break;case D3D_DRIVER_TYPE_WARP:label=L"WARP";break;case D3D_DRIVER_TYPE_REFERENCE:label=L"REF";break;case D3D_DRIVER_TYPE_SOFTWARE:label=L"SW";break;case D3D_DRIVER_TYPE_NULL:label=L"NULL";break;default:break;}panel.device+=L" ["+std::wstring(label)+L"]";}}
+        if(const auto record_device=find_native_record(device_identity.Get())){std::lock_guard lock(record_device->mutex);if(record_device->driver_type){const wchar_t* label=L"UNKNOWN";switch(*record_device->driver_type){case D3D_DRIVER_TYPE_UNKNOWN:label=explicit_adapter;break;case D3D_DRIVER_TYPE_HARDWARE:label=L"HW";break;case D3D_DRIVER_TYPE_WARP:label=L"WARP";break;case D3D_DRIVER_TYPE_REFERENCE:label=L"REF";break;case D3D_DRIVER_TYPE_SOFTWARE:label=L"SW";break;case D3D_DRIVER_TYPE_NULL:label=L"NULL";break;default:break;}panel.device+=L" ["+std::wstring(label)+L"]";}}
         impl_->pixels=std::make_unique<hud::PixelTransaction>();
-        impl_->drawn=impl_->pixels->begin(native,panel,flags,partial,impl_->reason);
+        impl_->drawn=impl_->pixels->begin(native,panel,flags,partial,impl_->reason,isolated);
     }catch(const std::exception& e){if(impl_)impl_->reason=e.what();}catch(...){if(impl_)impl_->reason="HUD setup failed";}
     if(impl_)try{auto& c=control();std::lock_guard lock(c.mutex);c.visibility[swap]={impl_->drawn,impl_->reason,GetTickCount64()};}catch(...){}
     SetLastError(error);
@@ -164,5 +172,8 @@ bool HudDraw::restore() noexcept {
     {NativeCall internal;clean=impl_->pixels->restore(impl_->reason);impl_->pixels.reset();}
     if(!clean){object_gap("HUD restore",__uuidof(IDXGISwapChain),"HUD pixel restoration failed; capture disabled");try{auto& c=control();std::lock_guard lock(c.mutex);c.visibility[impl_->id]={false,impl_->reason,GetTickCount64()};}catch(...){}}
     SetLastError(error);return clean;
+}
+void HudDraw::discard_backup() noexcept {
+    const auto error=GetLastError();if(impl_ && impl_->pixels){NativeCall internal;impl_->pixels->discard_backup();impl_->pixels.reset();}SetLastError(error);
 }
 }

@@ -108,8 +108,9 @@ void RecordedFrame::require_complete() const {
 }
 FrozenFrame freeze_frame(RecordedFrame&& frame,ObjectId output,ResourceSnapshot&& final_output){
     frame.require_complete();
-    if(!final_output.record || final_output.record->id!=output || !frame.initial_resources.contains(output))
-        throw std::runtime_error("Frame output lacks matching initial/final resource data");
+    if(!final_output.record || final_output.record->id!=output || !frame.initial_resources.contains(output)){
+        throw std::runtime_error("Frame output lacks matching initial/final resource data (output "+std::to_string(output)+", initial resources "+std::to_string(frame.initial_resources.size())+")");
+    }
     FrozenFrame result;result.output=output;result.start_completion=frame.start_completion;
     for(const auto& [id,held]:frame.objects){
         auto& r=*held.record;std::lock_guard lock(r.mutex);

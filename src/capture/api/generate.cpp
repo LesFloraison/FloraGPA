@@ -120,15 +120,28 @@ void method(std::ostream& out, const std::string& iface, const Json& m) {
         const auto& output = shaderOutputs.at(name);
         post += "remember_shader(" + output + " ? *" + output + " : nullptr, \"" + api + "\", pShaderBytecode, BytecodeLength, pClassLinkage);\n";
     }
-    out << ") override {\nconst DWORD before = GetLastError();\ntry {\n" << pre
+    out << ") override {\nconst DWORD before = GetLastError();\ntry {\n";
+    if(iface.starts_with("ID3D11DeviceContext"))out<<"PresentationLock context_access(presentation_context_mutex());\n";
+    // Keep operand resolution and returned view registration in one alias
+    // generation, without blocking unrelated CPU-only device creation in Present.
+    if(name.starts_with("CreateRenderTargetView") || name.starts_with("CreateShaderResourceView") || name.starts_with("CreateUnorderedAccessView") || name=="CreateDepthStencilView" || name=="GetResource")
+        out<<"PresentationLock alias_access(presentation_alias_mutex());\n";
+    out << pre
         << "auto* target = owner_.native<" << iface << ">();\n"
         << "if (!target) throw std::runtime_error(\"Native interface disappeared\");\n"
         << "NativeCall internal;\nSetLastError(before);\n";
-    if(iface.starts_with("ID3D11Device") && !iface.starts_with("ID3D11DeviceContext") &&
-       (name.starts_with("CreateRenderTargetView") || name.starts_with("CreateShaderResourceView") || name.starts_with("CreateUnorderedAccessView") || name=="CreateDepthStencilView")){
+    const bool presentation_view=iface.starts_with("ID3D11Device") && !iface.starts_with("ID3D11DeviceContext") &&
+       (name.starts_with("CreateRenderTargetView") || name.starts_with("CreateShaderResourceView") || name.starts_with("CreateUnorderedAccessView") || name=="CreateDepthStencilView");
+    if(presentation_view){
         std::string output;
         for(const auto& parameter:parameters)if(parameter.at("direction")=="out")output=parameter.at("name");
-        out<<"if(auto original=presentation_validation_resource(unwrap(pResource))){const auto validation=target->"<<name<<"(original.Get(),"<<parameters.at(1).at("name").get<std::string>()<<",nullptr);if(FAILED(validation)){if("<<output<<")*"<<output<<"=nullptr;return validation;}SetLastError(before);}\n";
+        const std::string descriptor=parameters.at(1).at("name");
+        const bool version1=name.ends_with("1");
+        const std::string family=name.starts_with("CreateRenderTargetView")?"RenderTargetView":name.starts_with("CreateShaderResourceView")?"ShaderResourceView":name.starts_with("CreateUnorderedAccessView")?"UnorderedAccessView":"DepthStencilView";
+        const std::string description=family=="RenderTargetView"?"D3D11_RENDER_TARGET_VIEW_DESC":family=="ShaderResourceView"?"D3D11_SHADER_RESOURCE_VIEW_DESC":family=="UnorderedAccessView"?"D3D11_UNORDERED_ACCESS_VIEW_DESC":"D3D11_DEPTH_STENCIL_VIEW_DESC";
+        out<<"auto presentation_original=presentation_validation_resource(unwrap(pResource));HRESULT presentation_validation=S_OK;\nif(presentation_original){presentation_validation=target->"<<name<<"(presentation_original.Get(),"<<descriptor<<",nullptr);if(FAILED(presentation_validation)){presentation_view_result(presentation_original.Get(),\""<<api<<"\",presentation_validation,presentation_validation,"<<descriptor<<"?UINT("<<descriptor<<"->Format):0);if("<<output<<")*"<<output<<"=nullptr;return presentation_validation;}SetLastError(before);}\n";
+        out<<description<<(version1?"1":"")<<" presentation_description{};auto* presentation_descriptor="<<descriptor<<";\nif(presentation_original){if(!"<<output<<")return presentation_validation;if(!presentation_descriptor){Microsoft::WRL::ComPtr<ID3D11"<<family<<(version1?"1":"")<<"> native_default;const auto default_result=target->"<<name<<"(presentation_original.Get(),nullptr,&native_default);if(FAILED(default_result)){*"<<output<<"=nullptr;return default_result;}native_default->GetDesc"<<(version1?"1":"")<<"(&presentation_description);presentation_descriptor=&presentation_description;}}\nSetLastError(before);\n";
+        const auto token=", "+descriptor+",";args.replace(args.find(token),token.size(),", presentation_descriptor,");
     }
     if (iface.starts_with("ID3D11DeviceContext")) {
         std::string kind="unsupported",words="{}",operand="nullptr",floats="nullptr",integers="nullptr",source="nullptr";
@@ -173,6 +186,7 @@ void method(std::ostream& out, const std::string& iface, const Json& m) {
         out << "record_external_call(\"" << api << "\");\n";
     if (result != "void") out << "auto result = ";
     out << "target->" << name << "(" << args << ");\nconst DWORD after = GetLastError();\n";
+    if(presentation_view){const std::string descriptor=parameters.at(1).at("name");out<<"if(presentation_original)presentation_view_result(presentation_original.Get(),\""<<api<<"\",presentation_validation,result,"<<descriptor<<"?UINT("<<descriptor<<"->Format):0);\n";}
     if(iface=="ID3D11DeviceContext" && name=="Map")out << "record_map_result(this, pResource, Subresource, result, pMappedResource);\n";
     if(iface=="ID3D11DeviceContext" && name=="GetData")out << "record_query_observation(this, pAsync, CommandKind::query_get_data, result, pData, DataSize, GetDataFlags);\n";
     if (!post.empty()) {

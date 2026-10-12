@@ -42,6 +42,13 @@ void Settings::validate() const {
     if(parse_hotkey(hotkey_name(mode_key))!=mode_key || parse_hotkey(hotkey_name(capture_key))!=capture_key)throw std::invalid_argument("Invalid hotkey state");
     if(mode_key.key && mode_key==capture_key)throw std::invalid_argument("HUD and capture hotkeys must differ");
 }
+std::string failure_summary(std::string_view reason){
+    if(reason.find("MSAA sample-preserving")!=reason.npos)return "Capture failed: MSAA";
+    // Drop a located API prefix from the small HUD; full diagnostics stay in
+    // capture status. Do not confuse C++ namespace separators with this delimiter.
+    const auto separator=reason.find(": ");if(separator!=reason.npos)reason.remove_prefix(separator+2);
+    return reason.empty()?"Capture failed":"Capture failed: "+std::string(reason);
+}
 bool KeyEdge::update(const Hotkey& key,const std::array<bool,256>& keys,bool foreground) noexcept {
     const bool down=key.key && key.key<keys.size() && keys[key.key] && keys[0x11]==key.control && keys[0x10]==key.shift && keys[0x12]==key.alt && !keys[0x5b] && !keys[0x5c];
     const bool trigger=foreground && focused_ && down && !down_;

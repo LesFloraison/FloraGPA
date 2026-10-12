@@ -2,12 +2,13 @@
 #include <d3d11_4.h>
 #include <wrl/client.h>
 #include <memory>
+#include "protocol.hpp"
 
 namespace flora::capture {
 // Native swap-buffer identity stays public; GPU operands use clean storage.
 // Registration owns native buffer references. Release registrations before
 // Resize, then restore them if native Resize fails. Caller serializes that
-// transition with all application access. Not enabled by SwapChain yet.
+// transition with all application access.
 class PresentationResource {
     struct Impl;
     std::unique_ptr<Impl> impl_;
@@ -23,4 +24,6 @@ Microsoft::WRL::ComPtr<IUnknown> presentation_identity(IUnknown* identity);
 void retain_presentation_view(IUnknown* native);
 Microsoft::WRL::ComPtr<ID3D11Resource> presentation_validation_resource(ID3D11Resource* clean);
 bool presentation_private_key(REFGUID key) noexcept;
+Json presentation_status();
+void presentation_view_result(ID3D11Resource* original,const char* api,HRESULT validation,HRESULT result,UINT format);
 }

@@ -45,15 +45,15 @@ struct PixelTransaction::Impl {
 };
 PixelTransaction::PixelTransaction():impl_(std::make_unique<Impl>()){}
 PixelTransaction::~PixelTransaction(){if(impl_->modified)impl_->copy_back();}
-bool PixelTransaction::begin(IDXGISwapChain* native,const Panel& panel,UINT flags,bool partial,std::string& reason) noexcept {
+bool PixelTransaction::begin(IDXGISwapChain* native,const Panel& panel,UINT flags,bool partial,std::string& reason,bool isolated) noexcept {
     const auto last=GetLastError();
     try{
         if(impl_->modified)throw std::logic_error("HUD transaction already active");
         auto& p=*impl_;reason.clear();
         DXGI_SWAP_CHAIN_DESC desc{};check(native->GetDesc(&desc),"Read HUD swap chain");
         if(panel.mode==Mode::Hidden)throw std::runtime_error("Hidden");
-        if(flags || partial)throw std::runtime_error("HUD skips TEST, flagged or partial Present");
-        if(desc.BufferCount!=1 || (desc.SwapEffect!=DXGI_SWAP_EFFECT_DISCARD && desc.SwapEffect!=DXGI_SWAP_EFFECT_SEQUENTIAL))throw std::runtime_error("Multi-buffer HUD pixel restoration is unverified");
+        if((flags&~(isolated?DXGI_PRESENT_ALLOW_TEARING:0u)) || partial)throw std::runtime_error("HUD skips TEST, unsupported flags or partial Present");
+        if(!isolated && (desc.BufferCount!=1 || (desc.SwapEffect!=DXGI_SWAP_EFFECT_DISCARD && desc.SwapEffect!=DXGI_SWAP_EFFECT_SEQUENTIAL)))throw std::runtime_error("Multi-buffer HUD requires isolated application storage");
         if(desc.SampleDesc.Count!=1 || (desc.BufferDesc.Format!=DXGI_FORMAT_R8G8B8A8_UNORM && desc.BufferDesc.Format!=DXGI_FORMAT_B8G8R8A8_UNORM))throw std::runtime_error("Unsupported HUD sample count or format");
         if(desc.Flags&(DXGI_SWAP_CHAIN_FLAG_GDI_COMPATIBLE|DXGI_SWAP_CHAIN_FLAG_DISPLAY_ONLY|DXGI_SWAP_CHAIN_FLAG_RESTRICTED_CONTENT))throw std::runtime_error("Unsupported HUD shared or protected presentation");
         check(native->GetDevice(IID_PPV_ARGS(&p.device)),"Get HUD native device");p.device->GetImmediateContext(&p.context);
@@ -83,7 +83,7 @@ bool PixelTransaction::begin(IDXGISwapChain* native,const Panel& panel,UINT flag
         p.context->Unmap(p.stage.Get(),0);
         Canvas canvas(int(p.width),int(p.height));
         const auto text=[&](const std::wstring& s,int x,int y,int w,int h,int font,bool bold=false,UINT align=DT_LEFT){canvas.text(s,px(x),px(y),px(w),px(h),px(font),bold,align);};
-        text(panel.message.empty()?L"FloraGPA · Hooked":L"FloraGPA · "+panel.message,10,5,208,18,13,true);text(L"Mode  "+panel.mode_key,10,23,208,16,12);
+        text(panel.message.empty()?L"FloraGPA · Hooked":panel.message,10,5,208,18,13,true);text(L"Mode  "+panel.mode_key,10,23,208,16,12);
         text(panel.device,10,39,208,16,12);text(L"Res  "+std::to_wstring(desc.BufferDesc.Width)+L"×"+std::to_wstring(desc.BufferDesc.Height),10,55,208,16,12);
         text(rate(panel.fps.current),225,5,75,56,48,true,DT_RIGHT);
         const int footer=desired_height-20;
@@ -121,4 +121,5 @@ bool PixelTransaction::restore(std::string& reason) noexcept {
     }catch(const std::exception& e){reason=e.what();}catch(...){reason="HUD pixel restoration failed";}
     SetLastError(last);return false;
 }
+void PixelTransaction::discard_backup() noexcept {impl_->modified=false;}
 }

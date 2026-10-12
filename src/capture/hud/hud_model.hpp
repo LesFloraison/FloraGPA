@@ -17,6 +17,7 @@ struct Hotkey {
 };
 Hotkey parse_hotkey(std::string_view text);
 std::string hotkey_name(const Hotkey& key);
+std::string failure_summary(std::string_view reason);
 struct Settings {
     Mode mode=Mode::Compact;
     Hotkey mode_key{0x70,true,false,false};

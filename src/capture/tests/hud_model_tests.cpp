@@ -11,6 +11,8 @@ int main(){try{
     for(const auto text:{"","Ctrl","Ctrl+","Ctrl+Ctrl+C","C","Ctrl+c","Win+C","Ctrl+F0","Ctrl+F25","Ctrl+F01","Ctrl+C+F1","Ctrl++C"})rejects([&]{parse_hotkey(text);});
     settings.capture_key=settings.mode_key;rejects([&]{settings.validate();});
     settings.mode_key={};settings.capture_key={};settings.validate();
+    require(failure_summary("ID3D11DeviceContext::ClearRenderTargetView: MSAA sample-preserving capture is not implemented")=="Capture failed: MSAA","MSAA summary hides cause");
+    require(failure_summary("API: Device removed")=="Capture failed: Device removed" && failure_summary("")=="Capture failed","Failure summary");
     require(parse_mode("off")==Mode::Hidden,"Hidden mode");rejects([]{parse_mode("unknown");});
     std::array<bool,256> keys{};KeyEdge edge;const auto capture=parse_hotkey("Ctrl+Shift+C");
     require(!edge.update(capture,keys,true),"Initial focus");keys[0x11]=keys[0x10]=keys['C']=true;

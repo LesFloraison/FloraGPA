@@ -13,6 +13,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     for name in ('captures', 'replay', 'oracle-tools', 'qt-bin', 'out'):
         parser.add_argument('--'+name, type=Path, required=True)
+    parser.add_argument('--flip', action='store_true', help='Expect the native flip Present RTV-unbinding diagnostic')
     args = parser.parse_args()
     out = args.out.resolve()
     out.mkdir(parents=True, exist_ok=False)
@@ -71,7 +72,10 @@ def main():
             check(name+'-exact-original-pixels', original['replayed_rgba_sha256'] == hashlib.sha256(pixels).hexdigest())
             check(name+'-executed', flora['reference_pixels_used'] is False and original['new_framebuffer_count'] > 0 and original['native']['open_status'] == 0 and original['native']['playback_status'] == 0 and original['native']['closed'])
             check(name+'-reference-control', original['comparison_to_captured_resource']['rgba_equal'] is (label == 'captured'))
-            check(name+'-no-hud-commands', flora['counts'] == {'UpdateSubresource': 1, 'Draw': 1, 'Present': 1})
+            expected_counts = {'UpdateSubresource': 1, 'Draw': 1, 'Present': 1}
+            if args.flip:
+                expected_counts['present_rtv_unbinds'] = 1
+            check(name+'-no-hud-commands', flora['counts'] == expected_counts)
         name = f'{index}-inventory'
         run(name, [args.replay.resolve(), 'inventory', source, '--out', out/name])
         inventory = json.loads((out/name/'report.json').read_text())

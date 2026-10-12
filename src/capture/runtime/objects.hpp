@@ -1,6 +1,7 @@
 #pragma once
 #include "protocol.hpp"
 #include "metadata.hpp"
+#include "presentation_access.hpp"
 #include <d3d11_4.h>
 #include <dxgi1_6.h>
 #include <algorithm>

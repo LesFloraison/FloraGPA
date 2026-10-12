@@ -116,6 +116,7 @@ void wrap_object(REFIID iid, void** output, const char* api) noexcept {
     if (!output || !*output) return;
     const DWORD before = GetLastError(); IUnknown* identity = nullptr;
     try {
+        PresentationLock aliases(presentation_alias_mutex());
         auto& r = registry();
         {
             std::lock_guard lock(r.mutex);
@@ -175,6 +176,7 @@ void wrap_object(REFIID iid, void** output, const char* api) noexcept {
 void* unwrap_object(const void* input, REFIID iid) {
     if (!input) return nullptr;
     const DWORD before = GetLastError();
+    PresentationLock aliases(presentation_alias_mutex());
     auto& r = registry(); std::lock_guard lock(r.mutex);
     auto found = r.proxies.find(input);
     void* result = found == r.proxies.end() ? const_cast<void*>(input) : found->second->native(iid);
@@ -188,7 +190,7 @@ Json object_status() {
         result = {{"created",r.created}, {"destroyed",r.destroyed}, {"active",r.native.size()},
             {"interface_gaps",r.gaps}, {"last_gap",r.last_gap}, {"lost_diagnostics",lost_diagnostics.load()}, {"recording_profile","immediate capture and supported precompiled deferred actions; unsupported GPU calls reject"}};
     }
-    result["metadata"] = metadata_status(); return result;
+    result["metadata"] = metadata_status();result["presentation_storage"]=presentation_status(); return result;
 }
 std::shared_ptr<ObjectRecord> object_record(const void* proxy) {
     auto& r = registry(); Object* owner = nullptr;

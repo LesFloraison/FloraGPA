@@ -37,6 +37,11 @@ Run run(DXGI_SWAP_EFFECT effect,UINT count,bool isolated,bool tearing,bool nonse
     texture.Usage=D3D11_USAGE_STAGING;texture.CPUAccessFlags=D3D11_CPU_ACCESS_READ;check(device->CreateTexture2D(&texture,nullptr,&stage));
     const auto read=[&](ID3D11Texture2D* source){context->CopyResource(stage.Get(),source);D3D11_MAPPED_SUBRESOURCE mapped{};check(context->Map(stage.Get(),0,D3D11_MAP_READ,0,&mapped));Pixels pixels{};for(UINT y=0;y<extent;++y)memcpy(pixels.data()+y*extent,static_cast<uint8_t*>(mapped.pData)+size_t(y)*mapped.RowPitch,extent*4);context->Unmap(stage.Get(),0);return pixels;};
     Pixels base{};base.fill(0xff603020u);for(UINT slot=0;slot<clean.size();++slot)context->UpdateSubresource(clean.buffer(slot),0,nullptr,base.data(),extent*4,0);
+    ComPtr<ID3D11Predicate> predicate;D3D11_QUERY_DESC query{D3D11_QUERY_OCCLUSION_PREDICATE,0};check(device->CreatePredicate(&query,&predicate));context->Begin(predicate.Get());context->End(predicate.Get());BOOL observed=TRUE;const auto deadline=GetTickCount64()+5000;HRESULT query_result=S_FALSE;while((query_result=context->GetData(predicate.Get(),&observed,sizeof observed,0))==S_FALSE && GetTickCount64()<deadline)Sleep(1);require(query_result==S_OK && !observed,"Empty predicate did not resolve false");
+    const auto predicated_private_copy=[&](UINT frame,auto&& operation){
+        const BOOL value=BOOL(frame%2);context->SetPredication(predicate.Get(),value);operation();
+        ComPtr<ID3D11Predicate> actual;BOOL actual_value=FALSE;context->GetPredication(&actual,&actual_value);require(actual==predicate && actual_value==value,"Private copies changed application predication");context->SetPredication(nullptr,FALSE);
+    };
     Run result;const UINT flags=(tearing?DXGI_PRESENT_ALLOW_TEARING:0)|(nonsequencing?DXGI_PRESENT_DO_NOT_SEQUENCE:0);
     // Warm up all native slots; no assumption about initial undefined contents.
     for(UINT i=0;i<count;++i){context->UpdateSubresource(real.Get(),0,nullptr,base.data(),extent*4,0);require(swap->Present(tearing?0:1,flags&~DXGI_PRESENT_DO_NOT_SEQUENCE)==S_OK,"Warmup Present did not succeed");}
@@ -55,7 +60,8 @@ Run run(DXGI_SWAP_EFFECT effect,UINT count,bool isolated,bool tearing,bool nonse
             clean.advance(E_FAIL,0);clean.advance(DXGI_STATUS_OCCLUDED,0);
             require(GetLastError()==0x4312,"Clean ring no-op changed LastError");
             for(UINT slot=0;slot<count;++slot)require(read(clean.buffer(slot))==unchanged[slot],"Non-rotating result changed clean buffers");
-            clean.prepare(swap.Get(),flags);
+            predicated_private_copy(frame,[&]{clean.prepare(swap.Get(),flags);});
+            require(read(real.Get())==read(application),"Predicate suppressed private presentation copy");
             const uint32_t green=0xff00ff00u;D3D11_BOX hud{0,0,0,1,1,1};context->UpdateSubresource(real.Get(),0,&hud,&green,4,0);
             require(read(real.Get())[0]==green,"Decorated presentation surface missing HUD marker");
             require(read(application)[0]==base[0],"HUD changed application surface before Present");++result.decorated;
@@ -64,7 +70,7 @@ Run run(DXGI_SWAP_EFFECT effect,UINT count,bool isolated,bool tearing,bool nonse
         const auto hr=frame%2?swap->Present1(tearing?0:1,flags,&parameters):swap->Present(tearing?0:1,flags);
         require(hr==S_OK,"Present did not succeed");
         if(isolated){
-            clean.advance(hr,flags);
+            predicated_private_copy(frame,[&]{clean.advance(hr,flags);});
         }
         if(effect!=DXGI_SWAP_EFFECT_FLIP_DISCARD){
             for(UINT slot=0;slot<count;++slot){

@@ -3,6 +3,7 @@
 #include "objects.hpp"
 #include "capture_session.hpp"
 #include "hud_control.hpp"
+#include "presentation_storage.hpp"
 #include <atomic>
 #include <map>
 #include <memory>
@@ -49,6 +50,29 @@ class SwapChain final:public IDXGISwapChain4,public IDXGISwapChainMedia {
     IUnknown* identity_; // Weak canonical identity; real_ owns its lifetime.
     std::uint64_t id_;
     ULONG references_=1; // Guarded by Registry::mutex.
+    std::unique_ptr<PresentationStorage> storage_;
+
+    void initialize_storage() noexcept {
+        const auto error=GetLastError();
+        if(hud_connected())try{NativeCall internal;storage_=std::make_unique<PresentationStorage>(real_);}catch(...){storage_.reset();}
+        SetLastError(error);
+    }
+    bool prepare_storage(UINT flags) noexcept {
+        const auto error=GetLastError();bool good=true;
+        if(storage_)try{NativeCall internal;storage_->before_present(real_,flags);}catch(const std::exception& e){object_gap("HUD presentation storage",__uuidof(IDXGISwapChain),e.what());good=false;}catch(...){object_gap("HUD presentation storage",__uuidof(IDXGISwapChain),"Preparation failed");good=false;}
+        SetLastError(error);return good;
+    }
+    bool complete_storage(UINT flags,HRESULT result) noexcept {
+        const auto error=GetLastError();bool good=true;
+        if(storage_)try{NativeCall internal;storage_->after_present(real_,flags,result);}catch(const std::exception& e){object_gap("HUD presentation storage",__uuidof(IDXGISwapChain),e.what());good=false;}catch(...){object_gap("HUD presentation storage",__uuidof(IDXGISwapChain),"Completion failed");good=false;}
+        SetLastError(error);return good;
+    }
+    void restore_storage_after_resize(HRESULT result) noexcept {
+        const auto error=GetLastError();
+        if(SUCCEEDED(result)){storage_.reset();initialize_storage();}
+        else if(storage_)try{NativeCall internal;storage_->attach(real_);}catch(...){object_gap("HUD Resize",__uuidof(IDXGISwapChain),"Cannot restore presentation aliases after failed Resize");}
+        SetLastError(error);
+    }
 
     template<class F> void observe(F&& f) noexcept {
         const DWORD error=GetLastError();
@@ -93,7 +117,7 @@ class SwapChain final:public IDXGISwapChain4,public IDXGISwapChainMedia {
         });SetLastError(error);
     }
 public:
-    SwapChain(IDXGISwapChain* real,IUnknown* identity,std::uint64_t id):real_(real),identity_(identity),id_(id){}
+    SwapChain(IDXGISwapChain* real,IUnknown* identity,std::uint64_t id):real_(real),identity_(identity),id_(id){initialize_storage();}
     // Caller holds registry lock; consumes another native returned reference.
     void adopt(IDXGISwapChain* returned){++references_;real_->AddRef();returned->Release();}
     HRESULT STDMETHODCALLTYPE QueryInterface(REFIID iid,void** output) override {
@@ -118,6 +142,8 @@ public:
     }
     ULONG STDMETHODCALLTYPE Release() override {
         const DWORD before=GetLastError();
+        PresentationLock context_access(presentation_context_mutex());
+        PresentationLock alias_access(presentation_alias_mutex());
         auto& r=registry();bool destroy=false;IDXGISwapChain* real=real_;
         {
             std::lock_guard<std::mutex> lock(r.mutex);
@@ -136,6 +162,7 @@ public:
         const auto result=real_->GetDevice(iid,output);if(SUCCEEDED(result))wrap_object(iid,output,"IDXGISwapChain::GetDevice");return result;
     }
     HRESULT STDMETHODCALLTYPE GetBuffer(UINT index,REFIID iid,void** output) override {
+        PresentationLock alias_access(presentation_alias_mutex());
         const auto result=real_->GetBuffer(index,iid,output);if(SUCCEEDED(result))wrap_object(iid,output,"IDXGISwapChain::GetBuffer");return result;
     }
     HRESULT STDMETHODCALLTYPE GetContainingOutput(IDXGIOutput** output) override {
@@ -153,31 +180,39 @@ public:
         escaped("GetCoreWindow (window not wrapped)",iid,result,output);return result;
     }
     HRESULT STDMETHODCALLTYPE Present(UINT interval,UINT flags) override {
+        const auto before=GetLastError();PresentationLock context_access(presentation_context_mutex());SetLastError(before);
         hud_input(flags,real_);
         capture_before_present(id_,real_,flags,false);
-        HudDraw hud;hud.begin(id_,real_,flags,false);
+        const bool prepared=prepare_storage(flags);
+        HudDraw hud;if(prepared)hud.begin(id_,real_,flags,false,bool(storage_));
         const auto result=real_->Present(interval,flags);const auto ordinal=presented(flags,result,false,interval);
-        const bool clean=hud.restore();
+        bool clean=true;if(storage_){hud.discard_backup();clean=complete_storage(flags,result);}else clean=hud.restore();clean&=prepared;
         hud_presented(id_,flags,result);
         capture_after_present(id_,real_,interval,flags,false,clean?result:E_FAIL,ordinal);return result;
     }
     HRESULT STDMETHODCALLTYPE Present1(UINT interval,UINT flags,const DXGI_PRESENT_PARAMETERS* parameters) override {
+        const auto before=GetLastError();PresentationLock context_access(presentation_context_mutex());SetLastError(before);
         hud_input(flags,real_);
         capture_before_present(id_,real_,flags,parameters && (parameters->DirtyRectsCount || parameters->pScrollRect || parameters->pScrollOffset));
-        HudDraw hud;hud.begin(id_,real_,flags,parameters && (parameters->DirtyRectsCount || parameters->pScrollRect || parameters->pScrollOffset));
+        const bool prepared=prepare_storage(flags);
+        HudDraw hud;if(prepared)hud.begin(id_,real_,flags,parameters && (parameters->DirtyRectsCount || parameters->pScrollRect || parameters->pScrollOffset),bool(storage_));
         const auto result=extended<IDXGISwapChain1>([&](auto* p){return p->Present1(interval,flags,parameters);});
-        const bool clean=hud.restore();
+        bool clean=true;if(storage_){hud.discard_backup();clean=complete_storage(flags,result);}else clean=hud.restore();clean&=prepared;
         hud_presented(id_,flags,result);
         const auto ordinal=presented(flags,result,true,interval);capture_after_present(id_,real_,interval,flags,true,clean?result:E_FAIL,ordinal);return result;
     }
     HRESULT STDMETHODCALLTYPE ResizeBuffers(UINT count,UINT width,UINT height,DXGI_FORMAT format,UINT flags) override {
+        const auto before=GetLastError();PresentationLock context_access(presentation_context_mutex());PresentationLock alias_access(presentation_alias_mutex());
         capture_invalidate_swap(id_,"ResizeBuffers interrupted capture");
-        const auto result=real_->ResizeBuffers(count,width,height,format,flags);resized(result);return result;
+        if(storage_)storage_->detach();SetLastError(before);
+        const auto result=real_->ResizeBuffers(count,width,height,format,flags);restore_storage_after_resize(result);resized(result);return result;
     }
     HRESULT STDMETHODCALLTYPE ResizeBuffers1(UINT count,UINT width,UINT height,DXGI_FORMAT format,UINT flags,const UINT* masks,IUnknown* const* queues) override {
+        const auto before=GetLastError();PresentationLock context_access(presentation_context_mutex());PresentationLock alias_access(presentation_alias_mutex());
         capture_invalidate_swap(id_,"ResizeBuffers1 interrupted capture");
+        if(storage_)storage_->detach();SetLastError(before);
         const auto result=extended<IDXGISwapChain3>([&](auto* p){return p->ResizeBuffers1(count,width,height,format,flags,masks,queues);});
-        resized(result);return result;
+        restore_storage_after_resize(result);resized(result);return result;
     }
     HRESULT STDMETHODCALLTYPE GetFrameStatisticsMedia(DXGI_FRAME_STATISTICS_MEDIA* statistics) override {
         return extended<IDXGISwapChainMedia>([&](auto* p){return p->GetFrameStatisticsMedia(statistics);});
@@ -226,6 +261,7 @@ void wrap_swap_chain(IDXGISwapChain** output) noexcept {
     if(!output || !*output)return;
     const DWORD error=GetLastError();IUnknown* identity=nullptr;
     try{
+        PresentationLock context_access(presentation_context_mutex());PresentationLock alias_access(presentation_alias_mutex());
         IDXGISwapChain* real=*output;
         auto& r=registry();
         {std::lock_guard<std::mutex> lock(r.mutex);if(r.wrappers.count(real)){SetLastError(error);return;}}

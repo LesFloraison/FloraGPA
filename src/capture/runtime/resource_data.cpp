@@ -1,5 +1,6 @@
 #include "resource_data.hpp"
 #include "objects.hpp"
+#include "presentation_resources.hpp"
 #include <wrl/client.h>
 #include <limits>
 #include <cstring>
@@ -58,6 +59,9 @@ ComPtr<ID3D11Device> snapshot_device(ID3D11DeviceContext* context,ID3D11Resource
 }
 ResourceShape resource_shape(ID3D11Resource* resource){
     if(!resource)throw std::runtime_error("Missing native resource");
+    // Private typeless storage is byte-compatible with the public swap format.
+    // Snapshots and wire descriptors describe the application resource.
+    auto original=presentation_validation_resource(resource);if(original)resource=original.Get();
     ResourceShape s;resource->GetType(&s.dimension);
     switch(s.dimension){
     case D3D11_RESOURCE_DIMENSION_BUFFER:{ComPtr<ID3D11Buffer> v;check(resource->QueryInterface(IID_PPV_ARGS(&v)),"Query buffer");D3D11_BUFFER_DESC d{};v->GetDesc(&d);s.width=d.ByteWidth;s.misc_flags=d.MiscFlags;break;}

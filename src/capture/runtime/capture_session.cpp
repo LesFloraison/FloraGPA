@@ -3,6 +3,7 @@
 #include "objects.hpp"
 #include "swap_chain.hpp"
 #include "encoder.hpp"
+#include "presentation_resources.hpp"
 #include <thread>
 #include <optional>
 
@@ -68,6 +69,7 @@ void finish(Request& r,IDXGISwapChain* swap){
         ComPtr<IUnknown> current,retained;
         check(swap->GetBuffer(0,IID_PPV_ARGS(&current)),"Cannot identify ending backbuffer");
         check(unwrap(r.buffer.Get())->QueryInterface(IID_PPV_ARGS(&retained)),"Cannot identify retained backbuffer");
+        retained=presentation_identity(retained.Get());
         if(current!=retained)throw std::runtime_error("DX11 logical backbuffer identity changed during capture");
     }
     if(r.owner!=GetCurrentThreadId())throw std::runtime_error("Present moved to another application thread");

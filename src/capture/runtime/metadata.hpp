@@ -46,7 +46,7 @@ std::shared_ptr<ObjectRecord> track_native_object(IUnknown* identity);
 std::shared_ptr<ObjectRecord> find_native_record(IUnknown* identity);
 void track_query(const void* context_proxy, IUnknown* query, bool begin) noexcept;
 void track_external_mapping(const void* proxy,bool mapped) noexcept;
-bool has_external_mapping(bool include_resource_mappings=false);
+bool has_external_mapping(bool include_resource_mappings=false,bool ignore_buffer_mappings=false);
 Json metadata_status();
 void observe_private_data(REFGUID key, const char* api) noexcept;
 // Input is an application proxy; these functions never issue GPU commands.
