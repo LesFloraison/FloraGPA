@@ -3859,6 +3859,13 @@
     }
   ],
   "independent_capture": {
+    "hud": {
+      "status": "foundation_only",
+      "evidence": "docs/CAPTURE_HUD.md",
+      "rendering_accepted": false,
+      "blocker": "Multi-buffer Present rotates storage behind stable COM identities; submitted buffers cannot be restored by the naive copy-back algorithm. Retained-content and exclusive-fullscreen isolation remain unverified.",
+      "validation": "HUD model, capture boundaries, shared-request injected controller and bootstrap tests pass; no HUD rendering or hotkey integration acceptance yet."
+    },
     "status": "partial",
     "profile": "GPA 2025 R1 legacy DX11 / IGPA v3",
     "production_frame_capture": false,

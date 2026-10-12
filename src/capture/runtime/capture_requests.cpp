@@ -1,0 +1,46 @@
+#include "capture_requests.hpp"
+#include "capture_session.hpp"
+#include "capture_model.hpp"
+#include "objects.hpp"
+#include "swap_chain.hpp"
+#include <mutex>
+
+namespace flora::capture {
+namespace {
+struct Requests {std::mutex mutex;std::filesystem::path directory;bool connected=false;};
+Requests& requests(){static auto* value=new Requests;return *value;}
+}
+void configure_capture_requests(const std::filesystem::path& directory){
+    if(!directory.is_absolute() || !std::filesystem::is_directory(directory))throw std::invalid_argument("Invalid capture output directory");
+    auto& r=requests();std::lock_guard lock(r.mutex);
+    if(!r.directory.empty())throw std::logic_error("Capture requests already configured");
+    r.directory=directory;r.connected=true;
+}
+bool capture_requests_connected(){auto& r=requests();std::lock_guard lock(r.mutex);return r.connected;}
+bool eligible_capture_swap(const Json& row){
+    return row.value("recent_present",false) && row.value("successful_presents",0ull)>=2 &&
+        supported_swap_buffers(row.value("swap_effect",99u),row.value("buffer_count",0u)) && row.value("samples",0u)==1 &&
+        (row.value("format",0u)==DXGI_FORMAT_R8G8B8A8_UNORM || row.value("format",0u)==DXGI_FORMAT_B8G8R8A8_UNORM);
+}
+bool capture_request_available(const Json& swaps,const Json& objects){
+    if(!capture_requests_connected() || objects.value("interface_gaps",0ull) || swaps.value("tracking_failures",0u))return false;
+    for(const auto& row:swaps["active"])if(eligible_capture_swap(row))return true;return false;
+}
+Json submit_capture_request(uint64_t selected,const std::string& request_id){
+    pipe_name(request_id);
+    auto& r=requests();std::lock_guard lock(r.mutex);
+    if(!r.connected)return {{"ok",false},{"error","disconnected"}};
+    if(capture_progress().value("busy",false))return {{"ok",false},{"error","busy"}};
+    const auto swaps=swap_chain_status(),objects=object_status();
+    if(objects.value("interface_gaps",0ull) || swaps.value("tracking_failures",0u))return {{"ok",false},{"error","capture_capability_incomplete"}};
+    std::vector<uint64_t> candidates;bool available=false;
+    for(const auto& row:swaps["active"]){
+        if(!eligible_capture_swap(row))continue;available=true;
+        if(selected?row["id"]==selected:row.value("foreground",false))candidates.push_back(row["id"].get<uint64_t>());
+    }
+    if(!available)return {{"ok",false},{"error","capture_capability_incomplete"}};
+    if(candidates.size()!=1)return {{"ok",false},{"error",selected?"swap_chain_unavailable":"swap_chain_selection_required"}};
+    return arm_capture(candidates.front(),r.directory/("frame-"+request_id+".gpa_frame"));
+}
+void disconnect_capture_requests(){auto& r=requests();std::lock_guard lock(r.mutex);r.connected=false;disconnect_capture();}
+}

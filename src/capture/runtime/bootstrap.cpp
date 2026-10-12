@@ -5,6 +5,7 @@
 #include "factory.hpp"
 #include "objects.hpp"
 #include "capture_session.hpp"
+#include "capture_requests.hpp"
 #include "capture_model.hpp"
 #include <filesystem>
 #include <d3d11.h>
@@ -73,12 +74,6 @@ struct Security {
 };
 std::string service_session;
 std::filesystem::path capture_directory;
-bool service_disconnected=false;
-bool eligible(const Json& row){
-    return row.value("recent_present",false) && row.value("successful_presents",0ull)>=2 &&
-        supported_swap_buffers(row.value("swap_effect",99u),row.value("buffer_count",0u)) && row.value("samples",0u)==1 &&
-        (row.value("format",0u)==DXGI_FORMAT_R8G8B8A8_UNORM || row.value("format",0u)==DXGI_FORMAT_B8G8R8A8_UNORM);
-}
 Json response(const Json& message,ULONG client_pid){
     Json result={{"ok",false},{"version",protocol_version},{"request_id",message.value("request_id",std::string())},
                  {"session_id",service_session},{"pid",GetCurrentProcessId()}};
@@ -90,31 +85,18 @@ Json response(const Json& message,ULONG client_pid){
     pipe_name(message.at("request_id").get<std::string>());
     const auto command=message.value("command",std::string());
     const auto swaps=swap_chain_status();const auto objects=object_status();
-    bool available=false;
-    for(const auto& row:swaps["active"])available=available || eligible(row);
-    available=available && objects.value("interface_gaps",0ull)==0 && swaps.value("tracking_failures",0u)==0 && !service_disconnected;
+    bool available=capture_request_available(swaps,objects);
     result["ok"]=true;
     if(command=="capture"){
-        if(service_disconnected){result["ok"]=false;result["error"]="disconnected";}
-        else if(capture_progress().value("busy",false)){result["ok"]=false;result["error"]="busy";}
-        else if(!available){result["ok"]=false;result["error"]="capture_capability_incomplete";}
-        else{
-            uint64_t selected=message.value("swap_chain",0ull);std::vector<uint64_t> candidates;
-            for(const auto& row:swaps["active"])if(eligible(row) && (selected?row["id"]==selected:row.value("foreground",false)))candidates.push_back(row["id"].get<uint64_t>());
-            if(candidates.size()!=1){result["ok"]=false;result["error"]=selected?"swap_chain_unavailable":"swap_chain_selection_required";}
-            else{
-                const auto name="frame-"+message.at("request_id").get<std::string>()+".gpa_frame";
-                const auto armed=arm_capture(candidates.front(),capture_directory/name);
-                result["ok"]=armed.value("ok",false);if(armed.contains("error"))result["error"]=armed["error"];
-            }
-        }
+        const auto armed=submit_capture_request(message.value("swap_chain",0ull),message.at("request_id").get<std::string>());
+        result["ok"]=armed.value("ok",false);if(armed.contains("error"))result["error"]=armed["error"];
     }else if(command=="cancel"){
         const auto cancelled=cancel_capture();result["cancelled"]=cancelled.value("cancelled",false);
     }else if(command=="disconnect"){
-        disconnect_capture();service_disconnected=true;available=false;
+        disconnect_capture_requests();available=false;
     }else if(command!="status"){result["ok"]=false;result["error"]="unknown_command";}
     const auto progress=capture_progress();const auto phase=progress.value("state",std::string("Tracking"));
-    result["state"]=service_disconnected?"Disconnected":progress.value("busy",false)?phase:creations.load()?"Tracking":"Starting";
+    result["state"]=!capture_requests_connected()?"Disconnected":progress.value("busy",false)?phase:creations.load()?"Tracking":"Starting";
     result["capture_progress"]=progress;
     if(phase=="Completed" || phase=="Cancelled" || phase=="Failed"){
         result["last_capture"]=progress;
@@ -147,6 +129,7 @@ DWORD WINAPI serve(void*){
         wchar_t output[32768]{};const auto count=GetEnvironmentVariableW(L"FLORAGPA_CAPTURE_OUTPUT",output,32768);
         if(!count || count>=32768)return ERROR_INVALID_PARAMETER;
         capture_directory=output;if(!capture_directory.is_absolute() || !std::filesystem::is_directory(capture_directory))return ERROR_INVALID_PARAMETER;
+        configure_capture_requests(capture_directory);
         const auto name=pipe_name(session);Security security;
         Handle pipe(CreateNamedPipeW(name.c_str(),PIPE_ACCESS_DUPLEX|FILE_FLAG_OVERLAPPED|FILE_FLAG_FIRST_PIPE_INSTANCE,
             PIPE_TYPE_BYTE|PIPE_READMODE_BYTE|PIPE_WAIT|PIPE_REJECT_REMOTE_CLIENTS,1,max_message,max_message,0,&security.attributes));
