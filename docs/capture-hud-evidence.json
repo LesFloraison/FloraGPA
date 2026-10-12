@@ -9,7 +9,7 @@
   "comparison": "Exact integer resource and RGBA bytes; no relaxed thresholds",
   "pending": [
     "General concurrent-context and external-interface stress",
-    "Raw-input-only hotkeys",
+    "Buffered-only Raw Input hotkeys",
     "Broader DPI/resolution matrix",
     "Native long-hold/focus stress and complete hidden-state failure matrix",
     "Driver/device-loss and cancellation/cleanup failure matrix",
@@ -440,6 +440,110 @@
       "validation_sha256": "1a2b4eecef4fff0772adc04bc4dde720187bca2ceff7cd490c2c29dc3eedcf15",
       "status_sha256": "1e6d695bf76f298cdd6a4103b2031c8b80a7ba6809269dc2e3d427293490e9e1",
       "clean_archive_rebuild_this_revision": false
+    }
+  },
+  "raw_input_progress": {
+    "implementation_base": "db8855f",
+    "status": "standard raw and legacy message input verified; remaining input gates explicit",
+    "raw_only": {
+      "frames": 3,
+      "checks": 82,
+      "exit": {
+        "exact_retained_pixels": true,
+        "frames": 15064,
+        "mode": "raw"
+      },
+      "legacy_key_events": 0,
+      "background_requests_ignored": true,
+      "background_mode_ignored": true,
+      "foreground_recovered": true,
+      "disconnect_application_received_extra_events": 6,
+      "disconnect_runtime_received_extra_events": 0,
+      "registration_unchanged": true,
+      "validation_sha256": "1a2b4eecef4fff0772adc04bc4dde720187bca2ceff7cd490c2c29dc3eedcf15"
+    },
+    "mixed_input": {
+      "frames": 1,
+      "checks": 28,
+      "mode_transitions": 1,
+      "raw_trigger_events": 0,
+      "application_receives_both_channels": true,
+      "exit": {
+        "exact_retained_pixels": true,
+        "frames": 2117,
+        "mode": "raw-legacy"
+      },
+      "validation_sha256": "6c7f181214f19e516bd71dce6d204b1f809023a575121c4ed4f83325891dbade"
+    },
+    "capture_only_ctest": "61/61",
+    "capture_ctest_sha256": "fcfbf37ca46d50a6ae84292182725193234efa4d954b02a78c5b92748c7b178a",
+    "retained_failure": "Generic Shift with MakeCode zero was not normalized; fixed after bounded fixture data proved the cause",
+    "model_scope": "1000 repeated makes; independent modifiers; foreground/held-key/extra-modifier/invalid-key/focus resynchronization",
+    "pending": [
+      "Physical long hold",
+      "Buffered-only raw input",
+      "Additional native input-thread/registration lifecycle stress"
+    ],
+    "artifacts": [
+      "artifacts\\capture-hud-raw-verified",
+      "artifacts\\capture-hud-dual-input",
+      "artifacts/capture-hud-raw-live",
+      "artifacts/capture-hud-raw-live2"
+    ],
+    "full_focused_ctest": "7/7 including 12 Qt cases",
+    "full_focused_ctest_sha256": "96d9a7fbf9c29338c15d24e9834a173df9b1ab6391e7cd92d2cc860519574b2f",
+    "binary_sha256": {
+      "FloraCaptureRuntime.dll": "dccb3ae3cb69adfe3041f757e3ca750a5ba5aa566939db6b2f93d1544806af32",
+      "FloraCaptureHudLiveTarget.exe": "6933321a016260279fef7fd89f2022a6e98afd967caa5e7a5f1d8beb7b9dffcc",
+      "FloraCaptureHudFocusTarget.exe": "2c13c9c0b916bdad08a12951f84f886f12c4ec227b3d60cf3ae4b2ba305f6ee8"
+    },
+    "gf2_final_regression": {
+      "artifacts": "artifacts/capture-hud-raw-gf2",
+      "capture": "frame-86e68d7f-d652-4025-ada6-5d31db0fc050.gpa_frame",
+      "capture_sha256": "1aebee0a065807b3b7fcfd239b0ae1f78a79848a8379ee055185f6de1dcfd44e",
+      "rgba_sha256": "505ea67881239914f740b1d369a89236ad04f90735fc49b418acee0e4d44db42",
+      "width": 2560,
+      "height": 1440,
+      "preview_exact": true,
+      "dual_player_exact": true,
+      "original_resource_exact": true,
+      "flora_reference_pixels_used": false,
+      "counts": {
+        "ClearDepthStencilView": 4,
+        "ClearRenderTargetView": 2,
+        "Draw": 1,
+        "DrawIndexed": 21,
+        "Map": 13,
+        "Present": 1,
+        "present_rtv_unbinds": 1,
+        "query_completion_unresolved": 1,
+        "query_end_observations": 1,
+        "query_metadata_records": 3,
+        "unmap_observations": 13
+      },
+      "original_native": {
+        "player_dll": "C:\\Program Files\\IntelSWTools\\GPA\\dx11_player.dll",
+        "player_sha256": "39061ff329e4a32d0c8375ce9ee15e2017bccab0593943b962a860e11723d38b",
+        "adapter_selection": "Original kernel default (undefined GpuId)",
+        "callbacks": [],
+        "open_status": 0,
+        "playback_status": 0,
+        "closed": true
+      },
+      "main_first_failure": "MSAA sample-preserving capture is not implemented",
+      "main_repeat_failure": "Unmap has no recorded successful Map",
+      "published_files": 1,
+      "disconnect_hud_visible": false,
+      "disconnect_input_threads": 0,
+      "normal_exit_requested": true
+    },
+    "source_sha256": {
+      "src/capture/runtime/hud_control.cpp": "1be587db631c4db8c421d30c8eef0c3f7d39ff2bf384789eac0d3cc5a8243dfd",
+      "src/capture/hud/hud_model.cpp": "0f380b9730b31a325503eaa9cf2354aa9c42ad6383db4e67a9b8290c91e53d93",
+      "src/capture/hud/hud_model.hpp": "d08363180e36c31f45ba03651bc557e5199ea6a0d63080cc7db0aa2f7960e247",
+      "src/capture/tests/hud_model_tests.cpp": "c4a798f89cb491339de7890b834de3d1cf6602fc9edee3f322eb5ab202c6ae2c",
+      "src/capture/tests/hud_live_target.cpp": "12a9dd456a354f3b66d43a13d3dae1c5063d02a78fd2ee2e58986e9307ebd845",
+      "src/capture/tests/hud_focus_target.cpp": "2e3db739a7d10a3336ba7e8d80b66a35d43f790aa29587d5b443db7ef7ed0a14"
     }
   }
 }

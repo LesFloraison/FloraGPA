@@ -11,6 +11,8 @@
 #include <map>
 #include <mutex>
 #include <thread>
+#include <vector>
+#include <set>
 
 namespace flora::capture {
 namespace {
@@ -21,6 +23,9 @@ struct Control {
     hud::Settings settings;
     bool mode_edge=false,capture_edge=false;
     std::map<DWORD,HHOOK> hooks;
+    std::map<DWORD,hud::RawKeyboard> raw_keys;
+    uint64_t raw_events=0,legacy_events=0;
+    bool raw_focused=false;
     std::string input_error;
     std::map<uint64_t,hud::FrameClock> clocks;
     hud::Message message;
@@ -32,6 +37,21 @@ struct Control {
     std::map<uint64_t,Visibility> visibility;
 };
 Control& control(){static auto* value=new Control;return *value;}
+std::array<bool,256> raw_key_snapshot(const hud::Settings& settings){
+    std::array<bool,256> keys{};
+    for(const auto key:{UINT(VK_LSHIFT),UINT(VK_RSHIFT),UINT(VK_LCONTROL),UINT(VK_RCONTROL),UINT(VK_LMENU),UINT(VK_RMENU),UINT(VK_LWIN),UINT(VK_RWIN),settings.mode_key.key,settings.capture_key.key})if(key)keys[key]=(GetAsyncKeyState(int(key))&0x8000)!=0;
+    return keys;
+}
+void raw_focus(Control& c,bool focused){
+    if(c.raw_focused==focused)return;c.raw_focused=focused;
+    const auto keys=raw_key_snapshot(c.settings);for(auto& [thread,keyboard]:c.raw_keys){(void)thread;keyboard.seed(keys,focused,c.settings);}
+}
+void input_failure(const char* reason) noexcept {try{auto& c=control();std::lock_guard lock(c.mutex);c.input_error=reason;}catch(...){}}
+std::vector<RAWINPUTDEVICE> keyboard_registrations(){
+    UINT count=0;if(GetRegisteredRawInputDevices(nullptr,&count,sizeof(RAWINPUTDEVICE))==UINT(-1) || count>256)throw std::runtime_error("Cannot inspect raw keyboard registrations");
+    std::vector<RAWINPUTDEVICE> devices(count);if(count && GetRegisteredRawInputDevices(devices.data(),&count,sizeof(RAWINPUTDEVICE))==UINT(-1))throw std::runtime_error("Raw keyboard registrations changed");
+    devices.resize(count);std::erase_if(devices,[](const auto& device){return device.usUsagePage!=1 || device.usUsage!=6;});return devices;
+}
 LRESULT CALLBACK keyboard_message(int code,WPARAM removed,LPARAM parameter){
     const auto error=GetLastError();
     try{if(code==HC_ACTION && removed==PM_REMOVE){const auto& message=*reinterpret_cast<const MSG*>(parameter);
@@ -39,10 +59,27 @@ LRESULT CALLBACK keyboard_message(int code,WPARAM removed,LPARAM parameter){
             DWORD foreground=0;GetWindowThreadProcessId(GetForegroundWindow(),&foreground);
             if(foreground==GetCurrentProcessId()){
                 const auto matches=[&](const hud::Hotkey& key){return key.key && message.wParam==key.key && bool(GetKeyState(VK_CONTROL)&0x8000)==key.control && bool(GetKeyState(VK_SHIFT)&0x8000)==key.shift && bool(GetKeyState(VK_MENU)&0x8000)==key.alt && !(GetKeyState(VK_LWIN)&0x8000) && !(GetKeyState(VK_RWIN)&0x8000);};
-                auto& c=control();std::lock_guard lock(c.mutex);if(c.connected){if(matches(c.settings.mode_key))c.mode_edge=true;if(matches(c.settings.capture_key))c.capture_edge=true;}
+                auto& c=control();std::lock_guard lock(c.mutex);if(c.connected){++c.legacy_events;if(matches(c.settings.mode_key))c.mode_edge=true;if(matches(c.settings.capture_key))c.capture_edge=true;}
+            }
+        }else if(message.message==WM_INPUT){
+            // The application still owns this handle and its cleanup. Reading
+            // does not change its registration or consume/replace its message.
+            RAWINPUT input{};UINT bytes=sizeof(input);const auto read=GetRawInputData(reinterpret_cast<HRAWINPUT>(message.lParam),RID_INPUT,&input,&bytes,sizeof(RAWINPUTHEADER));
+            if(read!=UINT(-1) && read>=sizeof(RAWINPUTHEADER)+sizeof(RAWKEYBOARD) && input.header.dwType==RIM_TYPEKEYBOARD){
+                bool raw_only=false;for(const auto& device:keyboard_registrations())raw_only|=(device.dwFlags&RIDEV_NOLEGACY)==RIDEV_NOLEGACY;
+                if(raw_only){
+                    const auto& key=input.data.keyboard;UINT vk=key.VKey;
+                    // Injected/generic keys may have no make code. Windows'
+                    // generic Shift maps to the left variant in that case.
+                    if(vk==VK_SHIFT)vk=key.MakeCode?MapVirtualKeyW(key.MakeCode,MAPVK_VSC_TO_VK_EX):VK_LSHIFT;
+                    else if(vk==VK_CONTROL)vk=(key.Flags&RI_KEY_E0)?VK_RCONTROL:VK_LCONTROL;
+                    else if(vk==VK_MENU)vk=(key.Flags&RI_KEY_E0)?VK_RMENU:VK_LMENU;
+                    DWORD foreground=0;GetWindowThreadProcessId(GetForegroundWindow(),&foreground);
+                    auto& c=control();std::lock_guard lock(c.mutex);if(c.connected){++c.raw_events;const bool focused=foreground==GetCurrentProcessId();raw_focus(c,focused);const auto action=c.raw_keys[GetCurrentThreadId()].event(vk,!(key.Flags&RI_KEY_BREAK),focused,c.settings);c.mode_edge|=action.mode;c.capture_edge|=action.capture;}
+                }
             }
         }
-    }}catch(...){}
+    }}catch(const std::exception& e){input_failure(e.what());}catch(...){input_failure("Cannot observe keyboard input");}
     SetLastError(error);return CallNextHookEx(nullptr,code,removed,parameter);
 }
 std::string uuid(){GUID id{};if(FAILED(CoCreateGuid(&id)))throw std::runtime_error("Cannot create capture request ID");
@@ -81,19 +118,25 @@ void configure_hud(const hud::Settings& settings){
     try{std::thread([]{try{worker();}catch(...){auto& state=control();std::lock_guard lock(state.mutex);state.connected=false;state.pending=false;state.processing=false;}}).detach();}catch(...){c.connected=false;throw;}
 }
 void disconnect_hud() noexcept {
-    try{auto& c=control();std::map<DWORD,HHOOK> hooks;{std::lock_guard lock(c.mutex);c.connected=false;c.pending=false;c.mode_edge=c.capture_edge=false;hooks.swap(c.hooks);}for(const auto& [id,hook]:hooks){(void)id;UnhookWindowsHookEx(hook);}c.ready.notify_one();}catch(...){}
+    try{auto& c=control();std::map<DWORD,HHOOK> hooks;{std::lock_guard lock(c.mutex);c.connected=false;c.pending=false;c.mode_edge=c.capture_edge=false;hooks.swap(c.hooks);c.raw_keys.clear();}for(const auto& [id,hook]:hooks){(void)id;UnhookWindowsHookEx(hook);}c.ready.notify_one();}catch(...){}
 }
 bool hud_connected() noexcept {try{auto& c=control();std::lock_guard lock(c.mutex);return c.connected;}catch(...){return false;}}
 void hud_input(UINT flags,IDXGISwapChain* native) noexcept {
     if(flags&DXGI_PRESENT_TEST)return;const auto error=GetLastError();
+    if(!hud_connected()){SetLastError(error);return;}
     try{
         DWORD foreground=0;GetWindowThreadProcessId(GetForegroundWindow(),&foreground);
         NativeCall internal;DXGI_SWAP_CHAIN_DESC desc{};if(FAILED(native->GetDesc(&desc))){SetLastError(error);return;}
         DWORD window_process=0;const auto thread=GetWindowThreadProcessId(desc.OutputWindow,&window_process);
+        std::set<DWORD> threads;if(thread && window_process==GetCurrentProcessId())threads.insert(thread);
+        for(const auto& device:keyboard_registrations())if(device.hwndTarget){DWORD pid=0;const auto input_thread=GetWindowThreadProcessId(device.hwndTarget,&pid);if(input_thread && pid==GetCurrentProcessId())threads.insert(input_thread);}
         auto& c=control();std::lock_guard lock(c.mutex);if(!c.connected){SetLastError(error);return;}
-        if(thread && window_process==GetCurrentProcessId() && !c.hooks.contains(thread) && (c.settings.mode_key.key || c.settings.capture_key.key)){
+        raw_focus(c,foreground==GetCurrentProcessId());
+        for(const auto input_thread:threads)if(!c.hooks.contains(input_thread) && (c.settings.mode_key.key || c.settings.capture_key.key)){
             HMODULE module=nullptr;GetModuleHandleExW(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS|GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,reinterpret_cast<LPCWSTR>(&keyboard_message),&module);
-            if(auto hook=SetWindowsHookExW(WH_GETMESSAGE,keyboard_message,module,thread)){c.hooks.emplace(thread,hook);c.input_error.clear();}
+            if(auto hook=SetWindowsHookExW(WH_GETMESSAGE,keyboard_message,module,input_thread)){
+                c.hooks.emplace(input_thread,hook);c.input_error.clear();c.raw_keys[input_thread].seed(raw_key_snapshot(c.settings),foreground==GetCurrentProcessId(),c.settings);
+            }
             else c.input_error="Cannot observe target keyboard messages: "+std::to_string(GetLastError());
         }
         const bool focused=foreground==GetCurrentProcessId();
@@ -103,7 +146,7 @@ void hud_input(UINT flags,IDXGISwapChain* native) noexcept {
             else{c.pending=true;c.ready.notify_one();}
         }
         c.mode_edge=c.capture_edge=false;
-    }catch(...){}SetLastError(error);
+    }catch(const std::exception& e){input_failure(e.what());}catch(...){input_failure("Cannot install keyboard observer");}SetLastError(error);
 }
 void hud_presented(uint64_t swap,UINT flags,HRESULT result) noexcept {
     if(flags&DXGI_PRESENT_TEST)return;const auto error=GetLastError();
@@ -118,7 +161,7 @@ Json hud_status(){
     return {{"mode",hud::mode_name(c.settings.mode)},{"connected",c.connected},{"visible",visible},{"selected_swap_chain",selected},
         {"reason",!c.connected?"Disconnected":c.settings.mode==hud::Mode::Hidden?"Hidden":visible?"":"See per-swap HUD reason"},
         {"hud_hotkey",hud::hotkey_name(c.settings.mode_key)},{"capture_hotkey",hud::hotkey_name(c.settings.capture_key)},
-        {"input_reason",c.input_error},{"input_threads",c.hooks.size()},{"input_profile","Target-thread keyboard messages; raw-input-only keys are not supported"},
+        {"input_reason",c.input_error},{"input_threads",c.hooks.size()},{"input_profile","Target-thread legacy and raw keyboard messages; buffered-only Raw Input is not observed"},{"raw_key_events",c.raw_events},{"legacy_key_events",c.legacy_events},
         {"request_pending",c.pending || c.processing},{"message",c.message.value(GetTickCount64())},{"last_request",c.last_request},{"swap_chains",rows}};
 }
 struct HudDraw::Impl {

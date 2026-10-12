@@ -30,6 +30,16 @@ class KeyEdge {
 public:
     bool update(const Hotkey& key,const std::array<bool,256>& keys,bool foreground) noexcept;
 };
+struct KeyActions {bool mode=false,capture=false;};
+// Ordered raw make/break state, with independent left/right modifiers.
+class RawKeyboard {
+    std::array<bool,256> keys_{};
+    KeyEdge mode_,capture_;
+    void modifiers() noexcept;
+public:
+    void seed(const std::array<bool,256>& keys,bool foreground,const Settings& settings) noexcept;
+    KeyActions event(uint32_t key,bool down,bool foreground,const Settings& settings) noexcept;
+};
 struct Fps { std::optional<double> current,minimum,maximum; uint64_t frames=0; };
 class FrameClock {
     std::optional<uint64_t> start_;

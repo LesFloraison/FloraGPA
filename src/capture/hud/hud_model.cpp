@@ -54,6 +54,18 @@ bool KeyEdge::update(const Hotkey& key,const std::array<bool,256>& keys,bool for
     const bool trigger=foreground && focused_ && down && !down_;
     down_=down;focused_=foreground;return trigger;
 }
+void RawKeyboard::modifiers() noexcept {
+    keys_[0x10]=keys_[0xa0] || keys_[0xa1];keys_[0x11]=keys_[0xa2] || keys_[0xa3];keys_[0x12]=keys_[0xa4] || keys_[0xa5];
+}
+void RawKeyboard::seed(const std::array<bool,256>& keys,bool foreground,const Settings& settings) noexcept {
+    keys_=keys;modifiers();mode_.update(settings.mode_key,keys_,foreground);capture_.update(settings.capture_key,keys_,foreground);
+}
+KeyActions RawKeyboard::event(uint32_t key,bool down,bool foreground,const Settings& settings) noexcept {
+    if(key>=keys_.size() || key==255)return {};
+    keys_[key]=down;modifiers();
+    const auto mode=mode_.update(settings.mode_key,keys_,foreground),capture=capture_.update(settings.capture_key,keys_,foreground);
+    return {mode && down && key==settings.mode_key.key,capture && down && key==settings.capture_key.key};
+}
 void FrameClock::present(uint64_t now,bool successful,bool test){
     if(!successful || test)return;
     ++fps_.frames;

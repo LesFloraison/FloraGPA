@@ -136,10 +136,17 @@ modifying the message. Normal Present consumes those requests; TEST does not.
 The control worker alone performs UUID generation, selection, busy checking and
 arming; the message hook performs no GPU or disk work. Disconnect removes all
 input hooks, stops the worker/HUD and leaves COM forwarding active.
-Raw-input-only keyboard registrations are **not supported yet**. The initial
-Present-only polling approach missed short synthetic presses; the actual native
-message path was then verified with the same short key presses. Pure polling
-edge tests are not evidence of native key-repeat/focus acceptance.
+For `RIDEV_NOLEGACY` keyboards, the same observer reads `WM_INPUT` and tracks
+ordered make/break events, including left/right modifiers and generic Shift with
+no scan code. Existing raw keyboard target threads are observed without changing
+their device registrations. When legacy messages are enabled, only those messages
+trigger hotkeys, avoiding duplicate actions from the raw copy. Focus changes
+resynchronize held chord state without firing it. Buffered-only Raw Input that
+bypasses `WM_INPUT` remains unobserved and is reported in the input profile.
+
+The initial Present-only polling approach missed short synthetic presses; native
+legacy and raw message paths have now been verified with short key presses.
+Pure state-machine repeat/focus tests are not evidence of a physical long hold.
 
 Status reports mode, per-swap actual visibility/skips, measured FPS, input profile,
 selected swap, request outcome and expiring messages. Only successful non-TEST
@@ -183,7 +190,7 @@ products, screenshots, captures and raw Ghidra output are not committed.
 
 ## Outstanding gates
 
-General concurrent-context stress, raw-input-only hotkeys, the broader DPI and
+General concurrent-context stress, buffered-only raw-input hotkeys, the broader DPI and
 resolution matrix, native long-hold/focus stress, active-query/hidden-state failure
 matrix and actual driver failure/device-loss cases remain open. Multi-buffer,
 borderless and exclusive integration evidence is recorded below and does not
@@ -389,3 +396,47 @@ working-build package manifest is hashed in `capture-hud-evidence.json`. A fresh
 Git-archive rebuild was not repeated. Broader outstanding gates above remain
 unaccepted; this evidence does not turn migration parity or formal GF2 capture
 acceptance into a completed milestone.
+
+## Raw keyboard input acceptance
+
+The independent raw-input fixture registers its own keyboard with
+`RIDEV_NOLEGACY | RIDEV_INPUTSINK` and checks the registration every frame. Native
+UI input produces no legacy key messages: Compact/Detailed/Hidden each capture
+one file, with identical raw-event counts in the observer and application. The
+three files pass **82** exact dual-player/preview/inventory/Draw-zero checks.
+After **15,064** frames the application's retained bytes still match exactly.
+
+A separate non-GPU foreground sink receives capture and mode chords while the
+target continues receiving background raw events; neither mode nor file count
+changes. Returning to the target restores mode switching. Disconnect removes
+all observers: another capture chord adds six raw events to the application but
+none to the runtime and publishes no fourth file. The keyboard registration
+remains unchanged throughout. A mixed raw-plus-legacy fixture verifies one mode
+transition and one file for one chord each; both input channels reach the app,
+only legacy triggers, and its file passes **28** dual-player checks.
+
+The native test initially exposed zero-make-code Shift from injected keyboard
+input; mode switching worked but capture did not. The bounded fixture event log
+located the issue, and the generic left-Shift fallback fixed it. Original failed
+runs remain under `artifacts/capture-hud-raw-live{,2}`. Successful runs are
+`artifacts/capture-hud-raw-verified` and `artifacts/capture-hud-dual-input`.
+Later focus resynchronization has additional held-chord/release tests; the native
+raw acceptance run predates that refinement. The model tests cover 1,000 repeated
+make events, independent left/right modifiers, foreground changes, extra Windows
+modifiers, invalid keys and focus resynchronization. Physical long-hold testing
+and buffered-only Raw Input are still open.
+
+The final input build passes all **61 capture-only CTests** and **7 focused full
+application CTests**, including **12 Qt cases**. A fresh GF2 start-screen hotkey
+capture executes 22 application draws in both players; the two RGBA outputs,
+captured resource and embedded preview agree exactly at 2560×1440. Flora replay
+does not substitute reference pixels. The main scene remains visibly hooked:
+the first request reports `Capture failed: MSAA`; a later request reaches the
+existing unmatched Map/Unmap refusal. Neither publishes a file. Disconnect
+removes the HUD and all input observers while the game continues normally.
+These results live under `artifacts/capture-hud-raw-gf2` and do not count toward
+formal six-frame capture acceptance.
+
+References: [Raw Input Overview](https://learn.microsoft.com/en-us/windows/win32/inputdev/about-raw-input),
+[RAWINPUTDEVICE](https://learn.microsoft.com/en-us/windows/win32/api/winuser/ns-winuser-rawinputdevice),
+[GetRawInputData](https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getrawinputdata).
