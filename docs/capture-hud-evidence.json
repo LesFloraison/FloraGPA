@@ -98,7 +98,28 @@
     "verified": ["Cross-interface identity and getters", "Original DXGI usage", "Exact clean snapshot bytes", "Canonical capture resource metadata", "Native read-only view HRESULT and debug diagnostic comparison", "Indirect native Resize rejection and subsequent success"],
     "remaining": ["Automatic swap-chain activation", "Synchronized alias registration changes on Resize", "Implicit Present unbinding", "Clean capture boundary integration", "GF2 visible HUD and frame isolation"]
   },
+  "present_binding_foundation": {
+    "runtime_enabled": false,
+    "native_facade_pairs": 192,
+    "feature_levels": ["11.0", "11.1"],
+    "presentation_calls": ["Present", "Present1"],
+    "verified": ["Native HRESULT and Debug Layer diagnostic comparison", "Surviving original view identities", "Six-stage SRVs, RTVs, CS/OM UAVs", "Unrelated UAV counter exactly 37", "LastError", "TEST, DO_NOT_SEQUENCE and invalid sync interval"],
+    "capture_only_focused_tests": "4/4",
+    "full_profile_focused_tests": "2/2",
+    "capture_ctest_sha256": "5137495fdf33819705ba5c4deca76af5088afb58474eacfe2cd43a541205e0fc",
+    "full_ctest_sha256": "b4e88dec132ead6f5ba0364fb6adee05c62a4db6861fab4b34694e6f6c3eafaf",
+    "test_executable_sha256": "9cd0df88b3b04423828642800f7050d2fd5f071cfb3b39b308a41cd2fd307e3f",
+    "expanded_storage_profiles": 16,
+    "expanded_decorated_frames": 384,
+    "expanded_retained_slot_comparisons": 600,
+    "nonsequencing_storage_output_sha256": "71811a7b577cf00b337806845b1f8b60d592691789db35f6d09cc123d2e59de8",
+    "retained_failures": ["Initial OM UAV range replacement cleared an unrelated slot; fixed", "Native OCCLUDED result failed strict presentation checks; unchanged cases passed after visible window activation", "DO_NOT_SEQUENCE fixture initially compared undefined native slots; warmup corrected"],
+    "scope": "Component comparison only. Runtime activation, Resize and context serialization, capture-file integration and GF2 visible HUD are pending. No new fullscreen facade or formal GF2 acceptance."
+  },
   "artifacts": [
+    "artifacts/capture-present-bindings-final-focused.log",
+    "artifacts/capture-present-bindings-full-focused.log",
+    "artifacts/capture-hud-ring-flags-initialized.json",
     "artifacts/capture-presentation-resources-ctest-details.log",
     "artifacts/capture-presentation-resources-full-tests.log",
     "artifacts/capture-hud-clean-ring-ctest-details.log",

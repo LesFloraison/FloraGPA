@@ -264,3 +264,37 @@ CTests pass serially, including 12 Qt cases. Logs are
 `artifacts/capture-presentation-resources-{all,full}-{build,tests}.log` and
 `artifacts/capture-presentation-resources-ctest-details.log`. Replay and shared
 format remain unchanged; no new legacy golden-frame or GF2 run is claimed.
+
+## Native Present binding transaction
+
+`PresentBindings` temporarily mirrors clean-buffer SRV, RTV and UAV bindings on
+the native presentation buffer. The real Present decides which bindings survive;
+only surviving mirrors are mapped back to the application's original views.
+It never restores a binding that Present removed. All mirror allocations finish
+before changing state. Native getter arrays are sampled in batches, unrelated
+views remain bound, and UAV counters use KEEP values. This component still
+requires the caller's context exclusion and internal recording scope; it is not
+automatically enabled in the runtime.
+
+The hardware comparison covers 192 native/facade pairs: feature levels 11.0 and
+11.1, Present/Present1, SEQUENTIAL/FLIP_SEQUENTIAL/FLIP_DISCARD, normal/TEST/
+DO_NOT_SEQUENCE/invalid-interval calls and RTV/six-stage SRV/CS UAV/OM UAV
+bindings. HRESULTs, surviving view identities and Debug Layer diagnostic IDs
+match. Unrelated UAV counters remain exactly 37, and LastError is preserved.
+The initial experiment found that updating one OM UAV slot cleared unrelated
+slots outside that range; the implementation now preserves the whole surviving
+range. Initial failed results remain in the ignored artifacts.
+
+Clean-storage comparisons now also exercise real DO_NOT_SEQUENCE calls: sixteen
+profiles, 384 decorated frames and 600 readable retained-slot comparisons. All
+initialized native and clean bytes match. DO_NOT_SEQUENCE prevents content
+rotation on this adapter even when flip Present unbinds views. Initial native
+slots must be initialized with sequencing presents; otherwise comparisons read
+undefined contents. This corrects the experimental fixture, not the rotation
+implementation. Native Present returning OCCLUDED was recorded as a failure;
+after activating the visible diagnostic window with a click, unchanged native
+cases passed. OCCLUDED is never accepted as successful presentation.
+
+These are component checks, not new GF2, exclusive-fullscreen facade, capture
+file or runtime concurrency acceptance. Automatic activation and capture/Resize
+transactions remain pending. Replay and shared format are unchanged.

@@ -21,11 +21,11 @@ void require(bool value,const char* message){if(!value)throw std::runtime_error(
 LRESULT CALLBACK procedure(HWND w,UINT m,WPARAM a,LPARAM b){return DefWindowProcW(w,m,a,b);}
 struct Window {
     HWND value;
-    Window(){value=CreateWindowW(L"FloraCleanBufferProbe",L"Flora clean buffer experiment",WS_OVERLAPPEDWINDOW,80,80,160,160,nullptr,nullptr,GetModuleHandleW(nullptr),nullptr);require(value!=nullptr,"Create window failed");ShowWindow(value,SW_SHOWNOACTIVATE);}
+    Window(){value=CreateWindowW(L"FloraCleanBufferProbe",L"Flora clean buffer experiment",WS_OVERLAPPEDWINDOW,80,80,160,160,nullptr,nullptr,GetModuleHandleW(nullptr),nullptr);require(value!=nullptr,"Create window failed");ShowWindow(value,SW_SHOW);SetForegroundWindow(value);for(unsigned i=0;i<20;++i){MSG msg{};while(PeekMessageW(&msg,nullptr,0,0,PM_REMOVE)){TranslateMessage(&msg);DispatchMessageW(&msg);}Sleep(10);}}
     ~Window(){DestroyWindow(value);}
 };
 struct Run {std::vector<Pixels> before,after;UINT decorated=0,debug_errors=0;};
-Run run(DXGI_SWAP_EFFECT effect,UINT count,bool isolated,bool tearing){
+Run run(DXGI_SWAP_EFFECT effect,UINT count,bool isolated,bool tearing,bool nonsequencing){
     Window window;ComPtr<ID3D11Device> device;ComPtr<ID3D11DeviceContext> context;
     check(D3D11CreateDevice(nullptr,D3D_DRIVER_TYPE_HARDWARE,nullptr,D3D11_CREATE_DEVICE_DEBUG,nullptr,0,D3D11_SDK_VERSION,&device,nullptr,&context));
     ComPtr<IDXGIDevice> dxgi;check(device.As(&dxgi));ComPtr<IDXGIAdapter> adapter;check(dxgi->GetAdapter(&adapter));ComPtr<IDXGIFactory2> factory;check(adapter->GetParent(IID_PPV_ARGS(&factory)));
@@ -37,9 +37,9 @@ Run run(DXGI_SWAP_EFFECT effect,UINT count,bool isolated,bool tearing){
     texture.Usage=D3D11_USAGE_STAGING;texture.CPUAccessFlags=D3D11_CPU_ACCESS_READ;check(device->CreateTexture2D(&texture,nullptr,&stage));
     const auto read=[&](ID3D11Texture2D* source){context->CopyResource(stage.Get(),source);D3D11_MAPPED_SUBRESOURCE mapped{};check(context->Map(stage.Get(),0,D3D11_MAP_READ,0,&mapped));Pixels pixels{};for(UINT y=0;y<extent;++y)memcpy(pixels.data()+y*extent,static_cast<uint8_t*>(mapped.pData)+size_t(y)*mapped.RowPitch,extent*4);context->Unmap(stage.Get(),0);return pixels;};
     Pixels base{};base.fill(0xff603020u);for(UINT slot=0;slot<clean.size();++slot)context->UpdateSubresource(clean.buffer(slot),0,nullptr,base.data(),extent*4,0);
-    Run result;const UINT flags=tearing?DXGI_PRESENT_ALLOW_TEARING:0;
+    Run result;const UINT flags=(tearing?DXGI_PRESENT_ALLOW_TEARING:0)|(nonsequencing?DXGI_PRESENT_DO_NOT_SEQUENCE:0);
     // Warm up all native slots; no assumption about initial undefined contents.
-    for(UINT i=0;i<count;++i){context->UpdateSubresource(real.Get(),0,nullptr,base.data(),extent*4,0);require(swap->Present(tearing?0:1,flags)==S_OK,"Warmup Present did not succeed");}
+    for(UINT i=0;i<count;++i){context->UpdateSubresource(real.Get(),0,nullptr,base.data(),extent*4,0);require(swap->Present(tearing?0:1,flags&~DXGI_PRESENT_DO_NOT_SEQUENCE)==S_OK,"Warmup Present did not succeed");}
     for(UINT frame=0;frame<24;++frame){
         auto* application=isolated?clean.buffer(0):real.Get();
         if(effect==DXGI_SWAP_EFFECT_FLIP_DISCARD)context->UpdateSubresource(application,0,nullptr,base.data(),extent*4,0);
@@ -52,7 +52,7 @@ Run run(DXGI_SWAP_EFFECT effect,UINT count,bool isolated,bool tearing){
         if(isolated){
             std::vector<Pixels> unchanged;for(UINT slot=0;slot<count;++slot)unchanged.push_back(read(clean.buffer(slot)));
             SetLastError(0x4312);clean.prepare(swap.Get(),DXGI_PRESENT_TEST);clean.advance(S_OK,DXGI_PRESENT_TEST);
-            clean.advance(E_FAIL,0);clean.advance(DXGI_STATUS_OCCLUDED,0);clean.advance(S_OK,DXGI_PRESENT_DO_NOT_SEQUENCE);
+            clean.advance(E_FAIL,0);clean.advance(DXGI_STATUS_OCCLUDED,0);
             require(GetLastError()==0x4312,"Clean ring no-op changed LastError");
             for(UINT slot=0;slot<count;++slot)require(read(clean.buffer(slot))==unchanged[slot],"Non-rotating result changed clean buffers");
             clean.prepare(swap.Get(),flags);
@@ -81,13 +81,14 @@ Run run(DXGI_SWAP_EFFECT effect,UINT count,bool isolated,bool tearing){
 int main(){try{
     WNDCLASSW cls{};cls.lpfnWndProc=procedure;cls.hInstance=GetModuleHandleW(nullptr);cls.lpszClassName=L"FloraCleanBufferProbe";require(RegisterClassW(&cls)!=0,"Register class failed");
     Json rows=Json::array();
-    for(auto effect:{DXGI_SWAP_EFFECT_SEQUENTIAL,DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL,DXGI_SWAP_EFFECT_FLIP_DISCARD})for(UINT count:{2u,3u})for(bool tearing:{false,true}){
-        if(tearing && effect==DXGI_SWAP_EFFECT_SEQUENTIAL)continue;
-        const auto native=run(effect,count,false,tearing);const auto isolated=run(effect,count,true,tearing);
+    for(auto effect:{DXGI_SWAP_EFFECT_SEQUENTIAL,DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL,DXGI_SWAP_EFFECT_FLIP_DISCARD})for(UINT count:{2u,3u})for(bool tearing:{false,true})for(bool nonsequencing:{false,true}){
+        if((tearing && effect==DXGI_SWAP_EFFECT_SEQUENTIAL) || (tearing && nonsequencing))continue;
+        const auto native=run(effect,count,false,tearing,nonsequencing);const auto isolated=run(effect,count,true,tearing,nonsequencing);
+        if(native.before!=isolated.before || native.after!=isolated.after)std::cerr<<Json{{"effect",effect},{"buffers",count},{"tearing",tearing},{"nonsequencing",nonsequencing}}.dump()<<'\n';
         require(native.before==isolated.before,"Clean buffer pre-Present contents differ from native");
         require(native.after==isolated.after,"Clean buffer rotation differs from native");
         require(!native.debug_errors && !isolated.debug_errors,"Debug layer diagnostics");
-        rows.push_back({{"effect",effect},{"buffers",count},{"tearing",tearing},{"frames",native.before.size()},{"decorated_frames",isolated.decorated},{"readable_slot_checks",native.after.size()},{"exact",true}});
+        rows.push_back({{"effect",effect},{"buffers",count},{"tearing",tearing},{"nonsequencing",nonsequencing},{"frames",native.before.size()},{"decorated_frames",isolated.decorated},{"readable_slot_checks",native.after.size()},{"exact",true}});
     }
     std::cout<<Json{{"passed",true},{"scope","Native clean-buffer algorithm experiment, not runtime COM virtualization or capture acceptance"},{"profiles",rows}}.dump(2)<<'\n';return 0;
 }catch(const std::exception& e){std::cerr<<e.what()<<'\n';return 1;}}
