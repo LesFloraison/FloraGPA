@@ -533,3 +533,32 @@ with no Debug Layer warnings/errors in the final valid test. Logs use the
 `artifacts/capture-hud-concurrency-verified-*` and
 `artifacts/capture-hud-concurrency-repeat-tests.log` paths. No new Qt lifecycle,
 packaged injection or GF2 result is claimed for this revision.
+
+## Injected presentation and restoration failures
+
+`capture_hud_faults` and `capture_hud_faults_hardware` exercise the production
+wrapper with real WARP/hardware DX11 resources and the Debug Layer. A test-only
+swap-chain facade inspects the decorated native surface, then returns controlled
+`DXGI_STATUS_OCCLUDED`, `DXGI_ERROR_DEVICE_REMOVED`, `DXGI_ERROR_DEVICE_RESET`
+and `DXGI_ERROR_WAS_STILL_DRAWING` results. A fifth case returns `S_OK` but
+fails the restoration-stage GetBuffer. The facade does not call native Present;
+these cases do not establish actual device removal or screen presentation.
+
+All five cases leave the application's resource bytes exactly clean, retain the
+application-facing HRESULT/LastError and publish neither a frame nor a partial
+file. Restoration failure creates an explicit capability gap: the next HUD draw
+is skipped and the shared CLI/hotkey capture entry returns
+`capture_capability_incomplete`. Final cleanup releases wrappers/native metadata
+and produces no Debug Layer warning/error. Both tests pass serially in both
+capture-only and full builds against production revision `9b8ada3`; this change
+adds tests only. Final logs are
+`artifacts/capture-hud-fault-request-tests.log` and
+`artifacts/capture-hud-fault-request-full-tests.log`, with hashed evidence in
+`docs/capture-hud-evidence.json` under `fault_progress`.
+
+The first test run prematurely checked native metadata lifetime while its own
+raw device/context/swap-chain references were still held. That failed run is
+retained in `artifacts/capture-hud-fault-run.log`; the test now releases those
+oracle references before checking native lifetime. No production fix was needed.
+Real device loss, current-revision interactive Present/GF2 regression and the
+remaining HUD acceptance matrix stay pending. Formal GF2 acceptance stays 0/6.

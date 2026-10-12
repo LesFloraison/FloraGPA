@@ -709,7 +709,7 @@
     },
     "runtime_sha256": "64afb8680eb56248978dd7a7ac35265ffc45e54a4fc132202f2951a3a3e6af05"
   },
-  "latest_progress": "concurrency_progress; interactive current-revision validation is pending; earlier source evidence remains historical",
+  "latest_progress": "fault_progress; injected failures verified on production 9b8ada3; current-revision interactive regression remains pending",
   "concurrency_progress": {
     "implementation_base": "1ecbb95",
     "status": "reproduced lock inversion repaired; interactive regression pending",
@@ -766,5 +766,69 @@
       "FloraCaptureRuntime.dll": "814498599cdd58d009e4161470171b67e118a09bcac67c81c6acf107f8f7276f",
       "FloraCaptureHudConcurrencyTests.exe": "992c74df066f25763a521269f1dab2c1e3d4b7a49119e2aa98c267552e06db38"
     }
+  },
+  "fault_progress": {
+    "production_revision": "9b8ada3",
+    "status": "fault injection verified; actual device loss and interactive regression pending",
+    "scope": "Test-only Present/GetBuffer facade; real two-buffer SEQUENTIAL RGBA8 WARP/hardware DX11 resources and Debug Layer. Native Present is not executed.",
+    "cases": [
+      "DXGI_STATUS_OCCLUDED",
+      "DXGI_ERROR_DEVICE_REMOVED",
+      "DXGI_ERROR_DEVICE_RESET",
+      "DXGI_ERROR_WAS_STILL_DRAWING",
+      "S_OK with restoration-stage GetBuffer failure"
+    ],
+    "verified": [
+      "HUD changes native presentation pixels before each injected result",
+      "Application resource bytes remain exact",
+      "Original Present HRESULT, LastError, sync interval and flags survive",
+      "No frame or partial file published",
+      "Restoration failure records a capability gap, skips subsequent HUD drawing and rejects shared capture requests",
+      "Wrapped and native metadata lifetimes released; no Debug Layer warnings/errors"
+    ],
+    "capture_only_tests": "2/2",
+    "full_tests": "2/2",
+    "gpu_execution": "serial",
+    "results": [
+      {
+        "path": "build/capture/src/capture/hud-faults/1e1af3d678ddc4a7/results.json",
+        "sha256": "cc1a441944a1a9a5044a823682193bcf9f7a9cfd53a0df200f58c39594a5732b",
+        "driver": "hardware",
+        "cases": 5
+      },
+      {
+        "path": "build/capture/src/capture/hud-faults/e5384ebf61d0a638/results.json",
+        "sha256": "66af98acd538e300dd047b2f8f58fe551dca16e2c29ed94cb56fea1ead5be5d6",
+        "driver": "WARP",
+        "cases": 5
+      },
+      {
+        "path": "build/vs2022/src/capture/hud-faults/bc0d5da234f7f526/results.json",
+        "sha256": "cc1a441944a1a9a5044a823682193bcf9f7a9cfd53a0df200f58c39594a5732b",
+        "driver": "hardware",
+        "cases": 5
+      },
+      {
+        "path": "build/vs2022/src/capture/hud-faults/1545ee6306c6555e/results.json",
+        "sha256": "66af98acd538e300dd047b2f8f58fe551dca16e2c29ed94cb56fea1ead5be5d6",
+        "driver": "WARP",
+        "cases": 5
+      }
+    ],
+    "log_sha256": {
+      "artifacts/capture-hud-fault-request-tests.log": "75dd838c11609105c87c3b1bed422e9aa61be09e125c296c329c16b82653a6e3",
+      "artifacts/capture-hud-fault-request-full-tests.log": "d79c0f51d77a658c196eb78952d10f84eaecf4721a2643119280b6e4cd641881"
+    },
+    "source_sha256": {
+      "src/capture/tests/hud_fault_tests.cpp": "4619e7341e39c4e18ab335ce82d6e0b454fbfb3917464cbfd0f60e1d52615309"
+    },
+    "initial_test_failure": {
+      "log": "artifacts/capture-hud-fault-run.log",
+      "sha256": "576936322e7b35dca6064d0acfd70c40bf1e99c48a69938e8e46373efb6faf98",
+      "reason": "Test checked native metadata lifetime before releasing its own raw oracle references; corrected test teardown only"
+    },
+    "desktop_recheck": "Owned input fixture still returns failed to activate captured window; current-revision screen presentation and GF2 remain pending",
+    "actual_device_loss_verified": false,
+    "formal_gf2_accepted_frames": 0
   }
 }
