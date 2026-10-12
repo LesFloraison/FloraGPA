@@ -233,3 +233,34 @@ above refer to the previous integrated revision, not a new complete regression.
 Microsoft documents the slot access and implicit unbinding requirements in
 [DXGI_SWAP_EFFECT](https://learn.microsoft.com/en-us/windows/win32/api/dxgi/ne-dxgi-dxgi_swap_effect)
 and the [flip model guidance](https://learn.microsoft.com/en-us/windows/win32/direct3ddxgi/for-best-performance--use-dxgi-flip-model).
+
+## Presentation resource identity foundation
+
+`PresentationResource` connects an original native texture identity with clean
+GPU storage. The application's resource methods still use the original object,
+including DXGI usage flags. GPU operands use the clean texture. Returned view
+resources are canonicalized back to the original identity, and metadata lookup
+uses that same identity, avoiding private clone definitions in captured files.
+Native views retain the original buffer through a reserved lifetime interface so
+indirect references continue to prevent native ResizeBuffers. Creating a view
+first validates the original resource, preserving read-only slot restrictions.
+
+The hardware Debug Layer test `capture_presentation_resources` verifies cross-
+interface identity, GetResource and context getters, original DXGI usage, exact
+clean snapshot bytes despite different native pixels, a single metadata record
+per public buffer, matching native read-only rejection diagnostics, and native
+Resize failure/success before/after a retained view is released. Unexpected
+warnings/errors are checked separately from the intentional native rejections.
+The initial missing test include dependency and extended descriptor parameter
+name build errors are retained in the ignored build logs.
+
+Registration is currently exercised by that test only. Automatic swap-chain
+activation, synchronized Resize registration transitions, implicit Present
+unbinding and clean capture boundary selection are still pending. No GF2 visible
+HUD or new frame-file compatibility claim follows from this identity test.
+
+Both complete builds succeed; all 59 capture-only and 62 selected full-profile
+CTests pass serially, including 12 Qt cases. Logs are
+`artifacts/capture-presentation-resources-{all,full}-{build,tests}.log` and
+`artifacts/capture-presentation-resources-ctest-details.log`. Replay and shared
+format remain unchanged; no new legacy golden-frame or GF2 run is claimed.

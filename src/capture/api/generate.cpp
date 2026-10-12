@@ -124,6 +124,12 @@ void method(std::ostream& out, const std::string& iface, const Json& m) {
         << "auto* target = owner_.native<" << iface << ">();\n"
         << "if (!target) throw std::runtime_error(\"Native interface disappeared\");\n"
         << "NativeCall internal;\nSetLastError(before);\n";
+    if(iface.starts_with("ID3D11Device") && !iface.starts_with("ID3D11DeviceContext") &&
+       (name.starts_with("CreateRenderTargetView") || name.starts_with("CreateShaderResourceView") || name.starts_with("CreateUnorderedAccessView") || name=="CreateDepthStencilView")){
+        std::string output;
+        for(const auto& parameter:parameters)if(parameter.at("direction")=="out")output=parameter.at("name");
+        out<<"if(auto original=presentation_validation_resource(unwrap(pResource))){const auto validation=target->"<<name<<"(original.Get(),"<<parameters.at(1).at("name").get<std::string>()<<",nullptr);if(FAILED(validation)){if("<<output<<")*"<<output<<"=nullptr;return validation;}SetLastError(before);}\n";
+    }
     if (iface.starts_with("ID3D11DeviceContext")) {
         std::string kind="unsupported",words="{}",operand="nullptr",floats="nullptr",integers="nullptr",source="nullptr";
         const std::map<std::string,std::string> draws{{"Draw","draw"},{"DrawIndexed","draw_indexed"},
@@ -189,7 +195,7 @@ int main(int argc, char** argv) {
         std::ifstream input(argv[1]); const Json spec = Json::parse(input);
         if (spec.at("schema") != 1) throw std::runtime_error("Unsupported API schema");
         std::ostringstream out;
-        out << "// Generated from capture/api/interfaces.json. Do not edit.\n#include \"objects.hpp\"\n#include \"command_stream.hpp\"\n#include \"deferred_history.hpp\"\nnamespace flora::capture {\nnamespace {\n";
+        out << "// Generated from capture/api/interfaces.json. Do not edit.\n#include \"objects.hpp\"\n#include \"command_stream.hpp\"\n#include \"deferred_history.hpp\"\n#include \"presentation_resources.hpp\"\nnamespace flora::capture {\nnamespace {\n";
         for (const auto& family : spec.at("families")) {
             const std::string name = family; auto chain = ancestry(spec, name);
             out << "class Proxy_" << name << " final : public " << name << ", public Proxy {\nObject& owner_;\npublic:\n"

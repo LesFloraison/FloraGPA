@@ -1,6 +1,7 @@
 #include "metadata.hpp"
 #include "objects.hpp"
 #include "deferred_resources.hpp"
+#include "presentation_resources.hpp"
 #include <dxgi1_6.h>
 #include <wrl/client.h>
 #include <map>
@@ -127,6 +128,7 @@ template<class I> bool install(IUnknown* native, Token* token) {
 }
 std::shared_ptr<ObjectRecord> track_native_object(IUnknown* identity) {
     if (!identity) throw std::runtime_error("Missing native identity");
+    const auto canonical=presentation_identity(identity);identity=canonical.Get();
     NativeCall internal;
     auto& r = registry();
     for (;;) {
@@ -165,6 +167,7 @@ std::shared_ptr<ObjectRecord> track_native_object(IUnknown* identity) {
     }
 }
 std::shared_ptr<ObjectRecord> find_native_record(IUnknown* identity) {
+    const auto canonical=presentation_identity(identity);identity=canonical.Get();
     auto& r=registry();std::shared_ptr<Entry> entry;
     {std::lock_guard lock(r.mutex);auto it=r.objects.find(identity);if(it==r.objects.end())return {};entry=it->second;}
     std::lock_guard lock(entry->mutex);return entry->record.lock();
@@ -258,7 +261,7 @@ Json metadata_status() {
     return {{"created",created},{"destroyed",destroyed},{"alive",alive},{"kinds",kinds},{"active_mapping_count",mapping_count},{"active_mappings",mappings}};
 }
 void observe_private_data(REFGUID key, const char* api) noexcept {
-    if (key == lifetime_key) object_gap(api, __uuidof(IUnknown), "Application accessed reserved native lifetime metadata");
+    if (key == lifetime_key || presentation_private_key(key)) object_gap(api, __uuidof(IUnknown), "Application accessed reserved native lifetime metadata");
 }
 void remember_shader(IUnknown* output, const char* api, const void* bytes, SIZE_T size, IUnknown* linkage) noexcept {
     if (!output) return;

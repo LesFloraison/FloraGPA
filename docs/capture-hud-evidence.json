@@ -86,7 +86,21 @@
     "ghidra_post_chain_sha256": "c0957fc97130a930afab630a8709599dd057c70633b265d39cda23c25b2cf04f",
     "scope": "Native clean logical storage against native baseline; COM facade, actual failure, fullscreen and GF2 integration are not established by this test"
   },
+  "presentation_identity_foundation": {
+    "automatic_swap_activation": false,
+    "capture_only_ctest": "59/59",
+    "selected_full_ctest": "62/62",
+    "qt_cases": 12,
+    "complete_builds": ["capture-only", "capture-full"],
+    "test_executable_sha256": "3981b54523ff22a4b58c5bc0f6487f785cbe6451d9d6ad03ad4bb8bb5d85afd4",
+    "capture_ctest_details_sha256": "99c6a947119a638e38897d5235b9c9e3d32b861e5257e81df805efa8cde86d70",
+    "full_ctest_log_sha256": "c1544d76cc364801fe62fba867eb8e65aca238cd735c9016278c16926a8068fa",
+    "verified": ["Cross-interface identity and getters", "Original DXGI usage", "Exact clean snapshot bytes", "Canonical capture resource metadata", "Native read-only view HRESULT and debug diagnostic comparison", "Indirect native Resize rejection and subsequent success"],
+    "remaining": ["Automatic swap-chain activation", "Synchronized alias registration changes on Resize", "Implicit Present unbinding", "Clean capture boundary integration", "GF2 visible HUD and frame isolation"]
+  },
   "artifacts": [
+    "artifacts/capture-presentation-resources-ctest-details.log",
+    "artifacts/capture-presentation-resources-full-tests.log",
     "artifacts/capture-hud-clean-ring-ctest-details.log",
     "artifacts/capture-hud-clean-ring-full-tests.log",
     "artifacts/capture-hud-plan/hud-post-chain.c",

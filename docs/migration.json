@@ -3862,6 +3862,7 @@
     "hud": {
       "status": "partial_runtime_integration",
       "multi_buffer_progress": "CleanBufferRing native storage primitive passes ten hardware presentation profiles, 240 decorated frames and 360 retained-slot exact comparisons with no Debug Layer warning/error. Not yet wired into runtime; COM/resource identity, Resize references, Present unbinding and concurrency integration remain required before GF2 HUD can be enabled. See CAPTURE_HUD.md.",
+      "presentation_identity_progress": "PresentationResource maps native public identity to clean GPU storage. Hardware test verifies QI/GetResource/context getters, DXGI usage, clean snapshot bytes, canonical metadata, native read-only view rejection and indirect native Resize references. Swap-chain activation, synchronized registration transitions, Present unbinding and capture boundary integration remain pending; no new GF2 acceptance claim.",
       "evidence": "docs/CAPTURE_HUD.md",
       "rendering_accepted": false,
       "blocker": "Multi-buffer Present rotates storage behind stable COM identities; submitted buffers are read-only and cannot be restored by the naive copy-back algorithm. GF2 HUD drawing remains safely skipped; raw-input-only keys and general concurrency/DPI/borderless/failure coverage remain incomplete.",

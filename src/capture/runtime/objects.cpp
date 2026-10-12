@@ -1,5 +1,6 @@
 #include "objects.hpp"
 #include "factory.hpp"
+#include "presentation_resources.hpp"
 #include <atomic>
 #include <map>
 #include <mutex>
@@ -120,8 +121,10 @@ void wrap_object(REFIID iid, void** output, const char* api) noexcept {
             std::lock_guard lock(r.mutex);
             if (r.proxies.contains(*output)) { SetLastError(before); return; }
         }
-        auto* returned = static_cast<IUnknown*>(*output);
         NativeCall internal;
+        presentation_returned(iid,output);
+        auto* returned = static_cast<IUnknown*>(*output);
+        retain_presentation_view(returned);
         // Adapter::GetParent returns the already-specialized factory family.
         IDXGIFactory* factory = nullptr;
         if (SUCCEEDED(returned->QueryInterface(IID_PPV_ARGS(&factory)))) {
@@ -175,6 +178,7 @@ void* unwrap_object(const void* input, REFIID iid) {
     auto& r = registry(); std::lock_guard lock(r.mutex);
     auto found = r.proxies.find(input);
     void* result = found == r.proxies.end() ? const_cast<void*>(input) : found->second->native(iid);
+    result=presentation_operand(result,iid);
     SetLastError(before); return result;
 }
 Json object_status() {
