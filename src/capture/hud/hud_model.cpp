@@ -10,6 +10,21 @@ Mode parse_mode(std::string_view text){
     if(text=="compact")return Mode::Compact;if(text=="detailed")return Mode::Detailed;if(text=="off")return Mode::Hidden;
     throw std::invalid_argument("HUD mode must be compact, detailed or off");
 }
+std::optional<PanelLayout> panel_layout(uint32_t sw,uint32_t sh,uint32_t cw,uint32_t ch,uint32_t dpi,Mode mode) noexcept {
+    if(!sw || !sh || !cw || !ch || mode==Mode::Hidden || dpi<48 || dpi>768)return {};
+    const auto height=mode==Mode::Detailed?144u:88u;
+    const double density=double(dpi)/96,margin=std::round(12*density);
+    if(cw<=2*margin || ch<=2*margin)return {};
+    const double scale=(std::min)({density,(double(cw)-2*margin)/312,(double(ch)-2*margin)/height});
+    // Keep text readable; do not attempt a zero-sized or clipped GPU region.
+    if(scale<0.6*density)return {};
+    PanelLayout p;p.scale=scale;p.canvas_width=uint32_t(std::lround(312*scale));p.canvas_height=uint32_t(std::lround(height*scale));
+    const double sx=double(sw)/cw,sy=double(sh)/ch;
+    p.x=uint32_t(std::lround(margin*sx));p.y=uint32_t(std::lround(margin*sy));
+    p.width=uint32_t(std::lround(p.canvas_width*sx));p.height=uint32_t(std::lround(p.canvas_height*sy));
+    if(p.width<120 || p.height<32 || p.x>=sw || p.y>=sh || p.width>sw-p.x || p.height>sh-p.y)return {};
+    return p;
+}
 Hotkey parse_hotkey(std::string_view text){
     if(text=="off")return {};
     if(text.empty() || text.size()>64)throw std::invalid_argument("Invalid HUD hotkey");

@@ -1,4 +1,5 @@
 #include "hud_pixels.hpp"
+#include <dxgi1_2.h>
 #include <wrl/client.h>
 #include <algorithm>
 #include <cmath>
@@ -11,6 +12,14 @@ using Microsoft::WRL::ComPtr;
 namespace {
 void check(HRESULT hr,const char* operation){if(FAILED(hr))throw std::runtime_error(std::string(operation)+" ("+std::to_string(uint32_t(hr))+")");}
 std::wstring rate(const std::optional<double>& value){return value?std::to_wstring(std::lround(*value)):L"--";}
+struct WindowDpiScope {
+    DPI_AWARENESS_CONTEXT previous=nullptr;
+    explicit WindowDpiScope(HWND window){
+        const auto context=GetWindowDpiAwarenessContext(window);
+        if(!context || !(previous=SetThreadDpiAwarenessContext(context)))throw std::runtime_error("HUD window DPI context unavailable");
+    }
+    ~WindowDpiScope(){if(previous)SetThreadDpiAwarenessContext(previous);}
+};
 struct Canvas {
     HDC dc=CreateCompatibleDC(nullptr);
     HBITMAP bitmap=nullptr;
@@ -59,17 +68,22 @@ bool PixelTransaction::begin(IDXGISwapChain* native,const Panel& panel,UINT flag
         check(native->GetDevice(IID_PPV_ARGS(&p.device)),"Get HUD native device");p.device->GetImmediateContext(&p.context);
         check(native->GetBuffer(0,IID_PPV_ARGS(&p.buffer)),"Get HUD native buffer");
         D3D11_TEXTURE2D_DESC texture{};p.buffer->GetDesc(&texture);
-        const UINT dpi=desc.OutputWindow?GetDpiForWindow(desc.OutputWindow):96;
-        const double dpi_scale=double(dpi?dpi:96)/96.0;
-        const auto margin=UINT(std::lround(12*dpi_scale));
-        if(texture.Width<=2*margin)throw std::runtime_error("Window is too small for HUD");
-        const double scale=(std::min)(dpi_scale,double(texture.Width-2*margin)/312.0);
-        if(scale<0.6)throw std::runtime_error("Window is too small for HUD");
+        const auto surface_width=texture.Width,surface_height=texture.Height;
+        UINT dpi=96,client_width=texture.Width,client_height=texture.Height;
+        if(desc.OutputWindow){
+            WindowDpiScope scope(desc.OutputWindow);dpi=GetDpiForWindow(desc.OutputWindow);
+            if(desc.Windowed){RECT client{};if(!GetClientRect(desc.OutputWindow,&client) || client.right<=0 || client.bottom<=0)throw std::runtime_error("HUD client area unavailable");client_width=UINT(client.right);client_height=UINT(client.bottom);}
+        }
+        if(desc.Windowed && (client_width!=surface_width || client_height!=surface_height)){
+            ComPtr<IDXGISwapChain1> swap1;DXGI_SWAP_CHAIN_DESC1 desc1{};
+            if(SUCCEEDED(native->QueryInterface(IID_PPV_ARGS(&swap1))) && SUCCEEDED(swap1->GetDesc1(&desc1)) && desc1.Scaling!=DXGI_SCALING_STRETCH)throw std::runtime_error("HUD requires stretch scaling for unequal client and surface sizes");
+        }
+        const auto layout=panel_layout(texture.Width,texture.Height,client_width,client_height,dpi,panel.mode);
+        if(!layout)throw std::runtime_error("Window is too small for HUD");
+        const double scale=layout->scale;
         const auto px=[&](int n){return (std::max)(1,int(std::lround(n*scale)));};
-        p.x=margin;p.y=margin;
+        p.x=layout->x;p.y=layout->y;p.width=layout->width;p.height=layout->height;
         const auto desired_height=panel.mode==Mode::Detailed?144:88;
-        if(texture.Width<=p.x*2+UINT(px(120)) || texture.Height<=p.y*2+UINT(px(desired_height)))throw std::runtime_error("Window is too small for HUD");
-        p.width=(std::min)(UINT(px(312)),texture.Width-p.x*2);p.height=UINT(px(desired_height));
         texture.Width=p.width;texture.Height=p.height;texture.MipLevels=1;texture.ArraySize=1;texture.BindFlags=0;texture.MiscFlags=0;texture.CPUAccessFlags=0;texture.Usage=D3D11_USAGE_DEFAULT;
         check(p.device->CreateTexture2D(&texture,nullptr,&p.backup),"Create private HUD backup");
         check(p.device->CreateTexture2D(&texture,nullptr,&p.upload),"Create private HUD upload");
@@ -81,10 +95,10 @@ bool PixelTransaction::begin(IDXGISwapChain* native,const Panel& panel,UINT flag
         try{p.clean.resize(size_t(p.width)*p.height*4);}catch(...){p.context->Unmap(p.stage.Get(),0);throw;}
         for(UINT row=0;row<p.height;++row)std::memcpy(p.clean.data()+size_t(row)*p.width*4,static_cast<uint8_t*>(mapped.pData)+size_t(row)*mapped.RowPitch,size_t(p.width)*4);
         p.context->Unmap(p.stage.Get(),0);
-        Canvas canvas(int(p.width),int(p.height));
+        Canvas canvas(int(layout->canvas_width),int(layout->canvas_height));
         const auto text=[&](const std::wstring& s,int x,int y,int w,int h,int font,bool bold=false,UINT align=DT_LEFT){canvas.text(s,px(x),px(y),px(w),px(h),px(font),bold,align);};
-        text(panel.message.empty()?L"FloraGPA · Hooked":panel.message,10,5,208,18,13,true);text(L"Mode  "+panel.mode_key,10,23,208,16,12);
-        text(panel.device,10,39,208,16,12);text(L"Res  "+std::to_wstring(desc.BufferDesc.Width)+L"×"+std::to_wstring(desc.BufferDesc.Height),10,55,208,16,12);
+        text(panel.message.empty()?L"FloraGPA · Hooked":panel.message,10,5,208,16,13,true);text(L"Mode  "+panel.mode_key,10,22,208,14,12);
+        text(panel.device,10,37,208,14,12);text(L"Res  "+std::to_wstring(surface_width)+L"×"+std::to_wstring(surface_height),10,52,208,14,12);
         text(rate(panel.fps.current),225,5,75,56,48,true,DT_RIGHT);
         const int footer=desired_height-20;
         text(panel.adapter,8,footer+2,207,17,12,true);text(rate(panel.fps.minimum),223,footer+2,35,17,12,true,DT_RIGHT);text(rate(panel.fps.maximum),264,footer+2,35,17,12,true,DT_RIGHT);
@@ -96,12 +110,16 @@ bool PixelTransaction::begin(IDXGISwapChain* native,const Panel& panel,UINT flag
         GdiFlush();auto pixels=p.clean;const bool bgra=desc.BufferDesc.Format==DXGI_FORMAT_B8G8R8A8_UNORM;
         const int radius=px(12);
         for(UINT y=0;y<p.height;++y)for(UINT x=0;x<p.width;++x){
-            const int cx=x<UINT(radius)?radius:x>=p.width-UINT(radius)?int(p.width)-radius-1:int(x);
-            const int cy=y<UINT(radius)?radius:y>=p.height-UINT(radius)?int(p.height)-radius-1:int(y);
-            const int dx=int(x)-cx,dy=int(y)-cy;if(dx*dx+dy*dy>radius*radius)continue;
-            const size_t at=(size_t(y)*p.width+x)*4;const auto mask=canvas.pixels[at/4]&255u;
-            const bool bottom=y>=UINT(px(footer));const unsigned alpha=bottom?220u:210u;
-            unsigned ink[3]{255,255,255};if(bottom && x>=UINT(px(223)) && x<UINT(px(263))){ink[0]=255;ink[1]=54;ink[2]=40;}else if(bottom && x>=UINT(px(264))){ink[0]=54;ink[1]=210;ink[2]=70;}
+            // Rasterize in client/DPI space, then map into the stretched DXGI
+            // surface. A lower render resolution must not enlarge the HUD.
+            const int sx=(std::min)(canvas.width-1,int((uint64_t(x)*2+1)*layout->canvas_width/(uint64_t(p.width)*2)));
+            const int sy=(std::min)(canvas.height-1,int((uint64_t(y)*2+1)*layout->canvas_height/(uint64_t(p.height)*2)));
+            const int cx=sx<radius?radius:sx>=canvas.width-radius?canvas.width-radius-1:sx;
+            const int cy=sy<radius?radius:sy>=canvas.height-radius?canvas.height-radius-1:sy;
+            const int dx=sx-cx,dy=sy-cy;if(dx*dx+dy*dy>radius*radius)continue;
+            const size_t at=(size_t(y)*p.width+x)*4;const auto mask=canvas.pixels[size_t(sy)*canvas.width+sx]&255u;
+            const bool bottom=sy>=px(footer);const unsigned alpha=bottom?220u:210u;
+            unsigned ink[3]{255,255,255};if(bottom && sx>=px(223) && sx<px(263)){ink[0]=255;ink[1]=54;ink[2]=40;}else if(bottom && sx>=px(264)){ink[0]=54;ink[1]=210;ink[2]=70;}
             const unsigned background[3]{bottom?0u:20u,bottom?0u:37u,bottom?0u:70u};
             for(unsigned c=0;c<3;++c){const unsigned component=bgra?2-c:c;const unsigned base=(unsigned(pixels[at+c])*(255-alpha)+background[component]*alpha+127)/255;pixels[at+c]=uint8_t((base*(255-mask)+ink[component]*mask+127)/255);}
             // Preserve alpha: HUD is display decoration, not an application alpha edit.

@@ -10,7 +10,7 @@
   "pending": [
     "General concurrent-context and external-interface stress",
     "Buffered-only Raw Input hotkeys",
-    "Broader DPI/resolution matrix",
+    "Physical cross-monitor DPI transitions; native window-awareness/resolution/resize cases are verified",
     "Native long-hold/focus stress and complete hidden-state failure matrix",
     "Driver/device-loss and cancellation/cleanup failure matrix",
     "Formal GF2 six-frame acceptance remains separate and 0/6"
@@ -544,6 +544,170 @@
       "src/capture/tests/hud_model_tests.cpp": "c4a798f89cb491339de7890b834de3d1cf6602fc9edee3f322eb5ab202c6ae2c",
       "src/capture/tests/hud_live_target.cpp": "12a9dd456a354f3b66d43a13d3dae1c5063d02a78fd2ee2e58986e9307ebd845",
       "src/capture/tests/hud_focus_target.cpp": "2e3db739a7d10a3336ba7e8d80b66a35d43f790aa29587d5b443db7ef7ed0a14"
-    }
-  }
+    },
+    "implementation_commit": "e8a5553"
+  },
+  "layout_progress": {
+    "implementation_base": "e8a5553",
+    "scope": "Client DPI geometry mapped into native DXGI stretch surface; native per-window awareness and opposite caller context; not physical monitor transitions",
+    "native_cases": 30,
+    "native_dpi": [
+      96,
+      144
+    ],
+    "model_dpi": [
+      96,
+      120,
+      144,
+      192,
+      288
+    ],
+    "native_evidence_sha256": "9f37858d9f3d36e6c7d7f242b9b0ddd75b0b2051092cea0e26984913683cfdfd",
+    "profiles": {
+      "blt": {
+        "artifacts": "artifacts/capture-hud-layout-final-blt",
+        "frames": 3,
+        "checks": 82,
+        "validation_sha256": "e2b4866fe782e33a569620474866911f28c49d16f71f20e2514fdcb9730179aa",
+        "exit": {
+          "exact_retained_pixels": true,
+          "frames": 25,
+          "mode": "blt"
+        },
+        "captures": {
+          "frame-31e6923a-faaf-4681-9bb2-524a05930ccb.gpa_frame": "0fa8b5008f97f27a0430f27c533887fa1a9fa23da254aa6956c7be5afc3a128b",
+          "frame-6e282624-e94f-4064-ba32-da3bff6d9501.gpa_frame": "405b56afa16d3ecff36b575bd3dd0afca94109baf6567b7745cf1f88faa31797",
+          "frame-7f205a46-d690-4061-a35e-dfd73c205b52.gpa_frame": "20d3a65d851da8e4ed7a65eb39fe4f6a21ca016cfda993466cec7a40bc550a64"
+        },
+        "present_resize": {
+          "failed_present_restored": true,
+          "held_resize_rejected": true,
+          "partial_present1": true,
+          "same_size_resize": true,
+          "test_present": true
+        }
+      },
+      "flip3": {
+        "artifacts": "artifacts/capture-hud-layout-final-flip3",
+        "frames": 3,
+        "checks": 82,
+        "validation_sha256": "e2b4866fe782e33a569620474866911f28c49d16f71f20e2514fdcb9730179aa",
+        "exit": {
+          "exact_retained_pixels": true,
+          "frames": 23,
+          "mode": "flip3"
+        },
+        "captures": {
+          "frame-27220055-09db-4a47-af11-90aa9450abca.gpa_frame": "6a8b856c6d6a4e1629f4e787ba90330b47460a422f3bf4f188115249fdd1f35b",
+          "frame-748da60b-6459-410c-9f3d-f5099ac42877.gpa_frame": "a21a3d2d87050673d47d59aeb11ae03a69b6c6de02f7e5d27b3b6a8a5a6f1901",
+          "frame-899be8ef-9653-4b03-97b3-99874a4c2bd3.gpa_frame": "cc6fa2536dbfb008c312e4fd83ac4c31681293657ec8dc31717508428da80a78"
+        },
+        "present_resize": {
+          "failed_present_restored": true,
+          "held_resize_rejected": true,
+          "partial_present1": true,
+          "same_size_resize": true,
+          "test_present": true
+        }
+      },
+      "borderless": {
+        "artifacts": "artifacts/capture-hud-layout-final-borderless",
+        "frames": 3,
+        "checks": 82,
+        "validation_sha256": "e2b4866fe782e33a569620474866911f28c49d16f71f20e2514fdcb9730179aa",
+        "exit": {
+          "exact_retained_pixels": true,
+          "frames": 32,
+          "mode": "borderless"
+        },
+        "captures": {
+          "frame-99ef610f-b699-4d2d-8fa9-1709bb823fd4.gpa_frame": "03e84e39679768202ebab954fcfac5260f0af938d6e756ae2fc26b707ec2918d",
+          "frame-bb1336b9-6bb8-4f4e-94ab-d5aa8d9279be.gpa_frame": "51be22582a425d6c04a7219605559b205fd9a1be60280d45ee6483a5a8c95230",
+          "frame-df96f10e-7538-4ef2-a477-539e441f2b9a.gpa_frame": "bcdba0a3c16f21ef53e64c75e3f6f58498fe7ce57f30b0f9ada6b9c44063bb73"
+        },
+        "present_resize": {
+          "failed_present_restored": true,
+          "held_resize_rejected": true,
+          "partial_present1": true,
+          "same_size_resize": true,
+          "test_present": true
+        }
+      },
+      "exclusive": {
+        "artifacts": "artifacts/capture-hud-layout-final-exclusive",
+        "frames": 3,
+        "checks": 82,
+        "validation_sha256": "1a2b4eecef4fff0772adc04bc4dde720187bca2ceff7cd490c2c29dc3eedcf15",
+        "exit": {
+          "exact_retained_pixels": true,
+          "frames": 15,
+          "mode": "exclusive"
+        },
+        "captures": {
+          "frame-65846864-7b4a-403d-8bc6-cb77fbd0236d.gpa_frame": "0cc650b106118318c647b5b1d0fc6e046b13b7b08fd2e169f35921beb3f1e2cb",
+          "frame-6edae4b5-198a-4e6d-b1b4-759deb532949.gpa_frame": "7090c8ec9b8dc76daab8b9cca6acab11e4dbb51d0cf94fb4682cc0f04bb3d6f2",
+          "frame-bae51723-bf42-4036-8171-6f4e464e5ca8.gpa_frame": "ec0dbea18c518e63be1a5deb32684927be0f19ab795d67de09f416ec172d77e6"
+        }
+      }
+    },
+    "capture_only_ctest": "62/62",
+    "capture_only_ctest_sha256": "48199b6f71a458cf08802d3998534851e50376a721b1ef49fde59b2a65342116",
+    "full_focused_ctest": "8/8 including 12 Qt cases",
+    "full_focused_ctest_sha256": "e65caf55d17745cd5bf510fa9d7d5bd543b686d99cfb3c7199ac864be04fcd4f",
+    "final_guard_test": "Native 30 cases and full-profile capture_hud_layout pass after adding two non-stretch guard cases; production unchanged",
+    "full_guard_test_sha256": "083b1f51c0cb7dc9abda5edbe27aae7c87ff7bfabc0eb7772b5b153c79c84947",
+    "gf2": {
+      "artifacts": "artifacts/capture-hud-layout-gf2",
+      "dual_player": {
+        "capture_sha256": "a90f2891f0f2667b31ac4fffc00c6ab3c8f2fc9508d66c23cbeb240b5a8ff10d",
+        "rgba_sha256": "3bccb26bd89e54992f654621ab2b488d1fc9ca2f0cda469c21b25355af3cebe8",
+        "dimensions": [
+          2560,
+          1440
+        ],
+        "preview_exact": true,
+        "dual_player_exact": true,
+        "original_resource_exact": true,
+        "flora_reference_pixels_used": false,
+        "counts": {
+          "ClearDepthStencilView": 4,
+          "ClearRenderTargetView": 2,
+          "CopySubresourceRegion": 3,
+          "Draw": 1,
+          "DrawIndexed": 21,
+          "Map": 16,
+          "Present": 1,
+          "present_rtv_unbinds": 1,
+          "query_completion_unresolved": 1,
+          "query_end_observations": 1,
+          "query_metadata_records": 3,
+          "unmap_observations": 16
+        },
+        "original_native": {
+          "player_dll": "C:\\Program Files\\IntelSWTools\\GPA\\dx11_player.dll",
+          "player_sha256": "39061ff329e4a32d0c8375ce9ee15e2017bccab0593943b962a860e11723d38b",
+          "adapter_selection": "Original kernel default (undefined GpuId)",
+          "callbacks": [],
+          "open_status": 0,
+          "playback_status": 0,
+          "closed": true
+        }
+      },
+      "compact_detailed_hidden_verified": true,
+      "main_message": "Capture failed: MSAA",
+      "hidden_request_reached": "Capturing",
+      "disconnect_result": "Cancelled",
+      "disconnect_observers": 0,
+      "published_files": 1
+    },
+    "source_sha256": {
+      "src/capture/hud/hud_model.hpp": "1cc0f47f30296b572c5c5c3c4deb8bdff854aa5f03d5c6b1d60be63ea6be8cf0",
+      "src/capture/hud/hud_model.cpp": "9073bf0fc6f63cadc0fdba9497eea08a96c3a2dd3d6c3478cd129db07071ed6c",
+      "src/capture/hud/hud_pixels.cpp": "8985103ce32f6e947e8a0a2831091d8db78fbae6cd2e8610426951f6c49110e0",
+      "src/capture/tests/hud_model_tests.cpp": "0282fd56044495b11a41037f487bb27a5992b94f51d5533e8bd78c0eff819a82",
+      "src/capture/tests/hud_layout_tests.cpp": "feb961625500796e57a1a987cdbfa9db9b51d588b8e3455f9058a53b1d59ec56"
+    },
+    "runtime_sha256": "64afb8680eb56248978dd7a7ac35265ffc45e54a4fc132202f2951a3a3e6af05"
+  },
+  "latest_progress": "layout_progress; initial integration commit and older scoped evidence retained"
 }

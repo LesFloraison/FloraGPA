@@ -440,3 +440,50 @@ formal six-frame capture acceptance.
 References: [Raw Input Overview](https://learn.microsoft.com/en-us/windows/win32/inputdev/about-raw-input),
 [RAWINPUTDEVICE](https://learn.microsoft.com/en-us/windows/win32/api/winuser/ns-winuser-rawinputdevice),
 [GetRawInputData](https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getrawinputdata).
+
+## Window DPI and render resolution
+
+HUD geometry now uses the window's client/DPI coordinate space, then maps the
+panel into the native presentation surface. A 400×300 backbuffer stretched into
+an 800×600 client therefore has the same displayed panel footprint as an 800×600
+backbuffer. Nonuniform stretch maps each axis separately. Unequal client/surface
+sizes with a known non-stretch DXGI mode skip before any pixel change. The
+compact panel's resolution row ends above its footer. Short and narrow clients
+shrink the complete panel proportionally; unreadable sizes skip explicitly.
+
+The runtime temporarily uses the window's DPI awareness context solely for its
+geometry queries and restores the calling thread's context before drawing.
+It does not alter process DPI settings. This follows the window-specific model
+documented by [GetDpiForWindow](https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getdpiforwindow)
+and [GetWindowDpiAwarenessContext](https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getwindowdpiawarenesscontext).
+
+`capture_hud_layout` measures actual changed GPU pixels across **28 layout cases**:
+native DPI-unaware (96 DPI) and per-monitor-aware (144 DPI) windows, opposite
+caller-thread awareness, compact/detailed, 800×600 / 400×300 / 1600×900 surfaces,
+narrow/short/unreadable clients, and return to the original size after Resize.
+Every case preserves caller DPI, LastError and alpha; whole-resource bytes match
+exactly after restore and the debug layer reports no warning/error. Measured
+displayed margins and panel dimensions stay constant across render resolutions.
+Two additional native flip cases verify that `DXGI_SCALING_NONE` with unequal
+client/surface dimensions refuses before drawing and leaves bytes unchanged.
+The pure geometry checks additionally cover 96/120/144/192/288 DPI. Generated
+visuals and native results are ignored under `artifacts/capture-hud-layout-final-native`.
+This is not evidence of physically moving a window between differently scaled
+monitors or changing the desktop's DPI during capture.
+
+Complete capture-only regression passes **62/62**; focused full application
+regression passes **8/8**, including **12 Qt cases**. The two final non-stretch
+test cases also pass in both builds. Final injected blt, three-buffer flip,
+monitor-sized borderless and exclusive-fullscreen sessions publish twelve files
+and pass **328** exact dual-player/preview/inventory/Draw-zero checks. All four
+applications exit with exact retained scene bytes. Windowed sessions additionally
+exercise TEST, invalid Present, partial Present1, retained-reference Resize
+failure and successful Resize. GPU checks remain serial.
+
+A fresh GF2 run verifies all three modes and start-screen hotkey capture, with
+22 application draws and exact dual-player/captured-resource/preview bytes at
+2560×1440. The main scene visibly reports `Capture failed: MSAA`. Hidden mode
+still starts a request; disconnect during that request reaches `Cancelled`,
+removes input observers and publishes no additional file. Game rendering remains
+normal until a normal close. Evidence is under `artifacts/capture-hud-layout-gf2`.
+This remains scoped HUD evidence; formal GF2 six-frame acceptance stays **0/6**.

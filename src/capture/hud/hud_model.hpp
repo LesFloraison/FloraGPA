@@ -10,6 +10,14 @@ namespace flora::capture::hud {
 enum class Mode { Compact, Detailed, Hidden };
 const char* mode_name(Mode mode) noexcept;
 Mode parse_mode(std::string_view text);
+struct PanelLayout {
+    uint32_t x=0,y=0,width=0,height=0,canvas_width=0,canvas_height=0;
+    double scale=1;
+};
+// Client dimensions use the window's DPI coordinate space. Surface dimensions
+// may differ when DXGI stretches the backbuffer into the client area.
+std::optional<PanelLayout> panel_layout(uint32_t surface_width,uint32_t surface_height,
+    uint32_t client_width,uint32_t client_height,uint32_t dpi,Mode mode) noexcept;
 struct Hotkey {
     uint32_t key=0;
     bool control=false,shift=false,alt=false;

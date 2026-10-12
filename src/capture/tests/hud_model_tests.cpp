@@ -14,6 +14,21 @@ int main(){try{
     require(failure_summary("ID3D11DeviceContext::ClearRenderTargetView: MSAA sample-preserving capture is not implemented")=="Capture failed: MSAA","MSAA summary hides cause");
     require(failure_summary("API: Device removed")=="Capture failed: Device removed" && failure_summary("")=="Capture failed","Failure summary");
     require(parse_mode("off")==Mode::Hidden,"Hidden mode");rejects([]{parse_mode("unknown");});
+    {
+        const auto normal=panel_layout(800,600,800,600,96,Mode::Compact);
+        require(normal && normal->x==12 && normal->y==12 && normal->width==312 && normal->height==88,"Default DIP footprint");
+        const auto low=panel_layout(400,300,800,600,96,Mode::Compact);
+        require(low && low->x==6 && low->y==6 && low->width==156 && low->height==44,"Render resolution changed displayed HUD size");
+        const auto stretched=panel_layout(1600,900,800,600,96,Mode::Compact);
+        require(stretched && stretched->x==24 && stretched->y==18 && stretched->width==624 && stretched->height==132,"Nonuniform stretch changed DIP aspect");
+        for(const auto dpi:{96u,120u,144u,192u,288u})for(const auto mode:{Mode::Compact,Mode::Detailed}){
+            const auto p=panel_layout(3840,2160,3840,2160,dpi,mode);require(p && p->x==12*dpi/96 && p->width==312*dpi/96 && p->height==(mode==Mode::Compact?88u:144u)*dpi/96,"DPI footprint");
+        }
+        require(panel_layout(240,180,240,180,96,Mode::Detailed).has_value(),"Narrow window should scale down");
+        require(panel_layout(800,100,800,100,96,Mode::Compact).has_value(),"Short window should scale down");
+        for(const auto mode:{Mode::Compact,Mode::Detailed})require(!panel_layout(180,100,180,100,96,mode),"Unreadable window accepted");
+        require(!panel_layout(800,600,0,0,96,Mode::Compact) && !panel_layout(800,600,800,600,0,Mode::Compact) && !panel_layout(800,600,800,600,96,Mode::Hidden),"Unavailable geometry rendered");
+    }
     std::array<bool,256> keys{};KeyEdge edge;const auto capture=parse_hotkey("Ctrl+Shift+C");
     require(!edge.update(capture,keys,true),"Initial focus");keys[0x11]=keys[0x10]=keys['C']=true;
     require(edge.update(capture,keys,true),"Pressed chord");require(!edge.update(capture,keys,true),"Key repeat");
