@@ -26,6 +26,26 @@ SubresourceData mapped_layout(ID3D11Resource* resource,const ObjectRecord& r,UIN
     return resource_layout(s,DeferredHistory::byte_limit).at(subresource);
 }
 }
+ObjectId DeferredBindingBuilder::object_id(IUnknown* value){
+    const auto r=object_record(value);if(!r || r->device!=device_)throw std::runtime_error("Deferred binding identity/device mismatch");return r->id;
+}
+void record_deferred_binding_impl(ID3D11DeviceContext* context,const char* api,const void* input,void(*build)(const void*,DeferredBindingBuilder&)) noexcept{
+    LastError error;
+    try{
+        auto r=object_record(context);if(!r || !deferred(*r))return;
+        std::lock_guard lock(r->mutex);auto& h=history(*r);auto& b=h.pending;
+        try{
+            if(native_call_depth>1 || b.recording_thread!=GetCurrentThreadId())throw std::runtime_error("Binding recording thread/reentrancy mismatch");
+            if(!h.binding_pending)throw std::runtime_error("Binding has no preceding observation");
+            auto& call=b.calls.at(*h.binding_pending);
+            if(call.api!=api || call.kind!=CommandKind::binding || call.thread!=GetCurrentThreadId() || call.binding)throw std::runtime_error("Binding observation was interleaved or omitted");
+            h.binding_pending.reset();
+            if(b.owned_bytes>DeferredHistory::byte_limit)throw std::runtime_error("Deferred binding byte limit exceeded");
+            DeferredBindingBuilder builder(r->device,DeferredHistory::byte_limit-b.owned_bytes);build(input,builder);
+            b.owned_bytes+=builder.result.owned_bytes;call.binding=std::move(builder.result);
+        }catch(const std::exception& e){gap(b,std::string(api)+": "+e.what());}
+    }catch(...){object_gap(api,__uuidof(ID3D11DeviceContext),"Deferred binding metadata unavailable");}
+}
 void observe_deferred_call(ID3D11DeviceContext* context,const char* api,CommandKind kind,const std::array<uint32_t,5>& words,IUnknown* operand,const float* floats,const UINT* integers,IUnknown* source,const UpdateSource* update,const CopyRegion* region) noexcept{
     LastError error;std::shared_ptr<ObjectRecord> r;
     try{
@@ -33,12 +53,14 @@ void observe_deferred_call(ID3D11DeviceContext* context,const char* api,CommandK
         const std::string_view name=api;
         if(name.ends_with("::FinishCommandList") || (kind==CommandKind::read && !name.ends_with("::End")))return;
         std::lock_guard lock(r->mutex);auto& h=history(*r);auto& b=h.pending;
+        h.binding_pending.reset();
         if(kind==CommandKind::map && h.mappings.erase({identity(operand),words[0]}))gap(b,"Map: overlapping mapping discarded without reading old storage");
         if(native_call_depth>1){gap(b,std::string(api)+": reentrant deferred call");return;}
         if(!b.recording_thread)b.recording_thread=GetCurrentThreadId();
         else if(b.recording_thread!=GetCurrentThreadId())gap(b,std::string(api)+": recording thread changed; synchronization unproven");
         if(b.calls.size()>=DeferredHistory::call_limit){gap(b,std::string(api)+": deferred call limit exceeded");return;}
-        DeferredCall c;c.api=api;c.kind=kind;c.sequence=b.calls.size();c.words=words;c.operand=identity(operand);c.source=identity(source);
+        DeferredCall c;c.api=api;c.kind=kind;c.sequence=b.calls.size();c.thread=GetCurrentThreadId();c.words=words;c.operand=identity(operand);c.source=identity(source);
+        if(name.ends_with("::SetResourceMinLOD"))gap(b,std::string(api)+": SetResourceMinLOD is immediate-context only");
         if(floats)std::copy_n(floats,4,c.floats.begin());if(integers)std::copy_n(integers,4,c.words.begin());
         if(region)c.copy_region=*region;
         try{
@@ -50,7 +72,7 @@ void observe_deferred_call(ID3D11DeviceContext* context,const char* api,CommandK
                 const auto shape=resource_shape(native.Get());const auto layout=update_layout(shape,object->descriptor,words[0],c.update_box?&*c.update_box:nullptr);
                 if(layout.slice_bytes*layout.depth>DeferredHistory::byte_limit-b.owned_bytes)throw std::runtime_error("Deferred payload byte limit exceeded");
                 auto data=layout;copy_pitched(data,update->data,update->row_pitch,update->depth_pitch);c.data=std::move(data.bytes);b.owned_bytes+=c.data.size();c.words={words[0],update->row_pitch,update->depth_pitch,UINT(update->extended),update->flags};
-            }else if(kind!=CommandKind::map && kind!=CommandKind::clear_rtv && kind!=CommandKind::clear_dsv && kind!=CommandKind::clear_uav_uint && kind!=CommandKind::clear_uav_float && kind!=CommandKind::copy_resource && kind!=CommandKind::copy_region)
+            }else if(kind!=CommandKind::binding && kind!=CommandKind::map && kind!=CommandKind::clear_rtv && kind!=CommandKind::clear_dsv && kind!=CommandKind::clear_uav_uint && kind!=CommandKind::clear_uav_float && kind!=CommandKind::copy_resource && kind!=CommandKind::copy_region)
                 throw std::runtime_error("Deferred state, mapping, query or command arguments require further tracking");
         }catch(const std::exception& e){gap(b,std::string(api)+": "+e.what());}
         if(kind==CommandKind::map){
@@ -59,6 +81,7 @@ void observe_deferred_call(ID3D11DeviceContext* context,const char* api,CommandK
             h.mappings.emplace(key,DeferredHistory::Mapping{b.calls.size(),GetCurrentThreadId()});
         }
         b.calls.push_back(std::move(c));
+        if(kind==CommandKind::binding)h.binding_pending=b.calls.size()-1;
     }catch(...){object_gap(api,__uuidof(ID3D11DeviceContext),"Deferred call metadata unavailable");}
 }
 void remember_deferred_map_result(ID3D11DeviceContext* context,ID3D11Resource* resource,UINT subresource,HRESULT result,const D3D11_MAPPED_SUBRESOURCE* mapped) noexcept{
@@ -110,6 +133,8 @@ void remember_deferred_finish(ID3D11DeviceContext* context,HRESULT result,BOOL r
         auto output=list?object_record(list):nullptr;std::shared_ptr<const DeferredCommandList> completed;
         {std::lock_guard lock(r->mutex);auto& h=history(*r);if(FAILED(result)){++h.failed_finishes;return;}
             if(h.finishes==UINT64_MAX)throw std::runtime_error("Deferred generation overflow");
+            for(const auto& call:h.pending.calls)if(call.kind==CommandKind::binding && !call.binding){gap(h.pending,call.api+": binding arguments unavailable");break;}
+            h.binding_pending.reset();
             if(!h.mappings.empty()){gap(h.pending,"FinishCommandList: unfinished mappings; storage was not read");h.mappings.clear();}
             h.pending.generation=++h.finishes;h.pending.restore_deferred_state=restore!=FALSE;
             completed=std::make_shared<const DeferredCommandList>(std::move(h.pending));h.pending={};h.pending.context=r->id;h.pending.device=r->device;h.pending.starts_default=restore==FALSE;

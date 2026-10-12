@@ -25,6 +25,28 @@ std::string match(const std::vector<std::string>& chain) {
     for (const auto& name : chain) { if (!result.empty()) result += " || "; result += "iid == __uuidof(" + name + ")"; }
     return result;
 }
+void binding_arguments(std::ostream& out,const Json& m,const std::string& api){
+    const std::string method=m.at("name");
+    const std::map<std::string,std::string> limits{{"NumBuffers",method=="SOSetTargets"?"4":method=="IASetVertexBuffers"?"32":"14"},
+        {"NumViews",method=="OMSetRenderTargets"?"8":"128"},{"NumClassInstances","D3D11_SHADER_MAX_INTERFACES"},
+        {"NumSamplers","16"},{"NumRTVs","8"},{"NumUAVs","64"},{"NumViewports","16"},{"NumRects","16"},{"4","4"}};
+    out<<"record_deferred_binding(this, \""<<api<<"\", [&]([[maybe_unused]] DeferredBindingBuilder& b){\n";
+    for(const auto& p:m.at("parameters")){
+        const std::string name=p.at("name"),type=p.at("type"),declaration=p.at("declaration");std::string count=p.at("count");
+        std::smatch extent;if(count.empty() && std::regex_search(declaration,extent,std::regex("\\[\\s*([0-9]+)\\s*\\]")))count=extent[1];
+        const bool com=std::regex_search(type,std::regex("\\bI(?:D3D|DXGI|Unknown)[A-Za-z0-9_]*\\b"));
+        std::string ignored="false";
+        if(method=="OMSetRenderTargetsAndUnorderedAccessViews"){
+            if(count=="NumRTVs" || name=="pDepthStencilView")ignored="NumRTVs == UINT(-1)";
+            if(count=="NumUAVs")ignored="NumUAVs == UINT(-1)";
+            if(name=="UAVStartSlot")ignored="NumUAVs == UINT(-1)";
+        }
+        if(!count.empty())out<<"b."<<(com?"objects":"array")<<"(\""<<name<<"\", "<<name<<", "<<count<<", "<<limits.at(count)<<", "<<ignored<<");\n";
+        else if(com)out<<"b.object(\""<<name<<"\", "<<name<<", "<<ignored<<");\n";
+        else out<<"b.value(\""<<name<<"\", "<<name<<", "<<ignored<<");\n";
+    }
+    out<<"});\n";
+}
 void method(std::ostream& out, const std::string& iface, const Json& m) {
     const std::string name = m.at("name"), result = m.at("result"), api = iface + "::" + name;
     const auto& parameters = m.at("parameters");
@@ -43,7 +65,10 @@ void method(std::ostream& out, const std::string& iface, const Json& m) {
         const bool is_com = std::regex_search(type, com, std::regex("\\b(I(?:D3D|DXGI|Unknown)[A-Za-z0-9_]*)\\b"));
         std::string arg = pname;
         if (is_com && direction == "in" && name != "SetPrivateDataInterface") {
-            if (count.empty()) arg = "unwrap(" + pname + ")";
+            if (count.empty()) {
+                arg = "unwrap(" + pname + ")";
+                if(name=="OMSetRenderTargetsAndUnorderedAccessViews" && pname=="pDepthStencilView")arg="(NumRTVs == UINT(-1) ? nullptr : "+arg+")";
+            }
             else {
                 std::string keep = "";
                 if (name == "OMSetRenderTargetsAndUnorderedAccessViews") keep = ", " + count + " == UINT(-1)";
@@ -134,6 +159,7 @@ void method(std::ostream& out, const std::string& iface, const Json& m) {
             out << "CopyRegion region{DstSubresource,DstX,DstY,DstZ,SrcSubresource," << (name=="CopySubresourceRegion1"?"CopyFlags,true":"0,false") << ",{}};\nif(pSrcBox)region.box=ResourceBox{pSrcBox->left,pSrcBox->top,pSrcBox->front,pSrcBox->right,pSrcBox->bottom,pSrcBox->back};\nrecord_context_call(this, \"" << api << "\", CommandKind::copy_region, {}, pDstResource, nullptr, nullptr, pSrcResource, nullptr, &region);\n";
         else if(name=="Unmap")out << "record_unmap(this, pResource, Subresource);\n";
         else out << "record_context_call(this, \"" << api << "\", CommandKind::" << kind << ", " << words << ", " << operand << ", " << floats << ", " << integers << ", " << source << ");\n";
+        if(kind=="binding")binding_arguments(out,m,api);
     }
     else if(name=="WriteToSubresource" || name=="Map" || name=="Unmap" || name=="GetDC" || name=="ReleaseDC" ||
         name.starts_with("OfferResources") || name.starts_with("ReclaimResources") || name=="Trim" ||

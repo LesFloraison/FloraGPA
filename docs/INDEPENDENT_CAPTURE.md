@@ -1668,3 +1668,56 @@ summary hashes in `artifacts/capture-deferred-map-package-validation.json`.
 These package checks establish build/runtime independence and control behavior;
 the separate working-build matrix above supplies dual-player pixel comparisons.
 They do not establish deferred file encoding or GF2 scene acceptance.
+
+## Owned deferred binding arguments
+
+The native generator now emits typed argument observations for 46 binding APIs.
+Forty-five are exercised as valid deferred calls; SetResourceMinLOD is recorded
+with an explicit immediate-context-only gap, matching this runtime's Debug Layer
+diagnostic. The per-call CPU payload owns scalar/array bytes and stable object
+IDs for all six shader stages, 11.1 constant-buffer ranges, IA, RS, OM, SO and
+predication. Fixed BlendFactor arrays are copied as four floats, not addresses.
+Null arrays, explicit null object slots, count-zero arrays and ignored KEEP
+arguments remain distinguishable. Payloads share the existing 64 MiB journal
+budget and enforce API array capacities before copying. Immediate contexts do
+not build or allocate these deferred argument payloads.
+
+These are setter inputs, not inferred effective pipeline state. Automatic hazard
+unbinding, inherited state, predicate/counter behavior and command-list lowering
+remain unresolved. Creation graphs for dead or driver-elided binding objects
+still need retention; owning their IDs alone does not reconstruct those objects.
+No deferred getters are used to guess state. A pending-call
+slot associates each payload with its originating observation/thread; omitted,
+interleaved, duplicate and budget-limited inputs cannot replace an earlier call's
+arguments. Finish marks missing binding payloads as gaps. Immutable list records
+contain no native COM references or caller addresses and do not depend on replay.
+
+Microsoft's [OM binding contract](https://learn.microsoft.com/en-us/windows/win32/api/d3d11/nf-d3d11-id3d11devicecontext-omsetrendertargetsandunorderedaccessviews)
+specifies ignored parameters under KEEP. The wrapper previously unwrapped the
+depth-stencil argument even when NumRTVs requested KEEP; it now skips that
+lookup. Tests pass inaccessible sentinel pointers for ignored RTV/DSV/UAV/count
+arguments and verify safe native forwarding, including immediate-context RTV
+getter identity. Explicit initial-count KEEP values are retained without
+inventing hidden counter values.
+
+WARP/hardware fixtures cover the 45 deferred APIs, aliased buffer arrays, original
+constant ranges, viewport/scissor/blend arrays mutated before Finish, exact
+native green Draw pixels and Dispatch integers, retained CPU IDs after every
+native object dies, and oversized/budget/duplicate/dropped-input guards. The
+immediate-only negative preserves the requested LOD value in metadata and verifies
+that native resource LOD remains unchanged. Final Debug Layer runs have zero
+unexpected warnings/errors and exactly one expected MinLOD diagnostic per device.
+Initial logs retain the immediate-only discovery, a zero-count UAV warning, an
+invalid feature-level-11.0 UAV slot in the fixture, and build fixes for an unused
+generated parameter and missing test-only WRL include. The final fixture corrects
+the no-op/slot cases and checks the immediate-only diagnostic explicitly.
+
+All 48 capture-only and 50 relevant full-profile suites pass, with eleven Qt
+cases without skips and a complete application build. The existing-profile
+startup matrix produces 115 files in 23 launches and passes 737 serial dual-player,
+CPU and module checks. Evidence hashes are in
+`artifacts/capture-deferred-bindings-validation.json`. These files still do not
+exercise deferred encoding. Encoder, replay and shared-format sources are
+unchanged; no new golden run is claimed. The latest clean source-package proof
+covers `c57bd39`; the binding revision's package, original GUI/adapter and GF2
+scene gates remain pending. Accepted GF2 scene frames remain **0/6**.

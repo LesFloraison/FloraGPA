@@ -1,5 +1,6 @@
 #pragma once
 #include "capture_model.hpp"
+#include "deferred_bindings.hpp"
 #include <deque>
 #include <memory>
 namespace flora::capture {
@@ -8,11 +9,13 @@ struct DeferredCall {
     CommandKind kind=CommandKind::unsupported;
     std::string api;
     uint64_t sequence=0;
+    DWORD thread=0;
     ObjectId operand=0,source=0;
     std::array<uint32_t,5> words{};
     std::array<float,4> floats{};
     std::optional<ResourceBox> update_box;
     std::optional<CopyRegion> copy_region;
+    std::optional<DeferredBinding> binding;
     std::vector<uint8_t> data;
     HRESULT result=S_OK;
     bool completed=true;
@@ -39,6 +42,7 @@ struct DeferredHistory {
     DeferredCommandList pending;
     uint64_t finishes=0,failed_finishes=0,execution_serial=0;
     std::deque<CommandListExecution> executions;
+    std::optional<size_t> binding_pending;
     // Only live mappings contain borrowed pointers. Unmap removes the entry
     // before copying; immutable command-list histories never contain pointers.
     struct Mapping {

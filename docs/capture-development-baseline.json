@@ -9,7 +9,7 @@
     "B": "native launch/control and capture-only package validated",
     "C": "partial: persistent native identity, descriptor graph and owned buffer/texture/shader/input-layout/SO creation metadata validated; other creation paths pending",
     "D": "partial: startup-injected blit/flip/tearing capture with dynamic mapped constants; dual-player execution verified on self-owned targets",
-    "E": "partial: initial resources, immediate Map/Unmap, whole/region BC1-5 copies, zero-flag Updates and scoped EVENT observations verified; deferred compilation histories now own Map bytes/results; deferred state/encoding, successful in-frame waits and hidden-state coverage pending",
+    "E": "partial: initial resources, immediate Map/Unmap, whole/region BC1-5 copies, zero-flag Updates and scoped EVENT observations verified; deferred histories own Map and binding inputs; effective state/hazards, deferred encoding, successful in-frame waits and hidden states pending",
     "F": "partial: native CLI and asynchronous Qt capture/cancel/disconnect/completed-file opening tested; full profile/deployment acceptance pending",
     "G": "pending: no six-frame GF2 or original GUI capture acceptance"
   },
@@ -1014,5 +1014,60 @@
       "scope": "Clean capture-only source build and packaged IPC/publication/lifecycle; dual-player pixel checks belong to the separate working-build matrix",
       "evidence": "artifacts\\capture-deferred-map-source-build\\validation.json"
     }
+  },
+  "deferred_bindings": {
+    "status": "Owned setter inputs; effective state/hazard reconstruction and deferred encoding remain pending",
+    "generated_binding_apis": 46,
+    "valid_deferred_binding_apis": 45,
+    "immediate_only": "SetResourceMinLOD: owned attempted arguments, explicit gap, unchanged native LOD and one expected Debug Layer diagnostic per device",
+    "ownership": "Scalar/array bytes and stable IDs; null arrays, count-zero arrays, explicit null slots and ignored KEEP remain distinct; no COM references or caller addresses",
+    "limits": "Shared 64 MiB payload budget, per-API array capacity, pending-call/thread association and missing/duplicate/dropped-input rejection",
+    "keep_fix": "Ignored depth-stencil argument is not unwrapped; inaccessible sentinel pointers verify RTV/DSV/UAV/count KEEP and immediate-context RTV getter identity",
+    "native_oracles": [
+      "45 API inventory",
+      "Aliased buffer identities",
+      "Constant-buffer ranges",
+      "Mutated viewport/scissor/blend/count arrays",
+      "Exact green Draw pixels",
+      "Exact Dispatch integers 37/38/39/40",
+      "Owned IDs after native destruction",
+      "Oversize/budget/missing/duplicate/dropped arguments"
+    ],
+    "native_devices": [
+      "WARP",
+      "hardware"
+    ],
+    "debug_unexpected_warnings_or_errors": 0,
+    "debug_expected_min_lod_diagnostics_per_device": 1,
+    "retained_failures": [
+      "Unused generated callback parameter",
+      "Missing test-only WRL include",
+      "MinLOD immediate-only discovery",
+      "Zero-count UAV fixture warning",
+      "Invalid feature-level-11.0 UAVStartSlot in fixture"
+    ],
+    "capture_only_ctest": 48,
+    "full_profile_ctest": 50,
+    "full_profile_scope": "46 independent capture suites, two existing structure suites and two checked-format suites",
+    "qt_cases": 11,
+    "qt_skipped": 0,
+    "full_application_build": true,
+    "injected_launches": 23,
+    "injected_files": 115,
+    "injected_checks": 737,
+    "original_player_reports": 115,
+    "original_player_sha256": "39061ff329e4a32d0c8375ce9ee15e2017bccab0593943b962a860e11723d38b",
+    "accepted_deferred_files": 0,
+    "replay_encoder_and_format_sources": "unchanged",
+    "pending": [
+      "Creation-definition graphs for dead or driver-elided binding objects",
+      "Effective binding and hazard-unbinding reconstruction",
+      "Inherited deferred state, predicates and hidden counters",
+      "Initial GPU data at execution and repeated/nested-list lowering",
+      "Deferred file encoding and dual-player acceptance",
+      "Binding revision source-package proof; latest clean proof is c57bd39",
+      "Original GUI/adapter and six GF2 scene frames"
+    ],
+    "evidence": "artifacts/capture-deferred-bindings-validation.json"
   }
 }
