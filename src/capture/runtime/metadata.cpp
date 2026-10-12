@@ -1,5 +1,6 @@
 #include "metadata.hpp"
 #include "objects.hpp"
+#include "deferred_resources.hpp"
 #include <dxgi1_6.h>
 #include <wrl/client.h>
 #include <map>
@@ -8,12 +9,14 @@
 namespace flora::capture {
 using Microsoft::WRL::ComPtr;
 namespace {
-// Reserved only for native lifetime notification. The token has no reference
-// to the native object, its device, or its wrapper: there is no ownership cycle.
+// Reserved for native lifetime notification. Neither token nor entry owns its
+// parent object. Deferred contexts/lists may pin resource children separately;
+// ordinary resource/device/context metadata records remain CPU-only.
 const GUID lifetime_key{0x62867ec1,0x723d,0x4e8e,{0xae,0x35,0xa7,0xc5,0x10,0x29,0x42,0xe1}};
 struct Entry {
     std::recursive_mutex mutex;
     std::weak_ptr<ObjectRecord> record;
+    std::shared_ptr<const DeferredResourceLeases> deferred_resources;
 };
 struct Registry {
     std::mutex mutex;
@@ -165,6 +168,46 @@ std::shared_ptr<ObjectRecord> find_native_record(IUnknown* identity) {
     auto& r=registry();std::shared_ptr<Entry> entry;
     {std::lock_guard lock(r.mutex);auto it=r.objects.find(identity);if(it==r.objects.end())return {};entry=it->second;}
     std::lock_guard lock(entry->mutex);return entry->record.lock();
+}
+namespace {
+std::shared_ptr<Entry> lease_entry(IUnknown* application_owner,const char* kind){
+    if(!application_owner)throw std::runtime_error("Deferred resource owner missing");
+    ComPtr<IUnknown> native;if(FAILED(unwrap(application_owner)->QueryInterface(IID_PPV_ARGS(&native))))throw std::runtime_error("Deferred resource owner identity missing");
+    auto& r=registry();std::shared_ptr<Entry> entry;
+    {std::lock_guard lock(r.mutex);auto it=r.objects.find(native.Get());if(it==r.objects.end())throw std::runtime_error("Deferred resource owner is untracked");entry=it->second;}
+    {std::lock_guard lock(entry->mutex);auto record=entry->record.lock();if(!record || record->kind!=kind)throw std::runtime_error("Deferred resource owner kind mismatch");
+        if(record->kind=="context"){ContextRecordDesc d{};if(record->descriptor.size()!=sizeof d)throw std::runtime_error("Deferred resource context descriptor missing");memcpy(&d,record->descriptor.data(),sizeof d);if(d.type!=D3D11_DEVICE_CONTEXT_DEFERRED)throw std::runtime_error("Resource leases require a deferred context");}}
+    return entry;
+}
+}
+void retain_deferred_resource(ID3D11DeviceContext* context,IUnknown* operand){
+    if(!operand)return;NativeCall internal;
+    ComPtr<ID3D11Resource> resource;
+    if(FAILED(operand->QueryInterface(IID_PPV_ARGS(&resource)))){
+        ComPtr<ID3D11View> view;if(FAILED(operand->QueryInterface(IID_PPV_ARGS(&view))))return;view->GetResource(&resource);
+    }
+    ComPtr<IUnknown> identity;if(!resource || FAILED(resource.As(&identity)))throw std::runtime_error("Deferred resource identity missing");
+    auto record=find_native_record(identity.Get());auto owner=object_record(context);
+    if(!record || !owner || record->device!=owner->device)throw std::runtime_error("Deferred resource lease device mismatch");
+    auto entry=lease_entry(context,"context");std::shared_ptr<const DeferredResourceLeases> previous;
+    {std::lock_guard lock(entry->mutex);previous=entry->deferred_resources;}
+    if(previous && previous->contains(record->id))return;
+    if(previous && previous->size()>=8192)throw std::runtime_error("Deferred resource lease object limit exceeded");
+    // COM AddRef/Release and map allocation run outside registry/entry locks.
+    auto next=std::make_shared<DeferredResourceLeases>();if(previous)*next=*previous;next->emplace(record->id,std::move(resource));
+    {std::lock_guard lock(entry->mutex);if(entry->deferred_resources!=previous)throw std::runtime_error("Concurrent deferred resource lease mutation");entry->deferred_resources=std::move(next);}
+}
+void finish_deferred_resources(ID3D11DeviceContext* context,HRESULT result,ID3D11CommandList* list){
+    if(FAILED(result))return;NativeCall internal;
+    auto source=lease_entry(context,"context");auto destination=list?lease_entry(list,"command_list"):nullptr;
+    if(list){auto a=object_record(context),b=object_record(list);if(!a || !b || a->device!=b->device)throw std::runtime_error("Finished resource lease device mismatch");}
+    std::shared_ptr<const DeferredResourceLeases> completed,old;
+    {std::lock_guard lock(source->mutex);completed=std::move(source->deferred_resources);}
+    if(destination){std::lock_guard lock(destination->mutex);old=std::move(destination->deferred_resources);destination->deferred_resources=std::move(completed);}
+    // Null-output Finish discards its leases. Release outside the entry locks.
+}
+std::shared_ptr<const DeferredResourceLeases> command_list_resources(IUnknown* list){
+    NativeCall internal;auto entry=lease_entry(list,"command_list");std::lock_guard lock(entry->mutex);return entry->deferred_resources;
 }
 void track_query(const void* context_proxy,IUnknown* query,bool begin) noexcept {
     try {

@@ -1826,3 +1826,65 @@ Deferred execution-time snapshots, command-list lowering/encoding, original GUI
 acceptance and GF2 scene acceptance remain pending. Accepted deferred files and
 GF2 scene frames remain **0** and **0/6**, respectively. The latest clean
 source-package proof still covers `c57bd39`.
+
+## Precompiled deferred execution capture
+
+The execution stage supersedes the earlier zero-file deferred milestones above.
+Supported precompiled lists now expand at each actual immediate-context
+`ExecuteCommandList` call, preserving execution order and repeated calls. CPU
+provenance retains list/context IDs, generation, execution ordinal, source call
+sequence and the restore flag. The file contains ordinary executable actions;
+native CommandList groups are not encoded. The existing independent encoder is
+unchanged, and no replay or shared-format implementation is reused or modified.
+
+Native resource leases are separate from immutable CPU histories. Context/list
+lifetime entries own resource references without referencing their parent COM
+object. Successful Finish transfers the leases, failed Finish retains them, and
+null-output Finish discards them. Execution borrows a shared lease while its
+caller owns the list; no weak native pointer is promoted. Resource contents are
+read before the first recorded use at the immediate execution position. Existing
+initial data is retained across repeated lists and earlier recorded writes.
+Creation bytes and compilation-time state do not substitute for those contents.
+
+The supported lowering covers Draw variants, Dispatch, Clear, CopyResource,
+CopySubresourceRegion/1 and UpdateSubresource/1 within the existing encoder's
+profiles. Missing definitions, device mismatches, payload/command limits,
+cancellation and unsupported actions reject publication while native calls
+continue to forward. Deferred Map rename dependencies, nested lists, query and
+hidden counter/predicate/SO/MinLOD state remain unsupported. Compilation during
+the captured frame and execution on additional contexts/threads also refuse.
+This is not general multithreaded deferred capture.
+
+The WARP/hardware execution fixture compiles compute before graphics, changes a
+buffer from creation value 9 to execution value 1, releases application resource
+and shader references, and captures Draw/Dispatch/Dispatch/Draw. The result is
+integer 3 and exact red pixels. The next frame starts at 3 and produces 4 and
+green pixels. TRUE restoration and FALSE reset are checked against native state,
+following the [ExecuteCommandList contract](https://learn.microsoft.com/en-us/windows/win32/api/d3d11/nf-d3d11-id3d11devicecontext-executecommandlist).
+All source COM objects are destroyed before encoding; CPU histories remain
+readable and native lifetime counts return to zero. Debug Layer runs have no
+warnings or errors.
+
+Four positive files and four negative controls pass 132 serial dual-player,
+independent exact-pixel, event, inventory and DXBC/disassembly checks. Removing
+one Dispatch changes output to blue; removing both Draws leaves black despite
+the unchanged red preview. The original oracle executes the pinned GPA player
+kernel through the development runner; this does not establish original GUI or
+adapter acceptance. Startup injection additionally exercises five precompiled
+Draw files in mode 23: the expanded matrix completes 24 launches, 120 files and
+769 exact dual-player/module checks. All 54 capture-only and 56 selected
+full-profile tests pass, including eleven Qt cases with no skips. Final evidence
+hashes are recorded in the capture baseline and
+`artifacts/capture-deferred-execution-validation.json`.
+
+Reproduce the focused run with `tools/validate_capture_deferred.py`, passing
+the capture-only `FloraCaptureDeferredExecutionTests.exe`, the replay CLI,
+reference development tools, Qt DLL directory and a new evidence directory.
+`tools/validate_capture_controller.py` performs the separate injected matrix.
+Both validators execute GPU work serially; Python is only a development driver.
+
+GF2 scene acceptance remains **0/6**. The user chose to restart Codex elevated
+for the LocalCache permission blocker; the current process still reports no
+administrator membership. No game permissions were changed. The latest clean
+source-package proof remains `c57bd39`; current package proof, broader deferred
+profiles, original GUI/adapter checks and the six GF2 scene files remain pending.

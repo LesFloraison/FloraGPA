@@ -1,6 +1,7 @@
 #include "deferred_history.hpp"
 #include "command_stream.hpp"
 #include "objects.hpp"
+#include "deferred_resources.hpp"
 #include <cstring>
 namespace flora::capture {
 namespace {
@@ -45,6 +46,7 @@ void retain_pipeline_state(ID3D11DeviceContext* context,DeferredCommandList& bat
     for(const auto& [id,object]:snapshot.objects){
         if(id==batch.context)continue; // Context is compilation provenance, not an object creation dependency.
         charge(retain_deferred_definitions(object.native.Get(),batch.device,batch.definitions,added,DeferredHistory::byte_limit-batch.owned_bytes-bytes));
+        retain_deferred_resource(context,object.native.Get());
     }
     for(const auto& reason:snapshot.gaps)gap(batch,call.api+": "+reason);
     call.state=std::make_shared<const PipelineBindings>(std::move(snapshot.bindings));batch.definitions.merge(added);batch.owned_bytes+=bytes;
@@ -99,6 +101,8 @@ void observe_deferred_call(ID3D11DeviceContext* context,const char* api,CommandK
                 if(operand)bytes+=retain_deferred_definitions(operand,r->device,b.definitions,added,DeferredHistory::byte_limit-b.owned_bytes);
                 if(source)bytes+=retain_deferred_definitions(source,r->device,b.definitions,added,DeferredHistory::byte_limit-b.owned_bytes-bytes);
                 b.owned_bytes+=bytes;b.definitions.merge(added);
+                if(operand)retain_deferred_resource(context,unwrap(operand));
+                if(source)retain_deferred_resource(context,unwrap(source));
             }
             if(kind==CommandKind::update_subresource){
                 if(!operand || !update || !update->data || update->flags)throw std::runtime_error("Deferred Update requires data and zero flags");
@@ -167,6 +171,7 @@ void remember_deferred_finish(ID3D11DeviceContext* context,HRESULT result,BOOL r
     try{
         auto r=object_record(context);if(!r || !deferred(*r))return;
         auto output=list?object_record(list):nullptr;std::shared_ptr<const DeferredCommandList> completed;
+        finish_deferred_resources(context,result,list);
         {std::lock_guard lock(r->mutex);auto& h=history(*r);if(FAILED(result)){++h.failed_finishes;return;}
             if(h.finishes==UINT64_MAX)throw std::runtime_error("Deferred generation overflow");
             for(const auto& call:h.pending.calls)if(call.kind==CommandKind::binding && !call.binding){gap(h.pending,call.api+": binding arguments unavailable");break;}
@@ -191,12 +196,5 @@ void remember_command_list_execution(ID3D11DeviceContext* context,ID3D11CommandL
         std::lock_guard lock(r->mutex);auto& h=history(*r);if(h.execution_serial==UINT64_MAX)throw std::runtime_error("Execution serial overflow");e.context_serial=++h.execution_serial;
         if(h.executions.size()==DeferredHistory::execution_limit)h.executions.pop_front();h.executions.push_back(e);
     }catch(...){object_gap("ExecuteCommandList",__uuidof(ID3D11CommandList),"Command list execution metadata unavailable");}
-}
-std::string command_list_gap(IUnknown* list){
-    const auto r=object_record(list);if(!r)return "CommandList serialization is not implemented (untracked list)";
-    std::lock_guard lock(r->mutex);std::string reason="CommandList serialization is not implemented (list="+std::to_string(r->id);
-    if(const auto& b=r->command_list){reason+=", source_context="+std::to_string(b->context)+", generation="+std::to_string(b->generation)+", calls="+std::to_string(b->calls.size());if(!b->gaps.empty())reason+=", first_gap="+b->gaps.front();}
-    else reason+=", compilation metadata unavailable";
-    return reason+")";
 }
 }

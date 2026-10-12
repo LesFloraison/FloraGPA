@@ -92,6 +92,11 @@ struct CopyRegion {
     bool extended=false;
     std::optional<ResourceBox> box;
 };
+struct DeferredOrigin {
+    ObjectId list=0,source_context=0;
+    uint64_t generation=0,execution_ordinal=0,call_sequence=0;
+    bool restore_context_state=false;
+};
 struct RecordedCommand {
     CommandKind kind=CommandKind::unsupported;
     std::string api;
@@ -103,6 +108,7 @@ struct RecordedCommand {
     std::optional<QueryObservation> query;
     std::optional<ResourceBox> update_box;
     std::optional<CopyRegion> copy_region;
+    std::optional<DeferredOrigin> deferred;
     // Update uses words {subresource, original row pitch, depth pitch, extended, flags}; packed owned bytes.
     // Map uses words {subresource, type, flags}; bytes own the completed CPU write.
     int32_t result=0;

@@ -34,10 +34,10 @@ def main():
             check(name+'-both-players-exact-cpu',(out/(name+'-flora/frame.rgba')).read_bytes()==expected and original['replayed_rgba_sha256']==hashlib.sha256(expected).hexdigest())
             counts={'ClearRenderTargetView':1,'Draw':1,'Present':1}
             if session['mode']>=2 and session['mode']!=8:counts['present_rtv_unbinds']=1
-            if session['mode']>=13:counts['UpdateSubresource1' if session['mode'] in (14,16,18) else 'UpdateSubresource']=1
-            elif session['mode']>=11:counts.update(Map=1,unmap_observations=1)
-            if session['mode']>=19:counts['CopySubresourceRegion1' if session['mode'] in (20,22) else 'CopySubresourceRegion']=1
-            if session['mode']>=17:counts.update(query_metadata_records=2,query_end_observations=1,query_completion_unresolved=1)
+            if 13<=session['mode']<=22:counts['UpdateSubresource1' if session['mode'] in (14,16,18) else 'UpdateSubresource']=1
+            elif 11<=session['mode']<=12:counts.update(Map=1,unmap_observations=1)
+            if 19<=session['mode']<=22:counts['CopySubresourceRegion1' if session['mode'] in (20,22) else 'CopySubresourceRegion']=1
+            if 17<=session['mode']<=22:counts.update(query_metadata_records=2,query_end_observations=1,query_completion_unresolved=1)
             check(name+'-actual-events',flora['counts']==counts)
             check(name+'-execution-not-reference',flora['reference_pixels_used'] is False and original['new_framebuffer_count']>0 and original['native']['open_status']==0 and original['native']['playback_status']==0 and original['native']['closed'])
             check(name+'-captured-backbuffer-equal',original['comparison_to_captured_resource']['rgba_equal'] is True)

@@ -6,6 +6,7 @@ namespace flora::capture {
 struct RecordedFrame {
     std::optional<FrameStartCompletion> start_completion;
     std::map<ObjectId,RetainedObject> objects;
+    std::map<ObjectId,FrozenObject> deferred_definitions;
     std::map<ObjectId,ResourceSnapshot> initial_resources;
     std::vector<RecordedCommand> commands;
     std::vector<std::string> gaps;
@@ -41,9 +42,10 @@ public:
     void query(ID3D11DeviceContext*,ID3D11Asynchronous*,CommandKind,HRESULT,const void*,UINT,UINT);
     void reject_external(const char*);
 };
-// Temporary single-thread/immediate-context recorder. Caller owns the frame
-// boundary and must finish on the starting application thread. Any other
-// context/thread, unsupported GPU call or open query rejects the whole model.
+// One immediate execution thread, including supported precompiled command lists.
+// Caller owns the frame boundary and must finish on the starting application
+// thread. In-frame deferred compilation, other contexts/threads, unsupported GPU
+// calls and open queries reject the whole model.
 std::shared_ptr<FrameRecording> begin_recording(ID3D11DeviceContext*,const RecordingOptions& options={});
 // Called before native execution by generated proxies; always preserves native
 // forwarding, including on recording errors. Pointer arguments are transient.

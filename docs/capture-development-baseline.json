@@ -9,7 +9,7 @@
     "B": "native launch/control and capture-only package validated",
     "C": "partial: persistent native identity, descriptor graph and owned buffer/texture/shader/input-layout/SO creation metadata validated; other creation paths pending",
     "D": "partial: startup-injected blit/flip/tearing capture with dynamic mapped constants; dual-player execution verified on self-owned targets",
-    "E": "partial: immediate profiles verified; deferred owned histories/creation graphs and native effective pipeline snapshots cover tested state/hazard/Finish profiles; execution-time contents/hidden state, ordered lowering and deferred encoding remain pending",
+    "E": "partial: supported precompiled deferred actions expand in immediate execution order with execution-time initial GPU data and independent encoding; deferred Map/nesting/in-frame compilation, synchronization and hidden states remain pending",
     "F": "partial: native CLI and asynchronous Qt capture/cancel/disconnect/completed-file opening tested; full profile/deployment acceptance pending",
     "G": "pending: no six-frame GF2 or original GUI capture acceptance"
   },
@@ -1213,5 +1213,68 @@
     ],
     "reference": "https://learn.microsoft.com/en-us/windows/win32/api/d3d11/nf-d3d11-id3d11devicecontext-finishcommandlist",
     "evidence": "artifacts/capture-deferred-state-validation.json"
+  },
+  "deferred_execution": {
+    "status": "supported precompiled deferred actions generate executable IGPA v3 files; broader deferred capture remains partial",
+    "ownership": "CPU creation/state histories remain COM-free; separate native context/list lifetime entries lease resources during execution snapshots",
+    "ordering": "Actual immediate ExecuteCommandList call order and repeats; CPU provenance records list, context, generation, execution ordinal, call sequence and restore flag",
+    "file_representation": "Flattened executable actions; native CommandList groups are not encoded",
+    "initial_data": "Before first recorded use at the immediate execution position; earlier initial snapshots survive repeated lists",
+    "supported_lowering": [
+      "Draw variants",
+      "Dispatch",
+      "Clear",
+      "CopyResource",
+      "CopySubresourceRegion/1",
+      "UpdateSubresource/1"
+    ],
+    "native_oracles": [
+      "Post-compilation buffer change 9 to 1; first capture Draw/Dispatch/Dispatch/Draw produces integer 3 and red pixels",
+      "Next capture starts at 3 and produces 4 and green pixels",
+      "Execute TRUE preserves topology; FALSE restores defaults",
+      "Application resource/shader/context references released before execution; all source COM objects destroyed before encoding",
+      "Limits, missing definitions, deferred Map, nesting, cancellation and foreign execution refuse publication while native calls forward"
+    ],
+    "source_devices": [
+      "WARP",
+      "hardware"
+    ],
+    "debug_warnings_or_errors": 0,
+    "direct_positive_files": 4,
+    "direct_negative_controls": 4,
+    "direct_interop_checks": 132,
+    "injected_deferred_profile": 23,
+    "accepted_gf2_frames": 0,
+    "unchanged_sources": [
+      "Encoder",
+      "Replay",
+      "Shared format"
+    ],
+    "new_golden_run": false,
+    "latest_clean_package_revision": "c57bd39",
+    "original_player_sha256": "39061ff329e4a32d0c8375ce9ee15e2017bccab0593943b962a860e11723d38b",
+    "original_player_scope": "Pinned original kernel through the development private-ABI runner; no GUI/adapter acceptance claim",
+    "pending": [
+      "Deferred Map rename dependencies and nested lists",
+      "In-frame compilation and multicontext/thread synchronization",
+      "Deferred queries, counter UAVs, SO append, predicates and MinLOD",
+      "Broader deferred file profiles and native command-list grouping",
+      "Current revision clean source-package proof",
+      "Original GUI/adapter and six GF2 scene frames"
+    ],
+    "gf2_permission_status": "User selected elevated Codex restart; current process still not administrator; no game permission changes",
+    "reference": "https://learn.microsoft.com/en-us/windows/win32/api/d3d11/nf-d3d11-id3d11devicecontext-executecommandlist",
+    "evidence": "artifacts/capture-deferred-execution-validation.json",
+    "capture_only_ctest": 54,
+    "full_profile_ctest": 56,
+    "qt_cases": 11,
+    "qt_skipped": 0,
+    "full_application_build": true,
+    "injected_launches": 24,
+    "injected_files": 120,
+    "injected_checks": 769,
+    "injected_deferred_files": 5,
+    "accepted_deferred_files": 9,
+    "original_player_reports": 128
   }
 }

@@ -63,5 +63,4 @@ void remember_deferred_finish(ID3D11DeviceContext*,HRESULT,BOOL,ID3D11CommandLis
 void remember_deferred_map_result(ID3D11DeviceContext*,ID3D11Resource*,UINT,HRESULT,const D3D11_MAPPED_SUBRESOURCE*) noexcept;
 void remember_deferred_unmap(ID3D11DeviceContext*,ID3D11Resource*,UINT) noexcept;
 void remember_command_list_execution(ID3D11DeviceContext*,ID3D11CommandList*,BOOL) noexcept;
-std::string command_list_gap(IUnknown*);
 }
