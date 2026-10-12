@@ -3860,11 +3860,11 @@
   ],
   "independent_capture": {
     "hud": {
-      "status": "foundation_only",
+      "status": "native_pixel_component",
       "evidence": "docs/CAPTURE_HUD.md",
       "rendering_accepted": false,
-      "blocker": "Multi-buffer Present rotates storage behind stable COM identities; submitted buffers cannot be restored by the naive copy-back algorithm. Retained-content and exclusive-fullscreen isolation remain unverified.",
-      "validation": "HUD model, capture boundaries, shared-request injected controller and bootstrap tests pass; no HUD rendering or hotkey integration acceptance yet."
+      "blocker": "Multi-buffer Present rotates storage behind stable COM identities; submitted buffers are read-only and cannot be restored by the naive copy-back algorithm. General presentation and runtime integration acceptance remain incomplete.",
+      "validation": "HUD model/shared-request foundation passes; independent single-buffer DISCARD/SEQUENTIAL pixel component passes 24 windowed and 24 exclusive-fullscreen retained frames, state/resize/debug-layer checks. This is not general flip or GF2 HUD acceptance."
     },
     "status": "partial",
     "profile": "GPA 2025 R1 legacy DX11 / IGPA v3",

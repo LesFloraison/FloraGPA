@@ -19,6 +19,33 @@ Foundation verification: `capture_hud_model`, `capture_boundaries`,
 The existing injected controller matrix still runs through the shared request service.
 No HUD is drawn by this foundation change.
 
+## Native pixel component
+
+The independent `PixelTransaction` component rasterizes owned Arial text with
+GDI, composites a small CPU region, and uses private native DX11 textures to
+back up, display and restore that region. It changes no pipeline bindings and
+creates no shaders. The synchronous region readback is an intentionally limited
+first implementation; its performance cost is included in the measured FPS.
+
+The supported pixel experiment is single-buffer DISCARD or SEQUENTIAL with
+single-sample RGBA8/BGRA8. Multi-buffer, flagged/partial Present, protected/shared
+presentation and unsupported formats skip before modifying the backbuffer.
+Private references exist only for the transaction, so ResizeBuffers can succeed
+after it ends. Runtime composition must additionally establish query, mapping,
+predication and concurrency safety and exclude native calls from recording.
+
+`capture_hud_pixels` passes 24 retained frames across both effects, with compact
+and detailed modes, exact whole-buffer comparisons, output binding preservation,
+TEST/partial skips, simulated failed-Present restoration, Resize and no debug-layer
+warnings. A separate hardware `--exclusive` run passes 24 frames while checking
+GetFullscreenState on every iteration. The earlier fullscreen attempts returned
+0x887A0022 until the test window obtained foreground focus; those failures are
+retained, not counted as successful fullscreen tests. This proves the scoped
+single-buffer experiment only, not general flip or multi-buffer isolation.
+
+Evidence: `artifacts/capture-hud-focused-tests.log`,
+`artifacts/capture-hud-pixels-exclusive-verified.log` and the native test sources.
+
 ## Presentation investigation
 
 `FloraCaptureHudBufferProbe` is a native development experiment, not a runtime
@@ -32,8 +59,10 @@ The submitted image becomes logical slot 2. Copying a backup to the retained
 GetBuffer(0) therefore restores the wrong buffer. Attempted copies to the other
 slots do not restore their pixels. FLIP_DISCARD rejects GetBuffer(1/2).
 Single-buffer DISCARD accepted restoration in this small experiment.
-These observations do not establish a general safe restoration algorithm, nor
-exclusive-fullscreen, failed-Present or retained-content acceptance.
+The debug-layer follow-up `artifacts/capture-hud-buffer-debug.json` identifies
+message 285: the destination buffer is read-only. These observations do not
+establish a general safe restoration algorithm. The separate single-buffer test
+above does not cover multi-buffer preservation or actual driver Present failures.
 
 An unsafe presentation path must skip HUD before drawing and report its reason.
 No change may assume that stable COM identity implies stable physical storage.
@@ -52,6 +81,13 @@ Raw output is ignored under `artifacts/capture-hud-plan`.
   global around HUD rendering. This alone proves neither clean backbuffer
   restoration nor clean retained contents on subsequent frames.
 * RVA 0x3000d0: frame/capture boundary work precedes the HUD call.
+* RenderDirect3D11 vtable RVA 0x43af58: slots 7/8 lead to 0x337aa0/0x3384f0.
+  They bracket HUD setup/drawing with context getter/setter helpers 0x340cc0
+  and 0x340800. These are pipeline-state operations, not proof of pixel isolation.
+* Present wrapper RVA 0x39620 calls 0x3000d0, invokes the saved original Present
+  function with application arguments, then calls 0x300680. The latter contains
+  metrics/frame-boundary work; the inspected paths have not established a safe
+  copy-back algorithm for the observed read-only rotated buffers.
 
 Original binaries, fonts and shaders are not product dependencies or copied assets.
 The [Intel HUD reference](https://www.intel.com/content/www/us/en/docs/gpa/user-guide/2025-1/heads-up-display-hud-ui-reference.html)
@@ -59,7 +95,7 @@ describes the default mode/capture shortcuts and FPS timing.
 
 ## Outstanding gates
 
-Native drawing and pixel restoration; protocol/configuration and Qt controls;
-real input and visual verification; deterministic retained-content and exclusive
-fullscreen tests; file inventory and dual-player isolation; GF2 start-screen HUD
+Runtime integration, protocol/configuration and Qt controls; real input and visual
+verification; captured file inventory and dual-player isolation; multi-buffer,
+broader concurrency and actual failed-Present isolation; GF2 start-screen HUD
 capture and main-scene MSAA refusal. Formal GF2 acceptance remains 0/6.

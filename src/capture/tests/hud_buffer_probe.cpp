@@ -1,11 +1,13 @@
 // Native-only presentation experiment. Not linked into the injected runtime.
 #include <windows.h>
 #include <d3d11.h>
+#include <d3d11sdklayers.h>
 #include <dxgi1_4.h>
 #include <wrl/client.h>
 #include <nlohmann/json.hpp>
 #include <iostream>
 #include <stdexcept>
+#include <vector>
 using Microsoft::WRL::ComPtr;
 using Json=nlohmann::json;
 void check(HRESULT hr){if(FAILED(hr))throw std::runtime_error("Native probe HRESULT: "+std::to_string(uint32_t(hr)));}
@@ -33,6 +35,8 @@ int main(){try{
             const auto presented=pixels(after.Get());
             row["frames"].push_back({{"slots",slots},{"before",before},{"after_present",presented},{"after_restore",pixels(after.Get())},{"same_identity",buffer==after},{"index_before",index},{"index_after",swap3?swap3->GetCurrentBackBufferIndex():0},{"result",uint32_t(hr)}});
         }
+        ComPtr<ID3D11InfoQueue> info;check(device.As(&info));row["debug_messages"]=Json::array();
+        for(UINT64 n=0;n<info->GetNumStoredMessages();++n){SIZE_T size=0;check(info->GetMessage(n,nullptr,&size));std::vector<uint8_t> bytes(size);auto* message=reinterpret_cast<D3D11_MESSAGE*>(bytes.data());check(info->GetMessage(n,message,&size));row["debug_messages"].push_back({{"id",message->ID},{"severity",message->Severity},{"description",message->pDescription}});}
         results.push_back(row);context->ClearState();context->Flush();
     }
     DestroyWindow(window);std::cout<<results.dump(2)<<'\n';return 0;
