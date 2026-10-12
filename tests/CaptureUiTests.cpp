@@ -7,6 +7,7 @@
 #include <QLineEdit>
 #include <QComboBox>
 #include <QLabel>
+#include <QJsonArray>
 #include <QSignalSpy>
 #include <QTemporaryDir>
 #include <QtTest>
@@ -33,6 +34,15 @@ class CaptureUiTests final : public QObject {
         client.status();QTRY_COMPARE(responses.size(),3);
         client.disconnectSession();QTRY_COMPARE(responses.size(),4);QVERIFY(!client.connected());
         QCOMPARE(errors.size(),0);
+    }
+    void hudOptions() {
+        QTemporaryDir dir;CaptureClient client;client.setController(controller());QSignalSpy responses(&client,&CaptureClient::response);
+        client.launch("target.exe",{},dir.path(),{"target argument"},{"off","Alt+F3","off"});QTRY_COMPARE(responses.size(),1);
+        const auto json=responses.first()[1].toJsonObject().value("arguments").toArray();QStringList args;for(const auto& arg:json)args<<arg.toString();
+        QCOMPARE(args.value(args.indexOf("--hud")+1),"off");QCOMPARE(args.value(args.indexOf("--hud-hotkey")+1),"Alt+F3");QCOMPARE(args.value(args.indexOf("--capture-hotkey")+1),"off");
+        QVERIFY(args.indexOf("--hud")<args.indexOf("--"));QCOMPARE(args.last(),"target argument");
+        CaptureDialog dialog(controller());QCOMPARE(dialog.findChild<QComboBox*>("captureHudMode")->currentData().toString(),"compact");
+        QCOMPARE(dialog.findChild<QLineEdit*>("captureHudHotkey")->text(),"Ctrl+F1");QCOMPARE(dialog.findChild<QLineEdit*>("captureFrameHotkey")->text(),"Ctrl+Shift+C");
     }
     void processFailures_data() {
         QTest::addColumn<QByteArray>("mode");

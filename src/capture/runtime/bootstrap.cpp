@@ -6,6 +6,7 @@
 #include "objects.hpp"
 #include "capture_session.hpp"
 #include "capture_requests.hpp"
+#include "hud_control.hpp"
 #include "capture_model.hpp"
 #include <filesystem>
 #include <d3d11.h>
@@ -30,6 +31,9 @@ void record_creation(HRESULT hr,D3D_FEATURE_LEVEL* selected){
         else ++failures;
     }
 }
+void record_driver(ID3D11Device** device,D3D_DRIVER_TYPE type) noexcept {
+    try{if(device && *device)if(auto record=object_record(*device)){std::lock_guard lock(record->mutex);record->driver_type=type;}}catch(...){}
+}
 HRESULT WINAPI create_device(IDXGIAdapter* adapter,D3D_DRIVER_TYPE type,HMODULE software,UINT flags,
     const D3D_FEATURE_LEVEL* levels,UINT count,UINT sdk,ID3D11Device** device,D3D_FEATURE_LEVEL* selected,
     ID3D11DeviceContext** context){
@@ -37,7 +41,7 @@ HRESULT WINAPI create_device(IDXGIAdapter* adapter,D3D_DRIVER_TYPE type,HMODULE 
     ++creation_depth; NativeCall internal;
     const HRESULT result=real_create(unwrap(adapter),type,software,flags,levels,count,sdk,device,selected,context);
     const DWORD error=GetLastError();record_creation(result,selected);
-    if(SUCCEEDED(result)){if(!selected && device && *device)level=(*device)->GetFeatureLevel();wrap_object(device,"D3D11CreateDevice");wrap_object(context,"D3D11CreateDevice");}
+    if(SUCCEEDED(result)){if(!selected && device && *device)level=(*device)->GetFeatureLevel();wrap_object(device,"D3D11CreateDevice");wrap_object(context,"D3D11CreateDevice");record_driver(device,type);}
     --creation_depth;SetLastError(error);return result;
 }
 HRESULT WINAPI create_swap(IDXGIAdapter* adapter,D3D_DRIVER_TYPE type,HMODULE software,UINT flags,
@@ -50,6 +54,7 @@ HRESULT WINAPI create_swap(IDXGIAdapter* adapter,D3D_DRIVER_TYPE type,HMODULE so
     if(SUCCEEDED(result) && creation_depth==1){
         if(!selected && device && *device)level=(*device)->GetFeatureLevel();
         wrap_swap_chain(swap);wrap_object(device,"D3D11CreateDeviceAndSwapChain");wrap_object(context,"D3D11CreateDeviceAndSwapChain");
+        record_driver(device,type);
     }
     --creation_depth;SetLastError(error);return result;
 }
@@ -80,7 +85,7 @@ Json response(const Json& message,ULONG client_pid){
     const auto number_matches=[&](const char* key,uint64_t value){return message.contains(key) && message[key].is_number_unsigned() && message[key].get<uint64_t>()==value;};
     if(!number_matches("version",protocol_version)){result["error"]="protocol_version_mismatch";return result;}
     if(message.value("session_id",std::string())!=service_session || !number_matches("target_pid",GetCurrentProcessId()) || !number_matches("client_pid",client_pid)){result["error"]="session_process_mismatch";return result;}
-    if(message.contains("swap_chain") && (!message["swap_chain"].is_number_unsigned() || message["swap_chain"].get<uint64_t>()==0)){result["error"]="invalid_swap_chain";return result;}
+    if(message.contains("swap_chain") && (!message["swap_chain"].is_number_unsigned() || (message["swap_chain"].get<uint64_t>()==0 && message.value("command",std::string())!="select"))){result["error"]="invalid_swap_chain";return result;}
     // Validate the UUID before using it as a file name. Paths never come from IPC.
     pipe_name(message.at("request_id").get<std::string>());
     const auto command=message.value("command",std::string());
@@ -90,14 +95,19 @@ Json response(const Json& message,ULONG client_pid){
     if(command=="capture"){
         const auto armed=submit_capture_request(message.value("swap_chain",0ull),message.at("request_id").get<std::string>());
         result["ok"]=armed.value("ok",false);if(armed.contains("error"))result["error"]=armed["error"];
+        hud_feedback(armed);
+    }else if(command=="select"){
+        const auto selected=select_capture_swap(message.at("swap_chain").get<uint64_t>());result["ok"]=selected.value("ok",false);if(selected.contains("error"))result["error"]=selected["error"];
     }else if(command=="cancel"){
         const auto cancelled=cancel_capture();result["cancelled"]=cancelled.value("cancelled",false);
     }else if(command=="disconnect"){
         disconnect_capture_requests();available=false;
+        disconnect_hud();
     }else if(command!="status"){result["ok"]=false;result["error"]="unknown_command";}
     const auto progress=capture_progress();const auto phase=progress.value("state",std::string("Tracking"));
     result["state"]=!capture_requests_connected()?"Disconnected":progress.value("busy",false)?phase:creations.load()?"Tracking":"Starting";
     result["capture_progress"]=progress;
+    result["hud"]=hud_status();
     if(phase=="Completed" || phase=="Cancelled" || phase=="Failed"){
         result["last_capture"]=progress;
         if(progress.contains("file"))result["last_capture"]["path"]=progress["file"];
@@ -130,6 +140,12 @@ DWORD WINAPI serve(void*){
         if(!count || count>=32768)return ERROR_INVALID_PARAMETER;
         capture_directory=output;if(!capture_directory.is_absolute() || !std::filesystem::is_directory(capture_directory))return ERROR_INVALID_PARAMETER;
         configure_capture_requests(capture_directory);
+        auto setting=[](const char* key,const char* fallback){char value[128]{};const auto size=GetEnvironmentVariableA(key,value,sizeof(value));if(size>=sizeof(value))throw std::invalid_argument("HUD setting is too long");return std::string(size?value:fallback);};
+        hud::Settings hud_settings;
+        hud_settings.mode=hud::parse_mode(setting("FLORAGPA_CAPTURE_HUD","compact"));
+        hud_settings.mode_key=hud::parse_hotkey(setting("FLORAGPA_CAPTURE_HUD_HOTKEY","Ctrl+F1"));
+        hud_settings.capture_key=hud::parse_hotkey(setting("FLORAGPA_CAPTURE_CAPTURE_HOTKEY","Ctrl+Shift+C"));
+        configure_hud(hud_settings);
         const auto name=pipe_name(session);Security security;
         Handle pipe(CreateNamedPipeW(name.c_str(),PIPE_ACCESS_DUPLEX|FILE_FLAG_OVERLAPPED|FILE_FLAG_FIRST_PIPE_INSTANCE,
             PIPE_TYPE_BYTE|PIPE_READMODE_BYTE|PIPE_WAIT|PIPE_REJECT_REMOTE_CLIENTS,1,max_message,max_message,0,&security.attributes));

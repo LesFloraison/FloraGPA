@@ -9,7 +9,7 @@
 
 namespace flora::capture {
 using Json=nlohmann::json;
-inline constexpr std::uint32_t protocol_version=2;
+inline constexpr std::uint32_t protocol_version=3;
 inline constexpr std::uint32_t max_message=65536;
 inline constexpr DWORD io_timeout=5000;
 class Handle {

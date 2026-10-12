@@ -43,6 +43,7 @@ Json progress(const std::shared_ptr<Request>& r){
     std::lock_guard lock(r->report);
     const bool terminal=r->phase==Phase::Completed || r->phase==Phase::Cancelled || r->phase==Phase::Failed;
     Json result={{"state",name(r->phase)},{"swap_chain",r->id},{"busy",!terminal || !r->released.load()},{"cancel_requested",r->cancelled.load()}};
+    const auto request_name=r->output.filename().u8string();result["request_name"]=std::string(request_name.begin(),request_name.end());
     if(r->published){result["state"]="Completed";const auto path=r->output.u8string();result["file"]=std::string(path.begin(),path.end());}
     if(r->present_ordinal)result["present_ordinal"]=r->present_ordinal.load();
     if(!r->error.empty())result["error"]=r->error;

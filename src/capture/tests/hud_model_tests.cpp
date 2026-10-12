@@ -18,6 +18,7 @@ int main(){try{
     require(!edge.update(capture,keys,false) && !edge.update(capture,keys,true),"Focus with held key");
     keys['C']=false;edge.update(capture,keys,true);keys['C']=true;require(edge.update(capture,keys,true),"Release and re-press");
     keys[0x12]=true;require(!edge.update(capture,keys,true),"Extra modifier");
+    keys[0x12]=false;keys[0x5b]=true;require(!edge.update(capture,keys,true),"Windows modifier was ignored");
     FrameClock clock;require(!clock.value(0).current,"No fabricated FPS");clock.present(0,true,false);
     for(uint64_t i=1;i<=60;++i)clock.present(i*1000000000ull/60,true,false);
     auto fps=clock.value(1000000000);require(fps.frames==61 && fps.current && std::abs(*fps.current-60)<0.0001,"60 FPS window");

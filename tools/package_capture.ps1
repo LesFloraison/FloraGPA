@@ -39,6 +39,6 @@ foreach ($file in Get-ChildItem -LiteralPath $destination -File -Recurse) {
     finally { $stream.Dispose(); $algorithm.Dispose() }
     $hashes[$file.FullName.Substring($destination.Length+1).Replace('\','/')] = $hash
 }
-@{schema=1;milestone='native_present_capture';capture_profile='limited; query runtime status';protocol_version=2;files=$hashes} |
+@{schema=1;milestone='native_present_capture';capture_profile='limited; query runtime status';protocol_version=3;files=$hashes} |
     ConvertTo-Json -Depth 5 | Set-Content -LiteralPath (Join-Path $destination 'manifest.json') -Encoding UTF8
 Write-Output "Native capture package: $destination"

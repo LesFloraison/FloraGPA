@@ -5,6 +5,7 @@
 #include <atomic>
 #include <memory>
 #include <mutex>
+#include <optional>
 #include <string>
 #include <set>
 #include <vector>
@@ -29,6 +30,7 @@ struct ObjectRecord {
     QueryEndStamp last_query_end;
     uint64_t query_end_serial=0;
     bool external_mapping=false;
+    std::optional<D3D_DRIVER_TYPE> driver_type;
     std::vector<InputElementRecord> input_elements;
     std::vector<StreamElementRecord> stream_elements;
     std::vector<UINT> stream_strides;

@@ -35,6 +35,15 @@ CaptureDialog::CaptureDialog(const QString &controller, QWidget *parent) : QDial
     out_->setToolTip("A new session directory. Existing directories are preserved."); form->addRow("Output",out_);
     swaps_=new QComboBox(this); swaps_->setObjectName("captureSwapChains"); form->addRow("Swap chain",swaps_);
     layout->addLayout(form);
+    auto settings=new QGroupBox("HUD settings",this);settings->setObjectName("captureHudSettings");settings->setCheckable(true);settings->setChecked(false);
+    auto settingsLayout=new QVBoxLayout(settings);auto settingsBody=new QWidget(settings);auto hudForm=new QFormLayout(settingsBody);
+    hudMode_=new QComboBox(settingsBody);hudMode_->setObjectName("captureHudMode");
+    hudMode_->addItem("Compact","compact");hudMode_->addItem("Detailed","detailed");hudMode_->addItem("Off","off");
+    hudKey_=new QLineEdit("Ctrl+F1",settingsBody);hudKey_->setObjectName("captureHudHotkey");
+    captureKey_=new QLineEdit("Ctrl+Shift+C",settingsBody);captureKey_->setObjectName("captureFrameHotkey");
+    for(auto field:{hudKey_,captureKey_})field->setToolTip("Ctrl, Shift or Alt plus A–Z, 0–9 or F1–F24. Enter off to disable.");
+    hudForm->addRow("HUD",hudMode_);hudForm->addRow("Cycle HUD",hudKey_);hudForm->addRow("Capture frame",captureKey_);
+    settingsLayout->addWidget(settingsBody);settingsBody->hide();connect(settings,&QGroupBox::toggled,settingsBody,&QWidget::setVisible);layout->addWidget(settings);
     status_=new QLabel("Ready to launch",this); status_->setObjectName("captureStatus"); status_->setWordWrap(true); layout->addWidget(status_);
     auto actions = new QHBoxLayout;
     launch_=new QPushButton("Launch",this); capture_=new QPushButton("Capture Next Frame",this); cancel_=new QPushButton("Cancel",this);
@@ -48,9 +57,10 @@ CaptureDialog::CaptureDialog(const QString &controller, QWidget *parent) : QDial
     log_->hide(); logs->addWidget(log_); connect(details,&QGroupBox::toggled,log_,&QWidget::setVisible); layout->addWidget(details);
     connect(launch_,&QPushButton::clicked,this,[this] {
         completed_.clear(); lastResult_.clear(); available_=false;
-        client_.launch(exe_->text(),cwd_->text(),out_->text(),QProcess::splitCommand(arguments_->text()));
+        client_.launch(exe_->text(),cwd_->text(),out_->text(),QProcess::splitCommand(arguments_->text()),{hudMode_->currentData().toString(),hudKey_->text(),captureKey_->text()});
     });
     connect(capture_,&QPushButton::clicked,this,[this] { client_.capture(swaps_->currentData().toString()); });
+    connect(swaps_,&QComboBox::activated,this,[this](int){if(client_.connected() && !client_.busy())client_.selectSwap(swaps_->currentData().toString());});
     connect(cancel_,&QPushButton::clicked,&client_,&CaptureClient::cancel);
     connect(disconnect_,&QPushButton::clicked,&client_,&CaptureClient::disconnectSession);
     connect(open_,&QPushButton::clicked,this,[this] { if(QFileInfo(completed_).isFile())emit openCaptureRequested(completed_); });
@@ -68,6 +78,9 @@ void CaptureDialog::showResponse(const QString &command,const QJsonObject &resul
     if(!result.value("ok").toBool())status_->setText(result.value("error").toString("Capture request failed"));
     else status_->setText(available_?phase:phase+" — frame capture unavailable");
     QStringList gaps;for(const auto &gap:state.value("capability_gaps").toArray())gaps<<gap.toString();
+    const auto hud=state.value("hud").toObject();
+    for(const auto& row:hud.value("swap_chains").toArray()){const auto detail=row.toObject();if(!detail.value("visible").toBool() && !detail.value("reason").toString().isEmpty())gaps<<"HUD: "+detail.value("reason").toString();}
+    const auto hudRequest=hud.value("last_request").toObject();if(!hudRequest.isEmpty()){const auto encoded=QString::fromUtf8(QJsonDocument(hudRequest).toJson(QJsonDocument::Compact));if(encoded!=lastHudRequest_){lastHudRequest_=encoded;log_->appendPlainText(encoded);}}
     status_->setToolTip(gaps.join('\n'));
     if(command!="status" || !result.value("ok").toBool())log_->appendPlainText(QString::fromUtf8(QJsonDocument(result).toJson(QJsonDocument::Compact)));
     const auto selected=swaps_->currentData().toString(); swaps_->clear();
@@ -103,7 +116,9 @@ void CaptureDialog::updateControls() {
     cancel_->setEnabled(idle && client_.connected() && activeCapture_);
     disconnect_->setEnabled(idle && client_.connected());
     open_->setEnabled(idle && !completed_.isEmpty());
-    for(auto field:{exe_,arguments_,cwd_,out_})field->setEnabled(idle && !client_.connected());
+    for(auto field:{exe_,arguments_,cwd_,out_,hudKey_,captureKey_})field->setEnabled(idle && !client_.connected());
+    hudMode_->setEnabled(idle && !client_.connected());
+    swaps_->setEnabled(idle && client_.connected());
 }
 void CaptureDialog::closeEvent(QCloseEvent *event) {
     // The application owns this persistent modeless dialog. Hiding it preserves

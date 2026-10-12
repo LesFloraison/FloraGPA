@@ -43,7 +43,7 @@ void Settings::validate() const {
     if(mode_key.key && mode_key==capture_key)throw std::invalid_argument("HUD and capture hotkeys must differ");
 }
 bool KeyEdge::update(const Hotkey& key,const std::array<bool,256>& keys,bool foreground) noexcept {
-    const bool down=key.key && key.key<keys.size() && keys[key.key] && keys[0x11]==key.control && keys[0x10]==key.shift && keys[0x12]==key.alt;
+    const bool down=key.key && key.key<keys.size() && keys[key.key] && keys[0x11]==key.control && keys[0x10]==key.shift && keys[0x12]==key.alt && !keys[0x5b] && !keys[0x5c];
     const bool trigger=foreground && focused_ && down && !down_;
     down_=down;focused_=foreground;return trigger;
 }

@@ -2,6 +2,7 @@
 #include "factory.hpp"
 #include "objects.hpp"
 #include "capture_session.hpp"
+#include "hud_control.hpp"
 #include <atomic>
 #include <map>
 #include <memory>
@@ -122,7 +123,7 @@ public:
             std::lock_guard<std::mutex> lock(r.mutex);
             if(--references_==0){r.objects.erase(identity_);r.wrappers.erase(this);r.observations.erase(id_);++r.destroyed;destroy=true;}
         }
-        if(destroy)capture_invalidate_swap(id_,"Selected swap chain was destroyed");
+        if(destroy){capture_invalidate_swap(id_,"Selected swap chain was destroyed");hud_removed(id_);}
         SetLastError(before);const ULONG result=real->Release();const DWORD after=GetLastError();
         if(destroy)delete this;SetLastError(after);return result;
     }
@@ -152,14 +153,22 @@ public:
         escaped("GetCoreWindow (window not wrapped)",iid,result,output);return result;
     }
     HRESULT STDMETHODCALLTYPE Present(UINT interval,UINT flags) override {
+        hud_input(flags,real_);
         capture_before_present(id_,real_,flags,false);
+        HudDraw hud;hud.begin(id_,real_,flags,false);
         const auto result=real_->Present(interval,flags);const auto ordinal=presented(flags,result,false,interval);
-        capture_after_present(id_,real_,interval,flags,false,result,ordinal);return result;
+        const bool clean=hud.restore();
+        hud_presented(id_,flags,result);
+        capture_after_present(id_,real_,interval,flags,false,clean?result:E_FAIL,ordinal);return result;
     }
     HRESULT STDMETHODCALLTYPE Present1(UINT interval,UINT flags,const DXGI_PRESENT_PARAMETERS* parameters) override {
+        hud_input(flags,real_);
         capture_before_present(id_,real_,flags,parameters && (parameters->DirtyRectsCount || parameters->pScrollRect || parameters->pScrollOffset));
+        HudDraw hud;hud.begin(id_,real_,flags,parameters && (parameters->DirtyRectsCount || parameters->pScrollRect || parameters->pScrollOffset));
         const auto result=extended<IDXGISwapChain1>([&](auto* p){return p->Present1(interval,flags,parameters);});
-        const auto ordinal=presented(flags,result,true,interval);capture_after_present(id_,real_,interval,flags,true,result,ordinal);return result;
+        const bool clean=hud.restore();
+        hud_presented(id_,flags,result);
+        const auto ordinal=presented(flags,result,true,interval);capture_after_present(id_,real_,interval,flags,true,clean?result:E_FAIL,ordinal);return result;
     }
     HRESULT STDMETHODCALLTYPE ResizeBuffers(UINT count,UINT width,UINT height,DXGI_FORMAT format,UINT flags) override {
         capture_invalidate_swap(id_,"ResizeBuffers interrupted capture");

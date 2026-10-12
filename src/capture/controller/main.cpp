@@ -1,4 +1,5 @@
 #include "protocol.hpp"
+#include "hud_model.hpp"
 #include <detours.h>
 #include <objbase.h>
 #include <algorithm>
@@ -38,7 +39,7 @@ void ensure_x64(const fs::path& path){
        !f.read(reinterpret_cast<char*>(&header),sizeof(header)) || header.Machine!=IMAGE_FILE_MACHINE_AMD64)
         throw std::invalid_argument("Only Windows x64 targets are supported");
 }
-std::vector<wchar_t> environment(const std::string& session,const fs::path& output){
+std::vector<wchar_t> environment(const std::string& session,const fs::path& output,const hud::Settings& settings){
     LPWCH raw=GetEnvironmentStringsW();if(!raw)win_error("Read environment");
     std::vector<std::wstring> entries;
     try{
@@ -48,6 +49,10 @@ std::vector<wchar_t> environment(const std::string& session,const fs::path& outp
     FreeEnvironmentStringsW(raw);
     entries.push_back(L"FLORAGPA_CAPTURE_SESSION="+std::wstring(session.begin(),session.end()));
     entries.push_back(L"FLORAGPA_CAPTURE_OUTPUT="+output.wstring());
+    const auto append=[&](const wchar_t* name,const std::string& value){entries.push_back(std::wstring(name)+L"="+std::wstring(value.begin(),value.end()));};
+    append(L"FLORAGPA_CAPTURE_HUD",hud::mode_name(settings.mode));
+    append(L"FLORAGPA_CAPTURE_HUD_HOTKEY",hud::hotkey_name(settings.mode_key));
+    append(L"FLORAGPA_CAPTURE_CAPTURE_HOTKEY",hud::hotkey_name(settings.capture_key));
     std::sort(entries.begin(),entries.end(),[](const auto& a,const auto& b){return _wcsicmp(a.c_str(),b.c_str())<0;});
     std::vector<wchar_t> result;
     for(const auto& entry:entries){result.insert(result.end(),entry.begin(),entry.end());result.push_back(0);}
@@ -87,26 +92,28 @@ int wmain(int argc,wchar_t** argv){
         if(argc<2 || std::wstring(argv[1])==L"--help"){
             std::cout<<"FloraCapture native DX11 capture (limited profile; inspect status)\n"
                      <<"launch --exe FILE --out NEW_DIRECTORY [--cwd DIRECTORY] [-- target arguments]\n"
+                     <<"  [--hud compact|detailed|off] [--hud-hotkey Ctrl+F1|off] [--capture-hotkey Ctrl+Shift+C|off]\n"
                      <<"status|capture|cancel|disconnect --session SESSION_JSON [capture: --swap-chain ID]\n";
+            std::cout<<"select --session SESSION_JSON --swap-chain ID (0 selects automatic foreground)\n";
             return argc<2?2:0;
         }
         const std::wstring verb=argv[1];std::map<std::wstring,std::wstring> options;std::vector<std::wstring> arguments;
         for(int i=2;i<argc;++i){
             std::wstring key=argv[i];
             if(key==L"--"){while(++i<argc)arguments.emplace_back(argv[i]);break;}
-            if(key!=L"--exe" && key!=L"--out" && key!=L"--cwd" && key!=L"--session" && key!=L"--swap-chain")throw std::invalid_argument("Unknown option");
+            if(key!=L"--exe" && key!=L"--out" && key!=L"--cwd" && key!=L"--session" && key!=L"--swap-chain" && key!=L"--hud" && key!=L"--hud-hotkey" && key!=L"--capture-hotkey")throw std::invalid_argument("Unknown option");
             if(++i>=argc || !options.emplace(key,argv[i]).second)throw std::invalid_argument("Missing or duplicate option value");
         }
         if(verb!=L"launch"){
-            if(verb!=L"status" && verb!=L"capture" && verb!=L"cancel" && verb!=L"disconnect")throw std::invalid_argument("Unknown command");
+            if(verb!=L"status" && verb!=L"capture" && verb!=L"cancel" && verb!=L"disconnect" && verb!=L"select")throw std::invalid_argument("Unknown command");
             const bool selected=options.count(L"--swap-chain")!=0;
-            if(options.size()!=(selected?2u:1u) || !options.count(L"--session") || !arguments.empty() || (selected && verb!=L"capture"))
+            if(options.size()!=(selected?2u:1u) || !options.count(L"--session") || !arguments.empty() || (selected && verb!=L"capture" && verb!=L"select") || (verb==L"select" && !selected))
                 throw std::invalid_argument("Expected --session and optional capture --swap-chain");
             Json extra=Json::object();
             if(selected){
                 const auto& text=options.at(L"--swap-chain");
                 if(text.empty() || text.find_first_not_of(L"0123456789")!=std::wstring::npos)throw std::invalid_argument("Invalid swap-chain ID");
-                const auto id=std::stoull(text);if(!id)throw std::invalid_argument("Invalid swap-chain ID");extra["swap_chain"]=id;
+                const auto id=std::stoull(text);if(!id && verb!=L"select")throw std::invalid_argument("Invalid swap-chain ID");extra["swap_chain"]=id;
             }
             std::ifstream file(fs::path(options.at(L"--session")));Json session;file>>session;
             if(session.value("version",0u)!=protocol_version)throw std::invalid_argument("Session protocol mismatch");
@@ -121,6 +128,11 @@ int wmain(int argc,wchar_t** argv){
             const auto result=command(session.at("session_id"),utf8(verb),session.at("pid").get<DWORD>(),extra);std::cout<<result.dump()<<'\n';return result.value("ok",false)?0:3;
         }
         if(!options.count(L"--exe") || !options.count(L"--out") || options.count(L"--session") || options.count(L"--swap-chain"))throw std::invalid_argument("launch requires --exe and --out");
+        hud::Settings settings;
+        if(options.count(L"--hud"))settings.mode=hud::parse_mode(utf8(options.at(L"--hud")));
+        if(options.count(L"--hud-hotkey"))settings.mode_key=hud::parse_hotkey(utf8(options.at(L"--hud-hotkey")));
+        if(options.count(L"--capture-hotkey"))settings.capture_key=hud::parse_hotkey(utf8(options.at(L"--capture-hotkey")));
+        settings.validate();
         const auto exe=fs::absolute(options.at(L"--exe"));ensure_x64(exe);
         const auto cwd=options.count(L"--cwd")?fs::absolute(options.at(L"--cwd")):exe.parent_path();
         if(!fs::is_directory(cwd))throw std::invalid_argument("Target working directory does not exist");
@@ -131,7 +143,7 @@ int wmain(int argc,wchar_t** argv){
         const auto out=fs::absolute(options.at(L"--out"));
         if(fs::exists(out))throw std::invalid_argument("Session directory must be new");
         fs::create_directories(out);
-        const auto session=uuid();auto env=environment(session,out);
+        const auto session=uuid();auto env=environment(session,out,settings);
         std::wstring line=quote(exe.wstring());for(const auto& arg:arguments)line+=L" "+quote(arg);
         STARTUPINFOEXW startup{};startup.StartupInfo.cb=sizeof(startup);PROCESS_INFORMATION child{};
         // The target must not keep the controller's redirected stdout/stderr

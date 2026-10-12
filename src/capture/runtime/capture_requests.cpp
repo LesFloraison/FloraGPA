@@ -7,7 +7,7 @@
 
 namespace flora::capture {
 namespace {
-struct Requests {std::mutex mutex;std::filesystem::path directory;bool connected=false;};
+struct Requests {std::mutex mutex;std::filesystem::path directory;bool connected=false;uint64_t selected=0;};
 Requests& requests(){static auto* value=new Requests;return *value;}
 }
 void configure_capture_requests(const std::filesystem::path& directory){
@@ -43,4 +43,11 @@ Json submit_capture_request(uint64_t selected,const std::string& request_id){
     return arm_capture(candidates.front(),r.directory/("frame-"+request_id+".gpa_frame"));
 }
 void disconnect_capture_requests(){auto& r=requests();std::lock_guard lock(r.mutex);r.connected=false;disconnect_capture();}
+Json select_capture_swap(uint64_t selected){
+    auto& r=requests();std::lock_guard lock(r.mutex);if(!r.connected)return {{"ok",false},{"error","disconnected"}};
+    if(selected){bool found=false;const auto swaps=swap_chain_status();for(const auto& row:swaps["active"])if(row["id"]==selected)found=true;
+        if(!found)return {{"ok",false},{"error","swap_chain_unavailable"}};}
+    r.selected=selected;return {{"ok",true},{"selected_swap_chain",selected}};
+}
+uint64_t selected_capture_swap(){auto& r=requests();std::lock_guard lock(r.mutex);return r.selected;}
 }

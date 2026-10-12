@@ -42,7 +42,7 @@ void CaptureClient::finish(int exitCode, QProcess::ExitStatus exitStatus) {
     if (result.value("ok").toBool() != (exitCode == 0)) { emit failed("Capture controller result disagrees with its exit code"); return; }
     if (command == "launch" && result.value("ok").toBool()) {
         const auto file = result.value("session_file").toString();
-        if (result.value("version").toInt() != 2 || file.isEmpty() || !QFileInfo(file).isFile()) {
+        if (result.value("version").toInt() != 3 || file.isEmpty() || !QFileInfo(file).isFile()) {
             emit failed("Invalid capture session manifest"); return;
         }
         session_ = file; connected_ = true;
@@ -52,8 +52,11 @@ void CaptureClient::finish(int exitCode, QProcess::ExitStatus exitStatus) {
     emit response(command, result);
 }
 void CaptureClient::launch(const QString &exe, const QString &cwd, const QString &out, const QStringList &arguments) {
+    launch(exe,cwd,out,arguments,HudSettings{});
+}
+void CaptureClient::launch(const QString &exe, const QString &cwd, const QString &out, const QStringList &arguments, const HudSettings &hud) {
     if (connected_) { emit failed("Disconnect the current session before launching another target"); return; }
-    QStringList args{"--exe",exe,"--out",out};
+    QStringList args{"--exe",exe,"--out",out,"--hud",hud.mode,"--hud-hotkey",hud.modeKey,"--capture-hotkey",hud.captureKey};
     if (!cwd.isEmpty()) args << "--cwd" << cwd;
     if (!arguments.isEmpty()) args << "--" << arguments;
     start("launch",args);
@@ -67,5 +70,6 @@ void CaptureClient::capture(const QString &swapChain) {
     sessionCommand("capture", swapChain.isEmpty() ? QStringList{} : QStringList{"--swap-chain",swapChain});
 }
 void CaptureClient::cancel() { sessionCommand("cancel"); }
+void CaptureClient::selectSwap(const QString &swapChain) { sessionCommand("select",{"--swap-chain",swapChain.isEmpty()?QString("0"):swapChain}); }
 void CaptureClient::disconnectSession() { sessionCommand("disconnect"); }
 }
