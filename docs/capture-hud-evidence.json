@@ -72,7 +72,24 @@
     "Native long-hold/focus stress and hidden-state failure matrix",
     "Actual driver Present failures"
   ],
+  "clean_storage_experiment": {
+    "runtime_enabled": false,
+    "profiles": 10,
+    "decorated_frames": 240,
+    "retained_slot_comparisons": 360,
+    "debug_warnings_or_errors": 0,
+    "capture_only_focused_tests": "2/2",
+    "full_profile_focused_tests": "2/2",
+    "capture_test_executable_sha256": "d59932f425e41df62e64459e86338fd1d3f7ef7461fa07660d75bf34505961b2",
+    "ctest_details_sha256": "e056b3c504b3879b1ca023bdc298b3bca7e34f154debb955805935367bb2b5b0",
+    "full_ctest_log_sha256": "d2b9a494472bae5a3fddd7a6af5f611dce5f48ce69df03dd5e65e9f90737d91d",
+    "ghidra_post_chain_sha256": "c0957fc97130a930afab630a8709599dd057c70633b265d39cda23c25b2cf04f",
+    "scope": "Native clean logical storage against native baseline; COM facade, actual failure, fullscreen and GF2 integration are not established by this test"
+  },
   "artifacts": [
+    "artifacts/capture-hud-clean-ring-ctest-details.log",
+    "artifacts/capture-hud-clean-ring-full-tests.log",
+    "artifacts/capture-hud-plan/hud-post-chain.c",
     "artifacts/capture-hud-all-capture-tests.log",
     "artifacts/capture-hud-full-tests.log",
     "artifacts/capture-hud-pixels-exclusive-verified.log",

@@ -184,3 +184,52 @@ hotkeys, explicit borderless and DPI/resolution matrix, native long-hold/focus
 stress, active-query/hidden-state failure matrix, actual driver Present failures,
 and GF2 visible HUD acceptance. The successful single-buffer experiment cannot
 be extrapolated to read-only rotated buffers. Formal GF2 acceptance remains 0/6.
+
+## Clean presentation storage investigation
+
+Further read-only Ghidra output is in
+`artifacts/capture-hud-plan/hud-post-chain.{c,txt,log}`, for the same pinned shim.
+RVA 0x339e90 unmaps the HUD vertex/index buffers, selects a HUD pixel shader,
+binds each cached RTV and issues DrawIndexed (context slot 12). RVA 0x3384f0
+then restores pipeline state through 0x340800. This is batch submission before
+the native Present, not a post-Present pixel restore. Post-Present 0x300a40 is
+conditional capture/frame bookkeeping; 0x3020e0 processes a pending output
+string. These additional paths still provide no proof of retained-pixel cleanup.
+The original behavior must not be used as evidence that our stricter isolation
+requirement is automatically satisfied.
+
+The recorded GF2 swap is two-buffer FLIP_SEQUENTIAL, RGBA8, sample count one,
+with Present interval zero and ALLOW_TEARING. Its main-scene MSAA refusal concerns
+other captured resources, not this final backbuffer's sample count.
+
+`CleanBufferRing` is a native storage primitive, **not yet wired into runtime**.
+Application logical buffers remain clean; only a copy into the real presentation
+surface receives display decoration. After successful sequencing Present, clean
+contents rotate in place while logical resource identities stay stable. No
+persistent reference to a native swap buffer is held. The eventual runtime
+facade must preserve GetBuffer/QI/GetResource identity, read-only slot behavior,
+Present unbinding, direct/indirect Resize references and synchronization. Capture
+must use the application's clean logical buffer, and hidden/disconnected modes
+must preserve that same application resource model until destruction. A new ring
+is required for every successful Resize, even when dimensions do not change.
+
+The native `capture_hud_clean_buffers` experiment passes on the local NVIDIA
+hardware: ten profiles (two/three buffers, SEQUENTIAL/FLIP_SEQUENTIAL/FLIP_DISCARD,
+plus tearing for flip), 240 decorated frames and 360 readable retained-slot
+comparisons. Baseline and isolated runs match exact bytes before Present and in
+every readable retained slot afterward. Present and Present1 alternate; the HUD
+test marker's region is never overwritten by application updates. Flip-discard
+uses a full application redraw and makes no claim about undefined post-Present
+contents. TEST and synthetic failed/occluded/non-sequencing ring transitions do
+not rotate clean data. No Debug Layer warning/error occurs. This is a storage
+algorithm test, not a COM facade, actual driver failure or GF2 acceptance test.
+
+Both capture-only and full profiles build this target and pass the new test plus
+the architecture boundary check. Exact output is retained in
+`artifacts/capture-hud-clean-ring-ctest-details.log`; earlier handwritten prototype
+output remains in `artifacts/capture-hud-clean-buffers.json`. Existing 57/60 counts
+above refer to the previous integrated revision, not a new complete regression.
+
+Microsoft documents the slot access and implicit unbinding requirements in
+[DXGI_SWAP_EFFECT](https://learn.microsoft.com/en-us/windows/win32/api/dxgi/ne-dxgi-dxgi_swap_effect)
+and the [flip model guidance](https://learn.microsoft.com/en-us/windows/win32/direct3ddxgi/for-best-performance--use-dxgi-flip-model).
