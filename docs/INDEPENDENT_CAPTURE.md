@@ -1686,7 +1686,8 @@ These are setter inputs, not inferred effective pipeline state. Automatic hazard
 unbinding, inherited state, predicate/counter behavior and command-list lowering
 remain unresolved. Creation graphs for dead or driver-elided binding objects
 still need retention; owning their IDs alone does not reconstruct those objects.
-No deferred getters are used to guess state. A pending-call
+This input-history step does not infer effective state from setter values;
+the later native getter sampling is documented below. A pending-call
 slot associates each payload with its originating observation/thread; omitted,
 interleaved, duplicate and budget-limited inputs cannot replace an earlier call's
 arguments. Finish marks missing binding payloads as gaps. Immutable list records
@@ -1773,3 +1774,55 @@ Effective state/hazards, inherited state, hidden counters, execution snapshots a
 deferred encoding remain unfinished. The latest clean source-package proof is
 `c57bd39`; current package, original GUI/adapter and GF2 scene acceptance remain
 pending. GF2 accepted scene frames remain **0/6**.
+
+## Effective deferred pipeline bindings
+
+Each supported deferred Draw/Dispatch, Clear, Copy, Update and Map action now
+owns an immutable CPU snapshot of the native context's effective bindings before
+that action. The sampler shares capture-runtime getter code with immediate
+capture; neither path depends on replay. It reads the six shader stages, constant
+ranges, IA/RS/OM, SO and predicate bindings. It does not issue draws, copies,
+readbacks, flushes or state-setting calls. Temporary getter references are released
+after a closed creation graph and CPU values have been retained. Binding-only
+calls allocate no pipeline snapshot; snapshots and their variable arrays count
+toward the existing 64 MiB payload limit.
+
+The native runtime supplies hazard-resolved bindings, rather than a new software
+simulation of overlapping views. WARP and hardware tests cover output-induced
+SRV unbinding, rejected conflicting SRV inputs, non-overlapping array slices,
+CS UAV hazards, KEEP, explicit ClearState and high shader slots. All six stages'
+constant-buffer ranges are checked. This is evidence for those profiles, not an
+exhaustive validation of every view format or protected context.
+
+An action in a new list samples the retained context after
+[`FinishCommandList(TRUE)`](https://learn.microsoft.com/en-us/windows/win32/api/d3d11/nf-d3d11-id3d11devicecontext-finishcommandlist).
+Its definitions include inherited bound objects even if the earlier command list
+and the application's shader references were released. `FALSE` and `ClearState`
+are checked against native default bindings. The old unconditional inherited-state
+gap is removed; unsupported actions and hidden execution state still refuse.
+No prior list's Draw/Dispatch is copied into the next list.
+
+Getter-visible bindings do not establish execution-time resource contents or
+counter values. Deferred sampling never calls GetResourceMinLOD; resource clamp,
+APPEND/COUNTER UAVs, SO append position and active predicates retain explicit
+gaps. Counter reset setter arguments remain separate evidence. Early snapshot
+budget failure and a later creation-dependency budget failure publish no partial
+state. The existing thread/reentrancy, call-count and object-count guards remain.
+
+The new fixture executes an original deferred Draw and a setter-free successor,
+then independently recreates shaders and applies the captured state to reproduce
+exact red pixels. A compute consumer produces exact integers 71/72/73/74. Both
+WARP and hardware source devices pass. With the Debug Layer enabled, ordinary
+profiles have no warnings/errors; deliberately conflicting bindings produce
+exactly six warnings with identical IDs/severities/order in native and wrapped
+runs. Initial build shadowing and a raw-baseline ignored-pointer sentinel crash
+are retained in local logs. The latter fixture was corrected to use the null
+native arguments emitted by the wrapper; wrapped KEEP still uses inaccessible
+sentinels. No error tolerance was relaxed.
+
+Full regression results and hashes are recorded in the accompanying capture
+baseline and ignored `artifacts/capture-deferred-state-validation.json`.
+Deferred execution-time snapshots, command-list lowering/encoding, original GUI
+acceptance and GF2 scene acceptance remain pending. Accepted deferred files and
+GF2 scene frames remain **0** and **0/6**, respectively. The latest clean
+source-package proof still covers `c57bd39`.

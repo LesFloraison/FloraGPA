@@ -9,7 +9,7 @@
     "B": "native launch/control and capture-only package validated",
     "C": "partial: persistent native identity, descriptor graph and owned buffer/texture/shader/input-layout/SO creation metadata validated; other creation paths pending",
     "D": "partial: startup-injected blit/flip/tearing capture with dynamic mapped constants; dual-player execution verified on self-owned targets",
-    "E": "partial: immediate resource/update/copy/EVENT profiles verified; deferred histories own Map/binding inputs and durable creation graphs; execution-time contents, effective state/hazards, deferred encoding and remaining hidden states pending",
+    "E": "partial: immediate profiles verified; deferred owned histories/creation graphs and native effective pipeline snapshots cover tested state/hazard/Finish profiles; execution-time contents/hidden state, ordered lowering and deferred encoding remain pending",
     "F": "partial: native CLI and asynchronous Qt capture/cancel/disconnect/completed-file opening tested; full profile/deployment acceptance pending",
     "G": "pending: no six-frame GF2 or original GUI capture acceptance"
   },
@@ -1137,5 +1137,81 @@
       "Original GUI/adapter and six GF2 scene frames"
     ],
     "evidence": "artifacts/capture-deferred-definitions-validation.json"
+  },
+  "deferred_effective_state": {
+    "status": "Effective compilation-time bindings retained per action; deferred execution-time contents/lowering/encoding remain pending",
+    "method": "Native getters on the deferred context before supported actions; shared capture-runtime sampler with explicit immediate/deferred entry points",
+    "action_kinds": [
+      "Draw",
+      "DrawIndexed",
+      "DrawInstanced",
+      "DrawIndexedInstanced",
+      "Dispatch",
+      "Clear",
+      "CopyResource",
+      "CopySubresourceRegion/1",
+      "UpdateSubresource/1",
+      "Map"
+    ],
+    "ownership": "Immutable CPU snapshots and closed bound-object creation graphs; no native COM references retained in histories",
+    "budget": "State/variable arrays and new creation definitions share the existing 64 MiB payload budget; binding-only records do not allocate a pipeline snapshot",
+    "new_native_oracles": [
+      "Six-stage constant buffer ranges at slot 13",
+      "Shader/fixed-pipeline state and exact red Draw pixels",
+      "Setter-free Finish(TRUE) successor after releasing earlier list and shader wrappers",
+      "Finish(FALSE)/ClearState default bindings",
+      "Independent captured-state Draw and Dispatch consumers; integers 71/72/73/74",
+      "Output-induced SRV nulling and rejected conflicting SRV input",
+      "Disjoint Texture2D array slices remain bound",
+      "CS UAV hazards, high SRV slots and inaccessible wrapped KEEP arguments",
+      "Native versus wrapped Debug Layer IDs/severities/order",
+      "LastError and native lifetime preservation"
+    ],
+    "guards": [
+      "Resource MinLOD never read at deferred compile time",
+      "APPEND/COUNTER UAV counts not guessed from reset arguments",
+      "SO append/predicate gaps",
+      "Early state and late definition-budget failures publish no partial snapshot",
+      "Immediate/deferred sampler type contracts"
+    ],
+    "source_devices": [
+      "WARP",
+      "hardware"
+    ],
+    "debug_expected_hazard_warnings_per_run": 6,
+    "debug_unexpected_warnings_or_errors": 0,
+    "retained_findings": [
+      "Initial /W4 shadowing warning corrected",
+      "Raw unwrapped baseline with ignored invalid COM sentinel crashed under Debug Layer; baseline now receives null native arguments as forwarded by wrapper, wrapped sentinel retained"
+    ],
+    "capture_only_ctest": 52,
+    "full_profile_ctest": 54,
+    "qt_cases": 11,
+    "qt_skipped": 0,
+    "full_application_build": true,
+    "injected_launches": 23,
+    "injected_files": 115,
+    "injected_checks": 737,
+    "original_player_reports": 115,
+    "original_player_sha256": "39061ff329e4a32d0c8375ce9ee15e2017bccab0593943b962a860e11723d38b",
+    "accepted_deferred_files": 0,
+    "accepted_gf2_frames": 0,
+    "unchanged_sources": [
+      "Encoder",
+      "Replay",
+      "Shared format"
+    ],
+    "new_golden_run": false,
+    "latest_clean_package_revision": "c57bd39",
+    "pending": [
+      "Execution-time initial GPU data and hidden state dependencies",
+      "Repeated/nested command-list lowering and synchronization",
+      "Deferred file encoding and dual-player execution",
+      "Broader binding/view profiles and class linkage",
+      "Current revision clean source-package proof",
+      "Original GUI/adapter and six GF2 scene frames"
+    ],
+    "reference": "https://learn.microsoft.com/en-us/windows/win32/api/d3d11/nf-d3d11-id3d11devicecontext-finishcommandlist",
+    "evidence": "artifacts/capture-deferred-state-validation.json"
   }
 }

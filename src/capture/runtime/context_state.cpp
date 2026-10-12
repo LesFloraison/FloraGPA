@@ -16,9 +16,10 @@ template<class T,size_t N> struct Returned {
 };
 class Builder {
     ID3D11DeviceContext* context_;
+    bool deferred_;
 public:
     ContextSnapshot result;
-    explicit Builder(ID3D11DeviceContext* context):context_(context){}
+    explicit Builder(ID3D11DeviceContext* context,bool deferred):context_(context),deferred_(deferred){}
     ObjectId retain(IUnknown* object){
         if(!object)return 0;
         ComPtr<IUnknown> native;check(object->QueryInterface(IID_PPV_ARGS(&native)),"Snapshot object identity failed");
@@ -33,8 +34,18 @@ public:
         ComPtr<ID3D11Resource> resource;
         if(SUCCEEDED(native.As(&resource))){
             const auto shape=resource_shape(resource.Get());
-            if(shape.misc_flags&D3D11_RESOURCE_MISC_RESOURCE_CLAMP)
-                result.bindings.resource_min_lod.emplace(record->id,context_->GetResourceMinLOD(resource.Get()));
+            if(shape.misc_flags&D3D11_RESOURCE_MISC_RESOURCE_CLAMP){
+                if(deferred_)result.gaps.push_back("Deferred resource MinLOD requires execution-time state");
+                else result.bindings.resource_min_lod.emplace(record->id,context_->GetResourceMinLOD(resource.Get()));
+            }
+        }
+        if(deferred_){
+            ComPtr<ID3D11UnorderedAccessView> uav;
+            if(SUCCEEDED(native.As(&uav))){
+                D3D11_UNORDERED_ACCESS_VIEW_DESC d{};uav->GetDesc(&d);
+                if(d.ViewDimension==D3D11_UAV_DIMENSION_BUFFER && (d.Buffer.Flags&(D3D11_BUFFER_UAV_FLAG_APPEND|D3D11_BUFFER_UAV_FLAG_COUNTER)))
+                    result.gaps.push_back("Deferred UAV counter requires execution-time state and ordered resets");
+            }
         }
         return record->id;
     }
@@ -46,14 +57,16 @@ public:
 void ContextSnapshot::require_supported_bindings() const {
     if(!gaps.empty())throw std::runtime_error(gaps.front());
 }
-ContextSnapshot snapshot_context(ID3D11DeviceContext* application_context){
+namespace {
+ContextSnapshot snapshot_pipeline(ID3D11DeviceContext* application_context,bool deferred){
     LastErrorScope last_error;NativeCall internal;
     if(!application_context || !object_record(application_context))throw std::runtime_error("Snapshot context is not tracked");
     auto* context=unwrap(application_context);
-    if(context->GetType()!=D3D11_DEVICE_CONTEXT_IMMEDIATE)throw std::runtime_error("Pipeline snapshot requires an immediate context");
+    if(context->GetType()!=(deferred?D3D11_DEVICE_CONTEXT_DEFERRED:D3D11_DEVICE_CONTEXT_IMMEDIATE))
+        throw std::runtime_error(deferred?"Pipeline snapshot requires a deferred context":"Pipeline snapshot requires an immediate context");
     ComPtr<ID3D11Device> device;context->GetDevice(&device);
     check(device->GetDeviceRemovedReason(),"Pipeline snapshot device removed");
-    Builder out(context);auto& state=out.result.bindings;
+    Builder out(context,deferred);auto& state=out.result.bindings;
     state.context=out.retain(context);state.device=out.retain(device.Get());state.feature_level=device->GetFeatureLevel();
     if(state.feature_level<D3D_FEATURE_LEVEL_11_0)throw std::runtime_error("Pipeline snapshot requires feature level 11.0 or newer");
     state.uav_slots=state.feature_level>=D3D_FEATURE_LEVEL_11_1?D3D11_1_UAV_SLOT_COUNT:D3D11_PS_CS_UAV_REGISTER_COUNT;
@@ -113,4 +126,7 @@ ContextSnapshot snapshot_context(ID3D11DeviceContext* application_context){
     if(predicate)out.result.gaps.push_back("Active predicate query state reconstruction is unsupported");
     check(device->GetDeviceRemovedReason(),"Pipeline snapshot device removed");return std::move(out.result);
 }
+}
+ContextSnapshot snapshot_context(ID3D11DeviceContext* context){return snapshot_pipeline(context,false);}
+ContextSnapshot snapshot_deferred_context(ID3D11DeviceContext* context){return snapshot_pipeline(context,true);}
 }

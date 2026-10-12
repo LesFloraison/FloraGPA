@@ -21,4 +21,7 @@ struct ContextSnapshot {
 // pipeline state: not active queries, command lists, resource bytes or counters.
 // Never call from the IPC thread. Does not apply state to the application.
 ContextSnapshot snapshot_context(ID3D11DeviceContext* application_context);
+// Compilation-time binding getters only. No GPU contents/counters or resource
+// MinLOD sampling: those depend on the later ExecuteCommandList position.
+ContextSnapshot snapshot_deferred_context(ID3D11DeviceContext* application_context);
 }

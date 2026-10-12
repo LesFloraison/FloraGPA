@@ -25,6 +25,30 @@ SubresourceData mapped_layout(ID3D11Resource* resource,const ObjectRecord& r,UIN
     }
     return resource_layout(s,DeferredHistory::byte_limit).at(subresource);
 }
+bool has_pipeline_state(CommandKind kind){
+    switch(kind){
+    case CommandKind::draw:case CommandKind::draw_indexed:case CommandKind::draw_instanced:
+    case CommandKind::draw_indexed_instanced:case CommandKind::dispatch:
+    case CommandKind::clear_rtv:case CommandKind::clear_dsv:case CommandKind::clear_uav_uint:case CommandKind::clear_uav_float:
+    case CommandKind::copy_resource:case CommandKind::copy_region:case CommandKind::update_subresource:case CommandKind::map:return true;
+    default:return false;
+    }
+}
+void retain_pipeline_state(ID3D11DeviceContext* context,DeferredCommandList& batch,DeferredCall& call){
+    size_t bytes=0;
+    auto charge=[&](size_t size){if(batch.owned_bytes>DeferredHistory::byte_limit || size>DeferredHistory::byte_limit-batch.owned_bytes-bytes)throw std::runtime_error("Deferred pipeline state byte limit exceeded");bytes+=size;};
+    charge(sizeof(PipelineBindings));
+    auto snapshot=snapshot_deferred_context(context);
+    for(const auto& s:snapshot.bindings.shaders)charge(s.classes.size()*sizeof(ObjectId));
+    charge(snapshot.bindings.viewports.size()*sizeof(D3D11_VIEWPORT));charge(snapshot.bindings.scissors.size()*sizeof(D3D11_RECT));
+    DeferredDefinitionGraph added;
+    for(const auto& [id,object]:snapshot.objects){
+        if(id==batch.context)continue; // Context is compilation provenance, not an object creation dependency.
+        charge(retain_deferred_definitions(object.native.Get(),batch.device,batch.definitions,added,DeferredHistory::byte_limit-batch.owned_bytes-bytes));
+    }
+    for(const auto& reason:snapshot.gaps)gap(batch,call.api+": "+reason);
+    call.state=std::make_shared<const PipelineBindings>(std::move(snapshot.bindings));batch.definitions.merge(added);batch.owned_bytes+=bytes;
+}
 }
 ObjectId DeferredBindingBuilder::object_id(IUnknown* value){
     const auto r=object_record(value);if(!r || r->device!=device_)throw std::runtime_error("Deferred binding identity/device mismatch");
@@ -65,6 +89,7 @@ void observe_deferred_call(ID3D11DeviceContext* context,const char* api,CommandK
         if(floats)std::copy_n(floats,4,c.floats.begin());if(integers)std::copy_n(integers,4,c.words.begin());
         if(region)c.copy_region=*region;
         try{
+            if(has_pipeline_state(kind))retain_pipeline_state(context,b,c);
             // CommandList expansion has its own unresolved provenance model.
             // Other direct operands (Clear/Copy/Map/Update/query) need the same
             // durable creation graph as binding arguments.
@@ -83,7 +108,7 @@ void observe_deferred_call(ID3D11DeviceContext* context,const char* api,CommandK
                 const auto shape=resource_shape(native.Get());const auto layout=update_layout(shape,object->descriptor,words[0],c.update_box?&*c.update_box:nullptr);
                 if(layout.slice_bytes*layout.depth>DeferredHistory::byte_limit-b.owned_bytes)throw std::runtime_error("Deferred payload byte limit exceeded");
                 auto data=layout;copy_pitched(data,update->data,update->row_pitch,update->depth_pitch);c.data=std::move(data.bytes);b.owned_bytes+=c.data.size();c.words={words[0],update->row_pitch,update->depth_pitch,UINT(update->extended),update->flags};
-            }else if(kind!=CommandKind::binding && kind!=CommandKind::map && kind!=CommandKind::clear_rtv && kind!=CommandKind::clear_dsv && kind!=CommandKind::clear_uav_uint && kind!=CommandKind::clear_uav_float && kind!=CommandKind::copy_resource && kind!=CommandKind::copy_region)
+            }else if(kind!=CommandKind::binding && !has_pipeline_state(kind))
                 throw std::runtime_error("Deferred state, mapping, query or command arguments require further tracking");
         }catch(const std::exception& e){gap(b,std::string(api)+": "+e.what());}
         if(kind==CommandKind::map){
@@ -149,7 +174,8 @@ void remember_deferred_finish(ID3D11DeviceContext* context,HRESULT result,BOOL r
             if(!h.mappings.empty()){gap(h.pending,"FinishCommandList: unfinished mappings; storage was not read");h.mappings.clear();}
             h.pending.generation=++h.finishes;h.pending.restore_deferred_state=restore!=FALSE;
             completed=std::make_shared<const DeferredCommandList>(std::move(h.pending));h.pending={};h.pending.context=r->id;h.pending.device=r->device;h.pending.starts_default=restore==FALSE;
-            if(restore)gap(h.pending,"Deferred state inherited across FinishCommandList is not yet captured");
+            // The next action samples the runtime's restored binding state,
+            // independently of this completed list's setter history.
         }
         // Successful Finish with null output discards a batch, just as native.
         if(!list)return;

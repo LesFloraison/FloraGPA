@@ -16,6 +16,9 @@ struct DeferredCall {
     std::optional<ResourceBox> update_box;
     std::optional<CopyRegion> copy_region;
     std::optional<DeferredBinding> binding;
+    // Effective native bindings before this action, including runtime hazard
+    // nulling and Finish(TRUE) retention. No execution-time GPU contents.
+    std::shared_ptr<const PipelineBindings> state;
     std::vector<uint8_t> data;
     HRESULT result=S_OK;
     bool completed=true;
