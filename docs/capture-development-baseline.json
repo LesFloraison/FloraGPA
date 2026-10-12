@@ -999,9 +999,20 @@
       "NO_OVERWRITE written-range/rename dependencies",
       "Repeated/nested-list lowering and deferred serialization",
       "WARP zero-pitch texture handling beyond explicit refusal",
-      "Current revision source-package proof",
       "Original GUI/adapter and six GF2 scene frames"
     ],
-    "evidence": "artifacts/capture-deferred-map-validation.json"
+    "evidence": "artifacts/capture-deferred-map-validation.json",
+    "source_package": {
+      "revision": "c57bd398f339eeedde7a12ec9ab21e5e06484403",
+      "steps": 6,
+      "ctest": 46,
+      "launches": 23,
+      "frames": 115,
+      "system_path_only": true,
+      "no_qt_discovery": true,
+      "module_audit": "no GPA, Qt, RenderDoc, Python, FloraReplay or FloraCore modules",
+      "scope": "Clean capture-only source build and packaged IPC/publication/lifecycle; dual-player pixel checks belong to the separate working-build matrix",
+      "evidence": "artifacts\\capture-deferred-map-source-build\\validation.json"
+    }
   }
 }

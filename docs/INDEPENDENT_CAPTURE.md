@@ -1653,5 +1653,18 @@ regression produces 115 files in 23 launches and passes 737 serial checks agains
 FloraGPA, the pinned original replay kernel and independent CPU expectations.
 Evidence hashes are in `artifacts/capture-deferred-map-validation.json`.
 These files do not exercise deferred serialization. Encoder/replay/shared-format
-sources are unchanged; no new golden run is claimed. Current source-package,
-original GUI/adapter and GF2 scene acceptance remain pending; GF2 stays **0/6**.
+sources are unchanged; no new golden run is claimed. Original GUI/adapter and
+GF2 scene acceptance remain pending; GF2 stays **0/6**.
+
+
+The committed deferred-Map revision `c57bd39` subsequently passes six clean
+source/archive/package steps and all 46 serial CTests. A fresh directory with
+spaces, system-only PATH and no Qt discovery produces a standalone package that
+completes 23 launches and 115 file publications, IPC error/recovery/cancel/
+disconnect checks and native identity/exit checks. Module inventories contain
+no GPA, Qt, RenderDoc, Python, FloraReplay or FloraCore. Evidence is retained in
+`artifacts/capture-deferred-map-source-build/validation.json`, with independent
+summary hashes in `artifacts/capture-deferred-map-package-validation.json`.
+These package checks establish build/runtime independence and control behavior;
+the separate working-build matrix above supplies dual-player pixel comparisons.
+They do not establish deferred file encoding or GF2 scene acceptance.
