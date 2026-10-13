@@ -1214,12 +1214,98 @@
     "new_original_gui_run": false,
     "replay_shared_format_changed": false,
     "new_golden_run": false,
-    "clean_source_package": "Latest proof 4330a64 precedes RGBA16; current revision source-package validation pending",
+    "clean_source_package": {
+      "commit": "a2a3465d08f02e7cf85627d03d2c4a39d14eb888",
+      "passed": true,
+      "scope": "Committed RGBA16 encoder/runtime source builds independently; packaged controls exercise existing profiles and RGBA8 MSAA, not GF2 or RGBA16 startup dual-player acceptance",
+      "steps": [
+        {
+          "name": "configure",
+          "exit_code": 0
+        },
+        {
+          "name": "build",
+          "exit_code": 0
+        },
+        {
+          "name": "ctest",
+          "exit_code": 0
+        },
+        {
+          "name": "package",
+          "exit_code": 0
+        },
+        {
+          "name": "package-control",
+          "exit_code": 0
+        },
+        {
+          "name": "package-live-control",
+          "exit_code": 0
+        },
+        {
+          "name": "package-msaa-control",
+          "exit_code": 0
+        }
+      ],
+      "validator_sha256": "01b44160be6210936da8a89c7427085a3b24ad2f87ce68becfd58705beb72cf1",
+      "environment_keys": [
+        "ALLUSERSPROFILE",
+        "APPDATA",
+        "CL",
+        "COMSPEC",
+        "HOMEDRIVE",
+        "HOMEPATH",
+        "LOCALAPPDATA",
+        "NUMBER_OF_PROCESSORS",
+        "OS",
+        "PATH",
+        "PATHEXT",
+        "PROCESSOR_ARCHITECTURE",
+        "PROGRAMDATA",
+        "PROGRAMFILES",
+        "PROGRAMFILES(X86)",
+        "PROGRAMW6432",
+        "PUBLIC",
+        "SYSTEMDRIVE",
+        "SYSTEMROOT",
+        "TEMP",
+        "TMP",
+        "USERDOMAIN",
+        "USERNAME",
+        "USERPROFILE",
+        "WINDIR"
+      ],
+      "packaged_live_frames": 120,
+      "packaged_msaa_launches": 2,
+      "packaged_msaa_frames": 10,
+      "package_files": {
+        "dependencies.json": "ddae10be48d1c3ec765ddb4c5b44ff7e8aba911f49cc80b6586d57b2c75267a5",
+        "FloraCapture.exe": "db3fa469bcf7be0d3b44c2bfc026d03016505c286124f192b4bb4110b6e156c5",
+        "FloraCaptureRuntime.dll": "aabb6ce7e2ddc2b8012154b4f314b6d02bc42541208b1e5a8f22f375bfe8e25d",
+        "manifest.json": "b1d5f42c4b3583257437652827ed844f97e0d6aa660570f7cb914432d5a1c495",
+        "msvcp140.dll": "0f885b509a685d2bbfa652fed26b5fb31d88fbdab0a978c641d1c7b8aa460aa9",
+        "vcruntime140.dll": "d5e4d9a3e835fa679450145d6a7d94e36573a509317111904d9b3712c30d9066",
+        "vcruntime140_1.dll": "1f2d41c4aa5db0bc33ebf7b66d72943a817d7ce6cbe880502a9403823633093f",
+        "licenses/detours-MIT.txt": "f854ae8aabc0404652b48a2b3bf7f21ec174c69d73f5596934c20884eb0639ef",
+        "licenses/nlohmann-json-MIT.txt": "46a65cffd1ea955132d95a8dd921640714a8d6b537d2e4e482d31145ae95b603"
+      },
+      "no_qt_discovery": true,
+      "system_path_only": true,
+      "capture_only_ctest": 98,
+      "packaged_live_launches": 24,
+      "evidence_sha256": {
+        "artifacts/capture-msaa-rgba16-source-a2a3465/validation.json": "2988041c21f34495bf4a48dfeafd15d14af96a6edc0ddf918af6fc9ed19c2680",
+        "artifacts/capture-msaa-rgba16-source-a2a3465/ctest.log": "79aa3a52cff438b82adb84f5e9826d0473ad906a618249321e725f886415d1ab",
+        "artifacts/capture-msaa-rgba16-source-a2a3465/packaged-live/results.json": "a1df2df9d29c86b47ca36a152d3c711c0f1b463c898a755d9363cad63c91bad2",
+        "artifacts/capture-msaa-rgba16-source-a2a3465/packaged-msaa/results.json": "336d7214bb30047a567bfb27c7b0249c31da483158d1115d0bbd0e4ecfabab98"
+      }
+    },
     "pending": [
       "D32S8 MSAA initialization required by GF2",
       "Broader MSAA mutation, deferred, query/predicate and swap-chain output profiles",
-      "RGBA16 startup-injected dual-player proof and current committed-source package",
-      "Formal two-launch six-frame/two-scene GF2 acceptance"
+      "Formal two-launch six-frame/two-scene GF2 acceptance",
+      "RGBA16 startup-injected dual-player proof"
     ],
     "source_sha256": {
       "src/capture/CMakeLists.txt": "b392745eb5cf63befb8f6db3b67815ca2fcb66e079780c7bd50bda079bf0f833",
@@ -1355,5 +1441,118 @@
       "artifacts/capture-gf2-rgba16-20261014/status-main-result.json": "37fdb885e2951ced69ff2b0e7f0c345ded0858fda790f0659a0ed44369b16991",
       "artifacts/capture-gf2-rgba16-20261014/status-start.json": "fae4a5d0c4a3c0f787117183e217dfea38b04673f71aea7410bd92e5f3ec90d2"
     }
+  },
+  "depth32_stencil8_wire_experiment": {
+    "base_commit": "a2a3465d08f02e7cf85627d03d2c4a39d14eb888",
+    "status": "Test-only D32S8 initialization wire sequence verified; production depth MSAA capture remains refused",
+    "profile": "13x7 two layers, R32G8X24_TYPELESS storage and D32_FLOAT_S8X24_UINT DSV; quality zero, 2x/4x; WARP/hardware",
+    "oracle": "Native producer uses 256 complete stencil-reference selections per sample, independently of the eight bitwise restoration passes. CPU float32 depth words and stencil values match initial readback and final byte-tile display exactly, including alpha. Unused D32S8 padding canonicalized to zero.",
+    "encoding": "Per-plane R32G32_UINT uploads; one depth Draw and eight stencil-bit Draws with sample masks, then CopyResource. Clear supplies deterministic zero for removal controls.",
+    "native_results": [
+      {
+        "debug_warnings_or_errors": 0,
+        "files": 6,
+        "hardware": false,
+        "passed": true,
+        "source_gpu_objects_alive": 0
+      },
+      {
+        "debug_warnings_or_errors": 0,
+        "files": 6,
+        "hardware": true,
+        "passed": true,
+        "source_gpu_objects_alive": 0
+      }
+    ],
+    "positive_files": 4,
+    "negative_files": 8,
+    "dual_player_files": 12,
+    "dual_player_checks": 306,
+    "focused_ctest": 2,
+    "source_objects_alive": 0,
+    "new_production_support": false,
+    "replay_shared_format_changed": false,
+    "new_golden_run": false,
+    "new_gf2_launches": 0,
+    "accepted_gf2_frames": 0,
+    "source_sha256": {
+      "src/capture/tests/msaa_depth_encoding_fixture.hpp": "75e1b7937ca0d9b1bd54b627a032fcc3b518ea7907ce92a023239060c5ba1726",
+      "src/capture/tests/msaa_depth_encoding_tests.cpp": "5bda57674800dea5393854abd8f12e53ad45c485d93e019368696c8de48b4287",
+      "src/capture/CMakeLists.txt": "6cc524102ad21d35fccae691bb3db3c57b9d0d305f17f10dd9d0df77cee63dcd",
+      "tools/validate_capture_msaa_encoding.py": "1232908bb1bf47e25de087ae87baa94f7e078416fc20a38c81407d89fb6581a2"
+    },
+    "evidence_sha256": {
+      "artifacts/capture-msaa-depth-wire-20261014/validation.json": "9a50b5dca6ba6ae54cc69ef54312f97b7e34ac283c3bc11e8fe081d9caafb89e",
+      "artifacts/capture-msaa-depth-wire-20261014/inputs.json": "6ec6dfef6e732656633fd0ec98c68df71d81fa43b3ab4cc48a33d0ed68794a65",
+      "artifacts/capture-msaa-depth-wire-20261014/ctest.log": "4da9ef2b6e2c6ee3ff8cfec7203da27ced2b389e4bb136c4d209005f4710f03a",
+      "artifacts/capture-msaa-depth-wire-20261014/warp-msaa-probe.log": "198d8e5f47466e448dfd9efe25f15d530494ba0ac6ada8682b48a47f62b94e1c",
+      "artifacts/capture-msaa-depth-wire-20261014/hardware-msaa-probe.log": "2f0cf63f884e885d0a1f23cba7fff804be270b3780f04e559916918ad9a990d9"
+    },
+    "files": [
+      {
+        "file": "warp-msaa/2x-complete.gpa_frame",
+        "sha256": "e6bfd952a09bd2c634cb51bfaad5ae00d691545c5baf6211e3669e266981b9cc",
+        "expected_sha256": "80db0bc5076967c12569727ec2dedd4e043f94874f947fc966d0b50abd3e78c2"
+      },
+      {
+        "file": "warp-msaa/2x-missing-application-draws.gpa_frame",
+        "sha256": "6819acc6d4b72d462a3cd67b0a489cee5beacd74e8f6e415a5b07d686e4ede20",
+        "expected_sha256": "498d5cffee80255cc4c91573e85a42bd56ba8fc78a15076211126c9691b8ad31"
+      },
+      {
+        "file": "warp-msaa/2x-missing-initialization.gpa_frame",
+        "sha256": "33d3e4b714e66c3d525edd670945ab0d88d9a30d02256afdd67f78f9909b1ea4",
+        "expected_sha256": "27d5782dfd6ad01c9fdbae26f5672dd68e30fa472f6465b34c84be498b8bb876"
+      },
+      {
+        "file": "warp-msaa/4x-complete.gpa_frame",
+        "sha256": "46c1b8f473fdca0aa100ac92f4fe4cd766b9d4b08e0c4f395024f5dbcb0167f7",
+        "expected_sha256": "1baee9474cbce2dd1f4f0446bc6adfd3388547a481bbefab0ccfb647ae465014"
+      },
+      {
+        "file": "warp-msaa/4x-missing-application-draws.gpa_frame",
+        "sha256": "8e8fa26b0a6bef193ec52fc0a4f8126d24a07ce54c7a339b011de70db3a01956",
+        "expected_sha256": "a0a03c2d866163edeb8a4bc54ad882a9ec481a430a0ba2f9610f901b9e66465c"
+      },
+      {
+        "file": "warp-msaa/4x-missing-initialization.gpa_frame",
+        "sha256": "614fa632e89a2244f2a4c5b113c634f4d8ba49939022e06d722fc51b311db44a",
+        "expected_sha256": "cb944213cc40ef5a9b27ef124f127a341a087a4b03cabeebdda2087e723788ad"
+      },
+      {
+        "file": "hardware-msaa/2x-complete.gpa_frame",
+        "sha256": "e6bfd952a09bd2c634cb51bfaad5ae00d691545c5baf6211e3669e266981b9cc",
+        "expected_sha256": "80db0bc5076967c12569727ec2dedd4e043f94874f947fc966d0b50abd3e78c2"
+      },
+      {
+        "file": "hardware-msaa/2x-missing-application-draws.gpa_frame",
+        "sha256": "6819acc6d4b72d462a3cd67b0a489cee5beacd74e8f6e415a5b07d686e4ede20",
+        "expected_sha256": "498d5cffee80255cc4c91573e85a42bd56ba8fc78a15076211126c9691b8ad31"
+      },
+      {
+        "file": "hardware-msaa/2x-missing-initialization.gpa_frame",
+        "sha256": "33d3e4b714e66c3d525edd670945ab0d88d9a30d02256afdd67f78f9909b1ea4",
+        "expected_sha256": "27d5782dfd6ad01c9fdbae26f5672dd68e30fa472f6465b34c84be498b8bb876"
+      },
+      {
+        "file": "hardware-msaa/4x-complete.gpa_frame",
+        "sha256": "46c1b8f473fdca0aa100ac92f4fe4cd766b9d4b08e0c4f395024f5dbcb0167f7",
+        "expected_sha256": "1baee9474cbce2dd1f4f0446bc6adfd3388547a481bbefab0ccfb647ae465014"
+      },
+      {
+        "file": "hardware-msaa/4x-missing-application-draws.gpa_frame",
+        "sha256": "8e8fa26b0a6bef193ec52fc0a4f8126d24a07ce54c7a339b011de70db3a01956",
+        "expected_sha256": "a0a03c2d866163edeb8a4bc54ad882a9ec481a430a0ba2f9610f901b9e66465c"
+      },
+      {
+        "file": "hardware-msaa/4x-missing-initialization.gpa_frame",
+        "sha256": "614fa632e89a2244f2a4c5b113c634f4d8ba49939022e06d722fc51b311db44a",
+        "expected_sha256": "cb944213cc40ef5a9b27ef124f127a341a087a4b03cabeebdda2087e723788ad"
+      }
+    ],
+    "references": [
+      "https://learn.microsoft.com/en-us/windows/win32/api/d3d11/ns-d3d11-d3d11_depth_stencil_desc",
+      "https://learn.microsoft.com/en-us/windows/win32/direct3d11/d3d10-graphics-programming-guide-output-merger-stage"
+    ]
   }
 }

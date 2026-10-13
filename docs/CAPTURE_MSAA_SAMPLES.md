@@ -401,3 +401,30 @@ Raw evidence is retained in `artifacts/capture-msaa-rgba16-20261014` and
 `artifacts/capture-gf2-rgba16-20261014`. Regression counts, hashes and pending
 package scope are recorded in the baseline. Depth/stencil initialization,
 broader hidden-state/query profiles and formal GF2 acceptance remain incomplete.
+
+The committed RGBA16 revision `a2a3465` subsequently passed all seven isolated
+source/package stages and 98 serial CTests. Packaged controls produced 120
+existing-profile files in 24 launches and ten RGBA8 MSAA files in two launches.
+This does not add RGBA16 startup-injected dual-player or GF2 acceptance.
+
+### D32S8 initialization wire experiment
+
+`FloraCaptureMsaaDepthEncodingTests` is a test-only writer, with no Replay
+dependency. It preserves owned D32S8 sample planes through R32G32_UINT uploads,
+one depth Draw and eight stencil-bit Draws per plane, then CopyResource. The
+native producer instead selects whole stencil values across 256 reference
+passes, providing an independent control for the bitwise initializer. Exact CPU
+float32 words and stencil bytes verify initial samples and final display tiles;
+unused D32S8 padding remains canonical zero.
+
+WARP and hardware, two layers and 2x/4x quality-zero samples produce four positive
+files and eight Draw-removal controls. All 306 dual-player checks and both focused
+CTests pass, including actual execution, events, shaders, unchanged captured
+references in negative files, native owner release and zero Debug Layer warnings.
+Raw evidence: `artifacts/capture-msaa-depth-wire-20261014`. The baseline records
+hashes and scope. Production depth MSAA capture still refuses; this experiment
+does not change the GF2 0/6 status.
+
+State construction follows Microsoft's [depth/stencil descriptor semantics](https://learn.microsoft.com/en-us/windows/win32/api/d3d11/ns-d3d11-d3d11_depth_stencil_desc)
+and [output-merger depth clamping and sample masks](https://learn.microsoft.com/en-us/windows/win32/direct3d11/d3d10-graphics-programming-guide-output-merger-stage).
+Broader depth values and production model validation require separate checks.
