@@ -590,13 +590,74 @@ target. These results use the fixed runtime hashed in `device_lock_progress`.
 A fresh GF2 process now visibly renders Compact/Detailed/Hidden with zero
 interface gaps; Hidden mode still completes hotkey capture. Six diagnostic files
 execute in both players with exact resource/preview/output bytes and no reference
-image substitution. User-assisted approximately three-second holds added four
-files after the first tool-triggered capture; the user confirmed several separate
-presses. Files are spaced 10–23 seconds apart with no repeat burst. The last file
-comes from the explicit Hidden-mode test. This is scoped manual input evidence.
+image substitution. After the user reported an approximately three-second hold,
+four files followed the first tool-triggered capture; the user confirmed several separate
+presses. Files are spaced 10–23 seconds apart with no repeat burst. These counts
+cannot isolate the response to one physical hold, so they do not by themselves
+pass the single-hold acceptance test. The last file comes from the explicit
+Hidden-mode test. This is scoped manual input evidence.
 
 The game is downloading a new resource update; these six files belong to its
 update screen, not the required start/home scenes. New start-screen capture,
 main-scene MSAA refusal and disconnect checks remain pending. Formal GF2
 acceptance is still **0/6**. The live updating session is retained so the download
-can finish without another restart.
+can finish without another restart. The following continuation supersedes this
+temporary update blocker.
+
+## Updated GF2 start and home scene checks
+
+After the update finished, the same injected session (`b3b60d11-18b2-4c69-9775-3e45a565c50c`,
+PID 2020) reached the start screen and home scene on production revision
+`ff94b30`. The visible game version was `4.0.5136.14794.28495.3242`. Compact and
+Detailed HUD modes render there; the start-screen hotkey publishes
+`frame-9e68818b-c434-4a5e-b649-6135734b0a41.gpa_frame` at Present 337886.
+
+That 2560x1440 file executes in FloraGPA and the original GPA player with exact
+agreement between both outputs, the captured backbuffer and the preview. Flora
+reports no reference-image substitution. The inventory contains 108 resources
+and 18 application Draws (one Draw and 17 DrawIndexed). A negative copy retains
+the preview/reference bytes but sets all 18 draw counts to zero: both players
+still agree with each other, and their output differs from the positive frame.
+Vertex shader 25 and pixel shader 26 export as DXBC and assembly. Pipeline event
+371 exposes 1302 known fields and four unknown fields; this is not complete
+pipeline-format coverage. The initial export script used the wrong pixel-shader
+type number, then read the inventory and corrected it without modifying the
+capture or production code.
+
+The home-scene request visibly reports `Capture failed: MSAA`; its full error is
+`ID3D11DeviceContext::ClearRenderTargetView: MSAA sample-preserving capture is not implemented`.
+It publishes no file, exits busy state and continues presenting. Its message
+subsequently expires. Hidden mode removes the HUD but still accepts a new hotkey
+request; on the equipment screen that request explicitly refuses an Unmap without
+a recorded successful Map. This separate capture limitation also publishes no
+file. The shortcut remains visible to the game, which can open its own C-key UI.
+
+After restoring Compact and disconnecting, HUD visibility is false and input
+observer threads are zero. A further hotkey leaves the last request unchanged and
+publishes no file, while successful Presents reach 348924. The session has seven
+files total: six earlier update-screen diagnostics and this start-screen file.
+The game then exits through normal Alt+F4; process absence was checked. Screenshots,
+status snapshots, exports and serial GPU validation live in
+`artifacts/capture-hud-device-lock-gf2-completion`; hashes and outcomes are recorded
+under `gf2_completion_progress` in `docs/capture-hud-evidence.json`.
+
+The desktop/update blocker is resolved. These scoped GF2 HUD checks pass; the
+remaining HUD stress/failure gates are not promoted, and formal two-launch,
+six-frame GF2 acceptance remains **0/6**. MSAA capture remains unsupported.
+
+## ResizeBuffers1 rejection and recovery
+
+Microsoft specifies [ResizeBuffers1](https://learn.microsoft.com/en-us/windows/win32/api/dxgi1_4/nf-dxgi1_4-idxgiswapchain3-resizebuffers1)
+for swap chains created with a D3D12 command queue. A successful D3D12 resize is
+outside this DX11 capture scope. `capture_hud_resize` and its hardware variant
+instead compare the native DX11 rejection with production wrappers on blt and
+flip chains, both with held backbuffer references and after releasing them.
+
+All four native/wrapped pairs return the same `DXGI_ERROR_INVALID_CALL` and
+LastError, with matching D3D11 Debug Layer warning/error IDs. The tests verify
+exact retained pixels, public resource identity, reattachment to private clean
+storage, subsequent successful ordinary ResizeBuffers to 96x96, exact new-buffer
+pixels, no capability gaps and released object lifetimes. They do not perform
+Present or prove D3D12 support. Capture-only focused tests pass **5/5** and the
+full-build resize cases pass **2/2**, serially. This adds tests only; the runtime,
+replay and format are unchanged from the GF2-validated production revision.

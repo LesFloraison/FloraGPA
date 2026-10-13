@@ -3,7 +3,7 @@
   "date": "2026-10-13",
   "branch": "feature/dx11-capture",
   "tested_source_commit": "179b3597eac0a1a2250b5909464790ef7c1b0bd8",
-  "delivery": "partial; supported multi-buffer, exclusive and GF2 HUD integration verified; broader stress/failure gates remain open",
+  "delivery": "partial; current-runtime GF2 start/home HUD integration and scoped clean dual replay verified; remaining stress/failure gates stay open",
   "protocol": 3,
   "profile": "Native clean application storage for single-sample RGBA8/BGRA8 SEQUENTIAL/FLIP_SEQUENTIAL/FLIP_DISCARD; guarded single-buffer DISCARD fallback; no active HUD query/predicate/texture mapping or interface escape",
   "comparison": "Exact integer resource and RGBA bytes; no relaxed thresholds",
@@ -11,7 +11,7 @@
     "General concurrent-context and external-interface stress",
     "Buffered-only Raw Input hotkeys",
     "Physical cross-monitor DPI transitions; native window-awareness/resolution/resize cases are verified",
-    "Native long-hold/focus stress and complete hidden-state failure matrix",
+    "Isolated physical single-hold and native focus stress and complete hidden-state failure matrix",
     "Driver/device-loss and cancellation/cleanup failure matrix",
     "Formal GF2 six-frame acceptance remains separate and 0/6"
   ],
@@ -709,7 +709,7 @@
     },
     "runtime_sha256": "64afb8680eb56248978dd7a7ac35265ffc45e54a4fc132202f2951a3a3e6af05"
   },
-  "latest_progress": "device_lock_progress; repaired GF2 HUD and six exact update-screen dual replays; game update still blocks required start/home checks",
+  "latest_progress": "gf2_completion_progress and resize_rejection_progress; updated GF2 start/home HUD checks completed on ff94b30; remaining stress/failure gates stay open",
   "concurrency_progress": {
     "implementation_base": "1ecbb95",
     "status": "reproduced lock inversion repaired; interactive regression pending",
@@ -1151,7 +1151,7 @@
       ],
       "dual_validation_sha256": "b1a01d2f46e83721293c774ef8b7fe0be394c0f57cbddf95e77d6047d3a17196",
       "physical_hold": {
-        "scope": "User-assisted approximately 3-second holds; user confirmed several independent shortcut presses",
+        "scope": "User reported an approximately 3-second hold and later confirmed several separate shortcut presses; file timing cannot isolate one physical hold",
         "baseline_files": 1,
         "added_user_files": 4,
         "file_intervals_seconds": [
@@ -1160,7 +1160,8 @@
           10
         ],
         "repeat_burst_observed": false,
-        "later_hidden_mode_capture_files": 1
+        "later_hidden_mode_capture_files": 1,
+        "isolated_single_hold_verified": false
       }
     },
     "package_manifest_sha256": "5321eaa758485a611cd1ed586a0e365c23b8bf7c1280e8c37f8d8977288de8df",
@@ -1168,6 +1169,183 @@
       "source": "a1c6f41",
       "scope": "Four previously desktop-dependent tests, Qt, four presentation modes and standalone package passed before GF2 exposed device-origin interface gap",
       "retained_borderless_oracle_failure": "artifacts/capture-hud-resumed-borderless/validation; initial invocation omitted --flip; native creation and earlier baseline prove flip RTV unbinding is expected; same files pass validation-flip"
+    }
+  },
+  "gf2_completion_progress": {
+    "production_revision": "ff94b30b247635bc8bcc82d2998eb2b23e0a80fd",
+    "runtime_sha256": "965f165c6c87b766f64b0058c375abd057936f499b4e94bcdb0454ad1afae057",
+    "session_id": "b3b60d11-18b2-4c69-9775-3e45a565c50c",
+    "pid": 2020,
+    "game_version_observed": "4.0.5136.14794.28495.3242",
+    "artifact_directory": "artifacts/capture-hud-device-lock-gf2-completion",
+    "start_capture": {
+      "busy": false,
+      "cancel_requested": false,
+      "file": "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\capture-hud-device-lock-gf2\\session\\frame-9e68818b-c434-4a5e-b649-6135734b0a41.gpa_frame",
+      "present_ordinal": 337886,
+      "request_name": "frame-9e68818b-c434-4a5e-b649-6135734b0a41.gpa_frame",
+      "state": "Completed",
+      "swap_chain": 1
+    },
+    "validation": {
+      "captured": {
+        "rgba_sha256": "627df8ba6c58d209525ea973c7e263d5c4f8fc4d3bfab3be33b2f1a32b3acd2d",
+        "counts": {
+          "ClearDepthStencilView": 4,
+          "ClearRenderTargetView": 2,
+          "CopySubresourceRegion": 3,
+          "Draw": 1,
+          "DrawIndexed": 17,
+          "Map": 15,
+          "Present": 1,
+          "present_rtv_unbinds": 1,
+          "query_completion_unresolved": 1,
+          "query_end_observations": 1,
+          "query_metadata_records": 4,
+          "unmap_observations": 15
+        },
+        "dimensions": [
+          2560,
+          1440
+        ],
+        "original_resource_exact": true,
+        "both_executed": true,
+        "original_native": {
+          "player_dll": "C:\\Program Files\\IntelSWTools\\GPA\\dx11_player.dll",
+          "player_sha256": "39061ff329e4a32d0c8375ce9ee15e2017bccab0593943b962a860e11723d38b",
+          "adapter_selection": "Original kernel default (undefined GpuId)",
+          "callbacks": [],
+          "open_status": 0,
+          "playback_status": 0,
+          "closed": true
+        }
+      },
+      "draw-zero": {
+        "rgba_sha256": "7c881295ab2768f399217475b6ec8b6be0599c02e470ebdf833d68be4685847b",
+        "counts": {
+          "ClearDepthStencilView": 4,
+          "ClearRenderTargetView": 2,
+          "CopySubresourceRegion": 3,
+          "Draw": 1,
+          "DrawIndexed": 17,
+          "Map": 15,
+          "Present": 1,
+          "present_rtv_unbinds": 1,
+          "query_completion_unresolved": 1,
+          "query_end_observations": 1,
+          "query_metadata_records": 4,
+          "unmap_observations": 15
+        },
+        "dimensions": [
+          2560,
+          1440
+        ],
+        "original_resource_exact": false,
+        "both_executed": true,
+        "original_native": {
+          "player_dll": "C:\\Program Files\\IntelSWTools\\GPA\\dx11_player.dll",
+          "player_sha256": "39061ff329e4a32d0c8375ce9ee15e2017bccab0593943b962a860e11723d38b",
+          "adapter_selection": "Original kernel default (undefined GpuId)",
+          "callbacks": [],
+          "open_status": 0,
+          "playback_status": 0,
+          "closed": true
+        }
+      },
+      "capture_sha256": "a842caa5ecad59772ab8d6bd032872f1bf7470846da0bf109e440d938c8b10b8",
+      "preview_exact": true,
+      "draw_zero_changes": 18,
+      "pipeline_event": 371,
+      "pipeline_known_fields": 1302,
+      "pipeline_unknown_fields": 4,
+      "exported_shader_ids": [
+        25,
+        26
+      ],
+      "resource_count": 108,
+      "scope": "Current-runtime GF2 start-screen HUD capture; not formal six-frame/MSAA acceptance",
+      "retained_script_correction": "First shader loop used type 0x91 for pixel shader; inventory identifies 0x92. Existing successful replay/negative/pipeline outputs retained; missing pixel shader exported without changing source/capture."
+    },
+    "home_scene_request": {
+      "busy": false,
+      "cancel_requested": false,
+      "error": "ID3D11DeviceContext::ClearRenderTargetView: MSAA sample-preserving capture is not implemented",
+      "request_name": "frame-cff798f8-7006-4577-b6c2-ff7a2a0c1ed2.gpa_frame",
+      "state": "Failed",
+      "swap_chain": 1
+    },
+    "msaa_message_visible": "Capture failed: MSAA",
+    "failure_message_expired": true,
+    "hidden_request": {
+      "busy": false,
+      "cancel_requested": false,
+      "error": "ID3D11DeviceContext::Unmap: Unmap has no recorded successful Map",
+      "request_name": "frame-941ffd3d-0c45-44b9-b2a5-007471a1b379.gpa_frame",
+      "state": "Failed",
+      "swap_chain": 1
+    },
+    "disconnect": {
+      "input_threads": 0,
+      "visible": false,
+      "request_unchanged_after_hotkey": true,
+      "successful_presents": 348924
+    },
+    "session_file_count": 7,
+    "failed_request_files_absent": true,
+    "normal_exit": "Alt+F4 followed by process-absence check in task tool output; no persisted exit artifact",
+    "isolated_physical_hold": "Not established by the multiple-press evidence; repeat-edge model tests remain separate",
+    "formal_gf2_accepted_frames": 0,
+    "artifact_sha256": {
+      "disconnect.json": "df921e746c6d3c65f3e3dfb169442ef3f9e71ff33becba8ed1bcf4eecb5af9ed",
+      "disconnected.png": "0695ca7b22be17cbed9db124545341e4374c602c74d7b756a24580188544d52c",
+      "failure-expired-status.json": "02f8b0b67a42caa5229e08365ab9d7fa14f77acf5e91571889f368dfc8d3b987",
+      "hidden-request-status.json": "392cacdbffb42c242edbf5d6fb8f7dad876ae18a05a4fe67c7e6d60590b81452",
+      "hidden-status.json": "90d9b912bc6a2dd35404bb0f2387d0166ac5284433b4a5fec0d7160f0986f256",
+      "input.json": "24c53effa5328816b04b22cd5f9d53627f62c52b5be39a1d0be20396113866f2",
+      "main-msaa.png": "dfcd6928dc216e3b8ae89117bbf39e98f118610ea2f61e4f93c1f76331e9f4a4",
+      "main-request-status.json": "c49020232fdc45098133c0a9af5b0bb4c1e88d700454976fe08ec54f95e56929",
+      "post-disconnect-key-status.json": "a350299a341a818ac58d8869690a2fb00f5d691efe8389af4d214c88387d8509",
+      "start-status.json": "e9028c1a0ac2d6ad1d930650eeef72f5cad007859ccaecb5b5d6c77be4824d67",
+      "validation.json": "3f59b2e9a4350d89f0982f633229d2b6bb1727fedda54320f92fe2c8edc26ba8"
+    }
+  },
+  "resize_rejection_progress": {
+    "production_revision": "ff94b30b247635bc8bcc82d2998eb2b23e0a80fd",
+    "source": "src/capture/tests/hud_resize_tests.cpp",
+    "scope": "Native/wrapped DX11 rejection of D3D12-only ResizeBuffers1; no Present or D3D12 success claim",
+    "reference": "https://learn.microsoft.com/en-us/windows/win32/api/dxgi1_4/nf-dxgi1_4-idxgiswapchain3-resizebuffers1",
+    "drivers": [
+      "WARP",
+      "hardware"
+    ],
+    "effects": [
+      "SEQUENTIAL",
+      "FLIP_SEQUENTIAL"
+    ],
+    "native_wrapped_pairs": 4,
+    "calls_per_pair": [
+      "held references",
+      "released references"
+    ],
+    "hresult": "DXGI_ERROR_INVALID_CALL",
+    "checks": [
+      "native HRESULT/LastError and D3D11 warning/error IDs",
+      "exact retained pixels",
+      "public identity",
+      "private storage reattachment",
+      "ordinary resize to 96x96",
+      "new resource pixels",
+      "no capability gap",
+      "released object lifetimes"
+    ],
+    "capture_only_focused_tests": "5/5",
+    "full_focused_tests": "2/2",
+    "source_sha256": "0a533135563fb8666c266a0ec3df7badf43d129300efd5ec40076201b76fb925",
+    "log_sha256": {
+      "artifacts/capture-hud-resize-final-tests.log": "bb48dade3125168d48cc3bb1220681b7e55019dd24a1cdaf14cf99ce4f24dc6a",
+      "artifacts/capture-hud-resize-full-tests.log": "5e5219be93a992a25213ab8121c6b3202854d941228f47a1c59ba5ace3b4dc62",
+      "artifacts/capture-hud-resize-final-build.log": "61a198335ab66edc939ed3f5049945cccf1cab27391dd549d8f488370c384b23",
+      "artifacts/capture-hud-resize-full-build.log": "918f1ef410e0d49068f4442f8b6d246c43d285bd7d0ad6e0a4b213900a3e1994"
     }
   }
 }
