@@ -51,11 +51,15 @@ MsaaSamples msaa_sample_layout(const ResourceShape& s,uint32_t quality,size_t by
         result.planes.push_back({layer,sample,row,{}});
     return result;
 }
+bool msaa_initialization_color_format(DXGI_FORMAT format) noexcept {
+    return (format>=DXGI_FORMAT_R8G8B8A8_TYPELESS && format<=DXGI_FORMAT_R8G8B8A8_SINT) ||
+           (format>=DXGI_FORMAT_R16G16B16A16_TYPELESS && format<=DXGI_FORMAT_R16G16B16A16_SINT);
+}
 MsaaInitializationLayout validate_msaa_initialization(const MsaaSamples& data,
     const D3D11_TEXTURE2D_DESC& d,size_t byte_limit,size_t plane_limit) {
     if(!data.resource)throw std::runtime_error("MSAA initialization resource identity is zero");
     const auto& s=data.shape;
-    if(data.encoding!=MsaaSampleEncoding::color_bits || s.format<DXGI_FORMAT_R8G8B8A8_TYPELESS || s.format>DXGI_FORMAT_R8G8B8A8_SINT)
+    if(data.encoding!=MsaaSampleEncoding::color_bits || !msaa_initialization_color_format(s.format))
         throw std::runtime_error("MSAA initialization format/encoding is not verified");
     if(data.quality || (s.samples!=2 && s.samples!=4))
         throw std::runtime_error("MSAA initialization sample count/quality is not verified");

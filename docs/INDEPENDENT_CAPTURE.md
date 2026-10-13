@@ -2012,3 +2012,11 @@ checks. A new GF2 main-scene attempt with that package pinpoints the next gap:
 initialization. The request refuses without publishing; the game continues
 rendering and closes normally after disconnect. Formal GF2 acceptance remains
 0/6. Raw evidence and scope are recorded in the MSAA baseline/report.
+
+RGBA16 color initialization is subsequently admitted by the shared runtime/CPU
+table and family-aware view checks. WARP/hardware tests verify all high/low
+component bytes and exact FLOAT RTV writes through 12 files / 250 dual-player
+checks. A new GF2 main-scene preflight now first refuses format 19
+(`R32G8X24_TYPELESS`), 2x MSAA; it publishes nothing and the game continues
+rendering. The next required implementation is depth/stencil initialization.
+This diagnostic launch does not count toward the formal six-frame gate.

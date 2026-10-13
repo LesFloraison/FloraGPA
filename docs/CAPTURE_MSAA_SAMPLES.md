@@ -2,7 +2,7 @@
 
 MSAA work now includes an owned CPU sample model, native readback primitives,
 a scoped color initialization encoder and immediate-context recording. The
-recording path retains RGBA8 2x/4x quality-zero samples before first use and
+recording path retains RGBA8/RGBA16 2x/4x quality-zero samples before first use and
 passes owned bytes to the encoder. Two native startup-injected color profiles
 also pass repeated capture and dual-player execution. Broader formats and
 hidden-state combinations remain pending. GF2
@@ -361,3 +361,43 @@ Raw evidence is `artifacts/capture-gf2-msaa-20261014`, with hashes and the exact
 error in the baseline's `gf2_rgba16_preflight` entry. The next implementation
 step is RGBA16 sample initialization and its independent native/dual-player
 checks before repeating this scene.
+
+## RGBA16 initialization and recording
+
+The color initialization admission table now also includes the RGBA16 family.
+Runtime and CPU validation share that table. MSAA view validation compares
+format families and still requires a typed view, exact format for typed source
+textures, valid array bounds and matching bind flags. Cross-family views remain
+errors. The existing integer-plane helper already uses the validated storage
+format, integer view and actual plane bytes; no new wire layout, runtime shader
+compiler dependency or Replay helper is required for this extension.
+
+The native fixture supplies distinct 16-bit values for every component,
+coordinate, layer and sample, checks captured initial planes against explicit
+little-endian CPU words, then partially writes through FLOAT RTVs. The four
+write values are exactly representable binary16 numbers: 1.5, -1, 2^-14 and
+1365/4096. A UINT SRV display shader renders separate low-byte and high-byte
+tiles for all four components into RGBA8. Therefore exact output comparison
+covers all 16 bits, including alpha; it does not rely on tone mapping, reduced
+precision or a relaxed floating-point tolerance.
+
+`FloraCaptureMsaaRgba16Tests` covers two layers, 2x/4x quality zero, WARP and
+hardware. It records actual context calls, releases native owners before
+encoding, and checks four recording-budget refusals plus six encoder refusals
+per device, including wrong row width and incompatible views. Twelve positive
+and Draw-removal files pass 250 actual dual-player checks through
+`tools/validate_capture_msaa_encoder.py --recorded --rgba16`. The exercised
+profile is typeless RGBA16 storage, UINT seed/read views and FLOAT application
+writes, not a certification of every typed member or state combination.
+
+One new GF2 main-scene preflight with the RGBA16-enabled worktree reports its
+first missing profile as format 19 (`R32G8X24_TYPELESS`), two samples, resource
+3654, observed at `ClearRenderTargetView`. The bound depth/stencil dependency
+still refuses; no file or partial transaction is published. Presents advance
+from 2119 to 4365 with zero interface gaps. Disconnect and normal UI close
+succeed. The error change identifies the next requirement but does not establish
+correct replay of a complete GF2 frame. Formal acceptance remains **0/6**.
+Raw evidence is retained in `artifacts/capture-msaa-rgba16-20261014` and
+`artifacts/capture-gf2-rgba16-20261014`. Regression counts, hashes and pending
+package scope are recorded in the baseline. Depth/stencil initialization,
+broader hidden-state/query profiles and formal GF2 acceptance remain incomplete.

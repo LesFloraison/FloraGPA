@@ -19,8 +19,9 @@ struct MsaaInitializationLayout {
     MsaaSampleAccess access;
     size_t bytes=0,planes=0;
 };
+bool msaa_initialization_color_format(DXGI_FORMAT) noexcept;
 // Pure CPU validation before records/temporary files are allocated. Currently
-// verified for the RGBA8 color family, quality zero and 2x/4x samples.
+// verified for RGBA8/RGBA16 color families, quality zero and 2x/4x samples.
 MsaaInitializationLayout validate_msaa_initialization(const MsaaSamples&,
     const D3D11_TEXTURE2D_DESC&,size_t byte_limit,size_t plane_limit);
 }

@@ -81,7 +81,7 @@ struct FrameRecording::Impl {
             if(desc.SampleDesc.Count>1){
                 // Keep the live recording profile inside the independently
                 // validated encoder profile before executing any readback work.
-                if(desc.Format<DXGI_FORMAT_R8G8B8A8_TYPELESS || desc.Format>DXGI_FORMAT_R8G8B8A8_SINT ||
+                if(!msaa_initialization_color_format(desc.Format) ||
                    desc.SampleDesc.Quality || (desc.SampleDesc.Count!=2 && desc.SampleDesc.Count!=4) ||
                    desc.Usage!=D3D11_USAGE_DEFAULT || desc.CPUAccessFlags || desc.MiscFlags ||
                    (desc.BindFlags&~(D3D11_BIND_RENDER_TARGET|D3D11_BIND_SHADER_RESOURCE)))

@@ -172,8 +172,10 @@ class Encoder {
             else{require(d.ViewDimension==D3D11_RTV_DIMENSION_TEXTURE2DMSARRAY,"Encoder MSAA RTV dimension mismatch");first=d.Texture2DMSArray.FirstArraySlice;count=d.Texture2DMSArray.ArraySize;}
         }else throw std::runtime_error("Encoder MSAA view kind unsupported");
         require(first<shape.array_size && count && count<=shape.array_size-first,"Encoder MSAA view array range invalid");
-        require(format>=DXGI_FORMAT_R8G8B8A8_UNORM && format<=DXGI_FORMAT_R8G8B8A8_SINT &&
-            (shape.format==DXGI_FORMAT_R8G8B8A8_TYPELESS || shape.format==format),"Encoder MSAA view format incompatible");
+        const auto storage=msaa_.at(o.resource).access.storage;
+        require(msaa_initialization_color_format(format) && format!=storage &&
+            msaa_integer_access(format).storage==storage &&
+            (shape.format==storage || shape.format==format),"Encoder MSAA view format incompatible");
         const auto resource=descriptor<D3D11_TEXTURE2D_DESC>(frame_.objects.at(o.resource));
         const UINT required=(o.kind=="srv" || o.kind=="srv1")?D3D11_BIND_SHADER_RESOURCE:D3D11_BIND_RENDER_TARGET;
         require((resource.BindFlags&required)!=0,"Encoder MSAA view requires missing bind flag");

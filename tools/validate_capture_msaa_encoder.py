@@ -14,7 +14,9 @@ def main():
     for name in ('probe', 'replay', 'oracle-tools', 'qt-bin', 'out'):
         p.add_argument('--'+name, required=True, type=Path)
     p.add_argument('--recorded', action='store_true', help='Validate the wrapped-context recording probe')
+    p.add_argument('--rgba16', action='store_true', help='Verify both bytes of recorded RGBA16 components')
     a = p.parse_args()
+    if a.rgba16 and not a.recorded:p.error('--rgba16 requires --recorded')
     out = a.out.resolve()
     out.mkdir(parents=True, exist_ok=False)
     env = dict(os.environ)
@@ -62,6 +64,7 @@ def main():
         check(device+'-owned-source-debug-refusals', result['passed'] and result['source_gpu_objects_alive'] == 0 and
               result['debug_warnings_or_errors'] == 0 and
               (result['recording_refusals'] == 4 if a.recorded else result['encoder_refusals'] == 50))
+        if a.rgba16:check(device+'-rgba16-refusals',result['component_bytes']==2 and result['encoder_refusals']==6)
         manifest = json.loads((out/device/'frames.json').read_text())
         for samples in (2, 4):
             source = out/device/f'{samples}x-complete.gpa_frame'
@@ -76,8 +79,11 @@ def main():
             (out/device/(name+'.gpa_frame')).write_bytes(data)
             expected = bytearray()
             for y in range(14):
-                for x in range(13*samples):
-                    expected += bytes((240, 19, 73, 255) if x % 13 < 6 and (x // 13) % 2 == 0 else (0, 0, 0, 0))
+                for x in range(13*samples*(2 if a.rgba16 else 1)):
+                    sample=x//(26 if a.rgba16 else 13)
+                    modified=x%13<6 and sample%2==0
+                    color=tuple((word>>(((x//13)%2)*8))&255 for word in (0x3e00,0xbc00,0x0400,0x3555)) if a.rgba16 else (240,19,73,255)
+                    expected += bytes(color if modified else (0,0,0,0))
             (out/device/(name+'.expected.rgba')).write_bytes(expected)
             manifest.append(dict(file=name+'.gpa_frame', samples=samples, application_draws=3, helper_draws=0))
         for item in manifest:
