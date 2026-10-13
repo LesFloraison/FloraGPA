@@ -3,8 +3,9 @@
 MSAA work now includes an owned CPU sample model, native readback primitives,
 a scoped color initialization encoder and immediate-context recording. The
 recording path retains RGBA8 2x/4x quality-zero samples before first use and
-passes owned bytes to the encoder. Startup-injected MSAA acceptance, broader
-formats and hidden-state combinations remain pending. GF2
+passes owned bytes to the encoder. Two native startup-injected color profiles
+also pass repeated capture and dual-player execution. Broader formats and
+hidden-state combinations remain pending. GF2
 formal scene acceptance remains **0/6**. The supported HUD acceptance is separate.
 
 `MsaaSamples` retains resource identity, original dimensions/format/sample count,
@@ -301,3 +302,36 @@ execution oracle. Evidence is retained in
 `artifacts/capture-msaa-recording-20261014`; regression counts and hashes are
 recorded separately in the baseline. This is wrapped-context coverage, not
 startup-injected MSAA or formal GF2 acceptance.
+
+## Startup-injected color capture
+
+The native live target now has two MSAA profiles without any capture-runtime,
+encoder or Replay linkage. A persistent 13x7 two-layer texture contains distinct
+coordinate/layer/sample values. Every frame changes only the left part of even
+samples, cycling five exact integer colors; the display Draw shows each sample
+separately in a single-sample swap-chain output. Unmodified samples therefore
+depend on preserved initial data. After disconnect, another native render and
+staging readback must match the target's independent CPU oracle.
+
+Mode 24 uses 2x samples, direct device/swap-chain creation and blt `Present`;
+mode 25 uses 4x, factory `CreateSwapChainForHwnd`, flip-discard and `Present1`.
+`FloraCaptureMsaaControllerTests` exercises actual launch injection, invalid IPC
+identities, duplicate requests, armed cancellation, three consecutive captures,
+an explicitly rejected update, successful recovery, disconnect and normal exit.
+Both targets remain alive after disconnect and preserve backbuffer identity;
+the flip path retains its required unbinding behavior.
+
+`tools/validate_capture_msaa_injected.py` checks every captured file against
+fixed CPU rules using its own Present ordinal, executes both players, verifies
+event counts and shader exports, and audits independent modules. Separate
+negative copies remove either initialization Draws or the two application
+modification Draws. They keep the original reference image but must produce
+respectively zeroed untouched samples or the preceding frame's modified color.
+The first run passes eight live files plus four negative files / 280 checks.
+This validates these color profiles, not MSAA depth, query/predicate combinations,
+deferred execution, multisampled swap-chain output or GF2 scene acceptance.
+
+The source-package validator now includes a seventh `package-msaa-control`
+stage. Its result must be recorded separately after testing the committed
+source archive. Raw evidence is retained in
+`artifacts/capture-msaa-injected-20261014` and exact hashes/counts in the baseline.

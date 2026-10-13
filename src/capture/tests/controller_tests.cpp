@@ -55,7 +55,12 @@ struct Harness {
 }
 int wmain(int argc,wchar_t** argv){try{
     require(argc==4,"Expected controller, target and new output directory");const auto out=fs::absolute(argv[3]);require(!signal_exists(out),"Output exists");Json results=Json::array();
-    for(unsigned mode=0;mode<24;++mode){
+#ifdef FLORA_MSAA_CONTROLLER
+    constexpr unsigned first_mode=24,last_mode=26;
+#else
+    constexpr unsigned first_mode=0,last_mode=24;
+#endif
+    for(unsigned mode=first_mode;mode<last_mode;++mode){
         Harness h(fs::absolute(argv[1]),fs::absolute(argv[2]),out/std::to_wstring(mode));h.launch(mode);h.reject_bad_identity();
         auto status=h.call(L"status");require(status["capture_available"],"Live target profile was not available");const auto id=std::to_wstring(status["swap_chains"]["active"][0]["id"].get<uint64_t>());
         h.pause();h.call(L"capture",0,id);require(h.call(L"capture",3,id)["error"]=="busy","Duplicate request was not busy");require(h.call(L"cancel")["cancelled"],"Armed cancel failed");h.resume();
@@ -72,8 +77,9 @@ int wmain(int argc,wchar_t** argv){try{
         signal(h.oracle/L"finish.signal");require(WaitForSingleObject(h.process.value,10000)==WAIT_OBJECT_0,"Target did not exit");require(h.call(L"status",3)["state"]=="Exited","Target exit not reported");
         for(const auto& entry:fs::directory_iterator(h.session))require(entry.path().extension()!=L".partial","Transaction leaked partial output");
         std::ifstream exit_file(h.oracle/L"exit.json");Json exit;exit_file>>exit;
-        require(exit["identity_checks"]==exit["frames"],"Backbuffer identity observations missing");if(mode>=2 && mode!=8)require(exit["unbind_checks"]==exit["frames"],"Flip unbind observations missing");
+        require(exit["identity_checks"]==exit["frames"],"Backbuffer identity observations missing");if(mode>=2 && mode!=8 && mode!=24)require(exit["unbind_checks"]==exit["frames"],"Flip unbind observations missing");
+        if(mode>=24)require(exit["msaa_native_cpu_exact"],"Native MSAA CPU oracle failed after disconnect");
         results.push_back({{"mode",mode},{"frames",frames},{"target_exit",exit},{"automatic_foreground",foreground},{"failure",failed["last_capture"]},{"module_status",status}});
     }
-    std::ofstream report(out/L"results.json");report<<results.dump(2);std::cout<<Json{{"passed",true},{"launches",24},{"scope","Startup injection and native private IPC"}}.dump()<<'\n';return 0;
+    std::ofstream report(out/L"results.json");report<<results.dump(2);std::cout<<Json{{"passed",true},{"launches",last_mode-first_mode},{"scope","Startup injection and native private IPC"}}.dump()<<'\n';return 0;
 }catch(const std::exception& e){std::cerr<<e.what()<<'\n';return 1;}}

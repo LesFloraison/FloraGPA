@@ -903,5 +903,156 @@
         "expected_sha256": "ca7e175b4bd3bdd9bf0f767d640a85198c73cffe79a68d7ec4b911d50eb94a4f"
       }
     ]
+  },
+  "startup_injected_color": {
+    "base_commit": "f8ac8fe1ec11cae88324ee66a7db20b600ce3928",
+    "status": "Native startup-injected RGBA8 MSAA profiles pass repeated capture and actual dual-player execution",
+    "launches": 2,
+    "live_files": 8,
+    "negative_control_files": 4,
+    "dual_player_files": 12,
+    "dual_player_checks": 280,
+    "capture_focused_ctest": 3,
+    "full_focused_ctest": 2,
+    "profiles": [
+      "2x quality-zero two-layer RGBA8, direct device/swap creation, blt Present",
+      "4x quality-zero two-layer RGBA8, factory CreateSwapChainForHwnd, flip-discard Present1"
+    ],
+    "controls": [
+      "invalid IPC identity",
+      "duplicate busy",
+      "armed cancel",
+      "three consecutive captures",
+      "rejected update",
+      "recovery capture",
+      "disconnect while armed",
+      "target remains alive",
+      "normal exit",
+      "native CPU oracle after disconnect",
+      "initialization Draw removal",
+      "application Draw removal preserving previous-frame samples"
+    ],
+    "automatic_foreground_sessions": 0,
+    "new_gf2_launches": 0,
+    "accepted_gf2_frames": 0,
+    "new_original_gui_run": false,
+    "replay_shared_format_changed": false,
+    "new_golden_run": false,
+    "clean_source_package": "New seventh package-msaa-control stage added; committed archive verification pending",
+    "source_sha256": {
+      "src/capture/CMakeLists.txt": "a6f207b9a4bfe958a13ad97ce70500c2c501bfe0303f4c23e53100b902935562",
+      "src/capture/tests/controller_tests.cpp": "dfbd03ff0cad7613f6c79b6e8a0bd30b668811c0fbf9374e650d045da66d3176",
+      "src/capture/tests/live_target.cpp": "d60e7b80b33658c1752462e848e36937adcfb362faac3f9d75a357fc2025417f",
+      "src/capture/tests/msaa_live_renderer.hpp": "d8546916ce6e7c7be1d84445432e191ea7b7b2685fb73a76f3abde4dddc24eac",
+      "tools/validate_capture_msaa_injected.py": "2d89a23a9c1699a9d0cfe1d01920288be8795c6446f668c65dac26a0582a85d3",
+      "tools/validate_capture_source_build.py": "01b44160be6210936da8a89c7427085a3b24ad2f87ce68becfd58705beb72cf1"
+    },
+    "evidence_sha256": {
+      "artifacts/capture-msaa-injected-20261014/dual/validation.json": "59de95e19c223bfd7d3819a789c4f503ffe8e5b1065358d277ae196876996c84",
+      "artifacts/capture-msaa-injected-20261014/dual/inputs.json": "d239b145daead83896cb2ffe8a42905c3063202bf22355a939a61170879941e2",
+      "artifacts/capture-msaa-injected-20261014/dual/native/results.json": "3834148ad5e72648905d7b71447ceea5690f62de53d9ad7697417e41f20f1720",
+      "artifacts/capture-msaa-injected-20261014/regression.log": "c83d9fc07298947e2ed5ea28028556aaadb9e844c60c2b03d493b633321ec281",
+      "artifacts/capture-msaa-injected-20261014/full-focused.log": "6a526a8ce12b3acb0f16cafea331464a17432c5f17d6b6cb2de96d9917188c94",
+      "artifacts/capture-msaa-injected-20261014/build.log": "15024e40bed8c56a9661f0a8797f2b050c9595bb9ec4fd84cf92ba328253a2f3",
+      "artifacts/capture-msaa-injected-20261014/full-build.log": "100afb556f56d0c0f906e6019ba4c8a16535beceee8412527b78866aa3b8161a"
+    },
+    "files": [
+      {
+        "file": "native/24/session/frame-e7dd0fee-9366-4164-9e82-5e5645b0c1e9.gpa_frame",
+        "sha256": "12d15106c093575539b5b6aca59637d66c82139ae9b3e26739794aec623b94fb",
+        "samples": 2,
+        "present_ordinal": 12,
+        "control": "complete",
+        "expected_sha256": "4772bc5e6736027146ac50672c1f5a28ed388720b5df71864bb871ea0d2b8559"
+      },
+      {
+        "file": "24-0-missing-initialization.gpa_frame",
+        "sha256": "e04348088ebe93579bd3aa71a961fa85c7ac75847fac50c2d47dee8657d1e3b3",
+        "samples": 2,
+        "present_ordinal": 12,
+        "control": "missing-initialization",
+        "expected_sha256": "5d9a5c7234b28baead15d9b09a710f92f524ecc00683ff612f0d866915b2bacd"
+      },
+      {
+        "file": "24-0-missing-application.gpa_frame",
+        "sha256": "c57e2a1984c58786f07a6c52662f2143ce16125030fedfe39b5b84aced3fb31c",
+        "samples": 2,
+        "present_ordinal": 12,
+        "control": "missing-application",
+        "expected_sha256": "c1c88b5938469ee1c74d7c22d290f19321df6b19260e90215bcd7f3c1e55e1ac"
+      },
+      {
+        "file": "native/24/session/frame-6dfd21b1-8150-4325-97d9-b0ebddb730ed.gpa_frame",
+        "sha256": "36524b435b6e80a163c0c605247858f42e94d438054dcc02d3e5a13c6cd6e785",
+        "samples": 2,
+        "present_ordinal": 19,
+        "control": "complete",
+        "expected_sha256": "2e88b3fbf277c27721df8ca5523ef3b6f7e739f7eea389619af80c63f4a15ff5"
+      },
+      {
+        "file": "native/24/session/frame-60137f36-70b1-47d6-a3a3-5ebef7d43ffb.gpa_frame",
+        "sha256": "66ec23aafbe79c04ff72402e9208ff945876da44dd440f4080b4fa95c6385dc0",
+        "samples": 2,
+        "present_ordinal": 27,
+        "control": "complete",
+        "expected_sha256": "4772bc5e6736027146ac50672c1f5a28ed388720b5df71864bb871ea0d2b8559"
+      },
+      {
+        "file": "native/24/session/frame-afdd2ec8-8588-45b4-966e-9824545d156d.gpa_frame",
+        "sha256": "48944589ed4dba16126b6618cd83a8f34a874c3f44a9d260767e1447b6460e5a",
+        "samples": 2,
+        "present_ordinal": 39,
+        "control": "complete",
+        "expected_sha256": "2e88b3fbf277c27721df8ca5523ef3b6f7e739f7eea389619af80c63f4a15ff5"
+      },
+      {
+        "file": "native/25/session/frame-dcdb16d5-228b-491b-93a6-acbef246a343.gpa_frame",
+        "sha256": "e4bc0fcdd791ebff875f8ae71bb56bf3a9b74ae855f20e4f9d69d5801cbf47f0",
+        "samples": 4,
+        "present_ordinal": 12,
+        "control": "complete",
+        "expected_sha256": "09c6cc544508978d87e531b76ea0e0b2dd86eb1c1bb75073584bee742596dd74"
+      },
+      {
+        "file": "25-0-missing-initialization.gpa_frame",
+        "sha256": "6c2dfdf5f63fd642c28d2f9c11c53349a0d488f64ce65babd20ed79b163867d7",
+        "samples": 4,
+        "present_ordinal": 12,
+        "control": "missing-initialization",
+        "expected_sha256": "e9b56067eae1b4448db3ef84b8b738a5a7981ba383205816a3618a931dc469de"
+      },
+      {
+        "file": "25-0-missing-application.gpa_frame",
+        "sha256": "54b36b1bae1bba3b93918fe6bd17d5441948349ca32da838c1e6f32ae1b1dcc2",
+        "samples": 4,
+        "present_ordinal": 12,
+        "control": "missing-application",
+        "expected_sha256": "fb05ad65624797b72b80275cf88f26bf272db8eafb9b09d00cbe31c3fb36a58a"
+      },
+      {
+        "file": "native/25/session/frame-1aaf541a-c788-43d4-a03d-ca03db4315e7.gpa_frame",
+        "sha256": "e30bddf407200963989c97a99f0ea5a140279e1a0e6e8f45822b0b6418ce5dd4",
+        "samples": 4,
+        "present_ordinal": 20,
+        "control": "complete",
+        "expected_sha256": "cb214b38c72caae693b5e4c1bdb3b977abe6c15f1f8a7c9490ea7eef00d109a5"
+      },
+      {
+        "file": "native/25/session/frame-9b235829-70fb-44c1-8126-e9af99873279.gpa_frame",
+        "sha256": "ed7bae24b0b277d719e34fefa4423b647259ee039560e6ddf3127ca36b72f991",
+        "samples": 4,
+        "present_ordinal": 25,
+        "control": "complete",
+        "expected_sha256": "cb214b38c72caae693b5e4c1bdb3b977abe6c15f1f8a7c9490ea7eef00d109a5"
+      },
+      {
+        "file": "native/25/session/frame-ecc96681-4d82-47e0-be5f-e1acc8716278.gpa_frame",
+        "sha256": "dd67a22bf4afb86a3fc0798e83bbaac9ab3cdf070741d8cd64da7066041b1534",
+        "samples": 4,
+        "present_ordinal": 33,
+        "control": "complete",
+        "expected_sha256": "7b152b82fcec97b7ce9d046ecf992e7432f2aa9414126198ff30861581d85c17"
+      }
+    ]
   }
 }

@@ -75,6 +75,19 @@ def main():
             for s in ('intelswtools/gpa/','python3','qt6','renderdoc'))]
         if forbidden:raise RuntimeError('Unexpected packaged live dependencies: '+repr(forbidden))
     evidence['packaged_live_frames']=sum(len(session['frames']) for session in live)
+    run('package-msaa-control',[build/'capture/Release/FloraCaptureMsaaControllerTests.exe',package/'FloraCapture.exe',
+        build/'capture/Release/FloraCaptureLiveTarget.exe',out/'packaged-msaa'])
+    msaa=json.loads((out/'packaged-msaa/results.json').read_text())
+    if len(msaa)!=2 or {s['mode'] for s in msaa}!={24,25}:
+        raise RuntimeError('Packaged MSAA startup paths missing')
+    for session in msaa:
+        if len(session['frames'])<4 or not session['target_exit']['msaa_native_cpu_exact']:
+            raise RuntimeError('Packaged MSAA repeated capture/native output failed')
+        forbidden=[m for m in session['module_status']['loaded_modules'] if any(s in m.replace('\\','/').lower()
+            for s in ('intelswtools/gpa/','python3','qt6','renderdoc','florareplay','floracore'))]
+        if forbidden:raise RuntimeError('Unexpected packaged MSAA dependencies: '+repr(forbidden))
+    evidence['packaged_msaa_launches']=len(msaa)
+    evidence['packaged_msaa_frames']=sum(len(session['frames']) for session in msaa)
     evidence['package_files']={p.relative_to(package).as_posix():hashlib.sha256(p.read_bytes()).hexdigest()
         for p in package.rglob('*') if p.is_file()}
     evidence.update(passed=True,no_qt_discovery=True,system_path_only=True,loaded_modules=status['loaded_modules'])

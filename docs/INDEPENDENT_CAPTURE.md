@@ -1995,3 +1995,12 @@ include removal controls for both application and initialization Draws.
 Deferred MSAA, unsupported initialization formats, query/predicate combinations
 and MSAA swap-chain output remain refused. Startup-injected MSAA and GF2
 acceptance remain pending; see the MSAA report's immediate recording section.
+
+Two subsequent native startup-injected profiles now exercise persistent MSAA
+color textures with direct/blt Present and factory/flip Present1. Three
+consecutive captures, rejection/recovery, cancellation and disconnect pass;
+eight actual files and four Draw-removal controls pass 280 exact dual-player
+checks. The target independently verifies its native output after disconnect.
+The source-package gate includes these paths as a separate seventh stage.
+Depth/other initialization profiles and formal GF2 scene acceptance remain
+incomplete; see the MSAA report's startup-injected section.
