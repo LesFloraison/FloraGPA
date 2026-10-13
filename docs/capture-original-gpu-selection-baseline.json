@@ -1,0 +1,492 @@
+{
+  "schema": "FloraGPA original Intel GPU selection baseline 1",
+  "source_commit": "b7266f7e97630798666771cc6b87af9346335d9b",
+  "formal_accepted_frames": 0,
+  "required_frames": 6,
+  "raw_evidence": "artifacts/capture-original-gpu-selection-20261014",
+  "manifest_sha256": "b30fdc5a41c61f11c704f8012b390d2ae5f4862c6c48a3ef873600dfb781efb0",
+  "input_baseline": "docs/capture-gf2-intel-baseline.json",
+  "player_sha256": "39061ff329e4a32d0c8375ce9ee15e2017bccab0593943b962a860e11723d38b",
+  "enumeration": {
+    "rva": "0x11bd30",
+    "element_bytes": 376,
+    "pci_vendor_offset": "0x80",
+    "pci_device_offset": "0x84",
+    "gpu_id_offset": "0x94",
+    "gpu_id_bytes": 12,
+    "selector_predicate_rva": "0x11c100",
+    "vector_cleanup_rva": "0x04f440",
+    "procedure": "Copy ID from the unique Intel result; never hardcode the machine-local identity"
+  },
+  "original_audits": [
+    {
+      "player_dll": "C:\\Program Files\\IntelSWTools\\GPA\\dx11_player.dll",
+      "player_sha256": "39061ff329e4a32d0c8375ce9ee15e2017bccab0593943b962a860e11723d38b",
+      "adapter_selection": "Original enumerator Intel GpuId",
+      "enumerated_adapters": [
+        {
+          "vendor_id": 32902,
+          "device_id": 18086,
+          "gpu_id_bytes": "01000000c006010000000000"
+        },
+        {
+          "vendor_id": 4318,
+          "device_id": 9373,
+          "gpu_id_bytes": "01000000a1db000000000000"
+        },
+        {
+          "vendor_id": 5140,
+          "device_id": 140,
+          "gpu_id_bytes": "010000004a06010000000000"
+        }
+      ],
+      "selected_gpu_id_bytes": "01000000c00601000000000000000000",
+      "callbacks": [],
+      "open_status": 0,
+      "playback_status": 0,
+      "audit": {
+        "scope": "Explicit playback; DrawIndexed path of this pinned build",
+        "negative_control_suppress_draws": false,
+        "context_count": 1,
+        "d3d11_calls": {
+          "DrawIndexed": 176,
+          "submitted_indices": 1364046
+        },
+        "event_dispatch_count": 497,
+        "event_function_rvas": {
+          "0x25b40": 5,
+          "0x27ec0": 25,
+          "0x26250": 3,
+          "0x259e0": 8,
+          "0x27080": 244,
+          "0x27f50": 176,
+          "0x29bf0": 9,
+          "0x27fe0": 9,
+          "0x29cf0": 6,
+          "0x28850": 4,
+          "0x28950": 2,
+          "0x28b40": 6
+        },
+        "actual_context_adapters": [
+          {
+            "description": "Intel(R) Iris(R) Xe Graphics",
+            "vendor_id": 32902,
+            "device_id": 18086,
+            "luid": [
+              67264,
+              0
+            ]
+          }
+        ]
+      },
+      "closed": true
+    },
+    {
+      "player_dll": "C:\\Program Files\\IntelSWTools\\GPA\\dx11_player.dll",
+      "player_sha256": "39061ff329e4a32d0c8375ce9ee15e2017bccab0593943b962a860e11723d38b",
+      "adapter_selection": "Original enumerator Intel GpuId",
+      "enumerated_adapters": [
+        {
+          "vendor_id": 32902,
+          "device_id": 18086,
+          "gpu_id_bytes": "01000000c006010000000000"
+        },
+        {
+          "vendor_id": 4318,
+          "device_id": 9373,
+          "gpu_id_bytes": "01000000a1db000000000000"
+        },
+        {
+          "vendor_id": 5140,
+          "device_id": 140,
+          "gpu_id_bytes": "010000004a06010000000000"
+        }
+      ],
+      "selected_gpu_id_bytes": "01000000c00601000000000000000000",
+      "callbacks": [],
+      "open_status": 0,
+      "playback_status": 0,
+      "audit": {
+        "scope": "Explicit playback; DrawIndexed path of this pinned build",
+        "negative_control_suppress_draws": false,
+        "context_count": 1,
+        "d3d11_calls": {
+          "DrawIndexed": 176,
+          "submitted_indices": 1364046
+        },
+        "event_dispatch_count": 497,
+        "event_function_rvas": {
+          "0x25b40": 5,
+          "0x27ec0": 25,
+          "0x26250": 3,
+          "0x259e0": 8,
+          "0x27080": 244,
+          "0x27f50": 176,
+          "0x29bf0": 9,
+          "0x27fe0": 9,
+          "0x29cf0": 6,
+          "0x28850": 4,
+          "0x28950": 2,
+          "0x28b40": 6
+        },
+        "actual_context_adapters": [
+          {
+            "description": "Intel(R) Iris(R) Xe Graphics",
+            "vendor_id": 32902,
+            "device_id": 18086,
+            "luid": [
+              67264,
+              0
+            ]
+          }
+        ]
+      },
+      "closed": true
+    },
+    {
+      "player_dll": "C:\\Program Files\\IntelSWTools\\GPA\\dx11_player.dll",
+      "player_sha256": "39061ff329e4a32d0c8375ce9ee15e2017bccab0593943b962a860e11723d38b",
+      "adapter_selection": "Original enumerator Intel GpuId",
+      "enumerated_adapters": [
+        {
+          "vendor_id": 32902,
+          "device_id": 18086,
+          "gpu_id_bytes": "01000000c006010000000000"
+        },
+        {
+          "vendor_id": 4318,
+          "device_id": 9373,
+          "gpu_id_bytes": "01000000a1db000000000000"
+        },
+        {
+          "vendor_id": 5140,
+          "device_id": 140,
+          "gpu_id_bytes": "010000004a06010000000000"
+        }
+      ],
+      "selected_gpu_id_bytes": "01000000c00601000000000000000000",
+      "callbacks": [],
+      "open_status": 0,
+      "playback_status": 0,
+      "audit": {
+        "scope": "Explicit playback; DrawIndexed path of this pinned build",
+        "negative_control_suppress_draws": false,
+        "context_count": 1,
+        "d3d11_calls": {
+          "DrawIndexed": 176,
+          "submitted_indices": 1364046
+        },
+        "event_dispatch_count": 497,
+        "event_function_rvas": {
+          "0x25b40": 5,
+          "0x27ec0": 25,
+          "0x26250": 3,
+          "0x259e0": 8,
+          "0x27080": 244,
+          "0x27f50": 176,
+          "0x29bf0": 9,
+          "0x27fe0": 9,
+          "0x29cf0": 6,
+          "0x28850": 4,
+          "0x28950": 2,
+          "0x28b40": 6
+        },
+        "actual_context_adapters": [
+          {
+            "description": "Intel(R) Iris(R) Xe Graphics",
+            "vendor_id": 32902,
+            "device_id": 18086,
+            "luid": [
+              67264,
+              0
+            ]
+          }
+        ]
+      },
+      "closed": true
+    },
+    {
+      "player_dll": "C:\\Program Files\\IntelSWTools\\GPA\\dx11_player.dll",
+      "player_sha256": "39061ff329e4a32d0c8375ce9ee15e2017bccab0593943b962a860e11723d38b",
+      "adapter_selection": "Original enumerator Intel GpuId",
+      "enumerated_adapters": [
+        {
+          "vendor_id": 32902,
+          "device_id": 18086,
+          "gpu_id_bytes": "01000000c006010000000000"
+        },
+        {
+          "vendor_id": 4318,
+          "device_id": 9373,
+          "gpu_id_bytes": "01000000a1db000000000000"
+        },
+        {
+          "vendor_id": 5140,
+          "device_id": 140,
+          "gpu_id_bytes": "010000004a06010000000000"
+        }
+      ],
+      "selected_gpu_id_bytes": "01000000c00601000000000000000000",
+      "callbacks": [],
+      "open_status": 0,
+      "playback_status": 0,
+      "audit": {
+        "scope": "Explicit playback; DrawIndexed path of this pinned build",
+        "negative_control_suppress_draws": true,
+        "context_count": 1,
+        "d3d11_calls": {
+          "DrawIndexed": 176,
+          "submitted_indices": 1364046,
+          "suppressed_DrawIndexed": 176
+        },
+        "event_dispatch_count": 497,
+        "event_function_rvas": {
+          "0x25b40": 5,
+          "0x27ec0": 25,
+          "0x26250": 3,
+          "0x259e0": 8,
+          "0x27080": 244,
+          "0x27f50": 176,
+          "0x29bf0": 9,
+          "0x27fe0": 9,
+          "0x29cf0": 6,
+          "0x28850": 4,
+          "0x28950": 2,
+          "0x28b40": 6
+        },
+        "actual_context_adapters": [
+          {
+            "description": "Intel(R) Iris(R) Xe Graphics",
+            "vendor_id": 32902,
+            "device_id": 18086,
+            "luid": [
+              67264,
+              0
+            ]
+          }
+        ]
+      },
+      "closed": true
+    }
+  ],
+  "comparisons": {
+    "original-intel-0": {
+      "sha256": "690fe4d68f3b7f2da906d9ed8c09301882c354a16ab114e8209a5632f14e336f",
+      "different_pixels": 10,
+      "different_channels": 20,
+      "maximum": 6
+    },
+    "original-intel-1": {
+      "sha256": "690fe4d68f3b7f2da906d9ed8c09301882c354a16ab114e8209a5632f14e336f",
+      "different_pixels": 10,
+      "different_channels": 20,
+      "maximum": 6
+    },
+    "original-intel-2": {
+      "sha256": "690fe4d68f3b7f2da906d9ed8c09301882c354a16ab114e8209a5632f14e336f",
+      "different_pixels": 10,
+      "different_channels": 20,
+      "maximum": 6
+    },
+    "original-intel-negative": {
+      "sha256": "4ca7171140d4edbe7e4cf812b5b8f7ed4a2b8792b1c82d1380e54f797548438e",
+      "different_pixels": 2199901,
+      "different_channels": 4748270,
+      "maximum": 243
+    },
+    "flora-intel-0": {
+      "sha256": "690fe4d68f3b7f2da906d9ed8c09301882c354a16ab114e8209a5632f14e336f",
+      "different_pixels": 10,
+      "different_channels": 20,
+      "maximum": 6
+    },
+    "flora-intel-1": {
+      "sha256": "690fe4d68f3b7f2da906d9ed8c09301882c354a16ab114e8209a5632f14e336f",
+      "different_pixels": 10,
+      "different_channels": 20,
+      "maximum": 6
+    },
+    "flora-intel-2": {
+      "sha256": "690fe4d68f3b7f2da906d9ed8c09301882c354a16ab114e8209a5632f14e336f",
+      "different_pixels": 10,
+      "different_channels": 20,
+      "maximum": 6
+    },
+    "flora-intel-negative": {
+      "sha256": "4ca7171140d4edbe7e4cf812b5b8f7ed4a2b8792b1c82d1380e54f797548438e",
+      "different_pixels": 2199901,
+      "different_channels": 4748270,
+      "maximum": 243
+    }
+  },
+  "different_pixels": [
+    {
+      "x": 936,
+      "y": 325,
+      "captured": [
+        165,
+        154,
+        171,
+        255
+      ],
+      "replayed": [
+        165,
+        153,
+        171,
+        255
+      ]
+    },
+    {
+      "x": 937,
+      "y": 325,
+      "captured": [
+        169,
+        158,
+        175,
+        255
+      ],
+      "replayed": [
+        168,
+        158,
+        175,
+        255
+      ]
+    },
+    {
+      "x": 938,
+      "y": 325,
+      "captured": [
+        176,
+        165,
+        183,
+        255
+      ],
+      "replayed": [
+        175,
+        164,
+        183,
+        255
+      ]
+    },
+    {
+      "x": 936,
+      "y": 326,
+      "captured": [
+        165,
+        153,
+        170,
+        255
+      ],
+      "replayed": [
+        166,
+        152,
+        171,
+        255
+      ]
+    },
+    {
+      "x": 937,
+      "y": 326,
+      "captured": [
+        170,
+        159,
+        177,
+        255
+      ],
+      "replayed": [
+        172,
+        162,
+        179,
+        255
+      ]
+    },
+    {
+      "x": 938,
+      "y": 326,
+      "captured": [
+        165,
+        154,
+        174,
+        255
+      ],
+      "replayed": [
+        161,
+        148,
+        169,
+        255
+      ]
+    },
+    {
+      "x": 939,
+      "y": 326,
+      "captured": [
+        112,
+        101,
+        121,
+        255
+      ],
+      "replayed": [
+        109,
+        99,
+        118,
+        255
+      ]
+    },
+    {
+      "x": 937,
+      "y": 327,
+      "captured": [
+        170,
+        159,
+        176,
+        255
+      ],
+      "replayed": [
+        170,
+        160,
+        176,
+        255
+      ]
+    },
+    {
+      "x": 938,
+      "y": 327,
+      "captured": [
+        160,
+        149,
+        169,
+        255
+      ],
+      "replayed": [
+        159,
+        148,
+        169,
+        255
+      ]
+    },
+    {
+      "x": 939,
+      "y": 327,
+      "captured": [
+        96,
+        87,
+        105,
+        255
+      ],
+      "replayed": [
+        96,
+        86,
+        105,
+        255
+      ]
+    }
+  ],
+  "production_changes": false,
+  "threshold_changed": false,
+  "gpu_checks_serial": true,
+  "limits": [
+    "One historical diagnostic capture; does not establish general GPU selector ABI",
+    "Ten captured-versus-replayed pixels still differ; cause unresolved",
+    "Original GUI shader/resource inspection pending"
+  ]
+}
