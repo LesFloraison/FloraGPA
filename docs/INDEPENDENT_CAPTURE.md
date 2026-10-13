@@ -1970,3 +1970,11 @@ both devices. MSAA production snapshot/encoding guards remain;
 verified dual-player initialization and production integration are still required before
 restarting formal GF2 acceptance. This step does not turn the diagnostic files
 above into accepted scene frames.
+
+The subsequent executable-initialization experiment reconstructs 2x/4x RGBA8
+array samples in both players using explicit helper Draw/Copy records, with
+initialization-removal and application-Draw-removal controls. It also exposed
+and fixed a production encoder scissor-mask omission; populated and empty arrays
+now update in original GPA. The test-only MSAA writer is not production MSAA
+capture support. Scope, retained failures and evidence are described in
+[the MSAA report](CAPTURE_MSAA_SAMPLES.md#executable-initialization-experiment).

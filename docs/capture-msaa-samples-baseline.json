@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "status": "Color and depth/stencil sample readback foundation; MSAA production capture remains refused",
+  "status": "Native color/depth readback and experimental color initialization proven; production MSAA capture remains refused",
   "base_commit": "d13a472074975274b6a116751772262ef40e8794",
   "scope": "Capture-owned CPU model and native bit-preserving per-sample readback; no frame encoding",
   "native_results": [
@@ -340,6 +340,191 @@
       "artifacts/capture-msaa-depth-20261013/full-ctest.log": "035675f30c223fbc0dfb1d4cf79872aed04d7f9a57819e717e7a81cf0850d7d2",
       "artifacts/capture-msaa-depth-20261013/full-detailed.log": "fffaf8267c5f1bcadbecf73567b4eb90185d07bd2e116025f219991e83f11a0e",
       "artifacts/capture-msaa-depth-20261013/capture-ui.txt": "233aa2a40f2a6983c74a7b25264bc786d5db968f9160f9414b1a22204daf84c6"
+    }
+  },
+  "wire_initialization_experiment": {
+    "base_commit": "9857785dce06f3257bf4ef2ddf29a812ce201da9",
+    "status": "Test-only MSAA Draw/Copy wire initialization verified; production scissor-mask defect fixed; production MSAA still refused",
+    "msaa_scope": "RGBA8 typeless storage, UINT helper upload and UNORM application observation; 13x7, two layers, 2x/4x, quality zero; WARP/hardware producers",
+    "msaa_files": {
+      "positive": 4,
+      "missing_initialization": 4,
+      "missing_application_draws": 4
+    },
+    "scissor_files": 8,
+    "scissor_cases": [
+      "left-to-right rectangles",
+      "populated-to-empty scissor array",
+      "empty array followed by scissor disable",
+      "initial empty enabled scissor"
+    ],
+    "dual_player_checks": 412,
+    "oracle": "Owned native pre-frame planes and captured final GPU image match independent CPU formulas; each sample displayed separately; exact bytes, no resolve or tolerance",
+    "source_objects_dead_before_encoding": true,
+    "debug_warnings_or_errors": 0,
+    "provenance": "Experimental initialization annotation plus fixture event-ID manifest; original GUI grouping/context identity not certified",
+    "negative_controls": "Both removal controls keep complete captured final reference and preview; unrelated ordinary MSAA GenData cannot supply sample values",
+    "scissor_fix": "State mask bit 672 enabled; nonzero scissor data reference always emitted, including count-zero arrays",
+    "original_player_sha256": "39061ff329e4a32d0c8375ce9ee15e2017bccab0593943b962a860e11723d38b",
+    "initial_failures": [
+      "build.log: state wire array needed explicit byte-vector construction",
+      "build3.log: scissor fixture needed explicit encoder target include propagation",
+      "first-original: sample initialization correct but scissor edits absent; 280/364 pixels matched. Isolated state bit 672 fix restores exact output"
+    ],
+    "diagnostic_controls": "no-scissor, all-samples, no-annotations, no-copy variants retained; no thresholds relaxed",
+    "capture_only_ctest": 91,
+    "full_profile_selected_ctest": 94,
+    "qt_cases": 12,
+    "full_application_build": true,
+    "gpu_tests_serial": true,
+    "injected_regression": {
+      "launches": 24,
+      "files": 120,
+      "dual_player_checks": 769,
+      "scope": "Existing production single-sample profiles; same scissor fix, not MSAA capture"
+    },
+    "production_msaa_integration": false,
+    "accepted_msaa_capture_files": 0,
+    "accepted_gf2_frames": 0,
+    "new_gf2_launches": 0,
+    "new_original_gui_run": false,
+    "replay_shared_format_changed": false,
+    "new_golden_run": false,
+    "clean_source_package": "Latest proof remains a665593 depth-readback revision; this revision not source-package validated",
+    "pending": [
+      "Bounded capture-owned initialization lowering and build-time shaders",
+      "Remaining color/depth/stencil initialization profiles",
+      "Production snapshot/encoder integration and provenance",
+      "Formal six-frame GF2 acceptance across two launches and scenes"
+    ],
+    "files": [
+      {
+        "file": "warp-msaa/2x-complete.gpa_frame",
+        "sha256": "6616757bf38f5a8e2449038a5acd13b2d338912464753251f67e01a042066139",
+        "expected_sha256": "c1c88b5938469ee1c74d7c22d290f19321df6b19260e90215bcd7f3c1e55e1ac"
+      },
+      {
+        "file": "warp-msaa/2x-missing-application-draws.gpa_frame",
+        "sha256": "f39113b9c9bcfdd788d7005919925898856c38704db3d0f784bf141aab844c92",
+        "expected_sha256": "34799da0f161968434fc8f7303fae5fd8dc357e77b928409403606f112f3226a"
+      },
+      {
+        "file": "warp-msaa/2x-missing-initialization.gpa_frame",
+        "sha256": "eea746647ae6398214df361d954ffc8b3d07e73082605c6c54e4080b1841f64c",
+        "expected_sha256": "826d3099fc292a2b6d4246005d1032d94494175012c4bc8adbc8eeb7f4fa21a2"
+      },
+      {
+        "file": "warp-msaa/4x-complete.gpa_frame",
+        "sha256": "9f49df4d076680aa9bea5674c142a7f19d80152063a071e598019cf6614c5468",
+        "expected_sha256": "fb05ad65624797b72b80275cf88f26bf272db8eafb9b09d00cbe31c3fb36a58a"
+      },
+      {
+        "file": "warp-msaa/4x-missing-application-draws.gpa_frame",
+        "sha256": "87045bbd248dddf5314b8ddf1405f0ebffa7cc5f261906f67f942579223779db",
+        "expected_sha256": "4cdac83c367934f6484adfd6b41cb4df8ad9960aaf9c174dd49fc590ede0acb1"
+      },
+      {
+        "file": "warp-msaa/4x-missing-initialization.gpa_frame",
+        "sha256": "612af2eb77e8254a3cc3700be02ab0ade8a9ce34d3d8018801205abbbf038355",
+        "expected_sha256": "ca7e175b4bd3bdd9bf0f767d640a85198c73cffe79a68d7ec4b911d50eb94a4f"
+      },
+      {
+        "file": "warp-scissor/0.gpa_frame",
+        "sha256": "d13b4ea2736b3b29c1bc6102d6c41606b8e13694362a67a2c709a7db4d624fca",
+        "expected_sha256": "7bf6298183524f89c7ca1150cf51d291b86cd2268664c97c11fd79230a39010a"
+      },
+      {
+        "file": "warp-scissor/1.gpa_frame",
+        "sha256": "ef84066fc7270c3148bf59e4a815b8d52ebc2e0d77f9477dd89c7294101aa0b7",
+        "expected_sha256": "2f0d8fa5c64e99b124e75ceb13badd960fba22ba3b4a1fe72d9c70ae1f11f074"
+      },
+      {
+        "file": "warp-scissor/2.gpa_frame",
+        "sha256": "f79c3a03bd6ff0f446235f65f8dc3eda75b5d4693cf66408efa76fe41c726491",
+        "expected_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636"
+      },
+      {
+        "file": "warp-scissor/3.gpa_frame",
+        "sha256": "0cf5ae30aa0ddbe0a083dcd089a938d7d433f2ebfc736100a2e1a3f2862d7051",
+        "expected_sha256": "2c893cd47b6757133987906e00c55e6dcce3c567b9df9e7f91ffecd3604cc6a6"
+      },
+      {
+        "file": "hardware-msaa/2x-complete.gpa_frame",
+        "sha256": "6616757bf38f5a8e2449038a5acd13b2d338912464753251f67e01a042066139",
+        "expected_sha256": "c1c88b5938469ee1c74d7c22d290f19321df6b19260e90215bcd7f3c1e55e1ac"
+      },
+      {
+        "file": "hardware-msaa/2x-missing-application-draws.gpa_frame",
+        "sha256": "f39113b9c9bcfdd788d7005919925898856c38704db3d0f784bf141aab844c92",
+        "expected_sha256": "34799da0f161968434fc8f7303fae5fd8dc357e77b928409403606f112f3226a"
+      },
+      {
+        "file": "hardware-msaa/2x-missing-initialization.gpa_frame",
+        "sha256": "eea746647ae6398214df361d954ffc8b3d07e73082605c6c54e4080b1841f64c",
+        "expected_sha256": "826d3099fc292a2b6d4246005d1032d94494175012c4bc8adbc8eeb7f4fa21a2"
+      },
+      {
+        "file": "hardware-msaa/4x-complete.gpa_frame",
+        "sha256": "9f49df4d076680aa9bea5674c142a7f19d80152063a071e598019cf6614c5468",
+        "expected_sha256": "fb05ad65624797b72b80275cf88f26bf272db8eafb9b09d00cbe31c3fb36a58a"
+      },
+      {
+        "file": "hardware-msaa/4x-missing-application-draws.gpa_frame",
+        "sha256": "87045bbd248dddf5314b8ddf1405f0ebffa7cc5f261906f67f942579223779db",
+        "expected_sha256": "4cdac83c367934f6484adfd6b41cb4df8ad9960aaf9c174dd49fc590ede0acb1"
+      },
+      {
+        "file": "hardware-msaa/4x-missing-initialization.gpa_frame",
+        "sha256": "612af2eb77e8254a3cc3700be02ab0ade8a9ce34d3d8018801205abbbf038355",
+        "expected_sha256": "ca7e175b4bd3bdd9bf0f767d640a85198c73cffe79a68d7ec4b911d50eb94a4f"
+      },
+      {
+        "file": "hardware-scissor/0.gpa_frame",
+        "sha256": "ec7dce98b3e2f99fbb7a87b8d21b40fae0c6addb48ae8b103c12c5deff972e55",
+        "expected_sha256": "7bf6298183524f89c7ca1150cf51d291b86cd2268664c97c11fd79230a39010a"
+      },
+      {
+        "file": "hardware-scissor/1.gpa_frame",
+        "sha256": "0002d7938b533b07dfdb4b0adf7e450ca64bc311ea488b3e32d92357f75cddeb",
+        "expected_sha256": "2f0d8fa5c64e99b124e75ceb13badd960fba22ba3b4a1fe72d9c70ae1f11f074"
+      },
+      {
+        "file": "hardware-scissor/2.gpa_frame",
+        "sha256": "1124b870ac7b9a390ef7fb07790158d4654095f19eec14eecb03088cd6b0c6d1",
+        "expected_sha256": "b4b8868b8dbbe0e497492d5b01faa59813760910557b898c169177175b451636"
+      },
+      {
+        "file": "hardware-scissor/3.gpa_frame",
+        "sha256": "4e8c55b0c0df971305eb019b7a38bf37186c93e828a35c54699c081072dd8a53",
+        "expected_sha256": "2c893cd47b6757133987906e00c55e6dcce3c567b9df9e7f91ffecd3604cc6a6"
+      }
+    ],
+    "source_sha256": {
+      "src/capture/encoder/encoder.cpp": "145acf46eaaa9656b5f077cccaf8cafa699a0ea5730c62f33fea40a740e16cb6",
+      "src/capture/CMakeLists.txt": "c67d5f595251f10de3505914c3b82a880fa99f95c3d5b14f7de106522b7b0ba0",
+      "src/capture/tests/msaa_encoding_tests.cpp": "e02a9ea8d3b348de8abc4ef483de0737def32bf1ca93142d0d4c9662a3c9257b",
+      "src/capture/tests/scissor_encoding_tests.cpp": "763c5357dee9023744b3515dfd77a4a1aabc1485dadc84551b272a4c19c1730f",
+      "tools/validate_capture_msaa_encoding.py": "7ff87c9c292991946f8ebc771a09574c142af110fd24f8754597aece9e5380a5"
+    },
+    "evidence_sha256": {
+      "artifacts/capture-msaa-wire-20261014/dual/validation.json": "9f268ae3f57aea28714901d1ddab5125d70c968c71bcac915c965e2048ee95e4",
+      "artifacts/capture-msaa-wire-20261014/dual/inputs.json": "c35de52a0064a4362008d8b716b4619f4a30ddb8adc81636042ba103babeb7f7",
+      "artifacts/capture-msaa-wire-20261014/injected/validation.json": "55b48f6ad3e749527f4cca3bbb0fe2639b53217b73caf0c2259ede83f63cab4e",
+      "artifacts/capture-msaa-wire-20261014/injected/inputs.json": "866cc66c735c92d4c52d99478a9ea9d4728086c76eb808ca754cfd473826c9af",
+      "artifacts/capture-msaa-wire-20261014/capture-ctest.log": "9bc7eb3aa36b9b8983f8452953120314f7a9727623393d549f07d9cfbe57c2fd",
+      "artifacts/capture-msaa-wire-20261014/capture-detailed.log": "24351d3dfb561a0e3d7eb583cd66143eb600158bfa28f3a7fe9e9ae716455aa6",
+      "artifacts/capture-msaa-wire-20261014/full-ctest.log": "107b2798c9eb31bc9bcd9d0baf9f07a92c3503a7a1bbf66d44b35a670da1d063",
+      "artifacts/capture-msaa-wire-20261014/full-detailed.log": "07a618316791bb69fbd6af77eb087f72503cad0cccd38fa6ad2a34b7dd845d87",
+      "artifacts/capture-msaa-wire-20261014/capture-ui.txt": "d78049c4cc073f534e2774865e53039253a7caed1d9f8f8261c9ba26f8f8d3b2",
+      "artifacts/capture-msaa-wire-20261014/capture-build.log": "355b8e6c160516e29dce51e8a749797aaefd3162c1e0abcae3f9a35e3f5536fc",
+      "artifacts/capture-msaa-wire-20261014/full-build.log": "46553214e5cefe8d1d16c60c97a64b2aee9a6b63abc848de099dd291a55f9de1",
+      "artifacts/capture-msaa-wire-20261014/build.log": "58285978c8549a071a5738de1341effb5b2f1849c26273218242a4a5bdc012e8",
+      "artifacts/capture-msaa-wire-20261014/build3.log": "b59fd40e323d2a2170690b77beec8ff7a74a6521e6cba175a3808ace372ccb8a",
+      "artifacts/capture-msaa-wire-20261014/diagnosis.log": "edab61fb5e44610a2a000861eec490b360496caeb39c2c6a33ebe7dc69f258e8",
+      "artifacts/capture-msaa-wire-20261014/first-original/replay_report.json": "4373410298a3f8c0412db731c371c63781ac4c887889db3050976f0f74175027",
+      "artifacts/capture-msaa-wire-20261014/scissor-mask-original/replay_report.json": "635258dbfbb49956c37a7e85ebe529ce90ebdd4d82d042a1961003e7b901e61c",
+      "artifacts/capture-msaa-wire-20261014/warp/2x-complete.gpa_frame": "778648987ba2312fb2b984a1cf86eca7723671656acb0ea3064c1d3de6cb4635",
+      "artifacts/capture-msaa-wire-20261014/scissor-mask.gpa_frame": "6616757bf38f5a8e2449038a5acd13b2d338912464753251f67e01a042066139"
     }
   }
 }

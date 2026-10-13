@@ -137,7 +137,7 @@ class Encoder {
         const auto& s=command.bindings;require(s.context==context_ && s.device==device_,"Encoder mixed context/device state");
         require(!s.predicate && std::all_of(s.stream_targets.begin(),s.stream_targets.end(),[](auto id){return id==0;}),"Predicate/SO state encoding pending");
         for(const auto& [id,lod]:s.resource_min_lod){resource_ref(id);require(lod==0,"Nonzero resource minimum LOD encoding pending");}
-        state_block out{};out.mask.fill(UINT32_MAX);out.mask[672/32]&=~(1u<<(672%32));
+        state_block out{};out.mask.fill(UINT32_MAX);
         out.ib=ref(s.index_buffer,"buffer");out.ib_format=s.index_format;out.ib_offset=s.index_offset;out.input_layout=ref(s.input_layout,"input_layout");out.topology=s.topology;
         refs(s.vertices,out.vb,{"buffer"});out.strides=s.strides;out.offsets=s.offsets;
 #define STAGE(NAME,INDEX) {const auto& stage=s.shaders[size_t(ShaderStage::INDEX)];require(stage.classes.empty(),"Dynamic class state encoding pending"); \
@@ -147,6 +147,8 @@ class Encoder {
 #undef STAGE
         require(s.viewports.size()<=16 && s.scissors.size()<=16,"Encoder viewport/scissor limit exceeded");
         Payload viewports;viewports.value(narrow(s.viewports.size()));for(const auto& v:s.viewports)viewports.raw(v);out.viewports=add(9,0x87,std::move(viewports));
+        // Always materialize the array, including count zero. Mask bit 672 must
+        // stay enabled so the original player applies changes and empty resets.
         Payload scissors;scissors.value(narrow(s.scissors.size()));for(const auto& v:s.scissors)scissors.raw(v);out.scissors=add(9,0x86,std::move(scissors));
         out.rasterizer=typed(s.rasterizer,{"rasterizer","rasterizer1","rasterizer2"});out.blend=typed(s.blend,{"blend","blend1"});out.blend_factor=s.blend_factor;out.sample_mask=s.sample_mask;out.depth_state=ref(s.depth_stencil,"depth_stencil");out.stencil_ref=s.stencil_ref;out.dsv=ref(s.depth_view,"dsv");
         for(const auto& [id,count]:command.uav_counters){(void)count;require(id!=0,"Encoder counter identity is null");typed(id,{"uav","uav1"});}

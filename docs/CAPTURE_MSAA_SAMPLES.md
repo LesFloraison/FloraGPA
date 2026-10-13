@@ -142,3 +142,66 @@ delivery/control checks, not MSAA encoded frames. The raw source-package run is
 Production
 snapshot/encoding, Replay and shared format are unchanged; formal GF2 remains
 **0/6**, with no new dual-player or golden-frame result.
+
+## Executable initialization experiment
+
+The next experiment moves the owned native sample planes into an ordinary
+single-sample integer texture per plane, draws each plane to its matching layer
+and sample of a private MSAA render target, and copies that texture to the
+application resource. It uses ordinary DX11 Draw/Copy records and shader DXBC.
+No GPA private entry points or Replay helpers are used by the fixture. This is
+a **test-only wire writer**, not a production encoder/runtime integration.
+
+The source application produces 13 x 7 RGBA8 planes, two layers, 2x/4x samples,
+quality zero, with coordinate/layer/sample-specific values. Capture's native
+readback owns the initial planes before the application overwrites the left
+region of even samples. A final application shader displays every sample in
+separate tiles; no Resolve or averaging can hide sample differences. Source COM
+objects are destroyed before encoding. Native initial planes and final output
+are checked against independent CPU formulas, with exact bytes and clean Debug
+Layer results on WARP and hardware.
+
+The encoded MSAA resources retain their sample counts and array layers. Their
+ordinary GenData contains deliberately unrelated bytes, so it cannot supply
+correct samples. An explicitly labelled experimental initialization region and
+the fixture's event-ID manifest distinguish helper operations from application
+Draws. Original GUI grouping and annotation context identity are not certified.
+This does not claim the helpers were application calls.
+
+Both players execute complete files and two controls: deleting initialization
+Draws leaves the helper's deterministic cleared contents; deleting application
+Draws retains the initial sample patterns. Both controls retain the complete
+file's captured final image and preview. Four positives and eight controls
+(two source devices, two sample counts) match their respective independent
+expected bytes. The validator also checks event counts, sample/layer descriptors,
+shader DXBC/disassembly and Flora's module inventory.
+
+### Scissor encoding defect found by the experiment
+
+The first original-player run restored all initial planes but omitted the
+scissored application changes. The fixture and production encoder inherited a
+disabled state-mask bit 672 from the old empty-reference workaround. Flora's
+full-state application masked this omission; original GPA respects the bit.
+Changing only that bit makes the original output exact. Disabling scissor,
+changing sample masks and removing annotations were separate retained diagnostic
+controls, not accepted substitutes for the requested behavior.
+
+The production encoder now leaves bit 672 enabled and always emits a valid
+scissor array record, including count zero. Four hook-observed cases on each
+source device exercise left-to-right rectangle changes, resetting to an empty
+array with scissor enabled, disabling scissor after that reset, and an initially
+empty scissor array. All eight production-encoded files execute exactly in both
+players. This is an actual encoder fix; production MSAA publication remains
+explicitly refused.
+
+The combined validator is `tools/validate_capture_msaa_encoding.py`; its first
+complete matrix passes 20 files / 412 checks. Raw evidence is retained in
+`artifacts/capture-msaa-wire-20261014`, including the initial mismatched original
+image and the isolated mask-bit correction. Regression counts, hashes and
+subsequent injected checks are recorded separately in the baseline. The earlier
+depth readback source-package proof remains revision `a665593`.
+
+Remaining work includes a bounded capture-owned initialization lowering model,
+build-time shader generation, broader color/depth/stencil initialization,
+production frame snapshot/encoder integration, and GF2's formal six-frame gate.
+The successful color wire experiment does not establish those requirements.

@@ -1,0 +1,99 @@
+// Experimental wire fixture only. It does not enable the production encoder's
+// MSAA guard. Uses owned native samples and the format contract, never Replay.
+#include "msaa_readback.hpp"
+#include "objects.hpp"
+#include "format/Writer.h"
+#include <d3dcompiler.h>
+#include <d3d11sdklayers.h>
+#include <wrl/client.h>
+#include <filesystem>
+#include <fstream>
+#include <iostream>
+using namespace flora::capture;
+using namespace flora::format;
+using Microsoft::WRL::ComPtr;
+namespace {
+constexpr UINT width=13,height=7,layers=2;
+const char* vertex="float4 main(uint i:SV_VertexID):SV_Position{return float4(i==2?3:-1,i==1?3:-1,0,1);}";
+const char* produce=R"(cbuffer Layer:register(b0){uint layer;}
+uint4 main(float4 p:SV_Position,uint s:SV_SampleIndex):SV_Target{
+uint x=uint(p.x),y=uint(p.y);return uint4((x*17+y*3+layer*71+s*29)&255,(y*31+layer*43+s*13)&255,(x*7+y*11+layer*19+s*37)&255,255);})";
+const char* restore="Texture2D<uint4> plane:register(t0);uint4 main(float4 p:SV_Position):SV_Target{return plane.Load(int3(uint2(p.xy),0));}";
+const char* change="uint4 main():SV_Target{return uint4(240,19,73,255);}";
+std::string display(UINT samples){return "Texture2DMSArray<float4> source:register(t0);float4 main(float4 p:SV_Position):SV_Target{uint2 q=uint2(p.xy);uint s=q.x/13,l=q.y/7;return source.Load(int3(q.x%13,q.y%7,l),s);}";}
+void require(bool ok,const char* why){if(!ok)throw std::runtime_error(why);}
+void check(HRESULT hr){if(FAILED(hr))throw std::runtime_error("MSAA wire fixture HRESULT "+std::to_string(UINT(hr)));}
+ByteBuffer compile(const std::string& text,const char* profile){ComPtr<ID3DBlob> code,error;const auto hr=D3DCompile(text.data(),text.size(),"MSAA wire experiment",nullptr,nullptr,"main",profile,D3DCOMPILE_ENABLE_STRICTNESS,0,&code,&error);if(FAILED(hr)&&error)throw std::runtime_error(static_cast<const char*>(error->GetBufferPointer()));check(hr);auto* p=static_cast<const uint8_t*>(code->GetBufferPointer());return {p,p+code->GetBufferSize()};}
+std::array<uint8_t,4> pixel(UINT x,UINT y,UINT layer,UINT sample,bool changed){if(changed && x<width/2 && !(sample%2))return {240,19,73,255};return {uint8_t(x*17+y*3+layer*71+sample*29),uint8_t(y*31+layer*43+sample*13),uint8_t(x*7+y*11+layer*19+sample*37),255};}
+ByteBuffer expected(UINT samples,bool changed,bool initialized=true){ByteBuffer result;for(UINT y=0;y<height*layers;++y)for(UINT x=0;x<width*samples;++x){const bool modified=changed && x%width<width/2 && !((x/width)%2);const auto p=initialized||modified?pixel(x%width,y%height,y/height,x/width,changed):std::array<uint8_t,4>{0,0,0,0};result.insert(result.end(),p.begin(),p.end());}return result;}
+struct Owned {MsaaSamples samples;ByteBuffer final;};
+Owned native(bool hardware,UINT samples){
+    ComPtr<ID3D11Device> device;ComPtr<ID3D11DeviceContext> context;check(D3D11CreateDevice(nullptr,hardware?D3D_DRIVER_TYPE_HARDWARE:D3D_DRIVER_TYPE_WARP,nullptr,D3D11_CREATE_DEVICE_DEBUG,nullptr,0,D3D11_SDK_VERSION,&device,nullptr,&context));
+    ComPtr<ID3D11InfoQueue> info;check(device.As(&info));info->ClearStoredMessages();wrap_object(device.GetAddressOf(),"MSAA wire device");wrap_object(context.GetAddressOf(),"MSAA wire context");
+    D3D11_TEXTURE2D_DESC td{width,height,1,layers,DXGI_FORMAT_R8G8B8A8_TYPELESS,{samples,0},D3D11_USAGE_DEFAULT,D3D11_BIND_RENDER_TARGET|D3D11_BIND_SHADER_RESOURCE,0,0};ComPtr<ID3D11Texture2D> source;check(device->CreateTexture2D(&td,nullptr,&source));
+    const auto vsCode=compile(vertex,"vs_5_0"),psCode=compile(produce,"ps_5_0"),changeCode=compile(change,"ps_5_0"),displayCode=compile(display(samples),"ps_5_0");
+    ComPtr<ID3D11VertexShader> vs;ComPtr<ID3D11PixelShader> ps,edit,show;check(device->CreateVertexShader(vsCode.data(),vsCode.size(),nullptr,&vs));check(device->CreatePixelShader(psCode.data(),psCode.size(),nullptr,&ps));check(device->CreatePixelShader(changeCode.data(),changeCode.size(),nullptr,&edit));check(device->CreatePixelShader(displayCode.data(),displayCode.size(),nullptr,&show));
+    D3D11_BUFFER_DESC bd{16,D3D11_USAGE_DEFAULT,D3D11_BIND_CONSTANT_BUFFER,0,0,0};ComPtr<ID3D11Buffer> cb;check(device->CreateBuffer(&bd,nullptr,&cb));auto* b=cb.Get();
+    D3D11_RASTERIZER_DESC rd{};rd.FillMode=D3D11_FILL_SOLID;rd.CullMode=D3D11_CULL_NONE;rd.DepthClipEnable=TRUE;rd.MultisampleEnable=TRUE;ComPtr<ID3D11RasterizerState> raster,scissor;check(device->CreateRasterizerState(&rd,&raster));rd.ScissorEnable=TRUE;check(device->CreateRasterizerState(&rd,&scissor));
+    context->VSSetShader(vs.Get(),nullptr,0);context->PSSetShader(ps.Get(),nullptr,0);context->PSSetConstantBuffers(0,1,&b);context->RSSetState(raster.Get());context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);D3D11_VIEWPORT vp{0,0,float(width),float(height),0,1};context->RSSetViewports(1,&vp);
+    std::array<ComPtr<ID3D11RenderTargetView>,layers> views;
+    for(UINT layer=0;layer<layers;++layer){D3D11_RENDER_TARGET_VIEW_DESC vd{};vd.Format=DXGI_FORMAT_R8G8B8A8_UINT;vd.ViewDimension=D3D11_RTV_DIMENSION_TEXTURE2DMSARRAY;vd.Texture2DMSArray={layer,1};check(device->CreateRenderTargetView(source.Get(),&vd,&views[layer]));auto* r=views[layer].Get();context->OMSetRenderTargets(1,&r,nullptr);const UINT data[]{layer,0,0,0};context->UpdateSubresource(cb.Get(),0,nullptr,data,0,0);context->Draw(3,0);}
+    Owned result;result.samples=snapshot_msaa_samples(context.Get(),source.Get());
+    for(const auto& plane:result.samples.planes){ByteBuffer oracle;for(UINT y=0;y<height;++y)for(UINT x=0;x<width;++x){const auto p=pixel(x,y,plane.array_slice,plane.sample,false);oracle.insert(oracle.end(),p.begin(),p.end());}require(plane.bytes==oracle,"Native initial samples differ from CPU");}
+    context->PSSetShader(edit.Get(),nullptr,0);context->RSSetState(scissor.Get());D3D11_RECT rect{0,0,width/2,height};context->RSSetScissorRects(1,&rect);context->OMSetBlendState(nullptr,nullptr,0x55555555);
+    for(const auto& view:views){auto* r=view.Get();context->OMSetRenderTargets(1,&r,nullptr);context->Draw(3,0);}
+    context->OMSetRenderTargets(0,nullptr,nullptr);td={width*samples,height*layers,1,1,DXGI_FORMAT_R8G8B8A8_UNORM,{1,0},D3D11_USAGE_DEFAULT,D3D11_BIND_RENDER_TARGET,0,0};ComPtr<ID3D11Texture2D> output;ComPtr<ID3D11RenderTargetView> target;check(device->CreateTexture2D(&td,nullptr,&output));check(device->CreateRenderTargetView(output.Get(),nullptr,&target));
+    D3D11_SHADER_RESOURCE_VIEW_DESC sd{};sd.Format=DXGI_FORMAT_R8G8B8A8_UNORM;sd.ViewDimension=D3D11_SRV_DIMENSION_TEXTURE2DMSARRAY;sd.Texture2DMSArray.ArraySize=layers;ComPtr<ID3D11ShaderResourceView> srv;check(device->CreateShaderResourceView(source.Get(),&sd,&srv));auto* s=srv.Get();auto* r=target.Get();context->PSSetShaderResources(0,1,&s);context->OMSetRenderTargets(1,&r,nullptr);context->PSSetShader(show.Get(),nullptr,0);context->RSSetState(raster.Get());context->OMSetBlendState(nullptr,nullptr,UINT_MAX);vp.Width=float(width*samples);vp.Height=float(height*layers);context->RSSetViewports(1,&vp);context->Draw(3,0);
+    result.final=snapshot_resource(context.Get(),output.Get()).subresources.at(0).bytes;require(result.final==expected(samples,true),"Native final image differs from CPU");context->ClearState();
+    for(UINT64 i=0;i<info->GetNumStoredMessagesAllowedByRetrievalFilter();++i){SIZE_T size=0;check(info->GetMessage(i,nullptr,&size));ByteBuffer bytes(size);auto* m=reinterpret_cast<D3D11_MESSAGE*>(bytes.data());check(info->GetMessage(i,m,&size));require(m->Severity>D3D11_MESSAGE_SEVERITY_WARNING,m->pDescription);}
+    return result;
+}
+struct Payload:ByteBuffer {
+    template<class T>Payload& v(T value){auto at=size();resize(at+sizeof value);wire_write(data()+at,value);return *this;}
+    Payload& q(std::initializer_list<uint64_t> values){for(auto value:values)v(value);return *this;}
+    Payload& u(std::initializer_list<uint32_t> values){for(auto value:values)v(value);return *this;}
+    Payload& bytes(const ByteBuffer& b){insert(end(),b.begin(),b.end());return *this;}
+    template<class T>Payload& raw(const T& value){auto* p=reinterpret_cast<const uint8_t*>(&value);insert(end(),p,p+sizeof value);return *this;}
+};
+struct Record {uint8_t category;uint16_t type;ByteBuffer payload;};
+struct WireFixture {
+    std::map<uint64_t,Record> records;uint64_t next=4;Json helper=Json::array(),application=Json::array();
+    uint64_t add(uint8_t category,uint16_t type,ByteBuffer payload){const auto id=next++;records.emplace(id,Record{category,type,std::move(payload)});return id;}
+    uint64_t blob(const ByteBuffer& data){return add(9,1,Payload{}.v(UINT(data.size())).bytes(data));}
+    template<class T>uint64_t resource(uint16_t type,const T& desc,uint64_t data=0,bool has_data=false,uint64_t owner=2){const auto id=next++;auto p=Payload{}.q({id,owner}).raw(desc);if(has_data)p.v(data);records.emplace(id,Record{5,type,p});return id;}
+    uint64_t texture(const D3D11_TEXTURE2D_DESC& desc,const ByteBuffer& data,uint64_t owner=2,uint16_t type=0x85){return resource(type,desc,blob(data),true,owner);}
+    template<class T>uint64_t view(uint16_t type,uint64_t texture,const T& desc){const auto id=next++;records.emplace(id,Record{5,type,Payload{}.q({id,2,texture}).raw(desc)});return id;}
+    uint64_t shader(uint16_t type,const ByteBuffer& code){const auto data=add(9,0x81,Payload{}.v(uint64_t(code.size())).bytes(code).q({0}));const auto id=next++;records.emplace(id,Record{5,type,Payload{}.q({id,2,0,0,0,0,data})});return id;}
+    uint64_t state(uint64_t vs,uint64_t ps,uint64_t raster,uint64_t rtv,uint64_t srv,UINT w,UINT h,UINT mask=UINT_MAX,bool partial=false){state_block s{};s.mask.fill(UINT_MAX);s.topology=D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;s.vs_shader=vs;s.ps_shader=ps;s.ps_srv[0]=srv;s.rasterizer=raster;s.rtv[0]=rtv;s.rt_count=1;s.om_uav_start=64;s.om_uav_counts.fill(UINT_MAX);s.cs_uav_counts.fill(UINT_MAX);s.sample_mask=mask;D3D11_VIEWPORT vp{0,0,float(w),float(h),0,1};s.viewports=add(9,0x87,Payload{}.u({1}).raw(vp));D3D11_RECT rect{0,0,partial?LONG(width/2):LONG(w),LONG(h)};s.scissors=add(9,0x86,Payload{}.u({1}).raw(rect));const auto wire=encode_state_block(s);return add(3,3,ByteBuffer(wire.begin(),wire.end()));}
+    void draw(uint64_t state,bool init){auto id=add(7,0x37,Payload{}.q({state,0,1}).u({3,0}));(init?helper:application).push_back(id);}
+    void annotation(bool begin){if(begin){std::u16string name=u"FloraCapture initialization (experimental): per-sample contents";name.push_back(0);ByteBuffer data(name.size()*2);memcpy(data.data(),name.data(),data.size());add(7,0x327b,Payload{}.q({0,UINT64_MAX-2}).u({0,UINT(data.size())}).bytes(data));}else add(7,0x327c,Payload{}.q({0,UINT64_MAX-2}).u({0}));}
+    Json write(const std::filesystem::path& path,const Owned& owned,UINT samples,bool init,bool edits){
+        records.emplace(1,Record{5,0x127,Payload{}.q({1,2,0})});records.emplace(2,Record{5,0x81,Payload{}.q({2,0}).u({1,0,D3D_FEATURE_LEVEL_11_0})});
+        DXGI_SWAP_CHAIN_DESC swap{};swap.BufferDesc.Width=width*samples;swap.BufferDesc.Height=height*layers;swap.BufferDesc.Format=DXGI_FORMAT_R8G8B8A8_UNORM;swap.SampleDesc.Count=1;swap.BufferUsage=DXGI_USAGE_RENDER_TARGET_OUTPUT;swap.BufferCount=1;swap.Windowed=TRUE;records.emplace(3,Record{5,0x38,Payload{}.q({3,2}).raw(swap)});
+        D3D11_TEXTURE2D_DESC td{width,height,1,layers,DXGI_FORMAT_R8G8B8A8_TYPELESS,{samples,0},D3D11_USAGE_DEFAULT,D3D11_BIND_RENDER_TARGET|D3D11_BIND_SHADER_RESOURCE,0,0};
+        // Ordinary GenData is deliberately nonrepresentative. Initialization
+        // must execute Draw/Copy; players cannot obtain the samples from here.
+        ByteBuffer poison(width*height*layers*4,0xa5);auto original=texture(td,poison),temporary=texture(td,poison);
+        const auto vs=shader(0x90,compile(vertex,"vs_5_0")),restore_ps=shader(0x92,compile(restore,"ps_5_0")),edit_ps=shader(0x92,compile(change,"ps_5_0")),show_ps=shader(0x92,compile(display(samples),"ps_5_0"));
+        D3D11_RASTERIZER_DESC rd{};rd.FillMode=D3D11_FILL_SOLID;rd.CullMode=D3D11_CULL_NONE;rd.DepthClipEnable=TRUE;rd.MultisampleEnable=TRUE;auto raster=resource(0x89,rd);rd.ScissorEnable=TRUE;auto scissor=resource(0x89,rd);
+        std::array<uint64_t,layers> original_views{},temporary_views{};
+        for(UINT l=0;l<layers;++l){D3D11_RENDER_TARGET_VIEW_DESC vd{};vd.Format=DXGI_FORMAT_R8G8B8A8_UINT;vd.ViewDimension=D3D11_RTV_DIMENSION_TEXTURE2DMSARRAY;vd.Texture2DMSArray={l,1};original_views[l]=view(0x8d,original,vd);temporary_views[l]=view(0x8d,temporary,vd);}
+        annotation(true);
+        for(auto v:temporary_views)add(7,0x32,Payload{}.q({0,1,v}).v(uint8_t(1)).u({0,0,0,0}));
+        for(const auto& plane:owned.samples.planes){D3D11_TEXTURE2D_DESC d{width,height,1,1,DXGI_FORMAT_R8G8B8A8_UINT,{1,0},D3D11_USAGE_DEFAULT,D3D11_BIND_SHADER_RESOURCE,0,0};auto data=texture(d,plane.bytes);D3D11_SHADER_RESOURCE_VIEW_DESC sd{};sd.Format=d.Format;sd.ViewDimension=D3D11_SRV_DIMENSION_TEXTURE2D;sd.Texture2D.MipLevels=1;auto srv=view(0x8c,data,sd);auto s=state(vs,restore_ps,raster,temporary_views[plane.array_slice],srv,width,height,1u<<plane.sample);if(init)draw(s,true);}
+        auto copy=add(7,0x3e,Payload{}.q({0,1,original,temporary}));helper.push_back(copy);annotation(false);
+        if(edits)for(auto v:original_views)draw(state(vs,edit_ps,scissor,v,0,width,height,0x55555555,true),false);
+        D3D11_SHADER_RESOURCE_VIEW_DESC sd{};sd.Format=DXGI_FORMAT_R8G8B8A8_UNORM;sd.ViewDimension=D3D11_SRV_DIMENSION_TEXTURE2DMSARRAY;sd.Texture2DMSArray.ArraySize=layers;auto srv=view(0x8c,original,sd);
+        td={width*samples,height*layers,1,1,DXGI_FORMAT_R8G8B8A8_UNORM,{1,0},D3D11_USAGE_DEFAULT,D3D11_BIND_RENDER_TARGET,0,0};auto output=texture(td,ByteBuffer(owned.final.size()),3);D3D11_RENDER_TARGET_VIEW_DESC vd{};vd.Format=td.Format;vd.ViewDimension=D3D11_RTV_DIMENSION_TEXTURE2D;auto rtv=view(0x8d,output,vd);draw(state(vs,show_ps,raster,rtv,srv,td.Width,td.Height),false);texture(td,owned.final,3,0x87);add(7,0x3257,Payload{}.q({0,3}).u({0,1,0}));
+        Header h{};memcpy(h.data(),"IGPA",4);wire_write<uint32_t>(h.data()+4,HEADER_SIZE);wire_write<uint32_t>(h.data()+8,VERSION);memcpy(h.data()+API_OFFSET,"DX11",4);memcpy(h.data()+0x4c,"DX11_0",6);memcpy(h.data()+0xd4,"FloraMsaaExperiment",19);wire_write<uint32_t>(h.data()+0xfc,6);wire_write(h.data()+DIMENSIONS_OFFSET,td.Width);wire_write(h.data()+DIMENSIONS_OFFSET+4,td.Height);
+        ByteBuffer bmp(54+owned.final.size());bmp[0]='B';bmp[1]='M';wire_write(bmp.data()+2,UINT(bmp.size()));wire_write<UINT>(bmp.data()+10,54);wire_write<UINT>(bmp.data()+14,40);wire_write(bmp.data()+18,td.Width);wire_write<int32_t>(bmp.data()+22,-int32_t(td.Height));wire_write<uint16_t>(bmp.data()+26,1);wire_write<uint16_t>(bmp.data()+28,32);wire_write(bmp.data()+34,UINT(owned.final.size()));for(size_t i=0;i<owned.final.size();i+=4){bmp[54+i]=owned.final[i+2];bmp[55+i]=owned.final[i+1];bmp[56+i]=owned.final[i];bmp[57+i]=owned.final[i+3];}
+        ContainerWriter writer(path,h);for(const auto& [id,r]:records)writer.append({id,r.category,r.type,r.payload.data(),r.payload.size()});writer.finish(bmp);
+        return Json{{"file",path.filename().string()},{"samples",samples},{"layers",layers},{"initialization",init},{"application_edits",edits},{"helper_events",helper},{"application_draws",application},{"msaa_resource",original},{"helper_resource",temporary},{"scope","Experimental Draw/Copy initialization; production MSAA capture still refused"}};
+    }
+};
+void bytes(const std::filesystem::path& path,const ByteBuffer& value){std::ofstream file(path,std::ios::binary);file.write(reinterpret_cast<const char*>(value.data()),value.size());require(bool(file),"Write oracle failed");}
+}
+int wmain(int argc,wchar_t** argv){try{bool hardware=false;std::filesystem::path out;for(int i=1;i<argc;++i){if(std::wstring(argv[i])==L"--hardware")hardware=true;else out=argv[i];}Json results=Json::array();if(!out.empty())std::filesystem::create_directories(out);
+    for(UINT samples:{2u,4u}){auto data=native(hardware,samples);require(object_status().at("active")==0 && metadata_status().at("alive")==0,"Source objects alive before encoding");if(out.empty())continue;for(UINT mode=0;mode<3;++mode){const auto name=std::to_string(samples)+"x-"+(mode==0?"complete":mode==1?"missing-initialization":"missing-application-draws");WireFixture fixture;results.push_back(fixture.write(out/(name+".gpa_frame"),data,samples,mode!=1,mode!=2));bytes(out/(name+".expected.rgba"),expected(samples,mode!=2,mode!=1));}}
+    if(!out.empty()){std::ofstream file(out/"frames.json");file<<results.dump(2);require(bool(file),"Write manifest failed");}std::cout<<Json{{"passed",true},{"hardware",hardware},{"source_gpu_objects_alive",0},{"debug_warnings_or_errors",0},{"files",results.size()}}.dump()<<'\n';return 0;
+}catch(const std::exception& e){std::cerr<<e.what()<<'\n';return 1;}}
