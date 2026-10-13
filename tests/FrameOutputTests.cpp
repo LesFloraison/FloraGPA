@@ -63,6 +63,36 @@ void oracle(const QString &path) {
 class FrameOutputTests : public QObject {
     Q_OBJECT
   private slots:
+    void vendorSelectionArguments() {
+        const QString executable = QCoreApplication::applicationDirPath() + "/FloraGPA.Cli.exe";
+        const QList<QStringList> invalid{
+            {"replay", "missing.gpa_frame", "--gpu-vendor", "0"},
+            {"replay", "missing.gpa_frame", "--gpu-vendor", "65536"},
+            {"replay", "missing.gpa_frame", "--gpu-vendor", "0x10000"},
+            {"replay", "missing.gpa_frame", "--gpu-vendor", "-1"},
+            {"replay", "missing.gpa_frame", "--gpu-vendor", "+32902"},
+            {"replay", "missing.gpa_frame", "--gpu-vendor", " 32902"},
+            {"replay", "missing.gpa_frame", "--gpu-vendor", "intel"},
+            {"replay", "missing.gpa_frame", "--gpu-vendor", "0x8086", "--warp"},
+            {"inventory", "missing.gpa_frame", "--gpu-vendor", "0x8086"},
+            {"metric-profile", "missing.gpa_frame", "--gpu-vendor", "0x8086"}};
+        for (const auto &arguments : invalid) {
+            QProcess process;
+            process.start(executable, arguments);
+            QVERIFY(process.waitForStarted());
+            QVERIFY(process.waitForFinished(30000));
+            QVERIFY(process.exitCode() != 0);
+            QVERIFY2(process.readAllStandardError().contains("--gpu-vendor"), qPrintable(arguments.join(' ')));
+        }
+        for (const auto &vendor : {"32902", "0x8086", "0X8086"}) {
+            QProcess process;
+            process.start(executable, {"replay", "missing.gpa_frame", "--gpu-vendor", vendor});
+            QVERIFY(process.waitForStarted());
+            QVERIFY(process.waitForFinished(30000));
+            QVERIFY(process.exitCode() != 0);
+            QVERIFY(!process.readAllStandardError().contains("--gpu-vendor"));
+        }
+    }
     void resolvedInitializationReport() {
         QTemporaryDir dir;
         for (bool initial : {true, false}) {
@@ -113,8 +143,8 @@ class FrameOutputTests : public QObject {
         capture.add(5, 9, 1, statePack(16u, 11u, 22u, 33u, 44u));
         capture.add(100, 7, 0x246, statePack(Id(0), Id(1), int32_t(0), Id(2), 0u, 4u, 0u, Id(5)));
         capture.add(110, 7, 0x246, statePack(Id(0), Id(1), int32_t(-1), Id(2), 0u, 4u, 0u, Id(5)));
-        // The old fixture encoded a successful READ as a captured write. Keep
-        // that malformed layout as a negative control for the Map audit.
+        // Executable READ now supports an empty data diff, but still requires
+        // its nonzero saved-data identity. Retain the missing-identity negative.
         auto malformed = capture;
         malformed.add(120, 7, 0x246, statePack(Id(0), Id(1), int32_t(0), Id(2), 0u, 1u, 0u, Id(0)));
         const auto invalidPath = dir.filePath("read-as-write.gpa_frame");
@@ -125,9 +155,10 @@ class FrameOutputTests : public QObject {
         Replay invalidReplay(invalidFrame, invalidOptions);
         try {
             invalidReplay.run();
-            QFAIL("A READ in a captured-write record must be rejected");
+            QFAIL("Executable READ without a data identity must be rejected");
         } catch (const std::runtime_error &error) {
-            QVERIFY(QString::fromUtf8(error.what()).contains("Captured write record contains a READ Map"));
+            QVERIFY2(QString::fromUtf8(error.what()).contains("Successful Map has no captured data identity"),
+                     error.what());
         }
         capture.add(6, 5, 0x83, statePack(Id(0), Id(0), 16u, 3u, 0u, 0x20000u, 0u, 0u, Id(0)));
         capture.add(120, 7, 0x34ec, statePack(Id(0), Id(1), int32_t(0), Id(6), 0u, 1u, 0u, Id(777)));

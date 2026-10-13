@@ -1,0 +1,290 @@
+{
+  "schema": "FloraGPA explicit replay adapter and GF2 Intel baseline 1",
+  "source_parent": "a20176f4878016dcb82e615dc62048421df38d4f",
+  "formal_accepted_frames": 0,
+  "required_frames": 6,
+  "raw_evidence": "artifacts/capture-gf2-intel-20261014",
+  "manifest_sha256": "8e7ff009d8c487a585192812cc14d6162f7c5aefda2befcf1aa4a48563c5eb37",
+  "frame": {
+    "file": "frame-72ff809b-5485-4b22-a90e-554a3573bb97.gpa_frame",
+    "bytes": 871418347,
+    "sha256": "591bfd79ef78ad1428e79d052758cdc9ec425c1651f23d2e26e051d6d2dc5879",
+    "reference_rgba_sha256": "7a58e38f938743b0056441cd781e70310b8fb51e4b9e967d458df00e15589e95",
+    "width": 2560,
+    "height": 1440
+  },
+  "session": {
+    "id": "e5f72090-84bd-4813-b53d-a744fe8682da",
+    "present": 6892,
+    "continued_presents": 7209,
+    "resource_limit_mib": 2048,
+    "game_arguments": [
+      "-force-d3d11",
+      "-force-device-index",
+      "1",
+      "-logFile",
+      "<evidence>/player.log"
+    ],
+    "capture_adapter": "Intel(R) Iris(R) Xe Graphics",
+    "scene": "home",
+    "interface_gaps": 0
+  },
+  "flora_replays": [
+    {
+      "repeat": 0,
+      "adapter": "Intel(R) Iris(R) Xe Graphics",
+      "sha256": "7a58e38f938743b0056441cd781e70310b8fb51e4b9e967d458df00e15589e95",
+      "comparison": {
+        "different_pixels": 0,
+        "different_channels": 0,
+        "maximum": 0
+      },
+      "counts": {
+        "ClearDepthStencilView": 8,
+        "ClearRenderTargetView": 5,
+        "CopyResource": 3,
+        "Draw": 25,
+        "DrawIndexed": 176,
+        "DrawIndexedInstanced": 9,
+        "Map": 244,
+        "Present": 1,
+        "ResolveSubresource": 6,
+        "annotation_records": 18,
+        "present_rtv_unbinds": 1,
+        "query_completion_unresolved": 1,
+        "query_end_observations": 1,
+        "query_metadata_records": 3,
+        "unmap_observations": 244
+      }
+    },
+    {
+      "repeat": 1,
+      "adapter": "Intel(R) Iris(R) Xe Graphics",
+      "sha256": "690fe4d68f3b7f2da906d9ed8c09301882c354a16ab114e8209a5632f14e336f",
+      "comparison": {
+        "different_pixels": 10,
+        "different_channels": 20,
+        "maximum": 6
+      },
+      "counts": {
+        "ClearDepthStencilView": 8,
+        "ClearRenderTargetView": 5,
+        "CopyResource": 3,
+        "Draw": 25,
+        "DrawIndexed": 176,
+        "DrawIndexedInstanced": 9,
+        "Map": 244,
+        "Present": 1,
+        "ResolveSubresource": 6,
+        "annotation_records": 18,
+        "present_rtv_unbinds": 1,
+        "query_completion_unresolved": 1,
+        "query_end_observations": 1,
+        "query_metadata_records": 3,
+        "unmap_observations": 244
+      }
+    },
+    {
+      "repeat": 2,
+      "adapter": "Intel(R) Iris(R) Xe Graphics",
+      "sha256": "690fe4d68f3b7f2da906d9ed8c09301882c354a16ab114e8209a5632f14e336f",
+      "comparison": {
+        "different_pixels": 10,
+        "different_channels": 20,
+        "maximum": 6
+      },
+      "counts": {
+        "ClearDepthStencilView": 8,
+        "ClearRenderTargetView": 5,
+        "CopyResource": 3,
+        "Draw": 25,
+        "DrawIndexed": 176,
+        "DrawIndexedInstanced": 9,
+        "Map": 244,
+        "Present": 1,
+        "ResolveSubresource": 6,
+        "annotation_records": 18,
+        "present_rtv_unbinds": 1,
+        "query_completion_unresolved": 1,
+        "query_end_observations": 1,
+        "query_metadata_records": 3,
+        "unmap_observations": 244
+      }
+    }
+  ],
+  "original_default": {
+    "adapter_audit": {
+      "scope": "Explicit playback; DrawIndexed path of this pinned build",
+      "negative_control_suppress_draws": false,
+      "context_count": 1,
+      "d3d11_calls": {
+        "DrawIndexed": 176,
+        "submitted_indices": 1364046
+      },
+      "event_dispatch_count": 497,
+      "event_function_rvas": {
+        "0x25b40": 5,
+        "0x27ec0": 25,
+        "0x26250": 3,
+        "0x259e0": 8,
+        "0x27080": 244,
+        "0x27f50": 176,
+        "0x29bf0": 9,
+        "0x27fe0": 9,
+        "0x29cf0": 6,
+        "0x28850": 4,
+        "0x28950": 2,
+        "0x28b40": 6
+      },
+      "actual_context_adapters": [
+        {
+          "description": "NVIDIA GeForce RTX 3070 Laptop GPU",
+          "vendor_id": 4318,
+          "device_id": 9373,
+          "luid": [
+            56225,
+            0
+          ]
+        }
+      ]
+    },
+    "comparison": {
+      "different_pixels": 2216743,
+      "different_channels": 3296065,
+      "maximum": 95
+    }
+  },
+  "golden": [
+    {
+      "case": "gf2",
+      "rgba_sha256": "2e1abc5eacb0bbfd801f9fe059c305baa9a0786c384b36a42fa5a323dd979fd1",
+      "passed": true,
+      "counts": {
+        "ClearDepthStencilView": 2,
+        "ClearRenderTargetView": 1,
+        "CreateBuffer": 2,
+        "DrawIndexed": 72,
+        "Map": 44,
+        "Present": 1,
+        "buffers_created_without_initial_data": 2,
+        "object_observation_records": 49,
+        "pipeline_setter_records": 142,
+        "private_data_observations": 4,
+        "query_completion_unresolved": 1,
+        "query_metadata_records": 2,
+        "state_or_auxiliary_records": 551,
+        "unmap_observations": 44
+      }
+    },
+    {
+      "case": "gf2-negative",
+      "rgba_sha256": "b2c5548a51715f581c4591acc266ac7a0c65b54b7ecd9a49f43499fa9b76c5f1",
+      "passed": true,
+      "counts": {
+        "ClearDepthStencilView": 2,
+        "ClearRenderTargetView": 1,
+        "CreateBuffer": 2,
+        "Map": 44,
+        "Present": 1,
+        "buffers_created_without_initial_data": 2,
+        "object_observation_records": 49,
+        "pipeline_setter_records": 142,
+        "private_data_observations": 4,
+        "query_completion_unresolved": 1,
+        "query_metadata_records": 2,
+        "state_or_auxiliary_records": 551,
+        "unmap_observations": 44
+      }
+    },
+    {
+      "case": "bf1",
+      "rgba_sha256": "1f724d1840652f66afd26dd30c95aecd5c1b4932eede56109198f15a8f57a2f6",
+      "passed": true,
+      "counts": {
+        "ClearDepthStencilView": 10,
+        "ClearRenderTargetView": 10,
+        "ClearUnorderedAccessViewFloat": 1,
+        "CopyResource": 2,
+        "CopyStructureCount": 6,
+        "CopySubresourceRegion": 7,
+        "Dispatch": 60,
+        "DispatchIndirect": 13,
+        "Draw": 79,
+        "DrawIndexed": 41,
+        "DrawIndexedInstanced": 1053,
+        "DrawInstanced": 29,
+        "GenerateMips": 2,
+        "Map": 4151,
+        "Present": 1,
+        "UpdateSubresource": 27,
+        "map_read_observations": 2,
+        "map_read_synchronizations": 2,
+        "object_observation_records": 28,
+        "pipeline_setter_records": 2221,
+        "query_completion_unresolved": 17,
+        "query_metadata_records": 17,
+        "state_or_auxiliary_records": 7354,
+        "unmap_observations": 4153,
+        "unresolved_input_layout_setters": 2,
+        "unresolved_output_setters": 6,
+        "unresolved_shader_setters": 4,
+        "unresolved_srv_setters": 2
+      }
+    },
+    {
+      "case": "bf1-negative",
+      "rgba_sha256": "cd3a3066f984b1c317fbeefec2836503f32078321d3dc1f367465f2c06d435bf",
+      "passed": true,
+      "counts": {
+        "ClearDepthStencilView": 10,
+        "ClearRenderTargetView": 10,
+        "ClearUnorderedAccessViewFloat": 1,
+        "CopyResource": 2,
+        "CopyStructureCount": 6,
+        "CopySubresourceRegion": 7,
+        "Dispatch": 60,
+        "DispatchIndirect": 13,
+        "GenerateMips": 2,
+        "Map": 4151,
+        "Present": 1,
+        "UpdateSubresource": 27,
+        "map_read_observations": 2,
+        "map_read_synchronizations": 2,
+        "object_observation_records": 28,
+        "pipeline_setter_records": 2221,
+        "query_completion_unresolved": 17,
+        "query_metadata_records": 17,
+        "state_or_auxiliary_records": 7354,
+        "unmap_observations": 4153,
+        "unresolved_input_layout_setters": 2,
+        "unresolved_output_setters": 6,
+        "unresolved_shader_setters": 4,
+        "unresolved_srv_setters": 2
+      }
+    }
+  ],
+  "explicit_nvidia_golden": {
+    "adapter": "NVIDIA GeForce RTX 3070 Laptop GPU",
+    "sha256": "2e1abc5eacb0bbfd801f9fe059c305baa9a0786c384b36a42fa5a323dd979fd1"
+  },
+  "ctest_passed": 5,
+  "argument_validation_cases": 13,
+  "missing_vendor_refused": true,
+  "gui": {
+    "selected_gpu": "This PC (0: GPU 0: Intel(R) Iris(R) Xe Graphics)",
+    "new_frame_opened": false,
+    "blocker": "Computer Use could not operate the folder modal: set_value reported not settable; click reported point outside window bounds; modal focus did not change.",
+    "cleanup": "Diagnostic GPA process stopped; no captured-frame GUI inspection pass claimed."
+  },
+  "exact_comparison_rule_unchanged": true,
+  "binaries": {
+    "build/vs2022/Release/FloraGPA.Cli.exe": "6ffe4c3d90418726807e0828134d87df1165f2cde5b269c50f1e45b7e9385b8f",
+    "build/vs2022/Release/FloraGPA.Worker.exe": "44cb74863779327011fc7d76f6dc759610dd0715183af33c7e7c9acab1d15003",
+    "build/capture/capture/Release/FloraCapture.exe": "0bc61e429745e1b0f6fd046762cae923471686782a1ab48ba853cca12aaaacf3",
+    "build/capture/capture/Release/FloraCaptureRuntime.dll": "2524977896b74462f62675226f93bf51d6e857471a74093615906247ff0542d3"
+  },
+  "source_files": {
+    "src/cli/main.cpp": "e49d2cf5eb86c0db637ca10909c01bcdd17a9ba5920ea406f1ef36beaab516b4",
+    "tests/FrameOutputTests.cpp": "8593b0bc07a275a31c258dfb03f946ee5682f73bb8fb6e311f6db04df239428b"
+  }
+}

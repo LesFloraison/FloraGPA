@@ -107,6 +107,7 @@ int main(int argc, char **argv) {
     p.addOption({"decompiler", "Optional cmd_Decompiler.exe for recovery fallback or assembly", "path"});
     p.addOption({"recover", "Reconstruct supported DXBC as editable HLSL (shader only)"});
     p.addOption({"warp", "Use the WARP software adapter"});
+    p.addOption({"gpu-vendor", "Use the first adapter with this PCI vendor ID (decimal or 0x hex)", "id"});
     p.addOption({"timings", "Collect native GPU timestamps and pipeline statistics"});
     p.addOption({"debug-device", "Enable D3D11 validation"});
     p.addOption({"renderdoc", "Optional RenderDoc DLL for independent replay recapture", "path"});
@@ -183,6 +184,22 @@ int main(int argc, char **argv) {
         if (args.isEmpty())
             throw std::runtime_error("Expected command");
         auto command = args[0];
+        std::optional<uint32_t> gpuVendor;
+        if (p.isSet("gpu-vendor")) {
+            const QStringList supported{"replay", "buffer", "texture", "statistics", "texture-storage",
+                                        "geometry", "post-geometry", "replay-pipeline", "predicate",
+                                        "shader-checkpoint", "draw-resources", "coverage", "quad", "timings"};
+            if (!supported.contains(command))
+                throw std::runtime_error("--gpu-vendor applies to native replay commands only");
+            if (p.isSet("warp"))
+                throw std::runtime_error("--gpu-vendor cannot be combined with --warp");
+            bool valid = false;
+            const auto value = p.value("gpu-vendor");
+            const auto vendor = value.toUInt(&valid, value.startsWith("0x", Qt::CaseInsensitive) ? 16 : 10);
+            if (!valid || !vendor || vendor > 0xffff || value != value.trimmed() || value.startsWith('+'))
+                throw std::runtime_error("--gpu-vendor requires a PCI vendor ID in 1..65535");
+            gpuVendor = vendor;
+        }
         if (p.isSet("no-buffer-csv") && command != "buffer")
             throw std::runtime_error("--no-buffer-csv applies to buffer only");
         if (p.isSet("preview-request") && command != "draw-resources")
@@ -452,6 +469,7 @@ int main(int argc, char **argv) {
                 throw std::runtime_error("draw-resources requires --id and --out and observes both draw boundaries");
             ReplayOptions options;
             options.warp = p.isSet("warp");
+            options.vendor = gpuVendor;
             options.debug = p.isSet("debug-device");
             if (p.isSet("experiment")) {
                 Experiment project(frame);
@@ -475,6 +493,7 @@ int main(int argc, char **argv) {
                     : "Coverage requires --id and --out and defines its own replay boundary");
             ReplayOptions options;
             options.warp = p.isSet("warp");
+            options.vendor = gpuVendor;
             options.debug = p.isSet("debug-device");
             options.until = parseId("id");
             if (p.isSet("experiment")) {
@@ -521,6 +540,7 @@ int main(int argc, char **argv) {
             const auto request=gpuProfileRequest(values);
             const auto selected=gpuProfileSelection(frame,request);
             ReplayOptions options;options.warp=p.isSet("warp");options.debug=p.isSet("debug-device");options.until=selected.end;
+            options.vendor = gpuVendor;
             if(p.isSet("experiment")){Experiment project(frame);project.load(p.value("experiment"),frame);project.apply(frame,options);}
             for(const auto &value:p.value("disable").split(',',Qt::SkipEmptyParts)) {
                 bool valid=false;const auto id=value.toULongLong(&valid);
@@ -756,6 +776,7 @@ int main(int argc, char **argv) {
             ReplayOptions options;
             options.timings = p.isSet("timings");
             options.warp = p.isSet("warp");
+            options.vendor = gpuVendor;
             options.debug = p.isSet("debug-device");
             if (p.isSet("renderdoc")) {
                 options.renderdocLibrary = p.value("renderdoc").toStdWString();
