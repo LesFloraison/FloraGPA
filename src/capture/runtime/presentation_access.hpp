@@ -19,7 +19,15 @@ inline std::recursive_mutex& presentation_context_mutex(ID3D11Device* device){
     std::lock_guard lock(gates->mutex);auto& gate=gates->values[identity.Get()];if(!gate)gate=std::make_unique<std::recursive_mutex>();return *gate;
 }
 inline std::recursive_mutex& presentation_context_mutex(ID3D11DeviceContext* context){Microsoft::WRL::ComPtr<ID3D11Device> device;context->GetDevice(&device);return presentation_context_mutex(device.Get());}
-inline std::recursive_mutex& presentation_context_mutex(ID3D11Multithread* protection){Microsoft::WRL::ComPtr<ID3D11DeviceContext> context;if(FAILED(protection->QueryInterface(IID_PPV_ARGS(&context))))throw std::runtime_error("Multithread context unavailable");return presentation_context_mutex(context.Get());}
+inline std::recursive_mutex& presentation_context_mutex(ID3D11Multithread* protection){
+    // The runtime exposes this IID from both context and device identities.
+    // A device-origin interface need not support QI to ID3D11DeviceContext.
+    Microsoft::WRL::ComPtr<ID3D11DeviceContext> context;
+    if(SUCCEEDED(protection->QueryInterface(IID_PPV_ARGS(&context))))return presentation_context_mutex(context.Get());
+    Microsoft::WRL::ComPtr<ID3D11Device> device;
+    if(FAILED(protection->QueryInterface(IID_PPV_ARGS(&device))))throw std::runtime_error("Multithread device unavailable");
+    return presentation_context_mutex(device.Get());
+}
 inline std::recursive_mutex& presentation_context_mutex(IDXGISwapChain* swap){Microsoft::WRL::ComPtr<ID3D11Device> device;if(FAILED(swap->GetDevice(IID_PPV_ARGS(&device))))throw std::runtime_error("Presentation device unavailable");return presentation_context_mutex(device.Get());}
 inline std::recursive_mutex& presentation_alias_mutex(){static auto* value=new std::recursive_mutex;return *value;}
 using PresentationLock=std::lock_guard<std::recursive_mutex>;

@@ -709,7 +709,7 @@
     },
     "runtime_sha256": "64afb8680eb56248978dd7a7ac35265ffc45e54a4fc132202f2951a3a3e6af05"
   },
-  "latest_progress": "fault_progress; injected failures verified on production 9b8ada3; current-revision interactive regression remains pending",
+  "latest_progress": "device_lock_progress; repaired GF2 HUD and six exact update-screen dual replays; game update still blocks required start/home checks",
   "concurrency_progress": {
     "implementation_base": "1ecbb95",
     "status": "reproduced lock inversion repaired; interactive regression pending",
@@ -830,5 +830,344 @@
     "desktop_recheck": "Owned input fixture still returns failed to activate captured window; current-revision screen presentation and GF2 remain pending",
     "actual_device_loss_verified": false,
     "formal_gf2_accepted_frames": 0
+  },
+  "device_lock_progress": {
+    "base_revision": "a1c6f41",
+    "reason": "GF2 device-origin ID3D11Multithread cannot QI to ID3D11DeviceContext; context-only gate lookup blocked native SetMultithreadProtected",
+    "native_reproducer": "passed",
+    "wrapped_before_fix": "failed: Native multithread protection unavailable",
+    "capture_only_tests": "72/72",
+    "full_focused_tests": "12/12 including 12 Qt cases",
+    "log_sha256": {
+      "artifacts/capture-hud-device-lock-native.log": "616f31d9f8bf03705dfca55d3e5be6ef63f9955131c7e5f5aa72fc5d8511c476",
+      "artifacts/capture-hud-device-lock-repro.log": "095bf22bcaf4b1b00850e06612a9f6bb91c136b7481d6d5d16f642608a12423f",
+      "artifacts/capture-hud-device-lock-tests.log": "3f387ed788deb2a0fb8494f0cc207950126a402d0c6ec0a4b1ffba0b5f1acd21",
+      "artifacts/capture-hud-device-lock-full-tests.log": "599149f3092e56313cc63a40c3fb975852cf32c3f5c2836b236febeb7f2ea494"
+    },
+    "source_sha256": {
+      "src/capture/runtime/presentation_access.hpp": "e703aee7c2671a5dafb8b8c9ea3ca184a4f6f75fae77b01d5f22e746a5bcac92",
+      "src/capture/tests/hud_concurrency_tests.cpp": "55b3ec1b561be0e17627037531745fca844d243b0caf66535bc5ce708c6fc9cf"
+    },
+    "runtime_sha256": "965f165c6c87b766f64b0058c375abd057936f499b4e94bcdb0454ad1afae057",
+    "presentation_profiles": {
+      "blt": {
+        "artifacts": "artifacts/capture-hud-device-lock-blt",
+        "checks": 82,
+        "validation_sha256": "e2b4866fe782e33a569620474866911f28c49d16f71f20e2514fdcb9730179aa",
+        "exit": {
+          "exact_retained_pixels": true,
+          "frames": 26,
+          "mode": "blt"
+        },
+        "captures": {
+          "frame-00272b42-d7c3-40a8-8397-42606ead8dfd.gpa_frame": "f68507cf9002199d2bec51bc721d67c77de10495deef1b4ac4648a8c533410c1",
+          "frame-6674eaee-7fbe-4ab5-abcf-60ca52ea5bd0.gpa_frame": "447d1cac69f6aefe77a440c4e8038abb8d9195e657abcd5cdbcea580ac6720e5",
+          "frame-c3cb57ad-7673-420f-9495-cd0e58b7cb26.gpa_frame": "62129687ff934ee99d6eb89df27027ad1cf7f696c727f2b03dbe9353b29b850d"
+        }
+      },
+      "flip3": {
+        "artifacts": "artifacts/capture-hud-device-lock-flip3",
+        "checks": 82,
+        "validation_sha256": "e2b4866fe782e33a569620474866911f28c49d16f71f20e2514fdcb9730179aa",
+        "exit": {
+          "exact_retained_pixels": true,
+          "frames": 22,
+          "mode": "flip3"
+        },
+        "captures": {
+          "frame-184624a0-eb78-40c3-a7d5-942948e131c8.gpa_frame": "9dbc2a6fbf3a933c8d8d907532d6484ada3f101efc10eec91cbecb10ef519f47",
+          "frame-78bb1dc7-56f0-4cb1-8343-898a18b0c580.gpa_frame": "da9230abbf999aab1bf309d093f0fbb43ace97e7eab8eea54971bdbb8bc12e78",
+          "frame-91d29ac6-abf6-4eaa-ac0c-8301ed4b948f.gpa_frame": "ab361ce2fa8dc8b2e09e26b98a347930fa0ba9f80a4e4d33ce011288fd38f8a7"
+        }
+      },
+      "borderless": {
+        "artifacts": "artifacts/capture-hud-device-lock-borderless",
+        "checks": 82,
+        "validation_sha256": "e2b4866fe782e33a569620474866911f28c49d16f71f20e2514fdcb9730179aa",
+        "exit": {
+          "exact_retained_pixels": true,
+          "frames": 20,
+          "mode": "borderless"
+        },
+        "captures": {
+          "frame-08e23be9-d611-4b18-b949-d37e24778f51.gpa_frame": "d00e899eefed9fea62d5cb4747eb33a6642d2fea0a1b4567aa5bbff5e7c1d450",
+          "frame-b19311be-bc56-45d3-b7ae-64a31c20bcae.gpa_frame": "7be757fe68d77fcba33b0870f3cd646a730d5629297ddb4ec2fef23ad5406fe1",
+          "frame-bdb6b65a-1147-4186-b904-afe2813cbd22.gpa_frame": "3fe9e4249987a3e7f90319cb51d782540af2d92903ee8c16162c26a34b81b93f"
+        }
+      },
+      "exclusive": {
+        "artifacts": "artifacts/capture-hud-device-lock-exclusive",
+        "checks": 82,
+        "validation_sha256": "1a2b4eecef4fff0772adc04bc4dde720187bca2ceff7cd490c2c29dc3eedcf15",
+        "exit": {
+          "exact_retained_pixels": true,
+          "frames": 21,
+          "mode": "exclusive"
+        },
+        "captures": {
+          "frame-97825cac-65c5-4c94-b29f-2ef364eabab3.gpa_frame": "885e8485b84303b786bb7f0c7e6bce90fbc91bffde6244302f368444d5dd5a4c",
+          "frame-daf0e19e-e8cc-4041-a385-fc1fc6ec5afe.gpa_frame": "f8aaca7a22397d21863ae22025d215e4293e6feb8633769d43208fefe7f2f337",
+          "frame-ed014622-7db4-4baa-b271-2c73aef43887.gpa_frame": "747fcfe1bf131b5dd5503868163eb7eb3db94cb9dfb700cc6d6bb83f559cfd93"
+        }
+      },
+      "package-check": {
+        "artifacts": "artifacts/capture-hud-device-lock-package-check",
+        "checks": 82,
+        "validation_sha256": "1a2b4eecef4fff0772adc04bc4dde720187bca2ceff7cd490c2c29dc3eedcf15",
+        "exit": {
+          "exact_retained_pixels": true,
+          "frames": 20,
+          "mode": "exclusive"
+        },
+        "captures": {
+          "frame-107c7cde-3750-4f79-8624-f9a7d1c96466.gpa_frame": "34e87065bde72856d310d7475624146446039b9e0c559b6e1586173eaf3dfb88",
+          "frame-3a580c5d-02e2-4883-8c9e-5b1409b03bcc.gpa_frame": "c8dc60184d6ce4e2a3d6d27079742a96d7b394816930de6f3825208a2a9c3714",
+          "frame-e43285ff-992a-4b8e-8d3b-a890e7fa6f2c.gpa_frame": "2c62b2f5b81c124b9ab85b7a31217324f09de32c03e636f378a0ef47b7c869a5"
+        }
+      }
+    },
+    "gf2": {
+      "artifacts": "artifacts/capture-hud-device-lock-gf2",
+      "verified": "Compact/Detailed/Hidden visibly verified; Hidden hotkey capture completed; all six update-screen files execute exactly in both players and match captured resources/previews; zero interface gaps",
+      "pending": "Game resource update still precedes start/home access; current start/home MSAA-refusal and disconnect checks pending",
+      "formal_accepted_frames": 0,
+      "diagnostic_files": [
+        {
+          "capture": "frame-36a98067-aa65-46b7-93be-26b90493263b.gpa_frame",
+          "sha256": "e743ec454f003876f919d9ef855240ebb3c8e30368c08cd85011cb1cec5808cf",
+          "rgba_sha256": "40cd27f4305280c0abc3337f0b37b0d500eb7dfd06a38656259180847db8d1f7",
+          "dimensions": [
+            2560,
+            1440
+          ],
+          "counts": {
+            "ClearDepthStencilView": 7,
+            "CopySubresourceRegion": 3,
+            "Draw": 3,
+            "DrawIndexed": 12,
+            "Map": 22,
+            "Present": 1,
+            "present_rtv_unbinds": 1,
+            "query_completion_unresolved": 1,
+            "query_end_observations": 1,
+            "query_metadata_records": 4,
+            "unmap_observations": 22
+          },
+          "preview_exact": true,
+          "dual_player_exact": true,
+          "original_resource_exact": true,
+          "flora_reference_pixels_used": false,
+          "original_native": {
+            "player_dll": "C:\\Program Files\\IntelSWTools\\GPA\\dx11_player.dll",
+            "player_sha256": "39061ff329e4a32d0c8375ce9ee15e2017bccab0593943b962a860e11723d38b",
+            "adapter_selection": "Original kernel default (undefined GpuId)",
+            "callbacks": [],
+            "open_status": 0,
+            "playback_status": 0,
+            "closed": true
+          },
+          "new_framebuffer_count": 1
+        },
+        {
+          "capture": "frame-44f2078c-b2b8-4bda-8913-dbd7206fcf1c.gpa_frame",
+          "sha256": "2794c74a412082fb73865e8eb88382da13c5089c219e041a3aca90b72c97320c",
+          "rgba_sha256": "799a3ecd604dde17c6e3d95898eb24ff626059874520a16e08887fc916d5dee5",
+          "dimensions": [
+            2560,
+            1440
+          ],
+          "counts": {
+            "ClearDepthStencilView": 7,
+            "CopySubresourceRegion": 3,
+            "Draw": 3,
+            "DrawIndexed": 12,
+            "Map": 20,
+            "Present": 1,
+            "present_rtv_unbinds": 1,
+            "query_completion_unresolved": 1,
+            "query_end_observations": 1,
+            "query_metadata_records": 3,
+            "unmap_observations": 20
+          },
+          "preview_exact": true,
+          "dual_player_exact": true,
+          "original_resource_exact": true,
+          "flora_reference_pixels_used": false,
+          "original_native": {
+            "player_dll": "C:\\Program Files\\IntelSWTools\\GPA\\dx11_player.dll",
+            "player_sha256": "39061ff329e4a32d0c8375ce9ee15e2017bccab0593943b962a860e11723d38b",
+            "adapter_selection": "Original kernel default (undefined GpuId)",
+            "callbacks": [],
+            "open_status": 0,
+            "playback_status": 0,
+            "closed": true
+          },
+          "new_framebuffer_count": 1
+        },
+        {
+          "capture": "frame-a6e0c4b9-bb5f-427b-8fc9-227e93dc660c.gpa_frame",
+          "sha256": "4c20dcbf2f0db0214bfece49a498f6828b18e71656e57eed1830cb5d41ac6cff",
+          "rgba_sha256": "07b047ac90ca1bbb873418f03e2762497f13c71ea298be8b4864cb2eda0e3052",
+          "dimensions": [
+            2560,
+            1440
+          ],
+          "counts": {
+            "ClearDepthStencilView": 7,
+            "CopySubresourceRegion": 3,
+            "Draw": 3,
+            "DrawIndexed": 12,
+            "Map": 22,
+            "Present": 1,
+            "present_rtv_unbinds": 1,
+            "query_completion_unresolved": 1,
+            "query_end_observations": 1,
+            "query_metadata_records": 3,
+            "unmap_observations": 22
+          },
+          "preview_exact": true,
+          "dual_player_exact": true,
+          "original_resource_exact": true,
+          "flora_reference_pixels_used": false,
+          "original_native": {
+            "player_dll": "C:\\Program Files\\IntelSWTools\\GPA\\dx11_player.dll",
+            "player_sha256": "39061ff329e4a32d0c8375ce9ee15e2017bccab0593943b962a860e11723d38b",
+            "adapter_selection": "Original kernel default (undefined GpuId)",
+            "callbacks": [],
+            "open_status": 0,
+            "playback_status": 0,
+            "closed": true
+          },
+          "new_framebuffer_count": 1
+        },
+        {
+          "capture": "frame-b7706c54-5c18-4801-9f69-94eab223373a.gpa_frame",
+          "sha256": "84287d760f8d9492310c6c715e7a2f48509c9e62ded54d8211576b03fa8226f6",
+          "rgba_sha256": "b8116752ccd433089bfb1ced3fb316c364a6a670a2786f70e7f436ee5123f991",
+          "dimensions": [
+            2560,
+            1440
+          ],
+          "counts": {
+            "ClearDepthStencilView": 7,
+            "CopySubresourceRegion": 3,
+            "Draw": 3,
+            "DrawIndexed": 12,
+            "Map": 20,
+            "Present": 1,
+            "present_rtv_unbinds": 1,
+            "query_completion_unresolved": 1,
+            "query_end_observations": 1,
+            "query_metadata_records": 3,
+            "unmap_observations": 20
+          },
+          "preview_exact": true,
+          "dual_player_exact": true,
+          "original_resource_exact": true,
+          "flora_reference_pixels_used": false,
+          "original_native": {
+            "player_dll": "C:\\Program Files\\IntelSWTools\\GPA\\dx11_player.dll",
+            "player_sha256": "39061ff329e4a32d0c8375ce9ee15e2017bccab0593943b962a860e11723d38b",
+            "adapter_selection": "Original kernel default (undefined GpuId)",
+            "callbacks": [],
+            "open_status": 0,
+            "playback_status": 0,
+            "closed": true
+          },
+          "new_framebuffer_count": 1
+        },
+        {
+          "capture": "frame-c1306f7b-0a1e-4ced-8990-fada1e201f63.gpa_frame",
+          "sha256": "fffb07167d80ceece3b0b40542344b3eecf742cb28cfad2e7d01230f1992235d",
+          "rgba_sha256": "54b91cb01ebb07021006bfe3ff9d8a644857774d7ab6713e642f6c7de4f9e37e",
+          "dimensions": [
+            2560,
+            1440
+          ],
+          "counts": {
+            "ClearDepthStencilView": 7,
+            "CopySubresourceRegion": 3,
+            "Draw": 3,
+            "DrawIndexed": 12,
+            "Map": 22,
+            "Present": 1,
+            "present_rtv_unbinds": 1,
+            "query_completion_unresolved": 1,
+            "query_end_observations": 1,
+            "query_metadata_records": 3,
+            "unmap_observations": 22
+          },
+          "preview_exact": true,
+          "dual_player_exact": true,
+          "original_resource_exact": true,
+          "flora_reference_pixels_used": false,
+          "original_native": {
+            "player_dll": "C:\\Program Files\\IntelSWTools\\GPA\\dx11_player.dll",
+            "player_sha256": "39061ff329e4a32d0c8375ce9ee15e2017bccab0593943b962a860e11723d38b",
+            "adapter_selection": "Original kernel default (undefined GpuId)",
+            "callbacks": [],
+            "open_status": 0,
+            "playback_status": 0,
+            "closed": true
+          },
+          "new_framebuffer_count": 1
+        },
+        {
+          "capture": "frame-f01f6eaa-14f9-4be5-b62d-eff2669c8437.gpa_frame",
+          "sha256": "af152210a39235a891ad5f07aa4ae284b8c9a57b612b33f28468d1d3ffa0c0c9",
+          "rgba_sha256": "f745bd9a7f6363983271c79c1f9f3c71df37bdca2e40ba1bf379f73d932bffbb",
+          "dimensions": [
+            2560,
+            1440
+          ],
+          "counts": {
+            "ClearDepthStencilView": 7,
+            "CopySubresourceRegion": 3,
+            "Draw": 3,
+            "DrawIndexed": 12,
+            "Map": 22,
+            "Present": 1,
+            "present_rtv_unbinds": 1,
+            "query_completion_unresolved": 1,
+            "query_end_observations": 1,
+            "query_metadata_records": 3,
+            "unmap_observations": 22
+          },
+          "preview_exact": true,
+          "dual_player_exact": true,
+          "original_resource_exact": true,
+          "flora_reference_pixels_used": false,
+          "original_native": {
+            "player_dll": "C:\\Program Files\\IntelSWTools\\GPA\\dx11_player.dll",
+            "player_sha256": "39061ff329e4a32d0c8375ce9ee15e2017bccab0593943b962a860e11723d38b",
+            "adapter_selection": "Original kernel default (undefined GpuId)",
+            "callbacks": [],
+            "open_status": 0,
+            "playback_status": 0,
+            "closed": true
+          },
+          "new_framebuffer_count": 1
+        }
+      ],
+      "dual_validation_sha256": "b1a01d2f46e83721293c774ef8b7fe0be394c0f57cbddf95e77d6047d3a17196",
+      "physical_hold": {
+        "scope": "User-assisted approximately 3-second holds; user confirmed several independent shortcut presses",
+        "baseline_files": 1,
+        "added_user_files": 4,
+        "file_intervals_seconds": [
+          23,
+          11,
+          10
+        ],
+        "repeat_burst_observed": false,
+        "later_hidden_mode_capture_files": 1
+      }
+    },
+    "package_manifest_sha256": "5321eaa758485a611cd1ed586a0e365c23b8bf7c1280e8c37f8d8977288de8df",
+    "pre_fix_validation": {
+      "source": "a1c6f41",
+      "scope": "Four previously desktop-dependent tests, Qt, four presentation modes and standalone package passed before GF2 exposed device-origin interface gap",
+      "retained_borderless_oracle_failure": "artifacts/capture-hud-resumed-borderless/validation; initial invocation omitted --flip; native creation and earlier baseline prove flip RTV unbinding is expected; same files pass validation-flip"
+    }
   }
 }

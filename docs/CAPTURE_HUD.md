@@ -562,3 +562,41 @@ retained in `artifacts/capture-hud-fault-run.log`; the test now releases those
 oracle references before checking native lifetime. No production fix was needed.
 Real device loss, current-revision interactive Present/GF2 regression and the
 remaining HUD acceptance matrix stay pending. Formal GF2 acceptance stays 0/6.
+
+## Device-origin multithread interface
+
+After desktop interaction was restored, GF2 exposed a missing interface path in
+the per-device gate implementation: its `ID3D11Multithread` comes from the native
+device and cannot be queried back to `ID3D11DeviceContext`. The former context-only
+lookup threw before forwarding `SetMultithreadProtected`; the recorded gap then
+correctly suppressed HUD rendering and capture. The failed game session remains
+under `artifacts/capture-hud-resumed-gf2` with no accepted file.
+
+The lock lookup now resolves a context-origin interface through GetDevice, or a
+device-origin interface through its native ID3D11Device identity. Both routes
+use the same device gate. The concurrency oracle adds `--device` and four
+WARP/hardware native/wrapped cases. Before the fix, the hardware native case
+passed while the wrapper failed with `Native multithread protection unavailable`;
+both logs are retained under `artifacts/capture-hud-device-lock-*`.
+
+After repair, capture-only passes **72/72** tests; the full build passes **12/12**
+focused tests, including **12 Qt cases**. Repeated injected blt, three-buffer flip,
+borderless and exclusive sessions plus a standalone system-PATH exclusive package
+produce **15 files / 410 exact checks**. Application retained bytes, dual-player
+execution, previews, command/resource inventory and Draw-zero controls all pass.
+The package audit finds no Qt/Core/Replay/GPA/RenderDoc/Python modules in the
+target. These results use the fixed runtime hashed in `device_lock_progress`.
+
+A fresh GF2 process now visibly renders Compact/Detailed/Hidden with zero
+interface gaps; Hidden mode still completes hotkey capture. Six diagnostic files
+execute in both players with exact resource/preview/output bytes and no reference
+image substitution. User-assisted approximately three-second holds added four
+files after the first tool-triggered capture; the user confirmed several separate
+presses. Files are spaced 10–23 seconds apart with no repeat burst. The last file
+comes from the explicit Hidden-mode test. This is scoped manual input evidence.
+
+The game is downloading a new resource update; these six files belong to its
+update screen, not the required start/home scenes. New start-screen capture,
+main-scene MSAA refusal and disconnect checks remain pending. Formal GF2
+acceptance is still **0/6**. The live updating session is retained so the download
+can finish without another restart.

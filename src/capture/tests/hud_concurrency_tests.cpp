@@ -10,7 +10,7 @@ using Microsoft::WRL::ComPtr;
 void check(HRESULT value){if(FAILED(value))throw std::runtime_error("DX11 HRESULT "+std::to_string(uint32_t(value)));}
 void require(bool value,const char* reason){if(!value)throw std::runtime_error(reason);}
 int main(int argc,char** argv){try{
-    bool native_only=false,hardware=false;for(int i=1;i<argc;++i){const std::string arg=argv[i];if(arg=="--native")native_only=true;else if(arg=="--hardware")hardware=true;else throw std::runtime_error("Unknown test argument");}
+    bool native_only=false,hardware=false,device_interface=false;for(int i=1;i<argc;++i){const std::string arg=argv[i];if(arg=="--native")native_only=true;else if(arg=="--hardware")hardware=true;else if(arg=="--device")device_interface=true;else throw std::runtime_error("Unknown test argument");}
     const auto driver=hardware?D3D_DRIVER_TYPE_HARDWARE:D3D_DRIVER_TYPE_WARP;
     std::atomic<bool> finished=false;
     std::jthread watchdog([&](std::stop_token stop){for(unsigned i=0;i<800 && !stop.stop_requested();++i)std::this_thread::sleep_for(std::chrono::milliseconds(10));if(!stop.stop_requested() && !finished){std::cerr<<"Timed out: application Multithread lock and presentation gate deadlocked\n"<<std::flush;ExitProcess(86);}});
@@ -18,7 +18,8 @@ int main(int argc,char** argv){try{
     check(D3D11CreateDevice(nullptr,driver,nullptr,D3D11_CREATE_DEVICE_DEBUG,nullptr,0,D3D11_SDK_VERSION,&device,nullptr,&context));
     ComPtr<ID3D11InfoQueue> info;check(device.As(&info));
     if(!native_only)wrap_object(context.GetAddressOf(),"HUD lock-order oracle");
-    ComPtr<ID3D11Multithread> multithread;check(context.As(&multithread));multithread->SetMultithreadProtected(TRUE);require(multithread->GetMultithreadProtected(),"Native multithread protection unavailable");
+    if(!native_only && device_interface)wrap_object(device.GetAddressOf(),"Device multithread oracle");
+    ComPtr<ID3D11Multithread> multithread;check(device_interface?device.As(&multithread):context.As(&multithread));multithread->SetMultithreadProtected(TRUE);require(multithread->GetMultithreadProtected(),"Native multithread protection unavailable");
     multithread->Enter();multithread->Enter();
     std::atomic<bool> started=false,returned=false;
     std::jthread worker([&]{started=true;context->Flush();returned=true;});
@@ -46,7 +47,7 @@ int main(int argc,char** argv){try{
     multithread->Enter();context->Flush();require(context->GetType()==D3D11_DEVICE_CONTEXT_IMMEDIATE,"Disabled-protection owner access failed");multithread->Leave();
     require(!multithread->GetMultithreadProtected(),"Wrapper changed native protection flag");
     multithread->SetMultithreadProtected(TRUE);
-    if(!native_only)wrap_object(device.GetAddressOf(),"HUD CPU-view oracle");
+    if(!native_only && !device_interface)wrap_object(device.GetAddressOf(),"HUD CPU-view oracle");
     D3D11_TEXTURE2D_DESC desc{};desc.Width=desc.Height=8;desc.MipLevels=desc.ArraySize=1;desc.Format=DXGI_FORMAT_R8G8B8A8_UNORM;desc.SampleDesc.Count=1;desc.BindFlags=D3D11_BIND_RENDER_TARGET;
     ComPtr<ID3D11Texture2D> texture,copy;check(device->CreateTexture2D(&desc,nullptr,&texture));check(device->CreateTexture2D(&desc,nullptr,&copy));
     for(unsigned iteration=0;iteration<8;++iteration){
