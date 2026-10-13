@@ -1,0 +1,339 @@
+{
+  "schema": "FloraGPA resource recording budget baseline 1",
+  "date": "2026-10-14",
+  "parent_commit": "db6fd27",
+  "protocol_version": 4,
+  "default_resource_limit_mib": 1024,
+  "max_resource_limit_mib": 4096,
+  "validation": {
+    "capture_only_build": "passed",
+    "full_build": "passed",
+    "capture_ctest": 111,
+    "full_focused_ctest": 15,
+    "dual_player": {
+      "passed": true,
+      "scope": "Serial dual-player gate for native Present-boundary transactions (internal control API).",
+      "checks": [
+        {
+          "name": "native-transactions",
+          "passed": true
+        },
+        {
+          "name": "published-controls-exist",
+          "passed": true
+        },
+        {
+          "name": "0-captured-flora",
+          "passed": true
+        },
+        {
+          "name": "0-captured-original",
+          "passed": true
+        },
+        {
+          "name": "0-captured-both-players-exact-cpu",
+          "passed": true
+        },
+        {
+          "name": "0-captured-recorded-events",
+          "passed": true
+        },
+        {
+          "name": "0-captured-native-execution",
+          "passed": true
+        },
+        {
+          "name": "0-captured-original-execution",
+          "passed": true
+        },
+        {
+          "name": "0-captured-actual-captured-backbuffer",
+          "passed": true
+        },
+        {
+          "name": "1-captured-flora",
+          "passed": true
+        },
+        {
+          "name": "1-captured-original",
+          "passed": true
+        },
+        {
+          "name": "1-captured-both-players-exact-cpu",
+          "passed": true
+        },
+        {
+          "name": "1-captured-recorded-events",
+          "passed": true
+        },
+        {
+          "name": "1-captured-native-execution",
+          "passed": true
+        },
+        {
+          "name": "1-captured-original-execution",
+          "passed": true
+        },
+        {
+          "name": "1-captured-actual-captured-backbuffer",
+          "passed": true
+        },
+        {
+          "name": "2-captured-flora",
+          "passed": true
+        },
+        {
+          "name": "2-captured-original",
+          "passed": true
+        },
+        {
+          "name": "2-captured-both-players-exact-cpu",
+          "passed": true
+        },
+        {
+          "name": "2-captured-recorded-events",
+          "passed": true
+        },
+        {
+          "name": "2-captured-native-execution",
+          "passed": true
+        },
+        {
+          "name": "2-captured-original-execution",
+          "passed": true
+        },
+        {
+          "name": "2-captured-actual-captured-backbuffer",
+          "passed": true
+        }
+      ]
+    },
+    "resource_bytes": {
+      "passed": true,
+      "frame_sha256": "a9c0405b2498afcb5866069cf3576f664515f1b359aa911607b1987e43d9a33b",
+      "resources": [
+        {
+          "resource": 8,
+          "data_record": 13,
+          "bytes": 2097152,
+          "sha256": "6b1af8abd39e399851524c6652a3eecd15eee2a465e6ddda085e5b7c400a70b0",
+          "exact": true
+        }
+      ]
+    },
+    "native_transactions": {
+      "completed": [
+        {
+          "busy": false,
+          "cancel_requested": false,
+          "file": "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\capture-resource-budget-20261014\\dual\\native\\frame-0.gpa_frame",
+          "present_ordinal": 5,
+          "request_name": "frame-0.gpa_frame",
+          "resource_limit_mib": 4,
+          "state": "Completed",
+          "swap_chain": 1
+        },
+        {
+          "busy": false,
+          "cancel_requested": false,
+          "file": "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\capture-resource-budget-20261014\\dual\\native\\frame-1.gpa_frame",
+          "present_ordinal": 7,
+          "request_name": "frame-1.gpa_frame",
+          "resource_limit_mib": 1024,
+          "state": "Completed",
+          "swap_chain": 1
+        },
+        {
+          "busy": false,
+          "cancel_requested": false,
+          "file": "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\capture-resource-budget-20261014\\dual\\native\\frame-2.gpa_frame",
+          "present_ordinal": 9,
+          "request_name": "frame-2.gpa_frame",
+          "resource_limit_mib": 1024,
+          "state": "Completed",
+          "swap_chain": 1
+        }
+      ],
+      "hud_enabled": false,
+      "hud_presents": 0,
+      "injected_failures": [
+        {
+          "busy": false,
+          "cancel_requested": false,
+          "error": "ID3D11DeviceContext::ClearRenderTargetView: Resource capture byte limit exceeded",
+          "request_name": "budget-rejected.gpa_frame",
+          "resource_limit_mib": 1,
+          "state": "Failed",
+          "swap_chain": 1
+        },
+        {
+          "busy": false,
+          "cancel_requested": false,
+          "error": "Present failed or was occluded",
+          "request_name": "failed-present-142213121.gpa_frame",
+          "resource_limit_mib": 1024,
+          "state": "Failed",
+          "swap_chain": 1
+        },
+        {
+          "busy": false,
+          "cancel_requested": false,
+          "error": "Present failed or was occluded",
+          "request_name": "failed-present-2289696773.gpa_frame",
+          "resource_limit_mib": 1024,
+          "state": "Failed",
+          "swap_chain": 1
+        },
+        {
+          "busy": false,
+          "cancel_requested": false,
+          "error": "Create capture temporary: The system cannot find the path specified.",
+          "present_ordinal": 43,
+          "request_name": "write.gpa_frame",
+          "resource_limit_mib": 1024,
+          "state": "Failed",
+          "swap_chain": 1
+        }
+      ],
+      "publication_races": [
+        {
+          "busy": false,
+          "cancel_requested": true,
+          "error": "Frame encoding cancelled",
+          "present_ordinal": 17,
+          "request_name": "race-0.gpa_frame",
+          "resource_limit_mib": 1024,
+          "state": "Cancelled",
+          "swap_chain": 1
+        },
+        {
+          "busy": false,
+          "cancel_requested": true,
+          "error": "Frame encoding cancelled",
+          "present_ordinal": 19,
+          "request_name": "race-1.gpa_frame",
+          "resource_limit_mib": 1024,
+          "state": "Cancelled",
+          "swap_chain": 1
+        },
+        {
+          "busy": false,
+          "cancel_requested": true,
+          "error": "Frame encoding cancelled",
+          "present_ordinal": 21,
+          "request_name": "race-2.gpa_frame",
+          "resource_limit_mib": 1024,
+          "state": "Cancelled",
+          "swap_chain": 1
+        },
+        {
+          "busy": false,
+          "cancel_requested": true,
+          "error": "Frame encoding cancelled",
+          "present_ordinal": 23,
+          "request_name": "race-3.gpa_frame",
+          "resource_limit_mib": 1024,
+          "state": "Cancelled",
+          "swap_chain": 1
+        },
+        {
+          "busy": false,
+          "cancel_requested": true,
+          "error": "Frame encoding cancelled",
+          "present_ordinal": 25,
+          "request_name": "race-4.gpa_frame",
+          "resource_limit_mib": 1024,
+          "state": "Cancelled",
+          "swap_chain": 1
+        },
+        {
+          "busy": false,
+          "cancel_requested": true,
+          "error": "Frame encoding cancelled",
+          "present_ordinal": 27,
+          "request_name": "race-5.gpa_frame",
+          "resource_limit_mib": 1024,
+          "state": "Cancelled",
+          "swap_chain": 1
+        },
+        {
+          "busy": false,
+          "cancel_requested": true,
+          "error": "Frame encoding cancelled",
+          "present_ordinal": 29,
+          "request_name": "race-6.gpa_frame",
+          "resource_limit_mib": 1024,
+          "state": "Cancelled",
+          "swap_chain": 1
+        },
+        {
+          "busy": false,
+          "cancel_requested": true,
+          "error": "Frame encoding cancelled",
+          "present_ordinal": 31,
+          "request_name": "race-7.gpa_frame",
+          "resource_limit_mib": 1024,
+          "state": "Cancelled",
+          "swap_chain": 1
+        },
+        {
+          "busy": false,
+          "cancel_requested": true,
+          "error": "Frame encoding cancelled",
+          "present_ordinal": 33,
+          "request_name": "race-8.gpa_frame",
+          "resource_limit_mib": 1024,
+          "state": "Cancelled",
+          "swap_chain": 1
+        },
+        {
+          "busy": false,
+          "cancel_requested": true,
+          "error": "Frame encoding cancelled",
+          "present_ordinal": 35,
+          "request_name": "race-9.gpa_frame",
+          "resource_limit_mib": 1024,
+          "state": "Cancelled",
+          "swap_chain": 1
+        },
+        {
+          "busy": false,
+          "cancel_requested": true,
+          "error": "Frame encoding cancelled",
+          "present_ordinal": 37,
+          "request_name": "race-10.gpa_frame",
+          "resource_limit_mib": 1024,
+          "state": "Cancelled",
+          "swap_chain": 1
+        },
+        {
+          "busy": false,
+          "cancel_requested": true,
+          "error": "Frame encoding cancelled",
+          "present_ordinal": 39,
+          "request_name": "race-11.gpa_frame",
+          "resource_limit_mib": 1024,
+          "state": "Cancelled",
+          "swap_chain": 1
+        }
+      ],
+      "retained_scene_checks": 0
+    }
+  },
+  "formal_gf2_accepted_frames": 0,
+  "equipment_room_with_larger_budget": "not yet attempted at this stage",
+  "raw_evidence": [
+    "artifacts\\capture-resource-budget-20261014",
+    "artifacts\\capture-gf2-determinism-20261014"
+  ],
+  "evidence_sha256": {
+    "artifacts\\capture-gf2-determinism-20261014\\budget-build.log": "72f81f04e8a7a04c93ee71454f4f74bf741a16494a275ca391efcf6c406d1df3",
+    "artifacts\\capture-gf2-determinism-20261014\\budget-full-build.log": "73a599b502ba6b3e88ef87b20415e6cf604c241f46cb0edd70c52e518d8081df",
+    "artifacts\\capture-gf2-determinism-20261014\\budget-capture-ctest.log": "0596e47c0b0f50ec9d91e3578f6103dcc953869f074db68891e22b9865fab5c0",
+    "artifacts\\capture-resource-budget-20261014\\dual.log": "407c890b7e8a88226b99db2195a5f8b0194a6cbf6ee00a6229bf62a2a3432786",
+    "artifacts\\capture-resource-budget-20261014\\full-focused-ctest.log": "9dccf224648f664456e1fc92d51d0970af9b5071a9bbc1c9945f173f65ffa8c3",
+    "artifacts\\capture-resource-budget-20261014\\budget-resource-check.json": "dfb8bb589b58945d95fea766391229c4bb32dc96fe25976bd771aee9b812f75f",
+    "artifacts\\capture-resource-budget-20261014\\dual\\native\\results.json": "ccfbba0de1d838ba8278cfba4325fee7c08b93752d29cd1b091dc8c9a6900330",
+    "artifacts\\capture-resource-budget-20261014\\dual\\validation.json": "36ea1738a8cf4c63d4e06b7347478436683a69ad0e84a19f6a9e6f3afc0023c7"
+  }
+}

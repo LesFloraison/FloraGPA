@@ -11,13 +11,15 @@ EVENT observations now serialize; in-frame successful completion still rejects.
 The elevated continuation resolved game-cache access. Colored GF2 start-screen
 preflights replay exactly. Two latest home-scene captures execute in both players
 but fail exact pixel comparison; repeated replays also vary. The equipment-room
-request exceeds the current resource budget. Formal scene acceptance remains 0/6.
+request exceeded the default resource budget; per-request CLI budgets are now
+available for a new attempt. Formal scene acceptance remains 0/6.
 Serial resource probes now locate a variable home-scene prefix at DrawIndexed
 2305; its settled input storage compares exactly, and WARP repeats agree within
 the adapter. The cause remains unresolved; see [CAPTURE_REPEATABILITY.md](CAPTURE_REPEATABILITY.md).
 
 Capture HUD work is tracked separately in [CAPTURE_HUD.md](CAPTURE_HUD.md).
-Protocol v3 adds configurable HUD/hotkeys and Qt settings. Drawing is currently
+Protocol v4 adds bounded per-request CLI resource budgets to the earlier
+HUD/hotkey and Qt settings. See [CAPTURE_RESOURCE_BUDGET.md](CAPTURE_RESOURCE_BUDGET.md). Drawing is currently
 limited to guarded single-buffer blt devices; flip/multi-buffer chains (including
 GF2) skip HUD because pixel isolation is not yet established. This limitation
 does not disable the in-game capture shortcut or expand capture format support.

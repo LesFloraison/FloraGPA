@@ -3964,7 +3964,7 @@
     "pipeline_bindings": "Capture-owned six-stage/IA/RS/OM values retained per command; WARP/hardware 11.0/11.1 exact Draw/Dispatch oracles; hidden state gaps remain",
     "command_model": "Generated COM observers own Clear/Draw/Dispatch, Map/Unmap data, CopyResource and bounded CopySubresourceRegion/1 operands including BC1-5 block geometry, whole-subresource/boxed Update bytes and owned region coordinates and EVENT observations; per-command graphics bindings/counters and first-use GPU bytes; completed-preframe/pending-status EVENT observations encode, in-frame completed waits and unsupported commands reject",
     "encoder": "Independent CPU encoder connected to native background writer and private IPC; limited injected Draw profile passes dual-player execution",
-    "present_transaction": "Real Present boundaries with application-thread GPU work and background CPU writing; protocol v3 binds session/PIDs, adds HUD settings and hotkey swap selection, and defaults to unique eligible foreground swap",
+    "present_transaction": "Real Present boundaries with application-thread GPU work and background CPU writing; protocol v4 binds session/PIDs and validated per-request resource budgets, retains HUD settings/hotkey selection and defaults to unique eligible foreground swap",
     "limited_cli_frame_capture": true,
     "ordinary_event_observations": "Private frame-start S_OK/TRUE proof gates pre-frame completed and matching in-frame pending status-only observations; independent API wire encoding and reader audit; no materialized query wait",
     "gf2_scene_acceptance": {
@@ -3977,6 +3977,7 @@
       "original_gui_preflight_files": 1,
       "latest_msaa_preflight": "docs/capture-constant-range-baseline.json: gf2",
       "home_scene_diagnostic_files": 2,
+      "resource_budget_extension": "CLI per-request 1..4096 MiB with unchanged 1024 MiB default; native low-budget refusal/recovery, injected malformed input/default reset and dual-player fixture checks pass. Larger-budget equipment-room retry pending; see docs/capture-resource-budget-baseline.json.",
       "repeatability_diagnosis": "docs/capture-repeatability-baseline.json: serial fresh-process raw MSAA sample comparisons locate variability at event 2305 after stable event 2291; seven textures/eight buffers have identical pre-event storage; WARP repetitions agree internally. Cause unresolved, no threshold relaxation or accepted frame."
     },
     "deferred_history": "Capture-owned bounded CPU compilation journals, immutable Finish generations and actual immediate execution expansion with repeated calls; native resource leases are separate from CPU histories",

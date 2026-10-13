@@ -26,7 +26,7 @@ bool capture_request_available(const Json& swaps,const Json& objects){
     if(!capture_requests_connected() || objects.value("interface_gaps",0ull) || swaps.value("tracking_failures",0u))return false;
     for(const auto& row:swaps["active"])if(eligible_capture_swap(row))return true;return false;
 }
-Json submit_capture_request(uint64_t selected,const std::string& request_id){
+Json submit_capture_request(uint64_t selected,const std::string& request_id,uint32_t resource_limit_mib){
     pipe_name(request_id);
     auto& r=requests();std::lock_guard lock(r.mutex);
     if(!r.connected)return {{"ok",false},{"error","disconnected"}};
@@ -40,7 +40,7 @@ Json submit_capture_request(uint64_t selected,const std::string& request_id){
     }
     if(!available)return {{"ok",false},{"error","capture_capability_incomplete"}};
     if(candidates.size()!=1)return {{"ok",false},{"error",selected?"swap_chain_unavailable":"swap_chain_selection_required"}};
-    return arm_capture(candidates.front(),r.directory/("frame-"+request_id+".gpa_frame"));
+    return arm_capture(candidates.front(),r.directory/("frame-"+request_id+".gpa_frame"),resource_limit_mib);
 }
 void disconnect_capture_requests(){auto& r=requests();std::lock_guard lock(r.mutex);r.connected=false;disconnect_capture();}
 Json select_capture_swap(uint64_t selected){

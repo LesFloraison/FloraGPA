@@ -93,7 +93,7 @@ int wmain(int argc,wchar_t** argv){
             std::cout<<"FloraCapture native DX11 capture (limited profile; inspect status)\n"
                      <<"launch --exe FILE --out NEW_DIRECTORY [--cwd DIRECTORY] [-- target arguments]\n"
                      <<"  [--hud compact|detailed|off] [--hud-hotkey Ctrl+F1|off] [--capture-hotkey Ctrl+Shift+C|off]\n"
-                     <<"status|capture|cancel|disconnect --session SESSION_JSON [capture: --swap-chain ID]\n";
+                     <<"status|capture|cancel|disconnect --session SESSION_JSON [capture: --swap-chain ID --resource-limit-mib 1..4096]\n";
             std::cout<<"select --session SESSION_JSON --swap-chain ID (0 selects automatic foreground)\n";
             return argc<2?2:0;
         }
@@ -101,15 +101,21 @@ int wmain(int argc,wchar_t** argv){
         for(int i=2;i<argc;++i){
             std::wstring key=argv[i];
             if(key==L"--"){while(++i<argc)arguments.emplace_back(argv[i]);break;}
-            if(key!=L"--exe" && key!=L"--out" && key!=L"--cwd" && key!=L"--session" && key!=L"--swap-chain" && key!=L"--hud" && key!=L"--hud-hotkey" && key!=L"--capture-hotkey")throw std::invalid_argument("Unknown option");
+            if(key!=L"--exe" && key!=L"--out" && key!=L"--cwd" && key!=L"--session" && key!=L"--swap-chain" && key!=L"--hud" && key!=L"--hud-hotkey" && key!=L"--capture-hotkey" && key!=L"--resource-limit-mib")throw std::invalid_argument("Unknown option");
             if(++i>=argc || !options.emplace(key,argv[i]).second)throw std::invalid_argument("Missing or duplicate option value");
         }
         if(verb!=L"launch"){
             if(verb!=L"status" && verb!=L"capture" && verb!=L"cancel" && verb!=L"disconnect" && verb!=L"select")throw std::invalid_argument("Unknown command");
             const bool selected=options.count(L"--swap-chain")!=0;
-            if(options.size()!=(selected?2u:1u) || !options.count(L"--session") || !arguments.empty() || (selected && verb!=L"capture" && verb!=L"select") || (verb==L"select" && !selected))
-                throw std::invalid_argument("Expected --session and optional capture --swap-chain");
+            const bool limited=options.count(L"--resource-limit-mib")!=0;
+            if(options.size()!=(1u+unsigned(selected)+unsigned(limited)) || !options.count(L"--session") || !arguments.empty() || (selected && verb!=L"capture" && verb!=L"select") || (verb==L"select" && !selected) || (limited && verb!=L"capture"))
+                throw std::invalid_argument("Expected --session and optional capture --swap-chain/--resource-limit-mib");
             Json extra=Json::object();
+            if(limited){
+                const auto& text=options.at(L"--resource-limit-mib");
+                if(text.empty() || text.find_first_not_of(L"0123456789")!=std::wstring::npos)throw std::invalid_argument("Invalid resource limit");
+                const auto mib=std::stoull(text);(void)resource_limit_bytes(mib);extra["resource_limit_mib"]=mib;
+            }
             if(selected){
                 const auto& text=options.at(L"--swap-chain");
                 if(text.empty() || text.find_first_not_of(L"0123456789")!=std::wstring::npos)throw std::invalid_argument("Invalid swap-chain ID");
@@ -127,7 +133,7 @@ int wmain(int argc,wchar_t** argv){
             }
             const auto result=command(session.at("session_id"),utf8(verb),session.at("pid").get<DWORD>(),extra);std::cout<<result.dump()<<'\n';return result.value("ok",false)?0:3;
         }
-        if(!options.count(L"--exe") || !options.count(L"--out") || options.count(L"--session") || options.count(L"--swap-chain"))throw std::invalid_argument("launch requires --exe and --out");
+        if(!options.count(L"--exe") || !options.count(L"--out") || options.count(L"--session") || options.count(L"--swap-chain") || options.count(L"--resource-limit-mib"))throw std::invalid_argument("launch requires --exe and --out");
         hud::Settings settings;
         if(options.count(L"--hud"))settings.mode=hud::parse_mode(utf8(options.at(L"--hud")));
         if(options.count(L"--hud-hotkey"))settings.mode_key=hud::parse_hotkey(utf8(options.at(L"--hud-hotkey")));

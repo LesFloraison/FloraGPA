@@ -14,6 +14,7 @@ enum class Phase { Armed,Capturing,Finalizing,Completed,Cancelled,Failed };
 const char* name(Phase phase){switch(phase){case Phase::Armed:return "Armed";case Phase::Capturing:return "Capturing";case Phase::Finalizing:return "Finalizing";case Phase::Completed:return "Completed";case Phase::Cancelled:return "Cancelled";default:return "Failed";}}
 struct Request {
     uint64_t id;
+    uint32_t resource_limit_mib;
     std::filesystem::path output;
     std::mutex operation,publication,report;
     std::atomic<bool> cancelled=false,published=false,released=false,writing=false,aborted=false;
@@ -26,7 +27,7 @@ struct Request {
     std::shared_ptr<FrameRecording> recording;
     std::optional<FrozenFrame> pending;
     DXGI_SWAP_CHAIN_DESC descriptor{};
-    explicit Request(uint64_t value,const std::filesystem::path& path):id(value),output(path){}
+    explicit Request(uint64_t value,const std::filesystem::path& path,uint32_t limit):id(value),resource_limit_mib(limit),output(path){}
     void state(Phase value){std::lock_guard lock(report);phase=value;}
     Phase state(){std::lock_guard lock(report);return phase;}
     void release(){recording.reset();context.Reset();buffer.Reset();released=true;}
@@ -44,6 +45,7 @@ Json progress(const std::shared_ptr<Request>& r){
     std::lock_guard lock(r->report);
     const bool terminal=r->phase==Phase::Completed || r->phase==Phase::Cancelled || r->phase==Phase::Failed;
     Json result={{"state",name(r->phase)},{"swap_chain",r->id},{"busy",!terminal || !r->released.load()},{"cancel_requested",r->cancelled.load()}};
+    result["resource_limit_mib"]=r->resource_limit_mib;
     const auto request_name=r->output.filename().u8string();result["request_name"]=std::string(request_name.begin(),request_name.end());
     if(r->published){result["state"]="Completed";const auto path=r->output.u8string();result["file"]=std::string(path.begin(),path.end());}
     if(r->present_ordinal)result["present_ordinal"]=r->present_ordinal.load();
@@ -61,7 +63,7 @@ void start(Request& r,IDXGISwapChain* swap){
     ComPtr<ID3D11Device> device;check(swap->GetDevice(IID_PPV_ARGS(&device)),"Swap chain has no DX11 device");
     device->GetImmediateContext(&r.context);wrap_object(r.context.GetAddressOf(),"Capture::ImmediateContext");
     check(swap->GetBuffer(0,IID_PPV_ARGS(&r.buffer)),"Cannot get capture backbuffer");wrap_object(r.buffer.GetAddressOf(),"Capture::Backbuffer");
-    RecordingOptions options;options.cancelled=[&r]{return r.cancelled.load();};
+    RecordingOptions options;options.byte_limit=resource_limit_bytes(r.resource_limit_mib);options.cancelled=[&r]{return r.cancelled.load();};
     r.owner=GetCurrentThreadId();r.recording=begin_recording(r.context.Get(),options);r.state(Phase::Capturing);
 }
 void finish(Request& r,IDXGISwapChain* swap){
@@ -75,7 +77,7 @@ void finish(Request& r,IDXGISwapChain* swap){
     if(r.owner!=GetCurrentThreadId())throw std::runtime_error("Present moved to another application thread");
     boundary_open=true;
     auto frame=r.recording->finish();frame.require_complete();
-    SnapshotOptions options;options.cancelled=[&r]{return r.cancelled.load();};
+    SnapshotOptions options;options.byte_limit=resource_limit_bytes(r.resource_limit_mib);options.cancelled=[&r]{return r.cancelled.load();};
     auto final=snapshot_resource(r.context.Get(),r.buffer.Get(),options);
     const auto id=final.record->id;
     r.pending=freeze_frame(std::move(frame),id,std::move(final));
@@ -86,13 +88,15 @@ void publish(std::shared_ptr<Request> r){
     std::thread([r]{
         try{
             EncodeOptions options;options.cancelled=[r]{return r->cancelled.load();};options.publication_mutex=&r->publication;options.published=&r->published;
+            options.msaa_byte_limit=resource_limit_bytes(r->resource_limit_mib);
             encode_frame(*r->pending,r->output,options);r->pending.reset();r->state(Phase::Completed);
         }catch(const std::exception& e){r->pending.reset();r->fail(e.what());}
         catch(...){r->pending.reset();r->fail("Background encoder failed");}
     }).detach();
 }
 }
-Json arm_capture(uint64_t id,const std::filesystem::path& output){
+Json arm_capture(uint64_t id,const std::filesystem::path& output,uint32_t resource_limit_mib){
+    if(!resource_limit_mib || resource_limit_mib>max_resource_limit_mib)return {{"ok",false},{"error","invalid_resource_limit"}};
     if(!id || !output.is_absolute() || output.extension()!=L".gpa_frame")return {{"ok",false},{"error","Invalid capture identity or destination"}};
     auto& s=service();std::lock_guard lock(s.mutex);
     if(s.disconnected)return {{"ok",false},{"error","disconnected"}};
@@ -101,7 +105,7 @@ Json arm_capture(uint64_t id,const std::filesystem::path& output){
     const auto observations=swap_chain_status();bool found=false;
     for(const auto& row:observations["active"])if(row["id"]==id && row["successful_presents"].get<uint64_t>()>0)found=true;
     if(!found)return {{"ok",false},{"error","Selected swap chain is missing or has not presented"}};
-    s.request=std::make_shared<Request>(id,output);auto result=progress(s.request);result["ok"]=true;return result;
+    s.request=std::make_shared<Request>(id,output,resource_limit_mib);auto result=progress(s.request);result["ok"]=true;return result;
 }
 Json capture_progress(){return progress(active());}
 Json cancel_capture(){

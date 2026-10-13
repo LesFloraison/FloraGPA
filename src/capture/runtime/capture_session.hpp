@@ -4,7 +4,7 @@
 #include <filesystem>
 namespace flora::capture {
 // Internal control API; GPU work executes only from the application's callbacks.
-Json arm_capture(uint64_t swap_chain,const std::filesystem::path& output);
+Json arm_capture(uint64_t swap_chain,const std::filesystem::path& output,uint32_t resource_limit_mib=default_resource_limit_mib);
 Json capture_progress();
 Json cancel_capture();
 void disconnect_capture();

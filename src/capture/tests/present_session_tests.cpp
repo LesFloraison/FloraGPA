@@ -46,7 +46,7 @@ struct Fixture {
     }
     ~Fixture(){context->ClearState();context->Flush();rtv.Reset();swap.Reset();context.Reset();device.Reset();DestroyWindow(window);}
 };
-Json control_arm(uint64_t id,const fs::path& path){return std::async(std::launch::async,[&]{return arm_capture(id,path);}).get();}
+Json control_arm(uint64_t id,const fs::path& path,uint32_t limit=default_resource_limit_mib){return std::async(std::launch::async,[&]{return arm_capture(id,path,limit);}).get();}
 Json control_cancel(){return std::async(std::launch::async,[]{return cancel_capture();}).get();}
 Json settled(){for(unsigned i=0;i<1000;++i){auto p=capture_progress();if(!p.value("busy",false))return p;Sleep(5);}throw std::runtime_error("Capture transaction did not settle");}
 }
@@ -54,12 +54,24 @@ int wmain(int argc,wchar_t** argv){try{
     require(argc>=2 && argc<=4,"Expected new output directory, optional flip mode and --hud");if(argc>=3){const auto mode=std::stoul(argv[2]);test_effect=mode==1?DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL:DXGI_SWAP_EFFECT_FLIP_DISCARD;test_buffers=mode==1?2:3;}if(argc==4){const std::wstring option=argv[3];require(option==L"--hud" || option==L"--large","Unknown Present option");test_large=true;test_hud=option==L"--hud";if(test_hud){hud::Settings settings;settings.mode_key={};settings.capture_key={};configure_hud(settings);}}const auto out=fs::absolute(argv[1]);require(!fs::exists(out),"Test output directory must be new");fs::create_directories(out);Json results=Json::array(),races=Json::array(),faults=Json::array();
     {
         Fixture f;f.draw();f.present();require(!control_arm(UINT64_MAX,out/L"unknown.gpa_frame")["ok"],"Unknown swap accepted");
+        for(uint32_t limit:{0u,4097u,UINT32_MAX})require(control_arm(f.id,out/L"invalid-budget.gpa_frame",limit)["error"]=="invalid_resource_limit","Invalid internal budget accepted");
+        ComPtr<ID3D11Texture2D> budget_texture;ComPtr<ID3D11ShaderResourceView> budget_view;
+        const bool budget_case=!test_hud && !test_large;
+        if(budget_case){
+            D3D11_TEXTURE2D_DESC desc{};desc.Width=1024;desc.Height=512;desc.MipLevels=desc.ArraySize=1;desc.Format=DXGI_FORMAT_R8G8B8A8_UNORM;desc.SampleDesc.Count=1;desc.BindFlags=D3D11_BIND_SHADER_RESOURCE;
+            std::vector<uint32_t> pixels(1024*512,0xff203040u);D3D11_SUBRESOURCE_DATA initial{pixels.data(),4096,0};
+            check(f.device->CreateTexture2D(&desc,&initial,&budget_texture));check(f.device->CreateShaderResourceView(budget_texture.Get(),nullptr,&budget_view));auto* view=budget_view.Get();f.context->PSSetShaderResources(0,1,&view);
+            const auto path=out/L"budget-rejected.gpa_frame";require(control_arm(f.id,path,1)["ok"],"Cannot arm low-budget case");f.present();f.draw();f.present();const auto failure=settled();faults.push_back(failure);
+            require(failure["state"]=="Failed" && failure["resource_limit_mib"]==1 && failure["error"].get<std::string>().find("byte limit")!=std::string::npos && !fs::exists(path),"Low budget did not refuse without publication");
+        }
         for(unsigned i=0;i<3;++i){
-            const auto path=out/(L"frame-"+std::to_wstring(i)+L".gpa_frame");require(control_arm(f.id,path)["ok"],"Could not arm capture");require(control_arm(f.id,out/L"busy.gpa_frame")["error"]=="busy","Duplicate capture not rejected");
+            const auto path=out/(L"frame-"+std::to_wstring(i)+L".gpa_frame");require(control_arm(f.id,path,budget_case && i==0?4:default_resource_limit_mib)["ok"],"Could not arm capture");require(control_arm(f.id,out/L"busy.gpa_frame")["error"]=="busy","Duplicate capture not rejected");
             f.present(false,DXGI_PRESENT_TEST);require(capture_progress()["state"]=="Armed","TEST advanced armed boundary");
             f.draw();f.present(i==1);require(capture_progress()["state"]=="Capturing","First Present did not start capture");
             f.draw();f.present(false,DXGI_PRESENT_TEST);require(capture_progress()["state"]=="Capturing","TEST ended capture");f.present(i==1);
             auto result=settled();results.push_back(result);require(result["state"]=="Completed" && fs::exists(path),result.dump().c_str());require(control_cancel()["cancelled"]==false,"Published file was reported cancelled");
+            require(result["resource_limit_mib"]==(budget_case && i==0?4:default_resource_limit_mib),"Request budget did not reset to default");
+            if(budget_case && i==0){ID3D11ShaderResourceView* empty=nullptr;f.context->PSSetShaderResources(0,1,&empty);budget_view.Reset();budget_texture.Reset();}
         }
         require(!control_arm(f.id,out/L"frame-0.gpa_frame")["ok"],"Existing capture accepted");
         require(control_arm(f.id,out/L"cancel-armed.gpa_frame")["ok"],"Cannot arm cancellation test");require(control_cancel()["cancelled"],"Armed cancellation failed");

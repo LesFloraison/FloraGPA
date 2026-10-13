@@ -38,15 +38,19 @@ struct Harness {
     void resume(){fs::remove(oracle/L"pause.signal");const auto end=GetTickCount64()+5000;while(signal_exists(oracle/L"paused.signal")){require(GetTickCount64()<end,"Resume timeout");Sleep(5);}}
     void reject_bad_identity(){
         std::ifstream file(session/L"session.json");Json manifest;file>>manifest;
-        for(unsigned mode=0;mode<8;++mode){
+        for(unsigned mode=0;mode<15;++mode){
             const auto name=pipe_name(manifest["session_id"].get<std::string>());Handle pipe;
             const auto deadline=GetTickCount64()+5000;
             do{pipe.value=CreateFileW(name.c_str(),GENERIC_READ|GENERIC_WRITE,0,nullptr,OPEN_EXISTING,FILE_FLAG_OVERLAPPED|SECURITY_SQOS_PRESENT|SECURITY_IDENTIFICATION,nullptr);if(pipe.value!=INVALID_HANDLE_VALUE)break;Sleep(5);}while(GetTickCount64()<deadline);
             require(pipe.value!=INVALID_HANDLE_VALUE,"Cannot open identity test pipe");
             Json bad={{"version",protocol_version},{"session_id",manifest["session_id"]},{"target_pid",manifest["pid"]},{"client_pid",GetCurrentProcessId()},{"request_id","00000000-0000-4000-8000-000000000001"},{"command","capture"}};
-            if(mode==0)bad["version"]=1;else if(mode==1)bad["client_pid"]=0;else if(mode==2)bad["target_pid"]=0;else if(mode==3)bad["session_id"]="00000000-0000-4000-8000-000000000002";else if(mode==4)bad["version"]=uint64_t(0x100000002);else if(mode==5)bad["version"]=2.0;else if(mode==6)bad["swap_chain"]=0;else bad["swap_chain"]=-1;
+            if(mode==0)bad["version"]=1;else if(mode==1)bad["client_pid"]=0;else if(mode==2)bad["target_pid"]=0;else if(mode==3)bad["session_id"]="00000000-0000-4000-8000-000000000002";else if(mode==4)bad["version"]=uint64_t(0x100000002);else if(mode==5)bad["version"]=2.0;else if(mode==6)bad["swap_chain"]=0;else if(mode==7)bad["swap_chain"]=-1;
+            else if(mode==8)bad["resource_limit_mib"]=0;else if(mode==9)bad["resource_limit_mib"]=4097;
+            else if(mode==10)bad["resource_limit_mib"]=1.0;else if(mode==11)bad["resource_limit_mib"]="1024";
+            else if(mode==12)bad["resource_limit_mib"]=-1;else if(mode==13)bad["resource_limit_mib"]=UINT64_MAX;
+            else{bad["command"]="status";bad["resource_limit_mib"]=1024;}
             send(pipe.value,bad);const auto answer=receive(pipe.value);send(pipe.value,Json{{"request_id",bad["request_id"]}});
-            require(!answer["ok"].get<bool>() && answer["error"]==(mode==0 || mode==4 || mode==5?"protocol_version_mismatch":mode>=6?"invalid_swap_chain":"session_process_mismatch"),"Invalid IPC identity accepted");
+            require(!answer["ok"].get<bool>() && answer["error"]==(mode==0 || mode==4 || mode==5?"protocol_version_mismatch":mode>=8?"invalid_resource_limit":mode>=6?"invalid_swap_chain":"session_process_mismatch"),"Invalid IPC identity accepted");
             std::ofstream log(out/(L"identity-"+std::to_wstring(mode)+L".json"));log<<answer.dump(2);
         }
     }
@@ -62,10 +66,19 @@ int wmain(int argc,wchar_t** argv){try{
 #endif
     for(unsigned mode=first_mode;mode<last_mode;++mode){
         Harness h(fs::absolute(argv[1]),fs::absolute(argv[2]),out/std::to_wstring(mode));h.launch(mode);h.reject_bad_identity();
-        auto status=h.call(L"status");require(status["capture_available"],"Live target profile was not available");const auto id=std::to_wstring(status["swap_chains"]["active"][0]["id"].get<uint64_t>());
+        if(mode==first_mode){
+            for(const auto* invalid:{L"0",L"4097",L"-1",L"1.0",L"18446744073709551616"})
+                require(!h.run({L"capture",L"--session",(h.session/L"session.json").wstring(),L"--resource-limit-mib",invalid},2)["ok"].get<bool>(),"Invalid CLI limit accepted");
+            require(!h.run({L"status",L"--session",(h.session/L"session.json").wstring(),L"--resource-limit-mib",L"4"},2)["ok"].get<bool>(),"Status accepted a capture-only limit");
+        }
+        auto status=h.call(L"status");require(status["capture_limits"]["default_resource_limit_mib"]==1024 && status["capture_limits"]["max_resource_limit_mib"]==4096,"Capture budget capabilities missing");require(status["capture_available"],"Live target profile was not available");const auto id=std::to_wstring(status["swap_chains"]["active"][0]["id"].get<uint64_t>());
         h.pause();h.call(L"capture",0,id);require(h.call(L"capture",3,id)["error"]=="busy","Duplicate request was not busy");require(h.call(L"cancel")["cancelled"],"Armed cancel failed");h.resume();
         Json frames=Json::array();
-        for(unsigned frame=0;frame<3;++frame){h.call(L"capture",0,id);const auto done=h.settle();require(done["last_capture"]["state"]=="Completed",done.dump().c_str());const auto path=fs::u8path(done["last_capture"]["path"].get<std::string>());require(fs::is_regular_file(path),"Completed frame missing");frames.push_back(done["last_capture"]);}
+        for(unsigned frame=0;frame<3;++frame){
+            const uint32_t limit=frame==0?4:frame==1?4096:1024;
+            if(frame<2)h.run({L"capture",L"--session",(h.session/L"session.json").wstring(),L"--swap-chain",id,L"--resource-limit-mib",std::to_wstring(limit)});
+            else h.call(L"capture",0,id);
+            const auto done=h.settle();require(done["last_capture"]["resource_limit_mib"]==limit,"Request resource budget not preserved/reset");require(done["last_capture"]["state"]=="Completed",done.dump().c_str());const auto path=fs::u8path(done["last_capture"]["path"].get<std::string>());require(fs::is_regular_file(path),"Completed frame missing");frames.push_back(done["last_capture"]);}
         // Default selection is environment-sensitive; verify either the unique
         // foreground result or a specific request to select explicitly.
         const auto automatic=h.call(L"capture",-1);bool foreground=automatic["ok"].get<bool>();

@@ -97,11 +97,15 @@ Json response(const Json& message,ULONG client_pid){
     // Validate the UUID before using it as a file name. Paths never come from IPC.
     pipe_name(message.at("request_id").get<std::string>());
     const auto command=message.value("command",std::string());
+    if(message.contains("resource_limit_mib") && (command!="capture" || !message["resource_limit_mib"].is_number_unsigned() ||
+       !message["resource_limit_mib"].get<uint64_t>() || message["resource_limit_mib"].get<uint64_t>()>max_resource_limit_mib)){
+        result["error"]="invalid_resource_limit";return result;
+    }
     const auto swaps=swap_chain_status();const auto objects=object_status();
     bool available=capture_request_available(swaps,objects);
     result["ok"]=true;
     if(command=="capture"){
-        const auto armed=submit_capture_request(message.value("swap_chain",0ull),message.at("request_id").get<std::string>());
+        const auto armed=submit_capture_request(message.value("swap_chain",0ull),message.at("request_id").get<std::string>(),message.value("resource_limit_mib",default_resource_limit_mib));
         result["ok"]=armed.value("ok",false);if(armed.contains("error"))result["error"]=armed["error"];
         hud_feedback(armed);
     }else if(command=="select"){
@@ -121,6 +125,7 @@ Json response(const Json& message,ULONG client_pid){
         if(progress.contains("file"))result["last_capture"]["path"]=progress["file"];
     }
     result["capture_available"]=available;result["swap_chains"]=swaps;result["objects"]=objects;
+    result["capture_limits"]={{"default_resource_limit_mib",default_resource_limit_mib},{"max_resource_limit_mib",max_resource_limit_mib}};
     result["device_creations"]=creations.load();result["creation_failures"]=failures.load();result["feature_level"]=level.load();result["hook_status"]=hook_status.load();
     result["capability_gaps"]={"Single-sample RGBA8/BGRA8; dirty/scroll and flags other than ALLOW_TEARING unsupported","Query, empty-box/flagged/planar Updates, region/format copies, planar Maps and hidden states are incomplete","Deferred Map renaming, nested lists and in-frame compilation unsupported","Single immediate-context execution thread only"};
     if(command=="status"){
