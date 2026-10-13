@@ -1,6 +1,6 @@
 # Capture HUD acceptance audit
 
-Audit checkpoint: publication/Resize fix after `a03429c`, on `feature/dx11-capture`. This maps the requested
+Audit checkpoint: native interaction tests after `d4ae3e4`, on `feature/dx11-capture`. This maps the requested
 HUD plan to implementation and observed evidence. It does not declare delivery
 complete, count HUD experiments toward the separate six-frame capture gate, or
 promote old experiments to current-binary GF2 results.
@@ -11,7 +11,10 @@ The current regression is `publication_progress`: 83/83 capture-only CTests,
 with 15 files and 410 exact checks. Two HUD publication profiles additionally
 pass 119 checks each. The latest GF2 start capture executes in both players with
 exact clean backbuffer/preview pixels and a Draw-zero negative control. GPU checks
-were serial. Runtime SHA-256 is recorded in the evidence JSON.
+were serial. Runtime SHA-256 is recorded in the evidence JSON. The subsequent
+test-only `interaction_progress` adds native focus/selection evidence, five files
+and 120 dual-player checks on the unchanged DLL, plus 4/4 capture-only and 2/2
+full-profile focused CTests including capture UI.
 
 | Requested behavior | Evidence inspected | Result and remaining limit |
 | --- | --- | --- |
@@ -19,9 +22,9 @@ were serial. Runtime SHA-256 is recorded in the evidence JSON.
 | Independent native HUD component, no Qt/Core/Replay/format/GPA dependency | `src/capture/CMakeLists.txt`, HUD sources, package module inventories | Independent component and capture-only package verified. GDI rasterization and native DX11 copies use owned text/pixels; no GPA font/shader assets or private calls. |
 | Compact panel, Detailed/Hidden modes, real feature level/driver/adapter/resolution, FPS | `hud_control.cpp`, `hud_model.cpp`, `hud_pixels.cpp`; `publication_progress.gf2` | Latest GF2 Compact/Detailed/Hidden cycle and main-scene feedback verified. FPS is measured per swap, with one-second updates, seven-second history and absent values before samples. |
 | DPI, resolution changes, small windows, long adapter names | `hud_model_tests.cpp`, `hud_layout_tests.cpp`, `layout_progress` | Native awareness/resolution/resize and exact pixel bounds/alpha verified. Physical cross-monitor transitions remain unverified. |
-| Ctrl+F1 and configurable/disabled hotkeys; rising edge, foreground only, no message consumption | `hud_control.cpp`, `hud_model_tests.cpp`, `hud_raw_buffer_tests.cpp`, `raw_input_progress`, `buffered_input_progress` | Legacy, raw-message, mixed and buffered input paths tested; application input bytes/registration preserved. Isolated physical hold and broader native focus transitions remain open. |
+| Ctrl+F1 and configurable/disabled hotkeys; rising edge, foreground only, no message consumption | `hud_control.cpp`, `hud_model_tests.cpp`, `hud_raw_buffer_tests.cpp`, `interaction_progress` | Actual native foreground/background transitions verified for x64 buffered Raw Input and mixed legacy/raw input. Background chords reach the registered application/sink without changing HUD mode or submitting capture; foreground return restores one capture and one mode edge. Registration and retained pixels stay exact. Physical single hold and held-key-through-focus transitions remain unverified. |
 | English Armed/Capturing/Saving/Saved/Cancelled/Failed/Busy feedback, timed expiry | `hud_control.cpp`, `hud_model_tests.cpp`, `gf2_completion_progress` | Model expiry and observed GF2 failure/expiry verified. Exhaustive live screenshots of every phase are not established by model tests. |
-| Shared request selection/UUID/busy/arm path, explicit swap selection and ambiguity | `capture_requests.cpp`, `controller_tests.cpp`, `CaptureUiTests.cpp` | CLI and HUD use the same entry. Controller covers busy and unique-foreground-or-selection outcome; Qt selection wiring is tested. An actual simultaneous ambiguous multi-swap hotkey exercise is not established by that conditional test. |
+| Shared request selection/UUID/busy/arm path, explicit swap selection and ambiguity | `capture_requests.cpp`, `controller_tests.cpp`, `CaptureUiTests.cpp`, `hud_selection_target.cpp`, `interaction_progress` | Two real same-HWND foreground chains produce `Select swap chain`; both explicit IDs reach arm. A unique recent candidate is selected automatically, and resumed ambiguity refuses again. Three selected files execute with exact red/blue pixels while the other chain is idle. Another chain Present during recording remains explicitly unsupported and publishes nothing; this is not full overlapping multi-swap capture support. |
 | Render outside capture event/object/resource streams; native private calls | `swap_chain.cpp`, `hud_control.cpp`, `presentation_resources.cpp`; injected fixture validators | Capture freezes before HUD; clean storage precedes next recording. Exact event/resource inventory checks and Draw-zero negative controls establish actual replay without HUD objects or work. |
 | Clean initial resources, final backbuffer and preview; retained pixels across frames | `hud_clean_buffers_tests.cpp`, `presentation_resources_tests.cpp`, `validate_capture_hud.py`; runtime and package profile evidence | Deterministic resource bytes, preview and both players agree. Blt, multiple flip buffers, repeated captures, partial/failed Present and Resize experiments are recorded. |
 | Windowed, borderless and exclusive fullscreen; no desktop-window substitute | `publication_progress.profiles` | Current native in-process presentation passes blt, flip3, borderless, exclusive and a System32-PATH exclusive package profile: three clean files and 82 checks per profile. |
@@ -41,9 +44,10 @@ were serial. Runtime SHA-256 is recorded in the evidence JSON.
    a late reply cannot validate it. A future isolated physical hold needs a fresh
    baseline. The user-confirmed multiple separate presses and automated short
    chords do not establish a single hold.
-2. Close native focus-transition and simultaneous ambiguous multi-swap hotkey
-   integration cases. HUD-active publication races, mapping/escape and combined
-   cancellation/failure now have explicit fixture coverage.
+2. Ordinary native focus transitions and simultaneous ambiguous multi-swap hotkeys
+   now have explicit integration evidence. A physical key held across a focus
+   change has not been exercised. Preserve the separate capture limitation:
+   another chain Present during recording still explicitly rejects the frame.
 3. Keep physical cross-monitor transitions, actual driver removal and arbitrary
    unsynchronized/external-interface races outside the verified scope unless
    actually exercised. Component tests establish only their recorded conditions.

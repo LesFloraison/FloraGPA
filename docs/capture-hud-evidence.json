@@ -1623,7 +1623,7 @@
     "live_gf2_pid": null,
     "live_baseline_files": 0,
     "pending_input": "No live baseline. Isolated physical hold remains unverified; previous separate presses cannot establish it.",
-    "latest_evidence": "publication_progress"
+    "latest_evidence": "interaction_progress (runtime unchanged from publication_progress)"
   },
   "present_concurrency_progress": {
     "source_base": "68b567b",
@@ -1967,6 +1967,107 @@
       "artifacts/capture-hud-publication-gf2/exit-check.json": "9085fb84d61a58d7edca2712ea6393ee800c7866d62b947f6a1f3d02986a63cc",
       "artifacts/capture-hud-publication-gf2/validation/validation.json": "89cb87c84a9cd2052569101f7a215665df58588f37616df8e63595e8810c1979",
       "artifacts/capture-hud-publication-gf2/validate.py": "4d7e4dbb50dad45eae607c2b138ab06bdd8ff2b1b09f19114c19ba6fe2a64b0c"
+    }
+  },
+  "interaction_progress": {
+    "source_base": "d4ae3e4",
+    "production_changed": false,
+    "runtime_sha256": "073f753a2950ac186b693a947ef92028e30c192deef006ea28de7b42c744b515",
+    "focus_profiles": {
+      "buffered": {
+        "pid": 27864,
+        "background_events_received_by_app": 14,
+        "foreground_legacy_events": 0,
+        "foreground_buffered_events": 24,
+        "background_mode_unchanged": true,
+        "background_request_absent": true,
+        "foreground_capture_files": 1,
+        "mode_recovered_without_double_trigger": true,
+        "app_registration_preserved": true,
+        "retained_pixels_exact": true,
+        "dual_checks": 28,
+        "evidence": "artifacts/capture-hud-focus-current"
+      },
+      "mixed_legacy": {
+        "pid": 30932,
+        "background_events_received_by_app": 14,
+        "foreground_legacy_events": 7,
+        "foreground_buffered_events": 0,
+        "background_mode_unchanged": true,
+        "background_request_absent": true,
+        "foreground_capture_files": 1,
+        "mode_recovered_without_double_trigger": true,
+        "app_registration_preserved": true,
+        "retained_pixels_exact": true,
+        "dual_checks": 28,
+        "evidence": "artifacts/capture-hud-focus-legacy"
+      }
+    },
+    "selection": {
+      "real_swap_chains": 2,
+      "same_foreground_hwnd": true,
+      "native_baseline_passed": true,
+      "automatic_ambiguity_refused_twice": true,
+      "explicit_ids_armed": [
+        2,
+        1
+      ],
+      "unique_recent_candidate_selected": true,
+      "published_files": 3,
+      "dual_checks": 64,
+      "clear_color_negative_controls": 3,
+      "both_surfaces_exact_after_exit": true,
+      "app_chords_forwarded": 6,
+      "overlapping_present_capture": "Unsupported; explicit located failure without publication",
+      "overlapping_present_error": "Other swap-chain Present during capture: External resource mutation or synchronization is not recorded",
+      "scope": "Both chains continuously present for ambiguity and failure cases; successful files are captured while the other chain is idle, not proof of overlapping multi-swap capture."
+    },
+    "build_profiles": [
+      "capture-only",
+      "complete application"
+    ],
+    "capture_only_focused_tests": "4/4",
+    "full_focused_tests": "2/2 including capture UI",
+    "all_test_processes_exited": true,
+    "physical_single_hold_verified": false,
+    "formal_gf2_accepted_frames": 0,
+    "scope": "Native Windows focus changes and short injected keyboard chords via the Computer Use tool; no key-held-during-focus-change, physical long-hold or monitor transition claim.",
+    "sha256": {
+      "artifacts/capture-hud-focus-current/baseline.json": "768da78ff15f4f459e5c99e2aedb9c5b1244f1fe2f70550be82113be5719d96f",
+      "artifacts/capture-hud-focus-current/foreground-detailed.json": "5456d29824901dcef7285e6d0eeb3b06e3cca9e9cd483ee03752384ace3b3743",
+      "artifacts/capture-hud-focus-current/background-chords.json": "11b713e615edbed15241222b08dd36869610131e6c13451c18503a74f8e97a81",
+      "artifacts/capture-hud-focus-current/background-input.json": "5bac71dcc27575e46757e4fcdaf8af67b62c7dd80069c7c295e8692052c126b7",
+      "artifacts/capture-hud-focus-current/recovered.json": "1ccf654a46569a06a3f69ec388150a8d49cd7a4f655ccc515e2da2e05a1e5648",
+      "artifacts/capture-hud-focus-current/recovered-input.json": "6e1274427f4f88d3694cf0d2c3151c21785e4c745e6806306f759a7bf70945d9",
+      "artifacts/capture-hud-focus-current/target/exit.json": "1ee940b1562bc0424f74f969c3432ca057d352b08809343c5dbcefe7f0a1af4b",
+      "artifacts/capture-hud-focus-current/validation/validation.json": "6c7f181214f19e516bd71dce6d204b1f809023a575121c4ed4f83325891dbade",
+      "artifacts/capture-hud-focus-legacy/baseline.json": "29007155b2ad5d8bfb20b48b665c9ffef4ca118f23dd99a5c1558c073e3d7e11",
+      "artifacts/capture-hud-focus-legacy/foreground-detailed.json": "ae779b401a6e5c5dd832d509a1473ceb8f81c5ec70791298c20b432d3f90e83f",
+      "artifacts/capture-hud-focus-legacy/background-chords.json": "bd712eef04012f86197827031d3327e2d1874926c0c69dd4e6dd97d6b500b737",
+      "artifacts/capture-hud-focus-legacy/background-input.json": "416d3511c04722c7dcc36c9e885b2e791e42301ef24900526ace43e59ce4aed1",
+      "artifacts/capture-hud-focus-legacy/recovered.json": "60ef907f8cdf099b858a1c0a09e2349b3be1898737825758c3c3d2b32eaf72e4",
+      "artifacts/capture-hud-focus-legacy/recovered-input.json": "e142af27a65adb0dfc6b9375d5fccb3d627afde8ed1524f001189ade0e1f747c",
+      "artifacts/capture-hud-focus-legacy/target/exit.json": "03fea2e042534f2733bd157bc212c5012c404813fb8cf0156855a09a03c15728",
+      "artifacts/capture-hud-focus-legacy/validation/validation.json": "6c7f181214f19e516bd71dce6d204b1f809023a575121c4ed4f83325891dbade",
+      "artifacts/capture-hud-selection-current/baseline.json": "a303bdae6eff0ffbb7d7cb60812bca8290b13e3c49ec4c6bf911c2789e8e145f",
+      "artifacts/capture-hud-selection-current/ambiguous.json": "f7f1fac11e08fd4dd15506f1c9dbaaf4945fdcb6db4a7b9ed25dacc67c8e0c54",
+      "artifacts/capture-hud-selection-current/ambiguous.png": "1107a37a4e4d7afc9de3c0861eb9fff71c0595eb1f186679e676abb9868ce821",
+      "artifacts/capture-hud-selection-current/concurrent-refusal.json": "6f312da3f5c83a4d3f8c2492f14fd94140b518668ea2427610f1e4fdfab879c4",
+      "artifacts/capture-hud-selection-current/selected-first.json": "fbf6d3899b125676c0ea2fd28b3e66c1141cc6808aa9c25afde0d0579735fbe9",
+      "artifacts/capture-hud-selection-current/selected-second.json": "61b95ad561cfbf6c702aaf1490310e97d58a7dca6297ae6fa4875d86286cf52e",
+      "artifacts/capture-hud-selection-current/automatic-first.json": "65bec9217ec598c1c696e18aab443b9806a4da6ad2a9bd551ab2888c0e77f965",
+      "artifacts/capture-hud-selection-current/ambiguous-again.json": "91d63011325a994f688a5fe8288048ab2eda87d74bf918cb958abd1e42d447cf",
+      "artifacts/capture-hud-selection-current/target/exit.json": "da3b29a5c65613b58a3a8a1819e1d8132d3dd8e13efea316adfd24bbcee62fa2",
+      "artifacts/capture-hud-selection-current/validation/validation.json": "4b3194f72fc88d9d26bca0749d4e13c73a5b8889140ba0faef3980844de8338d",
+      "src/capture/tests/hud_selection_target.cpp": "9229c0488c99b101d857b3ccd800faa45b3e26f8ecdd32b63b4c612502dc5ceb",
+      "tools/validate_capture_hud_selection.py": "0041f9afe13fd6df97a083043362e6f82456afe97df5fab8242791aed899dc5c",
+      "build/capture/capture/Release/FloraCaptureRuntime.dll": "073f753a2950ac186b693a947ef92028e30c192deef006ea28de7b42c744b515",
+      "build/capture/capture/Release/FloraCaptureHudSelectionTarget.exe": "a4737e6c57545f54d4ca273494c4eed9efedf6a69934f70507f989e528f59bae",
+      "artifacts/capture-hud-selection-build.log": "5d1dadf7a8053ca83b988f4cf06252fbaa7b8e9eeda535225a85c86d59d73f55",
+      "artifacts/capture-hud-selection-full-build.log": "25c4d04e863f43c03f9f50944267f6190b3a5009edad70ff17568aef61cbce85",
+      "artifacts/capture-hud-selection-ctest.log": "f103ff77a4beaf7f1e4c2d217ea207f23389b3cd991c40f8fe3b268ddd9bc22b",
+      "artifacts/capture-hud-selection-full-ctest.log": "ec66fe8969b8d964a37404f9e6355a777f4813d05f38293871fe159bc8daee75",
+      "artifacts/capture-hud-selection-native/exit.json": "ec124cc45cfce2a97f2d4c7662d72763de308585b4d771ed851471e206524df8"
     }
   }
 }

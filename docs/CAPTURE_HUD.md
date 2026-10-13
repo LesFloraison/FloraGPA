@@ -894,3 +894,46 @@ unchanged while successful Presents advance from 9271 to 21122. HUD was already
 Hidden here, so this check does not independently prove visible-HUD removal.
 The game exits normally with zero reported interface gaps. These automated short
 chords do not establish a physical single hold. Formal GF2 acceptance remains 0/6.
+
+## Native focus transitions and multi-swap selection
+
+On production `d4ae3e4`, native x64 buffered Raw Input and mixed legacy/raw
+applications were each moved behind a separate foreground input sink. A mode
+chord followed by a capture chord reached that sink; the application's INPUTSINK
+registration also delivered the background raw records. HUD stayed Detailed and
+submitted no request. Returning to the target restored exactly one capture and
+one mode transition to Hidden. Mixed input used the legacy stream without a
+second raw trigger. Each experiment preserves registration and exact retained
+pixels and passes **28 dual-player/preview/event/resource/Draw-zero checks**.
+These were short tool-injected chords with actual Windows foreground changes,
+not a physical hold or a key held through a focus change.
+
+`FloraCaptureHudSelectionTarget` is an independent DX11 application with two blt
+swap chains on one HWND and a shared immediate context. Both chains continuously
+Present during the ambiguous-candidate experiment. Native unhooked presentation
+and exact red/blue surface bytes pass first. Injected Ctrl+Shift+C then produces
+the visible `Select swap chain` message and publishes nothing. Explicit ID 2
+reaches Armed, but another chain Present during recording triggers the existing
+located capture rejection. The failure and absent output are retained; it is
+not counted as successful multi-swap capture.
+
+Application signals can leave either chain idle. With the other chain idle,
+explicit IDs 1 and 2 capture the correct red/blue scene, and automatic selection
+chooses the sole recent presenter. Resuming both presenters restores ambiguity
+and refuses again rather than reusing the last automatic choice. All six capture
+chords reached the application. Both application surfaces retain exact bytes on
+normal exit. `validate_capture_hud_selection.py` replays the three published
+files in both players, checks exact previews and application-only event/object
+inventory, and changes each Clear to green as an execution negative control:
+**64 checks pass**. Example invocation (development-only Python):
+
+```powershell
+python tools/validate_capture_hud_selection.py --evidence artifacts/capture-hud-selection-current --replay build/vs2022/Release/FloraGPA.Cli.exe --oracle-tools D:/CDXrepo/FloraGPA/tools --qt-bin D:/Qt/6.11.2/msvc2022_64/bin --out artifacts/capture-hud-selection-recheck
+```
+
+This test-only revision builds the new fixture in both profiles. Four focused
+capture-only tests and two focused full-profile tests including Qt capture UI
+pass. Production DLL SHA-256 remains
+`073f753a2950ac186b693a947ef92028e30c192deef006ea28de7b42c744b515`;
+the preceding GF2 result therefore remains applicable. Evidence, exact scope and
+hashes are under `interaction_progress` in `capture-hud-evidence.json`.
