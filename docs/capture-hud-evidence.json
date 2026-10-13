@@ -1620,10 +1620,10 @@
     "delivery_complete": false,
     "installed_reference_hash_rechecked": true,
     "method": "Read implementation/test scope and retained outcomes; component checks do not establish unexecuted live integration cases",
-    "live_gf2_pid": null,
-    "live_baseline_files": 0,
-    "pending_input": "No live baseline. Isolated physical hold remains unverified; previous separate presses cannot establish it.",
-    "latest_evidence": "interaction_progress (runtime unchanged from publication_progress)"
+    "live_gf2_pid": 51016,
+    "live_baseline_files": 1,
+    "pending_input": "Instrumented single-hold check: short-control baseline has one edge, one attempt, one accepted request and zero repeat messages; user action pending.",
+    "latest_evidence": "input_diagnostics_progress"
   },
   "present_concurrency_progress": {
     "source_base": "68b567b",
@@ -2068,6 +2068,65 @@
       "artifacts/capture-hud-selection-ctest.log": "f103ff77a4beaf7f1e4c2d217ea207f23389b3cd991c40f8fe3b268ddd9bc22b",
       "artifacts/capture-hud-selection-full-ctest.log": "ec66fe8969b8d964a37404f9e6355a777f4813d05f38293871fe159bc8daee75",
       "artifacts/capture-hud-selection-native/exit.json": "ec124cc45cfce2a97f2d4c7662d72763de308585b4d771ed851471e206524df8"
+    }
+  },
+  "input_diagnostics_progress": {
+    "source_base": "389efaf",
+    "production_change": "Add monotonic hotkey edges, worker attempts/accepted requests and suppressed legacy repeat-message counters; no rendering or input-dispatch change",
+    "protocol": 3,
+    "protocol_scope": "Additive read-only HUD status diagnostics; existing configuration/control validation unchanged",
+    "prior_physical_hold": {
+      "pid": 36468,
+      "user_report": "One approximately three-second physical Ctrl+Shift+C hold completed",
+      "last_request": {
+        "busy": false,
+        "cancel_requested": false,
+        "error": "ID3D11DeviceContext::ClearRenderTargetView: MSAA sample-preserving capture is not implemented",
+        "request_name": "frame-4fb3e241-d3f8-410f-b3ad-10bd6f3cc8e2.gpa_frame",
+        "state": "Failed",
+        "swap_chain": 1
+      },
+      "published_files": 0,
+      "single_submission_measured": false,
+      "reason": "Old status retained only the last request; MSAA refusal produces no file, so request count cannot be inferred",
+      "normal_exit": true
+    },
+    "current_gf2": {
+      "pid": 51016,
+      "session_id": "e68d48ee-b7c6-45d4-bc53-1e0e9b52d3ee",
+      "visible_start_hud": true,
+      "short_press_counters": {
+        "capture_edges": 1,
+        "hotkey_request_attempts": 1,
+        "hotkey_requests_accepted": 1,
+        "legacy_capture_repeat_messages": 0,
+        "legacy_mode_repeat_messages": 0,
+        "mode_edges": 0
+      },
+      "short_press_file": "frame-1f651ab6-2838-49f1-ac32-eacd72dd61d8.gpa_frame",
+      "physical_hold_status": "Awaiting user action after instrumented baseline; compare against start-capture-status.json",
+      "dual_replay_status": "Pending for the newly instrumented DLL",
+      "session_left_running": true
+    },
+    "capture_only_focused_tests": "6/6",
+    "full_capture_ui_tests": "1/1",
+    "build_profiles": [
+      "capture-only",
+      "full runtime and Qt test target"
+    ],
+    "formal_gf2_accepted_frames": 0,
+    "sha256": {
+      "src/capture/runtime/hud_control.cpp": "a3c2884feb6444806efdffb8fd7da0118a9e3ee14b58f8e851968188b723590d",
+      "tools/validate_capture_hud_hold.py": "87bd0972ed6869dc39b45e934b4b7bce89a5b71e21c1f114859e7887c691e006",
+      "build/capture/capture/Release/FloraCaptureRuntime.dll": "3091d598dbc94dbdce7d725100d4753fb98d4378683655772ceecd072cdf4c84",
+      "artifacts/capture-hud-input-counts-build.log": "5651e5b13ad4787da6961b9a06e132acd70e7f0272126a5e8ba1c3bac563ecc1",
+      "artifacts/capture-hud-input-counts-full-build.log": "a06d3cf1f2accee75906b24053ca6decb4ef886ab0b858f2790342177766c5ef",
+      "artifacts/capture-hud-input-counts-tests.log": "14b2a90e9c680c092f6372fcd4f1076ac4f8899b9505d3033cfe6c6cce85cc1a",
+      "artifacts/capture-hud-input-counts-ui-tests.log": "947aab11ddbedff996e721df82e8ac3f8c30f6311628bd2a464b846fed3dd9bb",
+      "artifacts/capture-hud-counted-hold/initial.json": "86c7ba8a1cc2cab25f1aa264418f89820507508402b6847e9c3f7d855e43290e",
+      "artifacts/capture-hud-counted-hold/start-capture-status.json": "29ff545fd198d7ffbe030e3d26dce7167597d73b6e1f1eef08396897b5e62c4f",
+      "artifacts/capture-hud-final-hold/after-hold.json": "9684be1772ec9c44a51799948568dca4384829e1e0d2ec00b85a5b8b04a41269",
+      "artifacts/capture-hud-final-hold/outcome.json": "da28ac825c5f4582052692d3a2c53eada77cd1d26d4b5c483070a5ad1b7ea5aa"
     }
   }
 }

@@ -937,3 +937,25 @@ pass. Production DLL SHA-256 remains
 `073f753a2950ac186b693a947ef92028e30c192deef006ea28de7b42c744b515`;
 the preceding GF2 result therefore remains applicable. Evidence, exact scope and
 hashes are under `interaction_progress` in `capture-hud-evidence.json`.
+
+## Hotkey request diagnostics
+
+`status.hud.input_diagnostics` contains monotonic process-session counters:
+`mode_edges`, `capture_edges`, `hotkey_request_attempts`,
+`hotkey_requests_accepted`, `legacy_mode_repeat_messages` and
+`legacy_capture_repeat_messages`. Edges count foreground matching input before
+Present coalescing; attempts count work taken by the hotkey worker; accepted
+counts successful arm responses, even if the frame later fails. CLI requests
+are excluded. Repeat counters count matching legacy keydown messages with the
+previous-state bit set; they do not measure raw repeats or hold duration.
+All fields are additive status diagnostics under protocol 3; configuration and
+control-message validation are unchanged. No keyboard text is retained.
+
+This closes an evidence gap exposed by the user-reported single physical hold
+in GF2 PID 36468. By the follow-up, the application was in its main scene and
+the last request had failed explicitly on MSAA. There were no output files.
+The old status retained only the last request, so that observation cannot prove
+how many failed requests occurred during the hold. The user report and failure
+are preserved without claiming a successful frame or a measured single request.
+The instrumented follow-up must compare counters against a recorded baseline,
+including a positive repeat-message count for the legacy hold experiment.

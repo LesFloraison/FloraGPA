@@ -26,6 +26,10 @@ struct Control {
     std::map<DWORD,HHOOK> hooks;
     std::map<DWORD,hud::RawKeyboard> raw_keys;
     uint64_t raw_events=0,legacy_events=0,buffered_events=0;
+    // Session-lifetime diagnostics, independent of file publication: a failed
+    // capture must still be distinguishable from repeated hotkey submissions.
+    uint64_t mode_edges=0,capture_edges=0,hotkey_attempts=0,hotkey_accepted=0;
+    uint64_t legacy_mode_repeats=0,legacy_capture_repeats=0;
     bool raw_focused=false;
     std::string input_error;
     std::map<uint64_t,hud::FrameClock> clocks;
@@ -70,17 +74,22 @@ void raw_keyboard_events(const std::vector<RAWKEYBOARD>& keys,bool buffered){
         else if(vk==VK_MENU)vk=(key.Flags&RI_KEY_E0)?VK_RMENU:VK_LMENU;
         ++c.raw_events;if(buffered)++c.buffered_events;
         const auto action=keyboard.event(vk,!(key.Flags&RI_KEY_BREAK),focused,c.settings);
+        c.mode_edges+=action.mode;c.capture_edges+=action.capture;
         c.mode_edge|=action.mode;c.capture_edge|=action.capture;
     }
 }
 LRESULT CALLBACK keyboard_message(int code,WPARAM removed,LPARAM parameter){
     const auto error=GetLastError();
     try{if(code==HC_ACTION && removed==PM_REMOVE){const auto& message=*reinterpret_cast<const MSG*>(parameter);
-        if((message.message==WM_KEYDOWN || message.message==WM_SYSKEYDOWN) && !(message.lParam&(LPARAM(1)<<30))){
+        if(message.message==WM_KEYDOWN || message.message==WM_SYSKEYDOWN){
             DWORD foreground=0;GetWindowThreadProcessId(GetForegroundWindow(),&foreground);
             if(foreground==GetCurrentProcessId()){
                 const auto matches=[&](const hud::Hotkey& key){return key.key && message.wParam==key.key && bool(GetKeyState(VK_CONTROL)&0x8000)==key.control && bool(GetKeyState(VK_SHIFT)&0x8000)==key.shift && bool(GetKeyState(VK_MENU)&0x8000)==key.alt && !(GetKeyState(VK_LWIN)&0x8000) && !(GetKeyState(VK_RWIN)&0x8000);};
-                auto& c=control();std::lock_guard lock(c.mutex);if(c.connected){++c.legacy_events;if(matches(c.settings.mode_key))c.mode_edge=true;if(matches(c.settings.capture_key))c.capture_edge=true;}
+                auto& c=control();std::lock_guard lock(c.mutex);if(c.connected){
+                    const bool mode=matches(c.settings.mode_key),capture=matches(c.settings.capture_key);
+                    if(message.lParam&(LPARAM(1)<<30)){c.legacy_mode_repeats+=mode;c.legacy_capture_repeats+=capture;}
+                    else{++c.legacy_events;c.mode_edges+=mode;c.capture_edges+=capture;c.mode_edge|=mode;c.capture_edge|=capture;}
+                }
             }
         }else if(message.message==WM_INPUT){
             // The application still owns this handle and its cleanup. Reading
@@ -106,10 +115,10 @@ void feedback(Control& c,const Json& result){
 void worker(){
     auto& c=control();
     for(;;){
-        {std::unique_lock lock(c.mutex);c.ready.wait(lock,[&]{return c.pending || !c.connected;});if(!c.connected)return;c.pending=false;c.processing=true;}
+        {std::unique_lock lock(c.mutex);c.ready.wait(lock,[&]{return c.pending || !c.connected;});if(!c.connected)return;c.pending=false;c.processing=true;++c.hotkey_attempts;}
         Json result;
         try{result=submit_capture_request(selected_capture_swap(),uuid());}catch(const std::exception& e){result={{"ok",false},{"error",e.what()}};}catch(...){result={{"ok",false},{"error","Capture request failed"}};}
-        {std::lock_guard lock(c.mutex);c.processing=false;feedback(c,result);}
+        {std::lock_guard lock(c.mutex);c.processing=false;c.hotkey_accepted+=result.value("ok",false);feedback(c,result);}
     }
 }
 void progress_message(Control& c,const Json& progress){
@@ -179,6 +188,7 @@ Json hud_status(){
         {"reason",!c.connected?"Disconnected":c.settings.mode==hud::Mode::Hidden?"Hidden":visible?"":"See per-swap HUD reason"},
         {"hud_hotkey",hud::hotkey_name(c.settings.mode_key)},{"capture_hotkey",hud::hotkey_name(c.settings.capture_key)},
         {"input_reason",c.input_error},{"input_threads",c.hooks.size()},{"input_profile","Target-thread legacy messages, raw keyboard messages and native x64 raw input batches"},{"raw_key_events",c.raw_events},{"buffered_key_events",c.buffered_events},{"legacy_key_events",c.legacy_events},
+        {"input_diagnostics",{{"mode_edges",c.mode_edges},{"capture_edges",c.capture_edges},{"hotkey_request_attempts",c.hotkey_attempts},{"hotkey_requests_accepted",c.hotkey_accepted},{"legacy_mode_repeat_messages",c.legacy_mode_repeats},{"legacy_capture_repeat_messages",c.legacy_capture_repeats}}},
         {"request_pending",c.pending || c.processing},{"message",c.message.value(GetTickCount64())},{"last_request",c.last_request},{"swap_chains",rows}};
 }
 struct HudDraw::Impl {

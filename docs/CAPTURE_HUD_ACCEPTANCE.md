@@ -16,6 +16,14 @@ test-only `interaction_progress` adds native focus/selection evidence, five file
 and 120 dual-player checks on the unchanged DLL, plus 4/4 capture-only and 2/2
 full-profile focused CTests including capture UI.
 
+The later `input_diagnostics_progress` adds read-only hotkey counters. Its two
+runtime builds, six focused capture-only tests and Qt capture UI pass. The new
+GF2 short-control capture reports one edge/attempt/accepted request; physical
+hold and this new file's dual replay remain pending. The earlier reported hold
+reached MSAA refusal with no file on the old runtime; last-request-only status
+could not measure its submission count. Rendering code is unchanged, but that
+old observation is not promoted to a counted long-hold pass.
+
 | Requested behavior | Evidence inspected | Result and remaining limit |
 | --- | --- | --- |
 | Read-only original GPA HUD research, pinned DLL and RVA conclusions | `CAPTURE_HUD.md`, Reference research and Clean presentation storage investigation; ignored `artifacts/capture-hud-plan`; installed shim SHA-256 rechecked against `cb0b99d113511cbf7ca9f949d97aa02e4a1f8f110b1f3ad3165d8a81035dee31` | HUD state bracketing, capture toggle, FPS and native Present order located. Original retained-pixel safety is explicitly unproven; product isolation has independent tests. |
