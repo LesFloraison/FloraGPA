@@ -1,4 +1,4 @@
-"""Execute production MSAA encoder files in both players; runtime capture remains unintegrated."""
+"""Execute owned-model or wrapped-context MSAA encoder files in both players."""
 import argparse
 import hashlib
 import json
@@ -13,6 +13,7 @@ def main():
     p = argparse.ArgumentParser(description=__doc__)
     for name in ('probe', 'replay', 'oracle-tools', 'qt-bin', 'out'):
         p.add_argument('--'+name, required=True, type=Path)
+    p.add_argument('--recorded', action='store_true', help='Validate the wrapped-context recording probe')
     a = p.parse_args()
     out = a.out.resolve()
     out.mkdir(parents=True, exist_ok=False)
@@ -59,7 +60,8 @@ def main():
     for device in ('warp', 'hardware'):
         result = json.loads(run(device+'-probe', [a.probe.resolve(), *(['--hardware'] if device == 'hardware' else []), out/device]))
         check(device+'-owned-source-debug-refusals', result['passed'] and result['source_gpu_objects_alive'] == 0 and
-              result['debug_warnings_or_errors'] == 0 and result['encoder_refusals'] == 50)
+              result['debug_warnings_or_errors'] == 0 and
+              (result['recording_refusals'] == 4 if a.recorded else result['encoder_refusals'] == 50))
         manifest = json.loads((out/device/'frames.json').read_text())
         for samples in (2, 4):
             source = out/device/f'{samples}x-complete.gpa_frame'

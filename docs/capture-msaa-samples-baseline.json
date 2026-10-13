@@ -767,5 +767,141 @@
       "artifacts/capture-msaa-encoder-20261014/full-build.log": "554952ac2c7a56a10e14c5b3b258130bbde94fcdf15fed808666f035bb336a31",
       "artifacts/capture-msaa-encoder-20261014/full-build2.log": "f462c999adf6c9afa2be33020263839769a84377781ac1befc6c21dc3a7ebc31"
     }
+  },
+  "immediate_recording": {
+    "base_commit": "20649a8b6ac0d8812499c187fbc25e32a48717d4",
+    "status": "Scoped RGBA8 MSAA initialization connected to wrapped immediate-context recording; injected MSAA and GF2 pending",
+    "profile": "13x7 two-layer RGBA8 typeless source, UINT rendering and UNORM display; 2x/4x quality zero; WARP/hardware",
+    "native_results": [
+      {
+        "debug_warnings_or_errors": 0,
+        "files": 4,
+        "hardware": false,
+        "passed": true,
+        "recording_refusals": 4,
+        "scope": "Wrapped immediate-context MSAA recording; startup injection and GF2 pending",
+        "source_gpu_objects_alive": 0
+      },
+      {
+        "debug_warnings_or_errors": 0,
+        "files": 4,
+        "hardware": true,
+        "passed": true,
+        "recording_refusals": 4,
+        "scope": "Wrapped immediate-context MSAA recording; startup injection and GF2 pending",
+        "source_gpu_objects_alive": 0
+      }
+    ],
+    "dual_player_files": 12,
+    "dual_player_checks": 248,
+    "wrapped_positive_files": 4,
+    "application_draw_removal_files": 4,
+    "initialization_draw_removal_files": 4,
+    "capture_only_ctest": 95,
+    "full_selected_ctest": 98,
+    "qt_cases": 12,
+    "qt_skipped": 0,
+    "gpu_tests_serial": true,
+    "injected_existing_profile_launches": 24,
+    "injected_existing_profile_files": 96,
+    "injected_existing_profile_checks": 625,
+    "injected_automatic_foreground_sessions": 0,
+    "accepted_gf2_frames": 0,
+    "new_gf2_launches": 0,
+    "startup_injected_msaa_verified": false,
+    "new_original_gui_run": false,
+    "replay_shared_format_changed": false,
+    "new_golden_run": false,
+    "clean_source_package": "Latest proof a899110 covers CPU encoder before this runtime integration; current revision package remains pending",
+    "pending": [
+      "Startup-injected MSAA Present/control/package acceptance",
+      "Depth/stencil and other initialization formats",
+      "MSAA mutation, deferred, query/predicate and swap-chain output profiles",
+      "Original GUI context/grouping and arbitrary event replay",
+      "Formal GF2 two-launch six-frame/two-scene acceptance"
+    ],
+    "source_sha256": {
+      "src/capture/runtime/command_stream.cpp": "5e6c59e27ea301a9fd4f3f640070dc22a2debd6e831d6bb788ef5e9ec0699a36",
+      "src/capture/runtime/command_stream.hpp": "7a453d73a2719243628d0089e1a1f3d7802e0d1dae4af43bb54e7e9b4cbff6ff",
+      "src/capture/tests/msaa_native_fixture.hpp": "11ed4ca85a3e67154662f9a55748861f825506395c47b5d23cb3bf973592f7c3",
+      "src/capture/tests/msaa_recording_tests.cpp": "9cc35c65a297454371884614c509eaee574a3f7fbd24b07595c23cc90ff8d448",
+      "src/capture/CMakeLists.txt": "4afcfefdb86672d33f9dcf54a8383c18ab98e35747b86ab5792080b3dfa3a486",
+      "tools/validate_capture_msaa_encoder.py": "34cc5797442c1e38113cd4b750a7796499f4748efbbf173d4bb01ba813f2d31d"
+    },
+    "evidence_sha256": {
+      "artifacts/capture-msaa-recording-20261014/dual/validation.json": "d80cf3512ba6412cb02b209cfe82812d81708deca200a58911a1d5e8385afd6a",
+      "artifacts/capture-msaa-recording-20261014/dual/inputs.json": "31261c200e3269a1411e584980470c398cbae2847075e12624bf2627955a5677",
+      "artifacts/capture-msaa-recording-20261014/injected/validation.json": "31b6801b2a5d83c7960dd83aaa709ca597aa0e61b7bb9267417f871a9fa5f40e",
+      "artifacts/capture-msaa-recording-20261014/injected/inputs.json": "77c160652eceff2cc0ffe9627450c1818516ca4d494cba4bf7a2a98e54315f2c",
+      "artifacts/capture-msaa-recording-20261014/capture-ctest.log": "6cd543289bb43d265a61f8d32776a30c8666defea5f2c679f93af49604e8e3c7",
+      "artifacts/capture-msaa-recording-20261014/capture-detailed.log": "c680facdecf736e1c428fb901572b91774b93c086014ec19085e61aeb54954b4",
+      "artifacts/capture-msaa-recording-20261014/full-ctest.log": "4a815fb68d59a21b06cf41e105595012235de75543540b590862206839e81c7d",
+      "artifacts/capture-msaa-recording-20261014/full-detailed.log": "0db747580cd70181c56e2433c4dfa26e53d44e9a954dc5054bd9b162fa4dfdd7",
+      "artifacts/capture-msaa-recording-20261014/capture-ui.txt": "68da85a94ef1ecc2d8bdcb2b23885745a2d4618d6c69ef78fdb408aae54c7230",
+      "artifacts/capture-msaa-recording-20261014/build.log": "4fbb8a6c395cc88b6440076b529a986a6b21a54e376923f2928041fc2a4486ac",
+      "artifacts/capture-msaa-recording-20261014/full-build.log": "7c638df60832093cfb073deeadd198b304449b7ac8522d464aa553df3bbb474d"
+    },
+    "files": [
+      {
+        "file": "warp/2x-complete.gpa_frame",
+        "sha256": "5a23c2c305b8b23bf238a4984aaee3704f84a37935f6be89e69886a7edee23c0",
+        "expected_sha256": "c1c88b5938469ee1c74d7c22d290f19321df6b19260e90215bcd7f3c1e55e1ac"
+      },
+      {
+        "file": "warp/2x-missing-application-draws.gpa_frame",
+        "sha256": "37323c719e1d6b853578518b6e3554302758f2d6150194c46cf72344c4b001d2",
+        "expected_sha256": "34799da0f161968434fc8f7303fae5fd8dc357e77b928409403606f112f3226a"
+      },
+      {
+        "file": "warp/4x-complete.gpa_frame",
+        "sha256": "a751788d6c6747bf122d4463c6db178b01a6b9feb46c0cf2df4767be33b47aef",
+        "expected_sha256": "fb05ad65624797b72b80275cf88f26bf272db8eafb9b09d00cbe31c3fb36a58a"
+      },
+      {
+        "file": "warp/4x-missing-application-draws.gpa_frame",
+        "sha256": "34a0851724859cb9312ecc63e015153ca90a6007af0bb1c40fdd07f6cc61420b",
+        "expected_sha256": "4cdac83c367934f6484adfd6b41cb4df8ad9960aaf9c174dd49fc590ede0acb1"
+      },
+      {
+        "file": "warp/2x-missing-initialization.gpa_frame",
+        "sha256": "07a5e97d7a63a3cfb69d947f29017ece7841dc97388f69a31bea2050077c385b",
+        "expected_sha256": "826d3099fc292a2b6d4246005d1032d94494175012c4bc8adbc8eeb7f4fa21a2"
+      },
+      {
+        "file": "warp/4x-missing-initialization.gpa_frame",
+        "sha256": "4fb1291309cc2924610577c2df134d643454ed951863540d3dd77aa376b5b58f",
+        "expected_sha256": "ca7e175b4bd3bdd9bf0f767d640a85198c73cffe79a68d7ec4b911d50eb94a4f"
+      },
+      {
+        "file": "hardware/2x-complete.gpa_frame",
+        "sha256": "4fe28bdc647bd7d784406c1869faee435ecc032b91a9641a1fc5fa9e00bdf0c9",
+        "expected_sha256": "c1c88b5938469ee1c74d7c22d290f19321df6b19260e90215bcd7f3c1e55e1ac"
+      },
+      {
+        "file": "hardware/2x-missing-application-draws.gpa_frame",
+        "sha256": "ae666c032904934b28bc78c037e3fc0e1336ae23ec2886b1e329ecb2b4c99458",
+        "expected_sha256": "34799da0f161968434fc8f7303fae5fd8dc357e77b928409403606f112f3226a"
+      },
+      {
+        "file": "hardware/4x-complete.gpa_frame",
+        "sha256": "fd57652119c130b1ca66d69142879c659b8687344003fbcbb17d091869ecacf1",
+        "expected_sha256": "fb05ad65624797b72b80275cf88f26bf272db8eafb9b09d00cbe31c3fb36a58a"
+      },
+      {
+        "file": "hardware/4x-missing-application-draws.gpa_frame",
+        "sha256": "8d4252f3fb7df33c6ed74159a7159fab65bc4e34898d135aa9065ad98751960f",
+        "expected_sha256": "4cdac83c367934f6484adfd6b41cb4df8ad9960aaf9c174dd49fc590ede0acb1"
+      },
+      {
+        "file": "hardware/2x-missing-initialization.gpa_frame",
+        "sha256": "2198bf7a080d1ded6bdf5930c1eb97b1e6ac95c536721223161a2172044ce281",
+        "expected_sha256": "826d3099fc292a2b6d4246005d1032d94494175012c4bc8adbc8eeb7f4fa21a2"
+      },
+      {
+        "file": "hardware/4x-missing-initialization.gpa_frame",
+        "sha256": "c564a29897ab96171bc0637231376b101ff6f1ebb7eee1d5be37bb0ec2cc48d5",
+        "expected_sha256": "ca7e175b4bd3bdd9bf0f767d640a85198c73cffe79a68d7ec4b911d50eb94a4f"
+      }
+    ]
   }
 }

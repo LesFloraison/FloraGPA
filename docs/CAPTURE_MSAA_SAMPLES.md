@@ -1,9 +1,10 @@
 # Capture-owned MSAA sample readback
 
-MSAA work now includes an owned CPU sample model, native readback primitives and
-a scoped color initialization encoder. It does **not** enable live MSAA frame
-capture: the ordinary recording snapshot still rejects MSAA. The encoder only
-accepts inputs that explicitly supply complete, validated sample planes. GF2
+MSAA work now includes an owned CPU sample model, native readback primitives,
+a scoped color initialization encoder and immediate-context recording. The
+recording path retains RGBA8 2x/4x quality-zero samples before first use and
+passes owned bytes to the encoder. Startup-injected MSAA acceptance, broader
+formats and hidden-state combinations remain pending. GF2
 formal scene acceptance remains **0/6**. The supported HUD acceptance is separate.
 
 `MsaaSamples` retains resource identity, original dimensions/format/sample count,
@@ -253,9 +254,9 @@ copies. Exact sample-tile pixels, application-Draw deletion controls, shader
 exports, event counts and independent modules are checked. Unlike the previous
 experiment, positive files now come from `encode_frame`.
 
-Runtime recording does not yet populate `initial_msaa`; its existing refusal
-remains deliberate. Production integration, broader initialization formats and
-GF2's six-frame gate are still incomplete. Current evidence and exact regression
+At this encoder stage, runtime recording did not yet populate `initial_msaa`.
+The subsequent immediate recording stage is described below. Broader
+initialization formats and GF2's six-frame gate remain incomplete. Evidence and regression
 counts are in the baseline's `color_encoder` entry and ignored directory
 `artifacts/capture-msaa-encoder-20261014`. No new GF2/GUI/golden result is implied.
 
@@ -268,3 +269,35 @@ archived source directory with spaces under System32-only PATH. The module
 audit finds no Qt, Python, GPA, RenderDoc, FloraCore or FloraReplay. Raw evidence
 is retained in `artifacts/capture-msaa-encoder-source-a899110`; this does not
 claim live MSAA capture or a new dual-player/GF2 result.
+
+## Immediate-context recording
+
+The runtime now snapshots supported MSAA dependencies before their first
+recorded use. Later references keep the original samples, even after an
+application Draw changes the resource. Sample bytes contribute to the same
+frame byte budget as ordinary resources and payloads; an additional aggregate
+limit bounds the number of planes. `freeze_frame` moves this separate owned
+map to the encoder and releases all retained COM objects on the application
+thread. No Replay or format-reader dependency is introduced.
+
+Live admission is limited to DEFAULT RGBA8 color resources, 2x/4x, quality zero,
+ordinary SRV/RTV bindings and no special flags. Unsupported initialization
+profiles include resource ID, format and sample count in the error. Deferred
+MSAA and direct MSAA copy/update/map commands explicitly refuse. Encoder query
+and predicate restrictions remain in force; MSAA swap-chain output is still
+unsupported. The broader standalone depth sample reader does not imply depth
+capture support.
+
+`FloraCaptureMsaaRecordingTests` observes actual wrapped context calls instead
+of constructing command models. WARP and hardware retain all pre-modification
+planes, record exactly three application Draws with no internal helper calls,
+match independent CPU output and release native owners before encoding.
+Each device also refuses four byte/plane-budget cases after verifying that
+the application's final pixels are unchanged. The recorded positive files,
+application-Draw deletion controls and initialization-Draw deletion controls
+pass 12 files / 248 exact dual-player checks using
+`tools/validate_capture_msaa_encoder.py --recorded`. No preview is used as the
+execution oracle. Evidence is retained in
+`artifacts/capture-msaa-recording-20261014`; regression counts and hashes are
+recorded separately in the baseline. This is wrapped-context coverage, not
+startup-injected MSAA or formal GF2 acceptance.

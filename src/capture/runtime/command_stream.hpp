@@ -8,6 +8,7 @@ struct RecordedFrame {
     std::map<ObjectId,RetainedObject> objects;
     std::map<ObjectId,FrozenObject> deferred_definitions;
     std::map<ObjectId,ResourceSnapshot> initial_resources;
+    std::map<ObjectId,MsaaSamples> initial_msaa;
     std::vector<RecordedCommand> commands;
     std::vector<std::string> gaps;
     size_t initial_bytes=0;
@@ -17,6 +18,7 @@ struct RecordedFrame {
 struct RecordingOptions {
     size_t byte_limit=default_resource_byte_limit;
     size_t command_limit=100000;
+    size_t msaa_plane_limit=1024;
     uint32_t readback_timeout_ms=5000;
     std::function<bool()> cancelled;
 };

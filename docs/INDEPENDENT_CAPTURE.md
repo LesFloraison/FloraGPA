@@ -1983,6 +1983,15 @@ The capture encoder now accepts a separate, validated `initial_msaa` model and
 emits the scoped RGBA8 initialization using build-time DXBC. Its positive files
 pass both players with deletion controls; model limits and view/identity checks
 refuse malformed input before publication. This supersedes the test-only writer
-limitation for that CPU encoding path. Runtime recording still rejects MSAA and
-does not populate the model. Depth/stencil initialization, broader profiles and
+limitation for that CPU encoding path. At that stage runtime recording still
+rejected MSAA and did not populate the model. Depth/stencil initialization, broader profiles and
 the formal GF2 gate remain pending; see the report's encoder section.
+
+The subsequent immediate-context path now fills the separate owned sample map
+before first use of supported RGBA8 2x/4x quality-zero resources. Actual wrapped
+Draws preserve their initial samples and native output, and freeze releases
+all native owners before CPU encoding. Twelve files / 248 dual-player checks
+include removal controls for both application and initialization Draws.
+Deferred MSAA, unsupported initialization formats, query/predicate combinations
+and MSAA swap-chain output remain refused. Startup-injected MSAA and GF2
+acceptance remain pending; see the MSAA report's immediate recording section.

@@ -5,6 +5,7 @@
 #include "deferred_history.hpp"
 #include "deferred_resources.hpp"
 #include "deferred_lowering.hpp"
+#include "msaa_readback.hpp"
 #include <cstring>
 
 namespace flora::capture {
@@ -69,8 +70,34 @@ struct FrameRecording::Impl {
     std::map<std::pair<ObjectId,UINT>,Mapping> mappings;
     std::map<ObjectId,std::pair<uint64_t,uint64_t>> query_ends; // generation, command sequence
     size_t payload_bytes=0;
+    size_t msaa_planes=0;
     uint64_t deferred_executions=0;
     RecordedFrame frame;
+    void snapshot(ID3D11DeviceContext* current,ID3D11Resource* resource,ObjectId id,SnapshotOptions readback){
+        if(frame.initial_resources.contains(id) || frame.initial_msaa.contains(id))return;
+        ComPtr<ID3D11Texture2D> texture;
+        if(SUCCEEDED(resource->QueryInterface(IID_PPV_ARGS(&texture)))){
+            D3D11_TEXTURE2D_DESC desc{};texture->GetDesc(&desc);
+            if(desc.SampleDesc.Count>1){
+                // Keep the live recording profile inside the independently
+                // validated encoder profile before executing any readback work.
+                if(desc.Format<DXGI_FORMAT_R8G8B8A8_TYPELESS || desc.Format>DXGI_FORMAT_R8G8B8A8_SINT ||
+                   desc.SampleDesc.Quality || (desc.SampleDesc.Count!=2 && desc.SampleDesc.Count!=4) ||
+                   desc.Usage!=D3D11_USAGE_DEFAULT || desc.CPUAccessFlags || desc.MiscFlags ||
+                   (desc.BindFlags&~(D3D11_BIND_RENDER_TARGET|D3D11_BIND_SHADER_RESOURCE)))
+                    throw std::runtime_error("MSAA recording initialization profile unsupported (resource="+std::to_string(id)+", format="+std::to_string(UINT(desc.Format))+", samples="+std::to_string(desc.SampleDesc.Count)+")");
+                const auto count=size_t(desc.ArraySize)*desc.SampleDesc.Count;
+                if(count>options.msaa_plane_limit-msaa_planes)throw std::runtime_error("MSAA recording plane limit exceeded");
+                auto data=snapshot_msaa_samples(current,texture.Get(),readback);
+                const auto layout=validate_msaa_initialization(data,desc,readback.byte_limit,options.msaa_plane_limit-msaa_planes);
+                frame.initial_bytes+=layout.bytes;msaa_planes+=layout.planes;
+                frame.initial_msaa.emplace(id,std::move(data));return;
+            }
+        }
+        auto data=snapshot_resource(current,resource,readback);
+        for(const auto& sub:data.subresources)frame.initial_bytes+=sub.bytes.size();
+        frame.initial_resources.emplace(id,std::move(data));
+    }
     void gap(const char* api,const char* reason) noexcept {
         frame.failed=true;
         try{if(frame.gaps.size()<32)frame.gaps.push_back(std::string(api)+": "+reason);}catch(...){}
@@ -121,6 +148,7 @@ FrozenFrame freeze_frame(RecordedFrame&& frame,ObjectId output,ResourceSnapshot&
         result.objects.emplace(id,std::move(object));
     }
     for(auto& [id,resource]:frame.initial_resources)result.initial_resources.emplace(id,ResourceContents{resource.shape,std::move(resource.subresources)});
+    result.initial_msaa=std::move(frame.initial_msaa);
     result.objects.merge(frame.deferred_definitions);
     result.commands=std::move(frame.commands);result.final_output={final_output.shape,std::move(final_output.subresources)};
     frame.objects.clear();frame.initial_resources.clear();return result;
@@ -182,6 +210,7 @@ void FrameRecording::observe(ID3D11DeviceContext* context,const char* api,Comman
                     if(!leases || !leases->contains(id))throw std::runtime_error("CommandList resource lease missing: "+std::to_string(id));
                     auto* resource=leases->at(id).Get();if(retain(held,resource)!=id)throw std::runtime_error("CommandList resource identity changed");
                     require_unmapped(held.objects.at(id).record);
+                    if(resource_shape(resource).samples>1)throw std::runtime_error("Deferred MSAA recording is not verified");
                     if(!p.frame.initial_resources.contains(id)){
                         options.byte_limit=p.options.byte_limit-p.frame.initial_bytes-p.payload_bytes-expanded.payload_bytes;
                         auto data=snapshot_resource(context,resource,options);
@@ -229,11 +258,9 @@ void FrameRecording::observe(ID3D11DeviceContext* context,const char* api,Comman
             if(object.record->kind!="device" && object.record->device!=snapshot.bindings.device)
                 throw std::runtime_error("Command operand belongs to another device");
             ComPtr<ID3D11Resource> resource;
-            if(SUCCEEDED(object.native.As(&resource)) && !p.frame.initial_resources.contains(id)){
+            if(SUCCEEDED(object.native.As(&resource))){
                 options.byte_limit=p.options.byte_limit-p.frame.initial_bytes-p.payload_bytes;
-                auto data=snapshot_resource(context,resource.Get(),options);
-                for(const auto& sub:data.subresources)p.frame.initial_bytes+=sub.bytes.size();
-                p.frame.initial_resources.emplace(id,std::move(data));
+                p.snapshot(context,resource.Get(),id,options);
             }
             ComPtr<ID3D11UnorderedAccessView> uav;
             if(SUCCEEDED(object.native.As(&uav))){
@@ -243,6 +270,9 @@ void FrameRecording::observe(ID3D11DeviceContext* context,const char* api,Comman
                 }
             }
         }
+        if((kind==CommandKind::copy_resource || kind==CommandKind::copy_region || kind==CommandKind::update_subresource || kind==CommandKind::map) &&
+           (p.frame.initial_msaa.contains(command.operand) || p.frame.initial_msaa.contains(command.source)))
+            throw std::runtime_error("MSAA recording mutation command is not verified");
         if(kind==CommandKind::copy_resource){
             const auto& destination=p.frame.initial_resources.at(command.operand);
             validate_copy_resource(destination.shape,destination.record->descriptor,p.frame.initial_resources.at(command.source).shape);
