@@ -50,6 +50,8 @@ def main():
     parser.add_argument('--out', type=Path, required=True)
     parser.add_argument('--cmake', type=Path)
     parser.add_argument('--jobs', type=int, default=4)
+    parser.add_argument('--profile', choices=['vs2022', 'replay-only', 'capture-full'], default='vs2022',
+                        help='Configure/build the named source preset and package its actual build directory')
     parser.add_argument('--test-target', action='append', default=[],
                         help='Also build this Qt test target from the same archive (repeatable; does not run tests)')
     args = parser.parse_args()
@@ -74,7 +76,7 @@ def main():
     archive = output/'source.zip'
     report = dict(schema='FloraGPA committed source build 1', completed=False,
                   source_commit=commit, verifier_sha256=digest(Path(__file__)),
-                  test_targets=test_targets,
+                  test_targets=test_targets, profile=args.profile,
                   steps=[], limits=[
                       'Committed source only; uncommitted changes are not included',
                       'Fresh source and process environment on this host, not a clean-machine certification',
@@ -128,30 +130,41 @@ def main():
                 raise RuntimeError(name+' failed; see '+str(output/(name+'.log')))
             print(name, 'passed', flush=True)
 
-        run('configure', [cmake, '--preset', 'vs2022', '-DCMAKE_PREFIX_PATH='+str(qt),
+        build_name = 'replay' if args.profile == 'replay-only' else 'vs2022'
+        build_preset = 'release' if args.profile == 'vs2022' else args.profile+'-release'
+        build_root = source/'build'/build_name
+        run('configure', [cmake, '--preset', args.profile, '-DCMAKE_PREFIX_PATH='+str(qt),
                           '-DBUILD_TESTING=OFF'])
-        if not (source/'build/vs2022/FloraGPA.sln').is_file():
+        if not (build_root/'FloraGPA.sln').is_file():
             raise RuntimeError('Configured solution is missing')
-        run('build', [cmake, '--build', '--preset', 'release', '--parallel', args.jobs])
+        if args.profile == 'replay-only':
+            if any(build_root.rglob('FloraCapture*.vcxproj')):
+                raise RuntimeError('Replay-only configuration contains capture targets')
+            cache = (build_root/'CMakeCache.txt').read_text()
+            if 'FLORA_BUILD_CAPTURE:BOOL=OFF' not in cache or 'FLORA_BUILD_CAPTURE_UI:BOOL=OFF' not in cache:
+                raise RuntimeError('Replay-only configuration did not disable capture')
+        run('build', [cmake, '--build', '--preset', build_preset, '--parallel', args.jobs])
         package = output/'portable'
         package_command = [windows/'System32/WindowsPowerShell/v1.0/powershell.exe',
                         '-NoProfile', '-ExecutionPolicy', 'Bypass', '-File',
-                        source/'tools/package.ps1', '-OutputDirectory', package]
+                        source/'tools/package.ps1', '-BuildDirectory', build_root, '-OutputDirectory', package]
         if args.renderdoc_root:
             package_command += ['-RenderDocRoot', args.renderdoc_root.resolve(strict=True)]
         run('package', package_command)
         report['package_files'] = {p.relative_to(package).as_posix(): digest(p)
                                    for p in package.rglob('*') if p.is_file()}
+        if args.profile == 'replay-only' and any('floracapture' in name.lower() for name in report['package_files']):
+            raise RuntimeError('Replay-only package includes capture components')
         if test_targets:
             # Package production first, then build selected tests against exactly
             # these sources. Never attach test executables from the caller's
             # incremental workspace build to the committed-source evidence.
-            release = source/'build/vs2022/Release'
+            release = build_root/'Release'
             production = {name: digest(release/name) for name in report['package_files']
                           if name.startswith('FloraGPA.') and (release/name).is_file()}
-            run('configure-tests', [cmake, '--preset', 'vs2022',
+            run('configure-tests', [cmake, '--preset', args.profile,
                                     '-DCMAKE_PREFIX_PATH='+str(qt), '-DBUILD_TESTING=ON'])
-            run('build-tests', [cmake, '--build', '--preset', 'release', '--parallel',
+            run('build-tests', [cmake, '--build', '--preset', build_preset, '--parallel',
                                 args.jobs, '--target', *test_targets])
             report['test_files'] = {p.name: digest(p) for p in sorted(release.glob('Flora*.exe'))
                                     if not p.name.startswith('FloraGPA.')}

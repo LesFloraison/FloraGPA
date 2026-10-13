@@ -89,12 +89,18 @@ struct InheritedHandles {
 }
 int wmain(int argc,wchar_t** argv){
     try{
+        if(argc>=2 && std::wstring(argv[1])==L"--version"){
+            if(argc!=2)throw std::invalid_argument("--version takes no arguments");
+            std::cout<<Json{{"schema",1},{"application","FloraCapture"},{"architecture","x64"},
+                            {"protocol_version",protocol_version}}.dump()<<'\n';return 0;
+        }
         if(argc<2 || std::wstring(argv[1])==L"--help"){
             std::cout<<"FloraCapture native DX11 capture (limited profile; inspect status)\n"
                      <<"launch --exe FILE --out NEW_DIRECTORY [--cwd DIRECTORY] [-- target arguments]\n"
                      <<"  [--hud compact|detailed|off] [--hud-hotkey Ctrl+F1|off] [--capture-hotkey Ctrl+Shift+C|off]\n"
                      <<"status|capture|cancel|disconnect --session SESSION_JSON [capture: --swap-chain ID --resource-limit-mib 1..4096]\n";
             std::cout<<"select --session SESSION_JSON --swap-chain ID (0 selects automatic foreground)\n";
+            std::cout<<"--version (JSON build/protocol identity)\n";
             return argc<2?2:0;
         }
         const std::wstring verb=argv[1];std::map<std::wstring,std::wstring> options;std::vector<std::wstring> arguments;

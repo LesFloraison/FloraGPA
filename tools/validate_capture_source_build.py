@@ -60,10 +60,17 @@ def main():
     powershell=Path(os.environ['WINDIR'])/'System32/WindowsPowerShell/v1.0/powershell.exe'
     run('package',[powershell,'-NoProfile','-ExecutionPolicy','Bypass','-File',source/'tools/package_capture.ps1',
         '-BuildDirectory',build,'-OutputDirectory',package])
+    package_manifest=json.loads((package/'manifest.json').read_text(encoding='utf-8-sig'))
+    identity=json.loads(subprocess.check_output([str(package/'FloraCapture.exe'),'--version'],env=env,cwd=package,text=True))
+    if package_manifest['protocol_version']!=identity['protocol_version']:
+        raise RuntimeError('Package protocol differs from its executable')
+    evidence['package_identity']=identity
     run('package-control',[cmake,'-DCONTROLLER='+str(package/'FloraCapture.exe'),
         '-DPROBE='+str(build/'capture/Release/FloraCaptureFactoryProbe.exe'),
         '-DOUTPUT='+str(out/'packaged-control'),'-P',source/'tests/CaptureBootstrap.cmake'])
     status=json.loads(next((out/'packaged-control').glob('*/status.json')).read_text())
+    if status['version']!=identity['protocol_version']:
+        raise RuntimeError('Packaged controller and injected runtime protocol differ')
     forbidden=[m for m in status['loaded_modules'] if any(s in m.replace('\\','/').lower()
         for s in ('intelswtools/gpa/','python3','qt6','renderdoc'))]
     if forbidden:raise RuntimeError('Unexpected packaged runtime dependencies: '+repr(forbidden))

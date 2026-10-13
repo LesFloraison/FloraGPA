@@ -3,11 +3,13 @@ param(
     [ValidateSet('Release')][string]$Configuration = 'Release',
     [string]$OutputDirectory = '',
     [string]$VisualStudioRoot = '',
-    [string]$RenderDocRoot = ''
+    [string]$RenderDocRoot = '',
+    [string]$BuildDirectory = "$PSScriptRoot\..\build\vs2022"
 )
 $ErrorActionPreference = 'Stop'
 $repo = Split-Path -Parent $PSScriptRoot
-$build = Join-Path $repo "build\vs2022\$Configuration"
+$buildRoot = [System.IO.Path]::GetFullPath($BuildDirectory)
+$build = Join-Path $buildRoot $Configuration
 $destination = if ($OutputDirectory) { [System.IO.Path]::GetFullPath($OutputDirectory) } else { Join-Path $repo 'out\FloraGPA' }
 if ((Test-Path -LiteralPath $destination) -and
     ((-not (Test-Path -LiteralPath $destination -PathType Container)) -or
@@ -45,7 +47,7 @@ foreach ($file in $rdcManifest.licenses) {
         throw "RenderDoc runtime notice is missing or modified: $($file.path)"
     }
 }
-$cachePath = Join-Path $repo 'build\vs2022\CMakeCache.txt'
+$cachePath = Join-Path $buildRoot 'CMakeCache.txt'
 if (Test-Path -LiteralPath $cachePath -PathType Leaf) {
     foreach ($line in Get-Content -LiteralPath $cachePath) {
         if ($line -match '^([^#/:][^:]*):[^=]+=(.*)$') {
@@ -53,6 +55,7 @@ if (Test-Path -LiteralPath $cachePath -PathType Leaf) {
         }
     }
 }
+if ($cache['FLORA_BUILD_REPLAY'] -ne 'ON') { throw 'Application packaging requires a replay-enabled build.' }
 if (-not $QtRoot -and $cache['Qt6_DIR']) {
     $QtRoot = [System.IO.Path]::GetFullPath((Join-Path $cache['Qt6_DIR'] '..\..\..'))
 }

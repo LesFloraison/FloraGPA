@@ -24,6 +24,14 @@ $binarySubdirectory = if ($cache['FLORA_BUILD_REPLAY'] -eq 'ON') { 'Release' } e
 foreach ($name in @('FloraCapture.exe','FloraCaptureRuntime.dll')) { $sources[$name] = Join-Path $build "$binarySubdirectory\$name" }
 foreach ($name in @('msvcp140.dll','vcruntime140.dll','vcruntime140_1.dll')) { $sources[$name] = Join-Path $crt $name }
 foreach ($source in $sources.Values) { if (-not (Test-Path -LiteralPath $source -PathType Leaf)) { throw "Missing package input: $source" } }
+$identityText = & $sources['FloraCapture.exe'] --version
+if ($LASTEXITCODE -ne 0) { throw 'Cannot query the capture controller build identity.' }
+$identity = $identityText | ConvertFrom-Json
+if ($identity.schema -ne 1 -or $identity.application -ne 'FloraCapture' -or $identity.architecture -ne 'x64' -or
+    ($identity.protocol_version -isnot [int] -and $identity.protocol_version -isnot [long]) -or
+    $identity.protocol_version -lt 1 -or $identity.protocol_version -gt [uint32]::MaxValue) {
+    throw 'Invalid capture controller build identity.'
+}
 New-Item -ItemType Directory -Path $destination | Out-Null
 foreach ($name in $sources.Keys) { Copy-Item -LiteralPath $sources[$name] -Destination (Join-Path $destination $name) }
 $licenses = Join-Path $destination 'licenses'
@@ -39,6 +47,6 @@ foreach ($file in Get-ChildItem -LiteralPath $destination -File -Recurse) {
     finally { $stream.Dispose(); $algorithm.Dispose() }
     $hashes[$file.FullName.Substring($destination.Length+1).Replace('\','/')] = $hash
 }
-@{schema=1;milestone='native_present_capture';capture_profile='limited; query runtime status';protocol_version=3;files=$hashes} |
+@{schema=1;milestone='native_present_capture';capture_profile='limited; query runtime status';protocol_version=$identity.protocol_version;files=$hashes} |
     ConvertTo-Json -Depth 5 | Set-Content -LiteralPath (Join-Path $destination 'manifest.json') -Encoding UTF8
 Write-Output "Native capture package: $destination"
