@@ -835,3 +835,62 @@ results; they do not claim actual driver removal or screen presentation.
 There are **12 cases per driver/variant**, with WARP/hardware and restoration/
 interface variants: **48 cases** in each build profile. Evidence is under
 `mapping_guard_progress` in the JSON. The runtime is unchanged from `7326f1a`.
+
+## HUD publication races and Resize reference draining
+
+The Present-session fixture now has full-size HUD variants for two-buffer
+FLIP_SEQUENTIAL and three-buffer FLIP_DISCARD, plus a same-size HUD-off baseline.
+They retain the existing Armed/recording cancellation, publication race, writer
+failure, Resize interruption and disconnect checks while requiring HUD to execute
+on each ordinary successful Present. The window is not activated; native API
+transaction results do not by themselves establish screen visibility.
+
+The first HUD run reproduced DXGI_ERROR_INVALID_CALL at ordinary ResizeBuffers
+after the application unbound and released its RTV. The same-size HUD-off run
+passed. Private clean views can defer destruction while retaining real-buffer
+parents, so storage detach now releases aliases and drains that native destruction
+queue before Resize, preserving LastError and application bindings. This extends
+the earlier teardown fix to Resize; no application-side Flush was inserted to
+make the oracle pass. Held-reference rejection and ResizeBuffers1 recovery tests
+continue to pass.
+
+After Resize, new logical buffers are explicitly initialized before exact scene
+checks. The initial three-buffer assertion had incorrectly compared an undefined
+new slot to initialized scene pixels; that failure is retained separately from
+the reproduced Resize bug. Each publication-race result must be either Completed
+with its final file, or Cancelled with no file. Already-published cancellation
+must report not cancelled. Retained 800x600 scene bytes are checked after each
+race. Published files are independently replayed against an application-owned
+black canvas with an 8x8 red Draw, including Draw-zero controls, exact previews,
+event counts and object inventory.
+
+The older GF2 physical-hold session (PID 32968) received no shortcut input and
+produced no captures during the waiting interval. It was closed normally to
+replace the runtime. That waiting baseline is now closed; a later physical-hold
+reply cannot validate it retroactively.
+
+Both complete builds pass. Serial regression passes **83/83 capture-only** and
+**33/33 focused full-profile CTests**, including the Qt capture UI. Each new HUD
+publication profile passes **119 dual-player/preview/event/object checks** and 12
+exact retained-scene checks. All 12 racing attempts per profile were Cancelled;
+the three Completed controls separately rejected late cancellation. This does
+not claim both possible outcomes won an actual race.
+
+Current injected blt, flip3, borderless, exclusive and independent-package
+exclusive profiles produce **15 files / 410 exact checks**. The package runs
+with System32-only PATH and no forbidden capture dependencies. Its test fixture
+is separate from the shipping package.
+
+Fresh GF2 session PID 51216 uses runtime SHA-256
+`073f753a2950ac186b693a947ef92028e30c192deef006ea28de7b42c744b515`.
+Compact/Detailed/Hidden modes and a start-screen hotkey capture pass. Both players
+execute the file with exact captured-backbuffer and preview pixels at 2560x1440;
+zeroing all 18 Draw counts changes both outputs identically. Inventory contains
+108 application resources, and VS 25 / PS 26 export DXBC successfully. Main-scene
+HUD visibly reports `Capture failed: MSAA`. A later Hidden-mode request reaches
+capture but explicitly rejects unmatched Unmap; neither failure publishes a file.
+After disconnect, both shortcuts leave the last request and input counts
+unchanged while successful Presents advance from 9271 to 21122. HUD was already
+Hidden here, so this check does not independently prove visible-HUD removal.
+The game exits normally with zero reported interface gaps. These automated short
+chords do not establish a physical single hold. Formal GF2 acceptance remains 0/6.

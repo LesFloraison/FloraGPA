@@ -708,7 +708,7 @@
     },
     "runtime_sha256": "64afb8680eb56248978dd7a7ac35265ffc45e54a4fc132202f2951a3a3e6af05"
   },
-  "latest_progress": "mapping_guard_progress; 48 mapped-resource/interface/cancellation/failure cases pass in each build profile; physical-input and remaining interactive acceptance are open",
+  "latest_progress": "publication_progress; Resize deferred-reference regression fixed, full CTests and exact dual publication controls pass; live/package follow-up in progress",
   "concurrency_progress": {
     "implementation_base": "1ecbb95",
     "status": "reproduced lock inversion repaired; interactive regression pending",
@@ -1587,9 +1587,9 @@
       "visible_compact_start_screen": true,
       "baseline_captures": 0,
       "baseline_legacy_keyboard_events": 0,
-      "physical_hold": "Pending user action in this fresh session; earlier multiple presses are not single-hold proof",
-      "current_capture_home_exit": "Pending",
-      "session_left_running": true
+      "physical_hold": "Closed baseline: no shortcut input and zero captures; not single-hold proof",
+      "current_capture_home_exit": "This baseline was closed normally; fresh current-DLL acceptance is in publication_progress.gf2",
+      "session_left_running": false
     },
     "retained_failures": [
       "Initial SO vertex-ID oracle corrected to explicit constant markers after native failure",
@@ -1615,14 +1615,15 @@
     }
   },
   "acceptance_audit": {
-    "source_commit": "7326f1a",
+    "source_commit": "a03429c + publication/Resize fix",
     "document": "docs/CAPTURE_HUD_ACCEPTANCE.md",
     "delivery_complete": false,
     "installed_reference_hash_rechecked": true,
     "method": "Read implementation/test scope and retained outcomes; component checks do not establish unexecuted live integration cases",
-    "live_gf2_pid": 32968,
+    "live_gf2_pid": null,
     "live_baseline_files": 0,
-    "pending_input": "Single physical Ctrl+Shift+C hold; previous multiple presses are not reused"
+    "pending_input": "No live baseline. Isolated physical hold remains unverified; previous separate presses cannot establish it.",
+    "latest_evidence": "publication_progress"
   },
   "present_concurrency_progress": {
     "source_base": "68b567b",
@@ -1711,5 +1712,261 @@
       "artifacts/capture-hud-guards-full-details.log": "65dbb2a6c8466641fc57a09bc5237352db3ab63a16f2451b1c68322f67fbae26"
     },
     "full_cases": 48
+  },
+  "publication_progress": {
+    "source_base": "a03429c",
+    "reason": "Real same-size ResizeBuffers failed only with HUD clean storage after application RTV release; native delayed clean-view parent references were not drained before Resize",
+    "implementation": "PresentationStorage detach releases private aliases and Flushes the native context before Resize; preserves LastError and live application bindings/references",
+    "native_same_size_hud_off_baseline": "Passed before production fix, while HUD variants failed with DXGI_ERROR_INVALID_CALL at Resize",
+    "capture_only_tests": "83/83",
+    "full_focused_tests": "33/33 including capture UI",
+    "build_profiles": [
+      "capture-only",
+      "complete application"
+    ],
+    "publication_profiles": {
+      "flip1": {
+        "completed_controls": 3,
+        "publication_race_outcomes": [
+          "Cancelled",
+          "Cancelled",
+          "Cancelled",
+          "Cancelled",
+          "Cancelled",
+          "Cancelled",
+          "Cancelled",
+          "Cancelled",
+          "Cancelled",
+          "Cancelled",
+          "Cancelled",
+          "Cancelled"
+        ],
+        "hud_presents": 46,
+        "retained_scene_checks": 12,
+        "published_files": 3,
+        "dual_checks": 119,
+        "all_checks_passed": true
+      },
+      "flip2": {
+        "completed_controls": 3,
+        "publication_race_outcomes": [
+          "Cancelled",
+          "Cancelled",
+          "Cancelled",
+          "Cancelled",
+          "Cancelled",
+          "Cancelled",
+          "Cancelled",
+          "Cancelled",
+          "Cancelled",
+          "Cancelled",
+          "Cancelled",
+          "Cancelled"
+        ],
+        "hud_presents": 47,
+        "retained_scene_checks": 12,
+        "published_files": 3,
+        "dual_checks": 119,
+        "all_checks_passed": true
+      }
+    },
+    "validator_default_regression": "23 exact checks passed",
+    "profiles": {
+      "blt": {
+        "files": 3,
+        "exact_checks": 82,
+        "passed": true,
+        "retained_pixels_exact": true,
+        "system_only_path": false
+      },
+      "borderless": {
+        "files": 3,
+        "exact_checks": 82,
+        "passed": true,
+        "retained_pixels_exact": true,
+        "system_only_path": false
+      },
+      "exclusive": {
+        "files": 3,
+        "exact_checks": 82,
+        "passed": true,
+        "retained_pixels_exact": true,
+        "system_only_path": false
+      },
+      "flip3": {
+        "files": 3,
+        "exact_checks": 82,
+        "passed": true,
+        "retained_pixels_exact": true,
+        "system_only_path": false
+      },
+      "package-exclusive": {
+        "files": 3,
+        "exact_checks": 82,
+        "passed": true,
+        "retained_pixels_exact": true,
+        "system_only_path": true
+      }
+    },
+    "gf2": {
+      "pid": 51216,
+      "session_id": "ea239581-f838-4d60-8d91-575f7f0f105a",
+      "session_left_running": false,
+      "modes_observed": [
+        "compact",
+        "detailed",
+        "off"
+      ],
+      "start_capture": {
+        "capture": "frame-663ceb91-1487-438d-9493-4bd5e44e2bd0.gpa_frame",
+        "capture_sha256": "1dbab0db30d36ec7fe0b07113343ad4704f6d0eefdb646ed457f7120bc427b7d",
+        "draw_zero_changes": 18,
+        "preview_exact": true,
+        "dimensions": [
+          2560,
+          1440
+        ],
+        "resource_count": 108,
+        "exported_shaders": [
+          "25",
+          "26"
+        ],
+        "players": {
+          "captured": {
+            "rgba_sha256": "24faa86a79e90de05c5e26d5f10336f32665f7f0289066c2de0f6d5b6e48b548",
+            "counts": {
+              "ClearDepthStencilView": 4,
+              "ClearRenderTargetView": 2,
+              "CopySubresourceRegion": 3,
+              "Draw": 1,
+              "DrawIndexed": 17,
+              "Map": 15,
+              "Present": 1,
+              "present_rtv_unbinds": 1,
+              "query_completion_unresolved": 1,
+              "query_end_observations": 1,
+              "query_metadata_records": 3,
+              "unmap_observations": 15
+            },
+            "original_native": {
+              "player_dll": "C:\\Program Files\\IntelSWTools\\GPA\\dx11_player.dll",
+              "player_sha256": "39061ff329e4a32d0c8375ce9ee15e2017bccab0593943b962a860e11723d38b",
+              "adapter_selection": "Original kernel default (undefined GpuId)",
+              "callbacks": [],
+              "open_status": 0,
+              "playback_status": 0,
+              "closed": true
+            },
+            "dual_exact": true,
+            "reference_pixels_used": false
+          },
+          "draw-zero": {
+            "rgba_sha256": "e05b766c7b3fb71f27473fd07237bf7bd1b02c7a7c604bbf54a91f511988fd96",
+            "counts": {
+              "ClearDepthStencilView": 4,
+              "ClearRenderTargetView": 2,
+              "CopySubresourceRegion": 3,
+              "Draw": 1,
+              "DrawIndexed": 17,
+              "Map": 15,
+              "Present": 1,
+              "present_rtv_unbinds": 1,
+              "query_completion_unresolved": 1,
+              "query_end_observations": 1,
+              "query_metadata_records": 3,
+              "unmap_observations": 15
+            },
+            "original_native": {
+              "player_dll": "C:\\Program Files\\IntelSWTools\\GPA\\dx11_player.dll",
+              "player_sha256": "39061ff329e4a32d0c8375ce9ee15e2017bccab0593943b962a860e11723d38b",
+              "adapter_selection": "Original kernel default (undefined GpuId)",
+              "callbacks": [],
+              "open_status": 0,
+              "playback_status": 0,
+              "closed": true
+            },
+            "dual_exact": true,
+            "reference_pixels_used": false
+          }
+        },
+        "formal_gf2_accepted_frames": 0
+      },
+      "home_visible_refusal": "ID3D11DeviceContext::ClearRenderTargetView: MSAA sample-preserving capture is not implemented",
+      "hidden_hotkey_refusal": "ID3D11DeviceContext::Unmap: Unmap has no recorded successful Map",
+      "failed_requests_published": false,
+      "disconnect": {
+        "both_shortcuts_inactive": true,
+        "request_and_input_counts_unchanged": true,
+        "legacy_events": 19,
+        "mode": "off",
+        "presents_before": 9271,
+        "presents_after": 21122,
+        "visibility_limit": "HUD was Hidden before disconnect; this GF2 observation does not independently prove removal of a visible HUD"
+      },
+      "interface_gaps": 0,
+      "forbidden_modules_absent": true,
+      "normal_exit_confirmed": true,
+      "root_capture_files": 1,
+      "physical_single_hold_verified": false,
+      "input_scope": "Automated short chords; user-confirmed earlier separate presses are not single-hold evidence",
+      "evidence_directory": "artifacts/capture-hud-publication-gf2"
+    },
+    "closed_hold_baseline": {
+      "pid": 32968,
+      "captures": 0,
+      "legacy_events": 0,
+      "normal_exit_requested": true,
+      "process_and_window_absent": true,
+      "single_hold_verified": false
+    },
+    "retained_failures": [
+      "Initial HUD test target lacked the FloraCaptureHud include dependency",
+      "HUD-enabled Resize failure reproduced; same-size HUD-off baseline passed",
+      "Three-buffer post-Resize pixel oracle initially read an uninitialized logical slot; new slots now initialized before comparisons"
+    ],
+    "scope": "No replay/format changes; controlled race attempts currently cancelled before publication, completed controls separately reject late cancellation; physical long hold and remaining live interaction still unverified",
+    "sha256": {
+      "src/capture/runtime/presentation_storage.cpp": "e948522cbdcaa191540174e4bbab5151d136895f6f27e06abd8408dabbd1a582",
+      "src/capture/tests/present_session_tests.cpp": "12e48cc34c3e9e61b224262f265a12f96677c157af7b0a0771df4e46c0a56969",
+      "tools/validate_capture_present.py": "272d75fcb1c61f99211268057d575195586f6d633a689fef29c3c08936d90841",
+      "build/capture/capture/Release/FloraCaptureRuntime.dll": "073f753a2950ac186b693a947ef92028e30c192deef006ea28de7b42c744b515",
+      "artifacts/capture-hud-publication-all-tests.log": "5df7b41f6133e6c6842bbb6db5c3011b8c546a7bd803442d9aa81b2b3fb9b750",
+      "artifacts/capture-hud-publication-all-details.log": "5dda9542fd671a8e1bc725a261c77398692109643762770eb9eb27796d508318",
+      "artifacts/capture-hud-publication-full-tests.log": "3df0707d37beadc40ad32d3a95e03a870f48a7392635e10ef0f0061310042a0d",
+      "artifacts/capture-hud-publication-full-details.log": "35664a428a438ceec89b654529df35fd4bfbd962cfb51dae4828b5e8482145eb",
+      "artifacts/capture-hud-publication-dual-flip1/validation.json": "4c5d3bc2f3003eeac593200ebd86046f38f1c4fd151aaffdde5092a63dfeb921",
+      "artifacts/capture-hud-publication-dual-flip2/validation.json": "4c5d3bc2f3003eeac593200ebd86046f38f1c4fd151aaffdde5092a63dfeb921",
+      "artifacts/capture-hud-publication-dual-baseline/validation.json": "36ea1738a8cf4c63d4e06b7347478436683a69ad0e84a19f6a9e6f3afc0023c7",
+      "artifacts/capture-hud-publication-large-baseline.log": "fdc2ee6402f9b13ff8b08f70a590d53ed6dbba5e0d023c8b45abfca1ef997cad",
+      "artifacts/capture-hud-publication-diagnostic.log": "c53c66778e0b6a8d553331cb7fdb6576d24695be79ba4179d6df83e86a0c970a",
+      "artifacts/capture-hud-publication-profiles/blt/validation/validation.json": "e2b4866fe782e33a569620474866911f28c49d16f71f20e2514fdcb9730179aa",
+      "artifacts/capture-hud-publication-profiles/blt/target/exit.json": "d8d42be202e053431e04372d5fa362e7a7b953811bba6993c9d1f27a1da3f974",
+      "artifacts/capture-hud-publication-profiles/blt/after.json": "300d3cc183fb6fd4788f2d90167e9d7d5998dade9d7805751df52f41b3415456",
+      "artifacts/capture-hud-publication-profiles/borderless/validation/validation.json": "e2b4866fe782e33a569620474866911f28c49d16f71f20e2514fdcb9730179aa",
+      "artifacts/capture-hud-publication-profiles/borderless/target/exit.json": "c5bc89ba8bd4dd332385a9fa895fdc8cd53a5292b9bd32b3ee7d8ccc309df61b",
+      "artifacts/capture-hud-publication-profiles/borderless/after.json": "882d02f3d3757284d0af64558189e128412e48abb6c8627be26c5aca7ffb49fa",
+      "artifacts/capture-hud-publication-profiles/exclusive/validation/validation.json": "1a2b4eecef4fff0772adc04bc4dde720187bca2ceff7cd490c2c29dc3eedcf15",
+      "artifacts/capture-hud-publication-profiles/exclusive/target/exit.json": "b32942532f5a30ccf775f181eef1f91cd956efe222001f70f0da698a7d1b24cc",
+      "artifacts/capture-hud-publication-profiles/exclusive/after.json": "9a757f5390f39df949408e82dc2c78e0fd5a72b13675ff60f681653ec7119d6a",
+      "artifacts/capture-hud-publication-profiles/flip3/validation/validation.json": "e2b4866fe782e33a569620474866911f28c49d16f71f20e2514fdcb9730179aa",
+      "artifacts/capture-hud-publication-profiles/flip3/target/exit.json": "a44bf9de673e990307c46c1b8f635ee65ef13f0bc1d26d47281194a47e0824f3",
+      "artifacts/capture-hud-publication-profiles/flip3/after.json": "2849e68ad112d96354ac32b12d09c249fd25599236801a4343e6d60418abb8b3",
+      "artifacts/capture-hud-publication-profiles/package-exclusive/validation/validation.json": "1a2b4eecef4fff0772adc04bc4dde720187bca2ceff7cd490c2c29dc3eedcf15",
+      "artifacts/capture-hud-publication-profiles/package-exclusive/target/exit.json": "1f228c4a00861b5b6a410578009a5565dabc72d44c779d381295952e4f69a2f9",
+      "artifacts/capture-hud-publication-profiles/package-exclusive/after.json": "613b2054978b68b47128948d7596bf45e4c026e62e4676fd3ee010282e44051a",
+      "artifacts/capture-hud-publication-gf2/start-capture-status.json": "25dcc2335432f4fd4415b026c9e5aa16604a5e3039ea06fdfc971fe5a8fb09a0",
+      "artifacts/capture-hud-publication-gf2/start-capture.png": "36a04ef20b301a0f41886e20b1a536f31620f925cd91ddbaac6cb2da9d1d407c",
+      "artifacts/capture-hud-publication-gf2/detailed.png": "8ea69e9601fdddd85995ade63aa398faf3f96c5f0d48341143fd5572de0f0e40",
+      "artifacts/capture-hud-publication-gf2/hidden.png": "2396acda59d34a1178f5a0c7f2a33f39896480347655ada032211c00772260e0",
+      "artifacts/capture-hud-publication-gf2/home-status.json": "f3fc616f6b77f4d1236ee1333c2f6acd3e5641df144627b85dc698c9b1c7f9e5",
+      "artifacts/capture-hud-publication-gf2/home-refusal.png": "a94ff0bf04ab3ed2c72a9ee5c29f8fc640c019829a24f23e61464ec0d2c6e558",
+      "artifacts/capture-hud-publication-gf2/hidden-request-status.json": "1f9011e7fd1508a37db00ed5fcf5bbabc51cf4cfef70e4f5c89a911957f23279",
+      "artifacts/capture-hud-publication-gf2/disconnect.json": "b4cf71ad40553b3e49fa0e61b579ec98d4a657202ff4b668cd991331da446b29",
+      "artifacts/capture-hud-publication-gf2/post-disconnect-status.json": "62e24c7dd01422a870ec7ab7b3c9938baa07f9d6744052b0f855c5e101f0cc89",
+      "artifacts/capture-hud-publication-gf2/disconnected.png": "cb36ae187068f09d789958ddc1b0e0eccd108b51ab3d6d57bbcc0a1a0970b73f",
+      "artifacts/capture-hud-publication-gf2/exit-check.json": "9085fb84d61a58d7edca2712ea6393ee800c7866d62b947f6a1f3d02986a63cc",
+      "artifacts/capture-hud-publication-gf2/validation/validation.json": "89cb87c84a9cd2052569101f7a215665df58588f37616df8e63595e8810c1979",
+      "artifacts/capture-hud-publication-gf2/validate.py": "4d7e4dbb50dad45eae607c2b138ab06bdd8ff2b1b09f19114c19ba6fe2a64b0c"
+    }
   }
 }

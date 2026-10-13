@@ -28,7 +28,15 @@ PresentationStorage::~PresentationStorage(){
     context.Reset();
     SetLastError(error);
 }
-void PresentationStorage::detach(){impl_->bindings.clear();impl_->aliases.clear();}
+void PresentationStorage::detach(){
+    const DWORD error=GetLastError();
+    impl_->bindings.clear();impl_->aliases.clear();
+    // A released clean RTV can still retain its real-buffer parent until
+    // deferred destruction runs. Resize must not see that private reference.
+    // Live application views remain alive; Flush does not unbind their state.
+    impl_->context->Flush();
+    SetLastError(error);
+}
 void PresentationStorage::attach(IDXGISwapChain* swap){
     auto& p=*impl_;if(!p.aliases.empty())throw std::logic_error("Presentation aliases already attached");
     DXGI_SWAP_CHAIN_DESC desc{};check(swap->GetDesc(&desc));

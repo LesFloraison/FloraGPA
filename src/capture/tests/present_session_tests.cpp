@@ -1,19 +1,23 @@
 #include "capture_session.hpp"
 #include "swap_chain.hpp"
 #include "objects.hpp"
+#include "hud_control.hpp"
 #include <d3dcompiler.h>
 #include <wrl/client.h>
 #include <fstream>
 #include <iostream>
 #include <thread>
 #include <future>
+#include <source_location>
 using namespace flora::capture;
 using Microsoft::WRL::ComPtr;
 namespace fs=std::filesystem;
 namespace {
 DXGI_SWAP_EFFECT test_effect=DXGI_SWAP_EFFECT_DISCARD;UINT test_buffers=1;
+bool test_hud=false,test_large=false;
+unsigned hud_presents=0;
 void require(bool v,const char* why){if(!v)throw std::runtime_error(why);}
-void check(HRESULT hr){require(SUCCEEDED(hr),"Present oracle HRESULT failed");}
+void check(HRESULT hr,const std::source_location& at=std::source_location::current()){if(FAILED(hr))throw std::runtime_error("Present oracle HRESULT "+std::to_string(uint32_t(hr))+" at line "+std::to_string(at.line()));}
 LRESULT CALLBACK proc(HWND w,UINT m,WPARAM a,LPARAM b){return DefWindowProcW(w,m,a,b);}
 struct Fixture {
     HWND window=nullptr;uint64_t id=0;
@@ -21,8 +25,8 @@ struct Fixture {
     ComPtr<IDXGISwapChain> swap;ComPtr<ID3D11RenderTargetView> rtv;
     Fixture(){
         WNDCLASSW cls{};cls.lpfnWndProc=proc;cls.hInstance=GetModuleHandleW(nullptr);cls.lpszClassName=L"FloraPresentCaptureOracle";RegisterClassW(&cls);
-        window=CreateWindowW(cls.lpszClassName,L"Flora capture boundary test",WS_OVERLAPPEDWINDOW,0,0,160,160,nullptr,nullptr,cls.hInstance,nullptr);require(window!=nullptr,"Cannot create capture test window");ShowWindow(window,SW_SHOWNOACTIVATE);
-        DXGI_SWAP_CHAIN_DESC d{};d.BufferDesc.Width=d.BufferDesc.Height=8;d.BufferDesc.Format=DXGI_FORMAT_R8G8B8A8_UNORM;d.SampleDesc.Count=1;d.BufferUsage=DXGI_USAGE_RENDER_TARGET_OUTPUT;d.BufferCount=test_buffers;d.OutputWindow=window;d.Windowed=TRUE;d.SwapEffect=test_effect;
+        window=CreateWindowW(cls.lpszClassName,L"Flora capture boundary test",WS_OVERLAPPEDWINDOW,0,0,test_large?840:160,test_large?660:160,nullptr,nullptr,cls.hInstance,nullptr);require(window!=nullptr,"Cannot create capture test window");if(!test_large)ShowWindow(window,SW_SHOWNOACTIVATE);
+        DXGI_SWAP_CHAIN_DESC d{};d.BufferDesc.Width=test_large?800:8;d.BufferDesc.Height=test_large?600:8;d.BufferDesc.Format=DXGI_FORMAT_R8G8B8A8_UNORM;d.SampleDesc.Count=1;d.BufferUsage=DXGI_USAGE_RENDER_TARGET_OUTPUT;d.BufferCount=test_buffers;d.OutputWindow=window;d.Windowed=TRUE;d.SwapEffect=test_effect;
         check(D3D11CreateDeviceAndSwapChain(nullptr,D3D_DRIVER_TYPE_HARDWARE,nullptr,0,nullptr,0,D3D11_SDK_VERSION,&d,&swap,&device,nullptr,&context));
         wrap_swap_chain(swap.GetAddressOf());wrap_object(device.GetAddressOf(),"PresentTest::Device");wrap_object(context.GetAddressOf(),"PresentTest::Context");
         const auto observed=swap_chain_status();for(const auto& row:observed["active"])if(row["window"]==reinterpret_cast<uintptr_t>(window))id=row["id"].get<uint64_t>();require(id!=0,"Missing observed swap identity");
@@ -34,7 +38,12 @@ struct Fixture {
     }
     void target(){ComPtr<ID3D11Texture2D> buffer;check(swap->GetBuffer(0,IID_PPV_ARGS(&buffer)));check(device->CreateRenderTargetView(buffer.Get(),nullptr,&rtv));auto* view=rtv.Get();context->OMSetRenderTargets(1,&view,nullptr);}
     void draw(){auto* view=rtv.Get();context->OMSetRenderTargets(1,&view,nullptr);const float black[]{0,0,0,1};context->ClearRenderTargetView(rtv.Get(),black);context->Draw(3,0);}
-    void present(bool extended=false,UINT flags=0){if(extended){ComPtr<IDXGISwapChain1> v;check(swap.As(&v));DXGI_PRESENT_PARAMETERS p{};check(v->Present1(0,flags,&p));}else check(swap->Present(0,flags));}
+    void present(bool extended=false,UINT flags=0){if(extended){ComPtr<IDXGISwapChain1> v;check(swap.As(&v));DXGI_PRESENT_PARAMETERS p{};check(v->Present1(0,flags,&p));}else check(swap->Present(0,flags));if(test_hud && !(flags&DXGI_PRESENT_TEST)){const auto h=hud_status();require(h["visible"].get<bool>() && h["swap_chains"][0]["reason"]=="","HUD did not execute in publication test");++hud_presents;}}
+    void exact_scene(){
+        if(!test_hud)return;
+        ComPtr<ID3D11Texture2D> buffer,stage;check(swap->GetBuffer(0,IID_PPV_ARGS(&buffer)));D3D11_TEXTURE2D_DESC d{};buffer->GetDesc(&d);d.BindFlags=d.MiscFlags=0;d.Usage=D3D11_USAGE_STAGING;d.CPUAccessFlags=D3D11_CPU_ACCESS_READ;check(device->CreateTexture2D(&d,nullptr,&stage));context->CopyResource(stage.Get(),buffer.Get());D3D11_MAPPED_SUBRESOURCE map{};check(context->Map(stage.Get(),0,D3D11_MAP_READ,0,&map));bool exact=true;
+        for(UINT y=0;y<d.Height;++y){const auto* row=reinterpret_cast<const UINT*>(static_cast<const uint8_t*>(map.pData)+size_t(y)*map.RowPitch);for(UINT x=0;x<d.Width;++x)exact&=row[x]==(x<8 && y<8?0xff0000ffu:0xff000000u);}context->Unmap(stage.Get(),0);require(exact,"HUD publication/cancellation contaminated retained scene");
+    }
     ~Fixture(){context->ClearState();context->Flush();rtv.Reset();swap.Reset();context.Reset();device.Reset();DestroyWindow(window);}
 };
 Json control_arm(uint64_t id,const fs::path& path){return std::async(std::launch::async,[&]{return arm_capture(id,path);}).get();}
@@ -42,7 +51,7 @@ Json control_cancel(){return std::async(std::launch::async,[]{return cancel_capt
 Json settled(){for(unsigned i=0;i<1000;++i){auto p=capture_progress();if(!p.value("busy",false))return p;Sleep(5);}throw std::runtime_error("Capture transaction did not settle");}
 }
 int wmain(int argc,wchar_t** argv){try{
-    require(argc==2 || argc==3,"Expected new output directory and optional flip mode");if(argc==3){const auto mode=std::stoul(argv[2]);test_effect=mode==1?DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL:DXGI_SWAP_EFFECT_FLIP_DISCARD;test_buffers=mode==1?2:3;}const auto out=fs::absolute(argv[1]);require(!fs::exists(out),"Test output directory must be new");fs::create_directories(out);Json results=Json::array(),races=Json::array(),faults=Json::array();
+    require(argc>=2 && argc<=4,"Expected new output directory, optional flip mode and --hud");if(argc>=3){const auto mode=std::stoul(argv[2]);test_effect=mode==1?DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL:DXGI_SWAP_EFFECT_FLIP_DISCARD;test_buffers=mode==1?2:3;}if(argc==4){const std::wstring option=argv[3];require(option==L"--hud" || option==L"--large","Unknown Present option");test_large=true;test_hud=option==L"--hud";if(test_hud){hud::Settings settings;settings.mode_key={};settings.capture_key={};configure_hud(settings);}}const auto out=fs::absolute(argv[1]);require(!fs::exists(out),"Test output directory must be new");fs::create_directories(out);Json results=Json::array(),races=Json::array(),faults=Json::array();
     {
         Fixture f;f.draw();f.present();require(!control_arm(UINT64_MAX,out/L"unknown.gpa_frame")["ok"],"Unknown swap accepted");
         for(unsigned i=0;i<3;++i){
@@ -55,13 +64,17 @@ int wmain(int argc,wchar_t** argv){try{
         require(!control_arm(f.id,out/L"frame-0.gpa_frame")["ok"],"Existing capture accepted");
         require(control_arm(f.id,out/L"cancel-armed.gpa_frame")["ok"],"Cannot arm cancellation test");require(control_cancel()["cancelled"],"Armed cancellation failed");
         require(control_arm(f.id,out/L"cancel-recording.gpa_frame")["ok"],"Cannot arm active cancellation");f.present();f.draw();control_cancel();require(capture_progress()["busy"],"Cancelled GPU model released on control path");f.present();require(settled()["state"]=="Cancelled","Active cancellation not settled");
-        require(control_arm(f.id,out/L"resize.gpa_frame")["ok"],"Cannot arm resize test");f.present();f.draw();f.context->OMSetRenderTargets(0,nullptr,nullptr);f.rtv.Reset();check(f.swap->ResizeBuffers(0,8,8,DXGI_FORMAT_R8G8B8A8_UNORM,0));require(settled()["state"]=="Failed","Resize did not reject frame");f.target();
+        require(control_arm(f.id,out/L"resize.gpa_frame")["ok"],"Cannot arm resize test");f.present();f.draw();f.context->OMSetRenderTargets(0,nullptr,nullptr);f.rtv.Reset();check(f.swap->ResizeBuffers(0,test_large?800:8,test_large?600:8,DXGI_FORMAT_R8G8B8A8_UNORM,0));require(settled()["state"]=="Failed","Resize did not reject frame");f.target();
+        // New buffers have undefined contents. Initialize every logical slot
+        // before comparing retained pixels across publication/cancel races.
+        if(test_large)for(UINT slot=0;slot<test_buffers;++slot){f.draw();f.present();}
         require(control_arm(f.id,out/L"unsupported.gpa_frame")["ok"],"Cannot arm unsupported test");f.present();f.draw();{ComPtr<ID3D11Texture2D> buffer;check(f.swap->GetBuffer(0,IID_PPV_ARGS(&buffer)));std::array<UINT,64> pixels{};D3D11_BOX box{0,0,0,0,4,1};f.context->UpdateSubresource(buffer.Get(),0,&box,pixels.data(),32,256);}f.present();require(settled()["state"]=="Failed","Unsupported call was silently omitted");
         require(control_arm(f.id,out/L"boundary-gap.gpa_frame")["ok"],"Cannot arm boundary gap test");f.present();f.draw();capture_before_present(f.id,nullptr,0,false);f.draw();capture_after_present(f.id,nullptr,0,0,false,S_OK);require(settled()["state"]=="Failed","Context call inside Present boundary was omitted");
         for(unsigned i=0;i<12;++i){
             const auto path=out/(L"race-"+std::to_wstring(i)+L".gpa_frame");require(control_arm(f.id,path)["ok"],"Cannot arm publication race");f.present();f.draw();f.present();control_cancel();const auto result=settled();
             races.push_back(result);
             require((result["state"]=="Completed" && fs::exists(path)) || (result["state"]=="Cancelled" && !fs::exists(path)),"Cancellation/publication outcome is inconsistent");
+            f.exact_scene();
         }
         for(auto hr:{DXGI_STATUS_OCCLUDED,DXGI_ERROR_DEVICE_REMOVED}){
             const auto path=out/(L"failed-present-"+std::to_wstring(uint32_t(hr))+L".gpa_frame");require(control_arm(f.id,path)["ok"],"Cannot arm injected Present result test");f.present();f.draw();capture_before_present(f.id,nullptr,0,false);capture_after_present(f.id,nullptr,0,0,false,hr);
@@ -73,5 +86,5 @@ int wmain(int argc,wchar_t** argv){try{
     for(const auto* name:{L"busy",L"cancel-armed",L"cancel-recording",L"resize",L"unsupported",L"boundary-gap",L"disconnect",L"after-disconnect"})require(!fs::exists(out/(std::wstring(name)+L".gpa_frame")),"Failed capture published a file");
     for(const auto& entry:fs::directory_iterator(out))require(entry.path().extension()!=L".partial","Capture transaction leaked a partial file");
     require(object_status()["active"]==0 && metadata_status()["alive"]==0,"Capture session retained native objects");
-    std::ofstream report(out/L"results.json");report<<Json{{"completed",results},{"publication_races",races},{"injected_failures",faults}}.dump(2);std::cout<<Json{{"passed",true},{"completed",3},{"scope","Actual swap-chain boundaries; internal control API"}}.dump()<<'\n';return 0;
+    if(test_hud)disconnect_hud();std::ofstream report(out/L"results.json");report<<Json{{"completed",results},{"publication_races",races},{"injected_failures",faults},{"hud_enabled",test_hud},{"hud_presents",hud_presents},{"retained_scene_checks",test_hud?12:0}}.dump(2);std::cout<<Json{{"passed",true},{"completed",3},{"hud_enabled",test_hud},{"hud_presents",hud_presents},{"scope","Actual swap-chain boundaries; internal control API"}}.dump()<<'\n';return 0;
 }catch(const std::exception& e){std::cerr<<e.what()<<'\n';return 1;}}
