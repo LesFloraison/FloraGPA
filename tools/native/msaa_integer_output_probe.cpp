@@ -42,17 +42,20 @@ uint16_t half(unsigned value) {
 }
 } // namespace
 int wmain(int argc, wchar_t **argv) {
-    if ((argc < 3 || argc > 6) ||
+    if ((argc < 3 || argc > 7) ||
         (std::wstring(argv[2]) != L"hardware" && std::wstring(argv[2]) != L"warp" &&
          std::wstring(argv[2]) != L"intel") ||
         (argc >= 4 && std::wstring(argv[3]) != L"sample" && std::wstring(argv[3]) != L"pixel-edges" &&
          std::wstring(argv[3]) != L"pixel-normal" && std::wstring(argv[3]) != L"pixel-clusters" &&
          std::wstring(argv[3]) != L"pixel-textured" && std::wstring(argv[3]) != L"pixel-mesh") ||
-        (argc >= 4 && std::wstring(argv[3]) == L"pixel-mesh" && argc != 5 && argc != 6) ||
-        (argc == 6 &&
+        (argc >= 4 && std::wstring(argv[3]) == L"pixel-mesh" && argc < 5) ||
+        (argc == 7 && std::wstring(argv[6]) != L"resolve-source") ||
+        (argc >= 6 &&
          (std::wstring(argv[3]) != L"pixel-mesh" ||
           (std::wstring(argv[5]) != L"summary-only" && std::wstring(argv[5]) != L"summary-rt-copy" &&
-           std::wstring(argv[5]) != L"summary-region-copy"))) ||
+           std::wstring(argv[5]) != L"summary-region-copy" &&
+           std::wstring(argv[5]) != L"summary-overwrite-0" &&
+           std::wstring(argv[5]) != L"summary-overwrite-1"))) ||
         (argc == 5 && std::wstring(argv[3]) != L"pixel-mesh" &&
          std::wstring(argv[4]) != L"resolve-before-read" && std::wstring(argv[4]) != L"flush-before-read" &&
          std::wstring(argv[4]) != L"large")) {
@@ -60,16 +63,21 @@ int wmain(int argc, wchar_t **argv) {
             << "NEW_OUT hardware|warp|intel [sample|pixel-edges|pixel-normal|pixel-clusters|pixel-textured] "
                "[resolve-before-read|flush-before-read|large]\n"
                "NEW_OUT hardware|warp|intel pixel-mesh POSTVS_BIN "
-               "[summary-only|summary-rt-copy|summary-region-copy]\n";
+               "[summary-only|summary-rt-copy|summary-region-copy|summary-overwrite-0|summary-overwrite-1] "
+               "[resolve-source]\n";
         return 2;
     }
     try {
         const bool pixelEdges = argc >= 4 && std::wstring(argv[3]) != L"sample";
         const bool pixelTextured = argc >= 4 && std::wstring(argv[3]) == L"pixel-textured";
         const bool pixelMesh = argc >= 4 && std::wstring(argv[3]) == L"pixel-mesh";
-        const bool summaryOnly = argc == 6;
-        const bool copyRenderTarget = argc == 6 && std::wstring(argv[5]) == L"summary-rt-copy";
-        const bool copyRegion = argc == 6 && std::wstring(argv[5]) == L"summary-region-copy";
+        const bool summaryOnly = argc >= 6;
+        const bool resolveSource = argc == 7;
+        const bool copyRenderTarget = argc >= 6 && std::wstring(argv[5]) == L"summary-rt-copy";
+        const bool copyRegion = argc >= 6 && std::wstring(argv[5]) == L"summary-region-copy";
+        const int overwriteSample = argc >= 6 && std::wstring(argv[5]) == L"summary-overwrite-0"   ? 0
+                                    : argc >= 6 && std::wstring(argv[5]) == L"summary-overwrite-1" ? 1
+                                                                                                   : -1;
         const bool pixelClusters = (argc >= 4 && std::wstring(argv[3]) == L"pixel-clusters") || pixelTextured;
         const bool pixelNormal =
             (argc >= 4 && std::wstring(argv[3]) == L"pixel-normal") || pixelClusters || pixelMesh;
@@ -134,6 +142,18 @@ int wmain(int argc, wchar_t **argv) {
         ComPtr<ID3D11PixelShader> ps;
         check(device->CreateVertexShader(vsCode->GetBufferPointer(), vsCode->GetBufferSize(), nullptr, &vs));
         check(device->CreatePixelShader(psCode->GetBufferPointer(), psCode->GetBufferSize(), nullptr, &ps));
+        ComPtr<ID3D11PixelShader> overwritePs;
+        if (overwriteSample >= 0) {
+            const auto code = compile("float4 main(float4 p:SV_Position):SV_Target{"
+                                      "return float4(64,128,256,2047);}",
+                                      "ps_5_0");
+            check(device->CreatePixelShader(code->GetBufferPointer(), code->GetBufferSize(), nullptr,
+                                            &overwritePs));
+            std::ofstream file(output / "overwrite-ps.dxbc", std::ios::binary);
+            file.exceptions(std::ios::badbit | std::ios::failbit);
+            file.write(static_cast<const char *>(code->GetBufferPointer()), code->GetBufferSize());
+            file.close();
+        }
         ComPtr<ID3DBlob> renderVsCode = vsCode, renderPsCode = psCode;
         ComPtr<ID3D11VertexShader> edgeVs;
         ComPtr<ID3D11PixelShader> edgePs;
@@ -249,7 +269,8 @@ int wmain(int argc, wchar_t **argv) {
                       << "\nwidth=" << width << "\nheight=" << height << "\nmesh_vertices=" << meshVertexCount
                       << "\nsummary_only=" << summaryOnly << "\ncopy_render_target=" << copyRenderTarget
                       << "\ncopy_region=" << copyRegion << "\nresolve_before_read=" << resolveBeforeRead
-                      << "\nflush_before_read=" << flushBeforeRead << '\n';
+                      << "\noverwrite_sample=" << overwriteSample << "\nflush_before_read=" << flushBeforeRead
+                      << "\nresolve_source=" << resolveSource << '\n';
         configuration.close();
         const D3D11_VIEWPORT viewport{0, 0, float(width), float(height), 0, 1};
         D3D11_RASTERIZER_DESC rd{};
@@ -271,6 +292,12 @@ int wmain(int argc, wchar_t **argv) {
         witnesses
             << "samples,quality,repeat,sample,source_bind_flags,read_path,x,y,r_bits,g_bits,b_bits,a_bits\n";
         std::set<std::pair<UINT, UINT>> witnessPixels;
+        // Fixed witness from the documented reduced GF2 geometry; never used as an oracle.
+        if (pixelMesh)
+            witnessPixels.emplace(815, 843);
+        std::ofstream resolveReport(output / "resolved.csv");
+        resolveReport.exceptions(std::ios::badbit | std::ios::failbit);
+        resolveReport << "source_bind_flags,x,y,r_bits,g_bits,b_bits,a_bits\n";
         uint64_t totalDifferences = 0;
         for (const UINT samples : large ? std::vector<UINT>{2} : std::vector<UINT>{2, 4})
             for (const UINT quality : large ? std::vector<UINT>{0}
@@ -307,7 +334,7 @@ int wmain(int argc, wchar_t **argv) {
                     ComPtr<ID3D11ShaderResourceView> srv;
                     check(device->CreateShaderResourceView(readable.Get(), &sd, &srv));
                     desc.SampleDesc = {1, 0};
-                    if (resolveBeforeRead) {
+                    if (resolveBeforeRead || resolveSource) {
                         auto resolvedDesc = desc;
                         resolvedDesc.Format = DXGI_FORMAT_R16G16B16A16_FLOAT;
                         check(device->CreateTexture2D(&resolvedDesc, nullptr, &resolved));
@@ -351,7 +378,35 @@ int wmain(int argc, wchar_t **argv) {
                                       : pixelEdges    ? 6
                                                       : 3,
                                       0);
+                        if (overwriteSample >= 0) {
+                            context->VSSetShader(vs.Get(), nullptr, 0);
+                            context->IASetInputLayout(nullptr);
+                            context->PSSetShader(overwritePs.Get(), nullptr, 0);
+                            context->OMSetBlendState(nullptr, nullptr, 1u << overwriteSample);
+                            context->Draw(3, 0);
+                            context->OMSetBlendState(nullptr, nullptr, 0xffffffffu);
+                        }
                         context->OMSetRenderTargets(0, nullptr, nullptr);
+                        if (resolveSource) {
+                            context->ResolveSubresource(resolved.Get(), 0, rendered.Get(), 0,
+                                                        DXGI_FORMAT_R16G16B16A16_FLOAT);
+                            context->CopyResource(staging.Get(), resolved.Get());
+                            D3D11_MAPPED_SUBRESOURCE mapped{};
+                            check(context->Map(staging.Get(), 0, D3D11_MAP_READ, 0, &mapped));
+                            if (mapped.RowPitch < width * 8) {
+                                context->Unmap(staging.Get(), 0);
+                                throw std::runtime_error("Resolved row is too short");
+                            }
+                            for (const auto &[x, y] : witnessPixels) {
+                                const auto row = reinterpret_cast<const uint16_t *>(
+                                    static_cast<const char *>(mapped.pData) + y * mapped.RowPitch);
+                                resolveReport << sourceBind << ',' << x << ',' << y;
+                                for (unsigned k = 0; k < 4; ++k)
+                                    resolveReport << ',' << row[x * 4 + k];
+                                resolveReport << '\n';
+                            }
+                            context->Unmap(staging.Get(), 0);
+                        }
                         if (resolveBeforeRead)
                             context->ResolveSubresource(resolved.Get(), 0, rendered.Get(), 0,
                                                         DXGI_FORMAT_R16G16B16A16_FLOAT);
@@ -414,9 +469,15 @@ int wmain(int argc, wchar_t **argv) {
                                                 differences += value != half(values[k] & 2047);
                                         }
                                         if (pixelNormal) {
-                                            for (unsigned k = 0; k < 3; ++k)
-                                                differences += !integerHalf[row[x * 4 + k]];
                                             differences += row[x * 4 + 3] != half(2047);
+                                            if (overwriteSample == int(sample)) {
+                                                const std::array<uint16_t, 3> sentinel{half(64), half(128),
+                                                                                       half(256)};
+                                                for (unsigned k = 0; k < 3; ++k)
+                                                    differences += row[x * 4 + k] != sentinel[k];
+                                            } else
+                                                for (unsigned k = 0; k < 3; ++k)
+                                                    differences += !integerHalf[row[x * 4 + k]];
                                         } else if (pixelEdges) {
                                             const auto color = row + x * 4;
                                             const std::array<uint16_t, 4> a{half(1), half(511), half(1023),
@@ -487,6 +548,7 @@ int wmain(int argc, wchar_t **argv) {
         report.close();
         anomalies.close();
         witnesses.close();
+        resolveReport.close();
         std::cout << "different_words=" << totalDifferences << " debug_failures=" << debugFailures << '\n';
         return totalDifferences || debugFailures ? 1 : 0;
     } catch (const std::exception &error) {

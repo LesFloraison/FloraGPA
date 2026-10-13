@@ -1,0 +1,1941 @@
+{
+  "schema": "FloraGPA MSAA sample overwrite baseline 1",
+  "source_parent": "0f352d188df7e408430c6b48e89aa5e1d4f8a37c",
+  "formal_accepted_frames": 0,
+  "required_frames": 6,
+  "production_changes": false,
+  "driver_settings_changed": false,
+  "raw_evidence": "artifacts/capture-msaa-sample-overwrite-20261014",
+  "manifest_sha256": "4212230a1fd00c47c5bedc1064fc55520640c7960b97e9af8034da4fef3b9480",
+  "mesh_sha256": "b9873898b17a4629b44a6b4624a7b7bee996f82ee772a3a17e7704dad55ea3ea",
+  "source_sha256": "0be5355c4e365f46e3356420f670af40ab2de89d5f290c7b7747be0a0c7591c3",
+  "binary_sha256": "0bf94f9ef39a6ab2d1747bba5b48b98819cd0ffec92134c471ee2c39025be132",
+  "processes": 54,
+  "sample_readbacks": 324,
+  "expected_failing_nvidia_processes": 18,
+  "debug_failures": 0,
+  "witness_xy": [
+    815,
+    843
+  ],
+  "repeats_exact": true,
+  "resolve_does_not_change_witness_samples": true,
+  "cases": [
+    {
+      "label": "hardware-summary-only-resolve-0-0",
+      "backend": "hardware",
+      "mode": "summary-only",
+      "resolve_source": false,
+      "repeat": 0,
+      "exit_code": 1,
+      "different_words": 2,
+      "debug_failures": 0,
+      "readbacks": 6,
+      "witnesses": [
+        {
+          "bind": 32,
+          "sample": 0,
+          "path": "copy",
+          "rgba": [
+            1464.0,
+            1952.0,
+            709.5,
+            2047.0
+          ]
+        },
+        {
+          "bind": 32,
+          "sample": 1,
+          "path": "copy",
+          "rgba": [
+            1464.0,
+            1952.0,
+            709.5,
+            2047.0
+          ]
+        },
+        {
+          "bind": 40,
+          "sample": 0,
+          "path": "copy",
+          "rgba": [
+            1512.0,
+            1938.0,
+            721.0,
+            2047.0
+          ]
+        },
+        {
+          "bind": 40,
+          "sample": 1,
+          "path": "copy",
+          "rgba": [
+            1417.0,
+            1966.0,
+            698.0,
+            2047.0
+          ]
+        },
+        {
+          "bind": 40,
+          "sample": 0,
+          "path": "direct",
+          "rgba": [
+            1512.0,
+            1938.0,
+            721.0,
+            2047.0
+          ]
+        },
+        {
+          "bind": 40,
+          "sample": 1,
+          "path": "direct",
+          "rgba": [
+            1417.0,
+            1966.0,
+            698.0,
+            2047.0
+          ]
+        }
+      ],
+      "resolved": [],
+      "binary_sha256": "0bf94f9ef39a6ab2d1747bba5b48b98819cd0ffec92134c471ee2c39025be132"
+    },
+    {
+      "label": "hardware-summary-only-resolve-1-0",
+      "backend": "hardware",
+      "mode": "summary-only",
+      "resolve_source": true,
+      "repeat": 0,
+      "exit_code": 1,
+      "different_words": 2,
+      "debug_failures": 0,
+      "readbacks": 6,
+      "witnesses": [
+        {
+          "bind": 32,
+          "sample": 0,
+          "path": "copy",
+          "rgba": [
+            1464.0,
+            1952.0,
+            709.5,
+            2047.0
+          ]
+        },
+        {
+          "bind": 32,
+          "sample": 1,
+          "path": "copy",
+          "rgba": [
+            1464.0,
+            1952.0,
+            709.5,
+            2047.0
+          ]
+        },
+        {
+          "bind": 40,
+          "sample": 0,
+          "path": "copy",
+          "rgba": [
+            1512.0,
+            1938.0,
+            721.0,
+            2047.0
+          ]
+        },
+        {
+          "bind": 40,
+          "sample": 1,
+          "path": "copy",
+          "rgba": [
+            1417.0,
+            1966.0,
+            698.0,
+            2047.0
+          ]
+        },
+        {
+          "bind": 40,
+          "sample": 0,
+          "path": "direct",
+          "rgba": [
+            1512.0,
+            1938.0,
+            721.0,
+            2047.0
+          ]
+        },
+        {
+          "bind": 40,
+          "sample": 1,
+          "path": "direct",
+          "rgba": [
+            1417.0,
+            1966.0,
+            698.0,
+            2047.0
+          ]
+        }
+      ],
+      "resolved": [
+        {
+          "bind": 32,
+          "rgba": [
+            1464.0,
+            1952.0,
+            709.5,
+            2047.0
+          ],
+          "cpu_nearest_even_average": [
+            1464.0,
+            1952.0,
+            709.5,
+            2047.0
+          ]
+        },
+        {
+          "bind": 40,
+          "rgba": [
+            1465.0,
+            1952.0,
+            709.5,
+            2047.0
+          ],
+          "cpu_nearest_even_average": [
+            1464.0,
+            1952.0,
+            709.5,
+            2047.0
+          ]
+        }
+      ],
+      "binary_sha256": "0bf94f9ef39a6ab2d1747bba5b48b98819cd0ffec92134c471ee2c39025be132"
+    },
+    {
+      "label": "hardware-summary-overwrite-0-resolve-0-0",
+      "backend": "hardware",
+      "mode": "summary-overwrite-0",
+      "resolve_source": false,
+      "repeat": 0,
+      "exit_code": 1,
+      "different_words": 1,
+      "debug_failures": 0,
+      "readbacks": 6,
+      "witnesses": [
+        {
+          "bind": 32,
+          "sample": 0,
+          "path": "copy",
+          "rgba": [
+            64.0,
+            128.0,
+            256.0,
+            2047.0
+          ]
+        },
+        {
+          "bind": 32,
+          "sample": 1,
+          "path": "copy",
+          "rgba": [
+            1464.0,
+            1952.0,
+            709.5,
+            2047.0
+          ]
+        },
+        {
+          "bind": 40,
+          "sample": 0,
+          "path": "copy",
+          "rgba": [
+            64.0,
+            128.0,
+            256.0,
+            2047.0
+          ]
+        },
+        {
+          "bind": 40,
+          "sample": 1,
+          "path": "copy",
+          "rgba": [
+            1417.0,
+            1966.0,
+            698.0,
+            2047.0
+          ]
+        },
+        {
+          "bind": 40,
+          "sample": 0,
+          "path": "direct",
+          "rgba": [
+            64.0,
+            128.0,
+            256.0,
+            2047.0
+          ]
+        },
+        {
+          "bind": 40,
+          "sample": 1,
+          "path": "direct",
+          "rgba": [
+            1417.0,
+            1966.0,
+            698.0,
+            2047.0
+          ]
+        }
+      ],
+      "resolved": [],
+      "binary_sha256": "0bf94f9ef39a6ab2d1747bba5b48b98819cd0ffec92134c471ee2c39025be132"
+    },
+    {
+      "label": "hardware-summary-overwrite-0-resolve-1-0",
+      "backend": "hardware",
+      "mode": "summary-overwrite-0",
+      "resolve_source": true,
+      "repeat": 0,
+      "exit_code": 1,
+      "different_words": 1,
+      "debug_failures": 0,
+      "readbacks": 6,
+      "witnesses": [
+        {
+          "bind": 32,
+          "sample": 0,
+          "path": "copy",
+          "rgba": [
+            64.0,
+            128.0,
+            256.0,
+            2047.0
+          ]
+        },
+        {
+          "bind": 32,
+          "sample": 1,
+          "path": "copy",
+          "rgba": [
+            1464.0,
+            1952.0,
+            709.5,
+            2047.0
+          ]
+        },
+        {
+          "bind": 40,
+          "sample": 0,
+          "path": "copy",
+          "rgba": [
+            64.0,
+            128.0,
+            256.0,
+            2047.0
+          ]
+        },
+        {
+          "bind": 40,
+          "sample": 1,
+          "path": "copy",
+          "rgba": [
+            1417.0,
+            1966.0,
+            698.0,
+            2047.0
+          ]
+        },
+        {
+          "bind": 40,
+          "sample": 0,
+          "path": "direct",
+          "rgba": [
+            64.0,
+            128.0,
+            256.0,
+            2047.0
+          ]
+        },
+        {
+          "bind": 40,
+          "sample": 1,
+          "path": "direct",
+          "rgba": [
+            1417.0,
+            1966.0,
+            698.0,
+            2047.0
+          ]
+        }
+      ],
+      "resolved": [
+        {
+          "bind": 32,
+          "rgba": [
+            764.0,
+            1040.0,
+            482.75,
+            2047.0
+          ],
+          "cpu_nearest_even_average": [
+            764.0,
+            1040.0,
+            482.75,
+            2047.0
+          ]
+        },
+        {
+          "bind": 40,
+          "rgba": [
+            740.5,
+            1047.0,
+            477.0,
+            2047.0
+          ],
+          "cpu_nearest_even_average": [
+            740.5,
+            1047.0,
+            477.0,
+            2047.0
+          ]
+        }
+      ],
+      "binary_sha256": "0bf94f9ef39a6ab2d1747bba5b48b98819cd0ffec92134c471ee2c39025be132"
+    },
+    {
+      "label": "hardware-summary-overwrite-1-resolve-0-0",
+      "backend": "hardware",
+      "mode": "summary-overwrite-1",
+      "resolve_source": false,
+      "repeat": 0,
+      "exit_code": 1,
+      "different_words": 1,
+      "debug_failures": 0,
+      "readbacks": 6,
+      "witnesses": [
+        {
+          "bind": 32,
+          "sample": 0,
+          "path": "copy",
+          "rgba": [
+            1464.0,
+            1952.0,
+            709.5,
+            2047.0
+          ]
+        },
+        {
+          "bind": 32,
+          "sample": 1,
+          "path": "copy",
+          "rgba": [
+            64.0,
+            128.0,
+            256.0,
+            2047.0
+          ]
+        },
+        {
+          "bind": 40,
+          "sample": 0,
+          "path": "copy",
+          "rgba": [
+            1512.0,
+            1938.0,
+            721.0,
+            2047.0
+          ]
+        },
+        {
+          "bind": 40,
+          "sample": 1,
+          "path": "copy",
+          "rgba": [
+            64.0,
+            128.0,
+            256.0,
+            2047.0
+          ]
+        },
+        {
+          "bind": 40,
+          "sample": 0,
+          "path": "direct",
+          "rgba": [
+            1512.0,
+            1938.0,
+            721.0,
+            2047.0
+          ]
+        },
+        {
+          "bind": 40,
+          "sample": 1,
+          "path": "direct",
+          "rgba": [
+            64.0,
+            128.0,
+            256.0,
+            2047.0
+          ]
+        }
+      ],
+      "resolved": [],
+      "binary_sha256": "0bf94f9ef39a6ab2d1747bba5b48b98819cd0ffec92134c471ee2c39025be132"
+    },
+    {
+      "label": "hardware-summary-overwrite-1-resolve-1-0",
+      "backend": "hardware",
+      "mode": "summary-overwrite-1",
+      "resolve_source": true,
+      "repeat": 0,
+      "exit_code": 1,
+      "different_words": 1,
+      "debug_failures": 0,
+      "readbacks": 6,
+      "witnesses": [
+        {
+          "bind": 32,
+          "sample": 0,
+          "path": "copy",
+          "rgba": [
+            1464.0,
+            1952.0,
+            709.5,
+            2047.0
+          ]
+        },
+        {
+          "bind": 32,
+          "sample": 1,
+          "path": "copy",
+          "rgba": [
+            64.0,
+            128.0,
+            256.0,
+            2047.0
+          ]
+        },
+        {
+          "bind": 40,
+          "sample": 0,
+          "path": "copy",
+          "rgba": [
+            1512.0,
+            1938.0,
+            721.0,
+            2047.0
+          ]
+        },
+        {
+          "bind": 40,
+          "sample": 1,
+          "path": "copy",
+          "rgba": [
+            64.0,
+            128.0,
+            256.0,
+            2047.0
+          ]
+        },
+        {
+          "bind": 40,
+          "sample": 0,
+          "path": "direct",
+          "rgba": [
+            1512.0,
+            1938.0,
+            721.0,
+            2047.0
+          ]
+        },
+        {
+          "bind": 40,
+          "sample": 1,
+          "path": "direct",
+          "rgba": [
+            64.0,
+            128.0,
+            256.0,
+            2047.0
+          ]
+        }
+      ],
+      "resolved": [
+        {
+          "bind": 32,
+          "rgba": [
+            764.0,
+            1040.0,
+            482.75,
+            2047.0
+          ],
+          "cpu_nearest_even_average": [
+            764.0,
+            1040.0,
+            482.75,
+            2047.0
+          ]
+        },
+        {
+          "bind": 40,
+          "rgba": [
+            788.0,
+            1033.0,
+            488.5,
+            2047.0
+          ],
+          "cpu_nearest_even_average": [
+            788.0,
+            1033.0,
+            488.5,
+            2047.0
+          ]
+        }
+      ],
+      "binary_sha256": "0bf94f9ef39a6ab2d1747bba5b48b98819cd0ffec92134c471ee2c39025be132"
+    },
+    {
+      "label": "intel-summary-only-resolve-0-0",
+      "backend": "intel",
+      "mode": "summary-only",
+      "resolve_source": false,
+      "repeat": 0,
+      "exit_code": 0,
+      "different_words": 0,
+      "debug_failures": 0,
+      "readbacks": 6,
+      "witnesses": [
+        {
+          "bind": 32,
+          "sample": 0,
+          "path": "copy",
+          "rgba": [
+            1513.0,
+            1938.0,
+            722.0,
+            2047.0
+          ]
+        },
+        {
+          "bind": 32,
+          "sample": 1,
+          "path": "copy",
+          "rgba": [
+            1417.0,
+            1966.0,
+            698.0,
+            2047.0
+          ]
+        },
+        {
+          "bind": 40,
+          "sample": 0,
+          "path": "copy",
+          "rgba": [
+            1513.0,
+            1938.0,
+            722.0,
+            2047.0
+          ]
+        },
+        {
+          "bind": 40,
+          "sample": 1,
+          "path": "copy",
+          "rgba": [
+            1417.0,
+            1966.0,
+            698.0,
+            2047.0
+          ]
+        },
+        {
+          "bind": 40,
+          "sample": 0,
+          "path": "direct",
+          "rgba": [
+            1513.0,
+            1938.0,
+            722.0,
+            2047.0
+          ]
+        },
+        {
+          "bind": 40,
+          "sample": 1,
+          "path": "direct",
+          "rgba": [
+            1417.0,
+            1966.0,
+            698.0,
+            2047.0
+          ]
+        }
+      ],
+      "resolved": [],
+      "binary_sha256": "0bf94f9ef39a6ab2d1747bba5b48b98819cd0ffec92134c471ee2c39025be132"
+    },
+    {
+      "label": "intel-summary-only-resolve-1-0",
+      "backend": "intel",
+      "mode": "summary-only",
+      "resolve_source": true,
+      "repeat": 0,
+      "exit_code": 0,
+      "different_words": 0,
+      "debug_failures": 0,
+      "readbacks": 6,
+      "witnesses": [
+        {
+          "bind": 32,
+          "sample": 0,
+          "path": "copy",
+          "rgba": [
+            1513.0,
+            1938.0,
+            722.0,
+            2047.0
+          ]
+        },
+        {
+          "bind": 32,
+          "sample": 1,
+          "path": "copy",
+          "rgba": [
+            1417.0,
+            1966.0,
+            698.0,
+            2047.0
+          ]
+        },
+        {
+          "bind": 40,
+          "sample": 0,
+          "path": "copy",
+          "rgba": [
+            1513.0,
+            1938.0,
+            722.0,
+            2047.0
+          ]
+        },
+        {
+          "bind": 40,
+          "sample": 1,
+          "path": "copy",
+          "rgba": [
+            1417.0,
+            1966.0,
+            698.0,
+            2047.0
+          ]
+        },
+        {
+          "bind": 40,
+          "sample": 0,
+          "path": "direct",
+          "rgba": [
+            1513.0,
+            1938.0,
+            722.0,
+            2047.0
+          ]
+        },
+        {
+          "bind": 40,
+          "sample": 1,
+          "path": "direct",
+          "rgba": [
+            1417.0,
+            1966.0,
+            698.0,
+            2047.0
+          ]
+        }
+      ],
+      "resolved": [
+        {
+          "bind": 32,
+          "rgba": [
+            1465.0,
+            1952.0,
+            710.0,
+            2047.0
+          ],
+          "cpu_nearest_even_average": [
+            1465.0,
+            1952.0,
+            710.0,
+            2047.0
+          ]
+        },
+        {
+          "bind": 40,
+          "rgba": [
+            1465.0,
+            1952.0,
+            710.0,
+            2047.0
+          ],
+          "cpu_nearest_even_average": [
+            1465.0,
+            1952.0,
+            710.0,
+            2047.0
+          ]
+        }
+      ],
+      "binary_sha256": "0bf94f9ef39a6ab2d1747bba5b48b98819cd0ffec92134c471ee2c39025be132"
+    },
+    {
+      "label": "intel-summary-overwrite-0-resolve-0-0",
+      "backend": "intel",
+      "mode": "summary-overwrite-0",
+      "resolve_source": false,
+      "repeat": 0,
+      "exit_code": 0,
+      "different_words": 0,
+      "debug_failures": 0,
+      "readbacks": 6,
+      "witnesses": [
+        {
+          "bind": 32,
+          "sample": 0,
+          "path": "copy",
+          "rgba": [
+            64.0,
+            128.0,
+            256.0,
+            2047.0
+          ]
+        },
+        {
+          "bind": 32,
+          "sample": 1,
+          "path": "copy",
+          "rgba": [
+            1417.0,
+            1966.0,
+            698.0,
+            2047.0
+          ]
+        },
+        {
+          "bind": 40,
+          "sample": 0,
+          "path": "copy",
+          "rgba": [
+            64.0,
+            128.0,
+            256.0,
+            2047.0
+          ]
+        },
+        {
+          "bind": 40,
+          "sample": 1,
+          "path": "copy",
+          "rgba": [
+            1417.0,
+            1966.0,
+            698.0,
+            2047.0
+          ]
+        },
+        {
+          "bind": 40,
+          "sample": 0,
+          "path": "direct",
+          "rgba": [
+            64.0,
+            128.0,
+            256.0,
+            2047.0
+          ]
+        },
+        {
+          "bind": 40,
+          "sample": 1,
+          "path": "direct",
+          "rgba": [
+            1417.0,
+            1966.0,
+            698.0,
+            2047.0
+          ]
+        }
+      ],
+      "resolved": [],
+      "binary_sha256": "0bf94f9ef39a6ab2d1747bba5b48b98819cd0ffec92134c471ee2c39025be132"
+    },
+    {
+      "label": "intel-summary-overwrite-0-resolve-1-0",
+      "backend": "intel",
+      "mode": "summary-overwrite-0",
+      "resolve_source": true,
+      "repeat": 0,
+      "exit_code": 0,
+      "different_words": 0,
+      "debug_failures": 0,
+      "readbacks": 6,
+      "witnesses": [
+        {
+          "bind": 32,
+          "sample": 0,
+          "path": "copy",
+          "rgba": [
+            64.0,
+            128.0,
+            256.0,
+            2047.0
+          ]
+        },
+        {
+          "bind": 32,
+          "sample": 1,
+          "path": "copy",
+          "rgba": [
+            1417.0,
+            1966.0,
+            698.0,
+            2047.0
+          ]
+        },
+        {
+          "bind": 40,
+          "sample": 0,
+          "path": "copy",
+          "rgba": [
+            64.0,
+            128.0,
+            256.0,
+            2047.0
+          ]
+        },
+        {
+          "bind": 40,
+          "sample": 1,
+          "path": "copy",
+          "rgba": [
+            1417.0,
+            1966.0,
+            698.0,
+            2047.0
+          ]
+        },
+        {
+          "bind": 40,
+          "sample": 0,
+          "path": "direct",
+          "rgba": [
+            64.0,
+            128.0,
+            256.0,
+            2047.0
+          ]
+        },
+        {
+          "bind": 40,
+          "sample": 1,
+          "path": "direct",
+          "rgba": [
+            1417.0,
+            1966.0,
+            698.0,
+            2047.0
+          ]
+        }
+      ],
+      "resolved": [
+        {
+          "bind": 32,
+          "rgba": [
+            740.5,
+            1047.0,
+            477.0,
+            2047.0
+          ],
+          "cpu_nearest_even_average": [
+            740.5,
+            1047.0,
+            477.0,
+            2047.0
+          ]
+        },
+        {
+          "bind": 40,
+          "rgba": [
+            740.5,
+            1047.0,
+            477.0,
+            2047.0
+          ],
+          "cpu_nearest_even_average": [
+            740.5,
+            1047.0,
+            477.0,
+            2047.0
+          ]
+        }
+      ],
+      "binary_sha256": "0bf94f9ef39a6ab2d1747bba5b48b98819cd0ffec92134c471ee2c39025be132"
+    },
+    {
+      "label": "intel-summary-overwrite-1-resolve-0-0",
+      "backend": "intel",
+      "mode": "summary-overwrite-1",
+      "resolve_source": false,
+      "repeat": 0,
+      "exit_code": 0,
+      "different_words": 0,
+      "debug_failures": 0,
+      "readbacks": 6,
+      "witnesses": [
+        {
+          "bind": 32,
+          "sample": 0,
+          "path": "copy",
+          "rgba": [
+            1513.0,
+            1938.0,
+            722.0,
+            2047.0
+          ]
+        },
+        {
+          "bind": 32,
+          "sample": 1,
+          "path": "copy",
+          "rgba": [
+            64.0,
+            128.0,
+            256.0,
+            2047.0
+          ]
+        },
+        {
+          "bind": 40,
+          "sample": 0,
+          "path": "copy",
+          "rgba": [
+            1513.0,
+            1938.0,
+            722.0,
+            2047.0
+          ]
+        },
+        {
+          "bind": 40,
+          "sample": 1,
+          "path": "copy",
+          "rgba": [
+            64.0,
+            128.0,
+            256.0,
+            2047.0
+          ]
+        },
+        {
+          "bind": 40,
+          "sample": 0,
+          "path": "direct",
+          "rgba": [
+            1513.0,
+            1938.0,
+            722.0,
+            2047.0
+          ]
+        },
+        {
+          "bind": 40,
+          "sample": 1,
+          "path": "direct",
+          "rgba": [
+            64.0,
+            128.0,
+            256.0,
+            2047.0
+          ]
+        }
+      ],
+      "resolved": [],
+      "binary_sha256": "0bf94f9ef39a6ab2d1747bba5b48b98819cd0ffec92134c471ee2c39025be132"
+    },
+    {
+      "label": "intel-summary-overwrite-1-resolve-1-0",
+      "backend": "intel",
+      "mode": "summary-overwrite-1",
+      "resolve_source": true,
+      "repeat": 0,
+      "exit_code": 0,
+      "different_words": 0,
+      "debug_failures": 0,
+      "readbacks": 6,
+      "witnesses": [
+        {
+          "bind": 32,
+          "sample": 0,
+          "path": "copy",
+          "rgba": [
+            1513.0,
+            1938.0,
+            722.0,
+            2047.0
+          ]
+        },
+        {
+          "bind": 32,
+          "sample": 1,
+          "path": "copy",
+          "rgba": [
+            64.0,
+            128.0,
+            256.0,
+            2047.0
+          ]
+        },
+        {
+          "bind": 40,
+          "sample": 0,
+          "path": "copy",
+          "rgba": [
+            1513.0,
+            1938.0,
+            722.0,
+            2047.0
+          ]
+        },
+        {
+          "bind": 40,
+          "sample": 1,
+          "path": "copy",
+          "rgba": [
+            64.0,
+            128.0,
+            256.0,
+            2047.0
+          ]
+        },
+        {
+          "bind": 40,
+          "sample": 0,
+          "path": "direct",
+          "rgba": [
+            1513.0,
+            1938.0,
+            722.0,
+            2047.0
+          ]
+        },
+        {
+          "bind": 40,
+          "sample": 1,
+          "path": "direct",
+          "rgba": [
+            64.0,
+            128.0,
+            256.0,
+            2047.0
+          ]
+        }
+      ],
+      "resolved": [
+        {
+          "bind": 32,
+          "rgba": [
+            788.5,
+            1033.0,
+            489.0,
+            2047.0
+          ],
+          "cpu_nearest_even_average": [
+            788.5,
+            1033.0,
+            489.0,
+            2047.0
+          ]
+        },
+        {
+          "bind": 40,
+          "rgba": [
+            788.5,
+            1033.0,
+            489.0,
+            2047.0
+          ],
+          "cpu_nearest_even_average": [
+            788.5,
+            1033.0,
+            489.0,
+            2047.0
+          ]
+        }
+      ],
+      "binary_sha256": "0bf94f9ef39a6ab2d1747bba5b48b98819cd0ffec92134c471ee2c39025be132"
+    },
+    {
+      "label": "warp-summary-only-resolve-0-0",
+      "backend": "warp",
+      "mode": "summary-only",
+      "resolve_source": false,
+      "repeat": 0,
+      "exit_code": 0,
+      "different_words": 0,
+      "debug_failures": 0,
+      "readbacks": 6,
+      "witnesses": [
+        {
+          "bind": 32,
+          "sample": 0,
+          "path": "copy",
+          "rgba": [
+            1513.0,
+            1937.0,
+            721.0,
+            2047.0
+          ]
+        },
+        {
+          "bind": 32,
+          "sample": 1,
+          "path": "copy",
+          "rgba": [
+            1422.0,
+            1967.0,
+            699.0,
+            2047.0
+          ]
+        },
+        {
+          "bind": 40,
+          "sample": 0,
+          "path": "copy",
+          "rgba": [
+            1513.0,
+            1937.0,
+            721.0,
+            2047.0
+          ]
+        },
+        {
+          "bind": 40,
+          "sample": 1,
+          "path": "copy",
+          "rgba": [
+            1422.0,
+            1967.0,
+            699.0,
+            2047.0
+          ]
+        },
+        {
+          "bind": 40,
+          "sample": 0,
+          "path": "direct",
+          "rgba": [
+            1513.0,
+            1937.0,
+            721.0,
+            2047.0
+          ]
+        },
+        {
+          "bind": 40,
+          "sample": 1,
+          "path": "direct",
+          "rgba": [
+            1422.0,
+            1967.0,
+            699.0,
+            2047.0
+          ]
+        }
+      ],
+      "resolved": [],
+      "binary_sha256": "0bf94f9ef39a6ab2d1747bba5b48b98819cd0ffec92134c471ee2c39025be132"
+    },
+    {
+      "label": "warp-summary-only-resolve-1-0",
+      "backend": "warp",
+      "mode": "summary-only",
+      "resolve_source": true,
+      "repeat": 0,
+      "exit_code": 0,
+      "different_words": 0,
+      "debug_failures": 0,
+      "readbacks": 6,
+      "witnesses": [
+        {
+          "bind": 32,
+          "sample": 0,
+          "path": "copy",
+          "rgba": [
+            1513.0,
+            1937.0,
+            721.0,
+            2047.0
+          ]
+        },
+        {
+          "bind": 32,
+          "sample": 1,
+          "path": "copy",
+          "rgba": [
+            1422.0,
+            1967.0,
+            699.0,
+            2047.0
+          ]
+        },
+        {
+          "bind": 40,
+          "sample": 0,
+          "path": "copy",
+          "rgba": [
+            1513.0,
+            1937.0,
+            721.0,
+            2047.0
+          ]
+        },
+        {
+          "bind": 40,
+          "sample": 1,
+          "path": "copy",
+          "rgba": [
+            1422.0,
+            1967.0,
+            699.0,
+            2047.0
+          ]
+        },
+        {
+          "bind": 40,
+          "sample": 0,
+          "path": "direct",
+          "rgba": [
+            1513.0,
+            1937.0,
+            721.0,
+            2047.0
+          ]
+        },
+        {
+          "bind": 40,
+          "sample": 1,
+          "path": "direct",
+          "rgba": [
+            1422.0,
+            1967.0,
+            699.0,
+            2047.0
+          ]
+        }
+      ],
+      "resolved": [
+        {
+          "bind": 32,
+          "rgba": [
+            1467.0,
+            1952.0,
+            710.0,
+            2047.0
+          ],
+          "cpu_nearest_even_average": [
+            1468.0,
+            1952.0,
+            710.0,
+            2047.0
+          ]
+        },
+        {
+          "bind": 40,
+          "rgba": [
+            1467.0,
+            1952.0,
+            710.0,
+            2047.0
+          ],
+          "cpu_nearest_even_average": [
+            1468.0,
+            1952.0,
+            710.0,
+            2047.0
+          ]
+        }
+      ],
+      "binary_sha256": "0bf94f9ef39a6ab2d1747bba5b48b98819cd0ffec92134c471ee2c39025be132"
+    },
+    {
+      "label": "warp-summary-overwrite-0-resolve-0-0",
+      "backend": "warp",
+      "mode": "summary-overwrite-0",
+      "resolve_source": false,
+      "repeat": 0,
+      "exit_code": 0,
+      "different_words": 0,
+      "debug_failures": 0,
+      "readbacks": 6,
+      "witnesses": [
+        {
+          "bind": 32,
+          "sample": 0,
+          "path": "copy",
+          "rgba": [
+            64.0,
+            128.0,
+            256.0,
+            2047.0
+          ]
+        },
+        {
+          "bind": 32,
+          "sample": 1,
+          "path": "copy",
+          "rgba": [
+            1422.0,
+            1967.0,
+            699.0,
+            2047.0
+          ]
+        },
+        {
+          "bind": 40,
+          "sample": 0,
+          "path": "copy",
+          "rgba": [
+            64.0,
+            128.0,
+            256.0,
+            2047.0
+          ]
+        },
+        {
+          "bind": 40,
+          "sample": 1,
+          "path": "copy",
+          "rgba": [
+            1422.0,
+            1967.0,
+            699.0,
+            2047.0
+          ]
+        },
+        {
+          "bind": 40,
+          "sample": 0,
+          "path": "direct",
+          "rgba": [
+            64.0,
+            128.0,
+            256.0,
+            2047.0
+          ]
+        },
+        {
+          "bind": 40,
+          "sample": 1,
+          "path": "direct",
+          "rgba": [
+            1422.0,
+            1967.0,
+            699.0,
+            2047.0
+          ]
+        }
+      ],
+      "resolved": [],
+      "binary_sha256": "0bf94f9ef39a6ab2d1747bba5b48b98819cd0ffec92134c471ee2c39025be132"
+    },
+    {
+      "label": "warp-summary-overwrite-0-resolve-1-0",
+      "backend": "warp",
+      "mode": "summary-overwrite-0",
+      "resolve_source": true,
+      "repeat": 0,
+      "exit_code": 0,
+      "different_words": 0,
+      "debug_failures": 0,
+      "readbacks": 6,
+      "witnesses": [
+        {
+          "bind": 32,
+          "sample": 0,
+          "path": "copy",
+          "rgba": [
+            64.0,
+            128.0,
+            256.0,
+            2047.0
+          ]
+        },
+        {
+          "bind": 32,
+          "sample": 1,
+          "path": "copy",
+          "rgba": [
+            1422.0,
+            1967.0,
+            699.0,
+            2047.0
+          ]
+        },
+        {
+          "bind": 40,
+          "sample": 0,
+          "path": "copy",
+          "rgba": [
+            64.0,
+            128.0,
+            256.0,
+            2047.0
+          ]
+        },
+        {
+          "bind": 40,
+          "sample": 1,
+          "path": "copy",
+          "rgba": [
+            1422.0,
+            1967.0,
+            699.0,
+            2047.0
+          ]
+        },
+        {
+          "bind": 40,
+          "sample": 0,
+          "path": "direct",
+          "rgba": [
+            64.0,
+            128.0,
+            256.0,
+            2047.0
+          ]
+        },
+        {
+          "bind": 40,
+          "sample": 1,
+          "path": "direct",
+          "rgba": [
+            1422.0,
+            1967.0,
+            699.0,
+            2047.0
+          ]
+        }
+      ],
+      "resolved": [
+        {
+          "bind": 32,
+          "rgba": [
+            743.0,
+            1047.0,
+            477.5,
+            2047.0
+          ],
+          "cpu_nearest_even_average": [
+            743.0,
+            1048.0,
+            477.5,
+            2047.0
+          ]
+        },
+        {
+          "bind": 40,
+          "rgba": [
+            743.0,
+            1047.0,
+            477.5,
+            2047.0
+          ],
+          "cpu_nearest_even_average": [
+            743.0,
+            1048.0,
+            477.5,
+            2047.0
+          ]
+        }
+      ],
+      "binary_sha256": "0bf94f9ef39a6ab2d1747bba5b48b98819cd0ffec92134c471ee2c39025be132"
+    },
+    {
+      "label": "warp-summary-overwrite-1-resolve-0-0",
+      "backend": "warp",
+      "mode": "summary-overwrite-1",
+      "resolve_source": false,
+      "repeat": 0,
+      "exit_code": 0,
+      "different_words": 0,
+      "debug_failures": 0,
+      "readbacks": 6,
+      "witnesses": [
+        {
+          "bind": 32,
+          "sample": 0,
+          "path": "copy",
+          "rgba": [
+            1513.0,
+            1937.0,
+            721.0,
+            2047.0
+          ]
+        },
+        {
+          "bind": 32,
+          "sample": 1,
+          "path": "copy",
+          "rgba": [
+            64.0,
+            128.0,
+            256.0,
+            2047.0
+          ]
+        },
+        {
+          "bind": 40,
+          "sample": 0,
+          "path": "copy",
+          "rgba": [
+            1513.0,
+            1937.0,
+            721.0,
+            2047.0
+          ]
+        },
+        {
+          "bind": 40,
+          "sample": 1,
+          "path": "copy",
+          "rgba": [
+            64.0,
+            128.0,
+            256.0,
+            2047.0
+          ]
+        },
+        {
+          "bind": 40,
+          "sample": 0,
+          "path": "direct",
+          "rgba": [
+            1513.0,
+            1937.0,
+            721.0,
+            2047.0
+          ]
+        },
+        {
+          "bind": 40,
+          "sample": 1,
+          "path": "direct",
+          "rgba": [
+            64.0,
+            128.0,
+            256.0,
+            2047.0
+          ]
+        }
+      ],
+      "resolved": [],
+      "binary_sha256": "0bf94f9ef39a6ab2d1747bba5b48b98819cd0ffec92134c471ee2c39025be132"
+    },
+    {
+      "label": "warp-summary-overwrite-1-resolve-1-0",
+      "backend": "warp",
+      "mode": "summary-overwrite-1",
+      "resolve_source": true,
+      "repeat": 0,
+      "exit_code": 0,
+      "different_words": 0,
+      "debug_failures": 0,
+      "readbacks": 6,
+      "witnesses": [
+        {
+          "bind": 32,
+          "sample": 0,
+          "path": "copy",
+          "rgba": [
+            1513.0,
+            1937.0,
+            721.0,
+            2047.0
+          ]
+        },
+        {
+          "bind": 32,
+          "sample": 1,
+          "path": "copy",
+          "rgba": [
+            64.0,
+            128.0,
+            256.0,
+            2047.0
+          ]
+        },
+        {
+          "bind": 40,
+          "sample": 0,
+          "path": "copy",
+          "rgba": [
+            1513.0,
+            1937.0,
+            721.0,
+            2047.0
+          ]
+        },
+        {
+          "bind": 40,
+          "sample": 1,
+          "path": "copy",
+          "rgba": [
+            64.0,
+            128.0,
+            256.0,
+            2047.0
+          ]
+        },
+        {
+          "bind": 40,
+          "sample": 0,
+          "path": "direct",
+          "rgba": [
+            1513.0,
+            1937.0,
+            721.0,
+            2047.0
+          ]
+        },
+        {
+          "bind": 40,
+          "sample": 1,
+          "path": "direct",
+          "rgba": [
+            64.0,
+            128.0,
+            256.0,
+            2047.0
+          ]
+        }
+      ],
+      "resolved": [
+        {
+          "bind": 32,
+          "rgba": [
+            788.5,
+            1032.0,
+            488.5,
+            2047.0
+          ],
+          "cpu_nearest_even_average": [
+            788.5,
+            1032.0,
+            488.5,
+            2047.0
+          ]
+        },
+        {
+          "bind": 40,
+          "rgba": [
+            788.5,
+            1032.0,
+            488.5,
+            2047.0
+          ],
+          "cpu_nearest_even_average": [
+            788.5,
+            1032.0,
+            488.5,
+            2047.0
+          ]
+        }
+      ],
+      "binary_sha256": "0bf94f9ef39a6ab2d1747bba5b48b98819cd0ffec92134c471ee2c39025be132"
+    }
+  ],
+  "oracle_controls": [
+    {
+      "backend": "hardware",
+      "readbacks": 36,
+      "exit_code": 0
+    },
+    {
+      "backend": "warp",
+      "readbacks": 36,
+      "exit_code": 0
+    }
+  ],
+  "refusals": [
+    {
+      "case": "invalid-resolve",
+      "exit_code": 2
+    },
+    {
+      "case": "non-mesh-resolve",
+      "exit_code": 2
+    },
+    {
+      "case": "invalid-sample",
+      "exit_code": 2
+    },
+    {
+      "case": "existing-output",
+      "exit_code": 1
+    }
+  ],
+  "profile_query": {
+    "mutations": false,
+    "rows": [
+      {
+        "profile": "base",
+        "lookup_status": 0,
+        "settings": {
+          "MFAA": {
+            "status": -160,
+            "current": null,
+            "location": 3
+          },
+          "FXAA": {
+            "status": -160,
+            "current": null,
+            "location": 3
+          },
+          "AA_mode": {
+            "status": -160,
+            "current": null,
+            "location": 3
+          },
+          "AA_method": {
+            "status": -160,
+            "current": null,
+            "location": 3
+          },
+          "AA_replay": {
+            "status": -160,
+            "current": null,
+            "location": 3
+          },
+          "AA_gamma": {
+            "status": -160,
+            "current": null,
+            "location": 3
+          },
+          "AA_alpha_to_coverage": {
+            "status": -160,
+            "current": null,
+            "location": 3
+          }
+        },
+        "enumerated_count": 0,
+        "enumerated_aa": []
+      },
+      {
+        "profile": "global",
+        "lookup_status": 0,
+        "settings": {
+          "MFAA": {
+            "status": -160,
+            "current": null,
+            "location": 3
+          },
+          "FXAA": {
+            "status": -160,
+            "current": null,
+            "location": 3
+          },
+          "AA_mode": {
+            "status": -160,
+            "current": null,
+            "location": 3
+          },
+          "AA_method": {
+            "status": -160,
+            "current": null,
+            "location": 3
+          },
+          "AA_replay": {
+            "status": -160,
+            "current": null,
+            "location": 3
+          },
+          "AA_gamma": {
+            "status": -160,
+            "current": null,
+            "location": 3
+          },
+          "AA_alpha_to_coverage": {
+            "status": -160,
+            "current": null,
+            "location": 3
+          }
+        },
+        "enumerated_count": 0,
+        "enumerated_aa": []
+      },
+      {
+        "profile": "D:\\CDXrepo\\FloraGPA-Cpp\\build\\vs2022\\Release\\FloraMsaaIntegerOutputProbe.exe",
+        "lookup_status": -166
+      },
+      {
+        "profile": "D:\\CDXrepo\\FloraGPA-Cpp\\build\\vs2022\\Release\\FloraGPA.Cli.exe",
+        "lookup_status": -166
+      },
+      {
+        "profile": "D:/Program Files/GF2Exilium/GF2 Game/GF2_Exilium.exe",
+        "lookup_status": -166
+      }
+    ],
+    "available_defaults": {
+      "MFAA": {
+        "status": 0,
+        "type": 0,
+        "default": 0
+      },
+      "FXAA": {
+        "status": 0,
+        "type": 0,
+        "default": 0
+      },
+      "AA_mode": {
+        "status": 0,
+        "type": 0,
+        "default": 0
+      },
+      "AA_method": {
+        "status": 0,
+        "type": 0,
+        "default": 0
+      },
+      "AA_replay": {
+        "status": 0,
+        "type": 0,
+        "default": 0
+      },
+      "AA_gamma": {
+        "status": 0,
+        "type": 0,
+        "default": 0
+      },
+      "AA_alpha_to_coverage": {
+        "status": 0,
+        "type": 0,
+        "default": 0
+      }
+    },
+    "headers": {
+      "nvapi.h": "76bbb71107c1388134d41712bed56bb6d80ec426f9bb2c168e2d6941b90f16ca",
+      "NvApiDriverSettings.h": "95ffda903832840343a81189e052a0756774bd92e4b37f2dc49598d493f951d4",
+      "nvapi_interface.h": "d279f81e7f92f2743bfea2ec7ada693001805e13645eb1c6f2af44ef9c342834"
+    }
+  },
+  "ctest_passed": 4,
+  "new_golden_run": false,
+  "inference": "Anomaly affects source Resolve after a one-sample overwrite before any MSAA CopyResource. It is not solely an MSAA sample-copy/readback artifact. Exact driver mechanism and complete GF2 mismatch cause remain unknown.",
+  "resolve_cpu_oracle": false
+}
