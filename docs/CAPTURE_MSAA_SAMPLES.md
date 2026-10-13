@@ -258,3 +258,13 @@ remains deliberate. Production integration, broader initialization formats and
 GF2's six-frame gate are still incomplete. Current evidence and exact regression
 counts are in the baseline's `color_encoder` entry and ignored directory
 `artifacts/capture-msaa-encoder-20261014`. No new GF2/GUI/golden result is implied.
+
+The committed CPU encoder revision `a899110` additionally passes the isolated
+source-package validator: 93 serial CTests, all six stages, 24 packaged launches
+and 96 existing single-sample files. All 24 targets were nonforeground, so
+automatic selection correctly refused; explicit selection and recovery passed.
+Shader generation succeeds from the
+archived source directory with spaces under System32-only PATH. The module
+audit finds no Qt, Python, GPA, RenderDoc, FloraCore or FloraReplay. Raw evidence
+is retained in `artifacts/capture-msaa-encoder-source-a899110`; this does not
+claim live MSAA capture or a new dual-player/GF2 result.

@@ -597,7 +597,67 @@
     "initial_failures": [
       "build2.log: shared native fixture needed format include propagation on new test target; corrected with FloraGpaFormat"
     ],
-    "clean_source_package": "Latest proof is earlier a665593; new shader build generator package validation pending",
+    "clean_source_package": {
+      "commit": "a899110b460882e83091387552089f666ba2829c",
+      "passed": true,
+      "steps": [
+        {
+          "name": "configure",
+          "exit_code": 0
+        },
+        {
+          "name": "build",
+          "exit_code": 0
+        },
+        {
+          "name": "ctest",
+          "exit_code": 0
+        },
+        {
+          "name": "package",
+          "exit_code": 0
+        },
+        {
+          "name": "package-control",
+          "exit_code": 0
+        },
+        {
+          "name": "package-live-control",
+          "exit_code": 0
+        }
+      ],
+      "ctest": 93,
+      "no_qt_discovery": true,
+      "system_path_only": true,
+      "packaged_launches": 24,
+      "packaged_files": 96,
+      "scope": "Committed CPU MSAA encoder and shader build generator; packaged existing single-sample profiles verify independent delivery/control, not MSAA runtime integration or new dual-player pixels",
+      "forbidden_module_audit": [
+        "Qt",
+        "Python",
+        "RenderDoc",
+        "GPA",
+        "FloraReplay",
+        "FloraCore"
+      ],
+      "package_hashes": {
+        "dependencies.json": "ddae10be48d1c3ec765ddb4c5b44ff7e8aba911f49cc80b6586d57b2c75267a5",
+        "FloraCapture.exe": "015647dfe2389098fd6db6928e60e063cb76e11c45587feb1256eec2a8cdc3bd",
+        "FloraCaptureRuntime.dll": "d9ab34574a70dc6274e5c1b2880c2677e6a18b142ea1d197d3ffcc7121b4182b",
+        "manifest.json": "7ccf3b18ec66f8ca11c043194c17289d88bdc49c67ae76a675a45d5fc12b791e",
+        "msvcp140.dll": "0f885b509a685d2bbfa652fed26b5fb31d88fbdab0a978c641d1c7b8aa460aa9",
+        "vcruntime140.dll": "d5e4d9a3e835fa679450145d6a7d94e36573a509317111904d9b3712c30d9066",
+        "vcruntime140_1.dll": "1f2d41c4aa5db0bc33ebf7b66d72943a817d7ce6cbe880502a9403823633093f",
+        "licenses/detours-MIT.txt": "f854ae8aabc0404652b48a2b3bf7f21ec174c69d73f5596934c20884eb0639ef",
+        "licenses/nlohmann-json-MIT.txt": "46a65cffd1ea955132d95a8dd921640714a8d6b537d2e4e482d31145ae95b603"
+      },
+      "evidence_sha256": {
+        "artifacts/capture-msaa-encoder-source-a899110/validation.json": "86af508bacd722a4e4d172a328d0e644ef4bcb0c19fb1ececef77ac2cac34dd7",
+        "artifacts/capture-msaa-encoder-source-a899110/ctest.log": "98d2789eda4b7dd2cedc92bb9bff61a330c9ad3eafec3789561fc86cc42810bc",
+        "artifacts/capture-msaa-encoder-source-a899110/packaged-live/results.json": "67dd389d9a9391f9b60db2616746c429ecc9a31948f453f5316831183e22afd9",
+        "artifacts/capture-msaa-encoder-source-a899110/source.zip": "b5564b301863f39384e0be9f4fed1ca3d73d515b49d73c3899df6a31603c4c59"
+      }
+    },
     "pending": [
       "Runtime recording/freeze integration and capture-only production MSAA acceptance",
       "Depth/stencil and remaining color initialization",
