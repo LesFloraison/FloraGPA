@@ -118,7 +118,7 @@ void run(ID3D11Device* device,ID3D11DeviceContext* context){
     hr(D3D11CreateDevice(nullptr,D3D_DRIVER_TYPE_WARP,nullptr,0,nullptr,0,D3D11_SDK_VERSION,&other,nullptr,&other_context));
     wrap_object(other_context.GetAddressOf(),"MSAA other-device context");rejects([&]{snapshot_msaa_samples(other_context.Get(),texture.Get());},"device mismatch");
     desc.Format=DXGI_FORMAT_R32_TYPELESS;desc.BindFlags=D3D11_BIND_DEPTH_STENCIL;ComPtr<ID3D11Texture2D> depth;hr(device->CreateTexture2D(&desc,nullptr,&depth));
-    rejects([&]{snapshot_msaa_samples(context,depth.Get());},"depth/stencil");
+    SnapshotOptions depth_limit;depth_limit.byte_limit=1;rejects([&]{snapshot_msaa_samples(context,depth.Get(),depth_limit);},"byte limit");
     // No shader readback may run inside a query issued through a known wrapper;
     // raw/interface-escape histories are refused by the runtime gap guard.
     context->ClearState();context->Flush();

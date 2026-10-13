@@ -12,7 +12,7 @@ COM owners, Replay objects or wire records. The runtime depends only on native
 DX11/D3DCompiler and capture-owned metadata; no replay helper was imported.
 
 `snapshot_msaa_samples` copies the source once into compatible private typeless
-storage, then reads each sample through an integer view. A private compute shader
+storage, then reads each color sample through an integer view. A private compute shader
 uses [Texture2DMSArray.Load](https://learn.microsoft.com/en-us/windows/win32/direct3dhlsl/sm5-object-texture2dmsarray-load)
 and writes uint4 values into a staging-bound buffer. CPU packing retains the
 source component widths. There is no Resolve, averaging, float conversion, sRGB
@@ -36,8 +36,9 @@ metadata explicitly refuse. This is not support for arbitrary concurrent or
 escaped native context access.
 
 Integer-view families cover R/RG/RGBA color storage with 8-, 16- or 32-bit
-components where the device supports multisample integer loads. Depth/stencil,
-BGRA, packed formats and special resource flags remain explicit gaps. The table
+components where the device supports multisample integer loads. The subsequent
+depth/stencil extension is described below. BGRA, packed color formats and special
+resource flags remain explicit gaps. The table
 of compatible families is broader than the concrete test matrix below; it does
 not certify every member on every device.
 
@@ -83,11 +84,55 @@ remain intact, with the successful revision and hashes pinned in the baseline.
 
 ## Remaining capture work
 
-Depth/stencil and the formats required by GF2 must retain their individual
-sample values too. Next, independently encode a verified initialization sequence
+Remaining formats required by GF2 must retain their individual sample values
+too. Next, independently encode a verified initialization sequence
 and prove that original GPA and Flora both reconstruct retained samples before
 application commands. Ordinary legacy MSAA GenData is insufficient: the retained
 sample experiment in `D:/CDXrepo/FloraGPA/analysis/ACTIVE_MSAA.md` demonstrates that
 both players can agree on an incorrect image when initial samples are missing.
 Helper initialization must remain distinguishable from application events.
 No new original-player, GUI or GF2 acceptance is claimed by this readback step.
+
+## Depth/stencil sample readback
+
+The next native primitive stage covers D16, D32, D24S8 and D32S8, including their
+typeless depth-bound variants. D16/D32 use compatible integer views. Combined
+formats use separate depth and stencil aspect views: D24 converts the loaded
+UNORM value back to its 24-bit integer and packs the stencil byte; D32S8 retains
+the loaded depth bits and stencil value. `MsaaSampleEncoding` makes these CPU
+layouts explicit. D32S8 uses eight bytes per pixel, with the unused 24 bits
+canonicalized to zero; those unused bits are not claimed as source data.
+The [DXGI format definition](https://learn.microsoft.com/en-us/windows/win32/api/dxgiformat/ne-dxgiformat-dxgi_format)
+distinguishes the depth, stencil and unused portions.
+
+The independent application fixture renders coordinate/layer/sample-specific
+depth and stencil into both an MSAA texture and separate single-sample array
+layers. The reference uses ordinary native Copy/Map, without the MSAA readback
+shader, resolve or capture helper. Every captured plane must match those native
+storage bytes exactly. Floating depth and stencil also match independent CPU
+expectations. D32S8 padding is normalized by the fixed layout rule on both sides.
+No tolerance is used for sample comparison.
+
+The matrix uses 67 x 19 pixels, two layers, 2x/4x samples and quality zero. Depth
+patterns include zero, one, one half, 1/2^24, (2^24-1)/2^24 and varied binary
+fractions. Each WARP/hardware run passes 16 cases and 92,938 checks, with zero
+Debug Layer warnings/errors. Checks cover cancellation/recovery, source lifetime,
+DSV/state/stencil reference/sample mask/LastError preservation, helper exclusion
+from the application stream and continued production snapshot refusal.
+
+An initial CPU-only oracle assumed one universal UNORM round-up rule. Hardware
+D16 at one half disproved that assumption. The corrected oracle compares exact
+independently produced native storage, retaining the failed run. The expanded
+matrix records 3,554 WARP and 1,294 hardware native-versus-CPU quantization
+differences as diagnostics, counted once per case; none is a tolerated mismatch
+between the native oracle and readback. Initial fixture lifetime-order and
+variable-name failures are also retained. This matrix does not establish every
+depth bit pattern, device, sample quality or count.
+
+Reproduce with target `FloraCaptureMsaaDepthTests` and
+`ctest --preset capture-only-release -R '^capture_msaa_depth'`. Raw logs remain
+under `artifacts/capture-msaa-depth-20261013`; hashes and regression results are
+in the baseline's `depth_stencil_readback` entry. The earlier clean source/package
+result applies to color revision `1891553`, not this extension. Production
+snapshot/encoding, Replay and shared format are unchanged; formal GF2 remains
+**0/6**, with no new dual-player or golden-frame result.

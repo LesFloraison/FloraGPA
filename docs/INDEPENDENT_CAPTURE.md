@@ -1964,7 +1964,9 @@ broader query/deferred profiles and the six formal scene frames remain pending.
 The subsequent [capture-owned MSAA sample primitive](CAPTURE_MSAA_SAMPLES.md)
 preserves color storage bits per array layer and sample, with native WARP/hardware
 oracles and state-isolation checks. It is separate from ordinary resource data
-and has no Replay dependency. MSAA production snapshot/encoding guards remain;
-depth/stencil and verified dual-player initialization are still required before
+and has no Replay dependency. A subsequent depth/stencil extension verifies
+D16/D32/D24S8/D32S8 and typeless variants against independent native storage on
+both devices. MSAA production snapshot/encoding guards remain;
+verified dual-player initialization and production integration are still required before
 restarting formal GF2 acceptance. This step does not turn the diagnostic files
 above into accepted scene frames.

@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "status": "Color sample readback foundation; MSAA production capture remains refused",
+  "status": "Color and depth/stencil sample readback foundation; MSAA production capture remains refused",
   "base_commit": "d13a472074975274b6a116751772262ef40e8794",
   "scope": "Capture-owned CPU model and native bit-preserving per-sample readback; no frame encoding",
   "native_results": [
@@ -174,5 +174,112 @@
       "artifacts/capture-msaa-readback-source-1891553/source.zip": "cfd2eceb708caf7d27023b20854a464887180df2e44c6c5dce8f19dff6abd9ee"
     },
     "excluded_run": "capture-msaa-readback-source-20261013 archived preceding d13a472 before commit gate completed; explicitly cancelled, not counted"
+  },
+  "depth_stencil_readback": {
+    "base_commit": "07ff08bf4d924dc2d85119d2f4c287d14edf4f3d",
+    "status": "Native depth/stencil primitive verified; no MSAA frame encoding or publication",
+    "native_results": [
+      {
+        "cases": 16,
+        "checks": 92938,
+        "debug_warnings_or_errors": 0,
+        "hardware": false,
+        "native_unorm_cpu_differences": 3554,
+        "passed": true,
+        "scope": "Exact native depth/stencil storage oracle; unused D32S8 padding canonicalized to zero; no MSAA frame encoding"
+      },
+      {
+        "cases": 16,
+        "checks": 92938,
+        "debug_warnings_or_errors": 0,
+        "hardware": true,
+        "native_unorm_cpu_differences": 1294,
+        "passed": true,
+        "scope": "Exact native depth/stencil storage oracle; unused D32S8 padding canonicalized to zero; no MSAA frame encoding"
+      }
+    ],
+    "typed_formats": [
+      "D16_UNORM",
+      "D32_FLOAT",
+      "D24_UNORM_S8_UINT",
+      "D32_FLOAT_S8X24_UINT"
+    ],
+    "typeless_depth_bound_variants": true,
+    "dimensions": [
+      67,
+      19
+    ],
+    "array_layers": 2,
+    "sample_counts": [
+      2,
+      4
+    ],
+    "sample_quality": 0,
+    "oracle": "Independent application single-sample depth/stencil producer; ordinary native Copy/Map; exact per-plane bytes, no tolerance or MSAA helper in reference",
+    "padding": "D32S8 unused 24 bits are canonical zero, not captured source data",
+    "depth_patterns": "0, 1, 1/2, 1/2^24, (2^24-1)/2^24 and coordinate/layer/sample-specific binary fractions",
+    "cpu_quantization_differences": "Diagnostics only, counted once per case; never treated as tolerated native-oracle/readback mismatches",
+    "state_checks": [
+      "DSV/state identity, stencil reference, sample mask and LastError",
+      "No helper events/resources or registered native objects",
+      "Cancellation, byte limit and repeat recovery",
+      "CPU samples survive source destruction; native objects released",
+      "Production resource snapshot continues to refuse MSAA"
+    ],
+    "capture_only_ctest": 87,
+    "full_profile_selected_ctest": 90,
+    "qt_cases": 12,
+    "qt_skipped": 0,
+    "full_application_build": true,
+    "gpu_tests_serial": true,
+    "production_integration": false,
+    "accepted_msaa_capture_files": 0,
+    "accepted_gf2_frames": 0,
+    "new_gf2_launches": 0,
+    "new_dual_player_run": false,
+    "new_golden_run": false,
+    "encoder_replay_shared_format_changed": false,
+    "clean_source_package": "Earlier color revision 1891553 only; depth extension not yet source-package validated",
+    "initial_failures": [
+      "focused.log: native hardware D16 half-value disproved universal CPU round-up oracle; replaced with independent exact native storage reference, no comparison tolerance",
+      "focused.log: fixture asserted lifetime before releasing application DSV references; release order corrected before Flush",
+      "build2.log: duplicate fixture reference variable renamed stencil_reference"
+    ],
+    "pending": [
+      "Verified initialization encoding and sample reconstruction in both players",
+      "Production MSAA snapshot integration",
+      "Remaining packed/BGRA formats",
+      "Broader depth bit patterns, sample counts/qualities/devices",
+      "Formal GF2 two launches, three captures each, at least two scenes"
+    ],
+    "source_sha256": {
+      "src/capture/CMakeLists.txt": "a7fbefdf434dd2e6175bf480b8c848a12189de8760d203d56365ad910966ef68",
+      "src/capture/include/msaa_samples.hpp": "953cd80f38e9600b0d8319d4cefa261f61d1ba97b71919b2121c722226d4a939",
+      "src/capture/model/msaa_samples.cpp": "9982ac28851268dde09ed9fc91f6ab1a574f3a2ac7fe94c357534e914a940e85",
+      "src/capture/runtime/msaa_readback.cpp": "8574bdbf650379666bd3a80d6ef732a0381ecff73c946b6c7b406c9a9c424fe2",
+      "src/capture/tests/msaa_readback_tests.cpp": "0f5e8c32ee76a9d54c059c8df60d6d23b7882b242d81b534a0937781210a800a",
+      "src/capture/tests/msaa_depth_tests.cpp": "aed989e21a0aee1173934c8e411c0c33780d57e4e3a7783563618e4a37d71389"
+    },
+    "binary_sha256": {
+      "build/capture/capture/Release/FloraCaptureMsaaDepthTests.exe": "593c330d4a930ad63096db0960dd67e9eddc9934a8950d97d118d89751eb3fc4",
+      "build/capture/capture/Release/FloraCaptureRuntime.dll": "c31bd3ec486050b3304225649aac04a5e7d3655cdf7210e60711b562ec35c2b4",
+      "build/vs2022/Release/FloraCaptureMsaaDepthTests.exe": "858f3540525a5a46d68c6cf34434adffff5e84ffc1bab92c9b08a57ccc456511"
+    },
+    "evidence_sha256": {
+      "artifacts/capture-msaa-depth-20261013/build.log": "c835aa650bb8a137ba011d75d3d350baea9d116ed9d622fed1cd57f0e403c5fc",
+      "artifacts/capture-msaa-depth-20261013/build2.log": "7b3f08cc12b9f5a403cbce6d5202dea697982421b5ad4b504f0d2c4463a06a09",
+      "artifacts/capture-msaa-depth-20261013/build3.log": "a49efd20b5b9d426d6b5c098a0e9730ea483bb1ea9515d46eb2fb33f678591c5",
+      "artifacts/capture-msaa-depth-20261013/build4.log": "a49efd20b5b9d426d6b5c098a0e9730ea483bb1ea9515d46eb2fb33f678591c5",
+      "artifacts/capture-msaa-depth-20261013/capture-build.log": "c1e2f98daa316bd654f26bebc083e334695a4183fa37548fbd58acdf7eed1dba",
+      "artifacts/capture-msaa-depth-20261013/capture-ctest.log": "fcf697c986e5f1adc39c5502333d9944c4d4f78da6abf5d71a3c894d8de34278",
+      "artifacts/capture-msaa-depth-20261013/capture-detailed.log": "98fb49a323e6eb8d493dd23744dac9ffc2212b5168894786002a369eed02260e",
+      "artifacts/capture-msaa-depth-20261013/focused.log": "a5678dd7c618bf9f22b2707abf55633e1f8d08b4c96b330c1f5d154e6a70e5a2",
+      "artifacts/capture-msaa-depth-20261013/focused3.log": "37e01a15e98b2441cb65154aec654c0b3d70d03d89c8650fe6fde64389441786",
+      "artifacts/capture-msaa-depth-20261013/focused4.log": "8ccb502e4f04988a22e90437afe1ef559659209f7c36cf87dea72e502ad10d7a",
+      "artifacts/capture-msaa-depth-20261013/full-build.log": "b804f531056a314345f714480f0e4efdfbd691e479edd9bc2ec9f61ed01a9f92",
+      "artifacts/capture-msaa-depth-20261013/full-ctest.log": "035675f30c223fbc0dfb1d4cf79872aed04d7f9a57819e717e7a81cf0850d7d2",
+      "artifacts/capture-msaa-depth-20261013/full-detailed.log": "fffaf8267c5f1bcadbecf73567b4eb90185d07bd2e116025f219991e83f11a0e",
+      "artifacts/capture-msaa-depth-20261013/capture-ui.txt": "233aa2a40f2a6983c74a7b25264bc786d5db968f9160f9414b1a22204daf84c6"
+    }
   }
 }
