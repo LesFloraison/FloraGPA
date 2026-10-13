@@ -43,11 +43,12 @@ about sample mixing, not a same-execution identity or a driver diagnosis.
 
 Microsoft D3DCompile PS controls for PrimitiveID and Position each produce
 identical outputs in three fresh processes, with 952,720 marked pixels and
-no fractional marked components. A separately compiled HLSL normal-prefix
-control still produces 154 fractional marked components per process, and
-0/3/3 differing uint16 words. Thus the earlier assembler is not sufficient
-to explain the observed anomaly. The HLSL control is not claimed to be
-bit-identical to the original shader.
+no fractional marked components. The historical HLSL normal-prefix control's
+154-component result is invalid: a later Debug Layer rerun identified missing
+input-signature placeholders and four linkage errors. The corrected HLSL
+control still has 27 fractional marked components and no linkage errors;
+see the [native minimal reproduction](CAPTURE_MSAA_MINIMAL_REPRO.md).
+Neither HLSL control is claimed to be bit-identical to the original shader.
 
 Using the original, unmodified shader with the modified descriptor:
 

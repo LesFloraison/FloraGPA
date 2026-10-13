@@ -1,0 +1,627 @@
+{
+  "schema": "FloraGPA native MSAA minimal reproduction baseline 1",
+  "source_parent": "58f739dcf5103aa912cb69a2117159cc85cdca6c",
+  "date": "2026-10-14",
+  "formal_accepted_frames": 0,
+  "required_frames": 6,
+  "production_changes": false,
+  "raw_evidence": "artifacts/capture-gf2-resolve-isolation-20261014",
+  "manifest_sha256": "f14f16a73a71a893178195852150c5e0ab3efd7c2762239fafd3fe45a22b6b84",
+  "input_frame_sha256": "e4546f2ee56a7a395c5ae447004e2204df6058b89702dde66479981f37ff2dcb",
+  "postvs": {
+    "acceptance_established": false,
+    "adapter": "NVIDIA GeForce RTX 3070 Laptop GPU",
+    "attributes": [
+      "float4 SV_POSITION",
+      "float4 TEXCOORD1"
+    ],
+    "bytes_sha256": "18b7ac167f430d77e049dd91e9d9c47d85794bef13839f945af8ad4bcfe783be",
+    "completed": true,
+    "event": 2305,
+    "frame_sha256": "e4546f2ee56a7a395c5ae447004e2204df6058b89702dde66479981f37ff2dcb",
+    "primitives": 9269,
+    "stride": 32,
+    "vertex_count": 27807,
+    "vertex_shader": 509
+  },
+  "reduction": {
+    "triangles": 2,
+    "source_triangle_ids": [
+      522,
+      525
+    ],
+    "probe_count": 26,
+    "sha256": "b9873898b17a4629b44a6b4624a7b7bee996f82ee772a3a17e7704dad55ea3ea",
+    "one_minimal": true
+  },
+  "procedural_readbacks": 1368,
+  "procedural_processes": 14,
+  "final_native_results": [
+    {
+      "label": "sample-hardware",
+      "driver": "hardware",
+      "mode": "sample",
+      "options": null,
+      "exports": 36,
+      "different_words": 0,
+      "debug_failures": 0,
+      "expected_failure": false,
+      "binary_sha256": "b616a9c75c1d8879171916a0c9a2c14b55e21ec5c40e4ffcb31c6714d81d1fef"
+    },
+    {
+      "label": "sample-warp",
+      "driver": "warp",
+      "mode": "sample",
+      "options": null,
+      "exports": 36,
+      "different_words": 0,
+      "debug_failures": 0,
+      "expected_failure": false,
+      "binary_sha256": "b616a9c75c1d8879171916a0c9a2c14b55e21ec5c40e4ffcb31c6714d81d1fef"
+    },
+    {
+      "label": "pixel-edges-hardware",
+      "driver": "hardware",
+      "mode": "pixel-edges",
+      "options": null,
+      "exports": 108,
+      "different_words": 0,
+      "debug_failures": 0,
+      "expected_failure": false,
+      "binary_sha256": "b616a9c75c1d8879171916a0c9a2c14b55e21ec5c40e4ffcb31c6714d81d1fef"
+    },
+    {
+      "label": "pixel-edges-warp",
+      "driver": "warp",
+      "mode": "pixel-edges",
+      "options": null,
+      "exports": 108,
+      "different_words": 0,
+      "debug_failures": 0,
+      "expected_failure": false,
+      "binary_sha256": "b616a9c75c1d8879171916a0c9a2c14b55e21ec5c40e4ffcb31c6714d81d1fef"
+    },
+    {
+      "label": "pixel-normal-hardware",
+      "driver": "hardware",
+      "mode": "pixel-normal",
+      "options": null,
+      "exports": 108,
+      "different_words": 0,
+      "debug_failures": 0,
+      "expected_failure": false,
+      "binary_sha256": "b616a9c75c1d8879171916a0c9a2c14b55e21ec5c40e4ffcb31c6714d81d1fef"
+    },
+    {
+      "label": "pixel-normal-warp",
+      "driver": "warp",
+      "mode": "pixel-normal",
+      "options": null,
+      "exports": 108,
+      "different_words": 0,
+      "debug_failures": 0,
+      "expected_failure": false,
+      "binary_sha256": "b616a9c75c1d8879171916a0c9a2c14b55e21ec5c40e4ffcb31c6714d81d1fef"
+    },
+    {
+      "label": "pixel-clusters-hardware",
+      "driver": "hardware",
+      "mode": "pixel-clusters",
+      "options": null,
+      "exports": 108,
+      "different_words": 0,
+      "debug_failures": 0,
+      "expected_failure": false,
+      "binary_sha256": "b616a9c75c1d8879171916a0c9a2c14b55e21ec5c40e4ffcb31c6714d81d1fef"
+    },
+    {
+      "label": "pixel-clusters-warp",
+      "driver": "warp",
+      "mode": "pixel-clusters",
+      "options": null,
+      "exports": 108,
+      "different_words": 0,
+      "debug_failures": 0,
+      "expected_failure": false,
+      "binary_sha256": "b616a9c75c1d8879171916a0c9a2c14b55e21ec5c40e4ffcb31c6714d81d1fef"
+    },
+    {
+      "label": "pixel-textured-hardware",
+      "driver": "hardware",
+      "mode": "pixel-textured",
+      "options": null,
+      "exports": 108,
+      "different_words": 0,
+      "debug_failures": 0,
+      "expected_failure": false,
+      "binary_sha256": "b616a9c75c1d8879171916a0c9a2c14b55e21ec5c40e4ffcb31c6714d81d1fef"
+    },
+    {
+      "label": "pixel-textured-warp",
+      "driver": "warp",
+      "mode": "pixel-textured",
+      "options": null,
+      "exports": 108,
+      "different_words": 0,
+      "debug_failures": 0,
+      "expected_failure": false,
+      "binary_sha256": "b616a9c75c1d8879171916a0c9a2c14b55e21ec5c40e4ffcb31c6714d81d1fef"
+    },
+    {
+      "label": "resolve-before-read-hardware",
+      "driver": "hardware",
+      "mode": "pixel-normal",
+      "options": [
+        "resolve-before-read"
+      ],
+      "exports": 108,
+      "different_words": 0,
+      "debug_failures": 0,
+      "expected_failure": false,
+      "binary_sha256": "b616a9c75c1d8879171916a0c9a2c14b55e21ec5c40e4ffcb31c6714d81d1fef"
+    },
+    {
+      "label": "resolve-before-read-warp",
+      "driver": "warp",
+      "mode": "pixel-normal",
+      "options": [
+        "resolve-before-read"
+      ],
+      "exports": 108,
+      "different_words": 0,
+      "debug_failures": 0,
+      "expected_failure": false,
+      "binary_sha256": "b616a9c75c1d8879171916a0c9a2c14b55e21ec5c40e4ffcb31c6714d81d1fef"
+    },
+    {
+      "label": "flush-before-read-hardware",
+      "driver": "hardware",
+      "mode": "pixel-normal",
+      "options": [
+        "flush-before-read"
+      ],
+      "exports": 108,
+      "different_words": 0,
+      "debug_failures": 0,
+      "expected_failure": false,
+      "binary_sha256": "b616a9c75c1d8879171916a0c9a2c14b55e21ec5c40e4ffcb31c6714d81d1fef"
+    },
+    {
+      "label": "flush-before-read-warp",
+      "driver": "warp",
+      "mode": "pixel-normal",
+      "options": [
+        "flush-before-read"
+      ],
+      "exports": 108,
+      "different_words": 0,
+      "debug_failures": 0,
+      "expected_failure": false,
+      "binary_sha256": "b616a9c75c1d8879171916a0c9a2c14b55e21ec5c40e4ffcb31c6714d81d1fef"
+    },
+    {
+      "label": "reduced-hardware-0",
+      "driver": "hardware",
+      "mode": "pixel-mesh",
+      "options": [
+        "artifacts\\capture-gf2-resolve-isolation-20261014\\reduce\\reduced.bin",
+        "summary-only"
+      ],
+      "exports": 6,
+      "different_words": 2,
+      "debug_failures": 0,
+      "expected_failure": true,
+      "binary_sha256": "b616a9c75c1d8879171916a0c9a2c14b55e21ec5c40e4ffcb31c6714d81d1fef"
+    },
+    {
+      "label": "reduced-hardware-1",
+      "driver": "hardware",
+      "mode": "pixel-mesh",
+      "options": [
+        "artifacts\\capture-gf2-resolve-isolation-20261014\\reduce\\reduced.bin",
+        "summary-only"
+      ],
+      "exports": 6,
+      "different_words": 2,
+      "debug_failures": 0,
+      "expected_failure": true,
+      "binary_sha256": "b616a9c75c1d8879171916a0c9a2c14b55e21ec5c40e4ffcb31c6714d81d1fef"
+    },
+    {
+      "label": "reduced-hardware-2",
+      "driver": "hardware",
+      "mode": "pixel-mesh",
+      "options": [
+        "artifacts\\capture-gf2-resolve-isolation-20261014\\reduce\\reduced.bin",
+        "summary-only"
+      ],
+      "exports": 6,
+      "different_words": 2,
+      "debug_failures": 0,
+      "expected_failure": true,
+      "binary_sha256": "b616a9c75c1d8879171916a0c9a2c14b55e21ec5c40e4ffcb31c6714d81d1fef"
+    },
+    {
+      "label": "reduced-intel-0",
+      "driver": "intel",
+      "mode": "pixel-mesh",
+      "options": [
+        "artifacts\\capture-gf2-resolve-isolation-20261014\\reduce\\reduced.bin",
+        "summary-only"
+      ],
+      "exports": 6,
+      "different_words": 0,
+      "debug_failures": 0,
+      "expected_failure": false,
+      "binary_sha256": "b616a9c75c1d8879171916a0c9a2c14b55e21ec5c40e4ffcb31c6714d81d1fef"
+    },
+    {
+      "label": "reduced-intel-1",
+      "driver": "intel",
+      "mode": "pixel-mesh",
+      "options": [
+        "artifacts\\capture-gf2-resolve-isolation-20261014\\reduce\\reduced.bin",
+        "summary-only"
+      ],
+      "exports": 6,
+      "different_words": 0,
+      "debug_failures": 0,
+      "expected_failure": false,
+      "binary_sha256": "b616a9c75c1d8879171916a0c9a2c14b55e21ec5c40e4ffcb31c6714d81d1fef"
+    },
+    {
+      "label": "reduced-intel-2",
+      "driver": "intel",
+      "mode": "pixel-mesh",
+      "options": [
+        "artifacts\\capture-gf2-resolve-isolation-20261014\\reduce\\reduced.bin",
+        "summary-only"
+      ],
+      "exports": 6,
+      "different_words": 0,
+      "debug_failures": 0,
+      "expected_failure": false,
+      "binary_sha256": "b616a9c75c1d8879171916a0c9a2c14b55e21ec5c40e4ffcb31c6714d81d1fef"
+    },
+    {
+      "label": "reduced-warp-0",
+      "driver": "warp",
+      "mode": "pixel-mesh",
+      "options": [
+        "artifacts\\capture-gf2-resolve-isolation-20261014\\reduce\\reduced.bin",
+        "summary-only"
+      ],
+      "exports": 6,
+      "different_words": 0,
+      "debug_failures": 0,
+      "expected_failure": false,
+      "binary_sha256": "b616a9c75c1d8879171916a0c9a2c14b55e21ec5c40e4ffcb31c6714d81d1fef"
+    },
+    {
+      "label": "reduced-warp-1",
+      "driver": "warp",
+      "mode": "pixel-mesh",
+      "options": [
+        "artifacts\\capture-gf2-resolve-isolation-20261014\\reduce\\reduced.bin",
+        "summary-only"
+      ],
+      "exports": 6,
+      "different_words": 0,
+      "debug_failures": 0,
+      "expected_failure": false,
+      "binary_sha256": "b616a9c75c1d8879171916a0c9a2c14b55e21ec5c40e4ffcb31c6714d81d1fef"
+    },
+    {
+      "label": "reduced-warp-2",
+      "driver": "warp",
+      "mode": "pixel-mesh",
+      "options": [
+        "artifacts\\capture-gf2-resolve-isolation-20261014\\reduce\\reduced.bin",
+        "summary-only"
+      ],
+      "exports": 6,
+      "different_words": 0,
+      "debug_failures": 0,
+      "expected_failure": false,
+      "binary_sha256": "b616a9c75c1d8879171916a0c9a2c14b55e21ec5c40e4ffcb31c6714d81d1fef"
+    },
+    {
+      "label": "reduced-rt-copy",
+      "driver": "hardware",
+      "mode": "pixel-mesh",
+      "options": [
+        "artifacts\\capture-gf2-resolve-isolation-20261014\\reduce\\reduced.bin",
+        "summary-rt-copy"
+      ],
+      "exports": 6,
+      "different_words": 2,
+      "debug_failures": 0,
+      "expected_failure": true,
+      "binary_sha256": "b616a9c75c1d8879171916a0c9a2c14b55e21ec5c40e4ffcb31c6714d81d1fef"
+    },
+    {
+      "label": "single-triangle-0",
+      "driver": "hardware",
+      "mode": "pixel-mesh",
+      "options": [
+        "artifacts\\capture-gf2-resolve-isolation-20261014\\final-current\\triangle-0.bin",
+        "summary-only"
+      ],
+      "exports": 6,
+      "different_words": 0,
+      "debug_failures": 0,
+      "expected_failure": false,
+      "binary_sha256": "b616a9c75c1d8879171916a0c9a2c14b55e21ec5c40e4ffcb31c6714d81d1fef"
+    },
+    {
+      "label": "single-triangle-1",
+      "driver": "hardware",
+      "mode": "pixel-mesh",
+      "options": [
+        "artifacts\\capture-gf2-resolve-isolation-20261014\\final-current\\triangle-1.bin",
+        "summary-only"
+      ],
+      "exports": 6,
+      "different_words": 0,
+      "debug_failures": 0,
+      "expected_failure": false,
+      "binary_sha256": "b616a9c75c1d8879171916a0c9a2c14b55e21ec5c40e4ffcb31c6714d81d1fef"
+    }
+  ],
+  "witness_half_words": [
+    {
+      "samples": "2",
+      "quality": "0",
+      "repeat": "0",
+      "sample": "0",
+      "source_bind_flags": "32",
+      "read_path": "copy",
+      "x": "815",
+      "y": "843",
+      "r_bits": "26040",
+      "g_bits": "26528",
+      "b_bits": "24971",
+      "a_bits": "26623"
+    },
+    {
+      "samples": "2",
+      "quality": "0",
+      "repeat": "0",
+      "sample": "1",
+      "source_bind_flags": "32",
+      "read_path": "copy",
+      "x": "815",
+      "y": "843",
+      "r_bits": "26040",
+      "g_bits": "26528",
+      "b_bits": "24971",
+      "a_bits": "26623"
+    },
+    {
+      "samples": "2",
+      "quality": "0",
+      "repeat": "0",
+      "sample": "0",
+      "source_bind_flags": "40",
+      "read_path": "copy",
+      "x": "815",
+      "y": "843",
+      "r_bits": "26088",
+      "g_bits": "26514",
+      "b_bits": "24994",
+      "a_bits": "26623"
+    },
+    {
+      "samples": "2",
+      "quality": "0",
+      "repeat": "0",
+      "sample": "1",
+      "source_bind_flags": "40",
+      "read_path": "copy",
+      "x": "815",
+      "y": "843",
+      "r_bits": "25993",
+      "g_bits": "26542",
+      "b_bits": "24948",
+      "a_bits": "26623"
+    },
+    {
+      "samples": "2",
+      "quality": "0",
+      "repeat": "0",
+      "sample": "0",
+      "source_bind_flags": "40",
+      "read_path": "direct",
+      "x": "815",
+      "y": "843",
+      "r_bits": "26088",
+      "g_bits": "26514",
+      "b_bits": "24994",
+      "a_bits": "26623"
+    },
+    {
+      "samples": "2",
+      "quality": "0",
+      "repeat": "0",
+      "sample": "1",
+      "source_bind_flags": "40",
+      "read_path": "direct",
+      "x": "815",
+      "y": "843",
+      "r_bits": "25993",
+      "g_bits": "26542",
+      "b_bits": "24948",
+      "a_bits": "26623"
+    }
+  ],
+  "refusals": [
+    {
+      "tool": "FloraMsaaIntegerOutputProbe.exe",
+      "label": "bad-mode",
+      "exit_code": 2,
+      "error": "NEW_OUT hardware|warp|intel [sample|pixel-edges|pixel-normal|pixel-clusters|pixel-textured] [resolve-before-read|flush-before-read|large]\r\nNEW_OUT hardware|warp|intel pixel-mesh POSTVS_BIN [summary-only|summary-rt-copy|summary-region-copy]\r\n"
+    },
+    {
+      "tool": "FloraMsaaIntegerOutputProbe.exe",
+      "label": "short",
+      "exit_code": 1,
+      "error": "Expected bounded position/normal triangle-list bytes\r\n"
+    },
+    {
+      "tool": "FloraMsaaIntegerOutputProbe.exe",
+      "label": "nonfinite",
+      "exit_code": 1,
+      "error": "Mesh contains a nonfinite attribute\r\n"
+    },
+    {
+      "tool": "FloraMsaaIntegerOutputProbe.exe",
+      "label": "existing",
+      "exit_code": 1,
+      "error": "Output directory must be new\r\n"
+    },
+    {
+      "tool": "FloraReplayPostVsProbe.exe",
+      "label": "bad-event",
+      "exit_code": 1,
+      "error": "Expected unsigned event ID\r\n"
+    }
+  ],
+  "independence": {
+    "imports": [
+      "d3d11.dll",
+      "D3DCOMPILER_47.dll",
+      "dxgi.dll",
+      "MSVCP140.dll",
+      "VCRUNTIME140.dll",
+      "VCRUNTIME140_1.dll",
+      "api-ms-win-crt-runtime-l1-1-0.dll",
+      "api-ms-win-crt-heap-l1-1-0.dll",
+      "api-ms-win-crt-stdio-l1-1-0.dll",
+      "api-ms-win-crt-filesystem-l1-1-0.dll",
+      "api-ms-win-crt-math-l1-1-0.dll",
+      "api-ms-win-crt-string-l1-1-0.dll",
+      "api-ms-win-crt-locale-l1-1-0.dll",
+      "KERNEL32.dll"
+    ],
+    "capture_solution_has_development_targets": false,
+    "capture_solution_sha256": "6d3396c08caf68968cd2042023fdb0d11dc1fded069a8f6404fd63239eacc0fd"
+  },
+  "corrected_hlsl": [
+    {
+      "label": "hlsl-normal-linked",
+      "repeat": 0,
+      "marker_pixels": 952720,
+      "fractional_marked_words": 27,
+      "different_words": 0,
+      "sha256": "c17b43225bd89a81cd8ab38374474bdc5111d058e594cde857993e607e84de11"
+    },
+    {
+      "label": "hlsl-normal-linked",
+      "repeat": 1,
+      "marker_pixels": 952720,
+      "fractional_marked_words": 27,
+      "different_words": 0,
+      "sha256": "c17b43225bd89a81cd8ab38374474bdc5111d058e594cde857993e607e84de11"
+    },
+    {
+      "label": "hlsl-normal-linked",
+      "repeat": 2,
+      "marker_pixels": 952720,
+      "fractional_marked_words": 27,
+      "different_words": 0,
+      "sha256": "c17b43225bd89a81cd8ab38374474bdc5111d058e594cde857993e607e84de11"
+    }
+  ],
+  "shader_factors": [
+    {
+      "variant": "sm5",
+      "shader_sha256": "b3d5d7d92e531327652f7e5001f9a933579cc43d3a1756bb39424468a9c0b7f1",
+      "marker_pixels": 952720,
+      "fractional_marked_components": 26,
+      "pixel_847_0": [
+        2018.0,
+        759.5,
+        332.0,
+        2047.0
+      ]
+    },
+    {
+      "variant": "no-front",
+      "shader_sha256": "931deb66a731027657af2b996deadc2ee9490172bd43a407b64d2ddf90037d4c",
+      "marker_pixels": 952720,
+      "fractional_marked_components": 27,
+      "pixel_847_0": [
+        2018.0,
+        759.5,
+        332.0,
+        2047.0
+      ]
+    },
+    {
+      "variant": "no-texture",
+      "shader_sha256": "c2d409f4f8432875b5464e286baa09c59e605334f284916ed779ab09b5ed387d",
+      "marker_pixels": 952720,
+      "fractional_marked_components": 42,
+      "pixel_847_0": [
+        1874.0,
+        753.0,
+        1116.0,
+        2047.0
+      ]
+    },
+    {
+      "variant": "sample-only",
+      "shader_sha256": "ce77b4276a5e9361a619b579f1aab359593f253ebef41b268b66daa2050906d2",
+      "marker_pixels": 952720,
+      "fractional_marked_components": 192,
+      "pixel_847_0": [
+        0.0,
+        1679.0,
+        1679.0,
+        2047.0
+      ]
+    },
+    {
+      "variant": "input-only",
+      "shader_sha256": "e13014e18547d1eacab4c421d8f1b210fff3d9cd26adfc825ebb46ebb1aaf13e",
+      "marker_pixels": 952720,
+      "fractional_marked_components": 28,
+      "pixel_847_0": [
+        1115.0,
+        496.5,
+        408.5,
+        2047.0
+      ]
+    }
+  ],
+  "additional_checks": {
+    "reversed_triangle_order_still_fails": true,
+    "copy_subresource_region_still_fails": true,
+    "ctest_passed": 4,
+    "new_golden_run": false,
+    "gpu_checks_serial": true
+  },
+  "adapters": [
+    {
+      "name": "NVIDIA GeForce RTX 3070 Laptop GPU",
+      "driver": "32.0.15.8097",
+      "driver_date": "2025-08-07"
+    },
+    {
+      "name": "Intel Iris Xe Graphics",
+      "driver": "32.0.101.6790",
+      "driver_date": "2025-04-28"
+    }
+  ],
+  "binaries": {
+    "FloraMsaaIntegerOutputProbe.exe": "b616a9c75c1d8879171916a0c9a2c14b55e21ec5c40e4ffcb31c6714d81d1fef",
+    "FloraReplayMsaaProbe.exe": "975ceeded928c7e94495b90ceb56c483e97b261f1ef3760836823c49345eb2ab",
+    "FloraReplayPostVsProbe.exe": "723a4312cfb1f2199980f0afe29378e2e8ac0535f1b14240255bee5c933cd4c7"
+  },
+  "source_files": {
+    "CMakeLists.txt": "5c95150cd902a50f4fbd93888eb055a126d66ebebc13220e8e043fd7cc9b1d6c",
+    "tools\\native\\msaa_integer_output_probe.cpp": "5257000650cd8df7a8941ec568622ee5c12cf55ee35c0e098fe54cb6cd65baae",
+    "tools\\native\\replay_msaa_probe.cpp": "650de97bba36b3696e0996385f383e3f6278f4d0948563f18ab6afaa97bd7b81",
+    "tools\\native\\replay_postvs_probe.cpp": "1dc5bf2babc187a32294d45d623dcfecf6e74d2a67f4dce31cdfb04b0ab151e9"
+  }
+}

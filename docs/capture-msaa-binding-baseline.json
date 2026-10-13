@@ -369,5 +369,10 @@
   "source_files": {
     "tools\\native\\msaa_integer_output_probe.cpp": "de10a7d97e5e93780f9f666de6d0e08d7897006342c35d988747e0bc1bbe88e7",
     "tools\\native\\replay_msaa_probe.cpp": "00fb56a4c07241da8e3baedbe4c2623f1742872371384772d4aa5d75e288c297"
+  },
+  "hlsl_control_validity": {
+    "valid": false,
+    "reason": "Missing input-signature placeholders; Debug Layer rerun reports four VS/PS linkage errors. Historical 154-component result is not valid evidence.",
+    "superseded_by": "docs/capture-msaa-minimal-repro-baseline.json"
   }
 }

@@ -119,11 +119,21 @@ std::vector<uint8_t> read(ID3D11Device *device, ID3D11Texture2D *source, bool in
 }
 } // namespace
 int wmain(int argc, wchar_t **argv) {
-    if (argc != 8) {
-        std::cerr << "FRAME NEW_OUT EVENT RESOURCE SAMPLE SHADER_ID SHADER_DXBC\n";
+    if ((argc != 8 && argc != 9) ||
+        (argc == 9 && std::wstring(argv[8]) != L"at-boundary" && std::wstring(argv[8]) != L"fresh-target" &&
+         std::wstring(argv[8]) != L"fresh-target-srv" && std::wstring(argv[8]) != L"single-target" &&
+         std::wstring(argv[8]) != L"no-depth")) {
+        std::cerr << "FRAME NEW_OUT EVENT RESOURCE SAMPLE SHADER_ID SHADER_DXBC "
+                     "[at-boundary|fresh-target|fresh-target-srv|single-target|no-depth]\n";
         return 2;
     }
     try {
+        const std::wstring mode = argc == 9 ? argv[8] : L"default";
+        const bool atBoundary = mode == L"at-boundary";
+        const bool freshTarget = mode == L"fresh-target" || mode == L"fresh-target-srv";
+        std::string modeName;
+        for (const auto c : mode)
+            modeName.push_back(static_cast<char>(c)); // Validated ASCII mode names only.
         const auto number = [](const wchar_t *value) {
             const std::wstring text(value);
             if (text.empty() || text.find_first_not_of(L"0123456789") != std::wstring::npos)
@@ -143,12 +153,6 @@ int wmain(int argc, wchar_t **argv) {
         options.shaders[shader] = readFile(argv[7]);
         Replay replay(frame, options);
         Com<ID3D11Texture2D> source;
-        replay.run({}, [&](Id id, bool after, ID3D11DeviceContext *, const auto &objects) {
-            if (id == event && after)
-                check(objects.at(resource).As(&source), "Retain selected texture for probe");
-        });
-        if (!source)
-            throw std::runtime_error("Selected draw/resource not observed");
         Json hashes = Json::object();
         auto save = [&](const std::string &name, const std::vector<uint8_t> &bytes) {
             std::ofstream f(output / (name + ".bin"), std::ios::binary);
@@ -157,6 +161,58 @@ int wmain(int argc, wchar_t **argv) {
             f.close();
             hashes[name] = sha256(bytes);
         };
+        replay.run({}, [&](Id id, bool after, ID3D11DeviceContext *context, const auto &objects) {
+            if (id == event && !after && (mode == L"single-target" || mode == L"no-depth")) {
+                std::array<ID3D11RenderTargetView *, 8> raw{};
+                std::array<Com<ID3D11RenderTargetView>, 8> held;
+                Com<ID3D11DepthStencilView> depth;
+                context->OMGetRenderTargets(UINT(raw.size()), raw.data(), &depth);
+                for (size_t i = 0; i < raw.size(); ++i)
+                    held[i].Attach(raw[i]);
+                context->OMSetRenderTargets(mode == L"single-target" ? 1 : UINT(raw.size()), raw.data(),
+                                            mode == L"no-depth" ? nullptr : depth.Get());
+            }
+            if (id == event && !after && freshTarget) {
+                Com<ID3D11Texture2D> original;
+                check(objects.at(resource).As(&original), "Retain original target");
+                D3D11_TEXTURE2D_DESC desc{};
+                original->GetDesc(&desc);
+                if (mode == L"fresh-target-srv")
+                    desc.BindFlags |= D3D11_BIND_SHADER_RESOURCE;
+                check(replay.nativeDevice()->CreateTexture2D(&desc, nullptr, &source), "Create fresh target");
+                std::array<ID3D11RenderTargetView *, 8> raw{};
+                std::array<Com<ID3D11RenderTargetView>, 8> held;
+                Com<ID3D11DepthStencilView> depth;
+                context->OMGetRenderTargets(UINT(raw.size()), raw.data(), &depth);
+                for (size_t i = 0; i < raw.size(); ++i)
+                    held[i].Attach(raw[i]);
+                if (!held[0])
+                    throw std::runtime_error("Fresh-target probe requires RTV slot zero");
+                Com<ID3D11Resource> bound;
+                held[0]->GetResource(&bound);
+                if (bound.Get() != static_cast<ID3D11Resource *>(original.Get()))
+                    throw std::runtime_error("Selected resource is not RTV slot zero");
+                D3D11_RENDER_TARGET_VIEW_DESC viewDesc{};
+                held[0]->GetDesc(&viewDesc);
+                Com<ID3D11RenderTargetView> replacement;
+                check(replay.nativeDevice()->CreateRenderTargetView(source.Get(), &viewDesc, &replacement),
+                      "Create fresh target RTV");
+                context->OMSetRenderTargets(0, nullptr, nullptr);
+                context->CopyResource(source.Get(), original.Get());
+                raw[0] = replacement.Get();
+                context->OMSetRenderTargets(UINT(raw.size()), raw.data(), depth.Get());
+            }
+            if (id == event && after) {
+                if (!freshTarget)
+                    check(objects.at(resource).As(&source), "Retain selected texture for probe");
+                if (atBoundary) {
+                    save("boundary-float", read(replay.nativeDevice(), source.Get(), false, UINT(sample)));
+                    save("boundary-integer", read(replay.nativeDevice(), source.Get(), true, UINT(sample)));
+                }
+            }
+        });
+        if (!source)
+            throw std::runtime_error("Selected draw/resource not observed");
         D3D11_TEXTURE2D_DESC descriptor{};
         source->GetDesc(&descriptor);
         const bool directAvailable = (descriptor.BindFlags & D3D11_BIND_SHADER_RESOURCE) != 0;
@@ -164,10 +220,14 @@ int wmain(int argc, wchar_t **argv) {
             save("direct-float", read(replay.nativeDevice(), source.Get(), false, UINT(sample), false));
             save("direct-integer", read(replay.nativeDevice(), source.Get(), true, UINT(sample), false));
         }
-        save("native-first", replay.readMsaa(resource, UINT(sample), DXGI_FORMAT_R16G16B16A16_FLOAT).bytes);
+        if (!freshTarget)
+            save("native-first",
+                 replay.readMsaa(resource, UINT(sample), DXGI_FORMAT_R16G16B16A16_FLOAT).bytes);
         save("float", read(replay.nativeDevice(), source.Get(), false, UINT(sample)));
         save("integer", read(replay.nativeDevice(), source.Get(), true, UINT(sample)));
-        save("native-last", replay.readMsaa(resource, UINT(sample), DXGI_FORMAT_R16G16B16A16_FLOAT).bytes);
+        if (!freshTarget)
+            save("native-last",
+                 replay.readMsaa(resource, UINT(sample), DXGI_FORMAT_R16G16B16A16_FLOAT).bytes);
         Json report{{"completed", true},
                     {"acceptance_established", false},
                     {"reference_pixels_used", false},
@@ -178,6 +238,9 @@ int wmain(int argc, wchar_t **argv) {
                     {"sample", sample},
                     {"shader", shader},
                     {"direct_readback_available", directAvailable},
+                    {"read_at_draw_boundary", atBoundary},
+                    {"fresh_target_at_draw", freshTarget},
+                    {"diagnostic_mode", modeName},
                     {"source_bind_flags", descriptor.BindFlags},
                     {"shader_sha256", sha256(options.shaders.at(shader))},
                     {"output_sha256", hashes}};
