@@ -33,6 +33,7 @@ class Encoder {
     std::map<ObjectId,uint64_t> ids_;
     std::map<uint64_t,Record> records_;
     std::map<ObjectId,MsaaInitializationLayout> msaa_;
+    std::array<bool,size_t(ShaderStage::count)> constant_windows_{};
     uint64_t next_=4;
     ObjectId device_=0,context_=0;
     void checkpoint(){if(options_.cancelled && options_.cancelled())throw std::runtime_error("Frame encoding cancelled");}
@@ -276,6 +277,29 @@ class Encoder {
         add(ref(id),5,type,std::move(p));
     }
     template<size_t N>void refs(const std::array<ObjectId,N>& from,std::array<uint64_t,N>& to,std::initializer_list<const char*> kinds){for(size_t i=0;i<N;++i)to[i]=typed(from[i],kinds);}
+    void constant_buffers(const PipelineBindings& bindings,size_t index){
+        const auto& stage=bindings.shaders[index];bool window=false;
+        for(size_t slot=0;slot<stage.buffers.size();++slot){
+            if(!stage.buffers[slot])continue;
+            ref(stage.buffers[slot],"buffer");const auto d=descriptor<D3D11_BUFFER_DESC>(frame_.objects.at(stage.buffers[slot]));
+            require(d.BindFlags==D3D11_BIND_CONSTANT_BUFFER && d.ByteWidth && !(d.ByteWidth%16),"Encoder invalid constant-buffer descriptor");
+            const auto first=stage.first_constants[slot],count=stage.constant_counts[slot];
+            if(!bindings.constant_ranges){require(!first,"Encoder constant-buffer window observation missing");continue;}
+            require(!(first%16) && !(count%16) && count<=4096,"Encoder invalid constant-buffer window");
+            window=window || first || count!=4096;
+        }
+        if(!window && !constant_windows_[index])return;
+        // State blocks contain buffer identities, but no CB1 windows. Emit the
+        // complete observed stage immediately before its Draw/Dispatch, and an
+        // ordinary setter when returning to whole buffers to end prior windows.
+        Payload p;p.q({0,1}).u({0,narrow(stage.buffers.size())}).value<uint8_t>(1);
+        for(auto id:stage.buffers)p.value(ref(id,"buffer"));
+        if(window){
+            p.value<uint8_t>(1);for(size_t slot=0;slot<stage.buffers.size();++slot)p.value(stage.buffers[slot]?stage.first_constants[slot]:0u);
+            p.value<uint8_t>(1);for(size_t slot=0;slot<stage.buffers.size();++slot)p.value(stage.buffers[slot]?stage.constant_counts[slot]:0u);
+        }
+        add(7,uint16_t((window?0x24f:0x249)+index),std::move(p));constant_windows_[index]=window;
+    }
     uint64_t state(const RecordedCommand& command){
         const auto& s=command.bindings;require(s.context==context_ && s.device==device_,"Encoder mixed context/device state");
         require(!s.predicate && std::all_of(s.stream_targets.begin(),s.stream_targets.end(),[](auto id){return id==0;}),"Predicate/SO state encoding pending");
@@ -284,7 +308,7 @@ class Encoder {
         out.ib=ref(s.index_buffer,"buffer");out.ib_format=s.index_format;out.ib_offset=s.index_offset;out.input_layout=ref(s.input_layout,"input_layout");out.topology=s.topology;
         refs(s.vertices,out.vb,{"buffer"});out.strides=s.strides;out.offsets=s.offsets;
 #define STAGE(NAME,INDEX) {const auto& stage=s.shaders[size_t(ShaderStage::INDEX)];require(stage.classes.empty(),"Dynamic class state encoding pending"); \
-    for(size_t i=0;i<stage.buffers.size();++i)if(stage.buffers[i])require(!stage.first_constants[i] && (!s.constant_ranges || stage.constant_counts[i]==4096),"Constant-buffer range encoding pending"); \
+    constant_buffers(s,size_t(ShaderStage::INDEX)); \
     refs(stage.buffers,out.NAME##_cb,{"buffer"});refs(stage.samplers,out.NAME##_samplers,{"sampler"});refs(stage.resources,out.NAME##_srv,{"srv","srv1"});out.NAME##_shader=ref(stage.shader,#INDEX "_shader");}
         STAGE(vs,vertex) STAGE(hs,hull) STAGE(ds,domain) STAGE(gs,geometry) STAGE(ps,pixel) STAGE(cs,compute)
 #undef STAGE

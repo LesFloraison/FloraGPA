@@ -9,8 +9,9 @@ inspection and GF2 six-frame gate remain incomplete. GF2 passes its two-buffer
 FLIP_SEQUENTIAL / ALLOW_TEARING boundary and mapped writes. Limited pre-frame
 EVENT observations now serialize; in-frame successful completion still rejects.
 The elevated continuation resolved game-cache access. Colored GF2 start-screen
-preflights replay exactly; the latest main-scene attempt reaches the explicit
-constant-buffer range encoding guard. Formal scene acceptance remains 0/6.
+preflights replay exactly. Two latest home-scene captures execute in both players
+but fail exact pixel comparison; repeated replays also vary. The equipment-room
+request exceeds the current resource budget. Formal scene acceptance remains 0/6.
 
 Capture HUD work is tracked separately in [CAPTURE_HUD.md](CAPTURE_HUD.md).
 Protocol v3 adds configurable HUD/hotkeys and Qt settings. Drawing is currently
@@ -2073,3 +2074,21 @@ and disconnect followed by normal window close succeeds. Formal acceptance is
 still **0/6**. Details, regression results and hashes are in
 [the MSAA report](CAPTURE_MSAA_SAMPLES.md) and
 `capture-msaa-query-baseline.json`; current-source packaging remains pending.
+
+## Observed constant-buffer windows
+
+Capture Encoder now writes six-stage CB1 windows and ordinary resets from its
+own pipeline model, preserving offsets, counts, null bindings and same-buffer
+transitions. Native and wrapped WARP/hardware outputs match the CPU oracle with
+no Debug Layer warnings. Thirty-six files pass 618 dual-player/removal checks;
+114 capture-only and 117 selected full CTests pass. No Replay or format-reader
+implementation changed.
+
+GF2 now publishes two home-scene files that execute in both players, with event,
+shader and selected pipeline inspection plus an actual-work removal control.
+Exact RGBA comparison fails, and repeated execution itself varies in each
+player. The equipment-room request hits the existing 1 GiB resource budget and
+publishes nothing; the game continues and exits normally. Formal acceptance is
+still **0/6**, with no tolerance relaxation. See
+[the constant-window report](CAPTURE_CONSTANT_RANGES.md) and
+`capture-constant-range-baseline.json` for precise scope, hashes and evidence.

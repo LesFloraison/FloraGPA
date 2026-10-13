@@ -1,0 +1,536 @@
+{
+  "schema": 1,
+  "status": "Six-stage native constant-buffer windows verified; two GF2 home files execute but fail exact pixels; equipment room exceeds budget",
+  "base_commit": "823e0e0f4e59452aff35ddc811925c643d3936a4",
+  "tests": {
+    "capture_ctest": 114,
+    "selected_full_ctest": 117,
+    "dual_files": 36,
+    "dual_checks": 618
+  },
+  "native_results": [
+    {
+      "encoder_refusals": 30,
+      "files": 18,
+      "hardware": false,
+      "native_diagnostics": [
+        {
+          "native_warnings": [],
+          "stage": 0
+        },
+        {
+          "native_warnings": [],
+          "stage": 1
+        },
+        {
+          "native_warnings": [],
+          "stage": 2
+        },
+        {
+          "native_warnings": [],
+          "stage": 3
+        },
+        {
+          "native_warnings": [],
+          "stage": 4
+        },
+        {
+          "native_warnings": [],
+          "stage": 5
+        }
+      ],
+      "passed": true,
+      "source_gpu_objects_alive": 0
+    },
+    {
+      "encoder_refusals": 30,
+      "files": 18,
+      "hardware": true,
+      "native_diagnostics": [
+        {
+          "native_warnings": [],
+          "stage": 0
+        },
+        {
+          "native_warnings": [],
+          "stage": 1
+        },
+        {
+          "native_warnings": [],
+          "stage": 2
+        },
+        {
+          "native_warnings": [],
+          "stage": 3
+        },
+        {
+          "native_warnings": [],
+          "stage": 4
+        },
+        {
+          "native_warnings": [],
+          "stage": 5
+        }
+      ],
+      "passed": true,
+      "source_gpu_objects_alive": 0
+    }
+  ],
+  "inputs": {
+    "build\\capture\\capture\\Release\\FloraCaptureConstantRangeTests.exe": "374a26c1d55d0b6252c44c874db7c5e9c6ac21c18979a642b66b0a4a7d69bedd",
+    "build\\vs2022\\Release\\FloraGPA.Cli.exe": "b9f35372b0e40f86ea37a482f06d6e9f82b9a83edb26e7680048bd8dd809adeb",
+    "D:\\CDXrepo\\FloraGPA\\tools\\replay_frame.py": "2ea1a82998b29e42c8eb62dd963dc3fc6a32b47e63a9a1c243bc655769234f2d",
+    "D:\\CDXrepo\\FloraGPA-Cpp\\tools\\validate_capture_constant_ranges.py": "479ee33fbfe4c4ea45f8f5d3d339d4ff66df7a4911d9e8eb207899c6bf7d92a9"
+  },
+  "files": [
+    {
+      "file": "warp/0-complete.gpa_frame",
+      "sha256": "4373cfbd762349cde0f5a00a6589ca011dfd18ef87918a674529c2fd5e143cb8",
+      "expected_sha256": "14f8e94c53295950300ab5767acb11bd95982ee3b044d847037e3cfecbed6f41"
+    },
+    {
+      "file": "warp/0-missing-windows.gpa_frame",
+      "sha256": "4f52b981034f9990e78b27c8a741b0c9d63268e4f90ca4f2a7b75777c866e4cb",
+      "expected_sha256": "4decc20f63686e66d35bed4a80d39c66df7db11ad0d8be71ba5ba847eb2349e9"
+    },
+    {
+      "file": "warp/0-missing-work.gpa_frame",
+      "sha256": "4efe4fda3a9cf9f06f7d1857a175de46cf9b623d0a4e6d4d6af12e0dcef0c1b0",
+      "expected_sha256": "c19eb3a9c604a3529f1767e5452bba81f9759f7d6853242194841fd0a4e64989"
+    },
+    {
+      "file": "warp/1-complete.gpa_frame",
+      "sha256": "a094a02cbd56a8f1d2caaaaf09c31f8df13d129aeebabe9377aea7786e57c217",
+      "expected_sha256": "14f8e94c53295950300ab5767acb11bd95982ee3b044d847037e3cfecbed6f41"
+    },
+    {
+      "file": "warp/1-missing-windows.gpa_frame",
+      "sha256": "85b724ae95adbfe6b6c03627d1325df4682945e74a1bdab4287e974dd484fa42",
+      "expected_sha256": "4decc20f63686e66d35bed4a80d39c66df7db11ad0d8be71ba5ba847eb2349e9"
+    },
+    {
+      "file": "warp/1-missing-work.gpa_frame",
+      "sha256": "cf4430fab60006f74e12710b13dd5f050e0f564f2ffe0c42eb4bb98a02c55bdc",
+      "expected_sha256": "c19eb3a9c604a3529f1767e5452bba81f9759f7d6853242194841fd0a4e64989"
+    },
+    {
+      "file": "warp/2-complete.gpa_frame",
+      "sha256": "7a6a4cf31883a4f963d4b00c6c52c971a430138338d5641179c1a3fe6e410112",
+      "expected_sha256": "14f8e94c53295950300ab5767acb11bd95982ee3b044d847037e3cfecbed6f41"
+    },
+    {
+      "file": "warp/2-missing-windows.gpa_frame",
+      "sha256": "4dd76df0dca5ec8058f1f54e16459dba6eb107d5854c9f6315a7df021c8bf129",
+      "expected_sha256": "4decc20f63686e66d35bed4a80d39c66df7db11ad0d8be71ba5ba847eb2349e9"
+    },
+    {
+      "file": "warp/2-missing-work.gpa_frame",
+      "sha256": "68c73c567021fc1a93635627e6585fed2ca6f0e9a9dd436c9fb0490f5be48604",
+      "expected_sha256": "c19eb3a9c604a3529f1767e5452bba81f9759f7d6853242194841fd0a4e64989"
+    },
+    {
+      "file": "warp/3-complete.gpa_frame",
+      "sha256": "a4c131de666de4e085bd0d9357e17c42aca423e898c619e9d77a72aacf57e208",
+      "expected_sha256": "14f8e94c53295950300ab5767acb11bd95982ee3b044d847037e3cfecbed6f41"
+    },
+    {
+      "file": "warp/3-missing-windows.gpa_frame",
+      "sha256": "a447e96d65db8c96b86f7023eb13778b3eda7980c24d14e7071b617a3bb7ab40",
+      "expected_sha256": "4decc20f63686e66d35bed4a80d39c66df7db11ad0d8be71ba5ba847eb2349e9"
+    },
+    {
+      "file": "warp/3-missing-work.gpa_frame",
+      "sha256": "43b450bd2b154c3dd6b505d2ae9294b1413622412e5eb013a01d76bc1088e26b",
+      "expected_sha256": "c19eb3a9c604a3529f1767e5452bba81f9759f7d6853242194841fd0a4e64989"
+    },
+    {
+      "file": "warp/4-complete.gpa_frame",
+      "sha256": "9c166c67263156279a8dd0b34aa95723453d87d588db17b697ea6b0d898b7250",
+      "expected_sha256": "14f8e94c53295950300ab5767acb11bd95982ee3b044d847037e3cfecbed6f41"
+    },
+    {
+      "file": "warp/4-missing-windows.gpa_frame",
+      "sha256": "fca6afc57afa9e4c0d1debc76aa5d015f9819e3eb1f96704a4b97efed838f367",
+      "expected_sha256": "4decc20f63686e66d35bed4a80d39c66df7db11ad0d8be71ba5ba847eb2349e9"
+    },
+    {
+      "file": "warp/4-missing-work.gpa_frame",
+      "sha256": "6380a64deea4cfc842d30fb6f56b7f1dfa01f678da0e5711e9a6f7701e9f9660",
+      "expected_sha256": "c19eb3a9c604a3529f1767e5452bba81f9759f7d6853242194841fd0a4e64989"
+    },
+    {
+      "file": "warp/5-complete.gpa_frame",
+      "sha256": "f40aa77a69a566a33a06d0756edefaf75341b8536f737df3d87c0cdcc5804bde",
+      "expected_sha256": "14f8e94c53295950300ab5767acb11bd95982ee3b044d847037e3cfecbed6f41"
+    },
+    {
+      "file": "warp/5-missing-windows.gpa_frame",
+      "sha256": "1af40026809c94e751211e1f69d1504037fac8fe89fc29a8369dac9ae285473d",
+      "expected_sha256": "4decc20f63686e66d35bed4a80d39c66df7db11ad0d8be71ba5ba847eb2349e9"
+    },
+    {
+      "file": "warp/5-missing-work.gpa_frame",
+      "sha256": "218cb433f260f86ee55d331a536078f689d9354d3ff0c5920b3682dd779dd76e",
+      "expected_sha256": "c19eb3a9c604a3529f1767e5452bba81f9759f7d6853242194841fd0a4e64989"
+    },
+    {
+      "file": "hardware/0-complete.gpa_frame",
+      "sha256": "af39b7c7e4547820e01e222ce9a98f44d69fcc8915be1c8c1ce1140214db5162",
+      "expected_sha256": "14f8e94c53295950300ab5767acb11bd95982ee3b044d847037e3cfecbed6f41"
+    },
+    {
+      "file": "hardware/0-missing-windows.gpa_frame",
+      "sha256": "30e8ba54e0c385728830187c6187905d683627a6cda399ed8ab43f4e2f6b69c4",
+      "expected_sha256": "4decc20f63686e66d35bed4a80d39c66df7db11ad0d8be71ba5ba847eb2349e9"
+    },
+    {
+      "file": "hardware/0-missing-work.gpa_frame",
+      "sha256": "9645f64e5bb74b54d40662e45e04c07ea7d76de0157e7cf24caf9dfdff575a53",
+      "expected_sha256": "c19eb3a9c604a3529f1767e5452bba81f9759f7d6853242194841fd0a4e64989"
+    },
+    {
+      "file": "hardware/1-complete.gpa_frame",
+      "sha256": "60d896ef8cd65c7e3538b0c786eed8dcb7a9c03ed2d631747ae678864a9a089d",
+      "expected_sha256": "14f8e94c53295950300ab5767acb11bd95982ee3b044d847037e3cfecbed6f41"
+    },
+    {
+      "file": "hardware/1-missing-windows.gpa_frame",
+      "sha256": "93446e33a1d77b0f9723d67e7cc6be16e2189a7877218d8af50071a763b85994",
+      "expected_sha256": "4decc20f63686e66d35bed4a80d39c66df7db11ad0d8be71ba5ba847eb2349e9"
+    },
+    {
+      "file": "hardware/1-missing-work.gpa_frame",
+      "sha256": "f54ae06c9045734e110e4ec29ca2560adf29838516a5a780a0c2981f6676ff35",
+      "expected_sha256": "c19eb3a9c604a3529f1767e5452bba81f9759f7d6853242194841fd0a4e64989"
+    },
+    {
+      "file": "hardware/2-complete.gpa_frame",
+      "sha256": "17b3e4436378b8032339900b317f813376769d36a6229cbfde437ca2c3ba6757",
+      "expected_sha256": "14f8e94c53295950300ab5767acb11bd95982ee3b044d847037e3cfecbed6f41"
+    },
+    {
+      "file": "hardware/2-missing-windows.gpa_frame",
+      "sha256": "b71c90058e3944b2a3a32a93bc1fa10c42b47e8e8c948c964d4e631b1646a025",
+      "expected_sha256": "4decc20f63686e66d35bed4a80d39c66df7db11ad0d8be71ba5ba847eb2349e9"
+    },
+    {
+      "file": "hardware/2-missing-work.gpa_frame",
+      "sha256": "f906a81602602f0b6535c4d15fa6f34500d1421fb6baa880f00feb2f4f8a2dd9",
+      "expected_sha256": "c19eb3a9c604a3529f1767e5452bba81f9759f7d6853242194841fd0a4e64989"
+    },
+    {
+      "file": "hardware/3-complete.gpa_frame",
+      "sha256": "c1c9df609a880ce99421e4ccbba5bb3ae67e40f400eecbe5b600e9d7ea1225db",
+      "expected_sha256": "14f8e94c53295950300ab5767acb11bd95982ee3b044d847037e3cfecbed6f41"
+    },
+    {
+      "file": "hardware/3-missing-windows.gpa_frame",
+      "sha256": "b1245960a473d41499b3d0e91dd9d49d6d9c866158bb48da91071131b0542cad",
+      "expected_sha256": "4decc20f63686e66d35bed4a80d39c66df7db11ad0d8be71ba5ba847eb2349e9"
+    },
+    {
+      "file": "hardware/3-missing-work.gpa_frame",
+      "sha256": "710a5d2052defd4647c80d0b74c96cab14f38180167867a8d36d8039f98e7291",
+      "expected_sha256": "c19eb3a9c604a3529f1767e5452bba81f9759f7d6853242194841fd0a4e64989"
+    },
+    {
+      "file": "hardware/4-complete.gpa_frame",
+      "sha256": "f7c6251afedc0fb57dd7c4f0b18fd426821b71a698bbd0f0ebce14f1bc75c39e",
+      "expected_sha256": "14f8e94c53295950300ab5767acb11bd95982ee3b044d847037e3cfecbed6f41"
+    },
+    {
+      "file": "hardware/4-missing-windows.gpa_frame",
+      "sha256": "a716894f566991d0c7c498f6198794ea0f5d8002f381866e554e5692541dbc2a",
+      "expected_sha256": "4decc20f63686e66d35bed4a80d39c66df7db11ad0d8be71ba5ba847eb2349e9"
+    },
+    {
+      "file": "hardware/4-missing-work.gpa_frame",
+      "sha256": "8f66c860e227558b7e7914f3544cad4f5fae761deea416f8937cc527fb820818",
+      "expected_sha256": "c19eb3a9c604a3529f1767e5452bba81f9759f7d6853242194841fd0a4e64989"
+    },
+    {
+      "file": "hardware/5-complete.gpa_frame",
+      "sha256": "5103e782daa5355b9078ed8ee12f10abb97346e70d01250481eb78c1704f7d36",
+      "expected_sha256": "14f8e94c53295950300ab5767acb11bd95982ee3b044d847037e3cfecbed6f41"
+    },
+    {
+      "file": "hardware/5-missing-windows.gpa_frame",
+      "sha256": "852f4dd4a285bd07894dc005b712cb7a2967dff0d5450f23632b66f2c53346bf",
+      "expected_sha256": "4decc20f63686e66d35bed4a80d39c66df7db11ad0d8be71ba5ba847eb2349e9"
+    },
+    {
+      "file": "hardware/5-missing-work.gpa_frame",
+      "sha256": "7d499146d7b961612ec555971d688b1562a025374addc8e014e8a4cc5c20c37a",
+      "expected_sha256": "c19eb3a9c604a3529f1767e5452bba81f9759f7d6853242194841fd0a4e64989"
+    }
+  ],
+  "gf2": {
+    "accepted_frames": 0,
+    "required_frames": 6,
+    "session_id": "129273c1-10dd-48df-8fc8-c4087f2bb034",
+    "pid": 46576,
+    "game_version": "4.0.5136.14794.28495.3242",
+    "published_home_frames": [
+      {
+        "file": "frame-6714dcd8-2b99-4bde-90dc-a3910743d7fc.gpa_frame",
+        "sha256": "e4546f2ee56a7a395c5ae447004e2204df6058b89702dde66479981f37ff2dcb",
+        "bytes": 1007260401,
+        "present_ordinal": 2279,
+        "flora_actual_execution": true,
+        "original_actual_execution": true,
+        "accepted": false,
+        "draws": 248,
+        "dispatches": 0,
+        "resources": 618,
+        "shaders": 98,
+        "original_player": {
+          "player_dll": "C:\\Program Files\\IntelSWTools\\GPA\\dx11_player.dll",
+          "player_sha256": "39061ff329e4a32d0c8375ce9ee15e2017bccab0593943b962a860e11723d38b",
+          "adapter_selection": "Original kernel default (undefined GpuId)",
+          "callbacks": [],
+          "open_status": 0,
+          "playback_status": 0,
+          "closed": true
+        }
+      },
+      {
+        "file": "frame-2da75b09-06a9-4612-978a-144988d024f3.gpa_frame",
+        "sha256": "8e675b03165d08684ee213401b96679e38ca3ccc7de8e30548055c19859e7ff1",
+        "bytes": 1007452625,
+        "present_ordinal": 4026,
+        "flora_actual_execution": true,
+        "original_actual_execution": true,
+        "accepted": false,
+        "draws": 248,
+        "dispatches": 0,
+        "resources": 620,
+        "shaders": 98,
+        "original_player": {
+          "player_dll": "C:\\Program Files\\IntelSWTools\\GPA\\dx11_player.dll",
+          "player_sha256": "39061ff329e4a32d0c8375ce9ee15e2017bccab0593943b962a860e11723d38b",
+          "adapter_selection": "Original kernel default (undefined GpuId)",
+          "callbacks": [],
+          "open_status": 0,
+          "playback_status": 0,
+          "closed": true
+        }
+      }
+    ],
+    "equipment_room_failure": {
+      "busy": false,
+      "cancel_requested": false,
+      "error": "ID3D11DeviceContext::ClearRenderTargetView: Resource capture byte limit exceeded",
+      "request_name": "frame-c6fab0e4-ab32-4db2-aa51-eb7fbe336b32.gpa_frame",
+      "state": "Failed",
+      "swap_chain": 1
+    },
+    "presents_before": 2275,
+    "presents_after": 8171,
+    "normal_exit": true,
+    "interface_gaps": 0,
+    "pixel_comparison": {
+      "fixed_rule": "exact RGBA bytes, zero tolerance",
+      "accepted": false,
+      "frames": [
+        {
+          "frame": 0,
+          "captured_rgba_sha256": "d0b64f80d445d07b1fa1a019761b43784f46a91e7138e2fa871617534aa89201",
+          "comparisons": {
+            "flora_vs_capture": {
+              "exact": false,
+              "different_pixels": 55,
+              "different_channels": 57,
+              "max_channel_error": 7,
+              "channel_counts": [
+                19,
+                10,
+                27,
+                1
+              ]
+            },
+            "original_vs_capture": {
+              "exact": false,
+              "different_pixels": 61,
+              "different_channels": 65,
+              "max_channel_error": 7,
+              "channel_counts": [
+                23,
+                15,
+                25,
+                2
+              ]
+            },
+            "flora_vs_original": {
+              "exact": false,
+              "different_pixels": 56,
+              "different_channels": 58,
+              "max_channel_error": 2,
+              "channel_counts": [
+                26,
+                13,
+                16,
+                3
+              ]
+            }
+          }
+        },
+        {
+          "frame": 1,
+          "captured_rgba_sha256": "6ec1de4523af197b87046e5fb5ee6c89c4952f9d63931179f67500d45ec3677c",
+          "comparisons": {
+            "flora_vs_capture": {
+              "exact": false,
+              "different_pixels": 101,
+              "different_channels": 112,
+              "max_channel_error": 8,
+              "channel_counts": [
+                55,
+                19,
+                33,
+                5
+              ]
+            },
+            "original_vs_capture": {
+              "exact": false,
+              "different_pixels": 60,
+              "different_channels": 63,
+              "max_channel_error": 3,
+              "channel_counts": [
+                28,
+                9,
+                26,
+                0
+              ]
+            },
+            "flora_vs_original": {
+              "exact": false,
+              "different_pixels": 105,
+              "different_channels": 115,
+              "max_channel_error": 8,
+              "channel_counts": [
+                59,
+                20,
+                31,
+                5
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "repeat_comparison": [
+      {
+        "player": "flora",
+        "identical": false,
+        "different_pixels": 47,
+        "different_channels": 47,
+        "max_channel_error": 2,
+        "first_sha256": "47ace4fa5e690e7ae4b6d664ad2822a07a17ae8898998f75ff81414b2a63b297",
+        "repeat_sha256": "9d2165471c9ea22a983ee4680c43588ec1a4dd0a6455c658228a2bc1cfb384fc"
+      },
+      {
+        "player": "original",
+        "identical": false,
+        "different_pixels": 94,
+        "different_channels": 100,
+        "max_channel_error": 2,
+        "first_sha256": "a49e302d728c0143f0cf80252b20297909d54b365e7bbcf79b3b640767de1c72",
+        "repeat_sha256": "40df21ffd901bd681b1d49d40c5380d38eb0efbf52de2cb66a9b56f62e632732"
+      }
+    ],
+    "negative_control": {
+      "both_players_equal": true,
+      "different_from_captured_reference": true,
+      "zeroed_work": 248,
+      "flora_actual_execution": true,
+      "original_playback_status": 0,
+      "rgba_sha256": "c8d5bb18fd22f0b5be7af5211de69d25c4a9c18dbf42bf99df03ff5c5e07070d",
+      "captured_rgba_sha256": "d0b64f80d445d07b1fa1a019761b43784f46a91e7138e2fa871617534aa89201"
+    },
+    "inspection": {
+      "passed": true,
+      "scope": "Selected native replay pipelines and key VS/PS DXBC/disassembly; original GUI inspection still pending",
+      "pipelines": [
+        {
+          "frame": 0,
+          "event": "2667",
+          "known_fields": 1302,
+          "unknown_fields": 4
+        },
+        {
+          "frame": 0,
+          "event": "3435",
+          "known_fields": 1302,
+          "unknown_fields": 4
+        },
+        {
+          "frame": 1,
+          "event": "2675",
+          "known_fields": 1302,
+          "unknown_fields": 4
+        },
+        {
+          "frame": 1,
+          "event": "3432",
+          "known_fields": 1302,
+          "unknown_fields": 4
+        }
+      ],
+      "shader_exports": 8
+    },
+    "runtime_module_audit": {
+      "passed": true,
+      "modules_examined": 142,
+      "forbidden_modules": []
+    },
+    "raw_evidence": "artifacts\\capture-gf2-constant-ranges-20261014",
+    "evidence_hashes": {
+      "binaries.json": "b7f17b651e31465cf0e9a21a65d5d159fa499b1709e87d7fa8f4b0e152259641",
+      "comparison-rule.json": "d39eceeb66074aac2cad4012730ecb89907223cf194c9798d4c6591b94c80106",
+      "disconnect.json": "6aa01af9f22a5e2a0d31186e270baaed6bdf0b7dff6b1c2d80e43c7b308c5bf0",
+      "environment-final.json": "6e2176082f25bbd495037aa95f17b638a9bfe6765756d5520cc3e61938a9f401",
+      "inspection-audit.json": "f83f56ab67624b5ba3c9749f034e99f16f311d8bf0844c22f528bfc6633684bf",
+      "inspection-selection.json": "296de6d723d9bb2a73b7aa9b8cbfeafa998890c7ef3b9672d4c2f461daccf098",
+      "launch.json": "baca786b476fe396a612a24d51c5be06cfc9738379f4dc79747861d1f51faa38",
+      "negative-comparison.json": "e1954b0302bf6fb534ea42787d1d241f3f2088317cec7ea857462a8c9b6eee80",
+      "negative-control.json": "6e090f646d07c8031b8fd034a07f6672af383e585b1c46711e5988e171bd5dfb",
+      "pixel-comparison.json": "20931034a3c620a2081bb09f004017d7aab292407fbee26ab8f4aea5bac36cc1",
+      "repeat-comparison.json": "4014f3a3d49c10789c4df67c6c23392ca307c03d117bc9a6ca01834b0b56bf98",
+      "request-main-2.json": "b2768ebac04edce560c221d468d1f5100347d2c1f517dcce837e77eab7b17ee9",
+      "request-main.json": "e2b008a9fdc379b62e4933135b43f851e37c268bfcee5eac8a391d0fa6cd35c7",
+      "request-room.json": "09ebec3fe50d46becca04c0ae8d35d2807f46865fe8cb1083277dfa9df6e93c8",
+      "runtime-module-audit.json": "59e097cfced07e0d2fba803b287e105c9fb4dbd7721a6db6da4673e9808ae6de",
+      "status-after-room.json": "2d25d6034e384c9902cd6803d2248720ff75caa280a10bd8f4f7ea12a5a6bf0e",
+      "status-exited-final.json": "75d63ea0013cac31dc32fb090f1ebb81930b51dcb05c224bd5bf6a8c5fd016bf",
+      "status-exited.json": "ecc6435e3563ad9eabecc51ef9de04f99ac7214624ec0139ba121b8ca035426f",
+      "status-main-2-result.json": "42aba1ac4741755f7a6760f6bb89e1eac17d996e9aaf8ce4727cc85b59799540",
+      "status-main-before.json": "05b635ccdd2eac5d04d67cf7e96c6c14ba26aae17be864d1a2c10142ab503170",
+      "status-main-result.json": "5cf3ad1802b97e16010b5b54a45a7c1a43b0aff6ed053b86cd43dec158048647",
+      "status-room-before.json": "2a229b30887e686a838c9970f760510c6c06dae52bb57ba6c332694e57fd6637",
+      "status-room-result.json": "ffa8f07a4efb183a64086e62b0f1c71ddbbc92958897a1674352c95ee5ca22e2",
+      "status-start.json": "96d870ca4a5841b792a39e7526bdb414363cc6fb1cba05abd1d997c96ab17f7a"
+    }
+  },
+  "development_failure": "Initial baseline readback incorrectly called capture snapshot_resource on untracked native objects; test fixed to use an independent staging readback. Original failed log preserved.",
+  "raw_evidence": "artifacts\\capture-constant-ranges-20261014",
+  "log_hashes": {
+    "build-2.log": "c48cb1f20e21cd8ec4e078f69252ec6c299075907516527080024d3211c9b18b",
+    "build-3.log": "e56220b12b4d109ae04856c390808a6e9c84877b31799ff319dc483d698da306",
+    "build.log": "8e82d0a45c4c501507b989b4788ae4e28486390917ea4119731318b95afcef70",
+    "capture-ctest.log": "ee54a972b8bfc0ab346301b40544630000e66da5601183f252a1d7d505b19365",
+    "dual.log": "4430012a36a63dc9c04aec22147006bafb65ee89809ea15ebcd6c47e599c6e88",
+    "early-flora.log": "4232c3d7dd50f347da48a89548b9323dc556ab3f78ec859d85db9d49f9e006ba",
+    "early-original.log": "b3cd076278fdcedbf6e6270734cf4b935d578ac9161224381701ec61f4029d5c",
+    "focused-ctest.log": "0ab974a71dd5bb26f30c4fddd51b71c8455512cba12c1c24105916cd11d2dc49",
+    "full-build.log": "f97839952032ed772f38dff1fe2e51dacfbd4ba7e78358a8e9c721dfeb1a63fa",
+    "full-ctest.log": "c51c298663d30e48a6eb286666915627d0549e3f2f002daa363ddfabc84b53e6",
+    "native-warp-2.log": "330c078cb2bbf8c8fadc66e284a6dfc26c75b16ba79fc966c8d80d62b6b6f356",
+    "native-warp.log": "473d9eaa76c7fb8305f44f1dfc143214883d9fc41b4c467dd0923690e1852c13"
+  },
+  "scope_limits": [
+    "No tolerance relaxation; exact GF2 output remains unverified",
+    "Repeated replay itself varies in both players; cause not yet established",
+    "Equipment room requires more than current 1 GiB frame resource budget",
+    "Current-source independent package and full six-frame acceptance pending"
+  ]
+}
