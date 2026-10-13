@@ -86,7 +86,10 @@ class Encoder {
         }
         if(msaa_.empty())return;
         for(const auto& command:frame_.commands){
-            checkpoint();require(command.kind!=CommandKind::query_end && command.kind!=CommandKind::query_get_data,"Encoder MSAA initialization with query observations is not verified");
+            // EVENT observations still pass the shared provenance/scope gate in write().
+            // MSAA helper work precedes application commands; it does not establish
+            // completion of any captured in-frame End.
+            checkpoint();
             require(!command.bindings.predicate,"Encoder predicated MSAA frame is not verified");
             if(command.kind==CommandKind::copy_resource || command.kind==CommandKind::copy_region ||
                command.kind==CommandKind::update_subresource || command.kind==CommandKind::map || command.kind==CommandKind::unmap)

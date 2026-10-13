@@ -2,6 +2,7 @@
 // Independent native producer for the D32S8 initialization wire experiment.
 // The producer selects complete stencil values; the initializer uses bit passes.
 #include "msaa_readback.hpp"
+#include "msaa_event_fixture.hpp"
 #include "objects.hpp"
 #include "command_stream.hpp"
 #include "format/Writer.h"
@@ -40,7 +41,7 @@ UINT stencil_byte(UINT x,UINT y,UINT layer,UINT sample){return (x*13+y*7+layer*9
 ByteBuffer expected(UINT samples,bool edits,bool initialized=true){ByteBuffer bytes;for(UINT y=0;y<height*layers;++y)for(UINT x=0;x<width*samples*2;++x){const UINT sample=x/(width*2),tile=(x/width)%2,px=x%width,py=y%height,layer=y/height;const bool modified=edits && px<width/2 && !(sample%2);const UINT d=modified?0x3e800000:initialized?depth_word(px,py,layer,sample):0,s=modified?0xa6:initialized?stencil_byte(px,py,layer,sample):0;if(tile)bytes.insert(bytes.end(),{uint8_t(s),0,0,255});else for(UINT b=0;b<4;++b)bytes.push_back(uint8_t(d>>(b*8)));}return bytes;}
 D3D11_DEPTH_STENCIL_DESC depth_state(bool stencil=true){D3D11_DEPTH_STENCIL_DESC d{};d.DepthEnable=TRUE;d.DepthWriteMask=D3D11_DEPTH_WRITE_MASK_ALL;d.DepthFunc=D3D11_COMPARISON_ALWAYS;d.StencilEnable=stencil;d.StencilReadMask=255;d.StencilWriteMask=255;d.FrontFace={D3D11_STENCIL_OP_KEEP,D3D11_STENCIL_OP_KEEP,D3D11_STENCIL_OP_REPLACE,D3D11_COMPARISON_ALWAYS};d.BackFace=d.FrontFace;return d;}
 struct Owned{MsaaSamples samples;ByteBuffer final;};
-Owned native(bool hardware,UINT samples,FrozenFrame* captured=nullptr,const RecordingOptions& options={}){
+Owned native(bool hardware,UINT samples,FrozenFrame* captured=nullptr,const RecordingOptions& options={},bool events=false){
     ComPtr<ID3D11Device> device;ComPtr<ID3D11DeviceContext> context;check(D3D11CreateDevice(nullptr,hardware?D3D_DRIVER_TYPE_HARDWARE:D3D_DRIVER_TYPE_WARP,nullptr,D3D11_CREATE_DEVICE_DEBUG,nullptr,0,D3D11_SDK_VERSION,&device,nullptr,&context));
     ComPtr<ID3D11InfoQueue> info;check(device.As(&info));info->ClearStoredMessages();wrap_object(device.GetAddressOf(),"MSAA depth fixture device");wrap_object(context.GetAddressOf(),"MSAA depth fixture context");
     D3D11_TEXTURE2D_DESC td{width,height,1,layers,DXGI_FORMAT_R32G8X24_TYPELESS,{samples,0},D3D11_USAGE_DEFAULT,D3D11_BIND_DEPTH_STENCIL|D3D11_BIND_SHADER_RESOURCE,0,0};ComPtr<ID3D11Texture2D> source;check(device->CreateTexture2D(&td,nullptr,&source));
@@ -55,12 +56,15 @@ Owned native(bool hardware,UINT samples,FrozenFrame* captured=nullptr,const Reco
         for(UINT sample=0;sample<samples;++sample){context->OMSetBlendState(nullptr,nullptr,1u<<sample);for(UINT ref=0;ref<256;++ref){const UINT values[]{layer,sample,ref,0};context->UpdateSubresource(cb.Get(),0,nullptr,values,0,0);context->OMSetDepthStencilState(state.Get(),ref);context->Draw(3,0);}}}
     Owned result;result.samples=snapshot_msaa_samples(context.Get(),source.Get());
     for(const auto& plane:result.samples.planes){ByteBuffer oracle;for(UINT y=0;y<height;++y)for(UINT x=0;x<width;++x){for(UINT word:{depth_word(x,y,plane.array_slice,plane.sample),stencil_byte(x,y,plane.array_slice,plane.sample)})for(UINT b=0;b<4;++b)oracle.push_back(uint8_t(word>>(b*8)));}require(plane.bytes==oracle,"Initial D32S8 samples differ from CPU words");}
+    MsaaEventFixture event;event.prepare(device.Get(),context.Get(),events,samples==4);
     std::shared_ptr<FrameRecording> recording;if(captured)recording=begin_recording(context.Get(),options);
+    event.observe(context.Get());
     context->PSSetShader(edit.Get(),nullptr,0);context->RSSetState(scissor.Get());D3D11_RECT rect{0,0,width/2,height};context->RSSetScissorRects(1,&rect);context->OMSetBlendState(nullptr,nullptr,0x55555555);context->OMSetDepthStencilState(state.Get(),0xa6);
     for(const auto& view:views){context->OMSetRenderTargets(0,nullptr,view.Get());context->Draw(3,0);}
     context->OMSetRenderTargets(0,nullptr,nullptr);context->OMSetDepthStencilState(nullptr,0);
     td={width*samples*2,height*layers,1,1,DXGI_FORMAT_R8G8B8A8_UNORM,{1,0},D3D11_USAGE_DEFAULT,D3D11_BIND_RENDER_TARGET,0,0};ComPtr<ID3D11Texture2D> output;ComPtr<ID3D11RenderTargetView> target;check(device->CreateTexture2D(&td,nullptr,&output));check(device->CreateRenderTargetView(output.Get(),nullptr,&target));
     D3D11_SHADER_RESOURCE_VIEW_DESC sd{};sd.Format=DXGI_FORMAT_R32_FLOAT_X8X24_TYPELESS;sd.ViewDimension=D3D11_SRV_DIMENSION_TEXTURE2DMSARRAY;sd.Texture2DMSArray.ArraySize=layers;ComPtr<ID3D11ShaderResourceView> depth,stencil;check(device->CreateShaderResourceView(source.Get(),&sd,&depth));sd.Format=DXGI_FORMAT_X32_TYPELESS_G8X24_UINT;check(device->CreateShaderResourceView(source.Get(),&sd,&stencil));ID3D11ShaderResourceView* srvs[]{depth.Get(),stencil.Get()};auto* r=target.Get();context->PSSetShaderResources(0,2,srvs);context->OMSetRenderTargets(1,&r,nullptr);context->PSSetShader(show.Get(),nullptr,0);context->RSSetState(raster.Get());context->OMSetBlendState(nullptr,nullptr,UINT_MAX);vp.Width=float(td.Width);vp.Height=float(td.Height);context->RSSetViewports(1,&vp);context->Draw(3,0);
+    event.end(context.Get());
     std::optional<RecordedFrame> recorded;if(recording)recorded=recording->finish();
     auto final=snapshot_resource(context.Get(),output.Get());result.final=final.subresources[0].bytes;require(result.final==expected(samples,true),"Native final depth/stencil byte tiles differ from CPU");context->ClearState();
     for(UINT64 i=0;i<info->GetNumStoredMessagesAllowedByRetrievalFilter();++i){SIZE_T size=0;check(info->GetMessage(i,nullptr,&size));ByteBuffer bytes(size);auto* m=reinterpret_cast<D3D11_MESSAGE*>(bytes.data());check(info->GetMessage(i,m,&size));if(m->Severity<=D3D11_MESSAGE_SEVERITY_WARNING)throw std::runtime_error(m->pDescription);}

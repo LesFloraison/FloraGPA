@@ -16,7 +16,9 @@ def main():
     p.add_argument('--recorded', action='store_true', help='Validate the wrapped-context recording probe')
     p.add_argument('--rgba16', action='store_true', help='Verify both bytes of recorded RGBA16 components')
     p.add_argument('--depth', action='store_true', help='Verify exact D32S8 words and stencil byte tiles')
+    p.add_argument('--queries', action='store_true', help='Validate pre-frame EVENT observations with MSAA initialization')
     a = p.parse_args()
+    if a.queries and not a.recorded:p.error('--queries requires --recorded')
     if a.rgba16 and not a.recorded:p.error('--rgba16 requires --recorded')
     if a.depth and (not a.recorded or a.rgba16):p.error('--depth requires --recorded and excludes --rgba16')
     out = a.out.resolve()
@@ -65,9 +67,9 @@ def main():
         result = json.loads(run(device+'-probe', [a.probe.resolve(), *(['--hardware'] if device == 'hardware' else []), out/device]))
         check(device+'-owned-source-debug-refusals', result['passed'] and result['source_gpu_objects_alive'] == 0 and
               result['debug_warnings_or_errors'] == 0 and
-              (result['recording_refusals'] == 4 if a.recorded else result['encoder_refusals'] == 50))
-        if a.rgba16:check(device+'-rgba16-refusals',result['component_bytes']==2 and result['encoder_refusals']==6)
-        if a.depth:check(device+'-depth-refusals',result['depth_format']==19 and result['encoder_refusals']==30)
+              (result['encoder_refusals'] == 20 if a.queries else result['recording_refusals'] == 4 if a.recorded else result['encoder_refusals'] == 50))
+        if a.rgba16 and not a.queries:check(device+'-rgba16-refusals',result['component_bytes']==2 and result['encoder_refusals']==6)
+        if a.depth and not a.queries:check(device+'-depth-refusals',result['depth_format']==19 and result['encoder_refusals']==30)
         manifest = json.loads((out/device/'frames.json').read_text())
         for samples in (2, 4):
             source = out/device/f'{samples}x-complete.gpa_frame'
@@ -95,6 +97,10 @@ def main():
         for item in manifest:
             frame = out/device/item['file']
             case = device+'-'+frame.stem
+            if a.queries:
+                _, _, event_records, _, _ = parse(frame)
+                check(case+'-event-records', sum(e[4] == 7 and e[5] == 0x34fa for e in event_records) == 1 and
+                      sum(e[4] == 7 and e[5] == 0x34fb for e in event_records) == 2)
             expected = frame.with_suffix('.expected.rgba').read_bytes()
             frames.append(dict(file=frame.relative_to(out).as_posix(), sha256=hashlib.sha256(frame.read_bytes()).hexdigest(),
                                expected_sha256=hashlib.sha256(expected).hexdigest()))

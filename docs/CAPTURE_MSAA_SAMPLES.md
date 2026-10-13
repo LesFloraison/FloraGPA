@@ -469,3 +469,29 @@ Scoped color Resolve recording/encoding has subsequently passed its independent
 [dual-player gate](CAPTURE_RESOLVE.md). The latest GF2 preflight now refuses a
 cross-frame Unmap; formal acceptance remains 0/6. This supersedes the earlier
 Resolve blocker without expanding the D32S8 or package evidence above.
+
+### MSAA initialization with pre-frame EVENT observations
+
+The encoder now applies its existing EVENT provenance/scope gate to frames with
+MSAA initialization, instead of rejecting every query command in such frames.
+Only observations already covered by the private frame-start completion, and the
+previously scoped status-only pending observations, are admitted. In-frame
+successful completion, pending result bytes, missing or inconsistent provenance,
+and predicates remain rejected. Initialization helper Draws do not establish
+completion of any captured in-frame End. Ordinary EVENT records remain metadata
+observations; this change does not materialize a query or synthesize a GPU wait.
+
+`FloraCaptureMsaa{Rgba8,Rgba16,Depth}QueryTests` uses actual CreateQuery (2x) and
+CreateQuery1 (4x) calls, End before recording, two successful GetData observations
+(BOOL and status-only), three application Draws and a second End. Metadata may
+normalize either creation path to the highest supported Query interface. Native
+WARP/hardware execution checks initial per-sample bytes, final CPU-oracle pixels,
+shared query identity/generation, source owner release and the Debug Layer.
+Twenty invalid-model refusals per profile/device retain the publication guards.
+
+The dual-player validator also removes application Draws and initialization Draws
+while retaining captured reference pixels. RGBA16 component bits and D32S8
+depth/stencil words are displayed as RGBA8 byte tiles and compared exactly, without
+a floating-point tolerance. This is a wrapped-context combination test, not a
+startup-injected test or a formal GF2 acceptance result. See
+`capture-msaa-query-baseline.json` for results, input hashes and current blockers.

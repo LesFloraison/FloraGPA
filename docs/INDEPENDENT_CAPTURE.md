@@ -9,8 +9,8 @@ inspection and GF2 six-frame gate remain incomplete. GF2 passes its two-buffer
 FLIP_SEQUENTIAL / ALLOW_TEARING boundary and mapped writes. Limited pre-frame
 EVENT observations now serialize; in-frame successful completion still rejects.
 The elevated continuation resolved game-cache access. Colored GF2 start-screen
-preflights replay exactly; the main scene still refuses MSAA sample preservation,
-and formal scene acceptance remains 0/6.
+preflights replay exactly; the latest main-scene attempt reaches the explicit
+constant-buffer range encoding guard. Formal scene acceptance remains 0/6.
 
 Capture HUD work is tracked separately in [CAPTURE_HUD.md](CAPTURE_HUD.md).
 Protocol v3 adds configurable HUD/hotkeys and Qt settings. Drawing is currently
@@ -2056,3 +2056,20 @@ pass. GF2 now completes runtime recording and refuses the unverified MSAA/query
 encoding combination. No frame is published; the game continues and closes
 normally. Formal acceptance stays 0/6. See [boundary Map evidence](CAPTURE_MAP_BOUNDARIES.md)
 and [the production baseline](capture-boundary-map-recording-baseline.json).
+
+## MSAA and EVENT observation combination
+
+The encoder now uses its existing EVENT provenance gate for frames containing
+MSAA initialization. Wrapped RGBA8, RGBA16 and D32S8 producers verify real
+pre-frame End/GetData observations, exact initial samples and final pixels on
+WARP and hardware. Thirty-six positive and Draw-removal files pass 804 checks
+in both players. In-frame successful EVENT completion and predicates remain
+unsupported; ordinary EVENT records remain metadata observations.
+
+The subsequent elevated GF2 home-scene attempt completes runtime recording and
+passes that query gate, then refuses `Constant-buffer range encoding pending`.
+No frame is published, the game continues presenting with zero interface gaps,
+and disconnect followed by normal window close succeeds. Formal acceptance is
+still **0/6**. Details, regression results and hashes are in
+[the MSAA report](CAPTURE_MSAA_SAMPLES.md) and
+`capture-msaa-query-baseline.json`; current-source packaging remains pending.
