@@ -161,6 +161,7 @@ void method(std::ostream& out, const std::string& iface, const Json& m) {
         else if(name=="Map") {kind="map";operand="pResource";words="{Subresource,UINT(MapType),MapFlags}";}
         else if(name=="ExecuteCommandList") {operand="pCommandList";words="{UINT(RestoreContextState)}";}
         else if(name=="CopyResource") {kind="copy_resource";operand="pDstResource";source="pSrcResource";}
+        else if(name=="ResolveSubresource") {kind="resolve";operand="pDstResource";source="pSrcResource";words="{DstSubresource,SrcSubresource,UINT(Format)}";}
         // GetData observes completion and can order later CPU writes. It is not
         // a passive state getter, even when the query End preceded this frame.
         else if(name=="Begin" || name=="End" || name=="GetData") {

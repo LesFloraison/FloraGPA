@@ -464,3 +464,8 @@ acceptance remains **0/6**. Resolve recording/encoding, broader hidden-state
 profiles, injected D32S8 dual-player proof and a new committed-source package
 remain pending. The latest independent package proof is RGBA16 revision
 `a2a3465`, before this depth integration.
+
+Scoped color Resolve recording/encoding has subsequently passed its independent
+[dual-player gate](CAPTURE_RESOLVE.md). The latest GF2 preflight now refuses a
+cross-frame Unmap; formal acceptance remains 0/6. This supersedes the earlier
+Resolve blocker without expanding the D32S8 or package evidence above.

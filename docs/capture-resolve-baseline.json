@@ -1,0 +1,341 @@
+{
+  "schema": 1,
+  "status": "Scoped production immediate Resolve verified; formal GF2 acceptance incomplete",
+  "base_commit": "7e5270132165c377e4e0e969512d644d40ad1606",
+  "scope": "Immediate 2x/4x quality-zero RGBA8_UNORM/RGBA16_FLOAT; typed/typeless Texture2D arrays; single-sample DEFAULT destination including nonzero mip; no predication/deferred Resolve",
+  "builds": {
+    "capture_only": true,
+    "full_vs2022": true
+  },
+  "tests": {
+    "capture_ctest": 104,
+    "selected_full_ctest": 107,
+    "qt_cases": 12,
+    "dual_files": 48,
+    "dual_checks": 1110
+  },
+  "native_results": [
+    {
+      "debug_warnings_or_errors": 0,
+      "encoder_refusals": 72,
+      "files": 24,
+      "hardware": false,
+      "passed": true,
+      "source_gpu_objects_alive": 0
+    },
+    {
+      "debug_warnings_or_errors": 0,
+      "encoder_refusals": 72,
+      "files": 24,
+      "hardware": true,
+      "passed": true,
+      "source_gpu_objects_alive": 0
+    }
+  ],
+  "inputs": {
+    "build\\capture\\capture\\Release\\FloraCaptureResolveTests.exe": "2cca5632887b95abfed11200b3a892ccc7bdc410843ccab8ac8d45d211822eb8",
+    "build\\vs2022\\Release\\FloraGPA.Cli.exe": "b9f35372b0e40f86ea37a482f06d6e9f82b9a83edb26e7680048bd8dd809adeb",
+    "D:\\CDXrepo\\FloraGPA\\tools\\replay_frame.py": "2ea1a82998b29e42c8eb62dd963dc3fc6a32b47e63a9a1c243bc655769234f2d",
+    "D:\\CDXrepo\\FloraGPA-Cpp\\tools\\validate_capture_resolve.py": "cdcb999539fa4b325f7d32b328a2329d4f9f2edb2f2db0ceb18374bed1b7531d"
+  },
+  "files": [
+    {
+      "file": "warp/rgba8-2x-mixed-complete.gpa_frame",
+      "sha256": "1982cdf528f45d575dcf763ec23fcc5ed1d02aa8cd4e16321aa8193c16feb600",
+      "expected_sha256": "46dc7627c875d38217ee684bf8408b575cbc6432ab4d7a8ab821f48e99174389"
+    },
+    {
+      "file": "warp/rgba8-2x-mixed-missing-resolve.gpa_frame",
+      "sha256": "521893f78e376ee47d7640a24c219b7f0d70c76734be6dd52fd81e7c7a463387",
+      "expected_sha256": "0d0b709ccccd7e25c57469eb4b0618a7389f0ab6f8aa85cba97fcd2757ee98b9"
+    },
+    {
+      "file": "warp/rgba8-2x-mixed-missing-application-draw.gpa_frame",
+      "sha256": "d7994547c8f499fb7432f6c14c0e93ca9fe0669a01e3b7b14cd8ddf6c6c393ac",
+      "expected_sha256": "9c3100614f08202d8b5d2a26c8a553abbd963fa5ff318a27fe66bfe7db728be8"
+    },
+    {
+      "file": "warp/rgba8-2x-matched-complete.gpa_frame",
+      "sha256": "d4746142fae0350132340753c684c953ea287988a53971915d5a434bd300ad18",
+      "expected_sha256": "46dc7627c875d38217ee684bf8408b575cbc6432ab4d7a8ab821f48e99174389"
+    },
+    {
+      "file": "warp/rgba8-2x-matched-missing-resolve.gpa_frame",
+      "sha256": "95c6946fcda5b3b6fd4654627fae499388bd99626422c66a4bc0ed4270312372",
+      "expected_sha256": "0d0b709ccccd7e25c57469eb4b0618a7389f0ab6f8aa85cba97fcd2757ee98b9"
+    },
+    {
+      "file": "warp/rgba8-2x-matched-missing-application-draw.gpa_frame",
+      "sha256": "e1ba6c6cf066a43c2aa65048317f11900ada5a26c00d3f4736ec161ce1a77c5e",
+      "expected_sha256": "9c3100614f08202d8b5d2a26c8a553abbd963fa5ff318a27fe66bfe7db728be8"
+    },
+    {
+      "file": "warp/rgba8-4x-mixed-complete.gpa_frame",
+      "sha256": "c94ad597285121cd00204a49b3ad516f70d6c8cd8ebc5e4962cab97a6056af97",
+      "expected_sha256": "ce0e69e0724fc788be0d9a9f640b72d2d5e9d87ec533ab442ef1d3cdc725d802"
+    },
+    {
+      "file": "warp/rgba8-4x-mixed-missing-resolve.gpa_frame",
+      "sha256": "aa0631516d392635399f600e36d86b5256eec9f666da4348e1202ad096186a3a",
+      "expected_sha256": "0d0b709ccccd7e25c57469eb4b0618a7389f0ab6f8aa85cba97fcd2757ee98b9"
+    },
+    {
+      "file": "warp/rgba8-4x-mixed-missing-application-draw.gpa_frame",
+      "sha256": "501aeeb8c3674652b6c9268f77a015b03904a203216e904bad60099059fec4da",
+      "expected_sha256": "26667378f53c4a5d6168a557028fbd25702e606bafc23525468d9fae499f911d"
+    },
+    {
+      "file": "warp/rgba8-4x-matched-complete.gpa_frame",
+      "sha256": "f3dafb676524a6447749a82d68ee9140dabdc1f9242db5782778d6ad8766927e",
+      "expected_sha256": "ce0e69e0724fc788be0d9a9f640b72d2d5e9d87ec533ab442ef1d3cdc725d802"
+    },
+    {
+      "file": "warp/rgba8-4x-matched-missing-resolve.gpa_frame",
+      "sha256": "3c70bed51d686ab20882d1a84b761a5c510f88949a3e8317fdeb3d5cdfefeccb",
+      "expected_sha256": "0d0b709ccccd7e25c57469eb4b0618a7389f0ab6f8aa85cba97fcd2757ee98b9"
+    },
+    {
+      "file": "warp/rgba8-4x-matched-missing-application-draw.gpa_frame",
+      "sha256": "611fc25c898731041705f3e021d8bd9f432f9a631a2bcba6981e3a67126d7c27",
+      "expected_sha256": "26667378f53c4a5d6168a557028fbd25702e606bafc23525468d9fae499f911d"
+    },
+    {
+      "file": "warp/rgba16-2x-mixed-complete.gpa_frame",
+      "sha256": "64852728dcc774299eea91c25d85a0c9afd2a99e5a176b34651cdcc6268e26fd",
+      "expected_sha256": "df378f0f69b027e2ed35feeef7d4e07a36dc852617ce9e815903fa8d171d2660"
+    },
+    {
+      "file": "warp/rgba16-2x-mixed-missing-resolve.gpa_frame",
+      "sha256": "99251a81d63c3012554f16f81954257144655da0cb27c59752339bd2ccfcb8ea",
+      "expected_sha256": "22508c725ddf513e4b8fa3d21af20181f3810026da71759020ecc28ad4dd710e"
+    },
+    {
+      "file": "warp/rgba16-2x-mixed-missing-application-draw.gpa_frame",
+      "sha256": "cafc09c19a00593213ead854e7299149d8a8323fd5a26df22b6c348bb431ac5d",
+      "expected_sha256": "e727b22d4e39cd848b2ed989b55a2cd1a2efe0f4a00ba83e5de7b096e654f721"
+    },
+    {
+      "file": "warp/rgba16-2x-matched-complete.gpa_frame",
+      "sha256": "aa3affc94c7729279db42c97288cd5cdf23c1a379112e11f0d96709221bef5b9",
+      "expected_sha256": "df378f0f69b027e2ed35feeef7d4e07a36dc852617ce9e815903fa8d171d2660"
+    },
+    {
+      "file": "warp/rgba16-2x-matched-missing-resolve.gpa_frame",
+      "sha256": "1534310db271e2bf6f233f317b5bff8b8a74138e9f774101cfe58fdcbe65f21c",
+      "expected_sha256": "22508c725ddf513e4b8fa3d21af20181f3810026da71759020ecc28ad4dd710e"
+    },
+    {
+      "file": "warp/rgba16-2x-matched-missing-application-draw.gpa_frame",
+      "sha256": "5e7219aafe95fba9460d5e07a6a6f14a18fd727848472fa3a7c7ddb4e6b452aa",
+      "expected_sha256": "e727b22d4e39cd848b2ed989b55a2cd1a2efe0f4a00ba83e5de7b096e654f721"
+    },
+    {
+      "file": "warp/rgba16-4x-mixed-complete.gpa_frame",
+      "sha256": "26e6aa212cf057cef83f6f757982cfeeaaa98a22e7d1f698f6abcc60ad0cfcdb",
+      "expected_sha256": "34cba926d613c1e3c18db8d12f6b272f3dbba7d35518a7e816062249a524977d"
+    },
+    {
+      "file": "warp/rgba16-4x-mixed-missing-resolve.gpa_frame",
+      "sha256": "65aece866217ab397528c63ce3ea680604592f83e6cefeccabf47b7c4f58f365",
+      "expected_sha256": "22508c725ddf513e4b8fa3d21af20181f3810026da71759020ecc28ad4dd710e"
+    },
+    {
+      "file": "warp/rgba16-4x-mixed-missing-application-draw.gpa_frame",
+      "sha256": "055be818f93adf5a54b33b5391032a09bfaa79e0b73af22a6992d8bdacf89e1f",
+      "expected_sha256": "6a69ed77e41becab044babb496c1ec96d2330d356de73a833bde29d1abb1c2cd"
+    },
+    {
+      "file": "warp/rgba16-4x-matched-complete.gpa_frame",
+      "sha256": "24b36c5033e15adfdb940e56bb79ee1f85c89b55e288499f508d39770faecace",
+      "expected_sha256": "34cba926d613c1e3c18db8d12f6b272f3dbba7d35518a7e816062249a524977d"
+    },
+    {
+      "file": "warp/rgba16-4x-matched-missing-resolve.gpa_frame",
+      "sha256": "42f8691247877648d99ff6ca0e7ee662a946c55bfa51f01a33c8be686de117ac",
+      "expected_sha256": "22508c725ddf513e4b8fa3d21af20181f3810026da71759020ecc28ad4dd710e"
+    },
+    {
+      "file": "warp/rgba16-4x-matched-missing-application-draw.gpa_frame",
+      "sha256": "f5463ee114984ae24d8af5c225aace711e603366a1ffe61e0dac4e8ff660bb3d",
+      "expected_sha256": "6a69ed77e41becab044babb496c1ec96d2330d356de73a833bde29d1abb1c2cd"
+    },
+    {
+      "file": "hardware/rgba8-2x-mixed-complete.gpa_frame",
+      "sha256": "2ecb847b61f7a67dfce417da3e9c8831284cd42128f8efcc48f0cb15b2c4ad7b",
+      "expected_sha256": "46dc7627c875d38217ee684bf8408b575cbc6432ab4d7a8ab821f48e99174389"
+    },
+    {
+      "file": "hardware/rgba8-2x-mixed-missing-resolve.gpa_frame",
+      "sha256": "9b11b3dee06c70e6ba62a3d2822b8472124b1b45f00928f62ed35bc9bef0f37e",
+      "expected_sha256": "0d0b709ccccd7e25c57469eb4b0618a7389f0ab6f8aa85cba97fcd2757ee98b9"
+    },
+    {
+      "file": "hardware/rgba8-2x-mixed-missing-application-draw.gpa_frame",
+      "sha256": "63f4334a2f3b0d3f5dc9b7b6b8184ee62a5ae6befe3637abbf736dd93cbeb911",
+      "expected_sha256": "9c3100614f08202d8b5d2a26c8a553abbd963fa5ff318a27fe66bfe7db728be8"
+    },
+    {
+      "file": "hardware/rgba8-2x-matched-complete.gpa_frame",
+      "sha256": "34f24a7b37cd646782eac5cd666df5b7cb3d757b1948edd7e74973bb45280fa0",
+      "expected_sha256": "46dc7627c875d38217ee684bf8408b575cbc6432ab4d7a8ab821f48e99174389"
+    },
+    {
+      "file": "hardware/rgba8-2x-matched-missing-resolve.gpa_frame",
+      "sha256": "e74050d2260b180f929fc6578a2f2cc7b47268ab6154cfa30054172439836d47",
+      "expected_sha256": "0d0b709ccccd7e25c57469eb4b0618a7389f0ab6f8aa85cba97fcd2757ee98b9"
+    },
+    {
+      "file": "hardware/rgba8-2x-matched-missing-application-draw.gpa_frame",
+      "sha256": "4d15b88d4f3d216e1028a496a2717d41dab5ed94c08f425329beff1216fc601d",
+      "expected_sha256": "9c3100614f08202d8b5d2a26c8a553abbd963fa5ff318a27fe66bfe7db728be8"
+    },
+    {
+      "file": "hardware/rgba8-4x-mixed-complete.gpa_frame",
+      "sha256": "a26b24e8686681033f86d49766107127e5d81c88433a0b43fc52b72d04023dc8",
+      "expected_sha256": "ce0e69e0724fc788be0d9a9f640b72d2d5e9d87ec533ab442ef1d3cdc725d802"
+    },
+    {
+      "file": "hardware/rgba8-4x-mixed-missing-resolve.gpa_frame",
+      "sha256": "81ac12504ec7a0fd821229c176e2b0d9be4a0adc5d987dfb80e42ccf41e6e23b",
+      "expected_sha256": "0d0b709ccccd7e25c57469eb4b0618a7389f0ab6f8aa85cba97fcd2757ee98b9"
+    },
+    {
+      "file": "hardware/rgba8-4x-mixed-missing-application-draw.gpa_frame",
+      "sha256": "4335b5d695a49d32f30a5648c93bd8a9655b9a03173ac755feb2f7734ac8da04",
+      "expected_sha256": "26667378f53c4a5d6168a557028fbd25702e606bafc23525468d9fae499f911d"
+    },
+    {
+      "file": "hardware/rgba8-4x-matched-complete.gpa_frame",
+      "sha256": "39d9c6ce63260c49425a0fc406f91e426fa73f141bb26dac962c0ffdcd8d9b8a",
+      "expected_sha256": "ce0e69e0724fc788be0d9a9f640b72d2d5e9d87ec533ab442ef1d3cdc725d802"
+    },
+    {
+      "file": "hardware/rgba8-4x-matched-missing-resolve.gpa_frame",
+      "sha256": "705b00b545548666d1ba764a1e3fa5410895f35f8e431b437b3277a61d85179b",
+      "expected_sha256": "0d0b709ccccd7e25c57469eb4b0618a7389f0ab6f8aa85cba97fcd2757ee98b9"
+    },
+    {
+      "file": "hardware/rgba8-4x-matched-missing-application-draw.gpa_frame",
+      "sha256": "403419ed47a73d9d2aa4e87bd278a39b656dd63d80a09c905c0d822726751dc8",
+      "expected_sha256": "26667378f53c4a5d6168a557028fbd25702e606bafc23525468d9fae499f911d"
+    },
+    {
+      "file": "hardware/rgba16-2x-mixed-complete.gpa_frame",
+      "sha256": "4c17f47e45067d71929284073e60315d0dc06aac0ab7bfbb73144d710418fcaa",
+      "expected_sha256": "df378f0f69b027e2ed35feeef7d4e07a36dc852617ce9e815903fa8d171d2660"
+    },
+    {
+      "file": "hardware/rgba16-2x-mixed-missing-resolve.gpa_frame",
+      "sha256": "f974783bd59d27b8b92f48394602bcccda57f9cb0bc02408a5bd0484b3e69a4b",
+      "expected_sha256": "22508c725ddf513e4b8fa3d21af20181f3810026da71759020ecc28ad4dd710e"
+    },
+    {
+      "file": "hardware/rgba16-2x-mixed-missing-application-draw.gpa_frame",
+      "sha256": "24afd0e5fa1534281ab0ee1824cc1f2378535246cf92e652c3b7c643c1ebfef8",
+      "expected_sha256": "e727b22d4e39cd848b2ed989b55a2cd1a2efe0f4a00ba83e5de7b096e654f721"
+    },
+    {
+      "file": "hardware/rgba16-2x-matched-complete.gpa_frame",
+      "sha256": "c252a8d2a0146b0ece92b3971cbbcacc01abac9d582adb624e6e621e61549a7c",
+      "expected_sha256": "df378f0f69b027e2ed35feeef7d4e07a36dc852617ce9e815903fa8d171d2660"
+    },
+    {
+      "file": "hardware/rgba16-2x-matched-missing-resolve.gpa_frame",
+      "sha256": "5787f00c44dba55f64df0c8f5f0b103fba37b5b27e80445e379f69e84e66cb7e",
+      "expected_sha256": "22508c725ddf513e4b8fa3d21af20181f3810026da71759020ecc28ad4dd710e"
+    },
+    {
+      "file": "hardware/rgba16-2x-matched-missing-application-draw.gpa_frame",
+      "sha256": "009cb2c6fd1d5ed836121aee4a41fa3e383385c7c4e50a3951e38653d4a09ecd",
+      "expected_sha256": "e727b22d4e39cd848b2ed989b55a2cd1a2efe0f4a00ba83e5de7b096e654f721"
+    },
+    {
+      "file": "hardware/rgba16-4x-mixed-complete.gpa_frame",
+      "sha256": "16370db9efecc6eb779aa098a7e53aaff15ac0f4c2c5d0ae030fbe9911aa4c0e",
+      "expected_sha256": "34cba926d613c1e3c18db8d12f6b272f3dbba7d35518a7e816062249a524977d"
+    },
+    {
+      "file": "hardware/rgba16-4x-mixed-missing-resolve.gpa_frame",
+      "sha256": "c84def6cc0f5ba5eba814fb7f26a6192f50a9a66930f7e0b172a83b71d428b19",
+      "expected_sha256": "22508c725ddf513e4b8fa3d21af20181f3810026da71759020ecc28ad4dd710e"
+    },
+    {
+      "file": "hardware/rgba16-4x-mixed-missing-application-draw.gpa_frame",
+      "sha256": "774a8feb9922e59e3291fe4673a00a9a67024ba45873e79cc3f61b6bddc8af88",
+      "expected_sha256": "6a69ed77e41becab044babb496c1ec96d2330d356de73a833bde29d1abb1c2cd"
+    },
+    {
+      "file": "hardware/rgba16-4x-matched-complete.gpa_frame",
+      "sha256": "3726424f5b4c37d4f96dfc7aeb36e494d0600641d1d46f14523c091c08a92192",
+      "expected_sha256": "34cba926d613c1e3c18db8d12f6b272f3dbba7d35518a7e816062249a524977d"
+    },
+    {
+      "file": "hardware/rgba16-4x-matched-missing-resolve.gpa_frame",
+      "sha256": "7baaa5a5817e4eaf03a9dbfa041879c9156c9e31ff79cf7f31c5e78e6dc557d5",
+      "expected_sha256": "22508c725ddf513e4b8fa3d21af20181f3810026da71759020ecc28ad4dd710e"
+    },
+    {
+      "file": "hardware/rgba16-4x-matched-missing-application-draw.gpa_frame",
+      "sha256": "9ef7d530da9796672c45fcdcaf3f2a5c1a84267b86dbb63437ec2823aa4f6c55",
+      "expected_sha256": "6a69ed77e41becab044babb496c1ec96d2330d356de73a833bde29d1abb1c2cd"
+    }
+  ],
+  "gf2_preflight": {
+    "pid": 20780,
+    "session_id": "b83a179b-987a-4902-bc3b-d89a7844cc55",
+    "administrator": true,
+    "game_version": "4.0.5136.14794.28495.3242",
+    "observed_scene": "Main character scene entered from animated start screen",
+    "capture_source": "Uncommitted Resolve worktree atop 7e52701",
+    "binaries": [
+      {
+        "Path": "D:\\CDXrepo\\FloraGPA-Cpp\\build\\capture\\capture\\Release\\FloraCapture.exe",
+        "Hash": "EE9112DBFAA66619A7194353E2A8ADAA0CB94610F1450509062EF3EEDF4A0E10"
+      },
+      {
+        "Path": "D:\\CDXrepo\\FloraGPA-Cpp\\build\\capture\\capture\\Release\\FloraCaptureRuntime.dll",
+        "Hash": "05FC0202AA4AEFCC131D00466862F2E36368D05163F9A5BEF130978B754B6776"
+      }
+    ],
+    "error": "ID3D11DeviceContext::Unmap: Unmap has no recorded successful Map",
+    "present_before": 2868,
+    "present_after_failure": 5285,
+    "interface_gaps": 0,
+    "published_files": 0,
+    "partial_files": 0,
+    "disconnected": true,
+    "process_exited": true,
+    "close_method": "Alt+F4 through computer-use",
+    "accepted_frames": 0,
+    "required_frames": 6
+  },
+  "remaining": [
+    "Cross-frame Map ownership and data",
+    "Broader hidden-state and deferred profiles",
+    "Startup-injected Resolve/D32S8 dual-player proof",
+    "Current committed-source package; latest a2a3465 precedes depth/Resolve",
+    "Formal GF2 two-launch six-frame gate; no new original GUI or golden run"
+  ],
+  "evidence_sha256": {
+    "artifacts/capture-gf2-resolve-20261014/binaries.json": "244a28bdb42f0543e10cfeaf6a2f6e002bc0c40c14d7a8edbb956a772e90201b",
+    "artifacts/capture-gf2-resolve-20261014/comparison-rule.json": "d39eceeb66074aac2cad4012730ecb89907223cf194c9798d4c6591b94c80106",
+    "artifacts/capture-gf2-resolve-20261014/disconnect.json": "892474f3bf7c101ee1e6faf18bb7543fc76d106927c1538bd5136f78c2eb2475",
+    "artifacts/capture-gf2-resolve-20261014/environment-final.json": "1175c74ee7165ec805c4d7db2dfa6f66af370d79310a149cd73f5dc0a8f5aa24",
+    "artifacts/capture-gf2-resolve-20261014/launch.json": "ac36391e8425e598452ac53b44a58242dbccda92a28eaacba8e6adb86e287915",
+    "artifacts/capture-gf2-resolve-20261014/request-main.json": "410b7b4ab8c5f2b66e76a9ee05ff1927a01b40c8439384c28e5eb0330c2b0b80",
+    "artifacts/capture-gf2-resolve-20261014/status-after-failure.json": "17ba65090235605c1aa4f55db04f8deb4bf873bdb72fc291d61826078e0421b0",
+    "artifacts/capture-gf2-resolve-20261014/status-exited.json": "75d63ea0013cac31dc32fb090f1ebb81930b51dcb05c224bd5bf6a8c5fd016bf",
+    "artifacts/capture-gf2-resolve-20261014/status-main-before.json": "092cc89d15fcff1fbb82ef9de96d610279fbb9045669076579f333b55fec2e17",
+    "artifacts/capture-gf2-resolve-20261014/status-main-result.json": "eb31d1c45e0bead37a15256f506f3b7fd8909aaa0e5f7722f6c2ec9bb93ae8c7",
+    "artifacts/capture-gf2-resolve-20261014/status-start.json": "aa5b172aabd57e3cbd255f58bb992be6f33910f4e3ba6a858d5c03eca5a9049d",
+    "artifacts/capture-resolve-20261014/build-2.log": "eb5b3d0f2fdf5d0dc5a02ee0351a23c895827e08509d9e5a4fc68b4ca518328b",
+    "artifacts/capture-resolve-20261014/build.log": "aa0e31e0b1be7db8589ed9a191001f1edccafa29001ddde23fcfb9c337c9248f",
+    "artifacts/capture-resolve-20261014/capture-ctest.log": "82d833d55a69e6c70f041a3b861e2b59110ff86628d8136a25d7844eb3087d95",
+    "artifacts/capture-resolve-20261014/capture-ui.txt": "4ac79c87bf2bc08f325cfd3b132fd211eb7c2e2bf29193f81b480e15a7d9da5b",
+    "artifacts/capture-resolve-20261014/dual/inputs.json": "22b88220b68ea490929b2ba745d06961d9257ec14c863ca1c0669dfaed5615d1",
+    "artifacts/capture-resolve-20261014/dual/validation.json": "fae0626db6b538cede9fe9ba12058c851e025de3ee6263950ea4fc4fc8e314e3",
+    "artifacts/capture-resolve-20261014/focused.log": "1f1a1006bb04219c77047043906cfe6ec63fffd8d7c90f547cee96f993a216e5",
+    "artifacts/capture-resolve-20261014/full-build.log": "608cb6a939b376b0a9dfa545fc7e6c7ae2c11098e045bf49d7a3e789338b9947",
+    "artifacts/capture-resolve-20261014/full-ctest.log": "b6e477d154465381ab0f845473fd6b46fda0e5ef88b070939248cc45e2f4e42c"
+  }
+}

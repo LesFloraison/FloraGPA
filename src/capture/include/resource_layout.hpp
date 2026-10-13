@@ -10,4 +10,7 @@ void validate_copy_resource(const ResourceShape& destination, std::span<const ui
     const ResourceShape& source);
 void validate_copy_region(const ResourceShape& destination, std::span<const uint8_t> destination_descriptor,
     const ResourceShape& source, std::span<const uint8_t> source_descriptor, const CopyRegion&, bool same_resource);
+void validate_resolve(const ResourceShape& destination, std::span<const uint8_t> destination_descriptor,
+    const ResourceShape& source, std::span<const uint8_t> source_descriptor,
+    uint32_t destination_subresource,uint32_t source_subresource,DXGI_FORMAT format,bool same_resource);
 }

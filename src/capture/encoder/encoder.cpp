@@ -456,6 +456,16 @@ public:
                 if(c.extended)p.value(c.flags);
                 add(7,c.extended?0x256:0x40,std::move(p));continue;
             }
+            if(command.kind==CommandKind::resolve){
+                require(command.bindings.context==context_ && command.bindings.device==device_,"Encoder Resolve context mismatch");
+                require(command.completed && !command.deferred && command.operand && command.source && !w[3] && !w[4],"Encoder Resolve arguments incomplete or unsupported");
+                require(!command.bindings.predicate && command.data.empty() && command.before_data.empty(),"Encoder Resolve has predicate or unexpected CPU bytes");
+                require(frame_.initial_resources.contains(command.operand) && msaa_.contains(command.source),"Encoder Resolve initial resources missing");
+                const auto& d=frame_.initial_resources.at(command.operand);const auto& s=frame_.initial_msaa.at(command.source);
+                validate_resolve(d.shape,frame_.objects.at(command.operand).descriptor,s.shape,frame_.objects.at(command.source).descriptor,
+                    w[0],w[1],DXGI_FORMAT(w[2]),command.operand==command.source);
+                add(7,0x42,Payload{}.q({0,1,resource_ref(command.operand)}).value(w[0]).value(resource_ref(command.source)).u({w[1],w[2]}));continue;
+            }
             if(command.kind==CommandKind::copy_resource){
                 require(command.bindings.context==context_ && command.bindings.device==device_,"Encoder copy context mismatch");
                 require(!command.bindings.predicate,"Encoder predicated copy is unsupported");

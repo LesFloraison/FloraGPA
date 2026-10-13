@@ -233,17 +233,24 @@ void FrameRecording::observe(ID3D11DeviceContext* context,const char* api,Comman
         if(kind==CommandKind::map && (!operand || words[1]<1 || words[1]>5 || (words[2]&~D3D11_MAP_FLAG_DO_NOT_WAIT)))throw std::runtime_error("Invalid Map arguments");
         if((kind==CommandKind::copy_resource || kind==CommandKind::copy_region) && (!operand || !source))throw std::runtime_error("CopyResource operand is missing");
         if(kind==CommandKind::copy_region && !region)throw std::runtime_error("CopySubresourceRegion coordinates missing");
+        if(kind==CommandKind::resolve && (!operand || !source))throw std::runtime_error("Resolve operand is missing");
         const bool clear=kind==CommandKind::clear_rtv || kind==CommandKind::clear_dsv || kind==CommandKind::clear_uav_uint || kind==CommandKind::clear_uav_float;
         if(kind==CommandKind::update_subresource && (!operand || !update || !update->data || update->flags))throw std::runtime_error("UpdateSubresource requires nonnull data and zero copy flags");
         if(clear && !operand)throw std::runtime_error("Clear operand is missing");
         if(clear && (kind==CommandKind::clear_uav_uint?!integers:!floats))throw std::runtime_error("Clear value is missing");
         if(p.frame.commands.size()>=p.options.command_limit)throw std::runtime_error("Frame command limit exceeded");
         ContextSnapshot snapshot;
-        if(kind==CommandKind::map){
+        if(kind==CommandKind::map || kind==CommandKind::resolve){
             // Map touches its operand, not the currently bound graphics or
             // compute pipeline. Other bound resources may still be mapped.
             snapshot.bindings.context=p.context_id;snapshot.bindings.device=record->device;
             retain(snapshot,context);ComPtr<ID3D11Device> device;unwrap(context)->GetDevice(&device);retain(snapshot,device.Get());
+            if(kind==CommandKind::resolve){
+                ComPtr<ID3D11Predicate> predicate;BOOL value=FALSE;unwrap(context)->GetPredication(&predicate,&value);
+                if(predicate)throw std::runtime_error("Predicated Resolve is not verified");
+                UINT support=0;if(FAILED(device->CheckFormatSupport(DXGI_FORMAT(words[2]),&support)) || !(support&D3D11_FORMAT_SUPPORT_MULTISAMPLE_RESOLVE))
+                    throw std::runtime_error("Resolve format is unsupported by the device");
+            }
         }else{snapshot=snapshot_context(context);snapshot.require_supported_bindings();}
         RecordedCommand command;command.kind=kind;command.api=api;command.sequence=p.frame.commands.size();command.words=words;
         if(kind==CommandKind::update_subresource && update->box){command.update_box.emplace();static_assert(sizeof(ResourceBox)==sizeof(D3D11_BOX));memcpy(command.update_box->data(),update->box,sizeof(D3D11_BOX));}
@@ -252,6 +259,7 @@ void FrameRecording::observe(ID3D11DeviceContext* context,const char* api,Comman
         if(integers)std::copy_n(integers,4,command.words.begin());
         command.operand=retain(snapshot,operand);
         command.source=retain(snapshot,source);
+        if(kind==CommandKind::resolve)command.completed=true;
         if(kind==CommandKind::copy_resource && command.operand==command.source)throw std::runtime_error("CopyResource operands alias");
         SnapshotOptions options;options.timeout_ms=p.options.readback_timeout_ms;options.cancelled=[&p]{if(p.options.cancelled && p.options.cancelled())p.cancelled=true;return p.cancelled.load();};
         for(const auto& [id,object]:snapshot.objects){
@@ -279,6 +287,14 @@ void FrameRecording::observe(ID3D11DeviceContext* context,const char* api,Comman
         if(kind==CommandKind::copy_resource){
             const auto& destination=p.frame.initial_resources.at(command.operand);
             validate_copy_resource(destination.shape,destination.record->descriptor,p.frame.initial_resources.at(command.source).shape);
+        }
+        if(kind==CommandKind::resolve){
+            if(!p.frame.initial_msaa.contains(command.source) || !p.frame.initial_resources.contains(command.operand))
+                throw std::runtime_error("Resolve requires preserved MSAA source and ordinary destination");
+            const auto& destination=p.frame.initial_resources.at(command.operand);
+            const auto& initial=p.frame.initial_msaa.at(command.source);
+            validate_resolve(destination.shape,destination.record->descriptor,initial.shape,snapshot.objects.at(command.source).record->descriptor,
+                words[0],words[1],DXGI_FORMAT(words[2]),command.operand==command.source);
         }
         if(kind==CommandKind::copy_region){
             const auto& destination=p.frame.initial_resources.at(command.operand);

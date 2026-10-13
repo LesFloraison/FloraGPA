@@ -2030,3 +2030,11 @@ nothing, continues rendering and exits normally after disconnect. Formal GF2
 acceptance stays 0/6. Latest standalone source-package evidence is `a2a3465`
 (98 CTests, seven stages), before depth integration. The MSAA report and baseline
 retain each phase's exact scope, hashes and remaining work.
+
+Scoped immediate RGBA8/RGBA16 Resolve recording now passes 48 files / 1110 exact
+dual-player checks, with repeated resolves, partial sample Draws, array/mip
+selection and deletion controls. All 104 capture-only and 107 selected full
+CTests pass, including twelve Qt cases. The next elevated GF2 main-scene refusal
+is an Unmap whose successful Map preceded the recording; no frame is published,
+the game continues rendering and exits normally. Formal acceptance stays 0/6.
+See [Resolve scope and evidence](CAPTURE_RESOLVE.md).
