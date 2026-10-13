@@ -325,6 +325,10 @@ dual-player file test is claimed for this command-model iteration.
 
 ## Build and control
 
+Current independent package evidence is recorded in
+[capture and replay package validation](CAPTURE_PACKAGE_VALIDATION.md).
+It verifies source commit `3a00e4a` and does not establish GF2 formal acceptance.
+
 ```powershell
 cmake --preset capture-only
 cmake --build --preset capture-only-release

@@ -1,0 +1,353 @@
+{
+  "schema": "FloraGPA independent package baseline 1",
+  "date": "2026-10-14",
+  "source_commit": "3a00e4af04cfe022c0fc4865f55edc77f31376f4",
+  "formal_accepted_frames": 0,
+  "required_frames": 6,
+  "raw_evidence": "artifacts/capture-package-audit-20261014",
+  "capture": {
+    "source_build": true,
+    "ctest_passed": 114,
+    "ctest_failed": 0,
+    "no_qt_discovery": true,
+    "system_path_only": true,
+    "identity": {
+      "application": "FloraCapture",
+      "architecture": "x64",
+      "protocol_version": 4,
+      "schema": 1
+    },
+    "live_launches": 24,
+    "live_frames": 96,
+    "msaa_launches": 2,
+    "msaa_frames": 8,
+    "package_files": {
+      "dependencies.json": "ddae10be48d1c3ec765ddb4c5b44ff7e8aba911f49cc80b6586d57b2c75267a5",
+      "FloraCapture.exe": "3d11ea58a7d95a997cd2e2f3481f22b89a4bcc953739fdbd1824ceefd9b10b69",
+      "FloraCaptureRuntime.dll": "9425b8829785b7f981acecec3873bda588f4a0258c8e175c4148512f220d54bb",
+      "manifest.json": "341e24c04c2c13d43ba741cc1eb9b54e3194d7445eb63f10a83cd100cc2bf8b4",
+      "msvcp140.dll": "0f885b509a685d2bbfa652fed26b5fb31d88fbdab0a978c641d1c7b8aa460aa9",
+      "vcruntime140.dll": "d5e4d9a3e835fa679450145d6a7d94e36573a509317111904d9b3712c30d9066",
+      "vcruntime140_1.dll": "1f2d41c4aa5db0bc33ebf7b66d72943a817d7ce6cbe880502a9403823633093f",
+      "licenses/detours-MIT.txt": "f854ae8aabc0404652b48a2b3bf7f21ec174c69d73f5596934c20884eb0639ef",
+      "licenses/nlohmann-json-MIT.txt": "46a65cffd1ea955132d95a8dd921640714a8d6b537d2e4e482d31145ae95b603"
+    },
+    "source_archive_sha256": "4e87bbfb0760f6b7877006d65ca6d927b3390dfb8374a2ff0c2e6fcf9f2d4e6a"
+  },
+  "replay": {
+    "source_profile": "replay-only",
+    "configure_build_passed": true,
+    "initial_package_attempt": "failed: incomplete selected RenderDoc directory",
+    "package_retry_completed": true,
+    "package_files": {
+      "concrt140.dll": "2405355f0a58067b258f8df33c327e3a3d716eaac5a3a5aebb757842d85bd376",
+      "D3Dcompiler_47.dll": "e994847e01a6f1e4cbdc5a864616ac262f67ee4f14db194984661a8d927ab7f4",
+      "FloraGPA.Cli.exe": "6c22652c55a82df13e2f6213f0a511f479aaa514134db65dd204ae8c41bb2ec2",
+      "FloraGPA.exe": "196ab4a2752805b632729cac229b40d06dc19a40a42192817cb14b1c18bc2f2d",
+      "FloraGPA.Metrics.dll": "b15b4edf6ba18c6943658a7c723831de145db289069b7a582e3cd3e4bf92b216",
+      "FloraGPA.Rdc.exe": "20ede97c16fe85db58db2459bf2d6dabfaf6ec0e26d98c5ecef06c92eba427b8",
+      "FloraGPA.Worker.exe": "6c22652c55a82df13e2f6213f0a511f479aaa514134db65dd204ae8c41bb2ec2",
+      "msvcp140.dll": "0f885b509a685d2bbfa652fed26b5fb31d88fbdab0a978c641d1c7b8aa460aa9",
+      "msvcp140_1.dll": "bfad5aef4c63a669e3c140655cdfdf395b6c979b400a447bd5dcb65ed8826c3d",
+      "msvcp140_2.dll": "3ea06f0ee098b4823cb79599df3780e7f23cce52c19aac31d2a0d47efe33a5e9",
+      "msvcp140_atomic_wait.dll": "640b2aefced484d0368eea5bdd06addd0658a3a70a49256e560d6923b404a479",
+      "msvcp140_codecvt_ids.dll": "f2069a52880ec885ee7f0511186100eb7fada0411a2b4948fafea7735b878a18",
+      "Qt6Core.dll": "22c113a5644b875b2c85482723cd5d2e6a3a4029169778fcc78adde08ef3b6aa",
+      "Qt6Gui.dll": "19265a4e76efc12ef5f5bcf59be6c6a5b9b59ec4c89660797738bd2da7f719cc",
+      "Qt6Network.dll": "75ff0896a618f4f5b602f391eb4917a55fd738b2e751d2cf18244a0de3619184",
+      "Qt6Svg.dll": "1052c17a9df0eb82023e0e4c369bbd0af58e4c5fea3c27a4b5ee83b60c015492",
+      "Qt6Widgets.dll": "e6d0b7e2e697de6ad985b97f9ed8b381c1c2172fcae87b6ab08455b3b7330f32",
+      "THIRD_PARTY.md": "ca96f1135e39b2ec957af25e7ac67047472fd56b2671b34de257a3405779ec03",
+      "vccorlib140.dll": "19839407c3fdbc824e5bce189bf68ddf8097f12ec28b757797ffa0415c144ddd",
+      "vcruntime140.dll": "d5e4d9a3e835fa679450145d6a7d94e36573a509317111904d9b3712c30d9066",
+      "vcruntime140_1.dll": "1f2d41c4aa5db0bc33ebf7b66d72943a817d7ce6cbe880502a9403823633093f",
+      "vcruntime140_threads.dll": "219915cf20822f34d5e7c1fdd4e21ae7f3396881096c51036225fb8f84b47afa",
+      "vc_redist.x64.exe": "cc0ff0eb1dc3f5188ae6300faef32bf5beeba4bdd6e8e445a9184072096b713b",
+      "generic/qtuiotouchplugin.dll": "a0b971771417d60c6c2dedf66d06f6e99bd3236aa1aa6949c7e4e08d51fb69f9",
+      "iconengines/qsvgicon.dll": "7879ba1d2f293ad09c515de736add8c1023b0a4e80e2301d1283555efc2e8828",
+      "imageformats/qgif.dll": "de1c1ea34cbc4156ce452023470e2145af4855128756d081d56e9a0997d0dda8",
+      "imageformats/qico.dll": "af98cacb134525fab15cf2146a4e6b90266f14493e72e4d51df89a5caadea157",
+      "imageformats/qjpeg.dll": "a8854ac38d2bb83e8018bdcbfc93420a876251b3d2a79933e1a3c9a8ed2a24cb",
+      "imageformats/qsvg.dll": "486b395e23e258d03d54cdba045f129e9b1321f9ff12f99fe58293e0351b8caf",
+      "licenses/COPYING.txt": "eb7e9ab9690124c5c9f42bdc81383d886a3dede26345b6ed15bbad7caf81f7ea",
+      "licenses/Copyright.txt": "d1f5b8f5eba2e9073463bc29b30572d84033f59e8d8057a95dff37c3414305b9",
+      "licenses/GPL-3.0-only.txt": "8ceb4b9ee5adedde47b31e975c1d90c73ad27b6b165a1dcd80c7c545eb65b903",
+      "licenses/intel-metrics-discovery-MIT.txt": "653129790534d6a3e843eaafc62cf04299e7e238f6f411173e85ea7fc315c8ac",
+      "licenses/LGPL-3.0-only.txt": "da7eabb7bafdf7d3ae5e9f223aa5bdc1eece45ac569dc21b3b037520b4464768",
+      "licenses/LICENSE": "2004ee3ef8282a85f7dbd035dfacf63cf03d569537bc08655ffeb140ea3671c5",
+      "licenses/LICENSE.FDL": "c256483c2d1e8a51b62fc7a44a58f21cb4ef23fa840c7d33e3658035fd8cf62f",
+      "licenses/nlohmann-json-MIT.txt": "46a65cffd1ea955132d95a8dd921640714a8d6b537d2e4e482d31145ae95b603",
+      "licenses/renderdoc-api-MIT.txt": "bc7497320109a35a0b1cc090072961dcacf3a153b2f0a91de5909ce5944d9c43",
+      "networkinformation/qnetworklistmanager.dll": "2f7c43bb4ec05e9f23a326ac69e84a6df071cdf7cc0bf87cde98f81958ad9bae",
+      "platforms/qoffscreen.dll": "95391476bba1d0b50cc822b93d7509341024cc7c18cd615f82e471a3e3a61caa",
+      "platforms/qwindows.dll": "d94c584a18829d11fbf3aefd07e7b1e189e0cf063a0515826960037efa7465df",
+      "RenderDoc/msvcp140.dll": "0f885b509a685d2bbfa652fed26b5fb31d88fbdab0a978c641d1c7b8aa460aa9",
+      "RenderDoc/renderdoc.dll": "313f450bfa1f7f7d5f50cc7ee80d9f99b68d3fe873e25eb865ff0433e359f7b3",
+      "RenderDoc/renderdoccmd.exe": "273352017e23e890fe9134de0157d1fe556676a4c6004bfe3265db1a4648ed07",
+      "RenderDoc/runtime-manifest.json": "925471f821cc0bbe1bd04af75907a923a62c3b543cf328efdbb111d7592fff14",
+      "RenderDoc/vcruntime140.dll": "d5e4d9a3e835fa679450145d6a7d94e36573a509317111904d9b3712c30d9066",
+      "styles/qmodernwindowsstyle.dll": "f6b88d403d7175f5b830d4958264690e5c8bbaf0148e1ccf42d52704b0480792",
+      "tls/qcertonlybackend.dll": "ff0f1a60ec60fc23ec74ff5d325ddef05c1ed68fc89466bffc1d874c7c544adb",
+      "tls/qschannelbackend.dll": "761178263b47a5f05e151806bb5854d9e5c9cbc67d08187724d80f9e317471f8",
+      "RenderDoc/licenses/LICENSE.md": "ba3b05b7f5bfdb4b4917bf8ea3aa9c4ea4c20ff6522de9109a6cc982c5c35730",
+      "RenderDoc/licenses/docs/credits_acknowledgements.rst": "92508c32f1cd4abf3435f39fe0fa5578939c5592c541835c1fb9cbec889081ff",
+      "RenderDoc/licenses/util/installer/LICENSE.rtf": "d9ddff326fa8918ea2d90bf0ea974cc337a302da1d747ce7f6c70a4f4415370e",
+      "RenderDoc/licenses/renderdoc/3rdparty/breakpad/LICENSE": "f9752a0a4ac5215eaa3a4f0ec29cd52563c883de5d7870525cc0bc3a21cb8e15",
+      "RenderDoc/licenses/renderdoc/3rdparty/catch/LICENSE.txt": "c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566",
+      "RenderDoc/licenses/renderdoc/3rdparty/glslang/LICENSE.txt": "17e70c676e1521ff3e4686f04a2053d93a7e28a33be8de7ec37ab0ff72feb677",
+      "RenderDoc/licenses/renderdoc/3rdparty/half/LICENSE.txt": "d098b70e0b195ce538efa38b73c02fccbae89d169126efea7546892c7a3d5d9d",
+      "RenderDoc/licenses/renderdoc/3rdparty/include-bin/LICENSE": "c5385fe1cfe1652b3dd93b49bc3493aff78bf975031e8fc151a035961aedb496",
+      "RenderDoc/licenses/renderdoc/3rdparty/interceptor-lib/LICENSE": "a1e4522979cd422b42d0b464072eb7d0d218651659f56bf09f8c147384e3f105",
+      "RenderDoc/licenses/renderdoc/3rdparty/jpeg-compressor/LICENSE.txt": "8430eedb203de1670b52779eb06d9e2bfae83740f8e1ba05dcb1f5d2cfd6381c",
+      "RenderDoc/licenses/renderdoc/3rdparty/lz4/LICENSE": "d15d99c8dc6b0ec22174c0e563a95bc40f9363ca7f9d9d793bb5c5a8e8d0af71",
+      "RenderDoc/licenses/renderdoc/3rdparty/pugixml/LICENSE.md": "e35adb9dc50ddec38ed207af7f3a14a8197ae815a43f98b90ad297d5e509297a",
+      "RenderDoc/licenses/renderdoc/3rdparty/zstd/LICENSE": "2c1a7fa704df8f3a606f6fc010b8b5aaebf403f3aeec339a12048f1ba7331a0b"
+    },
+    "capture_components": [],
+    "source_archive_sha256": "4e87bbfb0760f6b7877006d65ca6d927b3390dfb8374a2ff0c2e6fcf9f2d4e6a"
+  },
+  "golden": [
+    {
+      "case": "gf2",
+      "rgba_sha256": "2e1abc5eacb0bbfd801f9fe059c305baa9a0786c384b36a42fa5a323dd979fd1",
+      "passed": true,
+      "counts": {
+        "ClearDepthStencilView": 2,
+        "ClearRenderTargetView": 1,
+        "CreateBuffer": 2,
+        "DrawIndexed": 72,
+        "Map": 44,
+        "Present": 1,
+        "buffers_created_without_initial_data": 2,
+        "object_observation_records": 49,
+        "pipeline_setter_records": 142,
+        "private_data_observations": 4,
+        "query_completion_unresolved": 1,
+        "query_metadata_records": 2,
+        "state_or_auxiliary_records": 551,
+        "unmap_observations": 44
+      }
+    },
+    {
+      "case": "gf2-negative",
+      "rgba_sha256": "b2c5548a51715f581c4591acc266ac7a0c65b54b7ecd9a49f43499fa9b76c5f1",
+      "passed": true,
+      "counts": {
+        "ClearDepthStencilView": 2,
+        "ClearRenderTargetView": 1,
+        "CreateBuffer": 2,
+        "Map": 44,
+        "Present": 1,
+        "buffers_created_without_initial_data": 2,
+        "object_observation_records": 49,
+        "pipeline_setter_records": 142,
+        "private_data_observations": 4,
+        "query_completion_unresolved": 1,
+        "query_metadata_records": 2,
+        "state_or_auxiliary_records": 551,
+        "unmap_observations": 44
+      }
+    },
+    {
+      "case": "bf1",
+      "rgba_sha256": "1f724d1840652f66afd26dd30c95aecd5c1b4932eede56109198f15a8f57a2f6",
+      "passed": true,
+      "counts": {
+        "ClearDepthStencilView": 10,
+        "ClearRenderTargetView": 10,
+        "ClearUnorderedAccessViewFloat": 1,
+        "CopyResource": 2,
+        "CopyStructureCount": 6,
+        "CopySubresourceRegion": 7,
+        "Dispatch": 60,
+        "DispatchIndirect": 13,
+        "Draw": 79,
+        "DrawIndexed": 41,
+        "DrawIndexedInstanced": 1053,
+        "DrawInstanced": 29,
+        "GenerateMips": 2,
+        "Map": 4151,
+        "Present": 1,
+        "UpdateSubresource": 27,
+        "map_read_observations": 2,
+        "map_read_synchronizations": 2,
+        "object_observation_records": 28,
+        "pipeline_setter_records": 2221,
+        "query_completion_unresolved": 17,
+        "query_metadata_records": 17,
+        "state_or_auxiliary_records": 7354,
+        "unmap_observations": 4153,
+        "unresolved_input_layout_setters": 2,
+        "unresolved_output_setters": 6,
+        "unresolved_shader_setters": 4,
+        "unresolved_srv_setters": 2
+      }
+    },
+    {
+      "case": "bf1-negative",
+      "rgba_sha256": "cd3a3066f984b1c317fbeefec2836503f32078321d3dc1f367465f2c06d435bf",
+      "passed": true,
+      "counts": {
+        "ClearDepthStencilView": 10,
+        "ClearRenderTargetView": 10,
+        "ClearUnorderedAccessViewFloat": 1,
+        "CopyResource": 2,
+        "CopyStructureCount": 6,
+        "CopySubresourceRegion": 7,
+        "Dispatch": 60,
+        "DispatchIndirect": 13,
+        "GenerateMips": 2,
+        "Map": 4151,
+        "Present": 1,
+        "UpdateSubresource": 27,
+        "map_read_observations": 2,
+        "map_read_synchronizations": 2,
+        "object_observation_records": 28,
+        "pipeline_setter_records": 2221,
+        "query_completion_unresolved": 17,
+        "query_metadata_records": 17,
+        "state_or_auxiliary_records": 7354,
+        "unmap_observations": 4153,
+        "unresolved_input_layout_setters": 2,
+        "unresolved_output_setters": 6,
+        "unresolved_shader_setters": 4,
+        "unresolved_srv_setters": 2
+      }
+    }
+  ],
+  "msaa_dual": {
+    "checks": 279,
+    "files": 12,
+    "captured_files": 8,
+    "negative_controls": 4,
+    "passed": true
+  },
+  "runtime": {
+    "actual_replay_reports": 16,
+    "replay_module_counts": [
+      73,
+      74
+    ],
+    "qt_from_package": true,
+    "forbidden_replay_modules": [],
+    "capture_bootstrap_module_count": 39
+  },
+  "refusals": [
+    "existing capture output",
+    "wrong replay build (corrected check with valid runtime)",
+    "extra version arguments"
+  ],
+  "limits": [
+    "Same host, not a separate clean Windows installation",
+    "Installed compiler, SDK and GPU drivers remain available",
+    "Eight newly verified self-owned MSAA captures are not GF2 acceptance frames",
+    "Original GPA is a separate development oracle only",
+    "First replay package failure and inconclusive negative check retained; success uses explicit retry evidence"
+  ],
+  "evidence": {
+    "capture-source/validation.json": {
+      "bytes": 4387,
+      "sha256": "ebf0b4cc59e02c485ffef19eb7ac3cc877b369c956d711753df5cf2a81f54d5a"
+    },
+    "capture-source/configure.log": {
+      "bytes": 585,
+      "sha256": "f99173a6c9a2c18f3d8c395add543961ed1678818f17b42ee4ef1c09c6498fd8"
+    },
+    "capture-source/build.log": {
+      "bytes": 29369,
+      "sha256": "f91a41151598b62ae1c61f7f2886871be594202ac481615c40c142b026a949e8"
+    },
+    "capture-source/ctest.log": {
+      "bytes": 15135,
+      "sha256": "b86e4712ae6d9783352395804e1e463668f57cca37557ac999a1191caefdd5c4"
+    },
+    "capture-source/package.log": {
+      "bytes": 113,
+      "sha256": "f3b8ad8f162c7f119e822ea56761a8c6e0d14acc5f9d18c5fb7a99b27b43513a"
+    },
+    "capture-source/package/manifest.json": {
+      "bytes": 1085,
+      "sha256": "341e24c04c2c13d43ba741cc1eb9b54e3194d7445eb63f10a83cd100cc2bf8b4"
+    },
+    "capture-source/packaged-live/results.json": {
+      "bytes": 292955,
+      "sha256": "e09a638de33f92185d6622a26daf6410c565b72c8d7911c3a3b47a7346faca1b"
+    },
+    "capture-source/packaged-msaa/results.json": {
+      "bytes": 23889,
+      "sha256": "fd7e88dc5794cf5284e25d5201ccb2a068ab5b9ca90a3e436adf59a9fc91837e"
+    },
+    "replay-source/validation.json": {
+      "bytes": 3004,
+      "sha256": "bd28f798608d868251ecfb457b037952953bdd5deca74180429fa9064fce04f4"
+    },
+    "replay-source/configure.log": {
+      "bytes": 1202,
+      "sha256": "a52aae5fa0526c4ff5f8365067b4a95e312faa660408e83509e52d7b65bf00f1"
+    },
+    "replay-source/build.log": {
+      "bytes": 11412,
+      "sha256": "04172973436f6cbc91382ffc4058ed82399288b0c2e0315de02f0b144b93e42d"
+    },
+    "replay-source/package.log": {
+      "bytes": 840,
+      "sha256": "823276352ec8be206d615718d49c03e070b75d0f0b4fee61526a963c62ed7e75"
+    },
+    "replay-source/package-retry.log": {
+      "bytes": 3030,
+      "sha256": "bcd3a43d5b5c7eb1e21de457a27b3614ffeda5d470b5a3f764225f7a98e6f859"
+    },
+    "replay-source/package-retry.json": {
+      "bytes": 7892,
+      "sha256": "4d228d18bb4620d240d0f4bc55c88aea7e31f2b8f16211559dd151b20050d872"
+    },
+    "replay-target-audit.json": {
+      "bytes": 688,
+      "sha256": "f582ab3c0ebb33211ec1da0021819fc178755bacd0825919b83db0dfb40e4e58"
+    },
+    "package-import-audit.json": {
+      "bytes": 5001,
+      "sha256": "bee868e9f35695016d63fed34b48367f081a59085224bf8e0f61b6de4ffdd367"
+    },
+    "runtime-audit.json": {
+      "bytes": 10408,
+      "sha256": "6c882fab87ec7ddf9d93f954a19196cbae092966a32917f8d8eee63ce34c244c"
+    },
+    "golden/validation.json": {
+      "bytes": 3387,
+      "sha256": "a1f6d11deab2e8324c8626ab359b139abf8a83257d06874c3cb6a251a357b84a"
+    },
+    "msaa-dual/validation.json": {
+      "bytes": 27036,
+      "sha256": "6aa7aad63b2e151e66bc7ecc35170aa94bb5433ee83a1e70684c082c9cd4bd3d"
+    },
+    "msaa-dual/inputs.json": {
+      "bytes": 1453,
+      "sha256": "2b7f4a6ffdc0da1c2d5550f005638c09dbeb8eba2aeb8ce3ac8c989c5fe0280c"
+    },
+    "refusal-checks.json": {
+      "bytes": 1321,
+      "sha256": "a87ee11b2fd1ed3e560e911d4157574c16f988283d9e8c67f5b8d2cf4a040c3d"
+    },
+    "refuse-capture-as-replay-verified.json": {
+      "bytes": 715,
+      "sha256": "3ff3b446d22b6e36e1195188111f661ff182652dfc7d0394410b61c2ce354c45"
+    },
+    "refuse-capture-as-replay-verified.log": {
+      "bytes": 473,
+      "sha256": "bb8218a227558d24a8294fb48d258bdab067f8f4b429a915f64ec6718b955866"
+    },
+    "audit_imports.py": {
+      "bytes": 1402,
+      "sha256": "4cccca8c4bcb8fa7227593ed096005ad2af1ad0eae4fef3ee25e66abe0d2adca"
+    },
+    "validate_runtime.py": {
+      "bytes": 2477,
+      "sha256": "4a49764bf13343813ba7eea042e925d51d4f0a848671a56680aa29bc1fd80160"
+    },
+    "local-ctest.log": {
+      "bytes": 648,
+      "sha256": "323ec63ee9af1b0eccc97c2b8f05c042f0f30147a75561565ec74e497c23f6f8"
+    }
+  }
+}
