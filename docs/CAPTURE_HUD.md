@@ -803,3 +803,35 @@ use or every external-interface race.
 The change adds tests only; production runtime bytes remain those verified at
 `7326f1a`. See `present_concurrency_progress` in the evidence JSON. The live GF2
 session remains untouched pending the isolated physical hold.
+
+## Mapped resources, interface escapes and cancellation guards
+
+The native-resource HUD fault fixture now probes three live mapping cases before
+its failure tests. Dynamic texture and IDXGISurface maps span three Presents;
+HUD is skipped before decoration with a located reason. Mappings remain active,
+application bytes are exact after Unmap, and the next Present resumes HUD.
+An outstanding dynamic buffer map remains untouched while HUD continues to draw
+through private textures. This distinguishes the supported isolated-buffer case
+from unsafe texture/external mappings; it does not weaken the guard.
+
+A separate process variant obtains the real, unsupported ID3D11Debug interface
+through the wrapped device. The returned native pointer and feature-mask getter
+match the native device result. QueryInterface and IID
+`79cf2233-7536-4948-9d36-1e4692dc5760` appear in the capability gap; HUD skips with
+`HUD skips untracked interfaces`, an already armed frame fails, and the shared
+request entry rejects later capture. This is an actual native interface escape,
+not a direct call to the test's gap reporter.
+
+Control-thread cancellation is combined with HUD rendering while Armed,
+Capturing, and Capturing followed by an injected device-removal Present result.
+All settle as Cancelled on the correct thread, preserve native results and clean
+application pixels, show Cancelled feedback, and publish nothing. A separate
+missing-directory writer failure becomes Failed without leaking a file. The
+four existing Present failures and restoration-failure variant remain covered.
+Each variant verifies native object cleanup and an empty Debug Layer warning/error
+list. These tests use real DX11 resources and controlled Present/GetBuffer
+results; they do not claim actual driver removal or screen presentation.
+
+There are **12 cases per driver/variant**, with WARP/hardware and restoration/
+interface variants: **48 cases** in each build profile. Evidence is under
+`mapping_guard_progress` in the JSON. The runtime is unchanged from `7326f1a`.

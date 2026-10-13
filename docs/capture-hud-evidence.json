@@ -708,7 +708,7 @@
     },
     "runtime_sha256": "64afb8680eb56248978dd7a7ac35265ffc45e54a4fc132202f2951a3a3e6af05"
   },
-  "latest_progress": "present_concurrency_progress; real native Present/context protected concurrency verified in both build profiles without touching the GF2 hold baseline",
+  "latest_progress": "mapping_guard_progress; 48 mapped-resource/interface/cancellation/failure cases pass in each build profile; physical-input and remaining interactive acceptance are open",
   "concurrency_progress": {
     "implementation_base": "1ecbb95",
     "status": "reproduced lock inversion repaired; interactive regression pending",
@@ -1671,5 +1671,45 @@
       "artifacts/capture-hud-present-concurrency-hardware.json": "51f23b90497086e7b0fea9363f785a491687f71218907c106cada5562f126b4a",
       "artifacts/capture-hud-present-concurrency-diagnostic.log": "fbc8daffb4746566f90d73604308082e28b33dfaec4c761ace4c20e0639031a7"
     }
+  },
+  "mapping_guard_progress": {
+    "source_base": "c6a19c5",
+    "production_revision": "7326f1a",
+    "production_changed": false,
+    "runtime_sha256": "dc784f65f6050e923f190b25545a85fd662a3367154b84dac0e74b323e2a7ab9",
+    "cases_per_variant": 12,
+    "capture_only_variants": 4,
+    "capture_only_cases": 48,
+    "capture_only_tests": "4/4",
+    "full_tests": "4/4",
+    "verified": [
+      "Dynamic texture Map spans three Presents: HUD skipped, lifetime and bytes preserved, rendering resumes after Unmap",
+      "Dynamic buffer Map spans three decorated Presents: application bytes and mapping lifetime unchanged",
+      "IDXGISurface Map spans three Presents: HUD skipped, external mapping preserved, bytes exact and rendering resumes",
+      "Actual native ID3D11Debug QueryInterface returns original pointer and callable getter while recording located IID gap; HUD skips; armed and future captures reject",
+      "Control-thread Armed/recording cancellation and cancellation combined with injected device-removal result settle without output and preserve clean pixels/native result",
+      "HUD-active writer missing-directory failure terminates without publication",
+      "Existing four injected Present outcomes and restoration-failure guard retained",
+      "No output/partial files, Debug Layer warnings/errors or tracked native/wrapper leaks"
+    ],
+    "scope": "Native-resource fault facade; no actual screen presentation, full-disk or physical driver-removal claim",
+    "reports": {
+      "restore-hardware": "artifacts\\capture-hud-guards-restore-hardware.json",
+      "restore-WARP": "artifacts\\capture-hud-guards-restore-WARP.json",
+      "escape-hardware": "artifacts\\capture-hud-guards-escape-hardware.json",
+      "escape-WARP": "artifacts\\capture-hud-guards-escape-WARP.json"
+    },
+    "sha256": {
+      "artifacts\\capture-hud-guards-restore-hardware.json": "9c1db5e4df8fbfa38c2621e6f24e849230bbca3f9ff7325b75cbde8d2c4c546b",
+      "artifacts\\capture-hud-guards-restore-WARP.json": "69c89996e914e73fb6aa2dc545546bbc035b11b4f7efbc1690450143ee86c4b4",
+      "artifacts\\capture-hud-guards-escape-hardware.json": "d525db2823d30cfb074238f571fd39c64377fb53c23cb6bee4b2a2b2900d360e",
+      "artifacts\\capture-hud-guards-escape-WARP.json": "c99410a72df4e20d9d2b506db491825093f05a705573a7813237d7e4b464e6de",
+      "src/capture/tests/hud_fault_tests.cpp": "d821272e4b2800a0068977657ae22840b2b061affe7aef4902fb825494d85b99",
+      "artifacts/capture-hud-guards-final-details.log": "645b18bb4044517d2e927038be6c6f39c13bac685816665b4345c1bce47a94b2",
+      "artifacts/capture-hud-guards-final-tests.log": "5bba6ec1e51edd0403903b4ddaa9a7a40b4c6a5361f913e72956048e91767fa7",
+      "artifacts/capture-hud-guards-full-tests.log": "0c15a69e4a02e00f0c639cdf8793c73f8bb6b16c4f5f5a33e468b9b401c907fb",
+      "artifacts/capture-hud-guards-full-details.log": "65dbb2a6c8466641fc57a09bc5237352db3ab63a16f2451b1c68322f67fbae26"
+    },
+    "full_cases": 48
   }
 }

@@ -9,6 +9,7 @@
 #include <wrl/client.h>
 #include <filesystem>
 #include <fstream>
+#include <future>
 #include <iostream>
 using namespace flora::capture;
 using Microsoft::WRL::ComPtr;
@@ -66,7 +67,9 @@ public:
 };
 LRESULT CALLBACK proc(HWND w,UINT m,WPARAM a,LPARAM b){return DefWindowProcW(w,m,a,b);}
 int wmain(int argc,wchar_t** argv){try{
-    require(argc==2 || (argc==3 && std::wstring(argv[2])==L"--hardware"),"Expected a new output directory and optional --hardware");const bool hardware=argc==3;const auto out=fs::absolute(argv[1]);require(!fs::exists(out),"Output already exists");fs::create_directories(out);
+    require(argc>=2 && argc<=4,"Expected a new output directory and optional --hardware/--escape");bool hardware=false,escape=false;
+    for(int i=2;i<argc;++i){const std::wstring option=argv[i];if(option==L"--hardware")hardware=true;else if(option==L"--escape")escape=true;else throw std::runtime_error("Unknown HUD guard test option");}
+    const auto out=fs::absolute(argv[1]);require(!fs::exists(out),"Output already exists");fs::create_directories(out);
     configure_capture_requests(out);hud::Settings settings;settings.mode_key={};settings.capture_key={};configure_hud(settings);
     WNDCLASSW cls{};cls.lpfnWndProc=proc;cls.hInstance=GetModuleHandleW(nullptr);cls.lpszClassName=L"FloraHudFaultOracle";require(RegisterClassW(&cls)!=0,"Window class failed");
     HWND window=CreateWindowW(cls.lpszClassName,L"Flora HUD fault oracle",WS_POPUP,0,0,800,600,nullptr,nullptr,cls.hInstance,nullptr);require(window!=nullptr,"Window failed");
@@ -84,7 +87,55 @@ int wmain(int argc,wchar_t** argv){try{
         const auto id=swap_chain_status()["active"][0]["id"].get<uint64_t>();
         std::vector<uint8_t> clean(800*600*4);for(size_t i=0;i<clean.size();i+=4){clean[i]=32;clean[i+1]=48;clean[i+2]=96;clean[i+3]=255;}
         const auto exact=[&]{require(pixels(device.Get(),context.Get(),buffer.Get())==clean,"Fault left HUD pixels in application storage");};exact();
+        const auto mapped_present=[&](bool should_draw){
+            clear();check(swap->Present(0,0));require(fault->decorated==should_draw,"Mapped-resource HUD guard drew or skipped incorrectly");exact();
+            const auto status=hud_status();require(status["swap_chains"].size()==1,"Mapped-resource swap missing");
+            require(status["swap_chains"][0]["reason"]==(should_draw?"":"HUD skips active texture or external mappings"),"Mapped-resource HUD reason missing");
+        };
+        // A Map borrowed from the application remains valid across Present.
+        // Inspect GPU bytes after Unmap rather than reading write-combined CPU
+        // memory. Private HUD work must neither end nor modify the mapping.
+        {
+            D3D11_TEXTURE2D_DESC td{};td.Width=td.Height=8;td.MipLevels=td.ArraySize=1;td.Format=DXGI_FORMAT_R8G8B8A8_UNORM;td.SampleDesc.Count=1;td.Usage=D3D11_USAGE_DYNAMIC;td.BindFlags=D3D11_BIND_SHADER_RESOURCE;td.CPUAccessFlags=D3D11_CPU_ACCESS_WRITE;
+            ComPtr<ID3D11Texture2D> texture;check(device->CreateTexture2D(&td,nullptr,&texture));D3D11_MAPPED_SUBRESOURCE map{};check(context->Map(texture.Get(),0,D3D11_MAP_WRITE_DISCARD,0,&map));
+            for(UINT y=0;y<8;++y)memset(static_cast<uint8_t*>(map.pData)+size_t(y)*map.RowPitch,0x5a,32);
+            for(unsigned i=0;i<3;++i){mapped_present(false);require(metadata_status()["active_mapping_count"]==1,"HUD changed application texture mapping lifetime");}
+            context->Unmap(texture.Get(),0);require(pixels(device.Get(),context.Get(),texture.Get())==std::vector<uint8_t>(256,0x5a),"HUD changed mapped texture bytes");mapped_present(true);
+            cases.push_back({{"dynamic_texture_map",true},{"skipped_presents",3},{"mapped_bytes_exact",true},{"resumed_after_unmap",true}});
+        }
+        {
+            D3D11_BUFFER_DESC bd{};bd.ByteWidth=128;bd.Usage=D3D11_USAGE_DYNAMIC;bd.BindFlags=D3D11_BIND_VERTEX_BUFFER;bd.CPUAccessFlags=D3D11_CPU_ACCESS_WRITE;
+            ComPtr<ID3D11Buffer> buffer,stage;check(device->CreateBuffer(&bd,nullptr,&buffer));D3D11_MAPPED_SUBRESOURCE map{};check(context->Map(buffer.Get(),0,D3D11_MAP_WRITE_DISCARD,0,&map));memset(map.pData,0x6b,128);
+            for(unsigned i=0;i<3;++i){mapped_present(true);require(metadata_status()["active_mapping_count"]==1,"HUD changed application buffer mapping lifetime");}
+            context->Unmap(buffer.Get(),0);bd.Usage=D3D11_USAGE_STAGING;bd.BindFlags=0;bd.CPUAccessFlags=D3D11_CPU_ACCESS_READ;check(device->CreateBuffer(&bd,nullptr,&stage));context->CopyResource(stage.Get(),buffer.Get());check(context->Map(stage.Get(),0,D3D11_MAP_READ,0,&map));const std::vector<uint8_t> expected(128,0x6b);const bool unchanged=memcmp(map.pData,expected.data(),expected.size())==0;context->Unmap(stage.Get(),0);require(unchanged,"HUD changed mapped buffer bytes");
+            cases.push_back({{"dynamic_buffer_map",true},{"decorated_presents",3},{"mapped_bytes_exact",true}});
+        }
+        {
+            D3D11_TEXTURE2D_DESC td{};td.Width=td.Height=8;td.MipLevels=td.ArraySize=1;td.Format=DXGI_FORMAT_R8G8B8A8_UNORM;td.SampleDesc.Count=1;td.Usage=D3D11_USAGE_STAGING;td.CPUAccessFlags=D3D11_CPU_ACCESS_READ|D3D11_CPU_ACCESS_WRITE;
+            ComPtr<ID3D11Texture2D> texture;check(device->CreateTexture2D(&td,nullptr,&texture));ComPtr<IDXGISurface> surface;check(texture.As(&surface));DXGI_MAPPED_RECT map{};check(surface->Map(&map,DXGI_MAP_WRITE));for(UINT y=0;y<8;++y)memset(map.pBits+size_t(y)*map.Pitch,0x7c,32);
+            for(unsigned i=0;i<3;++i){mapped_present(false);require(has_external_mapping(),"HUD ended application DXGI mapping");}
+            check(surface->Unmap());require(!has_external_mapping(),"DXGI mapping did not end");require(pixels(device.Get(),context.Get(),texture.Get())==std::vector<uint8_t>(256,0x7c),"HUD changed DXGI mapped bytes");mapped_present(true);
+            cases.push_back({{"dxgi_surface_map",true},{"skipped_presents",3},{"mapped_bytes_exact",true},{"resumed_after_unmap",true}});
+        }
         unsigned ordinal=0;
+        // Exercise the control-thread cancellation path with HUD rendering and
+        // a native-resource failure facade in the same Present transaction.
+        for(unsigned mode=0;mode<3;++mode){
+            const auto path=out/(L"cancel-"+std::to_wstring(mode)+L".gpa_frame");fault->result=S_OK;require(arm_capture(id,path).value("ok",false),"Cannot arm HUD cancellation");
+            if(mode){clear();check(swap->Present(0,0));require(capture_progress()["state"]=="Capturing","HUD cancellation did not enter recording");clear();}
+            const auto cancel=std::async(std::launch::async,[]{return cancel_capture();}).get();require(cancel.value("ok",false),"Control cancellation failed");
+            if(mode)require(capture_progress()["busy"],"Control cancellation released GPU state on the wrong thread");
+            fault->result=mode==2?DXGI_ERROR_DEVICE_REMOVED:S_OK;const auto result=swap->Present(2,0);const auto last=GetLastError();
+            require(result==fault->result && last==0x51a7 && fault->decorated,"Cancellation changed native result or skipped HUD");exact();const auto progress=capture_progress();
+            require(progress["state"]=="Cancelled" && !progress["busy"].get<bool>() && !fs::exists(path),"Cancelled HUD frame was published or retained");
+            require(hud_status()["message"]=="Cancelled","HUD cancellation feedback missing");cases.push_back({{"cancel_phase",mode?"recording":"armed"},{"injected_device_removed",mode==2},{"actual_return",uint32_t(result)},{"last_error",last},{"exact_application_pixels",true},{"progress",progress}});
+        }
+        fault->result=S_OK;{
+            const auto path=out/L"missing-directory"/L"writer.gpa_frame";require(arm_capture(id,path).value("ok",false),"Cannot arm HUD writer failure");clear();check(swap->Present(0,0));clear();check(swap->Present(0,0));require(fault->decorated,"Writer-failure boundary did not render HUD");
+            const auto deadline=GetTickCount64()+5000;while(capture_progress()["busy"].get<bool>() && GetTickCount64()<deadline)Sleep(1);const auto progress=capture_progress();
+            require(progress["state"]=="Failed" && !progress["busy"].get<bool>() && !fs::exists(path),"HUD writer failure was not terminal");exact();
+            cases.push_back({{"writer_missing_directory",true},{"exact_application_pixels",true},{"progress",progress}});
+        }
         for(const auto result:{DXGI_STATUS_OCCLUDED,DXGI_ERROR_DEVICE_REMOVED,DXGI_ERROR_DEVICE_RESET,DXGI_ERROR_WAS_STILL_DRAWING}){
             const auto path=out/(L"fault-"+std::to_wstring(ordinal++)+L".gpa_frame");
             require(arm_capture(id,path).value("ok",false),"Cannot arm failure case");fault->result=S_OK;clear();check(swap->Present(0,0));require(capture_progress()["state"]=="Capturing","Capture did not start");clear();
@@ -93,11 +144,21 @@ int wmain(int argc,wchar_t** argv){try{
             const auto progress=capture_progress();require(progress["state"]=="Failed" && !progress["busy"].get<bool>() && !fs::exists(path),"Failed Present published a capture");exact();
             require(object_status().value("interface_gaps",0ull)==0,"Ordinary failed Present disabled forwarding");cases.push_back({{"injected_hresult",uint32_t(result)},{"actual_return",uint32_t(returned)},{"last_error",last},{"decorated",true},{"exact_application_pixels",true},{"progress",progress}});
         }
+        if(escape){
+            fault->result=S_OK;clear();check(swap->Present(0,0));const auto path=out/L"interface-escape.gpa_frame";require(arm_capture(id,path).value("ok",false),"Cannot arm interface guard");
+            ComPtr<ID3D11Debug> native_debug,returned_debug;check(native_device.As(&native_debug));const auto hr=device.As(&returned_debug);check(hr);require(returned_debug==native_debug && returned_debug->GetFeatureMask()==native_debug->GetFeatureMask(),"Unsupported native interface did not forward transparently");
+            const auto gap=object_status()["last_gap"];require(gap["api"]=="QueryInterface" && gap["reason"]=="Interface forwarding is not implemented" && !gap["iid"].get<std::string>().empty(),"Escaped IID was not reported");
+            clear();const auto result=swap->Present(1,0);const auto last=GetLastError();require(result==S_OK && last==0x51a7 && !fault->decorated,"Escaped interface changed result or allowed HUD drawing");exact();
+            require(hud_status()["swap_chains"][0]["reason"]=="HUD skips untracked interfaces","Escaped-interface HUD reason missing");const auto progress=capture_progress();require(progress["state"]=="Failed" && !fs::exists(path),"Interface escape published armed frame");
+            require(submit_capture_request(id,"12345678-1234-4234-8234-123456789abc")["error"]=="capture_capability_incomplete","Interface escape allowed future capture");
+            cases.push_back({{"native_debug_interface_escape",true},{"native_interface_forwarded",true},{"gap",gap},{"hud_skipped",true},{"exact_application_pixels",true},{"progress",progress}});
+        }else{
         fault->result=S_OK;clear();check(swap->Present(0,0));const auto path=out/L"restore-failure.gpa_frame";require(arm_capture(id,path).value("ok",false),"Cannot arm restoration failure");clear();check(swap->Present(0,0));clear();fault->fail_restore=true;
         const auto returned=swap->Present(1,0);const auto last=GetLastError();require(returned==S_OK && last==0x51a7,"Internal restoration error replaced application result");require(fault->decorated,"Restoration failure never drew HUD");
         const auto progress=capture_progress();require(progress["state"]=="Failed" && !fs::exists(path),"Failed restoration published a capture");require(object_status().value("interface_gaps",0ull)>0,"Restoration failure was silent");exact();cases.push_back({{"restore_get_buffer_failure",true},{"actual_return",uint32_t(returned)},{"last_error",last},{"exact_application_pixels",true},{"progress",progress}});
         const auto rejected=submit_capture_request(id,"12345678-1234-4234-8234-123456789abc");require(!rejected.value("ok",false) && rejected["error"]=="capture_capability_incomplete","Shared capture entry ignored restoration failure");
         fault->fail_restore=false;clear();check(swap->Present(0,0));require(!fault->decorated,"HUD ignored a restoration capability gap");exact();
+        }
         disconnect_hud();disconnect_capture_requests();context->ClearState();
     }
     for(const auto& entry:fs::directory_iterator(out))require(entry.path().extension()!=L".gpa_frame" && entry.path().extension()!=L".partial","Failure leaked a published or partial frame");
@@ -106,5 +167,5 @@ int wmain(int argc,wchar_t** argv){try{
     info.Reset();real.Reset();native_context.Reset();native_device.Reset();DestroyWindow(window);
     require(metadata_status()["alive"]==0,"Fault cleanup retained native metadata lifetimes");
     std::ofstream file(out/L"results.json");file<<Json{{"scope","Injected Present/GetBuffer results; real DX11 resources; no actual device removal or screen presentation"},{"driver",hardware?"hardware":"WARP"},{"cases",cases},{"no_frame_or_partial_files",true},{"no_debug_warnings",true},{"wrapped_objects_released",true},{"future_capture_rejected",true}}.dump(2);
-    std::cout<<"Five injected HUD failures preserve application bytes/results and publish no frame; native resources and Debug Layer verified\n";return 0;
+    std::cout<<cases.size()<<" HUD mapping/interface/failure cases preserve application bytes/results and publish no frame; native resources and Debug Layer verified\n";return 0;
 }catch(const std::exception& e){std::cerr<<e.what()<<'\n';return 1;}}
