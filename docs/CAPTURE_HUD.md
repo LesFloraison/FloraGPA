@@ -725,3 +725,48 @@ runs are retained. No physical long-hold response arrived during the isolated
 baseline window, so that gate is still pending. Buffered-only Raw Input is no
 longer an implementation gap. Broader input/fault stress and formal GF2 **0/6**
 remain separate, uncompleted gates; this revision changes no replay/format code.
+
+## Hidden GPU state and presentation teardown
+
+`capture_hud_hidden_state` and its hardware variant execute actual native
+Present/Present1 calls, then repeat the same operations through production
+wrappers. Each device covers SEQUENTIAL and FLIP_SEQUENTIAL with both APIs.
+The independent application checks exact SO bytes at an initial offset and after
+KEEP append, CS/OM counters (37/53, then 38/53 after application dispatch), shader
+and resource getter identities, pipeline/SO query counts, both predicate binding
+values and the observable NULL-predicate BOOL. Active queries/predication skip
+HUD with explicit reasons; ordinary safe Presents show it. TEST and invalid-sync
+Presents, and all 800x600 retained scene pixels, are included. Debug Layer reports
+no warnings/errors. These are HUD-state tests, not newly supported capture wire
+layouts for SO or predicates.
+
+The fixture exposed delayed native clean-view destruction: released views kept
+private parent references to real swap buffers after all application proxies were
+gone. Presentation-storage teardown now releases its private storage, then calls
+native Flush under the existing device gate, preserving LastError and application
+bindings. It does not ClearState or flush on every Present. This follows the
+[DX11 deferred-destruction contract](https://learn.microsoft.com/en-us/windows/win32/api/d3d11/nf-d3d11-id3d11devicecontext-flush).
+The final regression has no test-only native reference or post-scope Flush to
+mask the lifetime failure; all tracked native objects and wrappers are released.
+
+The initial SO fixture incorrectly used vertex IDs as marker values; the retained
+native failure led to explicit constant-buffer markers. A separate diagnostic
+found that LastError differs across independent native flip Presents. Both runs'
+raw values remain in evidence; deterministic GPU results/HRESULTs are compared,
+while controlled fault tests retain exact native LastError forwarding checks.
+Initial failures and diagnostic live-object reports remain under the ignored
+`artifacts/capture-hud-hidden-state-*` prefix.
+
+Validation of this change passes **77/77 capture-only CTests**, **23/23 focused
+full-profile CTests** and the **capture UI CTest**, with both complete builds.
+A fresh package using only System32 in PATH completes three exclusive-fullscreen
+captures and **82 exact dual-player/preview/inventory/Draw-zero checks**; retained
+application pixels are exact and forbidden runtime modules are absent.
+
+A new GF2 session (PID 32968) displays the current DLL's compact HUD at the start
+screen. Its baseline has zero captures and zero observed legacy keyboard events.
+The session is left open for an isolated physical hold; no result is inferred
+from the earlier user-confirmed multiple separate presses. Current-run capture,
+home-scene and exit results remain pending at this checkpoint. Historical GF2
+results remain attached to their tested revisions. See `hidden_state_progress`
+in the evidence JSON; formal six-frame acceptance is still **0/6**.

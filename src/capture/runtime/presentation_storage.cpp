@@ -15,7 +15,19 @@ struct PresentationStorage::Impl {
     explicit Impl(IDXGISwapChain* swap):clean(swap){ComPtr<ID3D11Device> device;check(swap->GetDevice(IID_PPV_ARGS(&device)));device->GetImmediateContext(&context);}
 };
 PresentationStorage::PresentationStorage(IDXGISwapChain* swap):impl_(std::make_unique<Impl>(swap)){attach(swap);}
-PresentationStorage::~PresentationStorage()=default;
+PresentationStorage::~PresentationStorage(){
+    const DWORD error=GetLastError();
+    // Released clean views can remain in D3D11's deferred-destruction queue.
+    // Their private parent links retain real swap buffers, so drain that queue
+    // after releasing our storage. Do not ClearState: application bindings and
+    // externally held views must keep their normal lifetimes. The caller owns
+    // the device's presentation gate during teardown and Resize.
+    auto context=impl_->context;
+    impl_.reset();
+    context->Flush();
+    context.Reset();
+    SetLastError(error);
+}
 void PresentationStorage::detach(){impl_->bindings.clear();impl_->aliases.clear();}
 void PresentationStorage::attach(IDXGISwapChain* swap){
     auto& p=*impl_;if(!p.aliases.empty())throw std::logic_error("Presentation aliases already attached");

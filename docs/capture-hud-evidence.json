@@ -10,7 +10,7 @@
   "pending": [
     "General concurrent-context and external-interface stress",
     "Physical cross-monitor DPI transitions; native window-awareness/resolution/resize cases are verified",
-    "Isolated physical single-hold and native focus stress and complete hidden-state failure matrix",
+    "Isolated physical single-hold and native focus stress; native SO/counter/query/predicate HUD preservation is verified",
     "Driver/device-loss and cancellation/cleanup failure matrix",
     "Formal GF2 six-frame acceptance remains separate and 0/6"
   ],
@@ -708,7 +708,7 @@
     },
     "runtime_sha256": "64afb8680eb56248978dd7a7ac35265ffc45e54a4fc132202f2951a3a3e6af05"
   },
-  "latest_progress": "buffered_input_progress; native x64 buffered-only hotkeys verified with unchanged application input, six clean own-fixture captures and fresh GF2 start/home regression",
+  "latest_progress": "hidden_state_progress; eight real native/wrapped Present pairs verify hidden GPU state and teardown; current GF2 compact start HUD visible, isolated physical hold pending",
   "concurrency_progress": {
     "implementation_base": "1ecbb95",
     "status": "reproduced lock inversion repaired; interactive regression pending",
@@ -1538,6 +1538,80 @@
       "artifacts/capture-hud-raw-buffer-native-visible/exit.json": "c54ce20964c75fbba63047a0b958536dba3b0ff5469230b0d2e50b067f7829b8",
       "artifacts/capture-hud-raw-buffer-native-visible/input.json": "18b6dc11366b4b162bb8a050a7e6a11fe547ad05741d7dc9d93c4c004ae18655",
       "artifacts/capture-hud-raw-buffer-native-visible/ready.json": "e4ea97358c367b1380bddf18c690f23d79216724acf0906a572b799cdddffd15"
+    }
+  },
+  "hidden_state_progress": {
+    "source_base": "92cf539",
+    "date": "2026-10-13",
+    "implementation": "Release private presentation storage before draining native deferred destruction under the existing device gate; preserve LastError and application bindings without ClearState or per-Present Flush",
+    "native_wrapped_pairs": 8,
+    "drivers": [
+      "WARP",
+      "hardware"
+    ],
+    "swap_effects": [
+      "SEQUENTIAL",
+      "FLIP_SEQUENTIAL"
+    ],
+    "apis": [
+      "Present",
+      "Present1"
+    ],
+    "verified": [
+      "SO initial byte offset and KEEP append produce four exact marker vectors",
+      "CS/OM counters remain 37/53, then application Dispatch increments only CS to 38",
+      "Application shader, constant, SO and UAV getter identities preserved",
+      "Active pipeline/SO queries skip HUD; exact application statistics retained",
+      "Both predicate binding values preserved; active predicates skip HUD; NULL predicate TRUE preserved",
+      "TEST and invalid-sync Present results, safe HUD visibility and all 800x600 retained scene pixels",
+      "No D3D11 Debug Layer warnings/errors or capability gaps",
+      "All wrappers and tracked native objects released without test-only post-scope Flush"
+    ],
+    "last_error": "Raw values retained for both runs; separate native Present calls vary with timing, so deterministic GPU/HRESULT comparisons omit LastError. Controlled fault suite still verifies exact native result/LastError forwarding.",
+    "tests": {
+      "capture_only": "77/77",
+      "full_focused": "23/23",
+      "qt_capture": "1/1 CTest",
+      "complete_builds": true
+    },
+    "package": {
+      "mode": "exclusive",
+      "system_only_path": true,
+      "captures": 3,
+      "exact_checks": 82,
+      "retained_pixels_exact": true,
+      "forbidden_modules_absent": true
+    },
+    "gf2": {
+      "pid": 32968,
+      "visible_compact_start_screen": true,
+      "baseline_captures": 0,
+      "baseline_legacy_keyboard_events": 0,
+      "physical_hold": "Pending user action in this fresh session; earlier multiple presses are not single-hold proof",
+      "current_capture_home_exit": "Pending",
+      "session_left_running": true
+    },
+    "retained_failures": [
+      "Initial SO vertex-ID oracle corrected to explicit constant markers after native failure",
+      "Live-object audit identified deferred clean-view parent references",
+      "Test-only post-scope Flush diagnostic removed from final regression",
+      "Native flip LastError differs between independent runs; observations retained",
+      "First full build interrupted before tests to keep all GPU checks serial; complete build rerun passed"
+    ],
+    "scope": "HUD state and cleanup only; no replay/format changes or new SO/predicate capture support; formal GF2 acceptance stays 0/6",
+    "sha256": {
+      "src/capture/tests/hud_hidden_state_tests.cpp": "b6522658b975d6a9f291b170480ab7353c72261cd2bf05772d81406946459473",
+      "src/capture/runtime/presentation_storage.cpp": "05d7fbeddc0f5ea266756c7d98fe9cc10ed7696df57592d89946aa20cd414cb1",
+      "build/capture/capture/Release/FloraCaptureRuntime.dll": "dc784f65f6050e923f190b25545a85fd662a3367154b84dac0e74b323e2a7ab9",
+      "artifacts/capture-hud-hidden-state-all-tests.log": "da17ad86991904ea2704fa11590686e2a2fba14a530a65f44d4dc307be7c8a9f",
+      "artifacts/capture-hud-hidden-state-all-details.log": "b69ada9156497db0f67daa8f0e653788e3c1b1bb5d70b70cf045e8cd52d1899a",
+      "artifacts/capture-hud-hidden-state-full-tests.log": "7eda1ccb2c11e17e13b1eec02c9cd93e73d0e98fc0a949d2b1e627f2a97ce640",
+      "artifacts/capture-hud-hidden-state-full-details.log": "d181e39834228812e0ea6c811789bb02f5bc20e5399a59a5cc511bc64981ed34",
+      "artifacts/capture-hud-hidden-state-ui.log": "01d05569e3d5fc5b3d547ec2826c94e5d99a1e364be93b3410908997856fb12c",
+      "artifacts/capture-hud-hidden-state-package-validation.log": "79190afc661ea9c8e6d48be593c1a2a0d8acd8739377dab924c78ea294aa37e4",
+      "artifacts/capture-hud-hidden-state-package-check/target/exit.json": "0afb97a2526bf7f23ba8a80760c35456c20bb4b460b472182b543fae43b6b5ad",
+      "artifacts/capture-hud-hidden-state-gf2/baseline-status.json": "1561015e91958424291dd323934fd99b2b3304f0996aa623a34c0dfd008343cc",
+      "artifacts/capture-hud-hidden-state-gf2/start-hud.png": "8788ca985ed2a3955e4558ccb6021b94818cbc340ba15b7c96a7c4e1d3f035e1"
     }
   }
 }
