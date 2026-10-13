@@ -17,7 +17,7 @@ struct LastErrorScope{DWORD value=GetLastError();~LastErrorScope(){SetLastError(
 void require_unmapped(const std::shared_ptr<ObjectRecord>& record){
     std::lock_guard lock(record->mutex);
     if(!record->mapped_subresources.empty()){
-        const auto [context,subresource]=*record->mapped_subresources.begin();
+        const auto [context,subresource]=record->mapped_subresources.begin()->first;
         throw std::runtime_error("Command references an application-mapped resource (resource="+std::to_string(record->id)+", context="+std::to_string(context)+", subresource="+std::to_string(subresource)+")");
     }
 }
@@ -407,7 +407,15 @@ void FrameRecording::unmap(ID3D11DeviceContext* context,ID3D11Resource* resource
     try{
         auto c=object_record(context),r=object_record(resource);
         if(!c || c->id!=p.context_id || !r)throw std::runtime_error("Unmap context/resource identity mismatch");
-        auto found=p.mappings.find({r->id,subresource});if(found==p.mappings.end())throw std::runtime_error("Unmap has no recorded successful Map");
+        auto found=p.mappings.find({r->id,subresource});if(found==p.mappings.end()){
+            std::string reason="Unmap has no recorded successful Map (resource="+std::to_string(r->id)+", context="+std::to_string(c->id)+", subresource="+std::to_string(subresource);
+            std::lock_guard resource_lock(r->mutex);
+            if(auto history=r->mapped_subresources.find({c->id,subresource});history!=r->mapped_subresources.end()){
+                const auto& stamp=history->second;
+                reason+=", type="+std::to_string(UINT(stamp.type))+", flags="+std::to_string(stamp.flags)+", generation="+std::to_string(stamp.generation)+", map_thread="+std::to_string(stamp.thread)+", unmap_thread="+std::to_string(GetCurrentThreadId());
+            }else reason+=", mapping_history=absent";
+            throw std::runtime_error(reason+")");
+        }
         if(p.frame.commands.size()>=p.options.command_limit)throw std::runtime_error("Frame command limit exceeded");
         auto& command=p.frame.commands.at(found->second.command);const auto& mapped=found->second.mapped;
         auto sub=resource_layout(p.frame.initial_resources.at(r->id).shape).at(subresource);

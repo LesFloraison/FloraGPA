@@ -84,6 +84,10 @@ void storage(bool hardware){
     check(f.context->Map(b.Get(),0,D3D11_MAP_WRITE,0,&mapped));memset(mapped.pData,0,16);f.context->Unmap(b.Get(),0);require(!memcmp(frame.commands[4].data.data(),green,16),"Map record borrowed application memory");
     check(f.context->Map(b.Get(),0,D3D11_MAP_READ_WRITE,0,&mapped));
     auto status=metadata_status();require(status.at("active_mapping_count")==1 && status.at("active_mappings").at(0).at("resource")==id,"Active mapping diagnostic lost identity");
+    const auto& provenance=status.at("active_mappings").at(0);
+    require(provenance.at("map_type")==D3D11_MAP_READ_WRITE && provenance.at("map_flags")==0 && provenance.at("result")==S_OK &&
+        provenance.at("thread")==GetCurrentThreadId() && provenance.at("generation")==5 && provenance.at("cpu_storage")==true &&
+        provenance.at("row_pitch")==mapped.RowPitch && provenance.at("depth_pitch")==mapped.DepthPitch,"Map provenance did not preserve native result");
     recording.reset();recording=begin_recording(f.context.Get());const float independentRed[]{1,0,0,1};f.context->ClearRenderTargetView(f.rtv.Get(),independentRed);
     memset(mapped.pData,0x5a,16);
     auto independent=recording->finish();independent.require_complete();require(independent.commands.size()==1 && !independent.initial_resources.contains(id),"Unrelated pre-frame map entered capture dependencies");
@@ -95,6 +99,7 @@ void storage(bool hardware){
     record_context_call(f.context.Get(),"test::mapped dependency",CommandKind::map,{0,D3D11_MAP_READ},b.Get());
     auto mappedDependency=recording->finish();rejects([&]{mappedDependency.require_complete();},"application-mapped resource");
     recording.reset();recording=begin_recording(f.context.Get());f.context->Unmap(b.Get(),0);auto spanning=recording->finish();rejects([&]{spanning.require_complete();},"Unmap has no recorded successful Map");
+    rejects([&]{spanning.require_complete();},"type=3, flags=0, generation=5");
     require(metadata_status().at("active_mapping_count")==0,"Unmap diagnostic did not clear");
     recording.reset();recording=begin_recording(f.context.Get());check(f.context->Map(b.Get(),0,D3D11_MAP_WRITE,0,&mapped));
     memset(mapped.pData,0x3c,16);f.context->ClearRenderTargetView(f.rtv.Get(),independentRed);f.context->Unmap(b.Get(),0);

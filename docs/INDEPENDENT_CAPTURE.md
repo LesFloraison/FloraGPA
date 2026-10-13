@@ -2038,3 +2038,10 @@ CTests pass, including twelve Qt cases. The next elevated GF2 main-scene refusal
 is an Unmap whose successful Map preceded the recording; no frame is published,
 the game continues rendering and exits normally. Formal acceptance stays 0/6.
 See [Resolve scope and evidence](CAPTURE_RESOLVE.md).
+
+Successful Map scalar provenance now narrows the latest GF2 boundary failure to
+a same-thread buffer WRITE_DISCARD with zero flags. No mapped pointer is retained
+by this diagnostic history, and cross-frame capture still refuses. Both builds,
+13 capture-focused / 14 full-focused CTests and twelve Qt cases pass. The game
+continues after refusal and exits normally; formal acceptance stays 0/6. See
+[Map boundary evidence and remaining work](CAPTURE_MAP_BOUNDARIES.md).

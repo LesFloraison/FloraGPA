@@ -13,6 +13,15 @@
 namespace flora::capture {
 struct DeferredHistory;
 struct DeferredCommandList;
+// Scalar provenance only. Never retain a mapped CPU pointer after the API call.
+struct MappingStamp {
+    uint64_t generation=0;
+    DWORD thread=0;
+    D3D11_MAP type{};
+    UINT flags=0,row_pitch=0,depth_pitch=0;
+    HRESULT result=E_FAIL;
+    bool cpu_storage=false;
+};
 // Capture-owned model. No replay objects, GPU executors or wire record types.
 // Holding a record never holds a native COM object alive.
 struct ObjectRecord {
@@ -25,7 +34,8 @@ struct ObjectRecord {
     std::string creation_api;
     std::vector<uint8_t> creation_bytes;
     std::vector<SubresourceData> creation_subresources;
-    std::set<std::pair<uint64_t,UINT>> mapped_subresources;
+    std::map<std::pair<uint64_t,UINT>,MappingStamp> mapped_subresources;
+    uint64_t mapping_serial=0;
     std::set<uint64_t> active_queries;
     QueryEndStamp last_query_end;
     uint64_t query_end_serial=0;

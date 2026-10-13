@@ -82,12 +82,17 @@ void remember_texture(ID3D11Resource* output,const D3D11_SUBRESOURCE_DATA* initi
     }catch(const std::exception& e){object_gap(api,__uuidof(ID3D11Resource),e.what());}
     catch(...){object_gap(api,__uuidof(ID3D11Resource),"Texture creation data unavailable");}
 }
-void track_mapping(const void* context_proxy,ID3D11Resource* resource,UINT subresource,bool mapped) noexcept{
+void track_mapping(const void* context_proxy,ID3D11Resource* resource,UINT subresource,bool mapped,
+    D3D11_MAP type,UINT flags,HRESULT result,const D3D11_MAPPED_SUBRESOURCE* storage) noexcept{
     try{
         auto record=object_record(resource),context=object_record(context_proxy);
         if(!record || !context)throw std::runtime_error("Mapped object metadata unavailable");
         std::lock_guard lock(record->mutex);const auto key=std::pair{context->id,subresource};
-        if(mapped){if(!record->mapped_subresources.insert(key).second)throw std::runtime_error("Repeated Map without Unmap");}
+        if(mapped){
+            MappingStamp stamp;stamp.generation=++record->mapping_serial;stamp.thread=GetCurrentThreadId();stamp.type=type;stamp.flags=flags;stamp.result=result;
+            if(storage){stamp.row_pitch=storage->RowPitch;stamp.depth_pitch=storage->DepthPitch;stamp.cpu_storage=storage->pData!=nullptr;}
+            if(!record->mapped_subresources.emplace(key,stamp).second)throw std::runtime_error("Repeated Map without Unmap");
+        }
         else if(!record->mapped_subresources.erase(key))throw std::runtime_error("Unmap without tracked Map");
     }catch(const std::exception& e){object_gap(mapped?"Map":"Unmap",__uuidof(ID3D11Resource),e.what());}
     catch(...){object_gap("Map/Unmap",__uuidof(ID3D11Resource),"Map tracking failed");}

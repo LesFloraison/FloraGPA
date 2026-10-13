@@ -1,0 +1,137 @@
+{
+  "schema": 1,
+  "base_commit": "d489f407fa215c92d34027bd247d6e4763b6314e",
+  "status": "Scalar Map provenance verified; cross-frame capture remains refused",
+  "scope": "No mapped pointer retention or bytes; diagnostics only; no Replay/format change",
+  "tests": {
+    "capture_focused": 13,
+    "full_focused": 14,
+    "qt_cases": 12,
+    "both_builds": true
+  },
+  "gf2_preflight": {
+    "pid": 23576,
+    "session_id": "7327cdfd-bf48-42a3-aa7f-feab766682d6",
+    "administrator": true,
+    "scene": "Main character scene entered from animated start screen",
+    "capture_source": "Uncommitted provenance worktree atop d489f40",
+    "game_version": "4.0.5136.14794.28495.3242",
+    "error": "ID3D11DeviceContext::Unmap: Unmap has no recorded successful Map (resource=4717, context=3, subresource=0, type=4, flags=0, generation=506, map_thread=13848, unmap_thread=13848)",
+    "observed_active_mappings_before_request": [
+      {
+        "context": 3,
+        "cpu_storage": true,
+        "depth_pitch": 191872,
+        "device": 2,
+        "generation": 504,
+        "kind": "buffer",
+        "map_flags": 0,
+        "map_type": 4,
+        "resource": 4717,
+        "result": 0,
+        "row_pitch": 191872,
+        "subresource": 0,
+        "thread": 13848
+      },
+      {
+        "context": 3,
+        "cpu_storage": true,
+        "depth_pitch": 16896,
+        "device": 2,
+        "generation": 626,
+        "kind": "buffer",
+        "map_flags": 0,
+        "map_type": 4,
+        "resource": 4640,
+        "result": 0,
+        "row_pitch": 16896,
+        "subresource": 0,
+        "thread": 13848
+      },
+      {
+        "context": 3,
+        "cpu_storage": true,
+        "depth_pitch": 191872,
+        "device": 2,
+        "generation": 504,
+        "kind": "buffer",
+        "map_flags": 0,
+        "map_type": 4,
+        "resource": 4718,
+        "result": 0,
+        "row_pitch": 191872,
+        "subresource": 0,
+        "thread": 13848
+      },
+      {
+        "context": 3,
+        "cpu_storage": true,
+        "depth_pitch": 191872,
+        "device": 2,
+        "generation": 496,
+        "kind": "buffer",
+        "map_flags": 0,
+        "map_type": 4,
+        "resource": 4719,
+        "result": 0,
+        "row_pitch": 191872,
+        "subresource": 0,
+        "thread": 13848
+      },
+      {
+        "context": 3,
+        "cpu_storage": true,
+        "depth_pitch": 16896,
+        "device": 2,
+        "generation": 625,
+        "kind": "buffer",
+        "map_flags": 0,
+        "map_type": 4,
+        "resource": 4650,
+        "result": 0,
+        "row_pitch": 16896,
+        "subresource": 0,
+        "thread": 13848
+      }
+    ],
+    "present_before": 2072,
+    "present_after_failure": 3316,
+    "interface_gaps": 0,
+    "published_files": 0,
+    "partial_files": 0,
+    "disconnected": true,
+    "process_exited": true,
+    "close_method": "Alt+F4 through computer-use",
+    "accepted_frames": 0,
+    "required_frames": 6,
+    "binaries": [
+      {
+        "Path": "D:\\CDXrepo\\FloraGPA-Cpp\\build\\capture\\capture\\Release\\FloraCapture.exe",
+        "Hash": "EE9112DBFAA66619A7194353E2A8ADAA0CB94610F1450509062EF3EEDF4A0E10"
+      },
+      {
+        "Path": "D:\\CDXrepo\\FloraGPA-Cpp\\build\\capture\\capture\\Release\\FloraCaptureRuntime.dll",
+        "Hash": "8C1D630D79325CE47CFA319B110C138719F64D90432A9DA13AC52360FD1EA4DB"
+      }
+    ]
+  },
+  "next_step": "Implement independently tested immediate same-thread boundary-spanning buffer WRITE_DISCARD data/lifetime model; no implicit support for NO_OVERWRITE, other formats or threads",
+  "evidence_sha256": {
+    "artifacts/capture-gf2-map-provenance-20261014/binaries.json": "4a8e1299e442b78cee02e959e1b438616ea7438d1e51c5fc56c929d268987350",
+    "artifacts/capture-gf2-map-provenance-20261014/comparison-rule.json": "d39eceeb66074aac2cad4012730ecb89907223cf194c9798d4c6591b94c80106",
+    "artifacts/capture-gf2-map-provenance-20261014/disconnect.json": "ef2045c01377615cc9c71544f635303558d620302f761cffe371cf5ab8d5feb1",
+    "artifacts/capture-gf2-map-provenance-20261014/environment-final.json": "36ab25c3af92f3b6309578a1ba3bc5b12545d1ac3900edc7a8333c6f24719c10",
+    "artifacts/capture-gf2-map-provenance-20261014/launch.json": "44a7ead81de56cf7d5baa2acf9f564b75d3774daee18c9f5f498dd4b0a9a8ba4",
+    "artifacts/capture-gf2-map-provenance-20261014/request-main.json": "d04d2bfe09c2ab44ec3610a49ef90303c5f301a716dd34178d34ee99d87a4233",
+    "artifacts/capture-gf2-map-provenance-20261014/status-after-failure.json": "bdf5f5d7d0dd55432231f304ec2c4c8efaab9fec3396f0f8bf26e79a80e1def3",
+    "artifacts/capture-gf2-map-provenance-20261014/status-exited.json": "75d63ea0013cac31dc32fb090f1ebb81930b51dcb05c224bd5bf6a8c5fd016bf",
+    "artifacts/capture-gf2-map-provenance-20261014/status-main-before.json": "65bdc0f2dd5f518c0bc2226f0832d01547c34e2df25e3958a5245a5f3f9b1ab0",
+    "artifacts/capture-gf2-map-provenance-20261014/status-main-result.json": "e38163d03c2d0a020d82078fc13ba116cb61387ce1dedd950c16f06a54ccbf1f",
+    "artifacts/capture-gf2-map-provenance-20261014/status-start.json": "f95d0005e4c17503834712e7c839d6109d0e524d6482d59e59cea733c039669b",
+    "artifacts/capture-map-provenance-20261014/build.log": "b1e4b2ee5b3dc51aadcf2ee5d241a5fa23c41254b454d9c997170f43f856d578",
+    "artifacts/capture-map-provenance-20261014/capture-ui.txt": "da9499397dea1987db82c7ef2a84517d359dcd1bde952ea5e919f46a0ce6b6bd",
+    "artifacts/capture-map-provenance-20261014/focused.log": "25451e8446225b13d6c867dd4a7a889309e31b539ef638734e69886f75f05ad8",
+    "artifacts/capture-map-provenance-20261014/full-build.log": "3472c5d4c42974fc460e8b415c997214913cdd7a7c9fc4d91df0c5051088c680",
+    "artifacts/capture-map-provenance-20261014/full-focused.log": "fa74f5a4ad77b93685625bb4406522b8f4853efca1380219dc868f101685f85d"
+  }
+}

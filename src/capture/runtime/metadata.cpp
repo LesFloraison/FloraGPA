@@ -252,9 +252,12 @@ Json metadata_status() {
         if (record && record->alive) {
             std::lock_guard lock(record->mutex);
             ++alive; auto& value = kinds[record->kind]; if (value.is_null()) value = 0u; value = value.get<uint64_t>() + 1;
-            for(const auto& [context,subresource]:record->mapped_subresources){
+            for(const auto& [key,stamp]:record->mapped_subresources){
+                const auto [context,subresource]=key;
                 ++mapping_count;
-                if(mappings.size()<16)mappings.push_back({{"resource",record->id},{"device",record->device},{"context",context},{"subresource",subresource},{"kind",record->kind}});
+                if(mappings.size()<16)mappings.push_back({{"resource",record->id},{"device",record->device},{"context",context},{"subresource",subresource},{"kind",record->kind},
+                    {"generation",stamp.generation},{"thread",stamp.thread},{"map_type",UINT(stamp.type)},{"map_flags",stamp.flags},{"result",stamp.result},
+                    {"row_pitch",stamp.row_pitch},{"depth_pitch",stamp.depth_pitch},{"cpu_storage",stamp.cpu_storage}});
             }
         }
     }

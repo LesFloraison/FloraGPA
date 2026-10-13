@@ -9,7 +9,8 @@ namespace flora::capture {
 struct ObjectRecord;
 ResourceShape resource_shape(ID3D11Resource* native);
 void remember_texture(ID3D11Resource* output, const D3D11_SUBRESOURCE_DATA* initial, const char* api) noexcept;
-void track_mapping(const void* context_proxy, ID3D11Resource* resource, UINT subresource, bool mapped) noexcept;
+void track_mapping(const void* context_proxy, ID3D11Resource* resource, UINT subresource, bool mapped,
+    D3D11_MAP type={},UINT flags=0,HRESULT result=S_OK,const D3D11_MAPPED_SUBRESOURCE* storage=nullptr) noexcept;
 struct SnapshotOptions {
     size_t byte_limit=default_resource_byte_limit;
     uint32_t timeout_ms=5000;

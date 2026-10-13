@@ -100,7 +100,7 @@ void method(std::ostream& out, const std::string& iface, const Json& m) {
         post += "remember_texture(" + output + " ? *" + output + " : nullptr, pInitialData, \"" + api + "\");\n";
     }
     if (iface == "ID3D11DeviceContext" && (name == "Map" || name == "Unmap"))
-        post += "track_mapping(static_cast<IUnknown*>(&owner_), pResource, Subresource, " + std::string(name=="Map"?"true":"false") + ");\n";
+        post += "track_mapping(static_cast<IUnknown*>(&owner_), pResource, Subresource, " + std::string(name=="Map"?"true, MapType, MapFlags, result, pMappedResource":"false") + ");\n";
     if (iface == "ID3D11DeviceContext" && (name == "Begin" || name == "End"))
         post += "track_query(static_cast<IUnknown*>(&owner_), pAsync, " + std::string(name=="Begin"?"true":"false") + ");\n";
     if (iface == "ID3D11DeviceContext" && name == "End")
