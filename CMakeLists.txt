@@ -29,6 +29,8 @@ if(NOT FLORA_BUILD_REPLAY)
 endif()
 if(BUILD_TESTING)
   # Explicit development probe; never deployed and not run by the default tests.
+  add_executable(FloraReplaySyncProbe EXCLUDE_FROM_ALL tools/native/replay_sync_probe.cpp)
+  target_link_libraries(FloraReplaySyncProbe PRIVATE FloraReplay)
   add_executable(FloraPresentBoundaryProbe EXCLUDE_FROM_ALL tools/native/present_boundary_probe.cpp)
   target_link_libraries(FloraPresentBoundaryProbe PRIVATE d3d11 dxgi)
   add_executable(FloraPresentCaptureProbe EXCLUDE_FROM_ALL tools/native/present_capture_probe.cpp)

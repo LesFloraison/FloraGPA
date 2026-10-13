@@ -353,7 +353,14 @@
     "shader-509/shader.dxbc": "18669b668cb39b907a02cfec253f74b24d0c09c6ae73d0d65f27455032b2d869",
     "shader-510/shader.dxbc": "8208195a6263fdfba1261860ff60ab42c14168ec7f9218c4de4824432d532318",
     "pipeline-2305/replay-pipeline.json": "f36e2ef0543071620f3ea996774653385ff1efe588efdb6e1f2d3eac680750ff",
-    "tool-refusals.json": "b1b9cd946c64c38508904ab0452263394affb323450977afe5baa8a119cd9c96"
+    "tool-refusals.json": "b1b9cd946c64c38508904ab0452263394affb323450977afe5baa8a119cd9c96",
+    "sync-results.json": "00a3ab8586b7343d16fba1d122156f584a881c7cba2808db057632f2beb4c658",
+    "sync_probe.py": "01ae710e9a012a515eb15e620fad45fcaf745cb9d61899ef0fdd0add062f0909",
+    "sync-build.log": "fcd7cda7d8365f4a67558eb0422c80a6642a966f0b14caf1eb7fb98e152cce3f",
+    "sync-build-2.log": "00c0c0fb3d963aeabcaf1932e86a1cbb940d71e1ec3d0d346c244fc39b51114b",
+    "sync-format-ctest.log": "bd29c66d48f8e3886c47f56b2beb9efcb1aa28f1d5bd745228d0a89c3119ea89",
+    "golden-repeat-results.json": "6b92fda074996855ad984b34e20c5278fa6e3c5ea532c6b8419638f5300fc03b",
+    "golden_repeat.py": "4be4e9a71db651f69baeb00c81fee2085baa28c3e33fa7d8e4e98bebe53773a5"
   },
   "limits": [
     "No cause established; shader overlays change compiler choices and timing",
@@ -372,5 +379,93 @@
       "rejected": true,
       "exit_code": 1
     }
-  ]
+  ],
+  "explicit_completion_probe": [
+    {
+      "mode": "none",
+      "different_bytes": [
+        814,
+        1742
+      ],
+      "sha256": [
+        "8f39941eb7190f8baf3fa24fc940b1dda0f9436f12f3b89265287212d925879b",
+        "20f75cd2484b5c574e379ba0f74fb5a11ce851a60eb419d20296c0834582332b",
+        "456cb5f1079d560eb3e73dda3aa0c74cb0e4c2a1ae0b58d987246220f17fad8b"
+      ],
+      "waits": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "mode": "maps",
+      "different_bytes": [
+        457,
+        25
+      ],
+      "sha256": [
+        "f8b4e44e3dc88b9ed753dc8a941b0db3698994b08cda06e40effb6ee2b3d77ce",
+        "ad418ebbaa661e58b887b8aa8532c42bba771f7ab30837cf0180100d39e1cfe4",
+        "c539e11eeb94fe2bf3031a2b434dde56c0d4e862b1d13431cee054560a2262f7"
+      ],
+      "waits": [
+        143,
+        143,
+        143
+      ]
+    },
+    {
+      "mode": "all",
+      "different_bytes": [
+        1201,
+        1042
+      ],
+      "sha256": [
+        "fc756a89b4bc0bbea6dbf2e30b11d0cb2bc29a59f7fb4db03f785e4b7d111ca9",
+        "afbe74d9f1da1aa2d650572b1b158d415daf28311a56ce7b7b89313fd6ad4582",
+        "d5044cacc6c03b5fdfa6bb66e211f5ea866d1e143200e9c0dd9a0757fe2be1b1"
+      ],
+      "waits": [
+        449,
+        449,
+        449
+      ]
+    }
+  ],
+  "original_golden_control": {
+    "source": "D:\\CDXrepo\\FloraGPA\\GF2_Exilium_2026_03_03__00_19_35.gpa_frame",
+    "source_sha256": "fc7b7f7de20a578da2977b2ff91d96f5cf80887b393bc85859be8cab1af91c8e",
+    "results": [
+      {
+        "player": "flora",
+        "different_bytes": [
+          0,
+          0
+        ],
+        "sha256": [
+          "2e1abc5eacb0bbfd801f9fe059c305baa9a0786c384b36a42fa5a323dd979fd1",
+          "2e1abc5eacb0bbfd801f9fe059c305baa9a0786c384b36a42fa5a323dd979fd1",
+          "2e1abc5eacb0bbfd801f9fe059c305baa9a0786c384b36a42fa5a323dd979fd1"
+        ]
+      },
+      {
+        "player": "original",
+        "different_bytes": [
+          0,
+          0
+        ],
+        "sha256": [
+          "2e1abc5eacb0bbfd801f9fe059c305baa9a0786c384b36a42fa5a323dd979fd1",
+          "2e1abc5eacb0bbfd801f9fe059c305baa9a0786c384b36a42fa5a323dd979fd1",
+          "2e1abc5eacb0bbfd801f9fe059c305baa9a0786c384b36a42fa5a323dd979fd1"
+        ]
+      }
+    ]
+  },
+  "completion_probe_validation": {
+    "native_build": "passed after adding missing JSON include",
+    "boundary_format_ctest": "4/4 passed",
+    "production_replay_modified": false
+  }
 }

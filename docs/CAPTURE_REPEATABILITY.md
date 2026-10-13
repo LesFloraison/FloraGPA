@@ -80,3 +80,38 @@ shared format changed, so no new CTest/golden-frame coverage is claimed.
 
 The exact-pixel failure, equipment-room 1 GiB resource-budget refusal,
 current-source package proof and two-launch/six-frame acceptance remain open.
+
+## Explicit GPU completion experiment
+
+`FloraReplaySyncProbe` is an excluded development target, linked only to the
+existing replay library. It uses its command observer to insert a private EVENT
+query and wait for completion either after every command or after executable
+Map records. Each wait has a 30-second deadline. No production replay behavior
+or capture encoding changes. Its command line is:
+
+```text
+FloraReplaySyncProbe FRAME NEW_OUT none|all|maps EVENT RESOURCE TYPED_FORMAT SAMPLE
+```
+
+Nine fresh hardware processes repeated the same resource 380 / sample 0 export
+at event 2305:
+
+| Mode | Completed waits per run | Different bytes versus first run |
+|---|---:|---:|
+| none | 0 | 814, 1742 |
+| maps | 143 | 457, 25 |
+| all | 449 | 1201, 1042 |
+
+Waiting after all commands did not remove the variation. This rejects blanket
+per-command synchronization as a demonstrated fix; it does not prove which
+operation inside the draw is responsible. The waits are experimental and must
+not be added to production merely to change mismatch counts.
+
+As a separate control, the preserved original GPA file
+`D:/CDXrepo/FloraGPA/GF2_Exilium_2026_03_03__00_19_35.gpa_frame` executed three times
+in Flora and three times in the original GPA kernel. All six RGBA outputs were
+identical (SHA256 `2e1abc5eacb0bbfd801f9fe059c305baa9a0786c384b36a42fa5a323dd979fd1`).
+This older scene is not the new home-scene capture and does not resolve its
+failure. Build succeeded after adding the initially missing JSON include; the
+original failed build log is retained. Four boundary/format CTests also passed.
+The baseline stores both experiments and their evidence hashes.
