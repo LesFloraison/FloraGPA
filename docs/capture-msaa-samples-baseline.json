@@ -1,0 +1,116 @@
+{
+  "schema": 1,
+  "status": "Color sample readback foundation; MSAA production capture remains refused",
+  "base_commit": "d13a472074975274b6a116751772262ef40e8794",
+  "scope": "Capture-owned CPU model and native bit-preserving per-sample readback; no frame encoding",
+  "native_results": [
+    {
+      "cases": 20,
+      "checks": 1586,
+      "debug_warnings_or_errors": 0,
+      "hardware": false,
+      "passed": true,
+      "scope": "Owned color MSAA sample readback; no MSAA frame encoding"
+    },
+    {
+      "cases": 20,
+      "checks": 1586,
+      "debug_warnings_or_errors": 0,
+      "hardware": true,
+      "passed": true,
+      "scope": "Owned color MSAA sample readback; no MSAA frame encoding"
+    }
+  ],
+  "formats": [
+    "R8G8B8A8_UNORM",
+    "R8G8B8A8_UNORM_SRGB",
+    "R16G16B16A16_FLOAT",
+    "R32G32B32A32_FLOAT",
+    "R32G32_UINT",
+    "R16G16_SINT",
+    "R32_FLOAT",
+    "R8G8_SNORM",
+    "R16_FLOAT",
+    "R8_UNORM"
+  ],
+  "dimensions": [
+    7,
+    5
+  ],
+  "array_layers": 2,
+  "sample_counts": [
+    2,
+    4
+  ],
+  "sample_quality": 0,
+  "oracle": "Sample-frequency integer producer copied to original typed storage; independent CPU packed bytes; exact comparison with no tolerance",
+  "floating_bit_patterns": [
+    "NaN payload",
+    "positive/negative infinity",
+    "negative zero",
+    "subnormal"
+  ],
+  "state_checks": [
+    "No application events/resources or registered helper objects",
+    "PS/CB identity, topology, viewport and LastError",
+    "CPU data survives source COM destruction",
+    "SO append bytes across success and cancellation",
+    "CS/OM UAV counters 37/53 followed by application increment to 38",
+    "Active-query refusal leaves CSInvocations zero",
+    "Predicate refusal retains identity and BOOL",
+    "Budget, timeout, late cancellation and recovery",
+    "Unknown native object refuses without registration",
+    "Foreign device and deferred context refuse"
+  ],
+  "capture_only_ctest": 85,
+  "full_profile_selected_ctest": 88,
+  "qt_cases": 12,
+  "qt_skipped": 0,
+  "full_application_build": true,
+  "gpu_tests_serial": true,
+  "accepted_msaa_capture_files": 0,
+  "accepted_gf2_frames": 0,
+  "new_gf2_launches": 0,
+  "encoder_replay_shared_format_changed": false,
+  "new_golden_run": false,
+  "new_dual_player_run": false,
+  "pending": [
+    "Depth/stencil and remaining packed/BGRA formats",
+    "Broader quality/count/device profiles",
+    "Verified initialization encoding and sample restoration in both players",
+    "Production MSAA snapshot integration",
+    "GF2 two launches/three frames each/two scenes"
+  ],
+  "initial_failure": "Test variable small collided with Windows macro; renamed, compile log retained",
+  "source_sha256": {
+    "src/capture/include/msaa_samples.hpp": "287184cf7368b91a03fab3cdbf12340c35b8ff175fba6f1a26fef10e3782b9e2",
+    "src/capture/model/msaa_samples.cpp": "fc6794cedefd47aea3b5a38cb649522bf9eacdfa21593961fd10d7c8cd040d8c",
+    "src/capture/runtime/msaa_readback.hpp": "70df6521cf6a4a30d6b07a286d2c4a65c5f68830620f5a3edd051703f7fe0ed8",
+    "src/capture/runtime/msaa_readback.cpp": "79ab031aa308120694eb729a8e7a4132d1c9080bfbbb4877d0a9ba7d0cb3e700",
+    "src/capture/tests/msaa_readback_tests.cpp": "cdaad5caff94401367055d638642246d923889f90e297181afb30e054c72099a",
+    "src/capture/CMakeLists.txt": "7969e830ac8879166399d6cd91490d0391f42dfff97570a7e1e9e9be652d7e41"
+  },
+  "binary_sha256": {
+    "build/capture/capture/Release/FloraCaptureMsaaReadbackTests.exe": "6aebada3a3e1f424d5a5dd8ee4f382ca4692d4e04c9c58fcb6d57b8c11370264",
+    "build/capture/capture/Release/FloraCaptureRuntime.dll": "bf5634abc267e54bb234cd49ffc37d264f4021f11ca46a6483be4c98c5ed996e",
+    "build/vs2022/Release/FloraCaptureMsaaReadbackTests.exe": "9b4b08e268b557691eefe36aef22911bcb4c542ea16f92ee2bcd2f99b8bfbfa1"
+  },
+  "evidence_sha256": {
+    "artifacts/capture-msaa-readback-20261013/build.log": "a9f3706538b30076d2b427c6d95f7404c897304a8e764eab692972708aba6291",
+    "artifacts/capture-msaa-readback-20261013/build2.log": "97c726faeca812b1b279df0c96613b0a14884436c5d8f48b98f3c16a6528207c",
+    "artifacts/capture-msaa-readback-20261013/build3.log": "8ebc60ffd991d8d3b32e3a995c6bd6d9bbb03956a8f6c4b12bdf5730a3f19766",
+    "artifacts/capture-msaa-readback-20261013/capture-build.log": "38fc6ee5c8e8c88843712018beb76bc381b465da73c1a51e00ed6889711d490b",
+    "artifacts/capture-msaa-readback-20261013/capture-ctest.log": "93f5f848b4be07f86c7f863002be2435d1054325a1078067cf336c80fd8f3b99",
+    "artifacts/capture-msaa-readback-20261013/capture-detailed.log": "862fb22544650b7d1fe4f7e53e5a201b09fc7f3761083fa0b5b03541e2862842",
+    "artifacts/capture-msaa-readback-20261013/focused.log": "a82180e308fc9d03c962aa52e6ac6463659fd8528e50965052a1182db4585f12",
+    "artifacts/capture-msaa-readback-20261013/focused2.log": "6cf9af4aacf6ab1b4043f505a8059c231d6821b488aa259db4f0d50032851caf",
+    "artifacts/capture-msaa-readback-20261013/full-build.log": "710ef420b925d9b7e2a227f8e2cf21676a7bd5576c1f8f0c620b98e2f9edecb3",
+    "artifacts/capture-msaa-readback-20261013/full-ctest.log": "b117d346f6844cdffcf5f4b330a76a14a9d4758615f6b6de66652fb831c52aec",
+    "artifacts/capture-msaa-readback-20261013/full-detailed.log": "86b3617bfe27cce1619b3dd28fec7cba76f0244f90deb1aa3de272e6ee4a12c0",
+    "artifacts/capture-msaa-readback-20261013/capture-ui.txt": "dafeda868aa5fdb6fc11056cd8238992b0becc6f04421bf8035ac88cecaae4b0"
+  },
+  "references": [
+    "https://learn.microsoft.com/en-us/windows/win32/direct3dhlsl/sm5-object-texture2dmsarray-load",
+    "https://learn.microsoft.com/en-us/windows/win32/api/d3d11/nf-d3d11-id3d11devicecontext-executecommandlist"
+  ]
+}

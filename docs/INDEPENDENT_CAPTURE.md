@@ -1958,3 +1958,13 @@ Final test counts, input hashes and retained evidence paths are recorded in the
 ignored run summary. Replay and shared format sources are unchanged. The latest
 clean source-package proof remains `c57bd39`; current package validation, MSAA,
 broader query/deferred profiles and the six formal scene frames remain pending.
+
+## MSAA sample readback foundation
+
+The subsequent [capture-owned MSAA sample primitive](CAPTURE_MSAA_SAMPLES.md)
+preserves color storage bits per array layer and sample, with native WARP/hardware
+oracles and state-isolation checks. It is separate from ordinary resource data
+and has no Replay dependency. MSAA production snapshot/encoding guards remain;
+depth/stencil and verified dual-player initialization are still required before
+restarting formal GF2 acceptance. This step does not turn the diagnostic files
+above into accepted scene frames.
