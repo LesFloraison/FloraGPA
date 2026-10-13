@@ -28,11 +28,13 @@ def main():
     result['counter_deltas']={key:new[key]-old[key] for key in old}
     for key in ('capture_edges','hotkey_request_attempts','hotkey_requests_accepted'):
         check('exactly-one-'+key,result['counter_deltas'][key]==1)
-    check('legacy-repeats-observed',result['counter_deltas']['legacy_capture_repeat_messages']>0)
+    result['single_submission_measured']=True
+    result['legacy_repeat_suppression_verified']=result['counter_deltas']['legacy_capture_repeat_messages']>0
     check('no-mode-change',result['counter_deltas']['mode_edges']==0 and before['hud']['mode']==after['hud']['mode'])
     progress=after['capture_progress'];request=after['hud']['last_request']
     check('settled-request',not progress['busy'] and not after['hud']['request_pending'] and progress['state'] in ('Completed','Failed'))
-    check('request-identity',request['ok'] and request['request_name']==progress['request_name'] and request['request_name']!=before['hud']['last_request']['request_name'])
+    previous_request=before['hud']['last_request'] or {}
+    check('request-identity',request['ok'] and request['request_name']==progress['request_name'] and request['request_name']!=previous_request.get('request_name'))
     directory=args.session.resolve();frame=directory/progress['request_name']
     check('bounded-output-name',frame.parent==directory and frame.suffix=='.gpa_frame')
     if progress['state']=='Completed':
@@ -45,6 +47,9 @@ def main():
         result['capture_error']=progress['error']
     check('no-partial-file',not list(directory.glob('*.partial')))
     result['snapshot_sha256']={str(path):hashlib.sha256(path.read_bytes()).hexdigest() for path in (args.before,args.after)}
+    # Preserve useful submission/file evidence even when Windows delivered no
+    # typematic messages. The strict repeat-suppression gate remains unchanged.
+    check('legacy-repeats-observed',result['legacy_repeat_suppression_verified'])
     result['passed']=True;args.out.write_text(json.dumps(result,indent=2)+'\n');print(json.dumps(result))
 
 

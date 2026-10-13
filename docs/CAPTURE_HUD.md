@@ -959,3 +959,22 @@ how many failed requests occurred during the hold. The user report and failure
 are preserved without claiming a successful frame or a measured single request.
 The instrumented follow-up must compare counters against a recorded baseline,
 including a positive repeat-message count for the legacy hold experiment.
+
+## Counted user hold after relaunch
+
+On `20e38bf`, session `c8a28530-1129-4ca1-a1cd-f429039763b4` starts with
+zero counters and a null request in `initial.json`. The user confirmed one
+approximately three-second physical hold. One edge, one worker attempt, one
+accepted request and one file were measured; no automated capture chord was
+sent. Legacy repeat messages are zero, so the strict typematic gate remains
+unpassed. Duration is user-reported, not measured. No further user input is
+pending for this observation.
+
+The file executes in Flora and the pinned original player with exact 2560x1440
+backbuffer/preview bytes and no visible HUD. Zeroing 18 Draw counts changes both
+outputs identically. Inventory contains 105 resources; VS/PS exports succeed.
+One unresolved query-completion diagnostic remains. The validator now accepts
+a null previous request and retains all successful submission/file evidence
+before evaluating the unchanged strict repeat gate. A labelled synthetic
+positive-repeat fixture passes and a no-input fixture rejects. Evidence and
+hashes are under `single_hold_progress`; formal GF2 acceptance stays 0/6.

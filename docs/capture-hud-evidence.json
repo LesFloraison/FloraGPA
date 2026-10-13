@@ -10,7 +10,7 @@
   "pending": [
     "General concurrent-context and external-interface stress",
     "Physical cross-monitor DPI transitions; native window-awareness/resolution/resize cases are verified",
-    "Isolated physical single-hold and native focus stress; native SO/counter/query/predicate HUD preservation is verified",
+    "Legacy typematic suppression and key-held-through-focus stress remain unverified; user-attested isolated hold produced exactly one measured submission; ordinary native focus and hidden-state preservation verified",
     "Driver/device-loss and cancellation/cleanup failure matrix",
     "Formal GF2 six-frame acceptance remains separate and 0/6"
   ],
@@ -1615,15 +1615,15 @@
     }
   },
   "acceptance_audit": {
-    "source_commit": "a03429c + publication/Resize fix",
+    "source_commit": "20e38bf",
     "document": "docs/CAPTURE_HUD_ACCEPTANCE.md",
     "delivery_complete": false,
     "installed_reference_hash_rechecked": true,
     "method": "Read implementation/test scope and retained outcomes; component checks do not establish unexecuted live integration cases",
-    "live_gf2_pid": 51016,
-    "live_baseline_files": 1,
-    "pending_input": "Instrumented single-hold check: short-control baseline has one edge, one attempt, one accepted request and zero repeat messages; user action pending.",
-    "latest_evidence": "input_diagnostics_progress"
+    "live_gf2_pid": 14736,
+    "live_baseline_files": 0,
+    "pending_input": null,
+    "latest_evidence": "single_hold_progress"
   },
   "present_concurrency_progress": {
     "source_base": "68b567b",
@@ -2104,9 +2104,9 @@
         "mode_edges": 0
       },
       "short_press_file": "frame-1f651ab6-2838-49f1-ac32-eacd72dd61d8.gpa_frame",
-      "physical_hold_status": "Awaiting user action after instrumented baseline; compare against start-capture-status.json",
+      "physical_hold_status": "User closed this session before the physical hold; superseded by single_hold_progress.",
       "dual_replay_status": "Pending for the newly instrumented DLL",
-      "session_left_running": true
+      "session_left_running": false
     },
     "capture_only_focused_tests": "6/6",
     "full_capture_ui_tests": "1/1",
@@ -2127,6 +2127,114 @@
       "artifacts/capture-hud-counted-hold/start-capture-status.json": "29ff545fd198d7ffbe030e3d26dce7167597d73b6e1f1eef08396897b5e62c4f",
       "artifacts/capture-hud-final-hold/after-hold.json": "9684be1772ec9c44a51799948568dca4384829e1e0d2ec00b85a5b8b04a41269",
       "artifacts/capture-hud-final-hold/outcome.json": "da28ac825c5f4582052692d3a2c53eada77cd1d26d4b5c483070a5ad1b7ea5aa"
+    }
+  },
+  "single_hold_progress": {
+    "source_commit": "20e38bf",
+    "runtime_sha256": "3091d598dbc94dbdce7d725100d4753fb98d4378683655772ceecd072cdf4c84",
+    "pid": 14736,
+    "session_id": "c8a28530-1129-4ca1-a1cd-f429039763b4",
+    "user_report": "User confirmed completion of the requested single approximately three-second Ctrl+Shift+C hold after relaunch.",
+    "duration_source": "User attestation; duration not automatically measured",
+    "automated_capture_chords": 0,
+    "baseline": "initial.json (zero counters and null last_request); baseline.json was recorded after input and is not the zero baseline",
+    "counter_deltas": {
+      "capture_edges": 1,
+      "hotkey_request_attempts": 1,
+      "hotkey_requests_accepted": 1,
+      "legacy_capture_repeat_messages": 0,
+      "legacy_mode_repeat_messages": 0,
+      "mode_edges": 0
+    },
+    "single_submission_measured": true,
+    "legacy_repeat_suppression_verified": false,
+    "strict_hold_validator_passed": false,
+    "strict_hold_validator_reason": "No legacy typematic messages observed; all eleven other submission, identity and publication checks pass. No threshold relaxed.",
+    "published_files": 1,
+    "interface_gaps": 0,
+    "replay": {
+      "capture": "frame-94e4ea53-b761-4878-ac33-4f3c8c912c46.gpa_frame",
+      "capture_sha256": "1fd564a54dfe502796486c964ed7f15d3b98717053a77ebd1ecfcee261d472b5",
+      "draw_zero_changes": 18,
+      "preview_exact": true,
+      "dimensions": [
+        2560,
+        1440
+      ],
+      "resource_count": 105,
+      "exported_shaders": [
+        "25",
+        "26"
+      ],
+      "players": {
+        "captured": {
+          "rgba_sha256": "64a8150af0c389bbca22e1f8b85c2ab04367a2bed5b12f922800927ce27168c9",
+          "counts": {
+            "ClearDepthStencilView": 4,
+            "ClearRenderTargetView": 2,
+            "Draw": 1,
+            "DrawIndexed": 17,
+            "Map": 12,
+            "Present": 1,
+            "present_rtv_unbinds": 1,
+            "query_completion_unresolved": 1,
+            "query_end_observations": 1,
+            "query_metadata_records": 3,
+            "unmap_observations": 12
+          },
+          "original_native": {
+            "player_dll": "C:\\Program Files\\IntelSWTools\\GPA\\dx11_player.dll",
+            "player_sha256": "39061ff329e4a32d0c8375ce9ee15e2017bccab0593943b962a860e11723d38b",
+            "adapter_selection": "Original kernel default (undefined GpuId)",
+            "callbacks": [],
+            "open_status": 0,
+            "playback_status": 0,
+            "closed": true
+          },
+          "dual_exact": true,
+          "reference_pixels_used": false
+        },
+        "draw-zero": {
+          "rgba_sha256": "a58a3a89e3887a384dd3cf6f6f67b37547211fe16bc73f496469a66c3d7353bc",
+          "counts": {
+            "ClearDepthStencilView": 4,
+            "ClearRenderTargetView": 2,
+            "Draw": 1,
+            "DrawIndexed": 17,
+            "Map": 12,
+            "Present": 1,
+            "present_rtv_unbinds": 1,
+            "query_completion_unresolved": 1,
+            "query_end_observations": 1,
+            "query_metadata_records": 3,
+            "unmap_observations": 12
+          },
+          "original_native": {
+            "player_dll": "C:\\Program Files\\IntelSWTools\\GPA\\dx11_player.dll",
+            "player_sha256": "39061ff329e4a32d0c8375ce9ee15e2017bccab0593943b962a860e11723d38b",
+            "adapter_selection": "Original kernel default (undefined GpuId)",
+            "callbacks": [],
+            "open_status": 0,
+            "playback_status": 0,
+            "closed": true
+          },
+          "dual_exact": true,
+          "reference_pixels_used": false
+        }
+      },
+      "formal_gf2_accepted_frames": 0
+    },
+    "visual_inspection": "Replayed start screen has no FloraGPA HUD; preview equals replay exactly.",
+    "query_completion_unresolved": 1,
+    "session_left_running": true,
+    "validator_regression": "Actual null baseline reaches repeat gate; labelled synthetic positive repeat passes; identical no-input snapshots reject.",
+    "formal_gf2_accepted_frames": 0,
+    "sha256": {
+      "artifacts/capture-hud-counted-hold-relaunch/initial.json": "f885b20f03ca4496c40d0e8872f9260270349afdaf78e4ff10e62cffe0a408ac",
+      "artifacts/capture-hud-counted-hold-relaunch/after-hold.json": "7accb98cd0bdbcbe5cd529362e9f3fc8c7bbb64463ec0082faf671ec678337f5",
+      "artifacts/capture-hud-counted-hold-relaunch/hold-validation.json": "35c0820c7193132e402f13373d757bb6d12ddaf8e4081ec2b96e52921761c519",
+      "artifacts/capture-hud-counted-hold-relaunch/validation/validation.json": "eb8be52d0802c55151c5172f21695717e00741d88f9009d1893562bd184aeacc",
+      "artifacts/capture-hud-counted-hold-relaunch/validate.py": "4d7e4dbb50dad45eae607c2b138ab06bdd8ff2b1b09f19114c19ba6fe2a64b0c"
     }
   }
 }
