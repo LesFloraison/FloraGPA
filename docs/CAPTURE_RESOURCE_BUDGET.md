@@ -46,6 +46,9 @@ and target-continuation checks remain in those suites. The larger allowed value
 is not a claim that a 4 GiB workload was exercised by these small fixtures.
 
 Actual test results and hashes are recorded in `capture-resource-budget-baseline.json`.
-This removes a fixed-limit obstacle to another GF2 attempt; equipment-room
-capture and exact dual-player pixels still require real-game verification.
-Formal GF2 acceptance remains 0/6.
+On source revision `7249486`, three consecutive 2048 MiB requests in the GF2
+equipment room complete and both players execute the resulting files. This
+resolves the recording-budget obstacle for that workload. Exact output comparisons
+still fail; formal acceptance remains 0/6. See
+[the equipment-room report](CAPTURE_GF2_EQUIPMENT_ROOM.md) and its baseline for
+capture hashes, comparisons, continued-gameplay evidence and GUI limitations.

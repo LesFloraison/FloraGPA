@@ -1,0 +1,390 @@
+{
+  "schema": "FloraGPA GF2 equipment-room diagnostic baseline 1",
+  "date": "2026-10-14",
+  "source_commit": "7249486",
+  "scope": "Three diagnostic captures in one startup-injected equipment-room session; not a completed formal launch",
+  "formal_accepted_frames": 0,
+  "formal_required_frames": 6,
+  "game_version": "4.0.5136.14794.28495.3242",
+  "binary_hashes": [
+    {
+      "Algorithm": "SHA256",
+      "Hash": "16C1B4184EA7222A6E4A1DF0F0337E6DA92D8BD3AF0AF27E05F1CB1E18C0960C",
+      "Path": "D:\\CDXrepo\\FloraGPA-Cpp\\build\\capture\\capture\\Release\\FloraCapture.exe"
+    },
+    {
+      "Algorithm": "SHA256",
+      "Hash": "9FAB3666E0B73AC116AF831F31C1161F7C42EFC67D9E3DCAA066CE4E1100FDA5",
+      "Path": "D:\\CDXrepo\\FloraGPA-Cpp\\build\\capture\\capture\\Release\\FloraCaptureRuntime.dll"
+    }
+  ],
+  "comparison_rule": {
+    "output": "single-sample RGBA8/BGRA8",
+    "rule": "exact RGBA bytes, zero tolerance",
+    "resource_integers": "exact bytes",
+    "floating_msaa": "not accepted without separately fixed rule",
+    "accepted_frames": 0
+  },
+  "frames": [
+    {
+      "index": 0,
+      "bytes": 1340890202,
+      "session_id": "10ea0a3c-720f-4a12-8c14-671c132978cd",
+      "present_ordinal": 4119,
+      "resource_limit_mib": 2048,
+      "sha256": "9cb667549b7747d01e37285b191534f16ce39a2ba826cfd65b728b593bc17371",
+      "comparisons": {
+        "flora_vs_capture": {
+          "different_pixels": 65,
+          "different_channels": 68,
+          "max_absolute_difference": 1
+        },
+        "original_vs_capture": {
+          "different_pixels": 55,
+          "different_channels": 57,
+          "max_absolute_difference": 1
+        },
+        "flora_vs_original": {
+          "different_pixels": 54,
+          "different_channels": 57,
+          "max_absolute_difference": 1
+        }
+      },
+      "captured_rgba_sha256": "ee9559ce092ad56cd31c05d3c2166d1ecfa44776ffdcf314d9420be835638237",
+      "file": "frame-41ae2ca2-dfda-4165-8c4e-240570167583.gpa_frame",
+      "flora_completed": true,
+      "original_native": {
+        "player_dll": "C:\\Program Files\\IntelSWTools\\GPA\\dx11_player.dll",
+        "player_sha256": "39061ff329e4a32d0c8375ce9ee15e2017bccab0593943b962a860e11723d38b",
+        "adapter_selection": "Original kernel default (undefined GpuId)",
+        "callbacks": [],
+        "open_status": 0,
+        "playback_status": 0,
+        "closed": true
+      },
+      "original_new_framebuffer_count": 1,
+      "original_rgba_sha256": "74f940aa42722b3a9d00d644482ac7d62b66cb6e46fcb96dd3e5014f240220fc",
+      "flora_storage_sha256": "25d92f7e9bec2d6b13f7da23c06d10ffe4db0a4ec2aa21b168a997db8b2721d5",
+      "counts": {
+        "ClearDepthStencilView": 11,
+        "ClearRenderTargetView": 9,
+        "CopyResource": 4,
+        "Dispatch": 3,
+        "Draw": 26,
+        "DrawIndexed": 235,
+        "DrawIndexedInstanced": 341,
+        "Map": 377,
+        "Present": 1,
+        "ResolveSubresource": 9,
+        "annotation_records": 24,
+        "present_rtv_unbinds": 1,
+        "query_completion_unresolved": 1,
+        "query_end_observations": 1,
+        "query_metadata_records": 4,
+        "unmap_observations": 377
+      },
+      "accepted": false
+    },
+    {
+      "index": 1,
+      "bytes": 1340891224,
+      "session_id": "10ea0a3c-720f-4a12-8c14-671c132978cd",
+      "present_ordinal": 5857,
+      "resource_limit_mib": 2048,
+      "sha256": "7bf6a322cc54c5f7feaccec2dcec4b0ee7cfb49808cd9f854a04456d43ab0855",
+      "comparisons": {
+        "flora_vs_capture": {
+          "different_pixels": 42,
+          "different_channels": 46,
+          "max_absolute_difference": 1
+        },
+        "original_vs_capture": {
+          "different_pixels": 42,
+          "different_channels": 44,
+          "max_absolute_difference": 1
+        },
+        "flora_vs_original": {
+          "different_pixels": 30,
+          "different_channels": 32,
+          "max_absolute_difference": 1
+        }
+      },
+      "captured_rgba_sha256": "a2d255c605760f2727e4c0a830de4a1faa85afdf15668d76b7df907031c88186",
+      "file": "frame-8e6efb53-e11f-47ed-af94-04a60ca46b17.gpa_frame",
+      "flora_completed": true,
+      "original_native": {
+        "player_dll": "C:\\Program Files\\IntelSWTools\\GPA\\dx11_player.dll",
+        "player_sha256": "39061ff329e4a32d0c8375ce9ee15e2017bccab0593943b962a860e11723d38b",
+        "adapter_selection": "Original kernel default (undefined GpuId)",
+        "callbacks": [],
+        "open_status": 0,
+        "playback_status": 0,
+        "closed": true
+      },
+      "original_new_framebuffer_count": 1,
+      "original_rgba_sha256": "333ed28defcd42165249985c43393c3f5b546939ef1dd7591d16b22c78893e30",
+      "flora_storage_sha256": "f30b8c0ab5986f1d56b8259bb4cc0b2ba2e663c0c27159d09d11331aaccfca81",
+      "counts": {
+        "ClearDepthStencilView": 11,
+        "ClearRenderTargetView": 9,
+        "CopyResource": 4,
+        "Dispatch": 3,
+        "Draw": 26,
+        "DrawIndexed": 235,
+        "DrawIndexedInstanced": 341,
+        "Map": 377,
+        "Present": 1,
+        "ResolveSubresource": 9,
+        "annotation_records": 24,
+        "present_rtv_unbinds": 1,
+        "query_completion_unresolved": 1,
+        "query_end_observations": 1,
+        "query_metadata_records": 4,
+        "unmap_observations": 377
+      },
+      "accepted": false
+    },
+    {
+      "index": 2,
+      "bytes": 1340889971,
+      "session_id": "10ea0a3c-720f-4a12-8c14-671c132978cd",
+      "present_ordinal": 6146,
+      "resource_limit_mib": 2048,
+      "sha256": "f537ad3186b757b21ee205fa994bfbe1ade0bbca0d40d828ff93e6fdd81b3032",
+      "comparisons": {
+        "flora_vs_capture": {
+          "different_pixels": 64,
+          "different_channels": 66,
+          "max_absolute_difference": 1
+        },
+        "original_vs_capture": {
+          "different_pixels": 183,
+          "different_channels": 210,
+          "max_absolute_difference": 3
+        },
+        "flora_vs_original": {
+          "different_pixels": 145,
+          "different_channels": 172,
+          "max_absolute_difference": 3
+        }
+      },
+      "captured_rgba_sha256": "f045f6767b8b4bd78d42064b9cd76bc44b2972189c9038fc846ccf66a4bbe73f",
+      "file": "frame-cb92440a-b6dc-4936-a68b-90b28a472df4.gpa_frame",
+      "flora_completed": true,
+      "original_native": {
+        "player_dll": "C:\\Program Files\\IntelSWTools\\GPA\\dx11_player.dll",
+        "player_sha256": "39061ff329e4a32d0c8375ce9ee15e2017bccab0593943b962a860e11723d38b",
+        "adapter_selection": "Original kernel default (undefined GpuId)",
+        "callbacks": [],
+        "open_status": 0,
+        "playback_status": 0,
+        "closed": true
+      },
+      "original_new_framebuffer_count": 1,
+      "original_rgba_sha256": "02ad7595c334a9a93c7fa298679c44c22b40cb948fbcb583881c56dfd2c61af5",
+      "flora_storage_sha256": "a3589b239e38f4668cc645c1388b18778e3b412a4a65df97453e0af810b87d3e",
+      "counts": {
+        "ClearDepthStencilView": 11,
+        "ClearRenderTargetView": 9,
+        "CopyResource": 4,
+        "Dispatch": 3,
+        "Draw": 26,
+        "DrawIndexed": 235,
+        "DrawIndexedInstanced": 341,
+        "Map": 377,
+        "Present": 1,
+        "ResolveSubresource": 9,
+        "annotation_records": 24,
+        "present_rtv_unbinds": 1,
+        "query_completion_unresolved": 1,
+        "query_end_observations": 1,
+        "query_metadata_records": 4,
+        "unmap_observations": 377
+      },
+      "accepted": false
+    }
+  ],
+  "native_inspection": {
+    "passed_scoped_native_inspection": true,
+    "original_gui_inspection": "First unmodified file directly opens with rendered final RTV and 638 events; browser rejects; selected shader/resource/state inspection and other two GUI files pending.",
+    "frames": [
+      {
+        "index": 0,
+        "resources": 968,
+        "draws": 602,
+        "dispatches": 3,
+        "shaders": 139,
+        "pipelines": [
+          {
+            "event": 5347,
+            "known_fields": 1302,
+            "unknown_fields": 4
+          },
+          {
+            "event": 5001,
+            "known_fields": 1302,
+            "unknown_fields": 4
+          },
+          {
+            "event": 6377,
+            "known_fields": 1302,
+            "unknown_fields": 4
+          }
+        ],
+        "shader_exports": [
+          38,
+          39,
+          82,
+          867,
+          868
+        ]
+      },
+      {
+        "index": 1,
+        "resources": 968,
+        "draws": 602,
+        "dispatches": 3,
+        "shaders": 139,
+        "pipelines": [
+          {
+            "event": 5347,
+            "known_fields": 1302,
+            "unknown_fields": 4
+          },
+          {
+            "event": 5001,
+            "known_fields": 1302,
+            "unknown_fields": 4
+          },
+          {
+            "event": 6377,
+            "known_fields": 1302,
+            "unknown_fields": 4
+          }
+        ],
+        "shader_exports": [
+          38,
+          39,
+          82,
+          867,
+          868
+        ]
+      },
+      {
+        "index": 2,
+        "resources": 968,
+        "draws": 602,
+        "dispatches": 3,
+        "shaders": 139,
+        "pipelines": [
+          {
+            "event": 5347,
+            "known_fields": 1302,
+            "unknown_fields": 4
+          },
+          {
+            "event": 5001,
+            "known_fields": 1302,
+            "unknown_fields": 4
+          },
+          {
+            "event": 6377,
+            "known_fields": 1302,
+            "unknown_fields": 4
+          }
+        ],
+        "shader_exports": [
+          38,
+          39,
+          82,
+          867,
+          868
+        ]
+      }
+    ]
+  },
+  "negative_control": {
+    "both_players_execute": true,
+    "outputs_equal": true,
+    "output_differs_from_reference": true,
+    "reference_preserved": true,
+    "output_sha256": "bf8296104142b51a431ca4224986f4ea1a5051c87cd896550070bd562c33a2d7"
+  },
+  "original_gui": {
+    "source_frame_sha256": "9cb667549b7747d01e37285b191534f16ce39a2ba826cfd65b728b593bc17371",
+    "browser": {
+      "status": "rejected",
+      "message": "Unsupported API: Other",
+      "api_display": "N/A",
+      "versioned_header_probe": "N/A; not a fix"
+    },
+    "direct_open": {
+      "unmodified_file": true,
+      "opened": true,
+      "adapter": "NVIDIA GeForce RTX 3070 Laptop GPU",
+      "events": 638,
+      "final_rtv": "T:0x2f",
+      "display_format": "R8G8B8A8_UNORM_SRGB",
+      "dimensions": [
+        2560,
+        1440
+      ],
+      "rendered_equipment_room": true,
+      "histogram": true
+    },
+    "selected_draw_dispatch_shader_resource_state_inspection": "pending",
+    "other_two_gui_files": "pending",
+    "automation_failures": [
+      "computer-use request timed out: click",
+      "computer-use request timed out: activate_window"
+    ],
+    "evidence_kind": "Native GUI observations; screenshots retained in task transcript",
+    "acceptance_established": false
+  },
+  "runtime_audit": {
+    "module_count": 142,
+    "forbidden": [],
+    "interface_gaps": 0
+  },
+  "continued_after_captures": {
+    "presents_observed": 8426,
+    "disconnected": true,
+    "game_continued": true,
+    "normal_exit": {
+      "error": "target_exited",
+      "ok": false,
+      "state": "Exited"
+    }
+  },
+  "remaining": [
+    "Exact output correctness; cause of variation unresolved",
+    "Original capture-browser API recognition",
+    "Selected original GUI event/shader/resource/pipeline inspection in all three files",
+    "Two formal launches, three accepted frames each, across two scenes",
+    "Current-source independent-package verification"
+  ],
+  "raw_evidence": "artifacts\\capture-gf2-resource-budget-20261014",
+  "evidence_sha256": {
+    "room-replay-results.json": "16af23b60018ff534573e161c193fc305b2cd3945227bf0a246dbaef7cc111bc",
+    "inspection-audit.json": "c3fcc43831f75ab644ce2bcbe35c1740967f46c3be90518937509f93703f52ec",
+    "inspection-selection.json": "5f93a4591393f3fd3218413a122d3f0c53f2a41ea6688ada1ebcfae6d66e0eed",
+    "negative-control.json": "8c0855c2b86cc244334f24e7792e1fd103edec2bb3d3ba751bd578965aa51fa6",
+    "negative-comparison.json": "41595d73d76b65d780527057e1bbfcb579548261e31af95ea2d2b62157050822",
+    "runtime-module-audit.json": "e02d7cb7f0fe8155b5a327dc9e171600b5561be31796c9b32c23e9b06b6fc39a",
+    "comparison-rule.json": "d39eceeb66074aac2cad4012730ecb89907223cf194c9798d4c6591b94c80106",
+    "environment.json": "9116d0272df1ad5b13c53985360dd7aad0594f962bdefef9b4ded28197b140f2",
+    "binary-hashes.json": "c1b47ab68944908c899b58349d9b9b5f327a8afa60b3a18fc6a002005d2d6cc7",
+    "launch.json": "5f3d693f2ff5d528986c0bd0a37d405bcabb6559b050d8f42705d3d7b245ea90",
+    "status-room-result.json": "3b4e7c2eefd5b6b8057f79d73fdd39f16bc83448bf4a69f62870d2a3ff8d1be7",
+    "status-room-2-result.json": "eed55ea71077de5fb37679841a889a4d953d74937c7d66c640a08f47407c411c",
+    "status-room-3-result.json": "23b314acc7f0b7d2f9f483e11fbc231af24c1860ccdc09540721da3f29470ef4",
+    "status-after-three.json": "79fdffc8e9a93f16f3e61e553023961ac3c7c6ef9a3803b240da0eaafa25b396",
+    "disconnect.json": "abd0e0893b6c8569d89a90d6e36ff4e5e3e6de51f92391ee0b39766b0e4172e4",
+    "status-exited.json": "75d63ea0013cac31dc32fb090f1ebb81930b51dcb05c224bd5bf6a8c5fd016bf",
+    "original-gui-observations.json": "8deeba05d4fd4dc295e948ad5530d89763bd26947560d5b1370eb69084676764",
+    "gui-api-probe.json": "6b72c0e29bfaf2fc05756a6040a8e6999e485252391b27db9692505fdec747d9",
+    "replay_rooms.py": "47d7b941c599d294c8e1c1e0ef9ef7713e3a78382240612d28186fa2ea8628c3",
+    "inspect_rooms.py": "d8ec5aff7595479cf9700d2b0f896c920ff80acc0be877a70e425955e819fede",
+    "replay_negative.py": "bc839e0a8eaef5ea4a2494b83e67250c47297d62e95c6a7a4c69b53f329cdabc"
+  }
+}

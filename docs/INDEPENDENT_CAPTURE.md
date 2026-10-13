@@ -2097,3 +2097,21 @@ publishes nothing; the game continues and exits normally. Formal acceptance is
 still **0/6**, with no tolerance relaxation. See
 [the constant-window report](CAPTURE_CONSTANT_RANGES.md) and
 `capture-constant-range-baseline.json` for precise scope, hashes and evidence.
+
+## Equipment-room recording budget and diagnostics
+
+The CLI now accepts a bounded per-request `--resource-limit-mib` (1..4096,
+default 1024). Private IPC v4 validates it independently in controller and runtime;
+capture-owned recording, final readback and encoding receive the immutable value.
+Both builds, 111 capture CTests, 15 full focused CTests, budget refusal/recovery
+and 23 exact dual-player fixture checks pass. See
+[resource-budget scope](CAPTURE_RESOURCE_BUDGET.md).
+
+Three subsequent GF2 equipment-room requests at 2048 MiB publish successfully,
+and both players execute each file. The game continues after repeated capture and
+disconnect, then exits normally. All three fail the unchanged exact-pixel rule.
+Selected native pipeline/DXBC exports and a 605-work deletion control are recorded.
+Original GPA directly opens the first unmodified file with the rendered room and
+638 events, but its browser rejects API detection; further original-GUI inspection
+is pending. Formal acceptance remains **0/6**. See
+[the equipment-room evidence](CAPTURE_GF2_EQUIPMENT_ROOM.md).

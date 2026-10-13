@@ -321,7 +321,7 @@
     }
   },
   "formal_gf2_accepted_frames": 0,
-  "equipment_room_with_larger_budget": "not yet attempted at this stage",
+  "equipment_room_with_larger_budget": "Three consecutive 2048 MiB requests complete on 7249486; both players execute all files but exact pixels fail. See capture-gf2-equipment-room-baseline.json.",
   "raw_evidence": [
     "artifacts\\capture-resource-budget-20261014",
     "artifacts\\capture-gf2-determinism-20261014"
