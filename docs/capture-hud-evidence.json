@@ -1613,5 +1613,15 @@
       "artifacts/capture-hud-hidden-state-gf2/baseline-status.json": "1561015e91958424291dd323934fd99b2b3304f0996aa623a34c0dfd008343cc",
       "artifacts/capture-hud-hidden-state-gf2/start-hud.png": "8788ca985ed2a3955e4558ccb6021b94818cbc340ba15b7c96a7c4e1d3f035e1"
     }
+  },
+  "acceptance_audit": {
+    "source_commit": "7326f1a",
+    "document": "docs/CAPTURE_HUD_ACCEPTANCE.md",
+    "delivery_complete": false,
+    "installed_reference_hash_rechecked": true,
+    "method": "Read implementation/test scope and retained outcomes; component checks do not establish unexecuted live integration cases",
+    "live_gf2_pid": 32968,
+    "live_baseline_files": 0,
+    "pending_input": "Single physical Ctrl+Shift+C hold; previous multiple presses are not reused"
   }
 }

@@ -1,7 +1,8 @@
 # Native capture HUD
 
-Current integration work is described in **Runtime clean presentation storage**
-below. Earlier sections retain their original component-only scope and evidence.
+The current requirement-by-requirement audit is in
+[CAPTURE_HUD_ACCEPTANCE.md](CAPTURE_HUD_ACCEPTANCE.md). Earlier sections below
+retain their original component-only scope and evidence.
 
 Implementation branch: `feature/dx11-capture`. This work is separate from
 legacy migration parity and the six-frame GF2 acceptance. Delivery is incomplete.
@@ -192,11 +193,14 @@ products, screenshots, captures and raw Ghidra output are not committed.
 
 ## Outstanding gates
 
-General concurrent-context stress, buffered-only raw-input hotkeys, the broader DPI and
-resolution matrix, native long-hold/focus stress, active-query/hidden-state failure
-matrix and actual driver failure/device-loss cases remain open. Multi-buffer,
-borderless and exclusive integration evidence is recorded below and does not
-establish those broader cases. Formal GF2 acceptance remains 0/6.
+The current [acceptance audit](CAPTURE_HUD_ACCEPTANCE.md) identifies the remaining
+integration cases and the exact limits of component evidence. Buffered raw input,
+native DPI/resolution/resize cases, and SO/UAV/query/predicate preservation now
+have verified results in later sections; they are no longer blanket open items.
+Physical hold/focus, simultaneous multi-swap input, actual Present/context races,
+and combined unsafe-state/failure/cancellation coverage remain open, alongside
+physical cross-monitor and actual driver-loss observations. Current GF2 follow-up
+is awaiting its isolated input baseline. Formal GF2 capture acceptance stays 0/6.
 
 ## Clean presentation storage investigation
 
