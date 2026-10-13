@@ -1,6 +1,8 @@
 #include "encoder.hpp"
 #include "resource_layout.hpp"
 #include "query_dependencies.hpp"
+#include "msaa_samples.hpp"
+#include "capture_msaa_shaders.hpp"
 #include "format/Writer.h"
 #include <algorithm>
 #include <cstring>
@@ -30,6 +32,7 @@ class Encoder {
     const EncodeOptions& options_;
     std::map<ObjectId,uint64_t> ids_;
     std::map<uint64_t,Record> records_;
+    std::map<ObjectId,MsaaInitializationLayout> msaa_;
     uint64_t next_=4;
     ObjectId device_=0,context_=0;
     void checkpoint(){if(options_.cancelled && options_.cancelled())throw std::runtime_error("Frame encoding cancelled");}
@@ -68,7 +71,77 @@ class Encoder {
             require(bytes.size()<=UINT32_MAX-b.bytes.size(),"Encoder resource blob overflow");bytes.insert(bytes.end(),b.bytes.begin(),b.bytes.end());
         }return bytes;
     }
+    void preflight_msaa(){
+        size_t bytes=0,planes=0;
+        for(const auto& [id,samples]:frame_.initial_msaa){
+            checkpoint();require(id && id==samples.resource,"Encoder MSAA key/resource identity mismatch");
+            require(!frame_.initial_resources.contains(id),"Encoder resource has both ordinary and MSAA contents");
+            require(id!=frame_.output,"Encoder MSAA output profile unsupported");
+            const auto found=frame_.objects.find(id);require(found!=frame_.objects.end(),"Encoder orphan MSAA initial contents");
+            const auto& o=found->second;require(o.kind=="texture2d" || o.kind=="texture2d1","Encoder MSAA object kind mismatch");
+            require(o.descriptor.size()==(o.kind=="texture2d"?sizeof(D3D11_TEXTURE2D_DESC):sizeof(D3D11_TEXTURE2D_DESC1)),"Encoder MSAA descriptor length mismatch");
+            if(o.kind=="texture2d1")require(descriptor<D3D11_TEXTURE2D_DESC1>(o).TextureLayout==D3D11_TEXTURE_LAYOUT_UNDEFINED,"Encoder explicit MSAA texture layout unsupported");
+            auto plan=validate_msaa_initialization(samples,descriptor<D3D11_TEXTURE2D_DESC>(o),options_.msaa_byte_limit-bytes,options_.msaa_plane_limit-planes);
+            bytes+=plan.bytes;planes+=plan.planes;msaa_.emplace(id,plan);
+        }
+        if(msaa_.empty())return;
+        for(const auto& command:frame_.commands){
+            checkpoint();require(command.kind!=CommandKind::query_end && command.kind!=CommandKind::query_get_data,"Encoder MSAA initialization with query observations is not verified");
+            require(!command.bindings.predicate,"Encoder predicated MSAA frame is not verified");
+            if(command.kind==CommandKind::copy_resource || command.kind==CommandKind::copy_region ||
+               command.kind==CommandKind::update_subresource || command.kind==CommandKind::map || command.kind==CommandKind::unmap)
+                require(!msaa_.contains(command.operand) && !msaa_.contains(command.source),"Encoder MSAA mutation command is not verified");
+        }
+    }
+    template<class T>uint64_t helper_object(uint16_t type,const T& desc){
+        const auto id=allocate();add(id,5,type,Payload{}.q({id,2}).raw(desc));return id;
+    }
+    uint64_t helper_texture(const D3D11_TEXTURE2D_DESC& d,std::span<const uint8_t> data){
+        const auto id=allocate();add(id,5,0x85,Payload{}.q({id,2}).raw(d).value(blob(data)));return id;
+    }
+    template<class T>uint64_t helper_view(uint16_t type,uint64_t resource,const T& d){
+        const auto id=allocate();add(id,5,type,Payload{}.q({id,2,resource}).raw(d));return id;
+    }
+    uint64_t helper_shader(uint16_t type,std::span<const uint8_t> code){
+        const auto data=add(9,0x81,Payload{}.value(uint64_t(code.size())).bytes(code).q({0}));
+        const auto id=allocate();add(id,5,type,Payload{}.q({id,2,0,0,0,0,data}));return id;
+    }
+    void initialize_msaa(){
+        if(msaa_.empty())return;
+        const auto vertex=helper_shader(0x90,msaa_shaders::vertex),pixel=helper_shader(0x92,msaa_shaders::color);
+        D3D11_RASTERIZER_DESC rd{};rd.FillMode=D3D11_FILL_SOLID;rd.CullMode=D3D11_CULL_NONE;rd.DepthClipEnable=TRUE;rd.MultisampleEnable=TRUE;
+        const auto raster=helper_object(0x89,rd),scissors=add(9,0x86,Payload{}.u({0}));
+        for(const auto& [id,plan]:msaa_){
+            checkpoint();const auto& samples=frame_.initial_msaa.at(id);const auto& shape=samples.shape;
+            std::u16string name=u"FloraCapture initialization: MSAA resource ";for(char c:std::to_string(id))name.push_back(char16_t(c));name.push_back(0);
+            add(7,0x327b,Payload{}.q({0,UINT64_MAX-2}).u({0,narrow(name.size()*2)}).bytes({reinterpret_cast<const uint8_t*>(name.data()),name.size()*2}));
+            D3D11_TEXTURE2D_DESC td{shape.width,shape.height,1,shape.array_size,plan.access.storage,{shape.samples,samples.quality},D3D11_USAGE_DEFAULT,D3D11_BIND_RENDER_TARGET,0,0};
+            const auto temporary=helper_texture(td,{});
+            std::vector<uint64_t> views;
+            for(UINT layer=0;layer<shape.array_size;++layer){D3D11_RENDER_TARGET_VIEW_DESC d{};d.Format=plan.access.view;d.ViewDimension=D3D11_RTV_DIMENSION_TEXTURE2DMSARRAY;d.Texture2DMSArray={layer,1};
+                const auto view=helper_view(0x8d,temporary,d);views.push_back(view);add(7,0x32,Payload{}.q({0,1,view}).value<uint8_t>(1).u({0,0,0,0}));}
+            const D3D11_VIEWPORT viewport{0,0,float(shape.width),float(shape.height),0,1};
+            const auto viewports=add(9,0x87,Payload{}.u({1}).raw(viewport));
+            for(const auto& plane:samples.planes){
+                checkpoint();D3D11_TEXTURE2D_DESC d{shape.width,shape.height,1,1,plan.access.view,{1,0},D3D11_USAGE_DEFAULT,D3D11_BIND_SHADER_RESOURCE,0,0};
+                const auto texture=helper_texture(d,plane.bytes);D3D11_SHADER_RESOURCE_VIEW_DESC sd{};sd.Format=d.Format;sd.ViewDimension=D3D11_SRV_DIMENSION_TEXTURE2D;sd.Texture2D.MipLevels=1;
+                const auto srv=helper_view(0x8c,texture,sd);state_block state{};state.mask.fill(UINT32_MAX);
+                state.topology=D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;state.vs_shader=vertex;state.ps_shader=pixel;state.ps_srv[0]=srv;state.rasterizer=raster;
+                state.viewports=viewports;state.scissors=scissors;state.sample_mask=1u<<plane.sample;state.rtv[0]=views.at(plane.array_slice);state.rt_count=1;state.om_uav_start=64;
+                state.om_uav_counts.fill(UINT32_MAX);state.cs_uav_counts.fill(UINT32_MAX);
+                const auto state_id=add(3,3,Payload{}.bytes(encode_state_block(state)));
+                add(7,0x37,Payload{}.q({state_id,0,1}).u({3,0}));
+            }
+            add(7,0x3e,Payload{}.q({0,1,resource_ref(id),temporary}));add(7,0x327c,Payload{}.q({0,UINT64_MAX-2}).u({0}));
+        }
+    }
     void resource(ObjectId id,const FrozenObject& object){
+        if(msaa_.contains(id)){
+            const auto d=descriptor<D3D11_TEXTURE2D_DESC>(object);
+            // Ordinary GenData cannot represent MSAA. The explicit helper
+            // sequence below supplies every sample before application commands.
+            add(ref(id),5,0x85,Payload{}.q({ref(id),2}).raw(d).value(blob({})));return;
+        }
         const auto data=frame_.initial_resources.find(id);require(data!=frame_.initial_resources.end(),"Encoder resource has no initial GPU contents");
         const auto& s=data->second.shape;Payload payload;payload.q({ref(id),id==frame_.output?3ull:2ull});uint16_t type=0;
         if(object.kind=="buffer"){
@@ -86,6 +159,25 @@ class Encoder {
         require(!(s.misc_flags&~allowed),"Encoder special/shared resource flags unsupported");
         payload.value(blob(contents(data->second)));add(ref(id),5,type,std::move(payload));
     }
+    void validate_msaa_view(const FrozenObject& o){
+        const auto& shape=frame_.initial_msaa.at(o.resource).shape;
+        DXGI_FORMAT format=DXGI_FORMAT_UNKNOWN;UINT first=0,count=0;
+        if(o.kind=="srv" || o.kind=="srv1"){
+            const auto d=descriptor<D3D11_SHADER_RESOURCE_VIEW_DESC>(o);format=d.Format;
+            if(d.ViewDimension==D3D11_SRV_DIMENSION_TEXTURE2DMS){require(shape.array_size==1,"Encoder MSAA non-array SRV targets an array");count=1;}
+            else{require(d.ViewDimension==D3D11_SRV_DIMENSION_TEXTURE2DMSARRAY,"Encoder MSAA SRV dimension mismatch");first=d.Texture2DMSArray.FirstArraySlice;count=d.Texture2DMSArray.ArraySize;}
+        }else if(o.kind=="rtv" || o.kind=="rtv1"){
+            const auto d=descriptor<D3D11_RENDER_TARGET_VIEW_DESC>(o);format=d.Format;
+            if(d.ViewDimension==D3D11_RTV_DIMENSION_TEXTURE2DMS){require(shape.array_size==1,"Encoder MSAA non-array RTV targets an array");count=1;}
+            else{require(d.ViewDimension==D3D11_RTV_DIMENSION_TEXTURE2DMSARRAY,"Encoder MSAA RTV dimension mismatch");first=d.Texture2DMSArray.FirstArraySlice;count=d.Texture2DMSArray.ArraySize;}
+        }else throw std::runtime_error("Encoder MSAA view kind unsupported");
+        require(first<shape.array_size && count && count<=shape.array_size-first,"Encoder MSAA view array range invalid");
+        require(format>=DXGI_FORMAT_R8G8B8A8_UNORM && format<=DXGI_FORMAT_R8G8B8A8_SINT &&
+            (shape.format==DXGI_FORMAT_R8G8B8A8_TYPELESS || shape.format==format),"Encoder MSAA view format incompatible");
+        const auto resource=descriptor<D3D11_TEXTURE2D_DESC>(frame_.objects.at(o.resource));
+        const UINT required=(o.kind=="srv" || o.kind=="srv1")?D3D11_BIND_SHADER_RESOURCE:D3D11_BIND_RENDER_TARGET;
+        require((resource.BindFlags&required)!=0,"Encoder MSAA view requires missing bind flag");
+    }
     void object(ObjectId id,const FrozenObject& o){
         if(id==device_ || id==context_)return;
         require(o.device==device_,"Encoder object belongs to another device");
@@ -100,7 +192,8 @@ class Encoder {
         if(o.kind=="buffer" || o.kind=="texture1d" || o.kind=="texture2d" || o.kind=="texture2d1" || o.kind=="texture3d" || o.kind=="texture3d1"){resource(id,o);return;}
         Payload p;p.q({ref(id),2});uint16_t type=0;
         if(o.resource){
-            require(frame_.initial_resources.contains(o.resource),"Encoder view source has no resource data");p.value(resource_ref(o.resource));
+            require(frame_.initial_resources.contains(o.resource) || msaa_.contains(o.resource),"Encoder view source has no resource data");p.value(resource_ref(o.resource));
+            if(msaa_.contains(o.resource))validate_msaa_view(o);
             if(o.kind=="srv" || o.kind=="srv1"){
                 if(o.kind=="srv1"){auto d=descriptor<D3D11_SHADER_RESOURCE_VIEW_DESC1>(o);if(d.ViewDimension==D3D11_SRV_DIMENSION_TEXTURE2D)require(!d.Texture2D.PlaneSlice,"SRV plane selection is not encoded");if(d.ViewDimension==D3D11_SRV_DIMENSION_TEXTURE2DARRAY)require(!d.Texture2DArray.PlaneSlice,"SRV plane selection is not encoded");}
                 p.raw(descriptor<D3D11_SHADER_RESOURCE_VIEW_DESC>(o));type=0x8c;
@@ -170,6 +263,7 @@ public:
     Encoder(const FrozenFrame& frame,const EncodeOptions& options):frame_(frame),options_(options){}
     void write(const std::filesystem::path& path){
         checkpoint();
+        preflight_msaa();
         for(const auto& command:frame_.commands)
             if(command.kind==CommandKind::query_end || command.kind==CommandKind::query_get_data){
                 EventDependencyOptions analysis_options;analysis_options.cancelled=options_.cancelled;
@@ -234,6 +328,7 @@ public:
         add(3,5,0x38,std::move(swap));
         for(const auto& [id,o]:frame_.objects)object(id,o);
         for(const auto& [id,data]:frame_.initial_resources){(void)data;require(frame_.objects.contains(id),"Encoder orphan initial resource");resource_ref(id);}
+        initialize_msaa();
         std::map<std::pair<ObjectId,UINT>,bool> mappings;
         uint64_t sequence=0;
         for(const auto& command:frame_.commands){

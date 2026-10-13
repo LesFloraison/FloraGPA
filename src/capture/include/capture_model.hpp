@@ -30,6 +30,23 @@ struct SubresourceData {
     std::vector<uint8_t> bytes;
 };
 using ObjectId = uint64_t;
+// MSAA contents are separate from ordinary GenData/subresources. Each plane
+// owns exactly one array layer/sample, never resolved pixels or COM references.
+struct MsaaSamplePlane {
+    uint32_t array_slice=0, sample=0;
+    size_t row_bytes=0;
+    std::vector<uint8_t> bytes;
+};
+enum class MsaaSampleEncoding { color_bits, depth16, depth32, depth24_stencil8, depth32_stencil8 };
+struct MsaaSamples {
+    ObjectId resource=0;
+    ResourceShape shape;
+    uint32_t quality=0;
+    // D32S8 uses depth32 followed by stencil in a zero-filled uint32. Unused
+    // padding is canonical zero and does not claim to preserve source bits.
+    MsaaSampleEncoding encoding=MsaaSampleEncoding::color_bits;
+    std::vector<MsaaSamplePlane> planes;
+};
 enum class ShaderStage : size_t { vertex, hull, domain, geometry, pixel, compute, count };
 struct ShaderBindings {
     ObjectId shader=0;
@@ -145,6 +162,7 @@ struct FrozenFrame {
     std::optional<FrameStartCompletion> start_completion;
     std::map<ObjectId,FrozenObject> objects;
     std::map<ObjectId,ResourceContents> initial_resources;
+    std::map<ObjectId,MsaaSamples> initial_msaa;
     std::vector<RecordedCommand> commands;
     ObjectId output=0;
     ResourceContents final_output;

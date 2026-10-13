@@ -7,6 +7,8 @@
 namespace flora::capture {
 struct EncodeOptions {
     std::function<bool()> cancelled;
+    size_t msaa_byte_limit=size_t(1)<<30;
+    size_t msaa_plane_limit=1024;
     // Optional publication gate. Cancellation takes the same mutex and checks
     // published before claiming cancellation. These pointers outlive encode_frame.
     std::mutex* publication_mutex=nullptr;

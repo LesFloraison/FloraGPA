@@ -1,9 +1,10 @@
 # Capture-owned MSAA sample readback
 
-The first MSAA implementation step adds an owned CPU sample model and a private
-native readback primitive. It does **not** enable MSAA frame publication. The
-ordinary resource snapshot and encoder still reject MSAA, so GF2 formal scene
-acceptance remains **0/6**. The latest supported HUD acceptance is separate.
+MSAA work now includes an owned CPU sample model, native readback primitives and
+a scoped color initialization encoder. It does **not** enable live MSAA frame
+capture: the ordinary recording snapshot still rejects MSAA. The encoder only
+accepts inputs that explicitly supply complete, validated sample planes. GF2
+formal scene acceptance remains **0/6**. The supported HUD acceptance is separate.
 
 `MsaaSamples` retains resource identity, original dimensions/format/sample count,
 quality, and a tightly packed plane for each array layer and sample. It cannot
@@ -205,3 +206,55 @@ Remaining work includes a bounded capture-owned initialization lowering model,
 build-time shader generation, broader color/depth/stencil initialization,
 production frame snapshot/encoder integration, and GF2's formal six-frame gate.
 The successful color wire experiment does not establish those requirements.
+
+## Capture-owned initialization encoder
+
+`FrozenFrame::initial_msaa` now carries the owned sample model independently of
+ordinary `initial_resources`. The encoder validates all MSAA inputs before
+allocating initialization records or opening a transaction. Map keys, resource
+identity, object kind, exact descriptor size, dimensions, format, sample count,
+quality and usage must agree. Every layer/sample must appear exactly once in
+canonical order with exact row and plane lengths. Total source-byte and plane
+budgets apply across the entire frame, including multiple MSAA resources.
+Defaults are one GiB and 1,024 planes. Invalid or cancelled inputs publish no file.
+
+MSAA SRVs/RTVs additionally require compatible typed formats, matching MSAA
+view dimensions, bounded array ranges and actual resource bind flags. The current
+encoder permits the RGBA8 color family, quality zero, 2x/4x samples and ordinary
+DEFAULT resources. Depth/stencil initialization, other color families, special
+flags, application MSAA copy/update/map commands, predicates and query-containing
+MSAA frames explicitly refuse. The dual-player corpus currently exercises
+typeless RGBA8 storage, UINT initialization views and UNORM application views;
+the table is not a certification of every family member/device combination.
+
+The encoder emits a labelled initialization region, a private compatible MSAA
+target, owned ordinary plane textures, per-sample masked Draws and a final
+CopyResource. Original resource descriptors remain intact. Empty ordinary
+GenData makes clear that the initial sample data comes from the explicit
+operations. Helper IDs are allocated separately from application object IDs and
+all helpers precede application commands. Each application Draw keeps its full
+captured state and sample mask. Original GUI grouping/context association and
+arbitrary selected-event replay remain separate acceptance requirements.
+
+Capture-owned HLSL is compiled by `FloraCaptureShaderCompiler` during the build.
+Only generated DXBC arrays enter `FloraCaptureEncoder`; its target does not link
+D3DCompiler, D3D11, DXGI, Replay, Core, Qt or the format reader. The dependency
+check now explicitly forbids a D3DCompiler link on the encoder. No runtime shader
+compiler or GPU helper was added to the CPU encoder, and no generated header or
+shader binary is committed.
+
+`FloraCaptureMsaaEncoderTests` supplies real native sample snapshots to the
+production encoder after source COM objects are destroyed. The native fixture is
+shared with the earlier wire experiment without importing replay code. It
+checks malformed models, aggregate limits, incompatible views and cancellation.
+`tools/validate_capture_msaa_encoder.py` executes the resulting files in both
+players and removes initialization Draws only in separate negative-control
+copies. Exact sample-tile pixels, application-Draw deletion controls, shader
+exports, event counts and independent modules are checked. Unlike the previous
+experiment, positive files now come from `encode_frame`.
+
+Runtime recording does not yet populate `initial_msaa`; its existing refusal
+remains deliberate. Production integration, broader initialization formats and
+GF2's six-frame gate are still incomplete. Current evidence and exact regression
+counts are in the baseline's `color_encoder` entry and ignored directory
+`artifacts/capture-msaa-encoder-20261014`. No new GF2/GUI/golden result is implied.

@@ -1978,3 +1978,11 @@ and fixed a production encoder scissor-mask omission; populated and empty arrays
 now update in original GPA. The test-only MSAA writer is not production MSAA
 capture support. Scope, retained failures and evidence are described in
 [the MSAA report](CAPTURE_MSAA_SAMPLES.md#executable-initialization-experiment).
+
+The capture encoder now accepts a separate, validated `initial_msaa` model and
+emits the scoped RGBA8 initialization using build-time DXBC. Its positive files
+pass both players with deletion controls; model limits and view/identity checks
+refuse malformed input before publication. This supersedes the test-only writer
+limitation for that CPU encoding path. Runtime recording still rejects MSAA and
+does not populate the model. Depth/stencil initialization, broader profiles and
+the formal GF2 gate remain pending; see the report's encoder section.

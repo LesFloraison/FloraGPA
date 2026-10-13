@@ -51,4 +51,33 @@ MsaaSamples msaa_sample_layout(const ResourceShape& s,uint32_t quality,size_t by
         result.planes.push_back({layer,sample,row,{}});
     return result;
 }
+MsaaInitializationLayout validate_msaa_initialization(const MsaaSamples& data,
+    const D3D11_TEXTURE2D_DESC& d,size_t byte_limit,size_t plane_limit) {
+    if(!data.resource)throw std::runtime_error("MSAA initialization resource identity is zero");
+    const auto& s=data.shape;
+    if(data.encoding!=MsaaSampleEncoding::color_bits || s.format<DXGI_FORMAT_R8G8B8A8_TYPELESS || s.format>DXGI_FORMAT_R8G8B8A8_SINT)
+        throw std::runtime_error("MSAA initialization format/encoding is not verified");
+    if(data.quality || (s.samples!=2 && s.samples!=4))
+        throw std::runtime_error("MSAA initialization sample count/quality is not verified");
+    if(d.Width!=s.width || d.Height!=s.height || d.MipLevels!=s.mip_levels ||
+       d.ArraySize!=s.array_size || d.Format!=s.format || d.SampleDesc.Count!=s.samples ||
+       d.SampleDesc.Quality!=data.quality || d.MiscFlags!=s.misc_flags)
+        throw std::runtime_error("MSAA initialization descriptor/shape mismatch");
+    if(d.Usage!=D3D11_USAGE_DEFAULT || d.CPUAccessFlags ||
+       (d.BindFlags&~(D3D11_BIND_RENDER_TARGET|D3D11_BIND_SHADER_RESOURCE)))
+        throw std::runtime_error("MSAA initialization resource usage/bind flags unsupported");
+    const auto count=size_t(s.array_size)*s.samples;
+    if(count>plane_limit)throw std::runtime_error("MSAA initialization plane limit exceeded");
+    const auto layout=msaa_sample_layout(s,data.quality,byte_limit);
+    if(data.planes.size()!=layout.planes.size())throw std::runtime_error("MSAA initialization plane count mismatch");
+    size_t bytes=0;
+    for(size_t i=0;i<layout.planes.size();++i){const auto& expected=layout.planes[i];const auto& p=data.planes[i];
+        if(p.array_slice!=expected.array_slice || p.sample!=expected.sample || p.row_bytes!=expected.row_bytes ||
+           p.bytes.size()!=expected.row_bytes*s.height)
+            throw std::runtime_error("MSAA initialization plane identity/layout/length mismatch");
+        if(p.bytes.size()>byte_limit-bytes)throw std::runtime_error("MSAA initialization byte limit exceeded");
+        bytes+=p.bytes.size();
+    }
+    return {msaa_integer_access(s.format),bytes,count};
+}
 }

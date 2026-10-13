@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "status": "Native color/depth readback and experimental color initialization proven; production MSAA capture remains refused",
+  "status": "Native sample readback and scoped production color encoder verified; runtime MSAA capture remains refused",
   "base_commit": "d13a472074975274b6a116751772262ef40e8794",
   "scope": "Capture-owned CPU model and native bit-preserving per-sample readback; no frame encoding",
   "native_results": [
@@ -525,6 +525,187 @@
       "artifacts/capture-msaa-wire-20261014/scissor-mask-original/replay_report.json": "635258dbfbb49956c37a7e85ebe529ce90ebdd4d82d042a1961003e7b901e61c",
       "artifacts/capture-msaa-wire-20261014/warp/2x-complete.gpa_frame": "778648987ba2312fb2b984a1cf86eca7723671656acb0ea3064c1d3de6cb4635",
       "artifacts/capture-msaa-wire-20261014/scissor-mask.gpa_frame": "6616757bf38f5a8e2449038a5acd13b2d338912464753251f67e01a042066139"
+    }
+  },
+  "color_encoder": {
+    "base_commit": "282421e60dce62bd08a4691aae4f83c323b80b3f",
+    "status": "Production CPU encoder initializes validated owned RGBA8 sample planes; runtime recording integration remains refused",
+    "model": "FrozenFrame.initial_msaa is separate from ordinary initial_resources; owned CPU bytes only",
+    "limits": {
+      "aggregate_bytes": 1073741824,
+      "aggregate_planes": 1024
+    },
+    "input_guards": [
+      "resource/map identity",
+      "exclusive ordinary/MSAA ownership",
+      "exact descriptor size and shape",
+      "canonical plane identities, count, row size and payload length",
+      "aggregate budgets",
+      "view type, compatible format, array bounds and bind flags",
+      "resource usage and special flags",
+      "unsupported depth/other color/count/quality/mutation/query/predicate profiles",
+      "cancellation before publication"
+    ],
+    "build_time_shaders": "Native FloraCaptureShaderCompiler compiles capture-owned HLSL; generated DXBC arrays only in encoder; no compiler/GPU/Replay/Reader dependency on encoder target",
+    "wire": "Labelled helper region, compatible private MSAA target, ordinary UINT plane textures, masked per-plane Draws and CopyResource; original MSAA GenData is empty",
+    "native_results": [
+      {
+        "debug_warnings_or_errors": 0,
+        "encoder_refusals": 50,
+        "files": 4,
+        "hardware": false,
+        "passed": true,
+        "scope": "Production MSAA encoder from owned native samples; runtime recording integration pending",
+        "source_gpu_objects_alive": 0
+      },
+      {
+        "debug_warnings_or_errors": 0,
+        "encoder_refusals": 50,
+        "files": 4,
+        "hardware": true,
+        "passed": true,
+        "scope": "Production MSAA encoder from owned native samples; runtime recording integration pending",
+        "source_gpu_objects_alive": 0
+      }
+    ],
+    "dual_player_files": 12,
+    "dual_player_checks": 248,
+    "positive_files": 4,
+    "application_draw_removal_files": 4,
+    "initialization_draw_removal_files": 4,
+    "oracle": "Native pre-frame sample readback and final image plus exact independent CPU sample tiles; source COM objects destroyed before encode; retained reference/preview in removal controls",
+    "verified_profile": "13x7 RGBA8 typeless source, UINT initialization and UNORM application views; two layers, 2x/4x, quality zero; WARP/hardware source devices",
+    "capture_only_regression_ctest": 93,
+    "final_capture_only_focused_ctest": 2,
+    "regression_scope_note": "93-case capture regression preceded the final predicate refusal; final focused encoder cases and all 96 full-profile tests include it",
+    "full_profile_selected_ctest": 96,
+    "qt_cases": 12,
+    "qt_skipped": 0,
+    "build_profiles": [
+      "capture-only-release",
+      "capture-full-release"
+    ],
+    "gpu_tests_serial": true,
+    "production_msaa_encoder": true,
+    "production_msaa_runtime_integration": false,
+    "accepted_msaa_capture_files": 0,
+    "accepted_gf2_frames": 0,
+    "new_gf2_launches": 0,
+    "new_original_gui_run": false,
+    "replay_shared_format_changed": false,
+    "new_golden_run": false,
+    "initial_failures": [
+      "build2.log: shared native fixture needed format include propagation on new test target; corrected with FloraGpaFormat"
+    ],
+    "clean_source_package": "Latest proof is earlier a665593; new shader build generator package validation pending",
+    "pending": [
+      "Runtime recording/freeze integration and capture-only production MSAA acceptance",
+      "Depth/stencil and remaining color initialization",
+      "Broader sample counts/quality/devices",
+      "Query/predicate and MSAA mutation coverage",
+      "Original GUI grouping and selected-event initialization behavior",
+      "Formal GF2 two launches, three frames each, at least two scenes"
+    ],
+    "files": [
+      {
+        "file": "warp/2x-complete.gpa_frame",
+        "sha256": "5733064178eba3e8dfa06d7215a20956961308bf18227f3da59c833a8fdb260f",
+        "expected_sha256": "c1c88b5938469ee1c74d7c22d290f19321df6b19260e90215bcd7f3c1e55e1ac"
+      },
+      {
+        "file": "warp/2x-missing-application-draws.gpa_frame",
+        "sha256": "21fa55ca1636d36fed5edff72c81160bcfa332fa32b4d4ce007f5ea795657dbc",
+        "expected_sha256": "34799da0f161968434fc8f7303fae5fd8dc357e77b928409403606f112f3226a"
+      },
+      {
+        "file": "warp/4x-complete.gpa_frame",
+        "sha256": "cda11f143d112d3d9afd1e1382eceb52fe5992994e23ca0c464442c384e3d3d8",
+        "expected_sha256": "fb05ad65624797b72b80275cf88f26bf272db8eafb9b09d00cbe31c3fb36a58a"
+      },
+      {
+        "file": "warp/4x-missing-application-draws.gpa_frame",
+        "sha256": "47147eeb22531214fea10a40f2cbbeb1bed597e6125bed05da9b627ca5a8869b",
+        "expected_sha256": "4cdac83c367934f6484adfd6b41cb4df8ad9960aaf9c174dd49fc590ede0acb1"
+      },
+      {
+        "file": "warp/2x-missing-initialization.gpa_frame",
+        "sha256": "30e5760158ae5da3345c2bb2ebe044dd970f670cb543e9c5976e5c4c144d2e03",
+        "expected_sha256": "826d3099fc292a2b6d4246005d1032d94494175012c4bc8adbc8eeb7f4fa21a2"
+      },
+      {
+        "file": "warp/4x-missing-initialization.gpa_frame",
+        "sha256": "cd63d3b9956aa8deb7960d12a35c4d58c28b5d9ad959c07706aa5b32278f63ac",
+        "expected_sha256": "ca7e175b4bd3bdd9bf0f767d640a85198c73cffe79a68d7ec4b911d50eb94a4f"
+      },
+      {
+        "file": "hardware/2x-complete.gpa_frame",
+        "sha256": "ceb79c1af90efc589156df269a5d4bdee3c028f396b98eefd56615e3451db0d4",
+        "expected_sha256": "c1c88b5938469ee1c74d7c22d290f19321df6b19260e90215bcd7f3c1e55e1ac"
+      },
+      {
+        "file": "hardware/2x-missing-application-draws.gpa_frame",
+        "sha256": "3524d514635756b4559742f182954032ea3e5cf407d8bdcbf14b686cb741ec99",
+        "expected_sha256": "34799da0f161968434fc8f7303fae5fd8dc357e77b928409403606f112f3226a"
+      },
+      {
+        "file": "hardware/4x-complete.gpa_frame",
+        "sha256": "a55f46895a852dbd8a98cb4b00d4c6327625909196d5fbc3abedd0737b3f3a21",
+        "expected_sha256": "fb05ad65624797b72b80275cf88f26bf272db8eafb9b09d00cbe31c3fb36a58a"
+      },
+      {
+        "file": "hardware/4x-missing-application-draws.gpa_frame",
+        "sha256": "9d7774c7e438daa39770740bb589108dbea54a51232a0a847fc7643c60289d34",
+        "expected_sha256": "4cdac83c367934f6484adfd6b41cb4df8ad9960aaf9c174dd49fc590ede0acb1"
+      },
+      {
+        "file": "hardware/2x-missing-initialization.gpa_frame",
+        "sha256": "4f5bfbedae98ecef0463267ca80bb2b5874fee8042d1dc5c0ef5944ea0198c5b",
+        "expected_sha256": "826d3099fc292a2b6d4246005d1032d94494175012c4bc8adbc8eeb7f4fa21a2"
+      },
+      {
+        "file": "hardware/4x-missing-initialization.gpa_frame",
+        "sha256": "cf5fd37e54262923c385dec56cb35070a141c3e1aff397dc99656836996cae4b",
+        "expected_sha256": "ca7e175b4bd3bdd9bf0f767d640a85198c73cffe79a68d7ec4b911d50eb94a4f"
+      }
+    ],
+    "source_sha256": {
+      "src/capture/CMakeLists.txt": "8ef360af4f83dc54f90a0a651fa0d9eb51150ad0bbff430d87cce50024cbf37c",
+      "src/capture/encoder/encoder.cpp": "63d390a8f59baec0a557bb6cc86d50cdb30d626b3d93073da6edf7a3e36c20a3",
+      "src/capture/encoder/encoder.hpp": "93eb38f6e8667f74ad9d8c5b8d48d80fc895ac0a22cf22249d038af7c53c40d9",
+      "src/capture/include/capture_model.hpp": "12ba4350d6cd4d2fafc7874f6620f95e5d4d479c88ef7ea00f5fd9fefd71ee7c",
+      "src/capture/include/msaa_samples.hpp": "bc381b73b79079010e2ffe016df484b45b55e4c76fe14c39502ceae1bb87b011",
+      "src/capture/model/msaa_samples.cpp": "3310476bfc97e3adb159b44a384d5a9c29ce4d03e3e33c3a7036ae3e174900ae",
+      "src/capture/api/compile_msaa_shaders.cpp": "6e073d2adccfb34e9a77efe5978c1ff8104c682272f96f018b328cad81e86558",
+      "src/capture/shaders/msaa_initialize_vs.hlsl": "b7c659d780bbbf194465f14bf0b839041628d8641cb172eb8781fe9f40871929",
+      "src/capture/shaders/msaa_initialize_uint_ps.hlsl": "4deaa10be05d9d67c8639544831d5372f237ff5ed23777a6bf92af4af933b465",
+      "src/capture/tests/msaa_encoder_tests.cpp": "d61db672c282857c0a035ecbc0bff06c2f0e8b793e5a1d07423dda126dbd7ebb",
+      "src/capture/tests/msaa_native_fixture.hpp": "3e309c63938f089fbeb66671018542a60e4c423cf33c0914c67f0656cd6c3159",
+      "src/capture/tests/msaa_encoding_tests.cpp": "46b50045a012f91ae1b494e55a1364cafab03a88398be4e22f7e6536901d914d",
+      "tools/validate_capture_msaa_encoder.py": "437c1071550da919e2c6e9f427a7f83b6b8334d63d731e1f3b67048c0bd800f9",
+      "tools/check_capture_boundaries.cmake": "aeeb5f835464ac0e06fbcedd88a28453cd2dbb152634730b5c7778545d6435cd"
+    },
+    "generated_shader_header_sha256": {
+      "build/capture/src/capture/generated/capture_msaa_shaders.hpp": "c774f6cb8aafca9d09ec1604e1e5ee2f15c6c30ce8e56f9b9cb9be83263d3ee7",
+      "build/vs2022/src/capture/generated/capture_msaa_shaders.hpp": "c774f6cb8aafca9d09ec1604e1e5ee2f15c6c30ce8e56f9b9cb9be83263d3ee7"
+    },
+    "evidence_sha256": {
+      "artifacts/capture-msaa-encoder-20261014/dual-final/validation.json": "55d01e7507de91b6e141e5d52a77c1e6e3afab05c9bae0398133eed660e0ec11",
+      "artifacts/capture-msaa-encoder-20261014/dual-final/inputs.json": "3c62ae1130fbbd97c830df23d4e0c4e6cc14af06bd0d2ee65970ad9748a1b199",
+      "artifacts/capture-msaa-encoder-20261014/dual/validation.json": "8a0077a019ed337e3a1190763c7223794b78f58a6f28b728bd4acaa5ec6219c9",
+      "artifacts/capture-msaa-encoder-20261014/capture-ctest.log": "5128dadc7f7d6be87e4a2351da454c92737202ab31b8c14010288d365e1225b6",
+      "artifacts/capture-msaa-encoder-20261014/capture-detailed.log": "f166167d3a859ca41682f72143c519534c01c2cdabe35cead46aa9bc6063a4e2",
+      "artifacts/capture-msaa-encoder-20261014/focused-final.log": "44e2b1b6130968df85dd7db6917c8ae2c50bd4a03d921552957cdbd73caec82d",
+      "artifacts/capture-msaa-encoder-20261014/focused-final-detailed.log": "31016b24c373fe53a1eee837931cf7b34a18ed8bfe071b345aa5d6fe87f14790",
+      "artifacts/capture-msaa-encoder-20261014/full-ctest.log": "d689a23c907f5ee2e94d65b902b37555ae82157a6d67ac5ec00e741330b1017a",
+      "artifacts/capture-msaa-encoder-20261014/full-detailed.log": "f92fca00a9d2f2235e601fdef02df84ac0d4d0649bedc717a7720094a3d4a9bf",
+      "artifacts/capture-msaa-encoder-20261014/capture-ui.txt": "136bfa5cd04daed2b869aa15cf9cb352465fbc245a6e3fe0a23c79babdeed8b2",
+      "artifacts/capture-msaa-encoder-20261014/build.log": "4171721054a46dd740edd8f8ef990fafe0dcd2e2243410c81c75b11107c0961a",
+      "artifacts/capture-msaa-encoder-20261014/build2.log": "ec935aa23469d41293d68d66bec93c88101142e361edfd05ab7a3345595e8683",
+      "artifacts/capture-msaa-encoder-20261014/build3.log": "e0ec174f41269c116dc03e83f8117795fe1e661534dd21390c7454c79232227f",
+      "artifacts/capture-msaa-encoder-20261014/capture-build.log": "ee56ed9407b5ec1f873130f2cd99f2e8b6853a6cfd384debe580a202a329af66",
+      "artifacts/capture-msaa-encoder-20261014/capture-build2.log": "521044153e5b14f29989af86e7ccd3bc685434265012045eb5b8622495328bbe",
+      "artifacts/capture-msaa-encoder-20261014/full-build.log": "554952ac2c7a56a10e14c5b3b258130bbde94fcdf15fed808666f035bb336a31",
+      "artifacts/capture-msaa-encoder-20261014/full-build2.log": "f462c999adf6c9afa2be33020263839769a84377781ac1befc6c21dc3a7ebc31"
     }
   }
 }
