@@ -8,12 +8,19 @@
 #include <fstream>
 #include <iostream>
 using Microsoft::WRL::ComPtr;
+using QWORD=ULONGLONG; // WinUser.h's x64 NEXTRAWINPUTBLOCK requires this alias.
 namespace fs=std::filesystem;
 void check(HRESULT h){if(FAILED(h))throw std::runtime_error("DX11 HRESULT "+std::to_string(uint32_t(h)));}
-uint64_t raw_keys=0,legacy_keys=0,raw_mode_keys=0,raw_capture_keys=0;
+uint64_t raw_keys=0,legacy_keys=0,raw_mode_keys=0,raw_capture_keys=0,buffered_keys=0,raw_messages=0;
 flora::capture::Json input_events=flora::capture::Json::array();
+flora::capture::Json buffer_reads=flora::capture::Json::array();
+void raw_keyboard(const RAWKEYBOARD& key,bool buffered){
+    ++raw_keys;if(buffered)++buffered_keys;
+    if(input_events.size()<64 && (key.VKey==VK_F1 || key.VKey=='C' || key.VKey==VK_SHIFT || key.VKey==VK_CONTROL))input_events.push_back({{"key",key.VKey},{"scan",key.MakeCode},{"flags",key.Flags},{"buffered",buffered}});
+    if(!(key.Flags&RI_KEY_BREAK)){raw_mode_keys+=key.VKey==VK_F1;raw_capture_keys+=key.VKey=='C';}
+}
 LRESULT CALLBACK proc(HWND w,UINT m,WPARAM a,LPARAM b){
-    if(m==WM_INPUT){RAWINPUT raw{};UINT bytes=sizeof raw;const auto read=GetRawInputData(reinterpret_cast<HRAWINPUT>(b),RID_INPUT,&raw,&bytes,sizeof(RAWINPUTHEADER));if(read!=UINT(-1) && raw.header.dwType==RIM_TYPEKEYBOARD){++raw_keys;const auto& key=raw.data.keyboard;if(input_events.size()<32 && (key.VKey==VK_F1 || key.VKey=='C' || key.VKey==VK_SHIFT || key.VKey==VK_CONTROL))input_events.push_back({{"key",key.VKey},{"scan",key.MakeCode},{"flags",key.Flags}});if(!(key.Flags&RI_KEY_BREAK)){raw_mode_keys+=key.VKey==VK_F1;raw_capture_keys+=key.VKey=='C';}}}
+    if(m==WM_INPUT){++raw_messages;RAWINPUT raw{};UINT bytes=sizeof raw;const auto read=GetRawInputData(reinterpret_cast<HRAWINPUT>(b),RID_INPUT,&raw,&bytes,sizeof(RAWINPUTHEADER));if(read!=UINT(-1) && raw.header.dwType==RIM_TYPEKEYBOARD)raw_keyboard(raw.data.keyboard,false);}
     if(m==WM_KEYDOWN || m==WM_SYSKEYDOWN)++legacy_keys;
     if(m==WM_CLOSE){DestroyWindow(w);return 0;}if(m==WM_DESTROY){PostQuitMessage(0);return 0;}return DefWindowProcW(w,m,a,b);
 }
@@ -21,7 +28,8 @@ int wmain(int argc,wchar_t** argv){if(argc<2 || argc>3)return 2;const fs::path o
     WNDCLASSW cls{};cls.lpfnWndProc=proc;cls.hInstance=GetModuleHandleW(nullptr);cls.lpszClassName=L"FloraHudLiveOracle";RegisterClassW(&cls);
     RECT bounds{100,100,1000,800};if(mode==L"borderless"){MONITORINFO monitor{sizeof(MONITORINFO)};if(!GetMonitorInfoW(MonitorFromPoint(POINT{0,0},MONITOR_DEFAULTTOPRIMARY),&monitor))throw std::runtime_error("Cannot query borderless monitor");bounds=monitor.rcMonitor;}
     HWND window=CreateWindowW(cls.lpszClassName,L"Flora HUD retained scene",mode==L"borderless"?WS_POPUP:WS_OVERLAPPEDWINDOW,bounds.left,bounds.top,bounds.right-bounds.left,bounds.bottom-bounds.top,nullptr,nullptr,cls.hInstance,nullptr);ShowWindow(window,SW_SHOW);SetForegroundWindow(window);
-    if(mode.starts_with(L"raw")){RAWINPUTDEVICE keyboard{1,6,DWORD((mode==L"raw"?RIDEV_NOLEGACY:0)|RIDEV_INPUTSINK),window};if(!RegisterRawInputDevices(&keyboard,1,sizeof keyboard))throw std::runtime_error("Raw keyboard registration failed");SetWindowTextW(window,mode==L"raw"?L"Flora HUD raw keyboard oracle":L"Flora HUD raw and legacy oracle");}
+    const bool buffered=mode==L"raw-buffer",raw_only=mode==L"raw" || buffered;
+    if(mode.starts_with(L"raw")){RAWINPUTDEVICE keyboard{1,6,DWORD((raw_only?RIDEV_NOLEGACY:0)|RIDEV_INPUTSINK),window};if(!RegisterRawInputDevices(&keyboard,1,sizeof keyboard))throw std::runtime_error("Raw keyboard registration failed");SetWindowTextW(window,buffered?L"Flora HUD buffered keyboard oracle":raw_only?L"Flora HUD raw keyboard oracle":L"Flora HUD raw and legacy oracle");}
     DXGI_SWAP_CHAIN_DESC d{};d.BufferDesc.Width=800;d.BufferDesc.Height=600;d.BufferDesc.Format=DXGI_FORMAT_R8G8B8A8_UNORM;d.BufferUsage=DXGI_USAGE_RENDER_TARGET_OUTPUT;d.SampleDesc.Count=1;d.BufferCount=1;d.SwapEffect=DXGI_SWAP_EFFECT_SEQUENTIAL;d.OutputWindow=window;d.Windowed=TRUE;
     if(mode!=L"single"){d.BufferCount=mode==L"flip3"?3:2;d.SwapEffect=mode==L"blt"?DXGI_SWAP_EFFECT_SEQUENTIAL:DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL;}
     ComPtr<ID3D11Device> device;ComPtr<ID3D11DeviceContext> context;ComPtr<IDXGISwapChain> swap;
@@ -35,8 +43,22 @@ int wmain(int argc,wchar_t** argv){if(argc<2 || argc>3)return 2;const fs::path o
     context->VSSetShader(vs.Get(),nullptr,0);context->PSSetShader(ps.Get(),nullptr,0);auto* view=rtv.Get();context->OMSetRenderTargets(1,&view,nullptr);context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);D3D11_VIEWPORT viewport{799,599,1,1,0,1};context->RSSetViewports(1,&viewport);
     {std::ofstream ready(out/L"ready.json");ready<<flora::capture::Json{{"window",reinterpret_cast<uintptr_t>(window)},{"pid",GetCurrentProcessId()}}.dump();}
     uint64_t frames=0;bool done=false,exercised=false;const auto deadline=GetTickCount64()+600000;
-    while(!done && !fs::exists(out/L"finish.signal") && GetTickCount64()<deadline){MSG msg{};while(PeekMessageW(&msg,nullptr,0,0,PM_REMOVE)){if(msg.message==WM_QUIT)done=true;TranslateMessage(&msg);DispatchMessageW(&msg);}if(done)break;
-        if(mode.starts_with(L"raw")){RAWINPUTDEVICE keyboard{};UINT count=1;const auto number=GetRegisteredRawInputDevices(&keyboard,&count,sizeof keyboard);if(number!=1 || keyboard.usUsagePage!=1 || keyboard.usUsage!=6 || keyboard.dwFlags!=((mode==L"raw"?RIDEV_NOLEGACY:0)|RIDEV_INPUTSINK) || keyboard.hwndTarget!=window)throw std::runtime_error("Hook changed application keyboard registration");std::ofstream input(out/L"input.json");input<<flora::capture::Json{{"events",input_events},{"raw_keys",raw_keys},{"legacy_keys",legacy_keys},{"raw_mode_keys",raw_mode_keys},{"raw_capture_keys",raw_capture_keys},{"registration_unchanged",true}}.dump(2);}
+    while(!done && !fs::exists(out/L"finish.signal") && GetTickCount64()<deadline){MSG msg{};
+        const auto pump=[&](UINT first,UINT last){while(PeekMessageW(&msg,nullptr,first,last,PM_REMOVE)){if(msg.message==WM_QUIT)done=true;TranslateMessage(&msg);DispatchMessageW(&msg);}};
+        if(buffered){
+            // Deliberately leave WM_INPUT in the queue: only the application's
+            // own buffered reads may consume it. No synthetic keyboard input.
+            pump(0,WM_INPUT-1);pump(WM_INPUT+1,UINT(-1));
+            alignas(8) unsigned char storage[4096]{};UINT bytes=sizeof storage;SetLastError(0x51a7);
+            const auto records=GetRawInputBuffer(reinterpret_cast<PRAWINPUT>(storage),&bytes,sizeof(RAWINPUTHEADER));const auto last=GetLastError();
+            if(records==UINT(-1))throw std::runtime_error("Buffered keyboard read failed");
+            if(records){
+                if(buffer_reads.size()<32)buffer_reads.push_back({{"records",records},{"bytes",bytes},{"last_error",last}});
+                auto* raw=reinterpret_cast<PRAWINPUT>(storage);for(UINT i=0;i<records;++i){if(raw->header.dwType==RIM_TYPEKEYBOARD)raw_keyboard(raw->data.keyboard,true);raw=NEXTRAWINPUTBLOCK(raw);}
+            }
+        }else pump(0,0);
+        if(done)break;
+        if(mode.starts_with(L"raw")){RAWINPUTDEVICE keyboard{};UINT count=1;const auto number=GetRegisteredRawInputDevices(&keyboard,&count,sizeof keyboard);if(number!=1 || keyboard.usUsagePage!=1 || keyboard.usUsage!=6 || keyboard.dwFlags!=((raw_only?RIDEV_NOLEGACY:0)|RIDEV_INPUTSINK) || keyboard.hwndTarget!=window)throw std::runtime_error("Hook changed application keyboard registration");std::ofstream input(out/L"input.json");input<<flora::capture::Json{{"events",input_events},{"raw_keys",raw_keys},{"legacy_keys",legacy_keys},{"raw_mode_keys",raw_mode_keys},{"raw_capture_keys",raw_capture_keys},{"raw_messages",raw_messages},{"buffered_keys",buffered_keys},{"buffer_reads",buffer_reads},{"registration_unchanged",true}}.dump(2);}
         if(!exercised && fs::exists(out/L"exercise.signal")){
             const auto clean_region=[&]{
                 D3D11_TEXTURE2D_DESC td{};buffer->GetDesc(&td);td.BindFlags=td.MiscFlags=0;td.Usage=D3D11_USAGE_STAGING;td.CPUAccessFlags=D3D11_CPU_ACCESS_READ;

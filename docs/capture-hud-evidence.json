@@ -9,7 +9,6 @@
   "comparison": "Exact integer resource and RGBA bytes; no relaxed thresholds",
   "pending": [
     "General concurrent-context and external-interface stress",
-    "Buffered-only Raw Input hotkeys",
     "Physical cross-monitor DPI transitions; native window-awareness/resolution/resize cases are verified",
     "Isolated physical single-hold and native focus stress and complete hidden-state failure matrix",
     "Driver/device-loss and cancellation/cleanup failure matrix",
@@ -709,7 +708,7 @@
     },
     "runtime_sha256": "64afb8680eb56248978dd7a7ac35265ffc45e54a4fc132202f2951a3a3e6af05"
   },
-  "latest_progress": "gf2_completion_progress and resize_rejection_progress; updated GF2 start/home HUD checks completed on ff94b30; remaining stress/failure gates stay open",
+  "latest_progress": "buffered_input_progress; native x64 buffered-only hotkeys verified with unchanged application input, six clean own-fixture captures and fresh GF2 start/home regression",
   "concurrency_progress": {
     "implementation_base": "1ecbb95",
     "status": "reproduced lock inversion repaired; interactive regression pending",
@@ -1346,6 +1345,199 @@
       "artifacts/capture-hud-resize-full-tests.log": "5e5219be93a992a25213ab8121c6b3202854d941228f47a1c59ba5ace3b4dc62",
       "artifacts/capture-hud-resize-final-build.log": "61a198335ab66edc939ed3f5049945cccf1cab27391dd549d8f488370c384b23",
       "artifacts/capture-hud-resize-full-build.log": "918f1ef410e0d49068f4442f8b6d246c43d285bd7d0ad6e0a4b213900a3e1994"
+    }
+  },
+  "buffered_input_progress": {
+    "base_revision": "c497f68b7678db7239177d3c077af351b5b3506f",
+    "runtime_sha256": "5890147cc54936eff80261698ba133ca3ce97ad1edf0052eaafe341faf2b57ab",
+    "source_sha256": {
+      "src/capture/hud/raw_input.hpp": "77cde6714eb2cd3104c2bd68a7a09580d99790ff3b1d8ec7a4a7f7090ff4e0f8",
+      "src/capture/hud/raw_input.cpp": "e09c334cb98e7dee16583d1fee61f3a4f471eecef8d65296ed7cce1a7af60ec2",
+      "src/capture/runtime/bootstrap.cpp": "4eddf27bff402e59bd8cd6dca6f4336049df31cea8202f81bd1d162237966a1f",
+      "src/capture/runtime/hud_control.cpp": "bb0f4b17602fe177820ee18e0617e90ab7146269c6dbe2f0d71b956699656059",
+      "src/capture/runtime/hud_control.hpp": "ad4ee54a7219ae595453a1f5057bd82f50739311ea10958598796313d9f99e1d",
+      "src/capture/tests/hud_raw_buffer_tests.cpp": "b197e228336e56e430f1f92e1d2777b54f22d5228945507325aa3f44ee7c6d65",
+      "src/capture/tests/hud_live_target.cpp": "5e6b6356893dd3da61d0bbb93d572d03ff15f706f3533ac837011e53d0406d5d",
+      "src/capture/CMakeLists.txt": "8b43be2421a1fbbb92810cd6920d3149f673d7281dfe913dd65c16de53cb824f"
+    },
+    "capture_only_tests": "75/75",
+    "full_focused_tests": "24/24",
+    "qt_cases": 12,
+    "build_profiles": [
+      "capture-only",
+      "full"
+    ],
+    "log_sha256": {
+      "artifacts/capture-hud-raw-buffer-all-build.log": "a6954145fdf6f0be26619bf1ead031d945feb76b6b15f5645cdab33157d64deb",
+      "artifacts/capture-hud-raw-buffer-full-build.log": "dc4b32f2f8eaa32e253a473d9c970eaa0ed9ffb10637cc5cd42da21241fb63eb",
+      "artifacts/capture-hud-raw-buffer-all-tests.log": "7c6bb37ef2b7c422cead7a6609d56eb325d682910ec24577d876af85d2aab71f",
+      "artifacts/capture-hud-raw-buffer-full-tests.log": "e94c2ad13c3606882b9fd465aa5c312506d06546edc1a1988e81ab954414c003",
+      "artifacts/capture-hud-raw-buffer-dual.log": "79190afc661ea9c8e6d48be593c1a2a0d8acd8739377dab924c78ea294aa37e4",
+      "artifacts/capture-hud-raw-buffer-package-dual.log": "79190afc661ea9c8e6d48be593c1a2a0d8acd8739377dab924c78ea294aa37e4"
+    },
+    "raw_native_comparison": {
+      "events_identical": true,
+      "key_records": 10,
+      "raw_messages": 0,
+      "legacy_messages": 0,
+      "native_buffer_size": 4096,
+      "native_last_error": 20903,
+      "registration_unchanged": true
+    },
+    "buffered_live": {
+      "captures": 3,
+      "dual_checks": 82,
+      "modes": [
+        "compact",
+        "detailed",
+        "off"
+      ],
+      "post_disconnect_application_events": 6,
+      "post_disconnect_observation_unchanged": true,
+      "post_disconnect_request_unchanged": true,
+      "exact_retained_pixels": true,
+      "input_reason": ""
+    },
+    "standalone_package": {
+      "manifest_sha256": "281c537462519db0ae0479ddc4eb61cd29787754c88b38ee28a1657502d96ca4",
+      "system_path_only": true,
+      "mode": "exclusive",
+      "captures": 3,
+      "dual_checks": 82,
+      "exact_retained_pixels": true,
+      "forbidden_runtime_modules": []
+    },
+    "gf2": {
+      "session_id": "74c72fb9-2e9a-4e54-a43e-fc9cbcc5b585",
+      "pid": 24804,
+      "input_path": "legacy keyboard messages; buffered_key_events remains zero",
+      "validation": {
+        "capture": "frame-97305a91-c737-4fc0-bc7d-21562b299e89.gpa_frame",
+        "capture_sha256": "ac125ee2967e7621e98028fce9e97adfa714c19b844e1a1ef5bff5e026c58c70",
+        "draw_zero_changes": 18,
+        "preview_exact": true,
+        "dimensions": [
+          2560,
+          1440
+        ],
+        "resource_count": 108,
+        "exported_shaders": [
+          "25",
+          "26"
+        ],
+        "players": {
+          "captured": {
+            "rgba_sha256": "ae9e2a74f8b64caf7f4fe73060f2be12449893c697db6770d1aa2f2d4dc42650",
+            "counts": {
+              "ClearDepthStencilView": 4,
+              "ClearRenderTargetView": 2,
+              "CopySubresourceRegion": 3,
+              "Draw": 1,
+              "DrawIndexed": 17,
+              "Map": 15,
+              "Present": 1,
+              "present_rtv_unbinds": 1,
+              "query_completion_unresolved": 1,
+              "query_end_observations": 1,
+              "query_metadata_records": 3,
+              "unmap_observations": 15
+            },
+            "original_native": {
+              "player_dll": "C:\\Program Files\\IntelSWTools\\GPA\\dx11_player.dll",
+              "player_sha256": "39061ff329e4a32d0c8375ce9ee15e2017bccab0593943b962a860e11723d38b",
+              "adapter_selection": "Original kernel default (undefined GpuId)",
+              "callbacks": [],
+              "open_status": 0,
+              "playback_status": 0,
+              "closed": true
+            },
+            "dual_exact": true,
+            "reference_pixels_used": false
+          },
+          "draw-zero": {
+            "rgba_sha256": "5067f98d2a749d0117f13ce8acc4055f60346f219e53a37a38a3748b838a3a69",
+            "counts": {
+              "ClearDepthStencilView": 4,
+              "ClearRenderTargetView": 2,
+              "CopySubresourceRegion": 3,
+              "Draw": 1,
+              "DrawIndexed": 17,
+              "Map": 15,
+              "Present": 1,
+              "present_rtv_unbinds": 1,
+              "query_completion_unresolved": 1,
+              "query_end_observations": 1,
+              "query_metadata_records": 3,
+              "unmap_observations": 15
+            },
+            "original_native": {
+              "player_dll": "C:\\Program Files\\IntelSWTools\\GPA\\dx11_player.dll",
+              "player_sha256": "39061ff329e4a32d0c8375ce9ee15e2017bccab0593943b962a860e11723d38b",
+              "adapter_selection": "Original kernel default (undefined GpuId)",
+              "callbacks": [],
+              "open_status": 0,
+              "playback_status": 0,
+              "closed": true
+            },
+            "dual_exact": true,
+            "reference_pixels_used": false
+          }
+        },
+        "formal_gf2_accepted_frames": 0
+      },
+      "home_request": {
+        "busy": false,
+        "cancel_requested": false,
+        "error": "ID3D11DeviceContext::ClearRenderTargetView: MSAA sample-preserving capture is not implemented",
+        "request_name": "frame-7f8dc982-e15d-4f4c-a41a-148c445bbb62.gpa_frame",
+        "state": "Failed",
+        "swap_chain": 1
+      },
+      "home_message": "Capture failed: MSAA",
+      "post_disconnect_presents": 5309,
+      "interface_gaps": 0,
+      "file_count": 1,
+      "normal_exit": true
+    },
+    "physical_single_hold": "Pending; no user response/new physical input during the isolated baseline, then automatic validation continued and window closed",
+    "retained_issues": [
+      "Initial live-fixture compile required QWORD alias for SDK NEXTRAWINPUTBLOCK",
+      "Initial hidden native baseline launch retained; exited through finish signal and replaced with a visible baseline"
+    ],
+    "scope": "Native x64 buffered Raw Input added; no replay/format change; remaining stress/failure and formal GF2 six-frame gates not promoted",
+    "artifact_sha256": {
+      "artifacts/capture-hud-raw-buffer-injected/before-disconnect-input.json": "8d03876e669ae8f7506fc4119558073c2878aa04365ad3b42d5d96759302f1c1",
+      "artifacts/capture-hud-raw-buffer-injected/compact-status.json": "84030a1c8bd409e917da26a7f412939105269754834c382ae0e1c91c9b927ae7",
+      "artifacts/capture-hud-raw-buffer-injected/disconnect.json": "71dd10f29cb99f1667a6b99dfec2bf35373dbedee05c8d4bf7b90c7b001f110d",
+      "artifacts/capture-hud-raw-buffer-injected/first-input.json": "a941289e85e643e27146b37b43a9e5ee9479537b53ee381b3a7c8871b29ddc5f",
+      "artifacts/capture-hud-raw-buffer-injected/first-status.json": "4072667ab990cf825d41f8f339eaa905b0294947d7933af3a6638b2ad49540b0",
+      "artifacts/capture-hud-raw-buffer-injected/hidden-status.json": "9800fc7c043733a88c0413737e2204ec97443d41ccf1f993ad56749883f99c06",
+      "artifacts/capture-hud-raw-buffer-injected/post-disconnect-input.json": "4020e9a1a0a219721aa6f4327fff5c347e1dbdee9999a45c37a516fd081f4cb8",
+      "artifacts/capture-hud-raw-buffer-injected/post-disconnect-status.json": "98006d6749f2efa1e129d3f34ece914ad398af011d9e61793e8e4d9cfebc6d9c",
+      "artifacts/capture-hud-raw-buffer-injected/target/exit.json": "f9321f9fdc339bb365ffa79dd6f5a784e63c05ffebc29ad4559ae4b0aeaf41bf",
+      "artifacts/capture-hud-raw-buffer-injected/target/input.json": "4020e9a1a0a219721aa6f4327fff5c347e1dbdee9999a45c37a516fd081f4cb8",
+      "artifacts/capture-hud-raw-buffer-injected/target/ready.json": "7b812d90a1771f638ba37a8f0f69568e9c603ad1ca2391e13443ba912fd51b93",
+      "artifacts/capture-hud-raw-buffer-package-check/after.json": "2739dcc9389602acb0fa4d34a92dd389d1f2ebf02dc557847736fa898fe1c778",
+      "artifacts/capture-hud-raw-buffer-package-check/before.json": "5cff80a90e8660b05b461961fc0aea1d04cfe5fad0ea06ad684cbc671ef6c894",
+      "artifacts/capture-hud-raw-buffer-package-check/disconnect.json": "0224e5c0fe49c5e6dee0a32d2cf4e32f35511b4e54eeb0b7789bfb5b2dd82704",
+      "artifacts/capture-hud-raw-buffer-package-check/launch.json": "378f96e33b0d4cc7973efab0b8de42b32150be71588ea2eed0b47b044b3ca9df",
+      "artifacts/capture-hud-raw-buffer-package-check/requests.json": "dfe3dfed64096a4b3dabbad99e84516c95a9bd0e1267681cc8316e0e5c477a4e",
+      "artifacts/capture-hud-raw-buffer-package-check/target/exit.json": "1f228c4a00861b5b6a410578009a5565dabc72d44c779d381295952e4f69a2f9",
+      "artifacts/capture-hud-raw-buffer-package-check/target/ready.json": "b4c766fcbcabfd944d372fdbeb2c1799f9a471703e0e73c463a6fe667671351d",
+      "artifacts/capture-hud-raw-buffer-gf2/disconnect.json": "009b4d7e40596225ce544d91ed25eaa2b35e56a67a47ba53d082009d4e0c9c2b",
+      "artifacts/capture-hud-raw-buffer-gf2/disconnected.png": "5077cc62ef06ac16325e6426f9366944c79ebb569cf800dce68d6519e58610ff",
+      "artifacts/capture-hud-raw-buffer-gf2/exit-check.json": "d987d3f1a46c302fbf533b1053d8a151005782038f45e7c43c8f0097e843aea1",
+      "artifacts/capture-hud-raw-buffer-gf2/hidden-status.json": "6e78f0da2bf73b4577ff46e4025673b3de98bfe8b39c6dd30496ea3a499af3e7",
+      "artifacts/capture-hud-raw-buffer-gf2/home-msaa.png": "cc28e02200c30cd2d2d98a603f0e8a3142d0a34b37ec7cf0f98c8dfb3aac9dc9",
+      "artifacts/capture-hud-raw-buffer-gf2/home-status.json": "b5917f0bb9361bb7541e753b5c51aec015f6a811007a65a054defcc4bf5b6e28",
+      "artifacts/capture-hud-raw-buffer-gf2/post-disconnect-status.json": "72bb6577b8190b04bf3f01e2ee5e9efd7bdc711769794d3d2f216c8c9b3b773d",
+      "artifacts/capture-hud-raw-buffer-gf2/start-capture-status.json": "f2e22e96975b9bcbaacd5f9bd40f591cee218db525d9821e6718d745a3c622d1",
+      "artifacts/capture-hud-raw-buffer-gf2/startup-status.json": "b01b81bdd9e4128d0d72d017ce4f682cb68e76885f915d28bd9f863aa09bb46a",
+      "artifacts/capture-hud-raw-buffer-gf2/validate.py": "4d7e4dbb50dad45eae607c2b138ab06bdd8ff2b1b09f19114c19ba6fe2a64b0c",
+      "artifacts/capture-hud-raw-buffer-gf2/validation/validation.json": "180eafa0e39a9751d1a36ca10f1c47658b662b868e0db9c8285d45b67fd9ed8d",
+      "artifacts/capture-hud-raw-buffer-native-visible/exit.json": "c54ce20964c75fbba63047a0b958536dba3b0ff5469230b0d2e50b067f7829b8",
+      "artifacts/capture-hud-raw-buffer-native-visible/input.json": "18b6dc11366b4b162bb8a050a7e6a11fe547ad05741d7dc9d93c4c004ae18655",
+      "artifacts/capture-hud-raw-buffer-native-visible/ready.json": "e4ea97358c367b1380bddf18c690f23d79216724acf0906a572b799cdddffd15"
     }
   }
 }

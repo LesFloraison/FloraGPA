@@ -8,6 +8,7 @@ void configure_hud(const hud::Settings& settings);
 bool hud_connected() noexcept;
 void disconnect_hud() noexcept;
 void hud_input(UINT flags,IDXGISwapChain* native) noexcept;
+void hud_raw_buffer(const void* data,size_t capacity,UINT records) noexcept;
 void hud_presented(uint64_t swap,UINT flags,HRESULT result) noexcept;
 void hud_removed(uint64_t swap) noexcept;
 void hud_feedback(const Json& response);

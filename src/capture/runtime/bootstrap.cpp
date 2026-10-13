@@ -25,6 +25,14 @@ std::atomic<long> hook_status{ERROR_NOT_READY};
 thread_local unsigned creation_depth=0;
 decltype(&D3D11CreateDevice) real_create=D3D11CreateDevice;
 decltype(&D3D11CreateDeviceAndSwapChain) real_create_swap=D3D11CreateDeviceAndSwapChain;
+decltype(&GetRawInputBuffer) real_raw_buffer=GetRawInputBuffer;
+UINT WINAPI raw_buffer(PRAWINPUT data,PUINT bytes,UINT header_size){
+    const auto result=real_raw_buffer(data,bytes,header_size);const auto error=GetLastError();
+    // Only inspect successful native output. Query/error calls need no buffer
+    // access, and the application still owns all records and cleanup.
+    if(data && bytes && result && result!=UINT(-1) && header_size==sizeof(RAWINPUTHEADER))hud_raw_buffer(data,*bytes,result);
+    SetLastError(error);return result;
+}
 void record_creation(HRESULT hr,D3D_FEATURE_LEVEL* selected){
     if(creation_depth==1){
         if(SUCCEEDED(hr)){++creations;if(selected)level=static_cast<unsigned>(*selected);}
@@ -182,6 +190,7 @@ BOOL WINAPI DllMain(HINSTANCE module,DWORD reason,LPVOID){
         if(error==NO_ERROR)error=DetourUpdateThread(GetCurrentThread());
         if(error==NO_ERROR)error=DetourAttach(reinterpret_cast<PVOID*>(&real_create),create_device);
         if(error==NO_ERROR)error=DetourAttach(reinterpret_cast<PVOID*>(&real_create_swap),create_swap);
+        if(error==NO_ERROR)error=DetourAttach(reinterpret_cast<PVOID*>(&real_raw_buffer),raw_buffer);
         if(error==NO_ERROR)error=attach_factory_hooks();
         if(error!=NO_ERROR){DetourTransactionAbort();hook_status=error;return FALSE;}
         hook_status=DetourTransactionCommit();if(hook_status!=NO_ERROR)return FALSE;

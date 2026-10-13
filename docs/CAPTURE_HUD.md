@@ -134,15 +134,17 @@ A target-thread `WH_GETMESSAGE` observer records non-repeat keyboard messages
 from the foreground target process and always calls the next hook without
 modifying the message. Normal Present consumes those requests; TEST does not.
 The control worker alone performs UUID generation, selection, busy checking and
-arming; the message hook performs no GPU or disk work. Disconnect removes all
-input hooks, stops the worker/HUD and leaves COM forwarding active.
+arming; the input observers perform no GPU or disk work. Disconnect removes
+message hooks and stops the worker/HUD. The startup-installed buffered-input
+detour remains a transparent native forwarder, like the live COM wrappers.
 For `RIDEV_NOLEGACY` keyboards, the same observer reads `WM_INPUT` and tracks
 ordered make/break events, including left/right modifiers and generic Shift with
 no scan code. Existing raw keyboard target threads are observed without changing
 their device registrations. When legacy messages are enabled, only those messages
 trigger hotkeys, avoiding duplicate actions from the raw copy. Focus changes
-resynchronize held chord state without firing it. Buffered-only Raw Input that
-bypasses `WM_INPUT` remains unobserved and is reported in the input profile.
+resynchronize held chord state without firing it. Native x64 buffered Raw Input
+that bypasses `WM_INPUT` is observed after the application's successful
+GetRawInputBuffer call; see **Buffered raw keyboard input** below.
 
 The initial Present-only polling approach missed short synthetic presses; native
 legacy and raw message paths have now been verified with short key presses.
@@ -661,3 +663,65 @@ pixels, no capability gaps and released object lifetimes. They do not perform
 Present or prove D3D12 support. Capture-only focused tests pass **5/5** and the
 full-build resize cases pass **2/2**, serially. This adds tests only; the runtime,
 replay and format are unchanged from the GF2-validated production revision.
+
+## Buffered raw keyboard input
+
+The startup Detours transaction also intercepts GetRawInputBuffer. It calls the
+native API first, then observes only successful nonempty keyboard output. Null
+buffer size queries and failed calls pass through. The bounded parser copies
+keyboard records, checks variable record lengths and native x64 alignment, and
+never mutates or retains the application's buffer. The observer restores the
+native LastError and does not change the return count, size or registration.
+This follows Microsoft's [buffered read contract](https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getrawinputbuffer);
+the application remains responsible for consuming its own input queue.
+
+Buffered and WM_INPUT keyboard records share foreground checks, modifier state
+and repeat edges. Both only trigger shortcuts for RIDEV_NOLEGACY registrations;
+when legacy messages are enabled, the existing legacy stream remains the source
+of actions. A normal Present consumes pending edges and the control worker calls
+the same capture request entry as CLI. Hidden mode keeps observing input, whereas
+disconnect stops observation without removing a detour beneath active callers.
+The additive `buffered_key_events` status counter identifies this path; protocol
+3 configuration and control messages are unchanged.
+
+The independent `raw-buffer` application fixture excludes WM_INPUT from its
+message pump and reads it exclusively through GetRawInputBuffer. This prevents
+the earlier message observer from accidentally satisfying the new test. Its
+native baseline and injected input logs retain application make/break records,
+buffer sizes, LastError, message counts and original device registrations.
+
+Validation on the implementation based on `c497f68`:
+
+* Capture-only **75/75** CTests and complete builds pass. Full-profile focused
+  regression passes **24/24**, including **12 Qt cases**.
+* The initial native and injected Ctrl+F1 / Ctrl+Shift+C sequence gives the
+  application the same ten key records, size 4096 and LastError 0x51a7, with zero
+  WM_INPUT/legacy keyboard deliveries. All three HUD modes work. Three captures
+  pass **82 exact dual-player/preview/inventory/Draw-zero checks**. After
+  disconnect, another chord delivers six more application records without
+  changing the HUD event count, last request or capture-file count. Retained
+  application pixels are exact on normal exit.
+* A fresh standalone system-PATH package completes an exclusive session with
+  three additional captures and **82 exact checks**, clean retained pixels and
+  no Qt/Replay/Core/GPA/RenderDoc/Python modules in the target. The live fixture
+  is copied into this test package separately; it is not a shipping component.
+* A new GF2 session (PID 24804) renders Compact/Detailed/Hidden and publishes one
+  start-screen hotkey frame. Both players, its captured backbuffer and preview
+  agree exactly. Zeroing all 18 Draw counts changes both outputs identically;
+  108 resources and vertex/pixel shader exports remain accessible. The home
+  scene visibly refuses unsupported MSAA, publishes nothing for that request,
+  and keeps running. Disconnect removes HUD and stops shortcuts; the game reaches
+  Present 5309 with zero interface gaps, then exits normally. This confirms the
+  existing GF2 legacy-message path after installing the additional detour; it
+  does not claim GF2 itself uses buffered Raw Input.
+
+Evidence and binary/source hashes are under `buffered_input_progress` in
+`docs/capture-hud-evidence.json`. Ignored directories use the
+`artifacts/capture-hud-raw-buffer-*` prefix. The initial fixture compile missed the
+SDK's QWORD alias used by NEXTRAWINPUTBLOCK; the corrected native test uses
+ULONGLONG. The first baseline launch inherited a hidden startup window, was
+ended through its finish signal, and was replaced with a visible baseline; both
+runs are retained. No physical long-hold response arrived during the isolated
+baseline window, so that gate is still pending. Buffered-only Raw Input is no
+longer an implementation gap. Broader input/fault stress and formal GF2 **0/6**
+remain separate, uncompleted gates; this revision changes no replay/format code.
