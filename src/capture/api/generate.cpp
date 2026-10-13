@@ -179,7 +179,7 @@ void method(std::ostream& out, const std::string& iface, const Json& m) {
             out << "UpdateSource update{pSrcData,pDstBox,SrcRowPitch,SrcDepthPitch," << (name=="UpdateSubresource1"?"CopyFlags,true":"0,false") << "};\nrecord_context_call(this, \"" << api << "\", CommandKind::update_subresource, {DstSubresource}, pDstResource, nullptr, nullptr, nullptr, &update);\n";
         else if(name=="CopySubresourceRegion" || name=="CopySubresourceRegion1")
             out << "CopyRegion region{DstSubresource,DstX,DstY,DstZ,SrcSubresource," << (name=="CopySubresourceRegion1"?"CopyFlags,true":"0,false") << ",{}};\nif(pSrcBox)region.box=ResourceBox{pSrcBox->left,pSrcBox->top,pSrcBox->front,pSrcBox->right,pSrcBox->bottom,pSrcBox->back};\nrecord_context_call(this, \"" << api << "\", CommandKind::copy_region, {}, pDstResource, nullptr, nullptr, pSrcResource, nullptr, &region);\n";
-        else if(name=="Unmap")out << "record_unmap(this, pResource, Subresource);\n";
+        else if(name=="Unmap")out << "record_unmap(this, pResource, Subresource);\ninvalidate_mapping_storage(static_cast<IUnknown*>(&owner_), pResource, Subresource);\n";
         else out << "record_context_call(this, \"" << api << "\", CommandKind::" << kind << ", " << words << ", " << operand << ", " << floats << ", " << integers << ", " << source << ");\n";
         if(kind=="binding")binding_arguments(out,m,api);
     }

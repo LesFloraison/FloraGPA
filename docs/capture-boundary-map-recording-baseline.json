@@ -1,0 +1,244 @@
+{
+  "schema": 1,
+  "status": "Scoped production start/end buffer WRITE_DISCARD verified; full GF2 gate incomplete",
+  "base_commit": "8472dc8e2b1f960ff8d6e5776829a9211997d043",
+  "scope": "Immediate same-thread/context, zero-flag dynamic vertex/index/constant/typed-SRV buffers without misc flags/structured stride; separate owned initial/final mapping model; labelled replay restoration and cleanup",
+  "tests": {
+    "capture_ctest": 106,
+    "selected_full_ctest": 109,
+    "qt_cases": 12,
+    "dual_files": 16,
+    "dual_checks": 246,
+    "both_builds": true
+  },
+  "native_results": [
+    {
+      "debug_warnings_or_errors": 0,
+      "encoder_refusals": 42,
+      "files": 8,
+      "hardware": false,
+      "passed": true,
+      "source_gpu_objects_alive": 0
+    },
+    {
+      "debug_warnings_or_errors": 0,
+      "encoder_refusals": 42,
+      "files": 8,
+      "hardware": true,
+      "passed": true,
+      "source_gpu_objects_alive": 0
+    }
+  ],
+  "inputs": {
+    "build\\capture\\capture\\Release\\FloraCaptureBoundaryMapTests.exe": "5fa1168b230924536f87ada42c1f99464c891d440bf62031d73f0368e176b8cc",
+    "build\\vs2022\\Release\\FloraGPA.Cli.exe": "b9f35372b0e40f86ea37a482f06d6e9f82b9a83edb26e7680048bd8dd809adeb",
+    "D:\\CDXrepo\\FloraGPA\\tools\\replay_frame.py": "2ea1a82998b29e42c8eb62dd963dc3fc6a32b47e63a9a1c243bc655769234f2d",
+    "D:\\CDXrepo\\FloraGPA-Cpp\\tools\\validate_capture_boundary_maps.py": "e3bf450d1862a76715160872ce1b0899bf96c9c59d3d77d04c89ae4108ec8158"
+  },
+  "files": [
+    {
+      "file": "warp/constant-complete.gpa_frame",
+      "sha256": "6a08cbfc524082b4f5eaf7afd17baf7e6de1dc560d97cd13088ea450a741edb4",
+      "expected_sha256": "7bf6298183524f89c7ca1150cf51d291b86cd2268664c97c11fd79230a39010a"
+    },
+    {
+      "file": "warp/constant-missing-initial-maps.gpa_frame",
+      "sha256": "583dc3f445be9d40145e16f55590a83c5eaff377156c2103d6db2f1f354e53cd",
+      "expected_sha256": "84b827f9f929c811dc32a9442f580f45a58b1d726e45b4784718421750a42437"
+    },
+    {
+      "file": "warp/constant-open-end-complete.gpa_frame",
+      "sha256": "b2601649f480ecbb02643e21d65192756bf7ed73e781628261a88f6492be219a",
+      "expected_sha256": "7bf6298183524f89c7ca1150cf51d291b86cd2268664c97c11fd79230a39010a"
+    },
+    {
+      "file": "warp/constant-open-end-missing-initial-maps.gpa_frame",
+      "sha256": "6b3abc359d20f5351d0154a9b9dcd9423558a3729a3b7db8c4f46e11777277d5",
+      "expected_sha256": "84b827f9f929c811dc32a9442f580f45a58b1d726e45b4784718421750a42437"
+    },
+    {
+      "file": "warp/srv-complete.gpa_frame",
+      "sha256": "23f234606b58b04e16fadd5f5f4954fa5ee649d236208c42a863e2d6cb1c7d8d",
+      "expected_sha256": "7bf6298183524f89c7ca1150cf51d291b86cd2268664c97c11fd79230a39010a"
+    },
+    {
+      "file": "warp/srv-missing-initial-maps.gpa_frame",
+      "sha256": "e03fb4ea9b4a9f91ac7d79fabacee39ddc570d519283d5e0767171c56e264f27",
+      "expected_sha256": "84b827f9f929c811dc32a9442f580f45a58b1d726e45b4784718421750a42437"
+    },
+    {
+      "file": "warp/srv-open-end-complete.gpa_frame",
+      "sha256": "f540c51bc9b03b1d3fd017e7abe323a2b77a3572809d59a5e2a98d03fe71b178",
+      "expected_sha256": "7bf6298183524f89c7ca1150cf51d291b86cd2268664c97c11fd79230a39010a"
+    },
+    {
+      "file": "warp/srv-open-end-missing-initial-maps.gpa_frame",
+      "sha256": "bfd1032c365cea589c96b167d1a7e583f16fe18038998d2f300291b0315be3ef",
+      "expected_sha256": "84b827f9f929c811dc32a9442f580f45a58b1d726e45b4784718421750a42437"
+    },
+    {
+      "file": "hardware/constant-complete.gpa_frame",
+      "sha256": "6ab599751be74a83d05ce0dc9f26c7736e23038e82313095a60217edcfb31297",
+      "expected_sha256": "7bf6298183524f89c7ca1150cf51d291b86cd2268664c97c11fd79230a39010a"
+    },
+    {
+      "file": "hardware/constant-missing-initial-maps.gpa_frame",
+      "sha256": "f15917bc48b20c8ccb5916c71491248a9d72570b911e035dc3c801193305ea86",
+      "expected_sha256": "84b827f9f929c811dc32a9442f580f45a58b1d726e45b4784718421750a42437"
+    },
+    {
+      "file": "hardware/constant-open-end-complete.gpa_frame",
+      "sha256": "2ec218add9ace333e270f4df763813beb3da4aa03838d610b32fdf2fd7855b26",
+      "expected_sha256": "7bf6298183524f89c7ca1150cf51d291b86cd2268664c97c11fd79230a39010a"
+    },
+    {
+      "file": "hardware/constant-open-end-missing-initial-maps.gpa_frame",
+      "sha256": "a7a6dc565260b62a91965dcf1c1e080402876eee020fe55d05ae32fd5996f829",
+      "expected_sha256": "84b827f9f929c811dc32a9442f580f45a58b1d726e45b4784718421750a42437"
+    },
+    {
+      "file": "hardware/srv-complete.gpa_frame",
+      "sha256": "a50d11207aa83ff5b5e92eb2b7ccbc3813dd9776e49d9b2d3828fdca32043517",
+      "expected_sha256": "7bf6298183524f89c7ca1150cf51d291b86cd2268664c97c11fd79230a39010a"
+    },
+    {
+      "file": "hardware/srv-missing-initial-maps.gpa_frame",
+      "sha256": "9dff324b43f21444e12646549510dc8ef03e190cd437446930ed5c046da3b221",
+      "expected_sha256": "84b827f9f929c811dc32a9442f580f45a58b1d726e45b4784718421750a42437"
+    },
+    {
+      "file": "hardware/srv-open-end-complete.gpa_frame",
+      "sha256": "1416b66aa3e042685e7083cbc5480e94b2978358c353556c0bbd3b06f90a8598",
+      "expected_sha256": "7bf6298183524f89c7ca1150cf51d291b86cd2268664c97c11fd79230a39010a"
+    },
+    {
+      "file": "hardware/srv-open-end-missing-initial-maps.gpa_frame",
+      "sha256": "988adb696410a6a6961d5192bf96febe3310f20cfd7a181a46e88f88ea04241e",
+      "expected_sha256": "84b827f9f929c811dc32a9442f580f45a58b1d726e45b4784718421750a42437"
+    }
+  ],
+  "gf2_preflights": [
+    {
+      "stage": "Start boundary support only",
+      "source": "Uncommitted boundary mapping worktree atop 8472dc8",
+      "pid": 49260,
+      "session_id": "283ca651-3abc-4b91-82a5-ff1b587a60df",
+      "administrator": true,
+      "game_version": "4.0.5136.14794.28495.3242",
+      "scene": "Main character scene entered from animated start screen",
+      "error": "finish: Frame ends with an active resource mapping",
+      "present_before": 2709,
+      "present_after_failure": 6765,
+      "interface_gaps": 0,
+      "published_files": 0,
+      "partial_files": 0,
+      "disconnected": true,
+      "process_exited": true,
+      "close_method": "Alt+F4 through computer-use",
+      "accepted_frames": 0,
+      "required_frames": 6,
+      "binaries": [
+        {
+          "Path": "D:\\CDXrepo\\FloraGPA-Cpp\\build\\capture\\capture\\Release\\FloraCapture.exe",
+          "Hash": "EE9112DBFAA66619A7194353E2A8ADAA0CB94610F1450509062EF3EEDF4A0E10"
+        },
+        {
+          "Path": "D:\\CDXrepo\\FloraGPA-Cpp\\build\\capture\\capture\\Release\\FloraCaptureRuntime.dll",
+          "Hash": "1DCE7FFBDD3DA659A5DCBF77FB03824E2B516A6956901A3C7355D83EAA7C4323"
+        }
+      ]
+    },
+    {
+      "stage": "Start and end boundary support",
+      "source": "Uncommitted boundary mapping worktree atop 8472dc8",
+      "pid": 33740,
+      "session_id": "0f11b62c-f04f-494a-928c-6d6be9255bf3",
+      "administrator": true,
+      "game_version": "4.0.5136.14794.28495.3242",
+      "scene": "Main character scene entered from animated start screen",
+      "error": "Encoder MSAA initialization with query observations is not verified",
+      "present_before": 2155,
+      "present_after_failure": 6546,
+      "interface_gaps": 0,
+      "published_files": 0,
+      "partial_files": 0,
+      "disconnected": true,
+      "process_exited": true,
+      "close_method": "Alt+F4 through computer-use",
+      "accepted_frames": 0,
+      "required_frames": 6,
+      "binaries": [
+        {
+          "Path": "D:\\CDXrepo\\FloraGPA-Cpp\\build\\capture\\capture\\Release\\FloraCapture.exe",
+          "Hash": "EE9112DBFAA66619A7194353E2A8ADAA0CB94610F1450509062EF3EEDF4A0E10"
+        },
+        {
+          "Path": "D:\\CDXrepo\\FloraGPA-Cpp\\build\\capture\\capture\\Release\\FloraCaptureRuntime.dll",
+          "Hash": "E6CBAB685C51E2E92D35403985D60F420DCD8E5312B24269222C2FB56E0548AB"
+        }
+      ]
+    }
+  ],
+  "retained_earlier_proofs": {
+    "start_only": {
+      "files": 8,
+      "checks": 118
+    },
+    "initial_start_and_end": {
+      "files": 16,
+      "checks": 246,
+      "encoder_refusals_per_device": 40
+    }
+  },
+  "remaining": [
+    "MSAA initialization with EVENT observations; no guard relaxed",
+    "Deferred/foreign-thread/writer and other boundary Map storage profiles",
+    "Startup-injected boundary Map fixture",
+    "Current committed-source package; latest a2a3465 predates depth/Resolve",
+    "Formal GF2 two-launch six-frame dual-player/GUI gate"
+  ],
+  "replay_and_shared_format_changed": false,
+  "new_golden_run": false,
+  "evidence_sha256": {
+    "artifacts/capture-boundary-maps-20261014/build-2.log": "36f467e197a24e4276f8a2c105ec52b294e5bfdf037ba7e56fe16c97acff67c1",
+    "artifacts/capture-boundary-maps-20261014/build-end.log": "635df21cb891b73f46d0b2dbdf734428f42cea3247ec1fa3d9f8c846fbc003f6",
+    "artifacts/capture-boundary-maps-20261014/build-final.log": "f61c56a0c328704821c51d5a4702568e981ae0aa3f7b6bb4b2c69e0bd202384b",
+    "artifacts/capture-boundary-maps-20261014/build.log": "ba9dfcb61add47d6f12632fe77a27e35d2b4d659eac83324996a31c670548a9d",
+    "artifacts/capture-boundary-maps-20261014/capture-ctest.log": "31e4ef6d76a3eda69cb5263b3e9bf0ee4e0d9e2fc53db39233c8e43a549748ce",
+    "artifacts/capture-boundary-maps-20261014/capture-ui.txt": "d5df91c978b17164ff4cc9ccdb76d5c6c1c80642fdcecad5ffd32c86113c1f78",
+    "artifacts/capture-boundary-maps-20261014/dual/validation.json": "f997cbc1a497125ba8e5f36e4755c6b32291e521d1ffbaa1a844497fef50a57c",
+    "artifacts/capture-boundary-maps-20261014/dual-end/validation.json": "1e8b8afb1268b8aad94c99634caf04fc3d4e610d5c2154695a9ed7473019ce96",
+    "artifacts/capture-boundary-maps-20261014/dual-final/validation.json": "3b8bff9099f5cd85f9652bdf7937d38a821d7d76c7016e2fa06e86268caae694",
+    "artifacts/capture-boundary-maps-20261014/dual-verified/inputs.json": "f575a49ed04a9af5efae1ea9658a3bf5fd8a6f23cc7ae0b97236bf699f211d47",
+    "artifacts/capture-boundary-maps-20261014/dual-verified/validation.json": "1113c21e2e49cb0e0426fdfe7b1fe69841369f8678666a34479d0f1b2b01d830",
+    "artifacts/capture-boundary-maps-20261014/focused-2.log": "4ed695ddef0d321d93ef43905328d184f8eb9f4ad6e8a5484e23b9f30c900a3a",
+    "artifacts/capture-boundary-maps-20261014/focused-end.log": "9e977f6a2bd25faf42ce9aa2c9c0578d5aaf8dd9910fc2593ff9a18240dfcdd3",
+    "artifacts/capture-boundary-maps-20261014/focused.log": "3254eb075a5794bf39f3be751592fdeb621a3bc72660fba75224f812b19ca01c",
+    "artifacts/capture-boundary-maps-20261014/full-build-end.log": "a5a96d00ce6a1654b4c9b0433d6e5e1801dcf4f535e3e60ad34865b815bebcec",
+    "artifacts/capture-boundary-maps-20261014/full-build-final.log": "4ca817fe79ed7ab43f464177c85828e4ce5eb2e97dd08e4d9ab118a785b4b2fa",
+    "artifacts/capture-boundary-maps-20261014/full-build.log": "816d024acdd6fcff02690134a883535ad06242b25743b61d4daefa530bd1d065",
+    "artifacts/capture-boundary-maps-20261014/full-ctest.log": "8082256b662d1b2be8df368b7eb3a5bc8ef757d6b48636e4365067fc99fece41",
+    "artifacts/capture-gf2-boundary-end-20261014/binaries.json": "1bf282f2db5329d154efade41662c5291c5ad6f3eedf441cb8ac58cbd6c3028c",
+    "artifacts/capture-gf2-boundary-end-20261014/comparison-rule.json": "d39eceeb66074aac2cad4012730ecb89907223cf194c9798d4c6591b94c80106",
+    "artifacts/capture-gf2-boundary-end-20261014/disconnect.json": "519397de57d328d5b4f093180a4072cca4a0e1904457bf28780b5e0055b78159",
+    "artifacts/capture-gf2-boundary-end-20261014/environment-final.json": "1dfa324f34a0979870d29a00ab661d87e9fc3e52bfe78abbf676e1169134b994",
+    "artifacts/capture-gf2-boundary-end-20261014/launch.json": "e57fcc392da9e2e07f3e47956fb3c9872f03b8b2c9f717f4142a9aef4f1a4155",
+    "artifacts/capture-gf2-boundary-end-20261014/request-main.json": "d939eaeac138fdc9b82b2db702bad7ec372112f636b608c6f331ace9de6c2c78",
+    "artifacts/capture-gf2-boundary-end-20261014/status-after-failure.json": "c30150c1b914abd688d4d3b243492c3d161a72395aae6a05d93e69dfc6328944",
+    "artifacts/capture-gf2-boundary-end-20261014/status-exited.json": "75d63ea0013cac31dc32fb090f1ebb81930b51dcb05c224bd5bf6a8c5fd016bf",
+    "artifacts/capture-gf2-boundary-end-20261014/status-main-before.json": "66489d37193557d77a00c28072361b2fa772b353f6782112062d929c5681f200",
+    "artifacts/capture-gf2-boundary-end-20261014/status-main-result.json": "269b990ed5341c0c350982b431b4a45b0b4c93e5c5130914676526442a61050a",
+    "artifacts/capture-gf2-boundary-end-20261014/status-start.json": "fbf837c020be775f163005472cee1ec9cb5853f8e19909513d5a04c4d790ac16",
+    "artifacts/capture-gf2-boundary-maps-20261014/binaries.json": "24a01b5621c308eff3ac4a947beab6fc1b6362e3276d2cf7d3e210620016eeba",
+    "artifacts/capture-gf2-boundary-maps-20261014/comparison-rule.json": "d39eceeb66074aac2cad4012730ecb89907223cf194c9798d4c6591b94c80106",
+    "artifacts/capture-gf2-boundary-maps-20261014/disconnect.json": "54e489faa85255475b84764587bb627c5f844fbdbaa9f4390f59377b83191bbc",
+    "artifacts/capture-gf2-boundary-maps-20261014/environment-final.json": "cf95c2284a6976f5c6876b7659c5f1ca3becc79bce27827fb452703e0b2f6f8a",
+    "artifacts/capture-gf2-boundary-maps-20261014/launch.json": "692b5645152582fc1682eac29b001e0dc297bbdc25b318b732664a959cfebf7c",
+    "artifacts/capture-gf2-boundary-maps-20261014/request-main.json": "d7822eacbdb479bb0e2630dc8e8414a5da7e3dd0749a1ae3f24253266df565fa",
+    "artifacts/capture-gf2-boundary-maps-20261014/status-after-failure.json": "a54540a1b2284a5ca12e9c18ae2aa9b20a07c6d87bf57baec5ae62a8973ee0dc",
+    "artifacts/capture-gf2-boundary-maps-20261014/status-exited.json": "75d63ea0013cac31dc32fb090f1ebb81930b51dcb05c224bd5bf6a8c5fd016bf",
+    "artifacts/capture-gf2-boundary-maps-20261014/status-main-before.json": "e55ab93d595483fe9f308dba60b8666cd5bdc2fb6a909962ea876bdee5ded52d",
+    "artifacts/capture-gf2-boundary-maps-20261014/status-main-result.json": "88172b61e030090fff4d272df140c28671343b2c68f246e862aa5851ca0f825a",
+    "artifacts/capture-gf2-boundary-maps-20261014/status-start.json": "bb623d90a9376d486d2c4168edceccda6b1a34eab945083cb822884035060e3f"
+  }
+}

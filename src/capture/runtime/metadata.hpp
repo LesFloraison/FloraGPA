@@ -4,6 +4,7 @@
 #include <d3d11_4.h>
 #include <atomic>
 #include <memory>
+#include <map>
 #include <mutex>
 #include <optional>
 #include <string>
@@ -13,7 +14,7 @@
 namespace flora::capture {
 struct DeferredHistory;
 struct DeferredCommandList;
-// Scalar provenance only. Never retain a mapped CPU pointer after the API call.
+// Scalar provenance only; safe to copy into frame-local boundary snapshots.
 struct MappingStamp {
     uint64_t generation=0;
     DWORD thread=0;
@@ -22,6 +23,9 @@ struct MappingStamp {
     HRESULT result=E_FAIL;
     bool cpu_storage=false;
 };
+// Runtime-only borrowed storage. Cleared before native Unmap and before the
+// last application wrapper reference is released. Never frozen or serialized.
+struct ActiveMapping : MappingStamp { D3D11_MAPPED_SUBRESOURCE storage{}; };
 // Capture-owned model. No replay objects, GPU executors or wire record types.
 // Holding a record never holds a native COM object alive.
 struct ObjectRecord {
@@ -34,7 +38,7 @@ struct ObjectRecord {
     std::string creation_api;
     std::vector<uint8_t> creation_bytes;
     std::vector<SubresourceData> creation_subresources;
-    std::map<std::pair<uint64_t,UINT>,MappingStamp> mapped_subresources;
+    std::map<std::pair<uint64_t,UINT>,ActiveMapping> mapped_subresources;
     uint64_t mapping_serial=0;
     std::set<uint64_t> active_queries;
     QueryEndStamp last_query_end;
@@ -58,6 +62,8 @@ void track_query(const void* context_proxy, IUnknown* query, bool begin) noexcep
 void track_external_mapping(const void* proxy,bool mapped) noexcept;
 bool has_external_mapping(bool include_resource_mappings=false,bool ignore_buffer_mappings=false);
 Json metadata_status();
+std::vector<std::shared_ptr<ObjectRecord>> active_mapping_records();
+void invalidate_mapping_storage(const void* context_proxy,ID3D11Resource*,UINT) noexcept;
 void observe_private_data(REFGUID key, const char* api) noexcept;
 // Input is an application proxy; these functions never issue GPU commands.
 std::shared_ptr<ObjectRecord> object_record(const void* proxy);

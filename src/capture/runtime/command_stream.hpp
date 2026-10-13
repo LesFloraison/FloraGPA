@@ -9,6 +9,8 @@ struct RecordedFrame {
     std::map<ObjectId,FrozenObject> deferred_definitions;
     std::map<ObjectId,ResourceSnapshot> initial_resources;
     std::map<ObjectId,MsaaSamples> initial_msaa;
+    std::vector<InitialMap> initial_maps;
+    std::vector<FinalMap> final_maps;
     std::vector<RecordedCommand> commands;
     std::vector<std::string> gaps;
     size_t initial_bytes=0;

@@ -68,6 +68,8 @@ struct FrameRecording::Impl {
     bool finished=false,starting=true;
     struct Mapping {size_t command;D3D11_MAPPED_SUBRESOURCE mapped{};};
     std::map<std::pair<ObjectId,UINT>,Mapping> mappings;
+    struct BoundaryMapping {MappingStamp stamp;ResourceSnapshot initial;};
+    std::map<ObjectId,BoundaryMapping> boundary_mappings;
     std::map<ObjectId,std::pair<uint64_t,uint64_t>> query_ends; // generation, command sequence
     size_t payload_bytes=0;
     size_t msaa_planes=0;
@@ -113,8 +115,8 @@ FrameRecording::FrameRecording(ID3D11DeviceContext* context,const RecordingOptio
     {std::lock_guard lock(record->mutex);if(!record->active_queries.empty())throw std::runtime_error("Recording cannot start inside an active query");}
     if(has_external_mapping())throw std::runtime_error("Recording cannot start with an active DXGI mapping");
     // An untouched resource may remain CPU-mapped across this frame. Each
-    // snapshot still refuses mapped dependencies, and an Unmap whose Map
-    // predates recording fails without reading an unowned pointer.
+    // snapshot still refuses mapped GPU dependencies. Supported same-thread
+    // WRITE_DISCARD buffers receive an owned CPU boundary snapshot at start.
     if(object_status().at("interface_gaps").get<uint64_t>())throw std::runtime_error("Recording has prior interface capability gaps");
     impl_->context=context;impl_->context_id=record->id;impl_->options=options;
 }
@@ -128,6 +130,23 @@ void FrameRecording::complete_start(){
         return p.cancelled.load();
     };
     p.frame.start_completion=complete_frame_start(p.context.Get(),options);
+    for(const auto& record:active_mapping_records()){
+        if(options.cancelled())throw std::runtime_error("Boundary Map snapshot cancelled");
+        std::lock_guard lock(record->mutex);
+        if(!record->alive || record->device!=p.frame.start_completion->device || record->kind!="buffer" || record->descriptor.size()!=sizeof(D3D11_BUFFER_DESC))continue;
+        auto found=record->mapped_subresources.find({p.context_id,0});if(found==record->mapped_subresources.end())continue;
+        const auto& live=found->second;
+        // Unsupported or foreign mappings remain untouched. Their in-frame
+        // use/Unmap still fails with the original provenance diagnostic.
+        if(live.thread!=p.thread || live.type!=D3D11_MAP_WRITE_DISCARD || live.flags || live.result!=S_OK || !live.storage.pData)continue;
+        D3D11_BUFFER_DESC desc{};memcpy(&desc,record->descriptor.data(),sizeof desc);
+        if(desc.Usage!=D3D11_USAGE_DYNAMIC || desc.CPUAccessFlags!=D3D11_CPU_ACCESS_WRITE || desc.MiscFlags || desc.StructureByteStride ||
+           !desc.BindFlags || (desc.BindFlags&~(D3D11_BIND_VERTEX_BUFFER|D3D11_BIND_INDEX_BUFFER|D3D11_BIND_CONSTANT_BUFFER|D3D11_BIND_SHADER_RESOURCE)))continue;
+        ResourceSnapshot initial;initial.record=record;initial.shape.dimension=D3D11_RESOURCE_DIMENSION_BUFFER;initial.shape.width=desc.ByteWidth;
+        initial.subresources=resource_layout(initial.shape,p.options.byte_limit-p.payload_bytes);
+        auto& sub=initial.subresources.at(0);copy_pitched(sub,live.storage.pData,live.storage.RowPitch,live.storage.DepthPitch);
+        p.payload_bytes+=sub.bytes.size();p.boundary_mappings.emplace(record->id,Impl::BoundaryMapping{live,std::move(initial)});
+    }
     if(options.cancelled())throw std::runtime_error("Frame start completion cancelled");
     p.starting=false;
 }
@@ -152,6 +171,8 @@ FrozenFrame freeze_frame(RecordedFrame&& frame,ObjectId output,ResourceSnapshot&
     }
     for(auto& [id,resource]:frame.initial_resources)result.initial_resources.emplace(id,ResourceContents{resource.shape,std::move(resource.subresources)});
     result.initial_msaa=std::move(frame.initial_msaa);
+    result.initial_maps=std::move(frame.initial_maps);
+    result.final_maps=std::move(frame.final_maps);
     result.objects.merge(frame.deferred_definitions);
     result.commands=std::move(frame.commands);result.final_output={final_output.shape,std::move(final_output.subresources)};
     frame.objects.clear();frame.initial_resources.clear();return result;
@@ -176,8 +197,27 @@ RecordedFrame FrameRecording::finish(){
     ComPtr<ID3D11Device> device;unwrap(p.context.Get())->GetDevice(&device);
     if(FAILED(device->GetDeviceRemovedReason()))p.gap("finish","Device removed during recording");
     if(object_status().at("interface_gaps").get<uint64_t>())p.gap("finish","Interface capability gap during recording");
-    if(!p.mappings.empty())p.gap("finish","Frame ends with an active resource mapping");
+    if(!p.frame.failed && !p.cancelled){try{
+        for(const auto& [key,mapping]:p.mappings){
+            auto& command=p.frame.commands.at(mapping.command);auto record=p.frame.initial_resources.at(key.first).record;
+            std::lock_guard resource_lock(record->mutex);
+            auto live=record->mapped_subresources.find({p.context_id,key.second});
+            if(command.kind!=CommandKind::map || command.words[0] || command.words[1]!=D3D11_MAP_WRITE_DISCARD || command.words[2] || command.result!=S_OK ||
+               record->kind!="buffer" || record->descriptor.size()!=sizeof(D3D11_BUFFER_DESC) || live==record->mapped_subresources.end() ||
+               live->second.thread!=p.thread || !live->second.storage.pData || live->second.storage.pData!=mapping.mapped.pData)
+                throw std::runtime_error("Frame ends with an active resource mapping outside the verified boundary profile");
+            D3D11_BUFFER_DESC d{};memcpy(&d,record->descriptor.data(),sizeof d);
+            if(d.Usage!=D3D11_USAGE_DYNAMIC || d.CPUAccessFlags!=D3D11_CPU_ACCESS_WRITE || d.MiscFlags || d.StructureByteStride || !d.BindFlags ||
+                (d.BindFlags&~(D3D11_BIND_VERTEX_BUFFER|D3D11_BIND_INDEX_BUFFER|D3D11_BIND_CONSTANT_BUFFER|D3D11_BIND_SHADER_RESOURCE)))
+                throw std::runtime_error("Frame ends with an active resource mapping outside the verified storage profile");
+            auto sub=resource_layout(p.frame.initial_resources.at(key.first).shape,p.options.byte_limit-p.frame.initial_bytes-p.payload_bytes).at(0);
+            copy_pitched(sub,live->second.storage.pData,live->second.storage.RowPitch,live->second.storage.DepthPitch);
+            command.data=std::move(sub.bytes);command.completed=true;p.payload_bytes+=command.data.size();
+            p.frame.final_maps.push_back({key.first,p.context_id,record->device,live->second.generation,command.sequence,p.thread});
+        }
+    }catch(const std::exception& e){p.gap("finish",e.what());}}
     p.mappings.clear(); // No mapped pointer escapes the application-thread recording.
+    p.boundary_mappings.clear();
     p.finished=true;p.frame.cancelled=p.cancelled.load();
     auto& r=registry();{std::lock_guard guard(r.mutex);if(auto active=r.active.lock();active.get()==this){r.active.reset();r.enabled.store(false);}}
     return std::move(p.frame);
@@ -408,6 +448,25 @@ void FrameRecording::unmap(ID3D11DeviceContext* context,ID3D11Resource* resource
         auto c=object_record(context),r=object_record(resource);
         if(!c || c->id!=p.context_id || !r)throw std::runtime_error("Unmap context/resource identity mismatch");
         auto found=p.mappings.find({r->id,subresource});if(found==p.mappings.end()){
+            if(auto boundary=p.boundary_mappings.find(r->id);boundary!=p.boundary_mappings.end() && subresource==0){
+                if(p.frame.commands.size()>=p.options.command_limit)throw std::runtime_error("Frame command limit exceeded");
+                auto& saved=boundary->second;std::lock_guard resource_lock(r->mutex);
+                auto live=r->mapped_subresources.find({c->id,subresource});
+                if(live==r->mapped_subresources.end() || live->second.generation!=saved.stamp.generation || live->second.thread!=p.thread || !live->second.storage.pData)
+                    throw std::runtime_error("Boundary Map lifetime/generation changed");
+                if(p.frame.initial_resources.contains(r->id))throw std::runtime_error("Boundary Map resource already used");
+                auto sub=resource_layout(saved.initial.shape,p.options.byte_limit-p.frame.initial_bytes-p.payload_bytes).at(0);
+                copy_pitched(sub,live->second.storage.pData,live->second.storage.RowPitch,live->second.storage.DepthPitch);
+                InitialMap initial{r->id,c->id,c->device,saved.stamp.generation,saved.stamp.thread,std::move(sub.bytes)};
+                p.frame.initial_bytes+=initial.data.size(); // Boundary bytes move out of the pending payload budget.
+                p.frame.initial_maps.push_back(std::move(initial));
+                p.frame.initial_resources.emplace(r->id,std::move(saved.initial));
+                p.frame.objects.try_emplace(r->id,RetainedObject{r,{}});
+                RecordedCommand end;end.kind=CommandKind::unmap;end.api=api;end.sequence=p.frame.commands.size();end.operand=r->id;
+                end.bindings.context=c->id;end.bindings.device=c->device;end.completed=true;
+                ContextSnapshot held;retain(held,context);ComPtr<ID3D11Device> device;unwrap(context)->GetDevice(&device);retain(held,device.Get());
+                p.frame.objects.merge(held.objects);p.frame.commands.push_back(std::move(end));p.boundary_mappings.erase(boundary);return;
+            }
             std::string reason="Unmap has no recorded successful Map (resource="+std::to_string(r->id)+", context="+std::to_string(c->id)+", subresource="+std::to_string(subresource);
             std::lock_guard resource_lock(r->mutex);
             if(auto history=r->mapped_subresources.find({c->id,subresource});history!=r->mapped_subresources.end()){

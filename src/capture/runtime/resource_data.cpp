@@ -89,8 +89,8 @@ void track_mapping(const void* context_proxy,ID3D11Resource* resource,UINT subre
         if(!record || !context)throw std::runtime_error("Mapped object metadata unavailable");
         std::lock_guard lock(record->mutex);const auto key=std::pair{context->id,subresource};
         if(mapped){
-            MappingStamp stamp;stamp.generation=++record->mapping_serial;stamp.thread=GetCurrentThreadId();stamp.type=type;stamp.flags=flags;stamp.result=result;
-            if(storage){stamp.row_pitch=storage->RowPitch;stamp.depth_pitch=storage->DepthPitch;stamp.cpu_storage=storage->pData!=nullptr;}
+            ActiveMapping stamp;stamp.generation=++record->mapping_serial;stamp.thread=GetCurrentThreadId();stamp.type=type;stamp.flags=flags;stamp.result=result;
+            if(storage){stamp.storage=*storage;stamp.row_pitch=storage->RowPitch;stamp.depth_pitch=storage->DepthPitch;stamp.cpu_storage=storage->pData!=nullptr;}
             if(!record->mapped_subresources.emplace(key,stamp).second)throw std::runtime_error("Repeated Map without Unmap");
         }
         else if(!record->mapped_subresources.erase(key))throw std::runtime_error("Unmap without tracked Map");

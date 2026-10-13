@@ -2045,3 +2045,14 @@ by this diagnostic history, and cross-frame capture still refuses. Both builds,
 13 capture-focused / 14 full-focused CTests and twelve Qt cases pass. The game
 continues after refusal and exits normally; formal acceptance stays 0/6. See
 [Map boundary evidence and remaining work](CAPTURE_MAP_BOUNDARIES.md).
+
+Scoped same-thread buffer WRITE_DISCARD now spans both frame boundaries through
+independent owned initial/final mapping models. Native mappings remain intact;
+replay restoration/cleanup helpers are labelled separately from application
+Unmap. Sixteen files / 246 exact dual-player checks, forty-two malformed encoder
+refusals per device and native lifetime/budget/thread/cancellation guards pass.
+Both builds, all 106 capture-only / 109 selected full CTests and twelve Qt cases
+pass. GF2 now completes runtime recording and refuses the unverified MSAA/query
+encoding combination. No frame is published; the game continues and closes
+normally. Formal acceptance stays 0/6. See [boundary Map evidence](CAPTURE_MAP_BOUNDARIES.md)
+and [the production baseline](capture-boundary-map-recording-baseline.json).

@@ -376,7 +376,27 @@ public:
         for(const auto& [id,o]:frame_.objects)object(id,o);
         for(const auto& [id,data]:frame_.initial_resources){(void)data;require(frame_.objects.contains(id),"Encoder orphan initial resource");resource_ref(id);}
         initialize_msaa();
-        std::map<std::pair<ObjectId,UINT>,bool> mappings;
+        std::map<std::pair<ObjectId,UINT>,uint64_t> mappings;
+        for(const auto& initial:frame_.initial_maps){
+            checkpoint();
+            require(initial.resource && initial.context==context_ && initial.device==device_ && initial.generation && initial.thread,
+                "Encoder boundary Map provenance mismatch");
+            require(frame_.start_completion && initial.thread==frame_.start_completion->thread,"Encoder boundary Map thread mismatch");
+            const auto resource=typed(initial.resource,{"buffer"});const auto& object=frame_.objects.at(initial.resource);
+            require(object.device==device_ && object.descriptor.size()==sizeof(D3D11_BUFFER_DESC),"Encoder boundary Map resource mismatch");
+            const auto d=descriptor<D3D11_BUFFER_DESC>(object);
+            require(d.Usage==D3D11_USAGE_DYNAMIC && d.CPUAccessFlags==D3D11_CPU_ACCESS_WRITE && !d.MiscFlags && !d.StructureByteStride && d.BindFlags &&
+                !(d.BindFlags&~(D3D11_BIND_VERTEX_BUFFER|D3D11_BIND_INDEX_BUFFER|D3D11_BIND_CONSTANT_BUFFER|D3D11_BIND_SHADER_RESOURCE)),"Encoder boundary Map storage unsupported");
+            require(frame_.initial_resources.contains(initial.resource),"Encoder boundary Map initial data missing");
+            const auto& baseline=frame_.initial_resources.at(initial.resource);
+            require(baseline.shape.dimension==D3D11_RESOURCE_DIMENSION_BUFFER && baseline.shape.width==d.ByteWidth && initial.data.size()==d.ByteWidth,
+                "Encoder boundary Map byte length mismatch");
+            require(mappings.emplace(std::pair{initial.resource,0u},UINT64_MAX).second,"Encoder duplicate boundary Map");
+            std::u16string name=u"FloraCapture initialization: frame-start Map";name.push_back(0);
+            add(7,0x327b,Payload{}.q({0,UINT64_MAX-2}).u({0,narrow(name.size()*2)}).bytes({reinterpret_cast<const uint8_t*>(name.data()),name.size()*2}));
+            add(7,0x246,Payload{}.q({0,1}).value<int32_t>(S_OK).value(resource).u({0,D3D11_MAP_WRITE_DISCARD,0}).value(blob(initial.data)));
+            add(7,0x327c,Payload{}.q({0,UINT64_MAX-2}).u({0}));
+        }
         uint64_t sequence=0;
         for(const auto& command:frame_.commands){
             require(command.sequence==sequence++,"Encoder command sequence mismatch");const auto& w=command.words;Payload p;uint16_t type=0;
@@ -408,7 +428,7 @@ public:
                     require(!(mapped_shape.format>=DXGI_FORMAT_NV12 && mapped_shape.format<=DXGI_FORMAT_P016),"Encoder planar Map layout unverified");
                     require(mapped_shape.dimension==D3D11_RESOURCE_DIMENSION_BUFFER || w[1]!=D3D11_MAP_WRITE_NO_OVERWRITE,"Encoder texture NO_OVERWRITE unsupported");
                     const auto& sub=layout.at(w[0]);require(command.data.size()==sub.slice_bytes*sub.depth,"Encoder Map data length mismatch");
-                    require(mappings.emplace(key,true).second,"Encoder overlapping Map calls");
+                    require(mappings.emplace(key,command.sequence).second,"Encoder overlapping Map calls");
                     if(w[1]==D3D11_MAP_WRITE_NO_OVERWRITE)data=mapped_diff(command.before_data,command.data);
                     else{require(command.before_data.empty(),"Encoder unexpected Map baseline");data=blob(command.data);}
                 }
@@ -486,6 +506,23 @@ public:
                 if(type==0x31){require((w[0]&~3u)==0 && w[1]<=255,"Encoder invalid depth/stencil clear arguments");p.value(w[0]).value(command.floats[0]).value(uint8_t(w[1]));}
                 else{p.value<uint8_t>(1);if(type==0x33)for(size_t i=0;i<4;++i)p.value(w[i]);else for(auto v:command.floats)p.value(v);}
             }add(7,type,std::move(p));
+        }
+        for(const auto& final_map:frame_.final_maps){
+            require(final_map.resource && final_map.context==context_ && final_map.device==device_ && final_map.generation && final_map.thread && frame_.start_completion &&
+                final_map.thread==frame_.start_completion->thread && final_map.command_sequence<frame_.commands.size(),"Encoder final Map provenance mismatch");
+            const auto& command=frame_.commands.at(final_map.command_sequence);
+            require(command.kind==CommandKind::map && command.operand==final_map.resource && command.words==std::array<uint32_t,5>{0,D3D11_MAP_WRITE_DISCARD,0,0,0} &&
+                command.result==S_OK && command.completed,"Encoder final Map command mismatch");
+            const auto resource=typed(final_map.resource,{"buffer"});const auto& object=frame_.objects.at(final_map.resource);
+            require(object.device==device_ && object.descriptor.size()==sizeof(D3D11_BUFFER_DESC),"Encoder final Map resource mismatch");
+            const auto d=descriptor<D3D11_BUFFER_DESC>(object);
+            require(d.Usage==D3D11_USAGE_DYNAMIC && d.CPUAccessFlags==D3D11_CPU_ACCESS_WRITE && !d.MiscFlags && !d.StructureByteStride && d.BindFlags &&
+                !(d.BindFlags&~(D3D11_BIND_VERTEX_BUFFER|D3D11_BIND_INDEX_BUFFER|D3D11_BIND_CONSTANT_BUFFER|D3D11_BIND_SHADER_RESOURCE)),"Encoder final Map storage unsupported");
+            const auto open=mappings.find({final_map.resource,0});require(open!=mappings.end() && open->second==final_map.command_sequence,"Encoder final Map is not the open generation or is duplicated");mappings.erase(open);
+            std::u16string name=u"FloraCapture cleanup: frame-end Map";name.push_back(0);
+            add(7,0x327b,Payload{}.q({0,UINT64_MAX-2}).u({0,narrow(name.size()*2)}).bytes({reinterpret_cast<const uint8_t*>(name.data()),name.size()*2}));
+            add(7,0x34ed,Payload{}.q({0,1,resource}).u({0}));
+            add(7,0x327c,Payload{}.q({0,UINT64_MAX-2}).u({0}));
         }
         require(mappings.empty(),"Encoder frame has unpaired Map");
         const auto reference_data=blob(final);add(5,0x87,Payload{}.q({UINT64_MAX-1,3}).raw(output_desc).value(reference_data));

@@ -263,6 +263,19 @@ Json metadata_status() {
     }
     return {{"created",created},{"destroyed",destroyed},{"alive",alive},{"kinds",kinds},{"active_mapping_count",mapping_count},{"active_mappings",mappings}};
 }
+std::vector<std::shared_ptr<ObjectRecord>> active_mapping_records(){
+    auto& r=registry();std::vector<std::shared_ptr<Entry>> entries;
+    {std::lock_guard lock(r.mutex);for(const auto& [identity,entry]:r.objects){(void)identity;entries.push_back(entry);}}
+    std::vector<std::shared_ptr<ObjectRecord>> result;
+    for(const auto& entry:entries){std::shared_ptr<ObjectRecord> record;{std::lock_guard lock(entry->mutex);record=entry->record.lock();}
+        if(record){std::lock_guard lock(record->mutex);if(record->alive && !record->mapped_subresources.empty())result.push_back(record);}}
+    return result;
+}
+void invalidate_mapping_storage(const void* context_proxy,ID3D11Resource* resource,UINT subresource) noexcept {
+    try{auto r=object_record(resource),c=object_record(context_proxy);if(!r || !c)return;
+        std::lock_guard lock(r->mutex);if(auto it=r->mapped_subresources.find({c->id,subresource});it!=r->mapped_subresources.end())it->second.storage={};
+    }catch(...){object_gap("Unmap",__uuidof(ID3D11Resource),"Mapping storage invalidation failed");}
+}
 void observe_private_data(REFGUID key, const char* api) noexcept {
     if (key == lifetime_key || presentation_private_key(key)) object_gap(api, __uuidof(IUnknown), "Application accessed reserved native lifetime metadata");
 }

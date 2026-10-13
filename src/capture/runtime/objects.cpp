@@ -100,6 +100,10 @@ ULONG Object::Release() {
             ++r.destroyed; destroy = true;
         }
     }
+    if(destroy && impl_->record){
+        std::lock_guard lock(impl_->record->mutex);
+        for(auto& [key,mapping]:impl_->record->mapped_subresources){(void)key;mapping.storage={};}
+    }
     SetLastError(before); const auto count = identity->Release(); const DWORD after = GetLastError();
     if (destroy) delete this;
     SetLastError(after); return count;

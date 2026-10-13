@@ -147,6 +147,22 @@ struct FrozenObject {
     bool creation_observed=false;
 };
 struct ResourceContents { ResourceShape shape; std::vector<SubresourceData> subresources; };
+// A successful buffer WRITE_DISCARD already active at frame start. Initial
+// resource bytes are the boundary-time CPU contents; data owns bytes copied
+// immediately before the matching application Unmap. No borrowed pointer.
+struct InitialMap {
+    ObjectId resource=0,context=0,device=0;
+    uint64_t generation=0;
+    uint32_t thread=0;
+    std::vector<uint8_t> data;
+};
+// Application Map is still active at the final boundary. Its command owns the
+// boundary-time bytes. Any replay cleanup Unmap is explicitly a helper event.
+struct FinalMap {
+    ObjectId resource=0,context=0,device=0;
+    uint64_t generation=0,command_sequence=0;
+    uint32_t thread=0;
+};
 // Native DX11 exposes logical backbuffer zero across presentation. Buffer count
 // and swap effect remain the actual application descriptor in the wire record.
 inline bool supported_swap_buffers(UINT effect,UINT count){
@@ -164,6 +180,8 @@ struct FrozenFrame {
     std::map<ObjectId,FrozenObject> objects;
     std::map<ObjectId,ResourceContents> initial_resources;
     std::map<ObjectId,MsaaSamples> initial_msaa;
+    std::vector<InitialMap> initial_maps;
+    std::vector<FinalMap> final_maps;
     std::vector<RecordedCommand> commands;
     ObjectId output=0;
     ResourceContents final_output;
