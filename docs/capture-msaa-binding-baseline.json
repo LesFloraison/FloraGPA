@@ -1,0 +1,373 @@
+{
+  "schema": "FloraGPA capture MSAA binding diagnosis baseline 1",
+  "date": "2026-10-14",
+  "source_parent": "ce012963f9c7132b56cd61e28df019e362736482",
+  "formal_accepted_frames": 0,
+  "required_frames": 6,
+  "production_changes": false,
+  "acceptance_established": false,
+  "raw_evidence": "artifacts/capture-gf2-draw-isolation-20261014",
+  "evidence_manifest_sha256": "ed6e30f9f9d77a8ee73d6484d36402e7fb8786c39b6b0fd76361e464d356077c",
+  "input_change": {
+    "source": "artifacts\\capture-gf2-constant-ranges-20261014\\session\\frame-6714dcd8-2b99-4bde-90dc-a3910743d7fc.gpa_frame",
+    "source_sha256": "e4546f2ee56a7a395c5ae447004e2204df6058b89702dde66479981f37ff2dcb",
+    "probe": "artifacts\\capture-gf2-draw-isolation-20261014\\shader-readable-380.gpa_frame",
+    "probe_sha256": "786e87ef1e89e85bed6d22b9e4d742a2217c82c8b9009669c1aece6e91639a3d",
+    "changed_bytes": [
+      26336
+    ],
+    "changes": [
+      {
+        "resource": 380,
+        "offset": 26336,
+        "old": 32,
+        "new": 40
+      }
+    ],
+    "acceptance_established": false
+  },
+  "independent_controls": {
+    "executable_sha256": "144c8591901d110f218212748c5aad4aa8c2ff3ad9dfb85d551720d8aecc1d1b",
+    "results": [
+      {
+        "mode": "sample",
+        "driver": "hardware",
+        "exports": 36,
+        "different_words": 0,
+        "debug_failures": 0,
+        "copy_direct_exact": true,
+        "repeats_exact": true,
+        "csv_sha256": "b06022ead88cccb18c5d766f016c30abcc793c3cd9c9fde219fb9113d21fbac1",
+        "copy_direct_comparisons": 0,
+        "oracle": "exact CPU integer-to-half image"
+      },
+      {
+        "mode": "sample",
+        "driver": "warp",
+        "exports": 36,
+        "different_words": 0,
+        "debug_failures": 0,
+        "copy_direct_exact": true,
+        "repeats_exact": true,
+        "csv_sha256": "b06022ead88cccb18c5d766f016c30abcc793c3cd9c9fde219fb9113d21fbac1",
+        "copy_direct_comparisons": 0,
+        "oracle": "exact CPU integer-to-half image"
+      },
+      {
+        "mode": "pixel-edges",
+        "driver": "hardware",
+        "exports": 108,
+        "different_words": 0,
+        "debug_failures": 0,
+        "copy_direct_exact": true,
+        "repeats_exact": true,
+        "csv_sha256": "4d7b04ea7683ab334a3121806ca633b775d2a848c2ceac90310d1b26ec8d1b70",
+        "copy_direct_comparisons": 36,
+        "oracle": "two valid color tuples per pixel"
+      },
+      {
+        "mode": "pixel-edges",
+        "driver": "warp",
+        "exports": 108,
+        "different_words": 0,
+        "debug_failures": 0,
+        "copy_direct_exact": true,
+        "repeats_exact": true,
+        "csv_sha256": "4d7b04ea7683ab334a3121806ca633b775d2a848c2ceac90310d1b26ec8d1b70",
+        "copy_direct_comparisons": 36,
+        "oracle": "two valid color tuples per pixel"
+      },
+      {
+        "mode": "pixel-normal",
+        "driver": "hardware",
+        "exports": 108,
+        "different_words": 0,
+        "debug_failures": 0,
+        "copy_direct_exact": true,
+        "repeats_exact": true,
+        "csv_sha256": "4d7b04ea7683ab334a3121806ca633b775d2a848c2ceac90310d1b26ec8d1b70",
+        "copy_direct_comparisons": 36,
+        "oracle": "RGB is an exactly represented integer from 0 to 2047; alpha equals 2047"
+      },
+      {
+        "mode": "pixel-normal",
+        "driver": "warp",
+        "exports": 108,
+        "different_words": 0,
+        "debug_failures": 0,
+        "copy_direct_exact": true,
+        "repeats_exact": true,
+        "csv_sha256": "4d7b04ea7683ab334a3121806ca633b775d2a848c2ceac90310d1b26ec8d1b70",
+        "copy_direct_comparisons": 36,
+        "oracle": "RGB is an exactly represented integer from 0 to 2047; alpha equals 2047"
+      }
+    ],
+    "acceptance_established": false
+  },
+  "marker_results": [
+    {
+      "repeat": 0,
+      "marker_pixels": 952720,
+      "fractional_marked_words": 0,
+      "different_words": 0,
+      "reader_hashes": {
+        "direct-float": "1b16e7be3d7f9fb02077b983a13c746db71026344831e8765537f8a4c21e6836",
+        "direct-integer": "1b16e7be3d7f9fb02077b983a13c746db71026344831e8765537f8a4c21e6836",
+        "float": "1b16e7be3d7f9fb02077b983a13c746db71026344831e8765537f8a4c21e6836",
+        "integer": "1b16e7be3d7f9fb02077b983a13c746db71026344831e8765537f8a4c21e6836",
+        "native-first": "1b16e7be3d7f9fb02077b983a13c746db71026344831e8765537f8a4c21e6836",
+        "native-last": "1b16e7be3d7f9fb02077b983a13c746db71026344831e8765537f8a4c21e6836"
+      }
+    },
+    {
+      "repeat": 1,
+      "marker_pixels": 952720,
+      "fractional_marked_words": 0,
+      "different_words": 0,
+      "reader_hashes": {
+        "direct-float": "1b16e7be3d7f9fb02077b983a13c746db71026344831e8765537f8a4c21e6836",
+        "direct-integer": "1b16e7be3d7f9fb02077b983a13c746db71026344831e8765537f8a4c21e6836",
+        "float": "1b16e7be3d7f9fb02077b983a13c746db71026344831e8765537f8a4c21e6836",
+        "integer": "1b16e7be3d7f9fb02077b983a13c746db71026344831e8765537f8a4c21e6836",
+        "native-first": "1b16e7be3d7f9fb02077b983a13c746db71026344831e8765537f8a4c21e6836",
+        "native-last": "1b16e7be3d7f9fb02077b983a13c746db71026344831e8765537f8a4c21e6836"
+      }
+    },
+    {
+      "repeat": 2,
+      "marker_pixels": 952720,
+      "fractional_marked_words": 0,
+      "different_words": 0,
+      "reader_hashes": {
+        "direct-float": "1b16e7be3d7f9fb02077b983a13c746db71026344831e8765537f8a4c21e6836",
+        "direct-integer": "1b16e7be3d7f9fb02077b983a13c746db71026344831e8765537f8a4c21e6836",
+        "float": "1b16e7be3d7f9fb02077b983a13c746db71026344831e8765537f8a4c21e6836",
+        "integer": "1b16e7be3d7f9fb02077b983a13c746db71026344831e8765537f8a4c21e6836",
+        "native-first": "1b16e7be3d7f9fb02077b983a13c746db71026344831e8765537f8a4c21e6836",
+        "native-last": "1b16e7be3d7f9fb02077b983a13c746db71026344831e8765537f8a4c21e6836"
+      }
+    }
+  ],
+  "original_shader_results": [
+    {
+      "mode": "prefix",
+      "repeat": 0,
+      "hash": "c689e227232c7b560e36fc596a41dcca5577b98899f880a10aa693b9ecd4b0a4",
+      "different_bytes": 0
+    },
+    {
+      "mode": "prefix",
+      "repeat": 1,
+      "hash": "c689e227232c7b560e36fc596a41dcca5577b98899f880a10aa693b9ecd4b0a4",
+      "different_bytes": 0
+    },
+    {
+      "mode": "prefix",
+      "repeat": 2,
+      "hash": "c689e227232c7b560e36fc596a41dcca5577b98899f880a10aa693b9ecd4b0a4",
+      "different_bytes": 0
+    },
+    {
+      "mode": "final",
+      "repeat": 0,
+      "hash": "970ed27c1e14db77b42b1f264e156f8e31767eb165b78dc73f2a4412977fdfb1",
+      "different_bytes": 0
+    },
+    {
+      "mode": "final",
+      "repeat": 1,
+      "hash": "970ed27c1e14db77b42b1f264e156f8e31767eb165b78dc73f2a4412977fdfb1",
+      "different_bytes": 0
+    },
+    {
+      "mode": "final",
+      "repeat": 2,
+      "hash": "970ed27c1e14db77b42b1f264e156f8e31767eb165b78dc73f2a4412977fdfb1",
+      "different_bytes": 0
+    },
+    {
+      "mode": "original",
+      "repeat": 0,
+      "hash": "9b29ca36da662a4f31bdfd236f2e68435dafc784fdddb86ab9b8e81b9bc3c2c4",
+      "comparison": {
+        "rgb_equal": false,
+        "rgb_mean_absolute_error": 9.865089699074074e-05,
+        "rgba_equal": false
+      }
+    },
+    {
+      "mode": "original",
+      "repeat": 1,
+      "hash": "9b29ca36da662a4f31bdfd236f2e68435dafc784fdddb86ab9b8e81b9bc3c2c4",
+      "comparison": {
+        "rgb_equal": false,
+        "rgb_mean_absolute_error": 9.865089699074074e-05,
+        "rgba_equal": false
+      }
+    },
+    {
+      "mode": "original",
+      "repeat": 2,
+      "hash": "9b29ca36da662a4f31bdfd236f2e68435dafc784fdddb86ab9b8e81b9bc3c2c4",
+      "comparison": {
+        "rgb_equal": false,
+        "rgb_mean_absolute_error": 9.865089699074074e-05,
+        "rgba_equal": false
+      }
+    }
+  ],
+  "final_pixels": {
+    "images": [
+      "Flora",
+      "Intel GPA",
+      "captured"
+    ],
+    "comparisons": [
+      {
+        "left": 0,
+        "right": 1,
+        "changed_pixels": 20,
+        "changed_components": 20,
+        "max_error": 2,
+        "exact": false
+      },
+      {
+        "left": 0,
+        "right": 2,
+        "changed_pixels": 984,
+        "changed_components": 1054,
+        "max_error": 6,
+        "exact": false
+      },
+      {
+        "left": 1,
+        "right": 2,
+        "changed_pixels": 998,
+        "changed_components": 1068,
+        "max_error": 6,
+        "exact": false
+      }
+    ]
+  },
+  "sample_comparison": {
+    "pixel_847_0": {
+      "direct-readback/float.bin": [
+        2018.0,
+        759.5,
+        332.0,
+        2047.0
+      ],
+      "original-sample1/float.bin": [
+        2018.0,
+        759.5,
+        332.0,
+        2047.0
+      ],
+      "readable-0/direct-float.bin": [
+        2004.0,
+        760.0,
+        330.0,
+        2047.0
+      ],
+      "readable-sample1/direct-float.bin": [
+        2032.0,
+        759.0,
+        334.0,
+        2047.0
+      ]
+    },
+    "fractional_sample0_pixels": 22,
+    "matching_modified_sample_average": 13,
+    "all_readback_pixels_are_samples_not_resolves": true,
+    "limitation": "Sample 0 and sample 1 were exported in separate replay executions; the averaging observation is a diagnostic clue, not a same-execution identity or a root-cause proof."
+  },
+  "hlsl_control": [
+    {
+      "label": "hlsl-normal",
+      "repeat": 0,
+      "marker_pixels": 952720,
+      "fractional_marked_words": 154,
+      "different_words": 0,
+      "sha256": "0f2921e5044a384b92f4c36003413edff6cc0354b66e9b5447d8e0d6b6726321"
+    },
+    {
+      "label": "hlsl-normal",
+      "repeat": 1,
+      "marker_pixels": 952720,
+      "fractional_marked_words": 154,
+      "different_words": 3,
+      "sha256": "9eeb864394693a8a6ad4c66587a559ce62e36702201e4248d7de1a1b2d465bfd"
+    },
+    {
+      "label": "hlsl-normal",
+      "repeat": 2,
+      "marker_pixels": 952720,
+      "fractional_marked_words": 154,
+      "different_words": 3,
+      "sha256": "40f57ecfc5023cd8c47ed15b9bafdff8ceab6bcc11bf241870ef655aa3a8f8db"
+    }
+  ],
+  "identity_controls": [
+    {
+      "label": "primitive",
+      "repeat": 0,
+      "marker_pixels": 952720,
+      "fractional_marked_words": 0,
+      "different_words": 0,
+      "sha256": "b5c1fb4fe9a8f3459f3bfd7b740325f3501ce857320c9908886f7e89ec395a3d"
+    },
+    {
+      "label": "primitive",
+      "repeat": 1,
+      "marker_pixels": 952720,
+      "fractional_marked_words": 0,
+      "different_words": 0,
+      "sha256": "b5c1fb4fe9a8f3459f3bfd7b740325f3501ce857320c9908886f7e89ec395a3d"
+    },
+    {
+      "label": "primitive",
+      "repeat": 2,
+      "marker_pixels": 952720,
+      "fractional_marked_words": 0,
+      "different_words": 0,
+      "sha256": "b5c1fb4fe9a8f3459f3bfd7b740325f3501ce857320c9908886f7e89ec395a3d"
+    },
+    {
+      "label": "position",
+      "repeat": 0,
+      "marker_pixels": 952720,
+      "fractional_marked_words": 0,
+      "different_words": 0,
+      "sha256": "a54e57ffebacc8314685b5a7d420020a0d080bdc5594651aea50256a908d3d3b"
+    },
+    {
+      "label": "position",
+      "repeat": 1,
+      "marker_pixels": 952720,
+      "fractional_marked_words": 0,
+      "different_words": 0,
+      "sha256": "a54e57ffebacc8314685b5a7d420020a0d080bdc5594651aea50256a908d3d3b"
+    },
+    {
+      "label": "position",
+      "repeat": 2,
+      "marker_pixels": 952720,
+      "fractional_marked_words": 0,
+      "different_words": 0,
+      "sha256": "a54e57ffebacc8314685b5a7d420020a0d080bdc5594651aea50256a908d3d3b"
+    }
+  ],
+  "tests": {
+    "boundary_ctests_passed": 4,
+    "gpu_checks_serial": true,
+    "new_golden_run": false
+  },
+  "binaries": {
+    "FloraMsaaIntegerOutputProbe.exe": "144c8591901d110f218212748c5aad4aa8c2ff3ad9dfb85d551720d8aecc1d1b",
+    "FloraReplayMsaaProbe.exe": "a163b2b5cbd11cac2bf22ac4adbe23e253180697d64b15fed668314c11c6d722"
+  },
+  "source_files": {
+    "tools\\native\\msaa_integer_output_probe.cpp": "de10a7d97e5e93780f9f666de6d0e08d7897006342c35d988747e0bc1bbe88e7",
+    "tools\\native\\replay_msaa_probe.cpp": "00fb56a4c07241da8e3baedbe4c2623f1742872371384772d4aa5d75e288c297"
+  }
+}

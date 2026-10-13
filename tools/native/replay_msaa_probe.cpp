@@ -26,18 +26,25 @@ Com<ID3DBlob> compile(const std::string &text, const char *profile) {
           "Compile MSAA diagnosis");
     return code;
 }
-std::vector<uint8_t> read(ID3D11Device *device, ID3D11Texture2D *source, bool integer, UINT sample) {
+std::vector<uint8_t> read(ID3D11Device *device, ID3D11Texture2D *source, bool integer, UINT sample,
+                          bool copySource = true) {
     D3D11_TEXTURE2D_DESC desc{};
     source->GetDesc(&desc);
     if (desc.Format != DXGI_FORMAT_R16G16B16A16_TYPELESS || desc.ArraySize != 1 || desc.MipLevels != 1 ||
         desc.SampleDesc.Count <= 1 || desc.SampleDesc.Count <= sample)
         throw std::runtime_error("Probe expects a single-layer half-float MSAA target");
     const auto width = desc.Width, height = desc.Height;
+    const bool directAvailable = (desc.BindFlags & D3D11_BIND_SHADER_RESOURCE) != 0;
+    if (!copySource && !directAvailable)
+        throw std::runtime_error("Direct MSAA probe requires a shader-readable source");
     desc.Usage = D3D11_USAGE_DEFAULT;
     desc.CPUAccessFlags = desc.MiscFlags = 0;
     desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
     Com<ID3D11Texture2D> readable, target, staging;
-    check(device->CreateTexture2D(&desc, nullptr, &readable), "Create probe copy");
+    if (copySource)
+        check(device->CreateTexture2D(&desc, nullptr, &readable), "Create probe copy");
+    else
+        readable = source;
     const auto format = integer ? DXGI_FORMAT_R16G16B16A16_UINT : DXGI_FORMAT_R16G16B16A16_FLOAT;
     D3D11_SHADER_RESOURCE_VIEW_DESC sd{};
     sd.Format = format;
@@ -78,7 +85,8 @@ std::vector<uint8_t> read(ID3D11Device *device, ID3D11Texture2D *source, bool in
     Com<ID3D11DeviceContext> deferred, immediate;
     check(device->CreateDeferredContext(0, &deferred), "Create probe context");
     device->GetImmediateContext(&immediate);
-    deferred->CopyResource(readable.Get(), source);
+    if (copySource)
+        deferred->CopyResource(readable.Get(), source);
     deferred->VSSetShader(vs.Get(), nullptr, 0);
     deferred->PSSetShader(ps.Get(), nullptr, 0);
     deferred->RSSetState(rs.Get());
@@ -149,6 +157,13 @@ int wmain(int argc, wchar_t **argv) {
             f.close();
             hashes[name] = sha256(bytes);
         };
+        D3D11_TEXTURE2D_DESC descriptor{};
+        source->GetDesc(&descriptor);
+        const bool directAvailable = (descriptor.BindFlags & D3D11_BIND_SHADER_RESOURCE) != 0;
+        if (directAvailable) {
+            save("direct-float", read(replay.nativeDevice(), source.Get(), false, UINT(sample), false));
+            save("direct-integer", read(replay.nativeDevice(), source.Get(), true, UINT(sample), false));
+        }
         save("native-first", replay.readMsaa(resource, UINT(sample), DXGI_FORMAT_R16G16B16A16_FLOAT).bytes);
         save("float", read(replay.nativeDevice(), source.Get(), false, UINT(sample)));
         save("integer", read(replay.nativeDevice(), source.Get(), true, UINT(sample)));
@@ -162,6 +177,8 @@ int wmain(int argc, wchar_t **argv) {
                     {"resource", resource},
                     {"sample", sample},
                     {"shader", shader},
+                    {"direct_readback_available", directAvailable},
+                    {"source_bind_flags", descriptor.BindFlags},
                     {"shader_sha256", sha256(options.shaders.at(shader))},
                     {"output_sha256", hashes}};
         std::ofstream f(output / L"report.json");

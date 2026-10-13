@@ -70,12 +70,18 @@ execution environment, not proof that capture or the driver is correct.
 The capture used installed RenderDoc 1.46; analysis used the existing bundled
 1.45 backend. Their identities are retained in the reports.
 
-These results narrow the investigation beyond the selected readback path. They
+These results narrow the investigation beyond the selected readback view. They
 do **not** identify the underlying draw/driver/MSAA interaction, prove the
 earlier normal/lighting hypotheses, or justify changing production rendering.
 An exploratory read-only NVAPI profile query returned setting-not-found values;
 it supplies no evidence that antialiasing overrides are enabled or disabled.
 No driver settings were changed.
+
+Follow-up [binding controls](CAPTURE_MSAA_BINDING_DIAGNOSIS.md) establish that
+all four readers share a CopyResource from an RT-only source. Their agreement
+does not exclude this common step or source storage behavior. Adding SRV
+capability in a diagnostic file copy changes the observations, but still fails
+final-image acceptance; it is not a production fix.
 
 ## Reproduction and evidence
 
