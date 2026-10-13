@@ -1,0 +1,1046 @@
+{
+  "schema": "FloraGPA Intel GF2 repeated capture baseline 1",
+  "source_commit": "43640193090fa77e38017e18cd9c9e6226964e0a",
+  "formal_accepted_frames": 0,
+  "required_frames": 6,
+  "exact_dual_replay_candidate_frames": 3,
+  "completed_three_capture_launches": 1,
+  "raw_evidence": "artifacts/capture-gf2-intel-repeat-20261014",
+  "manifest_sha256": "c5bc768d4caf2a31ac255122d94ceb9cdb5f6c6e847dbd8c825d33eed854e8b1",
+  "session": {
+    "id": "ed538b6a-65ff-4285-8414-71427a29339c",
+    "pid": 31928,
+    "swap_chain": 1,
+    "resource_limit_mib": 2048,
+    "capture_adapter": "Intel(R) Iris(R) Xe Graphics",
+    "game_arguments": [
+      "-force-d3d11",
+      "-force-device-index",
+      "1"
+    ],
+    "continued_presents": 2335,
+    "disconnected": true,
+    "normal_exit": true,
+    "interface_gaps": 0,
+    "lost_diagnostics": 0,
+    "forbidden_modules": []
+  },
+  "frames": [
+    {
+      "index": 0,
+      "frame": "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\capture-gf2-intel-repeat-20261014\\session\\frame-4adc44c2-49ad-4d4a-9390-2b274ecd1cac.gpa_frame",
+      "scene": "home",
+      "present": 1414,
+      "bytes": 1006223068,
+      "replays": [
+        {
+          "repeat": 0,
+          "comparisons": {
+            "flora_vs_captured": {
+              "different_pixels": 0,
+              "different_channels": 0,
+              "maximum": 0
+            },
+            "original_vs_captured": {
+              "different_pixels": 0,
+              "different_channels": 0,
+              "maximum": 0
+            },
+            "flora_vs_original": {
+              "different_pixels": 0,
+              "different_channels": 0,
+              "maximum": 0
+            }
+          },
+          "rgba_sha256": {
+            "flora": "af7f8706d9113b4e65ecabb98390b928ee104cfece834a4e48a52b8fecf10171",
+            "original": "af7f8706d9113b4e65ecabb98390b928ee104cfece834a4e48a52b8fecf10171",
+            "captured": "af7f8706d9113b4e65ecabb98390b928ee104cfece834a4e48a52b8fecf10171"
+          },
+          "flora_counts": {
+            "ClearDepthStencilView": 12,
+            "ClearRenderTargetView": 8,
+            "CopyResource": 3,
+            "Draw": 26,
+            "DrawIndexed": 199,
+            "DrawIndexedInstanced": 11,
+            "Map": 314,
+            "Present": 1,
+            "ResolveSubresource": 12,
+            "annotation_records": 26,
+            "present_rtv_unbinds": 1,
+            "query_completion_unresolved": 1,
+            "query_end_observations": 1,
+            "query_metadata_records": 3,
+            "unmap_observations": 314
+          },
+          "original_audit": {
+            "scope": "Explicit playback; DrawIndexed path of this pinned build",
+            "negative_control_suppress_draws": false,
+            "context_count": 1,
+            "d3d11_calls": {
+              "DrawIndexed": 199,
+              "submitted_indices": 1371306
+            },
+            "event_dispatch_count": 609,
+            "event_function_rvas": {
+              "0x25b40": 8,
+              "0x27ec0": 26,
+              "0x26250": 3,
+              "0x259e0": 12,
+              "0x27080": 314,
+              "0x27f50": 199,
+              "0x29bf0": 11,
+              "0x27fe0": 11,
+              "0x29cf0": 7,
+              "0x28b40": 12,
+              "0x28850": 4,
+              "0x28950": 2
+            },
+            "actual_context_adapters": [
+              {
+                "description": "Intel(R) Iris(R) Xe Graphics",
+                "vendor_id": 32902,
+                "device_id": 18086,
+                "luid": [
+                  67264,
+                  0
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "repeat": 1,
+          "comparisons": {
+            "flora_vs_captured": {
+              "different_pixels": 0,
+              "different_channels": 0,
+              "maximum": 0
+            },
+            "original_vs_captured": {
+              "different_pixels": 0,
+              "different_channels": 0,
+              "maximum": 0
+            },
+            "flora_vs_original": {
+              "different_pixels": 0,
+              "different_channels": 0,
+              "maximum": 0
+            }
+          },
+          "rgba_sha256": {
+            "flora": "af7f8706d9113b4e65ecabb98390b928ee104cfece834a4e48a52b8fecf10171",
+            "original": "af7f8706d9113b4e65ecabb98390b928ee104cfece834a4e48a52b8fecf10171",
+            "captured": "af7f8706d9113b4e65ecabb98390b928ee104cfece834a4e48a52b8fecf10171"
+          },
+          "flora_counts": {
+            "ClearDepthStencilView": 12,
+            "ClearRenderTargetView": 8,
+            "CopyResource": 3,
+            "Draw": 26,
+            "DrawIndexed": 199,
+            "DrawIndexedInstanced": 11,
+            "Map": 314,
+            "Present": 1,
+            "ResolveSubresource": 12,
+            "annotation_records": 26,
+            "present_rtv_unbinds": 1,
+            "query_completion_unresolved": 1,
+            "query_end_observations": 1,
+            "query_metadata_records": 3,
+            "unmap_observations": 314
+          },
+          "original_audit": {
+            "scope": "Explicit playback; DrawIndexed path of this pinned build",
+            "negative_control_suppress_draws": false,
+            "context_count": 1,
+            "d3d11_calls": {
+              "DrawIndexed": 199,
+              "submitted_indices": 1371306
+            },
+            "event_dispatch_count": 609,
+            "event_function_rvas": {
+              "0x25b40": 8,
+              "0x27ec0": 26,
+              "0x26250": 3,
+              "0x259e0": 12,
+              "0x27080": 314,
+              "0x27f50": 199,
+              "0x29bf0": 11,
+              "0x27fe0": 11,
+              "0x29cf0": 7,
+              "0x28b40": 12,
+              "0x28850": 4,
+              "0x28950": 2
+            },
+            "actual_context_adapters": [
+              {
+                "description": "Intel(R) Iris(R) Xe Graphics",
+                "vendor_id": 32902,
+                "device_id": 18086,
+                "luid": [
+                  67264,
+                  0
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "repeat": 2,
+          "comparisons": {
+            "flora_vs_captured": {
+              "different_pixels": 0,
+              "different_channels": 0,
+              "maximum": 0
+            },
+            "original_vs_captured": {
+              "different_pixels": 0,
+              "different_channels": 0,
+              "maximum": 0
+            },
+            "flora_vs_original": {
+              "different_pixels": 0,
+              "different_channels": 0,
+              "maximum": 0
+            }
+          },
+          "rgba_sha256": {
+            "flora": "af7f8706d9113b4e65ecabb98390b928ee104cfece834a4e48a52b8fecf10171",
+            "original": "af7f8706d9113b4e65ecabb98390b928ee104cfece834a4e48a52b8fecf10171",
+            "captured": "af7f8706d9113b4e65ecabb98390b928ee104cfece834a4e48a52b8fecf10171"
+          },
+          "flora_counts": {
+            "ClearDepthStencilView": 12,
+            "ClearRenderTargetView": 8,
+            "CopyResource": 3,
+            "Draw": 26,
+            "DrawIndexed": 199,
+            "DrawIndexedInstanced": 11,
+            "Map": 314,
+            "Present": 1,
+            "ResolveSubresource": 12,
+            "annotation_records": 26,
+            "present_rtv_unbinds": 1,
+            "query_completion_unresolved": 1,
+            "query_end_observations": 1,
+            "query_metadata_records": 3,
+            "unmap_observations": 314
+          },
+          "original_audit": {
+            "scope": "Explicit playback; DrawIndexed path of this pinned build",
+            "negative_control_suppress_draws": false,
+            "context_count": 1,
+            "d3d11_calls": {
+              "DrawIndexed": 199,
+              "submitted_indices": 1371306
+            },
+            "event_dispatch_count": 609,
+            "event_function_rvas": {
+              "0x25b40": 8,
+              "0x27ec0": 26,
+              "0x26250": 3,
+              "0x259e0": 12,
+              "0x27080": 314,
+              "0x27f50": 199,
+              "0x29bf0": 11,
+              "0x27fe0": 11,
+              "0x29cf0": 7,
+              "0x28b40": 12,
+              "0x28850": 4,
+              "0x28950": 2
+            },
+            "actual_context_adapters": [
+              {
+                "description": "Intel(R) Iris(R) Xe Graphics",
+                "vendor_id": 32902,
+                "device_id": 18086,
+                "luid": [
+                  67264,
+                  0
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "sha256": "0a606a6eba1f69a4751ca19726097a39da093b28658a10fad675637b5b79475f"
+    },
+    {
+      "index": 1,
+      "frame": "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\capture-gf2-intel-repeat-20261014\\session\\frame-23d87d95-edc8-4c95-a656-5a0836b55e93.gpa_frame",
+      "scene": "equipment_room",
+      "present": 1766,
+      "bytes": 1340781186,
+      "replays": [
+        {
+          "repeat": 0,
+          "comparisons": {
+            "flora_vs_captured": {
+              "different_pixels": 0,
+              "different_channels": 0,
+              "maximum": 0
+            },
+            "original_vs_captured": {
+              "different_pixels": 0,
+              "different_channels": 0,
+              "maximum": 0
+            },
+            "flora_vs_original": {
+              "different_pixels": 0,
+              "different_channels": 0,
+              "maximum": 0
+            }
+          },
+          "rgba_sha256": {
+            "flora": "4f1e64c60472b570ed3a211401895f7454c339dc7f19a247c00450cc0cfa50e4",
+            "original": "4f1e64c60472b570ed3a211401895f7454c339dc7f19a247c00450cc0cfa50e4",
+            "captured": "4f1e64c60472b570ed3a211401895f7454c339dc7f19a247c00450cc0cfa50e4"
+          },
+          "flora_counts": {
+            "ClearDepthStencilView": 11,
+            "ClearRenderTargetView": 9,
+            "CopyResource": 4,
+            "Dispatch": 3,
+            "Draw": 26,
+            "DrawIndexed": 234,
+            "DrawIndexedInstanced": 341,
+            "Map": 380,
+            "Present": 1,
+            "ResolveSubresource": 9,
+            "annotation_records": 24,
+            "present_rtv_unbinds": 1,
+            "query_completion_unresolved": 1,
+            "query_end_observations": 1,
+            "query_metadata_records": 3,
+            "unmap_observations": 380
+          },
+          "original_audit": {
+            "scope": "Explicit playback; DrawIndexed path of this pinned build",
+            "negative_control_suppress_draws": false,
+            "context_count": 1,
+            "d3d11_calls": {
+              "DrawIndexed": 234,
+              "submitted_indices": 1692606
+            },
+            "event_dispatch_count": 1684,
+            "event_function_rvas": {
+              "0x25b40": 9,
+              "0x27ec0": 26,
+              "0x26250": 4,
+              "0x259e0": 11,
+              "0x27080": 380,
+              "0x29bf0": 341,
+              "0x28850": 316,
+              "0x27fe0": 341,
+              "0x29cf0": 7,
+              "0x28950": 3,
+              "0x27f50": 234,
+              "0x28b40": 9,
+              "0x27cc0": 3
+            },
+            "actual_context_adapters": [
+              {
+                "description": "Intel(R) Iris(R) Xe Graphics",
+                "vendor_id": 32902,
+                "device_id": 18086,
+                "luid": [
+                  67264,
+                  0
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "repeat": 1,
+          "comparisons": {
+            "flora_vs_captured": {
+              "different_pixels": 0,
+              "different_channels": 0,
+              "maximum": 0
+            },
+            "original_vs_captured": {
+              "different_pixels": 0,
+              "different_channels": 0,
+              "maximum": 0
+            },
+            "flora_vs_original": {
+              "different_pixels": 0,
+              "different_channels": 0,
+              "maximum": 0
+            }
+          },
+          "rgba_sha256": {
+            "flora": "4f1e64c60472b570ed3a211401895f7454c339dc7f19a247c00450cc0cfa50e4",
+            "original": "4f1e64c60472b570ed3a211401895f7454c339dc7f19a247c00450cc0cfa50e4",
+            "captured": "4f1e64c60472b570ed3a211401895f7454c339dc7f19a247c00450cc0cfa50e4"
+          },
+          "flora_counts": {
+            "ClearDepthStencilView": 11,
+            "ClearRenderTargetView": 9,
+            "CopyResource": 4,
+            "Dispatch": 3,
+            "Draw": 26,
+            "DrawIndexed": 234,
+            "DrawIndexedInstanced": 341,
+            "Map": 380,
+            "Present": 1,
+            "ResolveSubresource": 9,
+            "annotation_records": 24,
+            "present_rtv_unbinds": 1,
+            "query_completion_unresolved": 1,
+            "query_end_observations": 1,
+            "query_metadata_records": 3,
+            "unmap_observations": 380
+          },
+          "original_audit": {
+            "scope": "Explicit playback; DrawIndexed path of this pinned build",
+            "negative_control_suppress_draws": false,
+            "context_count": 1,
+            "d3d11_calls": {
+              "DrawIndexed": 234,
+              "submitted_indices": 1692606
+            },
+            "event_dispatch_count": 1684,
+            "event_function_rvas": {
+              "0x25b40": 9,
+              "0x27ec0": 26,
+              "0x26250": 4,
+              "0x259e0": 11,
+              "0x27080": 380,
+              "0x29bf0": 341,
+              "0x28850": 316,
+              "0x27fe0": 341,
+              "0x29cf0": 7,
+              "0x28950": 3,
+              "0x27f50": 234,
+              "0x28b40": 9,
+              "0x27cc0": 3
+            },
+            "actual_context_adapters": [
+              {
+                "description": "Intel(R) Iris(R) Xe Graphics",
+                "vendor_id": 32902,
+                "device_id": 18086,
+                "luid": [
+                  67264,
+                  0
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "repeat": 2,
+          "comparisons": {
+            "flora_vs_captured": {
+              "different_pixels": 0,
+              "different_channels": 0,
+              "maximum": 0
+            },
+            "original_vs_captured": {
+              "different_pixels": 0,
+              "different_channels": 0,
+              "maximum": 0
+            },
+            "flora_vs_original": {
+              "different_pixels": 0,
+              "different_channels": 0,
+              "maximum": 0
+            }
+          },
+          "rgba_sha256": {
+            "flora": "4f1e64c60472b570ed3a211401895f7454c339dc7f19a247c00450cc0cfa50e4",
+            "original": "4f1e64c60472b570ed3a211401895f7454c339dc7f19a247c00450cc0cfa50e4",
+            "captured": "4f1e64c60472b570ed3a211401895f7454c339dc7f19a247c00450cc0cfa50e4"
+          },
+          "flora_counts": {
+            "ClearDepthStencilView": 11,
+            "ClearRenderTargetView": 9,
+            "CopyResource": 4,
+            "Dispatch": 3,
+            "Draw": 26,
+            "DrawIndexed": 234,
+            "DrawIndexedInstanced": 341,
+            "Map": 380,
+            "Present": 1,
+            "ResolveSubresource": 9,
+            "annotation_records": 24,
+            "present_rtv_unbinds": 1,
+            "query_completion_unresolved": 1,
+            "query_end_observations": 1,
+            "query_metadata_records": 3,
+            "unmap_observations": 380
+          },
+          "original_audit": {
+            "scope": "Explicit playback; DrawIndexed path of this pinned build",
+            "negative_control_suppress_draws": false,
+            "context_count": 1,
+            "d3d11_calls": {
+              "DrawIndexed": 234,
+              "submitted_indices": 1692606
+            },
+            "event_dispatch_count": 1684,
+            "event_function_rvas": {
+              "0x25b40": 9,
+              "0x27ec0": 26,
+              "0x26250": 4,
+              "0x259e0": 11,
+              "0x27080": 380,
+              "0x29bf0": 341,
+              "0x28850": 316,
+              "0x27fe0": 341,
+              "0x29cf0": 7,
+              "0x28950": 3,
+              "0x27f50": 234,
+              "0x28b40": 9,
+              "0x27cc0": 3
+            },
+            "actual_context_adapters": [
+              {
+                "description": "Intel(R) Iris(R) Xe Graphics",
+                "vendor_id": 32902,
+                "device_id": 18086,
+                "luid": [
+                  67264,
+                  0
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "sha256": "d699d088fdba167852467f41d41b01c81c062c26a4cc702e6b20414766fe0ae6"
+    },
+    {
+      "index": 2,
+      "frame": "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\capture-gf2-intel-repeat-20261014\\session\\frame-31646f44-7c4b-4a9f-b8d8-872ad84002db.gpa_frame",
+      "scene": "equipment_room",
+      "present": 2017,
+      "bytes": 1347588982,
+      "replays": [
+        {
+          "repeat": 0,
+          "comparisons": {
+            "flora_vs_captured": {
+              "different_pixels": 0,
+              "different_channels": 0,
+              "maximum": 0
+            },
+            "original_vs_captured": {
+              "different_pixels": 0,
+              "different_channels": 0,
+              "maximum": 0
+            },
+            "flora_vs_original": {
+              "different_pixels": 0,
+              "different_channels": 0,
+              "maximum": 0
+            }
+          },
+          "rgba_sha256": {
+            "flora": "f63d44336c5384c769751b5feace9d3cdb3641b0f6e03227b68fc5c63dcc6613",
+            "original": "f63d44336c5384c769751b5feace9d3cdb3641b0f6e03227b68fc5c63dcc6613",
+            "captured": "f63d44336c5384c769751b5feace9d3cdb3641b0f6e03227b68fc5c63dcc6613"
+          },
+          "flora_counts": {
+            "ClearDepthStencilView": 11,
+            "ClearRenderTargetView": 9,
+            "CopyResource": 4,
+            "Dispatch": 3,
+            "Draw": 26,
+            "DrawIndexed": 235,
+            "DrawIndexedInstanced": 341,
+            "Map": 382,
+            "Present": 1,
+            "ResolveSubresource": 9,
+            "annotation_records": 24,
+            "present_rtv_unbinds": 1,
+            "query_completion_unresolved": 1,
+            "query_end_observations": 1,
+            "query_metadata_records": 3,
+            "unmap_observations": 382
+          },
+          "original_audit": {
+            "scope": "Explicit playback; DrawIndexed path of this pinned build",
+            "negative_control_suppress_draws": false,
+            "context_count": 1,
+            "d3d11_calls": {
+              "DrawIndexed": 235,
+              "submitted_indices": 1692642
+            },
+            "event_dispatch_count": 1687,
+            "event_function_rvas": {
+              "0x25b40": 9,
+              "0x27ec0": 26,
+              "0x26250": 4,
+              "0x259e0": 11,
+              "0x27080": 382,
+              "0x29bf0": 341,
+              "0x28850": 316,
+              "0x27fe0": 341,
+              "0x29cf0": 7,
+              "0x28950": 3,
+              "0x27f50": 235,
+              "0x28b40": 9,
+              "0x27cc0": 3
+            },
+            "actual_context_adapters": [
+              {
+                "description": "Intel(R) Iris(R) Xe Graphics",
+                "vendor_id": 32902,
+                "device_id": 18086,
+                "luid": [
+                  67264,
+                  0
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "repeat": 1,
+          "comparisons": {
+            "flora_vs_captured": {
+              "different_pixels": 0,
+              "different_channels": 0,
+              "maximum": 0
+            },
+            "original_vs_captured": {
+              "different_pixels": 0,
+              "different_channels": 0,
+              "maximum": 0
+            },
+            "flora_vs_original": {
+              "different_pixels": 0,
+              "different_channels": 0,
+              "maximum": 0
+            }
+          },
+          "rgba_sha256": {
+            "flora": "f63d44336c5384c769751b5feace9d3cdb3641b0f6e03227b68fc5c63dcc6613",
+            "original": "f63d44336c5384c769751b5feace9d3cdb3641b0f6e03227b68fc5c63dcc6613",
+            "captured": "f63d44336c5384c769751b5feace9d3cdb3641b0f6e03227b68fc5c63dcc6613"
+          },
+          "flora_counts": {
+            "ClearDepthStencilView": 11,
+            "ClearRenderTargetView": 9,
+            "CopyResource": 4,
+            "Dispatch": 3,
+            "Draw": 26,
+            "DrawIndexed": 235,
+            "DrawIndexedInstanced": 341,
+            "Map": 382,
+            "Present": 1,
+            "ResolveSubresource": 9,
+            "annotation_records": 24,
+            "present_rtv_unbinds": 1,
+            "query_completion_unresolved": 1,
+            "query_end_observations": 1,
+            "query_metadata_records": 3,
+            "unmap_observations": 382
+          },
+          "original_audit": {
+            "scope": "Explicit playback; DrawIndexed path of this pinned build",
+            "negative_control_suppress_draws": false,
+            "context_count": 1,
+            "d3d11_calls": {
+              "DrawIndexed": 235,
+              "submitted_indices": 1692642
+            },
+            "event_dispatch_count": 1687,
+            "event_function_rvas": {
+              "0x25b40": 9,
+              "0x27ec0": 26,
+              "0x26250": 4,
+              "0x259e0": 11,
+              "0x27080": 382,
+              "0x29bf0": 341,
+              "0x28850": 316,
+              "0x27fe0": 341,
+              "0x29cf0": 7,
+              "0x28950": 3,
+              "0x27f50": 235,
+              "0x28b40": 9,
+              "0x27cc0": 3
+            },
+            "actual_context_adapters": [
+              {
+                "description": "Intel(R) Iris(R) Xe Graphics",
+                "vendor_id": 32902,
+                "device_id": 18086,
+                "luid": [
+                  67264,
+                  0
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "repeat": 2,
+          "comparisons": {
+            "flora_vs_captured": {
+              "different_pixels": 0,
+              "different_channels": 0,
+              "maximum": 0
+            },
+            "original_vs_captured": {
+              "different_pixels": 0,
+              "different_channels": 0,
+              "maximum": 0
+            },
+            "flora_vs_original": {
+              "different_pixels": 0,
+              "different_channels": 0,
+              "maximum": 0
+            }
+          },
+          "rgba_sha256": {
+            "flora": "f63d44336c5384c769751b5feace9d3cdb3641b0f6e03227b68fc5c63dcc6613",
+            "original": "f63d44336c5384c769751b5feace9d3cdb3641b0f6e03227b68fc5c63dcc6613",
+            "captured": "f63d44336c5384c769751b5feace9d3cdb3641b0f6e03227b68fc5c63dcc6613"
+          },
+          "flora_counts": {
+            "ClearDepthStencilView": 11,
+            "ClearRenderTargetView": 9,
+            "CopyResource": 4,
+            "Dispatch": 3,
+            "Draw": 26,
+            "DrawIndexed": 235,
+            "DrawIndexedInstanced": 341,
+            "Map": 382,
+            "Present": 1,
+            "ResolveSubresource": 9,
+            "annotation_records": 24,
+            "present_rtv_unbinds": 1,
+            "query_completion_unresolved": 1,
+            "query_end_observations": 1,
+            "query_metadata_records": 3,
+            "unmap_observations": 382
+          },
+          "original_audit": {
+            "scope": "Explicit playback; DrawIndexed path of this pinned build",
+            "negative_control_suppress_draws": false,
+            "context_count": 1,
+            "d3d11_calls": {
+              "DrawIndexed": 235,
+              "submitted_indices": 1692642
+            },
+            "event_dispatch_count": 1687,
+            "event_function_rvas": {
+              "0x25b40": 9,
+              "0x27ec0": 26,
+              "0x26250": 4,
+              "0x259e0": 11,
+              "0x27080": 382,
+              "0x29bf0": 341,
+              "0x28850": 316,
+              "0x27fe0": 341,
+              "0x29cf0": 7,
+              "0x28950": 3,
+              "0x27f50": 235,
+              "0x28b40": 9,
+              "0x27cc0": 3
+            },
+            "actual_context_adapters": [
+              {
+                "description": "Intel(R) Iris(R) Xe Graphics",
+                "vendor_id": 32902,
+                "device_id": 18086,
+                "luid": [
+                  67264,
+                  0
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "sha256": "e2ea29a80f275dea41012ac92959e3256b9bad4e6e4b3963a105bd19a6009714"
+    }
+  ],
+  "negative_controls": [
+    {
+      "index": 0,
+      "comparisons": {
+        "flora": {
+          "different_pixels": 2330132,
+          "maximum": 242,
+          "sha256": "2d846431fcc0621f909761629322d376912948e667b202c333513689f676386f"
+        },
+        "original": {
+          "different_pixels": 2330132,
+          "maximum": 242,
+          "sha256": "2d846431fcc0621f909761629322d376912948e667b202c333513689f676386f"
+        }
+      },
+      "outputs_equal": true,
+      "original_suppressed_DrawIndexed": 199
+    },
+    {
+      "index": 1,
+      "comparisons": {
+        "flora": {
+          "different_pixels": 900035,
+          "maximum": 197,
+          "sha256": "e336abf5f0937372a06f40bb81fdf6e57eba5a985d43ee24260ceec79d86346c"
+        },
+        "original": {
+          "different_pixels": 900035,
+          "maximum": 197,
+          "sha256": "e336abf5f0937372a06f40bb81fdf6e57eba5a985d43ee24260ceec79d86346c"
+        }
+      },
+      "outputs_equal": true,
+      "original_suppressed_DrawIndexed": 234
+    },
+    {
+      "index": 2,
+      "comparisons": {
+        "flora": {
+          "different_pixels": 970781,
+          "maximum": 180,
+          "sha256": "3084e2b5533ac46214a7b13e0be563e5e4bdda1c66bdf18e209ac6fa745bb80d"
+        },
+        "original": {
+          "different_pixels": 970781,
+          "maximum": 180,
+          "sha256": "3084e2b5533ac46214a7b13e0be563e5e4bdda1c66bdf18e209ac6fa745bb80d"
+        }
+      },
+      "outputs_equal": true,
+      "original_suppressed_DrawIndexed": 235
+    }
+  ],
+  "inspection": [
+    {
+      "index": 0,
+      "resources": 608,
+      "draws": 236,
+      "dispatches": 0,
+      "pipelines": [
+        {
+          "event": "2288",
+          "known_fields": 1302,
+          "unknown_fields": 4
+        },
+        {
+          "event": "3343",
+          "known_fields": 1302,
+          "unknown_fields": 4
+        }
+      ],
+      "shaders": [
+        {
+          "resource_id": 37,
+          "bytes": 556,
+          "sha256": "6b3ed052e7846fc4ba2bb450c0fa6466ea69567965217ed8c9bb3505ca151ce6"
+        },
+        {
+          "resource_id": 38,
+          "bytes": 588,
+          "sha256": "bc4aee2598ed82ed1d584dc8b5b26aacc9628827f25fe707893bb2978af09e23"
+        },
+        {
+          "resource_id": 500,
+          "bytes": 3400,
+          "sha256": "18669b668cb39b907a02cfec253f74b24d0c09c6ae73d0d65f27455032b2d869"
+        },
+        {
+          "resource_id": 501,
+          "bytes": 16652,
+          "sha256": "8208195a6263fdfba1261860ff60ab42c14168ec7f9218c4de4824432d532318"
+        }
+      ]
+    },
+    {
+      "index": 1,
+      "resources": 966,
+      "draws": 601,
+      "dispatches": 3,
+      "pipelines": [
+        {
+          "event": "5034",
+          "known_fields": 1302,
+          "unknown_fields": 4
+        },
+        {
+          "event": "5357",
+          "known_fields": 1302,
+          "unknown_fields": 4
+        },
+        {
+          "event": "6377",
+          "known_fields": 1302,
+          "unknown_fields": 4
+        }
+      ],
+      "shaders": [
+        {
+          "resource_id": 38,
+          "bytes": 556,
+          "sha256": "6b3ed052e7846fc4ba2bb450c0fa6466ea69567965217ed8c9bb3505ca151ce6"
+        },
+        {
+          "resource_id": 39,
+          "bytes": 588,
+          "sha256": "bc4aee2598ed82ed1d584dc8b5b26aacc9628827f25fe707893bb2978af09e23"
+        },
+        {
+          "resource_id": 81,
+          "bytes": 27884,
+          "sha256": "5c65778a398b19407968c283cc2f3bc299faf63b49dd9bf79b0589d2ddf63d3f"
+        },
+        {
+          "resource_id": 866,
+          "bytes": 4168,
+          "sha256": "6cc3d926b5f1a5f8af332ff7327bb856b4687b9c9801af363b230f880b5d1387"
+        },
+        {
+          "resource_id": 867,
+          "bytes": 16356,
+          "sha256": "57711ec60ddadf5c6df36dfdeaeffbc6be002db77030137981cf2d3806832a80"
+        }
+      ]
+    },
+    {
+      "index": 2,
+      "resources": 970,
+      "draws": 602,
+      "dispatches": 3,
+      "pipelines": [
+        {
+          "event": "5040",
+          "known_fields": 1302,
+          "unknown_fields": 4
+        },
+        {
+          "event": "5363",
+          "known_fields": 1302,
+          "unknown_fields": 4
+        },
+        {
+          "event": "6393",
+          "known_fields": 1302,
+          "unknown_fields": 4
+        }
+      ],
+      "shaders": [
+        {
+          "resource_id": 38,
+          "bytes": 556,
+          "sha256": "6b3ed052e7846fc4ba2bb450c0fa6466ea69567965217ed8c9bb3505ca151ce6"
+        },
+        {
+          "resource_id": 39,
+          "bytes": 588,
+          "sha256": "bc4aee2598ed82ed1d584dc8b5b26aacc9628827f25fe707893bb2978af09e23"
+        },
+        {
+          "resource_id": 81,
+          "bytes": 27884,
+          "sha256": "5c65778a398b19407968c283cc2f3bc299faf63b49dd9bf79b0589d2ddf63d3f"
+        },
+        {
+          "resource_id": 868,
+          "bytes": 4168,
+          "sha256": "6cc3d926b5f1a5f8af332ff7327bb856b4687b9c9801af363b230f880b5d1387"
+        },
+        {
+          "resource_id": 869,
+          "bytes": 16356,
+          "sha256": "57711ec60ddadf5c6df36dfdeaeffbc6be002db77030137981cf2d3806832a80"
+        }
+      ]
+    }
+  ],
+  "original_gui": [
+    {
+      "frame_index": 0,
+      "opened": true,
+      "adapter_title": "GPU 0: Intel(R) Iris(R) Xe Graphics",
+      "events": 271,
+      "final_rtv": "T:0x2d",
+      "final_format": "R8G8B8A8_UNORM_SRGB",
+      "dimensions": [
+        2560,
+        1440
+      ],
+      "selected_event": 34,
+      "selected_api": "DrawIndexedInstanced",
+      "inspected": [
+        "D32_FLOAT_S8X24_UINT 3456x1944 (2x) depth resource",
+        "Vertex shader 0x376 DXBC input/output signatures and assembly",
+        "Depth ON, WRITE_MASK_ALL, GREATER_EQUAL, stencil OFF, solid fill/back cull",
+        "B:0x46 constant buffer size 44544 and data table"
+      ],
+      "evidence": "Computer Use screenshots in task transcript",
+      "limits": [
+        "Selected GUI inspection only; no byte export comparison yet"
+      ]
+    },
+    {
+      "frame_index": 1,
+      "opened": true,
+      "adapter_title": "GPU 0: Intel(R) Iris(R) Xe Graphics",
+      "events": 637,
+      "final_rtv": "T:0x2e",
+      "selected_event": 487,
+      "selected_api": "Dispatch",
+      "dimensions": [
+        54,
+        31,
+        1
+      ],
+      "inspected": [
+        "Compute shader SH:0x2f DXBC cs_5_0, thread group 32x32x1",
+        "CBV b0, SRVs t0/t1, sampler s0 and UAV u0 bindings",
+        "T:0x27a UAV R8G8B8A8_UNORM 1728x972 image and histogram"
+      ],
+      "evidence": "Computer Use screenshots in task transcript",
+      "limits": [
+        "Selected GUI inspection only; resource bytes not exported from GUI"
+      ]
+    },
+    {
+      "frame_index": 2,
+      "opened": true,
+      "adapter_title": "GPU 0: Intel(R) Iris(R) Xe Graphics",
+      "events": 638,
+      "final_rtv": "T:0x2e",
+      "selected_events": [
+        220,
+        469
+      ],
+      "selected_api": "DrawIndexed",
+      "inspected": [
+        "D16_UNORM 4096x4096 shadow depth resource metadata",
+        "Color-pass Vertex 0x6d0 and Pixel 0x6d1 DXBC signatures and bindings",
+        "Pixel outputs SV_Target0/1/2 and SRV t0",
+        "Depth ON, WRITE_MASK_ALL, GREATER_EQUAL; stencil ON, masks 0xff, reference 200",
+        "T:0x2ae SRV BC1_UNORM_SRGB 2048x2048 mip image and histogram"
+      ],
+      "evidence": "Computer Use screenshots in task transcript",
+      "limits": [
+        "Selected GUI inspection only; no GUI resource-byte comparison"
+      ]
+    }
+  ],
+  "gpu_checks_serial": true,
+  "exact_rule_unchanged": true,
+  "production_changes": false,
+  "remaining": [
+    "Second independent launch with three captures and full validation",
+    "Selected resource byte comparisons across execution paths",
+    "Outstanding historical Intel ten-pixel and NVIDIA MSAA discrepancies",
+    "Final regression and current-source package gate; broader unsupported API scope remains explicit"
+  ],
+  "binaries": {
+    "build/vs2022/Release/FloraGPA.Cli.exe": "6ffe4c3d90418726807e0828134d87df1165f2cde5b269c50f1e45b7e9385b8f",
+    "build/capture/capture/Release/FloraCapture.exe": "0bc61e429745e1b0f6fd046762cae923471686782a1ab48ba853cca12aaaacf3",
+    "build/capture/capture/Release/FloraCaptureRuntime.dll": "2524977896b74462f62675226f93bf51d6e857471a74093615906247ff0542d3"
+  }
+}
