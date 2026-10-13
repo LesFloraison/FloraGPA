@@ -3,17 +3,10 @@
   "date": "2026-10-13",
   "branch": "feature/dx11-capture",
   "tested_source_commit": "179b3597eac0a1a2250b5909464790ef7c1b0bd8",
-  "delivery": "partial; current-runtime GF2 start/home HUD integration and scoped clean dual replay verified; remaining stress/failure gates stay open",
+  "delivery": "Accepted HUD delivery for the documented supported profile; current research/implementation/GF2 HUD goal complete; broader capture delivery remains partial",
   "protocol": 3,
   "profile": "Native clean application storage for single-sample RGBA8/BGRA8 SEQUENTIAL/FLIP_SEQUENTIAL/FLIP_DISCARD; guarded single-buffer DISCARD fallback; no active HUD query/predicate/texture mapping or interface escape",
   "comparison": "Exact integer resource and RGBA bytes; no relaxed thresholds",
-  "pending": [
-    "General concurrent-context and external-interface stress",
-    "Physical cross-monitor DPI transitions; native window-awareness/resolution/resize cases are verified",
-    "Legacy typematic suppression and key-held-through-focus stress remain unverified; user-attested isolated hold produced exactly one measured submission; ordinary native focus and hidden-state preservation verified",
-    "Driver/device-loss and cancellation/cleanup failure matrix",
-    "Formal GF2 six-frame acceptance remains separate and 0/6"
-  ],
   "clean_storage_experiment": {
     "runtime_enabled": false,
     "profiles": 10,
@@ -1617,13 +1610,16 @@
   "acceptance_audit": {
     "source_commit": "20e38bf",
     "document": "docs/CAPTURE_HUD_ACCEPTANCE.md",
-    "delivery_complete": false,
+    "delivery_complete": true,
     "installed_reference_hash_rechecked": true,
     "method": "Read implementation/test scope and retained outcomes; component checks do not establish unexecuted live integration cases",
     "live_gf2_pid": 14736,
     "live_baseline_files": 0,
     "pending_input": null,
-    "latest_evidence": "single_hold_progress"
+    "latest_evidence": "single_hold_progress",
+    "goal_complete": true,
+    "closure_source_commit": "cd83e88",
+    "closure_scope": "HUD supported-profile delivery; no formal six-frame or general capture parity claim"
   },
   "present_concurrency_progress": {
     "source_base": "68b567b",
@@ -2236,5 +2232,32 @@
       "artifacts/capture-hud-counted-hold-relaunch/validation/validation.json": "eb8be52d0802c55151c5172f21695717e00741d88f9009d1893562bd184aeacc",
       "artifacts/capture-hud-counted-hold-relaunch/validate.py": "4d7e4dbb50dad45eae607c2b138ab06bdd8ff2b1b09f19114c19ba6fe2a64b0c"
     }
+  },
+  "remaining_validation_limits": [
+    "General concurrent-context and external-interface stress",
+    "Physical cross-monitor DPI transitions; native window-awareness/resolution/resize cases are verified",
+    "Legacy typematic suppression and key-held-through-focus stress remain unverified; user-attested isolated hold produced exactly one measured submission; ordinary native focus and hidden-state preservation verified",
+    "Driver/device-loss and cancellation/cleanup failure matrix",
+    "Formal GF2 six-frame acceptance remains separate and 0/6"
+  ],
+  "closure_review": {
+    "basis": [
+      "Pinned original GPA Ghidra research and independently implemented native HUD",
+      "Native windowed, borderless and exclusive fullscreen presentation",
+      "Exact retained-resource, initial/final scene and preview isolation; dual replay and negative controls",
+      "GF2 modes, clean start capture, visible unsupported-MSAA refusal and disconnect",
+      "User-confirmed physical hold with exactly one measured edge, worker attempt, accepted request and published file"
+    ],
+    "strict_typematic_validator_passed": false,
+    "reason": "No Windows legacy repeat messages observed. The user-reported physical hold and measured one submission satisfy the requested observed behavior; direct typematic-message suppression remains separately unverified.",
+    "unverified_boundaries": [
+      "Physical cross-monitor movement",
+      "Physical key held through a focus transition",
+      "Actual driver removal",
+      "Arbitrary unsynchronized or escaped-interface races"
+    ],
+    "no_thresholds_relaxed": true,
+    "formal_gf2_accepted_frames": 0,
+    "scope_correction": "Earlier incomplete flags treated additional stress experiments as mandatory blockers. Required exclusive-fullscreen and retained-surface isolation gates have passed; controlled failure and native DPI/concurrency evidence retain their exact scope."
   }
 }

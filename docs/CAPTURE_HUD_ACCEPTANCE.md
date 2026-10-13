@@ -1,9 +1,22 @@
 # Capture HUD acceptance audit
 
-Audit checkpoint: counted user hold on `20e38bf`, on `feature/dx11-capture`. This maps the requested
-HUD plan to implementation and observed evidence. It does not declare delivery
-complete, count HUD experiments toward the separate six-frame capture gate, or
-promote old experiments to current-binary GF2 results.
+Closure review after `cd83e88`, on `feature/dx11-capture`: the HUD work is
+accepted for its documented supported profile. The current goal (original GPA
+HUD research, native capture HUD implementation and GF2 HUD acceptance) is met.
+Exclusive fullscreen and retained-surface isolation, the explicit delivery
+gates, have passed. The user-confirmed physical hold has one measured submission.
+This does not count HUD experiments toward the separate six-frame capture gate
+or promote old experiments to current-binary GF2 results.
+
+The earlier incomplete status overclassified additional stress experiments as
+release blockers. The remaining limits below are retained as unverified scope,
+not asserted successes. No failed safety or pixel comparison has been waived:
+the legacy typematic validator still fails its observation prerequisite because
+Windows delivered no repeat messages during the measured hold. It is a separate
+repeat-message experiment, not a prerequisite for accepting the observed single
+submission. Native DPI tests, controlled device-loss/failure tests and supported
+concurrency tests remain the evidence for those behaviors; physical monitor
+transitions, real driver removal and arbitrary races are not claimed.
 
 The detailed historical evidence is in [capture-hud-evidence.json](capture-hud-evidence.json).
 The current regression is `publication_progress`: 83/83 capture-only CTests,
@@ -51,7 +64,7 @@ old observation is not promoted to a counted long-hold pass.
 | GF2 visible HUD, hotkey clean start capture, main-scene MSAA refusal | `publication_progress.gf2` | Production `d4ae3e4` passes three modes, start hotkey capture, exact dual/backbuffer/preview pixels, 18-Draw zero control, 108-resource inventory and VS/PS exports. Main scene visibly refuses MSAA; a later Hidden request refuses unmatched Unmap and publishes nothing. Disconnected shortcuts leave requests/input counts unchanged while Presents advance; normal exit confirmed. The later counted hold on `20e38bf` is recorded in `single_hold_progress`; typematic messages were not observed. |
 | Personal English commits, honest migration, ignored research/artifacts | Git author/committer, `docs/migration.json`, ignored artifact paths | Floraison identity retained; capture evidence is independent of legacy parity. Formal two-launch/six-frame capture acceptance remains 0/6 and outside HUD acceptance. |
 
-## Next acceptance actions
+## Remaining validation limits
 
 1. The new session PID 14736 has a zero baseline, user-confirmed single hold,
    one measured submission and one dual-verified file. No further user input is
@@ -66,5 +79,6 @@ old observation is not promoted to a counted long-hold pass.
    unsynchronized/external-interface races outside the verified scope unless
    actually exercised. Component tests establish only their recorded conditions.
 
-This checklist makes the remaining work concrete; it does not relax the original
-plan or replace missing evidence with source inspection.
+These limits remain available for follow-up hardening. MSAA frame capture,
+overlapping multi-swap capture and the formal GF2 six-frame gate belong to the
+continuing capture work, and are not completed by accepting the HUD.
