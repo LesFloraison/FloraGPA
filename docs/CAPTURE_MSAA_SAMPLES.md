@@ -71,6 +71,16 @@ Reproduce with the capture-only `FloraCaptureMsaaReadbackTests` build target and
 `ctest --preset capture-only-release -R '^capture_msaa_readback'`. GPU tests run
 serially. No Python, Qt, GPA or RenderDoc is needed by this native fixture.
 
+Committed revision `1891553` also passes the clean source/archive workflow:
+six configure/build/test/package/control steps, all 85 serial CTests, and 24
+packaged launches publishing 120 existing-profile frames. The isolated build
+uses a System32-only PATH and does not discover Qt. Runtime module inventories
+contain no Qt, Python, RenderDoc, GPA, FloraReplay or FloraCore. These packaged
+frames validate existing single-sample delivery/control; they are not MSAA files
+or a new dual-player pixel run. A preceding archive accidentally started before
+the whitespace commit gate completed was cancelled and excluded. Both raw runs
+remain intact, with the successful revision and hashes pinned in the baseline.
+
 ## Remaining capture work
 
 Depth/stencil and the formats required by GF2 must retain their individual

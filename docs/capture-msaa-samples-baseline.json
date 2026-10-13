@@ -112,5 +112,67 @@
   "references": [
     "https://learn.microsoft.com/en-us/windows/win32/direct3dhlsl/sm5-object-texture2dmsarray-load",
     "https://learn.microsoft.com/en-us/windows/win32/api/d3d11/nf-d3d11-id3d11devicecontext-executecommandlist"
-  ]
+  ],
+  "clean_source_package": {
+    "commit": "1891553c00b866fc98dccd5f1821b5803e3ae72c",
+    "passed": true,
+    "steps": [
+      {
+        "name": "configure",
+        "exit_code": 0
+      },
+      {
+        "name": "build",
+        "exit_code": 0
+      },
+      {
+        "name": "ctest",
+        "exit_code": 0
+      },
+      {
+        "name": "package",
+        "exit_code": 0
+      },
+      {
+        "name": "package-control",
+        "exit_code": 0
+      },
+      {
+        "name": "package-live-control",
+        "exit_code": 0
+      }
+    ],
+    "ctest": 85,
+    "no_qt_discovery": true,
+    "system_path_only": true,
+    "packaged_launches": 24,
+    "packaged_files": 120,
+    "scope": "Committed color-MSAA primitive passes isolated native tests; packaged existing single-sample profiles validate delivery/control, not MSAA frame encoding or dual-player pixels",
+    "forbidden_module_audit": [
+      "Qt",
+      "Python",
+      "RenderDoc",
+      "GPA",
+      "FloraReplay",
+      "FloraCore"
+    ],
+    "package_hashes": {
+      "dependencies.json": "ddae10be48d1c3ec765ddb4c5b44ff7e8aba911f49cc80b6586d57b2c75267a5",
+      "FloraCapture.exe": "fc80ccd2003c897c5e2d9fe04c9e85e057e8cc4b4e8a0adbf4cae8aec9aa8ce5",
+      "FloraCaptureRuntime.dll": "a207b80cf8c7f73b5a98183c366587ed9b8f6b95c6584bf236d39ebab76a5016",
+      "manifest.json": "f012df25675f4e343e8ee44c4e7686e95c8a4fe63709945db65daf625322453d",
+      "msvcp140.dll": "0f885b509a685d2bbfa652fed26b5fb31d88fbdab0a978c641d1c7b8aa460aa9",
+      "vcruntime140.dll": "d5e4d9a3e835fa679450145d6a7d94e36573a509317111904d9b3712c30d9066",
+      "vcruntime140_1.dll": "1f2d41c4aa5db0bc33ebf7b66d72943a817d7ce6cbe880502a9403823633093f",
+      "licenses/detours-MIT.txt": "f854ae8aabc0404652b48a2b3bf7f21ec174c69d73f5596934c20884eb0639ef",
+      "licenses/nlohmann-json-MIT.txt": "46a65cffd1ea955132d95a8dd921640714a8d6b537d2e4e482d31145ae95b603"
+    },
+    "evidence_sha256": {
+      "artifacts/capture-msaa-readback-source-1891553/validation.json": "d177d9f6c20d639a655ef4a85b551da85deee50f581573070aa51a777a259a78",
+      "artifacts/capture-msaa-readback-source-1891553/ctest.log": "c41b4a29f61a40bd67d343e0b17a82d8dfcfbbdd292a42c82e37aa059c869f09",
+      "artifacts/capture-msaa-readback-source-1891553/packaged-live/results.json": "d0a2e5ec184266979cdbecf1b7b6268bfbd4aa2369c9ef43126ef2ce566be2b0",
+      "artifacts/capture-msaa-readback-source-1891553/source.zip": "cfd2eceb708caf7d27023b20854a464887180df2e44c6c5dce8f19dff6abd9ee"
+    },
+    "excluded_run": "capture-msaa-readback-source-20261013 archived preceding d13a472 before commit gate completed; explicitly cancelled, not counted"
+  }
 }
