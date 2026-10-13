@@ -2004,3 +2004,11 @@ checks. The target independently verifies its native output after disconnect.
 The source-package gate includes these paths as a separate seventh stage.
 Depth/other initialization profiles and formal GF2 scene acceptance remain
 incomplete; see the MSAA report's startup-injected section.
+
+Committed package `4330a64` passes 96 CTests and all seven independent-source
+stages. Its ten MSAA files plus four removal controls pass 325 dual-player
+checks. A new GF2 main-scene attempt with that package pinpoints the next gap:
+`ClearRenderTargetView` needs format 9 (`R16G16B16A16_TYPELESS`), 2x sample
+initialization. The request refuses without publishing; the game continues
+rendering and closes normally after disconnect. Formal GF2 acceptance remains
+0/6. Raw evidence and scope are recorded in the MSAA baseline/report.

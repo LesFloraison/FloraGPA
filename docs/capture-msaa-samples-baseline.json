@@ -938,7 +938,71 @@
     "new_original_gui_run": false,
     "replay_shared_format_changed": false,
     "new_golden_run": false,
-    "clean_source_package": "New seventh package-msaa-control stage added; committed archive verification pending",
+    "clean_source_package": {
+      "commit": "4330a643b2c7f319bd3bb22ade1f89487dc8030d",
+      "passed": true,
+      "steps": [
+        {
+          "name": "configure",
+          "exit_code": 0
+        },
+        {
+          "name": "build",
+          "exit_code": 0
+        },
+        {
+          "name": "ctest",
+          "exit_code": 0
+        },
+        {
+          "name": "package",
+          "exit_code": 0
+        },
+        {
+          "name": "package-control",
+          "exit_code": 0
+        },
+        {
+          "name": "package-live-control",
+          "exit_code": 0
+        },
+        {
+          "name": "package-msaa-control",
+          "exit_code": 0
+        }
+      ],
+      "ctest": 96,
+      "no_qt_discovery": true,
+      "system_path_only": true,
+      "existing_profile_launches": 24,
+      "existing_profile_files": 120,
+      "msaa_launches": 2,
+      "msaa_files": 10,
+      "msaa_automatic_foreground_sessions": 2,
+      "msaa_dual_files": 14,
+      "msaa_dual_checks": 325,
+      "scope": "Committed independent package, including actual native startup-injected MSAA files replayed in both players with negative controls; not GF2 acceptance",
+      "package_hashes": {
+        "dependencies.json": "ddae10be48d1c3ec765ddb4c5b44ff7e8aba911f49cc80b6586d57b2c75267a5",
+        "FloraCapture.exe": "6c7b7610b47943cf6af2242f8b8849cd34f118425ef8a20391834b369e1aa0b5",
+        "FloraCaptureRuntime.dll": "8e535bd1fd53a09b2745921e36a595910eeb1e1f16261a857b2e1a76d538979b",
+        "manifest.json": "f9fa509523170666c0ad514ad25bf2c226e0eeb00d4fcc87b961b9f25d499acf",
+        "msvcp140.dll": "0f885b509a685d2bbfa652fed26b5fb31d88fbdab0a978c641d1c7b8aa460aa9",
+        "vcruntime140.dll": "d5e4d9a3e835fa679450145d6a7d94e36573a509317111904d9b3712c30d9066",
+        "vcruntime140_1.dll": "1f2d41c4aa5db0bc33ebf7b66d72943a817d7ce6cbe880502a9403823633093f",
+        "licenses/detours-MIT.txt": "f854ae8aabc0404652b48a2b3bf7f21ec174c69d73f5596934c20884eb0639ef",
+        "licenses/nlohmann-json-MIT.txt": "46a65cffd1ea955132d95a8dd921640714a8d6b537d2e4e482d31145ae95b603"
+      },
+      "evidence_sha256": {
+        "artifacts/capture-msaa-injected-source-4330a64/validation.json": "62d3c58c5934cbd665338bb7440560e6dd778c7292440788aad597df61a194b1",
+        "artifacts/capture-msaa-injected-source-4330a64/ctest.log": "53b6187f4ed69f2f0e4e5ed7112103caa84d11da3fae631a2b6d99b624ef62c2",
+        "artifacts/capture-msaa-injected-source-4330a64/packaged-live/results.json": "ed7578c08929b40e4c6fb19cff542455aa5ded928af7a653fd6cb539ad0e7dee",
+        "artifacts/capture-msaa-injected-source-4330a64/packaged-msaa/results.json": "47209f4bce169bc1880c4f8599b71239a206ff7993a71dc9b4846424bc43482e",
+        "artifacts/capture-msaa-injected-source-4330a64/dual-msaa/validation.json": "60d395fb28c4fb707a590baab6925d12bca0e286b2dee84299120d3fd8ebf249",
+        "artifacts/capture-msaa-injected-source-4330a64/dual-msaa/inputs.json": "e8b9d3a0b53368bc6cb9019d64dcd5af2b3abf9091891b313914e7eca0789f45",
+        "artifacts/capture-msaa-injected-source-4330a64/source.zip": "a0ff859fe5d5e85364db43732232a255e0431b031594211482111e3228aa6d23"
+      }
+    },
     "source_sha256": {
       "src/capture/CMakeLists.txt": "a6f207b9a4bfe958a13ad97ce70500c2c501bfe0303f4c23e53100b902935562",
       "src/capture/tests/controller_tests.cpp": "dfbd03ff0cad7613f6c79b6e8a0bd30b668811c0fbf9374e650d045da66d3176",
@@ -1054,5 +1118,48 @@
         "expected_sha256": "7b152b82fcec97b7ce9d046ecf992e7432f2aa9414126198ff30861581d85c17"
       }
     ]
+  },
+  "gf2_rgba16_preflight": {
+    "status": "Main-scene capture explicitly refused; next required initialization family identified",
+    "diagnostic_launches": 1,
+    "pid": 36260,
+    "session_id": "e9d6603d-13d7-4b07-8e88-bd2460b2fefc",
+    "swap_chain": 1,
+    "game_version": "4.0.5136.14794.28495.3242",
+    "administrator": true,
+    "permission_blocker_resolved": true,
+    "observed_scene": "Main character scene, entered from animated start screen",
+    "capture_runtime_commit": "4330a643b2c7f319bd3bb22ade1f89487dc8030d",
+    "capture_runtime_sha256": "8e535bd1fd53a09b2745921e36a595910eeb1e1f16261a857b2e1a76d538979b",
+    "error": "ID3D11DeviceContext::ClearRenderTargetView: MSAA recording initialization profile unsupported (resource=2981, format=9, samples=2)",
+    "required_format": "DXGI_FORMAT_R16G16B16A16_TYPELESS (9)",
+    "samples": 2,
+    "trigger": "ID3D11DeviceContext::ClearRenderTargetView",
+    "resource_id": 2981,
+    "present_before": 2566,
+    "present_after_failure": 3823,
+    "interface_gaps": 0,
+    "published_files": 0,
+    "partial_files": 0,
+    "disconnected": true,
+    "close_method": "Alt+F4 through computer-use",
+    "process_exited": true,
+    "exit_code": null,
+    "game_graphics_settings_changed": false,
+    "accepted_gf2_frames": 0,
+    "required_gf2_frames": 6,
+    "next_step": "Extend capture-owned initialization, native recording and dual-player tests for the observed RGBA16 family before retrying this scene",
+    "evidence_sha256": {
+      "artifacts/capture-gf2-msaa-20261014/comparison-rule.json": "d39eceeb66074aac2cad4012730ecb89907223cf194c9798d4c6591b94c80106",
+      "artifacts/capture-gf2-msaa-20261014/disconnect.json": "94ade429e3106f53b6621a7ec1df4a84733de2557d0b4686c2565a8be0dddf33",
+      "artifacts/capture-gf2-msaa-20261014/environment-final.json": "61a2c7cfb3c955d43171d3f744fbc0c92a01ae15d54fa8fddeed0fa93252fef7",
+      "artifacts/capture-gf2-msaa-20261014/launch.json": "e990e2b7e5785cd7df2953fdd6c2a37f3a6a924cd0051a72bfadf6f03ddd1f69",
+      "artifacts/capture-gf2-msaa-20261014/request-main.json": "140e9cf7736858b33e35bd04192fe5fa7f461b19036240fce807a6a90a23f6e2",
+      "artifacts/capture-gf2-msaa-20261014/status-after-failure.json": "82eb81f991738a56e161e9cf90ecbf371e1f9e61c5927eef6f2cb7b8496fa1d4",
+      "artifacts/capture-gf2-msaa-20261014/status-exited.json": "75d63ea0013cac31dc32fb090f1ebb81930b51dcb05c224bd5bf6a8c5fd016bf",
+      "artifacts/capture-gf2-msaa-20261014/status-main-before.json": "c2b299bfa9df153ac0011971c32e99f838cf9ce5e816e34d3eb9cf71e552a59a",
+      "artifacts/capture-gf2-msaa-20261014/status-main-result.json": "fc62f7e356a893b81fe836a64ccc06721f73ad5a7ee96a7979adee5fa4865512",
+      "artifacts/capture-gf2-msaa-20261014/status-start.json": "bac236d238081e95a1ee055686523b98e55919401eba08b0a175f587c1103dc5"
+    }
   }
 }

@@ -332,6 +332,32 @@ This validates these color profiles, not MSAA depth, query/predicate combination
 deferred execution, multisampled swap-chain output or GF2 scene acceptance.
 
 The source-package validator now includes a seventh `package-msaa-control`
-stage. Its result must be recorded separately after testing the committed
-source archive. Raw evidence is retained in
+stage. The committed `4330a64` archive passes all seven stages and 96 serial
+CTests with System32-only PATH and no Qt discovery. The package produces 120
+existing-profile files across 24 launches and ten MSAA files across two launches;
+both MSAA sessions also pass unique-foreground automatic selection. Those ten
+packaged files plus four removal controls pass 325 actual dual-player checks.
+Loaded-module audits exclude Qt, Python, GPA, RenderDoc, FloraCore and FloraReplay.
+Raw source-package evidence is retained in
+`artifacts/capture-msaa-injected-source-4330a64`. Initial workspace evidence is in
 `artifacts/capture-msaa-injected-20261014` and exact hashes/counts in the baseline.
+
+## GF2 format-specific continuation
+
+A new elevated launch using the independently built `4330a64` package reaches
+the animated start screen and main character scene. The main-scene request
+explicitly refuses at `ID3D11DeviceContext::ClearRenderTargetView` for resource
+2981: format 9 (`R16G16B16A16_TYPELESS`), two samples. This identifies the next
+required color initialization family; it does not prove the typed application
+view, later resources or later command/state requirements are covered.
+
+No `.gpa_frame` or `.partial` is published. Presents advance from 2566 before
+the request to 3823 after refusal, with zero interface gaps. The scene remains
+visible, disconnect succeeds and Alt+F4 closes the diagnostic process; the CLI
+subsequently reports Exited. Graphics settings were unchanged. HUD and capture
+hotkeys were disabled for this diagnostic launch. No new accepted GF2 frame or
+original-player scene result is claimed: formal acceptance remains **0/6**.
+Raw evidence is `artifacts/capture-gf2-msaa-20261014`, with hashes and the exact
+error in the baseline's `gf2_rgba16_preflight` entry. The next implementation
+step is RGBA16 sample initialization and its independent native/dual-player
+checks before repeating this scene.
