@@ -774,3 +774,32 @@ from the earlier user-confirmed multiple separate presses. Current-run capture,
 home-scene and exit results remain pending at this checkpoint. Historical GF2
 results remain attached to their tested revisions. See `hidden_state_progress`
 in the evidence JSON; formal six-frame acceptance is still **0/6**.
+
+## Real Present and protected-context concurrency
+
+`capture_hud_present_concurrency` and its hardware variant exercise real native
+Present/Present1 while a different application thread owns nested
+ID3D11Multithread Enter sections. The owner performs UpdateSubresource, CopyResource,
+Flush and GetType before releasing both levels; the presenter must complete
+without inverting the native/device/alias locks. Both device-origin and
+context-origin protection interfaces, SEQUENTIAL and FLIP_SEQUENTIAL are covered.
+
+There are eight native/wrapped pairs per driver, each with eight contested
+Presents: **16 pairs / 256 calls** across WARP and hardware, plus warmup calls.
+Every application marker and all retained 800x600 scene pixels compare exactly.
+The HUD reports no skip reason, native resources release, interface gaps stay
+zero, and Debug Layer reports no warnings/errors. A watchdog makes lock-order
+failure terminal rather than leaving a hung test process.
+
+The fixture deliberately never shows or activates its windows, preserving the
+live GF2 physical-input baseline. This is native API concurrency evidence, not
+screen-visibility evidence. The initial assumption that a hidden window must
+return DXGI_STATUS_OCCLUDED was disproved by the unwrapped baseline; the corrected
+fixture records actual successful/occluded results and primes both logical slots.
+All recorded concurrent calls on this machine returned S_OK, and the foreground
+window was unchanged. This does not establish arbitrary unsynchronized context
+use or every external-interface race.
+
+The change adds tests only; production runtime bytes remain those verified at
+`7326f1a`. See `present_concurrency_progress` in the evidence JSON. The live GF2
+session remains untouched pending the isolated physical hold.

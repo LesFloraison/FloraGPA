@@ -708,7 +708,7 @@
     },
     "runtime_sha256": "64afb8680eb56248978dd7a7ac35265ffc45e54a4fc132202f2951a3a3e6af05"
   },
-  "latest_progress": "hidden_state_progress; eight real native/wrapped Present pairs verify hidden GPU state and teardown; current GF2 compact start HUD visible, isolated physical hold pending",
+  "latest_progress": "present_concurrency_progress; real native Present/context protected concurrency verified in both build profiles without touching the GF2 hold baseline",
   "concurrency_progress": {
     "implementation_base": "1ecbb95",
     "status": "reproduced lock inversion repaired; interactive regression pending",
@@ -1623,5 +1623,53 @@
     "live_gf2_pid": 32968,
     "live_baseline_files": 0,
     "pending_input": "Single physical Ctrl+Shift+C hold; previous multiple presses are not reused"
+  },
+  "present_concurrency_progress": {
+    "source_base": "68b567b",
+    "production_revision": "7326f1a",
+    "runtime_sha256": "dc784f65f6050e923f190b25545a85fd662a3367154b84dac0e74b323e2a7ab9",
+    "production_changed": false,
+    "native_wrapped_pairs": 16,
+    "contended_present_calls": 256,
+    "warmup_presents": 64,
+    "drivers": [
+      "WARP",
+      "hardware"
+    ],
+    "swap_effects": [
+      "SEQUENTIAL",
+      "FLIP_SEQUENTIAL"
+    ],
+    "apis": [
+      "Present",
+      "Present1"
+    ],
+    "multithread_origins": [
+      "device",
+      "context"
+    ],
+    "window_profile": "Never shown or activated; actual native APIs, not screen visibility acceptance",
+    "verified": [
+      "Nested native Enter owner makes immediate context progress while a second thread attempts Present",
+      "Exact UpdateSubresource/CopyResource marker bytes and all retained scene pixels",
+      "HUD path has no skip reason; no interface gaps",
+      "No Debug Layer warnings/errors; all tracked native objects and wrappers released",
+      "Foreground window unchanged in both drivers; GF2 baseline remains zero captures/keyboard events"
+    ],
+    "capture_only_focused_tests": "2/2",
+    "full_focused_tests": "2/2",
+    "initial_failure": "Unwrapped hidden-window first Present returned S_OK, contradicting the initial occlusion-only oracle. Corrected fixture records actual native outcomes and primes both buffer slots; initial failure retained.",
+    "native_results": "All 256 recorded contended calls returned S_OK on this machine. Raw LastError values retained, not compared across independently scheduled native runs.",
+    "remaining": "Arbitrary unsynchronized/external-interface races, native focus/physical hold, multi-swap hotkey and combined unsafe-state/fault coverage; no formal GF2 capture promotion",
+    "sha256": {
+      "src/capture/tests/hud_present_concurrency_tests.cpp": "57d7a7c3cdd81267745c0ce2633539ef84a46dda07df1dc9437c0d7f43872410",
+      "artifacts/capture-hud-present-concurrency-tests.log": "3b9306443ff92fa5d8ce85330612ccc3d6646aa7a285e3c7982be31a445ee397",
+      "artifacts/capture-hud-present-concurrency-details.log": "c5676f6a5e6ddfde1d700b394aaf1c43e78be72d734cd559e461e286df91f14e",
+      "artifacts/capture-hud-present-concurrency-full-tests.log": "62c43576401293fba79429967116d343e68e3485a3406e20562e54e53d09619a",
+      "artifacts/capture-hud-present-concurrency-full-details.log": "8a27458c212cc0e535759f2acba621b289f98b72a31fa62f340911f8b3828f56",
+      "artifacts/capture-hud-present-concurrency-WARP.json": "79a2a22df895e1e8fc275f3e6c11aa66aef317eceef6e9cbad57109e56ab5d02",
+      "artifacts/capture-hud-present-concurrency-hardware.json": "51f23b90497086e7b0fea9363f785a491687f71218907c106cada5562f126b4a",
+      "artifacts/capture-hud-present-concurrency-diagnostic.log": "fbc8daffb4746566f90d73604308082e28b33dfaec4c761ace4c20e0639031a7"
+    }
   }
 }
