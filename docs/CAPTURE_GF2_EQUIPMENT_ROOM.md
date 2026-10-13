@@ -78,3 +78,7 @@ complete original-GUI inspection, two formal launches with three accepted frames
 each across two scenes, and current-source independent-package verification.
 This diagnostic run is not one completed formal acceptance launch. No production
 Capture, Replay or format code changed in this evidence stage.
+
+The later [preview compatibility stage](CAPTURE_PREVIEW_COMPATIBILITY.md) identifies
+and fixes negative-height BMP rejection for new encoder output. It preserves the
+three original diagnostic files and does not change their failed pixel results.

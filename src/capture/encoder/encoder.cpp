@@ -558,8 +558,15 @@ public:
         GUID guid{};require(SUCCEEDED(CoCreateGuid(&guid)),"Frame GUID generation failed");memcpy(header.data()+0x20,&guid,16);memcpy(header.data()+API_OFFSET,"DX11",4);memcpy(header.data()+0x4c,"DX11_0",6);
         require(frame_.producer.size()<32 && frame_.producer.find('\0')==std::string::npos,"Encoder producer name is invalid");memcpy(header.data()+0xd4,frame_.producer.data(),frame_.producer.size());wire_write<uint32_t>(header.data()+0xfc,6);
         wire_write(header.data()+DIMENSIONS_OFFSET,shape.width);wire_write(header.data()+DIMENSIONS_OFFSET+4,shape.height);
-        ByteBuffer bmp(54+final.size());bmp[0]='B';bmp[1]='M';wire_write(bmp.data()+2,narrow(bmp.size()));wire_write<uint32_t>(bmp.data()+10,54);wire_write<uint32_t>(bmp.data()+14,40);wire_write(bmp.data()+18,shape.width);wire_write<int32_t>(bmp.data()+22,-int32_t(shape.height));wire_write<uint16_t>(bmp.data()+26,1);wire_write<uint16_t>(bmp.data()+28,32);wire_write(bmp.data()+34,narrow(final.size()));
-        for(size_t i=0;i<final.size();i+=4){bmp[54+i]=final[i+(shape.format==DXGI_FORMAT_R8G8B8A8_UNORM?2:0)];bmp[55+i]=final[i+1];bmp[56+i]=final[i+(shape.format==DXGI_FORMAT_R8G8B8A8_UNORM?0:2)];bmp[57+i]=final[i+3];}
+        // GPA 2025 R1's capture browser treats a negative BMP height as an
+        // unsigned allocation size. Use bottom-up rows; GPU records stay intact.
+        ByteBuffer bmp(54+final.size());bmp[0]='B';bmp[1]='M';wire_write(bmp.data()+2,narrow(bmp.size()));wire_write<uint32_t>(bmp.data()+10,54);wire_write<uint32_t>(bmp.data()+14,40);wire_write(bmp.data()+18,shape.width);wire_write<int32_t>(bmp.data()+22,int32_t(shape.height));wire_write<uint16_t>(bmp.data()+26,1);wire_write<uint16_t>(bmp.data()+28,32);wire_write(bmp.data()+34,narrow(final.size()));
+        const size_t row_bytes=size_t(shape.width)*4;
+        for(size_t y=0;y<shape.height;++y){checkpoint();for(size_t x=0;x<row_bytes;x+=4){
+            const size_t source=y*row_bytes+x,target=54+(shape.height-1-y)*row_bytes+x;
+            bmp[target]=final[source+(shape.format==DXGI_FORMAT_R8G8B8A8_UNORM?2:0)];bmp[target+1]=final[source+1];
+            bmp[target+2]=final[source+(shape.format==DXGI_FORMAT_R8G8B8A8_UNORM?0:2)];bmp[target+3]=final[source+3];
+        }}
         checkpoint();ContainerWriter writer(path,header);for(const auto& [id,r]:records_){checkpoint();writer.append({id,r.category,r.type,r.bytes.data(),r.bytes.size()});}
         std::unique_lock<std::mutex> publication;
         if(options_.publication_mutex)publication=std::unique_lock<std::mutex>(*options_.publication_mutex);

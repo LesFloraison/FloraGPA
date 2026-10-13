@@ -1,0 +1,145 @@
+{
+  "schema": "FloraGPA legacy preview compatibility baseline 1",
+  "date": "2026-10-14",
+  "parent_commit": "4f41e8c",
+  "research": {
+    "module": "C:\\Program Files\\IntelSWTools\\GPA\\com\\intel\\framedb\\framedb_qt.dll",
+    "sha256": "35a03995d50f390ed74722385583e7bb011f84e563a579c88086d8039ad1df80",
+    "source_commit": "4f41e8c",
+    "image_base": "0x180000000",
+    "anchors": [
+      {
+        "function_rva": "0x3ab790",
+        "rva": "0x3ab969",
+        "instruction": "cmp dword ptr [rbp + 0x60], 0x41504749"
+      },
+      {
+        "function_rva": "0x3c2780",
+        "rva": "0x3c2790",
+        "instruction": "mov dword ptr [r15], 0x41504749"
+      },
+      {
+        "function_rva": "0x3c3b60",
+        "rva": "0x3c3bfe",
+        "instruction": "mov dword ptr [rbp - 0x29], 0x41504749"
+      },
+      {
+        "function_rva": "0x5c8210",
+        "rva": "0x5c8a43",
+        "instruction": "lea rdx, [rip + 0x25a9be]"
+      },
+      {
+        "function_rva": "0x5c8210",
+        "rva": "0x5c8c42",
+        "instruction": "cmp eax, 0x41504749"
+      }
+    ],
+    "scope": "Local read-only analysis of capture-browser metadata parser; no private address invocation or production linking",
+    "observations": {
+      "unmodified_room_frame_direct_open": true,
+      "unmodified_room_frame_browser_open": "Unsupported API: Other",
+      "api_string_only_probe": "Browser still displays N/A"
+    },
+    "conclusions": "Legacy preview reader rejects negative height via unsigned size calculation. Bottom-up-only GF2 probe recognized/opened; new production preview recognized. GPU records unchanged; pixel mismatch unresolved.",
+    "functions": {
+      "legacy_stat_vtable": "0x7c4aa8",
+      "legacy_stat": "0x3aa940",
+      "bmp_reader": "0x397810",
+      "pixel_size_check": "0x397050"
+    }
+  },
+  "differential_probe": {
+    "source": "artifacts\\capture-gf2-resource-budget-20261014\\session\\frame-41ae2ca2-dfda-4165-8c4e-240570167583.gpa_frame",
+    "probe": "artifacts\\capture-gf2-resource-budget-20261014\\session\\z-preview-bottom-up.gpa_frame",
+    "change": "Only embedded BMP height and row order; header, records, index and reference remain byte-identical",
+    "unchanged_prefix_sha256": "5d6d50e1e8a5ce66a7b66eba594d5b88c53184a87350433722fcb09ad1a36f5e",
+    "prefix_bytes": 1326144548,
+    "source_sha256": "9cb667549b7747d01e37285b191534f16ce39a2ba826cfd65b728b593bc17371",
+    "probe_sha256": "a2731ee1bb973ce01e5d7359a8087c89d0a2618ceea4c766600ed7c7af494c83",
+    "acceptance_established": false
+  },
+  "production_previews": [
+    {
+      "file": "artifacts\\capture-gui-metadata-research\\present-dual\\native\\frame-0.gpa_frame",
+      "frame_sha256": "3543002b060afa1e342807d08afccbf6f5c6d354d1ee047ebe94de7ba7894108",
+      "preview_sha256": "dbb8a4b6f68a45a387a441977b8625913453d90c46424285d2d8ed5de1134be8",
+      "pillow_rgba_sha256": "411ddde3d5278f39982d2a4f4e67edd5e47a3504caa13dc1ef1f8a6027b553b1",
+      "exact_asymmetric_cpu_image": true
+    },
+    {
+      "file": "artifacts\\capture-gui-metadata-research\\present-dual\\native\\frame-1.gpa_frame",
+      "frame_sha256": "bd5850cfb257552d2be5a85f575442e2acdb2280200d056fba03168cc8c22755",
+      "preview_sha256": "dbb8a4b6f68a45a387a441977b8625913453d90c46424285d2d8ed5de1134be8",
+      "pillow_rgba_sha256": "411ddde3d5278f39982d2a4f4e67edd5e47a3504caa13dc1ef1f8a6027b553b1",
+      "exact_asymmetric_cpu_image": true
+    },
+    {
+      "file": "artifacts\\capture-gui-metadata-research\\present-dual\\native\\frame-2.gpa_frame",
+      "frame_sha256": "e9baeed7e84a6e7d88ff74160e7cddc045e37397733b891e657c6d400ae4ee8c",
+      "preview_sha256": "dbb8a4b6f68a45a387a441977b8625913453d90c46424285d2d8ed5de1134be8",
+      "pillow_rgba_sha256": "411ddde3d5278f39982d2a4f4e67edd5e47a3504caa13dc1ef1f8a6027b553b1",
+      "exact_asymmetric_cpu_image": true
+    }
+  ],
+  "gui": {
+    "version": "GPA 2025 R1 25.1.1743502079",
+    "differential_probe": {
+      "api": "DirectX 11.0",
+      "preview_orientation": "correct",
+      "browser_open": true,
+      "analysis_events": 638,
+      "final_rtv": "T:0x2f",
+      "dimensions": [
+        2560,
+        1440
+      ],
+      "rendered_equipment_room": true
+    },
+    "fresh_production": {
+      "file": "zz-production-preview.gpa_frame",
+      "api": "DirectX 11.0",
+      "preview": "black with red patch at top left",
+      "frame_sha256": "3543002b060afa1e342807d08afccbf6f5c6d354d1ee047ebe94de7ba7894108"
+    },
+    "descriptive_metadata": "resolution N/A; host/GPU Not available",
+    "analysis_input": "computer-use click timed out; no deeper inspection claimed",
+    "evidence": "Native computer-use observations and screenshots in task transcript",
+    "formal_accepted_frames": 0
+  },
+  "validation": {
+    "capture_build": "passed",
+    "full_build": "passed",
+    "capture_ctest": 16,
+    "full_ctest": 17,
+    "dual_player_checks": 119,
+    "dual_player_passed": true,
+    "independent_pillow_decode": true,
+    "gpu_checks_serial": true
+  },
+  "production_code_scope": "Capture Encoder preview height/row layout only; Replay and checked reader unchanged",
+  "formal_gf2_accepted_frames": 0,
+  "remaining": [
+    "GF2 exact pixels and fresh six-frame acceptance",
+    "Original GUI selected event/shader/resource/state inspection",
+    "Descriptive browser metadata",
+    "Current-source package verification"
+  ],
+  "raw_evidence": "artifacts\\capture-gui-metadata-research",
+  "evidence_sha256": {
+    "research.json": "d31ddc6908cc5273ffb406eb2b2681eee1a262940b1fda4f20fe049aa12f1270",
+    "header.c": "6116604fb5ba093387bc54e91fdec47754ba97ada83b7ec3fe66278e081607ca",
+    "legacy-stat.c": "65a5f05e8341b9242e6de18c5049cda7ca62b6589ef6cd056902835de544b2b1",
+    "preview.c": "4d01ec0c55990bf4016837724f19ab2630146123ab0162f040ba8efdcb030339",
+    "preview-pixels.c": "11aa661c36160cd7c4905f6acde8f1216fad2230720f47088e4e6a3ab3ff06f9",
+    "instruction-anchors.json": "0d9fdbf6ad84990831fcdae4bf8ff1403ffed2bfe2766aac17be90515031a17f",
+    "bottom-up-probe.json": "cc726c77354dbb9f56cc705ead8195627dbccd815fcddcdf6a2dc538de37886f",
+    "gui-observations.json": "aa58dfcc64819869d523e9e19cdd2114f9760cd4442483300f85e16b561601b4",
+    "capture-build.log": "aced5b23cd67af9b0732a7e4a86ec920ddb83ad586db9cc1846f7549a572806e",
+    "full-build.log": "2bb4fb0910a65e97a8caadde2c79d102de482d57d22da1e50fff5f4f30ffd784",
+    "capture-ctest.log": "975a1eac7b83cc7c672c4793e588e4f66ebbcaa96f093f493f2fd58a85c02c17",
+    "full-ctest.log": "23c4dd5f0f89d93abb6f88701b51fa88d3226f6182b82cef8b0d9d36a0a68b1b",
+    "dual.log": "f6aae9d8a933d5e66a23ff304e8d06c1f8adaf41087e7c92493e69143e5f3c90",
+    "present-dual/validation.json": "4c5d3bc2f3003eeac593200ebd86046f38f1c4fd151aaffdde5092a63dfeb921",
+    "preview-independent-check.json": "b65c2cfa875f8977d7162d54b3bff4d82150dee5bd1b18a2685ff88ca9524890"
+  }
+}

@@ -52,8 +52,8 @@ def main():
         preview,size=struct.unpack_from('<QI',data,276)
         check(name+'-bounded-preview',preview<=len(data) and size<=len(data)-preview)
         bmp=data[preview:preview+size]
-        check(name+'-preview-layout',len(bmp)==54+len(expected) and bmp[:2]==b'BM' and struct.unpack_from('<ii',bmp,18)==(800,-600))
-        pixels=bytearray(bmp[54:]);pixels[0::4],pixels[2::4]=pixels[2::4],pixels[0::4]
+        check(name+'-preview-layout',len(bmp)==54+len(expected) and bmp[:2]==b'BM' and struct.unpack_from('<ii',bmp,18)==(800,600))
+        pixels=bytearray(b"".join(bmp[54+y*3200:54+(y+1)*3200] for y in range(599,-1,-1)));pixels[0::4],pixels[2::4]=pixels[2::4],pixels[0::4]
         check(name+'-clean-preview',pixels==expected)
         changed=bytearray(data);struct.pack_into('<4f',changed,clears[0][0]+25,0,1,0,1)
         negative=out/(name+'-green-clear.gpa_frame');negative.write_bytes(changed)

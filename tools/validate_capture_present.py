@@ -49,8 +49,8 @@ def main():
                 if (category,kind)==(7,0x37):draws.append((position,size))
             check(f'{index}-app-draw',len(draws)==1 and draws[0][1]==32)
             preview,size=struct.unpack_from('<QI',raw,276);check(f'{index}-bounded-preview',preview<=len(raw) and size<=len(raw)-preview)
-            bmp=raw[preview:preview+size];check(f'{index}-preview-layout',len(bmp)==54+len(expected) and bmp[:2]==b'BM' and struct.unpack_from('<ii',bmp,18)==(800,-600))
-            rgba=bytearray(bmp[54:]);rgba[0::4],rgba[2::4]=rgba[2::4],rgba[0::4];check(f'{index}-clean-preview',rgba==expected)
+            bmp=raw[preview:preview+size];check(f'{index}-preview-layout',len(bmp)==54+len(expected) and bmp[:2]==b'BM' and struct.unpack_from('<ii',bmp,18)==(800,600))
+            rgba=bytearray(b"".join(bmp[54+y*3200:54+(y+1)*3200] for y in range(599,-1,-1)));rgba[0::4],rgba[2::4]=rgba[2::4],rgba[0::4];check(f'{index}-clean-preview',rgba==expected)
             negative=bytearray(raw);struct.pack_into('<I',negative,draws[0][0]+24,0);path=out/f'{index}-draw-zero.gpa_frame';path.write_bytes(negative)
             variants.append(('draw-zero',path,bytes((0,0,0,255))*(800*600)))
         for label,source,pixels in variants:

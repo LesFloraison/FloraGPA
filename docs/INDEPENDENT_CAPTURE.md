@@ -2115,3 +2115,10 @@ Original GPA directly opens the first unmodified file with the rendered room and
 638 events, but its browser rejects API detection; further original-GUI inspection
 is pending. Formal acceptance remains **0/6**. See
 [the equipment-room evidence](CAPTURE_GF2_EQUIPMENT_ROOM.md).
+
+The subsequent [preview compatibility fix](CAPTURE_PREVIEW_COMPATIBILITY.md)
+changes new encoder output to bottom-up BMP rows, resolving the browser's
+negative-height rejection. A preview-only GF2 differential probe and fresh
+production fixtures are recognized by the original browser; the probe reaches
+actual analysis. This does not resolve the independent GF2 pixel mismatch or
+complete its six-frame gate.
