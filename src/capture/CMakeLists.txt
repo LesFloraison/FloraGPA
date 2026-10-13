@@ -43,7 +43,10 @@ add_custom_command(OUTPUT "${MSAA_SHADER_HEADER}"
   COMMAND FloraCaptureShaderCompiler "${MSAA_SHADER_HEADER}"
     "${CMAKE_CURRENT_SOURCE_DIR}/shaders/msaa_initialize_vs.hlsl"
     "${CMAKE_CURRENT_SOURCE_DIR}/shaders/msaa_initialize_uint_ps.hlsl"
-  DEPENDS FloraCaptureShaderCompiler shaders/msaa_initialize_vs.hlsl shaders/msaa_initialize_uint_ps.hlsl VERBATIM)
+    "${CMAKE_CURRENT_SOURCE_DIR}/shaders/msaa_initialize_depth_ps.hlsl"
+    "${CMAKE_CURRENT_SOURCE_DIR}/shaders/msaa_initialize_stencil_ps.hlsl"
+  DEPENDS FloraCaptureShaderCompiler shaders/msaa_initialize_vs.hlsl shaders/msaa_initialize_uint_ps.hlsl
+    shaders/msaa_initialize_depth_ps.hlsl shaders/msaa_initialize_stencil_ps.hlsl VERBATIM)
 add_library(FloraCaptureEncoder STATIC encoder/encoder.cpp "${MSAA_SHADER_HEADER}")
 target_include_directories(FloraCaptureEncoder PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/generated")
 target_include_directories(FloraCaptureEncoder PUBLIC encoder)
@@ -112,6 +115,12 @@ if(BUILD_TESTING)
   add_test(NAME capture_msaa_depth_encoding COMMAND FloraCaptureMsaaDepthEncodingTests)
   add_test(NAME capture_msaa_depth_encoding_hardware COMMAND FloraCaptureMsaaDepthEncodingTests --hardware)
   set_tests_properties(capture_msaa_depth_encoding capture_msaa_depth_encoding_hardware PROPERTIES RUN_SERIAL TRUE TIMEOUT 120)
+  add_executable(FloraCaptureMsaaDepthRecordingTests tests/msaa_depth_recording_tests.cpp)
+  target_include_directories(FloraCaptureMsaaDepthRecordingTests PRIVATE runtime)
+  target_link_libraries(FloraCaptureMsaaDepthRecordingTests PRIVATE FloraCaptureObjects FloraCaptureEncoder FloraGpaFormat capture_protocol d3dcompiler)
+  add_test(NAME capture_msaa_depth_recording COMMAND FloraCaptureMsaaDepthRecordingTests)
+  add_test(NAME capture_msaa_depth_recording_hardware COMMAND FloraCaptureMsaaDepthRecordingTests --hardware)
+  set_tests_properties(capture_msaa_depth_recording capture_msaa_depth_recording_hardware PROPERTIES RUN_SERIAL TRUE TIMEOUT 120)
   add_executable(FloraCaptureScissorEncodingTests tests/scissor_encoding_tests.cpp)
   target_include_directories(FloraCaptureScissorEncodingTests PRIVATE runtime)
   target_link_libraries(FloraCaptureScissorEncodingTests PRIVATE FloraCaptureObjects FloraCaptureEncoder capture_protocol d3dcompiler)

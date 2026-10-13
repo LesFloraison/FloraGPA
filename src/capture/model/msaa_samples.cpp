@@ -1,5 +1,6 @@
 #include "msaa_samples.hpp"
 #include <stdexcept>
+#include <cstring>
 
 namespace flora::capture {
 MsaaSampleAccess msaa_integer_access(DXGI_FORMAT format) {
@@ -55,11 +56,16 @@ bool msaa_initialization_color_format(DXGI_FORMAT format) noexcept {
     return (format>=DXGI_FORMAT_R8G8B8A8_TYPELESS && format<=DXGI_FORMAT_R8G8B8A8_SINT) ||
            (format>=DXGI_FORMAT_R16G16B16A16_TYPELESS && format<=DXGI_FORMAT_R16G16B16A16_SINT);
 }
+bool msaa_initialization_depth_format(DXGI_FORMAT format) noexcept {
+    return format==DXGI_FORMAT_R32G8X24_TYPELESS || format==DXGI_FORMAT_D32_FLOAT_S8X24_UINT;
+}
 MsaaInitializationLayout validate_msaa_initialization(const MsaaSamples& data,
     const D3D11_TEXTURE2D_DESC& d,size_t byte_limit,size_t plane_limit) {
     if(!data.resource)throw std::runtime_error("MSAA initialization resource identity is zero");
     const auto& s=data.shape;
-    if(data.encoding!=MsaaSampleEncoding::color_bits || !msaa_initialization_color_format(s.format))
+    const bool depth=msaa_initialization_depth_format(s.format);
+    if(depth ? data.encoding!=MsaaSampleEncoding::depth32_stencil8 :
+       (data.encoding!=MsaaSampleEncoding::color_bits || !msaa_initialization_color_format(s.format)))
         throw std::runtime_error("MSAA initialization format/encoding is not verified");
     if(data.quality || (s.samples!=2 && s.samples!=4))
         throw std::runtime_error("MSAA initialization sample count/quality is not verified");
@@ -67,12 +73,14 @@ MsaaInitializationLayout validate_msaa_initialization(const MsaaSamples& data,
        d.ArraySize!=s.array_size || d.Format!=s.format || d.SampleDesc.Count!=s.samples ||
        d.SampleDesc.Quality!=data.quality || d.MiscFlags!=s.misc_flags)
         throw std::runtime_error("MSAA initialization descriptor/shape mismatch");
+    const UINT output_bind=depth?D3D11_BIND_DEPTH_STENCIL:D3D11_BIND_RENDER_TARGET;
     if(d.Usage!=D3D11_USAGE_DEFAULT || d.CPUAccessFlags ||
-       (d.BindFlags&~(D3D11_BIND_RENDER_TARGET|D3D11_BIND_SHADER_RESOURCE)))
+       (depth && !(d.BindFlags&D3D11_BIND_DEPTH_STENCIL)) ||
+       (d.BindFlags&~(output_bind|D3D11_BIND_SHADER_RESOURCE)))
         throw std::runtime_error("MSAA initialization resource usage/bind flags unsupported");
     const auto count=size_t(s.array_size)*s.samples;
     if(count>plane_limit)throw std::runtime_error("MSAA initialization plane limit exceeded");
-    const auto layout=msaa_sample_layout(s,data.quality,byte_limit);
+    const auto layout=msaa_sample_layout(s,data.quality,byte_limit,depth);
     if(data.planes.size()!=layout.planes.size())throw std::runtime_error("MSAA initialization plane count mismatch");
     size_t bytes=0;
     for(size_t i=0;i<layout.planes.size();++i){const auto& expected=layout.planes[i];const auto& p=data.planes[i];
@@ -80,8 +88,16 @@ MsaaInitializationLayout validate_msaa_initialization(const MsaaSamples& data,
            p.bytes.size()!=expected.row_bytes*s.height)
             throw std::runtime_error("MSAA initialization plane identity/layout/length mismatch");
         if(p.bytes.size()>byte_limit-bytes)throw std::runtime_error("MSAA initialization byte limit exceeded");
+        if(depth)for(size_t at=0;at<p.bytes.size();at+=8){
+            uint32_t value=0,stencil=0;memcpy(&value,p.bytes.data()+at,4);memcpy(&stencil,p.bytes.data()+at+4,4);
+            // SV_Depth is clamped by the output merger. Do not silently change
+            // NaNs, signed zero, out-of-range values or unverified subnormals.
+            if(value>0x3f800000u || (value && value<0x00800000u))
+                throw std::runtime_error("MSAA depth initialization value is not exactly restorable");
+            if(stencil>255)throw std::runtime_error("MSAA depth initialization padding is not canonical");
+        }
         bytes+=p.bytes.size();
     }
-    return {msaa_integer_access(s.format),bytes,count};
+    return {msaa_sample_access(s.format,depth),bytes,count};
 }
 }

@@ -15,8 +15,10 @@ def main():
         p.add_argument('--'+name, required=True, type=Path)
     p.add_argument('--recorded', action='store_true', help='Validate the wrapped-context recording probe')
     p.add_argument('--rgba16', action='store_true', help='Verify both bytes of recorded RGBA16 components')
+    p.add_argument('--depth', action='store_true', help='Verify exact D32S8 words and stencil byte tiles')
     a = p.parse_args()
     if a.rgba16 and not a.recorded:p.error('--rgba16 requires --recorded')
+    if a.depth and (not a.recorded or a.rgba16):p.error('--depth requires --recorded and excludes --rgba16')
     out = a.out.resolve()
     out.mkdir(parents=True, exist_ok=False)
     env = dict(os.environ)
@@ -65,11 +67,12 @@ def main():
               result['debug_warnings_or_errors'] == 0 and
               (result['recording_refusals'] == 4 if a.recorded else result['encoder_refusals'] == 50))
         if a.rgba16:check(device+'-rgba16-refusals',result['component_bytes']==2 and result['encoder_refusals']==6)
+        if a.depth:check(device+'-depth-refusals',result['depth_format']==19 and result['encoder_refusals']==30)
         manifest = json.loads((out/device/'frames.json').read_text())
         for samples in (2, 4):
             source = out/device/f'{samples}x-complete.gpa_frame'
             raw, offset, records, helpers, labels = parse(source)
-            check(device+f'-{samples}x-helper-labels', len(labels) == 1 and len(helpers) == samples*2)
+            check(device+f'-{samples}x-helper-labels', len(labels) == 1 and len(helpers) == samples*2*(9 if a.depth else 1))
             data = bytearray(raw)
             keep = [e for e in records if e[0] not in helpers]
             struct.pack_into('<I', data, 12, len(keep))
@@ -79,11 +82,14 @@ def main():
             (out/device/(name+'.gpa_frame')).write_bytes(data)
             expected = bytearray()
             for y in range(14):
-                for x in range(13*samples*(2 if a.rgba16 else 1)):
-                    sample=x//(26 if a.rgba16 else 13)
+                for x in range(13*samples*(2 if a.rgba16 or a.depth else 1)):
+                    sample=x//(26 if a.rgba16 or a.depth else 13)
                     modified=x%13<6 and sample%2==0
                     color=tuple((word>>(((x//13)%2)*8))&255 for word in (0x3e00,0xbc00,0x0400,0x3555)) if a.rgba16 else (240,19,73,255)
-                    expected += bytes(color if modified else (0,0,0,0))
+                    if a.depth:
+                        color=((0xa6 if modified else 0),0,0,255) if (x//13)%2 else ((0,0,128,62) if modified else (0,0,0,0))
+                        expected += bytes(color)
+                    else:expected += bytes(color if modified else (0,0,0,0))
             (out/device/(name+'.expected.rgba')).write_bytes(expected)
             manifest.append(dict(file=name+'.gpa_frame', samples=samples, application_draws=3, helper_draws=0))
         for item in manifest:
@@ -107,7 +113,7 @@ def main():
             inventory = json.loads((out/(case+'-inventory/report.json')).read_text())
             check(case+'-inventory', inventory['draws'] == draws and inventory['dispatches'] == 0)
             shaders = [r for r in inventory['resources'] if 0x90 <= r['type'] <= 0x95]
-            check(case+'-application-helper-shaders', len(shaders) == 5)
+            check(case+'-application-helper-shaders', len(shaders) == (6 if a.depth else 5))
             for shader in shaders:
                 name = case+'-shader-'+shader['id']
                 run(name, [a.replay.resolve(), 'shader', frame, '--id', shader['id'], '--out', out/name])

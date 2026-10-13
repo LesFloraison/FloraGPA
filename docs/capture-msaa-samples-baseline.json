@@ -1554,5 +1554,201 @@
       "https://learn.microsoft.com/en-us/windows/win32/api/d3d11/ns-d3d11-d3d11_depth_stencil_desc",
       "https://learn.microsoft.com/en-us/windows/win32/direct3d11/d3d10-graphics-programming-guide-output-merger-stage"
     ]
+  },
+  "depth32_stencil8_recording": {
+    "base_commit": "1474d2bd8d6677547b3862a9a28677aabb459bf0",
+    "status": "Scoped D32S8 immediate recording and independent CPU encoder verified; GF2 now reaches unsupported ResolveSubresource",
+    "profile": "13x7 two layers, typeless D32S8, writable DSV and separate depth/stencil SRVs, partial masked application writes; 2x/4x quality zero, WARP/hardware",
+    "oracle": "Exact CPU float32 depth words and stencil bytes, initial sample planes and final byte tiles including alpha. Whole-value stencil producer is independent of bitwise helper initialization.",
+    "native_results": [
+      {
+        "debug_warnings_or_errors": 0,
+        "depth_format": 19,
+        "encoder_refusals": 30,
+        "files": 4,
+        "hardware": false,
+        "passed": true,
+        "recording_refusals": 4,
+        "scope": "Wrapped immediate-context MSAA recording; broader startup injection and GF2 pending",
+        "source_gpu_objects_alive": 0
+      },
+      {
+        "debug_warnings_or_errors": 0,
+        "depth_format": 19,
+        "encoder_refusals": 30,
+        "files": 4,
+        "hardware": true,
+        "passed": true,
+        "recording_refusals": 4,
+        "scope": "Wrapped immediate-context MSAA recording; broader startup injection and GF2 pending",
+        "source_gpu_objects_alive": 0
+      }
+    ],
+    "dual_player_files": 12,
+    "dual_player_checks": 274,
+    "positive_files": 4,
+    "negative_files": 8,
+    "capture_only_ctest": 102,
+    "full_selected_ctest": 105,
+    "qt_cases": 12,
+    "qt_skipped": 0,
+    "rgba16_regression_files": 12,
+    "rgba16_regression_checks": 250,
+    "rgba8_injected_regression": {
+      "launches": 2,
+      "actual_files": 10,
+      "negative_controls": 4,
+      "dual_player_files": 14,
+      "checks": 326,
+      "automatic_foreground_sessions": 2
+    },
+    "gpu_tests_serial": true,
+    "new_gf2_launches": 1,
+    "accepted_gf2_frames": 0,
+    "replay_shared_format_changed": false,
+    "new_golden_run": false,
+    "new_original_gui_run": false,
+    "clean_source_package": "Latest proof a2a3465 precedes D32S8 integration; current committed-source package pending",
+    "value_scope": "Positive zero and nonnegative normal float32 up to one; reject signed zero, subnormals, NaN/infinity and out-of-range values. Exact stencil byte with canonical zero unused 24 bits.",
+    "pending": [
+      "ResolveSubresource recording and independent encoding",
+      "D32S8 startup-injected self-owned dual-player proof and committed-source package",
+      "Other depth formats, read-only DSVs, MSAA mutation/deferred/query/predicate/output profiles",
+      "Formal two-launch six-frame/two-scene GF2 acceptance"
+    ],
+    "source_sha256": {
+      "src/capture/CMakeLists.txt": "fb5945f79ff6dc27ed714031726da8c090d4be2940239bdf7f23247dd3fce17e",
+      "src/capture/api/compile_msaa_shaders.cpp": "007e6ed5d9afd5cc42b315d69e30d69d48610bc22173c07df632bb1763752f41",
+      "src/capture/encoder/encoder.cpp": "2959806fd23b3e10f0624c8acdcca99ddf54b61dc6b898006aab7ca5cf7aa751",
+      "src/capture/include/msaa_samples.hpp": "a32ffc5356622d0078c247473fe32607e9b41682a6d8f99abe46f0dff0b0e03e",
+      "src/capture/model/msaa_samples.cpp": "dc8bbd9845f43f3c4ee66fddf0e2e97f8949b1f74840f5fac89dcd7a65cd0af4",
+      "src/capture/runtime/command_stream.cpp": "7acbdc6773974078bf3e8eb09fbd90a243ef9a0138ca0bd8941c448f7c9cedf8",
+      "src/capture/shaders/msaa_initialize_depth_ps.hlsl": "3db97839b07935e4e7a8f2b30cf758b01102ac69d096c2db3bb8748c05e97b3b",
+      "src/capture/shaders/msaa_initialize_stencil_ps.hlsl": "841c482ec14f1ea2cafb23ff9d1edd93c7dc31f95c1c6ee5c9f24d0184162ffe",
+      "src/capture/tests/msaa_depth_encoding_fixture.hpp": "185bb0149017660e389531561140252af96bc12fe0c9570d7be886eb20afcc77",
+      "src/capture/tests/msaa_depth_recording_tests.cpp": "6046a63f117527b3b2155b716ed2dd77ec8af041ce3e5b9cdf7650345365f508",
+      "tools/validate_capture_msaa_encoder.py": "4664e24377e2fda13220d5de2750ae543b619cf37fa219ad60580620a9dbe3f4"
+    },
+    "binary_sha256": {
+      "build/capture/capture/Release/FloraCapture.exe": "ee9112dbfaa66619a7194353e2a8adaa0cb94610f1450509062ef3eedf4a0e10",
+      "build/capture/capture/Release/FloraCaptureRuntime.dll": "0bf56aa26883736cd75462c842f54da855544a9e52e90ee242a1e07f33c26f8f",
+      "build/capture/capture/Release/FloraCaptureMsaaDepthRecordingTests.exe": "b1e9613e0acb05e0c98746776ec3ca1d85401d2cbe1922f605d62f333750f349"
+    },
+    "evidence_sha256": {
+      "artifacts/capture-msaa-depth-recording-20261014/build.log": "25db2e40e7b9ef65de59134594656057a977c01dd04bed5d3b15585de0b60640",
+      "artifacts/capture-msaa-depth-recording-20261014/capture-ctest.log": "c9beee0bcc7658338e814ae3acb82f8f46d52e7225f81fb9a43fd935ba161c55",
+      "artifacts/capture-msaa-depth-recording-20261014/capture-detailed.log": "df787191e3acd2275d97d057a393e77fddb4b0eb2b483c498ecacf4dfb50d453",
+      "artifacts/capture-msaa-depth-recording-20261014/focused.log": "da54235994789cd69077b78ff5ccc7ac7c2dc05785b5da76d86bf36db7baf77c",
+      "artifacts/capture-msaa-depth-recording-20261014/full-build.log": "5e1e85a4659cf0074686a3c35c231975097f60d8d06db0081d6d45675456c712",
+      "artifacts/capture-msaa-depth-recording-20261014/full-ctest.log": "340cec203b35535b84ae7f87a9b288f01353790ace881d8b19f2ed2c513ba94d",
+      "artifacts/capture-msaa-depth-recording-20261014/full-detailed.log": "7ac1bda043424a9455d2bfea04cc52c2693b61cf274cf513fde2b8f8d89aa1c6",
+      "artifacts/capture-msaa-depth-recording-20261014/capture-ui.txt": "631ee80c977f406f8d9a39411246f81af6760de52ac57da4b4ff1560ca704803",
+      "artifacts/capture-msaa-depth-recording-20261014/dual/validation.json": "582488983e2e65f6ac0a76cbb48e861ca95625f33c4bd8e0f31489c02d3d5c51",
+      "artifacts/capture-msaa-depth-recording-20261014/dual/inputs.json": "d1809673253beaa830ee6465322eef482dc3181643722468730ac75e8101d4cc",
+      "artifacts/capture-msaa-depth-recording-20261014/rgba16-regression/validation.json": "8510e8d3ae847a3e58a13d3b7abb62941a814a60d3bf3e7fdd9a705de64e252d",
+      "artifacts/capture-msaa-depth-recording-20261014/rgba16-regression/inputs.json": "cd1e391d2227df7810ffc10fbf65dfd40bdff5cb6904eeb3067969e68fca9d20",
+      "artifacts/capture-msaa-depth-recording-20261014/rgba8-injected/validation.json": "1cda74b2cc74f07918ccbe0d6a7fc810d1f02f58c0cfa9fde5565ac4e2bc6330",
+      "artifacts/capture-msaa-depth-recording-20261014/rgba8-injected/inputs.json": "139a9e51a76ff6c8bcb41d111b5605fc0f675cefec8d2291456ca573393490e7"
+    },
+    "files": [
+      {
+        "file": "warp/2x-complete.gpa_frame",
+        "sha256": "8bd827571da07876153652985c3b28899b05441d2e5c9fbbb3854d32ca146453",
+        "expected_sha256": "80db0bc5076967c12569727ec2dedd4e043f94874f947fc966d0b50abd3e78c2"
+      },
+      {
+        "file": "warp/2x-missing-application-draws.gpa_frame",
+        "sha256": "386c91d84923879cbde2b8cec15f260b87b7b1b352c32ccba153ffed640bdca8",
+        "expected_sha256": "498d5cffee80255cc4c91573e85a42bd56ba8fc78a15076211126c9691b8ad31"
+      },
+      {
+        "file": "warp/4x-complete.gpa_frame",
+        "sha256": "8e423e5fc781232c02f0e1ca9094e7a8d8f47d6ac34e5e1e9d2641b5670b81cf",
+        "expected_sha256": "1baee9474cbce2dd1f4f0446bc6adfd3388547a481bbefab0ccfb647ae465014"
+      },
+      {
+        "file": "warp/4x-missing-application-draws.gpa_frame",
+        "sha256": "1c4922578bf5a6d23acd358ca68e107f681151a9b11418586f3a65d37716e5c5",
+        "expected_sha256": "a0a03c2d866163edeb8a4bc54ad882a9ec481a430a0ba2f9610f901b9e66465c"
+      },
+      {
+        "file": "warp/2x-missing-initialization.gpa_frame",
+        "sha256": "ccacd688c1745e4a457f835c60dd77b083d5ba85cf670cefd5d46a58126f257f",
+        "expected_sha256": "27d5782dfd6ad01c9fdbae26f5672dd68e30fa472f6465b34c84be498b8bb876"
+      },
+      {
+        "file": "warp/4x-missing-initialization.gpa_frame",
+        "sha256": "f64f106da3df67344b883eefb155a8729f273c6ee0c6208c4841fe106cbdc208",
+        "expected_sha256": "cb944213cc40ef5a9b27ef124f127a341a087a4b03cabeebdda2087e723788ad"
+      },
+      {
+        "file": "hardware/2x-complete.gpa_frame",
+        "sha256": "64153d9c2b690ba4eaf032a02dca3e41156a3fee4aa36eaa5df306b7de513d18",
+        "expected_sha256": "80db0bc5076967c12569727ec2dedd4e043f94874f947fc966d0b50abd3e78c2"
+      },
+      {
+        "file": "hardware/2x-missing-application-draws.gpa_frame",
+        "sha256": "f86880198634b4af66e8d7777c40583da5eacf0118429995300d04d6cb66704b",
+        "expected_sha256": "498d5cffee80255cc4c91573e85a42bd56ba8fc78a15076211126c9691b8ad31"
+      },
+      {
+        "file": "hardware/4x-complete.gpa_frame",
+        "sha256": "65facf94ef373e2345a8ec2752e72f85f9b5d36cdc81af926d562d43eed3a810",
+        "expected_sha256": "1baee9474cbce2dd1f4f0446bc6adfd3388547a481bbefab0ccfb647ae465014"
+      },
+      {
+        "file": "hardware/4x-missing-application-draws.gpa_frame",
+        "sha256": "d46988a278ab8de6788666f0a341f4918ffc91d4fcfa4f30a375031b8d35732f",
+        "expected_sha256": "a0a03c2d866163edeb8a4bc54ad882a9ec481a430a0ba2f9610f901b9e66465c"
+      },
+      {
+        "file": "hardware/2x-missing-initialization.gpa_frame",
+        "sha256": "bb4fb1f4cda7b48c1dc30714c13be5f5db6f6a45eb988cdb5729b1a7ee8f15bb",
+        "expected_sha256": "27d5782dfd6ad01c9fdbae26f5672dd68e30fa472f6465b34c84be498b8bb876"
+      },
+      {
+        "file": "hardware/4x-missing-initialization.gpa_frame",
+        "sha256": "7412a4ec98973c308d33c6a0f02d53fd591ac48b706202332c20625f2dc9e039",
+        "expected_sha256": "cb944213cc40ef5a9b27ef124f127a341a087a4b03cabeebdda2087e723788ad"
+      }
+    ]
+  },
+  "gf2_resolve_preflight": {
+    "status": "Main-scene capture explicitly refused at ResolveSubresource; no frame published",
+    "diagnostic_launches": 1,
+    "pid": 7828,
+    "session_id": "accc3cb7-f4c7-4528-bbd4-3f41e799f9f5",
+    "swap_chain": 1,
+    "game_version": "4.0.5136.14794.28495.3242",
+    "administrator": true,
+    "permission_blocker_resolved": true,
+    "observed_scene": "Main character scene entered from animated start screen",
+    "capture_source": "Uncommitted D32S8 worktree atop 1474d2bd8d6677547b3862a9a28677aabb459bf0",
+    "capture_runtime_sha256": "0bf56aa26883736cd75462c842f54da855544a9e52e90ee242a1e07f33c26f8f",
+    "error": "ID3D11DeviceContext::ResolveSubresource: GPU call recording is not implemented",
+    "present_before": 1393,
+    "present_after_failure": 3220,
+    "interface_gaps": 0,
+    "published_files": 0,
+    "partial_files": 0,
+    "disconnected": true,
+    "process_exited": true,
+    "close_method": "Alt+F4 through computer-use",
+    "accepted_gf2_frames": 0,
+    "required_gf2_frames": 6,
+    "next_step": "Implement and independently validate ResolveSubresource before retrying main-scene capture",
+    "evidence_sha256": {
+      "artifacts/capture-gf2-depth-20261014/binaries.json": "83ce2ee031488a5254308ad52143645df3960449cdb250dbd1640f9c1ae79d8d",
+      "artifacts/capture-gf2-depth-20261014/comparison-rule.json": "d39eceeb66074aac2cad4012730ecb89907223cf194c9798d4c6591b94c80106",
+      "artifacts/capture-gf2-depth-20261014/disconnect.json": "a4b3fd4dee25634c4a0983777f8e010b25285fefc2c27b08b13ccbc69e2f1607",
+      "artifacts/capture-gf2-depth-20261014/environment-final.json": "52b28142dbe9c4085ecc792962b3656abffce46971eaa766afb0d5c78d9f152f",
+      "artifacts/capture-gf2-depth-20261014/launch.json": "7511bfae5d22a22983141bed17d7ef0cf61a961531eac550c9fb315ee13bfc0d",
+      "artifacts/capture-gf2-depth-20261014/request-main.json": "63e9aaf968ad5b29e8322ef49212ea756fae0bd6ec765c387c94be9c97050b6d",
+      "artifacts/capture-gf2-depth-20261014/status-after-failure.json": "eefff2094c01bd5c78c42d8b498e16ae935d3990a63dca14abc546cc2ae623a2",
+      "artifacts/capture-gf2-depth-20261014/status-exited.json": "75d63ea0013cac31dc32fb090f1ebb81930b51dcb05c224bd5bf6a8c5fd016bf",
+      "artifacts/capture-gf2-depth-20261014/status-main-before.json": "4f742f41db49019a184b096afa925183a68155cac27a15dc308dbb2a19ea8c4f",
+      "artifacts/capture-gf2-depth-20261014/status-main-result.json": "46ad5dc2e7077ee2d885745b4bf142fd65a492fcae2a806fef277ddbd67380a6",
+      "artifacts/capture-gf2-depth-20261014/status-start.json": "199e7d76fc74f694398ba390f50cf2faa475e78fc4c6bd2a5c6a7667afb88c6d"
+    }
   }
 }

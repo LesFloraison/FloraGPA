@@ -1,9 +1,9 @@
 # Capture-owned MSAA sample readback
 
 MSAA work now includes an owned CPU sample model, native readback primitives,
-a scoped color initialization encoder and immediate-context recording. The
-recording path retains RGBA8/RGBA16 2x/4x quality-zero samples before first use and
-passes owned bytes to the encoder. Two native startup-injected color profiles
+a scoped color/depth initialization encoder and immediate-context recording. The
+recording path retains RGBA8/RGBA16 and D32S8 2x/4x quality-zero samples before
+first use and passes owned bytes to the encoder. Two native startup-injected RGBA8 profiles
 also pass repeated capture and dual-player execution. Broader formats and
 hidden-state combinations remain pending. GF2
 formal scene acceptance remains **0/6**. The supported HUD acceptance is separate.
@@ -428,3 +428,39 @@ does not change the GF2 0/6 status.
 State construction follows Microsoft's [depth/stencil descriptor semantics](https://learn.microsoft.com/en-us/windows/win32/api/d3d11/ns-d3d11-d3d11_depth_stencil_desc)
 and [output-merger depth clamping and sample masks](https://learn.microsoft.com/en-us/windows/win32/direct3d11/d3d10-graphics-programming-guide-output-merger-stage).
 Broader depth values and production model validation require separate checks.
+
+### D32S8 immediate recording and production encoding
+
+The independent CPU encoder now emits the verified depth/stencil initialization
+sequence, using DXBC generated at build time. The runtime saves first-use D32S8
+sample planes through the existing native readback and shared frame budgets.
+No Replay, Core, GPU execution or shader compiler dependency was added to the
+encoder. DSV/SRV format families, array ranges, binding flags and encoding tags
+are checked before publication. Read-only DSVs remain outside this profile.
+
+Depth storage must be positive zero or a nonnegative normal float32 value at most
+one. Negative zero, subnormals, NaN/infinity and out-of-range values explicitly
+refuse rather than pass through output-merger clamping. Stencil is an exact byte;
+the unused 24 bits must be zero. The native probe uses typeless D32S8 storage,
+ordinary writable DSVs and separate depth/stencil SRVs. It does not certify all
+typed-resource or view/state combinations.
+
+`FloraCaptureMsaaDepthRecordingTests` records two partial application depth/stencil
+Draws and a final byte-display Draw. It checks initial samples against independent
+CPU words and releases all source owners before encoding. WARP/hardware each
+pass 30 invalid-model refusals and four recording-budget refusals. Twelve positive
+and Draw-removal files pass 274 exact dual-player, event and shader checks. The
+native final pixels stay correct even in rejected recording attempts, with no
+Debug Layer warnings/errors. Regression counts and hashes are in the baseline;
+raw evidence is `artifacts/capture-msaa-depth-recording-20261014`.
+
+A subsequent elevated GF2 main-scene preflight reaches the next explicit gap:
+`ID3D11DeviceContext::ResolveSubresource: GPU call recording is not implemented`.
+It publishes no frame or partial file. Presents advance from 1393 to 3220 with
+zero interface gaps; disconnect and normal UI close succeed. This establishes
+progress through the earlier initialization guards, not successful replay of a
+complete GF2 frame. Evidence is `artifacts/capture-gf2-depth-20261014`; formal
+acceptance remains **0/6**. Resolve recording/encoding, broader hidden-state
+profiles, injected D32S8 dual-player proof and a new committed-source package
+remain pending. The latest independent package proof is RGBA16 revision
+`a2a3465`, before this depth integration.

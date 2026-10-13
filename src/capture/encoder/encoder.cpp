@@ -106,15 +106,51 @@ class Encoder {
         const auto data=add(9,0x81,Payload{}.value(uint64_t(code.size())).bytes(code).q({0}));
         const auto id=allocate();add(id,5,type,Payload{}.q({id,2,0,0,0,0,data}));return id;
     }
+    uint64_t initialize_msaa_depth(const MsaaSamples& samples,uint64_t vertex,uint64_t raster,uint64_t scissors){
+        const auto& shape=samples.shape;
+        const auto depth_pixel=helper_shader(0x92,msaa_shaders::depth),stencil_pixel=helper_shader(0x92,msaa_shaders::stencil);
+        D3D11_DEPTH_STENCIL_DESC ds{};ds.DepthEnable=TRUE;ds.DepthWriteMask=D3D11_DEPTH_WRITE_MASK_ALL;ds.DepthFunc=D3D11_COMPARISON_ALWAYS;
+        ds.StencilReadMask=255;ds.StencilWriteMask=255;ds.FrontFace={D3D11_STENCIL_OP_KEEP,D3D11_STENCIL_OP_KEEP,D3D11_STENCIL_OP_REPLACE,D3D11_COMPARISON_ALWAYS};ds.BackFace=ds.FrontFace;
+        const auto depth_state=helper_object(0x8b,ds);
+        std::array<uint64_t,8> stencil_states{},constants{};
+        for(UINT bit=0;bit<8;++bit){
+            ds.DepthEnable=FALSE;ds.DepthWriteMask=D3D11_DEPTH_WRITE_MASK_ZERO;ds.StencilEnable=TRUE;ds.StencilWriteMask=uint8_t(1u<<bit);stencil_states[bit]=helper_object(0x8b,ds);
+            D3D11_BUFFER_DESC bd{16,D3D11_USAGE_DEFAULT,D3D11_BIND_CONSTANT_BUFFER,0,0,0};
+            const auto data=blob(Payload{}.u({1u<<bit,0,0,0})),id=allocate();add(id,5,0x83,Payload{}.q({id,2}).raw(bd).value(data));constants[bit]=id;
+        }
+        D3D11_TEXTURE2D_DESC td{shape.width,shape.height,1,shape.array_size,DXGI_FORMAT_R32G8X24_TYPELESS,{shape.samples,samples.quality},D3D11_USAGE_DEFAULT,D3D11_BIND_DEPTH_STENCIL,0,0};
+        const auto temporary=helper_texture(td,{});std::vector<uint64_t> views;
+        for(UINT layer=0;layer<shape.array_size;++layer){D3D11_DEPTH_STENCIL_VIEW_DESC d{};d.Format=DXGI_FORMAT_D32_FLOAT_S8X24_UINT;d.ViewDimension=D3D11_DSV_DIMENSION_TEXTURE2DMSARRAY;d.Texture2DMSArray={layer,1};
+            const auto view=helper_view(0x8e,temporary,d);views.push_back(view);add(7,0x31,Payload{}.q({0,1,view}).u({3}).value(0.0f).value(uint8_t(0)));}
+        const D3D11_VIEWPORT viewport{0,0,float(shape.width),float(shape.height),0,1};const auto viewports=add(9,0x87,Payload{}.u({1}).raw(viewport));
+        for(const auto& plane:samples.planes){
+            checkpoint();D3D11_TEXTURE2D_DESC d{shape.width,shape.height,1,1,DXGI_FORMAT_R32G32_UINT,{1,0},D3D11_USAGE_DEFAULT,D3D11_BIND_SHADER_RESOURCE,0,0};
+            const auto texture=helper_texture(d,plane.bytes);D3D11_SHADER_RESOURCE_VIEW_DESC sd{};sd.Format=d.Format;sd.ViewDimension=D3D11_SRV_DIMENSION_TEXTURE2D;sd.Texture2D.MipLevels=1;
+            const auto srv=helper_view(0x8c,texture,sd);state_block state{};state.mask.fill(UINT32_MAX);
+            state.topology=D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;state.vs_shader=vertex;state.ps_shader=depth_pixel;state.ps_srv[0]=srv;state.rasterizer=raster;
+            state.viewports=viewports;state.scissors=scissors;state.sample_mask=1u<<plane.sample;state.dsv=views.at(plane.array_slice);state.depth_state=depth_state;state.om_uav_start=64;
+            state.om_uav_counts.fill(UINT32_MAX);state.cs_uav_counts.fill(UINT32_MAX);
+            auto draw=[&]{const auto id=add(3,3,Payload{}.bytes(encode_state_block(state)));add(7,0x37,Payload{}.q({id,0,1}).u({3,0}));};draw();
+            state.ps_shader=stencil_pixel;
+            for(UINT bit=0;bit<8;++bit){state.depth_state=stencil_states[bit];state.stencil_ref=1u<<bit;state.ps_cb[0]=constants[bit];draw();}
+        }
+        return temporary;
+    }
     void initialize_msaa(){
         if(msaa_.empty())return;
-        const auto vertex=helper_shader(0x90,msaa_shaders::vertex),pixel=helper_shader(0x92,msaa_shaders::color);
+        const auto vertex=helper_shader(0x90,msaa_shaders::vertex);
+        const bool color=std::any_of(msaa_.begin(),msaa_.end(),[](const auto& entry){return entry.second.access.encoding==MsaaSampleEncoding::color_bits;});
+        const auto pixel=color?helper_shader(0x92,msaa_shaders::color):0;
         D3D11_RASTERIZER_DESC rd{};rd.FillMode=D3D11_FILL_SOLID;rd.CullMode=D3D11_CULL_NONE;rd.DepthClipEnable=TRUE;rd.MultisampleEnable=TRUE;
         const auto raster=helper_object(0x89,rd),scissors=add(9,0x86,Payload{}.u({0}));
         for(const auto& [id,plan]:msaa_){
             checkpoint();const auto& samples=frame_.initial_msaa.at(id);const auto& shape=samples.shape;
             std::u16string name=u"FloraCapture initialization: MSAA resource ";for(char c:std::to_string(id))name.push_back(char16_t(c));name.push_back(0);
             add(7,0x327b,Payload{}.q({0,UINT64_MAX-2}).u({0,narrow(name.size()*2)}).bytes({reinterpret_cast<const uint8_t*>(name.data()),name.size()*2}));
+            if(plan.access.encoding==MsaaSampleEncoding::depth32_stencil8){
+                const auto temporary=initialize_msaa_depth(samples,vertex,raster,scissors);
+                add(7,0x3e,Payload{}.q({0,1,resource_ref(id),temporary}));add(7,0x327c,Payload{}.q({0,UINT64_MAX-2}).u({0}));continue;
+            }
             D3D11_TEXTURE2D_DESC td{shape.width,shape.height,1,shape.array_size,plan.access.storage,{shape.samples,samples.quality},D3D11_USAGE_DEFAULT,D3D11_BIND_RENDER_TARGET,0,0};
             const auto temporary=helper_texture(td,{});
             std::vector<uint64_t> views;
@@ -170,14 +206,23 @@ class Encoder {
             const auto d=descriptor<D3D11_RENDER_TARGET_VIEW_DESC>(o);format=d.Format;
             if(d.ViewDimension==D3D11_RTV_DIMENSION_TEXTURE2DMS){require(shape.array_size==1,"Encoder MSAA non-array RTV targets an array");count=1;}
             else{require(d.ViewDimension==D3D11_RTV_DIMENSION_TEXTURE2DMSARRAY,"Encoder MSAA RTV dimension mismatch");first=d.Texture2DMSArray.FirstArraySlice;count=d.Texture2DMSArray.ArraySize;}
+        }else if(o.kind=="dsv"){
+            const auto d=descriptor<D3D11_DEPTH_STENCIL_VIEW_DESC>(o);format=d.Format;
+            require(d.Flags==0,"Encoder MSAA read-only DSV profile is not verified");
+            if(d.ViewDimension==D3D11_DSV_DIMENSION_TEXTURE2DMS){require(shape.array_size==1,"Encoder MSAA non-array DSV targets an array");count=1;}
+            else{require(d.ViewDimension==D3D11_DSV_DIMENSION_TEXTURE2DMSARRAY,"Encoder MSAA DSV dimension mismatch");first=d.Texture2DMSArray.FirstArraySlice;count=d.Texture2DMSArray.ArraySize;}
         }else throw std::runtime_error("Encoder MSAA view kind unsupported");
         require(first<shape.array_size && count && count<=shape.array_size-first,"Encoder MSAA view array range invalid");
         const auto storage=msaa_.at(o.resource).access.storage;
-        require(msaa_initialization_color_format(format) && format!=storage &&
+        if(msaa_.at(o.resource).access.encoding==MsaaSampleEncoding::depth32_stencil8){
+            const bool dsv=o.kind=="dsv",srv=o.kind=="srv" || o.kind=="srv1";
+            require(dsv?format==DXGI_FORMAT_D32_FLOAT_S8X24_UINT:
+                (srv && shape.format==storage && (format==DXGI_FORMAT_R32_FLOAT_X8X24_TYPELESS || format==DXGI_FORMAT_X32_TYPELESS_G8X24_UINT)),"Encoder MSAA depth view format incompatible");
+        }else require(o.kind!="dsv" && msaa_initialization_color_format(format) && format!=storage &&
             msaa_integer_access(format).storage==storage &&
             (shape.format==storage || shape.format==format),"Encoder MSAA view format incompatible");
         const auto resource=descriptor<D3D11_TEXTURE2D_DESC>(frame_.objects.at(o.resource));
-        const UINT required=(o.kind=="srv" || o.kind=="srv1")?D3D11_BIND_SHADER_RESOURCE:D3D11_BIND_RENDER_TARGET;
+        const UINT required=(o.kind=="srv" || o.kind=="srv1")?D3D11_BIND_SHADER_RESOURCE:o.kind=="dsv"?D3D11_BIND_DEPTH_STENCIL:D3D11_BIND_RENDER_TARGET;
         require((resource.BindFlags&required)!=0,"Encoder MSAA view requires missing bind flag");
     }
     void object(ObjectId id,const FrozenObject& o){

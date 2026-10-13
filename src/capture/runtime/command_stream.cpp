@@ -81,10 +81,13 @@ struct FrameRecording::Impl {
             if(desc.SampleDesc.Count>1){
                 // Keep the live recording profile inside the independently
                 // validated encoder profile before executing any readback work.
-                if(!msaa_initialization_color_format(desc.Format) ||
+                const bool depth=msaa_initialization_depth_format(desc.Format);
+                const UINT output_bind=depth?D3D11_BIND_DEPTH_STENCIL:D3D11_BIND_RENDER_TARGET;
+                if((!depth && !msaa_initialization_color_format(desc.Format)) ||
                    desc.SampleDesc.Quality || (desc.SampleDesc.Count!=2 && desc.SampleDesc.Count!=4) ||
                    desc.Usage!=D3D11_USAGE_DEFAULT || desc.CPUAccessFlags || desc.MiscFlags ||
-                   (desc.BindFlags&~(D3D11_BIND_RENDER_TARGET|D3D11_BIND_SHADER_RESOURCE)))
+                   (depth && !(desc.BindFlags&D3D11_BIND_DEPTH_STENCIL)) ||
+                   (desc.BindFlags&~(output_bind|D3D11_BIND_SHADER_RESOURCE)))
                     throw std::runtime_error("MSAA recording initialization profile unsupported (resource="+std::to_string(id)+", format="+std::to_string(UINT(desc.Format))+", samples="+std::to_string(desc.SampleDesc.Count)+")");
                 const auto count=size_t(desc.ArraySize)*desc.SampleDesc.Count;
                 if(count>options.msaa_plane_limit-msaa_planes)throw std::runtime_error("MSAA recording plane limit exceeded");

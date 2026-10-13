@@ -2020,3 +2020,13 @@ checks. A new GF2 main-scene preflight now first refuses format 19
 (`R32G8X24_TYPELESS`), 2x MSAA; it publishes nothing and the game continues
 rendering. The next required implementation is depth/stencil initialization.
 This diagnostic launch does not count toward the formal six-frame gate.
+
+D32S8 initialization is now connected to the capture-owned immediate recording
+model and CPU encoder after a separate 306-check wire experiment. Production
+recording passes 12 files / 274 exact dual-player checks and rejects unverified
+depth values, padding and view profiles before publication. A new elevated GF2
+main-scene attempt first refuses `ResolveSubresource` recording; it publishes
+nothing, continues rendering and exits normally after disconnect. Formal GF2
+acceptance stays 0/6. Latest standalone source-package evidence is `a2a3465`
+(98 CTests, seven stages), before depth integration. The MSAA report and baseline
+retain each phase's exact scope, hashes and remaining work.
