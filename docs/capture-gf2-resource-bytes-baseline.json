@@ -1,0 +1,401 @@
+{
+  "schema": "FloraGPA selected GF2 buffer and texture bytes baseline 1",
+  "source_commit": "d96c0267ed79eb215f26ccf4a504128ff596cbbe",
+  "input_baseline": "docs/capture-gf2-intel-repeat-baseline.json",
+  "raw_evidence": "artifacts/capture-gf2-resource-bytes-20261014",
+  "manifest_sha256": "d1df5deca0dc7257f1f6bcdafc15dcb443ed9be38777846f9fef0a50dd1a8460",
+  "buffer_bindings": 33,
+  "unique_buffers": 24,
+  "texture_checks": 3,
+  "buffer_results": [
+    {
+      "index": 0,
+      "event": 2288,
+      "draw_ordinal": 73,
+      "buffer_checks": [
+        {
+          "binding": "vs.cb.0",
+          "resource_id": 116,
+          "original_bytes": 44704,
+          "flora_bytes": 44704,
+          "exact": true,
+          "original_sha256": "1a70b6f1f72b0b9d62669929f22ab074e96c29f827493fe1c47f7e61e9e19276",
+          "flora_sha256": "1a70b6f1f72b0b9d62669929f22ab074e96c29f827493fe1c47f7e61e9e19276"
+        },
+        {
+          "binding": "vs.cb.1",
+          "resource_id": 58,
+          "original_bytes": 528,
+          "flora_bytes": 528,
+          "exact": true,
+          "original_sha256": "477882006ab78aac8f839e7a8a70bf3873714c26e48c8448dcd3b7c74da3d8dc",
+          "flora_sha256": "477882006ab78aac8f839e7a8a70bf3873714c26e48c8448dcd3b7c74da3d8dc"
+        },
+        {
+          "binding": "vs.cb.2",
+          "resource_id": 117,
+          "original_bytes": 544,
+          "flora_bytes": 544,
+          "exact": true,
+          "original_sha256": "97c92335cc2d9bdd82b026749c0f45eaa61158e3c37eef7ca96c0537be1abc78",
+          "flora_sha256": "97c92335cc2d9bdd82b026749c0f45eaa61158e3c37eef7ca96c0537be1abc78"
+        },
+        {
+          "binding": "vs.cb.3",
+          "resource_id": 15,
+          "original_bytes": 368,
+          "flora_bytes": 368,
+          "exact": true,
+          "original_sha256": "e2960e7e3553b0a8aa228338abc456b17beac23168d58e33901eec11f888c2b8",
+          "flora_sha256": "e2960e7e3553b0a8aa228338abc456b17beac23168d58e33901eec11f888c2b8"
+        },
+        {
+          "binding": "ps.cb.0",
+          "resource_id": 116,
+          "original_bytes": 44704,
+          "flora_bytes": 44704,
+          "exact": true,
+          "original_sha256": "1a70b6f1f72b0b9d62669929f22ab074e96c29f827493fe1c47f7e61e9e19276",
+          "flora_sha256": "1a70b6f1f72b0b9d62669929f22ab074e96c29f827493fe1c47f7e61e9e19276"
+        },
+        {
+          "binding": "ps.cb.1",
+          "resource_id": 58,
+          "original_bytes": 528,
+          "flora_bytes": 528,
+          "exact": true,
+          "original_sha256": "477882006ab78aac8f839e7a8a70bf3873714c26e48c8448dcd3b7c74da3d8dc",
+          "flora_sha256": "477882006ab78aac8f839e7a8a70bf3873714c26e48c8448dcd3b7c74da3d8dc"
+        },
+        {
+          "binding": "ps.cb.2",
+          "resource_id": 117,
+          "original_bytes": 544,
+          "flora_bytes": 544,
+          "exact": true,
+          "original_sha256": "97c92335cc2d9bdd82b026749c0f45eaa61158e3c37eef7ca96c0537be1abc78",
+          "flora_sha256": "97c92335cc2d9bdd82b026749c0f45eaa61158e3c37eef7ca96c0537be1abc78"
+        },
+        {
+          "binding": "vb.0",
+          "resource_id": 468,
+          "original_bytes": 717400,
+          "flora_bytes": 717400,
+          "exact": true,
+          "original_sha256": "66162167beddfae413139036b12320853097d584cdb42d812fd3989a0a28c276",
+          "flora_sha256": "66162167beddfae413139036b12320853097d584cdb42d812fd3989a0a28c276"
+        },
+        {
+          "binding": "vb.1",
+          "resource_id": 318,
+          "original_bytes": 358700,
+          "flora_bytes": 358700,
+          "exact": true,
+          "original_sha256": "8a13b6a36d83e02fcfc6d26ac8537c0e2a2234b548d07731eee2e0dafd8397dc",
+          "flora_sha256": "8a13b6a36d83e02fcfc6d26ac8537c0e2a2234b548d07731eee2e0dafd8397dc"
+        },
+        {
+          "binding": "vb.2",
+          "resource_id": 319,
+          "original_bytes": 573920,
+          "flora_bytes": 573920,
+          "exact": true,
+          "original_sha256": "6eb6b45e3966cf959462e66f145e0db97a6955c927f12adaafb90cc3615358d7",
+          "flora_sha256": "6eb6b45e3966cf959462e66f145e0db97a6955c927f12adaafb90cc3615358d7"
+        },
+        {
+          "binding": "ib",
+          "resource_id": 320,
+          "original_bytes": 143382,
+          "flora_bytes": 143382,
+          "exact": true,
+          "original_sha256": "cab59509117de9fbcc1307586a5a78df3227433785903ecd9cd15d496fbe21f6",
+          "flora_sha256": "cab59509117de9fbcc1307586a5a78df3227433785903ecd9cd15d496fbe21f6"
+        }
+      ],
+      "unique_buffers": 8,
+      "snapshot_output_exact": true
+    },
+    {
+      "index": 1,
+      "event": 5034,
+      "draw_ordinal": 80,
+      "buffer_checks": [
+        {
+          "binding": "vs.cb.0",
+          "resource_id": 360,
+          "original_bytes": 44704,
+          "flora_bytes": 44704,
+          "exact": true,
+          "original_sha256": "21a27bbe03349bbcf0612a4be1bfa7c7db85e4417e40a9029abf9104f570cc57",
+          "flora_sha256": "21a27bbe03349bbcf0612a4be1bfa7c7db85e4417e40a9029abf9104f570cc57"
+        },
+        {
+          "binding": "vs.cb.1",
+          "resource_id": 60,
+          "original_bytes": 528,
+          "flora_bytes": 528,
+          "exact": true,
+          "original_sha256": "929e3117360b0d71b0011d117116163546e1107c0fcf6434fc349dfc08d1fe70",
+          "flora_sha256": "929e3117360b0d71b0011d117116163546e1107c0fcf6434fc349dfc08d1fe70"
+        },
+        {
+          "binding": "vs.cb.2",
+          "resource_id": 361,
+          "original_bytes": 544,
+          "flora_bytes": 544,
+          "exact": true,
+          "original_sha256": "a82c6401c8b371ebaa3929b38f259aa48c0ee51ddc86be5c2cbdfe07bb9316a3",
+          "flora_sha256": "a82c6401c8b371ebaa3929b38f259aa48c0ee51ddc86be5c2cbdfe07bb9316a3"
+        },
+        {
+          "binding": "vs.cb.3",
+          "resource_id": 17,
+          "original_bytes": 368,
+          "flora_bytes": 368,
+          "exact": true,
+          "original_sha256": "4532d17d9167620f954a1a2fbb870f2bd0b983374e42d95ebb3620ae18186a86",
+          "flora_sha256": "4532d17d9167620f954a1a2fbb870f2bd0b983374e42d95ebb3620ae18186a86"
+        },
+        {
+          "binding": "ps.cb.0",
+          "resource_id": 360,
+          "original_bytes": 44704,
+          "flora_bytes": 44704,
+          "exact": true,
+          "original_sha256": "21a27bbe03349bbcf0612a4be1bfa7c7db85e4417e40a9029abf9104f570cc57",
+          "flora_sha256": "21a27bbe03349bbcf0612a4be1bfa7c7db85e4417e40a9029abf9104f570cc57"
+        },
+        {
+          "binding": "ps.cb.1",
+          "resource_id": 60,
+          "original_bytes": 528,
+          "flora_bytes": 528,
+          "exact": true,
+          "original_sha256": "929e3117360b0d71b0011d117116163546e1107c0fcf6434fc349dfc08d1fe70",
+          "flora_sha256": "929e3117360b0d71b0011d117116163546e1107c0fcf6434fc349dfc08d1fe70"
+        },
+        {
+          "binding": "ps.cb.2",
+          "resource_id": 361,
+          "original_bytes": 544,
+          "flora_bytes": 544,
+          "exact": true,
+          "original_sha256": "a82c6401c8b371ebaa3929b38f259aa48c0ee51ddc86be5c2cbdfe07bb9316a3",
+          "flora_sha256": "a82c6401c8b371ebaa3929b38f259aa48c0ee51ddc86be5c2cbdfe07bb9316a3"
+        },
+        {
+          "binding": "vb.0",
+          "resource_id": 820,
+          "original_bytes": 1129920,
+          "flora_bytes": 1129920,
+          "exact": true,
+          "original_sha256": "ebe30ab4c914cfa8b789cf0f0d21edb4398e419f48e11c873a89bd0c546576f9",
+          "flora_sha256": "ebe30ab4c914cfa8b789cf0f0d21edb4398e419f48e11c873a89bd0c546576f9"
+        },
+        {
+          "binding": "vb.1",
+          "resource_id": 790,
+          "original_bytes": 564960,
+          "flora_bytes": 564960,
+          "exact": true,
+          "original_sha256": "cb31ad53a0d55003e1b3a0c748c75a15aaba282640fa304ad70ca718811a1ccd",
+          "flora_sha256": "cb31ad53a0d55003e1b3a0c748c75a15aaba282640fa304ad70ca718811a1ccd"
+        },
+        {
+          "binding": "vb.2",
+          "resource_id": 791,
+          "original_bytes": 903936,
+          "flora_bytes": 903936,
+          "exact": true,
+          "original_sha256": "54368fd2415f1557870ba8d1050973e6b2ee5797a2e8a8ed7a0c71b014299e9d",
+          "flora_sha256": "54368fd2415f1557870ba8d1050973e6b2ee5797a2e8a8ed7a0c71b014299e9d"
+        },
+        {
+          "binding": "ib",
+          "resource_id": 792,
+          "original_bytes": 261822,
+          "flora_bytes": 261822,
+          "exact": true,
+          "original_sha256": "c1c158c27ede38c95300e0f4858a049968df82debd6acecde0157be76f64d002",
+          "flora_sha256": "c1c158c27ede38c95300e0f4858a049968df82debd6acecde0157be76f64d002"
+        }
+      ],
+      "unique_buffers": 8,
+      "snapshot_output_exact": true
+    },
+    {
+      "index": 2,
+      "event": 5040,
+      "draw_ordinal": 80,
+      "buffer_checks": [
+        {
+          "binding": "vs.cb.0",
+          "resource_id": 362,
+          "original_bytes": 44704,
+          "flora_bytes": 44704,
+          "exact": true,
+          "original_sha256": "586c87555746e0e1bdef55c6283793417aa669a0dbd5de251ba97a0a6502e094",
+          "flora_sha256": "586c87555746e0e1bdef55c6283793417aa669a0dbd5de251ba97a0a6502e094"
+        },
+        {
+          "binding": "vs.cb.1",
+          "resource_id": 60,
+          "original_bytes": 528,
+          "flora_bytes": 528,
+          "exact": true,
+          "original_sha256": "4cdbe3c9d101c954922fc0715328c0bcff3d6b1ca9a352414e27f02e683aecdd",
+          "flora_sha256": "4cdbe3c9d101c954922fc0715328c0bcff3d6b1ca9a352414e27f02e683aecdd"
+        },
+        {
+          "binding": "vs.cb.2",
+          "resource_id": 363,
+          "original_bytes": 544,
+          "flora_bytes": 544,
+          "exact": true,
+          "original_sha256": "a82c6401c8b371ebaa3929b38f259aa48c0ee51ddc86be5c2cbdfe07bb9316a3",
+          "flora_sha256": "a82c6401c8b371ebaa3929b38f259aa48c0ee51ddc86be5c2cbdfe07bb9316a3"
+        },
+        {
+          "binding": "vs.cb.3",
+          "resource_id": 17,
+          "original_bytes": 368,
+          "flora_bytes": 368,
+          "exact": true,
+          "original_sha256": "4532d17d9167620f954a1a2fbb870f2bd0b983374e42d95ebb3620ae18186a86",
+          "flora_sha256": "4532d17d9167620f954a1a2fbb870f2bd0b983374e42d95ebb3620ae18186a86"
+        },
+        {
+          "binding": "ps.cb.0",
+          "resource_id": 362,
+          "original_bytes": 44704,
+          "flora_bytes": 44704,
+          "exact": true,
+          "original_sha256": "586c87555746e0e1bdef55c6283793417aa669a0dbd5de251ba97a0a6502e094",
+          "flora_sha256": "586c87555746e0e1bdef55c6283793417aa669a0dbd5de251ba97a0a6502e094"
+        },
+        {
+          "binding": "ps.cb.1",
+          "resource_id": 60,
+          "original_bytes": 528,
+          "flora_bytes": 528,
+          "exact": true,
+          "original_sha256": "4cdbe3c9d101c954922fc0715328c0bcff3d6b1ca9a352414e27f02e683aecdd",
+          "flora_sha256": "4cdbe3c9d101c954922fc0715328c0bcff3d6b1ca9a352414e27f02e683aecdd"
+        },
+        {
+          "binding": "ps.cb.2",
+          "resource_id": 363,
+          "original_bytes": 544,
+          "flora_bytes": 544,
+          "exact": true,
+          "original_sha256": "a82c6401c8b371ebaa3929b38f259aa48c0ee51ddc86be5c2cbdfe07bb9316a3",
+          "flora_sha256": "a82c6401c8b371ebaa3929b38f259aa48c0ee51ddc86be5c2cbdfe07bb9316a3"
+        },
+        {
+          "binding": "vb.0",
+          "resource_id": 895,
+          "original_bytes": 1129920,
+          "flora_bytes": 1129920,
+          "exact": true,
+          "original_sha256": "ac8a5bb8f318e0dac4524edf62316093330b5ea29f94913ddbc38177688cdd35",
+          "flora_sha256": "ac8a5bb8f318e0dac4524edf62316093330b5ea29f94913ddbc38177688cdd35"
+        },
+        {
+          "binding": "vb.1",
+          "resource_id": 792,
+          "original_bytes": 564960,
+          "flora_bytes": 564960,
+          "exact": true,
+          "original_sha256": "cb31ad53a0d55003e1b3a0c748c75a15aaba282640fa304ad70ca718811a1ccd",
+          "flora_sha256": "cb31ad53a0d55003e1b3a0c748c75a15aaba282640fa304ad70ca718811a1ccd"
+        },
+        {
+          "binding": "vb.2",
+          "resource_id": 793,
+          "original_bytes": 903936,
+          "flora_bytes": 903936,
+          "exact": true,
+          "original_sha256": "54368fd2415f1557870ba8d1050973e6b2ee5797a2e8a8ed7a0c71b014299e9d",
+          "flora_sha256": "54368fd2415f1557870ba8d1050973e6b2ee5797a2e8a8ed7a0c71b014299e9d"
+        },
+        {
+          "binding": "ib",
+          "resource_id": 794,
+          "original_bytes": 261822,
+          "flora_bytes": 261822,
+          "exact": true,
+          "original_sha256": "c1c158c27ede38c95300e0f4858a049968df82debd6acecde0157be76f64d002",
+          "flora_sha256": "c1c158c27ede38c95300e0f4858a049968df82debd6acecde0157be76f64d002"
+        }
+      ],
+      "unique_buffers": 8,
+      "snapshot_output_exact": true
+    }
+  ],
+  "texture_results": [
+    {
+      "index": 0,
+      "event": 2288,
+      "draw_ordinal": 73,
+      "texture_checks": [
+        {
+          "binding": "ps.srv.3",
+          "resource_id": 252,
+          "original_bytes": 2796216,
+          "flora_bytes": 2796216,
+          "exact": true,
+          "original_sha256": "cbd42f6881c072c4bce6b8faf0c90e02642c5f2557d84eef7bff8bb30ffce4e8",
+          "flora_sha256": "cbd42f6881c072c4bce6b8faf0c90e02642c5f2557d84eef7bff8bb30ffce4e8"
+        }
+      ],
+      "unique_textures": 1,
+      "snapshot_output_exact": true
+    },
+    {
+      "index": 1,
+      "event": 5034,
+      "draw_ordinal": 80,
+      "texture_checks": [
+        {
+          "binding": "ps.srv.3",
+          "resource_id": 684,
+          "original_bytes": 2796216,
+          "flora_bytes": 2796216,
+          "exact": true,
+          "original_sha256": "005150170cc0dd8104007e52fc311a3a258367fd8e3fac429e940aa0af2c2a0c",
+          "flora_sha256": "005150170cc0dd8104007e52fc311a3a258367fd8e3fac429e940aa0af2c2a0c"
+        }
+      ],
+      "unique_textures": 1,
+      "snapshot_output_exact": true
+    },
+    {
+      "index": 2,
+      "event": 5040,
+      "draw_ordinal": 80,
+      "texture_checks": [
+        {
+          "binding": "ps.srv.3",
+          "resource_id": 686,
+          "original_bytes": 2796216,
+          "flora_bytes": 2796216,
+          "exact": true,
+          "original_sha256": "005150170cc0dd8104007e52fc311a3a258367fd8e3fac429e940aa0af2c2a0c",
+          "flora_sha256": "005150170cc0dd8104007e52fc311a3a258367fd8e3fac429e940aa0af2c2a0c"
+        }
+      ],
+      "unique_textures": 1,
+      "snapshot_output_exact": true
+    }
+  ],
+  "formal_accepted_frames": 0,
+  "required_frames": 6,
+  "production_changes": false,
+  "serial_gpu_checks": true,
+  "limitations": [
+    "Selected draw inputs only, not exhaustive resource verification",
+    "BC1 texture scope; no new MSAA or hidden-state proof",
+    "Both players consume captured records; does not establish original application contents of all intermediate resources"
+  ]
+}
