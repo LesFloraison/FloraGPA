@@ -1,0 +1,376 @@
+{
+  "schema": "FloraGPA capture repeatability baseline 1",
+  "date": "2026-10-14",
+  "source_commit": "5dffe0628e50b856866ae1d5b5e795e55c7596d8",
+  "formal_accepted_frames": 0,
+  "required_frames": 6,
+  "scope": "Diagnostic only; unchanged exact-byte acceptance; no production C++ modifications",
+  "frame_sha256": "e4546f2ee56a7a395c5ae447004e2204df6058b89702dde66479981f37ff2dcb",
+  "cli_sha256": "b9f35372b0e40f86ea37a482f06d6e9f82b9a83edb26e7680048bd8dd809adeb",
+  "raw_evidence": "artifacts\\capture-gf2-determinism-20261014",
+  "probes": [
+    {
+      "label": "before-variable-draw",
+      "command": "texture",
+      "event": 2291,
+      "resource": 380,
+      "typed_format": 10,
+      "sample": 0
+    },
+    {
+      "label": "variable-draw",
+      "command": "texture",
+      "event": 2305,
+      "resource": 380,
+      "typed_format": 10,
+      "sample": 0
+    },
+    {
+      "label": "warp-draw",
+      "command": "texture",
+      "event": 2305,
+      "resource": 380,
+      "typed_format": 10,
+      "sample": 0,
+      "warp": true
+    }
+  ],
+  "repeat_results": [
+    {
+      "label": "before-variable-draw",
+      "different_bytes_vs_first": [
+        0,
+        0
+      ],
+      "runs": [
+        {
+          "path": "before-variable-draw-0\\texture.bin",
+          "bytes": 53747712,
+          "sha256": "8f08b7b719bccccbfe4364eda960438be836a670aa6de5213e844ef48d912885",
+          "report_sha256": "4926d9fdaa38744f3bb4bce3a7d9b34a89801e111c0285e69fe8b5bf0f9c5cfe",
+          "adapter": "NVIDIA GeForce RTX 3070 Laptop GPU"
+        },
+        {
+          "path": "before-variable-draw-1\\texture.bin",
+          "bytes": 53747712,
+          "sha256": "8f08b7b719bccccbfe4364eda960438be836a670aa6de5213e844ef48d912885",
+          "report_sha256": "d517e4720437a287eaad587c8220bfece291d52cb4dd471ba63f8d9f36848b8e",
+          "adapter": "NVIDIA GeForce RTX 3070 Laptop GPU"
+        },
+        {
+          "path": "before-variable-draw-2\\texture.bin",
+          "bytes": 53747712,
+          "sha256": "8f08b7b719bccccbfe4364eda960438be836a670aa6de5213e844ef48d912885",
+          "report_sha256": "69d56565a7726ea02768b24c93b3c27a8cc552f8cc2922ca47f7d6f6fee5746b",
+          "adapter": "NVIDIA GeForce RTX 3070 Laptop GPU"
+        }
+      ]
+    },
+    {
+      "label": "variable-draw",
+      "different_bytes_vs_first": [
+        386,
+        161
+      ],
+      "runs": [
+        {
+          "path": "variable-draw-0\\texture.bin",
+          "bytes": 53747712,
+          "sha256": "4007ababff3a72d188e83b8973f2c4355c099e4328b80ecc480c27fb2a572960",
+          "report_sha256": "5ebd7f764722848c4a50034bbc80a57596de59236ecfa5f73267961324ab3c8c",
+          "adapter": "NVIDIA GeForce RTX 3070 Laptop GPU"
+        },
+        {
+          "path": "variable-draw-1\\texture.bin",
+          "bytes": 53747712,
+          "sha256": "38d316a7270298f89516c7ea7ddfe3ea8002f47fe9fc9d0d81a204aeee0a59a5",
+          "report_sha256": "4f6a46e7f69af2da6328e9cebfa5cd7159ebabd4b6b2ab0c248fd9089806a127",
+          "adapter": "NVIDIA GeForce RTX 3070 Laptop GPU"
+        },
+        {
+          "path": "variable-draw-2\\texture.bin",
+          "bytes": 53747712,
+          "sha256": "b9090b16f73fc19f164a5b4b4632ac4502895eb2701b6e3b49f0b8674cf59753",
+          "report_sha256": "ed9edbe00dda7434fac91d88eab79e44b605a19648d5077ceaf7a2c444fa1701",
+          "adapter": "NVIDIA GeForce RTX 3070 Laptop GPU"
+        }
+      ]
+    },
+    {
+      "label": "warp-draw",
+      "different_bytes_vs_first": [
+        0,
+        0
+      ],
+      "runs": [
+        {
+          "path": "warp-draw-0\\texture.bin",
+          "bytes": 53747712,
+          "sha256": "71a1b23ca795867b014bd4a7a54dcda24feadd5e27fad649cc99fc16f22b3734",
+          "report_sha256": "bf8c0ab042acbf23179be19c3f388805112243ff69ba0f94b2fa32c35b2d4f35",
+          "adapter": "Microsoft Basic Render Driver"
+        },
+        {
+          "path": "warp-draw-1\\texture.bin",
+          "bytes": 53747712,
+          "sha256": "71a1b23ca795867b014bd4a7a54dcda24feadd5e27fad649cc99fc16f22b3734",
+          "report_sha256": "57ab03c4549d2ab9d9bdb752c68173651dd709741393298737cba5abd87eb218",
+          "adapter": "Microsoft Basic Render Driver"
+        },
+        {
+          "path": "warp-draw-2\\texture.bin",
+          "bytes": 53747712,
+          "sha256": "71a1b23ca795867b014bd4a7a54dcda24feadd5e27fad649cc99fc16f22b3734",
+          "report_sha256": "c1627c3d4f7518e15d2041ec7df5f825489d9ce8bf58518fb76291c2a8a12eb9",
+          "adapter": "Microsoft Basic Render Driver"
+        }
+      ]
+    }
+  ],
+  "input_results": [
+    {
+      "label": "adjacent-2291",
+      "bytes": 53747712,
+      "different_bytes_vs_first": [
+        0,
+        0
+      ],
+      "sha256": [
+        "8f08b7b719bccccbfe4364eda960438be836a670aa6de5213e844ef48d912885",
+        "8f08b7b719bccccbfe4364eda960438be836a670aa6de5213e844ef48d912885",
+        "8f08b7b719bccccbfe4364eda960438be836a670aa6de5213e844ef48d912885"
+      ]
+    },
+    {
+      "label": "adjacent-2305",
+      "bytes": 53747712,
+      "different_bytes_vs_first": [
+        842,
+        838
+      ],
+      "sha256": [
+        "cc4daa52750b51261b8accc7b9b69174bae1a59572a4d52d5079f58a3b914420",
+        "5cee2d4a82acff873c2d9a8388234060a66091bd06f22ec61c8c7c61c7b70f7c",
+        "113667703826586aac76875500204c1abbcd98f663c6835a9583e4b9ea07917a"
+      ]
+    },
+    {
+      "label": "input-texture-84",
+      "bytes": 524448,
+      "different_bytes_vs_first": [
+        0
+      ],
+      "sha256": [
+        "bf3bd795d66d8568d3c31f5462e2351aea297d85a9ef839c5dabb9301ceb3fe4",
+        "bf3bd795d66d8568d3c31f5462e2351aea297d85a9ef839c5dabb9301ceb3fe4"
+      ]
+    },
+    {
+      "label": "input-texture-391",
+      "bytes": 33554432,
+      "different_bytes_vs_first": [
+        0
+      ],
+      "sha256": [
+        "2d8510bc3e77a141b68a51077f1a2ce1035d12604f7fa58acd99a1d3ee94be1a",
+        "2d8510bc3e77a141b68a51077f1a2ce1035d12604f7fa58acd99a1d3ee94be1a"
+      ]
+    },
+    {
+      "label": "input-texture-500",
+      "bytes": 8388608,
+      "different_bytes_vs_first": [
+        0
+      ],
+      "sha256": [
+        "4399c0bd5ed87c449f274887d17ec3236aa1239c78c1912c5098a96e3a72b0c3",
+        "4399c0bd5ed87c449f274887d17ec3236aa1239c78c1912c5098a96e3a72b0c3"
+      ]
+    },
+    {
+      "label": "input-texture-268",
+      "bytes": 2796216,
+      "different_bytes_vs_first": [
+        0
+      ],
+      "sha256": [
+        "e34fbe81e955eed6ba8a0f89a483d8758ce701383e83dd7d11e00fbb52b72c51",
+        "e34fbe81e955eed6ba8a0f89a483d8758ce701383e83dd7d11e00fbb52b72c51"
+      ]
+    },
+    {
+      "label": "input-texture-273",
+      "bytes": 5592432,
+      "different_bytes_vs_first": [
+        0
+      ],
+      "sha256": [
+        "e430c3d5592231f5106944d508e088958dbf966b887f2c02a2990f6581cabaef",
+        "e430c3d5592231f5106944d508e088958dbf966b887f2c02a2990f6581cabaef"
+      ]
+    },
+    {
+      "label": "input-texture-284",
+      "bytes": 5592432,
+      "different_bytes_vs_first": [
+        0
+      ],
+      "sha256": [
+        "0cd43884fff781b8043bcdeb60dc37d19d564d51cc4f53d521748f26800812fc",
+        "0cd43884fff781b8043bcdeb60dc37d19d564d51cc4f53d521748f26800812fc"
+      ]
+    },
+    {
+      "label": "input-texture-216",
+      "bytes": 32768,
+      "different_bytes_vs_first": [
+        0
+      ],
+      "sha256": [
+        "0b87d1a379c8adb9ee1aa42770da3e247de3c605a34478fc381ca35fcb8a1a10",
+        "0b87d1a379c8adb9ee1aa42770da3e247de3c605a34478fc381ca35fcb8a1a10"
+      ]
+    },
+    {
+      "label": "input-buffer-119",
+      "bytes": 44704,
+      "different_bytes_vs_first": [
+        0
+      ],
+      "sha256": [
+        "fe64aa56918cf2d97d284b5b82b0afacbfb94b5cd4057b5323dab01f36264230",
+        "fe64aa56918cf2d97d284b5b82b0afacbfb94b5cd4057b5323dab01f36264230"
+      ]
+    },
+    {
+      "label": "input-buffer-59",
+      "bytes": 528,
+      "different_bytes_vs_first": [
+        0
+      ],
+      "sha256": [
+        "5e02db28869304debdd6ed0fd1642790bb7f1713ca618fa28ebd9d8fa4a4dcb0",
+        "5e02db28869304debdd6ed0fd1642790bb7f1713ca618fa28ebd9d8fa4a4dcb0"
+      ]
+    },
+    {
+      "label": "input-buffer-120",
+      "bytes": 544,
+      "different_bytes_vs_first": [
+        0
+      ],
+      "sha256": [
+        "97c92335cc2d9bdd82b026749c0f45eaa61158e3c37eef7ca96c0537be1abc78",
+        "97c92335cc2d9bdd82b026749c0f45eaa61158e3c37eef7ca96c0537be1abc78"
+      ]
+    },
+    {
+      "label": "input-buffer-15",
+      "bytes": 368,
+      "different_bytes_vs_first": [
+        0
+      ],
+      "sha256": [
+        "62c411b50197638f7f95b57be389b12717ba26030d76caad8ab920bff1d1e5b5",
+        "62c411b50197638f7f95b57be389b12717ba26030d76caad8ab920bff1d1e5b5"
+      ]
+    },
+    {
+      "label": "input-buffer-332",
+      "bytes": 130902,
+      "different_bytes_vs_first": [
+        0
+      ],
+      "sha256": [
+        "a572f5cb9f834d81825741de9188a62aee5926216bdae40139c0040b461e3d00",
+        "a572f5cb9f834d81825741de9188a62aee5926216bdae40139c0040b461e3d00"
+      ]
+    },
+    {
+      "label": "input-buffer-471",
+      "bytes": 718200,
+      "different_bytes_vs_first": [
+        0
+      ],
+      "sha256": [
+        "7f324c3fc1c024f199e72b19690e2051876fee0e36ac497497f82e5a4b9ba608",
+        "7f324c3fc1c024f199e72b19690e2051876fee0e36ac497497f82e5a4b9ba608"
+      ]
+    },
+    {
+      "label": "input-buffer-330",
+      "bytes": 359100,
+      "different_bytes_vs_first": [
+        0
+      ],
+      "sha256": [
+        "88760a35bd3c13720923042f1f2a6ab52be3de5a35c8c3ab93859349d6e7a955",
+        "88760a35bd3c13720923042f1f2a6ab52be3de5a35c8c3ab93859349d6e7a955"
+      ]
+    },
+    {
+      "label": "input-buffer-331",
+      "bytes": 574560,
+      "different_bytes_vs_first": [
+        0
+      ],
+      "sha256": [
+        "408ea9fc13f0e7e5805a608f8dd34ed04ef2d34f54a5f3976e774de439603f77",
+        "408ea9fc13f0e7e5805a608f8dd34ed04ef2d34f54a5f3976e774de439603f77"
+      ]
+    },
+    {
+      "label": "warp-2305",
+      "bytes": 53747712,
+      "different_bytes_vs_first": [
+        0
+      ],
+      "sha256": [
+        "71a1b23ca795867b014bd4a7a54dcda24feadd5e27fad649cc99fc16f22b3734",
+        "71a1b23ca795867b014bd4a7a54dcda24feadd5e27fad649cc99fc16f22b3734"
+      ]
+    }
+  ],
+  "evidence_sha256": {
+    "prefix-comparison.json": "3a6735780b73a009cfec249c98e6693fb7211807ac1494667305304b09bd0cb7",
+    "bisect-results.json": "5f5324dd668a6c53c10fb795279c42bdbc25788e861561bd31efe434dad48d28",
+    "input-repeat-results.json": "3f6bbdc575cdd6304c5246b6a45506c4cf3ef206a4931e6a5abf0579f22980f9",
+    "shader-probe-results.json": "a042fe96a97467f22b038e96f9bda6758b9698670ca304a54ddd450d3c227960",
+    "shader-math-probe-results.json": "0c65f5ecb2b7856b1005d1afe8988cc5f911e9393a50f9fc32b1be5836d02a28",
+    "shader-input-bits-results.json": "09f54b0369d8d6cd3b04d6fae98b67d11567800018df96fed296ef79e5c97588",
+    "shader-sampling-bits-results.json": "70c80ff135d59931ac01df822d2a13e9f5e9c6660f2e2b1720782ff099227f3f",
+    "debug-repeat-results.json": "ab365611c6f9ed0836c3872f87299961d9df7765202686e7b1b70a7ddf266246",
+    "draw-inputs.json": "7ec95b4c5c535ae402f43e76301be6461b63f84d4fe03762a615b92d0d30714b",
+    "reproducible/results.json": "a52bd7c8085c948a676152ef5670ffe7e6f633b23a0e9aaade80094608d08ab2",
+    "prefix_probe.py": "cdaee10bfeed5e743bf5c90acc87db3d86d74ec22ddd3f618c9785ddce068e43",
+    "bisect_probe.py": "0e6ed15a91572fb64b7c00c733cc3122310a521ebc6298334612cd34187d2349",
+    "input_probe.py": "3b487b923ee0635231eb68f51ce26fa90d08fe04fcb9e2e24fe5dcc6376bf45c",
+    "shader_probe.py": "ec713e0af6310d9cf38a360290828dfbaf6c92f242136238b20e09007ddd73fa",
+    "shader_math_probe.py": "fc6e6c091cf7c2d6545031a3ccb5708f185b562b9b10f13f88de5964672862ff",
+    "shader_input_bits.py": "d8afe4814ef453575e5ed2fa7bc8901213cbe95748c3a44548c68b5c601d44e6",
+    "shader_sampling_bits.py": "3485ae14db9b9e37a0bd5fa95e9d59fb790572c28c4ebbaa73873a5e0b0859e1",
+    "debug_probe.py": "20bfe7913113841029deea4987c0c0af09d271ebbf57e1e026b1e68a6a2b3471",
+    "shader-509/shader.dxbc": "18669b668cb39b907a02cfec253f74b24d0c09c6ae73d0d65f27455032b2d869",
+    "shader-510/shader.dxbc": "8208195a6263fdfba1261860ff60ab42c14168ec7f9218c4de4824432d532318",
+    "pipeline-2305/replay-pipeline.json": "f36e2ef0543071620f3ea996774653385ff1efe588efdb6e1f2d3eac680750ff",
+    "tool-refusals.json": "b1b9cd946c64c38508904ab0452263394affb323450977afe5baa8a119cd9c96"
+  },
+  "limits": [
+    "No cause established; shader overlays change compiler choices and timing",
+    "Pre-event settled input equality does not exclude execution synchronization issues",
+    "WARP equality is within adapter, not agreement with hardware or captured output",
+    "No new accepted GF2 frame or current-source package proof"
+  ],
+  "tool_refusal_checks": [
+    {
+      "case": "hash-mismatch",
+      "rejected": true,
+      "exit_code": 2
+    },
+    {
+      "case": "existing-output",
+      "rejected": true,
+      "exit_code": 1
+    }
+  ]
+}

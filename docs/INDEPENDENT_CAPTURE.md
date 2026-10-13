@@ -12,6 +12,9 @@ The elevated continuation resolved game-cache access. Colored GF2 start-screen
 preflights replay exactly. Two latest home-scene captures execute in both players
 but fail exact pixel comparison; repeated replays also vary. The equipment-room
 request exceeds the current resource budget. Formal scene acceptance remains 0/6.
+Serial resource probes now locate a variable home-scene prefix at DrawIndexed
+2305; its settled input storage compares exactly, and WARP repeats agree within
+the adapter. The cause remains unresolved; see [CAPTURE_REPEATABILITY.md](CAPTURE_REPEATABILITY.md).
 
 Capture HUD work is tracked separately in [CAPTURE_HUD.md](CAPTURE_HUD.md).
 Protocol v3 adds configurable HUD/hotkeys and Qt settings. Drawing is currently

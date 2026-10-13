@@ -3976,7 +3976,8 @@
       "permission_blocker_resolved": true,
       "original_gui_preflight_files": 1,
       "latest_msaa_preflight": "docs/capture-constant-range-baseline.json: gf2",
-      "home_scene_diagnostic_files": 2
+      "home_scene_diagnostic_files": 2,
+      "repeatability_diagnosis": "docs/capture-repeatability-baseline.json: serial fresh-process raw MSAA sample comparisons locate variability at event 2305 after stable event 2291; seven textures/eight buffers have identical pre-event storage; WARP repetitions agree internally. Cause unresolved, no threshold relaxation or accepted frame."
     },
     "deferred_history": "Capture-owned bounded CPU compilation journals, immutable Finish generations and actual immediate execution expansion with repeated calls; native resource leases are separate from CPU histories",
     "deferred_mappings": "Capture-owned Map HRESULT/type/flags/pitches and Unmap payloads; borrowed pointers excluded from immutable lists; NO_OVERWRITE dependencies and deferred encoding remain unresolved",
