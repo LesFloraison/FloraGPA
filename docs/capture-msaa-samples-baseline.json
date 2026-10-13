@@ -239,7 +239,67 @@
     "new_dual_player_run": false,
     "new_golden_run": false,
     "encoder_replay_shared_format_changed": false,
-    "clean_source_package": "Earlier color revision 1891553 only; depth extension not yet source-package validated",
+    "clean_source_package": {
+      "commit": "a66559397776265ab57bd3856cd4c30db514b164",
+      "passed": true,
+      "steps": [
+        {
+          "name": "configure",
+          "exit_code": 0
+        },
+        {
+          "name": "build",
+          "exit_code": 0
+        },
+        {
+          "name": "ctest",
+          "exit_code": 0
+        },
+        {
+          "name": "package",
+          "exit_code": 0
+        },
+        {
+          "name": "package-control",
+          "exit_code": 0
+        },
+        {
+          "name": "package-live-control",
+          "exit_code": 0
+        }
+      ],
+      "ctest": 87,
+      "no_qt_discovery": true,
+      "system_path_only": true,
+      "packaged_launches": 24,
+      "packaged_files": 120,
+      "scope": "Committed native depth/stencil and color readback fixtures; packaged existing single-sample profiles validate independent delivery/control, not MSAA frame encoding or new dual-player pixels",
+      "forbidden_module_audit": [
+        "Qt",
+        "Python",
+        "RenderDoc",
+        "GPA",
+        "FloraReplay",
+        "FloraCore"
+      ],
+      "package_hashes": {
+        "dependencies.json": "ddae10be48d1c3ec765ddb4c5b44ff7e8aba911f49cc80b6586d57b2c75267a5",
+        "FloraCapture.exe": "cef288b2f90c242dbbb5ba91ea68cb057c96ef62da03e7a721e19d035b62d512",
+        "FloraCaptureRuntime.dll": "5ece799b357e08ea817a9ce8b24e3323038eb2dbe04427f0a457980791c149e7",
+        "manifest.json": "f59bd43116e0f032724922ea013376cfee9b93eb26185c0febd913a3e86b13f1",
+        "msvcp140.dll": "0f885b509a685d2bbfa652fed26b5fb31d88fbdab0a978c641d1c7b8aa460aa9",
+        "vcruntime140.dll": "d5e4d9a3e835fa679450145d6a7d94e36573a509317111904d9b3712c30d9066",
+        "vcruntime140_1.dll": "1f2d41c4aa5db0bc33ebf7b66d72943a817d7ce6cbe880502a9403823633093f",
+        "licenses/detours-MIT.txt": "f854ae8aabc0404652b48a2b3bf7f21ec174c69d73f5596934c20884eb0639ef",
+        "licenses/nlohmann-json-MIT.txt": "46a65cffd1ea955132d95a8dd921640714a8d6b537d2e4e482d31145ae95b603"
+      },
+      "evidence_sha256": {
+        "artifacts/capture-msaa-depth-source-a665593/validation.json": "364bfd693b0b85aa0a169def81b986b1522d2aa24d7c8885099f3e6f1160de2a",
+        "artifacts/capture-msaa-depth-source-a665593/ctest.log": "48a38b47738ab82e0c6db18ba4b69a9fa25ccb082a6cb0fcbcda65684a742f7f",
+        "artifacts/capture-msaa-depth-source-a665593/packaged-live/results.json": "50f340cc252321ec71fc0196604469cdfd4fbc09f5f118dcc5e506444a10c75f",
+        "artifacts/capture-msaa-depth-source-a665593/source.zip": "b95da0f686483f6d8b793ef2169d9c53984282bea474c1a0ce40ee786c98b858"
+      }
+    },
     "initial_failures": [
       "focused.log: native hardware D16 half-value disproved universal CPU round-up oracle; replaced with independent exact native storage reference, no comparison tolerance",
       "focused.log: fixture asserted lifetime before releasing application DSV references; release order corrected before Flush",

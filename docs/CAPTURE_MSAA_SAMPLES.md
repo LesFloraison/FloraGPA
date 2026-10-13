@@ -132,7 +132,13 @@ depth bit pattern, device, sample quality or count.
 Reproduce with target `FloraCaptureMsaaDepthTests` and
 `ctest --preset capture-only-release -R '^capture_msaa_depth'`. Raw logs remain
 under `artifacts/capture-msaa-depth-20261013`; hashes and regression results are
-in the baseline's `depth_stencil_readback` entry. The earlier clean source/package
-result applies to color revision `1891553`, not this extension. Production
+in the baseline's `depth_stencil_readback` entry. Committed depth revision
+`a665593` also passes all six clean source/build/test/package/control steps and
+87 serial CTests. With a System32-only PATH and no Qt discovery, 24 packaged
+launches publish 120 existing-profile files; runtime inventories contain no Qt,
+Python, RenderDoc, GPA, FloraReplay or FloraCore. These remain single-sample
+delivery/control checks, not MSAA encoded frames. The raw source-package run is
+`artifacts/capture-msaa-depth-source-a665593`, with hashes in the baseline.
+Production
 snapshot/encoding, Replay and shared format are unchanged; formal GF2 remains
 **0/6**, with no new dual-player or golden-frame result.
