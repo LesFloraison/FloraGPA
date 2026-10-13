@@ -1,0 +1,184 @@
+{
+  "schema": "FloraGPA capture MSAA diagnosis baseline 1",
+  "date": "2026-10-14",
+  "source_parent": "e60c2aeebe0b5cde2de1496f369522db9433c942",
+  "formal_accepted_frames": 0,
+  "required_frames": 6,
+  "production_changes": false,
+  "scope": "Diagnostic only; exact-byte acceptance unchanged",
+  "raw_evidence": "artifacts/capture-gf2-msaa-diagnosis-20261014",
+  "input_sha256": "e4546f2ee56a7a395c5ae447004e2204df6058b89702dde66479981f37ff2dcb",
+  "binaries": {
+    "FloraMsaaIntegerOutputProbe.exe": "968c51b04a99439328ec2c63bbe36b16ed2195cdd0f7780e28234a0a207b5945",
+    "FloraReplayMsaaProbe.exe": "6df148f18292a29c20e36cbbdafd6a2315131f29e0e63a245a1b1e3883f056ba"
+  },
+  "independent_cpu_oracle": {
+    "sample_exports": 72,
+    "processes": 2,
+    "different_words": 0,
+    "samples": [
+      2,
+      4
+    ],
+    "qualities": [
+      0,
+      4294967295
+    ],
+    "renders_per_combination": 3
+  },
+  "marker_results": [
+    {
+      "label": "constant",
+      "repeat": 0,
+      "marker_pixels": 952720,
+      "fractional_marked_words": 0,
+      "changed_words": 0,
+      "sha256": "d7cab03a975916c167e7f701e5adba02e2340d565c76160e8a63068cd8fbcef3"
+    },
+    {
+      "label": "constant",
+      "repeat": 1,
+      "marker_pixels": 952720,
+      "fractional_marked_words": 0,
+      "changed_words": 0,
+      "sha256": "d7cab03a975916c167e7f701e5adba02e2340d565c76160e8a63068cd8fbcef3"
+    },
+    {
+      "label": "constant",
+      "repeat": 2,
+      "marker_pixels": 952720,
+      "fractional_marked_words": 0,
+      "changed_words": 0,
+      "sha256": "d7cab03a975916c167e7f701e5adba02e2340d565c76160e8a63068cd8fbcef3"
+    },
+    {
+      "label": "normal-marker",
+      "repeat": 0,
+      "marker_pixels": 952720,
+      "fractional_marked_words": 28,
+      "changed_words": 0,
+      "sha256": "f8ddc40cc678b711738d58e0965b546b8997f4ff792c37f53cd447a6627ba43c"
+    },
+    {
+      "label": "normal-marker",
+      "repeat": 1,
+      "marker_pixels": 952720,
+      "fractional_marked_words": 27,
+      "changed_words": 6,
+      "sha256": "8c61c06821108c7916c0bca7b8e1ccc66040e2ba9d7b7563b69f6f7beb95ff31"
+    },
+    {
+      "label": "normal-marker",
+      "repeat": 2,
+      "marker_pixels": 952720,
+      "fractional_marked_words": 27,
+      "changed_words": 6,
+      "sha256": "8c61c06821108c7916c0bca7b8e1ccc66040e2ba9d7b7563b69f6f7beb95ff31"
+    }
+  ],
+  "same_execution": [
+    {
+      "file": "float.bin",
+      "bytes": 53747712,
+      "sha256": "2ecb3df56635a93e4cffe9cb080eadfae10a911beacbb3fe61a98a858da1671e",
+      "different_words": 0,
+      "marker_pixels": 952720,
+      "fractional_marked_words": 27
+    },
+    {
+      "file": "integer.bin",
+      "bytes": 53747712,
+      "sha256": "2ecb3df56635a93e4cffe9cb080eadfae10a911beacbb3fe61a98a858da1671e",
+      "different_words": 0,
+      "marker_pixels": 952720,
+      "fractional_marked_words": 27
+    },
+    {
+      "file": "native-first.bin",
+      "bytes": 53747712,
+      "sha256": "2ecb3df56635a93e4cffe9cb080eadfae10a911beacbb3fe61a98a858da1671e",
+      "different_words": 0,
+      "marker_pixels": 952720,
+      "fractional_marked_words": 27
+    },
+    {
+      "file": "native-last.bin",
+      "bytes": 53747712,
+      "sha256": "2ecb3df56635a93e4cffe9cb080eadfae10a911beacbb3fe61a98a858da1671e",
+      "different_words": 0,
+      "marker_pixels": 952720,
+      "fractional_marked_words": 27
+    }
+  ],
+  "same_execution_shader_sha256": "8f307837229b57a59dcfd0eb5f0f3d8f75a6432c134326068a741b20f934b55c",
+  "refusal_checks": [
+    "refuse-existing-replay",
+    "refuse-existing-oracle",
+    "refuse-invalid-sample"
+  ],
+  "ctest": {
+    "passed": 4,
+    "failed": 0,
+    "tests": [
+      "capture_boundaries",
+      "format_container",
+      "format_codecs",
+      "format_writer"
+    ]
+  },
+  "conclusion": "Selected FLOAT and UINT readback paths agree within each execution; underlying GF2 variability remains unresolved. No accepted capture, tolerance relaxation or production fix.",
+  "evidence": {
+    "manifest.json": {
+      "bytes": 40304,
+      "sha256": "c5e413603ecad252210233452b333881946e4041cf1c6170fd015e58a63cec26"
+    },
+    "final-validation.json": {
+      "bytes": 15302,
+      "sha256": "4a67954c207e03afd1d84923a04d9e69b7f08cc00930437c137e727c6f98b895"
+    },
+    "driver.json": {
+      "bytes": 294,
+      "sha256": "e320b449832fedfd23d30881a7669a4da14ae929f95685de00261f976e175d84"
+    },
+    "marker-results.json": {
+      "bytes": 1383,
+      "sha256": "c7c7b7b4ded6bec35037a61c6b97feded9fb876a798090407b614605dfd19ce3"
+    },
+    "same-execution/report.json": {
+      "bytes": 767,
+      "sha256": "3637ba524c2129ae2be37718a907dc6496617d7586f88f4031945fb559e551a8"
+    },
+    "final-same-execution/report.json": {
+      "bytes": 767,
+      "sha256": "3637ba524c2129ae2be37718a907dc6496617d7586f88f4031945fb559e551a8"
+    },
+    "marker-pipeline-valid/replay-pipeline.json": {
+      "bytes": 263163,
+      "sha256": "0f5f39ea5cfdf3c54017a3851f650973e16cb9c19ce50a244e4de445fc2fc25e"
+    },
+    "rdc-marker/report.json": {
+      "bytes": 12867,
+      "sha256": "9b4430e8350cc6a575804e7ae9f3da680c0c29cd68f47c0bd32bba4d6d546346"
+    },
+    "rdc-texture/result.json": {
+      "bytes": 84314,
+      "sha256": "78ac2976ee2624d3d174a0c8ade1c4e6ac8659f4e777c751e893364d007cfb13"
+    },
+    "history-847-0/result.json": {
+      "bytes": 103607,
+      "sha256": "168dd06d2d6d1400db6af24563ecd93da8b98633e2427bbd5a57a84fb5acdff3"
+    },
+    "final-build.log": {
+      "bytes": 758,
+      "sha256": "0aa279b3bbb25848ac5efab7bcbd27ad83a8a2ad29180b7cd933e3befb505938"
+    },
+    "ctest.log": {
+      "bytes": 630,
+      "sha256": "f79eb6ea18497aacb577db838969f3c4c625a81ef4d4aac1a75e601446fe2e56"
+    }
+  },
+  "source_sha256": {
+    "tools\\native\\msaa_integer_output_probe.cpp": "a43b8a572336e529d50578f2684eab0dcfc289bb95b3f36776d2d25b029f0787",
+    "tools\\native\\replay_msaa_probe.cpp": "f0c44116337ff94bf26763d4cc0ec58c32b3d25c86f404c7c5a19d4fb8a858e7"
+  }
+}

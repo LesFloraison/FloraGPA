@@ -115,3 +115,10 @@ This older scene is not the new home-scene capture and does not resolve its
 failure. Build succeeded after adding the initially missing JSON include; the
 original failed build log is retained. Four boundary/format CTests also passed.
 The baseline stores both experiments and their evidence hashes.
+
+## MSAA readback controls
+
+The [subsequent MSAA diagnosis](CAPTURE_MSAA_DIAGNOSIS.md) adds an independent
+CPU-oracle fixture and same-execution FLOAT/UINT readback comparisons. Both
+paths reproduce the selected GF2 diagnostic anomaly; neither supplies an
+exact-pixel fix or an accepted frame. Production behavior remains unchanged.
