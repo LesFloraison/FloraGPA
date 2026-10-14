@@ -1,0 +1,123 @@
+{
+  "schema": 1,
+  "date": "2026-10-14",
+  "source_parent_commit": "27036f9b994aa30f805beb6933bf218abd8755be",
+  "source_hashes": {
+    "tools/gpa_shader_isa_audit.py": "c4d89aa4a6f25554aa2ad6c60a4bf5c7b9a9fd77a11d6c8ea48909965f4c9712",
+    "docs/CAPTURE_GF2_ISA_AUDIT.md": "717d93ea7b24a02c6489fc491eb4e9ae4dd45a86b2553759458aa825848cb9ce"
+  },
+  "input": {
+    "file": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-resolve-current-20261014\\launch-2\\session\\frame-d3b245ec-09d2-4888-91af-5032f19ddbd6.gpa_frame",
+    "sha256": "9bef49cd3f807ae3796ece91d35960604ce4158d0736acb5d545efa346aafacf"
+  },
+  "summary": {
+    "schema": 1,
+    "current_gate_passed": false,
+    "production_fix": false,
+    "runs": [
+      {
+        "directory": "run-0",
+        "pid": 2472,
+        "exit_code": 0,
+        "requests": 4,
+        "report_sha256": "34b6b274b60ce5b6a65620d2a35e6c62c3a9e03d413a3ff5c8288c45901f0d56",
+        "command": [
+          "--file_to_open",
+          "C:/Users/Myrrr/FloraGPA-evidence/capture-gf2-resolve-current-20261014/launch-2/session/frame-d3b245ec-09d2-4888-91af-5032f19ddbd6.gpa_frame",
+          "--py_plugin",
+          "flora_shader_audit",
+          "--py_arg",
+          "C:/Users/Myrrr/FloraGPA-evidence/capture-gf2-isa-audit-20261014/run-0",
+          "--output_log",
+          "C:/Users/Myrrr/FloraGPA-evidence/capture-gf2-isa-audit-20261014/run-0.log"
+        ]
+      },
+      {
+        "directory": "run-1",
+        "pid": 13788,
+        "exit_code": 0,
+        "requests": 4,
+        "report_sha256": "12e585c48184481ee805b840dd62a4aa267e197f746d3cc4224f7d677c3095f3",
+        "command": [
+          "--file_to_open",
+          "C:/Users/Myrrr/FloraGPA-evidence/capture-gf2-resolve-current-20261014/launch-2/session/frame-d3b245ec-09d2-4888-91af-5032f19ddbd6.gpa_frame",
+          "--py_plugin",
+          "flora_shader_audit",
+          "--py_arg",
+          "C:/Users/Myrrr/FloraGPA-evidence/capture-gf2-isa-audit-20261014/run-1",
+          "--output_log",
+          "C:/Users/Myrrr/FloraGPA-evidence/capture-gf2-isa-audit-20261014/run-1.log"
+        ]
+      }
+    ],
+    "shader_assembly_sha256": {
+      "vertex": "09dae96e427683913be9671acafcb06a066be506c110f46c8a3608c2ff7927b4",
+      "pixel": "06c6fa935592bef2c5ccfb465db35eb859cc75b3bdc94e6df9130cf1deb79c01"
+    },
+    "sources": {
+      "pixel": {
+        "sha256": "dc9bca5c2d7bd649cf06b2575c02829fcac051f11df822fbc0aca479ce8093a5",
+        "utf8_bytes": 86917,
+        "lines": 890
+      },
+      "vertex": {
+        "sha256": "3c9c3aa5c5ad33ab855796d49305aee0e12300b599f199d3be189f4098ce4796",
+        "utf8_bytes": 21871,
+        "lines": 228
+      }
+    },
+    "mapping": {
+      "captured_event": 5651,
+      "original_event": {
+        "id": 1761,
+        "name": "DrawIndexed",
+        "is_event": true,
+        "arguments": [
+          {
+            "name": "IndexCount",
+            "type": "UINT",
+            "value": 7401
+          },
+          {
+            "name": "StartIndexLocation",
+            "type": "UINT",
+            "value": 0
+          },
+          {
+            "name": "BaseVertexLocation",
+            "type": "INT",
+            "value": 0
+          }
+        ]
+      },
+      "program": {
+        "id": 57,
+        "stages": [
+          "vertex",
+          "pixel"
+        ]
+      }
+    },
+    "identities": {
+      "C:\\Users\\Myrrr\\Documents\\GPA\\python_plugins\\flora_shader_audit\\__init__.py": "c4d89aa4a6f25554aa2ad6c60a4bf5c7b9a9fd77a11d6c8ea48909965f4c9712",
+      "C:\\Program Files\\IntelSWTools\\GPA\\FrameAnalyzer.exe": "f28314fddc16750ce0b041bd0edd5dff980116803cd585349f93c89a59087280",
+      "C:\\Program Files\\IntelSWTools\\GPA\\python_plugins\\plugin_api\\program.py": "da29915f2e4397df06c64b84b08ece18e1a81b7d76ee195492b2e25b3349113f",
+      "C:\\Program Files\\IntelSWTools\\GPA\\dx11_player.dll": "39061ff329e4a32d0c8375ce9ee15e2017bccab0593943b962a860e11723d38b"
+    },
+    "limitations": "Original GPA ISA exports only; no measurement of the machine code executed by Flora or the game, no simultaneous output or fragment measurement, and no production fix."
+  },
+  "validation": {
+    "fresh_processes": 2,
+    "successful_isa_requests": 8,
+    "shader_pairs_matched": 2,
+    "full_ordered_actions_matched": 606,
+    "sources_equal_across_programs_and_processes": true,
+    "python_source_parsed": true
+  },
+  "replay_sha256": "215ebafed657953f0671c32a0948e12c8c965437a3eaa33e6d38aedcff5e2ddc",
+  "raw": {
+    "root": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-isa-audit-20261014",
+    "files": 23,
+    "manifest_sha256": "8981bcd08774d1a1f9cfade3b0991744d74a49ae02c1561c4010dd4d74ed9843"
+  }
+}

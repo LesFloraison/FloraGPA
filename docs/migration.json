@@ -4507,6 +4507,15 @@
       "current_gate_passed": false,
       "production_fix": false,
       "limits": "Both known color outcomes use identical observed module paths, feature level and flags. Module disk hashes do not identify generated shader ISA or driver internal decisions. The tested public IGC environment dump route yielded no artifacts on this Windows driver. No production fix; the formal six-frame gate remains failed."
+    },
+    "gf2_isa_audit": {
+      "evidence": "docs/CAPTURE_GF2_ISA_AUDIT.md",
+      "baseline": "docs/capture-gf2-isa-audit-baseline.json",
+      "fresh_processes": 2,
+      "successful_isa_requests": 8,
+      "current_gate_passed": false,
+      "production_fix": false,
+      "limits": "Original GPA ISA exports only; no measurement of the machine code executed by Flora or the game, no simultaneous output or fragment measurement, and no production fix."
     }
   }
 }
