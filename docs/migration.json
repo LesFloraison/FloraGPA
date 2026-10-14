@@ -4432,6 +4432,27 @@
       "current_gate_passed": false,
       "production_fix": false,
       "limits": "Mirror/count instrumentation stabilizes both half/float target runs. Original shader with debug layer still varies. One surviving write per sample applies only to modified executions; original fragment histories and full-precision shader outputs remain unproven. Formal six-frame gate remains failed."
+    },
+    "gf2_count_checkpoint_diagnosis": {
+      "evidence": "docs/CAPTURE_GF2_COUNT_CHECKPOINT.md",
+      "baseline": "docs/capture-gf2-count-checkpoint-baseline.json",
+      "count_only_executions": 20,
+      "count_only_matching": 20,
+      "shader_recreation_executions": 20,
+      "shader_recreation_matching": 3,
+      "binding_only_executions": 10,
+      "binding_only_matching": 1,
+      "baseline_executions": 10,
+      "baseline_matching": 3,
+      "exploratory_executions": 1,
+      "native_cases": 16,
+      "native_exact_texels": 504,
+      "native_refusals": 96,
+      "probe_cases": 28,
+      "probe_refusals": 22,
+      "current_gate_passed": false,
+      "production_fix": false,
+      "limits": "Count-only output stabilizes instrumented runs; original shader recreation and binding-only controls retain both outcomes. The repack source is already canonical and remains byte-identical, so this is not an independent metadata control. Original fragment histories and the effect of added output on execution remain unresolved; formal six-frame gate failed."
     }
   }
 }

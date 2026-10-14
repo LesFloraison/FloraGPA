@@ -1,0 +1,846 @@
+{
+  "schema": 1,
+  "date": "2026-10-14",
+  "source_parent_commit": "c61682f987b321c0ee154fe21d507c9349fb6293",
+  "source_hashes": {
+    "tools/native/fragment_checkpoint.h": "5c52b6352d23bc078aa1218ded5b56543cf278a27aa693663b16440ca8cc1dc6",
+    "tools/native/fragment_checkpoint_tests.cpp": "c61c8d99617f600dfc0a9602aecd0cc2d80bdcb6012791c9431d33270feb6428",
+    "tools/native/replay_texel_probe.cpp": "8adcda613e1e667ff5faf7b3cc4e052dc50de918f58d872dffe2687d078b6072",
+    "tools/validate_capture_texel_probe.py": "ab8e76368623ce691f758edd8e414f55a358331b4baf76c1d300e5d761cb2e08",
+    "docs/CAPTURE_GF2_COUNT_CHECKPOINT.md": "b0933d26e8fb934023ba53d842db3f6003f34cd8aa337c24b195ead3cda47e49"
+  },
+  "current_gate_passed": false,
+  "production_changed": false,
+  "input": {
+    "file": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-resolve-current-20261014\\launch-2\\session\\frame-d3b245ec-09d2-4888-91af-5032f19ddbd6.gpa_frame",
+    "sha256": "9bef49cd3f807ae3796ece91d35960604ce4158d0736acb5d545efa346aafacf",
+    "event": 5651,
+    "resource": 411,
+    "layer": 0,
+    "pixel": [
+      1596,
+      1519
+    ]
+  },
+  "groups": [
+    {
+      "name": "exploratory",
+      "binary": "FloraReplayTexelProbe-initial.exe",
+      "directories": [
+        "count-0"
+      ],
+      "binary_sha256": "cdf62de03675ec494c380d0a8d5a7d68b1873e8a7c7a4a58a9262dfa1a68416e"
+    },
+    {
+      "name": "controls",
+      "binary": "FloraReplayTexelProbe-controls.exe",
+      "directories": [
+        "fragment-count-0",
+        "shader-recreate-0",
+        "shader-repack-0",
+        "pipeline-debug-0",
+        "fragment-count-1",
+        "shader-recreate-1",
+        "shader-repack-1",
+        "pipeline-debug-1",
+        "fragment-count-2",
+        "shader-recreate-2",
+        "shader-repack-2",
+        "pipeline-debug-2",
+        "fragment-count-3",
+        "shader-recreate-3",
+        "shader-repack-3",
+        "pipeline-debug-3",
+        "fragment-count-4",
+        "shader-recreate-4",
+        "shader-repack-4",
+        "pipeline-debug-4",
+        "fragment-count-5",
+        "shader-recreate-5",
+        "shader-repack-5",
+        "pipeline-debug-5",
+        "fragment-count-6",
+        "shader-recreate-6",
+        "shader-repack-6",
+        "pipeline-debug-6",
+        "fragment-count-7",
+        "shader-recreate-7",
+        "shader-repack-7",
+        "pipeline-debug-7",
+        "fragment-count-8",
+        "shader-recreate-8",
+        "shader-repack-8",
+        "pipeline-debug-8",
+        "fragment-count-9",
+        "shader-recreate-9",
+        "shader-repack-9",
+        "pipeline-debug-9"
+      ],
+      "binary_sha256": "5e8bd07093b61a67defd8683c17b921f3f1c4724d2a1e2a21a62a1d088982a8b"
+    },
+    {
+      "name": "attachment_pair",
+      "binary": "FloraReplayTexelProbe.exe",
+      "directories": [
+        "paired-fragment-binding-0",
+        "paired-fragment-count-0",
+        "paired-fragment-binding-1",
+        "paired-fragment-count-1",
+        "paired-fragment-binding-2",
+        "paired-fragment-count-2",
+        "paired-fragment-binding-3",
+        "paired-fragment-count-3",
+        "paired-fragment-binding-4",
+        "paired-fragment-count-4",
+        "paired-fragment-binding-5",
+        "paired-fragment-count-5",
+        "paired-fragment-binding-6",
+        "paired-fragment-count-6",
+        "paired-fragment-binding-7",
+        "paired-fragment-count-7",
+        "paired-fragment-binding-8",
+        "paired-fragment-count-8",
+        "paired-fragment-binding-9",
+        "paired-fragment-count-9"
+      ],
+      "binary_sha256": "9b414a402981cdd06a18a972e4c0b21dff7675d97a9c1a79919eacf59ca03448"
+    }
+  ],
+  "totals": {
+    "exploratory/fragment-count": {
+      "matching": 1,
+      "alternate": 0
+    },
+    "controls/fragment-count": {
+      "matching": 10,
+      "alternate": 0
+    },
+    "controls/shader-recreate": {
+      "matching": 3,
+      "alternate": 7
+    },
+    "controls/shader-repack": {
+      "matching": 0,
+      "alternate": 10
+    },
+    "controls/pipeline-debug": {
+      "matching": 3,
+      "alternate": 7
+    },
+    "attachment_pair/fragment-binding": {
+      "matching": 1,
+      "alternate": 9
+    },
+    "attachment_pair/fragment-count": {
+      "matching": 10,
+      "alternate": 0
+    }
+  },
+  "runs": [
+    {
+      "group": "exploratory",
+      "directory": "count-0",
+      "mode": "fragment-count",
+      "modified_draw": true,
+      "rgba_sha256": "d5ffe329528ecabc09517514d1b41c5a8d305210480ad9454c732051a697d0e7",
+      "capture_matching": true,
+      "report_sha256": "b2b2aecedae086425395193b4f356b11098219f6cf24fbb79cad5fdf9d112c82",
+      "png_sha256": "488fe73cd858012a8973a48eb2f9139f68857ce1668ef013885936f5cb45369b"
+    },
+    {
+      "group": "controls",
+      "directory": "fragment-count-0",
+      "mode": "fragment-count",
+      "modified_draw": true,
+      "rgba_sha256": "d5ffe329528ecabc09517514d1b41c5a8d305210480ad9454c732051a697d0e7",
+      "capture_matching": true,
+      "report_sha256": "b2b2aecedae086425395193b4f356b11098219f6cf24fbb79cad5fdf9d112c82",
+      "png_sha256": "488fe73cd858012a8973a48eb2f9139f68857ce1668ef013885936f5cb45369b"
+    },
+    {
+      "group": "controls",
+      "directory": "shader-recreate-0",
+      "mode": "shader-recreate",
+      "modified_draw": true,
+      "rgba_sha256": "b548683168d47d12344c2a976155eb716c4a14d135dcbb8c9df542b0abd0caa1",
+      "capture_matching": false,
+      "report_sha256": "9b569ac8babc88338e57569329aeccc951a1f8d7606186ac1c7b4d6179b6b47c",
+      "png_sha256": "0e119453793730e1935d5813cd759c69091d9e21ee371235b5214f0127b656fd"
+    },
+    {
+      "group": "controls",
+      "directory": "shader-repack-0",
+      "mode": "shader-repack",
+      "modified_draw": true,
+      "rgba_sha256": "b548683168d47d12344c2a976155eb716c4a14d135dcbb8c9df542b0abd0caa1",
+      "capture_matching": false,
+      "report_sha256": "d4468c30b6eb2c3161e47ff21a174d6bf2a2b786c8d05e279c956d393ce81180",
+      "png_sha256": "0e119453793730e1935d5813cd759c69091d9e21ee371235b5214f0127b656fd"
+    },
+    {
+      "group": "controls",
+      "directory": "pipeline-debug-0",
+      "mode": "pipeline-debug",
+      "modified_draw": false,
+      "rgba_sha256": "b548683168d47d12344c2a976155eb716c4a14d135dcbb8c9df542b0abd0caa1",
+      "capture_matching": false,
+      "report_sha256": "960640e142120704a98ab22a909468be63355677991a70d1469bfbb8979f535b",
+      "png_sha256": "0e119453793730e1935d5813cd759c69091d9e21ee371235b5214f0127b656fd"
+    },
+    {
+      "group": "controls",
+      "directory": "fragment-count-1",
+      "mode": "fragment-count",
+      "modified_draw": true,
+      "rgba_sha256": "d5ffe329528ecabc09517514d1b41c5a8d305210480ad9454c732051a697d0e7",
+      "capture_matching": true,
+      "report_sha256": "b2b2aecedae086425395193b4f356b11098219f6cf24fbb79cad5fdf9d112c82",
+      "png_sha256": "488fe73cd858012a8973a48eb2f9139f68857ce1668ef013885936f5cb45369b"
+    },
+    {
+      "group": "controls",
+      "directory": "shader-recreate-1",
+      "mode": "shader-recreate",
+      "modified_draw": true,
+      "rgba_sha256": "b548683168d47d12344c2a976155eb716c4a14d135dcbb8c9df542b0abd0caa1",
+      "capture_matching": false,
+      "report_sha256": "9b569ac8babc88338e57569329aeccc951a1f8d7606186ac1c7b4d6179b6b47c",
+      "png_sha256": "0e119453793730e1935d5813cd759c69091d9e21ee371235b5214f0127b656fd"
+    },
+    {
+      "group": "controls",
+      "directory": "shader-repack-1",
+      "mode": "shader-repack",
+      "modified_draw": true,
+      "rgba_sha256": "b548683168d47d12344c2a976155eb716c4a14d135dcbb8c9df542b0abd0caa1",
+      "capture_matching": false,
+      "report_sha256": "d4468c30b6eb2c3161e47ff21a174d6bf2a2b786c8d05e279c956d393ce81180",
+      "png_sha256": "0e119453793730e1935d5813cd759c69091d9e21ee371235b5214f0127b656fd"
+    },
+    {
+      "group": "controls",
+      "directory": "pipeline-debug-1",
+      "mode": "pipeline-debug",
+      "modified_draw": false,
+      "rgba_sha256": "d5ffe329528ecabc09517514d1b41c5a8d305210480ad9454c732051a697d0e7",
+      "capture_matching": true,
+      "report_sha256": "97cd053abfbff03e74b22ed65a6077bacd921a7d90b800e98b938e1a44ead86f",
+      "png_sha256": "488fe73cd858012a8973a48eb2f9139f68857ce1668ef013885936f5cb45369b"
+    },
+    {
+      "group": "controls",
+      "directory": "fragment-count-2",
+      "mode": "fragment-count",
+      "modified_draw": true,
+      "rgba_sha256": "d5ffe329528ecabc09517514d1b41c5a8d305210480ad9454c732051a697d0e7",
+      "capture_matching": true,
+      "report_sha256": "b2b2aecedae086425395193b4f356b11098219f6cf24fbb79cad5fdf9d112c82",
+      "png_sha256": "488fe73cd858012a8973a48eb2f9139f68857ce1668ef013885936f5cb45369b"
+    },
+    {
+      "group": "controls",
+      "directory": "shader-recreate-2",
+      "mode": "shader-recreate",
+      "modified_draw": true,
+      "rgba_sha256": "d5ffe329528ecabc09517514d1b41c5a8d305210480ad9454c732051a697d0e7",
+      "capture_matching": true,
+      "report_sha256": "db9df73111c73d94a4e79c70ffdb9bda40236351418373b0f4c4ba1074194262",
+      "png_sha256": "488fe73cd858012a8973a48eb2f9139f68857ce1668ef013885936f5cb45369b"
+    },
+    {
+      "group": "controls",
+      "directory": "shader-repack-2",
+      "mode": "shader-repack",
+      "modified_draw": true,
+      "rgba_sha256": "b548683168d47d12344c2a976155eb716c4a14d135dcbb8c9df542b0abd0caa1",
+      "capture_matching": false,
+      "report_sha256": "d4468c30b6eb2c3161e47ff21a174d6bf2a2b786c8d05e279c956d393ce81180",
+      "png_sha256": "0e119453793730e1935d5813cd759c69091d9e21ee371235b5214f0127b656fd"
+    },
+    {
+      "group": "controls",
+      "directory": "pipeline-debug-2",
+      "mode": "pipeline-debug",
+      "modified_draw": false,
+      "rgba_sha256": "b548683168d47d12344c2a976155eb716c4a14d135dcbb8c9df542b0abd0caa1",
+      "capture_matching": false,
+      "report_sha256": "960640e142120704a98ab22a909468be63355677991a70d1469bfbb8979f535b",
+      "png_sha256": "0e119453793730e1935d5813cd759c69091d9e21ee371235b5214f0127b656fd"
+    },
+    {
+      "group": "controls",
+      "directory": "fragment-count-3",
+      "mode": "fragment-count",
+      "modified_draw": true,
+      "rgba_sha256": "d5ffe329528ecabc09517514d1b41c5a8d305210480ad9454c732051a697d0e7",
+      "capture_matching": true,
+      "report_sha256": "b2b2aecedae086425395193b4f356b11098219f6cf24fbb79cad5fdf9d112c82",
+      "png_sha256": "488fe73cd858012a8973a48eb2f9139f68857ce1668ef013885936f5cb45369b"
+    },
+    {
+      "group": "controls",
+      "directory": "shader-recreate-3",
+      "mode": "shader-recreate",
+      "modified_draw": true,
+      "rgba_sha256": "b548683168d47d12344c2a976155eb716c4a14d135dcbb8c9df542b0abd0caa1",
+      "capture_matching": false,
+      "report_sha256": "9b569ac8babc88338e57569329aeccc951a1f8d7606186ac1c7b4d6179b6b47c",
+      "png_sha256": "0e119453793730e1935d5813cd759c69091d9e21ee371235b5214f0127b656fd"
+    },
+    {
+      "group": "controls",
+      "directory": "shader-repack-3",
+      "mode": "shader-repack",
+      "modified_draw": true,
+      "rgba_sha256": "b548683168d47d12344c2a976155eb716c4a14d135dcbb8c9df542b0abd0caa1",
+      "capture_matching": false,
+      "report_sha256": "d4468c30b6eb2c3161e47ff21a174d6bf2a2b786c8d05e279c956d393ce81180",
+      "png_sha256": "0e119453793730e1935d5813cd759c69091d9e21ee371235b5214f0127b656fd"
+    },
+    {
+      "group": "controls",
+      "directory": "pipeline-debug-3",
+      "mode": "pipeline-debug",
+      "modified_draw": false,
+      "rgba_sha256": "b548683168d47d12344c2a976155eb716c4a14d135dcbb8c9df542b0abd0caa1",
+      "capture_matching": false,
+      "report_sha256": "960640e142120704a98ab22a909468be63355677991a70d1469bfbb8979f535b",
+      "png_sha256": "0e119453793730e1935d5813cd759c69091d9e21ee371235b5214f0127b656fd"
+    },
+    {
+      "group": "controls",
+      "directory": "fragment-count-4",
+      "mode": "fragment-count",
+      "modified_draw": true,
+      "rgba_sha256": "d5ffe329528ecabc09517514d1b41c5a8d305210480ad9454c732051a697d0e7",
+      "capture_matching": true,
+      "report_sha256": "b2b2aecedae086425395193b4f356b11098219f6cf24fbb79cad5fdf9d112c82",
+      "png_sha256": "488fe73cd858012a8973a48eb2f9139f68857ce1668ef013885936f5cb45369b"
+    },
+    {
+      "group": "controls",
+      "directory": "shader-recreate-4",
+      "mode": "shader-recreate",
+      "modified_draw": true,
+      "rgba_sha256": "b548683168d47d12344c2a976155eb716c4a14d135dcbb8c9df542b0abd0caa1",
+      "capture_matching": false,
+      "report_sha256": "9b569ac8babc88338e57569329aeccc951a1f8d7606186ac1c7b4d6179b6b47c",
+      "png_sha256": "0e119453793730e1935d5813cd759c69091d9e21ee371235b5214f0127b656fd"
+    },
+    {
+      "group": "controls",
+      "directory": "shader-repack-4",
+      "mode": "shader-repack",
+      "modified_draw": true,
+      "rgba_sha256": "b548683168d47d12344c2a976155eb716c4a14d135dcbb8c9df542b0abd0caa1",
+      "capture_matching": false,
+      "report_sha256": "d4468c30b6eb2c3161e47ff21a174d6bf2a2b786c8d05e279c956d393ce81180",
+      "png_sha256": "0e119453793730e1935d5813cd759c69091d9e21ee371235b5214f0127b656fd"
+    },
+    {
+      "group": "controls",
+      "directory": "pipeline-debug-4",
+      "mode": "pipeline-debug",
+      "modified_draw": false,
+      "rgba_sha256": "d5ffe329528ecabc09517514d1b41c5a8d305210480ad9454c732051a697d0e7",
+      "capture_matching": true,
+      "report_sha256": "97cd053abfbff03e74b22ed65a6077bacd921a7d90b800e98b938e1a44ead86f",
+      "png_sha256": "488fe73cd858012a8973a48eb2f9139f68857ce1668ef013885936f5cb45369b"
+    },
+    {
+      "group": "controls",
+      "directory": "fragment-count-5",
+      "mode": "fragment-count",
+      "modified_draw": true,
+      "rgba_sha256": "d5ffe329528ecabc09517514d1b41c5a8d305210480ad9454c732051a697d0e7",
+      "capture_matching": true,
+      "report_sha256": "b2b2aecedae086425395193b4f356b11098219f6cf24fbb79cad5fdf9d112c82",
+      "png_sha256": "488fe73cd858012a8973a48eb2f9139f68857ce1668ef013885936f5cb45369b"
+    },
+    {
+      "group": "controls",
+      "directory": "shader-recreate-5",
+      "mode": "shader-recreate",
+      "modified_draw": true,
+      "rgba_sha256": "d5ffe329528ecabc09517514d1b41c5a8d305210480ad9454c732051a697d0e7",
+      "capture_matching": true,
+      "report_sha256": "db9df73111c73d94a4e79c70ffdb9bda40236351418373b0f4c4ba1074194262",
+      "png_sha256": "488fe73cd858012a8973a48eb2f9139f68857ce1668ef013885936f5cb45369b"
+    },
+    {
+      "group": "controls",
+      "directory": "shader-repack-5",
+      "mode": "shader-repack",
+      "modified_draw": true,
+      "rgba_sha256": "b548683168d47d12344c2a976155eb716c4a14d135dcbb8c9df542b0abd0caa1",
+      "capture_matching": false,
+      "report_sha256": "d4468c30b6eb2c3161e47ff21a174d6bf2a2b786c8d05e279c956d393ce81180",
+      "png_sha256": "0e119453793730e1935d5813cd759c69091d9e21ee371235b5214f0127b656fd"
+    },
+    {
+      "group": "controls",
+      "directory": "pipeline-debug-5",
+      "mode": "pipeline-debug",
+      "modified_draw": false,
+      "rgba_sha256": "b548683168d47d12344c2a976155eb716c4a14d135dcbb8c9df542b0abd0caa1",
+      "capture_matching": false,
+      "report_sha256": "960640e142120704a98ab22a909468be63355677991a70d1469bfbb8979f535b",
+      "png_sha256": "0e119453793730e1935d5813cd759c69091d9e21ee371235b5214f0127b656fd"
+    },
+    {
+      "group": "controls",
+      "directory": "fragment-count-6",
+      "mode": "fragment-count",
+      "modified_draw": true,
+      "rgba_sha256": "d5ffe329528ecabc09517514d1b41c5a8d305210480ad9454c732051a697d0e7",
+      "capture_matching": true,
+      "report_sha256": "b2b2aecedae086425395193b4f356b11098219f6cf24fbb79cad5fdf9d112c82",
+      "png_sha256": "488fe73cd858012a8973a48eb2f9139f68857ce1668ef013885936f5cb45369b"
+    },
+    {
+      "group": "controls",
+      "directory": "shader-recreate-6",
+      "mode": "shader-recreate",
+      "modified_draw": true,
+      "rgba_sha256": "b548683168d47d12344c2a976155eb716c4a14d135dcbb8c9df542b0abd0caa1",
+      "capture_matching": false,
+      "report_sha256": "9b569ac8babc88338e57569329aeccc951a1f8d7606186ac1c7b4d6179b6b47c",
+      "png_sha256": "0e119453793730e1935d5813cd759c69091d9e21ee371235b5214f0127b656fd"
+    },
+    {
+      "group": "controls",
+      "directory": "shader-repack-6",
+      "mode": "shader-repack",
+      "modified_draw": true,
+      "rgba_sha256": "b548683168d47d12344c2a976155eb716c4a14d135dcbb8c9df542b0abd0caa1",
+      "capture_matching": false,
+      "report_sha256": "d4468c30b6eb2c3161e47ff21a174d6bf2a2b786c8d05e279c956d393ce81180",
+      "png_sha256": "0e119453793730e1935d5813cd759c69091d9e21ee371235b5214f0127b656fd"
+    },
+    {
+      "group": "controls",
+      "directory": "pipeline-debug-6",
+      "mode": "pipeline-debug",
+      "modified_draw": false,
+      "rgba_sha256": "d5ffe329528ecabc09517514d1b41c5a8d305210480ad9454c732051a697d0e7",
+      "capture_matching": true,
+      "report_sha256": "97cd053abfbff03e74b22ed65a6077bacd921a7d90b800e98b938e1a44ead86f",
+      "png_sha256": "488fe73cd858012a8973a48eb2f9139f68857ce1668ef013885936f5cb45369b"
+    },
+    {
+      "group": "controls",
+      "directory": "fragment-count-7",
+      "mode": "fragment-count",
+      "modified_draw": true,
+      "rgba_sha256": "d5ffe329528ecabc09517514d1b41c5a8d305210480ad9454c732051a697d0e7",
+      "capture_matching": true,
+      "report_sha256": "b2b2aecedae086425395193b4f356b11098219f6cf24fbb79cad5fdf9d112c82",
+      "png_sha256": "488fe73cd858012a8973a48eb2f9139f68857ce1668ef013885936f5cb45369b"
+    },
+    {
+      "group": "controls",
+      "directory": "shader-recreate-7",
+      "mode": "shader-recreate",
+      "modified_draw": true,
+      "rgba_sha256": "b548683168d47d12344c2a976155eb716c4a14d135dcbb8c9df542b0abd0caa1",
+      "capture_matching": false,
+      "report_sha256": "9b569ac8babc88338e57569329aeccc951a1f8d7606186ac1c7b4d6179b6b47c",
+      "png_sha256": "0e119453793730e1935d5813cd759c69091d9e21ee371235b5214f0127b656fd"
+    },
+    {
+      "group": "controls",
+      "directory": "shader-repack-7",
+      "mode": "shader-repack",
+      "modified_draw": true,
+      "rgba_sha256": "b548683168d47d12344c2a976155eb716c4a14d135dcbb8c9df542b0abd0caa1",
+      "capture_matching": false,
+      "report_sha256": "d4468c30b6eb2c3161e47ff21a174d6bf2a2b786c8d05e279c956d393ce81180",
+      "png_sha256": "0e119453793730e1935d5813cd759c69091d9e21ee371235b5214f0127b656fd"
+    },
+    {
+      "group": "controls",
+      "directory": "pipeline-debug-7",
+      "mode": "pipeline-debug",
+      "modified_draw": false,
+      "rgba_sha256": "b548683168d47d12344c2a976155eb716c4a14d135dcbb8c9df542b0abd0caa1",
+      "capture_matching": false,
+      "report_sha256": "960640e142120704a98ab22a909468be63355677991a70d1469bfbb8979f535b",
+      "png_sha256": "0e119453793730e1935d5813cd759c69091d9e21ee371235b5214f0127b656fd"
+    },
+    {
+      "group": "controls",
+      "directory": "fragment-count-8",
+      "mode": "fragment-count",
+      "modified_draw": true,
+      "rgba_sha256": "d5ffe329528ecabc09517514d1b41c5a8d305210480ad9454c732051a697d0e7",
+      "capture_matching": true,
+      "report_sha256": "b2b2aecedae086425395193b4f356b11098219f6cf24fbb79cad5fdf9d112c82",
+      "png_sha256": "488fe73cd858012a8973a48eb2f9139f68857ce1668ef013885936f5cb45369b"
+    },
+    {
+      "group": "controls",
+      "directory": "shader-recreate-8",
+      "mode": "shader-recreate",
+      "modified_draw": true,
+      "rgba_sha256": "b548683168d47d12344c2a976155eb716c4a14d135dcbb8c9df542b0abd0caa1",
+      "capture_matching": false,
+      "report_sha256": "9b569ac8babc88338e57569329aeccc951a1f8d7606186ac1c7b4d6179b6b47c",
+      "png_sha256": "0e119453793730e1935d5813cd759c69091d9e21ee371235b5214f0127b656fd"
+    },
+    {
+      "group": "controls",
+      "directory": "shader-repack-8",
+      "mode": "shader-repack",
+      "modified_draw": true,
+      "rgba_sha256": "b548683168d47d12344c2a976155eb716c4a14d135dcbb8c9df542b0abd0caa1",
+      "capture_matching": false,
+      "report_sha256": "d4468c30b6eb2c3161e47ff21a174d6bf2a2b786c8d05e279c956d393ce81180",
+      "png_sha256": "0e119453793730e1935d5813cd759c69091d9e21ee371235b5214f0127b656fd"
+    },
+    {
+      "group": "controls",
+      "directory": "pipeline-debug-8",
+      "mode": "pipeline-debug",
+      "modified_draw": false,
+      "rgba_sha256": "b548683168d47d12344c2a976155eb716c4a14d135dcbb8c9df542b0abd0caa1",
+      "capture_matching": false,
+      "report_sha256": "960640e142120704a98ab22a909468be63355677991a70d1469bfbb8979f535b",
+      "png_sha256": "0e119453793730e1935d5813cd759c69091d9e21ee371235b5214f0127b656fd"
+    },
+    {
+      "group": "controls",
+      "directory": "fragment-count-9",
+      "mode": "fragment-count",
+      "modified_draw": true,
+      "rgba_sha256": "d5ffe329528ecabc09517514d1b41c5a8d305210480ad9454c732051a697d0e7",
+      "capture_matching": true,
+      "report_sha256": "b2b2aecedae086425395193b4f356b11098219f6cf24fbb79cad5fdf9d112c82",
+      "png_sha256": "488fe73cd858012a8973a48eb2f9139f68857ce1668ef013885936f5cb45369b"
+    },
+    {
+      "group": "controls",
+      "directory": "shader-recreate-9",
+      "mode": "shader-recreate",
+      "modified_draw": true,
+      "rgba_sha256": "d5ffe329528ecabc09517514d1b41c5a8d305210480ad9454c732051a697d0e7",
+      "capture_matching": true,
+      "report_sha256": "db9df73111c73d94a4e79c70ffdb9bda40236351418373b0f4c4ba1074194262",
+      "png_sha256": "488fe73cd858012a8973a48eb2f9139f68857ce1668ef013885936f5cb45369b"
+    },
+    {
+      "group": "controls",
+      "directory": "shader-repack-9",
+      "mode": "shader-repack",
+      "modified_draw": true,
+      "rgba_sha256": "b548683168d47d12344c2a976155eb716c4a14d135dcbb8c9df542b0abd0caa1",
+      "capture_matching": false,
+      "report_sha256": "d4468c30b6eb2c3161e47ff21a174d6bf2a2b786c8d05e279c956d393ce81180",
+      "png_sha256": "0e119453793730e1935d5813cd759c69091d9e21ee371235b5214f0127b656fd"
+    },
+    {
+      "group": "controls",
+      "directory": "pipeline-debug-9",
+      "mode": "pipeline-debug",
+      "modified_draw": false,
+      "rgba_sha256": "b548683168d47d12344c2a976155eb716c4a14d135dcbb8c9df542b0abd0caa1",
+      "capture_matching": false,
+      "report_sha256": "960640e142120704a98ab22a909468be63355677991a70d1469bfbb8979f535b",
+      "png_sha256": "0e119453793730e1935d5813cd759c69091d9e21ee371235b5214f0127b656fd"
+    },
+    {
+      "group": "attachment_pair",
+      "directory": "paired-fragment-binding-0",
+      "mode": "fragment-binding",
+      "modified_draw": true,
+      "rgba_sha256": "b548683168d47d12344c2a976155eb716c4a14d135dcbb8c9df542b0abd0caa1",
+      "capture_matching": false,
+      "report_sha256": "666281f4d205a679c38e79a260ccdfca78c64cc08b0dc9096220502b7bc104ba",
+      "png_sha256": "0e119453793730e1935d5813cd759c69091d9e21ee371235b5214f0127b656fd"
+    },
+    {
+      "group": "attachment_pair",
+      "directory": "paired-fragment-count-0",
+      "mode": "fragment-count",
+      "modified_draw": true,
+      "rgba_sha256": "d5ffe329528ecabc09517514d1b41c5a8d305210480ad9454c732051a697d0e7",
+      "capture_matching": true,
+      "report_sha256": "b2b2aecedae086425395193b4f356b11098219f6cf24fbb79cad5fdf9d112c82",
+      "png_sha256": "488fe73cd858012a8973a48eb2f9139f68857ce1668ef013885936f5cb45369b"
+    },
+    {
+      "group": "attachment_pair",
+      "directory": "paired-fragment-binding-1",
+      "mode": "fragment-binding",
+      "modified_draw": true,
+      "rgba_sha256": "b548683168d47d12344c2a976155eb716c4a14d135dcbb8c9df542b0abd0caa1",
+      "capture_matching": false,
+      "report_sha256": "666281f4d205a679c38e79a260ccdfca78c64cc08b0dc9096220502b7bc104ba",
+      "png_sha256": "0e119453793730e1935d5813cd759c69091d9e21ee371235b5214f0127b656fd"
+    },
+    {
+      "group": "attachment_pair",
+      "directory": "paired-fragment-count-1",
+      "mode": "fragment-count",
+      "modified_draw": true,
+      "rgba_sha256": "d5ffe329528ecabc09517514d1b41c5a8d305210480ad9454c732051a697d0e7",
+      "capture_matching": true,
+      "report_sha256": "b2b2aecedae086425395193b4f356b11098219f6cf24fbb79cad5fdf9d112c82",
+      "png_sha256": "488fe73cd858012a8973a48eb2f9139f68857ce1668ef013885936f5cb45369b"
+    },
+    {
+      "group": "attachment_pair",
+      "directory": "paired-fragment-binding-2",
+      "mode": "fragment-binding",
+      "modified_draw": true,
+      "rgba_sha256": "b548683168d47d12344c2a976155eb716c4a14d135dcbb8c9df542b0abd0caa1",
+      "capture_matching": false,
+      "report_sha256": "666281f4d205a679c38e79a260ccdfca78c64cc08b0dc9096220502b7bc104ba",
+      "png_sha256": "0e119453793730e1935d5813cd759c69091d9e21ee371235b5214f0127b656fd"
+    },
+    {
+      "group": "attachment_pair",
+      "directory": "paired-fragment-count-2",
+      "mode": "fragment-count",
+      "modified_draw": true,
+      "rgba_sha256": "d5ffe329528ecabc09517514d1b41c5a8d305210480ad9454c732051a697d0e7",
+      "capture_matching": true,
+      "report_sha256": "b2b2aecedae086425395193b4f356b11098219f6cf24fbb79cad5fdf9d112c82",
+      "png_sha256": "488fe73cd858012a8973a48eb2f9139f68857ce1668ef013885936f5cb45369b"
+    },
+    {
+      "group": "attachment_pair",
+      "directory": "paired-fragment-binding-3",
+      "mode": "fragment-binding",
+      "modified_draw": true,
+      "rgba_sha256": "b548683168d47d12344c2a976155eb716c4a14d135dcbb8c9df542b0abd0caa1",
+      "capture_matching": false,
+      "report_sha256": "666281f4d205a679c38e79a260ccdfca78c64cc08b0dc9096220502b7bc104ba",
+      "png_sha256": "0e119453793730e1935d5813cd759c69091d9e21ee371235b5214f0127b656fd"
+    },
+    {
+      "group": "attachment_pair",
+      "directory": "paired-fragment-count-3",
+      "mode": "fragment-count",
+      "modified_draw": true,
+      "rgba_sha256": "d5ffe329528ecabc09517514d1b41c5a8d305210480ad9454c732051a697d0e7",
+      "capture_matching": true,
+      "report_sha256": "b2b2aecedae086425395193b4f356b11098219f6cf24fbb79cad5fdf9d112c82",
+      "png_sha256": "488fe73cd858012a8973a48eb2f9139f68857ce1668ef013885936f5cb45369b"
+    },
+    {
+      "group": "attachment_pair",
+      "directory": "paired-fragment-binding-4",
+      "mode": "fragment-binding",
+      "modified_draw": true,
+      "rgba_sha256": "d5ffe329528ecabc09517514d1b41c5a8d305210480ad9454c732051a697d0e7",
+      "capture_matching": true,
+      "report_sha256": "0be1805628df03341f6381e2b71c943a8135d6730120387dfa2355b708ad9e0f",
+      "png_sha256": "488fe73cd858012a8973a48eb2f9139f68857ce1668ef013885936f5cb45369b"
+    },
+    {
+      "group": "attachment_pair",
+      "directory": "paired-fragment-count-4",
+      "mode": "fragment-count",
+      "modified_draw": true,
+      "rgba_sha256": "d5ffe329528ecabc09517514d1b41c5a8d305210480ad9454c732051a697d0e7",
+      "capture_matching": true,
+      "report_sha256": "b2b2aecedae086425395193b4f356b11098219f6cf24fbb79cad5fdf9d112c82",
+      "png_sha256": "488fe73cd858012a8973a48eb2f9139f68857ce1668ef013885936f5cb45369b"
+    },
+    {
+      "group": "attachment_pair",
+      "directory": "paired-fragment-binding-5",
+      "mode": "fragment-binding",
+      "modified_draw": true,
+      "rgba_sha256": "b548683168d47d12344c2a976155eb716c4a14d135dcbb8c9df542b0abd0caa1",
+      "capture_matching": false,
+      "report_sha256": "666281f4d205a679c38e79a260ccdfca78c64cc08b0dc9096220502b7bc104ba",
+      "png_sha256": "0e119453793730e1935d5813cd759c69091d9e21ee371235b5214f0127b656fd"
+    },
+    {
+      "group": "attachment_pair",
+      "directory": "paired-fragment-count-5",
+      "mode": "fragment-count",
+      "modified_draw": true,
+      "rgba_sha256": "d5ffe329528ecabc09517514d1b41c5a8d305210480ad9454c732051a697d0e7",
+      "capture_matching": true,
+      "report_sha256": "b2b2aecedae086425395193b4f356b11098219f6cf24fbb79cad5fdf9d112c82",
+      "png_sha256": "488fe73cd858012a8973a48eb2f9139f68857ce1668ef013885936f5cb45369b"
+    },
+    {
+      "group": "attachment_pair",
+      "directory": "paired-fragment-binding-6",
+      "mode": "fragment-binding",
+      "modified_draw": true,
+      "rgba_sha256": "b548683168d47d12344c2a976155eb716c4a14d135dcbb8c9df542b0abd0caa1",
+      "capture_matching": false,
+      "report_sha256": "666281f4d205a679c38e79a260ccdfca78c64cc08b0dc9096220502b7bc104ba",
+      "png_sha256": "0e119453793730e1935d5813cd759c69091d9e21ee371235b5214f0127b656fd"
+    },
+    {
+      "group": "attachment_pair",
+      "directory": "paired-fragment-count-6",
+      "mode": "fragment-count",
+      "modified_draw": true,
+      "rgba_sha256": "d5ffe329528ecabc09517514d1b41c5a8d305210480ad9454c732051a697d0e7",
+      "capture_matching": true,
+      "report_sha256": "b2b2aecedae086425395193b4f356b11098219f6cf24fbb79cad5fdf9d112c82",
+      "png_sha256": "488fe73cd858012a8973a48eb2f9139f68857ce1668ef013885936f5cb45369b"
+    },
+    {
+      "group": "attachment_pair",
+      "directory": "paired-fragment-binding-7",
+      "mode": "fragment-binding",
+      "modified_draw": true,
+      "rgba_sha256": "b548683168d47d12344c2a976155eb716c4a14d135dcbb8c9df542b0abd0caa1",
+      "capture_matching": false,
+      "report_sha256": "666281f4d205a679c38e79a260ccdfca78c64cc08b0dc9096220502b7bc104ba",
+      "png_sha256": "0e119453793730e1935d5813cd759c69091d9e21ee371235b5214f0127b656fd"
+    },
+    {
+      "group": "attachment_pair",
+      "directory": "paired-fragment-count-7",
+      "mode": "fragment-count",
+      "modified_draw": true,
+      "rgba_sha256": "d5ffe329528ecabc09517514d1b41c5a8d305210480ad9454c732051a697d0e7",
+      "capture_matching": true,
+      "report_sha256": "b2b2aecedae086425395193b4f356b11098219f6cf24fbb79cad5fdf9d112c82",
+      "png_sha256": "488fe73cd858012a8973a48eb2f9139f68857ce1668ef013885936f5cb45369b"
+    },
+    {
+      "group": "attachment_pair",
+      "directory": "paired-fragment-binding-8",
+      "mode": "fragment-binding",
+      "modified_draw": true,
+      "rgba_sha256": "b548683168d47d12344c2a976155eb716c4a14d135dcbb8c9df542b0abd0caa1",
+      "capture_matching": false,
+      "report_sha256": "666281f4d205a679c38e79a260ccdfca78c64cc08b0dc9096220502b7bc104ba",
+      "png_sha256": "0e119453793730e1935d5813cd759c69091d9e21ee371235b5214f0127b656fd"
+    },
+    {
+      "group": "attachment_pair",
+      "directory": "paired-fragment-count-8",
+      "mode": "fragment-count",
+      "modified_draw": true,
+      "rgba_sha256": "d5ffe329528ecabc09517514d1b41c5a8d305210480ad9454c732051a697d0e7",
+      "capture_matching": true,
+      "report_sha256": "b2b2aecedae086425395193b4f356b11098219f6cf24fbb79cad5fdf9d112c82",
+      "png_sha256": "488fe73cd858012a8973a48eb2f9139f68857ce1668ef013885936f5cb45369b"
+    },
+    {
+      "group": "attachment_pair",
+      "directory": "paired-fragment-binding-9",
+      "mode": "fragment-binding",
+      "modified_draw": true,
+      "rgba_sha256": "b548683168d47d12344c2a976155eb716c4a14d135dcbb8c9df542b0abd0caa1",
+      "capture_matching": false,
+      "report_sha256": "666281f4d205a679c38e79a260ccdfca78c64cc08b0dc9096220502b7bc104ba",
+      "png_sha256": "0e119453793730e1935d5813cd759c69091d9e21ee371235b5214f0127b656fd"
+    },
+    {
+      "group": "attachment_pair",
+      "directory": "paired-fragment-count-9",
+      "mode": "fragment-count",
+      "modified_draw": true,
+      "rgba_sha256": "d5ffe329528ecabc09517514d1b41c5a8d305210480ad9454c732051a697d0e7",
+      "capture_matching": true,
+      "report_sha256": "b2b2aecedae086425395193b4f356b11098219f6cf24fbb79cad5fdf9d112c82",
+      "png_sha256": "488fe73cd858012a8973a48eb2f9139f68857ce1668ef013885936f5cb45369b"
+    }
+  ],
+  "pixel_differences": {
+    "d5ffe329528ecabc09517514d1b41c5a8d305210480ad9454c732051a697d0e7": [],
+    "b548683168d47d12344c2a976155eb716c4a14d135dcbb8c9df542b0abd0caa1": [
+      {
+        "x": 1182,
+        "y": 313,
+        "captured": [
+          12,
+          14,
+          12,
+          255
+        ],
+        "replayed": [
+          12,
+          15,
+          12,
+          255
+        ]
+      },
+      {
+        "x": 1182,
+        "y": 314,
+        "captured": [
+          13,
+          12,
+          8,
+          247
+        ],
+        "replayed": [
+          13,
+          12,
+          8,
+          248
+        ]
+      },
+      {
+        "x": 1183,
+        "y": 314,
+        "captured": [
+          22,
+          22,
+          17,
+          254
+        ],
+        "replayed": [
+          22,
+          22,
+          17,
+          255
+        ]
+      }
+    ]
+  },
+  "shader": {
+    "original_sha256": "fe92913b679084eb0c88a589285f8470cef44e70075b02a966adad683fd7bd95",
+    "count_sha256": "36e81f84589bff2faedefa6aaf92befc50d62cbb1532b6e02bba69e20f0f5199",
+    "added_rows": [
+      [
+        50331749,
+        1057010,
+        3
+      ],
+      [
+        134217782,
+        1057010,
+        3,
+        16386,
+        1065353216,
+        1065353216,
+        1065353216,
+        1065353216
+      ]
+    ],
+    "original_instructions_preserved_exact": true,
+    "repack_bytes_identical": true
+  },
+  "validation": {
+    "native_cases": 16,
+    "native_exact_texels": 504,
+    "native_refusals": 96,
+    "scoped_debug_warnings_or_errors": 0,
+    "prefix_debug_messages": 608,
+    "probe_cases": 28,
+    "probe_refusals": 22,
+    "ctest_passed": 1,
+    "capture_only_configured": true
+  },
+  "native_binary_sha256": "8414a1bbd4158ddfed6be494948a15f6d12907c8f6793048047d374f90b8f7b5",
+  "replay_sha256": "215ebafed657953f0671c32a0948e12c8c965437a3eaa33e6d38aedcff5e2ddc",
+  "raw": {
+    "root": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-count-checkpoint-20261014",
+    "files": 508,
+    "manifest_sha256": "d5a8bcac4f1f7a8b263a3cebf43879550cf78c85db03da533996f8817c23b549"
+  },
+  "limits": "Count-only output stabilizes instrumented runs; original shader recreation and binding-only controls retain both outcomes. The repack source is already canonical and remains byte-identical, so this is not an independent metadata control. Original fragment histories and the effect of added output on execution remain unresolved; formal six-frame gate failed."
+}

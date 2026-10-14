@@ -133,6 +133,8 @@ def main():
                 ('depth-budget', dict(mode='depth', budget=3), 'Depth checkpoint read budget too small'),
                 ('fragment-budget', dict(mode='fragment', budget=7), 'Fragment checkpoint read budget too small'),
                 ('fragment-half-budget', dict(mode='fragment-half', budget=7), 'Fragment checkpoint read budget too small'),
+                ('fragment-count-budget', dict(mode='fragment-count', budget=7), 'Fragment checkpoint read budget too small'),
+                ('fragment-binding-budget', dict(mode='fragment-binding', budget=7), 'Fragment checkpoint read budget too small'),
                 ('depth-missing-dsv', dict(mode='depth', budget=7), 'requires a bound DSV'),
                 ('non-event', dict(first=resource, last=resource), 'event boundaries'),
                 ('existing', dict(destination=existing), 'already exists'),
