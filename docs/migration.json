@@ -4545,6 +4545,24 @@
       "current_gate_passed": false,
       "production_fix": false,
       "limits": "Original GPA ISA exports show changed render-write subtype/order and control flow after adding an unused output. This is not the machine code measured in Flora/game execution, not a shader-equivalence proof and not a root-cause fix. Formal six-frame acceptance remains failed."
+    },
+    "gf2_output_remap_diagnosis": {
+      "evidence": "docs/CAPTURE_GF2_OUTPUT_REMAP.md",
+      "baseline": "docs/capture-gf2-output-remap-baseline.json",
+      "remap_executions": 3,
+      "remap_matching": 3,
+      "original_shader_executions": 3,
+      "original_shader_matching": 1,
+      "native_cases": 4,
+      "native_exact_texels": 96,
+      "native_refusals": 44,
+      "probe_cases": 28,
+      "probe_refusals": 26,
+      "isa_processes": 2,
+      "isa_requests": 4,
+      "current_gate_passed": false,
+      "production_fix": false,
+      "limits": "Three scoped output-slot remaps match the capture; three original shader recreations still vary. Output count and arithmetic instructions are unchanged. Two original-GPA ISA exports show two simd8 writes instead of the previous lo8ds/simd8 pair. The ISA-only derivative retains original RTV/blend records and is not a reproduction of the scoped remap. No measured runtime ISA, deterministic-behavior proof or production fix; formal six-frame acceptance remains failed."
     }
   }
 }

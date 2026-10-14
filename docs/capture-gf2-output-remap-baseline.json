@@ -1,0 +1,306 @@
+{
+  "schema": 1,
+  "date": "2026-10-14",
+  "source_parent_commit": "e97004c2fc99896e1839802ef3e155e6a6d3cd74",
+  "source_hashes": {
+    "CMakeLists.txt": "afdc900320ffc6e3ea3f6be3bb0b51d15f1a37c9d4421cd483372c545e552264",
+    "tools/native/output_remap_checkpoint.h": "7be392da87c0f23de32d929ea0eefff0414b730cdb0110e1812161121a9223c1",
+    "tools/native/output_remap_tests.cpp": "ae1a55906b862eaecce40525b8b3a9f271d4d9a268ada279fccb22bb1eca1840",
+    "tools/native/replay_texel_probe.cpp": "b2c843f0703b5db9a467b73fcfd78dff7b54187754c13336e047cd0ab994d1af",
+    "tools/validate_capture_texel_probe.py": "0cd0b35f3b340e1d90ef9e31cc4b0dfbf193d3e7eae109e815d9b1ecb27a2101",
+    "docs/CAPTURE_GF2_OUTPUT_REMAP.md": "93f24b1e7d427bc2d2f794fd592808e3b3006600b17bfe65680bf2c56366763f"
+  },
+  "input": {
+    "file": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-resolve-current-20261014\\launch-2\\session\\frame-d3b245ec-09d2-4888-91af-5032f19ddbd6.gpa_frame",
+    "sha256": "9bef49cd3f807ae3796ece91d35960604ce4158d0736acb5d545efa346aafacf",
+    "event": 5651
+  },
+  "summary": {
+    "schema": 1,
+    "current_gate_passed": false,
+    "production_fix": false,
+    "totals": {
+      "output-remap": {
+        "matching": 3,
+        "alternate": 0
+      },
+      "shader-recreate": {
+        "matching": 1,
+        "alternate": 2
+      }
+    },
+    "runs": [
+      {
+        "directory": "output-remap-0",
+        "mode": "output-remap",
+        "capture_matching": true,
+        "rgba_sha256": "d5ffe329528ecabc09517514d1b41c5a8d305210480ad9454c732051a697d0e7",
+        "report_sha256": "94ecb5b616ba4a0900f6138bff126f9c8b0611c46c0090f55b77d8dfe5cf26ae"
+      },
+      {
+        "directory": "shader-recreate-0",
+        "mode": "shader-recreate",
+        "capture_matching": false,
+        "rgba_sha256": "b548683168d47d12344c2a976155eb716c4a14d135dcbb8c9df542b0abd0caa1",
+        "report_sha256": "7dd2c15b0c41c20f0dd1b9824074d767038718da9788c23d31be09a70fa1ff76"
+      },
+      {
+        "directory": "output-remap-1",
+        "mode": "output-remap",
+        "capture_matching": true,
+        "rgba_sha256": "d5ffe329528ecabc09517514d1b41c5a8d305210480ad9454c732051a697d0e7",
+        "report_sha256": "46c2b5191549aa65b2414a57a84f7f258515d5b330c3d611216e202035a44915"
+      },
+      {
+        "directory": "shader-recreate-1",
+        "mode": "shader-recreate",
+        "capture_matching": false,
+        "rgba_sha256": "b548683168d47d12344c2a976155eb716c4a14d135dcbb8c9df542b0abd0caa1",
+        "report_sha256": "36695e9a847cda21657149f2538d4787d2913eb1bd853a39747087c3346f24a2"
+      },
+      {
+        "directory": "output-remap-2",
+        "mode": "output-remap",
+        "capture_matching": true,
+        "rgba_sha256": "d5ffe329528ecabc09517514d1b41c5a8d305210480ad9454c732051a697d0e7",
+        "report_sha256": "2f513240f21ec6734a42dc116e4addcc0f32e14f256662f69960e1a01d6810ee"
+      },
+      {
+        "directory": "shader-recreate-2",
+        "mode": "shader-recreate",
+        "capture_matching": true,
+        "rgba_sha256": "d5ffe329528ecabc09517514d1b41c5a8d305210480ad9454c732051a697d0e7",
+        "report_sha256": "49a68201c1decfd944628cb0d21188695a47fe279396d633f120f79f6d60e7ee"
+      }
+    ],
+    "pixel_differences": {
+      "d5ffe329528ecabc09517514d1b41c5a8d305210480ad9454c732051a697d0e7": [],
+      "b548683168d47d12344c2a976155eb716c4a14d135dcbb8c9df542b0abd0caa1": [
+        {
+          "x": 1182,
+          "y": 313,
+          "captured": [
+            12,
+            14,
+            12,
+            255
+          ],
+          "replayed": [
+            12,
+            15,
+            12,
+            255
+          ]
+        },
+        {
+          "x": 1182,
+          "y": 314,
+          "captured": [
+            13,
+            12,
+            8,
+            247
+          ],
+          "replayed": [
+            13,
+            12,
+            8,
+            248
+          ]
+        },
+        {
+          "x": 1183,
+          "y": 314,
+          "captured": [
+            22,
+            22,
+            17,
+            254
+          ],
+          "replayed": [
+            22,
+            22,
+            17,
+            255
+          ]
+        }
+      ]
+    },
+    "shader": {
+      "original_sha256": "fe92913b679084eb0c88a589285f8470cef44e70075b02a966adad683fd7bd95",
+      "modified_sha256": "05380474f3b2dd8c2b9a0de8b9815b21b078ab26318206556b66c3850322a9ec",
+      "bytes": 13328,
+      "changes": {
+        "OSGN": [
+          {
+            "byte_offset": 36,
+            "before": 1,
+            "after": 3
+          },
+          {
+            "byte_offset": 48,
+            "before": 1,
+            "after": 3
+          }
+        ],
+        "SHDR": [
+          {
+            "byte_offset": 380,
+            "before": 1,
+            "after": 3
+          },
+          {
+            "byte_offset": 12748,
+            "before": 1,
+            "after": 3
+          },
+          {
+            "byte_offset": 12828,
+            "before": 1,
+            "after": 3
+          },
+          {
+            "byte_offset": 12848,
+            "before": 1,
+            "after": 3
+          }
+        ]
+      },
+      "modified_rows": [
+        {
+          "opcode": 101,
+          "word_offset": 93,
+          "destination_register_before": 1,
+          "destination_register_after": 3
+        },
+        {
+          "opcode": 50,
+          "word_offset": 3185,
+          "destination_register_before": 1,
+          "destination_register_after": 3
+        },
+        {
+          "opcode": 54,
+          "word_offset": 3205,
+          "destination_register_before": 1,
+          "destination_register_after": 3
+        },
+        {
+          "opcode": 50,
+          "word_offset": 3210,
+          "destination_register_before": 1,
+          "destination_register_after": 3
+        }
+      ],
+      "all_other_chunk_words_unchanged": true
+    },
+    "isa": [
+      {
+        "directory": "isa-0",
+        "pixel_sha256": "6cc8f6ab41b9b4944016784ecaacc2575cf7c3a0d4fb3bee46fa16c5d7e966e8",
+        "vertex_sha256": "3c9c3aa5c5ad33ab855796d49305aee0e12300b599f199d3be189f4098ce4796",
+        "pixel_lines": 889,
+        "render_writes": [
+          {
+            "line": 877,
+            "descriptor": "0x040b0404",
+            "extended_descriptor": "0x140",
+            "binding_table_index": 4,
+            "subtype_bits": 4,
+            "subtype": "simd8",
+            "fp32": true,
+            "last_render_target": false,
+            "predicate": null,
+            "end_of_thread": false
+          },
+          {
+            "line": 883,
+            "descriptor": "0x08031401",
+            "extended_descriptor": "0x0",
+            "binding_table_index": 1,
+            "subtype_bits": 4,
+            "subtype": "simd8",
+            "fp32": true,
+            "last_render_target": true,
+            "predicate": "(f1.1)",
+            "end_of_thread": true
+          }
+        ]
+      },
+      {
+        "directory": "isa-1",
+        "pixel_sha256": "6cc8f6ab41b9b4944016784ecaacc2575cf7c3a0d4fb3bee46fa16c5d7e966e8",
+        "vertex_sha256": "3c9c3aa5c5ad33ab855796d49305aee0e12300b599f199d3be189f4098ce4796",
+        "pixel_lines": 889,
+        "render_writes": [
+          {
+            "line": 877,
+            "descriptor": "0x040b0404",
+            "extended_descriptor": "0x140",
+            "binding_table_index": 4,
+            "subtype_bits": 4,
+            "subtype": "simd8",
+            "fp32": true,
+            "last_render_target": false,
+            "predicate": null,
+            "end_of_thread": false
+          },
+          {
+            "line": 883,
+            "descriptor": "0x08031401",
+            "extended_descriptor": "0x0",
+            "binding_table_index": 1,
+            "subtype_bits": 4,
+            "subtype": "simd8",
+            "fp32": true,
+            "last_render_target": true,
+            "predicate": "(f1.1)",
+            "end_of_thread": true
+          }
+        ]
+      }
+    ]
+  },
+  "isa_derivative": {
+    "source": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-resolve-current-20261014\\launch-2\\session\\frame-d3b245ec-09d2-4888-91af-5032f19ddbd6.gpa_frame",
+    "source_sha256": "9bef49cd3f807ae3796ece91d35960604ce4158d0736acb5d545efa346aafacf",
+    "file": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-output-remap-20261014\\output-remap.gpa_frame",
+    "sha256": "7942ae46cad1050e504042a5e6bafa9ee8ade177f4978921b0c9f0fa587ef129",
+    "shader_sha256": "05380474f3b2dd8c2b9a0de8b9815b21b078ab26318206556b66c3850322a9ec",
+    "changed_record_ids": [
+      1785
+    ],
+    "records_compared": 6395,
+    "header_and_index_unchanged": true,
+    "acceptance_established": false,
+    "scope": "ISA-only derivative: changes every use of PS 889. Original RTV/blend records retained; this frame is not the scoped runtime remap experiment and is not an image-equivalence control."
+  },
+  "validation": {
+    "native_cases": 4,
+    "native_exact_texels": 96,
+    "native_refusals": 44,
+    "native_debug_warnings_or_errors": 0,
+    "scoped_gf2_debug_warnings_or_errors": 0,
+    "gf2_prefix_messages_per_run": 608,
+    "probe_cases": 28,
+    "probe_refusals": 26,
+    "ctest_passed": 1,
+    "capture_only_configured": true,
+    "isa_processes": 2,
+    "isa_requests": 4,
+    "initial_native_fixture_failed": true
+  },
+  "binaries": {
+    "FloraReplayTexelProbe.exe": "428eaf74271041c30f2de2b7f4823fdc6c4b829dbea51b7ce577c18ed6b4831e",
+    "FloraOutputRemapTests.exe": "edf56761ca3b723c6d8364729f30719f3adfe8413364803e0d57195a9536d37d",
+    "FloraOutputRemapTests-invalid-fixture.exe": "82eec530bd77e69a445e9815503d1ff7d76d7eb8a86daa48cc717e9cab2e79ca",
+    "FloraReplayTexelProbe-initial.exe": "313293ac1abd49e2d55adcbb644510520657b547882cccc0864942bab069220f"
+  },
+  "raw": {
+    "root": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-output-remap-20261014",
+    "files": 164,
+    "manifest_sha256": "8e0b9c65a5d8036c7393e354ec2ce6d95b70079a0337c975fac7244f18e6ae61"
+  },
+  "replay_sha256": "215ebafed657953f0671c32a0948e12c8c965437a3eaa33e6d38aedcff5e2ddc",
+  "limits": "Three scoped output-slot remaps match the capture; three original shader recreations still vary. Output count and arithmetic instructions are unchanged. Two original-GPA ISA exports show two simd8 writes instead of the previous lo8ds/simd8 pair. The ISA-only derivative retains original RTV/blend records and is not a reproduction of the scoped remap. No measured runtime ISA, deterministic-behavior proof or production fix; formal six-frame acceptance remains failed."
+}

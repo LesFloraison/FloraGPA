@@ -5,6 +5,7 @@
 #include "input_checkpoint.h"
 #include "pipeline_checkpoint.h"
 #include "fragment_checkpoint.h"
+#include "output_remap_checkpoint.h"
 #include "depth_plane_checkpoint.h"
 #include "process_modules.h"
 #include <QImage>
@@ -38,7 +39,7 @@ int wmain(int argc, wchar_t** argv) {
     Json report{{"schema", 1}, {"completed", false}, {"acceptance_established", false},
                 {"reference_pixels_used", false}, {"observations", Json::array()}};
     try {
-        require(argc == 13, "FRAME NEW_OUT VENDOR RESOURCE SAMPLE LAYER X Y before|after|trace|final|checkpoint|inputs|depth|pipeline|pipeline-debug|depth-planes|unblended|fragment|fragment-half|fragment-count|fragment-binding|fragment-masked|shader-recreate|shader-repack|shader-count-unused FIRST LAST READ_BUDGET");
+        require(argc == 13, "FRAME NEW_OUT VENDOR RESOURCE SAMPLE LAYER X Y before|after|trace|final|checkpoint|inputs|depth|pipeline|pipeline-debug|depth-planes|unblended|fragment|fragment-half|fragment-count|fragment-binding|fragment-masked|shader-recreate|shader-repack|shader-count-unused|output-remap FIRST LAST READ_BUDGET");
         const auto vendor = number(argv[3]), resource = number(argv[4]), sample = number(argv[5]),
                    layer = number(argv[6]), x = number(argv[7]), y = number(argv[8]),
                    first = number(argv[10]), last = number(argv[11]);
@@ -48,7 +49,8 @@ int wmain(int argc, wchar_t** argv) {
         const bool countOnly=mode==L"fragment-count"||mode==L"fragment-binding"||mode==L"fragment-masked";
         const bool fragment = mode == L"fragment" || mode == L"fragment-half" || countOnly;
         const bool unusedOutput=mode==L"shader-count-unused";
-        const bool shaderExperiment=mode==L"shader-recreate"||mode==L"shader-repack"||unusedOutput;
+        const bool outputRemap=mode==L"output-remap";
+        const bool shaderExperiment=mode==L"shader-recreate"||mode==L"shader-repack"||unusedOutput||outputRemap;
         const bool pipeline = mode==L"depth-planes" || shaderExperiment || mode == L"pipeline-debug" || mode == L"pipeline" || mode == L"unblended" || fragment;
         const bool depth = mode == L"depth" || pipeline;
         const bool inputs = mode == L"inputs" || depth;
@@ -88,7 +90,7 @@ int wmain(int argc, wchar_t** argv) {
                     "Expected Draw/Dispatch event boundaries");
         require(fs::create_directory(destination), "Cannot create output directory");
         output = destination;
-        report.update({{"mode", unusedOutput ? "shader-count-unused" : mode == L"shader-recreate" ? "shader-recreate" : mode == L"shader-repack" ? "shader-repack" : mode == L"fragment-masked" ? "fragment-masked" : mode == L"fragment-binding" ? "fragment-binding" : mode == L"fragment-count" ? "fragment-count" : mode == L"fragment-half" ? "fragment-half" : mode == L"fragment" ? "fragment" : mode == L"unblended" ? "unblended" : mode == L"depth-planes" ? "depth-planes" : mode == L"pipeline-debug" ? "pipeline-debug" : mode == L"pipeline" ? "pipeline" : mode == L"depth" ? "depth" : mode == L"inputs" ? "inputs" : mode == L"checkpoint" ? "checkpoint" : mode == L"final" ? "final" : mode == L"trace" ? "trace" : mode == L"before" ? "before" : "after"}, {"vendor", vendor},
+        report.update({{"mode", outputRemap ? "output-remap" : unusedOutput ? "shader-count-unused" : mode == L"shader-recreate" ? "shader-recreate" : mode == L"shader-repack" ? "shader-repack" : mode == L"fragment-masked" ? "fragment-masked" : mode == L"fragment-binding" ? "fragment-binding" : mode == L"fragment-count" ? "fragment-count" : mode == L"fragment-half" ? "fragment-half" : mode == L"fragment" ? "fragment" : mode == L"unblended" ? "unblended" : mode == L"depth-planes" ? "depth-planes" : mode == L"pipeline-debug" ? "pipeline-debug" : mode == L"pipeline" ? "pipeline" : mode == L"depth" ? "depth" : mode == L"inputs" ? "inputs" : mode == L"checkpoint" ? "checkpoint" : mode == L"final" ? "final" : mode == L"trace" ? "trace" : mode == L"before" ? "before" : "after"}, {"vendor", vendor},
                        {"resource", resource}, {"sample", sample}, {"layer", layer}, {"x", x}, {"y", y},
                        {"first", first}, {"last", last}, {"read_budget", budget},
                        {"observer_changes_scheduling", mode == L"trace" || checkpoint}, {"typed_format", typed}});
@@ -128,6 +130,7 @@ int wmain(int argc, wchar_t** argv) {
         diagnostic::UnblendedRt0 blendOverride;
         diagnostic::FragmentCheckpoint fragments;
         diagnostic::ScopedPixelShader shaderOverride;
+        diagnostic::OutputRemapCheckpoint outputRemapScope;
         std::vector<uint8_t> mirroredShader;
         Com<ID3D11InfoQueue> fragmentDebug;
         report["modified_draw"] = mode == L"unblended" || fragment || shaderExperiment;
@@ -148,7 +151,7 @@ int wmain(int argc, wchar_t** argv) {
                 if (writer) {
                     if(mode==L"unblended" && after)blendOverride.restore();
                     if((fragment||shaderExperiment) && after){
-                        fragments.restore();shaderOverride.restore();
+                        fragments.restore();shaderOverride.restore();outputRemapScope.restore();
                         require(!fragmentDebug->GetNumMessagesDiscardedByMessageCountLimit(),"Lost fragment debug messages");
                         report["fragment_debug"]=Json::array();
                         for(UINT64 i=0;i<fragmentDebug->GetNumStoredMessages();++i){
@@ -212,7 +215,8 @@ int wmain(int argc, wchar_t** argv) {
                                 if(mode==L"shader-recreate"||mode==L"fragment-binding")mirroredShader.assign(source.begin(),source.end());
                                 else if(mode==L"shader-repack"){
                                     auto parts=readDxbcParts(source);std::erase_if(parts,[](const auto& p){return p.first!=0x4e475349&&p.first!=0x4e47534f&&p.first!=0x52444853;});mirroredShader=makeDxbc(parts);
-                                }else mirroredShader=diagnostic::mirrorFragmentShader(source,countOnly||unusedOutput);
+                                }else if(outputRemap)mirroredShader=diagnostic::remapFragmentOutput(source);
+                                else mirroredShader=diagnostic::mirrorFragmentShader(source,countOnly||unusedOutput);
                                 report["original_ps_sha256"]=sha256(source);report["mirrored_ps_sha256"]=sha256(mirroredShader);
                                 std::ofstream shaderFile(output/"mirrored.dxbc",std::ios::binary);shaderFile.exceptions(std::ios::badbit|std::ios::failbit);shaderFile.write(reinterpret_cast<const char*>(mirroredShader.data()),mirroredShader.size());shaderFile.close();
                                 Com<ID3DBlob> assembly;check(D3DDisassemble(mirroredShader.data(),mirroredShader.size(),0,nullptr,&assembly),"Disassemble mirrored shader");
@@ -222,7 +226,19 @@ int wmain(int argc, wchar_t** argv) {
                                         require(report["native_pipeline"]["rtv"][3].is_null(),"Unused shader output requires unbound RTV3");
                                         report["private_attachments_allocated"]=false;
                                     }
-                                    report["replacement_same_com_identity"]=shaderOverride.apply(replay.nativeDevice(),context,mirroredShader);
+                                    if(outputRemap){
+                                        outputRemapScope.apply(replay.nativeDevice(),context,mirroredShader);
+                                        Com<ID3D11PixelShader> ps;Com<ID3D11BlendState> blend;
+                                        context->PSGetShader(&ps,nullptr,nullptr);context->OMGetBlendState(&blend,nullptr,nullptr);
+                                        auto observedObjects=objects;Id psId=UINT64_MAX,blendId=UINT64_MAX-1;
+                                        require(!observedObjects.contains(psId)&&!observedObjects.contains(blendId),"Synthetic remap identity collision");
+                                        observedObjects[psId]=ps;observedObjects[blendId]=blend;
+                                        auto observed=diagnostic::pipelineCheckpoint(context,observedObjects);
+                                        auto expected=report["native_pipeline"];expected["shaders"]["ps"]=psId;expected["blend"]["id"]=blendId;
+                                        expected["blend"]["targets"][3]=expected["blend"]["targets"][1];expected["rtv"][3]=expected["rtv"][1];expected["rtv"][1]=nullptr;
+                                        require(observed==expected,"Unexpected output-remap pipeline change");
+                                        report["remapped_pipeline"]=observed;report["private_attachments_allocated"]=false;
+                                    }else report["replacement_same_com_identity"]=shaderOverride.apply(replay.nativeDevice(),context,mirroredShader);
                                 }
                                 else {
                                     fragments.apply(replay.nativeDevice(),context,mirroredShader,mode==L"fragment-half",countOnly,mode==L"fragment-masked");
