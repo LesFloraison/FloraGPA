@@ -1,0 +1,243 @@
+{
+  "schema": 1,
+  "date": "2026-10-14",
+  "source_parent_commit": "776275fa32718d878cfce44ce7f57b67d69b5ce7",
+  "source_hashes": {
+    "tools/inspect_gpa_render_messages.py": "94edc19734967f4e3105086af17f8194940f77dc7a2cf0eaca03def97e533a39",
+    "tools/test_gpa_render_messages.py": "8f4d78b687d694bbba953a4ac0769e5199271e68d9764fa48ee06ce9b59015b8",
+    "docs/CAPTURE_GF2_ISA_COMPARISON.md": "6a0e9263b9c4e7f2ed914699aa85daa2eb9d6c681b3045d5c5886393d0fc377a"
+  },
+  "summary": {
+    "schema": 1,
+    "current_gate_passed": false,
+    "production_fix": false,
+    "successful_runs": [
+      {
+        "directory": "original",
+        "pid": 45132,
+        "exit_code": 0,
+        "requests": 4,
+        "report_sha256": "e77caf06ba4489c5da923e264dbc6434bc5d0b4bc6178d7b80ba2245e7b70152",
+        "command": [
+          "--file_to_open",
+          "C:/Users/Myrrr/FloraGPA-evidence/capture-gf2-resolve-current-20261014/launch-2/session/frame-d3b245ec-09d2-4888-91af-5032f19ddbd6.gpa_frame",
+          "--py_plugin",
+          "flora_shader_audit",
+          "--py_arg",
+          "C:/Users/Myrrr/FloraGPA-evidence/capture-gf2-sparse-isa-20261014/original",
+          "--output_log",
+          "C:/Users/Myrrr/FloraGPA-evidence/capture-gf2-sparse-isa-20261014/original.log"
+        ]
+      },
+      {
+        "directory": "validated-count-0",
+        "pid": 33144,
+        "exit_code": 0,
+        "requests": 2,
+        "report_sha256": "fdb2ce9334a2384c2425ad0d315614fe652407ba06083e7757f53e855ad5b78d",
+        "command": [
+          "--file_to_open",
+          "D:/CDXrepo/FloraGPA-Cpp/artifacts/capture-gf2-isa-comparison-20261014/count-output.gpa_frame",
+          "--py_plugin",
+          "flora_shader_audit",
+          "--py_arg",
+          "C:/Users/Myrrr/FloraGPA-evidence/capture-gf2-sparse-isa-20261014/validated-count-0",
+          "--output_log",
+          "C:/Users/Myrrr/FloraGPA-evidence/capture-gf2-sparse-isa-20261014/validated-count-0.log"
+        ]
+      },
+      {
+        "directory": "validated-count-1",
+        "pid": 28872,
+        "exit_code": 0,
+        "requests": 2,
+        "report_sha256": "c70d035d0fb0b3970502e5a0b075f3d14b3e082d807a4098c9631633ac974cdd",
+        "command": [
+          "--file_to_open",
+          "D:/CDXrepo/FloraGPA-Cpp/artifacts/capture-gf2-isa-comparison-20261014/count-output.gpa_frame",
+          "--py_plugin",
+          "flora_shader_audit",
+          "--py_arg",
+          "C:/Users/Myrrr/FloraGPA-evidence/capture-gf2-sparse-isa-20261014/validated-count-1",
+          "--output_log",
+          "C:/Users/Myrrr/FloraGPA-evidence/capture-gf2-sparse-isa-20261014/validated-count-1.log"
+        ]
+      }
+    ],
+    "excluded_runs": [
+      {
+        "directory": "count-0",
+        "pid": 3456,
+        "exit_code": 0,
+        "report_sha256": "6f727a6a2ee91905395b60ce78f705f6732fffb886d911edefe4f8ef6d5a49b1",
+        "reason": "Incorrect expected matching program count; no ISA requested."
+      },
+      {
+        "directory": "count-1",
+        "pid": 52020,
+        "exit_code": 0,
+        "report_sha256": "6f727a6a2ee91905395b60ce78f705f6732fffb886d911edefe4f8ef6d5a49b1",
+        "reason": "Incorrect expected matching program count; no ISA requested."
+      }
+    ],
+    "stages": {
+      "original": {
+        "vertex": {
+          "bytes": 21871,
+          "lines": 228,
+          "sha256": "3c9c3aa5c5ad33ab855796d49305aee0e12300b599f199d3be189f4098ce4796"
+        },
+        "pixel": {
+          "bytes": 86917,
+          "lines": 890,
+          "sha256": "dc9bca5c2d7bd649cf06b2575c02829fcac051f11df822fbc0aca479ce8093a5"
+        }
+      },
+      "validated-count-0": {
+        "vertex": {
+          "bytes": 21871,
+          "lines": 228,
+          "sha256": "3c9c3aa5c5ad33ab855796d49305aee0e12300b599f199d3be189f4098ce4796"
+        },
+        "pixel": {
+          "bytes": 87782,
+          "lines": 900,
+          "sha256": "71cc3c3ee94b9be272e3fb374e1636f3b25396ed55c790012dc060a74ab42a2a"
+        }
+      }
+    },
+    "original_render_writes": [
+      {
+        "line": 874,
+        "descriptor": "0x10030201",
+        "extended_descriptor": "0x0",
+        "binding_table_index": 1,
+        "subtype_bits": 2,
+        "subtype": "lo8ds",
+        "fp32": true,
+        "last_render_target": false,
+        "predicate": "(f1.1)",
+        "end_of_thread": false
+      },
+      {
+        "line": 886,
+        "descriptor": "0x040b1402",
+        "extended_descriptor": "0x140",
+        "binding_table_index": 2,
+        "subtype_bits": 4,
+        "subtype": "simd8",
+        "fp32": true,
+        "last_render_target": true,
+        "predicate": null,
+        "end_of_thread": true
+      }
+    ],
+    "modified_render_writes": [
+      {
+        "line": 872,
+        "descriptor": "0x040b0402",
+        "extended_descriptor": "0x140",
+        "binding_table_index": 2,
+        "subtype_bits": 4,
+        "subtype": "simd8",
+        "fp32": true,
+        "last_render_target": false,
+        "predicate": null,
+        "end_of_thread": false
+      },
+      {
+        "line": 884,
+        "descriptor": "0x040b0404",
+        "extended_descriptor": "0x140",
+        "binding_table_index": 4,
+        "subtype_bits": 4,
+        "subtype": "simd8",
+        "fp32": true,
+        "last_render_target": false,
+        "predicate": null,
+        "end_of_thread": false
+      },
+      {
+        "line": 894,
+        "descriptor": "0x08031401",
+        "extended_descriptor": "0x0",
+        "binding_table_index": 1,
+        "subtype_bits": 4,
+        "subtype": "simd8",
+        "fp32": true,
+        "last_render_target": true,
+        "predicate": "(f0.0)",
+        "end_of_thread": true
+      }
+    ],
+    "decoder_source": {
+      "sha256": "ddfa4819f57ca57167520f70b02dbd6356dbaf4641043e367642a734a6b118ca",
+      "url": "https://github.com/intel/intel-graphics-compiler/blob/c189f01356d4d887b47a4ae72ad770ec086824a9/visa/iga/IGALibrary/Backend/Messages/MessageDecoderOther.cpp",
+      "git_blob_sha": "b8d0b5892c2c752c6d243d362e9cbe6a0aae477d",
+      "commit": "c189f01356d4d887b47a4ae72ad770ec086824a9",
+      "fields": [
+        "MessageTypeRC:14:4",
+        "DataSize:30:1",
+        "Subop:8:3",
+        "LastRenderTargetSelect:12:1",
+        "BTS:0:8"
+      ],
+      "function": "MessageDecoderOther::tryDecodeRC"
+    },
+    "derivative": {
+      "acceptance_established": false,
+      "source": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-resolve-current-20261014\\launch-2\\session\\frame-d3b245ec-09d2-4888-91af-5032f19ddbd6.gpa_frame",
+      "source_sha256": "9bef49cd3f807ae3796ece91d35960604ce4158d0736acb5d545efa346aafacf",
+      "file": "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\capture-gf2-isa-comparison-20261014\\count-output.gpa_frame",
+      "sha256": "49ec1932269370ca800a9dea89473549a9e520c8b22aaa2ddcd6af41b61eb097",
+      "shader_resource": 889,
+      "shader_data": 1785,
+      "modified_shader_sha256": "36e81f84589bff2faedefa6aaf92befc50d62cbb1532b6e02bba69e20f0f5199",
+      "changed_record_ids": [
+        1785
+      ],
+      "original_records_compared": 6395,
+      "old_index": 1325990900,
+      "new_index": 1340903446,
+      "changed_header_fields": [
+        "index offset",
+        "empty pool offset"
+      ],
+      "preview_and_original_file_body_retained": true,
+      "scope": "Changes every use of shader 889; no extra attachment and no framebuffer equivalence claim."
+    },
+    "sparse_attempt": {
+      "completed": false,
+      "logical_bytes": 1341056858,
+      "physical_bytes": 76152832,
+      "path": "C:/Users/Myrrr/FloraGPA-evidence/capture-gf2-sparse-isa-20261014/original.gpa_frame.partial",
+      "cleanup": "Generated incomplete derivative removed; source and derivation script retained.",
+      "failure": "Disk-full while reading the new sparse file during verification; full file hash unavailable. No GPA execution."
+    },
+    "build_cache_cleanup": {
+      "files": 169,
+      "bytes": 1498493087
+    }
+  },
+  "identities": {
+    "C:\\Users\\Myrrr\\Documents\\GPA\\python_plugins\\flora_shader_audit\\__init__.py": "c4d89aa4a6f25554aa2ad6c60a4bf5c7b9a9fd77a11d6c8ea48909965f4c9712",
+    "C:\\Program Files\\IntelSWTools\\GPA\\FrameAnalyzer.exe": "f28314fddc16750ce0b041bd0edd5dff980116803cd585349f93c89a59087280",
+    "C:\\Program Files\\IntelSWTools\\GPA\\python_plugins\\plugin_api\\program.py": "da29915f2e4397df06c64b84b08ece18e1a81b7d76ee195492b2e25b3349113f",
+    "C:\\Program Files\\IntelSWTools\\GPA\\dx11_player.dll": "39061ff329e4a32d0c8375ce9ee15e2017bccab0593943b962a860e11723d38b"
+  },
+  "validation": {
+    "parser_tests": 6,
+    "ctest_passed": 1,
+    "successful_fresh_processes": 3,
+    "successful_isa_requests": 8,
+    "excluded_processes": 2,
+    "unchanged_original_records": 6394
+  },
+  "raw": {
+    "root": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-sparse-isa-20261014",
+    "files": 48,
+    "manifest_sha256": "162fbfbc43c1883e2bcde0ebabb8b64b00331573d79b1f2fbc4e38e84302f09b"
+  },
+  "replay_sha256": "215ebafed657953f0671c32a0948e12c8c965437a3eaa33e6d38aedcff5e2ddc",
+  "limits": "Original GPA ISA exports show changed render-write subtype/order and control flow after adding an unused output. This is not the machine code measured in Flora/game execution, not a shader-equivalence proof and not a root-cause fix. Formal six-frame acceptance remains failed."
+}
