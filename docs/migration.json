@@ -4471,6 +4471,26 @@
       "current_gate_passed": false,
       "production_fix": false,
       "limits": "Count shader remains capture-matching with private target write mask zero; original shader still varies. Actual storage writes are not necessary for the observed instrumentation effect. This does not prove original full-precision inputs or complete depth planes equal, and is not a production fix. Formal six-frame gate remains failed."
+    },
+    "gf2_depth_planes_diagnosis": {
+      "evidence": "docs/CAPTURE_GF2_DEPTH_PLANES.md",
+      "baseline": "docs/capture-gf2-depth-planes-baseline.json",
+      "validated_executions": 10,
+      "validated_matching": 3,
+      "validated_alternate": 7,
+      "statistics_executions": 2,
+      "exploratory_executions": 1,
+      "full_planes_per_execution": 4,
+      "bytes_per_plane": 53747712,
+      "native_cases": 8,
+      "native_plane_texels": 1440,
+      "native_selected_texels": 192,
+      "native_refusals": 64,
+      "probe_cases": 28,
+      "probe_refusals": 24,
+      "current_gate_passed": false,
+      "production_fix": false,
+      "limits": "Complete shader-readable depth/stencil planes now agree across both final color outcomes. GPU padding/compression metadata is excluded. This does not establish equal intermediate fragment histories, post-VS values or shader execution. No production fix; formal six-frame gate remains failed."
     }
   }
 }

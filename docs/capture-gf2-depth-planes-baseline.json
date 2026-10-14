@@ -1,0 +1,423 @@
+{
+  "schema": 1,
+  "date": "2026-10-14",
+  "source_parent_commit": "f1d7dfc923cc00e0311e097126e59898c9f10ff0",
+  "source_hashes": {
+    "tools/native/depth_plane_checkpoint.h": "ee0e604881bd42876e8212244ec85f3c1d30135b09e2b1aed3775a6e1ed9e69b",
+    "tools/native/depth_checkpoint_tests.cpp": "b792fd6a39f2f3698d9f0f837adf0b22ee5e7f6e8ae982038b528a87d02777d4",
+    "tools/native/replay_texel_probe.cpp": "630efc814735807bd79224450dff3908001bbae6ed3c855cb151a5e9deeea3c6",
+    "tools/validate_capture_texel_probe.py": "777fc94ecc3b1c17960332979ceab67c86d0f40396f4dfc00dac1f8eeaab98db",
+    "docs/CAPTURE_GF2_DEPTH_PLANES.md": "a6f9437b730b3f7865b02b44f943a623a180780d05f64bfe56df870f634b8d29"
+  },
+  "current_gate_passed": false,
+  "production_changed": false,
+  "input": {
+    "file": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-resolve-current-20261014\\launch-2\\session\\frame-d3b245ec-09d2-4888-91af-5032f19ddbd6.gpa_frame",
+    "sha256": "9bef49cd3f807ae3796ece91d35960604ce4158d0736acb5d545efa346aafacf",
+    "event": 5651,
+    "color_resource": 411,
+    "depth_resource": 419,
+    "layer": 0,
+    "pixel": [
+      1596,
+      1519
+    ]
+  },
+  "groups": [
+    {
+      "name": "exploratory",
+      "binary": "FloraReplayTexelProbe-before-stats.exe",
+      "directories": [
+        "planes-0"
+      ],
+      "binary_sha256": "0418fc99bbf5d0810cbc8f0f5306c72eeb1ceeed90885598ce9734d766f6c01f"
+    },
+    {
+      "name": "validated",
+      "binary": "FloraReplayTexelProbe-before-stats.exe",
+      "directories": [
+        "validated-planes-0",
+        "validated-planes-1",
+        "validated-planes-2",
+        "validated-planes-3",
+        "validated-planes-4",
+        "validated-planes-5",
+        "validated-planes-6",
+        "validated-planes-7",
+        "validated-planes-8",
+        "validated-planes-9"
+      ],
+      "binary_sha256": "0418fc99bbf5d0810cbc8f0f5306c72eeb1ceeed90885598ce9734d766f6c01f"
+    },
+    {
+      "name": "statistics",
+      "binary": "FloraReplayTexelProbe.exe",
+      "directories": [
+        "stats-0",
+        "stats-1"
+      ],
+      "binary_sha256": "12039ddc91d24896f9d2081d2bb4416c60eaf341b5dfb53eb3c787fb2b4fa975"
+    }
+  ],
+  "totals": {
+    "exploratory": {
+      "matching": 0,
+      "alternate": 1
+    },
+    "validated": {
+      "matching": 3,
+      "alternate": 7
+    },
+    "statistics": {
+      "matching": 0,
+      "alternate": 2
+    }
+  },
+  "runs": [
+    {
+      "group": "exploratory",
+      "directory": "planes-0",
+      "capture_matching": false,
+      "rgba_sha256": "b548683168d47d12344c2a976155eb716c4a14d135dcbb8c9df542b0abd0caa1",
+      "report_sha256": "afa4d68daff469945649f7af4779f3b17068bea0043365da8e4c3ad2afd25a60",
+      "png_sha256": "0e119453793730e1935d5813cd759c69091d9e21ee371235b5214f0127b656fd"
+    },
+    {
+      "group": "validated",
+      "directory": "validated-planes-0",
+      "capture_matching": false,
+      "rgba_sha256": "b548683168d47d12344c2a976155eb716c4a14d135dcbb8c9df542b0abd0caa1",
+      "report_sha256": "afa4d68daff469945649f7af4779f3b17068bea0043365da8e4c3ad2afd25a60",
+      "png_sha256": "0e119453793730e1935d5813cd759c69091d9e21ee371235b5214f0127b656fd"
+    },
+    {
+      "group": "validated",
+      "directory": "validated-planes-1",
+      "capture_matching": true,
+      "rgba_sha256": "d5ffe329528ecabc09517514d1b41c5a8d305210480ad9454c732051a697d0e7",
+      "report_sha256": "6d6003c29513f3cf229fb7eb6e8458b9aa38a3553b752f7f2ba10d67762277bd",
+      "png_sha256": "488fe73cd858012a8973a48eb2f9139f68857ce1668ef013885936f5cb45369b"
+    },
+    {
+      "group": "validated",
+      "directory": "validated-planes-2",
+      "capture_matching": true,
+      "rgba_sha256": "d5ffe329528ecabc09517514d1b41c5a8d305210480ad9454c732051a697d0e7",
+      "report_sha256": "6d6003c29513f3cf229fb7eb6e8458b9aa38a3553b752f7f2ba10d67762277bd",
+      "png_sha256": "488fe73cd858012a8973a48eb2f9139f68857ce1668ef013885936f5cb45369b"
+    },
+    {
+      "group": "validated",
+      "directory": "validated-planes-3",
+      "capture_matching": false,
+      "rgba_sha256": "b548683168d47d12344c2a976155eb716c4a14d135dcbb8c9df542b0abd0caa1",
+      "report_sha256": "afa4d68daff469945649f7af4779f3b17068bea0043365da8e4c3ad2afd25a60",
+      "png_sha256": "0e119453793730e1935d5813cd759c69091d9e21ee371235b5214f0127b656fd"
+    },
+    {
+      "group": "validated",
+      "directory": "validated-planes-4",
+      "capture_matching": true,
+      "rgba_sha256": "d5ffe329528ecabc09517514d1b41c5a8d305210480ad9454c732051a697d0e7",
+      "report_sha256": "6d6003c29513f3cf229fb7eb6e8458b9aa38a3553b752f7f2ba10d67762277bd",
+      "png_sha256": "488fe73cd858012a8973a48eb2f9139f68857ce1668ef013885936f5cb45369b"
+    },
+    {
+      "group": "validated",
+      "directory": "validated-planes-5",
+      "capture_matching": false,
+      "rgba_sha256": "b548683168d47d12344c2a976155eb716c4a14d135dcbb8c9df542b0abd0caa1",
+      "report_sha256": "afa4d68daff469945649f7af4779f3b17068bea0043365da8e4c3ad2afd25a60",
+      "png_sha256": "0e119453793730e1935d5813cd759c69091d9e21ee371235b5214f0127b656fd"
+    },
+    {
+      "group": "validated",
+      "directory": "validated-planes-6",
+      "capture_matching": false,
+      "rgba_sha256": "b548683168d47d12344c2a976155eb716c4a14d135dcbb8c9df542b0abd0caa1",
+      "report_sha256": "afa4d68daff469945649f7af4779f3b17068bea0043365da8e4c3ad2afd25a60",
+      "png_sha256": "0e119453793730e1935d5813cd759c69091d9e21ee371235b5214f0127b656fd"
+    },
+    {
+      "group": "validated",
+      "directory": "validated-planes-7",
+      "capture_matching": false,
+      "rgba_sha256": "b548683168d47d12344c2a976155eb716c4a14d135dcbb8c9df542b0abd0caa1",
+      "report_sha256": "afa4d68daff469945649f7af4779f3b17068bea0043365da8e4c3ad2afd25a60",
+      "png_sha256": "0e119453793730e1935d5813cd759c69091d9e21ee371235b5214f0127b656fd"
+    },
+    {
+      "group": "validated",
+      "directory": "validated-planes-8",
+      "capture_matching": false,
+      "rgba_sha256": "b548683168d47d12344c2a976155eb716c4a14d135dcbb8c9df542b0abd0caa1",
+      "report_sha256": "afa4d68daff469945649f7af4779f3b17068bea0043365da8e4c3ad2afd25a60",
+      "png_sha256": "0e119453793730e1935d5813cd759c69091d9e21ee371235b5214f0127b656fd"
+    },
+    {
+      "group": "validated",
+      "directory": "validated-planes-9",
+      "capture_matching": false,
+      "rgba_sha256": "b548683168d47d12344c2a976155eb716c4a14d135dcbb8c9df542b0abd0caa1",
+      "report_sha256": "afa4d68daff469945649f7af4779f3b17068bea0043365da8e4c3ad2afd25a60",
+      "png_sha256": "0e119453793730e1935d5813cd759c69091d9e21ee371235b5214f0127b656fd"
+    },
+    {
+      "group": "statistics",
+      "directory": "stats-0",
+      "capture_matching": false,
+      "rgba_sha256": "b548683168d47d12344c2a976155eb716c4a14d135dcbb8c9df542b0abd0caa1",
+      "report_sha256": "c954602f94e6daf2d9da8a293cf62065154aa147d42e92da285f9774cc81ed1e",
+      "png_sha256": "0e119453793730e1935d5813cd759c69091d9e21ee371235b5214f0127b656fd"
+    },
+    {
+      "group": "statistics",
+      "directory": "stats-1",
+      "capture_matching": false,
+      "rgba_sha256": "b548683168d47d12344c2a976155eb716c4a14d135dcbb8c9df542b0abd0caa1",
+      "report_sha256": "c954602f94e6daf2d9da8a293cf62065154aa147d42e92da285f9774cc81ed1e",
+      "png_sha256": "0e119453793730e1935d5813cd759c69091d9e21ee371235b5214f0127b656fd"
+    }
+  ],
+  "depth_planes": [
+    {
+      "after": false,
+      "bytes": 53747712,
+      "height": 1944,
+      "layer": 0,
+      "negative_depth_values": 0,
+      "nonfinite_depth_values": 0,
+      "sample": 0,
+      "selected_words": [
+        1025609039,
+        200
+      ],
+      "sha256": "1fa71f428c1b66f50e125289c36b6041e98e90ba0f3d74bdc2edb8d9efb3fa32",
+      "stencil_histogram": [
+        {
+          "texels": 6284182,
+          "value": 0
+        },
+        {
+          "texels": 409110,
+          "value": 200
+        },
+        {
+          "texels": 9699,
+          "value": 201
+        },
+        {
+          "texels": 14349,
+          "value": 203
+        },
+        {
+          "texels": 1124,
+          "value": 204
+        }
+      ],
+      "subnormal_depth_values": 0,
+      "width": 3456,
+      "zero_depth_values": 0
+    },
+    {
+      "after": false,
+      "bytes": 53747712,
+      "height": 1944,
+      "layer": 0,
+      "negative_depth_values": 0,
+      "nonfinite_depth_values": 0,
+      "sample": 1,
+      "selected_words": [
+        1025614223,
+        200
+      ],
+      "sha256": "2f4a4e7fa02cd5fd93743bfc8c440ac8dbd83db4e1774339d94dd030ad68586d",
+      "stencil_histogram": [
+        {
+          "texels": 6284134,
+          "value": 0
+        },
+        {
+          "texels": 409148,
+          "value": 200
+        },
+        {
+          "texels": 9693,
+          "value": 201
+        },
+        {
+          "texels": 14372,
+          "value": 203
+        },
+        {
+          "texels": 1117,
+          "value": 204
+        }
+      ],
+      "subnormal_depth_values": 0,
+      "width": 3456,
+      "zero_depth_values": 0
+    },
+    {
+      "after": true,
+      "bytes": 53747712,
+      "height": 1944,
+      "layer": 0,
+      "negative_depth_values": 0,
+      "nonfinite_depth_values": 0,
+      "sample": 0,
+      "selected_words": [
+        1025641657,
+        200
+      ],
+      "sha256": "48c1da4fdbbb8a322ca3b983a8e8083840b69404c1a7fef68904b387d16ff0ac",
+      "stencil_histogram": [
+        {
+          "texels": 6280137,
+          "value": 0
+        },
+        {
+          "texels": 413155,
+          "value": 200
+        },
+        {
+          "texels": 9699,
+          "value": 201
+        },
+        {
+          "texels": 14349,
+          "value": 203
+        },
+        {
+          "texels": 1124,
+          "value": 204
+        }
+      ],
+      "subnormal_depth_values": 0,
+      "width": 3456,
+      "zero_depth_values": 0
+    },
+    {
+      "after": true,
+      "bytes": 53747712,
+      "height": 1944,
+      "layer": 0,
+      "negative_depth_values": 0,
+      "nonfinite_depth_values": 0,
+      "sample": 1,
+      "selected_words": [
+        1025625546,
+        200
+      ],
+      "sha256": "e8d3b0d05f5856eabb73e0b081700595c4478a88436b0131e6c8bb4c813532ab",
+      "stencil_histogram": [
+        {
+          "texels": 6280083,
+          "value": 0
+        },
+        {
+          "texels": 413199,
+          "value": 200
+        },
+        {
+          "texels": 9693,
+          "value": 201
+        },
+        {
+          "texels": 14372,
+          "value": 203
+        },
+        {
+          "texels": 1117,
+          "value": 204
+        }
+      ],
+      "subnormal_depth_values": 0,
+      "width": 3456,
+      "zero_depth_values": 0
+    }
+  ],
+  "pixel_differences": {
+    "b548683168d47d12344c2a976155eb716c4a14d135dcbb8c9df542b0abd0caa1": [
+      {
+        "x": 1182,
+        "y": 313,
+        "captured": [
+          12,
+          14,
+          12,
+          255
+        ],
+        "replayed": [
+          12,
+          15,
+          12,
+          255
+        ]
+      },
+      {
+        "x": 1182,
+        "y": 314,
+        "captured": [
+          13,
+          12,
+          8,
+          247
+        ],
+        "replayed": [
+          13,
+          12,
+          8,
+          248
+        ]
+      },
+      {
+        "x": 1183,
+        "y": 314,
+        "captured": [
+          22,
+          22,
+          17,
+          254
+        ],
+        "replayed": [
+          22,
+          22,
+          17,
+          255
+        ]
+      }
+    ],
+    "d5ffe329528ecabc09517514d1b41c5a8d305210480ad9454c732051a697d0e7": []
+  },
+  "excluded_native": {
+    "excluded_native_report": "native-planes.json",
+    "excluded_native_binary": "FloraDepthCheckpointTests-stale.exe",
+    "sha256": "78a4492e3e22d6d8e9c989fa5ad76b77eaccecb9462d941e68e20c5026ce6a4a",
+    "reason": "An expanded native build failed because append was not a visible function. The existing old depth test binary was inadvertently copied and executed before the build failure was handled; its report has no complete-plane checks and is excluded. The corrected independent little-endian encoder was built successfully, and native-planes-validated.json passed before the ten validated GF2 runs.",
+    "other_build_repair": "An earlier /WX shadowed-local warning was fixed by naming the full-plane buffer planeBytes.",
+    "exploratory_replay": "planes-0",
+    "accepted_native_report": "native-planes-validated.json"
+  },
+  "validation": {
+    "native_cases": 8,
+    "native_planes": 96,
+    "native_plane_texels": 1440,
+    "native_selected_texels": 192,
+    "native_refusals": 64,
+    "native_debug_warnings_or_errors": 0,
+    "independent_python_plane_hashes": 96,
+    "probe_cases": 28,
+    "probe_refusals": 24,
+    "ctest_passed": 1,
+    "capture_only_configured": true
+  },
+  "native_binary_sha256": "d94d335ec496a8105c4c3e88b38645420a89c3884f9d2b15789dd5f927234dcc",
+  "replay_sha256": "215ebafed657953f0671c32a0948e12c8c965437a3eaa33e6d38aedcff5e2ddc",
+  "raw": {
+    "root": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-depth-planes-20261014",
+    "files": 158,
+    "manifest_sha256": "e222942a2e7cefadf751296d1817bd49794ddd4af7d5bdbdee4df1ffea66f194"
+  },
+  "limits": "Complete shader-readable depth/stencil planes now agree across both final color outcomes. GPU padding/compression metadata is excluded. This does not establish equal intermediate fragment histories, post-VS values or shader execution. No production fix; formal six-frame gate remains failed."
+}

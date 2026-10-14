@@ -5,6 +5,7 @@
 #include "input_checkpoint.h"
 #include "pipeline_checkpoint.h"
 #include "fragment_checkpoint.h"
+#include "depth_plane_checkpoint.h"
 #include <QImage>
 #include <d3d11sdklayers.h>
 #include <fstream>
@@ -36,7 +37,7 @@ int wmain(int argc, wchar_t** argv) {
     Json report{{"schema", 1}, {"completed", false}, {"acceptance_established", false},
                 {"reference_pixels_used", false}, {"observations", Json::array()}};
     try {
-        require(argc == 13, "FRAME NEW_OUT VENDOR RESOURCE SAMPLE LAYER X Y before|after|trace|final|checkpoint|inputs|depth|pipeline|pipeline-debug|unblended|fragment|fragment-half|fragment-count|fragment-binding|fragment-masked|shader-recreate|shader-repack FIRST LAST READ_BUDGET");
+        require(argc == 13, "FRAME NEW_OUT VENDOR RESOURCE SAMPLE LAYER X Y before|after|trace|final|checkpoint|inputs|depth|pipeline|pipeline-debug|depth-planes|unblended|fragment|fragment-half|fragment-count|fragment-binding|fragment-masked|shader-recreate|shader-repack FIRST LAST READ_BUDGET");
         const auto vendor = number(argv[3]), resource = number(argv[4]), sample = number(argv[5]),
                    layer = number(argv[6]), x = number(argv[7]), y = number(argv[8]),
                    first = number(argv[10]), last = number(argv[11]);
@@ -46,7 +47,7 @@ int wmain(int argc, wchar_t** argv) {
         const bool countOnly=mode==L"fragment-count"||mode==L"fragment-binding"||mode==L"fragment-masked";
         const bool fragment = mode == L"fragment" || mode == L"fragment-half" || countOnly;
         const bool shaderExperiment=mode==L"shader-recreate"||mode==L"shader-repack";
-        const bool pipeline = shaderExperiment || mode == L"pipeline-debug" || mode == L"pipeline" || mode == L"unblended" || fragment;
+        const bool pipeline = mode==L"depth-planes" || shaderExperiment || mode == L"pipeline-debug" || mode == L"pipeline" || mode == L"unblended" || fragment;
         const bool depth = mode == L"depth" || pipeline;
         const bool inputs = mode == L"inputs" || depth;
         const bool checkpoint = mode == L"checkpoint" || inputs;
@@ -71,6 +72,7 @@ int wmain(int argc, wchar_t** argv) {
         require(sample < info.samples && layer < info.layers && x < info.width && y < info.height,
                 "Texel selection out of bounds");
         require(!fragment || budget >= 3 + (countOnly?3u:4u) * info.samples,"Fragment checkpoint read budget too small");
+        require(mode!=L"depth-planes" || budget>=3+4*info.samples,"Depth plane checkpoint read budget too small");
         require(!depth || budget >= 3 + 2 * info.samples,"Depth checkpoint read budget too small");
         uint64_t bytes = 0;
         for (const auto& sub : textureSubresources(description)) {
@@ -84,7 +86,7 @@ int wmain(int argc, wchar_t** argv) {
                     "Expected Draw/Dispatch event boundaries");
         require(fs::create_directory(destination), "Cannot create output directory");
         output = destination;
-        report.update({{"mode", mode == L"shader-recreate" ? "shader-recreate" : mode == L"shader-repack" ? "shader-repack" : mode == L"fragment-masked" ? "fragment-masked" : mode == L"fragment-binding" ? "fragment-binding" : mode == L"fragment-count" ? "fragment-count" : mode == L"fragment-half" ? "fragment-half" : mode == L"fragment" ? "fragment" : mode == L"unblended" ? "unblended" : mode == L"pipeline-debug" ? "pipeline-debug" : mode == L"pipeline" ? "pipeline" : mode == L"depth" ? "depth" : mode == L"inputs" ? "inputs" : mode == L"checkpoint" ? "checkpoint" : mode == L"final" ? "final" : mode == L"trace" ? "trace" : mode == L"before" ? "before" : "after"}, {"vendor", vendor},
+        report.update({{"mode", mode == L"shader-recreate" ? "shader-recreate" : mode == L"shader-repack" ? "shader-repack" : mode == L"fragment-masked" ? "fragment-masked" : mode == L"fragment-binding" ? "fragment-binding" : mode == L"fragment-count" ? "fragment-count" : mode == L"fragment-half" ? "fragment-half" : mode == L"fragment" ? "fragment" : mode == L"unblended" ? "unblended" : mode == L"depth-planes" ? "depth-planes" : mode == L"pipeline-debug" ? "pipeline-debug" : mode == L"pipeline" ? "pipeline" : mode == L"depth" ? "depth" : mode == L"inputs" ? "inputs" : mode == L"checkpoint" ? "checkpoint" : mode == L"final" ? "final" : mode == L"trace" ? "trace" : mode == L"before" ? "before" : "after"}, {"vendor", vendor},
                        {"resource", resource}, {"sample", sample}, {"layer", layer}, {"x", x}, {"y", y},
                        {"first", first}, {"last", last}, {"read_budget", budget},
                        {"observer_changes_scheduling", mode == L"trace" || checkpoint}, {"typed_format", typed}});
@@ -243,6 +245,25 @@ int wmain(int argc, wchar_t** argv) {
             for(unsigned after=0;after<2;++after)for(uint32_t lane=0;lane<info.samples;++lane){
                 const auto value=diagnostic::readCheckpoint(replay.nativeDevice(),depthCopies[after].Get(),20,lane,0,uint32_t(x),uint32_t(y));
                 report["depth_samples"].push_back({{"after",after!=0},{"sample",lane},{"depth_float_bits",value[0]},{"stencil",value[1]}});
+            }
+        }
+        if(mode==L"depth-planes"){
+            report["depth_planes"]=Json::array();
+            for(unsigned after=0;after<2;++after)for(uint32_t lane=0;lane<info.samples;++lane){
+                const auto planeBytes=diagnostic::readDepthPlane(replay.nativeDevice(),depthCopies[after].Get(),lane,0);
+                const auto offset=(size_t(y)*info.width+size_t(x))*8;
+                std::array<uint32_t,2> point{};std::memcpy(point.data(),planeBytes.data()+offset,sizeof point);
+                const auto& single=report["depth_samples"][after*info.samples+lane];
+                require(single["depth_float_bits"]==point[0]&&single["stencil"]==point[1],"Full depth plane differs from single-texel reader");
+                uint64_t nonfinite=0,negative=0,subnormal=0,zero=0;std::array<uint64_t,256> stencilCounts{};
+                for(size_t cursor=0;cursor<planeBytes.size();cursor+=8){
+                    std::array<uint32_t,2> value{};std::memcpy(value.data(),planeBytes.data()+cursor,sizeof value);
+                    require(value[1]<256,"Depth plane stencil exceeds eight bits");++stencilCounts[value[1]];
+                    const auto exponent=value[0]&0x7f800000u,mantissa=value[0]&0x007fffffu;
+                    nonfinite+=exponent==0x7f800000u;negative+=(value[0]>>31)!=0;subnormal+=exponent==0&&mantissa!=0;zero+=(value[0]&0x7fffffffu)==0;
+                }
+                Json histogram=Json::array();for(unsigned value=0;value<stencilCounts.size();++value)if(stencilCounts[value])histogram.push_back({{"value",value},{"texels",stencilCounts[value]}});
+                report["depth_planes"].push_back({{"after",after!=0},{"sample",lane},{"layer",0},{"width",info.width},{"height",info.height},{"bytes",planeBytes.size()},{"sha256",sha256(planeBytes)},{"selected_words",point},{"nonfinite_depth_values",nonfinite},{"negative_depth_values",negative},{"subnormal_depth_values",subnormal},{"zero_depth_values",zero},{"stencil_histogram",histogram}});
             }
         }
         if (!full)

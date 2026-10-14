@@ -131,6 +131,7 @@ def main():
                 ('range', dict(last=application[1]), 'identical first/last'),
                 ('checkpoint-budget', dict(mode='checkpoint'), 'budget >= 3'),
                 ('depth-budget', dict(mode='depth', budget=3), 'Depth checkpoint read budget too small'),
+                ('depth-planes-budget', dict(mode='depth-planes', budget=7), 'Depth plane checkpoint read budget too small'),
                 ('fragment-budget', dict(mode='fragment', budget=7), 'Fragment checkpoint read budget too small'),
                 ('fragment-half-budget', dict(mode='fragment-half', budget=7), 'Fragment checkpoint read budget too small'),
                 ('fragment-count-budget', dict(mode='fragment-count', budget=7), 'Fragment checkpoint read budget too small'),
