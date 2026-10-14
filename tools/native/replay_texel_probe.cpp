@@ -3,6 +3,7 @@
 #include "replay/Replay.h"
 #include "texel_checkpoint.h"
 #include "input_checkpoint.h"
+#include "pipeline_checkpoint.h"
 #include <QImage>
 #include <fstream>
 #include <iostream>
@@ -33,14 +34,17 @@ int wmain(int argc, wchar_t** argv) {
     Json report{{"schema", 1}, {"completed", false}, {"acceptance_established", false},
                 {"reference_pixels_used", false}, {"observations", Json::array()}};
     try {
-        require(argc == 13, "FRAME NEW_OUT VENDOR RESOURCE SAMPLE LAYER X Y before|after|trace|final|checkpoint|inputs|depth FIRST LAST READ_BUDGET");
+        require(argc == 13, "FRAME NEW_OUT VENDOR RESOURCE SAMPLE LAYER X Y before|after|trace|final|checkpoint|inputs|depth|pipeline|unblended FIRST LAST READ_BUDGET");
         const auto vendor = number(argv[3]), resource = number(argv[4]), sample = number(argv[5]),
                    layer = number(argv[6]), x = number(argv[7]), y = number(argv[8]),
                    first = number(argv[10]), last = number(argv[11]);
         // The final argument is an explicit read budget, including before/after trace observations.
         const auto budget = number(argv[12]);
         const std::wstring mode(argv[9]);
-        const bool checkpoint = mode == L"checkpoint" || mode == L"inputs" || mode == L"depth";
+        const bool pipeline = mode == L"pipeline" || mode == L"unblended";
+        const bool depth = mode == L"depth" || pipeline;
+        const bool inputs = mode == L"inputs" || depth;
+        const bool checkpoint = mode == L"checkpoint" || inputs;
         require(mode == L"before" || mode == L"after" || mode == L"trace" || mode == L"final" || checkpoint, "Unknown probe mode");
         const bool full = mode == L"trace" || mode == L"final" || checkpoint;
         require(vendor && vendor <= UINT16_MAX && resource && first && last >= first,
@@ -61,7 +65,7 @@ int wmain(int argc, wchar_t** argv) {
         require(typed != 0, "Expected RGBA8/RGBA16 color family");
         require(sample < info.samples && layer < info.layers && x < info.width && y < info.height,
                 "Texel selection out of bounds");
-        require(mode != L"depth" || budget >= 3 + 2 * info.samples,"Depth checkpoint read budget too small");
+        require(!depth || budget >= 3 + 2 * info.samples,"Depth checkpoint read budget too small");
         uint64_t bytes = 0;
         for (const auto& sub : textureSubresources(description)) {
             require(sub.size <= (uint64_t(2) << 30) - bytes, "Readback memory budget exceeded");
@@ -74,7 +78,7 @@ int wmain(int argc, wchar_t** argv) {
                     "Expected Draw/Dispatch event boundaries");
         require(fs::create_directory(destination), "Cannot create output directory");
         output = destination;
-        report.update({{"mode", mode == L"depth" ? "depth" : mode == L"inputs" ? "inputs" : mode == L"checkpoint" ? "checkpoint" : mode == L"final" ? "final" : mode == L"trace" ? "trace" : mode == L"before" ? "before" : "after"}, {"vendor", vendor},
+        report.update({{"mode", mode == L"unblended" ? "unblended" : mode == L"pipeline" ? "pipeline" : mode == L"depth" ? "depth" : mode == L"inputs" ? "inputs" : mode == L"checkpoint" ? "checkpoint" : mode == L"final" ? "final" : mode == L"trace" ? "trace" : mode == L"before" ? "before" : "after"}, {"vendor", vendor},
                        {"resource", resource}, {"sample", sample}, {"layer", layer}, {"x", x}, {"y", y},
                        {"first", first}, {"last", last}, {"read_budget", budget},
                        {"observer_changes_scheduling", mode == L"trace" || checkpoint}, {"typed_format", typed}});
@@ -111,6 +115,8 @@ int wmain(int argc, wchar_t** argv) {
         std::array<Com<ID3D11Texture2D>, 2> checkpoints;
         std::array<Com<ID3D11Texture2D>, 2> depthCopies;
         diagnostic::InputCheckpoint inputCopies;
+        diagnostic::UnblendedRt0 blendOverride;
+        report["modified_draw"] = mode == L"unblended";
         ReplayBoundaryObserver observer;
         if (mode == L"trace" || checkpoint) {
             observer = [&](Id id, bool after, auto* context, const auto& objects) {
@@ -126,13 +132,19 @@ int wmain(int argc, wchar_t** argv) {
                     writer |= target == resource;
                 }
                 if (writer) {
+                    if(mode==L"unblended" && after)blendOverride.restore();
+                    if(pipeline){
+                        const auto native=diagnostic::pipelineCheckpoint(context,objects);
+                        if(after)require(report["native_pipeline"]==native,"Draw changed inspected pipeline bindings");
+                        else report["native_pipeline"]=native;
+                    }
                     writers.insert(id);
                     if (checkpoint) {
-                        if ((mode == L"inputs" || mode == L"depth") && !after)
+                        if (inputs && !after)
                             inputCopies.capture(replay.nativeDevice(), context, objects);
                         require(objects.contains(resource), "Resource has no executed GPU object");
                         checkpoints[after ? 1 : 0] = diagnostic::checkpoint(replay.nativeDevice(), context, objects.at(resource).Get(), typed);
-                        if (mode == L"depth") {
+                        if (depth) {
                             Com<ID3D11DepthStencilView> view; context->OMGetRenderTargets(0,nullptr,&view);
                             require(bool(view), "Depth checkpoint requires a bound DSV");
                             D3D11_DEPTH_STENCIL_VIEW_DESC vd{};view->GetDesc(&vd);
@@ -158,6 +170,12 @@ int wmain(int argc, wchar_t** argv) {
                             if(after)require(report["depth_state"]==stateReport,"Draw changed depth binding state");else report["depth_state"]=stateReport;
                             depthCopies[after?1:0]=diagnostic::checkpoint(replay.nativeDevice(),context,native.Get(),20);
                         }
+                        if(mode==L"unblended" && !after){
+                            require(event.type==0x39 && !state.stages[1].shader && !state.stages[2].shader && !state.stages[3].shader && !state.soCount && !state.predicate,
+                                    "Unblended experiment requires VS/PS DrawIndexed without SO/predicate");
+                            require(report["native_pipeline"]["rtv"][0]["resource"]==resource,"Unblended resource must be RTV0");
+                            blendOverride.apply(replay.nativeDevice(),context);
+                        }
                     } else read(id, after, objects);
                 }
             };
@@ -171,7 +189,7 @@ int wmain(int argc, wchar_t** argv) {
                 report["observations"].push_back({{"event", first}, {"after", i != 0}, {"words", words}});
             }
         }
-        if(mode==L"depth"){
+        if(depth){
             require(depthCopies[0] && depthCopies[1],"Missing depth checkpoints");
             report["depth_samples"]=Json::array();
             for(unsigned after=0;after<2;++after)for(uint32_t lane=0;lane<info.samples;++lane){
@@ -186,7 +204,7 @@ int wmain(int argc, wchar_t** argv) {
         report["last_work_event"] = replay.lastWorkEvent(); report["writers"] = writers;
         if (full) {
             const auto image = replay.output();
-            if (mode == L"inputs" || mode == L"depth") report["inputs"] = inputCopies.read(replay.nativeDevice());
+            if (inputs) report["inputs"] = inputCopies.read(replay.nativeDevice());
             replay.inspectNativeState([&](auto*, const auto& objects) {
                 require(objects.contains(image.resource) && frame.resource(image.resource).type == 0x85,
                         "Final output is not an executed GPU texture");

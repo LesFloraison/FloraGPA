@@ -4396,6 +4396,25 @@
       "current_gate_passed": false,
       "all_draw_inputs_proven_equal": false,
       "limits": "One pixel, both depth/stencil samples and native depth binding agree before/after across two color outcomes. Fifteen checked input resources also agree. Full planes, fragment histories and other native pipeline state are not proven equal; added copies alter scheduling. Formal six-frame gate remains failed."
+    },
+    "gf2_blend_checkpoint_diagnosis": {
+      "evidence": "docs/CAPTURE_GF2_BLEND_CHECKPOINT.md",
+      "baseline": "docs/capture-gf2-blend-checkpoint-baseline.json",
+      "normal_executions": 10,
+      "normal_outputs_capture_matching": 1,
+      "normal_outputs_known_alternate": 9,
+      "modified_executions": 10,
+      "modified_distinct_outputs": 1,
+      "inspected_input_resources": 15,
+      "native_cases": 4,
+      "native_exact_texels": 72,
+      "native_refusals": 16,
+      "probe_cases": 28,
+      "probe_refusals": 18,
+      "ctest_passed": 1,
+      "current_gate_passed": false,
+      "all_draw_inputs_proven_equal": false,
+      "limits": "Observed native bindings, fifteen input resources and selected depth/stencil checkpoints agree across normal and modified runs. Stable unblended last half-float color does not establish identical fragment histories/full-precision outputs or a blend hardware fault. Formal six-frame gate remains failed."
     }
   }
 }
