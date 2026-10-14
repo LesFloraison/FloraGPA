@@ -1,6 +1,7 @@
 // Development-only repeated DrawIndexed from one GPU checkpoint.
 // Copies, readbacks and repeated draws change execution; this cannot grant capture acceptance.
 #include "replay/Replay.h"
+#include "pipeline_checkpoint.h"
 #include <bit>
 #include <d3d11sdklayers.h>
 #include <d3dcompiler.h>
@@ -30,8 +31,9 @@ struct Checkpoint {
 };
 } // namespace
 int wmain(int argc, wchar_t **argv) {
-    if (argc != 8 && (argc != 9 || std::wstring(argv[8]) != L"--debug-device")) {
-        std::cerr << "FRAME NEW_OUT EVENT RESOURCE SAMPLE PCI_VENDOR REPEATS [--debug-device]\n";
+    if (argc < 8) {
+        std::cerr << "FRAME NEW_OUT EVENT RESOURCE SAMPLE PCI_VENDOR REPEATS [--debug-device] "
+                     "[--indices FIRST COUNT] [--defer-readback]\n";
         return 2;
     }
     fs::path output;
@@ -42,6 +44,20 @@ int wmain(int argc, wchar_t **argv) {
     try {
         const auto id = number(argv[3]), resource = number(argv[4]), sample = number(argv[5]),
                    vendor = number(argv[6]), repeats = number(argv[7]);
+        bool debugDevice = false, deferReadback = false;
+        std::optional<std::array<uint64_t, 2>> range;
+        for (int i = 8; i < argc; ++i) {
+            const std::wstring option(argv[i]);
+            if (option == L"--debug-device" && !debugDevice)
+                debugDevice = true;
+            else if (option == L"--defer-readback" && !deferReadback)
+                deferReadback = true;
+            else if (option == L"--indices" && !range && i + 2 < argc) {
+                range = {number(argv[i + 1]), number(argv[i + 2])};
+                i += 2;
+            } else
+                throw std::invalid_argument("Unknown, duplicate or incomplete option");
+        }
         if (!id || !resource || sample > UINT32_MAX || !vendor || vendor > UINT16_MAX || repeats < 2 ||
             repeats > 100)
             throw std::invalid_argument("Invalid event/resource/sample/vendor/repeat selection");
@@ -55,6 +71,16 @@ int wmain(int argc, wchar_t **argv) {
             state.stages[1].shader || state.stages[2].shader || state.stages[3].shader || state.soCount ||
             state.predicate || !state.stages[0].shader || !state.stages[4].shader)
             throw std::runtime_error("Expected bounded DrawIndexed without tessellation/GS/SO/predicate");
+        auto restoredArgs = event.args;
+        if (range) {
+            const auto start = (*range)[0], count = (*range)[1];
+            if (state.topology != D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST || start % 3 || !count ||
+                count % 3 || start > event.args[0] || count > event.args[0] - start ||
+                start > UINT32_MAX - event.args[1])
+                throw std::invalid_argument("Index range must select complete original triangles");
+            restoredArgs[0] = UINT(count);
+            restoredArgs[1] += UINT(start);
+        }
         // Shader model 4 cannot write UAVs. Refuse a wider shader model rather than failing to
         // restore shader-visible side effects before the next diagnostic draw.
         for (const auto stage : {0u, 4u}) {
@@ -72,7 +98,7 @@ int wmain(int argc, wchar_t **argv) {
         ReplayOptions options;
         options.until = id;
         options.vendor = uint32_t(vendor);
-        options.debug = argc == 9;
+        options.debug = debugDevice;
         Replay replay(frame, options);
         Com<ID3D11InfoQueue> diagnostics;
         if (options.debug)
@@ -105,6 +131,12 @@ int wmain(int argc, wchar_t **argv) {
                        {"requested_gpu_vendor", vendor},
                        {"adapter", replay.adapter()},
                        {"debug_device", options.debug},
+                       {"original_draw_args", event.args},
+                       {"restored_draw_args", restoredArgs},
+                       {"modified_restored_draw", restoredArgs != event.args},
+                       {"deferred_readback", deferReadback},
+                       {"device_feature_level", uint32_t(replay.nativeDevice()->GetFeatureLevel())},
+                       {"device_creation_flags", replay.nativeDevice()->GetCreationFlags()},
                        {"repeats", repeats},
                        {"runs", Json::array()},
                        {"checkpoint", Json::array()}});
@@ -113,6 +145,8 @@ int wmain(int argc, wchar_t **argv) {
         std::array<ID3D11RenderTargetView *, 8> views{};
         Com<ID3D11DepthStencilView> depth;
         std::vector<Checkpoint> checkpoints;
+        Com<ID3D11Texture2D> selectedTarget;
+        std::vector<Com<ID3D11Texture2D>> pending;
         bool observed = false;
         std::vector<uint8_t> first;
         std::set<std::string> hashes;
@@ -121,6 +155,7 @@ int wmain(int argc, wchar_t **argv) {
                 return;
             if (!after) {
                 report["prefix_debug_messages"] = collectDiagnostics();
+                report["native_pipeline"] = diagnostic::pipelineCheckpoint(context, objects);
                 context->OMGetRenderTargets(UINT(views.size()), views.data(), &depth);
                 for (size_t i = 0; i < views.size(); ++i)
                     held[i].Attach(views[i]);
@@ -163,20 +198,27 @@ int wmain(int argc, wchar_t **argv) {
                 }
                 if (!found)
                     throw std::runtime_error("Selected target is not a bound output");
+                if (deferReadback) {
+                    D3D11_TEXTURE2D_DESC desc{};
+                    target->GetDesc(&desc);
+                    const auto snapshotBytes = uint64_t(desc.Width) * desc.Height *
+                                               desc.SampleDesc.Count * 8 * (repeats + 1);
+                    if (desc.ArraySize != 1 || desc.MipLevels != 1 || snapshotBytes > (uint64_t(512) << 20))
+                        throw std::runtime_error("Deferred readback exceeds single-layer/512 MiB budget");
+                    report["deferred_snapshot_bytes"] = snapshotBytes;
+                    selectedTarget = target;
+                    pending.resize(size_t(repeats + 1));
+                    for (auto &copy : pending)
+                        check(replay.nativeDevice()->CreateTexture2D(&desc, nullptr, &copy),
+                              "Create deferred sample source");
+                }
                 context->OMSetRenderTargets(0, nullptr, nullptr);
                 for (const auto &item : checkpoints)
                     context->CopyResource(item.copy.Get(), item.source.Get());
                 context->OMSetRenderTargets(UINT(views.size()), views.data(), depth.Get());
                 return;
             }
-            for (uint64_t iteration = 0; iteration <= repeats; ++iteration) {
-                if (iteration) {
-                    context->OMSetRenderTargets(0, nullptr, nullptr);
-                    for (const auto &item : checkpoints)
-                        context->CopyResource(item.source.Get(), item.copy.Get());
-                    context->OMSetRenderTargets(UINT(views.size()), views.data(), depth.Get());
-                    context->DrawIndexed(event.args[0], event.args[1], std::bit_cast<INT>(event.args[2]));
-                }
+            const auto record = [&](uint64_t iteration) {
                 const auto bytes =
                     replay.readMsaa(resource, UINT(sample), DXGI_FORMAT_R16G16B16A16_FLOAT).bytes;
                 if (!iteration)
@@ -204,7 +246,35 @@ int wmain(int argc, wchar_t **argv) {
                                           {"different_bytes_vs_first", difference},
                                           {"first_offsets", offsets}});
                 report["runs"].back()["debug_messages"] = collectDiagnostics();
+                if (diagnostic::pipelineCheckpoint(context, objects) != report["native_pipeline"])
+                    throw std::runtime_error("Checkpoint readback changed native pipeline bindings");
                 save(output / "report.json", report);
+            };
+            for (uint64_t iteration = 0; iteration <= repeats; ++iteration) {
+                if (iteration) {
+                    context->OMSetRenderTargets(0, nullptr, nullptr);
+                    for (const auto &item : checkpoints)
+                        context->CopyResource(item.source.Get(), item.copy.Get());
+                    context->OMSetRenderTargets(UINT(views.size()), views.data(), depth.Get());
+                    context->DrawIndexed(restoredArgs[0], restoredArgs[1], std::bit_cast<INT>(restoredArgs[2]));
+                }
+                if (diagnostic::pipelineCheckpoint(context, objects) != report["native_pipeline"])
+                    throw std::runtime_error("Checkpoint draw changed native pipeline bindings");
+                if (deferReadback) {
+                    context->OMSetRenderTargets(0, nullptr, nullptr);
+                    context->CopyResource(pending[size_t(iteration)].Get(), selectedTarget.Get());
+                    context->OMSetRenderTargets(UINT(views.size()), views.data(), depth.Get());
+                } else
+                    record(iteration);
+            }
+            if (deferReadback) {
+                report["deferred_submission_debug_messages"] = collectDiagnostics();
+                for (uint64_t iteration = 0; iteration <= repeats; ++iteration) {
+                    context->OMSetRenderTargets(0, nullptr, nullptr);
+                    context->CopyResource(selectedTarget.Get(), pending[size_t(iteration)].Get());
+                    context->OMSetRenderTargets(UINT(views.size()), views.data(), depth.Get());
+                    record(iteration);
+                }
             }
             observed = true;
         });

@@ -8,6 +8,9 @@ The current Draw now has an independent native fixture with explicit feature-lev
 and device-flag controls; see [CAPTURE_GF2_NATIVE_LEVEL.md](CAPTURE_GF2_NATIVE_LEVEL.md).
 Its selected sample is now isolated to original triangle 2443; see
 [CAPTURE_GF2_CURRENT_PRIMITIVE.md](CAPTURE_GF2_CURRENT_PRIMITIVE.md).
+Prefix/checkpoint controls retain the selected-point change even when sample
+readback is deferred; [CAPTURE_GF2_PREFIX_TRIANGLE.md](CAPTURE_GF2_PREFIX_TRIANGLE.md)
+also records a separate unexplained partial-plane variant.
 
 GPU-generated indirect Draw/Dispatch arguments now remain native indirect records,
 with immediate/deferred/nested execution and byte-exact controls documented in

@@ -1,0 +1,569 @@
+{
+  "schema": 1,
+  "date": "2026-10-14",
+  "source_parent_commit": "ec6e4305ede14e6c8fdbd4d1f6f422cde2fbbe38",
+  "source_hashes": {
+    "tools/native/replay_draw_repeat_probe.cpp": "1c37ff2ad35fcec25e62c99675d25fff9962b29ea669b76e1091a322d19edb98",
+    "docs/CAPTURE_GF2_PREFIX_TRIANGLE.md": "edbe1dbee580147e5a85a3c60400cd6fe84a51974b0eccc2ab2a810e79179fd8",
+    "docs/INDEPENDENT_CAPTURE.md": "dba48c8f01026988e5a0a3ee2c6c899de66fb8ad024092b7b636b10d8695ab40"
+  },
+  "summary": {
+    "schema": 1,
+    "current_gate_passed": false,
+    "production_fix": false,
+    "runs": [
+      {
+        "directory": "full-0",
+        "report_sha256": "5d92e097cf95b2eeeafb1ca0e2bae3ec5be4a69d6daa50fb5f1b3b018878ff42",
+        "deferred_readback": false,
+        "restored_draw_args": [
+          7401,
+          0,
+          0
+        ],
+        "observations": [
+          {
+            "iteration": 0,
+            "sha256": "d9e2edda8025bbe17034e5c6000d8e06790476e1e061323836ab2b7b7f21f2aa",
+            "half_words": [
+              9109,
+              9233,
+              8865,
+              15151
+            ],
+            "different_bytes_vs_first": 0
+          },
+          {
+            "iteration": 1,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5",
+            "half_words": [
+              9127,
+              9247,
+              8891,
+              15143
+            ],
+            "different_bytes_vs_first": 4
+          },
+          {
+            "iteration": 2,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5",
+            "half_words": [
+              9127,
+              9247,
+              8891,
+              15143
+            ],
+            "different_bytes_vs_first": 4
+          }
+        ]
+      },
+      {
+        "directory": "triangle-0",
+        "report_sha256": "371f157d32e155fbd440d105c90c6fd433e306ee7f349772c5dc37a918c49660",
+        "deferred_readback": false,
+        "restored_draw_args": [
+          3,
+          7329,
+          0
+        ],
+        "observations": [
+          {
+            "iteration": 0,
+            "sha256": "d9e2edda8025bbe17034e5c6000d8e06790476e1e061323836ab2b7b7f21f2aa",
+            "half_words": [
+              9109,
+              9233,
+              8865,
+              15151
+            ],
+            "different_bytes_vs_first": 0
+          },
+          {
+            "iteration": 1,
+            "sha256": "3b44459ed71aec47595e416ca241c00740fa181bf478e8971554c439e30a0603",
+            "half_words": [
+              9127,
+              9247,
+              8891,
+              15143
+            ],
+            "different_bytes_vs_first": 45812
+          },
+          {
+            "iteration": 2,
+            "sha256": "3b44459ed71aec47595e416ca241c00740fa181bf478e8971554c439e30a0603",
+            "half_words": [
+              9127,
+              9247,
+              8891,
+              15143
+            ],
+            "different_bytes_vs_first": 45812
+          }
+        ]
+      },
+      {
+        "directory": "full-1",
+        "report_sha256": "5d92e097cf95b2eeeafb1ca0e2bae3ec5be4a69d6daa50fb5f1b3b018878ff42",
+        "deferred_readback": false,
+        "restored_draw_args": [
+          7401,
+          0,
+          0
+        ],
+        "observations": [
+          {
+            "iteration": 0,
+            "sha256": "d9e2edda8025bbe17034e5c6000d8e06790476e1e061323836ab2b7b7f21f2aa",
+            "half_words": [
+              9109,
+              9233,
+              8865,
+              15151
+            ],
+            "different_bytes_vs_first": 0
+          },
+          {
+            "iteration": 1,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5",
+            "half_words": [
+              9127,
+              9247,
+              8891,
+              15143
+            ],
+            "different_bytes_vs_first": 4
+          },
+          {
+            "iteration": 2,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5",
+            "half_words": [
+              9127,
+              9247,
+              8891,
+              15143
+            ],
+            "different_bytes_vs_first": 4
+          }
+        ]
+      },
+      {
+        "directory": "triangle-1",
+        "report_sha256": "fceb54de6591492a8605ea9945c2af6c20743f2f41e2a1898f344b0b902a281f",
+        "deferred_readback": false,
+        "restored_draw_args": [
+          3,
+          7329,
+          0
+        ],
+        "observations": [
+          {
+            "iteration": 0,
+            "sha256": "d9e2edda8025bbe17034e5c6000d8e06790476e1e061323836ab2b7b7f21f2aa",
+            "half_words": [
+              9109,
+              9233,
+              8865,
+              15151
+            ],
+            "different_bytes_vs_first": 0
+          },
+          {
+            "iteration": 1,
+            "sha256": "d9105c1b71bc6853eb293fdd9450b867734662b4f4b8eb7bc53787cf871b427f",
+            "half_words": [
+              9127,
+              9247,
+              8891,
+              15143
+            ],
+            "different_bytes_vs_first": 45812
+          },
+          {
+            "iteration": 2,
+            "sha256": "d9105c1b71bc6853eb293fdd9450b867734662b4f4b8eb7bc53787cf871b427f",
+            "half_words": [
+              9127,
+              9247,
+              8891,
+              15143
+            ],
+            "different_bytes_vs_first": 45812
+          }
+        ]
+      },
+      {
+        "directory": "full-2",
+        "report_sha256": "5d92e097cf95b2eeeafb1ca0e2bae3ec5be4a69d6daa50fb5f1b3b018878ff42",
+        "deferred_readback": false,
+        "restored_draw_args": [
+          7401,
+          0,
+          0
+        ],
+        "observations": [
+          {
+            "iteration": 0,
+            "sha256": "d9e2edda8025bbe17034e5c6000d8e06790476e1e061323836ab2b7b7f21f2aa",
+            "half_words": [
+              9109,
+              9233,
+              8865,
+              15151
+            ],
+            "different_bytes_vs_first": 0
+          },
+          {
+            "iteration": 1,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5",
+            "half_words": [
+              9127,
+              9247,
+              8891,
+              15143
+            ],
+            "different_bytes_vs_first": 4
+          },
+          {
+            "iteration": 2,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5",
+            "half_words": [
+              9127,
+              9247,
+              8891,
+              15143
+            ],
+            "different_bytes_vs_first": 4
+          }
+        ]
+      },
+      {
+        "directory": "triangle-2",
+        "report_sha256": "371f157d32e155fbd440d105c90c6fd433e306ee7f349772c5dc37a918c49660",
+        "deferred_readback": false,
+        "restored_draw_args": [
+          3,
+          7329,
+          0
+        ],
+        "observations": [
+          {
+            "iteration": 0,
+            "sha256": "d9e2edda8025bbe17034e5c6000d8e06790476e1e061323836ab2b7b7f21f2aa",
+            "half_words": [
+              9109,
+              9233,
+              8865,
+              15151
+            ],
+            "different_bytes_vs_first": 0
+          },
+          {
+            "iteration": 1,
+            "sha256": "3b44459ed71aec47595e416ca241c00740fa181bf478e8971554c439e30a0603",
+            "half_words": [
+              9127,
+              9247,
+              8891,
+              15143
+            ],
+            "different_bytes_vs_first": 45812
+          },
+          {
+            "iteration": 2,
+            "sha256": "3b44459ed71aec47595e416ca241c00740fa181bf478e8971554c439e30a0603",
+            "half_words": [
+              9127,
+              9247,
+              8891,
+              15143
+            ],
+            "different_bytes_vs_first": 45812
+          }
+        ]
+      },
+      {
+        "directory": "deferred-full-0",
+        "report_sha256": "52200265a6b26eb4dc61488da78aa1db99eb0facd321a688cdd74bd9d9ee1425",
+        "deferred_readback": true,
+        "restored_draw_args": [
+          7401,
+          0,
+          0
+        ],
+        "observations": [
+          {
+            "iteration": 0,
+            "sha256": "d9e2edda8025bbe17034e5c6000d8e06790476e1e061323836ab2b7b7f21f2aa",
+            "half_words": [
+              9109,
+              9233,
+              8865,
+              15151
+            ],
+            "different_bytes_vs_first": 0
+          },
+          {
+            "iteration": 1,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5",
+            "half_words": [
+              9127,
+              9247,
+              8891,
+              15143
+            ],
+            "different_bytes_vs_first": 4
+          },
+          {
+            "iteration": 2,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5",
+            "half_words": [
+              9127,
+              9247,
+              8891,
+              15143
+            ],
+            "different_bytes_vs_first": 4
+          }
+        ]
+      },
+      {
+        "directory": "deferred-triangle-0",
+        "report_sha256": "8c798367506caff391dbb29b13ff27a3a18e658107cac934c03de28c351f4a56",
+        "deferred_readback": true,
+        "restored_draw_args": [
+          3,
+          7329,
+          0
+        ],
+        "observations": [
+          {
+            "iteration": 0,
+            "sha256": "d9e2edda8025bbe17034e5c6000d8e06790476e1e061323836ab2b7b7f21f2aa",
+            "half_words": [
+              9109,
+              9233,
+              8865,
+              15151
+            ],
+            "different_bytes_vs_first": 0
+          },
+          {
+            "iteration": 1,
+            "sha256": "3b44459ed71aec47595e416ca241c00740fa181bf478e8971554c439e30a0603",
+            "half_words": [
+              9127,
+              9247,
+              8891,
+              15143
+            ],
+            "different_bytes_vs_first": 45812
+          },
+          {
+            "iteration": 2,
+            "sha256": "3b44459ed71aec47595e416ca241c00740fa181bf478e8971554c439e30a0603",
+            "half_words": [
+              9127,
+              9247,
+              8891,
+              15143
+            ],
+            "different_bytes_vs_first": 45812
+          }
+        ]
+      },
+      {
+        "directory": "final-full",
+        "report_sha256": "15593dd747902d3f6919e8b906a1495897a2d3272ab3ffcfaf129aaf0f367101",
+        "deferred_readback": false,
+        "restored_draw_args": [
+          7401,
+          0,
+          0
+        ],
+        "observations": [
+          {
+            "iteration": 0,
+            "sha256": "d9e2edda8025bbe17034e5c6000d8e06790476e1e061323836ab2b7b7f21f2aa",
+            "half_words": [
+              9109,
+              9233,
+              8865,
+              15151
+            ],
+            "different_bytes_vs_first": 0
+          },
+          {
+            "iteration": 1,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5",
+            "half_words": [
+              9127,
+              9247,
+              8891,
+              15143
+            ],
+            "different_bytes_vs_first": 4
+          },
+          {
+            "iteration": 2,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5",
+            "half_words": [
+              9127,
+              9247,
+              8891,
+              15143
+            ],
+            "different_bytes_vs_first": 4
+          }
+        ]
+      },
+      {
+        "directory": "deferred-full-1",
+        "report_sha256": "52200265a6b26eb4dc61488da78aa1db99eb0facd321a688cdd74bd9d9ee1425",
+        "deferred_readback": true,
+        "restored_draw_args": [
+          7401,
+          0,
+          0
+        ],
+        "observations": [
+          {
+            "iteration": 0,
+            "sha256": "d9e2edda8025bbe17034e5c6000d8e06790476e1e061323836ab2b7b7f21f2aa",
+            "half_words": [
+              9109,
+              9233,
+              8865,
+              15151
+            ],
+            "different_bytes_vs_first": 0
+          },
+          {
+            "iteration": 1,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5",
+            "half_words": [
+              9127,
+              9247,
+              8891,
+              15143
+            ],
+            "different_bytes_vs_first": 4
+          },
+          {
+            "iteration": 2,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5",
+            "half_words": [
+              9127,
+              9247,
+              8891,
+              15143
+            ],
+            "different_bytes_vs_first": 4
+          }
+        ]
+      },
+      {
+        "directory": "deferred-triangle-1",
+        "report_sha256": "8c798367506caff391dbb29b13ff27a3a18e658107cac934c03de28c351f4a56",
+        "deferred_readback": true,
+        "restored_draw_args": [
+          3,
+          7329,
+          0
+        ],
+        "observations": [
+          {
+            "iteration": 0,
+            "sha256": "d9e2edda8025bbe17034e5c6000d8e06790476e1e061323836ab2b7b7f21f2aa",
+            "half_words": [
+              9109,
+              9233,
+              8865,
+              15151
+            ],
+            "different_bytes_vs_first": 0
+          },
+          {
+            "iteration": 1,
+            "sha256": "3b44459ed71aec47595e416ca241c00740fa181bf478e8971554c439e30a0603",
+            "half_words": [
+              9127,
+              9247,
+              8891,
+              15143
+            ],
+            "different_bytes_vs_first": 45812
+          },
+          {
+            "iteration": 2,
+            "sha256": "3b44459ed71aec47595e416ca241c00740fa181bf478e8971554c439e30a0603",
+            "half_words": [
+              9127,
+              9247,
+              8891,
+              15143
+            ],
+            "different_bytes_vs_first": 45812
+          }
+        ]
+      }
+    ],
+    "processes": 11,
+    "initial_complete_draws": 11,
+    "restored_draws": 22,
+    "sample_observations": 33,
+    "deferred_processes": 4,
+    "refusals": 14,
+    "unexpected_partial_plane_variants": [
+      {
+        "directory": "triangle-1",
+        "sha256": "d9105c1b71bc6853eb293fdd9450b867734662b4f4b8eb7bc53787cf871b427f",
+        "x": 1571,
+        "y": 1461,
+        "canonical_half_words": [
+          11702,
+          10154,
+          6537,
+          15359
+        ],
+        "variant_half_words": [
+          11702,
+          10154,
+          6536,
+          15359
+        ],
+        "cause_established": false
+      }
+    ],
+    "all_partial_planes_equal_native": false,
+    "compressed_files": 22,
+    "allocation_saved": 455127040,
+    "limits": "At the selected point, initial complete Draws are lower and restored full/isolated Draws are higher, also with deferred readback. Intervening sample readers are not necessary in these runs. One isolated process retains a second plane hash differing by one half-float bit at (1571,1461); its cause and pre-Draw checkpoint contents were not established. Copies, restoration, allocation and history remain altered. Formal acceptance remains failed."
+  },
+  "validation": {
+    "build_passed": true,
+    "boundary_ctest_passed": true,
+    "refusals": 14,
+    "scoped_debug_warnings_or_errors": 0,
+    "prefix_debug_messages_per_run": 608,
+    "deferred_submission_debug_warnings_or_errors": 0,
+    "initial_verifier_failed": true,
+    "unexpected_plane_variant_retained": true,
+    "all_gpu_work_serial": true,
+    "production_source_changed": false
+  },
+  "binaries": {
+    "FloraReplayDrawRepeatProbe.exe": "69530cbac1185fc5c08be1cd41dd972ec0555400016d446582d6d4564c7946c5",
+    "FloraReplayDrawRepeatProbe-final.exe": "287641fd8e921bd8b10e46e74184bb52b4cd469ef9119dcc37b651e3c8f57842"
+  },
+  "binary_scope": {
+    "initial": "First six immediate-readback processes",
+    "final": "Four deferred-readback processes, final immediate full-range control and fourteen refusals"
+  },
+  "raw": {
+    "root": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-prefix-triangle-20261014",
+    "files": 78,
+    "manifest_sha256": "9ad7c49f2aaa5826ee495fa952988f097b3c65afab7dc18f0511f1e44e015134"
+  },
+  "replay_sha256": "215ebafed657953f0671c32a0948e12c8c965437a3eaa33e6d38aedcff5e2ddc"
+}

@@ -4595,6 +4595,20 @@
       "current_gate_passed": false,
       "production_fix": false,
       "limits": "Original triangle 2443 alone reproduces the native higher sample-1 value. This does not reproduce the lower variant in the isolated runner. Current CPU-projected pixel center lies inside this triangle, unlike the older triangle-1613 case. Unsnapped projection is not GPU coverage proof; formal acceptance remains failed."
+    },
+    "gf2_prefix_triangle_diagnosis": {
+      "evidence": "docs/CAPTURE_GF2_PREFIX_TRIANGLE.md",
+      "baseline": "docs/capture-gf2-prefix-triangle-baseline.json",
+      "processes": 11,
+      "initial_complete_draws": 11,
+      "restored_draws": 22,
+      "sample_observations": 33,
+      "deferred_processes": 4,
+      "refusal_cases": 14,
+      "unexpected_partial_plane_variants": 1,
+      "current_gate_passed": false,
+      "production_fix": false,
+      "limits": "At the selected point, initial complete Draws are lower and restored full/isolated Draws are higher, also with deferred readback. Intervening sample readers are not necessary in these runs. One isolated process retains a second plane hash differing by one half-float bit at (1571,1461); its cause and pre-Draw checkpoint contents were not established. Copies, restoration, allocation and history remain altered. Formal acceptance remains failed."
     }
   }
 }
