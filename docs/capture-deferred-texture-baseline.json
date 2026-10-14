@@ -1,0 +1,165 @@
+{
+  "schema": "FloraGPA deferred texture discard 1",
+  "date": "2026-10-14",
+  "parent_commit": "aa8e3a5b1eee08155ff980336706aae820ae16df",
+  "scope": "Single-mip single-layer dynamic texture discards with verified pitches; RGBA8 and BC1 native oracles",
+  "capture_ctest": {
+    "passed": 123,
+    "total": 123
+  },
+  "full_focused_ctest": {
+    "passed": 23,
+    "total": 23
+  },
+  "native_profiles": {
+    "warp": [
+      {
+        "depth_pitch": 0,
+        "mode": 1,
+        "refused": false,
+        "row_pitch": 0
+      },
+      {
+        "depth_pitch": 0,
+        "mode": 2,
+        "refused": true,
+        "row_pitch": 0
+      },
+      {
+        "depth_pitch": 0,
+        "mode": 3,
+        "refused": true,
+        "row_pitch": 0
+      },
+      {
+        "depth_pitch": 0,
+        "mode": 4,
+        "refused": true,
+        "row_pitch": 0
+      },
+      {
+        "depth_pitch": 0,
+        "mode": 5,
+        "refused": true,
+        "row_pitch": 0
+      },
+      {
+        "depth_pitch": 0,
+        "mode": 6,
+        "refused": true,
+        "row_pitch": 0
+      }
+    ],
+    "hardware": [
+      {
+        "depth_pitch": 28,
+        "mode": 1,
+        "refused": false,
+        "row_pitch": 28
+      },
+      {
+        "depth_pitch": 84,
+        "mode": 2,
+        "refused": false,
+        "row_pitch": 28
+      },
+      {
+        "depth_pitch": 84,
+        "mode": 3,
+        "refused": false,
+        "row_pitch": 28
+      },
+      {
+        "depth_pitch": 32,
+        "mode": 4,
+        "refused": false,
+        "row_pitch": 16
+      },
+      {
+        "depth_pitch": 84,
+        "mode": 5,
+        "refused": false,
+        "row_pitch": 28
+      },
+      {
+        "depth_pitch": 84,
+        "mode": 6,
+        "refused": false,
+        "row_pitch": 28
+      }
+    ]
+  },
+  "malformed_model_refusals": 104,
+  "dual_player": {
+    "files": 28,
+    "checks": 371,
+    "default_original_adapter": true,
+    "new_original_gui": false
+  },
+  "packaged_injection": {
+    "launches": 1,
+    "frames": 5,
+    "checks": 33,
+    "mode": 28,
+    "system_only_child_path": true,
+    "native_runtime_sha256": "384ba2592bffbc35fecf97a5722517d3afd6ad72feda2d2bb85ed73b8df8a7d3",
+    "target_continues_after_capture_and_disconnect": true
+  },
+  "source_binaries": {
+    "build/capture/capture/Release/FloraCaptureDeferredTextureTests.exe": "09821298500d36e23f34f956de672da11e7f3b8df8daf8b3334c5c60fe7881e8",
+    "build/capture/capture/Release/FloraCaptureRuntime.dll": "384ba2592bffbc35fecf97a5722517d3afd6ad72feda2d2bb85ed73b8df8a7d3"
+  },
+  "final_frame_sha256": {
+    "final-native-corrected/warp/1/aba.gpa_frame": "44610cc8c18d7fc8cfbde180b49944c711ad07926f6632cb1325703ec5764529",
+    "final-native-corrected/warp/1/bab.gpa_frame": "bdbfd7a1fb0bc6f77b3dd02eb66be2ba0e62799378d6dd74657ffab5a45b6050",
+    "final-native-corrected/warp/1/missing-draws.gpa_frame": "bd75a9711d486990cc952ef33dc1185548e2aed4cf9267db0853f6610051046f",
+    "final-native-corrected/warp/1/missing-map.gpa_frame": "19c5fdf3e72f561dc90843e5cddf28123d83e20907228acbbb4e8ca7708bdf61",
+    "final-native-corrected/hardware/1/aba.gpa_frame": "94d5c46a67dfafee6c344c47d41acb2992a33af77255aaeb0a6b892ef99fb29e",
+    "final-native-corrected/hardware/1/bab.gpa_frame": "571a8c8f8bc695ede263706596d7f10b8ec6a44d0584d203aea3cc079bcccb49",
+    "final-native-corrected/hardware/1/missing-draws.gpa_frame": "29bab1471cc39d577870a6387d8419ec055f4270ff3e7c7340a7be2d5f994ae5",
+    "final-native-corrected/hardware/1/missing-map.gpa_frame": "0f3fc1540cb6df93c8f9112b4e794979d7be7b3bf5465af5a44425335f113a96",
+    "final-native-corrected/hardware/2/aba.gpa_frame": "73111edee834d6f646ed57e16df90cb4403b42d9c57df2408461a985c1fabb40",
+    "final-native-corrected/hardware/2/bab.gpa_frame": "23d16a60915294e031f5d5feb8df296c74b7a63d29ee5dc8d6050537f4a289fc",
+    "final-native-corrected/hardware/2/missing-draws.gpa_frame": "40d57d4d0d2dfb70dbed77ab1cfde746c8e5751a2ecb20087f05ebfa74527d1d",
+    "final-native-corrected/hardware/2/missing-map.gpa_frame": "d7a94297f4f9f166dc986caa10a41ef791aa43b98ab3165a864fd16e444cc94f",
+    "final-native-corrected/hardware/3/aba.gpa_frame": "dd53b1a3d8ef8fb5b5217735393b77791a16c183cf3a88893d7dbc7b8e2e1df4",
+    "final-native-corrected/hardware/3/bab.gpa_frame": "b33ab981e313ef87661c40899f22aa1ab844c0f6d52f98b549503fce590a4243",
+    "final-native-corrected/hardware/3/missing-draws.gpa_frame": "4cd96dff9b6138341f296a5441bebb7fc1ab7242a50f735ce00c0eb71735e3aa",
+    "final-native-corrected/hardware/3/missing-map.gpa_frame": "634c34e78d1009ae690b07ede54f075a1453ff39ae6abbb37c0e2524c15448dc",
+    "final-native-corrected/hardware/4/aba.gpa_frame": "0bc48fc05b03bc768dee499b65c4fb416cc310009f262e7acf719fcf187df0a2",
+    "final-native-corrected/hardware/4/bab.gpa_frame": "11ebfce7ed3e489323a8bc0537a1efa6649fafce5452619ca3e261b6a58e5ea0",
+    "final-native-corrected/hardware/4/missing-draws.gpa_frame": "042345845dd5fdcaae7a09c352979f500aefbe8f6c72da065aabf0358778b324",
+    "final-native-corrected/hardware/4/missing-map.gpa_frame": "bafb20a05b4e0e3448261e03dfef49527ddf3b7fac91fe1b2f0dc03a528cb539",
+    "final-native-corrected/hardware/5/aba.gpa_frame": "16419bb2b67c160ec1ab652f748314eab8397ac7a4ed31893338c37d9cf47fcf",
+    "final-native-corrected/hardware/5/bab.gpa_frame": "4b55b870ff793511d911e6ee226195fa4eb67b612ec00dffbe2f2fb1e5848b10",
+    "final-native-corrected/hardware/5/missing-draws.gpa_frame": "c812f243d8c4ed928a499be615b5807d35ada47594fb293f585e58eda5e64736",
+    "final-native-corrected/hardware/5/missing-map.gpa_frame": "5d59b2c66d97bbdb35affabaedeb63b8bc57f1544133e1f97e134f8acf07bd17",
+    "final-native-corrected/hardware/6/aba.gpa_frame": "ca47e831eff7d7120946539d6075d0639ece6c5cc59a9b1921220392cf404999",
+    "final-native-corrected/hardware/6/bab.gpa_frame": "6d50f9552676cb59b32daa29426cac2d9258231782bc134c13e934f4ba90dd00",
+    "final-native-corrected/hardware/6/missing-draws.gpa_frame": "b39bb1fa4248222df140f0ebcb96ddbbed326b57116475a40f9459208b631513",
+    "final-native-corrected/hardware/6/missing-map.gpa_frame": "505df4cd7f3d6a468aaf27c91b61aa6e1ca3aff483bebd53b2af8ac4ea427cf4",
+    "injected/native/28/session/frame-00fdc060-e14f-493e-912a-9ecf179855f9.gpa_frame": "0125e82630428ffb09932b24cac23b50932493c8dc0901677e3710a2d2ad888a",
+    "injected/native/28/session/frame-132d338d-0d0a-4330-b727-eea9d8a35c19.gpa_frame": "12bfb6808f814b87f96a38b2ac0e81e4b4d7fde39e3bd8ec2a1aaecc577f42f8",
+    "injected/native/28/session/frame-71eb3655-db1e-43f4-af38-25256eeed974.gpa_frame": "48b9864e3a72b54a45c590cd99f5bbba758f78d1685c839ddb8597cace122162",
+    "injected/native/28/session/frame-e23db874-4df3-4763-869f-a2bc1bd4299f.gpa_frame": "7ef4ba8edbd435b4ed772ccdd6321cbd3eb87ee01f3429868932883793bf5082",
+    "injected/native/28/session/frame-f3ae2496-15c6-42bb-b836-2d4773562a64.gpa_frame": "2c123435dae927aba2e99cc5bd6b8365d3e35d7a7c7fc36151744758c9adc652"
+  },
+  "evidence_manifest": {
+    "path": "artifacts/capture-deferred-texture-20261014/evidence-manifest.json",
+    "sha256": "cf67d8ebadd5f56216339690f480bccccbd15e1b47f9374dccec833fb4fa92bb",
+    "files": 1992
+  },
+  "initial_failures": [
+    "Extended test helper inferred descriptor version from creation API; corrected to frozen object kind. Failed logs and partial corpus retained separately."
+  ],
+  "replay_or_format_changed": false,
+  "new_gf2_acceptance": false,
+  "overall_capture_status": "partial",
+  "remaining": [
+    "Invalid native texture pitches; multiple mips, arrays, planar and explicit layouts",
+    "Unknown/GPU-mutated buffer NO_OVERWRITE baselines",
+    "Nested lists and in-frame compilation",
+    "Foreign immediate execution threads and hidden states",
+    "Historical Intel/NVIDIA pixel mismatches"
+  ]
+}

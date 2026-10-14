@@ -1,8 +1,41 @@
 #include "deferred_lowering.hpp"
+#include "resource_layout.hpp"
 #include <functional>
 namespace flora::capture {
 namespace {
 void require(bool value,const char* message){if(!value)throw std::runtime_error(message);}
+template<class T>T descriptor(const FrozenObject& object){
+    require(object.descriptor.size()==sizeof(T),"Deferred texture Map descriptor size mismatch");
+    T value{};memcpy(&value,object.descriptor.data(),sizeof value);return value;
+}
+void texture_discard(const FrozenObject& object,const DeferredCall& call){
+    require(call.words[1]==D3D11_MAP_WRITE_DISCARD && call.before_data.empty(),"Deferred texture Map requires WRITE_DISCARD");
+    ResourceShape shape;
+    auto common=[&](const auto& d){
+        require(d.Usage==D3D11_USAGE_DYNAMIC && d.CPUAccessFlags==D3D11_CPU_ACCESS_WRITE &&
+                !(d.BindFlags&~D3D11_BIND_SHADER_RESOURCE) && !d.MiscFlags && d.MipLevels==1,
+                "Deferred texture discard requires a single mip and ordinary dynamic storage");
+        shape.width=d.Width;shape.format=d.Format;
+    };
+    auto two=[&](const auto& d){common(d);require(d.ArraySize==1 && d.SampleDesc.Count==1 && !d.SampleDesc.Quality,
+        "Deferred texture discard array/MSAA profile unsupported");shape.dimension=D3D11_RESOURCE_DIMENSION_TEXTURE2D;shape.height=d.Height;};
+    auto three=[&](const auto& d){common(d);shape.dimension=D3D11_RESOURCE_DIMENSION_TEXTURE3D;shape.height=d.Height;shape.depth=d.Depth;};
+    if(object.kind=="texture1d"){const auto d=descriptor<D3D11_TEXTURE1D_DESC>(object);common(d);require(d.ArraySize==1,"Deferred texture discard array profile unsupported");shape.dimension=D3D11_RESOURCE_DIMENSION_TEXTURE1D;}
+    else if(object.kind=="texture2d")two(descriptor<D3D11_TEXTURE2D_DESC>(object));
+    else if(object.kind=="texture3d")three(descriptor<D3D11_TEXTURE3D_DESC>(object));
+    else if(object.kind=="texture2d1"){const auto d=descriptor<D3D11_TEXTURE2D_DESC1>(object);require(d.TextureLayout==D3D11_TEXTURE_LAYOUT_UNDEFINED,"Deferred explicit texture layout unsupported");two(d);}
+    else if(object.kind=="texture3d1"){const auto d=descriptor<D3D11_TEXTURE3D_DESC1>(object);require(d.TextureLayout==D3D11_TEXTURE_LAYOUT_UNDEFINED,"Deferred explicit texture layout unsupported");three(d);}
+    else throw std::runtime_error("Deferred Map resource kind unsupported");
+    require(!(shape.format>=DXGI_FORMAT_NV12 && shape.format<=DXGI_FORMAT_P016),"Deferred planar Map layout unsupported");
+    const auto sub=resource_layout(shape,call.data.size()).at(0);
+    require(sub.slice_bytes*sub.depth==call.data.size(),"Deferred texture Map payload length mismatch");
+    const size_t row=call.words[3],slice=call.words[4];
+    require(sub.rows==1 || row>=sub.row_bytes,"Deferred texture Map row pitch is too small");
+    require(!row || sub.rows-1<=(SIZE_MAX-sub.row_bytes)/row,"Deferred texture Map row span overflow");
+    const size_t span=(sub.rows-1)*row+sub.row_bytes;
+    require(sub.depth==1 || slice>=span,"Deferred texture Map depth pitch is too small");
+    require(span<=size_t(PTRDIFF_MAX) && (!slice || sub.depth-1<=(size_t(PTRDIFF_MAX)-span)/slice),"Deferred texture Map pointer span overflow");
+}
 bool supported(CommandKind kind){switch(kind){
 case CommandKind::draw:case CommandKind::draw_indexed:case CommandKind::draw_instanced:case CommandKind::draw_indexed_instanced:case CommandKind::dispatch:
 case CommandKind::clear_rtv:case CommandKind::clear_dsv:case CommandKind::clear_uav_uint:case CommandKind::clear_uav_float:
@@ -48,7 +81,7 @@ DeferredExpansion lower_deferred(const DeferredCommandList& list,const DeferredO
         if(call.kind==CommandKind::unmap){
             const auto found=mappings.find(call.operand);
             require(found!=mappings.end() && call.words==std::array<uint32_t,5>{} && call.data.empty() && call.before_data.empty() && call.result==S_OK,
-                    "Deferred Unmap has no matching complete buffer discard");
+                    "Deferred Unmap has no matching complete Map");
             state=found->second;mappings.erase(found);
         }
         require(state && call.completed,"Deferred action state/data incomplete");
@@ -59,15 +92,17 @@ DeferredExpansion lower_deferred(const DeferredCommandList& list,const DeferredO
         if(call.kind==CommandKind::map){
             require(call.operand && !call.source && call.result==S_OK && call.words[0]==0 &&
                     (call.words[1]==D3D11_MAP_WRITE_DISCARD || call.words[1]==D3D11_MAP_WRITE_NO_OVERWRITE) && !call.words[2],
-                    "Deferred Map rename requires a complete zero-flag buffer write");
+                    "Deferred Map rename requires a complete zero-flag write");
             const auto& object=out.definitions.at(call.operand);
-            require(object.kind=="buffer" && object.descriptor.size()==sizeof(D3D11_BUFFER_DESC),
+            if(object.kind=="buffer"){
+            require(object.descriptor.size()==sizeof(D3D11_BUFFER_DESC),
                     "Deferred Map rename resource is not a verified buffer");
             D3D11_BUFFER_DESC desc{};memcpy(&desc,object.descriptor.data(),sizeof desc);
             require(desc.ByteWidth && desc.Usage==D3D11_USAGE_DYNAMIC && desc.CPUAccessFlags==D3D11_CPU_ACCESS_WRITE &&
                     !desc.MiscFlags && !desc.StructureByteStride &&
                     !(desc.BindFlags&~(D3D11_BIND_VERTEX_BUFFER|D3D11_BIND_INDEX_BUFFER|D3D11_BIND_CONSTANT_BUFFER|D3D11_BIND_SHADER_RESOURCE)) &&
                     call.data.size()==desc.ByteWidth,"Deferred Map rename buffer descriptor/payload unsupported");
+            }else texture_discard(object,call);
             require(mappings.emplace(call.operand,state).second,"Deferred Map rename overlaps an open mapping");
             if(call.words[1]==D3D11_MAP_WRITE_NO_OVERWRITE){
                 const auto previous=mapped_contents.find(call.operand);

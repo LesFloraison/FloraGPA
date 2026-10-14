@@ -21,6 +21,8 @@ own lowering, with repeated-list and dual-player validation in
 [CAPTURE_DEFERRED_DISCARD.md](CAPTURE_DEFERRED_DISCARD.md).
 Verified same-list `NO_OVERWRITE` baselines and sparse updates follow in
 [CAPTURE_DEFERRED_NOOVERWRITE.md](CAPTURE_DEFERRED_NOOVERWRITE.md).
+Single-mip deferred texture discard capture, checked pitches and native/dual-player
+evidence are recorded in [CAPTURE_DEFERRED_TEXTURE.md](CAPTURE_DEFERRED_TEXTURE.md).
 
 Capture HUD work is tracked separately in [CAPTURE_HUD.md](CAPTURE_HUD.md).
 Protocol v4 adds bounded per-request CLI resource budgets to the earlier
