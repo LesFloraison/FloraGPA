@@ -1,0 +1,538 @@
+{
+  "schema": 1,
+  "date": "2026-10-14",
+  "current_gate_passed": false,
+  "production_fix": false,
+  "source_parent_commit": "7e309932844773d52ba7368b919e167920d24df6",
+  "source_hashes": {
+    "CMakeLists.txt": "83b1161d4d6a6a0ea2a264f266c930a41fc877f27f0415fe6c91ce1b0795b73d",
+    "tools/native/replay_final_samples_probe.cpp": "1f0a330678db249a55f61edb1afdf1f1c51d25c8a63a9466c5a7d51851bac3ad",
+    "tools/validate_capture_final_samples.py": "978f388827dda1aaaee19275fc874a24108bdd24a68141ada94b235bf0cdecaf",
+    "docs/CAPTURE_GF2_PAIRED_SAMPLES.md": "86605087df516971452c1f11d100cd45d4b1cc11f29fc4742b758833d744f70c"
+  },
+  "identity": {
+    "passed": true,
+    "continued_present": 1662,
+    "capture_runtime_sha256": "ccba35348f8b51dffdbd39a9564f847bb463e23ae7722189c30edc98f8e89aca",
+    "replay_sha256": "215ebafed657953f0671c32a0948e12c8c965437a3eaa33e6d38aedcff5e2ddc",
+    "final_probe_sha256": "f3103de59d6a98b17b63f4e1f492ac63d93a23b450d3ac904d95f2089b96b591",
+    "diagnostic_files_preserved_after_compression": true,
+    "target_modules_independent": true
+  },
+  "validation_probe_sha256": "32bb63c94ae99ca094f66cfc33fd714ceef6f74dd9be3d1cf7acadcf242f2f85",
+  "counts": {
+    "native_cases": 12,
+    "native_sample_planes_exact": 72,
+    "refusals": 12,
+    "new_gf2_files": 2,
+    "ordinary_positive_executions_exact": 12,
+    "paired_new_executions": 2,
+    "paired_new_outputs_exact": 2,
+    "paired_new_sample_comparisons": 12,
+    "paired_new_sample_exact": 10,
+    "paired_new_sample_mismatches": 2,
+    "retained_variable_executions": 3,
+    "retained_variable_outputs_exact": 1,
+    "retained_variable_outputs_mismatched": 2,
+    "ctest_passed": 4,
+    "golden_frames_exact": 2,
+    "golden_negative_controls_passed": 2
+  },
+  "raw": [
+    {
+      "root": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-final-samples-20261014",
+      "manifest_sha256": "15c4ee1d1d8eddee72ad636f1005ac31a06e7159cf2d27c619bb170a6008ba4d",
+      "files": 713
+    },
+    {
+      "root": "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\capture-gf2-paired-variable-20261014",
+      "manifest_sha256": "633f1ca6c5788dccf0fb021d6949818daf46d11b8ee52240a11c315d1824bf0a",
+      "files": 29
+    }
+  ],
+  "new_frames": [
+    {
+      "index": 0,
+      "file": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-final-samples-20261014\\session\\frame-70b72371-c8b6-4a2e-8a37-555bef59d74d.gpa_frame",
+      "sha256": "8c2444a671f835757c6f0ba57434ac773915c39eb8a4c8f989a37599d5b22a52",
+      "bytes": 1340595726,
+      "present": 1254,
+      "ordinary_replays": [
+        {
+          "repeat": 0,
+          "flora_vs_capture": {
+            "pixels": 0,
+            "channels": 0,
+            "maximum": 0
+          },
+          "original_vs_capture": {
+            "pixels": 0,
+            "channels": 0,
+            "maximum": 0
+          },
+          "flora_vs_original": {
+            "pixels": 0,
+            "channels": 0,
+            "maximum": 0
+          }
+        },
+        {
+          "repeat": 1,
+          "flora_vs_capture": {
+            "pixels": 0,
+            "channels": 0,
+            "maximum": 0
+          },
+          "original_vs_capture": {
+            "pixels": 0,
+            "channels": 0,
+            "maximum": 0
+          },
+          "flora_vs_original": {
+            "pixels": 0,
+            "channels": 0,
+            "maximum": 0
+          }
+        },
+        {
+          "repeat": 2,
+          "flora_vs_capture": {
+            "pixels": 0,
+            "channels": 0,
+            "maximum": 0
+          },
+          "original_vs_capture": {
+            "pixels": 0,
+            "channels": 0,
+            "maximum": 0
+          },
+          "flora_vs_original": {
+            "pixels": 0,
+            "channels": 0,
+            "maximum": 0
+          }
+        }
+      ]
+    },
+    {
+      "index": 1,
+      "file": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-final-samples-20261014\\session\\frame-8684c19a-72f3-452a-8be1-def9532e0e13.gpa_frame",
+      "sha256": "a46d5012f2aa57e7668f90b92e31c3212d877bad27c5b60e7d5502f8cc4d15ef",
+      "bytes": 1348632938,
+      "present": 1396,
+      "ordinary_replays": [
+        {
+          "repeat": 0,
+          "flora_vs_capture": {
+            "pixels": 0,
+            "channels": 0,
+            "maximum": 0
+          },
+          "original_vs_capture": {
+            "pixels": 0,
+            "channels": 0,
+            "maximum": 0
+          },
+          "flora_vs_original": {
+            "pixels": 0,
+            "channels": 0,
+            "maximum": 0
+          }
+        },
+        {
+          "repeat": 1,
+          "flora_vs_capture": {
+            "pixels": 0,
+            "channels": 0,
+            "maximum": 0
+          },
+          "original_vs_capture": {
+            "pixels": 0,
+            "channels": 0,
+            "maximum": 0
+          },
+          "flora_vs_original": {
+            "pixels": 0,
+            "channels": 0,
+            "maximum": 0
+          }
+        },
+        {
+          "repeat": 2,
+          "flora_vs_capture": {
+            "pixels": 0,
+            "channels": 0,
+            "maximum": 0
+          },
+          "original_vs_capture": {
+            "pixels": 0,
+            "channels": 0,
+            "maximum": 0
+          },
+          "flora_vs_original": {
+            "pixels": 0,
+            "channels": 0,
+            "maximum": 0
+          }
+        }
+      ]
+    }
+  ],
+  "paired_new": {
+    "acceptance_established": false,
+    "probe_sha256": "f3103de59d6a98b17b63f4e1f492ac63d93a23b450d3ac904d95f2089b96b591",
+    "runs": [
+      {
+        "index": 0,
+        "repeat": 0,
+        "frame_sha256": "8c2444a671f835757c6f0ba57434ac773915c39eb8a4c8f989a37599d5b22a52",
+        "final_pixels": 0,
+        "final_channels": 0,
+        "samples": [
+          {
+            "runtime_resource": 3199,
+            "wire_resource": 411,
+            "layer": 0,
+            "sample": 0,
+            "different_pixels": 0,
+            "different_bytes": 0,
+            "first_locations": [],
+            "expected_sha256": "801cbb187037a36ebed6ea11ba707740717cc472a873905384513f5e525c2171",
+            "actual_sha256": "801cbb187037a36ebed6ea11ba707740717cc472a873905384513f5e525c2171"
+          },
+          {
+            "runtime_resource": 3199,
+            "wire_resource": 411,
+            "layer": 0,
+            "sample": 1,
+            "different_pixels": 0,
+            "different_bytes": 0,
+            "first_locations": [],
+            "expected_sha256": "3f88f41eb092d42cbb5ede13a4ba9f926640a7bcf954857db3d2a1ec50c78d58",
+            "actual_sha256": "3f88f41eb092d42cbb5ede13a4ba9f926640a7bcf954857db3d2a1ec50c78d58"
+          },
+          {
+            "runtime_resource": 3206,
+            "wire_resource": 415,
+            "layer": 0,
+            "sample": 0,
+            "different_pixels": 0,
+            "different_bytes": 0,
+            "first_locations": [],
+            "expected_sha256": "c530a25ad96bda080fc6bbbfc7ac923f78a150d1ad74a9534510c74d04918fc9",
+            "actual_sha256": "c530a25ad96bda080fc6bbbfc7ac923f78a150d1ad74a9534510c74d04918fc9"
+          },
+          {
+            "runtime_resource": 3206,
+            "wire_resource": 415,
+            "layer": 0,
+            "sample": 1,
+            "different_pixels": 0,
+            "different_bytes": 0,
+            "first_locations": [],
+            "expected_sha256": "8fb2f1f96ccb79feb5715f46c575d0b9ba7fcd14c3986b4a9e4e714a0a71bc95",
+            "actual_sha256": "8fb2f1f96ccb79feb5715f46c575d0b9ba7fcd14c3986b4a9e4e714a0a71bc95"
+          },
+          {
+            "runtime_resource": 3750,
+            "wire_resource": 621,
+            "layer": 0,
+            "sample": 0,
+            "different_pixels": 0,
+            "different_bytes": 0,
+            "first_locations": [],
+            "expected_sha256": "b199860609dab61e3f54ef530b4f2da45375919f6ea7bbe63863ff8e445e83b1",
+            "actual_sha256": "b199860609dab61e3f54ef530b4f2da45375919f6ea7bbe63863ff8e445e83b1"
+          },
+          {
+            "runtime_resource": 3750,
+            "wire_resource": 621,
+            "layer": 0,
+            "sample": 1,
+            "different_pixels": 1,
+            "different_bytes": 2,
+            "first_locations": [
+              [
+                1505,
+                1583
+              ]
+            ],
+            "expected_sha256": "a4566827a1b97ec98f3bb5334932c580e565d00eb54311eb1d716f843f51b0ad",
+            "actual_sha256": "908aecb67427bba86bf7c92febb0525b0443b5e57ac95ec0efbf23165a1d83d9"
+          }
+        ]
+      },
+      {
+        "index": 1,
+        "repeat": 0,
+        "frame_sha256": "a46d5012f2aa57e7668f90b92e31c3212d877bad27c5b60e7d5502f8cc4d15ef",
+        "final_pixels": 0,
+        "final_channels": 0,
+        "samples": [
+          {
+            "runtime_resource": 3199,
+            "wire_resource": 411,
+            "layer": 0,
+            "sample": 0,
+            "different_pixels": 0,
+            "different_bytes": 0,
+            "first_locations": [],
+            "expected_sha256": "f00a1805d70c9b7fcfc27cfce011af2fcfe0dc6126c6c932d7fb0b99382c6f6c",
+            "actual_sha256": "f00a1805d70c9b7fcfc27cfce011af2fcfe0dc6126c6c932d7fb0b99382c6f6c"
+          },
+          {
+            "runtime_resource": 3199,
+            "wire_resource": 411,
+            "layer": 0,
+            "sample": 1,
+            "different_pixels": 0,
+            "different_bytes": 0,
+            "first_locations": [],
+            "expected_sha256": "da581b723d12b73a150c85ccac74b5ee947ae074e811c66ccc00a5f63153f423",
+            "actual_sha256": "da581b723d12b73a150c85ccac74b5ee947ae074e811c66ccc00a5f63153f423"
+          },
+          {
+            "runtime_resource": 3206,
+            "wire_resource": 415,
+            "layer": 0,
+            "sample": 0,
+            "different_pixels": 0,
+            "different_bytes": 0,
+            "first_locations": [],
+            "expected_sha256": "b8f5b0f87845edee6638056b34c1218239729c361218b518da1b32675551e4b4",
+            "actual_sha256": "b8f5b0f87845edee6638056b34c1218239729c361218b518da1b32675551e4b4"
+          },
+          {
+            "runtime_resource": 3206,
+            "wire_resource": 415,
+            "layer": 0,
+            "sample": 1,
+            "different_pixels": 0,
+            "different_bytes": 0,
+            "first_locations": [],
+            "expected_sha256": "50284338b802b4edd82ca54a640be88bd5ff39caa2cb9db4b51ad36011b8c939",
+            "actual_sha256": "50284338b802b4edd82ca54a640be88bd5ff39caa2cb9db4b51ad36011b8c939"
+          },
+          {
+            "runtime_resource": 3750,
+            "wire_resource": 621,
+            "layer": 0,
+            "sample": 0,
+            "different_pixels": 1,
+            "different_bytes": 3,
+            "first_locations": [
+              [
+                993,
+                1936
+              ]
+            ],
+            "expected_sha256": "f4abb7a9d94faf280413bcdf7dd21b5d1d2b45b6296dc81e06ac644e6e9d4740",
+            "actual_sha256": "2e9594017b654802b797eb53753164276e8ca2e048db5ce6ac8ed714044b3e2e"
+          },
+          {
+            "runtime_resource": 3750,
+            "wire_resource": 621,
+            "layer": 0,
+            "sample": 1,
+            "different_pixels": 0,
+            "different_bytes": 0,
+            "first_locations": [],
+            "expected_sha256": "96e65b64e32a304abafc39902333cf8338da30df7874ec53c21cfbf664c5dad0",
+            "actual_sha256": "96e65b64e32a304abafc39902333cf8338da30df7874ec53c21cfbf664c5dad0"
+          }
+        ]
+      }
+    ],
+    "completed": true
+  },
+  "new_differences": [
+    {
+      "index": 0,
+      "resource": 621,
+      "sample": 1,
+      "x": 1583,
+      "y": 1505,
+      "captured_bits": [
+        14222,
+        12046,
+        9475,
+        15356
+      ],
+      "replayed_bits": [
+        14223,
+        12047,
+        9475,
+        15356
+      ],
+      "captured": [
+        0.47216796875,
+        0.1102294921875,
+        0.0195770263671875,
+        0.998046875
+      ],
+      "replayed": [
+        0.472412109375,
+        0.11029052734375,
+        0.0195770263671875,
+        0.998046875
+      ]
+    },
+    {
+      "index": 1,
+      "resource": 621,
+      "sample": 0,
+      "x": 1936,
+      "y": 993,
+      "captured_bits": [
+        7804,
+        8117,
+        8176,
+        15358
+      ],
+      "replayed_bits": [
+        7803,
+        8115,
+        8174,
+        15358
+      ],
+      "captured": [
+        0.0063323974609375,
+        0.007526397705078125,
+        0.00775146484375,
+        0.9990234375
+      ],
+      "replayed": [
+        0.006328582763671875,
+        0.007518768310546875,
+        0.00774383544921875,
+        0.9990234375
+      ]
+    }
+  ],
+  "retained_variable": {
+    "frame": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-resolve-current-20261014\\launch-2\\session\\frame-d3b245ec-09d2-4888-91af-5032f19ddbd6.gpa_frame",
+    "frame_sha256": "9bef49cd3f807ae3796ece91d35960604ce4158d0736acb5d545efa346aafacf",
+    "probe_sha256": "f3103de59d6a98b17b63f4e1f492ac63d93a23b450d3ac904d95f2089b96b591",
+    "resource_ids": [
+      411,
+      415,
+      621
+    ],
+    "acceptance_established": false,
+    "runs": [
+      {
+        "repeat": 0,
+        "output_sha256": "b548683168d47d12344c2a976155eb716c4a14d135dcbb8c9df542b0abd0caa1",
+        "different_pixels": 3,
+        "different_channels": 3,
+        "sample_hashes": {
+          "411-layer-0-sample-0.bin": "0eb4d4d6fed115a79f9165b50cf4797fa56430fc2e7731c7b389ae6d1a2b32c8",
+          "411-layer-0-sample-1.bin": "4ba088744b6257848ed9c07ee54cda5c56d4b8ae650dd5ea3ff578f05b52f396",
+          "415-layer-0-sample-0.bin": "f7b8e058d001c2289e412296d07a8ddca5283c4772c0f4ecdf21b7b00784ee75",
+          "415-layer-0-sample-1.bin": "5ae718c946edf0f9a5d7821e50ea2ee39c1d82f11829f9694a1d9fe76cd40db2",
+          "621-layer-0-sample-0.bin": "84fdb7815bd33019ea839c9b5bf5ea47abd7e0b52724622588882118d594613d",
+          "621-layer-0-sample-1.bin": "be6361cae15b342cff38c723e70c7e2efcf58dcb3e12bba5bdf9d3b7eab113b5"
+        }
+      },
+      {
+        "repeat": 1,
+        "output_sha256": "b548683168d47d12344c2a976155eb716c4a14d135dcbb8c9df542b0abd0caa1",
+        "different_pixels": 3,
+        "different_channels": 3,
+        "sample_hashes": {
+          "411-layer-0-sample-0.bin": "0eb4d4d6fed115a79f9165b50cf4797fa56430fc2e7731c7b389ae6d1a2b32c8",
+          "411-layer-0-sample-1.bin": "4ba088744b6257848ed9c07ee54cda5c56d4b8ae650dd5ea3ff578f05b52f396",
+          "415-layer-0-sample-0.bin": "f7b8e058d001c2289e412296d07a8ddca5283c4772c0f4ecdf21b7b00784ee75",
+          "415-layer-0-sample-1.bin": "5ae718c946edf0f9a5d7821e50ea2ee39c1d82f11829f9694a1d9fe76cd40db2",
+          "621-layer-0-sample-0.bin": "84fdb7815bd33019ea839c9b5bf5ea47abd7e0b52724622588882118d594613d",
+          "621-layer-0-sample-1.bin": "be6361cae15b342cff38c723e70c7e2efcf58dcb3e12bba5bdf9d3b7eab113b5"
+        }
+      },
+      {
+        "repeat": 2,
+        "output_sha256": "d5ffe329528ecabc09517514d1b41c5a8d305210480ad9454c732051a697d0e7",
+        "different_pixels": 0,
+        "different_channels": 0,
+        "sample_hashes": {
+          "411-layer-0-sample-0.bin": "0eb4d4d6fed115a79f9165b50cf4797fa56430fc2e7731c7b389ae6d1a2b32c8",
+          "411-layer-0-sample-1.bin": "da944a4e5fa4e9bed9e919b162d6a220b3ab6f35261a163b53c107556e411e2d",
+          "415-layer-0-sample-0.bin": "f7b8e058d001c2289e412296d07a8ddca5283c4772c0f4ecdf21b7b00784ee75",
+          "415-layer-0-sample-1.bin": "5ae718c946edf0f9a5d7821e50ea2ee39c1d82f11829f9694a1d9fe76cd40db2",
+          "621-layer-0-sample-0.bin": "84fdb7815bd33019ea839c9b5bf5ea47abd7e0b52724622588882118d594613d",
+          "621-layer-0-sample-1.bin": "be6361cae15b342cff38c723e70c7e2efcf58dcb3e12bba5bdf9d3b7eab113b5"
+        }
+      }
+    ],
+    "completed": true
+  },
+  "retained_difference": {
+    "different_pixels": 1,
+    "different_words": 4,
+    "samples": [
+      {
+        "x": 1596,
+        "y": 1519,
+        "alternate_bits": [
+          9109,
+          9233,
+          8865,
+          15151
+        ],
+        "capture_matching_bits": [
+          9127,
+          9247,
+          8891,
+          15143
+        ],
+        "alternate_values": [
+          0.01480865478515625,
+          0.0158843994140625,
+          0.01294708251953125,
+          0.89794921875
+        ],
+        "capture_matching_values": [
+          0.01494598388671875,
+          0.0160980224609375,
+          0.01314544677734375,
+          0.89404296875
+        ]
+      }
+    ]
+  },
+  "storage_verification": {
+    "passed": true,
+    "files": [
+      {
+        "file": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-resolve-current-20261014\\launch-1\\session\\frame-a9cc1fa1-84b3-4b0f-a380-843020667242.gpa_frame",
+        "sha256": "79bc2cda8e30b23a65c24b7763b6ccb699860eb70158a7a47f94bee831f17310",
+        "bytes": 1006359604
+      },
+      {
+        "file": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-resolve-current-20261014\\launch-1\\session\\frame-a601a1dd-5861-46da-89e8-e189a109b184.gpa_frame",
+        "sha256": "a1ba70475e8fb53917483463c237c8b721e2c701bbb8c9faa8e898b11178466b",
+        "bytes": 1340622090
+      },
+      {
+        "file": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-resolve-current-20261014\\launch-1\\session\\frame-1ec050c8-0e7a-4e2d-ad03-782fefefe5ae.gpa_frame",
+        "sha256": "d2a42c816c865348b58aa4b308d3e956bd1f5b1f8b965818c1322b470117450d",
+        "bytes": 1340598894
+      },
+      {
+        "file": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-resolve-current-20261014\\launch-2\\session\\frame-34fd5222-f159-4ba6-a723-e7d024ba259c.gpa_frame",
+        "sha256": "9809a7f23ee0158bf9e9c923a8f3a1d41767930c36376b6445b92efb72fec0ba",
+        "bytes": 1007084605
+      },
+      {
+        "file": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-resolve-current-20261014\\launch-2\\session\\frame-d3b245ec-09d2-4888-91af-5032f19ddbd6.gpa_frame",
+        "sha256": "9bef49cd3f807ae3796ece91d35960604ce4158d0736acb5d545efa346aafacf",
+        "bytes": 1340890034
+      },
+      {
+        "file": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-resolve-current-20261014\\launch-2\\session\\frame-d170546d-6788-4611-af32-ed70587eda33.gpa_frame",
+        "sha256": "1f470f99b9522ae39f012838cf0d1c41d13108edda5519f357a0136de5ecd694",
+        "bytes": 1340597894
+      }
+    ]
+  },
+  "limits": "Exploratory initial-probe outputs are retained separately. Paired observations use a frozen probe; final validated probe changes only exception-report completion. No first divergent Draw or root cause established. New files are not fully resource-exact; the original six-file gate still fails. Production capture/replay implementation unchanged."
+}

@@ -4319,6 +4319,28 @@
       "current_gate_passed": false,
       "limits": "Separate excluded diagnostic DLL exports retained frame-end MSAA color samples without Replay dependencies. One new GF2 diagnostic file matches both players and all six application sample planes twice; it does not reproduce or fix the two formal-gate discrepancies. Additional reads can perturb timing. No replacement acceptance file or relaxed tolerance.",
       "ctest_passed": 161
+    },
+    "gf2_paired_sample_diagnosis": {
+      "evidence": "docs/CAPTURE_GF2_PAIRED_SAMPLES.md",
+      "baseline": "docs/capture-gf2-paired-samples-baseline.json",
+      "native_cases": 12,
+      "native_sample_planes_exact": 72,
+      "refusals": 12,
+      "new_gf2_files": 2,
+      "ordinary_positive_executions_exact": 12,
+      "paired_new_executions": 2,
+      "paired_new_outputs_exact": 2,
+      "paired_new_sample_comparisons": 12,
+      "paired_new_sample_exact": 10,
+      "paired_new_sample_mismatches": 2,
+      "retained_variable_executions": 3,
+      "retained_variable_outputs_exact": 1,
+      "retained_variable_outputs_mismatched": 2,
+      "ctest_passed": 4,
+      "golden_frames_exact": 2,
+      "golden_negative_controls_passed": 2,
+      "current_gate_passed": false,
+      "limits": "Exploratory initial-probe outputs are retained separately. Paired observations use a frozen probe; final validated probe changes only exception-report completion. No first divergent Draw or root cause established. New files are not fully resource-exact; the original six-file gate still fails. Production capture/replay implementation unchanged."
     }
   }
 }
