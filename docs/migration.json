@@ -4002,7 +4002,7 @@
     "deferred_mappings": "Capture-owned Map HRESULT/type/flags/pitches and Unmap payloads; borrowed pointers excluded from immutable lists. Complete dynamic-buffer WRITE_DISCARD and verified same-list NO_OVERWRITE, plus single-mip/single-layer dynamic texture discards with checked pitches, lower per execution. Unknown/GPU-mutated baselines, invalid pitches and broader rename dependencies refuse. See CAPTURE_DEFERRED_TEXTURE.md.",
     "deferred_bindings": "Typed input histories for 45 valid deferred APIs plus native effective action snapshots; unsupported MinLOD/class/hidden-state profiles reject",
     "deferred_definitions": "Independent CPU creation graphs preserve device/resource/view dependencies, DXBC, state descriptors, semantic strings and original creation bytes after native destruction; not execution-time GPU contents or deferred encoding",
-    "deferred_effective_state": "Native compilation-time getter snapshots plus execution-time GPU initial data feed supported flattened actions; hidden deferred state remains unsupported",
+    "deferred_effective_state": "Native compilation-time getter snapshots plus execution-time GPU initial data feed supported flattened actions. Explicit deferred CS Counter/Append reset histories and ordered KEEP are verified; unknown first KEEP, OM hidden counters and broader hidden state refuse.",
     "deferred_execution": "Supported Draw/Dispatch/Clear/Copy/Update and scoped Map/Unmap actions expand at actual immediate ExecuteCommandList positions. Bounded merged lists preserve repeated child order and full CPU ancestry. Same-frame compilation with workers joined before submission is validated. Open-map merges, unverified states/dependencies and foreign immediate execution refuse.",
     "deferred_nooverwrite_validation": {
       "evidence": "docs/CAPTURE_DEFERRED_NOOVERWRITE.md",
@@ -4084,6 +4084,16 @@
       "packaged_injected_checks": 33,
       "malformed_model_checks": 36,
       "limits": "16 merge edges and 4096 visited calls; two-level native/WARP/hardware and injected profiles verified. Broader dependencies and hidden/query states remain partial."
+    },
+    "deferred_counter_validation": {
+      "evidence": "docs/CAPTURE_DEFERRED_COUNTERS.md",
+      "baseline": "docs/capture-deferred-counters-baseline.json",
+      "dual_player_files": 24,
+      "dual_player_checks": 484,
+      "packaged_injected_frames": 5,
+      "packaged_injected_checks": 33,
+      "malformed_model_checks": 104,
+      "limits": "CS Counter/Append explicit reset before first use within each submission; null/UINT_MAX KEEP and nested/repeated lists verified. Unknown initial KEEP, OM counters and numeric UINT_MAX refuse. No new GF2 or original GUI acceptance; overall delivery remains partial."
     }
   }
 }

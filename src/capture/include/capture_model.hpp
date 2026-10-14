@@ -5,6 +5,7 @@
 #include <array>
 #include <cstdint>
 #include <map>
+#include <set>
 #include <string>
 #include <vector>
 namespace flora::capture {
@@ -138,6 +139,8 @@ struct RecordedCommand {
     std::vector<uint8_t> before_data; // NO_OVERWRITE baseline for sparse byte patches.
     PipelineBindings bindings;
     std::map<ObjectId,uint32_t> uav_counters;
+    // Verified deferred use following an ordered reset; the value stays on GPU.
+    std::set<ObjectId> uav_counter_keeps;
 };
 struct FrozenObject {
     ObjectId id=0,device=0,resource=0,class_linkage=0;

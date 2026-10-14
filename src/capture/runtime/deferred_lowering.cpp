@@ -43,8 +43,34 @@ case CommandKind::copy_resource:case CommandKind::copy_region:case CommandKind::
 case CommandKind::map:case CommandKind::unmap:return true;
 default:return false;
 }}
+// Counters belong to views, not pipeline state. Share their ordered reset/KEEP
+// history across nested lists, including RestoreContextState=TRUE. Never guess
+// a GPU-modified count: after the first reset, the encoder emits KEEP.
+struct CounterHistory {std::map<ObjectId,UINT> pending;std::set<ObjectId> initialized;};
+bool hidden_counter(const FrozenObject& object){
+    require((object.kind=="uav" || object.kind=="uav1") && object.descriptor.size()>=sizeof(D3D11_UNORDERED_ACCESS_VIEW_DESC),"Deferred UAV descriptor missing");
+    D3D11_UNORDERED_ACCESS_VIEW_DESC value{};memcpy(&value,object.descriptor.data(),sizeof value);
+    return value.ViewDimension==D3D11_UAV_DIMENSION_BUFFER && (value.Buffer.Flags&(D3D11_BUFFER_UAV_FLAG_APPEND|D3D11_BUFFER_UAV_FLAG_COUNTER));
+}
+void counter_binding(const DeferredCall& call,const DeferredCommandList& list,CounterHistory& counters){
+    const bool om=call.api.ends_with("::OMSetRenderTargetsAndUnorderedAccessViews");
+    if(!om && !call.api.ends_with("::CSSetUnorderedAccessViews"))return;
+    const auto& args=call.binding->arguments;
+    auto arg=[&](const char* name)->const BindingArgument&{const BindingArgument* result=nullptr;for(const auto& a:args)if(a.name==name){require(!result,"Deferred counter binding argument duplicate");result=&a;}require(result,"Deferred counter binding argument missing");return *result;};
+    auto scalar=[&](const char* name){const auto& a=arg(name);require(a.kind==BindingArgumentKind::value && a.present && !a.ignored && a.data.size()==4,"Deferred counter scalar invalid");UINT value;memcpy(&value,a.data.data(),4);return value;};
+    const UINT count=scalar("NumUAVs");if(om && count==UINT_MAX)return;
+    const UINT start=scalar(om?"UAVStartSlot":"StartSlot");require(start<=64 && count<=64-start,"Deferred counter slot range invalid");
+    const auto& views=arg("ppUnorderedAccessViews");const auto& values=arg("pUAVInitialCounts");
+    require(views.kind==BindingArgumentKind::objects && views.count==count && !views.ignored && views.objects.size()==(views.present?count:0),"Deferred counter view array invalid");
+    require(values.kind==BindingArgumentKind::array && values.element_size==4 && values.count==count && !values.ignored && values.data.size()==(values.present?size_t(count)*4:0),"Deferred counter reset array invalid");
+    if(!views.present || !values.present)return;
+    for(UINT i=0;i<count;++i){if(!views.objects[i])continue;const auto found=list.definitions.find(views.objects[i]);require(found!=list.definitions.end(),"Deferred counter definition missing");
+        if(!hidden_counter(found->second.object))continue;UINT value;memcpy(&value,values.data.data()+i*4,4);
+        if(value!=UINT_MAX)counters.pending[views.objects[i]]=value;
+    }
+}
 DeferredExpansion expand(const DeferredCommandList& list,const DeferredOrigin& origin,ObjectId context,size_t command_limit,size_t payload_limit,
-                         size_t depth,size_t& visits,std::set<const DeferredCommandList*>& active){
+                         size_t depth,size_t& visits,std::set<const DeferredCommandList*>& active,CounterHistory& counters){
     require(depth<=DeferredHistory::nesting_limit,"Deferred merge nesting limit exceeded");
     require(active.insert(&list).second,"Deferred merge cycle");
     require(context && origin.list && origin.source_context==list.context && origin.generation==list.generation,"Deferred execution provenance mismatch");
@@ -71,7 +97,7 @@ DeferredExpansion expand(const DeferredCommandList& list,const DeferredOrigin& o
         for(const auto& stage:s.shaders){require(stage.classes.empty(),"Deferred shader classes unsupported");retain(stage.shader);for(auto id:stage.buffers)retain(id);for(auto id:stage.resources)retain(id);for(auto id:stage.samplers)retain(id);}
         for(auto id:s.vertices)retain(id);for(auto id:s.render_targets)retain(id);
         for(auto id:s.stream_targets)require(!id,"Deferred SO append state unsupported");
-        auto uav=[&](ObjectId id){if(!id)return;retain(id);const auto& d=out.definitions.at(id).descriptor;require(d.size()>=sizeof(D3D11_UNORDERED_ACCESS_VIEW_DESC),"Deferred UAV descriptor missing");D3D11_UNORDERED_ACCESS_VIEW_DESC value{};memcpy(&value,d.data(),sizeof value);require(value.ViewDimension!=D3D11_UAV_DIMENSION_BUFFER || !(value.Buffer.Flags&(D3D11_BUFFER_UAV_FLAG_APPEND|D3D11_BUFFER_UAV_FLAG_COUNTER)),"Deferred hidden UAV counter unsupported");};
+        auto uav=[&](ObjectId id){if(!id)return;retain(id);hidden_counter(out.definitions.at(id));};
         for(auto id:s.om_uavs)uav(id);for(auto id:s.cs_uavs)uav(id);
         for(auto id:{s.input_layout,s.index_buffer,s.rasterizer,s.blend,s.depth_stencil,s.depth_view})retain(id);
     };
@@ -85,7 +111,7 @@ DeferredExpansion expand(const DeferredCommandList& list,const DeferredOrigin& o
             const auto& child=*call.merged_list;
             require(child.device==list.device,"Deferred merge device mismatch");
             DeferredOrigin nested{call.operand,child.context,child.generation,call.sequence+1,0,call.words[0]!=0};
-            auto added=expand(child,nested,context,command_limit-out.commands.size(),payload_limit-out.payload_bytes,depth+1,visits,active);
+            auto added=expand(child,nested,context,command_limit-out.commands.size(),payload_limit-out.payload_bytes,depth+1,visits,active,counters);
             for(auto& command:added.commands){
                 if(command.kind==CommandKind::map || command.kind==CommandKind::copy_resource ||
                    command.kind==CommandKind::copy_region || command.kind==CommandKind::update_subresource)
@@ -98,7 +124,7 @@ DeferredExpansion expand(const DeferredCommandList& list,const DeferredOrigin& o
             out.definitions.merge(added.definitions);out.payload_bytes+=added.payload_bytes;
             continue;
         }
-        if(call.kind==CommandKind::binding){require(call.binding.has_value(),"Deferred binding arguments missing");continue;}
+        if(call.kind==CommandKind::binding){require(call.binding.has_value(),"Deferred binding arguments missing");counter_binding(call,list,counters);continue;}
         require(supported(call.kind),"Deferred action lowering unsupported (Map rename/query/nested list or unknown action)");
         require(out.commands.size()<command_limit,"Deferred expansion command limit exceeded");
         auto state=call.state;
@@ -139,6 +165,13 @@ DeferredExpansion expand(const DeferredCommandList& list,const DeferredOrigin& o
         }
         RecordedCommand c;c.kind=call.kind;c.api=call.api;c.words=call.words;c.floats=call.floats;c.operand=call.operand;c.source=call.source;c.update_box=call.update_box;c.copy_region=call.copy_region;c.data=call.data;c.result=call.result;c.completed=true;
         c.before_data=call.before_data;c.bindings=*state;c.bindings.context=context;c.deferred=origin;c.deferred->call_sequence=call.sequence;
+        if(call.kind==CommandKind::draw || call.kind==CommandKind::draw_indexed || call.kind==CommandKind::draw_instanced || call.kind==CommandKind::draw_indexed_instanced || call.kind==CommandKind::dispatch){
+            auto counter=[&](ObjectId id){if(!id || !hidden_counter(out.definitions.at(id)) || c.uav_counters.contains(id) || c.uav_counter_keeps.contains(id))return;
+                if(auto reset=counters.pending.find(id);reset!=counters.pending.end()){c.uav_counters.emplace(id,reset->second);counters.pending.erase(reset);counters.initialized.insert(id);}
+                else{require(counters.initialized.contains(id),"Deferred UAV counter initial value unavailable before first use");c.uav_counter_keeps.insert(id);}
+            };
+            for(auto id:state->cs_uavs)counter(id);for(auto id:state->om_uavs)counter(id);
+        }
         out.payload_bytes+=c.data.size()+c.before_data.size();out.commands.push_back(std::move(c));
     }
     require(mappings.empty(),"Deferred Map rename has no matching Unmap");
@@ -148,6 +181,6 @@ DeferredExpansion expand(const DeferredCommandList& list,const DeferredOrigin& o
 }
 DeferredExpansion lower_deferred(const DeferredCommandList& list,const DeferredOrigin& origin,ObjectId context,size_t command_limit,size_t payload_limit){
     size_t visits=0;std::set<const DeferredCommandList*> active;
-    return expand(list,origin,context,command_limit,payload_limit,0,visits,active);
+    CounterHistory counters;return expand(list,origin,context,command_limit,payload_limit,0,visits,active,counters);
 }
 }

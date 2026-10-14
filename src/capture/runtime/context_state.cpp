@@ -39,14 +39,8 @@ public:
                 else result.bindings.resource_min_lod.emplace(record->id,context_->GetResourceMinLOD(resource.Get()));
             }
         }
-        if(deferred_){
-            ComPtr<ID3D11UnorderedAccessView> uav;
-            if(SUCCEEDED(native.As(&uav))){
-                D3D11_UNORDERED_ACCESS_VIEW_DESC d{};uav->GetDesc(&d);
-                if(d.ViewDimension==D3D11_UAV_DIMENSION_BUFFER && (d.Buffer.Flags&(D3D11_BUFFER_UAV_FLAG_APPEND|D3D11_BUFFER_UAV_FLAG_COUNTER)))
-                    result.gaps.push_back("Deferred UAV counter requires execution-time state and ordered resets");
-            }
-        }
+        // Hidden counters are not getters: deferred lowering verifies ordered
+        // explicit resets/KEEP before admitting any consuming Draw/Dispatch.
         return record->id;
     }
     template<class T,size_t N> void retain(const Returned<T,N>& source,std::array<ObjectId,N>& target){

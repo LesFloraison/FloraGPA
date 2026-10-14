@@ -33,6 +33,7 @@ class Encoder {
     std::map<ObjectId,uint64_t> ids_;
     std::map<uint64_t,Record> records_;
     std::map<ObjectId,MsaaInitializationLayout> msaa_;
+    std::set<ObjectId> initialized_counters_;
     std::array<bool,size_t(ShaderStage::count)> constant_windows_{};
     uint64_t next_=4;
     ObjectId device_=0,context_=0;
@@ -318,18 +319,35 @@ class Encoder {
         // stay enabled so the original player applies changes and empty resets.
         Payload scissors;scissors.value(narrow(s.scissors.size()));for(const auto& v:s.scissors)scissors.raw(v);out.scissors=add(9,0x86,std::move(scissors));
         out.rasterizer=typed(s.rasterizer,{"rasterizer","rasterizer1","rasterizer2"});out.blend=typed(s.blend,{"blend","blend1"});out.blend_factor=s.blend_factor;out.sample_mask=s.sample_mask;out.depth_state=ref(s.depth_stencil,"depth_stencil");out.stencil_ref=s.stencil_ref;out.dsv=ref(s.depth_view,"dsv");
-        for(const auto& [id,count]:command.uav_counters){(void)count;require(id!=0,"Encoder counter identity is null");typed(id,{"uav","uav1"});}
+        for(const auto& [id,count]:command.uav_counters){require(id!=0,"Encoder counter identity is null");typed(id,{"uav","uav1"});require(count!=UINT_MAX && !command.uav_counter_keeps.contains(id),"Encoder counter reset/KEEP is ambiguous");}
+        for(auto id:command.uav_counter_keeps){require(id && (std::find(s.cs_uavs.begin(),s.cs_uavs.end(),id)!=s.cs_uavs.end() || std::find(s.om_uavs.begin(),s.om_uavs.end(),id)!=s.om_uavs.end()),"Encoder counter KEEP is not bound");
+            typed(id,{"uav","uav1"});const auto d=descriptor<D3D11_UNORDERED_ACCESS_VIEW_DESC>(frame_.objects.at(id));
+            require(d.ViewDimension==D3D11_UAV_DIMENSION_BUFFER && (d.Buffer.Flags&(D3D11_BUFFER_UAV_FLAG_APPEND|D3D11_BUFFER_UAV_FLAG_COUNTER)),"Encoder KEEP view has no hidden counter");}
         auto require_counter=[&](ObjectId id){if(!id)return;typed(id,{"uav","uav1"});const auto d=descriptor<D3D11_UNORDERED_ACCESS_VIEW_DESC>(frame_.objects.at(id));
             if(d.ViewDimension==D3D11_UAV_DIMENSION_BUFFER && (d.Buffer.Flags&(D3D11_BUFFER_UAV_FLAG_APPEND|D3D11_BUFFER_UAV_FLAG_COUNTER)))
-                require(command.uav_counters.contains(id),"Encoder hidden UAV counter is missing");};
+                {if(command.uav_counters.contains(id))initialized_counters_.insert(id);
+                 else require(command.uav_counter_keeps.contains(id) && initialized_counters_.contains(id),"Encoder hidden UAV counter is missing");}};
         out.om_uav_start=64;out.om_uav_counts.fill(UINT32_MAX);out.cs_uav_counts.fill(UINT32_MAX);
         for(size_t i=0;i<64;++i){require(i<8 || (!s.om_uavs[i] && !s.cs_uavs[i]),"Extended UAV wire validation pending");if(i>=8)continue;
+            if(s.om_uavs[i]){typed(s.om_uavs[i],{"uav","uav1"});const auto d=descriptor<D3D11_UNORDERED_ACCESS_VIEW_DESC>(frame_.objects.at(s.om_uavs[i]));
+                require(d.ViewDimension!=D3D11_UAV_DIMENSION_BUFFER || !(d.Buffer.Flags&(D3D11_BUFFER_UAV_FLAG_APPEND|D3D11_BUFFER_UAV_FLAG_COUNTER)),"Encoder OM counter state wire validation pending");}
             require_counter(s.om_uavs[i]);require_counter(s.cs_uavs[i]);
             out.rtv[i]=typed(s.render_targets[i],{"rtv","rtv1"});if(out.rtv[i])out.rt_count=UINT(i+1);
             if(s.om_uavs[i]){require(!s.render_targets[i],"Overlapping RTV/UAV state");out.rtv[i]=typed(s.om_uavs[i],{"uav","uav1"});out.om_uav_start=(std::min)(out.om_uav_start,UINT(i));out.rt_count=UINT(i+1);}
             out.cs_uav[i]=typed(s.cs_uavs[i],{"uav","uav1"});if(out.cs_uav[i])out.cs_uav_count=UINT(i+1);
-            if(auto c=command.uav_counters.find(s.om_uavs[i]);c!=command.uav_counters.end())out.om_uav_counts[i]=c->second;
-            if(auto c=command.uav_counters.find(s.cs_uavs[i]);c!=command.uav_counters.end())out.cs_uav_counts[i]=c->second;
+        }
+        // Snapshot count fields do not establish a counter's initial value.
+        // Emit the verified setter wire record before consumption; subsequent
+        // snapshot binding must KEEP the value updated by GPU execution.
+        for(const auto& [id,count]:command.uav_counters){
+            const auto cs=std::find(s.cs_uavs.begin(),s.cs_uavs.end(),id);
+            const auto om=std::find(s.om_uavs.begin(),s.om_uavs.end(),id);
+            require(cs!=s.cs_uavs.end() || om!=s.om_uavs.end(),"Encoder counter reset is not bound");
+            require(cs!=s.cs_uavs.end(),"Encoder OM counter reset wire validation pending");
+            Payload p;p.q({0,1});
+            p.u({UINT(cs-s.cs_uavs.begin()),1})
+                .value<uint8_t>(1).value(ref(id)).value<uint8_t>(1).value(count);
+            add(7,0x25e,std::move(p));
         }
         return add(3,3,Payload{}.bytes(encode_state_block(out)));
     }
@@ -427,6 +445,8 @@ public:
         uint64_t sequence=0;
         for(const auto& command:frame_.commands){
             require(command.sequence==sequence++,"Encoder command sequence mismatch");const auto& w=command.words;Payload p;uint16_t type=0;
+            const bool gpu_action=command.kind==CommandKind::draw || command.kind==CommandKind::draw_indexed || command.kind==CommandKind::draw_instanced || command.kind==CommandKind::draw_indexed_instanced || command.kind==CommandKind::dispatch;
+            require(gpu_action || command.uav_counter_keeps.empty(),"Encoder counter KEEP attached to non-GPU command");
             require(command.kind==CommandKind::update_subresource || !command.update_box,"Encoder box attached to non-Update command");
             require(command.kind==CommandKind::copy_region || !command.copy_region,"Encoder region attached to non-copy command");
             if(command.kind==CommandKind::query_end || command.kind==CommandKind::query_get_data){

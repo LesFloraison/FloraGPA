@@ -1,0 +1,101 @@
+{
+  "schema": "FloraGPA explicit deferred CS counter validation 1",
+  "date": "2026-10-14",
+  "parent_commit": "870d04b2994cd45d015ecf9dd0c7839b7fe141ea",
+  "scope": "Explicit CS Counter/Append resets and ordered KEEP, nested parent initialization and repeated submissions",
+  "capture_ctest": {
+    "passed": 132,
+    "total": 132
+  },
+  "final_capture_focused_ctest": {
+    "passed": 33,
+    "total": 33
+  },
+  "full_focused_ctest": {
+    "passed": 34,
+    "total": 34
+  },
+  "malformed_model_checks": {
+    "lowering": 56,
+    "encoder_no_publication": 48
+  },
+  "dual_player": {
+    "files": 24,
+    "checks": 484,
+    "default_original_adapter": true,
+    "native_full_buffer_and_counter": true,
+    "flora_full_buffer_and_counter": true,
+    "original_buffer_counter_observer": false,
+    "new_original_gui": false
+  },
+  "packaged_injection": {
+    "launches": 1,
+    "frames": 5,
+    "checks": 33,
+    "mode": 31,
+    "system_only_child_path": true,
+    "runtime_sha256": "8f19732df46ab44ac42e208ca278cca7bcdc98752c54ed36875a80495de0adf8",
+    "target_continues_after_disconnect": true
+  },
+  "previous_runtime_control": {
+    "runtime_sha256": "0fa287e33b8fd397657197c8a304f62d784a6e7cc2316d0dac9ed5118c294bdc",
+    "frames": 0,
+    "failure": "ID3D11DeviceContext::ExecuteCommandList: Deferred compilation gap: ID3D11DeviceContext::Dispatch: Deferred UAV counter requires execution-time state and ordered resets",
+    "target_exit_ok": true
+  },
+  "source_binaries": {
+    "build/capture/capture/Release/FloraCaptureDeferredCounterTests.exe": "36d79680aff425ab9fb0e9e970667c8ba069e9c972fa355308b1a444015ca081",
+    "build/capture/capture/Release/FloraCaptureRuntime.dll": "8f19732df46ab44ac42e208ca278cca7bcdc98752c54ed36875a80495de0adf8"
+  },
+  "final_frame_sha256": {
+    "dual-shipping/hardware/append-0-no-draw.gpa_frame": "2c1cec636596b875bd79b43d8bf5d5f57fabf41625133bc3d11e92ad0f926f32",
+    "dual-shipping/hardware/append-0-reset-again.gpa_frame": "4fb127e7c88f58280624dcd31a53f6d8844cc9c211026461a49ea79cfcd1fa8c",
+    "dual-shipping/hardware/append-0.gpa_frame": "85e08407d43aba3d2de069d0ff7af358b1cfa1e2f0fac7dd37f82345eb1823f8",
+    "dual-shipping/hardware/append-1-no-draw.gpa_frame": "0f65840216ca53b388e2580c4a697a61dc2ba46167bcdfca9819b7ce331d5070",
+    "dual-shipping/hardware/append-1-reset-again.gpa_frame": "415e51bf30f3f52d48bb752c6434c35cae36a52bd15dc878f3aefa850914fe0e",
+    "dual-shipping/hardware/append-1.gpa_frame": "36f99ad0a4b4c324f05644dc41789dfc5a6a8601472c715fd113fca2e67bb09e",
+    "dual-shipping/hardware/counter-0-no-draw.gpa_frame": "c6cf66456e3643edfce795d6ea415aa6919284382c1c81554c350f84774fdf2a",
+    "dual-shipping/hardware/counter-0-reset-again.gpa_frame": "4c1ddc4e973dac4a1bbbcc50c635a421b3ee502aae8151afa9087ca254ca8408",
+    "dual-shipping/hardware/counter-0.gpa_frame": "e4ee9d76a9b1717e272df93d208460c6784964817103b0d13265261ceef95c55",
+    "dual-shipping/hardware/counter-1-no-draw.gpa_frame": "ebf02bb347e0fe91546e33e1849454d03d771ed312eb099453048dba677714cd",
+    "dual-shipping/hardware/counter-1-reset-again.gpa_frame": "f229db7403d7da86f46119dcf5d36ed83011f21aa04267cdeb0a1f9590e4556a",
+    "dual-shipping/hardware/counter-1.gpa_frame": "752585d70208be504a818d3619ca6c582ca09319918d89201ee1f84b6e8c98b6",
+    "dual-shipping/warp/append-0-no-draw.gpa_frame": "8cc0dcd25529cd863019cebafb935d616cd540edae14d375707ce1ce6e98f065",
+    "dual-shipping/warp/append-0-reset-again.gpa_frame": "37bfb8d117230324583e70a75f1e88045ed3d6adc8890ac116b55fe8b068e876",
+    "dual-shipping/warp/append-0.gpa_frame": "a69224f73323d1f00ee99eb68a3f5b7d0268fca0a2df878939d0e79af8b13401",
+    "dual-shipping/warp/append-1-no-draw.gpa_frame": "80ea05b8145cc7fe69372b421668cdbc20a8eecd66d5b429af38695cd14994a8",
+    "dual-shipping/warp/append-1-reset-again.gpa_frame": "29aa1311ba1af4a9c9dd00fd49417bd0c4aaef143a6af1c157dc0303bb940503",
+    "dual-shipping/warp/append-1.gpa_frame": "b793d74fac25ab7653f5a9a11de95e9eda13bca51520919a5fa432d955c40db7",
+    "dual-shipping/warp/counter-0-no-draw.gpa_frame": "15ecc718b8fa0b05b144d27ddcef6fb7335210f446e1f1e706e5b8599af96afb",
+    "dual-shipping/warp/counter-0-reset-again.gpa_frame": "c5d68d00423a44a7d8ed1e1a7bd6b55bdea9b76c19eac62ef0f0091391f5c5eb",
+    "dual-shipping/warp/counter-0.gpa_frame": "87528c1f53d8d05eae4f064bcf3773679f5009810b708b66516b608bca884d1e",
+    "dual-shipping/warp/counter-1-no-draw.gpa_frame": "7dd989b930d455f078c1c08b48e86b508801301a34fe64d6bff66e8b29a7366c",
+    "dual-shipping/warp/counter-1-reset-again.gpa_frame": "d57431073293915b565af6850d6beccd3f5fe1bf65e0de3c1f21430fbb77fe03",
+    "dual-shipping/warp/counter-1.gpa_frame": "4cd3bb17b7d46f67d273cd478b2c70f70df514ffbc0cab2ac9dd7e6174e8aab0",
+    "injected/native/31/session/frame-10c702a0-089a-41b4-a15c-309d8505ec6c.gpa_frame": "ca98755635965f6f56816308192dca8f45af094ee7261ee2ddd42fb9596ca332",
+    "injected/native/31/session/frame-12c13aec-1527-4e06-9a0c-58c5a8f12d54.gpa_frame": "18c0688b67a69a71ef1dbab230fbb6df7d589f75b999af0585e69ddddc71c648",
+    "injected/native/31/session/frame-13328e2a-36dd-421f-9d6b-89ad7d8137ff.gpa_frame": "9097385c1dd30e783cd09a7f1bfeafac3f3c7366d6a32ea29670d256f3c2c57f",
+    "injected/native/31/session/frame-2fb1e442-1eda-4742-84b3-2001224fcb6b.gpa_frame": "efe73890f1afb3493bdcdd1f3874e6a4ed3c3e5ebba316a2e437d5f13848b71f",
+    "injected/native/31/session/frame-deddcd8f-9a8b-4c9f-8f7d-89f63bbc0f7a.gpa_frame": "9329382d7e90eb34737dac995c6244ab8981d4e65512a58ab066efcb82d4c8b0"
+  },
+  "evidence_manifest": {
+    "path": "artifacts/capture-deferred-counters-20261014/evidence-manifest.json",
+    "sha256": "9d4b663646c5421ed151dbb539c7d011bdc604c2e1ace1c540e482d49e1f56d9",
+    "files": 3228
+  },
+  "validation_sequence": "Complete capture regression followed by final OM guard/status focused suites and shipping dual-player/package checks",
+  "preserved_failed_experiments": [
+    "dual: snapshot-only initialization rejected by Flora",
+    "dual-setters: raw 0x3522 setter executes in Flora but original pixels disagree"
+  ],
+  "replay_or_format_changed": false,
+  "new_gf2_acceptance": false,
+  "overall_capture_status": "partial",
+  "remaining": [
+    "Frame-initial deferred KEEP without recorded reset",
+    "OM hidden-counter encoding",
+    "UINT_MAX numeric hidden count restoration",
+    "Broader predicate/SO/query and synchronization profiles",
+    "Historical Intel/NVIDIA pixel mismatches"
+  ]
+}

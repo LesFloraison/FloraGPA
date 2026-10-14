@@ -59,7 +59,9 @@ struct Harness {
 }
 int wmain(int argc,wchar_t** argv){try{
     require(argc==4,"Expected controller, target and new output directory");const auto out=fs::absolute(argv[3]);require(!signal_exists(out),"Output exists");Json results=Json::array();
-#if defined(FLORA_NESTED_DEFERRED_CONTROLLER)
+#if defined(FLORA_DEFERRED_COUNTER_CONTROLLER)
+    constexpr unsigned first_mode=31,last_mode=32;
+#elif defined(FLORA_NESTED_DEFERRED_CONTROLLER)
     constexpr unsigned first_mode=30,last_mode=31;
 #elif defined(FLORA_INFRAME_DEFERRED_CONTROLLER)
     constexpr unsigned first_mode=29,last_mode=30;

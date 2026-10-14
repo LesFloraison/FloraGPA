@@ -28,6 +28,8 @@ only immediate submission enters the frame. See
 [CAPTURE_DEFERRED_INFRAME.md](CAPTURE_DEFERRED_INFRAME.md).
 Bounded merged-list expansion, repeated child execution and independent native
 resource lifetimes follow in [CAPTURE_DEFERRED_NESTED.md](CAPTURE_DEFERRED_NESTED.md).
+Explicit deferred CS counter resets and ordered KEEP, with nested-list and
+dual-player controls, follow in [CAPTURE_DEFERRED_COUNTERS.md](CAPTURE_DEFERRED_COUNTERS.md).
 
 Capture HUD work is tracked separately in [CAPTURE_HUD.md](CAPTURE_HUD.md).
 Protocol v4 adds bounded per-request CLI resource budgets to the earlier

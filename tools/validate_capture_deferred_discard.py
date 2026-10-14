@@ -1,4 +1,4 @@
-"""Serial dual-player checks for precompiled deferred buffer discards; no GF2/GUI acceptance."""
+"""Serial dual-player checks for deferred discards or explicit counters; no GF2/GUI acceptance."""
 import argparse
 import hashlib
 import json
@@ -12,6 +12,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     for key in ('probe', 'replay', 'oracle-tools', 'qt-bin', 'out'):
         parser.add_argument('--'+key, type=Path, required=True)
+    parser.add_argument('--profile', choices=('discard', 'counters'), default='discard')
     args = parser.parse_args()
     out = args.out.resolve()
     out.mkdir(parents=True, exist_ok=False)
@@ -24,7 +25,7 @@ def main():
     def check(name, passed):
         checks.append(dict(name=name, passed=bool(passed)))
         (out/'validation.json').write_text(json.dumps(dict(
-            scope=__doc__, passed=all(x['passed'] for x in checks), checks=checks), indent=2)+'\n')
+            scope=__doc__+'; profile='+args.profile, passed=all(x['passed'] for x in checks), checks=checks), indent=2)+'\n')
         if not passed:
             raise AssertionError(name)
 
@@ -38,6 +39,14 @@ def main():
              'bab': ((0, 255, 0, 255), 1, 3),
              'missing-discard': ((0, 255, 0, 255), 1, 3),
              'missing-draw': ((0, 0, 0, 255), 0, 3)}
+    if args.profile == 'counters':
+        modes = {}
+        for kind in ('counter', 'append'):
+            for frame in range(2):
+                prefix = f'{kind}-{frame}'
+                modes[prefix] = ((0, 255, 0, 255) if frame else (255, 0, 0, 255), 1, 6 if frame else 3)
+                modes[prefix+'-reset-again'] = ((0, 0, 255, 255), 1, 6 if frame else 3)
+                modes[prefix+'-no-draw'] = ((0, 0, 0, 255), 0, 6 if frame else 3)
     for device in ('warp', 'hardware'):
         probe = run(device+'-probe', [args.probe.resolve(),
                     *(['--hardware'] if device == 'hardware' else []), out/device])
@@ -57,15 +66,34 @@ def main():
                   original['native']['open_status'] == 0 and original['native']['playback_status'] == 0 and
                   original['native']['closed'] and original['new_framebuffer_count'] > 0)
             check(name+'-captured-reference-control', original['comparison_to_captured_resource']['rgba_equal'] is
-                  (not mode.startswith('missing-')))
+                  (not (mode.startswith('missing-') or mode.endswith(('-reset-again', '-no-draw')))))
             maps = 2 if mode == 'missing-discard' else 3
             counts = dict(Dispatch=dispatches, Present=1, Map=maps, unmap_observations=maps)
+            if args.profile == 'counters':
+                counts = dict(Dispatch=dispatches, Present=1)
             if draws:
                 counts['Draw'] = draws
             check(name+'-actual-events', flora['counts'] == counts)
             run(name+'-inventory', [args.replay.resolve(), 'inventory', frame, '--out', out/(name+'-inventory')])
             inventory = json.loads((out/(name+'-inventory/report.json')).read_text())
             check(name+'-inventory', inventory['draws'] == draws and inventory['dispatches'] == dispatches)
+            if args.profile == 'counters':
+                resets = [c for c in inventory['commands'] if c['type'] == 0x25e]
+                check(name+'-explicit-counter-resets', len(resets) ==
+                      (dispatches if mode.endswith('-reset-again') else dispatches//3*2))
+                resources = [r for r in inventory['resources'] if r['type'] == 0x83]
+                last_dispatch = [c for c in inventory['commands'] if c['type'] == 0x35][-1]['id']
+                run(name+'-buffer', [args.replay.resolve(), 'buffer', frame, '--id', resources[0]['id'],
+                                    '--event', last_dispatch, '--out', out/(name+'-buffer')])
+                first, last = (4, 1) if mode.split('-')[1] == '1' else (2, 5)
+                indices = {first, last}
+                if not mode.endswith('-reset-again'):
+                    indices.add(first+1)
+                expected_buffer = b''.join((17 if i in indices else 0).to_bytes(4, 'little') for i in range(16))
+                check(name+'-flora-full-resource', len(resources) == 1 and
+                      (out/(name+'-buffer/buffer.bin')).read_bytes() == expected_buffer)
+                counters = json.loads((out/(name+'-buffer/report.json')).read_text())['uav_counters']
+                check(name+'-flora-final-counter', len(counters) == 1 and counters[0]['value'] == last+1)
             shaders = [r for r in inventory['resources'] if 0x90 <= r['type'] <= 0x95]
             check(name+'-three-shaders', len(shaders) == 3)
             for shader in shaders:
