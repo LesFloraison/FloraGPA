@@ -4046,7 +4046,7 @@
         "limits": "System-only child PATH and actual module/import audits; not separate clean-machine certification"
       }
     },
-    "production_frame_capture_scope": "Limited real application capture is accepted for the six documented Intel GF2 files; the general production release flag remains false pending broader correctness and API scope.",
+    "production_frame_capture_scope": "Historical limited acceptance applies only to the six documented earlier Intel GF2 files and their pinned runtime. The current deferred-Resolve runtime fails its new six-file exact-pixel gate; general production release remains false.",
     "replay_adapter_ui": {
       "status": "Explicit native GPU selection and project restoration verified on this host",
       "evidence": "docs/CAPTURE_REPLAY_ADAPTER_UI.md",
@@ -4282,6 +4282,26 @@
       "cpu_tests_passed": 8,
       "current_gate_passed": false,
       "limits": "Original GPA Plugin API details now verified for all six retained files; manual GUI input is not verified. Default shader disassembly is not raw bytecode identity, resource metadata checks are not new readbacks. Prior pixel mismatches and newer runtime identity remain unresolved; no new captured files or formal acceptance."
+    },
+    "gf2_deferred_resolve_revalidation": {
+      "evidence": "docs/CAPTURE_GF2_RESOLVE_CURRENT.md",
+      "baseline": "docs/capture-gf2-resolve-current-baseline.json",
+      "captured_files": 6,
+      "positive_executions": 36,
+      "positive_exact": 26,
+      "positive_mismatches": 10,
+      "negative_pairs_passed": 6,
+      "original_plugin_exports": 6,
+      "ordered_actions_matched": 2885,
+      "shader_disassemblies_exact": 28,
+      "resource_buffer_checks_exact": 66,
+      "resource_bc1_checks_exact": 6,
+      "observer_outputs_exact": 8,
+      "observer_outputs_match_uninstrumented": 11,
+      "observer_runs": 12,
+      "cpu_tests_passed": 8,
+      "current_gate_passed": false,
+      "limits": "Two fresh Intel launches cover home/equipment with current runtime. Two files fail exact final pixels (one stable six-run discrepancy, one variable). All selected resource bytes and original API details agree; one resource observer differs from uninstrumented output. No tolerance change, replacement file, production fix or current-runtime acceptance."
     }
   }
 }
