@@ -6,6 +6,7 @@
 #include "pipeline_checkpoint.h"
 #include "fragment_checkpoint.h"
 #include "depth_plane_checkpoint.h"
+#include "process_modules.h"
 #include <QImage>
 #include <d3d11sdklayers.h>
 #include <fstream>
@@ -293,6 +294,9 @@ int wmain(int argc, wchar_t** argv) {
             report["output"]["png_round_trip_exact"] = true;
             require(replay.output().rgba == image.rgba, "Readback changed final output");
         }
+        report["device_feature_level"]=uint32_t(replay.nativeDevice()->GetFeatureLevel());
+        report["device_creation_flags"]=replay.nativeDevice()->GetCreationFlags();
+        report["loaded_modules"]=diagnostic::processModules();
         report["completed"] = true; save(output / "report.json", report);
         std::cout << report.dump() << '\n';
         return 0;

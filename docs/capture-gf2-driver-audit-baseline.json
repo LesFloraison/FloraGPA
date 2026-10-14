@@ -1,0 +1,256 @@
+{
+  "schema": 1,
+  "date": "2026-10-14",
+  "source_parent_commit": "b234a77daf3249c24df8fa1394e33d49189236d0",
+  "source_hashes": {
+    "CMakeLists.txt": "c0fa0a2f280d4c15a3cdce2d9bd98b30974827b4f2436f7e5d5f6183cdfd8310",
+    "tools/native/driver_compile_probe.cpp": "87b3a3bd719ada75bf9f7a31dfec5a59faf0bdd27f55dcb7c8c142e0f4940b6c",
+    "tools/native/process_modules.h": "11a6cc6ba4ed0d71475fee1e77975ce83e407ec1bb21ff42b8da4d3403e5770c",
+    "tools/native/replay_texel_probe.cpp": "33e3e7af5be955245e52987c109ca21ccc2f5a6270ec8d95ce1f17af77e37f69",
+    "docs/CAPTURE_GF2_DRIVER_AUDIT.md": "f4109a9e5ad625eef18d128c5e7b3978172091aa26b4310a285df9cdf767557f"
+  },
+  "input": {
+    "file": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-resolve-current-20261014\\launch-2\\session\\frame-d3b245ec-09d2-4888-91af-5032f19ddbd6.gpa_frame",
+    "sha256": "9bef49cd3f807ae3796ece91d35960604ce4158d0736acb5d545efa346aafacf",
+    "event": 5651
+  },
+  "summary": {
+    "schema": 1,
+    "current_gate_passed": false,
+    "production_fix": false,
+    "replay_executions": 10,
+    "matching": 1,
+    "alternate": 9,
+    "runs": [
+      {
+        "directory": "replay-0",
+        "capture_matching": false,
+        "rgba_sha256": "b548683168d47d12344c2a976155eb716c4a14d135dcbb8c9df542b0abd0caa1",
+        "report_sha256": "69538d4e1ef968c5f109ba3e920c1a5257713c53ff29b01de8887e5a22a1464e",
+        "png_sha256": "0e119453793730e1935d5813cd759c69091d9e21ee371235b5214f0127b656fd"
+      },
+      {
+        "directory": "replay-1",
+        "capture_matching": false,
+        "rgba_sha256": "b548683168d47d12344c2a976155eb716c4a14d135dcbb8c9df542b0abd0caa1",
+        "report_sha256": "5f6468ef9b91ae840e03b510b71784f3b5b8882ac7d1758c8aa334fe4dc43135",
+        "png_sha256": "0e119453793730e1935d5813cd759c69091d9e21ee371235b5214f0127b656fd"
+      },
+      {
+        "directory": "replay-2",
+        "capture_matching": false,
+        "rgba_sha256": "b548683168d47d12344c2a976155eb716c4a14d135dcbb8c9df542b0abd0caa1",
+        "report_sha256": "7f21cdf5963de7987921785aac50e411acb2644bb6acf49651228ce46a4306e7",
+        "png_sha256": "0e119453793730e1935d5813cd759c69091d9e21ee371235b5214f0127b656fd"
+      },
+      {
+        "directory": "replay-3",
+        "capture_matching": false,
+        "rgba_sha256": "b548683168d47d12344c2a976155eb716c4a14d135dcbb8c9df542b0abd0caa1",
+        "report_sha256": "6f0ac19bf0ab40cbdb50ccd770be373f8ffb692be1dbaee90d5c875f2137a44e",
+        "png_sha256": "0e119453793730e1935d5813cd759c69091d9e21ee371235b5214f0127b656fd"
+      },
+      {
+        "directory": "replay-4",
+        "capture_matching": false,
+        "rgba_sha256": "b548683168d47d12344c2a976155eb716c4a14d135dcbb8c9df542b0abd0caa1",
+        "report_sha256": "dfb1e9c28d09a1b36ea8b9cf6d0cfac547ac134a0e7126687c15f1c96fdaf24f",
+        "png_sha256": "0e119453793730e1935d5813cd759c69091d9e21ee371235b5214f0127b656fd"
+      },
+      {
+        "directory": "replay-5",
+        "capture_matching": false,
+        "rgba_sha256": "b548683168d47d12344c2a976155eb716c4a14d135dcbb8c9df542b0abd0caa1",
+        "report_sha256": "8afc9714c7329c56e2f39d3f1299581866fa99e6fa956990de8b3f80e891af83",
+        "png_sha256": "0e119453793730e1935d5813cd759c69091d9e21ee371235b5214f0127b656fd"
+      },
+      {
+        "directory": "replay-6",
+        "capture_matching": true,
+        "rgba_sha256": "d5ffe329528ecabc09517514d1b41c5a8d305210480ad9454c732051a697d0e7",
+        "report_sha256": "5373fb374bb3fceca3ba6538e328e9e23e11b07777c87155c4aad31c5bef2ca0",
+        "png_sha256": "488fe73cd858012a8973a48eb2f9139f68857ce1668ef013885936f5cb45369b"
+      },
+      {
+        "directory": "replay-7",
+        "capture_matching": false,
+        "rgba_sha256": "b548683168d47d12344c2a976155eb716c4a14d135dcbb8c9df542b0abd0caa1",
+        "report_sha256": "5f37f1d751217cd87a0ee24f0b7b8a239d9e065a7b135cb2f2b46d224c39620f",
+        "png_sha256": "0e119453793730e1935d5813cd759c69091d9e21ee371235b5214f0127b656fd"
+      },
+      {
+        "directory": "replay-8",
+        "capture_matching": false,
+        "rgba_sha256": "b548683168d47d12344c2a976155eb716c4a14d135dcbb8c9df542b0abd0caa1",
+        "report_sha256": "8a04c61d3147c0dfc78b88327efffd80e166f7c414c1844c256a9545a54095ce",
+        "png_sha256": "0e119453793730e1935d5813cd759c69091d9e21ee371235b5214f0127b656fd"
+      },
+      {
+        "directory": "replay-9",
+        "capture_matching": false,
+        "rgba_sha256": "b548683168d47d12344c2a976155eb716c4a14d135dcbb8c9df542b0abd0caa1",
+        "report_sha256": "87f9c4b15eb5f9162f7c6ab5f789b6fc8f76ee8c2f0276c1074977a58980898b",
+        "png_sha256": "0e119453793730e1935d5813cd759c69091d9e21ee371235b5214f0127b656fd"
+      }
+    ],
+    "pixel_differences": {
+      "b548683168d47d12344c2a976155eb716c4a14d135dcbb8c9df542b0abd0caa1": [
+        {
+          "x": 1182,
+          "y": 313,
+          "captured": [
+            12,
+            14,
+            12,
+            255
+          ],
+          "replayed": [
+            12,
+            15,
+            12,
+            255
+          ]
+        },
+        {
+          "x": 1182,
+          "y": 314,
+          "captured": [
+            13,
+            12,
+            8,
+            247
+          ],
+          "replayed": [
+            13,
+            12,
+            8,
+            248
+          ]
+        },
+        {
+          "x": 1183,
+          "y": 314,
+          "captured": [
+            22,
+            22,
+            17,
+            254
+          ],
+          "replayed": [
+            22,
+            22,
+            17,
+            255
+          ]
+        }
+      ],
+      "d5ffe329528ecabc09517514d1b41c5a8d305210480ad9454c732051a697d0e7": []
+    },
+    "feature_level": 45312,
+    "creation_flags": 0,
+    "native_module_count": 44,
+    "replay_module_count": 64,
+    "driver_modules": [
+      {
+        "path": "c:/windows/system32/driverstore/filerepository/iigd_dch.inf_amd64_38e51a298b862feb/igc64.dll",
+        "bytes": 86829440,
+        "sha256": "22fe18f7b9f39deb8f23ebdec5cc8b71c8849d0b949fae5e73a7c402aeef85bd",
+        "native": true,
+        "replay": true
+      },
+      {
+        "path": "c:/windows/system32/driverstore/filerepository/iigd_dch.inf_amd64_38e51a298b862feb/igd10iumd64.dll",
+        "bytes": 5484448,
+        "sha256": "4bc32bfbcd2092dbe6a6920d695c7c771027b116340ee36aee410d2b10fcba9b",
+        "native": true,
+        "replay": true
+      },
+      {
+        "path": "c:/windows/system32/driverstore/filerepository/iigd_dch.inf_amd64_38e51a298b862feb/igd10um64xe.dll",
+        "bytes": 18355200,
+        "sha256": "afac9a4d04b2acf5325076edaf850aecaf6ff101563b9d959b5156e8fb511d09",
+        "native": true,
+        "replay": true
+      },
+      {
+        "path": "c:/windows/system32/driverstore/filerepository/iigd_dch.inf_amd64_38e51a298b862feb/igdgmm64.dll",
+        "bytes": 6000512,
+        "sha256": "e11e23cf9ee593bcd648fc929deb4dc0c5e61270e74525e27dbb01f411010328",
+        "native": true,
+        "replay": true
+      },
+      {
+        "path": "c:/windows/system32/driverstore/filerepository/iigd_dch.inf_amd64_38e51a298b862feb/intelcontrollib.dll",
+        "bytes": 722464,
+        "sha256": "65595242e99e6184cb7d1e0cecf33c2289c78d506bbd8154407bddcb5c11950b",
+        "native": true,
+        "replay": true
+      }
+    ],
+    "native": {
+      "completed": true,
+      "inherited_test_keys": {
+        "IGC_ShaderDumpEnable": null,
+        "IGC_DumpToCustomDir": null,
+        "IGC_ShaderDumpPidDisable": null,
+        "IGC_ShaderDumpRegexFilter": null
+      },
+      "default_dump_existed": false,
+      "runs": [
+        {
+          "label": "baseline",
+          "seed": 3736625863,
+          "environment": {},
+          "shader_sha256": "d7386fd7d81093f474ec0203f39d91627a23ed014f1f49fd0b059eabd8019d09",
+          "output_sha256": "a5fb7e0c32fe21a5a45ee0a73b6043a6957eba31a0c0ba27aac6f9838384aba7",
+          "dumps": []
+        },
+        {
+          "label": "dump-1",
+          "seed": 231995885,
+          "environment": {
+            "IGC_ShaderDumpEnable": "1",
+            "IGC_DumpToCustomDir": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-driver-audit-20261014\\dump-1-compiler",
+            "IGC_ShaderDumpPidDisable": "1"
+          },
+          "shader_sha256": "b5437099a43d9dfbc7e060c5293c4a198f36f838fada942ab638e2f278bfbe58",
+          "output_sha256": "d8aa4303b9200bd3b0278647a58e610626cff8ad3fe459f1afc8b287749f1734",
+          "dumps": []
+        },
+        {
+          "label": "dump-2",
+          "seed": 2435681681,
+          "environment": {
+            "IGC_ShaderDumpEnable": "1",
+            "IGC_DumpToCustomDir": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-driver-audit-20261014\\dump-2-compiler",
+            "IGC_ShaderDumpPidDisable": "1"
+          },
+          "shader_sha256": "a4e9a937d1ab3e5384fca388223dc461fb75f37136f2a1eb8725e950912fbe4a",
+          "output_sha256": "1cbd842cff54aa262cd9a35649aaecb4af984710e4562b84265f251616df22da",
+          "dumps": []
+        }
+      ],
+      "default_dump_exists_after": false
+    }
+  },
+  "validation": {
+    "native_executions": 3,
+    "native_exact_texels": 273,
+    "native_refusals": 8,
+    "probe_cases": 28,
+    "probe_refusals": 24,
+    "ctest_passed": 1,
+    "capture_only_configured": true
+  },
+  "binaries": {
+    "FloraDriverCompileProbe.exe": "afbf4ca0cc954b2ca13ee0b5632cf8e22deeffa21b5388fd50af636330cc244b",
+    "FloraReplayTexelProbe.exe": "86669aef1003f16047c401b2d63e39f1c5ab9e4f4a34d063cfe0dc96d3b382a9"
+  },
+  "replay_sha256": "215ebafed657953f0671c32a0948e12c8c965437a3eaa33e6d38aedcff5e2ddc",
+  "raw": {
+    "root": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-driver-audit-20261014",
+    "files": 160,
+    "manifest_sha256": "1a142bb97d284ac0ba00423a895987b33f1294541c98ffaaf9345e44c3b5fef6"
+  },
+  "limits": "Both known color outcomes use identical observed module paths, feature level and flags. Module disk hashes do not identify generated shader ISA or driver internal decisions. The tested public IGC environment dump route yielded no artifacts on this Windows driver. No production fix; the formal six-frame gate remains failed."
+}

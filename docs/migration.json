@@ -4491,6 +4491,22 @@
       "current_gate_passed": false,
       "production_fix": false,
       "limits": "Complete shader-readable depth/stencil planes now agree across both final color outcomes. GPU padding/compression metadata is excluded. This does not establish equal intermediate fragment histories, post-VS values or shader execution. No production fix; formal six-frame gate remains failed."
+    },
+    "gf2_driver_audit": {
+      "evidence": "docs/CAPTURE_GF2_DRIVER_AUDIT.md",
+      "baseline": "docs/capture-gf2-driver-audit-baseline.json",
+      "executions": 10,
+      "matching": 1,
+      "alternate": 9,
+      "native_executions": 3,
+      "native_exact_texels": 273,
+      "native_refusals": 8,
+      "probe_cases": 28,
+      "probe_refusals": 24,
+      "compiler_dump_files": 0,
+      "current_gate_passed": false,
+      "production_fix": false,
+      "limits": "Both known color outcomes use identical observed module paths, feature level and flags. Module disk hashes do not identify generated shader ISA or driver internal decisions. The tested public IGC environment dump route yielded no artifacts on this Windows driver. No production fix; the formal six-frame gate remains failed."
     }
   }
 }
