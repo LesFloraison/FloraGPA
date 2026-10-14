@@ -16,6 +16,7 @@
 #include <iostream>
 #include <map>
 #include <nlohmann/json.hpp>
+#include <optional>
 #include <psapi.h>
 #include <sstream>
 #include <vector>
@@ -339,6 +340,46 @@ struct Gpu {
         context->Unmap(staging.Get(), 0);
         return result;
     }
+    Json samplePositions(const Resource &r) {
+        require(r.desc.Format != DXGI_FORMAT_R32G8X24_TYPELESS, "Sample-position probe requires color");
+        begin(r.desc.SampleDesc.Count, 1, false);
+        auto desc = r.desc;
+        desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+        desc.Usage = D3D11_USAGE_DEFAULT;
+        desc.CPUAccessFlags = desc.MiscFlags = 0;
+        ComPtr<ID3D11Texture2D> source;
+        check(device->CreateTexture2D(&desc, nullptr, &source), "Create sample-pattern resource");
+        auto view = srv(source.Get(), access(r), true);
+        auto rawView = view.Get();
+        context->PSSetShaderResources(0, 1, &rawView);
+        D3D11_TEXTURE2D_DESC out{
+            desc.SampleDesc.Count,    1, 1, 1, DXGI_FORMAT_R32G32_FLOAT, {1, 0}, D3D11_USAGE_DEFAULT,
+            D3D11_BIND_RENDER_TARGET, 0, 0};
+        ComPtr<ID3D11Texture2D> target;
+        check(device->CreateTexture2D(&out, nullptr, &target), "Create sample-position target");
+        ComPtr<ID3D11RenderTargetView> rtv;
+        check(device->CreateRenderTargetView(target.Get(), nullptr, &rtv), "Create sample-position RTV");
+        auto raw = rtv.Get();
+        context->OMSetRenderTargets(1, &raw, nullptr);
+        draw("Texture2DMS<uint4> t:register(t0);float2 main(float4 p:SV_Position):SV_Target{"
+             "return t.GetSamplePosition((int)p.x);}");
+        context->ClearState();
+        out.BindFlags = 0;
+        out.Usage = D3D11_USAGE_STAGING;
+        out.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
+        ComPtr<ID3D11Texture2D> staging;
+        check(device->CreateTexture2D(&out, nullptr, &staging), "Create sample-position staging");
+        context->CopyResource(staging.Get(), target.Get());
+        D3D11_MAPPED_SUBRESOURCE mapped{};
+        check(context->Map(staging.Get(), 0, D3D11_MAP_READ, 0, &mapped), "Map sample positions");
+        std::array<std::array<float, 2>, 8> positions{};
+        std::memcpy(positions.data(), mapped.pData, out.Width * sizeof(positions[0]));
+        context->Unmap(staging.Get(), 0);
+        Json result = Json::array();
+        for (UINT i = 0; i < out.Width; ++i)
+            result.push_back(positions[i]);
+        return result;
+    }
     Json messages() {
         Json result = Json::array();
         for (UINT64 i = 0; i < debug->GetNumStoredMessages(); ++i) {
@@ -376,8 +417,9 @@ Json compare(const Bytes &actual, const Bytes &expected, UINT stride) {
 }
 } // namespace
 int wmain(int argc, wchar_t **argv) {
-    if ((argc != 5 && argc != 6) || (argc == 6 && std::wstring(argv[5]) != L"--skip-draw")) {
-        std::cerr << "BUNDLE NEW_OUT PCI_VENDOR|warp REPEATS [--skip-draw]\n";
+    if (argc < 5) {
+        std::cerr << "BUNDLE NEW_OUT PCI_VENDOR|warp REPEATS [--skip-draw] [--indices FIRST COUNT] "
+                     "[--pixel RESOURCE X Y] [--sample-positions] [--summary-only]\n";
         return 2;
     }
     Json report{{"completed", false}, {"acceptance_established", false}, {"comparisons", Json::array()}};
@@ -392,8 +434,30 @@ int wmain(int argc, wchar_t **argv) {
     };
     try {
         const auto repeats = number(argv[4]);
-        const bool skipDraw = argc == 6;
+        bool skipDraw = false, summaryOnly = false, samplePositions = false;
+        std::optional<std::array<UINT, 2>> indices;
+        std::optional<std::array<UINT, 3>> pixel;
+        for (int i = 5; i < argc; ++i) {
+            const std::wstring option(argv[i]);
+            if (option == L"--skip-draw" && !skipDraw)
+                skipDraw = true;
+            else if (option == L"--summary-only" && !summaryOnly)
+                summaryOnly = true;
+            else if (option == L"--sample-positions" && !samplePositions)
+                samplePositions = true;
+            else if (option == L"--indices" && !indices && i + 2 < argc) {
+                indices = std::array<UINT, 2>{number(argv[i + 1]), number(argv[i + 2])};
+                i += 2;
+            } else if (option == L"--pixel" && !pixel && i + 3 < argc) {
+                pixel = std::array<UINT, 3>{number(argv[i + 1]), number(argv[i + 2]), number(argv[i + 3])};
+                i += 3;
+            } else
+                throw std::runtime_error("Unknown, duplicate or incomplete option");
+        }
+        require(!(skipDraw && indices), "Skip Draw cannot select an index range");
+        require(!samplePositions || pixel.has_value(), "Sample positions require --pixel");
         report["skip_draw"] = skipDraw;
+        report["summary_only"] = summaryOnly;
         require(repeats > 0 && repeats <= 20, "Repeat count must be 1..20");
         const auto vendor = std::wstring(argv[3]) == L"warp" ? 0 : number(argv[3]);
         require(vendor <= 65535, "Invalid vendor");
@@ -402,6 +466,23 @@ int wmain(int argc, wchar_t **argv) {
         auto bundle = Json::parse(text);
         require(bundle.at("schema") == "Flora native draw fixture 1" && bundle.at("completed") == true,
                 "Incomplete or unsupported fixture");
+        if (indices) {
+            const UINT count = bundle.at("draw").at(0).get<UINT>();
+            require(bundle.at("topology").get<UINT>() == D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST &&
+                        (*indices)[0] % 3 == 0 && (*indices)[1] && (*indices)[1] % 3 == 0 &&
+                        (*indices)[0] <= count && (*indices)[1] <= count - (*indices)[0],
+                    "Index range must select complete triangles within the original draw");
+            require(bundle.at("draw").at(1).get<UINT>() <= UINT32_MAX - (*indices)[0],
+                    "Draw start index overflow");
+        }
+        if (pixel) {
+            const auto &item = bundle.at("resources").at(std::to_string((*pixel)[0]));
+            require(item.contains("samples"), "Pixel inspection requires an MSAA output");
+            const auto desc = pod<D3D11_TEXTURE2D_DESC>(item.at("desc"));
+            require((*pixel)[1] < desc.Width && (*pixel)[2] < desc.Height,
+                    "Pixel coordinate exceeds texture bounds");
+            report["pixel"] = *pixel;
+        }
         const auto requestedOutput = fs::absolute(argv[2]);
         require(fs::create_directory(requestedOutput), "Output directory must be new");
         output = requestedOutput;
@@ -616,6 +697,22 @@ int wmain(int argc, wchar_t **argv) {
         count(bundle.at("draw"), 3);
         auto draw = bundle.at("draw").get<std::array<UINT, 3>>();
         require(draw[0] && draw[0] <= 1000000, "Draw count exceeds bound");
+        report["original_draw"] = draw;
+        if (indices) {
+            draw[0] = (*indices)[1];
+            draw[1] += (*indices)[0];
+        }
+        report["applied_draw"] = draw;
+        auto addPixel = [&](Json &result, uint64_t id, const Resource &r, const Bytes &actual,
+                            const Bytes &expected) {
+            if (pixel && (*pixel)[0] == id) {
+                const size_t first = (size_t((*pixel)[2]) * r.desc.Width + (*pixel)[1]) * Gpu::pixelBytes(r);
+                const auto length = Gpu::pixelBytes(r);
+                result["actual_pixel_bytes"] = Bytes(actual.begin() + first, actual.begin() + first + length);
+                result["expected_pixel_bytes"] =
+                    Bytes(expected.begin() + first, expected.begin() + first + length);
+            }
+        };
         auto bind = [&] {
             auto *c = gpu.context.Get();
             c->ClearState();
@@ -670,6 +767,11 @@ int wmain(int argc, wchar_t **argv) {
                 targets[i] = rtvs[i].Get();
             c->OMSetRenderTargets(8, targets, dsv.Get());
         };
+        if (samplePositions) {
+            report["sample_positions"] = gpu.samplePositions(resources.at((*pixel)[0]));
+            report["sample_positions_source"] =
+                "Private resource with the same dimensions/format/sample descriptor";
+        }
         report["initialization_debug"] = gpu.messages();
         save();
         for (const auto &message : report["initialization_debug"])
@@ -684,6 +786,7 @@ int wmain(int argc, wchar_t **argv) {
                 for (UINT sample = 0; sample < r.samples.size(); ++sample) {
                     auto actual = gpu.sample(r, sample);
                     auto result = compare(actual, r.samples[sample], Gpu::pixelBytes(r));
+                    addPixel(result, id, r, actual, r.samples[sample]);
                     result["phase"] = "restore";
                     result["repeat"] = repeat;
                     result["resource"] = id;
@@ -709,12 +812,13 @@ int wmain(int argc, wchar_t **argv) {
                         root,
                         bundle.at("resources").at(std::to_string(id)).at("expected_after_draw").at(sample));
                     auto result = compare(actual, expected, Gpu::pixelBytes(r));
+                    addPixel(result, id, r, actual, expected);
                     allEqual &= result.at("exact").get<bool>();
                     result["phase"] = "draw";
                     result["repeat"] = repeat;
                     result["resource"] = id;
                     result["sample"] = sample;
-                    if (!result.at("exact").get<bool>()) {
+                    if (!result.at("exact").get<bool>() && !summaryOnly) {
                         const auto name = std::to_string(repeat) + "-" + std::to_string(id) + "-s" +
                                           std::to_string(sample) + ".bin";
                         std::ofstream f(output / name, std::ios::binary);

@@ -1,0 +1,1292 @@
+{
+  "schema": "FloraGPA GF2 primitive reduction 1",
+  "date": "2026-10-14",
+  "base_commit": "a5a43c34d59228f6ea27765c722852d9a836457d",
+  "current_gate_passed": false,
+  "production_changed": false,
+  "input": {
+    "frame_sha256": "a30ddd946f1ff174d6c704c0d820554d0614f45f90508349e3004fb7f8cd9b06",
+    "event": 5598,
+    "bundle": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-draw-fixture-20261014\\bundle-complete",
+    "bundle_sha256": "2df2a232c3f25c773eeaf894dd9882b7e1430ab2b54f14f3a67ffa2d72821fa7",
+    "resources": 19,
+    "vs_sha256": "18669b668cb39b907a02cfec253f74b24d0c09c6ae73d0d65f27455032b2d869",
+    "ps_sha256": "fe92913b679084eb0c88a589285f8470cef44e70075b02a966adad683fd7bd95"
+  },
+  "comparison": "Exact bytes; altered index ranges are diagnostic only",
+  "runs": [
+    {
+      "name": "full",
+      "report": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-primitive-20261014\\full\\report.json",
+      "sha256": "883590ce39a8ffa1abec8b2db9a534e072e34009791d151d54dbdc4349dd6911",
+      "completed": true,
+      "original_draw": [
+        7401,
+        0,
+        0
+      ],
+      "applied_draw": [
+        7401,
+        0,
+        0
+      ],
+      "draw_repetitions": 1,
+      "initial_samples_exact": 8,
+      "output_sample_hashes": [
+        {
+          "repeat": 0,
+          "resource": 411,
+          "sample": 0,
+          "sha256": "471cc3603bfe5281287caf5c31926dfdd1e8446444bd10bcb57c2895901d0e97"
+        },
+        {
+          "repeat": 0,
+          "resource": 411,
+          "sample": 1,
+          "sha256": "48374e89c213b3687c6ecf4d520d5590f23ba2bafd3ad3de35b8632fe8e004f5"
+        },
+        {
+          "repeat": 0,
+          "resource": 415,
+          "sample": 0,
+          "sha256": "ee8c4daeca87ad70fcfcf995c274262b2d813bbc12b355e1c5715cf232a78b68"
+        },
+        {
+          "repeat": 0,
+          "resource": 415,
+          "sample": 1,
+          "sha256": "28eea209c532cb00a7d0aef152ed0034ef4cd1cda5e95ad2fec48f329806f218"
+        },
+        {
+          "repeat": 0,
+          "resource": 419,
+          "sample": 0,
+          "sha256": "f4f80f6b0a37fdf9dcae3a7278d6a6a31cff3e4ebc0f368c95cff32b903269a1"
+        },
+        {
+          "repeat": 0,
+          "resource": 419,
+          "sample": 1,
+          "sha256": "652b86cb53a7828ef641c78f0439ef4682af2fac37eb030925290d4ab9a1e136"
+        },
+        {
+          "repeat": 0,
+          "resource": 618,
+          "sample": 0,
+          "sha256": "10bfd552c3acc038eab0bb6fcecf3c309680f224dbba938eccd0d73013e144b4"
+        },
+        {
+          "repeat": 0,
+          "resource": 618,
+          "sample": 1,
+          "sha256": "a35b24aaf37c0c99ac636f424343ba92c8bff6a872a387c17b1c3139d97f681e"
+        }
+      ],
+      "selected_pixel": [
+        {
+          "repeat": 0,
+          "sample": 0,
+          "words": [
+            14698,
+            13854,
+            13265,
+            15091
+          ]
+        },
+        {
+          "repeat": 0,
+          "sample": 1,
+          "words": [
+            14651,
+            13021,
+            10297,
+            15360
+          ]
+        }
+      ],
+      "sample_positions": null,
+      "debug_messages": 0,
+      "module_audit_passed": true,
+      "summary_only": true
+    },
+    {
+      "name": "before-1613",
+      "report": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-primitive-20261014\\before-1613\\report.json",
+      "sha256": "e1f8ffde15dedf9694d6e71ae506f07fce7db89dffb2ec77af55c0ddcfa19c95",
+      "completed": true,
+      "original_draw": [
+        7401,
+        0,
+        0
+      ],
+      "applied_draw": [
+        4839,
+        0,
+        0
+      ],
+      "draw_repetitions": 1,
+      "initial_samples_exact": 8,
+      "output_sample_hashes": [
+        {
+          "repeat": 0,
+          "resource": 411,
+          "sample": 0,
+          "sha256": "471cc3603bfe5281287caf5c31926dfdd1e8446444bd10bcb57c2895901d0e97"
+        },
+        {
+          "repeat": 0,
+          "resource": 411,
+          "sample": 1,
+          "sha256": "48374e89c213b3687c6ecf4d520d5590f23ba2bafd3ad3de35b8632fe8e004f5"
+        },
+        {
+          "repeat": 0,
+          "resource": 415,
+          "sample": 0,
+          "sha256": "1307bd358616b63a8edf9bcbc97a661ca562ae1815d361d8d558e549a25b2d78"
+        },
+        {
+          "repeat": 0,
+          "resource": 415,
+          "sample": 1,
+          "sha256": "78c96f2dae1aafd0425442111fd0f2c55a1bb83f2a2f8b4e9134d4fbb689c42b"
+        },
+        {
+          "repeat": 0,
+          "resource": 419,
+          "sample": 0,
+          "sha256": "021d1391ed1bef5feb9e434a32c4596797944dab695cc9daf414b39e895c57d1"
+        },
+        {
+          "repeat": 0,
+          "resource": 419,
+          "sample": 1,
+          "sha256": "f961ff5e496a2b986aafc162a854534ab5004afcb086d530880b661ac1a06b1c"
+        },
+        {
+          "repeat": 0,
+          "resource": 618,
+          "sample": 0,
+          "sha256": "4290775ecd984906f6f652be8b96524f574739a1163dd67cc03fd5b214199e27"
+        },
+        {
+          "repeat": 0,
+          "resource": 618,
+          "sample": 1,
+          "sha256": "b9da459028c98347ba21878be78d97b021f179e65890d210c258ca6e377d866c"
+        }
+      ],
+      "selected_pixel": [
+        {
+          "repeat": 0,
+          "sample": 0,
+          "words": [
+            12486,
+            11038,
+            8056,
+            15360
+          ]
+        },
+        {
+          "repeat": 0,
+          "sample": 1,
+          "words": [
+            12486,
+            11038,
+            8056,
+            15360
+          ]
+        }
+      ],
+      "sample_positions": null,
+      "debug_messages": 0,
+      "module_audit_passed": true,
+      "summary_only": true
+    },
+    {
+      "name": "through-1613",
+      "report": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-primitive-20261014\\through-1613\\report.json",
+      "sha256": "7d4e78f3877927558e54d6d49b149d90b2eea4d7e8b9575699104ac2ecd6e73d",
+      "completed": true,
+      "original_draw": [
+        7401,
+        0,
+        0
+      ],
+      "applied_draw": [
+        4842,
+        0,
+        0
+      ],
+      "draw_repetitions": 1,
+      "initial_samples_exact": 8,
+      "output_sample_hashes": [
+        {
+          "repeat": 0,
+          "resource": 411,
+          "sample": 0,
+          "sha256": "471cc3603bfe5281287caf5c31926dfdd1e8446444bd10bcb57c2895901d0e97"
+        },
+        {
+          "repeat": 0,
+          "resource": 411,
+          "sample": 1,
+          "sha256": "48374e89c213b3687c6ecf4d520d5590f23ba2bafd3ad3de35b8632fe8e004f5"
+        },
+        {
+          "repeat": 0,
+          "resource": 415,
+          "sample": 0,
+          "sha256": "8af1659d90203e0c5470f766167b9bf752b5e0d64746afe3894ecc882580b34b"
+        },
+        {
+          "repeat": 0,
+          "resource": 415,
+          "sample": 1,
+          "sha256": "78c96f2dae1aafd0425442111fd0f2c55a1bb83f2a2f8b4e9134d4fbb689c42b"
+        },
+        {
+          "repeat": 0,
+          "resource": 419,
+          "sample": 0,
+          "sha256": "6abb9289ff48a4f6e4f4698aebeed2bfdb195b2d23541a81bc66f1198bf6955a"
+        },
+        {
+          "repeat": 0,
+          "resource": 419,
+          "sample": 1,
+          "sha256": "f961ff5e496a2b986aafc162a854534ab5004afcb086d530880b661ac1a06b1c"
+        },
+        {
+          "repeat": 0,
+          "resource": 618,
+          "sample": 0,
+          "sha256": "e07c7e9b783c0c9e01b8a70a77c098ee6e12b4d0d6bb25cb716a0aa27ec0f9ac"
+        },
+        {
+          "repeat": 0,
+          "resource": 618,
+          "sample": 1,
+          "sha256": "b9da459028c98347ba21878be78d97b021f179e65890d210c258ca6e377d866c"
+        }
+      ],
+      "selected_pixel": [
+        {
+          "repeat": 0,
+          "sample": 0,
+          "words": [
+            14698,
+            13854,
+            13265,
+            15091
+          ]
+        },
+        {
+          "repeat": 0,
+          "sample": 1,
+          "words": [
+            12486,
+            11038,
+            8056,
+            15360
+          ]
+        }
+      ],
+      "sample_positions": null,
+      "debug_messages": 0,
+      "module_audit_passed": true,
+      "summary_only": true
+    },
+    {
+      "name": "through-1614",
+      "report": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-primitive-20261014\\through-1614\\report.json",
+      "sha256": "1fb44acc7900bd32c2f63c883f036b1efc8595319485b80d7a71a78e36bbc808",
+      "completed": true,
+      "original_draw": [
+        7401,
+        0,
+        0
+      ],
+      "applied_draw": [
+        4845,
+        0,
+        0
+      ],
+      "draw_repetitions": 1,
+      "initial_samples_exact": 8,
+      "output_sample_hashes": [
+        {
+          "repeat": 0,
+          "resource": 411,
+          "sample": 0,
+          "sha256": "471cc3603bfe5281287caf5c31926dfdd1e8446444bd10bcb57c2895901d0e97"
+        },
+        {
+          "repeat": 0,
+          "resource": 411,
+          "sample": 1,
+          "sha256": "48374e89c213b3687c6ecf4d520d5590f23ba2bafd3ad3de35b8632fe8e004f5"
+        },
+        {
+          "repeat": 0,
+          "resource": 415,
+          "sample": 0,
+          "sha256": "aceb4fe1613c4ffd51e3807485f3715968a59b2e84e5b106099f07b2d4335fc6"
+        },
+        {
+          "repeat": 0,
+          "resource": 415,
+          "sample": 1,
+          "sha256": "1340117af01878409c87ed6cd531657cf46564a53ecdab69268f02a5b3b5673f"
+        },
+        {
+          "repeat": 0,
+          "resource": 419,
+          "sample": 0,
+          "sha256": "3dabee42fcec5f8902afd5142abdd75ba4b154a937c99b68e22d95e0c46c9c08"
+        },
+        {
+          "repeat": 0,
+          "resource": 419,
+          "sample": 1,
+          "sha256": "920df59b4aa27c59a93cee0f79d3fd196ecf7633890ec0c9c886f11bfa910be5"
+        },
+        {
+          "repeat": 0,
+          "resource": 618,
+          "sample": 0,
+          "sha256": "d248f5fc8d53e22190896afe01c68a58983a2e802ae84beb1bf43d651e23f583"
+        },
+        {
+          "repeat": 0,
+          "resource": 618,
+          "sample": 1,
+          "sha256": "f26e5ea352d6543c789553b014331305a6d2b9d86347d78d727dcbaa6d217e0f"
+        }
+      ],
+      "selected_pixel": [
+        {
+          "repeat": 0,
+          "sample": 0,
+          "words": [
+            14698,
+            13854,
+            13265,
+            15091
+          ]
+        },
+        {
+          "repeat": 0,
+          "sample": 1,
+          "words": [
+            14651,
+            13021,
+            10297,
+            15360
+          ]
+        }
+      ],
+      "sample_positions": null,
+      "debug_messages": 0,
+      "module_audit_passed": true,
+      "summary_only": true
+    },
+    {
+      "name": "only-1613",
+      "report": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-primitive-20261014\\only-1613\\report.json",
+      "sha256": "1e1f1484b544993673256e28e58890c4c947d30d89e726fb78e21c520c62040f",
+      "completed": true,
+      "original_draw": [
+        7401,
+        0,
+        0
+      ],
+      "applied_draw": [
+        3,
+        4839,
+        0
+      ],
+      "draw_repetitions": 1,
+      "initial_samples_exact": 8,
+      "output_sample_hashes": [
+        {
+          "repeat": 0,
+          "resource": 411,
+          "sample": 0,
+          "sha256": "471cc3603bfe5281287caf5c31926dfdd1e8446444bd10bcb57c2895901d0e97"
+        },
+        {
+          "repeat": 0,
+          "resource": 411,
+          "sample": 1,
+          "sha256": "48374e89c213b3687c6ecf4d520d5590f23ba2bafd3ad3de35b8632fe8e004f5"
+        },
+        {
+          "repeat": 0,
+          "resource": 415,
+          "sample": 0,
+          "sha256": "2507b69fa27c25b7771d896b24d273756eb63612d554919beac163bfef4147f2"
+        },
+        {
+          "repeat": 0,
+          "resource": 415,
+          "sample": 1,
+          "sha256": "354e785aed5bb1cdcacab43d61e851a5c626b2590130125e54c75e53f66c0cf8"
+        },
+        {
+          "repeat": 0,
+          "resource": 419,
+          "sample": 0,
+          "sha256": "1cf59687b2c239632187e9897f50204437dedc945e0767575f90c49c70bcbe98"
+        },
+        {
+          "repeat": 0,
+          "resource": 419,
+          "sample": 1,
+          "sha256": "00be48afb03a98bf98ba82612d54c2004d92781ca0958b37df6b382e09769f9f"
+        },
+        {
+          "repeat": 0,
+          "resource": 618,
+          "sample": 0,
+          "sha256": "00493cb4e4ab0b341024fb7203093c13edd15abdd14425ec91d4b3f1c394a4fc"
+        },
+        {
+          "repeat": 0,
+          "resource": 618,
+          "sample": 1,
+          "sha256": "df51ee7e4a648425f9e6b9e8f97f55d62ecfbcbde2772adae2ceeb546dd82d42"
+        }
+      ],
+      "selected_pixel": [
+        {
+          "repeat": 0,
+          "sample": 0,
+          "words": [
+            14698,
+            13854,
+            13265,
+            15091
+          ]
+        },
+        {
+          "repeat": 0,
+          "sample": 1,
+          "words": [
+            12486,
+            11038,
+            8056,
+            15360
+          ]
+        }
+      ],
+      "sample_positions": null,
+      "debug_messages": 0,
+      "module_audit_passed": true,
+      "summary_only": true
+    },
+    {
+      "name": "only-1613-repeat",
+      "report": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-primitive-20261014\\only-1613-repeat\\report.json",
+      "sha256": "9ffc7dc21672d88a9d6433169ef215a3969be642d3bb15076d8e803e729aaafe",
+      "completed": true,
+      "original_draw": [
+        7401,
+        0,
+        0
+      ],
+      "applied_draw": [
+        3,
+        4839,
+        0
+      ],
+      "draw_repetitions": 3,
+      "initial_samples_exact": 24,
+      "output_sample_hashes": [
+        {
+          "repeat": 0,
+          "resource": 411,
+          "sample": 0,
+          "sha256": "471cc3603bfe5281287caf5c31926dfdd1e8446444bd10bcb57c2895901d0e97"
+        },
+        {
+          "repeat": 0,
+          "resource": 411,
+          "sample": 1,
+          "sha256": "48374e89c213b3687c6ecf4d520d5590f23ba2bafd3ad3de35b8632fe8e004f5"
+        },
+        {
+          "repeat": 0,
+          "resource": 415,
+          "sample": 0,
+          "sha256": "2507b69fa27c25b7771d896b24d273756eb63612d554919beac163bfef4147f2"
+        },
+        {
+          "repeat": 0,
+          "resource": 415,
+          "sample": 1,
+          "sha256": "354e785aed5bb1cdcacab43d61e851a5c626b2590130125e54c75e53f66c0cf8"
+        },
+        {
+          "repeat": 0,
+          "resource": 419,
+          "sample": 0,
+          "sha256": "1cf59687b2c239632187e9897f50204437dedc945e0767575f90c49c70bcbe98"
+        },
+        {
+          "repeat": 0,
+          "resource": 419,
+          "sample": 1,
+          "sha256": "00be48afb03a98bf98ba82612d54c2004d92781ca0958b37df6b382e09769f9f"
+        },
+        {
+          "repeat": 0,
+          "resource": 618,
+          "sample": 0,
+          "sha256": "00493cb4e4ab0b341024fb7203093c13edd15abdd14425ec91d4b3f1c394a4fc"
+        },
+        {
+          "repeat": 0,
+          "resource": 618,
+          "sample": 1,
+          "sha256": "df51ee7e4a648425f9e6b9e8f97f55d62ecfbcbde2772adae2ceeb546dd82d42"
+        },
+        {
+          "repeat": 1,
+          "resource": 411,
+          "sample": 0,
+          "sha256": "471cc3603bfe5281287caf5c31926dfdd1e8446444bd10bcb57c2895901d0e97"
+        },
+        {
+          "repeat": 1,
+          "resource": 411,
+          "sample": 1,
+          "sha256": "48374e89c213b3687c6ecf4d520d5590f23ba2bafd3ad3de35b8632fe8e004f5"
+        },
+        {
+          "repeat": 1,
+          "resource": 415,
+          "sample": 0,
+          "sha256": "2507b69fa27c25b7771d896b24d273756eb63612d554919beac163bfef4147f2"
+        },
+        {
+          "repeat": 1,
+          "resource": 415,
+          "sample": 1,
+          "sha256": "354e785aed5bb1cdcacab43d61e851a5c626b2590130125e54c75e53f66c0cf8"
+        },
+        {
+          "repeat": 1,
+          "resource": 419,
+          "sample": 0,
+          "sha256": "1cf59687b2c239632187e9897f50204437dedc945e0767575f90c49c70bcbe98"
+        },
+        {
+          "repeat": 1,
+          "resource": 419,
+          "sample": 1,
+          "sha256": "00be48afb03a98bf98ba82612d54c2004d92781ca0958b37df6b382e09769f9f"
+        },
+        {
+          "repeat": 1,
+          "resource": 618,
+          "sample": 0,
+          "sha256": "00493cb4e4ab0b341024fb7203093c13edd15abdd14425ec91d4b3f1c394a4fc"
+        },
+        {
+          "repeat": 1,
+          "resource": 618,
+          "sample": 1,
+          "sha256": "df51ee7e4a648425f9e6b9e8f97f55d62ecfbcbde2772adae2ceeb546dd82d42"
+        },
+        {
+          "repeat": 2,
+          "resource": 411,
+          "sample": 0,
+          "sha256": "471cc3603bfe5281287caf5c31926dfdd1e8446444bd10bcb57c2895901d0e97"
+        },
+        {
+          "repeat": 2,
+          "resource": 411,
+          "sample": 1,
+          "sha256": "48374e89c213b3687c6ecf4d520d5590f23ba2bafd3ad3de35b8632fe8e004f5"
+        },
+        {
+          "repeat": 2,
+          "resource": 415,
+          "sample": 0,
+          "sha256": "2507b69fa27c25b7771d896b24d273756eb63612d554919beac163bfef4147f2"
+        },
+        {
+          "repeat": 2,
+          "resource": 415,
+          "sample": 1,
+          "sha256": "354e785aed5bb1cdcacab43d61e851a5c626b2590130125e54c75e53f66c0cf8"
+        },
+        {
+          "repeat": 2,
+          "resource": 419,
+          "sample": 0,
+          "sha256": "1cf59687b2c239632187e9897f50204437dedc945e0767575f90c49c70bcbe98"
+        },
+        {
+          "repeat": 2,
+          "resource": 419,
+          "sample": 1,
+          "sha256": "00be48afb03a98bf98ba82612d54c2004d92781ca0958b37df6b382e09769f9f"
+        },
+        {
+          "repeat": 2,
+          "resource": 618,
+          "sample": 0,
+          "sha256": "00493cb4e4ab0b341024fb7203093c13edd15abdd14425ec91d4b3f1c394a4fc"
+        },
+        {
+          "repeat": 2,
+          "resource": 618,
+          "sample": 1,
+          "sha256": "df51ee7e4a648425f9e6b9e8f97f55d62ecfbcbde2772adae2ceeb546dd82d42"
+        }
+      ],
+      "selected_pixel": [
+        {
+          "repeat": 0,
+          "sample": 0,
+          "words": [
+            14698,
+            13854,
+            13265,
+            15091
+          ]
+        },
+        {
+          "repeat": 0,
+          "sample": 1,
+          "words": [
+            12486,
+            11038,
+            8056,
+            15360
+          ]
+        },
+        {
+          "repeat": 1,
+          "sample": 0,
+          "words": [
+            14698,
+            13854,
+            13265,
+            15091
+          ]
+        },
+        {
+          "repeat": 1,
+          "sample": 1,
+          "words": [
+            12486,
+            11038,
+            8056,
+            15360
+          ]
+        },
+        {
+          "repeat": 2,
+          "sample": 0,
+          "words": [
+            14698,
+            13854,
+            13265,
+            15091
+          ]
+        },
+        {
+          "repeat": 2,
+          "sample": 1,
+          "words": [
+            12486,
+            11038,
+            8056,
+            15360
+          ]
+        }
+      ],
+      "sample_positions": [
+        [
+          0.25,
+          0.25
+        ],
+        [
+          -0.25,
+          -0.25
+        ]
+      ],
+      "debug_messages": 0,
+      "module_audit_passed": true,
+      "summary_only": true
+    },
+    {
+      "name": "only-1614",
+      "report": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-primitive-20261014\\only-1614\\report.json",
+      "sha256": "2c9c7427e71a713c6c20822e5c2c559cffbfec073d4bff74b7624b31c89acfb2",
+      "completed": true,
+      "original_draw": [
+        7401,
+        0,
+        0
+      ],
+      "applied_draw": [
+        3,
+        4842,
+        0
+      ],
+      "draw_repetitions": 1,
+      "initial_samples_exact": 8,
+      "output_sample_hashes": [
+        {
+          "repeat": 0,
+          "resource": 411,
+          "sample": 0,
+          "sha256": "471cc3603bfe5281287caf5c31926dfdd1e8446444bd10bcb57c2895901d0e97"
+        },
+        {
+          "repeat": 0,
+          "resource": 411,
+          "sample": 1,
+          "sha256": "48374e89c213b3687c6ecf4d520d5590f23ba2bafd3ad3de35b8632fe8e004f5"
+        },
+        {
+          "repeat": 0,
+          "resource": 415,
+          "sample": 0,
+          "sha256": "0c49d2403aa9376ee59a45c7562c399f05be4a6f1c123a2be0631a6800ddac89"
+        },
+        {
+          "repeat": 0,
+          "resource": 415,
+          "sample": 1,
+          "sha256": "6603c556c25f52e708278a2890d5056a5d4ae61f47c70d0dcb8e10ecb9dbb7c4"
+        },
+        {
+          "repeat": 0,
+          "resource": 419,
+          "sample": 0,
+          "sha256": "50b6efd9e1d164894a91e5d91caef815a24282d96fe8703c78a46264dd350b07"
+        },
+        {
+          "repeat": 0,
+          "resource": 419,
+          "sample": 1,
+          "sha256": "0b098626bd49cadc74650337bb445ab3f28684e76562c00afa322108fa0b57d0"
+        },
+        {
+          "repeat": 0,
+          "resource": 618,
+          "sample": 0,
+          "sha256": "b00a6816a6055a1c382db7546fc70fe21eea07452568c438245d4173525384ea"
+        },
+        {
+          "repeat": 0,
+          "resource": 618,
+          "sample": 1,
+          "sha256": "b54ef977c0a0d255a92bc19ad01ec1f97fea5efdf49c5a24a84583eecd155451"
+        }
+      ],
+      "selected_pixel": [
+        {
+          "repeat": 0,
+          "sample": 0,
+          "words": [
+            12486,
+            11038,
+            8056,
+            15360
+          ]
+        },
+        {
+          "repeat": 0,
+          "sample": 1,
+          "words": [
+            14651,
+            13021,
+            10297,
+            15360
+          ]
+        }
+      ],
+      "sample_positions": null,
+      "debug_messages": 0,
+      "module_audit_passed": true,
+      "summary_only": true
+    },
+    {
+      "name": "full-range",
+      "report": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-primitive-20261014\\full-range\\report.json",
+      "sha256": "b89f53704aaf0e854db627180eb234bd303d6824aeedf618b6bdb3268af784ac",
+      "completed": true,
+      "original_draw": [
+        7401,
+        0,
+        0
+      ],
+      "applied_draw": [
+        7401,
+        0,
+        0
+      ],
+      "draw_repetitions": 1,
+      "initial_samples_exact": 8,
+      "output_sample_hashes": [
+        {
+          "repeat": 0,
+          "resource": 411,
+          "sample": 0,
+          "sha256": "471cc3603bfe5281287caf5c31926dfdd1e8446444bd10bcb57c2895901d0e97"
+        },
+        {
+          "repeat": 0,
+          "resource": 411,
+          "sample": 1,
+          "sha256": "48374e89c213b3687c6ecf4d520d5590f23ba2bafd3ad3de35b8632fe8e004f5"
+        },
+        {
+          "repeat": 0,
+          "resource": 415,
+          "sample": 0,
+          "sha256": "ee8c4daeca87ad70fcfcf995c274262b2d813bbc12b355e1c5715cf232a78b68"
+        },
+        {
+          "repeat": 0,
+          "resource": 415,
+          "sample": 1,
+          "sha256": "28eea209c532cb00a7d0aef152ed0034ef4cd1cda5e95ad2fec48f329806f218"
+        },
+        {
+          "repeat": 0,
+          "resource": 419,
+          "sample": 0,
+          "sha256": "f4f80f6b0a37fdf9dcae3a7278d6a6a31cff3e4ebc0f368c95cff32b903269a1"
+        },
+        {
+          "repeat": 0,
+          "resource": 419,
+          "sample": 1,
+          "sha256": "652b86cb53a7828ef641c78f0439ef4682af2fac37eb030925290d4ab9a1e136"
+        },
+        {
+          "repeat": 0,
+          "resource": 618,
+          "sample": 0,
+          "sha256": "10bfd552c3acc038eab0bb6fcecf3c309680f224dbba938eccd0d73013e144b4"
+        },
+        {
+          "repeat": 0,
+          "resource": 618,
+          "sample": 1,
+          "sha256": "a35b24aaf37c0c99ac636f424343ba92c8bff6a872a387c17b1c3139d97f681e"
+        }
+      ],
+      "selected_pixel": [
+        {
+          "repeat": 0,
+          "sample": 0,
+          "words": [
+            14698,
+            13854,
+            13265,
+            15091
+          ]
+        },
+        {
+          "repeat": 0,
+          "sample": 1,
+          "words": [
+            14651,
+            13021,
+            10297,
+            15360
+          ]
+        }
+      ],
+      "sample_positions": null,
+      "debug_messages": 0,
+      "module_audit_passed": true,
+      "summary_only": true
+    },
+    {
+      "name": "default-regression",
+      "report": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-primitive-20261014\\default-regression\\report.json",
+      "sha256": "1dca693670a1a5a489c8890ccda388064e2fd9e3734d88d9989f452c96799e7c",
+      "completed": true,
+      "original_draw": [
+        7401,
+        0,
+        0
+      ],
+      "applied_draw": [
+        7401,
+        0,
+        0
+      ],
+      "draw_repetitions": 1,
+      "initial_samples_exact": 8,
+      "output_sample_hashes": [
+        {
+          "repeat": 0,
+          "resource": 411,
+          "sample": 0,
+          "sha256": "471cc3603bfe5281287caf5c31926dfdd1e8446444bd10bcb57c2895901d0e97"
+        },
+        {
+          "repeat": 0,
+          "resource": 411,
+          "sample": 1,
+          "sha256": "48374e89c213b3687c6ecf4d520d5590f23ba2bafd3ad3de35b8632fe8e004f5"
+        },
+        {
+          "repeat": 0,
+          "resource": 415,
+          "sample": 0,
+          "sha256": "ee8c4daeca87ad70fcfcf995c274262b2d813bbc12b355e1c5715cf232a78b68"
+        },
+        {
+          "repeat": 0,
+          "resource": 415,
+          "sample": 1,
+          "sha256": "28eea209c532cb00a7d0aef152ed0034ef4cd1cda5e95ad2fec48f329806f218"
+        },
+        {
+          "repeat": 0,
+          "resource": 419,
+          "sample": 0,
+          "sha256": "f4f80f6b0a37fdf9dcae3a7278d6a6a31cff3e4ebc0f368c95cff32b903269a1"
+        },
+        {
+          "repeat": 0,
+          "resource": 419,
+          "sample": 1,
+          "sha256": "652b86cb53a7828ef641c78f0439ef4682af2fac37eb030925290d4ab9a1e136"
+        },
+        {
+          "repeat": 0,
+          "resource": 618,
+          "sample": 0,
+          "sha256": "10bfd552c3acc038eab0bb6fcecf3c309680f224dbba938eccd0d73013e144b4"
+        },
+        {
+          "repeat": 0,
+          "resource": 618,
+          "sample": 1,
+          "sha256": "a35b24aaf37c0c99ac636f424343ba92c8bff6a872a387c17b1c3139d97f681e"
+        }
+      ],
+      "selected_pixel": [],
+      "sample_positions": null,
+      "debug_messages": 0,
+      "module_audit_passed": true,
+      "summary_only": false
+    }
+  ],
+  "cpu_projection": {
+    "source": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-boundary-20261014\\postvs-0\\vertices.bin",
+    "sha256": "709fd0266c2402c376c2e3dc57aa49329036dd252accad08a5cf43df64c045b1",
+    "candidate_report_sha256": "2905df3f5590b286aba865db3835465e3f4d411d5a28f69c1e1d62f8cb89344a",
+    "triangle_1613": {
+      "primitive": 1613,
+      "index_count_through": 4842,
+      "screen": [
+        [
+          1563.7082350738738,
+          1493.2314590176882
+        ],
+        [
+          1565.4510894891685,
+          1493.9967397095984
+        ],
+        [
+          1561.4145805968615,
+          1492.119171772712
+        ]
+      ],
+      "depth": [
+        0.04087685232853712,
+        0.040957208883871256,
+        0.04096305871539392
+      ],
+      "clip_w": [
+        2.445223331451416,
+        2.4404282569885254,
+        2.440079927444458
+      ],
+      "area": -0.18326525081176617,
+      "weights": {
+        "center": [
+          -2.732280895039911,
+          1.8214570825087206,
+          1.91082381253119
+        ],
+        "a": [
+          0.21282319023762053,
+          0.20990330075892114,
+          0.5772735090034583
+        ],
+        "b": [
+          -5.677384980317443,
+          3.433010864258521,
+          3.244374116058922
+        ]
+      }
+    },
+    "limits": "Floating-point projection used for search only; not a GPU coverage, snapping, clipping or shader oracle."
+  },
+  "validation": {
+    "refusals": [
+      {
+        "options": [
+          "--indices"
+        ],
+        "exit": 1,
+        "message": "Unknown, duplicate or incomplete option"
+      },
+      {
+        "options": [
+          "--indices",
+          "0"
+        ],
+        "exit": 1,
+        "message": "Unknown, duplicate or incomplete option"
+      },
+      {
+        "options": [
+          "--indices",
+          "1",
+          "3"
+        ],
+        "exit": 1,
+        "message": "Index range must select complete triangles within the original draw"
+      },
+      {
+        "options": [
+          "--indices",
+          "0",
+          "4"
+        ],
+        "exit": 1,
+        "message": "Index range must select complete triangles within the original draw"
+      },
+      {
+        "options": [
+          "--indices",
+          "0",
+          "0"
+        ],
+        "exit": 1,
+        "message": "Index range must select complete triangles within the original draw"
+      },
+      {
+        "options": [
+          "--indices",
+          "7401",
+          "3"
+        ],
+        "exit": 1,
+        "message": "Index range must select complete triangles within the original draw"
+      },
+      {
+        "options": [
+          "--indices",
+          "4294967295",
+          "3"
+        ],
+        "exit": 1,
+        "message": "Index range must select complete triangles within the original draw"
+      },
+      {
+        "options": [
+          "--indices",
+          "0",
+          "7404"
+        ],
+        "exit": 1,
+        "message": "Index range must select complete triangles within the original draw"
+      },
+      {
+        "options": [
+          "--indices",
+          "0",
+          "3",
+          "--indices",
+          "0",
+          "3"
+        ],
+        "exit": 1,
+        "message": "Unknown, duplicate or incomplete option"
+      },
+      {
+        "options": [
+          "--skip-draw",
+          "--indices",
+          "0",
+          "3"
+        ],
+        "exit": 1,
+        "message": "Skip Draw cannot select an index range"
+      },
+      {
+        "options": [
+          "--pixel"
+        ],
+        "exit": 1,
+        "message": "Unknown, duplicate or incomplete option"
+      },
+      {
+        "options": [
+          "--pixel",
+          "618",
+          "1562"
+        ],
+        "exit": 1,
+        "message": "Unknown, duplicate or incomplete option"
+      },
+      {
+        "options": [
+          "--pixel",
+          "0",
+          "0",
+          "0"
+        ],
+        "exit": 1,
+        "message": "[json.exception.out_of_range.403] key '0' not found"
+      },
+      {
+        "options": [
+          "--pixel",
+          "17",
+          "0",
+          "0"
+        ],
+        "exit": 1,
+        "message": "Pixel inspection requires an MSAA output"
+      },
+      {
+        "options": [
+          "--pixel",
+          "618",
+          "3456",
+          "0"
+        ],
+        "exit": 1,
+        "message": "Pixel coordinate exceeds texture bounds"
+      },
+      {
+        "options": [
+          "--pixel",
+          "618",
+          "0",
+          "1944"
+        ],
+        "exit": 1,
+        "message": "Pixel coordinate exceeds texture bounds"
+      },
+      {
+        "options": [
+          "--pixel",
+          "618",
+          "-1",
+          "0"
+        ],
+        "exit": 1,
+        "message": "Expected unsigned decimal argument"
+      },
+      {
+        "options": [
+          "--pixel",
+          "618",
+          "0",
+          "0",
+          "--pixel",
+          "618",
+          "0",
+          "0"
+        ],
+        "exit": 1,
+        "message": "Unknown, duplicate or incomplete option"
+      },
+      {
+        "options": [
+          "--summary-only",
+          "--summary-only"
+        ],
+        "exit": 1,
+        "message": "Unknown, duplicate or incomplete option"
+      },
+      {
+        "options": [
+          "--sample-positions"
+        ],
+        "exit": 1,
+        "message": "Sample positions require --pixel"
+      },
+      {
+        "options": [
+          "--pixel",
+          "618",
+          "0",
+          "0",
+          "--sample-positions",
+          "--sample-positions"
+        ],
+        "exit": 1,
+        "message": "Unknown, duplicate or incomplete option"
+      },
+      {
+        "options": [
+          "--unknown"
+        ],
+        "exit": 1,
+        "message": "Unknown, duplicate or incomplete option"
+      },
+      {
+        "options": [
+          "existing output"
+        ],
+        "exit": 1,
+        "message": "Output directory must be new"
+      }
+    ],
+    "ctest_passed": 4,
+    "ctest_sha256": "83f6204e51d720a6152c815ce59166da4a9b567c6ae96e85b428c6114a510b27",
+    "standalone_configure_sha256": "9d63ebc2b0c5cd129cda592100ca7b8911b9c944eb9d936e4c0099fc7d6bc7d8",
+    "standalone_build_sha256": "9e2b9e4192e0bc73583b8b28903fcc65ac6857b29706c35fb8adcfceebf51038",
+    "full_build_sha256": "2cbca5be02227fc21cb4ff04b7e0ee43c37a6424cf044083cc637c1556ae2417",
+    "default_vs_full_range_all_samples_exact": true,
+    "gpu_serial": true,
+    "latest_production_goldens": "docs/capture-gf2-draw-fixture-baseline.json",
+    "original_gpa_gui": false
+  },
+  "sources": {
+    "tools/native/native_draw_fixture.cpp": "2508d2e7f0c20ed8adfd1adf22eb3db14006808f2493abe03856b28511b335a6"
+  },
+  "binaries": {
+    "standalone_sha256": "a4b81525005b913538018971af95ea37be71a0abe4a629d144f39cda1a92a7b3",
+    "full_sha256": "b4fa88296e5fb3a371636e8a438bcfe72fa2330ce3a92f7eede7bdd33ee0c411"
+  },
+  "production_identity": {
+    "replay_sha256": "215ebafed657953f0671c32a0948e12c8c965437a3eaa33e6d38aedcff5e2ddc",
+    "runtime_sha256": "f2d92dd99f5b26ee232064ca26645136fa808ab2e7e6e810193376527f092df3",
+    "controller_sha256": "0bc61e429745e1b0f6fd046762cae923471686782a1ab48ba853cca12aaaacf3"
+  },
+  "references": [
+    "https://learn.microsoft.com/en-us/windows/win32/direct3dhlsl/sm5-object-texture2dms-getsampleposition",
+    "https://learn.microsoft.com/en-us/windows/win32/direct3d11/d3d10-graphics-programming-guide-rasterizer-stage-rules"
+  ],
+  "evidence": {
+    "directory": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-primitive-20261014",
+    "manifest_files": 31,
+    "manifest_sha256": "a163b800defb50790e69381e98a4db719642588a404d0c1723d625ee6f54313b"
+  },
+  "limits": [
+    "Original triangle 1613 alone produces the lower sample-0 variant. Native runner variability remains unreproduced.",
+    "The higher export variant is not explained; no driver defect, undefined application behavior or capture fix established.",
+    "Index-range execution and helper passes alter execution conditions. No additional frame accepted."
+  ]
+}

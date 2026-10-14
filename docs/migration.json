@@ -4194,6 +4194,19 @@
       "golden_frames_exact": 2,
       "current_gate_passed": false,
       "limits": "Standalone D3D11 runner consistently yields the known lower single-pixel variant; exported post-draw data is higher. All eight initial samples restore exactly. No within-runner variability, root cause, production fix or new accepted frame; original GPA GUI and formal gate remain incomplete."
+    },
+    "gf2_primitive_diagnosis": {
+      "evidence": "docs/CAPTURE_GF2_PRIMITIVE.md",
+      "baseline": "docs/capture-gf2-primitive-baseline.json",
+      "event": 5598,
+      "primitive_zero_based": 1613,
+      "processes": 9,
+      "draw_executions": 11,
+      "initial_samples_exact": 88,
+      "refusals_passed": 23,
+      "ctest_passed": 4,
+      "current_gate_passed": false,
+      "limits": "Single original triangle yields the known lower pixel; neighboring triangle affects sample 1. GPU sample offsets measured, full-range/default images agree. Higher variant and root cause remain unexplained; no production change or new accepted frame."
     }
   }
 }
