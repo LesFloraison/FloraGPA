@@ -4563,6 +4563,21 @@
       "current_gate_passed": false,
       "production_fix": false,
       "limits": "Three scoped output-slot remaps match the capture; three original shader recreations still vary. Output count and arithmetic instructions are unchanged. Two original-GPA ISA exports show two simd8 writes instead of the previous lo8ds/simd8 pair. The ISA-only derivative retains original RTV/blend records and is not a reproduction of the scoped remap. No measured runtime ISA, deterministic-behavior proof or production fix; formal six-frame acceptance remains failed."
+    },
+    "gf2_native_device_controls": {
+      "evidence": "docs/CAPTURE_GF2_NATIVE_LEVEL.md",
+      "baseline": "docs/capture-gf2-native-level-baseline.json",
+      "native_processes_current_frame": 10,
+      "native_draw_repetitions_current_frame": 19,
+      "exact_restore_planes": 152,
+      "exact_post_draw_planes": 133,
+      "differing_post_draw_planes": 19,
+      "legacy_fixture_control": true,
+      "skip_draw_control": true,
+      "refusal_cases": 15,
+      "current_gate_passed": false,
+      "production_fix": false,
+      "limits": "The current single Draw produces the higher variant in all 19 native executions, with 11.0/11.1 and debug-on/off controls. The export run produced the lower variant. This does not reproduce variability inside the independent runner or prove a capture/driver root cause; debug-off runs have no debug-queue observation."
     }
   }
 }

@@ -74,6 +74,8 @@ int wmain(int argc, wchar_t **argv) {
         options.vendor = uint32_t(vendor);
         Replay replay(frame, options);
         bundle["adapter"] = replay.adapter();
+        bundle["export_device"] = {{"feature_level", uint32_t(replay.nativeDevice()->GetFeatureLevel())},
+                                   {"creation_flags", replay.nativeDevice()->GetCreationFlags()}};
         bool observed = false;
         replay.run({}, [&](Id selected, bool after, ID3D11DeviceContext *context, const auto &objects) {
             if (selected != eventId || after)

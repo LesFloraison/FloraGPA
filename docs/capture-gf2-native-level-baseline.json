@@ -1,0 +1,943 @@
+{
+  "schema": 1,
+  "date": "2026-10-14",
+  "source_parent_commit": "0fab6088ecaa1701b23a4b9b88d5a5b27e1f5045",
+  "source_hashes": {
+    "tools/native/native_draw_fixture.cpp": "184fdea7c983e90ec0849ab07cb83a08e9a4b95645acf39ddded2f972e8cf022",
+    "tools/native/replay_draw_export_probe.cpp": "51d05fa6e784956ef306890f950f579d6399d83c305c6f282d082b5158b4f421",
+    "tools/native/draw_fixture/CMakeLists.txt": "4a33ba5c0644a600c587e8a3f9fb02b96d196459534057f973fd93e873ed5d3d",
+    "docs/INDEPENDENT_CAPTURE.md": "574fa6a1d306483c83131126adbdf7a75ce0d43482fb60a169c901891a4c107b",
+    "docs/CAPTURE_GF2_NATIVE_LEVEL.md": "85c1e98c8c44ec9965adcdb23e2a1dadacccc5f2b1d4c02c56359b54a5ba3622"
+  },
+  "summary": {
+    "schema": 1,
+    "current_gate_passed": false,
+    "production_fix": false,
+    "bundle": "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\capture-gf2-native-level-20261014",
+    "bundle_sha256": "91b0b9148cf17867d84b9363e2bee0acb3933672e250f788cc658aec87599f96",
+    "payloads": 34,
+    "payload_bytes": 804996440,
+    "input_resources_verified": 15,
+    "current_runs": [
+      {
+        "directory": "export-level-0",
+        "report_sha256": "1402afef67b061bdc2854c0d1c3112ae23424cf8ece88438d6c93884873f7e12",
+        "feature_level": 45312,
+        "flags": 2,
+        "feature_level_source": "exported replay device",
+        "restore_planes": 16,
+        "draw_planes": 16,
+        "exact_draw_planes": 14,
+        "modules": 47,
+        "changed": [
+          {
+            "actual_pixel_bytes": [
+              167,
+              35,
+              31,
+              36,
+              187,
+              34,
+              39,
+              59
+            ],
+            "different_bytes": 4,
+            "different_pixels": 1,
+            "exact": false,
+            "expected_pixel_bytes": [
+              149,
+              35,
+              17,
+              36,
+              161,
+              34,
+              47,
+              59
+            ],
+            "expected_sha256": "d9e2edda8025bbe17034e5c6000d8e06790476e1e061323836ab2b7b7f21f2aa",
+            "phase": "draw",
+            "repeat": 0,
+            "resource": 411,
+            "sample": 1,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5"
+          },
+          {
+            "actual_pixel_bytes": [
+              167,
+              35,
+              31,
+              36,
+              187,
+              34,
+              39,
+              59
+            ],
+            "different_bytes": 4,
+            "different_pixels": 1,
+            "exact": false,
+            "expected_pixel_bytes": [
+              149,
+              35,
+              17,
+              36,
+              161,
+              34,
+              47,
+              59
+            ],
+            "expected_sha256": "d9e2edda8025bbe17034e5c6000d8e06790476e1e061323836ab2b7b7f21f2aa",
+            "phase": "draw",
+            "repeat": 1,
+            "resource": 411,
+            "sample": 1,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5"
+          }
+        ]
+      },
+      {
+        "directory": "level-110-0",
+        "report_sha256": "64a14e0e6a05d97f3a81a496e077a853126985ca6d1153be11c80dfa39f7215f",
+        "feature_level": 45056,
+        "flags": 2,
+        "feature_level_source": "explicit diagnostic override",
+        "restore_planes": 16,
+        "draw_planes": 16,
+        "exact_draw_planes": 14,
+        "modules": 47,
+        "changed": [
+          {
+            "actual_pixel_bytes": [
+              167,
+              35,
+              31,
+              36,
+              187,
+              34,
+              39,
+              59
+            ],
+            "different_bytes": 4,
+            "different_pixels": 1,
+            "exact": false,
+            "expected_pixel_bytes": [
+              149,
+              35,
+              17,
+              36,
+              161,
+              34,
+              47,
+              59
+            ],
+            "expected_sha256": "d9e2edda8025bbe17034e5c6000d8e06790476e1e061323836ab2b7b7f21f2aa",
+            "phase": "draw",
+            "repeat": 0,
+            "resource": 411,
+            "sample": 1,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5"
+          },
+          {
+            "actual_pixel_bytes": [
+              167,
+              35,
+              31,
+              36,
+              187,
+              34,
+              39,
+              59
+            ],
+            "different_bytes": 4,
+            "different_pixels": 1,
+            "exact": false,
+            "expected_pixel_bytes": [
+              149,
+              35,
+              17,
+              36,
+              161,
+              34,
+              47,
+              59
+            ],
+            "expected_sha256": "d9e2edda8025bbe17034e5c6000d8e06790476e1e061323836ab2b7b7f21f2aa",
+            "phase": "draw",
+            "repeat": 1,
+            "resource": 411,
+            "sample": 1,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5"
+          }
+        ]
+      },
+      {
+        "directory": "export-level-1",
+        "report_sha256": "b716db0d547b9b8b1e869e5db8ae473ade250cf706ec74d8187325903edd8966",
+        "feature_level": 45312,
+        "flags": 2,
+        "feature_level_source": "exported replay device",
+        "restore_planes": 16,
+        "draw_planes": 16,
+        "exact_draw_planes": 14,
+        "modules": 47,
+        "changed": [
+          {
+            "actual_pixel_bytes": [
+              167,
+              35,
+              31,
+              36,
+              187,
+              34,
+              39,
+              59
+            ],
+            "different_bytes": 4,
+            "different_pixels": 1,
+            "exact": false,
+            "expected_pixel_bytes": [
+              149,
+              35,
+              17,
+              36,
+              161,
+              34,
+              47,
+              59
+            ],
+            "expected_sha256": "d9e2edda8025bbe17034e5c6000d8e06790476e1e061323836ab2b7b7f21f2aa",
+            "phase": "draw",
+            "repeat": 0,
+            "resource": 411,
+            "sample": 1,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5"
+          },
+          {
+            "actual_pixel_bytes": [
+              167,
+              35,
+              31,
+              36,
+              187,
+              34,
+              39,
+              59
+            ],
+            "different_bytes": 4,
+            "different_pixels": 1,
+            "exact": false,
+            "expected_pixel_bytes": [
+              149,
+              35,
+              17,
+              36,
+              161,
+              34,
+              47,
+              59
+            ],
+            "expected_sha256": "d9e2edda8025bbe17034e5c6000d8e06790476e1e061323836ab2b7b7f21f2aa",
+            "phase": "draw",
+            "repeat": 1,
+            "resource": 411,
+            "sample": 1,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5"
+          }
+        ]
+      },
+      {
+        "directory": "level-110-1",
+        "report_sha256": "81729b89b6d5d3758a01aa1390b28c8b92922b7dcc987a7fedc6db977d9e3e8a",
+        "feature_level": 45056,
+        "flags": 2,
+        "feature_level_source": "explicit diagnostic override",
+        "restore_planes": 16,
+        "draw_planes": 16,
+        "exact_draw_planes": 14,
+        "modules": 47,
+        "changed": [
+          {
+            "actual_pixel_bytes": [
+              167,
+              35,
+              31,
+              36,
+              187,
+              34,
+              39,
+              59
+            ],
+            "different_bytes": 4,
+            "different_pixels": 1,
+            "exact": false,
+            "expected_pixel_bytes": [
+              149,
+              35,
+              17,
+              36,
+              161,
+              34,
+              47,
+              59
+            ],
+            "expected_sha256": "d9e2edda8025bbe17034e5c6000d8e06790476e1e061323836ab2b7b7f21f2aa",
+            "phase": "draw",
+            "repeat": 0,
+            "resource": 411,
+            "sample": 1,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5"
+          },
+          {
+            "actual_pixel_bytes": [
+              167,
+              35,
+              31,
+              36,
+              187,
+              34,
+              39,
+              59
+            ],
+            "different_bytes": 4,
+            "different_pixels": 1,
+            "exact": false,
+            "expected_pixel_bytes": [
+              149,
+              35,
+              17,
+              36,
+              161,
+              34,
+              47,
+              59
+            ],
+            "expected_sha256": "d9e2edda8025bbe17034e5c6000d8e06790476e1e061323836ab2b7b7f21f2aa",
+            "phase": "draw",
+            "repeat": 1,
+            "resource": 411,
+            "sample": 1,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5"
+          }
+        ]
+      },
+      {
+        "directory": "export-level-2",
+        "report_sha256": "beea1f75a12d456346eeded9cebca943f95c63be727ffb69f00b883a730b8134",
+        "feature_level": 45312,
+        "flags": 2,
+        "feature_level_source": "exported replay device",
+        "restore_planes": 16,
+        "draw_planes": 16,
+        "exact_draw_planes": 14,
+        "modules": 47,
+        "changed": [
+          {
+            "actual_pixel_bytes": [
+              167,
+              35,
+              31,
+              36,
+              187,
+              34,
+              39,
+              59
+            ],
+            "different_bytes": 4,
+            "different_pixels": 1,
+            "exact": false,
+            "expected_pixel_bytes": [
+              149,
+              35,
+              17,
+              36,
+              161,
+              34,
+              47,
+              59
+            ],
+            "expected_sha256": "d9e2edda8025bbe17034e5c6000d8e06790476e1e061323836ab2b7b7f21f2aa",
+            "phase": "draw",
+            "repeat": 0,
+            "resource": 411,
+            "sample": 1,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5"
+          },
+          {
+            "actual_pixel_bytes": [
+              167,
+              35,
+              31,
+              36,
+              187,
+              34,
+              39,
+              59
+            ],
+            "different_bytes": 4,
+            "different_pixels": 1,
+            "exact": false,
+            "expected_pixel_bytes": [
+              149,
+              35,
+              17,
+              36,
+              161,
+              34,
+              47,
+              59
+            ],
+            "expected_sha256": "d9e2edda8025bbe17034e5c6000d8e06790476e1e061323836ab2b7b7f21f2aa",
+            "phase": "draw",
+            "repeat": 1,
+            "resource": 411,
+            "sample": 1,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5"
+          }
+        ]
+      },
+      {
+        "directory": "level-110-2",
+        "report_sha256": "3fe17a173188e5f1d94b609d0b65cfe90e9a587e4d645fce9395d97c97ffda74",
+        "feature_level": 45056,
+        "flags": 2,
+        "feature_level_source": "explicit diagnostic override",
+        "restore_planes": 16,
+        "draw_planes": 16,
+        "exact_draw_planes": 14,
+        "modules": 47,
+        "changed": [
+          {
+            "actual_pixel_bytes": [
+              167,
+              35,
+              31,
+              36,
+              187,
+              34,
+              39,
+              59
+            ],
+            "different_bytes": 4,
+            "different_pixels": 1,
+            "exact": false,
+            "expected_pixel_bytes": [
+              149,
+              35,
+              17,
+              36,
+              161,
+              34,
+              47,
+              59
+            ],
+            "expected_sha256": "d9e2edda8025bbe17034e5c6000d8e06790476e1e061323836ab2b7b7f21f2aa",
+            "phase": "draw",
+            "repeat": 0,
+            "resource": 411,
+            "sample": 1,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5"
+          },
+          {
+            "actual_pixel_bytes": [
+              167,
+              35,
+              31,
+              36,
+              187,
+              34,
+              39,
+              59
+            ],
+            "different_bytes": 4,
+            "different_pixels": 1,
+            "exact": false,
+            "expected_pixel_bytes": [
+              149,
+              35,
+              17,
+              36,
+              161,
+              34,
+              47,
+              59
+            ],
+            "expected_sha256": "d9e2edda8025bbe17034e5c6000d8e06790476e1e061323836ab2b7b7f21f2aa",
+            "phase": "draw",
+            "repeat": 1,
+            "resource": 411,
+            "sample": 1,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5"
+          }
+        ]
+      },
+      {
+        "directory": "final-debug",
+        "report_sha256": "54b23c02ba2c960146c271f59ee5391cfe82aaf23732e6812d3fe13771a81cbc",
+        "feature_level": 45312,
+        "flags": 2,
+        "feature_level_source": "exported replay device",
+        "restore_planes": 8,
+        "draw_planes": 8,
+        "exact_draw_planes": 7,
+        "modules": 47,
+        "changed": [
+          {
+            "actual_pixel_bytes": [
+              167,
+              35,
+              31,
+              36,
+              187,
+              34,
+              39,
+              59
+            ],
+            "different_bytes": 4,
+            "different_pixels": 1,
+            "exact": false,
+            "expected_pixel_bytes": [
+              149,
+              35,
+              17,
+              36,
+              161,
+              34,
+              47,
+              59
+            ],
+            "expected_sha256": "d9e2edda8025bbe17034e5c6000d8e06790476e1e061323836ab2b7b7f21f2aa",
+            "phase": "draw",
+            "repeat": 0,
+            "resource": 411,
+            "sample": 1,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5"
+          }
+        ]
+      },
+      {
+        "directory": "no-debug-0",
+        "report_sha256": "57aad37618638455710e439c82662016458fd252630a8593e264bbc806e1a5f9",
+        "feature_level": 45312,
+        "flags": 0,
+        "feature_level_source": "exported replay device",
+        "restore_planes": 16,
+        "draw_planes": 16,
+        "exact_draw_planes": 14,
+        "modules": 45,
+        "changed": [
+          {
+            "actual_pixel_bytes": [
+              167,
+              35,
+              31,
+              36,
+              187,
+              34,
+              39,
+              59
+            ],
+            "different_bytes": 4,
+            "different_pixels": 1,
+            "exact": false,
+            "expected_pixel_bytes": [
+              149,
+              35,
+              17,
+              36,
+              161,
+              34,
+              47,
+              59
+            ],
+            "expected_sha256": "d9e2edda8025bbe17034e5c6000d8e06790476e1e061323836ab2b7b7f21f2aa",
+            "phase": "draw",
+            "repeat": 0,
+            "resource": 411,
+            "sample": 1,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5"
+          },
+          {
+            "actual_pixel_bytes": [
+              167,
+              35,
+              31,
+              36,
+              187,
+              34,
+              39,
+              59
+            ],
+            "different_bytes": 4,
+            "different_pixels": 1,
+            "exact": false,
+            "expected_pixel_bytes": [
+              149,
+              35,
+              17,
+              36,
+              161,
+              34,
+              47,
+              59
+            ],
+            "expected_sha256": "d9e2edda8025bbe17034e5c6000d8e06790476e1e061323836ab2b7b7f21f2aa",
+            "phase": "draw",
+            "repeat": 1,
+            "resource": 411,
+            "sample": 1,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5"
+          }
+        ]
+      },
+      {
+        "directory": "no-debug-1",
+        "report_sha256": "a27fbd3b156e512656b371be6663a56c0154d2f9ebbcd6cd2a3796dc5e465c52",
+        "feature_level": 45312,
+        "flags": 0,
+        "feature_level_source": "exported replay device",
+        "restore_planes": 16,
+        "draw_planes": 16,
+        "exact_draw_planes": 14,
+        "modules": 45,
+        "changed": [
+          {
+            "actual_pixel_bytes": [
+              167,
+              35,
+              31,
+              36,
+              187,
+              34,
+              39,
+              59
+            ],
+            "different_bytes": 4,
+            "different_pixels": 1,
+            "exact": false,
+            "expected_pixel_bytes": [
+              149,
+              35,
+              17,
+              36,
+              161,
+              34,
+              47,
+              59
+            ],
+            "expected_sha256": "d9e2edda8025bbe17034e5c6000d8e06790476e1e061323836ab2b7b7f21f2aa",
+            "phase": "draw",
+            "repeat": 0,
+            "resource": 411,
+            "sample": 1,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5"
+          },
+          {
+            "actual_pixel_bytes": [
+              167,
+              35,
+              31,
+              36,
+              187,
+              34,
+              39,
+              59
+            ],
+            "different_bytes": 4,
+            "different_pixels": 1,
+            "exact": false,
+            "expected_pixel_bytes": [
+              149,
+              35,
+              17,
+              36,
+              161,
+              34,
+              47,
+              59
+            ],
+            "expected_sha256": "d9e2edda8025bbe17034e5c6000d8e06790476e1e061323836ab2b7b7f21f2aa",
+            "phase": "draw",
+            "repeat": 1,
+            "resource": 411,
+            "sample": 1,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5"
+          }
+        ]
+      },
+      {
+        "directory": "no-debug-2",
+        "report_sha256": "9c55dd01e721304b1f8cbd5729a0ba0b925232af62e68b5d83ab0b18cd9e3644",
+        "feature_level": 45312,
+        "flags": 0,
+        "feature_level_source": "exported replay device",
+        "restore_planes": 16,
+        "draw_planes": 16,
+        "exact_draw_planes": 14,
+        "modules": 45,
+        "changed": [
+          {
+            "actual_pixel_bytes": [
+              167,
+              35,
+              31,
+              36,
+              187,
+              34,
+              39,
+              59
+            ],
+            "different_bytes": 4,
+            "different_pixels": 1,
+            "exact": false,
+            "expected_pixel_bytes": [
+              149,
+              35,
+              17,
+              36,
+              161,
+              34,
+              47,
+              59
+            ],
+            "expected_sha256": "d9e2edda8025bbe17034e5c6000d8e06790476e1e061323836ab2b7b7f21f2aa",
+            "phase": "draw",
+            "repeat": 0,
+            "resource": 411,
+            "sample": 1,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5"
+          },
+          {
+            "actual_pixel_bytes": [
+              167,
+              35,
+              31,
+              36,
+              187,
+              34,
+              39,
+              59
+            ],
+            "different_bytes": 4,
+            "different_pixels": 1,
+            "exact": false,
+            "expected_pixel_bytes": [
+              149,
+              35,
+              17,
+              36,
+              161,
+              34,
+              47,
+              59
+            ],
+            "expected_sha256": "d9e2edda8025bbe17034e5c6000d8e06790476e1e061323836ab2b7b7f21f2aa",
+            "phase": "draw",
+            "repeat": 1,
+            "resource": 411,
+            "sample": 1,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5"
+          }
+        ]
+      }
+    ],
+    "current_repetitions": 19,
+    "current_restore_planes": 152,
+    "current_exact_draw_planes": 133,
+    "current_different_draw_planes": 19,
+    "separate_controls": [
+      {
+        "directory": "skip",
+        "report_sha256": "bfa95d051eb19dc77008095bbc2b4243661b3b02fe75478795e6a18a96521dda",
+        "feature_level": 45312,
+        "flags": 0,
+        "feature_level_source": "exported replay device",
+        "restore_planes": 8,
+        "draw_planes": 8,
+        "exact_draw_planes": 2,
+        "modules": 45,
+        "changed": [
+          {
+            "actual_pixel_bytes": [
+              79,
+              30,
+              157,
+              31,
+              51,
+              30,
+              181,
+              59
+            ],
+            "different_bytes": 45774,
+            "different_pixels": 6664,
+            "exact": false,
+            "expected_pixel_bytes": [
+              20,
+              29,
+              194,
+              29,
+              101,
+              28,
+              0,
+              60
+            ],
+            "expected_sha256": "5b51cc7ed20a638399d68280b94731e2b87b055fba75b02b24d3caba73170a16",
+            "phase": "draw",
+            "repeat": 0,
+            "resource": 411,
+            "sample": 0,
+            "sha256": "a1ab425473351b59ba36f1d4b7a8a9b0c4cc3ca4d8a6dcf2375e4a54340ee6e1"
+          },
+          {
+            "actual_pixel_bytes": [
+              79,
+              30,
+              157,
+              31,
+              51,
+              30,
+              181,
+              59
+            ],
+            "different_bytes": 45829,
+            "different_pixels": 6673,
+            "exact": false,
+            "expected_pixel_bytes": [
+              149,
+              35,
+              17,
+              36,
+              161,
+              34,
+              47,
+              59
+            ],
+            "expected_sha256": "d9e2edda8025bbe17034e5c6000d8e06790476e1e061323836ab2b7b7f21f2aa",
+            "phase": "draw",
+            "repeat": 0,
+            "resource": 411,
+            "sample": 1,
+            "sha256": "4c38dcaea62b4c7d7bfc5ee198a7454e1eee3246be4da8cb89bb6227ed91c780"
+          },
+          {
+            "different_bytes": 14740,
+            "different_pixels": 6650,
+            "exact": false,
+            "expected_sha256": "c88a7596166ac30c40898dd27c1a67eed4c6fcbb7030f19df5166f480b99bcfb",
+            "phase": "draw",
+            "repeat": 0,
+            "resource": 415,
+            "sample": 0,
+            "sha256": "72a8681ed94462faf638f0d186265a885e6610b4b69e60178f6843abcb137163"
+          },
+          {
+            "different_bytes": 14762,
+            "different_pixels": 6660,
+            "exact": false,
+            "expected_sha256": "ac0bc9e93ae0bc4c6cf8913cff1a2047c8b101a2c883e6a711142daf62c99d55",
+            "phase": "draw",
+            "repeat": 0,
+            "resource": 415,
+            "sample": 1,
+            "sha256": "864d45191212c19c53452eedfef97cb91a33095fd480b5eac3d59594c4dfadb2"
+          },
+          {
+            "different_bytes": 27616,
+            "different_pixels": 6664,
+            "exact": false,
+            "expected_sha256": "48c1da4fdbbb8a322ca3b983a8e8083840b69404c1a7fef68904b387d16ff0ac",
+            "phase": "draw",
+            "repeat": 0,
+            "resource": 419,
+            "sample": 0,
+            "sha256": "1fa71f428c1b66f50e125289c36b6041e98e90ba0f3d74bdc2edb8d9efb3fa32"
+          },
+          {
+            "different_bytes": 27642,
+            "different_pixels": 6673,
+            "exact": false,
+            "expected_sha256": "e8d3b0d05f5856eabb73e0b081700595c4478a88436b0131e6c8bb4c813532ab",
+            "phase": "draw",
+            "repeat": 0,
+            "resource": 419,
+            "sample": 1,
+            "sha256": "2f4a4e7fa02cd5fd93743bfc8c440ac8dbd83db4e1774339d94dd030ad68586d"
+          }
+        ]
+      },
+      {
+        "directory": "legacy",
+        "report_sha256": "2bd2106d042447eb14edfe1962e0cdb90fe09c326c581bd152e16f404360cc45",
+        "feature_level": 45056,
+        "flags": 2,
+        "feature_level_source": "legacy fixture default; export level unknown",
+        "restore_planes": 8,
+        "draw_planes": 8,
+        "exact_draw_planes": 7,
+        "modules": 47,
+        "changed": [
+          {
+            "actual_pixel_bytes": [
+              106,
+              57,
+              30,
+              54,
+              209,
+              51,
+              243,
+              58
+            ],
+            "different_bytes": 4,
+            "different_pixels": 1,
+            "exact": false,
+            "expected_pixel_bytes": [
+              10,
+              58,
+              131,
+              54,
+              242,
+              51,
+              243,
+              58
+            ],
+            "expected_sha256": "b7b48ed95b35542afa7a66b93d9d029be81debe11ecc77741b4b74330fbc8a50",
+            "phase": "draw",
+            "repeat": 0,
+            "resource": 618,
+            "sample": 0,
+            "sha256": "10bfd552c3acc038eab0bb6fcecf3c309680f224dbba938eccd0d73013e144b4"
+          }
+        ]
+      }
+    ],
+    "refusals": 15,
+    "limits": "The current single Draw produces the higher variant in all 19 native executions, with 11.0/11.1 and debug-on/off controls. The export run produced the lower variant. This does not reproduce variability inside the independent runner or prove a capture/driver root cause; debug-off runs have no debug-queue observation."
+  },
+  "validation": {
+    "boundary_ctest_passed": true,
+    "standalone_build_passed": true,
+    "full_project_build_passed": true,
+    "refusal_cases": 15,
+    "all_gpu_runs_serial": true,
+    "system32_only_native_path": true,
+    "production_replay_changed": false
+  },
+  "binaries": {
+    "FloraNativeDrawFixture.exe": "b7a6fe82559b6760d166ea18351ef9e4bf5c70c0815c74435f5232f4a2e927a4",
+    "FloraNativeDrawFixture-standalone.exe": "344b53c789ddf5ad82819bb16c86eec7853ec9871d68c7d60d62ddbada944037",
+    "FloraNativeDrawFixture-final.exe": "134a4e43ae550bf822087b4593703d01b5c79a63a9f1f1b048e7de0ff1c7246d",
+    "FloraReplayDrawExportProbe.exe": "e55b878ba98f55c674e5fda574eca8b3ec87f9b9096b6f16be100effdbec1daf"
+  },
+  "binary_scope": {
+    "initial_full": "FloraNativeDrawFixture.exe; compiled but not used for these GPU runs",
+    "initial_native": "FloraNativeDrawFixture-standalone.exe; first six feature-level controls",
+    "final_native": "FloraNativeDrawFixture-final.exe; final debug, flags-zero, skip, legacy and refusal controls",
+    "exporter": "FloraReplayDrawExportProbe.exe; current frame export"
+  },
+  "raw": {
+    "root": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-native-level-20261014",
+    "files": 125,
+    "manifest_sha256": "cf1991331f7ffaa17166499118de80c15dca66961fe5ece7c5864861724705ce",
+    "bundle_root": "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\capture-gf2-native-level-20261014",
+    "bundle_manifest_sha256": "b5928bf78b06d3565e2c5db4b54045bb38bf3a96cede85b2ffb209e3d80241f6"
+  },
+  "replay_sha256": "215ebafed657953f0671c32a0948e12c8c965437a3eaa33e6d38aedcff5e2ddc"
+}

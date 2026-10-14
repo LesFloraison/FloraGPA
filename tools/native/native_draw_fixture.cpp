@@ -115,7 +115,7 @@ struct Gpu {
     ComPtr<ID3D11VertexShader> fullscreen;
     std::map<std::string, ComPtr<ID3D11PixelShader>> pixelShaders;
     Json adapter;
-    explicit Gpu(uint32_t vendor) {
+    Gpu(uint32_t vendor, D3D_FEATURE_LEVEL level, bool debugEnabled) {
         ComPtr<IDXGIAdapter1> selected;
         if (vendor) {
             ComPtr<IDXGIFactory1> factory;
@@ -135,12 +135,16 @@ struct Gpu {
             }
             require(bool(selected), "Requested hardware vendor unavailable");
         }
+        const UINT flags = debugEnabled ? D3D11_CREATE_DEVICE_DEBUG : 0;
         check(D3D11CreateDevice(selected.Get(), vendor ? D3D_DRIVER_TYPE_UNKNOWN : D3D_DRIVER_TYPE_WARP,
-                                nullptr, D3D11_CREATE_DEVICE_DEBUG, nullptr, 0, D3D11_SDK_VERSION, &device,
+                                nullptr, flags, &level, 1, D3D11_SDK_VERSION, &device,
                                 nullptr, &context),
-              "Create debug device");
+              "Create fixture device");
+        require(device->GetFeatureLevel() == level, "Requested feature level was not created");
+        require(device->GetCreationFlags() == flags, "Requested device flags were not applied");
         check(context.As(&context1), "Get context1");
-        check(device.As(&debug), "Get debug queue");
+        if (debugEnabled)
+            check(device.As(&debug), "Get debug queue");
         ComPtr<IDXGIDevice> dxgi;
         ComPtr<IDXGIAdapter> actual;
         check(device.As(&dxgi), "Get DXGI device");
@@ -386,6 +390,8 @@ struct Gpu {
     }
     Json messages() {
         Json result = Json::array();
+        if (!debug)
+            return result;
         for (UINT64 i = 0; i < debug->GetNumStoredMessages(); ++i) {
             SIZE_T size{};
             check(debug->GetMessage(i, nullptr, &size), "Size debug message");
@@ -423,7 +429,8 @@ Json compare(const Bytes &actual, const Bytes &expected, UINT stride) {
 int wmain(int argc, wchar_t **argv) {
     if (argc < 5) {
         std::cerr << "BUNDLE NEW_OUT PCI_VENDOR|warp REPEATS [--skip-draw] [--indices FIRST COUNT] "
-                     "[--pixel RESOURCE X Y] [--sample-positions] [--float-rt0 | --unblended-rt0] [--summary-only]\n";
+                     "[--pixel RESOURCE X Y] [--sample-positions] [--float-rt0 | --unblended-rt0] [--summary-only] "
+                     "[--feature-level 110|111] [--no-debug]\n";
         return 2;
     }
     Json report{{"completed", false}, {"acceptance_established", false}, {"comparisons", Json::array()}};
@@ -439,13 +446,16 @@ int wmain(int argc, wchar_t **argv) {
     try {
         const auto repeats = number(argv[4]);
         bool skipDraw = false, summaryOnly = false, samplePositions = false, floatRt0 = false,
-             unblendedRt0 = false;
+             unblendedRt0 = false, noDebug = false;
         std::optional<std::array<UINT, 2>> indices;
         std::optional<std::array<UINT, 3>> pixel;
+        std::optional<D3D_FEATURE_LEVEL> levelOverride;
         for (int i = 5; i < argc; ++i) {
             const std::wstring option(argv[i]);
             if (option == L"--skip-draw" && !skipDraw)
                 skipDraw = true;
+            else if (option == L"--no-debug" && !noDebug)
+                noDebug = true;
             else if (option == L"--summary-only" && !summaryOnly)
                 summaryOnly = true;
             else if (option == L"--sample-positions" && !samplePositions)
@@ -454,7 +464,11 @@ int wmain(int argc, wchar_t **argv) {
                 floatRt0 = true;
             else if (option == L"--unblended-rt0" && !unblendedRt0)
                 unblendedRt0 = true;
-            else if (option == L"--indices" && !indices && i + 2 < argc) {
+            else if (option == L"--feature-level" && !levelOverride && i + 1 < argc) {
+                const std::wstring level(argv[++i]);
+                require(level == L"110" || level == L"111", "Feature level must be 110 or 111");
+                levelOverride = level == L"110" ? D3D_FEATURE_LEVEL_11_0 : D3D_FEATURE_LEVEL_11_1;
+            } else if (option == L"--indices" && !indices && i + 2 < argc) {
                 indices = std::array<UINT, 2>{number(argv[i + 1]), number(argv[i + 2])};
                 i += 2;
             } else if (option == L"--pixel" && !pixel && i + 3 < argc) {
@@ -480,6 +494,23 @@ int wmain(int argc, wchar_t **argv) {
         auto bundle = Json::parse(text);
         require(bundle.at("schema") == "Flora native draw fixture 1" && bundle.at("completed") == true,
                 "Incomplete or unsupported fixture");
+        D3D_FEATURE_LEVEL level = D3D_FEATURE_LEVEL_11_0;
+        report["feature_level_source"] = "legacy fixture default; export level unknown";
+        if (bundle.contains("export_device")) {
+            const auto &observed = bundle.at("export_device");
+            const auto &value = observed.at("feature_level");
+            require(value.is_number_unsigned() &&
+                        (value == uint32_t(D3D_FEATURE_LEVEL_11_0) || value == uint32_t(D3D_FEATURE_LEVEL_11_1)),
+                    "Unsupported exported feature level");
+            level = D3D_FEATURE_LEVEL(value.get<uint32_t>());
+            report["export_device"] = observed;
+            report["feature_level_source"] = "exported replay device";
+        }
+        if (levelOverride) {
+            level = *levelOverride;
+            report["feature_level_source"] = "explicit diagnostic override";
+        }
+        report["requested_feature_level"] = uint32_t(level);
         if (indices) {
             const UINT count = bundle.at("draw").at(0).get<UINT>();
             require(bundle.at("topology").get<UINT>() == D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST &&
@@ -518,8 +549,11 @@ int wmain(int argc, wchar_t **argv) {
         report["bundle_sha256"] = hash(text);
         report["event"] = bundle.at("event");
         save();
-        Gpu gpu(vendor);
+        Gpu gpu(vendor, level, !noDebug);
         report["adapter"] = gpu.adapter;
+        report["device_feature_level"] = uint32_t(gpu.device->GetFeatureLevel());
+        report["device_creation_flags"] = gpu.device->GetCreationFlags();
+        report["debug_observation_available"] = !noDebug;
         std::map<uint64_t, Resource> resources;
         require(bundle.at("resources").is_object() && bundle.at("resources").size() <= 256,
                 "Resource count exceeds bound");

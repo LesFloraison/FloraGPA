@@ -1,8 +1,11 @@
 # Independent DX11 capture
 
-Current-runtime GF2 revalidation has found a variable four-pixel output in one of
-six new files; its gate is not passed. See [CAPTURE_GF2_CURRENT.md](CAPTURE_GF2_CURRENT.md).
+The latest current-runtime GF2 gate fails: two of six files have execution
+differences, with 26 of 36 positive executions matching exactly. See
+[CAPTURE_GF2_RESOLVE_CURRENT.md](CAPTURE_GF2_RESOLVE_CURRENT.md).
 The historical six-frame result below retains its original runtime/file identities.
+The current Draw now has an independent native fixture with explicit feature-level
+and device-flag controls; see [CAPTURE_GF2_NATIVE_LEVEL.md](CAPTURE_GF2_NATIVE_LEVEL.md).
 
 GPU-generated indirect Draw/Dispatch arguments now remain native indirect records,
 with immediate/deferred/nested execution and byte-exact controls documented in
@@ -12,8 +15,8 @@ Implementation is **partial**. The native controller now launches, injects and
 captures a limited blit/flip DX11 profile through private IPC. Completed
 `.gpa_frame` files execute in FloraGPA and the installed original GPA kernel.
 Unsupported profiles fail explicitly. Qt exposes the same workflow and passes
-only completed file paths into replay. **Six GF2 files now pass scoped acceptance
-on Intel Iris Xe**, from two independent launches with three consecutive captures
+only completed file paths into replay. **A previous runtime passed scoped acceptance
+for six GF2 files on Intel Iris Xe**, from two independent launches with three consecutive captures
 each, covering home and equipment-room scenes. Exact dual-player execution,
 selected resource bytes, original GUI inspection and independent package gates
 are recorded in [CAPTURE_GF2_ACCEPTANCE.md](CAPTURE_GF2_ACCEPTANCE.md).
