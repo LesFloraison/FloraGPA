@@ -4116,6 +4116,19 @@
       "original_observed_draws": 108,
       "original_counter_and_buffer_boundaries": 216,
       "limits": "Verified native UAV lifetime and per-submission initial CS/OM KEEP; numeric UINT_MAX, extended slots and broader hidden state remain pending. No new GF2 or original GUI acceptance; overall delivery partial."
+    },
+    "structure_count_validation": {
+      "evidence": "docs/CAPTURE_STRUCTURE_COUNT.md",
+      "baseline": "docs/capture-structure-count-baseline.json",
+      "dual_player_files": 36,
+      "dual_player_checks": 832,
+      "counter_regression_files": 48,
+      "counter_regression_checks": 968,
+      "packaged_injected_frames": 10,
+      "packaged_injected_checks": 65,
+      "original_observed_copies": 240,
+      "original_counter_source_destination_boundaries_each": 480,
+      "limits": "Ordinary destination buffers and valid Counter/Append sources; predicate, same-resource copies and numeric UINT_MAX refuse. No expanded query-completion proof or indirect capture; no new GF2 or original GUI acceptance."
     }
   }
 }

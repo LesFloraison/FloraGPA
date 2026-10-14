@@ -40,7 +40,7 @@ void texture_discard(const FrozenObject& object,const DeferredCall& call){
 bool supported(CommandKind kind){switch(kind){
 case CommandKind::draw:case CommandKind::draw_indexed:case CommandKind::draw_instanced:case CommandKind::draw_indexed_instanced:case CommandKind::dispatch:
 case CommandKind::clear_rtv:case CommandKind::clear_dsv:case CommandKind::clear_uav_uint:case CommandKind::clear_uav_float:
-case CommandKind::copy_resource:case CommandKind::copy_region:case CommandKind::update_subresource:return true;
+case CommandKind::copy_structure_count:case CommandKind::copy_resource:case CommandKind::copy_region:case CommandKind::update_subresource:return true;
 case CommandKind::map:case CommandKind::unmap:return true;
 default:return false;
 }}
@@ -115,7 +115,7 @@ DeferredExpansion expand(const DeferredCommandList& list,const DeferredOrigin& o
             auto added=expand(child,nested,context,command_limit-out.commands.size(),payload_limit-out.payload_bytes,depth+1,visits,active,counters);
             for(const auto& [id,index]:added.initial_counter_uses)out.initial_counter_uses.emplace(id,out.commands.size()+index);
             for(auto& command:added.commands){
-                if(command.kind==CommandKind::map || command.kind==CommandKind::copy_resource ||
+                if(command.kind==CommandKind::map || command.kind==CommandKind::copy_structure_count || command.kind==CommandKind::copy_resource ||
                    command.kind==CommandKind::copy_region || command.kind==CommandKind::update_subresource)
                     mapped_contents.erase(command.operand);
                 command.merged_origins.insert(command.merged_origins.begin(),*command.deferred);
@@ -162,19 +162,22 @@ DeferredExpansion expand(const DeferredCommandList& list,const DeferredOrigin& o
                         "Deferred NO_OVERWRITE baseline is not the preceding list-owned write");
             }else require(call.before_data.empty(),"Deferred discard has an unexpected baseline");
             mapped_contents[call.operand]=&call.data;
-        }else if(call.kind==CommandKind::copy_resource || call.kind==CommandKind::copy_region || call.kind==CommandKind::update_subresource){
+        }else if(call.kind==CommandKind::copy_structure_count || call.kind==CommandKind::copy_resource || call.kind==CommandKind::copy_region || call.kind==CommandKind::update_subresource){
             mapped_contents.erase(call.operand);
         }
         RecordedCommand c;c.kind=call.kind;c.api=call.api;c.words=call.words;c.floats=call.floats;c.operand=call.operand;c.source=call.source;c.update_box=call.update_box;c.copy_region=call.copy_region;c.data=call.data;c.result=call.result;c.completed=true;
         c.before_data=call.before_data;c.bindings=*state;c.bindings.context=context;c.deferred=origin;c.deferred->call_sequence=call.sequence;
-        if(call.kind==CommandKind::draw || call.kind==CommandKind::draw_indexed || call.kind==CommandKind::draw_instanced || call.kind==CommandKind::draw_indexed_instanced || call.kind==CommandKind::dispatch){
+        if(call.kind==CommandKind::copy_structure_count || call.kind==CommandKind::draw || call.kind==CommandKind::draw_indexed || call.kind==CommandKind::draw_instanced || call.kind==CommandKind::draw_indexed_instanced || call.kind==CommandKind::dispatch){
             auto counter=[&](ObjectId id){if(!id || !hidden_counter(out.definitions.at(id)) || c.uav_counters.contains(id) || c.uav_counter_keeps.contains(id))return;
                 if(auto reset=counters.pending.find(id);reset!=counters.pending.end()){c.uav_counters.emplace(id,reset->second);counters.pending.erase(reset);counters.initialized.insert(id);}
                 else if(counters.initialized.contains(id))c.uav_counter_keeps.insert(id);
                 else{require(counters.allow_snapshots,"Deferred UAV counter initial value unavailable before first use");
                     out.initial_counter_uses.emplace(id,out.commands.size());counters.initialized.insert(id);}
             };
-            for(auto id:state->cs_uavs)counter(id);for(auto id:state->om_uavs)counter(id);
+            if(call.kind==CommandKind::copy_structure_count){
+                require(call.operand && call.source && out.definitions.at(call.operand).kind=="buffer" && hidden_counter(out.definitions.at(call.source)),"Deferred CopyStructureCount operands invalid");
+                counter(call.source);
+            }else{for(auto id:state->cs_uavs)counter(id);for(auto id:state->om_uavs)counter(id);}
         }
         out.payload_bytes+=c.data.size()+c.before_data.size();out.commands.push_back(std::move(c));
     }
@@ -194,8 +197,8 @@ void complete_deferred_counters(DeferredExpansion& expanded,const std::map<Objec
         require(index<expanded.commands.size(),"Deferred counter snapshot command index invalid");
         const auto& c=expanded.commands[index];
         require(expanded.definitions.contains(id) && hidden_counter(expanded.definitions.at(id)),"Deferred counter snapshot definition invalid");
-        require(c.kind==CommandKind::draw || c.kind==CommandKind::draw_indexed || c.kind==CommandKind::draw_instanced || c.kind==CommandKind::draw_indexed_instanced || c.kind==CommandKind::dispatch,"Deferred counter snapshot action invalid");
-        require(std::find(c.bindings.cs_uavs.begin(),c.bindings.cs_uavs.end(),id)!=c.bindings.cs_uavs.end() || std::find(c.bindings.om_uavs.begin(),c.bindings.om_uavs.end(),id)!=c.bindings.om_uavs.end(),"Deferred counter snapshot is not bound");
+        require(c.kind==CommandKind::copy_structure_count || c.kind==CommandKind::draw || c.kind==CommandKind::draw_indexed || c.kind==CommandKind::draw_instanced || c.kind==CommandKind::draw_indexed_instanced || c.kind==CommandKind::dispatch,"Deferred counter snapshot action invalid");
+        require((c.kind==CommandKind::copy_structure_count && c.source==id) || std::find(c.bindings.cs_uavs.begin(),c.bindings.cs_uavs.end(),id)!=c.bindings.cs_uavs.end() || std::find(c.bindings.om_uavs.begin(),c.bindings.om_uavs.end(),id)!=c.bindings.om_uavs.end(),"Deferred counter snapshot is not bound");
         require(!c.uav_counters.contains(id) && !c.uav_counter_keeps.contains(id),"Deferred counter snapshot overlaps reset/KEEP");
     }
     for(const auto& [id,index]:expanded.initial_counter_uses)expanded.commands[index].uav_counters.emplace(id,values.at(id));

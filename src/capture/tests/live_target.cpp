@@ -31,7 +31,8 @@ void save(const fs::path& path,const Json& value){auto temp=path;temp+=L".tmp";{
 }
 int wmain(int argc,wchar_t** argv){if(argc!=3)return 2;const fs::path out=fs::absolute(argv[1]);fs::create_directories(out);try{
     const UINT mode=std::stoul(argv[2]);
-    const bool counter_mode=mode>=31 && mode<=34, om_counter=mode==32 || mode==34, initial_counter=mode>=33 && mode<=34;
+    const bool counter_mode=mode>=31 && mode<=36, om_counter=mode==32 || mode==34, initial_counter=mode>=33 && mode<=36;
+    const bool counter_copy=mode==35 || mode==36;
     WNDCLASSW cls{};cls.lpfnWndProc=proc;cls.hInstance=GetModuleHandleW(nullptr);cls.lpszClassName=L"FloraLiveCaptureTarget";RegisterClassW(&cls);
     HWND window=CreateWindowW(cls.lpszClassName,L"Flora native capture target",WS_OVERLAPPEDWINDOW,0,0,160,160,nullptr,nullptr,cls.hInstance,nullptr);if(!window)throw std::runtime_error("Target window creation failed");ShowWindow(window,SW_SHOW);SetForegroundWindow(window);
     ComPtr<ID3D11Device> device;ComPtr<ID3D11DeviceContext> context;ComPtr<IDXGISwapChain> swap;
@@ -55,6 +56,7 @@ int wmain(int argc,wchar_t** argv){if(argc!=3)return 2;const fs::path out=fs::ab
     const std::array<const char*,5> colors{"1,0,0,1","0,1,0,1","0,0,1,1","1,1,1,1","0,1,1,1"};std::array<ComPtr<ID3D11PixelShader>,5> cycle;
     for(size_t i=0;i<colors.size();++i){const auto source=std::string("float4 main():SV_Target{return float4(")+colors[i]+");}";auto bytes=shader(source.c_str(),"ps_5_0");check(device->CreatePixelShader(bytes->GetBufferPointer(),bytes->GetBufferSize(),nullptr,&cycle[i]));}
     ComPtr<ID3D11Buffer> mapped_color;ComPtr<ID3D11PixelShader> mapped_shader;
+    ComPtr<ID3D11Buffer> copied_count;ComPtr<ID3D11ShaderResourceView> copied_count_srv;
     ComPtr<ID3D11Buffer> counter_buffer;ComPtr<ID3D11UnorderedAccessView> counter_uav;
     ComPtr<ID3D11ShaderResourceView> counter_srv;ComPtr<ID3D11ComputeShader> counter_shader;ComPtr<ID3D11PixelShader> counter_pixel;
     if(counter_mode){
@@ -65,7 +67,8 @@ int wmain(int argc,wchar_t** argv){if(argc!=3)return 2;const fs::path out=fs::ab
         auto bytes=shader(!om_counter?"RWStructuredBuffer<uint> b:register(u0);[numthreads(1,1,1)]void main(){uint i=b.IncrementCounter();b[i]=17;}":"RWStructuredBuffer<uint> b:register(u1);float4 main():SV_Target{uint i=b.IncrementCounter();b[i]=17;return float4(0,0,0,1);}",!om_counter?"cs_5_0":"ps_5_0");
         if(!om_counter)check(device->CreateComputeShader(bytes->GetBufferPointer(),bytes->GetBufferSize(),nullptr,&counter_shader));
         else check(device->CreatePixelShader(bytes->GetBufferPointer(),bytes->GetBufferSize(),nullptr,&counter_pixel));
-        for(size_t i=0;i<colors.size();++i){const auto source=std::string("StructuredBuffer<uint> b:register(t0);float4 main():SV_Target{return b[2]==17&&b[3]==17&&b[4]==0?float4(")+colors[i]+"):float4(0,0,0,1);}";
+        if(counter_copy){D3D11_BUFFER_DESC d{16,D3D11_USAGE_DEFAULT,D3D11_BIND_SHADER_RESOURCE,0,0,0};const UINT zeros[4]{};D3D11_SUBRESOURCE_DATA data{zeros,0,0};check(device->CreateBuffer(&d,&data,&copied_count));D3D11_SHADER_RESOURCE_VIEW_DESC v{};v.Format=DXGI_FORMAT_R32_UINT;v.ViewDimension=D3D11_SRV_DIMENSION_BUFFER;v.Buffer.NumElements=4;check(device->CreateShaderResourceView(copied_count.Get(),&v,&copied_count_srv));}
+        for(size_t i=0;i<colors.size();++i){const auto source=std::string(counter_copy?"Buffer<uint> b:register(t0);float4 main():SV_Target{return b[0]==2&&b[1]==4?float4(":"StructuredBuffer<uint> b:register(t0);float4 main():SV_Target{return b[2]==17&&b[3]==17&&b[4]==0?float4(")+colors[i]+"):float4(0,0,0,1);}";
             bytes=shader(source.c_str(),"ps_5_0");check(device->CreatePixelShader(bytes->GetBufferPointer(),bytes->GetBufferSize(),nullptr,&cycle[i]));}
     }
     if(mode==29 || mode==30){
@@ -115,18 +118,22 @@ int wmain(int argc,wchar_t** argv){if(argc!=3)return 2;const fs::path out=fs::ab
             std::thread worker([&]{try{
                 ComPtr<ID3D11DeviceContext> deferred;check(device->CreateDeferredContext(0,&deferred));
                 auto* u=counter_uav.Get();const UINT first=2;const UINT* counts=initial_counter?nullptr:&first;
+                if(mode==36)deferred->CopyStructureCount(copied_count.Get(),0,u);
                 if(!om_counter){deferred->CSSetUnorderedAccessViews(0,1,&u,counts);deferred->CSSetShader(counter_shader.Get(),nullptr,0);
                     deferred->Dispatch(1,1,1);deferred->CSSetUnorderedAccessViews(0,1,&u,nullptr);deferred->Dispatch(1,1,1);}
                 else{deferred->OMSetRenderTargetsAndUnorderedAccessViews(1,&view,nullptr,1,1,&u,counts);
                     deferred->VSSetShader(vs.Get(),nullptr,0);deferred->PSSetShader(counter_pixel.Get(),nullptr,0);
                     deferred->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);D3D11_VIEWPORT one{0,0,1,1,0,1};deferred->RSSetViewports(1,&one);
                     deferred->Draw(3,0);deferred->OMSetRenderTargetsAndUnorderedAccessViews(1,&view,nullptr,1,1,&u,nullptr);deferred->Draw(3,0);}
+                if(mode==36){u=nullptr;deferred->CSSetUnorderedAccessViews(0,1,&u,nullptr);deferred->CopyStructureCount(copied_count.Get(),4,counter_uav.Get());}
                 check(deferred->FinishCommandList(FALSE,&list));
             }catch(...){error=std::current_exception();}});
             worker.join();if(error)std::rethrow_exception(error);
             if(initial_counter)seed_counter(2);
+            if(mode==35)context->CopyStructureCount(copied_count.Get(),0,counter_uav.Get());
             context->ExecuteCommandList(list.Get(),TRUE);
-            auto* source=counter_srv.Get();context->PSSetShaderResources(0,1,&source);context->Draw(3,0);
+            if(mode==35)context->CopyStructureCount(copied_count.Get(),4,counter_uav.Get());
+            auto* source=counter_copy?copied_count_srv.Get():counter_srv.Get();context->PSSetShaderResources(0,1,&source);context->Draw(3,0);
             source=nullptr;context->PSSetShaderResources(0,1,&source);
         }else if(mode==29 || mode==30){
             ComPtr<ID3D11CommandList> list;std::exception_ptr error;

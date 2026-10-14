@@ -35,6 +35,8 @@ observations follow in [CAPTURE_DEFERRED_OM_COUNTERS.md](CAPTURE_DEFERRED_OM_COU
 First-use KEEP now reads actual native UAV counters before immediate submission,
 with per-view lifetime and repeated-list checks in
 [CAPTURE_DEFERRED_INITIAL_COUNTERS.md](CAPTURE_DEFERRED_INITIAL_COUNTERS.md).
+Application `CopyStructureCount` now uses those counter dependencies on immediate
+and deferred contexts; see [CAPTURE_STRUCTURE_COUNT.md](CAPTURE_STRUCTURE_COUNT.md).
 
 Capture HUD work is tracked separately in [CAPTURE_HUD.md](CAPTURE_HUD.md).
 Protocol v4 adds bounded per-request CLI resource budgets to the earlier

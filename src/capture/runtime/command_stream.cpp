@@ -295,7 +295,7 @@ void FrameRecording::observe(ID3D11DeviceContext* context,const char* api,Comman
             throw std::runtime_error("GPU call recording is not implemented");
         }
         if(kind==CommandKind::map && (!operand || words[1]<1 || words[1]>5 || (words[2]&~D3D11_MAP_FLAG_DO_NOT_WAIT)))throw std::runtime_error("Invalid Map arguments");
-        if((kind==CommandKind::copy_resource || kind==CommandKind::copy_region) && (!operand || !source))throw std::runtime_error("CopyResource operand is missing");
+        if((kind==CommandKind::copy_structure_count || kind==CommandKind::copy_resource || kind==CommandKind::copy_region) && (!operand || !source))throw std::runtime_error("CopyResource operand is missing");
         if(kind==CommandKind::copy_region && !region)throw std::runtime_error("CopySubresourceRegion coordinates missing");
         if(kind==CommandKind::resolve && (!operand || !source))throw std::runtime_error("Resolve operand is missing");
         const bool clear=kind==CommandKind::clear_rtv || kind==CommandKind::clear_dsv || kind==CommandKind::clear_uav_uint || kind==CommandKind::clear_uav_float;
@@ -304,11 +304,21 @@ void FrameRecording::observe(ID3D11DeviceContext* context,const char* api,Comman
         if(clear && (kind==CommandKind::clear_uav_uint?!integers:!floats))throw std::runtime_error("Clear value is missing");
         if(p.frame.commands.size()>=p.options.command_limit)throw std::runtime_error("Frame command limit exceeded");
         ContextSnapshot snapshot;
-        if(kind==CommandKind::map || kind==CommandKind::resolve){
+        if(kind==CommandKind::map || kind==CommandKind::resolve || kind==CommandKind::copy_structure_count){
             // Map touches its operand, not the currently bound graphics or
             // compute pipeline. Other bound resources may still be mapped.
             snapshot.bindings.context=p.context_id;snapshot.bindings.device=record->device;
             retain(snapshot,context);ComPtr<ID3D11Device> device;unwrap(context)->GetDevice(&device);retain(snapshot,device.Get());
+            if(kind==CommandKind::copy_structure_count){
+                ComPtr<ID3D11Predicate> predicate;BOOL value=FALSE;unwrap(context)->GetPredication(&predicate,&value);
+                if(predicate)throw std::runtime_error("Predicated CopyStructureCount is not verified");
+                ComPtr<ID3D11Buffer> destination,source_buffer;ComPtr<ID3D11UnorderedAccessView> view;ComPtr<ID3D11Resource> resource;
+                if(FAILED(unwrap(operand)->QueryInterface(IID_PPV_ARGS(&destination))) || FAILED(unwrap(source)->QueryInterface(IID_PPV_ARGS(&view))))throw std::runtime_error("CopyStructureCount operand type invalid");
+                view->GetResource(&resource);if(FAILED(resource.As(&source_buffer)))throw std::runtime_error("CopyStructureCount source is not a buffer");
+                D3D11_BUFFER_DESC d{},s{};D3D11_UNORDERED_ACCESS_VIEW_DESC v{};destination->GetDesc(&d);source_buffer->GetDesc(&s);view->GetDesc(&v);
+                if(destination.Get()==source_buffer.Get())throw std::runtime_error("CopyStructureCount same-resource copy is not verified");
+                validate_copy_structure_count(d,v,s,words[0]);
+            }
             if(kind==CommandKind::resolve){
                 ComPtr<ID3D11Predicate> predicate;BOOL value=FALSE;unwrap(context)->GetPredication(&predicate,&value);
                 if(predicate)throw std::runtime_error("Predicated Resolve is not verified");
@@ -323,7 +333,7 @@ void FrameRecording::observe(ID3D11DeviceContext* context,const char* api,Comman
         if(integers)std::copy_n(integers,4,command.words.begin());
         command.operand=retain(snapshot,operand);
         command.source=retain(snapshot,source);
-        if(kind==CommandKind::resolve)command.completed=true;
+        if(kind==CommandKind::resolve || kind==CommandKind::copy_structure_count)command.completed=true;
         if(kind==CommandKind::copy_resource && command.operand==command.source)throw std::runtime_error("CopyResource operands alias");
         SnapshotOptions options;options.timeout_ms=p.options.readback_timeout_ms;options.cancelled=[&p]{if(p.options.cancelled && p.options.cancelled())p.cancelled=true;return p.cancelled.load();};
         for(const auto& [id,object]:snapshot.objects){

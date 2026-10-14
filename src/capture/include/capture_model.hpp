@@ -82,7 +82,7 @@ struct PipelineBindings {
 };
 enum class CommandKind { unsupported, read, binding, draw, draw_indexed, draw_instanced,
     draw_indexed_instanced, dispatch, clear_rtv, clear_dsv, clear_uav_uint, clear_uav_float, map, unmap, copy_resource,
-    query_end, query_get_data, update_subresource, copy_region, resolve };
+    query_end, query_get_data, update_subresource, copy_region, resolve, copy_structure_count };
 // CPU observation history, not a cross-thread/context GPU ordering proof.
 struct QueryEndStamp {
     uint64_t generation=0;

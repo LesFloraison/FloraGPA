@@ -49,6 +49,7 @@ def main():
             if 19<=session['mode']<=22:counts['CopySubresourceRegion1' if session['mode'] in (20,22) else 'CopySubresourceRegion']=1
             if 17<=session['mode']<=22:counts.update(query_metadata_records=2,query_end_observations=1,query_completion_unresolved=1)
             if session['mode'] in (31,33):counts.update(ClearUnorderedAccessViewUint=1,Dispatch=2)
+            if session['mode'] in (35,36):counts.update(ClearUnorderedAccessViewUint=1,Dispatch=2,CopyStructureCount=2,ClearState=2 if session['mode']==35 else 1,annotation_records=4 if session['mode']==35 else 2)
             if session['mode'] in (32,34):counts.update(ClearUnorderedAccessViewUint=1,Draw=3,ClearState=1,annotation_records=2)
             check(name+'-actual-events',flora['counts']==counts)
             check(name+'-execution-not-reference',flora['reference_pixels_used'] is False and original['new_framebuffer_count']>0 and original['native']['open_status']==0 and original['native']['playback_status']==0 and original['native']['closed'])

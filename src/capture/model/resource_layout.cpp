@@ -4,6 +4,18 @@
 #include <limits>
 #include <stdexcept>
 namespace flora::capture {
+void validate_copy_structure_count(const D3D11_BUFFER_DESC& d,const D3D11_UNORDERED_ACCESS_VIEW_DESC& v,const D3D11_BUFFER_DESC& s,uint32_t offset){
+    if((d.Usage!=D3D11_USAGE_DEFAULT && d.Usage!=D3D11_USAGE_STAGING) || (d.MiscFlags&D3D11_RESOURCE_MISC_BUFFER_STRUCTURED) || offset%4 || uint64_t(offset)+4>d.ByteWidth)
+        throw std::runtime_error("CopyStructureCount destination usage/offset invalid");
+    if(v.ViewDimension!=D3D11_UAV_DIMENSION_BUFFER || v.Format!=DXGI_FORMAT_UNKNOWN ||
+       (v.Buffer.Flags!=D3D11_BUFFER_UAV_FLAG_APPEND && v.Buffer.Flags!=D3D11_BUFFER_UAV_FLAG_COUNTER) ||
+       !(s.BindFlags&D3D11_BIND_UNORDERED_ACCESS) || !(s.MiscFlags&D3D11_RESOURCE_MISC_BUFFER_STRUCTURED) ||
+       !s.StructureByteStride || s.StructureByteStride>2048 || s.StructureByteStride%4 || s.ByteWidth%s.StructureByteStride)
+        throw std::runtime_error("CopyStructureCount source is not a valid structured counter UAV");
+    const auto elements=s.ByteWidth/s.StructureByteStride;
+    if(!v.Buffer.NumElements || v.Buffer.FirstElement>elements || v.Buffer.NumElements>elements-v.Buffer.FirstElement)
+        throw std::runtime_error("CopyStructureCount UAV range invalid");
+}
 void validate_copy_resource(const ResourceShape& d,std::span<const uint8_t> descriptor,const ResourceShape& s){
     if(d.dimension!=s.dimension || d.width!=s.width || d.height!=s.height || d.depth!=s.depth ||
        d.mip_levels!=s.mip_levels || d.array_size!=s.array_size || d.samples!=s.samples)

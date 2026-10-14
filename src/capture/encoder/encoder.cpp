@@ -301,12 +301,12 @@ class Encoder {
         }
         add(7,uint16_t((window?0x24f:0x249)+index),std::move(p));constant_windows_[index]=window;
     }
-    void counter_resets(const RecordedCommand& command){
+    void counter_resets(const RecordedCommand& command,bool unbound=false){
         const auto& s=command.bindings;
-        const bool om_reset=std::any_of(command.uav_counters.begin(),command.uav_counters.end(),[&](const auto& entry){
+        const bool om_reset=unbound || std::any_of(command.uav_counters.begin(),command.uav_counters.end(),[&](const auto& entry){
             return std::find(s.om_uavs.begin(),s.om_uavs.end(),entry.first)!=s.om_uavs.end();});
         if(om_reset){
-            std::u16string name=u"FloraCapture counter reset: OM through CS";name.push_back(0);
+            std::u16string name=unbound?u"FloraCapture counter reset: copy source":u"FloraCapture counter reset: OM through CS";name.push_back(0);
             add(7,0x327b,Payload{}.q({0,UINT64_MAX-3}).u({0,narrow(name.size()*2)}).bytes({reinterpret_cast<const uint8_t*>(name.data()),name.size()*2}));
             // Avoid output/input hazards while temporarily binding the same view
             // to CS. The following complete action snapshot restores bindings;
@@ -316,8 +316,8 @@ class Encoder {
         for(const auto& [id,count]:command.uav_counters){
             const auto cs=std::find(s.cs_uavs.begin(),s.cs_uavs.end(),id);
             const auto om=std::find(s.om_uavs.begin(),s.om_uavs.end(),id);
-            require(cs!=s.cs_uavs.end() || om!=s.om_uavs.end(),"Encoder counter reset is not bound");
-            const bool temporary=cs==s.cs_uavs.end();
+            require(unbound || cs!=s.cs_uavs.end() || om!=s.om_uavs.end(),"Encoder counter reset is not bound");
+            const bool temporary=unbound || cs==s.cs_uavs.end();
             Payload p;p.q({0,1}).u({temporary?0u:UINT(cs-s.cs_uavs.begin()),1})
                 .value<uint8_t>(1).value(typed(id,{"uav","uav1"})).value<uint8_t>(1).value(count);
             add(7,0x25e,std::move(p));
@@ -457,7 +457,7 @@ public:
         for(const auto& command:frame_.commands){
             require(command.sequence==sequence++,"Encoder command sequence mismatch");const auto& w=command.words;Payload p;uint16_t type=0;
             const bool gpu_action=command.kind==CommandKind::draw || command.kind==CommandKind::draw_indexed || command.kind==CommandKind::draw_instanced || command.kind==CommandKind::draw_indexed_instanced || command.kind==CommandKind::dispatch;
-            require(gpu_action || command.uav_counter_keeps.empty(),"Encoder counter KEEP attached to non-GPU command");
+            require(gpu_action || command.kind==CommandKind::copy_structure_count || command.uav_counter_keeps.empty(),"Encoder counter KEEP attached to non-GPU command");
             require(command.kind==CommandKind::update_subresource || !command.update_box,"Encoder box attached to non-Update command");
             require(command.kind==CommandKind::copy_region || !command.copy_region,"Encoder region attached to non-copy command");
             if(command.kind==CommandKind::query_end || command.kind==CommandKind::query_get_data){
@@ -520,6 +520,21 @@ public:
                 if(command.update_box)for(auto coordinate:*command.update_box)payload.value(coordinate);
                 payload.value(data).u({w[1],w[2]});
                 if(w[3])payload.value(w[4]);add(7,w[3]?0x255:0x247,std::move(payload));continue;
+            }
+            if(command.kind==CommandKind::copy_structure_count){
+                require(command.bindings.context==context_ && command.bindings.device==device_,"Encoder counter copy context mismatch");
+                require(command.completed && command.operand && command.source && !w[1] && !w[2] && !w[3] && !w[4],"Encoder counter copy arguments incomplete");
+                require(!command.bindings.predicate && command.data.empty() && command.before_data.empty(),"Encoder counter copy has predicate/CPU bytes");
+                const auto destination=ref(command.operand,"buffer"),source=typed(command.source,{"uav","uav1"});
+                const auto& view=frame_.objects.at(command.source);ref(view.resource,"buffer");
+                require(view.resource!=command.operand && frame_.initial_resources.contains(command.operand) && frame_.initial_resources.contains(view.resource),"Encoder counter copy resource data missing/aliased");
+                validate_copy_structure_count(descriptor<D3D11_BUFFER_DESC>(frame_.objects.at(command.operand)),descriptor<D3D11_UNORDERED_ACCESS_VIEW_DESC>(view),descriptor<D3D11_BUFFER_DESC>(frame_.objects.at(view.resource)),w[0]);
+                require(command.uav_counters.size()+command.uav_counter_keeps.size()==1,"Encoder counter copy hidden state missing/extra");
+                if(command.uav_counters.contains(command.source)){
+                    require(command.uav_counters.at(command.source)!=UINT_MAX,"Encoder counter copy numeric UINT_MAX unsupported");
+                    counter_resets(command,true);initialized_counters_.insert(command.source);
+                }else require(command.uav_counter_keeps.contains(command.source) && initialized_counters_.contains(command.source),"Encoder counter copy KEEP has no initial value");
+                add(7,0x3f,Payload{}.q({0,1,destination}).value(w[0]).value(source));continue;
             }
             if(command.kind==CommandKind::copy_region){
                 require(command.bindings.context==context_ && command.bindings.device==device_,"Encoder region copy context mismatch");
