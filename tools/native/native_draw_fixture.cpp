@@ -199,6 +199,8 @@ struct Gpu {
         return view;
     }
     static DXGI_FORMAT access(const Resource &r) {
+        if (r.desc.Format == DXGI_FORMAT_R32G32B32A32_TYPELESS)
+            return DXGI_FORMAT_R32G32B32A32_UINT;
         if (r.desc.Format == DXGI_FORMAT_R16G16B16A16_TYPELESS)
             return DXGI_FORMAT_R16G16B16A16_UINT;
         if (r.desc.Format == DXGI_FORMAT_R8G8B8A8_TYPELESS)
@@ -208,7 +210,9 @@ struct Gpu {
         throw std::runtime_error("Unsupported MSAA storage format");
     }
     static UINT pixelBytes(const Resource &r) {
-        return r.desc.Format == DXGI_FORMAT_R8G8B8A8_TYPELESS ? 4 : 8;
+        return r.desc.Format == DXGI_FORMAT_R8G8B8A8_TYPELESS       ? 4
+               : r.desc.Format == DXGI_FORMAT_R32G32B32A32_TYPELESS ? 16
+                                                                    : 8;
     }
     void restore(Resource &r) {
         const bool depth = r.desc.Format == DXGI_FORMAT_R32G8X24_TYPELESS;
@@ -419,7 +423,7 @@ Json compare(const Bytes &actual, const Bytes &expected, UINT stride) {
 int wmain(int argc, wchar_t **argv) {
     if (argc < 5) {
         std::cerr << "BUNDLE NEW_OUT PCI_VENDOR|warp REPEATS [--skip-draw] [--indices FIRST COUNT] "
-                     "[--pixel RESOURCE X Y] [--sample-positions] [--summary-only]\n";
+                     "[--pixel RESOURCE X Y] [--sample-positions] [--float-rt0] [--summary-only]\n";
         return 2;
     }
     Json report{{"completed", false}, {"acceptance_established", false}, {"comparisons", Json::array()}};
@@ -434,7 +438,7 @@ int wmain(int argc, wchar_t **argv) {
     };
     try {
         const auto repeats = number(argv[4]);
-        bool skipDraw = false, summaryOnly = false, samplePositions = false;
+        bool skipDraw = false, summaryOnly = false, samplePositions = false, floatRt0 = false;
         std::optional<std::array<UINT, 2>> indices;
         std::optional<std::array<UINT, 3>> pixel;
         for (int i = 5; i < argc; ++i) {
@@ -445,6 +449,8 @@ int wmain(int argc, wchar_t **argv) {
                 summaryOnly = true;
             else if (option == L"--sample-positions" && !samplePositions)
                 samplePositions = true;
+            else if (option == L"--float-rt0" && !floatRt0)
+                floatRt0 = true;
             else if (option == L"--indices" && !indices && i + 2 < argc) {
                 indices = std::array<UINT, 2>{number(argv[i + 1]), number(argv[i + 2])};
                 i += 2;
@@ -456,8 +462,10 @@ int wmain(int argc, wchar_t **argv) {
         }
         require(!(skipDraw && indices), "Skip Draw cannot select an index range");
         require(!samplePositions || pixel.has_value(), "Sample positions require --pixel");
+        require(!floatRt0 || pixel.has_value(), "Float output requires --pixel");
         report["skip_draw"] = skipDraw;
         report["summary_only"] = summaryOnly;
+        report["float_rt0"] = floatRt0;
         require(repeats > 0 && repeats <= 20, "Repeat count must be 1..20");
         const auto vendor = std::wstring(argv[3]) == L"warp" ? 0 : number(argv[3]);
         require(vendor <= 65535, "Invalid vendor");
@@ -482,6 +490,13 @@ int wmain(int argc, wchar_t **argv) {
             require((*pixel)[1] < desc.Width && (*pixel)[2] < desc.Height,
                     "Pixel coordinate exceeds texture bounds");
             report["pixel"] = *pixel;
+        }
+        if (floatRt0) {
+            require(!bundle.at("rtv").at(0).is_null() &&
+                        bundle.at("rtv").at(0).at("resource").get<uint64_t>() == (*pixel)[0],
+                    "Float output requires the selected pixel in RTV 0");
+            require(pod<D3D11_BLEND_DESC>(bundle.at("blend")).IndependentBlendEnable,
+                    "Float output requires independent blend state");
         }
         const auto requestedOutput = fs::absolute(argv[2]);
         require(fs::create_directory(requestedOutput), "Output directory must be new");
@@ -635,6 +650,8 @@ int wmain(int argc, wchar_t **argv) {
         ComPtr<ID3D11RasterizerState> raster;
         check(gpu.device->CreateRasterizerState(&rs, &raster), "Create fixture rasterizer");
         auto bs = pod<D3D11_BLEND_DESC>(bundle.at("blend"));
+        if (floatRt0)
+            bs.RenderTarget[0].BlendEnable = FALSE;
         ComPtr<ID3D11BlendState> blend;
         check(gpu.device->CreateBlendState(&bs, &blend), "Create fixture blend");
         auto ds = pod<D3D11_DEPTH_STENCIL_DESC>(bundle.at("depth"));
@@ -667,6 +684,23 @@ int wmain(int argc, wchar_t **argv) {
             auto d = pod<D3D11_DEPTH_STENCIL_VIEW_DESC>(v.at("desc"));
             check(gpu.device->CreateDepthStencilView(resource(v.at("resource")), &d, &dsv),
                   "Create fixture DSV");
+        }
+        Resource floatOutput;
+        if (floatRt0) {
+            floatOutput.desc = resources.at((*pixel)[0]).desc;
+            floatOutput.desc.Format = DXGI_FORMAT_R32G32B32A32_TYPELESS;
+            floatOutput.desc.Usage = D3D11_USAGE_DEFAULT;
+            floatOutput.desc.BindFlags = D3D11_BIND_RENDER_TARGET;
+            floatOutput.desc.CPUAccessFlags = floatOutput.desc.MiscFlags = 0;
+            ComPtr<ID3D11Texture2D> texture;
+            check(gpu.device->CreateTexture2D(&floatOutput.desc, nullptr, &texture), "Create float output");
+            floatOutput.object = texture;
+            D3D11_RENDER_TARGET_VIEW_DESC desc{};
+            desc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+            desc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2DMS;
+            rtvs[0].Reset();
+            check(gpu.device->CreateRenderTargetView(texture.Get(), &desc, &rtvs[0]),
+                  "Create float output RTV");
         }
         struct Stage {
             std::array<ComPtr<ID3D11SamplerState>, 16> samplers;
@@ -803,8 +837,25 @@ int wmain(int argc, wchar_t **argv) {
                     require(result.at("exact"), "MSAA restoration is not byte exact");
                 }
             bind();
+            if (floatRt0) {
+                const float zero[4]{};
+                gpu.context->ClearRenderTargetView(rtvs[0].Get(), zero);
+            }
             if (!skipDraw)
                 gpu.context->DrawIndexed(draw[0], draw[1], std::bit_cast<INT>(draw[2]));
+            if (floatRt0) {
+                for (UINT sample = 0; sample < floatOutput.desc.SampleDesc.Count; ++sample) {
+                    auto bytes = gpu.sample(floatOutput, sample);
+                    const size_t offset = (size_t((*pixel)[2]) * floatOutput.desc.Width + (*pixel)[1]) * 16;
+                    std::array<uint32_t, 4> words{};
+                    std::memcpy(words.data(), bytes.data() + offset, 16);
+                    report["float_output"].push_back({{"repeat", repeat},
+                                                      {"sample", sample},
+                                                      {"sha256", hash(bytes)},
+                                                      {"pixel_words", words}});
+                }
+                save();
+            }
             for (auto &[id, r] : resources)
                 for (UINT sample = 0; sample < r.samples.size(); ++sample) {
                     auto actual = gpu.sample(r, sample);

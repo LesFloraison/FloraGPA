@@ -1,0 +1,1112 @@
+{
+  "schema": "FloraGPA GF2 fragment controls 1",
+  "date": "2026-10-14",
+  "base_commit": "a05c76fefc90cc42b8217dc88ca788848186d520",
+  "current_gate_passed": false,
+  "production_changed": false,
+  "input": {
+    "frame_sha256": "a30ddd946f1ff174d6c704c0d820554d0614f45f90508349e3004fb7f8cd9b06",
+    "event": 5598,
+    "bundle": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-draw-fixture-20261014\\bundle-complete",
+    "bundle_sha256": "2df2a232c3f25c773eeaf894dd9882b7e1430ab2b54f14f3a67ffa2d72821fa7",
+    "resources": 19,
+    "vs_sha256": "18669b668cb39b907a02cfec253f74b24d0c09c6ae73d0d65f27455032b2d869",
+    "ps_sha256": "fe92913b679084eb0c88a589285f8470cef44e70075b02a966adad683fd7bd95"
+  },
+  "runs": [
+    {
+      "name": "float-original",
+      "kind": "native",
+      "report": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-fragment-20261014\\float-original\\report.json",
+      "report_sha256": "4a0a1fa3ce90a6954e50bcc7b4b065fcdce8f9e3f28533f2d2c7aeb4b8b3419e",
+      "completed": true,
+      "initial_samples_exact": 24,
+      "scoped_debug_messages": 0,
+      "prefix_debug_counts": {},
+      "float_output": [
+        {
+          "pixel_words": [
+            1061556244,
+            1055032779,
+            1049847438,
+            1062752239
+          ],
+          "repeat": 0,
+          "sample": 0,
+          "sha256": "2aa5e5bff18ae13c5d73286ae27dfb695418336a4823c189b83eea7797a56650"
+        },
+        {
+          "pixel_words": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "repeat": 0,
+          "sample": 1,
+          "sha256": "594e1598fd751a15c1f77561f55c33ff277c62d9a804e48efa419b8542844407"
+        },
+        {
+          "pixel_words": [
+            1061556244,
+            1055032779,
+            1049847438,
+            1062752239
+          ],
+          "repeat": 1,
+          "sample": 0,
+          "sha256": "2aa5e5bff18ae13c5d73286ae27dfb695418336a4823c189b83eea7797a56650"
+        },
+        {
+          "pixel_words": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "repeat": 1,
+          "sample": 1,
+          "sha256": "594e1598fd751a15c1f77561f55c33ff277c62d9a804e48efa419b8542844407"
+        },
+        {
+          "pixel_words": [
+            1061556244,
+            1055032779,
+            1049847438,
+            1062752239
+          ],
+          "repeat": 2,
+          "sample": 0,
+          "sha256": "2aa5e5bff18ae13c5d73286ae27dfb695418336a4823c189b83eea7797a56650"
+        },
+        {
+          "pixel_words": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "repeat": 2,
+          "sample": 1,
+          "sha256": "594e1598fd751a15c1f77561f55c33ff277c62d9a804e48efa419b8542844407"
+        }
+      ],
+      "diagnostic_ps_sha256": null,
+      "module_audit_passed": true
+    },
+    {
+      "name": "native-original-full",
+      "kind": "native",
+      "report": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-fragment-20261014\\native-original-full\\report.json",
+      "report_sha256": "0a6480e5f6565fdb70cb93d8140db2b0aafbb49fe6e634dd0d851389cae02a5a",
+      "completed": true,
+      "initial_samples_exact": 8,
+      "scoped_debug_messages": 0,
+      "prefix_debug_counts": {},
+      "float_output": [
+        {
+          "pixel_words": [
+            1061556244,
+            1055032779,
+            1049847438,
+            1062752239
+          ],
+          "repeat": 0,
+          "sample": 0,
+          "sha256": "c61f77ea2d736e1f8ed722f6739d309864dd18c2e90fd70d6f4fb8378078c773"
+        },
+        {
+          "pixel_words": [
+            1059547317,
+            1046193259,
+            1023884640,
+            1065353216
+          ],
+          "repeat": 0,
+          "sample": 1,
+          "sha256": "b86968ecfe46e7f028a8a1895844553dd451d00ce8b2001364bd961a02eea0bd"
+        }
+      ],
+      "diagnostic_ps_sha256": null,
+      "module_audit_passed": true
+    },
+    {
+      "name": "native-zero",
+      "kind": "native",
+      "report": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-fragment-20261014\\native-zero\\report.json",
+      "report_sha256": "c8bab27bf9f096ce2e3caa9a51b087f1423064bf1fdd5ac2e193efbe6a34fb8b",
+      "completed": true,
+      "initial_samples_exact": 8,
+      "scoped_debug_messages": 0,
+      "prefix_debug_counts": {},
+      "float_output": [
+        {
+          "pixel_words": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "repeat": 0,
+          "sample": 0,
+          "sha256": "594e1598fd751a15c1f77561f55c33ff277c62d9a804e48efa419b8542844407"
+        },
+        {
+          "pixel_words": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "repeat": 0,
+          "sample": 1,
+          "sha256": "594e1598fd751a15c1f77561f55c33ff277c62d9a804e48efa419b8542844407"
+        }
+      ],
+      "diagnostic_ps_sha256": null,
+      "module_audit_passed": true
+    },
+    {
+      "name": "aligned-input-texcoord0-native",
+      "kind": "native",
+      "report": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-fragment-20261014\\aligned-input-texcoord0-native\\report.json",
+      "report_sha256": "628dc4a224b43ca4ab7a615e0654e5e085699abbd2d8fda3598c893f1e886f3d",
+      "completed": true,
+      "initial_samples_exact": 8,
+      "scoped_debug_messages": 0,
+      "prefix_debug_counts": {},
+      "float_output": [
+        {
+          "pixel_words": [
+            1032206534,
+            1051267108,
+            0,
+            0
+          ],
+          "repeat": 0,
+          "sample": 0,
+          "sha256": "5c57cfe21d54a6d4d7e3be3d2d8829daed55da1aacd14ebb48067510c7b9606a"
+        },
+        {
+          "pixel_words": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "repeat": 0,
+          "sample": 1,
+          "sha256": "594e1598fd751a15c1f77561f55c33ff277c62d9a804e48efa419b8542844407"
+        }
+      ],
+      "diagnostic_ps_sha256": null,
+      "module_audit_passed": true
+    },
+    {
+      "name": "aligned-input-texcoord1-native",
+      "kind": "native",
+      "report": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-fragment-20261014\\aligned-input-texcoord1-native\\report.json",
+      "report_sha256": "2ca17ef1c88d98d983ec6e89003ed487c8acbd22c4318fde495fca8726a46870",
+      "completed": true,
+      "initial_samples_exact": 8,
+      "scoped_debug_messages": 0,
+      "prefix_debug_counts": {},
+      "float_output": [
+        {
+          "pixel_words": [
+            1045629799,
+            1062065237,
+            3213144967,
+            3189434086
+          ],
+          "repeat": 0,
+          "sample": 0,
+          "sha256": "7b98b32850046d89c14fc64f33e3c77e56c7f639c83b101839c8227672647f31"
+        },
+        {
+          "pixel_words": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "repeat": 0,
+          "sample": 1,
+          "sha256": "594e1598fd751a15c1f77561f55c33ff277c62d9a804e48efa419b8542844407"
+        }
+      ],
+      "diagnostic_ps_sha256": null,
+      "module_audit_passed": true
+    },
+    {
+      "name": "aligned-input-texcoord2-native",
+      "kind": "native",
+      "report": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-fragment-20261014\\aligned-input-texcoord2-native\\report.json",
+      "report_sha256": "00c220bf831575b743627a19a685e4df7bb623c4f6d10d0c3f069c6fcd7c4a9b",
+      "completed": true,
+      "initial_samples_exact": 8,
+      "scoped_debug_messages": 0,
+      "prefix_debug_counts": {},
+      "float_output": [
+        {
+          "pixel_words": [
+            1055039761,
+            3210516726,
+            3207020407,
+            1067765091
+          ],
+          "repeat": 0,
+          "sample": 0,
+          "sha256": "fd414e6b90fd8325a54699c2c2073e91e1767222a3403c85b2d5caa27b717166"
+        },
+        {
+          "pixel_words": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "repeat": 0,
+          "sample": 1,
+          "sha256": "594e1598fd751a15c1f77561f55c33ff277c62d9a804e48efa419b8542844407"
+        }
+      ],
+      "diagnostic_ps_sha256": null,
+      "module_audit_passed": true
+    },
+    {
+      "name": "aligned-input-texcoord3-native",
+      "kind": "native",
+      "report": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-fragment-20261014\\aligned-input-texcoord3-native\\report.json",
+      "report_sha256": "3c472bd51533ef06b0437d78ee5c186019e0ae217f3065daeed0307982ce96ba",
+      "completed": true,
+      "initial_samples_exact": 8,
+      "scoped_debug_messages": 0,
+      "prefix_debug_counts": {},
+      "float_output": [
+        {
+          "pixel_words": [
+            1066439498,
+            3178095429,
+            1049078544,
+            3188997043
+          ],
+          "repeat": 0,
+          "sample": 0,
+          "sha256": "abfa90c2082e5e39de62c9dba4671d35eaf9e35974778afe0e18864c0df5bfe2"
+        },
+        {
+          "pixel_words": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "repeat": 0,
+          "sample": 1,
+          "sha256": "594e1598fd751a15c1f77561f55c33ff277c62d9a804e48efa419b8542844407"
+        }
+      ],
+      "diagnostic_ps_sha256": null,
+      "module_audit_passed": true
+    },
+    {
+      "name": "aligned-input-texcoord6-native",
+      "kind": "native",
+      "report": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-fragment-20261014\\aligned-input-texcoord6-native\\report.json",
+      "report_sha256": "6c7ceace6ea3586bf0c5adb580e8f707170eb3ab108fe9c1fb750c13c554a8c1",
+      "completed": true,
+      "initial_samples_exact": 8,
+      "scoped_debug_messages": 0,
+      "prefix_debug_counts": {},
+      "float_output": [
+        {
+          "pixel_words": [
+            1041078023,
+            3204842822,
+            3222975508,
+            0
+          ],
+          "repeat": 0,
+          "sample": 0,
+          "sha256": "28ebf0b0a274772628cc1b43da1b9cb9f7b2d242042f487226579cc3d8b99d58"
+        },
+        {
+          "pixel_words": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "repeat": 0,
+          "sample": 1,
+          "sha256": "594e1598fd751a15c1f77561f55c33ff277c62d9a804e48efa419b8542844407"
+        }
+      ],
+      "diagnostic_ps_sha256": null,
+      "module_audit_passed": true
+    },
+    {
+      "name": "aligned-input-front-native",
+      "kind": "native",
+      "report": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-fragment-20261014\\aligned-input-front-native\\report.json",
+      "report_sha256": "26c687e90f8550318b5dbdd074f2ec82e5bd3559efd10cece127959de7574c45",
+      "completed": true,
+      "initial_samples_exact": 8,
+      "scoped_debug_messages": 0,
+      "prefix_debug_counts": {},
+      "float_output": [
+        {
+          "pixel_words": [
+            1065353216,
+            0,
+            0,
+            0
+          ],
+          "repeat": 0,
+          "sample": 0,
+          "sha256": "0bc02bd3fafc35deb3b087f2a06e57a1e0ee554c38179051fe34446a8a5dd7f5"
+        },
+        {
+          "pixel_words": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "repeat": 0,
+          "sample": 1,
+          "sha256": "594e1598fd751a15c1f77561f55c33ff277c62d9a804e48efa419b8542844407"
+        }
+      ],
+      "diagnostic_ps_sha256": null,
+      "module_audit_passed": true
+    },
+    {
+      "name": "replay-original-0",
+      "kind": "replay",
+      "report": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-fragment-20261014\\replay-original-0\\report.json",
+      "report_sha256": "ee3308e4169bc7440c7a0f3b6cd45a6be8741e3ff1edf11858fb49b62be01929",
+      "completed": true,
+      "initial_samples_exact": 0,
+      "scoped_debug_messages": 0,
+      "prefix_debug_counts": {
+        "severity-1-id-390": 303,
+        "severity-1-id-372": 303,
+        "severity-2-id-3146081": 2
+      },
+      "float_output": [
+        {
+          "pixel_words": [
+            1061556244,
+            1055032779,
+            1049847438,
+            1062752239
+          ],
+          "sample": 0,
+          "sha256": "c61f77ea2d736e1f8ed722f6739d309864dd18c2e90fd70d6f4fb8378078c773"
+        },
+        {
+          "pixel_words": [
+            1059547317,
+            1046193259,
+            1023884640,
+            1065353216
+          ],
+          "sample": 1,
+          "sha256": "b86968ecfe46e7f028a8a1895844553dd451d00ce8b2001364bd961a02eea0bd"
+        }
+      ],
+      "diagnostic_ps_sha256": null,
+      "module_audit_passed": false
+    },
+    {
+      "name": "replay-original-1",
+      "kind": "replay",
+      "report": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-fragment-20261014\\replay-original-1\\report.json",
+      "report_sha256": "ee3308e4169bc7440c7a0f3b6cd45a6be8741e3ff1edf11858fb49b62be01929",
+      "completed": true,
+      "initial_samples_exact": 0,
+      "scoped_debug_messages": 0,
+      "prefix_debug_counts": {
+        "severity-1-id-390": 303,
+        "severity-1-id-372": 303,
+        "severity-2-id-3146081": 2
+      },
+      "float_output": [
+        {
+          "pixel_words": [
+            1061556244,
+            1055032779,
+            1049847438,
+            1062752239
+          ],
+          "sample": 0,
+          "sha256": "c61f77ea2d736e1f8ed722f6739d309864dd18c2e90fd70d6f4fb8378078c773"
+        },
+        {
+          "pixel_words": [
+            1059547317,
+            1046193259,
+            1023884640,
+            1065353216
+          ],
+          "sample": 1,
+          "sha256": "b86968ecfe46e7f028a8a1895844553dd451d00ce8b2001364bd961a02eea0bd"
+        }
+      ],
+      "diagnostic_ps_sha256": null,
+      "module_audit_passed": false
+    },
+    {
+      "name": "replay-original-2",
+      "kind": "replay",
+      "report": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-fragment-20261014\\replay-original-2\\report.json",
+      "report_sha256": "ee3308e4169bc7440c7a0f3b6cd45a6be8741e3ff1edf11858fb49b62be01929",
+      "completed": true,
+      "initial_samples_exact": 0,
+      "scoped_debug_messages": 0,
+      "prefix_debug_counts": {
+        "severity-1-id-390": 303,
+        "severity-1-id-372": 303,
+        "severity-2-id-3146081": 2
+      },
+      "float_output": [
+        {
+          "pixel_words": [
+            1061556244,
+            1055032779,
+            1049847438,
+            1062752239
+          ],
+          "sample": 0,
+          "sha256": "c61f77ea2d736e1f8ed722f6739d309864dd18c2e90fd70d6f4fb8378078c773"
+        },
+        {
+          "pixel_words": [
+            1059547317,
+            1046193259,
+            1023884640,
+            1065353216
+          ],
+          "sample": 1,
+          "sha256": "b86968ecfe46e7f028a8a1895844553dd451d00ce8b2001364bd961a02eea0bd"
+        }
+      ],
+      "diagnostic_ps_sha256": null,
+      "module_audit_passed": false
+    },
+    {
+      "name": "replay-original-3",
+      "kind": "replay",
+      "report": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-fragment-20261014\\replay-original-3\\report.json",
+      "report_sha256": "ee3308e4169bc7440c7a0f3b6cd45a6be8741e3ff1edf11858fb49b62be01929",
+      "completed": true,
+      "initial_samples_exact": 0,
+      "scoped_debug_messages": 0,
+      "prefix_debug_counts": {
+        "severity-1-id-390": 303,
+        "severity-1-id-372": 303,
+        "severity-2-id-3146081": 2
+      },
+      "float_output": [
+        {
+          "pixel_words": [
+            1061556244,
+            1055032779,
+            1049847438,
+            1062752239
+          ],
+          "sample": 0,
+          "sha256": "c61f77ea2d736e1f8ed722f6739d309864dd18c2e90fd70d6f4fb8378078c773"
+        },
+        {
+          "pixel_words": [
+            1059547317,
+            1046193259,
+            1023884640,
+            1065353216
+          ],
+          "sample": 1,
+          "sha256": "b86968ecfe46e7f028a8a1895844553dd451d00ce8b2001364bd961a02eea0bd"
+        }
+      ],
+      "diagnostic_ps_sha256": null,
+      "module_audit_passed": false
+    },
+    {
+      "name": "aligned-input-texcoord0-replay",
+      "kind": "replay",
+      "report": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-fragment-20261014\\aligned-input-texcoord0-replay\\report.json",
+      "report_sha256": "d3ae2819bd266f8d51631eeb161e67f81a6ec5b3d0200f4d8747f01c322766ea",
+      "completed": true,
+      "initial_samples_exact": 0,
+      "scoped_debug_messages": 0,
+      "prefix_debug_counts": {
+        "severity-1-id-390": 303,
+        "severity-1-id-372": 303,
+        "severity-2-id-3146081": 2
+      },
+      "float_output": [
+        {
+          "pixel_words": [
+            1032206534,
+            1051267108,
+            0,
+            0
+          ],
+          "sample": 0,
+          "sha256": "5c57cfe21d54a6d4d7e3be3d2d8829daed55da1aacd14ebb48067510c7b9606a"
+        },
+        {
+          "pixel_words": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "sample": 1,
+          "sha256": "594e1598fd751a15c1f77561f55c33ff277c62d9a804e48efa419b8542844407"
+        }
+      ],
+      "diagnostic_ps_sha256": "d73e0a8b6d17f34007c50b49677e6012643b58b8d0fe38d4a3494db316cbea8d",
+      "module_audit_passed": false
+    },
+    {
+      "name": "aligned-input-texcoord1-replay",
+      "kind": "replay",
+      "report": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-fragment-20261014\\aligned-input-texcoord1-replay\\report.json",
+      "report_sha256": "ed0264139a6563036a6062081e24ffd7b30c3177a29bc43be256a38279c76d02",
+      "completed": true,
+      "initial_samples_exact": 0,
+      "scoped_debug_messages": 0,
+      "prefix_debug_counts": {
+        "severity-1-id-390": 303,
+        "severity-1-id-372": 303,
+        "severity-2-id-3146081": 2
+      },
+      "float_output": [
+        {
+          "pixel_words": [
+            1045629799,
+            1062065237,
+            3213144967,
+            3189434086
+          ],
+          "sample": 0,
+          "sha256": "7b98b32850046d89c14fc64f33e3c77e56c7f639c83b101839c8227672647f31"
+        },
+        {
+          "pixel_words": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "sample": 1,
+          "sha256": "594e1598fd751a15c1f77561f55c33ff277c62d9a804e48efa419b8542844407"
+        }
+      ],
+      "diagnostic_ps_sha256": "a95501c12bdc680f1cc11895c556e951820623ab8c763059e6b7ef1bcb8203c1",
+      "module_audit_passed": false
+    },
+    {
+      "name": "aligned-input-texcoord2-replay",
+      "kind": "replay",
+      "report": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-fragment-20261014\\aligned-input-texcoord2-replay\\report.json",
+      "report_sha256": "3c7c5b4f8e86a34f5816ee6cc0958779edf5e80871a4f7d3b0d3f823d72e8b8e",
+      "completed": true,
+      "initial_samples_exact": 0,
+      "scoped_debug_messages": 0,
+      "prefix_debug_counts": {
+        "severity-1-id-390": 303,
+        "severity-1-id-372": 303,
+        "severity-2-id-3146081": 2
+      },
+      "float_output": [
+        {
+          "pixel_words": [
+            1055039761,
+            3210516726,
+            3207020407,
+            1067765091
+          ],
+          "sample": 0,
+          "sha256": "fd414e6b90fd8325a54699c2c2073e91e1767222a3403c85b2d5caa27b717166"
+        },
+        {
+          "pixel_words": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "sample": 1,
+          "sha256": "594e1598fd751a15c1f77561f55c33ff277c62d9a804e48efa419b8542844407"
+        }
+      ],
+      "diagnostic_ps_sha256": "f2aba0b45e792221c39754921aeb44991bf051321f0fd786f63a700a24f5a421",
+      "module_audit_passed": false
+    },
+    {
+      "name": "aligned-input-texcoord3-replay",
+      "kind": "replay",
+      "report": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-fragment-20261014\\aligned-input-texcoord3-replay\\report.json",
+      "report_sha256": "baa1019a4460aa61f02927b6e8ba859386496e378b02ae2497ed129e3d022654",
+      "completed": true,
+      "initial_samples_exact": 0,
+      "scoped_debug_messages": 0,
+      "prefix_debug_counts": {
+        "severity-1-id-390": 303,
+        "severity-1-id-372": 303,
+        "severity-2-id-3146081": 2
+      },
+      "float_output": [
+        {
+          "pixel_words": [
+            1066439498,
+            3178095429,
+            1049078544,
+            3188997043
+          ],
+          "sample": 0,
+          "sha256": "abfa90c2082e5e39de62c9dba4671d35eaf9e35974778afe0e18864c0df5bfe2"
+        },
+        {
+          "pixel_words": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "sample": 1,
+          "sha256": "594e1598fd751a15c1f77561f55c33ff277c62d9a804e48efa419b8542844407"
+        }
+      ],
+      "diagnostic_ps_sha256": "8244facd05f4561fa5c6e7efbdb3fc42acdf0215519a7ec7ce50d2f7a1592f57",
+      "module_audit_passed": false
+    },
+    {
+      "name": "aligned-input-texcoord6-replay",
+      "kind": "replay",
+      "report": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-fragment-20261014\\aligned-input-texcoord6-replay\\report.json",
+      "report_sha256": "f3960ba95eef4433c0eac5be85dd3da106efa130080b68ecf764ce8c32bd9983",
+      "completed": true,
+      "initial_samples_exact": 0,
+      "scoped_debug_messages": 0,
+      "prefix_debug_counts": {
+        "severity-1-id-390": 303,
+        "severity-1-id-372": 303,
+        "severity-2-id-3146081": 2
+      },
+      "float_output": [
+        {
+          "pixel_words": [
+            1041078023,
+            3204842822,
+            3222975508,
+            0
+          ],
+          "sample": 0,
+          "sha256": "28ebf0b0a274772628cc1b43da1b9cb9f7b2d242042f487226579cc3d8b99d58"
+        },
+        {
+          "pixel_words": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "sample": 1,
+          "sha256": "594e1598fd751a15c1f77561f55c33ff277c62d9a804e48efa419b8542844407"
+        }
+      ],
+      "diagnostic_ps_sha256": "7dd49782ffc6df02ef42349427c111e2aa0b9aedbf11404894db9e7d96a5c8e3",
+      "module_audit_passed": false
+    },
+    {
+      "name": "aligned-input-front-replay",
+      "kind": "replay",
+      "report": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-fragment-20261014\\aligned-input-front-replay\\report.json",
+      "report_sha256": "7fbefdfd85930099e1b99ea633009492f9e9be815c5554f599582c9e4fadfca3",
+      "completed": true,
+      "initial_samples_exact": 0,
+      "scoped_debug_messages": 0,
+      "prefix_debug_counts": {
+        "severity-1-id-390": 303,
+        "severity-1-id-372": 303,
+        "severity-2-id-3146081": 2
+      },
+      "float_output": [
+        {
+          "pixel_words": [
+            1065353216,
+            0,
+            0,
+            0
+          ],
+          "sample": 0,
+          "sha256": "0bc02bd3fafc35deb3b087f2a06e57a1e0ee554c38179051fe34446a8a5dd7f5"
+        },
+        {
+          "pixel_words": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "sample": 1,
+          "sha256": "594e1598fd751a15c1f77561f55c33ff277c62d9a804e48efa419b8542844407"
+        }
+      ],
+      "diagnostic_ps_sha256": "ebbe47451c9e0f94e1c9c45b6f0864238e629f7c7dbebc959cf2dc82c78f8a82",
+      "module_audit_passed": false
+    }
+  ],
+  "interpolated_input_comparisons": [
+    {
+      "semantic": "TEXCOORD0",
+      "shader_sha256": "d73e0a8b6d17f34007c50b49677e6012643b58b8d0fe38d4a3494db316cbea8d",
+      "native_words": [
+        1032206534,
+        1051267108,
+        0,
+        0
+      ],
+      "replay_words": [
+        1032206534,
+        1051267108,
+        0,
+        0
+      ],
+      "values": [
+        0.06553797423839569,
+        0.33020126819610596,
+        0.0,
+        0.0
+      ],
+      "native_report": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-fragment-20261014\\aligned-input-texcoord0-native\\report.json",
+      "replay_report": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-fragment-20261014\\aligned-input-texcoord0-replay\\report.json"
+    },
+    {
+      "semantic": "TEXCOORD1",
+      "shader_sha256": "a95501c12bdc680f1cc11895c556e951820623ab8c763059e6b7ef1bcb8203c1",
+      "native_words": [
+        1045629799,
+        1062065237,
+        3213144967,
+        3189434086
+      ],
+      "replay_words": [
+        1045629799,
+        1062065237,
+        3213144967,
+        3189434086
+      ],
+      "values": [
+        0.20609818398952484,
+        0.8040211796760559,
+        -1.0367287397384644,
+        -0.15127143263816833
+      ],
+      "native_report": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-fragment-20261014\\aligned-input-texcoord1-native\\report.json",
+      "replay_report": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-fragment-20261014\\aligned-input-texcoord1-replay\\report.json"
+    },
+    {
+      "semantic": "TEXCOORD2",
+      "shader_sha256": "f2aba0b45e792221c39754921aeb44991bf051321f0fd786f63a700a24f5a421",
+      "native_words": [
+        1055039761,
+        3210516726,
+        3207020407,
+        1067765091
+      ],
+      "replay_words": [
+        1055039761,
+        3210516726,
+        3207020407,
+        1067765091
+      ],
+      "values": [
+        0.44263508915901184,
+        -0.8617089986801147,
+        -0.6533121466636658,
+        1.2875179052352905
+      ],
+      "native_report": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-fragment-20261014\\aligned-input-texcoord2-native\\report.json",
+      "replay_report": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-fragment-20261014\\aligned-input-texcoord2-replay\\report.json"
+    },
+    {
+      "semantic": "TEXCOORD3",
+      "shader_sha256": "8244facd05f4561fa5c6e7efbdb3fc42acdf0215519a7ec7ce50d2f7a1592f57",
+      "native_words": [
+        1066439498,
+        3178095429,
+        1049078544,
+        3188997043
+      ],
+      "replay_words": [
+        1066439498,
+        3178095429,
+        1049078544,
+        3188997043
+      ],
+      "values": [
+        1.1294949054718018,
+        -0.05807806923985481,
+        0.26497697830200195,
+        -0.14475898444652557
+      ],
+      "native_report": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-fragment-20261014\\aligned-input-texcoord3-native\\report.json",
+      "replay_report": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-fragment-20261014\\aligned-input-texcoord3-replay\\report.json"
+    },
+    {
+      "semantic": "TEXCOORD6",
+      "shader_sha256": "7dd49782ffc6df02ef42349427c111e2aa0b9aedbf11404894db9e7d96a5c8e3",
+      "native_words": [
+        1041078023,
+        3204842822,
+        3222975508,
+        0
+      ],
+      "replay_words": [
+        1041078023,
+        3204842822,
+        3222975508,
+        0
+      ],
+      "values": [
+        0.13827143609523773,
+        -0.5235179662704468,
+        -2.417241096496582,
+        0.0
+      ],
+      "native_report": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-fragment-20261014\\aligned-input-texcoord6-native\\report.json",
+      "replay_report": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-fragment-20261014\\aligned-input-texcoord6-replay\\report.json"
+    },
+    {
+      "semantic": "front",
+      "shader_sha256": "ebbe47451c9e0f94e1c9c45b6f0864238e629f7c7dbebc959cf2dc82c78f8a82",
+      "native_words": [
+        1065353216,
+        0,
+        0,
+        0
+      ],
+      "replay_words": [
+        1065353216,
+        0,
+        0,
+        0
+      ],
+      "values": [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "native_report": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-fragment-20261014\\aligned-input-front-native\\report.json",
+      "replay_report": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-fragment-20261014\\aligned-input-front-replay\\report.json"
+    }
+  ],
+  "blend_reconstruction": {
+    "source_words": [
+      1061556244,
+      1055032779,
+      1049847438,
+      1062752239
+    ],
+    "source_float32": [
+      0.7736828327178955,
+      0.44242700934410095,
+      0.28789180517196655,
+      0.8449696898460388
+    ],
+    "source_half_words": [
+      14897,
+      14100,
+      13467,
+      15042
+    ],
+    "destination_half_words": [
+      12486,
+      11038,
+      8056,
+      15360
+    ],
+    "computed_half_words": [
+      14698,
+      13854,
+      13265,
+      15091
+    ],
+    "unquantized_source_result_words": [
+      14698,
+      13855,
+      13266,
+      15092
+    ],
+    "observed_lower_words": [
+      14698,
+      13854,
+      13265,
+      15091
+    ],
+    "observed_higher_words": [
+      14858,
+      13955,
+      13298,
+      15091
+    ],
+    "lower_file": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-primitive-20261014\\default-regression\\0-618-s0.bin",
+    "lower_file_sha256": "10bfd552c3acc038eab0bb6fcecf3c309680f224dbba938eccd0d73013e144b4",
+    "numpy_version": "2.5.2",
+    "conclusion": "Exact reconstruction of the lower variant in this control; does not establish the higher-variant cause."
+  },
+  "original_gpa_gui": {
+    "file": "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\capture-gf2-current-20261014\\launch-1\\session\\frame-23c72ea8-d6f0-4557-96e7-48513d0f27bd.gpa_frame",
+    "sha256": "b574705cec603b85906917c16b93e9832140e42ddd9a6115da975d8f67e8521e",
+    "analyzer": "C:/Program Files/IntelSWTools/GPA/FrameAnalyzer.exe",
+    "analyzer_sha256": "f28314fddc16750ce0b041bd0edd5dff980116803cd585349f93c89a59087280",
+    "file_version": "25, 1, 26603, 47871",
+    "display_version": "Graphics Frame Analyzer 2025 R1 (25.1.1743502079)",
+    "adapter": "Intel(R) Iris(R) Xe Graphics",
+    "events_displayed": 637,
+    "current_texture": "T:0x2e (RTV 0) (Final)",
+    "format": "R8G8B8A8_UNORM_SRGB",
+    "dimensions": [
+      2560,
+      1440
+    ],
+    "displayed_full_frame_us": 173212,
+    "timing_is_observation_not_performance_acceptance": true,
+    "screenshot": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-fragment-20261014\\gpa-gui\\equipment-final.png",
+    "screenshot_sha256": "d83f42ecf899b35e7c6c22b67facd58c6f843125554ae450afa549a2be503fc2",
+    "event_and_shader_resource_inspection_complete": false,
+    "browser_metadata_missing": [
+      "resolution",
+      "host",
+      "GPU"
+    ],
+    "automation_limit": "Two click timeouts, including one after refreshing the returned window binding; no selected Draw/shader/non-final resource panel acceptance.",
+    "processes_exited_before_final_goldens": true,
+    "skill": "C:/Users/Myrrr/.codex/plugins/cache/openai-bundled/computer-use/26.1007.21434/skills/computer-use/SKILL.md"
+  },
+  "failed_probes": [
+    "input-texcoord0-native: D3D11 linkage error 343, excluded",
+    "linked-input-texcoord0-compiled: HLSL signature ordering error, excluded",
+    "Initial fragment probe compile attempted private Replay API; replaced by a development-only reader"
+  ],
+  "validation": {
+    "refusals": [
+      {
+        "case": "float-no-pixel",
+        "exit": 1,
+        "message": "Float output requires"
+      },
+      {
+        "case": "float-duplicate",
+        "exit": 1,
+        "message": "duplicate"
+      },
+      {
+        "case": "float-wrong-output",
+        "exit": 1,
+        "message": "RTV 0"
+      },
+      {
+        "case": "float-blend",
+        "exit": 1,
+        "message": "independent blend"
+      },
+      {
+        "case": "replay-event",
+        "exit": 1,
+        "message": "Invalid event"
+      },
+      {
+        "case": "replay-vendor",
+        "exit": 1,
+        "message": "Invalid event"
+      },
+      {
+        "case": "replay-overflow",
+        "exit": 1,
+        "message": "overflow"
+      },
+      {
+        "case": "replay-pixel",
+        "exit": 1,
+        "message": "in-bounds"
+      },
+      {
+        "case": "replay-buffer",
+        "exit": 1,
+        "message": "MSAA output"
+      },
+      {
+        "case": "replay-wrong-binding",
+        "exit": 1,
+        "message": "differs from RTV0"
+      },
+      {
+        "case": "replay-vertex",
+        "exit": 1,
+        "message": "pixel shader"
+      },
+      {
+        "case": "replay-garbage",
+        "exit": 1,
+        "message": "Reflect diagnostic"
+      },
+      {
+        "case": "replay-existing",
+        "exit": 1,
+        "message": "must be new"
+      }
+    ],
+    "ctest_passed": 4,
+    "ctest_sha256": "53003072155a8f5a854262780b8693a40e518cdacb80cb2acec6f9a4ea69bf11",
+    "golden": [
+      {
+        "label": "golden-gf2",
+        "rgba_sha256": "2e1abc5eacb0bbfd801f9fe059c305baa9a0786c384b36a42fa5a323dd979fd1",
+        "adapter": "NVIDIA GeForce RTX 3070 Laptop GPU"
+      },
+      {
+        "label": "golden-bf1",
+        "rgba_sha256": "1f724d1840652f66afd26dd30c95aecd5c1b4932eede56109198f15a8f57a2f6",
+        "adapter": "NVIDIA GeForce RTX 3070 Laptop GPU"
+      }
+    ],
+    "capture_only_configure_sha256": "1129f315de5be5dc183b889d77e920de5c0c1f4f8593cfd9af93d1d2332f75f3",
+    "build_sha256": "05d225f140052d5c24037a3e52356c5ecf2e665ea9e36556fdceb0e3fc83e3b0",
+    "full_draw_float_samples_exact_across_paths": true,
+    "formal_gui_gate_passed": false
+  },
+  "production_identity": {
+    "replay_sha256": "215ebafed657953f0671c32a0948e12c8c965437a3eaa33e6d38aedcff5e2ddc",
+    "runtime_sha256": "f2d92dd99f5b26ee232064ca26645136fa808ab2e7e6e810193376527f092df3",
+    "controller_sha256": "0bc61e429745e1b0f6fd046762cae923471686782a1ab48ba853cca12aaaacf3"
+  },
+  "sources": {
+    "CMakeLists.txt": "4f7f1361c6101539dda7b82898b6bb1b5ad57b8e99552df9267bb0591c9cb499",
+    "tools/native/native_draw_fixture.cpp": "0be78d44199b0ce8b5088aecb4b2d74670c65ea89977df179b9c6e807699a15c",
+    "tools/native/replay_fragment_probe.cpp": "0de7e41c1c4487e7693c9408d47494aee938311e4dd66013791a5560337a6af7"
+  },
+  "binaries": {
+    "native_standalone_sha256": "36ad27c0957cbce7abe0e862e6423e31ed6ed5c043d78c76f52e0a3c851da758",
+    "native_full_sha256": "b36a9ab9222a3ded5d6dec842ea66baf557de3cf92ce8e059fcf529f38f2cc12",
+    "fragment_probe_sha256": "18d2bd6f98f0ded92d9a17ad915562d6fc3b10a2a0d686bff4272668a5122204"
+  },
+  "evidence": {
+    "directory": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-fragment-20261014",
+    "manifest_files": 154,
+    "manifest_sha256": "ed7bc6e5ba6909a2b70ac5b5d6c98410b6ef6d1644790c30f2597d8cee1e0404"
+  },
+  "limits": [
+    "Float target, disabled blend and diagnostic shader replacements alter execution. No original higher variant reproduced or root cause established.",
+    "Nineteen input components agree only in six instrumented primitive-filtered shader pairs.",
+    "Original GPA GUI observation is one final image/event overview; detailed panels and current six-frame gate remain incomplete."
+  ]
+}
