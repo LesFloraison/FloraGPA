@@ -1,0 +1,532 @@
+{
+  "schema": 1,
+  "date": "2026-10-14",
+  "source_base_commit": "eb23b6991215336b336513a2289d2db267a14ffb",
+  "formal_acceptance_established": false,
+  "official_export_processes_completed": 6,
+  "cpu_tests_passed": 8,
+  "counts": {
+    "events": [
+      273,
+      637,
+      632,
+      272,
+      631,
+      638
+    ],
+    "ordered_actions": 2881,
+    "selected_events": 16,
+    "shader_disassemblies": 28,
+    "resource_bindings": 144,
+    "graphics_state_groups": 180
+  },
+  "analyzer": {
+    "path": "C:\\Program Files\\IntelSWTools\\GPA\\FrameAnalyzer.exe",
+    "sha256": "f28314fddc16750ce0b041bd0edd5dff980116803cd585349f93c89a59087280"
+  },
+  "plugin_sha256": "2d3a503e236b6927185a32e4dcc2af5a9a08f4e60a5371e0a19717b7112d5c86",
+  "system_disassembler_sha256": "e1296b501a32420f0d2c006c71666c9a8a303539ef112d1cee095c0dcfb7d697",
+  "source_hashes": {
+    "tools\\validate_capture_gpa_inspection.py": "71144492b8ebc6ae1e76a1f12e69e539937f79ed22631e68c4f797652e1d1cc1",
+    "tools\\test_capture_gpa_inspection.py": "33e08be8f2932c958c031e21c199c1cdd77f1217e2bb1b12fbd90e439632e0c2",
+    "docs\\CAPTURE_GF2_PLUGIN_INSPECTION.md": "f9950ff5db8e3d417a90d6426687aa523325c3460cc370f152fe6140fccd0332"
+  },
+  "evidence_hashes": {
+    "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-plugin-20261014\\comparison-final.json": "1fd003d932704f55ef72cec6589310154436b010775aa5b9cee0d00dafbd109c",
+    "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-plugin-20261014\\comparison.json": "746693b64a83e29c97351b3d857f4d21b193baaa752a7196c5d84290afc17f33",
+    "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-plugin-20261014\\equipment-export-v2.json": "b0da6ddee9bfe30e71203a0300913365f62c5b8789cb3f807a50ae9859cc9b63",
+    "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-plugin-20261014\\equipment-export-v2.log": "eb2ec1e1308117a4c4c39153f8701a9e2b3399512494f6188e8a4c63737523d2",
+    "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-plugin-20261014\\equipment-export.log": "d6872254b1ae7a2a2d1c613e0957b13a277ec79480ec50e4cbe90c18ccb2521c",
+    "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-plugin-20261014\\export-1-0.json": "f2d6be51a35456a9aeeb87939dc614193bad088faa53ef74549a63d1b8aef7ca",
+    "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-plugin-20261014\\export-1-0.log": "ea8b7665b49980718e61008fd9f6032994df9709f5ac4ca7f3f9e03e1e5992bb",
+    "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-plugin-20261014\\export-1-2.json": "577a8383eabfdadee4f781ea0e8f74d040a74642491b57a74413d91225fd0953",
+    "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-plugin-20261014\\export-1-2.log": "081bc5a8de9ba1cd96814d0fb4bcf9d8c7cd5c3fd35892514811b5f02015321e",
+    "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-plugin-20261014\\export-2-0.json": "646b8c68cd9fb7bdbcf454e62681697e2c2bf13e60cc8d453bd634bdf34a7072",
+    "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-plugin-20261014\\export-2-0.log": "b4fb8edd56f71a1cbc3579e801936da30ad4e21c4fffc115324c2cb29df7d406",
+    "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-plugin-20261014\\export-2-1.json": "bd8ac16f2cb5c40c751b54fff64be55697bbe8c50aa302ba94df552eaefa3404",
+    "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-plugin-20261014\\export-2-1.log": "b047ffedeeb254d22e55a48e31e5cef046133c1803ac915e17f4f2dd1545dd79",
+    "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-plugin-20261014\\export-2-2.json": "11e5c10ac059155aafe33d0e0c19cdd52007edef80048c0ffb43d5b7b28b255d",
+    "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-plugin-20261014\\export-2-2.log": "817cd5f9f7b2b724306439f9a59e95ff2e76c6f66f9fc4961cb5ce667df11a10",
+    "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-plugin-20261014\\export-manifest.json": "d1d6f23f15cc28757eaef8f55b7da29d2ac3e07ec9e921f3f38b3facfb51606c",
+    "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-plugin-20261014\\export-plugin.py": "2d3a503e236b6927185a32e4dcc2af5a9a08f4e60a5371e0a19717b7112d5c86",
+    "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-plugin-20261014\\export_remaining.py": "0212110d34a8743e1db2caa80601bf9e8eac5aae9b732e8f3ef423cb5039eaef",
+    "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-plugin-20261014\\refusal-tests.txt": "f7f2cca39c011eeadc6e587d4f79e9ecd073243d3ec962d19a9119021021b279",
+    "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-plugin-20261014\\rejected-plugin\\__init__.py": "2d3a503e236b6927185a32e4dcc2af5a9a08f4e60a5371e0a19717b7112d5c86",
+    "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\capture-gf2-current-20261014\\launch-1\\inspection-selection.json": "340145ffaa9a06d57c67f06b40589f8a5ea055d74522509732c9d266df111100",
+    "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\capture-gf2-current-20261014\\launch-1\\inventory-0\\report.json": "a96337f18c274169ae832f3fb32f164d5800a359cde50e18a3d25021aa2756fb",
+    "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\capture-gf2-current-20261014\\launch-1\\inventory-1\\report.json": "452f650e4ed2ed82d5951329b22d0f3dfd45dccc2291f87ec097e3e0b2366ac2",
+    "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\capture-gf2-current-20261014\\launch-1\\inventory-2\\report.json": "5e1ac1aa693a907a18753a1ed280903e133dde4a1b790695f512ee715cfca42a",
+    "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\capture-gf2-current-20261014\\launch-1\\pipeline-0-2300\\replay-pipeline.json": "fc5e6cebb0789ff57661bfa1d5ab15638d93f7131af28b2105ab885b8cc18faa",
+    "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\capture-gf2-current-20261014\\launch-1\\pipeline-0-2300\\report.json": "db2a30a527e62236acd0170aad5ca939c4fcaddb677831bd9fbff1f0d87ffcf7",
+    "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\capture-gf2-current-20261014\\launch-1\\pipeline-0-3360\\replay-pipeline.json": "f81800ea664bfb8497b41a7dc3142b0b4f6188d075992d664713e003b39b8400",
+    "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\capture-gf2-current-20261014\\launch-1\\pipeline-0-3360\\report.json": "57ed1397c4b50c5753c1b0c849eabd393592b04c6187e4dd06bbfc786b7dee8d",
+    "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\capture-gf2-current-20261014\\launch-1\\pipeline-1-5068\\replay-pipeline.json": "c3ee6ea866002e7591f325c9d283a005a5fe59d48f9ddfd5547947391d3a0782",
+    "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\capture-gf2-current-20261014\\launch-1\\pipeline-1-5068\\report.json": "be518e5ce64c14e0ad5c0981126f0637f5dc822ad4d4fcff6fd616f7276f1629",
+    "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\capture-gf2-current-20261014\\launch-1\\pipeline-1-5357\\replay-pipeline.json": "8a16d5e22a1f0dc4f1961e7446b09ad8f70fa968e444537d08e261a2045c9394",
+    "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\capture-gf2-current-20261014\\launch-1\\pipeline-1-5357\\report.json": "bbef8df73bfc2e3f3f32d828edccc7bf0e2800141fb91a06382aaa92da88846d",
+    "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\capture-gf2-current-20261014\\launch-1\\pipeline-1-6377\\replay-pipeline.json": "16a5162c4a153497a9d4bbf74148578d90961a85e18e46a9b46004d75b2a7435",
+    "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\capture-gf2-current-20261014\\launch-1\\pipeline-1-6377\\report.json": "438df6b8ae3857ba59db6dac862e8f9486fe99ed59c543f08bb00aeb1428fc61",
+    "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\capture-gf2-current-20261014\\launch-1\\pipeline-2-5003\\replay-pipeline.json": "f170fff4b0c625d1442d5ae05a79edb09085b933cf3a9ef239f7a3767327c95f",
+    "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\capture-gf2-current-20261014\\launch-1\\pipeline-2-5003\\report.json": "6387bb6e0fb5a23f3b3380f23fbe996920d9869b2f91b5ecd6f1012b1163b8c4",
+    "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\capture-gf2-current-20261014\\launch-1\\pipeline-2-5292\\replay-pipeline.json": "1502d10773869ee6d6ca0fec0acb3ca226fbf07d825a157684b0809e8986900f",
+    "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\capture-gf2-current-20261014\\launch-1\\pipeline-2-5292\\report.json": "f7df8f9e0b254108e332670811d3d0346a54b173a198d9f5d1781e3d4feabd97",
+    "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\capture-gf2-current-20261014\\launch-1\\pipeline-2-6326\\replay-pipeline.json": "69335019c1ae14244b56ac75502e7c88b85ca143590b2211af70c70d884141f6",
+    "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\capture-gf2-current-20261014\\launch-1\\pipeline-2-6326\\report.json": "42a1937aa575a6f0ef0063a19a3633b29a994c009e142eaab976c7dd254bd7a8",
+    "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\capture-gf2-current-20261014\\launch-1\\shader-0-37\\shader.dxbc": "6b3ed052e7846fc4ba2bb450c0fa6466ea69567965217ed8c9bb3505ca151ce6",
+    "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\capture-gf2-current-20261014\\launch-1\\shader-0-38\\shader.dxbc": "bc4aee2598ed82ed1d584dc8b5b26aacc9628827f25fe707893bb2978af09e23",
+    "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\capture-gf2-current-20261014\\launch-1\\shader-0-502\\shader.dxbc": "18669b668cb39b907a02cfec253f74b24d0c09c6ae73d0d65f27455032b2d869",
+    "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\capture-gf2-current-20261014\\launch-1\\shader-0-503\\shader.dxbc": "8208195a6263fdfba1261860ff60ab42c14168ec7f9218c4de4824432d532318",
+    "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\capture-gf2-current-20261014\\launch-1\\shader-1-38\\shader.dxbc": "6b3ed052e7846fc4ba2bb450c0fa6466ea69567965217ed8c9bb3505ca151ce6",
+    "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\capture-gf2-current-20261014\\launch-1\\shader-1-39\\shader.dxbc": "bc4aee2598ed82ed1d584dc8b5b26aacc9628827f25fe707893bb2978af09e23",
+    "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\capture-gf2-current-20261014\\launch-1\\shader-1-81\\shader.dxbc": "5c65778a398b19407968c283cc2f3bc299faf63b49dd9bf79b0589d2ddf63d3f",
+    "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\capture-gf2-current-20261014\\launch-1\\shader-1-862\\shader.dxbc": "6cc3d926b5f1a5f8af332ff7327bb856b4687b9c9801af363b230f880b5d1387",
+    "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\capture-gf2-current-20261014\\launch-1\\shader-1-863\\shader.dxbc": "57711ec60ddadf5c6df36dfdeaeffbc6be002db77030137981cf2d3806832a80",
+    "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\capture-gf2-current-20261014\\launch-1\\shader-2-38\\shader.dxbc": "6b3ed052e7846fc4ba2bb450c0fa6466ea69567965217ed8c9bb3505ca151ce6",
+    "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\capture-gf2-current-20261014\\launch-1\\shader-2-39\\shader.dxbc": "bc4aee2598ed82ed1d584dc8b5b26aacc9628827f25fe707893bb2978af09e23",
+    "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\capture-gf2-current-20261014\\launch-1\\shader-2-81\\shader.dxbc": "5c65778a398b19407968c283cc2f3bc299faf63b49dd9bf79b0589d2ddf63d3f",
+    "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\capture-gf2-current-20261014\\launch-1\\shader-2-862\\shader.dxbc": "6cc3d926b5f1a5f8af332ff7327bb856b4687b9c9801af363b230f880b5d1387",
+    "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\capture-gf2-current-20261014\\launch-1\\shader-2-863\\shader.dxbc": "57711ec60ddadf5c6df36dfdeaeffbc6be002db77030137981cf2d3806832a80",
+    "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\capture-gf2-current-20261014\\launch-2\\inspection-selection.json": "2b0a77321c3f0f223fbdff7ba423b2124b23e1a1cff22b8501f8c674fe6c35e2",
+    "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\capture-gf2-current-20261014\\launch-2\\inventory-0\\report.json": "7000cbcd71e3417ab57d290fcc7a053144d3629732c10c19464cd37932826a4f",
+    "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\capture-gf2-current-20261014\\launch-2\\inventory-1\\report.json": "bd43874952a8949ebb0a304b66aaaa35cc3d509c499876d6119987b52c519b5b",
+    "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\capture-gf2-current-20261014\\launch-2\\inventory-2\\report.json": "a4e582b1db173741315a6e302a383dc861461ddf4b04be3107812941b51a9188",
+    "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\capture-gf2-current-20261014\\launch-2\\pipeline-0-2288\\replay-pipeline.json": "83fc2ffbc294e338c313fd233d9cde01bfb49fffc056f7a7a42c287f419d8575",
+    "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\capture-gf2-current-20261014\\launch-2\\pipeline-0-2288\\report.json": "9497cbb97400f068f17083d3f0f791055c988d81fa1f23b22768ae0bd1cc16ac",
+    "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\capture-gf2-current-20261014\\launch-2\\pipeline-0-3350\\replay-pipeline.json": "435ddf34c61fa7eb98aecf6b0a375db33e677e6b17ed12e9da56cf3379c4c9d8",
+    "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\capture-gf2-current-20261014\\launch-2\\pipeline-0-3350\\report.json": "88c8a21f3140f209e163fe5046e95f947b31e35b12a89acb8b5cb2b7b0878b07",
+    "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\capture-gf2-current-20261014\\launch-2\\pipeline-1-4982\\replay-pipeline.json": "dfda3ff4b78bc6a0c5e2c1d8fbf50aad679c5170175d54b26bb3d50843cec2c8",
+    "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\capture-gf2-current-20261014\\launch-2\\pipeline-1-4982\\report.json": "636dab14d2526e2a1feaa565943b2c6b3c0905eac99db600cbe58cdd77682412",
+    "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\capture-gf2-current-20261014\\launch-2\\pipeline-1-5265\\replay-pipeline.json": "9ddbc689d15e764ff17020f171f5e785e28a6421d98a01a1179ff743d4e7269e",
+    "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\capture-gf2-current-20261014\\launch-2\\pipeline-1-5265\\report.json": "d2da30d2edc220f6eb8eb86a5b9964aafcd4e9f349bd57dda77540d6073bc3a2",
+    "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\capture-gf2-current-20261014\\launch-2\\pipeline-1-6295\\replay-pipeline.json": "802145b78d727e23713ba36707d1426af0581d65fc411d5557d75564ff029825",
+    "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\capture-gf2-current-20261014\\launch-2\\pipeline-1-6295\\report.json": "2b74d2993937b4463e506b903ae45237097167edf580deee42b60b47b1bffe4b",
+    "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\capture-gf2-current-20261014\\launch-2\\pipeline-2-5050\\replay-pipeline.json": "a94cb0aa69a99203acd819e7a516ba2c3708d4c16d465d13edfe2cc19afa3107",
+    "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\capture-gf2-current-20261014\\launch-2\\pipeline-2-5050\\report.json": "cd0533cda685c9740708962a0fa8bdbe9a96b9ec7e0c42228333140e8c2ccf52",
+    "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\capture-gf2-current-20261014\\launch-2\\pipeline-2-5333\\replay-pipeline.json": "e6b1d52e5d0a2768c9c5647bee6de9d2eb378771a28525e0edfb585df641ea12",
+    "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\capture-gf2-current-20261014\\launch-2\\pipeline-2-5333\\report.json": "14acb9bb5a7f7dffe3bd9b48457695c6a988bab508a6ee81b72f1fcbec73adf3",
+    "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\capture-gf2-current-20261014\\launch-2\\pipeline-2-6363\\replay-pipeline.json": "209028cd956174742a6ae759d13eafc4ff93a485f226a03e84976785fef93c7b",
+    "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\capture-gf2-current-20261014\\launch-2\\pipeline-2-6363\\report.json": "88e585d9c6cd5b1bb5f3790964bed35a4926b9259d3bd11e3055a2cedccd24be",
+    "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\capture-gf2-current-20261014\\launch-2\\shader-0-37\\shader.dxbc": "6b3ed052e7846fc4ba2bb450c0fa6466ea69567965217ed8c9bb3505ca151ce6",
+    "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\capture-gf2-current-20261014\\launch-2\\shader-0-38\\shader.dxbc": "bc4aee2598ed82ed1d584dc8b5b26aacc9628827f25fe707893bb2978af09e23",
+    "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\capture-gf2-current-20261014\\launch-2\\shader-0-498\\shader.dxbc": "18669b668cb39b907a02cfec253f74b24d0c09c6ae73d0d65f27455032b2d869",
+    "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\capture-gf2-current-20261014\\launch-2\\shader-0-499\\shader.dxbc": "8208195a6263fdfba1261860ff60ab42c14168ec7f9218c4de4824432d532318",
+    "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\capture-gf2-current-20261014\\launch-2\\shader-1-38\\shader.dxbc": "6b3ed052e7846fc4ba2bb450c0fa6466ea69567965217ed8c9bb3505ca151ce6",
+    "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\capture-gf2-current-20261014\\launch-2\\shader-1-39\\shader.dxbc": "bc4aee2598ed82ed1d584dc8b5b26aacc9628827f25fe707893bb2978af09e23",
+    "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\capture-gf2-current-20261014\\launch-2\\shader-1-81\\shader.dxbc": "5c65778a398b19407968c283cc2f3bc299faf63b49dd9bf79b0589d2ddf63d3f",
+    "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\capture-gf2-current-20261014\\launch-2\\shader-1-862\\shader.dxbc": "6cc3d926b5f1a5f8af332ff7327bb856b4687b9c9801af363b230f880b5d1387",
+    "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\capture-gf2-current-20261014\\launch-2\\shader-1-863\\shader.dxbc": "57711ec60ddadf5c6df36dfdeaeffbc6be002db77030137981cf2d3806832a80",
+    "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\capture-gf2-current-20261014\\launch-2\\shader-2-38\\shader.dxbc": "6b3ed052e7846fc4ba2bb450c0fa6466ea69567965217ed8c9bb3505ca151ce6",
+    "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\capture-gf2-current-20261014\\launch-2\\shader-2-39\\shader.dxbc": "bc4aee2598ed82ed1d584dc8b5b26aacc9628827f25fe707893bb2978af09e23",
+    "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\capture-gf2-current-20261014\\launch-2\\shader-2-81\\shader.dxbc": "5c65778a398b19407968c283cc2f3bc299faf63b49dd9bf79b0589d2ddf63d3f",
+    "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\capture-gf2-current-20261014\\launch-2\\shader-2-864\\shader.dxbc": "6cc3d926b5f1a5f8af332ff7327bb856b4687b9c9801af363b230f880b5d1387",
+    "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\capture-gf2-current-20261014\\launch-2\\shader-2-865\\shader.dxbc": "57711ec60ddadf5c6df36dfdeaeffbc6be002db77030137981cf2d3806832a80"
+  },
+  "frames": [
+    {
+      "launch": 1,
+      "index": 0,
+      "events": 273,
+      "ordered_actions": 238,
+      "programs": 50,
+      "resources": 255,
+      "groupings": 5,
+      "selected": [
+        {
+          "captured_event": 2300,
+          "original_event": 452,
+          "name": "DrawIndexed",
+          "shaders": [
+            {
+              "stage": "vertex",
+              "captured_id": 502,
+              "original_id": 1132,
+              "sha256": "18669b668cb39b907a02cfec253f74b24d0c09c6ae73d0d65f27455032b2d869",
+              "disassembly_sha256": "09dae96e427683913be9671acafcb06a066be506c110f46c8a3608c2ff7927b4"
+            },
+            {
+              "stage": "pixel",
+              "captured_id": 503,
+              "original_id": 1133,
+              "sha256": "8208195a6263fdfba1261860ff60ab42c14168ec7f9218c4de4824432d532318",
+              "disassembly_sha256": "a2286ead6056bee45964147b2e4c070dafc9fd6efb0b341c53157710731b8bf4"
+            }
+          ],
+          "resources": 16,
+          "graphics_state_groups": 15
+        },
+        {
+          "captured_event": 3360,
+          "original_event": 940,
+          "name": "DrawIndexed",
+          "shaders": [
+            {
+              "stage": "vertex",
+              "captured_id": 37,
+              "original_id": 619,
+              "sha256": "6b3ed052e7846fc4ba2bb450c0fa6466ea69567965217ed8c9bb3505ca151ce6",
+              "disassembly_sha256": "2d3eb319e077366be482fb2ac2980ea40ba450b2bc8bb897c2dc9aa83ec64e1a"
+            },
+            {
+              "stage": "pixel",
+              "captured_id": 38,
+              "original_id": 620,
+              "sha256": "bc4aee2598ed82ed1d584dc8b5b26aacc9628827f25fe707893bb2978af09e23",
+              "disassembly_sha256": "4a9cc823411b8bd0f3e19a918e5a9bec50df13735a1b79440d47667e27622efa"
+            }
+          ],
+          "resources": 4,
+          "graphics_state_groups": 15
+        }
+      ]
+    },
+    {
+      "launch": 1,
+      "index": 1,
+      "events": 637,
+      "ordered_actions": 604,
+      "programs": 72,
+      "resources": 475,
+      "groupings": 5,
+      "selected": [
+        {
+          "captured_event": 5357,
+          "original_event": 1626,
+          "name": "Dispatch",
+          "shaders": [
+            {
+              "stage": "compute",
+              "captured_id": 81,
+              "original_id": 1016,
+              "sha256": "5c65778a398b19407968c283cc2f3bc299faf63b49dd9bf79b0589d2ddf63d3f",
+              "disassembly_sha256": "bf3245f3ad1b77702d12acec82983bd574dc802ef081c93e9e8d063bbe48054f"
+            }
+          ],
+          "resources": 4,
+          "graphics_state_groups": 0
+        },
+        {
+          "captured_event": 5068,
+          "original_event": 1476,
+          "name": "DrawIndexed",
+          "shaders": [
+            {
+              "stage": "vertex",
+              "captured_id": 862,
+              "original_id": 1757,
+              "sha256": "6cc3d926b5f1a5f8af332ff7327bb856b4687b9c9801af363b230f880b5d1387",
+              "disassembly_sha256": "0f442d9ebeb63a970f90aa68cd5923dac77145245c2098eef4a5cb7f40f8d8ec"
+            },
+            {
+              "stage": "pixel",
+              "captured_id": 863,
+              "original_id": 1758,
+              "sha256": "57711ec60ddadf5c6df36dfdeaeffbc6be002db77030137981cf2d3806832a80",
+              "disassembly_sha256": "6e6c7bf85e5bb13d2a7c7e37c1063beb15b22a1981470ff1117a5dcb758a7662"
+            }
+          ],
+          "resources": 18,
+          "graphics_state_groups": 15
+        },
+        {
+          "captured_event": 6377,
+          "original_event": 2076,
+          "name": "DrawIndexed",
+          "shaders": [
+            {
+              "stage": "vertex",
+              "captured_id": 38,
+              "original_id": 969,
+              "sha256": "6b3ed052e7846fc4ba2bb450c0fa6466ea69567965217ed8c9bb3505ca151ce6",
+              "disassembly_sha256": "2d3eb319e077366be482fb2ac2980ea40ba450b2bc8bb897c2dc9aa83ec64e1a"
+            },
+            {
+              "stage": "pixel",
+              "captured_id": 39,
+              "original_id": 970,
+              "sha256": "bc4aee2598ed82ed1d584dc8b5b26aacc9628827f25fe707893bb2978af09e23",
+              "disassembly_sha256": "4a9cc823411b8bd0f3e19a918e5a9bec50df13735a1b79440d47667e27622efa"
+            }
+          ],
+          "resources": 4,
+          "graphics_state_groups": 15
+        }
+      ]
+    },
+    {
+      "launch": 1,
+      "index": 2,
+      "events": 632,
+      "ordered_actions": 599,
+      "programs": 71,
+      "resources": 476,
+      "groupings": 5,
+      "selected": [
+        {
+          "captured_event": 5292,
+          "original_event": 1595,
+          "name": "Dispatch",
+          "shaders": [
+            {
+              "stage": "compute",
+              "captured_id": 81,
+              "original_id": 1016,
+              "sha256": "5c65778a398b19407968c283cc2f3bc299faf63b49dd9bf79b0589d2ddf63d3f",
+              "disassembly_sha256": "bf3245f3ad1b77702d12acec82983bd574dc802ef081c93e9e8d063bbe48054f"
+            }
+          ],
+          "resources": 4,
+          "graphics_state_groups": 0
+        },
+        {
+          "captured_event": 5003,
+          "original_event": 1445,
+          "name": "DrawIndexed",
+          "shaders": [
+            {
+              "stage": "vertex",
+              "captured_id": 862,
+              "original_id": 1756,
+              "sha256": "6cc3d926b5f1a5f8af332ff7327bb856b4687b9c9801af363b230f880b5d1387",
+              "disassembly_sha256": "0f442d9ebeb63a970f90aa68cd5923dac77145245c2098eef4a5cb7f40f8d8ec"
+            },
+            {
+              "stage": "pixel",
+              "captured_id": 863,
+              "original_id": 1757,
+              "sha256": "57711ec60ddadf5c6df36dfdeaeffbc6be002db77030137981cf2d3806832a80",
+              "disassembly_sha256": "6e6c7bf85e5bb13d2a7c7e37c1063beb15b22a1981470ff1117a5dcb758a7662"
+            }
+          ],
+          "resources": 18,
+          "graphics_state_groups": 15
+        },
+        {
+          "captured_event": 6326,
+          "original_event": 2051,
+          "name": "DrawIndexed",
+          "shaders": [
+            {
+              "stage": "vertex",
+              "captured_id": 38,
+              "original_id": 969,
+              "sha256": "6b3ed052e7846fc4ba2bb450c0fa6466ea69567965217ed8c9bb3505ca151ce6",
+              "disassembly_sha256": "2d3eb319e077366be482fb2ac2980ea40ba450b2bc8bb897c2dc9aa83ec64e1a"
+            },
+            {
+              "stage": "pixel",
+              "captured_id": 39,
+              "original_id": 970,
+              "sha256": "bc4aee2598ed82ed1d584dc8b5b26aacc9628827f25fe707893bb2978af09e23",
+              "disassembly_sha256": "4a9cc823411b8bd0f3e19a918e5a9bec50df13735a1b79440d47667e27622efa"
+            }
+          ],
+          "resources": 4,
+          "graphics_state_groups": 15
+        }
+      ]
+    },
+    {
+      "launch": 2,
+      "index": 0,
+      "events": 272,
+      "ordered_actions": 237,
+      "programs": 50,
+      "resources": 254,
+      "groupings": 5,
+      "selected": [
+        {
+          "captured_event": 2288,
+          "original_event": 446,
+          "name": "DrawIndexed",
+          "shaders": [
+            {
+              "stage": "vertex",
+              "captured_id": 498,
+              "original_id": 1127,
+              "sha256": "18669b668cb39b907a02cfec253f74b24d0c09c6ae73d0d65f27455032b2d869",
+              "disassembly_sha256": "09dae96e427683913be9671acafcb06a066be506c110f46c8a3608c2ff7927b4"
+            },
+            {
+              "stage": "pixel",
+              "captured_id": 499,
+              "original_id": 1128,
+              "sha256": "8208195a6263fdfba1261860ff60ab42c14168ec7f9218c4de4824432d532318",
+              "disassembly_sha256": "a2286ead6056bee45964147b2e4c070dafc9fd6efb0b341c53157710731b8bf4"
+            }
+          ],
+          "resources": 16,
+          "graphics_state_groups": 15
+        },
+        {
+          "captured_event": 3350,
+          "original_event": 937,
+          "name": "DrawIndexed",
+          "shaders": [
+            {
+              "stage": "vertex",
+              "captured_id": 37,
+              "original_id": 617,
+              "sha256": "6b3ed052e7846fc4ba2bb450c0fa6466ea69567965217ed8c9bb3505ca151ce6",
+              "disassembly_sha256": "2d3eb319e077366be482fb2ac2980ea40ba450b2bc8bb897c2dc9aa83ec64e1a"
+            },
+            {
+              "stage": "pixel",
+              "captured_id": 38,
+              "original_id": 618,
+              "sha256": "bc4aee2598ed82ed1d584dc8b5b26aacc9628827f25fe707893bb2978af09e23",
+              "disassembly_sha256": "4a9cc823411b8bd0f3e19a918e5a9bec50df13735a1b79440d47667e27622efa"
+            }
+          ],
+          "resources": 4,
+          "graphics_state_groups": 15
+        }
+      ]
+    },
+    {
+      "launch": 2,
+      "index": 1,
+      "events": 631,
+      "ordered_actions": 598,
+      "programs": 71,
+      "resources": 476,
+      "groupings": 5,
+      "selected": [
+        {
+          "captured_event": 5265,
+          "original_event": 1577,
+          "name": "Dispatch",
+          "shaders": [
+            {
+              "stage": "compute",
+              "captured_id": 81,
+              "original_id": 1016,
+              "sha256": "5c65778a398b19407968c283cc2f3bc299faf63b49dd9bf79b0589d2ddf63d3f",
+              "disassembly_sha256": "bf3245f3ad1b77702d12acec82983bd574dc802ef081c93e9e8d063bbe48054f"
+            }
+          ],
+          "resources": 4,
+          "graphics_state_groups": 0
+        },
+        {
+          "captured_event": 4982,
+          "original_event": 1431,
+          "name": "DrawIndexed",
+          "shaders": [
+            {
+              "stage": "vertex",
+              "captured_id": 862,
+              "original_id": 1756,
+              "sha256": "6cc3d926b5f1a5f8af332ff7327bb856b4687b9c9801af363b230f880b5d1387",
+              "disassembly_sha256": "0f442d9ebeb63a970f90aa68cd5923dac77145245c2098eef4a5cb7f40f8d8ec"
+            },
+            {
+              "stage": "pixel",
+              "captured_id": 863,
+              "original_id": 1757,
+              "sha256": "57711ec60ddadf5c6df36dfdeaeffbc6be002db77030137981cf2d3806832a80",
+              "disassembly_sha256": "6e6c7bf85e5bb13d2a7c7e37c1063beb15b22a1981470ff1117a5dcb758a7662"
+            }
+          ],
+          "resources": 18,
+          "graphics_state_groups": 15
+        },
+        {
+          "captured_event": 6295,
+          "original_event": 2032,
+          "name": "DrawIndexed",
+          "shaders": [
+            {
+              "stage": "vertex",
+              "captured_id": 38,
+              "original_id": 969,
+              "sha256": "6b3ed052e7846fc4ba2bb450c0fa6466ea69567965217ed8c9bb3505ca151ce6",
+              "disassembly_sha256": "2d3eb319e077366be482fb2ac2980ea40ba450b2bc8bb897c2dc9aa83ec64e1a"
+            },
+            {
+              "stage": "pixel",
+              "captured_id": 39,
+              "original_id": 970,
+              "sha256": "bc4aee2598ed82ed1d584dc8b5b26aacc9628827f25fe707893bb2978af09e23",
+              "disassembly_sha256": "4a9cc823411b8bd0f3e19a918e5a9bec50df13735a1b79440d47667e27622efa"
+            }
+          ],
+          "resources": 4,
+          "graphics_state_groups": 15
+        }
+      ]
+    },
+    {
+      "launch": 2,
+      "index": 2,
+      "events": 638,
+      "ordered_actions": 605,
+      "programs": 72,
+      "resources": 476,
+      "groupings": 5,
+      "selected": [
+        {
+          "captured_event": 5333,
+          "original_event": 1608,
+          "name": "Dispatch",
+          "shaders": [
+            {
+              "stage": "compute",
+              "captured_id": 81,
+              "original_id": 1018,
+              "sha256": "5c65778a398b19407968c283cc2f3bc299faf63b49dd9bf79b0589d2ddf63d3f",
+              "disassembly_sha256": "bf3245f3ad1b77702d12acec82983bd574dc802ef081c93e9e8d063bbe48054f"
+            }
+          ],
+          "resources": 4,
+          "graphics_state_groups": 0
+        },
+        {
+          "captured_event": 5050,
+          "original_event": 1462,
+          "name": "DrawIndexed",
+          "shaders": [
+            {
+              "stage": "vertex",
+              "captured_id": 864,
+              "original_id": 1760,
+              "sha256": "6cc3d926b5f1a5f8af332ff7327bb856b4687b9c9801af363b230f880b5d1387",
+              "disassembly_sha256": "0f442d9ebeb63a970f90aa68cd5923dac77145245c2098eef4a5cb7f40f8d8ec"
+            },
+            {
+              "stage": "pixel",
+              "captured_id": 865,
+              "original_id": 1761,
+              "sha256": "57711ec60ddadf5c6df36dfdeaeffbc6be002db77030137981cf2d3806832a80",
+              "disassembly_sha256": "6e6c7bf85e5bb13d2a7c7e37c1063beb15b22a1981470ff1117a5dcb758a7662"
+            }
+          ],
+          "resources": 18,
+          "graphics_state_groups": 15
+        },
+        {
+          "captured_event": 6363,
+          "original_event": 2063,
+          "name": "DrawIndexed",
+          "shaders": [
+            {
+              "stage": "vertex",
+              "captured_id": 38,
+              "original_id": 971,
+              "sha256": "6b3ed052e7846fc4ba2bb450c0fa6466ea69567965217ed8c9bb3505ca151ce6",
+              "disassembly_sha256": "2d3eb319e077366be482fb2ac2980ea40ba450b2bc8bb897c2dc9aa83ec64e1a"
+            },
+            {
+              "stage": "pixel",
+              "captured_id": 39,
+              "original_id": 972,
+              "sha256": "bc4aee2598ed82ed1d584dc8b5b26aacc9628827f25fe707893bb2978af09e23",
+              "disassembly_sha256": "4a9cc823411b8bd0f3e19a918e5a9bec50df13735a1b79440d47667e27622efa"
+            }
+          ],
+          "resources": 4,
+          "graphics_state_groups": 15
+        }
+      ]
+    }
+  ]
+}

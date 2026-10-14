@@ -4269,6 +4269,19 @@
       "current_runtime_failed_checks": 3,
       "current_gate_passed": false,
       "limits": "Read-only audit of saved outputs, not new GPU execution. Two known pixel mismatches persist; newer runtime identity differs. Original GPA detail input times out and manual response is pending. Detailed per-file inspection and current-runtime formal acceptance remain incomplete."
+    },
+    "gf2_original_plugin_inspection": {
+      "evidence": "docs/CAPTURE_GF2_PLUGIN_INSPECTION.md",
+      "baseline": "docs/capture-gf2-plugin-inspection-baseline.json",
+      "official_export_processes_completed": 6,
+      "ordered_actions_matched": 2881,
+      "selected_events": 16,
+      "shader_disassemblies_exact": 28,
+      "resource_binding_metadata_checks": 144,
+      "graphics_state_groups_exact": 180,
+      "cpu_tests_passed": 8,
+      "current_gate_passed": false,
+      "limits": "Original GPA Plugin API details now verified for all six retained files; manual GUI input is not verified. Default shader disassembly is not raw bytecode identity, resource metadata checks are not new readbacks. Prior pixel mismatches and newer runtime identity remain unresolved; no new captured files or formal acceptance."
     }
   }
 }
