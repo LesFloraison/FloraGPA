@@ -4637,6 +4637,22 @@
       "current_gate_passed": false,
       "production_fix": false,
       "limits": "All three observed GPU-completion controls retain lower original/higher restored planes. Selected-color and all-output round trips produce higher originals in seven processes; depth-only controls remain lower. One of thirteen no-round-trip originals is also higher. Initial round-trip resource bytes are not independently compared in these processes, so no cause or production fix is established. Formal acceptance remains failed."
+    },
+    "gf2_initial_color_audit": {
+      "evidence": "docs/CAPTURE_GF2_INITIAL_AUDIT.md",
+      "baseline": "docs/capture-gf2-initial-audit-baseline.json",
+      "processes": 12,
+      "initial_complete_draws": 12,
+      "restored_draws": 24,
+      "post_draw_observations": 36,
+      "audited_processes": 10,
+      "exact_initial_sample_pairs": 20,
+      "initial_plane_observations": 40,
+      "additional_post_draw_variants": 1,
+      "refusal_cases": 3,
+      "current_gate_passed": false,
+      "production_fix": false,
+      "limits": "Both complete selected-color initial samples match before/after restoration and the retained native fixture in ten processes. First Draw output still varies; one other-color control adds a third exact plane hash, reconstructed from all twelve reported differing bytes and verified against the runtime hash. This does not prove all other input bytes or internal GPU representations, and no production repair or formal acceptance is established."
     }
   }
 }

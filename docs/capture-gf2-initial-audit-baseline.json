@@ -1,0 +1,823 @@
+{
+  "schema": 1,
+  "date": "2026-10-14",
+  "source_parent_commit": "b4e70df3fcd0175c54a7531d0082c1c94ee9ff61",
+  "source_hashes": {
+    "tools/native/replay_draw_repeat_probe.cpp": "b31fbcee0a8743242a57adaf942f9ec8a77e5f63d8368b3619475ca4941f012f",
+    "src/replay/Msaa.cpp": "eafc0c6252478761b6378e83350085fd3822648fb18363a971ca53bba12fabd7",
+    "docs/CAPTURE_GF2_INITIAL_AUDIT.md": "22b38e3523e6d4a1b9e655e378ad5a05f8c2c8c3af804014c5c6bdb1f7030b7e",
+    "docs/INDEPENDENT_CAPTURE.md": "cbf911cfd94bcb328d2532c2baeee422760658840c8d1c30d221ecc6ebb7d3ab"
+  },
+  "summary": {
+    "schema": 1,
+    "current_gate_passed": false,
+    "production_fix": false,
+    "runs": [
+      {
+        "label": "audit-0-none",
+        "output": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-initial-audit-20261014\\audit-0-none",
+        "report_sha256": "6cc51b46267e9834ad49eabdf4d3bae0b6b5d08d60e08edabac677de2f4e43d8",
+        "restore_mode": "none",
+        "audit_initial": true,
+        "initial_plane_audit": [
+          {
+            "after_sha256": "a1ab425473351b59ba36f1d4b7a8a9b0c4cc3ca4d8a6dcf2375e4a54340ee6e1",
+            "before_sha256": "a1ab425473351b59ba36f1d4b7a8a9b0c4cc3ca4d8a6dcf2375e4a54340ee6e1",
+            "bytes": 53747712,
+            "different_bytes": 0,
+            "first_differences": [],
+            "sample": 0
+          },
+          {
+            "after_sha256": "4c38dcaea62b4c7d7bfc5ee198a7454e1eee3246be4da8cb89bb6227ed91c780",
+            "before_sha256": "4c38dcaea62b4c7d7bfc5ee198a7454e1eee3246be4da8cb89bb6227ed91c780",
+            "bytes": 53747712,
+            "different_bytes": 0,
+            "first_differences": [],
+            "sample": 1
+          }
+        ],
+        "deferred_readback": false,
+        "observations": [
+          {
+            "iteration": 0,
+            "sha256": "d9e2edda8025bbe17034e5c6000d8e06790476e1e061323836ab2b7b7f21f2aa",
+            "half_words": [
+              9109,
+              9233,
+              8865,
+              15151
+            ],
+            "different_bytes_vs_first": 0
+          },
+          {
+            "iteration": 1,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5",
+            "half_words": [
+              9127,
+              9247,
+              8891,
+              15143
+            ],
+            "different_bytes_vs_first": 4
+          },
+          {
+            "iteration": 2,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5",
+            "half_words": [
+              9127,
+              9247,
+              8891,
+              15143
+            ],
+            "different_bytes_vs_first": 4
+          }
+        ]
+      },
+      {
+        "label": "audit-1-selected",
+        "output": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-initial-audit-20261014\\audit-1-selected",
+        "report_sha256": "593aa2d9c7a052ce3a620a0b1c82a8f931b9d13820cb965b96f0e9fe91126338",
+        "restore_mode": "selected",
+        "audit_initial": true,
+        "initial_plane_audit": [
+          {
+            "after_sha256": "a1ab425473351b59ba36f1d4b7a8a9b0c4cc3ca4d8a6dcf2375e4a54340ee6e1",
+            "before_sha256": "a1ab425473351b59ba36f1d4b7a8a9b0c4cc3ca4d8a6dcf2375e4a54340ee6e1",
+            "bytes": 53747712,
+            "different_bytes": 0,
+            "first_differences": [],
+            "sample": 0
+          },
+          {
+            "after_sha256": "4c38dcaea62b4c7d7bfc5ee198a7454e1eee3246be4da8cb89bb6227ed91c780",
+            "before_sha256": "4c38dcaea62b4c7d7bfc5ee198a7454e1eee3246be4da8cb89bb6227ed91c780",
+            "bytes": 53747712,
+            "different_bytes": 0,
+            "first_differences": [],
+            "sample": 1
+          }
+        ],
+        "deferred_readback": false,
+        "observations": [
+          {
+            "iteration": 0,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5",
+            "half_words": [
+              9127,
+              9247,
+              8891,
+              15143
+            ],
+            "different_bytes_vs_first": 0
+          },
+          {
+            "iteration": 1,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5",
+            "half_words": [
+              9127,
+              9247,
+              8891,
+              15143
+            ],
+            "different_bytes_vs_first": 0
+          },
+          {
+            "iteration": 2,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5",
+            "half_words": [
+              9127,
+              9247,
+              8891,
+              15143
+            ],
+            "different_bytes_vs_first": 0
+          }
+        ]
+      },
+      {
+        "label": "audit-2-other-color",
+        "output": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-initial-audit-20261014\\audit-2-other-color",
+        "report_sha256": "8a436c8146475398c33f2824907987dabb2226d309dd54105a395af6b010bad6",
+        "restore_mode": "other-color",
+        "audit_initial": true,
+        "initial_plane_audit": [
+          {
+            "after_sha256": "a1ab425473351b59ba36f1d4b7a8a9b0c4cc3ca4d8a6dcf2375e4a54340ee6e1",
+            "before_sha256": "a1ab425473351b59ba36f1d4b7a8a9b0c4cc3ca4d8a6dcf2375e4a54340ee6e1",
+            "bytes": 53747712,
+            "different_bytes": 0,
+            "first_differences": [],
+            "sample": 0
+          },
+          {
+            "after_sha256": "4c38dcaea62b4c7d7bfc5ee198a7454e1eee3246be4da8cb89bb6227ed91c780",
+            "before_sha256": "4c38dcaea62b4c7d7bfc5ee198a7454e1eee3246be4da8cb89bb6227ed91c780",
+            "bytes": 53747712,
+            "different_bytes": 0,
+            "first_differences": [],
+            "sample": 1
+          }
+        ],
+        "deferred_readback": false,
+        "observations": [
+          {
+            "iteration": 0,
+            "sha256": "d5ac6de67dac7c0138b27c45694ef098b5929de1d28f09f7d9ef6aafc2486481",
+            "half_words": [
+              9109,
+              9233,
+              8865,
+              15151
+            ],
+            "different_bytes_vs_first": 0
+          },
+          {
+            "iteration": 1,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5",
+            "half_words": [
+              9127,
+              9247,
+              8891,
+              15143
+            ],
+            "different_bytes_vs_first": 12
+          },
+          {
+            "iteration": 2,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5",
+            "half_words": [
+              9127,
+              9247,
+              8891,
+              15143
+            ],
+            "different_bytes_vs_first": 12
+          }
+        ]
+      },
+      {
+        "label": "audit-3-depth",
+        "output": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-initial-audit-20261014\\audit-3-depth",
+        "report_sha256": "ce910f0b4d947e46305015f70fe556be774174e8001dba15bdabafd332fa8787",
+        "restore_mode": "depth",
+        "audit_initial": true,
+        "initial_plane_audit": [
+          {
+            "after_sha256": "a1ab425473351b59ba36f1d4b7a8a9b0c4cc3ca4d8a6dcf2375e4a54340ee6e1",
+            "before_sha256": "a1ab425473351b59ba36f1d4b7a8a9b0c4cc3ca4d8a6dcf2375e4a54340ee6e1",
+            "bytes": 53747712,
+            "different_bytes": 0,
+            "first_differences": [],
+            "sample": 0
+          },
+          {
+            "after_sha256": "4c38dcaea62b4c7d7bfc5ee198a7454e1eee3246be4da8cb89bb6227ed91c780",
+            "before_sha256": "4c38dcaea62b4c7d7bfc5ee198a7454e1eee3246be4da8cb89bb6227ed91c780",
+            "bytes": 53747712,
+            "different_bytes": 0,
+            "first_differences": [],
+            "sample": 1
+          }
+        ],
+        "deferred_readback": false,
+        "observations": [
+          {
+            "iteration": 0,
+            "sha256": "d9e2edda8025bbe17034e5c6000d8e06790476e1e061323836ab2b7b7f21f2aa",
+            "half_words": [
+              9109,
+              9233,
+              8865,
+              15151
+            ],
+            "different_bytes_vs_first": 0
+          },
+          {
+            "iteration": 1,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5",
+            "half_words": [
+              9127,
+              9247,
+              8891,
+              15143
+            ],
+            "different_bytes_vs_first": 4
+          },
+          {
+            "iteration": 2,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5",
+            "half_words": [
+              9127,
+              9247,
+              8891,
+              15143
+            ],
+            "different_bytes_vs_first": 4
+          }
+        ]
+      },
+      {
+        "label": "audit-4-depth",
+        "output": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-initial-audit-20261014\\audit-4-depth",
+        "report_sha256": "c7a805bf6155e5d9e92efad84c1a7fbc8073b1979c2dbde46c32ef900ecd4974",
+        "restore_mode": "depth",
+        "audit_initial": true,
+        "initial_plane_audit": [
+          {
+            "after_sha256": "a1ab425473351b59ba36f1d4b7a8a9b0c4cc3ca4d8a6dcf2375e4a54340ee6e1",
+            "before_sha256": "a1ab425473351b59ba36f1d4b7a8a9b0c4cc3ca4d8a6dcf2375e4a54340ee6e1",
+            "bytes": 53747712,
+            "different_bytes": 0,
+            "first_differences": [],
+            "sample": 0
+          },
+          {
+            "after_sha256": "4c38dcaea62b4c7d7bfc5ee198a7454e1eee3246be4da8cb89bb6227ed91c780",
+            "before_sha256": "4c38dcaea62b4c7d7bfc5ee198a7454e1eee3246be4da8cb89bb6227ed91c780",
+            "bytes": 53747712,
+            "different_bytes": 0,
+            "first_differences": [],
+            "sample": 1
+          }
+        ],
+        "deferred_readback": false,
+        "observations": [
+          {
+            "iteration": 0,
+            "sha256": "d9e2edda8025bbe17034e5c6000d8e06790476e1e061323836ab2b7b7f21f2aa",
+            "half_words": [
+              9109,
+              9233,
+              8865,
+              15151
+            ],
+            "different_bytes_vs_first": 0
+          },
+          {
+            "iteration": 1,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5",
+            "half_words": [
+              9127,
+              9247,
+              8891,
+              15143
+            ],
+            "different_bytes_vs_first": 4
+          },
+          {
+            "iteration": 2,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5",
+            "half_words": [
+              9127,
+              9247,
+              8891,
+              15143
+            ],
+            "different_bytes_vs_first": 4
+          }
+        ]
+      },
+      {
+        "label": "audit-5-other-color",
+        "output": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-initial-audit-20261014\\audit-5-other-color",
+        "report_sha256": "2f14f99b5ff19947efa6b471653cd677a7b1c59d623107902caa2f4a1adbf159",
+        "restore_mode": "other-color",
+        "audit_initial": true,
+        "initial_plane_audit": [
+          {
+            "after_sha256": "a1ab425473351b59ba36f1d4b7a8a9b0c4cc3ca4d8a6dcf2375e4a54340ee6e1",
+            "before_sha256": "a1ab425473351b59ba36f1d4b7a8a9b0c4cc3ca4d8a6dcf2375e4a54340ee6e1",
+            "bytes": 53747712,
+            "different_bytes": 0,
+            "first_differences": [],
+            "sample": 0
+          },
+          {
+            "after_sha256": "4c38dcaea62b4c7d7bfc5ee198a7454e1eee3246be4da8cb89bb6227ed91c780",
+            "before_sha256": "4c38dcaea62b4c7d7bfc5ee198a7454e1eee3246be4da8cb89bb6227ed91c780",
+            "bytes": 53747712,
+            "different_bytes": 0,
+            "first_differences": [],
+            "sample": 1
+          }
+        ],
+        "deferred_readback": false,
+        "observations": [
+          {
+            "iteration": 0,
+            "sha256": "d9e2edda8025bbe17034e5c6000d8e06790476e1e061323836ab2b7b7f21f2aa",
+            "half_words": [
+              9109,
+              9233,
+              8865,
+              15151
+            ],
+            "different_bytes_vs_first": 0
+          },
+          {
+            "iteration": 1,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5",
+            "half_words": [
+              9127,
+              9247,
+              8891,
+              15143
+            ],
+            "different_bytes_vs_first": 4
+          },
+          {
+            "iteration": 2,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5",
+            "half_words": [
+              9127,
+              9247,
+              8891,
+              15143
+            ],
+            "different_bytes_vs_first": 4
+          }
+        ]
+      },
+      {
+        "label": "audit-6-selected",
+        "output": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-initial-audit-20261014\\audit-6-selected",
+        "report_sha256": "6cb8a42a44966903d260ce4ed4c1ce304840d276fad11246ad751562e998fb61",
+        "restore_mode": "selected",
+        "audit_initial": true,
+        "initial_plane_audit": [
+          {
+            "after_sha256": "a1ab425473351b59ba36f1d4b7a8a9b0c4cc3ca4d8a6dcf2375e4a54340ee6e1",
+            "before_sha256": "a1ab425473351b59ba36f1d4b7a8a9b0c4cc3ca4d8a6dcf2375e4a54340ee6e1",
+            "bytes": 53747712,
+            "different_bytes": 0,
+            "first_differences": [],
+            "sample": 0
+          },
+          {
+            "after_sha256": "4c38dcaea62b4c7d7bfc5ee198a7454e1eee3246be4da8cb89bb6227ed91c780",
+            "before_sha256": "4c38dcaea62b4c7d7bfc5ee198a7454e1eee3246be4da8cb89bb6227ed91c780",
+            "bytes": 53747712,
+            "different_bytes": 0,
+            "first_differences": [],
+            "sample": 1
+          }
+        ],
+        "deferred_readback": false,
+        "observations": [
+          {
+            "iteration": 0,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5",
+            "half_words": [
+              9127,
+              9247,
+              8891,
+              15143
+            ],
+            "different_bytes_vs_first": 0
+          },
+          {
+            "iteration": 1,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5",
+            "half_words": [
+              9127,
+              9247,
+              8891,
+              15143
+            ],
+            "different_bytes_vs_first": 0
+          },
+          {
+            "iteration": 2,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5",
+            "half_words": [
+              9127,
+              9247,
+              8891,
+              15143
+            ],
+            "different_bytes_vs_first": 0
+          }
+        ]
+      },
+      {
+        "label": "audit-7-none",
+        "output": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-initial-audit-20261014\\audit-7-none",
+        "report_sha256": "4413085b313e6c68ec0a0d123a8dee6c3356e77ad82a6e4c19f100c0f21010dc",
+        "restore_mode": "none",
+        "audit_initial": true,
+        "initial_plane_audit": [
+          {
+            "after_sha256": "a1ab425473351b59ba36f1d4b7a8a9b0c4cc3ca4d8a6dcf2375e4a54340ee6e1",
+            "before_sha256": "a1ab425473351b59ba36f1d4b7a8a9b0c4cc3ca4d8a6dcf2375e4a54340ee6e1",
+            "bytes": 53747712,
+            "different_bytes": 0,
+            "first_differences": [],
+            "sample": 0
+          },
+          {
+            "after_sha256": "4c38dcaea62b4c7d7bfc5ee198a7454e1eee3246be4da8cb89bb6227ed91c780",
+            "before_sha256": "4c38dcaea62b4c7d7bfc5ee198a7454e1eee3246be4da8cb89bb6227ed91c780",
+            "bytes": 53747712,
+            "different_bytes": 0,
+            "first_differences": [],
+            "sample": 1
+          }
+        ],
+        "deferred_readback": false,
+        "observations": [
+          {
+            "iteration": 0,
+            "sha256": "d9e2edda8025bbe17034e5c6000d8e06790476e1e061323836ab2b7b7f21f2aa",
+            "half_words": [
+              9109,
+              9233,
+              8865,
+              15151
+            ],
+            "different_bytes_vs_first": 0
+          },
+          {
+            "iteration": 1,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5",
+            "half_words": [
+              9127,
+              9247,
+              8891,
+              15143
+            ],
+            "different_bytes_vs_first": 4
+          },
+          {
+            "iteration": 2,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5",
+            "half_words": [
+              9127,
+              9247,
+              8891,
+              15143
+            ],
+            "different_bytes_vs_first": 4
+          }
+        ]
+      },
+      {
+        "label": "raw-selected",
+        "output": "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\capture-gf2-initial-audit-raw-20261014",
+        "report_sha256": "2330462ec84b02dc574387ff5c00fb7244a16b18ae0285f00fa6e6a8cf12ae2b",
+        "restore_mode": "selected",
+        "audit_initial": true,
+        "initial_plane_audit": [
+          {
+            "after_sha256": "a1ab425473351b59ba36f1d4b7a8a9b0c4cc3ca4d8a6dcf2375e4a54340ee6e1",
+            "before_sha256": "a1ab425473351b59ba36f1d4b7a8a9b0c4cc3ca4d8a6dcf2375e4a54340ee6e1",
+            "bytes": 53747712,
+            "different_bytes": 0,
+            "first_differences": [],
+            "sample": 0
+          },
+          {
+            "after_sha256": "4c38dcaea62b4c7d7bfc5ee198a7454e1eee3246be4da8cb89bb6227ed91c780",
+            "before_sha256": "4c38dcaea62b4c7d7bfc5ee198a7454e1eee3246be4da8cb89bb6227ed91c780",
+            "bytes": 53747712,
+            "different_bytes": 0,
+            "first_differences": [],
+            "sample": 1
+          }
+        ],
+        "deferred_readback": false,
+        "observations": [
+          {
+            "iteration": 0,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5",
+            "half_words": [
+              9127,
+              9247,
+              8891,
+              15143
+            ],
+            "different_bytes_vs_first": 0
+          },
+          {
+            "iteration": 1,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5",
+            "half_words": [
+              9127,
+              9247,
+              8891,
+              15143
+            ],
+            "different_bytes_vs_first": 0
+          },
+          {
+            "iteration": 2,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5",
+            "half_words": [
+              9127,
+              9247,
+              8891,
+              15143
+            ],
+            "different_bytes_vs_first": 0
+          }
+        ]
+      },
+      {
+        "label": "other-color-plain",
+        "output": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-initial-audit-20261014\\other-color-plain",
+        "report_sha256": "395450f0b789c1031e3b1bc6031a83e2246c3846124843ee15a4496a82f94924",
+        "restore_mode": "other-color",
+        "audit_initial": false,
+        "initial_plane_audit": [],
+        "deferred_readback": false,
+        "observations": [
+          {
+            "iteration": 0,
+            "sha256": "d9e2edda8025bbe17034e5c6000d8e06790476e1e061323836ab2b7b7f21f2aa",
+            "half_words": [
+              9109,
+              9233,
+              8865,
+              15151
+            ],
+            "different_bytes_vs_first": 0
+          },
+          {
+            "iteration": 1,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5",
+            "half_words": [
+              9127,
+              9247,
+              8891,
+              15143
+            ],
+            "different_bytes_vs_first": 4
+          },
+          {
+            "iteration": 2,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5",
+            "half_words": [
+              9127,
+              9247,
+              8891,
+              15143
+            ],
+            "different_bytes_vs_first": 4
+          }
+        ]
+      },
+      {
+        "label": "deferred-selected",
+        "output": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-initial-audit-20261014\\deferred-selected",
+        "report_sha256": "7e5ac292ce1cfea6052f3c4bb61a5af2a3ae5d6b265d6b99cf597bd192860d79",
+        "restore_mode": "selected",
+        "audit_initial": true,
+        "initial_plane_audit": [
+          {
+            "after_sha256": "a1ab425473351b59ba36f1d4b7a8a9b0c4cc3ca4d8a6dcf2375e4a54340ee6e1",
+            "before_sha256": "a1ab425473351b59ba36f1d4b7a8a9b0c4cc3ca4d8a6dcf2375e4a54340ee6e1",
+            "bytes": 53747712,
+            "different_bytes": 0,
+            "first_differences": [],
+            "sample": 0
+          },
+          {
+            "after_sha256": "4c38dcaea62b4c7d7bfc5ee198a7454e1eee3246be4da8cb89bb6227ed91c780",
+            "before_sha256": "4c38dcaea62b4c7d7bfc5ee198a7454e1eee3246be4da8cb89bb6227ed91c780",
+            "bytes": 53747712,
+            "different_bytes": 0,
+            "first_differences": [],
+            "sample": 1
+          }
+        ],
+        "deferred_readback": true,
+        "observations": [
+          {
+            "iteration": 0,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5",
+            "half_words": [
+              9127,
+              9247,
+              8891,
+              15143
+            ],
+            "different_bytes_vs_first": 0
+          },
+          {
+            "iteration": 1,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5",
+            "half_words": [
+              9127,
+              9247,
+              8891,
+              15143
+            ],
+            "different_bytes_vs_first": 0
+          },
+          {
+            "iteration": 2,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5",
+            "half_words": [
+              9127,
+              9247,
+              8891,
+              15143
+            ],
+            "different_bytes_vs_first": 0
+          }
+        ]
+      },
+      {
+        "label": "default-summary",
+        "output": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-initial-audit-20261014\\default-summary",
+        "report_sha256": "0a82f3ccaf661ef174f5e920d888b38057dbecc1eaaa5fe41bbca91f6d1ea75f",
+        "restore_mode": "none",
+        "audit_initial": false,
+        "initial_plane_audit": [],
+        "deferred_readback": false,
+        "observations": [
+          {
+            "iteration": 0,
+            "sha256": "d9e2edda8025bbe17034e5c6000d8e06790476e1e061323836ab2b7b7f21f2aa",
+            "half_words": [
+              9109,
+              9233,
+              8865,
+              15151
+            ],
+            "different_bytes_vs_first": 0
+          },
+          {
+            "iteration": 1,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5",
+            "half_words": [
+              9127,
+              9247,
+              8891,
+              15143
+            ],
+            "different_bytes_vs_first": 4
+          },
+          {
+            "iteration": 2,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5",
+            "half_words": [
+              9127,
+              9247,
+              8891,
+              15143
+            ],
+            "different_bytes_vs_first": 4
+          }
+        ]
+      }
+    ],
+    "processes": 12,
+    "post_draw_observations": 36,
+    "audited_processes": 10,
+    "initial_plane_pairs": 20,
+    "initial_plane_observations": 40,
+    "refusal_cases": 3,
+    "initial_reference_planes": [
+      {
+        "bytes": 53747712,
+        "file": "411-s0.bin",
+        "sha256": "a1ab425473351b59ba36f1d4b7a8a9b0c4cc3ca4d8a6dcf2375e4a54340ee6e1"
+      },
+      {
+        "bytes": 53747712,
+        "file": "411-s1.bin",
+        "sha256": "4c38dcaea62b4c7d7bfc5ee198a7454e1eee3246be4da8cb89bb6227ed91c780"
+      }
+    ],
+    "variant_reconstruction": {
+      "schema": 1,
+      "derived_not_direct_readback": true,
+      "source": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-prefix-triangle-20261014\\final-full\\39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5.bin",
+      "source_sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5",
+      "report": "audit-2-other-color/report.json",
+      "sha256": "d5ac6de67dac7c0138b27c45694ef098b5929de1d28f09f7d9ef6aafc2486481",
+      "bytes": 53747712,
+      "different_bytes": 12,
+      "pixels": [
+        {
+          "x": 1596,
+          "y": 1519,
+          "first_half_words": [
+            9109,
+            9233,
+            8865,
+            15151
+          ],
+          "restored_half_words": [
+            9127,
+            9247,
+            8891,
+            15143
+          ]
+        },
+        {
+          "x": 1597,
+          "y": 1521,
+          "first_half_words": [
+            9428,
+            9476,
+            9295,
+            15129
+          ],
+          "restored_half_words": [
+            9413,
+            9457,
+            9281,
+            15128
+          ]
+        },
+        {
+          "x": 1598,
+          "y": 1523,
+          "first_half_words": [
+            9572,
+            9621,
+            9441,
+            15111
+          ],
+          "restored_half_words": [
+            9541,
+            9580,
+            9404,
+            15111
+          ]
+        }
+      ],
+      "acceptance_established": false
+    },
+    "probe_sha256": "41aa138529fb07a98def7322781f34260d5176b8ae9843856c49568cbf50d888",
+    "allocation_saved": 82763776
+  },
+  "validation": {
+    "build_passed": true,
+    "boundary_ctest_passed": true,
+    "refusals": 3,
+    "scoped_debug_messages": 0,
+    "prefix_debug_messages_per_run": 608,
+    "all_gpu_work_serial": true,
+    "production_source_changed": false,
+    "initial_snapshot_bytes_equal": true,
+    "direct_raw_control_planes_exact": true,
+    "variant_derived_not_direct_readback": true,
+    "variant_reconstruction_hash_verified": true
+  },
+  "raw": [
+    {
+      "root": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-initial-audit-20261014",
+      "files": 42,
+      "manifest_sha256": "6c044cc4f57aba10cbc87ce3f214777cb8179ae95a02dffe5557996ff1cc96d0"
+    },
+    {
+      "root": "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\capture-gf2-initial-audit-raw-20261014",
+      "files": 4,
+      "manifest_sha256": "4122e7ec92afe2bb80220180113703f1cd15f26d515d0e443f8311f72c485606"
+    }
+  ],
+  "replay_sha256": "215ebafed657953f0671c32a0948e12c8c965437a3eaa33e6d38aedcff5e2ddc"
+}

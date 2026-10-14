@@ -38,7 +38,7 @@ int wmain(int argc, wchar_t **argv) {
                      "[--indices FIRST COUNT] [--defer-readback] "
                      "[--initial-delay-ms 0..1000] [--summary-only] "
                      "[--initial-submit none|flush|event|wait] "
-                     "[--initial-restore none|selected|depth|all]\n";
+                     "[--initial-restore none|selected|other-color|depth|all] [--audit-initial]\n";
         return 2;
     }
     fs::path output;
@@ -50,6 +50,7 @@ int wmain(int argc, wchar_t **argv) {
         const auto id = number(argv[3]), resource = number(argv[4]), sample = number(argv[5]),
                    vendor = number(argv[6]), repeats = number(argv[7]);
         bool debugDevice = false, deferReadback = false, summaryOnly = false;
+        bool auditInitial = false;
         bool submitSpecified = false;
         std::string initialSubmit = "none";
         bool restoreSpecified = false;
@@ -64,6 +65,8 @@ int wmain(int argc, wchar_t **argv) {
                 deferReadback = true;
             else if (option == L"--summary-only" && !summaryOnly)
                 summaryOnly = true;
+            else if (option == L"--audit-initial" && !auditInitial)
+                auditInitial = true;
             else if (option == L"--initial-delay-ms" && !initialDelay && i + 1 < argc) {
                 initialDelay = number(argv[++i]);
                 if (*initialDelay > 1000)
@@ -78,9 +81,11 @@ int wmain(int argc, wchar_t **argv) {
             } else if (option == L"--initial-restore" && !restoreSpecified && i + 1 < argc) {
                 restoreSpecified = true;
                 const std::wstring mode(argv[++i]);
-                if (mode != L"none" && mode != L"selected" && mode != L"depth" && mode != L"all")
-                    throw std::invalid_argument("Initial restore must be none, selected, depth or all");
+                if (mode != L"none" && mode != L"selected" && mode != L"other-color" &&
+                    mode != L"depth" && mode != L"all")
+                    throw std::invalid_argument("Initial restore must be none, selected, other-color, depth or all");
                 initialRestore = mode == L"none" ? "none" : mode == L"selected" ? "selected"
+                                                         : mode == L"other-color" ? "other-color"
                                                          : mode == L"depth" ? "depth" : "all";
             } else if (option == L"--indices" && !range && i + 2 < argc) {
                 range = {number(argv[i + 1]), number(argv[i + 2])};
@@ -175,6 +180,7 @@ int wmain(int argc, wchar_t **argv) {
                        {"initial_delay_requested_ms", initialDelay.value_or(0)},
                        {"initial_restore_mode", initialRestore},
                        {"initial_restored_outputs", 0},
+                       {"audit_initial", auditInitial},
                        {"initial_submission", {{"mode", initialSubmit},
                                                 {"event_created", bool(initialEvent)},
                                                 {"explicit_flush", false},
@@ -192,6 +198,7 @@ int wmain(int argc, wchar_t **argv) {
         Com<ID3D11DepthStencilView> depth;
         std::vector<Checkpoint> checkpoints;
         Com<ID3D11Texture2D> selectedTarget;
+        Com<ID3D11Texture2D> initialBefore, initialAfter;
         std::vector<Com<ID3D11Texture2D>> pending;
         bool observed = false;
         std::vector<uint8_t> first;
@@ -237,6 +244,7 @@ int wmain(int argc, wchar_t **argv) {
                                                     {"samples", item.desc.SampleDesc.Count}});
                     if (item.source.Get() == target.Get()) {
                         found = true;
+                        initialBefore = item.copy;
                         if (item.desc.Format != DXGI_FORMAT_R16G16B16A16_TYPELESS ||
                             item.desc.SampleDesc.Count <= sample || item.desc.SampleDesc.Count <= 1)
                             throw std::runtime_error("Expected selected half-float MSAA output sample");
@@ -244,6 +252,21 @@ int wmain(int argc, wchar_t **argv) {
                 }
                 if (!found)
                     throw std::runtime_error("Selected target is not a bound output");
+                if (deferReadback || auditInitial) {
+                    D3D11_TEXTURE2D_DESC desc{};
+                    target->GetDesc(&desc);
+                    const auto textureBytes = uint64_t(desc.Width) * desc.Height * desc.SampleDesc.Count * 8;
+                    const auto extraTextures = (deferReadback ? repeats + 1 : 0) +
+                                              (auditInitial ? (deferReadback ? 1 : 2) : 0);
+                    if (desc.ArraySize != 1 || desc.MipLevels != 1 ||
+                        textureBytes * extraTextures > (uint64_t(512) << 20))
+                        throw std::runtime_error("Supplemental snapshots exceed single-layer/512 MiB budget");
+                    report["supplemental_snapshot_bytes"] = textureBytes * extraTextures;
+                    selectedTarget = target;
+                    if (auditInitial)
+                        check(replay.nativeDevice()->CreateTexture2D(&desc, nullptr, &initialAfter),
+                              "Create initial post-restore snapshot");
+                }
                 if (deferReadback) {
                     D3D11_TEXTURE2D_DESC desc{};
                     target->GetDesc(&desc);
@@ -265,6 +288,8 @@ int wmain(int argc, wchar_t **argv) {
                 for (const auto &item : checkpoints) {
                     if (initialRestore == "all" ||
                         (initialRestore == "selected" && item.source.Get() == target.Get()) ||
+                        (initialRestore == "other-color" && item.source.Get() != target.Get() &&
+                         (item.desc.BindFlags & D3D11_BIND_RENDER_TARGET)) ||
                         (initialRestore == "depth" && (item.desc.BindFlags & D3D11_BIND_DEPTH_STENCIL))) {
                         context->CopyResource(item.source.Get(), item.copy.Get());
                         ++initialRestored;
@@ -273,6 +298,8 @@ int wmain(int argc, wchar_t **argv) {
                 report["initial_restored_outputs"] = initialRestored;
                 if (initialRestore != "none" && !initialRestored)
                     throw std::runtime_error("Initial restore did not select a bound output");
+                if (auditInitial)
+                    context->CopyResource(initialAfter.Get(), target.Get());
                 context->OMSetRenderTargets(UINT(views.size()), views.data(), depth.Get());
                 auto &submission = report["initial_submission"];
                 const auto submitStart = std::chrono::steady_clock::now();
@@ -379,6 +406,68 @@ int wmain(int argc, wchar_t **argv) {
                     context->OMSetRenderTargets(UINT(views.size()), views.data(), depth.Get());
                     record(iteration);
                 }
+            }
+            if (auditInitial) {
+                // All observed Draws have finished. Retain their last output while sampling the
+                // two initial snapshots; never run the sample reader before the original Draw.
+                Com<ID3D11Texture2D> finalOutput;
+                if (deferReadback) {
+                    finalOutput = pending.back();
+                } else {
+                    D3D11_TEXTURE2D_DESC desc{};
+                    selectedTarget->GetDesc(&desc);
+                    check(replay.nativeDevice()->CreateTexture2D(&desc, nullptr, &finalOutput),
+                          "Create final output preservation snapshot");
+                    context->OMSetRenderTargets(0, nullptr, nullptr);
+                    context->CopyResource(finalOutput.Get(), selectedTarget.Get());
+                    context->OMSetRenderTargets(UINT(views.size()), views.data(), depth.Get());
+                }
+                const auto restore = [&](ID3D11Texture2D *snapshot) {
+                    context->OMSetRenderTargets(0, nullptr, nullptr);
+                    context->CopyResource(selectedTarget.Get(), snapshot);
+                    context->OMSetRenderTargets(UINT(views.size()), views.data(), depth.Get());
+                };
+                D3D11_TEXTURE2D_DESC desc{};
+                selectedTarget->GetDesc(&desc);
+                report["initial_plane_audit"] = Json::array();
+                for (UINT selectedSample = 0; selectedSample < desc.SampleDesc.Count; ++selectedSample) {
+                    restore(initialBefore.Get());
+                    const auto before = replay.readMsaa(resource, selectedSample, DXGI_FORMAT_R16G16B16A16_FLOAT).bytes;
+                    restore(initialAfter.Get());
+                    const auto after = replay.readMsaa(resource, selectedSample, DXGI_FORMAT_R16G16B16A16_FLOAT).bytes;
+                    if (before.size() != after.size() || before.size() != uint64_t(desc.Width) * desc.Height * 8)
+                        throw std::runtime_error("Initial snapshot plane size changed");
+                    size_t differences = 0;
+                    Json firstDifferences = Json::array();
+                    for (size_t i = 0; i < before.size(); ++i)
+                        if (before[i] != after[i]) {
+                            ++differences;
+                            if (firstDifferences.size() < 16)
+                                firstDifferences.push_back({{"offset", i}, {"before", before[i]}, {"after", after[i]}});
+                        }
+                    const auto beforeHash = sha256(before), afterHash = sha256(after);
+                    if (!summaryOnly)
+                        for (const auto *bytes : {&before, &after}) {
+                            const auto file = output / (sha256(*bytes) + ".bin");
+                            if (!fs::exists(file)) {
+                                std::ofstream stream(file, std::ios::binary);
+                                stream.exceptions(std::ios::badbit | std::ios::failbit);
+                                stream.write(reinterpret_cast<const char *>(bytes->data()), bytes->size());
+                                stream.close();
+                            }
+                        }
+                    report["initial_plane_audit"].push_back({{"sample", selectedSample}, {"bytes", before.size()},
+                        {"before_sha256", beforeHash}, {"after_sha256", afterHash},
+                        {"different_bytes", differences}, {"first_differences", firstDifferences}});
+                }
+                restore(finalOutput.Get());
+                const auto preserved = replay.readMsaa(resource, UINT(sample), DXGI_FORMAT_R16G16B16A16_FLOAT).bytes;
+                report["audit_final_plane_sha256"] = sha256(preserved);
+                if (report["audit_final_plane_sha256"] != report["runs"].back()["sha256"])
+                    throw std::runtime_error("Initial audit changed the final observed sample plane");
+                report["initial_audit_debug_messages"] = collectDiagnostics();
+                if (diagnostic::pipelineCheckpoint(context, objects) != report["native_pipeline"])
+                    throw std::runtime_error("Initial audit changed native pipeline bindings");
             }
             observed = true;
         });

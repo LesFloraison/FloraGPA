@@ -16,6 +16,9 @@ Draw's plane in one delayed process but does not reliably remove the discrepancy
 [GPU-completion and output-copy controls](CAPTURE_GF2_OUTPUT_ROUNDTRIP.md) retain
 the discrepancy after observed completion, while selected-color round trips
 correlate with the higher original plane; the cause remains unproven.
+The [initial color audit](CAPTURE_GF2_INITIAL_AUDIT.md) finds both complete MSAA
+samples unchanged across those copies, while retaining a third output variant
+from an other-color restoration control.
 
 GPU-generated indirect Draw/Dispatch arguments now remain native indirect records,
 with immediate/deferred/nested execution and byte-exact controls documented in
