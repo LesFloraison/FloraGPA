@@ -57,7 +57,7 @@ void faults(bool hardware){Fixture f(hardware);const float red[]{1,0,0,1};f.c->C
     RecordingOptions budget;budget.byte_limit=1;rejects("byte limit",budget);budget={};budget.command_limit=0;rejects("command limit",budget);
     auto broken=std::make_shared<DeferredCommandList>(*source);broken->definitions.erase(id(f.texture.Get()));object_record(list.Get())->command_list=broken;rejects("definition missing");object_record(list.Get())->command_list=source;
     broken=std::make_shared<DeferredCommandList>(*source);broken->calls.back().kind=CommandKind::map;object_record(list.Get())->command_list=broken;rejects("Map rename");object_record(list.Get())->command_list=source;
-    f.c->ExecuteCommandList(list.Get(),FALSE);auto nested=f.finish();auto record=begin_recording(f.immediate.Get());f.immediate->ExecuteCommandList(nested.Get(),FALSE);auto refused=record->finish();require(refused.failed,"Nested list was silently accepted");
+    f.c->ExecuteCommandList(list.Get(),FALSE);auto nested=f.finish();auto record=begin_recording(f.immediate.Get());f.immediate->ExecuteCommandList(nested.Get(),FALSE);auto merged=record->finish();merged.require_complete();require(merged.commands.size()==1&&merged.commands[0].merged_origins.size()==1,"Merged Clear provenance missing");
     record=begin_recording(f.immediate.Get());record->cancel();f.immediate->ExecuteCommandList(list.Get(),FALSE);require(record->finish().cancelled,"Deferred cancellation result lost");
     record=begin_recording(f.immediate.Get());std::thread worker([&]{f.immediate->ExecuteCommandList(list.Get(),FALSE);});worker.join();require(record->finish().failed,"Foreign immediate execution silently accepted");
     // The shared lease can safely outlive its source list during readback, and

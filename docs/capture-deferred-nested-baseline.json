@@ -1,0 +1,81 @@
+{
+  "schema": "FloraGPA merged deferred command lists 1",
+  "date": "2026-10-14",
+  "parent_commit": "29a6aee1a27a3278f10a39e7294e9ae7b89285d8",
+  "scope": "Two-level A/B/A and B/A/B merges with source wrapper destruction, Map renames and per-frame worker merging",
+  "capture_ctest": {
+    "passed": 129,
+    "total": 129
+  },
+  "full_focused_ctest": {
+    "passed": 31,
+    "total": 31
+  },
+  "final_provenance_ctest": {
+    "passed": 2,
+    "total": 2
+  },
+  "malformed_model_checks": 36,
+  "limits": {
+    "nesting_edges": 16,
+    "visited_calls_per_expansion": 4096,
+    "journal_bytes": 67108864,
+    "resource_leases": 8192
+  },
+  "dual_player": {
+    "files": 8,
+    "checks": 132,
+    "default_original_adapter": true,
+    "new_original_gui": false
+  },
+  "packaged_injection": {
+    "launches": 1,
+    "frames": 5,
+    "checks": 33,
+    "mode": 30,
+    "system_only_child_path": true,
+    "runtime_sha256": "0fa287e33b8fd397657197c8a304f62d784a6e7cc2316d0dac9ed5118c294bdc",
+    "target_continues_after_disconnect": true
+  },
+  "previous_runtime_control": {
+    "runtime_sha256": "f08a968fc28982707d0166cbab3fa29f89314d3a414f1db383257312e5d7bdaa",
+    "frames": 0,
+    "failure": "ID3D11DeviceContext::ExecuteCommandList: Deferred compilation gap: ID3D11DeviceContext::ExecuteCommandList: Deferred state, mapping, query or command arguments require further tracking",
+    "target_exit_ok": true
+  },
+  "source_binaries": {
+    "build/capture/capture/Release/FloraCaptureNestedDeferredTests.exe": "2169161410635d8ba0cc70d7b63c58aff754f066cf36af94c479a71cfdc06475",
+    "build/capture/capture/Release/FloraCaptureRuntime.dll": "0fa287e33b8fd397657197c8a304f62d784a6e7cc2316d0dac9ed5118c294bdc"
+  },
+  "final_frame_sha256": {
+    "dual-final/hardware/aba.gpa_frame": "df9044b8b916f858e473a207b6a4d7c5dd1e3fb23c24a8c7b562a87320330da8",
+    "dual-final/hardware/bab.gpa_frame": "bfb440439c255c543ea32f2d7d398287eb1bd90670543342461b030f1209e3f7",
+    "dual-final/hardware/missing-discard.gpa_frame": "fb34572bc65ecbee597f5757470688bd0947e614fbc9e3ed8fbce3128e49baba",
+    "dual-final/hardware/missing-draw.gpa_frame": "a83d1c946d3b8fb49d4409b77601bc104aba99f08c6a2a90ebe3d217c28d0b6f",
+    "dual-final/warp/aba.gpa_frame": "b3706523e0c2405b8953c45c521176c3a223726efa9d282328d5ffc58f7cc9c6",
+    "dual-final/warp/bab.gpa_frame": "ea860b9f65505a479bd130a3eca0785974052b8e32399d879298c4c9afdff3c1",
+    "dual-final/warp/missing-discard.gpa_frame": "8df7c460187ee27502a0a6e319da329b73dbe2bcb73243eef4ad1917b896a5cc",
+    "dual-final/warp/missing-draw.gpa_frame": "7cb75efc6dea7c85ed5db3a4e6e23458f0d279b99afded4607c267bc5cb374f5",
+    "injected/native/30/session/frame-0c25d8bb-c2ac-4e83-aa8d-5c1b2d9a00be.gpa_frame": "067378f78edc348acce84a42c5becb03f0128f3ce8cf6460f73660eaaf709a25",
+    "injected/native/30/session/frame-76130e76-5a21-48fa-ab95-095b44df958c.gpa_frame": "1c5bdc4a7e76df8965cd24839230fd4479fd366803daf6e9af9f173e059f68c7",
+    "injected/native/30/session/frame-c210ce22-1fc9-4e5f-9faa-139274099d9a.gpa_frame": "f4f5b0cf04dac07182d5cbd92ecde67d40be9f106cdaa167954bd07a1943868e",
+    "injected/native/30/session/frame-ce497cbd-d21f-4094-9c69-37f9befafe8b.gpa_frame": "9aa2aff6dd28450a270fad28a7cf2f20700d40f4df9639bf3a22206c34e491cf",
+    "injected/native/30/session/frame-e64c86ed-031d-432b-b388-faf58fed6c46.gpa_frame": "37caffe8387618f2e9fa68198ffc6b7d30f307837fed5f4716fd5e3fb792fc3c"
+  },
+  "evidence_manifest": {
+    "path": "artifacts/capture-deferred-nested-20261014/evidence-manifest.json",
+    "sha256": "cf569654daf88d66696e90d2f29b7c36b1ff1b05569943e1dc4eeeca2bd6fdfc",
+    "files": 836
+  },
+  "validation_sequence": "Complete capture run; test-only ancestry assertions then pass both native suites, 31 focused full-application suites and the final eight-file dual-player corpus",
+  "replay_or_format_changed": false,
+  "new_gf2_acceptance": false,
+  "overall_capture_status": "partial",
+  "remaining": [
+    "Open mappings across merges",
+    "Unverified parent/child NO_OVERWRITE dependencies",
+    "Foreign immediate execution and broader synchronization",
+    "Hidden/query states",
+    "Historical Intel/NVIDIA pixel mismatches"
+  ]
+}

@@ -91,9 +91,24 @@ void observe_deferred_call(ID3D11DeviceContext* context,const char* api,CommandK
         if(floats)std::copy_n(floats,4,c.floats.begin());if(integers)std::copy_n(integers,4,c.words.begin());
         if(region)c.copy_region=*region;
         try{
+            if(name.ends_with("::ExecuteCommandList")){
+                if(!h.mappings.empty())throw std::runtime_error("Deferred merge with open mappings is unverified");
+                const auto child=object_record(operand);
+                if(!child || child->device!=r->device)throw std::runtime_error("Deferred merge list/device missing");
+                {std::lock_guard child_lock(child->mutex);c.merged_list=child->command_list;}
+                if(!c.merged_list || c.merged_list->device!=r->device)throw std::runtime_error("Deferred merge history missing");
+                const auto& merged=*c.merged_list;
+                if(merged.nesting_depth>=DeferredHistory::nesting_limit)throw std::runtime_error("Deferred merge nesting limit exceeded");
+                if(b.owned_bytes>DeferredHistory::byte_limit || merged.owned_bytes>DeferredHistory::byte_limit-b.owned_bytes)
+                    throw std::runtime_error("Deferred merge payload byte limit exceeded");
+                const auto leases=command_list_resources(operand);
+                if(leases)for(const auto& [id,resource]:*leases){(void)id;retain_deferred_resource(context,resource.Get());}
+                b.owned_bytes+=merged.owned_bytes;b.nesting_depth=std::max(b.nesting_depth,merged.nesting_depth+1);
+                b.calls.push_back(std::move(c));return;
+            }
             if(has_pipeline_state(kind))retain_pipeline_state(context,b,c);
-            // CommandList expansion has its own unresolved provenance model.
-            // Other direct operands (Clear/Copy/Map/Update/query) need the same
+            // Merged lists above retain their own immutable creation graphs.
+            // Direct operands (Clear/Copy/Map/Update/query) need the same
             // durable creation graph as binding arguments.
             if(!name.ends_with("::ExecuteCommandList")){
                 if(b.owned_bytes>DeferredHistory::byte_limit)throw std::runtime_error("Deferred definition byte limit exceeded");

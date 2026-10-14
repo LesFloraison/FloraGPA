@@ -3954,7 +3954,7 @@
     ],
     "pending": [
       "Remaining creation paths and class-instance metadata",
-      "Successful in-frame EVENT completion semantics and other query types, empty-box/constant-buffer-box/packed-box/flagged/planar Updates and remaining region/format copies (overlap, flags, empty boxes, depth/constant and BC6H/BC7/packed/planar storage) and additional Map profiles, multicontext synchronization, unverified deferred Map dependencies, nested lists and compilation synchronization and remaining hidden states",
+      "Successful in-frame EVENT completion semantics and other query types, empty-box/constant-buffer-box/packed-box/flagged/planar Updates and remaining region/format copies (overlap, flags, empty boxes, depth/constant and BC6H/BC7/packed/planar storage) and additional Map profiles, multicontext synchronization, unverified deferred Map dependencies, open-map merge dependencies and compilation synchronization and remaining hidden states",
       "Remaining command/state wire layouts and real swap-chain presentation serialization",
       "Broader generated-capture dual-player and original GUI acceptance beyond documented self-owned profiles and six scoped Intel GF2 files",
       "Historical Intel repeatability and NVIDIA MSAA discrepancies; six scoped Intel GF2 files retain their original validated runtime identity"
@@ -3998,12 +3998,12 @@
       "acceptance_scope": "This host, Intel Iris Xe capture and both players, GPA 2025 R1 legacy DX11 / IGPA v3, home and equipment-room scenes; not general GPU/API correctness",
       "acceptance_evidence": "docs/capture-gf2-acceptance-baseline.json"
     },
-    "deferred_history": "Capture-owned bounded CPU compilation journals, including same-frame and separate worker contexts. Finished immutable generations expand only at actual immediate execution; native resource leases remain separate from CPU histories.",
+    "deferred_history": "Capture-owned bounded CPU compilation journals, including same-frame worker contexts and immutable merged-list edges. Resource COM leases remain in independent native lifetime entries; source wrappers may die before parent execution.",
     "deferred_mappings": "Capture-owned Map HRESULT/type/flags/pitches and Unmap payloads; borrowed pointers excluded from immutable lists. Complete dynamic-buffer WRITE_DISCARD and verified same-list NO_OVERWRITE, plus single-mip/single-layer dynamic texture discards with checked pitches, lower per execution. Unknown/GPU-mutated baselines, invalid pitches and broader rename dependencies refuse. See CAPTURE_DEFERRED_TEXTURE.md.",
     "deferred_bindings": "Typed input histories for 45 valid deferred APIs plus native effective action snapshots; unsupported MinLOD/class/hidden-state profiles reject",
     "deferred_definitions": "Independent CPU creation graphs preserve device/resource/view dependencies, DXBC, state descriptors, semantic strings and original creation bytes after native destruction; not execution-time GPU contents or deferred encoding",
     "deferred_effective_state": "Native compilation-time getter snapshots plus execution-time GPU initial data feed supported flattened actions; hidden deferred state remains unsupported",
-    "deferred_execution": "Supported Draw/Dispatch/Clear/Copy/Update and scoped buffer/texture Map/Unmap actions lower at actual immediate ExecuteCommandList positions. Same-frame compilation on the capture thread and independent workers joined before submission is validated; unsubmitted lists add no frame events. Repeated order and first-use snapshots are preserved. Nested lists, unverified states and foreign immediate execution refuse.",
+    "deferred_execution": "Supported Draw/Dispatch/Clear/Copy/Update and scoped Map/Unmap actions expand at actual immediate ExecuteCommandList positions. Bounded merged lists preserve repeated child order and full CPU ancestry. Same-frame compilation with workers joined before submission is validated. Open-map merges, unverified states/dependencies and foreign immediate execution refuse.",
     "deferred_nooverwrite_validation": {
       "evidence": "docs/CAPTURE_DEFERRED_NOOVERWRITE.md",
       "baseline": "docs/capture-deferred-nooverwrite-baseline.json",
@@ -4074,6 +4074,16 @@
       "packaged_injected_frames": 5,
       "packaged_injected_checks": 33,
       "limits": "Single owner per deferred compilation batch; fixture joins workers before immediate execution. No arbitrary scheduling/race or new GF2 acceptance claim."
+    },
+    "deferred_nested_validation": {
+      "evidence": "docs/CAPTURE_DEFERRED_NESTED.md",
+      "baseline": "docs/capture-deferred-nested-baseline.json",
+      "dual_player_files": 8,
+      "dual_player_checks": 132,
+      "packaged_injected_frames": 5,
+      "packaged_injected_checks": 33,
+      "malformed_model_checks": 36,
+      "limits": "16 merge edges and 4096 visited calls; two-level native/WARP/hardware and injected profiles verified. Broader dependencies and hidden/query states remain partial."
     }
   }
 }

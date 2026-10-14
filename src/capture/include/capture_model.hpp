@@ -126,6 +126,9 @@ struct RecordedCommand {
     std::optional<ResourceBox> update_box;
     std::optional<CopyRegion> copy_region;
     std::optional<DeferredOrigin> deferred;
+    // Outer-to-inner merge provenance, after the actual immediate submission.
+    // Nested ordinals are positions in the containing compilation journal.
+    std::vector<DeferredOrigin> merged_origins;
     // Update uses words {subresource, original row pitch, depth pitch, extended, flags}; packed owned bytes.
     // Map uses words {subresource, type, flags}; bytes own the completed CPU write.
     // Resolve uses words {destination subresource, source subresource, typed format}.

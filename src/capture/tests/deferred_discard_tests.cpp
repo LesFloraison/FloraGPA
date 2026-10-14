@@ -78,6 +78,7 @@ std::vector<FrozenFrame> run(bool hardware,bool wrapped){
         const float black[]{0,0,0,1};immediate->ClearRenderTargetView(rtv.Get(),black);
         auto recording=wrapped?begin_recording(immediate.Get()):nullptr;
 #if defined(FLORA_INFRAME_DEFERRED)
+        for(auto& context:c)if(!context)check(device->CreateDeferredContext(0,&context));
         if(!frame){compileList(0);compileList(1);}
         else{
             std::exception_ptr errors[2];
@@ -92,11 +93,64 @@ std::vector<FrozenFrame> run(bool hardware,bool wrapped){
         const float unsubmitted[]{1,1,1,1};unused->ClearRenderTargetView(rtv.Get(),unsubmitted);
         ComPtr<ID3D11CommandList> unsubmittedList;check(unused->FinishCommandList(FALSE,&unsubmittedList));unsubmittedList.Reset();unused.Reset();
 #endif
+#if defined(FLORA_NESTED_DEFERRED)
+        ComPtr<ID3D11DeviceContext> merge,outer;check(device->CreateDeferredContext(0,&merge));check(device->CreateDeferredContext(0,&outer));
+        auto append=[&](ID3D11DeviceContext* target,ID3D11CommandList* list,BOOL restore){
+            target->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);target->ExecuteCommandList(list,restore);
+            D3D11_PRIMITIVE_TOPOLOGY topology{};target->IAGetPrimitiveTopology(&topology);
+            require(topology==(restore?D3D11_PRIMITIVE_TOPOLOGY_LINELIST:D3D11_PRIMITIVE_TOPOLOGY_UNDEFINED),"Merged context restoration changed");
+        };
+        append(merge.Get(),lists[frame].Get(),TRUE);append(merge.Get(),lists[!frame].Get(),FALSE);
+        ComPtr<ID3D11CommandList> pair,combined;check(merge->FinishCommandList(TRUE,&pair));
+        append(outer.Get(),pair.Get(),TRUE);append(outer.Get(),lists[frame].Get(),FALSE);check(outer->FinishCommandList(FALSE,&combined));
+        const std::array<ObjectId,2> leafIds{wrapped?id(lists[0].Get()):0,wrapped?id(lists[1].Get()):0};
+        const std::array<ObjectId,2> leafContexts{wrapped?id(c[0].Get()):0,wrapped?id(c[1].Get()):0};
+        if(wrapped){
+            const auto source=object_record(combined.Get())->command_list;
+            DeferredOrigin origin{id(combined.Get()),source->context,source->generation,1,0,true};
+            require(lower_deferred(*source,origin,id(immediate.Get()),100,1<<20).commands.size()==9,"Merged CPU expansion missing commands");
+            auto rejects=[&](const DeferredCommandList& list,const char* reason,size_t commands=100,size_t bytes=1<<20){
+                bool failed=false;try{lower_deferred(list,origin,id(immediate.Get()),commands,bytes);}catch(const std::exception& e){failed=std::string(e.what()).find(reason)!=std::string::npos;}
+                require(failed,"Malformed merged list did not reject for the expected reason");
+            };
+            const auto firstMerge=std::find_if(source->calls.begin(),source->calls.end(),[](const auto& call){return bool(call.merged_list);})-source->calls.begin();
+            auto bad=*source;bad.calls[firstMerge].words[1]=1;rejects(bad,"arguments");
+            bad=*source;bad.calls[firstMerge].merged_list.reset();rejects(bad,"unsupported");
+            bad=*source;auto child=std::make_shared<DeferredCommandList>(*bad.calls[firstMerge].merged_list);child->device++;bad.calls[firstMerge].merged_list=child;rejects(bad,"device mismatch");
+            child=std::make_shared<DeferredCommandList>(*source->calls[firstMerge].merged_list);child->gaps.push_back("Deliberate child gap");bad=*source;bad.calls[firstMerge].merged_list=child;rejects(bad,"Deliberate child gap");
+            auto cycle=std::make_shared<DeferredCommandList>(*source);cycle->calls[firstMerge].merged_list=cycle;
+            try{rejects(*cycle,"cycle");}catch(...){cycle->calls[firstMerge].merged_list.reset();throw;}cycle->calls[firstMerge].merged_list.reset();
+            auto chain=std::make_shared<DeferredCommandList>(*source);chain->calls.clear();
+            for(UINT depth=0;depth<17;++depth){auto parent=std::make_shared<DeferredCommandList>(*source);parent->calls={source->calls[firstMerge]};parent->calls[0].merged_list=chain;chain=parent;}rejects(*chain,"nesting limit");
+            chain=std::make_shared<DeferredCommandList>(*source);chain->calls.clear();
+            for(UINT depth=0;depth<12;++depth){auto parent=std::make_shared<DeferredCommandList>(*source);auto call=source->calls[firstMerge];call.merged_list=chain;parent->calls={call,call};parent->calls[1].sequence++;chain=parent;}rejects(*chain,"traversal limit");
+            rejects(*source,"command limit",8);rejects(*source,"payload byte limit",100,16);
+            std::cout<<"merged_refusals=9 frame="<<frame<<'\n';
+        }
+        // The parent owns its CPU graph and native resource leases independently
+        // of every source context/list wrapper.
+        pair.Reset();merge.Reset();outer.Reset();for(auto& list:lists)list.Reset();for(auto& context:c)context.Reset();
+        immediate->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);immediate->ExecuteCommandList(combined.Get(),TRUE);
+        D3D11_PRIMITIVE_TOPOLOGY topology{};immediate->IAGetPrimitiveTopology(&topology);require(topology==D3D11_PRIMITIVE_TOPOLOGY_LINELIST,"Merged immediate restoration changed");
+        combined.Reset();
+#else
         for(UINT step=0;step<3;++step){const UINT index=(step==1)^frame;const BOOL restore=step!=1;immediate->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);immediate->ExecuteCommandList(lists[index].Get(),restore);D3D11_PRIMITIVE_TOPOLOGY topology{};immediate->IAGetPrimitiveTopology(&topology);require(topology==(restore?D3D11_PRIMITIVE_TOPOLOGY_LINELIST:D3D11_PRIMITIVE_TOPOLOGY_UNDEFINED),"Execute state restoration changed");}
+#endif
         immediate->ClearState();auto* target=rtv.Get();auto* source=srv.Get();D3D11_VIEWPORT viewport{0,0,8,8,0,1};
         immediate->OMSetRenderTargets(1,&target,nullptr);immediate->RSSetViewports(1,&viewport);immediate->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
         immediate->VSSetShader(vs.Get(),nullptr,0);immediate->PSSetShader(ps.Get(),nullptr,0);immediate->PSSetShaderResources(0,1,&source);immediate->Draw(3,0);
-        RecordedFrame captured;if(recording){captured=recording->finish();captured.require_complete();require(captured.commands.size()==10,"Deferred discard execution order lost");for(UINT i=0;i<9;++i)require(captured.commands[i].deferred&&captured.commands[i].deferred->execution_ordinal==i/3+1,"Repeated discard provenance lost");}
+        RecordedFrame captured;if(recording){captured=recording->finish();captured.require_complete();require(captured.commands.size()==10,"Deferred discard execution order lost");for(UINT i=0;i<9;++i){
+#if defined(FLORA_NESTED_DEFERRED)
+            require(captured.commands[i].deferred&&captured.commands[i].deferred->execution_ordinal==1&&captured.commands[i].merged_origins.size()==(i<6?2:1),"Merged discard provenance lost");
+            const auto& command=captured.commands[i];const auto& leaf=command.merged_origins.back();const UINT index=(i/3==1)^frame;
+            require(leaf.list==leafIds[index]&&leaf.source_context==leafContexts[index]&&leaf.generation==1&&
+                    leaf.call_sequence==(i%3==2?5:i%3)&&leaf.restore_context_state==(i<3)&&
+                    command.deferred->call_sequence==(i<6?1:3),"Merged leaf identity/order/restore provenance changed");
+            if(i<6)require(command.merged_origins.front().restore_context_state,"Outer merge restoration provenance lost");
+#else
+            require(captured.commands[i].deferred&&captured.commands[i].deferred->execution_ordinal==i/3+1,"Repeated discard provenance lost");
+#endif
+        }}
         const auto actual=readBuffer(result.Get());
         const UINT expected[]{frame?37u:22u,3,frame?5u:3u,frame?2u:1u};require(actual.size()==sizeof expected&&!memcmp(actual.data(),expected,sizeof expected),"Native execution integer oracle mismatch");
         const auto current=readBuffer(constants.Get());

@@ -54,7 +54,7 @@ int wmain(int argc,wchar_t** argv){if(argc!=3)return 2;const fs::path out=fs::ab
     const std::array<const char*,5> colors{"1,0,0,1","0,1,0,1","0,0,1,1","1,1,1,1","0,1,1,1"};std::array<ComPtr<ID3D11PixelShader>,5> cycle;
     for(size_t i=0;i<colors.size();++i){const auto source=std::string("float4 main():SV_Target{return float4(")+colors[i]+");}";auto bytes=shader(source.c_str(),"ps_5_0");check(device->CreatePixelShader(bytes->GetBufferPointer(),bytes->GetBufferSize(),nullptr,&cycle[i]));}
     ComPtr<ID3D11Buffer> mapped_color;ComPtr<ID3D11PixelShader> mapped_shader;
-    if(mode==29){
+    if(mode==29 || mode==30){
         D3D11_BUFFER_DESC desc{16,D3D11_USAGE_DYNAMIC,D3D11_BIND_CONSTANT_BUFFER,D3D11_CPU_ACCESS_WRITE,0,0};
         check(device->CreateBuffer(&desc,nullptr,&mapped_color));
         auto bytes=shader("cbuffer C:register(b0){float4 color;}float4 main():SV_Target{return color;}","ps_5_0");
@@ -93,7 +93,7 @@ int wmain(int argc,wchar_t** argv){if(argc!=3)return 2;const fs::path out=fs::ab
             else if(mode>=15){float color[4];memcpy(color,values[frames%5],16);D3D11_BOX box{1,0,0,2,1,1};if(mode==16 || mode==18)update_context->UpdateSubresource1(boxed_color.Get(),0,&box,color,16,16,0);else context->UpdateSubresource(mode>=19?region_source.Get():boxed_color.Get(),0,&box,color,16,16);if(mode>=19){if(mode==20)update_context->CopySubresourceRegion1(boxed_color.Get(),0,1,0,0,region_source.Get(),0,&box,0);else context->CopySubresourceRegion(boxed_color.Get(),0,1,0,0,region_source.Get(),0,&box);}memset(color,0xcd,sizeof color);memset(&box,0,sizeof box);}
             else if(mode>=13){float color[4];memcpy(color,values[frames%5],16);if(mode==14)update_context->UpdateSubresource1(mapped_color.Get(),0,nullptr,color,0,0,0);else context->UpdateSubresource(mapped_color.Get(),0,nullptr,color,0,0);memset(color,0xcd,sizeof color);}
             else{D3D11_MAPPED_SUBRESOURCE mapped{};check(context->Map(mapped_color.Get(),0,D3D11_MAP_WRITE_DISCARD,0,&mapped));memcpy(mapped.pData,values[frames%5],16);context->Unmap(mapped_color.Get(),0);}context->PSSetShader(mapped_shader.Get(),nullptr,0);}
-        if(mode==29){
+        if(mode==29 || mode==30){
             ComPtr<ID3D11CommandList> list;std::exception_ptr error;
             std::thread worker([&]{try{
                 ComPtr<ID3D11DeviceContext> deferred;check(device->CreateDeferredContext(0,&deferred));
@@ -105,6 +105,11 @@ int wmain(int argc,wchar_t** argv){if(argc!=3)return 2;const fs::path out=fs::ab
                 deferred->OMSetRenderTargets(1,&view,nullptr);deferred->RSSetViewports(1,&vp);
                 deferred->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);deferred->Draw(3,0);
                 check(deferred->FinishCommandList(FALSE,&list));
+                if(mode==30)for(UINT level=0;level<2;++level){
+                    ComPtr<ID3D11DeviceContext> merge;check(device->CreateDeferredContext(0,&merge));
+                    merge->ExecuteCommandList(list.Get(),level==0);ComPtr<ID3D11CommandList> merged;
+                    check(merge->FinishCommandList(level!=0,&merged));list=std::move(merged);
+                }
             }catch(...){error=std::current_exception();}});
             worker.join();if(error)std::rethrow_exception(error);context->ExecuteCommandList(list.Get(),TRUE);
         }else if(multisample)multisample->render(rtv.Get(),frames);else if(mode==23 || mode==26 || mode==27 || mode==28)context->ExecuteCommandList(deferred_draws[frames%5].Get(),TRUE);else context->Draw(3,0);

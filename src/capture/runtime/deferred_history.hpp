@@ -5,6 +5,7 @@
 #include <memory>
 namespace flora::capture {
 struct UpdateSource;
+struct DeferredCommandList;
 struct DeferredCall {
     CommandKind kind=CommandKind::unsupported;
     std::string api;
@@ -19,6 +20,9 @@ struct DeferredCall {
     // Effective native bindings before this action, including runtime hazard
     // nulling and Finish(TRUE) retention. No execution-time GPU contents.
     std::shared_ptr<const PipelineBindings> state;
+    // Immutable CPU history only. Resource COM leases belong to the parent
+    // native context/list lifetime entry, independently of this edge.
+    std::shared_ptr<const DeferredCommandList> merged_list;
     std::vector<uint8_t> data;
     // Owned CPU bytes at a successful buffer NO_OVERWRITE Map, before the
     // application writes. Lowering verifies this against the list's last write.
@@ -35,6 +39,7 @@ struct DeferredCommandList {
     DeferredDefinitionGraph definitions;
     std::vector<std::string> gaps;
     size_t owned_bytes=0;
+    size_t nesting_depth=0;
 };
 struct CommandListExecution {
     ObjectId list=0,source_context=0;
@@ -46,6 +51,7 @@ struct CommandListExecution {
 // references; execution entries are CPU call observations, not a GPU fence proof.
 struct DeferredHistory {
     static constexpr size_t call_limit=4096,byte_limit=size_t(64)<<20,execution_limit=256;
+    static constexpr size_t nesting_limit=16;
     DeferredCommandList pending;
     uint64_t finishes=0,failed_finishes=0,execution_serial=0;
     std::deque<CommandListExecution> executions;

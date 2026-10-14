@@ -43,8 +43,10 @@ case CommandKind::copy_resource:case CommandKind::copy_region:case CommandKind::
 case CommandKind::map:case CommandKind::unmap:return true;
 default:return false;
 }}
-}
-DeferredExpansion lower_deferred(const DeferredCommandList& list,const DeferredOrigin& origin,ObjectId context,size_t command_limit,size_t payload_limit){
+DeferredExpansion expand(const DeferredCommandList& list,const DeferredOrigin& origin,ObjectId context,size_t command_limit,size_t payload_limit,
+                         size_t depth,size_t& visits,std::set<const DeferredCommandList*>& active){
+    require(depth<=DeferredHistory::nesting_limit,"Deferred merge nesting limit exceeded");
+    require(active.insert(&list).second,"Deferred merge cycle");
     require(context && origin.list && origin.source_context==list.context && origin.generation==list.generation,"Deferred execution provenance mismatch");
     if(!list.gaps.empty())throw std::runtime_error("Deferred compilation gap: "+list.gaps.front());
     DeferredExpansion out;std::set<ObjectId> visiting;
@@ -74,6 +76,28 @@ DeferredExpansion lower_deferred(const DeferredCommandList& list,const DeferredO
         for(auto id:{s.input_layout,s.index_buffer,s.rasterizer,s.blend,s.depth_stencil,s.depth_view})retain(id);
     };
     for(const auto& call:list.calls){
+        require(++visits<=DeferredHistory::call_limit,"Deferred merge traversal limit exceeded");
+        if(call.merged_list){
+            require(call.kind==CommandKind::unsupported && call.api.ends_with("::ExecuteCommandList") && call.operand && !call.source &&
+                    call.completed && call.result==S_OK && call.data.empty() && call.before_data.empty() &&
+                    !call.words[1] && !call.words[2] && !call.words[3] && !call.words[4],"Deferred merge arguments invalid");
+            require(mappings.empty(),"Deferred merge with open mappings is unverified");
+            const auto& child=*call.merged_list;
+            require(child.device==list.device,"Deferred merge device mismatch");
+            DeferredOrigin nested{call.operand,child.context,child.generation,call.sequence+1,0,call.words[0]!=0};
+            auto added=expand(child,nested,context,command_limit-out.commands.size(),payload_limit-out.payload_bytes,depth+1,visits,active);
+            for(auto& command:added.commands){
+                if(command.kind==CommandKind::map || command.kind==CommandKind::copy_resource ||
+                   command.kind==CommandKind::copy_region || command.kind==CommandKind::update_subresource)
+                    mapped_contents.erase(command.operand);
+                command.merged_origins.insert(command.merged_origins.begin(),*command.deferred);
+                command.deferred=origin;command.deferred->call_sequence=call.sequence;
+                out.commands.push_back(std::move(command));
+            }
+            out.resources.insert(added.resources.begin(),added.resources.end());
+            out.definitions.merge(added.definitions);out.payload_bytes+=added.payload_bytes;
+            continue;
+        }
         if(call.kind==CommandKind::binding){require(call.binding.has_value(),"Deferred binding arguments missing");continue;}
         require(supported(call.kind),"Deferred action lowering unsupported (Map rename/query/nested list or unknown action)");
         require(out.commands.size()<command_limit,"Deferred expansion command limit exceeded");
@@ -118,6 +142,12 @@ DeferredExpansion lower_deferred(const DeferredCommandList& list,const DeferredO
         out.payload_bytes+=c.data.size()+c.before_data.size();out.commands.push_back(std::move(c));
     }
     require(mappings.empty(),"Deferred Map rename has no matching Unmap");
+    active.erase(&list);
     return out;
+}
+}
+DeferredExpansion lower_deferred(const DeferredCommandList& list,const DeferredOrigin& origin,ObjectId context,size_t command_limit,size_t payload_limit){
+    size_t visits=0;std::set<const DeferredCommandList*> active;
+    return expand(list,origin,context,command_limit,payload_limit,0,visits,active);
 }
 }
