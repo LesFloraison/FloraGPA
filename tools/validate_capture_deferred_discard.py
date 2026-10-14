@@ -12,7 +12,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     for key in ('probe', 'replay', 'oracle-tools', 'qt-bin', 'out'):
         parser.add_argument('--'+key, type=Path, required=True)
-    parser.add_argument('--profile', choices=('discard', 'counters'), default='discard')
+    parser.add_argument('--profile', choices=('discard', 'counters', 'om-counters'), default='discard')
     args = parser.parse_args()
     out = args.out.resolve()
     out.mkdir(parents=True, exist_ok=False)
@@ -39,7 +39,7 @@ def main():
              'bab': ((0, 255, 0, 255), 1, 3),
              'missing-discard': ((0, 255, 0, 255), 1, 3),
              'missing-draw': ((0, 0, 0, 255), 0, 3)}
-    if args.profile == 'counters':
+    if args.profile in ('counters', 'om-counters'):
         modes = {}
         for kind in ('counter', 'append'):
             for frame in range(2):
@@ -47,6 +47,8 @@ def main():
                 modes[prefix] = ((0, 255, 0, 255) if frame else (255, 0, 0, 255), 1, 6 if frame else 3)
                 modes[prefix+'-reset-again'] = ((0, 0, 255, 255), 1, 6 if frame else 3)
                 modes[prefix+'-no-draw'] = ((0, 0, 0, 255), 0, 6 if frame else 3)
+        if args.profile == 'om-counters':
+            modes = {key: (color, draws+dispatches, 0) for key, (color, draws, dispatches) in modes.items()}
     for device in ('warp', 'hardware'):
         probe = run(device+'-probe', [args.probe.resolve(),
                     *(['--hardware'] if device == 'hardware' else []), out/device])
@@ -69,20 +71,29 @@ def main():
                   (not (mode.startswith('missing-') or mode.endswith(('-reset-again', '-no-draw')))))
             maps = 2 if mode == 'missing-discard' else 3
             counts = dict(Dispatch=dispatches, Present=1, Map=maps, unmap_observations=maps)
-            if args.profile == 'counters':
-                counts = dict(Dispatch=dispatches, Present=1)
+            if args.profile in ('counters', 'om-counters'):
+                counts = dict(Present=1)
+                actions = 6 if mode.split('-')[1] == '1' else 3
+                resets = actions if mode.endswith('-reset-again') else actions//3*2
+                if args.profile == 'counters':
+                    counts['Dispatch'] = dispatches
+                else:
+                    counts.update(ClearState=resets, annotation_records=2*resets)
             if draws:
                 counts['Draw'] = draws
             check(name+'-actual-events', flora['counts'] == counts)
             run(name+'-inventory', [args.replay.resolve(), 'inventory', frame, '--out', out/(name+'-inventory')])
             inventory = json.loads((out/(name+'-inventory/report.json')).read_text())
             check(name+'-inventory', inventory['draws'] == draws and inventory['dispatches'] == dispatches)
-            if args.profile == 'counters':
-                resets = [c for c in inventory['commands'] if c['type'] == 0x25e]
-                check(name+'-explicit-counter-resets', len(resets) ==
-                      (dispatches if mode.endswith('-reset-again') else dispatches//3*2))
+            if args.profile in ('counters', 'om-counters'):
+                records = [c for c in inventory['commands'] if c['type'] == 0x25e]
+                check(name+'-explicit-counter-records', len(records) == resets*(2 if args.profile == 'om-counters' else 1))
                 resources = [r for r in inventory['resources'] if r['type'] == 0x83]
-                last_dispatch = [c for c in inventory['commands'] if c['type'] == 0x35][-1]['id']
+                if args.profile == 'om-counters':
+                    commands = [c for c in inventory['commands'] if c['type'] == 0x37]
+                    last_dispatch = commands[-1 if mode.endswith('-no-draw') else -2]['id']
+                else:
+                    last_dispatch = [c for c in inventory['commands'] if c['type'] == 0x35][-1]['id']
                 run(name+'-buffer', [args.replay.resolve(), 'buffer', frame, '--id', resources[0]['id'],
                                     '--event', last_dispatch, '--out', out/(name+'-buffer')])
                 first, last = (4, 1) if mode.split('-')[1] == '1' else (2, 5)
@@ -90,7 +101,7 @@ def main():
                 if not mode.endswith('-reset-again'):
                     indices.add(first+1)
                 expected_buffer = b''.join((17 if i in indices else 0).to_bytes(4, 'little') for i in range(16))
-                check(name+'-flora-full-resource', len(resources) == 1 and
+                check(name+'-flora-full-resource', len(resources) == (2 if args.profile == 'om-counters' else 1) and
                       (out/(name+'-buffer/buffer.bin')).read_bytes() == expected_buffer)
                 counters = json.loads((out/(name+'-buffer/report.json')).read_text())['uav_counters']
                 check(name+'-flora-final-counter', len(counters) == 1 and counters[0]['value'] == last+1)

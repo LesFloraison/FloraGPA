@@ -30,6 +30,8 @@ Bounded merged-list expansion, repeated child execution and independent native
 resource lifetimes follow in [CAPTURE_DEFERRED_NESTED.md](CAPTURE_DEFERRED_NESTED.md).
 Explicit deferred CS counter resets and ordered KEEP, with nested-list and
 dual-player controls, follow in [CAPTURE_DEFERRED_COUNTERS.md](CAPTURE_DEFERRED_COUNTERS.md).
+OM counter restoration, CB1 preservation and actual original-player buffer/counter
+observations follow in [CAPTURE_DEFERRED_OM_COUNTERS.md](CAPTURE_DEFERRED_OM_COUNTERS.md).
 
 Capture HUD work is tracked separately in [CAPTURE_HUD.md](CAPTURE_HUD.md).
 Protocol v4 adds bounded per-request CLI resource budgets to the earlier

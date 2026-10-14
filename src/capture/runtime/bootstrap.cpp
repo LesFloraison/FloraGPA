@@ -127,7 +127,7 @@ Json response(const Json& message,ULONG client_pid){
     result["capture_available"]=available;result["swap_chains"]=swaps;result["objects"]=objects;
     result["capture_limits"]={{"default_resource_limit_mib",default_resource_limit_mib},{"max_resource_limit_mib",max_resource_limit_mib}};
     result["device_creations"]=creations.load();result["creation_failures"]=failures.load();result["feature_level"]=level.load();result["hook_status"]=hook_status.load();
-    result["capability_gaps"]={"Single-sample RGBA8/BGRA8; dirty/scroll and flags other than ALLOW_TEARING unsupported","Query, empty-box/flagged/planar Updates, region/format copies, planar Maps and hidden states are incomplete","Deferred nesting beyond bounded journal limits, unverified Map baselines/layouts and hidden states unsupported","Deferred CS counters require a recorded reset before first use; OM counter encoding remains unverified","Single immediate-context execution thread only"};
+    result["capability_gaps"]={"Single-sample RGBA8/BGRA8; dirty/scroll and flags other than ALLOW_TEARING unsupported","Query, empty-box/flagged/planar Updates, region/format copies, planar Maps and hidden states are incomplete","Deferred nesting beyond bounded journal limits, unverified Map baselines/layouts and hidden states unsupported","Deferred CS/OM counters require a recorded reset before first use; unknown initial KEEP and numeric UINT_MAX remain unsupported","Single immediate-context execution thread only"};
     if(command=="status"){
         result["factories"]=factory_status();
         HMODULE modules[1024]{};DWORD needed=0;

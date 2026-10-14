@@ -1,0 +1,142 @@
+{
+  "schema": "FloraGPA deferred OM counter validation 1",
+  "date": "2026-10-14",
+  "parent_commit": "413901bf26d5ec532d5214911f371b2a1ad294f4",
+  "scope": "PS UAV slot 1 with RTV slot 0; explicit reset, counter/RTV/UAV KEEP, nested reuse, CB1 restoration",
+  "capture_ctest": {
+    "passed": 135,
+    "total": 135
+  },
+  "final_keep_ctest": {
+    "passed": 4,
+    "total": 4
+  },
+  "full_focused_ctest": {
+    "passed": 37,
+    "total": 37,
+    "full_suite_not_run": 285
+  },
+  "malformed_model_checks_per_profile": {
+    "lowering": 56,
+    "encoder_no_publication": 48
+  },
+  "dual_player": {
+    "om_files": 24,
+    "om_checks": 484,
+    "cs_regression_files": 24,
+    "cs_regression_checks": 484,
+    "default_original_adapter": true,
+    "new_original_gui": false
+  },
+  "original_observer": {
+    "files": 24,
+    "draws": 108,
+    "counter_boundary_comparisons": 216,
+    "full_buffer_boundary_comparisons": 216,
+    "exact_pixels_preserved": true,
+    "draw_rva": "0x27ec0",
+    "native_context_slot": 13,
+    "om_uav_slot": 1,
+    "source_hashes": {
+      "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\capture-deferred-om-counters-20261014\\observe_original.py": "cbdd740b1c7cfad1cbd7b036f4a99b4fedf06b7889de8d8d272055cf18b9f8a6",
+      "C:\\Program Files\\IntelSWTools\\GPA\\dx11_player.dll": "39061ff329e4a32d0c8375ce9ee15e2017bccab0593943b962a860e11723d38b",
+      "D:\\CDXrepo\\FloraGPA\\tools\\probe_original_preframe_counter.py": "842de02b40fd1f318c20b21cef0f14df97b38a7fcc0401c8b36ccbbc8f6e2e47",
+      "D:\\CDXrepo\\FloraGPA\\tools\\audit_replay.py": "d18d684b8338e6f3b18c233be6b67548111d7a48e770cda6ae099b74f80b251d",
+      "D:\\CDXrepo\\FloraGPA\\tools\\gpa_native.py": "f7ee63e82a9c8363cfde81633863a820e8f4277d0a80f0d90075b499f56bcffd",
+      "D:\\CDXrepo\\FloraGPA\\tools\\frame_image.py": "404967cb0f55fb29255ea70f4556586700b20a316239e00af337289257b802c3",
+      "D:\\CDXrepo\\FloraGPA\\standalone\\dx11.py": "73ca89e7efe6dbe9917abcf0e9d63381914d66a363e4098287c91892002cd42e",
+      "D:\\CDXrepo\\FloraGPA\\standalone\\uav_counters.py": "6eb61959eb0713398a9d071edc3f3f0f296e4bdd5c724fb84417249466577f87"
+    }
+  },
+  "packaged_injection": {
+    "launches": 1,
+    "frames": 5,
+    "checks": 33,
+    "mode": 32,
+    "system_only_child_path": true,
+    "runtime_sha256": "4a4bae38743857362afe3c8394e645324a0e31e6281a5abfaebff1b6bbdbfc33",
+    "target_continues_after_disconnect": true
+  },
+  "previous_runtime_control": {
+    "runtime_sha256": "8f19732df46ab44ac42e208ca278cca7bcdc98752c54ed36875a80495de0adf8",
+    "frames": 0,
+    "failure": "Encoder OM counter state wire validation pending",
+    "target_exit_ok": true
+  },
+  "source_binaries": {
+    "build/capture/capture/Release/FloraCaptureDeferredOmCounterTests.exe": "fd1ca718368b51387eee953fc4b93a5712af0d8841296f619c678fb91673de78",
+    "build/capture/capture/Release/FloraCaptureDeferredCounterTests.exe": "f70ba645e453b649af3fc1ffba728bcbf89be6af9c1acb1f787577fa04d5f109",
+    "build/capture/capture/Release/FloraCaptureRuntime.dll": "4a4bae38743857362afe3c8394e645324a0e31e6281a5abfaebff1b6bbdbfc33"
+  },
+  "final_frame_sha256": {
+    "dual-final/hardware/append-0-no-draw.gpa_frame": "34c6a65c92b78e638cdc5bb678451b3e72f28808bba87fd1051be6902a659d78",
+    "dual-final/hardware/append-0-reset-again.gpa_frame": "24045640f793e0943000842aef0d265cc5e360a6350f265c161e6e27933f910f",
+    "dual-final/hardware/append-0.gpa_frame": "6b659cc77ff1dc8cccae46081eb521efa13e848827f56f87dca1cd88517c0841",
+    "dual-final/hardware/append-1-no-draw.gpa_frame": "3643e64ca79ae05bff9396a7053152ae7241ff2d1441878cd654c5aa5ead1e48",
+    "dual-final/hardware/append-1-reset-again.gpa_frame": "a793d9e41383a2485aa8f7cdbe742eed9c45eecb1e1f7977c47894fd5b2b0f3b",
+    "dual-final/hardware/append-1.gpa_frame": "f0c767671a1dcd7048b4d22726ba8e0c374483ec571b9004643fe74a7e284f17",
+    "dual-final/hardware/counter-0-no-draw.gpa_frame": "722a30f61ee59e7168bdb0283d4ffea2f1be2d4d4e91162abe43137758e2c8b8",
+    "dual-final/hardware/counter-0-reset-again.gpa_frame": "4e2ca6fd4cbd1b4d7ab5f8963bd6f077f3b160b7210aea82a45c4c6b6f41007a",
+    "dual-final/hardware/counter-0.gpa_frame": "b56519c9ad08d881fa6158f4356a6350c9e3ea668af3470fded39664274186ca",
+    "dual-final/hardware/counter-1-no-draw.gpa_frame": "fac30295d93c11af4c62eb9782c995ff04f445363002c5cfbee25184ef083524",
+    "dual-final/hardware/counter-1-reset-again.gpa_frame": "cc681a50a0f882a6c0392ae118929b4e79b70f09d0e9e5c9640c6a252a182f15",
+    "dual-final/hardware/counter-1.gpa_frame": "df0b7ab092c50deed0b4e940db836aab27ae82fec90ee8b9aba06e8107080934",
+    "dual-final/warp/append-0-no-draw.gpa_frame": "29ff83671874c90115c09a074d06b229b84baf9114a61a1067cd4b3405cdaa71",
+    "dual-final/warp/append-0-reset-again.gpa_frame": "b58ba72de5d113b75f49112e5229f441c0855e4f4689e8f9bef330830991bbca",
+    "dual-final/warp/append-0.gpa_frame": "226bd0a0fe11b77a824511ccabaaa11cb7d36a6b95d3f65bcd2c4418d1225efa",
+    "dual-final/warp/append-1-no-draw.gpa_frame": "405da3a1721220201dd16b8fd90bc9f390af6480b82f57524edf8c9ba1022fb2",
+    "dual-final/warp/append-1-reset-again.gpa_frame": "c6c1443f834fedb216832660489578c27ccf583378702fb6d47b74f8590fd7dc",
+    "dual-final/warp/append-1.gpa_frame": "9a3f3c738d81d32da64fed56a4f6478b3043f4cd8cae67f21f7227dba0a78c77",
+    "dual-final/warp/counter-0-no-draw.gpa_frame": "d7763fe55b6933efa24c8ba09aff2abfc8169fa0a6fbb3386efea9a3ccb3f99b",
+    "dual-final/warp/counter-0-reset-again.gpa_frame": "430ddab596d5d6320ae0508f9900c5cb1c5afff380cf6c398f4b9789531704aa",
+    "dual-final/warp/counter-0.gpa_frame": "57df5042c0ec5c10b78dcd253c30d48e9dd2bee6ac1545ecdd4c0ea83d1eba3d",
+    "dual-final/warp/counter-1-no-draw.gpa_frame": "efbef9d4c8760a0a84b1cb9a814e3c3f24b9535a4933dda8275d91be80dffa37",
+    "dual-final/warp/counter-1-reset-again.gpa_frame": "e9aada5674ac6e6266c47e389a1e8cc26f026d85eaa630f6e04c40324e797128",
+    "dual-final/warp/counter-1.gpa_frame": "6ff83e5592812c8297f0d6fdefe5158b67687c55cfcfa6b368c9c024aec90868",
+    "cs-regression/hardware/append-0-no-draw.gpa_frame": "65f21003588ce2eb81fc116b2c41191bbb2a267e334be32ad3aa5789f88a54b0",
+    "cs-regression/hardware/append-0-reset-again.gpa_frame": "29ae868f01cca0ffb3b20c0afa6c5fb8bdc41ba3dcdc0db528b1b1c9d68a611f",
+    "cs-regression/hardware/append-0.gpa_frame": "bfd8aa20d535575bc4c3c321a8c22c4dbcde33b00486e920d52b0481215f5dff",
+    "cs-regression/hardware/append-1-no-draw.gpa_frame": "18ebf497ec61027138a54edb7f3072a7f0f143b3e61459ba8d4177623db12ee0",
+    "cs-regression/hardware/append-1-reset-again.gpa_frame": "8ef2061c076a9de45f4d8e85ea63088ac3c9a2b41e8957469c8b4b6dc7c77b87",
+    "cs-regression/hardware/append-1.gpa_frame": "a516f8e7d3dbc7ddc53a8472ebde693fbc9dde5a2370bdfef4e673c7ce42a4b1",
+    "cs-regression/hardware/counter-0-no-draw.gpa_frame": "e0e2657114128cc47c373397a7cb2388b725cfeed8c7786bc2d75097719f2021",
+    "cs-regression/hardware/counter-0-reset-again.gpa_frame": "ff5b9e74de1ec1410fbb14f9279d537c4c7c36532aaa8d868733ac55f58baedf",
+    "cs-regression/hardware/counter-0.gpa_frame": "b5f2e41d3110b0581ff48cb4c85e0eee3845730d1460d7d65294d571cc164339",
+    "cs-regression/hardware/counter-1-no-draw.gpa_frame": "9c26bf34b772efd3cadb9a4f6fcbce348be6fb9d82c722825cb4cd4cb845d9dc",
+    "cs-regression/hardware/counter-1-reset-again.gpa_frame": "9dca101b23234f6e26731bdb9a1e65f0758afb6ae1925532523e4f1bbd42d599",
+    "cs-regression/hardware/counter-1.gpa_frame": "f0815b4a9d3f646b6b95c1be4aec75af6a0d0cd93779621f00c4303af6c9c95a",
+    "cs-regression/warp/append-0-no-draw.gpa_frame": "c2c60f989b273b0f9b1181c25734f4b47cb6fa36ebe5f131f9cafd07b394671f",
+    "cs-regression/warp/append-0-reset-again.gpa_frame": "8298fe311e78cec11efe84122b7c87dda63ebba6330de1aa16699eef88b11d39",
+    "cs-regression/warp/append-0.gpa_frame": "51fa6b8d1f3a02c72b566a4a2d1fd7e2cb4719eb5306d4c34a1052ef533825f0",
+    "cs-regression/warp/append-1-no-draw.gpa_frame": "f168382af7a7cd5e2a89dea82de01fdac6e75031a681d7758d37f52ba2c5a386",
+    "cs-regression/warp/append-1-reset-again.gpa_frame": "4df466e62e9687b65f07f49fba1b37b3f136d10e6e9ebf14ad734c27b45a1a47",
+    "cs-regression/warp/append-1.gpa_frame": "0b7edbb705c1dad35ef5e1093c365200cc7f9ecae616d6345b1c3ddae6f0a950",
+    "cs-regression/warp/counter-0-no-draw.gpa_frame": "0a521504f5312f698ee64e613d3e9613206d298b41b467c2b8fb883e1b2786c8",
+    "cs-regression/warp/counter-0-reset-again.gpa_frame": "c915c2a375daa2e8b826d9acbecfdc49b290c088eab64f8afb12bed8efeedef5",
+    "cs-regression/warp/counter-0.gpa_frame": "acd94d7140bb018acd045e0dcd1a0b51357cc6a5cc97987b71e0cdf4a8c107c8",
+    "cs-regression/warp/counter-1-no-draw.gpa_frame": "e9ed22a95ac21792a5d601a68c5faff656c8bf5c255339be0d29c58b318725e7",
+    "cs-regression/warp/counter-1-reset-again.gpa_frame": "3772cd49a18ae6acac0fb1f9966f69461148dfe92413807f9ba9bc7627f13ddc",
+    "cs-regression/warp/counter-1.gpa_frame": "23b7749642622f1dc3b1573be7962b5cfd86baefd7e6f87a669e53b6b593bb8d",
+    "injected/native/32/session/frame-511a6743-1e06-412d-9984-4a0bcd2fc4f9.gpa_frame": "04299ba9fe173453aadce26b3c083bf6cbc14026071ad7077ded3d17caaaa6bd",
+    "injected/native/32/session/frame-5a1d469c-0bba-4ba5-9377-494dfc048e1c.gpa_frame": "093babec8de4508814e3639d265cfa903f71357126d26209ac520e7c21e7cf70",
+    "injected/native/32/session/frame-83d70a70-6c43-4583-80de-ace6e396cd15.gpa_frame": "1716105249bcb67a9d57fe8fc156af51a031a51d67ea13779b328d06343051b0",
+    "injected/native/32/session/frame-957f3eec-5765-478b-bef2-cd64fe6f4eff.gpa_frame": "ae3dce0cce00d36a640d46fca317ce9463d3c6411a725e50b9cfec22fadb2060",
+    "injected/native/32/session/frame-bc1a6e2b-2547-4974-9660-eb9785a43a2f.gpa_frame": "72bd9427970f91d0bce5fc0abe8ac03b58f08f08d2010d836c4a111610e435dc"
+  },
+  "evidence_manifest": {
+    "path": "artifacts/capture-deferred-om-counters-20261014/evidence-manifest.json",
+    "sha256": "10655a0418eec3866b3db54bbddd99022478489bdd845ccbab3c55860564a24b",
+    "files": 3384
+  },
+  "validation_sequence": "Complete capture suite; test-only KEEP variants then four native suites, final OM/CS corpora, original observer, independent package and focused application suites",
+  "replay_or_format_changed": false,
+  "new_gf2_acceptance": false,
+  "overall_capture_status": "partial",
+  "remaining": [
+    "Unknown initial KEEP without recorded reset",
+    "Numeric UINT_MAX counter restoration",
+    "Extended UAV slots and exhaustive OM stages/slots",
+    "Broader predicate/SO/query and synchronization profiles",
+    "Historical Intel/NVIDIA pixel mismatches"
+  ]
+}

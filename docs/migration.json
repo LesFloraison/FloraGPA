@@ -4002,7 +4002,7 @@
     "deferred_mappings": "Capture-owned Map HRESULT/type/flags/pitches and Unmap payloads; borrowed pointers excluded from immutable lists. Complete dynamic-buffer WRITE_DISCARD and verified same-list NO_OVERWRITE, plus single-mip/single-layer dynamic texture discards with checked pitches, lower per execution. Unknown/GPU-mutated baselines, invalid pitches and broader rename dependencies refuse. See CAPTURE_DEFERRED_TEXTURE.md.",
     "deferred_bindings": "Typed input histories for 45 valid deferred APIs plus native effective action snapshots; unsupported MinLOD/class/hidden-state profiles reject",
     "deferred_definitions": "Independent CPU creation graphs preserve device/resource/view dependencies, DXBC, state descriptors, semantic strings and original creation bytes after native destruction; not execution-time GPU contents or deferred encoding",
-    "deferred_effective_state": "Native compilation-time getter snapshots plus execution-time GPU initial data feed supported flattened actions. Explicit deferred CS Counter/Append reset histories and ordered KEEP are verified; unknown first KEEP, OM hidden counters and broader hidden state refuse.",
+    "deferred_effective_state": "Native compilation-time getter snapshots plus execution-time GPU initial data feed supported flattened actions. Explicit CS/OM Counter/Append reset histories and ordered KEEP are verified; unknown first KEEP and broader hidden state refuse. OM helper restoration preserves CB1 windows and has original-player buffer/counter observations.",
     "deferred_execution": "Supported Draw/Dispatch/Clear/Copy/Update and scoped Map/Unmap actions expand at actual immediate ExecuteCommandList positions. Bounded merged lists preserve repeated child order and full CPU ancestry. Same-frame compilation with workers joined before submission is validated. Open-map merges, unverified states/dependencies and foreign immediate execution refuse.",
     "deferred_nooverwrite_validation": {
       "evidence": "docs/CAPTURE_DEFERRED_NOOVERWRITE.md",
@@ -4039,7 +4039,7 @@
       "evidence": "docs/capture-package-baseline.json",
       "limits": "Restricted system-PATH runtime checks on this host, not clean-machine certification or GF2 acceptance; first replay package attempt failed for incomplete runtime inputs and explicit retry passed.",
       "current_source_validation": {
-        "status": "Current-source independent packages pass on this host",
+        "status": "GF2 acceptance packages at the recorded source commit; later capture builds have separate stage evidence",
         "source_commit": "e3f46740e0118815d80c4b4f63254510dc365761",
         "evidence": "docs/capture-gf2-acceptance-baseline.json",
         "capture_binary_identity_matches_six_frames": true,
@@ -4093,7 +4093,18 @@
       "packaged_injected_frames": 5,
       "packaged_injected_checks": 33,
       "malformed_model_checks": 104,
-      "limits": "CS Counter/Append explicit reset before first use within each submission; null/UINT_MAX KEEP and nested/repeated lists verified. Unknown initial KEEP, OM counters and numeric UINT_MAX refuse. No new GF2 or original GUI acceptance; overall delivery remains partial."
+      "limits": "Historical CS-stage validation. OM support follows in deferred_om_counter_validation. Unknown initial KEEP and numeric UINT_MAX still refuse. No new GF2 or original GUI acceptance; overall delivery remains partial."
+    },
+    "deferred_om_counter_validation": {
+      "evidence": "docs/CAPTURE_DEFERRED_OM_COUNTERS.md",
+      "baseline": "docs/capture-deferred-om-counters-baseline.json",
+      "dual_player_files": 48,
+      "dual_player_checks": 968,
+      "packaged_injected_frames": 5,
+      "packaged_injected_checks": 33,
+      "original_observed_draws": 108,
+      "original_counter_and_buffer_boundaries": 216,
+      "limits": "Native PS slot 1 with one RTV, CB1 window, Append/Counter and nested/repeated lists; not exhaustive OM stage/slot coverage. First-use unknown KEEP, numeric UINT_MAX and broader hidden states remain pending. Historical GF2 runtime identities unchanged."
     }
   }
 }

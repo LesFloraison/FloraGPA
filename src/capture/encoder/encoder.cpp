@@ -301,10 +301,35 @@ class Encoder {
         }
         add(7,uint16_t((window?0x24f:0x249)+index),std::move(p));constant_windows_[index]=window;
     }
+    void counter_resets(const RecordedCommand& command){
+        const auto& s=command.bindings;
+        const bool om_reset=std::any_of(command.uav_counters.begin(),command.uav_counters.end(),[&](const auto& entry){
+            return std::find(s.om_uavs.begin(),s.om_uavs.end(),entry.first)!=s.om_uavs.end();});
+        if(om_reset){
+            std::u16string name=u"FloraCapture counter reset: OM through CS";name.push_back(0);
+            add(7,0x327b,Payload{}.q({0,UINT64_MAX-3}).u({0,narrow(name.size()*2)}).bytes({reinterpret_cast<const uint8_t*>(name.data()),name.size()*2}));
+            // Avoid output/input hazards while temporarily binding the same view
+            // to CS. The following complete action snapshot restores bindings;
+            // CB1 setters must be emitted AFTER this helper, not cleared by it.
+            add(7,0x242,Payload{}.q({0,1}));
+        }
+        for(const auto& [id,count]:command.uav_counters){
+            const auto cs=std::find(s.cs_uavs.begin(),s.cs_uavs.end(),id);
+            const auto om=std::find(s.om_uavs.begin(),s.om_uavs.end(),id);
+            require(cs!=s.cs_uavs.end() || om!=s.om_uavs.end(),"Encoder counter reset is not bound");
+            const bool temporary=cs==s.cs_uavs.end();
+            Payload p;p.q({0,1}).u({temporary?0u:UINT(cs-s.cs_uavs.begin()),1})
+                .value<uint8_t>(1).value(typed(id,{"uav","uav1"})).value<uint8_t>(1).value(count);
+            add(7,0x25e,std::move(p));
+            if(temporary)add(7,0x25e,Payload{}.q({0,1}).u({0,1}).value<uint8_t>(1).value<uint64_t>(0).value<uint8_t>(0));
+        }
+        if(om_reset)add(7,0x327c,Payload{}.q({0,UINT64_MAX-3}).u({0}));
+    }
     uint64_t state(const RecordedCommand& command){
         const auto& s=command.bindings;require(s.context==context_ && s.device==device_,"Encoder mixed context/device state");
         require(!s.predicate && std::all_of(s.stream_targets.begin(),s.stream_targets.end(),[](auto id){return id==0;}),"Predicate/SO state encoding pending");
         for(const auto& [id,lod]:s.resource_min_lod){resource_ref(id);require(lod==0,"Nonzero resource minimum LOD encoding pending");}
+        counter_resets(command);
         state_block out{};out.mask.fill(UINT32_MAX);
         out.ib=ref(s.index_buffer,"buffer");out.ib_format=s.index_format;out.ib_offset=s.index_offset;out.input_layout=ref(s.input_layout,"input_layout");out.topology=s.topology;
         refs(s.vertices,out.vb,{"buffer"});out.strides=s.strides;out.offsets=s.offsets;
@@ -329,26 +354,12 @@ class Encoder {
                  else require(command.uav_counter_keeps.contains(id) && initialized_counters_.contains(id),"Encoder hidden UAV counter is missing");}};
         out.om_uav_start=64;out.om_uav_counts.fill(UINT32_MAX);out.cs_uav_counts.fill(UINT32_MAX);
         for(size_t i=0;i<64;++i){require(i<8 || (!s.om_uavs[i] && !s.cs_uavs[i]),"Extended UAV wire validation pending");if(i>=8)continue;
-            if(s.om_uavs[i]){typed(s.om_uavs[i],{"uav","uav1"});const auto d=descriptor<D3D11_UNORDERED_ACCESS_VIEW_DESC>(frame_.objects.at(s.om_uavs[i]));
-                require(d.ViewDimension!=D3D11_UAV_DIMENSION_BUFFER || !(d.Buffer.Flags&(D3D11_BUFFER_UAV_FLAG_APPEND|D3D11_BUFFER_UAV_FLAG_COUNTER)),"Encoder OM counter state wire validation pending");}
             require_counter(s.om_uavs[i]);require_counter(s.cs_uavs[i]);
             out.rtv[i]=typed(s.render_targets[i],{"rtv","rtv1"});if(out.rtv[i])out.rt_count=UINT(i+1);
             if(s.om_uavs[i]){require(!s.render_targets[i],"Overlapping RTV/UAV state");out.rtv[i]=typed(s.om_uavs[i],{"uav","uav1"});out.om_uav_start=(std::min)(out.om_uav_start,UINT(i));out.rt_count=UINT(i+1);}
             out.cs_uav[i]=typed(s.cs_uavs[i],{"uav","uav1"});if(out.cs_uav[i])out.cs_uav_count=UINT(i+1);
         }
-        // Snapshot count fields do not establish a counter's initial value.
-        // Emit the verified setter wire record before consumption; subsequent
-        // snapshot binding must KEEP the value updated by GPU execution.
-        for(const auto& [id,count]:command.uav_counters){
-            const auto cs=std::find(s.cs_uavs.begin(),s.cs_uavs.end(),id);
-            const auto om=std::find(s.om_uavs.begin(),s.om_uavs.end(),id);
-            require(cs!=s.cs_uavs.end() || om!=s.om_uavs.end(),"Encoder counter reset is not bound");
-            require(cs!=s.cs_uavs.end(),"Encoder OM counter reset wire validation pending");
-            Payload p;p.q({0,1});
-            p.u({UINT(cs-s.cs_uavs.begin()),1})
-                .value<uint8_t>(1).value(ref(id)).value<uint8_t>(1).value(count);
-            add(7,0x25e,std::move(p));
-        }
+        // Setters establish initialization; snapshots KEEP the GPU-updated value.
         return add(3,3,Payload{}.bytes(encode_state_block(out)));
     }
 public:

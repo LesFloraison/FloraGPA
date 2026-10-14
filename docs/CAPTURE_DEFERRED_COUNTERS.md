@@ -1,5 +1,9 @@
 # Deferred CS UAV counter resets and KEEP
 
+Follow-up: [OM counter validation](CAPTURE_DEFERRED_OM_COUNTERS.md) extends the
+OM refusal described in this historical CS-stage report, with native and
+original-player hidden-state evidence. Its initial-KEEP limits still apply.
+
 Capture now lowers explicit CS Append/Counter resets and subsequent KEEP uses
 from its own deferred journal. A pending reset belongs to the UAV identity and
 survives pipeline restoration, unbinding and nested list boundaries. The first
