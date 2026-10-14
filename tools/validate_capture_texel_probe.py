@@ -130,6 +130,8 @@ def main():
                 ('vendor', dict(vendor=0), 'Invalid vendor'),
                 ('range', dict(last=application[1]), 'identical first/last'),
                 ('checkpoint-budget', dict(mode='checkpoint'), 'budget >= 3'),
+                ('depth-budget', dict(mode='depth', budget=3), 'Depth checkpoint read budget too small'),
+                ('depth-missing-dsv', dict(mode='depth', budget=7), 'requires a bound DSV'),
                 ('non-event', dict(first=resource, last=resource), 'event boundaries'),
                 ('existing', dict(destination=existing), 'already exists'),
                 ('exhausted', dict(mode='trace', last=application[-1]), 'Read budget exhausted')]
@@ -140,6 +142,9 @@ def main():
         if label == 'exhausted':
             report = json.loads((destination / 'report.json').read_text())
             assert not report['completed'] and len(report['observations']) == 1
+        elif label == 'depth-missing-dsv':
+            report = json.loads((destination / 'report.json').read_text())
+            assert not report['completed'] and not (destination / 'frame.png').exists()
         elif label == 'existing':
             assert (existing / 'report.json').read_bytes() == original
         else:

@@ -1,0 +1,236 @@
+{
+  "schema": 1,
+  "date": "2026-10-14",
+  "source_parent_commit": "83809ddd7d62a434e1f6f952cad81b61a1c3b05d",
+  "source_hashes": {
+    "CMakeLists.txt": "20920b84cd6d184d59d66f5dcab38b29d68465984b0f7e9148f26f52bdcafc49",
+    "tools/native/depth_checkpoint_tests.cpp": "7f573e1fd6ecef3377047ebad9fa40c9904cd0e982b6d71f0b81474394af8e7e",
+    "tools/native/texel_checkpoint.h": "0f50dae3c0dc5fa4ec49fd67e6c472fc8b6e519170d5fef6c979823d0fba8e67",
+    "tools/native/replay_texel_probe.cpp": "205bb9786e00a7641b7a8cf7a7fbdf862f79b0d29a461c39f18a42efc1c069b5",
+    "tools/validate_capture_texel_probe.py": "a1f824dabea03e0a01b4cb7fcc347525b22c48a8cb5b209c78944220ec1d32ef",
+    "docs/CAPTURE_GF2_DEPTH_CHECKPOINT.md": "d9e1b83a48ae493046e0bf8bb1147c7159f03eb8ffa1fbbff42613a60be241e5"
+  },
+  "current_gate_passed": false,
+  "production_changed": false,
+  "input": {
+    "file": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-resolve-current-20261014\\launch-2\\session\\frame-d3b245ec-09d2-4888-91af-5032f19ddbd6.gpa_frame",
+    "sha256": "9bef49cd3f807ae3796ece91d35960604ce4158d0736acb5d545efa346aafacf",
+    "event": 5651,
+    "color_resource": 411,
+    "depth_resource": 419,
+    "sample": 1,
+    "layer": 0,
+    "x": 1596,
+    "y": 1519
+  },
+  "depth_state": {
+    "back": [
+      1,
+      1,
+      1,
+      8
+    ],
+    "depth_enable": 1,
+    "depth_function": 7,
+    "depth_write_mask": 1,
+    "front": [
+      1,
+      1,
+      3,
+      8
+    ],
+    "resource": 419,
+    "stencil_enable": 1,
+    "stencil_read_mask": 255,
+    "stencil_reference": 200,
+    "stencil_write_mask": 255
+  },
+  "depth_samples": [
+    {
+      "after": false,
+      "depth_float_bits": 1025609039,
+      "sample": 0,
+      "stencil": 200
+    },
+    {
+      "after": false,
+      "depth_float_bits": 1025614223,
+      "sample": 1,
+      "stencil": 200
+    },
+    {
+      "after": true,
+      "depth_float_bits": 1025641657,
+      "sample": 0,
+      "stencil": 200
+    },
+    {
+      "after": true,
+      "depth_float_bits": 1025625546,
+      "sample": 1,
+      "stencil": 200
+    }
+  ],
+  "runs": [
+    {
+      "index": 0,
+      "report_sha256": "616e38118f41a65c3333de68129a885cf06559d9ece8ed3d884f842caa3f2f7f",
+      "png_sha256": "0e119453793730e1935d5813cd759c69091d9e21ee371235b5214f0127b656fd",
+      "rgba_sha256": "b548683168d47d12344c2a976155eb716c4a14d135dcbb8c9df542b0abd0caa1",
+      "capture_matching": false
+    },
+    {
+      "index": 1,
+      "report_sha256": "616e38118f41a65c3333de68129a885cf06559d9ece8ed3d884f842caa3f2f7f",
+      "png_sha256": "0e119453793730e1935d5813cd759c69091d9e21ee371235b5214f0127b656fd",
+      "rgba_sha256": "b548683168d47d12344c2a976155eb716c4a14d135dcbb8c9df542b0abd0caa1",
+      "capture_matching": false
+    },
+    {
+      "index": 2,
+      "report_sha256": "616e38118f41a65c3333de68129a885cf06559d9ece8ed3d884f842caa3f2f7f",
+      "png_sha256": "0e119453793730e1935d5813cd759c69091d9e21ee371235b5214f0127b656fd",
+      "rgba_sha256": "b548683168d47d12344c2a976155eb716c4a14d135dcbb8c9df542b0abd0caa1",
+      "capture_matching": false
+    },
+    {
+      "index": 3,
+      "report_sha256": "616e38118f41a65c3333de68129a885cf06559d9ece8ed3d884f842caa3f2f7f",
+      "png_sha256": "0e119453793730e1935d5813cd759c69091d9e21ee371235b5214f0127b656fd",
+      "rgba_sha256": "b548683168d47d12344c2a976155eb716c4a14d135dcbb8c9df542b0abd0caa1",
+      "capture_matching": false
+    },
+    {
+      "index": 4,
+      "report_sha256": "616e38118f41a65c3333de68129a885cf06559d9ece8ed3d884f842caa3f2f7f",
+      "png_sha256": "0e119453793730e1935d5813cd759c69091d9e21ee371235b5214f0127b656fd",
+      "rgba_sha256": "b548683168d47d12344c2a976155eb716c4a14d135dcbb8c9df542b0abd0caa1",
+      "capture_matching": false
+    },
+    {
+      "index": 5,
+      "report_sha256": "616e38118f41a65c3333de68129a885cf06559d9ece8ed3d884f842caa3f2f7f",
+      "png_sha256": "0e119453793730e1935d5813cd759c69091d9e21ee371235b5214f0127b656fd",
+      "rgba_sha256": "b548683168d47d12344c2a976155eb716c4a14d135dcbb8c9df542b0abd0caa1",
+      "capture_matching": false
+    },
+    {
+      "index": 6,
+      "report_sha256": "616e38118f41a65c3333de68129a885cf06559d9ece8ed3d884f842caa3f2f7f",
+      "png_sha256": "0e119453793730e1935d5813cd759c69091d9e21ee371235b5214f0127b656fd",
+      "rgba_sha256": "b548683168d47d12344c2a976155eb716c4a14d135dcbb8c9df542b0abd0caa1",
+      "capture_matching": false
+    },
+    {
+      "index": 7,
+      "report_sha256": "616e38118f41a65c3333de68129a885cf06559d9ece8ed3d884f842caa3f2f7f",
+      "png_sha256": "0e119453793730e1935d5813cd759c69091d9e21ee371235b5214f0127b656fd",
+      "rgba_sha256": "b548683168d47d12344c2a976155eb716c4a14d135dcbb8c9df542b0abd0caa1",
+      "capture_matching": false
+    },
+    {
+      "index": 8,
+      "report_sha256": "558c39d7496888967f42cd3a26bdf71a80718f09c4366026f0da03b042f92b31",
+      "png_sha256": "488fe73cd858012a8973a48eb2f9139f68857ce1668ef013885936f5cb45369b",
+      "rgba_sha256": "d5ffe329528ecabc09517514d1b41c5a8d305210480ad9454c732051a697d0e7",
+      "capture_matching": true
+    },
+    {
+      "index": 9,
+      "report_sha256": "558c39d7496888967f42cd3a26bdf71a80718f09c4366026f0da03b042f92b31",
+      "png_sha256": "488fe73cd858012a8973a48eb2f9139f68857ce1668ef013885936f5cb45369b",
+      "rgba_sha256": "d5ffe329528ecabc09517514d1b41c5a8d305210480ad9454c732051a697d0e7",
+      "capture_matching": true
+    }
+  ],
+  "pixel_differences": {
+    "b548683168d47d12344c2a976155eb716c4a14d135dcbb8c9df542b0abd0caa1": [
+      {
+        "x": 1182,
+        "y": 313,
+        "captured": [
+          12,
+          14,
+          12,
+          255
+        ],
+        "replayed": [
+          12,
+          15,
+          12,
+          255
+        ]
+      },
+      {
+        "x": 1182,
+        "y": 314,
+        "captured": [
+          13,
+          12,
+          8,
+          247
+        ],
+        "replayed": [
+          13,
+          12,
+          8,
+          248
+        ]
+      },
+      {
+        "x": 1183,
+        "y": 314,
+        "captured": [
+          22,
+          22,
+          17,
+          254
+        ],
+        "replayed": [
+          22,
+          22,
+          17,
+          255
+        ]
+      }
+    ],
+    "d5ffe329528ecabc09517514d1b41c5a8d305210480ad9454c732051a697d0e7": []
+  },
+  "input_resource_hashes": {
+    "17": "afc769e69b29cd956d5ff796d76d762681ecb4ba65b4b62a6b50c30abe6f68a3",
+    "60": "c01a2d733b26102cd633116c2fc65c3811beeb6c215a5674e006f7a3646cbbf2",
+    "97": "bf3bd795d66d8568d3c31f5462e2351aea297d85a9ef839c5dabb9301ceb3fe4",
+    "363": "712a0e859e9619959fb0682efee4f5af156df2b0426e242108f4e9c02de0fb81",
+    "365": "fbf6945e916735267c12a54b52966d357dccac287858431b0703e5112ff2e939",
+    "386": "0b87d1a379c8adb9ee1aa42770da3e247de3c605a34478fc381ca35fcb8a1a10",
+    "422": "066f00da3fe002547049e0d6c62586dbbc57d28feb5f530c9fe06ddf25af3268",
+    "675": "7c68f90861cba29188cc3a8ff13441723050ed3966f57c671f2e6e3bd19139ec",
+    "676": "19f1f7444503e0bce6dbdada65318a74e0f90d1a05d8a335ebc0b4485f0583e8",
+    "690": "e615f00e62f96057b8bf1b3f53f83f53dafbbb5f2d7359ac0a1929cc45b1ba55",
+    "798": "3085d5a6e50f1af627a56edae7c4ea5ea86d6ca53383ee03cebce7fa3156818c",
+    "799": "43e1ad0ab21d4346a999890676f10556c68788cbe3447b985d0adb3cc5c33b02",
+    "800": "4975cd4abb98e8e803fdc9652df8127c1a3b47289c9a6bf801992c3cac392eee",
+    "826": "619081936069bd9e80f56fe3ba7a2fab2c307badc543ed8c647f3c51ed8c1d95",
+    "896": "34325b9acc876ec0fb58fe66885160fd20ec83cd5120365fe74ef85a0aec8373"
+  },
+  "binaries": {
+    "FloraReplayTexelProbe.exe": "ba837dfc975ac1cc13895f59f78ce67bc47e650c6c497f84b7c560c453459935",
+    "FloraDepthCheckpointTests.exe": "78a4492e3e22d6d8e9c989fa5ad76b77eaccecb9462d941e68e20c5026ce6a4a"
+  },
+  "validation": {
+    "native_cases": 8,
+    "native_exact_texels": 192,
+    "native_refusals": 40,
+    "native_debug_warnings_or_errors": 0,
+    "probe_cases": 28,
+    "probe_refusals": 18,
+    "ctest_passed": 1
+  },
+  "replay_sha256": "215ebafed657953f0671c32a0948e12c8c965437a3eaa33e6d38aedcff5e2ddc",
+  "raw": {
+    "root": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-depth-checkpoint-20261014",
+    "files": 135,
+    "manifest_sha256": "ff0f083d104c9461dfbf63c687a361744658f7a0b8a22ed7146733649e395fc0"
+  },
+  "limits": "One pixel, both depth/stencil samples and native depth binding agree before/after across two color outcomes. Fifteen checked input resources also agree. Full planes, fragment histories and other native pipeline state are not proven equal; added copies alter scheduling. Formal six-frame gate remains failed."
+}

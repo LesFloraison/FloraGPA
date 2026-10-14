@@ -33,14 +33,14 @@ int wmain(int argc, wchar_t** argv) {
     Json report{{"schema", 1}, {"completed", false}, {"acceptance_established", false},
                 {"reference_pixels_used", false}, {"observations", Json::array()}};
     try {
-        require(argc == 13, "FRAME NEW_OUT VENDOR RESOURCE SAMPLE LAYER X Y before|after|trace|final|checkpoint|inputs FIRST LAST READ_BUDGET");
+        require(argc == 13, "FRAME NEW_OUT VENDOR RESOURCE SAMPLE LAYER X Y before|after|trace|final|checkpoint|inputs|depth FIRST LAST READ_BUDGET");
         const auto vendor = number(argv[3]), resource = number(argv[4]), sample = number(argv[5]),
                    layer = number(argv[6]), x = number(argv[7]), y = number(argv[8]),
                    first = number(argv[10]), last = number(argv[11]);
         // The final argument is an explicit read budget, including before/after trace observations.
         const auto budget = number(argv[12]);
         const std::wstring mode(argv[9]);
-        const bool checkpoint = mode == L"checkpoint" || mode == L"inputs";
+        const bool checkpoint = mode == L"checkpoint" || mode == L"inputs" || mode == L"depth";
         require(mode == L"before" || mode == L"after" || mode == L"trace" || mode == L"final" || checkpoint, "Unknown probe mode");
         const bool full = mode == L"trace" || mode == L"final" || checkpoint;
         require(vendor && vendor <= UINT16_MAX && resource && first && last >= first,
@@ -61,6 +61,7 @@ int wmain(int argc, wchar_t** argv) {
         require(typed != 0, "Expected RGBA8/RGBA16 color family");
         require(sample < info.samples && layer < info.layers && x < info.width && y < info.height,
                 "Texel selection out of bounds");
+        require(mode != L"depth" || budget >= 3 + 2 * info.samples,"Depth checkpoint read budget too small");
         uint64_t bytes = 0;
         for (const auto& sub : textureSubresources(description)) {
             require(sub.size <= (uint64_t(2) << 30) - bytes, "Readback memory budget exceeded");
@@ -73,7 +74,7 @@ int wmain(int argc, wchar_t** argv) {
                     "Expected Draw/Dispatch event boundaries");
         require(fs::create_directory(destination), "Cannot create output directory");
         output = destination;
-        report.update({{"mode", mode == L"inputs" ? "inputs" : mode == L"checkpoint" ? "checkpoint" : mode == L"final" ? "final" : mode == L"trace" ? "trace" : mode == L"before" ? "before" : "after"}, {"vendor", vendor},
+        report.update({{"mode", mode == L"depth" ? "depth" : mode == L"inputs" ? "inputs" : mode == L"checkpoint" ? "checkpoint" : mode == L"final" ? "final" : mode == L"trace" ? "trace" : mode == L"before" ? "before" : "after"}, {"vendor", vendor},
                        {"resource", resource}, {"sample", sample}, {"layer", layer}, {"x", x}, {"y", y},
                        {"first", first}, {"last", last}, {"read_budget", budget},
                        {"observer_changes_scheduling", mode == L"trace" || checkpoint}, {"typed_format", typed}});
@@ -108,6 +109,7 @@ int wmain(int argc, wchar_t** argv) {
         // Draw snapshots identify potential RTV writers, not every possible resource mutation.
         std::set<Id> writers;
         std::array<Com<ID3D11Texture2D>, 2> checkpoints;
+        std::array<Com<ID3D11Texture2D>, 2> depthCopies;
         diagnostic::InputCheckpoint inputCopies;
         ReplayBoundaryObserver observer;
         if (mode == L"trace" || checkpoint) {
@@ -126,10 +128,36 @@ int wmain(int argc, wchar_t** argv) {
                 if (writer) {
                     writers.insert(id);
                     if (checkpoint) {
-                        if (mode == L"inputs" && !after)
+                        if ((mode == L"inputs" || mode == L"depth") && !after)
                             inputCopies.capture(replay.nativeDevice(), context, objects);
                         require(objects.contains(resource), "Resource has no executed GPU object");
                         checkpoints[after ? 1 : 0] = diagnostic::checkpoint(replay.nativeDevice(), context, objects.at(resource).Get(), typed);
+                        if (mode == L"depth") {
+                            Com<ID3D11DepthStencilView> view; context->OMGetRenderTargets(0,nullptr,&view);
+                            require(bool(view), "Depth checkpoint requires a bound DSV");
+                            D3D11_DEPTH_STENCIL_VIEW_DESC vd{};view->GetDesc(&vd);
+                            require(vd.Format==DXGI_FORMAT_D32_FLOAT_S8X24_UINT,"Depth checkpoint requires D32S8");
+                            Com<ID3D11Resource> native;view->GetResource(&native);
+                            Com<ID3D11Texture2D> texture;check(native.As(&texture),"Get depth checkpoint source");
+                            D3D11_TEXTURE2D_DESC desc{};texture->GetDesc(&desc);
+                            require(desc.Width==info.width && desc.Height==info.height && desc.SampleDesc.Count==info.samples &&
+                                    desc.ArraySize==1 && layer==0 && vd.ViewDimension==D3D11_DSV_DIMENSION_TEXTURE2DMS,
+                                    "Depth checkpoint requires a matching single-layer MSAA DSV");
+                            require(uint64_t(desc.Width)*desc.Height*desc.SampleDesc.Count*16 <= (uint64_t(512)<<20),"Depth checkpoint memory budget exceeded");
+                            Com<IUnknown> identity;check(native.As(&identity),"Get depth identity");Id depthId{};
+                            for(const auto& [candidate,object]:objects){Com<IUnknown> other;check(object.As(&other),"Get native identity");if(other.Get()==identity.Get()){depthId=candidate;break;}}
+                            require(depthId!=0,"Depth resource has no executed identity");
+                            Com<ID3D11DepthStencilState> ds;UINT stencilRef{};context->OMGetDepthStencilState(&ds,&stencilRef);
+                            require(bool(ds),"Depth checkpoint requires explicit depth state");
+                            D3D11_DEPTH_STENCIL_DESC stateDesc{};ds->GetDesc(&stateDesc);
+                            const auto face=[](const auto& f){return Json::array({f.StencilFailOp,f.StencilDepthFailOp,f.StencilPassOp,f.StencilFunc});};
+                            Json stateReport={{"resource",depthId},{"stencil_reference",stencilRef},{"depth_enable",stateDesc.DepthEnable},
+                                {"depth_write_mask",stateDesc.DepthWriteMask},{"depth_function",stateDesc.DepthFunc},{"stencil_enable",stateDesc.StencilEnable},
+                                {"stencil_read_mask",stateDesc.StencilReadMask},{"stencil_write_mask",stateDesc.StencilWriteMask},
+                                {"front",face(stateDesc.FrontFace)},{"back",face(stateDesc.BackFace)}};
+                            if(after)require(report["depth_state"]==stateReport,"Draw changed depth binding state");else report["depth_state"]=stateReport;
+                            depthCopies[after?1:0]=diagnostic::checkpoint(replay.nativeDevice(),context,native.Get(),20);
+                        }
                     } else read(id, after, objects);
                 }
             };
@@ -143,6 +171,14 @@ int wmain(int argc, wchar_t** argv) {
                 report["observations"].push_back({{"event", first}, {"after", i != 0}, {"words", words}});
             }
         }
+        if(mode==L"depth"){
+            require(depthCopies[0] && depthCopies[1],"Missing depth checkpoints");
+            report["depth_samples"]=Json::array();
+            for(unsigned after=0;after<2;++after)for(uint32_t lane=0;lane<info.samples;++lane){
+                const auto value=diagnostic::readCheckpoint(replay.nativeDevice(),depthCopies[after].Get(),20,lane,0,uint32_t(x),uint32_t(y));
+                report["depth_samples"].push_back({{"after",after!=0},{"sample",lane},{"depth_float_bits",value[0]},{"stencil",value[1]}});
+            }
+        }
         if (!full)
             replay.inspectNativeState([&](auto*, const auto& objects) { read(first, mode == L"after", objects); });
         require(mode == L"final" || !report["observations"].empty(), "No selected render target writers observed");
@@ -150,7 +186,7 @@ int wmain(int argc, wchar_t** argv) {
         report["last_work_event"] = replay.lastWorkEvent(); report["writers"] = writers;
         if (full) {
             const auto image = replay.output();
-            if (mode == L"inputs") report["inputs"] = inputCopies.read(replay.nativeDevice());
+            if (mode == L"inputs" || mode == L"depth") report["inputs"] = inputCopies.read(replay.nativeDevice());
             replay.inspectNativeState([&](auto*, const auto& objects) {
                 require(objects.contains(image.resource) && frame.resource(image.resource).type == 0x85,
                         "Final output is not an executed GPU texture");
