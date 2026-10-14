@@ -4177,6 +4177,23 @@
       "golden_frames_exact": 2,
       "current_gate_passed": false,
       "limits": "Between-execution variation remains; large RenderDoc history failed with Intel device loss. Active replay GPU reporting verified on two small controls. No capture or rendering fix."
+    },
+    "gf2_isolated_draw_diagnosis": {
+      "evidence": "docs/CAPTURE_GF2_DRAW_FIXTURE.md",
+      "baseline": "docs/capture-gf2-draw-fixture-baseline.json",
+      "event": 5598,
+      "resources": 19,
+      "native_draw_processes": 5,
+      "draw_repetitions": 13,
+      "initial_sample_comparisons_exact": 104,
+      "post_draw_sample_comparisons": 104,
+      "post_draw_samples_exact": 91,
+      "skip_draw_processes": 1,
+      "refusals_passed": 11,
+      "ctest_passed": 4,
+      "golden_frames_exact": 2,
+      "current_gate_passed": false,
+      "limits": "Standalone D3D11 runner consistently yields the known lower single-pixel variant; exported post-draw data is higher. All eight initial samples restore exactly. No within-runner variability, root cause, production fix or new accepted frame; original GPA GUI and formal gate remain incomplete."
     }
   }
 }

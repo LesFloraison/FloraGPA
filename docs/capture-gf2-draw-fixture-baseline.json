@@ -1,0 +1,465 @@
+{
+  "schema": "FloraGPA isolated GF2 draw fixture 1",
+  "date": "2026-10-14",
+  "base_commit": "dd9f7b102dc6f7cbab56075f016aec99b9255428",
+  "current_gate_passed": false,
+  "production_changed": false,
+  "comparison": "Exact bytes; no relaxed threshold",
+  "input": {
+    "frame_sha256": "a30ddd946f1ff174d6c704c0d820554d0614f45f90508349e3004fb7f8cd9b06",
+    "event": 5598,
+    "bundle": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-draw-fixture-20261014\\bundle-complete",
+    "bundle_sha256": "2df2a232c3f25c773eeaf894dd9882b7e1430ab2b54f14f3a67ffa2d72821fa7",
+    "resources": 19,
+    "vs_sha256": "18669b668cb39b907a02cfec253f74b24d0c09c6ae73d0d65f27455032b2d869",
+    "ps_sha256": "fe92913b679084eb0c88a589285f8470cef44e70075b02a966adad683fd7bd95"
+  },
+  "processes": [
+    {
+      "path": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-draw-fixture-20261014\\intel-2\\report.json",
+      "report_sha256": "19da35dfc268fa5fe553794c480add9f7120932c3686c825bfc78f17a36a81c3",
+      "skip_draw": false,
+      "draw_repetitions": 1,
+      "restore_comparisons": 8,
+      "draw_comparisons": 8,
+      "draw_exact": 7,
+      "differences": [
+        {
+          "actual_file": "0-618-s0.bin",
+          "different_bytes": 4,
+          "different_pixels": 1,
+          "exact": false,
+          "expected_sha256": "b7b48ed95b35542afa7a66b93d9d029be81debe11ecc77741b4b74330fbc8a50",
+          "phase": "draw",
+          "repeat": 0,
+          "resource": 618,
+          "sample": 0,
+          "sha256": "10bfd552c3acc038eab0bb6fcecf3c309680f224dbba938eccd0d73013e144b4"
+        }
+      ],
+      "debug_messages": 0,
+      "module_audit_passed": true,
+      "adapter": {
+        "device": 18086,
+        "name": "Intel(R) Iris(R) Xe Graphics",
+        "vendor": 32902
+      }
+    },
+    {
+      "path": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-draw-fixture-20261014\\intel-3\\report.json",
+      "report_sha256": "68f4b49d47aabe0795833d736a8ea22f077d5b0f87d4a1ffdc0fd9e6840d0c31",
+      "skip_draw": false,
+      "draw_repetitions": 3,
+      "restore_comparisons": 24,
+      "draw_comparisons": 24,
+      "draw_exact": 21,
+      "differences": [
+        {
+          "actual_file": "0-618-s0.bin",
+          "different_bytes": 4,
+          "different_pixels": 1,
+          "exact": false,
+          "expected_sha256": "b7b48ed95b35542afa7a66b93d9d029be81debe11ecc77741b4b74330fbc8a50",
+          "phase": "draw",
+          "repeat": 0,
+          "resource": 618,
+          "sample": 0,
+          "sha256": "10bfd552c3acc038eab0bb6fcecf3c309680f224dbba938eccd0d73013e144b4"
+        },
+        {
+          "actual_file": "1-618-s0.bin",
+          "different_bytes": 4,
+          "different_pixels": 1,
+          "exact": false,
+          "expected_sha256": "b7b48ed95b35542afa7a66b93d9d029be81debe11ecc77741b4b74330fbc8a50",
+          "phase": "draw",
+          "repeat": 1,
+          "resource": 618,
+          "sample": 0,
+          "sha256": "10bfd552c3acc038eab0bb6fcecf3c309680f224dbba938eccd0d73013e144b4"
+        },
+        {
+          "actual_file": "2-618-s0.bin",
+          "different_bytes": 4,
+          "different_pixels": 1,
+          "exact": false,
+          "expected_sha256": "b7b48ed95b35542afa7a66b93d9d029be81debe11ecc77741b4b74330fbc8a50",
+          "phase": "draw",
+          "repeat": 2,
+          "resource": 618,
+          "sample": 0,
+          "sha256": "10bfd552c3acc038eab0bb6fcecf3c309680f224dbba938eccd0d73013e144b4"
+        }
+      ],
+      "debug_messages": 0,
+      "module_audit_passed": true,
+      "adapter": {
+        "device": 18086,
+        "name": "Intel(R) Iris(R) Xe Graphics",
+        "vendor": 32902
+      }
+    },
+    {
+      "path": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-draw-fixture-20261014\\intel-4\\report.json",
+      "report_sha256": "271a80fdda80e8997c942b82844ec671700e17210ed28f3c347690c881d9affd",
+      "skip_draw": false,
+      "draw_repetitions": 3,
+      "restore_comparisons": 24,
+      "draw_comparisons": 24,
+      "draw_exact": 21,
+      "differences": [
+        {
+          "actual_file": "0-618-s0.bin",
+          "different_bytes": 4,
+          "different_pixels": 1,
+          "exact": false,
+          "expected_sha256": "b7b48ed95b35542afa7a66b93d9d029be81debe11ecc77741b4b74330fbc8a50",
+          "phase": "draw",
+          "repeat": 0,
+          "resource": 618,
+          "sample": 0,
+          "sha256": "10bfd552c3acc038eab0bb6fcecf3c309680f224dbba938eccd0d73013e144b4"
+        },
+        {
+          "actual_file": "1-618-s0.bin",
+          "different_bytes": 4,
+          "different_pixels": 1,
+          "exact": false,
+          "expected_sha256": "b7b48ed95b35542afa7a66b93d9d029be81debe11ecc77741b4b74330fbc8a50",
+          "phase": "draw",
+          "repeat": 1,
+          "resource": 618,
+          "sample": 0,
+          "sha256": "10bfd552c3acc038eab0bb6fcecf3c309680f224dbba938eccd0d73013e144b4"
+        },
+        {
+          "actual_file": "2-618-s0.bin",
+          "different_bytes": 4,
+          "different_pixels": 1,
+          "exact": false,
+          "expected_sha256": "b7b48ed95b35542afa7a66b93d9d029be81debe11ecc77741b4b74330fbc8a50",
+          "phase": "draw",
+          "repeat": 2,
+          "resource": 618,
+          "sample": 0,
+          "sha256": "10bfd552c3acc038eab0bb6fcecf3c309680f224dbba938eccd0d73013e144b4"
+        }
+      ],
+      "debug_messages": 0,
+      "module_audit_passed": true,
+      "adapter": {
+        "device": 18086,
+        "name": "Intel(R) Iris(R) Xe Graphics",
+        "vendor": 32902
+      }
+    },
+    {
+      "path": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-draw-fixture-20261014\\intel-5\\report.json",
+      "report_sha256": "de1876c9909838f2603d896bcc8683ac36ec8e54257e8fb7365f3488612cc04e",
+      "skip_draw": false,
+      "draw_repetitions": 3,
+      "restore_comparisons": 24,
+      "draw_comparisons": 24,
+      "draw_exact": 21,
+      "differences": [
+        {
+          "actual_file": "0-618-s0.bin",
+          "different_bytes": 4,
+          "different_pixels": 1,
+          "exact": false,
+          "expected_sha256": "b7b48ed95b35542afa7a66b93d9d029be81debe11ecc77741b4b74330fbc8a50",
+          "phase": "draw",
+          "repeat": 0,
+          "resource": 618,
+          "sample": 0,
+          "sha256": "10bfd552c3acc038eab0bb6fcecf3c309680f224dbba938eccd0d73013e144b4"
+        },
+        {
+          "actual_file": "1-618-s0.bin",
+          "different_bytes": 4,
+          "different_pixels": 1,
+          "exact": false,
+          "expected_sha256": "b7b48ed95b35542afa7a66b93d9d029be81debe11ecc77741b4b74330fbc8a50",
+          "phase": "draw",
+          "repeat": 1,
+          "resource": 618,
+          "sample": 0,
+          "sha256": "10bfd552c3acc038eab0bb6fcecf3c309680f224dbba938eccd0d73013e144b4"
+        },
+        {
+          "actual_file": "2-618-s0.bin",
+          "different_bytes": 4,
+          "different_pixels": 1,
+          "exact": false,
+          "expected_sha256": "b7b48ed95b35542afa7a66b93d9d029be81debe11ecc77741b4b74330fbc8a50",
+          "phase": "draw",
+          "repeat": 2,
+          "resource": 618,
+          "sample": 0,
+          "sha256": "10bfd552c3acc038eab0bb6fcecf3c309680f224dbba938eccd0d73013e144b4"
+        }
+      ],
+      "debug_messages": 0,
+      "module_audit_passed": true,
+      "adapter": {
+        "device": 18086,
+        "name": "Intel(R) Iris(R) Xe Graphics",
+        "vendor": 32902
+      }
+    },
+    {
+      "path": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-draw-fixture-20261014\\standalone-intel\\report.json",
+      "report_sha256": "1ca07050aabf061ff9d27d0ff8dc7eaad7c7ce47c4da717e92558fa9bfce5bd6",
+      "skip_draw": false,
+      "draw_repetitions": 3,
+      "restore_comparisons": 24,
+      "draw_comparisons": 24,
+      "draw_exact": 21,
+      "differences": [
+        {
+          "actual_file": "0-618-s0.bin",
+          "different_bytes": 4,
+          "different_pixels": 1,
+          "exact": false,
+          "expected_sha256": "b7b48ed95b35542afa7a66b93d9d029be81debe11ecc77741b4b74330fbc8a50",
+          "phase": "draw",
+          "repeat": 0,
+          "resource": 618,
+          "sample": 0,
+          "sha256": "10bfd552c3acc038eab0bb6fcecf3c309680f224dbba938eccd0d73013e144b4"
+        },
+        {
+          "actual_file": "1-618-s0.bin",
+          "different_bytes": 4,
+          "different_pixels": 1,
+          "exact": false,
+          "expected_sha256": "b7b48ed95b35542afa7a66b93d9d029be81debe11ecc77741b4b74330fbc8a50",
+          "phase": "draw",
+          "repeat": 1,
+          "resource": 618,
+          "sample": 0,
+          "sha256": "10bfd552c3acc038eab0bb6fcecf3c309680f224dbba938eccd0d73013e144b4"
+        },
+        {
+          "actual_file": "2-618-s0.bin",
+          "different_bytes": 4,
+          "different_pixels": 1,
+          "exact": false,
+          "expected_sha256": "b7b48ed95b35542afa7a66b93d9d029be81debe11ecc77741b4b74330fbc8a50",
+          "phase": "draw",
+          "repeat": 2,
+          "resource": 618,
+          "sample": 0,
+          "sha256": "10bfd552c3acc038eab0bb6fcecf3c309680f224dbba938eccd0d73013e144b4"
+        }
+      ],
+      "debug_messages": 0,
+      "module_audit_passed": true,
+      "adapter": {
+        "device": 18086,
+        "name": "Intel(R) Iris(R) Xe Graphics",
+        "vendor": 32902
+      }
+    },
+    {
+      "path": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-draw-fixture-20261014\\standalone-skip\\report.json",
+      "report_sha256": "d4a2bfb71fd3ab9a1cbb679cfdb53d1ed10f74b37f0a2552c14a6e215be3bf18",
+      "skip_draw": true,
+      "draw_repetitions": 1,
+      "restore_comparisons": 8,
+      "draw_comparisons": 8,
+      "draw_exact": 2,
+      "differences": [
+        {
+          "actual_file": "0-415-s0.bin",
+          "different_bytes": 28332,
+          "different_pixels": 11749,
+          "exact": false,
+          "expected_sha256": "ee8c4daeca87ad70fcfcf995c274262b2d813bbc12b355e1c5715cf232a78b68",
+          "phase": "draw",
+          "repeat": 0,
+          "resource": 415,
+          "sample": 0,
+          "sha256": "73b66d497b72fe7c7b0c43984bd76f8314e23e1711319ebe39d6efa101cf8131"
+        },
+        {
+          "actual_file": "0-415-s1.bin",
+          "different_bytes": 28390,
+          "different_pixels": 11765,
+          "exact": false,
+          "expected_sha256": "28eea209c532cb00a7d0aef152ed0034ef4cd1cda5e95ad2fec48f329806f218",
+          "phase": "draw",
+          "repeat": 0,
+          "resource": 415,
+          "sample": 1,
+          "sha256": "354e785aed5bb1cdcacab43d61e851a5c626b2590130125e54c75e53f66c0cf8"
+        },
+        {
+          "actual_file": "0-419-s0.bin",
+          "different_bytes": 51592,
+          "different_pixels": 11794,
+          "exact": false,
+          "expected_sha256": "f4f80f6b0a37fdf9dcae3a7278d6a6a31cff3e4ebc0f368c95cff32b903269a1",
+          "phase": "draw",
+          "repeat": 0,
+          "resource": 419,
+          "sample": 0,
+          "sha256": "86d8aa6dbd3e2bdcc7730db47496eae9a6ed795c2e8e17a908f124e5daab0fc3"
+        },
+        {
+          "actual_file": "0-419-s1.bin",
+          "different_bytes": 51696,
+          "different_pixels": 11814,
+          "exact": false,
+          "expected_sha256": "652b86cb53a7828ef641c78f0439ef4682af2fac37eb030925290d4ab9a1e136",
+          "phase": "draw",
+          "repeat": 0,
+          "resource": 419,
+          "sample": 1,
+          "sha256": "00be48afb03a98bf98ba82612d54c2004d92781ca0958b37df6b382e09769f9f"
+        },
+        {
+          "actual_file": "0-618-s0.bin",
+          "different_bytes": 81026,
+          "different_pixels": 11794,
+          "exact": false,
+          "expected_sha256": "b7b48ed95b35542afa7a66b93d9d029be81debe11ecc77741b4b74330fbc8a50",
+          "phase": "draw",
+          "repeat": 0,
+          "resource": 618,
+          "sample": 0,
+          "sha256": "e2911d20e2d65de14c9b703fb4999016e0cad552c81f48fbcd77766a2a011891"
+        },
+        {
+          "actual_file": "0-618-s1.bin",
+          "different_bytes": 81178,
+          "different_pixels": 11814,
+          "exact": false,
+          "expected_sha256": "a35b24aaf37c0c99ac636f424343ba92c8bff6a872a387c17b1c3139d97f681e",
+          "phase": "draw",
+          "repeat": 0,
+          "resource": 618,
+          "sample": 1,
+          "sha256": "df51ee7e4a648425f9e6b9e8f97f55d62ecfbcbde2772adae2ceeb546dd82d42"
+        }
+      ],
+      "debug_messages": 0,
+      "module_audit_passed": true,
+      "adapter": {
+        "device": 18086,
+        "name": "Intel(R) Iris(R) Xe Graphics",
+        "vendor": 32902
+      }
+    }
+  ],
+  "failed_runs": [
+    "bundle",
+    "intel-0",
+    "intel-1"
+  ],
+  "validation": {
+    "refusals": [
+      {
+        "case": "refused-zero",
+        "exit": 1,
+        "message": "Repeat count must be 1..20"
+      },
+      {
+        "case": "refused-too-many",
+        "exit": 1,
+        "message": "Repeat count must be 1..20"
+      },
+      {
+        "case": "refused-signed",
+        "exit": 1,
+        "message": "Expected unsigned decimal argument"
+      },
+      {
+        "case": "refused-vendor",
+        "exit": 1,
+        "message": "Invalid vendor"
+      },
+      {
+        "case": "refused-option",
+        "exit": 2,
+        "message": "BUNDLE NEW_OUT PCI_VENDOR|warp REPEATS [--skip-draw]"
+      },
+      {
+        "case": "refused-existing",
+        "exit": 1,
+        "message": "Output directory must be new"
+      },
+      {
+        "case": "refused-incomplete",
+        "exit": 1,
+        "message": "Incomplete or unsupported fixture"
+      },
+      {
+        "case": "refused-truncated",
+        "exit": 1,
+        "message": "[json.exception.parse_error.101] parse error at line 1, column 2: syntax error while parsing object key - unexpected end of input; expected string literal"
+      },
+      {
+        "case": "refused-traversal",
+        "exit": 1,
+        "message": "Payload must have a flat filename"
+      },
+      {
+        "case": "refused-hash",
+        "exit": 1,
+        "message": "Payload size or SHA256 mismatch"
+      },
+      {
+        "case": "refused-pitch",
+        "exit": 1,
+        "message": "Subresource layout differs from its descriptor"
+      }
+    ],
+    "ctest_passed": 4,
+    "ctest_sha256": "0305b8df3124ef3533f570d668965e0dcc8895eaff7e5ac082863e4f6043f1e7",
+    "capture_only_configure_sha256": "b50bf58bc64f823fc5b4bf854850d299df895a88152b5f7d38145c71218e1325",
+    "standalone_configure_sha256": "035e596c3ec94f0d4e37b908d211ca3a4a330d82ea782fceeaa443b572a83bc7",
+    "standalone_build_sha256": "53f7d00ad3f41f477c07968238cfa3ea4d818a60185d814cb512a59b5282bb1b",
+    "golden": [
+      {
+        "label": "golden-gf2",
+        "rgba_sha256": "2e1abc5eacb0bbfd801f9fe059c305baa9a0786c384b36a42fa5a323dd979fd1",
+        "adapter": "NVIDIA GeForce RTX 3070 Laptop GPU"
+      },
+      {
+        "label": "golden-bf1",
+        "rgba_sha256": "1f724d1840652f66afd26dd30c95aecd5c1b4932eede56109198f15a8f57a2f6",
+        "adapter": "NVIDIA GeForce RTX 3070 Laptop GPU"
+      }
+    ],
+    "gpu_serial": true,
+    "original_gpa_gui": false
+  },
+  "production_identity": {
+    "replay_sha256": "215ebafed657953f0671c32a0948e12c8c965437a3eaa33e6d38aedcff5e2ddc",
+    "runtime_sha256": "f2d92dd99f5b26ee232064ca26645136fa808ab2e7e6e810193376527f092df3",
+    "controller_sha256": "0bc61e429745e1b0f6fd046762cae923471686782a1ab48ba853cca12aaaacf3"
+  },
+  "sources": {
+    "CMakeLists.txt": "64eed2107b493c06a6bf33da87c3174b72af90109b2519ca92349ca6244345b4",
+    "tools\\native\\native_draw_fixture.cpp": "33561ec98d264b82d3f64c190fa464907763542b0ebccac63ae9661bab37005d",
+    "tools\\native\\replay_draw_export_probe.cpp": "921f8366d0ed6698d3d5b2740b8b21ba6b09c7622e917e62f9bfea7c1638bd22",
+    "tools\\native\\draw_fixture\\CMakeLists.txt": "4a33ba5c0644a600c587e8a3f9fb02b96d196459534057f973fd93e873ed5d3d"
+  },
+  "binaries": {
+    "exporter_sha256": "f831735c7e239ec765cb196be3a1c32663165deba49ac83fee1d46262e7eafcd",
+    "full_runner_sha256": "74b5183c6d294fa5655ea328d8dfcae065cfce36374538b2dff42a351a3813de",
+    "standalone_runner_sha256": "2a2912171a0bd94f06c0b12c0e3cf8070d34d38dab4c2c798e44e306b0cb4520"
+  },
+  "evidence": {
+    "directory": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-draw-fixture-20261014",
+    "manifest_entries": 128,
+    "manifest_sha256": "4fee84c2e5ec5d92a49c145501c843864683f6679519b8923741bfda041042e1"
+  },
+  "limits": [
+    "The independent runner stays at the lower variant; only its comparison with the export execution differs. No within-runner variability reproduced.",
+    "Restoration, private resource identities and boundary readbacks change execution conditions. No driver root cause established.",
+    "Supports this restricted SM4 DrawIndexed fixture and listed resource shapes/formats; not a general frame player.",
+    "Current six-frame acceptance and original GPA GUI inspection remain incomplete."
+  ]
+}
