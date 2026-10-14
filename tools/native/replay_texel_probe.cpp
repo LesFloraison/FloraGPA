@@ -38,7 +38,7 @@ int wmain(int argc, wchar_t** argv) {
     Json report{{"schema", 1}, {"completed", false}, {"acceptance_established", false},
                 {"reference_pixels_used", false}, {"observations", Json::array()}};
     try {
-        require(argc == 13, "FRAME NEW_OUT VENDOR RESOURCE SAMPLE LAYER X Y before|after|trace|final|checkpoint|inputs|depth|pipeline|pipeline-debug|depth-planes|unblended|fragment|fragment-half|fragment-count|fragment-binding|fragment-masked|shader-recreate|shader-repack FIRST LAST READ_BUDGET");
+        require(argc == 13, "FRAME NEW_OUT VENDOR RESOURCE SAMPLE LAYER X Y before|after|trace|final|checkpoint|inputs|depth|pipeline|pipeline-debug|depth-planes|unblended|fragment|fragment-half|fragment-count|fragment-binding|fragment-masked|shader-recreate|shader-repack|shader-count-unused FIRST LAST READ_BUDGET");
         const auto vendor = number(argv[3]), resource = number(argv[4]), sample = number(argv[5]),
                    layer = number(argv[6]), x = number(argv[7]), y = number(argv[8]),
                    first = number(argv[10]), last = number(argv[11]);
@@ -47,7 +47,8 @@ int wmain(int argc, wchar_t** argv) {
         const std::wstring mode(argv[9]);
         const bool countOnly=mode==L"fragment-count"||mode==L"fragment-binding"||mode==L"fragment-masked";
         const bool fragment = mode == L"fragment" || mode == L"fragment-half" || countOnly;
-        const bool shaderExperiment=mode==L"shader-recreate"||mode==L"shader-repack";
+        const bool unusedOutput=mode==L"shader-count-unused";
+        const bool shaderExperiment=mode==L"shader-recreate"||mode==L"shader-repack"||unusedOutput;
         const bool pipeline = mode==L"depth-planes" || shaderExperiment || mode == L"pipeline-debug" || mode == L"pipeline" || mode == L"unblended" || fragment;
         const bool depth = mode == L"depth" || pipeline;
         const bool inputs = mode == L"inputs" || depth;
@@ -87,7 +88,7 @@ int wmain(int argc, wchar_t** argv) {
                     "Expected Draw/Dispatch event boundaries");
         require(fs::create_directory(destination), "Cannot create output directory");
         output = destination;
-        report.update({{"mode", mode == L"shader-recreate" ? "shader-recreate" : mode == L"shader-repack" ? "shader-repack" : mode == L"fragment-masked" ? "fragment-masked" : mode == L"fragment-binding" ? "fragment-binding" : mode == L"fragment-count" ? "fragment-count" : mode == L"fragment-half" ? "fragment-half" : mode == L"fragment" ? "fragment" : mode == L"unblended" ? "unblended" : mode == L"depth-planes" ? "depth-planes" : mode == L"pipeline-debug" ? "pipeline-debug" : mode == L"pipeline" ? "pipeline" : mode == L"depth" ? "depth" : mode == L"inputs" ? "inputs" : mode == L"checkpoint" ? "checkpoint" : mode == L"final" ? "final" : mode == L"trace" ? "trace" : mode == L"before" ? "before" : "after"}, {"vendor", vendor},
+        report.update({{"mode", unusedOutput ? "shader-count-unused" : mode == L"shader-recreate" ? "shader-recreate" : mode == L"shader-repack" ? "shader-repack" : mode == L"fragment-masked" ? "fragment-masked" : mode == L"fragment-binding" ? "fragment-binding" : mode == L"fragment-count" ? "fragment-count" : mode == L"fragment-half" ? "fragment-half" : mode == L"fragment" ? "fragment" : mode == L"unblended" ? "unblended" : mode == L"depth-planes" ? "depth-planes" : mode == L"pipeline-debug" ? "pipeline-debug" : mode == L"pipeline" ? "pipeline" : mode == L"depth" ? "depth" : mode == L"inputs" ? "inputs" : mode == L"checkpoint" ? "checkpoint" : mode == L"final" ? "final" : mode == L"trace" ? "trace" : mode == L"before" ? "before" : "after"}, {"vendor", vendor},
                        {"resource", resource}, {"sample", sample}, {"layer", layer}, {"x", x}, {"y", y},
                        {"first", first}, {"last", last}, {"read_budget", budget},
                        {"observer_changes_scheduling", mode == L"trace" || checkpoint}, {"typed_format", typed}});
@@ -154,7 +155,13 @@ int wmain(int argc, wchar_t** argv) {
                             SIZE_T bytes=0;check(fragmentDebug->GetMessage(i,nullptr,&bytes),"Measure fragment message");std::vector<uint8_t> data(bytes);auto* message=reinterpret_cast<D3D11_MESSAGE*>(data.data());check(fragmentDebug->GetMessage(i,message,&bytes),"Read fragment message");
                             report["fragment_debug"].push_back({{"severity",message->Severity},{"id",message->ID},{"text",message->pDescription}});
                         }
-                        for(const auto& message:report["fragment_debug"])require(message["severity"].template get<unsigned>()>D3D11_MESSAGE_SEVERITY_WARNING,"Fragment scope has a debug warning/error");
+                        unsigned expectedWarnings=0;
+                        for(const auto& message:report["fragment_debug"]){
+                            const auto severity=message["severity"].template get<unsigned>();
+                            if(unusedOutput && diagnostic::unusedOutputWarning(severity,message["id"].template get<unsigned>(),message["text"].template get<std::string>()))++expectedWarnings;
+                            else require(severity>D3D11_MESSAGE_SEVERITY_WARNING,"Fragment scope has an unexpected debug warning/error");
+                        }
+                        if(unusedOutput)report["expected_unbound_output_warnings"]=expectedWarnings;
                         fragmentDebug->ClearStoredMessages();
                     }
                     if(pipeline){
@@ -205,12 +212,18 @@ int wmain(int argc, wchar_t** argv) {
                                 if(mode==L"shader-recreate"||mode==L"fragment-binding")mirroredShader.assign(source.begin(),source.end());
                                 else if(mode==L"shader-repack"){
                                     auto parts=readDxbcParts(source);std::erase_if(parts,[](const auto& p){return p.first!=0x4e475349&&p.first!=0x4e47534f&&p.first!=0x52444853;});mirroredShader=makeDxbc(parts);
-                                }else mirroredShader=diagnostic::mirrorFragmentShader(source,countOnly);
+                                }else mirroredShader=diagnostic::mirrorFragmentShader(source,countOnly||unusedOutput);
                                 report["original_ps_sha256"]=sha256(source);report["mirrored_ps_sha256"]=sha256(mirroredShader);
                                 std::ofstream shaderFile(output/"mirrored.dxbc",std::ios::binary);shaderFile.exceptions(std::ios::badbit|std::ios::failbit);shaderFile.write(reinterpret_cast<const char*>(mirroredShader.data()),mirroredShader.size());shaderFile.close();
                                 Com<ID3DBlob> assembly;check(D3DDisassemble(mirroredShader.data(),mirroredShader.size(),0,nullptr,&assembly),"Disassemble mirrored shader");
                                 std::ofstream assemblyFile(output/"mirrored.asm",std::ios::binary);assemblyFile.exceptions(std::ios::badbit|std::ios::failbit);assemblyFile.write(static_cast<const char*>(assembly->GetBufferPointer()),assembly->GetBufferSize());assemblyFile.close();
-                                if(shaderExperiment)report["replacement_same_com_identity"]=shaderOverride.apply(replay.nativeDevice(),context,mirroredShader);
+                                if(shaderExperiment){
+                                    if(unusedOutput){
+                                        require(report["native_pipeline"]["rtv"][3].is_null(),"Unused shader output requires unbound RTV3");
+                                        report["private_attachments_allocated"]=false;
+                                    }
+                                    report["replacement_same_com_identity"]=shaderOverride.apply(replay.nativeDevice(),context,mirroredShader);
+                                }
                                 else {
                                     fragments.apply(replay.nativeDevice(),context,mirroredShader,mode==L"fragment-half",countOnly,mode==L"fragment-masked");
                                     Com<ID3D11BlendState> applied;context->OMGetBlendState(&applied,nullptr,nullptr);D3D11_BLEND_DESC appliedDesc{};applied->GetDesc(&appliedDesc);

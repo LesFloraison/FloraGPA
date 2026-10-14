@@ -22,8 +22,9 @@ int wmain(int argc,wchar_t** argv){
             require(warp||selected,"Intel adapter unavailable");Com<ID3D11Device> device;Com<ID3D11DeviceContext> context;
             check(D3D11CreateDevice(selected.Get(),warp?D3D_DRIVER_TYPE_WARP:D3D_DRIVER_TYPE_UNKNOWN,nullptr,D3D11_CREATE_DEVICE_DEBUG,nullptr,0,D3D11_SDK_VERSION,&device,nullptr,&context),"Create test device");
             Com<ID3D11InfoQueue> debug;check(device.As(&debug),"Get test diagnostics");
-            for(const UINT samples:{2u,4u})for(const unsigned mode:{0u,1u,2u,3u,4u}){
+            for(const UINT samples:{2u,4u})for(const unsigned mode:{0u,1u,2u,3u,4u,5u}){
                 const bool half=mode==1,countOnly=mode>=2,bindingOnly=mode==3,masked=mode==4;
+                const bool unusedOutput=mode==5;
                 context->ClearState();debug->ClearStoredMessages();std::map<Id,Com<IUnknown>> objects;
                 std::array<Com<ID3D11Texture2D>,3> textures;std::array<Com<ID3D11RenderTargetView>,3> targets;
                 for(unsigned i=0;i<3;++i){D3D11_TEXTURE2D_DESC td{1,1,1,1,DXGI_FORMAT_R16G16B16A16_TYPELESS,{samples,0},D3D11_USAGE_DEFAULT,D3D11_BIND_RENDER_TARGET|D3D11_BIND_SHADER_RESOURCE,0,0};check(device->CreateTexture2D(&td,nullptr,&textures[i]),"Create oracle target");D3D11_RENDER_TARGET_VIEW_DESC vd{};vd.Format=DXGI_FORMAT_R16G16B16A16_FLOAT;vd.ViewDimension=D3D11_RTV_DIMENSION_TEXTURE2DMS;check(device->CreateRenderTargetView(textures[i].Get(),&vd,&targets[i]),"Create oracle RTV");objects[10+i*2]=textures[i];objects[11+i*2]=targets[i];}
@@ -49,7 +50,17 @@ int wmain(int argc,wchar_t** argv){
                     {
                         if(phase==1){observation.apply(device.Get(),context.Get(),Bytes(static_cast<const uint8_t*>(mirrored->GetBufferPointer()),mirrored->GetBufferSize()),half,countOnly,masked);refuses([&]{observation.apply(device.Get(),context.Get(),{});},"cannot be reused");Com<ID3D11BlendState> applied;context->OMGetBlendState(&applied,nullptr,nullptr);D3D11_BLEND_DESC observed{};applied->GetDesc(&observed);require(observed.RenderTarget[3].RenderTargetWriteMask==(masked?0:15),"Counter write mask differs from request");context->Draw(3,0);}
                         {diagnostic::ScopedPixelShader shader;
-                            if(phase==2){shader.apply(device.Get(),context.Get(),Bytes(static_cast<const uint8_t*>(pc->GetBufferPointer()),pc->GetBufferSize()));refuses([&]{shader.apply(device.Get(),context.Get(),{});},"already active");}
+                            if(phase==2){
+                                const auto selectedCode=unusedOutput?mirrored:pc;
+                                shader.apply(device.Get(),context.Get(),Bytes(static_cast<const uint8_t*>(selectedCode->GetBufferPointer()),selectedCode->GetBufferSize()));
+                                refuses([&]{shader.apply(device.Get(),context.Get(),{});},"already active");
+                                if(unusedOutput){
+                                    Com<ID3D11PixelShader> active;context->PSGetShader(&active,nullptr,nullptr);objects[6]=active;
+                                    auto applied=diagnostic::pipelineCheckpoint(context.Get(),objects);
+                                    require(applied["shaders"]["ps"]==6,"Expected replacement PS identity");applied["shaders"]["ps"]=2;
+                                    require(applied==baseline,"Shader-only replacement changed non-PS pipeline state");objects.erase(6);
+                                }
+                            }
                             context->Draw(3,0);
                         }
                         observation.restore();
@@ -78,8 +89,20 @@ int wmain(int argc,wchar_t** argv){
                 context->OMSetRenderTargetsAndUnorderedAccessViews(D3D11_KEEP_RENDER_TARGETS_AND_DEPTH_STENCIL,nullptr,nullptr,4,1,&rawUav,nullptr);
                 refuses([&]{diagnostic::FragmentCheckpoint observation;observation.apply(device.Get(),context.Get(),{});},"bound OM UAVs");rawUav=nullptr;context->OMSetRenderTargetsAndUnorderedAccessViews(D3D11_KEEP_RENDER_TARGETS_AND_DEPTH_STENCIL,nullptr,nullptr,4,1,&rawUav,nullptr);
                 require(!debug->GetNumMessagesDiscardedByMessageCountLimit(),"Lost debug messages");
-                for(UINT64 i=0;i<debug->GetNumStoredMessagesAllowedByRetrievalFilter();++i){SIZE_T size=0;check(debug->GetMessage(i,nullptr,&size),"Measure debug message");std::vector<uint8_t> bytes(size);auto* message=reinterpret_cast<D3D11_MESSAGE*>(bytes.data());check(debug->GetMessage(i,message,&size),"Read debug message");require(message->Severity>D3D11_MESSAGE_SEVERITY_WARNING,message->pDescription);}
-                report["cases"].push_back({{"warp",warp},{"samples",samples},{"half_mirror",half},{"count_only",countOnly},{"binding_only",bindingOnly},{"masked_counter",masked},{"exact_texels",checks},{"refusals",refusals},{"debug_warnings_or_errors",0},{"pipeline",baseline}});
+                unsigned expectedWarnings=0;Json expectedMessages=Json::array();
+                for(UINT64 i=0;i<debug->GetNumStoredMessagesAllowedByRetrievalFilter();++i){
+                    SIZE_T size=0;check(debug->GetMessage(i,nullptr,&size),"Measure debug message");std::vector<uint8_t> bytes(size);auto* message=reinterpret_cast<D3D11_MESSAGE*>(bytes.data());check(debug->GetMessage(i,message,&size),"Read debug message");
+                    if(unusedOutput&&diagnostic::unusedOutputWarning(message->Severity,message->ID,message->pDescription)){
+                        ++expectedWarnings;expectedMessages.push_back({{"severity",message->Severity},{"id",message->ID},{"text",message->pDescription}});
+                    }else require(message->Severity>D3D11_MESSAGE_SEVERITY_WARNING,message->pDescription);
+                }
+                require(expectedWarnings==(unusedOutput?1u:0u),"Unexpected number of unbound output warnings");
+                require(!diagnostic::unusedOutputWarning(D3D11_MESSAGE_SEVERITY_ERROR,D3D11_MESSAGE_ID_DEVICE_DRAW_RENDERTARGETVIEW_NOT_SET,"slot 3"),"Error accepted as expected warning");
+                require(!diagnostic::unusedOutputWarning(D3D11_MESSAGE_SEVERITY_WARNING,D3D11_MESSAGE_ID_UNKNOWN,"slot 3"),"Wrong diagnostic ID accepted");
+                require(!diagnostic::unusedOutputWarning(D3D11_MESSAGE_SEVERITY_WARNING,D3D11_MESSAGE_ID_DEVICE_DRAW_RENDERTARGETVIEW_NOT_SET,"slot 2"),"Wrong slot accepted");
+                report["cases"].push_back({{"warp",warp},{"samples",samples},{"half_mirror",half},{"count_only",countOnly},{"binding_only",bindingOnly},{"masked_counter",masked},{"exact_texels",checks},{"refusals",refusals},{"debug_warnings_or_errors",expectedWarnings},{"unexpected_debug_warnings_or_errors",0},{"pipeline",baseline}});
+                report["cases"].back()["unused_shader_output"]=unusedOutput;
+                report["cases"].back()["expected_unbound_output_warnings"]=expectedMessages;
             }
         }
         report["completed"]=true;std::ofstream stream(output);stream.exceptions(std::ios::badbit|std::ios::failbit);stream<<report.dump(2)<<'\n';stream.close();std::cout<<"Native fragment checkpoint checks passed\n";return 0;

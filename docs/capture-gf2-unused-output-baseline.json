@@ -1,0 +1,215 @@
+{
+  "schema": 1,
+  "date": "2026-10-14",
+  "source_parent_commit": "4d07bdc99bcd1087074b33ccae05633a5a5a0bdf",
+  "source_hashes": {
+    "tools/native/fragment_checkpoint.h": "8ada6d1f1b22bab407d4b08dbe97ad79b328d20ebe793376962c17c7211aee6a",
+    "tools/native/fragment_checkpoint_tests.cpp": "f2fa8f7276ad9544230037f5272e6f7ac8fea7c09112e923d9de9f7e7b843893",
+    "tools/native/replay_texel_probe.cpp": "957b8eabf1e15c4e80b4c0dd98e6badb8e1b9366c06d794a9ada15345e0b0d58",
+    "tools/validate_capture_texel_probe.py": "7751ed28ab05460b01b2444d4da825643d45d5cf70f0fd0eccc0e49443cba96f",
+    "docs/CAPTURE_GF2_UNUSED_OUTPUT.md": "c9458ee1e1317bac8009371d0e2e39343fef2bf531cf5b93402350085cfe0093"
+  },
+  "input": {
+    "file": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-resolve-current-20261014\\launch-2\\session\\frame-d3b245ec-09d2-4888-91af-5032f19ddbd6.gpa_frame",
+    "sha256": "9bef49cd3f807ae3796ece91d35960604ce4158d0736acb5d545efa346aafacf",
+    "event": 5651
+  },
+  "summary": {
+    "schema": 1,
+    "current_gate_passed": false,
+    "production_fix": false,
+    "totals": {
+      "shader-count-unused": {
+        "matching": 3,
+        "alternate": 0
+      },
+      "shader-recreate": {
+        "matching": 1,
+        "alternate": 2
+      }
+    },
+    "runs": [
+      {
+        "directory": "shader-count-unused-0",
+        "mode": "shader-count-unused",
+        "capture_matching": true,
+        "rgba_sha256": "d5ffe329528ecabc09517514d1b41c5a8d305210480ad9454c732051a697d0e7",
+        "report_sha256": "37e7c68056d2454b974c8e61489ef41c4786046dc780f1df5ba841678c91681b",
+        "png_sha256": "488fe73cd858012a8973a48eb2f9139f68857ce1668ef013885936f5cb45369b"
+      },
+      {
+        "directory": "shader-recreate-0",
+        "mode": "shader-recreate",
+        "capture_matching": false,
+        "rgba_sha256": "b548683168d47d12344c2a976155eb716c4a14d135dcbb8c9df542b0abd0caa1",
+        "report_sha256": "7b737c3a6715f4344fa180c2a4bbb6d605455d2646686af6db27c4e659cd158e",
+        "png_sha256": "0e119453793730e1935d5813cd759c69091d9e21ee371235b5214f0127b656fd"
+      },
+      {
+        "directory": "shader-count-unused-1",
+        "mode": "shader-count-unused",
+        "capture_matching": true,
+        "rgba_sha256": "d5ffe329528ecabc09517514d1b41c5a8d305210480ad9454c732051a697d0e7",
+        "report_sha256": "a458290bdc3300f9a17e9f8bcbdbe8d780af56bc274d8a880cfce9b555fd65e2",
+        "png_sha256": "488fe73cd858012a8973a48eb2f9139f68857ce1668ef013885936f5cb45369b"
+      },
+      {
+        "directory": "shader-recreate-1",
+        "mode": "shader-recreate",
+        "capture_matching": false,
+        "rgba_sha256": "b548683168d47d12344c2a976155eb716c4a14d135dcbb8c9df542b0abd0caa1",
+        "report_sha256": "5dd4263a8b06a4f5166ec53f2f9a56e6742d65715d5202578864372d75817cf8",
+        "png_sha256": "0e119453793730e1935d5813cd759c69091d9e21ee371235b5214f0127b656fd"
+      },
+      {
+        "directory": "shader-count-unused-2",
+        "mode": "shader-count-unused",
+        "capture_matching": true,
+        "rgba_sha256": "d5ffe329528ecabc09517514d1b41c5a8d305210480ad9454c732051a697d0e7",
+        "report_sha256": "5bb25271676f19d756d0a9b1066cf965ce707f63857ac2d3afa9b4299fc0ce7f",
+        "png_sha256": "488fe73cd858012a8973a48eb2f9139f68857ce1668ef013885936f5cb45369b"
+      },
+      {
+        "directory": "shader-recreate-2",
+        "mode": "shader-recreate",
+        "capture_matching": true,
+        "rgba_sha256": "d5ffe329528ecabc09517514d1b41c5a8d305210480ad9454c732051a697d0e7",
+        "report_sha256": "15842d66be243e10ba456640a13fd2f15cd8f375a4037b45276f443c9a999b04",
+        "png_sha256": "488fe73cd858012a8973a48eb2f9139f68857ce1668ef013885936f5cb45369b"
+      }
+    ],
+    "pixel_differences": {
+      "d5ffe329528ecabc09517514d1b41c5a8d305210480ad9454c732051a697d0e7": [],
+      "b548683168d47d12344c2a976155eb716c4a14d135dcbb8c9df542b0abd0caa1": [
+        {
+          "x": 1182,
+          "y": 313,
+          "captured": [
+            12,
+            14,
+            12,
+            255
+          ],
+          "replayed": [
+            12,
+            15,
+            12,
+            255
+          ]
+        },
+        {
+          "x": 1182,
+          "y": 314,
+          "captured": [
+            13,
+            12,
+            8,
+            247
+          ],
+          "replayed": [
+            13,
+            12,
+            8,
+            248
+          ]
+        },
+        {
+          "x": 1183,
+          "y": 314,
+          "captured": [
+            22,
+            22,
+            17,
+            254
+          ],
+          "replayed": [
+            22,
+            22,
+            17,
+            255
+          ]
+        }
+      ]
+    },
+    "shader": {
+      "original_sha256": "fe92913b679084eb0c88a589285f8470cef44e70075b02a966adad683fd7bd95",
+      "modified_sha256": "36e81f84589bff2faedefa6aaf92befc50d62cbb1532b6e02bba69e20f0f5199",
+      "original_instructions_preserved": true,
+      "added_rows": [
+        [
+          50331749,
+          1057010,
+          3
+        ],
+        [
+          134217782,
+          1057010,
+          3,
+          16386,
+          1065353216,
+          1065353216,
+          1065353216,
+          1065353216
+        ]
+      ]
+    },
+    "failed_isa_copy_attempts": {
+      "completed": true,
+      "attempts": [
+        {
+          "file": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-unused-output-20261014\\diagnostic-frame\\count-output.gpa_frame.partial",
+          "bytes": 444596224,
+          "sha256": "408ca2c04c69d8e1803ffc382bd88e8f094f5351e6849010e946a75c78755bb1",
+          "source_prefix_byte_exact": true,
+          "source": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-resolve-current-20261014\\launch-2\\session\\frame-d3b245ec-09d2-4888-91af-5032f19ddbd6.gpa_frame",
+          "reason": "Disk-full while copying original bytes, before any shader/header/index modification.",
+          "cleanup": "Temporary duplicate prefix removed after exact comparison; source and failure logs retained."
+        },
+        {
+          "file": "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\capture-gf2-unused-output-20261014\\count-output.gpa_frame.partial",
+          "bytes": 661651456,
+          "sha256": "1a53ec039710a4849015846e35dff582f999c85c205fe30003b76ba65973812a",
+          "source_prefix_byte_exact": true,
+          "source": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-resolve-current-20261014\\launch-2\\session\\frame-d3b245ec-09d2-4888-91af-5032f19ddbd6.gpa_frame",
+          "reason": "Disk-full while copying original bytes, before any shader/header/index modification.",
+          "cleanup": "Temporary duplicate prefix removed after exact comparison; source and failure logs retained."
+        }
+      ]
+    },
+    "storage_compression": {
+      "outputs": {
+        "files": 18,
+        "saved_allocation": 169074688
+      },
+      "rgba": {
+        "files": 75,
+        "saved_allocation": 282652672
+      }
+    }
+  },
+  "validation": {
+    "native_cases": 24,
+    "exact_texels": 744,
+    "refusals": 144,
+    "expected_native_warnings": 4,
+    "unexpected_native_warnings_or_errors": 0,
+    "expected_gf2_scope_warnings": 3,
+    "unexpected_gf2_scope_warnings_or_errors": 0,
+    "probe_cases": 28,
+    "probe_refusals": 25,
+    "ctest_passed": 1,
+    "capture_only_configured": true
+  },
+  "binaries": {
+    "FloraReplayTexelProbe.exe": "bdb7dc79dee47983bce09573c533af2a2b2ec5d908b0007520cddc8e17e7285d",
+    "FloraFragmentCheckpointTests.exe": "93e3b93c66e154c16d1800198573a03b1b1c09bd7f5da36e528591d69c16cd6d",
+    "FloraFragmentCheckpointTests-before-report-label.exe": "0eeddc8bd405729ae02b33c454a4f1206ec0d9e5067771d0ecea81b1f5f61582"
+  },
+  "raw": {
+    "root": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-unused-output-20261014",
+    "files": 253,
+    "manifest_sha256": "3240adb4cce86a55e5cc31108f9cf563bad6442919b60c34b70588257a17fd1c"
+  },
+  "replay_sha256": "215ebafed657953f0671c32a0948e12c8c965437a3eaa33e6d38aedcff5e2ddc",
+  "limits": "Matching instrumented results do not require a private RTV attachment in these three runs. Original shader recreation still varies. Modified ISA export was not completed because two diagnostic-copy attempts ran out of disk space; only duplicate source prefixes were removed after verification. No production fix; six-frame acceptance remains failed."
+}

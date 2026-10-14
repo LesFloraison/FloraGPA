@@ -4,6 +4,11 @@
 #include "texel_checkpoint.h"
 
 namespace flora::diagnostic {
+inline bool unusedOutputWarning(unsigned severity,unsigned id,const std::string& text){
+    return severity==D3D11_MESSAGE_SEVERITY_WARNING &&
+           id==D3D11_MESSAGE_ID_DEVICE_DRAW_RENDERTARGETVIEW_NOT_SET &&
+           text.find("slot 3")!=std::string::npos;
+}
 class ScopedPixelShader {
     Com<ID3D11DeviceContext> context_;
     Com<ID3D11PixelShader> original_;

@@ -4516,6 +4516,23 @@
       "current_gate_passed": false,
       "production_fix": false,
       "limits": "Original GPA ISA exports only; no measurement of the machine code executed by Flora or the game, no simultaneous output or fragment measurement, and no production fix."
+    },
+    "gf2_unused_output_diagnosis": {
+      "evidence": "docs/CAPTURE_GF2_UNUSED_OUTPUT.md",
+      "baseline": "docs/capture-gf2-unused-output-baseline.json",
+      "unused_output_executions": 3,
+      "unused_output_matching": 3,
+      "original_shader_executions": 3,
+      "original_shader_matching": 1,
+      "native_cases": 24,
+      "native_exact_texels": 744,
+      "native_refusals": 144,
+      "probe_cases": 28,
+      "probe_refusals": 25,
+      "modified_isa_export_completed": false,
+      "current_gate_passed": false,
+      "production_fix": false,
+      "limits": "Matching instrumented results do not require a private RTV attachment in these three runs. Original shader recreation still varies. Modified ISA export was not completed because two diagnostic-copy attempts ran out of disk space; only duplicate source prefixes were removed after verification. No production fix; six-frame acceptance remains failed."
     }
   }
 }
