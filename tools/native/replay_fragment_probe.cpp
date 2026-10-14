@@ -1,4 +1,4 @@
-// Development-only float output observation at one original replay Draw boundary.
+// Development-only unblended output observation at one original replay Draw boundary.
 #include "replay/Replay.h"
 #include <d3d11sdklayers.h>
 #include <d3dcompiler.h>
@@ -50,10 +50,11 @@ Json messages(ID3D11InfoQueue *queue) {
     queue->ClearStoredMessages();
     return result;
 }
-std::vector<uint8_t> readFloatSample(ID3D11Texture2D *source, UINT sample) {
+std::vector<uint8_t> readSample(ID3D11Texture2D *source, UINT sample, bool half) {
     D3D11_TEXTURE2D_DESC desc{};
     source->GetDesc(&desc);
-    if (desc.Format != DXGI_FORMAT_R32G32B32A32_TYPELESS || desc.ArraySize != 1 || desc.MipLevels != 1 ||
+    if (desc.Format != (half ? DXGI_FORMAT_R16G16B16A16_TYPELESS : DXGI_FORMAT_R32G32B32A32_TYPELESS) ||
+        desc.ArraySize != 1 || desc.MipLevels != 1 ||
         sample >= desc.SampleDesc.Count)
         throw std::runtime_error("Unexpected private float texture");
     Com<ID3D11Device> device;
@@ -65,7 +66,7 @@ std::vector<uint8_t> readFloatSample(ID3D11Texture2D *source, UINT sample) {
     Com<ID3D11Texture2D> copy, target, staging;
     check(device->CreateTexture2D(&desc, nullptr, &copy), "Create float read copy");
     D3D11_SHADER_RESOURCE_VIEW_DESC sd{};
-    sd.Format = DXGI_FORMAT_R32G32B32A32_UINT;
+    sd.Format = half ? DXGI_FORMAT_R16G16B16A16_UINT : DXGI_FORMAT_R32G32B32A32_UINT;
     sd.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2DMS;
     Com<ID3D11ShaderResourceView> srv;
     check(device->CreateShaderResourceView(copy.Get(), &sd, &srv), "Create float bit SRV");
@@ -122,7 +123,7 @@ std::vector<uint8_t> readFloatSample(ID3D11Texture2D *source, UINT sample) {
     context->ExecuteCommandList(commands.Get(), TRUE);
     D3D11_MAPPED_SUBRESOURCE mapped{};
     check(context->Map(staging.Get(), 0, D3D11_MAP_READ, 0, &mapped), "Map float sample");
-    const size_t row = size_t(desc.Width) * 16;
+    const size_t row = size_t(desc.Width) * (half ? 8 : 16);
     if (mapped.RowPitch < row) {
         context->Unmap(staging.Get(), 0);
         throw std::runtime_error("Invalid float row pitch");
@@ -137,8 +138,8 @@ std::vector<uint8_t> readFloatSample(ID3D11Texture2D *source, UINT sample) {
 }
 } // namespace
 int wmain(int argc, wchar_t **argv) {
-    if (argc != 8 && argc != 9) {
-        std::cerr << "FRAME NEW_OUT EVENT RTV0_RESOURCE X Y PCI_VENDOR [DIAGNOSTIC_PS_DXBC]\n";
+    if (argc < 8 || argc > 10) {
+        std::cerr << "FRAME NEW_OUT EVENT RTV0_RESOURCE X Y PCI_VENDOR [DIAGNOSTIC_PS_DXBC] [--unblended-rt0]\n";
         return 2;
     }
     Json report{{"completed", false},
@@ -154,6 +155,20 @@ int wmain(int argc, wchar_t **argv) {
         f.close();
     };
     try {
+        bool unblendedRt0 = false;
+        fs::path replacementPath;
+        for (int i = 8; i < argc; ++i) {
+            const std::wstring option(argv[i]);
+            if (option == L"--unblended-rt0" && !unblendedRt0)
+                unblendedRt0 = true;
+            else if (!option.starts_with(L"--") && replacementPath.empty())
+                replacementPath = argv[i];
+            else
+                throw std::runtime_error("Unknown or duplicate option");
+        }
+        report["unblended_rt0"] = unblendedRt0;
+        if (unblendedRt0)
+            report["transform"] = "Disable RTV0 blending; preserve original RGBA16 resource and initial contents";
         const auto eid = number(argv[3]), rid = number(argv[4]), x = number(argv[5]), y = number(argv[6]),
                    vendor = number(argv[7]);
         if (!eid || !rid || !vendor || vendor > UINT16_MAX)
@@ -170,9 +185,11 @@ int wmain(int argc, wchar_t **argv) {
             resource.desc[3] != 1 || resource.desc[5] <= 1 || resource.desc[5] > 8 || resource.desc[6] != 0 ||
             x >= resource.desc[0] || y >= resource.desc[1])
             throw std::runtime_error("Expected in-bounds single-layer quality-zero MSAA output");
+        if (unblendedRt0 && resource.desc[4] != DXGI_FORMAT_R16G16B16A16_TYPELESS)
+            throw std::runtime_error("Unblended mode requires typeless RGBA16");
         std::vector<uint8_t> replacement;
-        if (argc == 9)
-            replacement = shader(argv[8]);
+        if (!replacementPath.empty())
+            replacement = shader(replacementPath);
         const auto requested = fs::absolute(argv[2]);
         if (!fs::create_directory(requested))
             throw std::runtime_error("Output directory must be new");
@@ -225,23 +242,32 @@ int wmain(int argc, wchar_t **argv) {
             texture->GetDesc(&desc);
             if (std::memcmp(&desc, resource.desc.data(), sizeof(desc)))
                 throw std::runtime_error("Native texture descriptor differs");
-            desc.Format = DXGI_FORMAT_R32G32B32A32_TYPELESS;
-            desc.Usage = D3D11_USAGE_DEFAULT;
-            desc.BindFlags = D3D11_BIND_RENDER_TARGET;
-            desc.CPUAccessFlags = desc.MiscFlags = 0;
-            std::memcpy(resource.desc.data(), &desc, sizeof(desc));
-            resource.data = 0;
-            check(device->CreateTexture2D(&desc, nullptr, &target), "Create private float target");
-            D3D11_RENDER_TARGET_VIEW_DESC viewDesc{};
-            viewDesc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
-            viewDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2DMS;
-            views[0].Reset();
-            check(device->CreateRenderTargetView(target.Get(), &viewDesc, &views[0]), "Create float RTV");
-            const float zero[4]{};
-            context->ClearRenderTargetView(views[0].Get(), zero);
-            for (UINT i = 0; i < 8; ++i)
-                rawViews[i] = views[i].Get();
-            context->OMSetRenderTargets(8, rawViews, depth.Get());
+            if (unblendedRt0) {
+                D3D11_RENDER_TARGET_VIEW_DESC viewDesc{};
+                views[0]->GetDesc(&viewDesc);
+                if (viewDesc.Format != DXGI_FORMAT_R16G16B16A16_FLOAT ||
+                    viewDesc.ViewDimension != D3D11_RTV_DIMENSION_TEXTURE2DMS)
+                    throw std::runtime_error("Unblended mode requires RGBA16 FLOAT MSAA RTV");
+                target = texture;
+            } else {
+                desc.Format = DXGI_FORMAT_R32G32B32A32_TYPELESS;
+                desc.Usage = D3D11_USAGE_DEFAULT;
+                desc.BindFlags = D3D11_BIND_RENDER_TARGET;
+                desc.CPUAccessFlags = desc.MiscFlags = 0;
+                std::memcpy(resource.desc.data(), &desc, sizeof(desc));
+                resource.data = 0;
+                check(device->CreateTexture2D(&desc, nullptr, &target), "Create private float target");
+                D3D11_RENDER_TARGET_VIEW_DESC viewDesc{};
+                viewDesc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+                viewDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2DMS;
+                views[0].Reset();
+                check(device->CreateRenderTargetView(target.Get(), &viewDesc, &views[0]), "Create float RTV");
+                const float zero[4]{};
+                context->ClearRenderTargetView(views[0].Get(), zero);
+                for (UINT i = 0; i < 8; ++i)
+                    rawViews[i] = views[i].Get();
+                context->OMSetRenderTargets(8, rawViews, depth.Get());
+            }
             Com<ID3D11BlendState> blend;
             float factor[4]{};
             UINT mask{};
@@ -274,13 +300,19 @@ int wmain(int argc, wchar_t **argv) {
         if (!observed || !target)
             throw std::runtime_error("Draw was not observed");
         for (UINT sample = 0; sample < resource.desc[5]; ++sample) {
-            const auto data = readFloatSample(target.Get(), sample);
-            const size_t offset = (size_t(y) * resource.desc[0] + x) * 16;
-            if (data.size() != size_t(resource.desc[0]) * resource.desc[1] * 16)
+            const auto data = readSample(target.Get(), sample, unblendedRt0);
+            const size_t pixelBytes = unblendedRt0 ? 8 : 16;
+            const size_t offset = (size_t(y) * resource.desc[0] + x) * pixelBytes;
+            if (data.size() != size_t(resource.desc[0]) * resource.desc[1] * pixelBytes)
                 throw std::runtime_error("Unexpected sample size");
             std::array<uint32_t, 4> words{};
-            std::memcpy(words.data(), data.data() + offset, 16);
-            report["float_output"].push_back(
+            if (unblendedRt0) {
+                std::array<uint16_t, 4> halves{};
+                std::memcpy(halves.data(), data.data() + offset, 8);
+                std::copy(halves.begin(), halves.end(), words.begin());
+            } else
+                std::memcpy(words.data(), data.data() + offset, 16);
+            report[unblendedRt0 ? "half_output" : "float_output"].push_back(
                 {{"sample", sample}, {"sha256", sha256(data)}, {"pixel_words", words}});
         }
         report["scoped_debug"] = messages(debug.Get());
@@ -290,7 +322,7 @@ int wmain(int argc, wchar_t **argv) {
                 throw std::runtime_error("Fragment observation emitted debug warnings/errors");
         report["completed"] = true;
         save();
-        std::cout << "Observed float fragment output\n";
+        std::cout << "Observed unblended fragment output\n";
         return 0;
     } catch (const std::exception &e) {
         report["error"] = e.what();

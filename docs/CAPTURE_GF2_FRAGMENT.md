@@ -61,6 +61,11 @@ chosen acceptance rule. This is a consistency check for the lower
 variant, not proof that the higher variant cannot originate in any particular
 part of the original execution path.
 
+Subsequent [original-format GPU controls](CAPTURE_GF2_HALF_SOURCE.md) show that
+the stored unblended half values do not uniquely determine the blend input:
+two constant sources store the same half words but blend differently. The CPU
+reconstruction above must not be read as the hardware's rounding sequence.
+
 ## Interpolated input controls
 
 Six diagnostic pixel shaders select original primitive 1613 and output one input:

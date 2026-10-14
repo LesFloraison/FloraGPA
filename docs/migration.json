@@ -4222,6 +4222,18 @@
       "original_gpa_gui_files_partially_inspected": 1,
       "current_gate_passed": false,
       "limits": "Float-output and input probes agree between standalone execution and Flora replay; lower half output reconstructs exactly. Higher variant unresolved. GPA GUI displays one current equipment frame and 637 events, but detailed shader/resource inspection is incomplete after input timeouts. No production fix or new accepted frame."
+    },
+    "gf2_half_source_diagnosis": {
+      "evidence": "docs/CAPTURE_GF2_HALF_SOURCE.md",
+      "baseline": "docs/capture-gf2-half-source-baseline.json",
+      "native_processes": 9,
+      "replay_processes": 6,
+      "initial_samples_exact": 88,
+      "constant_shader_controls": 4,
+      "refusals_passed": 12,
+      "ctest_passed": 4,
+      "current_gate_passed": false,
+      "limits": "Original-format unblended sample planes agree across paths. Two constant sources store identical half values but blend differently, preventing inversion from stored output. Higher variant and detailed GPA GUI acceptance remain unresolved; production binaries unchanged."
     }
   }
 }

@@ -1,0 +1,296 @@
+{
+  "schema": "FloraGPA GF2 half source controls 1",
+  "date": "2026-10-14",
+  "base_commit": "ab9bbc8e2cb9b3e7b826658b076f8a6280d9fd4a",
+  "current_gate_passed": false,
+  "production_changed": false,
+  "input": {
+    "frame_sha256": "a30ddd946f1ff174d6c704c0d820554d0614f45f90508349e3004fb7f8cd9b06",
+    "event": 5598,
+    "bundle": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-draw-fixture-20261014\\bundle-complete",
+    "bundle_sha256": "2df2a232c3f25c773eeaf894dd9882b7e1430ab2b54f14f3a67ffa2d72821fa7",
+    "resources": 19,
+    "vs_sha256": "18669b668cb39b907a02cfec253f74b24d0c09c6ae73d0d65f27455032b2d869",
+    "ps_sha256": "fe92913b679084eb0c88a589285f8470cef44e70075b02a966adad683fd7bd95"
+  },
+  "runs": [
+    {
+      "name": "native-half",
+      "report_sha256": "b6cd65b71060790a5874d3cd8e1dfe8e8c22d7658a0a22de7f533a0e7c8ae2cc",
+      "completed": true,
+      "scoped_debug_messages": 0,
+      "prefix_debug_messages": 0
+    },
+    {
+      "name": "native-half-skip",
+      "report_sha256": "208c16dd8ed6e6815c88be73206078c31484fef141b50f5323cc0e5c874b4208",
+      "completed": true,
+      "scoped_debug_messages": 0,
+      "prefix_debug_messages": 0
+    },
+    {
+      "name": "native-original",
+      "report_sha256": "6b88e966668c248e4973f836b1f3022d54d25f8e6b45132c67d66f1e43b11e28",
+      "completed": true,
+      "scoped_debug_messages": 0,
+      "prefix_debug_messages": 0
+    },
+    {
+      "name": "constant-float-blend",
+      "report_sha256": "eb1907d743fe4799b8157fccc1422b5f3c3b74a3412b36987433fbc6fabcb5ee",
+      "completed": true,
+      "scoped_debug_messages": 0,
+      "prefix_debug_messages": 0
+    },
+    {
+      "name": "constant-float-unblended",
+      "report_sha256": "45ed41026a183ec30128768b623f5fecec3b30281090f4134d7930603c20ada2",
+      "completed": true,
+      "scoped_debug_messages": 0,
+      "prefix_debug_messages": 0
+    },
+    {
+      "name": "constant-half-blend",
+      "report_sha256": "bd0de6be88ffd16ab7b1e8424e79bbd54a6f8bee4bcce590ea11dc2c37ca3031",
+      "completed": true,
+      "scoped_debug_messages": 0,
+      "prefix_debug_messages": 0
+    },
+    {
+      "name": "constant-half-unblended",
+      "report_sha256": "bd7e27cdd71d1c2fdefef6316035464aab041bdc082db1c0210f044d6696251d",
+      "completed": true,
+      "scoped_debug_messages": 0,
+      "prefix_debug_messages": 0
+    },
+    {
+      "name": "final-native-half",
+      "report_sha256": "2a8e7339b3d2bc37532908ffb4817ffcca7d8f9e4b5e8a08264b26c7955f99e2",
+      "completed": true,
+      "scoped_debug_messages": 0,
+      "prefix_debug_messages": 0
+    },
+    {
+      "name": "final-native-float",
+      "report_sha256": "a5f3acfaeec43437a210f37a848321e34bd2c4b947b9638b0aae6aa68d4987ec",
+      "completed": true,
+      "scoped_debug_messages": 0,
+      "prefix_debug_messages": 0
+    },
+    {
+      "name": "replay-half-0",
+      "report_sha256": "2cb8601b40f046e00d988320f44e96a6c85f559a0c70d975d41a2344bd6bafc5",
+      "completed": true,
+      "scoped_debug_messages": 0,
+      "prefix_debug_messages": 608
+    },
+    {
+      "name": "replay-half-1",
+      "report_sha256": "2cb8601b40f046e00d988320f44e96a6c85f559a0c70d975d41a2344bd6bafc5",
+      "completed": true,
+      "scoped_debug_messages": 0,
+      "prefix_debug_messages": 608
+    },
+    {
+      "name": "replay-half-2",
+      "report_sha256": "2cb8601b40f046e00d988320f44e96a6c85f559a0c70d975d41a2344bd6bafc5",
+      "completed": true,
+      "scoped_debug_messages": 0,
+      "prefix_debug_messages": 608
+    },
+    {
+      "name": "replay-half-3",
+      "report_sha256": "2cb8601b40f046e00d988320f44e96a6c85f559a0c70d975d41a2344bd6bafc5",
+      "completed": true,
+      "scoped_debug_messages": 0,
+      "prefix_debug_messages": 608
+    },
+    {
+      "name": "replay-float-regression",
+      "report_sha256": "e22fd71bac5eb05ba868f7a61d288db2531de59063e1a232cdacb424e9f7cf96",
+      "completed": true,
+      "scoped_debug_messages": 0,
+      "prefix_debug_messages": 608
+    },
+    {
+      "name": "final-replay-constant",
+      "report_sha256": "efa1a36d9720a656b82b26045e11900753224fe03af4076f3863525295fb4759",
+      "completed": true,
+      "scoped_debug_messages": 0,
+      "prefix_debug_messages": 608
+    }
+  ],
+  "native_processes": 9,
+  "native_restore_iterations": 11,
+  "native_initial_samples_exact": 88,
+  "replay_processes": 6,
+  "original_shader_unblended_half_words": [
+    14896,
+    14100,
+    13467,
+    15042
+  ],
+  "original_shader_unblended_sample_sha256": [
+    "13e15c85ebaf9ba28c3f61b379b9b756eb5c8a9650c4748c69b17f1b5f786682",
+    "89caf81a6ed2000a5960c0d8eccc8d4c600bc3ab69f7000285bc8c5ee738faea"
+  ],
+  "constant_shader_controls": {
+    "constant-float-blend": [
+      14698,
+      13854,
+      13265,
+      15091
+    ],
+    "constant-float-unblended": [
+      14896,
+      14100,
+      13467,
+      15042
+    ],
+    "constant-half-blend": [
+      14697,
+      13854,
+      13265,
+      15091
+    ],
+    "constant-half-unblended": [
+      14896,
+      14100,
+      13467,
+      15042
+    ]
+  },
+  "constant_shader_input_float_bits": [
+    1061556244,
+    1055032779,
+    1049847438,
+    1062752239
+  ],
+  "whole_float_regression_sha256": [
+    "c61f77ea2d736e1f8ed722f6739d309864dd18c2e90fd70d6f4fb8378078c773",
+    "b86968ecfe46e7f028a8a1895844553dd451d00ce8b2001364bd961a02eea0bd"
+  ],
+  "gui_retry": {
+    "frame": "frame-23c72ea8-d6f0-4557-96e7-48513d0f27bd.gpa_frame",
+    "events_displayed": 637,
+    "collection_finished_before_input": true,
+    "new_detail_acceptance": false,
+    "input_failures": [
+      "computer-use request timed out: click",
+      "computer-use request timed out: press_key"
+    ],
+    "binding_recovered_before_keyboard_attempt": true,
+    "owned_process_ids": [
+      52896,
+      37244
+    ],
+    "processes_confirmed_exited_before_gpu_controls": true,
+    "previous_screenshot": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-fragment-20261014\\gpa-gui\\equipment-final.png",
+    "new_screenshot_saved": false
+  },
+  "validation": {
+    "refusals": [
+      {
+        "case": "native-no-pixel",
+        "exit": 1,
+        "message": "requires --pixel"
+      },
+      {
+        "case": "native-duplicate",
+        "exit": 1,
+        "message": "duplicate"
+      },
+      {
+        "case": "native-conflict",
+        "exit": 1,
+        "message": "mutually exclusive"
+      },
+      {
+        "case": "native-wrong-output",
+        "exit": 1,
+        "message": "RTV 0"
+      },
+      {
+        "case": "native-non-independent",
+        "exit": 1,
+        "message": "independent blend"
+      },
+      {
+        "case": "native-wrong-format",
+        "exit": 1,
+        "message": "typeless RGBA16"
+      },
+      {
+        "case": "native-wrong-view",
+        "exit": 1,
+        "message": "FLOAT RTV"
+      },
+      {
+        "case": "replay-duplicate",
+        "exit": 1,
+        "message": "duplicate"
+      },
+      {
+        "case": "replay-unknown",
+        "exit": 1,
+        "message": "Unknown"
+      },
+      {
+        "case": "replay-wrong-format",
+        "exit": 1,
+        "message": "typeless RGBA16"
+      },
+      {
+        "case": "replay-vertex",
+        "exit": 1,
+        "message": "pixel shader"
+      },
+      {
+        "case": "replay-existing",
+        "exit": 1,
+        "message": "must be new"
+      }
+    ],
+    "ctest_passed": 4,
+    "ctest_sha256": "652cf5601f55a703af9174c2c5aa2da27774ce6a49e8a91f959c9043f51b457a",
+    "full_build_sha256": "95a7507987d5cb28e207e4d5730cc0d90fd0e8a27f1a79221eedc8a7855a8a44",
+    "standalone_build_sha256": "428872a62eb60010a5e2baa4900cb955a5c31530b7c490ec1661fa3170bb616c",
+    "goldens_rerun": false,
+    "golden_scope": "No production replay/format changes; previous two exact golden checks remain attached to their baseline."
+  },
+  "production_identity": {
+    "replay_sha256": "215ebafed657953f0671c32a0948e12c8c965437a3eaa33e6d38aedcff5e2ddc",
+    "runtime_sha256": "f2d92dd99f5b26ee232064ca26645136fa808ab2e7e6e810193376527f092df3",
+    "controller_sha256": "0bc61e429745e1b0f6fd046762cae923471686782a1ab48ba853cca12aaaacf3"
+  },
+  "sources": {
+    "tools/native/native_draw_fixture.cpp": "2eee71874b3a64b2011e13720bfd88195120ccb595d7a2508d0ff1cf5d5da595",
+    "tools/native/replay_fragment_probe.cpp": "8d97ed6d6775711b791742f2b52d774bcd3cdfdcee31905720129ede0afe3a5e"
+  },
+  "initial_binaries": [
+    {
+      "Path": "D:\\CDXrepo\\FloraGPA-Cpp\\build\\vs2022\\Release\\FloraNativeDrawFixture.exe",
+      "Hash": "7493A09D17BC644A75FB3A0A4A33C6A0FB504FF33FEE9FBC837FA89D9127216B"
+    },
+    {
+      "Path": "D:\\CDXrepo\\FloraGPA-Cpp\\build\\vs2022\\Release\\FloraReplayFragmentProbe.exe",
+      "Hash": "A0D100C080CF9B9428A82CF35C3D0ABFBAF2B9E1DEAC000E4189319EECB1A7AA"
+    }
+  ],
+  "final_binaries": {
+    "standalone_native_sha256": "1e23b78b74242782f999dc04bc0d97f747d0248e06565de1106b3bc4e26adde2",
+    "full_native_sha256": "7d402ad26557aa9c3512c7d7539bd311895b13097bc975838ca7527b6713896f",
+    "fragment_probe_sha256": "c1e51dbb56b79df85020b1cacfcd1a15dfe1c5bd6c24ea7a337756bf02b09cfd"
+  },
+  "evidence": {
+    "directory": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-half-source-20261014",
+    "manifest_files": 80,
+    "manifest_sha256": "bbc9a0ff05943201b4ceb7ab8921d7a1190f5a2aba0831fe223efb7b5513d877"
+  },
+  "limits": [
+    "Disabling blending still changes execution; no inference that shader/driver optimization is preserved.",
+    "Constant shaders replace original calculations and use triangle 1613; controls establish observed GPU mapping, not original-program equivalence.",
+    "Higher variant not reproduced; no production fix or newly accepted frame.",
+    "Detailed original GPA UI inspection still blocked by input timeouts."
+  ]
+}

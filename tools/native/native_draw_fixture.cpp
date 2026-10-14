@@ -423,7 +423,7 @@ Json compare(const Bytes &actual, const Bytes &expected, UINT stride) {
 int wmain(int argc, wchar_t **argv) {
     if (argc < 5) {
         std::cerr << "BUNDLE NEW_OUT PCI_VENDOR|warp REPEATS [--skip-draw] [--indices FIRST COUNT] "
-                     "[--pixel RESOURCE X Y] [--sample-positions] [--float-rt0] [--summary-only]\n";
+                     "[--pixel RESOURCE X Y] [--sample-positions] [--float-rt0 | --unblended-rt0] [--summary-only]\n";
         return 2;
     }
     Json report{{"completed", false}, {"acceptance_established", false}, {"comparisons", Json::array()}};
@@ -438,7 +438,8 @@ int wmain(int argc, wchar_t **argv) {
     };
     try {
         const auto repeats = number(argv[4]);
-        bool skipDraw = false, summaryOnly = false, samplePositions = false, floatRt0 = false;
+        bool skipDraw = false, summaryOnly = false, samplePositions = false, floatRt0 = false,
+             unblendedRt0 = false;
         std::optional<std::array<UINT, 2>> indices;
         std::optional<std::array<UINT, 3>> pixel;
         for (int i = 5; i < argc; ++i) {
@@ -451,6 +452,8 @@ int wmain(int argc, wchar_t **argv) {
                 samplePositions = true;
             else if (option == L"--float-rt0" && !floatRt0)
                 floatRt0 = true;
+            else if (option == L"--unblended-rt0" && !unblendedRt0)
+                unblendedRt0 = true;
             else if (option == L"--indices" && !indices && i + 2 < argc) {
                 indices = std::array<UINT, 2>{number(argv[i + 1]), number(argv[i + 2])};
                 i += 2;
@@ -463,9 +466,12 @@ int wmain(int argc, wchar_t **argv) {
         require(!(skipDraw && indices), "Skip Draw cannot select an index range");
         require(!samplePositions || pixel.has_value(), "Sample positions require --pixel");
         require(!floatRt0 || pixel.has_value(), "Float output requires --pixel");
+        require(!unblendedRt0 || pixel.has_value(), "Unblended output requires --pixel");
+        require(!(floatRt0 && unblendedRt0), "Output transformations are mutually exclusive");
         report["skip_draw"] = skipDraw;
         report["summary_only"] = summaryOnly;
         report["float_rt0"] = floatRt0;
+        report["unblended_rt0"] = unblendedRt0;
         require(repeats > 0 && repeats <= 20, "Repeat count must be 1..20");
         const auto vendor = std::wstring(argv[3]) == L"warp" ? 0 : number(argv[3]);
         require(vendor <= 65535, "Invalid vendor");
@@ -491,12 +497,20 @@ int wmain(int argc, wchar_t **argv) {
                     "Pixel coordinate exceeds texture bounds");
             report["pixel"] = *pixel;
         }
-        if (floatRt0) {
+        if (floatRt0 || unblendedRt0) {
             require(!bundle.at("rtv").at(0).is_null() &&
                         bundle.at("rtv").at(0).at("resource").get<uint64_t>() == (*pixel)[0],
-                    "Float output requires the selected pixel in RTV 0");
+                    "Unblended output requires the selected pixel in RTV 0");
             require(pod<D3D11_BLEND_DESC>(bundle.at("blend")).IndependentBlendEnable,
-                    "Float output requires independent blend state");
+                    "Unblended output requires independent blend state");
+            if (unblendedRt0) {
+                const auto desc = pod<D3D11_TEXTURE2D_DESC>(
+                    bundle.at("resources").at(std::to_string((*pixel)[0])).at("desc"));
+                const auto view = pod<D3D11_RENDER_TARGET_VIEW_DESC>(bundle.at("rtv").at(0).at("desc"));
+                require(desc.Format == DXGI_FORMAT_R16G16B16A16_TYPELESS &&
+                            view.Format == DXGI_FORMAT_R16G16B16A16_FLOAT,
+                        "Unblended mode requires typeless RGBA16 with FLOAT RTV");
+            }
         }
         const auto requestedOutput = fs::absolute(argv[2]);
         require(fs::create_directory(requestedOutput), "Output directory must be new");
@@ -650,7 +664,7 @@ int wmain(int argc, wchar_t **argv) {
         ComPtr<ID3D11RasterizerState> raster;
         check(gpu.device->CreateRasterizerState(&rs, &raster), "Create fixture rasterizer");
         auto bs = pod<D3D11_BLEND_DESC>(bundle.at("blend"));
-        if (floatRt0)
+        if (floatRt0 || unblendedRt0)
             bs.RenderTarget[0].BlendEnable = FALSE;
         ComPtr<ID3D11BlendState> blend;
         check(gpu.device->CreateBlendState(&bs, &blend), "Create fixture blend");
