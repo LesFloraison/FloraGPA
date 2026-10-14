@@ -4341,6 +4341,26 @@
       "golden_negative_controls_passed": 2,
       "current_gate_passed": false,
       "limits": "Exploratory initial-probe outputs are retained separately. Paired observations use a frozen probe; final validated probe changes only exception-report completion. No first divergent Draw or root cause established. New files are not fully resource-exact; the original six-file gate still fails. Production capture/replay implementation unchanged."
+    },
+    "gf2_texel_boundary_diagnosis": {
+      "evidence": "docs/CAPTURE_GF2_TEXEL_BOUNDARY.md",
+      "baseline": "docs/capture-gf2-texel-boundary-baseline.json",
+      "native_cases": 28,
+      "refusals": 16,
+      "trace_executions": 10,
+      "prefix_executions": 24,
+      "final_executions": 10,
+      "final_capture_matching": 2,
+      "checkpoint_executions": 10,
+      "checkpoint_capture_matching": 1,
+      "checkpoint_known_alternate": 8,
+      "checkpoint_additional_output": 1,
+      "localized_draw": 5651,
+      "ctest_passed": 4,
+      "golden_frames_exact": 2,
+      "golden_negative_controls_passed": 2,
+      "current_gate_passed": false,
+      "limits": "Same pre-Draw selected texel and two post-Draw values in complete replay copies. One run has an additional output hash without saved full pixels; it is not counted as the known alternate. Other inputs are not proven equal; first divergent frame operation and root cause remain unknown. Added copies alter scheduling. No new capture or acceptance tolerance."
     }
   }
 }

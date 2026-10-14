@@ -1,0 +1,165 @@
+// Development-only. Trace readbacks change GPU scheduling; they cannot grant acceptance.
+// Reuses Replay's integer sample reader, retaining only one texel per observation.
+#include "replay/Replay.h"
+#include "texel_checkpoint.h"
+#include <fstream>
+#include <iostream>
+#include <nlohmann/json.hpp>
+
+using namespace flora;
+namespace fs = std::filesystem;
+using Json = nlohmann::json;
+namespace {
+void require(bool value, const char* message) {
+    if (!value) throw std::runtime_error(message);
+}
+uint64_t number(const wchar_t* text) {
+    const std::wstring value(text);
+    require(!value.empty() && value.find_first_not_of(L"0123456789") == std::wstring::npos,
+            "Expected unsigned decimal argument");
+    return std::stoull(value);
+}
+void save(const fs::path& path, const Json& report) {
+    std::ofstream stream(path);
+    stream.exceptions(std::ios::badbit | std::ios::failbit);
+    stream << report.dump(2) << '\n';
+    stream.close();
+}
+}
+int wmain(int argc, wchar_t** argv) {
+    fs::path output;
+    Json report{{"schema", 1}, {"completed", false}, {"acceptance_established", false},
+                {"reference_pixels_used", false}, {"observations", Json::array()}};
+    try {
+        require(argc == 13, "FRAME NEW_OUT VENDOR RESOURCE SAMPLE LAYER X Y before|after|trace|final|checkpoint FIRST LAST READ_BUDGET");
+        const auto vendor = number(argv[3]), resource = number(argv[4]), sample = number(argv[5]),
+                   layer = number(argv[6]), x = number(argv[7]), y = number(argv[8]),
+                   first = number(argv[10]), last = number(argv[11]);
+        // The final argument is an explicit read budget, including before/after trace observations.
+        const auto budget = number(argv[12]);
+        const std::wstring mode(argv[9]);
+        require(mode == L"before" || mode == L"after" || mode == L"trace" || mode == L"final" || mode == L"checkpoint", "Unknown probe mode");
+        const bool full = mode == L"trace" || mode == L"final" || mode == L"checkpoint";
+        require(vendor && vendor <= UINT16_MAX && resource && first && last >= first,
+                "Invalid vendor/resource/event selection");
+        require(budget && budget <= 1024, "Read budget must be in 1..1024");
+        require(full || first == last, "Prefix modes require identical first/last events");
+        require(mode != L"checkpoint" || (first == last && budget >= 3), "Checkpoint needs one event and budget >= 3");
+        const auto destination = fs::absolute(argv[2]);
+        require(!fs::exists(destination), "Output directory already exists");
+        Frame frame(fs::absolute(argv[1]));
+        const auto description = frame.resource(resource);
+        require(description.type == 0x85, "Expected a Texture2D resource");
+        const auto info = textureInfo(description);
+        require(info.dimension == 3 && info.mips == 1 && (info.samples == 2 || info.samples == 4),
+                "Expected 2x/4x MSAA with one mip");
+        const uint32_t typed = info.format >= 9 && info.format <= 14 ? 12u :
+                               info.format >= 27 && info.format <= 32 ? 30u : 0u;
+        require(typed != 0, "Expected RGBA8/RGBA16 color family");
+        require(sample < info.samples && layer < info.layers && x < info.width && y < info.height,
+                "Texel selection out of bounds");
+        uint64_t bytes = 0;
+        for (const auto& sub : textureSubresources(description)) {
+            require(sub.size <= (uint64_t(2) << 30) - bytes, "Readback memory budget exceeded");
+            bytes += sub.size;
+        }
+        require(mode != L"checkpoint" || bytes <= (uint64_t(2) << 30) / (2 * info.samples),
+                "Checkpoint memory budget exceeded");
+        for (const auto id : {first, last})
+            require(frame.entry(id).category == 7 && isDraw(frame.entry(id).type),
+                    "Expected Draw/Dispatch event boundaries");
+        require(fs::create_directory(destination), "Cannot create output directory");
+        output = destination;
+        report.update({{"mode", mode == L"checkpoint" ? "checkpoint" : mode == L"final" ? "final" : mode == L"trace" ? "trace" : mode == L"before" ? "before" : "after"}, {"vendor", vendor},
+                       {"resource", resource}, {"sample", sample}, {"layer", layer}, {"x", x}, {"y", y},
+                       {"first", first}, {"last", last}, {"read_budget", budget},
+                       {"observer_changes_scheduling", mode == L"trace" || mode == L"checkpoint"}, {"typed_format", typed}});
+        save(output / "report.json", report);
+        ReplayOptions options; options.vendor = uint32_t(vendor);
+        if (!full) { options.until = first; options.before = mode == L"before"; }
+        Replay replay(frame, options);
+        require(replay.adapterDescription().VendorId == vendor, "Unexpected GPU vendor");
+        auto read = [&](Id event, bool after, const auto& objects) {
+            require(report["observations"].size() < budget, "Read budget exhausted");
+            require(objects.contains(resource), "Resource has no executed GPU object");
+            const auto storage = replay.readMsaa(resource, uint32_t(sample), typed);
+            require(storage.integerBits && !storage.depthStencil && storage.mode == "selected_sample",
+                    "Sample reader did not preserve integer storage");
+            bool found = false;
+            for (const auto& sub : textureSubresources(storage.resource)) {
+                if (sub.layer != layer) continue;
+                const auto stride = typed == 12 ? 8u : 4u;
+                const auto offset = sub.offset + y * sub.rowPitch + x * stride;
+                require(offset <= storage.bytes.size() && stride <= storage.bytes.size() - offset,
+                        "Texel storage out of bounds");
+                std::array<uint32_t, 4> words{};
+                for (unsigned c = 0; c < 4; ++c) {
+                    words[c] = storage.bytes[size_t(offset) + c * (stride / 4)];
+                    if (stride == 8) words[c] |= uint32_t(storage.bytes[size_t(offset) + c * 2 + 1]) << 8;
+                }
+                report["observations"].push_back({{"event", event}, {"after", after}, {"words", words}});
+                found = true;
+            }
+            require(found, "Selected layer missing from sample storage");
+        };
+        // Draw snapshots identify potential RTV writers, not every possible resource mutation.
+        std::set<Id> writers;
+        std::array<Com<ID3D11Texture2D>, 2> checkpoints;
+        ReplayBoundaryObserver observer;
+        if (mode == L"trace" || mode == L"checkpoint") {
+            observer = [&](Id id, bool after, auto* context, const auto& objects) {
+                if (id < first || id > last) return;
+                const auto event = frame.event(id);
+                const auto state = frame.state(event.state);
+                bool writer = false;
+                for (const auto view : state.rtv) {
+                    if (!view) continue;
+                    const auto payload = frame.payload(view, 5, 0x8d);
+                    require(payload.size() >= 24, "Truncated render target view");
+                    Id target{}; std::memcpy(&target, payload.data() + 16, sizeof target);
+                    writer |= target == resource;
+                }
+                if (writer) {
+                    writers.insert(id);
+                    if (mode == L"checkpoint") {
+                        require(objects.contains(resource), "Resource has no executed GPU object");
+                        checkpoints[after ? 1 : 0] = diagnostic::checkpoint(replay.nativeDevice(), context, objects.at(resource).Get(), typed);
+                    } else read(id, after, objects);
+                }
+            };
+        }
+        replay.run({}, observer);
+        if (mode == L"checkpoint") {
+            require(checkpoints[0] && checkpoints[1], "No selected render target writers observed");
+            for (unsigned i = 0; i < 2; ++i) {
+                const auto words = diagnostic::readCheckpoint(replay.nativeDevice(), checkpoints[i].Get(), typed,
+                                                              uint32_t(sample), uint32_t(layer), uint32_t(x), uint32_t(y));
+                report["observations"].push_back({{"event", first}, {"after", i != 0}, {"words", words}});
+            }
+        }
+        if (!full)
+            replay.inspectNativeState([&](auto*, const auto& objects) { read(first, mode == L"after", objects); });
+        require(mode == L"final" || !report["observations"].empty(), "No selected render target writers observed");
+        report["adapter"] = replay.adapter(); report["counts"] = replay.counts;
+        report["last_work_event"] = replay.lastWorkEvent(); report["writers"] = writers;
+        if (full) {
+            const auto image = replay.output();
+            replay.inspectNativeState([&](auto*, const auto& objects) {
+                require(objects.contains(image.resource) && frame.resource(image.resource).type == 0x85,
+                        "Final output is not an executed GPU texture");
+                read(replay.lastWorkEvent(), true, objects);
+            });
+            report["final_texel"] = report["observations"].back(); report["observations"].erase(report["observations"].end()-1);
+            report["output"] = {{"resource", image.resource}, {"width", image.width}, {"height", image.height},
+                                {"sha256", sha256(image.rgba)}};
+            require(replay.output().rgba == image.rgba, "Readback changed final output");
+        }
+        report["completed"] = true; save(output / "report.json", report);
+        std::cout << report.dump() << '\n';
+        return 0;
+    } catch (const std::exception& error) {
+        report["completed"] = false; report["error"] = error.what();
+        if (!output.empty()) { try { save(output / "report.json", report); } catch (...) {} }
+        std::cerr << report.dump() << '\n'; return 1;
+    }
+}
