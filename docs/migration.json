@@ -4028,6 +4028,14 @@
         "limits": "System-only child PATH and actual module/import audits; not separate clean-machine certification"
       }
     },
-    "production_frame_capture_scope": "Limited real application capture is accepted for the six documented Intel GF2 files; the general production release flag remains false pending broader correctness and API scope."
+    "production_frame_capture_scope": "Limited real application capture is accepted for the six documented Intel GF2 files; the general production release flag remains false pending broader correctness and API scope.",
+    "replay_adapter_ui": {
+      "status": "Explicit native GPU selection and project restoration verified on this host",
+      "evidence": "docs/CAPTURE_REPLAY_ADAPTER_UI.md",
+      "baseline": "docs/capture-replay-adapter-ui-baseline.json",
+      "gf2_gui_exact_frames": 6,
+      "validation": "Two focused CTests pass; related eight initially pass seven, then corrected asynchronous navigation fixture passes gpu_profile. Six preserved Intel GF2 captures render exact output-widget RGBA. Replay-only package passes four historical golden checks and one explicit Intel frame, with five actual module audits and source boundary checks.",
+      "limits": "First DXGI adapter per PCI vendor, not per-LUID selection. No new capture runtime, original-GPA or full CTest sweep in this stage; historical Intel/NVIDIA correctness gaps remain open."
+    }
   }
 }

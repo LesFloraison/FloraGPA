@@ -99,8 +99,11 @@ RT-only RGBA16 2x MSAA native reproduction remains unresolved. Passing these
 six Intel files does not fix either issue. Broader deferred execution, hidden
 states, API/interface coverage, real device-loss and HUD stress limitations
 remain as recorded in `migration.json`; overall status stays `partial` and
-the general production-release flag stays false. Native inspection here uses
-the CLI; six-file GUI inspection is of the original GPA.
+the general production-release flag stays false. Native inspection in this
+acceptance stage uses the CLI; original GPA supplies its six-file GUI inspection.
+A subsequent stage adds Qt native device selection and verifies all six exact
+images in FloraGPA's output widget; see
+[CAPTURE_REPLAY_ADAPTER_UI.md](CAPTURE_REPLAY_ADAPTER_UI.md).
 
 Raw captures and research remain ignored in the two Intel session directories,
 the corresponding resource-byte directories, and

@@ -5,6 +5,7 @@ struct ReplayUiState {
     std::string target = "auto", channel = "rgba", low = "0", high = "1";
     std::optional<uint32_t> layer, sample;
     bool warp = false;
+    std::optional<uint32_t> gpuVendor;
     Id event = 0;
     int boundary = 0;
     std::string geometryStage = "final", geometryTable = "expanded_vertices", geometryInstance;

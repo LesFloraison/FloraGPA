@@ -9,6 +9,9 @@ on Intel Iris Xe**, from two independent launches with three consecutive capture
 each, covering home and equipment-room scenes. Exact dual-player execution,
 selected resource bytes, original GUI inspection and independent package gates
 are recorded in [CAPTURE_GF2_ACCEPTANCE.md](CAPTURE_GF2_ACCEPTANCE.md).
+Qt now exposes explicit native replay device selection; all six accepted files
+also reproduce their exact image hashes in its output widget. See
+[CAPTURE_REPLAY_ADAPTER_UI.md](CAPTURE_REPLAY_ADAPTER_UI.md).
 The full planned release remains incomplete. Earlier Intel pixel mismatches and
 the NVIDIA MSAA anomaly remain unresolved; see the acceptance document's limits
 and [CAPTURE_REPEATABILITY.md](CAPTURE_REPEATABILITY.md). Unsupported API and

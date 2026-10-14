@@ -1,0 +1,282 @@
+{
+  "schema": "FloraGPA native replay adapter UI 1",
+  "date": "2026-10-14",
+  "production_parent": "f18773f",
+  "scope": "GUI native vendor selection, preserved Intel GF2 frames and same-host replay-only package",
+  "frames": [
+    {
+      "actual_adapter": "Intel(R) Iris(R) Xe Graphics",
+      "frame": "frame-4adc44c2-49ad-4d4a-9390-2b274ecd1cac.gpa_frame",
+      "height": 1440,
+      "rgba_sha256": "af7f8706d9113b4e65ecabb98390b928ee104cfece834a4e48a52b8fecf10171",
+      "selected_vendor": 32902,
+      "width": 2560,
+      "frame_sha256": "0a606a6eba1f69a4751ca19726097a39da093b28658a10fad675637b5b79475f"
+    },
+    {
+      "actual_adapter": "Intel(R) Iris(R) Xe Graphics",
+      "frame": "frame-23d87d95-edc8-4c95-a656-5a0836b55e93.gpa_frame",
+      "height": 1440,
+      "rgba_sha256": "4f1e64c60472b570ed3a211401895f7454c339dc7f19a247c00450cc0cfa50e4",
+      "selected_vendor": 32902,
+      "width": 2560,
+      "frame_sha256": "d699d088fdba167852467f41d41b01c81c062c26a4cc702e6b20414766fe0ae6"
+    },
+    {
+      "actual_adapter": "Intel(R) Iris(R) Xe Graphics",
+      "frame": "frame-31646f44-7c4b-4a9f-b8d8-872ad84002db.gpa_frame",
+      "height": 1440,
+      "rgba_sha256": "f63d44336c5384c769751b5feace9d3cdb3641b0f6e03227b68fc5c63dcc6613",
+      "selected_vendor": 32902,
+      "width": 2560,
+      "frame_sha256": "e2ea29a80f275dea41012ac92959e3256b9bad4e6e4b3963a105bd19a6009714"
+    },
+    {
+      "actual_adapter": "Intel(R) Iris(R) Xe Graphics",
+      "frame": "frame-ff4b6d3f-d22c-4bde-bb8b-ea23bc255b26.gpa_frame",
+      "height": 1440,
+      "rgba_sha256": "30fd30008fa58bca44d3cf16f3c6db94c04e559c3119bd50a38b1bf1abbbb5c5",
+      "selected_vendor": 32902,
+      "width": 2560,
+      "frame_sha256": "d546669af953cf8b655eaf483f069dc81052b9331abb41385f8895d6b041598e"
+    },
+    {
+      "actual_adapter": "Intel(R) Iris(R) Xe Graphics",
+      "frame": "frame-8303d287-f7f2-4ac0-bdf4-bb1090e0508a.gpa_frame",
+      "height": 1440,
+      "rgba_sha256": "addfe86d102844ddf19840579b80ee2ab1ff29a6360ac41a464b9ad09379db3c",
+      "selected_vendor": 32902,
+      "width": 2560,
+      "frame_sha256": "58daa443d8e9b8fcef0cff772747baaf910f6c33dadc3cb3a2961b29a474efcd"
+    },
+    {
+      "actual_adapter": "Intel(R) Iris(R) Xe Graphics",
+      "frame": "frame-898db51b-7c23-47b8-bba2-e39fe5a2b423.gpa_frame",
+      "height": 1440,
+      "rgba_sha256": "db46f5153846ed97804b4ec2308019c661d281441eb1096f146d20e02d0e26f9",
+      "selected_vendor": 32902,
+      "width": 2560,
+      "frame_sha256": "0f2ab2d831311a01ea297f4dabde9ad8753177b5c3637f9ca7d72790ebd0f94c"
+    }
+  ],
+  "tests": {
+    "focused_passed": 2,
+    "related_initial_passed": 7,
+    "related_initial_total": 8,
+    "corrected_gpu_profile_passed": 1,
+    "full_sweep": false,
+    "historical_package_golden_passed": 4
+  },
+  "package": {
+    "package_file_count": 62,
+    "isolated_environment": "Windows system paths only; app-local Qt",
+    "loaded_module_audits": 5,
+    "intel_frame": {
+      "frame": "frame-4adc44c2-49ad-4d4a-9390-2b274ecd1cac.gpa_frame",
+      "rgba_sha256": "af7f8706d9113b4e65ecabb98390b928ee104cfece834a4e48a52b8fecf10171",
+      "adapter": "Intel(R) Iris(R) Xe Graphics",
+      "reference_pixels_used": false
+    },
+    "binaries": {
+      "FloraGPA.exe": "9901b70a8538b59372c9ccf84b361573943981e1aa899ba80224777ff89cfd8d",
+      "FloraGPA.Worker.exe": "13eee88c2fc3542f1acd9f44c015b9e0c758db9354490c5915663240278521eb",
+      "FloraGPA.Cli.exe": "90e9f81350cf7c97880d48f3b4da603f29b8d0511f1c3c4562dcdff82c4efaa1"
+    },
+    "capture_package_retested": false
+  },
+  "raw_evidence": [
+    {
+      "path": "artifacts/capture-replay-adapter-ui-20261014/audit.py",
+      "sha256": "b0cef388d1fa31697554f20c5351e8cc8d53ddca19739972abaf0f19dffc1206",
+      "bytes": 2638
+    },
+    {
+      "path": "artifacts/capture-replay-adapter-ui-20261014/boundaries.log",
+      "sha256": "6948a92ab37870ee2ab8c13f4f9601c891b6286a2e3559b1d89243254a2ff0f8",
+      "bytes": 51
+    },
+    {
+      "path": "artifacts/capture-replay-adapter-ui-20261014/build.log",
+      "sha256": "0fb4b2225ced69711a885f00cedf0ca7d7c2a581c1bb184c0583870b25a90aaf",
+      "bytes": 19201
+    },
+    {
+      "path": "artifacts/capture-replay-adapter-ui-20261014/first-ui-attempt.txt",
+      "sha256": "34055c5d65e748648c474b3eddfdd71514f2df355e98b46945b24d86b34395b4",
+      "bytes": 1207
+    },
+    {
+      "path": "artifacts/capture-replay-adapter-ui-20261014/focused-corrected.log",
+      "sha256": "ca9b4bfe767729b93d9633e0e1d65ea0ce82e49eace18ef32a05da42eeac772f",
+      "bytes": 417
+    },
+    {
+      "path": "artifacts/capture-replay-adapter-ui-20261014/focused-ui-passed.txt",
+      "sha256": "651778257e91fe1a9481a4db5d1d3d16cf7afb9ff86a3095782cedc52a65394d",
+      "bytes": 1727
+    },
+    {
+      "path": "artifacts/capture-replay-adapter-ui-20261014/focused.log",
+      "sha256": "06acb369a2f610fb991cd6ab7c1f351a888e5c14d4d0b989d4130ac8acffb4c6",
+      "bytes": 512
+    },
+    {
+      "path": "artifacts/capture-replay-adapter-ui-20261014/gpu-profile-cancel-diagnostic.txt",
+      "sha256": "b3e020390759faf86f5122e4e088c867b5ead728cfdf5d70cb54d331ae2683b3",
+      "bytes": 1500
+    },
+    {
+      "path": "artifacts/capture-replay-adapter-ui-20261014/gpu-profile-corrected-build.log",
+      "sha256": "a0a18e242bf51c9f6acb57e1a57ca46ac15f8ca68c114cf60a8510e828a583a9",
+      "bytes": 1798
+    },
+    {
+      "path": "artifacts/capture-replay-adapter-ui-20261014/gpu-profile-corrected.log",
+      "sha256": "eb886fee9a793909e6638117ba20a9c0a797c0cdd04a2c9bae4df85d29fce5ac",
+      "bytes": 312
+    },
+    {
+      "path": "artifacts/capture-replay-adapter-ui-20261014/gpu-profile-diagnostic-build.log",
+      "sha256": "a3de9f3544b9a95a86101a0df4414248f8b3c794d3ab92acfa24ac8404b75244",
+      "bytes": 1798
+    },
+    {
+      "path": "artifacts/capture-replay-adapter-ui-20261014/gpu-profile-first-failure.txt",
+      "sha256": "3a7862b9b4af2e6817792a3008a744455bdcc7963c3c45258ff73b8d0d70062d",
+      "bytes": 1491
+    },
+    {
+      "path": "artifacts/capture-replay-adapter-ui-20261014/package-golden/bf1/output_storage.json",
+      "sha256": "0d2253d424c5663ea1c7acb679572b9ca18e2ed0f69fdfeed5f0cb1d2e438a68",
+      "bytes": 746
+    },
+    {
+      "path": "artifacts/capture-replay-adapter-ui-20261014/package-golden/bf1/report.json",
+      "sha256": "b62a0a25439d47043c05518b642d56c4d55628315aacc83f1a41266a92c6274a",
+      "bytes": 23402
+    },
+    {
+      "path": "artifacts/capture-replay-adapter-ui-20261014/package-golden/bf1-negative/output_storage.json",
+      "sha256": "21c410abd9d2cf5448da5733274f51d6d8f7b025009c2ca878e873bd0e62a36c",
+      "bytes": 746
+    },
+    {
+      "path": "artifacts/capture-replay-adapter-ui-20261014/package-golden/bf1-negative/report.json",
+      "sha256": "11c11ed076a97abec2e4d92666f2ba0908692d8a95691f7f75bd28723cc60b5a",
+      "bytes": 23304
+    },
+    {
+      "path": "artifacts/capture-replay-adapter-ui-20261014/package-golden/bf1-negative.log",
+      "sha256": "eae578f2e127551bd2ebbaa059093d0cf26d3b84928eba5dcf5e76e68bb3148e",
+      "bytes": 38012
+    },
+    {
+      "path": "artifacts/capture-replay-adapter-ui-20261014/package-golden/bf1.log",
+      "sha256": "eae578f2e127551bd2ebbaa059093d0cf26d3b84928eba5dcf5e76e68bb3148e",
+      "bytes": 38012
+    },
+    {
+      "path": "artifacts/capture-replay-adapter-ui-20261014/package-golden/gf2/output_storage.json",
+      "sha256": "6ddd28c6e623e17a2996c917d9259fc2c0633aa6eefa538c50626ce994fa5df3",
+      "bytes": 748
+    },
+    {
+      "path": "artifacts/capture-replay-adapter-ui-20261014/package-golden/gf2/report.json",
+      "sha256": "0a87cdaf481043c74766b532a0ac2d59643a47eaab52757f84a9eda1970bab78",
+      "bytes": 9207
+    },
+    {
+      "path": "artifacts/capture-replay-adapter-ui-20261014/package-golden/gf2-negative/output_storage.json",
+      "sha256": "1f2e9d0fa02fb623369c97181f49b8752790cc06757d7534ee741350f3a685f6",
+      "bytes": 748
+    },
+    {
+      "path": "artifacts/capture-replay-adapter-ui-20261014/package-golden/gf2-negative/report.json",
+      "sha256": "001753ee78201a0fd2731530223d82bebf9850ccd1d0be2b3eb39ecd3a5c3b81",
+      "bytes": 9142
+    },
+    {
+      "path": "artifacts/capture-replay-adapter-ui-20261014/package-golden/gf2-negative.log",
+      "sha256": "bf3404bbc64f692c67e3c103b344419a5d137abb2955951e58a0fc8143dfd2fb",
+      "bytes": 1768
+    },
+    {
+      "path": "artifacts/capture-replay-adapter-ui-20261014/package-golden/gf2.log",
+      "sha256": "bf3404bbc64f692c67e3c103b344419a5d137abb2955951e58a0fc8143dfd2fb",
+      "bytes": 1768
+    },
+    {
+      "path": "artifacts/capture-replay-adapter-ui-20261014/package-golden/validation.json",
+      "sha256": "a1f6d11deab2e8324c8626ab359b139abf8a83257d06874c3cb6a251a357b84a",
+      "bytes": 3387
+    },
+    {
+      "path": "artifacts/capture-replay-adapter-ui-20261014/package-golden.log",
+      "sha256": "9045dc3e3b7870e530a1c62f26394abd4443e9d3b985817f7f32052b1f0e9635",
+      "bytes": 58
+    },
+    {
+      "path": "artifacts/capture-replay-adapter-ui-20261014/package-intel/output_storage.json",
+      "sha256": "b3c4ae644b855120af1e5ac609dd52fdb2eb7ff7cda5361db9c5763399f29ede",
+      "bytes": 746
+    },
+    {
+      "path": "artifacts/capture-replay-adapter-ui-20261014/package-intel/report.json",
+      "sha256": "fec1899d89bd97090179d188bcb2edd155df49cbae63ad7a8886cf76bfcc27c9",
+      "bytes": 11388
+    },
+    {
+      "path": "artifacts/capture-replay-adapter-ui-20261014/package-intel.log",
+      "sha256": "cb6fec677fef90b18ae1a5c09c5c85683d257c4ad057f4d2e640d16e19c8d96c",
+      "bytes": 17216
+    },
+    {
+      "path": "artifacts/capture-replay-adapter-ui-20261014/package-validation.json",
+      "sha256": "05cc089495b8d2508a8cabce74068937fc05282cb0ca4f573422acc9d10a993f",
+      "bytes": 740
+    },
+    {
+      "path": "artifacts/capture-replay-adapter-ui-20261014/regression.log",
+      "sha256": "2f29cec41fd2d1ecbd1291fb93e3e7902b5e0f437f019e54a8816253cbc262ce",
+      "bytes": 1105
+    },
+    {
+      "path": "artifacts/capture-replay-adapter-ui-20261014/replay-only-build.log",
+      "sha256": "bf6f7b7fd4288e6998e3a3bcc6a39907091a83ccbcfd54bc18bd0c1b45086107",
+      "bytes": 6069
+    },
+    {
+      "path": "artifacts/capture-replay-adapter-ui-20261014/replay-package.log",
+      "sha256": "4e7f4f947b7dbb8e83fd06dc862305405ff0073b5cd5d7352e157b742668710f",
+      "bytes": 2994
+    },
+    {
+      "path": "artifacts/capture-replay-adapter-ui-20261014/six-frame-ui/results.json",
+      "sha256": "3dd3a869fe1156de60fcc24c7438a022d964e7bd692a70244b1094f6003c7c6d",
+      "bytes": 2216
+    },
+    {
+      "path": "artifacts/capture-replay-adapter-ui-20261014/six-frame-ui-request.json",
+      "sha256": "b20bdc61aca855c6f331b2b389c76163d44e61c8f0ed335edd73ed9c3b7e0156",
+      "bytes": 2133
+    },
+    {
+      "path": "artifacts/capture-replay-adapter-ui-20261014/six-frame-ui.log",
+      "sha256": "59c4c8c0dafe4252efcc28fafeead9a55729a7c630540a14fbb1a107dd9a6a3a",
+      "bytes": 1622
+    },
+    {
+      "path": "artifacts/capture-replay-adapter-ui-20261014/test-rebuild.log",
+      "sha256": "21c732d8f60c376a94bf980f2cc78e341e60098f517434f9090042d76335f1e7",
+      "bytes": 1818
+    }
+  ],
+  "overall_capture_status": "partial",
+  "unresolved": [
+    "Historical Intel ten-pixel mismatch",
+    "NVIDIA RT-only RGBA16 2x MSAA native anomaly",
+    "Broader API and hidden-state coverage"
+  ],
+  "capture_runtime_changed": false,
+  "original_gpa_rerun": false
+}

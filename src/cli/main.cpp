@@ -14,6 +14,7 @@
 #include "application/ExperimentReport.h"
 #include "application/ExternalShaderTools.h"
 #include "application/FrameOutput.h"
+#include "application/ReplayCommands.h"
 #include "application/FrameValidation.h"
 #include "application/Geometry.h"
 #include "application/GpuProfile.h"
@@ -186,10 +187,7 @@ int main(int argc, char **argv) {
         auto command = args[0];
         std::optional<uint32_t> gpuVendor;
         if (p.isSet("gpu-vendor")) {
-            const QStringList supported{"replay", "buffer", "texture", "statistics", "texture-storage",
-                                        "geometry", "post-geometry", "replay-pipeline", "predicate",
-                                        "shader-checkpoint", "draw-resources", "coverage", "quad", "timings"};
-            if (!supported.contains(command))
+            if (!usesNativeReplayDevice(command.toStdString()))
                 throw std::runtime_error("--gpu-vendor applies to native replay commands only");
             if (p.isSet("warp"))
                 throw std::runtime_error("--gpu-vendor cannot be combined with --warp");

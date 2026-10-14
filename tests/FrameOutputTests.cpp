@@ -267,6 +267,22 @@ class FrameOutputTests : public QObject {
         QCOMPARE(restored.sample, std::optional<uint32_t>(3));
         QCOMPARE(restored.boundary, 1);
         QVERIFY(restored.warp);
+        QVERIFY(!restored.gpuVendor);
+        auto explicitGpu = state;
+        explicitGpu.warp = false;
+        explicitGpu.gpuVendor = 0x8086;
+        const auto gpuUi = replayUiDocument(frame, explicitGpu, ui);
+        QCOMPARE(gpuUi["driver"], Json("hardware"));
+        QCOMPARE(gpuUi["flora_gpu_vendor"], Json(0x8086));
+        QCOMPARE(replayUiState(frame, gpuUi).gpuVendor, std::optional<uint32_t>(0x8086));
+        QVERIFY(!replayUiDocument(frame, state, gpuUi).contains("flora_gpu_vendor"));
+        explicitGpu.warp = true;
+        QVERIFY_THROWS_EXCEPTION(std::exception, replayUiDocument(frame, explicitGpu));
+        explicitGpu.warp = false;
+        for (uint32_t invalid : {0u, 65536u, UINT32_MAX}) {
+            explicitGpu.gpuVendor = invalid;
+            QVERIFY_THROWS_EXCEPTION(std::exception, replayUiDocument(frame, explicitGpu));
+        }
         QCOMPARE(ui["frame_display"]["future_setting"], Json("keep"));
         QCOMPARE(ui["shader_documents"], original["shader_documents"]);
         Experiment experiment(frame);
@@ -290,6 +306,12 @@ class FrameOutputTests : public QObject {
               Json{{"frame_display", {{"low", "nan"}}}}, Json{{"frame_display", {{"layer", true}}}},
               Json{{"flora_output_boundary", 3}}})
             QVERIFY_THROWS_EXCEPTION(std::exception, replayUiState(frame, bad));
+        for (const auto &invalid : {Json(0), Json(-1), Json(65536), Json(UINT64_MAX), Json(true),
+                                   Json(32902.0), Json("32902"), Json(), Json::array()})
+            QVERIFY_THROWS_EXCEPTION(std::exception,
+                                     replayUiState(frame, Json{{"flora_gpu_vendor", invalid}}));
+        QVERIFY_THROWS_EXCEPTION(std::exception,
+                                 replayUiState(frame, Json{{"driver", "warp"}, {"flora_gpu_vendor", 0x8086}}));
         QCOMPARE(replayUiState(frame, Json{{"frame_display", {{"target", "swap:123"}}}}).target,
                  std::string("auto"));
         QCOMPARE(replayUiState(frame, Json::object()).boundary, 0);

@@ -56,6 +56,12 @@ ReplayUiState replayUiState(const Frame &frame, const Json &ui, Id currentEvent)
     if (driver != "hardware" && driver != "warp")
         throw std::runtime_error("Invalid project replay device");
     state.warp = driver == "warp";
+    if (ui.contains("flora_gpu_vendor")) {
+        const auto &vendor = ui.at("flora_gpu_vendor");
+        if (!vendor.is_number_integer() || vendor < 1 || vendor > 0xffff || state.warp)
+            throw std::runtime_error("Invalid project replay GPU vendor");
+        state.gpuVendor = vendor.get<uint32_t>();
+    }
     auto display = ui.value("frame_display", Json::object());
     if (!display.is_object())
         throw std::runtime_error("Project frame display must be an object");
@@ -141,6 +147,8 @@ Json replayUiDocument(const Frame &frame, const ReplayUiState &state, const Json
                         {"sample", state.sample ? std::to_string(*state.sample) : ""}});
     ui["frame_display"] = std::move(display);
     ui["driver"] = state.warp ? "warp" : "hardware";
+    if (state.gpuVendor) ui["flora_gpu_vendor"] = *state.gpuVendor;
+    else ui.erase("flora_gpu_vendor");
     ui["event"] = state.event && eventId(frame, Json(state.event), true) ? Json(state.event) : Json();
     ui["command"] = state.event ? Json(state.event) : Json();
     ui["flora_output_boundary"] = state.boundary;

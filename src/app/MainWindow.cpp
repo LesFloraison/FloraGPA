@@ -1,4 +1,5 @@
 #include "MainWindow.h"
+#include "ReplayAdapters.h"
 #ifdef FLORA_CAPTURE_UI
 #include "capture_ui/CaptureDialog.h"
 #endif
@@ -487,8 +488,7 @@ void MainWindow::buildUi() {
     bar->addWidget(spacer);
     adapter_ = new QComboBox;
     adapter_->setObjectName("replayAdapter");
-    adapter_->addItems({"Hardware · DX11", "WARP · DX11"});
-    adapter_->setToolTip("Replay adapter");
+    populateReplayAdapters(*adapter_);
     bar->addWidget(adapter_);
     auto central = new QWidget;
     auto root = new QVBoxLayout(central);
@@ -1702,8 +1702,7 @@ void MainWindow::startWorker(QStringList args, bool timings) {
         args << "--preview-request" << path;
     }
     if ((args.first() == "replay" && !args.contains("--renderdoc")) || args.first() == "texture") invalidateResourceImage();
-    if (adapter_->currentIndex() == 1 && !scheduled && !catalog)
-        args << "--warp";
+    args << replayAdapterArguments(*adapter_, args.first());
     runningRevision_ = revision_;
     runningTimings_ = timings;
     runningKind_ = args.first();
@@ -3912,7 +3911,7 @@ void MainWindow::openExperiment() {
             outputHigh_->setText(QString::fromStdString(settings.high));
             outputLayer_->setValue(settings.layer ? int(*settings.layer) : -1);
             outputSample_->setValue(settings.sample ? int(*settings.sample) : -1);
-            adapter_->setCurrentIndex(settings.warp ? 1 : 0);
+            restoreReplayAdapter(*adapter_, settings.warp, settings.gpuVendor);
         }
         experiment_ = std::move(candidate);
         shaderDocument_ = 0;
@@ -3980,6 +3979,7 @@ bool MainWindow::saveExperiment() {
         if (outputSample_->value() >= 0)
             state.sample = uint32_t(outputSample_->value());
         state.warp = adapter_->currentIndex() == 1;
+        state.gpuVendor = selectedReplayVendor(*adapter_);
         state.event = selectedEvent_;
         state.boundary = boundary_->currentIndex();
         state.geometryStage = geometryStage_->currentData().toString().toStdString();

@@ -236,9 +236,14 @@ class GpuProfileTests final : public QObject {
                 break;
             }
         QVERIFY(hit);
+        done.clear();
         QTest::mouseClick(timeline->viewport(), Qt::LeftButton, Qt::NoModifier, point);
         QCOMPARE(navigation.size(), 1);
         QCOMPARE(navigation[0][0].toULongLong(), event);
+        // Navigation queues a preview before busy() becomes true. Finish that
+        // request before a file dialog can dispatch it during project import.
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
+        QVERIFY2(done.takeLast()[0].toBool(), qPrintable(window.statusBar()->currentMessage()));
         view->exportResult(dir.filePath("timings.zip"));
         QFile zip(dir.filePath("timings.zip"));
         QVERIFY(zip.open(QIODevice::ReadOnly));
@@ -269,7 +274,7 @@ class GpuProfileTests final : public QObject {
         done.clear();
         fileAction(window, "openExperiment", project);
         QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 30000);
-        QVERIFY(done.takeLast()[0].toBool());
+        QVERIFY2(done.takeLast()[0].toBool(), qPrintable(window.statusBar()->currentMessage()));
         QCOMPARE(view->settings(), settings);
         QCOMPARE(table->topLevelItemCount(), 0);
         view->findChild<QLineEdit *>("profileSamples")->setText("1000");
