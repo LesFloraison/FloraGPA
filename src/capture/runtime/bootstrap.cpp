@@ -90,6 +90,9 @@ std::filesystem::path capture_directory;
 Json response(const Json& message,ULONG client_pid){
     Json result={{"ok",false},{"version",protocol_version},{"request_id",message.value("request_id",std::string())},
                  {"session_id",service_session},{"pid",GetCurrentProcessId()}};
+#ifdef FLORA_CAPTURE_FINAL_MSAA_DIAGNOSTICS
+    result["development_runtime"]="final_msaa_readbacks";
+#endif
     const auto number_matches=[&](const char* key,uint64_t value){return message.contains(key) && message[key].is_number_unsigned() && message[key].get<uint64_t>()==value;};
     if(!number_matches("version",protocol_version)){result["error"]="protocol_version_mismatch";return result;}
     if(message.value("session_id",std::string())!=service_session || !number_matches("target_pid",GetCurrentProcessId()) || !number_matches("client_pid",client_pid)){result["error"]="session_process_mismatch";return result;}

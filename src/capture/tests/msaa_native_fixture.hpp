@@ -13,6 +13,7 @@
 #include <fstream>
 #include <iostream>
 #include <thread>
+#include <functional>
 using namespace flora::capture;
 using namespace flora::format;
 using Microsoft::WRL::ComPtr;
@@ -49,7 +50,8 @@ void check(HRESULT hr){if(FAILED(hr))throw std::runtime_error("MSAA wire fixture
 ByteBuffer compile(const std::string& text,const char* profile){ComPtr<ID3DBlob> code,error;const auto hr=D3DCompile(text.data(),text.size(),"MSAA wire experiment",nullptr,nullptr,"main",profile,D3DCOMPILE_ENABLE_STRICTNESS,0,&code,&error);if(FAILED(hr)&&error)throw std::runtime_error(static_cast<const char*>(error->GetBufferPointer()));check(hr);auto* p=static_cast<const uint8_t*>(code->GetBufferPointer());return {p,p+code->GetBufferSize()};}
 ByteBuffer expected(UINT samples,bool changed,bool initialized=true){ByteBuffer result;for(UINT y=0;y<height*layers;++y)for(UINT x=0;x<width*samples*display_tiles;++x){const auto sample=x/(width*display_tiles),tile=(x/width)%display_tiles;const bool modified=changed && x%width<width/2 && !(sample%2);const auto p=initialized||modified?pixel(x%width,y%height,y/height,sample,changed,tile):std::array<uint8_t,4>{0,0,0,0};result.insert(result.end(),p.begin(),p.end());}return result;}
 struct Owned {MsaaSamples samples;ByteBuffer final;};
-Owned native(bool hardware,UINT samples,FrozenFrame* captured=nullptr,const RecordingOptions& options={},bool events=false,bool deferred=false,bool copyMutation=false){
+Owned native(bool hardware,UINT samples,FrozenFrame* captured=nullptr,const RecordingOptions& options={},bool events=false,bool deferred=false,bool copyMutation=false,
+    const std::function<void(ID3D11DeviceContext*,const RecordedFrame&)>& inspect={}){
     ComPtr<ID3D11Device> device;ComPtr<ID3D11DeviceContext> context;check(D3D11CreateDevice(nullptr,hardware?D3D_DRIVER_TYPE_HARDWARE:D3D_DRIVER_TYPE_WARP,nullptr,D3D11_CREATE_DEVICE_DEBUG,nullptr,0,D3D11_SDK_VERSION,&device,nullptr,&context));
     ComPtr<ID3D11InfoQueue> info;check(device.As(&info));info->ClearStoredMessages();wrap_object(device.GetAddressOf(),"MSAA wire device");wrap_object(context.GetAddressOf(),"MSAA wire context");
     D3D11_TEXTURE2D_DESC td{width,height,1,layers,storage_format,{samples,0},D3D11_USAGE_DEFAULT,D3D11_BIND_RENDER_TARGET|D3D11_BIND_SHADER_RESOURCE,0,0};ComPtr<ID3D11Texture2D> source;check(device->CreateTexture2D(&td,nullptr,&source));
@@ -62,7 +64,7 @@ Owned native(bool hardware,UINT samples,FrozenFrame* captured=nullptr,const Reco
     for(UINT layer=0;layer<layers;++layer){D3D11_RENDER_TARGET_VIEW_DESC vd{};vd.Format=integer_format;vd.ViewDimension=D3D11_RTV_DIMENSION_TEXTURE2DMSARRAY;vd.Texture2DMSArray={layer,1};check(device->CreateRenderTargetView(source.Get(),&vd,&views[layer]));auto* r=views[layer].Get();context->OMSetRenderTargets(1,&r,nullptr);const UINT data[]{layer,0,0,0};context->UpdateSubresource(cb.Get(),0,nullptr,data,0,0);context->Draw(3,0);}
     Owned result;result.samples=snapshot_msaa_samples(context.Get(),source.Get());
     for(const auto& plane:result.samples.planes){ByteBuffer oracle;for(UINT y=0;y<height;++y)for(UINT x=0;x<width;++x){const auto p=sample_bytes(x,y,plane.array_slice,plane.sample);oracle.insert(oracle.end(),p.begin(),p.end());}require(plane.bytes==oracle,"Native initial samples differ from CPU");}
-    if(render_format!=integer_format)for(UINT layer=0;layer<layers;++layer){views[layer].Reset();D3D11_RENDER_TARGET_VIEW_DESC vd{};vd.Format=render_format;vd.ViewDimension=D3D11_RTV_DIMENSION_TEXTURE2DMSARRAY;vd.Texture2DMSArray={layer,1};check(device->CreateRenderTargetView(source.Get(),&vd,&views[layer]));}
+    if constexpr(render_format!=integer_format)for(UINT layer=0;layer<layers;++layer){views[layer].Reset();D3D11_RENDER_TARGET_VIEW_DESC vd{};vd.Format=render_format;vd.ViewDimension=D3D11_RTV_DIMENSION_TEXTURE2DMSARRAY;vd.Texture2DMSArray={layer,1};check(device->CreateRenderTargetView(source.Get(),&vd,&views[layer]));}
     MsaaEventFixture event;event.prepare(device.Get(),context.Get(),events,samples==4);
     std::shared_ptr<FrameRecording> recording;if(captured)recording=begin_recording(context.Get(),options);
     event.observe(context.Get());
@@ -104,6 +106,12 @@ Owned native(bool hardware,UINT samples,FrozenFrame* captured=nullptr,const Reco
     event.end(context.Get());
     std::optional<RecordedFrame> recorded;if(recording)recorded=recording->finish();
     auto final=snapshot_resource(context.Get(),output.Get());result.final=final.subresources.at(0).bytes;require(result.final==expected(samples,true),"Native final image differs from CPU");
+    if(inspect){require(recorded.has_value(),"Inspection requires recording");inspect(context.Get(),*recorded);
+        // Draw once more through the still-bound application pipeline. This
+        // checks state restoration as well as the existing output bytes.
+        require(snapshot_resource(context.Get(),output.Get()).subresources.at(0).bytes==result.final,"Inspection changed output bytes");
+        context->Draw(3,0);
+        require(snapshot_resource(context.Get(),output.Get()).subresources.at(0).bytes==result.final,"Inspection changed application draw state");}
     if(captured){recorded->require_complete();*captured=freeze_frame(std::move(*recorded),object_record(output.Get())->id,std::move(final));}
     context->ClearState();
     for(UINT64 i=0;i<info->GetNumStoredMessagesAllowedByRetrievalFilter();++i){SIZE_T size=0;check(info->GetMessage(i,nullptr,&size));ByteBuffer bytes(size);auto* m=reinterpret_cast<D3D11_MESSAGE*>(bytes.data());check(info->GetMessage(i,m,&size));require(m->Severity>D3D11_MESSAGE_SEVERITY_WARNING,m->pDescription);}

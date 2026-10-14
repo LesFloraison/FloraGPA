@@ -4302,6 +4302,23 @@
       "cpu_tests_passed": 8,
       "current_gate_passed": false,
       "limits": "Two fresh Intel launches cover home/equipment with current runtime. Two files fail exact final pixels (one stable six-run discrepancy, one variable). All selected resource bytes and original API details agree; one resource observer differs from uninstrumented output. No tolerance change, replacement file, production fix or current-runtime acceptance."
+    },
+    "final_msaa_diagnostics": {
+      "evidence": "docs/CAPTURE_FINAL_MSAA_DIAGNOSTICS.md",
+      "baseline": "docs/capture-final-msaa-baseline.json",
+      "development_only": true,
+      "native_planes_exact": 24,
+      "native_refusals_passed": 20,
+      "injected_captured_files": 8,
+      "injected_planes_exact": 48,
+      "injected_dual_player_files": 12,
+      "injected_dual_player_checks": 279,
+      "gf2_diagnostic_files": 1,
+      "gf2_positive_executions_exact": 6,
+      "gf2_sample_comparisons_exact": 12,
+      "current_gate_passed": false,
+      "limits": "Separate excluded diagnostic DLL exports retained frame-end MSAA color samples without Replay dependencies. One new GF2 diagnostic file matches both players and all six application sample planes twice; it does not reproduce or fix the two formal-gate discrepancies. Additional reads can perturb timing. No replacement acceptance file or relaxed tolerance.",
+      "ctest_passed": 161
     }
   }
 }

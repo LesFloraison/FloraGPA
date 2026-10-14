@@ -6,6 +6,9 @@
 #include "presentation_resources.hpp"
 #include <thread>
 #include <optional>
+#ifdef FLORA_CAPTURE_FINAL_MSAA_DIAGNOSTICS
+#include "../diagnostics/final_msaa.hpp"
+#endif
 
 namespace flora::capture {
 using Microsoft::WRL::ComPtr;
@@ -79,6 +82,14 @@ void finish(Request& r,IDXGISwapChain* swap){
     auto frame=r.recording->finish();frame.require_complete();
     SnapshotOptions options;options.byte_limit=resource_limit_bytes(r.resource_limit_mib);options.cancelled=[&r]{return r.cancelled.load();};
     auto final=snapshot_resource(r.context.Get(),r.buffer.Get(),options);
+#ifdef FLORA_CAPTURE_FINAL_MSAA_DIAGNOSTICS
+    auto diagnostic_path=r.output;diagnostic_path+=L".final-msaa";
+    diagnostics::export_final_msaa(r.context.Get(),frame,diagnostic_path,options);
+    const auto after=snapshot_resource(r.context.Get(),r.buffer.Get(),options);
+    if(final.subresources.size()!=1 || after.subresources.size()!=1 ||
+       final.subresources[0].bytes!=after.subresources[0].bytes)
+        throw std::runtime_error("Final-MSAA diagnosis changed the capture backbuffer");
+#endif
     const auto id=final.record->id;
     r.pending=freeze_frame(std::move(frame),id,std::move(final));
     r.release();r.state(Phase::Finalizing);

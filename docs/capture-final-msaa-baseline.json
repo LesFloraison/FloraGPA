@@ -1,0 +1,269 @@
+{
+  "schema": 1,
+  "date": "2026-10-14",
+  "current_gate_passed": false,
+  "production_fix": false,
+  "development_only": true,
+  "source_parent_commit": "15491012fa1c9dc0f07c3f34007cc77da7a36904",
+  "raw_root": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-final-msaa-20261014",
+  "raw_manifest_files": 1253,
+  "raw_manifest_sha256": "5b455896856c5851957d12f938dc7816e2a309a966a0ac3f808ad5533fbe69c8",
+  "source_hashes": {
+    "CMakeLists.txt": "5ddc9b27628a152a6234575148b8076c9560877345e0ff02ec16a16248920a99",
+    "src/capture/CMakeLists.txt": "d700bec1324c320f3fe0198fa4fdfbc64935e56973fd3a6d0f523369c20eb489",
+    "src/capture/diagnostics/final_msaa.cpp": "e9bed3c56900146adcfd20c76fa995951d06e09dff1ab6aa69ccc7b6a39857cc",
+    "src/capture/diagnostics/final_msaa.hpp": "18cec6e8e12f4e57bd71f540db06d50476434aae752f4269ef94dd235cb6af89",
+    "src/capture/diagnostics/exports.def": "9f5bcee11c03b29b9890aebf28c4c02b71e4e231714e97ec5085ade0c123ef54",
+    "src/capture/runtime/bootstrap.cpp": "d3b945552abb20191a6beece0f67df11613e2e021a04cdded124b96405d7b315",
+    "src/capture/runtime/capture_session.cpp": "c1c4d541d669db5a5c145e3a78614e479be7b899dad6ba75707f019d43a12cf6",
+    "src/capture/tests/final_msaa_tests.cpp": "722462ea1f918a04f914b6ad4b4e29ce3f73a719b3a584b4566d9fd17edb25cb",
+    "src/capture/tests/msaa_native_fixture.hpp": "c838c79c29f13b0fee0276e3cb44b00d31cf070532388c4b73c4fc2db0c2731e",
+    "docs/CAPTURE_FINAL_MSAA_DIAGNOSTICS.md": "eeab83b9dc31ebeed2764735a5411867a08b660b2be1a3294c6ba6957ba191d8"
+  },
+  "package_audit": {
+    "passed": true,
+    "development_runtime_sha256": "ccba35348f8b51dffdbd39a9564f847bb463e23ae7722189c30edc98f8e89aca",
+    "production_runtime_sha256": "c3e1f44e3d58e4fc4f613e5c7373588e33fa626c94bd98ee2f9013f386db39c6",
+    "controller_sha256": "0bc61e429745e1b0f6fd046762cae923471686782a1ab48ba853cca12aaaacf3",
+    "production_excludes_diagnostics": true,
+    "target_modules_independent": true,
+    "target_runtime": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-final-msaa-20261014\\package-final\\FloraCaptureRuntime.dll"
+  },
+  "counts": {
+    "ctest_passed": 161,
+    "native_planes_exact": 24,
+    "native_refusals_passed": 20,
+    "injected_launches": 2,
+    "injected_captures": 8,
+    "injected_planes_exact": 48,
+    "injected_dual_files": 12,
+    "injected_dual_checks": 279,
+    "gf2_diagnostic_files": 1,
+    "gf2_positive_exact": 6,
+    "gf2_samples": 6,
+    "gf2_sample_comparisons_exact": 12
+  },
+  "gf2": {
+    "session_id": "01355e42-9e11-4cb5-a84c-3bc073784a62",
+    "pid": 33884,
+    "process_created": 134364445359115728,
+    "file": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-final-msaa-20261014\\gf2\\session\\frame-13714340-3f05-473a-96db-1d0728dd38be.gpa_frame",
+    "file_sha256": "c61d498e4ae26f8055b2212b1cb3d69240dd14c2533c275712f072c4e070b6f4",
+    "bytes": 1352555110,
+    "present": 1108,
+    "continued_present": 1244,
+    "scene": "equipment_room",
+    "adapter": "Intel(R) Iris(R) Xe Graphics",
+    "readback_bytes": 268738560,
+    "positive_executions": [
+      {
+        "repeat": 0,
+        "flora_vs_capture": {
+          "pixels": 0,
+          "channels": 0,
+          "maximum": 0
+        },
+        "original_vs_capture": {
+          "pixels": 0,
+          "channels": 0,
+          "maximum": 0
+        },
+        "flora_vs_original": {
+          "pixels": 0,
+          "channels": 0,
+          "maximum": 0
+        }
+      },
+      {
+        "repeat": 1,
+        "flora_vs_capture": {
+          "pixels": 0,
+          "channels": 0,
+          "maximum": 0
+        },
+        "original_vs_capture": {
+          "pixels": 0,
+          "channels": 0,
+          "maximum": 0
+        },
+        "flora_vs_original": {
+          "pixels": 0,
+          "channels": 0,
+          "maximum": 0
+        }
+      },
+      {
+        "repeat": 2,
+        "flora_vs_capture": {
+          "pixels": 0,
+          "channels": 0,
+          "maximum": 0
+        },
+        "original_vs_capture": {
+          "pixels": 0,
+          "channels": 0,
+          "maximum": 0
+        },
+        "flora_vs_original": {
+          "pixels": 0,
+          "channels": 0,
+          "maximum": 0
+        }
+      }
+    ],
+    "samples": {
+      "acceptance_established": false,
+      "frame_sha256": "c61d498e4ae26f8055b2212b1cb3d69240dd14c2533c275712f072c4e070b6f4",
+      "cli_sha256": "215ebafed657953f0671c32a0948e12c8c965437a3eaa33e6d38aedcff5e2ddc",
+      "event": 6419,
+      "comparisons": [
+        {
+          "runtime_resource": 3244,
+          "wire_resource": 413,
+          "sample": 0,
+          "repeat": 0,
+          "bytes": 53747712,
+          "different_bytes": 0,
+          "different_pixels": 0,
+          "expected_sha256": "da57be0be0b60e6e1a1780dbdc0aba310dd81a6b42b5134a3c9657f9e300bb6b",
+          "actual_sha256": "da57be0be0b60e6e1a1780dbdc0aba310dd81a6b42b5134a3c9657f9e300bb6b",
+          "first_locations": []
+        },
+        {
+          "runtime_resource": 3244,
+          "wire_resource": 413,
+          "sample": 0,
+          "repeat": 1,
+          "bytes": 53747712,
+          "different_bytes": 0,
+          "different_pixels": 0,
+          "expected_sha256": "da57be0be0b60e6e1a1780dbdc0aba310dd81a6b42b5134a3c9657f9e300bb6b",
+          "actual_sha256": "da57be0be0b60e6e1a1780dbdc0aba310dd81a6b42b5134a3c9657f9e300bb6b",
+          "first_locations": []
+        },
+        {
+          "runtime_resource": 3244,
+          "wire_resource": 413,
+          "sample": 1,
+          "repeat": 0,
+          "bytes": 53747712,
+          "different_bytes": 0,
+          "different_pixels": 0,
+          "expected_sha256": "af545be26e761272cedbd35e24a6731b2f0091a102cd8cd1aaf1483fe6cacfac",
+          "actual_sha256": "af545be26e761272cedbd35e24a6731b2f0091a102cd8cd1aaf1483fe6cacfac",
+          "first_locations": []
+        },
+        {
+          "runtime_resource": 3244,
+          "wire_resource": 413,
+          "sample": 1,
+          "repeat": 1,
+          "bytes": 53747712,
+          "different_bytes": 0,
+          "different_pixels": 0,
+          "expected_sha256": "af545be26e761272cedbd35e24a6731b2f0091a102cd8cd1aaf1483fe6cacfac",
+          "actual_sha256": "af545be26e761272cedbd35e24a6731b2f0091a102cd8cd1aaf1483fe6cacfac",
+          "first_locations": []
+        },
+        {
+          "runtime_resource": 3251,
+          "wire_resource": 417,
+          "sample": 0,
+          "repeat": 0,
+          "bytes": 26873856,
+          "different_bytes": 0,
+          "different_pixels": 0,
+          "expected_sha256": "83fd7a4544ee3b486d3edefade58d026062d23e153493bec84fe0a2550d3de06",
+          "actual_sha256": "83fd7a4544ee3b486d3edefade58d026062d23e153493bec84fe0a2550d3de06",
+          "first_locations": []
+        },
+        {
+          "runtime_resource": 3251,
+          "wire_resource": 417,
+          "sample": 0,
+          "repeat": 1,
+          "bytes": 26873856,
+          "different_bytes": 0,
+          "different_pixels": 0,
+          "expected_sha256": "83fd7a4544ee3b486d3edefade58d026062d23e153493bec84fe0a2550d3de06",
+          "actual_sha256": "83fd7a4544ee3b486d3edefade58d026062d23e153493bec84fe0a2550d3de06",
+          "first_locations": []
+        },
+        {
+          "runtime_resource": 3251,
+          "wire_resource": 417,
+          "sample": 1,
+          "repeat": 0,
+          "bytes": 26873856,
+          "different_bytes": 0,
+          "different_pixels": 0,
+          "expected_sha256": "3ee60f3f2f03cf869e28e5ad6b13e608801518e331077c04bd32c154491cbe77",
+          "actual_sha256": "3ee60f3f2f03cf869e28e5ad6b13e608801518e331077c04bd32c154491cbe77",
+          "first_locations": []
+        },
+        {
+          "runtime_resource": 3251,
+          "wire_resource": 417,
+          "sample": 1,
+          "repeat": 1,
+          "bytes": 26873856,
+          "different_bytes": 0,
+          "different_pixels": 0,
+          "expected_sha256": "3ee60f3f2f03cf869e28e5ad6b13e608801518e331077c04bd32c154491cbe77",
+          "actual_sha256": "3ee60f3f2f03cf869e28e5ad6b13e608801518e331077c04bd32c154491cbe77",
+          "first_locations": []
+        },
+        {
+          "runtime_resource": 3788,
+          "wire_resource": 623,
+          "sample": 0,
+          "repeat": 0,
+          "bytes": 53747712,
+          "different_bytes": 0,
+          "different_pixels": 0,
+          "expected_sha256": "5cb8d69d0bcec91306467c51ed20209a2201b13016249de27dc9ae2554e6d737",
+          "actual_sha256": "5cb8d69d0bcec91306467c51ed20209a2201b13016249de27dc9ae2554e6d737",
+          "first_locations": []
+        },
+        {
+          "runtime_resource": 3788,
+          "wire_resource": 623,
+          "sample": 0,
+          "repeat": 1,
+          "bytes": 53747712,
+          "different_bytes": 0,
+          "different_pixels": 0,
+          "expected_sha256": "5cb8d69d0bcec91306467c51ed20209a2201b13016249de27dc9ae2554e6d737",
+          "actual_sha256": "5cb8d69d0bcec91306467c51ed20209a2201b13016249de27dc9ae2554e6d737",
+          "first_locations": []
+        },
+        {
+          "runtime_resource": 3788,
+          "wire_resource": 623,
+          "sample": 1,
+          "repeat": 0,
+          "bytes": 53747712,
+          "different_bytes": 0,
+          "different_pixels": 0,
+          "expected_sha256": "738bece62b69862925e0a48d45a3337d0a5cbc9eee6cf48c08fe05ccfa1e665d",
+          "actual_sha256": "738bece62b69862925e0a48d45a3337d0a5cbc9eee6cf48c08fe05ccfa1e665d",
+          "first_locations": []
+        },
+        {
+          "runtime_resource": 3788,
+          "wire_resource": 623,
+          "sample": 1,
+          "repeat": 1,
+          "bytes": 53747712,
+          "different_bytes": 0,
+          "different_pixels": 0,
+          "expected_sha256": "738bece62b69862925e0a48d45a3337d0a5cbc9eee6cf48c08fe05ccfa1e665d",
+          "actual_sha256": "738bece62b69862925e0a48d45a3337d0a5cbc9eee6cf48c08fe05ccfa1e665d",
+          "first_locations": []
+        }
+      ],
+      "completed": true
+    }
+  },
+  "limits": "The new diagnostic observation matches. The prior six-frame gate still fails at two files; no tolerance changes or replacements. Rebuilt production DLL has a new identity and has not undergone new GF2 acceptance."
+}

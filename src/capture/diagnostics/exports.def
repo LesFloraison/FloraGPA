@@ -1,0 +1,3 @@
+LIBRARY FloraCaptureDiagnosticRuntime
+EXPORTS
+    DetourFinishHelperProcess @1
