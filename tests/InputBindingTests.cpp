@@ -63,6 +63,9 @@ Capture inputs() {
 }
 Capture gaps() {
     auto c = inputs();
+    // inputs() removes the original commands, including the append-counter reset.
+    // The Dispatch below consumes that counter, so its fixture must initialize it.
+    command(c, 199, 0x3522, statePack(1u, 1u, uint8_t(1), Id(12), uint8_t(1), 0u));
     command(c, 200, 0x34e6, statePack(2u, 2u, uint8_t(1), Id(999), Id(6)));
     command(c, 201, 0x34e6, statePack(2u, 1u, uint8_t(1), Id(0)));
     command(c, 202, 0x34f7, statePack(3u, 1u, uint8_t(1), Id(0)));

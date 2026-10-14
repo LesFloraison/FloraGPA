@@ -583,7 +583,10 @@ class PostTransformTests final : public QObject {
             dialog->setDirectory(dir.path());
             QMetaObject::invokeMethod(dialog, "accept", Qt::QueuedConnection);
         });
+        QSignalSpy exported(&window, &MainWindow::exportFinished);
         window.findChild<QAction *>("exportGeometry")->trigger();
+        QTRY_COMPARE_WITH_TIMEOUT(exported.size(), 1, 30000);
+        QVERIFY(exported.takeFirst()[0].toBool());
         for (const auto *file :
              {"geometry.json", "vertices.bin", "vertices.validity.bin", "vertices.csv", "patch_constants.bin",
               "patch_constants.validity.bin", "patch_constants.csv"})
@@ -689,7 +692,10 @@ class PostTransformTests final : public QObject {
             dialog->setDirectory(dir.path());
             QMetaObject::invokeMethod(dialog, "accept", Qt::QueuedConnection);
         });
+        QSignalSpy exported(&window, &MainWindow::exportFinished);
         window.findChild<QAction *>("exportGeometry")->trigger();
+        QTRY_COMPARE_WITH_TIMEOUT(exported.size(), 1, 30000);
+        QVERIFY(exported.takeFirst()[0].toBool());
         for (const auto *file : {"geometry.json", "vertices.bin", "vertices.csv", "geometry.obj"})
             QVERIFY(QFile::exists(dir.path() + "/FloraGPA-Geometry-1000/" + file));
         const auto evidence = qEnvironmentVariable("FLORA_POST_TRANSFORM_EVIDENCE_DIR");
@@ -719,6 +725,8 @@ class PostTransformTests final : public QObject {
             QMetaObject::invokeMethod(dialog, "accept", Qt::QueuedConnection);
         });
         window.findChild<QAction *>("exportGeometry")->trigger();
+        QTRY_COMPARE_WITH_TIMEOUT(exported.size(), 1, 30000);
+        QVERIFY(exported.takeFirst()[0].toBool());
         for (const auto *file : {"geometry.json", "vertices.bin", "vertices.csv", "geometry.obj",
                                  "unique_vertices.bin", "unique_vertices.csv", "references.csv"})
             QVERIFY(QFile::exists(dir.path() + "/FloraGPA-Geometry-1000-1/" + file));
@@ -768,6 +776,8 @@ class PostTransformTests final : public QObject {
             QMetaObject::invokeMethod(dialog, "accept", Qt::QueuedConnection);
         });
         window.findChild<QAction *>("exportGeometry")->trigger();
+        QTRY_COMPARE_WITH_TIMEOUT(exported.size(), 1, 30000);
+        QVERIFY(exported.takeFirst()[0].toBool());
         for (const auto *file : {"geometry.json", "vertices.bin", "vertices.validity.bin", "vertices.csv"})
             QVERIFY(QFile::exists(dir.path() + "/FloraGPA-Geometry-1000-2/" + file));
         QVERIFY(!QFile::exists(dir.path() + "/FloraGPA-Geometry-1000-2/geometry.obj"));
@@ -805,6 +815,8 @@ class PostTransformTests final : public QObject {
             QMetaObject::invokeMethod(dialog, "accept", Qt::QueuedConnection);
         });
         window.findChild<QAction *>("exportGeometry")->trigger();
+        QTRY_COMPARE_WITH_TIMEOUT(exported.size(), 1, 30000);
+        QVERIFY(exported.takeFirst()[0].toBool());
         for (const auto *file : {"geometry.json", "vertices.bin", "vertices.validity.bin", "vertices.csv",
                                  "primitives.csv", "geometry.obj"})
             QVERIFY(QFile::exists(dir.path() + "/FloraGPA-Geometry-150/" + file));
