@@ -2,6 +2,8 @@
 // Reuses Replay's integer sample reader, retaining only one texel per observation.
 #include "replay/Replay.h"
 #include "texel_checkpoint.h"
+#include "input_checkpoint.h"
+#include <QImage>
 #include <fstream>
 #include <iostream>
 #include <nlohmann/json.hpp>
@@ -31,20 +33,21 @@ int wmain(int argc, wchar_t** argv) {
     Json report{{"schema", 1}, {"completed", false}, {"acceptance_established", false},
                 {"reference_pixels_used", false}, {"observations", Json::array()}};
     try {
-        require(argc == 13, "FRAME NEW_OUT VENDOR RESOURCE SAMPLE LAYER X Y before|after|trace|final|checkpoint FIRST LAST READ_BUDGET");
+        require(argc == 13, "FRAME NEW_OUT VENDOR RESOURCE SAMPLE LAYER X Y before|after|trace|final|checkpoint|inputs FIRST LAST READ_BUDGET");
         const auto vendor = number(argv[3]), resource = number(argv[4]), sample = number(argv[5]),
                    layer = number(argv[6]), x = number(argv[7]), y = number(argv[8]),
                    first = number(argv[10]), last = number(argv[11]);
         // The final argument is an explicit read budget, including before/after trace observations.
         const auto budget = number(argv[12]);
         const std::wstring mode(argv[9]);
-        require(mode == L"before" || mode == L"after" || mode == L"trace" || mode == L"final" || mode == L"checkpoint", "Unknown probe mode");
-        const bool full = mode == L"trace" || mode == L"final" || mode == L"checkpoint";
+        const bool checkpoint = mode == L"checkpoint" || mode == L"inputs";
+        require(mode == L"before" || mode == L"after" || mode == L"trace" || mode == L"final" || checkpoint, "Unknown probe mode");
+        const bool full = mode == L"trace" || mode == L"final" || checkpoint;
         require(vendor && vendor <= UINT16_MAX && resource && first && last >= first,
                 "Invalid vendor/resource/event selection");
         require(budget && budget <= 1024, "Read budget must be in 1..1024");
         require(full || first == last, "Prefix modes require identical first/last events");
-        require(mode != L"checkpoint" || (first == last && budget >= 3), "Checkpoint needs one event and budget >= 3");
+        require(!checkpoint || (first == last && budget >= 3), "Checkpoint needs one event and budget >= 3");
         const auto destination = fs::absolute(argv[2]);
         require(!fs::exists(destination), "Output directory already exists");
         Frame frame(fs::absolute(argv[1]));
@@ -63,17 +66,17 @@ int wmain(int argc, wchar_t** argv) {
             require(sub.size <= (uint64_t(2) << 30) - bytes, "Readback memory budget exceeded");
             bytes += sub.size;
         }
-        require(mode != L"checkpoint" || bytes <= (uint64_t(2) << 30) / (2 * info.samples),
+        require(!checkpoint || bytes <= (uint64_t(2) << 30) / (2 * info.samples),
                 "Checkpoint memory budget exceeded");
         for (const auto id : {first, last})
             require(frame.entry(id).category == 7 && isDraw(frame.entry(id).type),
                     "Expected Draw/Dispatch event boundaries");
         require(fs::create_directory(destination), "Cannot create output directory");
         output = destination;
-        report.update({{"mode", mode == L"checkpoint" ? "checkpoint" : mode == L"final" ? "final" : mode == L"trace" ? "trace" : mode == L"before" ? "before" : "after"}, {"vendor", vendor},
+        report.update({{"mode", mode == L"inputs" ? "inputs" : mode == L"checkpoint" ? "checkpoint" : mode == L"final" ? "final" : mode == L"trace" ? "trace" : mode == L"before" ? "before" : "after"}, {"vendor", vendor},
                        {"resource", resource}, {"sample", sample}, {"layer", layer}, {"x", x}, {"y", y},
                        {"first", first}, {"last", last}, {"read_budget", budget},
-                       {"observer_changes_scheduling", mode == L"trace" || mode == L"checkpoint"}, {"typed_format", typed}});
+                       {"observer_changes_scheduling", mode == L"trace" || checkpoint}, {"typed_format", typed}});
         save(output / "report.json", report);
         ReplayOptions options; options.vendor = uint32_t(vendor);
         if (!full) { options.until = first; options.before = mode == L"before"; }
@@ -105,8 +108,9 @@ int wmain(int argc, wchar_t** argv) {
         // Draw snapshots identify potential RTV writers, not every possible resource mutation.
         std::set<Id> writers;
         std::array<Com<ID3D11Texture2D>, 2> checkpoints;
+        diagnostic::InputCheckpoint inputCopies;
         ReplayBoundaryObserver observer;
-        if (mode == L"trace" || mode == L"checkpoint") {
+        if (mode == L"trace" || checkpoint) {
             observer = [&](Id id, bool after, auto* context, const auto& objects) {
                 if (id < first || id > last) return;
                 const auto event = frame.event(id);
@@ -121,7 +125,9 @@ int wmain(int argc, wchar_t** argv) {
                 }
                 if (writer) {
                     writers.insert(id);
-                    if (mode == L"checkpoint") {
+                    if (checkpoint) {
+                        if (mode == L"inputs" && !after)
+                            inputCopies.capture(replay.nativeDevice(), context, objects);
                         require(objects.contains(resource), "Resource has no executed GPU object");
                         checkpoints[after ? 1 : 0] = diagnostic::checkpoint(replay.nativeDevice(), context, objects.at(resource).Get(), typed);
                     } else read(id, after, objects);
@@ -129,7 +135,7 @@ int wmain(int argc, wchar_t** argv) {
             };
         }
         replay.run({}, observer);
-        if (mode == L"checkpoint") {
+        if (checkpoint) {
             require(checkpoints[0] && checkpoints[1], "No selected render target writers observed");
             for (unsigned i = 0; i < 2; ++i) {
                 const auto words = diagnostic::readCheckpoint(replay.nativeDevice(), checkpoints[i].Get(), typed,
@@ -144,6 +150,7 @@ int wmain(int argc, wchar_t** argv) {
         report["last_work_event"] = replay.lastWorkEvent(); report["writers"] = writers;
         if (full) {
             const auto image = replay.output();
+            if (mode == L"inputs") report["inputs"] = inputCopies.read(replay.nativeDevice());
             replay.inspectNativeState([&](auto*, const auto& objects) {
                 require(objects.contains(image.resource) && frame.resource(image.resource).type == 0x85,
                         "Final output is not an executed GPU texture");
@@ -152,6 +159,15 @@ int wmain(int argc, wchar_t** argv) {
             report["final_texel"] = report["observations"].back(); report["observations"].erase(report["observations"].end()-1);
             report["output"] = {{"resource", image.resource}, {"width", image.width}, {"height", image.height},
                                 {"sha256", sha256(image.rgba)}};
+            const QImage png(image.rgba.data(), int(image.width), int(image.height), int(image.width * 4), QImage::Format_RGBA8888);
+            const auto pngPath = QString::fromStdWString((output / "frame.png").wstring());
+            require(png.save(pngPath, "PNG"), "Cannot save final PNG");
+            const auto restored = QImage(pngPath).convertToFormat(QImage::Format_RGBA8888);
+            require(!restored.isNull() && restored.width() == png.width() && restored.height() == png.height(), "PNG round-trip shape differs");
+            for (uint32_t row = 0; row < image.height; ++row)
+                require(std::memcmp(restored.constScanLine(int(row)), image.rgba.data() + size_t(row) * image.width * 4,
+                                    size_t(image.width) * 4) == 0, "PNG round-trip bytes differ");
+            report["output"]["png_round_trip_exact"] = true;
             require(replay.output().rgba == image.rgba, "Readback changed final output");
         }
         report["completed"] = true; save(output / "report.json", report);

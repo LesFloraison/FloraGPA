@@ -4361,6 +4361,23 @@
       "golden_negative_controls_passed": 2,
       "current_gate_passed": false,
       "limits": "Same pre-Draw selected texel and two post-Draw values in complete replay copies. One run has an additional output hash without saved full pixels; it is not counted as the known alternate. Other inputs are not proven equal; first divergent frame operation and root cause remain unknown. Added copies alter scheduling. No new capture or acceptance tolerance."
+    },
+    "gf2_input_checkpoint_diagnosis": {
+      "evidence": "docs/CAPTURE_GF2_INPUT_CHECKPOINT.md",
+      "baseline": "docs/capture-gf2-input-checkpoint-baseline.json",
+      "inspected_resources": 15,
+      "inspected_resource_bytes": 52511484,
+      "executions": 10,
+      "outputs_capture_matching": 2,
+      "outputs_known_alternate": 8,
+      "native_resource_comparisons": 32,
+      "native_refusals": 10,
+      "probe_cases": 28,
+      "probe_refusals": 16,
+      "ctest_passed": 1,
+      "current_gate_passed": false,
+      "all_draw_inputs_proven_equal": false,
+      "limits": "All 15 inspected VS/PS CB/SRV and IA VB/IB resources agree across two final outputs. MSAA DSV/output planes, other shader stages, full native pipeline state and fragment results are not proven equal. Extra copies alter scheduling. Formal six-frame gate remains failed."
     }
   }
 }

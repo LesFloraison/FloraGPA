@@ -6,6 +6,7 @@ import os
 from pathlib import Path
 import struct
 import subprocess
+from PIL import Image
 
 from validate_capture_msaa_injected import pixels, records
 
@@ -23,6 +24,10 @@ def main():
     env = dict(os.environ)
     env['PATH'] = str(args.qt_bin.resolve()) + os.pathsep + env['PATH']
     result = dict(completed=False, acceptance_established=False, cases=[], refusals=[])
+
+    def check_png(destination, expected):
+        with Image.open(destination / 'frame.png') as image:
+            assert image.convert('RGBA').tobytes() == expected
 
     def save():
         (output / 'results.json').write_text(json.dumps(result, indent=2) + '\n')
@@ -69,6 +74,8 @@ def main():
                 observed = report['final_texel']
                 assert observed['words'] == words(expected, layer, sample, x, y), label
                 assert report['output']['sha256'] == hashlib.sha256(expected).hexdigest()
+                assert report['output']['png_round_trip_exact']
+                check_png(destination, expected)
                 if mode == 'trace':
                     assert report['writers'] and len(report['observations']) == 2 * len(report['writers'])
                 result['cases'].append(dict(label=label, command=command, words=observed['words'],
@@ -95,6 +102,8 @@ def main():
                         report = json.loads((destination / 'report.json').read_text())
                         assert report['completed'] and len(report['observations']) == 2
                         assert report['output']['sha256'] == hashlib.sha256(expected).hexdigest()
+                        assert report['output']['png_round_trip_exact']
+                        check_png(destination, expected)
                         for after, observation in enumerate(report['observations']):
                             oracle = pixels(samples, item['present_ordinal'], 'complete' if after else 'missing-application')
                             assert observation['after'] is bool(after)

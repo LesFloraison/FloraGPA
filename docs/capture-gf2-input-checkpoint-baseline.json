@@ -1,0 +1,497 @@
+{
+  "schema": 1,
+  "date": "2026-10-14",
+  "source_parent_commit": "99c78bd84fda36013a5c2e9f9e5bde026fd60171",
+  "source_hashes": {
+    "CMakeLists.txt": "e1bbfd8025be1e9448aaf7517f5a4227c36361ea53788a0efead78156541a86c",
+    "tools/native/input_checkpoint.h": "c86a31efb4b752ced2e0eddd1a3b3738f2e37ff26ff8534cfb2e9cf84b7c34b2",
+    "tools/native/input_checkpoint_tests.cpp": "55cdc3761be4e9ac6368489a3ccf1351d7a69b0cbedc4c667957b49d5caa879f",
+    "tools/native/replay_texel_probe.cpp": "8178100668552f55a54aaa479ca5f466a32b6ff4d9344e1f39d8747c17431036",
+    "tools/validate_capture_texel_probe.py": "e606031237d26c0b927b2fb0aff37bc1583cbbe3484ddd27cea0c63adcc68810",
+    "docs/CAPTURE_GF2_INPUT_CHECKPOINT.md": "fdbb87b3114ef6376c124234016a5640a2d62ce76c826fdfe4121c4cae86d182"
+  },
+  "current_gate_passed": false,
+  "production_changed": false,
+  "input": {
+    "file": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-resolve-current-20261014\\launch-2\\session\\frame-d3b245ec-09d2-4888-91af-5032f19ddbd6.gpa_frame",
+    "sha256": "9bef49cd3f807ae3796ece91d35960604ce4158d0736acb5d545efa346aafacf",
+    "event": 5651,
+    "resource": 411,
+    "sample": 1,
+    "layer": 0,
+    "x": 1596,
+    "y": 1519
+  },
+  "resources": [
+    {
+      "bytes": 368,
+      "desc": [
+        368,
+        2,
+        4,
+        65536,
+        0,
+        0
+      ],
+      "kind": "buffer",
+      "resource": 17,
+      "sha256": "afc769e69b29cd956d5ff796d76d762681ecb4ba65b4b62a6b50c30abe6f68a3"
+    },
+    {
+      "bytes": 528,
+      "desc": [
+        528,
+        2,
+        4,
+        65536,
+        0,
+        0
+      ],
+      "kind": "buffer",
+      "resource": 60,
+      "sha256": "c01a2d733b26102cd633116c2fc65c3811beeb6c215a5674e006f7a3646cbbf2"
+    },
+    {
+      "bytes": 524448,
+      "desc": [
+        256,
+        256,
+        9,
+        6,
+        95,
+        1,
+        0,
+        0,
+        8,
+        0,
+        4
+      ],
+      "kind": "texture2d",
+      "min_lod": 0.0,
+      "resource": 97,
+      "sha256": "bf3bd795d66d8568d3c31f5462e2351aea297d85a9ef839c5dabb9301ceb3fe4"
+    },
+    {
+      "bytes": 544,
+      "desc": [
+        544,
+        2,
+        4,
+        65536,
+        0,
+        0
+      ],
+      "kind": "buffer",
+      "resource": 363,
+      "sha256": "712a0e859e9619959fb0682efee4f5af156df2b0426e242108f4e9c02de0fb81"
+    },
+    {
+      "bytes": 44768,
+      "desc": [
+        44768,
+        2,
+        4,
+        65536,
+        0,
+        0
+      ],
+      "kind": "buffer",
+      "resource": 365,
+      "sha256": "fbf6945e916735267c12a54b52966d357dccac287858431b0703e5112ff2e939"
+    },
+    {
+      "bytes": 32768,
+      "desc": [
+        256,
+        16,
+        1,
+        1,
+        10,
+        1,
+        0,
+        0,
+        8,
+        0,
+        0
+      ],
+      "kind": "texture2d",
+      "min_lod": 0.0,
+      "resource": 386,
+      "sha256": "0b87d1a379c8adb9ee1aa42770da3e247de3c605a34478fc381ca35fcb8a1a10"
+    },
+    {
+      "bytes": 33554432,
+      "desc": [
+        4096,
+        4096,
+        1,
+        1,
+        53,
+        1,
+        0,
+        0,
+        72,
+        0,
+        0
+      ],
+      "kind": "texture2d",
+      "min_lod": 0.0,
+      "resource": 422,
+      "sha256": "066f00da3fe002547049e0d6c62586dbbc57d28feb5f530c9fe06ddf25af3268"
+    },
+    {
+      "bytes": 5592432,
+      "desc": [
+        2048,
+        2048,
+        12,
+        1,
+        99,
+        1,
+        0,
+        0,
+        8,
+        0,
+        0
+      ],
+      "kind": "texture2d",
+      "min_lod": 0.0,
+      "resource": 675,
+      "sha256": "7c68f90861cba29188cc3a8ff13441723050ed3966f57c671f2e6e3bd19139ec"
+    },
+    {
+      "bytes": 5592432,
+      "desc": [
+        2048,
+        2048,
+        12,
+        1,
+        98,
+        1,
+        0,
+        0,
+        8,
+        0,
+        0
+      ],
+      "kind": "texture2d",
+      "min_lod": 0.0,
+      "resource": 676,
+      "sha256": "19f1f7444503e0bce6dbdada65318a74e0f90d1a05d8a335ebc0b4485f0583e8"
+    },
+    {
+      "bytes": 5592432,
+      "desc": [
+        2048,
+        2048,
+        12,
+        1,
+        98,
+        1,
+        0,
+        0,
+        8,
+        0,
+        0
+      ],
+      "kind": "texture2d",
+      "min_lod": 0.0,
+      "resource": 690,
+      "sha256": "e615f00e62f96057b8bf1b3f53f83f53dafbbb5f2d7359ac0a1929cc45b1ba55"
+    },
+    {
+      "bytes": 222580,
+      "desc": [
+        222580,
+        0,
+        1,
+        0,
+        0,
+        0
+      ],
+      "kind": "buffer",
+      "resource": 798,
+      "sha256": "3085d5a6e50f1af627a56edae7c4ea5ea86d6ca53383ee03cebce7fa3156818c"
+    },
+    {
+      "bytes": 356128,
+      "desc": [
+        356128,
+        0,
+        1,
+        0,
+        0,
+        0
+      ],
+      "kind": "buffer",
+      "resource": 799,
+      "sha256": "43e1ad0ab21d4346a999890676f10556c68788cbe3447b985d0adb3cc5c33b02"
+    },
+    {
+      "bytes": 107304,
+      "desc": [
+        107304,
+        0,
+        2,
+        0,
+        0,
+        0
+      ],
+      "kind": "buffer",
+      "resource": 800,
+      "sha256": "4975cd4abb98e8e803fdc9652df8127c1a3b47289c9a6bf801992c3cac392eee"
+    },
+    {
+      "bytes": 445160,
+      "desc": [
+        445160,
+        2,
+        1,
+        65536,
+        0,
+        0
+      ],
+      "kind": "buffer",
+      "resource": 826,
+      "sha256": "619081936069bd9e80f56fe3ba7a2fab2c307badc543ed8c647f3c51ed8c1d95"
+    },
+    {
+      "bytes": 445160,
+      "desc": [
+        445160,
+        2,
+        1,
+        65536,
+        0,
+        0
+      ],
+      "kind": "buffer",
+      "resource": 896,
+      "sha256": "34325b9acc876ec0fb58fe66885160fd20ec83cd5120365fe74ef85a0aec8373"
+    }
+  ],
+  "input_bytes": 52511484,
+  "pre_draw_words": [
+    7759,
+    8093,
+    7731,
+    15285
+  ],
+  "runs": [
+    {
+      "index": 0,
+      "report_sha256": "abedbd65909dd04403c3502dac88cc23d179f34da4189afb67c0b20bcdcab6c4",
+      "png_sha256": "0e119453793730e1935d5813cd759c69091d9e21ee371235b5214f0127b656fd",
+      "rgba_sha256": "b548683168d47d12344c2a976155eb716c4a14d135dcbb8c9df542b0abd0caa1",
+      "capture_matching": false,
+      "after_words": [
+        9109,
+        9233,
+        8865,
+        15151
+      ]
+    },
+    {
+      "index": 1,
+      "report_sha256": "493d05d36f6710a285af1fbc6f353a6ec30684d128ca07f79df36c7d1231da03",
+      "png_sha256": "488fe73cd858012a8973a48eb2f9139f68857ce1668ef013885936f5cb45369b",
+      "rgba_sha256": "d5ffe329528ecabc09517514d1b41c5a8d305210480ad9454c732051a697d0e7",
+      "capture_matching": true,
+      "after_words": [
+        9127,
+        9247,
+        8891,
+        15143
+      ]
+    },
+    {
+      "index": 2,
+      "report_sha256": "abedbd65909dd04403c3502dac88cc23d179f34da4189afb67c0b20bcdcab6c4",
+      "png_sha256": "0e119453793730e1935d5813cd759c69091d9e21ee371235b5214f0127b656fd",
+      "rgba_sha256": "b548683168d47d12344c2a976155eb716c4a14d135dcbb8c9df542b0abd0caa1",
+      "capture_matching": false,
+      "after_words": [
+        9109,
+        9233,
+        8865,
+        15151
+      ]
+    },
+    {
+      "index": 3,
+      "report_sha256": "abedbd65909dd04403c3502dac88cc23d179f34da4189afb67c0b20bcdcab6c4",
+      "png_sha256": "0e119453793730e1935d5813cd759c69091d9e21ee371235b5214f0127b656fd",
+      "rgba_sha256": "b548683168d47d12344c2a976155eb716c4a14d135dcbb8c9df542b0abd0caa1",
+      "capture_matching": false,
+      "after_words": [
+        9109,
+        9233,
+        8865,
+        15151
+      ]
+    },
+    {
+      "index": 4,
+      "report_sha256": "abedbd65909dd04403c3502dac88cc23d179f34da4189afb67c0b20bcdcab6c4",
+      "png_sha256": "0e119453793730e1935d5813cd759c69091d9e21ee371235b5214f0127b656fd",
+      "rgba_sha256": "b548683168d47d12344c2a976155eb716c4a14d135dcbb8c9df542b0abd0caa1",
+      "capture_matching": false,
+      "after_words": [
+        9109,
+        9233,
+        8865,
+        15151
+      ]
+    },
+    {
+      "index": 5,
+      "report_sha256": "abedbd65909dd04403c3502dac88cc23d179f34da4189afb67c0b20bcdcab6c4",
+      "png_sha256": "0e119453793730e1935d5813cd759c69091d9e21ee371235b5214f0127b656fd",
+      "rgba_sha256": "b548683168d47d12344c2a976155eb716c4a14d135dcbb8c9df542b0abd0caa1",
+      "capture_matching": false,
+      "after_words": [
+        9109,
+        9233,
+        8865,
+        15151
+      ]
+    },
+    {
+      "index": 6,
+      "report_sha256": "abedbd65909dd04403c3502dac88cc23d179f34da4189afb67c0b20bcdcab6c4",
+      "png_sha256": "0e119453793730e1935d5813cd759c69091d9e21ee371235b5214f0127b656fd",
+      "rgba_sha256": "b548683168d47d12344c2a976155eb716c4a14d135dcbb8c9df542b0abd0caa1",
+      "capture_matching": false,
+      "after_words": [
+        9109,
+        9233,
+        8865,
+        15151
+      ]
+    },
+    {
+      "index": 7,
+      "report_sha256": "493d05d36f6710a285af1fbc6f353a6ec30684d128ca07f79df36c7d1231da03",
+      "png_sha256": "488fe73cd858012a8973a48eb2f9139f68857ce1668ef013885936f5cb45369b",
+      "rgba_sha256": "d5ffe329528ecabc09517514d1b41c5a8d305210480ad9454c732051a697d0e7",
+      "capture_matching": true,
+      "after_words": [
+        9127,
+        9247,
+        8891,
+        15143
+      ]
+    },
+    {
+      "index": 8,
+      "report_sha256": "abedbd65909dd04403c3502dac88cc23d179f34da4189afb67c0b20bcdcab6c4",
+      "png_sha256": "0e119453793730e1935d5813cd759c69091d9e21ee371235b5214f0127b656fd",
+      "rgba_sha256": "b548683168d47d12344c2a976155eb716c4a14d135dcbb8c9df542b0abd0caa1",
+      "capture_matching": false,
+      "after_words": [
+        9109,
+        9233,
+        8865,
+        15151
+      ]
+    },
+    {
+      "index": 9,
+      "report_sha256": "abedbd65909dd04403c3502dac88cc23d179f34da4189afb67c0b20bcdcab6c4",
+      "png_sha256": "0e119453793730e1935d5813cd759c69091d9e21ee371235b5214f0127b656fd",
+      "rgba_sha256": "b548683168d47d12344c2a976155eb716c4a14d135dcbb8c9df542b0abd0caa1",
+      "capture_matching": false,
+      "after_words": [
+        9109,
+        9233,
+        8865,
+        15151
+      ]
+    }
+  ],
+  "pixel_differences": {
+    "b548683168d47d12344c2a976155eb716c4a14d135dcbb8c9df542b0abd0caa1": [
+      {
+        "x": 1182,
+        "y": 313,
+        "captured": [
+          12,
+          14,
+          12,
+          255
+        ],
+        "replayed": [
+          12,
+          15,
+          12,
+          255
+        ]
+      },
+      {
+        "x": 1182,
+        "y": 314,
+        "captured": [
+          13,
+          12,
+          8,
+          247
+        ],
+        "replayed": [
+          13,
+          12,
+          8,
+          248
+        ]
+      },
+      {
+        "x": 1183,
+        "y": 314,
+        "captured": [
+          22,
+          22,
+          17,
+          254
+        ],
+        "replayed": [
+          22,
+          22,
+          17,
+          255
+        ]
+      }
+    ],
+    "d5ffe329528ecabc09517514d1b41c5a8d305210480ad9454c732051a697d0e7": []
+  },
+  "binaries": {
+    "FloraReplayTexelProbe.exe": "1148478c0059d4de774256c47b9cfc5446ff5d3cb3fc8880c311db38aed4555b",
+    "FloraReplayTexelProbe-final.exe": "4c630bdaa31a91fcfd072eaada397439321d837c529bd74be404ba54a6c53a0a",
+    "FloraInputCheckpointTests.exe": "5ab62c5c9758baa39964741074e6aa86603a8ff08ef92aa64e534919a1bee7e9",
+    "native-float-control.exe": "acb884f6183947edbb069c01a3f504d3e086ce58b722f53088a4d08ce48aedc9"
+  },
+  "validation": {
+    "native_resource_comparisons": 32,
+    "native_refusals": 10,
+    "native_debug_warnings_or_errors": 0,
+    "probe_cases": 28,
+    "probe_refusals": 16,
+    "ctest_passed": 1
+  },
+  "exploratory_native_float": {
+    "passed_arbitrary_typed_float_bytes": false,
+    "warp_direct_changed_words": 0,
+    "intel_direct_changed_nan_words": 22,
+    "log_sha256": "d853601f387cf96b341d922cc72be90593fc0c0d6114705edc530f59833c5da9"
+  },
+  "exploratory_gf2": {
+    "executions": 10,
+    "counted_as_final_validation": false,
+    "limitation": "Initial probe queried MinLOD without the RESOURCE_CLAMP flag; final validation and GF2 executions use the corrected frozen binary."
+  },
+  "replay_sha256": "215ebafed657953f0671c32a0948e12c8c965437a3eaa33e6d38aedcff5e2ddc",
+  "raw": {
+    "root": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-input-checkpoint-20261014",
+    "files": 166,
+    "manifest_sha256": "9c4c6ce298c9dd90e5b51a5dbd94ce4aff9e776658c648d0971f0190b147d163"
+  },
+  "limits": "All 15 inspected VS/PS CB/SRV and IA VB/IB resources agree across two final outputs. MSAA DSV/output planes, other shader stages, full native pipeline state and fragment results are not proven equal. Extra copies alter scheduling. Formal six-frame gate remains failed."
+}
