@@ -1,0 +1,79 @@
+{
+  "schema": "FloraGPA in-frame deferred compilation 1",
+  "date": "2026-10-14",
+  "parent_commit": "f2c6073fe1782f4c4c2c2f181b3e49bc467b439e",
+  "scope": "Same-frame CPU compilation on the capture thread or two workers, joined before immediate submission",
+  "capture_ctest": {
+    "passed": 126,
+    "total": 126
+  },
+  "full_focused_ctest": {
+    "passed": 28,
+    "total": 28
+  },
+  "status_only_followup_ctest": {
+    "passed": 3,
+    "total": 3
+  },
+  "dual_player": {
+    "files": 8,
+    "checks": 132,
+    "default_original_adapter": true,
+    "new_original_gui": false
+  },
+  "packaged_injection": {
+    "launches": 1,
+    "frames": 5,
+    "checks": 33,
+    "mode": 29,
+    "system_only_child_path": true,
+    "runtime_sha256": "f08a968fc28982707d0166cbab3fa29f89314d3a414f1db383257312e5d7bdaa",
+    "target_continues_after_disconnect": true
+  },
+  "previous_runtime_control": {
+    "runtime_sha256": "384ba2592bffbc35fecf97a5722517d3afd6ad72feda2d2bb85ed73b8df8a7d3",
+    "frames": 0,
+    "failure": "ID3D11DeviceContext::Map: Concurrent or foreign-thread context call is unsupported",
+    "target_exit_ok": true
+  },
+  "source_binaries": {
+    "build/capture/capture/Release/FloraCaptureInFrameDeferredTests.exe": "7a8c538aff10ec342c6d652a700b4e3633921dcb6cd63f097591361cdcd31a9e",
+    "build/capture/capture/Release/FloraCaptureCommandStreamTests.exe": "3c106e6a6e3fe5c831ae62479b0496cbab7ebd54fb8249af5cd782d22e3dbd9d",
+    "build/capture/capture/Release/FloraCaptureRuntime.dll": "f08a968fc28982707d0166cbab3fa29f89314d3a414f1db383257312e5d7bdaa"
+  },
+  "final_frame_sha256": {
+    "dual-final/hardware/aba.gpa_frame": "a29c2121a84c6b81118faefad664710b6b565374ab7420d2f7f3c1a554b727c8",
+    "dual-final/hardware/bab.gpa_frame": "456a1390ca54e57606f65e1e309a07bc40fb2eb405fe031d4f85dc65df66339e",
+    "dual-final/hardware/missing-discard.gpa_frame": "c93ba508679e0bbe760e3262e061ee3e7453a322137b96c24bc7a12d99ba0d6c",
+    "dual-final/hardware/missing-draw.gpa_frame": "d373d69b7da1d65a0f8634f54f36a3343a0ed97983879665e06c3c9c9332c03c",
+    "dual-final/warp/aba.gpa_frame": "07145dae64b111405b34a841c1dedeb5ca36953adf661f18c7aff558a26710b4",
+    "dual-final/warp/bab.gpa_frame": "103f9e52b78ca31b131fdea4986cb32537af97dc4fe6c677c716b1896bec0071",
+    "dual-final/warp/missing-discard.gpa_frame": "0ed5255ee5ea6548f1f225f77f06290a90a4602da7283b906cda9fe95fd475aa",
+    "dual-final/warp/missing-draw.gpa_frame": "42c270dbe063236399a4c5110c0f82c152515cfb3ba5903d9d2463e006026824",
+    "injected-final/native/29/session/frame-04be1957-3506-4ea5-a080-b2b8ea9bb61c.gpa_frame": "48bd272106a4e31804354f0251f20397f06cb0dafbc7798bc52b6fa0f5451921",
+    "injected-final/native/29/session/frame-1f7d8963-cbf6-4876-8145-853e729bb4ca.gpa_frame": "b596b5130f5de58e884a9922ea6392dd64b1264677e77f645873c0017dfe630e",
+    "injected-final/native/29/session/frame-2b05e9b0-9009-473c-bf2d-82f6ff10c68d.gpa_frame": "ae5267d590da8d6f9da2087b3c1fa2faff33589c48e4480e262043a414b9e5bf",
+    "injected-final/native/29/session/frame-4499474c-c72f-4cf4-a7d3-9d7b477615ed.gpa_frame": "db31e9affcc0c2ff260f0199987ab27db47e102056a893281d70d1f5d01070c2",
+    "injected-final/native/29/session/frame-8ff08bd0-0770-4994-8fb3-36ab141a5a61.gpa_frame": "a77372e40db7b372f3a2370ccdcb5c1e5c2cf845ad85f3f600e956c803e46010"
+  },
+  "evidence_manifest": {
+    "path": "artifacts/capture-deferred-inframe-20261014/evidence-manifest.json",
+    "sha256": "0e4024df40f009638742ce2eedd9833409165fda839a76d822adeb33bb86d374",
+    "files": 1017
+  },
+  "initial_failures": [
+    "Native null-output FinishCommandList test failed; corrected to a real released unsubmitted list",
+    "Two stream tests still expected unsubmitted deferred ClearState to reject; replaced with a no-event assertion"
+  ],
+  "validation_sequence": "Full capture run follows routing/lock-test fixes; final status-text-only update then passes bootstrap/controller/boundary checks and packaged injection",
+  "replay_or_format_changed": false,
+  "new_gf2_acceptance": false,
+  "overall_capture_status": "partial",
+  "remaining": [
+    "Nested lists",
+    "Unproven same-context compilation thread handoff",
+    "Foreign immediate execution",
+    "Unverified Map dependencies and hidden/query states",
+    "Historical Intel/NVIDIA pixel mismatches"
+  ]
+}

@@ -3954,10 +3954,10 @@
     ],
     "pending": [
       "Remaining creation paths and class-instance metadata",
-      "Successful in-frame EVENT completion semantics and other query types, empty-box/constant-buffer-box/packed-box/flagged/planar Updates and remaining region/format copies (overlap, flags, empty boxes, depth/constant and BC6H/BC7/packed/planar storage) and additional Map profiles, multicontext synchronization, deferred Map/nesting/in-frame compilation and remaining hidden states",
+      "Successful in-frame EVENT completion semantics and other query types, empty-box/constant-buffer-box/packed-box/flagged/planar Updates and remaining region/format copies (overlap, flags, empty boxes, depth/constant and BC6H/BC7/packed/planar storage) and additional Map profiles, multicontext synchronization, unverified deferred Map dependencies, nested lists and compilation synchronization and remaining hidden states",
       "Remaining command/state wire layouts and real swap-chain presentation serialization",
-      "Broader generated-capture dual-player and original GUI acceptance beyond self-owned profiles and one GF2 start-screen preflight",
-      "Two GF2 launches with three frames each across two scenes"
+      "Broader generated-capture dual-player and original GUI acceptance beyond documented self-owned profiles and six scoped Intel GF2 files",
+      "Historical Intel repeatability and NVIDIA MSAA discrepancies; six scoped Intel GF2 files retain their original validated runtime identity"
     ],
     "note": "New capture work is separate from legacy Python module migration; no full parity claim.",
     "bootstrap": "native x64 launch/control and Factory0-7/SwapChain0-4 wrappers validated",
@@ -3998,12 +3998,12 @@
       "acceptance_scope": "This host, Intel Iris Xe capture and both players, GPA 2025 R1 legacy DX11 / IGPA v3, home and equipment-room scenes; not general GPU/API correctness",
       "acceptance_evidence": "docs/capture-gf2-acceptance-baseline.json"
     },
-    "deferred_history": "Capture-owned bounded CPU compilation journals, immutable Finish generations and actual immediate execution expansion with repeated calls; native resource leases are separate from CPU histories",
+    "deferred_history": "Capture-owned bounded CPU compilation journals, including same-frame and separate worker contexts. Finished immutable generations expand only at actual immediate execution; native resource leases remain separate from CPU histories.",
     "deferred_mappings": "Capture-owned Map HRESULT/type/flags/pitches and Unmap payloads; borrowed pointers excluded from immutable lists. Complete dynamic-buffer WRITE_DISCARD and verified same-list NO_OVERWRITE, plus single-mip/single-layer dynamic texture discards with checked pitches, lower per execution. Unknown/GPU-mutated baselines, invalid pitches and broader rename dependencies refuse. See CAPTURE_DEFERRED_TEXTURE.md.",
     "deferred_bindings": "Typed input histories for 45 valid deferred APIs plus native effective action snapshots; unsupported MinLOD/class/hidden-state profiles reject",
     "deferred_definitions": "Independent CPU creation graphs preserve device/resource/view dependencies, DXBC, state descriptors, semantic strings and original creation bytes after native destruction; not execution-time GPU contents or deferred encoding",
     "deferred_effective_state": "Native compilation-time getter snapshots plus execution-time GPU initial data feed supported flattened actions; hidden deferred state remains unsupported",
-    "deferred_execution": "Supported precompiled Draw/Dispatch/Clear/Copy/Update and complete buffer/texture Map/Unmap actions lower at actual immediate ExecuteCommandList positions. Texture discards require the documented single-subresource profile; buffer NO_OVERWRITE requires a verified same-list baseline without intervening destination writes. Repeated order, execution snapshots, lifetime release and independent files tested. Nested lists, in-frame compilation and foreign immediate execution refuse.",
+    "deferred_execution": "Supported Draw/Dispatch/Clear/Copy/Update and scoped buffer/texture Map/Unmap actions lower at actual immediate ExecuteCommandList positions. Same-frame compilation on the capture thread and independent workers joined before submission is validated; unsubmitted lists add no frame events. Repeated order and first-use snapshots are preserved. Nested lists, unverified states and foreign immediate execution refuse.",
     "deferred_nooverwrite_validation": {
       "evidence": "docs/CAPTURE_DEFERRED_NOOVERWRITE.md",
       "baseline": "docs/capture-deferred-nooverwrite-baseline.json",
@@ -4065,6 +4065,15 @@
       "malformed_model_refusals": 104,
       "warp_invalid_pitch_refusals": 5,
       "limits": "RGBA8 1D/2D/3D and BC1 2D, including version-1 creation, on this host. WARP supports only the single-row profile in this fixture. Wider formats are not exhaustive. No new GF2 or original GUI claim; overall delivery remains partial."
+    },
+    "deferred_inframe_validation": {
+      "evidence": "docs/CAPTURE_DEFERRED_INFRAME.md",
+      "baseline": "docs/capture-deferred-inframe-baseline.json",
+      "dual_player_files": 8,
+      "dual_player_checks": 132,
+      "packaged_injected_frames": 5,
+      "packaged_injected_checks": 33,
+      "limits": "Single owner per deferred compilation batch; fixture joins workers before immediate execution. No arbitrary scheduling/race or new GF2 acceptance claim."
     }
   }
 }

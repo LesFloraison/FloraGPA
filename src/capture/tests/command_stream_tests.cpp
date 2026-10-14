@@ -133,9 +133,10 @@ void failures(bool hardware){
     run([&](auto recording){recording->cancel();f.context->Draw(3,0);},"cancelled");
     RecordingOptions limit;limit.byte_limit=1;run([&](auto){f.context->Draw(3,0);},"byte limit",limit);
     limit={};limit.command_limit=0;run([&](auto){f.context->Draw(3,0);},"command limit",limit);
-    run([&](auto){std::thread worker([&]{D3D11_PRIMITIVE_TOPOLOGY value;f.context->IAGetPrimitiveTopology(&value);});worker.join();},"foreign-thread");
+    run([&](auto){std::lock_guard metadata_lock(object_record(f.context.Get())->mutex);std::thread worker([&]{D3D11_PRIMITIVE_TOPOLOGY value;f.context->IAGetPrimitiveTopology(&value);});worker.join();},"foreign-thread");
     run([&](auto){NativeCall nested;f.context->Draw(3,0);},"Reentrant");
-    ComPtr<ID3D11DeviceContext> deferred;check(f.device->CreateDeferredContext(0,&deferred));run([&](auto){deferred->ClearState();},"Multiple context");
+    ComPtr<ID3D11DeviceContext> deferred;check(f.device->CreateDeferredContext(0,&deferred));
+    {auto recording=begin_recording(f.context.Get());deferred->ClearState();auto frame=recording->finish();frame.require_complete();require(frame.commands.empty(),"Unsubmitted deferred state entered the frame");}
     D3D11_QUERY_DESC q{D3D11_QUERY_OCCLUSION,0};ComPtr<ID3D11Query> query;check(f.device->CreateQuery(&q,&query));f.context->Begin(query.Get());rejects([&]{begin_recording(f.context.Get());},"active query");f.context->End(query.Get());
     D3D11_TEXTURE2D_DESC td{};td.Width=td.Height=4;td.MipLevels=td.ArraySize=td.SampleDesc.Count=1;td.Format=DXGI_FORMAT_R8G8B8A8_UNORM;td.Usage=D3D11_USAGE_STAGING;td.CPUAccessFlags=D3D11_CPU_ACCESS_READ|D3D11_CPU_ACCESS_WRITE;
     ComPtr<ID3D11Texture2D> texture;check(f.device->CreateTexture2D(&td,nullptr,&texture));ComPtr<IDXGISurface> surface;check(texture.As(&surface));DXGI_MAPPED_RECT mapped{};

@@ -7,11 +7,13 @@
 #include <d3d11sdklayers.h>
 #include <filesystem>
 #include <iostream>
+#include <thread>
+#include <source_location>
 using namespace flora::capture;
 using Microsoft::WRL::ComPtr;
 namespace {
 void require(bool value,const char* why){if(!value)throw std::runtime_error(why);}
-void check(HRESULT hr){require(SUCCEEDED(hr),"Native deferred discard call failed");}
+void check(HRESULT hr,const std::source_location& location=std::source_location::current()){if(FAILED(hr))throw std::runtime_error("Native deferred discard call failed at line "+std::to_string(location.line())+": "+std::to_string(UINT(hr)));}
 ObjectId id(IUnknown* value){return object_record(value)->id;}
 ComPtr<ID3DBlob> compile(const char* source,const char* profile){ComPtr<ID3DBlob> code,error;check(D3DCompile(source,strlen(source),"discard",nullptr,nullptr,"main",profile,0,0,&code,&error));return code;}
 std::vector<FrozenFrame> run(bool hardware,bool wrapped){
@@ -43,7 +45,9 @@ std::vector<FrozenFrame> run(bool hardware,bool wrapped){
     check(device->CreatePixelShader(psCode->GetBufferPointer(),psCode->GetBufferSize(),nullptr,&ps));
     auto upload=[&](ID3D11DeviceContext* context,UINT factor,UINT tag){D3D11_MAPPED_SUBRESOURCE mapped{};check(context->Map(constants.Get(),0,D3D11_MAP_WRITE_DISCARD,0,&mapped));const UINT data[]{factor,tag,0,0};memcpy(mapped.pData,data,sizeof data);context->Unmap(constants.Get(),0);};
     ComPtr<ID3D11CommandList> lists[2];
-    for(UINT i=0;i<2;++i){upload(c[i].Get(),i?5:3,i?2:1);auto* cb=constants.Get();auto* target=uav.Get();c[i]->CSSetConstantBuffers(0,1,&cb);c[i]->CSSetUnorderedAccessViews(0,1,&target,nullptr);c[i]->CSSetShader(cs.Get(),nullptr,0);c[i]->Dispatch(1,1,1);check(c[i]->FinishCommandList(i?TRUE:FALSE,&lists[i]));}
+    auto compileList=[&](UINT i){lists[i].Reset();upload(c[i].Get(),i?5:3,i?2:1);auto* cb=constants.Get();auto* target=uav.Get();c[i]->CSSetConstantBuffers(0,1,&cb);c[i]->CSSetUnorderedAccessViews(0,1,&target,nullptr);c[i]->CSSetShader(cs.Get(),nullptr,0);c[i]->Dispatch(1,1,1);check(c[i]->FinishCommandList(i?TRUE:FALSE,&lists[i]));};
+#if !defined(FLORA_INFRAME_DEFERRED)
+    for(UINT i=0;i<2;++i)compileList(i);
     if(wrapped){
         const auto original=object_record(lists[0].Get())->command_list;
         DeferredOrigin origin{id(lists[0].Get()),original->context,original->generation,1,0,true};
@@ -64,6 +68,7 @@ std::vector<FrozenFrame> run(bool hardware,bool wrapped){
         rejects([](auto& b){b.definitions.at(b.calls[0].operand).object.descriptor.clear();});
         std::cout<<"malformed_refusals="<<rejected<<'\n';
     }
+#endif
     D3D11_TEXTURE2D_DESC td{8,8,1,1,DXGI_FORMAT_R8G8B8A8_UNORM,{1,0},D3D11_USAGE_DEFAULT,D3D11_BIND_RENDER_TARGET,0,0};
     ComPtr<ID3D11Texture2D> texture;ComPtr<ID3D11RenderTargetView> rtv;check(device->CreateTexture2D(&td,nullptr,&texture));check(device->CreateRenderTargetView(texture.Get(),nullptr,&rtv));
     std::vector<FrozenFrame> frames;
@@ -72,6 +77,21 @@ std::vector<FrozenFrame> run(bool hardware,bool wrapped){
         const UINT zeros[4]{};immediate->UpdateSubresource(result.Get(),0,nullptr,zeros,0,0);
         const float black[]{0,0,0,1};immediate->ClearRenderTargetView(rtv.Get(),black);
         auto recording=wrapped?begin_recording(immediate.Get()):nullptr;
+#if defined(FLORA_INFRAME_DEFERRED)
+        if(!frame){compileList(0);compileList(1);}
+        else{
+            std::exception_ptr errors[2];
+            std::thread first([&]{try{compileList(0);}catch(...){errors[0]=std::current_exception();}});
+            std::thread second([&]{try{compileList(1);}catch(...){errors[1]=std::current_exception();}});
+            first.join();second.join();for(auto error:errors)if(error)std::rethrow_exception(error);
+        }
+        // Recording work that is never submitted must not enter the frame.
+        ComPtr<ID3D11DeviceContext> unused;check(device->CreateDeferredContext(0,&unused));
+        D3D11_QUERY_DESC queryDesc{D3D11_QUERY_EVENT,0};ComPtr<ID3D11Query> unsubmittedQuery;
+        check(device->CreateQuery(&queryDesc,&unsubmittedQuery));unused->End(unsubmittedQuery.Get());
+        const float unsubmitted[]{1,1,1,1};unused->ClearRenderTargetView(rtv.Get(),unsubmitted);
+        ComPtr<ID3D11CommandList> unsubmittedList;check(unused->FinishCommandList(FALSE,&unsubmittedList));unsubmittedList.Reset();unused.Reset();
+#endif
         for(UINT step=0;step<3;++step){const UINT index=(step==1)^frame;const BOOL restore=step!=1;immediate->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);immediate->ExecuteCommandList(lists[index].Get(),restore);D3D11_PRIMITIVE_TOPOLOGY topology{};immediate->IAGetPrimitiveTopology(&topology);require(topology==(restore?D3D11_PRIMITIVE_TOPOLOGY_LINELIST:D3D11_PRIMITIVE_TOPOLOGY_UNDEFINED),"Execute state restoration changed");}
         immediate->ClearState();auto* target=rtv.Get();auto* source=srv.Get();D3D11_VIEWPORT viewport{0,0,8,8,0,1};
         immediate->OMSetRenderTargets(1,&target,nullptr);immediate->RSSetViewports(1,&viewport);immediate->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -89,6 +109,16 @@ std::vector<FrozenFrame> run(bool hardware,bool wrapped){
         if(wrapped){const UINT initial[]{17,99,0,0};const auto& bytes=captured.initial_resources.at(id(constants.Get())).subresources[0].bytes;require(bytes.size()==sizeof initial&&!memcmp(bytes.data(),initial,sizeof initial),"Initial buffer bytes came from compiled Map");auto image=snapshot_resource(immediate.Get(),texture.Get());frames.push_back(freeze_frame(std::move(captured),id(texture.Get()),std::move(image)));}
     }
     immediate->ClearState();
+#if defined(FLORA_INFRAME_DEFERRED)
+    if(wrapped){
+        auto recording=begin_recording(immediate.Get());
+        ComPtr<ID3D11DeviceContext> unsupported;check(device->CreateDeferredContext(0,&unsupported));
+        D3D11_QUERY_DESC desc{D3D11_QUERY_EVENT,0};ComPtr<ID3D11Query> query;check(device->CreateQuery(&desc,&query));
+        unsupported->End(query.Get());ComPtr<ID3D11CommandList> list;check(unsupported->FinishCommandList(FALSE,&list));
+        immediate->ExecuteCommandList(list.Get(),FALSE);const auto rejected=recording->finish();
+        require(rejected.failed&&!rejected.gaps.empty()&&rejected.gaps[0].find("Deferred")!=std::string::npos,"Executed unsupported in-frame list did not refuse with provenance");
+    }
+#endif
     ComPtr<ID3D11InfoQueue> info;check(unwrap(device.Get())->QueryInterface(IID_PPV_ARGS(&info)));
     for(UINT64 i=0;i<info->GetNumStoredMessagesAllowedByRetrievalFilter();++i){SIZE_T n=0;check(info->GetMessage(i,nullptr,&n));std::vector<uint8_t> storage(n);auto* message=reinterpret_cast<D3D11_MESSAGE*>(storage.data());check(info->GetMessage(i,message,&n));if(message->Severity<=D3D11_MESSAGE_SEVERITY_WARNING){std::cerr<<message->pDescription<<'\n';throw std::runtime_error("Debug Layer warning/error");}}
     return frames;

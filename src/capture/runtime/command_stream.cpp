@@ -14,6 +14,16 @@ namespace {
 struct Registry {std::mutex mutex;std::weak_ptr<FrameRecording> active;std::atomic<bool> enabled=false;};
 Registry& registry(){static Registry value;return value;}
 struct LastErrorScope{DWORD value=GetLastError();~LastErrorScope(){SetLastError(value);}};
+bool compilation_context(ID3D11DeviceContext* context) {
+    const auto record=object_record(context);
+    if(!record)return false; // Unknown identity must still fail in the frame observer.
+    // Context kind/descriptor are immutable after wrapper publication. Do not
+    // wait for mutable recording metadata before the foreign-thread guard.
+    ContextRecordDesc descriptor{};
+    if(record->kind!="context" || record->descriptor.size()!=sizeof descriptor)return false;
+    memcpy(&descriptor,record->descriptor.data(),sizeof descriptor);
+    return descriptor.type==D3D11_DEVICE_CONTEXT_DEFERRED;
+}
 void require_unmapped(const std::shared_ptr<ObjectRecord>& record){
     std::lock_guard lock(record->mutex);
     if(!record->mapped_subresources.empty()){
@@ -499,13 +509,13 @@ void FrameRecording::reject_external(const char* api) {
 void record_map_result(ID3D11DeviceContext* context,ID3D11Resource* resource,UINT subresource,HRESULT result,const D3D11_MAPPED_SUBRESOURCE* mapped) noexcept {
     remember_deferred_map_result(context,resource,subresource,result,mapped);
     auto& r=registry();if(!r.enabled.load(std::memory_order_relaxed))return;LastErrorScope error;
-    try{std::shared_ptr<FrameRecording> active;{std::lock_guard lock(r.mutex);active=r.active.lock();}if(active)active->mapped(context,resource,subresource,result,mapped);}
+    try{if(compilation_context(context))return;std::shared_ptr<FrameRecording> active;{std::lock_guard lock(r.mutex);active=r.active.lock();}if(active)active->mapped(context,resource,subresource,result,mapped);}
     catch(...){object_gap("Map",__uuidof(ID3D11DeviceContext),"Map observer failed");}
 }
 void record_unmap(ID3D11DeviceContext* context,ID3D11Resource* resource,UINT subresource) noexcept {
     remember_deferred_unmap(context,resource,subresource);
-    capture_context_activity();auto& r=registry();if(!r.enabled.load(std::memory_order_relaxed))return;LastErrorScope error;
-    try{std::shared_ptr<FrameRecording> active;{std::lock_guard lock(r.mutex);active=r.active.lock();}if(active)active->unmap(context,resource,subresource);}
+    LastErrorScope error;
+    try{if(compilation_context(context))return;capture_context_activity();auto& r=registry();if(!r.enabled.load(std::memory_order_relaxed))return;std::shared_ptr<FrameRecording> active;{std::lock_guard lock(r.mutex);active=r.active.lock();}if(active)active->unmap(context,resource,subresource);}
     catch(...){object_gap("Unmap",__uuidof(ID3D11DeviceContext),"Unmap observer failed");}
 }
 void record_external_call(const char* api) noexcept {
@@ -516,18 +526,21 @@ void record_external_call(const char* api) noexcept {
     catch(...){object_gap(api,__uuidof(IUnknown),"External frame observer failed");}
 }
 void record_query_observation(ID3D11DeviceContext* context,ID3D11Asynchronous* async,CommandKind kind,HRESULT result,const void* data,UINT size,UINT flags) noexcept {
-    capture_context_activity();auto& r=registry();if(!r.enabled.load(std::memory_order_relaxed))return;
     LastErrorScope last_error;
-    try{std::shared_ptr<FrameRecording> active;{std::lock_guard lock(r.mutex);active=r.active.lock();}
+    try{if(compilation_context(context))return;capture_context_activity();auto& r=registry();if(!r.enabled.load(std::memory_order_relaxed))return;std::shared_ptr<FrameRecording> active;{std::lock_guard lock(r.mutex);active=r.active.lock();}
         if(active)active->query(context,async,kind,result,data,size,flags);
     }catch(...){object_gap("Query observation",__uuidof(ID3D11DeviceContext),"Frame observer failed");}
 }
 void record_context_call(ID3D11DeviceContext* context,const char* api,CommandKind kind,std::array<uint32_t,5> words,IUnknown* operand,const float* floats,const UINT* integers,IUnknown* source,const UpdateSource* update,const CopyRegion* region) noexcept {
     observe_deferred_call(context,api,kind,words,operand,floats,integers,source,update,region);
-    capture_context_activity();
-    auto& r=registry();if(!r.enabled.load(std::memory_order_relaxed))return;
     LastErrorScope last_error;
     try {
+        // Compilation has its own bounded CPU journal and does not submit GPU
+        // work. Only immediate ExecuteCommandList establishes frame order.
+        // This also permits worker compilation during a Present boundary.
+        if(compilation_context(context))return;
+        capture_context_activity();
+        auto& r=registry();if(!r.enabled.load(std::memory_order_relaxed))return;
         std::shared_ptr<FrameRecording> active;{std::lock_guard lock(r.mutex);active=r.active.lock();}
         if(active)active->observe(context,api,kind,words,operand,floats,integers,source,update,region);
     }catch(...){object_gap(api,__uuidof(ID3D11DeviceContext),"Frame observer failed");}

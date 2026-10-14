@@ -23,6 +23,9 @@ Verified same-list `NO_OVERWRITE` baselines and sparse updates follow in
 [CAPTURE_DEFERRED_NOOVERWRITE.md](CAPTURE_DEFERRED_NOOVERWRITE.md).
 Single-mip deferred texture discard capture, checked pitches and native/dual-player
 evidence are recorded in [CAPTURE_DEFERRED_TEXTURE.md](CAPTURE_DEFERRED_TEXTURE.md).
+Same-frame and worker-thread compilation now use those independent journals;
+only immediate submission enters the frame. See
+[CAPTURE_DEFERRED_INFRAME.md](CAPTURE_DEFERRED_INFRAME.md).
 
 Capture HUD work is tracked separately in [CAPTURE_HUD.md](CAPTURE_HUD.md).
 Protocol v4 adds bounded per-request CLI resource budgets to the earlier
