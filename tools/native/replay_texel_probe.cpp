@@ -36,14 +36,14 @@ int wmain(int argc, wchar_t** argv) {
     Json report{{"schema", 1}, {"completed", false}, {"acceptance_established", false},
                 {"reference_pixels_used", false}, {"observations", Json::array()}};
     try {
-        require(argc == 13, "FRAME NEW_OUT VENDOR RESOURCE SAMPLE LAYER X Y before|after|trace|final|checkpoint|inputs|depth|pipeline|pipeline-debug|unblended|fragment|fragment-half|fragment-count|fragment-binding|shader-recreate|shader-repack FIRST LAST READ_BUDGET");
+        require(argc == 13, "FRAME NEW_OUT VENDOR RESOURCE SAMPLE LAYER X Y before|after|trace|final|checkpoint|inputs|depth|pipeline|pipeline-debug|unblended|fragment|fragment-half|fragment-count|fragment-binding|fragment-masked|shader-recreate|shader-repack FIRST LAST READ_BUDGET");
         const auto vendor = number(argv[3]), resource = number(argv[4]), sample = number(argv[5]),
                    layer = number(argv[6]), x = number(argv[7]), y = number(argv[8]),
                    first = number(argv[10]), last = number(argv[11]);
         // The final argument is an explicit read budget, including before/after trace observations.
         const auto budget = number(argv[12]);
         const std::wstring mode(argv[9]);
-        const bool countOnly=mode==L"fragment-count"||mode==L"fragment-binding";
+        const bool countOnly=mode==L"fragment-count"||mode==L"fragment-binding"||mode==L"fragment-masked";
         const bool fragment = mode == L"fragment" || mode == L"fragment-half" || countOnly;
         const bool shaderExperiment=mode==L"shader-recreate"||mode==L"shader-repack";
         const bool pipeline = shaderExperiment || mode == L"pipeline-debug" || mode == L"pipeline" || mode == L"unblended" || fragment;
@@ -84,7 +84,7 @@ int wmain(int argc, wchar_t** argv) {
                     "Expected Draw/Dispatch event boundaries");
         require(fs::create_directory(destination), "Cannot create output directory");
         output = destination;
-        report.update({{"mode", mode == L"shader-recreate" ? "shader-recreate" : mode == L"shader-repack" ? "shader-repack" : mode == L"fragment-binding" ? "fragment-binding" : mode == L"fragment-count" ? "fragment-count" : mode == L"fragment-half" ? "fragment-half" : mode == L"fragment" ? "fragment" : mode == L"unblended" ? "unblended" : mode == L"pipeline-debug" ? "pipeline-debug" : mode == L"pipeline" ? "pipeline" : mode == L"depth" ? "depth" : mode == L"inputs" ? "inputs" : mode == L"checkpoint" ? "checkpoint" : mode == L"final" ? "final" : mode == L"trace" ? "trace" : mode == L"before" ? "before" : "after"}, {"vendor", vendor},
+        report.update({{"mode", mode == L"shader-recreate" ? "shader-recreate" : mode == L"shader-repack" ? "shader-repack" : mode == L"fragment-masked" ? "fragment-masked" : mode == L"fragment-binding" ? "fragment-binding" : mode == L"fragment-count" ? "fragment-count" : mode == L"fragment-half" ? "fragment-half" : mode == L"fragment" ? "fragment" : mode == L"unblended" ? "unblended" : mode == L"pipeline-debug" ? "pipeline-debug" : mode == L"pipeline" ? "pipeline" : mode == L"depth" ? "depth" : mode == L"inputs" ? "inputs" : mode == L"checkpoint" ? "checkpoint" : mode == L"final" ? "final" : mode == L"trace" ? "trace" : mode == L"before" ? "before" : "after"}, {"vendor", vendor},
                        {"resource", resource}, {"sample", sample}, {"layer", layer}, {"x", x}, {"y", y},
                        {"first", first}, {"last", last}, {"read_budget", budget},
                        {"observer_changes_scheduling", mode == L"trace" || checkpoint}, {"typed_format", typed}});
@@ -202,13 +202,17 @@ int wmain(int argc, wchar_t** argv) {
                                 if(mode==L"shader-recreate"||mode==L"fragment-binding")mirroredShader.assign(source.begin(),source.end());
                                 else if(mode==L"shader-repack"){
                                     auto parts=readDxbcParts(source);std::erase_if(parts,[](const auto& p){return p.first!=0x4e475349&&p.first!=0x4e47534f&&p.first!=0x52444853;});mirroredShader=makeDxbc(parts);
-                                }else mirroredShader=diagnostic::mirrorFragmentShader(source,mode==L"fragment-count");
+                                }else mirroredShader=diagnostic::mirrorFragmentShader(source,countOnly);
                                 report["original_ps_sha256"]=sha256(source);report["mirrored_ps_sha256"]=sha256(mirroredShader);
                                 std::ofstream shaderFile(output/"mirrored.dxbc",std::ios::binary);shaderFile.exceptions(std::ios::badbit|std::ios::failbit);shaderFile.write(reinterpret_cast<const char*>(mirroredShader.data()),mirroredShader.size());shaderFile.close();
                                 Com<ID3DBlob> assembly;check(D3DDisassemble(mirroredShader.data(),mirroredShader.size(),0,nullptr,&assembly),"Disassemble mirrored shader");
                                 std::ofstream assemblyFile(output/"mirrored.asm",std::ios::binary);assemblyFile.exceptions(std::ios::badbit|std::ios::failbit);assemblyFile.write(static_cast<const char*>(assembly->GetBufferPointer()),assembly->GetBufferSize());assemblyFile.close();
                                 if(shaderExperiment)report["replacement_same_com_identity"]=shaderOverride.apply(replay.nativeDevice(),context,mirroredShader);
-                                else fragments.apply(replay.nativeDevice(),context,mirroredShader,mode==L"fragment-half",countOnly);
+                                else {
+                                    fragments.apply(replay.nativeDevice(),context,mirroredShader,mode==L"fragment-half",countOnly,mode==L"fragment-masked");
+                                    Com<ID3D11BlendState> applied;context->OMGetBlendState(&applied,nullptr,nullptr);D3D11_BLEND_DESC appliedDesc{};applied->GetDesc(&appliedDesc);
+                                    const auto& counter=appliedDesc.RenderTarget[3];report["private_counter_state"]={{"blend",counter.BlendEnable},{"src",counter.SrcBlend},{"dst",counter.DestBlend},{"op",counter.BlendOp},{"src_alpha",counter.SrcBlendAlpha},{"dst_alpha",counter.DestBlendAlpha},{"alpha_op",counter.BlendOpAlpha},{"write_mask",counter.RenderTargetWriteMask}};
+                                }
                             }else blendOverride.apply(replay.nativeDevice(),context);
                         }
                     } else read(id, after, objects);

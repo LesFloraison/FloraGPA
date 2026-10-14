@@ -4453,6 +4453,24 @@
       "current_gate_passed": false,
       "production_fix": false,
       "limits": "Count-only output stabilizes instrumented runs; original shader recreation and binding-only controls retain both outcomes. The repack source is already canonical and remains byte-identical, so this is not an independent metadata control. Original fragment histories and the effect of added output on execution remain unresolved; formal six-frame gate failed."
+    },
+    "gf2_output_mask_diagnosis": {
+      "evidence": "docs/CAPTURE_GF2_OUTPUT_MASK.md",
+      "baseline": "docs/capture-gf2-output-mask-baseline.json",
+      "masked_executions": 10,
+      "masked_matching": 10,
+      "unmasked_executions": 10,
+      "unmasked_matching": 10,
+      "baseline_executions": 10,
+      "baseline_matching": 2,
+      "native_cases": 20,
+      "native_exact_texels": 624,
+      "native_refusals": 120,
+      "probe_cases": 28,
+      "probe_refusals": 23,
+      "current_gate_passed": false,
+      "production_fix": false,
+      "limits": "Count shader remains capture-matching with private target write mask zero; original shader still varies. Actual storage writes are not necessary for the observed instrumentation effect. This does not prove original full-precision inputs or complete depth planes equal, and is not a production fix. Formal six-frame gate remains failed."
     }
   }
 }

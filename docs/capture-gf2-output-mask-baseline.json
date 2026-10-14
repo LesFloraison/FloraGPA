@@ -1,0 +1,417 @@
+{
+  "schema": 1,
+  "date": "2026-10-14",
+  "source_parent_commit": "f3f503889431518bd3b2af08f5ed3494b709d6ab",
+  "source_hashes": {
+    "tools/native/fragment_checkpoint.h": "a01bcec805b47128f9150a74042d8a215ba3ead88fc6dd7793d311e7090a3d54",
+    "tools/native/fragment_checkpoint_tests.cpp": "6c3f530c8e5aa7ec5eaad4ffe1b54e962e4414cc80d83810aae373b80667ce3d",
+    "tools/native/replay_texel_probe.cpp": "3a3f301de0cf987d7af509136358f51d4e5c31a55db709ccc2cdba297cfa08f0",
+    "tools/validate_capture_texel_probe.py": "db110955a95362dee8f8a60cea86871c61f951f7ddedd5388315b2126f7818e5",
+    "docs/CAPTURE_GF2_OUTPUT_MASK.md": "9baea831e1e60a93f7a7cc683df3a2cfe209c1a64867f0c52d4dc1f9de610872"
+  },
+  "current_gate_passed": false,
+  "production_changed": false,
+  "input": {
+    "file": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-resolve-current-20261014\\launch-2\\session\\frame-d3b245ec-09d2-4888-91af-5032f19ddbd6.gpa_frame",
+    "sha256": "9bef49cd3f807ae3796ece91d35960604ce4158d0736acb5d545efa346aafacf",
+    "event": 5651,
+    "resource": 411,
+    "layer": 0,
+    "pixel": [
+      1596,
+      1519
+    ]
+  },
+  "totals": {
+    "fragment-masked": {
+      "matching": 10,
+      "alternate": 0
+    },
+    "fragment-count": {
+      "matching": 10,
+      "alternate": 0
+    },
+    "pipeline-debug": {
+      "matching": 2,
+      "alternate": 8
+    }
+  },
+  "runs": [
+    {
+      "directory": "fragment-masked-0",
+      "mode": "fragment-masked",
+      "index": 0,
+      "modified_draw": true,
+      "capture_matching": true,
+      "rgba_sha256": "d5ffe329528ecabc09517514d1b41c5a8d305210480ad9454c732051a697d0e7",
+      "png_sha256": "488fe73cd858012a8973a48eb2f9139f68857ce1668ef013885936f5cb45369b",
+      "report_sha256": "66810c0bd0407883b11b6c111280bc5bdc7606ece3c9aff0cc8b21cd2ac81838"
+    },
+    {
+      "directory": "fragment-count-0",
+      "mode": "fragment-count",
+      "index": 0,
+      "modified_draw": true,
+      "capture_matching": true,
+      "rgba_sha256": "d5ffe329528ecabc09517514d1b41c5a8d305210480ad9454c732051a697d0e7",
+      "png_sha256": "488fe73cd858012a8973a48eb2f9139f68857ce1668ef013885936f5cb45369b",
+      "report_sha256": "eb56f1619547ea8265f52e050fb86d45851ddddc60b2364f2953c6910563800f"
+    },
+    {
+      "directory": "pipeline-debug-0",
+      "mode": "pipeline-debug",
+      "index": 0,
+      "modified_draw": false,
+      "capture_matching": false,
+      "rgba_sha256": "b548683168d47d12344c2a976155eb716c4a14d135dcbb8c9df542b0abd0caa1",
+      "png_sha256": "0e119453793730e1935d5813cd759c69091d9e21ee371235b5214f0127b656fd",
+      "report_sha256": "960640e142120704a98ab22a909468be63355677991a70d1469bfbb8979f535b"
+    },
+    {
+      "directory": "fragment-masked-1",
+      "mode": "fragment-masked",
+      "index": 1,
+      "modified_draw": true,
+      "capture_matching": true,
+      "rgba_sha256": "d5ffe329528ecabc09517514d1b41c5a8d305210480ad9454c732051a697d0e7",
+      "png_sha256": "488fe73cd858012a8973a48eb2f9139f68857ce1668ef013885936f5cb45369b",
+      "report_sha256": "66810c0bd0407883b11b6c111280bc5bdc7606ece3c9aff0cc8b21cd2ac81838"
+    },
+    {
+      "directory": "fragment-count-1",
+      "mode": "fragment-count",
+      "index": 1,
+      "modified_draw": true,
+      "capture_matching": true,
+      "rgba_sha256": "d5ffe329528ecabc09517514d1b41c5a8d305210480ad9454c732051a697d0e7",
+      "png_sha256": "488fe73cd858012a8973a48eb2f9139f68857ce1668ef013885936f5cb45369b",
+      "report_sha256": "eb56f1619547ea8265f52e050fb86d45851ddddc60b2364f2953c6910563800f"
+    },
+    {
+      "directory": "pipeline-debug-1",
+      "mode": "pipeline-debug",
+      "index": 1,
+      "modified_draw": false,
+      "capture_matching": false,
+      "rgba_sha256": "b548683168d47d12344c2a976155eb716c4a14d135dcbb8c9df542b0abd0caa1",
+      "png_sha256": "0e119453793730e1935d5813cd759c69091d9e21ee371235b5214f0127b656fd",
+      "report_sha256": "960640e142120704a98ab22a909468be63355677991a70d1469bfbb8979f535b"
+    },
+    {
+      "directory": "fragment-masked-2",
+      "mode": "fragment-masked",
+      "index": 2,
+      "modified_draw": true,
+      "capture_matching": true,
+      "rgba_sha256": "d5ffe329528ecabc09517514d1b41c5a8d305210480ad9454c732051a697d0e7",
+      "png_sha256": "488fe73cd858012a8973a48eb2f9139f68857ce1668ef013885936f5cb45369b",
+      "report_sha256": "66810c0bd0407883b11b6c111280bc5bdc7606ece3c9aff0cc8b21cd2ac81838"
+    },
+    {
+      "directory": "fragment-count-2",
+      "mode": "fragment-count",
+      "index": 2,
+      "modified_draw": true,
+      "capture_matching": true,
+      "rgba_sha256": "d5ffe329528ecabc09517514d1b41c5a8d305210480ad9454c732051a697d0e7",
+      "png_sha256": "488fe73cd858012a8973a48eb2f9139f68857ce1668ef013885936f5cb45369b",
+      "report_sha256": "eb56f1619547ea8265f52e050fb86d45851ddddc60b2364f2953c6910563800f"
+    },
+    {
+      "directory": "pipeline-debug-2",
+      "mode": "pipeline-debug",
+      "index": 2,
+      "modified_draw": false,
+      "capture_matching": false,
+      "rgba_sha256": "b548683168d47d12344c2a976155eb716c4a14d135dcbb8c9df542b0abd0caa1",
+      "png_sha256": "0e119453793730e1935d5813cd759c69091d9e21ee371235b5214f0127b656fd",
+      "report_sha256": "960640e142120704a98ab22a909468be63355677991a70d1469bfbb8979f535b"
+    },
+    {
+      "directory": "fragment-masked-3",
+      "mode": "fragment-masked",
+      "index": 3,
+      "modified_draw": true,
+      "capture_matching": true,
+      "rgba_sha256": "d5ffe329528ecabc09517514d1b41c5a8d305210480ad9454c732051a697d0e7",
+      "png_sha256": "488fe73cd858012a8973a48eb2f9139f68857ce1668ef013885936f5cb45369b",
+      "report_sha256": "66810c0bd0407883b11b6c111280bc5bdc7606ece3c9aff0cc8b21cd2ac81838"
+    },
+    {
+      "directory": "fragment-count-3",
+      "mode": "fragment-count",
+      "index": 3,
+      "modified_draw": true,
+      "capture_matching": true,
+      "rgba_sha256": "d5ffe329528ecabc09517514d1b41c5a8d305210480ad9454c732051a697d0e7",
+      "png_sha256": "488fe73cd858012a8973a48eb2f9139f68857ce1668ef013885936f5cb45369b",
+      "report_sha256": "eb56f1619547ea8265f52e050fb86d45851ddddc60b2364f2953c6910563800f"
+    },
+    {
+      "directory": "pipeline-debug-3",
+      "mode": "pipeline-debug",
+      "index": 3,
+      "modified_draw": false,
+      "capture_matching": false,
+      "rgba_sha256": "b548683168d47d12344c2a976155eb716c4a14d135dcbb8c9df542b0abd0caa1",
+      "png_sha256": "0e119453793730e1935d5813cd759c69091d9e21ee371235b5214f0127b656fd",
+      "report_sha256": "960640e142120704a98ab22a909468be63355677991a70d1469bfbb8979f535b"
+    },
+    {
+      "directory": "fragment-masked-4",
+      "mode": "fragment-masked",
+      "index": 4,
+      "modified_draw": true,
+      "capture_matching": true,
+      "rgba_sha256": "d5ffe329528ecabc09517514d1b41c5a8d305210480ad9454c732051a697d0e7",
+      "png_sha256": "488fe73cd858012a8973a48eb2f9139f68857ce1668ef013885936f5cb45369b",
+      "report_sha256": "66810c0bd0407883b11b6c111280bc5bdc7606ece3c9aff0cc8b21cd2ac81838"
+    },
+    {
+      "directory": "fragment-count-4",
+      "mode": "fragment-count",
+      "index": 4,
+      "modified_draw": true,
+      "capture_matching": true,
+      "rgba_sha256": "d5ffe329528ecabc09517514d1b41c5a8d305210480ad9454c732051a697d0e7",
+      "png_sha256": "488fe73cd858012a8973a48eb2f9139f68857ce1668ef013885936f5cb45369b",
+      "report_sha256": "eb56f1619547ea8265f52e050fb86d45851ddddc60b2364f2953c6910563800f"
+    },
+    {
+      "directory": "pipeline-debug-4",
+      "mode": "pipeline-debug",
+      "index": 4,
+      "modified_draw": false,
+      "capture_matching": false,
+      "rgba_sha256": "b548683168d47d12344c2a976155eb716c4a14d135dcbb8c9df542b0abd0caa1",
+      "png_sha256": "0e119453793730e1935d5813cd759c69091d9e21ee371235b5214f0127b656fd",
+      "report_sha256": "960640e142120704a98ab22a909468be63355677991a70d1469bfbb8979f535b"
+    },
+    {
+      "directory": "fragment-masked-5",
+      "mode": "fragment-masked",
+      "index": 5,
+      "modified_draw": true,
+      "capture_matching": true,
+      "rgba_sha256": "d5ffe329528ecabc09517514d1b41c5a8d305210480ad9454c732051a697d0e7",
+      "png_sha256": "488fe73cd858012a8973a48eb2f9139f68857ce1668ef013885936f5cb45369b",
+      "report_sha256": "66810c0bd0407883b11b6c111280bc5bdc7606ece3c9aff0cc8b21cd2ac81838"
+    },
+    {
+      "directory": "fragment-count-5",
+      "mode": "fragment-count",
+      "index": 5,
+      "modified_draw": true,
+      "capture_matching": true,
+      "rgba_sha256": "d5ffe329528ecabc09517514d1b41c5a8d305210480ad9454c732051a697d0e7",
+      "png_sha256": "488fe73cd858012a8973a48eb2f9139f68857ce1668ef013885936f5cb45369b",
+      "report_sha256": "eb56f1619547ea8265f52e050fb86d45851ddddc60b2364f2953c6910563800f"
+    },
+    {
+      "directory": "pipeline-debug-5",
+      "mode": "pipeline-debug",
+      "index": 5,
+      "modified_draw": false,
+      "capture_matching": true,
+      "rgba_sha256": "d5ffe329528ecabc09517514d1b41c5a8d305210480ad9454c732051a697d0e7",
+      "png_sha256": "488fe73cd858012a8973a48eb2f9139f68857ce1668ef013885936f5cb45369b",
+      "report_sha256": "97cd053abfbff03e74b22ed65a6077bacd921a7d90b800e98b938e1a44ead86f"
+    },
+    {
+      "directory": "fragment-masked-6",
+      "mode": "fragment-masked",
+      "index": 6,
+      "modified_draw": true,
+      "capture_matching": true,
+      "rgba_sha256": "d5ffe329528ecabc09517514d1b41c5a8d305210480ad9454c732051a697d0e7",
+      "png_sha256": "488fe73cd858012a8973a48eb2f9139f68857ce1668ef013885936f5cb45369b",
+      "report_sha256": "66810c0bd0407883b11b6c111280bc5bdc7606ece3c9aff0cc8b21cd2ac81838"
+    },
+    {
+      "directory": "fragment-count-6",
+      "mode": "fragment-count",
+      "index": 6,
+      "modified_draw": true,
+      "capture_matching": true,
+      "rgba_sha256": "d5ffe329528ecabc09517514d1b41c5a8d305210480ad9454c732051a697d0e7",
+      "png_sha256": "488fe73cd858012a8973a48eb2f9139f68857ce1668ef013885936f5cb45369b",
+      "report_sha256": "eb56f1619547ea8265f52e050fb86d45851ddddc60b2364f2953c6910563800f"
+    },
+    {
+      "directory": "pipeline-debug-6",
+      "mode": "pipeline-debug",
+      "index": 6,
+      "modified_draw": false,
+      "capture_matching": false,
+      "rgba_sha256": "b548683168d47d12344c2a976155eb716c4a14d135dcbb8c9df542b0abd0caa1",
+      "png_sha256": "0e119453793730e1935d5813cd759c69091d9e21ee371235b5214f0127b656fd",
+      "report_sha256": "960640e142120704a98ab22a909468be63355677991a70d1469bfbb8979f535b"
+    },
+    {
+      "directory": "fragment-masked-7",
+      "mode": "fragment-masked",
+      "index": 7,
+      "modified_draw": true,
+      "capture_matching": true,
+      "rgba_sha256": "d5ffe329528ecabc09517514d1b41c5a8d305210480ad9454c732051a697d0e7",
+      "png_sha256": "488fe73cd858012a8973a48eb2f9139f68857ce1668ef013885936f5cb45369b",
+      "report_sha256": "66810c0bd0407883b11b6c111280bc5bdc7606ece3c9aff0cc8b21cd2ac81838"
+    },
+    {
+      "directory": "fragment-count-7",
+      "mode": "fragment-count",
+      "index": 7,
+      "modified_draw": true,
+      "capture_matching": true,
+      "rgba_sha256": "d5ffe329528ecabc09517514d1b41c5a8d305210480ad9454c732051a697d0e7",
+      "png_sha256": "488fe73cd858012a8973a48eb2f9139f68857ce1668ef013885936f5cb45369b",
+      "report_sha256": "eb56f1619547ea8265f52e050fb86d45851ddddc60b2364f2953c6910563800f"
+    },
+    {
+      "directory": "pipeline-debug-7",
+      "mode": "pipeline-debug",
+      "index": 7,
+      "modified_draw": false,
+      "capture_matching": true,
+      "rgba_sha256": "d5ffe329528ecabc09517514d1b41c5a8d305210480ad9454c732051a697d0e7",
+      "png_sha256": "488fe73cd858012a8973a48eb2f9139f68857ce1668ef013885936f5cb45369b",
+      "report_sha256": "97cd053abfbff03e74b22ed65a6077bacd921a7d90b800e98b938e1a44ead86f"
+    },
+    {
+      "directory": "fragment-masked-8",
+      "mode": "fragment-masked",
+      "index": 8,
+      "modified_draw": true,
+      "capture_matching": true,
+      "rgba_sha256": "d5ffe329528ecabc09517514d1b41c5a8d305210480ad9454c732051a697d0e7",
+      "png_sha256": "488fe73cd858012a8973a48eb2f9139f68857ce1668ef013885936f5cb45369b",
+      "report_sha256": "66810c0bd0407883b11b6c111280bc5bdc7606ece3c9aff0cc8b21cd2ac81838"
+    },
+    {
+      "directory": "fragment-count-8",
+      "mode": "fragment-count",
+      "index": 8,
+      "modified_draw": true,
+      "capture_matching": true,
+      "rgba_sha256": "d5ffe329528ecabc09517514d1b41c5a8d305210480ad9454c732051a697d0e7",
+      "png_sha256": "488fe73cd858012a8973a48eb2f9139f68857ce1668ef013885936f5cb45369b",
+      "report_sha256": "eb56f1619547ea8265f52e050fb86d45851ddddc60b2364f2953c6910563800f"
+    },
+    {
+      "directory": "pipeline-debug-8",
+      "mode": "pipeline-debug",
+      "index": 8,
+      "modified_draw": false,
+      "capture_matching": false,
+      "rgba_sha256": "b548683168d47d12344c2a976155eb716c4a14d135dcbb8c9df542b0abd0caa1",
+      "png_sha256": "0e119453793730e1935d5813cd759c69091d9e21ee371235b5214f0127b656fd",
+      "report_sha256": "960640e142120704a98ab22a909468be63355677991a70d1469bfbb8979f535b"
+    },
+    {
+      "directory": "fragment-masked-9",
+      "mode": "fragment-masked",
+      "index": 9,
+      "modified_draw": true,
+      "capture_matching": true,
+      "rgba_sha256": "d5ffe329528ecabc09517514d1b41c5a8d305210480ad9454c732051a697d0e7",
+      "png_sha256": "488fe73cd858012a8973a48eb2f9139f68857ce1668ef013885936f5cb45369b",
+      "report_sha256": "66810c0bd0407883b11b6c111280bc5bdc7606ece3c9aff0cc8b21cd2ac81838"
+    },
+    {
+      "directory": "fragment-count-9",
+      "mode": "fragment-count",
+      "index": 9,
+      "modified_draw": true,
+      "capture_matching": true,
+      "rgba_sha256": "d5ffe329528ecabc09517514d1b41c5a8d305210480ad9454c732051a697d0e7",
+      "png_sha256": "488fe73cd858012a8973a48eb2f9139f68857ce1668ef013885936f5cb45369b",
+      "report_sha256": "eb56f1619547ea8265f52e050fb86d45851ddddc60b2364f2953c6910563800f"
+    },
+    {
+      "directory": "pipeline-debug-9",
+      "mode": "pipeline-debug",
+      "index": 9,
+      "modified_draw": false,
+      "capture_matching": false,
+      "rgba_sha256": "b548683168d47d12344c2a976155eb716c4a14d135dcbb8c9df542b0abd0caa1",
+      "png_sha256": "0e119453793730e1935d5813cd759c69091d9e21ee371235b5214f0127b656fd",
+      "report_sha256": "960640e142120704a98ab22a909468be63355677991a70d1469bfbb8979f535b"
+    }
+  ],
+  "pixel_differences": {
+    "d5ffe329528ecabc09517514d1b41c5a8d305210480ad9454c732051a697d0e7": [],
+    "b548683168d47d12344c2a976155eb716c4a14d135dcbb8c9df542b0abd0caa1": [
+      {
+        "x": 1182,
+        "y": 313,
+        "captured": [
+          12,
+          14,
+          12,
+          255
+        ],
+        "replayed": [
+          12,
+          15,
+          12,
+          255
+        ]
+      },
+      {
+        "x": 1182,
+        "y": 314,
+        "captured": [
+          13,
+          12,
+          8,
+          247
+        ],
+        "replayed": [
+          13,
+          12,
+          8,
+          248
+        ]
+      },
+      {
+        "x": 1183,
+        "y": 314,
+        "captured": [
+          22,
+          22,
+          17,
+          254
+        ],
+        "replayed": [
+          22,
+          22,
+          17,
+          255
+        ]
+      }
+    ]
+  },
+  "count_shader_sha256": "36e81f84589bff2faedefa6aaf92befc50d62cbb1532b6e02bba69e20f0f5199",
+  "validation": {
+    "native_cases": 20,
+    "native_exact_texels": 624,
+    "native_refusals": 120,
+    "scoped_debug_warnings_or_errors": 0,
+    "prefix_debug_messages": 608,
+    "probe_cases": 28,
+    "probe_refusals": 23,
+    "ctest_passed": 1,
+    "capture_only_configured": true
+  },
+  "binaries": {
+    "FloraReplayTexelProbe.exe": "8f2d6ddf955478adb105ca32c4b8c65b21b66a54d31640e581d1ab1c69cc8f51",
+    "FloraFragmentCheckpointTests.exe": "cc5d1b2519bc91d6ff8fff374ba9195a26f764e6717e8bf3acec4d4ad0e751c9"
+  },
+  "replay_sha256": "215ebafed657953f0671c32a0948e12c8c965437a3eaa33e6d38aedcff5e2ddc",
+  "raw": {
+    "root": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-output-mask-20261014",
+    "files": 240,
+    "manifest_sha256": "2081ff6b9f77b1b6bc0d135be6d3cc88ed46aacdae0c96b8daa80116afe04033"
+  },
+  "limits": "Count shader remains capture-matching with private target write mask zero; original shader still varies. Actual storage writes are not necessary for the observed instrumentation effect. This does not prove original full-precision inputs or complete depth planes equal, and is not a production fix. Formal six-frame gate remains failed."
+}

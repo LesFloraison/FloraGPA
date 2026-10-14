@@ -22,8 +22,8 @@ int wmain(int argc,wchar_t** argv){
             require(warp||selected,"Intel adapter unavailable");Com<ID3D11Device> device;Com<ID3D11DeviceContext> context;
             check(D3D11CreateDevice(selected.Get(),warp?D3D_DRIVER_TYPE_WARP:D3D_DRIVER_TYPE_UNKNOWN,nullptr,D3D11_CREATE_DEVICE_DEBUG,nullptr,0,D3D11_SDK_VERSION,&device,nullptr,&context),"Create test device");
             Com<ID3D11InfoQueue> debug;check(device.As(&debug),"Get test diagnostics");
-            for(const UINT samples:{2u,4u})for(const unsigned mode:{0u,1u,2u,3u}){
-                const bool half=mode==1,countOnly=mode>=2,bindingOnly=mode==3;
+            for(const UINT samples:{2u,4u})for(const unsigned mode:{0u,1u,2u,3u,4u}){
+                const bool half=mode==1,countOnly=mode>=2,bindingOnly=mode==3,masked=mode==4;
                 context->ClearState();debug->ClearStoredMessages();std::map<Id,Com<IUnknown>> objects;
                 std::array<Com<ID3D11Texture2D>,3> textures;std::array<Com<ID3D11RenderTargetView>,3> targets;
                 for(unsigned i=0;i<3;++i){D3D11_TEXTURE2D_DESC td{1,1,1,1,DXGI_FORMAT_R16G16B16A16_TYPELESS,{samples,0},D3D11_USAGE_DEFAULT,D3D11_BIND_RENDER_TARGET|D3D11_BIND_SHADER_RESOURCE,0,0};check(device->CreateTexture2D(&td,nullptr,&textures[i]),"Create oracle target");D3D11_RENDER_TARGET_VIEW_DESC vd{};vd.Format=DXGI_FORMAT_R16G16B16A16_FLOAT;vd.ViewDimension=D3D11_RTV_DIMENSION_TEXTURE2DMS;check(device->CreateRenderTargetView(textures[i].Get(),&vd,&targets[i]),"Create oracle RTV");objects[10+i*2]=textures[i];objects[11+i*2]=targets[i];}
@@ -47,7 +47,7 @@ int wmain(int argc,wchar_t** argv){
                     const float initial[]{0.25f,0.5f,0.75f,1};for(const auto& target:targets)context->ClearRenderTargetView(target.Get(),initial);
                     diagnostic::FragmentCheckpoint observation;
                     {
-                        if(phase==1){observation.apply(device.Get(),context.Get(),Bytes(static_cast<const uint8_t*>(mirrored->GetBufferPointer()),mirrored->GetBufferSize()),half,countOnly);refuses([&]{observation.apply(device.Get(),context.Get(),{});},"cannot be reused");context->Draw(3,0);}
+                        if(phase==1){observation.apply(device.Get(),context.Get(),Bytes(static_cast<const uint8_t*>(mirrored->GetBufferPointer()),mirrored->GetBufferSize()),half,countOnly,masked);refuses([&]{observation.apply(device.Get(),context.Get(),{});},"cannot be reused");Com<ID3D11BlendState> applied;context->OMGetBlendState(&applied,nullptr,nullptr);D3D11_BLEND_DESC observed{};applied->GetDesc(&observed);require(observed.RenderTarget[3].RenderTargetWriteMask==(masked?0:15),"Counter write mask differs from request");context->Draw(3,0);}
                         {diagnostic::ScopedPixelShader shader;
                             if(phase==2){shader.apply(device.Get(),context.Get(),Bytes(static_cast<const uint8_t*>(pc->GetBufferPointer()),pc->GetBufferSize()));refuses([&]{shader.apply(device.Get(),context.Get(),{});},"already active");}
                             context->Draw(3,0);
@@ -56,7 +56,7 @@ int wmain(int argc,wchar_t** argv){
                     }
                     if(phase==1)for(UINT sample=0;sample<samples;++sample){
                         const auto expectedColor=sample%2?std::array<uint32_t,4>{}:half?std::array<uint32_t,4>{0x3800,0x3400,0x3000,0x3800}:std::array<uint32_t,4>{0x3f000000,0x3e800000,0x3e000000,0x3f000000};
-                        const auto expectedCount=(sample%2||bindingOnly)?std::array<uint32_t,4>{}:std::array<uint32_t,4>{0x40000000,0x40000000,0x40000000,0x40000000};
+                        const auto expectedCount=(sample%2||bindingOnly||masked)?std::array<uint32_t,4>{}:std::array<uint32_t,4>{0x40000000,0x40000000,0x40000000,0x40000000};
                         if(!countOnly){require(diagnostic::readCheckpoint(device.Get(),observation.textures[0].Get(),half?12u:3u,sample,0,0,0)==expectedColor,"Mirrored float output differs from CPU oracle");++checks;}else require(!observation.textures[0],"Counter-only mode allocated a color mirror");
                         require(diagnostic::readCheckpoint(device.Get(),observation.textures[1].Get(),3,sample,0,0,0)==expectedCount,"Fragment count differs from CPU oracle");++checks;
                     }
@@ -79,7 +79,7 @@ int wmain(int argc,wchar_t** argv){
                 refuses([&]{diagnostic::FragmentCheckpoint observation;observation.apply(device.Get(),context.Get(),{});},"bound OM UAVs");rawUav=nullptr;context->OMSetRenderTargetsAndUnorderedAccessViews(D3D11_KEEP_RENDER_TARGETS_AND_DEPTH_STENCIL,nullptr,nullptr,4,1,&rawUav,nullptr);
                 require(!debug->GetNumMessagesDiscardedByMessageCountLimit(),"Lost debug messages");
                 for(UINT64 i=0;i<debug->GetNumStoredMessagesAllowedByRetrievalFilter();++i){SIZE_T size=0;check(debug->GetMessage(i,nullptr,&size),"Measure debug message");std::vector<uint8_t> bytes(size);auto* message=reinterpret_cast<D3D11_MESSAGE*>(bytes.data());check(debug->GetMessage(i,message,&size),"Read debug message");require(message->Severity>D3D11_MESSAGE_SEVERITY_WARNING,message->pDescription);}
-                report["cases"].push_back({{"warp",warp},{"samples",samples},{"half_mirror",half},{"count_only",countOnly},{"binding_only",bindingOnly},{"exact_texels",checks},{"refusals",refusals},{"debug_warnings_or_errors",0},{"pipeline",baseline}});
+                report["cases"].push_back({{"warp",warp},{"samples",samples},{"half_mirror",half},{"count_only",countOnly},{"binding_only",bindingOnly},{"masked_counter",masked},{"exact_texels",checks},{"refusals",refusals},{"debug_warnings_or_errors",0},{"pipeline",baseline}});
             }
         }
         report["completed"]=true;std::ofstream stream(output);stream.exceptions(std::ios::badbit|std::ios::failbit);stream<<report.dump(2)<<'\n';stream.close();std::cout<<"Native fragment checkpoint checks passed\n";return 0;

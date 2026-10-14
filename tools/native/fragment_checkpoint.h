@@ -82,7 +82,7 @@ public:
     FragmentCheckpoint(const FragmentCheckpoint&)=delete;
     FragmentCheckpoint& operator=(const FragmentCheckpoint&)=delete;
     ~FragmentCheckpoint(){restore();}
-    void apply(ID3D11Device* device,ID3D11DeviceContext* context,Bytes mirrored,bool halfMirror=false,bool countOnly=false){
+    void apply(ID3D11Device* device,ID3D11DeviceContext* context,Bytes mirrored,bool halfMirror=false,bool countOnly=false,bool suppressCounterWrites=false){
         if(active_||textures[1])throw std::runtime_error("Fragment checkpoint cannot be reused");
         requireUnpredicated(context);
         // OMSetRenderTargets could disturb UAV bindings; this tool does not preserve counters.
@@ -110,6 +110,7 @@ public:
         if(!bd.IndependentBlendEnable||bd.AlphaToCoverageEnable)throw std::runtime_error("Fragment checkpoint requires independent blending without alpha coverage");
         for(const auto& target:bd.RenderTarget)if(target.LogicOpEnable)throw std::runtime_error("Fragment checkpoint does not support logic operations");
         for(unsigned i=countOnly?3u:2u;i<4;++i){auto& rt=bd.RenderTarget[i];rt.BlendEnable=i==3;rt.SrcBlend=rt.SrcBlendAlpha=D3D11_BLEND_ONE;rt.DestBlend=rt.DestBlendAlpha=D3D11_BLEND_ONE;rt.BlendOp=rt.BlendOpAlpha=D3D11_BLEND_OP_ADD;rt.RenderTargetWriteMask=15;}
+        if(suppressCounterWrites)bd.RenderTarget[3].RenderTargetWriteMask=0;
         Com<ID3D11Device1> device1;check(device->QueryInterface(IID_PPV_ARGS(&device1)),"Get fragment device1");
         Com<ID3D11BlendState1> replacementBlend;check(device1->CreateBlendState1(&bd,&replacementBlend),"Create fragment blend state");
         Com<ID3D11PixelShader> replacement;check(device->CreatePixelShader(mirrored.data(),mirrored.size(),nullptr,&replacement),"Create mirrored pixel shader");
