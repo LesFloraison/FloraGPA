@@ -551,7 +551,7 @@ public:
             }
             if(command.kind==CommandKind::resolve){
                 require(command.bindings.context==context_ && command.bindings.device==device_,"Encoder Resolve context mismatch");
-                require(command.completed && !command.deferred && command.operand && command.source && !w[3] && !w[4],"Encoder Resolve arguments incomplete or unsupported");
+                require(command.completed && command.operand && command.source && !w[3] && !w[4],"Encoder Resolve arguments incomplete or unsupported");
                 require(!command.bindings.predicate && command.data.empty() && command.before_data.empty(),"Encoder Resolve has predicate or unexpected CPU bytes");
                 require(frame_.initial_resources.contains(command.operand) && msaa_.contains(command.source),"Encoder Resolve initial resources missing");
                 const auto& d=frame_.initial_resources.at(command.operand);const auto& s=frame_.initial_msaa.at(command.source);

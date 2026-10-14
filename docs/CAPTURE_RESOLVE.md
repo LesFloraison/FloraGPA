@@ -1,5 +1,10 @@
 # Captured DX11 multisample resolves
 
+This document preserves the earlier immediate-Resolve milestone and its then-current
+GF2 status. Later deferred and startup-injected Resolve evidence is in
+[CAPTURE_DEFERRED_RESOLVE.md](CAPTURE_DEFERRED_RESOLVE.md); current GF2 limitations
+are tracked separately in `docs/migration.json`.
+
 The capture runtime records immediate-context `ResolveSubresource` independently
 of Replay. The CPU encoder emits the verified legacy category 7 / type `0x42`
 record after validating the captured resource graph and subresource dimensions.

@@ -32,7 +32,7 @@ bool has_pipeline_state(CommandKind kind){
     case CommandKind::draw_indexed_instanced:case CommandKind::dispatch:
     case CommandKind::dispatch_indirect:case CommandKind::draw_instanced_indirect:case CommandKind::draw_indexed_instanced_indirect:
     case CommandKind::clear_rtv:case CommandKind::clear_dsv:case CommandKind::clear_uav_uint:case CommandKind::clear_uav_float:
-    case CommandKind::copy_structure_count:case CommandKind::copy_resource:case CommandKind::copy_region:case CommandKind::update_subresource:case CommandKind::map:return true;
+    case CommandKind::resolve:case CommandKind::copy_structure_count:case CommandKind::copy_resource:case CommandKind::copy_region:case CommandKind::update_subresource:case CommandKind::map:return true;
     default:return false;
     }
 }

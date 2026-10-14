@@ -274,6 +274,20 @@ void FrameRecording::observe(ID3D11DeviceContext* context,const char* api,Comman
                         throw std::runtime_error("Deferred MSAA mutation command is not verified");
                 }
                 ContextSnapshot held;retain(held,context);ComPtr<ID3D11Device> device;unwrap(context)->GetDevice(&device);retain(held,device.Get());
+                for(const auto& command:expanded.commands)if(command.kind==CommandKind::resolve){
+                    auto shape=[&](ObjectId id){
+                        if(!leases || !leases->contains(id))throw std::runtime_error("Deferred Resolve resource lease missing");
+                        ComPtr<ID3D11Resource> resource;
+                        if(FAILED(leases->at(id).As(&resource)))throw std::runtime_error("Deferred Resolve operand is not a resource");
+                        return resource_shape(resource.Get());
+                    };
+                    const auto format=DXGI_FORMAT(command.words[2]);
+                    validate_resolve(shape(command.operand),expanded.definitions.at(command.operand).descriptor,
+                        shape(command.source),expanded.definitions.at(command.source).descriptor,
+                        command.words[0],command.words[1],format,command.operand==command.source);
+                    UINT support=0;if(FAILED(device->CheckFormatSupport(format,&support)) || !(support&D3D11_FORMAT_SUPPORT_MULTISAMPLE_RESOLVE))
+                        throw std::runtime_error("Deferred Resolve format is unsupported by the device");
+                }
                 SnapshotOptions options;options.timeout_ms=p.options.readback_timeout_ms;options.cancelled=[&p]{if(p.options.cancelled&&p.options.cancelled())p.cancelled=true;return p.cancelled.load();};
                 // Sample at this immediate execution position, never at Finish
                 // or from creation data. Earlier recorded writes already own a

@@ -9,7 +9,7 @@ import subprocess
 import sys
 
 
-def pixels(samples, ordinal, control='complete'):
+def pixels(samples, ordinal, control='complete', resolve=False):
     colors=((240,19,73,255),(19,240,73,255),(19,73,240,255),(240,73,19,255),(73,19,240,255))
     result=bytearray()
     for y in range(14):
@@ -18,6 +18,17 @@ def pixels(samples, ordinal, control='complete'):
             p=((px*17+py*3+layer*71+sample*29)&255,(py*31+layer*43+sample*13)&255,(px*7+py*11+layer*19+sample*37)&255,255)
             if control=='missing-initialization':p=(0,0,0,0)
             if px<6 and sample%2==0:p=colors[(ordinal-(2 if control=='missing-application' else 1))%5]
+            if resolve:
+                values=[]
+                for lane in range(samples):
+                    q=((px*16+py*8+layer*24+lane*8)%192,(py*24+layer*16+lane*8)%192,(px*8+py*8+layer*8+lane*8)%192,248)
+                    if control=='missing-initialization':q=(0,0,0,0)
+                    if px<6 and lane%2==0:
+                        q=((240,16,72,248),(16,240,72,248),(16,72,240,248),(240,72,16,248),(72,16,240,248))[(ordinal-(2 if control in ('missing-application','missing-resolve') else 1))%5]
+                    values.append(q)
+                sums=[sum(q[c] for q in values) for c in range(4)]
+                assert all(v%samples==0 for v in sums)
+                p=tuple(v//samples for v in sums)
             result.extend(p)
     return result
 
@@ -42,6 +53,7 @@ def main():
     p.add_argument('--controller',type=Path,help='Use an independently packaged controller/runtime')
     p.add_argument('--sessions',type=Path,help='Validate retained controller results instead of launching new targets')
     p.add_argument('--deferred',action='store_true',help='Use worker-compiled MSAA draw modes')
+    p.add_argument('--resolve',action='store_true',help='Use repeated worker-compiled MSAA resolves')
     a=p.parse_args();out=a.out.resolve();out.mkdir(parents=True,exist_ok=False);binary=a.bin.resolve()
     env=dict(os.environ);env.pop('GPA_LOCAL_INJECT',None);env['PYTHONDONTWRITEBYTECODE']='1';env['PATH']=str(a.qt_bin.resolve())+os.pathsep+env['PATH']
     checks=[];files=[]
@@ -52,26 +64,28 @@ def main():
         r=subprocess.run([str(x) for x in args],env=env,capture_output=True,timeout=120);(out/(name+'.log')).write_bytes(r.stdout+b'\n'+r.stderr);check(name,r.returncode==0);return r.stdout
     controller=a.controller.resolve() if a.controller else binary/'FloraCapture.exe'
     sessions_path=a.sessions.resolve() if a.sessions else out/'native/results.json'
-    harness='FloraCaptureDeferredMsaaControllerTests.exe' if a.deferred else 'FloraCaptureMsaaControllerTests.exe'
+    harness='FloraCaptureDeferredResolveControllerTests.exe' if a.resolve else 'FloraCaptureDeferredMsaaControllerTests.exe' if a.deferred else 'FloraCaptureMsaaControllerTests.exe'
     if not a.sessions:run('injected-controller',[binary/harness,controller,binary/'FloraCaptureLiveTarget.exe',out/'native'])
-    sessions=json.loads(sessions_path.read_text());check('two-startup-paths',len(sessions)==2 and {s['mode'] for s in sessions}==({40,41} if a.deferred else {24,25}))
+    sessions=json.loads(sessions_path.read_text());check('two-startup-paths',len(sessions)==2 and {s['mode'] for s in sessions}==({42,43} if a.resolve else {40,41} if a.deferred else {24,25}))
     for session in sessions:
-        mode=session['mode'];samples=2 if mode in (24,40) else 4
+        mode=session['mode'];samples=2 if mode in (24,40,42) else 4
         check(f'{mode}-native-after-disconnect',session['target_exit']['ok'] and session['target_exit']['msaa_native_cpu_exact'])
         check(f'{mode}-independent-target',not any(any(t in m.replace('\\','/').lower() for t in ('intelswtools/gpa/','python3','qt6','renderdoc','florareplay','floracore')) for m in session['module_status']['loaded_modules']))
         check(f'{mode}-consecutive-and-recovery',len(session['frames'])>=4 and len(list((sessions_path.parent/str(mode)/'session').glob('*.gpa_frame')))==len(session['frames']))
-        cases=[]
+        cases=[];application_count=5 if a.resolve else 3
         for index,item in enumerate(session['frames']):
             path=Path(item['path']);ordinal=item['present_ordinal'];name=f'{mode}-{index}';raw,offset,entries,helpers,application,labels=records(path)
-            check(name+'-recorded-initialization',ordinal>3 and len(helpers)==2*samples and len(application)==3 and len(labels)==1)
-            cases.append((name,path,ordinal,'complete',2*samples+3))
+            check(name+'-recorded-initialization',ordinal>3 and len(helpers)==2*samples and len(application)==application_count and len(labels)==1)
+            cases.append((name,path,ordinal,'complete',2*samples+application_count))
             if index==0:
-                for control,remove in [('missing-initialization',helpers),('missing-application',application[:2])]:
+                controls=[('missing-initialization',helpers),('missing-application',application[:-1])]
+                if a.resolve:controls.append(('missing-resolve',[e[0] for e in entries if e[4:]==(7,0x42)]))
+                for control,remove in controls:
                     data=bytearray(raw);keep=[entry for entry in entries if entry[0] not in remove];struct.pack_into('<I',data,12,len(keep))
                     for i,entry in enumerate(keep):struct.pack_into('<QQIBBH',data,offset+24*i,*entry)
-                    negative=out/(name+'-'+control+'.gpa_frame');negative.write_bytes(data);cases.append((name+'-'+control,negative,ordinal,control,2*samples+3-len(remove)))
+                    negative=out/(name+'-'+control+'.gpa_frame');negative.write_bytes(data);cases.append((name+'-'+control,negative,ordinal,control,2*samples+application_count-(0 if control=='missing-resolve' else len(remove))))
         for name,path,ordinal,control,draws in cases:
-            expected=pixels(samples,ordinal,control);(out/(name+'.expected.rgba')).write_bytes(expected)
+            expected=pixels(samples,ordinal,control,a.resolve);(out/(name+'.expected.rgba')).write_bytes(expected)
             files.append(dict(file=os.path.relpath(path,out).replace('\\','/'),sha256=hashlib.sha256(path.read_bytes()).hexdigest(),samples=samples,present_ordinal=ordinal,control=control,expected_sha256=hashlib.sha256(expected).hexdigest()))
             run(name+'-flora',[a.replay.resolve(),'replay',path,'--out',out/(name+'-flora')])
             run(name+'-original',[sys.executable,a.oracle_tools.resolve()/'replay_frame.py',path,'--out',out/(name+'-original'),'--timeout','60'])
@@ -79,7 +93,7 @@ def main():
             check(name+'-exact-cpu', (out/(name+'-flora/frame.rgba')).read_bytes()==expected and original['replayed_rgba_sha256']==hashlib.sha256(expected).hexdigest())
             check(name+'-native-execution',flora['reference_pixels_used'] is False and original['new_framebuffer_count']>0 and original['native']['open_status']==0 and original['native']['playback_status']==0 and original['native']['closed'])
             check(name+'-captured-reference-control',original['comparison_to_captured_resource']['rgba_equal'] is (control=='complete'))
-            check(name+'-events',flora['counts']['Draw']==draws and flora['counts']['Present']==1 and flora['counts']['ClearRenderTargetView']==3)
+            check(name+'-events',flora['counts']['Draw']==draws and flora['counts']['Present']==1 and flora['counts']['ClearRenderTargetView']==3 and flora['counts'].get('ResolveSubresource',0)==(4 if a.resolve and control!='missing-resolve' else 0))
             run(name+'-inventory',[a.replay.resolve(),'inventory',path,'--out',out/(name+'-inventory')]);inventory=json.loads((out/(name+'-inventory/report.json')).read_text())
             check(name+'-inventory',inventory['draws']==draws and inventory['dispatches']==0)
             shaders=[r for r in inventory['resources'] if 0x90<=r['type']<=0x95];check(name+'-application-helper-shaders',len(shaders)>=5)

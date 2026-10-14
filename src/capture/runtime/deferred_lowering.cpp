@@ -41,7 +41,7 @@ bool supported(CommandKind kind){switch(kind){
 case CommandKind::draw:case CommandKind::draw_indexed:case CommandKind::draw_instanced:case CommandKind::draw_indexed_instanced:case CommandKind::dispatch:
 case CommandKind::dispatch_indirect:case CommandKind::draw_instanced_indirect:case CommandKind::draw_indexed_instanced_indirect:
 case CommandKind::clear_rtv:case CommandKind::clear_dsv:case CommandKind::clear_uav_uint:case CommandKind::clear_uav_float:
-case CommandKind::copy_structure_count:case CommandKind::copy_resource:case CommandKind::copy_region:case CommandKind::update_subresource:return true;
+case CommandKind::resolve:case CommandKind::copy_structure_count:case CommandKind::copy_resource:case CommandKind::copy_region:case CommandKind::update_subresource:return true;
 case CommandKind::map:case CommandKind::unmap:return true;
 default:return false;
 }}
@@ -142,6 +142,11 @@ DeferredExpansion expand(const DeferredCommandList& list,const DeferredOrigin& o
         require(call.data.size()<=payload_limit-out.payload_bytes,"Deferred expansion payload byte limit exceeded");
         require(call.before_data.size()<=payload_limit-out.payload_bytes-call.data.size(),"Deferred expansion baseline byte limit exceeded");
         bindings(*state);retain(call.operand);retain(call.source);
+        if(call.kind==CommandKind::resolve){
+            require(call.operand && call.source && !call.words[3] && !call.words[4] && call.result==S_OK &&
+                    call.data.empty() && !call.update_box && !call.copy_region,"Deferred Resolve arguments invalid");
+            mapped_contents.erase(call.operand);
+        }
         if(indirect_argument_bytes(call.kind)){
             require(call.operand && !call.source && !call.words[1] && !call.words[2] && !call.words[3] && !call.words[4],"Deferred indirect arguments invalid");
             const auto& buffer=out.definitions.at(call.operand);require(buffer.kind=="buffer","Deferred indirect operand is not a buffer");

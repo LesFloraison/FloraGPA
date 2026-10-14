@@ -81,6 +81,8 @@ int wmain(int argc,wchar_t** argv){try{
     constexpr unsigned first_mode=27,last_mode=28;
 #elif defined(FLORA_DEFERRED_DISCARD_CONTROLLER)
     constexpr unsigned first_mode=26,last_mode=27;
+#elif defined(FLORA_DEFERRED_RESOLVE_CONTROLLER)
+    constexpr unsigned first_mode=42,last_mode=44;
 #elif defined(FLORA_DEFERRED_MSAA_CONTROLLER)
     constexpr unsigned first_mode=40,last_mode=42;
 #elif defined(FLORA_MSAA_CONTROLLER)
@@ -114,8 +116,8 @@ int wmain(int argc,wchar_t** argv){try{
         signal(h.oracle/L"finish.signal");require(WaitForSingleObject(h.process.value,10000)==WAIT_OBJECT_0,"Target did not exit");require(h.call(L"status",3)["state"]=="Exited","Target exit not reported");
         for(const auto& entry:fs::directory_iterator(h.session))require(entry.path().extension()!=L".partial","Transaction leaked partial output");
         std::ifstream exit_file(h.oracle/L"exit.json");Json exit;exit_file>>exit;
-        require(exit["identity_checks"]==exit["frames"],"Backbuffer identity observations missing");if(mode>=2 && mode!=8 && mode!=24 && mode!=40)require(exit["unbind_checks"]==exit["frames"],"Flip unbind observations missing");
-        if(mode==24 || mode==25 || mode==40 || mode==41)require(exit["msaa_native_cpu_exact"],"Native MSAA CPU oracle failed after disconnect");
+        require(exit["identity_checks"]==exit["frames"],"Backbuffer identity observations missing");if(mode>=2 && mode!=8 && mode!=24 && mode!=40 && mode!=42)require(exit["unbind_checks"]==exit["frames"],"Flip unbind observations missing");
+        if(mode==24 || mode==25 || mode==40 || mode==41 || mode==42 || mode==43)require(exit["msaa_native_cpu_exact"],"Native MSAA CPU oracle failed after disconnect");
         results.push_back({{"mode",mode},{"frames",frames},{"target_exit",exit},{"automatic_foreground",foreground},{"failure",failed["last_capture"]},{"module_status",status}});
     }
     std::ofstream report(out/L"results.json");report<<results.dump(2);std::cout<<Json{{"passed",true},{"launches",last_mode-first_mode},{"scope","Startup injection and native private IPC"}}.dump()<<'\n';return 0;

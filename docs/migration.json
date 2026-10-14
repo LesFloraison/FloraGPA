@@ -4003,7 +4003,7 @@
     "deferred_bindings": "Typed input histories for 45 valid deferred APIs plus native effective action snapshots; unsupported MinLOD/class/hidden-state profiles reject",
     "deferred_definitions": "Independent CPU creation graphs preserve device/resource/view dependencies, DXBC, state descriptors, semantic strings and original creation bytes after native destruction; not execution-time GPU contents or deferred encoding",
     "deferred_effective_state": "Native compilation-time pipeline snapshots and execution-time GPU data feed capture-owned flattened actions. CS/OM Counter/Append first KEEP reads each retained native UAV before immediate submission; later actions preserve ordered reset/KEEP. Native leases are separate from CPU journals and frozen definitions. Missing/unrepresentable counter state and broader hidden state refuse.",
-    "deferred_execution": "Supported Draw/Dispatch/Clear/Copy/Update and scoped Map/Unmap actions expand at actual immediate ExecuteCommandList positions. Bounded merged lists preserve repeated child order and full CPU ancestry. Same-frame compilation with workers joined before submission is validated. Open-map merges, unverified states/dependencies and foreign immediate execution refuse.",
+    "deferred_execution": "Supported Draw/Dispatch/Clear/Copy/Resolve/Update and scoped Map/Unmap actions expand at actual immediate ExecuteCommandList positions. Bounded merged lists preserve repeated child order and full CPU ancestry. Same-frame compilation with workers joined before submission is validated. Open-map merges, unverified states/dependencies and foreign immediate execution refuse.",
     "deferred_nooverwrite_validation": {
       "evidence": "docs/CAPTURE_DEFERRED_NOOVERWRITE.md",
       "baseline": "docs/capture-deferred-nooverwrite-baseline.json",
@@ -4028,7 +4028,7 @@
     "msaa_color_encoder": "Validated RGBA8/RGBA16 planes encode labelled sample Draw/Copy initialization with build-time DXBC. Wrapped RGBA16 storage/FLOAT-write profile passes exact dual-player/removal controls; RGBA8 also has startup-injected proof. D32S8 is tracked separately; broader state profiles remain pending.",
     "msaa_immediate_recording": "First-use RGBA8/RGBA16/D32S8 2x/4x quality-zero samples share frame byte and plane budgets. Wrapped Draws and owner release tested; startup-injected repeated Present capture verified for RGBA8. Depth value/view scope explicitly guarded. Scoped RGBA8/RGBA16 Resolve admitted; other mutations/in-frame completed queries/predicates/output remain refused; supported deferred MSAA follows in deferred_msaa_validation; scoped Intel GF2 6/6, with historical Intel/NVIDIA discrepancies unresolved.",
     "msaa_depth_encoder": "Validated D32S8 planes lower to depth and stencil-bit sample Draws plus CopyResource using build-time DXBC. Wrapped native WARP/hardware exact dual-player/removal controls pass; read-only views, broader depth formats/states and startup proof pending.",
-    "multisample_resolve": "Immediate validated RGBA8_UNORM/RGBA16_FLOAT 2x/4x quality-zero source and single-sample DEFAULT destination; typed/typeless array and destination-mip profiles, repeated order and retained initial samples pass exact dual-player controls. Deferred/predicate and broader profiles refuse.",
+    "multisample_resolve": "Immediate and deferred RGBA8_UNORM/RGBA16_FLOAT 2x/4x quality-zero source and single-sample DEFAULT destination; typed/typeless arrays and destination mips retain submission-time initial data. Deferred repeated lists and startup injection pass exact dual-player controls. Predicate, other formats/quality and unsupported storage still refuse. See deferred_resolve_validation.",
     "mapping_provenance": "Successful Map scalar type/flags/result/pitches/thread/generation retained until native Unmap. Separate runtime borrowed storage invalidated before native Unmap/last wrapper release; no pointer in frozen CPU data or status. Scoped boundary buffer WRITE_DISCARD owns initial and final bytes; unsupported profiles refuse.",
     "boundary_mappings": "Independent initial/final Map CPU models preserve boundary bytes, real Unmap order and still-open application maps. Encoder emits labelled frame-start restoration and frame-end cleanup helpers. Same-thread immediate dynamic vertex/index/constant/typed-SRV buffers with zero flags/misc/structured stride only; deferred/NO_OVERWRITE/texture/foreign and broader lifetime profiles pending.",
     "msaa_query_observations": "Scoped pre-frame-completed EVENT observations and existing status-only pending scope pass the shared provenance gate with MSAA initialization. Wrapped RGBA8/RGBA16/D32S8 native WARP/hardware and 36 dual-player files / 804 checks pass; in-frame successful completion and predicates remain refused. See capture-msaa-query-baseline.json.",
@@ -4156,7 +4156,7 @@
       "variable_event": 5598,
       "diagnostic_runs": 101,
       "limits": "One frame varies in both players; exact-byte rule unchanged. Historical accepted six-file runtime identities remain separate. Current original GUI inspection and overall delivery remain incomplete.",
-      "later_runtime_changes": "Deferred MSAA support changes the runtime after this six-file candidate baseline; no new GF2 gate is claimed. See deferred_msaa_validation."
+      "later_runtime_changes": "Deferred MSAA and Resolve support change the runtime after this six-file candidate baseline; no new GF2 gate is claimed. See deferred_msaa_validation and deferred_resolve_validation."
     },
     "gf2_boundary_diagnosis": {
       "evidence": "docs/CAPTURE_GF2_BOUNDARY.md",
@@ -4245,7 +4245,19 @@
       "packaged_dual_files": 12,
       "packaged_dual_checks": 279,
       "native_refusals": 48,
-      "limits": "Verified 2x/4x quality-zero RGBA8/RGBA16/D32S8 at actual submission. Earlier initial samples preserved across repeated lists; unsupported mutations/Resolve refuse. New runtime not GF2-accepted; historical file identities and pixel discrepancies remain open."
+      "limits": "Verified 2x/4x quality-zero RGBA8/RGBA16/D32S8 at actual submission. Earlier initial samples preserved across repeated lists. At this milestone unsupported mutations/Resolve refused; later Resolve support is recorded separately in deferred_resolve_validation. New runtime not GF2-accepted; historical file identities and pixel discrepancies remain open."
+    },
+    "deferred_resolve_validation": {
+      "evidence": "docs/CAPTURE_DEFERRED_RESOLVE.md",
+      "baseline": "docs/capture-deferred-resolve-baseline.json",
+      "dual_player_files": 64,
+      "dual_player_checks": 1510,
+      "packaged_injected_captures": 8,
+      "packaged_dual_files": 14,
+      "packaged_dual_checks": 323,
+      "native_refusals": 96,
+      "encoder_refusals": 144,
+      "limits": "Scoped RGBA8/RGBA16 2x/4x quality-zero typed/typeless array and destination-mip Resolve at actual submission. Repeated order and initial samples preserved. Predicate/other MSAA mutations and broader storage refuse; conservative deferred pipeline dependencies remain. No new GF2 or original GUI acceptance."
     }
   }
 }

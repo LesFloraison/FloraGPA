@@ -13,6 +13,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     for name in ('probe', 'replay', 'oracle-tools', 'qt-bin', 'out'):
         parser.add_argument('--'+name, type=Path, required=True)
+    parser.add_argument('--deferred', action='store_true')
     args = parser.parse_args()
     out = args.out.resolve()
     out.mkdir(parents=True, exist_ok=False)
@@ -37,10 +38,11 @@ def main():
 
     for device in ('warp', 'hardware'):
         native = json.loads(run(device+'-probe', [args.probe.resolve(), *(['--hardware'] if device == 'hardware' else []), out/device]))
-        check(device+'-native-oracle-refusals-lifetime-debug', native['passed'] and native['encoder_refusals'] == 72 and
+        check(device+'-native-oracle-refusals-lifetime-debug', native['passed'] and native['encoder_refusals'] == 72 and native['deferred'] == args.deferred and
+              native['native_refusals'] == (48 if args.deferred else 0) and
               native['source_gpu_objects_alive'] == 0 and native['debug_warnings_or_errors'] == 0)
         manifest = json.loads((out/device/'frames.json').read_text())
-        check(device+'-profiles', len(manifest) == 24)
+        check(device+'-profiles', len(manifest) == (32 if args.deferred else 24))
         for item in manifest:
             frame = out/device/item['file']
             case = device+'-'+frame.stem
@@ -55,10 +57,9 @@ def main():
                     check(case+f'-resolve-{ident}-wire-length', size == 44)
                     link, context, dst, sub, src, src_sub, fmt = struct.unpack_from('<QQQIQII', raw, at)
                     resolves.append((link, context, dst, sub, src, src_sub, fmt))
+            ordered = [(1, 1), (3, 0)] * (1 if item['resolves'] == 2 else 2) if args.deferred else [(1, 1), (1, 1), (3, 0)]
             check(case+'-ordered-resolve-arguments', len(resolves) == item['resolves'] and (not resolves or
-                  [r[3:] for r in resolves] == [(1, resolves[0][4], 1, 10 if item['wide'] else 28),
-                                               (1, resolves[0][4], 1, 10 if item['wide'] else 28),
-                                               (3, resolves[0][4], 0, 10 if item['wide'] else 28)]))
+                  [r[3:] for r in resolves] == [(dst, resolves[0][4], src, 10 if item['wide'] else 28) for dst, src in ordered]))
             files.append(dict(file=frame.relative_to(out).as_posix(), sha256=hashlib.sha256(raw).hexdigest(),
                               expected_sha256=hashlib.sha256(expected).hexdigest()))
             run(case+'-flora', [args.replay.resolve(), 'replay', frame, '--out', out/(case+'-flora')])

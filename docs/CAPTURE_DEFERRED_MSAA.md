@@ -1,5 +1,9 @@
 # Deferred DX11 MSAA capture
 
+This is the evidence for the MSAA milestone. Subsequent deferred Resolve support
+and its separate runtime/package validation are in
+[CAPTURE_DEFERRED_RESOLVE.md](CAPTURE_DEFERRED_RESOLVE.md).
+
 Immediate `ExecuteCommandList` now uses the capture-owned initial-resource
 snapshot path for retained MSAA resources instead of rejecting every deferred
 MSAA use. It snapshots at submission, preserves any earlier frame-start data,

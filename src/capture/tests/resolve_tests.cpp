@@ -2,17 +2,25 @@
 #include "encoder.hpp"
 #include "msaa_readback.hpp"
 #include "objects.hpp"
+#include "deferred_history.hpp"
 #include <d3dcompiler.h>
 #include <d3d11sdklayers.h>
 #include <wrl/client.h>
 #include <filesystem>
 #include <fstream>
 #include <iostream>
+#include <thread>
 using namespace flora::capture;
 using Microsoft::WRL::ComPtr;
 using ByteBuffer=std::vector<uint8_t>;
 namespace {
 constexpr UINT width=8,height=4,layers=2;
+#ifdef FLORA_DEFERRED_RESOLVE
+constexpr bool deferred=true;
+#else
+constexpr bool deferred=false;
+#endif
+unsigned native_refusals=0;
 void require(bool ok,const char* why){if(!ok)throw std::runtime_error(why);}
 void check(HRESULT hr){if(FAILED(hr))throw std::runtime_error("Resolve fixture HRESULT "+std::to_string(UINT(hr)));}
 ByteBuffer compile(const std::string& text,const char* profile){ComPtr<ID3DBlob> code,error;auto hr=D3DCompile(text.data(),text.size(),"Independent resolve producer",nullptr,nullptr,"main",profile,D3DCOMPILE_ENABLE_STRICTNESS,0,&code,&error);if(FAILED(hr)&&error)throw std::runtime_error(static_cast<const char*>(error->GetBufferPointer()));check(hr);auto* p=static_cast<const uint8_t*>(code->GetBufferPointer());return {p,p+code->GetBufferSize()};}
@@ -41,20 +49,64 @@ FrozenFrame native(bool hardware,bool wide,UINT samples,bool typed_source,bool m
     D3D11_RASTERIZER_DESC rd{};rd.FillMode=D3D11_FILL_SOLID;rd.CullMode=D3D11_CULL_NONE;rd.DepthClipEnable=TRUE;rd.MultisampleEnable=TRUE;ComPtr<ID3D11RasterizerState> raster,scissor;check(device->CreateRasterizerState(&rd,&raster));rd.ScissorEnable=TRUE;check(device->CreateRasterizerState(&rd,&scissor));
     context->VSSetShader(vs.Get(),nullptr,0);context->PSSetShader(ps.Get(),nullptr,0);context->PSSetConstantBuffers(0,1,&b);context->RSSetState(raster.Get());context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);D3D11_VIEWPORT vp{0,0,float(width),float(height),0,1};context->RSSetViewports(1,&vp);
     std::array<ComPtr<ID3D11RenderTargetView>,layers> views;
-    for(UINT layer=0;layer<layers;++layer){D3D11_RENDER_TARGET_VIEW_DESC vd{};vd.Format=typed;vd.ViewDimension=D3D11_RTV_DIMENSION_TEXTURE2DMSARRAY;vd.Texture2DMSArray={layer,1};check(device->CreateRenderTargetView(source.Get(),&vd,&views[layer]));auto* v=views[layer].Get();context->OMSetRenderTargets(1,&v,nullptr);UINT data[]{layer,0,0,0};context->UpdateSubresource(cb.Get(),0,nullptr,data,0,0);context->Draw(3,0);}
+    for(UINT layer=0;layer<layers;++layer){D3D11_RENDER_TARGET_VIEW_DESC vd{};vd.Format=typed;vd.ViewDimension=D3D11_RTV_DIMENSION_TEXTURE2DMSARRAY;vd.Texture2DMSArray={layer,1};check(device->CreateRenderTargetView(source.Get(),&vd,&views[layer]));}
+    auto changeSamples=[&](ID3D11DeviceContext* draw){
+        draw->VSSetShader(vs.Get(),nullptr,0);draw->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);draw->RSSetViewports(1,&vp);
+        draw->PSSetShader(edit.Get(),nullptr,0);draw->RSSetState(scissor.Get());D3D11_RECT rect{0,0,width/2,height};draw->RSSetScissorRects(1,&rect);draw->OMSetBlendState(nullptr,nullptr,0x55555555);auto* v=views[1].Get();draw->OMSetRenderTargets(1,&v,nullptr);draw->Draw(3,0);
+    };
+    ComPtr<ID3D11DeviceContext> worker;ComPtr<ID3D11CommandList> resolveList,editList;
+    if(deferred){
+        check(device->CreateDeferredContext(0,&worker));std::exception_ptr failure;
+        std::thread compileLists([&]{try{
+            worker->ResolveSubresource(destination.Get(),1,source.Get(),1,typed);
+            worker->ResolveSubresource(destination.Get(),3,source.Get(),0,typed);
+            check(worker->FinishCommandList(TRUE,&resolveList));
+            changeSamples(worker.Get());check(worker->FinishCommandList(FALSE,&editList));
+        }catch(...){failure=std::current_exception();}});compileLists.join();if(failure)std::rethrow_exception(failure);
+    }
+    // Compile before GPU initialization: FinishCommandList must never freeze
+    // creation-time or compilation-time samples for the later submission.
+    for(UINT layer=0;layer<layers;++layer){auto* v=views[layer].Get();context->OMSetRenderTargets(1,&v,nullptr);UINT data[]{layer,0,0,0};context->UpdateSubresource(cb.Get(),0,nullptr,data,0,0);context->Draw(3,0);}
     const auto samples_before=snapshot_msaa_samples(context.Get(),source.Get());
     for(const auto& plane:samples_before.planes){ByteBuffer cpu;for(UINT y=0;y<height;++y)for(UINT x=0;x<width;++x)for(UINT c=0;c<4;++c)append(cpu,wide,units(wide,x,y,plane.array_slice,plane.sample,c));require(cpu==plane.bytes,"Native source samples differ from CPU");}
     auto recording=begin_recording(context.Get());
-    context->ResolveSubresource(destination.Get(),1,source.Get(),1,typed);
-    context->PSSetShader(edit.Get(),nullptr,0);context->RSSetState(scissor.Get());D3D11_RECT rect{0,0,width/2,height};context->RSSetScissorRects(1,&rect);context->OMSetBlendState(nullptr,nullptr,0x55555555);auto* v=views[1].Get();context->OMSetRenderTargets(1,&v,nullptr);context->Draw(3,0);
-    context->ResolveSubresource(destination.Get(),1,source.Get(),1,typed);
-    context->ResolveSubresource(destination.Get(),3,source.Get(),0,typed);
+    if(deferred){
+        context->ExecuteCommandList(resolveList.Get(),TRUE);ComPtr<ID3D11PixelShader> actual;
+        context->PSGetShader(&actual,nullptr,nullptr);require(actual.Get()==ps.Get(),"Resolve Execute(TRUE) changed immediate shader");
+        context->ExecuteCommandList(editList.Get(),FALSE);actual.Reset();context->PSGetShader(&actual,nullptr,nullptr);require(!actual,"Resolve Execute(FALSE) did not restore default state");
+        context->ExecuteCommandList(resolveList.Get(),TRUE);context->PSGetShader(&actual,nullptr,nullptr);require(!actual,"Repeated Resolve changed restored state");
+        context->VSSetShader(vs.Get(),nullptr,0);context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+    }else{
+        context->ResolveSubresource(destination.Get(),1,source.Get(),1,typed);changeSamples(context.Get());
+        context->ResolveSubresource(destination.Get(),1,source.Get(),1,typed);context->ResolveSubresource(destination.Get(),3,source.Get(),0,typed);
+    }
     context->OMSetRenderTargets(0,nullptr,nullptr);td={width*(wide?2u:1u),height*layers,1,1,DXGI_FORMAT_R8G8B8A8_UNORM,{1,0},D3D11_USAGE_DEFAULT,D3D11_BIND_RENDER_TARGET,0,0};ComPtr<ID3D11Texture2D> output;ComPtr<ID3D11RenderTargetView> target;check(device->CreateTexture2D(&td,nullptr,&output));check(device->CreateRenderTargetView(output.Get(),nullptr,&target));
     D3D11_SHADER_RESOURCE_VIEW_DESC sd{};sd.Format=typed;sd.ViewDimension=D3D11_SRV_DIMENSION_TEXTURE2DARRAY;sd.Texture2DArray={1,1,0,layers};ComPtr<ID3D11ShaderResourceView> srv;check(device->CreateShaderResourceView(destination.Get(),&sd,&srv));auto* s=srv.Get();auto* r=target.Get();context->PSSetShaderResources(0,1,&s);context->OMSetRenderTargets(1,&r,nullptr);context->PSSetShader(show.Get(),nullptr,0);context->RSSetState(raster.Get());context->OMSetBlendState(nullptr,nullptr,UINT_MAX);vp.Width=float(td.Width);vp.Height=float(td.Height);context->RSSetViewports(1,&vp);context->Draw(3,0);
-    auto recorded=recording->finish();recorded.require_complete();require(recorded.commands.size()==5,"Resolve order/command count changed");require(recorded.initial_msaa.size()==1,"Resolve lost initial samples");
+    auto recorded=recording->finish();recorded.require_complete();require(recorded.commands.size()==(deferred?6u:5u),"Resolve order/command count changed");require(recorded.initial_msaa.size()==1,"Resolve lost initial samples");
+    if(deferred)for(size_t i=0;i<5;++i){const auto& c=recorded.commands[i];const UINT execution=i<2?1:i==2?2:3;
+        require(c.deferred && c.deferred->execution_ordinal==execution && c.deferred->restore_context_state==(execution!=2),"Resolve deferred execution provenance lost");
+        require(c.deferred->list==object_record(execution==2?editList.Get():resolveList.Get())->id,"Resolve repeated list identity changed");
+    }
     const auto& saved=recorded.initial_msaa.begin()->second;for(size_t i=0;i<saved.planes.size();++i)require(saved.planes[i].bytes==samples_before.planes[i].bytes,"Resolve replaced initial samples with later writes");
     auto resolved=snapshot_resource(context.Get(),destination.Get());for(UINT sub=0;sub<4;++sub){auto cpu=initial[sub];if(sub%2){cpu.clear();for(UINT y=0;y<height;++y)for(UINT x=0;x<width;++x)for(UINT c=0;c<4;++c)append(cpu,wide,final_units(wide,x,y,1-sub/2,c,samples,true,true));}require(cpu==resolved.subresources[sub].bytes,"Native resolve destination bytes/mip preservation differ");require(recorded.initial_resources.at(resolved.record->id).subresources[sub].bytes==initial[sub],"Resolve destination initial contents changed");}
     auto final=snapshot_resource(context.Get(),output.Get());require(final.subresources[0].bytes==expected(wide,samples),"Native resolve display differs from CPU");auto frozen=freeze_frame(std::move(recorded),object_record(output.Get())->id,std::move(final));context->ClearState();
+
+    if(deferred){
+        const auto listRecord=object_record(resolveList.Get());const auto original=listRecord->command_list;
+        for(UINT mode=0;mode<6;++mode){
+            auto broken=std::make_shared<DeferredCommandList>(*original);auto& call=broken->calls[0];RecordingOptions options;const char* reason="";
+            if(mode==0){call.words[0]=UINT_MAX;reason="destination subresource";}
+            if(mode==1){call.words[2]=DXGI_FORMAT_R8G8B8A8_TYPELESS;reason="typed format";}
+            if(mode==2){auto state=std::make_shared<PipelineBindings>(*call.state);state->predicate=UINT64_MAX;call.state=state;reason="predicate";}
+            if(mode==3){call.words[3]=1;reason="Resolve arguments";}
+            if(mode==4){options.byte_limit=1;reason="byte limit";}
+            if(mode==5){options.msaa_plane_limit=1;reason="plane limit";}
+            listRecord->command_list=broken;auto rejected=begin_recording(context.Get(),options);context->ExecuteCommandList(resolveList.Get(),TRUE);auto bad=rejected->finish();
+            listRecord->command_list=original;bool refused=false;try{bad.require_complete();}catch(const std::exception& e){require(std::string(e.what()).find(reason)!=std::string::npos,e.what());refused=true;}
+            require(refused && bad.commands.empty(),"Invalid deferred Resolve was recorded");++native_refusals;
+            const auto continued=snapshot_resource(context.Get(),destination.Get());for(UINT sub=0;sub<4;++sub)require(continued.subresources[sub].bytes==resolved.subresources[sub].bytes,"Resolve failure changed native forwarding");
+        }
+    }
     for(UINT64 i=0;i<info->GetNumStoredMessagesAllowedByRetrievalFilter();++i){SIZE_T size=0;check(info->GetMessage(i,nullptr,&size));ByteBuffer bytes(size);auto* m=reinterpret_cast<D3D11_MESSAGE*>(bytes.data());check(info->GetMessage(i,m,&size));if(m->Severity<=D3D11_MESSAGE_SEVERITY_WARNING)throw std::runtime_error(m->pDescription);}
     return frozen;
 }
@@ -65,6 +117,6 @@ unsigned malformed(const FrozenFrame& frame,const std::filesystem::path& out){un
 }
 int wmain(int argc,wchar_t** argv){try{bool hardware=false;std::filesystem::path out;for(int i=1;i<argc;++i){if(std::wstring(argv[i])==L"--hardware")hardware=true;else out=argv[i];}const bool temporary=out.empty();if(temporary)out=std::filesystem::temp_directory_path()/("FloraResolve-"+std::to_string(GetCurrentProcessId())+"-"+std::to_string(GetTickCount64()));require(std::filesystem::create_directories(out),"Resolve output already exists");Json manifest=Json::array();unsigned refusals=0;
     for(bool wide:{false,true})for(UINT samples:{2u,4u})for(bool matched:{false,true}){auto frame=native(hardware,wide,samples,samples==4,matched);require(object_status().at("active")==0 && metadata_status().at("alive")==0,"Resolve model retained native owners");refusals+=malformed(frame,out);
-        for(UINT mode=0;mode<3;++mode){auto f=frame;const auto name=std::string(wide?"rgba16-":"rgba8-")+std::to_string(samples)+(matched?"x-matched-":"x-mixed-")+(mode==0?"complete":mode==1?"missing-resolve":"missing-application-draw");if(mode==1)std::erase_if(f.commands,[](const auto& c){return c.kind==CommandKind::resolve;});if(mode==2)f.commands.erase(f.commands.begin()+1);for(size_t i=0;i<f.commands.size();++i)f.commands[i].sequence=i;encode_frame(f,out/(name+".gpa_frame"));raw(out/(name+".expected.rgba"),expected(wide,samples,mode!=2,mode!=1));manifest.push_back(Json{{"file",name+".gpa_frame"},{"samples",samples},{"wide",wide},{"draws",layers*samples+(mode==2?1:2)},{"resolves",mode==1?0:3}});}}
-    std::ofstream file(out/"frames.json");file<<manifest.dump(2);file.close();require(bool(file),"Resolve manifest write failed");if(temporary){for(const auto& entry:std::filesystem::directory_iterator(out)){require(entry.is_regular_file(),"Unexpected fixture output kind");std::filesystem::remove(entry.path());}std::filesystem::remove(out);}std::cout<<Json{{"passed",true},{"hardware",hardware},{"files",manifest.size()},{"encoder_refusals",refusals},{"source_gpu_objects_alive",0},{"debug_warnings_or_errors",0}}.dump()<<'\n';return 0;
+        for(UINT mode=0;mode<(deferred?4u:3u);++mode){auto f=frame;const auto name=std::string(wide?"rgba16-":"rgba8-")+std::to_string(samples)+(matched?"x-matched-":"x-mixed-")+(mode==0?"complete":mode==1?"missing-resolve":mode==2?"missing-application-draw":"missing-last-execution");if(mode==1)std::erase_if(f.commands,[](const auto& c){return c.kind==CommandKind::resolve;});if(mode==2)f.commands.erase(f.commands.begin()+(deferred?2:1));if(mode==3)std::erase_if(f.commands,[](const auto& c){return c.deferred && c.deferred->execution_ordinal==3;});for(size_t i=0;i<f.commands.size();++i)f.commands[i].sequence=i;encode_frame(f,out/(name+".gpa_frame"));raw(out/(name+".expected.rgba"),expected(wide,samples,mode!=2 && mode!=3,mode!=1));manifest.push_back(Json{{"file",name+".gpa_frame"},{"samples",samples},{"wide",wide},{"draws",layers*samples+(mode==2?1:2)},{"resolves",mode==1?0:mode==3?2:deferred?4:3}});}}
+    std::ofstream file(out/"frames.json");file<<manifest.dump(2);file.close();require(bool(file),"Resolve manifest write failed");if(temporary){for(const auto& entry:std::filesystem::directory_iterator(out)){require(entry.is_regular_file(),"Unexpected fixture output kind");std::filesystem::remove(entry.path());}std::filesystem::remove(out);}std::cout<<Json{{"passed",true},{"hardware",hardware},{"files",manifest.size()},{"encoder_refusals",refusals},{"native_refusals",native_refusals},{"deferred",deferred},{"source_gpu_objects_alive",0},{"debug_warnings_or_errors",0}}.dump()<<'\n';return 0;
 }catch(const std::exception& e){std::cerr<<e.what()<<'\n';return 1;}}
