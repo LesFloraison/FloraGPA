@@ -4578,6 +4578,23 @@
       "current_gate_passed": false,
       "production_fix": false,
       "limits": "The current single Draw produces the higher variant in all 19 native executions, with 11.0/11.1 and debug-on/off controls. The export run produced the lower variant. This does not reproduce variability inside the independent runner or prove a capture/driver root cause; debug-off runs have no debug-queue observation."
+    },
+    "gf2_current_primitive_diagnosis": {
+      "evidence": "docs/CAPTURE_GF2_CURRENT_PRIMITIVE.md",
+      "baseline": "docs/capture-gf2-current-primitive-baseline.json",
+      "event": 5651,
+      "primitive": 2443,
+      "first_index": 7329,
+      "index_count": 3,
+      "native_processes": 9,
+      "draw_repetitions": 11,
+      "exact_restore_planes": 88,
+      "postvs_vertices": 7401,
+      "cpu_test_groups": 7,
+      "cli_refusals": 4,
+      "current_gate_passed": false,
+      "production_fix": false,
+      "limits": "Original triangle 2443 alone reproduces the native higher sample-1 value. This does not reproduce the lower variant in the isolated runner. Current CPU-projected pixel center lies inside this triangle, unlike the older triangle-1613 case. Unsnapped projection is not GPU coverage proof; formal acceptance remains failed."
     }
   }
 }

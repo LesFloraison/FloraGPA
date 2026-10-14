@@ -6,6 +6,8 @@ differences, with 26 of 36 positive executions matching exactly. See
 The historical six-frame result below retains its original runtime/file identities.
 The current Draw now has an independent native fixture with explicit feature-level
 and device-flag controls; see [CAPTURE_GF2_NATIVE_LEVEL.md](CAPTURE_GF2_NATIVE_LEVEL.md).
+Its selected sample is now isolated to original triangle 2443; see
+[CAPTURE_GF2_CURRENT_PRIMITIVE.md](CAPTURE_GF2_CURRENT_PRIMITIVE.md).
 
 GPU-generated indirect Draw/Dispatch arguments now remain native indirect records,
 with immediate/deferred/nested execution and byte-exact controls documented in

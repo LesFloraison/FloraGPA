@@ -1,0 +1,379 @@
+{
+  "schema": 1,
+  "date": "2026-10-14",
+  "source_parent_commit": "61cb82cdebea1efbf0c5a5561769f75249b73ac0",
+  "source_hashes": {
+    "tools/inspect_draw_candidates.py": "428e084008ad16ad42662456ab210d865272e86780b81c99cab45bccd0e98b42",
+    "tools/test_draw_candidates.py": "056051a50a5e9a2d6cb1023b5762af90d7f650873bc3131572ce25df297b4bcf",
+    "docs/CAPTURE_GF2_CURRENT_PRIMITIVE.md": "299ae939ffd3eb5e947e8ef7d0313391e8174ce3c7427daa2d6336bedc856264",
+    "docs/INDEPENDENT_CAPTURE.md": "e506441d721c53dd3670898d71be2effc34d6e84bb4d6bf5d91121837e123411"
+  },
+  "summary": {
+    "schema": 1,
+    "current_gate_passed": false,
+    "production_fix": false,
+    "runs": [
+      {
+        "directory": "only-2412",
+        "applied_draw": [
+          3,
+          7236,
+          0
+        ],
+        "repetitions": 1,
+        "observed_half_words": [
+          [
+            7759,
+            8093,
+            7731,
+            15285
+          ],
+          [
+            7759,
+            8093,
+            7731,
+            15285
+          ]
+        ],
+        "report_sha256": "84701577fc26e85ce94a5bf60eafdfa405d6529da000b9ef444cb58d29c9e02a"
+      },
+      {
+        "directory": "only-2432",
+        "applied_draw": [
+          3,
+          7296,
+          0
+        ],
+        "repetitions": 1,
+        "observed_half_words": [
+          [
+            7759,
+            8093,
+            7731,
+            15285
+          ],
+          [
+            7759,
+            8093,
+            7731,
+            15285
+          ]
+        ],
+        "report_sha256": "c8396e0523664d4c7aa221d2a5b50d322c739d7546baa94adad48183e1dc8705"
+      },
+      {
+        "directory": "only-2443",
+        "applied_draw": [
+          3,
+          7329,
+          0
+        ],
+        "repetitions": 1,
+        "observed_half_words": [
+          [
+            7759,
+            8093,
+            7731,
+            15285
+          ],
+          [
+            9127,
+            9247,
+            8891,
+            15143
+          ]
+        ],
+        "report_sha256": "a576ae304e3a196fc8100ba1a296e8f3005bb6c5d20ed6dc36fa9e91430c0b72"
+      },
+      {
+        "directory": "before-2443",
+        "applied_draw": [
+          7329,
+          0,
+          0
+        ],
+        "repetitions": 1,
+        "observed_half_words": [
+          [
+            7759,
+            8093,
+            7731,
+            15285
+          ],
+          [
+            7759,
+            8093,
+            7731,
+            15285
+          ]
+        ],
+        "report_sha256": "24986e2f48a04b4eeba3de130523b6fe8a4363b60e6ec396bdd93c5990d77890"
+      },
+      {
+        "directory": "through-2443",
+        "applied_draw": [
+          7332,
+          0,
+          0
+        ],
+        "repetitions": 1,
+        "observed_half_words": [
+          [
+            7759,
+            8093,
+            7731,
+            15285
+          ],
+          [
+            9127,
+            9247,
+            8891,
+            15143
+          ]
+        ],
+        "report_sha256": "750019eb9d7a93e6726f0f154f5f8fc41662552ac55840cd41459e53f05cbfdc"
+      },
+      {
+        "directory": "through-2444",
+        "applied_draw": [
+          7335,
+          0,
+          0
+        ],
+        "repetitions": 1,
+        "observed_half_words": [
+          [
+            7444,
+            7618,
+            7269,
+            15360
+          ],
+          [
+            9127,
+            9247,
+            8891,
+            15143
+          ]
+        ],
+        "report_sha256": "0016adb4b15d1473e8bac3eed4b9d2288e3a1f09b644bcb002ecff3d78dfb3f9"
+      },
+      {
+        "directory": "only-2444",
+        "applied_draw": [
+          3,
+          7332,
+          0
+        ],
+        "repetitions": 1,
+        "observed_half_words": [
+          [
+            7444,
+            7618,
+            7269,
+            15360
+          ],
+          [
+            7759,
+            8093,
+            7731,
+            15285
+          ]
+        ],
+        "report_sha256": "9fb111534e0c3480b1e355e0df1038b7655d38d4076c07cfa7185c8af44d519a"
+      },
+      {
+        "directory": "isolated-repeat",
+        "applied_draw": [
+          3,
+          7329,
+          0
+        ],
+        "repetitions": 3,
+        "observed_half_words": [
+          [
+            7759,
+            8093,
+            7731,
+            15285
+          ],
+          [
+            9127,
+            9247,
+            8891,
+            15143
+          ]
+        ],
+        "report_sha256": "59b7713bf914eb44887c500c8bf40a0ad3ed55765ad0dcef13ad33997f3f1677"
+      },
+      {
+        "directory": "explicit-full",
+        "applied_draw": [
+          7401,
+          0,
+          0
+        ],
+        "repetitions": 1,
+        "observed_half_words": [
+          [
+            7444,
+            7618,
+            7269,
+            15360
+          ],
+          [
+            9127,
+            9247,
+            8891,
+            15143
+          ]
+        ],
+        "report_sha256": "70bb63ed2d9330965029dff2e6fc7678a9a2c5e5640305b6b8bf1d9585f0614d"
+      }
+    ],
+    "native_processes": 9,
+    "draw_repetitions": 11,
+    "exact_restore_planes": 88,
+    "postvs_vertices": 7401,
+    "postvs_stride": 160,
+    "candidate_count": 16,
+    "selected": {
+      "primitive": 2443,
+      "first_index": 7329,
+      "index_count": 3,
+      "clip": [
+        [
+          -0.18732628226280212,
+          -1.4458982944488525,
+          0.09995131194591522,
+          2.5314509868621826
+        ],
+        [
+          -0.19283612072467804,
+          -1.419905662536621,
+          0.09995143115520477,
+          2.525552749633789
+        ],
+        [
+          -0.19885136187076569,
+          -1.4066100120544434,
+          0.09995126724243164,
+          2.5334079265594482
+        ]
+      ],
+      "screen": [
+        [
+          1600.1287445697858,
+          1527.1808624769546
+        ],
+        [
+          1596.0602427882127,
+          1518.4737587388424
+        ],
+        [
+          1592.3664331707776,
+          1511.6781613349215
+        ]
+      ],
+      "signed_double_area": -4.514483383138291,
+      "area": 2.2572416915691456,
+      "barycentric": {
+        "center": [
+          0.1777228545113104,
+          0.7455789482992699,
+          0.07669819718941975
+        ],
+        "sample-0": [
+          0.005954153463972073,
+          1.1742210035527838,
+          -0.18017515701675588
+        ],
+        "sample-1": [
+          0.3494915555586494,
+          0.316936893045756,
+          0.3335715513955946
+        ]
+      }
+    },
+    "legacy_projection": {
+      "primitive": 1613,
+      "first_index": 4839,
+      "index_count": 3,
+      "clip": [
+        [
+          -0.2324826717376709,
+          -1.3112421035766602,
+          0.09995303303003311,
+          2.445223331451416
+        ],
+        [
+          -0.22956536710262299,
+          -1.3105921745300293,
+          0.09995312988758087,
+          2.4404282569885254
+        ],
+        [
+          -0.23523248732089996,
+          -1.3056917190551758,
+          0.09995313733816147,
+          2.440079927444458
+        ]
+      ],
+      "screen": [
+        [
+          1563.7082350738738,
+          1493.2314590176882
+        ],
+        [
+          1565.4510894891685,
+          1493.9967397095986
+        ],
+        [
+          1561.4145805968612,
+          1492.119171772712
+        ]
+      ],
+      "signed_double_area": -0.18326525081107037,
+      "area": 0.09163262540553518,
+      "barycentric": {
+        "center": [
+          -2.732280895053491,
+          1.8214570825165446,
+          1.9108238125369466
+        ]
+      }
+    },
+    "sample_positions": [
+      [
+        0.25,
+        0.25
+      ],
+      [
+        -0.25,
+        -0.25
+      ]
+    ],
+    "limits": "Original triangle 2443 alone reproduces the native higher sample-1 value. This does not reproduce the lower variant in the isolated runner. Current CPU-projected pixel center lies inside this triangle, unlike the older triangle-1613 case. Unsnapped projection is not GPU coverage proof; formal acceptance remains failed."
+  },
+  "validation": {
+    "cpu_test_groups": 7,
+    "cli_refusals": 4,
+    "boundary_ctest_passed": true,
+    "all_gpu_work_serial": true,
+    "production_code_changed": false
+  },
+  "binaries": {
+    "FloraNativeDrawFixture.exe": "134a4e43ae550bf822087b4593703d01b5c79a63a9f1f1b048e7de0ff1c7246d",
+    "FloraReplayPostVsProbe.exe": "0515cb6d260e62f0381385937d0ef86b4a3514e8e31e7305e14509250dbf9199"
+  },
+  "bundle": {
+    "path": "D:/CDXrepo/FloraGPA-Cpp/artifacts/capture-gf2-native-level-20261014",
+    "metadata_sha256": "91b0b9148cf17867d84b9363e2bee0acb3933672e250f788cc658aec87599f96",
+    "source_baseline": "docs/capture-gf2-native-level-baseline.json"
+  },
+  "raw": {
+    "root": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-current-primitive-20261014",
+    "files": 43,
+    "manifest_sha256": "d5d7c4984c694c8d43a91429ea99fe1957f7a2fcf3088de9a190dec40c6837e1"
+  },
+  "replay_sha256": "215ebafed657953f0671c32a0948e12c8c965437a3eaa33e6d38aedcff5e2ddc"
+}
