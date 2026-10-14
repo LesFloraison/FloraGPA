@@ -20,6 +20,9 @@ struct DeferredCall {
     // nulling and Finish(TRUE) retention. No execution-time GPU contents.
     std::shared_ptr<const PipelineBindings> state;
     std::vector<uint8_t> data;
+    // Owned CPU bytes at a successful buffer NO_OVERWRITE Map, before the
+    // application writes. Lowering verifies this against the list's last write.
+    std::vector<uint8_t> before_data;
     HRESULT result=S_OK;
     bool completed=true;
 };

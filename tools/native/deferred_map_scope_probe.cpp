@@ -13,10 +13,11 @@ using Microsoft::WRL::ComPtr;
 void check(HRESULT hr) { if (FAILED(hr)) throw std::runtime_error("Native DX11 call failed"); }
 int wmain(int argc, wchar_t **argv) {
     try {
-        bool warp=false; UINT vendor=0;
+        bool warp=false,noOverwrite=false; UINT vendor=0;
         for(int i=1;i<argc;++i) {
             const std::wstring arg=argv[i];
             if(arg==L"--warp") warp=true;
+            else if(arg==L"--no-overwrite") noOverwrite=true;
             else if(arg==L"--vendor" && i+1<argc) vendor=std::stoul(argv[++i],nullptr,0);
             else throw std::runtime_error("Unknown argument");
         }
@@ -41,8 +42,9 @@ int wmain(int argc, wchar_t **argv) {
             D3D11_BUFFER_DESC desc{16,usage,bind,cpu,0,0};
             ComPtr<ID3D11Buffer> value; check(device->CreateBuffer(&desc,nullptr,&value)); return value;
         };
-        auto source=buffer(D3D11_USAGE_DYNAMIC,D3D11_CPU_ACCESS_WRITE,D3D11_BIND_CONSTANT_BUFFER);
+        auto source=buffer(D3D11_USAGE_DYNAMIC,D3D11_CPU_ACCESS_WRITE,noOverwrite?D3D11_BIND_VERTEX_BUFFER:D3D11_BIND_CONSTANT_BUFFER);
         auto sink=buffer(D3D11_USAGE_DEFAULT,0,D3D11_BIND_CONSTANT_BUFFER);
+        auto prefix=buffer(D3D11_USAGE_DEFAULT,0,D3D11_BIND_CONSTANT_BUFFER);
         auto staging=buffer(D3D11_USAGE_STAGING,D3D11_CPU_ACCESS_READ,0);
         auto upload=[&](ID3D11DeviceContext* c,UINT tag) {
             D3D11_MAPPED_SUBRESOURCE mapped{}; check(c->Map(source.Get(),0,D3D11_MAP_WRITE_DISCARD,0,&mapped));
@@ -59,6 +61,17 @@ int wmain(int argc, wchar_t **argv) {
         ComPtr<ID3D11CommandList> lists[2];
         for(UINT i=0;i<2;++i) {
             upload(contexts[i].Get(),i+1);
+            if(noOverwrite){
+                const D3D11_BOX used{0,0,0,8,1,1};
+                contexts[i]->CopySubresourceRegion(prefix.Get(),0,0,0,0,source.Get(),0,&used);
+                D3D11_MAPPED_SUBRESOURCE mapped{};check(contexts[i]->Map(source.Get(),0,D3D11_MAP_WRITE_NO_OVERWRITE,0,&mapped));
+                std::array<UINT,4> before{};memcpy(before.data(),mapped.pData,sizeof before);
+                const UINT tail[]{i+101,i+102};memcpy(static_cast<unsigned char*>(mapped.pData)+8,tail,sizeof tail);
+                std::array<UINT,4> after{};memcpy(after.data(),mapped.pData,sizeof after);
+                contexts[i]->Unmap(source.Get(),0);
+                std::cout<<"cpu-before="<<before[0]<<','<<before[1]<<','<<before[2]<<','<<before[3]
+                         <<" cpu-after="<<after[0]<<','<<after[1]<<','<<after[2]<<','<<after[3]<<'\n';
+            }
             contexts[i]->CopyResource(sink.Get(),source.Get());
             check(contexts[i]->FinishCommandList(FALSE,&lists[i]));
         }
@@ -71,7 +84,8 @@ int wmain(int argc, wchar_t **argv) {
             immediate->ExecuteCommandList(lists[index].Get(),step++%2?TRUE:FALSE);
             const auto actual=read(sink.Get()), outside=read(source.Get());
             std::cout<<"list="<<index<<" inside="<<actual[0]<<" outside="<<outside[0]<<'\n';
-            for(UINT i=0;i<4;++i) if(actual[i]!=index+1+i) throw std::runtime_error("Retained list bytes differ");
+            for(UINT i=0;i<4;++i) if(actual[i]!=(noOverwrite&&i>=2?index+99+i:index+1+i)) throw std::runtime_error("Retained list bytes differ");
+            if(noOverwrite){const auto used=read(prefix.Get());if(used[0]!=index+1 || used[1]!=index+2)throw std::runtime_error("Previously consumed prefix changed");}
             if(outside!=actual) throw std::runtime_error("Global resource bytes differ from executed discard");
         }
         ComPtr<ID3D11InfoQueue> info;check(device.As(&info));

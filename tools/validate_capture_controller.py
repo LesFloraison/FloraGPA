@@ -45,6 +45,7 @@ def main():
             if session['mode']>=2 and session['mode']!=8:counts['present_rtv_unbinds']=1
             if 13<=session['mode']<=22:counts['UpdateSubresource1' if session['mode'] in (14,16,18) else 'UpdateSubresource']=1
             elif 11<=session['mode']<=12 or session['mode']==26:counts.update(Map=1,unmap_observations=1)
+            elif session['mode']==27:counts.update(Map=2,unmap_observations=2)
             if 19<=session['mode']<=22:counts['CopySubresourceRegion1' if session['mode'] in (20,22) else 'CopySubresourceRegion']=1
             if 17<=session['mode']<=22:counts.update(query_metadata_records=2,query_end_observations=1,query_completion_unresolved=1)
             check(name+'-actual-events',flora['counts']==counts)

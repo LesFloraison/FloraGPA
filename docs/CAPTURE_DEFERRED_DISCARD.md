@@ -1,5 +1,9 @@
 # Deferred buffer discard execution
 
+Follow-up: verified same-list buffer `NO_OVERWRITE` baselines are now supported;
+see [CAPTURE_DEFERRED_NOOVERWRITE.md](CAPTURE_DEFERRED_NOOVERWRITE.md). The evidence
+and limits below describe the original discard-only stage.
+
 Capture now lowers completed dynamic-buffer `WRITE_DISCARD`/`Unmap` pairs from
 precompiled command lists at each actual `ExecuteCommandList` position. Each
 execution owns another copy of the recorded payload and retains list generation,

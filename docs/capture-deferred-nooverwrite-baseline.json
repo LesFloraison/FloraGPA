@@ -1,0 +1,74 @@
+{
+  "schema": "FloraGPA deferred buffer NO_OVERWRITE 1",
+  "date": "2026-10-14",
+  "parent_commit": "6560a64e05d2fb39698d9427534cb5a56eef6455",
+  "scope": "Verified same-list dynamic-buffer NO_OVERWRITE baselines; vertex split images and injected constant-buffer colors",
+  "capture_ctest": {
+    "passed": 120,
+    "total": 120
+  },
+  "full_focused_ctest": {
+    "passed": 20,
+    "total": 20
+  },
+  "native_scope_devices": [
+    "WARP",
+    "Intel vendor 0x8086",
+    "NVIDIA vendor 0x10de"
+  ],
+  "native_scope_executions": 12,
+  "unsafe_history_refusals_per_wrapped_device": 9,
+  "payload_budget_refusals_per_wrapped_device": 1,
+  "dual_player": {
+    "files": 8,
+    "checks": 116,
+    "default_original_adapter": true,
+    "new_original_gui": false
+  },
+  "packaged_injection": {
+    "launches": 1,
+    "frames": 5,
+    "checks": 33,
+    "mode": 27,
+    "system_only_child_path": true,
+    "native_runtime_sha256": "26feb8269ca914ad432d86dd8d32ca449ecc4c5add1c337cc8006b77b11e2f5c",
+    "target_continues_after_capture_and_disconnect": true
+  },
+  "source_binaries": {
+    "build/capture/capture/Release/FloraCaptureDeferredNoOverwriteTests.exe": "52d3dad781286d6c66f522020dbec197d5fd58c950f4646a5b3edbd5d30028ee",
+    "build/capture/capture/Release/FloraCaptureRuntime.dll": "26feb8269ca914ad432d86dd8d32ca449ecc4c5add1c337cc8006b77b11e2f5c",
+    "build/vs2022/Release/FloraDeferredMapScopeProbe.exe": "c21c8cc225a616f741fee68cf3efbde7f31e421744bc71bc76592329038b4efe"
+  },
+  "frame_sha256": {
+    "injected/native/27/session/frame-3a413946-154d-441c-8e47-59f4c8e2fbc4.gpa_frame": "310763021e988d8aa7fc02a35fe202f8fa24a340988d2b0686724b9e16c5907c",
+    "injected/native/27/session/frame-47c982dc-58b3-468e-99a6-659baa4b9285.gpa_frame": "4762640d7c56f9dd11538814ef929d200f6b398eff5e195676f9f1bd98c9cd73",
+    "injected/native/27/session/frame-c507d860-ef09-4dc5-a7b7-61b2e45e2d35.gpa_frame": "e45b8564f39dd930584d6033319c203d6f8c18abfb7a7f0faa81906255248ec3",
+    "injected/native/27/session/frame-cf75a3f3-9ff7-4021-883c-aee582a09876.gpa_frame": "480ab832ce7f759a183a7def446b24be9d001501aa48a227aaf5555c8fd8d7d5",
+    "injected/native/27/session/frame-fd92f0cf-f59d-41d7-929f-eefb405d2373.gpa_frame": "8b0f8bfbe02cb0ed2f73389aad1926281dafcbe9eb49f6c5e8738559665ca3d1",
+    "dual/hardware/aba.gpa_frame": "3738bea10187010032489fa41d77c137af81295d679ee2f4e8ef074f33c5912d",
+    "dual/hardware/bab.gpa_frame": "72e7c28b5c8e55483286416abc017b71a9691c6441a4a4368f961f7b113279ec",
+    "dual/hardware/missing-draws.gpa_frame": "a08b302a7476b8110aa2f982a672259d270a104ed0a801305fc53f2fdb0b363d",
+    "dual/hardware/missing-nooverwrite.gpa_frame": "f91c3bac630bebd92bfd1ec99166d8f9b4206697bafbde0fb19bfdf4ca59feaa",
+    "dual/warp/aba.gpa_frame": "6c3cff536c4661763f4776f1c28d7432ef4c1ca7fa27d150ecbf09b8a68ff41c",
+    "dual/warp/bab.gpa_frame": "1e01ea6685dfefafb75fb746c7427fdb371b697767134248ee3cd8001db57240",
+    "dual/warp/missing-draws.gpa_frame": "da5672a5d5788182fbc01bdaa0426d8449f5802754e8487c115dc15e030dfba4",
+    "dual/warp/missing-nooverwrite.gpa_frame": "bce24f2d7058adccdd5e4981130cb4a0af879374fda064fba5091dc43ac987a0"
+  },
+  "evidence_manifest": {
+    "path": "artifacts/capture-deferred-nooverwrite-20261014/evidence-manifest.json",
+    "sha256": "de83234f4cd4b1396ca09beb6277663b4f68f37b975a3be4db4f6204c54cd6ce",
+    "files": 439
+  },
+  "initial_failures": [
+    "New test-only Map enum argument needed explicit UINT conversion; both initial failed full-build logs retained"
+  ],
+  "replay_or_format_changed": false,
+  "new_gf2_acceptance": false,
+  "overall_capture_status": "partial",
+  "remaining": [
+    "Unknown/GPU-mutated NO_OVERWRITE baselines and textures",
+    "Nested lists and in-frame compilation",
+    "Foreign immediate execution threads and hidden states",
+    "Historical Intel/NVIDIA pixel mismatches"
+  ]
+}

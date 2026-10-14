@@ -3999,11 +3999,20 @@
       "acceptance_evidence": "docs/capture-gf2-acceptance-baseline.json"
     },
     "deferred_history": "Capture-owned bounded CPU compilation journals, immutable Finish generations and actual immediate execution expansion with repeated calls; native resource leases are separate from CPU histories",
-    "deferred_mappings": "Capture-owned Map HRESULT/type/flags/pitches and Unmap payloads; borrowed pointers excluded from immutable lists. Complete dynamic-buffer WRITE_DISCARD pairs lower per actual execution; NO_OVERWRITE, texture and broader rename dependencies remain unresolved. See CAPTURE_DEFERRED_DISCARD.md.",
+    "deferred_mappings": "Capture-owned Map HRESULT/type/flags/pitches and Unmap payloads; borrowed pointers excluded from immutable lists. Complete dynamic-buffer WRITE_DISCARD pairs and verified same-list NO_OVERWRITE baselines lower per actual execution. GPU-mutated/unknown baselines and texture/broader rename dependencies refuse. See CAPTURE_DEFERRED_NOOVERWRITE.md.",
     "deferred_bindings": "Typed input histories for 45 valid deferred APIs plus native effective action snapshots; unsupported MinLOD/class/hidden-state profiles reject",
     "deferred_definitions": "Independent CPU creation graphs preserve device/resource/view dependencies, DXBC, state descriptors, semantic strings and original creation bytes after native destruction; not execution-time GPU contents or deferred encoding",
     "deferred_effective_state": "Native compilation-time getter snapshots plus execution-time GPU initial data feed supported flattened actions; hidden deferred state remains unsupported",
-    "deferred_execution": "Supported precompiled Draw/Dispatch/Clear/Copy/Update and complete buffer WRITE_DISCARD/Unmap actions lower at actual immediate ExecuteCommandList positions; repeated order, execution snapshots, lifetime release and independent files tested. Nested lists, in-frame compilation and foreign immediate execution refuse.",
+    "deferred_execution": "Supported precompiled Draw/Dispatch/Clear/Copy/Update and complete buffer Map/Unmap actions lower at actual immediate ExecuteCommandList positions; NO_OVERWRITE requires a verified same-list baseline without intervening destination writes. Repeated order, execution snapshots, lifetime release and independent files tested. Nested lists, in-frame compilation and foreign immediate execution refuse.",
+    "deferred_nooverwrite_validation": {
+      "evidence": "docs/CAPTURE_DEFERRED_NOOVERWRITE.md",
+      "baseline": "docs/capture-deferred-nooverwrite-baseline.json",
+      "dual_player_files": 8,
+      "dual_player_checks": 116,
+      "packaged_injected_frames": 5,
+      "packaged_injected_checks": 33,
+      "limits": "Exact native/wrapped vertex-buffer split images and injected constant-buffer colors; wider bind combinations are not exhaustive. No new GF2 or original-GPA GUI claim; overall delivery remains partial."
+    },
     "deferred_discard_validation": {
       "evidence": "docs/CAPTURE_DEFERRED_DISCARD.md",
       "baseline": "docs/capture-deferred-discard-baseline.json",

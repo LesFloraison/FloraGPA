@@ -141,7 +141,15 @@ void remember_deferred_map_result(ID3D11DeviceContext* context,ID3D11Resource* r
             if(c.words[2] || (c.words[1]!=D3D11_MAP_WRITE_DISCARD && c.words[1]!=D3D11_MAP_WRITE_NO_OVERWRITE))throw std::runtime_error("Deferred Map type/flags unsupported");
             it->second.layout=mapped_layout(resource,*object,subresource);
             it->second.mapped=*mapped;c.words[3]=mapped->RowPitch;c.words[4]=mapped->DepthPitch;
-            if(c.words[1]==D3D11_MAP_WRITE_NO_OVERWRITE)gap(b,"Map: NO_OVERWRITE bytes are observations only; written-range and rename dependencies remain unresolved");
+            if(c.words[1]==D3D11_MAP_WRITE_NO_OVERWRITE){
+                if(object->kind!="buffer" || subresource)throw std::runtime_error("Deferred NO_OVERWRITE requires a buffer");
+                auto before=it->second.layout;
+                const auto bytes=before.slice_bytes*before.depth;
+                if(b.owned_bytes>DeferredHistory::byte_limit || bytes>DeferredHistory::byte_limit-b.owned_bytes)
+                    throw std::runtime_error("Deferred NO_OVERWRITE baseline byte limit exceeded");
+                copy_pitched(before,mapped->pData,mapped->RowPitch,mapped->DepthPitch);
+                c.before_data=std::move(before.bytes);b.owned_bytes+=c.before_data.size();
+            }
         }catch(const std::exception& e){h.mappings.erase(it);gap(b,std::string("Map: ")+e.what());}
     }catch(...){object_gap("Map",__uuidof(ID3D11DeviceContext),"Deferred Map result metadata unavailable");}
 }
