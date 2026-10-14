@@ -8,6 +8,7 @@
 #include <string>
 #include <vector>
 #include <stdexcept>
+#include <thread>
 struct MsaaLiveRenderer {
     template<class T> using Ptr=Microsoft::WRL::ComPtr<T>;
     static constexpr UINT width=13,height=7,layers=2;
@@ -33,10 +34,19 @@ struct MsaaLiveRenderer {
         for(UINT layer=0;layer<layers;++layer){D3D11_RENDER_TARGET_VIEW_DESC vd{};vd.Format=DXGI_FORMAT_R8G8B8A8_UINT;vd.ViewDimension=D3D11_RTV_DIMENSION_TEXTURE2DMSARRAY;vd.Texture2DMSArray={layer,1};check(device->CreateRenderTargetView(source.Get(),&vd,&views[layer]));auto* r=views[layer].Get();context->OMSetRenderTargets(1,&r,nullptr);const UINT values[]{layer,0,0,0};D3D11_BUFFER_DESC bd{16,D3D11_USAGE_IMMUTABLE,D3D11_BIND_CONSTANT_BUFFER,0,0,0};D3D11_SUBRESOURCE_DATA data{values,0,0};Ptr<ID3D11Buffer> constants;check(device->CreateBuffer(&bd,&data,&constants));auto* b=constants.Get();context->PSSetConstantBuffers(0,1,&b);context->Draw(3,0);}
         D3D11_SHADER_RESOURCE_VIEW_DESC sd{};sd.Format=DXGI_FORMAT_R8G8B8A8_UNORM;sd.ViewDimension=D3D11_SRV_DIMENSION_TEXTURE2DMSARRAY;sd.Texture2DMSArray.ArraySize=layers;check(device->CreateShaderResourceView(source.Get(),&sd,&srv));context->ClearState();
     }
-    void render(ID3D11RenderTargetView* output,uint64_t frame){
+    void render(ID3D11RenderTargetView* output,uint64_t frame,bool deferred=false){
         ID3D11ShaderResourceView* none=nullptr;context->PSSetShaderResources(0,1,&none);
-        context->VSSetShader(vs.Get(),nullptr,0);context->PSSetShader(edits[frame%5].Get(),nullptr,0);context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);context->RSSetState(scissor.Get());D3D11_VIEWPORT vp{0,0,float(width),float(height),0,1};context->RSSetViewports(1,&vp);D3D11_RECT rect{0,0,width/2,height};context->RSSetScissorRects(1,&rect);context->OMSetBlendState(nullptr,nullptr,0x55555555);
-        for(const auto& view:views){auto* r=view.Get();context->OMSetRenderTargets(1,&r,nullptr);context->Draw(3,0);}
+        D3D11_VIEWPORT vp{0,0,float(width),float(height),0,1};
+        auto editsFor=[&](ID3D11DeviceContext* draw){
+        draw->VSSetShader(vs.Get(),nullptr,0);draw->PSSetShader(edits[frame%5].Get(),nullptr,0);draw->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);draw->RSSetState(scissor.Get());draw->RSSetViewports(1,&vp);D3D11_RECT rect{0,0,width/2,height};draw->RSSetScissorRects(1,&rect);draw->OMSetBlendState(nullptr,nullptr,0x55555555);
+        for(const auto& view:views){auto* r=view.Get();draw->OMSetRenderTargets(1,&r,nullptr);draw->Draw(3,0);}
+        };
+        if(deferred){
+            Ptr<ID3D11DeviceContext> worker;check(device->CreateDeferredContext(0,&worker));Ptr<ID3D11CommandList> commands;std::exception_ptr failure;
+            std::thread compileList([&]{try{editsFor(worker.Get());check(worker->FinishCommandList(FALSE,&commands));}catch(...){failure=std::current_exception();}});
+            compileList.join();if(failure)std::rethrow_exception(failure);context->ExecuteCommandList(commands.Get(),FALSE);
+        }else editsFor(context.Get());
+        context->VSSetShader(vs.Get(),nullptr,0);context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
         context->OMSetRenderTargets(1,&output,nullptr);auto* s=srv.Get();context->PSSetShaderResources(0,1,&s);context->PSSetShader(show.Get(),nullptr,0);context->RSSetState(raster.Get());context->RSSetScissorRects(0,nullptr);context->OMSetBlendState(nullptr,nullptr,UINT_MAX);vp.Width=float(width*samples);vp.Height=float(height*layers);context->RSSetViewports(1,&vp);context->Draw(3,0);
     }
     void verify(ID3D11Texture2D* output,uint64_t frame){

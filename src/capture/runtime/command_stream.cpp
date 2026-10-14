@@ -257,6 +257,22 @@ void FrameRecording::observe(ID3D11DeviceContext* context,const char* api,Comman
                 if(expanded.initial_counter_uses.size()>remaining/sizeof(UINT))throw std::runtime_error("CommandList counter snapshot byte limit exceeded");
                 expanded.payload_bytes+=expanded.initial_counter_uses.size()*sizeof(UINT);
                 auto leases=command_list_resources(operand);
+                auto multisampled=[&](ObjectId id){
+                    if(!id)return false;
+                    if(!leases || !leases->contains(id))throw std::runtime_error("CommandList mutation resource lease missing");
+                    ComPtr<ID3D11Resource> resource;
+                    if(FAILED(leases->at(id).As(&resource)))throw std::runtime_error("CommandList mutation resource type mismatch");
+                    return resource_shape(resource.Get()).samples>1;
+                };
+                // Flattening does not make an unsupported resource mutation
+                // representable. Refuse before any initial GPU readback.
+                for(const auto& command:expanded.commands){
+                    const auto action=command.kind;
+                    if((action==CommandKind::copy_resource || action==CommandKind::copy_region ||
+                        action==CommandKind::update_subresource || action==CommandKind::map || action==CommandKind::unmap) &&
+                       (multisampled(command.operand) || multisampled(command.source)))
+                        throw std::runtime_error("Deferred MSAA mutation command is not verified");
+                }
                 ContextSnapshot held;retain(held,context);ComPtr<ID3D11Device> device;unwrap(context)->GetDevice(&device);retain(held,device.Get());
                 SnapshotOptions options;options.timeout_ms=p.options.readback_timeout_ms;options.cancelled=[&p]{if(p.options.cancelled&&p.options.cancelled())p.cancelled=true;return p.cancelled.load();};
                 // Sample at this immediate execution position, never at Finish
@@ -267,13 +283,8 @@ void FrameRecording::observe(ID3D11DeviceContext* context,const char* api,Comman
                     ComPtr<ID3D11Resource> resource;if(FAILED(leases->at(id).As(&resource)))throw std::runtime_error("CommandList resource lease type mismatch");
                     if(retain(held,resource.Get())!=id)throw std::runtime_error("CommandList resource identity changed");
                     require_unmapped(held.objects.at(id).record);
-                    if(resource_shape(resource.Get()).samples>1)throw std::runtime_error("Deferred MSAA recording is not verified");
-                    if(!p.frame.initial_resources.contains(id)){
-                        options.byte_limit=p.options.byte_limit-p.frame.initial_bytes-p.payload_bytes-expanded.payload_bytes;
-                        auto data=snapshot_resource(context,resource.Get(),options);
-                        for(const auto& sub:data.subresources)p.frame.initial_bytes+=sub.bytes.size();
-                        p.frame.initial_resources.emplace(id,std::move(data));
-                    }
+                    options.byte_limit=p.options.byte_limit-p.frame.initial_bytes-p.payload_bytes-expanded.payload_bytes;
+                    p.snapshot(context,resource.Get(),id,options);
                 }
                 std::map<ObjectId,uint32_t> counters;
                 for(const auto& [id,index]:expanded.initial_counter_uses){

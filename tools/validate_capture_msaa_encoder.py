@@ -17,10 +17,12 @@ def main():
     p.add_argument('--rgba16', action='store_true', help='Verify both bytes of recorded RGBA16 components')
     p.add_argument('--depth', action='store_true', help='Verify exact D32S8 words and stencil byte tiles')
     p.add_argument('--queries', action='store_true', help='Validate pre-frame EVENT observations with MSAA initialization')
+    p.add_argument('--deferred', action='store_true', help='Validate repeated deferred MSAA executions')
     a = p.parse_args()
     if a.queries and not a.recorded:p.error('--queries requires --recorded')
     if a.rgba16 and not a.recorded:p.error('--rgba16 requires --recorded')
     if a.depth and (not a.recorded or a.rgba16):p.error('--depth requires --recorded and excludes --rgba16')
+    if a.deferred and (not a.recorded or a.queries):p.error('--deferred requires --recorded and excludes queries')
     out = a.out.resolve()
     out.mkdir(parents=True, exist_ok=False)
     env = dict(os.environ)
@@ -67,9 +69,9 @@ def main():
         result = json.loads(run(device+'-probe', [a.probe.resolve(), *(['--hardware'] if device == 'hardware' else []), out/device]))
         check(device+'-owned-source-debug-refusals', result['passed'] and result['source_gpu_objects_alive'] == 0 and
               result['debug_warnings_or_errors'] == 0 and
-              (result['encoder_refusals'] == 20 if a.queries else result['recording_refusals'] == 4 if a.recorded else result['encoder_refusals'] == 50))
-        if a.rgba16 and not a.queries:check(device+'-rgba16-refusals',result['component_bytes']==2 and result['encoder_refusals']==6)
-        if a.depth and not a.queries:check(device+'-depth-refusals',result['depth_format']==19 and result['encoder_refusals']==30)
+              (result['refusals'] == 8 if a.deferred else result['encoder_refusals'] == 20 if a.queries else result['recording_refusals'] == 4 if a.recorded else result['encoder_refusals'] == 50))
+        if a.rgba16 and not a.queries:check(device+'-rgba16-refusals',result['component_bytes']==2 and (result['refusals']==8 if a.deferred else result['encoder_refusals']==6))
+        if a.depth and not a.queries:check(device+'-depth-refusals',result['refusals']==8 if a.deferred else result['depth_format']==19 and result['encoder_refusals']==30)
         manifest = json.loads((out/device/'frames.json').read_text())
         for samples in (2, 4):
             source = out/device/f'{samples}x-complete.gpa_frame'
@@ -93,7 +95,7 @@ def main():
                         expected += bytes(color)
                     else:expected += bytes(color if modified else (0,0,0,0))
             (out/device/(name+'.expected.rgba')).write_bytes(expected)
-            manifest.append(dict(file=name+'.gpa_frame', samples=samples, application_draws=3, helper_draws=0))
+            manifest.append(dict(file=name+'.gpa_frame', samples=samples, application_draws=(5 if a.depth else 7) if a.deferred else 3, helper_draws=0))
         for item in manifest:
             frame = out/device/item['file']
             case = device+'-'+frame.stem
@@ -119,7 +121,7 @@ def main():
             inventory = json.loads((out/(case+'-inventory/report.json')).read_text())
             check(case+'-inventory', inventory['draws'] == draws and inventory['dispatches'] == 0)
             shaders = [r for r in inventory['resources'] if 0x90 <= r['type'] <= 0x95]
-            check(case+'-application-helper-shaders', len(shaders) == (6 if a.depth else 5))
+            check(case+'-application-helper-shaders', len(shaders) == (6 if a.depth or a.deferred else 5))
             for shader in shaders:
                 name = case+'-shader-'+shader['id']
                 run(name, [a.replay.resolve(), 'shader', frame, '--id', shader['id'], '--out', out/name])

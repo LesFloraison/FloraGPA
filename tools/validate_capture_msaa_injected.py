@@ -41,6 +41,7 @@ def main():
     for name in ('bin','replay','oracle-tools','qt-bin','out'):p.add_argument('--'+name,type=Path,required=True)
     p.add_argument('--controller',type=Path,help='Use an independently packaged controller/runtime')
     p.add_argument('--sessions',type=Path,help='Validate retained controller results instead of launching new targets')
+    p.add_argument('--deferred',action='store_true',help='Use worker-compiled MSAA draw modes')
     a=p.parse_args();out=a.out.resolve();out.mkdir(parents=True,exist_ok=False);binary=a.bin.resolve()
     env=dict(os.environ);env.pop('GPA_LOCAL_INJECT',None);env['PYTHONDONTWRITEBYTECODE']='1';env['PATH']=str(a.qt_bin.resolve())+os.pathsep+env['PATH']
     checks=[];files=[]
@@ -51,10 +52,11 @@ def main():
         r=subprocess.run([str(x) for x in args],env=env,capture_output=True,timeout=120);(out/(name+'.log')).write_bytes(r.stdout+b'\n'+r.stderr);check(name,r.returncode==0);return r.stdout
     controller=a.controller.resolve() if a.controller else binary/'FloraCapture.exe'
     sessions_path=a.sessions.resolve() if a.sessions else out/'native/results.json'
-    if not a.sessions:run('injected-controller',[binary/'FloraCaptureMsaaControllerTests.exe',controller,binary/'FloraCaptureLiveTarget.exe',out/'native'])
-    sessions=json.loads(sessions_path.read_text());check('two-startup-paths',len(sessions)==2 and {s['mode'] for s in sessions}=={24,25})
+    harness='FloraCaptureDeferredMsaaControllerTests.exe' if a.deferred else 'FloraCaptureMsaaControllerTests.exe'
+    if not a.sessions:run('injected-controller',[binary/harness,controller,binary/'FloraCaptureLiveTarget.exe',out/'native'])
+    sessions=json.loads(sessions_path.read_text());check('two-startup-paths',len(sessions)==2 and {s['mode'] for s in sessions}==({40,41} if a.deferred else {24,25}))
     for session in sessions:
-        mode=session['mode'];samples=2 if mode==24 else 4
+        mode=session['mode'];samples=2 if mode in (24,40) else 4
         check(f'{mode}-native-after-disconnect',session['target_exit']['ok'] and session['target_exit']['msaa_native_cpu_exact'])
         check(f'{mode}-independent-target',not any(any(t in m.replace('\\','/').lower() for t in ('intelswtools/gpa/','python3','qt6','renderdoc','florareplay','floracore')) for m in session['module_status']['loaded_modules']))
         check(f'{mode}-consecutive-and-recovery',len(session['frames'])>=4 and len(list((sessions_path.parent/str(mode)/'session').glob('*.gpa_frame')))==len(session['frames']))
@@ -84,7 +86,7 @@ def main():
             for shader in shaders:
                 label=name+'-shader-'+shader['id'];run(label,[a.replay.resolve(),'shader',path,'--id',shader['id'],'--out',out/label]);check(label+'-dxbc',(out/label/'shader.dxbc').read_bytes().startswith(b'DXBC') and (out/label/'shader.asm').stat().st_size>50)
             check(name+'-independent-replay',not any('intelswtools/gpa/' in m.replace('\\','/').lower() or Path(m).name.lower().startswith(('python','qt5')) for m in flora['loaded_modules']))
-    inputs=[binary/n for n in ('FloraCaptureLiveTarget.exe','FloraCaptureMsaaControllerTests.exe')]+[controller,controller.parent/'FloraCaptureRuntime.dll',sessions_path,a.replay,a.oracle_tools/'replay_frame.py',Path(__file__)]
+    inputs=[binary/n for n in ('FloraCaptureLiveTarget.exe',harness)]+[controller,controller.parent/'FloraCaptureRuntime.dll',sessions_path,a.replay,a.oracle_tools/'replay_frame.py',Path(__file__)]
     (out/'inputs.json').write_text(json.dumps({str(f):hashlib.sha256(f.read_bytes()).hexdigest() for f in inputs},indent=2)+'\n')
     print(json.dumps(dict(passed=True,files=len(files),checks=len(checks),captured_files=sum(len(s['frames']) for s in sessions))))
 

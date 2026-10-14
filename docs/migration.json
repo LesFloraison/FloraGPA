@@ -4026,7 +4026,7 @@
     "msaa_sample_readback": "Capture-owned per-layer/per-sample planes and exact native readback; scoped RGBA8/RGBA16/D32S8 connected to immediate recording. Standalone D16/D32/D24S8 readers do not establish initialization or capture support for those formats.",
     "msaa_initialization_experiment": "Historical test-only RGBA8 and D32S8 per-plane Draw/Copy initialization proofs with exact native and dual-player removal controls. Scoped production integration is tracked in msaa_color_encoder, msaa_depth_encoder and msaa_immediate_recording; broader formats and state profiles remain pending.",
     "msaa_color_encoder": "Validated RGBA8/RGBA16 planes encode labelled sample Draw/Copy initialization with build-time DXBC. Wrapped RGBA16 storage/FLOAT-write profile passes exact dual-player/removal controls; RGBA8 also has startup-injected proof. D32S8 is tracked separately; broader state profiles remain pending.",
-    "msaa_immediate_recording": "First-use RGBA8/RGBA16/D32S8 2x/4x quality-zero samples share frame byte and plane budgets. Wrapped Draws and owner release tested; startup-injected repeated Present capture verified for RGBA8. Depth value/view scope explicitly guarded. Scoped RGBA8/RGBA16 Resolve admitted; deferred MSAA/other mutations/in-frame completed queries/predicates/output remain refused; scoped Intel GF2 6/6, with historical Intel/NVIDIA discrepancies unresolved.",
+    "msaa_immediate_recording": "First-use RGBA8/RGBA16/D32S8 2x/4x quality-zero samples share frame byte and plane budgets. Wrapped Draws and owner release tested; startup-injected repeated Present capture verified for RGBA8. Depth value/view scope explicitly guarded. Scoped RGBA8/RGBA16 Resolve admitted; other mutations/in-frame completed queries/predicates/output remain refused; supported deferred MSAA follows in deferred_msaa_validation; scoped Intel GF2 6/6, with historical Intel/NVIDIA discrepancies unresolved.",
     "msaa_depth_encoder": "Validated D32S8 planes lower to depth and stencil-bit sample Draws plus CopyResource using build-time DXBC. Wrapped native WARP/hardware exact dual-player/removal controls pass; read-only views, broader depth formats/states and startup proof pending.",
     "multisample_resolve": "Immediate validated RGBA8_UNORM/RGBA16_FLOAT 2x/4x quality-zero source and single-sample DEFAULT destination; typed/typeless array and destination-mip profiles, repeated order and retained initial samples pass exact dual-player controls. Deferred/predicate and broader profiles refuse.",
     "mapping_provenance": "Successful Map scalar type/flags/result/pitches/thread/generation retained until native Unmap. Separate runtime borrowed storage invalidated before native Unmap/last wrapper release; no pointer in frozen CPU data or status. Scoped boundary buffer WRITE_DISCARD owns initial and final bytes; unsupported profiles refuse.",
@@ -4155,7 +4155,8 @@
       "current_gate_passed": false,
       "variable_event": 5598,
       "diagnostic_runs": 101,
-      "limits": "One frame varies in both players; exact-byte rule unchanged. Historical accepted six-file runtime identities remain separate. Current original GUI inspection and overall delivery remain incomplete."
+      "limits": "One frame varies in both players; exact-byte rule unchanged. Historical accepted six-file runtime identities remain separate. Current original GUI inspection and overall delivery remain incomplete.",
+      "later_runtime_changes": "Deferred MSAA support changes the runtime after this six-file candidate baseline; no new GF2 gate is claimed. See deferred_msaa_validation."
     },
     "gf2_boundary_diagnosis": {
       "evidence": "docs/CAPTURE_GF2_BOUNDARY.md",
@@ -4234,6 +4235,17 @@
       "ctest_passed": 4,
       "current_gate_passed": false,
       "limits": "Original-format unblended sample planes agree across paths. Two constant sources store identical half values but blend differently, preventing inversion from stored output. Higher variant and detailed GPA GUI acceptance remain unresolved; production binaries unchanged."
+    },
+    "deferred_msaa_validation": {
+      "evidence": "docs/CAPTURE_DEFERRED_MSAA.md",
+      "baseline": "docs/capture-deferred-msaa-baseline.json",
+      "dual_player_files": 36,
+      "dual_player_checks": 820,
+      "packaged_injected_captures": 8,
+      "packaged_dual_files": 12,
+      "packaged_dual_checks": 279,
+      "native_refusals": 48,
+      "limits": "Verified 2x/4x quality-zero RGBA8/RGBA16/D32S8 at actual submission. Earlier initial samples preserved across repeated lists; unsupported mutations/Resolve refuse. New runtime not GF2-accepted; historical file identities and pixel discrepancies remain open."
     }
   }
 }

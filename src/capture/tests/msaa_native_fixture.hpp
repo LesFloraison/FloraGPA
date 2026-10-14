@@ -12,6 +12,7 @@
 #include <filesystem>
 #include <fstream>
 #include <iostream>
+#include <thread>
 using namespace flora::capture;
 using namespace flora::format;
 using Microsoft::WRL::ComPtr;
@@ -48,7 +49,7 @@ void check(HRESULT hr){if(FAILED(hr))throw std::runtime_error("MSAA wire fixture
 ByteBuffer compile(const std::string& text,const char* profile){ComPtr<ID3DBlob> code,error;const auto hr=D3DCompile(text.data(),text.size(),"MSAA wire experiment",nullptr,nullptr,"main",profile,D3DCOMPILE_ENABLE_STRICTNESS,0,&code,&error);if(FAILED(hr)&&error)throw std::runtime_error(static_cast<const char*>(error->GetBufferPointer()));check(hr);auto* p=static_cast<const uint8_t*>(code->GetBufferPointer());return {p,p+code->GetBufferSize()};}
 ByteBuffer expected(UINT samples,bool changed,bool initialized=true){ByteBuffer result;for(UINT y=0;y<height*layers;++y)for(UINT x=0;x<width*samples*display_tiles;++x){const auto sample=x/(width*display_tiles),tile=(x/width)%display_tiles;const bool modified=changed && x%width<width/2 && !(sample%2);const auto p=initialized||modified?pixel(x%width,y%height,y/height,sample,changed,tile):std::array<uint8_t,4>{0,0,0,0};result.insert(result.end(),p.begin(),p.end());}return result;}
 struct Owned {MsaaSamples samples;ByteBuffer final;};
-Owned native(bool hardware,UINT samples,FrozenFrame* captured=nullptr,const RecordingOptions& options={},bool events=false){
+Owned native(bool hardware,UINT samples,FrozenFrame* captured=nullptr,const RecordingOptions& options={},bool events=false,bool deferred=false,bool copyMutation=false){
     ComPtr<ID3D11Device> device;ComPtr<ID3D11DeviceContext> context;check(D3D11CreateDevice(nullptr,hardware?D3D_DRIVER_TYPE_HARDWARE:D3D_DRIVER_TYPE_WARP,nullptr,D3D11_CREATE_DEVICE_DEBUG,nullptr,0,D3D11_SDK_VERSION,&device,nullptr,&context));
     ComPtr<ID3D11InfoQueue> info;check(device.As(&info));info->ClearStoredMessages();wrap_object(device.GetAddressOf(),"MSAA wire device");wrap_object(context.GetAddressOf(),"MSAA wire context");
     D3D11_TEXTURE2D_DESC td{width,height,1,layers,storage_format,{samples,0},D3D11_USAGE_DEFAULT,D3D11_BIND_RENDER_TARGET|D3D11_BIND_SHADER_RESOURCE,0,0};ComPtr<ID3D11Texture2D> source;check(device->CreateTexture2D(&td,nullptr,&source));
@@ -65,8 +66,39 @@ Owned native(bool hardware,UINT samples,FrozenFrame* captured=nullptr,const Reco
     MsaaEventFixture event;event.prepare(device.Get(),context.Get(),events,samples==4);
     std::shared_ptr<FrameRecording> recording;if(captured)recording=begin_recording(context.Get(),options);
     event.observe(context.Get());
+    if(deferred){
+        ComPtr<ID3D11DeviceContext> worker;check(device->CreateDeferredContext(0,&worker));
+        ComPtr<ID3D11CommandList> editList,resetList;
+        std::exception_ptr failure;
+        // One worker owns the deferred context. Joining is the explicit CPU
+        // synchronization point; only immediate submission contributes events.
+        std::thread compileLists([&]{try{
+            auto common=[&]{worker->VSSetShader(vs.Get(),nullptr,0);worker->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);worker->RSSetViewports(1,&vp);};
+            common();worker->PSSetShader(edit.Get(),nullptr,0);worker->RSSetState(scissor.Get());
+            D3D11_RECT rect{0,0,width/2,height};worker->RSSetScissorRects(1,&rect);worker->OMSetBlendState(nullptr,nullptr,0x55555555);
+            for(const auto& view:views){auto* r=view.Get();worker->OMSetRenderTargets(1,&r,nullptr);worker->Draw(3,0);}
+            if(copyMutation){D3D11_TEXTURE2D_DESC copyDesc{};source->GetDesc(&copyDesc);ComPtr<ID3D11Texture2D> copy;check(device->CreateTexture2D(&copyDesc,nullptr,&copy));worker->CopyResource(copy.Get(),source.Get());}
+            check(worker->FinishCommandList(FALSE,&editList));
+            common();worker->PSSetShader(ps.Get(),nullptr,0);worker->PSSetConstantBuffers(0,1,&b);worker->RSSetState(scissor.Get());
+            worker->RSSetScissorRects(1,&rect);worker->OMSetBlendState(nullptr,nullptr,0x55555555);
+            for(UINT layer=0;layer<layers;++layer){
+                D3D11_RENDER_TARGET_VIEW_DESC vd{};vd.Format=integer_format;vd.ViewDimension=D3D11_RTV_DIMENSION_TEXTURE2DMSARRAY;vd.Texture2DMSArray={layer,1};
+                ComPtr<ID3D11RenderTargetView> original;check(device->CreateRenderTargetView(source.Get(),&vd,&original));auto* r=original.Get();
+                worker->OMSetRenderTargets(1,&r,nullptr);const UINT data[]{layer,0,0,0};worker->UpdateSubresource(cb.Get(),0,nullptr,data,0,0);worker->Draw(3,0);
+            }
+            check(worker->FinishCommandList(FALSE,&resetList));
+        }catch(...){failure=std::current_exception();}});compileLists.join();if(failure)std::rethrow_exception(failure);
+        context->ExecuteCommandList(editList.Get(),TRUE);
+        ComPtr<ID3D11PixelShader> actual;context->PSGetShader(&actual,nullptr,nullptr);require(actual.Get()==ps.Get(),"Deferred TRUE lost immediate PS");actual.Reset();
+        context->ExecuteCommandList(resetList.Get(),FALSE);
+        context->PSGetShader(&actual,nullptr,nullptr);require(!actual,"Deferred FALSE did not reset immediate PS");
+        context->VSSetShader(vs.Get(),nullptr,0);context->PSSetShader(ps.Get(),nullptr,0);context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+        context->ExecuteCommandList(editList.Get(),TRUE);
+        context->PSGetShader(&actual,nullptr,nullptr);require(actual.Get()==ps.Get(),"Repeated deferred TRUE lost immediate PS");
+    }else{
     context->PSSetShader(edit.Get(),nullptr,0);context->RSSetState(scissor.Get());D3D11_RECT rect{0,0,width/2,height};context->RSSetScissorRects(1,&rect);context->OMSetBlendState(nullptr,nullptr,0x55555555);
     for(const auto& view:views){auto* r=view.Get();context->OMSetRenderTargets(1,&r,nullptr);context->Draw(3,0);}
+    }
     context->OMSetRenderTargets(0,nullptr,nullptr);td={width*samples*display_tiles,height*layers,1,1,DXGI_FORMAT_R8G8B8A8_UNORM,{1,0},D3D11_USAGE_DEFAULT,D3D11_BIND_RENDER_TARGET,0,0};ComPtr<ID3D11Texture2D> output;ComPtr<ID3D11RenderTargetView> target;check(device->CreateTexture2D(&td,nullptr,&output));check(device->CreateRenderTargetView(output.Get(),nullptr,&target));
     D3D11_SHADER_RESOURCE_VIEW_DESC sd{};sd.Format=display_format;sd.ViewDimension=D3D11_SRV_DIMENSION_TEXTURE2DMSARRAY;sd.Texture2DMSArray.ArraySize=layers;ComPtr<ID3D11ShaderResourceView> srv;check(device->CreateShaderResourceView(source.Get(),&sd,&srv));auto* s=srv.Get();auto* r=target.Get();context->PSSetShaderResources(0,1,&s);context->OMSetRenderTargets(1,&r,nullptr);context->PSSetShader(show.Get(),nullptr,0);context->RSSetState(raster.Get());context->OMSetBlendState(nullptr,nullptr,UINT_MAX);vp.Width=float(width*samples*display_tiles);vp.Height=float(height*layers);context->RSSetViewports(1,&vp);context->Draw(3,0);
     event.end(context.Get());

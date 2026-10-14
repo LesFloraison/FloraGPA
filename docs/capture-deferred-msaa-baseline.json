@@ -1,0 +1,393 @@
+{
+  "schema": "FloraGPA deferred MSAA validation 1",
+  "date": "2026-10-14",
+  "base_commit": "2a11c80b7adcfca3bb36b9aa0021d2650688eaed",
+  "scope": "RGBA8/RGBA16/D32S8 2x/4x quality-zero MSAA used by supported deferred commands; unsupported MSAA mutations/Resolve refuse",
+  "current_gf2_gate_passed": false,
+  "corpora": [
+    {
+      "name": "final-rgba8",
+      "files": 12,
+      "checks": 272,
+      "report_sha256": "d0b16b87f75e23619e7a21f59982d3f80989bf74fb113d6e2c5a7acdd6c66f0e",
+      "frames": [
+        {
+          "file": "warp/2x-complete.gpa_frame",
+          "sha256": "bf6bdcf5e3490215bed8ffd75d00017c31cf533125e848c8dbfb608d49eaf9cb",
+          "expected_sha256": "c1c88b5938469ee1c74d7c22d290f19321df6b19260e90215bcd7f3c1e55e1ac"
+        },
+        {
+          "file": "warp/2x-missing-last-execution.gpa_frame",
+          "sha256": "7902a60205200cd78aabcccce5a72e082c1d2e5efdbe5e832835549518e98aa6",
+          "expected_sha256": "34799da0f161968434fc8f7303fae5fd8dc357e77b928409403606f112f3226a"
+        },
+        {
+          "file": "warp/4x-complete.gpa_frame",
+          "sha256": "8574cd6c7cc4f1995c355628d3ad30972d218f284d83f96f189512b0210d90fc",
+          "expected_sha256": "fb05ad65624797b72b80275cf88f26bf272db8eafb9b09d00cbe31c3fb36a58a"
+        },
+        {
+          "file": "warp/4x-missing-last-execution.gpa_frame",
+          "sha256": "93a9a6a0506b5c6bbc1f257651d7c20bd8f475f079bf747ca58d4b0863f15218",
+          "expected_sha256": "4cdac83c367934f6484adfd6b41cb4df8ad9960aaf9c174dd49fc590ede0acb1"
+        },
+        {
+          "file": "warp/2x-missing-initialization.gpa_frame",
+          "sha256": "25f58822829e9286e448909b34a763beb439045531577fb089acbcadbeed75ef",
+          "expected_sha256": "826d3099fc292a2b6d4246005d1032d94494175012c4bc8adbc8eeb7f4fa21a2"
+        },
+        {
+          "file": "warp/4x-missing-initialization.gpa_frame",
+          "sha256": "22875e78279421daa8d1359be7d8ed976b700a30a798f380e007fc275d1b526b",
+          "expected_sha256": "ca7e175b4bd3bdd9bf0f767d640a85198c73cffe79a68d7ec4b911d50eb94a4f"
+        },
+        {
+          "file": "hardware/2x-complete.gpa_frame",
+          "sha256": "e55e373e66e6b04d397681742c5a9b7c86ef7dadb4a5103a91edd4bf769144dd",
+          "expected_sha256": "c1c88b5938469ee1c74d7c22d290f19321df6b19260e90215bcd7f3c1e55e1ac"
+        },
+        {
+          "file": "hardware/2x-missing-last-execution.gpa_frame",
+          "sha256": "2fca7502a35872b796b1eea0a2144ef2d9d16912cad42931273ea64519136f15",
+          "expected_sha256": "34799da0f161968434fc8f7303fae5fd8dc357e77b928409403606f112f3226a"
+        },
+        {
+          "file": "hardware/4x-complete.gpa_frame",
+          "sha256": "b9e98e6ca79683296920b20f5e9f4483e4d3cbc598aa455d2421fcdbdec4efab",
+          "expected_sha256": "fb05ad65624797b72b80275cf88f26bf272db8eafb9b09d00cbe31c3fb36a58a"
+        },
+        {
+          "file": "hardware/4x-missing-last-execution.gpa_frame",
+          "sha256": "c73434786700a0795a5585b710cad3942285791d4270b95f63dd415047c8db79",
+          "expected_sha256": "4cdac83c367934f6484adfd6b41cb4df8ad9960aaf9c174dd49fc590ede0acb1"
+        },
+        {
+          "file": "hardware/2x-missing-initialization.gpa_frame",
+          "sha256": "d90cee113906933b09d966d3751035e46c1252fc1add1014347722878c3458f6",
+          "expected_sha256": "826d3099fc292a2b6d4246005d1032d94494175012c4bc8adbc8eeb7f4fa21a2"
+        },
+        {
+          "file": "hardware/4x-missing-initialization.gpa_frame",
+          "sha256": "c26d24381a75e9952abd3abfdd44267fba90f0887ae7873f1f53c58d0d3eb593",
+          "expected_sha256": "ca7e175b4bd3bdd9bf0f767d640a85198c73cffe79a68d7ec4b911d50eb94a4f"
+        }
+      ]
+    },
+    {
+      "name": "final-rgba16",
+      "files": 12,
+      "checks": 274,
+      "report_sha256": "35ff3aac49828ff209fbe4140c5d9f9f9c3885010340ab1b499a3bc7ee7dbbf1",
+      "frames": [
+        {
+          "file": "warp/2x-complete.gpa_frame",
+          "sha256": "26256bc677732f4d0efdee52d4b02505e16632e60afa3209c0f63c1ebbeaf15c",
+          "expected_sha256": "fb94ac559ba6b8a02d74666510b558eaf97c153d52187e0c7831ebc25a04de3a"
+        },
+        {
+          "file": "warp/2x-missing-last-execution.gpa_frame",
+          "sha256": "91337e52a7472a63520aa98eba45331d74caba9960e57daaa0cb7e5c36733faa",
+          "expected_sha256": "9e380147785e8a175159d3ccde180d5686c567cbf58060fead68adffca01c519"
+        },
+        {
+          "file": "warp/4x-complete.gpa_frame",
+          "sha256": "48b5346f592a477aeca88c942b8d30ff92d171882d99b2dbaae8bafdbc9e002a",
+          "expected_sha256": "b6237180e93223281c5b3379f4f15d6cb341fb60b32e969614833bfc354d1cc8"
+        },
+        {
+          "file": "warp/4x-missing-last-execution.gpa_frame",
+          "sha256": "2122323c573eb05eb6296d9d3e1ad9a406152b5cefdfe2428e1c56a58d2e8afc",
+          "expected_sha256": "8abef2e15aceb85a2185a5ca2532a548f71b1201594346357f6c2b2eae7f2421"
+        },
+        {
+          "file": "warp/2x-missing-initialization.gpa_frame",
+          "sha256": "d2934be3d68511dbcea3570774acd56b46063a9f80d38705c336cf289dc878d0",
+          "expected_sha256": "f159575814d91afba33f7cac5000d7466cb8b8fda3c428bca2a1fced4f9077c5"
+        },
+        {
+          "file": "warp/4x-missing-initialization.gpa_frame",
+          "sha256": "914defef0ddee7f25f44226352007e5783b1918a12bdd67be2d21143c322d15a",
+          "expected_sha256": "59f9cee95b8c50c9edb1def5cf47cdde6441ac290ec7f086772381dcbbefec10"
+        },
+        {
+          "file": "hardware/2x-complete.gpa_frame",
+          "sha256": "71e3d12789ff2e47575688eff2543a2fcdd02a13d25eadac1f9af2d55607280e",
+          "expected_sha256": "fb94ac559ba6b8a02d74666510b558eaf97c153d52187e0c7831ebc25a04de3a"
+        },
+        {
+          "file": "hardware/2x-missing-last-execution.gpa_frame",
+          "sha256": "c380bf0f7791b0581ef1a1c169ec7948dce473344ec0e16b850c5deed2eedd8d",
+          "expected_sha256": "9e380147785e8a175159d3ccde180d5686c567cbf58060fead68adffca01c519"
+        },
+        {
+          "file": "hardware/4x-complete.gpa_frame",
+          "sha256": "8a304245273753e5b2d4311ea2dffb37d315f3667ee7984b743759a87f8be658",
+          "expected_sha256": "b6237180e93223281c5b3379f4f15d6cb341fb60b32e969614833bfc354d1cc8"
+        },
+        {
+          "file": "hardware/4x-missing-last-execution.gpa_frame",
+          "sha256": "2b421003d11ec79c43eda3cd01dc513fe511238add1132ae8cf6345d7be49701",
+          "expected_sha256": "8abef2e15aceb85a2185a5ca2532a548f71b1201594346357f6c2b2eae7f2421"
+        },
+        {
+          "file": "hardware/2x-missing-initialization.gpa_frame",
+          "sha256": "e9e854e39172705598bafbb4d07dfc6980688aaa9f0cb382816ef0250884bcbd",
+          "expected_sha256": "f159575814d91afba33f7cac5000d7466cb8b8fda3c428bca2a1fced4f9077c5"
+        },
+        {
+          "file": "hardware/4x-missing-initialization.gpa_frame",
+          "sha256": "897bea20dc895626137e3d332782402b2bd7c3cf75f47c78a2e2b3392f09fd5d",
+          "expected_sha256": "59f9cee95b8c50c9edb1def5cf47cdde6441ac290ec7f086772381dcbbefec10"
+        }
+      ]
+    },
+    {
+      "name": "final-depth",
+      "files": 12,
+      "checks": 274,
+      "report_sha256": "cf02bfe7e754a6f9197d3a09a33eefc0d76992de53fafc1cc83a76b183a8a670",
+      "frames": [
+        {
+          "file": "warp/2x-complete.gpa_frame",
+          "sha256": "2a76b0103bdca59f7a56573565cdf1e0573d3fed4a89faee5e16b6a1880ca3f5",
+          "expected_sha256": "80db0bc5076967c12569727ec2dedd4e043f94874f947fc966d0b50abd3e78c2"
+        },
+        {
+          "file": "warp/2x-missing-last-execution.gpa_frame",
+          "sha256": "e625c70ec9ab451d8186713ad90881a079707bed7016de93406bd471eafaa5e7",
+          "expected_sha256": "498d5cffee80255cc4c91573e85a42bd56ba8fc78a15076211126c9691b8ad31"
+        },
+        {
+          "file": "warp/4x-complete.gpa_frame",
+          "sha256": "5bb01fbfbea3ed80d84e45d4a9746aa9f1fb74c1a2e07badf645bc0c7e907980",
+          "expected_sha256": "1baee9474cbce2dd1f4f0446bc6adfd3388547a481bbefab0ccfb647ae465014"
+        },
+        {
+          "file": "warp/4x-missing-last-execution.gpa_frame",
+          "sha256": "1524dbf49bd25ba85407eefcf00efc5be7d61a4645ff46cd1215b306928de856",
+          "expected_sha256": "a0a03c2d866163edeb8a4bc54ad882a9ec481a430a0ba2f9610f901b9e66465c"
+        },
+        {
+          "file": "warp/2x-missing-initialization.gpa_frame",
+          "sha256": "2a2b8783f051376d9ef7d0e2823de966323c4c766bc094d0afbb2a7cb7bc8fb8",
+          "expected_sha256": "27d5782dfd6ad01c9fdbae26f5672dd68e30fa472f6465b34c84be498b8bb876"
+        },
+        {
+          "file": "warp/4x-missing-initialization.gpa_frame",
+          "sha256": "51ca37db1b909a13313a57385e3368ef0700a29d926924a5143c0de14131ad94",
+          "expected_sha256": "cb944213cc40ef5a9b27ef124f127a341a087a4b03cabeebdda2087e723788ad"
+        },
+        {
+          "file": "hardware/2x-complete.gpa_frame",
+          "sha256": "d6772c04a3f7a520c7b1127666128426f31fa89eab9cdf795fc778f3cc906e38",
+          "expected_sha256": "80db0bc5076967c12569727ec2dedd4e043f94874f947fc966d0b50abd3e78c2"
+        },
+        {
+          "file": "hardware/2x-missing-last-execution.gpa_frame",
+          "sha256": "4db64ecb3de83c024f2bfb3db267aadd2e6f0d0e9cb5f7ac9b733be657d15660",
+          "expected_sha256": "498d5cffee80255cc4c91573e85a42bd56ba8fc78a15076211126c9691b8ad31"
+        },
+        {
+          "file": "hardware/4x-complete.gpa_frame",
+          "sha256": "99ce2cb8442ca62ffe62b5143dd3b055d97d63f635ee289f8fb80269fa665bf4",
+          "expected_sha256": "1baee9474cbce2dd1f4f0446bc6adfd3388547a481bbefab0ccfb647ae465014"
+        },
+        {
+          "file": "hardware/4x-missing-last-execution.gpa_frame",
+          "sha256": "004382737dc0d9e232e791b00adf9e67082d53b9260537423146e028afb4d697",
+          "expected_sha256": "a0a03c2d866163edeb8a4bc54ad882a9ec481a430a0ba2f9610f901b9e66465c"
+        },
+        {
+          "file": "hardware/2x-missing-initialization.gpa_frame",
+          "sha256": "2bff8795d172580544fd29ee1aee76d7b6f3e78e163010c27d4e76d4a012133f",
+          "expected_sha256": "27d5782dfd6ad01c9fdbae26f5672dd68e30fa472f6465b34c84be498b8bb876"
+        },
+        {
+          "file": "hardware/4x-missing-initialization.gpa_frame",
+          "sha256": "c4e52ecbc4ec351cfa967a7256fed208a3ba4e037ffd1d8ef399e06a503d46e7",
+          "expected_sha256": "cb944213cc40ef5a9b27ef124f127a341a087a4b03cabeebdda2087e723788ad"
+        }
+      ]
+    }
+  ],
+  "native_refusals": 48,
+  "startup": {
+    "launches": 2,
+    "captured_files": 8,
+    "files_with_controls": 12,
+    "checks": 279,
+    "report_sha256": "2eacbc349952fdb82bec477e8372ceb76305b14f169bcced812e0ad474c51d71",
+    "sessions_sha256": "f5d1e3c9f50cb2e90ec9c30b564fb9b226268cc89d10985ee43e5f4ea468c16f",
+    "child_path": "C:/Windows/System32;C:/Windows",
+    "automatic_selection": "Both sessions correctly requested explicit selection",
+    "frames": [
+      {
+        "file": "../injected-native/40/session/frame-c5d89a9f-bdd3-44d5-9d23-0e4372574983.gpa_frame",
+        "sha256": "fed0e3924f15e86cde00baf3a6924b9ed4929a82942094efbe6cd08d726650e8",
+        "samples": 2,
+        "present_ordinal": 22,
+        "control": "complete",
+        "expected_sha256": "4772bc5e6736027146ac50672c1f5a28ed388720b5df71864bb871ea0d2b8559"
+      },
+      {
+        "file": "40-0-missing-initialization.gpa_frame",
+        "sha256": "37b0c6925abb989fda36c5713662cfd0d618491cd98559923a6becda170018f2",
+        "samples": 2,
+        "present_ordinal": 22,
+        "control": "missing-initialization",
+        "expected_sha256": "5d9a5c7234b28baead15d9b09a710f92f524ecc00683ff612f0d866915b2bacd"
+      },
+      {
+        "file": "40-0-missing-application.gpa_frame",
+        "sha256": "6ac00fc705ca91a872425d14be567cb7b4da0ae48ece79c178c7bc2943a3da0f",
+        "samples": 2,
+        "present_ordinal": 22,
+        "control": "missing-application",
+        "expected_sha256": "c1c88b5938469ee1c74d7c22d290f19321df6b19260e90215bcd7f3c1e55e1ac"
+      },
+      {
+        "file": "../injected-native/40/session/frame-49d33b7d-1f81-4aac-bc7a-3c479ef69121.gpa_frame",
+        "sha256": "7be3ade7dbd07b46a2a12d9c592421ee00291536e6499c7708f590b10c452534",
+        "samples": 2,
+        "present_ordinal": 28,
+        "control": "complete",
+        "expected_sha256": "6584afe517b175ec6f513096169acf5d60365fb6a5663fbdaac4be1624a381fc"
+      },
+      {
+        "file": "../injected-native/40/session/frame-df4b08ae-2d83-4b75-b6d9-819c8dd77908.gpa_frame",
+        "sha256": "8f04a4731f18f908c478ec477277cf01ecc408be99f2373b79269665e837ab7a",
+        "samples": 2,
+        "present_ordinal": 34,
+        "control": "complete",
+        "expected_sha256": "2e88b3fbf277c27721df8ca5523ef3b6f7e739f7eea389619af80c63f4a15ff5"
+      },
+      {
+        "file": "../injected-native/40/session/frame-69e73853-f6d9-48c3-9a08-87d54c0c2974.gpa_frame",
+        "sha256": "bcd18ed7e9150811821d7ee5cf6adabee211c104348b0cdc2c87c204e1ac4465",
+        "samples": 2,
+        "present_ordinal": 44,
+        "control": "complete",
+        "expected_sha256": "2e88b3fbf277c27721df8ca5523ef3b6f7e739f7eea389619af80c63f4a15ff5"
+      },
+      {
+        "file": "../injected-native/41/session/frame-5a5f025e-160b-40c4-8859-6ba8bee33bd1.gpa_frame",
+        "sha256": "ee8e0e2dbe40bde293cce60544273729934bcff69e1da67bdf1da2b251c60fe1",
+        "samples": 4,
+        "present_ordinal": 12,
+        "control": "complete",
+        "expected_sha256": "09c6cc544508978d87e531b76ea0e0b2dd86eb1c1bb75073584bee742596dd74"
+      },
+      {
+        "file": "41-0-missing-initialization.gpa_frame",
+        "sha256": "62f719211e90bf9bfa29ad07322d4a8e2a2a451431f7204b0e496d6bf33b7fe4",
+        "samples": 4,
+        "present_ordinal": 12,
+        "control": "missing-initialization",
+        "expected_sha256": "e9b56067eae1b4448db3ef84b8b738a5a7981ba383205816a3618a931dc469de"
+      },
+      {
+        "file": "41-0-missing-application.gpa_frame",
+        "sha256": "ebae7d47a9c5f145440d414750cfee609f0c0449af3abc86e752bd5fb7aadd12",
+        "samples": 4,
+        "present_ordinal": 12,
+        "control": "missing-application",
+        "expected_sha256": "fb05ad65624797b72b80275cf88f26bf272db8eafb9b09d00cbe31c3fb36a58a"
+      },
+      {
+        "file": "../injected-native/41/session/frame-2cec8033-17bf-4f68-96e9-a11ad47afb60.gpa_frame",
+        "sha256": "2f4574b84d131bb83a1f79df6d4193041737c07649b0343562c8c987e8cbeeba",
+        "samples": 4,
+        "present_ordinal": 18,
+        "control": "complete",
+        "expected_sha256": "7b152b82fcec97b7ce9d046ecf992e7432f2aa9414126198ff30861581d85c17"
+      },
+      {
+        "file": "../injected-native/41/session/frame-908a3e7d-66a9-45c8-8db4-9cfe4f1caf6d.gpa_frame",
+        "sha256": "4a0834f652c79d4b4b69ca54d82f577e28300782efa547a680836b7eac334251",
+        "samples": 4,
+        "present_ordinal": 23,
+        "control": "complete",
+        "expected_sha256": "7b152b82fcec97b7ce9d046ecf992e7432f2aa9414126198ff30861581d85c17"
+      },
+      {
+        "file": "../injected-native/41/session/frame-c47301d5-af3f-4904-9d96-84dce6866783.gpa_frame",
+        "sha256": "8e0b3a5ece2e4c6631dd6ae9073998a46d4707e12f76cf668285826decb6c899",
+        "samples": 4,
+        "present_ordinal": 32,
+        "control": "complete",
+        "expected_sha256": "09c6cc544508978d87e531b76ea0e0b2dd86eb1c1bb75073584bee742596dd74"
+      }
+    ]
+  },
+  "previous_runtime": {
+    "passed": true,
+    "pid": 27392,
+    "failure": {
+      "busy": false,
+      "cancel_requested": false,
+      "error": "ID3D11DeviceContext::ExecuteCommandList: Deferred MSAA recording is not verified",
+      "request_name": "frame-80487479-05eb-49a9-801b-ee0cccc914f4.gpa_frame",
+      "resource_limit_mib": 4,
+      "state": "Failed",
+      "swap_chain": 1
+    },
+    "target_exit": {
+      "frames": 13,
+      "identity_checks": 13,
+      "msaa_native_cpu_exact": true,
+      "ok": true,
+      "unbind_checks": 0
+    },
+    "runtime_sha256": "f2d92dd99f5b26ee232064ca26645136fa808ab2e7e6e810193376527f092df3",
+    "target_sha256": "abafc8ed06592477a26f5a3aaaa2f4ebaf58875c659182e3563219a1e49266b3",
+    "system_only_path": "C:/Windows/System32;C:/Windows"
+  },
+  "tests": {
+    "capture-ctest": {
+      "passed": 156,
+      "log_sha256": "36183e7c8030c2a093309ce5dd6376d11795019a4c3a38a2219d14706e9189ad"
+    },
+    "full-focused-ctest": {
+      "passed": 75,
+      "log_sha256": "2532aaa5ac2ba5c30177134cc66778bdd1ac395cf96643c81733bef08c434140"
+    }
+  },
+  "builds": {
+    "capture-build.log": "9d71c8e02ba2ecf072b5e5466c53abfb4a89266ecf4a0252887bfe67cb0ca35e",
+    "full-build.log": "ca34e47446224d7c9e1a87db0bdd3c5d467df9132d4a40ca166fb46b77a28c5a"
+  },
+  "identity": {
+    "runtime_sha256": "98fda03396df2f6e0bb062bf987ca13101c5f9e6c5774514254d39330847a59d",
+    "full_runtime_sha256": "a2a062fac1129c3312ff1f2913bb2d0ce9174bc6213ea1717b86dd81c19aaf57",
+    "controller_sha256": "0bc61e429745e1b0f6fd046762cae923471686782a1ab48ba853cca12aaaacf3",
+    "replay_sha256": "215ebafed657953f0671c32a0948e12c8c965437a3eaa33e6d38aedcff5e2ddc",
+    "live_target_sha256": "abafc8ed06592477a26f5a3aaaa2f4ebaf58875c659182e3563219a1e49266b3"
+  },
+  "sources": {
+    "src/capture/CMakeLists.txt": "1421ba4776041a9fadac855148814cf0af344f6b0206045f38b5ac5cca484288",
+    "src/capture/runtime/command_stream.cpp": "94140532f8ea83d356c258b0ad2c8ab879487c6e662eda6c7e1fe08ae59cbdb7",
+    "src/capture/tests/controller_tests.cpp": "0eeefaf4d5517a72d5c8e48198e5d03a22df8031a4f9eb06fe5c995110b3f24e",
+    "src/capture/tests/live_target.cpp": "90d075add9a183cc22004ec6bc8af38382f0841baac435d3f71fc018c0819a1c",
+    "src/capture/tests/msaa_depth_encoding_fixture.hpp": "63a6f812b4e6fd687ab240c64315416c62adc945c4e62b85c451f2ef8f191587",
+    "src/capture/tests/msaa_live_renderer.hpp": "3bb931ee32efaf4ba4cf98d6c129b79085c0862f0ae901908a2b911a5e5b5425",
+    "src/capture/tests/msaa_native_fixture.hpp": "11e2d94887dd69bb14d9ba9886a813670de4722b4ae2a285e8d105f6cddb63f4",
+    "tools/validate_capture_msaa_encoder.py": "9d284ff9bf876122135a3e482d0a1112ba8ec36e3bcd0474a328e473589e11db",
+    "tools/validate_capture_msaa_injected.py": "1537eecdbb3469c4dc4eca457c36c0442f02111730f60c5e1206038391be691f",
+    "src/capture/tests/deferred_msaa_tests.cpp": "7d6af610d64082fd47ad52a927142d0a80bb1f82a3c1ff9fa584e7154373c041"
+  },
+  "evidence": {
+    "directory": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-deferred-msaa-20261014",
+    "manifest_files": 4998,
+    "manifest_sha256": "bd9e44a8c86905218e5ce412901735149135f50db604991cfa4d54652f94a38b"
+  },
+  "failures_preserved": [
+    "build.log: parameter shadow warning treated as error",
+    "build-2.log: incorrect test field names"
+  ],
+  "limits": [
+    "Hardware plus WARP on this host; not arbitrary synchronization or exhaustive descriptor coverage",
+    "No new GF2 capture or original-GPA GUI acceptance; prior candidate evidence uses the previous runtime",
+    "Deferred Resolve/MSAA mutations, broader hidden/query states and unsupported formats remain incomplete",
+    "No new golden-frame run; production Replay/Format sources and replay executable unchanged"
+  ]
+}
