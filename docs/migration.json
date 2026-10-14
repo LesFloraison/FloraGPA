@@ -4142,6 +4142,20 @@
       "original_observed_indirect_calls": 48,
       "original_argument_boundaries": 96,
       "limits": "Immediate/deferred/nested native indirect APIs with GPU-generated arguments; broader predicate/SO/query, numeric UINT_MAX counters and synchronization remain limited. No new GF2 or original GUI acceptance."
+    },
+    "current_runtime_gf2_revalidation": {
+      "evidence": "docs/CAPTURE_GF2_CURRENT.md",
+      "baseline": "docs/capture-gf2-current-baseline.json",
+      "runtime_sha256": "f2d92dd99f5b26ee232064ca26645136fa808ab2e7e6e810193376527f092df3",
+      "captures": 6,
+      "launches": 2,
+      "pixel_stable_candidates": 5,
+      "exact_positive_executions": 34,
+      "positive_executions": 36,
+      "current_gate_passed": false,
+      "variable_event": 5598,
+      "diagnostic_runs": 101,
+      "limits": "One frame varies in both players; exact-byte rule unchanged. Historical accepted six-file runtime identities remain separate. Current original GUI inspection and overall delivery remain incomplete."
     }
   }
 }

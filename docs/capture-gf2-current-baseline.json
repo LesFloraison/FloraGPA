@@ -1,0 +1,3423 @@
+{
+  "schema": "FloraGPA current-runtime GF2 revalidation 1",
+  "date": "2026-10-14",
+  "source_identity": {
+    "replay_sha256": "215ebafed657953f0671c32a0948e12c8c965437a3eaa33e6d38aedcff5e2ddc",
+    "runtime_sha256": "f2d92dd99f5b26ee232064ca26645136fa808ab2e7e6e810193376527f092df3",
+    "controller_sha256": "0bc61e429745e1b0f6fd046762cae923471686782a1ab48ba853cca12aaaacf3",
+    "expected_frames_per_launch": 3,
+    "comparison": "Exact integer RGBA and resource bytes; no pixel tolerance",
+    "scenes": [
+      "home",
+      "equipment_room"
+    ],
+    "expected_launches": 2,
+    "source_commit": "c0eaa899134b396691bab8a463db7b862b2998d6"
+  },
+  "current_gate_passed": false,
+  "current_formally_accepted_frames": 0,
+  "required_frames": 6,
+  "capture_completed_frames": 6,
+  "pixel_stable_candidates": 5,
+  "exact_positive_executions": 34,
+  "positive_executions": 36,
+  "sessions": [
+    {
+      "launch": 1,
+      "session_id": "c1b381fa-6c25-4b94-b4c4-374da9071063",
+      "pid": 27380,
+      "process_created": 134364281515769140,
+      "capture_presents": [
+        10019,
+        13042,
+        13350
+      ],
+      "later_presents": 13515,
+      "normal_ui_exit_observed": true,
+      "exited": true,
+      "interface_gaps": 0,
+      "lost_diagnostics": 0
+    },
+    {
+      "launch": 2,
+      "session_id": "bb501f1a-b04a-456d-8d54-b10aaa50469c",
+      "pid": 29672,
+      "process_created": 134364289849369543,
+      "capture_presents": [
+        1067,
+        1882,
+        2147
+      ],
+      "later_presents": 2332,
+      "normal_ui_exit_observed": true,
+      "exited": true,
+      "interface_gaps": 0,
+      "lost_diagnostics": 0
+    }
+  ],
+  "frames": [
+    {
+      "launch": 1,
+      "index": 0,
+      "frame": "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\capture-gf2-current-20261014\\launch-1\\session\\frame-3fd51a50-3227-4d79-b7c7-8f08141ff660.gpa_frame",
+      "scene": "home",
+      "present": 10019,
+      "bytes": 1006290190,
+      "replays": [
+        {
+          "repeat": 0,
+          "comparisons": {
+            "flora_vs_captured": {
+              "different_pixels": 0,
+              "different_channels": 0,
+              "maximum": 0
+            },
+            "original_vs_captured": {
+              "different_pixels": 0,
+              "different_channels": 0,
+              "maximum": 0
+            },
+            "flora_vs_original": {
+              "different_pixels": 0,
+              "different_channels": 0,
+              "maximum": 0
+            }
+          },
+          "rgba_sha256": {
+            "flora": "5172c2dcfccb94afb631c3202bacacb96759a83062bf2d2754e94f43ee4a9bcd",
+            "original": "5172c2dcfccb94afb631c3202bacacb96759a83062bf2d2754e94f43ee4a9bcd",
+            "captured": "5172c2dcfccb94afb631c3202bacacb96759a83062bf2d2754e94f43ee4a9bcd"
+          },
+          "flora_counts": {
+            "ClearDepthStencilView": 12,
+            "ClearRenderTargetView": 8,
+            "CopyResource": 3,
+            "Draw": 26,
+            "DrawIndexed": 201,
+            "DrawIndexedInstanced": 11,
+            "Map": 316,
+            "Present": 1,
+            "ResolveSubresource": 12,
+            "annotation_records": 26,
+            "present_rtv_unbinds": 1,
+            "query_completion_unresolved": 1,
+            "query_end_observations": 1,
+            "query_metadata_records": 3,
+            "unmap_observations": 316
+          },
+          "original_audit": {
+            "scope": "Explicit playback; DrawIndexed path of this pinned build",
+            "negative_control_suppress_draws": false,
+            "context_count": 1,
+            "d3d11_calls": {
+              "DrawIndexed": 201,
+              "submitted_indices": 1371330
+            },
+            "event_dispatch_count": 613,
+            "event_function_rvas": {
+              "0x25b40": 8,
+              "0x27ec0": 26,
+              "0x26250": 3,
+              "0x259e0": 12,
+              "0x27080": 316,
+              "0x27f50": 201,
+              "0x29bf0": 11,
+              "0x27fe0": 11,
+              "0x29cf0": 7,
+              "0x28b40": 12,
+              "0x28850": 4,
+              "0x28950": 2
+            },
+            "actual_context_adapters": [
+              {
+                "description": "Intel(R) Iris(R) Xe Graphics",
+                "vendor_id": 32902,
+                "device_id": 18086,
+                "luid": [
+                  67264,
+                  0
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "repeat": 1,
+          "comparisons": {
+            "flora_vs_captured": {
+              "different_pixels": 0,
+              "different_channels": 0,
+              "maximum": 0
+            },
+            "original_vs_captured": {
+              "different_pixels": 0,
+              "different_channels": 0,
+              "maximum": 0
+            },
+            "flora_vs_original": {
+              "different_pixels": 0,
+              "different_channels": 0,
+              "maximum": 0
+            }
+          },
+          "rgba_sha256": {
+            "flora": "5172c2dcfccb94afb631c3202bacacb96759a83062bf2d2754e94f43ee4a9bcd",
+            "original": "5172c2dcfccb94afb631c3202bacacb96759a83062bf2d2754e94f43ee4a9bcd",
+            "captured": "5172c2dcfccb94afb631c3202bacacb96759a83062bf2d2754e94f43ee4a9bcd"
+          },
+          "flora_counts": {
+            "ClearDepthStencilView": 12,
+            "ClearRenderTargetView": 8,
+            "CopyResource": 3,
+            "Draw": 26,
+            "DrawIndexed": 201,
+            "DrawIndexedInstanced": 11,
+            "Map": 316,
+            "Present": 1,
+            "ResolveSubresource": 12,
+            "annotation_records": 26,
+            "present_rtv_unbinds": 1,
+            "query_completion_unresolved": 1,
+            "query_end_observations": 1,
+            "query_metadata_records": 3,
+            "unmap_observations": 316
+          },
+          "original_audit": {
+            "scope": "Explicit playback; DrawIndexed path of this pinned build",
+            "negative_control_suppress_draws": false,
+            "context_count": 1,
+            "d3d11_calls": {
+              "DrawIndexed": 201,
+              "submitted_indices": 1371330
+            },
+            "event_dispatch_count": 613,
+            "event_function_rvas": {
+              "0x25b40": 8,
+              "0x27ec0": 26,
+              "0x26250": 3,
+              "0x259e0": 12,
+              "0x27080": 316,
+              "0x27f50": 201,
+              "0x29bf0": 11,
+              "0x27fe0": 11,
+              "0x29cf0": 7,
+              "0x28b40": 12,
+              "0x28850": 4,
+              "0x28950": 2
+            },
+            "actual_context_adapters": [
+              {
+                "description": "Intel(R) Iris(R) Xe Graphics",
+                "vendor_id": 32902,
+                "device_id": 18086,
+                "luid": [
+                  67264,
+                  0
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "repeat": 2,
+          "comparisons": {
+            "flora_vs_captured": {
+              "different_pixels": 0,
+              "different_channels": 0,
+              "maximum": 0
+            },
+            "original_vs_captured": {
+              "different_pixels": 0,
+              "different_channels": 0,
+              "maximum": 0
+            },
+            "flora_vs_original": {
+              "different_pixels": 0,
+              "different_channels": 0,
+              "maximum": 0
+            }
+          },
+          "rgba_sha256": {
+            "flora": "5172c2dcfccb94afb631c3202bacacb96759a83062bf2d2754e94f43ee4a9bcd",
+            "original": "5172c2dcfccb94afb631c3202bacacb96759a83062bf2d2754e94f43ee4a9bcd",
+            "captured": "5172c2dcfccb94afb631c3202bacacb96759a83062bf2d2754e94f43ee4a9bcd"
+          },
+          "flora_counts": {
+            "ClearDepthStencilView": 12,
+            "ClearRenderTargetView": 8,
+            "CopyResource": 3,
+            "Draw": 26,
+            "DrawIndexed": 201,
+            "DrawIndexedInstanced": 11,
+            "Map": 316,
+            "Present": 1,
+            "ResolveSubresource": 12,
+            "annotation_records": 26,
+            "present_rtv_unbinds": 1,
+            "query_completion_unresolved": 1,
+            "query_end_observations": 1,
+            "query_metadata_records": 3,
+            "unmap_observations": 316
+          },
+          "original_audit": {
+            "scope": "Explicit playback; DrawIndexed path of this pinned build",
+            "negative_control_suppress_draws": false,
+            "context_count": 1,
+            "d3d11_calls": {
+              "DrawIndexed": 201,
+              "submitted_indices": 1371330
+            },
+            "event_dispatch_count": 613,
+            "event_function_rvas": {
+              "0x25b40": 8,
+              "0x27ec0": 26,
+              "0x26250": 3,
+              "0x259e0": 12,
+              "0x27080": 316,
+              "0x27f50": 201,
+              "0x29bf0": 11,
+              "0x27fe0": 11,
+              "0x29cf0": 7,
+              "0x28b40": 12,
+              "0x28850": 4,
+              "0x28950": 2
+            },
+            "actual_context_adapters": [
+              {
+                "description": "Intel(R) Iris(R) Xe Graphics",
+                "vendor_id": 32902,
+                "device_id": 18086,
+                "luid": [
+                  67264,
+                  0
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "sha256": "91a023d5a753c3397435d9b6db980d288684d4453083080079f3972069449c89"
+    },
+    {
+      "launch": 1,
+      "index": 1,
+      "frame": "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\capture-gf2-current-20261014\\launch-1\\session\\frame-23c72ea8-d6f0-4557-96e7-48513d0f27bd.gpa_frame",
+      "scene": "equipment_room",
+      "present": 13042,
+      "bytes": 1340781410,
+      "replays": [
+        {
+          "repeat": 0,
+          "comparisons": {
+            "flora_vs_captured": {
+              "different_pixels": 0,
+              "different_channels": 0,
+              "maximum": 0
+            },
+            "original_vs_captured": {
+              "different_pixels": 0,
+              "different_channels": 0,
+              "maximum": 0
+            },
+            "flora_vs_original": {
+              "different_pixels": 0,
+              "different_channels": 0,
+              "maximum": 0
+            }
+          },
+          "rgba_sha256": {
+            "flora": "2eb0f8599471d9dc4068eacece6f0a7d49e3d3821edc8669bd16babbc27e2ccb",
+            "original": "2eb0f8599471d9dc4068eacece6f0a7d49e3d3821edc8669bd16babbc27e2ccb",
+            "captured": "2eb0f8599471d9dc4068eacece6f0a7d49e3d3821edc8669bd16babbc27e2ccb"
+          },
+          "flora_counts": {
+            "ClearDepthStencilView": 11,
+            "ClearRenderTargetView": 9,
+            "CopyResource": 4,
+            "Dispatch": 3,
+            "Draw": 26,
+            "DrawIndexed": 234,
+            "DrawIndexedInstanced": 341,
+            "Map": 380,
+            "Present": 1,
+            "ResolveSubresource": 9,
+            "annotation_records": 24,
+            "present_rtv_unbinds": 1,
+            "query_completion_unresolved": 1,
+            "query_end_observations": 1,
+            "query_metadata_records": 3,
+            "unmap_observations": 380
+          },
+          "original_audit": {
+            "scope": "Explicit playback; DrawIndexed path of this pinned build",
+            "negative_control_suppress_draws": false,
+            "context_count": 1,
+            "d3d11_calls": {
+              "DrawIndexed": 234,
+              "submitted_indices": 1692612
+            },
+            "event_dispatch_count": 1684,
+            "event_function_rvas": {
+              "0x25b40": 9,
+              "0x27ec0": 26,
+              "0x26250": 4,
+              "0x259e0": 11,
+              "0x27080": 380,
+              "0x29bf0": 341,
+              "0x28850": 316,
+              "0x27fe0": 341,
+              "0x29cf0": 7,
+              "0x28950": 3,
+              "0x27f50": 234,
+              "0x28b40": 9,
+              "0x27cc0": 3
+            },
+            "actual_context_adapters": [
+              {
+                "description": "Intel(R) Iris(R) Xe Graphics",
+                "vendor_id": 32902,
+                "device_id": 18086,
+                "luid": [
+                  67264,
+                  0
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "repeat": 1,
+          "comparisons": {
+            "flora_vs_captured": {
+              "different_pixels": 0,
+              "different_channels": 0,
+              "maximum": 0
+            },
+            "original_vs_captured": {
+              "different_pixels": 0,
+              "different_channels": 0,
+              "maximum": 0
+            },
+            "flora_vs_original": {
+              "different_pixels": 0,
+              "different_channels": 0,
+              "maximum": 0
+            }
+          },
+          "rgba_sha256": {
+            "flora": "2eb0f8599471d9dc4068eacece6f0a7d49e3d3821edc8669bd16babbc27e2ccb",
+            "original": "2eb0f8599471d9dc4068eacece6f0a7d49e3d3821edc8669bd16babbc27e2ccb",
+            "captured": "2eb0f8599471d9dc4068eacece6f0a7d49e3d3821edc8669bd16babbc27e2ccb"
+          },
+          "flora_counts": {
+            "ClearDepthStencilView": 11,
+            "ClearRenderTargetView": 9,
+            "CopyResource": 4,
+            "Dispatch": 3,
+            "Draw": 26,
+            "DrawIndexed": 234,
+            "DrawIndexedInstanced": 341,
+            "Map": 380,
+            "Present": 1,
+            "ResolveSubresource": 9,
+            "annotation_records": 24,
+            "present_rtv_unbinds": 1,
+            "query_completion_unresolved": 1,
+            "query_end_observations": 1,
+            "query_metadata_records": 3,
+            "unmap_observations": 380
+          },
+          "original_audit": {
+            "scope": "Explicit playback; DrawIndexed path of this pinned build",
+            "negative_control_suppress_draws": false,
+            "context_count": 1,
+            "d3d11_calls": {
+              "DrawIndexed": 234,
+              "submitted_indices": 1692612
+            },
+            "event_dispatch_count": 1684,
+            "event_function_rvas": {
+              "0x25b40": 9,
+              "0x27ec0": 26,
+              "0x26250": 4,
+              "0x259e0": 11,
+              "0x27080": 380,
+              "0x29bf0": 341,
+              "0x28850": 316,
+              "0x27fe0": 341,
+              "0x29cf0": 7,
+              "0x28950": 3,
+              "0x27f50": 234,
+              "0x28b40": 9,
+              "0x27cc0": 3
+            },
+            "actual_context_adapters": [
+              {
+                "description": "Intel(R) Iris(R) Xe Graphics",
+                "vendor_id": 32902,
+                "device_id": 18086,
+                "luid": [
+                  67264,
+                  0
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "repeat": 2,
+          "comparisons": {
+            "flora_vs_captured": {
+              "different_pixels": 0,
+              "different_channels": 0,
+              "maximum": 0
+            },
+            "original_vs_captured": {
+              "different_pixels": 0,
+              "different_channels": 0,
+              "maximum": 0
+            },
+            "flora_vs_original": {
+              "different_pixels": 0,
+              "different_channels": 0,
+              "maximum": 0
+            }
+          },
+          "rgba_sha256": {
+            "flora": "2eb0f8599471d9dc4068eacece6f0a7d49e3d3821edc8669bd16babbc27e2ccb",
+            "original": "2eb0f8599471d9dc4068eacece6f0a7d49e3d3821edc8669bd16babbc27e2ccb",
+            "captured": "2eb0f8599471d9dc4068eacece6f0a7d49e3d3821edc8669bd16babbc27e2ccb"
+          },
+          "flora_counts": {
+            "ClearDepthStencilView": 11,
+            "ClearRenderTargetView": 9,
+            "CopyResource": 4,
+            "Dispatch": 3,
+            "Draw": 26,
+            "DrawIndexed": 234,
+            "DrawIndexedInstanced": 341,
+            "Map": 380,
+            "Present": 1,
+            "ResolveSubresource": 9,
+            "annotation_records": 24,
+            "present_rtv_unbinds": 1,
+            "query_completion_unresolved": 1,
+            "query_end_observations": 1,
+            "query_metadata_records": 3,
+            "unmap_observations": 380
+          },
+          "original_audit": {
+            "scope": "Explicit playback; DrawIndexed path of this pinned build",
+            "negative_control_suppress_draws": false,
+            "context_count": 1,
+            "d3d11_calls": {
+              "DrawIndexed": 234,
+              "submitted_indices": 1692612
+            },
+            "event_dispatch_count": 1684,
+            "event_function_rvas": {
+              "0x25b40": 9,
+              "0x27ec0": 26,
+              "0x26250": 4,
+              "0x259e0": 11,
+              "0x27080": 380,
+              "0x29bf0": 341,
+              "0x28850": 316,
+              "0x27fe0": 341,
+              "0x29cf0": 7,
+              "0x28950": 3,
+              "0x27f50": 234,
+              "0x28b40": 9,
+              "0x27cc0": 3
+            },
+            "actual_context_adapters": [
+              {
+                "description": "Intel(R) Iris(R) Xe Graphics",
+                "vendor_id": 32902,
+                "device_id": 18086,
+                "luid": [
+                  67264,
+                  0
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "sha256": "b574705cec603b85906917c16b93e9832140e42ddd9a6115da975d8f67e8521e"
+    },
+    {
+      "launch": 1,
+      "index": 2,
+      "frame": "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\capture-gf2-current-20261014\\launch-1\\session\\frame-8df44cb7-96a5-4ddf-9649-a60ac27325ba.gpa_frame",
+      "scene": "equipment_room",
+      "present": 13350,
+      "bytes": 1340623762,
+      "replays": [
+        {
+          "repeat": 0,
+          "comparisons": {
+            "flora_vs_captured": {
+              "different_pixels": 4,
+              "different_channels": 7,
+              "maximum": 1
+            },
+            "original_vs_captured": {
+              "different_pixels": 0,
+              "different_channels": 0,
+              "maximum": 0
+            },
+            "flora_vs_original": {
+              "different_pixels": 4,
+              "different_channels": 7,
+              "maximum": 1
+            }
+          },
+          "rgba_sha256": {
+            "flora": "a17099bf380fa1db9c6cd443b6da8b8cf96b5b3922e77538fa419ca574c6bb7c",
+            "original": "a9064677a283c7901bbe14e2f3748a72f5128adccb9b2f259004cb973c2c63cc",
+            "captured": "a9064677a283c7901bbe14e2f3748a72f5128adccb9b2f259004cb973c2c63cc"
+          },
+          "flora_counts": {
+            "ClearDepthStencilView": 11,
+            "ClearRenderTargetView": 9,
+            "CopyResource": 4,
+            "Dispatch": 3,
+            "Draw": 26,
+            "DrawIndexed": 229,
+            "DrawIndexedInstanced": 341,
+            "Map": 370,
+            "Present": 1,
+            "ResolveSubresource": 9,
+            "annotation_records": 24,
+            "present_rtv_unbinds": 1,
+            "query_completion_unresolved": 1,
+            "query_end_observations": 1,
+            "query_metadata_records": 3,
+            "unmap_observations": 370
+          },
+          "original_audit": {
+            "scope": "Explicit playback; DrawIndexed path of this pinned build",
+            "negative_control_suppress_draws": false,
+            "context_count": 1,
+            "d3d11_calls": {
+              "DrawIndexed": 229,
+              "submitted_indices": 1481628
+            },
+            "event_dispatch_count": 1669,
+            "event_function_rvas": {
+              "0x25b40": 9,
+              "0x27ec0": 26,
+              "0x26250": 4,
+              "0x259e0": 11,
+              "0x27080": 370,
+              "0x29bf0": 341,
+              "0x28850": 316,
+              "0x27fe0": 341,
+              "0x29cf0": 7,
+              "0x28950": 3,
+              "0x27f50": 229,
+              "0x28b40": 9,
+              "0x27cc0": 3
+            },
+            "actual_context_adapters": [
+              {
+                "description": "Intel(R) Iris(R) Xe Graphics",
+                "vendor_id": 32902,
+                "device_id": 18086,
+                "luid": [
+                  67264,
+                  0
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "repeat": 1,
+          "comparisons": {
+            "flora_vs_captured": {
+              "different_pixels": 0,
+              "different_channels": 0,
+              "maximum": 0
+            },
+            "original_vs_captured": {
+              "different_pixels": 0,
+              "different_channels": 0,
+              "maximum": 0
+            },
+            "flora_vs_original": {
+              "different_pixels": 0,
+              "different_channels": 0,
+              "maximum": 0
+            }
+          },
+          "rgba_sha256": {
+            "flora": "a9064677a283c7901bbe14e2f3748a72f5128adccb9b2f259004cb973c2c63cc",
+            "original": "a9064677a283c7901bbe14e2f3748a72f5128adccb9b2f259004cb973c2c63cc",
+            "captured": "a9064677a283c7901bbe14e2f3748a72f5128adccb9b2f259004cb973c2c63cc"
+          },
+          "flora_counts": {
+            "ClearDepthStencilView": 11,
+            "ClearRenderTargetView": 9,
+            "CopyResource": 4,
+            "Dispatch": 3,
+            "Draw": 26,
+            "DrawIndexed": 229,
+            "DrawIndexedInstanced": 341,
+            "Map": 370,
+            "Present": 1,
+            "ResolveSubresource": 9,
+            "annotation_records": 24,
+            "present_rtv_unbinds": 1,
+            "query_completion_unresolved": 1,
+            "query_end_observations": 1,
+            "query_metadata_records": 3,
+            "unmap_observations": 370
+          },
+          "original_audit": {
+            "scope": "Explicit playback; DrawIndexed path of this pinned build",
+            "negative_control_suppress_draws": false,
+            "context_count": 1,
+            "d3d11_calls": {
+              "DrawIndexed": 229,
+              "submitted_indices": 1481628
+            },
+            "event_dispatch_count": 1669,
+            "event_function_rvas": {
+              "0x25b40": 9,
+              "0x27ec0": 26,
+              "0x26250": 4,
+              "0x259e0": 11,
+              "0x27080": 370,
+              "0x29bf0": 341,
+              "0x28850": 316,
+              "0x27fe0": 341,
+              "0x29cf0": 7,
+              "0x28950": 3,
+              "0x27f50": 229,
+              "0x28b40": 9,
+              "0x27cc0": 3
+            },
+            "actual_context_adapters": [
+              {
+                "description": "Intel(R) Iris(R) Xe Graphics",
+                "vendor_id": 32902,
+                "device_id": 18086,
+                "luid": [
+                  67264,
+                  0
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "repeat": 2,
+          "comparisons": {
+            "flora_vs_captured": {
+              "different_pixels": 0,
+              "different_channels": 0,
+              "maximum": 0
+            },
+            "original_vs_captured": {
+              "different_pixels": 4,
+              "different_channels": 7,
+              "maximum": 1
+            },
+            "flora_vs_original": {
+              "different_pixels": 4,
+              "different_channels": 7,
+              "maximum": 1
+            }
+          },
+          "rgba_sha256": {
+            "flora": "a9064677a283c7901bbe14e2f3748a72f5128adccb9b2f259004cb973c2c63cc",
+            "original": "a17099bf380fa1db9c6cd443b6da8b8cf96b5b3922e77538fa419ca574c6bb7c",
+            "captured": "a9064677a283c7901bbe14e2f3748a72f5128adccb9b2f259004cb973c2c63cc"
+          },
+          "flora_counts": {
+            "ClearDepthStencilView": 11,
+            "ClearRenderTargetView": 9,
+            "CopyResource": 4,
+            "Dispatch": 3,
+            "Draw": 26,
+            "DrawIndexed": 229,
+            "DrawIndexedInstanced": 341,
+            "Map": 370,
+            "Present": 1,
+            "ResolveSubresource": 9,
+            "annotation_records": 24,
+            "present_rtv_unbinds": 1,
+            "query_completion_unresolved": 1,
+            "query_end_observations": 1,
+            "query_metadata_records": 3,
+            "unmap_observations": 370
+          },
+          "original_audit": {
+            "scope": "Explicit playback; DrawIndexed path of this pinned build",
+            "negative_control_suppress_draws": false,
+            "context_count": 1,
+            "d3d11_calls": {
+              "DrawIndexed": 229,
+              "submitted_indices": 1481628
+            },
+            "event_dispatch_count": 1669,
+            "event_function_rvas": {
+              "0x25b40": 9,
+              "0x27ec0": 26,
+              "0x26250": 4,
+              "0x259e0": 11,
+              "0x27080": 370,
+              "0x29bf0": 341,
+              "0x28850": 316,
+              "0x27fe0": 341,
+              "0x29cf0": 7,
+              "0x28950": 3,
+              "0x27f50": 229,
+              "0x28b40": 9,
+              "0x27cc0": 3
+            },
+            "actual_context_adapters": [
+              {
+                "description": "Intel(R) Iris(R) Xe Graphics",
+                "vendor_id": 32902,
+                "device_id": 18086,
+                "luid": [
+                  67264,
+                  0
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "sha256": "a30ddd946f1ff174d6c704c0d820554d0614f45f90508349e3004fb7f8cd9b06"
+    },
+    {
+      "launch": 2,
+      "index": 0,
+      "frame": "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\capture-gf2-current-20261014\\launch-2\\session\\frame-9fe1dadd-f08f-4771-a384-a9a42125227a.gpa_frame",
+      "scene": "home",
+      "present": 1067,
+      "bytes": 1006245896,
+      "replays": [
+        {
+          "repeat": 0,
+          "comparisons": {
+            "flora_vs_captured": {
+              "different_pixels": 0,
+              "different_channels": 0,
+              "maximum": 0
+            },
+            "original_vs_captured": {
+              "different_pixels": 0,
+              "different_channels": 0,
+              "maximum": 0
+            },
+            "flora_vs_original": {
+              "different_pixels": 0,
+              "different_channels": 0,
+              "maximum": 0
+            }
+          },
+          "rgba_sha256": {
+            "flora": "18c300a7e51e69e1373721a84bba3218a5ecef810fb6b7dc2cadf50e5a27c2d9",
+            "original": "18c300a7e51e69e1373721a84bba3218a5ecef810fb6b7dc2cadf50e5a27c2d9",
+            "captured": "18c300a7e51e69e1373721a84bba3218a5ecef810fb6b7dc2cadf50e5a27c2d9"
+          },
+          "flora_counts": {
+            "ClearDepthStencilView": 12,
+            "ClearRenderTargetView": 8,
+            "CopyResource": 3,
+            "Draw": 26,
+            "DrawIndexed": 200,
+            "DrawIndexedInstanced": 11,
+            "Map": 315,
+            "Present": 1,
+            "ResolveSubresource": 12,
+            "annotation_records": 26,
+            "present_rtv_unbinds": 1,
+            "query_completion_unresolved": 1,
+            "query_end_observations": 1,
+            "query_metadata_records": 3,
+            "unmap_observations": 315
+          },
+          "original_audit": {
+            "scope": "Explicit playback; DrawIndexed path of this pinned build",
+            "negative_control_suppress_draws": false,
+            "context_count": 1,
+            "d3d11_calls": {
+              "DrawIndexed": 200,
+              "submitted_indices": 1371294
+            },
+            "event_dispatch_count": 611,
+            "event_function_rvas": {
+              "0x25b40": 8,
+              "0x27ec0": 26,
+              "0x26250": 3,
+              "0x259e0": 12,
+              "0x27080": 315,
+              "0x27f50": 200,
+              "0x29bf0": 11,
+              "0x27fe0": 11,
+              "0x29cf0": 7,
+              "0x28b40": 12,
+              "0x28850": 4,
+              "0x28950": 2
+            },
+            "actual_context_adapters": [
+              {
+                "description": "Intel(R) Iris(R) Xe Graphics",
+                "vendor_id": 32902,
+                "device_id": 18086,
+                "luid": [
+                  67264,
+                  0
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "repeat": 1,
+          "comparisons": {
+            "flora_vs_captured": {
+              "different_pixels": 0,
+              "different_channels": 0,
+              "maximum": 0
+            },
+            "original_vs_captured": {
+              "different_pixels": 0,
+              "different_channels": 0,
+              "maximum": 0
+            },
+            "flora_vs_original": {
+              "different_pixels": 0,
+              "different_channels": 0,
+              "maximum": 0
+            }
+          },
+          "rgba_sha256": {
+            "flora": "18c300a7e51e69e1373721a84bba3218a5ecef810fb6b7dc2cadf50e5a27c2d9",
+            "original": "18c300a7e51e69e1373721a84bba3218a5ecef810fb6b7dc2cadf50e5a27c2d9",
+            "captured": "18c300a7e51e69e1373721a84bba3218a5ecef810fb6b7dc2cadf50e5a27c2d9"
+          },
+          "flora_counts": {
+            "ClearDepthStencilView": 12,
+            "ClearRenderTargetView": 8,
+            "CopyResource": 3,
+            "Draw": 26,
+            "DrawIndexed": 200,
+            "DrawIndexedInstanced": 11,
+            "Map": 315,
+            "Present": 1,
+            "ResolveSubresource": 12,
+            "annotation_records": 26,
+            "present_rtv_unbinds": 1,
+            "query_completion_unresolved": 1,
+            "query_end_observations": 1,
+            "query_metadata_records": 3,
+            "unmap_observations": 315
+          },
+          "original_audit": {
+            "scope": "Explicit playback; DrawIndexed path of this pinned build",
+            "negative_control_suppress_draws": false,
+            "context_count": 1,
+            "d3d11_calls": {
+              "DrawIndexed": 200,
+              "submitted_indices": 1371294
+            },
+            "event_dispatch_count": 611,
+            "event_function_rvas": {
+              "0x25b40": 8,
+              "0x27ec0": 26,
+              "0x26250": 3,
+              "0x259e0": 12,
+              "0x27080": 315,
+              "0x27f50": 200,
+              "0x29bf0": 11,
+              "0x27fe0": 11,
+              "0x29cf0": 7,
+              "0x28b40": 12,
+              "0x28850": 4,
+              "0x28950": 2
+            },
+            "actual_context_adapters": [
+              {
+                "description": "Intel(R) Iris(R) Xe Graphics",
+                "vendor_id": 32902,
+                "device_id": 18086,
+                "luid": [
+                  67264,
+                  0
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "repeat": 2,
+          "comparisons": {
+            "flora_vs_captured": {
+              "different_pixels": 0,
+              "different_channels": 0,
+              "maximum": 0
+            },
+            "original_vs_captured": {
+              "different_pixels": 0,
+              "different_channels": 0,
+              "maximum": 0
+            },
+            "flora_vs_original": {
+              "different_pixels": 0,
+              "different_channels": 0,
+              "maximum": 0
+            }
+          },
+          "rgba_sha256": {
+            "flora": "18c300a7e51e69e1373721a84bba3218a5ecef810fb6b7dc2cadf50e5a27c2d9",
+            "original": "18c300a7e51e69e1373721a84bba3218a5ecef810fb6b7dc2cadf50e5a27c2d9",
+            "captured": "18c300a7e51e69e1373721a84bba3218a5ecef810fb6b7dc2cadf50e5a27c2d9"
+          },
+          "flora_counts": {
+            "ClearDepthStencilView": 12,
+            "ClearRenderTargetView": 8,
+            "CopyResource": 3,
+            "Draw": 26,
+            "DrawIndexed": 200,
+            "DrawIndexedInstanced": 11,
+            "Map": 315,
+            "Present": 1,
+            "ResolveSubresource": 12,
+            "annotation_records": 26,
+            "present_rtv_unbinds": 1,
+            "query_completion_unresolved": 1,
+            "query_end_observations": 1,
+            "query_metadata_records": 3,
+            "unmap_observations": 315
+          },
+          "original_audit": {
+            "scope": "Explicit playback; DrawIndexed path of this pinned build",
+            "negative_control_suppress_draws": false,
+            "context_count": 1,
+            "d3d11_calls": {
+              "DrawIndexed": 200,
+              "submitted_indices": 1371294
+            },
+            "event_dispatch_count": 611,
+            "event_function_rvas": {
+              "0x25b40": 8,
+              "0x27ec0": 26,
+              "0x26250": 3,
+              "0x259e0": 12,
+              "0x27080": 315,
+              "0x27f50": 200,
+              "0x29bf0": 11,
+              "0x27fe0": 11,
+              "0x29cf0": 7,
+              "0x28b40": 12,
+              "0x28850": 4,
+              "0x28950": 2
+            },
+            "actual_context_adapters": [
+              {
+                "description": "Intel(R) Iris(R) Xe Graphics",
+                "vendor_id": 32902,
+                "device_id": 18086,
+                "luid": [
+                  67264,
+                  0
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "sha256": "83221521e2fd9068c58cf2e357eec264518df6cbd1699092558be8f18691dba1"
+    },
+    {
+      "launch": 2,
+      "index": 1,
+      "frame": "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\capture-gf2-current-20261014\\launch-2\\session\\frame-ea012dee-6ca2-4cc0-a01a-44a9b592d415.gpa_frame",
+      "scene": "equipment_room",
+      "present": 1882,
+      "bytes": 1340595478,
+      "replays": [
+        {
+          "repeat": 0,
+          "comparisons": {
+            "flora_vs_captured": {
+              "different_pixels": 0,
+              "different_channels": 0,
+              "maximum": 0
+            },
+            "original_vs_captured": {
+              "different_pixels": 0,
+              "different_channels": 0,
+              "maximum": 0
+            },
+            "flora_vs_original": {
+              "different_pixels": 0,
+              "different_channels": 0,
+              "maximum": 0
+            }
+          },
+          "rgba_sha256": {
+            "flora": "c96e671bd63899d81cea1d785b3dd530623ef0f4f962b922814260b625bfbe2d",
+            "original": "c96e671bd63899d81cea1d785b3dd530623ef0f4f962b922814260b625bfbe2d",
+            "captured": "c96e671bd63899d81cea1d785b3dd530623ef0f4f962b922814260b625bfbe2d"
+          },
+          "flora_counts": {
+            "ClearDepthStencilView": 11,
+            "ClearRenderTargetView": 9,
+            "CopyResource": 4,
+            "Dispatch": 3,
+            "Draw": 26,
+            "DrawIndexed": 228,
+            "DrawIndexedInstanced": 341,
+            "Map": 361,
+            "Present": 1,
+            "ResolveSubresource": 9,
+            "annotation_records": 24,
+            "present_rtv_unbinds": 1,
+            "query_completion_unresolved": 1,
+            "query_end_observations": 1,
+            "query_metadata_records": 3,
+            "unmap_observations": 361
+          },
+          "original_audit": {
+            "scope": "Explicit playback; DrawIndexed path of this pinned build",
+            "negative_control_suppress_draws": false,
+            "context_count": 1,
+            "d3d11_calls": {
+              "DrawIndexed": 228,
+              "submitted_indices": 1481592
+            },
+            "event_dispatch_count": 1659,
+            "event_function_rvas": {
+              "0x25b40": 9,
+              "0x27ec0": 26,
+              "0x26250": 4,
+              "0x259e0": 11,
+              "0x27080": 361,
+              "0x29bf0": 341,
+              "0x28850": 316,
+              "0x27fe0": 341,
+              "0x29cf0": 7,
+              "0x28950": 3,
+              "0x27f50": 228,
+              "0x28b40": 9,
+              "0x27cc0": 3
+            },
+            "actual_context_adapters": [
+              {
+                "description": "Intel(R) Iris(R) Xe Graphics",
+                "vendor_id": 32902,
+                "device_id": 18086,
+                "luid": [
+                  67264,
+                  0
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "repeat": 1,
+          "comparisons": {
+            "flora_vs_captured": {
+              "different_pixels": 0,
+              "different_channels": 0,
+              "maximum": 0
+            },
+            "original_vs_captured": {
+              "different_pixels": 0,
+              "different_channels": 0,
+              "maximum": 0
+            },
+            "flora_vs_original": {
+              "different_pixels": 0,
+              "different_channels": 0,
+              "maximum": 0
+            }
+          },
+          "rgba_sha256": {
+            "flora": "c96e671bd63899d81cea1d785b3dd530623ef0f4f962b922814260b625bfbe2d",
+            "original": "c96e671bd63899d81cea1d785b3dd530623ef0f4f962b922814260b625bfbe2d",
+            "captured": "c96e671bd63899d81cea1d785b3dd530623ef0f4f962b922814260b625bfbe2d"
+          },
+          "flora_counts": {
+            "ClearDepthStencilView": 11,
+            "ClearRenderTargetView": 9,
+            "CopyResource": 4,
+            "Dispatch": 3,
+            "Draw": 26,
+            "DrawIndexed": 228,
+            "DrawIndexedInstanced": 341,
+            "Map": 361,
+            "Present": 1,
+            "ResolveSubresource": 9,
+            "annotation_records": 24,
+            "present_rtv_unbinds": 1,
+            "query_completion_unresolved": 1,
+            "query_end_observations": 1,
+            "query_metadata_records": 3,
+            "unmap_observations": 361
+          },
+          "original_audit": {
+            "scope": "Explicit playback; DrawIndexed path of this pinned build",
+            "negative_control_suppress_draws": false,
+            "context_count": 1,
+            "d3d11_calls": {
+              "DrawIndexed": 228,
+              "submitted_indices": 1481592
+            },
+            "event_dispatch_count": 1659,
+            "event_function_rvas": {
+              "0x25b40": 9,
+              "0x27ec0": 26,
+              "0x26250": 4,
+              "0x259e0": 11,
+              "0x27080": 361,
+              "0x29bf0": 341,
+              "0x28850": 316,
+              "0x27fe0": 341,
+              "0x29cf0": 7,
+              "0x28950": 3,
+              "0x27f50": 228,
+              "0x28b40": 9,
+              "0x27cc0": 3
+            },
+            "actual_context_adapters": [
+              {
+                "description": "Intel(R) Iris(R) Xe Graphics",
+                "vendor_id": 32902,
+                "device_id": 18086,
+                "luid": [
+                  67264,
+                  0
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "repeat": 2,
+          "comparisons": {
+            "flora_vs_captured": {
+              "different_pixels": 0,
+              "different_channels": 0,
+              "maximum": 0
+            },
+            "original_vs_captured": {
+              "different_pixels": 0,
+              "different_channels": 0,
+              "maximum": 0
+            },
+            "flora_vs_original": {
+              "different_pixels": 0,
+              "different_channels": 0,
+              "maximum": 0
+            }
+          },
+          "rgba_sha256": {
+            "flora": "c96e671bd63899d81cea1d785b3dd530623ef0f4f962b922814260b625bfbe2d",
+            "original": "c96e671bd63899d81cea1d785b3dd530623ef0f4f962b922814260b625bfbe2d",
+            "captured": "c96e671bd63899d81cea1d785b3dd530623ef0f4f962b922814260b625bfbe2d"
+          },
+          "flora_counts": {
+            "ClearDepthStencilView": 11,
+            "ClearRenderTargetView": 9,
+            "CopyResource": 4,
+            "Dispatch": 3,
+            "Draw": 26,
+            "DrawIndexed": 228,
+            "DrawIndexedInstanced": 341,
+            "Map": 361,
+            "Present": 1,
+            "ResolveSubresource": 9,
+            "annotation_records": 24,
+            "present_rtv_unbinds": 1,
+            "query_completion_unresolved": 1,
+            "query_end_observations": 1,
+            "query_metadata_records": 3,
+            "unmap_observations": 361
+          },
+          "original_audit": {
+            "scope": "Explicit playback; DrawIndexed path of this pinned build",
+            "negative_control_suppress_draws": false,
+            "context_count": 1,
+            "d3d11_calls": {
+              "DrawIndexed": 228,
+              "submitted_indices": 1481592
+            },
+            "event_dispatch_count": 1659,
+            "event_function_rvas": {
+              "0x25b40": 9,
+              "0x27ec0": 26,
+              "0x26250": 4,
+              "0x259e0": 11,
+              "0x27080": 361,
+              "0x29bf0": 341,
+              "0x28850": 316,
+              "0x27fe0": 341,
+              "0x29cf0": 7,
+              "0x28950": 3,
+              "0x27f50": 228,
+              "0x28b40": 9,
+              "0x27cc0": 3
+            },
+            "actual_context_adapters": [
+              {
+                "description": "Intel(R) Iris(R) Xe Graphics",
+                "vendor_id": 32902,
+                "device_id": 18086,
+                "luid": [
+                  67264,
+                  0
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "sha256": "bb5216ca2a2cb9e602e99d3acaa519fb7e0e1a4a9f9127012f8d4bc34f87cfe2"
+    },
+    {
+      "launch": 2,
+      "index": 2,
+      "frame": "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\capture-gf2-current-20261014\\launch-2\\session\\frame-db867124-c787-4265-a001-abd85ed4c0e1.gpa_frame",
+      "scene": "equipment_room",
+      "present": 2147,
+      "bytes": 1340864766,
+      "replays": [
+        {
+          "repeat": 0,
+          "comparisons": {
+            "flora_vs_captured": {
+              "different_pixels": 0,
+              "different_channels": 0,
+              "maximum": 0
+            },
+            "original_vs_captured": {
+              "different_pixels": 0,
+              "different_channels": 0,
+              "maximum": 0
+            },
+            "flora_vs_original": {
+              "different_pixels": 0,
+              "different_channels": 0,
+              "maximum": 0
+            }
+          },
+          "rgba_sha256": {
+            "flora": "4a377563bbcee1a3e1e0baf7296ad700ecbf5ba9a47fa5acdb59b9e0a266914e",
+            "original": "4a377563bbcee1a3e1e0baf7296ad700ecbf5ba9a47fa5acdb59b9e0a266914e",
+            "captured": "4a377563bbcee1a3e1e0baf7296ad700ecbf5ba9a47fa5acdb59b9e0a266914e"
+          },
+          "flora_counts": {
+            "ClearDepthStencilView": 11,
+            "ClearRenderTargetView": 9,
+            "CopyResource": 4,
+            "Dispatch": 3,
+            "Draw": 26,
+            "DrawIndexed": 235,
+            "DrawIndexedInstanced": 341,
+            "Map": 373,
+            "Present": 1,
+            "ResolveSubresource": 9,
+            "annotation_records": 24,
+            "present_rtv_unbinds": 1,
+            "query_completion_unresolved": 1,
+            "query_end_observations": 1,
+            "query_metadata_records": 3,
+            "unmap_observations": 373
+          },
+          "original_audit": {
+            "scope": "Explicit playback; DrawIndexed path of this pinned build",
+            "negative_control_suppress_draws": false,
+            "context_count": 1,
+            "d3d11_calls": {
+              "DrawIndexed": 235,
+              "submitted_indices": 1692642
+            },
+            "event_dispatch_count": 1678,
+            "event_function_rvas": {
+              "0x25b40": 9,
+              "0x27ec0": 26,
+              "0x26250": 4,
+              "0x259e0": 11,
+              "0x27080": 373,
+              "0x29bf0": 341,
+              "0x28850": 316,
+              "0x27fe0": 341,
+              "0x29cf0": 7,
+              "0x28950": 3,
+              "0x27f50": 235,
+              "0x28b40": 9,
+              "0x27cc0": 3
+            },
+            "actual_context_adapters": [
+              {
+                "description": "Intel(R) Iris(R) Xe Graphics",
+                "vendor_id": 32902,
+                "device_id": 18086,
+                "luid": [
+                  67264,
+                  0
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "repeat": 1,
+          "comparisons": {
+            "flora_vs_captured": {
+              "different_pixels": 0,
+              "different_channels": 0,
+              "maximum": 0
+            },
+            "original_vs_captured": {
+              "different_pixels": 0,
+              "different_channels": 0,
+              "maximum": 0
+            },
+            "flora_vs_original": {
+              "different_pixels": 0,
+              "different_channels": 0,
+              "maximum": 0
+            }
+          },
+          "rgba_sha256": {
+            "flora": "4a377563bbcee1a3e1e0baf7296ad700ecbf5ba9a47fa5acdb59b9e0a266914e",
+            "original": "4a377563bbcee1a3e1e0baf7296ad700ecbf5ba9a47fa5acdb59b9e0a266914e",
+            "captured": "4a377563bbcee1a3e1e0baf7296ad700ecbf5ba9a47fa5acdb59b9e0a266914e"
+          },
+          "flora_counts": {
+            "ClearDepthStencilView": 11,
+            "ClearRenderTargetView": 9,
+            "CopyResource": 4,
+            "Dispatch": 3,
+            "Draw": 26,
+            "DrawIndexed": 235,
+            "DrawIndexedInstanced": 341,
+            "Map": 373,
+            "Present": 1,
+            "ResolveSubresource": 9,
+            "annotation_records": 24,
+            "present_rtv_unbinds": 1,
+            "query_completion_unresolved": 1,
+            "query_end_observations": 1,
+            "query_metadata_records": 3,
+            "unmap_observations": 373
+          },
+          "original_audit": {
+            "scope": "Explicit playback; DrawIndexed path of this pinned build",
+            "negative_control_suppress_draws": false,
+            "context_count": 1,
+            "d3d11_calls": {
+              "DrawIndexed": 235,
+              "submitted_indices": 1692642
+            },
+            "event_dispatch_count": 1678,
+            "event_function_rvas": {
+              "0x25b40": 9,
+              "0x27ec0": 26,
+              "0x26250": 4,
+              "0x259e0": 11,
+              "0x27080": 373,
+              "0x29bf0": 341,
+              "0x28850": 316,
+              "0x27fe0": 341,
+              "0x29cf0": 7,
+              "0x28950": 3,
+              "0x27f50": 235,
+              "0x28b40": 9,
+              "0x27cc0": 3
+            },
+            "actual_context_adapters": [
+              {
+                "description": "Intel(R) Iris(R) Xe Graphics",
+                "vendor_id": 32902,
+                "device_id": 18086,
+                "luid": [
+                  67264,
+                  0
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "repeat": 2,
+          "comparisons": {
+            "flora_vs_captured": {
+              "different_pixels": 0,
+              "different_channels": 0,
+              "maximum": 0
+            },
+            "original_vs_captured": {
+              "different_pixels": 0,
+              "different_channels": 0,
+              "maximum": 0
+            },
+            "flora_vs_original": {
+              "different_pixels": 0,
+              "different_channels": 0,
+              "maximum": 0
+            }
+          },
+          "rgba_sha256": {
+            "flora": "4a377563bbcee1a3e1e0baf7296ad700ecbf5ba9a47fa5acdb59b9e0a266914e",
+            "original": "4a377563bbcee1a3e1e0baf7296ad700ecbf5ba9a47fa5acdb59b9e0a266914e",
+            "captured": "4a377563bbcee1a3e1e0baf7296ad700ecbf5ba9a47fa5acdb59b9e0a266914e"
+          },
+          "flora_counts": {
+            "ClearDepthStencilView": 11,
+            "ClearRenderTargetView": 9,
+            "CopyResource": 4,
+            "Dispatch": 3,
+            "Draw": 26,
+            "DrawIndexed": 235,
+            "DrawIndexedInstanced": 341,
+            "Map": 373,
+            "Present": 1,
+            "ResolveSubresource": 9,
+            "annotation_records": 24,
+            "present_rtv_unbinds": 1,
+            "query_completion_unresolved": 1,
+            "query_end_observations": 1,
+            "query_metadata_records": 3,
+            "unmap_observations": 373
+          },
+          "original_audit": {
+            "scope": "Explicit playback; DrawIndexed path of this pinned build",
+            "negative_control_suppress_draws": false,
+            "context_count": 1,
+            "d3d11_calls": {
+              "DrawIndexed": 235,
+              "submitted_indices": 1692642
+            },
+            "event_dispatch_count": 1678,
+            "event_function_rvas": {
+              "0x25b40": 9,
+              "0x27ec0": 26,
+              "0x26250": 4,
+              "0x259e0": 11,
+              "0x27080": 373,
+              "0x29bf0": 341,
+              "0x28850": 316,
+              "0x27fe0": 341,
+              "0x29cf0": 7,
+              "0x28950": 3,
+              "0x27f50": 235,
+              "0x28b40": 9,
+              "0x27cc0": 3
+            },
+            "actual_context_adapters": [
+              {
+                "description": "Intel(R) Iris(R) Xe Graphics",
+                "vendor_id": 32902,
+                "device_id": 18086,
+                "luid": [
+                  67264,
+                  0
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "sha256": "50e3f63fe48aee307b6e1f4e76d13caa1b52ec70b6d1ab92c1cde4c8b55eb9fe"
+    }
+  ],
+  "references": [
+    {
+      "launch": 1,
+      "index": 0,
+      "frame": "frame-3fd51a50-3227-4d79-b7c7-8f08141ff660.gpa_frame",
+      "reference_resource": 3379,
+      "data_id": 3378,
+      "bytes": 14745600,
+      "rgba_sha256": "5172c2dcfccb94afb631c3202bacacb96759a83062bf2d2754e94f43ee4a9bcd",
+      "preview_and_all_original_references_exact": true,
+      "executions": [
+        {
+          "repeat": 0,
+          "flora": true,
+          "original": true
+        },
+        {
+          "repeat": 1,
+          "flora": true,
+          "original": true
+        },
+        {
+          "repeat": 2,
+          "flora": true,
+          "original": true
+        }
+      ]
+    },
+    {
+      "launch": 1,
+      "index": 1,
+      "frame": "frame-23c72ea8-d6f0-4557-96e7-48513d0f27bd.gpa_frame",
+      "reference_resource": 6393,
+      "data_id": 6392,
+      "bytes": 14745600,
+      "rgba_sha256": "2eb0f8599471d9dc4068eacece6f0a7d49e3d3821edc8669bd16babbc27e2ccb",
+      "preview_and_all_original_references_exact": true,
+      "executions": [
+        {
+          "repeat": 0,
+          "flora": true,
+          "original": true
+        },
+        {
+          "repeat": 1,
+          "flora": true,
+          "original": true
+        },
+        {
+          "repeat": 2,
+          "flora": true,
+          "original": true
+        }
+      ]
+    },
+    {
+      "launch": 1,
+      "index": 2,
+      "frame": "frame-8df44cb7-96a5-4ddf-9649-a60ac27325ba.gpa_frame",
+      "reference_resource": 6342,
+      "data_id": 6341,
+      "bytes": 14745600,
+      "rgba_sha256": "a9064677a283c7901bbe14e2f3748a72f5128adccb9b2f259004cb973c2c63cc",
+      "preview_and_all_original_references_exact": true,
+      "executions": [
+        {
+          "repeat": 0,
+          "flora": false,
+          "original": true
+        },
+        {
+          "repeat": 1,
+          "flora": true,
+          "original": true
+        },
+        {
+          "repeat": 2,
+          "flora": true,
+          "original": false
+        }
+      ]
+    },
+    {
+      "launch": 2,
+      "index": 0,
+      "frame": "frame-9fe1dadd-f08f-4771-a384-a9a42125227a.gpa_frame",
+      "reference_resource": 3369,
+      "data_id": 3368,
+      "bytes": 14745600,
+      "rgba_sha256": "18c300a7e51e69e1373721a84bba3218a5ecef810fb6b7dc2cadf50e5a27c2d9",
+      "preview_and_all_original_references_exact": true,
+      "executions": [
+        {
+          "repeat": 0,
+          "flora": true,
+          "original": true
+        },
+        {
+          "repeat": 1,
+          "flora": true,
+          "original": true
+        },
+        {
+          "repeat": 2,
+          "flora": true,
+          "original": true
+        }
+      ]
+    },
+    {
+      "launch": 2,
+      "index": 1,
+      "frame": "frame-ea012dee-6ca2-4cc0-a01a-44a9b592d415.gpa_frame",
+      "reference_resource": 6311,
+      "data_id": 6310,
+      "bytes": 14745600,
+      "rgba_sha256": "c96e671bd63899d81cea1d785b3dd530623ef0f4f962b922814260b625bfbe2d",
+      "preview_and_all_original_references_exact": true,
+      "executions": [
+        {
+          "repeat": 0,
+          "flora": true,
+          "original": true
+        },
+        {
+          "repeat": 1,
+          "flora": true,
+          "original": true
+        },
+        {
+          "repeat": 2,
+          "flora": true,
+          "original": true
+        }
+      ]
+    },
+    {
+      "launch": 2,
+      "index": 2,
+      "frame": "frame-db867124-c787-4265-a001-abd85ed4c0e1.gpa_frame",
+      "reference_resource": 6379,
+      "data_id": 6378,
+      "bytes": 14745600,
+      "rgba_sha256": "4a377563bbcee1a3e1e0baf7296ad700ecbf5ba9a47fa5acdb59b9e0a266914e",
+      "preview_and_all_original_references_exact": true,
+      "executions": [
+        {
+          "repeat": 0,
+          "flora": true,
+          "original": true
+        },
+        {
+          "repeat": 1,
+          "flora": true,
+          "original": true
+        },
+        {
+          "repeat": 2,
+          "flora": true,
+          "original": true
+        }
+      ]
+    }
+  ],
+  "negative_controls": [
+    {
+      "launch": 1,
+      "index": 0,
+      "comparisons": {
+        "flora": {
+          "different_pixels": 2210684,
+          "maximum": 248,
+          "sha256": "6fa093abaec674dd9115fdb1799cdc4ed2650c6f19e905ca4d5bfd3cdbd47c89"
+        },
+        "original": {
+          "different_pixels": 2210684,
+          "maximum": 248,
+          "sha256": "6fa093abaec674dd9115fdb1799cdc4ed2650c6f19e905ca4d5bfd3cdbd47c89"
+        }
+      },
+      "outputs_equal": true,
+      "original_suppressed_DrawIndexed": 201
+    },
+    {
+      "launch": 1,
+      "index": 1,
+      "comparisons": {
+        "flora": {
+          "different_pixels": 1045508,
+          "maximum": 165,
+          "sha256": "a2dd0e3ad095547547f100bfdeb1cc325fed34e68f01491101b96bce533f1964"
+        },
+        "original": {
+          "different_pixels": 1045508,
+          "maximum": 165,
+          "sha256": "a2dd0e3ad095547547f100bfdeb1cc325fed34e68f01491101b96bce533f1964"
+        }
+      },
+      "outputs_equal": true,
+      "original_suppressed_DrawIndexed": 234
+    },
+    {
+      "launch": 1,
+      "index": 2,
+      "comparisons": {
+        "flora": {
+          "different_pixels": 987799,
+          "maximum": 215,
+          "sha256": "f9aeabfd884719ccdec07513b456badf314d774ff17d3557effcb4749bd159e2"
+        },
+        "original": {
+          "different_pixels": 987799,
+          "maximum": 215,
+          "sha256": "f9aeabfd884719ccdec07513b456badf314d774ff17d3557effcb4749bd159e2"
+        }
+      },
+      "outputs_equal": true,
+      "original_suppressed_DrawIndexed": 229
+    },
+    {
+      "launch": 2,
+      "index": 0,
+      "comparisons": {
+        "flora": {
+          "different_pixels": 2390067,
+          "maximum": 246,
+          "sha256": "351f447ced4f6b9256a79691a0d30dc796c6a5db51413ca1b99b02ddb41b5b61"
+        },
+        "original": {
+          "different_pixels": 2390067,
+          "maximum": 246,
+          "sha256": "351f447ced4f6b9256a79691a0d30dc796c6a5db51413ca1b99b02ddb41b5b61"
+        }
+      },
+      "outputs_equal": true,
+      "original_suppressed_DrawIndexed": 200
+    },
+    {
+      "launch": 2,
+      "index": 1,
+      "comparisons": {
+        "flora": {
+          "different_pixels": 1051375,
+          "maximum": 230,
+          "sha256": "e4d6907b3e15450781a16e471393186ee2dc8185ad92bcf378f752bc200fab92"
+        },
+        "original": {
+          "different_pixels": 1051375,
+          "maximum": 230,
+          "sha256": "e4d6907b3e15450781a16e471393186ee2dc8185ad92bcf378f752bc200fab92"
+        }
+      },
+      "outputs_equal": true,
+      "original_suppressed_DrawIndexed": 228
+    },
+    {
+      "launch": 2,
+      "index": 2,
+      "comparisons": {
+        "flora": {
+          "different_pixels": 1005869,
+          "maximum": 195,
+          "sha256": "9d7351da5b746c5476b0b80da1d66201e44e80756b1e213bd8cb02b758df6237"
+        },
+        "original": {
+          "different_pixels": 1005869,
+          "maximum": 195,
+          "sha256": "9d7351da5b746c5476b0b80da1d66201e44e80756b1e213bd8cb02b758df6237"
+        }
+      },
+      "outputs_equal": true,
+      "original_suppressed_DrawIndexed": 235
+    }
+  ],
+  "inspection": [
+    {
+      "launch": 1,
+      "index": 0,
+      "resources": 610,
+      "draws": 238,
+      "dispatches": 0,
+      "pipelines": [
+        {
+          "event": "2300",
+          "known_fields": 1302,
+          "unknown_fields": 4
+        },
+        {
+          "event": "3360",
+          "known_fields": 1302,
+          "unknown_fields": 4
+        }
+      ],
+      "shaders": [
+        {
+          "resource_id": 37,
+          "sha256": "6b3ed052e7846fc4ba2bb450c0fa6466ea69567965217ed8c9bb3505ca151ce6"
+        },
+        {
+          "resource_id": 38,
+          "sha256": "bc4aee2598ed82ed1d584dc8b5b26aacc9628827f25fe707893bb2978af09e23"
+        },
+        {
+          "resource_id": 502,
+          "sha256": "18669b668cb39b907a02cfec253f74b24d0c09c6ae73d0d65f27455032b2d869"
+        },
+        {
+          "resource_id": 503,
+          "sha256": "8208195a6263fdfba1261860ff60ab42c14168ec7f9218c4de4824432d532318"
+        }
+      ]
+    },
+    {
+      "launch": 1,
+      "index": 1,
+      "resources": 966,
+      "draws": 601,
+      "dispatches": 3,
+      "pipelines": [
+        {
+          "event": "5068",
+          "known_fields": 1302,
+          "unknown_fields": 4
+        },
+        {
+          "event": "5357",
+          "known_fields": 1302,
+          "unknown_fields": 4
+        },
+        {
+          "event": "6377",
+          "known_fields": 1302,
+          "unknown_fields": 4
+        }
+      ],
+      "shaders": [
+        {
+          "resource_id": 38,
+          "sha256": "6b3ed052e7846fc4ba2bb450c0fa6466ea69567965217ed8c9bb3505ca151ce6"
+        },
+        {
+          "resource_id": 39,
+          "sha256": "bc4aee2598ed82ed1d584dc8b5b26aacc9628827f25fe707893bb2978af09e23"
+        },
+        {
+          "resource_id": 81,
+          "sha256": "5c65778a398b19407968c283cc2f3bc299faf63b49dd9bf79b0589d2ddf63d3f"
+        },
+        {
+          "resource_id": 862,
+          "sha256": "6cc3d926b5f1a5f8af332ff7327bb856b4687b9c9801af363b230f880b5d1387"
+        },
+        {
+          "resource_id": 863,
+          "sha256": "57711ec60ddadf5c6df36dfdeaeffbc6be002db77030137981cf2d3806832a80"
+        }
+      ]
+    },
+    {
+      "launch": 1,
+      "index": 2,
+      "resources": 966,
+      "draws": 596,
+      "dispatches": 3,
+      "pipelines": [
+        {
+          "event": "5003",
+          "known_fields": 1302,
+          "unknown_fields": 4
+        },
+        {
+          "event": "5292",
+          "known_fields": 1302,
+          "unknown_fields": 4
+        },
+        {
+          "event": "6326",
+          "known_fields": 1302,
+          "unknown_fields": 4
+        }
+      ],
+      "shaders": [
+        {
+          "resource_id": 38,
+          "sha256": "6b3ed052e7846fc4ba2bb450c0fa6466ea69567965217ed8c9bb3505ca151ce6"
+        },
+        {
+          "resource_id": 39,
+          "sha256": "bc4aee2598ed82ed1d584dc8b5b26aacc9628827f25fe707893bb2978af09e23"
+        },
+        {
+          "resource_id": 81,
+          "sha256": "5c65778a398b19407968c283cc2f3bc299faf63b49dd9bf79b0589d2ddf63d3f"
+        },
+        {
+          "resource_id": 862,
+          "sha256": "6cc3d926b5f1a5f8af332ff7327bb856b4687b9c9801af363b230f880b5d1387"
+        },
+        {
+          "resource_id": 863,
+          "sha256": "57711ec60ddadf5c6df36dfdeaeffbc6be002db77030137981cf2d3806832a80"
+        }
+      ]
+    },
+    {
+      "launch": 2,
+      "index": 0,
+      "resources": 608,
+      "draws": 237,
+      "dispatches": 0,
+      "pipelines": [
+        {
+          "event": "2288",
+          "known_fields": 1302,
+          "unknown_fields": 4
+        },
+        {
+          "event": "3350",
+          "known_fields": 1302,
+          "unknown_fields": 4
+        }
+      ],
+      "shaders": [
+        {
+          "resource_id": 37,
+          "sha256": "6b3ed052e7846fc4ba2bb450c0fa6466ea69567965217ed8c9bb3505ca151ce6"
+        },
+        {
+          "resource_id": 38,
+          "sha256": "bc4aee2598ed82ed1d584dc8b5b26aacc9628827f25fe707893bb2978af09e23"
+        },
+        {
+          "resource_id": 498,
+          "sha256": "18669b668cb39b907a02cfec253f74b24d0c09c6ae73d0d65f27455032b2d869"
+        },
+        {
+          "resource_id": 499,
+          "sha256": "8208195a6263fdfba1261860ff60ab42c14168ec7f9218c4de4824432d532318"
+        }
+      ]
+    },
+    {
+      "launch": 2,
+      "index": 1,
+      "resources": 966,
+      "draws": 595,
+      "dispatches": 3,
+      "pipelines": [
+        {
+          "event": "4982",
+          "known_fields": 1302,
+          "unknown_fields": 4
+        },
+        {
+          "event": "5265",
+          "known_fields": 1302,
+          "unknown_fields": 4
+        },
+        {
+          "event": "6295",
+          "known_fields": 1302,
+          "unknown_fields": 4
+        }
+      ],
+      "shaders": [
+        {
+          "resource_id": 38,
+          "sha256": "6b3ed052e7846fc4ba2bb450c0fa6466ea69567965217ed8c9bb3505ca151ce6"
+        },
+        {
+          "resource_id": 39,
+          "sha256": "bc4aee2598ed82ed1d584dc8b5b26aacc9628827f25fe707893bb2978af09e23"
+        },
+        {
+          "resource_id": 81,
+          "sha256": "5c65778a398b19407968c283cc2f3bc299faf63b49dd9bf79b0589d2ddf63d3f"
+        },
+        {
+          "resource_id": 862,
+          "sha256": "6cc3d926b5f1a5f8af332ff7327bb856b4687b9c9801af363b230f880b5d1387"
+        },
+        {
+          "resource_id": 863,
+          "sha256": "57711ec60ddadf5c6df36dfdeaeffbc6be002db77030137981cf2d3806832a80"
+        }
+      ]
+    },
+    {
+      "launch": 2,
+      "index": 2,
+      "resources": 968,
+      "draws": 602,
+      "dispatches": 3,
+      "pipelines": [
+        {
+          "event": "5050",
+          "known_fields": 1302,
+          "unknown_fields": 4
+        },
+        {
+          "event": "5333",
+          "known_fields": 1302,
+          "unknown_fields": 4
+        },
+        {
+          "event": "6363",
+          "known_fields": 1302,
+          "unknown_fields": 4
+        }
+      ],
+      "shaders": [
+        {
+          "resource_id": 38,
+          "sha256": "6b3ed052e7846fc4ba2bb450c0fa6466ea69567965217ed8c9bb3505ca151ce6"
+        },
+        {
+          "resource_id": 39,
+          "sha256": "bc4aee2598ed82ed1d584dc8b5b26aacc9628827f25fe707893bb2978af09e23"
+        },
+        {
+          "resource_id": 81,
+          "sha256": "5c65778a398b19407968c283cc2f3bc299faf63b49dd9bf79b0589d2ddf63d3f"
+        },
+        {
+          "resource_id": 864,
+          "sha256": "6cc3d926b5f1a5f8af332ff7327bb856b4687b9c9801af363b230f880b5d1387"
+        },
+        {
+          "resource_id": 865,
+          "sha256": "57711ec60ddadf5c6df36dfdeaeffbc6be002db77030137981cf2d3806832a80"
+        }
+      ]
+    }
+  ],
+  "buffer_checks": [
+    {
+      "launch": 1,
+      "index": 0,
+      "binding": "vs.cb.0",
+      "resource_id": 118,
+      "original_bytes": 44704,
+      "flora_bytes": 44704,
+      "exact": true,
+      "original_sha256": "b64287b88a1a15523a27ab50936d723968839132df03aa16cf9804f7b47ab3df",
+      "flora_sha256": "b64287b88a1a15523a27ab50936d723968839132df03aa16cf9804f7b47ab3df"
+    },
+    {
+      "launch": 1,
+      "index": 0,
+      "binding": "vs.cb.1",
+      "resource_id": 58,
+      "original_bytes": 528,
+      "flora_bytes": 528,
+      "exact": true,
+      "original_sha256": "d99290bb7dd9cd7a91ad2ec21d88620ed0f8f4c6a366b31eae12f2b9871eb690",
+      "flora_sha256": "d99290bb7dd9cd7a91ad2ec21d88620ed0f8f4c6a366b31eae12f2b9871eb690"
+    },
+    {
+      "launch": 1,
+      "index": 0,
+      "binding": "vs.cb.2",
+      "resource_id": 119,
+      "original_bytes": 544,
+      "flora_bytes": 544,
+      "exact": true,
+      "original_sha256": "97c92335cc2d9bdd82b026749c0f45eaa61158e3c37eef7ca96c0537be1abc78",
+      "flora_sha256": "97c92335cc2d9bdd82b026749c0f45eaa61158e3c37eef7ca96c0537be1abc78"
+    },
+    {
+      "launch": 1,
+      "index": 0,
+      "binding": "vs.cb.3",
+      "resource_id": 15,
+      "original_bytes": 368,
+      "flora_bytes": 368,
+      "exact": true,
+      "original_sha256": "a52e574083c0e2c487d2e1dd7c52ce7c32b004d46a817d720fbb9f8181bf9993",
+      "flora_sha256": "a52e574083c0e2c487d2e1dd7c52ce7c32b004d46a817d720fbb9f8181bf9993"
+    },
+    {
+      "launch": 1,
+      "index": 0,
+      "binding": "ps.cb.0",
+      "resource_id": 118,
+      "original_bytes": 44704,
+      "flora_bytes": 44704,
+      "exact": true,
+      "original_sha256": "b64287b88a1a15523a27ab50936d723968839132df03aa16cf9804f7b47ab3df",
+      "flora_sha256": "b64287b88a1a15523a27ab50936d723968839132df03aa16cf9804f7b47ab3df"
+    },
+    {
+      "launch": 1,
+      "index": 0,
+      "binding": "ps.cb.1",
+      "resource_id": 58,
+      "original_bytes": 528,
+      "flora_bytes": 528,
+      "exact": true,
+      "original_sha256": "d99290bb7dd9cd7a91ad2ec21d88620ed0f8f4c6a366b31eae12f2b9871eb690",
+      "flora_sha256": "d99290bb7dd9cd7a91ad2ec21d88620ed0f8f4c6a366b31eae12f2b9871eb690"
+    },
+    {
+      "launch": 1,
+      "index": 0,
+      "binding": "ps.cb.2",
+      "resource_id": 119,
+      "original_bytes": 544,
+      "flora_bytes": 544,
+      "exact": true,
+      "original_sha256": "97c92335cc2d9bdd82b026749c0f45eaa61158e3c37eef7ca96c0537be1abc78",
+      "flora_sha256": "97c92335cc2d9bdd82b026749c0f45eaa61158e3c37eef7ca96c0537be1abc78"
+    },
+    {
+      "launch": 1,
+      "index": 0,
+      "binding": "vb.0",
+      "resource_id": 468,
+      "original_bytes": 717400,
+      "flora_bytes": 717400,
+      "exact": true,
+      "original_sha256": "97297a827bef07b93b3cbe3daa4a572bdb3bbce4ff5c3f53497031a1fa68cf76",
+      "flora_sha256": "97297a827bef07b93b3cbe3daa4a572bdb3bbce4ff5c3f53497031a1fa68cf76"
+    },
+    {
+      "launch": 1,
+      "index": 0,
+      "binding": "vb.1",
+      "resource_id": 320,
+      "original_bytes": 358700,
+      "flora_bytes": 358700,
+      "exact": true,
+      "original_sha256": "8a13b6a36d83e02fcfc6d26ac8537c0e2a2234b548d07731eee2e0dafd8397dc",
+      "flora_sha256": "8a13b6a36d83e02fcfc6d26ac8537c0e2a2234b548d07731eee2e0dafd8397dc"
+    },
+    {
+      "launch": 1,
+      "index": 0,
+      "binding": "vb.2",
+      "resource_id": 321,
+      "original_bytes": 573920,
+      "flora_bytes": 573920,
+      "exact": true,
+      "original_sha256": "6eb6b45e3966cf959462e66f145e0db97a6955c927f12adaafb90cc3615358d7",
+      "flora_sha256": "6eb6b45e3966cf959462e66f145e0db97a6955c927f12adaafb90cc3615358d7"
+    },
+    {
+      "launch": 1,
+      "index": 0,
+      "binding": "ib",
+      "resource_id": 322,
+      "original_bytes": 143382,
+      "flora_bytes": 143382,
+      "exact": true,
+      "original_sha256": "cab59509117de9fbcc1307586a5a78df3227433785903ecd9cd15d496fbe21f6",
+      "flora_sha256": "cab59509117de9fbcc1307586a5a78df3227433785903ecd9cd15d496fbe21f6"
+    },
+    {
+      "launch": 1,
+      "index": 1,
+      "binding": "vs.cb.0",
+      "resource_id": 360,
+      "original_bytes": 44704,
+      "flora_bytes": 44704,
+      "exact": true,
+      "original_sha256": "43c0e2c556e893112b8b0008a8c65de6ecfc7ba6d2ba9f01135749335e80e869",
+      "flora_sha256": "43c0e2c556e893112b8b0008a8c65de6ecfc7ba6d2ba9f01135749335e80e869"
+    },
+    {
+      "launch": 1,
+      "index": 1,
+      "binding": "vs.cb.1",
+      "resource_id": 60,
+      "original_bytes": 528,
+      "flora_bytes": 528,
+      "exact": true,
+      "original_sha256": "b653e933c890d9444509153c3d79283ee76239cb4019ad2767cb68b730e77c93",
+      "flora_sha256": "b653e933c890d9444509153c3d79283ee76239cb4019ad2767cb68b730e77c93"
+    },
+    {
+      "launch": 1,
+      "index": 1,
+      "binding": "vs.cb.2",
+      "resource_id": 361,
+      "original_bytes": 544,
+      "flora_bytes": 544,
+      "exact": true,
+      "original_sha256": "7f7695fc4fc1572e3d90f1f3c6a293b42e370e6889d8babc6c3c0248c7012ecb",
+      "flora_sha256": "7f7695fc4fc1572e3d90f1f3c6a293b42e370e6889d8babc6c3c0248c7012ecb"
+    },
+    {
+      "launch": 1,
+      "index": 1,
+      "binding": "vs.cb.3",
+      "resource_id": 17,
+      "original_bytes": 368,
+      "flora_bytes": 368,
+      "exact": true,
+      "original_sha256": "4532d17d9167620f954a1a2fbb870f2bd0b983374e42d95ebb3620ae18186a86",
+      "flora_sha256": "4532d17d9167620f954a1a2fbb870f2bd0b983374e42d95ebb3620ae18186a86"
+    },
+    {
+      "launch": 1,
+      "index": 1,
+      "binding": "ps.cb.0",
+      "resource_id": 360,
+      "original_bytes": 44704,
+      "flora_bytes": 44704,
+      "exact": true,
+      "original_sha256": "43c0e2c556e893112b8b0008a8c65de6ecfc7ba6d2ba9f01135749335e80e869",
+      "flora_sha256": "43c0e2c556e893112b8b0008a8c65de6ecfc7ba6d2ba9f01135749335e80e869"
+    },
+    {
+      "launch": 1,
+      "index": 1,
+      "binding": "ps.cb.1",
+      "resource_id": 60,
+      "original_bytes": 528,
+      "flora_bytes": 528,
+      "exact": true,
+      "original_sha256": "b653e933c890d9444509153c3d79283ee76239cb4019ad2767cb68b730e77c93",
+      "flora_sha256": "b653e933c890d9444509153c3d79283ee76239cb4019ad2767cb68b730e77c93"
+    },
+    {
+      "launch": 1,
+      "index": 1,
+      "binding": "ps.cb.2",
+      "resource_id": 361,
+      "original_bytes": 544,
+      "flora_bytes": 544,
+      "exact": true,
+      "original_sha256": "7f7695fc4fc1572e3d90f1f3c6a293b42e370e6889d8babc6c3c0248c7012ecb",
+      "flora_sha256": "7f7695fc4fc1572e3d90f1f3c6a293b42e370e6889d8babc6c3c0248c7012ecb"
+    },
+    {
+      "launch": 1,
+      "index": 1,
+      "binding": "vb.0",
+      "resource_id": 893,
+      "original_bytes": 1129920,
+      "flora_bytes": 1129920,
+      "exact": true,
+      "original_sha256": "c108dfe2522c274ef1d9cd8b3bd0116d8eaffa5e6ea6c19fa2e97eb3a9f6f43e",
+      "flora_sha256": "c108dfe2522c274ef1d9cd8b3bd0116d8eaffa5e6ea6c19fa2e97eb3a9f6f43e"
+    },
+    {
+      "launch": 1,
+      "index": 1,
+      "binding": "vb.1",
+      "resource_id": 790,
+      "original_bytes": 564960,
+      "flora_bytes": 564960,
+      "exact": true,
+      "original_sha256": "cb31ad53a0d55003e1b3a0c748c75a15aaba282640fa304ad70ca718811a1ccd",
+      "flora_sha256": "cb31ad53a0d55003e1b3a0c748c75a15aaba282640fa304ad70ca718811a1ccd"
+    },
+    {
+      "launch": 1,
+      "index": 1,
+      "binding": "vb.2",
+      "resource_id": 791,
+      "original_bytes": 903936,
+      "flora_bytes": 903936,
+      "exact": true,
+      "original_sha256": "54368fd2415f1557870ba8d1050973e6b2ee5797a2e8a8ed7a0c71b014299e9d",
+      "flora_sha256": "54368fd2415f1557870ba8d1050973e6b2ee5797a2e8a8ed7a0c71b014299e9d"
+    },
+    {
+      "launch": 1,
+      "index": 1,
+      "binding": "ib",
+      "resource_id": 792,
+      "original_bytes": 261822,
+      "flora_bytes": 261822,
+      "exact": true,
+      "original_sha256": "c1c158c27ede38c95300e0f4858a049968df82debd6acecde0157be76f64d002",
+      "flora_sha256": "c1c158c27ede38c95300e0f4858a049968df82debd6acecde0157be76f64d002"
+    },
+    {
+      "launch": 1,
+      "index": 2,
+      "binding": "vs.cb.0",
+      "resource_id": 362,
+      "original_bytes": 44704,
+      "flora_bytes": 44704,
+      "exact": true,
+      "original_sha256": "ca2cdd8a024102da0b190065f7227acf6bada0d9dea33ddcfc7a3ce2999ecb48",
+      "flora_sha256": "ca2cdd8a024102da0b190065f7227acf6bada0d9dea33ddcfc7a3ce2999ecb48"
+    },
+    {
+      "launch": 1,
+      "index": 2,
+      "binding": "vs.cb.1",
+      "resource_id": 60,
+      "original_bytes": 528,
+      "flora_bytes": 528,
+      "exact": true,
+      "original_sha256": "a2a8b8f4555ba1ec3f8c025fc6d94521665d8fd0af03a568694166ceb213fb0e",
+      "flora_sha256": "a2a8b8f4555ba1ec3f8c025fc6d94521665d8fd0af03a568694166ceb213fb0e"
+    },
+    {
+      "launch": 1,
+      "index": 2,
+      "binding": "vs.cb.2",
+      "resource_id": 363,
+      "original_bytes": 544,
+      "flora_bytes": 544,
+      "exact": true,
+      "original_sha256": "7f7695fc4fc1572e3d90f1f3c6a293b42e370e6889d8babc6c3c0248c7012ecb",
+      "flora_sha256": "7f7695fc4fc1572e3d90f1f3c6a293b42e370e6889d8babc6c3c0248c7012ecb"
+    },
+    {
+      "launch": 1,
+      "index": 2,
+      "binding": "vs.cb.3",
+      "resource_id": 17,
+      "original_bytes": 368,
+      "flora_bytes": 368,
+      "exact": true,
+      "original_sha256": "4532d17d9167620f954a1a2fbb870f2bd0b983374e42d95ebb3620ae18186a86",
+      "flora_sha256": "4532d17d9167620f954a1a2fbb870f2bd0b983374e42d95ebb3620ae18186a86"
+    },
+    {
+      "launch": 1,
+      "index": 2,
+      "binding": "ps.cb.0",
+      "resource_id": 362,
+      "original_bytes": 44704,
+      "flora_bytes": 44704,
+      "exact": true,
+      "original_sha256": "ca2cdd8a024102da0b190065f7227acf6bada0d9dea33ddcfc7a3ce2999ecb48",
+      "flora_sha256": "ca2cdd8a024102da0b190065f7227acf6bada0d9dea33ddcfc7a3ce2999ecb48"
+    },
+    {
+      "launch": 1,
+      "index": 2,
+      "binding": "ps.cb.1",
+      "resource_id": 60,
+      "original_bytes": 528,
+      "flora_bytes": 528,
+      "exact": true,
+      "original_sha256": "a2a8b8f4555ba1ec3f8c025fc6d94521665d8fd0af03a568694166ceb213fb0e",
+      "flora_sha256": "a2a8b8f4555ba1ec3f8c025fc6d94521665d8fd0af03a568694166ceb213fb0e"
+    },
+    {
+      "launch": 1,
+      "index": 2,
+      "binding": "ps.cb.2",
+      "resource_id": 363,
+      "original_bytes": 544,
+      "flora_bytes": 544,
+      "exact": true,
+      "original_sha256": "7f7695fc4fc1572e3d90f1f3c6a293b42e370e6889d8babc6c3c0248c7012ecb",
+      "flora_sha256": "7f7695fc4fc1572e3d90f1f3c6a293b42e370e6889d8babc6c3c0248c7012ecb"
+    },
+    {
+      "launch": 1,
+      "index": 2,
+      "binding": "vb.0",
+      "resource_id": 893,
+      "original_bytes": 1129920,
+      "flora_bytes": 1129920,
+      "exact": true,
+      "original_sha256": "e19076d756b2856b200ca247464e87d78570de13eaee583de1289cfc6c771d1a",
+      "flora_sha256": "e19076d756b2856b200ca247464e87d78570de13eaee583de1289cfc6c771d1a"
+    },
+    {
+      "launch": 1,
+      "index": 2,
+      "binding": "vb.1",
+      "resource_id": 792,
+      "original_bytes": 564960,
+      "flora_bytes": 564960,
+      "exact": true,
+      "original_sha256": "cb31ad53a0d55003e1b3a0c748c75a15aaba282640fa304ad70ca718811a1ccd",
+      "flora_sha256": "cb31ad53a0d55003e1b3a0c748c75a15aaba282640fa304ad70ca718811a1ccd"
+    },
+    {
+      "launch": 1,
+      "index": 2,
+      "binding": "vb.2",
+      "resource_id": 793,
+      "original_bytes": 903936,
+      "flora_bytes": 903936,
+      "exact": true,
+      "original_sha256": "54368fd2415f1557870ba8d1050973e6b2ee5797a2e8a8ed7a0c71b014299e9d",
+      "flora_sha256": "54368fd2415f1557870ba8d1050973e6b2ee5797a2e8a8ed7a0c71b014299e9d"
+    },
+    {
+      "launch": 1,
+      "index": 2,
+      "binding": "ib",
+      "resource_id": 794,
+      "original_bytes": 261822,
+      "flora_bytes": 261822,
+      "exact": true,
+      "original_sha256": "c1c158c27ede38c95300e0f4858a049968df82debd6acecde0157be76f64d002",
+      "flora_sha256": "c1c158c27ede38c95300e0f4858a049968df82debd6acecde0157be76f64d002"
+    },
+    {
+      "launch": 2,
+      "index": 0,
+      "binding": "vs.cb.0",
+      "resource_id": 116,
+      "original_bytes": 44704,
+      "flora_bytes": 44704,
+      "exact": true,
+      "original_sha256": "02d2cf5a543e85b1364627fb2558576b045e05d0e2fd50752f8dfa0183ecc8f2",
+      "flora_sha256": "02d2cf5a543e85b1364627fb2558576b045e05d0e2fd50752f8dfa0183ecc8f2"
+    },
+    {
+      "launch": 2,
+      "index": 0,
+      "binding": "vs.cb.1",
+      "resource_id": 58,
+      "original_bytes": 528,
+      "flora_bytes": 528,
+      "exact": true,
+      "original_sha256": "3e0c60f4d803f68c412812b82b6501596e34bb464a2d7f0ebdb565b81e93eae1",
+      "flora_sha256": "3e0c60f4d803f68c412812b82b6501596e34bb464a2d7f0ebdb565b81e93eae1"
+    },
+    {
+      "launch": 2,
+      "index": 0,
+      "binding": "vs.cb.2",
+      "resource_id": 117,
+      "original_bytes": 544,
+      "flora_bytes": 544,
+      "exact": true,
+      "original_sha256": "97c92335cc2d9bdd82b026749c0f45eaa61158e3c37eef7ca96c0537be1abc78",
+      "flora_sha256": "97c92335cc2d9bdd82b026749c0f45eaa61158e3c37eef7ca96c0537be1abc78"
+    },
+    {
+      "launch": 2,
+      "index": 0,
+      "binding": "vs.cb.3",
+      "resource_id": 15,
+      "original_bytes": 368,
+      "flora_bytes": 368,
+      "exact": true,
+      "original_sha256": "8f5abdd07a467ff988946da3cb4aff997cfdeff1382914f9f73a68e7a6c4437b",
+      "flora_sha256": "8f5abdd07a467ff988946da3cb4aff997cfdeff1382914f9f73a68e7a6c4437b"
+    },
+    {
+      "launch": 2,
+      "index": 0,
+      "binding": "ps.cb.0",
+      "resource_id": 116,
+      "original_bytes": 44704,
+      "flora_bytes": 44704,
+      "exact": true,
+      "original_sha256": "02d2cf5a543e85b1364627fb2558576b045e05d0e2fd50752f8dfa0183ecc8f2",
+      "flora_sha256": "02d2cf5a543e85b1364627fb2558576b045e05d0e2fd50752f8dfa0183ecc8f2"
+    },
+    {
+      "launch": 2,
+      "index": 0,
+      "binding": "ps.cb.1",
+      "resource_id": 58,
+      "original_bytes": 528,
+      "flora_bytes": 528,
+      "exact": true,
+      "original_sha256": "3e0c60f4d803f68c412812b82b6501596e34bb464a2d7f0ebdb565b81e93eae1",
+      "flora_sha256": "3e0c60f4d803f68c412812b82b6501596e34bb464a2d7f0ebdb565b81e93eae1"
+    },
+    {
+      "launch": 2,
+      "index": 0,
+      "binding": "ps.cb.2",
+      "resource_id": 117,
+      "original_bytes": 544,
+      "flora_bytes": 544,
+      "exact": true,
+      "original_sha256": "97c92335cc2d9bdd82b026749c0f45eaa61158e3c37eef7ca96c0537be1abc78",
+      "flora_sha256": "97c92335cc2d9bdd82b026749c0f45eaa61158e3c37eef7ca96c0537be1abc78"
+    },
+    {
+      "launch": 2,
+      "index": 0,
+      "binding": "vb.0",
+      "resource_id": 464,
+      "original_bytes": 717400,
+      "flora_bytes": 717400,
+      "exact": true,
+      "original_sha256": "8c944f7fe7aa2f8e987d9ab0ea1f43a236873acb53e5d9351790282d011e87c8",
+      "flora_sha256": "8c944f7fe7aa2f8e987d9ab0ea1f43a236873acb53e5d9351790282d011e87c8"
+    },
+    {
+      "launch": 2,
+      "index": 0,
+      "binding": "vb.1",
+      "resource_id": 316,
+      "original_bytes": 358700,
+      "flora_bytes": 358700,
+      "exact": true,
+      "original_sha256": "8a13b6a36d83e02fcfc6d26ac8537c0e2a2234b548d07731eee2e0dafd8397dc",
+      "flora_sha256": "8a13b6a36d83e02fcfc6d26ac8537c0e2a2234b548d07731eee2e0dafd8397dc"
+    },
+    {
+      "launch": 2,
+      "index": 0,
+      "binding": "vb.2",
+      "resource_id": 317,
+      "original_bytes": 573920,
+      "flora_bytes": 573920,
+      "exact": true,
+      "original_sha256": "6eb6b45e3966cf959462e66f145e0db97a6955c927f12adaafb90cc3615358d7",
+      "flora_sha256": "6eb6b45e3966cf959462e66f145e0db97a6955c927f12adaafb90cc3615358d7"
+    },
+    {
+      "launch": 2,
+      "index": 0,
+      "binding": "ib",
+      "resource_id": 318,
+      "original_bytes": 143382,
+      "flora_bytes": 143382,
+      "exact": true,
+      "original_sha256": "cab59509117de9fbcc1307586a5a78df3227433785903ecd9cd15d496fbe21f6",
+      "flora_sha256": "cab59509117de9fbcc1307586a5a78df3227433785903ecd9cd15d496fbe21f6"
+    },
+    {
+      "launch": 2,
+      "index": 1,
+      "binding": "vs.cb.0",
+      "resource_id": 362,
+      "original_bytes": 44704,
+      "flora_bytes": 44704,
+      "exact": true,
+      "original_sha256": "98f44f33c518bdde05e820549a5cfab5eb8a12010b8fbba14a56bd1bbe9c4b0c",
+      "flora_sha256": "98f44f33c518bdde05e820549a5cfab5eb8a12010b8fbba14a56bd1bbe9c4b0c"
+    },
+    {
+      "launch": 2,
+      "index": 1,
+      "binding": "vs.cb.1",
+      "resource_id": 60,
+      "original_bytes": 528,
+      "flora_bytes": 528,
+      "exact": true,
+      "original_sha256": "30bb28328ea1936581a28db88b2ac9b8e95431600dadfed4064728bc0cb4cc31",
+      "flora_sha256": "30bb28328ea1936581a28db88b2ac9b8e95431600dadfed4064728bc0cb4cc31"
+    },
+    {
+      "launch": 2,
+      "index": 1,
+      "binding": "vs.cb.2",
+      "resource_id": 363,
+      "original_bytes": 544,
+      "flora_bytes": 544,
+      "exact": true,
+      "original_sha256": "f2569f5db50404fe33b8b4dc5abb3dcf888595264041267fce20045b79c5c367",
+      "flora_sha256": "f2569f5db50404fe33b8b4dc5abb3dcf888595264041267fce20045b79c5c367"
+    },
+    {
+      "launch": 2,
+      "index": 1,
+      "binding": "vs.cb.3",
+      "resource_id": 17,
+      "original_bytes": 368,
+      "flora_bytes": 368,
+      "exact": true,
+      "original_sha256": "4532d17d9167620f954a1a2fbb870f2bd0b983374e42d95ebb3620ae18186a86",
+      "flora_sha256": "4532d17d9167620f954a1a2fbb870f2bd0b983374e42d95ebb3620ae18186a86"
+    },
+    {
+      "launch": 2,
+      "index": 1,
+      "binding": "ps.cb.0",
+      "resource_id": 362,
+      "original_bytes": 44704,
+      "flora_bytes": 44704,
+      "exact": true,
+      "original_sha256": "98f44f33c518bdde05e820549a5cfab5eb8a12010b8fbba14a56bd1bbe9c4b0c",
+      "flora_sha256": "98f44f33c518bdde05e820549a5cfab5eb8a12010b8fbba14a56bd1bbe9c4b0c"
+    },
+    {
+      "launch": 2,
+      "index": 1,
+      "binding": "ps.cb.1",
+      "resource_id": 60,
+      "original_bytes": 528,
+      "flora_bytes": 528,
+      "exact": true,
+      "original_sha256": "30bb28328ea1936581a28db88b2ac9b8e95431600dadfed4064728bc0cb4cc31",
+      "flora_sha256": "30bb28328ea1936581a28db88b2ac9b8e95431600dadfed4064728bc0cb4cc31"
+    },
+    {
+      "launch": 2,
+      "index": 1,
+      "binding": "ps.cb.2",
+      "resource_id": 363,
+      "original_bytes": 544,
+      "flora_bytes": 544,
+      "exact": true,
+      "original_sha256": "f2569f5db50404fe33b8b4dc5abb3dcf888595264041267fce20045b79c5c367",
+      "flora_sha256": "f2569f5db50404fe33b8b4dc5abb3dcf888595264041267fce20045b79c5c367"
+    },
+    {
+      "launch": 2,
+      "index": 1,
+      "binding": "vb.0",
+      "resource_id": 825,
+      "original_bytes": 1129920,
+      "flora_bytes": 1129920,
+      "exact": true,
+      "original_sha256": "3f8f2a73261fd5196f4dc5d404d136bf0c0c6a92bca4fd81c4d9fc4459accc89",
+      "flora_sha256": "3f8f2a73261fd5196f4dc5d404d136bf0c0c6a92bca4fd81c4d9fc4459accc89"
+    },
+    {
+      "launch": 2,
+      "index": 1,
+      "binding": "vb.1",
+      "resource_id": 795,
+      "original_bytes": 564960,
+      "flora_bytes": 564960,
+      "exact": true,
+      "original_sha256": "cb31ad53a0d55003e1b3a0c748c75a15aaba282640fa304ad70ca718811a1ccd",
+      "flora_sha256": "cb31ad53a0d55003e1b3a0c748c75a15aaba282640fa304ad70ca718811a1ccd"
+    },
+    {
+      "launch": 2,
+      "index": 1,
+      "binding": "vb.2",
+      "resource_id": 796,
+      "original_bytes": 903936,
+      "flora_bytes": 903936,
+      "exact": true,
+      "original_sha256": "54368fd2415f1557870ba8d1050973e6b2ee5797a2e8a8ed7a0c71b014299e9d",
+      "flora_sha256": "54368fd2415f1557870ba8d1050973e6b2ee5797a2e8a8ed7a0c71b014299e9d"
+    },
+    {
+      "launch": 2,
+      "index": 1,
+      "binding": "ib",
+      "resource_id": 797,
+      "original_bytes": 261822,
+      "flora_bytes": 261822,
+      "exact": true,
+      "original_sha256": "c1c158c27ede38c95300e0f4858a049968df82debd6acecde0157be76f64d002",
+      "flora_sha256": "c1c158c27ede38c95300e0f4858a049968df82debd6acecde0157be76f64d002"
+    },
+    {
+      "launch": 2,
+      "index": 2,
+      "binding": "vs.cb.0",
+      "resource_id": 362,
+      "original_bytes": 44704,
+      "flora_bytes": 44704,
+      "exact": true,
+      "original_sha256": "1d17d3370a8f68d514bc5da4e35e505720d8294a2839ac89c36c2bbf15cdb619",
+      "flora_sha256": "1d17d3370a8f68d514bc5da4e35e505720d8294a2839ac89c36c2bbf15cdb619"
+    },
+    {
+      "launch": 2,
+      "index": 2,
+      "binding": "vs.cb.1",
+      "resource_id": 60,
+      "original_bytes": 528,
+      "flora_bytes": 528,
+      "exact": true,
+      "original_sha256": "3c1be37c4fc22ec1c50bd4399361cfcb5002dba0a3a7ce0b570a1262f97d5d57",
+      "flora_sha256": "3c1be37c4fc22ec1c50bd4399361cfcb5002dba0a3a7ce0b570a1262f97d5d57"
+    },
+    {
+      "launch": 2,
+      "index": 2,
+      "binding": "vs.cb.2",
+      "resource_id": 363,
+      "original_bytes": 544,
+      "flora_bytes": 544,
+      "exact": true,
+      "original_sha256": "f2569f5db50404fe33b8b4dc5abb3dcf888595264041267fce20045b79c5c367",
+      "flora_sha256": "f2569f5db50404fe33b8b4dc5abb3dcf888595264041267fce20045b79c5c367"
+    },
+    {
+      "launch": 2,
+      "index": 2,
+      "binding": "vs.cb.3",
+      "resource_id": 17,
+      "original_bytes": 368,
+      "flora_bytes": 368,
+      "exact": true,
+      "original_sha256": "4532d17d9167620f954a1a2fbb870f2bd0b983374e42d95ebb3620ae18186a86",
+      "flora_sha256": "4532d17d9167620f954a1a2fbb870f2bd0b983374e42d95ebb3620ae18186a86"
+    },
+    {
+      "launch": 2,
+      "index": 2,
+      "binding": "ps.cb.0",
+      "resource_id": 362,
+      "original_bytes": 44704,
+      "flora_bytes": 44704,
+      "exact": true,
+      "original_sha256": "1d17d3370a8f68d514bc5da4e35e505720d8294a2839ac89c36c2bbf15cdb619",
+      "flora_sha256": "1d17d3370a8f68d514bc5da4e35e505720d8294a2839ac89c36c2bbf15cdb619"
+    },
+    {
+      "launch": 2,
+      "index": 2,
+      "binding": "ps.cb.1",
+      "resource_id": 60,
+      "original_bytes": 528,
+      "flora_bytes": 528,
+      "exact": true,
+      "original_sha256": "3c1be37c4fc22ec1c50bd4399361cfcb5002dba0a3a7ce0b570a1262f97d5d57",
+      "flora_sha256": "3c1be37c4fc22ec1c50bd4399361cfcb5002dba0a3a7ce0b570a1262f97d5d57"
+    },
+    {
+      "launch": 2,
+      "index": 2,
+      "binding": "ps.cb.2",
+      "resource_id": 363,
+      "original_bytes": 544,
+      "flora_bytes": 544,
+      "exact": true,
+      "original_sha256": "f2569f5db50404fe33b8b4dc5abb3dcf888595264041267fce20045b79c5c367",
+      "flora_sha256": "f2569f5db50404fe33b8b4dc5abb3dcf888595264041267fce20045b79c5c367"
+    },
+    {
+      "launch": 2,
+      "index": 2,
+      "binding": "vb.0",
+      "resource_id": 895,
+      "original_bytes": 1129920,
+      "flora_bytes": 1129920,
+      "exact": true,
+      "original_sha256": "fd7b22d1a923a6f9cb6201dbce056798e7110177bc6e324f37aaeb02ff142e91",
+      "flora_sha256": "fd7b22d1a923a6f9cb6201dbce056798e7110177bc6e324f37aaeb02ff142e91"
+    },
+    {
+      "launch": 2,
+      "index": 2,
+      "binding": "vb.1",
+      "resource_id": 795,
+      "original_bytes": 564960,
+      "flora_bytes": 564960,
+      "exact": true,
+      "original_sha256": "cb31ad53a0d55003e1b3a0c748c75a15aaba282640fa304ad70ca718811a1ccd",
+      "flora_sha256": "cb31ad53a0d55003e1b3a0c748c75a15aaba282640fa304ad70ca718811a1ccd"
+    },
+    {
+      "launch": 2,
+      "index": 2,
+      "binding": "vb.2",
+      "resource_id": 796,
+      "original_bytes": 903936,
+      "flora_bytes": 903936,
+      "exact": true,
+      "original_sha256": "54368fd2415f1557870ba8d1050973e6b2ee5797a2e8a8ed7a0c71b014299e9d",
+      "flora_sha256": "54368fd2415f1557870ba8d1050973e6b2ee5797a2e8a8ed7a0c71b014299e9d"
+    },
+    {
+      "launch": 2,
+      "index": 2,
+      "binding": "ib",
+      "resource_id": 797,
+      "original_bytes": 261822,
+      "flora_bytes": 261822,
+      "exact": true,
+      "original_sha256": "c1c158c27ede38c95300e0f4858a049968df82debd6acecde0157be76f64d002",
+      "flora_sha256": "c1c158c27ede38c95300e0f4858a049968df82debd6acecde0157be76f64d002"
+    }
+  ],
+  "texture_checks": [
+    {
+      "launch": 1,
+      "index": 0,
+      "binding": "ps.srv.3",
+      "resource_id": 255,
+      "original_bytes": 2796216,
+      "flora_bytes": 2796216,
+      "exact": true,
+      "original_sha256": "cbd42f6881c072c4bce6b8faf0c90e02642c5f2557d84eef7bff8bb30ffce4e8",
+      "flora_sha256": "cbd42f6881c072c4bce6b8faf0c90e02642c5f2557d84eef7bff8bb30ffce4e8"
+    },
+    {
+      "launch": 1,
+      "index": 1,
+      "binding": "ps.srv.3",
+      "resource_id": 684,
+      "original_bytes": 2796216,
+      "flora_bytes": 2796216,
+      "exact": true,
+      "original_sha256": "005150170cc0dd8104007e52fc311a3a258367fd8e3fac429e940aa0af2c2a0c",
+      "flora_sha256": "005150170cc0dd8104007e52fc311a3a258367fd8e3fac429e940aa0af2c2a0c"
+    },
+    {
+      "launch": 1,
+      "index": 2,
+      "binding": "ps.srv.3",
+      "resource_id": 686,
+      "original_bytes": 2796216,
+      "flora_bytes": 2796216,
+      "exact": true,
+      "original_sha256": "005150170cc0dd8104007e52fc311a3a258367fd8e3fac429e940aa0af2c2a0c",
+      "flora_sha256": "005150170cc0dd8104007e52fc311a3a258367fd8e3fac429e940aa0af2c2a0c"
+    },
+    {
+      "launch": 2,
+      "index": 0,
+      "binding": "ps.srv.3",
+      "resource_id": 250,
+      "original_bytes": 2796216,
+      "flora_bytes": 2796216,
+      "exact": true,
+      "original_sha256": "cbd42f6881c072c4bce6b8faf0c90e02642c5f2557d84eef7bff8bb30ffce4e8",
+      "flora_sha256": "cbd42f6881c072c4bce6b8faf0c90e02642c5f2557d84eef7bff8bb30ffce4e8"
+    },
+    {
+      "launch": 2,
+      "index": 1,
+      "binding": "ps.srv.3",
+      "resource_id": 689,
+      "original_bytes": 2796216,
+      "flora_bytes": 2796216,
+      "exact": true,
+      "original_sha256": "005150170cc0dd8104007e52fc311a3a258367fd8e3fac429e940aa0af2c2a0c",
+      "flora_sha256": "005150170cc0dd8104007e52fc311a3a258367fd8e3fac429e940aa0af2c2a0c"
+    },
+    {
+      "launch": 2,
+      "index": 2,
+      "binding": "ps.srv.3",
+      "resource_id": 689,
+      "original_bytes": 2796216,
+      "flora_bytes": 2796216,
+      "exact": true,
+      "original_sha256": "005150170cc0dd8104007e52fc311a3a258367fd8e3fac429e940aa0af2c2a0c",
+      "flora_sha256": "005150170cc0dd8104007e52fc311a3a258367fd8e3fac429e940aa0af2c2a0c"
+    }
+  ],
+  "diagnostic_runs": 101,
+  "diagnostics": [
+    {
+      "directory": "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\capture-gf2-current-20261014\\hdr-probes",
+      "label": "main-before",
+      "runs": 3,
+      "different_bytes_vs_first": [
+        0,
+        0
+      ]
+    },
+    {
+      "directory": "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\capture-gf2-current-20261014\\hdr-probes",
+      "label": "main-opaque",
+      "runs": 3,
+      "different_bytes_vs_first": [
+        0,
+        0
+      ]
+    },
+    {
+      "directory": "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\capture-gf2-current-20261014\\hdr-probes",
+      "label": "main-final-sample0",
+      "runs": 3,
+      "different_bytes_vs_first": [
+        4,
+        4
+      ]
+    },
+    {
+      "directory": "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\capture-gf2-current-20261014\\hdr-probes",
+      "label": "main-final-sample1",
+      "runs": 3,
+      "different_bytes_vs_first": [
+        0,
+        0
+      ]
+    },
+    {
+      "directory": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-current-20261014\\prefixes",
+      "label": "prefix-5475",
+      "runs": 3,
+      "different_bytes_vs_first": [
+        0,
+        0
+      ]
+    },
+    {
+      "directory": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-current-20261014\\prefixes",
+      "label": "prefix-5575",
+      "runs": 3,
+      "different_bytes_vs_first": [
+        0,
+        0
+      ]
+    },
+    {
+      "directory": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-current-20261014\\prefixes",
+      "label": "prefix-5635",
+      "runs": 3,
+      "different_bytes_vs_first": [
+        0,
+        0
+      ]
+    },
+    {
+      "directory": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-current-20261014\\tail",
+      "label": "tail-5675",
+      "runs": 4,
+      "different_bytes_vs_first": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "directory": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-current-20261014\\tail",
+      "label": "tail-5700",
+      "runs": 4,
+      "different_bytes_vs_first": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "directory": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-current-20261014\\tail",
+      "label": "tail-5707",
+      "runs": 4,
+      "different_bytes_vs_first": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "directory": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-current-20261014\\tail",
+      "label": "tail-5711",
+      "runs": 4,
+      "different_bytes_vs_first": [
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "directory": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-current-20261014\\glass",
+      "label": "glass-5588",
+      "runs": 2,
+      "different_bytes_vs_first": [
+        0
+      ]
+    },
+    {
+      "directory": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-current-20261014\\glass",
+      "label": "glass-5598",
+      "runs": 2,
+      "different_bytes_vs_first": [
+        0
+      ]
+    },
+    {
+      "directory": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-current-20261014\\glass",
+      "label": "glass-5608",
+      "runs": 2,
+      "different_bytes_vs_first": [
+        0
+      ]
+    },
+    {
+      "directory": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-current-20261014\\glass",
+      "label": "glass-5615",
+      "runs": 2,
+      "different_bytes_vs_first": [
+        0
+      ]
+    },
+    {
+      "directory": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-current-20261014\\glass",
+      "label": "glass-5625",
+      "runs": 2,
+      "different_bytes_vs_first": [
+        0
+      ]
+    },
+    {
+      "directory": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-current-20261014\\glass",
+      "label": "glass-5635",
+      "runs": 2,
+      "different_bytes_vs_first": [
+        0
+      ]
+    },
+    {
+      "directory": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-current-20261014\\candidates",
+      "label": "candidate-5588",
+      "runs": 10,
+      "different_bytes_vs_first": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "directory": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-current-20261014\\candidates",
+      "label": "candidate-5598",
+      "runs": 10,
+      "different_bytes_vs_first": [
+        0,
+        0,
+        0,
+        4,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "directory": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-current-20261014\\inputs",
+      "label": "input-797",
+      "runs": 2,
+      "different_bytes_vs_first": [
+        0
+      ]
+    },
+    {
+      "directory": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-current-20261014\\inputs",
+      "label": "input-894",
+      "runs": 2,
+      "different_bytes_vs_first": [
+        0
+      ]
+    },
+    {
+      "directory": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-current-20261014\\inputs",
+      "label": "input-795",
+      "runs": 2,
+      "different_bytes_vs_first": [
+        0
+      ]
+    },
+    {
+      "directory": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-current-20261014\\inputs",
+      "label": "input-796",
+      "runs": 2,
+      "different_bytes_vs_first": [
+        0
+      ]
+    },
+    {
+      "directory": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-current-20261014\\inputs",
+      "label": "input-823",
+      "runs": 2,
+      "different_bytes_vs_first": [
+        0
+      ]
+    },
+    {
+      "directory": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-current-20261014\\inputs",
+      "label": "input-365",
+      "runs": 2,
+      "different_bytes_vs_first": [
+        0
+      ]
+    },
+    {
+      "directory": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-current-20261014\\inputs",
+      "label": "input-60",
+      "runs": 2,
+      "different_bytes_vs_first": [
+        0
+      ]
+    },
+    {
+      "directory": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-current-20261014\\inputs",
+      "label": "input-363",
+      "runs": 2,
+      "different_bytes_vs_first": [
+        0
+      ]
+    },
+    {
+      "directory": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-current-20261014\\inputs",
+      "label": "input-17",
+      "runs": 2,
+      "different_bytes_vs_first": [
+        0
+      ]
+    },
+    {
+      "directory": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-current-20261014\\inputs",
+      "label": "input-97",
+      "runs": 2,
+      "different_bytes_vs_first": [
+        0
+      ]
+    },
+    {
+      "directory": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-current-20261014\\inputs",
+      "label": "input-853",
+      "runs": 2,
+      "different_bytes_vs_first": [
+        0
+      ]
+    },
+    {
+      "directory": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-current-20261014\\inputs",
+      "label": "input-672",
+      "runs": 2,
+      "different_bytes_vs_first": [
+        0
+      ]
+    },
+    {
+      "directory": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-current-20261014\\inputs",
+      "label": "input-673",
+      "runs": 2,
+      "different_bytes_vs_first": [
+        0
+      ]
+    },
+    {
+      "directory": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-current-20261014\\inputs",
+      "label": "input-687",
+      "runs": 2,
+      "different_bytes_vs_first": [
+        0
+      ]
+    },
+    {
+      "directory": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-current-20261014\\inputs",
+      "label": "input-389",
+      "runs": 2,
+      "different_bytes_vs_first": [
+        0
+      ]
+    },
+    {
+      "directory": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-current-20261014\\inputs",
+      "label": "input-84",
+      "runs": 2,
+      "different_bytes_vs_first": [
+        0
+      ]
+    }
+  ],
+  "variable_boundary": {
+    "event": 5598,
+    "preceding_event": 5588,
+    "resource": 618,
+    "typed_format": 10,
+    "sample": 0,
+    "x": 1562,
+    "y": 1492,
+    "vs": 886,
+    "ps": 887,
+    "pre_event_input_resources": 16,
+    "pre_event_input_repeats": 2
+  },
+  "pixel_variants": {
+    "width": 2560,
+    "height": 1440,
+    "reference_sha256": "a9064677a283c7901bbe14e2f3748a72f5128adccb9b2f259004cb973c2c63cc",
+    "runs": [
+      {
+        "player": "flora",
+        "repeat": 0,
+        "differences": [
+          {
+            "x": 1157,
+            "y": 333,
+            "captured": [
+              187,
+              102,
+              25,
+              255
+            ],
+            "replayed": [
+              188,
+              103,
+              25,
+              255
+            ]
+          },
+          {
+            "x": 1157,
+            "y": 334,
+            "captured": [
+              199,
+              115,
+              36,
+              246
+            ],
+            "replayed": [
+              200,
+              115,
+              35,
+              246
+            ]
+          },
+          {
+            "x": 1158,
+            "y": 334,
+            "captured": [
+              202,
+              118,
+              37,
+              255
+            ],
+            "replayed": [
+              203,
+              118,
+              37,
+              255
+            ]
+          },
+          {
+            "x": 1157,
+            "y": 335,
+            "captured": [
+              215,
+              138,
+              49,
+              253
+            ],
+            "replayed": [
+              216,
+              139,
+              49,
+              253
+            ]
+          }
+        ],
+        "sha256": "a17099bf380fa1db9c6cd443b6da8b8cf96b5b3922e77538fa419ca574c6bb7c"
+      },
+      {
+        "player": "flora",
+        "repeat": 1,
+        "differences": [],
+        "sha256": "a9064677a283c7901bbe14e2f3748a72f5128adccb9b2f259004cb973c2c63cc"
+      },
+      {
+        "player": "flora",
+        "repeat": 2,
+        "differences": [],
+        "sha256": "a9064677a283c7901bbe14e2f3748a72f5128adccb9b2f259004cb973c2c63cc"
+      },
+      {
+        "player": "original",
+        "repeat": 0,
+        "differences": [],
+        "sha256": "a9064677a283c7901bbe14e2f3748a72f5128adccb9b2f259004cb973c2c63cc"
+      },
+      {
+        "player": "original",
+        "repeat": 1,
+        "differences": [],
+        "sha256": "a9064677a283c7901bbe14e2f3748a72f5128adccb9b2f259004cb973c2c63cc"
+      },
+      {
+        "player": "original",
+        "repeat": 2,
+        "differences": [
+          {
+            "x": 1157,
+            "y": 333,
+            "captured": [
+              187,
+              102,
+              25,
+              255
+            ],
+            "replayed": [
+              188,
+              103,
+              25,
+              255
+            ]
+          },
+          {
+            "x": 1157,
+            "y": 334,
+            "captured": [
+              199,
+              115,
+              36,
+              246
+            ],
+            "replayed": [
+              200,
+              115,
+              35,
+              246
+            ]
+          },
+          {
+            "x": 1158,
+            "y": 334,
+            "captured": [
+              202,
+              118,
+              37,
+              255
+            ],
+            "replayed": [
+              203,
+              118,
+              37,
+              255
+            ]
+          },
+          {
+            "x": 1157,
+            "y": 335,
+            "captured": [
+              215,
+              138,
+              49,
+              253
+            ],
+            "replayed": [
+              216,
+              139,
+              49,
+              253
+            ]
+          }
+        ],
+        "sha256": "a17099bf380fa1db9c6cd443b6da8b8cf96b5b3922e77538fa419ca574c6bb7c"
+      }
+    ]
+  },
+  "adapter_versions": [
+    {
+      "Name": "Intel(R) Iris(R) Xe Graphics",
+      "DriverVersion": "32.0.101.6790",
+      "PNPDeviceID": "PCI\\VEN_8086&DEV_46A6&SUBSYS_133D1043&REV_0C\\3&11583659&0&10"
+    },
+    {
+      "Name": "NVIDIA GeForce RTX 3070 Laptop GPU",
+      "DriverVersion": "32.0.15.8097",
+      "PNPDeviceID": "PCI\\VEN_10DE&DEV_249D&SUBSYS_133D1043&REV_A1\\4&174EDE7&0&0008"
+    }
+  ],
+  "current_original_gui_inspection": false,
+  "production_code_changed": false,
+  "new_ctest_or_golden_sweep": false,
+  "tool_sha256": "5651ab2ebf79d32c76271d65e51f30e43ff7ba1b356cf67b1c9dbceac98db524",
+  "argument_checks": [
+    {
+      "label": "zero",
+      "exit_code": 2,
+      "no_output": true
+    },
+    {
+      "label": "boolean",
+      "exit_code": 2,
+      "no_output": true
+    },
+    {
+      "label": "overflow",
+      "exit_code": 2,
+      "no_output": true
+    },
+    {
+      "label": "warp-conflict",
+      "exit_code": 2,
+      "no_output": true
+    }
+  ],
+  "historical_acceptance_unchanged": true,
+  "overall_capture_status": "partial",
+  "remaining": [
+    "Explain or eliminate the observed sample variation without relaxing comparison rules",
+    "Fresh original GUI inspection and full current-runtime six-frame acceptance",
+    "Broader capture API/state scope and historical Intel/NVIDIA issues"
+  ],
+  "evidence_manifests": [
+    {
+      "path": "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\capture-gf2-current-20261014\\evidence-manifest.json",
+      "files": 1037,
+      "sha256": "2b8d3924c2c7f0968223c1c8af136a6b6985bf3b162915890c63afbdf6035afa"
+    },
+    {
+      "path": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-current-20261014\\evidence-manifest.json",
+      "files": 443,
+      "sha256": "44cc26876adb9962b0926fdc8d73eb8f5742eb8910e4e7bb20c51c1b097fb1e9"
+    }
+  ]
+}

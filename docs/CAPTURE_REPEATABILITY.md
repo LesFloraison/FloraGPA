@@ -51,6 +51,13 @@ intact; replacement shaders were applied through replay experiment overlays.
 
 ## Reproduction
 
+Probes may include a numeric `gpu_vendor` (for example `32902` for Intel) to
+pin the native CLI's hardware selection. It must be a nonzero uint16 PCI vendor
+ID and cannot be combined with `warp: true`. The emitted command and reported
+adapter remain part of the evidence; omitting this field retains the CLI default.
+The later [current-runtime GF2 investigation](CAPTURE_GF2_CURRENT.md) exercises
+this option against an observed Intel MSAA variation.
+
 `tools/diagnose_capture_repeatability.py` is a development-only Python/NumPy
 driver for the existing native CLI. It never becomes a capture runtime dependency.
 It requires the input hash, creates a new evidence directory, runs one GPU

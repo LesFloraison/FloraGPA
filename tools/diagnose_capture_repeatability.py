@@ -52,7 +52,7 @@ def main():
     if not isinstance(probes, list) or not probes:
         parser.error("Expected a nonempty probe array")
     allowed = {"label", "command", "event", "resource", "before", "warp",
-               "debug_device", "typed_format", "sample"}
+               "debug_device", "typed_format", "sample", "gpu_vendor"}
     labels = set()
     for probe in probes:
         if not isinstance(probe, dict) or set(probe) - allowed:
@@ -72,6 +72,11 @@ def main():
         for key in ("before", "warp", "debug_device"):
             if key in probe and type(probe[key]) is not bool:
                 parser.error("Expected boolean probe switches")
+        if "gpu_vendor" in probe:
+            if type(probe["gpu_vendor"]) is not int or not 0 < probe["gpu_vendor"] <= 0xffff:
+                parser.error("Expected a nonzero uint16 PCI vendor ID")
+            if probe.get("warp", False):
+                parser.error("WARP and an explicit hardware vendor are mutually exclusive")
         for key in ("typed_format", "sample"):
             if key in probe and (probe["command"] != "texture" or
                                  type(probe[key]) is not int or not 0 <= probe[key] < 2**32):
@@ -99,7 +104,7 @@ def main():
             for key in ("before", "warp", "debug_device"):
                 if probe.get(key, False):
                     command += ["--" + key.replace("_", "-")]
-            for key in ("typed_format", "sample"):
+            for key in ("typed_format", "sample", "gpu_vendor"):
                 if key in probe:
                     command += ["--" + key.replace("_", "-"), str(probe[key])]
             row = dict(label=probe["label"], runs=[], different_bytes_vs_first=[])

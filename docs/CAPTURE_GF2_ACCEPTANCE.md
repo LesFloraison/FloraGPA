@@ -1,5 +1,9 @@
 # Scoped Intel GF2 six-frame acceptance
 
+This is the historical result for the identities recorded here. Subsequent
+[current-runtime revalidation](CAPTURE_GF2_CURRENT.md) found one variable file
+among six new candidates; that newer gate remains incomplete.
+
 **6/6 files pass** the GF2 gate on this host using Intel Iris Xe for capture
 and both players. Two independent startup-injected processes each captured
 three consecutive frames across the home and equipment-room scenes. This is

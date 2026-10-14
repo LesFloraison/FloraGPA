@@ -1,5 +1,9 @@
 # Independent DX11 capture
 
+Current-runtime GF2 revalidation has found a variable four-pixel output in one of
+six new files; its gate is not passed. See [CAPTURE_GF2_CURRENT.md](CAPTURE_GF2_CURRENT.md).
+The historical six-frame result below retains its original runtime/file identities.
+
 GPU-generated indirect Draw/Dispatch arguments now remain native indirect records,
 with immediate/deferred/nested execution and byte-exact controls documented in
 [CAPTURE_INDIRECT.md](CAPTURE_INDIRECT.md).
