@@ -1,0 +1,392 @@
+{
+  "schema": "FloraGPA GF2 boundary diagnosis 1",
+  "date": "2026-10-14",
+  "source_commit": "242f81286283fb61b9cd5c1146bb223cad6e6896",
+  "input": {
+    "frame": "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\capture-gf2-current-20261014\\launch-1\\session\\frame-8df44cb7-96a5-4ddf-9649-a60ac27325ba.gpa_frame",
+    "sha256": "a30ddd946f1ff174d6c704c0d820554d0614f45f90508349e3004fb7f8cd9b06",
+    "source_commit": "242f812",
+    "event": 5598
+  },
+  "current_gate_passed": false,
+  "production_changed": false,
+  "comparison": "Exact bytes; no tolerance",
+  "adapter": "Intel(R) Iris(R) Xe Graphics",
+  "production_identity": {
+    "replay_sha256": "215ebafed657953f0671c32a0948e12c8c965437a3eaa33e6d38aedcff5e2ddc",
+    "runtime_sha256": "f2d92dd99f5b26ee232064ca26645136fa808ab2e7e6e810193376527f092df3",
+    "controller_sha256": "0bc61e429745e1b0f6fd046762cae923471686782a1ab48ba853cca12aaaacf3",
+    "expected_frames_per_launch": 3,
+    "comparison": "Exact integer RGBA and resource bytes; no pixel tolerance",
+    "scenes": [
+      "home",
+      "equipment_room"
+    ],
+    "expected_launches": 2,
+    "source_commit": "c0eaa899134b396691bab8a463db7b862b2998d6"
+  },
+  "depth_stencil": {
+    "resource": 419,
+    "typed_format": 20,
+    "per_sample_repeats": 4,
+    "samples": [
+      {
+        "sample": 0,
+        "sha256": "86d8aa6dbd3e2bdcc7730db47496eae9a6ed795c2e8e17a908f124e5daab0fc3",
+        "bytes": 53747712,
+        "differences": [
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "sample": 1,
+        "sha256": "00be48afb03a98bf98ba82612d54c2004d92781ca0958b37df6b382e09769f9f",
+        "bytes": 53747712,
+        "differences": [
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "report_sha256": "138894bc82616d5bedf0d881496cd30928291f3f0ef46558e7972def93ccbefa"
+  },
+  "postvs": {
+    "full_signature_runs": 11,
+    "legacy_runs": 1,
+    "vertices": 7401,
+    "primitives": 2467,
+    "components": 40,
+    "stride": 160,
+    "sha256": "709fd0266c2402c376c2e3dc57aa49329036dd252accad08a5cf43df64c045b1",
+    "legacy_projection_exact": true,
+    "attributes": [
+      {
+        "component_type": 3,
+        "count": 4,
+        "index": 0,
+        "never_written_mask": 0,
+        "offset": 0,
+        "register": 0,
+        "semantic": "SV_POSITION",
+        "start": 0
+      },
+      {
+        "component_type": 3,
+        "count": 4,
+        "index": 0,
+        "never_written_mask": 0,
+        "offset": 16,
+        "register": 1,
+        "semantic": "TEXCOORD",
+        "start": 0
+      },
+      {
+        "component_type": 3,
+        "count": 4,
+        "index": 1,
+        "never_written_mask": 0,
+        "offset": 32,
+        "register": 2,
+        "semantic": "TEXCOORD",
+        "start": 0
+      },
+      {
+        "component_type": 3,
+        "count": 4,
+        "index": 2,
+        "never_written_mask": 0,
+        "offset": 48,
+        "register": 3,
+        "semantic": "TEXCOORD",
+        "start": 0
+      },
+      {
+        "component_type": 3,
+        "count": 4,
+        "index": 3,
+        "never_written_mask": 0,
+        "offset": 64,
+        "register": 4,
+        "semantic": "TEXCOORD",
+        "start": 0
+      },
+      {
+        "component_type": 3,
+        "count": 4,
+        "index": 4,
+        "never_written_mask": 0,
+        "offset": 80,
+        "register": 5,
+        "semantic": "TEXCOORD",
+        "start": 0
+      },
+      {
+        "component_type": 3,
+        "count": 4,
+        "index": 5,
+        "never_written_mask": 0,
+        "offset": 96,
+        "register": 6,
+        "semantic": "TEXCOORD",
+        "start": 0
+      },
+      {
+        "component_type": 3,
+        "count": 4,
+        "index": 6,
+        "never_written_mask": 0,
+        "offset": 112,
+        "register": 7,
+        "semantic": "TEXCOORD",
+        "start": 0
+      },
+      {
+        "component_type": 3,
+        "count": 4,
+        "index": 7,
+        "never_written_mask": 0,
+        "offset": 128,
+        "register": 8,
+        "semantic": "TEXCOORD",
+        "start": 0
+      },
+      {
+        "component_type": 3,
+        "count": 4,
+        "index": 9,
+        "never_written_mask": 0,
+        "offset": 144,
+        "register": 9,
+        "semantic": "TEXCOORD",
+        "start": 0
+      }
+    ],
+    "initial_report_sha256": "ec61b67928ba0c8154224d533587970d4a02db9d84eb3392201af3ce76920c06",
+    "final_report_sha256": "f147d7448f1ff7aeb461decfc796525810673ba85fb36e8b6a6175f37aef963f"
+  },
+  "checkpoints": [
+    {
+      "path": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-boundary-20261014\\checkpoint-0",
+      "binary_sha256": "c9e7e723f9f3d89adba40d5af469f79917ab78dbe73adf99744efd802bc15ec2",
+      "report_sha256": "b8a5db7e7974e1ada318a5515cf828be181a77db40bd7f5c249a64f3e380c2b1",
+      "sample": 0,
+      "debug_device": false,
+      "exports": 31,
+      "restored_draws": 30,
+      "initial_sha256": "b7b48ed95b35542afa7a66b93d9d029be81debe11ecc77741b4b74330fbc8a50",
+      "restored_hash_counts": {
+        "10bfd552c3acc038eab0bb6fcecf3c309680f224dbba938eccd0d73013e144b4": 30
+      },
+      "all_hash_counts": {
+        "b7b48ed95b35542afa7a66b93d9d029be81debe11ecc77741b4b74330fbc8a50": 1,
+        "10bfd552c3acc038eab0bb6fcecf3c309680f224dbba938eccd0d73013e144b4": 30
+      },
+      "max_different_bytes_vs_initial": 4
+    },
+    {
+      "path": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-boundary-20261014\\checkpoint-1",
+      "binary_sha256": "c9e7e723f9f3d89adba40d5af469f79917ab78dbe73adf99744efd802bc15ec2",
+      "report_sha256": "668e75a0d3eae4e574b7a49cb48f650d00bc63738bae9ea33349703ea65596b2",
+      "sample": 0,
+      "debug_device": false,
+      "exports": 31,
+      "restored_draws": 30,
+      "initial_sha256": "10bfd552c3acc038eab0bb6fcecf3c309680f224dbba938eccd0d73013e144b4",
+      "restored_hash_counts": {
+        "10bfd552c3acc038eab0bb6fcecf3c309680f224dbba938eccd0d73013e144b4": 30
+      },
+      "all_hash_counts": {
+        "10bfd552c3acc038eab0bb6fcecf3c309680f224dbba938eccd0d73013e144b4": 31
+      },
+      "max_different_bytes_vs_initial": 0
+    },
+    {
+      "path": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-boundary-20261014\\checkpoint-2",
+      "binary_sha256": "c9e7e723f9f3d89adba40d5af469f79917ab78dbe73adf99744efd802bc15ec2",
+      "report_sha256": "668e75a0d3eae4e574b7a49cb48f650d00bc63738bae9ea33349703ea65596b2",
+      "sample": 0,
+      "debug_device": false,
+      "exports": 31,
+      "restored_draws": 30,
+      "initial_sha256": "10bfd552c3acc038eab0bb6fcecf3c309680f224dbba938eccd0d73013e144b4",
+      "restored_hash_counts": {
+        "10bfd552c3acc038eab0bb6fcecf3c309680f224dbba938eccd0d73013e144b4": 30
+      },
+      "all_hash_counts": {
+        "10bfd552c3acc038eab0bb6fcecf3c309680f224dbba938eccd0d73013e144b4": 31
+      },
+      "max_different_bytes_vs_initial": 0
+    },
+    {
+      "path": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-boundary-20261014\\checkpoint-final",
+      "binary_sha256": "91a8466974a557d01474e30829e372ac6629c4df66fa958673c9f8a57e40c8a6",
+      "report_sha256": "fd5c74a55cb5e4e93dff9ad2fc73d692e6747c07bbd64c2f848e8a30e49cc80b",
+      "sample": 0,
+      "debug_device": false,
+      "exports": 31,
+      "restored_draws": 30,
+      "initial_sha256": "10bfd552c3acc038eab0bb6fcecf3c309680f224dbba938eccd0d73013e144b4",
+      "restored_hash_counts": {
+        "10bfd552c3acc038eab0bb6fcecf3c309680f224dbba938eccd0d73013e144b4": 30
+      },
+      "all_hash_counts": {
+        "10bfd552c3acc038eab0bb6fcecf3c309680f224dbba938eccd0d73013e144b4": 31
+      },
+      "max_different_bytes_vs_initial": 0
+    },
+    {
+      "path": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-boundary-20261014\\checkpoint-sample1",
+      "binary_sha256": "91a8466974a557d01474e30829e372ac6629c4df66fa958673c9f8a57e40c8a6",
+      "report_sha256": "746c9512395b357171fbd3ea48c5507fd38298875449933473a0129c50c33904",
+      "sample": 1,
+      "debug_device": false,
+      "exports": 11,
+      "restored_draws": 10,
+      "initial_sha256": "a35b24aaf37c0c99ac636f424343ba92c8bff6a872a387c17b1c3139d97f681e",
+      "restored_hash_counts": {
+        "a35b24aaf37c0c99ac636f424343ba92c8bff6a872a387c17b1c3139d97f681e": 10
+      },
+      "all_hash_counts": {
+        "a35b24aaf37c0c99ac636f424343ba92c8bff6a872a387c17b1c3139d97f681e": 11
+      },
+      "max_different_bytes_vs_initial": 0
+    },
+    {
+      "path": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-boundary-20261014\\checkpoint-debug",
+      "binary_sha256": "91a8466974a557d01474e30829e372ac6629c4df66fa958673c9f8a57e40c8a6",
+      "report_sha256": "8e8d6f0e1d294060894b6b8e48fee887fae81fd113a2e54cf2a45617b62d7af5",
+      "sample": 0,
+      "debug_device": true,
+      "exports": 11,
+      "restored_draws": 10,
+      "initial_sha256": "10bfd552c3acc038eab0bb6fcecf3c309680f224dbba938eccd0d73013e144b4",
+      "restored_hash_counts": {
+        "10bfd552c3acc038eab0bb6fcecf3c309680f224dbba938eccd0d73013e144b4": 10
+      },
+      "all_hash_counts": {
+        "10bfd552c3acc038eab0bb6fcecf3c309680f224dbba938eccd0d73013e144b4": 11
+      },
+      "max_different_bytes_vs_initial": 0
+    },
+    {
+      "path": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-boundary-20261014\\checkpoint-scoped-debug",
+      "binary_sha256": "18aa58aa23bdc5de1a324df45a7d504c6378656b0acf375a9041c12e86f3f3e2",
+      "report_sha256": "8daaada66461bfc3795b0ce7375dd65155ecfcab1eeb4b9ac081a79c4542fef8",
+      "sample": 0,
+      "debug_device": true,
+      "exports": 11,
+      "restored_draws": 10,
+      "initial_sha256": "10bfd552c3acc038eab0bb6fcecf3c309680f224dbba938eccd0d73013e144b4",
+      "restored_hash_counts": {
+        "10bfd552c3acc038eab0bb6fcecf3c309680f224dbba938eccd0d73013e144b4": 10
+      },
+      "all_hash_counts": {
+        "10bfd552c3acc038eab0bb6fcecf3c309680f224dbba938eccd0d73013e144b4": 11
+      },
+      "max_different_bytes_vs_initial": 0
+    },
+    {
+      "path": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-boundary-20261014\\checkpoint-scoped-default",
+      "binary_sha256": "18aa58aa23bdc5de1a324df45a7d504c6378656b0acf375a9041c12e86f3f3e2",
+      "report_sha256": "1f45cd01a478369e1e713f340d3e90cb2fad814b85714400fa729b7d8cd162f5",
+      "sample": 0,
+      "debug_device": false,
+      "exports": 3,
+      "restored_draws": 2,
+      "initial_sha256": "10bfd552c3acc038eab0bb6fcecf3c309680f224dbba938eccd0d73013e144b4",
+      "restored_hash_counts": {
+        "10bfd552c3acc038eab0bb6fcecf3c309680f224dbba938eccd0d73013e144b4": 2
+      },
+      "all_hash_counts": {
+        "10bfd552c3acc038eab0bb6fcecf3c309680f224dbba938eccd0d73013e144b4": 3
+      },
+      "max_different_bytes_vs_initial": 0
+    }
+  ],
+  "checkpoint_totals": {
+    "processes": 8,
+    "sample_exports": 160,
+    "restored_draws": 152,
+    "ordinary_sample0_restored": 122
+  },
+  "scoped_debug": {
+    "prefix_message_count": 608,
+    "prefix_message_groups": [
+      {
+        "id": 390,
+        "severity": 1,
+        "text": "ID3D11DeviceContext::DrawIndexedInstanced: The Pixel Shader unit expects a Sampler configured for comparison filtering to be set at Slot 6, but the sampler bound at this slot is configured for default filtering.  This mismatch will produce undefined behavior if the sampler is used (e.g. it is not skipped due to shader code branching).",
+        "count": 124
+      },
+      {
+        "id": 372,
+        "severity": 1,
+        "text": "ID3D11DeviceContext::DrawIndexedInstanced: The Shader Resource View in slot 6 of the Pixel Shader unit is using the Format (R8G8B8A8_UNORM_SRGB). This format does not support 'SampleCmp' or 'SampleCmpLevelZero', at least one of which is being used on the Resource by the shader. This mismatch is invalid if the shader actually uses the view (e.g. it is not skipped due to shader code branching).",
+        "count": 124
+      },
+      {
+        "id": 3146081,
+        "severity": 2,
+        "text": "ID3D11DeviceContext::DrawIndexedInstanced: The Pixel Shader expects a Render Target View bound to slot 2, but none is bound. This is OK, as writes of an unbound Render Target View are discarded. It is also possible the developer knows the data will not be used anyway. This is only a problem if the developer actually intended to bind a Render Target View here.",
+        "count": 1
+      },
+      {
+        "id": 3146081,
+        "severity": 2,
+        "text": "ID3D11DeviceContext::DrawIndexed: The Pixel Shader expects a Render Target View bound to slot 0, but none is bound. This is OK, as writes of an unbound Render Target View are discarded. It is also possible the developer knows the data will not be used anyway. This is only a problem if the developer actually intended to bind a Render Target View here.",
+        "count": 1
+      },
+      {
+        "id": 390,
+        "severity": 1,
+        "text": "ID3D11DeviceContext::DrawIndexedInstanced: The Pixel Shader unit expects a Sampler configured for comparison filtering to be set at Slot 8, but the sampler bound at this slot is configured for default filtering.  This mismatch will produce undefined behavior if the sampler is used (e.g. it is not skipped due to shader code branching).",
+        "count": 179
+      },
+      {
+        "id": 372,
+        "severity": 1,
+        "text": "ID3D11DeviceContext::DrawIndexedInstanced: The Shader Resource View in slot 8 of the Pixel Shader unit is using the Format (R8G8B8A8_UNORM_SRGB). This format does not support 'SampleCmp' or 'SampleCmpLevelZero', at least one of which is being used on the Resource by the shader. This mismatch is invalid if the shader actually uses the view (e.g. it is not skipped due to shader code branching).",
+        "count": 179
+      }
+    ],
+    "selected_probe_messages": 0,
+    "report_sha256": "8daaada66461bfc3795b0ce7375dd65155ecfcab1eeb4b9ac081a79c4542fef8"
+  },
+  "refusals": {
+    "count": 12,
+    "report_sha256": "caea2a9ef8b7d497fc96ea741ccdcd32b60bd31749c478d177354ed76cca0943"
+  },
+  "validation": {
+    "ctest_passed": 4,
+    "ctest_sha256": "35192e201a5c4a061ee695df3c95a35bc078b761488bb91fb517648b9a2b3626",
+    "capture_only_configured": true,
+    "capture_only_log_sha256": "b50bf58bc64f823fc5b4bf854850d299df895a88152b5f7d38145c71218e1325",
+    "gpu_serial": true,
+    "golden_sweep": false,
+    "original_gpa_gui": false
+  },
+  "sources": {
+    "CMakeLists.txt": "11b1e2def34642495c8fce50cf4e57dba4cae4621746793c70338de048b22e6c",
+    "tools/native/replay_postvs_probe.cpp": "ce6d33a7af7bc4b31b77d8b514a24a1bab6bbdac917f8243c22359d20802f3fb",
+    "tools/native/replay_draw_repeat_probe.cpp": "db0404e6d934695fef7d12c6c634fbef030f43de5b1cd7104dda1ad43daf0971"
+  },
+  "final_binaries": {
+    "FloraReplayDrawRepeatProbe.exe": "18aa58aa23bdc5de1a324df45a7d504c6378656b0acf375a9041c12e86f3f3e2",
+    "FloraReplayPostVsProbe.exe": "0515cb6d260e62f0381385937d0ef86b4a3514e8e31e7305e14509250dbf9199"
+  },
+  "evidence": {
+    "directory": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-boundary-20261014",
+    "manifest_sha256": "6ba3df2e81556475eb47b34d568e0513db4ff47f24e5de4984f9dccebf241d59",
+    "files": 158
+  },
+  "limits": [
+    "SO replaces rasterization; settled depth/VS outputs do not exclude execution-time changes.",
+    "One initial draw is high; every restored ordinary sample-0 draw is low. Stable restored runs are not a fix or proof of the cause.",
+    "Output copies, readbacks and shader reuse alter execution conditions.",
+    "Prefix debug warnings are retained; the whole frame is not claimed debug-clean.",
+    "No new original-player or GUI acceptance; current six-frame gate remains incomplete."
+  ]
+}

@@ -50,6 +50,11 @@ Two pre-event exports of each of 16 bound resources (ten buffers and six texture
 including an otherwise unused bound CS constant buffer) match in full. This
 verifies those settled snapshots; it does not exclude variation during the Draw.
 
+The [subsequent boundary investigation](CAPTURE_GF2_BOUNDARY.md) adds stable
+depth/stencil and full VS output comparisons. A GPU checkpoint experiment sees
+both earlier variants, but the restored-draw path itself is stable in the measured
+runs. This narrows reproduction conditions without resolving the failure.
+
 ## Other checks and remaining work
 
 All six Draw-deletion negative controls change output and agree between players.

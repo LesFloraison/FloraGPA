@@ -4156,6 +4156,17 @@
       "variable_event": 5598,
       "diagnostic_runs": 101,
       "limits": "One frame varies in both players; exact-byte rule unchanged. Historical accepted six-file runtime identities remain separate. Current original GUI inspection and overall delivery remain incomplete."
+    },
+    "gf2_boundary_diagnosis": {
+      "evidence": "docs/CAPTURE_GF2_BOUNDARY.md",
+      "baseline": "docs/capture-gf2-boundary-baseline.json",
+      "event": 5598,
+      "depth_sample_executions": 8,
+      "full_vs_executions": 11,
+      "checkpoint_processes": 8,
+      "checkpoint_exports": 160,
+      "current_gate_passed": false,
+      "limits": "Stable settled depth/VS inputs and restored draws narrow reproduction conditions; no root cause or production fix. Original GUI and six-frame acceptance remain incomplete."
     }
   }
 }
