@@ -15,12 +15,12 @@ inline Com<ID3D11Texture2D> checkpoint(ID3D11Device* device, ID3D11DeviceContext
     Com<ID3D11Texture2D> texture;
     check(source->QueryInterface(IID_PPV_ARGS(&texture)), "Get checkpoint texture");
     D3D11_TEXTURE2D_DESC desc{}; texture->GetDesc(&desc);
-    if (typed != 12 && typed != 30 && typed != 20) throw std::runtime_error("Unsupported checkpoint format");
+    if (typed != 12 && typed != 30 && typed != 20 && typed != 3) throw std::runtime_error("Unsupported checkpoint format");
     const bool depth = typed == 20;
     if (desc.MipLevels != 1 || desc.SampleDesc.Count <= 1 ||
-        !(depth ? (desc.Format == 19 || desc.Format == 20) : typed == 12 ? (desc.Format >= 9 && desc.Format <= 14) : (desc.Format >= 27 && desc.Format <= 32)))
+        !(depth ? (desc.Format == 19 || desc.Format == 20) : typed == 3 ? (desc.Format >= 1 && desc.Format <= 4) : typed == 12 ? (desc.Format >= 9 && desc.Format <= 14) : (desc.Format >= 27 && desc.Format <= 32)))
         throw std::runtime_error("Incompatible checkpoint source");
-    desc.Format = depth ? DXGI_FORMAT_R32G8X24_TYPELESS : typed == 12 ? DXGI_FORMAT_R16G16B16A16_TYPELESS : DXGI_FORMAT_R8G8B8A8_TYPELESS;
+    desc.Format = depth ? DXGI_FORMAT_R32G8X24_TYPELESS : typed == 3 ? DXGI_FORMAT_R32G32B32A32_TYPELESS : typed == 12 ? DXGI_FORMAT_R16G16B16A16_TYPELESS : DXGI_FORMAT_R8G8B8A8_TYPELESS;
     desc.Usage = D3D11_USAGE_DEFAULT; desc.CPUAccessFlags = desc.MiscFlags = 0;
     desc.BindFlags = D3D11_BIND_SHADER_RESOURCE | (depth ? D3D11_BIND_DEPTH_STENCIL : 0);
     Com<ID3D11Texture2D> copy;
@@ -32,11 +32,11 @@ inline std::array<uint32_t, 4> readCheckpoint(ID3D11Device* device, ID3D11Textur
                                              uint32_t typed, uint32_t sample, uint32_t layer,
                                              uint32_t x, uint32_t y) {
     D3D11_TEXTURE2D_DESC sourceDesc{}; source->GetDesc(&sourceDesc);
-    if ((typed != 12 && typed != 30 && typed != 20) || sourceDesc.MipLevels != 1 ||
+    if ((typed != 12 && typed != 30 && typed != 20 && typed != 3) || sourceDesc.MipLevels != 1 ||
         sourceDesc.SampleDesc.Count <= 1 || sample >= sourceDesc.SampleDesc.Count || layer >= sourceDesc.ArraySize ||
         x >= sourceDesc.Width || y >= sourceDesc.Height) throw std::runtime_error("Invalid checkpoint texel selection");
     const bool depth = typed == 20;
-    if (sourceDesc.Format != (depth ? 19 : typed == 12 ? 9 : 27))
+    if (sourceDesc.Format != (depth ? 19 : typed == 3 ? 1 : typed == 12 ? 9 : 27))
         throw std::runtime_error("Checkpoint reader requires matching typeless storage");
     auto compile = [](const std::string& text, const char* profile) {
         Com<ID3DBlob> code, errors;

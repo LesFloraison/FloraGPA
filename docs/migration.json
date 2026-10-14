@@ -4415,6 +4415,23 @@
       "current_gate_passed": false,
       "all_draw_inputs_proven_equal": false,
       "limits": "Observed native bindings, fifteen input resources and selected depth/stencil checkpoints agree across normal and modified runs. Stable unblended last half-float color does not establish identical fragment histories/full-precision outputs or a blend hardware fault. Formal six-frame gate remains failed."
+    },
+    "gf2_fragment_checkpoint_diagnosis": {
+      "evidence": "docs/CAPTURE_GF2_FRAGMENT_CHECKPOINT.md",
+      "baseline": "docs/capture-gf2-fragment-checkpoint-baseline.json",
+      "paired_modified_executions": 20,
+      "paired_modified_matching_outputs": 20,
+      "original_shader_debug_executions": 10,
+      "original_shader_debug_matching": 1,
+      "original_shader_debug_alternate": 9,
+      "native_cases": 8,
+      "native_exact_texels": 192,
+      "native_refusals": 32,
+      "probe_cases": 28,
+      "probe_refusals": 20,
+      "current_gate_passed": false,
+      "production_fix": false,
+      "limits": "Mirror/count instrumentation stabilizes both half/float target runs. Original shader with debug layer still varies. One surviving write per sample applies only to modified executions; original fragment histories and full-precision shader outputs remain unproven. Formal six-frame gate remains failed."
     }
   }
 }

@@ -1,0 +1,685 @@
+{
+  "schema": 1,
+  "date": "2026-10-14",
+  "source_parent_commit": "aa07982603ef8ca907335daf24692558ac5445f8",
+  "source_hashes": {
+    "CMakeLists.txt": "aba1e18612ba8353ef28234b21aac6f5fd4cc4addf70bdf8a3533773d890eefe",
+    "tools/native/fragment_checkpoint.h": "59b8d8d84655f4238c58f14f372d3d303966e46d74719735adab092bbcf4043e",
+    "tools/native/fragment_checkpoint_tests.cpp": "11d5060342a2acf0dac5cb82de8332397c69cab76a331bdaa6f964ae70136780",
+    "tools/native/texel_checkpoint.h": "00ee7c05c5103871dde1d6fe0c6199d9c78352d2aea2f005464c700fcc93ca2a",
+    "tools/native/replay_texel_probe.cpp": "4335b1f4b1b7c5a03f1e279486e450d284fce492cfc8714ee39a18041c0fdd0d",
+    "tools/validate_capture_texel_probe.py": "a4e698fa531099eb737dc17a11f424596f000792b4b4f6f0402a3eb9bcad511d",
+    "docs/CAPTURE_GF2_FRAGMENT_CHECKPOINT.md": "3fcc3ffc9e72e90b1cd7006facb187fa1276d08bf4d2957099d9ffc16724facd"
+  },
+  "current_gate_passed": false,
+  "production_changed": false,
+  "input": {
+    "file": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-resolve-current-20261014\\launch-2\\session\\frame-d3b245ec-09d2-4888-91af-5032f19ddbd6.gpa_frame",
+    "sha256": "9bef49cd3f807ae3796ece91d35960604ce4158d0736acb5d545efa346aafacf",
+    "event": 5651,
+    "resource": 411,
+    "layer": 0,
+    "pixel": [
+      1596,
+      1519
+    ]
+  },
+  "groups": [
+    {
+      "name": "initial",
+      "binary": "FloraReplayTexelProbe-initial.exe",
+      "directories": [
+        "fragment-0"
+      ],
+      "binary_sha256": "36cd090cab485deba7b9eacffdb49bd0e69e44563e7c86d301cb718655880c65"
+    },
+    {
+      "name": "float_debug",
+      "binary": "FloraReplayTexelProbe-float-debug.exe",
+      "directories": [
+        "validated-fragment-0",
+        "validated-fragment-1",
+        "validated-fragment-2",
+        "validated-fragment-3",
+        "validated-fragment-4",
+        "validated-fragment-5",
+        "validated-fragment-6",
+        "validated-fragment-7",
+        "validated-fragment-8",
+        "validated-fragment-9"
+      ],
+      "binary_sha256": "9189ce7b3081b6dc8da25709b63ae0f5cd05822338d5891a8a24631221e869d3"
+    },
+    {
+      "name": "paired",
+      "binary": "FloraReplayTexelProbe-mirror.exe",
+      "directories": [
+        "final-fragment-0",
+        "final-fragment-half-0",
+        "final-fragment-1",
+        "final-fragment-half-1",
+        "final-fragment-2",
+        "final-fragment-half-2",
+        "final-fragment-3",
+        "final-fragment-half-3",
+        "final-fragment-4",
+        "final-fragment-half-4",
+        "final-fragment-5",
+        "final-fragment-half-5",
+        "final-fragment-6",
+        "final-fragment-half-6",
+        "final-fragment-7",
+        "final-fragment-half-7",
+        "final-fragment-8",
+        "final-fragment-half-8",
+        "final-fragment-9",
+        "final-fragment-half-9"
+      ],
+      "binary_sha256": "d3eb021e0d8a6391ca89cbe272476d6d079131d802c75af2137dc61cc4846b47"
+    },
+    {
+      "name": "debug_control",
+      "binary": "FloraReplayTexelProbe.exe",
+      "directories": [
+        "debug-control-0",
+        "debug-control-1",
+        "debug-control-2",
+        "debug-control-3",
+        "debug-control-4",
+        "debug-control-5",
+        "debug-control-6",
+        "debug-control-7",
+        "debug-control-8",
+        "debug-control-9"
+      ],
+      "binary_sha256": "26c7fcac986e1bd22529aac8350348b627f6187e57d180c13fb525a95875bde5"
+    },
+    {
+      "name": "current_smoke",
+      "binary": "FloraReplayTexelProbe.exe",
+      "directories": [
+        "current-fragment",
+        "current-fragment-half"
+      ],
+      "binary_sha256": "26c7fcac986e1bd22529aac8350348b627f6187e57d180c13fb525a95875bde5"
+    }
+  ],
+  "runs": [
+    {
+      "group": "initial",
+      "directory": "fragment-0",
+      "mode": "fragment",
+      "modified_draw": true,
+      "report_sha256": "41452acf95c221ceaa5554df8c5406420d67f9c704e673f60d58c01118bccded",
+      "png_sha256": "488fe73cd858012a8973a48eb2f9139f68857ce1668ef013885936f5cb45369b",
+      "rgba_sha256": "d5ffe329528ecabc09517514d1b41c5a8d305210480ad9454c732051a697d0e7",
+      "capture_matching": true
+    },
+    {
+      "group": "float_debug",
+      "directory": "validated-fragment-0",
+      "mode": "fragment",
+      "modified_draw": true,
+      "report_sha256": "24be5bb2af02b0a5a0f4d8a489ac2e65a25d6407853be811af2364980d2cf400",
+      "png_sha256": "488fe73cd858012a8973a48eb2f9139f68857ce1668ef013885936f5cb45369b",
+      "rgba_sha256": "d5ffe329528ecabc09517514d1b41c5a8d305210480ad9454c732051a697d0e7",
+      "capture_matching": true
+    },
+    {
+      "group": "float_debug",
+      "directory": "validated-fragment-1",
+      "mode": "fragment",
+      "modified_draw": true,
+      "report_sha256": "24be5bb2af02b0a5a0f4d8a489ac2e65a25d6407853be811af2364980d2cf400",
+      "png_sha256": "488fe73cd858012a8973a48eb2f9139f68857ce1668ef013885936f5cb45369b",
+      "rgba_sha256": "d5ffe329528ecabc09517514d1b41c5a8d305210480ad9454c732051a697d0e7",
+      "capture_matching": true
+    },
+    {
+      "group": "float_debug",
+      "directory": "validated-fragment-2",
+      "mode": "fragment",
+      "modified_draw": true,
+      "report_sha256": "24be5bb2af02b0a5a0f4d8a489ac2e65a25d6407853be811af2364980d2cf400",
+      "png_sha256": "488fe73cd858012a8973a48eb2f9139f68857ce1668ef013885936f5cb45369b",
+      "rgba_sha256": "d5ffe329528ecabc09517514d1b41c5a8d305210480ad9454c732051a697d0e7",
+      "capture_matching": true
+    },
+    {
+      "group": "float_debug",
+      "directory": "validated-fragment-3",
+      "mode": "fragment",
+      "modified_draw": true,
+      "report_sha256": "24be5bb2af02b0a5a0f4d8a489ac2e65a25d6407853be811af2364980d2cf400",
+      "png_sha256": "488fe73cd858012a8973a48eb2f9139f68857ce1668ef013885936f5cb45369b",
+      "rgba_sha256": "d5ffe329528ecabc09517514d1b41c5a8d305210480ad9454c732051a697d0e7",
+      "capture_matching": true
+    },
+    {
+      "group": "float_debug",
+      "directory": "validated-fragment-4",
+      "mode": "fragment",
+      "modified_draw": true,
+      "report_sha256": "24be5bb2af02b0a5a0f4d8a489ac2e65a25d6407853be811af2364980d2cf400",
+      "png_sha256": "488fe73cd858012a8973a48eb2f9139f68857ce1668ef013885936f5cb45369b",
+      "rgba_sha256": "d5ffe329528ecabc09517514d1b41c5a8d305210480ad9454c732051a697d0e7",
+      "capture_matching": true
+    },
+    {
+      "group": "float_debug",
+      "directory": "validated-fragment-5",
+      "mode": "fragment",
+      "modified_draw": true,
+      "report_sha256": "24be5bb2af02b0a5a0f4d8a489ac2e65a25d6407853be811af2364980d2cf400",
+      "png_sha256": "488fe73cd858012a8973a48eb2f9139f68857ce1668ef013885936f5cb45369b",
+      "rgba_sha256": "d5ffe329528ecabc09517514d1b41c5a8d305210480ad9454c732051a697d0e7",
+      "capture_matching": true
+    },
+    {
+      "group": "float_debug",
+      "directory": "validated-fragment-6",
+      "mode": "fragment",
+      "modified_draw": true,
+      "report_sha256": "24be5bb2af02b0a5a0f4d8a489ac2e65a25d6407853be811af2364980d2cf400",
+      "png_sha256": "488fe73cd858012a8973a48eb2f9139f68857ce1668ef013885936f5cb45369b",
+      "rgba_sha256": "d5ffe329528ecabc09517514d1b41c5a8d305210480ad9454c732051a697d0e7",
+      "capture_matching": true
+    },
+    {
+      "group": "float_debug",
+      "directory": "validated-fragment-7",
+      "mode": "fragment",
+      "modified_draw": true,
+      "report_sha256": "24be5bb2af02b0a5a0f4d8a489ac2e65a25d6407853be811af2364980d2cf400",
+      "png_sha256": "488fe73cd858012a8973a48eb2f9139f68857ce1668ef013885936f5cb45369b",
+      "rgba_sha256": "d5ffe329528ecabc09517514d1b41c5a8d305210480ad9454c732051a697d0e7",
+      "capture_matching": true
+    },
+    {
+      "group": "float_debug",
+      "directory": "validated-fragment-8",
+      "mode": "fragment",
+      "modified_draw": true,
+      "report_sha256": "24be5bb2af02b0a5a0f4d8a489ac2e65a25d6407853be811af2364980d2cf400",
+      "png_sha256": "488fe73cd858012a8973a48eb2f9139f68857ce1668ef013885936f5cb45369b",
+      "rgba_sha256": "d5ffe329528ecabc09517514d1b41c5a8d305210480ad9454c732051a697d0e7",
+      "capture_matching": true
+    },
+    {
+      "group": "float_debug",
+      "directory": "validated-fragment-9",
+      "mode": "fragment",
+      "modified_draw": true,
+      "report_sha256": "24be5bb2af02b0a5a0f4d8a489ac2e65a25d6407853be811af2364980d2cf400",
+      "png_sha256": "488fe73cd858012a8973a48eb2f9139f68857ce1668ef013885936f5cb45369b",
+      "rgba_sha256": "d5ffe329528ecabc09517514d1b41c5a8d305210480ad9454c732051a697d0e7",
+      "capture_matching": true
+    },
+    {
+      "group": "paired",
+      "directory": "final-fragment-0",
+      "mode": "fragment",
+      "modified_draw": true,
+      "report_sha256": "24be5bb2af02b0a5a0f4d8a489ac2e65a25d6407853be811af2364980d2cf400",
+      "png_sha256": "488fe73cd858012a8973a48eb2f9139f68857ce1668ef013885936f5cb45369b",
+      "rgba_sha256": "d5ffe329528ecabc09517514d1b41c5a8d305210480ad9454c732051a697d0e7",
+      "capture_matching": true
+    },
+    {
+      "group": "paired",
+      "directory": "final-fragment-half-0",
+      "mode": "fragment-half",
+      "modified_draw": true,
+      "report_sha256": "2ed67f515236cfe0dd69627cc9217e4aee60f4ece7c1e95b7eff42640f1d4889",
+      "png_sha256": "488fe73cd858012a8973a48eb2f9139f68857ce1668ef013885936f5cb45369b",
+      "rgba_sha256": "d5ffe329528ecabc09517514d1b41c5a8d305210480ad9454c732051a697d0e7",
+      "capture_matching": true
+    },
+    {
+      "group": "paired",
+      "directory": "final-fragment-1",
+      "mode": "fragment",
+      "modified_draw": true,
+      "report_sha256": "24be5bb2af02b0a5a0f4d8a489ac2e65a25d6407853be811af2364980d2cf400",
+      "png_sha256": "488fe73cd858012a8973a48eb2f9139f68857ce1668ef013885936f5cb45369b",
+      "rgba_sha256": "d5ffe329528ecabc09517514d1b41c5a8d305210480ad9454c732051a697d0e7",
+      "capture_matching": true
+    },
+    {
+      "group": "paired",
+      "directory": "final-fragment-half-1",
+      "mode": "fragment-half",
+      "modified_draw": true,
+      "report_sha256": "2ed67f515236cfe0dd69627cc9217e4aee60f4ece7c1e95b7eff42640f1d4889",
+      "png_sha256": "488fe73cd858012a8973a48eb2f9139f68857ce1668ef013885936f5cb45369b",
+      "rgba_sha256": "d5ffe329528ecabc09517514d1b41c5a8d305210480ad9454c732051a697d0e7",
+      "capture_matching": true
+    },
+    {
+      "group": "paired",
+      "directory": "final-fragment-2",
+      "mode": "fragment",
+      "modified_draw": true,
+      "report_sha256": "24be5bb2af02b0a5a0f4d8a489ac2e65a25d6407853be811af2364980d2cf400",
+      "png_sha256": "488fe73cd858012a8973a48eb2f9139f68857ce1668ef013885936f5cb45369b",
+      "rgba_sha256": "d5ffe329528ecabc09517514d1b41c5a8d305210480ad9454c732051a697d0e7",
+      "capture_matching": true
+    },
+    {
+      "group": "paired",
+      "directory": "final-fragment-half-2",
+      "mode": "fragment-half",
+      "modified_draw": true,
+      "report_sha256": "2ed67f515236cfe0dd69627cc9217e4aee60f4ece7c1e95b7eff42640f1d4889",
+      "png_sha256": "488fe73cd858012a8973a48eb2f9139f68857ce1668ef013885936f5cb45369b",
+      "rgba_sha256": "d5ffe329528ecabc09517514d1b41c5a8d305210480ad9454c732051a697d0e7",
+      "capture_matching": true
+    },
+    {
+      "group": "paired",
+      "directory": "final-fragment-3",
+      "mode": "fragment",
+      "modified_draw": true,
+      "report_sha256": "24be5bb2af02b0a5a0f4d8a489ac2e65a25d6407853be811af2364980d2cf400",
+      "png_sha256": "488fe73cd858012a8973a48eb2f9139f68857ce1668ef013885936f5cb45369b",
+      "rgba_sha256": "d5ffe329528ecabc09517514d1b41c5a8d305210480ad9454c732051a697d0e7",
+      "capture_matching": true
+    },
+    {
+      "group": "paired",
+      "directory": "final-fragment-half-3",
+      "mode": "fragment-half",
+      "modified_draw": true,
+      "report_sha256": "2ed67f515236cfe0dd69627cc9217e4aee60f4ece7c1e95b7eff42640f1d4889",
+      "png_sha256": "488fe73cd858012a8973a48eb2f9139f68857ce1668ef013885936f5cb45369b",
+      "rgba_sha256": "d5ffe329528ecabc09517514d1b41c5a8d305210480ad9454c732051a697d0e7",
+      "capture_matching": true
+    },
+    {
+      "group": "paired",
+      "directory": "final-fragment-4",
+      "mode": "fragment",
+      "modified_draw": true,
+      "report_sha256": "24be5bb2af02b0a5a0f4d8a489ac2e65a25d6407853be811af2364980d2cf400",
+      "png_sha256": "488fe73cd858012a8973a48eb2f9139f68857ce1668ef013885936f5cb45369b",
+      "rgba_sha256": "d5ffe329528ecabc09517514d1b41c5a8d305210480ad9454c732051a697d0e7",
+      "capture_matching": true
+    },
+    {
+      "group": "paired",
+      "directory": "final-fragment-half-4",
+      "mode": "fragment-half",
+      "modified_draw": true,
+      "report_sha256": "2ed67f515236cfe0dd69627cc9217e4aee60f4ece7c1e95b7eff42640f1d4889",
+      "png_sha256": "488fe73cd858012a8973a48eb2f9139f68857ce1668ef013885936f5cb45369b",
+      "rgba_sha256": "d5ffe329528ecabc09517514d1b41c5a8d305210480ad9454c732051a697d0e7",
+      "capture_matching": true
+    },
+    {
+      "group": "paired",
+      "directory": "final-fragment-5",
+      "mode": "fragment",
+      "modified_draw": true,
+      "report_sha256": "24be5bb2af02b0a5a0f4d8a489ac2e65a25d6407853be811af2364980d2cf400",
+      "png_sha256": "488fe73cd858012a8973a48eb2f9139f68857ce1668ef013885936f5cb45369b",
+      "rgba_sha256": "d5ffe329528ecabc09517514d1b41c5a8d305210480ad9454c732051a697d0e7",
+      "capture_matching": true
+    },
+    {
+      "group": "paired",
+      "directory": "final-fragment-half-5",
+      "mode": "fragment-half",
+      "modified_draw": true,
+      "report_sha256": "2ed67f515236cfe0dd69627cc9217e4aee60f4ece7c1e95b7eff42640f1d4889",
+      "png_sha256": "488fe73cd858012a8973a48eb2f9139f68857ce1668ef013885936f5cb45369b",
+      "rgba_sha256": "d5ffe329528ecabc09517514d1b41c5a8d305210480ad9454c732051a697d0e7",
+      "capture_matching": true
+    },
+    {
+      "group": "paired",
+      "directory": "final-fragment-6",
+      "mode": "fragment",
+      "modified_draw": true,
+      "report_sha256": "24be5bb2af02b0a5a0f4d8a489ac2e65a25d6407853be811af2364980d2cf400",
+      "png_sha256": "488fe73cd858012a8973a48eb2f9139f68857ce1668ef013885936f5cb45369b",
+      "rgba_sha256": "d5ffe329528ecabc09517514d1b41c5a8d305210480ad9454c732051a697d0e7",
+      "capture_matching": true
+    },
+    {
+      "group": "paired",
+      "directory": "final-fragment-half-6",
+      "mode": "fragment-half",
+      "modified_draw": true,
+      "report_sha256": "2ed67f515236cfe0dd69627cc9217e4aee60f4ece7c1e95b7eff42640f1d4889",
+      "png_sha256": "488fe73cd858012a8973a48eb2f9139f68857ce1668ef013885936f5cb45369b",
+      "rgba_sha256": "d5ffe329528ecabc09517514d1b41c5a8d305210480ad9454c732051a697d0e7",
+      "capture_matching": true
+    },
+    {
+      "group": "paired",
+      "directory": "final-fragment-7",
+      "mode": "fragment",
+      "modified_draw": true,
+      "report_sha256": "24be5bb2af02b0a5a0f4d8a489ac2e65a25d6407853be811af2364980d2cf400",
+      "png_sha256": "488fe73cd858012a8973a48eb2f9139f68857ce1668ef013885936f5cb45369b",
+      "rgba_sha256": "d5ffe329528ecabc09517514d1b41c5a8d305210480ad9454c732051a697d0e7",
+      "capture_matching": true
+    },
+    {
+      "group": "paired",
+      "directory": "final-fragment-half-7",
+      "mode": "fragment-half",
+      "modified_draw": true,
+      "report_sha256": "2ed67f515236cfe0dd69627cc9217e4aee60f4ece7c1e95b7eff42640f1d4889",
+      "png_sha256": "488fe73cd858012a8973a48eb2f9139f68857ce1668ef013885936f5cb45369b",
+      "rgba_sha256": "d5ffe329528ecabc09517514d1b41c5a8d305210480ad9454c732051a697d0e7",
+      "capture_matching": true
+    },
+    {
+      "group": "paired",
+      "directory": "final-fragment-8",
+      "mode": "fragment",
+      "modified_draw": true,
+      "report_sha256": "24be5bb2af02b0a5a0f4d8a489ac2e65a25d6407853be811af2364980d2cf400",
+      "png_sha256": "488fe73cd858012a8973a48eb2f9139f68857ce1668ef013885936f5cb45369b",
+      "rgba_sha256": "d5ffe329528ecabc09517514d1b41c5a8d305210480ad9454c732051a697d0e7",
+      "capture_matching": true
+    },
+    {
+      "group": "paired",
+      "directory": "final-fragment-half-8",
+      "mode": "fragment-half",
+      "modified_draw": true,
+      "report_sha256": "2ed67f515236cfe0dd69627cc9217e4aee60f4ece7c1e95b7eff42640f1d4889",
+      "png_sha256": "488fe73cd858012a8973a48eb2f9139f68857ce1668ef013885936f5cb45369b",
+      "rgba_sha256": "d5ffe329528ecabc09517514d1b41c5a8d305210480ad9454c732051a697d0e7",
+      "capture_matching": true
+    },
+    {
+      "group": "paired",
+      "directory": "final-fragment-9",
+      "mode": "fragment",
+      "modified_draw": true,
+      "report_sha256": "24be5bb2af02b0a5a0f4d8a489ac2e65a25d6407853be811af2364980d2cf400",
+      "png_sha256": "488fe73cd858012a8973a48eb2f9139f68857ce1668ef013885936f5cb45369b",
+      "rgba_sha256": "d5ffe329528ecabc09517514d1b41c5a8d305210480ad9454c732051a697d0e7",
+      "capture_matching": true
+    },
+    {
+      "group": "paired",
+      "directory": "final-fragment-half-9",
+      "mode": "fragment-half",
+      "modified_draw": true,
+      "report_sha256": "2ed67f515236cfe0dd69627cc9217e4aee60f4ece7c1e95b7eff42640f1d4889",
+      "png_sha256": "488fe73cd858012a8973a48eb2f9139f68857ce1668ef013885936f5cb45369b",
+      "rgba_sha256": "d5ffe329528ecabc09517514d1b41c5a8d305210480ad9454c732051a697d0e7",
+      "capture_matching": true
+    },
+    {
+      "group": "debug_control",
+      "directory": "debug-control-0",
+      "mode": "pipeline-debug",
+      "modified_draw": false,
+      "report_sha256": "960640e142120704a98ab22a909468be63355677991a70d1469bfbb8979f535b",
+      "png_sha256": "0e119453793730e1935d5813cd759c69091d9e21ee371235b5214f0127b656fd",
+      "rgba_sha256": "b548683168d47d12344c2a976155eb716c4a14d135dcbb8c9df542b0abd0caa1",
+      "capture_matching": false
+    },
+    {
+      "group": "debug_control",
+      "directory": "debug-control-1",
+      "mode": "pipeline-debug",
+      "modified_draw": false,
+      "report_sha256": "960640e142120704a98ab22a909468be63355677991a70d1469bfbb8979f535b",
+      "png_sha256": "0e119453793730e1935d5813cd759c69091d9e21ee371235b5214f0127b656fd",
+      "rgba_sha256": "b548683168d47d12344c2a976155eb716c4a14d135dcbb8c9df542b0abd0caa1",
+      "capture_matching": false
+    },
+    {
+      "group": "debug_control",
+      "directory": "debug-control-2",
+      "mode": "pipeline-debug",
+      "modified_draw": false,
+      "report_sha256": "960640e142120704a98ab22a909468be63355677991a70d1469bfbb8979f535b",
+      "png_sha256": "0e119453793730e1935d5813cd759c69091d9e21ee371235b5214f0127b656fd",
+      "rgba_sha256": "b548683168d47d12344c2a976155eb716c4a14d135dcbb8c9df542b0abd0caa1",
+      "capture_matching": false
+    },
+    {
+      "group": "debug_control",
+      "directory": "debug-control-3",
+      "mode": "pipeline-debug",
+      "modified_draw": false,
+      "report_sha256": "960640e142120704a98ab22a909468be63355677991a70d1469bfbb8979f535b",
+      "png_sha256": "0e119453793730e1935d5813cd759c69091d9e21ee371235b5214f0127b656fd",
+      "rgba_sha256": "b548683168d47d12344c2a976155eb716c4a14d135dcbb8c9df542b0abd0caa1",
+      "capture_matching": false
+    },
+    {
+      "group": "debug_control",
+      "directory": "debug-control-4",
+      "mode": "pipeline-debug",
+      "modified_draw": false,
+      "report_sha256": "960640e142120704a98ab22a909468be63355677991a70d1469bfbb8979f535b",
+      "png_sha256": "0e119453793730e1935d5813cd759c69091d9e21ee371235b5214f0127b656fd",
+      "rgba_sha256": "b548683168d47d12344c2a976155eb716c4a14d135dcbb8c9df542b0abd0caa1",
+      "capture_matching": false
+    },
+    {
+      "group": "debug_control",
+      "directory": "debug-control-5",
+      "mode": "pipeline-debug",
+      "modified_draw": false,
+      "report_sha256": "960640e142120704a98ab22a909468be63355677991a70d1469bfbb8979f535b",
+      "png_sha256": "0e119453793730e1935d5813cd759c69091d9e21ee371235b5214f0127b656fd",
+      "rgba_sha256": "b548683168d47d12344c2a976155eb716c4a14d135dcbb8c9df542b0abd0caa1",
+      "capture_matching": false
+    },
+    {
+      "group": "debug_control",
+      "directory": "debug-control-6",
+      "mode": "pipeline-debug",
+      "modified_draw": false,
+      "report_sha256": "960640e142120704a98ab22a909468be63355677991a70d1469bfbb8979f535b",
+      "png_sha256": "0e119453793730e1935d5813cd759c69091d9e21ee371235b5214f0127b656fd",
+      "rgba_sha256": "b548683168d47d12344c2a976155eb716c4a14d135dcbb8c9df542b0abd0caa1",
+      "capture_matching": false
+    },
+    {
+      "group": "debug_control",
+      "directory": "debug-control-7",
+      "mode": "pipeline-debug",
+      "modified_draw": false,
+      "report_sha256": "97cd053abfbff03e74b22ed65a6077bacd921a7d90b800e98b938e1a44ead86f",
+      "png_sha256": "488fe73cd858012a8973a48eb2f9139f68857ce1668ef013885936f5cb45369b",
+      "rgba_sha256": "d5ffe329528ecabc09517514d1b41c5a8d305210480ad9454c732051a697d0e7",
+      "capture_matching": true
+    },
+    {
+      "group": "debug_control",
+      "directory": "debug-control-8",
+      "mode": "pipeline-debug",
+      "modified_draw": false,
+      "report_sha256": "960640e142120704a98ab22a909468be63355677991a70d1469bfbb8979f535b",
+      "png_sha256": "0e119453793730e1935d5813cd759c69091d9e21ee371235b5214f0127b656fd",
+      "rgba_sha256": "b548683168d47d12344c2a976155eb716c4a14d135dcbb8c9df542b0abd0caa1",
+      "capture_matching": false
+    },
+    {
+      "group": "debug_control",
+      "directory": "debug-control-9",
+      "mode": "pipeline-debug",
+      "modified_draw": false,
+      "report_sha256": "960640e142120704a98ab22a909468be63355677991a70d1469bfbb8979f535b",
+      "png_sha256": "0e119453793730e1935d5813cd759c69091d9e21ee371235b5214f0127b656fd",
+      "rgba_sha256": "b548683168d47d12344c2a976155eb716c4a14d135dcbb8c9df542b0abd0caa1",
+      "capture_matching": false
+    },
+    {
+      "group": "current_smoke",
+      "directory": "current-fragment",
+      "mode": "fragment",
+      "modified_draw": true,
+      "report_sha256": "24be5bb2af02b0a5a0f4d8a489ac2e65a25d6407853be811af2364980d2cf400",
+      "png_sha256": "488fe73cd858012a8973a48eb2f9139f68857ce1668ef013885936f5cb45369b",
+      "rgba_sha256": "d5ffe329528ecabc09517514d1b41c5a8d305210480ad9454c732051a697d0e7",
+      "capture_matching": true
+    },
+    {
+      "group": "current_smoke",
+      "directory": "current-fragment-half",
+      "mode": "fragment-half",
+      "modified_draw": true,
+      "report_sha256": "2ed67f515236cfe0dd69627cc9217e4aee60f4ece7c1e95b7eff42640f1d4889",
+      "png_sha256": "488fe73cd858012a8973a48eb2f9139f68857ce1668ef013885936f5cb45369b",
+      "rgba_sha256": "d5ffe329528ecabc09517514d1b41c5a8d305210480ad9454c732051a697d0e7",
+      "capture_matching": true
+    }
+  ],
+  "pixel_differences": {
+    "d5ffe329528ecabc09517514d1b41c5a8d305210480ad9454c732051a697d0e7": [],
+    "b548683168d47d12344c2a976155eb716c4a14d135dcbb8c9df542b0abd0caa1": [
+      {
+        "x": 1182,
+        "y": 313,
+        "captured": [
+          12,
+          14,
+          12,
+          255
+        ],
+        "replayed": [
+          12,
+          15,
+          12,
+          255
+        ]
+      },
+      {
+        "x": 1182,
+        "y": 314,
+        "captured": [
+          13,
+          12,
+          8,
+          247
+        ],
+        "replayed": [
+          13,
+          12,
+          8,
+          248
+        ]
+      },
+      {
+        "x": 1183,
+        "y": 314,
+        "captured": [
+          22,
+          22,
+          17,
+          254
+        ],
+        "replayed": [
+          22,
+          22,
+          17,
+          255
+        ]
+      }
+    ]
+  },
+  "float_words": [
+    [
+      1000506070,
+      1001931390,
+      999076797,
+      1065353216
+    ],
+    [
+      1015270884,
+      1015884030,
+      1013355746,
+      1063427123
+    ]
+  ],
+  "half_words": [
+    [
+      7444,
+      7618,
+      7269,
+      15360
+    ],
+    [
+      9246,
+      9321,
+      9012,
+      15124
+    ]
+  ],
+  "shader": {
+    "original_sha256": "fe92913b679084eb0c88a589285f8470cef44e70075b02a966adad683fd7bd95",
+    "modified_sha256": "ba7fb58c74c2496ec7fffe800640ae3c8c0ce41b13c7142d1342645e827c80d4",
+    "original_instruction_rows": 422,
+    "added_instruction_rows": [
+      [
+        50331749,
+        1057010,
+        2
+      ],
+      [
+        50331749,
+        1057010,
+        3
+      ],
+      [
+        150994994,
+        1056882,
+        2,
+        1052662,
+        0,
+        1049158,
+        1,
+        1049158,
+        2
+      ],
+      [
+        83886134,
+        1056898,
+        2,
+        1048634,
+        2
+      ],
+      [
+        134217782,
+        1057010,
+        3,
+        16386,
+        1065353216,
+        1065353216,
+        1065353216,
+        1065353216
+      ]
+    ],
+    "preserved_original_instructions_exact": true
+  },
+  "validation": {
+    "native_cases": 8,
+    "native_exact_texels": 192,
+    "native_refusals": 32,
+    "scoped_debug_warnings_or_errors": 0,
+    "prefix_debug_messages": 608,
+    "probe_cases": 28,
+    "probe_refusals": 20,
+    "ctest_passed": 1,
+    "capture_only_configured": true
+  },
+  "native_binary_sha256": "b65a682f0e7560f194f52eafe21499848d9a91e71d7f683c38c8d6b10fb215a2",
+  "replay_sha256": "215ebafed657953f0671c32a0948e12c8c965437a3eaa33e6d38aedcff5e2ddc",
+  "raw": {
+    "root": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-fragment-checkpoint-20261014",
+    "files": 308,
+    "manifest_sha256": "825d87ea25747a856808129342cf071ecb3c0e0055ca541c909dd8c07883c2e6"
+  },
+  "limits": "Mirror/count instrumentation stabilizes both half/float target runs. Original shader with debug layer still varies. One surviving write per sample applies only to modified executions; original fragment histories and full-precision shader outputs remain unproven. Formal six-frame gate remains failed."
+}
