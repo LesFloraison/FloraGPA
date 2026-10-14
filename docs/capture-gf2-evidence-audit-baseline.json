@@ -1,0 +1,83 @@
+{
+  "schema": 1,
+  "date": "2026-10-14",
+  "source_base_commit": "5ac3242a9931b2f55106df264dd29009fb2b7fd2",
+  "scope": "CPU-only audit of retained evidence; no new GPU playback or accepted capture",
+  "formal_acceptance_established": false,
+  "cpu_test_methods_passed": 8,
+  "reports": {
+    "current-runtime-audit": {
+      "path": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-gui-details-20261014\\current-runtime-audit.json",
+      "sha256": "f4331087960c9bb95634077afc2b764d73296524cd4c645365047ed1f9137f8c",
+      "expected_identity": {
+        "runtime_sha256": "4b314e2ff540e0f5beadf31943db1efa9f2efc0850a507be5a4997525798fcfc",
+        "controller_sha256": "0bc61e429745e1b0f6fd046762cae923471686782a1ab48ba853cca12aaaacf3",
+        "replay_sha256": "215ebafed657953f0671c32a0948e12c8c965437a3eaa33e6d38aedcff5e2ddc"
+      },
+      "checks": 134,
+      "frames": 6,
+      "failures": [
+        {
+          "name": "current/runtime_sha256",
+          "passed": false,
+          "recorded": "f2d92dd99f5b26ee232064ca26645136fa808ab2e7e6e810193376527f092df3",
+          "requested": "4b314e2ff540e0f5beadf31943db1efa9f2efc0850a507be5a4997525798fcfc"
+        },
+        {
+          "name": "1/2/0/flora/exact",
+          "passed": false,
+          "pixels": 4,
+          "channels": 7,
+          "maximum": 1
+        },
+        {
+          "name": "1/2/2/original/exact",
+          "passed": false,
+          "pixels": 4,
+          "channels": 7,
+          "maximum": 1
+        }
+      ],
+      "error": null,
+      "exit_code": 1
+    },
+    "recorded-runtime-audit": {
+      "path": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-gui-details-20261014\\recorded-runtime-audit.json",
+      "sha256": "48173f4eaa27a866d65c85ee6156cbf5c1ae30170c02854c6435011e3ef75a32",
+      "expected_identity": {
+        "runtime_sha256": "f2d92dd99f5b26ee232064ca26645136fa808ab2e7e6e810193376527f092df3",
+        "controller_sha256": "0bc61e429745e1b0f6fd046762cae923471686782a1ab48ba853cca12aaaacf3",
+        "replay_sha256": "215ebafed657953f0671c32a0948e12c8c965437a3eaa33e6d38aedcff5e2ddc"
+      },
+      "checks": 134,
+      "frames": 6,
+      "failures": [
+        {
+          "name": "1/2/0/flora/exact",
+          "passed": false,
+          "pixels": 4,
+          "channels": 7,
+          "maximum": 1
+        },
+        {
+          "name": "1/2/2/original/exact",
+          "passed": false,
+          "pixels": 4,
+          "channels": 7,
+          "maximum": 1
+        }
+      ],
+      "error": null,
+      "exit_code": 1
+    }
+  },
+  "evidence_files": {
+    "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-gui-details-20261014\\unit-tests.txt": "25dd53307f77b100663f160f3e55464948d49f32c27d4cdca561b6212e9c73f4",
+    "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-gui-details-20261014\\equipment-loaded-before-details.png": "2a28764af64bcf2112e07001b7b720b67015f98d3449d92341d0be2f77de5eab"
+  },
+  "source_hashes": {
+    "tools\\audit_capture_gf2_evidence.py": "0adaae34f4fc7a405f9b9e71d8c75cb272dac72758daa1a2716bb5b30a690e0d",
+    "tools\\test_audit_capture_gf2_evidence.py": "d77faba7fdb0940a9c96e8134fbedef128780fb07914195beaad644a85b69518",
+    "docs\\CAPTURE_GF2_EVIDENCE_AUDIT.md": "71994e18c0e40e7d62914714820614e33be5b7b096868c635b7d95f1e9cbce00"
+  }
+}

@@ -4258,6 +4258,17 @@
       "native_refusals": 96,
       "encoder_refusals": 144,
       "limits": "Scoped RGBA8/RGBA16 2x/4x quality-zero typed/typeless array and destination-mip Resolve at actual submission. Repeated order and initial samples preserved. Predicate/other MSAA mutations and broader storage refuse; conservative deferred pipeline dependencies remain. No new GF2 or original GUI acceptance."
+    },
+    "gf2_retained_evidence_audit": {
+      "evidence": "docs/CAPTURE_GF2_EVIDENCE_AUDIT.md",
+      "baseline": "docs/capture-gf2-evidence-audit-baseline.json",
+      "cpu_test_methods_passed": 8,
+      "retained_files": 6,
+      "checks_per_audit": 134,
+      "recorded_runtime_failed_checks": 2,
+      "current_runtime_failed_checks": 3,
+      "current_gate_passed": false,
+      "limits": "Read-only audit of saved outputs, not new GPU execution. Two known pixel mismatches persist; newer runtime identity differs. Original GPA detail input times out and manual response is pending. Detailed per-file inspection and current-runtime formal acceptance remain incomplete."
     }
   }
 }
