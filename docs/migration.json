@@ -4129,6 +4129,19 @@
       "original_observed_copies": 240,
       "original_counter_source_destination_boundaries_each": 480,
       "limits": "Ordinary destination buffers and valid Counter/Append sources; predicate, same-resource copies and numeric UINT_MAX refuse. No expanded query-completion proof or indirect capture; no new GF2 or original GUI acceptance."
+    },
+    "indirect_validation": {
+      "evidence": "docs/CAPTURE_INDIRECT.md",
+      "baseline": "docs/capture-indirect-baseline.json",
+      "dual_player_files": 54,
+      "dual_player_checks": 1114,
+      "regression_files": 60,
+      "regression_checks": 1316,
+      "packaged_injected_frames": 15,
+      "packaged_injected_checks": 97,
+      "original_observed_indirect_calls": 48,
+      "original_argument_boundaries": 96,
+      "limits": "Immediate/deferred/nested native indirect APIs with GPU-generated arguments; broader predicate/SO/query, numeric UINT_MAX counters and synchronization remain limited. No new GF2 or original GUI acceptance."
     }
   }
 }

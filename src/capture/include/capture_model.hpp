@@ -82,7 +82,15 @@ struct PipelineBindings {
 };
 enum class CommandKind { unsupported, read, binding, draw, draw_indexed, draw_instanced,
     draw_indexed_instanced, dispatch, clear_rtv, clear_dsv, clear_uav_uint, clear_uav_float, map, unmap, copy_resource,
-    query_end, query_get_data, update_subresource, copy_region, resolve, copy_structure_count };
+    query_end, query_get_data, update_subresource, copy_region, resolve, copy_structure_count, dispatch_indirect, draw_instanced_indirect, draw_indexed_instanced_indirect };
+constexpr uint32_t indirect_argument_bytes(CommandKind kind){
+    switch(kind){case CommandKind::dispatch_indirect:return 12;case CommandKind::draw_instanced_indirect:return 16;
+    case CommandKind::draw_indexed_instanced_indirect:return 20;default:return 0;}
+}
+constexpr bool is_gpu_action(CommandKind kind){
+    return indirect_argument_bytes(kind) || kind==CommandKind::draw || kind==CommandKind::draw_indexed ||
+        kind==CommandKind::draw_instanced || kind==CommandKind::draw_indexed_instanced || kind==CommandKind::dispatch;
+}
 // CPU observation history, not a cross-thread/context GPU ordering proof.
 struct QueryEndStamp {
     uint64_t generation=0;

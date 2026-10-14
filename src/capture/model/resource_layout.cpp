@@ -4,6 +4,11 @@
 #include <limits>
 #include <stdexcept>
 namespace flora::capture {
+void validate_indirect_arguments(const D3D11_BUFFER_DESC& desc,CommandKind kind,uint32_t offset){
+    const auto bytes=indirect_argument_bytes(kind);
+    if(!bytes || !(desc.MiscFlags&D3D11_RESOURCE_MISC_DRAWINDIRECT_ARGS) || offset%4 || uint64_t(offset)+bytes>desc.ByteWidth)
+        throw std::runtime_error("Indirect argument kind, buffer flag or aligned range invalid");
+}
 void validate_copy_structure_count(const D3D11_BUFFER_DESC& d,const D3D11_UNORDERED_ACCESS_VIEW_DESC& v,const D3D11_BUFFER_DESC& s,uint32_t offset){
     if((d.Usage!=D3D11_USAGE_DEFAULT && d.Usage!=D3D11_USAGE_STAGING) || (d.MiscFlags&D3D11_RESOURCE_MISC_BUFFER_STRUCTURED) || offset%4 || uint64_t(offset)+4>d.ByteWidth)
         throw std::runtime_error("CopyStructureCount destination usage/offset invalid");

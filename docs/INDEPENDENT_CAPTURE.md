@@ -1,5 +1,9 @@
 # Independent DX11 capture
 
+GPU-generated indirect Draw/Dispatch arguments now remain native indirect records,
+with immediate/deferred/nested execution and byte-exact controls documented in
+[CAPTURE_INDIRECT.md](CAPTURE_INDIRECT.md).
+
 Implementation is **partial**. The native controller now launches, injects and
 captures a limited blit/flip DX11 profile through private IPC. Completed
 `.gpa_frame` files execute in FloraGPA and the installed original GPA kernel.

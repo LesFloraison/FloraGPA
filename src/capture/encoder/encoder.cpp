@@ -456,7 +456,7 @@ public:
         uint64_t sequence=0;
         for(const auto& command:frame_.commands){
             require(command.sequence==sequence++,"Encoder command sequence mismatch");const auto& w=command.words;Payload p;uint16_t type=0;
-            const bool gpu_action=command.kind==CommandKind::draw || command.kind==CommandKind::draw_indexed || command.kind==CommandKind::draw_instanced || command.kind==CommandKind::draw_indexed_instanced || command.kind==CommandKind::dispatch;
+            const bool gpu_action=is_gpu_action(command.kind);
             require(gpu_action || command.kind==CommandKind::copy_structure_count || command.uav_counter_keeps.empty(),"Encoder counter KEEP attached to non-GPU command");
             require(command.kind==CommandKind::update_subresource || !command.update_box,"Encoder box attached to non-Update command");
             require(command.kind==CommandKind::copy_region || !command.copy_region,"Encoder region attached to non-copy command");
@@ -567,6 +567,13 @@ public:
                 const auto& d=frame_.initial_resources.at(command.operand);
                 validate_copy_resource(d.shape,frame_.objects.at(command.operand).descriptor,frame_.initial_resources.at(command.source).shape);
                 add(7,0x3e,Payload{}.q({0,1,destination,source}));continue;
+            }
+            if(indirect_argument_bytes(command.kind)){
+                require(command.operand && !command.source && !w[1] && !w[2] && !w[3] && !w[4] && command.data.empty() && command.before_data.empty(),"Encoder indirect arguments invalid");
+                const auto arguments=ref(command.operand,"buffer");require(frame_.initial_resources.contains(command.operand),"Encoder indirect initial data missing");
+                validate_indirect_arguments(descriptor<D3D11_BUFFER_DESC>(frame_.objects.at(command.operand)),command.kind,w[0]);
+                const auto indirect_type=command.kind==CommandKind::dispatch_indirect?0x36:command.kind==CommandKind::draw_instanced_indirect?0x3d:0x3b;
+                add(7,uint16_t(indirect_type),Payload{}.q({state(command),0,1,arguments}).value(w[0]));continue;
             }
             switch(command.kind){
             case CommandKind::draw:type=0x37;break;case CommandKind::draw_indexed:type=0x39;break;

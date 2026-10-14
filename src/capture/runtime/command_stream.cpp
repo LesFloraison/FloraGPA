@@ -294,6 +294,11 @@ void FrameRecording::observe(ID3D11DeviceContext* context,const char* api,Comman
                 throw std::runtime_error(query_gap(operand,api,words));
             throw std::runtime_error("GPU call recording is not implemented");
         }
+        if(indirect_argument_bytes(kind)){
+            ComPtr<ID3D11Buffer> buffer;
+            if(!operand || FAILED(unwrap(operand)->QueryInterface(IID_PPV_ARGS(&buffer))))throw std::runtime_error("Indirect argument buffer missing");
+            D3D11_BUFFER_DESC desc{};buffer->GetDesc(&desc);validate_indirect_arguments(desc,kind,words[0]);
+        }
         if(kind==CommandKind::map && (!operand || words[1]<1 || words[1]>5 || (words[2]&~D3D11_MAP_FLAG_DO_NOT_WAIT)))throw std::runtime_error("Invalid Map arguments");
         if((kind==CommandKind::copy_structure_count || kind==CommandKind::copy_resource || kind==CommandKind::copy_region) && (!operand || !source))throw std::runtime_error("CopyResource operand is missing");
         if(kind==CommandKind::copy_region && !region)throw std::runtime_error("CopySubresourceRegion coordinates missing");

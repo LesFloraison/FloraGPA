@@ -9,6 +9,7 @@
 #include <iostream>
 #include <array>
 #include "msaa_live_renderer.hpp"
+#include "indirect_live_renderer.hpp"
 #include <memory>
 #include <thread>
 using namespace flora::capture;
@@ -96,6 +97,7 @@ int wmain(int argc,wchar_t** argv){if(argc!=3)return 2;const fs::path out=fs::ab
     if(mode==27){D3D11_FEATURE_DATA_D3D11_OPTIONS options{};check(device->CheckFeatureSupport(D3D11_FEATURE_D3D11_OPTIONS,&options,sizeof options));if(!options.MapNoOverwriteOnDynamicConstantBuffer)throw std::runtime_error("NO_OVERWRITE constant-buffer fixture is unsupported on this device");}
     std::array<ComPtr<ID3D11CommandList>,5> deferred_draws;
     if(mode==23 || mode==26 || mode==27 || mode==28){ComPtr<ID3D11DeviceContext> deferred;check(device->CreateDeferredContext(0,&deferred));for(size_t i=0;i<deferred_draws.size();++i){if(mode==28){static const UINT pixels[]{0xff0000ff,0xff00ff00,0xffff0000,0xffffffff,0xffffff00};D3D11_MAPPED_SUBRESOURCE mapped{};check(deferred->Map(deferred_texture.Get(),0,D3D11_MAP_WRITE_DISCARD,0,&mapped));if(mapped.RowPitch<32)throw std::runtime_error("Native deferred texture pitch is invalid");for(UINT y=0;y<8;++y)for(UINT x=0;x<8;++x)memcpy(static_cast<uint8_t*>(mapped.pData)+size_t(y)*mapped.RowPitch+x*4,&pixels[i],4);deferred->Unmap(deferred_texture.Get(),0);auto* source=deferred_texture_view.Get();deferred->PSSetShaderResources(0,1,&source);}if(mode==26 || mode==27){static const float values[5][4]{{1,0,0,1},{0,1,0,1},{0,0,1,1},{1,1,1,1},{0,1,1,1}};D3D11_MAPPED_SUBRESOURCE mapped{};check(deferred->Map(mapped_color.Get(),0,D3D11_MAP_WRITE_DISCARD,0,&mapped));if(mode==27){const float black[4]{0,0,0,1};memcpy(mapped.pData,black,16);deferred->Unmap(mapped_color.Get(),0);check(deferred->Map(mapped_color.Get(),0,D3D11_MAP_WRITE_NO_OVERWRITE,0,&mapped));}memcpy(mapped.pData,values[i],16);deferred->Unmap(mapped_color.Get(),0);auto* cb=mapped_color.Get();deferred->PSSetConstantBuffers(0,1,&cb);}deferred->VSSetShader(vs.Get(),nullptr,0);deferred->PSSetShader((mode==26 || mode==27 || mode==28)?mapped_shader.Get():cycle[i].Get(),nullptr,0);deferred->OMSetRenderTargets(1,&view,nullptr);deferred->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);deferred->RSSetViewports(1,&vp);deferred->Draw(3,0);check(deferred->FinishCommandList(FALSE,&deferred_draws[i]));}}
+    std::unique_ptr<IndirectLiveRenderer> indirect;if(mode>=37 && mode<=39)indirect=std::make_unique<IndirectLiveRenderer>(device.Get(),mode-37);
     std::unique_ptr<MsaaLiveRenderer> multisample;if(msaa)multisample=std::make_unique<MsaaLiveRenderer>(device.Get(),context.Get(),mode==24?2:4);
     ComPtr<IDXGISwapChain1> swap1;check(swap.As(&swap1));uint64_t frames=0;const auto deadline=GetTickCount64()+120000;
     while(!signal_exists(out/L"finish.signal")){
@@ -110,7 +112,8 @@ int wmain(int argc,wchar_t** argv){if(argc!=3)return 2;const fs::path out=fs::ab
             else if(mode>=15){float color[4];memcpy(color,values[frames%5],16);D3D11_BOX box{1,0,0,2,1,1};if(mode==16 || mode==18)update_context->UpdateSubresource1(boxed_color.Get(),0,&box,color,16,16,0);else context->UpdateSubresource(mode>=19?region_source.Get():boxed_color.Get(),0,&box,color,16,16);if(mode>=19){if(mode==20)update_context->CopySubresourceRegion1(boxed_color.Get(),0,1,0,0,region_source.Get(),0,&box,0);else context->CopySubresourceRegion(boxed_color.Get(),0,1,0,0,region_source.Get(),0,&box);}memset(color,0xcd,sizeof color);memset(&box,0,sizeof box);}
             else if(mode>=13){float color[4];memcpy(color,values[frames%5],16);if(mode==14)update_context->UpdateSubresource1(mapped_color.Get(),0,nullptr,color,0,0,0);else context->UpdateSubresource(mapped_color.Get(),0,nullptr,color,0,0);memset(color,0xcd,sizeof color);}
             else{D3D11_MAPPED_SUBRESOURCE mapped{};check(context->Map(mapped_color.Get(),0,D3D11_MAP_WRITE_DISCARD,0,&mapped));memcpy(mapped.pData,values[frames%5],16);context->Unmap(mapped_color.Get(),0);}context->PSSetShader(mapped_shader.Get(),nullptr,0);}
-        if(counter_mode){
+        if(indirect){indirect->render(context.Get(),vs.Get(),cycle[frames%5].Get(),rtv.Get(),frames%5);}
+        else if(counter_mode){
             const UINT zeros[4]{};context->ClearUnorderedAccessViewUint(counter_uav.Get(),zeros);
             const auto seed_counter=[&](UINT count){auto* u=counter_uav.Get();context->CSSetUnorderedAccessViews(0,1,&u,&count);u=nullptr;context->CSSetUnorderedAccessViews(0,1,&u,nullptr);};
             if(initial_counter)seed_counter(9);

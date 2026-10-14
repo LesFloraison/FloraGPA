@@ -39,6 +39,7 @@ void texture_discard(const FrozenObject& object,const DeferredCall& call){
 }
 bool supported(CommandKind kind){switch(kind){
 case CommandKind::draw:case CommandKind::draw_indexed:case CommandKind::draw_instanced:case CommandKind::draw_indexed_instanced:case CommandKind::dispatch:
+case CommandKind::dispatch_indirect:case CommandKind::draw_instanced_indirect:case CommandKind::draw_indexed_instanced_indirect:
 case CommandKind::clear_rtv:case CommandKind::clear_dsv:case CommandKind::clear_uav_uint:case CommandKind::clear_uav_float:
 case CommandKind::copy_structure_count:case CommandKind::copy_resource:case CommandKind::copy_region:case CommandKind::update_subresource:return true;
 case CommandKind::map:case CommandKind::unmap:return true;
@@ -141,6 +142,11 @@ DeferredExpansion expand(const DeferredCommandList& list,const DeferredOrigin& o
         require(call.data.size()<=payload_limit-out.payload_bytes,"Deferred expansion payload byte limit exceeded");
         require(call.before_data.size()<=payload_limit-out.payload_bytes-call.data.size(),"Deferred expansion baseline byte limit exceeded");
         bindings(*state);retain(call.operand);retain(call.source);
+        if(indirect_argument_bytes(call.kind)){
+            require(call.operand && !call.source && !call.words[1] && !call.words[2] && !call.words[3] && !call.words[4],"Deferred indirect arguments invalid");
+            const auto& buffer=out.definitions.at(call.operand);require(buffer.kind=="buffer","Deferred indirect operand is not a buffer");
+            validate_indirect_arguments(descriptor<D3D11_BUFFER_DESC>(buffer),call.kind,call.words[0]);
+        }
         if(call.kind==CommandKind::map){
             require(call.operand && !call.source && call.result==S_OK && call.words[0]==0 &&
                     (call.words[1]==D3D11_MAP_WRITE_DISCARD || call.words[1]==D3D11_MAP_WRITE_NO_OVERWRITE) && !call.words[2],
@@ -167,7 +173,7 @@ DeferredExpansion expand(const DeferredCommandList& list,const DeferredOrigin& o
         }
         RecordedCommand c;c.kind=call.kind;c.api=call.api;c.words=call.words;c.floats=call.floats;c.operand=call.operand;c.source=call.source;c.update_box=call.update_box;c.copy_region=call.copy_region;c.data=call.data;c.result=call.result;c.completed=true;
         c.before_data=call.before_data;c.bindings=*state;c.bindings.context=context;c.deferred=origin;c.deferred->call_sequence=call.sequence;
-        if(call.kind==CommandKind::copy_structure_count || call.kind==CommandKind::draw || call.kind==CommandKind::draw_indexed || call.kind==CommandKind::draw_instanced || call.kind==CommandKind::draw_indexed_instanced || call.kind==CommandKind::dispatch){
+        if(call.kind==CommandKind::copy_structure_count || is_gpu_action(call.kind)){
             auto counter=[&](ObjectId id){if(!id || !hidden_counter(out.definitions.at(id)) || c.uav_counters.contains(id) || c.uav_counter_keeps.contains(id))return;
                 if(auto reset=counters.pending.find(id);reset!=counters.pending.end()){c.uav_counters.emplace(id,reset->second);counters.pending.erase(reset);counters.initialized.insert(id);}
                 else if(counters.initialized.contains(id))c.uav_counter_keeps.insert(id);
@@ -197,7 +203,7 @@ void complete_deferred_counters(DeferredExpansion& expanded,const std::map<Objec
         require(index<expanded.commands.size(),"Deferred counter snapshot command index invalid");
         const auto& c=expanded.commands[index];
         require(expanded.definitions.contains(id) && hidden_counter(expanded.definitions.at(id)),"Deferred counter snapshot definition invalid");
-        require(c.kind==CommandKind::copy_structure_count || c.kind==CommandKind::draw || c.kind==CommandKind::draw_indexed || c.kind==CommandKind::draw_instanced || c.kind==CommandKind::draw_indexed_instanced || c.kind==CommandKind::dispatch,"Deferred counter snapshot action invalid");
+        require(c.kind==CommandKind::copy_structure_count || is_gpu_action(c.kind),"Deferred counter snapshot action invalid");
         require((c.kind==CommandKind::copy_structure_count && c.source==id) || std::find(c.bindings.cs_uavs.begin(),c.bindings.cs_uavs.end(),id)!=c.bindings.cs_uavs.end() || std::find(c.bindings.om_uavs.begin(),c.bindings.om_uavs.end(),id)!=c.bindings.om_uavs.end(),"Deferred counter snapshot is not bound");
         require(!c.uav_counters.contains(id) && !c.uav_counter_keeps.contains(id),"Deferred counter snapshot overlaps reset/KEEP");
     }
