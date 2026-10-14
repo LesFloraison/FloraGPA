@@ -16,6 +16,9 @@ The full planned release remains incomplete. Earlier Intel pixel mismatches and
 the NVIDIA MSAA anomaly remain unresolved; see the acceptance document's limits
 and [CAPTURE_REPEATABILITY.md](CAPTURE_REPEATABILITY.md). Unsupported API and
 hidden-state profiles continue to reject explicitly.
+Precompiled deferred dynamic-buffer discard pairs now execute through capture's
+own lowering, with repeated-list and dual-player validation in
+[CAPTURE_DEFERRED_DISCARD.md](CAPTURE_DEFERRED_DISCARD.md).
 
 Capture HUD work is tracked separately in [CAPTURE_HUD.md](CAPTURE_HUD.md).
 Protocol v4 adds bounded per-request CLI resource budgets to the earlier

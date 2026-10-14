@@ -59,7 +59,9 @@ struct Harness {
 }
 int wmain(int argc,wchar_t** argv){try{
     require(argc==4,"Expected controller, target and new output directory");const auto out=fs::absolute(argv[3]);require(!signal_exists(out),"Output exists");Json results=Json::array();
-#ifdef FLORA_MSAA_CONTROLLER
+#if defined(FLORA_DEFERRED_DISCARD_CONTROLLER)
+    constexpr unsigned first_mode=26,last_mode=27;
+#elif defined(FLORA_MSAA_CONTROLLER)
     constexpr unsigned first_mode=24,last_mode=26;
 #else
     constexpr unsigned first_mode=0,last_mode=24;
@@ -91,7 +93,7 @@ int wmain(int argc,wchar_t** argv){try{
         for(const auto& entry:fs::directory_iterator(h.session))require(entry.path().extension()!=L".partial","Transaction leaked partial output");
         std::ifstream exit_file(h.oracle/L"exit.json");Json exit;exit_file>>exit;
         require(exit["identity_checks"]==exit["frames"],"Backbuffer identity observations missing");if(mode>=2 && mode!=8 && mode!=24)require(exit["unbind_checks"]==exit["frames"],"Flip unbind observations missing");
-        if(mode>=24)require(exit["msaa_native_cpu_exact"],"Native MSAA CPU oracle failed after disconnect");
+        if(mode==24 || mode==25)require(exit["msaa_native_cpu_exact"],"Native MSAA CPU oracle failed after disconnect");
         results.push_back({{"mode",mode},{"frames",frames},{"target_exit",exit},{"automatic_foreground",foreground},{"failure",failed["last_capture"]},{"module_status",status}});
     }
     std::ofstream report(out/L"results.json");report<<results.dump(2);std::cout<<Json{{"passed",true},{"launches",last_mode-first_mode},{"scope","Startup injection and native private IPC"}}.dump()<<'\n';return 0;

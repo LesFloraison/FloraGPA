@@ -1,0 +1,78 @@
+{
+  "schema": "FloraGPA deferred buffer discard 1",
+  "date": "2026-10-14",
+  "parent_commit": "b2c2316ae88a706a35a3a177a80c9d1ae5ea9162",
+  "scope": "Precompiled complete dynamic-buffer WRITE_DISCARD; strongest shader-consumption oracle is constant buffers",
+  "capture_ctest": {
+    "passed": 117,
+    "total": 117
+  },
+  "full_focused_ctest": {
+    "passed": 17,
+    "total": 17
+  },
+  "native_scope_devices": [
+    "WARP",
+    "Intel vendor 0x8086",
+    "NVIDIA vendor 0x10de"
+  ],
+  "native_scope_executions": 12,
+  "malformed_refusals_per_wrapped_device": 13,
+  "dual_player": {
+    "files": 8,
+    "checks": 132,
+    "default_original_adapter": true,
+    "new_original_gui": false
+  },
+  "packaged_injection": {
+    "launches": 1,
+    "frames": 5,
+    "checks": 33,
+    "mode": 26,
+    "system_only_child_path": true,
+    "native_runtime_sha256": "27dda7a7d3829b67efdcaa87eb7acf7d51f331928d9c89b37a57a5df6ef8beb2",
+    "target_continues_after_capture_and_disconnect": true
+  },
+  "source_binaries": {
+    "build/capture/capture/Release/FloraCaptureDeferredDiscardTests.exe": "0fda92ca0535db613b2737836299b25da79595566c2dc7779c10135b32d0cb9e",
+    "build/capture/capture/Release/FloraCaptureRuntime.dll": "27dda7a7d3829b67efdcaa87eb7acf7d51f331928d9c89b37a57a5df6ef8beb2",
+    "build/vs2022/Release/FloraDeferredMapScopeProbe.exe": "834acb998bb1d911d629f72326f23f1fe660f41e261f3a64bb97eb84b8c28258"
+  },
+  "frame_sha256": {
+    "injected/native/26/session/frame-65487329-5207-4e4e-bb93-e356175f589f.gpa_frame": "227d1d6a09e468710c36e8ee681fff12283431a06f2f1702f1b86c756892e113",
+    "injected/native/26/session/frame-a947a646-fe55-482d-b708-cb0c135b12df.gpa_frame": "174d7acb16434e23470e0b8ad282d2cffed6fb828bce3daf971ddc1b07478913",
+    "injected/native/26/session/frame-ba9d6fd0-978c-4e16-b8cd-8a505045a9e1.gpa_frame": "c9fdd8b6117e77ca97f214d4b742cb17b4190b1b0e70ea2266dc7878e229861d",
+    "injected/native/26/session/frame-d0f5b4b8-359b-4602-99e5-0bfed5da97a0.gpa_frame": "b1c5e5cafcf4399981bfe6ab4ac85caa54baa0dc58a51a1b51e64c7996322d3c",
+    "injected/native/26/session/frame-d7ceb127-c6be-4a07-a632-93cd9d700a2a.gpa_frame": "926968a798fb369130efda5ad6631f9361d44e7040fc1a05b856b969ffe4f6e7",
+    "dual-corrected/hardware/aba.gpa_frame": "62cfa69e383e28291dbd23028f876ad2bb838026caf5d5664e4c7be62afa8bd0",
+    "dual-corrected/hardware/bab.gpa_frame": "aa52bcb4b958464b978b3b24d86b2a0deeb1251113cb0c9b6b5f2208211f83d5",
+    "dual-corrected/hardware/missing-discard.gpa_frame": "cebbd298d46721865590fdd39293d12ac085c59ac222937c350a4f2326daf03b",
+    "dual-corrected/hardware/missing-draw.gpa_frame": "ffdfac8782e58d74be1b7623af8616d8a55c8b9009530b2a7ccc068a264fae1d",
+    "dual-corrected/warp/aba.gpa_frame": "8af306f5f13aa2d34943ca94a8ee8f7e35b38b9d7e0f9d51d1eb3789788b02f9",
+    "dual-corrected/warp/bab.gpa_frame": "77f06b6e833d20828f6b7a525c5b470e69bdb410692bd95ce1cd2cf943d72954",
+    "dual-corrected/warp/missing-discard.gpa_frame": "2e228496a1074ef9b1b98fbca50a04b6d37df8d8851c0a8dad380b94c5a41eec",
+    "dual-corrected/warp/missing-draw.gpa_frame": "fc3329f0426efd7240313f2da728a350a204ffa0f4bfe3a28a9928450e3d3287",
+    "dual/warp/aba.gpa_frame": "e232120f8490f7b5abc3df7019856e2d41d10d18ca02cb1dfbba031541f213ee",
+    "dual/warp/bab.gpa_frame": "9f799e89c8ee3a93f9785e10a8a6765d14af3f036a3762831bd4213668693d71",
+    "dual/warp/missing-discard.gpa_frame": "ae5fe97f895afa41b0788980fd3886341a340a53e8eb9864b3f5a271a86b0913",
+    "dual/warp/missing-draw.gpa_frame": "63469564ad69fe3699cabd8f85f6c9b2349f1e2fe59eae21a2fd2144b64000d4"
+  },
+  "evidence_manifest": {
+    "path": "artifacts/capture-deferred-map-scope-20261014/evidence-manifest.json",
+    "sha256": "2cefd40e6fdfba33138204be64126f03ee577a69aea670b4b48fb6f228987c6c",
+    "files": 516
+  },
+  "initial_failures": [
+    "Unwrapped fixture incorrectly required capture registry readback; corrected to native staging",
+    "Harness expected Unmap report key; corrected to existing unmap_observations"
+  ],
+  "replay_or_format_changed": false,
+  "new_gf2_acceptance": false,
+  "overall_capture_status": "partial",
+  "remaining": [
+    "Deferred NO_OVERWRITE and textures",
+    "Nested lists and in-frame compilation",
+    "Foreign immediate execution threads and hidden states",
+    "Historical Intel/NVIDIA pixel mismatches"
+  ]
+}

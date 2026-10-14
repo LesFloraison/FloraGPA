@@ -3999,11 +3999,20 @@
       "acceptance_evidence": "docs/capture-gf2-acceptance-baseline.json"
     },
     "deferred_history": "Capture-owned bounded CPU compilation journals, immutable Finish generations and actual immediate execution expansion with repeated calls; native resource leases are separate from CPU histories",
-    "deferred_mappings": "Capture-owned Map HRESULT/type/flags/pitches and Unmap payloads; borrowed pointers excluded from immutable lists; NO_OVERWRITE dependencies and deferred encoding remain unresolved",
+    "deferred_mappings": "Capture-owned Map HRESULT/type/flags/pitches and Unmap payloads; borrowed pointers excluded from immutable lists. Complete dynamic-buffer WRITE_DISCARD pairs lower per actual execution; NO_OVERWRITE, texture and broader rename dependencies remain unresolved. See CAPTURE_DEFERRED_DISCARD.md.",
     "deferred_bindings": "Typed input histories for 45 valid deferred APIs plus native effective action snapshots; unsupported MinLOD/class/hidden-state profiles reject",
     "deferred_definitions": "Independent CPU creation graphs preserve device/resource/view dependencies, DXBC, state descriptors, semantic strings and original creation bytes after native destruction; not execution-time GPU contents or deferred encoding",
     "deferred_effective_state": "Native compilation-time getter snapshots plus execution-time GPU initial data feed supported flattened actions; hidden deferred state remains unsupported",
-    "deferred_execution": "Supported precompiled Draw/Dispatch/Clear/Copy/Update actions lower at actual immediate ExecuteCommandList positions; repeated order, execution snapshots, lifetime release and independent files tested; Map/nesting/in-frame compilation and multicontext execution refuse",
+    "deferred_execution": "Supported precompiled Draw/Dispatch/Clear/Copy/Update and complete buffer WRITE_DISCARD/Unmap actions lower at actual immediate ExecuteCommandList positions; repeated order, execution snapshots, lifetime release and independent files tested. Nested lists, in-frame compilation and foreign immediate execution refuse.",
+    "deferred_discard_validation": {
+      "evidence": "docs/CAPTURE_DEFERRED_DISCARD.md",
+      "baseline": "docs/capture-deferred-discard-baseline.json",
+      "dual_player_files": 8,
+      "dual_player_checks": 132,
+      "packaged_injected_frames": 5,
+      "packaged_injected_checks": 33,
+      "limits": "Dynamic constant-buffer shader consumption is the strongest new oracle; wider bind combinations are not exhaustively covered. No new GF2 or original-GPA GUI acceptance; overall delivery remains partial."
+    },
     "mapped_dependencies": "Per-use immediate/deferred dependency checks and operand-only Map snapshots; unrelated mapped resources permitted. Scoped boundary WRITE_DISCARD preserves valid CPU bytes; mapped GPU dependencies, unsupported unowned Unmap and unfinished unverified mappings still refuse.",
     "msaa_sample_readback": "Capture-owned per-layer/per-sample planes and exact native readback; scoped RGBA8/RGBA16/D32S8 connected to immediate recording. Standalone D16/D32/D24S8 readers do not establish initialization or capture support for those formats.",
     "msaa_initialization_experiment": "Historical test-only RGBA8 and D32S8 per-plane Draw/Copy initialization proofs with exact native and dual-player removal controls. Scoped production integration is tracked in msaa_color_encoder, msaa_depth_encoder and msaa_immediate_recording; broader formats and state profiles remain pending.",

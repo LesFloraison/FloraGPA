@@ -7,6 +7,7 @@ bool supported(CommandKind kind){switch(kind){
 case CommandKind::draw:case CommandKind::draw_indexed:case CommandKind::draw_instanced:case CommandKind::draw_indexed_instanced:case CommandKind::dispatch:
 case CommandKind::clear_rtv:case CommandKind::clear_dsv:case CommandKind::clear_uav_uint:case CommandKind::clear_uav_float:
 case CommandKind::copy_resource:case CommandKind::copy_region:case CommandKind::update_subresource:return true;
+case CommandKind::map:case CommandKind::unmap:return true;
 default:return false;
 }}
 }
@@ -14,6 +15,7 @@ DeferredExpansion lower_deferred(const DeferredCommandList& list,const DeferredO
     require(context && origin.list && origin.source_context==list.context && origin.generation==list.generation,"Deferred execution provenance mismatch");
     if(!list.gaps.empty())throw std::runtime_error("Deferred compilation gap: "+list.gaps.front());
     DeferredExpansion out;std::set<ObjectId> visiting;
+    std::map<ObjectId,std::shared_ptr<const PipelineBindings>> mappings;
     std::function<void(ObjectId)> retain=[&](ObjectId id){
         if(!id || out.definitions.contains(id))return;
         require(visiting.insert(id).second,"Deferred definition cycle");
@@ -39,13 +41,35 @@ DeferredExpansion lower_deferred(const DeferredCommandList& list,const DeferredO
         if(call.kind==CommandKind::binding){require(call.binding.has_value(),"Deferred binding arguments missing");continue;}
         require(supported(call.kind),"Deferred action lowering unsupported (Map rename/query/nested list or unknown action)");
         require(out.commands.size()<command_limit,"Deferred expansion command limit exceeded");
-        require(call.state && call.completed,"Deferred action state/data incomplete");
+        auto state=call.state;
+        if(call.kind==CommandKind::unmap){
+            const auto found=mappings.find(call.operand);
+            require(found!=mappings.end() && call.words==std::array<uint32_t,5>{} && call.data.empty() && call.result==S_OK,
+                    "Deferred Unmap has no matching complete buffer discard");
+            state=found->second;mappings.erase(found);
+        }
+        require(state && call.completed,"Deferred action state/data incomplete");
         require(call.data.size()<=payload_limit-out.payload_bytes,"Deferred expansion payload byte limit exceeded");
-        bindings(*call.state);retain(call.operand);retain(call.source);
+        bindings(*state);retain(call.operand);retain(call.source);
+        if(call.kind==CommandKind::map){
+            require(call.operand && !call.source && call.result==S_OK && call.words[0]==0 &&
+                    call.words[1]==D3D11_MAP_WRITE_DISCARD && !call.words[2],
+                    "Deferred Map rename requires a complete zero-flag buffer WRITE_DISCARD");
+            const auto& object=out.definitions.at(call.operand);
+            require(object.kind=="buffer" && object.descriptor.size()==sizeof(D3D11_BUFFER_DESC),
+                    "Deferred Map rename resource is not a verified buffer");
+            D3D11_BUFFER_DESC desc{};memcpy(&desc,object.descriptor.data(),sizeof desc);
+            require(desc.ByteWidth && desc.Usage==D3D11_USAGE_DYNAMIC && desc.CPUAccessFlags==D3D11_CPU_ACCESS_WRITE &&
+                    !desc.MiscFlags && !desc.StructureByteStride &&
+                    !(desc.BindFlags&~(D3D11_BIND_VERTEX_BUFFER|D3D11_BIND_INDEX_BUFFER|D3D11_BIND_CONSTANT_BUFFER|D3D11_BIND_SHADER_RESOURCE)) &&
+                    call.data.size()==desc.ByteWidth,"Deferred Map rename buffer descriptor/payload unsupported");
+            require(mappings.emplace(call.operand,state).second,"Deferred Map rename overlaps an open mapping");
+        }
         RecordedCommand c;c.kind=call.kind;c.api=call.api;c.words=call.words;c.floats=call.floats;c.operand=call.operand;c.source=call.source;c.update_box=call.update_box;c.copy_region=call.copy_region;c.data=call.data;c.result=call.result;c.completed=true;
-        c.bindings=*call.state;c.bindings.context=context;c.deferred=origin;c.deferred->call_sequence=call.sequence;
+        c.bindings=*state;c.bindings.context=context;c.deferred=origin;c.deferred->call_sequence=call.sequence;
         out.payload_bytes+=c.data.size();out.commands.push_back(std::move(c));
     }
+    require(mappings.empty(),"Deferred Map rename has no matching Unmap");
     return out;
 }
 }
