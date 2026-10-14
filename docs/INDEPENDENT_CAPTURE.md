@@ -4,25 +4,22 @@ Implementation is **partial**. The native controller now launches, injects and
 captures a limited blit/flip DX11 profile through private IPC. Completed
 `.gpa_frame` files execute in FloraGPA and the installed original GPA kernel.
 Unsupported profiles fail explicitly. Qt exposes the same workflow and passes
-only completed file paths into replay. The full planned release, original GUI
-inspection and GF2 six-frame gate remain incomplete. GF2 passes its two-buffer
-FLIP_SEQUENTIAL / ALLOW_TEARING boundary and mapped writes. Limited pre-frame
-EVENT observations now serialize; in-frame successful completion still rejects.
-The elevated continuation resolved game-cache access. Colored GF2 start-screen
-preflights replay exactly. Two latest home-scene captures execute in both players
-but fail exact pixel comparison; repeated replays also vary. The equipment-room
-request exceeded the default resource budget; per-request CLI budgets are now
-available for a new attempt. Formal scene acceptance remains 0/6.
-Serial resource probes now locate a variable home-scene prefix at DrawIndexed
-2305; its settled input storage compares exactly, and WARP repeats agree within
-the adapter. The cause remains unresolved; see [CAPTURE_REPEATABILITY.md](CAPTURE_REPEATABILITY.md).
+only completed file paths into replay. **Six GF2 files now pass scoped acceptance
+on Intel Iris Xe**, from two independent launches with three consecutive captures
+each, covering home and equipment-room scenes. Exact dual-player execution,
+selected resource bytes, original GUI inspection and independent package gates
+are recorded in [CAPTURE_GF2_ACCEPTANCE.md](CAPTURE_GF2_ACCEPTANCE.md).
+The full planned release remains incomplete. Earlier Intel pixel mismatches and
+the NVIDIA MSAA anomaly remain unresolved; see the acceptance document's limits
+and [CAPTURE_REPEATABILITY.md](CAPTURE_REPEATABILITY.md). Unsupported API and
+hidden-state profiles continue to reject explicitly.
 
 Capture HUD work is tracked separately in [CAPTURE_HUD.md](CAPTURE_HUD.md).
 Protocol v4 adds bounded per-request CLI resource budgets to the earlier
-HUD/hotkey and Qt settings. See [CAPTURE_RESOURCE_BUDGET.md](CAPTURE_RESOURCE_BUDGET.md). Drawing is currently
-limited to guarded single-buffer blt devices; flip/multi-buffer chains (including
-GF2) skip HUD because pixel isolation is not yet established. This limitation
-does not disable the in-game capture shortcut or expand capture format support.
+HUD/hotkey and Qt settings. See [CAPTURE_RESOURCE_BUDGET.md](CAPTURE_RESOURCE_BUDGET.md).
+Guarded blt/flip HUD profiles and remaining limits are tracked in
+[CAPTURE_HUD_ACCEPTANCE.md](CAPTURE_HUD_ACCEPTANCE.md); HUD support does not expand
+capture format support.
 
 ## Architectural contract
 
@@ -58,7 +55,7 @@ concurrent request rejection, target exit and a real native-controller lifecycle
 The full-profile run has no skips; standalone UI-only tests intentionally omit
 the native-controller case when capture binaries are not configured. The full
 GUI and Worker compile, and the existing view-overlay tests pass. None of this
-constitutes acceptance of the unimplemented frame pipeline.
+establishes broader capture correctness beyond the documented supported profile.
 
 ## Historical foundations and remaining gates
 
