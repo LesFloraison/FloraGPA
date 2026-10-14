@@ -1,0 +1,602 @@
+{
+  "schema": "FloraGPA GF2 readback controls 1",
+  "date": "2026-10-14",
+  "base_commit": "ddf2d1e225d5cf729f047e860e25aee1138e5de0",
+  "input": {
+    "frame": "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\capture-gf2-current-20261014\\launch-1\\session\\frame-8df44cb7-96a5-4ddf-9649-a60ac27325ba.gpa_frame",
+    "sha256": "a30ddd946f1ff174d6c704c0d820554d0614f45f90508349e3004fb7f8cd9b06",
+    "source_commit": "242f812",
+    "event": 5598
+  },
+  "current_gate_passed": false,
+  "capture_production_changed": false,
+  "rdc_change": "Report active replay API properties; no adapter selection or rendering change.",
+  "comparison": "Exact bytes; no relaxed threshold",
+  "ordinary_processes": 12,
+  "fresh_target_processes": 6,
+  "legacy_control_processes": 7,
+  "original_boundary_controls": 3,
+  "sample_exports": 120,
+  "readbacks": [
+    {
+      "path": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-readback-20261014\\readback-0",
+      "mode": "default",
+      "original_shaders": true,
+      "source_bind_flags": 32,
+      "direct_readback": false,
+      "exports": 4,
+      "all_exports_sha256": "10bfd552c3acc038eab0bb6fcecf3c309680f224dbba938eccd0d73013e144b4",
+      "report_sha256": "a1cae389475825893ef45a75fccab7d6fc02c92f99e9f724a83cd44547d3b739"
+    },
+    {
+      "path": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-readback-20261014\\readback-1",
+      "mode": "default",
+      "original_shaders": true,
+      "source_bind_flags": 32,
+      "direct_readback": false,
+      "exports": 4,
+      "all_exports_sha256": "10bfd552c3acc038eab0bb6fcecf3c309680f224dbba938eccd0d73013e144b4",
+      "report_sha256": "a1cae389475825893ef45a75fccab7d6fc02c92f99e9f724a83cd44547d3b739"
+    },
+    {
+      "path": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-readback-20261014\\readback-2",
+      "mode": "default",
+      "original_shaders": true,
+      "source_bind_flags": 32,
+      "direct_readback": false,
+      "exports": 4,
+      "all_exports_sha256": "10bfd552c3acc038eab0bb6fcecf3c309680f224dbba938eccd0d73013e144b4",
+      "report_sha256": "a1cae389475825893ef45a75fccab7d6fc02c92f99e9f724a83cd44547d3b739"
+    },
+    {
+      "path": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-readback-20261014\\readback-3",
+      "mode": "default",
+      "original_shaders": true,
+      "source_bind_flags": 32,
+      "direct_readback": false,
+      "exports": 4,
+      "all_exports_sha256": "10bfd552c3acc038eab0bb6fcecf3c309680f224dbba938eccd0d73013e144b4",
+      "report_sha256": "a1cae389475825893ef45a75fccab7d6fc02c92f99e9f724a83cd44547d3b739"
+    },
+    {
+      "path": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-readback-20261014\\readback-4",
+      "mode": "default",
+      "original_shaders": true,
+      "source_bind_flags": 32,
+      "direct_readback": false,
+      "exports": 4,
+      "all_exports_sha256": "10bfd552c3acc038eab0bb6fcecf3c309680f224dbba938eccd0d73013e144b4",
+      "report_sha256": "a1cae389475825893ef45a75fccab7d6fc02c92f99e9f724a83cd44547d3b739"
+    },
+    {
+      "path": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-readback-20261014\\readback-5",
+      "mode": "default",
+      "original_shaders": true,
+      "source_bind_flags": 32,
+      "direct_readback": false,
+      "exports": 4,
+      "all_exports_sha256": "10bfd552c3acc038eab0bb6fcecf3c309680f224dbba938eccd0d73013e144b4",
+      "report_sha256": "a1cae389475825893ef45a75fccab7d6fc02c92f99e9f724a83cd44547d3b739"
+    },
+    {
+      "path": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-readback-20261014\\readback-6",
+      "mode": "default",
+      "original_shaders": true,
+      "source_bind_flags": 32,
+      "direct_readback": false,
+      "exports": 4,
+      "all_exports_sha256": "10bfd552c3acc038eab0bb6fcecf3c309680f224dbba938eccd0d73013e144b4",
+      "report_sha256": "a1cae389475825893ef45a75fccab7d6fc02c92f99e9f724a83cd44547d3b739"
+    },
+    {
+      "path": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-readback-20261014\\readback-7",
+      "mode": "default",
+      "original_shaders": true,
+      "source_bind_flags": 32,
+      "direct_readback": false,
+      "exports": 4,
+      "all_exports_sha256": "10bfd552c3acc038eab0bb6fcecf3c309680f224dbba938eccd0d73013e144b4",
+      "report_sha256": "a1cae389475825893ef45a75fccab7d6fc02c92f99e9f724a83cd44547d3b739"
+    },
+    {
+      "path": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-readback-20261014\\readback-8",
+      "mode": "default",
+      "original_shaders": true,
+      "source_bind_flags": 32,
+      "direct_readback": false,
+      "exports": 4,
+      "all_exports_sha256": "10bfd552c3acc038eab0bb6fcecf3c309680f224dbba938eccd0d73013e144b4",
+      "report_sha256": "a1cae389475825893ef45a75fccab7d6fc02c92f99e9f724a83cd44547d3b739"
+    },
+    {
+      "path": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-readback-20261014\\readback-9",
+      "mode": "default",
+      "original_shaders": true,
+      "source_bind_flags": 32,
+      "direct_readback": false,
+      "exports": 4,
+      "all_exports_sha256": "10bfd552c3acc038eab0bb6fcecf3c309680f224dbba938eccd0d73013e144b4",
+      "report_sha256": "a1cae389475825893ef45a75fccab7d6fc02c92f99e9f724a83cd44547d3b739"
+    },
+    {
+      "path": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-readback-20261014\\readback-10",
+      "mode": "default",
+      "original_shaders": true,
+      "source_bind_flags": 32,
+      "direct_readback": false,
+      "exports": 4,
+      "all_exports_sha256": "10bfd552c3acc038eab0bb6fcecf3c309680f224dbba938eccd0d73013e144b4",
+      "report_sha256": "a1cae389475825893ef45a75fccab7d6fc02c92f99e9f724a83cd44547d3b739"
+    },
+    {
+      "path": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-readback-20261014\\readback-11",
+      "mode": "default",
+      "original_shaders": true,
+      "source_bind_flags": 32,
+      "direct_readback": false,
+      "exports": 4,
+      "all_exports_sha256": "10bfd552c3acc038eab0bb6fcecf3c309680f224dbba938eccd0d73013e144b4",
+      "report_sha256": "a1cae389475825893ef45a75fccab7d6fc02c92f99e9f724a83cd44547d3b739"
+    },
+    {
+      "path": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-readback-20261014\\fresh-target-0",
+      "mode": "fresh-target",
+      "original_shaders": true,
+      "source_bind_flags": 32,
+      "direct_readback": false,
+      "exports": 2,
+      "all_exports_sha256": "10bfd552c3acc038eab0bb6fcecf3c309680f224dbba938eccd0d73013e144b4",
+      "report_sha256": "a44a1beb580ded47e11eb7049713711ce57caf4019d6bd6dba5e7a39335a5c9f"
+    },
+    {
+      "path": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-readback-20261014\\fresh-target-1",
+      "mode": "fresh-target",
+      "original_shaders": true,
+      "source_bind_flags": 32,
+      "direct_readback": false,
+      "exports": 2,
+      "all_exports_sha256": "10bfd552c3acc038eab0bb6fcecf3c309680f224dbba938eccd0d73013e144b4",
+      "report_sha256": "a44a1beb580ded47e11eb7049713711ce57caf4019d6bd6dba5e7a39335a5c9f"
+    },
+    {
+      "path": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-readback-20261014\\fresh-target-2",
+      "mode": "fresh-target",
+      "original_shaders": true,
+      "source_bind_flags": 32,
+      "direct_readback": false,
+      "exports": 2,
+      "all_exports_sha256": "10bfd552c3acc038eab0bb6fcecf3c309680f224dbba938eccd0d73013e144b4",
+      "report_sha256": "a44a1beb580ded47e11eb7049713711ce57caf4019d6bd6dba5e7a39335a5c9f"
+    },
+    {
+      "path": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-readback-20261014\\fresh-target-srv-0",
+      "mode": "fresh-target-srv",
+      "original_shaders": true,
+      "source_bind_flags": 40,
+      "direct_readback": true,
+      "exports": 4,
+      "all_exports_sha256": "10bfd552c3acc038eab0bb6fcecf3c309680f224dbba938eccd0d73013e144b4",
+      "report_sha256": "7732b0cb3d4fcd80f1c412958bb91cbea49206184da280abbb074585fdd14bf4"
+    },
+    {
+      "path": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-readback-20261014\\fresh-target-srv-1",
+      "mode": "fresh-target-srv",
+      "original_shaders": true,
+      "source_bind_flags": 40,
+      "direct_readback": true,
+      "exports": 4,
+      "all_exports_sha256": "10bfd552c3acc038eab0bb6fcecf3c309680f224dbba938eccd0d73013e144b4",
+      "report_sha256": "7732b0cb3d4fcd80f1c412958bb91cbea49206184da280abbb074585fdd14bf4"
+    },
+    {
+      "path": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-readback-20261014\\fresh-target-srv-2",
+      "mode": "fresh-target-srv",
+      "original_shaders": true,
+      "source_bind_flags": 40,
+      "direct_readback": true,
+      "exports": 4,
+      "all_exports_sha256": "10bfd552c3acc038eab0bb6fcecf3c309680f224dbba938eccd0d73013e144b4",
+      "report_sha256": "7732b0cb3d4fcd80f1c412958bb91cbea49206184da280abbb074585fdd14bf4"
+    },
+    {
+      "path": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-readback-20261014\\legacy-boundary",
+      "mode": "at-boundary",
+      "original_shaders": false,
+      "source_bind_flags": 32,
+      "direct_readback": false,
+      "exports": 6,
+      "all_exports_sha256": "a833d15c8465b8c4cab9f5c7f792aa47860246c528c4993f47ce7824b7dee5d6",
+      "report_sha256": "2da5b891882d064033bc8977c714a5491c027b29e9d7609a5bc55efad91e5ae4"
+    },
+    {
+      "path": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-readback-20261014\\original-boundary-0",
+      "mode": "at-boundary",
+      "original_shaders": true,
+      "source_bind_flags": 32,
+      "direct_readback": false,
+      "exports": 6,
+      "all_exports_sha256": "10bfd552c3acc038eab0bb6fcecf3c309680f224dbba938eccd0d73013e144b4",
+      "report_sha256": "5ffce114fe184a6ffe95fe9d37abcec2e6597a19fcb5a9a04242cf3d7469a7ea"
+    },
+    {
+      "path": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-readback-20261014\\original-boundary-1",
+      "mode": "at-boundary",
+      "original_shaders": true,
+      "source_bind_flags": 32,
+      "direct_readback": false,
+      "exports": 6,
+      "all_exports_sha256": "10bfd552c3acc038eab0bb6fcecf3c309680f224dbba938eccd0d73013e144b4",
+      "report_sha256": "5ffce114fe184a6ffe95fe9d37abcec2e6597a19fcb5a9a04242cf3d7469a7ea"
+    },
+    {
+      "path": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-readback-20261014\\original-boundary-2",
+      "mode": "at-boundary",
+      "original_shaders": true,
+      "source_bind_flags": 32,
+      "direct_readback": false,
+      "exports": 6,
+      "all_exports_sha256": "10bfd552c3acc038eab0bb6fcecf3c309680f224dbba938eccd0d73013e144b4",
+      "report_sha256": "5ffce114fe184a6ffe95fe9d37abcec2e6597a19fcb5a9a04242cf3d7469a7ea"
+    },
+    {
+      "path": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-readback-20261014\\replacement-default-0",
+      "mode": "default",
+      "original_shaders": false,
+      "source_bind_flags": 32,
+      "direct_readback": false,
+      "exports": 4,
+      "all_exports_sha256": "10bfd552c3acc038eab0bb6fcecf3c309680f224dbba938eccd0d73013e144b4",
+      "report_sha256": "b39b3908779f9413909856ea7abcb65da91040fbdac3e3b7bdf4ded0a55dff5d"
+    },
+    {
+      "path": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-readback-20261014\\replacement-default-1",
+      "mode": "default",
+      "original_shaders": false,
+      "source_bind_flags": 32,
+      "direct_readback": false,
+      "exports": 4,
+      "all_exports_sha256": "10bfd552c3acc038eab0bb6fcecf3c309680f224dbba938eccd0d73013e144b4",
+      "report_sha256": "b39b3908779f9413909856ea7abcb65da91040fbdac3e3b7bdf4ded0a55dff5d"
+    },
+    {
+      "path": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-readback-20261014\\replacement-default-2",
+      "mode": "default",
+      "original_shaders": false,
+      "source_bind_flags": 32,
+      "direct_readback": false,
+      "exports": 4,
+      "all_exports_sha256": "10bfd552c3acc038eab0bb6fcecf3c309680f224dbba938eccd0d73013e144b4",
+      "report_sha256": "b39b3908779f9413909856ea7abcb65da91040fbdac3e3b7bdf4ded0a55dff5d"
+    },
+    {
+      "path": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-readback-20261014\\legacy-boundary-repeat-0",
+      "mode": "at-boundary",
+      "original_shaders": false,
+      "source_bind_flags": 32,
+      "direct_readback": false,
+      "exports": 6,
+      "all_exports_sha256": "10bfd552c3acc038eab0bb6fcecf3c309680f224dbba938eccd0d73013e144b4",
+      "report_sha256": "90dc0c0fa322286d04959b0458b1a57ff74805af172e9dff36fe87ef6fd6803e"
+    },
+    {
+      "path": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-readback-20261014\\legacy-boundary-repeat-1",
+      "mode": "at-boundary",
+      "original_shaders": false,
+      "source_bind_flags": 32,
+      "direct_readback": false,
+      "exports": 6,
+      "all_exports_sha256": "10bfd552c3acc038eab0bb6fcecf3c309680f224dbba938eccd0d73013e144b4",
+      "report_sha256": "90dc0c0fa322286d04959b0458b1a57ff74805af172e9dff36fe87ef6fd6803e"
+    },
+    {
+      "path": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-readback-20261014\\legacy-boundary-repeat-2",
+      "mode": "at-boundary",
+      "original_shaders": false,
+      "source_bind_flags": 32,
+      "direct_readback": false,
+      "exports": 6,
+      "all_exports_sha256": "b7b48ed95b35542afa7a66b93d9d029be81debe11ecc77741b4b74330fbc8a50",
+      "report_sha256": "bc25932288ac2801d5404421ff15416c4a3a0f8454c89ac864c3a7dfc4dba9ec"
+    }
+  ],
+  "identical_shader": {
+    "shader": 887,
+    "data": 1781,
+    "captured_size": 13328,
+    "replacement_size": 13328,
+    "captured_sha256": "fe92913b679084eb0c88a589285f8470cef44e70075b02a966adad683fd7bd95",
+    "replacement_sha256": "fe92913b679084eb0c88a589285f8470cef44e70075b02a966adad683fd7bd95",
+    "equal": true
+  },
+  "legacy_outlier": {
+    "different_words": 4761,
+    "different_pixels": 4134,
+    "selected_low_bits": [
+      14698,
+      13854,
+      13265,
+      15091
+    ],
+    "selected_legacy_bits": [
+      14858,
+      13955,
+      13298,
+      15091
+    ],
+    "first_pixels": [
+      {
+        "x": 1256,
+        "y": 0,
+        "before": [
+          10404,
+          10898,
+          10935,
+          14848
+        ],
+        "after": [
+          10404,
+          10898,
+          10934,
+          14848
+        ]
+      },
+      {
+        "x": 1257,
+        "y": 0,
+        "before": [
+          10399,
+          10873,
+          10912,
+          14848
+        ],
+        "after": [
+          10399,
+          10873,
+          10900,
+          14848
+        ]
+      },
+      {
+        "x": 1258,
+        "y": 0,
+        "before": [
+          10393,
+          10853,
+          10892,
+          14848
+        ],
+        "after": [
+          10393,
+          10853,
+          10875,
+          14848
+        ]
+      },
+      {
+        "x": 1259,
+        "y": 0,
+        "before": [
+          10386,
+          10840,
+          10872,
+          14848
+        ],
+        "after": [
+          10386,
+          10840,
+          10868,
+          14848
+        ]
+      },
+      {
+        "x": 1358,
+        "y": 0,
+        "before": [
+          10371,
+          10928,
+          10898,
+          14848
+        ],
+        "after": [
+          10371,
+          10928,
+          10907,
+          14848
+        ]
+      },
+      {
+        "x": 1359,
+        "y": 0,
+        "before": [
+          10382,
+          10938,
+          10909,
+          14848
+        ],
+        "after": [
+          10382,
+          10938,
+          10928,
+          14848
+        ]
+      },
+      {
+        "x": 1360,
+        "y": 0,
+        "before": [
+          10369,
+          10913,
+          10896,
+          14848
+        ],
+        "after": [
+          10369,
+          10913,
+          10891,
+          14848
+        ]
+      },
+      {
+        "x": 1361,
+        "y": 0,
+        "before": [
+          10361,
+          10893,
+          10884,
+          14848
+        ],
+        "after": [
+          10357,
+          10893,
+          10868,
+          14848
+        ]
+      },
+      {
+        "x": 1362,
+        "y": 0,
+        "before": [
+          10361,
+          10881,
+          10872,
+          14848
+        ],
+        "after": [
+          10344,
+          10881,
+          10868,
+          14848
+        ]
+      },
+      {
+        "x": 1363,
+        "y": 0,
+        "before": [
+          10351,
+          10877,
+          10865,
+          14848
+        ],
+        "after": [
+          10339,
+          10877,
+          10865,
+          14848
+        ]
+      }
+    ]
+  },
+  "refusals": {
+    "count": 7,
+    "report_sha256": "50e26151a8b536c77025443d8e1d69b478cf1fc9c311b2165c8a3d40bb4aa88d"
+  },
+  "failed_history": {
+    "attempts": 1,
+    "stage": "RenderDoc replay before pixel-history result",
+    "result_produced": false,
+    "errors": [
+      "DXGI_ERROR_DEVICE_HUNG",
+      "DXGI_ERROR_DEVICE_REMOVED"
+    ],
+    "replay_adapter_from_log": "Intel(R) Iris(R) Xe Graphics",
+    "log_sha256": "fb288a03a2414da7d9a11314e1ed159592df79d14f85a4afbb222554f92e4877",
+    "job_sha256": "0acbbb9a40ccfc69aed5e96b026816a4456cbd90ef185c755b035821d6e2323c",
+    "worker_log_sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+    "recapture_sha256": "a223ec09ad3b380afb940b3f17a86687ccef0d96a0f3fac6896319b933812cf7",
+    "capture_library_sha256": "313f450bfa1f7f7d5f50cc7ee80d9f99b68d3fe873e25eb865ff0433e359f7b3",
+    "analysis_library_sha256": "313f450bfa1f7f7d5f50cc7ee80d9f99b68d3fe873e25eb865ff0433e359f7b3",
+    "capture_version": "1.45",
+    "analysis_version": "1.45"
+  },
+  "regressions": {
+    "completed": true,
+    "cli_sha256": "215ebafed657953f0671c32a0948e12c8c965437a3eaa33e6d38aedcff5e2ddc",
+    "worker_sha256": "8251eb4e06a2afb1d86ade75b6f2b882769f53292a713d7444c6c6a6135ff0c8",
+    "checks": [
+      {
+        "label": "fixture-intel",
+        "capture": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-readback-20261014\\fixture-intel-recapture\\independent_capture.rdc",
+        "capture_sha256": "dc0716e6d6858363cae06bd97c332d9461415ab9e46a87fce5f95344ec4aaf8f",
+        "environment": {
+          "degraded": false,
+          "gpu_vendor_enum": 5,
+          "gpu_vendor_name": "Intel",
+          "local_renderer_enum": 0,
+          "pipeline_type_enum": 0,
+          "remote": false
+        },
+        "report_sha256": "0b2a4aad62f0ebad0ea351b2ff7fc1a437a568e250053140e3df825f28c10fb9"
+      },
+      {
+        "label": "fixture-nvidia",
+        "capture": "D:\\CDXrepo\\FloraGPA-Cpp\\artifacts\\rdc-capture-validation\\msaa-rdc\\independent_capture.rdc",
+        "capture_sha256": "7154379cceca0ebf8572888ef1d58cb5ea3a02ba0f7a1cf8628083dfdd496e6e",
+        "environment": {
+          "degraded": false,
+          "gpu_vendor_enum": 6,
+          "gpu_vendor_name": "NVIDIA",
+          "local_renderer_enum": 0,
+          "pipeline_type_enum": 0,
+          "remote": false
+        },
+        "report_sha256": "ea298c2f2982f7efd9d5ddcd2c1216721b3c5e235df3abc2e17f6be4a701d8c7"
+      },
+      {
+        "label": "golden-gf2",
+        "frame": "D:\\CDXrepo\\FloraGPA\\GF2_Exilium_2026_03_03__00_19_35.gpa_frame",
+        "frame_sha256": "fc7b7f7de20a578da2977b2ff91d96f5cf80887b393bc85859be8cab1af91c8e",
+        "rgba_sha256": "2e1abc5eacb0bbfd801f9fe059c305baa9a0786c384b36a42fa5a323dd979fd1",
+        "report_sha256": "ada132d79d934e1b2fe0e6cac2d53addf2ee299c91061e5d7c1d0964b0166fbb",
+        "adapter": "NVIDIA GeForce RTX 3070 Laptop GPU"
+      },
+      {
+        "label": "golden-bf1",
+        "frame": "D:\\CDXrepo\\FloraGPA\\bf1_2026_01_21__16_53_05.gpa_frame",
+        "frame_sha256": "26044d33cb6c3087c2204b7d57664203741a679f988430b7d05b24af582e0620",
+        "rgba_sha256": "1f724d1840652f66afd26dd30c95aecd5c1b4932eede56109198f15a8f57a2f6",
+        "report_sha256": "1415fd4f12003189ebb653f1713f032b82d18912933e557d4b6a22875059c2bc",
+        "adapter": "NVIDIA GeForce RTX 3070 Laptop GPU"
+      }
+    ]
+  },
+  "validation": {
+    "ctest_passed": 11,
+    "ctest_sha256": "51ad27af3393706ecf29bce35d21f12cf46c42b44b014d7386252e6ccde1bcb5",
+    "gf2_bf1_golden_exact": true,
+    "gpu_serial": true,
+    "original_gpa_gui": false
+  },
+  "production_identity": {
+    "replay_sha256": "215ebafed657953f0671c32a0948e12c8c965437a3eaa33e6d38aedcff5e2ddc",
+    "runtime_sha256": "f2d92dd99f5b26ee232064ca26645136fa808ab2e7e6e810193376527f092df3",
+    "controller_sha256": "0bc61e429745e1b0f6fd046762cae923471686782a1ab48ba853cca12aaaacf3",
+    "expected_frames_per_launch": 3,
+    "comparison": "Exact integer RGBA and resource bytes; no pixel tolerance",
+    "scenes": [
+      "home",
+      "equipment_room"
+    ],
+    "expected_launches": 2,
+    "source_commit": "c0eaa899134b396691bab8a463db7b862b2998d6"
+  },
+  "sources": {
+    "src/rdc/Backend.cpp": "ac91869e3d761c6cd3302d2a65d9b0ef52a9396748311427d7e2a64b3cdd2590",
+    "tools/native/replay_msaa_probe.cpp": "3f126d4e45930c83ecf3d782cd45af0e40f55eacb519da1096c0b6b3f5af26de"
+  },
+  "final_binaries": {
+    "FloraGPA.Rdc.exe": "8251eb4e06a2afb1d86ade75b6f2b882769f53292a713d7444c6c6a6135ff0c8",
+    "FloraReplayMsaaProbe.exe": "ada424f6415aa95a7a263a7065572876523593de3def877652d2628ba40c19ce"
+  },
+  "evidence": {
+    "directory": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-readback-20261014",
+    "files": 250,
+    "manifest_sha256": "989193c720c687576d0aff59d205333b28024092881e2b204ce83bd6f146d51b"
+  },
+  "limits": [
+    "Unmodified-shader controls are lower; identical-shader replacement controls include one higher and one larger-difference image. Within-execution readers agree, but between-execution variation remains.",
+    "Read paths share operations; agreement cannot rule out common causes.",
+    "Fresh-target/direct-SRV modes change execution conditions and cannot justify a capture workaround.",
+    "Large RenderDoc analysis failed with device loss; no pixel history is claimed.",
+    "Current-runtime six-frame acceptance and original GPA GUI inspection remain incomplete."
+  ]
+}

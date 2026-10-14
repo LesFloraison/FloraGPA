@@ -4167,6 +4167,16 @@
       "checkpoint_exports": 160,
       "current_gate_passed": false,
       "limits": "Stable settled depth/VS inputs and restored draws narrow reproduction conditions; no root cause or production fix. Original GUI and six-frame acceptance remain incomplete."
+    },
+    "gf2_readback_diagnosis": {
+      "evidence": "docs/CAPTURE_GF2_READBACK.md",
+      "baseline": "docs/capture-gf2-readback-baseline.json",
+      "native_processes": 28,
+      "sample_exports": 120,
+      "ctest_passed": 11,
+      "golden_frames_exact": 2,
+      "current_gate_passed": false,
+      "limits": "Between-execution variation remains; large RenderDoc history failed with Intel device loss. Active replay GPU reporting verified on two small controls. No capture or rendering fix."
     }
   }
 }

@@ -84,3 +84,7 @@ source hashes, report identities and limitations. Raw evidence is preserved at
 `C:/Users/Myrrr/FloraGPA-evidence/capture-gf2-boundary-20261014`, with a manifest.
 The next investigation must distinguish effects of output restoration/readback
 from shader/raster execution, while preserving the original file and acceptance rule.
+
+[Subsequent readback controls](CAPTURE_GF2_READBACK.md) compare FLOAT/UINT and
+direct/copied paths, and preserve a failed RenderDoc pixel-history attempt.
+They do not resolve the current acceptance failure.

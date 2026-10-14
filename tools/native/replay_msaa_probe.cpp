@@ -119,16 +119,34 @@ std::vector<uint8_t> read(ID3D11Device *device, ID3D11Texture2D *source, bool in
 }
 } // namespace
 int wmain(int argc, wchar_t **argv) {
-    if ((argc != 8 && argc != 9) ||
-        (argc == 9 && std::wstring(argv[8]) != L"at-boundary" && std::wstring(argv[8]) != L"fresh-target" &&
-         std::wstring(argv[8]) != L"fresh-target-srv" && std::wstring(argv[8]) != L"single-target" &&
-         std::wstring(argv[8]) != L"no-depth")) {
+    int positionalCount = argc;
+    std::optional<uint32_t> vendor;
+    if (argc >= 10 && std::wstring(argv[argc - 2]) == L"--gpu-vendor") {
+        const std::wstring value(argv[argc - 1]);
+        try {
+            if (value.empty() || value.find_first_not_of(L"0123456789") != std::wstring::npos)
+                throw std::invalid_argument("Expected decimal PCI vendor ID");
+            const auto parsed = std::stoull(value);
+            if (!parsed || parsed > UINT16_MAX)
+                throw std::invalid_argument("Expected nonzero uint16 PCI vendor ID");
+            vendor = uint32_t(parsed);
+            positionalCount -= 2;
+        } catch (const std::exception &error) {
+            std::cerr << error.what() << '\n';
+            return 2;
+        }
+    }
+    if ((positionalCount != 8 && positionalCount != 9) ||
+        (positionalCount == 9 && std::wstring(argv[8]) != L"at-boundary" &&
+         std::wstring(argv[8]) != L"fresh-target" && std::wstring(argv[8]) != L"fresh-target-srv" &&
+         std::wstring(argv[8]) != L"single-target" && std::wstring(argv[8]) != L"no-depth")) {
         std::cerr << "FRAME NEW_OUT EVENT RESOURCE SAMPLE SHADER_ID SHADER_DXBC "
-                     "[at-boundary|fresh-target|fresh-target-srv|single-target|no-depth]\n";
+                     "[at-boundary|fresh-target|fresh-target-srv|single-target|no-depth] "
+                     "[--gpu-vendor DECIMAL]\nUse 0 - for the original shaders.\n";
         return 2;
     }
     try {
-        const std::wstring mode = argc == 9 ? argv[8] : L"default";
+        const std::wstring mode = positionalCount == 9 ? argv[8] : L"default";
         const bool atBoundary = mode == L"at-boundary";
         const bool freshTarget = mode == L"fresh-target" || mode == L"fresh-target-srv";
         std::string modeName;
@@ -142,7 +160,7 @@ int wmain(int argc, wchar_t **argv) {
         };
         const auto event = number(argv[3]), resource = number(argv[4]), sample = number(argv[5]),
                    shader = number(argv[6]);
-        if (!event || !resource || !shader || sample > UINT32_MAX)
+        if (!event || !resource || sample > UINT32_MAX || (!shader && std::wstring(argv[7]) != L"-"))
             throw std::invalid_argument("Invalid probe selection");
         const fs::path output = fs::absolute(argv[2]);
         if (!fs::create_directory(output))
@@ -150,7 +168,9 @@ int wmain(int argc, wchar_t **argv) {
         Frame frame(fs::absolute(argv[1]));
         ReplayOptions options;
         options.until = event;
-        options.shaders[shader] = readFile(argv[7]);
+        options.vendor = vendor;
+        if (shader)
+            options.shaders[shader] = readFile(argv[7]);
         Replay replay(frame, options);
         Com<ID3D11Texture2D> source;
         Json hashes = Json::object();
@@ -237,12 +257,14 @@ int wmain(int argc, wchar_t **argv) {
                     {"resource", resource},
                     {"sample", sample},
                     {"shader", shader},
+                    {"original_shaders", !shader},
+                    {"requested_gpu_vendor", vendor ? Json(*vendor) : Json(nullptr)},
                     {"direct_readback_available", directAvailable},
                     {"read_at_draw_boundary", atBoundary},
                     {"fresh_target_at_draw", freshTarget},
                     {"diagnostic_mode", modeName},
                     {"source_bind_flags", descriptor.BindFlags},
-                    {"shader_sha256", sha256(options.shaders.at(shader))},
+                    {"shader_sha256", shader ? Json(sha256(options.shaders.at(shader))) : Json(nullptr)},
                     {"output_sha256", hashes}};
         std::ofstream f(output / L"report.json");
         f.exceptions(std::ios::badbit | std::ios::failbit);

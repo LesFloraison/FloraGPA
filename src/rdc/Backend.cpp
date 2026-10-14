@@ -479,15 +479,30 @@ Json runRdcJob(const Json &job) {
     }
     Session session(job);
     auto &controller = *session.controller;
+    const auto properties = controller.GetAPIProperties();
+    const auto vendor = uint32_t(properties.vendor);
+    // These are RenderDoc 1.45 enum values, not PCI vendor IDs. Report the active
+    // replay controller rather than inferring its adapter from the capture host.
+    constexpr const char *vendorNames[]{"Unknown",     "ARM",      "AMD",    "Broadcom",
+                                        "Imagination", "Intel",    "NVIDIA", "Qualcomm",
+                                        "Verisilicon", "Software", "Samsung"};
     Events events;
     const auto roots = events.walk(controller.GetRootActions(), controller.GetStructuredFile());
     auto mapping = indexRdcEvents(roots, events.native);
-    Json result{{"ok", true},
-                {"action", action},
-                {"backend_version", session.version},
-                {"backend_commit", session.commit},
-                {"gpa_event_map", mapping["gpa_event_map"]},
-                {"gpa_command_map", mapping["gpa_command_map"]}};
+    Json result{
+        {"ok", true},
+        {"action", action},
+        {"backend_version", session.version},
+        {"backend_commit", session.commit},
+        {"replay_environment",
+         {{"gpu_vendor_enum", vendor},
+          {"gpu_vendor_name", vendor < std::size(vendorNames) ? Json(vendorNames[vendor]) : Json(nullptr)},
+          {"remote", properties.remoteReplay},
+          {"degraded", properties.degraded},
+          {"pipeline_type_enum", uint32_t(properties.pipelineType)},
+          {"local_renderer_enum", uint32_t(properties.localRenderer)}}},
+        {"gpa_event_map", mapping["gpa_event_map"]},
+        {"gpa_command_map", mapping["gpa_command_map"]}};
     // Match the original audit point before the replay controller is shut down.
     auto complete = [&] {
         result["loaded_modules"] = rdcLoadedModules();
