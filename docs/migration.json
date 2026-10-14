@@ -4621,6 +4621,22 @@
       "current_gate_passed": false,
       "production_fix": false,
       "limits": "One of three paired 1000 ms CPU-delay processes produces the higher original plane, while two remain lower; all three paired zero-delay originals remain lower. A separate delayed deferred-readback control remains lower. All restored Draws are higher. Waiting is not a reliable fix; neither runtime ISA nor a driver/compilation root cause is established. Formal acceptance remains failed."
+    },
+    "gf2_output_roundtrip_diagnosis": {
+      "evidence": "docs/CAPTURE_GF2_OUTPUT_ROUNDTRIP.md",
+      "baseline": "docs/capture-gf2-output-roundtrip-baseline.json",
+      "processes": 22,
+      "initial_complete_draws": 22,
+      "restored_draws": 44,
+      "sample_observations": 66,
+      "observed_initial_gpu_completions": 3,
+      "selected_color_roundtrips": 5,
+      "all_output_roundtrips": 2,
+      "depth_only_roundtrips": 2,
+      "refusal_cases": 8,
+      "current_gate_passed": false,
+      "production_fix": false,
+      "limits": "All three observed GPU-completion controls retain lower original/higher restored planes. Selected-color and all-output round trips produce higher originals in seven processes; depth-only controls remain lower. One of thirteen no-round-trip originals is also higher. Initial round-trip resource bytes are not independently compared in these processes, so no cause or production fix is established. Formal acceptance remains failed."
     }
   }
 }

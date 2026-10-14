@@ -1,0 +1,1198 @@
+{
+  "schema": 1,
+  "date": "2026-10-14",
+  "source_parent_commit": "6aab5a938ed8ea7d1905ed8596affcaa6d857aa8",
+  "source_hashes": {
+    "tools/native/replay_draw_repeat_probe.cpp": "fade3709ce49ba0ea0e1987047099e88d26e516b872987faa91c813814e4b948",
+    "docs/CAPTURE_GF2_OUTPUT_ROUNDTRIP.md": "560dd14841d6626caf6c62c781fbe55fd40d4b38ee96253570f93655788202f5",
+    "docs/INDEPENDENT_CAPTURE.md": "b4262f5b1eca520d8a9f74082e3707f6d85ceb9e9e4ffc70006a8957e9e3d0bc"
+  },
+  "summary": {
+    "schema": 1,
+    "current_gate_passed": false,
+    "production_fix": false,
+    "runs": [
+      {
+        "label": "run-0-none",
+        "report_sha256": "7ed8bf3582af150aa2445a76c424958a89414311095b22aac225dc88b73eed96",
+        "submission": {
+          "completion_observed": false,
+          "elapsed_ns": 100,
+          "event_created": false,
+          "explicit_flush": false,
+          "mode": "none",
+          "polls": 0,
+          "wait_limit_ms": 5000
+        },
+        "restore_mode": "none",
+        "restored_outputs": 0,
+        "deferred_readback": false,
+        "observations": [
+          {
+            "iteration": 0,
+            "sha256": "d9e2edda8025bbe17034e5c6000d8e06790476e1e061323836ab2b7b7f21f2aa",
+            "half_words": [
+              9109,
+              9233,
+              8865,
+              15151
+            ],
+            "different_bytes_vs_first": 0
+          },
+          {
+            "iteration": 1,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5",
+            "half_words": [
+              9127,
+              9247,
+              8891,
+              15143
+            ],
+            "different_bytes_vs_first": 4
+          },
+          {
+            "iteration": 2,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5",
+            "half_words": [
+              9127,
+              9247,
+              8891,
+              15143
+            ],
+            "different_bytes_vs_first": 4
+          }
+        ],
+        "binary": "FloraReplayDrawRepeatProbe.exe"
+      },
+      {
+        "label": "run-1-flush",
+        "report_sha256": "18279b5a77462c321f5eb85f16be580a88f6ab1a46bf88506664935bf3e7fe9f",
+        "submission": {
+          "completion_observed": false,
+          "elapsed_ns": 193800,
+          "event_created": false,
+          "explicit_flush": true,
+          "mode": "flush",
+          "polls": 0,
+          "wait_limit_ms": 5000
+        },
+        "restore_mode": "none",
+        "restored_outputs": 0,
+        "deferred_readback": false,
+        "observations": [
+          {
+            "iteration": 0,
+            "sha256": "d9e2edda8025bbe17034e5c6000d8e06790476e1e061323836ab2b7b7f21f2aa",
+            "half_words": [
+              9109,
+              9233,
+              8865,
+              15151
+            ],
+            "different_bytes_vs_first": 0
+          },
+          {
+            "iteration": 1,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5",
+            "half_words": [
+              9127,
+              9247,
+              8891,
+              15143
+            ],
+            "different_bytes_vs_first": 4
+          },
+          {
+            "iteration": 2,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5",
+            "half_words": [
+              9127,
+              9247,
+              8891,
+              15143
+            ],
+            "different_bytes_vs_first": 4
+          }
+        ],
+        "binary": "FloraReplayDrawRepeatProbe.exe"
+      },
+      {
+        "label": "run-2-event",
+        "report_sha256": "df24cb29c571d15180b8916e711a065758919c7e8bd021e89775f289e313217b",
+        "submission": {
+          "completion_observed": false,
+          "elapsed_ns": 79000,
+          "event_created": true,
+          "explicit_flush": true,
+          "mode": "event",
+          "polls": 0,
+          "wait_limit_ms": 5000
+        },
+        "restore_mode": "none",
+        "restored_outputs": 0,
+        "deferred_readback": false,
+        "observations": [
+          {
+            "iteration": 0,
+            "sha256": "d9e2edda8025bbe17034e5c6000d8e06790476e1e061323836ab2b7b7f21f2aa",
+            "half_words": [
+              9109,
+              9233,
+              8865,
+              15151
+            ],
+            "different_bytes_vs_first": 0
+          },
+          {
+            "iteration": 1,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5",
+            "half_words": [
+              9127,
+              9247,
+              8891,
+              15143
+            ],
+            "different_bytes_vs_first": 4
+          },
+          {
+            "iteration": 2,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5",
+            "half_words": [
+              9127,
+              9247,
+              8891,
+              15143
+            ],
+            "different_bytes_vs_first": 4
+          }
+        ],
+        "binary": "FloraReplayDrawRepeatProbe.exe"
+      },
+      {
+        "label": "run-3-wait",
+        "report_sha256": "8814ccdc08f35d93b5600bff28f5286de2065c256341077aa8b40e1eb1b20a64",
+        "submission": {
+          "completion_observed": true,
+          "elapsed_ns": 123722400,
+          "event_created": true,
+          "explicit_flush": true,
+          "last_hresult": 0,
+          "mode": "wait",
+          "polls": 12,
+          "wait_limit_ms": 5000
+        },
+        "restore_mode": "none",
+        "restored_outputs": 0,
+        "deferred_readback": false,
+        "observations": [
+          {
+            "iteration": 0,
+            "sha256": "d9e2edda8025bbe17034e5c6000d8e06790476e1e061323836ab2b7b7f21f2aa",
+            "half_words": [
+              9109,
+              9233,
+              8865,
+              15151
+            ],
+            "different_bytes_vs_first": 0
+          },
+          {
+            "iteration": 1,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5",
+            "half_words": [
+              9127,
+              9247,
+              8891,
+              15143
+            ],
+            "different_bytes_vs_first": 4
+          },
+          {
+            "iteration": 2,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5",
+            "half_words": [
+              9127,
+              9247,
+              8891,
+              15143
+            ],
+            "different_bytes_vs_first": 4
+          }
+        ],
+        "binary": "FloraReplayDrawRepeatProbe.exe"
+      },
+      {
+        "label": "run-4-wait",
+        "report_sha256": "52f6649c23d9f6e730a9c018102f329cf9910afa31827f238d6c29fa49aff625",
+        "submission": {
+          "completion_observed": true,
+          "elapsed_ns": 128104400,
+          "event_created": true,
+          "explicit_flush": true,
+          "last_hresult": 0,
+          "mode": "wait",
+          "polls": 14,
+          "wait_limit_ms": 5000
+        },
+        "restore_mode": "none",
+        "restored_outputs": 0,
+        "deferred_readback": false,
+        "observations": [
+          {
+            "iteration": 0,
+            "sha256": "d9e2edda8025bbe17034e5c6000d8e06790476e1e061323836ab2b7b7f21f2aa",
+            "half_words": [
+              9109,
+              9233,
+              8865,
+              15151
+            ],
+            "different_bytes_vs_first": 0
+          },
+          {
+            "iteration": 1,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5",
+            "half_words": [
+              9127,
+              9247,
+              8891,
+              15143
+            ],
+            "different_bytes_vs_first": 4
+          },
+          {
+            "iteration": 2,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5",
+            "half_words": [
+              9127,
+              9247,
+              8891,
+              15143
+            ],
+            "different_bytes_vs_first": 4
+          }
+        ],
+        "binary": "FloraReplayDrawRepeatProbe.exe"
+      },
+      {
+        "label": "run-5-event",
+        "report_sha256": "8a585a53187da376ae026a2de8023adcdd22bcfd040cc70e046a0a5ca486a165",
+        "submission": {
+          "completion_observed": false,
+          "elapsed_ns": 69800,
+          "event_created": true,
+          "explicit_flush": true,
+          "mode": "event",
+          "polls": 0,
+          "wait_limit_ms": 5000
+        },
+        "restore_mode": "none",
+        "restored_outputs": 0,
+        "deferred_readback": false,
+        "observations": [
+          {
+            "iteration": 0,
+            "sha256": "d9e2edda8025bbe17034e5c6000d8e06790476e1e061323836ab2b7b7f21f2aa",
+            "half_words": [
+              9109,
+              9233,
+              8865,
+              15151
+            ],
+            "different_bytes_vs_first": 0
+          },
+          {
+            "iteration": 1,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5",
+            "half_words": [
+              9127,
+              9247,
+              8891,
+              15143
+            ],
+            "different_bytes_vs_first": 4
+          },
+          {
+            "iteration": 2,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5",
+            "half_words": [
+              9127,
+              9247,
+              8891,
+              15143
+            ],
+            "different_bytes_vs_first": 4
+          }
+        ],
+        "binary": "FloraReplayDrawRepeatProbe.exe"
+      },
+      {
+        "label": "run-6-flush",
+        "report_sha256": "1acf06ddc80d671e1f7fae1bd3c45983d84102bbb465e19ab9bb15411f1ab3d0",
+        "submission": {
+          "completion_observed": false,
+          "elapsed_ns": 101500,
+          "event_created": false,
+          "explicit_flush": true,
+          "mode": "flush",
+          "polls": 0,
+          "wait_limit_ms": 5000
+        },
+        "restore_mode": "none",
+        "restored_outputs": 0,
+        "deferred_readback": false,
+        "observations": [
+          {
+            "iteration": 0,
+            "sha256": "d9e2edda8025bbe17034e5c6000d8e06790476e1e061323836ab2b7b7f21f2aa",
+            "half_words": [
+              9109,
+              9233,
+              8865,
+              15151
+            ],
+            "different_bytes_vs_first": 0
+          },
+          {
+            "iteration": 1,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5",
+            "half_words": [
+              9127,
+              9247,
+              8891,
+              15143
+            ],
+            "different_bytes_vs_first": 4
+          },
+          {
+            "iteration": 2,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5",
+            "half_words": [
+              9127,
+              9247,
+              8891,
+              15143
+            ],
+            "different_bytes_vs_first": 4
+          }
+        ],
+        "binary": "FloraReplayDrawRepeatProbe.exe"
+      },
+      {
+        "label": "run-7-none",
+        "report_sha256": "df87eeb026dbfd393800983ce3d073082447d8d6ee47082a4348cdcf8ded7d75",
+        "submission": {
+          "completion_observed": false,
+          "elapsed_ns": 100,
+          "event_created": false,
+          "explicit_flush": false,
+          "mode": "none",
+          "polls": 0,
+          "wait_limit_ms": 5000
+        },
+        "restore_mode": "none",
+        "restored_outputs": 0,
+        "deferred_readback": false,
+        "observations": [
+          {
+            "iteration": 0,
+            "sha256": "d9e2edda8025bbe17034e5c6000d8e06790476e1e061323836ab2b7b7f21f2aa",
+            "half_words": [
+              9109,
+              9233,
+              8865,
+              15151
+            ],
+            "different_bytes_vs_first": 0
+          },
+          {
+            "iteration": 1,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5",
+            "half_words": [
+              9127,
+              9247,
+              8891,
+              15143
+            ],
+            "different_bytes_vs_first": 4
+          },
+          {
+            "iteration": 2,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5",
+            "half_words": [
+              9127,
+              9247,
+              8891,
+              15143
+            ],
+            "different_bytes_vs_first": 4
+          }
+        ],
+        "binary": "FloraReplayDrawRepeatProbe.exe"
+      },
+      {
+        "label": "restore-0-none",
+        "report_sha256": "0af02cc7a366e9b33d562700cf9bc15c117da29b7d2c30a6672e9b1a6d6afb84",
+        "submission": {
+          "completion_observed": false,
+          "elapsed_ns": 0,
+          "event_created": false,
+          "explicit_flush": false,
+          "mode": "none",
+          "polls": 0,
+          "wait_limit_ms": 5000
+        },
+        "restore_mode": "none",
+        "restored_outputs": 0,
+        "deferred_readback": false,
+        "observations": [
+          {
+            "iteration": 0,
+            "sha256": "d9e2edda8025bbe17034e5c6000d8e06790476e1e061323836ab2b7b7f21f2aa",
+            "half_words": [
+              9109,
+              9233,
+              8865,
+              15151
+            ],
+            "different_bytes_vs_first": 0
+          },
+          {
+            "iteration": 1,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5",
+            "half_words": [
+              9127,
+              9247,
+              8891,
+              15143
+            ],
+            "different_bytes_vs_first": 4
+          },
+          {
+            "iteration": 2,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5",
+            "half_words": [
+              9127,
+              9247,
+              8891,
+              15143
+            ],
+            "different_bytes_vs_first": 4
+          }
+        ],
+        "binary": "FloraReplayDrawRepeatProbe-final.exe"
+      },
+      {
+        "label": "restore-1-all",
+        "report_sha256": "08dfcc6704faa89d60ce7792b4c5fe862e4d3088b1844bf843ca8bd30b39e86a",
+        "submission": {
+          "completion_observed": false,
+          "elapsed_ns": 100,
+          "event_created": false,
+          "explicit_flush": false,
+          "mode": "none",
+          "polls": 0,
+          "wait_limit_ms": 5000
+        },
+        "restore_mode": "all",
+        "restored_outputs": 4,
+        "deferred_readback": false,
+        "observations": [
+          {
+            "iteration": 0,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5",
+            "half_words": [
+              9127,
+              9247,
+              8891,
+              15143
+            ],
+            "different_bytes_vs_first": 0
+          },
+          {
+            "iteration": 1,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5",
+            "half_words": [
+              9127,
+              9247,
+              8891,
+              15143
+            ],
+            "different_bytes_vs_first": 0
+          },
+          {
+            "iteration": 2,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5",
+            "half_words": [
+              9127,
+              9247,
+              8891,
+              15143
+            ],
+            "different_bytes_vs_first": 0
+          }
+        ],
+        "binary": "FloraReplayDrawRepeatProbe-final.exe"
+      },
+      {
+        "label": "restore-2-selected",
+        "report_sha256": "6c0dc0d7f5509ae48ee247e7efa0505949f13d139fb5b4e0f6a62172722aca27",
+        "submission": {
+          "completion_observed": false,
+          "elapsed_ns": 300,
+          "event_created": false,
+          "explicit_flush": false,
+          "mode": "none",
+          "polls": 0,
+          "wait_limit_ms": 5000
+        },
+        "restore_mode": "selected",
+        "restored_outputs": 1,
+        "deferred_readback": false,
+        "observations": [
+          {
+            "iteration": 0,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5",
+            "half_words": [
+              9127,
+              9247,
+              8891,
+              15143
+            ],
+            "different_bytes_vs_first": 0
+          },
+          {
+            "iteration": 1,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5",
+            "half_words": [
+              9127,
+              9247,
+              8891,
+              15143
+            ],
+            "different_bytes_vs_first": 0
+          },
+          {
+            "iteration": 2,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5",
+            "half_words": [
+              9127,
+              9247,
+              8891,
+              15143
+            ],
+            "different_bytes_vs_first": 0
+          }
+        ],
+        "binary": "FloraReplayDrawRepeatProbe-final.exe"
+      },
+      {
+        "label": "restore-3-depth",
+        "report_sha256": "abd38072dd20f67e7ed203260f1d59599e55323b1e1cb1d349c72b5ead90a0eb",
+        "submission": {
+          "completion_observed": false,
+          "elapsed_ns": 100,
+          "event_created": false,
+          "explicit_flush": false,
+          "mode": "none",
+          "polls": 0,
+          "wait_limit_ms": 5000
+        },
+        "restore_mode": "depth",
+        "restored_outputs": 1,
+        "deferred_readback": false,
+        "observations": [
+          {
+            "iteration": 0,
+            "sha256": "d9e2edda8025bbe17034e5c6000d8e06790476e1e061323836ab2b7b7f21f2aa",
+            "half_words": [
+              9109,
+              9233,
+              8865,
+              15151
+            ],
+            "different_bytes_vs_first": 0
+          },
+          {
+            "iteration": 1,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5",
+            "half_words": [
+              9127,
+              9247,
+              8891,
+              15143
+            ],
+            "different_bytes_vs_first": 4
+          },
+          {
+            "iteration": 2,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5",
+            "half_words": [
+              9127,
+              9247,
+              8891,
+              15143
+            ],
+            "different_bytes_vs_first": 4
+          }
+        ],
+        "binary": "FloraReplayDrawRepeatProbe-final.exe"
+      },
+      {
+        "label": "restore-4-depth",
+        "report_sha256": "0b524e574d987044dc25a683732f48c660e6839f1e6d7a8cdaa96e47b27ab9e7",
+        "submission": {
+          "completion_observed": false,
+          "elapsed_ns": 0,
+          "event_created": false,
+          "explicit_flush": false,
+          "mode": "none",
+          "polls": 0,
+          "wait_limit_ms": 5000
+        },
+        "restore_mode": "depth",
+        "restored_outputs": 1,
+        "deferred_readback": false,
+        "observations": [
+          {
+            "iteration": 0,
+            "sha256": "d9e2edda8025bbe17034e5c6000d8e06790476e1e061323836ab2b7b7f21f2aa",
+            "half_words": [
+              9109,
+              9233,
+              8865,
+              15151
+            ],
+            "different_bytes_vs_first": 0
+          },
+          {
+            "iteration": 1,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5",
+            "half_words": [
+              9127,
+              9247,
+              8891,
+              15143
+            ],
+            "different_bytes_vs_first": 4
+          },
+          {
+            "iteration": 2,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5",
+            "half_words": [
+              9127,
+              9247,
+              8891,
+              15143
+            ],
+            "different_bytes_vs_first": 4
+          }
+        ],
+        "binary": "FloraReplayDrawRepeatProbe-final.exe"
+      },
+      {
+        "label": "restore-5-selected",
+        "report_sha256": "5ef2bec1511da10507faf1fd48035a02139431d725dedb4a13faf80bb2d73604",
+        "submission": {
+          "completion_observed": false,
+          "elapsed_ns": 100,
+          "event_created": false,
+          "explicit_flush": false,
+          "mode": "none",
+          "polls": 0,
+          "wait_limit_ms": 5000
+        },
+        "restore_mode": "selected",
+        "restored_outputs": 1,
+        "deferred_readback": false,
+        "observations": [
+          {
+            "iteration": 0,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5",
+            "half_words": [
+              9127,
+              9247,
+              8891,
+              15143
+            ],
+            "different_bytes_vs_first": 0
+          },
+          {
+            "iteration": 1,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5",
+            "half_words": [
+              9127,
+              9247,
+              8891,
+              15143
+            ],
+            "different_bytes_vs_first": 0
+          },
+          {
+            "iteration": 2,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5",
+            "half_words": [
+              9127,
+              9247,
+              8891,
+              15143
+            ],
+            "different_bytes_vs_first": 0
+          }
+        ],
+        "binary": "FloraReplayDrawRepeatProbe-final.exe"
+      },
+      {
+        "label": "restore-6-all",
+        "report_sha256": "6ab640b73eb4f9d97dfe7faf6f8d3259d4754fb35ad3a3659867999d27b2a4a0",
+        "submission": {
+          "completion_observed": false,
+          "elapsed_ns": 100,
+          "event_created": false,
+          "explicit_flush": false,
+          "mode": "none",
+          "polls": 0,
+          "wait_limit_ms": 5000
+        },
+        "restore_mode": "all",
+        "restored_outputs": 4,
+        "deferred_readback": false,
+        "observations": [
+          {
+            "iteration": 0,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5",
+            "half_words": [
+              9127,
+              9247,
+              8891,
+              15143
+            ],
+            "different_bytes_vs_first": 0
+          },
+          {
+            "iteration": 1,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5",
+            "half_words": [
+              9127,
+              9247,
+              8891,
+              15143
+            ],
+            "different_bytes_vs_first": 0
+          },
+          {
+            "iteration": 2,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5",
+            "half_words": [
+              9127,
+              9247,
+              8891,
+              15143
+            ],
+            "different_bytes_vs_first": 0
+          }
+        ],
+        "binary": "FloraReplayDrawRepeatProbe-final.exe"
+      },
+      {
+        "label": "restore-7-none",
+        "report_sha256": "74003fd35301d1a77bf6ccb188df897e39cf5fa3c4566adcdc692f6982ff2308",
+        "submission": {
+          "completion_observed": false,
+          "elapsed_ns": 100,
+          "event_created": false,
+          "explicit_flush": false,
+          "mode": "none",
+          "polls": 0,
+          "wait_limit_ms": 5000
+        },
+        "restore_mode": "none",
+        "restored_outputs": 0,
+        "deferred_readback": false,
+        "observations": [
+          {
+            "iteration": 0,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5",
+            "half_words": [
+              9127,
+              9247,
+              8891,
+              15143
+            ],
+            "different_bytes_vs_first": 0
+          },
+          {
+            "iteration": 1,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5",
+            "half_words": [
+              9127,
+              9247,
+              8891,
+              15143
+            ],
+            "different_bytes_vs_first": 0
+          },
+          {
+            "iteration": 2,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5",
+            "half_words": [
+              9127,
+              9247,
+              8891,
+              15143
+            ],
+            "different_bytes_vs_first": 0
+          }
+        ],
+        "binary": "FloraReplayDrawRepeatProbe-final.exe"
+      },
+      {
+        "label": "repeat-none-0",
+        "report_sha256": "1ddea968ca3a46ea576c82d2dfd0c1d799f091ffe8b36730242dd081923f252d",
+        "submission": {
+          "completion_observed": false,
+          "elapsed_ns": 100,
+          "event_created": false,
+          "explicit_flush": false,
+          "mode": "none",
+          "polls": 0,
+          "wait_limit_ms": 5000
+        },
+        "restore_mode": "none",
+        "restored_outputs": 0,
+        "deferred_readback": false,
+        "observations": [
+          {
+            "iteration": 0,
+            "sha256": "d9e2edda8025bbe17034e5c6000d8e06790476e1e061323836ab2b7b7f21f2aa",
+            "half_words": [
+              9109,
+              9233,
+              8865,
+              15151
+            ],
+            "different_bytes_vs_first": 0
+          },
+          {
+            "iteration": 1,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5",
+            "half_words": [
+              9127,
+              9247,
+              8891,
+              15143
+            ],
+            "different_bytes_vs_first": 4
+          },
+          {
+            "iteration": 2,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5",
+            "half_words": [
+              9127,
+              9247,
+              8891,
+              15143
+            ],
+            "different_bytes_vs_first": 4
+          }
+        ],
+        "binary": "FloraReplayDrawRepeatProbe-final.exe"
+      },
+      {
+        "label": "repeat-selected-0",
+        "report_sha256": "3770659cd0f7332e796d24f4ca209c4301e2770dd381eeddf335b253553f0f61",
+        "submission": {
+          "completion_observed": false,
+          "elapsed_ns": 200,
+          "event_created": false,
+          "explicit_flush": false,
+          "mode": "none",
+          "polls": 0,
+          "wait_limit_ms": 5000
+        },
+        "restore_mode": "selected",
+        "restored_outputs": 1,
+        "deferred_readback": false,
+        "observations": [
+          {
+            "iteration": 0,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5",
+            "half_words": [
+              9127,
+              9247,
+              8891,
+              15143
+            ],
+            "different_bytes_vs_first": 0
+          },
+          {
+            "iteration": 1,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5",
+            "half_words": [
+              9127,
+              9247,
+              8891,
+              15143
+            ],
+            "different_bytes_vs_first": 0
+          },
+          {
+            "iteration": 2,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5",
+            "half_words": [
+              9127,
+              9247,
+              8891,
+              15143
+            ],
+            "different_bytes_vs_first": 0
+          }
+        ],
+        "binary": "FloraReplayDrawRepeatProbe-final.exe"
+      },
+      {
+        "label": "repeat-selected-1",
+        "report_sha256": "5ef2bec1511da10507faf1fd48035a02139431d725dedb4a13faf80bb2d73604",
+        "submission": {
+          "completion_observed": false,
+          "elapsed_ns": 100,
+          "event_created": false,
+          "explicit_flush": false,
+          "mode": "none",
+          "polls": 0,
+          "wait_limit_ms": 5000
+        },
+        "restore_mode": "selected",
+        "restored_outputs": 1,
+        "deferred_readback": false,
+        "observations": [
+          {
+            "iteration": 0,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5",
+            "half_words": [
+              9127,
+              9247,
+              8891,
+              15143
+            ],
+            "different_bytes_vs_first": 0
+          },
+          {
+            "iteration": 1,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5",
+            "half_words": [
+              9127,
+              9247,
+              8891,
+              15143
+            ],
+            "different_bytes_vs_first": 0
+          },
+          {
+            "iteration": 2,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5",
+            "half_words": [
+              9127,
+              9247,
+              8891,
+              15143
+            ],
+            "different_bytes_vs_first": 0
+          }
+        ],
+        "binary": "FloraReplayDrawRepeatProbe-final.exe"
+      },
+      {
+        "label": "repeat-none-1",
+        "report_sha256": "1ddea968ca3a46ea576c82d2dfd0c1d799f091ffe8b36730242dd081923f252d",
+        "submission": {
+          "completion_observed": false,
+          "elapsed_ns": 100,
+          "event_created": false,
+          "explicit_flush": false,
+          "mode": "none",
+          "polls": 0,
+          "wait_limit_ms": 5000
+        },
+        "restore_mode": "none",
+        "restored_outputs": 0,
+        "deferred_readback": false,
+        "observations": [
+          {
+            "iteration": 0,
+            "sha256": "d9e2edda8025bbe17034e5c6000d8e06790476e1e061323836ab2b7b7f21f2aa",
+            "half_words": [
+              9109,
+              9233,
+              8865,
+              15151
+            ],
+            "different_bytes_vs_first": 0
+          },
+          {
+            "iteration": 1,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5",
+            "half_words": [
+              9127,
+              9247,
+              8891,
+              15143
+            ],
+            "different_bytes_vs_first": 4
+          },
+          {
+            "iteration": 2,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5",
+            "half_words": [
+              9127,
+              9247,
+              8891,
+              15143
+            ],
+            "different_bytes_vs_first": 4
+          }
+        ],
+        "binary": "FloraReplayDrawRepeatProbe-final.exe"
+      },
+      {
+        "label": "final-wait",
+        "report_sha256": "1cfcd720c1c10d657e0222f6d5ce218fdc76c0b5ac61dda10da5672aff9c5348",
+        "submission": {
+          "completion_observed": true,
+          "elapsed_ns": 120793800,
+          "event_created": true,
+          "explicit_flush": true,
+          "last_hresult": 0,
+          "mode": "wait",
+          "polls": 12,
+          "wait_limit_ms": 5000
+        },
+        "restore_mode": "none",
+        "restored_outputs": 0,
+        "deferred_readback": false,
+        "observations": [
+          {
+            "iteration": 0,
+            "sha256": "d9e2edda8025bbe17034e5c6000d8e06790476e1e061323836ab2b7b7f21f2aa",
+            "half_words": [
+              9109,
+              9233,
+              8865,
+              15151
+            ],
+            "different_bytes_vs_first": 0
+          },
+          {
+            "iteration": 1,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5",
+            "half_words": [
+              9127,
+              9247,
+              8891,
+              15143
+            ],
+            "different_bytes_vs_first": 4
+          },
+          {
+            "iteration": 2,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5",
+            "half_words": [
+              9127,
+              9247,
+              8891,
+              15143
+            ],
+            "different_bytes_vs_first": 4
+          }
+        ],
+        "binary": "FloraReplayDrawRepeatProbe-final.exe"
+      },
+      {
+        "label": "deferred-selected",
+        "report_sha256": "44acb242d15a7202814c65c23f7d6eee001c4a14ed2e094ec3212583921bd7de",
+        "submission": {
+          "completion_observed": false,
+          "elapsed_ns": 200,
+          "event_created": false,
+          "explicit_flush": false,
+          "mode": "none",
+          "polls": 0,
+          "wait_limit_ms": 5000
+        },
+        "restore_mode": "selected",
+        "restored_outputs": 1,
+        "deferred_readback": true,
+        "observations": [
+          {
+            "iteration": 0,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5",
+            "half_words": [
+              9127,
+              9247,
+              8891,
+              15143
+            ],
+            "different_bytes_vs_first": 0
+          },
+          {
+            "iteration": 1,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5",
+            "half_words": [
+              9127,
+              9247,
+              8891,
+              15143
+            ],
+            "different_bytes_vs_first": 0
+          },
+          {
+            "iteration": 2,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5",
+            "half_words": [
+              9127,
+              9247,
+              8891,
+              15143
+            ],
+            "different_bytes_vs_first": 0
+          }
+        ],
+        "binary": "FloraReplayDrawRepeatProbe-final.exe"
+      }
+    ],
+    "processes": 22,
+    "observations": 66,
+    "refusal_cases": 8,
+    "raw_reference_planes": {
+      "d9e2edda8025bbe17034e5c6000d8e06790476e1e061323836ab2b7b7f21f2aa": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-prefix-triangle-20261014\\final-full\\d9e2edda8025bbe17034e5c6000d8e06790476e1e061323836ab2b7b7f21f2aa.bin",
+      "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-prefix-triangle-20261014\\final-full\\39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5.bin"
+    },
+    "binaries": {
+      "FloraReplayDrawRepeatProbe.exe": "895f6d9e9a70b4612e0874cb288f9e437c8eb3dfaa27ac045a0bc42be94d8875",
+      "FloraReplayDrawRepeatProbe-final.exe": "b4e18314c3f1d4ab6aa07ccc3f1c2e14ae5e47652c23a7b1f08b33ed039c7a99"
+    }
+  },
+  "validation": {
+    "build_passed": true,
+    "boundary_ctest_passed": true,
+    "refusals": 8,
+    "scoped_debug_messages": 0,
+    "prefix_debug_messages_per_run": 608,
+    "all_gpu_work_serial": true,
+    "production_source_changed": false,
+    "summary_hashes_verified_against_retained_complete_planes": true,
+    "query_timeout_exercised": false,
+    "device_removal_exercised": false,
+    "initial_roundtrip_plane_bytes_compared": false
+  },
+  "binary_scope": {
+    "initial": "First eight submission controls",
+    "final": "Eight initial-restore runs, six follow-ups and eight refusals"
+  },
+  "raw": {
+    "root": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-initial-submit-20261014",
+    "files": 65,
+    "manifest_sha256": "d208ced43f4846e5640dbbdecb010e47ca636b35c7aa7366be3c0045fa48580b"
+  },
+  "replay_sha256": "215ebafed657953f0671c32a0948e12c8c965437a3eaa33e6d38aedcff5e2ddc"
+}

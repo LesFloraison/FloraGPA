@@ -36,7 +36,9 @@ int wmain(int argc, wchar_t **argv) {
     if (argc < 8) {
         std::cerr << "FRAME NEW_OUT EVENT RESOURCE SAMPLE PCI_VENDOR REPEATS [--debug-device] "
                      "[--indices FIRST COUNT] [--defer-readback] "
-                     "[--initial-delay-ms 0..1000] [--summary-only]\n";
+                     "[--initial-delay-ms 0..1000] [--summary-only] "
+                     "[--initial-submit none|flush|event|wait] "
+                     "[--initial-restore none|selected|depth|all]\n";
         return 2;
     }
     fs::path output;
@@ -48,6 +50,10 @@ int wmain(int argc, wchar_t **argv) {
         const auto id = number(argv[3]), resource = number(argv[4]), sample = number(argv[5]),
                    vendor = number(argv[6]), repeats = number(argv[7]);
         bool debugDevice = false, deferReadback = false, summaryOnly = false;
+        bool submitSpecified = false;
+        std::string initialSubmit = "none";
+        bool restoreSpecified = false;
+        std::string initialRestore = "none";
         std::optional<uint64_t> initialDelay;
         std::optional<std::array<uint64_t, 2>> range;
         for (int i = 8; i < argc; ++i) {
@@ -62,8 +68,21 @@ int wmain(int argc, wchar_t **argv) {
                 initialDelay = number(argv[++i]);
                 if (*initialDelay > 1000)
                     throw std::invalid_argument("Initial delay exceeds 1000 ms diagnostic bound");
-            }
-            else if (option == L"--indices" && !range && i + 2 < argc) {
+            } else if (option == L"--initial-submit" && !submitSpecified && i + 1 < argc) {
+                submitSpecified = true;
+                const std::wstring mode(argv[++i]);
+                if (mode != L"none" && mode != L"flush" && mode != L"event" && mode != L"wait")
+                    throw std::invalid_argument("Initial submission must be none, flush, event or wait");
+                initialSubmit = mode == L"none" ? "none" : mode == L"flush" ? "flush"
+                                                        : mode == L"event" ? "event" : "wait";
+            } else if (option == L"--initial-restore" && !restoreSpecified && i + 1 < argc) {
+                restoreSpecified = true;
+                const std::wstring mode(argv[++i]);
+                if (mode != L"none" && mode != L"selected" && mode != L"depth" && mode != L"all")
+                    throw std::invalid_argument("Initial restore must be none, selected, depth or all");
+                initialRestore = mode == L"none" ? "none" : mode == L"selected" ? "selected"
+                                                         : mode == L"depth" ? "depth" : "all";
+            } else if (option == L"--indices" && !range && i + 2 < argc) {
                 range = {number(argv[i + 1]), number(argv[i + 2])};
                 i += 2;
             } else
@@ -111,6 +130,11 @@ int wmain(int argc, wchar_t **argv) {
         options.vendor = uint32_t(vendor);
         options.debug = debugDevice;
         Replay replay(frame, options);
+        Com<ID3D11Query> initialEvent;
+        if (initialSubmit == "event" || initialSubmit == "wait") {
+            const D3D11_QUERY_DESC desc{D3D11_QUERY_EVENT, 0};
+            check(replay.nativeDevice()->CreateQuery(&desc, &initialEvent), "Create initial completion event");
+        }
         Com<ID3D11InfoQueue> diagnostics;
         if (options.debug)
             check(replay.nativeDevice()->QueryInterface(IID_PPV_ARGS(&diagnostics)), "Get diagnostic queue");
@@ -149,6 +173,14 @@ int wmain(int argc, wchar_t **argv) {
                        {"summary_only", summaryOnly},
                        {"raw_planes_saved", !summaryOnly},
                        {"initial_delay_requested_ms", initialDelay.value_or(0)},
+                       {"initial_restore_mode", initialRestore},
+                       {"initial_restored_outputs", 0},
+                       {"initial_submission", {{"mode", initialSubmit},
+                                                {"event_created", bool(initialEvent)},
+                                                {"explicit_flush", false},
+                                                {"completion_observed", false},
+                                                {"polls", 0},
+                                                {"wait_limit_ms", 5000}}},
                        {"device_feature_level", uint32_t(replay.nativeDevice()->GetFeatureLevel())},
                        {"device_creation_flags", replay.nativeDevice()->GetCreationFlags()},
                        {"repeats", repeats},
@@ -229,7 +261,54 @@ int wmain(int argc, wchar_t **argv) {
                 context->OMSetRenderTargets(0, nullptr, nullptr);
                 for (const auto &item : checkpoints)
                     context->CopyResource(item.copy.Get(), item.source.Get());
+                uint32_t initialRestored = 0;
+                for (const auto &item : checkpoints) {
+                    if (initialRestore == "all" ||
+                        (initialRestore == "selected" && item.source.Get() == target.Get()) ||
+                        (initialRestore == "depth" && (item.desc.BindFlags & D3D11_BIND_DEPTH_STENCIL))) {
+                        context->CopyResource(item.source.Get(), item.copy.Get());
+                        ++initialRestored;
+                    }
+                }
+                report["initial_restored_outputs"] = initialRestored;
+                if (initialRestore != "none" && !initialRestored)
+                    throw std::runtime_error("Initial restore did not select a bound output");
                 context->OMSetRenderTargets(UINT(views.size()), views.data(), depth.Get());
+                auto &submission = report["initial_submission"];
+                const auto submitStart = std::chrono::steady_clock::now();
+                if (initialEvent)
+                    context->End(initialEvent.Get());
+                if (initialSubmit != "none") {
+                    context->Flush();
+                    submission["explicit_flush"] = true;
+                }
+                if (initialSubmit == "wait") {
+                    uint64_t polls = 0;
+                    for (;;) {
+                        BOOL complete = FALSE;
+                        const auto status = context->GetData(initialEvent.Get(), &complete, sizeof(complete),
+                                                             D3D11_ASYNC_GETDATA_DONOTFLUSH);
+                        submission["polls"] = ++polls;
+                        submission["last_hresult"] = uint32_t(status);
+                        submission["elapsed_ns"] =
+                            std::chrono::duration_cast<std::chrono::nanoseconds>(
+                                std::chrono::steady_clock::now() - submitStart).count();
+                        check(status, "Read initial completion event");
+                        if (status == S_OK && complete) {
+                            submission["completion_observed"] = true;
+                            break;
+                        }
+                        if (status != S_FALSE)
+                            throw std::runtime_error("Unexpected initial completion event result");
+                        check(replay.nativeDevice()->GetDeviceRemovedReason(), "Initial wait device status");
+                        if (std::chrono::steady_clock::now() - submitStart >= std::chrono::seconds(5))
+                            throw std::runtime_error("Initial GPU completion exceeded 5000 ms diagnostic bound");
+                        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+                    }
+                }
+                submission["elapsed_ns"] =
+                    std::chrono::duration_cast<std::chrono::nanoseconds>(
+                        std::chrono::steady_clock::now() - submitStart).count();
                 // CPU scheduling perturbation only: no GPU flush, query or readback here.
                 const auto waitStart = std::chrono::steady_clock::now();
                 if (initialDelay.value_or(0))

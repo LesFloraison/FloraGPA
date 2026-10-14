@@ -13,6 +13,9 @@ readback is deferred; [CAPTURE_GF2_PREFIX_TRIANGLE.md](CAPTURE_GF2_PREFIX_TRIANG
 also records a separate unexplained partial-plane variant.
 An additional [CPU-delay control](CAPTURE_GF2_INITIAL_DELAY.md) changes the first
 Draw's plane in one delayed process but does not reliably remove the discrepancy.
+[GPU-completion and output-copy controls](CAPTURE_GF2_OUTPUT_ROUNDTRIP.md) retain
+the discrepancy after observed completion, while selected-color round trips
+correlate with the higher original plane; the cause remains unproven.
 
 GPU-generated indirect Draw/Dispatch arguments now remain native indirect records,
 with immediate/deferred/nested execution and byte-exact controls documented in
