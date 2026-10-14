@@ -15,6 +15,11 @@ constexpr bool output_merger=true;
 #else
 constexpr bool output_merger=false;
 #endif
+#ifdef FLORA_INITIAL_COUNTER
+constexpr bool initial_counters=true;
+#else
+constexpr bool initial_counters=false;
+#endif
 void require(bool value,const char* why){if(!value)throw std::runtime_error(why);}
 void check(HRESULT hr){require(SUCCEEDED(hr),"Native counter fixture call failed");}
 ObjectId id(IUnknown* p){return object_record(p)->id;}
@@ -29,7 +34,7 @@ std::vector<FrozenFrame> run(bool hardware,bool wrapped,bool append){
     ComPtr<ID3D11UnorderedAccessView> uav;ComPtr<ID3D11ShaderResourceView> srv;check(device->CreateUnorderedAccessView(buffer.Get(),&ud,&uav));check(device->CreateShaderResourceView(buffer.Get(),nullptr,&srv));
     auto csCode=shader(output_merger?(append?"cbuffer C:register(b0){uint value;}AppendStructuredBuffer<uint> b:register(u1);float4 main():SV_Target{b.Append(value);return float4(0,0,0,1);}":"cbuffer C:register(b0){uint value;}RWStructuredBuffer<uint> b:register(u1);float4 main():SV_Target{uint i=b.IncrementCounter();b[i]=value;return float4(0,0,0,1);}"):(append?"AppendStructuredBuffer<uint> b:register(u0);[numthreads(1,1,1)]void main(){b.Append(17);}":"RWStructuredBuffer<uint> b:register(u0);[numthreads(1,1,1)]void main(){uint i=b.IncrementCounter();b[i]=17;}"),output_merger?"ps_5_0":"cs_5_0");
     auto vsCode=shader("float4 main(uint v:SV_VertexID):SV_Position{return float4(v==2?3:-1,v==1?3:-1,0,1);}","vs_5_0");
-    auto psCode=shader("StructuredBuffer<uint> b:register(t0);float4 main():SV_Target{return b[2]==17&&b[3]==17&&b[5]==17&&b[1]==0&&b[4]==0?float4(1,0,0,1):b[1]==17&&b[4]==17&&b[5]==17&&b[2]==0&&b[3]==0?float4(0,1,0,1):float4(0,0,1,1);}","ps_5_0");
+    auto psCode=shader(initial_counters?"StructuredBuffer<uint> b:register(t0);float4 main():SV_Target{return b[2]==17&&b[3]==17&&b[5]==17&&b[1]==0&&b[4]==0?float4(1,0,0,1):b[1]==17&&b[4]==17&&b[5]==17&&b[2]==17&&b[3]==17?float4(0,1,0,1):float4(0,0,1,1);}":"StructuredBuffer<uint> b:register(t0);float4 main():SV_Target{return b[2]==17&&b[3]==17&&b[5]==17&&b[1]==0&&b[4]==0?float4(1,0,0,1):b[1]==17&&b[4]==17&&b[5]==17&&b[2]==0&&b[3]==0?float4(0,1,0,1):float4(0,0,1,1);}","ps_5_0");
     ComPtr<ID3D11ComputeShader> cs;ComPtr<ID3D11VertexShader> vs;ComPtr<ID3D11PixelShader> ps,counterPs;
     if(output_merger)check(device->CreatePixelShader(csCode->GetBufferPointer(),csCode->GetBufferSize(),nullptr,&counterPs));
     else check(device->CreateComputeShader(csCode->GetBufferPointer(),csCode->GetBufferSize(),nullptr,&cs));
@@ -55,7 +60,7 @@ std::vector<FrozenFrame> run(bool hardware,bool wrapped,bool append){
         const float black[]{0,0,0,1};immediate->ClearRenderTargetView(rtv.Get(),black);
         auto recording=wrapped?begin_recording(immediate.Get()):nullptr;
         ComPtr<ID3D11DeviceContext> deferred;check(device->CreateDeferredContext(0,&deferred));const UINT first=frame?4:2,last=frame?1:5,keep=UINT_MAX;
-        bind(deferred.Get(),&first);pipeline(deferred.Get());
+        bind(deferred.Get(),initial_counters?nullptr:&first);pipeline(deferred.Get());
         if(output_merger){auto* target=rtv.Get();deferred->OMSetRenderTargetsAndUnorderedAccessViews(1,&target,nullptr,0,UINT_MAX,nullptr,nullptr);}
         if(!frame){action(deferred.Get());bind(deferred.Get(),nullptr);action(deferred.Get());}
         else{
@@ -65,11 +70,34 @@ std::vector<FrozenFrame> run(bool hardware,bool wrapped,bool append){
         bind(deferred.Get(),&last);action(deferred.Get());ComPtr<ID3D11CommandList> list;check(deferred->FinishCommandList(FALSE,&list));
         if(wrapped){
             const auto original=object_record(list.Get())->command_list;
+            if(initial_counters){
+                auto model=*original;
+                // Put a non-consuming action before a nested first use. Pending
+                // counter locations must be rebased into the expanded stream.
+                auto prefix=model.calls.back();prefix.kind=CommandKind::clear_uav_uint;prefix.api="ID3D11DeviceContext::ClearUnorderedAccessViewUint";prefix.operand=id(view);prefix.words={};
+                model.calls.insert(model.calls.begin(),prefix);for(size_t i=0;i<model.calls.size();++i)model.calls[i].sequence=i;
+                DeferredOrigin origin{id(list.Get()),model.context,model.generation,1,0,true};
+                auto pending=lower_deferred(model,origin,id(immediate.Get()),100,1<<20,true);
+                require(pending.initial_counter_uses==std::map<ObjectId,size_t>{{id(view),1}},"Initial counter dependency/index was lost");
+                for(unsigned fault=0;fault<8;++fault){auto bad=pending;std::map<ObjectId,uint32_t> values{{id(view),first}};
+                    if(fault==0)values.clear();if(fault==1)values[0]=0;if(fault==2)values[id(view)]=UINT_MAX;
+                    if(fault==3)bad.initial_counter_uses[id(view)]=bad.commands.size();
+                    if(fault==4)bad.commands[1].uav_counter_keeps.insert(id(view));
+                    if(fault==5)bad.definitions.erase(id(view));
+                    if(fault==6){bad.commands[1].bindings.cs_uavs.fill(0);bad.commands[1].bindings.om_uavs.fill(0);}
+                    if(fault==7)bad.commands[1].kind=CommandKind::clear_uav_uint;
+                    bool rejected=false;try{complete_deferred_counters(bad,values);}catch(const std::exception& e){rejected=std::string(e.what()).find("Deferred counter snapshot")!=std::string::npos;}
+                    require(rejected && bad.commands[1].uav_counters.empty(),"Invalid counter dependency was completed");
+                }
+                complete_deferred_counters(pending,{{id(view),first}});
+                require(pending.initial_counter_uses.empty() && pending.commands[1].uav_counters.at(id(view))==first,"Counter dependency was not completed");
+                std::cout<<"initial_refusals=8\n";
+            }
             for(unsigned fault=0;fault<7;++fault){auto bad=*original;auto& args=bad.calls[0].binding->arguments;
-                if(fault==0){UINT keep=UINT_MAX;memcpy(args.back().data.data(),&keep,4);}
+                if(fault==0 && !initial_counters){UINT keep=UINT_MAX;memcpy(args.back().data.data(),&keep,4);}
                 if(fault==1)args.push_back(args.back());
                 if(fault==2)args.pop_back();
-                if(fault==3)args.back().data.pop_back();
+                if(fault==3){if(initial_counters)args.back().data.push_back(0);else args.back().data.pop_back();}
                 if(fault==4)args.back().element_size=8;
                 if(fault==5){UINT count=65;for(auto& a:args)if(a.name=="NumUAVs")memcpy(a.data.data(),&count,4);}
                 if(fault==6)for(auto& a:args)if(a.name=="ppUnorderedAccessViews")a.objects.clear();
@@ -78,11 +106,15 @@ std::vector<FrozenFrame> run(bool hardware,bool wrapped,bool append){
                 require(rejected,"Malformed or uninitialized counter binding was accepted");
             }
         }
-        deferred.Reset();for(UINT repeat=0;repeat<=frame;++repeat)immediate->ExecuteCommandList(list.Get(),TRUE);list.Reset();
+        deferred.Reset();
+        // Compilation saw counter 9. The executing value is changed only now;
+        // root reuse then starts from the first execution's final count 2.
+        if(initial_counters){immediate->CSSetUnorderedAccessViews(0,1,&view,&first);immediate->ClearState();}
+        for(UINT repeat=0;repeat<=frame;++repeat)immediate->ExecuteCommandList(list.Get(),TRUE);list.Reset();
         immediate->ClearState();auto* target=rtv.Get();auto* source=srv.Get();D3D11_VIEWPORT viewport{0,0,8,8,0,1};immediate->OMSetRenderTargets(1,&target,nullptr);immediate->RSSetViewports(1,&viewport);immediate->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);immediate->VSSetShader(vs.Get(),nullptr,0);immediate->PSSetShader(ps.Get(),nullptr,0);immediate->PSSetShaderResources(0,1,&source);immediate->Draw(3,0);
         RecordedFrame captured;if(recording){captured=recording->finish();captured.require_complete();require(captured.commands.size()==(frame?7:4),"Counter command count mismatch");
-            for(UINT i=0;i<(frame?6u:3u);++i){const auto& command=captured.commands[i];if(i%3==1)require(command.uav_counter_keeps.contains(id(view))&&command.uav_counters.empty(),"KEEP turned into reset");else require(command.uav_counters.at(id(view))==(i%3?last:first)&&command.uav_counter_keeps.empty(),"Explicit counter reset lost");}}
-        UINT expected[16]{};expected[first]=expected[first+1]=expected[last]=17;const auto bytes=readBuffer(unwrap(buffer.Get()));require(bytes.size()==sizeof expected&&!memcmp(bytes.data(),expected,sizeof expected),"Native counter resource oracle mismatch");
+            for(UINT i=0;i<(frame?6u:3u);++i){const auto& command=captured.commands[i];if(i%3==1)require(command.uav_counter_keeps.contains(id(view))&&command.uav_counters.empty(),"KEEP turned into reset");else require(command.uav_counters.at(id(view))==(i%3?last:initial_counters&&i==3?last+1:first)&&command.uav_counter_keeps.empty(),"Counter reset/snapshot lost");}}
+        UINT expected[16]{};expected[first]=expected[first+1]=expected[last]=17;if(initial_counters && frame)expected[last+1]=expected[last+2]=17;const auto bytes=readBuffer(unwrap(buffer.Get()));require(bytes.size()==sizeof expected&&!memcmp(bytes.data(),expected,sizeof expected),"Native counter resource oracle mismatch");
         D3D11_BUFFER_DESC countDesc{4,D3D11_USAGE_DEFAULT,0,0,0,0};ComPtr<ID3D11Buffer> count;check(unwrap(device.Get())->CreateBuffer(&countDesc,nullptr,&count));unwrap(immediate.Get())->CopyStructureCount(count.Get(),0,unwrap(view));const auto countBytes=readBuffer(count.Get());UINT countValue=0;memcpy(&countValue,countBytes.data(),4);require(countValue==last+1,"Native final hidden counter mismatch");
         auto stagingDesc=td;stagingDesc.Usage=D3D11_USAGE_STAGING;stagingDesc.BindFlags=0;stagingDesc.CPUAccessFlags=D3D11_CPU_ACCESS_READ;ComPtr<ID3D11Texture2D> staging;check(unwrap(device.Get())->CreateTexture2D(&stagingDesc,nullptr,&staging));unwrap(immediate.Get())->CopyResource(staging.Get(),unwrap(image.Get()));D3D11_MAPPED_SUBRESOURCE mapped{};check(unwrap(immediate.Get())->Map(staging.Get(),0,D3D11_MAP_READ,0,&mapped));const uint8_t rgba[]{uint8_t(frame?0:255),uint8_t(frame?255:0),0,255};bool exact=true;for(UINT y=0;y<8;++y)for(UINT x=0;x<8;++x)exact&=!memcmp(static_cast<const uint8_t*>(mapped.pData)+y*mapped.RowPitch+x*4,rgba,4);unwrap(immediate.Get())->Unmap(staging.Get(),0);require(exact,"Native counter pixel oracle mismatch");
         if(wrapped)frames.push_back(freeze_frame(std::move(captured),id(image.Get()),snapshot_resource(immediate.Get(),image.Get())));

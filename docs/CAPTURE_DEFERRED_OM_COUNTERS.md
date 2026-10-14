@@ -89,3 +89,7 @@ extended UAV slots, broader shader-stage/resource combinations and hidden
 predicate/SO/query state remain incomplete. The new native OM oracle covers PS
 slot 1 with one RTV; it does not claim exhaustive validation of every slot/stage.
 Historical Intel/NVIDIA discrepancies remain open. Overall capture stays partial.
+
+A later stage resolves first-use KEEP through execution-time native UAV readback;
+see [CAPTURE_DEFERRED_INITIAL_COUNTERS.md](CAPTURE_DEFERRED_INITIAL_COUNTERS.md).
+The results above retain their original source/runtime identities.

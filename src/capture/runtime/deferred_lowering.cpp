@@ -1,5 +1,6 @@
 #include "deferred_lowering.hpp"
 #include "resource_layout.hpp"
+#include <algorithm>
 #include <functional>
 namespace flora::capture {
 namespace {
@@ -46,7 +47,7 @@ default:return false;
 // Counters belong to views, not pipeline state. Share their ordered reset/KEEP
 // history across nested lists, including RestoreContextState=TRUE. Never guess
 // a GPU-modified count: after the first reset, the encoder emits KEEP.
-struct CounterHistory {std::map<ObjectId,UINT> pending;std::set<ObjectId> initialized;};
+struct CounterHistory {std::map<ObjectId,UINT> pending;std::set<ObjectId> initialized;bool allow_snapshots=false;};
 bool hidden_counter(const FrozenObject& object){
     require((object.kind=="uav" || object.kind=="uav1") && object.descriptor.size()>=sizeof(D3D11_UNORDERED_ACCESS_VIEW_DESC),"Deferred UAV descriptor missing");
     D3D11_UNORDERED_ACCESS_VIEW_DESC value{};memcpy(&value,object.descriptor.data(),sizeof value);
@@ -112,6 +113,7 @@ DeferredExpansion expand(const DeferredCommandList& list,const DeferredOrigin& o
             require(child.device==list.device,"Deferred merge device mismatch");
             DeferredOrigin nested{call.operand,child.context,child.generation,call.sequence+1,0,call.words[0]!=0};
             auto added=expand(child,nested,context,command_limit-out.commands.size(),payload_limit-out.payload_bytes,depth+1,visits,active,counters);
+            for(const auto& [id,index]:added.initial_counter_uses)out.initial_counter_uses.emplace(id,out.commands.size()+index);
             for(auto& command:added.commands){
                 if(command.kind==CommandKind::map || command.kind==CommandKind::copy_resource ||
                    command.kind==CommandKind::copy_region || command.kind==CommandKind::update_subresource)
@@ -168,7 +170,9 @@ DeferredExpansion expand(const DeferredCommandList& list,const DeferredOrigin& o
         if(call.kind==CommandKind::draw || call.kind==CommandKind::draw_indexed || call.kind==CommandKind::draw_instanced || call.kind==CommandKind::draw_indexed_instanced || call.kind==CommandKind::dispatch){
             auto counter=[&](ObjectId id){if(!id || !hidden_counter(out.definitions.at(id)) || c.uav_counters.contains(id) || c.uav_counter_keeps.contains(id))return;
                 if(auto reset=counters.pending.find(id);reset!=counters.pending.end()){c.uav_counters.emplace(id,reset->second);counters.pending.erase(reset);counters.initialized.insert(id);}
-                else{require(counters.initialized.contains(id),"Deferred UAV counter initial value unavailable before first use");c.uav_counter_keeps.insert(id);}
+                else if(counters.initialized.contains(id))c.uav_counter_keeps.insert(id);
+                else{require(counters.allow_snapshots,"Deferred UAV counter initial value unavailable before first use");
+                    out.initial_counter_uses.emplace(id,out.commands.size());counters.initialized.insert(id);}
             };
             for(auto id:state->cs_uavs)counter(id);for(auto id:state->om_uavs)counter(id);
         }
@@ -179,8 +183,22 @@ DeferredExpansion expand(const DeferredCommandList& list,const DeferredOrigin& o
     return out;
 }
 }
-DeferredExpansion lower_deferred(const DeferredCommandList& list,const DeferredOrigin& origin,ObjectId context,size_t command_limit,size_t payload_limit){
+DeferredExpansion lower_deferred(const DeferredCommandList& list,const DeferredOrigin& origin,ObjectId context,size_t command_limit,size_t payload_limit,bool allow_counter_snapshots){
     size_t visits=0;std::set<const DeferredCommandList*> active;
-    CounterHistory counters;return expand(list,origin,context,command_limit,payload_limit,0,visits,active,counters);
+    CounterHistory counters;counters.allow_snapshots=allow_counter_snapshots;return expand(list,origin,context,command_limit,payload_limit,0,visits,active,counters);
+}
+void complete_deferred_counters(DeferredExpansion& expanded,const std::map<ObjectId,uint32_t>& values){
+    require(values.size()==expanded.initial_counter_uses.size(),"Deferred counter snapshot set mismatch");
+    for(const auto& [id,index]:expanded.initial_counter_uses){
+        require(values.contains(id) && values.at(id)!=UINT_MAX,"Deferred counter snapshot missing or numeric UINT_MAX unsupported");
+        require(index<expanded.commands.size(),"Deferred counter snapshot command index invalid");
+        const auto& c=expanded.commands[index];
+        require(expanded.definitions.contains(id) && hidden_counter(expanded.definitions.at(id)),"Deferred counter snapshot definition invalid");
+        require(c.kind==CommandKind::draw || c.kind==CommandKind::draw_indexed || c.kind==CommandKind::draw_instanced || c.kind==CommandKind::draw_indexed_instanced || c.kind==CommandKind::dispatch,"Deferred counter snapshot action invalid");
+        require(std::find(c.bindings.cs_uavs.begin(),c.bindings.cs_uavs.end(),id)!=c.bindings.cs_uavs.end() || std::find(c.bindings.om_uavs.begin(),c.bindings.om_uavs.end(),id)!=c.bindings.om_uavs.end(),"Deferred counter snapshot is not bound");
+        require(!c.uav_counters.contains(id) && !c.uav_counter_keeps.contains(id),"Deferred counter snapshot overlaps reset/KEEP");
+    }
+    for(const auto& [id,index]:expanded.initial_counter_uses)expanded.commands[index].uav_counters.emplace(id,values.at(id));
+    expanded.initial_counter_uses.clear();
 }
 }

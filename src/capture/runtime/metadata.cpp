@@ -192,12 +192,23 @@ void retain_deferred_resource(ID3D11DeviceContext* context,IUnknown* operand){
     ComPtr<IUnknown> identity;if(!resource || FAILED(resource.As(&identity)))throw std::runtime_error("Deferred resource identity missing");
     auto record=find_native_record(identity.Get());auto owner=object_record(context);
     if(!record || !owner || record->device!=owner->device)throw std::runtime_error("Deferred resource lease device mismatch");
+    ComPtr<ID3D11UnorderedAccessView> uav;ComPtr<IUnknown> counter_identity;ObjectId counter_id=0;
+    if(SUCCEEDED(operand->QueryInterface(IID_PPV_ARGS(&uav)))){
+        D3D11_UNORDERED_ACCESS_VIEW_DESC desc{};uav->GetDesc(&desc);
+        if(desc.ViewDimension==D3D11_UAV_DIMENSION_BUFFER && (desc.Buffer.Flags&(D3D11_BUFFER_UAV_FLAG_APPEND|D3D11_BUFFER_UAV_FLAG_COUNTER))){
+            if(FAILED(uav.As(&counter_identity)))throw std::runtime_error("Deferred counter lease identity missing");
+            const auto counter=find_native_record(counter_identity.Get());
+            if(!counter || counter->device!=owner->device || counter->resource!=record->id)throw std::runtime_error("Deferred counter lease device/resource mismatch");
+            counter_id=counter->id;
+        }
+    }
     auto entry=lease_entry(context,"context");std::shared_ptr<const DeferredResourceLeases> previous;
     {std::lock_guard lock(entry->mutex);previous=entry->deferred_resources;}
-    if(previous && previous->contains(record->id))return;
-    if(previous && previous->size()>=8192)throw std::runtime_error("Deferred resource lease object limit exceeded");
+    if(previous && previous->contains(record->id) && (!counter_id || previous->contains(counter_id)))return;
     // COM AddRef/Release and map allocation run outside registry/entry locks.
-    auto next=std::make_shared<DeferredResourceLeases>();if(previous)*next=*previous;next->emplace(record->id,std::move(resource));
+    auto next=std::make_shared<DeferredResourceLeases>();if(previous)*next=*previous;next->emplace(record->id,std::move(identity));
+    if(counter_id)next->emplace(counter_id,std::move(counter_identity));
+    if(next->size()>8192)throw std::runtime_error("Deferred resource lease object limit exceeded");
     {std::lock_guard lock(entry->mutex);if(entry->deferred_resources!=previous)throw std::runtime_error("Concurrent deferred resource lease mutation");entry->deferred_resources=std::move(next);}
 }
 void finish_deferred_resources(ID3D11DeviceContext* context,HRESULT result,ID3D11CommandList* list){

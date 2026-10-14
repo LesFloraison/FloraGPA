@@ -32,6 +32,9 @@ Explicit deferred CS counter resets and ordered KEEP, with nested-list and
 dual-player controls, follow in [CAPTURE_DEFERRED_COUNTERS.md](CAPTURE_DEFERRED_COUNTERS.md).
 OM counter restoration, CB1 preservation and actual original-player buffer/counter
 observations follow in [CAPTURE_DEFERRED_OM_COUNTERS.md](CAPTURE_DEFERRED_OM_COUNTERS.md).
+First-use KEEP now reads actual native UAV counters before immediate submission,
+with per-view lifetime and repeated-list checks in
+[CAPTURE_DEFERRED_INITIAL_COUNTERS.md](CAPTURE_DEFERRED_INITIAL_COUNTERS.md).
 
 Capture HUD work is tracked separately in [CAPTURE_HUD.md](CAPTURE_HUD.md).
 Protocol v4 adds bounded per-request CLI resource budgets to the earlier

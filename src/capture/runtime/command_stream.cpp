@@ -252,7 +252,10 @@ void FrameRecording::observe(ID3D11DeviceContext* context,const char* api,Comman
                 if(!list || list->device!=record->device)throw std::runtime_error("CommandList compilation metadata/device unavailable");
                 if(p.deferred_executions==UINT64_MAX)throw std::runtime_error("Deferred execution ordinal overflow");
                 DeferredOrigin origin{list_record->id,list->context,list->generation,++p.deferred_executions,0,words[0]!=0};
-                auto expanded=lower_deferred(*list,origin,p.context_id,p.options.command_limit-p.frame.commands.size(),p.options.byte_limit-p.frame.initial_bytes-p.payload_bytes);
+                auto expanded=lower_deferred(*list,origin,p.context_id,p.options.command_limit-p.frame.commands.size(),p.options.byte_limit-p.frame.initial_bytes-p.payload_bytes,true);
+                const auto remaining=p.options.byte_limit-p.frame.initial_bytes-p.payload_bytes-expanded.payload_bytes;
+                if(expanded.initial_counter_uses.size()>remaining/sizeof(UINT))throw std::runtime_error("CommandList counter snapshot byte limit exceeded");
+                expanded.payload_bytes+=expanded.initial_counter_uses.size()*sizeof(UINT);
                 auto leases=command_list_resources(operand);
                 ContextSnapshot held;retain(held,context);ComPtr<ID3D11Device> device;unwrap(context)->GetDevice(&device);retain(held,device.Get());
                 SnapshotOptions options;options.timeout_ms=p.options.readback_timeout_ms;options.cancelled=[&p]{if(p.options.cancelled&&p.options.cancelled())p.cancelled=true;return p.cancelled.load();};
@@ -261,16 +264,27 @@ void FrameRecording::observe(ID3D11DeviceContext* context,const char* api,Comman
                 // frame-start snapshot and must not be replaced on later runs.
                 for(auto id:expanded.resources){
                     if(!leases || !leases->contains(id))throw std::runtime_error("CommandList resource lease missing: "+std::to_string(id));
-                    auto* resource=leases->at(id).Get();if(retain(held,resource)!=id)throw std::runtime_error("CommandList resource identity changed");
+                    ComPtr<ID3D11Resource> resource;if(FAILED(leases->at(id).As(&resource)))throw std::runtime_error("CommandList resource lease type mismatch");
+                    if(retain(held,resource.Get())!=id)throw std::runtime_error("CommandList resource identity changed");
                     require_unmapped(held.objects.at(id).record);
-                    if(resource_shape(resource).samples>1)throw std::runtime_error("Deferred MSAA recording is not verified");
+                    if(resource_shape(resource.Get()).samples>1)throw std::runtime_error("Deferred MSAA recording is not verified");
                     if(!p.frame.initial_resources.contains(id)){
                         options.byte_limit=p.options.byte_limit-p.frame.initial_bytes-p.payload_bytes-expanded.payload_bytes;
-                        auto data=snapshot_resource(context,resource,options);
+                        auto data=snapshot_resource(context,resource.Get(),options);
                         for(const auto& sub:data.subresources)p.frame.initial_bytes+=sub.bytes.size();
                         p.frame.initial_resources.emplace(id,std::move(data));
                     }
                 }
+                std::map<ObjectId,uint32_t> counters;
+                for(const auto& [id,index]:expanded.initial_counter_uses){
+                    (void)index;if(!leases || !leases->contains(id))throw std::runtime_error("CommandList counter view lease missing: "+std::to_string(id));
+                    ComPtr<ID3D11UnorderedAccessView> view;if(FAILED(leases->at(id).As(&view)))throw std::runtime_error("CommandList counter view lease type mismatch");
+                    if(retain(held,view.Get())!=id)throw std::runtime_error("CommandList counter view identity changed");
+                    options.byte_limit=sizeof(UINT);const auto counter=snapshot_uav_counter(context,view.Get(),options);
+                    if(counter.view->id!=id)throw std::runtime_error("CommandList counter snapshot identity changed");
+                    counters.emplace(id,counter.value);
+                }
+                complete_deferred_counters(expanded,counters);
                 if(options.cancelled())throw std::runtime_error("CommandList resource snapshot cancelled");
                 p.frame.objects.merge(held.objects);p.frame.deferred_definitions.merge(expanded.definitions);p.payload_bytes+=expanded.payload_bytes;
                 for(auto& command:expanded.commands){command.sequence=p.frame.commands.size();p.frame.commands.push_back(std::move(command));}
