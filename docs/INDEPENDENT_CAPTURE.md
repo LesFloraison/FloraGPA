@@ -11,6 +11,8 @@ Its selected sample is now isolated to original triangle 2443; see
 Prefix/checkpoint controls retain the selected-point change even when sample
 readback is deferred; [CAPTURE_GF2_PREFIX_TRIANGLE.md](CAPTURE_GF2_PREFIX_TRIANGLE.md)
 also records a separate unexplained partial-plane variant.
+An additional [CPU-delay control](CAPTURE_GF2_INITIAL_DELAY.md) changes the first
+Draw's plane in one delayed process but does not reliably remove the discrepancy.
 
 GPU-generated indirect Draw/Dispatch arguments now remain native indirect records,
 with immediate/deferred/nested execution and byte-exact controls documented in

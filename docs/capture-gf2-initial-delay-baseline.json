@@ -1,0 +1,387 @@
+{
+  "schema": 1,
+  "date": "2026-10-14",
+  "source_parent_commit": "4684f6e4c2fc1cce2c4f34a9bc51a2168633d78a",
+  "source_hashes": {
+    "tools/native/replay_draw_repeat_probe.cpp": "97077b9c8d9b8b78a96412782ca2a12d1329c280ec56a6fce0d4faa479ba1eab",
+    "docs/CAPTURE_GF2_INITIAL_DELAY.md": "3ba3bd7c9e2cb35076961f8eb2a19edd6894699be86ff158f73789adb5b15702",
+    "docs/INDEPENDENT_CAPTURE.md": "afeba4ffa14be70fe4ad1960cc303967b4341185faa52ca486797586f1f24974"
+  },
+  "summary": {
+    "schema": 1,
+    "current_gate_passed": false,
+    "production_fix": false,
+    "runs": [
+      {
+        "label": "run-0-delay-0",
+        "report_sha256": "53aaf8bb58356151b334596eae17d29540854d32a0703315565860b61e0e2b61",
+        "requested_ms": 0,
+        "elapsed_ns": 100,
+        "summary_only": true,
+        "deferred_readback": false,
+        "observations": [
+          {
+            "iteration": 0,
+            "sha256": "d9e2edda8025bbe17034e5c6000d8e06790476e1e061323836ab2b7b7f21f2aa",
+            "half_words": [
+              9109,
+              9233,
+              8865,
+              15151
+            ],
+            "different_bytes_vs_first": 0
+          },
+          {
+            "iteration": 1,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5",
+            "half_words": [
+              9127,
+              9247,
+              8891,
+              15143
+            ],
+            "different_bytes_vs_first": 4
+          },
+          {
+            "iteration": 2,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5",
+            "half_words": [
+              9127,
+              9247,
+              8891,
+              15143
+            ],
+            "different_bytes_vs_first": 4
+          }
+        ]
+      },
+      {
+        "label": "run-1-delay-1000",
+        "report_sha256": "fa32d2e542030d2625976c6f5b5c28509cb933624faefb3b5d73b20cb2a86ecb",
+        "requested_ms": 1000,
+        "elapsed_ns": 1010008400,
+        "summary_only": true,
+        "deferred_readback": false,
+        "observations": [
+          {
+            "iteration": 0,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5",
+            "half_words": [
+              9127,
+              9247,
+              8891,
+              15143
+            ],
+            "different_bytes_vs_first": 0
+          },
+          {
+            "iteration": 1,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5",
+            "half_words": [
+              9127,
+              9247,
+              8891,
+              15143
+            ],
+            "different_bytes_vs_first": 0
+          },
+          {
+            "iteration": 2,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5",
+            "half_words": [
+              9127,
+              9247,
+              8891,
+              15143
+            ],
+            "different_bytes_vs_first": 0
+          }
+        ]
+      },
+      {
+        "label": "run-2-delay-1000",
+        "report_sha256": "96c6eed43958ef27275f6ed9f3d237a9f4195903bcbc122061855b5b3b150086",
+        "requested_ms": 1000,
+        "elapsed_ns": 1007131000,
+        "summary_only": true,
+        "deferred_readback": false,
+        "observations": [
+          {
+            "iteration": 0,
+            "sha256": "d9e2edda8025bbe17034e5c6000d8e06790476e1e061323836ab2b7b7f21f2aa",
+            "half_words": [
+              9109,
+              9233,
+              8865,
+              15151
+            ],
+            "different_bytes_vs_first": 0
+          },
+          {
+            "iteration": 1,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5",
+            "half_words": [
+              9127,
+              9247,
+              8891,
+              15143
+            ],
+            "different_bytes_vs_first": 4
+          },
+          {
+            "iteration": 2,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5",
+            "half_words": [
+              9127,
+              9247,
+              8891,
+              15143
+            ],
+            "different_bytes_vs_first": 4
+          }
+        ]
+      },
+      {
+        "label": "run-3-delay-0",
+        "report_sha256": "48bb8ece766bdd4b605971dc2a579b71bf547041523567b24ca3af05bebce1bc",
+        "requested_ms": 0,
+        "elapsed_ns": 0,
+        "summary_only": true,
+        "deferred_readback": false,
+        "observations": [
+          {
+            "iteration": 0,
+            "sha256": "d9e2edda8025bbe17034e5c6000d8e06790476e1e061323836ab2b7b7f21f2aa",
+            "half_words": [
+              9109,
+              9233,
+              8865,
+              15151
+            ],
+            "different_bytes_vs_first": 0
+          },
+          {
+            "iteration": 1,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5",
+            "half_words": [
+              9127,
+              9247,
+              8891,
+              15143
+            ],
+            "different_bytes_vs_first": 4
+          },
+          {
+            "iteration": 2,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5",
+            "half_words": [
+              9127,
+              9247,
+              8891,
+              15143
+            ],
+            "different_bytes_vs_first": 4
+          }
+        ]
+      },
+      {
+        "label": "run-4-delay-0",
+        "report_sha256": "48bb8ece766bdd4b605971dc2a579b71bf547041523567b24ca3af05bebce1bc",
+        "requested_ms": 0,
+        "elapsed_ns": 0,
+        "summary_only": true,
+        "deferred_readback": false,
+        "observations": [
+          {
+            "iteration": 0,
+            "sha256": "d9e2edda8025bbe17034e5c6000d8e06790476e1e061323836ab2b7b7f21f2aa",
+            "half_words": [
+              9109,
+              9233,
+              8865,
+              15151
+            ],
+            "different_bytes_vs_first": 0
+          },
+          {
+            "iteration": 1,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5",
+            "half_words": [
+              9127,
+              9247,
+              8891,
+              15143
+            ],
+            "different_bytes_vs_first": 4
+          },
+          {
+            "iteration": 2,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5",
+            "half_words": [
+              9127,
+              9247,
+              8891,
+              15143
+            ],
+            "different_bytes_vs_first": 4
+          }
+        ]
+      },
+      {
+        "label": "run-5-delay-1000",
+        "report_sha256": "54db796b893924ab7bdac350c06934c3a3aebc4729b2e37a826ec1a58682ad71",
+        "requested_ms": 1000,
+        "elapsed_ns": 1005171200,
+        "summary_only": true,
+        "deferred_readback": false,
+        "observations": [
+          {
+            "iteration": 0,
+            "sha256": "d9e2edda8025bbe17034e5c6000d8e06790476e1e061323836ab2b7b7f21f2aa",
+            "half_words": [
+              9109,
+              9233,
+              8865,
+              15151
+            ],
+            "different_bytes_vs_first": 0
+          },
+          {
+            "iteration": 1,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5",
+            "half_words": [
+              9127,
+              9247,
+              8891,
+              15143
+            ],
+            "different_bytes_vs_first": 4
+          },
+          {
+            "iteration": 2,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5",
+            "half_words": [
+              9127,
+              9247,
+              8891,
+              15143
+            ],
+            "different_bytes_vs_first": 4
+          }
+        ]
+      },
+      {
+        "label": "default-raw",
+        "report_sha256": "0feb6ff8410cc0549f06130b4b6c7b43b75c19e1a3feaf773ecfb8db9e9764ce",
+        "requested_ms": 0,
+        "elapsed_ns": 0,
+        "summary_only": false,
+        "deferred_readback": false,
+        "observations": [
+          {
+            "iteration": 0,
+            "sha256": "d9e2edda8025bbe17034e5c6000d8e06790476e1e061323836ab2b7b7f21f2aa",
+            "half_words": [
+              9109,
+              9233,
+              8865,
+              15151
+            ],
+            "different_bytes_vs_first": 0
+          },
+          {
+            "iteration": 1,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5",
+            "half_words": [
+              9127,
+              9247,
+              8891,
+              15143
+            ],
+            "different_bytes_vs_first": 4
+          },
+          {
+            "iteration": 2,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5",
+            "half_words": [
+              9127,
+              9247,
+              8891,
+              15143
+            ],
+            "different_bytes_vs_first": 4
+          }
+        ]
+      },
+      {
+        "label": "deferred-summary",
+        "report_sha256": "ee1b60a20d980ab35149d8005b4ddb6f9eff3174dd66001e2ff145ad1233f6fa",
+        "requested_ms": 1000,
+        "elapsed_ns": 1001061900,
+        "summary_only": true,
+        "deferred_readback": true,
+        "observations": [
+          {
+            "iteration": 0,
+            "sha256": "d9e2edda8025bbe17034e5c6000d8e06790476e1e061323836ab2b7b7f21f2aa",
+            "half_words": [
+              9109,
+              9233,
+              8865,
+              15151
+            ],
+            "different_bytes_vs_first": 0
+          },
+          {
+            "iteration": 1,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5",
+            "half_words": [
+              9127,
+              9247,
+              8891,
+              15143
+            ],
+            "different_bytes_vs_first": 4
+          },
+          {
+            "iteration": 2,
+            "sha256": "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5",
+            "half_words": [
+              9127,
+              9247,
+              8891,
+              15143
+            ],
+            "different_bytes_vs_first": 4
+          }
+        ]
+      }
+    ],
+    "processes": 8,
+    "observations": 24,
+    "refusal_cases": 10,
+    "raw_reference_planes": {
+      "d9e2edda8025bbe17034e5c6000d8e06790476e1e061323836ab2b7b7f21f2aa": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-prefix-triangle-20261014\\final-full\\d9e2edda8025bbe17034e5c6000d8e06790476e1e061323836ab2b7b7f21f2aa.bin",
+      "39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-prefix-triangle-20261014\\final-full\\39c8da69214c57299c813e83bb9e0b8e7c29bcd42d07a541e4cc416882a939c5.bin"
+    },
+    "probe_sha256": "fa2751ebf00b358a997d051b96b29be0aa8f2977ee1f0aef1fd066ec4500f222"
+  },
+  "validation": {
+    "build_passed": true,
+    "boundary_ctest_passed": true,
+    "refusals": 10,
+    "scoped_debug_messages": 0,
+    "prefix_debug_messages_per_run": 608,
+    "all_gpu_work_serial": true,
+    "production_source_changed": false,
+    "summary_hashes_verified_against_retained_complete_planes": true,
+    "default_raw_planes_exact": true
+  },
+  "raw": {
+    "root": "C:\\Users\\Myrrr\\FloraGPA-evidence\\capture-gf2-initial-delay-20261014",
+    "files": 40,
+    "manifest_sha256": "8724efffb0cd9d068a3da66d39bc60733d7424ee6930a400e37834a0c67394b7"
+  },
+  "allocation_saved": 41369600,
+  "replay_sha256": "215ebafed657953f0671c32a0948e12c8c965437a3eaa33e6d38aedcff5e2ddc"
+}

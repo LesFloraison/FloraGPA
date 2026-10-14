@@ -3,11 +3,13 @@
 #include "replay/Replay.h"
 #include "pipeline_checkpoint.h"
 #include <bit>
+#include <chrono>
 #include <d3d11sdklayers.h>
 #include <d3dcompiler.h>
 #include <fstream>
 #include <iostream>
 #include <nlohmann/json.hpp>
+#include <thread>
 
 using namespace flora;
 namespace fs = std::filesystem;
@@ -33,7 +35,8 @@ struct Checkpoint {
 int wmain(int argc, wchar_t **argv) {
     if (argc < 8) {
         std::cerr << "FRAME NEW_OUT EVENT RESOURCE SAMPLE PCI_VENDOR REPEATS [--debug-device] "
-                     "[--indices FIRST COUNT] [--defer-readback]\n";
+                     "[--indices FIRST COUNT] [--defer-readback] "
+                     "[--initial-delay-ms 0..1000] [--summary-only]\n";
         return 2;
     }
     fs::path output;
@@ -44,7 +47,8 @@ int wmain(int argc, wchar_t **argv) {
     try {
         const auto id = number(argv[3]), resource = number(argv[4]), sample = number(argv[5]),
                    vendor = number(argv[6]), repeats = number(argv[7]);
-        bool debugDevice = false, deferReadback = false;
+        bool debugDevice = false, deferReadback = false, summaryOnly = false;
+        std::optional<uint64_t> initialDelay;
         std::optional<std::array<uint64_t, 2>> range;
         for (int i = 8; i < argc; ++i) {
             const std::wstring option(argv[i]);
@@ -52,6 +56,13 @@ int wmain(int argc, wchar_t **argv) {
                 debugDevice = true;
             else if (option == L"--defer-readback" && !deferReadback)
                 deferReadback = true;
+            else if (option == L"--summary-only" && !summaryOnly)
+                summaryOnly = true;
+            else if (option == L"--initial-delay-ms" && !initialDelay && i + 1 < argc) {
+                initialDelay = number(argv[++i]);
+                if (*initialDelay > 1000)
+                    throw std::invalid_argument("Initial delay exceeds 1000 ms diagnostic bound");
+            }
             else if (option == L"--indices" && !range && i + 2 < argc) {
                 range = {number(argv[i + 1]), number(argv[i + 2])};
                 i += 2;
@@ -135,6 +146,9 @@ int wmain(int argc, wchar_t **argv) {
                        {"restored_draw_args", restoredArgs},
                        {"modified_restored_draw", restoredArgs != event.args},
                        {"deferred_readback", deferReadback},
+                       {"summary_only", summaryOnly},
+                       {"raw_planes_saved", !summaryOnly},
+                       {"initial_delay_requested_ms", initialDelay.value_or(0)},
                        {"device_feature_level", uint32_t(replay.nativeDevice()->GetFeatureLevel())},
                        {"device_creation_flags", replay.nativeDevice()->GetCreationFlags()},
                        {"repeats", repeats},
@@ -216,6 +230,13 @@ int wmain(int argc, wchar_t **argv) {
                 for (const auto &item : checkpoints)
                     context->CopyResource(item.copy.Get(), item.source.Get());
                 context->OMSetRenderTargets(UINT(views.size()), views.data(), depth.Get());
+                // CPU scheduling perturbation only: no GPU flush, query or readback here.
+                const auto waitStart = std::chrono::steady_clock::now();
+                if (initialDelay.value_or(0))
+                    std::this_thread::sleep_for(std::chrono::milliseconds(*initialDelay));
+                report["initial_delay_elapsed_ns"] =
+                    std::chrono::duration_cast<std::chrono::nanoseconds>(
+                        std::chrono::steady_clock::now() - waitStart).count();
                 return;
             }
             const auto record = [&](uint64_t iteration) {
@@ -227,14 +248,17 @@ int wmain(int argc, wchar_t **argv) {
                     throw std::runtime_error("Checkpoint readback size changed");
                 size_t difference = 0;
                 Json offsets = Json::array();
+                Json differences = Json::array();
                 for (size_t i = 0; i < bytes.size(); ++i)
                     if (bytes[i] != first[i]) {
                         ++difference;
-                        if (offsets.size() < 16)
+                        if (offsets.size() < 16) {
                             offsets.push_back(i);
+                            differences.push_back({{"offset", i}, {"first", first[i]}, {"actual", bytes[i]}});
+                        }
                     }
                 const auto hash = sha256(bytes);
-                if (hashes.insert(hash).second) {
+                if (hashes.insert(hash).second && !summaryOnly) {
                     std::ofstream stream(output / (hash + ".bin"), std::ios::binary);
                     stream.exceptions(std::ios::badbit | std::ios::failbit);
                     stream.write(reinterpret_cast<const char *>(bytes.data()), bytes.size());
@@ -244,7 +268,8 @@ int wmain(int argc, wchar_t **argv) {
                                           {"sha256", hash},
                                           {"bytes", bytes.size()},
                                           {"different_bytes_vs_first", difference},
-                                          {"first_offsets", offsets}});
+                                          {"first_offsets", offsets},
+                                          {"first_differences", differences}});
                 report["runs"].back()["debug_messages"] = collectDiagnostics();
                 if (diagnostic::pipelineCheckpoint(context, objects) != report["native_pipeline"])
                     throw std::runtime_error("Checkpoint readback changed native pipeline bindings");

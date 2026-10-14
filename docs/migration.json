@@ -4609,6 +4609,18 @@
       "current_gate_passed": false,
       "production_fix": false,
       "limits": "At the selected point, initial complete Draws are lower and restored full/isolated Draws are higher, also with deferred readback. Intervening sample readers are not necessary in these runs. One isolated process retains a second plane hash differing by one half-float bit at (1571,1461); its cause and pre-Draw checkpoint contents were not established. Copies, restoration, allocation and history remain altered. Formal acceptance remains failed."
+    },
+    "gf2_initial_delay_diagnosis": {
+      "evidence": "docs/CAPTURE_GF2_INITIAL_DELAY.md",
+      "baseline": "docs/capture-gf2-initial-delay-baseline.json",
+      "processes": 8,
+      "initial_complete_draws": 8,
+      "restored_draws": 16,
+      "sample_observations": 24,
+      "refusal_cases": 10,
+      "current_gate_passed": false,
+      "production_fix": false,
+      "limits": "One of three paired 1000 ms CPU-delay processes produces the higher original plane, while two remain lower; all three paired zero-delay originals remain lower. A separate delayed deferred-readback control remains lower. All restored Draws are higher. Waiting is not a reliable fix; neither runtime ISA nor a driver/compilation root cause is established. Formal acceptance remains failed."
     }
   }
 }
