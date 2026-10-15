@@ -25,6 +25,20 @@ struct Registry {
     uint64_t next = 1, created = 0, destroyed = 0;
 };
 Registry& registry() { static auto* value = new Registry; return *value; }
+struct MappingIndex {
+    std::mutex mutex;
+    std::map<uint64_t,std::weak_ptr<ObjectRecord>> records;
+};
+MappingIndex& mapping_index(){static auto* value=new MappingIndex;return *value;}
+std::vector<std::shared_ptr<ObjectRecord>> mapped_candidates(){
+    auto& index=mapping_index();std::lock_guard lock(index.mutex);
+    std::vector<std::shared_ptr<ObjectRecord>> result;
+    for(auto it=index.records.begin();it!=index.records.end();){
+        if(auto record=it->second.lock();record && record->alive){result.push_back(std::move(record));++it;}
+        else it=index.records.erase(it);
+    }
+    return result;
+}
 class Token final : public IUnknown {
     std::atomic<ULONG> refs_{1};
     IUnknown* identity_; // Weak map key; never dereferenced.
@@ -228,7 +242,12 @@ void track_query(const void* context_proxy,IUnknown* query,bool begin) noexcept 
         auto context=object_record(context_proxy),record=object_record(query);
         if(!context || !record || context==record)throw std::runtime_error("Query/context metadata unavailable");
         std::scoped_lock lock(context->mutex,record->mutex);
-        if(begin)context->active_queries.insert(record->id);
+        if(begin){
+            D3D11_QUERY_DESC desc{D3D11_QUERY(UINT_MAX),0};
+            if((record->kind=="query" || record->kind=="query1") && record->descriptor.size()>=sizeof desc)
+                memcpy(&desc,record->descriptor.data(),sizeof desc);
+            context->active_queries[record->id]=desc.MiscFlags?D3D11_QUERY(UINT_MAX):desc.Query;
+        }
         else{
             context->active_queries.erase(record->id);
             if(record->last_query_end.generation==UINT64_MAX || context->query_end_serial==UINT64_MAX || context->descriptor.size()!=sizeof(ContextRecordDesc))
@@ -238,15 +257,20 @@ void track_query(const void* context_proxy,IUnknown* query,bool begin) noexcept 
         }
     } catch (...) {object_gap(begin?"Begin":"End",__uuidof(ID3D11Asynchronous),"Query activity tracking failed");}
 }
+void refresh_mapping_index(const std::shared_ptr<ObjectRecord>& record){
+    auto& index=mapping_index();std::lock_guard lock(index.mutex);
+    if(record->external_mapping || !record->mapped_subresources.empty())index.records[record->id]=record;
+    else index.records.erase(record->id);
+}
 void track_external_mapping(const void* proxy,bool mapped) noexcept {
     try{auto record=object_record(proxy);if(!record)throw std::runtime_error("Surface metadata unavailable");
-        std::lock_guard lock(record->mutex);record->external_mapping=mapped;
+        std::lock_guard lock(record->mutex);record->external_mapping=mapped;refresh_mapping_index(record);
     }catch(...){object_gap("DXGI mapping",__uuidof(IDXGISurface),"External mapping state unavailable");}
 }
 bool has_external_mapping(bool include_resource_mappings,bool ignore_buffer_mappings){
-    auto& r=registry();std::vector<std::shared_ptr<Entry>> entries;
-    {std::lock_guard lock(r.mutex);for(const auto& [identity,entry]:r.objects){(void)identity;entries.push_back(entry);}}
-    for(const auto& entry:entries){std::shared_ptr<ObjectRecord> record;{std::lock_guard lock(entry->mutex);record=entry->record.lock();}
+    // Never hold the index while locking a record: Map/Unmap update it under
+    // the record lock. Unmapped resources do not need a per-Present scan.
+    for(const auto& record:mapped_candidates()){
         if(record && record->alive){std::lock_guard lock(record->mutex);if(record->external_mapping || (include_resource_mappings && !(ignore_buffer_mappings && record->kind=="buffer") && !record->mapped_subresources.empty()))return true;}}
     return false;
 }
@@ -275,10 +299,8 @@ Json metadata_status() {
     return {{"created",created},{"destroyed",destroyed},{"alive",alive},{"kinds",kinds},{"active_mapping_count",mapping_count},{"active_mappings",mappings}};
 }
 std::vector<std::shared_ptr<ObjectRecord>> active_mapping_records(){
-    auto& r=registry();std::vector<std::shared_ptr<Entry>> entries;
-    {std::lock_guard lock(r.mutex);for(const auto& [identity,entry]:r.objects){(void)identity;entries.push_back(entry);}}
     std::vector<std::shared_ptr<ObjectRecord>> result;
-    for(const auto& entry:entries){std::shared_ptr<ObjectRecord> record;{std::lock_guard lock(entry->mutex);record=entry->record.lock();}
+    for(const auto& record:mapped_candidates()){
         if(record){std::lock_guard lock(record->mutex);if(record->alive && !record->mapped_subresources.empty())result.push_back(record);}}
     return result;
 }

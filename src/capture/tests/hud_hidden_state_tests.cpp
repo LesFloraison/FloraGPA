@@ -41,6 +41,16 @@ Json run(HWND window,D3D_DRIVER_TYPE driver,DXGI_SWAP_EFFECT effect,bool extende
     ComPtr<ID3D11Texture2D> buffer;check(swap->GetBuffer(0,IID_PPV_ARGS(&buffer)));ComPtr<ID3D11RenderTargetView> view;check(device->CreateRenderTargetView(buffer.Get(),nullptr,&view));
     const float color[]{32.f/255,48.f/255,96.f/255,1};
     for(UINT slot=0;slot<2;++slot){context->ClearRenderTargetView(view.Get(),color);present(0,0);}visibility(true,"");
+    // A timing interval spanning Present must not hide the HUD. Its GPU time
+    // includes instrumentation; validity/frequency and ordering remain native.
+    {D3D11_QUERY_DESC q{D3D11_QUERY_TIMESTAMP_DISJOINT,0};ComPtr<ID3D11Query> interval,first,last;
+        check(device->CreateQuery(&q,&interval));q.Query=D3D11_QUERY_TIMESTAMP;
+        check(device->CreateQuery(&q,&first));check(device->CreateQuery(&q,&last));
+        context->Begin(interval.Get());context->End(first.Get());present(0,0);visibility(true,"");
+        context->End(last.Get());context->End(interval.Get());
+        const auto timing=query<D3D11_QUERY_DATA_TIMESTAMP_DISJOINT>(context.Get(),interval.Get());
+        const auto a=query<UINT64>(context.Get(),first.Get()),b=query<UINT64>(context.Get(),last.Get());
+        require(timing.Frequency>0 && (timing.Disjoint || b>=a),"HUD corrupted native timing query");}
     auto code=compile("cbuffer Marker:register(b0){float marker;}float4 main(uint id:SV_VertexID):SV_Position{return float4(marker,2,3,1);}","vs_5_0");ComPtr<ID3D11VertexShader> vs;check(device->CreateVertexShader(code->GetBufferPointer(),code->GetBufferSize(),nullptr,&vs));
     code=compile("struct V{float4 p:SV_Position;};[maxvertexcount(1)]void main(point V p[1],inout PointStream<V> s){s.Append(p[0]);}","gs_5_0");D3D11_SO_DECLARATION_ENTRY entry{0,"SV_Position",0,0,4,0};UINT stride=16;ComPtr<ID3D11GeometryShader> gs;check(device->CreateGeometryShaderWithStreamOutput(code->GetBufferPointer(),code->GetBufferSize(),&entry,1,&stride,1,D3D11_SO_NO_RASTERIZED_STREAM,nullptr,&gs));
     std::array<float,24> initial;initial.fill(-123.f);D3D11_BUFFER_DESC bd{};bd.ByteWidth=sizeof initial;bd.BindFlags=D3D11_BIND_STREAM_OUTPUT;D3D11_SUBRESOURCE_DATA init{initial.data(),0,0};ComPtr<ID3D11Buffer> stream;check(device->CreateBuffer(&bd,&init,&stream));

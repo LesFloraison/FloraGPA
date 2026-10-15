@@ -22,6 +22,7 @@ struct RecordingOptions {
     size_t command_limit=100000;
     size_t msaa_plane_limit=1024;
     uint32_t readback_timeout_ms=5000;
+    bool serialized_context_threads=false;
     std::function<bool()> cancelled;
 };
 // Run on the application thread before handing CPU data to a background writer.
@@ -46,10 +47,10 @@ public:
     void query(ID3D11DeviceContext*,ID3D11Asynchronous*,CommandKind,HRESULT,const void*,UINT,UINT);
     void reject_external(const char*);
 };
-// One immediate execution thread, including supported precompiled command lists.
+// One immediate context, including supported precompiled command lists.
 // Caller owns the frame boundary and must finish on the starting application
-// thread. In-frame deferred compilation, other contexts/threads, unsupported GPU
-// calls and open queries reject the whole model.
+// thread. Opted-in worker calls require the generated proxy's context gate.
+// Other contexts, unprotected worker calls and unsupported GPU calls reject.
 std::shared_ptr<FrameRecording> begin_recording(ID3D11DeviceContext*,const RecordingOptions& options={});
 // Called before native execution by generated proxies; always preserves native
 // forwarding, including on recording errors. Pointer arguments are transient.

@@ -6,6 +6,7 @@
 #include <QPushButton>
 #include <QLineEdit>
 #include <QComboBox>
+#include <QAbstractItemView>
 #include <QLabel>
 #include <QCheckBox>
 #include <QJsonArray>
@@ -40,6 +41,17 @@ class CaptureUiTests final : public QObject {
         QTRY_VERIFY(dialog.findChild<QPushButton*>("captureDisconnect")->isEnabled());
         check->setChecked(false);QTRY_COMPARE(state->text(),"Off");
         QVERIFY(dialog.findChild<QPushButton*>("captureDisconnect")->isEnabled());
+    }
+    void pollingPreservesPopup() {
+        QTemporaryDir root;CaptureDialog dialog(controller());dialog.show();
+        auto* client=dialog.findChild<CaptureClient*>();QSignalSpy responses(client,&CaptureClient::response);
+        client->launch("target.exe",{},root.path(),{});QTRY_VERIFY(client->connected() && !client->busy());
+        for(const auto* name:{"captureSwapChains","captureResourceLimit"}){
+            auto* combo=dialog.findChild<QComboBox*>(name);combo->showPopup();QVERIFY(combo->view()->isVisible());
+            const auto count=responses.size();QTest::qWait(1500);
+            QVERIFY(combo->view()->isVisible());QCOMPARE(responses.size(),count);
+            combo->hidePopup();QTRY_VERIFY(responses.size()>count);QTRY_VERIFY(!client->busy());
+        }
     }
     void autoDetectFailure() {
         qputenv("FLORA_CAPTURE_MOCK","monitor-denied");AutoDetectClient client;QTemporaryDir root;
@@ -104,8 +116,10 @@ class CaptureUiTests final : public QObject {
         QTRY_VERIFY_WITH_TIMEOUT(!responses.empty(),20000);const auto launched=responses.first()[1].toJsonObject();QVERIFY(launched.value("ok").toBool());
         cleanup.process=OpenProcess(SYNCHRONIZE,FALSE,DWORD(launched.value("pid").toInteger()));QVERIFY(cleanup.process);
         auto* capture=dialog.findChild<QPushButton*>("captureNext");auto* open=dialog.findChild<QPushButton*>("captureOpen");
+        auto* limit=dialog.findChild<QComboBox*>("captureResourceLimit");QVERIFY(limit);QCOMPARE(limit->currentData().toUInt(),1024u);limit->setCurrentIndex(limit->findData(4096u));
         QTRY_VERIFY_WITH_TIMEOUT(capture->isEnabled(),20000);auto* swaps=dialog.findChild<QComboBox*>("captureSwapChains");QVERIFY(swaps->findData("1")>=0);swaps->setCurrentIndex(swaps->findData("1"));
         capture->click();QTRY_VERIFY_WITH_TIMEOUT(open->isEnabled(),20000);open->click();QCOMPARE(opened.size(),1);
+        bool budgetSeen=false;for(const auto& response:responses){const auto result=response[1].toJsonObject();if(result.value("last_capture").toObject().value("resource_limit_mib").toInt()==4096)budgetSeen=true;}QVERIFY(budgetSeen);
         const auto path=opened.first()[0].toString();QVERIFY(QFileInfo(path).isAbsolute());QVERIFY(QFileInfo(path).isFile());QCOMPARE(QFileInfo(path).suffix(),"gpa_frame");
         QFile unsupported(oracle+"/update.signal");QVERIFY(unsupported.open(QIODevice::WriteOnly));unsupported.close();
         QTRY_VERIFY(capture->isEnabled());capture->click();auto* status=dialog.findChild<QLabel*>("captureStatus");QTRY_COMPARE_WITH_TIMEOUT(status->text(),"Capture failed",20000);

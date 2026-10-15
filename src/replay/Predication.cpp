@@ -166,6 +166,7 @@ void Replay::applyPredicate(uint16_t type, Bytes payload) {
     }
 }
 void Replay::resetPredicates() {
+    ordinaryCompletions_.clear();
     context_->SetPredication(nullptr, FALSE);
     boundPredicate_ = 0;
     predicateValue_ = 0;

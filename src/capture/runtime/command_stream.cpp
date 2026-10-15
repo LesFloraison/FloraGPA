@@ -6,6 +6,7 @@
 #include "deferred_resources.hpp"
 #include "deferred_lowering.hpp"
 #include "msaa_readback.hpp"
+#include "presentation_access.hpp"
 #include <cstring>
 
 namespace flora::capture {
@@ -71,10 +72,22 @@ struct FrameRecording::Impl {
     ComPtr<ID3D11DeviceContext> context;
     ObjectId context_id=0;
     DWORD thread=GetCurrentThreadId();
+    std::recursive_mutex* context_gate=nullptr;
+    bool accepts_thread() const {
+        return GetCurrentThreadId()==thread || (options.serialized_context_threads && current_context_gate==context_gate);
+    }
     std::atomic<bool> cancelled=false;
     // Generated API names are static string literals. Retain the first failing
     // call without allocation or waiting for the application/driver lock.
     std::atomic<const char*> foreign_call=nullptr,reentrant_call=nullptr;
+    std::atomic<uint64_t> foreign_context=0;
+    std::atomic<DWORD> foreign_thread=0;
+    void foreign(ID3D11DeviceContext* current,const char* api){
+        const char* empty=nullptr;
+        if(foreign_call.compare_exchange_strong(empty,api)){
+            const auto record=object_record(current);foreign_context=record?record->id:0;foreign_thread=GetCurrentThreadId();
+        }
+    }
     bool finished=false,starting=true;
     struct Mapping {size_t command;D3D11_MAPPED_SUBRESOURCE mapped{};};
     std::map<std::pair<ObjectId,UINT>,Mapping> mappings;
@@ -122,13 +135,14 @@ FrameRecording::FrameRecording(ID3D11DeviceContext* context,const RecordingOptio
     if(!context)throw std::runtime_error("Recording requires a context");
     auto record=object_record(context);if(!record)throw std::runtime_error("Recording context is not tracked");
     if(unwrap(context)->GetType()!=D3D11_DEVICE_CONTEXT_IMMEDIATE)throw std::runtime_error("Recording requires an immediate context");
-    {std::lock_guard lock(record->mutex);if(!record->active_queries.empty())throw std::runtime_error("Recording cannot start inside an active query");}
+    {std::lock_guard lock(record->mutex);if(record->has_active_non_timing_query())throw std::runtime_error("Recording cannot start inside an active query");}
     if(has_external_mapping())throw std::runtime_error("Recording cannot start with an active DXGI mapping");
     // An untouched resource may remain CPU-mapped across this frame. Each
     // snapshot still refuses mapped GPU dependencies. Supported same-thread
     // WRITE_DISCARD buffers receive an owned CPU boundary snapshot at start.
     if(object_status().at("interface_gaps").get<uint64_t>())throw std::runtime_error("Recording has prior interface capability gaps");
     impl_->context=context;impl_->context_id=record->id;impl_->options=options;
+    impl_->context_gate=&presentation_context_mutex(unwrap(context));
 }
 FrameRecording::~FrameRecording()=default;
 void FrameRecording::complete_start(){
@@ -140,6 +154,7 @@ void FrameRecording::complete_start(){
         return p.cancelled.load();
     };
     p.frame.start_completion=complete_frame_start(p.context.Get(),options);
+    p.frame.start_completion->serialized_context_threads=p.options.serialized_context_threads;
     for(const auto& record:active_mapping_records()){
         if(options.cancelled())throw std::runtime_error("Boundary Map snapshot cancelled");
         std::lock_guard lock(record->mutex);
@@ -189,6 +204,8 @@ FrozenFrame freeze_frame(RecordedFrame&& frame,ObjectId output,ResourceSnapshot&
 }
 std::shared_ptr<FrameRecording> begin_recording(ID3D11DeviceContext* context,const RecordingOptions& options){
     LastErrorScope last_error;
+    std::unique_lock<std::recursive_mutex> boundary;
+    if(options.serialized_context_threads)boundary=std::unique_lock<std::recursive_mutex>(presentation_context_mutex(unwrap(context)));
     auto next=std::shared_ptr<FrameRecording>(new FrameRecording(context,options));
     auto& r=registry();
     {std::lock_guard lock(r.mutex);if(r.active.lock())throw std::runtime_error("Frame recording busy");r.active=next;r.enabled.store(true);}
@@ -200,9 +217,14 @@ RecordedFrame FrameRecording::finish(){
     LastErrorScope last_error;
     auto& p=*impl_;
     if(GetCurrentThreadId()!=p.thread)throw std::runtime_error("Recording must finish on its application thread");
+    std::unique_lock<std::recursive_mutex> boundary;
+    if(p.options.serialized_context_threads)boundary=std::unique_lock<std::recursive_mutex>(*p.context_gate);
     std::lock_guard lock(p.mutex);
     if(p.finished)throw std::runtime_error("Frame recording already finished");
-    if(auto api=p.foreign_call.load())p.gap(api,"Concurrent or foreign-thread context call is unsupported");
+    if(auto api=p.foreign_call.load()){
+        const auto reason="Concurrent or foreign-thread context call is unsupported (recording context="+std::to_string(p.context_id)+", thread="+std::to_string(p.thread)+", caller context="+std::to_string(p.foreign_context.load())+", thread="+std::to_string(p.foreign_thread.load())+")";
+        p.gap(api,reason.c_str());
+    }
     if(auto api=p.reentrant_call.load())p.gap(api,"Reentrant application context execution is unsupported");
     ComPtr<ID3D11Device> device;unwrap(p.context.Get())->GetDevice(&device);
     if(FAILED(device->GetDeviceRemovedReason()))p.gap("finish","Device removed during recording");
@@ -236,7 +258,7 @@ void FrameRecording::observe(ID3D11DeviceContext* context,const char* api,Comman
     auto& p=*impl_;
     // Never wait behind capture readback while a foreign caller may own the
     // driver's ID3D11Multithread lock. Mark failure and forward immediately.
-    if(GetCurrentThreadId()!=p.thread){const char* empty=nullptr;p.foreign_call.compare_exchange_strong(empty,api);return;}
+    if(!p.accepts_thread()){p.foreign(context,api);return;}
     if(native_call_depth>1 || p.starting){const char* empty=nullptr;p.reentrant_call.compare_exchange_strong(empty,api);return;}
     std::lock_guard lock(p.mutex);
     if(p.finished || p.frame.failed || p.cancelled.load() || p.foreign_call.load() || p.reentrant_call.load())return;
@@ -334,11 +356,17 @@ void FrameRecording::observe(ID3D11DeviceContext* context,const char* api,Comman
         if(clear && (kind==CommandKind::clear_uav_uint?!integers:!floats))throw std::runtime_error("Clear value is missing");
         if(p.frame.commands.size()>=p.options.command_limit)throw std::runtime_error("Frame command limit exceeded");
         ContextSnapshot snapshot;
-        if(kind==CommandKind::map || kind==CommandKind::resolve || kind==CommandKind::copy_structure_count){
+        if(kind==CommandKind::map || kind==CommandKind::resolve || kind==CommandKind::copy_structure_count || kind==CommandKind::generate_mips){
             // Map touches its operand, not the currently bound graphics or
             // compute pipeline. Other bound resources may still be mapped.
             snapshot.bindings.context=p.context_id;snapshot.bindings.device=record->device;
             retain(snapshot,context);ComPtr<ID3D11Device> device;unwrap(context)->GetDevice(&device);retain(snapshot,device.Get());
+            if(kind==CommandKind::generate_mips){
+                ComPtr<ID3D11ShaderResourceView> view;
+                if(!operand || FAILED(unwrap(operand)->QueryInterface(IID_PPV_ARGS(&view))))throw std::runtime_error("GenerateMips requires an SRV");
+                ComPtr<ID3D11Predicate> predicate;BOOL value=FALSE;unwrap(context)->GetPredication(&predicate,&value);
+                if(predicate)throw std::runtime_error("Predicated GenerateMips is not verified");
+            }
             if(kind==CommandKind::copy_structure_count){
                 ComPtr<ID3D11Predicate> predicate;BOOL value=FALSE;unwrap(context)->GetPredication(&predicate,&value);
                 if(predicate)throw std::runtime_error("Predicated CopyStructureCount is not verified");
@@ -432,13 +460,13 @@ void FrameRecording::observe(ID3D11DeviceContext* context,const char* api,Comman
     }catch(const std::exception& e){p.gap(api,e.what());}catch(...){p.gap(api,"Command observation failed");}
 }
 void FrameRecording::query(ID3D11DeviceContext* context,ID3D11Asynchronous* async,CommandKind kind,HRESULT result,const void* data,UINT size,UINT flags){
-    auto& p=*impl_;const auto* api=kind==CommandKind::query_end?"ID3D11DeviceContext::End":"ID3D11DeviceContext::GetData";
-    if(GetCurrentThreadId()!=p.thread){const char* empty=nullptr;p.foreign_call.compare_exchange_strong(empty,api);return;}
+    auto& p=*impl_;const auto* api=kind==CommandKind::query_begin?"ID3D11DeviceContext::Begin":kind==CommandKind::query_end?"ID3D11DeviceContext::End":"ID3D11DeviceContext::GetData";
+    if(!p.accepts_thread()){p.foreign(context,api);return;}
     if(native_call_depth>1 || p.starting){const char* empty=nullptr;p.reentrant_call.compare_exchange_strong(empty,api);return;}
     std::lock_guard lock(p.mutex);
     if(p.finished || p.frame.failed || p.cancelled || p.foreign_call.load() || p.reentrant_call.load())return;
     try{
-        if(kind!=CommandKind::query_end && kind!=CommandKind::query_get_data)throw std::runtime_error("Invalid query observation kind");
+        if(kind!=CommandKind::query_begin && kind!=CommandKind::query_end && kind!=CommandKind::query_get_data)throw std::runtime_error("Invalid query observation kind");
         auto c=object_record(context),q=object_record(async);
         if(!c || c->id!=p.context_id)throw std::runtime_error("Multiple context query execution is unsupported");
         if(!q || q->device!=c->device)throw std::runtime_error("Query identity/device mismatch");
@@ -446,7 +474,7 @@ void FrameRecording::query(ID3D11DeviceContext* context,ID3D11Asynchronous* asyn
         {
             std::lock_guard query_lock(q->mutex);
             if((q->kind=="query" || q->kind=="query1") && q->descriptor.size()>=sizeof(desc)){
-                memcpy(&desc,q->descriptor.data(),sizeof(desc));supported=desc.Query==D3D11_QUERY_EVENT && desc.MiscFlags==0;
+                memcpy(&desc,q->descriptor.data(),sizeof(desc));supported=(desc.Query==D3D11_QUERY_EVENT || desc.Query==D3D11_QUERY_TIMESTAMP || desc.Query==D3D11_QUERY_TIMESTAMP_DISJOINT) && desc.MiscFlags==0;
                 if(q->kind=="query1"){
                     if(q->descriptor.size()!=sizeof(D3D11_QUERY_DESC1))supported=false;
                     else{D3D11_QUERY_DESC1 extended{};memcpy(&extended,q->descriptor.data(),sizeof(extended));supported=supported && extended.ContextType==D3D11_CONTEXT_TYPE_ALL;}
@@ -455,18 +483,21 @@ void FrameRecording::query(ID3D11DeviceContext* context,ID3D11Asynchronous* asyn
             observation.last_end=q->last_query_end;
         }
         if(!supported)throw std::runtime_error(query_gap(async,api,{size,flags}));
+        if(kind==CommandKind::query_begin && desc.Query!=D3D11_QUERY_TIMESTAMP_DISJOINT)
+            throw std::runtime_error("Begin is invalid for an End-only query");
         if(p.frame.commands.size()>=p.options.command_limit)throw std::runtime_error("Frame command limit exceeded");
         const auto& stamp=observation.last_end;
         if(kind==CommandKind::query_end){
-            if(!stamp.generation || stamp.context!=p.context_id || stamp.thread!=p.thread || !stamp.immediate)
+            if(!stamp.generation || stamp.context!=p.context_id || stamp.thread!=GetCurrentThreadId() || !stamp.immediate)
                 throw std::runtime_error("EVENT End observation does not match native history");
             observation.end_sequence=p.frame.commands.size();
-        }else{
+        }else if(kind==CommandKind::query_get_data){
             if(result>=0 && result!=S_OK && result!=S_FALSE)throw std::runtime_error("Unexpected GetData success status");
             if(flags&~D3D11_ASYNC_GETDATA_DONOTFLUSH)throw std::runtime_error("Unsupported GetData flags");
             observation.has_output=data!=nullptr;
             if(result==S_OK){
-                if((data && size!=sizeof(BOOL)) || (!data && size))throw std::runtime_error("Invalid successful EVENT GetData output size");
+                const UINT expected=desc.Query==D3D11_QUERY_EVENT?sizeof(BOOL):desc.Query==D3D11_QUERY_TIMESTAMP?sizeof(UINT64):sizeof(D3D11_QUERY_DATA_TIMESTAMP_DISJOINT);
+                if((data && size!=expected) || (!data && size))throw std::runtime_error("Invalid successful query GetData output size");
                 if(data){
                     if(p.options.byte_limit-p.frame.initial_bytes-p.payload_bytes<sizeof(BOOL))throw std::runtime_error("Query result exceeds frame byte limit");
                     uint32_t value;memcpy(&value,data,sizeof(value));observation.value=value;
@@ -489,7 +520,7 @@ void FrameRecording::query(ID3D11DeviceContext* context,ID3D11Asynchronous* asyn
 }
 void FrameRecording::mapped(ID3D11DeviceContext* context,ID3D11Resource* resource,UINT subresource,HRESULT result,const D3D11_MAPPED_SUBRESOURCE* mapped){
     auto& p=*impl_;constexpr auto api="ID3D11DeviceContext::Map";
-    if(GetCurrentThreadId()!=p.thread){const char* empty=nullptr;p.foreign_call.compare_exchange_strong(empty,api);return;}
+    if(!p.accepts_thread()){p.foreign(context,api);return;}
     if(native_call_depth>1 || p.starting){const char* empty=nullptr;p.reentrant_call.compare_exchange_strong(empty,api);return;}
     std::lock_guard lock(p.mutex);if(p.finished || p.frame.failed || p.cancelled || p.foreign_call.load() || p.reentrant_call.load())return;
     try{
@@ -505,7 +536,7 @@ void FrameRecording::mapped(ID3D11DeviceContext* context,ID3D11Resource* resourc
 }
 void FrameRecording::unmap(ID3D11DeviceContext* context,ID3D11Resource* resource,UINT subresource){
     auto& p=*impl_;constexpr auto api="ID3D11DeviceContext::Unmap";
-    if(GetCurrentThreadId()!=p.thread){const char* empty=nullptr;p.foreign_call.compare_exchange_strong(empty,api);return;}
+    if(!p.accepts_thread()){p.foreign(context,api);return;}
     if(native_call_depth>1 || p.starting){const char* empty=nullptr;p.reentrant_call.compare_exchange_strong(empty,api);return;}
     std::lock_guard lock(p.mutex);if(p.finished || p.frame.failed || p.cancelled || p.foreign_call.load() || p.reentrant_call.load()){p.mappings.clear();return;}
     try{

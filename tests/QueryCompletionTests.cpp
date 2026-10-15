@@ -44,19 +44,74 @@ class QueryCompletionTests final : public QObject {
         QCOMPARE(validateFrame(f.path())["errors"],nlohmann::json(0));
         const auto audit=auditQueryCompletions(f);
         QCOMPARE(requireQueryCompletion(audit,30).end,Id(20));
-        QVERIFY(!requireQueryCompletion(audit,31).missing.empty());
+        QCOMPARE(requireQueryCompletion(audit,31).end,Id(15));
+        QVERIFY(requireQueryCompletion(audit,31).ordinary);
         ReplayOptions o;o.warp=true;Replay replay(f,o);replay.run();
         QCOMPARE(replay.counts.at("query_end_observations"),uint64_t(1));
-        QCOMPARE(replay.counts.at("query_completion_synchronizations"),uint64_t(1));
-        QCOMPARE(replay.counts.at("query_completion_unresolved"),uint64_t(1));
+        QCOMPARE(replay.counts.at("query_completion_synchronizations"),uint64_t(2));
+        QCOMPARE(replay.counts.at("ordinary_query_completion_synchronizations"),uint64_t(1));
+        QVERIFY(replay.unresolvedQueryCompletions().empty());
+        replay.run();
+        QCOMPARE(replay.counts.at("ordinary_query_completion_synchronizations"),uint64_t(1));
+        o.disabled.insert(15);Replay disabled(f,o);QVERIFY_THROWS_EXCEPTION(std::runtime_error,disabled.run());
     }
     void ordinaryEndGuards_data() {
         QTest::addColumn<QString>("mode");
         for(const auto mode:{"absent","future","flags","other-type","nested","conflict","erg","deferred"})QTest::newRow(mode)<<QString(mode);
     }
+    void ordinaryCompletionGuards_data() {
+        QTest::addColumn<QString>("mode");
+        for (const auto mode : {"event", "timestamp", "disjoint", "size", "false-event", "begin-again", "conflict-after", "other-context", "latest-end"})
+            QTest::newRow(mode) << QString(mode);
+    }
+    void ordinaryCompletionGuards() {
+        QFETCH(QString,mode); auto c=base();
+        const uint32_t type=mode=="timestamp"?2u:(mode=="disjoint" || mode=="begin-again")?3u:0u;
+        c.add(5,7,0x3152,pack(Id(0),Id(99),uint8_t(1),type,0u));
+        if(type==3)c.add(12,7,0x34f9,pack(Id(0),Id(1),Id(99)));
+        c.add(15,7,0x34fa,pack(Id(0),Id(1),Id(99)));
+        auto raw=get(0,99,true);put(raw,29,1u);put(raw,33,type==0?4u:type==2?8u:16u);
+        if(mode=="size")put(raw,33,8u);
+        if(mode=="false-event")put(raw,29,0u);
+        if(mode=="begin-again")c.add(25,7,0x34f9,pack(Id(0),Id(1),Id(99)));
+        if(mode=="conflict-after")c.add(25,7,0x3152,pack(Id(0),Id(99),uint8_t(1),2u,0u));
+        if(mode=="other-context"){c.add(3,5,0x127,Raw(24));put(raw,8,Id(3));}
+        if(mode=="latest-end")c.add(25,7,0x34fa,pack(Id(0),Id(1),Id(99)));
+        c.add(30,7,0x34fb,raw);
+        QTemporaryDir dir;const auto path=dir.filePath("completion.gpa_frame");c.save(path);Frame f(path.toStdWString());
+        const auto audit=auditQueryCompletions(f);const auto& q=audit.at(30);
+        if(mode=="size" || mode=="false-event")QVERIFY(!q.error.empty());
+        else if(mode=="begin-again" || mode=="conflict-after" || mode=="other-context"){
+            QCOMPARE(q.end,Id(0));QVERIFY(!q.missing.empty());
+        }else{
+            QVERIFY(q.error.empty());QVERIFY(q.ordinary);QCOMPARE(q.end,Id(mode=="latest-end"?25:15));
+            ReplayOptions o;o.warp=true;Replay r(f,o);r.run();
+            QCOMPARE(r.counts.at("ordinary_query_completion_synchronizations"),uint64_t(1));
+            o.disabled.insert(q.end);Replay disabled(f,o);QVERIFY_THROWS_EXCEPTION(std::runtime_error,disabled.run());
+        }
+    }
+    void timingObservations() {
+        auto c=base();
+        c.add(5,7,0x3152,pack(Id(0),Id(98),uint8_t(1),2u,0u));
+        c.add(6,7,0x3152,pack(Id(0),Id(99),uint8_t(1),3u,0u));
+        c.add(12,7,0x34f9,pack(Id(0),Id(1),Id(99)));
+        c.add(13,7,0x34fa,pack(Id(0),Id(1),Id(98)));
+        c.add(14,7,0x34fa,pack(Id(0),Id(1),Id(99)));
+        QTemporaryDir dir;const auto path=dir.filePath("timing.gpa_frame");c.save(path);Frame f(path.toStdWString());
+        QCOMPARE(auditEventEndObservations(f),(std::set<Id>{12,13,14}));
+        QCOMPARE(validateFrame(f.path())["errors"],nlohmann::json(0));
+        ReplayOptions o;o.warp=true;Replay replay(f,o);replay.run();
+        QCOMPARE(replay.counts.at("query_begin_observations"),uint64_t(1));
+        QCOMPARE(replay.counts.at("query_end_observations"),uint64_t(2));
+        // A TIMESTAMP is End-only; descriptor evidence must not authorize Begin.
+        c.add(11,7,0x34f9,pack(Id(0),Id(1),Id(98)));
+        const auto bad=dir.filePath("invalid-timing.gpa_frame");c.save(bad);Frame invalid(bad.toStdWString());
+        QVERIFY(!auditEventEndObservations(invalid).contains(11));
+        Replay reject(invalid,o);QVERIFY_THROWS_EXCEPTION(std::runtime_error,reject.run());
+    }
     void ordinaryEndGuards() {
         QFETCH(QString,mode);auto c=base();
-        if(mode!="absent")c.add(mode=="future"?25:5,7,0x3152,pack(Id(0),Id(99),uint8_t(1),mode=="other-type"?2u:0u,mode=="flags"?1u:0u));
+        if(mode!="absent")c.add(mode=="future"?25:5,7,0x3152,pack(Id(0),Id(99),uint8_t(1),mode=="other-type"?1u:0u,mode=="flags"?1u:0u));
         if(mode=="conflict")c.add(6,7,0x3152,pack(Id(0),Id(99),uint8_t(1),2u,0u));
         if(mode=="deferred"){auto raw=Raw(24);put<uint32_t>(raw,16,1);c.add(7,5,0x127,raw);}
         c.add(15,7,mode=="erg"?0x243:0x34fa,pack(Id(mode=="nested"?10:0),Id(mode=="deferred"?7:1),Id(99)));

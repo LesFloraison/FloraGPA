@@ -50,7 +50,7 @@ inline bool excluded(const wchar_t* path) noexcept {
     for(auto prefix:prefixes)if(_wcsnicmp(name,prefix,wcslen(prefix))==0)return true;
     constexpr const wchar_t* executables[]={L"steam.exe",L"steamservice.exe",L"steamwebhelper.exe",L"gameoverlayui.exe",
         L"steamerrorreporter64.exe",L"PCLauncher.exe",L"PCUpdater.exe",L"chrome.exe",L"msedge.exe",L"firefox.exe",
-        L"QtWebEngineProcess.exe",L"Code.exe",L"Codex.exe",L"devenv.exe",L"MSBuild.exe",L"dllhost.exe",
+        L"QtWebEngineProcess.exe",L"Code.exe",L"Codex.exe",L"codex-computer-use.exe",L"devenv.exe",L"MSBuild.exe",L"dllhost.exe",
         L"rundll32.exe",L"explorer.exe",L"conhost.exe"};
     for(auto executable:executables)if(_wcsicmp(name,executable)==0)return true;
     wchar_t windows[MAX_PATH]{};const auto n=GetWindowsDirectoryW(windows,MAX_PATH);

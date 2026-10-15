@@ -22,6 +22,7 @@ void object_gap(const char* api, REFIID iid, const char* reason) noexcept;
 void wrap_object(REFIID iid, void** output, const char* api) noexcept;
 void* unwrap_object(const void* input, REFIID iid);
 Json object_status();
+uint64_t object_gap_count();
 template<class T> T* unwrap(T* value) {
     return static_cast<T*>(unwrap_object(value, __uuidof(T)));
 }

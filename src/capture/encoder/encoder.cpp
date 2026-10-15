@@ -114,6 +114,7 @@ class Encoder {
     }
     uint64_t initialize_msaa_depth(const MsaaSamples& samples,uint64_t vertex,uint64_t raster,uint64_t scissors){
         const auto& shape=samples.shape;
+        const bool d24=samples.encoding==MsaaSampleEncoding::depth24_stencil8;
         const auto depth_pixel=helper_shader(0x92,msaa_shaders::depth),stencil_pixel=helper_shader(0x92,msaa_shaders::stencil);
         D3D11_DEPTH_STENCIL_DESC ds{};ds.DepthEnable=TRUE;ds.DepthWriteMask=D3D11_DEPTH_WRITE_MASK_ALL;ds.DepthFunc=D3D11_COMPARISON_ALWAYS;
         ds.StencilReadMask=255;ds.StencilWriteMask=255;ds.FrontFace={D3D11_STENCIL_OP_KEEP,D3D11_STENCIL_OP_KEEP,D3D11_STENCIL_OP_REPLACE,D3D11_COMPARISON_ALWAYS};ds.BackFace=ds.FrontFace;
@@ -124,14 +125,27 @@ class Encoder {
             D3D11_BUFFER_DESC bd{16,D3D11_USAGE_DEFAULT,D3D11_BIND_CONSTANT_BUFFER,0,0,0};
             const auto data=blob(Payload{}.u({1u<<bit,0,0,0})),id=allocate();add(id,5,0x83,Payload{}.q({id,2}).raw(bd).value(data));constants[bit]=id;
         }
-        D3D11_TEXTURE2D_DESC td{shape.width,shape.height,1,shape.array_size,DXGI_FORMAT_R32G8X24_TYPELESS,{shape.samples,samples.quality},D3D11_USAGE_DEFAULT,D3D11_BIND_DEPTH_STENCIL,0,0};
+        D3D11_TEXTURE2D_DESC td{shape.width,shape.height,1,shape.array_size,d24?DXGI_FORMAT_R24G8_TYPELESS:DXGI_FORMAT_R32G8X24_TYPELESS,{shape.samples,samples.quality},D3D11_USAGE_DEFAULT,D3D11_BIND_DEPTH_STENCIL,0,0};
         const auto temporary=helper_texture(td,{});std::vector<uint64_t> views;
-        for(UINT layer=0;layer<shape.array_size;++layer){D3D11_DEPTH_STENCIL_VIEW_DESC d{};d.Format=DXGI_FORMAT_D32_FLOAT_S8X24_UINT;d.ViewDimension=D3D11_DSV_DIMENSION_TEXTURE2DMSARRAY;d.Texture2DMSArray={layer,1};
+        for(UINT layer=0;layer<shape.array_size;++layer){D3D11_DEPTH_STENCIL_VIEW_DESC d{};d.Format=d24?DXGI_FORMAT_D24_UNORM_S8_UINT:DXGI_FORMAT_D32_FLOAT_S8X24_UINT;d.ViewDimension=D3D11_DSV_DIMENSION_TEXTURE2DMSARRAY;d.Texture2DMSArray={layer,1};
             const auto view=helper_view(0x8e,temporary,d);views.push_back(view);add(7,0x31,Payload{}.q({0,1,view}).u({3}).value(0.0f).value(uint8_t(0)));}
         const D3D11_VIEWPORT viewport{0,0,float(shape.width),float(shape.height),0,1};const auto viewports=add(9,0x87,Payload{}.u({1}).raw(viewport));
         for(const auto& plane:samples.planes){
             checkpoint();D3D11_TEXTURE2D_DESC d{shape.width,shape.height,1,1,DXGI_FORMAT_R32G32_UINT,{1,0},D3D11_USAGE_DEFAULT,D3D11_BIND_SHADER_RESOURCE,0,0};
-            const auto texture=helper_texture(d,plane.bytes);D3D11_SHADER_RESOURCE_VIEW_DESC sd{};sd.Format=d.Format;sd.ViewDimension=D3D11_SRV_DIMENSION_TEXTURE2D;sd.Texture2D.MipLevels=1;
+            ByteBuffer expanded;
+            if(d24){
+                expanded.reserve(plane.bytes.size()*2);
+                for(size_t at=0;at<plane.bytes.size();at+=4){
+                    uint32_t packed;memcpy(&packed,plane.bytes.data()+at,4);
+                    // Correctly rounded CPU division avoids shader reciprocal
+                    // approximation when converting the captured 24-bit UNORM.
+                    const float depth=float(double(packed&0xffffffu)/16777215.0);
+                    const uint32_t stencil=packed>>24;
+                    const auto offset=expanded.size();expanded.resize(offset+8);
+                    memcpy(expanded.data()+offset,&depth,4);memcpy(expanded.data()+offset+4,&stencil,4);
+                }
+            }
+            const auto texture=helper_texture(d,d24?expanded:plane.bytes);D3D11_SHADER_RESOURCE_VIEW_DESC sd{};sd.Format=d.Format;sd.ViewDimension=D3D11_SRV_DIMENSION_TEXTURE2D;sd.Texture2D.MipLevels=1;
             const auto srv=helper_view(0x8c,texture,sd);state_block state{};state.mask.fill(UINT32_MAX);
             state.topology=D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;state.vs_shader=vertex;state.ps_shader=depth_pixel;state.ps_srv[0]=srv;state.rasterizer=raster;
             state.viewports=viewports;state.scissors=scissors;state.sample_mask=1u<<plane.sample;state.dsv=views.at(plane.array_slice);state.depth_state=depth_state;state.om_uav_start=64;
@@ -153,7 +167,7 @@ class Encoder {
             checkpoint();const auto& samples=frame_.initial_msaa.at(id);const auto& shape=samples.shape;
             std::u16string name=u"FloraCapture initialization: MSAA resource ";for(char c:std::to_string(id))name.push_back(char16_t(c));name.push_back(0);
             add(7,0x327b,Payload{}.q({0,UINT64_MAX-2}).u({0,narrow(name.size()*2)}).bytes({reinterpret_cast<const uint8_t*>(name.data()),name.size()*2}));
-            if(plan.access.encoding==MsaaSampleEncoding::depth32_stencil8){
+            if(plan.access.encoding==MsaaSampleEncoding::depth32_stencil8 || plan.access.encoding==MsaaSampleEncoding::depth24_stencil8){
                 const auto temporary=initialize_msaa_depth(samples,vertex,raster,scissors);
                 add(7,0x3e,Payload{}.q({0,1,resource_ref(id),temporary}));add(7,0x327c,Payload{}.q({0,UINT64_MAX-2}).u({0}));continue;
             }
@@ -220,10 +234,12 @@ class Encoder {
         }else throw std::runtime_error("Encoder MSAA view kind unsupported");
         require(first<shape.array_size && count && count<=shape.array_size-first,"Encoder MSAA view array range invalid");
         const auto storage=msaa_.at(o.resource).access.storage;
-        if(msaa_.at(o.resource).access.encoding==MsaaSampleEncoding::depth32_stencil8){
+        if(msaa_initialization_depth_format(shape.format)){
             const bool dsv=o.kind=="dsv",srv=o.kind=="srv" || o.kind=="srv1";
-            require(dsv?format==DXGI_FORMAT_D32_FLOAT_S8X24_UINT:
-                (srv && shape.format==storage && (format==DXGI_FORMAT_R32_FLOAT_X8X24_TYPELESS || format==DXGI_FORMAT_X32_TYPELESS_G8X24_UINT)),"Encoder MSAA depth view format incompatible");
+            const bool d24=msaa_.at(o.resource).access.encoding==MsaaSampleEncoding::depth24_stencil8;
+            require(dsv?format==(d24?DXGI_FORMAT_D24_UNORM_S8_UINT:DXGI_FORMAT_D32_FLOAT_S8X24_UINT):
+                (srv && shape.format==storage && (format==(d24?DXGI_FORMAT_R24_UNORM_X8_TYPELESS:DXGI_FORMAT_R32_FLOAT_X8X24_TYPELESS) ||
+                format==(d24?DXGI_FORMAT_X24_TYPELESS_G8_UINT:DXGI_FORMAT_X32_TYPELESS_G8X24_UINT))),"Encoder MSAA depth view format incompatible");
         }else require(o.kind!="dsv" && msaa_initialization_color_format(format) && format!=storage &&
             msaa_integer_access(format).storage==storage &&
             (shape.format==storage || shape.format==format),"Encoder MSAA view format incompatible");
@@ -236,11 +252,11 @@ class Encoder {
         require(o.device==device_,"Encoder object belongs to another device");
         if(o.kind=="query" || o.kind=="query1"){
             const auto d=descriptor<D3D11_QUERY_DESC>(o);
-            require(d.Query==D3D11_QUERY_EVENT && !d.MiscFlags,"Encoder ordinary query profile unsupported");
+            require((d.Query==D3D11_QUERY_EVENT || d.Query==D3D11_QUERY_TIMESTAMP || d.Query==D3D11_QUERY_TIMESTAMP_DISJOINT) && !d.MiscFlags,"Encoder ordinary query profile unsupported");
             if(o.kind=="query1")require(descriptor<D3D11_QUERY_DESC1>(o).ContextType==D3D11_CONTEXT_TYPE_ALL,"Encoder Query1 context profile unsupported");
             // Descriptor observation identifies an ordinary query without inventing
             // a GPA predicate resource. Query identity is reserved but not materialized.
-            add(7,0x3152,Payload{}.q({0,ref(id)}).value<uint8_t>(1).u({0,0}));return;
+            add(7,0x3152,Payload{}.q({0,ref(id)}).value<uint8_t>(1).u({UINT(d.Query),d.MiscFlags}));return;
         }
         if(o.kind=="buffer" || o.kind=="texture1d" || o.kind=="texture2d" || o.kind=="texture2d1" || o.kind=="texture3d" || o.kind=="texture3d1"){resource(id,o);return;}
         Payload p;p.q({ref(id),2});uint16_t type=0;
@@ -369,7 +385,7 @@ public:
         checkpoint();
         preflight_msaa();
         for(const auto& command:frame_.commands)
-            if(command.kind==CommandKind::query_end || command.kind==CommandKind::query_get_data){
+            if(command.kind==CommandKind::query_begin || command.kind==CommandKind::query_end || command.kind==CommandKind::query_get_data){
                 EventDependencyOptions analysis_options;analysis_options.cancelled=options_.cancelled;
                 const auto dependencies=analyze_event_dependencies(frame_,analysis_options);
                 bool observations_only=frame_.start_completion.has_value();
@@ -378,11 +394,13 @@ public:
                     const bool pending=observed.scope==EventObservationScope::pending && q.end_sequence &&
                         q.last_end.immediate && q.last_end.context==c.bindings.context &&
                         !q.has_output && c.words[0]==0;
-                    observations_only=observations_only && (observed.scope==EventObservationScope::preframe_completed || pending);
+                    const bool recorded_completion=observed.scope==EventObservationScope::recorded_prefix &&
+                        c.result==S_OK && observed.prefix && observed.end_sequence;
+                    observations_only=observations_only && (observed.scope==EventObservationScope::preframe_completed || pending || recorded_completion);
                 }
-                // No in-frame successful completion is lowered here. Pre-frame
-                // work was drained before the initial state; a pending observation
-                // and an End alone promise no GPU completion during this frame.
+                // The private boundary EVENT drained pre-frame work. The checked
+                // reader issues a private EVENT at each saved ordinary-query End
+                // and waits at successful GetData, including uploads in its prefix.
                 if(observations_only)break;
                 std::string detail="; End observations="+std::to_string(dependencies.ends)+", GetData observations="+std::to_string(dependencies.observations.size());
                 std::array<size_t,8> scopes{};
@@ -407,7 +425,8 @@ public:
         ids_.emplace(context_,1);ids_.emplace(device_,2);
         for(const auto& [id,o]:frame_.objects){require(id && id==o.id,"Encoder object key/identity mismatch");if(!ids_.contains(id))ids_.emplace(id,allocate());}
         ref(context_,"context");ref(device_,"device");const auto device=descriptor<DeviceRecordDesc>(frame_.objects.at(device_));
-        require(device.feature_level>=D3D_FEATURE_LEVEL_11_0 && device.feature_level<=D3D_FEATURE_LEVEL_11_1,"Encoder feature level unsupported");
+        require(device.feature_level==D3D_FEATURE_LEVEL_11_0 || device.feature_level==D3D_FEATURE_LEVEL_11_1 ||
+            device.feature_level==D3D_FEATURE_LEVEL_12_0 || device.feature_level==D3D_FEATURE_LEVEL_12_1,"Encoder feature level unsupported");
         const auto context=descriptor<ContextRecordDesc>(frame_.objects.at(context_));require(!context.type,"Encoder deferred context unsupported");
         require(frame_.objects.at(context_).device==device_,"Encoder context device mismatch");
         typed(frame_.output,{"texture2d","texture2d1"});const auto output=frame_.objects.find(frame_.output);require(output!=frame_.objects.end() && frame_.initial_resources.contains(frame_.output),"Encoder output missing");
@@ -461,10 +480,11 @@ public:
             require(gpu_action || command.kind==CommandKind::copy_structure_count || command.uav_counter_keeps.empty(),"Encoder counter KEEP attached to non-GPU command");
             require(command.kind==CommandKind::update_subresource || !command.update_box,"Encoder box attached to non-Update command");
             require(command.kind==CommandKind::copy_region || !command.copy_region,"Encoder region attached to non-copy command");
-            if(command.kind==CommandKind::query_end || command.kind==CommandKind::query_get_data){
+            if(command.kind==CommandKind::query_begin || command.kind==CommandKind::query_end || command.kind==CommandKind::query_get_data){
                 require(command.query.has_value() && command.completed && command.bindings.context==context_ && command.bindings.device==device_,"Encoder query observation mismatch");
                 const auto query=typed(command.operand,{"query","query1"});
-                if(command.kind==CommandKind::query_end)add(7,0x34fa,Payload{}.q({0,1,query}));
+                if(command.kind==CommandKind::query_begin)add(7,0x34f9,Payload{}.q({0,1,query}));
+                else if(command.kind==CommandKind::query_end)add(7,0x34fa,Payload{}.q({0,1,query}));
                 else{const auto& q=*command.query;p.q({0,1}).value(command.result).value(query).value<uint8_t>(q.has_output?1:0);
                     if(q.has_output){require(q.value.has_value(),"Encoder query output bytes unavailable");p.value(*q.value);}p.u({w[0],w[1]});add(7,0x34fb,std::move(p));}
                 continue;
@@ -506,6 +526,12 @@ public:
                 for(auto id:state.vertices)unmapped(id);for(auto id:state.render_targets)unmapped(id);
                 for(auto id:state.stream_targets)unmapped(id);for(auto id:state.om_uavs)unmapped(id);for(auto id:state.cs_uavs)unmapped(id);
                 unmapped(state.index_buffer);unmapped(state.depth_view);
+            }
+            if(command.kind==CommandKind::generate_mips){
+                require(command.bindings.context==context_ && command.bindings.device==device_ && !command.bindings.predicate,"Encoder GenerateMips context/predicate mismatch");
+                const auto view=typed(command.operand,{"srv","srv1"});
+                require(frame_.initial_resources.contains(frame_.objects.at(command.operand).resource),"Encoder GenerateMips initial resource missing");
+                add(7,0x245,Payload{}.q({0,1,view}));continue;
             }
             if(command.kind==CommandKind::update_subresource){
                 require(command.bindings.context==context_ && command.bindings.device==device_,"Encoder Update context mismatch");

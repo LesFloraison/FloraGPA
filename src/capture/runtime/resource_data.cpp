@@ -94,6 +94,7 @@ void track_mapping(const void* context_proxy,ID3D11Resource* resource,UINT subre
             if(!record->mapped_subresources.emplace(key,stamp).second)throw std::runtime_error("Repeated Map without Unmap");
         }
         else if(!record->mapped_subresources.erase(key))throw std::runtime_error("Unmap without tracked Map");
+        refresh_mapping_index(record);
     }catch(const std::exception& e){object_gap(mapped?"Map":"Unmap",__uuidof(ID3D11Resource),e.what());}
     catch(...){object_gap("Map/Unmap",__uuidof(ID3D11Resource),"Map tracking failed");}
 }

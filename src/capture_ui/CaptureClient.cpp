@@ -67,8 +67,11 @@ void CaptureClient::sessionCommand(const QString &command, const QStringList &ex
     start(command,QStringList{"--session",session_} + extra);
 }
 void CaptureClient::status() { sessionCommand("status"); }
-void CaptureClient::capture(const QString &swapChain) {
-    sessionCommand("capture", swapChain.isEmpty() ? QStringList{} : QStringList{"--swap-chain",swapChain});
+void CaptureClient::capture(const QString &swapChain, unsigned resourceLimitMiB) {
+    if (!resourceLimitMiB || resourceLimitMiB > 4096) { emit failed("Capture limit must be 1–4096 MiB"); return; }
+    QStringList args{"--resource-limit-mib",QString::number(resourceLimitMiB)};
+    if (!swapChain.isEmpty()) args << "--swap-chain" << swapChain;
+    sessionCommand("capture", args);
 }
 void CaptureClient::cancel() { sessionCommand("cancel"); }
 void CaptureClient::selectSwap(const QString &swapChain) { sessionCommand("select",{"--swap-chain",swapChain.isEmpty()?QString("0"):swapChain}); }

@@ -57,14 +57,16 @@ bool msaa_initialization_color_format(DXGI_FORMAT format) noexcept {
            (format>=DXGI_FORMAT_R16G16B16A16_TYPELESS && format<=DXGI_FORMAT_R16G16B16A16_SINT);
 }
 bool msaa_initialization_depth_format(DXGI_FORMAT format) noexcept {
-    return format==DXGI_FORMAT_R32G8X24_TYPELESS || format==DXGI_FORMAT_D32_FLOAT_S8X24_UINT;
+    return format==DXGI_FORMAT_R32G8X24_TYPELESS || format==DXGI_FORMAT_D32_FLOAT_S8X24_UINT ||
+           format==DXGI_FORMAT_R24G8_TYPELESS || format==DXGI_FORMAT_D24_UNORM_S8_UINT;
 }
 MsaaInitializationLayout validate_msaa_initialization(const MsaaSamples& data,
     const D3D11_TEXTURE2D_DESC& d,size_t byte_limit,size_t plane_limit) {
     if(!data.resource)throw std::runtime_error("MSAA initialization resource identity is zero");
     const auto& s=data.shape;
     const bool depth=msaa_initialization_depth_format(s.format);
-    if(depth ? data.encoding!=MsaaSampleEncoding::depth32_stencil8 :
+    const auto depth_encoding=depth?msaa_sample_access(s.format,true).encoding:MsaaSampleEncoding::color_bits;
+    if(depth ? data.encoding!=depth_encoding :
        (data.encoding!=MsaaSampleEncoding::color_bits || !msaa_initialization_color_format(s.format)))
         throw std::runtime_error("MSAA initialization format/encoding is not verified");
     if(data.quality || (s.samples!=2 && s.samples!=4))
@@ -88,7 +90,7 @@ MsaaInitializationLayout validate_msaa_initialization(const MsaaSamples& data,
            p.bytes.size()!=expected.row_bytes*s.height)
             throw std::runtime_error("MSAA initialization plane identity/layout/length mismatch");
         if(p.bytes.size()>byte_limit-bytes)throw std::runtime_error("MSAA initialization byte limit exceeded");
-        if(depth)for(size_t at=0;at<p.bytes.size();at+=8){
+        if(depth && depth_encoding==MsaaSampleEncoding::depth32_stencil8)for(size_t at=0;at<p.bytes.size();at+=8){
             uint32_t value=0,stencil=0;memcpy(&value,p.bytes.data()+at,4);memcpy(&stencil,p.bytes.data()+at+4,4);
             // SV_Depth is clamped by the output merger. Do not silently change
             // NaNs, signed zero, out-of-range values or unverified subnormals.

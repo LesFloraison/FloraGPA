@@ -31,6 +31,18 @@ inline std::recursive_mutex& presentation_context_mutex(ID3D11Multithread* prote
 inline std::recursive_mutex& presentation_context_mutex(IDXGISwapChain* swap){Microsoft::WRL::ComPtr<ID3D11Device> device;if(FAILED(swap->GetDevice(IID_PPV_ARGS(&device))))throw std::runtime_error("Presentation device unavailable");return presentation_context_mutex(device.Get());}
 inline std::recursive_mutex& presentation_alias_mutex(){static auto* value=new std::recursive_mutex;return *value;}
 using PresentationLock=std::lock_guard<std::recursive_mutex>;
+// Only generated context proxies construct this after acquiring their device
+// gate. A caller on another thread must carry this proof before a recorder may
+// wait for mutable state; raw observer calls must still fail without waiting.
+inline thread_local const std::recursive_mutex* current_context_gate=nullptr;
+class ContextCallScope {
+    const std::recursive_mutex* previous_=current_context_gate;
+public:
+    explicit ContextCallScope(const std::recursive_mutex* gate){current_context_gate=gate;}
+    ~ContextCallScope(){current_context_gate=previous_;}
+    ContextCallScope(const ContextCallScope&)=delete;
+    ContextCallScope& operator=(const ContextCallScope&)=delete;
+};
 // Application Enter and context/presentation use the same per-device gate.
 // View creation uses native protection before alias/registry locks but does not
 // acquire a context gate, so CPU device work can progress while Present waits.

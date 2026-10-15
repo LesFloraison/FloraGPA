@@ -17,7 +17,7 @@ FrameStartCompletion complete_frame_start(ID3D11DeviceContext* context,const Fra
     Microsoft::WRL::ComPtr<ID3D11Predicate> predicate;BOOL predicate_value=FALSE;native->GetPredication(&predicate,&predicate_value);
     if(predicate)throw std::runtime_error("Frame start with predication is unsupported");
     FrameStartCompletion completed;completed.context=record->id;completed.device=record->device;completed.thread=GetCurrentThreadId();
-    {std::lock_guard lock(record->mutex);if(!record->active_queries.empty())throw std::runtime_error("Frame start cannot run inside an active query");completed.last_end_serial=record->query_end_serial;}
+    {std::lock_guard lock(record->mutex);if(record->has_active_non_timing_query())throw std::runtime_error("Frame start cannot run inside an active query");completed.last_end_serial=record->query_end_serial;}
     const auto start=GetTickCount64();
     auto checkpoint=[&]{
         if(options.cancelled && options.cancelled())throw std::runtime_error("Frame start completion cancelled");
@@ -37,7 +37,7 @@ FrameStartCompletion complete_frame_start(ID3D11DeviceContext* context,const Fra
         check(result,"Frame start GetData");
         if(result!=S_OK || ready!=TRUE)throw std::runtime_error("Frame start EVENT did not confirm completion");
         checkpoint();
-        {std::lock_guard lock(record->mutex);if(record->query_end_serial!=completed.last_end_serial || !record->active_queries.empty())throw std::runtime_error("Query activity changed during frame start completion");}
+        {std::lock_guard lock(record->mutex);if(record->query_end_serial!=completed.last_end_serial || record->has_active_non_timing_query())throw std::runtime_error("Query activity changed during frame start completion");}
         completed.result=result;completed.value=uint32_t(ready);completed.elapsed_ms=GetTickCount64()-start;return completed;
     }
 }

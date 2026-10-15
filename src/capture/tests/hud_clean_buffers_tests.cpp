@@ -47,7 +47,7 @@ Run run(DXGI_SWAP_EFFECT effect,UINT count,bool isolated,bool tearing,bool nonse
     for(UINT i=0;i<count;++i){context->UpdateSubresource(real.Get(),0,nullptr,base.data(),extent*4,0);require(swap->Present(tearing?0:1,flags&~DXGI_PRESENT_DO_NOT_SEQUENCE)==S_OK,"Warmup Present did not succeed");}
     for(UINT frame=0;frame<24;++frame){
         auto* application=isolated?clean.buffer(0):real.Get();
-        if(effect==DXGI_SWAP_EFFECT_FLIP_DISCARD)context->UpdateSubresource(application,0,nullptr,base.data(),extent*4,0);
+        if(effect==DXGI_SWAP_EFFECT_FLIP_DISCARD || effect==DXGI_SWAP_EFFECT_DISCARD)context->UpdateSubresource(application,0,nullptr,base.data(),extent*4,0);
         // Leave the HUD region untouched. Partial changes accumulate separately
         // in each retained physical buffer, exposing an incorrect rotation.
         const UINT x=8+frame%16,y=8+(frame/16);const uint32_t marker=0xff000000u|((frame+1)*997u);
@@ -55,11 +55,11 @@ Run run(DXGI_SWAP_EFFECT effect,UINT count,bool isolated,bool tearing,bool nonse
         result.before.push_back(read(application));
         const auto before_test=read(application);check(swap->Present(0,DXGI_PRESENT_TEST));require(read(application)==before_test,"TEST changed application pixels");
         if(isolated){
-            std::vector<Pixels> unchanged;for(UINT slot=0;slot<count;++slot)unchanged.push_back(read(clean.buffer(slot)));
+            std::vector<Pixels> unchanged;for(UINT slot=0;slot<clean.size();++slot)unchanged.push_back(read(clean.buffer(slot)));
             SetLastError(0x4312);clean.prepare(swap.Get(),DXGI_PRESENT_TEST);clean.advance(S_OK,DXGI_PRESENT_TEST);
             clean.advance(E_FAIL,0);clean.advance(DXGI_STATUS_OCCLUDED,0);
             require(GetLastError()==0x4312,"Clean ring no-op changed LastError");
-            for(UINT slot=0;slot<count;++slot)require(read(clean.buffer(slot))==unchanged[slot],"Non-rotating result changed clean buffers");
+            for(UINT slot=0;slot<clean.size();++slot)require(read(clean.buffer(slot))==unchanged[slot],"Non-rotating result changed clean buffers");
             predicated_private_copy(frame,[&]{clean.prepare(swap.Get(),flags);});
             require(read(real.Get())==read(application),"Predicate suppressed private presentation copy");
             const uint32_t green=0xff00ff00u;D3D11_BOX hud{0,0,0,1,1,1};context->UpdateSubresource(real.Get(),0,&hud,&green,4,0);
@@ -72,7 +72,7 @@ Run run(DXGI_SWAP_EFFECT effect,UINT count,bool isolated,bool tearing,bool nonse
         if(isolated){
             predicated_private_copy(frame,[&]{clean.advance(hr,flags);});
         }
-        if(effect!=DXGI_SWAP_EFFECT_FLIP_DISCARD){
+        if(effect!=DXGI_SWAP_EFFECT_FLIP_DISCARD && effect!=DXGI_SWAP_EFFECT_DISCARD){
             for(UINT slot=0;slot<count;++slot){
                 ComPtr<ID3D11Texture2D> view;if(!isolated)check(swap->GetBuffer(slot,IID_PPV_ARGS(&view)));
                 result.after.push_back(read(isolated?clean.buffer(slot):view.Get()));
@@ -87,8 +87,8 @@ Run run(DXGI_SWAP_EFFECT effect,UINT count,bool isolated,bool tearing,bool nonse
 int main(){try{
     WNDCLASSW cls{};cls.lpfnWndProc=procedure;cls.hInstance=GetModuleHandleW(nullptr);cls.lpszClassName=L"FloraCleanBufferProbe";require(RegisterClassW(&cls)!=0,"Register class failed");
     Json rows=Json::array();
-    for(auto format:{DXGI_FORMAT_R8G8B8A8_UNORM,DXGI_FORMAT_R10G10B10A2_UNORM})for(auto effect:{DXGI_SWAP_EFFECT_SEQUENTIAL,DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL,DXGI_SWAP_EFFECT_FLIP_DISCARD})for(UINT count:{2u,3u})for(bool tearing:{false,true})for(bool nonsequencing:{false,true}){
-        if((tearing && effect==DXGI_SWAP_EFFECT_SEQUENTIAL) || (tearing && nonsequencing))continue;
+    for(auto format:{DXGI_FORMAT_R8G8B8A8_UNORM,DXGI_FORMAT_R10G10B10A2_UNORM})for(auto effect:{DXGI_SWAP_EFFECT_DISCARD,DXGI_SWAP_EFFECT_SEQUENTIAL,DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL,DXGI_SWAP_EFFECT_FLIP_DISCARD})for(UINT count:{2u,3u})for(bool tearing:{false,true})for(bool nonsequencing:{false,true}){
+        if((tearing && (effect==DXGI_SWAP_EFFECT_SEQUENTIAL || effect==DXGI_SWAP_EFFECT_DISCARD)) || (tearing && nonsequencing))continue;
         const auto native=run(effect,count,false,tearing,nonsequencing,format);const auto isolated=run(effect,count,true,tearing,nonsequencing,format);
         if(native.before!=isolated.before || native.after!=isolated.after)std::cerr<<Json{{"format",format},{"effect",effect},{"buffers",count},{"tearing",tearing},{"nonsequencing",nonsequencing}}.dump()<<'\n';
         require(native.before==isolated.before,"Clean buffer pre-Present contents differ from native");

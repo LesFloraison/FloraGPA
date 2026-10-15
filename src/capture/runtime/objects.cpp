@@ -187,6 +187,7 @@ void* unwrap_object(const void* input, REFIID iid) {
     result=presentation_operand(result,iid);
     SetLastError(before); return result;
 }
+uint64_t object_gap_count(){auto& r=registry();std::lock_guard lock(r.mutex);return r.gaps;}
 Json object_status() {
     auto& r = registry(); Json result;
     {

@@ -24,14 +24,14 @@ std::shared_ptr<ObjectRecord> tracked(IUnknown* object) {
 MsaaSamples snapshot_msaa_samples(ID3D11DeviceContext* context,ID3D11Texture2D* texture,const SnapshotOptions& options) {
     LastError last;NativeCall internal;
     if(!context || !texture)throw std::runtime_error("MSAA snapshot requires context and texture");
-    if(object_status().at("interface_gaps").get<uint64_t>())
+    if(object_gap_count())
         throw std::runtime_error("MSAA snapshot has prior interface capability gaps");
     const auto start=GetTickCount64();
     auto* native=unwrap(context);auto* source=unwrap(texture);
     auto cr=tracked(context),tr=tracked(texture);
     if(native->GetType()!=D3D11_DEVICE_CONTEXT_IMMEDIATE)
         throw std::runtime_error("MSAA snapshot requires immediate context");
-    {std::lock_guard guard(cr->mutex);if(!cr->active_queries.empty())throw std::runtime_error("MSAA snapshot inside active query unsupported");}
+    {std::lock_guard guard(cr->mutex);if(cr->has_active_non_timing_query())throw std::runtime_error("MSAA snapshot inside active query unsupported");}
     {std::lock_guard guard(tr->mutex);if(!tr->mapped_subresources.empty() || tr->external_mapping)throw std::runtime_error("MSAA snapshot resource is mapped");}
     ComPtr<ID3D11Predicate> predicate;BOOL predicate_value=FALSE;native->GetPredication(&predicate,&predicate_value);
     if(predicate)throw std::runtime_error("MSAA snapshot with predication unsupported");

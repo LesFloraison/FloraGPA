@@ -216,8 +216,11 @@ void HudDraw::begin(uint64_t swap,IDXGISwapChain* native,UINT flags,bool partial
         Microsoft::WRL::ComPtr<ID3D11DeviceContext> context;device->GetImmediateContext(&context);
         Microsoft::WRL::ComPtr<IUnknown> identity;context.As(&identity);const auto record=find_native_record(identity.Get());
         if(!record)throw std::runtime_error("HUD immediate context is untracked");
-        {std::lock_guard lock(record->mutex);if(!record->active_queries.empty())throw std::runtime_error("HUD skips active queries");}
-        if(object_status().value("interface_gaps",0ull))throw std::runtime_error("HUD skips untracked interfaces");
+        // Timing includes profiler overhead, as it does for private presentation
+        // copies. It does not count pixels/primitives or control predication.
+        // Keep suppressing HUD for occlusion, pipeline and SO queries.
+        {std::lock_guard lock(record->mutex);if(record->has_active_non_timing_query() || (!isolated && !record->active_queries.empty()))throw std::runtime_error("HUD skips active queries");}
+        if(object_gap_count())throw std::runtime_error("HUD skips untracked interfaces");
         // The isolated renderer only copies private textures and the native
         // presentation surface. It never binds or reads application buffers;
         // outstanding CPU buffer mappings therefore remain untouched. Texture
@@ -228,7 +231,7 @@ void HudDraw::begin(uint64_t swap,IDXGISwapChain* native,UINT flags,bool partial
         if(SUCCEEDED(device.As(&dxgi)) && SUCCEEDED(dxgi->GetAdapter(&adapter)) && SUCCEEDED(adapter->GetDesc(&adapter_desc)))panel.adapter=adapter_desc.Description;
         const wchar_t* explicit_adapter=L"UNKNOWN";Microsoft::WRL::ComPtr<IDXGIAdapter1> adapter1;DXGI_ADAPTER_DESC1 description1{};
         if(adapter && SUCCEEDED(adapter.As(&adapter1)) && SUCCEEDED(adapter1->GetDesc1(&description1)))explicit_adapter=(description1.Flags&DXGI_ADAPTER_FLAG_SOFTWARE)?L"SW":L"HW";
-        const auto level=device->GetFeatureLevel();panel.device=L"DX "+std::to_wstring((unsigned(level)>>12)&15)+L"."+std::to_wstring((unsigned(level)>>8)&15);
+        const auto level=device->GetFeatureLevel();panel.device=L"DX11 FL "+std::to_wstring((unsigned(level)>>12)&15)+L"."+std::to_wstring((unsigned(level)>>8)&15);
         Microsoft::WRL::ComPtr<IUnknown> device_identity;device.As(&device_identity);
         if(const auto record_device=find_native_record(device_identity.Get())){std::lock_guard lock(record_device->mutex);if(record_device->driver_type){const wchar_t* label=L"UNKNOWN";switch(*record_device->driver_type){case D3D_DRIVER_TYPE_UNKNOWN:label=explicit_adapter;break;case D3D_DRIVER_TYPE_HARDWARE:label=L"HW";break;case D3D_DRIVER_TYPE_WARP:label=L"WARP";break;case D3D_DRIVER_TYPE_REFERENCE:label=L"REF";break;case D3D_DRIVER_TYPE_SOFTWARE:label=L"SW";break;case D3D_DRIVER_TYPE_NULL:label=L"NULL";break;default:break;}panel.device+=L" ["+std::wstring(label)+L"]";}}
         impl_->pixels=std::make_unique<hud::PixelTransaction>();

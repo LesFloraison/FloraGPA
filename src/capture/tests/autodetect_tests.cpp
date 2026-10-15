@@ -27,6 +27,7 @@ int main(){try{
     bool rejected=false;try{string_data(dword_value(1));}catch(...){rejected=true;}check(rejected);
     check(excluded(L"C:\\Apps\\Steam.exe"));check(excluded(L"C:\\Apps\\steamwebhelper.exe"));
     check(excluded(L"C:\\Apps\\FloraGPA.exe"));check(excluded(L"C:\\Apps\\UnityCrashHandler64.exe"));
+    check(excluded(L"C:\\Tools\\codex-computer-use.exe"));
     check(!excluded(L"D:\\Games\\UnlistedGame.exe"));
     check(!excluded(L"D:\\Games\\SteamWorld.exe"));check(!excluded(L"D:\\Games\\Flora.exe"));
     check(created(GetCurrentProcess())!=0);check(!created(nullptr));

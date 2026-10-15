@@ -18,7 +18,7 @@ class CaptureClient final : public QObject {
     void launch(const QString &exe, const QString &cwd, const QString &out, const QStringList &arguments);
     void launch(const QString &exe, const QString &cwd, const QString &out, const QStringList &arguments, const HudSettings &hud);
     void status();
-    void capture(const QString &swapChain = {});
+    void capture(const QString &swapChain = {}, unsigned resourceLimitMiB = 1024);
     void selectSwap(const QString &swapChain);
     void cancel();
     void disconnectSession();

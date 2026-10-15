@@ -105,6 +105,8 @@ void method(std::ostream& out, const std::string& iface, const Json& m) {
         post += "track_query(static_cast<IUnknown*>(&owner_), pAsync, " + std::string(name=="Begin"?"true":"false") + ");\n";
     if (iface == "ID3D11DeviceContext" && name == "End")
         post += "record_query_observation(this, pAsync, CommandKind::query_end);\n";
+    if (iface == "ID3D11DeviceContext" && name == "Begin")
+        post += "record_query_observation(this, pAsync, CommandKind::query_begin);\n";
     if ((iface=="IDXGISurface" && (name=="Map" || name=="Unmap")) ||
         (iface=="IDXGISurface1" && (name=="GetDC" || name=="ReleaseDC")))
         post += "track_external_mapping(static_cast<IUnknown*>(&owner_), " + std::string(name=="Map" || name=="GetDC"?"true":"false") + ");\n";
@@ -126,6 +128,7 @@ void method(std::ostream& out, const std::string& iface, const Json& m) {
     if(name.starts_with("CreateRenderTargetView") || name.starts_with("CreateShaderResourceView") || name.starts_with("CreateUnorderedAccessView") || name=="CreateDepthStencilView" || name=="GetResource")
         out<<"NativePresentationScope native_access(target);\n";
     if(iface.starts_with("ID3D11DeviceContext") || iface=="ID3D11Multithread")out<<"std::unique_lock<std::recursive_mutex> context_access(presentation_context_mutex(target));\n";
+    if(iface.starts_with("ID3D11DeviceContext"))out<<"ContextCallScope context_call(context_access.mutex());\n";
     // Keep operand resolution and returned view registration in one alias
     // generation, without blocking unrelated CPU-only device creation in Present.
     if(name.starts_with("CreateRenderTargetView") || name.starts_with("CreateShaderResourceView") || name.starts_with("CreateUnorderedAccessView") || name=="CreateDepthStencilView" || name=="GetResource")
@@ -161,6 +164,7 @@ void method(std::ostream& out, const std::string& iface, const Json& m) {
         else if(name=="Map") {kind="map";operand="pResource";words="{Subresource,UINT(MapType),MapFlags}";}
         else if(name=="ExecuteCommandList") {operand="pCommandList";words="{UINT(RestoreContextState)}";}
         else if(name=="DispatchIndirect" || name=="DrawInstancedIndirect" || name=="DrawIndexedInstancedIndirect") {kind=name=="DispatchIndirect"?"dispatch_indirect":name=="DrawInstancedIndirect"?"draw_instanced_indirect":"draw_indexed_instanced_indirect";operand="pBufferForArgs";words="{AlignedByteOffsetForArgs}";}
+        else if(name=="GenerateMips") {kind="generate_mips";operand="pShaderResourceView";}
         else if(name=="CopyStructureCount") {kind="copy_structure_count";operand="pDstBuffer";source="pSrcView";words="{DstAlignedByteOffset}";}
         else if(name=="CopyResource") {kind="copy_resource";operand="pDstResource";source="pSrcResource";}
         else if(name=="ResolveSubresource") {kind="resolve";operand="pDstResource";source="pSrcResource";words="{DstSubresource,SrcSubresource,UINT(Format)}";}
@@ -170,7 +174,7 @@ void method(std::ostream& out, const std::string& iface, const Json& m) {
             operand="pAsync";
             // End/GetData have mandatory post-native observers. Do not sample
             // resources or issue GPU work before the application's GetData.
-            if(name!="Begin")kind="read";
+            kind="read";
             if(name=="GetData")words="{DataSize,GetDataFlags}";
         }
         else if(name.find("Get")!=std::string::npos || name=="Flush" || name=="Flush1")kind="read";

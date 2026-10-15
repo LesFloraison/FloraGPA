@@ -1,0 +1,307 @@
+{
+  "schema": 1,
+  "date": "2026-10-16",
+  "scope": "POOLS and HELLDIVERS 2 x64 DX11 Auto-Detect compatibility follow-up",
+  "launcher": "Existing Steam PID 11368; not restarted. No game-name allowlist.",
+  "cases": [
+    {
+      "scene": "POOLS chapter 1",
+      "pid": 29404,
+      "session_id": "627d308e-4b88-4a29-906a-24a24bfad438",
+      "attachment_pass": true,
+      "hud_pass": true,
+      "capture_pass": true,
+      "checked_reader_replay_pass": true,
+      "capture": "artifacts/auto-detect-pools-hd2-04/sessions/627d308e-4b88-4a29-906a-24a24bfad438/frame-1a5e5795-b36a-4a7b-a2b0-dd71111c8c85.gpa_frame",
+      "capture_sha256": "9439909e2c626cd0b7c6179170eb248c6019ce8459538caa24351bacf6844ad4",
+      "report": "artifacts/auto-detect-pools-hd2-04/pools-replay/report.json",
+      "counts": {
+        "ClearDepthStencilView": 2,
+        "ClearRenderTargetView": 26,
+        "CopySubresourceRegion": 3,
+        "Dispatch": 125,
+        "DispatchIndirect": 38,
+        "Draw": 15,
+        "DrawIndexed": 19,
+        "DrawIndexedInstanced": 72,
+        "GenerateMips": 2,
+        "Map": 194,
+        "Present": 1,
+        "UpdateSubresource": 44,
+        "map_read_observations": 1,
+        "map_read_synchronizations": 1,
+        "present_rtv_unbinds": 1,
+        "query_begin_observations": 1,
+        "query_completion_unresolved": 5,
+        "query_end_observations": 4,
+        "query_metadata_records": 15,
+        "unmap_observations": 195
+      },
+      "feature_level": null,
+      "reference_pixels_used": false,
+      "image_comparison": {
+        "width": 2560,
+        "height": 1440,
+        "capture_bytes": 1880524371,
+        "reference": "capture-owned final output BMP",
+        "reference_sha256": "16bae55a8f82d3c6e431e4cedca41f714ba3a049a9186dfa486813ad8bd109a5",
+        "replay_sha256": "ef6f9840b0dcdff90d902db75f0044bb22f541ffec9f51019cef1277da79e901",
+        "equal": false,
+        "different_pixels": 5,
+        "mean_abs_error": 3.390842013888889e-07,
+        "max_abs_error": 1
+      },
+      "resource_limit_mib": 4096
+    },
+    {
+      "scene": "HELLDIVERS 2 intro",
+      "pid": 10752,
+      "session_id": "f9b16e0c-9553-4fc1-afcf-c416dec639f6",
+      "attachment_pass": true,
+      "hud_pass": true,
+      "capture_pass": true,
+      "checked_reader_replay_pass": true,
+      "capture": "artifacts/auto-detect-pools-hd2-08/sessions/f9b16e0c-9553-4fc1-afcf-c416dec639f6/frame-eaad1517-d70b-44a0-bd6a-08e05d27a62a.gpa_frame",
+      "capture_sha256": "d73df7907106f18cfc974ae18236aab9fed96223c8230287fa121dd3dfca4581",
+      "report": "artifacts/auto-detect-pools-hd2-09/helldivers-intro-replay/report.json",
+      "counts": {
+        "ClearDepthStencilView": 4,
+        "ClearRenderTargetView": 30,
+        "CopyResource": 2,
+        "CopySubresourceRegion": 1,
+        "Dispatch": 45,
+        "Draw": 73,
+        "Map": 149,
+        "Present": 1,
+        "UpdateSubresource": 7,
+        "annotation_records": 4,
+        "map_read_observations": 1,
+        "map_read_synchronizations": 1,
+        "ordinary_query_completion_synchronizations": 1,
+        "query_begin_observations": 1,
+        "query_completion_synchronizations": 1,
+        "query_completion_unresolved": 4,
+        "query_end_observations": 5,
+        "query_metadata_records": 10,
+        "unmap_observations": 150
+      },
+      "feature_level": 49408,
+      "reference_pixels_used": false,
+      "image_comparison": {
+        "width": 2560,
+        "height": 1440,
+        "capture_bytes": 808450809,
+        "reference": "capture-owned final output BMP",
+        "reference_sha256": "dcaeb900ffb81cc3bbfc11cd17f6cf63359f990667d8fa47914eb64cc5c58551",
+        "replay_sha256": "dcaeb900ffb81cc3bbfc11cd17f6cf63359f990667d8fa47914eb64cc5c58551",
+        "equal": true,
+        "different_pixels": 0,
+        "mean_abs_error": 0.0,
+        "max_abs_error": 0
+      },
+      "resource_limit_mib": 4096
+    },
+    {
+      "scene": "HELLDIVERS 2 ship",
+      "pid": 32364,
+      "session_id": "e1f5c7dd-4f8e-43e1-aa8f-f36f67cbc3f4",
+      "attachment_pass": true,
+      "hud_pass": true,
+      "capture_pass": true,
+      "checked_reader_replay_pass": true,
+      "capture": "artifacts/auto-detect-pools-hd2-09/sessions/e1f5c7dd-4f8e-43e1-aa8f-f36f67cbc3f4/frame-4767e9dd-59e7-4772-8204-29d6d6d5d392.gpa_frame",
+      "capture_sha256": "d84628bdd6e2178db4bfbd1ef6950ba88f1879e39b12cb0d49e3e75ed8bd43cb",
+      "report": "artifacts/auto-detect-pools-hd2-09/helldivers-ship-replay/report.json",
+      "counts": {
+        "ClearDepthStencilView": 10,
+        "ClearRenderTargetView": 42,
+        "CopyResource": 2,
+        "Dispatch": 94,
+        "Draw": 154,
+        "DrawIndexed": 286,
+        "DrawIndexedInstanced": 688,
+        "Map": 2748,
+        "Present": 1,
+        "UpdateSubresource": 30,
+        "annotation_records": 4,
+        "map_read_observations": 1,
+        "map_read_synchronizations": 1,
+        "ordinary_query_completion_synchronizations": 1,
+        "query_begin_observations": 1,
+        "query_completion_synchronizations": 1,
+        "query_completion_unresolved": 4,
+        "query_end_observations": 5,
+        "query_metadata_records": 10,
+        "unmap_observations": 2749
+      },
+      "feature_level": 49408,
+      "reference_pixels_used": false,
+      "image_comparison": {
+        "width": 2560,
+        "height": 1440,
+        "capture_bytes": 1870751241,
+        "reference": "capture-owned final output BMP",
+        "reference_sha256": "cb318e5c25d6467b6b2980c4306ef1338014bdbddc5e3f3012a4a19619f75497",
+        "replay_sha256": "6b5660b71e4317f0215337bd952791250b9bce099251268b4a3908298f7834c2",
+        "equal": false,
+        "different_pixels": 57552,
+        "mean_abs_error": 0.006050482855902778,
+        "max_abs_error": 9
+      },
+      "resource_limit_mib": 4096
+    },
+    {
+      "scene": "POOLS chapter 1 pause menu, final packaged GUI",
+      "pid": 34392,
+      "session_id": "3dae92ca-3f8d-4727-b2c5-25a0fda45b9c",
+      "process_identity": {
+        "ProcessId": 34392,
+        "ParentProcessId": 11368,
+        "CreationDate": "2026-10-16T03:54:58.559634+08:00",
+        "ExecutablePath": "D:\\SteamLibrary\\steamapps\\common\\Pools\\POOLS.exe",
+        "CommandLine": "D:\\SteamLibrary\\steamapps\\common\\Pools\\POOLS.exe -force-dx12"
+      },
+      "attachment_pass": true,
+      "hud_pass": true,
+      "capture_pass": true,
+      "checked_reader_replay_pass": true,
+      "gui_open_and_actual_replay_pass": true,
+      "capture": "artifacts/auto-detect-pools-hd2-10/ui-r2/auto-20261015-195302-584/3dae92ca-3f8d-4727-b2c5-25a0fda45b9c/frame-57484268-3777-4787-ab3d-9a569226c124.gpa_frame",
+      "capture_sha256": "d1f9a03009364d6e1f1cbad59a1a1d74b7016a6c40bfc81e1d6d925074c1d113",
+      "report": "artifacts/auto-detect-pools-hd2-10/pools-r2-replay/report.json",
+      "counts": {
+        "ClearDepthStencilView": 2,
+        "ClearRenderTargetView": 26,
+        "CopySubresourceRegion": 3,
+        "Dispatch": 125,
+        "DispatchIndirect": 38,
+        "Draw": 15,
+        "DrawIndexed": 28,
+        "DrawIndexedInstanced": 72,
+        "GenerateMips": 2,
+        "Map": 199,
+        "Present": 1,
+        "UpdateSubresource": 44,
+        "map_read_observations": 1,
+        "map_read_synchronizations": 1,
+        "present_rtv_unbinds": 1,
+        "query_begin_observations": 1,
+        "query_completion_unresolved": 5,
+        "query_end_observations": 4,
+        "query_metadata_records": 15,
+        "unmap_observations": 200
+      },
+      "feature_level": 45312,
+      "reference_pixels_used": false,
+      "image_comparison": {
+        "width": 2560,
+        "height": 1440,
+        "capture_bytes": 1881360342,
+        "reference": "capture-owned final output BMP",
+        "reference_sha256": "82ade984f643241412716548e2273b6dfbbcb9ffd8b731790a53a3712a94a9f7",
+        "replay_sha256": "dbde6b33b6db1141a8e58437a5ff7942f637063cb0b08c23a5a49b521015171b",
+        "equal": false,
+        "different_pixels": 15,
+        "mean_abs_error": 1.0172526041666667e-06,
+        "max_abs_error": 1
+      },
+      "resource_limit_mib": 4096,
+      "hud_screenshot": "artifacts/auto-detect-pools-hd2-10/pools-r2-hud.png",
+      "gui_replay_screenshot": "artifacts/auto-detect-pools-hd2-10/pools-r2-ui-replay.png"
+    }
+  ],
+  "packages": {
+    "gui": "artifacts/FloraGPA-AutoDetect-Compatibility-20261016-r2",
+    "capture": "artifacts/FloraCapture-AutoDetect-Compatibility-20261016"
+  },
+  "validation": {
+    "build": "VS2022 x64 Release: full build passed; subsequent UI-only build passed",
+    "query_ctest": "artifacts/auto-detect-pools-hd2-09/ctest-query.log",
+    "query_ctest_passed": 5,
+    "regressions": "artifacts/auto-detect-pools-hd2-09/ctest-regression.log",
+    "regression_initial_passed": 40,
+    "regression_initial_timeouts": 2,
+    "retry": "artifacts/auto-detect-pools-hd2-09/ctest-controller-retry.log",
+    "retry_passed": 2,
+    "retry_note": "Unchanged capture_controller and capture_deferred_resolve_controller passed after the full build finished. Initial timeout logs retained; cause not established.",
+    "rendered_controls": "artifacts/auto-detect-pools-hd2-09/controls/validation.json",
+    "rendered_control_cases": 18,
+    "golden": "artifacts/auto-detect-pools-hd2-09/golden/validation.json",
+    "golden_positive_and_negative_passed": 4,
+    "qt": "artifacts/auto-detect-pools-hd2-10/capture-ui-Release.txt",
+    "qt_passed": 15,
+    "packaged_probe": "artifacts/auto-detect-pools-hd2-09/package-autodetect",
+    "packaged_probe_checks": [
+      "external launch",
+      "stale environment",
+      "explicit peer coexistence",
+      "capture",
+      "control after stop",
+      "64-bit and 32-bit registry restored"
+    ],
+    "ship_negative": "artifacts/auto-detect-pools-hd2-09/helldivers-ship-negative/report.json",
+    "ship_negative_sha256": "5c72c27593443ba78ff99fe0fc92813e332875d094cc7b84b69a83fcd27f2c1a",
+    "final_registry_restored": "artifacts/auto-detect-pools-hd2-10/registry-after.json",
+    "package_hashes": [
+      {
+        "file": "FloraCaptureRuntime.dll",
+        "sha256": "39694f400b1cca6d6b3fd87a8106cd6d435fe236feef4fe14d0a146794a7028b",
+        "matches_build": true
+      },
+      {
+        "file": "FloraCaptureShim.dll",
+        "sha256": "0ffe0ae315b09cbe2efd028b0300a107356f0ce5c7b4571e1532388dd7cb896e",
+        "matches_build": true
+      },
+      {
+        "file": "FloraCapture.exe",
+        "sha256": "4164837698a4bb51fcbf93af859364ad3a19be2cd9b41df126584c8aa7fd1d2a",
+        "matches_build": true
+      },
+      {
+        "file": "FloraGPA.Cli.exe",
+        "sha256": "fda6c1b4b45e78da346ce71e8872f8e1d62521f2b5573ef3a829541300f4a754",
+        "matches_build": true
+      },
+      {
+        "file": "FloraGPA.exe",
+        "sha256": "59f32b7ed95194715f259bed8229d00ae29b2f3678c342d4702c329f570d3e8b",
+        "matches_build": true
+      }
+    ],
+    "isolated_package_replay": {
+      "path": "Windows/System32;Windows",
+      "qt_loaded_from_package": true,
+      "python_or_intel_player_loaded": false
+    }
+  },
+  "original_oracle": {
+    "report": "artifacts/auto-detect-pools-hd2-09/helldivers-ship-original/replay_report.json",
+    "three_way": {
+      "original_vs_captured": {
+        "equal": false,
+        "different_pixels": 59135,
+        "max_abs_error": 21,
+        "mean_abs_error": 0.006200832790798611
+      },
+      "flora_vs_original": {
+        "equal": false,
+        "different_pixels": 51041,
+        "max_abs_error": 21,
+        "mean_abs_error": 0.0053871663411458335
+      }
+    },
+    "runtime_dependency": false
+  },
+  "limitations": [
+    "Measured ship pixel differences remain; no full fidelity claim. The original Intel player also differs from the captured output.",
+    "Intro and ship came from separate game launches across implementation iterations; not two identical final-build launches.",
+    "Earlier OCTOPATH II acceptance has not been repeated after timing support. Original three-game acceptance remains incomplete.",
+    "Existing GF2 fidelity findings remain unchanged.",
+    "Ordinary timing wire retains only the legacy first UINT, not original GPU timing values.",
+    "Ship has four pre-frame query observations; recorder boundary completion covers prior work, and reader unresolved-observation diagnostics are retained.",
+    "HUD hotkeys retain the default 1 GiB budget; GUI Capture Next Frame supports 1/2/4 GiB.",
+    "POOLS Steam command line retains the existing -force-dx12 argument; observed API is DX11. No DX12 support claim.",
+    "Interim iteration 10 UI launch attached and displayed HUD but was closed without a capture while correcting popup polling."
+  ]
+}

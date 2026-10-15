@@ -79,7 +79,7 @@ void observe_deferred_call(ID3D11DeviceContext* context,const char* api,CommandK
     try{
         r=object_record(context);if(!r || !deferred(*r))return;
         const std::string_view name=api;
-        if(name.ends_with("::FinishCommandList") || (kind==CommandKind::read && !name.ends_with("::End")))return;
+        if(name.ends_with("::FinishCommandList") || (kind==CommandKind::read && !name.ends_with("::Begin") && !name.ends_with("::End")))return;
         std::lock_guard lock(r->mutex);auto& h=history(*r);auto& b=h.pending;
         h.binding_pending.reset();
         if(kind==CommandKind::map && h.mappings.erase({identity(operand),words[0]}))gap(b,"Map: overlapping mapping discarded without reading old storage");

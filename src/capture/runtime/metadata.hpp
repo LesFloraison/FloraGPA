@@ -40,7 +40,13 @@ struct ObjectRecord {
     std::vector<SubresourceData> creation_subresources;
     std::map<std::pair<uint64_t,UINT>,ActiveMapping> mapped_subresources;
     uint64_t mapping_serial=0;
-    std::set<uint64_t> active_queries;
+    // Preserve the query type without retaining a COM object. Unknown types
+    // remain unsafe for injected GPU work.
+    std::map<uint64_t,D3D11_QUERY> active_queries;
+    bool has_active_non_timing_query() const noexcept {
+        for(const auto& entry:active_queries)if(entry.second!=D3D11_QUERY_TIMESTAMP_DISJOINT)return true;
+        return false;
+    } // Caller holds mutex.
     QueryEndStamp last_query_end;
     uint64_t query_end_serial=0;
     bool external_mapping=false;
@@ -60,6 +66,8 @@ std::shared_ptr<ObjectRecord> track_native_object(IUnknown* identity);
 std::shared_ptr<ObjectRecord> find_native_record(IUnknown* identity);
 void track_query(const void* context_proxy, IUnknown* query, bool begin) noexcept;
 void track_external_mapping(const void* proxy,bool mapped) noexcept;
+// Caller holds record->mutex; maintains the small set of currently mapped objects.
+void refresh_mapping_index(const std::shared_ptr<ObjectRecord>& record);
 bool has_external_mapping(bool include_resource_mappings=false,bool ignore_buffer_mappings=false);
 Json metadata_status();
 std::vector<std::shared_ptr<ObjectRecord>> active_mapping_records();

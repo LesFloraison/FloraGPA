@@ -5,6 +5,12 @@ See [the acceptance record](auto-detect-baseline.json) for separate attachment,
 capture and executed-replay results. Existing GF2 fidelity limitations remain in
 `migration.json`; this feature does not replace their evidence.
 
+The subsequent [POOLS / HELLDIVERS 2 compatibility work](AUTO_DETECT_GAME_COMPATIBILITY.md)
+adds timing-query recording and GPU completion replay, DISCARD HUD support,
+serialized worker calls, GenerateMips and D24S8 MSAA initialization. The results
+below describe the original acceptance build; OCTOPATH II needs a new full-game
+run before its historical refusal can be marked resolved.
+
 On this host, two Steam-launched MiSide sessions and two GF2 launcher sessions
 complete attachment, HUD, capture and executed replay. Both GF2 title images and
 the second MiSide image are byte-exact; the first MiSide image differs in two
@@ -84,7 +90,8 @@ HUD blending and preview/replay export now support R10G10B10A2_UNORM while keepi
 the raw captured ten-bit resource. Explicit view descriptors with Format UNKNOWN
 are resolved on the original backbuffer before use with private typeless storage.
 Native R8/BGRA/R10 view tests and the R10 capture/replay CPU oracle cover this fix.
-OCTOPATH's TIMESTAMP query recording remains unsupported and fails explicitly.
+That acceptance build refused OCTOPATH's TIMESTAMP query recording explicitly;
+the later timing support does not by itself establish OCTOPATH game acceptance.
 
 The already running GF2 launcher inherited an earlier explicit capture session's
 environment. Using that variable as evidence of hook ownership incorrectly

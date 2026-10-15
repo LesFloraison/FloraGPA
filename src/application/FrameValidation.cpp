@@ -183,7 +183,7 @@ Json validateFrame(const std::filesystem::path &path, const std::function<bool()
                     if (eventEndObservations.contains(id)) {
                         const auto observed = readPredicateCommand(e.type, frame.payload(id));
                         finding(&e, "info", "ordinary_event_end_observation",
-                                "Descriptor identifies an ordinary EVENT; API End is an observation, not a native predicate or completion wait",
+                                "Descriptor identifies an ordinary EVENT or timing query; the API operation is an observation, not a native predicate or completion wait",
                                 observed.resource);
                     } else if (const auto operation = predicateOperation(e.type)) {
                         const auto p = readPredicateCommand(e.type, frame.payload(id));

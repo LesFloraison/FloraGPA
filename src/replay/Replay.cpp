@@ -66,7 +66,17 @@ Replay::Replay(const Frame &frame, ReplayOptions options)
         throw std::runtime_error("RenderDoc library and output must be specified together");
     if (!options_.renderdocLibrary.empty())
         renderdoc_ = std::make_unique<RenderDocCapture>(options_.renderdocLibrary, options_.renderdocOutput);
-    auto selected = createDx11Device(options_.warp, options_.debug, options_.vendor);
+    auto minimum = D3D_FEATURE_LEVEL_9_1;
+    for (const auto &[id, entry] : frame_.entries()) {
+        if (entry.category != 5 || entry.type != 0x81 || entry.size != 28) continue;
+        Reader descriptor(frame_.payload(id));
+        descriptor.read<Id>(); descriptor.read<Id>();
+        descriptor.read<uint32_t>(); descriptor.read<uint32_t>();
+        const auto level = descriptor.read<uint32_t>(); descriptor.end();
+        if (level == D3D_FEATURE_LEVEL_12_0 || level == D3D_FEATURE_LEVEL_12_1)
+            minimum = std::max(minimum, D3D_FEATURE_LEVEL(level));
+    }
+    auto selected = createDx11Device(options_.warp, options_.debug, options_.vendor, minimum);
     device_ = std::move(selected.device);
     context_ = std::move(selected.context);
     check(context_.As(&context1_), "Query DX11.1 context");
@@ -1003,8 +1013,21 @@ void Replay::command(const Entry &e) {
         if (!eventEndObservations_) eventEndObservations_ = auditEventEndObservations(frame_);
         if (eventEndObservations_->contains(e.id)) {
             if (!std::ranges::equal(payload, frame_.payload(e.id)))
-                throw std::runtime_error("EVENT End observation edits are not supported");
-            ++counts["query_end_observations"];
+                throw std::runtime_error("Ordinary query observation edits are not supported");
+            const auto command = readPredicateCommand(t, payload);
+            immediate(command.context);
+            if (predicateOperation(t) == PredicateOperation::Begin)
+                ordinaryCompletions_.erase(command.resource);
+            else {
+                // Timing values are observations; only their GPU completion boundary
+                // is reproduced. A private EVENT also covers all preceding uploads.
+                OrdinaryCompletion completion; completion.end = e.id;
+                const D3D11_QUERY_DESC desc{D3D11_QUERY_EVENT, 0};
+                check(device_->CreateQuery(&desc, &completion.query), "Create ordinary query completion");
+                context_->End(completion.query.Get());
+                ordinaryCompletions_[command.resource] = std::move(completion);
+            }
+            ++counts[predicateOperation(t) == PredicateOperation::Begin ? "query_begin_observations" : "query_end_observations"];
             return;
         }
         if (predicateOperation(t) == PredicateOperation::Set) {
@@ -1048,10 +1071,16 @@ void Replay::command(const Entry &e) {
             queryCompletionAudit_ = auditQueryCompletions(frame_);
         const auto &q = requireQueryCompletion(*queryCompletionAudit_, e.id);
         if (q.end) {
-            if (options_.disabled.contains(q.end) || activePredicates_.contains(q.resource) ||
-                unissuedPredicates_.contains(q.resource) || baselinePredicates_.contains(q.resource))
+            if (options_.disabled.contains(q.end) || (!q.ordinary && (activePredicates_.contains(q.resource) ||
+                unissuedPredicates_.contains(q.resource) || baselinePredicates_.contains(q.resource))))
                 throw std::runtime_error("GetData completion requires its captured predicate interval");
-            auto predicate = get<ID3D11Query>(q.resource);
+            ID3D11Query *predicate = nullptr;
+            if (q.ordinary) {
+                const auto found = ordinaryCompletions_.find(q.resource);
+                if (found == ordinaryCompletions_.end() || found->second.end != q.end)
+                    throw std::runtime_error("GetData completion requires its captured ordinary query End");
+                predicate = found->second.query.Get();
+            } else predicate = get<ID3D11Query>(q.resource);
             ReplayAnnotation marker(captureAnnotation_.Get(), e.id, "GetDataSynchronization");
             const auto operation = "GetData synchronization at event " + std::to_string(e.id) +
                                    ", query " + std::to_string(q.resource);
@@ -1065,6 +1094,7 @@ void Replay::command(const Entry &e) {
                 std::this_thread::sleep_for(std::chrono::milliseconds(1));
             }
             ++counts["query_completion_synchronizations"];
+            if (q.ordinary) ++counts["ordinary_query_completion_synchronizations"];
         } else if (!q.missing.empty()) {
             ++counts["query_completion_unresolved"];
             unresolvedQueryCompletions_.emplace(e.id, q);

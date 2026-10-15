@@ -108,6 +108,14 @@ void run(ID3D11Device* device,ID3D11DeviceContext* context){
     D3D11_QUERY_DATA_PIPELINE_STATISTICS stats{};HRESULT ready=S_FALSE;const auto deadline=GetTickCount64()+5000;
     while((ready=context->GetData(query.Get(),&stats,sizeof(stats),0))==S_FALSE && GetTickCount64()<deadline)Sleep(1);
     hr(ready);require(ready==S_OK && stats.CSInvocations==0,"Rejected readback affected active query");
+    qd.Query=D3D11_QUERY_TIMESTAMP_DISJOINT;ComPtr<ID3D11Query> timing;hr(device->CreateQuery(&qd,&timing));
+    context->Begin(timing.Get());
+    D3D11_TEXTURE2D_DESC timing_desc{};texture->GetDesc(&timing_desc);verify(snapshot_msaa_samples(context,texture.Get()),timing_desc);
+    require(object_record(context)->active_queries.contains(object_record(timing.Get())->id),"Readback ended application timing interval");
+    context->End(timing.Get());D3D11_QUERY_DATA_TIMESTAMP_DISJOINT timing_data{};
+    const auto timing_deadline=GetTickCount64()+5000;
+    while((ready=context->GetData(timing.Get(),&timing_data,sizeof timing_data,0))==S_FALSE && GetTickCount64()<timing_deadline)Sleep(1);
+    hr(ready);require(ready==S_OK && timing_data.Frequency,"Timing interval lost its native result");
     qd.Query=D3D11_QUERY_OCCLUSION_PREDICATE;ComPtr<ID3D11Predicate> predicate;hr(device->CreatePredicate(&qd,&predicate));context->Begin(predicate.Get());context->End(predicate.Get());context->SetPredication(predicate.Get(),TRUE);
     rejects([&]{snapshot_msaa_samples(context,texture.Get());},"predication");ComPtr<ID3D11Predicate> current;BOOL value=FALSE;context->GetPredication(&current,&value);require(current==predicate && value==TRUE,"Rejected readback changed predicate");context->SetPredication(nullptr,FALSE);
     ComPtr<ID3D11DeviceContext> deferred;hr(device->CreateDeferredContext(0,&deferred));rejects([&]{snapshot_msaa_samples(deferred.Get(),texture.Get());},"immediate");
@@ -119,8 +127,8 @@ void run(ID3D11Device* device,ID3D11DeviceContext* context){
     wrap_object(other_context.GetAddressOf(),"MSAA other-device context");rejects([&]{snapshot_msaa_samples(other_context.Get(),texture.Get());},"device mismatch");
     desc.Format=DXGI_FORMAT_R32_TYPELESS;desc.BindFlags=D3D11_BIND_DEPTH_STENCIL;ComPtr<ID3D11Texture2D> depth;hr(device->CreateTexture2D(&desc,nullptr,&depth));
     SnapshotOptions depth_limit;depth_limit.byte_limit=1;rejects([&]{snapshot_msaa_samples(context,depth.Get(),depth_limit);},"byte limit");
-    // No shader readback may run inside a query issued through a known wrapper;
-    // raw/interface-escape histories are refused by the runtime gap guard.
+    // Pixel/primitive queries remain protected; timing includes capture overhead.
+    // Raw/interface-escape histories are refused by the runtime gap guard.
     context->ClearState();context->Flush();
 }
 void hidden_state(ID3D11Device* device,ID3D11DeviceContext* context){

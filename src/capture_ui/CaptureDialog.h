@@ -31,6 +31,7 @@ class CaptureDialog final : public QDialog {
     QLineEdit *exe_, *arguments_, *cwd_, *out_;
     QLabel *status_;
     QComboBox *swaps_;
+    QComboBox *resourceLimit_;
     QComboBox *hudMode_;
     QLineEdit *hudKey_, *captureKey_;
     QPushButton *launch_, *capture_, *cancel_, *disconnect_, *open_;

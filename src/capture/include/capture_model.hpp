@@ -82,7 +82,7 @@ struct PipelineBindings {
 };
 enum class CommandKind { unsupported, read, binding, draw, draw_indexed, draw_instanced,
     draw_indexed_instanced, dispatch, clear_rtv, clear_dsv, clear_uav_uint, clear_uav_float, map, unmap, copy_resource,
-    query_end, query_get_data, update_subresource, copy_region, resolve, copy_structure_count, dispatch_indirect, draw_instanced_indirect, draw_indexed_instanced_indirect };
+    query_end, query_get_data, update_subresource, copy_region, resolve, copy_structure_count, dispatch_indirect, draw_instanced_indirect, draw_indexed_instanced_indirect, query_begin, generate_mips };
 constexpr uint32_t indirect_argument_bytes(CommandKind kind){
     switch(kind){case CommandKind::dispatch_indirect:return 12;case CommandKind::draw_instanced_indirect:return 16;
     case CommandKind::draw_indexed_instanced_indirect:return 20;default:return 0;}
@@ -105,12 +105,15 @@ struct FrameStartCompletion {
     uint64_t last_end_serial=0,elapsed_ms=0;
     int32_t result=E_FAIL;
     uint32_t value=0;
+    bool serialized_context_threads=false; // All accepted worker calls held the same device gate.
 };
 struct QueryObservation {
     QueryEndStamp last_end;
     std::optional<uint64_t> end_sequence; // Only a matching End in this recording.
     bool has_output=false;
-    std::optional<uint32_t> value; // EVENT BOOL, owned only after native S_OK.
+    // Legacy GPA GetData retains one UINT, including for larger timing results.
+    // This is an observation, never a reconstructed timestamp or GPU wait.
+    std::optional<uint32_t> value; // Owned only after native S_OK.
 };
 using ResourceBox = std::array<uint32_t,6>; // left, top, front, right, bottom, back
 struct CopyRegion {

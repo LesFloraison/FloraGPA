@@ -156,7 +156,7 @@ void query_boundaries(bool hardware){
         if(type!=0 && type!=2)f.context->Begin(query.Get());
         f.context->End(query.Get());
         const auto frame=recording->finish();
-        if(type==0){frame.require_complete();require(frame.commands.size()==1 && frame.commands[0].kind==CommandKind::query_end && frame.commands[0].query->last_end.generation==1,"EVENT End was not observed");continue;}
+        if(type==0 || type==2 || type==3){frame.require_complete();require(frame.commands.size()==(type==3?2u:1u) && frame.commands.back().kind==CommandKind::query_end && frame.commands.back().query->last_end.generation==1,"Ordinary query End was not observed");continue;}
         rejects([&]{frame.require_complete();},"Query recording is not implemented");
         require(frame.commands.empty() && frame.gaps.size()==1,"Rejected query escaped into the command model");
         const auto& gap=frame.gaps.front();

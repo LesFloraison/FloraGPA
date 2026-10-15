@@ -819,6 +819,7 @@ int main(int argc, char **argv) {
             }
             Replay replay(frame, options);
             report.insert("adapter", QString::fromStdString(replay.adapter()));
+            report.insert("feature_level", int(replay.featureLevel()));
             report.insert("event", options.until ? QJsonValue(QString::number(options.until))
                                                  : QJsonValue(QJsonValue::Null));
             report.insert("value_time",

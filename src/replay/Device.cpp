@@ -3,7 +3,7 @@
 #include <dxgi1_2.h>
 #include <sstream>
 namespace flora {
-Dx11Device createDx11Device(bool warp, bool debug, std::optional<uint32_t> vendor) {
+Dx11Device createDx11Device(bool warp, bool debug, std::optional<uint32_t> vendor, D3D_FEATURE_LEVEL minimum) {
     if (warp && vendor)
         throw std::runtime_error("Vendor selection cannot use a software device");
     Dx11Device result;
@@ -38,9 +38,14 @@ Dx11Device createDx11Device(bool warp, bool debug, std::optional<uint32_t> vendo
                         : warp ? D3D_DRIVER_TYPE_WARP
                                : D3D_DRIVER_TYPE_HARDWARE;
     const auto flags = debug ? D3D11_CREATE_DEVICE_DEBUG : 0u;
-    auto hr = D3D11CreateDevice(selected.Get(), driver, nullptr, flags, levels, vendor ? 2 : 7,
+    const D3D_FEATURE_LEVEL higher[]{D3D_FEATURE_LEVEL_12_1, D3D_FEATURE_LEVEL_12_0};
+    const bool requiresHigher = minimum > D3D_FEATURE_LEVEL_11_1;
+    if (requiresHigher && minimum != D3D_FEATURE_LEVEL_12_0 && minimum != D3D_FEATURE_LEVEL_12_1)
+        throw std::runtime_error("Unsupported captured DX11 feature level");
+    auto hr = D3D11CreateDevice(selected.Get(), driver, nullptr, flags, requiresHigher ? higher : levels,
+                                requiresHigher ? (minimum == D3D_FEATURE_LEVEL_12_1 ? 1u : 2u) : (vendor ? 2u : 7u),
                                 D3D11_SDK_VERSION, &result.device, &result.level, &result.context);
-    if (hr == E_INVALIDARG && !vendor)
+    if (hr == E_INVALIDARG && !vendor && !requiresHigher)
         hr = D3D11CreateDevice(nullptr, driver, nullptr, flags, nullptr, 0, D3D11_SDK_VERSION, &result.device,
                                &result.level, &result.context);
     check(hr, "D3D11CreateDevice");

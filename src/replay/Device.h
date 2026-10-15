@@ -12,5 +12,6 @@ struct Dx11Device {
     bool warp{};
     nlohmann::json information() const;
 };
-Dx11Device createDx11Device(bool warp = false, bool debug = false, std::optional<uint32_t> vendor = {});
+Dx11Device createDx11Device(bool warp = false, bool debug = false, std::optional<uint32_t> vendor = {},
+                           D3D_FEATURE_LEVEL minimum = D3D_FEATURE_LEVEL_9_1);
 } // namespace flora

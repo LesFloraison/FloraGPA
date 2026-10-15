@@ -178,6 +178,8 @@ class Replay {
     std::optional<QueryCompletionAudit> queryCompletionAudit_;
     std::optional<std::set<Id>> eventEndObservations_;
     QueryCompletionAudit unresolvedQueryCompletions_;
+    struct OrdinaryCompletion { Id end{}; Com<ID3D11Query> query; };
+    std::map<Id, OrdinaryCompletion> ordinaryCompletions_;
     std::set<Id> unissuedPredicates_;
     std::set<Id> baselinePredicates_;
     std::optional<std::map<Id, NormalizedPredicateProof>> normalizedPredication_;

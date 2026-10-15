@@ -3870,7 +3870,10 @@
         "OCTOPATH_TRAVELER_II": 0,
         "Girls_Frontline_2": 2
       },
-      "blocker": "OCTOPATH II hooks and HUD work in two Steam launches, but unsupported TIMESTAMP query recording prevents capture/replay. Full lifecycle/stress matrix remains incomplete.",
+      "blocker": "The original OCTOPATH II acceptance stopped at TIMESTAMP recording. Later timing-query support is implemented, but OCTOPATH II has not been revalidated; its closed-loop count remains zero. Full lifecycle/stress matrix remains incomplete.",
+      "compatibility_followup": "docs/AUTO_DETECT_GAME_COMPATIBILITY.md",
+      "compatibility_evidence": "docs/auto-detect-game-compatibility.json",
+      "compatibility_scope": "POOLS first chapter and HELLDIVERS 2 DX11 intro/ship frames execute in the checked native reader. Timing completion, serialized immediate-context workers, DISCARD HUD, GenerateMips and D24S8 MSAA initialization are supported within tested guards. Ship replay has measured pixel differences; full scene fidelity is not claimed. Existing GF2 findings remain unchanged.",
       "fidelity": "GF2 title-frame success does not replace historical GF2 fidelity findings or broaden existing scene acceptance."
     },
     "hud": {

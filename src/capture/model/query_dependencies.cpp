@@ -15,16 +15,17 @@ const FrozenObject& object(const FrozenFrame& frame,ObjectId id,ObjectId device)
         throw std::runtime_error("Object identity/device mismatch");
     return i->second;
 }
-void event_query(const FrozenFrame& frame,ObjectId id,ObjectId device){
+D3D11_QUERY event_query(const FrozenFrame& frame,ObjectId id,ObjectId device){
     const auto& o=object(frame,id,device);
+    const auto supported=[](D3D11_QUERY type){return type==D3D11_QUERY_EVENT || type==D3D11_QUERY_TIMESTAMP || type==D3D11_QUERY_TIMESTAMP_DISJOINT;};
     if(o.kind=="query"){
         const auto d=descriptor<D3D11_QUERY_DESC>(o);
-        if(d.Query==D3D11_QUERY_EVENT && !d.MiscFlags)return;
+        if(supported(d.Query) && !d.MiscFlags)return d.Query;
     }else if(o.kind=="query1"){
         const auto d=descriptor<D3D11_QUERY_DESC1>(o);
-        if(d.Query==D3D11_QUERY_EVENT && !d.MiscFlags && d.ContextType==D3D11_CONTEXT_TYPE_ALL)return;
+        if(supported(d.Query) && !d.MiscFlags && d.ContextType==D3D11_CONTEXT_TYPE_ALL)return d.Query;
     }
-    throw std::runtime_error("Only EVENT/ALL queries with zero miscellaneous flags are analyzed");
+    throw std::runtime_error("Only EVENT or timing/ALL queries with zero miscellaneous flags are analyzed");
 }
 void readable_copy(const FrozenFrame& frame,const RecordedCommand& command){
     const auto& source=object(frame,command.source,command.bindings.device);
@@ -49,6 +50,7 @@ EventDependencyReport analyze_event_dependencies(const FrozenFrame& frame,const 
     EventDependencyReport report;EventDependencyPrefix prefix;
     struct End {QueryEndStamp stamp;uint64_t sequence;std::shared_ptr<const EventDependencyPrefix> prefix;};
     std::map<ObjectId,End> ends;
+    std::set<ObjectId> active_timing;
     size_t retained=0;ObjectId context=0,device=0;
     const auto* start=frame.start_completion?&*frame.start_completion:nullptr;
     if(start){
@@ -80,28 +82,37 @@ EventDependencyReport analyze_event_dependencies(const FrozenFrame& frame,const 
             const auto& ctx=object(frame,context,device);
             if(ctx.kind!="context" || descriptor<ContextRecordDesc>(ctx).type!=D3D11_DEVICE_CONTEXT_IMMEDIATE)
                 throw std::runtime_error("Immediate context required");
-            if(c.kind==CommandKind::query_end || c.kind==CommandKind::query_get_data){
-                event_query(frame,c.operand,device);
+            if(c.kind==CommandKind::query_begin || c.kind==CommandKind::query_end || c.kind==CommandKind::query_get_data){
+                const auto type=event_query(frame,c.operand,device);
                 if(!c.completed || !c.query)throw std::runtime_error("Query observation missing");
                 const auto& q=*c.query;const auto& stamp=q.last_end;
+                if(c.kind==CommandKind::query_begin){
+                    if(type!=D3D11_QUERY_TIMESTAMP_DISJOINT || q.has_output || q.value || q.end_sequence || c.words!=std::array<uint32_t,5>{})
+                        throw std::runtime_error("Invalid timing Begin observation");
+                    active_timing.insert(c.operand);
+                    continue; // Timing intervals do not modify rendering resources.
+                }
                 if((!stamp.generation && (stamp.context || stamp.thread || stamp.immediate || stamp.context_serial || q.end_sequence)) ||
                    (stamp.generation && (!stamp.context || !stamp.thread)))throw std::runtime_error("Incomplete End history");
                 if(c.kind==CommandKind::query_end){
+                    active_timing.erase(c.operand);
                     if(!stamp.generation || !stamp.thread || !stamp.immediate || stamp.context!=context || q.end_sequence!=c.sequence || q.has_output || q.value)
                         throw std::runtime_error("End provenance mismatch");
                     if(auto previous=ends.find(c.operand);previous!=ends.end() && stamp.generation!=previous->second.stamp.generation+1)
                         throw std::runtime_error("End generation mismatch");
-                    if(start && (stamp.thread!=start->thread || stamp.context_serial<=end_serial))throw std::runtime_error("End frame start order mismatch");
+                    if(start && ((!start->serialized_context_threads && stamp.thread!=start->thread) || stamp.context_serial<=end_serial))throw std::runtime_error("End frame start order mismatch");
                     end_serial=stamp.context_serial;
                     charge(1);charge(prefix.copies.size());
                     ends[c.operand]={stamp,c.sequence,std::make_shared<const EventDependencyPrefix>(prefix)};
                     ++report.ends;continue;
                 }
                 if(c.words[1]&~D3D11_ASYNC_GETDATA_DONOTFLUSH)throw std::runtime_error("Invalid GetData flags");
+                if(c.result==S_OK && active_timing.contains(c.operand))throw std::runtime_error("Completed GetData inside an active timing interval");
                 if(c.result>=0 && c.result!=S_OK && c.result!=S_FALSE)throw std::runtime_error("Invalid GetData result");
                 if(c.result!=S_OK && q.value)throw std::runtime_error("Unavailable GetData result bytes retained");
-                if(c.result==S_OK && ((q.has_output && (c.words[0]!=sizeof(BOOL) || q.value!=1u)) || (!q.has_output && (c.words[0] || q.value))))
-                    throw std::runtime_error("Invalid completed EVENT output");
+                const UINT size=type==D3D11_QUERY_EVENT?sizeof(BOOL):type==D3D11_QUERY_TIMESTAMP?sizeof(UINT64):sizeof(D3D11_QUERY_DATA_TIMESTAMP_DISJOINT);
+                if(c.result==S_OK && ((q.has_output && (c.words[0]!=size || !q.value || (type==D3D11_QUERY_EVENT && q.value!=1u))) || (!q.has_output && (c.words[0] || q.value))))
+                    throw std::runtime_error("Invalid completed query output");
                 EventDependencyObservation observation;observation.query=c.operand;observation.sequence=c.sequence;observation.generation=stamp.generation;observation.end_sequence=q.end_sequence;
                 const auto end=ends.find(c.operand);
                 if(q.end_sequence){

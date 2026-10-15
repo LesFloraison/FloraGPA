@@ -136,7 +136,7 @@ Json response(const Json& message,ULONG client_pid){
     result["capture_limits"]={{"default_resource_limit_mib",default_resource_limit_mib},{"max_resource_limit_mib",max_resource_limit_mib}};
     result["device_creations"]=creations.load();result["creation_failures"]=failures.load();result["feature_level"]=level.load();result["hook_status"]=hook_status.load();
     result["attachment"]=automatic_session?"auto_detect":"launch";
-    result["capability_gaps"]={"Single-sample RGBA8/BGRA8/RGB10A2; dirty/scroll and flags other than ALLOW_TEARING unsupported","Query, empty-box/flagged/planar Updates, region/format copies, planar Maps and hidden states are incomplete","Deferred nesting beyond bounded journal limits, unverified Map baselines/layouts and hidden states unsupported","Deferred CS/OM initial KEEP requires a retained native UAV and successful execution-time readback; numeric UINT_MAX remains unsupported","Single immediate-context execution thread only"};
+    result["capability_gaps"]={"Single-sample RGBA8/BGRA8/RGB10A2; dirty/scroll and flags other than ALLOW_TEARING unsupported","Query, empty-box/flagged/planar Updates, region/format copies, planar Maps and hidden states are incomplete","Deferred nesting beyond bounded journal limits, unverified Map baselines/layouts and hidden states unsupported","Deferred CS/OM initial KEEP requires a retained native UAV and successful execution-time readback; numeric UINT_MAX remains unsupported","One immediate context; worker calls require proxy serialization; foreign boundary Maps unsupported"};
     if(command=="status"){
         result["factories"]=factory_status();
         HMODULE modules[1024]{};DWORD needed=0;

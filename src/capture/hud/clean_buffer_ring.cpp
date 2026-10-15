@@ -29,7 +29,7 @@ CleanBufferRing::CleanBufferRing(IDXGISwapChain* native):impl_(std::make_unique<
     check(native->GetDesc(&p.descriptor),"Clean buffers require a swap descriptor");
     const auto& d=p.descriptor;
     if(d.BufferCount<1 || d.BufferCount>16 || d.SampleDesc.Count!=1 || d.SampleDesc.Quality ||
-       (d.SwapEffect!=DXGI_SWAP_EFFECT_SEQUENTIAL && d.SwapEffect!=DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL && d.SwapEffect!=DXGI_SWAP_EFFECT_FLIP_DISCARD) ||
+       (d.SwapEffect!=DXGI_SWAP_EFFECT_DISCARD && d.SwapEffect!=DXGI_SWAP_EFFECT_SEQUENTIAL && d.SwapEffect!=DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL && d.SwapEffect!=DXGI_SWAP_EFFECT_FLIP_DISCARD) ||
        (d.BufferDesc.Format!=DXGI_FORMAT_R8G8B8A8_UNORM && d.BufferDesc.Format!=DXGI_FORMAT_B8G8R8A8_UNORM && d.BufferDesc.Format!=DXGI_FORMAT_R10G10B10A2_UNORM))
         throw std::runtime_error("Unsupported clean-buffer storage profile");
     check(native->GetDevice(IID_PPV_ARGS(&p.device)),"Clean buffers require DX11");p.device->GetImmediateContext(&p.context);
@@ -41,8 +41,11 @@ CleanBufferRing::CleanBufferRing(IDXGISwapChain* native):impl_(std::make_unique<
     // DXGI permits sRGB views of an UNORM swap buffer. Ordinary typed UNORM
     // textures do not; private typeless storage preserves both view formats.
     desc.Format=desc.Format==DXGI_FORMAT_R8G8B8A8_UNORM?DXGI_FORMAT_R8G8B8A8_TYPELESS:desc.Format==DXGI_FORMAT_B8G8R8A8_UNORM?DXGI_FORMAT_B8G8R8A8_TYPELESS:DXGI_FORMAT_R10G10B10A2_TYPELESS;
-    p.buffers.resize(d.BufferCount);
-    for(UINT slot=0;slot<d.BufferCount;++slot){
+    // Bitblt DISCARD exposes only buffer zero, even with multiple buffers.
+    // Its contents after Present are undefined; there is no readable ring to
+    // rotate or restore. Keep one isolated application surface in this mode.
+    p.buffers.resize(d.SwapEffect==DXGI_SWAP_EFFECT_DISCARD?1:d.BufferCount);
+    for(UINT slot=0;slot<p.buffers.size();++slot){
         check(p.device->CreateTexture2D(&desc,nullptr,&p.buffers[slot]),"Cannot allocate clean logical buffer");
         // Flip-discard exposes only slot zero; other contents are undefined.
         if(!slot || d.SwapEffect!=DXGI_SWAP_EFFECT_FLIP_DISCARD){

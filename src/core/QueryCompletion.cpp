@@ -20,10 +20,10 @@ QueryCompletion readQueryGetData(Bytes bytes) {
     r.end();
     return q;
 }
-std::set<Id> auditEventEndObservations(const Frame &frame, const CancelCheck &cancelled) {
+std::map<Id, uint32_t> auditOrdinaryQueryOperations(const Frame &frame, const CancelCheck &cancelled) {
     checkCancellation(cancelled);
-    std::map<Id, bool> descriptors;
-    std::set<Id> result;
+    std::map<Id, uint32_t> descriptors;
+    std::map<Id, uint32_t> result;
     for (const auto &[id, e] : frame.entries()) {
         checkCancellation(cancelled);
         if (e.category != 7) continue;
@@ -34,28 +34,37 @@ std::set<Id> auditEventEndObservations(const Frame &frame, const CancelCheck &ca
             uint32_t type = UINT32_MAX, flags = UINT32_MAX;
             if (present) { type = r.read<uint32_t>(); flags = r.read<uint32_t>(); }
             r.end();
-            const bool event = !link && query && present && type == 0 && flags == 0 && !frame.entries().contains(query);
+            const bool ordinary = !link && query && present && (type == 0 || type == 2 || type == 3) && flags == 0 && !frame.entries().contains(query);
             const auto found = descriptors.find(query);
             // Conflicting metadata cannot establish an ordinary-query identity.
-            descriptors[query] = event && (found == descriptors.end() || found->second);
-        } else if (e.type != 0x243 && predicateOperation(e.type) == PredicateOperation::End) {
+            descriptors[query] = ordinary && (found == descriptors.end() || found->second == type) ? type : UINT32_MAX;
+        } else if (e.type != 0x243 && e.type != 0x241 &&
+                   (predicateOperation(e.type) == PredicateOperation::End || predicateOperation(e.type) == PredicateOperation::Begin)) {
             Reader r(frame.payload(id));
             const auto link = r.read<Id>(), context = r.read<Id>(), query = r.read<Id>();
             r.end();
-            if (!link && descriptors.contains(query) && descriptors.at(query)) {
+            if (!link && descriptors.contains(query) && descriptors.at(query) != UINT32_MAX &&
+                (predicateOperation(e.type) == PredicateOperation::End || descriptors.at(query) == 3)) {
                 requireImmediateContext(frame, context);
-                result.insert(id);
+                result.emplace(id, descriptors.at(query));
             }
         }
     }
     return result;
 }
+std::set<Id> auditEventEndObservations(const Frame &frame, const CancelCheck &cancelled) {
+    std::set<Id> result;
+    for (const auto &[id, type] : auditOrdinaryQueryOperations(frame, cancelled)) result.insert(id);
+    return result;
+}
 QueryCompletionAudit auditQueryCompletions(const Frame &frame, const CancelCheck &cancelled) {
     checkCancellation(cancelled);
-    const auto eventEnds = auditEventEndObservations(frame, cancelled);
+    const auto eventEnds = auditOrdinaryQueryOperations(frame, cancelled);
     struct Interval {
         Id context{}, end{};
         bool active{};
+        bool ordinary{};
+        uint32_t type{};
     };
     std::map<Id, Interval> intervals;
     QueryCompletionAudit audit;
@@ -64,6 +73,22 @@ QueryCompletionAudit auditQueryCompletions(const Frame &frame, const CancelCheck
         if (e.category != 7)
             continue;
         const auto operation = predicateOperation(e.type);
+        if (e.type == 0x3152) {
+            Reader r(frame.payload(id));
+            const auto link = r.read<Id>(), query = r.read<Id>();
+            const bool present = r.flag();
+            uint32_t type = UINT32_MAX, flags = UINT32_MAX;
+            if (present) { type = r.read<uint32_t>(); flags = r.read<uint32_t>(); }
+            r.end();
+            auto found = intervals.find(query);
+            if (found != intervals.end() && found->second.ordinary &&
+                (link || !present || flags || type != found->second.type)) intervals.erase(found);
+        }
+        if (eventEnds.contains(id)) {
+            const auto command = readPredicateCommand(e.type, frame.payload(id));
+            intervals[command.resource] = {command.context, *operation == PredicateOperation::End ? id : 0,
+                                          *operation == PredicateOperation::Begin, true, eventEnds.at(id)};
+        }
         if (operation && *operation != PredicateOperation::Set && !eventEnds.contains(id)) {
             // Invalid predicate commands are independently rejected by replay.
             // Never use a malformed or unmatched interval as a completion proof.
@@ -108,6 +133,19 @@ QueryCompletionAudit auditQueryCompletions(const Frame &frame, const CancelCheck
                 throw std::runtime_error("Successful GetData has a null output with nonzero size");
             const auto resource = frame.entries().find(q.resource);
             if (resource == frame.entries().end()) {
+                const auto interval = intervals.find(q.resource);
+                if (interval != intervals.end() && interval->second.ordinary && interval->second.end &&
+                    !interval->second.active && interval->second.context == q.context) {
+                    const auto type = interval->second.type;
+                    const auto expected = type == 0 ? 4u : type == 2 ? 8u : 16u;
+                    if (q.hasData && q.size != expected)
+                        throw std::runtime_error("Ordinary query GetData size does not match its descriptor");
+                    if (type == 0 && q.hasData && q.word != 1)
+                        throw std::runtime_error("Successful EVENT GetData did not report completion");
+                    q.end = interval->second.end;
+                    q.ordinary = true;
+                    continue;
+                }
                 q.missing = "Successful GetData has no saved query resource or End boundary; its CPU/GPU "
                             "completion dependency cannot be reconstructed";
                 continue;
