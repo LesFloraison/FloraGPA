@@ -1,3 +1,4 @@
+#include "../../common/PackedColor.hpp"
 #include "encoder.hpp"
 #include "resource_layout.hpp"
 #include "query_dependencies.hpp"
@@ -411,7 +412,7 @@ public:
         require(frame_.objects.at(context_).device==device_,"Encoder context device mismatch");
         typed(frame_.output,{"texture2d","texture2d1"});const auto output=frame_.objects.find(frame_.output);require(output!=frame_.objects.end() && frame_.initial_resources.contains(frame_.output),"Encoder output missing");
         const auto& shape=frame_.final_output.shape;
-        require(shape.dimension==D3D11_RESOURCE_DIMENSION_TEXTURE2D && shape.mip_levels==1 && shape.array_size==1 && shape.samples==1 && (shape.format==DXGI_FORMAT_R8G8B8A8_UNORM || shape.format==DXGI_FORMAT_B8G8R8A8_UNORM),"Encoder output profile unsupported");
+        require(shape.dimension==D3D11_RESOURCE_DIMENSION_TEXTURE2D && shape.mip_levels==1 && shape.array_size==1 && shape.samples==1 && (shape.format==DXGI_FORMAT_R8G8B8A8_UNORM || shape.format==DXGI_FORMAT_B8G8R8A8_UNORM || shape.format==DXGI_FORMAT_R10G10B10A2_UNORM),"Encoder output profile unsupported");
         const auto final=contents(frame_.final_output);const auto output_desc=descriptor<D3D11_TEXTURE2D_DESC>(output->second);
         require(output_desc.MipLevels==1 && output_desc.ArraySize==1 && output_desc.SampleDesc.Count==1 && output_desc.SampleDesc.Quality==0,"Encoder output descriptor profile unsupported");
         require(shape.width==output_desc.Width && shape.height==output_desc.Height && shape.format==output_desc.Format,"Encoder final output descriptor mismatch");
@@ -617,8 +618,13 @@ public:
         const size_t row_bytes=size_t(shape.width)*4;
         for(size_t y=0;y<shape.height;++y){checkpoint();for(size_t x=0;x<row_bytes;x+=4){
             const size_t source=y*row_bytes+x,target=54+(shape.height-1-y)*row_bytes+x;
+            if(shape.format==DXGI_FORMAT_R10G10B10A2_UNORM){
+                uint32_t packed=0;std::memcpy(&packed,final.data()+source,4);const auto rgba=flora::unpack_rgb10a2(packed);
+                bmp[target]=rgba[2];bmp[target+1]=rgba[1];bmp[target+2]=rgba[0];bmp[target+3]=rgba[3];
+            }else{
             bmp[target]=final[source+(shape.format==DXGI_FORMAT_R8G8B8A8_UNORM?2:0)];bmp[target+1]=final[source+1];
             bmp[target+2]=final[source+(shape.format==DXGI_FORMAT_R8G8B8A8_UNORM?0:2)];bmp[target+3]=final[source+3];
+            }
         }}
         checkpoint();ContainerWriter writer(path,header);for(const auto& [id,r]:records_){checkpoint();writer.append({id,r.category,r.type,r.bytes.data(),r.bytes.size()});}
         std::unique_lock<std::mutex> publication;

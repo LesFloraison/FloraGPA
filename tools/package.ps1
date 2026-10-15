@@ -81,7 +81,7 @@ foreach ($name in @('msvcp140.dll','vcruntime140.dll','vcruntime140_1.dll')) {
 }
 $binaries = @('FloraGPA.exe','FloraGPA.Worker.exe','FloraGPA.Cli.exe','FloraGPA.Rdc.exe','FloraGPA.Metrics.dll')
 if ($cache['FLORA_BUILD_CAPTURE'] -eq 'ON') {
-    $binaries += @('FloraCapture.exe','FloraCaptureRuntime.dll')
+    $binaries += @('FloraCapture.exe','FloraCaptureRuntime.dll','FloraCaptureShim.dll')
 }
 foreach ($name in $binaries) {
     if (-not (Test-Path -LiteralPath (Join-Path $build $name) -PathType Leaf)) {

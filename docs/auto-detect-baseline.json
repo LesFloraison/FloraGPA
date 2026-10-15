@@ -1,0 +1,623 @@
+{
+  "schema": 1,
+  "date": "2026-10-16",
+  "source_base_commit": "7d0a2bb2ce65c42cd8f384f7c757374d2f04c70e",
+  "source_state": "uncommitted working tree",
+  "overall_acceptance_complete": false,
+  "scope": "New interactive x64 DX11 processes, current user/session; launchers remain running",
+  "games": [
+    {
+      "name": "MiSide",
+      "launch_source": "Steam library",
+      "launches": [
+        {
+          "evidence": "artifacts/auto-detect-games-03/miside-1",
+          "pid": 17832,
+          "process_created": 134365580548842368,
+          "session_id": "23a2ff95-cafc-4970-a379-6e8bcb7fb2c0",
+          "processes": [
+            {
+              "Name": "steam.exe",
+              "ProcessId": 11368,
+              "ParentProcessId": 14668,
+              "CreationDate": "2026-10-15T22:14:39.812185+08:00",
+              "CommandLine": "\"C:\\Program Files (x86)\\Steam\\Steam.exe\""
+            },
+            {
+              "Name": "MiSideFull.exe",
+              "ProcessId": 17832,
+              "ParentProcessId": 11368,
+              "CreationDate": "2026-10-16T01:14:14.884236+08:00",
+              "CommandLine": "D:\\SteamLibrary\\steamapps\\common\\MiSide\\MiSideFull.exe"
+            }
+          ],
+          "attachment_passed": true,
+          "device_creations": 2,
+          "hook_status": 0,
+          "hud_observed": true,
+          "swap_chains": {
+            "active": [
+              {
+                "buffer_count": 2,
+                "failed_resizes": 0,
+                "foreground": true,
+                "format": 28,
+                "height": 1440,
+                "id": 1,
+                "interface_escapes": 0,
+                "last_interface_escape": "",
+                "last_present_flags": 512,
+                "last_present_result": 0,
+                "last_resize_result": 0,
+                "last_sync_interval": 0,
+                "present1_calls": 0,
+                "present_calls": 6483,
+                "recent_present": true,
+                "resize_calls": 1,
+                "samples": 1,
+                "successful_presents": 6483,
+                "swap_effect": 3,
+                "test_presents": 0,
+                "unsuccessful_presents": 0,
+                "width": 2560,
+                "window": 855690
+              }
+            ],
+            "created": 1,
+            "destroyed": 0,
+            "tracking_failures": 0
+          },
+          "capture_state": "Completed",
+          "capture_passed": true,
+          "replay_passed": true,
+          "runtime_sha256": "b6d174a3f4d7205d22429eb88bb04d41dc28d35d060c4d91981ce570ae4a8160",
+          "shim_sha256": "1a4250077d1f338baf690e4ef7a7cb4df24f7647cea0b08c32adee6afd75858c",
+          "capture_file": "C:\\Users\\Myrrr\\Documents\\FloraGPA\\Captures\\20261016-010455-378\\auto-20261015-170929-221\\23a2ff95-cafc-4970-a379-6e8bcb7fb2c0\\frame-9cc82fac-5b57-4249-8097-6f62a94432cf.gpa_frame",
+          "replay_adapter": "NVIDIA GeForce RTX 3070 Laptop GPU",
+          "replay_counts": {
+            "ClearDepthStencilView": 10,
+            "ClearRenderTargetView": 2,
+            "CopyResource": 3,
+            "CopySubresourceRegion": 1,
+            "Dispatch": 23,
+            "Draw": 20,
+            "DrawIndexed": 73,
+            "Map": 100,
+            "Present": 1,
+            "ResolveSubresource": 3,
+            "UpdateSubresource": 9,
+            "annotation_records": 12,
+            "present_rtv_unbinds": 1,
+            "query_completion_unresolved": 1,
+            "query_end_observations": 1,
+            "query_metadata_records": 3,
+            "unmap_observations": 100
+          },
+          "reference_pixels_used": false,
+          "image_comparison": {
+            "comparison": "Encoder final-backbuffer preview vs actual replay RGBA",
+            "equal": false,
+            "different_pixels": 2,
+            "max_component_error": 1,
+            "mean_absolute_error": 1.3563368055555556e-07,
+            "capture_sha256": "6134b12b991dacfe477de7d217aac71d65e88ec02bee2a3902d8435215845d07",
+            "reference_rgba_sha256": "2dc79d169b0ca6d091995d95f86edbaae9ae1ae62868f2f0223a1aed62b86146",
+            "replayed_rgba_sha256": "645c321d540197aa11bc8242dc9ddb52d02b6a45975aa6e412fe33e92d501db8"
+          }
+        },
+        {
+          "evidence": "artifacts/auto-detect-games-03/miside-2",
+          "pid": 27404,
+          "process_created": 134365581513482529,
+          "session_id": "7a61c67b-a81f-44ba-a2e6-d5d5430e1581",
+          "processes": [
+            {
+              "Name": "steam.exe",
+              "ProcessId": 11368,
+              "ParentProcessId": 14668,
+              "CreationDate": "2026-10-15T22:14:39.812185+08:00",
+              "CommandLine": "\"C:\\Program Files (x86)\\Steam\\Steam.exe\""
+            },
+            {
+              "Name": "MiSideFull.exe",
+              "ProcessId": 27404,
+              "ParentProcessId": 11368,
+              "CreationDate": "2026-10-16T01:15:51.348252+08:00",
+              "CommandLine": "D:\\SteamLibrary\\steamapps\\common\\MiSide\\MiSideFull.exe"
+            }
+          ],
+          "attachment_passed": true,
+          "device_creations": 2,
+          "hook_status": 0,
+          "hud_observed": true,
+          "swap_chains": {
+            "active": [
+              {
+                "buffer_count": 2,
+                "failed_resizes": 0,
+                "foreground": true,
+                "format": 28,
+                "height": 1440,
+                "id": 1,
+                "interface_escapes": 0,
+                "last_interface_escape": "",
+                "last_present_flags": 512,
+                "last_present_result": 0,
+                "last_resize_result": 0,
+                "last_sync_interval": 0,
+                "present1_calls": 0,
+                "present_calls": 5009,
+                "recent_present": true,
+                "resize_calls": 1,
+                "samples": 1,
+                "successful_presents": 5009,
+                "swap_effect": 3,
+                "test_presents": 0,
+                "unsuccessful_presents": 0,
+                "width": 2560,
+                "window": 919966
+              }
+            ],
+            "created": 1,
+            "destroyed": 0,
+            "tracking_failures": 0
+          },
+          "capture_state": "Completed",
+          "capture_passed": true,
+          "replay_passed": true,
+          "runtime_sha256": "b6d174a3f4d7205d22429eb88bb04d41dc28d35d060c4d91981ce570ae4a8160",
+          "shim_sha256": "1a4250077d1f338baf690e4ef7a7cb4df24f7647cea0b08c32adee6afd75858c",
+          "capture_file": "C:\\Users\\Myrrr\\Documents\\FloraGPA\\Captures\\20261016-010455-378\\auto-20261015-170929-221\\7a61c67b-a81f-44ba-a2e6-d5d5430e1581\\frame-6464b6f2-9c41-4eae-a7d9-bd25b985f7d2.gpa_frame",
+          "replay_adapter": "NVIDIA GeForce RTX 3070 Laptop GPU",
+          "replay_counts": {
+            "ClearDepthStencilView": 10,
+            "ClearRenderTargetView": 2,
+            "CopyResource": 3,
+            "CopySubresourceRegion": 1,
+            "Dispatch": 23,
+            "Draw": 20,
+            "DrawIndexed": 73,
+            "Map": 100,
+            "Present": 1,
+            "ResolveSubresource": 3,
+            "UpdateSubresource": 9,
+            "annotation_records": 12,
+            "present_rtv_unbinds": 1,
+            "query_completion_unresolved": 1,
+            "query_end_observations": 1,
+            "query_metadata_records": 3,
+            "unmap_observations": 100
+          },
+          "reference_pixels_used": false,
+          "image_comparison": {
+            "comparison": "Encoder final-backbuffer preview vs actual replay RGBA",
+            "equal": true,
+            "different_pixels": 0,
+            "max_component_error": 0,
+            "mean_absolute_error": 0.0,
+            "capture_sha256": "0de77e5969809bac10d7d6dcb3714527471022c076b277c82b7361f334bc61db",
+            "reference_rgba_sha256": "4b97546fcc1675b924ce81d4acdf91bd0e22f566b9b09d2bc4a29b931ee0222a",
+            "replayed_rgba_sha256": "4b97546fcc1675b924ce81d4acdf91bd0e22f566b9b09d2bc4a29b931ee0222a"
+          }
+        }
+      ],
+      "closed_loop_launches": 2
+    },
+    {
+      "name": "OCTOPATH TRAVELER II",
+      "launch_source": "Steam library",
+      "launches": [
+        {
+          "evidence": "artifacts/auto-detect-games-03/octopath-1",
+          "pid": 20732,
+          "process_created": 134365577857334601,
+          "session_id": "c7a69f2d-5e0a-47bc-87e0-7c79f4e02edf",
+          "processes": [
+            {
+              "Name": "steam.exe",
+              "ProcessId": 11368,
+              "ParentProcessId": 14668,
+              "CreationDate": "2026-10-15T22:14:39.812185+08:00",
+              "CommandLine": "\"C:\\Program Files (x86)\\Steam\\Steam.exe\""
+            },
+            {
+              "Name": "FloraGPA.exe",
+              "ProcessId": 2828,
+              "ParentProcessId": 19012,
+              "CreationDate": "2026-10-16T01:04:55.324278+08:00",
+              "CommandLine": "\"D:\\CDXrepo\\FloraGPA-Cpp\\build\\vs2022\\Release\\FloraGPA.exe\" "
+            },
+            {
+              "Name": "Octopath_Traveler2-Win64-Shipping.exe",
+              "ProcessId": 20732,
+              "ParentProcessId": 11368,
+              "CreationDate": "2026-10-16T01:09:45.73346+08:00",
+              "CommandLine": "D:\\SteamLibrary\\steamapps\\common\\Octopath_Traveler2\\Octopath_Traveler2\\Binaries\\Win64\\Octopath_Traveler2-Win64-Shipping.exe"
+            }
+          ],
+          "attachment_passed": true,
+          "device_creations": 4,
+          "hook_status": 0,
+          "hud_observed": true,
+          "swap_chains": {
+            "active": [
+              {
+                "buffer_count": 2,
+                "failed_resizes": 0,
+                "foreground": true,
+                "format": 24,
+                "height": 720,
+                "id": 1,
+                "interface_escapes": 0,
+                "last_interface_escape": "",
+                "last_present_flags": 512,
+                "last_present_result": 0,
+                "last_resize_result": 0,
+                "last_sync_interval": 0,
+                "present1_calls": 0,
+                "present_calls": 1030,
+                "recent_present": true,
+                "resize_calls": 0,
+                "samples": 1,
+                "successful_presents": 1030,
+                "swap_effect": 4,
+                "test_presents": 0,
+                "unsuccessful_presents": 0,
+                "width": 1280,
+                "window": 1442996
+              }
+            ],
+            "created": 1,
+            "destroyed": 0,
+            "tracking_failures": 0
+          },
+          "capture_state": "Failed",
+          "capture_passed": false,
+          "replay_passed": false,
+          "runtime_sha256": "b6d174a3f4d7205d22429eb88bb04d41dc28d35d060c4d91981ce570ae4a8160",
+          "shim_sha256": "1a4250077d1f338baf690e4ef7a7cb4df24f7647cea0b08c32adee6afd75858c",
+          "capture_error": "ID3D11DeviceContext::End: Query recording is not implemented (object=406, kind=query1, type=TIMESTAMP(2), misc_flags=0, context_type=0): query intervals, result observations and completion dependencies require verified GPA encoding"
+        },
+        {
+          "evidence": "artifacts/auto-detect-games-03/octopath-2",
+          "pid": 2480,
+          "process_created": 134365579193596138,
+          "session_id": "79e04501-ee34-4c8e-80ea-a52b7d226690",
+          "processes": [
+            {
+              "Name": "steam.exe",
+              "ProcessId": 11368,
+              "ParentProcessId": 14668,
+              "CreationDate": "2026-10-15T22:14:39.812185+08:00",
+              "CommandLine": "\"C:\\Program Files (x86)\\Steam\\Steam.exe\""
+            },
+            {
+              "Name": "Octopath_Traveler2-Win64-Shipping.exe",
+              "ProcessId": 2480,
+              "ParentProcessId": 11368,
+              "CreationDate": "2026-10-16T01:11:59.359613+08:00",
+              "CommandLine": "D:\\SteamLibrary\\steamapps\\common\\Octopath_Traveler2\\Octopath_Traveler2\\Binaries\\Win64\\Octopath_Traveler2-Win64-Shipping.exe"
+            }
+          ],
+          "attachment_passed": true,
+          "device_creations": 4,
+          "hook_status": 0,
+          "hud_observed": true,
+          "swap_chains": {
+            "active": [
+              {
+                "buffer_count": 2,
+                "failed_resizes": 0,
+                "foreground": true,
+                "format": 24,
+                "height": 720,
+                "id": 1,
+                "interface_escapes": 0,
+                "last_interface_escape": "",
+                "last_present_flags": 512,
+                "last_present_result": 0,
+                "last_resize_result": 0,
+                "last_sync_interval": 0,
+                "present1_calls": 0,
+                "present_calls": 1455,
+                "recent_present": true,
+                "resize_calls": 0,
+                "samples": 1,
+                "successful_presents": 1455,
+                "swap_effect": 4,
+                "test_presents": 0,
+                "unsuccessful_presents": 0,
+                "width": 1280,
+                "window": 1313162
+              }
+            ],
+            "created": 1,
+            "destroyed": 0,
+            "tracking_failures": 0
+          },
+          "capture_state": "Failed",
+          "capture_passed": false,
+          "replay_passed": false,
+          "runtime_sha256": "b6d174a3f4d7205d22429eb88bb04d41dc28d35d060c4d91981ce570ae4a8160",
+          "shim_sha256": "1a4250077d1f338baf690e4ef7a7cb4df24f7647cea0b08c32adee6afd75858c",
+          "capture_error": "ID3D11DeviceContext::End: Query recording is not implemented (object=400, kind=query1, type=TIMESTAMP(2), misc_flags=0, context_type=0): query intervals, result observations and completion dependencies require verified GPA encoding"
+        }
+      ],
+      "closed_loop_launches": 0
+    },
+    {
+      "name": "Girls Frontline 2",
+      "launch_source": "independent launcher",
+      "launches": [
+        {
+          "evidence": "artifacts/auto-detect-games-04/gf2-1",
+          "pid": 25104,
+          "process_created": 134365592309523816,
+          "session_id": "f831f808-befe-472d-937e-2e0b7ee34c1a",
+          "processes": [
+            {
+              "ProcessId": 10392,
+              "ParentProcessId": 27792,
+              "CreationDate": "2026-10-15T23:22:13.205433+08:00",
+              "ExecutablePath": "D:\\Program Files\\GF2Exilium\\PCLauncher.exe"
+            },
+            {
+              "ProcessId": 25104,
+              "ParentProcessId": 10392,
+              "CreationDate": "2026-10-16T01:33:50.952381+08:00",
+              "ExecutablePath": "D:\\Program Files\\GF2Exilium\\GF2 Game\\GF2_Exilium.exe"
+            }
+          ],
+          "attachment_passed": true,
+          "device_creations": 2,
+          "hook_status": 0,
+          "hud_observed": true,
+          "swap_chains": {
+            "active": [
+              {
+                "buffer_count": 2,
+                "failed_resizes": 0,
+                "foreground": true,
+                "format": 28,
+                "height": 1440,
+                "id": 1,
+                "interface_escapes": 0,
+                "last_interface_escape": "",
+                "last_present_flags": 512,
+                "last_present_result": 0,
+                "last_resize_result": 0,
+                "last_sync_interval": 0,
+                "present1_calls": 0,
+                "present_calls": 274,
+                "recent_present": true,
+                "resize_calls": 2,
+                "samples": 1,
+                "successful_presents": 274,
+                "swap_effect": 3,
+                "test_presents": 0,
+                "unsuccessful_presents": 0,
+                "width": 2560,
+                "window": 1051038
+              }
+            ],
+            "created": 1,
+            "destroyed": 0,
+            "tracking_failures": 0
+          },
+          "capture_state": "Completed",
+          "capture_passed": true,
+          "replay_passed": true,
+          "runtime_sha256": "10aae11db754176b9aaa2f0ed6cf5d1a4b7d3683626d5fa2518042981a3cad32",
+          "shim_sha256": "db3ea2a1707d908b79e850a4b27da043ccfd9f04225242f941ef96997adcc15c",
+          "capture_file": "C:\\Users\\Myrrr\\Documents\\FloraGPA\\Captures\\20261016-013256-743\\auto-20261015-173326-943\\f831f808-befe-472d-937e-2e0b7ee34c1a\\frame-89fe9084-e7ea-4846-a59e-666be6277d9a.gpa_frame",
+          "replay_adapter": "NVIDIA GeForce RTX 3070 Laptop GPU",
+          "replay_counts": {
+            "ClearDepthStencilView": 4,
+            "ClearRenderTargetView": 2,
+            "CopySubresourceRegion": 3,
+            "Draw": 1,
+            "DrawIndexed": 17,
+            "Map": 15,
+            "Present": 1,
+            "present_rtv_unbinds": 1,
+            "query_completion_unresolved": 1,
+            "query_end_observations": 1,
+            "query_metadata_records": 3,
+            "unmap_observations": 15
+          },
+          "reference_pixels_used": false,
+          "image_comparison": {
+            "reference": "capture encoder final-backbuffer BMP; replay executes commands without using these pixels",
+            "width": 2560,
+            "height": 1440,
+            "different_pixels": 0,
+            "max_error": 0,
+            "mean_absolute_error": 0.0,
+            "capture_sha256": "61745009da1f46275645e7006c14bbcfcb1604adb0bbf1821be93e8b82417427",
+            "reference_rgba_sha256": "71022c8b172afdbd120329cd6ea920221fbbc44c7b9825f5f0af206eef28b2e8",
+            "replay_rgba_sha256": "71022c8b172afdbd120329cd6ea920221fbbc44c7b9825f5f0af206eef28b2e8"
+          }
+        },
+        {
+          "evidence": "artifacts/auto-detect-games-04/gf2-2",
+          "pid": 19184,
+          "process_created": 134365592963696378,
+          "session_id": "2dbfe61e-1b35-44af-b06c-dc35b616585f",
+          "processes": [
+            {
+              "ProcessId": 10392,
+              "ParentProcessId": 27792,
+              "CreationDate": "2026-10-15T23:22:13.205433+08:00",
+              "ExecutablePath": "D:\\Program Files\\GF2Exilium\\PCLauncher.exe"
+            },
+            {
+              "ProcessId": 19184,
+              "ParentProcessId": 10392,
+              "CreationDate": "2026-10-16T01:34:56.369637+08:00",
+              "ExecutablePath": "D:\\Program Files\\GF2Exilium\\GF2 Game\\GF2_Exilium.exe"
+            }
+          ],
+          "attachment_passed": true,
+          "device_creations": 2,
+          "hook_status": 0,
+          "hud_observed": true,
+          "swap_chains": {
+            "active": [
+              {
+                "buffer_count": 2,
+                "failed_resizes": 0,
+                "foreground": true,
+                "format": 28,
+                "height": 1440,
+                "id": 1,
+                "interface_escapes": 0,
+                "last_interface_escape": "",
+                "last_present_flags": 512,
+                "last_present_result": 0,
+                "last_resize_result": 0,
+                "last_sync_interval": 0,
+                "present1_calls": 0,
+                "present_calls": 489,
+                "recent_present": true,
+                "resize_calls": 2,
+                "samples": 1,
+                "successful_presents": 489,
+                "swap_effect": 3,
+                "test_presents": 0,
+                "unsuccessful_presents": 0,
+                "width": 2560,
+                "window": 4000446
+              }
+            ],
+            "created": 1,
+            "destroyed": 0,
+            "tracking_failures": 0
+          },
+          "capture_state": "Completed",
+          "capture_passed": true,
+          "replay_passed": true,
+          "runtime_sha256": "10aae11db754176b9aaa2f0ed6cf5d1a4b7d3683626d5fa2518042981a3cad32",
+          "shim_sha256": "db3ea2a1707d908b79e850a4b27da043ccfd9f04225242f941ef96997adcc15c",
+          "capture_file": "C:\\Users\\Myrrr\\Documents\\FloraGPA\\Captures\\20261016-013256-743\\auto-20261015-173326-943\\2dbfe61e-1b35-44af-b06c-dc35b616585f\\frame-c0923c0d-a88c-48da-a575-f69a72a67def.gpa_frame",
+          "replay_adapter": "NVIDIA GeForce RTX 3070 Laptop GPU",
+          "replay_counts": {
+            "ClearDepthStencilView": 4,
+            "ClearRenderTargetView": 2,
+            "CopySubresourceRegion": 3,
+            "Draw": 1,
+            "DrawIndexed": 17,
+            "Map": 15,
+            "Present": 1,
+            "present_rtv_unbinds": 1,
+            "query_completion_unresolved": 1,
+            "query_end_observations": 1,
+            "query_metadata_records": 3,
+            "unmap_observations": 15
+          },
+          "reference_pixels_used": false,
+          "image_comparison": {
+            "reference": "capture encoder final-backbuffer BMP; replay executes commands without using these pixels",
+            "width": 2560,
+            "height": 1440,
+            "different_pixels": 0,
+            "max_error": 0,
+            "mean_absolute_error": 0.0,
+            "capture_sha256": "bcba03812ff6aa9f32cc2a651536dcb0d00fd07e78fe607eb0a5a301a45b9f6a",
+            "reference_rgba_sha256": "a85d19097374bb0e8549a47d14bca8ddcf07d7771bb00e628d1737ece9cf5443",
+            "replay_rgba_sha256": "a85d19097374bb0e8549a47d14bca8ddcf07d7771bb00e628d1737ece9cf5443"
+          }
+        }
+      ],
+      "closed_loop_launches": 2
+    }
+  ],
+  "validation": {
+    "release_build": "artifacts/auto-detect-release-final.log",
+    "selected_ctest": "artifacts/auto-detect-ctest-release.log",
+    "selected_ctest_result": {
+      "passed": 20,
+      "failed": 0,
+      "gpu_execution": "serial"
+    },
+    "goldens": "artifacts/auto-detect-goldens-01/validation.json",
+    "native_probes": [
+      "artifacts/auto-detect-probe-01",
+      "artifacts/auto-detect-delayed-01",
+      "artifacts/auto-detect-rgb10-01",
+      "artifacts/auto-detect-stale-env-01",
+      "artifacts/auto-detect-dxgi-first-01",
+      "artifacts/auto-detect-residual-04",
+      "artifacts/auto-detect-concurrent-01",
+      "artifacts/auto-detect-explicit-peer-01",
+      "artifacts/auto-detect-package-probe-01"
+    ],
+    "policy_checks": [
+      "Exact registry restoration; token removal preserves third-party entries and separators",
+      "Third-party AppInit deletion/replacement and LoadAppInit changes preserved",
+      "Forged process creation time rejected",
+      "Recovery does not disarm a live manager",
+      "Guard and worker death followed by residual recovery",
+      "Residual shim renders without loading capture runtime when lease is invalid",
+      "Concurrent sessions have independent IDs and captures",
+      "Explicit launch does not double-attach while Auto-Detect is active"
+    ],
+    "qt_checks": [
+      "Default off and empty executable",
+      "Waiting, multiple sessions and selection",
+      "Hide keeps detection active",
+      "Stop retains existing session control",
+      "Mock permission denial and target exit"
+    ],
+    "pending": [
+      "Real UAC rejection and Secure Boot/signature-policy fault injection (policy logic implemented; host policies unchanged)",
+      "Arbitrary concurrent third-party registry writers between read and write",
+      "Arbitrary graphics calls from DLL initializers or concurrent entry patching stress",
+      "Multilevel synthetic launcher and forced OS PID reuse (creation-time mismatch tested)",
+      "OCTOPATH TIMESTAMP query encoding and complete captured-frame replay"
+    ],
+    "packaged_goldens": {
+      "evidence": "artifacts/auto-detect-package-goldens-01/validation.json",
+      "passed": 4,
+      "failed": 0,
+      "system_path_only": true
+    },
+    "initial_test_failures": [
+      "Residual-01: test relied on foreground swap selection; explicit fixture swap identity fixes focus dependency.",
+      "Residual-03: module inventory returns the registered short DLL basename; assertion now uses the actual ready-event path.",
+      "Earlier OCTOPATH R10/view failures and GF2 stale-environment failure are preserved under artifacts/auto-detect-games-01, -02 and -03/gf2-stale-environment."
+    ]
+  },
+  "packages": {
+    "application": "artifacts/FloraGPA-AutoDetect-20261016",
+    "capture": "artifacts/FloraCapture-AutoDetect-20261016",
+    "system_path_validation": "Passed: DXGI-first automatic capture, inherited stale session variables, explicit launch coexistence, and four golden/negative replays",
+    "capture_manifest": "artifacts/FloraCapture-AutoDetect-20261016/manifest.json",
+    "import_audit": [
+      "artifacts/auto-detect-imports-FloraCaptureShim.dll.txt",
+      "artifacts/auto-detect-imports-FloraCaptureRuntime.dll.txt",
+      "artifacts/auto-detect-imports-FloraCapture.exe.txt"
+    ]
+  },
+  "final_binaries": {
+    "FloraGPA.exe": "c5547ad71576ccca737732b43f9a691ecde551901a65f38c893b5c8a62cdb862",
+    "FloraGPA.Cli.exe": "7656bef36f93b43bbe0129519c650cac4eeee55fcc211da1561d56ab183a0a53",
+    "FloraCapture.exe": "bb136addd6c501dcc43ddede04f65b65e1bc239707396ce351081be835549b21",
+    "FloraCaptureRuntime.dll": "10aae11db754176b9aaa2f0ed6cf5d1a4b7d3683626d5fa2518042981a3cad32",
+    "FloraCaptureShim.dll": "db3ea2a1707d908b79e850a4b27da043ccfd9f04225242f941ef96997adcc15c"
+  },
+  "limitations": [
+    "Four successful title/menu captures do not establish full game-scene or API parity.",
+    "MiSide first image differs in two pixels by at most one channel value; second image is exact.",
+    "GF2 both title images are byte-exact on NVIDIA; earlier Intel/NVIDIA MSAA and broader scene fidelity issues are not cleared.",
+    "Successful replays retain the existing query_completion_unresolved notice; captured final images are compared independently.",
+    "MiSide/OCTOPATH evidence precedes the stale-environment/DXGI-first loader fixes; per-launch binary hashes identify the actual tested versions.",
+    "No original runtime, Python, Qt or replay dependency in the capture loader/runtime."
+  ],
+  "cleanup": {
+    "both_registry_views_match_original": true,
+    "recovery_journal_absent": true,
+    "evidence": "artifacts/auto-detect-final-registry.json",
+    "x86_renderduck_preserved": true,
+    "detector_active": false
+  }
+}

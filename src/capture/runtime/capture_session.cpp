@@ -61,7 +61,7 @@ void start(Request& r,IDXGISwapChain* swap){
     const auto& d=r.descriptor;
     if(!supported_swap_buffers(d.SwapEffect,d.BufferCount) || d.SampleDesc.Count!=1 || d.SampleDesc.Quality!=0)
         throw std::runtime_error("Unsupported swap effect/buffer count or MSAA");
-    if(d.BufferDesc.Format!=DXGI_FORMAT_R8G8B8A8_UNORM && d.BufferDesc.Format!=DXGI_FORMAT_B8G8R8A8_UNORM)
+    if(d.BufferDesc.Format!=DXGI_FORMAT_R8G8B8A8_UNORM && d.BufferDesc.Format!=DXGI_FORMAT_B8G8R8A8_UNORM && d.BufferDesc.Format!=DXGI_FORMAT_R10G10B10A2_UNORM)
         throw std::runtime_error("Capture output format is not implemented");
     ComPtr<ID3D11Device> device;check(swap->GetDevice(IID_PPV_ARGS(&device)),"Swap chain has no DX11 device");
     device->GetImmediateContext(&r.context);wrap_object(r.context.GetAddressOf(),"Capture::ImmediateContext");

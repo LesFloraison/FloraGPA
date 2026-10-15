@@ -63,7 +63,7 @@ bool PixelTransaction::begin(IDXGISwapChain* native,const Panel& panel,UINT flag
         if(panel.mode==Mode::Hidden)throw std::runtime_error("Hidden");
         if((flags&~(isolated?DXGI_PRESENT_ALLOW_TEARING:0u)) || partial)throw std::runtime_error("HUD skips TEST, unsupported flags or partial Present");
         if(!isolated && (desc.BufferCount!=1 || (desc.SwapEffect!=DXGI_SWAP_EFFECT_DISCARD && desc.SwapEffect!=DXGI_SWAP_EFFECT_SEQUENTIAL)))throw std::runtime_error("Multi-buffer HUD requires isolated application storage");
-        if(desc.SampleDesc.Count!=1 || (desc.BufferDesc.Format!=DXGI_FORMAT_R8G8B8A8_UNORM && desc.BufferDesc.Format!=DXGI_FORMAT_B8G8R8A8_UNORM))throw std::runtime_error("Unsupported HUD sample count or format");
+        if(desc.SampleDesc.Count!=1 || (desc.BufferDesc.Format!=DXGI_FORMAT_R8G8B8A8_UNORM && desc.BufferDesc.Format!=DXGI_FORMAT_B8G8R8A8_UNORM && desc.BufferDesc.Format!=DXGI_FORMAT_R10G10B10A2_UNORM))throw std::runtime_error("Unsupported HUD sample count or format");
         if(desc.Flags&(DXGI_SWAP_CHAIN_FLAG_GDI_COMPATIBLE|DXGI_SWAP_CHAIN_FLAG_DISPLAY_ONLY|DXGI_SWAP_CHAIN_FLAG_RESTRICTED_CONTENT))throw std::runtime_error("Unsupported HUD shared or protected presentation");
         check(native->GetDevice(IID_PPV_ARGS(&p.device)),"Get HUD native device");p.device->GetImmediateContext(&p.context);
         check(native->GetBuffer(0,IID_PPV_ARGS(&p.buffer)),"Get HUD native buffer");
@@ -121,7 +121,18 @@ bool PixelTransaction::begin(IDXGISwapChain* native,const Panel& panel,UINT flag
             const bool bottom=sy>=px(footer);const unsigned alpha=bottom?220u:210u;
             unsigned ink[3]{255,255,255};if(bottom && sx>=px(223) && sx<px(263)){ink[0]=255;ink[1]=54;ink[2]=40;}else if(bottom && sx>=px(264)){ink[0]=54;ink[1]=210;ink[2]=70;}
             const unsigned background[3]{bottom?0u:20u,bottom?0u:37u,bottom?0u:70u};
+            if(desc.BufferDesc.Format==DXGI_FORMAT_R10G10B10A2_UNORM){
+                uint32_t packed=0;std::memcpy(&packed,pixels.data()+at,4);uint32_t mixed=packed&0xc0000000u;
+                for(unsigned c=0;c<3;++c){
+                    const unsigned original=(packed>>(c*10))&1023u;
+                    const unsigned base=(original*(255-alpha)+((background[c]*1023u+127)/255)*alpha+127)/255;
+                    const unsigned value=(base*(255-mask)+((ink[c]*1023u+127)/255)*mask+127)/255;
+                    mixed|=value<<(c*10);
+                }
+                std::memcpy(pixels.data()+at,&mixed,4);
+            }else{
             for(unsigned c=0;c<3;++c){const unsigned component=bgra?2-c:c;const unsigned base=(unsigned(pixels[at+c])*(255-alpha)+background[component]*alpha+127)/255;pixels[at+c]=uint8_t((base*(255-mask)+ink[component]*mask+127)/255);}
+            }
             // Preserve alpha: HUD is display decoration, not an application alpha edit.
         }
         p.context->UpdateSubresource(p.upload.Get(),0,nullptr,pixels.data(),p.width*4,0);

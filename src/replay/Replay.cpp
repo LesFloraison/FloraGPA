@@ -1,3 +1,4 @@
+#include "../common/PackedColor.hpp"
 #include "Replay.h"
 #include "BlendState.h"
 #include "Device.h"
@@ -1749,7 +1750,7 @@ Image Replay::output(Id texture, UINT sub) {
     if (info.dimension != 3 || info.samples != 1 || sub >= info.mips * info.layers)
         throw std::runtime_error("Output conversion migration pending for this texture");
     if (info.format != 27 && info.format != 28 && info.format != 29 && info.format != 87 &&
-        info.format != 90 && info.format != 91)
+        info.format != 90 && info.format != 91 && info.format != 24)
         throw std::runtime_error("Output format conversion migration pending: " +
                                  std::to_string(info.format));
     auto obj = get<ID3D11Texture2D>(texture);
@@ -1777,6 +1778,13 @@ Image Replay::output(Id texture, UINT sub) {
             std::memcpy(out.rgba.data() + size_t(y) * desc.Width * 4,
                         static_cast<uint8_t *>(mapped.pData) + size_t(y) * mapped.RowPitch,
                         size_t(desc.Width) * 4);
+        if (info.format == 24)
+            for (size_t i = 0; i < out.rgba.size(); i += 4) {
+                uint32_t packed = 0;
+                std::memcpy(&packed, out.rgba.data() + i, 4);
+                const auto rgba = unpack_rgb10a2(packed);
+                std::copy(rgba.begin(), rgba.end(), out.rgba.begin() + i);
+            }
         if (info.format == 87 || info.format == 90 || info.format == 91)
             for (size_t i = 0; i < out.rgba.size(); i += 4)
                 std::swap(out.rgba[i], out.rgba[i + 2]);

@@ -21,7 +21,7 @@ $crt = Get-ChildItem -LiteralPath $redist -Directory | Where-Object { $_.Name -m
 if (-not $crt) { throw 'Configured x64 VC143 redistributable runtime is missing.' }
 $sources = @{}
 $binarySubdirectory = if ($cache['FLORA_BUILD_REPLAY'] -eq 'ON') { 'Release' } else { 'capture\Release' }
-foreach ($name in @('FloraCapture.exe','FloraCaptureRuntime.dll')) { $sources[$name] = Join-Path $build "$binarySubdirectory\$name" }
+foreach ($name in @('FloraCapture.exe','FloraCaptureRuntime.dll','FloraCaptureShim.dll')) { $sources[$name] = Join-Path $build "$binarySubdirectory\$name" }
 foreach ($name in @('msvcp140.dll','vcruntime140.dll','vcruntime140_1.dll')) { $sources[$name] = Join-Path $crt $name }
 foreach ($source in $sources.Values) { if (-not (Test-Path -LiteralPath $source -PathType Leaf)) { throw "Missing package input: $source" } }
 $identityText = & $sources['FloraCapture.exe'] --version

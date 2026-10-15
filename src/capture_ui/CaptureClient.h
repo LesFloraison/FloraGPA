@@ -22,6 +22,7 @@ class CaptureClient final : public QObject {
     void selectSwap(const QString &swapChain);
     void cancel();
     void disconnectSession();
+    void useSession(const QString& manifest);
   signals:
     void busyChanged(bool busy);
     void response(const QString &command, const QJsonObject &result);

@@ -15,6 +15,9 @@
 #include <psapi.h>
 #include <atomic>
 #include <vector>
+#include <fstream>
+#include <objbase.h>
+#include "auto_detect.hpp"
 
 using namespace flora::capture;
 namespace {
@@ -87,6 +90,8 @@ struct Security {
 };
 std::string service_session;
 std::filesystem::path capture_directory;
+bool automatic_session=false;
+std::atomic<bool> automatic_initialized{false};
 Json response(const Json& message,ULONG client_pid){
     Json result={{"ok",false},{"version",protocol_version},{"request_id",message.value("request_id",std::string())},
                  {"session_id",service_session},{"pid",GetCurrentProcessId()}};
@@ -130,7 +135,8 @@ Json response(const Json& message,ULONG client_pid){
     result["capture_available"]=available;result["swap_chains"]=swaps;result["objects"]=objects;
     result["capture_limits"]={{"default_resource_limit_mib",default_resource_limit_mib},{"max_resource_limit_mib",max_resource_limit_mib}};
     result["device_creations"]=creations.load();result["creation_failures"]=failures.load();result["feature_level"]=level.load();result["hook_status"]=hook_status.load();
-    result["capability_gaps"]={"Single-sample RGBA8/BGRA8; dirty/scroll and flags other than ALLOW_TEARING unsupported","Query, empty-box/flagged/planar Updates, region/format copies, planar Maps and hidden states are incomplete","Deferred nesting beyond bounded journal limits, unverified Map baselines/layouts and hidden states unsupported","Deferred CS/OM initial KEEP requires a retained native UAV and successful execution-time readback; numeric UINT_MAX remains unsupported","Single immediate-context execution thread only"};
+    result["attachment"]=automatic_session?"auto_detect":"launch";
+    result["capability_gaps"]={"Single-sample RGBA8/BGRA8/RGB10A2; dirty/scroll and flags other than ALLOW_TEARING unsupported","Query, empty-box/flagged/planar Updates, region/format copies, planar Maps and hidden states are incomplete","Deferred nesting beyond bounded journal limits, unverified Map baselines/layouts and hidden states unsupported","Deferred CS/OM initial KEEP requires a retained native UAV and successful execution-time readback; numeric UINT_MAX remains unsupported","Single immediate-context execution thread only"};
     if(command=="status"){
         result["factories"]=factory_status();
         HMODULE modules[1024]{};DWORD needed=0;
@@ -149,6 +155,7 @@ Json response(const Json& message,ULONG client_pid){
 }
 DWORD WINAPI serve(void*){
     try{
+      if(!automatic_session){
         char session[64]{};DWORD n=GetEnvironmentVariableA("FLORAGPA_CAPTURE_SESSION",session,sizeof(session));
         if(!n || n>=sizeof(session))return ERROR_INVALID_PARAMETER;
         service_session=session;
@@ -162,7 +169,8 @@ DWORD WINAPI serve(void*){
         hud_settings.mode_key=hud::parse_hotkey(setting("FLORAGPA_CAPTURE_HUD_HOTKEY","Ctrl+F1"));
         hud_settings.capture_key=hud::parse_hotkey(setting("FLORAGPA_CAPTURE_CAPTURE_HOTKEY","Ctrl+Shift+C"));
         configure_hud(hud_settings);
-        const auto name=pipe_name(session);Security security;
+      }
+        const auto name=pipe_name(service_session);Security security;
         Handle pipe(CreateNamedPipeW(name.c_str(),PIPE_ACCESS_DUPLEX|FILE_FLAG_OVERLAPPED|FILE_FLAG_FIRST_PIPE_INSTANCE,
             PIPE_TYPE_BYTE|PIPE_READMODE_BYTE|PIPE_WAIT|PIPE_REJECT_REMOTE_CLIENTS,1,max_message,max_message,0,&security.attributes));
         if(pipe.value==INVALID_HANDLE_VALUE)return GetLastError();
@@ -188,10 +196,55 @@ DWORD WINAPI serve(void*){
 }
 }
 
+extern "C" __declspec(dllexport) DWORD WINAPI FloraCaptureInitialize(DWORD version,
+    const autodetect::Lease* lease,const autodetect::Entries* original,autodetect::Entries* hooks) {
+    if(version!=autodetect::abi_version || !lease || !original || !hooks ||
+       !original->device || !original->swap || !original->factory || !original->factory1 || !original->factory2)
+        return ERROR_INVALID_PARAMETER;
+    if(automatic_initialized.exchange(true))return ERROR_ALREADY_INITIALIZED;
+    try {
+        automatic_session=true;
+        GUID guid{};if(FAILED(CoCreateGuid(&guid)))return ERROR_GEN_FAILURE;
+        wchar_t uuid[40]{};StringFromGUID2(guid,uuid,40);
+        service_session.clear();for(unsigned i=1;i<37;++i)service_session+=static_cast<char>(towlower(uuid[i]));
+        capture_directory=std::filesystem::path(lease->output)/std::filesystem::path(service_session);
+        if(!capture_directory.is_absolute() || !std::filesystem::create_directory(capture_directory))return ERROR_PATH_NOT_FOUND;
+        configure_capture_requests(capture_directory);
+        hud::Settings settings;
+        settings.mode=hud::parse_mode(lease->hud);settings.mode_key=hud::parse_hotkey(lease->hud_key);
+        settings.capture_key=hud::parse_hotkey(lease->capture_key);settings.validate();configure_hud(settings);
+        real_create=original->device;real_create_swap=original->swap;
+        hooks->device=create_device;hooks->swap=create_swap;configure_factory_entries(*original,*hooks);
+        LONG error=DetourTransactionBegin();
+        if(error==NO_ERROR)error=DetourUpdateThread(GetCurrentThread());
+        if(error==NO_ERROR)error=DetourAttach(reinterpret_cast<PVOID*>(&real_raw_buffer),raw_buffer);
+        if(error==NO_ERROR)error=DetourTransactionCommit();else DetourTransactionAbort();
+        hook_status=error;if(error!=NO_ERROR)return static_cast<DWORD>(error);
+        HANDLE thread=CreateThread(nullptr,0,serve,nullptr,0,nullptr);
+        if(!thread)return GetLastError();CloseHandle(thread);
+        wchar_t executable[32768]{};GetModuleFileNameW(nullptr,executable,32768);
+        const auto utf8=[](const std::filesystem::path& p){const auto bytes=p.u8string();return std::string(bytes.begin(),bytes.end());};
+        const auto file=capture_directory/L"session.json";
+        Json manifest={{"version",protocol_version},{"session_id",service_session},{"pid",GetCurrentProcessId()},
+            {"process_created",autodetect::created(GetCurrentProcess())},{"attachment","auto_detect"},
+            {"executable",utf8(executable)},{"runtime",utf8(lease->runtime)},
+            {"output_directory",utf8(capture_directory)},{"session_file",utf8(file)}};
+        {std::ofstream stream(capture_directory/L"session.tmp",std::ios::binary);stream<<manifest.dump(2);stream.close();if(!stream)return ERROR_WRITE_FAULT;}
+        std::filesystem::rename(capture_directory/L"session.tmp",file);
+        return ERROR_SUCCESS;
+    }catch(...){return ERROR_INVALID_DATA;}
+}
+
 BOOL WINAPI DllMain(HINSTANCE module,DWORD reason,LPVOID){
     if(DetourIsHelperProcess())return TRUE;
     if(reason==DLL_PROCESS_ATTACH){
-        if(!DetourRestoreAfterWith())return FALSE;
+        // Auto-Detect enters through the explicit ABI outside the loader lock.
+        // The existing suspended-launch path retains its early hook bootstrap.
+        char session[64]{};
+        if(!GetEnvironmentVariableA("FLORAGPA_CAPTURE_SESSION",session,sizeof(session)))return TRUE;
+        // An inherited session variable is not proof of suspended injection.
+        // Auto-Detect can load us in a child of an old injected launcher.
+        if(!DetourRestoreAfterWith())return TRUE;
         // Static CRT and thread_local recursion guard require thread callbacks.
         (void)module;
         LONG error=DetourTransactionBegin();

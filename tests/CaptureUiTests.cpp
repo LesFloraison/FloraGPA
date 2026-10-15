@@ -7,6 +7,7 @@
 #include <QLineEdit>
 #include <QComboBox>
 #include <QLabel>
+#include <QCheckBox>
 #include <QJsonArray>
 #include <QSignalSpy>
 #include <QTemporaryDir>
@@ -23,6 +24,27 @@ class CaptureUiTests final : public QObject {
         CaptureDialog dialog(controller());
         QVERIFY(!dialog.findChild<QPushButton *>("captureNext")->isEnabled());
         QVERIFY(!dialog.findChild<QPushButton *>("captureOpen")->isEnabled());
+    }
+    void autoDetectLifecycle() {
+        QTemporaryDir root;CaptureDialog dialog(controller());
+        auto* check=dialog.findChild<QCheckBox*>("captureAutoDetect");
+        auto* sessions=dialog.findChild<QComboBox*>("captureSessions");
+        auto* state=dialog.findChild<QLabel*>("captureAutoDetectStatus");
+        QVERIFY(check && sessions && state);QVERIFY(!check->isChecked());
+        dialog.findChild<QLineEdit*>("captureOutput")->setText(root.path());
+        dialog.show();check->setChecked(true);
+        QTRY_COMPARE(state->text(),"Watching");QTRY_COMPARE(sessions->count(),2);
+        QVERIFY(dialog.findChild<QLineEdit*>("captureExecutable")->text().isEmpty());
+        dialog.close();QVERIFY(!dialog.isVisible());QCOMPARE(state->text(),"Watching");
+        QTRY_VERIFY(sessions->isEnabled());sessions->setCurrentIndex(1);emit sessions->activated(1);
+        QTRY_VERIFY(dialog.findChild<QPushButton*>("captureDisconnect")->isEnabled());
+        check->setChecked(false);QTRY_COMPARE(state->text(),"Off");
+        QVERIFY(dialog.findChild<QPushButton*>("captureDisconnect")->isEnabled());
+    }
+    void autoDetectFailure() {
+        qputenv("FLORA_CAPTURE_MOCK","monitor-denied");AutoDetectClient client;QTemporaryDir root;
+        QSignalSpy failures(&client,&AutoDetectClient::failed);client.start(controller(),root.path(),{});
+        QTRY_COMPARE(failures.size(),1);QCOMPARE(failures.first().first().toString(),"Elevation denied");QTRY_VERIFY(!client.active());
     }
     void sessionLifecycle() {
         QTemporaryDir dir;QVERIFY(dir.isValid());CaptureClient client;client.setController(controller());

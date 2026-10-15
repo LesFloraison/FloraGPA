@@ -1,6 +1,6 @@
 find_package(Qt6 6.11 REQUIRED COMPONENTS Core Widgets)
 set(CMAKE_AUTOMOC ON)
-add_library(FloraCaptureUi CaptureClient.cpp CaptureClient.h CaptureDialog.cpp CaptureDialog.h)
+add_library(FloraCaptureUi CaptureClient.cpp CaptureClient.h CaptureDialog.cpp CaptureDialog.h AutoDetectClient.cpp AutoDetectClient.h)
 target_include_directories(FloraCaptureUi PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/..")
 target_link_libraries(FloraCaptureUi PUBLIC Qt6::Widgets)
 if(BUILD_TESTING)

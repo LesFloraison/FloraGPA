@@ -1,6 +1,7 @@
 #include "CaptureClient.h"
 #include <QFileInfo>
 #include <QJsonDocument>
+#include <QFile>
 
 namespace flora::capture_ui {
 CaptureClient::CaptureClient(QObject *parent) : QObject(parent) {
@@ -72,4 +73,13 @@ void CaptureClient::capture(const QString &swapChain) {
 void CaptureClient::cancel() { sessionCommand("cancel"); }
 void CaptureClient::selectSwap(const QString &swapChain) { sessionCommand("select",{"--swap-chain",swapChain.isEmpty()?QString("0"):swapChain}); }
 void CaptureClient::disconnectSession() { sessionCommand("disconnect"); }
+void CaptureClient::useSession(const QString& manifest) {
+    if(busy()){emit failed("Capture controller is busy");return;}
+    QFile file(manifest);if(!QFileInfo(file).isAbsolute() || !file.open(QIODevice::ReadOnly) || file.size()>65536){emit failed("Invalid capture session manifest");return;}
+    const auto value=QJsonDocument::fromJson(file.readAll()).object();
+    if(value.value("version").toInt()!=4 || value.value("pid").toInteger()<=0 || value.value("process_created").toInteger()<=0 || value.value("session_id").toString().isEmpty()){
+        emit failed("Invalid capture session manifest");return;
+    }
+    session_=manifest;connected_=true;status();
+}
 }

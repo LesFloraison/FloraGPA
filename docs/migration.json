@@ -3859,6 +3859,20 @@
     }
   ],
   "independent_capture": {
+    "auto_detect": {
+      "status": "partial",
+      "overall_acceptance_complete": false,
+      "implementation": "Native x64 AppInit shim, protected manager/guard and recovery lease, async Qt session controls; generic new-process DX11 detection",
+      "evidence": "docs/auto-detect-baseline.json",
+      "documentation": "docs/AUTO_DETECT.md",
+      "closed_loop_launches": {
+        "MiSide": 2,
+        "OCTOPATH_TRAVELER_II": 0,
+        "Girls_Frontline_2": 2
+      },
+      "blocker": "OCTOPATH II hooks and HUD work in two Steam launches, but unsupported TIMESTAMP query recording prevents capture/replay. Full lifecycle/stress matrix remains incomplete.",
+      "fidelity": "GF2 title-frame success does not replace historical GF2 fidelity findings or broaden existing scene acceptance."
+    },
     "hud": {
       "status": "accepted_supported_profile",
       "multi_buffer_progress": "Automatic clean presentation storage enabled for guarded single-sample RGBA8/BGRA8 blt and flip profiles. Five injected profiles including monitor-sized borderless and exclusive produce 15 files / 410 dual-player checks, exact retained application bytes and no HUD commands/resources.",

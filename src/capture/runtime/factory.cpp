@@ -208,4 +208,8 @@ LONG attach_factory_hooks() {
     if (error == NO_ERROR) error = DetourAttach(reinterpret_cast<PVOID *>(&original2), create2);
     return error;
 }
+void configure_factory_entries(const autodetect::Entries& original,autodetect::Entries& hooks) {
+    original0=original.factory;original1=original.factory1;original2=original.factory2;
+    hooks.factory=create0;hooks.factory1=create1;hooks.factory2=create2;
+}
 }

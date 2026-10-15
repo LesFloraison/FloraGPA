@@ -23,7 +23,7 @@ struct PresentationResource::Impl {std::shared_ptr<Entry> entry;};
 PresentationResource::PresentationResource(ID3D11Texture2D* original,ID3D11Texture2D* clean):impl_(std::make_unique<Impl>()){
     LastError preserve;if(!original || !clean || original==clean)throw std::invalid_argument("Distinct presentation resources are required");
     D3D11_TEXTURE2D_DESC a{},b{};original->GetDesc(&a);clean->GetDesc(&b);
-    if((a.Format==DXGI_FORMAT_R8G8B8A8_UNORM && b.Format==DXGI_FORMAT_R8G8B8A8_TYPELESS) || (a.Format==DXGI_FORMAT_B8G8R8A8_UNORM && b.Format==DXGI_FORMAT_B8G8R8A8_TYPELESS))b.Format=a.Format;
+    if((a.Format==DXGI_FORMAT_R8G8B8A8_UNORM && b.Format==DXGI_FORMAT_R8G8B8A8_TYPELESS) || (a.Format==DXGI_FORMAT_B8G8R8A8_UNORM && b.Format==DXGI_FORMAT_B8G8R8A8_TYPELESS) || (a.Format==DXGI_FORMAT_R10G10B10A2_UNORM && b.Format==DXGI_FORMAT_R10G10B10A2_TYPELESS))b.Format=a.Format;
     if(std::memcmp(&a,&b,sizeof a))throw std::invalid_argument("Presentation resource descriptors differ");
     ComPtr<ID3D11Device> da,db;original->GetDevice(&da);clean->GetDevice(&db);if(da!=db)throw std::invalid_argument("Presentation resources use different devices");
     auto entry=std::make_shared<Entry>();

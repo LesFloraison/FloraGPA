@@ -7,6 +7,7 @@
 #include <fstream>
 #include <iostream>
 #include <map>
+#include "../autodetect/monitor.hpp"
 
 using namespace flora::capture;
 namespace fs=std::filesystem;
@@ -88,6 +89,7 @@ struct InheritedHandles {
 };
 }
 int wmain(int argc,wchar_t** argv){
+    if(argc>=2 && (std::wstring(argv[1])==L"monitor" || std::wstring(argv[1])==L"monitor-worker" || std::wstring(argv[1])==L"monitor-guard" || std::wstring(argv[1])==L"monitor-recover"))return monitor_main(argc,argv);
     try{
         if(argc>=2 && std::wstring(argv[1])==L"--version"){
             if(argc!=2)throw std::invalid_argument("--version takes no arguments");
@@ -101,6 +103,7 @@ int wmain(int argc,wchar_t** argv){
                      <<"status|capture|cancel|disconnect --session SESSION_JSON [capture: --swap-chain ID --resource-limit-mib 1..4096]\n";
             std::cout<<"select --session SESSION_JSON --swap-chain ID (0 selects automatic foreground)\n";
             std::cout<<"--version (JSON build/protocol identity)\n";
+            std::cout<<"monitor --out NEW_DIRECTORY [--hud compact|detailed|off] (send stop on stdin to disarm)\n";
             return argc<2?2:0;
         }
         const std::wstring verb=argv[1];std::map<std::wstring,std::wstring> options;std::vector<std::wstring> arguments;

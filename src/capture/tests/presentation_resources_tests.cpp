@@ -11,15 +11,16 @@ void check(HRESULT hr){if(FAILED(hr))throw std::runtime_error("DX11 HRESULT "+st
 void require(bool good,const char* text){if(!good)throw std::runtime_error(text);}
 std::vector<int> diagnostics(ID3D11InfoQueue* info){std::vector<int> result;for(UINT64 i=0;i<info->GetNumStoredMessages();++i){SIZE_T size=0;check(info->GetMessage(i,nullptr,&size));std::vector<uint8_t> data(size);auto* message=reinterpret_cast<D3D11_MESSAGE*>(data.data());check(info->GetMessage(i,message,&size));if(message->Severity<=D3D11_MESSAGE_SEVERITY_WARNING)result.push_back(int(message->ID));}return result;}
 LRESULT CALLBACK proc(HWND w,UINT m,WPARAM a,LPARAM b){return DefWindowProcW(w,m,a,b);}
-int main(int argc,char**){try{
+int main(int argc,char** argv){try{
     WNDCLASSW cls{};cls.lpfnWndProc=proc;cls.hInstance=GetModuleHandleW(nullptr);cls.lpszClassName=L"FloraPresentationIdentity";require(RegisterClassW(&cls)!=0,"Window class failed");
     HWND window=CreateWindowW(cls.lpszClassName,L"Flora resource identity test",WS_OVERLAPPEDWINDOW,100,100,160,160,nullptr,nullptr,cls.hInstance,nullptr);require(window!=nullptr,"Window failed");
     DXGI_SWAP_CHAIN_DESC d{};d.BufferDesc.Width=d.BufferDesc.Height=64;d.BufferDesc.Format=DXGI_FORMAT_R8G8B8A8_UNORM;d.BufferUsage=DXGI_USAGE_RENDER_TARGET_OUTPUT|DXGI_USAGE_SHADER_INPUT;d.SampleDesc.Count=1;d.BufferCount=2;d.SwapEffect=DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL;d.OutputWindow=window;d.Windowed=TRUE;
-    if(argc>1)d.BufferDesc.Format=DXGI_FORMAT_B8G8R8A8_UNORM;
+    const bool rgb10=argc>1 && std::string(argv[1])=="--rgb10";
+    if(argc>1)d.BufferDesc.Format=rgb10?DXGI_FORMAT_R10G10B10A2_UNORM:DXGI_FORMAT_B8G8R8A8_UNORM;
     ComPtr<ID3D11Device> native_device;ComPtr<ID3D11DeviceContext> native_context;ComPtr<IDXGISwapChain> swap;
     check(D3D11CreateDeviceAndSwapChain(nullptr,D3D_DRIVER_TYPE_HARDWARE,nullptr,D3D11_CREATE_DEVICE_DEBUG,nullptr,0,D3D11_SDK_VERSION,&d,&swap,&native_device,nullptr,&native_context));
     ComPtr<ID3D11InfoQueue> info;check(native_device.As(&info));
-    ComPtr<ID3D11Texture2D> original,clean;check(swap->GetBuffer(0,IID_PPV_ARGS(&original)));D3D11_TEXTURE2D_DESC td{};original->GetDesc(&td);td.Format=argc>1?DXGI_FORMAT_B8G8R8A8_TYPELESS:DXGI_FORMAT_R8G8B8A8_TYPELESS;check(native_device->CreateTexture2D(&td,nullptr,&clean));
+    ComPtr<ID3D11Texture2D> original,clean;check(swap->GetBuffer(0,IID_PPV_ARGS(&original)));D3D11_TEXTURE2D_DESC td{};original->GetDesc(&td);td.Format=rgb10?DXGI_FORMAT_R10G10B10A2_TYPELESS:argc>1?DXGI_FORMAT_B8G8R8A8_TYPELESS:DXGI_FORMAT_R8G8B8A8_TYPELESS;check(native_device->CreateTexture2D(&td,nullptr,&clean));
     std::vector<uint32_t> red(64*64,0xff0000ffu),blue(64*64,0xffff0000u);
     native_context->UpdateSubresource(original.Get(),0,nullptr,red.data(),64*4,0);native_context->UpdateSubresource(clean.Get(),0,nullptr,blue.data(),64*4,0);
     auto registration=std::make_unique<PresentationResource>(original.Get(),clean.Get());
@@ -47,6 +48,14 @@ int main(int argc,char**){try{
     ComPtr<IDXGIResource> dxgi;check(application.As(&dxgi));DXGI_USAGE usage=0,native_usage=0;check(dxgi->GetUsage(&usage));{ComPtr<IDXGIResource> r;check(original.As(&r));check(r->GetUsage(&native_usage));}require(usage==native_usage && (usage&DXGI_USAGE_BACK_BUFFER),"Public buffer lost DXGI usage");
     ComPtr<IUnknown> dxgi_identity;check(dxgi.As(&dxgi_identity));require(dxgi_identity==public_identity,"Cross-interface identity changed");
     require(unwrap(application.Get())==clean.Get(),"GPU operands do not use clean content");
+    {
+        D3D11_RENDER_TARGET_VIEW_DESC inferred{};inferred.ViewDimension=D3D11_RTV_DIMENSION_TEXTURE2D;
+        ComPtr<ID3D11RenderTargetView> actual,expected;
+        check(native_device->CreateRenderTargetView(original.Get(),&inferred,&expected));
+        check(device->CreateRenderTargetView(application.Get(),&inferred,&actual));
+        D3D11_RENDER_TARGET_VIEW_DESC a{},b{};actual->GetDesc(&a);expected->GetDesc(&b);
+        require(memcmp(&a,&b,sizeof a)==0,"Explicit UNKNOWN view format did not match native inference");
+    }
     ComPtr<ID3D11RenderTargetView> view;check(device->CreateRenderTargetView(application.Get(),nullptr,&view));
     ComPtr<ID3D11Resource> resource;view->GetResource(&resource);ComPtr<IUnknown> returned_identity;check(resource.As(&returned_identity));require(returned_identity==public_identity,"View getter leaked clean resource identity");
     require(object_record(view.Get())->resource==resource_record->id,"View metadata references a private clone");
@@ -56,7 +65,7 @@ int main(int argc,char**){try{
     require(snapshot.shape.format==d.BufferDesc.Format,"Private typeless format leaked into snapshot");
     {
         D3D11_TEXTURE2D_DESC public_desc{};application->GetDesc(&public_desc);require(public_desc.Format==d.BufferDesc.Format,"Private typeless format leaked into public descriptor");
-        D3D11_RENDER_TARGET_VIEW_DESC description{};description.Format=argc>1?DXGI_FORMAT_B8G8R8A8_UNORM_SRGB:DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;description.ViewDimension=D3D11_RTV_DIMENSION_TEXTURE2D;
+        D3D11_RENDER_TARGET_VIEW_DESC description{};description.Format=rgb10?DXGI_FORMAT_R10G10B10A2_UNORM:argc>1?DXGI_FORMAT_B8G8R8A8_UNORM_SRGB:DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;description.ViewDimension=D3D11_RTV_DIMENSION_TEXTURE2D;
         ComPtr<ID3D11RenderTargetView> expected_srgb,actual_srgb;const auto expected=native_device->CreateRenderTargetView(original.Get(),&description,&expected_srgb);const auto actual=device->CreateRenderTargetView(application.Get(),&description,&actual_srgb);require(expected==S_OK && actual==expected,"sRGB swap-buffer view behavior differs from native");
         D3D11_RENDER_TARGET_VIEW_DESC actual_desc{};actual_srgb->GetDesc(&actual_desc);require(memcmp(&description,&actual_desc,sizeof description)==0,"sRGB view descriptor changed");
         const float values[]{.25f,.5f,.75f,1};native_context->ClearRenderTargetView(expected_srgb.Get(),values);context->ClearRenderTargetView(actual_srgb.Get(),values);

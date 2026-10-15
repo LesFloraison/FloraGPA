@@ -40,13 +40,13 @@ inline DWORD complete(HANDLE handle,OVERLAPPED& ov,DWORD timeout=io_timeout){
     if(!GetOverlappedResult(handle,&ov,&transferred,FALSE))win_error("Capture IPC completion");
     return transferred;
 }
-inline void transfer(HANDLE handle,void* buffer,std::uint32_t size,bool write){
+inline void transfer(HANDLE handle,void* buffer,std::uint32_t size,bool write,DWORD timeout=io_timeout){
     auto bytes=static_cast<std::uint8_t*>(buffer);
     while(size){
         Handle event(CreateEventW(nullptr,TRUE,FALSE,nullptr));if(!event.value)win_error("Create IPC event");
         OVERLAPPED ov{};ov.hEvent=event.value;DWORD n=0;
         BOOL ok=write?WriteFile(handle,bytes,size,&n,&ov):ReadFile(handle,bytes,size,&n,&ov);
-        if(!ok){if(GetLastError()!=ERROR_IO_PENDING)win_error("Capture IPC transfer");n=complete(handle,ov);}
+        if(!ok){if(GetLastError()!=ERROR_IO_PENDING)win_error("Capture IPC transfer");n=complete(handle,ov,timeout);}
         if(!n || n>size)throw std::runtime_error("Capture IPC closed or invalid transfer");
         bytes+=n;size-=n;
     }
@@ -57,10 +57,10 @@ inline void send(HANDLE handle,const Json& message){
     auto length=static_cast<std::uint32_t>(bytes.size());transfer(handle,&length,4,true);
     transfer(handle,bytes.data(),length,true);
 }
-inline Json receive(HANDLE handle){
-    std::uint32_t length=0;transfer(handle,&length,4,false);
+inline Json receive(HANDLE handle,DWORD timeout=io_timeout){
+    std::uint32_t length=0;transfer(handle,&length,4,false,timeout);
     if(!length || length>max_message)throw std::invalid_argument("Invalid capture message length");
-    std::string bytes(length,'\0');transfer(handle,bytes.data(),length,false);
+    std::string bytes(length,'\0');transfer(handle,bytes.data(),length,false,timeout);
     return Json::parse(bytes);
 }
 inline Json request(const std::string& session,const Json& message,DWORD expected_pid){

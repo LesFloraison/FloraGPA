@@ -20,7 +20,7 @@ bool capture_requests_connected(){auto& r=requests();std::lock_guard lock(r.mute
 bool eligible_capture_swap(const Json& row){
     return row.value("recent_present",false) && row.value("successful_presents",0ull)>=2 &&
         supported_swap_buffers(row.value("swap_effect",99u),row.value("buffer_count",0u)) && row.value("samples",0u)==1 &&
-        (row.value("format",0u)==DXGI_FORMAT_R8G8B8A8_UNORM || row.value("format",0u)==DXGI_FORMAT_B8G8R8A8_UNORM);
+        (row.value("format",0u)==DXGI_FORMAT_R8G8B8A8_UNORM || row.value("format",0u)==DXGI_FORMAT_B8G8R8A8_UNORM || row.value("format",0u)==DXGI_FORMAT_R10G10B10A2_UNORM);
 }
 bool capture_request_available(const Json& swaps,const Json& objects){
     if(!capture_requests_connected() || objects.value("interface_gaps",0ull) || swaps.value("tracking_failures",0u))return false;

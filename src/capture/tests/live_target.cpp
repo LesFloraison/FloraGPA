@@ -32,12 +32,20 @@ void save(const fs::path& path,const Json& value){auto temp=path;temp+=L".tmp";{
 }
 int wmain(int argc,wchar_t** argv){if(argc!=3)return 2;const fs::path out=fs::absolute(argv[1]);fs::create_directories(out);try{
     const UINT mode=std::stoul(argv[2]);
+    if(mode==45){
+        // Used with delay imports: DXGI is called before D3D11 is loaded.
+        auto module=LoadLibraryW(L"dxgi.dll");if(!module)throw std::runtime_error("Load DXGI");
+        auto create=reinterpret_cast<decltype(&CreateDXGIFactory1)>(GetProcAddress(module,"CreateDXGIFactory1"));
+        if(!create)throw std::runtime_error("Find DXGI factory");
+        ComPtr<IDXGIFactory> first;check(create(IID_PPV_ARGS(&first)));
+    }
     const bool counter_mode=mode>=31 && mode<=36, om_counter=mode==32 || mode==34, initial_counter=mode>=33 && mode<=36;
     const bool counter_copy=mode==35 || mode==36;
     WNDCLASSW cls{};cls.lpfnWndProc=proc;cls.hInstance=GetModuleHandleW(nullptr);cls.lpszClassName=L"FloraLiveCaptureTarget";RegisterClassW(&cls);
     HWND window=CreateWindowW(cls.lpszClassName,L"Flora native capture target",WS_OVERLAPPEDWINDOW,0,0,160,160,nullptr,nullptr,cls.hInstance,nullptr);if(!window)throw std::runtime_error("Target window creation failed");ShowWindow(window,SW_SHOW);SetForegroundWindow(window);
     ComPtr<ID3D11Device> device;ComPtr<ID3D11DeviceContext> context;ComPtr<IDXGISwapChain> swap;
     DXGI_SWAP_CHAIN_DESC d{};d.BufferDesc.Width=d.BufferDesc.Height=8;d.BufferDesc.Format=DXGI_FORMAT_R8G8B8A8_UNORM;d.SampleDesc.Count=1;d.BufferUsage=DXGI_USAGE_RENDER_TARGET_OUTPUT;d.BufferCount=1;d.OutputWindow=window;d.Windowed=TRUE;
+    if(mode==44)d.BufferDesc.Format=DXGI_FORMAT_R10G10B10A2_UNORM;
     const bool deferred_resolve=mode==42 || mode==43,deferred_msaa=mode==40 || mode==41 || deferred_resolve,msaa=mode==24 || mode==25 || deferred_msaa;
     if(msaa){d.BufferDesc.Width=MsaaLiveRenderer::width*((mode==24 || mode==40 || mode==42)?2:4);d.BufferDesc.Height=MsaaLiveRenderer::height*MsaaLiveRenderer::layers;}
     const bool tearing=mode==9 || mode==10 || mode==11 || mode==12;const bool flip=mode>=2 && mode!=8 && mode!=24 && mode!=40 && mode!=42;
