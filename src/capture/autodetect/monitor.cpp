@@ -1,11 +1,14 @@
 #include "monitor.hpp"
 #include "monitor_support.hpp"
+#include "active_attach.hpp"
+#include "attach_policy.hpp"
 #include "hud_model.hpp"
 #include <iostream>
 #include <map>
 #include <set>
 #include <atomic>
 #include <thread>
+#include <future>
 
 namespace flora::capture {
 namespace {
@@ -30,6 +33,9 @@ int worker(const std::wstring& pipe,DWORD client,std::uint64_t client_created){
     if(connection.value==INVALID_HANDLE_VALUE)win_error("Connect monitor owner");ULONG server=0;
     if(!GetNamedPipeServerProcessId(connection.value,&server) || server!=client)throw std::runtime_error("Monitor pipe identity mismatch");
     Lease* lease=nullptr;Handle mapping;Handle mutex;bool locked=false;fs::path journal;
+    Handle progress_mapping;
+    struct ProgressView {Progress* value=nullptr;~ProgressView(){if(value)UnmapViewOfFile(value);}} progress_view;
+    std::unique_ptr<ActiveAttach> active;
     try{
         const auto request=receive(connection.value);const auto root=protected_root();journal=root/L"recovery.json";
         Security acl(L"D:P(A;;GA;;;SY)(A;;GA;;;BA)(A;;GR;;;"+user_sid(owner.value)+L")");
@@ -45,6 +51,19 @@ int worker(const std::wstring& pipe,DWORD client,std::uint64_t client_created){
         InterlockedExchange(&lease->enabled,0);
         *lease=Lease{};lease->owner_pid=client;lease->owner_created=client_created;lease->broker_pid=GetCurrentProcessId();lease->broker_created=created(GetCurrentProcess());
         ProcessIdToSessionId(client,&lease->desktop_session);FILETIME now{};GetSystemTimeAsFileTime(&now);lease->started=file_time(now);
+        const auto target=request.value("target_exe",std::string());
+        if(!target.empty()){
+            const auto path=validate_target(wide(target));
+            wcscpy_s(lease->target,path.c_str());
+            // The broker is elevated, but a normally launched game may be at
+            // medium integrity. Only progress is writable; lease/config stays read-only.
+            Security progress_acl(L"D:P(A;;GA;;;SY)(A;;GA;;;BA)(A;;GRGW;;;"+user_sid(owner.value)+L")S:(ML;;NW;;;ME)");
+            progress_mapping.value=CreateFileMappingW(INVALID_HANDLE_VALUE,&progress_acl.attributes,PAGE_READWRITE,0,sizeof(Progress),progress_mapping_name(lease->started).c_str());
+            if(!progress_mapping.value)win_error("Create attachment progress");
+            progress_view.value=static_cast<Progress*>(MapViewOfFile(progress_mapping.value,FILE_MAP_ALL_ACCESS,0,0,sizeof(Progress)));
+            if(!progress_view.value)win_error("Map attachment progress");
+            *progress_view.value=Progress{};progress_view.value->epoch=lease->started;
+        }
         const auto output=fs::absolute(wide(request.at("output").get<std::string>()));
         if(fs::exists(output))throw std::runtime_error("Auto-Detect output directory must be new");fs::create_directories(output);
         if(wcscpy_s(lease->runtime,(staged/L"FloraCaptureRuntime.dll").c_str()) || wcscpy_s(lease->output,output.c_str()) || wcscpy_s(lease->sid,user_sid(owner.value).c_str()))throw std::runtime_error("Auto-Detect path is too long");
@@ -60,11 +79,37 @@ int worker(const std::wstring& pipe,DWORD client,std::uint64_t client_created){
         if(WaitForMultipleObjects(2,guard_waits,FALSE,10000)!=WAIT_OBJECT_0)throw std::runtime_error("Recovery guard failed to start");
         save(journal,{{"schema",1},{"shim",utf8(short_name)},{"before",before},{"installed",installed},{"load_before",load}});
         registry.put(L"AppInit_DLLs",installed);registry.put(L"LoadAppInit_DLLs",dword_value(1));InterlockedExchange(&lease->enabled,1);
+        if(lease->target[0])active=std::make_unique<ActiveAttach>(lease->target,shim,*lease,*progress_view.value);
         auto ready=event("ready");ready["state"]="Watching";ready["output_directory"]=utf8(output.wstring());ready["broker_pid"]=GetCurrentProcessId();ready["guard_pid"]=GetProcessId(guard.value);ready["shim"]=utf8(short_name);send(connection.value,ready);
         std::set<std::wstring> seen;auto next_heartbeat=GetTickCount64();
+        std::map<std::wstring,std::future<Json>> handshakes;
+        struct GraphicsWait { Json session; ULONGLONG started=GetTickCount64(),next=0; bool timed_out=false; };
+        std::map<std::wstring,GraphicsWait> graphics_waits;
         while(WaitForSingleObject(owner.value,0)==WAIT_TIMEOUT){
+            if(active)for(const auto& progress:active->drain())send(connection.value,progress);
             DWORD available=0;if(!PeekNamedPipe(connection.value,nullptr,0,nullptr,&available,nullptr))break;
             if(available){const auto command=receive(connection.value);if(command.value("command",std::string())=="stop")break;}
+            for(auto& [path,waiting]:graphics_waits){
+                if(handshakes.size()>=4)break;
+                if(handshakes.contains(path) || GetTickCount64()<waiting.next)continue;
+                waiting.next=GetTickCount64()+1000;
+                handshakes.emplace(path,std::async(std::launch::async,[session=waiting.session]{
+                    auto message=event("graphics_probe");message["session"]=session;
+                    try{
+                        const auto pid=session.at("pid").get<DWORD>();
+                        Handle process(OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION|SYNCHRONIZE,FALSE,pid));
+                        if(!process.value || created(process.value)!=session.at("process_created").get<std::uint64_t>() || WaitForSingleObject(process.value,0)==WAIT_OBJECT_0){message["exited"]=true;return message;}
+                        const auto status=flora::capture::request(session.at("session_id").get<std::string>(),
+                            {{"version",protocol_version},{"request_id",utf8(uuid())},{"command","status"}},pid);
+                        bool frames=false;
+                        if(status.value("ok",false) && status.value("device_creations",0u)>0)
+                            for(const auto& swap:status.value("swap_chains",Json::object()).value("active",Json::array()))
+                                frames|=swap.value("recent_present",false) && swap.value("successful_presents",0ull)>0;
+                        message["graphics_ready"]=frames;
+                    }catch(const std::exception& error){message["detail"]=exception_text(error);}
+                    return message;
+                }));
+            }
             for(const auto& directory:fs::directory_iterator(output)){
                 if(directory.is_regular_file() && directory.path().extension()==L".failure" && !seen.contains(directory.path().wstring())){
                     Failure failure{};std::ifstream file(directory.path(),std::ios::binary);file.read(reinterpret_cast<char*>(&failure),sizeof(failure));
@@ -76,20 +121,60 @@ int worker(const std::wstring& pipe,DWORD client,std::uint64_t client_created){
                     }
                 }
                 if(!directory.is_directory())continue;const auto manifest=directory.path()/L"session.json";
-                if(!fs::is_regular_file(manifest) || seen.contains(manifest.wstring()))continue;
+                if(!fs::is_regular_file(manifest) || seen.contains(manifest.wstring()) || handshakes.contains(manifest.wstring()) || handshakes.size()>=4)continue;
                 try{auto session=read(manifest);if(session.at("version")!=protocol_version || session.at("attachment")!="auto_detect")continue;
-                    auto message=event("session");message["session"]=session;send(connection.value,message);seen.insert(manifest.wstring());
+                    handshakes.emplace(manifest.wstring(),std::async(std::launch::async,[session]{
+                        auto message=event("session");
+                        try{
+                            const auto pid=session.at("pid").get<DWORD>();
+                            Handle process(OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION|SYNCHRONIZE,FALSE,pid));
+                            if(!process.value || created(process.value)!=session.at("process_created").get<std::uint64_t>())throw std::runtime_error("Session process identity changed");
+                            const auto status=flora::capture::request(session.at("session_id").get<std::string>(),
+                                {{"version",protocol_version},{"request_id",utf8(uuid())},{"command","status"}},pid);
+                            if(!status.value("ok",false))throw std::runtime_error(status.value("error",std::string("Session handshake rejected")));
+                            message["session"]=session;
+                        }catch(const std::exception& error){message=event("attachment_failed");message["pid"]=session.value("pid",0u);message["executable"]=session.value("executable",std::string());message["error"]=std::string("Session handshake: ")+exception_text(error);}
+                        return message;
+                    }));
                 }catch(const Json::exception&){/* An incomplete foreign file is not a session. */}
+            }
+            for(auto it=handshakes.begin();it!=handshakes.end();){
+                if(it->second.wait_for(std::chrono::milliseconds(0))!=std::future_status::ready){++it;continue;}
+                auto message=it->second.get();
+                if(message.value("event",std::string())=="graphics_probe"){
+                    auto waiting=graphics_waits.find(it->first);
+                    if(waiting!=graphics_waits.end()){
+                        auto& watch=waiting->second;const bool frames=message.value("graphics_ready",false);
+                        if(message.value("exited",false)){graphics_waits.erase(waiting);}
+                        else if(frames || (!watch.timed_out && GetTickCount64()-watch.started>=30000)){
+                            auto progress=event("attachment_progress");progress["state"]=frames?"Tracking":"Attach failed";
+                            progress["phase"]=frames?"graphics_confirmed":"graphics_timeout";
+                            progress["pid"]=watch.session.at("pid");progress["process_created"]=watch.session.at("process_created");
+                            progress["executable"]=watch.session.at("executable");progress["elapsed_ms"]=GetTickCount64()-watch.started;
+                            progress["win32_error"]=frames?0:WAIT_TIMEOUT;
+                            progress["detail"]=frames?"D3D11 device and real Presents observed":"Runtime connected; no D3D11 frame updates yet";
+                            send(connection.value,progress);watch.timed_out=true;
+                            if(frames)graphics_waits.erase(waiting); // Late frames recover the timeout state.
+                        }
+                    }
+                }else{
+                    send(connection.value,message);seen.insert(it->first);
+                    if(message.value("event",std::string())=="session" && lease->target[0] &&
+                       same_path(wide(message.at("session").at("executable").get<std::string>()),lease->target))
+                        graphics_waits.emplace(it->first,GraphicsWait{message.at("session")});
+                }
+                it=handshakes.erase(it);
             }
             if(GetTickCount64()>=next_heartbeat){send(connection.value,event("heartbeat"));next_heartbeat=GetTickCount64()+1000;}
             Sleep(100);
         }
-        InterlockedExchange(&lease->enabled,0);recover(journal);ReleaseMutex(mutex.value);locked=false;
+        active.reset();InterlockedExchange(&lease->enabled,0);recover(journal);ReleaseMutex(mutex.value);locked=false;
         auto done=event("stopped");done["state"]="Off";try{send(connection.value,done);}catch(...){}
         UnmapViewOfFile(lease);return 0;
     }catch(const std::exception& e){
+        active.reset();
         if(lease)InterlockedExchange(&lease->enabled,0);
-        std::string error=e.what();if(locked){try{recover(journal);}catch(const std::exception& cleanup){error+="; recovery required: ";error+=cleanup.what();}ReleaseMutex(mutex.value);}
+        std::string error=exception_text(e);if(locked){try{recover(journal);}catch(const std::exception& cleanup){error+="; recovery required: ";error+=exception_text(cleanup);}ReleaseMutex(mutex.value);}
         auto failure=event("error",false);failure["error"]=error;try{send(connection.value,failure);}catch(...){}
         if(lease)UnmapViewOfFile(lease);return 3;
     }
@@ -124,8 +209,9 @@ int monitor_main(int argc,wchar_t** argv){
         }
         if(verb==L"monitor-guard")return watchdog(std::stoul(options.at(L"--parent")),std::stoull(options.at(L"--created")),options.at(L"--ready"),protected_root());
         if(verb==L"monitor-worker")return worker(options.at(L"--pipe"),std::stoul(options.at(L"--client")),std::stoull(options.at(L"--client-created")));
-        for(const auto& [key,value]:options){(void)value;if(key!=L"--out" && key!=L"--hud" && key!=L"--hud-hotkey" && key!=L"--capture-hotkey" && key!=L"--owner-pid")throw std::invalid_argument("Unknown monitor option");}
+        for(const auto& [key,value]:options){(void)value;if(key!=L"--out" && key!=L"--hud" && key!=L"--hud-hotkey" && key!=L"--capture-hotkey" && key!=L"--owner-pid" && key!=L"--target-exe")throw std::invalid_argument("Unknown monitor option");}
         const auto output=fs::absolute(options.at(L"--out"));
+        const auto target=options.contains(L"--target-exe")?utf8(validate_target(options.at(L"--target-exe")).wstring()):std::string();
         hud::Settings settings;
         if(options.contains(L"--hud"))settings.mode=hud::parse_mode(utf8(options.at(L"--hud")));
         if(options.contains(L"--hud-hotkey"))settings.mode_key=hud::parse_hotkey(utf8(options.at(L"--hud-hotkey")));
@@ -142,7 +228,7 @@ int monitor_main(int argc,wchar_t** argv){
         if(wait!=WAIT_OBJECT_0){CancelIoEx(pipe.value,&ov);DWORD ignored=0;GetOverlappedResult(pipe.value,&ov,&ignored,TRUE);throw std::runtime_error("Auto-Detect manager did not connect");}
         DWORD ignored=0;if(!GetOverlappedResult(pipe.value,&ov,&ignored,TRUE))win_error("Connect Auto-Detect manager");
         ULONG client=0;if(!GetNamedPipeClientProcessId(pipe.value,&client) || client!=GetProcessId(child.value))throw std::runtime_error("Auto-Detect manager identity mismatch");
-        send(pipe.value,{{"output",utf8(output.wstring())},{"hud",hud::mode_name(settings.mode)},{"hud_key",hud::hotkey_name(settings.mode_key)},{"capture_key",hud::hotkey_name(settings.capture_key)}});
+        send(pipe.value,{{"output",utf8(output.wstring())},{"target_exe",target},{"hud",hud::mode_name(settings.mode)},{"hud_key",hud::hotkey_name(settings.mode_key)},{"capture_key",hud::hotkey_name(settings.capture_key)}});
         SetConsoleCtrlHandler(console_control,TRUE);
         std::thread([]{std::string line;while(std::getline(std::cin,line)){if(line=="stop")break;}stopping=true;}).detach();
         bool stop_sent=false,failed=false,first_message=true;
@@ -152,6 +238,6 @@ int monitor_main(int argc,wchar_t** argv){
             const auto type=message.value("event",std::string());if(type=="error"){failed=true;break;}if(type=="stopped")break;
         }
         WaitForSingleObject(child.value,10000);return failed?3:0;
-    }catch(const std::exception& e){auto failure=event("error",false);failure["error"]=e.what();std::cout<<failure.dump()<<std::endl;return 3;}
+    }catch(const std::exception& e){auto failure=event("error",false);failure["error"]=exception_text(e);std::cout<<failure.dump()<<std::endl;return 3;}
 }
 }

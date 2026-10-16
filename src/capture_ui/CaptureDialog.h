@@ -27,6 +27,7 @@ class CaptureDialog final : public QDialog {
     QComboBox* sessions_;
     QLabel* autoStatus_;
     QString controller_;
+    QString autoTarget_;
     QTimer poll_;
     QLineEdit *exe_, *arguments_, *cwd_, *out_;
     QLabel *status_;

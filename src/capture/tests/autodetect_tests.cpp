@@ -1,6 +1,9 @@
 #include "auto_detect.hpp"
 #include "../autodetect/registry_model.hpp"
 #include "../autodetect/monitor_support.hpp"
+#include "../autodetect/attach_policy.hpp"
+#include <thread>
+#include <array>
 #include <iostream>
 #include <stdexcept>
 using namespace flora::capture;
@@ -31,6 +34,20 @@ int main(){try{
     check(!excluded(L"D:\\Games\\UnlistedGame.exe"));
     check(!excluded(L"D:\\Games\\SteamWorld.exe"));check(!excluded(L"D:\\Games\\Flora.exe"));
     check(created(GetCurrentProcess())!=0);check(!created(nullptr));
+    check(same_path(L"D:/Games/Endfield.exe",L"d:\\games\\ENDFIELD.exe"));
+    check(same_path(L"\\\\?\\D:\\Games\\Endfield.exe",L"D:\\Games\\Endfield.exe"));
+    check(!same_path(L"D:\\Games\\Endfield.exe",L"E:\\Other\\Endfield.exe"));
+    check(!same_path(L"",L""));
+    AttachPolicy policy;
+    for(unsigned i=0;i<20;++i){const auto now=1000+i*250;check(policy.can_attempt(now));policy.attempted(now);check(!policy.can_attempt(now+249));}
+    check(!policy.can_attempt(100000));
+    policy=AttachPolicy{};policy.issued=true;check(!policy.can_attempt(100000));
+    policy=AttachPolicy{};policy.finished=true;check(!policy.can_attempt(100000));
+    Progress progress;std::array<AttachProgress*,16> claims{};std::array<std::thread,16> threads;
+    for(unsigned i=0;i<threads.size();++i)threads[i]=std::thread([&,i]{claims[i]=claim_progress(progress,42,100);});
+    for(auto& thread:threads)thread.join();
+    for(auto* claim:claims)check(claim && claim==claims[0]);
+    check(claim_progress(progress,42,101)!=claims[0]); // Reused PID is a different instance.
     check(wide(utf8(L"D:\\游戏\\Capture"))==L"D:\\游戏\\Capture");
     std::cout<<"Auto-Detect registry merge, exclusion, identity and Unicode policy passed\n";return 0;
 }catch(const std::exception& e){std::cerr<<e.what()<<'\n';return 1;}}

@@ -32,7 +32,8 @@ void save(const fs::path& path,const Json& value){auto temp=path;temp+=L".tmp";{
 }
 int wmain(int argc,wchar_t** argv){if(argc!=3)return 2;const fs::path out=fs::absolute(argv[1]);fs::create_directories(out);try{
     const UINT mode=std::stoul(argv[2]);
-    if(mode==45){
+    if(mode==46)Sleep(1500); // Active attachment without AppInit; graphics still uses normal entrypoints.
+    if(mode==45 || mode==46){
         // Used with delay imports: DXGI is called before D3D11 is loaded.
         auto module=LoadLibraryW(L"dxgi.dll");if(!module)throw std::runtime_error("Load DXGI");
         auto create=reinterpret_cast<decltype(&CreateDXGIFactory1)>(GetProcAddress(module,"CreateDXGIFactory1"));

@@ -58,6 +58,28 @@ class CaptureUiTests final : public QObject {
         QSignalSpy failures(&client,&AutoDetectClient::failed);client.start(controller(),root.path(),{});
         QTRY_COMPARE(failures.size(),1);QCOMPARE(failures.first().first().toString(),"Elevation denied");QTRY_VERIFY(!client.active());
     }
+    void autoDetectProgress() {
+        qputenv("FLORA_CAPTURE_MOCK","monitor-progress");AutoDetectClient client;QTemporaryDir root;
+        QSignalSpy progress(&client,&AutoDetectClient::attachmentProgress),failures(&client,&AutoDetectClient::failed);
+        const auto target=root.path()+"/Game With Spaces.exe";
+        client.start(controller(),root.path(),{},target);
+        QTRY_COMPARE(progress.size(),4);QCOMPARE(failures.size(),0);
+        QCOMPARE(progress.last()[0].toJsonObject().value("state").toString(),"Attach failed");
+        const auto json=progress.first()[0].toJsonObject().value("arguments").toArray();QStringList args;for(const auto& arg:json)args<<arg.toString();
+        QCOMPARE(args.value(args.indexOf("--target-exe")+1),target);
+        QVERIFY(client.active());client.stop();QTRY_VERIFY(!client.active());
+    }
+    void autoDetectPrefersTarget() {
+        QTemporaryDir root;CaptureDialog dialog(controller());
+        dialog.findChild<QLineEdit*>("captureOutput")->setText(root.path());
+        dialog.findChild<QLineEdit*>("captureExecutable")->setText(root.path()+"/Endfield.exe");
+        auto* client=dialog.findChild<CaptureClient*>();
+        auto* sessions=dialog.findChild<QComboBox*>("captureSessions");
+        dialog.findChild<QCheckBox*>("captureAutoDetect")->setChecked(true);
+        QTRY_COMPARE(sessions->count(),2);QTRY_VERIFY(client->connected());
+        QVERIFY(client->sessionFile().endsWith("session2.json"));
+        dialog.findChild<QCheckBox*>("captureAutoDetect")->setChecked(false);
+    }
     void sessionLifecycle() {
         QTemporaryDir dir;QVERIFY(dir.isValid());CaptureClient client;client.setController(controller());
         QSignalSpy responses(&client,&CaptureClient::response),errors(&client,&CaptureClient::failed);
@@ -113,7 +135,9 @@ class CaptureUiTests final : public QObject {
         dialog.findChild<QLineEdit*>("captureOutput")->setText(dir.path()+"/session");
         dialog.findChild<QLineEdit*>("captureArguments")->setText("\""+oracle+"\" 0");
         dialog.findChild<QPushButton*>("captureLaunch")->click();
-        QTRY_VERIFY_WITH_TIMEOUT(!responses.empty(),20000);const auto launched=responses.first()[1].toJsonObject();QVERIFY(launched.value("ok").toBool());
+        QTRY_VERIFY_WITH_TIMEOUT(!responses.empty() || !errors.empty(),20000);
+        QVERIFY2(!responses.empty(),qPrintable(errors.isEmpty()?QString("No launch response"):errors.first().first().toString()));
+        const auto launched=responses.first()[1].toJsonObject();QVERIFY(launched.value("ok").toBool());
         cleanup.process=OpenProcess(SYNCHRONIZE,FALSE,DWORD(launched.value("pid").toInteger()));QVERIFY(cleanup.process);
         auto* capture=dialog.findChild<QPushButton*>("captureNext");auto* open=dialog.findChild<QPushButton*>("captureOpen");
         auto* limit=dialog.findChild<QComboBox*>("captureResourceLimit");QVERIFY(limit);QCOMPARE(limit->currentData().toUInt(),1024u);limit->setCurrentIndex(limit->findData(4096u));

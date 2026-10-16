@@ -18,10 +18,14 @@ int main(int argc,char **argv) {
         if(mode=="monitor-denied"){emitEvent({{"schema",1},{"ok",false},{"event","error"},{"error","Elevation denied"}});return 3;}
         const auto root=args.value(args.indexOf("--out")+1);QDir().mkpath(root);
         emitEvent({{"schema",1},{"ok",true},{"event","ready"}});
+        if(mode=="monitor-progress"){
+            for(const auto* state:{"Detected","Attaching","Waiting for graphics","Attach failed"})
+                emitEvent({{"schema",1},{"ok",true},{"event","attachment_progress"},{"state",state},{"phase","test"},{"pid",42},{"win32_error",5},{"arguments",QJsonArray::fromStringList(args)}});
+        }
         for(int i=1;i<=2;++i){
             const auto path=root+QString("/session%1.json").arg(i);
             QJsonObject manifest{{"version",4},{"pid",i},{"process_created",12345},{"session_id",QString("session-%1").arg(i)},
-                {"attachment","auto_detect"},{"session_file",path},{"executable",QString("Game%1.exe").arg(i)}};
+                {"attachment","auto_detect"},{"session_file",path},{"executable",args.contains("--target-exe") && i==2?args.value(args.indexOf("--target-exe")+1):QString("Game%1.exe").arg(i)}};
             QFile file(path);if(!file.open(QIODevice::WriteOnly))return 2;file.write(QJsonDocument(manifest).toJson());file.close();
             emitEvent({{"schema",1},{"ok",true},{"event","session"},{"session",manifest}});
         }

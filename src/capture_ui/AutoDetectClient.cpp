@@ -21,11 +21,13 @@ AutoDetectClient::AutoDetectClient(QObject* parent):QObject(parent){
 AutoDetectClient::~AutoDetectClient(){
     stop();if(process_.state()!=QProcess::NotRunning && !process_.waitForFinished(5000)){process_.kill();process_.waitForFinished(2000);}
 }
-void AutoDetectClient::start(const QString& controller,const QString& output,const CaptureClient::HudSettings& hud){
+void AutoDetectClient::start(const QString& controller,const QString& output,const CaptureClient::HudSettings& hud,const QString& targetExe){
     if(active_){emit failed("Auto-Detect is already active");return;}
     buffer_.clear();stopped_=reportedError_=false;active_=true;emit stateChanged("Starting");
-    process_.start(controller,{"monitor","--out",output,"--hud",hud.mode,"--hud-hotkey",hud.modeKey,"--capture-hotkey",hud.captureKey,
-        "--owner-pid",QString::number(QCoreApplication::applicationPid())});deadline_.start(100000);
+    QStringList arguments{"monitor","--out",output,"--hud",hud.mode,"--hud-hotkey",hud.modeKey,"--capture-hotkey",hud.captureKey,
+        "--owner-pid",QString::number(QCoreApplication::applicationPid())};
+    if(!targetExe.trimmed().isEmpty())arguments<<"--target-exe"<<QFileInfo(targetExe.trimmed()).absoluteFilePath();
+    process_.start(controller,arguments);deadline_.start(100000);
 }
 void AutoDetectClient::stop(){if(!active_ || stopped_)return;stopped_=true;process_.write("stop\n");deadline_.start(15000);emit stateChanged("Stopping");}
 void AutoDetectClient::recover(const QString& controller){
@@ -48,6 +50,9 @@ void AutoDetectClient::consume(){
         else if(kind=="ready"){if(!stopped_)emit stateChanged("Watching");deadline_.start(10000);}
         else if(kind=="heartbeat"){if(!stopped_)deadline_.start(10000);}
         else if(kind=="stopped"){stopped_=true;deadline_.stop();}
+        else if(kind=="attachment_progress"){
+            if(!stopped_){emit stateChanged(message.value("state").toString());emit attachmentProgress(message);}
+        }
         else if(kind=="attachment_failed"){
             emit failed(QString("%1 · %2: %3").arg(QFileInfo(message.value("executable").toString()).fileName()).arg(message.value("pid").toInteger()).arg(message.value("error").toString()));
         }else if(kind=="session"){

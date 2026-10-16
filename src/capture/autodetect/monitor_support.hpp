@@ -8,6 +8,7 @@
 #include <objbase.h>
 #include <filesystem>
 #include <fstream>
+#include <algorithm>
 
 namespace flora::capture::autodetect {
 namespace fs=std::filesystem;
@@ -19,7 +20,12 @@ inline std::wstring wide(const std::string& text){
     if(text.empty())return {};const auto n=MultiByteToWideChar(CP_UTF8,MB_ERR_INVALID_CHARS,text.data(),static_cast<int>(text.size()),nullptr,0);
     if(!n)win_error("Decode text");std::wstring out(n,0);MultiByteToWideChar(CP_UTF8,0,text.data(),static_cast<int>(text.size()),out.data(),n);return out;
 }
-inline std::wstring uuid(){GUID id{};if(FAILED(CoCreateGuid(&id)))throw std::runtime_error("Create monitor ID");wchar_t value[40]{};StringFromGUID2(id,value,40);return std::wstring(value+1,36);}
+inline std::wstring uuid(){GUID id{};if(FAILED(CoCreateGuid(&id)))throw std::runtime_error("Create monitor ID");wchar_t value[40]{};StringFromGUID2(id,value,40);std::wstring result(value+1,36);std::transform(result.begin(),result.end(),result.begin(),[](wchar_t c){return static_cast<wchar_t>(towlower(c));});return result;}
+inline std::string exception_text(const std::exception& error){
+    // MSVC's localized system_error::what() may be ACP rather than UTF-8.
+    if(const auto* system=dynamic_cast<const std::system_error*>(&error))return "Win32 error "+std::to_string(system->code().value());
+    return error.what();
+}
 inline std::wstring quote(const std::wstring& text){std::wstring out=L"\"";unsigned slashes=0;for(auto c:text){if(c==L'\\'){++slashes;continue;}out.append(c==L'"'?slashes*2+1:slashes,L'\\');slashes=0;out+=c;}out.append(slashes*2,L'\\');return out+L'"';}
 inline fs::path executable(){wchar_t value[32768]{};if(!GetModuleFileNameW(nullptr,value,32768))win_error("Find monitor");return value;}
 inline std::wstring user_sid(HANDLE process){

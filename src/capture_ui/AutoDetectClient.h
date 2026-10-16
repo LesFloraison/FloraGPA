@@ -11,13 +11,14 @@ public:
     explicit AutoDetectClient(QObject* parent=nullptr);
     ~AutoDetectClient() override;
     bool active() const { return active_; }
-    void start(const QString& controller,const QString& output,const CaptureClient::HudSettings& hud);
+    void start(const QString& controller,const QString& output,const CaptureClient::HudSettings& hud,const QString& targetExe={});
     void stop();
     void recover(const QString& controller);
 signals:
     void stateChanged(const QString& state);
     void sessionFound(const QJsonObject& manifest);
     void failed(const QString& error);
+    void attachmentProgress(const QJsonObject& progress);
 private:
     void consume();
     QProcess process_;

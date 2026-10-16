@@ -9,6 +9,71 @@ import threading
 import time
 import winreg
 from pathlib import Path
+import ctypes
+from ctypes import wintypes
+
+
+class NoAppInitProcess:
+    """Owned native fixture with extension points disabled at process creation."""
+    def __init__(self, arguments):
+        k = ctypes.WinDLL('kernel32', use_last_error=True)
+        class Startup(ctypes.Structure):
+            _fields_ = [('cb', wintypes.DWORD), ('reserved', wintypes.LPWSTR), ('desktop', wintypes.LPWSTR),
+                        ('title', wintypes.LPWSTR), ('x', wintypes.DWORD), ('y', wintypes.DWORD),
+                        ('cx', wintypes.DWORD), ('cy', wintypes.DWORD), ('charsx', wintypes.DWORD),
+                        ('charsy', wintypes.DWORD), ('fill', wintypes.DWORD), ('flags', wintypes.DWORD),
+                        ('show', wintypes.WORD), ('reserved2size', wintypes.WORD), ('reserved2', ctypes.c_void_p),
+                        ('stdin', wintypes.HANDLE), ('stdout', wintypes.HANDLE), ('stderr', wintypes.HANDLE)]
+        class StartupEx(ctypes.Structure):
+            _fields_ = [('info', Startup), ('attributes', ctypes.c_void_p)]
+        class ProcessInfo(ctypes.Structure):
+            _fields_ = [('process', wintypes.HANDLE), ('thread', wintypes.HANDLE), ('pid', wintypes.DWORD), ('tid', wintypes.DWORD)]
+        k.InitializeProcThreadAttributeList.argtypes = [ctypes.c_void_p, wintypes.DWORD, wintypes.DWORD, ctypes.POINTER(ctypes.c_size_t)]
+        k.UpdateProcThreadAttribute.argtypes = [ctypes.c_void_p, wintypes.DWORD, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_void_p]
+        k.DeleteProcThreadAttributeList.argtypes = [ctypes.c_void_p]
+        k.CreateProcessW.argtypes = [wintypes.LPCWSTR, wintypes.LPWSTR, ctypes.c_void_p, ctypes.c_void_p, wintypes.BOOL, wintypes.DWORD, ctypes.c_void_p, wintypes.LPCWSTR, ctypes.c_void_p, ctypes.POINTER(ProcessInfo)]
+        k.CloseHandle.argtypes = [wintypes.HANDLE]
+        k.WaitForSingleObject.argtypes = [wintypes.HANDLE, wintypes.DWORD]
+        k.GetExitCodeProcess.argtypes = [wintypes.HANDLE, ctypes.POINTER(wintypes.DWORD)]
+        k.TerminateProcess.argtypes = [wintypes.HANDLE, wintypes.UINT]
+        size = ctypes.c_size_t()
+        k.InitializeProcThreadAttributeList(None, 1, 0, ctypes.byref(size))
+        storage = ctypes.create_string_buffer(size.value)
+        if not k.InitializeProcThreadAttributeList(storage, 1, 0, ctypes.byref(size)):
+            raise ctypes.WinError(ctypes.get_last_error())
+        try:
+            policy = ctypes.c_ulonglong(1 << 32)  # EXTENSION_POINT_DISABLE_ALWAYS_ON
+            if not k.UpdateProcThreadAttribute(storage, 0, 0x20007, ctypes.byref(policy), ctypes.sizeof(policy), None, None):
+                raise ctypes.WinError(ctypes.get_last_error())
+            startup = StartupEx(); startup.info.cb = ctypes.sizeof(startup)
+            startup.attributes = ctypes.addressof(storage)
+            info = ProcessInfo(); command = ctypes.create_unicode_buffer(subprocess.list2cmdline(arguments))
+            if not k.CreateProcessW(arguments[0], command, None, None, False, 0x80000, None, None, ctypes.byref(startup), ctypes.byref(info)):
+                raise ctypes.WinError(ctypes.get_last_error())
+            self.kernel, self.handle, self.pid = k, info.process, info.pid
+            k.CloseHandle(info.thread)
+        finally:
+            k.DeleteProcThreadAttributeList(storage)
+
+    def poll(self):
+        if self.kernel.WaitForSingleObject(self.handle, 0) == 0x102:
+            return None
+        code = wintypes.DWORD()
+        if not self.kernel.GetExitCodeProcess(self.handle, ctypes.byref(code)):
+            raise ctypes.WinError(ctypes.get_last_error())
+        return code.value
+
+    def wait(self, timeout):
+        if self.kernel.WaitForSingleObject(self.handle, int(timeout * 1000)) == 0x102:
+            raise subprocess.TimeoutExpired('native fixture', timeout)
+        return self.poll()
+
+    def terminate(self):
+        self.kernel.TerminateProcess(self.handle, 1)
+
+    def __del__(self):
+        if getattr(self, 'handle', None):
+            self.kernel.CloseHandle(self.handle)
 
 
 def registry():
@@ -32,6 +97,8 @@ def main():
     parser.add_argument('--stale-environment', action='store_true')
     parser.add_argument('--concurrent', action='store_true')
     parser.add_argument('--explicit-peer', action='store_true')
+    parser.add_argument('--active', action='store_true', help='Select fixture EXE for active attachment')
+    parser.add_argument('--no-appinit', action='store_true', help='Disable AppInit only in the owned fixture')
     parser.add_argument('--stop-kind', choices=['normal', 'owner-crash', 'broker-crash', 'residual'], default='normal')
     args = parser.parse_args()
     root = args.out.resolve()
@@ -45,7 +112,12 @@ def main():
     messages = queue.Queue()
     target = None
     peer = None
-    monitor = subprocess.Popen([str(binary / 'FloraCapture.exe'), 'monitor', '--out', str(root / 'sessions')],
+    if args.no_appinit and not args.active:
+        parser.error('--no-appinit requires --active')
+    monitor_args = [str(binary / 'FloraCapture.exe'), 'monitor', '--out', str(root / 'sessions')]
+    if args.active:
+        monitor_args += ['--target-exe', str(target_exe)]
+    monitor = subprocess.Popen(monitor_args,
                                stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, encoding='utf-8')
 
     def consume():
@@ -82,10 +154,15 @@ def main():
         if args.stale_environment:
             environment.update(FLORAGPA_CAPTURE_SESSION='35402d8d-e3f5-458d-8dfb-b7466ad486a9',
                                FLORAGPA_CAPTURE_OUTPUT=str(root / 'stale-output'))
-        target = subprocess.Popen([str(target_exe), str(oracle), args.mode], env=environment,
-                                  stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        if args.no_appinit:
+            target = NoAppInitProcess([str(target_exe), str(oracle), args.mode])
+        else:
+            target = subprocess.Popen([str(target_exe), str(oracle), args.mode], env=environment,
+                                      stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         session = event('session')['session']
         assert session['pid'] == target.pid
+        if args.no_appinit:
+            assert any(e.get('phase') == 'remote_load' and e.get('pid') == target.pid for e in events)
         manifest = session['session_file']
         forged = dict(session, process_created=session['process_created'] + 1)
         stale_manifest = root / 'stale-identity.json'
@@ -100,6 +177,11 @@ def main():
             time.sleep(.2)
         assert state['hook_status'] == 0 and state['device_creations'] > 0, state
         assert state['attachment'] == 'auto_detect'
+        if args.active:
+            deadline = time.monotonic() + 10
+            while not any(e.get('phase') == 'graphics_confirmed' and e.get('pid') == target.pid for e in events):
+                assert time.monotonic() < deadline, 'Broker did not confirm real D3D11 frame updates'
+                time.sleep(.1)
         (root / 'status.json').write_text(json.dumps(state, indent=2))
         # The self-owned fixture has exactly one swap; desktop focus can move
         # while inspecting the test. Select its recorded identity explicitly.
@@ -199,10 +281,14 @@ def main():
                     (inactive / 'finish.signal').touch()
                     probe.wait(timeout=15)
                 cli('monitor-recover')
-        deadline = time.monotonic() + 15
+        # RegFlushKey in the independent recovery guard can take tens of seconds
+        # on this host. Observe recovery completion instead of racing that guard.
+        recovery_started = time.monotonic()
+        deadline = recovery_started + 60
         while registry() != before and time.monotonic() < deadline:
             time.sleep(.2)
         assert registry() == before
+        (root / 'recovery-timing.json').write_text(json.dumps({'seconds': time.monotonic()-recovery_started}))
         assert cli('status', '--session', manifest)['capture_available']
         cli('disconnect', '--session', manifest)
     finally:

@@ -18,6 +18,7 @@
 #include <fstream>
 #include <objbase.h>
 #include "auto_detect.hpp"
+#include "detour_threads.hpp"
 
 using namespace flora::capture;
 namespace {
@@ -215,9 +216,11 @@ extern "C" __declspec(dllexport) DWORD WINAPI FloraCaptureInitialize(DWORD versi
         settings.capture_key=hud::parse_hotkey(lease->capture_key);settings.validate();configure_hud(settings);
         real_create=original->device;real_create_swap=original->swap;
         hooks->device=create_device;hooks->swap=create_swap;configure_factory_entries(*original,*hooks);
+        DetourThreads threads;
         LONG error=DetourTransactionBegin();
         if(error==NO_ERROR)error=DetourUpdateThread(GetCurrentThread());
         if(error==NO_ERROR)error=DetourAttach(reinterpret_cast<PVOID*>(&real_raw_buffer),raw_buffer);
+        if(error==NO_ERROR)error=threads.enlist();
         if(error==NO_ERROR)error=DetourTransactionCommit();else DetourTransactionAbort();
         hook_status=error;if(error!=NO_ERROR)return static_cast<DWORD>(error);
         HANDLE thread=CreateThread(nullptr,0,serve,nullptr,0,nullptr);

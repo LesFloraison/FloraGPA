@@ -32,6 +32,27 @@ launcher. Steam and the independent launcher may already be running. Select a
 detected session to use Capture Next Frame, Cancel, Disconnect or Open Capture.
 Each session has its own UUID, PID, process creation time and output directory.
 
+For a game that does not enter through AppInit, select its actual x64 game EXE
+in **Application** before enabling Auto-Detect. This adds early active attachment
+for that exact executable; the ordinary launcher still starts the game. The
+monitor scans every 50 ms and only considers matching processes created after
+activation, in the same user and desktop session. An already running target
+reports **Restart required**. An empty Application retains global detection.
+
+Target progress distinguishes **Detected**, **Attaching**, **Waiting for graphics**
+and **Attach failed**. Expanded task logs contain the PID, creation time, attempt,
+phase, elapsed time and Win32 error. Loading the shim is not capture success:
+session publication requires an authenticated runtime handshake, and **Tracking**
+requires a real device and recent successful presents. Auxiliary sessions remain
+selectable, but do not replace the selected game's automatic session selection.
+
+The native active loader makes at most 20 attempts, separated by 250 ms. It never
+reissues an outstanding remote load. A five-second acknowledgement timeout is
+reported without terminating the game/thread or freeing a still-used remote
+parameter. Late acknowledgements remain observable. Installed hooks without a
+graphics session produce a diagnostic after 30 seconds. No existing device is
+retrofitted, and target restrictions are not disabled.
+
 The setting is off at every application start. Hiding the Capture dialog keeps
 detection active. Disabling detection stops new attachments but retains existing
 session control. Application exit stops detection and disconnects sessions;
@@ -59,9 +80,12 @@ Existing 32-bit configuration, including this host's RenderDuck entry, is untouc
   than inherited environment variables, distinguish it from an automatic session.
 * `FloraCapture monitor` is a persistent schema-1 NDJSON controller. Its private
   authenticated pipe talks to an elevated `monitor-worker`. `ready`, `heartbeat`,
-  `session`, `attachment_failed`, `error` and `stopped` events drive an asynchronous
+  `session`, `attachment_progress`, `attachment_failed`, `error` and `stopped` events drive an asynchronous
   Qt client. Standard input `stop` ends detection. Existing one-shot commands use
   the detected version-4 session manifest unchanged.
+  Optional `--target-exe <absolute-path>` selects active attachment. The internal
+  lease/initialization ABI is version 2; capture files and control protocol remain
+  unchanged. The versioned progress mapping is scoped to the activation epoch.
 * The worker copies loader, runtime, controller and CRT dependencies into a unique
   administrator-protected Program Files directory. A creation-time-bound
   `monitor-guard` acknowledges readiness before registration. A durable protected
@@ -78,8 +102,11 @@ names are not an allowlist. Protected version directories remain on disk because
 already attached games may still reference them.
 
 The loader follows the [Microsoft initialization constraints](https://learn.microsoft.com/en-us/windows/win32/dlls/dynamic-link-library-best-practices):
-no runtime LoadLibrary, filesystem session creation, COM initialization or worker
-startup in its DllMain. Module lookup precedes the private patch lock. Arbitrary
+no runtime LoadLibrary, filesystem session creation or COM initialization in
+its DllMain. Active loads dispatch installation to a worker without waiting under
+the loader lock. AppInit retains its startup entry installation. Runtime/active
+patch transactions enlist peer threads; transactions are skipped when no new
+graphics entry needs patching. Module lookup precedes the private patch lock. Arbitrary
 third-party DLLs calling graphics from their own DllMain and arbitrary concurrent
 native entry patching are not established by the current test matrix.
 
@@ -137,3 +164,7 @@ after detection ends. Generated captures, research and evidence stay ignored.
 load a runtime without a valid lease, and exercises recovery. `--concurrent`
 checks separate sessions and captures; `--explicit-peer` checks entry ownership
 while automatic detection and explicit launch coexist.
+Use `--active` to target the copied fixture, `--no-appinit` to disable AppInit in
+that owned test process, and delayed probe mode `46` to leave an early attachment
+window before DXGI initialization. Active tests assert broker confirmation of
+real D3D11 frame updates before capture.

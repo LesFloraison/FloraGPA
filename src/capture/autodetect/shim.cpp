@@ -2,11 +2,31 @@
 #include "auto_detect.hpp"
 #include <detours.h>
 #include <sddl.h>
+#include "detour_threads.hpp"
 
 using namespace flora::capture::autodetect;
 namespace {
 const Lease* lease=nullptr;
 HANDLE mapping=nullptr, owner=nullptr, broker=nullptr;
+HANDLE progress_mapping=nullptr;
+Progress* progress=nullptr;
+AttachProgress* attachment=nullptr;
+thread_local bool loader_phase=false;
+void acknowledge(AttachStage stage,DWORD error=0) {
+    if(!attachment)return;
+    attachment->error=error;
+    InterlockedExchange(&attachment->stage,static_cast<LONG>(stage));
+}
+void open_progress() {
+    if(!lease->target[0])return;
+    wchar_t path[32768]{};
+    if(!GetModuleFileNameW(nullptr,path,32768) || _wcsicmp(path,lease->target))return;
+    progress_mapping=OpenFileMappingW(FILE_MAP_READ|FILE_MAP_WRITE,FALSE,progress_mapping_name(lease->started).c_str());
+    if(!progress_mapping)return;
+    progress=static_cast<Progress*>(MapViewOfFile(progress_mapping,FILE_MAP_READ|FILE_MAP_WRITE,0,0,sizeof(Progress)));
+    if(!progress || progress->version!=abi_version || progress->epoch!=lease->started)return;
+    attachment=claim_progress(*progress,GetCurrentProcessId(),created(GetCurrentProcess()));
+}
 std::uint64_t lease_epoch=0;
 Entries native{}, dispatch{};
 INIT_ONCE initialized=INIT_ONCE_STATIC_INIT;
@@ -33,8 +53,9 @@ BOOL CALLBACK initialize(PINIT_ONCE,PVOID,PVOID*) {
     Entries hooks{};
     const DWORD result=entry && patched?entry(abi_version,lease,&native,&hooks):
         (runtime?(patched?ERROR_PROC_NOT_FOUND:ERROR_INVALID_FUNCTION):GetLastError());
-    if(result==ERROR_SUCCESS)dispatch=hooks;
+    if(result==ERROR_SUCCESS){dispatch=hooks;acknowledge(AttachStage::runtime_ready);}
     else {
+        acknowledge(AttachStage::failed,result);
         wchar_t message[128]{};swprintf_s(message,L"FloraGPA Auto-Detect initialization failed: %lu\n",result);
         OutputDebugStringW(message);
         // Graphics-entry phase only: never create files from DllMain.
@@ -76,6 +97,10 @@ bool attach_graphics() {
     const FARPROC addresses[]={find(d3d,"D3D11CreateDevice"),find(d3d,"D3D11CreateDeviceAndSwapChain"),
         find(dxgi,"CreateDXGIFactory"),find(dxgi,"CreateDXGIFactory1"),find(dxgi,"CreateDXGIFactory2")};
     AcquireSRWLockExclusive(&patch_lock);
+    const bool needed=(addresses[0] && !native.device) || (addresses[1] && !native.swap) ||
+        (addresses[2] && !native.factory) || (addresses[3] && !native.factory1) || (addresses[4] && !native.factory2);
+    if(!needed){ReleaseSRWLockExclusive(&patch_lock);patching=false;return true;}
+    flora::capture::DetourThreads threads(!loader_phase);
     Entries before=native;
     LONG error=DetourTransactionBegin();
     if(error==NO_ERROR)error=DetourUpdateThread(GetCurrentThread());
@@ -87,6 +112,7 @@ bool attach_graphics() {
     hook(native.device,addresses[0],device);hook(native.swap,addresses[1],swap);
     hook(native.factory,addresses[2],factory);hook(native.factory1,addresses[3],factory1);
     hook(native.factory2,addresses[4],factory2);
+    if(error==NO_ERROR)error=threads.enlist();
     if(error==NO_ERROR)error=DetourTransactionCommit();else DetourTransactionAbort();
     if(error!=NO_ERROR)native=before;
     ReleaseSRWLockExclusive(&patch_lock);patching=false;return error==NO_ERROR;
@@ -121,17 +147,33 @@ bool eligible() {
     broker=OpenProcess(SYNCHRONIZE|PROCESS_QUERY_LIMITED_INFORMATION,FALSE,lease->broker_pid);
     return owner && broker && created(owner)==lease->owner_created && created(broker)==lease->broker_created && live();
 }
-}
-BOOL WINAPI DllMain(HINSTANCE,DWORD reason,LPVOID) {
-    if(reason!=DLL_PROCESS_ATTACH)return TRUE;
-    if(!eligible()){release_lease();return TRUE;}
+DWORD WINAPI install(void*) {
+    if(!live())return ERROR_CANCELLED;
+    acknowledge(AttachStage::installing);
+    flora::capture::DetourThreads threads(!loader_phase);
     auto error=DetourTransactionBegin();
     if(error==NO_ERROR)error=DetourUpdateThread(GetCurrentThread());
     if(error==NO_ERROR)error=DetourAttach(reinterpret_cast<PVOID*>(&load_w),hooked_w);
     if(error==NO_ERROR)error=DetourAttach(reinterpret_cast<PVOID*>(&load_a),hooked_a);
     if(error==NO_ERROR)error=DetourAttach(reinterpret_cast<PVOID*>(&load_exw),hooked_exw);
     if(error==NO_ERROR)error=DetourAttach(reinterpret_cast<PVOID*>(&load_exa),hooked_exa);
+    if(error==NO_ERROR)error=threads.enlist();
     if(error==NO_ERROR)error=DetourTransactionCommit();else DetourTransactionAbort();
-    if(error!=NO_ERROR){release_lease();return TRUE;}
-    attach_graphics();return TRUE;
+    if(error!=NO_ERROR){acknowledge(AttachStage::failed,error);return error;}
+    if(!attach_graphics()){acknowledge(AttachStage::failed,ERROR_INVALID_FUNCTION);return ERROR_INVALID_FUNCTION;}
+    if(attachment)InterlockedCompareExchange(&attachment->stage,static_cast<LONG>(AttachStage::hooks_ready),static_cast<LONG>(AttachStage::installing));
+    return ERROR_SUCCESS;
+}
+}
+BOOL WINAPI DllMain(HINSTANCE,DWORD reason,LPVOID) {
+    if(reason!=DLL_PROCESS_ATTACH)return TRUE;
+    if(!eligible()){release_lease();return TRUE;}
+    open_progress();
+    // A broker-requested load happens in an already running process. Install
+    // outside the loader lock so thread enlistment cannot deadlock DLL startup.
+    if(attachment && InterlockedCompareExchange(&attachment->stage,0,0)==static_cast<LONG>(AttachStage::requested)){
+        HANDLE thread=CreateThread(nullptr,0,install,nullptr,0,nullptr);
+        if(thread)CloseHandle(thread);else acknowledge(AttachStage::failed,GetLastError());
+    }else{loader_phase=true;install(nullptr);loader_phase=false;}
+    return TRUE;
 }

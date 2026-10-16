@@ -25,6 +25,7 @@ CaptureDialog::CaptureDialog(const QString &controller, QWidget *parent) : QDial
     setWindowTitle("DX11 Capture"); resize(660,400); client_.setController(controller);
     auto layout = new QVBoxLayout(this); auto form = new QFormLayout;
     exe_ = new QLineEdit(this); exe_->setObjectName("captureExecutable");
+    exe_->setToolTip("Auto-Detect: optionally select an EXE for early attachment, then start it normally. Leave empty for global detection.");
     auto row = new QHBoxLayout; row->addWidget(exe_); auto browse = new QPushButton("Browse…",this); row->addWidget(browse);
     connect(browse,&QPushButton::clicked,this,[this] {
         const auto path=QFileDialog::getOpenFileName(this,"Launch DX11 application",exe_->text(),"Applications (*.exe)");
@@ -84,7 +85,8 @@ CaptureDialog::CaptureDialog(const QString &controller, QWidget *parent) : QDial
     connect(autoCheck_,&QCheckBox::toggled,this,[this](bool checked){
         if(checked){
             const auto output=QDir(out_->text()).filePath("auto-"+QDateTime::currentDateTimeUtc().toString("yyyyMMdd-HHmmss-zzz"));
-            autoDetect_.start(controller_,output,{hudMode_->currentData().toString(),hudKey_->text(),captureKey_->text()});
+            autoTarget_=exe_->text().trimmed();
+            autoDetect_.start(controller_,output,{hudMode_->currentData().toString(),hudKey_->text(),captureKey_->text()},autoTarget_);
         }else autoDetect_.stop();updateControls();
     });
     connect(&autoDetect_,&AutoDetectClient::stateChanged,this,[this](const QString& state){
@@ -92,11 +94,16 @@ CaptureDialog::CaptureDialog(const QString &controller, QWidget *parent) : QDial
         if(state=="Off"){QSignalBlocker block(autoCheck_);autoCheck_->setChecked(false);}updateControls();
     });
     connect(&autoDetect_,&AutoDetectClient::failed,this,[this](const QString& error){status_->setText(error);log_->appendPlainText(error);});
+    connect(&autoDetect_,&AutoDetectClient::attachmentProgress,this,[this](const QJsonObject& progress){
+        log_->appendPlainText(QString::fromUtf8(QJsonDocument(progress).toJson(QJsonDocument::Compact)));
+    });
     connect(&autoDetect_,&AutoDetectClient::sessionFound,this,[this](const QJsonObject& manifest){
         const auto file=manifest.value("session_file").toString();if(sessions_->findData(file)>=0)return;
         sessions_->addItem(QFileInfo(manifest.value("executable").toString()).fileName()+" · "+QString::number(manifest.value("pid").toInteger()),file);
         log_->appendPlainText(QString::fromUtf8(QJsonDocument(manifest).toJson(QJsonDocument::Compact)));
-        if(!client_.connected() && !client_.busy()){sessions_->setCurrentIndex(sessions_->count()-1);completed_.clear();lastResult_.clear();available_=false;client_.useSession(file);}
+        const bool selected=autoTarget_.isEmpty() ||
+            QDir::cleanPath(QFileInfo(autoTarget_).absoluteFilePath()).compare(QDir::cleanPath(QFileInfo(manifest.value("executable").toString()).absoluteFilePath()),Qt::CaseInsensitive)==0;
+        if(selected && !client_.connected() && !client_.busy()){sessions_->setCurrentIndex(sessions_->count()-1);completed_.clear();lastResult_.clear();available_=false;client_.useSession(file);}
         updateControls();
     });
     connect(sessions_,&QComboBox::activated,this,[this](int index){
@@ -121,6 +128,14 @@ void CaptureDialog::showResponse(const QString &command,const QJsonObject &resul
     else status_->setText(available_?phase:phase+" — frame capture unavailable");
     QStringList gaps;for(const auto &gap:state.value("capability_gaps").toArray())gaps<<gap.toString();
     const auto hud=state.value("hud").toObject();
+    if(autoDetect_.active() && state.value("attachment")=="auto_detect" && result.value("ok").toBool()){
+        bool presenting=false;
+        for(const auto& value:state.value("swap_chains").toObject().value("active").toArray()){
+            const auto swap=value.toObject();
+            presenting|=swap.value("successful_presents").toInteger()>0 && swap.value("recent_present").toBool();
+        }
+        if(state.value("device_creations").toInteger()>0 && presenting)autoStatus_->setText("Tracking");
+    }
     for(const auto& row:hud.value("swap_chains").toArray()){const auto detail=row.toObject();if(!detail.value("visible").toBool() && !detail.value("reason").toString().isEmpty())gaps<<"HUD: "+detail.value("reason").toString();}
     const auto hudRequest=hud.value("last_request").toObject();if(!hudRequest.isEmpty()){const auto encoded=QString::fromUtf8(QJsonDocument(hudRequest).toJson(QJsonDocument::Compact));if(encoded!=lastHudRequest_){lastHudRequest_=encoded;log_->appendPlainText(encoded);}}
     status_->setToolTip(gaps.join('\n'));

@@ -2,14 +2,45 @@
 #include <windows.h>
 #include <cstdint>
 #include <cwchar>
+#include <string>
 #include <d3d11.h>
 #include <dxgi1_3.h>
 
 namespace flora::capture::autodetect {
-inline constexpr wchar_t mapping_name[]=L"Local\\FloraGPA.AutoDetect.v1";
+inline constexpr wchar_t mapping_name[]=L"Local\\FloraGPA.AutoDetect.v2";
+inline constexpr wchar_t progress_name[]=L"Local\\FloraGPA.AutoDetect.Progress.v2";
+inline std::wstring progress_mapping_name(std::uint64_t epoch){return std::wstring(progress_name)+L"."+std::to_wstring(epoch);}
 inline constexpr wchar_t mutex_name[]=L"Global\\FloraGPA.AutoDetect.Registry.v1";
 inline constexpr wchar_t registry_key[]=L"SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Windows";
-inline constexpr DWORD abi_version=1;
+inline constexpr DWORD abi_version=2;
+enum class AttachStage : LONG { empty, requested, installing, hooks_ready, runtime_ready, failed };
+struct AttachProgress {
+    volatile LONG pid=0, stage=0;
+    std::uint64_t process_created=0;
+    DWORD error=0;
+};
+struct Progress {
+    DWORD version=abi_version;
+    std::uint64_t epoch=0;
+    AttachProgress entries[128]{};
+};
+inline AttachProgress* claim_progress(Progress& progress,DWORD pid,std::uint64_t identity) noexcept {
+    // Identical identities probe in the same order. A slot is published only
+    // after its creation time is written, including when AppInit wins the race.
+    for(unsigned n=0;n<128;++n){
+        auto& entry=progress.entries[(pid+n)%128];
+        LONG owner=InterlockedCompareExchange(&entry.pid,0,0);
+        for(unsigned spin=0;owner==-1 && spin<1000;++spin){YieldProcessor();owner=InterlockedCompareExchange(&entry.pid,0,0);}
+        if(owner==-1)return nullptr;
+        if(owner==static_cast<LONG>(pid) && entry.process_created==identity)return &entry;
+        if(owner==0){
+            if(InterlockedCompareExchange(&entry.pid,-1,0)!=0){--n;continue;}
+            entry.process_created=identity;entry.error=0;entry.stage=0;
+            InterlockedExchange(&entry.pid,static_cast<LONG>(pid));return &entry;
+        }
+    }
+    return nullptr;
+}
 struct Lease {
     DWORD version=abi_version;
     volatile LONG enabled=0;
@@ -17,6 +48,7 @@ struct Lease {
     std::uint64_t started=0, broker_created=0, owner_created=0;
     wchar_t sid[184]{};
     wchar_t runtime[1024]{};
+    wchar_t target[1024]{};
     wchar_t output[4096]{};
     char hud[32]{}, hud_key[64]{}, capture_key[64]{};
 };
@@ -45,7 +77,7 @@ inline std::uint64_t created(HANDLE process) noexcept {
 inline bool excluded(const wchar_t* path) noexcept {
     const wchar_t* name=wcsrchr(path,L'\\');name=name?name+1:path;
     constexpr const wchar_t* prefixes[]={L"FloraGPA",L"FloraCapture",L"FloraAutoDetect",L"GpaMonitor",L"GpaServer",
-        L"frameanalyzer",L"systemanalyzer",L"renderdoc",L"UnityCrashHandler",L"crashpad",L"bugrpt",
+        L"frameanalyzer",L"systemanalyzer",L"renderdoc",L"riderduck",L"qriderduck",L"UnityCrashHandler",L"crashpad",L"bugrpt",
         L"NEPDaemon",L"KernelDumpAnalyzer"};
     for(auto prefix:prefixes)if(_wcsnicmp(name,prefix,wcslen(prefix))==0)return true;
     constexpr const wchar_t* executables[]={L"steam.exe",L"steamservice.exe",L"steamwebhelper.exe",L"gameoverlayui.exe",
