@@ -60,6 +60,7 @@ CaptureDialog::CaptureDialog(const QString &controller, QWidget *parent) : QDial
     hudForm->addRow("HUD",hudMode_);hudForm->addRow("Cycle HUD",hudKey_);hudForm->addRow("Capture frame",captureKey_);
     settingsLayout->addWidget(settingsBody);settingsBody->hide();connect(settings,&QGroupBox::toggled,settingsBody,&QWidget::setVisible);layout->addWidget(settings);
     status_=new QLabel("Ready to launch",this); status_->setObjectName("captureStatus"); status_->setWordWrap(true); layout->addWidget(status_);
+    inputStatus_=new QLabel("Hotkeys unavailable",this);inputStatus_->setObjectName("captureInputStatus");inputStatus_->hide();layout->addWidget(inputStatus_);
     auto actions = new QHBoxLayout;
     launch_=new QPushButton("Launch",this); capture_=new QPushButton("Capture Next Frame",this); cancel_=new QPushButton("Cancel",this);
     disconnect_=new QPushButton("Disconnect",this); open_=new QPushButton("Open Capture",this);
@@ -131,6 +132,13 @@ void CaptureDialog::showResponse(const QString &command,const QJsonObject &resul
     else status_->setText(available_?phase:phase+" — frame capture unavailable");
     QStringList gaps;for(const auto &gap:state.value("capability_gaps").toArray())gaps<<gap.toString();
     const auto hud=state.value("hud").toObject();
+    const auto inputError=hud.value("input_reason").toString();
+    inputStatus_->setVisible(!inputError.isEmpty());inputStatus_->setToolTip(inputError);
+    if(inputSession_!=client_.sessionFile() || lastInputError_!=inputError){
+        if(!inputError.isEmpty())log_->appendPlainText("Hotkeys unavailable: "+inputError);
+        else if(inputSession_==client_.sessionFile() && !lastInputError_.isEmpty())log_->appendPlainText("Hotkeys ready");
+        inputSession_=client_.sessionFile();lastInputError_=inputError;
+    }
     if(autoDetect_.active() && state.value("attachment")=="auto_detect" && result.value("ok").toBool()){
         bool presenting=false;
         for(const auto& value:state.value("swap_chains").toObject().value("active").toArray()){

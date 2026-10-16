@@ -159,11 +159,13 @@ void hud_input(UINT flags,IDXGISwapChain* native) noexcept {
         auto& c=control();std::lock_guard lock(c.mutex);if(!c.connected){SetLastError(error);return;}
         raw_focus(c,foreground==GetCurrentProcessId());
         for(const auto input_thread:threads)if(!c.hooks.contains(input_thread) && (c.settings.mode_key.key || c.settings.capture_key.key)){
-            HMODULE module=nullptr;GetModuleHandleExW(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS|GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,reinterpret_cast<LPCWSTR>(&keyboard_message),&module);
-            if(auto hook=SetWindowsHookExW(WH_GETMESSAGE,keyboard_message,module,input_thread)){
+            // Both the verified target thread and this callback belong to this
+            // process. Use a local hook, without registering a DLL module for
+            // system-mediated loading (which can fail with ERROR_MOD_NOT_FOUND).
+            if(auto hook=SetWindowsHookExW(WH_GETMESSAGE,keyboard_message,nullptr,input_thread)){
                 c.hooks.emplace(input_thread,hook);c.input_error.clear();c.raw_keys[input_thread].seed(raw_key_snapshot(c.settings),foreground==GetCurrentProcessId(),c.settings);
             }
-            else c.input_error="Cannot observe target keyboard messages: "+std::to_string(GetLastError());
+            else c.input_error="Cannot observe target keyboard messages: "+std::to_string(GetLastError())+" (thread "+std::to_string(input_thread)+")";
         }
         const bool focused=foreground==GetCurrentProcessId();
         if(focused && c.mode_edge)c.settings.mode=c.settings.mode==hud::Mode::Compact?hud::Mode::Detailed:c.settings.mode==hud::Mode::Detailed?hud::Mode::Hidden:hud::Mode::Compact;

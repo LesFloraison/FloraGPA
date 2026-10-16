@@ -8,6 +8,7 @@
 #include <QComboBox>
 #include <QAbstractItemView>
 #include <QLabel>
+#include <QPlainTextEdit>
 #include <QCheckBox>
 #include <QJsonArray>
 #include <QSignalSpy>
@@ -21,6 +22,19 @@ class CaptureUiTests final : public QObject {
     QString controller() { return QCoreApplication::applicationDirPath()+"/FloraCaptureMock.exe"; }
   private slots:
     void cleanup() { qunsetenv("FLORA_CAPTURE_MOCK"); }
+    void keyboardFailureStatus() {
+        qputenv("FLORA_CAPTURE_MOCK","input-error");QTemporaryDir dir;CaptureDialog dialog(controller());
+        dialog.findChild<QLineEdit*>("captureOutput")->setText(dir.path());
+        dialog.findChild<QPushButton*>("captureLaunch")->click();
+        auto* notice=dialog.findChild<QLabel*>("captureInputStatus");auto* client=dialog.findChild<CaptureClient*>();
+        auto* log=dialog.findChild<QPlainTextEdit*>();QVERIFY(notice);QVERIFY(log);
+        QTRY_VERIFY(!notice->isHidden());QVERIFY(notice->toolTip().contains("126"));
+        QTRY_VERIFY(dialog.findChild<QPushButton*>("captureNext")->isEnabled());
+        QTRY_VERIFY(!client->busy());client->status();QTRY_VERIFY(!client->busy());
+        QCOMPARE(log->toPlainText().count("Hotkeys unavailable:"),1);
+        qputenv("FLORA_CAPTURE_MOCK","settings");client->status();QTRY_VERIFY(notice->isHidden());
+        QVERIFY(log->toPlainText().contains("Hotkeys ready"));
+    }
     void sharedResourceLimit() {
         qputenv("FLORA_CAPTURE_MOCK","settings");QTemporaryDir dir;
         CaptureDialog dialog(controller());auto* client=dialog.findChild<CaptureClient*>();QVERIFY(client);

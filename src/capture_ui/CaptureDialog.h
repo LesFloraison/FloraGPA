@@ -33,6 +33,7 @@ class CaptureDialog final : public QDialog {
     QTimer poll_;
     QLineEdit *exe_, *arguments_, *cwd_, *out_;
     QLabel *status_;
+    QLabel *inputStatus_;
     QComboBox *swaps_;
     QComboBox *resourceLimit_;
     QComboBox *hudMode_;
@@ -42,6 +43,7 @@ class CaptureDialog final : public QDialog {
     bool available_ = false, activeCapture_ = false;
     QString completed_, lastResult_;
     QString lastHudRequest_;
+    QString inputSession_, lastInputError_;
     QString limitSession_, attemptedLimit_;
     unsigned confirmedLimit_ = 0;
 };

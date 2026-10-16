@@ -51,7 +51,8 @@ int main(int argc,char **argv) {
     } else if(command=="capture") {
         result["ok"]=false;result["error"]="capture_capability_incomplete";
     } else if(command=="disconnect")result["state"]="Disconnected";
-    if(mode=="settings" || mode=="settings-fail" || mode=="old-settings"){
+    if(mode=="input-error")result["hud"]=QJsonObject{{"input_reason","Cannot observe target keyboard messages: 126 (thread 42)"},{"input_threads",0}};
+    if(mode=="settings" || mode=="settings-fail" || mode=="old-settings" || mode=="input-error"){
         result["capture_available"]=true;
         result["swap_chains"]=QJsonObject{{"active",QJsonArray{QJsonObject{{"id",1},{"width",800},{"height",600}}}}};
         result["arguments"]=QJsonArray::fromStringList(args);

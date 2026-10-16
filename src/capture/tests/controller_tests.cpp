@@ -103,6 +103,7 @@ int wmain(int argc,wchar_t** argv){try{
         auto status=h.call(L"status");require(status["capture_limits"]["default_resource_limit_mib"]==1024 && status["capture_limits"]["max_resource_limit_mib"]==4096,"Capture budget capabilities missing");require(status["capture_available"],"Live target profile was not available");const auto id=std::to_wstring(status["swap_chains"]["active"][0]["id"].get<uint64_t>());
 #if defined(FLORA_RESOURCE_LIMIT_CONTROLLER)
         const auto configure=[&](unsigned limit){return h.run({L"configure",L"--session",(h.session/L"session.json").wstring(),L"--resource-limit-mib",std::to_wstring(limit)});};
+        require(status["hud"]["input_threads"].get<unsigned>()>0 && status["hud"]["input_reason"]=="","Local keyboard observer did not install in injected target");
         require(configure(4096)["capture_limits"]["session_resource_limit_mib"]==4096,"Session budget was not updated");
         h.pause();h.call(L"capture",0,id);
         auto updated=configure(2048);
