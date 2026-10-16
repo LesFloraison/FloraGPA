@@ -16,7 +16,8 @@ struct WindowDpiScope {
     DPI_AWARENESS_CONTEXT previous=nullptr;
     explicit WindowDpiScope(HWND window){
         const auto context=GetWindowDpiAwarenessContext(window);
-        if(!context || !(previous=SetThreadDpiAwarenessContext(context)))throw std::runtime_error("HUD window DPI context unavailable");
+        if(context)previous=SetThreadDpiAwarenessContext(context);
+        if(!previous)throw std::runtime_error("HUD window DPI context unavailable");
     }
     ~WindowDpiScope(){if(previous)SetThreadDpiAwarenessContext(previous);}
 };
