@@ -102,6 +102,7 @@ int wmain(int argc,wchar_t** argv){
                      <<"  [--hud compact|detailed|off] [--hud-hotkey Ctrl+F1|off] [--capture-hotkey Ctrl+Shift+C|off]\n"
                      <<"status|capture|cancel|disconnect --session SESSION_JSON [capture: --swap-chain ID --resource-limit-mib 1..4096]\n";
             std::cout<<"select --session SESSION_JSON --swap-chain ID (0 selects automatic foreground)\n";
+            std::cout<<"configure --session SESSION_JSON --resource-limit-mib 1..4096 (next button/hotkey capture budget)\n";
             std::cout<<"--version (JSON build/protocol identity)\n";
             std::cout<<"monitor --out NEW_DIRECTORY [--hud compact|detailed|off] (send stop on stdin to disarm)\n";
             return argc<2?2:0;
@@ -114,11 +115,11 @@ int wmain(int argc,wchar_t** argv){
             if(++i>=argc || !options.emplace(key,argv[i]).second)throw std::invalid_argument("Missing or duplicate option value");
         }
         if(verb!=L"launch"){
-            if(verb!=L"status" && verb!=L"capture" && verb!=L"cancel" && verb!=L"disconnect" && verb!=L"select")throw std::invalid_argument("Unknown command");
+            if(verb!=L"status" && verb!=L"capture" && verb!=L"cancel" && verb!=L"disconnect" && verb!=L"select" && verb!=L"configure")throw std::invalid_argument("Unknown command");
             const bool selected=options.count(L"--swap-chain")!=0;
             const bool limited=options.count(L"--resource-limit-mib")!=0;
-            if(options.size()!=(1u+unsigned(selected)+unsigned(limited)) || !options.count(L"--session") || !arguments.empty() || (selected && verb!=L"capture" && verb!=L"select") || (verb==L"select" && !selected) || (limited && verb!=L"capture"))
-                throw std::invalid_argument("Expected --session and optional capture --swap-chain/--resource-limit-mib");
+            if(options.size()!=(1u+unsigned(selected)+unsigned(limited)) || !options.count(L"--session") || !arguments.empty() || (selected && verb!=L"capture" && verb!=L"select") || (verb==L"select" && !selected) || (limited && verb!=L"capture" && verb!=L"configure") || (verb==L"configure" && !limited))
+                throw std::invalid_argument("Expected --session; configure requires --resource-limit-mib; capture accepts --swap-chain/--resource-limit-mib");
             Json extra=Json::object();
             if(limited){
                 const auto& text=options.at(L"--resource-limit-mib");

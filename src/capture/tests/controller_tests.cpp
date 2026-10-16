@@ -38,7 +38,7 @@ struct Harness {
     void resume(){fs::remove(oracle/L"pause.signal");const auto end=GetTickCount64()+5000;while(signal_exists(oracle/L"paused.signal")){require(GetTickCount64()<end,"Resume timeout");Sleep(5);}}
     void reject_bad_identity(){
         std::ifstream file(session/L"session.json");Json manifest;file>>manifest;
-        for(unsigned mode=0;mode<15;++mode){
+        for(unsigned mode=0;mode<22;++mode){
             const auto name=pipe_name(manifest["session_id"].get<std::string>());Handle pipe;
             const auto deadline=GetTickCount64()+5000;
             do{pipe.value=CreateFileW(name.c_str(),GENERIC_READ|GENERIC_WRITE,0,nullptr,OPEN_EXISTING,FILE_FLAG_OVERLAPPED|SECURITY_SQOS_PRESENT|SECURITY_IDENTIFICATION,nullptr);if(pipe.value!=INVALID_HANDLE_VALUE)break;Sleep(5);}while(GetTickCount64()<deadline);
@@ -48,7 +48,8 @@ struct Harness {
             else if(mode==8)bad["resource_limit_mib"]=0;else if(mode==9)bad["resource_limit_mib"]=4097;
             else if(mode==10)bad["resource_limit_mib"]=1.0;else if(mode==11)bad["resource_limit_mib"]="1024";
             else if(mode==12)bad["resource_limit_mib"]=-1;else if(mode==13)bad["resource_limit_mib"]=UINT64_MAX;
-            else{bad["command"]="status";bad["resource_limit_mib"]=1024;}
+            else if(mode==14){bad["command"]="status";bad["resource_limit_mib"]=1024;}
+            else{bad["command"]="configure";if(mode==15)bad["resource_limit_mib"]=0;else if(mode==16)bad["resource_limit_mib"]=4097;else if(mode==17)bad["resource_limit_mib"]=-1;else if(mode==18)bad["resource_limit_mib"]=1.0;else if(mode==19)bad["resource_limit_mib"]="1024";else if(mode==20)bad["resource_limit_mib"]=UINT64_MAX;}
             send(pipe.value,bad);const auto answer=receive(pipe.value);send(pipe.value,Json{{"request_id",bad["request_id"]}});
             require(!answer["ok"].get<bool>() && answer["error"]==(mode==0 || mode==4 || mode==5?"protocol_version_mismatch":mode>=8?"invalid_resource_limit":mode>=6?"invalid_swap_chain":"session_process_mismatch"),"Invalid IPC identity accepted");
             std::ofstream log(out/(L"identity-"+std::to_wstring(mode)+L".json"));log<<answer.dump(2);
@@ -59,7 +60,9 @@ struct Harness {
 }
 int wmain(int argc,wchar_t** argv){try{
     require(argc==4,"Expected controller, target and new output directory");const auto out=fs::absolute(argv[3]);require(!signal_exists(out),"Output exists");Json results=Json::array();
-#if defined(FLORA_INDIRECT_CONTROLLER)
+#if defined(FLORA_RESOURCE_LIMIT_CONTROLLER)
+    constexpr unsigned first_mode=0,last_mode=1;
+#elif defined(FLORA_INDIRECT_CONTROLLER)
     constexpr unsigned first_mode=37,last_mode=40;
 #elif defined(FLORA_STRUCTURE_COUNT_CONTROLLER)
     constexpr unsigned first_mode=35,last_mode=37;
@@ -98,6 +101,17 @@ int wmain(int argc,wchar_t** argv){try{
             require(!h.run({L"status",L"--session",(h.session/L"session.json").wstring(),L"--resource-limit-mib",L"4"},2)["ok"].get<bool>(),"Status accepted a capture-only limit");
         }
         auto status=h.call(L"status");require(status["capture_limits"]["default_resource_limit_mib"]==1024 && status["capture_limits"]["max_resource_limit_mib"]==4096,"Capture budget capabilities missing");require(status["capture_available"],"Live target profile was not available");const auto id=std::to_wstring(status["swap_chains"]["active"][0]["id"].get<uint64_t>());
+#if defined(FLORA_RESOURCE_LIMIT_CONTROLLER)
+        const auto configure=[&](unsigned limit){return h.run({L"configure",L"--session",(h.session/L"session.json").wstring(),L"--resource-limit-mib",std::to_wstring(limit)});};
+        require(configure(4096)["capture_limits"]["session_resource_limit_mib"]==4096,"Session budget was not updated");
+        h.pause();h.call(L"capture",0,id);
+        auto updated=configure(2048);
+        require(updated["capture_progress"]["resource_limit_mib"]==4096 && updated["capture_limits"]["session_resource_limit_mib"]==2048,"Configuration changed an already armed request");
+        h.call(L"cancel");h.resume();
+        h.call(L"capture",0,id);const auto inherited=h.settle();
+        require(inherited["last_capture"]["resource_limit_mib"]==2048 && inherited["last_capture"]["state"]=="Completed","Implicit request did not inherit session budget");
+        configure(1024);
+#endif
         h.pause();h.call(L"capture",0,id);require(h.call(L"capture",3,id)["error"]=="busy","Duplicate request was not busy");require(h.call(L"cancel")["cancelled"],"Armed cancel failed");h.resume();
         Json frames=Json::array();
         for(unsigned frame=0;frame<3;++frame){

@@ -106,17 +106,22 @@ Json response(const Json& message,ULONG client_pid){
     // Validate the UUID before using it as a file name. Paths never come from IPC.
     pipe_name(message.at("request_id").get<std::string>());
     const auto command=message.value("command",std::string());
-    if(message.contains("resource_limit_mib") && (command!="capture" || !message["resource_limit_mib"].is_number_unsigned() ||
-       !message["resource_limit_mib"].get<uint64_t>() || message["resource_limit_mib"].get<uint64_t>()>max_resource_limit_mib)){
+    if((command=="configure" && !message.contains("resource_limit_mib")) ||
+       (message.contains("resource_limit_mib") && ((command!="capture" && command!="configure") || !message["resource_limit_mib"].is_number_unsigned() ||
+       !message["resource_limit_mib"].get<uint64_t>() || message["resource_limit_mib"].get<uint64_t>()>max_resource_limit_mib))){
         result["error"]="invalid_resource_limit";return result;
     }
     const auto swaps=swap_chain_status();const auto objects=object_status();
     bool available=capture_request_available(swaps,objects);
     result["ok"]=true;
     if(command=="capture"){
-        const auto armed=submit_capture_request(message.value("swap_chain",0ull),message.at("request_id").get<std::string>(),message.value("resource_limit_mib",default_resource_limit_mib));
+        const auto limit=message.contains("resource_limit_mib")?std::optional<uint32_t>(message["resource_limit_mib"].get<uint32_t>()):std::nullopt;
+        const auto armed=submit_capture_request(message.value("swap_chain",0ull),message.at("request_id").get<std::string>(),limit);
         result["ok"]=armed.value("ok",false);if(armed.contains("error"))result["error"]=armed["error"];
         hud_feedback(armed);
+    }else if(command=="configure"){
+        const auto configured=configure_capture_limit(message["resource_limit_mib"].get<uint32_t>());
+        result["ok"]=configured.value("ok",false);if(configured.contains("error"))result["error"]=configured["error"];
     }else if(command=="select"){
         const auto selected=select_capture_swap(message.at("swap_chain").get<uint64_t>());result["ok"]=selected.value("ok",false);if(selected.contains("error"))result["error"]=selected["error"];
     }else if(command=="cancel"){
@@ -134,7 +139,7 @@ Json response(const Json& message,ULONG client_pid){
         if(progress.contains("file"))result["last_capture"]["path"]=progress["file"];
     }
     result["capture_available"]=available;result["swap_chains"]=swaps;result["objects"]=objects;
-    result["capture_limits"]={{"default_resource_limit_mib",default_resource_limit_mib},{"max_resource_limit_mib",max_resource_limit_mib}};
+    result["capture_limits"]={{"default_resource_limit_mib",default_resource_limit_mib},{"max_resource_limit_mib",max_resource_limit_mib},{"session_resource_limit_mib",capture_resource_limit()}};
     result["device_creations"]=creations.load();result["creation_failures"]=failures.load();result["feature_level"]=level.load();result["hook_status"]=hook_status.load();
     result["attachment"]=automatic_session?"auto_detect":"launch";
     result["capability_gaps"]={"Single-sample RGBA8/BGRA8/RGB10A2; dirty/scroll and flags other than ALLOW_TEARING unsupported","Query, empty-box/flagged/planar Updates, region/format copies, planar Maps and hidden states are incomplete","Deferred nesting beyond bounded journal limits, unverified Map baselines/layouts and hidden states unsupported","Deferred CS/OM initial KEEP requires a retained native UAV and successful execution-time readback; numeric UINT_MAX remains unsupported","One immediate context; worker calls require proxy serialization; foreign boundary Maps unsupported"};

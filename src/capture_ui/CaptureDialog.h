@@ -20,6 +20,8 @@ class CaptureDialog final : public QDialog {
     void closeEvent(QCloseEvent *event) override;
   private:
     void updateControls();
+    void syncResourceLimit();
+    bool resourceLimitSynced() const;
     void showResponse(const QString &command, const QJsonObject &result);
     CaptureClient client_;
     AutoDetectClient autoDetect_;
@@ -40,5 +42,7 @@ class CaptureDialog final : public QDialog {
     bool available_ = false, activeCapture_ = false;
     QString completed_, lastResult_;
     QString lastHudRequest_;
+    QString limitSession_, attemptedLimit_;
+    unsigned confirmedLimit_ = 0;
 };
 }

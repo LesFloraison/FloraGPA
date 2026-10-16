@@ -20,6 +20,7 @@ class CaptureClient final : public QObject {
     void status();
     void capture(const QString &swapChain = {}, unsigned resourceLimitMiB = 1024);
     void selectSwap(const QString &swapChain);
+    void setResourceLimit(unsigned resourceLimitMiB);
     void cancel();
     void disconnectSession();
     void useSession(const QString& manifest);

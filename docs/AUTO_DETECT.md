@@ -154,6 +154,18 @@ complete equivalence of original filtering, registry restoration or lifecycle.
 
 ## Reproduction
 
+The Capture limit combo applies to both the selected session's in-game hotkey
+and Capture Next Frame. The UI synchronizes it after launch/session selection
+and after changes, and waits for the runtime's acknowledgement before enabling
+the capture button. An already armed capture retains its original budget.
+The additive protocol-v4 `configure --session SESSION_JSON --resource-limit-mib
+1..4096` command updates the session default; `capture_limits.session_resource_limit_mib`
+reports the applied value. An omitted capture budget inherits that value;
+an explicit per-request budget does not overwrite it. Older runtimes without
+this capability require restarting the target, rather than silently accepting
+a UI value that their hotkey cannot use. Auto-Detect ABI and capture files are
+unchanged by this setting.
+
 Build `cmake --preset capture-full`, then
 `cmake --build build/vs2022 --config Release`. Relevant CTest names include
 `capture_autodetect_policy`, `capture_bootstrap`, `capture_ui`,

@@ -7,7 +7,7 @@
 
 namespace flora::capture {
 namespace {
-struct Requests {std::mutex mutex;std::filesystem::path directory;bool connected=false;uint64_t selected=0;};
+struct Requests {std::mutex mutex;std::filesystem::path directory;bool connected=false;uint64_t selected=0;uint32_t resource_limit_mib=default_resource_limit_mib;};
 Requests& requests(){static auto* value=new Requests;return *value;}
 }
 void configure_capture_requests(const std::filesystem::path& directory){
@@ -26,7 +26,17 @@ bool capture_request_available(const Json& swaps,const Json& objects){
     if(!capture_requests_connected() || objects.value("interface_gaps",0ull) || swaps.value("tracking_failures",0u))return false;
     for(const auto& row:swaps["active"])if(eligible_capture_swap(row))return true;return false;
 }
-Json submit_capture_request(uint64_t selected,const std::string& request_id,uint32_t resource_limit_mib){
+Json configure_capture_limit(uint32_t resource_limit_mib){
+    if(!resource_limit_mib || resource_limit_mib>max_resource_limit_mib)return {{"ok",false},{"error","invalid_resource_limit"}};
+    auto& r=requests();std::lock_guard lock(r.mutex);
+    if(!r.connected)return {{"ok",false},{"error","disconnected"}};
+    // Captures already armed retain their own budget. This setting applies to
+    // the next request, including requests from the in-process hotkey worker.
+    r.resource_limit_mib=resource_limit_mib;
+    return {{"ok",true},{"resource_limit_mib",r.resource_limit_mib}};
+}
+uint32_t capture_resource_limit(){auto& r=requests();std::lock_guard lock(r.mutex);return r.resource_limit_mib;}
+Json submit_capture_request(uint64_t selected,const std::string& request_id,std::optional<uint32_t> resource_limit_mib){
     pipe_name(request_id);
     auto& r=requests();std::lock_guard lock(r.mutex);
     if(!r.connected)return {{"ok",false},{"error","disconnected"}};
@@ -40,7 +50,7 @@ Json submit_capture_request(uint64_t selected,const std::string& request_id,uint
     }
     if(!available)return {{"ok",false},{"error","capture_capability_incomplete"}};
     if(candidates.size()!=1)return {{"ok",false},{"error",selected?"swap_chain_unavailable":"swap_chain_selection_required"}};
-    return arm_capture(candidates.front(),r.directory/("frame-"+request_id+".gpa_frame"),resource_limit_mib);
+    return arm_capture(candidates.front(),r.directory/("frame-"+request_id+".gpa_frame"),resource_limit_mib.value_or(r.resource_limit_mib));
 }
 void disconnect_capture_requests(){auto& r=requests();std::lock_guard lock(r.mutex);r.connected=false;disconnect_capture();}
 Json select_capture_swap(uint64_t selected){

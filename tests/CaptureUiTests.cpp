@@ -21,6 +21,49 @@ class CaptureUiTests final : public QObject {
     QString controller() { return QCoreApplication::applicationDirPath()+"/FloraCaptureMock.exe"; }
   private slots:
     void cleanup() { qunsetenv("FLORA_CAPTURE_MOCK"); }
+    void sharedResourceLimit() {
+        qputenv("FLORA_CAPTURE_MOCK","settings");QTemporaryDir dir;
+        CaptureDialog dialog(controller());auto* client=dialog.findChild<CaptureClient*>();QVERIFY(client);
+        QSignalSpy responses(client,&CaptureClient::response);
+        auto* limit=dialog.findChild<QComboBox*>("captureResourceLimit");
+        auto* capture=dialog.findChild<QPushButton*>("captureNext");
+        limit->setCurrentIndex(limit->findData(4096u));
+        dialog.findChild<QLineEdit*>("captureOutput")->setText(dir.path());
+        dialog.findChild<QPushButton*>("captureLaunch")->click();
+        QTRY_VERIFY(capture->isEnabled());
+        const auto confirmed=[&](unsigned expected){for(const auto& r:responses)if(r[0].toString()=="configure" && r[1].toJsonObject().value("capture_limits").toObject().value("session_resource_limit_mib").toInt()==int(expected))return true;return false;};
+        QVERIFY(confirmed(4096));
+        client->status(); // Changing the combo during a poll must not drop the update.
+        limit->setCurrentIndex(limit->findData(2048u));QVERIFY(!capture->isEnabled());
+        QTRY_VERIFY(capture->isEnabled());QVERIFY(confirmed(2048));
+        capture->click();QTRY_VERIFY(!client->busy());
+        bool buttonSeen=false;for(const auto& r:responses)if(r[0].toString()=="capture"){
+            const auto args=r[1].toJsonObject().value("arguments").toArray();const auto values=args.toVariantList();
+            const int i=values.indexOf("--resource-limit-mib");QVERIFY(i>=0);QCOMPARE(values.at(i+1).toString(),QString("2048"));buttonSeen=true;
+        }QVERIFY(buttonSeen);
+        // A newly selected Auto-Detect session must receive the same setting.
+        const auto manifest=dir.path()+"/auto-session.json";QFile file(manifest);QVERIFY(file.open(QIODevice::WriteOnly));
+        file.write("{\"version\":4,\"pid\":42,\"process_created\":1,\"session_id\":\"test\"}");file.close();
+        responses.clear();QTRY_VERIFY(!client->busy());client->useSession(manifest);
+        QTRY_VERIFY(confirmed(2048));QTRY_VERIFY(capture->isEnabled());
+    }
+    void resourceLimitFailure() {
+        qputenv("FLORA_CAPTURE_MOCK","settings-fail");QTemporaryDir dir;CaptureDialog dialog(controller());
+        auto* limit=dialog.findChild<QComboBox*>("captureResourceLimit");limit->setCurrentIndex(limit->findData(4096u));
+        dialog.findChild<QLineEdit*>("captureOutput")->setText(dir.path());
+        auto* client=dialog.findChild<CaptureClient*>();QSignalSpy responses(client,&CaptureClient::response);
+        dialog.findChild<QPushButton*>("captureLaunch")->click();
+        QTRY_VERIFY(responses.size()>=2);QTRY_VERIFY(!client->busy());
+        QVERIFY(!dialog.findChild<QPushButton*>("captureNext")->isEnabled());
+        bool rejected=false;for(const auto& r:responses)if(r[0].toString()=="configure")rejected=!r[1].toJsonObject().value("ok").toBool();QVERIFY(rejected);
+    }
+    void oldRuntimeResourceLimit() {
+        qputenv("FLORA_CAPTURE_MOCK","old-settings");QTemporaryDir dir;CaptureDialog dialog(controller());
+        dialog.findChild<QLineEdit*>("captureOutput")->setText(dir.path());
+        dialog.findChild<QPushButton*>("captureLaunch")->click();
+        QTRY_COMPARE(dialog.findChild<QLabel*>("captureStatus")->text(),QString("Restart target to update capture settings"));
+        QVERIFY(!dialog.findChild<QPushButton*>("captureNext")->isEnabled());
+    }
     void unavailableActions() {
         CaptureDialog dialog(controller());
         QVERIFY(!dialog.findChild<QPushButton *>("captureNext")->isEnabled());

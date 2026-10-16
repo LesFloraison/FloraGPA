@@ -34,14 +34,28 @@ int main(int argc,char **argv) {
     }
     if(mode=="slow")QThread::msleep(300);
     QJsonObject result{{"ok",true},{"version",4},{"state","Tracking"},{"capture_available",false}};
+    const auto session=args.value(args.indexOf("--session")+1);
+    unsigned limit=1024;
+    QFile budget(session+".budget");if(budget.open(QIODevice::ReadOnly)){limit=budget.readAll().toUInt();budget.close();}
+    if(command=="configure"){
+        if(mode=="settings-fail"){result["ok"]=false;result["error"]="configuration_rejected";}
+        else{limit=args.value(args.indexOf("--resource-limit-mib")+1).toUInt();if(!budget.open(QIODevice::WriteOnly))return 2;budget.write(QByteArray::number(limit));budget.close();}
+    }
+    if(mode!="old-settings")result["capture_limits"]=QJsonObject{{"session_resource_limit_mib",int(limit)}};
     if(command=="launch") {
         const auto path=args.value(args.indexOf("--out")+1)+"/session.json";
         QFile file(path);if(!file.open(QIODevice::WriteOnly))return 2;file.write("{}");file.close();
         result["session_file"]=path;
         result["arguments"]=QJsonArray::fromStringList(args);
+        result["status"]=QJsonObject{{"capture_limits",result["capture_limits"]},{"state","Tracking"}};
     } else if(command=="capture") {
         result["ok"]=false;result["error"]="capture_capability_incomplete";
     } else if(command=="disconnect")result["state"]="Disconnected";
+    if(mode=="settings" || mode=="settings-fail" || mode=="old-settings"){
+        result["capture_available"]=true;
+        result["swap_chains"]=QJsonObject{{"active",QJsonArray{QJsonObject{{"id",1},{"width",800},{"height",600}}}}};
+        result["arguments"]=QJsonArray::fromStringList(args);
+    }
     if(mode=="exited"){result["ok"]=false;result["state"]="Exited";result["error"]="target_exited";}
     auto bytes=QJsonDocument(result).toJson(QJsonDocument::Compact);fwrite(bytes.data(),1,bytes.size(),stdout);
     if(mode=="contradiction")return 2;

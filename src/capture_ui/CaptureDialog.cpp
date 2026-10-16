@@ -41,7 +41,7 @@ CaptureDialog::CaptureDialog(const QString &controller, QWidget *parent) : QDial
     swaps_=new QComboBox(this); swaps_->setObjectName("captureSwapChains"); form->addRow("Swap chain",swaps_);
     resourceLimit_=new QComboBox(this);resourceLimit_->setObjectName("captureResourceLimit");
     for(unsigned gib:{1u,2u,4u})resourceLimit_->addItem(QString::number(gib)+" GiB",gib*1024);
-    resourceLimit_->setToolTip("Resource budget for Capture Next Frame. Larger scenes may require 4 GiB. HUD hotkeys use the default 1 GiB budget.");
+    resourceLimit_->setToolTip("Resource budget for both Capture Next Frame and the in-game hotkey. Applies to the selected session's next capture.");
     form->addRow("Capture limit",resourceLimit_);
     layout->addLayout(form);
     auto detection=new QHBoxLayout;
@@ -75,6 +75,7 @@ CaptureDialog::CaptureDialog(const QString &controller, QWidget *parent) : QDial
         client_.launch(exe_->text(),cwd_->text(),out_->text(),QProcess::splitCommand(arguments_->text()),{hudMode_->currentData().toString(),hudKey_->text(),captureKey_->text()});
     });
     connect(capture_,&QPushButton::clicked,this,[this] { client_.capture(swaps_->currentData().toString(),resourceLimit_->currentData().toUInt()); });
+    connect(resourceLimit_,&QComboBox::currentIndexChanged,this,[this]{attemptedLimit_.clear();updateControls();syncResourceLimit();});
     connect(swaps_,&QComboBox::activated,this,[this](int){if(client_.connected() && !client_.busy())client_.selectSwap(swaps_->currentData().toString());});
     connect(cancel_,&QPushButton::clicked,&client_,&CaptureClient::cancel);
     connect(disconnect_,&QPushButton::clicked,&client_,&CaptureClient::disconnectSession);
@@ -114,13 +115,15 @@ CaptureDialog::CaptureDialog(const QString &controller, QWidget *parent) : QDial
         // Disabling a combo during a status request closes its popup. Let the
         // user finish selecting before the next background request.
         for(auto combo:{swaps_,sessions_,resourceLimit_})if(combo->view()->isVisible())return;
-        if(client_.connected() && !client_.busy())client_.status();
+        if(client_.connected() && !client_.busy()){syncResourceLimit();if(!client_.busy())client_.status();}
     });
     poll_.start(1000); updateControls();
     QTimer::singleShot(0,this,[this]{autoDetect_.recover(controller_);});
 }
 void CaptureDialog::showResponse(const QString &command,const QJsonObject &result) {
     const auto state = command=="launch" ? result.value("status").toObject() : result;
+    limitSession_=client_.sessionFile();
+    confirmedLimit_=state.value("capture_limits").toObject().value("session_resource_limit_mib").toInt();
     const auto phase=state.value("state").toString();
     activeCapture_=state.value("capture_progress").toObject().value("busy").toBool() || phase=="Armed" || phase=="Capturing" || phase=="Finalizing";
     available_=state.value("capture_available").toBool();
@@ -170,12 +173,27 @@ void CaptureDialog::showResponse(const QString &command,const QJsonObject &resul
         }
     }
     if(command=="disconnect" && result.value("ok").toBool())status_->setText("Disconnected");
+    if(client_.connected() && !confirmedLimit_){
+        status_->setText("Restart target to update capture settings");
+        attemptedLimit_=limitSession_+":"+QString::number(resourceLimit_->currentData().toUInt());
+    }else if(command=="configure" && !result.value("ok").toBool())status_->setText("Capture limit update failed");
     updateControls();
+    QTimer::singleShot(0,this,[this]{syncResourceLimit();});
+}
+bool CaptureDialog::resourceLimitSynced() const {
+    return limitSession_==client_.sessionFile() && confirmedLimit_==resourceLimit_->currentData().toUInt();
+}
+void CaptureDialog::syncResourceLimit() {
+    if(!client_.connected() || client_.busy() || activeCapture_ || resourceLimitSynced())return;
+    const auto key=client_.sessionFile()+":"+QString::number(resourceLimit_->currentData().toUInt());
+    if(attemptedLimit_==key)return;
+    attemptedLimit_=key;status_->setText("Applying capture limit");
+    client_.setResourceLimit(resourceLimit_->currentData().toUInt());
 }
 void CaptureDialog::updateControls() {
     const bool idle=!client_.busy();
     launch_->setEnabled(idle && !client_.connected() && !autoDetect_.active());
-    capture_->setEnabled(idle && client_.connected() && available_ && !activeCapture_ && swaps_->count()>0);
+    capture_->setEnabled(idle && client_.connected() && available_ && !activeCapture_ && swaps_->count()>0 && resourceLimitSynced());
     cancel_->setEnabled(idle && client_.connected() && activeCapture_);
     disconnect_->setEnabled(idle && client_.connected());
     open_->setEnabled(idle && !completed_.isEmpty());
