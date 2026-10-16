@@ -106,7 +106,7 @@ was reproduced independently and fixed by forwarding D3D11 video COM interfaces
 and unwrapping their resource operands, including nested SDK structures.
 `IDXGIKeyedMutex` also preserves shared-resource identity and synchronization.
 Video calls and cross-device synchronization during a capture remain explicit
-unsupported operations.
+unsupported operations. See [the local evidence](AUTO_DETECT_ENDFIELD.md).
 
 The loader follows the [Microsoft initialization constraints](https://learn.microsoft.com/en-us/windows/win32/dlls/dynamic-link-library-best-practices):
 no runtime LoadLibrary, filesystem session creation or COM initialization in
@@ -118,6 +118,13 @@ third-party DLLs calling graphics from their own DllMain and arbitrary concurren
 native entry patching are not established by the current test matrix.
 
 ## Compatibility changes discovered by acceptance
+
+Endfield's exact-path active attachment, generic video-interface forwarding,
+shared capture budget and local keyboard observer fixes were verified locally.
+The user accepts this capture improvement and confirms that original Intel GPA
+reads the latest captured frame normally. The checked reader still reports
+15 warnings; full replay fidelity and three consecutive cold launches remain
+unverified. See [Endfield evidence and limits](AUTO_DETECT_ENDFIELD.md).
 
 OCTOPATH TRAVELER II uses a ten-bit swap chain. Capture presentation storage,
 HUD blending and preview/replay export now support R10G10B10A2_UNORM while keeping

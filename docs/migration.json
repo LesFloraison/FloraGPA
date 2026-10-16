@@ -3862,7 +3862,18 @@
     "auto_detect": {
       "status": "partial",
       "overall_acceptance_complete": false,
-      "implementation": "Native x64 AppInit shim, protected manager/guard and recovery lease, async Qt session controls; generic new-process DX11 detection",
+      "implementation": "Native x64 AppInit shim plus optional exact-path active attachment for new processes, protected manager/guard and recovery lease, async Qt session controls; Auto-Detect ABI v2",
+      "endfield_active_attachment": {
+        "evidence": "docs/AUTO_DETECT_ENDFIELD.md",
+        "attachment_observed": true,
+        "capture_improvement_user_accepted": true,
+        "user_acceptance_date": "2026-10-16",
+        "original_intel_gpa_read": "User confirms original Intel GPA normally reads frame-554871be-9258-4050-9b59-1c8d87d70f78.gpa_frame (2,057,019,631 bytes). This is user-reported single-frame readability, not automated replay-fidelity acceptance.",
+        "stable_hud_acceptance_complete": false,
+        "accepted_cold_launches": 0,
+        "required_cold_launches": 3,
+        "blocker": "No remaining blocker for the user-accepted capture improvement. Generic video COM forwarding resolves the reproduced launcher decoder-view crash; shared 4,096 MiB capture settings resolve the earlier 1,024 MiB scene-budget failures; local keyboard registration restores physical HUD and capture hotkeys. The latest frame has zero checked-reader errors and 15 warnings (review_required) and is readable in original Intel GPA according to the user. Three consecutive cold launches, isolated held-key behavior and full replay fidelity remain unverified. Video commands and launcher dirty/scroll Present1 capture remain unsupported."
+      },
       "evidence": "docs/auto-detect-baseline.json",
       "documentation": "docs/AUTO_DETECT.md",
       "closed_loop_launches": {
@@ -3878,6 +3889,8 @@
     },
     "hud": {
       "status": "accepted_supported_profile",
+      "local_keyboard_registration_progress": "Same-process WH_GETMESSAGE registration now uses a null module after verifying target thread ownership. Previous Endfield PID 88984 reported Win32 126, zero input threads and zero hotkey edges while button capture worked. UI reports input failures and recovery without disabling button capture or repeating identical poll errors. VS2022 x64 Release and four serial CTests pass, including actual observer installation in the injected fixture and UI warning/recovery. Fresh Endfield PID 93852 loads the matching new runtime, registers one observer with no input error, and cycles Compact/Detailed/Off. User confirms normal HUD switching and successful physical hotkey capture. One capture edge/attempt/accepted request publishes a 2,057,019,631-byte file at Present 1377 using 4096 MiB. Checked reader: zero errors, 15 warnings, review_required. One-launch keyboard verification passes; full replay, isolated held-key behavior and three consecutive cold launches remain unverified. See docs/AUTO_DETECT_ENDFIELD.md and artifacts/keyboard-fix-01.",
+      "shared_capture_budget_progress": "UI Capture limit is synchronized to the selected runtime session and acknowledged before button capture; hotkeys inherit the same setting. In-flight requests retain their original budget, and older runtimes explicitly require restart. Release capture_resource_limit and capture_ui CTests pass (20 Qt cases). Endfield PID 98212 accepts three physical hotkey captures at 4096 MiB, publishing 382 MB, 1.92 GB and 645 MB files. A directly observed actual-scene button capture also completes at 4096 MiB and publishes 2.17 GB, with unchanged hotkey counters. Checked reader: zero errors, 15 warnings per file, review_required; replay fidelity remains unverified. See docs/AUTO_DETECT_ENDFIELD.md and artifacts/resource-limit-fix-01.",
       "multi_buffer_progress": "Automatic clean presentation storage enabled for guarded single-sample RGBA8/BGRA8 blt and flip profiles. Five injected profiles including monitor-sized borderless and exclusive produce 15 files / 410 dual-player checks, exact retained application bytes and no HUD commands/resources.",
       "presentation_identity_progress": "Native public identity, DXGI usage and view restrictions remain intact. Typeless private storage preserves native sRGB/default view behavior and captured UNORM descriptors. Resize detaches aliases and reattaches on failure; success starts a fresh generation.",
       "present_binding_progress": "192 native/facade pairs preserve surviving view identities, UAV counters, native HRESULT and diagnostics. Context gate integrates Present/capture; private copies preserve exact predicate identity/value. Broader concurrent/external-interface stress remains pending.",
