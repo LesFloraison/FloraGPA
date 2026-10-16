@@ -195,7 +195,7 @@ class MetricIterationTests : public QObject {
     Q_OBJECT
   private slots:
     void cumulativeReceiver() {
-        Transport t({{"timing", "ordinary"}});
+        Transport t(Json{{"timing", "ordinary"}});
         const auto result = MetricOuterPassRunner(t).run({42, 43}, Json::array({{2, 2}}));
         QCOMPARE(result["result"]["metrics"].size(), size_t(3));
         QCOMPARE(result["result"]["parallel_ranges"].size(), size_t(3));
@@ -203,7 +203,7 @@ class MetricIterationTests : public QObject {
         QVERIFY(t.trace.back() == Json::array({"prepare", Json::array()}));
     }
     void incompleteSuccess() {
-        Transport t({{"descriptions", Json::array({{{"id", 42}, {"name", "value"}, {"kind", 3}}})}});
+        Transport t(Json{{"descriptions", Json::array({{{"id", 42}, {"name", "value"}, {"kind", 3}}})}});
         const auto r = MetricIterationRunner(t).execute({42}, Json::array({{1, 1}}),
                                                         {{"weights", {1.}}, {"samples", 0}});
         QVERIFY(r["status"] == "success");

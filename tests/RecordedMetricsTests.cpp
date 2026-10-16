@@ -255,7 +255,7 @@ class RecordedMetricsTests : public QObject {
     Q_OBJECT
   private slots:
     void timeoutAborts() {
-        Fake fake({{"metadata",
+        Fake fake(Json{{"metadata",
                     {{"name", "Empty"},
                      {"metrics", Json::array()},
                      {"information", Json::array()},
@@ -271,7 +271,7 @@ class RecordedMetricsTests : public QObject {
         QVERIFY_THROWS_EXCEPTION(std::runtime_error, session.report());
     }
     void destructorReleases() {
-        Fake fake({{"metadata", {{"name", "Empty"}}}});
+        Fake fake(Json{{"metadata", {{"name", "Empty"}}}});
         {
             MdRecordedQueries session(fake, 10000, false, &fake);
             session.begin(10, 1);

@@ -335,7 +335,7 @@ class MetricPassControllerTests : public QObject {
     Q_OBJECT
   private slots:
     void absentCallbackAndFailedReset() {
-        MetricConsumer c({11});
+        MetricConsumer c(Json::array({11}));
         c.receive(999, UINT64_MAX, Bytes(), false);
         QVERIFY(c.rows().empty());
         QVERIFY_THROWS_EXCEPTION(std::invalid_argument, c.reset({11, 11}));
