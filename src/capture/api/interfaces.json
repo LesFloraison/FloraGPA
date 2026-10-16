@@ -38,7 +38,18 @@
     "IDXGIResource1",
     "IDXGISurface2",
     "IDXGIOutput6",
-    "IDXGIOutputDuplication"
+    "IDXGIOutputDuplication",
+    "ID3D11VideoDevice2",
+    "ID3D11VideoContext3",
+    "ID3D11VideoDecoder",
+    "ID3D11VideoProcessorEnumerator1",
+    "ID3D11VideoProcessor",
+    "ID3D11VideoDecoderOutputView",
+    "ID3D11VideoProcessorInputView",
+    "ID3D11VideoProcessorOutputView",
+    "ID3D11AuthenticatedChannel",
+    "ID3D11CryptoSession",
+    "IDXGIKeyedMutex"
   ],
   "interfaces": {
     "ID3D11Device5": {
@@ -8028,6 +8039,3703 @@
           "name": "ReleaseFrame",
           "result": "HRESULT",
           "parameters": []
+        }
+      ]
+    },
+    "ID3D11VideoDevice2": {
+      "parent": "ID3D11VideoDevice1",
+      "methods": [
+        {
+          "name": "CheckFeatureSupport",
+          "result": "HRESULT",
+          "parameters": [
+            {
+              "declaration": "D3D11_FEATURE_VIDEO Feature",
+              "name": "Feature",
+              "type": "D3D11_FEATURE_VIDEO",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "void *pFeatureSupportData",
+              "name": "pFeatureSupportData",
+              "type": "void *",
+              "direction": "out",
+              "count": ""
+            },
+            {
+              "declaration": "UINT FeatureSupportDataSize",
+              "name": "FeatureSupportDataSize",
+              "type": "UINT",
+              "direction": "in",
+              "count": ""
+            }
+          ]
+        },
+        {
+          "name": "NegotiateCryptoSessionKeyExchangeMT",
+          "result": "HRESULT",
+          "parameters": [
+            {
+              "declaration": "ID3D11CryptoSession *pCryptoSession",
+              "name": "pCryptoSession",
+              "type": "ID3D11CryptoSession *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "D3D11_CRYPTO_SESSION_KEY_EXCHANGE_FLAGS flags",
+              "name": "flags",
+              "type": "D3D11_CRYPTO_SESSION_KEY_EXCHANGE_FLAGS",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "UINT DataSize",
+              "name": "DataSize",
+              "type": "UINT",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "void *pData",
+              "name": "pData",
+              "type": "void *",
+              "direction": "inout",
+              "count": ""
+            }
+          ]
+        }
+      ]
+    },
+    "ID3D11VideoDevice1": {
+      "parent": "ID3D11VideoDevice",
+      "methods": [
+        {
+          "name": "GetCryptoSessionPrivateDataSize",
+          "result": "HRESULT",
+          "parameters": [
+            {
+              "declaration": "const GUID *pCryptoType",
+              "name": "pCryptoType",
+              "type": "const GUID *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "const GUID *pDecoderProfile",
+              "name": "pDecoderProfile",
+              "type": "const GUID *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "const GUID *pKeyExchangeType",
+              "name": "pKeyExchangeType",
+              "type": "const GUID *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "UINT *pPrivateInputSize",
+              "name": "pPrivateInputSize",
+              "type": "UINT *",
+              "direction": "out",
+              "count": ""
+            },
+            {
+              "declaration": "UINT *pPrivateOutputSize",
+              "name": "pPrivateOutputSize",
+              "type": "UINT *",
+              "direction": "out",
+              "count": ""
+            }
+          ]
+        },
+        {
+          "name": "GetVideoDecoderCaps",
+          "result": "HRESULT",
+          "parameters": [
+            {
+              "declaration": "const GUID *pDecoderProfile",
+              "name": "pDecoderProfile",
+              "type": "const GUID *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "UINT SampleWidth",
+              "name": "SampleWidth",
+              "type": "UINT",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "UINT SampleHeight",
+              "name": "SampleHeight",
+              "type": "UINT",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "const DXGI_RATIONAL *pFrameRate",
+              "name": "pFrameRate",
+              "type": "const DXGI_RATIONAL *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "UINT BitRate",
+              "name": "BitRate",
+              "type": "UINT",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "const GUID *pCryptoType",
+              "name": "pCryptoType",
+              "type": "const GUID *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "UINT *pDecoderCaps",
+              "name": "pDecoderCaps",
+              "type": "UINT *",
+              "direction": "out",
+              "count": ""
+            }
+          ]
+        },
+        {
+          "name": "CheckVideoDecoderDownsampling",
+          "result": "HRESULT",
+          "parameters": [
+            {
+              "declaration": "const D3D11_VIDEO_DECODER_DESC *pInputDesc",
+              "name": "pInputDesc",
+              "type": "const D3D11_VIDEO_DECODER_DESC *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "DXGI_COLOR_SPACE_TYPE InputColorSpace",
+              "name": "InputColorSpace",
+              "type": "DXGI_COLOR_SPACE_TYPE",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "const D3D11_VIDEO_DECODER_CONFIG *pInputConfig",
+              "name": "pInputConfig",
+              "type": "const D3D11_VIDEO_DECODER_CONFIG *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "const DXGI_RATIONAL *pFrameRate",
+              "name": "pFrameRate",
+              "type": "const DXGI_RATIONAL *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "const D3D11_VIDEO_SAMPLE_DESC *pOutputDesc",
+              "name": "pOutputDesc",
+              "type": "const D3D11_VIDEO_SAMPLE_DESC *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "BOOL *pSupported",
+              "name": "pSupported",
+              "type": "BOOL *",
+              "direction": "out",
+              "count": ""
+            },
+            {
+              "declaration": "BOOL *pRealTimeHint",
+              "name": "pRealTimeHint",
+              "type": "BOOL *",
+              "direction": "out",
+              "count": ""
+            }
+          ]
+        },
+        {
+          "name": "RecommendVideoDecoderDownsampleParameters",
+          "result": "HRESULT",
+          "parameters": [
+            {
+              "declaration": "const D3D11_VIDEO_DECODER_DESC *pInputDesc",
+              "name": "pInputDesc",
+              "type": "const D3D11_VIDEO_DECODER_DESC *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "DXGI_COLOR_SPACE_TYPE InputColorSpace",
+              "name": "InputColorSpace",
+              "type": "DXGI_COLOR_SPACE_TYPE",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "const D3D11_VIDEO_DECODER_CONFIG *pInputConfig",
+              "name": "pInputConfig",
+              "type": "const D3D11_VIDEO_DECODER_CONFIG *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "const DXGI_RATIONAL *pFrameRate",
+              "name": "pFrameRate",
+              "type": "const DXGI_RATIONAL *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "D3D11_VIDEO_SAMPLE_DESC *pRecommendedOutputDesc",
+              "name": "pRecommendedOutputDesc",
+              "type": "D3D11_VIDEO_SAMPLE_DESC *",
+              "direction": "out",
+              "count": ""
+            }
+          ]
+        }
+      ]
+    },
+    "ID3D11VideoDevice": {
+      "parent": "IUnknown",
+      "methods": [
+        {
+          "name": "CreateVideoDecoder",
+          "result": "HRESULT",
+          "parameters": [
+            {
+              "declaration": "const D3D11_VIDEO_DECODER_DESC *pVideoDesc",
+              "name": "pVideoDesc",
+              "type": "const D3D11_VIDEO_DECODER_DESC *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "const D3D11_VIDEO_DECODER_CONFIG *pConfig",
+              "name": "pConfig",
+              "type": "const D3D11_VIDEO_DECODER_CONFIG *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "ID3D11VideoDecoder **ppDecoder",
+              "name": "ppDecoder",
+              "type": "ID3D11VideoDecoder **",
+              "direction": "out",
+              "count": ""
+            }
+          ]
+        },
+        {
+          "name": "CreateVideoProcessor",
+          "result": "HRESULT",
+          "parameters": [
+            {
+              "declaration": "ID3D11VideoProcessorEnumerator *pEnum",
+              "name": "pEnum",
+              "type": "ID3D11VideoProcessorEnumerator *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "UINT RateConversionIndex",
+              "name": "RateConversionIndex",
+              "type": "UINT",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "ID3D11VideoProcessor **ppVideoProcessor",
+              "name": "ppVideoProcessor",
+              "type": "ID3D11VideoProcessor **",
+              "direction": "out",
+              "count": ""
+            }
+          ]
+        },
+        {
+          "name": "CreateAuthenticatedChannel",
+          "result": "HRESULT",
+          "parameters": [
+            {
+              "declaration": "D3D11_AUTHENTICATED_CHANNEL_TYPE ChannelType",
+              "name": "ChannelType",
+              "type": "D3D11_AUTHENTICATED_CHANNEL_TYPE",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "ID3D11AuthenticatedChannel **ppAuthenticatedChannel",
+              "name": "ppAuthenticatedChannel",
+              "type": "ID3D11AuthenticatedChannel **",
+              "direction": "out",
+              "count": ""
+            }
+          ]
+        },
+        {
+          "name": "CreateCryptoSession",
+          "result": "HRESULT",
+          "parameters": [
+            {
+              "declaration": "const GUID *pCryptoType",
+              "name": "pCryptoType",
+              "type": "const GUID *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "const GUID *pDecoderProfile",
+              "name": "pDecoderProfile",
+              "type": "const GUID *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "const GUID *pKeyExchangeType",
+              "name": "pKeyExchangeType",
+              "type": "const GUID *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "ID3D11CryptoSession **ppCryptoSession",
+              "name": "ppCryptoSession",
+              "type": "ID3D11CryptoSession **",
+              "direction": "out",
+              "count": ""
+            }
+          ]
+        },
+        {
+          "name": "CreateVideoDecoderOutputView",
+          "result": "HRESULT",
+          "parameters": [
+            {
+              "declaration": "ID3D11Resource *pResource",
+              "name": "pResource",
+              "type": "ID3D11Resource *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "const D3D11_VIDEO_DECODER_OUTPUT_VIEW_DESC *pDesc",
+              "name": "pDesc",
+              "type": "const D3D11_VIDEO_DECODER_OUTPUT_VIEW_DESC *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "ID3D11VideoDecoderOutputView **ppVDOVView",
+              "name": "ppVDOVView",
+              "type": "ID3D11VideoDecoderOutputView **",
+              "direction": "out",
+              "count": ""
+            }
+          ]
+        },
+        {
+          "name": "CreateVideoProcessorInputView",
+          "result": "HRESULT",
+          "parameters": [
+            {
+              "declaration": "ID3D11Resource *pResource",
+              "name": "pResource",
+              "type": "ID3D11Resource *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "ID3D11VideoProcessorEnumerator *pEnum",
+              "name": "pEnum",
+              "type": "ID3D11VideoProcessorEnumerator *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "const D3D11_VIDEO_PROCESSOR_INPUT_VIEW_DESC *pDesc",
+              "name": "pDesc",
+              "type": "const D3D11_VIDEO_PROCESSOR_INPUT_VIEW_DESC *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "ID3D11VideoProcessorInputView **ppVPIView",
+              "name": "ppVPIView",
+              "type": "ID3D11VideoProcessorInputView **",
+              "direction": "out",
+              "count": ""
+            }
+          ]
+        },
+        {
+          "name": "CreateVideoProcessorOutputView",
+          "result": "HRESULT",
+          "parameters": [
+            {
+              "declaration": "ID3D11Resource *pResource",
+              "name": "pResource",
+              "type": "ID3D11Resource *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "ID3D11VideoProcessorEnumerator *pEnum",
+              "name": "pEnum",
+              "type": "ID3D11VideoProcessorEnumerator *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "const D3D11_VIDEO_PROCESSOR_OUTPUT_VIEW_DESC *pDesc",
+              "name": "pDesc",
+              "type": "const D3D11_VIDEO_PROCESSOR_OUTPUT_VIEW_DESC *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "ID3D11VideoProcessorOutputView **ppVPOView",
+              "name": "ppVPOView",
+              "type": "ID3D11VideoProcessorOutputView **",
+              "direction": "out",
+              "count": ""
+            }
+          ]
+        },
+        {
+          "name": "CreateVideoProcessorEnumerator",
+          "result": "HRESULT",
+          "parameters": [
+            {
+              "declaration": "const D3D11_VIDEO_PROCESSOR_CONTENT_DESC *pDesc",
+              "name": "pDesc",
+              "type": "const D3D11_VIDEO_PROCESSOR_CONTENT_DESC *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "ID3D11VideoProcessorEnumerator **ppEnum",
+              "name": "ppEnum",
+              "type": "ID3D11VideoProcessorEnumerator **",
+              "direction": "out",
+              "count": ""
+            }
+          ]
+        },
+        {
+          "name": "GetVideoDecoderProfileCount",
+          "result": "UINT",
+          "parameters": []
+        },
+        {
+          "name": "GetVideoDecoderProfile",
+          "result": "HRESULT",
+          "parameters": [
+            {
+              "declaration": "UINT Index",
+              "name": "Index",
+              "type": "UINT",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "GUID *pDecoderProfile",
+              "name": "pDecoderProfile",
+              "type": "GUID *",
+              "direction": "out",
+              "count": ""
+            }
+          ]
+        },
+        {
+          "name": "CheckVideoDecoderFormat",
+          "result": "HRESULT",
+          "parameters": [
+            {
+              "declaration": "const GUID *pDecoderProfile",
+              "name": "pDecoderProfile",
+              "type": "const GUID *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "DXGI_FORMAT Format",
+              "name": "Format",
+              "type": "DXGI_FORMAT",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "BOOL *pSupported",
+              "name": "pSupported",
+              "type": "BOOL *",
+              "direction": "out",
+              "count": ""
+            }
+          ]
+        },
+        {
+          "name": "GetVideoDecoderConfigCount",
+          "result": "HRESULT",
+          "parameters": [
+            {
+              "declaration": "const D3D11_VIDEO_DECODER_DESC *pDesc",
+              "name": "pDesc",
+              "type": "const D3D11_VIDEO_DECODER_DESC *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "UINT *pCount",
+              "name": "pCount",
+              "type": "UINT *",
+              "direction": "out",
+              "count": ""
+            }
+          ]
+        },
+        {
+          "name": "GetVideoDecoderConfig",
+          "result": "HRESULT",
+          "parameters": [
+            {
+              "declaration": "const D3D11_VIDEO_DECODER_DESC *pDesc",
+              "name": "pDesc",
+              "type": "const D3D11_VIDEO_DECODER_DESC *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "UINT Index",
+              "name": "Index",
+              "type": "UINT",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "D3D11_VIDEO_DECODER_CONFIG *pConfig",
+              "name": "pConfig",
+              "type": "D3D11_VIDEO_DECODER_CONFIG *",
+              "direction": "out",
+              "count": ""
+            }
+          ]
+        },
+        {
+          "name": "GetContentProtectionCaps",
+          "result": "HRESULT",
+          "parameters": [
+            {
+              "declaration": "const GUID *pCryptoType",
+              "name": "pCryptoType",
+              "type": "const GUID *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "const GUID *pDecoderProfile",
+              "name": "pDecoderProfile",
+              "type": "const GUID *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "D3D11_VIDEO_CONTENT_PROTECTION_CAPS *pCaps",
+              "name": "pCaps",
+              "type": "D3D11_VIDEO_CONTENT_PROTECTION_CAPS *",
+              "direction": "out",
+              "count": ""
+            }
+          ]
+        },
+        {
+          "name": "CheckCryptoKeyExchange",
+          "result": "HRESULT",
+          "parameters": [
+            {
+              "declaration": "const GUID *pCryptoType",
+              "name": "pCryptoType",
+              "type": "const GUID *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "const GUID *pDecoderProfile",
+              "name": "pDecoderProfile",
+              "type": "const GUID *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "UINT Index",
+              "name": "Index",
+              "type": "UINT",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "GUID *pKeyExchangeType",
+              "name": "pKeyExchangeType",
+              "type": "GUID *",
+              "direction": "out",
+              "count": ""
+            }
+          ]
+        },
+        {
+          "name": "SetPrivateData",
+          "result": "HRESULT",
+          "parameters": [
+            {
+              "declaration": "REFGUID guid",
+              "name": "guid",
+              "type": "REFGUID",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "UINT DataSize",
+              "name": "DataSize",
+              "type": "UINT",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "const void *pData",
+              "name": "pData",
+              "type": "const void *",
+              "direction": "in",
+              "count": ""
+            }
+          ]
+        },
+        {
+          "name": "SetPrivateDataInterface",
+          "result": "HRESULT",
+          "parameters": [
+            {
+              "declaration": "REFGUID guid",
+              "name": "guid",
+              "type": "REFGUID",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "const IUnknown *pData",
+              "name": "pData",
+              "type": "const IUnknown *",
+              "direction": "in",
+              "count": ""
+            }
+          ]
+        }
+      ]
+    },
+    "ID3D11VideoContext3": {
+      "parent": "ID3D11VideoContext2",
+      "methods": [
+        {
+          "name": "DecoderBeginFrame1",
+          "result": "HRESULT",
+          "parameters": [
+            {
+              "declaration": "ID3D11VideoDecoder *pDecoder",
+              "name": "pDecoder",
+              "type": "ID3D11VideoDecoder *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "ID3D11VideoDecoderOutputView *pView",
+              "name": "pView",
+              "type": "ID3D11VideoDecoderOutputView *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "UINT ContentKeySize",
+              "name": "ContentKeySize",
+              "type": "UINT",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "const void *pContentKey",
+              "name": "pContentKey",
+              "type": "const void *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "UINT NumComponentHistograms",
+              "name": "NumComponentHistograms",
+              "type": "UINT",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "const UINT *pHistogramOffsets",
+              "name": "pHistogramOffsets",
+              "type": "const UINT *",
+              "direction": "in",
+              "count": "NumComponentHistograms"
+            },
+            {
+              "declaration": "ID3D11Buffer *const *ppHistogramBuffers",
+              "name": "ppHistogramBuffers",
+              "type": "ID3D11Buffer *const *",
+              "direction": "in",
+              "count": "NumComponentHistograms"
+            }
+          ]
+        },
+        {
+          "name": "SubmitDecoderBuffers2",
+          "result": "HRESULT",
+          "parameters": [
+            {
+              "declaration": "ID3D11VideoDecoder *pDecoder",
+              "name": "pDecoder",
+              "type": "ID3D11VideoDecoder *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "UINT NumBuffers",
+              "name": "NumBuffers",
+              "type": "UINT",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "const D3D11_VIDEO_DECODER_BUFFER_DESC2 *pBufferDesc",
+              "name": "pBufferDesc",
+              "type": "const D3D11_VIDEO_DECODER_BUFFER_DESC2 *",
+              "direction": "in",
+              "count": "NumBuffers"
+            }
+          ]
+        }
+      ]
+    },
+    "ID3D11VideoContext2": {
+      "parent": "ID3D11VideoContext1",
+      "methods": [
+        {
+          "name": "VideoProcessorSetOutputHDRMetaData",
+          "result": "void",
+          "parameters": [
+            {
+              "declaration": "ID3D11VideoProcessor *pVideoProcessor",
+              "name": "pVideoProcessor",
+              "type": "ID3D11VideoProcessor *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "DXGI_HDR_METADATA_TYPE Type",
+              "name": "Type",
+              "type": "DXGI_HDR_METADATA_TYPE",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "UINT Size",
+              "name": "Size",
+              "type": "UINT",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "const void *pHDRMetaData",
+              "name": "pHDRMetaData",
+              "type": "const void *",
+              "direction": "in",
+              "count": ""
+            }
+          ]
+        },
+        {
+          "name": "VideoProcessorGetOutputHDRMetaData",
+          "result": "void",
+          "parameters": [
+            {
+              "declaration": "ID3D11VideoProcessor *pVideoProcessor",
+              "name": "pVideoProcessor",
+              "type": "ID3D11VideoProcessor *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "DXGI_HDR_METADATA_TYPE *pType",
+              "name": "pType",
+              "type": "DXGI_HDR_METADATA_TYPE *",
+              "direction": "out",
+              "count": ""
+            },
+            {
+              "declaration": "UINT Size",
+              "name": "Size",
+              "type": "UINT",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "void *pMetaData",
+              "name": "pMetaData",
+              "type": "void *",
+              "direction": "out",
+              "count": ""
+            }
+          ]
+        },
+        {
+          "name": "VideoProcessorSetStreamHDRMetaData",
+          "result": "void",
+          "parameters": [
+            {
+              "declaration": "ID3D11VideoProcessor *pVideoProcessor",
+              "name": "pVideoProcessor",
+              "type": "ID3D11VideoProcessor *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "UINT StreamIndex",
+              "name": "StreamIndex",
+              "type": "UINT",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "DXGI_HDR_METADATA_TYPE Type",
+              "name": "Type",
+              "type": "DXGI_HDR_METADATA_TYPE",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "UINT Size",
+              "name": "Size",
+              "type": "UINT",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "const void *pHDRMetaData",
+              "name": "pHDRMetaData",
+              "type": "const void *",
+              "direction": "in",
+              "count": ""
+            }
+          ]
+        },
+        {
+          "name": "VideoProcessorGetStreamHDRMetaData",
+          "result": "void",
+          "parameters": [
+            {
+              "declaration": "ID3D11VideoProcessor *pVideoProcessor",
+              "name": "pVideoProcessor",
+              "type": "ID3D11VideoProcessor *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "UINT StreamIndex",
+              "name": "StreamIndex",
+              "type": "UINT",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "DXGI_HDR_METADATA_TYPE *pType",
+              "name": "pType",
+              "type": "DXGI_HDR_METADATA_TYPE *",
+              "direction": "out",
+              "count": ""
+            },
+            {
+              "declaration": "UINT Size",
+              "name": "Size",
+              "type": "UINT",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "void *pMetaData",
+              "name": "pMetaData",
+              "type": "void *",
+              "direction": "out",
+              "count": ""
+            }
+          ]
+        }
+      ]
+    },
+    "ID3D11VideoContext1": {
+      "parent": "ID3D11VideoContext",
+      "methods": [
+        {
+          "name": "SubmitDecoderBuffers1",
+          "result": "HRESULT",
+          "parameters": [
+            {
+              "declaration": "ID3D11VideoDecoder *pDecoder",
+              "name": "pDecoder",
+              "type": "ID3D11VideoDecoder *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "UINT NumBuffers",
+              "name": "NumBuffers",
+              "type": "UINT",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "const D3D11_VIDEO_DECODER_BUFFER_DESC1 *pBufferDesc",
+              "name": "pBufferDesc",
+              "type": "const D3D11_VIDEO_DECODER_BUFFER_DESC1 *",
+              "direction": "in",
+              "count": "NumBuffers"
+            }
+          ]
+        },
+        {
+          "name": "GetDataForNewHardwareKey",
+          "result": "HRESULT",
+          "parameters": [
+            {
+              "declaration": "ID3D11CryptoSession *pCryptoSession",
+              "name": "pCryptoSession",
+              "type": "ID3D11CryptoSession *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "UINT PrivateInputSize",
+              "name": "PrivateInputSize",
+              "type": "UINT",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "const void *pPrivatInputData",
+              "name": "pPrivatInputData",
+              "type": "const void *",
+              "direction": "in",
+              "count": "PrivateInputSize"
+            },
+            {
+              "declaration": "UINT64 *pPrivateOutputData",
+              "name": "pPrivateOutputData",
+              "type": "UINT64 *",
+              "direction": "out",
+              "count": ""
+            }
+          ]
+        },
+        {
+          "name": "CheckCryptoSessionStatus",
+          "result": "HRESULT",
+          "parameters": [
+            {
+              "declaration": "ID3D11CryptoSession *pCryptoSession",
+              "name": "pCryptoSession",
+              "type": "ID3D11CryptoSession *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "D3D11_CRYPTO_SESSION_STATUS *pStatus",
+              "name": "pStatus",
+              "type": "D3D11_CRYPTO_SESSION_STATUS *",
+              "direction": "out",
+              "count": ""
+            }
+          ]
+        },
+        {
+          "name": "DecoderEnableDownsampling",
+          "result": "HRESULT",
+          "parameters": [
+            {
+              "declaration": "ID3D11VideoDecoder *pDecoder",
+              "name": "pDecoder",
+              "type": "ID3D11VideoDecoder *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "DXGI_COLOR_SPACE_TYPE InputColorSpace",
+              "name": "InputColorSpace",
+              "type": "DXGI_COLOR_SPACE_TYPE",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "const D3D11_VIDEO_SAMPLE_DESC *pOutputDesc",
+              "name": "pOutputDesc",
+              "type": "const D3D11_VIDEO_SAMPLE_DESC *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "UINT ReferenceFrameCount",
+              "name": "ReferenceFrameCount",
+              "type": "UINT",
+              "direction": "in",
+              "count": ""
+            }
+          ]
+        },
+        {
+          "name": "DecoderUpdateDownsampling",
+          "result": "HRESULT",
+          "parameters": [
+            {
+              "declaration": "ID3D11VideoDecoder *pDecoder",
+              "name": "pDecoder",
+              "type": "ID3D11VideoDecoder *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "const D3D11_VIDEO_SAMPLE_DESC *pOutputDesc",
+              "name": "pOutputDesc",
+              "type": "const D3D11_VIDEO_SAMPLE_DESC *",
+              "direction": "in",
+              "count": ""
+            }
+          ]
+        },
+        {
+          "name": "VideoProcessorSetOutputColorSpace1",
+          "result": "void",
+          "parameters": [
+            {
+              "declaration": "ID3D11VideoProcessor *pVideoProcessor",
+              "name": "pVideoProcessor",
+              "type": "ID3D11VideoProcessor *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "DXGI_COLOR_SPACE_TYPE ColorSpace",
+              "name": "ColorSpace",
+              "type": "DXGI_COLOR_SPACE_TYPE",
+              "direction": "in",
+              "count": ""
+            }
+          ]
+        },
+        {
+          "name": "VideoProcessorSetOutputShaderUsage",
+          "result": "void",
+          "parameters": [
+            {
+              "declaration": "ID3D11VideoProcessor *pVideoProcessor",
+              "name": "pVideoProcessor",
+              "type": "ID3D11VideoProcessor *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "BOOL ShaderUsage",
+              "name": "ShaderUsage",
+              "type": "BOOL",
+              "direction": "in",
+              "count": ""
+            }
+          ]
+        },
+        {
+          "name": "VideoProcessorGetOutputColorSpace1",
+          "result": "void",
+          "parameters": [
+            {
+              "declaration": "ID3D11VideoProcessor *pVideoProcessor",
+              "name": "pVideoProcessor",
+              "type": "ID3D11VideoProcessor *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "DXGI_COLOR_SPACE_TYPE *pColorSpace",
+              "name": "pColorSpace",
+              "type": "DXGI_COLOR_SPACE_TYPE *",
+              "direction": "out",
+              "count": ""
+            }
+          ]
+        },
+        {
+          "name": "VideoProcessorGetOutputShaderUsage",
+          "result": "void",
+          "parameters": [
+            {
+              "declaration": "ID3D11VideoProcessor *pVideoProcessor",
+              "name": "pVideoProcessor",
+              "type": "ID3D11VideoProcessor *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "BOOL *pShaderUsage",
+              "name": "pShaderUsage",
+              "type": "BOOL *",
+              "direction": "out",
+              "count": ""
+            }
+          ]
+        },
+        {
+          "name": "VideoProcessorSetStreamColorSpace1",
+          "result": "void",
+          "parameters": [
+            {
+              "declaration": "ID3D11VideoProcessor *pVideoProcessor",
+              "name": "pVideoProcessor",
+              "type": "ID3D11VideoProcessor *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "UINT StreamIndex",
+              "name": "StreamIndex",
+              "type": "UINT",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "DXGI_COLOR_SPACE_TYPE ColorSpace",
+              "name": "ColorSpace",
+              "type": "DXGI_COLOR_SPACE_TYPE",
+              "direction": "in",
+              "count": ""
+            }
+          ]
+        },
+        {
+          "name": "VideoProcessorSetStreamMirror",
+          "result": "void",
+          "parameters": [
+            {
+              "declaration": "ID3D11VideoProcessor *pVideoProcessor",
+              "name": "pVideoProcessor",
+              "type": "ID3D11VideoProcessor *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "UINT StreamIndex",
+              "name": "StreamIndex",
+              "type": "UINT",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "BOOL Enable",
+              "name": "Enable",
+              "type": "BOOL",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "BOOL FlipHorizontal",
+              "name": "FlipHorizontal",
+              "type": "BOOL",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "BOOL FlipVertical",
+              "name": "FlipVertical",
+              "type": "BOOL",
+              "direction": "in",
+              "count": ""
+            }
+          ]
+        },
+        {
+          "name": "VideoProcessorGetStreamColorSpace1",
+          "result": "void",
+          "parameters": [
+            {
+              "declaration": "ID3D11VideoProcessor *pVideoProcessor",
+              "name": "pVideoProcessor",
+              "type": "ID3D11VideoProcessor *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "UINT StreamIndex",
+              "name": "StreamIndex",
+              "type": "UINT",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "DXGI_COLOR_SPACE_TYPE *pColorSpace",
+              "name": "pColorSpace",
+              "type": "DXGI_COLOR_SPACE_TYPE *",
+              "direction": "out",
+              "count": ""
+            }
+          ]
+        },
+        {
+          "name": "VideoProcessorGetStreamMirror",
+          "result": "void",
+          "parameters": [
+            {
+              "declaration": "ID3D11VideoProcessor *pVideoProcessor",
+              "name": "pVideoProcessor",
+              "type": "ID3D11VideoProcessor *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "UINT StreamIndex",
+              "name": "StreamIndex",
+              "type": "UINT",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "BOOL *pEnable",
+              "name": "pEnable",
+              "type": "BOOL *",
+              "direction": "out",
+              "count": ""
+            },
+            {
+              "declaration": "BOOL *pFlipHorizontal",
+              "name": "pFlipHorizontal",
+              "type": "BOOL *",
+              "direction": "out",
+              "count": ""
+            },
+            {
+              "declaration": "BOOL *pFlipVertical",
+              "name": "pFlipVertical",
+              "type": "BOOL *",
+              "direction": "out",
+              "count": ""
+            }
+          ]
+        },
+        {
+          "name": "VideoProcessorGetBehaviorHints",
+          "result": "HRESULT",
+          "parameters": [
+            {
+              "declaration": "ID3D11VideoProcessor *pVideoProcessor",
+              "name": "pVideoProcessor",
+              "type": "ID3D11VideoProcessor *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "UINT OutputWidth",
+              "name": "OutputWidth",
+              "type": "UINT",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "UINT OutputHeight",
+              "name": "OutputHeight",
+              "type": "UINT",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "DXGI_FORMAT OutputFormat",
+              "name": "OutputFormat",
+              "type": "DXGI_FORMAT",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "UINT StreamCount",
+              "name": "StreamCount",
+              "type": "UINT",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "const D3D11_VIDEO_PROCESSOR_STREAM_BEHAVIOR_HINT *pStreams",
+              "name": "pStreams",
+              "type": "const D3D11_VIDEO_PROCESSOR_STREAM_BEHAVIOR_HINT *",
+              "direction": "in",
+              "count": "StreamCount"
+            },
+            {
+              "declaration": "UINT *pBehaviorHints",
+              "name": "pBehaviorHints",
+              "type": "UINT *",
+              "direction": "out",
+              "count": ""
+            }
+          ]
+        }
+      ]
+    },
+    "ID3D11VideoContext": {
+      "parent": "ID3D11DeviceChild",
+      "methods": [
+        {
+          "name": "GetDecoderBuffer",
+          "result": "HRESULT",
+          "parameters": [
+            {
+              "declaration": "ID3D11VideoDecoder *pDecoder",
+              "name": "pDecoder",
+              "type": "ID3D11VideoDecoder *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "D3D11_VIDEO_DECODER_BUFFER_TYPE Type",
+              "name": "Type",
+              "type": "D3D11_VIDEO_DECODER_BUFFER_TYPE",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "UINT *pBufferSize",
+              "name": "pBufferSize",
+              "type": "UINT *",
+              "direction": "out",
+              "count": ""
+            },
+            {
+              "declaration": "void **ppBuffer",
+              "name": "ppBuffer",
+              "type": "void **",
+              "direction": "out",
+              "count": ""
+            }
+          ]
+        },
+        {
+          "name": "ReleaseDecoderBuffer",
+          "result": "HRESULT",
+          "parameters": [
+            {
+              "declaration": "ID3D11VideoDecoder *pDecoder",
+              "name": "pDecoder",
+              "type": "ID3D11VideoDecoder *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "D3D11_VIDEO_DECODER_BUFFER_TYPE Type",
+              "name": "Type",
+              "type": "D3D11_VIDEO_DECODER_BUFFER_TYPE",
+              "direction": "in",
+              "count": ""
+            }
+          ]
+        },
+        {
+          "name": "DecoderBeginFrame",
+          "result": "HRESULT",
+          "parameters": [
+            {
+              "declaration": "ID3D11VideoDecoder *pDecoder",
+              "name": "pDecoder",
+              "type": "ID3D11VideoDecoder *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "ID3D11VideoDecoderOutputView *pView",
+              "name": "pView",
+              "type": "ID3D11VideoDecoderOutputView *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "UINT ContentKeySize",
+              "name": "ContentKeySize",
+              "type": "UINT",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "const void *pContentKey",
+              "name": "pContentKey",
+              "type": "const void *",
+              "direction": "in",
+              "count": ""
+            }
+          ]
+        },
+        {
+          "name": "DecoderEndFrame",
+          "result": "HRESULT",
+          "parameters": [
+            {
+              "declaration": "ID3D11VideoDecoder *pDecoder",
+              "name": "pDecoder",
+              "type": "ID3D11VideoDecoder *",
+              "direction": "in",
+              "count": ""
+            }
+          ]
+        },
+        {
+          "name": "SubmitDecoderBuffers",
+          "result": "HRESULT",
+          "parameters": [
+            {
+              "declaration": "ID3D11VideoDecoder *pDecoder",
+              "name": "pDecoder",
+              "type": "ID3D11VideoDecoder *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "UINT NumBuffers",
+              "name": "NumBuffers",
+              "type": "UINT",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "const D3D11_VIDEO_DECODER_BUFFER_DESC *pBufferDesc",
+              "name": "pBufferDesc",
+              "type": "const D3D11_VIDEO_DECODER_BUFFER_DESC *",
+              "direction": "in",
+              "count": "NumBuffers"
+            }
+          ]
+        },
+        {
+          "name": "DecoderExtension",
+          "result": "APP_DEPRECATED_HRESULT",
+          "parameters": [
+            {
+              "declaration": "ID3D11VideoDecoder *pDecoder",
+              "name": "pDecoder",
+              "type": "ID3D11VideoDecoder *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "const D3D11_VIDEO_DECODER_EXTENSION *pExtensionData",
+              "name": "pExtensionData",
+              "type": "const D3D11_VIDEO_DECODER_EXTENSION *",
+              "direction": "in",
+              "count": ""
+            }
+          ]
+        },
+        {
+          "name": "VideoProcessorSetOutputTargetRect",
+          "result": "void",
+          "parameters": [
+            {
+              "declaration": "ID3D11VideoProcessor *pVideoProcessor",
+              "name": "pVideoProcessor",
+              "type": "ID3D11VideoProcessor *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "BOOL Enable",
+              "name": "Enable",
+              "type": "BOOL",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "const RECT *pRect",
+              "name": "pRect",
+              "type": "const RECT *",
+              "direction": "in",
+              "count": ""
+            }
+          ]
+        },
+        {
+          "name": "VideoProcessorSetOutputBackgroundColor",
+          "result": "void",
+          "parameters": [
+            {
+              "declaration": "ID3D11VideoProcessor *pVideoProcessor",
+              "name": "pVideoProcessor",
+              "type": "ID3D11VideoProcessor *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "BOOL YCbCr",
+              "name": "YCbCr",
+              "type": "BOOL",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "const D3D11_VIDEO_COLOR *pColor",
+              "name": "pColor",
+              "type": "const D3D11_VIDEO_COLOR *",
+              "direction": "in",
+              "count": ""
+            }
+          ]
+        },
+        {
+          "name": "VideoProcessorSetOutputColorSpace",
+          "result": "void",
+          "parameters": [
+            {
+              "declaration": "ID3D11VideoProcessor *pVideoProcessor",
+              "name": "pVideoProcessor",
+              "type": "ID3D11VideoProcessor *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "const D3D11_VIDEO_PROCESSOR_COLOR_SPACE *pColorSpace",
+              "name": "pColorSpace",
+              "type": "const D3D11_VIDEO_PROCESSOR_COLOR_SPACE *",
+              "direction": "in",
+              "count": ""
+            }
+          ]
+        },
+        {
+          "name": "VideoProcessorSetOutputAlphaFillMode",
+          "result": "void",
+          "parameters": [
+            {
+              "declaration": "ID3D11VideoProcessor *pVideoProcessor",
+              "name": "pVideoProcessor",
+              "type": "ID3D11VideoProcessor *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "D3D11_VIDEO_PROCESSOR_ALPHA_FILL_MODE AlphaFillMode",
+              "name": "AlphaFillMode",
+              "type": "D3D11_VIDEO_PROCESSOR_ALPHA_FILL_MODE",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "UINT StreamIndex",
+              "name": "StreamIndex",
+              "type": "UINT",
+              "direction": "in",
+              "count": ""
+            }
+          ]
+        },
+        {
+          "name": "VideoProcessorSetOutputConstriction",
+          "result": "void",
+          "parameters": [
+            {
+              "declaration": "ID3D11VideoProcessor *pVideoProcessor",
+              "name": "pVideoProcessor",
+              "type": "ID3D11VideoProcessor *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "BOOL Enable",
+              "name": "Enable",
+              "type": "BOOL",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "SIZE Size",
+              "name": "Size",
+              "type": "SIZE",
+              "direction": "in",
+              "count": ""
+            }
+          ]
+        },
+        {
+          "name": "VideoProcessorSetOutputStereoMode",
+          "result": "void",
+          "parameters": [
+            {
+              "declaration": "ID3D11VideoProcessor *pVideoProcessor",
+              "name": "pVideoProcessor",
+              "type": "ID3D11VideoProcessor *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "BOOL Enable",
+              "name": "Enable",
+              "type": "BOOL",
+              "direction": "in",
+              "count": ""
+            }
+          ]
+        },
+        {
+          "name": "VideoProcessorSetOutputExtension",
+          "result": "APP_DEPRECATED_HRESULT",
+          "parameters": [
+            {
+              "declaration": "ID3D11VideoProcessor *pVideoProcessor",
+              "name": "pVideoProcessor",
+              "type": "ID3D11VideoProcessor *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "const GUID *pExtensionGuid",
+              "name": "pExtensionGuid",
+              "type": "const GUID *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "UINT DataSize",
+              "name": "DataSize",
+              "type": "UINT",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "void *pData",
+              "name": "pData",
+              "type": "void *",
+              "direction": "in",
+              "count": ""
+            }
+          ]
+        },
+        {
+          "name": "VideoProcessorGetOutputTargetRect",
+          "result": "void",
+          "parameters": [
+            {
+              "declaration": "ID3D11VideoProcessor *pVideoProcessor",
+              "name": "pVideoProcessor",
+              "type": "ID3D11VideoProcessor *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "BOOL *Enabled",
+              "name": "Enabled",
+              "type": "BOOL *",
+              "direction": "out",
+              "count": ""
+            },
+            {
+              "declaration": "RECT *pRect",
+              "name": "pRect",
+              "type": "RECT *",
+              "direction": "out",
+              "count": ""
+            }
+          ]
+        },
+        {
+          "name": "VideoProcessorGetOutputBackgroundColor",
+          "result": "void",
+          "parameters": [
+            {
+              "declaration": "ID3D11VideoProcessor *pVideoProcessor",
+              "name": "pVideoProcessor",
+              "type": "ID3D11VideoProcessor *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "BOOL *pYCbCr",
+              "name": "pYCbCr",
+              "type": "BOOL *",
+              "direction": "out",
+              "count": ""
+            },
+            {
+              "declaration": "D3D11_VIDEO_COLOR *pColor",
+              "name": "pColor",
+              "type": "D3D11_VIDEO_COLOR *",
+              "direction": "out",
+              "count": ""
+            }
+          ]
+        },
+        {
+          "name": "VideoProcessorGetOutputColorSpace",
+          "result": "void",
+          "parameters": [
+            {
+              "declaration": "ID3D11VideoProcessor *pVideoProcessor",
+              "name": "pVideoProcessor",
+              "type": "ID3D11VideoProcessor *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "D3D11_VIDEO_PROCESSOR_COLOR_SPACE *pColorSpace",
+              "name": "pColorSpace",
+              "type": "D3D11_VIDEO_PROCESSOR_COLOR_SPACE *",
+              "direction": "out",
+              "count": ""
+            }
+          ]
+        },
+        {
+          "name": "VideoProcessorGetOutputAlphaFillMode",
+          "result": "void",
+          "parameters": [
+            {
+              "declaration": "ID3D11VideoProcessor *pVideoProcessor",
+              "name": "pVideoProcessor",
+              "type": "ID3D11VideoProcessor *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "D3D11_VIDEO_PROCESSOR_ALPHA_FILL_MODE *pAlphaFillMode",
+              "name": "pAlphaFillMode",
+              "type": "D3D11_VIDEO_PROCESSOR_ALPHA_FILL_MODE *",
+              "direction": "out",
+              "count": ""
+            },
+            {
+              "declaration": "UINT *pStreamIndex",
+              "name": "pStreamIndex",
+              "type": "UINT *",
+              "direction": "out",
+              "count": ""
+            }
+          ]
+        },
+        {
+          "name": "VideoProcessorGetOutputConstriction",
+          "result": "void",
+          "parameters": [
+            {
+              "declaration": "ID3D11VideoProcessor *pVideoProcessor",
+              "name": "pVideoProcessor",
+              "type": "ID3D11VideoProcessor *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "BOOL *pEnabled",
+              "name": "pEnabled",
+              "type": "BOOL *",
+              "direction": "out",
+              "count": ""
+            },
+            {
+              "declaration": "SIZE *pSize",
+              "name": "pSize",
+              "type": "SIZE *",
+              "direction": "out",
+              "count": ""
+            }
+          ]
+        },
+        {
+          "name": "VideoProcessorGetOutputStereoMode",
+          "result": "void",
+          "parameters": [
+            {
+              "declaration": "ID3D11VideoProcessor *pVideoProcessor",
+              "name": "pVideoProcessor",
+              "type": "ID3D11VideoProcessor *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "BOOL *pEnabled",
+              "name": "pEnabled",
+              "type": "BOOL *",
+              "direction": "out",
+              "count": ""
+            }
+          ]
+        },
+        {
+          "name": "VideoProcessorGetOutputExtension",
+          "result": "APP_DEPRECATED_HRESULT",
+          "parameters": [
+            {
+              "declaration": "ID3D11VideoProcessor *pVideoProcessor",
+              "name": "pVideoProcessor",
+              "type": "ID3D11VideoProcessor *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "const GUID *pExtensionGuid",
+              "name": "pExtensionGuid",
+              "type": "const GUID *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "UINT DataSize",
+              "name": "DataSize",
+              "type": "UINT",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "void *pData",
+              "name": "pData",
+              "type": "void *",
+              "direction": "out",
+              "count": ""
+            }
+          ]
+        },
+        {
+          "name": "VideoProcessorSetStreamFrameFormat",
+          "result": "void",
+          "parameters": [
+            {
+              "declaration": "ID3D11VideoProcessor *pVideoProcessor",
+              "name": "pVideoProcessor",
+              "type": "ID3D11VideoProcessor *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "UINT StreamIndex",
+              "name": "StreamIndex",
+              "type": "UINT",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "D3D11_VIDEO_FRAME_FORMAT FrameFormat",
+              "name": "FrameFormat",
+              "type": "D3D11_VIDEO_FRAME_FORMAT",
+              "direction": "in",
+              "count": ""
+            }
+          ]
+        },
+        {
+          "name": "VideoProcessorSetStreamColorSpace",
+          "result": "void",
+          "parameters": [
+            {
+              "declaration": "ID3D11VideoProcessor *pVideoProcessor",
+              "name": "pVideoProcessor",
+              "type": "ID3D11VideoProcessor *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "UINT StreamIndex",
+              "name": "StreamIndex",
+              "type": "UINT",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "const D3D11_VIDEO_PROCESSOR_COLOR_SPACE *pColorSpace",
+              "name": "pColorSpace",
+              "type": "const D3D11_VIDEO_PROCESSOR_COLOR_SPACE *",
+              "direction": "in",
+              "count": ""
+            }
+          ]
+        },
+        {
+          "name": "VideoProcessorSetStreamOutputRate",
+          "result": "void",
+          "parameters": [
+            {
+              "declaration": "ID3D11VideoProcessor *pVideoProcessor",
+              "name": "pVideoProcessor",
+              "type": "ID3D11VideoProcessor *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "UINT StreamIndex",
+              "name": "StreamIndex",
+              "type": "UINT",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "D3D11_VIDEO_PROCESSOR_OUTPUT_RATE OutputRate",
+              "name": "OutputRate",
+              "type": "D3D11_VIDEO_PROCESSOR_OUTPUT_RATE",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "BOOL RepeatFrame",
+              "name": "RepeatFrame",
+              "type": "BOOL",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "const DXGI_RATIONAL *pCustomRate",
+              "name": "pCustomRate",
+              "type": "const DXGI_RATIONAL *",
+              "direction": "in",
+              "count": ""
+            }
+          ]
+        },
+        {
+          "name": "VideoProcessorSetStreamSourceRect",
+          "result": "void",
+          "parameters": [
+            {
+              "declaration": "ID3D11VideoProcessor *pVideoProcessor",
+              "name": "pVideoProcessor",
+              "type": "ID3D11VideoProcessor *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "UINT StreamIndex",
+              "name": "StreamIndex",
+              "type": "UINT",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "BOOL Enable",
+              "name": "Enable",
+              "type": "BOOL",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "const RECT *pRect",
+              "name": "pRect",
+              "type": "const RECT *",
+              "direction": "in",
+              "count": ""
+            }
+          ]
+        },
+        {
+          "name": "VideoProcessorSetStreamDestRect",
+          "result": "void",
+          "parameters": [
+            {
+              "declaration": "ID3D11VideoProcessor *pVideoProcessor",
+              "name": "pVideoProcessor",
+              "type": "ID3D11VideoProcessor *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "UINT StreamIndex",
+              "name": "StreamIndex",
+              "type": "UINT",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "BOOL Enable",
+              "name": "Enable",
+              "type": "BOOL",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "const RECT *pRect",
+              "name": "pRect",
+              "type": "const RECT *",
+              "direction": "in",
+              "count": ""
+            }
+          ]
+        },
+        {
+          "name": "VideoProcessorSetStreamAlpha",
+          "result": "void",
+          "parameters": [
+            {
+              "declaration": "ID3D11VideoProcessor *pVideoProcessor",
+              "name": "pVideoProcessor",
+              "type": "ID3D11VideoProcessor *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "UINT StreamIndex",
+              "name": "StreamIndex",
+              "type": "UINT",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "BOOL Enable",
+              "name": "Enable",
+              "type": "BOOL",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "FLOAT Alpha",
+              "name": "Alpha",
+              "type": "FLOAT",
+              "direction": "in",
+              "count": ""
+            }
+          ]
+        },
+        {
+          "name": "VideoProcessorSetStreamPalette",
+          "result": "void",
+          "parameters": [
+            {
+              "declaration": "ID3D11VideoProcessor *pVideoProcessor",
+              "name": "pVideoProcessor",
+              "type": "ID3D11VideoProcessor *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "UINT StreamIndex",
+              "name": "StreamIndex",
+              "type": "UINT",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "UINT Count",
+              "name": "Count",
+              "type": "UINT",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "const UINT *pEntries",
+              "name": "pEntries",
+              "type": "const UINT *",
+              "direction": "in",
+              "count": "Count"
+            }
+          ]
+        },
+        {
+          "name": "VideoProcessorSetStreamPixelAspectRatio",
+          "result": "void",
+          "parameters": [
+            {
+              "declaration": "ID3D11VideoProcessor *pVideoProcessor",
+              "name": "pVideoProcessor",
+              "type": "ID3D11VideoProcessor *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "UINT StreamIndex",
+              "name": "StreamIndex",
+              "type": "UINT",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "BOOL Enable",
+              "name": "Enable",
+              "type": "BOOL",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "const DXGI_RATIONAL *pSourceAspectRatio",
+              "name": "pSourceAspectRatio",
+              "type": "const DXGI_RATIONAL *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "const DXGI_RATIONAL *pDestinationAspectRatio",
+              "name": "pDestinationAspectRatio",
+              "type": "const DXGI_RATIONAL *",
+              "direction": "in",
+              "count": ""
+            }
+          ]
+        },
+        {
+          "name": "VideoProcessorSetStreamLumaKey",
+          "result": "void",
+          "parameters": [
+            {
+              "declaration": "ID3D11VideoProcessor *pVideoProcessor",
+              "name": "pVideoProcessor",
+              "type": "ID3D11VideoProcessor *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "UINT StreamIndex",
+              "name": "StreamIndex",
+              "type": "UINT",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "BOOL Enable",
+              "name": "Enable",
+              "type": "BOOL",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "FLOAT Lower",
+              "name": "Lower",
+              "type": "FLOAT",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "FLOAT Upper",
+              "name": "Upper",
+              "type": "FLOAT",
+              "direction": "in",
+              "count": ""
+            }
+          ]
+        },
+        {
+          "name": "VideoProcessorSetStreamStereoFormat",
+          "result": "void",
+          "parameters": [
+            {
+              "declaration": "ID3D11VideoProcessor *pVideoProcessor",
+              "name": "pVideoProcessor",
+              "type": "ID3D11VideoProcessor *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "UINT StreamIndex",
+              "name": "StreamIndex",
+              "type": "UINT",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "BOOL Enable",
+              "name": "Enable",
+              "type": "BOOL",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "D3D11_VIDEO_PROCESSOR_STEREO_FORMAT Format",
+              "name": "Format",
+              "type": "D3D11_VIDEO_PROCESSOR_STEREO_FORMAT",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "BOOL LeftViewFrame0",
+              "name": "LeftViewFrame0",
+              "type": "BOOL",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "BOOL BaseViewFrame0",
+              "name": "BaseViewFrame0",
+              "type": "BOOL",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "D3D11_VIDEO_PROCESSOR_STEREO_FLIP_MODE FlipMode",
+              "name": "FlipMode",
+              "type": "D3D11_VIDEO_PROCESSOR_STEREO_FLIP_MODE",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "int MonoOffset",
+              "name": "MonoOffset",
+              "type": "int",
+              "direction": "in",
+              "count": ""
+            }
+          ]
+        },
+        {
+          "name": "VideoProcessorSetStreamAutoProcessingMode",
+          "result": "void",
+          "parameters": [
+            {
+              "declaration": "ID3D11VideoProcessor *pVideoProcessor",
+              "name": "pVideoProcessor",
+              "type": "ID3D11VideoProcessor *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "UINT StreamIndex",
+              "name": "StreamIndex",
+              "type": "UINT",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "BOOL Enable",
+              "name": "Enable",
+              "type": "BOOL",
+              "direction": "in",
+              "count": ""
+            }
+          ]
+        },
+        {
+          "name": "VideoProcessorSetStreamFilter",
+          "result": "void",
+          "parameters": [
+            {
+              "declaration": "ID3D11VideoProcessor *pVideoProcessor",
+              "name": "pVideoProcessor",
+              "type": "ID3D11VideoProcessor *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "UINT StreamIndex",
+              "name": "StreamIndex",
+              "type": "UINT",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "D3D11_VIDEO_PROCESSOR_FILTER Filter",
+              "name": "Filter",
+              "type": "D3D11_VIDEO_PROCESSOR_FILTER",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "BOOL Enable",
+              "name": "Enable",
+              "type": "BOOL",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "int Level",
+              "name": "Level",
+              "type": "int",
+              "direction": "in",
+              "count": ""
+            }
+          ]
+        },
+        {
+          "name": "VideoProcessorSetStreamExtension",
+          "result": "APP_DEPRECATED_HRESULT",
+          "parameters": [
+            {
+              "declaration": "ID3D11VideoProcessor *pVideoProcessor",
+              "name": "pVideoProcessor",
+              "type": "ID3D11VideoProcessor *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "UINT StreamIndex",
+              "name": "StreamIndex",
+              "type": "UINT",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "const GUID *pExtensionGuid",
+              "name": "pExtensionGuid",
+              "type": "const GUID *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "UINT DataSize",
+              "name": "DataSize",
+              "type": "UINT",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "void *pData",
+              "name": "pData",
+              "type": "void *",
+              "direction": "in",
+              "count": ""
+            }
+          ]
+        },
+        {
+          "name": "VideoProcessorGetStreamFrameFormat",
+          "result": "void",
+          "parameters": [
+            {
+              "declaration": "ID3D11VideoProcessor *pVideoProcessor",
+              "name": "pVideoProcessor",
+              "type": "ID3D11VideoProcessor *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "UINT StreamIndex",
+              "name": "StreamIndex",
+              "type": "UINT",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "D3D11_VIDEO_FRAME_FORMAT *pFrameFormat",
+              "name": "pFrameFormat",
+              "type": "D3D11_VIDEO_FRAME_FORMAT *",
+              "direction": "out",
+              "count": ""
+            }
+          ]
+        },
+        {
+          "name": "VideoProcessorGetStreamColorSpace",
+          "result": "void",
+          "parameters": [
+            {
+              "declaration": "ID3D11VideoProcessor *pVideoProcessor",
+              "name": "pVideoProcessor",
+              "type": "ID3D11VideoProcessor *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "UINT StreamIndex",
+              "name": "StreamIndex",
+              "type": "UINT",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "D3D11_VIDEO_PROCESSOR_COLOR_SPACE *pColorSpace",
+              "name": "pColorSpace",
+              "type": "D3D11_VIDEO_PROCESSOR_COLOR_SPACE *",
+              "direction": "out",
+              "count": ""
+            }
+          ]
+        },
+        {
+          "name": "VideoProcessorGetStreamOutputRate",
+          "result": "void",
+          "parameters": [
+            {
+              "declaration": "ID3D11VideoProcessor *pVideoProcessor",
+              "name": "pVideoProcessor",
+              "type": "ID3D11VideoProcessor *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "UINT StreamIndex",
+              "name": "StreamIndex",
+              "type": "UINT",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "D3D11_VIDEO_PROCESSOR_OUTPUT_RATE *pOutputRate",
+              "name": "pOutputRate",
+              "type": "D3D11_VIDEO_PROCESSOR_OUTPUT_RATE *",
+              "direction": "out",
+              "count": ""
+            },
+            {
+              "declaration": "BOOL *pRepeatFrame",
+              "name": "pRepeatFrame",
+              "type": "BOOL *",
+              "direction": "out",
+              "count": ""
+            },
+            {
+              "declaration": "DXGI_RATIONAL *pCustomRate",
+              "name": "pCustomRate",
+              "type": "DXGI_RATIONAL *",
+              "direction": "out",
+              "count": ""
+            }
+          ]
+        },
+        {
+          "name": "VideoProcessorGetStreamSourceRect",
+          "result": "void",
+          "parameters": [
+            {
+              "declaration": "ID3D11VideoProcessor *pVideoProcessor",
+              "name": "pVideoProcessor",
+              "type": "ID3D11VideoProcessor *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "UINT StreamIndex",
+              "name": "StreamIndex",
+              "type": "UINT",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "BOOL *pEnabled",
+              "name": "pEnabled",
+              "type": "BOOL *",
+              "direction": "out",
+              "count": ""
+            },
+            {
+              "declaration": "RECT *pRect",
+              "name": "pRect",
+              "type": "RECT *",
+              "direction": "out",
+              "count": ""
+            }
+          ]
+        },
+        {
+          "name": "VideoProcessorGetStreamDestRect",
+          "result": "void",
+          "parameters": [
+            {
+              "declaration": "ID3D11VideoProcessor *pVideoProcessor",
+              "name": "pVideoProcessor",
+              "type": "ID3D11VideoProcessor *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "UINT StreamIndex",
+              "name": "StreamIndex",
+              "type": "UINT",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "BOOL *pEnabled",
+              "name": "pEnabled",
+              "type": "BOOL *",
+              "direction": "out",
+              "count": ""
+            },
+            {
+              "declaration": "RECT *pRect",
+              "name": "pRect",
+              "type": "RECT *",
+              "direction": "out",
+              "count": ""
+            }
+          ]
+        },
+        {
+          "name": "VideoProcessorGetStreamAlpha",
+          "result": "void",
+          "parameters": [
+            {
+              "declaration": "ID3D11VideoProcessor *pVideoProcessor",
+              "name": "pVideoProcessor",
+              "type": "ID3D11VideoProcessor *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "UINT StreamIndex",
+              "name": "StreamIndex",
+              "type": "UINT",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "BOOL *pEnabled",
+              "name": "pEnabled",
+              "type": "BOOL *",
+              "direction": "out",
+              "count": ""
+            },
+            {
+              "declaration": "FLOAT *pAlpha",
+              "name": "pAlpha",
+              "type": "FLOAT *",
+              "direction": "out",
+              "count": ""
+            }
+          ]
+        },
+        {
+          "name": "VideoProcessorGetStreamPalette",
+          "result": "void",
+          "parameters": [
+            {
+              "declaration": "ID3D11VideoProcessor *pVideoProcessor",
+              "name": "pVideoProcessor",
+              "type": "ID3D11VideoProcessor *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "UINT StreamIndex",
+              "name": "StreamIndex",
+              "type": "UINT",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "UINT Count",
+              "name": "Count",
+              "type": "UINT",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "UINT *pEntries",
+              "name": "pEntries",
+              "type": "UINT *",
+              "direction": "out",
+              "count": "Count"
+            }
+          ]
+        },
+        {
+          "name": "VideoProcessorGetStreamPixelAspectRatio",
+          "result": "void",
+          "parameters": [
+            {
+              "declaration": "ID3D11VideoProcessor *pVideoProcessor",
+              "name": "pVideoProcessor",
+              "type": "ID3D11VideoProcessor *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "UINT StreamIndex",
+              "name": "StreamIndex",
+              "type": "UINT",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "BOOL *pEnabled",
+              "name": "pEnabled",
+              "type": "BOOL *",
+              "direction": "out",
+              "count": ""
+            },
+            {
+              "declaration": "DXGI_RATIONAL *pSourceAspectRatio",
+              "name": "pSourceAspectRatio",
+              "type": "DXGI_RATIONAL *",
+              "direction": "out",
+              "count": ""
+            },
+            {
+              "declaration": "DXGI_RATIONAL *pDestinationAspectRatio",
+              "name": "pDestinationAspectRatio",
+              "type": "DXGI_RATIONAL *",
+              "direction": "out",
+              "count": ""
+            }
+          ]
+        },
+        {
+          "name": "VideoProcessorGetStreamLumaKey",
+          "result": "void",
+          "parameters": [
+            {
+              "declaration": "ID3D11VideoProcessor *pVideoProcessor",
+              "name": "pVideoProcessor",
+              "type": "ID3D11VideoProcessor *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "UINT StreamIndex",
+              "name": "StreamIndex",
+              "type": "UINT",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "BOOL *pEnabled",
+              "name": "pEnabled",
+              "type": "BOOL *",
+              "direction": "out",
+              "count": ""
+            },
+            {
+              "declaration": "FLOAT *pLower",
+              "name": "pLower",
+              "type": "FLOAT *",
+              "direction": "out",
+              "count": ""
+            },
+            {
+              "declaration": "FLOAT *pUpper",
+              "name": "pUpper",
+              "type": "FLOAT *",
+              "direction": "out",
+              "count": ""
+            }
+          ]
+        },
+        {
+          "name": "VideoProcessorGetStreamStereoFormat",
+          "result": "void",
+          "parameters": [
+            {
+              "declaration": "ID3D11VideoProcessor *pVideoProcessor",
+              "name": "pVideoProcessor",
+              "type": "ID3D11VideoProcessor *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "UINT StreamIndex",
+              "name": "StreamIndex",
+              "type": "UINT",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "BOOL *pEnable",
+              "name": "pEnable",
+              "type": "BOOL *",
+              "direction": "out",
+              "count": ""
+            },
+            {
+              "declaration": "D3D11_VIDEO_PROCESSOR_STEREO_FORMAT *pFormat",
+              "name": "pFormat",
+              "type": "D3D11_VIDEO_PROCESSOR_STEREO_FORMAT *",
+              "direction": "out",
+              "count": ""
+            },
+            {
+              "declaration": "BOOL *pLeftViewFrame0",
+              "name": "pLeftViewFrame0",
+              "type": "BOOL *",
+              "direction": "out",
+              "count": ""
+            },
+            {
+              "declaration": "BOOL *pBaseViewFrame0",
+              "name": "pBaseViewFrame0",
+              "type": "BOOL *",
+              "direction": "out",
+              "count": ""
+            },
+            {
+              "declaration": "D3D11_VIDEO_PROCESSOR_STEREO_FLIP_MODE *pFlipMode",
+              "name": "pFlipMode",
+              "type": "D3D11_VIDEO_PROCESSOR_STEREO_FLIP_MODE *",
+              "direction": "out",
+              "count": ""
+            },
+            {
+              "declaration": "int *MonoOffset",
+              "name": "MonoOffset",
+              "type": "int *",
+              "direction": "out",
+              "count": ""
+            }
+          ]
+        },
+        {
+          "name": "VideoProcessorGetStreamAutoProcessingMode",
+          "result": "void",
+          "parameters": [
+            {
+              "declaration": "ID3D11VideoProcessor *pVideoProcessor",
+              "name": "pVideoProcessor",
+              "type": "ID3D11VideoProcessor *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "UINT StreamIndex",
+              "name": "StreamIndex",
+              "type": "UINT",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "BOOL *pEnabled",
+              "name": "pEnabled",
+              "type": "BOOL *",
+              "direction": "out",
+              "count": ""
+            }
+          ]
+        },
+        {
+          "name": "VideoProcessorGetStreamFilter",
+          "result": "void",
+          "parameters": [
+            {
+              "declaration": "ID3D11VideoProcessor *pVideoProcessor",
+              "name": "pVideoProcessor",
+              "type": "ID3D11VideoProcessor *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "UINT StreamIndex",
+              "name": "StreamIndex",
+              "type": "UINT",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "D3D11_VIDEO_PROCESSOR_FILTER Filter",
+              "name": "Filter",
+              "type": "D3D11_VIDEO_PROCESSOR_FILTER",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "BOOL *pEnabled",
+              "name": "pEnabled",
+              "type": "BOOL *",
+              "direction": "out",
+              "count": ""
+            },
+            {
+              "declaration": "int *pLevel",
+              "name": "pLevel",
+              "type": "int *",
+              "direction": "out",
+              "count": ""
+            }
+          ]
+        },
+        {
+          "name": "VideoProcessorGetStreamExtension",
+          "result": "APP_DEPRECATED_HRESULT",
+          "parameters": [
+            {
+              "declaration": "ID3D11VideoProcessor *pVideoProcessor",
+              "name": "pVideoProcessor",
+              "type": "ID3D11VideoProcessor *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "UINT StreamIndex",
+              "name": "StreamIndex",
+              "type": "UINT",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "const GUID *pExtensionGuid",
+              "name": "pExtensionGuid",
+              "type": "const GUID *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "UINT DataSize",
+              "name": "DataSize",
+              "type": "UINT",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "void *pData",
+              "name": "pData",
+              "type": "void *",
+              "direction": "out",
+              "count": ""
+            }
+          ]
+        },
+        {
+          "name": "VideoProcessorBlt",
+          "result": "HRESULT",
+          "parameters": [
+            {
+              "declaration": "ID3D11VideoProcessor *pVideoProcessor",
+              "name": "pVideoProcessor",
+              "type": "ID3D11VideoProcessor *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "ID3D11VideoProcessorOutputView *pView",
+              "name": "pView",
+              "type": "ID3D11VideoProcessorOutputView *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "UINT OutputFrame",
+              "name": "OutputFrame",
+              "type": "UINT",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "UINT StreamCount",
+              "name": "StreamCount",
+              "type": "UINT",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "const D3D11_VIDEO_PROCESSOR_STREAM *pStreams",
+              "name": "pStreams",
+              "type": "const D3D11_VIDEO_PROCESSOR_STREAM *",
+              "direction": "in",
+              "count": "StreamCount"
+            }
+          ]
+        },
+        {
+          "name": "NegotiateCryptoSessionKeyExchange",
+          "result": "HRESULT",
+          "parameters": [
+            {
+              "declaration": "ID3D11CryptoSession *pCryptoSession",
+              "name": "pCryptoSession",
+              "type": "ID3D11CryptoSession *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "UINT DataSize",
+              "name": "DataSize",
+              "type": "UINT",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "void *pData",
+              "name": "pData",
+              "type": "void *",
+              "direction": "inout",
+              "count": ""
+            }
+          ]
+        },
+        {
+          "name": "EncryptionBlt",
+          "result": "void",
+          "parameters": [
+            {
+              "declaration": "ID3D11CryptoSession *pCryptoSession",
+              "name": "pCryptoSession",
+              "type": "ID3D11CryptoSession *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "ID3D11Texture2D *pSrcSurface",
+              "name": "pSrcSurface",
+              "type": "ID3D11Texture2D *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "ID3D11Texture2D *pDstSurface",
+              "name": "pDstSurface",
+              "type": "ID3D11Texture2D *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "UINT IVSize",
+              "name": "IVSize",
+              "type": "UINT",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "void *pIV",
+              "name": "pIV",
+              "type": "void *",
+              "direction": "inout",
+              "count": ""
+            }
+          ]
+        },
+        {
+          "name": "DecryptionBlt",
+          "result": "void",
+          "parameters": [
+            {
+              "declaration": "ID3D11CryptoSession *pCryptoSession",
+              "name": "pCryptoSession",
+              "type": "ID3D11CryptoSession *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "ID3D11Texture2D *pSrcSurface",
+              "name": "pSrcSurface",
+              "type": "ID3D11Texture2D *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "ID3D11Texture2D *pDstSurface",
+              "name": "pDstSurface",
+              "type": "ID3D11Texture2D *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "D3D11_ENCRYPTED_BLOCK_INFO *pEncryptedBlockInfo",
+              "name": "pEncryptedBlockInfo",
+              "type": "D3D11_ENCRYPTED_BLOCK_INFO *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "UINT ContentKeySize",
+              "name": "ContentKeySize",
+              "type": "UINT",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "const void *pContentKey",
+              "name": "pContentKey",
+              "type": "const void *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "UINT IVSize",
+              "name": "IVSize",
+              "type": "UINT",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "void *pIV",
+              "name": "pIV",
+              "type": "void *",
+              "direction": "inout",
+              "count": ""
+            }
+          ]
+        },
+        {
+          "name": "StartSessionKeyRefresh",
+          "result": "void",
+          "parameters": [
+            {
+              "declaration": "ID3D11CryptoSession *pCryptoSession",
+              "name": "pCryptoSession",
+              "type": "ID3D11CryptoSession *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "UINT RandomNumberSize",
+              "name": "RandomNumberSize",
+              "type": "UINT",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "void *pRandomNumber",
+              "name": "pRandomNumber",
+              "type": "void *",
+              "direction": "out",
+              "count": ""
+            }
+          ]
+        },
+        {
+          "name": "FinishSessionKeyRefresh",
+          "result": "void",
+          "parameters": [
+            {
+              "declaration": "ID3D11CryptoSession *pCryptoSession",
+              "name": "pCryptoSession",
+              "type": "ID3D11CryptoSession *",
+              "direction": "in",
+              "count": ""
+            }
+          ]
+        },
+        {
+          "name": "GetEncryptionBltKey",
+          "result": "HRESULT",
+          "parameters": [
+            {
+              "declaration": "ID3D11CryptoSession *pCryptoSession",
+              "name": "pCryptoSession",
+              "type": "ID3D11CryptoSession *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "UINT KeySize",
+              "name": "KeySize",
+              "type": "UINT",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "void *pReadbackKey",
+              "name": "pReadbackKey",
+              "type": "void *",
+              "direction": "out",
+              "count": ""
+            }
+          ]
+        },
+        {
+          "name": "NegotiateAuthenticatedChannelKeyExchange",
+          "result": "HRESULT",
+          "parameters": [
+            {
+              "declaration": "ID3D11AuthenticatedChannel *pChannel",
+              "name": "pChannel",
+              "type": "ID3D11AuthenticatedChannel *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "UINT DataSize",
+              "name": "DataSize",
+              "type": "UINT",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "void *pData",
+              "name": "pData",
+              "type": "void *",
+              "direction": "inout",
+              "count": ""
+            }
+          ]
+        },
+        {
+          "name": "QueryAuthenticatedChannel",
+          "result": "HRESULT",
+          "parameters": [
+            {
+              "declaration": "ID3D11AuthenticatedChannel *pChannel",
+              "name": "pChannel",
+              "type": "ID3D11AuthenticatedChannel *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "UINT InputSize",
+              "name": "InputSize",
+              "type": "UINT",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "const void *pInput",
+              "name": "pInput",
+              "type": "const void *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "UINT OutputSize",
+              "name": "OutputSize",
+              "type": "UINT",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "void *pOutput",
+              "name": "pOutput",
+              "type": "void *",
+              "direction": "out",
+              "count": ""
+            }
+          ]
+        },
+        {
+          "name": "ConfigureAuthenticatedChannel",
+          "result": "HRESULT",
+          "parameters": [
+            {
+              "declaration": "ID3D11AuthenticatedChannel *pChannel",
+              "name": "pChannel",
+              "type": "ID3D11AuthenticatedChannel *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "UINT InputSize",
+              "name": "InputSize",
+              "type": "UINT",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "const void *pInput",
+              "name": "pInput",
+              "type": "const void *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "D3D11_AUTHENTICATED_CONFIGURE_OUTPUT *pOutput",
+              "name": "pOutput",
+              "type": "D3D11_AUTHENTICATED_CONFIGURE_OUTPUT *",
+              "direction": "out",
+              "count": ""
+            }
+          ]
+        },
+        {
+          "name": "VideoProcessorSetStreamRotation",
+          "result": "void",
+          "parameters": [
+            {
+              "declaration": "ID3D11VideoProcessor *pVideoProcessor",
+              "name": "pVideoProcessor",
+              "type": "ID3D11VideoProcessor *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "UINT StreamIndex",
+              "name": "StreamIndex",
+              "type": "UINT",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "BOOL Enable",
+              "name": "Enable",
+              "type": "BOOL",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "D3D11_VIDEO_PROCESSOR_ROTATION Rotation",
+              "name": "Rotation",
+              "type": "D3D11_VIDEO_PROCESSOR_ROTATION",
+              "direction": "in",
+              "count": ""
+            }
+          ]
+        },
+        {
+          "name": "VideoProcessorGetStreamRotation",
+          "result": "void",
+          "parameters": [
+            {
+              "declaration": "ID3D11VideoProcessor *pVideoProcessor",
+              "name": "pVideoProcessor",
+              "type": "ID3D11VideoProcessor *",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "UINT StreamIndex",
+              "name": "StreamIndex",
+              "type": "UINT",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "BOOL *pEnable",
+              "name": "pEnable",
+              "type": "BOOL *",
+              "direction": "out",
+              "count": ""
+            },
+            {
+              "declaration": "D3D11_VIDEO_PROCESSOR_ROTATION *pRotation",
+              "name": "pRotation",
+              "type": "D3D11_VIDEO_PROCESSOR_ROTATION *",
+              "direction": "out",
+              "count": ""
+            }
+          ]
+        }
+      ]
+    },
+    "ID3D11VideoDecoder": {
+      "parent": "ID3D11DeviceChild",
+      "methods": [
+        {
+          "name": "GetCreationParameters",
+          "result": "HRESULT",
+          "parameters": [
+            {
+              "declaration": "D3D11_VIDEO_DECODER_DESC *pVideoDesc",
+              "name": "pVideoDesc",
+              "type": "D3D11_VIDEO_DECODER_DESC *",
+              "direction": "out",
+              "count": ""
+            },
+            {
+              "declaration": "D3D11_VIDEO_DECODER_CONFIG *pConfig",
+              "name": "pConfig",
+              "type": "D3D11_VIDEO_DECODER_CONFIG *",
+              "direction": "out",
+              "count": ""
+            }
+          ]
+        },
+        {
+          "name": "GetDriverHandle",
+          "result": "HRESULT",
+          "parameters": [
+            {
+              "declaration": "HANDLE *pDriverHandle",
+              "name": "pDriverHandle",
+              "type": "HANDLE *",
+              "direction": "out",
+              "count": ""
+            }
+          ]
+        }
+      ]
+    },
+    "ID3D11VideoProcessorEnumerator1": {
+      "parent": "ID3D11VideoProcessorEnumerator",
+      "methods": [
+        {
+          "name": "CheckVideoProcessorFormatConversion",
+          "result": "HRESULT",
+          "parameters": [
+            {
+              "declaration": "DXGI_FORMAT InputFormat",
+              "name": "InputFormat",
+              "type": "DXGI_FORMAT",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "DXGI_COLOR_SPACE_TYPE InputColorSpace",
+              "name": "InputColorSpace",
+              "type": "DXGI_COLOR_SPACE_TYPE",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "DXGI_FORMAT OutputFormat",
+              "name": "OutputFormat",
+              "type": "DXGI_FORMAT",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "DXGI_COLOR_SPACE_TYPE OutputColorSpace",
+              "name": "OutputColorSpace",
+              "type": "DXGI_COLOR_SPACE_TYPE",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "BOOL *pSupported",
+              "name": "pSupported",
+              "type": "BOOL *",
+              "direction": "out",
+              "count": ""
+            }
+          ]
+        }
+      ]
+    },
+    "ID3D11VideoProcessorEnumerator": {
+      "parent": "ID3D11DeviceChild",
+      "methods": [
+        {
+          "name": "GetVideoProcessorContentDesc",
+          "result": "HRESULT",
+          "parameters": [
+            {
+              "declaration": "D3D11_VIDEO_PROCESSOR_CONTENT_DESC *pContentDesc",
+              "name": "pContentDesc",
+              "type": "D3D11_VIDEO_PROCESSOR_CONTENT_DESC *",
+              "direction": "out",
+              "count": ""
+            }
+          ]
+        },
+        {
+          "name": "CheckVideoProcessorFormat",
+          "result": "HRESULT",
+          "parameters": [
+            {
+              "declaration": "DXGI_FORMAT Format",
+              "name": "Format",
+              "type": "DXGI_FORMAT",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "UINT *pFlags",
+              "name": "pFlags",
+              "type": "UINT *",
+              "direction": "out",
+              "count": ""
+            }
+          ]
+        },
+        {
+          "name": "GetVideoProcessorCaps",
+          "result": "HRESULT",
+          "parameters": [
+            {
+              "declaration": "D3D11_VIDEO_PROCESSOR_CAPS *pCaps",
+              "name": "pCaps",
+              "type": "D3D11_VIDEO_PROCESSOR_CAPS *",
+              "direction": "out",
+              "count": ""
+            }
+          ]
+        },
+        {
+          "name": "GetVideoProcessorRateConversionCaps",
+          "result": "HRESULT",
+          "parameters": [
+            {
+              "declaration": "UINT TypeIndex",
+              "name": "TypeIndex",
+              "type": "UINT",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "D3D11_VIDEO_PROCESSOR_RATE_CONVERSION_CAPS *pCaps",
+              "name": "pCaps",
+              "type": "D3D11_VIDEO_PROCESSOR_RATE_CONVERSION_CAPS *",
+              "direction": "out",
+              "count": ""
+            }
+          ]
+        },
+        {
+          "name": "GetVideoProcessorCustomRate",
+          "result": "HRESULT",
+          "parameters": [
+            {
+              "declaration": "UINT TypeIndex",
+              "name": "TypeIndex",
+              "type": "UINT",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "UINT CustomRateIndex",
+              "name": "CustomRateIndex",
+              "type": "UINT",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "D3D11_VIDEO_PROCESSOR_CUSTOM_RATE *pRate",
+              "name": "pRate",
+              "type": "D3D11_VIDEO_PROCESSOR_CUSTOM_RATE *",
+              "direction": "out",
+              "count": ""
+            }
+          ]
+        },
+        {
+          "name": "GetVideoProcessorFilterRange",
+          "result": "HRESULT",
+          "parameters": [
+            {
+              "declaration": "D3D11_VIDEO_PROCESSOR_FILTER Filter",
+              "name": "Filter",
+              "type": "D3D11_VIDEO_PROCESSOR_FILTER",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "D3D11_VIDEO_PROCESSOR_FILTER_RANGE *pRange",
+              "name": "pRange",
+              "type": "D3D11_VIDEO_PROCESSOR_FILTER_RANGE *",
+              "direction": "out",
+              "count": ""
+            }
+          ]
+        }
+      ]
+    },
+    "ID3D11VideoProcessor": {
+      "parent": "ID3D11DeviceChild",
+      "methods": [
+        {
+          "name": "GetContentDesc",
+          "result": "void",
+          "parameters": [
+            {
+              "declaration": "D3D11_VIDEO_PROCESSOR_CONTENT_DESC *pDesc",
+              "name": "pDesc",
+              "type": "D3D11_VIDEO_PROCESSOR_CONTENT_DESC *",
+              "direction": "out",
+              "count": ""
+            }
+          ]
+        },
+        {
+          "name": "GetRateConversionCaps",
+          "result": "void",
+          "parameters": [
+            {
+              "declaration": "D3D11_VIDEO_PROCESSOR_RATE_CONVERSION_CAPS *pCaps",
+              "name": "pCaps",
+              "type": "D3D11_VIDEO_PROCESSOR_RATE_CONVERSION_CAPS *",
+              "direction": "out",
+              "count": ""
+            }
+          ]
+        }
+      ]
+    },
+    "ID3D11VideoDecoderOutputView": {
+      "parent": "ID3D11View",
+      "methods": [
+        {
+          "name": "GetDesc",
+          "result": "void",
+          "parameters": [
+            {
+              "declaration": "D3D11_VIDEO_DECODER_OUTPUT_VIEW_DESC *pDesc",
+              "name": "pDesc",
+              "type": "D3D11_VIDEO_DECODER_OUTPUT_VIEW_DESC *",
+              "direction": "out",
+              "count": ""
+            }
+          ]
+        }
+      ]
+    },
+    "ID3D11VideoProcessorInputView": {
+      "parent": "ID3D11View",
+      "methods": [
+        {
+          "name": "GetDesc",
+          "result": "void",
+          "parameters": [
+            {
+              "declaration": "D3D11_VIDEO_PROCESSOR_INPUT_VIEW_DESC *pDesc",
+              "name": "pDesc",
+              "type": "D3D11_VIDEO_PROCESSOR_INPUT_VIEW_DESC *",
+              "direction": "out",
+              "count": ""
+            }
+          ]
+        }
+      ]
+    },
+    "ID3D11VideoProcessorOutputView": {
+      "parent": "ID3D11View",
+      "methods": [
+        {
+          "name": "GetDesc",
+          "result": "void",
+          "parameters": [
+            {
+              "declaration": "D3D11_VIDEO_PROCESSOR_OUTPUT_VIEW_DESC *pDesc",
+              "name": "pDesc",
+              "type": "D3D11_VIDEO_PROCESSOR_OUTPUT_VIEW_DESC *",
+              "direction": "out",
+              "count": ""
+            }
+          ]
+        }
+      ]
+    },
+    "ID3D11AuthenticatedChannel": {
+      "parent": "ID3D11DeviceChild",
+      "methods": [
+        {
+          "name": "GetCertificateSize",
+          "result": "HRESULT",
+          "parameters": [
+            {
+              "declaration": "UINT *pCertificateSize",
+              "name": "pCertificateSize",
+              "type": "UINT *",
+              "direction": "out",
+              "count": ""
+            }
+          ]
+        },
+        {
+          "name": "GetCertificate",
+          "result": "HRESULT",
+          "parameters": [
+            {
+              "declaration": "UINT CertificateSize",
+              "name": "CertificateSize",
+              "type": "UINT",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "BYTE *pCertificate",
+              "name": "pCertificate",
+              "type": "BYTE *",
+              "direction": "out",
+              "count": ""
+            }
+          ]
+        },
+        {
+          "name": "GetChannelHandle",
+          "result": "void",
+          "parameters": [
+            {
+              "declaration": "HANDLE *pChannelHandle",
+              "name": "pChannelHandle",
+              "type": "HANDLE *",
+              "direction": "out",
+              "count": ""
+            }
+          ]
+        }
+      ]
+    },
+    "ID3D11CryptoSession": {
+      "parent": "ID3D11DeviceChild",
+      "methods": [
+        {
+          "name": "GetCryptoType",
+          "result": "void",
+          "parameters": [
+            {
+              "declaration": "GUID *pCryptoType",
+              "name": "pCryptoType",
+              "type": "GUID *",
+              "direction": "out",
+              "count": ""
+            }
+          ]
+        },
+        {
+          "name": "GetDecoderProfile",
+          "result": "void",
+          "parameters": [
+            {
+              "declaration": "GUID *pDecoderProfile",
+              "name": "pDecoderProfile",
+              "type": "GUID *",
+              "direction": "out",
+              "count": ""
+            }
+          ]
+        },
+        {
+          "name": "GetCertificateSize",
+          "result": "HRESULT",
+          "parameters": [
+            {
+              "declaration": "UINT *pCertificateSize",
+              "name": "pCertificateSize",
+              "type": "UINT *",
+              "direction": "out",
+              "count": ""
+            }
+          ]
+        },
+        {
+          "name": "GetCertificate",
+          "result": "HRESULT",
+          "parameters": [
+            {
+              "declaration": "UINT CertificateSize",
+              "name": "CertificateSize",
+              "type": "UINT",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "BYTE *pCertificate",
+              "name": "pCertificate",
+              "type": "BYTE *",
+              "direction": "out",
+              "count": ""
+            }
+          ]
+        },
+        {
+          "name": "GetCryptoSessionHandle",
+          "result": "void",
+          "parameters": [
+            {
+              "declaration": "HANDLE *pCryptoSessionHandle",
+              "name": "pCryptoSessionHandle",
+              "type": "HANDLE *",
+              "direction": "out",
+              "count": ""
+            }
+          ]
+        }
+      ]
+    },
+    "IDXGIKeyedMutex": {
+      "parent": "IDXGIDeviceSubObject",
+      "methods": [
+        {
+          "name": "AcquireSync",
+          "result": "HRESULT",
+          "parameters": [
+            {
+              "declaration": "UINT64 Key",
+              "name": "Key",
+              "type": "UINT64",
+              "direction": "in",
+              "count": ""
+            },
+            {
+              "declaration": "DWORD dwMilliseconds",
+              "name": "dwMilliseconds",
+              "type": "DWORD",
+              "direction": "in",
+              "count": ""
+            }
+          ]
+        },
+        {
+          "name": "ReleaseSync",
+          "result": "HRESULT",
+          "parameters": [
+            {
+              "declaration": "UINT64 Key",
+              "name": "Key",
+              "type": "UINT64",
+              "direction": "in",
+              "count": ""
+            }
+          ]
         }
       ]
     }

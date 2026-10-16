@@ -89,6 +89,16 @@ void method(std::ostream& out, const std::string& iface, const Json& m) {
         } else if (direction == "out" && std::regex_match(type, std::regex("void\\s*\\*\\s*\\*")) && !iid.empty()) {
             post += "wrap_object(" + iid + ", " + pname + ", \"" + api + "\");\n";
         }
+        if (type == "const D3D11_VIDEO_DECODER_EXTENSION *") {
+            pre += "VideoDecoderExtension input_" + pname + "(" + pname + ");\n";
+            arg = "input_" + pname + ".get()";
+        } else if (type == "const D3D11_VIDEO_PROCESSOR_STREAM *") {
+            pre += "VideoProcessorStreams input_" + pname + "(target, unwrap(pVideoProcessor), " + pname + ", StreamCount);\n";
+            arg = "input_" + pname + ".get()";
+        } else if (iface=="ID3D11VideoContext" && name=="DecoderBeginFrame" && pname=="pContentKey") {
+            pre += "VideoBeginFrameKey input_key(unwrap(pDecoder), ContentKeySize, pContentKey);\n";
+            arg = "input_key.get()";
+        }
         if (!args.empty()) args += ", "; args += arg;
     }
     if (iface == "ID3D11Device" && name == "CreateBuffer")
@@ -127,7 +137,7 @@ void method(std::ostream& out, const std::string& iface, const Json& m) {
         << "if (!target) throw std::runtime_error(\"Native interface disappeared\");\n";
     if(name.starts_with("CreateRenderTargetView") || name.starts_with("CreateShaderResourceView") || name.starts_with("CreateUnorderedAccessView") || name=="CreateDepthStencilView" || name=="GetResource")
         out<<"NativePresentationScope native_access(target);\n";
-    if(iface.starts_with("ID3D11DeviceContext") || iface=="ID3D11Multithread")out<<"std::unique_lock<std::recursive_mutex> context_access(presentation_context_mutex(target));\n";
+    if(iface.starts_with("ID3D11DeviceContext") || iface.starts_with("ID3D11VideoContext") || iface=="ID3D11Multithread")out<<"std::unique_lock<std::recursive_mutex> context_access(presentation_context_mutex(target));\n";
     if(iface.starts_with("ID3D11DeviceContext"))out<<"ContextCallScope context_call(context_access.mutex());\n";
     // Keep operand resolution and returned view registration in one alias
     // generation, without blocking unrelated CPU-only device creation in Present.
@@ -189,7 +199,7 @@ void method(std::ostream& out, const std::string& iface, const Json& m) {
         else out << "record_context_call(this, \"" << api << "\", CommandKind::" << kind << ", " << words << ", " << operand << ", " << floats << ", " << integers << ", " << source << ");\n";
         if(kind=="binding")binding_arguments(out,m,api);
     }
-    else if(name=="WriteToSubresource" || name=="Map" || name=="Unmap" || name=="GetDC" || name=="ReleaseDC" ||
+    else if(iface.starts_with("ID3D11VideoContext") || iface=="IDXGIKeyedMutex" || name=="WriteToSubresource" || name=="Map" || name=="Unmap" || name=="GetDC" || name=="ReleaseDC" ||
         name.starts_with("OfferResources") || name.starts_with("ReclaimResources") || name=="Trim" ||
         name.starts_with("GetDisplaySurfaceData") || name=="SetDisplaySurface")
         out << "record_external_call(\"" << api << "\");\n";
@@ -220,7 +230,7 @@ int main(int argc, char** argv) {
         std::ifstream input(argv[1]); const Json spec = Json::parse(input);
         if (spec.at("schema") != 1) throw std::runtime_error("Unsupported API schema");
         std::ostringstream out;
-        out << "// Generated from capture/api/interfaces.json. Do not edit.\n#include \"objects.hpp\"\n#include \"command_stream.hpp\"\n#include \"deferred_history.hpp\"\n#include \"presentation_resources.hpp\"\nnamespace flora::capture {\nnamespace {\n";
+        out << "// Generated from capture/api/interfaces.json. Do not edit.\n#include \"objects.hpp\"\n#include \"video_forwarding.hpp\"\n#include \"command_stream.hpp\"\n#include \"deferred_history.hpp\"\n#include \"presentation_resources.hpp\"\nnamespace flora::capture {\nnamespace {\n";
         for (const auto& family : spec.at("families")) {
             const std::string name = family; auto chain = ancestry(spec, name);
             out << "class Proxy_" << name << " final : public " << name << ", public Proxy {\nObject& owner_;\npublic:\n"

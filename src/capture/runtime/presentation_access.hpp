@@ -19,6 +19,7 @@ inline std::recursive_mutex& presentation_context_mutex(ID3D11Device* device){
     std::lock_guard lock(gates->mutex);auto& gate=gates->values[identity.Get()];if(!gate)gate=std::make_unique<std::recursive_mutex>();return *gate;
 }
 inline std::recursive_mutex& presentation_context_mutex(ID3D11DeviceContext* context){Microsoft::WRL::ComPtr<ID3D11Device> device;context->GetDevice(&device);return presentation_context_mutex(device.Get());}
+inline std::recursive_mutex& presentation_context_mutex(ID3D11VideoContext* context){Microsoft::WRL::ComPtr<ID3D11Device> device;context->GetDevice(&device);return presentation_context_mutex(device.Get());}
 inline std::recursive_mutex& presentation_context_mutex(ID3D11Multithread* protection){
     // The runtime exposes this IID from both context and device identities.
     // A device-origin interface need not support QI to ID3D11DeviceContext.

@@ -33,6 +33,10 @@ int main(){try{
     check(excluded(L"C:\\Tools\\codex-computer-use.exe"));
     check(!excluded(L"D:\\Games\\UnlistedGame.exe"));
     check(!excluded(L"D:\\Games\\SteamWorld.exe"));check(!excluded(L"D:\\Games\\Flora.exe"));
+    check(!excluded(L"C:\\TestApps\\Hypergryph Launcher\\Launcher.exe"));
+    check(!excluded(L"C:\\TestApps\\Hypergryph Launcher\\1.6.0\\Games.exe"));
+    check(!excluded(L"C:\\TestApps\\EndField Game\\Endfield.exe"));
+    check(!excluded(L"D:\\Another Game\\Games.exe"));
     check(created(GetCurrentProcess())!=0);check(!created(nullptr));
     check(same_path(L"D:/Games/Endfield.exe",L"d:\\games\\ENDFIELD.exe"));
     check(same_path(L"\\\\?\\D:\\Games\\Endfield.exe",L"D:\\Games\\Endfield.exe"));

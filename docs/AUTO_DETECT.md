@@ -101,6 +101,13 @@ analysis tools, common browsers, launcher and crash helpers are excluded; game
 names are not an allowlist. Protected version directories remain on disk because
 already attached games may still reference them.
 
+The Hypergryph launcher directory is not excluded. Its decoder-output-view crash
+was reproduced independently and fixed by forwarding D3D11 video COM interfaces
+and unwrapping their resource operands, including nested SDK structures.
+`IDXGIKeyedMutex` also preserves shared-resource identity and synchronization.
+Video calls and cross-device synchronization during a capture remain explicit
+unsupported operations.
+
 The loader follows the [Microsoft initialization constraints](https://learn.microsoft.com/en-us/windows/win32/dlls/dynamic-link-library-best-practices):
 no runtime LoadLibrary, filesystem session creation or COM initialization in
 its DllMain. Active loads dispatch installation to a worker without waiting under
