@@ -46,7 +46,20 @@ int wmain(int argc,wchar_t** argv){try{
             observation.kind=CommandKind::query_get_data;observation.api="ID3D11DeviceContext::GetData";
             observation.result=completed?S_OK:S_FALSE;observation.words={sizeof(BOOL),0};observation.query->has_output=true;
             if(completed)observation.query->value=1;invalid.commands.push_back(std::move(observation));
-            reject(std::move(invalid),"EVENT query serialization");
+            if(completed){
+                // Matched in-frame completion is supported by the ordinary-query
+                // replay wait. Missing provenance must still prevent publication.
+                const auto analysis=analyze_event_dependencies(invalid);
+                require(analysis.observations.back().scope==EventObservationScope::recorded_prefix,
+                        "Completed EVENT lost its recorded prefix");
+                const auto accepted=out/(std::to_string(samples)+"x-completed-event.gpa_frame");
+                encode_frame(invalid,accepted);
+                require(std::filesystem::is_regular_file(accepted),"Verified completion was not published");
+                require(std::filesystem::remove(accepted),"Cannot remove completion test output");
+                invalid.commands.back().query->end_sequence.reset();
+                invalid.commands.back().query->last_end={};
+                reject(std::move(invalid),"GetData lost its in-frame End association");
+            }else reject(std::move(invalid),"EVENT query serialization");
         }
         for(bool edits:{true,false}){
             auto copy=frame;if(!edits)copy.commands.erase(copy.commands.begin()+2,copy.commands.begin()+4);
