@@ -42,6 +42,7 @@ chronology remains in Chinese.
 | Inspect/export complete texture storage while preserving nonzero MinLOD | [Clamped texture storage](LOD_STORAGE_READBACK.md) |
 | Component responsibilities | [Architecture](ARCHITECTURE.md) |
 | Run tests and external comparisons | [Development validation](USAGE.md#development-validation) |
+| Review capture-to-main integration checks and retained failures | [Capture integration acceptance](CAPTURE_MAIN_INTEGRATION.md) |
 | Observe current-process native GUI resources and audit lifecycle snapshots | [GUI resource controls](GUI_RESOURCE_OBSERVATIONS.md) |
 | Locate GUI resource changes between Query navigation, choosers and structure exports | [Operation-level GUI controls](GUI_WORKFLOW_STAGES.md) |
 | Build committed source with an isolated process environment and package it | [Source build and packaging](SOURCE_BUILD_AND_PACKAGING.md) |
