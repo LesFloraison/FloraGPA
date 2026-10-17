@@ -7,6 +7,7 @@
 #include <QAction>
 #include <QDir>
 #include <QFile>
+#include <QFileInfo>
 #include <QMessageBox>
 #include <QProcess>
 #include <QSignalSpy>
@@ -251,6 +252,10 @@ class ShaderProjectUiTests final : public QObject {
         if (base.isEmpty())
             QSKIP("Optional original GPA fixture directory is not configured");
         const auto sample = base + "/analysis/capture_samples/shader_project/";
+        if (!QDir(sample).exists())
+            QSKIP("Optional original shader-project capture directory is unavailable");
+        QVERIFY2(QFileInfo::exists(sample + "manifest.json"), "Shader-project manifest is missing");
+        QVERIFY2(QFileInfo::exists(sample + "project.gpa_frame"), "Shader-project capture is missing");
         const auto manifest = load(sample + "manifest.json");
         Frame frame((sample + "project.gpa_frame").toStdWString());
         QCOMPARE(frame.sha256(), manifest.at("sha256").get<std::string>());

@@ -114,6 +114,7 @@ class CommandSearchTests final:public QObject {
             const auto root=qEnvironmentVariable("FLORA_TEST_CAPTURE_DIR");
             if(root.isEmpty())QSKIP("Set FLORA_TEST_CAPTURE_DIR for original API search equivalence");
             path=root+'/'+name;
+            if(!QFile::exists(path))QSKIP(qPrintable("Optional original API search capture is unavailable: "+path));
         }
         auto frame=std::make_shared<Frame>(path.toStdWString());
         if(!hash.isEmpty())QCOMPARE(QString::fromStdString(frame->sha256()),hash);
