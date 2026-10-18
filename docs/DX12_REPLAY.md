@@ -446,6 +446,66 @@ being present in metadata. For example, the first missing range starts at slot
 has been established for these entries. This evidence does **not** establish
 that every possible source of saved query values has been exhausted.
 
+#### Historical query source audit
+
+A later targeted audit inspected all **185,466 initialization** and **7,069
+frame** records in Talos, plus every referenced resource-data descriptor. It
+adds evidence about the missing source without changing replay policy:
+
+| Query heap | Resolve destination | Destination creation | Heap offset | Resource-data snapshots referenced |
+| --- | --- | --- | --- | --- |
+| 180523136 | 1643440736 | 78132 | 327680 | 0 for heap or destination |
+| 180521984 | 1643459296 | 12800 | 458752 | 0 for heap or destination |
+
+Both destinations are 65,536-byte placed buffers on heap **1646217152**,
+created at record **42957** with `D3D12_HEAP_TYPE_READBACK` and size **42,008,576**
+bytes. Their ranges do not overlap each other or any of the other six captured
+placed buffers on this heap. The keyframe forward reference for creation 12800
+is consistent with the existing unique-lifetime rule.
+
+Each destination has exactly 14 direct object references in the parsed stream:
+nine ResolveQueryData recordings, one creation, one GPU-VA observation, one
+Map, one Unmap and one reference-count adjustment. Eight resolves are historical
+recordings and the remaining resolve is in the frame. Map records **78134** and
+**12802** describe a read range `[0, 1936)`; frame Unmap records **188885** and
+**192477** precede their respective frame resolves. These Map/Unmap records do
+not contain the result-buffer bytes. This reference audit does not infer that
+CPU application decisions can be reconstructed from the stream.
+
+All **3,679** referenced CopyOperation resource descriptors were inspected:
+each descriptor's captured object matches its packet object, and none names
+either query heap or either destination. Thus neither an alternate object in a
+CopyOperation nor an overlapping placed resource provides a known saved-value
+source. This is a statement about referenced descriptors and understood records,
+not a claim that every unreferenced byte or possible format extension was decoded.
+
+Ghidra analysis of GPA 2025 R1
+`layers/d3d12-state-tracker-x64.dll`, SHA-256
+`066b82ef52c258d0db820dcca2f5c6719fc37deb7cbc78c96c077113dd8e2d8d`,
+finds the following functions (image base `0x180000000`):
+
+- `Pre_BeginQuery`, RVA **0xb200**, calls **0x5c160**. The latter inserts a
+  `(heap pointer, query type, slot)` tuple into the command-list state's ordered
+  set at offset `0x300`; the allocated tree node is 48 bytes.
+- `Pre_EndQuery`, RVA **0xbb00**, calls **0x5cc80**, which removes that tuple via
+  **0x5f9a0**. The erase helper unlinks and frees matching tree nodes.
+
+These handlers track active query boundaries. They do not retain completed GPU
+query values or resource-data offsets. This observation does not prove that no
+other capture-layer routine could save query data; it rules out these particular
+state handlers as that source. Together with the previously inspected playback
+forwarders and original-player validation errors, the audit provides no basis
+to fill missing slots, submit historical recordings as if they were executed,
+or silently skip the unresolved ResolveQueryData calls.
+
+Ignored local evidence: `talos-query-sources1.json`, `talos-query-heaps1.txt`,
+`talos-query-descriptors1.txt`, `query-state-strings2.txt`,
+`query-state-xrefs1.txt`, `query-state-impl1.txt` and `query-state-erase1.txt`.
+The audit used bounded metadata inspection, mapped resource descriptors and
+Ghidra; it performed **no GPU replay**. A new saved-value source is needed before
+retrying restoration. Talos full-frame replay remains unaccepted; work on other
+replay/analysis requirements can proceed independently.
+
 The workspace reports the first blocking resolve as `MissingData`, including
 its execution/source and exact missing count. Before execution 16001 remains
 selectable; after 16001 and later prefixes report the gap. Execution 16000 is
