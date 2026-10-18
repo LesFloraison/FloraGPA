@@ -4,6 +4,7 @@
 #define NOMINMAX
 #include <Windows.h>
 #include <d3d12.h>
+#include <d3d12sdklayers.h>
 #include <dxgi1_6.h>
 #include <wrl/client.h>
 #include <psapi.h>
@@ -13,6 +14,7 @@
 #include <charconv>
 #include <sstream>
 #include <algorithm>
+#include <map>
 
 namespace flora::dx12 {
 using Microsoft::WRL::ComPtr;
@@ -58,7 +60,7 @@ struct NativeDevice::Impl {
     nlohmann::json report;
     ~Impl() { device.Reset(); factory.Reset(); if (sdk1) sdk1->FreeUnusedSDKs(); }
 };
-NativeDevice::NativeDevice(const StreamDirectory &directory) : impl_(std::make_unique<Impl>()) {
+NativeDevice::NativeDevice(const StreamDirectory &directory, bool debug) : impl_(std::make_unique<Impl>()) {
     const auto selected = sdkForCapture(directory.path());
     auto &state = *impl_;
     state.report = {{"requested_sdk_version", selected.version},
@@ -91,6 +93,12 @@ NativeDevice::NativeDevice(const StreamDirectory &directory) : impl_(std::make_u
         check(state.sdk->SetSDKVersion(selected.version, ansiPath(relative).c_str()), "SetSDKVersion (legacy SDK; requires Developer Mode)");
         state.report["sdk_configuration"] = "ID3D12SDKConfiguration::SetSDKVersion";
     }
+    if (debug) {
+        ComPtr<ID3D12Debug> validation;
+        const auto hr = state.factory ? state.factory->GetConfigurationInterface(CLSID_D3D12Debug, IID_PPV_ARGS(&validation)) : D3D12GetDebugInterface(IID_PPV_ARGS(&validation));
+        check(hr, "Enable DX12 debug layer"); validation->EnableDebugLayer();
+    }
+    state.report["debug_layer"] = debug;
     ComPtr<IDXGIFactory6> dxgi;
     check(CreateDXGIFactory2(0, IID_PPV_ARGS(&dxgi)), "CreateDXGIFactory2");
     ComPtr<IDXGIAdapter1> adapter;
@@ -133,5 +141,24 @@ NativeDevice::NativeDevice(const StreamDirectory &directory) : impl_(std::make_u
 }
 NativeDevice::~NativeDevice() = default;
 ID3D12Device *NativeDevice::device() const { return impl_->device.Get(); }
-nlohmann::json NativeDevice::information() const { return impl_->report; }
+nlohmann::json NativeDevice::information() const {
+    auto result = impl_->report; ComPtr<ID3D12InfoQueue> queue;
+    if (impl_->device && SUCCEEDED(impl_->device.As(&queue))) {
+        auto messages = nlohmann::json::array(); const auto count = queue->GetNumStoredMessagesAllowedByRetrievalFilter();
+        std::map<std::pair<UINT, UINT>, nlohmann::json> unique; uint64_t errors{};
+        for (UINT64 i = 0; i < count; ++i) {
+            SIZE_T length{}; if (FAILED(queue->GetMessage(i, nullptr, &length))) continue;
+            std::vector<uint8_t> bytes(length); auto message = reinterpret_cast<D3D12_MESSAGE *>(bytes.data());
+            if (FAILED(queue->GetMessage(i, message, &length)) || message->Severity > D3D12_MESSAGE_SEVERITY_WARNING) continue;
+            errors += message->Severity <= D3D12_MESSAGE_SEVERITY_ERROR;
+            auto &entry = unique[{UINT(message->Severity), UINT(message->ID)}];
+            if (entry.is_null()) entry = {{"severity", UINT(message->Severity)}, {"id", UINT(message->ID)}, {"description", message->pDescription}, {"count", 0ULL}};
+            entry["count"] = entry["count"].get<uint64_t>() + 1;
+        }
+        for (const auto &[key, entry] : unique) if (messages.size() < 32) messages.push_back(entry);
+        result["validation_error_count"] = std::to_string(errors);
+        result["validation_messages"] = std::move(messages); result["validation_message_count"] = std::to_string(count);
+    }
+    return result;
+}
 }

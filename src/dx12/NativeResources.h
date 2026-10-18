@@ -40,6 +40,8 @@ class NativeResources final {
     void releaseCompleted(uint64_t releaseRecord);
     D3D12_RESOURCE_STATES state(uint64_t object, uint64_t atRecord, UINT subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES);
     void transition(uint64_t object, uint64_t atRecord, UINT subresource, D3D12_RESOURCE_STATES before, D3D12_RESOURCE_STATES after);
+    void requireState(uint64_t object, uint64_t atRecord, UINT subresource, D3D12_RESOURCE_STATES required);
+    void completeSubmission(D3D12_COMMAND_LIST_TYPE queueType);
     uint64_t remainingAllocationBudget() const;
     nlohmann::json information() const;
 };

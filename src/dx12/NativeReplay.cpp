@@ -2,6 +2,7 @@
 #include "StreamArguments.h"
 #include "TileRecipes.h"
 #include "NativeDescriptors.h"
+#include "NativeCommands.h"
 #include <wrl/client.h>
 #include <QCryptographicHash>
 #include <QByteArrayView>
@@ -9,6 +10,9 @@
 #include <set>
 #include <sstream>
 #include <thread>
+#include <functional>
+#include <QSaveFile>
+#include <QImage>
 
 namespace flora::dx12 {
 namespace {
@@ -79,6 +83,9 @@ struct NativeReplay::Impl {
     ComPtr<ID3D12Fence> completion; uint64_t completionValue{};
     json submissions = json::array(); std::map<std::string, uint64_t> recordedCommands, executedCommands;
     uint64_t currentRecord{}; bool initialized = false, attempted = false;
+    bool frameAttempted = false, boundaryReached = false, boundaryAfter = false;
+    uint64_t selectedExecution{};
+    using StateActions = std::vector<std::function<void()>>;
     struct Tiling { UINT total{}; D3D12_PACKED_MIP_INFO packed{}; std::vector<D3D12_SUBRESOURCE_TILING> subresources; };
     std::map<uint64_t, Tiling> tilings;
     uint64_t tileMappingCalls{};
@@ -189,9 +196,14 @@ struct NativeReplay::Impl {
             r.rangeCount, r.rangeFlags.data(), r.heapOffsets.data(), r.tileCounts.data(), r.flags);
         ++tileMappingCalls;
     }
-    void record(ID3D12GraphicsCommandList *list, uint64_t id, uint64_t expectedList) {
+    void record(ID3D12GraphicsCommandList *list, uint64_t id, uint64_t expectedList, StateActions *deferred = nullptr) {
         currentRecord = id; checkCancellation(cancelled); const auto &p = directory.packets().at(size_t(id - 1)); Reader r(directory.payload(p));
         require(r.read<uint64_t>() == expectedList, "Command belongs to another captured list");
+        const auto action = [&](std::function<void()> f) {
+            if (deferred) deferred->push_back([f = std::move(f), id] {
+                try { f(); } catch (const std::exception &e) { throw std::runtime_error("Execution source record " + std::to_string(id) + ": " + e.what()); }
+            }); else f();
+        };
         if (p.type == 0x1ae3cba2cc519ULL) {
             const auto copy = decodeTileCopy(directory.payload(p)); const auto tiles = tileRegion(copy.resource, id, copy.start, copy.size);
             auto tiled = resources.resource(copy.resource, id), buffer = resources.resource(copy.buffer, id); const auto desc = buffer->GetDesc();
@@ -200,8 +212,8 @@ struct NativeReplay::Impl {
             require(upload || direction == D3D12_TILE_COPY_FLAG_SWIZZLED_TILED_RESOURCE_TO_LINEAR_BUFFER, "Unknown tile copy flags");
             require(desc.Dimension == D3D12_RESOURCE_DIMENSION_BUFFER && copy.offset % D3D12_TILED_RESOURCE_TILE_SIZE_IN_BYTES == 0 &&
                 copy.offset <= desc.Width && tiles <= (desc.Width - copy.offset) / D3D12_TILED_RESOURCE_TILE_SIZE_IN_BYTES, "Tile copy exceeds its linear buffer");
-            require((resources.state(copy.resource, id, copy.start.Subresource) & (upload ? D3D12_RESOURCE_STATE_COPY_DEST : D3D12_RESOURCE_STATE_COPY_SOURCE)) &&
-                (resources.state(copy.buffer, id) & (upload ? D3D12_RESOURCE_STATE_COPY_SOURCE : D3D12_RESOURCE_STATE_COPY_DEST)), "Tile copy requires unresolved resource state promotion");
+            action([=, this] { resources.requireState(copy.resource, id, copy.start.Subresource, upload ? D3D12_RESOURCE_STATE_COPY_DEST : D3D12_RESOURCE_STATE_COPY_SOURCE);
+                resources.requireState(copy.buffer, id, 0, upload ? D3D12_RESOURCE_STATE_COPY_SOURCE : D3D12_RESOURCE_STATE_COPY_DEST); });
             list->CopyTiles(tiled, &copy.start, &copy.size, buffer, copy.offset, copy.flags);
         } else if (p.type == 0x1ae3c24e5dabeULL) {
             const auto count = r.read<UINT>(); std::vector<D3D12_RESOURCE_BARRIER> barriers;
@@ -212,7 +224,8 @@ struct NativeReplay::Impl {
                     require(barrier.Flags == D3D12_RESOURCE_BARRIER_FLAG_NONE, "Split barriers require the pending-transition execution path");
                     if (barrier.Type == D3D12_RESOURCE_BARRIER_TYPE_TRANSITION) {
                         const auto object = b.read<uint64_t>(); auto &t = barrier.Transition; t.Subresource = b.read<UINT>(); t.StateBefore = b.read<D3D12_RESOURCE_STATES>(); t.StateAfter = b.read<D3D12_RESOURCE_STATES>();
-                        t.pResource = resources.resource(object, id); resources.transition(object, id, t.Subresource, t.StateBefore, t.StateAfter);
+                        t.pResource = resources.resource(object, id);
+                        action([this, object, id, t] { resources.transition(object, id, t.Subresource, t.StateBefore, t.StateAfter); });
                     } else if (barrier.Type == D3D12_RESOURCE_BARRIER_TYPE_ALIASING) {
                         const auto before = b.read<uint64_t>(), after = b.read<uint64_t>();
                         barrier.Aliasing.pResourceBefore = before ? resources.resource(before, id) : nullptr; barrier.Aliasing.pResourceAfter = after ? resources.resource(after, id) : nullptr;
@@ -227,7 +240,7 @@ struct NativeReplay::Impl {
             const auto destination = r.read<uint64_t>(), destinationOffset = r.read<uint64_t>(), source = r.read<uint64_t>(), sourceOffset = r.read<uint64_t>(), count = r.read<uint64_t>(); r.end();
             auto dst = resources.resource(destination, id), src = resources.resource(source, id); const auto d = dst->GetDesc(), s = src->GetDesc();
             require(d.Dimension == D3D12_RESOURCE_DIMENSION_BUFFER && s.Dimension == D3D12_RESOURCE_DIMENSION_BUFFER && destinationOffset <= d.Width && count <= d.Width - destinationOffset && sourceOffset <= s.Width && count <= s.Width - sourceOffset, "Captured buffer copy is out of range");
-            require((resources.state(source, id) & D3D12_RESOURCE_STATE_COPY_SOURCE) && (resources.state(destination, id) & D3D12_RESOURCE_STATE_COPY_DEST), "Buffer copy requires unresolved resource state promotion");
+            action([=, this] { resources.requireState(source, id, 0, D3D12_RESOURCE_STATE_COPY_SOURCE); resources.requireState(destination, id, 0, D3D12_RESOURCE_STATE_COPY_DEST); });
             list->CopyBufferRegion(dst, destinationOffset, src, sourceOffset, count);
         } else if (p.type == 0x1ae3c53697cd3ULL) {
             auto dst = location(r); const auto x = r.read<UINT>(), y = r.read<UINT>(), z = r.read<UINT>(); auto src = location(r);
@@ -235,12 +248,12 @@ struct NativeReplay::Impl {
             dst.native.pResource = resources.resource(dst.object, id); src.native.pResource = resources.resource(src.object, id); checkLocation(dst); checkLocation(src);
             const auto srcSub = src.native.Type == D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX ? src.native.SubresourceIndex : 0;
             const auto dstSub = dst.native.Type == D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX ? dst.native.SubresourceIndex : 0;
-            require((resources.state(src.object, id, srcSub) & D3D12_RESOURCE_STATE_COPY_SOURCE) && (resources.state(dst.object, id, dstSub) & D3D12_RESOURCE_STATE_COPY_DEST), "Texture copy requires unresolved resource state promotion");
+            action([=, this] { resources.requireState(src.object, id, srcSub, D3D12_RESOURCE_STATE_COPY_SOURCE); resources.requireState(dst.object, id, dstSub, D3D12_RESOURCE_STATE_COPY_DEST); });
             list->CopyTextureRegion(&dst.native, x, y, z, &src.native, box ? &*box : nullptr);
         } else if (p.type == 0x1ae3c1d190092ULL) {
             const auto destination = r.read<uint64_t>(), source = r.read<uint64_t>(); r.end();
             auto dst = resources.resource(destination, id), src = resources.resource(source, id);
-            require((resources.state(source, id) & D3D12_RESOURCE_STATE_COPY_SOURCE) && (resources.state(destination, id) & D3D12_RESOURCE_STATE_COPY_DEST), "Resource copy requires unresolved resource state promotion");
+            action([=, this] { resources.requireState(source, id, D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES, D3D12_RESOURCE_STATE_COPY_SOURCE); resources.requireState(destination, id, D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES, D3D12_RESOURCE_STATE_COPY_DEST); });
             list->CopyResource(dst, src);
         } else throw std::runtime_error("Unsupported native initialization command: " + streamPacketName(p.type));
         ++recordedCommands[streamPacketName(p.type)];
@@ -269,6 +282,7 @@ struct NativeReplay::Impl {
         }
         require(pointers.size() == args.at("NumCommandLists").get<size_t>(), "Submission instance count mismatch");
         currentRecord = id; checkCancellation(cancelled); if (!pointers.empty()) nativeQueue->ExecuteCommandLists(UINT(pointers.size()), pointers.data()); wait(nativeQueue);
+        resources.completeSubmission(queueRecipes.at(queueId).desc.Type);
         executedCommands = recordedCommands;
         submissions.push_back({{"record", std::to_string(id)}, {"queue", std::to_string(queueId)}, {"lists", std::move(executions)}});
     }
@@ -313,6 +327,102 @@ void NativeReplay::initializeTransfers() {
         catch (const std::exception &e) { throw std::runtime_error("Initialization record " + std::to_string(s.currentRecord) + ": " + e.what()); }
     }
     for (const auto &[id, queue] : s.queues) s.wait(queue.Get()); s.initialized = true;
+}
+void NativeReplay::replayTo(uint64_t execution, bool after) {
+    auto &s = *impl_; require(s.initialized && !s.frameAttempted, "Frame replay requires a fresh initialized context");
+    s.frameAttempted = true; s.selectedExecution = execution; s.boundaryAfter = after;
+    const auto target = s.index.execution(execution);
+    require(target.submission > s.directory.initializationCount() && target.recordingComplete, "Select a complete frame execution instance");
+    NativeCommands commands(s.device, s.directory, s.resources, s.descriptors, s.cancelled);
+    struct Recording {
+        ComPtr<ID3D12CommandAllocator> allocator; ComPtr<ID3D12GraphicsCommandList> list;
+        Impl::StateActions states; size_t count{}, recorded{}; bool closed = false;
+    };
+    using Key = std::pair<size_t, size_t>;
+    std::map<Key, Recording> recordings;
+    std::map<std::pair<uint64_t, uint64_t>, Key> instances;
+    for (const auto &instance : s.index.lists()) {
+        if (instance.submission <= s.directory.initializationCount() || instance.submission > target.submission ||
+            (instance.submission == target.submission && instance.ordinal > target.ordinal)) continue;
+        require(instance.recording.has_value(), "Missing frame command-list recording"); const auto &original = s.index.recordings()[*instance.recording];
+        require(original.hasBeginning && original.closed && original.begin > s.directory.initializationCount(), "Frame list needs keyframe recording-state restoration");
+        const auto count = instance.submission == target.submission && instance.ordinal == target.ordinal ?
+            size_t(execution - instance.firstExecution + (after ? 1 : 0)) : original.records.size();
+        const Key key{*instance.recording, count}; recordings.try_emplace(key).first->second.count = count;
+        instances.emplace(std::pair{instance.submission, instance.ordinal}, key);
+    }
+    std::map<uint64_t, std::vector<Key>> starts;
+    for (const auto &[key, native] : recordings) starts[s.index.recordings()[key.first].begin].push_back(key);
+    for (uint64_t id = s.directory.initializationCount() + 1; id <= target.submission; ++id) {
+        s.currentRecord = id; checkCancellation(s.cancelled); const auto &p = s.directory.packets()[size_t(id - 1)];
+        try {
+            if (auto it = starts.find(id); it != starts.end()) for (const auto &key : it->second) {
+                auto &native = recordings.at(key); const auto args = decodeArguments(p.type, s.directory.payload(p)).values;
+                const auto allocatorId = value(args, "CommandAllocator"); require(s.allocatorRecipes.contains(allocatorId), "Missing frame allocator recipe");
+                const auto type = s.allocatorRecipes.at(allocatorId).type;
+                require(type == D3D12_COMMAND_LIST_TYPE_DIRECT || type == D3D12_COMMAND_LIST_TYPE_COPY || type == D3D12_COMMAND_LIST_TYPE_COMPUTE, "Unsupported frame command-list type");
+                if (args.contains("Type")) require(args.at("Type").get<UINT>() == UINT(type), "Frame list and allocator types disagree");
+                const auto pso = value(args, "InitialPipelineState"); auto initial = pso ? commands.pipelines().pipeline(pso, id) : nullptr;
+                check(s.device.device()->CreateCommandAllocator(type, IID_PPV_ARGS(&native.allocator)), "Create frame allocator");
+                check(s.device.device()->CreateCommandList(args.value("NodeMask", UINT(0)), type, native.allocator.Get(), initial, IID_PPV_ARGS(&native.list)), "Create frame command list");
+                if (!native.count) { check(native.list->Close(), "Close empty frame prefix"); native.closed = true; }
+            }
+            if (const auto recording = s.index.recordingForRecord(id)) {
+                for (auto &[key, native] : recordings) {
+                    if (key.first != *recording || native.closed) continue;
+                    require(native.list && native.recorded < native.count, "Invalid native recording boundary");
+                    const auto &original = s.index.recordings()[key.first]; require(original.records[native.recorded] == id, "Native recording order mismatch");
+                    if (transfer(p.type)) s.record(native.list.Get(), id, original.list, &native.states);
+                    else { commands.record(native.list.Get(), id, original.list, native.states); ++s.recordedCommands[streamPacketName(p.type)]; }
+                    if (++native.recorded == native.count) { check(native.list->Close(), "Close frame execution prefix"); native.closed = true; }
+                }
+                continue;
+            }
+            if (p.type == 0x20000000000000ULL) s.resources.restoreMappedData(id);
+            else if (s.descriptors.apply(id)) {}
+            else if (p.type == 0x125482975df48ULL) {
+                submissionExtension(s.directory, p); const auto args = decodeArguments(p.type, s.directory.payload(p)).values; const auto queueId = value(args, "Queue");
+                auto queue = s.queue(queueId); std::vector<ID3D12CommandList *> lists; json executed = json::array(); std::map<std::string, uint64_t> pendingCounts;
+                for (const auto &instance : s.index.lists()) {
+                    if (instance.submission != id) continue; const auto selected = instances.find({id, instance.ordinal}); if (selected == instances.end()) continue;
+                    auto &native = recordings.at(selected->second); require(native.closed, "Submitted frame recording is not closed");
+                    require(native.list->GetType() == s.queueRecipes.at(queueId).desc.Type, "Frame queue/list types disagree");
+                    for (auto &action : native.states) action(); lists.push_back(native.list.Get());
+                    const auto &original = s.index.recordings()[selected->second.first];
+                    for (size_t i = 0; i < native.count; ++i) ++pendingCounts[streamPacketName(s.directory.packets()[size_t(original.records[i] - 1)].type)];
+                    executed.push_back({{"list", std::to_string(instance.list)}, {"ordinal", std::to_string(instance.ordinal)},
+                        {"generation", std::to_string(original.generation)}, {"first_execution", std::to_string(instance.firstExecution)}, {"execution_count", std::to_string(native.count)}});
+                }
+                if (!lists.empty()) queue->ExecuteCommandLists(UINT(lists.size()), lists.data()); s.wait(queue);
+                s.resources.completeSubmission(s.queueRecipes.at(queueId).desc.Type);
+                for (const auto &[name, count] : pendingCounts) s.executedCommands[name] += count;
+                s.submissions.push_back({{"record", std::to_string(id)}, {"queue", std::to_string(queueId)}, {"lists", std::move(executed)}});
+            } else if (p.type == 0x12548dab1bf2dULL || p.type == 0x12548db3bfde2ULL) {
+                Reader r(s.directory.payload(p)); const auto queue = r.read<uint64_t>(), fence = r.read<uint64_t>(), value = r.read<uint64_t>();
+                check(r.read<HRESULT>(), "Captured frame synchronization"); r.end(); auto nativeQueue = s.queue(queue); auto nativeFence = s.fence(fence);
+                if (p.type == 0x12548dab1bf2dULL) { check(nativeQueue->Signal(nativeFence, value), "Replay frame signal"); s.wait(nativeQueue); }
+                else { require(nativeFence->GetCompletedValue() >= value, "Frame wait requires an unscheduled producer"); check(nativeQueue->Wait(nativeFence, value), "Replay frame wait"); }
+            } else if (p.type == 0x125482264c67fULL) s.mapTiles(id);
+            else if (isResourceRecipe(p.type) || isPipelineRecipe(p.type)) {} // Validated indexed recipes, materialized on use.
+            else switch (p.type) {
+            // These APIs carry no additional GPU commands. Map/Unmap data is
+            // restored by CopyOperation, and native allocations outlive all
+            // recordings in this bounded execution context.
+            case 0x127938b682074ULL: case 0x1ae3c721c351aULL: case 0x1ae3cd6acf667ULL:
+            case 0x1ae3ce8691d1cULL: case 0x1ae3c6360f841ULL:
+            case 0x1cb0a721c351aULL: case 0x1e6503e2ff325ULL: case 0x1e650cfcd4902ULL:
+            case 0x1e650e8691d1cULL: case 0x14538e8691d1cULL: case 0x11469e993999dULL:
+            case 0x1279331d76605ULL: case 0x1e6508ef58ff0ULL: case 0x15a3eb3b8e877ULL:
+            case 0x15a3edf3ce2bbULL: case 0x1af998824f46bULL: case 0x1d53218275f72ULL:
+            case 0x28000000000000ULL: break;
+            default: throw std::runtime_error("Unsupported frame CPU operation: " + streamPacketName(p.type));
+            }
+        } catch (const OperationCancelled &) { throw; }
+        catch (const std::exception &e) { throw std::runtime_error("Frame record " + std::to_string(id) + ": " + e.what()); }
+    }
+    const auto validation = s.device.information();
+    require(validation.value("validation_error_count", std::string("0")) == "0", "D3D12 validation reported errors; execution boundary is not accepted");
+    s.boundaryReached = true;
 }
 json NativeReplay::inspectBuffer(uint64_t creation, uint64_t offset, uint64_t length) {
     auto &s = *impl_; require(s.initialized, "Initialization submissions have not completed");
@@ -419,11 +529,69 @@ json NativeReplay::verifyInitializedTexture(uint64_t copyRecord) {
         {"expected_sha256", expected.result().toHex().toStdString()}, {"actual_sha256", actual.result().toHex().toStdString()},
         {"boundary", "after_initialization_submissions"}, {"row_padding_compared", false}, {"frame_replayed", false}};
 }
+json NativeReplay::readTexture(uint64_t object, UINT subresource, const std::filesystem::path &output) {
+    auto &s = *impl_; require(s.boundaryReached, "Frame execution boundary has not completed");
+    auto texture = s.resources.resource(object, s.currentRecord); const auto desc = texture->GetDesc();
+    require(desc.Dimension != D3D12_RESOURCE_DIMENSION_BUFFER && desc.SampleDesc.Count == 1, "Texture readback requires a single-sample texture");
+    D3D12_FEATURE_DATA_FORMAT_INFO format{desc.Format}; check(s.device.device()->CheckFeatureSupport(D3D12_FEATURE_FORMAT_INFO, &format, sizeof(format)), "Query readback planes");
+    require(subresource < UINT(desc.MipLevels) * (desc.Dimension == D3D12_RESOURCE_DIMENSION_TEXTURE3D ? 1 : desc.DepthOrArraySize) * format.PlaneCount, "Readback subresource is out of range");
+    D3D12_PLACED_SUBRESOURCE_FOOTPRINT footprint{}; UINT rows{}; UINT64 rowBytes{}, total{};
+    s.device.device()->GetCopyableFootprints(&desc, subresource, 1, 0, &footprint, &rows, &rowBytes, &total);
+    require(total && total != UINT64_MAX && rows && rowBytes, "Unsupported texture readback footprint");
+    D3D12_RESOURCE_DESC buffer{}; buffer.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER; buffer.Width = total; buffer.Height = 1;
+    buffer.DepthOrArraySize = buffer.MipLevels = 1; buffer.SampleDesc.Count = 1; buffer.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+    const auto allocation = s.device.device()->GetResourceAllocationInfo(0, 1, &buffer).SizeInBytes;
+    require(allocation <= s.resources.remainingAllocationBudget(), "Frame readback exceeds the allocation budget");
+    D3D12_HEAP_PROPERTIES heap{}; heap.Type = D3D12_HEAP_TYPE_READBACK; ComPtr<ID3D12Resource> readback;
+    check(s.device.device()->CreateCommittedResource(&heap, D3D12_HEAP_FLAG_NONE, &buffer, D3D12_RESOURCE_STATE_COPY_DEST, nullptr, IID_PPV_ARGS(&readback)), "Create frame texture readback");
+    ComPtr<ID3D12CommandAllocator> allocator; ComPtr<ID3D12GraphicsCommandList> list;
+    check(s.device.device()->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&allocator)), "Create frame readback allocator");
+    check(s.device.device()->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, allocator.Get(), nullptr, IID_PPV_ARGS(&list)), "Create frame readback list");
+    const auto before = s.resources.state(object, s.currentRecord, subresource);
+    D3D12_RESOURCE_BARRIER barrier{}; barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+    barrier.Transition = {texture, subresource, before, D3D12_RESOURCE_STATE_COPY_SOURCE}; const bool transition = !(before & D3D12_RESOURCE_STATE_COPY_SOURCE);
+    if (transition) list->ResourceBarrier(1, &barrier);
+    D3D12_TEXTURE_COPY_LOCATION source{}; source.pResource = texture; source.Type = D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX; source.SubresourceIndex = subresource;
+    D3D12_TEXTURE_COPY_LOCATION destination{}; destination.pResource = readback.Get(); destination.Type = D3D12_TEXTURE_COPY_TYPE_PLACED_FOOTPRINT; destination.PlacedFootprint = footprint;
+    list->CopyTextureRegion(&destination, 0, 0, 0, &source, nullptr);
+    if (transition) { std::swap(barrier.Transition.StateBefore, barrier.Transition.StateAfter); list->ResourceBarrier(1, &barrier); }
+    check(list->Close(), "Close frame readback"); ID3D12CommandQueue *queue{};
+    for (const auto &[id, native] : s.queues) if (s.queueRecipes.at(id).desc.Type == D3D12_COMMAND_LIST_TYPE_DIRECT) { queue = native.Get(); break; }
+    require(queue, "Frame texture readback requires a direct queue"); ID3D12CommandList *lists[]{list.Get()}; queue->ExecuteCommandLists(1, lists); s.wait(queue);
+    QSaveFile file(QString::fromStdWString(output.wstring())); require(file.open(QIODevice::WriteOnly), "Cannot open frame texture output");
+    void *mapped{}; D3D12_RANGE read{0, SIZE_T(total)}; check(readback->Map(0, &read, &mapped), "Map frame texture readback");
+    QCryptographicHash digest(QCryptographicHash::Sha256); uint64_t nonzero{}; std::string imageFile;
+    const uint64_t rowCount = uint64_t(rows) * footprint.Footprint.Depth;
+    try {
+        for (uint64_t row = 0; row < rowCount; ++row) {
+            checkCancellation(s.cancelled); const auto data = static_cast<const uint8_t *>(mapped) + footprint.Offset + row * footprint.Footprint.RowPitch;
+            digest.addData(QByteArrayView(reinterpret_cast<const char *>(data), qsizetype(rowBytes)));
+            for (uint64_t i = 0; i < rowBytes; ++i) nonzero += data[i] != 0;
+            require(file.write(reinterpret_cast<const char *>(data), qint64(rowBytes)) == qint64(rowBytes), "Cannot write frame texture output");
+        }
+        const auto pixelFormat = footprint.Footprint.Format;
+        const bool bgra = pixelFormat == DXGI_FORMAT_B8G8R8A8_UNORM || pixelFormat == DXGI_FORMAT_B8G8R8A8_UNORM_SRGB;
+        const bool rgba = pixelFormat == DXGI_FORMAT_R8G8B8A8_UNORM || pixelFormat == DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
+        if ((bgra || rgba) && footprint.Footprint.Depth == 1) {
+            const QImage image(static_cast<const uchar *>(mapped) + footprint.Offset, int(footprint.Footprint.Width), int(footprint.Footprint.Height),
+                qsizetype(footprint.Footprint.RowPitch), bgra ? QImage::Format_ARGB32 : QImage::Format_RGBA8888);
+            auto imagePath = output; imagePath.replace_extension(L".png"); QSaveFile png(QString::fromStdWString(imagePath.wstring()));
+            require(png.open(QIODevice::WriteOnly) && image.save(&png, "PNG") && png.commit(), "Cannot publish GPU texture PNG"); imageFile = imagePath.filename().string();
+        }
+    } catch (...) { D3D12_RANGE none{0, 0}; readback->Unmap(0, &none); throw; }
+    D3D12_RANGE none{0, 0}; readback->Unmap(0, &none); require(file.commit(), "Cannot publish frame texture output");
+    return {{"object", std::to_string(object)}, {"creation_record", std::to_string(s.resources.creationRecord(object, s.currentRecord))}, {"subresource", subresource},
+        {"width", footprint.Footprint.Width}, {"height", footprint.Footprint.Height}, {"depth", footprint.Footprint.Depth}, {"format", UINT(footprint.Footprint.Format)},
+        {"row_bytes", std::to_string(rowBytes)}, {"rows", rows}, {"bytes", std::to_string(rowBytes * rowCount)}, {"nonzero_bytes", std::to_string(nonzero)},
+        {"sha256", digest.result().toHex().toStdString()}, {"execution", std::to_string(s.selectedExecution)}, {"boundary", s.boundaryAfter ? "after" : "before"},
+        {"file", output.filename().string()}, {"image", imageFile}, {"source", "native_gpu_readback"}, {"row_padding_included", false}};
+}
 json NativeReplay::information() const {
     const auto &s = *impl_; return {{"status", s.initialized ? "initialization_transfers_executed" : "incomplete"},
         {"last_record", std::to_string(s.currentRecord)}, {"submissions", s.submissions}, {"recorded_commands", s.recordedCommands}, {"executed_commands", s.executedCommands}, {"resources", s.resources.information()},
         {"tile_mapping_calls", std::to_string(s.tileMappingCalls)},
         {"descriptors", s.descriptors.information()},
-        {"frame_replayed", false}, {"note", "Captured initialization transfers and descriptor restoration; shader access and frame commands remain unverified"}};
+        {"selected_execution", std::to_string(s.selectedExecution)}, {"boundary", s.boundaryAfter ? "after" : "before"}, {"execution_boundary_reached", s.boundaryReached},
+        {"frame_replayed", false}, {"note", "Native initialization and selected frame execution; full-frame correctness and analysis require separate validation"}};
 }
 }

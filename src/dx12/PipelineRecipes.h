@@ -48,6 +48,8 @@ class NativePipelines final {
     NativePipelines(NativeDevice &, const StreamDirectory &, const CancelCheck &cancelled = {});
     ~NativePipelines();
     ID3D12PipelineState *create(uint64_t record);
+    ID3D12PipelineState *pipeline(uint64_t object, uint64_t atRecord);
+    ID3D12RootSignature *rootSignature(uint64_t object, uint64_t atRecord);
     nlohmann::json information(uint64_t record) const;
 };
 }

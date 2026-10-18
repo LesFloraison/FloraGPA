@@ -341,7 +341,8 @@ bindings are recorded against the descriptor contents at the command's recording
 time, while shader-visible tables can be updated before submission. Rebuilding a
 frame command list at submission using only the latest CPU descriptors is not a
 valid replacement for this distinction. Initialization transfer lists do not
-consume descriptors and are unaffected by that pending integration.
+consume descriptors. The selected frame execution path below now preserves these
+recording boundaries; its remaining gaps are tracked separately.
 
 `BackBufferIndex` reconstructs offscreen resources from captured swapchain
 descriptions and `GetBuffer` identities, including forward initialization
@@ -375,6 +376,72 @@ Ghidra reader RVAs: `0x677480` / `0x60e8f0` (CPU heap handle), `0x53a2f0`
 (swapchain descriptions). The legacy swapchain descriptor omits native padding
 and is decoded field-by-field rather than copied as a 72-byte native structure.
 
+### Selected native frame execution
+
+`NativeReplay::replayTo` records frame command lists at their CPU stream
+boundaries and executes the indexed submission instances. Native allocations
+and command allocators stay alive through GPU completion. A selected instance
+can execute a prefix before or after its exact execution ID; repeated instances
+can retain both a full recording and the selected prefix. Resource-state checks
+run in submission order, independently of interleaved CPU recording order.
+Unsupported operations, unresolved queue producers, missing keyframe recording
+state and nonempty indirect submission remappings fail at their source boundary.
+Queue completion is currently serialized for correctness, not performance.
+
+The recorder implements the graphics/compute binding and draw paths encountered
+in Talos's first main recording, including native PSOs/root signatures, GPU
+address translation, vertex/index views, descriptors, clears, discard regions
+and query commands. Frame memory restoration handles bounded partial buffer
+patches (Talos records 185507/185508: 9,732 bytes followed by 1,080 bytes at offset
+8,652). COMMON promotion and submission-boundary decay follow the
+[D3D12 resource-state rules](https://learn.microsoft.com/en-us/windows/win32/direct3d12/using-resource-barriers-to-synchronize-resource-states-in-direct3d-12);
+upload/readback heaps retain their fixed states. State lookup also recognizes
+when every subresource has individually converged to the same state.
+
+Targeted native results on SDK 616 / RTX 5090 Laptop, with the D3D12 debug layer:
+
+| Boundary | Resource | Result |
+| --- | --- | --- |
+| Before execution 12675, source record 185550 | Depth object `4980699392`, creation 167081, subresource 1 | 2048x2048 R16 readback, all 8,388,608 bytes zero |
+| After execution 12675 | Same depth subresource | 792,141 changed bytes; SHA256 `c463ef68c2774b28af0f8462b3b92f9b56907e64bd42a7c465a29aeee7fea217` |
+| After execution 16000, source record 188916 | Color object `1651488160`, creation 42877, subresource 0 | All 521 Draws in the first main recording executed; 1920x1080 BGRA8 readback, SHA256 `4fcac91107578f2a4a96ec8ffaaaa1d1cf343155205ecf28beb3861c843eb2e8` |
+
+These accepted boundaries have zero debug-layer errors. Warnings report captured
+sampler comparison fields ignored by non-comparison filters, optimized-clear
+value differences, and buffer initial-state normalization. Raw texture bytes and
+PNG output are produced from GPU readback, never from the directory preview.
+Local evidence: `artifacts/dx12-research/talos-first-draw-before2`,
+`talos-first-draw-after1`, and `talos-first-color1` (ignored by Git).
+
+The next command, `ResolveQueryData` at source record 188923 / execution 16001,
+requests 236 occlusion queries, but this frame has only completed 96 of them.
+Executing it without restoring historical query state produced 140 debug-layer
+errors. The implementation now rejects that submission before GPU execution;
+it neither fabricates query results nor accepts the resulting image as a
+complete replay. `talos-query-guard1` verifies this failure in the Worker with
+zero native validation errors and no falsely reported executed Draws. Historical
+command recordings exist in metadata, but the necessary query-state restoration
+has not yet been established. This remains a full-frame blocker.
+
+Reproduce the accepted color boundary (new/empty output directory required):
+
+```powershell
+FloraGPA.Worker.exe validate-frame "D:\CDXrepo\captures\Talos_2026_10_18__00_55_08.gpa_frame" --check-initialization --max-bytes 4294967296 --check-execution 16000 --texture-object 1651488160 --debug-device --out talos-color
+```
+
+Use execution `12675`, texture object `4980699392`, `--subresource 1`, and
+optionally `--before` for the first Draw boundary. Overall validation continues
+to return blocked/exit 2 because full feature acceptance is unfinished.
+`nativeFrameUploadsAndStates` verifies the real partial upload bytes, upload-heap
+state preservation, buffer promotion/decay, depth promotion rejection, and the
+per-subresource convergence regression. No broad regression or Hellblade2 GPU
+rerun was used for this change.
+
+Additional Ghidra reader RVAs in the same StreamPlayback build/hash recorded
+above: `0x67c420` (render targets), `0x67c110` (discard), `0x67bcf0` (depth clear),
+`0x6094c0` (root constants), `0x67c2d0` (vertex views), `0x67bdb0` (color clear),
+`0x67c8c0` (descriptor heaps), `0x67a0c0` (query heap creation).
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |
@@ -383,7 +450,7 @@ and is decoded field-by-field rather than copied as a 72-byte native structure.
 | Submitted-list identity/navigation | Structural checks passed | Structural checks passed | Structural checks passed |
 | Native initialization buffer copy | One isolated copy verified | One isolated copy verified | One isolated copy verified |
 | Captured initialization submissions | 52 executed; selected buffer verified | 25 executed; selected buffer/texture verified | 26 executed; selected buffer/texture verified; tile transfers executed |
-| Complete native frame and selected-event replay | Unfinished | Unfinished | Unfinished |
+| Complete native frame and selected-event replay | Unfinished | First Draw before/after and first color boundary verified; full frame blocked by historical query state | Unfinished |
 | Resource/Pixel History with execution mapping | Unfinished | Unfinished | Unfinished |
 | VS/PS/CS debugging and geometry | Unfinished | Unfinished | Unfinished |
 | GPU performance analysis and modification experiments | Unfinished | Unfinished | Unfinished |
@@ -391,8 +458,8 @@ and is decoded field-by-field rather than copied as a 72-byte native structure.
 | Full portable replay/analysis without GPA/Python | Not verified | Not verified | Not verified |
 
 No unfinished item above has been attributed to a hardware limitation. Known
-implementation gaps include integrating PSO/root-signature and descriptor state
-into frame command execution, full resource lifetime and address-alias handling,
+implementation gaps include historical query state, frame execution coverage
+beyond the verified Talos prefix, full resource lifetime and address-alias handling,
 complete command arguments, dependency scheduling and cross-queue synchronization. The existing analysis
 backend still requires DX11 captures; its request envelope is shared, but its
 pipeline and execution mapping have not yet been ported to DX12.

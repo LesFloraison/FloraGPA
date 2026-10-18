@@ -221,6 +221,7 @@ struct NativePipelines::Impl {
     const StreamDirectory &directory;
     CancelCheck cancelled;
     std::map<uint64_t, std::vector<uint64_t>> rootRecords;
+    std::map<uint64_t, std::vector<uint64_t>> pipelineRecords;
     std::map<uint64_t, ComPtr<ID3D12RootSignature>> roots;
     std::map<uint64_t, ComPtr<ID3D12PipelineState>> pipelines;
     std::map<uint64_t, json> reports;
@@ -249,12 +250,27 @@ NativePipelines::NativePipelines(NativeDevice &device, const StreamDirectory &di
     : impl_(std::make_unique<Impl>(device, directory, cancelled)) {
     for (size_t i = 0; i < directory.packets().size(); ++i) {
         if (i % 1024 == 0) checkCancellation(cancelled);
-        const auto &p = directory.packets()[i]; if (p.type != 0x127938051b445ULL) continue;
+        const auto &p = directory.packets()[i];
+        if (isPipelineRecipe(p.type)) {
+            const auto r = decodePipelineRecipe(p.type, directory.payload(p));
+            if (SUCCEEDED(r.result) && r.object) impl_->pipelineRecords[r.object].push_back(i + 1);
+        }
+        if (p.type != 0x127938051b445ULL) continue;
         const auto r = decodeRootSignature(directory.payload(p));
         if (SUCCEEDED(r.result) && r.object) impl_->rootRecords[r.object].push_back(i + 1);
     }
 }
 NativePipelines::~NativePipelines() = default;
+ID3D12RootSignature *NativePipelines::rootSignature(uint64_t object, uint64_t atRecord) { return impl_->root(object, atRecord).first; }
+ID3D12PipelineState *NativePipelines::pipeline(uint64_t object, uint64_t atRecord) {
+    if (!object) return nullptr;
+    const auto it = impl_->pipelineRecords.find(object); require(it != impl_->pipelineRecords.end(), "Captured pipeline recipe is missing");
+    uint64_t selected{}; for (const auto id : it->second) if (id <= atRecord) selected = id;
+    if (!selected && atRecord <= impl_->directory.initializationCount()) for (const auto id : it->second) if (id <= impl_->directory.initializationCount()) {
+        require(!selected, "Ambiguous forward pipeline lifetime"); selected = id;
+    }
+    require(selected, "Pipeline is not defined at this boundary"); return create(selected);
+}
 ID3D12PipelineState *NativePipelines::create(uint64_t record) {
     auto &s = *impl_; checkCancellation(s.cancelled);
     if (auto cached = s.pipelines.find(record); cached != s.pipelines.end()) return cached->second.Get();

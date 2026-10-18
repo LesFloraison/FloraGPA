@@ -11,7 +11,7 @@ class NativeDevice final {
     struct Impl;
     std::unique_ptr<Impl> impl_;
   public:
-    explicit NativeDevice(const StreamDirectory &directory);
+    explicit NativeDevice(const StreamDirectory &directory, bool debug = false);
     ~NativeDevice();
     ID3D12Device *device() const;
     nlohmann::json information() const;

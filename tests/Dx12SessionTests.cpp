@@ -356,6 +356,40 @@ class Dx12SessionTests : public QObject {
         QVERIFY_THROWS_EXCEPTION(OperationCancelled,dx12::AddressIndex(directory,[]{return true;}));
         qInfo()<<"captured address ranges"<<addresses.rangeCount();
     }
+    void nativeFrameUploadsAndStates() {
+        const auto root=qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
+        if(root.isEmpty()) QSKIP("Set FLORA_DX12_CAPTURE_DIR for frame upload/state checks");
+        dx12::StreamDirectory directory(std::filesystem::path((root+"/Talos_2026_10_18__00_55_08.gpa_frame").toStdWString()));
+        dx12::NativeDevice device(directory); dx12::NativeResources resources(device,directory,256ULL*1024*1024);
+        std::vector<uint8_t> expected; uint64_t object{};
+        for (const uint64_t id : {185507ULL,185508ULL}) {
+            format::Reader r(directory.payload(directory.packets()[size_t(id-1)])); const auto buffer=r.read<uint64_t>();
+            if(object) QCOMPARE(buffer,object); object=buffer;
+            const auto data=directory.resourceData(r.read<uint64_t>()); format::Reader descriptor(directory.resources().bytes(data.descriptorOffset,64));
+            descriptor.skip(32); const auto offset=descriptor.read<uint64_t>();
+            if(expected.empty()) { QCOMPARE(offset,0ULL); expected.assign(data.bytes.begin(),data.bytes.end()); }
+            else { QCOMPARE(offset,8652ULL); QVERIFY(offset+data.size<=expected.size()); memcpy(expected.data()+offset,data.bytes.data(),size_t(data.size)); }
+            resources.restoreMappedData(id);
+        }
+        auto native=resources.resource(object,185508); void *mapped{}; D3D12_RANGE read{0,expected.size()};
+        QVERIFY(SUCCEEDED(native->Map(0,&read,&mapped))); const bool matches=memcmp(mapped,expected.data(),expected.size())==0;
+        D3D12_RANGE none{0,0}; native->Unmap(0,&none); QVERIFY(matches);
+        QCOMPARE(resources.information().at("uploaded_bytes").get<std::string>(),std::string("10812"));
+        resources.requireState(object,185508,0,D3D12_RESOURCE_STATE_COPY_SOURCE); resources.completeSubmission(D3D12_COMMAND_LIST_TYPE_COPY);
+        QCOMPARE(resources.state(object,185508),D3D12_RESOURCE_STATE_GENERIC_READ); // Upload heaps never decay.
+        const auto buffer=dx12::decodeResourceRecipe(directory.packets()[12].type,directory.payload(directory.packets()[12])).object;
+        resources.requireState(buffer,14,0,D3D12_RESOURCE_STATE_COPY_DEST); resources.completeSubmission(D3D12_COMMAND_LIST_TYPE_COPY);
+        QCOMPARE(resources.state(buffer,14),D3D12_RESOURCE_STATE_COMMON);
+        resources.requireState(buffer,14,0,D3D12_RESOURCE_STATE_COPY_SOURCE); resources.completeSubmission(D3D12_COMMAND_LIST_TYPE_DIRECT);
+        QCOMPARE(resources.state(buffer,14),D3D12_RESOURCE_STATE_COMMON);
+        const uint64_t depth=0x128df7100ULL; const auto desc=resources.resource(depth,185550)->GetDesc();
+        D3D12_FEATURE_DATA_FORMAT_INFO info{desc.Format}; QVERIFY(SUCCEEDED(device.device()->CheckFeatureSupport(D3D12_FEATURE_FORMAT_INFO,&info,sizeof(info))));
+        const auto count=UINT(desc.MipLevels)*desc.DepthOrArraySize*info.PlaneCount; QVERIFY(count>1);
+        for(UINT sub=0;sub<count;++sub) resources.transition(depth,185550,sub,resources.state(depth,185550,sub),D3D12_RESOURCE_STATE_COPY_SOURCE);
+        QCOMPARE(resources.state(depth,185550),D3D12_RESOURCE_STATE_COPY_SOURCE); // All individually transitioned subresources converge.
+        resources.transition(depth,185550,D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES,D3D12_RESOURCE_STATE_COPY_SOURCE,D3D12_RESOURCE_STATE_COMMON);
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error,resources.requireState(depth,185550,0,D3D12_RESOURCE_STATE_COPY_SOURCE));
+    }
     void nativeInitializationGuards() {
         const auto root=qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
         if(root.isEmpty()) QSKIP("Set FLORA_DX12_CAPTURE_DIR for native initialization guards");

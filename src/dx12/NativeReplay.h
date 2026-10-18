@@ -12,6 +12,8 @@ class NativeReplay final {
     NativeReplay(NativeDevice &, const StreamDirectory &, uint64_t allocationLimit, const CancelCheck &cancelled = {});
     ~NativeReplay();
     void initializeTransfers();
+    void replayTo(uint64_t execution, bool after);
+    nlohmann::json readTexture(uint64_t object, UINT subresource, const std::filesystem::path &output);
     nlohmann::json inspectBuffer(uint64_t creationRecord, uint64_t offset, uint64_t length);
     nlohmann::json verifyInitializedTexture(uint64_t copyRecord);
     nlohmann::json information() const;

@@ -107,6 +107,9 @@ struct NativeResources::Impl {
         uint64_t allocation{};
         std::optional<D3D12_RESOURCE_STATES> uniform;
         std::map<UINT, D3D12_RESOURCE_STATES> states;
+        bool touched = false;
+        std::set<UINT> promotedReads;
+        UINT subresources = 1;
     };
     std::map<uint64_t, Resource> resources;
     Impl(NativeDevice &d, const StreamDirectory &s, uint64_t l, CancelCheck c) : device(d), directory(s), cancelled(std::move(c)), addresses(s, cancelled), backbuffers(s, cancelled), limit(l) {}
@@ -191,28 +194,35 @@ ID3D12Resource *NativeResources::resource(uint64_t object, uint64_t atRecord) {
     }
     s.allocated += allocation; s.peakAllocated = (std::max)(s.peakAllocated, s.allocated); ++s.created; auto result = native.Get();
     const auto name = L"Flora DX12 resource " + std::to_wstring(object) + L" creation " + std::to_wstring(record); native->SetName(name.c_str());
-    s.resources.emplace(record, Impl::Resource{std::move(native), allocation, legacyState(r), {}}); return result;
+    UINT subresources = 1;
+    const auto nativeDescription = native->GetDesc();
+    if (nativeDescription.Dimension != D3D12_RESOURCE_DIMENSION_BUFFER) {
+        D3D12_FEATURE_DATA_FORMAT_INFO info{nativeDescription.Format}; check(s.device.device()->CheckFeatureSupport(D3D12_FEATURE_FORMAT_INFO, &info, sizeof(info)), "Query resource planes");
+        subresources = UINT(nativeDescription.MipLevels) * (nativeDescription.Dimension == D3D12_RESOURCE_DIMENSION_TEXTURE3D ? 1 : nativeDescription.DepthOrArraySize) * info.PlaneCount;
+    }
+    s.resources.emplace(record, Impl::Resource{std::move(native), allocation, legacyState(r), {}, false, {}, subresources}); return result;
 }
 void NativeResources::restoreMappedData(uint64_t record) {
     auto &s = *impl_; const auto &p = s.directory.packets().at(size_t(record - 1));
     require(p.type == 0x20000000000000ULL, "Expected captured memory-copy operation");
     Reader r(s.directory.payload(p)); const auto object = r.read<uint64_t>(); const auto data = s.directory.resourceData(r.read<uint64_t>()); r.end();
     const auto recipe = this->recipe(object, record);
-    require(recipe.description.Dimension == D3D12_RESOURCE_DIMENSION_BUFFER && data.capturedObject == object && data.size == recipe.description.Width,
-        "Captured memory copy is not a complete buffer snapshot");
+    require(recipe.description.Dimension == D3D12_RESOURCE_DIMENSION_BUFFER && data.capturedObject == object,
+        "Captured memory copy is not a buffer snapshot or patch");
     Reader descriptor(s.directory.resources().bytes(data.descriptorOffset, 64)); descriptor.skip(8);
     require(descriptor.read<uint64_t>() == 0, "Unsupported memory-copy subresource"); descriptor.skip(4);
     require(descriptor.read<UINT>() == 0, "Unsupported memory-copy descriptor flags"); descriptor.skip(8);
-    require(descriptor.read<uint64_t>() == 0, "Unsupported memory-copy destination offset"); descriptor.skip(16);
+    const auto destinationOffset = descriptor.read<uint64_t>(); descriptor.skip(16);
+    require(destinationOffset <= recipe.description.Width && data.size <= recipe.description.Width - destinationOffset, "Captured memory patch exceeds its buffer");
     require(descriptor.read<uint64_t>() == 0, "Unsupported memory-copy extension");
     auto native = resource(object, record); void *mapped{}; D3D12_RANGE noRead{0, 0}; check(native->Map(0, &noRead, &mapped), "Map captured buffer for initialization");
     try {
         for (size_t offset = 0; offset < data.bytes.size();) {
             checkCancellation(s.cancelled); const auto size = (std::min)(size_t(8 * 1024 * 1024), data.bytes.size() - offset);
-            memcpy(static_cast<uint8_t *>(mapped) + offset, data.bytes.data() + offset, size); offset += size;
+            memcpy(static_cast<uint8_t *>(mapped) + destinationOffset + offset, data.bytes.data() + offset, size); offset += size;
         }
     } catch (...) { native->Unmap(0, nullptr); throw; }
-    D3D12_RANGE written{0, SIZE_T(data.size)}; native->Unmap(0, &written); s.uploaded += data.size; ++s.uploadRecords;
+    D3D12_RANGE written{SIZE_T(destinationOffset), SIZE_T(destinationOffset + data.size)}; native->Unmap(0, &written); s.uploaded += data.size; ++s.uploadRecords;
 }
 ID3D12Heap *NativeResources::tileHeap(uint64_t object, uint64_t atRecord) {
     return impl_->heap(object, atRecord, D3D12_RESOURCE_ALLOCATION_INFO{0, D3D12_TILED_RESOURCE_TILE_SIZE_IN_BYTES}, 0);
@@ -235,18 +245,71 @@ D3D12_RESOURCE_STATES NativeResources::state(uint64_t object, uint64_t atRecord,
     resource(object, atRecord); const auto &r = impl_->resources.at(creationRecord(object, atRecord));
     require(r.uniform.has_value(), "Enhanced resource layout has no verified legacy state");
     if (subresource == D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES) {
-        for (const auto &[index, value] : r.states) require(value == *r.uniform, "Resource subresources do not share one state");
-        return *r.uniform;
+        const auto expected = r.states.size() == r.subresources ? r.states.begin()->second : *r.uniform;
+        for (const auto &[index, value] : r.states) require(value == expected, "Resource subresources do not share one state");
+        return expected;
     }
+    require(subresource < r.subresources, "Resource state subresource is out of range");
     if (auto it = r.states.find(subresource); it != r.states.end()) return it->second;
     return *r.uniform;
 }
 void NativeResources::transition(uint64_t object, uint64_t atRecord, UINT subresource, D3D12_RESOURCE_STATES before, D3D12_RESOURCE_STATES after) {
-    if (state(object, atRecord, subresource) != before)
+    const auto current = state(object, atRecord, subresource);
+    const auto desc = resource(object, atRecord)->GetDesc();
+    const auto promotable = [&](D3D12_RESOURCE_STATES value) {
+        if (desc.Flags & D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL) return false;
+        const UINT all = D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER | D3D12_RESOURCE_STATE_INDEX_BUFFER |
+            D3D12_RESOURCE_STATE_RENDER_TARGET | D3D12_RESOURCE_STATE_UNORDERED_ACCESS | D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE |
+            D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE | D3D12_RESOURCE_STATE_STREAM_OUT | D3D12_RESOURCE_STATE_INDIRECT_ARGUMENT |
+            D3D12_RESOURCE_STATE_COPY_SOURCE | D3D12_RESOURCE_STATE_COPY_DEST | D3D12_RESOURCE_STATE_RESOLVE_SOURCE | D3D12_RESOURCE_STATE_RESOLVE_DEST;
+        const UINT texture = D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE | D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE |
+            D3D12_RESOURCE_STATE_COPY_SOURCE | D3D12_RESOURCE_STATE_COPY_DEST;
+        return !(UINT(value) & ~(desc.Dimension == D3D12_RESOURCE_DIMENSION_BUFFER ||
+            (desc.Flags & D3D12_RESOURCE_FLAG_ALLOW_SIMULTANEOUS_ACCESS) ? all : texture));
+    };
+    if (current != before && !(current == D3D12_RESOURCE_STATE_COMMON && promotable(before)))
         throw std::runtime_error("Captured barrier state mismatch for resource " + std::to_string(object) + " at record " + std::to_string(atRecord));
     auto &r = impl_->resources.at(creationRecord(object, atRecord));
+    r.touched = true;
+    if (subresource == D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES) r.promotedReads.clear();
+    else {
+        if (r.promotedReads.erase(D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES)) for (UINT i = 0; i < r.subresources; ++i) r.promotedReads.insert(i);
+        r.promotedReads.erase(subresource);
+    }
     if (subresource == D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES) { r.uniform = after; r.states.clear(); }
     else r.states[subresource] = after;
+}
+void NativeResources::requireState(uint64_t object, uint64_t atRecord, UINT subresource, D3D12_RESOURCE_STATES required) {
+    const auto current = state(object, atRecord, subresource);
+    auto &r = impl_->resources.at(creationRecord(object, atRecord)); r.touched = true;
+    if ((current & required) == required) return;
+    // Promotion is legal only from COMMON (or a compatible implicit read).
+    const UINT reads = D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER | D3D12_RESOURCE_STATE_INDEX_BUFFER |
+        D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE | D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE |
+        D3D12_RESOURCE_STATE_INDIRECT_ARGUMENT | D3D12_RESOURCE_STATE_COPY_SOURCE;
+    const bool read = !(UINT(required) & ~reads);
+    require(current == D3D12_RESOURCE_STATE_COMMON || (read && (r.promotedReads.contains(subresource) || r.promotedReads.contains(D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES))), "Resource use needs an explicit transition");
+    const auto next = D3D12_RESOURCE_STATES(UINT(current) | UINT(required));
+    // transition validates that the requested COMMON promotion is supported by
+    // this resource class, without issuing an extra native barrier.
+    if (current == D3D12_RESOURCE_STATE_COMMON) transition(object, atRecord, subresource, required, next);
+    else if (subresource == D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES) { r.uniform = next; r.states.clear(); }
+    else r.states[subresource] = next;
+    if (read) r.promotedReads.insert(subresource);
+}
+void NativeResources::completeSubmission(D3D12_COMMAND_LIST_TYPE queueType) {
+    for (auto &[id, r] : impl_->resources) {
+        if (!r.touched) continue; r.touched = false;
+        D3D12_HEAP_PROPERTIES heap{}; D3D12_HEAP_FLAGS flags{};
+        if (SUCCEEDED(r.native->GetHeapProperties(&heap, &flags)) &&
+            (heap.Type == D3D12_HEAP_TYPE_UPLOAD || heap.Type == D3D12_HEAP_TYPE_READBACK || heap.Type == D3D12_HEAP_TYPE_GPU_UPLOAD)) continue;
+        const auto desc = r.native->GetDesc();
+        if (queueType == D3D12_COMMAND_LIST_TYPE_COPY || desc.Dimension == D3D12_RESOURCE_DIMENSION_BUFFER ||
+            (desc.Flags & D3D12_RESOURCE_FLAG_ALLOW_SIMULTANEOUS_ACCESS) || r.promotedReads.contains(D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES)) {
+            r.uniform = D3D12_RESOURCE_STATE_COMMON; r.states.clear();
+        } else for (const auto sub : r.promotedReads) r.states[sub] = D3D12_RESOURCE_STATE_COMMON;
+        r.promotedReads.clear();
+    }
 }
 uint64_t NativeResources::remainingAllocationBudget() const { return impl_->limit - impl_->allocated; }
 nlohmann::json NativeResources::information() const {

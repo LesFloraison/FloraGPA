@@ -16,7 +16,8 @@ int runDx12Cli(const QString &command, const QString &path, const QCommandLinePa
         if (option != "out" && option != "replay-identity" && !(command == "commands" && option == "filter") &&
             !(command == "validate-frame" && (option == "check-device" || option == "check-copy" || option == "check-pipeline" || option == "check-initialization" ||
                 (option == "max-bytes" && (options.isSet("check-copy") || options.isSet("check-initialization"))) ||
-                (options.isSet("check-initialization") && (option == "id" || option == "offset" || option == "length" || option == "verify-texture-copy")))))
+                (options.isSet("check-initialization") && (option == "id" || option == "offset" || option == "length" || option == "verify-texture-copy" ||
+                    option == "check-execution" || option == "texture-object" || option == "subresource" || option == "before" || option == "debug-device")))))
             throw std::runtime_error("Unsupported DX12 inspection option: --" + option.toStdString());
     if (options.value("out").isEmpty()) throw std::runtime_error("DX12 inspection requires --out");
     if (int(options.isSet("check-copy")) + int(options.isSet("check-pipeline")) + int(options.isSet("check-initialization")) > 1)
@@ -55,7 +56,7 @@ int runDx12Cli(const QString &command, const QString &path, const QCommandLinePa
                 if (!validRecord || !record || !validLimit || !limit) throw std::runtime_error("Invalid copy record or memory budget");
                 copy = dx12::prepareInitializationCopy(directory, record, limit);
             }
-            dx12::NativeDevice device(directory);
+            dx12::NativeDevice device(directory, options.isSet("debug-device"));
             report["device"] = device.information();
             if (copy) report["initialization_copy"] = dx12::executeInitializationCopy(device, *copy);
             if (pipelineRecord) {
@@ -73,6 +74,12 @@ int runDx12Cli(const QString &command, const QString &path, const QCommandLinePa
                 const auto offset = number("offset");
                 const auto length = options.isSet("length") ? number("length") : 0;
                 const auto textureCopy = options.isSet("verify-texture-copy") ? number("verify-texture-copy") : 0;
+                const auto execution = options.isSet("check-execution") ? number("check-execution") : 0;
+                const auto texture = options.isSet("texture-object") ? number("texture-object") : 0;
+                const auto subresource = number("subresource");
+                if ((options.isSet("check-execution") && !execution) || (!execution && (texture || options.isSet("before"))) ||
+                    (options.isSet("texture-object") && !texture) || subresource > UINT_MAX || (!texture && options.isSet("subresource")))
+                    throw std::runtime_error("Frame inspection requires a nonzero execution; texture inspection also requires an object and a valid subresource");
                 if (!limit || (options.isSet("id") && (!id || !length)) || (!id && (options.isSet("offset") || options.isSet("length"))))
                     throw std::runtime_error("Initialization requires a nonzero memory budget; buffer inspection requires --id and --length");
                 if (id) {
@@ -93,12 +100,17 @@ int runDx12Cli(const QString &command, const QString &path, const QCommandLinePa
                     if (id) report["initialized_buffer"] = replay.inspectBuffer(id, offset, length);
                     stage = "texture_readback";
                     if (textureCopy) report["initialized_texture"] = replay.verifyInitializedTexture(textureCopy);
+                    stage = "frame_execution";
+                    if (execution) replay.replayTo(execution, !options.isSet("before"));
+                    stage = "frame_texture_readback";
+                    if (texture) report["frame_texture"] = replay.readTexture(texture, UINT(subresource), std::filesystem::path(output.filePath("texture.bin").toStdWString()));
                     report["initialization"] = replay.information();
                 } catch (const std::exception &e) {
                     report["initialization"] = replay.information();
                     report["initialization"]["failure"] = e.what();
                     report["initialization"]["failure_stage"] = stage;
                 }
+                report["device"] = device.information();
             }
         } catch (const std::exception &e) {
             report[options.isSet("check-initialization") ? "initialization" : options.isSet("check-copy") ? "initialization_copy" : options.isSet("check-pipeline") ? "pipeline" : "device"] = {{"status", "failed"}, {"reason", e.what()}};
