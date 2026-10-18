@@ -131,6 +131,10 @@ class RdcCounterUiTests : public QObject {
                        {"request_identity", identity}, {"capture_identity", {{"kind", "runtime_session"}, {"value", "native-metrics"}}}};
         QVERIFY(view.finishNative(view.requestId(), raw));
         QCOMPARE(view.result().at("request_identity"), identity);
+        if (!output_.isEmpty() && report.at("native_measurement").contains("timeline")) {
+            view.resize(1100, 650); view.findChild<QTabWidget *>("rdcCounterTabs")->setCurrentIndex(2); view.show();
+            QTest::qWait(30); QVERIFY(view.grab().save(output_ + "/dx12-timeline.png"));
+        }
         QCOMPARE(view.result().at("capture_identity"), raw.at("capture_identity"));
         auto rows = view.findChild<QTreeWidget *>("rdcCounterValues");
         QCOMPARE(rows->topLevelItemCount(), 12);
@@ -154,6 +158,48 @@ class RdcCounterUiTests : public QObject {
         QCOMPARE(jump[0][0].toULongLong(), 9007199254740993ULL);
         report["values"][1]["execution"] = 9007199254740993ULL;
         QVERIFY_THROWS_EXCEPTION(std::runtime_error, view.finish(view.requestId(), report));
+    }
+    void nativeTimelineFallback() {
+        const auto path = qEnvironmentVariable("FLORA_DX12_NATIVE_METRICS");
+        if (path.isEmpty()) QSKIP("Set a recorded native timeline report");
+        auto report = read(path);
+        auto measurement = report.at("native_measurement");
+        auto &timeline = measurement.at("timeline");
+        auto row = timeline.at("entries").at(0);
+        // Force unavailable calibration and adjacent ticks above 2^53. This is
+        // a CPU display/identity boundary check, not another GPU measurement.
+        row["queue"] = "9007199254740993"; row["first_execution"] = "9007199254740993";
+        row["execution_count"] = "1";
+        row["timestamp_begin"] = "9007199254740993"; row["timestamp_end"] = "9007199254740994";
+        row["timestamp_frequency_hz"] = "1000000"; row["status"] = "measured";
+        row["clock_scope"] = "queue_only"; row["begin_seconds"] = nullptr; row["end_seconds"] = nullptr;
+        row["duration_seconds"] = 0.000001; row["reason"] = "Calibration unavailable";
+        timeline["entries"] = Json::array({row});
+        row["timestamp_begin"] = "9007199254740994"; row["timestamp_end"] = "9007199254740995";
+        timeline["entries"].push_back(row); timeline["synchronization"] = Json::array();
+        measurement["execution"] = "9007199254740993";
+        Json raw{{"completed", true}, {"backend", "dx12"}, {"execution", "9007199254740993"},
+                 {"performance", measurement}, {"device", report.at("device")}};
+        RdcCountersView view; view.setContext("timeline", 9007199254740993ULL, true);
+        QVERIFY(view.finishNative(view.requestId(), raw));
+        auto tree = view.findChild<QTreeWidget *>("rdcReplayTimeline");
+        QCOMPARE(tree->topLevelItemCount(), 1); const auto queue = tree->topLevelItem(0);
+        QCOMPARE(queue->childCount(), 2);
+        QCOMPARE(queue->child(0)->text(3), QString("0.000000"));
+        QCOMPARE(queue->child(1)->text(3), QString("0.001000"));
+        QCOMPARE(queue->child(1)->text(4), QString("1.000"));
+        QCOMPARE(queue->child(1)->text(2), QString("Queue 9007199254740993"));
+        QSignalSpy jump(&view, &RdcCountersView::eventRequested);
+        emit tree->itemDoubleClicked(queue->child(0), 0);
+        QCOMPARE(jump.count(), 1); QCOMPARE(jump[0][0].toULongLong(), 9007199254740993ULL);
+        QTemporaryDir temp; view.exportResult(temp.filePath("timeline.json"));
+        QCOMPARE(read(temp.filePath("timeline.json")).at("native_measurement"), measurement);
+        auto invalid = raw; invalid["performance"]["timeline"]["entries"][0]["timestamp_begin"] = 9007199254740993ULL;
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, view.finishNative(view.requestId(), invalid));
+        const auto token = view.requestId(); view.setContext("other experiment", 9007199254740993ULL, true);
+        QVERIFY(!view.finishNative(token, raw)); QCOMPARE(tree->topLevelItemCount(), 0);
+        view.setContext("dx11", 100, false);
+        QVERIFY(!view.findChild<QTabWidget *>("rdcCounterTabs")->isTabVisible(2));
     }
     void recordedReports() {
         const auto root = qEnvironmentVariable("FLORA_COUNTER_REPORTS");

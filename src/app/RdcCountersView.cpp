@@ -19,6 +19,9 @@
 #include <QToolButton>
 #include <QTreeWidget>
 #include <QVBoxLayout>
+#include <QStyledItemDelegate>
+#include <QPainter>
+#include <cmath>
 #include <charconv>
 #include <map>
 namespace flora {
@@ -33,16 +36,17 @@ QString unit(const Json &v) {
     s.remove("CounterUnit.");
     return s == "Seconds" ? "s" : s == "Percentage" ? "%" : s == "Absolute" ? "count" : s;
 }
-uint64_t executionId(const Json &value) {
+uint64_t decimal(const Json &value, bool nonzero = true) {
     if (!value.is_string())
         throw std::runtime_error("DX12 execution identity must be a decimal string");
     const auto &s = value.get_ref<const std::string &>();
     uint64_t id{};
     const auto parsed = std::from_chars(s.data(), s.data() + s.size(), id);
-    if (!id || parsed.ec != std::errc{} || parsed.ptr != s.data() + s.size())
+    if ((nonzero && !id) || parsed.ec != std::errc{} || parsed.ptr != s.data() + s.size() || s != std::to_string(id))
         throw std::runtime_error("Invalid DX12 counter execution identity");
     return id;
 }
+uint64_t executionId(const Json &value) { return decimal(value); }
 QTreeWidget *table(const char *name, const QStringList &columns) {
     auto tree = new QTreeWidget;
     tree->setObjectName(name);
@@ -54,6 +58,20 @@ QTreeWidget *table(const char *name, const QStringList &columns) {
     tree->header()->setSectionResizeMode(2, QHeaderView::ResizeToContents);
     return tree;
 }
+class TimelineBar final : public QStyledItemDelegate {
+  public:
+    using QStyledItemDelegate::QStyledItemDelegate;
+    void paint(QPainter *p, const QStyleOptionViewItem &option, const QModelIndex &index) const override {
+        QStyledItemDelegate::paint(p, option, index);
+        const auto span = index.data(Qt::UserRole + 2).toList();
+        if (span.size() != 2) return;
+        const auto rect = option.rect.adjusted(3, 5, -3, -5);
+        const auto begin = span[0].toDouble(), end = span[1].toDouble();
+        p->save(); p->setClipRect(rect);
+        p->fillRect(QRectF(rect.left() + begin * rect.width(), rect.top(),
+            std::max(2.0, (end - begin) * rect.width()), rect.height()), option.palette.highlight()); p->restore();
+    }
+};
 } // namespace
 RdcCountersView::RdcCountersView(QWidget *parent) : QWidget(parent) {
     setObjectName("rdcCountersView");
@@ -113,6 +131,12 @@ RdcCountersView::RdcCountersView(QWidget *parent) : QWidget(parent) {
     catalog_->setColumnWidth(1, 55);
     catalog_->setRootIsDecorated(false);
     tabs->addTab(catalog_, "Available");
+    timeline_ = table("rdcReplayTimeline", {"Queue / submission / list", "First execution", "Clock", "Begin (ms)", "Duration (µs)", "Interval"});
+    timeline_->setItemDelegateForColumn(5, new TimelineBar(timeline_));
+    timeline_->setColumnWidth(5, 180);
+    timeline_->setToolTip("Measured replay prefix; submissions are CPU-serialized. This is not original-application concurrency. Double-click to locate.");
+    tabs->addTab(timeline_, "Replay timeline");
+    tabs->setTabVisible(2, false);
     details_ = new QPlainTextEdit;
     details_->setObjectName("rdcCounterDetails");
     details_->setReadOnly(true);
@@ -171,6 +195,13 @@ RdcCountersView::RdcCountersView(QWidget *parent) : QWidget(parent) {
             emit eventRequested(item->data(0, Qt::UserRole).toULongLong());
     });
     connect(values_, &QTreeWidget::itemDoubleClicked, this, [this] { locate_->trigger(); });
+    connect(timeline_, &QTreeWidget::itemDoubleClicked, this, [this](QTreeWidgetItem *item) {
+        if (!busy_ && item->data(0, Qt::UserRole).toULongLong()) emit eventRequested(item->data(0, Qt::UserRole).toULongLong());
+    });
+    connect(timeline_, &QTreeWidget::itemSelectionChanged, this, [this] {
+        const auto item = timeline_->currentItem();
+        if (item) details_->setPlainText(item->data(0, Qt::UserRole + 1).toString());
+    });
     setBackendPath(configuredRenderDocLibrary(), false);
     updateActions();
 }
@@ -186,6 +217,7 @@ void RdcCountersView::setBackendPath(const QString &path, bool persist) {
 void RdcCountersView::setContext(const QString &key, qulonglong event, bool dx12) {
     const bool changed = key != key_ || dx12 != dx12_ || (dx12 && event != event_);
     dx12_ = dx12;
+    findChild<QTabWidget *>("rdcCounterTabs")->setTabVisible(2, dx12);
     scope_->setItemText(1, dx12 ? "Measured events" : "Frame");
     const bool selectionChanged = event != event_;
     key_ = key;
@@ -208,6 +240,7 @@ void RdcCountersView::invalidate() {
     result_ = nullptr;
     values_->clear();
     catalog_->clear();
+    timeline_->clear();
     details_->clear();
     summary_->setText("No sample");
     updateActions();
@@ -237,6 +270,31 @@ bool RdcCountersView::finishNative(uint64_t request, const Json &report) {
     if (measurement.at("execution") != std::to_string(event_) ||
         measurement.at("source") != "native_d3d12_queries")
         throw std::runtime_error("Native performance identity mismatch");
+    if (measurement.contains("timeline")) {
+        const auto &timeline = measurement.at("timeline");
+        if (timeline.at("source") != "native_d3d12_queries" || timeline.at("scope") != "frame_prefix_submitted_lists" ||
+            !timeline.at("entries").is_array() || timeline.at("entries").empty() || timeline.at("entries").size() > 65536)
+            throw std::runtime_error("Invalid native replay timeline");
+        for (const auto &entry : timeline.at("entries")) {
+            for (const auto key : {"queue", "submission", "command_list"}) (void)executionId(entry.at(key));
+            const auto count = decimal(entry.at("execution_count"), false);
+            if (count) (void)executionId(entry.at("first_execution"));
+            else if (!entry.at("first_execution").is_null()) throw std::runtime_error("Empty timeline list cannot identify an execution");
+            if (entry.at("status") == "measured") {
+                const auto begin = decimal(entry.at("timestamp_begin"), false), end = decimal(entry.at("timestamp_end"), false);
+                if (end < begin) throw std::runtime_error("Invalid timeline timestamp range");
+                if (entry.at("duration_seconds").is_number()) {
+                    const auto duration = entry.at("duration_seconds").get<double>();
+                    if (!std::isfinite(duration) || duration < 0 || !decimal(entry.at("timestamp_frequency_hz")))
+                        throw std::runtime_error("Invalid timeline duration");
+                }
+                if (entry.at("clock_scope") == "calibrated_cpu_qpc") {
+                    const auto a = entry.at("begin_seconds").get<double>(), b = entry.at("end_seconds").get<double>();
+                    if (!std::isfinite(a) || !std::isfinite(b) || b < a) throw std::runtime_error("Invalid calibrated timeline range");
+                }
+            }
+        }
+    }
     Json result{{"ok", true},
                 {"action", "counters"},
                 {"backend", "dx12"},
@@ -308,6 +366,7 @@ void RdcCountersView::render() {
     const QSignalBlocker blockValues(values_), blockCatalog(catalog_);
     values_->clear();
     catalog_->clear();
+    timeline_->clear();
     const auto filter = filter_->text();
     size_t shown = 0;
     std::map<std::string, QTreeWidgetItem *> groups;
@@ -366,11 +425,63 @@ void RdcCountersView::render() {
         item->setToolTip(0, text(d.at("category")) + "\n" + text(d.at("description")));
     }
     values_->setRootIsDecorated(scope_->currentIndex() != 0);
+    if (dx12_ && result_.contains("native_measurement") && result_.at("native_measurement").contains("timeline")) {
+        const auto &data = result_.at("native_measurement").at("timeline");
+        const auto &entries = data.at("entries");
+        std::map<std::string, uint64_t> origins;
+        std::map<std::string, std::pair<double, double>> ranges;
+        std::map<std::string, QTreeWidgetItem *> queues;
+        for (const auto &row : entries) if (row.at("status") == "measured") {
+            const auto queue = row.at("queue").get<std::string>(); const auto tick = decimal(row.at("timestamp_begin"), false);
+            const auto it = origins.find(queue); if (it == origins.end() || tick < it->second) origins[queue] = tick;
+        }
+        auto interval = [&](const Json &row) {
+            if (row.at("clock_scope") == "calibrated_cpu_qpc") return std::pair{row.at("begin_seconds").get<double>(), row.at("end_seconds").get<double>()};
+            const auto origin = origins.at(row.at("queue").get<std::string>());
+            const auto frequency = executionId(row.at("timestamp_frequency_hz"));
+            return std::pair{double(decimal(row.at("timestamp_begin"), false) - origin) / double(frequency),
+                double(decimal(row.at("timestamp_end"), false) - origin) / double(frequency)};
+        };
+        auto clock = [](const Json &row) { return row.at("clock_scope") == "calibrated_cpu_qpc" ? std::string("QPC") : "Queue " + row.at("queue").get<std::string>(); };
+        for (const auto &row : entries) if (row.at("status") == "measured" && row.at("duration_seconds").is_number()) {
+            const auto key = clock(row); const auto span = interval(row); const auto found = ranges.find(key);
+            if (found == ranges.end()) ranges[key] = span;
+            else { found->second.first = std::min(found->second.first, span.first); found->second.second = std::max(found->second.second, span.second); }
+        }
+        for (const auto &row : entries) {
+            if (!filter.isEmpty() && !QString::fromStdString(row.dump()).contains(filter, Qt::CaseInsensitive)) continue;
+            const auto queue = row.at("queue").get<std::string>(); auto &parent = queues[queue];
+            if (!parent) parent = new QTreeWidgetItem(timeline_, {"Queue " + QString::fromStdString(queue)});
+            auto item = new QTreeWidgetItem(parent, {"Submit " + text(row.at("submission")) + " / list " + text(row.at("list_ordinal")),
+                text(row.at("first_execution")), QString::fromStdString(clock(row)), "—", "—", ""});
+            if (!row.at("first_execution").is_null()) item->setData(0, Qt::UserRole, qulonglong(executionId(row.at("first_execution"))));
+            item->setData(0, Qt::UserRole + 1, QString::fromStdString(row.dump(2)));
+            if (row.at("status") == "measured" && row.at("duration_seconds").is_number()) {
+                const auto span = interval(row), range = ranges.at(clock(row));
+                item->setText(3, QString::number(span.first * 1000, 'f', 6));
+                item->setText(4, QString::number(row.at("duration_seconds").get<double>() * 1e6, 'f', 3));
+                if (range.second > range.first) item->setData(5, Qt::UserRole + 2,
+                    QVariantList{(span.first - range.first) / (range.second - range.first), (span.second - range.first) / (range.second - range.first)});
+            }
+            for (int i = 0; i < 6; ++i) item->setToolTip(i, text(row.at("reason")));
+        }
+        for (const auto &row : data.at("synchronization")) {
+            if (!filter.isEmpty() && !QString::fromStdString(row.dump()).contains(filter, Qt::CaseInsensitive)) continue;
+            const auto queue = row.at("queue").get<std::string>(); auto &parent = queues[queue];
+            if (!parent) parent = new QTreeWidgetItem(timeline_, {"Queue " + QString::fromStdString(queue)});
+            auto item = new QTreeWidgetItem(parent, {text(row.at("operation")) + " fence " + text(row.at("fence")), "—", "CPU observation", "—", "—"});
+            item->setData(0, Qt::UserRole + 1, QString::fromStdString(row.dump(2)));
+            item->setToolTip(0, "Fence value " + text(row.at("value")) + "; GPU wait duration was not measured");
+        }
+        if (entries.size() <= 128) timeline_->expandAll();
+    }
     if (groups.size() <= 16)
         values_->expandAll();
     summary_->setText(QString("%1 values · %2 available").arg(shown).arg(result_.at("available").size()));
     if (dx12_)
         summary_->setText(summary_->text() + " · native D3D12 · 1 sample · clocks not stabilized");
+    if (dx12_ && result_.contains("native_measurement") && result_.at("native_measurement").contains("timeline"))
+        summary_->setText(summary_->text() + " · serialized replay prefix");
     updateActions();
 }
 void RdcCountersView::exportResult(const QString &path) const {

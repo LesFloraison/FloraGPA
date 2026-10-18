@@ -94,7 +94,7 @@ nlohmann::json NativePerformance::result(ID3D12CommandQueue *queue) const {
         {"pipeline_statistics", nullptr},
         {"limitations",
          {"Single instrumented replay sample; GPU clocks are not stabilized.",
-          "No cross-queue calibration, synchronization timeline or vendor hardware counters.",
+          "Selected-event duration is queue-local; prefix timeline calibration is reported separately. No vendor hardware counters.",
           "Pipeline statistics are currently sampled only on direct command lists."}}};
     if (statistics_)
         result["pipeline_statistics"] = {{"IAVertices", std::to_string(stats.IAVertices)},

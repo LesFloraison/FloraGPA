@@ -4,6 +4,7 @@
 #include "NativeDescriptors.h"
 #include "NativeCommands.h"
 #include "NativePerformance.h"
+#include "NativeTimeline.h"
 #include "QueryReplayIndex.h"
 #include "../common/PackedColor.hpp"
 #include <wrl/client.h>
@@ -105,6 +106,7 @@ struct NativeReplay::Impl {
             size_t count{}, recorded{};
             bool closed = false;
             SubmittedList instance;
+            size_t timelineEntry{};
         };
         using Key = std::pair<size_t, size_t>;
         std::map<Key, Recording> recordings;
@@ -114,6 +116,7 @@ struct NativeReplay::Impl {
         bool after{}, markers{};
         bool measure{};
         std::unique_ptr<NativePerformance> performance;
+        std::unique_ptr<NativeTimeline> timeline;
         std::vector<CpuWait> cpuWaits;
     };
     std::unique_ptr<FramePlan> frame;
@@ -465,6 +468,7 @@ void NativeReplay::prepareExecution(uint64_t execution, bool after, bool analysi
     }
     for (const auto &[key, native] : recordings)
         starts[s.index.recordings()[key.first].begin].push_back(key);
+    if (performance) frame->timeline = std::make_unique<NativeTimeline>(s.device.device(), recordings.size());
     s.frame = std::move(frame);
 }
 void NativeReplay::Impl::recordFrame(uint64_t id) {
@@ -499,7 +503,16 @@ void NativeReplay::Impl::recordFrame(uint64_t id) {
                                                        native.allocator.Get(), initial,
                                                        IID_PPV_ARGS(&native.list)),
                   "Create frame command list");
+            if (frame->timeline) {
+                const auto &instance = native.instance;
+                native.timelineEntry = frame->timeline->begin(native.list.Get(),
+                    {{"submission", std::to_string(instance.submission)}, {"queue", std::to_string(instance.queue)},
+                     {"command_list", std::to_string(instance.list)}, {"generation", std::to_string(s.index.recordings()[key.first].generation)},
+                     {"list_ordinal", std::to_string(instance.ordinal)}, {"first_execution", native.count ? json(std::to_string(instance.firstExecution)) : json(nullptr)},
+                     {"execution_count", std::to_string(native.count)}});
+            }
             if (!native.count) {
+                if (frame->timeline) frame->timeline->end(native.list.Get(), native.timelineEntry);
                 check(native.list->Close(), "Close empty frame prefix");
                 native.closed = true;
             }
@@ -536,6 +549,7 @@ void NativeReplay::Impl::recordFrame(uint64_t id) {
                 native.list->EndEvent();
             if (measured) frame->performance->end(native.list.Get());
             if (++native.recorded == native.count) {
+                if (frame->timeline) frame->timeline->end(native.list.Get(), native.timelineEntry);
                 check(native.list->Close(), "Close frame execution prefix");
                 native.closed = true;
             }
@@ -690,7 +704,9 @@ void NativeReplay::replayTo(uint64_t execution, bool after, bool analysisMarkers
                     executed.push_back({{"list", std::to_string(instance.list)}, {"ordinal", std::to_string(instance.ordinal)},
                         {"generation", std::to_string(original.generation)}, {"first_execution", std::to_string(instance.firstExecution)}, {"execution_count", std::to_string(native.count)}});
                 }
+                if (s.frame->timeline) s.frame->timeline->beforeSubmit(id, queue);
                 if (!lists.empty()) queue->ExecuteCommandLists(UINT(lists.size()), lists.data()); s.wait(queue);
+                if (s.frame->timeline) s.frame->timeline->afterComplete(id, queue);
                 for (const auto &instance : s.index.lists()) {
                     const auto selected = instances.find({id, instance.ordinal});
                     if (instance.submission != id || selected == instances.end()) continue;
@@ -707,6 +723,7 @@ void NativeReplay::replayTo(uint64_t execution, bool after, bool analysisMarkers
                 check(r.read<HRESULT>(), "Captured frame synchronization"); r.end(); auto nativeQueue = s.queue(queue); auto nativeFence = s.fence(fence);
                 if (p.type == 0x12548dab1bf2dULL) { check(nativeQueue->Signal(nativeFence, value), "Replay frame signal"); s.wait(nativeQueue); }
                 else { require(nativeFence->GetCompletedValue() >= value, "Frame wait requires an unscheduled producer"); check(nativeQueue->Wait(nativeFence, value), "Replay frame wait"); }
+                if (s.frame->timeline) s.frame->timeline->synchronization(id, queue, fence, value, p.type == 0x12548db3bfde2ULL);
             } else if (p.type == 0x125482264c67fULL) s.mapTiles(id);
             else if (isResourceRecipe(p.type) || isPipelineRecipe(p.type) || p.type==0x12793fa7d46faULL) {} // Validated indexed recipes, materialized on use.
             else switch (p.type) {
@@ -1166,6 +1183,7 @@ json NativeReplay::performanceResult() const {
             "Performance results require a completed measured execution");
     const auto execution = s.index.execution(s.selectedExecution);
     auto result = s.frame->performance->result(s.queue(execution.queue));
+    if (s.frame->timeline) result["timeline"] = s.frame->timeline->result();
     result.update({{"execution", std::to_string(execution.id)}, {"source_record", std::to_string(execution.record)},
                    {"queue", std::to_string(execution.queue)}, {"submission", std::to_string(execution.submission)},
                    {"command_list", std::to_string(execution.list)}, {"generation", std::to_string(execution.generation)},

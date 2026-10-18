@@ -9,6 +9,7 @@
 #include "dx12/NativeResources.h"
 #include "dx12/TileRecipes.h"
 #include "dx12/NativeReplay.h"
+#include "dx12/NativeTimeline.h"
 #include "dx12/NativeCommands.h"
 #include "dx12/AddressIndex.h"
 #include "dx12/DescriptorRecipes.h"
@@ -72,6 +73,50 @@ QString fixture(QTemporaryDir &directory) {
 class Dx12SessionTests : public QObject {
     Q_OBJECT
   private slots:
+    void nativeTimelineQueues() {
+        const auto root = qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
+        if (root.isEmpty()) QSKIP("Set Talos capture for the local SDK/device configuration");
+        dx12::StreamDirectory directory(std::filesystem::path((root + "/Talos_2026_10_18__00_55_08.gpa_frame").toStdWString()));
+        dx12::NativeDevice device(directory, true); dx12::NativeTimeline timeline(device.device(), 3);
+        uint64_t submission = 9007199254740993ULL;
+        for (const auto type : {D3D12_COMMAND_LIST_TYPE_DIRECT, D3D12_COMMAND_LIST_TYPE_COMPUTE, D3D12_COMMAND_LIST_TYPE_COPY}) {
+            Microsoft::WRL::ComPtr<ID3D12CommandQueue> queue;
+            Microsoft::WRL::ComPtr<ID3D12CommandAllocator> allocator;
+            Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> list;
+            Microsoft::WRL::ComPtr<ID3D12Fence> fence;
+            D3D12_COMMAND_QUEUE_DESC desc{}; desc.Type = type;
+            QVERIFY(SUCCEEDED(device.device()->CreateCommandQueue(&desc, IID_PPV_ARGS(&queue))));
+            QVERIFY(SUCCEEDED(device.device()->CreateCommandAllocator(type, IID_PPV_ARGS(&allocator))));
+            QVERIFY(SUCCEEDED(device.device()->CreateCommandList(0, type, allocator.Get(), nullptr, IID_PPV_ARGS(&list))));
+            QVERIFY(SUCCEEDED(device.device()->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence))));
+            const auto entry = timeline.begin(list.Get(), {{"submission", std::to_string(submission)},
+                {"queue", std::to_string(submission)}, {"command_list", "7"}, {"generation", "1"},
+                {"list_ordinal", "0"}, {"first_execution", nullptr}, {"execution_count", "0"}});
+            timeline.end(list.Get(), entry); QVERIFY(SUCCEEDED(list->Close()));
+            timeline.beforeSubmit(submission, queue.Get());
+            ID3D12CommandList *lists[]{list.Get()}; queue->ExecuteCommandLists(1, lists);
+            QVERIFY(SUCCEEDED(queue->Signal(fence.Get(), 1)));
+            QTRY_VERIFY_WITH_TIMEOUT(fence->GetCompletedValue() >= 1, 5000);
+            timeline.afterComplete(submission, queue.Get()); ++submission;
+        }
+        const auto result = timeline.result(); QCOMPARE(result.at("entries").size(), size_t(3));
+        size_t measured{}, calibrated{};
+        for (const auto &row : result.at("entries")) {
+            if (row.at("status") == "measured") { ++measured; QVERIFY(row.at("duration_seconds").get<double>() >= 0); }
+            if (row.at("clock_scope") == "calibrated_cpu_qpc") ++calibrated;
+            QVERIFY(row.at("first_execution").is_null());
+        }
+        QVERIFY(measured >= 2); QVERIFY(calibrated >= 2);
+        qInfo() << "Queue timestamp support" << measured << "calibrated queues" << calibrated;
+        const auto info = device.information();
+        const auto output = qEnvironmentVariable("FLORA_DX12_TIMELINE_PROBE");
+        if (!output.isEmpty()) {
+            QFile file(output); QVERIFY(file.open(QIODevice::WriteOnly));
+            const auto bytes = nlohmann::json({{"timeline", result}, {"device", info}}).dump(2);
+            QCOMPARE(file.write(bytes.data(), qint64(bytes.size())), qint64(bytes.size()));
+        }
+        QCOMPARE(info.at("validation_error_count"), nlohmann::json("0"));
+    }
     void dx12InputMeshArtifacts() {
         const auto root = qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
         const auto artifact = qEnvironmentVariable("FLORA_DX12_INPUT_MESH");
@@ -1923,6 +1968,8 @@ class Dx12SessionTests : public QObject {
         QVERIFY(done.takeLast()[0].toBool());
         const auto result = metrics->result();
         const auto &measurement = result.at("native_measurement");
+        const auto output = qEnvironmentVariable("FLORA_DX12_NATIVE_METRICS");
+        if (!output.isEmpty()) metrics->exportResult(output);
         QCOMPARE(measurement.at("execution"), nlohmann::json("21895"));
         QCOMPARE(measurement.at("source_record"), nlohmann::json("274044"));
         QCOMPARE(measurement.at("queue_type"), nlohmann::json(0));
@@ -1935,13 +1982,39 @@ class Dx12SessionTests : public QObject {
         QVERIFY(end > begin);
         QVERIFY(frequency > 0);
         QCOMPARE(measurement.at("duration_seconds").get<double>(), double(end - begin) / double(frequency));
+        const auto &timeline = measurement.at("timeline");
+        QCOMPARE(timeline.at("scope"), nlohmann::json("frame_prefix_submitted_lists"));
+        QVERIFY(!timeline.at("entries").empty());
+        dx12::StreamDirectory directory(std::filesystem::path((root + "/bf1_2025_12_10__14_29_55.gpa_frame").toStdWString()));
+        dx12::SubmissionIndex index(directory);
+        bool containsSelection{}; size_t calibrated{};
+        for (const auto &entry : timeline.at("entries")) {
+            const auto count = std::stoull(entry.at("execution_count").get<std::string>());
+            const auto submission = std::stoull(entry.at("submission").get<std::string>());
+            const auto ordinal = std::stoull(entry.at("list_ordinal").get<std::string>());
+            const auto found = std::find_if(index.lists().begin(), index.lists().end(), [&](const auto &list) { return list.submission == submission && list.ordinal == ordinal; });
+            QVERIFY(found != index.lists().end()); QVERIFY(found->recording.has_value());
+            QCOMPARE(entry.at("queue"), nlohmann::json(std::to_string(found->queue)));
+            QCOMPARE(entry.at("generation"), nlohmann::json(std::to_string(index.recordings().at(*found->recording).generation)));
+            if (!count) QVERIFY(entry.at("first_execution").is_null());
+            const auto first = count ? std::stoull(entry.at("first_execution").get<std::string>()) : 0;
+            if (count) QCOMPARE(first, found->firstExecution);
+            if (entry.at("clock_scope") == "calibrated_cpu_qpc") ++calibrated;
+            if (first <= 21895 && 21895 - first < count) {
+                containsSelection = true;
+                QVERIFY(std::stoull(entry.at("timestamp_begin").get<std::string>()) <= begin);
+                QVERIFY(std::stoull(entry.at("timestamp_end").get<std::string>()) >= end);
+            }
+        }
+        QVERIFY(containsSelection); QVERIFY(calibrated > 0);
+        const auto timelineView = metrics->findChild<QTreeWidget *>("rdcReplayTimeline");
+        QVERIFY(timelineView->topLevelItemCount() > 0);
+        qInfo() << "Measured timeline lists" << timeline.at("entries").size() << "calibrated" << calibrated
+                << "queue groups" << timelineView->topLevelItemCount() << "fence observations" << timeline.at("synchronization").size();
         auto rows = metrics->findChild<QTreeWidget *>("rdcCounterValues");
         QCOMPARE(rows->topLevelItemCount(), 12);
         qInfo() << "BF1 native Dispatch seconds" << measurement.at("duration_seconds").get<double>()
                 << "frequency" << frequency << "CS invocations" << 4096;
-        const auto output = qEnvironmentVariable("FLORA_DX12_NATIVE_METRICS");
-        if (!output.isEmpty())
-            metrics->exportResult(output);
         rows->setCurrentItem(rows->topLevelItem(0));
         window.findChild<QLineEdit *>("apiSearch")->setText("filtered-out");
         metrics->findChild<QAction *>("locateRdcCounter")->trigger();

@@ -1876,6 +1876,73 @@ Focused evidence reuses the existing native Talos RDC (no new frame replay):
 This adds verified input geometry alongside the existing post-VS and MeshOut
 paths. It does not complete all geometry stages, formats or samples.
 
+### Measured replay queue timeline
+
+DX12 **Replay Metrics → Measure** now also collects timestamp brackets around
+each submitted command-list instance in the replayed frame prefix. The new
+**Replay timeline** tab groups intervals by queue, displays begin time/duration
+and proportional time bars, and supports double-click navigation to the first
+execution in a nonempty list. Repeated submissions retain separate identities.
+Empty lists have real brackets but a null `first_execution`; they must not jump
+to an adjacent list. Export retains the native timeline and calibration evidence.
+The DX11 metrics interface keeps its existing tabs and behavior.
+
+Timestamp heaps/readback are shared by command-list type, bounded to 65,536 list
+instances. Direct/Compute use timestamp heaps; Copy uses its separate heap type
+only when `CopyQueueTimestampQueriesSupported` is reported. Unsupported Copy
+intervals remain explicitly unmeasured. This follows Microsoft's
+[D3D12 timing and calibration contracts](https://learn.microsoft.com/en-us/windows/win32/direct3d12/timing).
+This does not extend the selected-event pipeline-statistics path to Copy lists.
+
+Each actual frame submission has `GetClockCalibration` pairs before submission
+and after its completion fence. GPU/QPC timestamps, frequencies, list identities
+and offsets remain decimal strings. Integer ticks are subtracted before floating
+point conversion. QPC alignment requires both pairs, matching GPU frequencies,
+bracketed timestamps and a calibration drift check. The tolerance is the larger
+of 100 microseconds and 0.1% of the calibration interval, plus the two API call
+windows. Drift and call windows are reported; this is a consistency check, not a
+guaranteed error bound. Failed calibration stays on a separate queue-local scale.
+Time bars share a scale only for intervals with accepted QPC calibration.
+
+The view explicitly describes a **serialized replay prefix**. Existing CPU
+completion waits change concurrency and the inserted queries affect timing;
+these results are not original-application queue overlap or frame performance.
+Timestamp brackets describe bottom-of-pipe completion intervals. Initialization
+and experiment helper submissions are excluded. Captured Queue Signal/Wait rows
+record CPU-side observations after the replay API/completion operation, with
+`gpu_wait_duration: null`. Actual GPU stall duration and full synchronization
+analysis remain unfinished; no CPU interval is substituted for a GPU wait.
+
+Focused evidence:
+
+- `bf1-native-timeline2.json` / `.txt`: one workspace measurement of BF1 execution
+  **21895** reaches **13 lists** in submission **364657**, queue **861708976**.
+  All 13 intervals calibrate, including two empty lists with no event link.
+  Original submission/list ordinal/generation/queue identities match the capture
+  index; the selected list's interval encloses the independently instrumented
+  Dispatch timestamps. CS invocations remain **4096**. Selected-event duration
+  is **3968 ticks / 1 GHz = 3.968 microseconds** for this single run.
+  One captured queue-signal observation is retained. The 13 lists share a single
+  queue: this sample is not evidence of cross-queue capture fidelity.
+- The first targeted run exposed the empty-list identity issue and failed its
+  identity check; the implementation and test now use submission/ordinal for
+  empty lists. The second run above is the verification of that concrete fix.
+- `native-timeline-queues1.json` / `.txt`: a **298 ms** minimal GPU fixture uses
+  three empty command lists on separate Direct, Compute and Copy queues. All
+  three acquire timestamps and QPC alignment on the RTX 5090 Laptop GPU, with
+  **zero D3D12 validation errors**. This checks query/clock plumbing, not captured
+  multi-queue dependencies or workload performance.
+- `native-timeline-ui1.txt`: five CPU UI checks pass, including the existing
+  DX11 behavior, report identity propagation, queue-local fallback, one-tick
+  differences above 2^53, exact event navigation/export and experiment
+  invalidation. `native-timeline-ui3` renders the real BF1 report for visual
+  inspection; all 13 intervals, two empty rows and the fence observation display.
+- Build167 builds GUI, CLI, Worker and focused tests; Build168/169 add the
+  minimal queue fixture and CPU rendering check. Build170 adds the visible
+  serialized-prefix label; Build171 updates the capability description and
+  builds the final GUI/CLI/Worker. No other full sample replay
+  was run for this change.
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |
@@ -1887,7 +1954,7 @@ paths. It does not complete all geometry stages, formats or samples.
 | Complete native frame and selected-event replay | Last indexed submission reached; backbuffer replay available in workspace; first Draw/UAV clear verified; full frame semantics/fidelity unfinished | First Draw before/after available in workspace; first color boundary verified; full frame blocked by historical query state | Last indexed submission reached through execution 37104; copied RGB10 backbuffer read/display verified; first Draw float boundary verified; output variation, full frame fidelity and general synchronization unfinished |
 | Resource/Pixel History with execution mapping | Color history connected to PS; partial buffer/texture resource usage, creation provenance and captured barrier details verified; full histories unfinished | Clear/Draw history and D16 event-boundary values verified from workspace pixel pick; modified VS and undo match native depth readbacks; fragment depths unavailable; full history unfinished | One mapped float pixel modification matches native before/after; full histories unfinished |
 | VS/PS/CS debugging and geometry | DXBC VS, PS, direct/indirect CS traces verified; selected PS and CS workspace paths checked; geometry and full stage coverage unfinished | Original and modified DXBC VS stepping/Watch, post-VS mesh and exact geometry restoration after undo verified in workspace; input float3 and original index bytes match captured initialization copies; remaining stages/formats unfinished | DXIL SM6.6 PS verified against GPU shader output; CS trace/breakpoint/SSA Watch verified; first MeshOut positions/indices, table and OBJ verified; UAV write validation, other stages and complete geometry unfinished |
-| GPU performance analysis and modification experiments | One selected Dispatch's native timestamp and pipeline statistics verified in workspace; byte-preserving CS import creates a PSO; full performance and experiments unfinished | Workspace Draw disable, VS replacement and constant-buffer patch change GPU output; undo restores exact bytes; D16 texture import/Clear boundaries verified; project persistence and stale-result rejection verified; full experiments and performance unfinished | Byte-preserving MS/PS import creates a PSO; changed shader execution, performance and full experiments unfinished |
+| GPU performance analysis and modification experiments | One selected Dispatch's native timestamp/statistics and 13-list calibrated replay timeline verified in workspace; byte-preserving CS import creates a PSO; original concurrency, full performance and experiments unfinished | Workspace Draw disable, VS replacement and constant-buffer patch change GPU output; undo restores exact bytes; D16 texture import/Clear boundaries verified; project persistence and stale-result rejection verified; full experiments and performance unfinished | Byte-preserving MS/PS import creates a PSO; changed shader execution, performance and full experiments unfinished |
 | Comparison with original GPA frame/intermediate resources | Both output frames compared; small RGB and widespread alpha differences remain unexplained; intermediate comparison unfinished | First color RGB exactly matches original playback; alpha differs; full/intermediate comparisons unfinished | Not performed |
 | Full portable replay/analysis without GPA/Python | Not verified | Not verified | Not verified |
 

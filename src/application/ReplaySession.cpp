@@ -409,7 +409,7 @@ class Dx12Session final : public IReplaySession {
             const auto kind = executionEvent(*selection.execution).workKind;
             if (kind != ReplayWorkKind::Draw && kind != ReplayWorkKind::Dispatch)
                 return {CapabilityStatus::NotImplemented, "Select a supported Draw or Dispatch for native GPU queries"};
-            return {CapabilityStatus::Supported, "One selected-execution GPU timestamp sample; pipeline statistics on direct lists; no stabilized clocks, calibrated timeline or vendor counters"};
+            return {CapabilityStatus::Supported, "One selected-execution GPU timestamp sample and serialized replay-prefix list timeline with calibration when available; pipeline statistics on direct lists; no stabilized clocks or vendor counters"};
         }
         if (feature == ReplayFeature::ShaderDebug || feature == ReplayFeature::Geometry) {
             auto executionOnly = selection;

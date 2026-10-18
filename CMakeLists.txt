@@ -207,6 +207,7 @@ target_sources(FloraExperiment PRIVATE src/application/ReplaySession.cpp src/dx1
 target_sources(FloraExperiment PRIVATE src/dx12/QueryReplayIndex.cpp)
 target_sources(FloraExperiment PRIVATE src/dx12/NativeDevice.cpp src/dx12/InitializationCopy.cpp src/dx12/PipelineRecipes.cpp src/dx12/NativeResources.cpp src/dx12/NativeReplay.cpp src/dx12/NativeCommands.cpp src/dx12/TileRecipes.cpp)
 target_sources(FloraExperiment PRIVATE src/dx12/NativePerformance.cpp src/dx12/NativePerformance.h)
+target_sources(FloraExperiment PRIVATE src/dx12/NativeTimeline.cpp src/dx12/NativeTimeline.h)
 target_sources(FloraExperiment PRIVATE src/dx12/AddressIndex.cpp src/dx12/DescriptorRecipes.cpp src/dx12/NativeDescriptors.cpp)
 target_sources(FloraExperiment PRIVATE src/dx12/BackBufferIndex.cpp)
 target_link_libraries(FloraExperiment PRIVATE d3d12 dxgi)

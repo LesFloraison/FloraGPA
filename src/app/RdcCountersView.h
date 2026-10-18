@@ -40,7 +40,7 @@ class RdcCountersView final : public QWidget {
     QComboBox *scope_;
     QLineEdit *filter_;
     QLabel *summary_;
-    QTreeWidget *values_, *catalog_;
+    QTreeWidget *values_, *catalog_, *timeline_;
     QPlainTextEdit *details_;
     void invalidate();
     void updateActions();
