@@ -68,6 +68,77 @@ QString fixture(QTemporaryDir &directory) {
 class Dx12SessionTests : public QObject {
     Q_OBJECT
   private slots:
+    void cpuFenceEventPlanning() {
+        QTemporaryDir temp;
+        const auto path = fixture(temp);
+        QByteArray thread;
+        uint64_t timestamp{};
+        auto packet = [&](uint64_t type, const QByteArray &payload) {
+            qword(thread, type);
+            qword(thread, ++timestamp);
+            qword(thread, 0);
+            qword(thread, uint64_t(payload.size()));
+            thread += payload;
+        };
+        QByteArray handle;
+        qword(handle, 5);
+        QByteArray registration;
+        qword(registration, UINT64_MAX - 2);
+        qword(registration, UINT64_MAX - 1);
+        qword(registration, 5);
+        dword(registration, 0);
+        QByteArray draw;
+        qword(draw, 7);
+        for (int i = 0; i < 4; ++i)
+            dword(draw, 1);
+        packet(0x27000000000000ULL, handle); // Missing keyframe CPU event state.
+        packet(0x114699e3dba70ULL, registration);
+        packet(0x27000000000000ULL, handle); // Known completion supersedes observation-only waits.
+        packet(0x1ae3c190d8b1eULL, draw);
+        packet(0x27000000000000ULL, handle); // Cannot reuse an already-consumed registration.
+        packet(0x1ae3c190d8b1eULL, draw);
+        write(path + "/thread-7-0", thread);
+        {
+            dx12::StreamDirectory directory(std::filesystem::path(path.toStdWString()));
+            const auto plan = dx12::planCpuWaits(directory, 4);
+            QCOMPARE(plan.size(), size_t(2));
+            QVERIFY(!plan[0].completion);
+            QVERIFY(plan[1].completion);
+            QCOMPARE(plan[1].completion->fence, UINT64_MAX - 2);
+            QCOMPARE(plan[1].completion->value, UINT64_MAX - 1);
+            QCOMPARE(plan[1].completion->registration, 2ULL);
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error, dx12::planCpuWaits(directory, 6));
+        }
+        thread.clear();
+        timestamp = 0;
+        packet(0x114699e3dba70ULL, registration);
+        packet(0x114699e3dba70ULL, registration);
+        write(path + "/thread-7-0", thread);
+        {
+            dx12::StreamDirectory directory(std::filesystem::path(path.toStdWString()));
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error, dx12::planCpuWaits(directory, 2));
+        }
+        registration.replace(16, 8, QByteArray(8, 0)); // Null handle is a synchronous completion wait.
+        thread.clear();
+        timestamp = 0;
+        packet(0x27000000000000ULL, handle);
+        packet(0x114699e3dba70ULL, registration);
+        packet(0x1ae3c190d8b1eULL, draw);
+        write(path + "/thread-7-0", thread);
+        {
+            dx12::StreamDirectory directory(std::filesystem::path(path.toStdWString()));
+            const auto plan = dx12::planCpuWaits(directory, 3);
+            QCOMPARE(plan.back().record, 2ULL);
+            QCOMPARE(plan.back().handle, 0ULL);
+            QVERIFY(plan.back().completion);
+        }
+        const auto bytes = [](const QByteArray &data) {
+            return format::Bytes(reinterpret_cast<const uint8_t *>(data.data()), size_t(data.size()));
+        };
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, dx12::decodeFenceEvent(bytes(registration.chopped(1))));
+        registration[27] = char(-128); // A failed captured registration cannot supply a wait.
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, dx12::decodeFenceEvent(bytes(registration)));
+    }
     void hellbladePrefixDependencies() {
         const auto root = qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
         if (root.isEmpty())
@@ -80,17 +151,18 @@ class Dx12SessionTests : public QObject {
         QCOMPARE(draw.submission, 578777ULL);
         QCOMPARE(draw.generation, 2ULL);
         QCOMPARE(draw.ordinal, 1ULL);
-        const auto waits = dx12::inspectObservationWaits(directory, draw.submission);
+        const auto waits = dx12::planCpuWaits(directory, draw.submission);
         QCOMPARE(waits.size(), size_t(2));
         QCOMPARE(waits[0].record, 577992ULL);
         QCOMPARE(waits[1].record, 578048ULL);
         QCOMPARE(waits[0].handle, 3964ULL);
-        try {
-            (void)dx12::inspectObservationWaits(directory, 579109);
-            QFAIL("Later CPU event registration must require synchronization reconstruction");
-        } catch (const std::runtime_error &e) {
-            QVERIFY(QString::fromUtf8(e.what()).contains("578875"));
-        }
+        const auto next = dx12::planCpuWaits(directory, 579109);
+        QCOMPARE(next.size(), size_t(4));
+        QCOMPARE(next.back().record, 579052ULL);
+        QVERIFY(next.back().completion.has_value());
+        QCOMPARE(next.back().completion->registration, 578875ULL);
+        QCOMPARE(next.back().completion->fence, 0x1f033697240ULL);
+        QCOMPARE(next.back().completion->value, 449714ULL);
     }
     void observationWaitBoundaries() {
         QTemporaryDir temp;
@@ -113,7 +185,7 @@ class Dx12SessionTests : public QObject {
         write(path + "/thread-8-1", thread);
         {
             dx12::StreamDirectory directory(std::filesystem::path(path.toStdWString()));
-            const auto waits = dx12::inspectObservationWaits(directory, 4);
+            const auto waits = dx12::planCpuWaits(directory, 4);
             QCOMPARE(waits.size(), size_t(1));
             QCOMPARE(waits.front().record, 1ULL);
             QCOMPARE(waits.front().handle, UINT64_MAX);
@@ -121,7 +193,7 @@ class Dx12SessionTests : public QObject {
             // has no dependency on this polling thread's unknown CPU event.
             QCOMPARE(directory.files().at(waits.front().file).thread, 8ULL);
             QVERIFY_THROWS_EXCEPTION(OperationCancelled,
-                                     dx12::inspectObservationWaits(directory, 4, [] { return true; }));
+                                     dx12::planCpuWaits(directory, 4, [] { return true; }));
         }
         QByteArray draw;
         qword(draw, 7);
@@ -131,8 +203,8 @@ class Dx12SessionTests : public QObject {
         write(path + "/thread-8-1", thread);
         {
             dx12::StreamDirectory directory(std::filesystem::path(path.toStdWString()));
-            QCOMPARE(dx12::inspectObservationWaits(directory, 4).size(), size_t(1));
-            QVERIFY_THROWS_EXCEPTION(std::runtime_error, dx12::inspectObservationWaits(directory, 5));
+            QCOMPARE(dx12::planCpuWaits(directory, 4).size(), size_t(1));
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error, dx12::planCpuWaits(directory, 5));
         }
         // A second stream file for the same captured thread must not bypass
         // its wait when the directory merges records by CPU timestamp.
@@ -144,13 +216,13 @@ class Dx12SessionTests : public QObject {
         write(path + "/thread-8-2", thread);
         {
             dx12::StreamDirectory directory(std::filesystem::path(path.toStdWString()));
-            QVERIFY_THROWS_EXCEPTION(std::runtime_error, dx12::inspectObservationWaits(directory, 4));
+            QVERIFY_THROWS_EXCEPTION(std::runtime_error, dx12::planCpuWaits(directory, 4));
         }
         thread.clear();
         packet(0x27000000000000ULL, 5, wait.chopped(1));
         write(path + "/thread-8-1", thread);
         dx12::StreamDirectory truncated(std::filesystem::path(path.toStdWString()));
-        QVERIFY_THROWS_EXCEPTION(std::runtime_error, dx12::inspectObservationWaits(truncated, 4));
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, dx12::planCpuWaits(truncated, 4));
     }
     void hellbladeRasterStateDecoding() {
         // Hellblade2 records 577565-577567. Keep nullable combiner arrays and
@@ -1235,6 +1307,49 @@ class Dx12SessionTests : public QObject {
             std::runtime_error,
             wide.finish(wide.requestId(),
                         {{"ok", true}, {"backend", "dx12"}, {"execution", "9007199254740992"}}));
+    }
+    void dxilComputeInstructionDebug() {
+        const auto path = qEnvironmentVariable("FLORA_DX12_DXIL_CS_TRACE");
+        if (path.isEmpty())
+            QSKIP("Set FLORA_DX12_DXIL_CS_TRACE to the Hellblade2 second-submission CS trace");
+        QFile input(path);
+        QVERIFY(input.open(QIODevice::ReadOnly));
+        const auto result = nlohmann::json::parse(input.readAll().toStdString());
+        QCOMPARE(result.at("execution"), nlohmann::json("10135"));
+        QCOMPARE(result.at("eid"), nlohmann::json(1814));
+        QVERIFY(result.at("disassembly").get<std::string>().find("compiled under SM6.6") !=
+                std::string::npos);
+        ReplayDebugView view("cs");
+        view.setContext("hellblade-dxil-compute", 10135, true);
+        QVERIFY(view.finish(view.requestId(), result));
+        QCOMPARE(view.model()->size(), size_t(715));
+        QVERIFY(view.model()->files().empty());
+        view.findChild<QLineEdit *>("debugInstruction")->setText("1677");
+        view.findChild<QAction *>("debugToggleInstructionBreakpoint")->trigger();
+        view.findChild<QAction *>("debugContinue")->trigger();
+        QCOMPARE(result.at("steps")[size_t(view.model()->position())].at("nextInstruction"),
+                 nlohmann::json(1677));
+        view.findChild<QAction *>("debugStep")->trigger();
+        QCOMPARE(result.at("steps")[size_t(view.model()->position())].at("nextInstruction"),
+                 nlohmann::json(1678));
+        view.model()->addWatch("_1509");
+        const auto watch = view.model()->watchResults().at(0);
+        QCOMPARE(watch.at("status"), nlohmann::json("available"));
+        QCOMPARE(watch.at("values"), nlohmann::json::array({8193}));
+        // Raw instruction values must not mask a source declaration that the
+        // debugger explicitly reports as undefined at the same name.
+        auto shadowed = result;
+        shadowed["trace"]["sourceVars"].push_back({{"name", "_1509"}, {"type", 3}, {"rows", 1},
+                                                  {"columns", 1}, {"undefinedValue", true},
+                                                  {"variables", nlohmann::json::array()}});
+        ReplayDebugModel source(std::move(shadowed));
+        source.move(size_t(view.model()->position()));
+        source.addWatch("_1509");
+        QCOMPARE(source.watchResults()[0]["status"], nlohmann::json("unavailable"));
+        const auto serial = view.requestId();
+        view.findChild<QLineEdit *>("debugThread")->setText("1 0 0");
+        QVERIFY(!view.model());
+        QVERIFY(!view.finish(serial, result));
     }
     void dxilPixelInstructionDebug() {
         const auto path = qEnvironmentVariable("FLORA_DX12_DXIL_PS_TRACE");

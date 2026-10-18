@@ -20,15 +20,20 @@ struct ExecutionInstance {
     uint64_t id{}, record{}, submission{}, queue{}, list{}, ordinal{}, generation{};
     bool recordingComplete = false;
 };
-struct ObservationWait {
+struct CpuFenceEvent {
+    uint64_t fence{}, value{}, handle{}, registration{};
+};
+CpuFenceEvent decodeFenceEvent(format::Bytes bytes);
+struct CpuWait {
     uint64_t record{}, handle{};
     uint32_t file{};
+    std::optional<CpuFenceEvent> completion;
 };
-// A captured CPU wait can be irrelevant to a selected GPU prefix only when
-// that thread performs no state-changing calls after it within the prefix.
-// This does not reconstruct event signalling or authorize future submissions.
-std::vector<ObservationWait> inspectObservationWaits(const StreamDirectory &, uint64_t lastRecord,
-                                                     const CancelCheck &cancelled = {});
+// Match single-registration event waits to Fence values. Unknown waits permit
+// only observations until a known completion wait supersedes them on that
+// thread. The native executor must verify every planned completion dependency.
+std::vector<CpuWait> planCpuWaits(const StreamDirectory &, uint64_t lastRecord,
+                                const CancelCheck &cancelled = {});
 // Indexes recorded command-list invocations. It does not certify replayability,
 // resolve object aliases, or invent a global GPU order from CPU timestamps.
 class SubmissionIndex {

@@ -321,6 +321,42 @@ Json ReplayDebugModel::resolve(const State &state) const {
     return records;
 }
 Json ReplayDebugModel::sourceValues() const { return resolve(state_); }
+Json ReplayDebugModel::expressionValues(const State &state) const {
+    auto records = resolve(state);
+    if (state.position < 0)
+        return records;
+    // DXIL instruction traces retain typed SSA values even without a PDB.
+    // They can supply Watch expressions without inventing source variables.
+    // Existing source declarations, including unavailable/undefined ones, take
+    // precedence over any raw value with the same root name.
+    const auto root = [](const std::string &name) { return name.substr(0, name.find_first_of(".[")); };
+    std::set<std::string> declared;
+    for (const auto &row : records)
+        declared.insert(root(row.value("source_container", row.at("name").get<std::string>())));
+    Index instruction;
+    for (const auto &variable : state.variables)
+        indexVariable(instruction, variable);
+    for (const auto &[name, variable] : instruction) {
+        if (!variable || name.empty() || declared.contains(root(name)) || members(variable))
+            continue;
+        const auto kind = variable->value("type", 255);
+        const auto rows = variable->value("rows", 0), columns = variable->value("columns", 0);
+        if (!types.contains(kind) || rows != 1 || columns < 1 || columns > 4)
+            continue; // Typeless registers, matrices and opaque handles need an explicit interpretation.
+        const auto data = variable->value("value", Json::object()).value(types.at(kind).second, Json::array());
+        if (!data.is_array() || data.size() < size_t(columns))
+            continue;
+        auto values = Json::array();
+        for (int i = 0; i < columns; ++i)
+            values.push_back(kind == 11 ? Json(data[size_t(i)].is_boolean() ? data[size_t(i)].get<bool>()
+                                                                          : data[size_t(i)] != 0)
+                                       : data[size_t(i)]);
+        records.push_back({{"name", name}, {"scope", "global"}, {"type", types.at(kind).first},
+                           {"rows", rows}, {"columns", columns}, {"status", "available"},
+                           {"values", std::move(values)}, {"origin", "typed_instruction_variable"}});
+    }
+    return records;
+}
 Json ReplayDebugModel::registerRows(const std::string &mode) const {
     if (mode != "float" && mode != "int" && mode != "uint" && mode != "hex")
         throw std::runtime_error("Unknown register interpretation");
@@ -451,7 +487,7 @@ bool ReplayDebugModel::breakpointEntry(int64_t position) {
     if (matches.empty())
         return false;
     move(conditionState_, size_t(position));
-    const DebugEnvironment environment(resolve(conditionState_));
+    const DebugEnvironment environment(expressionValues(conditionState_));
     for (const auto &p : matches) {
         try {
             if (environment.expression(conditions_.at(p)).truth())
@@ -543,7 +579,7 @@ void ReplayDebugModel::removeWatch(size_t index) {
 }
 Json ReplayDebugModel::watchResults() const {
     Json rows = Json::array();
-    const DebugEnvironment environment(sourceValues());
+    const DebugEnvironment environment(expressionValues(state_));
     for (const auto &e : watches_) {
         Json r{{"expression", e.text()}};
         try {
@@ -561,7 +597,7 @@ Json ReplayDebugModel::watchResults() const {
 }
 ExpressionValue ReplayDebugModel::evaluate(size_t position, const std::string &expression) {
     move(conditionState_, position);
-    return DebugEnvironment(resolve(conditionState_)).expression(DebugExpression(expression));
+    return DebugEnvironment(expressionValues(conditionState_)).expression(DebugExpression(expression));
 }
 Json ReplayDebugModel::identity(const Json &result) {
     const auto action = result.value("action", Json(nullptr)),

@@ -65,6 +65,7 @@ class ReplayDebugModel {
     std::vector<DebugExpression> watches_;
     void move(State &state, size_t position) const;
     Json resolve(const State &state) const;
+    Json expressionValues(const State &state) const;
     bool valid(int64_t position) const;
 };
 } // namespace flora

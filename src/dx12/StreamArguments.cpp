@@ -84,6 +84,8 @@ DecodedArguments decodeArguments(uint64_t type, format::Bytes payload) {
     }
     case 0x12548dab1bf2dULL: case 0x12548db3bfde2ULL:
         u64("Queue"); u64("Fence"); u64("Value"); u32("HRESULT"); break;
+    case 0x114699e3dba70ULL:
+        u64("Fence"); u64("Value"); u64("EventHandle"); u32("HRESULT"); r.end(); break;
     case 0x125482975df48ULL: {
         u64("Queue"); const auto count = r.read<uint32_t>(); v["NumCommandLists"] = count;
         const auto lists = pointers(r);

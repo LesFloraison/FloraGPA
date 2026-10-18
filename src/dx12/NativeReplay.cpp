@@ -9,6 +9,7 @@
 #include <QCryptographicHash>
 #include <QByteArrayView>
 #include <chrono>
+#include <algorithm>
 #include <set>
 #include <sstream>
 #include <thread>
@@ -87,6 +88,7 @@ struct NativeReplay::Impl {
     uint64_t currentRecord{}; bool initialized = false, attempted = false;
     bool frameAttempted = false, boundaryReached = false, boundaryAfter = false;
     uint64_t selectedExecution{};
+    std::map<uint64_t, uint64_t> completedCpuWaits;
     using StateActions = std::vector<std::function<void()>>;
     struct FramePlan {
         std::unique_ptr<NativeCommands> commands;
@@ -106,7 +108,7 @@ struct NativeReplay::Impl {
         bool after{}, markers{};
         bool measure{};
         std::unique_ptr<NativePerformance> performance;
-        std::vector<ObservationWait> observationWaits;
+        std::vector<CpuWait> cpuWaits;
     };
     std::unique_ptr<FramePlan> frame;
     void recordFrame(uint64_t id);
@@ -372,7 +374,7 @@ void NativeReplay::prepareExecution(uint64_t execution, bool after, bool analysi
     require(target.submission > s.directory.initializationCount() && target.recordingComplete,
             "Select a complete frame execution instance");
     auto frame = std::make_unique<Impl::FramePlan>();
-    frame->observationWaits = inspectObservationWaits(s.directory, target.submission, s.cancelled);
+    frame->cpuWaits = planCpuWaits(s.directory, target.submission, s.cancelled);
     frame->execution = execution;
     frame->after = after;
     frame->markers = analysisMarkers;
@@ -506,6 +508,17 @@ void NativeReplay::replayTo(uint64_t execution, bool after, bool analysisMarkers
     for (uint64_t id = s.directory.initializationCount() + 1; id <= target.submission; ++id) {
         s.currentRecord = id; checkCancellation(s.cancelled); const auto &p = s.directory.packets()[size_t(id - 1)];
         try {
+            const auto &waits = s.frame->cpuWaits;
+            const auto wait = std::lower_bound(waits.begin(), waits.end(), id,
+                                              [](const CpuWait &entry, uint64_t record) { return entry.record < record; });
+            if (wait != waits.end() && wait->record == id && wait->completion) {
+                const auto &dependency = *wait->completion;
+                const auto completed = s.fence(dependency.fence)->GetCompletedValue();
+                check(s.device.device()->GetDeviceRemovedReason(), "Replay CPU Fence wait");
+                require(completed != UINT64_MAX && completed >= dependency.value,
+                        "CPU Fence wait requires an unscheduled producer");
+                s.completedCpuWaits.emplace(id, completed);
+            }
             s.recordFrame(id);
             if (s.index.recordingForRecord(id)) continue;
             if (p.type == 0x20000000000000ULL) s.resources.restoreMappedData(id);
@@ -536,10 +549,26 @@ void NativeReplay::replayTo(uint64_t execution, bool after, bool analysisMarkers
             else if (isResourceRecipe(p.type) || isPipelineRecipe(p.type) || p.type==0x12793fa7d46faULL) {} // Validated indexed recipes, materialized on use.
             else switch (p.type) {
                 case 0x27000000000000ULL:
-                    // prepareExecution proved that this thread only polls or
-                    // adjusts fence references through the selected submission.
-                    // No GPU state or producer dependency is skipped here.
+                    // Known registrations were checked against the native Fence
+                    // above. Missing registrations remain observation-only until
+                    // a known wait on this thread provides a completion boundary.
                     break;
+                case 0x114699e3dba70ULL: {
+                    const auto event = decodeFenceEvent(s.directory.payload(p));
+                    (void)s.fence(event.fence);
+                    // The plan binds this registration to its subsequent wait;
+                    // replay never uses a captured HANDLE as an OS handle.
+                    break;
+                }
+                case 0x1cb0a721c351aULL: {
+                    Reader r(s.directory.payload(p));
+                    require(s.allocatorRecipes.contains(r.read<uint64_t>()), "Reset references an unknown allocator");
+                    check(r.read<HRESULT>(), "Captured command allocator reset");
+                    r.end();
+                    // Every submitted recording owns a fresh native allocator.
+                    // Completion checks still precede captured allocator reuse.
+                    break;
+                }
                 case 0x11469e993999dULL: {
                     Reader r(s.directory.payload(p));
                     require(s.fenceRecipes.contains(r.read<uint64_t>()),
@@ -672,7 +701,6 @@ void NativeReplay::replayTo(uint64_t execution, bool after, bool analysisMarkers
                 case 0x1ae3cd6acf667ULL:
                 case 0x1ae3ce8691d1cULL:
                 case 0x1ae3c6360f841ULL:
-                case 0x1cb0a721c351aULL:
                 case 0x1e6503e2ff325ULL:
                 case 0x1e650cfcd4902ULL:
                 case 0x1e650e8691d1cULL:
@@ -900,18 +928,28 @@ json NativeReplay::performanceResult() const {
 json NativeReplay::information() const {
     const auto &s = *impl_;
     auto waits = json::array();
-    if (s.frame) for (const auto &entry : s.frame->observationWaits) {
+    if (s.frame) for (const auto &entry : s.frame->cpuWaits) {
         if (waits.size() == 32) break;
-        waits.push_back({{"record", std::to_string(entry.record)}, {"handle", std::to_string(entry.handle)},
-                         {"file", s.directory.files().at(entry.file).storage->path().filename().string()}});
+        json wait{{"record", std::to_string(entry.record)}, {"handle", std::to_string(entry.handle)},
+                  {"file", s.directory.files().at(entry.file).storage->path().filename().string()},
+                  {"kind", entry.completion ? "fence_completion" : "observation_only"}};
+        if (entry.completion) {
+            const auto &event = *entry.completion;
+            wait.update({{"registration", std::to_string(event.registration)}, {"fence", std::to_string(event.fence)},
+                         {"value", std::to_string(event.value)}, {"native_completed_value", nullptr}});
+            if (const auto completed = s.completedCpuWaits.find(entry.record); completed != s.completedCpuWaits.end())
+                wait["native_completed_value"] = std::to_string(completed->second);
+        }
+        waits.push_back(std::move(wait));
     }
     return {{"status", s.initialized ? "initialization_transfers_executed" : "incomplete"},
         {"last_record", std::to_string(s.currentRecord)}, {"submissions", s.submissions}, {"recorded_commands", s.recordedCommands}, {"executed_commands", s.executedCommands}, {"resources", s.resources.information()},
         {"tile_mapping_calls", std::to_string(s.tileMappingCalls)},
         {"descriptors", s.descriptors.information()},
-        {"cpu_waits", {{"scope", "observation_only_through_selected_submission"},
-                       {"event_signalling_reconstructed", false},
-                       {"count", std::to_string(s.frame ? s.frame->observationWaits.size() : 0)},
+        {"cpu_waits", {{"scope", "single_registration_fence_dependencies_and_scoped_observations"},
+                       {"full_event_semantics", false},
+                       {"verified_fence_waits", std::to_string(s.completedCpuWaits.size())},
+                       {"count", std::to_string(s.frame ? s.frame->cpuWaits.size() : 0)},
                        {"first_records", std::move(waits)}}},
         {"selected_execution", std::to_string(s.selectedExecution)}, {"boundary", s.boundaryAfter ? "after" : "before"}, {"execution_boundary_reached", s.boundaryReached},
         {"frame_replayed", false}, {"note", "Native initialization and selected frame execution; full-frame correctness and analysis require separate validation"}};

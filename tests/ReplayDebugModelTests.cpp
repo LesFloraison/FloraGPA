@@ -131,6 +131,33 @@ Json fixture() {
 class ReplayDebugModelTests : public QObject {
     Q_OBJECT
   private slots:
+    void typedInstructionWatchLifetime() {
+        auto result = fixture();
+        const Json temporary{{"name", "_tmp"}, {"type", 4}, {"rows", 1}, {"columns", 1},
+                             {"value", {{"u32v", Json::array({UINT32_MAX})}}}};
+        const Json wide{{"name", "_wide"}, {"type", 8}, {"rows", 1}, {"columns", 1},
+                        {"value", {{"u64v", Json::array({UINT64_MAX})}}}};
+        const Json typeless{{"name", "r0"}, {"type", 255}, {"rows", 1}, {"columns", 1},
+                            {"value", {{"u32v", Json::array({99})}}}};
+        result["trace"]["inputs"] = Json::array({temporary, typeless, wide});
+        result["steps"][1]["changes"] = Json::array({{{"before", temporary}, {"after", {{"name", ""}}}}});
+        ReplayDebugModel model(result);
+        model.addWatch("_tmp");
+        model.addWatch("r0");
+        model.addWatch("_wide");
+        model.move(0);
+        QVERIFY(model.sourceValues().empty()); // Instruction values do not become fabricated source mappings.
+        QCOMPARE(model.watchResults()[0]["values"], Json::array({UINT32_MAX}));
+        QCOMPARE(model.watchResults()[1]["status"], Json("unavailable"));
+        // The expression evaluator does not implement 64-bit arithmetic. Reject
+        // this type explicitly rather than narrowing it or converting to float.
+        QCOMPARE(model.watchResults()[2]["status"], Json("unavailable"));
+        QVERIFY(model.watchResults()[2]["error"].get<std::string>().find("uint64") != std::string::npos);
+        model.move(1);
+        QCOMPARE(model.watchResults()[0]["status"], Json("unavailable"));
+        model.move(0);
+        QCOMPARE(model.watchResults()[0]["values"], Json::array({UINT32_MAX}));
+    }
     void configurationTransaction() {
         ReplayDebugModel model(fixture());
         model.move(1);

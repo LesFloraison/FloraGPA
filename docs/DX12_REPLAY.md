@@ -1089,13 +1089,12 @@ CPU `WaitOperation` stores a captured event handle (writer RVA `0x4f61d0`);
 Hellblade2 handle 3964 also appears in `FenceSetEventOnCompletion` record 578875.
 The first prefix includes waits 577992 and 578048 on thread 29988. After these
 waits, through submission 578777, that thread only observes Fence completion.
-`inspectObservationWaits` proves this bounded property before initialization and
+The original observation-wait guard proved this bounded property before initialization and
 reports the two waits explicitly. It does not synthesize an event signal or
 weaken GPU queue/Fence checks. Any later state-changing operation on the same
-thread, including in another stream file, fails preflight. Extending the prefix
-to submission 579109 currently fails at event registration 578875; CPU event
-signalling/scheduling remains unfinished. This is verified by CPU inspection,
-without another heavy GPU run.
+thread, including in another stream file, failed preflight. The next milestone
+below restores the known Fence dependency at registration 578875 and extends
+the prefix to submission 579109; general CPU event scheduling remains unfinished.
 
 The native before/after requests used SDK 616, the NVIDIA RTX 5090 Laptop GPU,
 a 12 GiB allocation budget and the debug layer. Both reached execution 9731 with
@@ -1142,13 +1141,72 @@ No GPA modules are loaded in these isolated analysis jobs. Evidence:
 CPU-only panel verification reuses the saved trace: instruction breakpoint 273,
 step to 274, `SV_Target` Watch, and stale-result rejection after changing pixel
 all pass. Wire truncation/array-length checks, cross-file wait guarding, and the
-real next-submission dependency failure are covered by focused tests. This does
-not yet verify Hellblade2's complete workspace request flow, VS/CS/MS debugging,
+then-blocked next-submission dependency are covered by focused tests. This does
+not yet verify Hellblade2's complete workspace request flow, VS/MS debugging,
 geometry, full histories, performance or modification experiments.
 Release GUI, CLI, Worker and the focused test target build successfully
 (`build106.log`). All four focused cases pass (`hellblade-final-checks1.txt`);
 these final checks reuse the trace and inspect CPU records without another GPU
 replay. No unrelated DX11/Talos/BF1 GPU regression run was added for this change.
+
+### Hellblade2 CPU Fence completion and DXIL compute debugging
+
+`planCpuWaits` associates a single captured `SetEventOnCompletion` registration
+with its subsequent wait. A null handle represents a synchronous completion wait.
+The native executor verifies the actual Fence value before passing that boundary;
+captured handles are never passed to Windows. Missing registrations permit only
+Fence observations/reference operations until a known completion boundary on the
+same captured thread. Mutations before that boundary, overlapping registrations,
+failed/truncated registrations and unscheduled producers fail explicitly. This
+does not restore arbitrary event reset/lifetime behavior or a complete CPU scheduler.
+Captured allocator resets validate object identity and HRESULT; each submitted
+recording still owns a fresh native allocator.
+
+GPA 2025 R1 `StreamPlayback.dll`, version/hash recorded above: reader RVA
+`0x67b010` reads Fence, value, event handle and HRESULT; execution RVA `0x62cb70`
+forwards the registration (`hellblade-fence-event-readers1.txt`). In the sample,
+queue Signal 578825 targets Fence **2131166327360**, value **449714**.
+Registration **578875** binds that pair to handle 3964; wait **579052** consumes it.
+The native Fence actually reports **449714** at that wait. The report separately
+lists three preceding observation-only waits and one verified Fence wait.
+
+One serial native run, `hellblade-second-submit1/validation.json`, reaches execution
+**10135** (source **578172**) in submission **579109**, list 2144009157136,
+generation 2, ordinal 1, after a `Dispatch(6,1,1)`. It executes the entire first
+frame submission and the selected second-submission prefix: ten Draw calls,
+50 Dispatch calls, 39 frame buffer copies and two query resolves. SDK 616 and the
+D3D12 debug layer report **zero validation errors**. The 12 GiB allocation budget
+has peak accounted allocation 5,238,685,696 bytes. This is not a full-frame or
+process-memory acceptance result. The diagnostic command's overall status remains
+blocked because complete-frame acceptance is unfinished; the selected boundary
+is explicitly reported as reached.
+
+The resulting 888,337,182-byte native RenderDoc capture maps all **435** marked
+executions uniquely. Execution 10135 maps to RDC event **1814**. RenderDoc 1.45
+returns **715** instruction states for group (0,0,0), thread (0,0,0), DXIL SM6.6
+CS hash `4dd2a9db58a8cac1b38e542290c4ca45`, with 64x1x1 threads per group.
+No PDB/source files or GPA modules are present. This invocation does not reach
+the shader's atomic UAV write; neither UAV write correctness nor original GPA
+output equivalence is claimed (`hellblade-dxil-cs1/result.json`).
+
+The trace exposed a Watch gap: typed SSA values existed in the instruction state
+but lacked source mappings. Watch, expression evaluation and conditional
+breakpoints now use typed instruction values when no source declaration owns the
+name. Undefined/unavailable source declarations retain priority. Instruction
+values do not become fabricated source variables. Typeless registers and matrices
+are not inferred; unsupported 64-bit expression types fail explicitly without
+narrowing or floating-point conversion. Variable removal and backward stepping
+restore the correct Watch availability.
+
+Focused CPU checks reuse saved traces: Hellblade2 instruction breakpoint 1677,
+step to 1678, `_1509` Watch = 8193, declaration priority and stale invocation
+rejection; existing BF1 CS Watch compatibility; event-plan boundaries and malformed
+registrations; shared model lifetime/configuration checks. All ten test cases pass
+(`hellblade-cpu-events-final2.txt`, `debug-watch-final2.txt`). Release GUI, CLI,
+Worker and both focused test targets build (`build110.log`, `build111.log`). No
+additional DX11/Talos/BF1 GPU replay was run. Subsequent indirect calls, complete
+Hellblade2 execution, geometry, performance, experiments and portable acceptance
+remain unfinished.
 
 ### Full feature acceptance
 
@@ -1158,9 +1216,9 @@ replay. No unrelated DX11/Talos/BF1 GPU regression run was added for this change
 | Submitted-list identity/navigation | Structural checks passed | Structural checks passed | Structural checks passed |
 | Native initialization buffer copy | One isolated copy verified | One isolated copy verified | One isolated copy verified |
 | Captured initialization submissions | 52 executed; selected buffer verified | 25 executed; selected buffer/texture verified | 26 executed; selected buffer/texture verified; tile transfers executed |
-| Complete native frame and selected-event replay | Last indexed submission reached; backbuffer replay available in workspace; first Draw/UAV clear verified; full frame semantics/fidelity unfinished | First Draw before/after available in workspace; first color boundary verified; full frame blocked by historical query state | First submitted Draw before/after raw float readback verified; full frame and CPU event synchronization unfinished |
+| Complete native frame and selected-event replay | Last indexed submission reached; backbuffer replay available in workspace; first Draw/UAV clear verified; full frame semantics/fidelity unfinished | First Draw before/after available in workspace; first color boundary verified; full frame blocked by historical query state | First Draw raw float before/after verified; entire first submit and second-submit prefix through CS 10135 executed with one verified CPU Fence dependency; full frame and general synchronization unfinished |
 | Resource/Pixel History with execution mapping | Color history connected to PS; partial buffer/texture resource usage, creation provenance and captured barrier details verified; full histories unfinished | Clear/Draw history and D16 event-boundary values verified from workspace pixel pick; fragment depths unavailable; full history unfinished | One mapped float pixel modification matches native before/after; full histories unfinished |
-| VS/PS/CS debugging and geometry | DXBC VS, PS, direct/indirect CS traces verified; selected PS and CS workspace paths checked; geometry and full stage coverage unfinished | DXBC VS debugging/Watch and post-VS mesh/OBJ verified in workspace; remaining stages unfinished | DXIL SM6.6 PS trace, instruction breakpoint and Watch verified against GPU shader output; other stages and geometry unfinished |
+| VS/PS/CS debugging and geometry | DXBC VS, PS, direct/indirect CS traces verified; selected PS and CS workspace paths checked; geometry and full stage coverage unfinished | DXBC VS debugging/Watch and post-VS mesh/OBJ verified in workspace; remaining stages unfinished | DXIL SM6.6 PS verified against GPU shader output; CS trace, instruction breakpoint and SSA Watch verified; UAV write validation, other stages and geometry unfinished |
 | GPU performance analysis and modification experiments | One selected Dispatch's native timestamp and pipeline statistics verified in workspace; full performance and experiments unfinished | Unfinished | Unfinished |
 | Comparison with original GPA frame/intermediate resources | Both output frames compared; small RGB and widespread alpha differences remain unexplained; intermediate comparison unfinished | First color RGB exactly matches original playback; alpha differs; full/intermediate comparisons unfinished | Not performed |
 | Full portable replay/analysis without GPA/Python | Not verified | Not verified | Not verified |
