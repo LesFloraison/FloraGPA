@@ -2,6 +2,7 @@
 #include "dx12/StreamDirectory.h"
 #include "dx12/StreamArguments.h"
 #include "dx12/SubmissionIndex.h"
+#include "dx12/InitializationCopy.h"
 #include "app/MainWindow.h"
 #include "app/Models.h"
 #include "app/Views.h"
@@ -198,6 +199,18 @@ class Dx12SessionTests : public QObject {
         model.setSession(openReplaySession(std::filesystem::path(path.toStdWString())));
         QVERIFY(model.matchesCommand(1,{},UINT64_MAX-1));QVERIFY(model.matchesCommand(1,{},UINT64_MAX-2));
         QVERIFY(!model.matchesCommand(1,{},17));
+    }
+    void initializationCopyDependencies() {
+        const auto root=qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
+        if(root.isEmpty()) QSKIP("Set FLORA_DX12_CAPTURE_DIR for captured copy dependency checks");
+        dx12::StreamDirectory directory(std::filesystem::path((root+"/Talos_2026_10_18__00_55_08.gpa_frame").toStdWString()));
+        const auto copy=dx12::prepareInitializationCopy(directory,8530,256ULL*1024*1024);
+        QCOMPARE(copy.sourceRecord,16ULL);QCOMPARE(copy.destinationRecord,13ULL);
+        QCOMPARE(copy.heapRecord,69087ULL);QCOMPARE(copy.count,2130ULL);
+        QVERIFY(copy.placed);QCOMPARE(copy.sourceData.size,copy.sourceDesc.Width);
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error,dx12::prepareInitializationCopy(directory,8530,1024));
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error,dx12::prepareInitializationCopy(directory,13,256ULL*1024*1024));
+        QVERIFY_THROWS_EXCEPTION(OperationCancelled,dx12::prepareInitializationCopy(directory,8530,256ULL*1024*1024,[]{return true;}));
     }
     void originalDirectories() {
         const auto root=qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");

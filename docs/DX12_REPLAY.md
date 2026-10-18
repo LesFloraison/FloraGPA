@@ -142,6 +142,28 @@ and [independent-device specification](https://microsoft.github.io/DirectX-Specs
 
 ### Outstanding implementation
 
+An additional targeted prerequisite is available as
+`validate-frame <directory> --check-copy <initialization-record> --out <new-directory>`.
+It resolves the selected buffer copy's creation recipes (including forward heap
+references), validates a complete captured Create/Map/CopyOperation/Unmap upload,
+creates native committed/placed resources, executes that CopyBufferRegion and
+compares GPU readback byte-for-byte. Allocation is bounded by `--max-bytes`
+(default 256 MiB), including the device's actual allocation requirements.
+This isolated check does not replay original queue dependencies or establish the
+resource's complete history. Overall validation remains blocked with exit code 2.
+
+| Targeted copy | Source / destination creation record | Bytes | Exact GPU readback SHA-256 |
+| --- | --- | ---: | --- |
+| Talos record 8530 | 16 / 13, heap 69087 | 2,130 | `5b3538cefb72a75c3d01861f8787be8ce4ade7effc1404fa09297c502500fb9a` |
+| BF1 record 11858 | 28 / 25, committed | 10,752 | `4741bc07df80a8c59551a9d7cb86d72c527a5284caece523a2b72fa869480721` |
+| Hellblade2 record 507335 | 102 / 99, heap 530246 | 8,192 | `c76759aec5daf179a7e2b3d717370c6707338e9cf24b6009b30d1143d5377f9e` |
+
+Each GPU check ran once, serially, in the native Worker on the NVIDIA adapter.
+No GPA/Python runtime is used by this path. The CPU-only dependency test also
+checked memory-budget rejection, wrong record type and cancellation. Heap and
+Map readers were corroborated at RVAs `0x5b61d0`, `0x67ced0`, `0x67d060`,
+and `0x60eb40`. Full portable-package validation is still outstanding.
+
 1. Complete typed arguments, resource/object catalog and submission-instance
    identity; preserve source file/offset provenance.
 2. Restore initial resources, addresses, descriptors, PSOs and queue/fence
