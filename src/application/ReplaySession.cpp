@@ -3,6 +3,8 @@
 #include "dx12/StreamDirectory.h"
 #include "dx12/StreamArguments.h"
 #include "dx12/SubmissionIndex.h"
+#include "dx12/NativeCommands.h"
+#include "dx12/BackBufferIndex.h"
 #include <QUuid>
 #include <sstream>
 #include <iomanip>
@@ -66,6 +68,8 @@ class Dx11Session final : public IReplaySession {
 class Dx12Session final : public IReplaySession {
     dx12::StreamDirectory directory_;
     dx12::SubmissionIndex submissions_;
+    dx12::BackBufferIndex backBuffers_;
+    std::map<uint64_t, std::vector<Id>> signatures_;
     std::vector<Id> ids_;
     std::vector<Id> resources_;
     std::string identity_ = QUuid::createUuid().toString(QUuid::WithoutBraces).toStdString();
@@ -73,17 +77,95 @@ class Dx12Session final : public IReplaySession {
         if (!id || id > directory_.packets().size()) throw std::runtime_error("Unknown DX12 event");
         return directory_.packets()[size_t(id - 1)];
     }
+    nlohmann::json resourceDescription(Id id) const {
+        if (const auto it = backBuffers_.buffers().find(id); it != backBuffers_.buffers().end()) {
+            const auto &d = it->second.description;
+            return {{"Dimension", UINT(d.Dimension)},
+                    {"Alignment", std::to_string(d.Alignment)},
+                    {"Width", std::to_string(d.Width)},
+                    {"Height", d.Height},
+                    {"DepthOrArraySize", d.DepthOrArraySize},
+                    {"MipLevels", d.MipLevels},
+                    {"Format", UINT(d.Format)},
+                    {"SampleCount", d.SampleDesc.Count},
+                    {"SampleQuality", d.SampleDesc.Quality},
+                    {"Layout", UINT(d.Layout)},
+                    {"Flags", UINT(d.Flags)}};
+        }
+        const auto &p = packet(id);
+        return dx12::decodeArguments(p.type, directory_.payload(p)).values.at("Description");
+    }
+    ReplayWorkKind workKind(Id id) const {
+        const auto &p = packet(id);
+        if (p.type == 0x1ae3c190d8b1eULL || p.type == 0x1ae3c86b1c3b9ULL)
+            return ReplayWorkKind::Draw;
+        if (p.type == 0x1ae3cef0e6c17ULL)
+            return ReplayWorkKind::Dispatch;
+        if (p.type != 0x1ae3ccddf9f8cULL)
+            return ReplayWorkKind::None;
+        try {
+            format::Reader command(directory_.payload(p));
+            command.skip(8);
+            const auto object = command.read<uint64_t>();
+            Id selected{};
+            if (const auto it = signatures_.find(object); it != signatures_.end())
+                for (const auto record : it->second)
+                    if (record <= id)
+                        selected = record;
+            if (!selected)
+                return ReplayWorkKind::MissingIndirect;
+            const auto recipe = dx12::decodeCommandSignature(directory_.payload(packet(selected)));
+            if (recipe.rootSignature || recipe.arguments.size() != 1 || recipe.byteStride % 4)
+                return ReplayWorkKind::UnsupportedIndirect;
+            switch (recipe.arguments[0].Type) {
+            case D3D12_INDIRECT_ARGUMENT_TYPE_DRAW:
+                if (recipe.byteStride >= sizeof(D3D12_DRAW_ARGUMENTS))
+                    return ReplayWorkKind::Draw;
+                break;
+            case D3D12_INDIRECT_ARGUMENT_TYPE_DRAW_INDEXED:
+                if (recipe.byteStride >= sizeof(D3D12_DRAW_INDEXED_ARGUMENTS))
+                    return ReplayWorkKind::Draw;
+                break;
+            case D3D12_INDIRECT_ARGUMENT_TYPE_DISPATCH:
+                if (recipe.byteStride >= sizeof(D3D12_DISPATCH_ARGUMENTS))
+                    return ReplayWorkKind::Dispatch;
+                break;
+            default:
+                break;
+            }
+        } catch (const std::exception &) {
+            // Keep malformed or unsupported records inspectable. The native
+            // replay path reports the detailed decoding failure when requested.
+            return ReplayWorkKind::MissingIndirect;
+        }
+        return ReplayWorkKind::UnsupportedIndirect;
+    }
+
   public:
     Dx12Session(const std::filesystem::path &path, const CancelCheck &cancelled)
-        : directory_(path, cancelled), submissions_(directory_, cancelled) {
+        : directory_(path, cancelled), submissions_(directory_, cancelled),
+          backBuffers_(directory_, cancelled) {
         ids_.reserve(directory_.packets().size());
         for (Id i = 1; i <= directory_.packets().size(); ++i) {
-            if (i % 1024 == 0) checkCancellation(cancelled);
+            if (i % 1024 == 0)
+                checkCancellation(cancelled);
             ids_.push_back(i);
             const auto &p = packet(i);
-            if (p.type == 0x12793f58d8f79ULL || p.type == 0x127935d88ccfaULL || p.type == 0x127937ac5a8a9ULL) {
+            if (p.type == 0x12793fa7d46faULL) {
+                try {
+                    const auto recipe = dx12::decodeCommandSignature(directory_.payload(p));
+                    if (SUCCEEDED(recipe.result) && recipe.object)
+                        signatures_[recipe.object].push_back(i);
+                } catch (const std::exception &) {
+                }
+            }
+            if (backBuffers_.buffers().contains(i))
+                resources_.push_back(i);
+            else if (p.type == 0x12793f58d8f79ULL || p.type == 0x127935d88ccfaULL ||
+                     p.type == 0x127937ac5a8a9ULL) {
                 auto decoded = dx12::decodeArguments(p.type, directory_.payload(p));
-                if (decoded.createdResource) resources_.push_back(i);
+                if (decoded.createdResource)
+                    resources_.push_back(i);
             }
         }
     }
@@ -93,6 +175,7 @@ class Dx12Session final : public IReplaySession {
     nlohmann::json information() const override {
         return {{"backend", "dx12"}, {"events", ids_.size()},
                 {"decoded_resource_creations", resources_.size()}, {"resource_catalog_complete", false},
+                {"swapchain_buffers", backBuffers_.buffers().size()},
                 {"indexed_execution_instances", std::to_string(submissions_.executionCount())},
                 {"submitted_lists", submissions_.lists().size()}, {"gpu_order_resolved", false},
                 {"initialization_records", directory_.initializationCount()},
@@ -104,17 +187,32 @@ class Dx12Session final : public IReplaySession {
     std::span<const Id> events() const override { return ids_; }
     std::span<const Id> resources() const override { return resources_; }
     SessionResource resource(Id id) const override {
-        if (!std::binary_search(resources_.begin(), resources_.end(), id)) throw std::runtime_error("Unknown DX12 resource creation");
+        if (!std::binary_search(resources_.begin(), resources_.end(), id))
+            throw std::runtime_error("Unknown DX12 resource creation");
+        if (const auto it = backBuffers_.buffers().find(id); it != backBuffers_.buffers().end())
+            return {id, it->second.object, "DX12 swapchain buffer " + std::to_string(it->second.index),
+                    resourceDescription(id).dump()};
         const auto &p = packet(id);
         const auto decoded = dx12::decodeArguments(p.type, directory_.payload(p));
         const auto &desc = decoded.values.at("Description");
-        return {id, *decoded.createdResource, "DX12 object " + std::to_string(*decoded.createdResource), desc.is_null() ? "No descriptor captured" : desc.dump()};
+        return {id, *decoded.createdResource, "DX12 object " + std::to_string(*decoded.createdResource),
+                desc.is_null() ? "No descriptor captured" : desc.dump()};
     }
     nlohmann::json resourceDetails(Id id) const override {
         const auto info = resource(id);
         auto out = eventDetails(id);
         out["captured_object"] = std::to_string(info.capturedObject);
-        out["resource_status"] = "Creation descriptor only; contents, lifetime aliases and GPU state are not restored";
+        if (const auto it = backBuffers_.buffers().find(id); it != backBuffers_.buffers().end()) {
+            const auto &buffer = it->second;
+            out["swapchain_buffer"] = {{"swapchain", std::to_string(buffer.swapchain)},
+                                       {"generation", std::to_string(buffer.generation)},
+                                       {"queue", std::to_string(buffer.queue)},
+                                       {"index", buffer.index},
+                                       {"description", resourceDescription(id)},
+                                       {"source", "captured_swapchain_description_and_GetBuffer"}};
+        }
+        out["resource_status"] =
+            "Creation descriptor only; contents, lifetime aliases and GPU state are not restored";
         return out;
     }
     SessionEvent event(Id id) const override {
@@ -138,6 +236,7 @@ class Dx12Session final : public IReplaySession {
     SessionEvent executionEvent(Id id) const override {
         const auto execution = submissions_.execution(id);
         auto out = event(execution.record);
+        out.workKind = workKind(execution.record);
         out.id = id; out.sourceRecord = execution.record;
         out.queue = execution.queue; out.submission = execution.submission; out.commandList = execution.list;
         out.summary = "Record " + std::to_string(execution.record) + " | submit " + std::to_string(execution.submission) +
@@ -146,6 +245,8 @@ class Dx12Session final : public IReplaySession {
         return out;
     }
     std::vector<Id> referencedObjects(Id id) const override {
+        if (const auto it = backBuffers_.buffers().find(id); it != backBuffers_.buffers().end())
+            return {it->second.swapchain, it->second.object};
         const auto &p = packet(id);
         try {
             auto decoded = dx12::decodeArguments(p.type, directory_.payload(p));
@@ -263,13 +364,22 @@ class Dx12Session final : public IReplaySession {
             const auto replay = capability(ReplayFeature::Replay, executionOnly);
             if (!replay.supported())
                 return replay;
-            const auto name = executionEvent(*selection.execution).name;
-            const bool draw = name == "ID3D12GraphicsCommandListDrawInstanced" ||
-                              name == "ID3D12GraphicsCommandListDrawIndexedInstanced";
-            const bool dispatch = name == "ID3D12GraphicsCommandListDispatch";
+            const auto event = executionEvent(*selection.execution);
+            if (event.workKind == ReplayWorkKind::MissingIndirect)
+                return {CapabilityStatus::MissingData,
+                        "The indirect call has no valid command signature at its recording boundary"};
+            if (event.workKind == ReplayWorkKind::UnsupportedIndirect)
+                return {CapabilityStatus::NotImplemented, "Indirect root arguments, GPU address patching or "
+                                                          "this signature layout are not implemented"};
+            const bool draw = event.workKind == ReplayWorkKind::Draw;
+            const bool dispatch = event.workKind == ReplayWorkKind::Dispatch;
             if (!draw && !(feature == ReplayFeature::ShaderDebug && dispatch))
                 return {CapabilityStatus::NotImplemented,
-                        "Select a direct Draw or Dispatch execution supported by this analysis"};
+                        "Select a Draw or Dispatch with a supported direct call or command signature"};
+            if (event.name == "ID3D12GraphicsCommandListExecuteIndirect")
+                return {CapabilityStatus::Supported,
+                        "Requires native replay and exactly one generated Draw/Dispatch action; empty or "
+                        "multiple-action indirect calls cannot select an invocation yet"};
             return {CapabilityStatus::Supported,
                     feature == ReplayFeature::Geometry
                         ? "Use Geometry > Replay Mesh; requires RenderDoc 1.45 and successful native prefix "
@@ -287,8 +397,7 @@ class Dx12Session final : public IReplaySession {
                     return {CapabilityStatus::MissingData,"Selected execution has no complete frame recording"};
                 if (selection.resource) {
                     (void)resource(selection.resource);
-                    const auto &record=packet(selection.resource);
-                    const auto descriptor=dx12::decodeArguments(record.type,directory_.payload(record)).values.at("Description");
+                    const auto descriptor=resourceDescription(selection.resource);
                     if (descriptor.is_null()) return {CapabilityStatus::MissingData,"Selected texture creation has no captured descriptor"};
                     if (descriptor.at("Dimension")==1) return {CapabilityStatus::NotImplemented,"Selected buffer readback is not yet connected to workspace replay; select a texture"};
                     if (descriptor.at("SampleCount")!=1) return {CapabilityStatus::NotImplemented,"DX12 multisample texture readback is not implemented"};

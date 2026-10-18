@@ -805,8 +805,8 @@ stops at the requested execution boundary. Present/frame selection and original
 GPA image/intermediate-resource comparison remain to be established. The color
 image above is an actual GPU result, not the directory preview. PS debugging,
 BF1 history/geometry, performance, experiments and portable-package acceptance
-are unfinished. Indirect CS was exercised through the isolated job interface;
-the workspace's analysis capability gating still needs indirect-action support.
+are unfinished. At this checkpoint indirect CS was exercised through the isolated
+job interface; workspace support is recorded in the next section.
 
 Release CLI, Worker, GUI, isolated RenderDoc service and the focused test targets
 built successfully (`build80.log`). Final signature-decoding/CS-control checks
@@ -816,6 +816,72 @@ with zero debug-layer errors (`talos-consumed-descriptors1`). No Hellblade2 repl
 or broad regression run was added. Captures, images, traces and crash-reproduction
 artifacts remain outside Git.
 
+### BF1 workspace backbuffers, indirect analysis and original-player comparison
+
+The resource catalog now includes swapchain buffers from the existing checked
+`BackBufferIndex`. These entries retain their GetBuffer record, captured object,
+swapchain generation, index and queue; their descriptions are explicitly derived
+from captured swapchain/GetBuffer data. No directory preview supplies their
+contents. They participate in normal resource selection, capability queries,
+Worker replay and raw-output export. BF1 has three such entries. Selecting buffer
+creation `11399` (index 0) and execution `37815` in the main window produces a
+1920×1009 native RGBA image, SHA256
+`cbd80034812485b2ee6c5a25d12896cc1671bb0e95df461fd72fa198c73a894b` in the observed
+run (`bf1-first-color-workspace1.png`). This hash is evidence, not a deterministic
+golden for this capture.
+
+Submitted events now expose a work kind resolved from the command signature at
+the recording boundary. The workspace enables CS for simple indirect Dispatch,
+and VS/PS/Replay Mesh for simple indirect Draw signatures. Missing/invalid
+signatures report missing data; unsupported root arguments/layouts report not
+implemented. Exactly one generated action is still required by the analysis
+backend. Zero or multiple generated actions report an explicit selection error;
+they are not successful empty traces. Actual BF1 execution `35808` now completes
+the main-window selection → native Worker recapture → isolated RenderDoc CS
+debugger path, returning 256 steps at RDC event `42909`. Switching to Draw
+`21622` clears that CS trace and changes the enabled stages. This is verified in
+`bf1-indirect-workspace1.txt`; indirect Draw UI behavior has not received separate
+GPU evidence.
+
+GPA 2025 R1 was run offscreen with `--exit-after-frame 2` and synchronous screenshot
+post-layer frames `1;2`, followed by one repeat of frame 2 to investigate the
+observed differences. GPA reports playback starting on captured frame `14773`.
+The first native submission ends its output transition at record `364404`
+(buffer creation `11399`), before Present `390416`; the second ends at `391654`
+(buffer creation `11395`), before Present `418061`. Their native images match
+the corresponding GPA screenshot's scene/particle frame, while cross-comparing
+frames gives RGB MAE about 10.38. Quantitative comparison covers 1,937,280 pixels:
+
+| Comparison | Exact RGB pixels | RGB mean absolute channel error | Maximum channel difference |
+| --- | ---: | ---: | ---: |
+| Native first submission vs GPA screenshot 1 | 1,868,607 | 0.0244121 | 4 |
+| Native last submission vs GPA screenshot 2 | 1,881,828 | 0.0285946 | 13 |
+| GPA screenshot 2 vs its repeat | 1,916,189 | 0.0146083 | 14 |
+| Native last submission vs repeated GPA screenshot 2 | 1,892,450 | 0.0167906 | 9 |
+
+This establishes observed frame correspondence, **not exact replay fidelity**.
+Original playback varies between runs. However, 35,403 native-differing pixels
+were unchanged between those two original runs, so this repeat does not explain
+all differences. Their producing passes remain to be isolated. The original
+screenshots are opaque while native alpha differs at 1,887,436 / 1,887,447 pixels
+for the first / last output. As for Talos, the reason for the alpha difference
+has not been established. GPA also logs a missing capture-root D3D12Core.dll and
+a captured/replay GPU-ID mismatch; neither is treated as proof of the difference's
+cause. Local evidence: `gpa-bf1-reference1.log`, `gpa-bf1-reference2.log`, both
+screenshot directories, `bf1-original-color-comparison1.json`,
+`bf1-original-repeat-comparison1.json`, and `bf1-first-color-comparison1.json`.
+
+The targeted main-window backbuffer test also ran the existing GF2 DX11 replay,
+event selection and geometry entry, then switched among the three DX12 sessions
+and replaced a running DX11 session. All passed, including unchanged GF2 RGBA
+SHA256 `2e1abc5eacb0bbfd801f9fe059c305baa9a0786c384b36a42fa5a323dd979fd1`
+(`bf1-backbuffer-dx11-workspace1.txt`). This did not replay Hellblade2 or run a
+broad regression suite.
+
+Release CLI, Worker, GUI, isolated analysis and focused tests build successfully
+(`build83.log` through `build85.log`). The small missing-signature/root-argument fixtures
+and existing selected-analysis capability checks pass (`bf1-analysis-gaps1.txt`).
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |
@@ -824,11 +890,11 @@ artifacts remain outside Git.
 | Submitted-list identity/navigation | Structural checks passed | Structural checks passed | Structural checks passed |
 | Native initialization buffer copy | One isolated copy verified | One isolated copy verified | One isolated copy verified |
 | Captured initialization submissions | 52 executed; selected buffer verified | 25 executed; selected buffer/texture verified | 26 executed; selected buffer/texture verified; tile transfers executed |
-| Complete native frame and selected-event replay | Last indexed submission and actual color readback reached; first Draw/UAV clear verified; full frame semantics and original comparison unfinished | First Draw before/after available in workspace; first color boundary verified; full frame blocked by historical query state | Unfinished |
+| Complete native frame and selected-event replay | Last indexed submission reached; backbuffer replay available in workspace; first Draw/UAV clear verified; full frame semantics/fidelity unfinished | First Draw before/after available in workspace; first color boundary verified; full frame blocked by historical query state | Unfinished |
 | Resource/Pixel History with execution mapping | Unfinished | Clear/Draw history and D16 event-boundary values verified from workspace pixel pick; fragment depths unavailable; full history unfinished | Unfinished |
-| VS/PS/CS debugging and geometry | DXBC VS, direct/indirect CS traces verified; direct CS workspace controls checked; PS/geometry and indirect UI gating unfinished | DXBC VS debugging/Watch and post-VS mesh/OBJ verified in workspace; remaining stages unfinished | Unfinished |
+| VS/PS/CS debugging and geometry | DXBC VS, direct/indirect CS traces verified; direct CS controls and indirect CS end-to-end workspace checked; PS/geometry unfinished | DXBC VS debugging/Watch and post-VS mesh/OBJ verified in workspace; remaining stages unfinished | Unfinished |
 | GPU performance analysis and modification experiments | Unfinished | Unfinished | Unfinished |
-| Comparison with original GPA frame/intermediate resources | Not performed | First color RGB exactly matches original playback; alpha differs; full/intermediate comparisons unfinished | Not performed |
+| Comparison with original GPA frame/intermediate resources | Both output frames compared; small RGB and widespread alpha differences remain unexplained; intermediate comparison unfinished | First color RGB exactly matches original playback; alpha differs; full/intermediate comparisons unfinished | Not performed |
 | Full portable replay/analysis without GPA/Python | Not verified | Not verified | Not verified |
 
 No unfinished item above has been attributed to a hardware limitation. Known

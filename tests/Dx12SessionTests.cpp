@@ -574,6 +574,191 @@ class Dx12SessionTests : public QObject {
         selection.session = "stale";
         QCOMPARE(session->capability(ReplayFeature::ShaderDebug, selection).status, CapabilityStatus::Failed);
     }
+    void indirectCapabilityGaps() {
+        for (bool missing : {true, false}) {
+            QTemporaryDir temp;
+            const auto path = fixture(temp);
+            QByteArray packets;
+            uint64_t timestamp{};
+            const auto packet = [&](uint64_t type, const QByteArray &body) {
+                qword(packets, type);
+                qword(packets, ++timestamp);
+                qword(packets, 0);
+                qword(packets, body.size());
+                packets += body;
+            };
+            if (!missing) {
+                QByteArray signature;
+                qword(signature, 1);
+                signature.append(char(1));
+                dword(signature, 16);
+                dword(signature, 2);
+                signature.append(char(1));
+                qword(signature, 2);
+                D3D12_INDIRECT_ARGUMENT_DESC argument{};
+                argument.Type = D3D12_INDIRECT_ARGUMENT_TYPE_CONSTANT;
+                argument.Constant.Num32BitValuesToSet = 1;
+                signature.append(reinterpret_cast<const char *>(&argument), sizeof(argument));
+                argument = {};
+                argument.Type = D3D12_INDIRECT_ARGUMENT_TYPE_DISPATCH;
+                signature.append(reinterpret_cast<const char *>(&argument), sizeof(argument));
+                dword(signature, 0);
+                qword(signature, 99); // Indirect root-argument replay is not implemented.
+                const auto iid = __uuidof(ID3D12CommandSignature);
+                signature.append(reinterpret_cast<const char *>(&iid), sizeof(iid));
+                signature.append(char(1));
+                qword(signature, 1);
+                qword(signature, 2);
+                dword(signature, S_OK);
+                packet(0x12793fa7d46faULL, signature);
+            }
+            QByteArray reset;
+            qword(reset, 3);
+            qword(reset, 4);
+            qword(reset, 0);
+            dword(reset, S_OK);
+            packet(0x1ae3c721c351aULL, reset);
+            QByteArray command;
+            qword(command, 3);
+            qword(command, 2);
+            dword(command, 1);
+            qword(command, 5);
+            qword(command, 0);
+            qword(command, 0);
+            qword(command, 0);
+            packet(0x1ae3ccddf9f8cULL, command);
+            QByteArray close;
+            qword(close, 3);
+            dword(close, S_OK);
+            packet(0x1ae3cd6acf667ULL, close);
+            QByteArray submit;
+            qword(submit, 6);
+            dword(submit, 1);
+            submit.append(char(1));
+            qword(submit, 1);
+            qword(submit, 3);
+            packet(0x125482975df48ULL, submit);
+            write(path + "/thread-7-0", packets);
+            const auto session = openReplaySession(std::filesystem::path(path.toStdWString()));
+            ReplaySelection selection;
+            selection.session = session->identity();
+            selection.execution = 1;
+            QCOMPARE(session->capability(ReplayFeature::ShaderDebug, selection).status,
+                     missing ? CapabilityStatus::MissingData : CapabilityStatus::NotImplemented);
+        }
+    }
+    void backBufferWorkspace() {
+        const auto root = qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
+        if (root.isEmpty())
+            QSKIP("Set capture directory for BF1 swapchain output");
+        const auto path = root + "/bf1_2025_12_10__14_29_55.gpa_frame";
+        const auto session = openReplaySession(std::filesystem::path(path.toStdWString()));
+        QCOMPARE(session->information().at("swapchain_buffers"), nlohmann::json(3));
+        QCOMPARE(session->resource(11399).capturedObject, 0x7e5335b0ULL);
+        const auto details = session->resourceDetails(11399).at("swapchain_buffer");
+        QCOMPARE(details.at("index"), nlohmann::json(0));
+        QCOMPARE(details.at("description").at("Width"), nlohmann::json("1920"));
+        QCOMPARE(details.at("description").at("Height"), nlohmann::json(1009));
+        ReplaySelection selection;
+        selection.session = session->identity();
+        selection.execution = 37815;
+        selection.resource = 11399;
+        QVERIFY(session->capability(ReplayFeature::Replay, selection).supported());
+        MainWindow window;
+        QSignalSpy loaded(&window, &MainWindow::captureLoaded), done(&window, &MainWindow::taskFinished);
+        window.openCapture(path);
+        QTRY_COMPARE_WITH_TIMEOUT(loaded.count(), 1, 30000);
+        window.findChild<QComboBox *>("apiEventDomain")->setCurrentIndex(1);
+        auto locate = window.findChild<QLineEdit *>("apiLocate");
+        locate->setText("37815");
+        QTest::keyClick(locate, Qt::Key_Return);
+        auto resources = window.findChild<QTableView *>("resources");
+        QVERIFY(resources);
+        QModelIndex selected;
+        for (int row = 0; row < resources->model()->rowCount(); ++row) {
+            auto index = resources->model()->index(row, 0);
+            if (index.data(Qt::UserRole).toULongLong() == 11399) {
+                selected = index;
+                break;
+            }
+        }
+        QVERIFY(selected.isValid());
+        resources->setCurrentIndex(selected);
+        window.findChild<QComboBox *>("outputBoundary")->setCurrentIndex(2);
+        const auto replay = window.findChild<QAction *>("replayFrame");
+        QVERIFY(replay->isEnabled());
+        replay->trigger();
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 60000);
+        QVERIFY(done.takeLast()[0].toBool());
+        const auto image =
+            window.findChild<ImageView *>("frameOutput")->image().convertToFormat(QImage::Format_RGBA8888);
+        QCOMPARE(image.size(), QSize(1920, 1009));
+        QVERIFY(window.findChild<QAction *>("exportOutputStorage")->isEnabled());
+        const auto output = qEnvironmentVariable("FLORA_DX12_BF1_COLOR");
+        if (!output.isEmpty())
+            QVERIFY(image.save(output));
+        qInfo() << "BF1 first submission color"
+                << QCryptographicHash::hash(
+                       QByteArray(reinterpret_cast<const char *>(image.constBits()), image.sizeInBytes()),
+                       QCryptographicHash::Sha256)
+                       .toHex();
+    }
+    void indirectAnalysisWorkspace() {
+        const auto root = qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
+        const auto library = qEnvironmentVariable("FLORA_RENDERDOC_LIBRARY");
+        if (root.isEmpty() || library.isEmpty())
+            QSKIP("Set capture directory and RenderDoc for the BF1 indirect CS workspace");
+        const auto path = root + "/bf1_2025_12_10__14_29_55.gpa_frame";
+        const auto session = openReplaySession(std::filesystem::path(path.toStdWString()));
+        ReplaySelection selection;
+        selection.session = session->identity();
+        selection.execution = 35808;
+        QCOMPARE(session->executionEvent(35808).workKind, ReplayWorkKind::Dispatch);
+        QVERIFY(session->capability(ReplayFeature::ShaderDebug, selection).supported());
+        QVERIFY(!session->capability(ReplayFeature::Geometry, selection).supported());
+        MainWindow window;
+        QSignalSpy loaded(&window, &MainWindow::captureLoaded), done(&window, &MainWindow::taskFinished);
+        window.openCapture(path);
+        QTRY_COMPARE_WITH_TIMEOUT(loaded.count(), 1, 30000);
+        window.findChild<QComboBox *>("apiEventDomain")->setCurrentIndex(1);
+        auto locate = window.findChild<QLineEdit *>("apiLocate");
+        locate->setText("35808");
+        QTest::keyClick(locate, Qt::Key_Return);
+        auto cs = window.findChild<ReplayDebugView *>("replayDebug-cs");
+        auto vs = window.findChild<ReplayDebugView *>("replayDebug-vs");
+        QVERIFY(cs);
+        QVERIFY(vs);
+        QVERIFY(!vs->findChild<QAction *>("replayDebugRead")->isEnabled());
+        QVERIFY(!window.findChild<ReplayMeshView *>("replayMeshView")
+                     ->findChild<QAction *>("replayMeshRead")
+                     ->isEnabled());
+        cs->setBackendPath(library, false);
+        auto read = cs->findChild<QAction *>("replayDebugRead");
+        QVERIFY(read->isEnabled());
+        QCOMPARE(cs->request().at("execution"), nlohmann::json("35808"));
+        read->trigger();
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 60000);
+        QVERIFY(done.takeLast()[0].toBool());
+        QVERIFY(cs->model());
+        const auto &result = cs->model()->result();
+        QCOMPARE(result.at("execution"), nlohmann::json("35808"));
+        QCOMPARE(result.at("backend"), nlohmann::json("dx12"));
+        QVERIFY(result.at("gpa_modules_loaded").empty());
+        QVERIFY(result.at("disassembly").get<std::string>().find("5297230d-b11ed8d4-8c1b1ca9-2d9bfa5f") !=
+                std::string::npos);
+        QVERIFY(cs->model()->size() > 1);
+        cs->findChild<QAction *>("debugStep")->trigger();
+        QCOMPARE(cs->model()->position(), int64_t(1));
+        qInfo() << "Indirect CS workspace steps" << cs->model()->size() << "RDC event"
+                << result.at("eid").get<unsigned>();
+        const auto serial = cs->requestId();
+        locate->setText("21622");
+        QTest::keyClick(locate, Qt::Key_Return);
+        QVERIFY(!cs->model());
+        QVERIFY(!read->isEnabled());
+        QVERIFY(vs->findChild<QAction *>("replayDebugRead")->isEnabled());
+        QVERIFY(!cs->finish(serial, {{"ok", false}, {"error", "stale indirect invocation"}}));
+    }
     void selectedAnalysisWorkspace() {
         const auto root = qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
         const auto library = qEnvironmentVariable("FLORA_RENDERDOC_LIBRARY");

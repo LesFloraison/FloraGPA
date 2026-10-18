@@ -1577,10 +1577,9 @@ void MainWindow::updateCheckpointContext() {
     if (dx12) {
         draw = dispatch = false;
         if (selection_.execution) {
-            const auto name = session_->executionEvent(*selection_.execution).name;
-            draw = name == "ID3D12GraphicsCommandListDrawInstanced" ||
-                   name == "ID3D12GraphicsCommandListDrawIndexedInstanced";
-            dispatch = name == "ID3D12GraphicsCommandListDispatch";
+            const auto kind = session_->executionEvent(*selection_.execution).workKind;
+            draw = kind == ReplayWorkKind::Draw;
+            dispatch = kind == ReplayWorkKind::Dispatch;
         }
     }
     if (history_) {

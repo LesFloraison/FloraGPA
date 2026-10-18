@@ -567,8 +567,22 @@ Json runRdcJob(const Json &job) {
     const auto resources = controller.GetResources();
     const auto gpa = job.value(dx12 ? "execution" : "gpa_event", Json(nullptr));
     const auto selectionMap = dx12 ? "execution_map" : "gpa_event_map";
-    if (!gpa.is_null() && !mapping[selectionMap].contains(std::to_string(number(gpa))))
+    if (!gpa.is_null() && !mapping[selectionMap].contains(std::to_string(number(gpa)))) {
+        const auto key = std::to_string(number(gpa));
+        if (dx12 && mapping["execution_commands"].contains(key)) {
+            const auto &command = mapping["execution_commands"][key];
+            const auto status = command.value("status", std::string());
+            if (command.value("name", std::string()) == "ID3D12GraphicsCommandListExecuteIndirect" &&
+                (status == "mapped" || status == "unrepresented")) {
+                if (command.at("event_ids").empty())
+                    throw std::runtime_error("Selected indirect call generated no Draw/Dispatch action");
+                if (command.at("event_ids").size() > 1)
+                    throw std::runtime_error("Selected indirect call generated multiple actions; individual "
+                                             "invocation selection is not implemented");
+            }
+        }
         throw std::runtime_error("Selected capture event has no uniquely mapped executed action");
+    }
     uint32_t eid = index(job, "eid");
     if (!eid) {
         if (!gpa.is_null())
