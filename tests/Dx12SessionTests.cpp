@@ -21,6 +21,7 @@
 #include "app/ReplayDebugView.h"
 #include "app/ReplayMeshView.h"
 #include "app/PixelHistoryView.h"
+#include "app/ResourceHistoryView.h"
 #include "application/NativeDebugConfig.h"
 #include <QAction>
 #include <QCryptographicHash>
@@ -646,6 +647,156 @@ class Dx12SessionTests : public QObject {
             QCOMPARE(session->capability(ReplayFeature::ShaderDebug, selection).status,
                      missing ? CapabilityStatus::MissingData : CapabilityStatus::NotImplemented);
         }
+    }
+    void resourceBarrierDetails() {
+        QByteArray bytes;
+        qword(bytes, 0x1234);
+        dword(bytes, 1);
+        bytes.append(char(1));
+        qword(bytes, 1);
+        dword(bytes, 0);
+        dword(bytes, 0);
+        qword(bytes, 9007199254740993ULL);
+        dword(bytes, UINT32_MAX);
+        dword(bytes, 4);
+        dword(bytes, 0);
+        dword(bytes, 0);
+        const auto payload = [&] {
+            return format::Bytes(reinterpret_cast<const uint8_t *>(bytes.constData()), size_t(bytes.size()));
+        };
+        const auto decoded = dx12::decodeArguments(0x1ae3c24e5dabeULL, payload());
+        QVERIFY(decoded.supported);
+        QCOMPARE(decoded.resources, std::vector<uint64_t>{9007199254740993ULL});
+        QCOMPARE(decoded.values.at("Barriers")[0].at("Resource"), nlohmann::json("9007199254740993"));
+        QCOMPARE(decoded.values.at("Barriers")[0].at("Subresource"), nlohmann::json(UINT32_MAX));
+        bytes.chop(1);
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, dx12::decodeArguments(0x1ae3c24e5dabeULL, payload()));
+    }
+    void backBufferResourceHistory() {
+        const auto root = qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
+        const auto reportPath = qEnvironmentVariable("FLORA_DX12_RESOURCE_HISTORY");
+        if (root.isEmpty() || reportPath.isEmpty())
+            QSKIP("Set BF1 capture directory and recorded resource history");
+        QFile file(reportPath);
+        QVERIFY(file.open(QIODevice::ReadOnly));
+        auto report = nlohmann::json::parse(file.readAll().toStdString());
+        const auto session = openReplaySession(
+            std::filesystem::path((root + "/bf1_2025_12_10__14_29_55.gpa_frame").toStdWString()));
+        size_t barriers = 0, targets = 0;
+        for (auto &row : report.at("resource_history")) {
+            QVERIFY(row.at("selectable").get<bool>());
+            QCOMPARE(row.at("content_change"), nlohmann::json("not_measured"));
+            if (row.at("usage_name") == "ColorTarget") {
+                ++targets;
+                QCOMPARE(row.at("evidence"), nlohmann::json("bound_use"));
+            } else if (row.at("usage_name") == "Barrier") {
+                ++barriers;
+                const auto detail =
+                    session->executionDetails(std::stoull(row.at("execution").get<std::string>()));
+                bool found = false;
+                for (const auto &barrier : detail.at("arguments").at("Barriers"))
+                    if (barrier.value("Resource", "") == "2119382448") {
+                        found = true;
+                        row["captured_resource_barriers"].push_back(barrier);
+                        if (row.at("execution") == "37815") {
+                            QCOMPARE(barrier.at("StateBefore"), nlohmann::json(4));
+                            QCOMPARE(barrier.at("StateAfter"), nlohmann::json(0));
+                            QCOMPARE(barrier.at("Subresource"), nlohmann::json(0));
+                        }
+                    }
+                QVERIFY(found);
+            }
+        }
+        QCOMPARE(barriers, size_t(4));
+        QCOMPARE(targets, size_t(56));
+        ResourceHistoryView view;
+        view.setContext("bf1-resource", 37815, 11399, 2119382448);
+        QCOMPARE(view.request().at("resource_creation"), nlohmann::json("11399"));
+        QVERIFY(view.finish(view.requestId(), report));
+        auto rows = view.findChild<QTreeWidget *>("resourceHistoryRows");
+        QCOMPARE(rows->topLevelItemCount(), 60);
+        QVERIFY(rows->topLevelItem(0)->text(4).contains("All: 0x0 → 0x4"));
+        QVERIFY(rows->topLevelItem(59)->text(4).contains("0: 0x4 → 0x0"));
+        rows->setCurrentItem(rows->topLevelItem(1));
+        QSignalSpy jump(&view, &ResourceHistoryView::eventRequested);
+        view.findChild<QAction *>("locateResourceHistoryEvent")->trigger();
+        QCOMPARE(jump.count(), 1);
+        QCOMPARE(jump[0][0].toULongLong(), 37273ULL);
+        const auto old = view.requestId();
+        view.setContext("new-session", 37815, 11399, 2119382448);
+        QVERIFY(!view.finish(old, report));
+        QCOMPARE(rows->topLevelItemCount(), 0);
+        report["resource_creation"] = "11395";
+        QVERIFY_THROWS_EXCEPTION(std::runtime_error, view.finish(view.requestId(), report));
+        view.setContext("wide", 9007199254740993ULL, UINT64_MAX - 1, UINT64_MAX);
+        QCOMPARE(view.request().at("execution"), nlohmann::json("9007199254740993"));
+        QCOMPARE(view.request().at("resource"), nlohmann::json("18446744073709551615"));
+    }
+    void bufferResourceHistoryWorkspace() {
+        const auto root = qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
+        const auto library = qEnvironmentVariable("FLORA_RENDERDOC_LIBRARY");
+        if (root.isEmpty() || library.isEmpty())
+            QSKIP("Set BF1 capture directory and RenderDoc");
+        MainWindow window;
+        QSignalSpy loaded(&window, &MainWindow::captureLoaded), done(&window, &MainWindow::taskFinished);
+        window.openCapture(root + "/bf1_2025_12_10__14_29_55.gpa_frame");
+        QTRY_COMPARE_WITH_TIMEOUT(loaded.count(), 1, 30000);
+        window.findChild<QComboBox *>("apiEventDomain")->setCurrentIndex(1);
+        auto locate = window.findChild<QLineEdit *>("apiLocate");
+        locate->setText("21622");
+        QTest::keyClick(locate, Qt::Key_Return);
+        auto resources = window.findChild<QTableView *>("resources");
+        QModelIndex selected;
+        for (int row = 0; row < resources->model()->rowCount(); ++row) {
+            const auto index = resources->model()->index(row, 0);
+            if (index.data(Qt::UserRole).toULongLong() == 11815) {
+                selected = index;
+                break;
+            }
+        }
+        QVERIFY(selected.isValid());
+        resources->setCurrentIndex(selected);
+        auto history = window.findChild<ResourceHistoryView *>("resourceHistoryView");
+        history->setBackendPath(library, false);
+        auto read = history->findChild<QAction *>("readResourceHistory");
+        QVERIFY(read->isEnabled());
+        QCOMPARE(history->request().at("resource"), nlohmann::json("864906160"));
+        done.clear();
+        read->trigger();
+        QTRY_VERIFY_WITH_TIMEOUT(!done.empty(), 60000);
+        QVERIFY(done.takeLast()[0].toBool());
+        const auto &result = history->result();
+        QVERIFY(result.at("gpa_modules_loaded").empty());
+        QCOMPARE(result.at("captured_creation").at("id"), nlohmann::json("11815"));
+        bool found = false;
+        auto rows = history->findChild<QTreeWidget *>("resourceHistoryRows");
+        for (size_t i = 0; i < result.at("resource_history").size(); ++i) {
+            const auto &row = result.at("resource_history")[i];
+            if (row.value("execution", "") != "21622")
+                continue;
+            found = true;
+            QVERIFY(row.at("usage_name").get<std::string>().ends_with("_RWResource"));
+            qInfo() << "BF1 root UAV usage"
+                    << QString::fromStdString(row.at("usage_name").get<std::string>());
+            QCOMPARE(row.at("evidence"), nlohmann::json("bound_use"));
+            QCOMPARE(row.at("captured_call").at("source_record"), nlohmann::json("328782"));
+            rows->setCurrentItem(rows->topLevelItem(int(i)));
+        }
+        QVERIFY(found);
+        qInfo() << "BF1 buffer resource history uses" << result.at("resource_history").size();
+        const auto out = qEnvironmentVariable("FLORA_DX12_BUFFER_HISTORY");
+        if (!out.isEmpty())
+            history->exportResult(out);
+        const auto serial = history->requestId();
+        window.findChild<QLineEdit *>("apiSearch")->setText("filtered-out");
+        history->findChild<QAction *>("locateResourceHistoryEvent")->trigger();
+        QVERIFY(window.findChild<QLineEdit *>("apiSearch")->text().isEmpty());
+        QCOMPARE(window.findChild<QTableView *>("apiLog")->currentIndex().data(Qt::UserRole).toULongLong(),
+                 21622ULL);
+        window.openCapture(root + "/Talos_2026_10_18__00_55_08.gpa_frame");
+        QTRY_COMPARE_WITH_TIMEOUT(loaded.count(), 2, 30000);
+        QVERIFY(!history->finish(serial, {{"ok", false}, {"error", "stale session"}}));
+        QVERIFY(history->result().is_null());
     }
     void backBufferWorkspace() {
         const auto root = qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");

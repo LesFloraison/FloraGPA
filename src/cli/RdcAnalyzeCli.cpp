@@ -31,7 +31,7 @@ int rdcAnalyzeCli(QStringList args) {
         p.addHelpOption();
         p.addPositionalArgument("capture", "Independent .rdc capture");
         p.addPositionalArgument("action", "inventory | postmesh | history | debug-pixel | debug-vertex | "
-                                          "debug-thread | counters | texture");
+                                          "debug-thread | counters | texture | resource-history");
         p.addOption({"out", "New or empty output directory", "path"});
         p.addOption({"renderdoc", "RenderDoc 1.45 native library", "path",
                      flora::defaultRenderDocLibrary()});

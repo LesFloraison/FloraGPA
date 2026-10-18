@@ -24,6 +24,7 @@
 #include "QuadView.h"
 #include "RasterizerDialog.h"
 #include "RdcCountersView.h"
+#include "ResourceHistoryView.h"
 #include "ReplayDebugView.h"
 #include "ReplayMeshView.h"
 #include "SamplerDialog.h"
@@ -1225,6 +1226,18 @@ void MainWindow::buildUi() {
     });
     history_ = new PixelHistoryView;
     leftTabs_->insertTab(1, history_, "Pixel History");
+    resourceHistory_ = new ResourceHistoryView;
+    leftTabs_->insertTab(2, resourceHistory_, "Resource History");
+    connect(resourceHistory_, &ResourceHistoryView::readRequested, this,
+            [this] { readRdcAnalysis(nullptr, RdcAnalysis::ResourceHistory); });
+    connect(resourceHistory_, &ResourceHistoryView::cancelRequested, this, &MainWindow::cancel);
+    connect(resourceHistory_, &ResourceHistoryView::error, this, &MainWindow::showError);
+    connect(resourceHistory_, &ResourceHistoryView::eventRequested, this, [this](qulonglong id) {
+        if (!busy()) {
+            findChild<QComboBox *>("apiEventDomain")->setCurrentIndex(1);
+            locateEvent(id);
+        }
+    });
     connect(history_, &PixelHistoryView::readRequested, this, [this] { readRdcAnalysis(); });
     connect(history_, &PixelHistoryView::cancelRequested, this, &MainWindow::cancel);
     connect(history_, &PixelHistoryView::eventRequested, this, [this](qulonglong id) {
@@ -1501,6 +1514,8 @@ void MainWindow::setBusy(bool busy) {
         history_->setWorkerBusy(busy);
     if (rdcCounters_)
         rdcCounters_->setWorkerBusy(busy);
+    if (resourceHistory_)
+        resourceHistory_->setWorkerBusy(busy);
     if (replayMesh_)
         replayMesh_->setWorkerBusy(busy);
     for (auto view : checkpoints_)
@@ -1605,6 +1620,12 @@ void MainWindow::updateCheckpointContext() {
     }
     if (rdcCounters_)
         rdcCounters_->setContext(frame_ ? analysisKey : QString{}, selectedEvent_);
+    if (resourceHistory_) {
+        const bool supported = dx12 && session_->capability(ReplayFeature::ResourceHistory, selection_).supported();
+        resourceHistory_->setContext(supported ? analysisKey : QString{}, selection_.execution.value_or(0),
+                                    dx12 ? selection_.resource : 0,
+                                    dx12 && selection_.resource ? session_->resource(selection_.resource).capturedObject : 0);
+    }
     if (replayMesh_)
         replayMesh_->setContext(draw ? analysisKey : QString{}, selectedEvent_, dx12);
     for (size_t i = 0; i < replayDebug_.size(); ++i)
@@ -1633,6 +1654,35 @@ QString MainWindow::historyContextKey() const {
            QString::fromLatin1(QCryptographicHash::hash(bytes, QCryptographicHash::Sha256).toHex());
 }
 bool MainWindow::finishRdcAnalysis(const nlohmann::json &result) {
+    if (runningAnalysis_ == RdcAnalysis::ResourceHistory) {
+        if (historyRequestId_ != resourceHistory_->requestId())
+            return false;
+        auto enriched = result;
+        if (enriched.value("ok", false)) {
+            enriched["captured_creation"] = session_->resourceDetails(selection_.resource);
+            for (auto &row : enriched.at("resource_history"))
+                if (row.value("selectable", false)) {
+                    const auto execution = std::stoull(row.at("execution").get<std::string>());
+                    row["captured_call"] = session_->executionDetails(execution);
+                    if (row.value("usage_name", "") == "Barrier") {
+                        row["captured_resource_barriers"] = nlohmann::json::array();
+                        const auto &call = row.at("captured_call");
+                        if (call.contains("arguments") && call["arguments"].contains("Barriers"))
+                            for (const auto &barrier : call["arguments"]["Barriers"]) {
+                                const auto object =
+                                    std::to_string(session_->resource(selection_.resource).capturedObject);
+                                if (barrier.value("Resource", "") == object ||
+                                    barrier.value("ResourceBefore", "") == object ||
+                                    barrier.value("ResourceAfter", "") == object)
+                                    row["captured_resource_barriers"].push_back(barrier);
+                            }
+                        if (!row["captured_resource_barriers"].empty())
+                            row["subresource_status"] = "see_captured_resource_barriers";
+                    }
+                }
+        }
+        return resourceHistory_->finish(historyRequestId_, enriched);
+    }
     if (runningAnalysis_ == RdcAnalysis::Mesh)
         return replayMesh_->finish(historyRequestId_, result,
                                    jobDir_ ? jobDir_->path() + "/result" : QString());
@@ -1645,7 +1695,7 @@ void MainWindow::readRdcAnalysis(ReplayDebugView *view, RdcAnalysis kind) {
     if (busy() || !session_)
         return;
     const bool dx12 = session_->backend() == ReplayBackend::Dx12;
-    if (dx12 && !view && kind != RdcAnalysis::Mesh && kind != RdcAnalysis::History)
+    if (dx12 && !view && kind != RdcAnalysis::Mesh && kind != RdcAnalysis::History && kind != RdcAnalysis::ResourceHistory)
         return;
     if (!view && kind == RdcAnalysis::History && !historyBackendReady()) {
         history_->setNotice("Select a RenderDoc 1.45 release library using RenderDoc…");
@@ -1655,16 +1705,20 @@ void MainWindow::readRdcAnalysis(ReplayDebugView *view, RdcAnalysis kind) {
     runningDebug_ = view;
     runningAnalysis_ = view ? RdcAnalysis::Debug : kind;
     const bool counters = kind == RdcAnalysis::Counters, mesh = kind == RdcAnalysis::Mesh;
-    historyRequestId_ = mesh       ? replayMesh_->requestId()
+    const bool resourceHistory = kind == RdcAnalysis::ResourceHistory;
+    historyRequestId_ = resourceHistory ? resourceHistory_->requestId()
+                        : mesh       ? replayMesh_->requestId()
                         : counters ? rdcCounters_->requestId()
                         : view     ? view->requestId()
                                    : history_->requestId();
     try {
-        historyRequest_ = mesh       ? replayMesh_->request()
+        historyRequest_ = resourceHistory ? resourceHistory_->request()
+                          : mesh       ? replayMesh_->request()
                           : counters ? rdcCounters_->request()
                           : view     ? view->request()
                                      : history_->request();
-        const auto library = QFileInfo(mesh       ? replayMesh_->backendPath()
+        const auto library = QFileInfo(resourceHistory ? resourceHistory_->backendPath()
+                                       : mesh       ? replayMesh_->backendPath()
                                        : counters ? rdcCounters_->backendPath()
                                        : view     ? view->backendPath()
                                                   : history_->backendPath())
@@ -1737,6 +1791,7 @@ void MainWindow::startHistoryWorker() {
     workerTimedOut_ = false;
     setBusy(true);
     statusBar()->showMessage(runningAnalysis_ == RdcAnalysis::Mesh       ? "Reading post-shader mesh…"
+                             : runningAnalysis_ == RdcAnalysis::ResourceHistory ? "Reading resource history…"
                              : runningAnalysis_ == RdcAnalysis::Counters ? "Measuring replay counters…"
                              : runningDebug_                             ? "Reading shader trace…"
                                                                          : "Reading pixel history…");
@@ -2076,6 +2131,7 @@ void MainWindow::finishWorker(int code, QProcess::ExitStatus status) {
             result["selection"] = historyRequest_;
             const bool accepted = finishRdcAnalysis(result);
             statusBar()->showMessage(accepted ? (runningAnalysis_ == RdcAnalysis::Mesh ? "Replay mesh ready"
+                                                 : runningAnalysis_ == RdcAnalysis::ResourceHistory ? "Resource history ready"
                                                  : runningAnalysis_ == RdcAnalysis::Counters
                                                      ? "Replay metrics ready"
                                                  : runningDebug_ ? "Shader trace ready"

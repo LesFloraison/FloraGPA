@@ -82,6 +82,45 @@ DecodedArguments decodeArguments(uint64_t type, format::Bytes payload) {
     case 0x1ae3cd301bf84ULL:
         u64("CommandList"); resource("Destination"); u64("DestinationOffset");
         resource("Source"); u64("SourceOffset"); u64("NumBytes"); break;
+    case 0x1ae3c24e5dabeULL: {
+        u64("CommandList");
+        const auto count = r.read<uint32_t>();
+        v["Barriers"] = json::array();
+        if (r.flag()) {
+            const auto entries = r.read<uint64_t>();
+            if (entries != count || entries > r.remaining() / 32)
+                throw std::runtime_error("Invalid resource barrier array");
+            for (uint32_t i = 0; i < count; ++i) {
+                Reader b(r.take(32));
+                const auto kind = b.read<uint32_t>(), flags = b.read<uint32_t>();
+                json barrier{{"Type", kind}, {"Flags", flags}};
+                auto ref = [&](const char *name) {
+                    const auto object = b.read<uint64_t>();
+                    barrier[name] = std::to_string(object);
+                    if (object)
+                        out.resources.push_back(object);
+                };
+                if (kind == 0) {
+                    ref("Resource");
+                    barrier["Subresource"] = b.read<uint32_t>();
+                    barrier["StateBefore"] = b.read<uint32_t>();
+                    barrier["StateAfter"] = b.read<uint32_t>();
+                } else if (kind == 1) {
+                    ref("ResourceBefore");
+                    ref("ResourceAfter");
+                } else if (kind == 2) {
+                    ref("Resource");
+                } else {
+                    throw std::runtime_error("Unknown resource barrier type");
+                }
+                v["Barriers"].push_back(std::move(barrier));
+            }
+        }
+        if (v["Barriers"].size() != count)
+            throw std::runtime_error("Missing resource barriers");
+        r.end();
+        break;
+    }
     case 0x1ae3c1d190092ULL:
         u64("CommandList"); resource("Destination"); resource("Source"); break;
     case 0x12793f58d8f79ULL: case 0x127935d88ccfaULL: case 0x127937ac5a8a9ULL: {

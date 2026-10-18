@@ -65,7 +65,7 @@ struct ProcessJob {
 Json prepareRdcJob(const QString &capture, const std::string &action, const QString &output,
                    const QString &library, const Json &options) {
     static const std::set<std::string> actions{"inventory",    "postmesh",     "history",  "debug-pixel",
-                                               "debug-vertex", "debug-thread", "counters", "texture"};
+                                               "debug-vertex", "debug-thread", "counters", "texture", "resource-history"};
     if (!actions.contains(action))
         throw std::runtime_error("Unknown RDC analysis action");
     Json job{{"gpa_event", nullptr},

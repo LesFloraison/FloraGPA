@@ -504,7 +504,7 @@ Json runRdcJob(const Json &job) {
     const auto action = job.at("action").get<std::string>();
     const bool debugging = action == "debug-pixel" || action == "debug-vertex" || action == "debug-thread";
     if (action != "history" && action != "events" && action != "counters" && action != "inventory" &&
-        action != "texture" && action != "postmesh" && !debugging)
+        action != "texture" && action != "resource-history" && action != "postmesh" && !debugging)
         throw std::runtime_error("Unsupported native RenderDoc job action");
     if (action != "events") {
         if (!job.value("gpa_event", Json(nullptr)).is_null() && !job.value("eid", Json(nullptr)).is_null())
@@ -744,6 +744,90 @@ Json runRdcJob(const Json &job) {
     }
     if (resource == ResourceId::Null())
         throw std::runtime_error("Select an explicit texture resource; no matching target");
+    if (action == "resource-history") {
+        static constexpr const char *usageNames[]{"Unused",         "VertexBuffer",
+                                                  "IndexBuffer",    "VS_Constants",
+                                                  "HS_Constants",   "DS_Constants",
+                                                  "GS_Constants",   "PS_Constants",
+                                                  "CS_Constants",   "TS_Constants",
+                                                  "MS_Constants",   "All_Constants",
+                                                  "StreamOut",      "VS_Resource",
+                                                  "HS_Resource",    "DS_Resource",
+                                                  "GS_Resource",    "PS_Resource",
+                                                  "CS_Resource",    "TS_Resource",
+                                                  "MS_Resource",    "All_Resource",
+                                                  "VS_RWResource",  "HS_RWResource",
+                                                  "DS_RWResource",  "GS_RWResource",
+                                                  "PS_RWResource",  "CS_RWResource",
+                                                  "TS_RWResource",  "MS_RWResource",
+                                                  "All_RWResource", "InputTarget",
+                                                  "ColorTarget",    "DepthStencilTarget",
+                                                  "Indirect",       "Clear",
+                                                  "Discard",        "GenMips",
+                                                  "Resolve",        "ResolveSrc",
+                                                  "ResolveDst",     "Copy",
+                                                  "CopySrc",        "CopyDst",
+                                                  "Barrier",        "CPUWrite"};
+        static_assert(std::size(usageNames) == size_t(ResourceUsage::CPUWrite) + 1);
+        Json rows = Json::array(), initialization = Json::array();
+        size_t unmapped = 0;
+        for (const auto &usage : controller.GetUsage(resource)) {
+            if (usage.eventId > eid)
+                continue;
+            if (rows.size() >= 1000000)
+                throw std::runtime_error("Resource history exceeds one million uses");
+            const auto type = size_t(usage.usage);
+            const bool operation = usage.usage >= ResourceUsage::Clear;
+            Json row{{"eventId", usage.eventId},
+                     {"usage", type},
+                     {"usage_name", type < std::size(usageNames) ? usageNames[type] : "Unknown"},
+                     {"evidence", type >= std::size(usageNames) ? "unknown"
+                                  : operation                   ? "recorded_operation"
+                                                                : "bound_use"},
+                     {"content_change", "not_measured"},
+                     {"subresource", nullptr},
+                     {"subresource_status", "not_provided_by_usage_index"}};
+            row.update(rdcProvenance(usage.eventId, mapping["reverse"]));
+            if (dx12 && !row.value("selectable", false))
+                ++unmapped;
+            rows.push_back(std::move(row));
+        }
+        Json name;
+        const auto &structured = controller.GetStructuredFile();
+        for (const auto &r : resources)
+            if (r.resourceId == resource) {
+                name = text(r.name);
+                for (const auto chunk : r.initialisationChunks) {
+                    Json entry{{"chunk_index", chunk},
+                               {"scope", "replay_resource_initialization"},
+                               {"execution", nullptr},
+                               {"selectable", false}};
+                    entry["name"] = chunk < structured.chunks.size() && structured.chunks[chunk]
+                                        ? Json(text(structured.chunks[chunk]->name))
+                                        : Json();
+                    initialization.push_back(std::move(entry));
+                }
+            }
+        result.update(
+            {{"eid", eid},
+             {"resource", resourceName(resource)},
+             {"resource_name", name},
+             {"resource_object", gpaResource},
+             {"resource_creation", job.value("resource_creation", Json())},
+             {"resource_history", rows},
+             {"replay_initialization", initialization},
+             {"partial", true},
+             {"history_scope",
+              {{"through_event", eid},
+               {"unmapped_uses", unmapped},
+               {"content_changes_measured", false},
+               {"limitations",
+                {"Bindings indicate possible use, not observed reads or writes.",
+                 "Usage records do not supply subresource ranges or fence dependencies.",
+                 "Replay initialization is separate from original execution markers.",
+                 "Only the captured replay prefix is covered; empty usage is not proof of no access."}}}}});
+        return complete();
+    }
     const auto textures = controller.GetTextures();
     const auto found = std::find_if(textures.begin(), textures.end(),
                                     [&](const auto &t) { return t.resourceId == resource; });

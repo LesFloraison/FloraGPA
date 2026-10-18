@@ -933,6 +933,72 @@ isolated analysis and focused tests build successfully (`build90.log`).
 This work does not establish full Pixel/Resource History,
 all PS invocations, DXIL debugging, or full-frame replay fidelity.
 
+### DX12 resource history in the shared workspace
+
+**Resource History** now queries the selected resource creation through a selected
+execution using the isolated native RenderDoc service. The same native-prefix
+cache, cancellation, request/session/revision identity checks and stale-result
+rejection used by the other analyses apply. Texture and buffer resources are
+accepted; this does not require the currently texture-only workspace readback.
+The CLI analysis action `resource-history` is also available for existing RDCs.
+
+The report and view deliberately distinguish:
+
+- Original captured resource creation, including GetBuffer/swapchain provenance.
+- Replay initialization chunks, such as native CreateCommittedResource, SetName
+  and Initial Contents, which have no fabricated original execution identity.
+- Execution usage records: bindings are potential accesses, while Copy/Clear,
+  CPUWrite and Barrier records are recorded operations. Neither proves a content
+  change; each row explicitly reports `content_change: not_measured`.
+
+Mapped rows preserve source record, queue, command-list generation, submission
+and list ordinal. The workspace attaches the original captured call. A checked
+decoder now exposes transition, aliasing and UAV barrier arguments, preserving
+64-bit resource identities as decimal strings. For matching transition barriers,
+the table displays the captured subresource, before/after state bits and flags.
+Other ranges remain unknown instead of being treated as whole-resource accesses.
+Fence-dependency history, complete resource lifetime/alias analysis and observed
+content modifications remain unfinished.
+
+BF1 backbuffer object `2119382448`, creation `11399`, through execution `37815`
+has 60 indexed uses in the existing independently generated capture: 56 color
+target bindings and four barriers. Every use maps uniquely. These are not 56
+observed writes; the previously verified pixel history at `(960,500)` has only
+four fragment records. The captured transitions for this backbuffer are:
+
+| Execution | Source record | Subresource | State before → after |
+| ---: | ---: | --- | --- |
+| 36771 | 364562 | All | `0x0 → 0x4` |
+| 37357 | 363338 | 0 | `0x4 → 0xc0` |
+| 37440 | 363459 | 0 | `0xc0 → 0x4` |
+| 37815 | 364404 | 0 | `0x4 → 0x0` |
+
+All four carry zero flags. The last transition explicitly names subresource zero;
+the initial assumption that it covered all subresources failed the targeted check
+and was corrected against the captured packet. Evidence:
+`bf1-resource-history1/result.json` and the source records above.
+
+The main-window buffer path was tested using BF1 creation `11815`, object
+`864906160`, through execution `21622`. The Worker generated that native prefix
+and queried it successfully without GPA modules. The report contains an unmapped
+CPUWrite at RenderDoc event `186` and a `VS_RWResource` binding at event `238`,
+mapped to execution `21622` / source `328782`. The initialization write is not
+attributed to the adjacent Draw. Earlier native buffer readback separately proved
+that this Draw changes the root UAV DWORD from zero to one; the usage query itself
+does not measure that change. Original creation details, filtering/locating the
+Draw and rejecting the old request after switching to Talos all passed.
+
+Local evidence: `bf1-buffer-history-workspace1.json` and
+`bf1-resource-history-workspace1.txt`. The same focused run verified the four real
+barrier records, truncated-barrier rejection and decimal identities above 2^53.
+The final CPU-only display check also passed for the captured all-subresources
+and subresource-zero transitions (`bf1-resource-history-display1.txt`). Release
+GUI, CLI, Worker, isolated analysis and focused tests build successfully
+(`build95.log`); the CLI help exposes the new analysis action.
+Full Resource History acceptance remains open, including capture synchronization,
+subresource usage for bindings, complete initialization provenance and actual
+modification observations. No full-sample replay suite was run for this change.
+
 ### Full feature acceptance
 
 | Requirement | BF1 | Talos | Hellblade2 |
@@ -942,7 +1008,7 @@ all PS invocations, DXIL debugging, or full-frame replay fidelity.
 | Native initialization buffer copy | One isolated copy verified | One isolated copy verified | One isolated copy verified |
 | Captured initialization submissions | 52 executed; selected buffer verified | 25 executed; selected buffer/texture verified | 26 executed; selected buffer/texture verified; tile transfers executed |
 | Complete native frame and selected-event replay | Last indexed submission reached; backbuffer replay available in workspace; first Draw/UAV clear verified; full frame semantics/fidelity unfinished | First Draw before/after available in workspace; first color boundary verified; full frame blocked by historical query state | Unfinished |
-| Resource/Pixel History with execution mapping | One backbuffer color history chain verified and connected to PS selection; full histories unfinished | Clear/Draw history and D16 event-boundary values verified from workspace pixel pick; fragment depths unavailable; full history unfinished | Unfinished |
+| Resource/Pixel History with execution mapping | Color history connected to PS; partial buffer/texture resource usage, creation provenance and captured barrier details verified; full histories unfinished | Clear/Draw history and D16 event-boundary values verified from workspace pixel pick; fragment depths unavailable; full history unfinished | Unfinished |
 | VS/PS/CS debugging and geometry | DXBC VS, PS, direct/indirect CS traces verified; selected PS and CS workspace paths checked; geometry and full stage coverage unfinished | DXBC VS debugging/Watch and post-VS mesh/OBJ verified in workspace; remaining stages unfinished | Unfinished |
 | GPU performance analysis and modification experiments | Unfinished | Unfinished | Unfinished |
 | Comparison with original GPA frame/intermediate resources | Both output frames compared; small RGB and widespread alpha differences remain unexplained; intermediate comparison unfinished | First color RGB exactly matches original playback; alpha differs; full/intermediate comparisons unfinished | Not performed |

@@ -40,6 +40,7 @@ class PixelHistoryView;
 class ReplayDebugView;
 class RdcCountersView;
 class ReplayMeshView;
+class ResourceHistoryView;
 class ShaderProjectDialog;
 class MainWindow final : public QMainWindow {
     Q_OBJECT
@@ -161,11 +162,12 @@ class MainWindow final : public QMainWindow {
     void updateStatistics();
     void updateCheckpointContext();
     QString historyContextKey() const;
-    enum class RdcAnalysis { History, Debug, Counters, Mesh };
+    enum class RdcAnalysis { History, Debug, Counters, Mesh, ResourceHistory };
     void readRdcAnalysis(ReplayDebugView *view = nullptr, RdcAnalysis kind = RdcAnalysis::History);
     bool finishRdcAnalysis(const nlohmann::json &result);
     void startHistoryWorker();
     PixelHistoryView *history_ = nullptr;
+    ResourceHistoryView *resourceHistory_ = nullptr;
     std::array<ReplayDebugView *, 3> replayDebug_{};
     ReplayDebugView *runningDebug_ = nullptr;
     RdcCountersView *rdcCounters_ = nullptr;

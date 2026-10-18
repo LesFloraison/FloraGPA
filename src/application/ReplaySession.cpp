@@ -358,6 +358,18 @@ class Dx12Session final : public IReplaySession {
                     "Query through the selected execution using RenderDoc 1.45; D16 fragment depths and "
                     "depth-test reasons remain unavailable"};
         }
+        if (feature == ReplayFeature::ResourceHistory) {
+            if (!selection.resource)
+                return {CapabilityStatus::MissingData, "Select a resource creation"};
+            try { (void)resource(selection.resource); }
+            catch (const std::exception &error) { return {CapabilityStatus::MissingData, error.what()}; }
+            auto executionOnly = selection;
+            executionOnly.resource = 0;
+            const auto replay = capability(ReplayFeature::Replay, executionOnly);
+            if (!replay.supported()) return replay;
+            return {CapabilityStatus::Supported, "Partial replay-prefix usage history; bindings are potential "
+                    "accesses, content changes and complete subresource/synchronization coverage are not measured"};
+        }
         if (feature == ReplayFeature::ShaderDebug || feature == ReplayFeature::Geometry) {
             auto executionOnly = selection;
             executionOnly.resource = 0;
