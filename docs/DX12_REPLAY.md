@@ -193,6 +193,47 @@ and `0x60eb40`. Full portable-package validation is still outstanding.
 
 ## Acceptance ledger
 
+### Pipeline reconstruction prerequisite
+
+`PipelineRecipes` decodes native graphics/compute descriptors, pipeline-library
+loads, root signatures and pipeline state streams. Shader bytecode and semantic
+names stay in the read-only mapping. Only native stream structures and small
+pointer-bearing arrays are materialized. All embedded pointers are replaced;
+captured driver-specific PSO caches are consumed but not submitted to a different
+adapter. A library load is reconstructed from its saved complete descriptor, so
+the implementation does not depend on the original driver library blob.
+
+`NativePipelines` resolves root signatures by captured object identity, including
+forward keyframe references, and caches native objects by creation record.
+Ambiguous initialization lifetimes, unknown stream subobjects, inconsistent
+lengths and truncated records fail explicitly. The pipeline-stream path includes
+AS/MS bytecode; Hellblade2 contains 72 mesh pipelines, which are required work
+for command/signature execution, not optional omissions.
+
+Focused CPU decoding covered all recorded pipeline recipes: BF1 1,015 / 21 root
+signatures; Talos 640 / 31; Hellblade2 11,571 / 208 (11,555 state streams).
+Malformed stream sizes/types and truncated records are rejected. The extra BF1
+pipeline beyond its 1,014 initialization recipes is a frame-thread creation.
+
+Serial native checks through `validate-frame --check-pipeline <record>` succeeded
+on the NVIDIA adapter for these distinct implementation paths:
+
+| Sample / record | Native path | Root creation record | Shader format |
+| --- | --- | --- | --- |
+| Talos / 183 | Library descriptor → graphics PSO | 102760 | DXBC VS/PS |
+| BF1 / 4756 | Compute PSO | 11792 | DXBC CS |
+| Hellblade2 / 4 | Pipeline state stream | 518001 | DXIL VS/PS |
+| Hellblade2 / 1390 | Mesh pipeline state stream | 538845 | DXIL MS/PS |
+
+These are native object-creation checks, not Draw/Dispatch or frame validation;
+the overall validator still reports blocked and returns 2. GPA/Python are not
+runtime dependencies of this path. Ghidra evidence uses the same reference DLL
+hash above: RVAs `0x679f00`, `0x679cf0`, `0x67a250`, `0x67cba0`, `0x677ee0`;
+descriptor readers `0x60dce0`, `0x60e800`, `0x8e1f50`; stream traversal `0x783d30`
+and pointer fixups `0x8e1720`, `0x8e16a0`, `0x8e28a0`, `0x8e2a60`.
+
+### Full feature acceptance
+
 | Requirement | BF1 | Talos | Hellblade2 |
 | --- | --- | --- | --- |
 | Open/index in shared workspace | Passed | Passed | Passed |
@@ -206,7 +247,8 @@ and `0x60eb40`. Full portable-package validation is still outstanding.
 | Full portable replay/analysis without GPA/Python | Not verified | Not verified | Not verified |
 
 No unfinished item above has been attributed to a hardware limitation. Known
-implementation gaps include PSO/root-signature/descriptor reconstruction,
+implementation gaps include integrating PSO/root-signature reconstruction into
+command execution, descriptor reconstruction,
 resource lifetime and address remapping, complete command arguments, initialization
 dependency scheduling and cross-queue synchronization. The existing analysis
 backend still requires DX11 captures; its request envelope is shared, but its

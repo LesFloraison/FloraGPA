@@ -4,6 +4,7 @@
 #include "dx12/StreamArguments.h"
 #include "dx12/SubmissionIndex.h"
 #include "dx12/InitializationCopy.h"
+#include "dx12/PipelineRecipes.h"
 #include "app/MainWindow.h"
 #include "app/Models.h"
 #include "app/Views.h"
@@ -264,6 +265,44 @@ class Dx12SessionTests : public QObject {
         QVERIFY_THROWS_EXCEPTION(std::runtime_error,dx12::prepareInitializationCopy(directory,8530,1024));
         QVERIFY_THROWS_EXCEPTION(std::runtime_error,dx12::prepareInitializationCopy(directory,13,256ULL*1024*1024));
         QVERIFY_THROWS_EXCEPTION(OperationCancelled,dx12::prepareInitializationCopy(directory,8530,256ULL*1024*1024,[]{return true;}));
+    }
+    void pipelineRecipeDecoding() {
+        const auto root=qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");
+        if(root.isEmpty()) QSKIP("Set FLORA_DX12_CAPTURE_DIR for captured pipeline decoding");
+        for(const auto name : {"bf1_2025_12_10__14_29_55.gpa_frame", "Talos_2026_10_18__00_55_08.gpa_frame",
+                              "Hellblade2-Win64-Shipping_2026_10_17__03_44_05.gpa_frame"}) {
+            dx12::StreamDirectory directory(std::filesystem::path((root+'/'+name).toStdWString()));
+            size_t roots{},pipelines{},streams{},mesh{},failed{};
+            for(size_t i=0;i<directory.packets().size();++i) {
+                const auto &p=directory.packets()[i];const auto bytes=directory.payload(p);
+                try {
+                    if(p.type==0x127938051b445ULL) {
+                        auto recipe=dx12::decodeRootSignature(bytes);++roots;
+                        if(SUCCEEDED(recipe.result)) QVERIFY(!recipe.bytecode.empty());
+                    } else if(dx12::isPipelineRecipe(p.type)) {
+                        auto recipe=dx12::decodePipelineRecipe(p.type,bytes);++pipelines;
+                        if(FAILED(recipe.result)) ++failed;
+                        if(recipe.kind==dx12::PipelineRecipe::Kind::Stream) ++streams;
+                        for(const auto &[stage,shader]:recipe.shaders) if(stage=="MS") ++mesh;
+                        if(pipelines==1) {
+                            qInfo()<<name<<"first pipeline"<<i+1<<QString::fromStdString(dx12::describePipelineRecipe(recipe).dump());
+                            QVERIFY_THROWS_EXCEPTION(std::runtime_error,dx12::decodePipelineRecipe(p.type,bytes.first(bytes.size()-1)));
+                            if(recipe.kind==dx12::PipelineRecipe::Kind::Stream) {
+                                auto malformed=std::vector<uint8_t>(bytes.begin(),bytes.end());
+                                const uint64_t invalidSize=UINT64_MAX;memcpy(malformed.data()+9,&invalidSize,8);
+                                QVERIFY_THROWS_EXCEPTION(std::runtime_error,dx12::decodePipelineRecipe(p.type,malformed));
+                                malformed.assign(bytes.begin(),bytes.end());
+                                const uint32_t invalidType=UINT32_MAX;memcpy(malformed.data()+26,&invalidType,4);
+                                QVERIFY_THROWS_EXCEPTION(std::runtime_error,dx12::decodePipelineRecipe(p.type,malformed));
+                            }
+                        }
+                    }
+                } catch(const std::exception &e) { QFAIL(qPrintable(QString("%1 record %2: %3").arg(name).arg(i+1).arg(e.what()))); }
+            }
+            qInfo()<<name<<"roots"<<roots<<"pipelines"<<pipelines<<"stream"<<streams<<"mesh"<<mesh<<"captured failures"<<failed;
+            QVERIFY(roots>0);QVERIFY(pipelines>0);
+            if(QString(name).startsWith("Hellblade2")) { QCOMPARE(streams,size_t(11555));QCOMPARE(mesh,size_t(72)); }
+        }
     }
     void originalDirectories() {
         const auto root=qEnvironmentVariable("FLORA_DX12_CAPTURE_DIR");

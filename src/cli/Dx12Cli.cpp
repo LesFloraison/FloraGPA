@@ -2,6 +2,7 @@
 #include "application/ReplaySession.h"
 #include "dx12/NativeDevice.h"
 #include "dx12/InitializationCopy.h"
+#include "dx12/PipelineRecipes.h"
 #include <QDir>
 #include <QSaveFile>
 #include <QTextStream>
@@ -12,10 +13,11 @@ int runDx12Cli(const QString &command, const QString &path, const QCommandLinePa
         throw std::runtime_error("DX12 " + command.toStdString() + " is not implemented; use inventory or commands for stream inspection");
     for (const auto &option : options.optionNames())
         if (option != "out" && option != "replay-identity" && !(command == "commands" && option == "filter") &&
-            !(command == "validate-frame" && (option == "check-device" || option == "check-copy" ||
+            !(command == "validate-frame" && (option == "check-device" || option == "check-copy" || option == "check-pipeline" ||
                 (option == "max-bytes" && options.isSet("check-copy")))))
             throw std::runtime_error("Unsupported DX12 inspection option: --" + option.toStdString());
     if (options.value("out").isEmpty()) throw std::runtime_error("DX12 inspection requires --out");
+    if (options.isSet("check-copy") && options.isSet("check-pipeline")) throw std::runtime_error("Choose one targeted initialization check per invocation");
     const QDir output(options.value("out"));
     if (output.exists() && !output.entryList(QDir::AllEntries | QDir::NoDotAndDotDot | QDir::Hidden | QDir::System).empty())
         throw std::runtime_error("Output directory must be new or empty");
@@ -31,10 +33,18 @@ int runDx12Cli(const QString &command, const QString &path, const QCommandLinePa
     auto report = session->information();
     report["status"] = command == "validate-frame" ? "blocked" : "indexed";
     report["note"] = "Stream indexing does not establish native replay support";
-    if (options.isSet("check-device") || options.isSet("check-copy")) {
+    if (options.isSet("check-device") || options.isSet("check-copy") || options.isSet("check-pipeline")) {
         try {
             dx12::StreamDirectory directory(std::filesystem::path(path.toStdWString()));
             std::optional<dx12::InitializationCopy> copy;
+            std::optional<uint64_t> pipelineRecord;
+            if (options.isSet("check-pipeline")) {
+                bool valid = false; const auto record = options.value("check-pipeline").toULongLong(&valid);
+                if (!valid || !record || record > directory.packets().size()) throw std::runtime_error("Invalid pipeline creation record");
+                const auto &packet = directory.packets()[size_t(record - 1)];
+                (void)dx12::decodePipelineRecipe(packet.type, directory.payload(packet));
+                pipelineRecord = record;
+            }
             if (options.isSet("check-copy")) {
                 bool validRecord = false, validLimit = false;
                 const auto record = options.value("check-copy").toULongLong(&validRecord);
@@ -45,8 +55,12 @@ int runDx12Cli(const QString &command, const QString &path, const QCommandLinePa
             dx12::NativeDevice device(directory);
             report["device"] = device.information();
             if (copy) report["initialization_copy"] = dx12::executeInitializationCopy(device, *copy);
+            if (pipelineRecord) {
+                dx12::NativePipelines pipelines(device, directory); pipelines.create(*pipelineRecord);
+                report["pipeline"] = pipelines.information(*pipelineRecord);
+            }
         } catch (const std::exception &e) {
-            report[options.isSet("check-copy") ? "initialization_copy" : "device"] = {{"status", "failed"}, {"reason", e.what()}};
+            report[options.isSet("check-copy") ? "initialization_copy" : options.isSet("check-pipeline") ? "pipeline" : "device"] = {{"status", "failed"}, {"reason", e.what()}};
         }
     }
     if (command == "commands") {

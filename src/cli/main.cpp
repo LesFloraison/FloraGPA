@@ -112,6 +112,7 @@ int main(int argc, char **argv) {
     p.addOption({"warp", "Use the WARP software adapter"});
     p.addOption({"check-device", "Check DX12 device/SDK initialization during validate-frame (does not validate replay)"});
     p.addOption({"check-copy", "Check one DX12 initialization CopyBufferRegion and compare GPU readback (validate-frame only)", "record"});
+    p.addOption({"check-pipeline", "Recreate a captured DX12 pipeline and its root signature (validate-frame only)", "record"});
     p.addOption({"gpu-vendor", "Use the first adapter with this PCI vendor ID (decimal or 0x hex)", "id"});
     p.addOption({"timings", "Collect native GPU timestamps and pipeline statistics"});
     p.addOption({"debug-device", "Enable D3D11 validation"});
@@ -208,6 +209,8 @@ int main(int argc, char **argv) {
             throw std::runtime_error("--check-device requires DX12 validate-frame");
         if (p.isSet("check-copy") && command != "validate-frame")
             throw std::runtime_error("--check-copy requires DX12 validate-frame");
+        if (p.isSet("check-pipeline") && command != "validate-frame")
+            throw std::runtime_error("--check-pipeline requires DX12 validate-frame");
         std::optional<uint32_t> gpuVendor;
         if (p.isSet("gpu-vendor")) {
             if (!usesNativeReplayDevice(command.toStdString()))
